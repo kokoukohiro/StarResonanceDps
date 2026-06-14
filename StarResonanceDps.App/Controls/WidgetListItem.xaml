@@ -1,0 +1,101 @@
+<UserControl x:Class="StarResonanceDps.App.Controls.WidgetListItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:StarResonanceDps.Core.Models;assembly=StarResonanceDps.Core"
+             Height="68">
+    <Border Margin="0,0,0,10"
+            Style="{StaticResource Panel.WidgetCard}"
+            Background="{Binding PanelBrush, TargetNullValue={StaticResource Brush.CardBackground}}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Ellipse Grid.Column="0" Width="13" Height="13" Margin="0,0,14,0" VerticalAlignment="Center">
+                <Ellipse.Style>
+                    <Style TargetType="Ellipse">
+                        <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
+                                <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Error}">
+                                <Setter Property="Fill" Value="{DynamicResource Brush.Danger}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Ellipse.Style>
+            </Ellipse>
+
+            <TextBlock Grid.Column="1" Style="{StaticResource Text.WidgetName}" Text="{Binding DisplayName}" Grid.ColumnSpan="2" Margin="0,0,147,0" />
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Height="34" VerticalAlignment="Center" Grid.ColumnSpan="2">
+
+                <!-- お気に入り -->
+                <Button Style="{DynamicResource Button.Icon}">
+                    <Path
+                        Style="{DynamicResource Icon.Stroke}"
+                        Data="{DynamicResource Icon.Favorite}" />
+                </Button>
+
+                <!-- 固定 / 非固定 -->
+                <Button Style="{DynamicResource Button.Icon}">
+                    <Path
+                        Style="{DynamicResource Icon.Fill}"
+                        Data="{DynamicResource Icon.Pin.Unfixed}" />
+                </Button>
+
+                <!-- ウィジェットを選択 -->
+                <Button Style="{DynamicResource Button.Icon}">
+                    <Path
+                        Style="{DynamicResource Icon.Stroke}"
+                        Data="{DynamicResource Icon.ExternalLink}" />
+                </Button>
+
+                <!-- 設定 -->
+                <Button Style="{DynamicResource Button.Icon}">
+                    <Path
+                        Style="{DynamicResource Icon.Fill}"
+                        Data="{DynamicResource Icon.Settings}" />
+                </Button>
+
+
+                <!-- 開始 / 停止 -->
+                <Button Style="{DynamicResource Button.Icon}">
+                    <Grid>
+                        <!-- Start -->
+                        <Path Data="{DynamicResource Icon.Start}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.StartFill}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+
+                        <!-- Stop -->
+                        <Path Data="{DynamicResource Icon.Stop}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.StopFill}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

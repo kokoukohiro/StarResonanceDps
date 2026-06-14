@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "StarResonanceDps.Core/1.0.0": {
+        "runtime": {
+          "StarResonanceDps.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "StarResonanceDps.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

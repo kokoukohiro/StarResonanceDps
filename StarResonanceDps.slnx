@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="StarResonanceDps.App/StarResonanceDps.App.csproj" />
+  <Project Path="StarResonanceDps.Core/StarResonanceDps.Core.csproj" />
+</Solution>
