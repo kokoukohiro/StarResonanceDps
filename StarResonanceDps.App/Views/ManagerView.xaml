@@ -8,6 +8,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition x:Name="WidgetListExternalScrollBarColumn" Width="16" />
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" Margin="8,4,6,8" Style="{StaticResource Panel.Root}">
@@ -59,7 +60,7 @@
                     </Button>
                 </StackPanel>
 
-                <Button VerticalAlignment="Bottom" Margin="0" Style="{DynamicResource Button.Sidebar}">
+                <Button VerticalAlignment="Bottom" Margin="0" Style="{DynamicResource Button.Sidebar}" Click="SettingsButton_Click">
                     <StackPanel Orientation="Horizontal">
                         <Path
                             Style="{DynamicResource Icon.Fill}"
@@ -73,7 +74,7 @@
             </Grid>
         </Border>
 
-        <Border Grid.Column="1" Margin="0,4,8,8" Style="{StaticResource Panel.Root}">
+        <Border Grid.Column="1" Margin="0,4,0,8" Style="{StaticResource Panel.Root}">
             <Grid Margin="24,20,24,20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -129,11 +130,15 @@
                     </ComboBox>
                 </Grid>
 
-                <ScrollViewer Grid.Row="2" Style="{StaticResource ScrollViewer.WidgetList}">
-                    <ScrollViewer.Resources>
-                        <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ScrollBar.WidgetList}" />
-                    </ScrollViewer.Resources>
-                    <ItemsControl ItemsSource="{Binding Widgets}">
+                <ScrollViewer x:Name="WidgetListScrollViewer"
+                              Grid.Row="2"
+                              Style="{StaticResource ScrollViewer.WidgetList}"
+                              VerticalScrollBarVisibility="Hidden"
+                              ScrollChanged="WidgetListScrollViewer_ScrollChanged"
+                              SizeChanged="WidgetListScrollViewer_SizeChanged">
+                    <ItemsControl x:Name="WidgetItemsControl"
+                                  ItemsSource="{Binding Widgets}"
+                                  SizeChanged="WidgetItemsControl_SizeChanged">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <controls:WidgetListItem />
@@ -143,5 +148,12 @@
                 </ScrollViewer>
             </Grid>
         </Border>
+
+        <ScrollBar x:Name="WidgetListExternalScrollBar"
+                   Grid.Column="2"
+                   Margin="5,4,5,8"
+                   Orientation="Vertical"
+                   Style="{StaticResource ScrollBar.WidgetList}"
+                   ValueChanged="WidgetListExternalScrollBar_ValueChanged" />
     </Grid>
 </UserControl>

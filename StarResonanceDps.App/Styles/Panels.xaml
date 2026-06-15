@@ -25,4 +25,27 @@
         <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
+
+    <Style x:Key="Panel.SettingSection" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Brush.CardBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Default}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="Panel.SettingFieldBase" TargetType="Border">
+        <Setter Property="Padding" Value="20,14" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="Panel.SettingField" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}">
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <Style x:Key="Panel.SettingFieldLast" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}" />
+
 </ResourceDictionary>

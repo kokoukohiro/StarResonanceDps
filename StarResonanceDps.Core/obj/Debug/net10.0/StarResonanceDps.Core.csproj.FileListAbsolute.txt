@@ -9,3 +9,4 @@ I:\GitHub\StarResonanceDps\StarResonanceDps.Core\obj\Debug\net10.0\StarResonance
 I:\GitHub\StarResonanceDps\StarResonanceDps.Core\obj\Debug\net10.0\refint\StarResonanceDps.Core.dll
 I:\GitHub\StarResonanceDps\StarResonanceDps.Core\obj\Debug\net10.0\StarResonanceDps.Core.pdb
 I:\GitHub\StarResonanceDps\StarResonanceDps.Core\obj\Debug\net10.0\ref\StarResonanceDps.Core.dll
+I:\GitHub\StarResonanceDps\StarResonanceDps.Core\obj\Debug\net10.0\StarResonanceDps.Core.sourcelink.json
