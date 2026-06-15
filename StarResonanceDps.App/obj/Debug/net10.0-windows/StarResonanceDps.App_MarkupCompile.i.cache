@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET10_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NET9_0_OR_GREATER;NET10_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 I:\GitHub\StarResonanceDps\StarResonanceDps.App\App.xaml
-13-803676027
+14-659017632
 
 141148627292
 235-1620893267
-Controls\AppHeader.xaml;Controls\SearchBox.xaml;Controls\WidgetListItem.xaml;MainWindow.xaml;Styles\AppTheme.xaml;Styles\Buttons.xaml;Styles\Colors.xaml;Styles\Icons.xaml;Styles\Inputs.xaml;Styles\Panels.xaml;Styles\Spacing.xaml;Styles\Typography.xaml;Views\ManagerView.xaml;
+Controls\AppHeader.xaml;Controls\SearchBox.xaml;Controls\WidgetListItem.xaml;MainWindow.xaml;Styles\AppTheme.xaml;Styles\Buttons.xaml;Styles\Colors.xaml;Styles\Icons.xaml;Styles\Inputs.xaml;Styles\Panels.xaml;Styles\ScrollBars.xaml;Styles\Spacing.xaml;Styles\Typography.xaml;Views\ManagerView.xaml;
 
 False
 

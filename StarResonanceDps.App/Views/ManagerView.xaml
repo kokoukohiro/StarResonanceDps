@@ -98,11 +98,11 @@
                               Width="120"
                               Style="{StaticResource Input.SelectBox}"
                               Tag="{DynamicResource Icon.Filter}"
-                              SelectedIndex="0">
+                              SelectedIndex="{Binding WidgetFilterIndex, Mode=TwoWay}">
                         <ComboBoxItem Content="すべて" />
                         <ComboBoxItem Content="お気に入り" />
-                        <ComboBoxItem Content="実行中" />
-                        <ComboBoxItem Content="ピン留め" />
+                        <ComboBoxItem Content="起動中" />
+                        <ComboBoxItem Content="停止中" />
                     </ComboBox>
 
                     <ComboBox Grid.Column="2"
@@ -110,10 +110,11 @@
                               Width="120"
                               Style="{StaticResource Input.SelectBox}"
                               Tag="{DynamicResource Icon.Sort}"
-                              SelectedIndex="0">
+                              SelectedIndex="{Binding WidgetSortIndex, Mode=TwoWay}">
+                        <ComboBoxItem Content="デフォルト" />
                         <ComboBoxItem Content="名前順" />
                         <ComboBoxItem Content="お気に入り" />
-                        <ComboBoxItem Content="実行状態" />
+                        <ComboBoxItem Content="起動状態" />
                         <ComboBoxItem Content="ピン留め" />
                     </ComboBox>
 
@@ -122,14 +123,16 @@
                         Margin="8,0,0,0"
                         Style="{StaticResource Input.IconOnlySelectBox}"
                         Tag="{DynamicResource Icon.MoreVertical}"
-                        SelectedIndex="-1"
-                        SelectionChanged="MoreActionComboBox_SelectionChanged">
-                        <ComboBoxItem Content="すべてのお気に入りを起動" />
-                        <ComboBoxItem Content="すべてを停止" />
+                        SelectedIndex="{Binding BulkActionIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="すべてのお気に入りを起動" />
+                        <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="すべてを停止" />
                     </ComboBox>
                 </Grid>
 
-                <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer Grid.Row="2" Style="{StaticResource ScrollViewer.WidgetList}">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="{x:Type ScrollBar}" BasedOn="{StaticResource ScrollBar.WidgetList}" />
+                    </ScrollViewer.Resources>
                     <ItemsControl ItemsSource="{Binding Widgets}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

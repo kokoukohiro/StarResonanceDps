@@ -26,7 +26,8 @@
             <Grid Grid.Column="1" Margin="12,0,0,0">
                 <TextBox x:Name="PART_TextBox"
                          Style="{StaticResource Input.SearchInnerTextBox}"
-                         Text="{Binding Text, ElementName=Root, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                         Text="{Binding Text, ElementName=Root, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                         FontWeight="SemiBold" />
 
                 <TextBlock Text="{Binding Placeholder, ElementName=Root}"
                            VerticalAlignment="Center"

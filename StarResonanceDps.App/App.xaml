@@ -10,6 +10,7 @@
                 <ResourceDictionary Source="Styles/Typography.xaml" />
                 <ResourceDictionary Source="Styles/Panels.xaml" />
                 <ResourceDictionary Source="Styles/Buttons.xaml" />
+                <ResourceDictionary Source="Styles/ScrollBars.xaml" />
                 <ResourceDictionary Source="Styles/Inputs.xaml" />
                 <ResourceDictionary Source="Styles/Icons.xaml" />
                 <ResourceDictionary Source="Styles/AppTheme.xaml" />

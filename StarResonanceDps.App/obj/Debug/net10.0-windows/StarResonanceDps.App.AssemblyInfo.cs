@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StarResonanceDps.App")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4200d7f5e9bd4ee56113189506fb6271fc161c5c")]
 [assembly: System.Reflection.AssemblyProductAttribute("StarResonanceDps.App")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StarResonanceDps.App")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

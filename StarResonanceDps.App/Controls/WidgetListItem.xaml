@@ -30,22 +30,78 @@
                 </Ellipse.Style>
             </Ellipse>
 
-            <TextBlock Grid.Column="1" Style="{StaticResource Text.WidgetName}" Text="{Binding DisplayName}" Grid.ColumnSpan="2" Margin="0,0,147,0" />
+            <TextBlock Grid.Column="1"
+                       Grid.ColumnSpan="2"
+                       Margin="0,0,147,0"
+                       Style="{StaticResource Text.WidgetName}"
+                       Text="{Binding DisplayName}" />
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Height="34" VerticalAlignment="Center" Grid.ColumnSpan="2">
+            <StackPanel Grid.Column="2"
+                        Grid.ColumnSpan="2"
+                        Orientation="Horizontal"
+                        Height="34"
+                        VerticalAlignment="Center">
 
                 <!-- お気に入り -->
-                <Button Style="{DynamicResource Button.Icon}">
-                    <Path
-                        Style="{DynamicResource Icon.Stroke}"
-                        Data="{DynamicResource Icon.Favorite}" />
+                <Button Style="{DynamicResource Button.Icon}"
+                        Command="{Binding ToggleFavoriteCommand}">
+                    <Grid>
+                        <Path Data="{DynamicResource Icon.Favorite}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Stroke}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                        <Path Data="{DynamicResource Icon.Favorite.Filled}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                    </Grid>
                 </Button>
 
                 <!-- 固定 / 非固定 -->
-                <Button Style="{DynamicResource Button.Icon}">
-                    <Path
-                        Style="{DynamicResource Icon.Fill}"
-                        Data="{DynamicResource Icon.Pin.Unfixed}" />
+                <Button Style="{DynamicResource Button.Icon}"
+                        Command="{Binding TogglePinCommand}">
+                    <Grid>
+                        <Path Data="{DynamicResource Icon.Pin.Unfixed}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                        <Path Data="{DynamicResource Icon.Pin.Fixed}">
+                            <Path.Style>
+                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPinned}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Path.Style>
+                        </Path>
+                    </Grid>
                 </Button>
 
                 <!-- ウィジェットを選択 -->
@@ -62,9 +118,9 @@
                         Data="{DynamicResource Icon.Settings}" />
                 </Button>
 
-
                 <!-- 開始 / 停止 -->
-                <Button Style="{DynamicResource Button.Icon}">
+                <Button Style="{DynamicResource Button.Icon}"
+                        Command="{Binding ToggleRunningCommand}">
                     <Grid>
                         <!-- Start -->
                         <Path Data="{DynamicResource Icon.Start}">

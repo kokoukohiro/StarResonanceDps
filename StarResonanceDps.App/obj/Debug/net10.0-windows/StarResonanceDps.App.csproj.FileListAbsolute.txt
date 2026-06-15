@@ -68,3 +68,5 @@ I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\Views\
 I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\Styles\Icons.baml
 I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\Controls\SearchBox.baml
 I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\Controls\SearchBox.g.cs
+I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\StarResonanceDps.App.sourcelink.json
+I:\GitHub\StarResonanceDps\StarResonanceDps.App\obj\Debug\net10.0-windows\Styles\ScrollBars.baml
