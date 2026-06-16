@@ -80,6 +80,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\common_attrattack.png" />
     <Resource Include="Assets\Images\common_attrblock.png" />

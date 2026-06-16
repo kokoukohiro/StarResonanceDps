@@ -30,10 +30,20 @@ public partial class ManagerView : UserControl
             return;
         }
 
-        _settingsWindow = new SettingsWindow
+        var managerWindow = Window.GetWindow(this);
+
+        _settingsWindow = new SettingsWindow();
+
+        if (managerWindow is not null)
         {
-            Owner = Window.GetWindow(this)
-        };
+            const double left_offset = 24;
+            const double top_offset = 72;
+
+            _settingsWindow.Owner = managerWindow;
+            _settingsWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            _settingsWindow.Left = managerWindow.Left + left_offset;
+            _settingsWindow.Top = managerWindow.Top + top_offset;
+        }
 
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.Show();
