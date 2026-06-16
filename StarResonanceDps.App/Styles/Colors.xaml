@@ -9,8 +9,6 @@
     <Color x:Key="Color.CardHoverBackground">#17283F</Color>
     <Color x:Key="Color.Border">#26384F</Color>
     <Color x:Key="Color.BorderSoft">#1E2C40</Color>
-    <Color x:Key="Color.Accent">#2297F4</Color>
-    <Color x:Key="Color.AccentSoft">#1A5C92</Color>
     <Color x:Key="Color.TextPrimary">#F4F8FC</Color>
     <Color x:Key="Color.TextSecondary">#9EADC0</Color>
     <Color x:Key="Color.TextMuted">#657589</Color>
@@ -26,8 +24,6 @@
     <SolidColorBrush x:Key="Brush.CardHoverBackground" Color="{StaticResource Color.CardHoverBackground}" />
     <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Border}" />
     <SolidColorBrush x:Key="Brush.BorderSoft" Color="{StaticResource Color.BorderSoft}" />
-    <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Accent}" />
-    <SolidColorBrush x:Key="Brush.AccentSoft" Color="{StaticResource Color.AccentSoft}" />
     <SolidColorBrush x:Key="Brush.TextPrimary" Color="{StaticResource Color.TextPrimary}" />
     <SolidColorBrush x:Key="Brush.TextSecondary" Color="{StaticResource Color.TextSecondary}" />
     <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource Color.TextMuted}" />

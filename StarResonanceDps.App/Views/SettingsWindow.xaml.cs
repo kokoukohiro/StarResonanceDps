@@ -132,14 +132,9 @@ public partial class SettingsWindow : Window
         ScrollToSection(UpdateSection);
     }
 
-    private void CancelButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        Close();
+        
     }
 
     private void ScrollToSection(FrameworkElement target)

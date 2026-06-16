@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
         Title="Star Resonance DPS Settings"
-        Width="920"
+        Width="760"
         Height="640"
         MinWidth="760"
         MinHeight="520"
@@ -36,7 +36,7 @@
                                 Click="BasicNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Settings}" />
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="基本設定" />
                             </StackPanel>
                         </Button>
@@ -54,7 +54,7 @@
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Theme}" />
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Theme}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="テーマ" />
                             </StackPanel>
                         </Button>
@@ -81,7 +81,7 @@
                                 <TextBlock x:Name="BasicSection"
                                            Text="基本設定"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="17"
+                                           FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
                                 <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
@@ -100,24 +100,12 @@
                                                                FontWeight="SemiBold" />
                                                 </StackPanel>
 
-                                                <Grid Grid.Column="1" VerticalAlignment="Center">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="8" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <ComboBox Grid.Column="0"
+                                                <ComboBox Grid.Column="1"
                                                               Style="{StaticResource Input.SettingsComboBox}"
                                                               SelectedIndex="0">
-                                                        <ComboBoxItem Content="自動選択" />
-                                                        <ComboBoxItem Content="Ethernet" />
-                                                        <ComboBoxItem Content="Wi-Fi" />
-                                                    </ComboBox>
-                                                    <Button Grid.Column="2"
-                                                            Content="自動選択"
-                                                            Style="{StaticResource Button.Secondary}" />
-                                                </Grid>
+                                                    <ComboBoxItem Content="Ethernet" />
+                                                    <ComboBoxItem Content="Wi-Fi" />
+                                                </ComboBox>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -126,7 +114,7 @@
                                 <TextBlock x:Name="DisplaySection"
                                            Text="表示設定"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="17"
+                                           FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
                                 <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
@@ -148,8 +136,10 @@
                                                 <ComboBox Grid.Column="1"
                                                           Style="{StaticResource Input.SettingsComboBox}"
                                                           SelectedIndex="0">
+                                                    <ComboBoxItem Content="システムと同じ" />
                                                     <ComboBoxItem Content="日本語" />
-                                                    <ComboBoxItem Content="中文" />
+                                                    <ComboBoxItem Content="한국어" />
+                                                    <ComboBoxItem Content="简体中文" />
                                                     <ComboBoxItem Content="English" />
                                                 </ComboBox>
                                             </Grid>
@@ -172,9 +162,8 @@
                                                 <ComboBox Grid.Column="1"
                                                           Style="{StaticResource Input.SettingsComboBox}"
                                                           SelectedIndex="0">
-                                                    <ComboBoxItem Content="標準" />
-                                                    <ComboBoxItem Content="短縮表示" />
-                                                    <ComboBoxItem Content="詳細表示" />
+                                                    <ComboBoxItem Content="英語表記（KMBT）" />
+                                                    <ComboBoxItem Content="日本語表記（万億兆）" />
                                                 </ComboBox>
                                             </Grid>
                                         </Border>
@@ -184,7 +173,7 @@
                                 <TextBlock x:Name="ThemeSection"
                                            Text="テーマ"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="17"
+                                           FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
                                 <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
@@ -197,19 +186,46 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="テーマ色"
+                                                    <TextBlock Text="ウィンドウの色"
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold" />
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <Border Width="24" Height="24" Margin="0,0,10,0" CornerRadius="12" Background="{DynamicResource Brush.Accent}" BorderBrush="White" BorderThickness="2" />
+                                                    <Border Width="24" Height="24" Margin="0,0,10,0" CornerRadius="12" Background="#2297F4" BorderBrush="White" BorderThickness="2" />
                                                     <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#7C5CFF" />
-                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#2FC8C8" />
                                                     <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#9FD14A" />
                                                     <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#FF9F2E" />
-                                                    <Border Width="22" Height="22" CornerRadius="11" Background="#F05284" />
+                                                    <Border Width="22" Height="22" Margin="0,0,12,0" CornerRadius="11" Background="#F05284" />
+
+                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Text}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="ボタンの色"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border Width="24" Height="24" Margin="0,0,10,0" CornerRadius="12" Background="#2297F4" BorderBrush="White" BorderThickness="2" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#7C5CFF" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#9FD14A" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#FF9F2E" />
+                                                    <Border Width="22" Height="22" Margin="0,0,12,0" CornerRadius="11" Background="#F05284" />
+
+                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Text}" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -228,16 +244,15 @@
                                                                FontWeight="SemiBold" />
                                                 </StackPanel>
 
-                                                <Grid Grid.Column="1" VerticalAlignment="Center">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="8" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Border Width="24" Height="24" Margin="0,0,10,0" CornerRadius="12" Background="#2297F4" BorderBrush="White" BorderThickness="2" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#7C5CFF" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#9FD14A" />
+                                                    <Border Width="22" Height="22" Margin="0,0,10,0" CornerRadius="11" Background="#FF9F2E" />
+                                                    <Border Width="22" Height="22" Margin="0,0,12,0" CornerRadius="11" Background="#F05284" />
 
-                                                    <Border Grid.Column="0" Width="34" Height="28" CornerRadius="4" Background="{DynamicResource Brush.TextPrimary}" BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" />
-                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Secondary}" />
-                                                </Grid>
+                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Text}" />
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -246,7 +261,7 @@
                                 <TextBlock x:Name="UpdateSection"
                                            Text="アップデート"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="17"
+                                           FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
                                 <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
@@ -265,7 +280,7 @@
                                                                FontWeight="SemiBold" />
                                                 </StackPanel>
 
-                                                <Button Grid.Column="1" Content="更新を確認" Style="{StaticResource Button.Primary}" />
+                                                <Button Grid.Column="1" Content="確認" Style="{StaticResource Button.Text}" />
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -287,9 +302,8 @@
                 <StackPanel Orientation="Horizontal"
                 HorizontalAlignment="Right"
                 Margin="18,10">
-                    <Button Content="初期化" Style="{StaticResource Button.Secondary}" />
-                    <Button Content="キャンセル" Margin="12,0,0,0" Click="CancelButton_Click" Style="{StaticResource Button.Secondary}" />
-                    <Button Content="保存" Margin="12,0,0,0" Click="SaveButton_Click" Style="{StaticResource Button.Primary}" />
+                    <Button Content="初期化" Style="{StaticResource Button.Text}" />
+                    <Button Content="保存" Margin="12,0,0,0" Click="SaveButton_Click" Style="{StaticResource Button.Text}" />
                 </StackPanel>
             </Grid>
         </Grid>

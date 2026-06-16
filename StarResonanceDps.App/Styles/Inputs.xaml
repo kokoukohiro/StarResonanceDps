@@ -122,6 +122,11 @@
         </Setter>
     </Style>
 
+    <Style x:Key="Input.SettingsComboBoxItem"
+       TargetType="{x:Type ComboBoxItem}"
+       BasedOn="{StaticResource Input.SelectComboBoxItem}">
+        <Setter Property="Height" Value="30" />
+    </Style>
 
     <Style x:Key="Input.SelectBox" TargetType="ComboBox">
         <Setter Property="Height" Value="40" />
@@ -320,8 +325,9 @@
 
 
     <Style x:Key="Input.SettingsComboBox" TargetType="ComboBox" BasedOn="{StaticResource Input.SelectBox}">
-        <Setter Property="MinWidth" Value="190" />
+        <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="220" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource Input.SettingsComboBoxItem}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
@@ -347,8 +353,8 @@
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" />
 
                                 <Path Grid.Column="1"
-                                      Width="14"
-                                      Height="14"
+                                      Width="12"
+                                      Height="12"
                                       Stretch="Uniform"
                                       Fill="Transparent"
                                       Stroke="{DynamicResource Brush.Icon}"
@@ -406,5 +412,5 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
 </ResourceDictionary>
