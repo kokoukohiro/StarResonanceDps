@@ -8,7 +8,6 @@ namespace StarResonanceDps.App.Views;
 
 public partial class ManagerView : UserControl
 {
-    private SettingsWindow? _settingsWindow;
     private bool _isSyncingExternalScrollBar;
 
     public ManagerView()
@@ -24,29 +23,22 @@ public partial class ManagerView : UserControl
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        if (_settingsWindow is { IsVisible: true })
-        {
-            _settingsWindow.Activate();
-            return;
-        }
-
         var managerWindow = Window.GetWindow(this);
 
-        _settingsWindow = new SettingsWindow();
+        var settingsWindow = new SettingsWindow();
 
         if (managerWindow is not null)
         {
-            const double left_offset = 24;
-            const double top_offset = 72;
+            const double leftOffset = 24;
+            const double topOffset = 72;
 
-            _settingsWindow.Owner = managerWindow;
-            _settingsWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            _settingsWindow.Left = managerWindow.Left + left_offset;
-            _settingsWindow.Top = managerWindow.Top + top_offset;
+            settingsWindow.Owner = managerWindow;
+            settingsWindow.WindowStartupLocation = WindowStartupLocation.Manual;
+            settingsWindow.Left = managerWindow.Left + leftOffset;
+            settingsWindow.Top = managerWindow.Top + topOffset;
         }
 
-        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
-        _settingsWindow.Show();
+        settingsWindow.ShowDialog();
     }
 
     private void WidgetListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)

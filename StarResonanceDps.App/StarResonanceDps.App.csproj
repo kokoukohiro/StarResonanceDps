@@ -44,6 +44,16 @@
     <None Remove="Assets\Images\common_icon19.png" />
     <None Remove="Assets\Images\common_icon20.png" />
     <None Remove="Assets\Images\common_icon21.png" />
+    <None Remove="Assets\Images\com_icon_question.png" />
+    <None Remove="Assets\Images\hazard_sign_dark_high.png" />
+    <None Remove="Assets\Images\hazard_sign_fire_high.png" />
+    <None Remove="Assets\Images\hazard_sign_ice_high.png" />
+    <None Remove="Assets\Images\hazard_sign_light_high.png" />
+    <None Remove="Assets\Images\hazard_sign_no_high.png" />
+    <None Remove="Assets\Images\hazard_sign_rock_high.png" />
+    <None Remove="Assets\Images\hazard_sign_sen_high.png" />
+    <None Remove="Assets\Images\hazard_sign_thunder_high.png" />
+    <None Remove="Assets\Images\hazard_sign_wind_high.png" />
     <None Remove="Assets\Images\profession_horizontal_01.png" />
     <None Remove="Assets\Images\profession_horizontal_02.png" />
     <None Remove="Assets\Images\profession_horizontal_03.png" />
@@ -53,6 +63,16 @@
     <None Remove="Assets\Images\profession_horizontal_07.png" />
     <None Remove="Assets\Images\profession_horizontal_08.png" />
     <None Remove="Assets\Images\profession_horizontal_09.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud00.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud01.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud02.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud03.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud04.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud05.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud06.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud07.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud08.png" />
+    <None Remove="Assets\Images\profession_horizontal_hud09.png" />
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
     <None Remove="Assets\Images\trialroad_icon_survival.png" />
@@ -68,6 +88,8 @@
     <Folder Include="Services\" />
     <Folder Include="Styles\" />
     <Folder Include="ViewModels\" />
+    <Folder Include="ViewModels\WidgetSettings\" />
+    <Folder Include="Views\WidgetSettings\" />
     <Folder Include="Views\Widgets\" />
   </ItemGroup>
 
@@ -121,6 +143,16 @@
     <Resource Include="Assets\Images\common_icon19.png" />
     <Resource Include="Assets\Images\common_icon20.png" />
     <Resource Include="Assets\Images\common_icon21.png" />
+    <Resource Include="Assets\Images\com_icon_question.png" />
+    <Resource Include="Assets\Images\hazard_sign_dark_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_fire_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_ice_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_light_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_no_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_rock_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_sen_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_thunder_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_wind_high.png" />
     <Resource Include="Assets\Images\profession_horizontal_01.png" />
     <Resource Include="Assets\Images\profession_horizontal_02.png" />
     <Resource Include="Assets\Images\profession_horizontal_03.png" />
@@ -130,6 +162,16 @@
     <Resource Include="Assets\Images\profession_horizontal_07.png" />
     <Resource Include="Assets\Images\profession_horizontal_08.png" />
     <Resource Include="Assets\Images\profession_horizontal_09.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud00.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud01.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud02.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud03.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud04.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud05.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud06.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud07.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud08.png" />
+    <Resource Include="Assets\Images\profession_horizontal_hud09.png" />
     <Resource Include="Assets\Images\trialroad_icon_assist.png" />
     <Resource Include="Assets\Images\trialroad_icon_attack.png" />
     <Resource Include="Assets\Images\trialroad_icon_survival.png" />

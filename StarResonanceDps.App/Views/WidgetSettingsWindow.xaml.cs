@@ -9,7 +9,7 @@ using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views;
 
-public partial class SettingsWindow : Window
+public partial class WidgetSettingsWindow : Window
 {
     private const int WmNcHitTest = 0x0084;
 
@@ -24,23 +24,28 @@ public partial class SettingsWindow : Window
 
     private const double ResizeBorderThickness = 8.0;
 
+    private readonly WidgetListItemViewModel _widget;
     private bool _isSyncingExternalScrollBar;
 
-    private SettingsViewModel ViewModel => (SettingsViewModel)DataContext;
+    private WidgetSettingsViewModel ViewModel => (WidgetSettingsViewModel)DataContext;
 
-    public SettingsWindow()
+    public WidgetSettingsWindow(WidgetListItemViewModel widget)
     {
+        _widget = widget;
+
         InitializeComponent();
-        Loaded += SettingsWindow_Loaded;
-        SourceInitialized += SettingsWindow_SourceInitialized;
+        DataContext = new WidgetSettingsViewModel(widget.Kind, widget.DisplayName);
+
+        Loaded += WidgetSettingsWindow_Loaded;
+        SourceInitialized += WidgetSettingsWindow_SourceInitialized;
     }
 
-    private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
+    private void WidgetSettingsWindow_Loaded(object sender, RoutedEventArgs e)
     {
         QueueUpdateExternalScrollBar();
     }
 
-    private void SettingsWindow_SourceInitialized(object? sender, EventArgs e)
+    private void WidgetSettingsWindow_SourceInitialized(object? sender, EventArgs e)
     {
         if (PresentationSource.FromVisual(this) is HwndSource source)
         {
@@ -136,24 +141,14 @@ public partial class SettingsWindow : Window
         return new Point(x, y);
     }
 
-    private void BasicNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(BasicSection);
-    }
-
-    private void DisplayNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(DisplaySection);
-    }
-
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);
     }
 
-    private void UpdateNavButton_Click(object sender, RoutedEventArgs e)
+    private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
-        ScrollToSection(UpdateSection);
+        ScrollToSection(ClassColorsHost);
     }
 
     private void ResetButton_Click(object sender, RoutedEventArgs e)
@@ -161,8 +156,8 @@ public partial class SettingsWindow : Window
         var confirmed = ConfirmWindow.Show(
             this,
             "設定の初期化",
-            "設定を初期化しますか？",
-            "すべての設定項目が初期値に戻ります。");
+            "ウィジェット設定を初期化しますか？",
+            "このウィジェットの個別設定が初期値に戻ります。");
 
         if (!confirmed)
         {
@@ -174,7 +169,8 @@ public partial class SettingsWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.SaveSettings();
+        var theme = ViewModel.SaveSettings();
+        _widget.ApplyTheme(theme);
         Close();
     }
 
@@ -232,8 +228,8 @@ public partial class SettingsWindow : Window
             scrollBar.SmallChange = 48;
             scrollBar.Value = Math.Min(scrollViewer.VerticalOffset, maximum);
             var isScrollBarVisible = maximum > 0;
-            scrollBar.Visibility = isScrollBarVisible ? Visibility.Visible : Visibility.Collapsed;
 
+            scrollBar.Visibility = isScrollBarVisible ? Visibility.Visible : Visibility.Collapsed;
             SettingsExternalScrollBarColumn.Width = isScrollBarVisible
                 ? new GridLength(16)
                 : new GridLength(8);

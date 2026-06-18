@@ -112,7 +112,8 @@
                 </Button>
 
                 <!-- 設定 -->
-                <Button Style="{DynamicResource Button.Icon}">
+                <Button Style="{DynamicResource Button.Icon}"
+                        Click="SettingsButton_Click">
                     <Path
                         Style="{DynamicResource Icon.Fill}"
                         Data="{DynamicResource Icon.Settings}" />

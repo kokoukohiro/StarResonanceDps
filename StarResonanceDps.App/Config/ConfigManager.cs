@@ -24,8 +24,22 @@ public sealed class ConfigManager
 
     public AppConfig AppConfig { get; }
 
+    public SettingsConfig GetSettingsSnapshot()
+    {
+        AppConfigDefaults.Normalize(AppConfig);
+        return AppConfig.Settings.Clone();
+    }
+
+    public void SaveSettings(SettingsConfig settings)
+    {
+        AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
+        Save();
+    }
+
     public void Save()
     {
+        AppConfigDefaults.Normalize(AppConfig);
+
         var directory = Path.GetDirectoryName(_configPath);
         if (!string.IsNullOrWhiteSpace(directory))
         {
@@ -45,18 +59,20 @@ public sealed class ConfigManager
     {
         if (!File.Exists(_configPath))
         {
-            return new AppConfig();
+            return AppConfigDefaults.Create();
         }
 
         try
         {
             var json = File.ReadAllText(_configPath);
             var root = JsonSerializer.Deserialize<AppSettingsRoot>(json, JsonOptions);
-            return root?.Config ?? new AppConfig();
+            var config = root?.Config ?? AppConfigDefaults.Create();
+            AppConfigDefaults.Normalize(config);
+            return config;
         }
         catch
         {
-            return new AppConfig();
+            return AppConfigDefaults.Create();
         }
     }
 

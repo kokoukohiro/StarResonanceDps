@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -9,6 +10,7 @@ namespace StarResonanceDps.App.ViewModels;
 public sealed partial class MainViewModel : ViewModelBase
 {
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
+    private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -23,6 +25,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private int _bulkActionIndex = -1;
 
     private bool _isBulkUpdatingWidgets;
+    private bool _isLoadingWidgets;
 
     public ICollectionView Widgets { get; }
 
@@ -50,12 +53,32 @@ public sealed partial class MainViewModel : ViewModelBase
             OriginalIndex = _widgetItems.Count
         };
 
+        _isLoadingWidgets = true;
+        try
+        {
+            widget.ApplyWidgetConfig(_widgetStateManager.GetWidgetSnapshot(kind));
+        }
+        finally
+        {
+            _isLoadingWidgets = false;
+        }
+
         widget.PropertyChanged += OnWidgetPropertyChanged;
         _widgetItems.Add(widget);
     }
 
     private void OnWidgetPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        if (sender is not WidgetListItemViewModel widget || _isLoadingWidgets)
+        {
+            return;
+        }
+
+        if (e.PropertyName is nameof(WidgetListItemViewModel.IsFavorite) or nameof(WidgetListItemViewModel.IsPinned))
+        {
+            _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned);
+        }
+
         if (e.PropertyName is not (nameof(WidgetListItemViewModel.DisplayName)
             or nameof(WidgetListItemViewModel.State)
             or nameof(WidgetListItemViewModel.IsFavorite)
@@ -138,7 +161,6 @@ public sealed partial class MainViewModel : ViewModelBase
             }
         }
     }
-
 
     private void StartFavoriteWidgets()
     {
