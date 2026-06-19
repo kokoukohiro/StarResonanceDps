@@ -13,7 +13,9 @@
         ResizeMode="CanResize"
         Background="Transparent"
         AllowsTransparency="True"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
     <Window.Resources>
         <converters:IndexToBooleanConverter x:Key="IndexToBooleanConverter" />
     </Window.Resources>
@@ -203,29 +205,25 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <RadioButton GroupName="WindowColor"
-                                                                 Background="#2297F4"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding WindowColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=0}" />
-                                                    <RadioButton GroupName="WindowColor"
-                                                                 Background="#7C5CFF"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding WindowColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=1}" />
-                                                    <RadioButton GroupName="WindowColor"
-                                                                 Background="#9FD14A"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding WindowColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=2}" />
-                                                    <RadioButton GroupName="WindowColor"
-                                                                 Background="#FF9F2E"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding WindowColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=3}" />
-                                                    <RadioButton GroupName="WindowColor"
-                                                                 Background="#F05284"
-                                                                 Margin="0,0,12,0"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding WindowColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=4}" />
+                                                    <ItemsControl ItemsSource="{Binding WindowColors.Colors}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Horizontal" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <RadioButton GroupName="WindowColor"
+                                                                             Tag="WindowColor"
+                                                                             Background="{Binding Brush}"
+                                                                             Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                                             Click="ColorOptionRadioButton_Click" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
 
-                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Text}" />
+                                                    <Button Grid.Column="2" Content="色を選択" Style="{StaticResource Button.Text}" Tag="WindowColor" Click="ColorPickerButton_Click" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -245,29 +243,24 @@
                                                 </StackPanel>
 
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <RadioButton GroupName="TextColor"
-                                                                 Background="#2297F4"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding TextColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=0}" />
-                                                    <RadioButton GroupName="TextColor"
-                                                                 Background="#7C5CFF"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding TextColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=1}" />
-                                                    <RadioButton GroupName="TextColor"
-                                                                 Background="#9FD14A"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding TextColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=2}" />
-                                                    <RadioButton GroupName="TextColor"
-                                                                 Background="#FF9F2E"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding TextColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=3}" />
-                                                    <RadioButton GroupName="TextColor"
-                                                                 Background="#F05284"
-                                                                 Margin="0,0,12,0"
-                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                 IsChecked="{Binding TextColorIndex, Mode=TwoWay, Converter={StaticResource IndexToBooleanConverter}, ConverterParameter=4}" />
-
-                                                    <Button Grid.Column="2" Content="カスタマイズ" Style="{StaticResource Button.Text}" />
+                                                    <ItemsControl ItemsSource="{Binding TextColors.Colors}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <StackPanel Orientation="Horizontal" />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <RadioButton GroupName="TextColor"
+                                                                             Tag="TextColor"
+                                                                             Background="{Binding Brush}"
+                                                                             Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                                             Click="ColorOptionRadioButton_Click" />
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <Button Grid.Column="2" Content="色を選択" Style="{StaticResource Button.Text}" Tag="TextColor" Click="ColorPickerButton_Click" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

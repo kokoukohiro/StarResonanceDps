@@ -12,7 +12,9 @@
         Background="Transparent"
         AllowsTransparency="True"
         ShowInTaskbar="False"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
     <Border Style="{StaticResource Panel.WindowFrame}">
         <Grid>
             <Grid.RowDefinitions>

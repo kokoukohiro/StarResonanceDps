@@ -1,10 +1,12 @@
-﻿namespace StarResonanceDps.App.Config;
+namespace StarResonanceDps.App.Config;
 
 public sealed class AppConfig
 {
     public WindowBounds? StartUpState { get; set; }
 
     public SettingsConfig Settings { get; set; } = AppConfigDefaults.CreateSettings();
+
+    public ColorPickerConfig ColorPicker { get; set; } = AppConfigDefaults.CreateColorPicker();
 }
 
 public sealed class WindowBounds
@@ -15,6 +17,19 @@ public sealed class WindowBounds
     public int Height { get; set; }
 }
 
+public sealed class ColorPickerConfig
+{
+    public List<string> RecentColors { get; set; } = [];
+
+    public ColorPickerConfig Clone()
+    {
+        return new ColorPickerConfig
+        {
+            RecentColors = RecentColors is null ? [] : [.. RecentColors]
+        };
+    }
+}
+
 public sealed class SettingsConfig
 {
     public int NetworkAdapterIndex { get; set; }
@@ -22,6 +37,8 @@ public sealed class SettingsConfig
     public int NumberDisplayFormatIndex { get; set; }
     public int WindowColorIndex { get; set; }
     public int TextColorIndex { get; set; }
+    public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
+    public List<string> TextColors { get; set; } = AppConfigDefaults.CreateDefaultTextColors();
 
     public SettingsConfig Clone()
     {
@@ -31,7 +48,9 @@ public sealed class SettingsConfig
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             WindowColorIndex = WindowColorIndex,
-            TextColorIndex = TextColorIndex
+            TextColorIndex = TextColorIndex,
+            WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
+            TextColors = TextColors is null ? AppConfigDefaults.CreateDefaultTextColors() : [.. TextColors]
         };
     }
 }

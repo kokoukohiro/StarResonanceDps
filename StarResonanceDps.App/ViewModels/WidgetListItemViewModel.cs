@@ -36,6 +36,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     [ObservableProperty]
     private Brush? _panelBrush;
 
+    private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
+
     public string StateText => State switch
     {
         WidgetState.Running => "起動中",
@@ -60,12 +62,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
-            Theme = new WidgetThemeConfig
-            {
-                WindowColorIndex = WindowColorIndex,
-                TextColorIndex = TextColorIndex,
-                WindowOpacity = WindowOpacity
-            }
+            Theme = _theme.Clone()
         };
     }
 
@@ -82,6 +79,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedTheme(theme);
 
+        _theme = normalized.Clone();
         WindowColorIndex = normalized.WindowColorIndex;
         TextColorIndex = normalized.TextColorIndex;
         WindowOpacity = normalized.WindowOpacity;
@@ -122,20 +120,37 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     private void UpdatePanelBrush()
     {
-        PanelBrush = WindowColorIndex switch
+        WidgetConfigDefaults.NormalizeTheme(_theme);
+
+        if (_theme.WindowColorIndex <= 0 || _theme.WindowColors.Count == 0)
         {
-            1 => CreateBrush(0x22, 0x1B, 0x49),
-            2 => CreateBrush(0x1D, 0x35, 0x25),
-            3 => CreateBrush(0x3A, 0x28, 0x13),
-            4 => CreateBrush(0x3A, 0x1A, 0x2A),
-            _ => null
-        };
+            PanelBrush = null;
+            return;
+        }
+
+        var hex = _theme.WindowColors[Math.Clamp(_theme.WindowColorIndex, 0, _theme.WindowColors.Count - 1)];
+        PanelBrush = TryCreateBrush(hex, out var brush) ? brush : null;
     }
 
-    private static SolidColorBrush CreateBrush(byte r, byte g, byte b)
+    private static bool TryCreateBrush(string hex, out SolidColorBrush brush)
     {
-        var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+        brush = new SolidColorBrush(Colors.Transparent);
+
+        if (hex.StartsWith("#", StringComparison.Ordinal))
+        {
+            hex = hex[1..];
+        }
+
+        if (hex.Length != 6
+            || !byte.TryParse(hex[..2], System.Globalization.NumberStyles.HexNumber, null, out var r)
+            || !byte.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out var g)
+            || !byte.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out var b))
+        {
+            return false;
+        }
+
+        brush = new SolidColorBrush(Color.FromArgb(0x33, r, g, b));
         brush.Freeze();
-        return brush;
+        return true;
     }
 }

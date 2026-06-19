@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Root"
-             MouseDown="SearchBox_MouseDown">
+             MouseDown="SearchBox_MouseDown"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
     <Border Style="{StaticResource Input.SearchFrame}">
         <Grid Margin="14,0">
             <Grid.ColumnDefinitions>
@@ -20,6 +22,7 @@
                   StrokeStartLineCap="Round"
                   StrokeEndLineCap="Round"
                   StrokeLineJoin="Round"
+                  SnapsToDevicePixels="True"
                   VerticalAlignment="Center"
                   Data="{DynamicResource Icon.Search}" />
 

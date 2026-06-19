@@ -30,9 +30,21 @@ public sealed class ConfigManager
         return AppConfig.Settings.Clone();
     }
 
+    public ColorPickerConfig GetColorPickerSnapshot()
+    {
+        AppConfigDefaults.Normalize(AppConfig);
+        return AppConfig.ColorPicker.Clone();
+    }
+
     public void SaveSettings(SettingsConfig settings)
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
+        Save();
+    }
+
+    public void SaveColorPicker(ColorPickerConfig colorPicker)
+    {
+        AppConfig.ColorPicker = AppConfigDefaults.CloneNormalizedColorPicker(colorPicker);
         Save();
     }
 

@@ -167,6 +167,57 @@ public partial class WidgetSettingsWindow : Window
         ViewModel.ResetToDefaults();
     }
 
+
+    private void ColorOptionRadioButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: ColorOptionViewModel option })
+        {
+            return;
+        }
+
+        if (sender is FrameworkElement { Tag: "WindowColor" })
+        {
+            ViewModel.ApplyWindowColor(option.Color);
+            return;
+        }
+
+        option.Select();
+    }
+
+    private void ColorPickerButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string target })
+        {
+            return;
+        }
+
+        var initialColor = target == "TextColor"
+            ? ViewModel.GetSelectedTextColor()
+            : ViewModel.GetSelectedWindowColor();
+
+        var owner = Window.GetWindow(this);
+        var window = new ColorPickerWindow(initialColor);
+
+        if (owner is not null)
+        {
+            window.Owner = owner;
+        }
+
+        if (window.ShowDialog() != true)
+        {
+            return;
+        }
+
+        if (target == "TextColor")
+        {
+            ViewModel.ApplyTextColor(window.SelectedColor);
+        }
+        else
+        {
+            ViewModel.ApplyWindowColor(window.SelectedColor);
+        }
+    }
+
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         var theme = ViewModel.SaveSettings();

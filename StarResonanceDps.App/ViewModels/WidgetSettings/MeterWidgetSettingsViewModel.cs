@@ -1,91 +1,89 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Windows.Media;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
 {
-    private const string ShieldKnightKey = "ShieldKnight";
-    private const string HeavyGuardianKey = "HeavyGuardian";
-    private const string VerdantOracleKey = "VerdantOracle";
-    private const string SoulMusicianKey = "SoulMusician";
-    private const string FlameBerserkerKey = "FlameBerserker";
-    private const string StormbladeKey = "Stormblade";
-    private const string FrostMageKey = "FrostMage";
-    private const string WindKnightKey = "WindKnight";
-    private const string MarksmanKey = "Marksman";
-    private const string TransformationKey = "Transformation";
-    private const string UnknownKey = "Unknown";
+    public const string ShieldKnightKey = "ShieldKnight";
+    public const string HeavyGuardianKey = "HeavyGuardian";
+    public const string VerdantOracleKey = "VerdantOracle";
+    public const string SoulMusicianKey = "SoulMusician";
+    public const string FlameBerserkerKey = "FlameBerserker";
+    public const string StormbladeKey = "Stormblade";
+    public const string FrostMageKey = "FrostMage";
+    public const string WindKnightKey = "WindKnight";
+    public const string MarksmanKey = "Marksman";
+    public const string TransformationKey = "Transformation";
+    public const string UnknownKey = "Unknown";
 
     private MeterWidgetSettingsConfig _lastSaved;
-
-    [ObservableProperty]
-    private int _shieldKnightClassColorIndex;
-
-    [ObservableProperty]
-    private int _heavyGuardianClassColorIndex;
-
-    [ObservableProperty]
-    private int _verdantOracleClassColorIndex;
-
-    [ObservableProperty]
-    private int _soulMusicianClassColorIndex;
-
-    [ObservableProperty]
-    private int _flameBerserkerClassColorIndex;
-
-    [ObservableProperty]
-    private int _stormbladeClassColorIndex;
-
-    [ObservableProperty]
-    private int _frostMageClassColorIndex;
-
-    [ObservableProperty]
-    private int _windKnightClassColorIndex;
-
-    [ObservableProperty]
-    private int _marksmanClassColorIndex;
-
-    [ObservableProperty]
-    private int _transformationClassColorIndex;
-
-    [ObservableProperty]
-    private int _unknownClassColorIndex;
 
     [ObservableProperty]
     private double _classColorOpacity = 100;
 
     public MeterWidgetSettingsViewModel(MeterWidgetSettingsConfig? config)
     {
+        ShieldKnightClassColors = CreateClassPalette(ShieldKnightKey);
+        HeavyGuardianClassColors = CreateClassPalette(HeavyGuardianKey);
+        VerdantOracleClassColors = CreateClassPalette(VerdantOracleKey);
+        SoulMusicianClassColors = CreateClassPalette(SoulMusicianKey);
+        FlameBerserkerClassColors = CreateClassPalette(FlameBerserkerKey);
+        StormbladeClassColors = CreateClassPalette(StormbladeKey);
+        FrostMageClassColors = CreateClassPalette(FrostMageKey);
+        WindKnightClassColors = CreateClassPalette(WindKnightKey);
+        MarksmanClassColors = CreateClassPalette(MarksmanKey);
+        TransformationClassColors = CreateClassPalette(TransformationKey);
+        UnknownClassColors = CreateClassPalette(UnknownKey);
+
+        foreach (var palette in GetAllPalettes())
+        {
+            palette.PaletteChanged += (_, _) => NotifyChanged();
+        }
+
         _lastSaved = WidgetConfigDefaults.CloneNormalizedMeter(config);
         LoadFromConfig(_lastSaved);
     }
 
     public bool HasUnsavedChanges => !SettingsEquals(CreateConfig(), _lastSaved);
 
+    public ColorPaletteViewModel ShieldKnightClassColors { get; }
+    public ColorPaletteViewModel HeavyGuardianClassColors { get; }
+    public ColorPaletteViewModel VerdantOracleClassColors { get; }
+    public ColorPaletteViewModel SoulMusicianClassColors { get; }
+    public ColorPaletteViewModel FlameBerserkerClassColors { get; }
+    public ColorPaletteViewModel StormbladeClassColors { get; }
+    public ColorPaletteViewModel FrostMageClassColors { get; }
+    public ColorPaletteViewModel WindKnightClassColors { get; }
+    public ColorPaletteViewModel MarksmanClassColors { get; }
+    public ColorPaletteViewModel TransformationClassColors { get; }
+    public ColorPaletteViewModel UnknownClassColors { get; }
+
     public MeterWidgetSettingsConfig CreateConfig()
     {
         var config = new MeterWidgetSettingsConfig
         {
-            ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-            {
-                [ShieldKnightKey] = ClampClassColorIndex(ShieldKnightClassColorIndex),
-                [HeavyGuardianKey] = ClampClassColorIndex(HeavyGuardianClassColorIndex),
-                [VerdantOracleKey] = ClampClassColorIndex(VerdantOracleClassColorIndex),
-                [SoulMusicianKey] = ClampClassColorIndex(SoulMusicianClassColorIndex),
-                [FlameBerserkerKey] = ClampClassColorIndex(FlameBerserkerClassColorIndex),
-                [StormbladeKey] = ClampClassColorIndex(StormbladeClassColorIndex),
-                [FrostMageKey] = ClampClassColorIndex(FrostMageClassColorIndex),
-                [WindKnightKey] = ClampClassColorIndex(WindKnightClassColorIndex),
-                [MarksmanKey] = ClampClassColorIndex(MarksmanClassColorIndex),
-                [TransformationKey] = ClampClassColorIndex(TransformationClassColorIndex),
-                [UnknownKey] = ClampClassColorIndex(UnknownClassColorIndex)
-            },
+            ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
                 WidgetConfigDefaults.MaxClassColorOpacity)
         };
+
+        AddPalette(config, ShieldKnightKey, ShieldKnightClassColors);
+        AddPalette(config, HeavyGuardianKey, HeavyGuardianClassColors);
+        AddPalette(config, VerdantOracleKey, VerdantOracleClassColors);
+        AddPalette(config, SoulMusicianKey, SoulMusicianClassColors);
+        AddPalette(config, FlameBerserkerKey, FlameBerserkerClassColors);
+        AddPalette(config, StormbladeKey, StormbladeClassColors);
+        AddPalette(config, FrostMageKey, FrostMageClassColors);
+        AddPalette(config, WindKnightKey, WindKnightClassColors);
+        AddPalette(config, MarksmanKey, MarksmanClassColors);
+        AddPalette(config, TransformationKey, TransformationClassColors);
+        AddPalette(config, UnknownKey, UnknownClassColors);
 
         WidgetConfigDefaults.NormalizeMeter(config);
         return config;
@@ -104,36 +102,90 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    public Color GetSelectedClassColor(string key)
+    {
+        return GetPalette(key).SelectedColor;
+    }
+
+    public void ApplyClassColor(string key, Color color)
+    {
+        GetPalette(key).AddOrSelect(color);
+        NotifyChanged();
+    }
+
+    public ColorPaletteViewModel GetPalette(string key)
+    {
+        return key switch
+        {
+            ShieldKnightKey => ShieldKnightClassColors,
+            HeavyGuardianKey => HeavyGuardianClassColors,
+            VerdantOracleKey => VerdantOracleClassColors,
+            SoulMusicianKey => SoulMusicianClassColors,
+            FlameBerserkerKey => FlameBerserkerClassColors,
+            StormbladeKey => StormbladeClassColors,
+            FrostMageKey => FrostMageClassColors,
+            WindKnightKey => WindKnightClassColors,
+            MarksmanKey => MarksmanClassColors,
+            TransformationKey => TransformationClassColors,
+            UnknownKey => UnknownClassColors,
+            _ => UnknownClassColors
+        };
+    }
+
     private void LoadFromConfig(MeterWidgetSettingsConfig config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedMeter(config);
-        ShieldKnightClassColorIndex = GetIndex(normalized, ShieldKnightKey);
-        HeavyGuardianClassColorIndex = GetIndex(normalized, HeavyGuardianKey);
-        VerdantOracleClassColorIndex = GetIndex(normalized, VerdantOracleKey);
-        SoulMusicianClassColorIndex = GetIndex(normalized, SoulMusicianKey);
-        FlameBerserkerClassColorIndex = GetIndex(normalized, FlameBerserkerKey);
-        StormbladeClassColorIndex = GetIndex(normalized, StormbladeKey);
-        FrostMageClassColorIndex = GetIndex(normalized, FrostMageKey);
-        WindKnightClassColorIndex = GetIndex(normalized, WindKnightKey);
-        MarksmanClassColorIndex = GetIndex(normalized, MarksmanKey);
-        TransformationClassColorIndex = GetIndex(normalized, TransformationKey);
-        UnknownClassColorIndex = GetIndex(normalized, UnknownKey);
+        LoadPalette(normalized, ShieldKnightKey, ShieldKnightClassColors);
+        LoadPalette(normalized, HeavyGuardianKey, HeavyGuardianClassColors);
+        LoadPalette(normalized, VerdantOracleKey, VerdantOracleClassColors);
+        LoadPalette(normalized, SoulMusicianKey, SoulMusicianClassColors);
+        LoadPalette(normalized, FlameBerserkerKey, FlameBerserkerClassColors);
+        LoadPalette(normalized, StormbladeKey, StormbladeClassColors);
+        LoadPalette(normalized, FrostMageKey, FrostMageClassColors);
+        LoadPalette(normalized, WindKnightKey, WindKnightClassColors);
+        LoadPalette(normalized, MarksmanKey, MarksmanClassColors);
+        LoadPalette(normalized, TransformationKey, TransformationClassColors);
+        LoadPalette(normalized, UnknownKey, UnknownClassColors);
         ClassColorOpacity = normalized.ClassColorOpacity;
     }
 
-    private static int GetIndex(MeterWidgetSettingsConfig config, string key)
+    private IEnumerable<ColorPaletteViewModel> GetAllPalettes()
     {
-        return config.ClassColorIndexes.TryGetValue(key, out var index)
-            ? ClampClassColorIndex(index)
-            : WidgetConfigDefaults.MinClassColorIndex;
+        yield return ShieldKnightClassColors;
+        yield return HeavyGuardianClassColors;
+        yield return VerdantOracleClassColors;
+        yield return SoulMusicianClassColors;
+        yield return FlameBerserkerClassColors;
+        yield return StormbladeClassColors;
+        yield return FrostMageClassColors;
+        yield return WindKnightClassColors;
+        yield return MarksmanClassColors;
+        yield return TransformationClassColors;
+        yield return UnknownClassColors;
     }
 
-    private static int ClampClassColorIndex(int index)
+    private static ColorPaletteViewModel CreateClassPalette(string key)
     {
-        return Math.Clamp(
-            index,
-            WidgetConfigDefaults.MinClassColorIndex,
-            WidgetConfigDefaults.MaxClassColorIndex);
+        return new ColorPaletteViewModel(
+            WidgetConfigDefaults.CreateDefaultClassColors(key),
+            WidgetConfigDefaults.MaxPaletteColorCount);
+    }
+
+    private static void LoadPalette(MeterWidgetSettingsConfig config, string key, ColorPaletteViewModel palette)
+    {
+        var colors = config.ClassColorPalettes.TryGetValue(key, out var value)
+            ? value
+            : WidgetConfigDefaults.CreateDefaultClassColors(key);
+        var index = config.ClassColorIndexes.TryGetValue(key, out var savedIndex)
+            ? savedIndex
+            : WidgetConfigDefaults.MinClassColorIndex;
+        palette.Load(colors, index);
+    }
+
+    private static void AddPalette(MeterWidgetSettingsConfig config, string key, ColorPaletteViewModel palette)
+    {
+        config.ClassColorIndexes[key] = palette.SelectedIndex;
+        config.ClassColorPalettes[key] = [.. palette.GetHexColors()];
     }
 
     private static bool SettingsEquals(MeterWidgetSettingsConfig left, MeterWidgetSettingsConfig right)
@@ -141,18 +193,29 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         var normalizedLeft = WidgetConfigDefaults.CloneNormalizedMeter(left);
         var normalizedRight = WidgetConfigDefaults.CloneNormalizedMeter(right);
 
-        return GetIndex(normalizedLeft, ShieldKnightKey) == GetIndex(normalizedRight, ShieldKnightKey)
-            && GetIndex(normalizedLeft, HeavyGuardianKey) == GetIndex(normalizedRight, HeavyGuardianKey)
-            && GetIndex(normalizedLeft, VerdantOracleKey) == GetIndex(normalizedRight, VerdantOracleKey)
-            && GetIndex(normalizedLeft, SoulMusicianKey) == GetIndex(normalizedRight, SoulMusicianKey)
-            && GetIndex(normalizedLeft, FlameBerserkerKey) == GetIndex(normalizedRight, FlameBerserkerKey)
-            && GetIndex(normalizedLeft, StormbladeKey) == GetIndex(normalizedRight, StormbladeKey)
-            && GetIndex(normalizedLeft, FrostMageKey) == GetIndex(normalizedRight, FrostMageKey)
-            && GetIndex(normalizedLeft, WindKnightKey) == GetIndex(normalizedRight, WindKnightKey)
-            && GetIndex(normalizedLeft, MarksmanKey) == GetIndex(normalizedRight, MarksmanKey)
-            && GetIndex(normalizedLeft, TransformationKey) == GetIndex(normalizedRight, TransformationKey)
-            && GetIndex(normalizedLeft, UnknownKey) == GetIndex(normalizedRight, UnknownKey)
-            && normalizedLeft.ClassColorOpacity == normalizedRight.ClassColorOpacity;
+        if (normalizedLeft.ClassColorOpacity != normalizedRight.ClassColorOpacity)
+        {
+            return false;
+        }
+
+        foreach (var key in WidgetConfigDefaults.ClassColorKeys)
+        {
+            if (!normalizedLeft.ClassColorIndexes.TryGetValue(key, out var leftIndex)
+                || !normalizedRight.ClassColorIndexes.TryGetValue(key, out var rightIndex)
+                || leftIndex != rightIndex)
+            {
+                return false;
+            }
+
+            var leftColors = normalizedLeft.ClassColorPalettes[key];
+            var rightColors = normalizedRight.ClassColorPalettes[key];
+            if (!leftColors.SequenceEqual(rightColors, StringComparer.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void NotifyChanged()
@@ -160,16 +223,5 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
-    partial void OnShieldKnightClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnHeavyGuardianClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnVerdantOracleClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnSoulMusicianClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnFlameBerserkerClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnStormbladeClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnFrostMageClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnWindKnightClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnMarksmanClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnTransformationClassColorIndexChanged(int value) => NotifyChanged();
-    partial void OnUnknownClassColorIndexChanged(int value) => NotifyChanged();
     partial void OnClassColorOpacityChanged(double value) => NotifyChanged();
 }

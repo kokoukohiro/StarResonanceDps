@@ -15,7 +15,9 @@
         Background="Transparent"
         AllowsTransparency="True"
         WindowStartupLocation="CenterScreen"
-        behaviors:WindowPlacementBehavior.UseAppConfigStartUpState="True">
+        behaviors:WindowPlacementBehavior.UseAppConfigStartUpState="True"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
     <Window.DataContext>
         <viewModels:MainViewModel />
     </Window.DataContext>

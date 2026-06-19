@@ -1,7 +1,9 @@
 <UserControl x:Class="StarResonanceDps.App.Controls.AppHeader"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Height="44">
+             Height="44"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
     <Grid Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -9,7 +11,12 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
-            <Image Width="22" Height="22" Source="/Assets/Images/ApplicationIcon_32x32.png" />
+            <Image Width="22"
+                   Height="22"
+                   Source="/Assets/Images/ApplicationIcon_32x32.png"
+                   Stretch="Uniform"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   SnapsToDevicePixels="True" />
             <TextBlock Margin="10,0,0,0"
                        VerticalAlignment="Center"
                        Foreground="{DynamicResource Brush.TextPrimary}"

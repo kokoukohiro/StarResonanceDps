@@ -2,7 +2,9 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:models="clr-namespace:StarResonanceDps.Core.Models;assembly=StarResonanceDps.Core"
-             Height="68">
+             Height="68"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
     <Border Margin="0,0,0,10"
             Style="{StaticResource Panel.WidgetCard}"
             Background="{Binding PanelBrush, TargetNullValue={StaticResource Brush.CardBackground}}">
@@ -14,7 +16,12 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Ellipse Grid.Column="0" Width="13" Height="13" Margin="0,0,14,0" VerticalAlignment="Center">
+            <Ellipse Grid.Column="0"
+                     Width="13"
+                     Height="13"
+                     Margin="0,0,14,0"
+                     VerticalAlignment="Center"
+                     SnapsToDevicePixels="True">
                 <Ellipse.Style>
                     <Style TargetType="Ellipse">
                         <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
