@@ -13,7 +13,7 @@
             <ColumnDefinition x:Name="WidgetListExternalScrollBarColumn" Width="16" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Margin="8,1,6,8" Style="{StaticResource Panel.Root}">
+        <ContentControl Grid.Column="0" Margin="8,1,6,8" Style="{StaticResource Panel.Root}">
             <Grid Margin="10">
                 <StackPanel>
                     <Button Style="{DynamicResource Button.Sidebar}">
@@ -74,9 +74,9 @@
                     </StackPanel>
                 </Button>
             </Grid>
-        </Border>
+        </ContentControl>
 
-        <Border Grid.Column="1" Margin="0,1,0,8" Style="{StaticResource Panel.Root}">
+        <ContentControl Grid.Column="1" Margin="0,1,0,8" Style="{StaticResource Panel.Root}">
             <Grid Margin="24,20,24,20">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -149,7 +149,7 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
-        </Border>
+        </ContentControl>
 
         <ScrollBar x:Name="WidgetListExternalScrollBar"
                    Grid.Column="2"

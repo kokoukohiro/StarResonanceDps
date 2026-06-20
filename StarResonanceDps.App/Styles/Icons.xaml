@@ -9,9 +9,6 @@
     <!-- Common stroke width for stroke-based icons -->
     <sys:Double x:Key="Icon.StrokeThickness">1.7</sys:Double>
 
-    <!-- Icon brushes -->
-    <SolidColorBrush x:Key="Brush.Icon" Color="#EAF4FF" />
-
     <!-- Profession image icons -->
     <sys:Double x:Key="Icon.Profession.Size">20</sys:Double>
 
@@ -25,58 +22,113 @@
     <BitmapImage x:Key="Icon.Profession.WindKnight" UriSource="/Assets/Images/profession_horizontal_hud02.png" />
     <BitmapImage x:Key="Icon.Profession.Marksman" UriSource="/Assets/Images/profession_horizontal_hud07.png" />
     <BitmapImage x:Key="Icon.Profession.Transformation" UriSource="/Assets/Images/profession_horizontal_hud00.png" />
+    <BitmapImage x:Key="Icon.Profession.Enemy" UriSource="/Assets/Images/profession_horizontal_hud00.png" />
     <BitmapImage x:Key="Icon.Profession.Unknown" UriSource="/Assets/Images/com_icon_question.png" />
 
-    <Style x:Key="Icon.ProfessionImage" TargetType="{x:Type Image}">
+    <!-- PNG profession icons are alpha masks, colored by the current text theme. -->
+    <Style x:Key="Icon.ProfessionMask" TargetType="{x:Type Rectangle}">
         <Setter Property="Width" Value="{DynamicResource Icon.Profession.Size}" />
         <Setter Property="Height" Value="{DynamicResource Icon.Profession.Size}" />
-        <Setter Property="Stretch" Value="Uniform" />
-        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+        <Setter Property="Fill" Value="{DynamicResource Brush.TextPrimary}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.ShieldKnight" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.ShieldKnight}" />
+    <Style x:Key="Icon.ProfessionMask.ShieldKnight" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.ShieldKnight}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.HeavyGuardian" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.HeavyGuardian}" />
+    <Style x:Key="Icon.ProfessionMask.HeavyGuardian" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.HeavyGuardian}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.VerdantOracle" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.VerdantOracle}" />
+    <Style x:Key="Icon.ProfessionMask.VerdantOracle" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.VerdantOracle}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.SoulMusician" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.SoulMusician}" />
+    <Style x:Key="Icon.ProfessionMask.SoulMusician" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.SoulMusician}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.FlameBerserker" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.FlameBerserker}" />
+    <Style x:Key="Icon.ProfessionMask.FlameBerserker" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.FlameBerserker}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.Stormblade" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.Stormblade}" />
+    <Style x:Key="Icon.ProfessionMask.Stormblade" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.Stormblade}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.FrostMage" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.FrostMage}" />
+    <Style x:Key="Icon.ProfessionMask.FrostMage" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.FrostMage}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.WindKnight" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.WindKnight}" />
+    <Style x:Key="Icon.ProfessionMask.WindKnight" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.WindKnight}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.Marksman" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.Marksman}" />
+    <Style x:Key="Icon.ProfessionMask.Marksman" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.Marksman}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.Transformation" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.Transformation}" />
+    <Style x:Key="Icon.ProfessionMask.Transformation" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.Transformation}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
-    <Style x:Key="Icon.ProfessionImage.Unknown" TargetType="{x:Type Image}" BasedOn="{StaticResource Icon.ProfessionImage}">
-        <Setter Property="Source" Value="{StaticResource Icon.Profession.Unknown}" />
+    <Style x:Key="Icon.ProfessionMask.Enemy" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.Enemy}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Icon.ProfessionMask.Unknown" TargetType="{x:Type Rectangle}" BasedOn="{StaticResource Icon.ProfessionMask}">
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Fill-based icon style -->
@@ -85,7 +137,7 @@
         <Setter Property="Width" Value="{DynamicResource Icon.Size}" />
         <Setter Property="Height" Value="{DynamicResource Icon.Size}" />
         <Setter Property="Stretch" Value="Uniform" />
-        <Setter Property="Fill" Value="{DynamicResource Brush.Icon}" />
+        <Setter Property="Fill" Value="{DynamicResource Brush.TextPrimary}" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
@@ -109,7 +161,7 @@
         <Setter Property="Height" Value="{DynamicResource Icon.Size}" />
         <Setter Property="Stretch" Value="Uniform" />
         <Setter Property="Fill" Value="Transparent" />
-        <Setter Property="Stroke" Value="{DynamicResource Brush.Icon}" />
+        <Setter Property="Stroke" Value="{DynamicResource Brush.TextPrimary}" />
         <Setter Property="StrokeThickness" Value="{DynamicResource Icon.StrokeThickness}" />
         <Setter Property="StrokeStartLineCap" Value="Round" />
         <Setter Property="StrokeEndLineCap" Value="Round" />

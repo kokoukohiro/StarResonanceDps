@@ -7,17 +7,11 @@ public static class AppConfigDefaults
 
     private static readonly string[] DefaultWindowColorHexes =
     [
-        "#2297F4",
-        "#7C5CFF",
-        "#9FD14A",
-        "#FF9F2E",
-        "#F05284"
-    ];
-
-    private static readonly string[] DefaultTextColorHexes =
-    [
+        "#0B1624",
         "#FFFFFF",
-        "#000000"
+        "#FFF450",
+        "#E5A1B3",
+        "#CDECFF"
     ];
 
     public static AppConfig Create()
@@ -38,9 +32,7 @@ public static class AppConfigDefaults
             LanguageIndex = 0,
             NumberDisplayFormatIndex = 0,
             WindowColorIndex = 0,
-            TextColorIndex = 0,
-            WindowColors = CreateDefaultWindowColors(),
-            TextColors = CreateDefaultTextColors()
+            WindowColors = CreateDefaultWindowColors()
         };
     }
 
@@ -55,11 +47,6 @@ public static class AppConfigDefaults
     public static List<string> CreateDefaultWindowColors()
     {
         return [.. DefaultWindowColorHexes];
-    }
-
-    public static List<string> CreateDefaultTextColors()
-    {
-        return [.. DefaultTextColorHexes];
     }
 
     public static void Normalize(AppConfig config)
@@ -91,9 +78,7 @@ public static class AppConfigDefaults
         settings.NumberDisplayFormatIndex = Clamp(settings.NumberDisplayFormatIndex, 0, 1);
 
         settings.WindowColors = NormalizeColorList(settings.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
-        settings.TextColors = NormalizeColorList(settings.TextColors, DefaultTextColorHexes, MaxPaletteColorCount);
         settings.WindowColorIndex = Clamp(settings.WindowColorIndex, 0, settings.WindowColors.Count - 1);
-        settings.TextColorIndex = Clamp(settings.TextColorIndex, 0, settings.TextColors.Count - 1);
     }
 
     public static void NormalizeColorPicker(ColorPickerConfig colorPicker)

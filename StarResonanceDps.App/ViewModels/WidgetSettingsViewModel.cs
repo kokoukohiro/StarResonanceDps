@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
-using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
 using StarResonanceDps.Core.Models;
 
@@ -13,6 +12,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
     private readonly WidgetStateManager _stateManager = WidgetStateManager.Instance;
     private readonly WidgetKind _kind;
     private WidgetThemeConfig _lastSavedTheme;
+    private bool _isLoadingTheme;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -24,14 +24,22 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
     {
         _kind = kind;
         DisplayName = displayName;
-        WindowColors = new ColorPaletteViewModel(WidgetConfigDefaults.CreateDefaultWindowColors(), WidgetConfigDefaults.MaxPaletteColorCount);
-        TextColors = new ColorPaletteViewModel(WidgetConfigDefaults.CreateDefaultTextColors(), WidgetConfigDefaults.MaxPaletteColorCount);
-        WindowColors.PaletteChanged += (_, _) => OnPropertyChanged(nameof(HasUnsavedChanges));
-        TextColors.PaletteChanged += (_, _) => OnPropertyChanged(nameof(HasUnsavedChanges));
+        WindowColors = new ColorPaletteViewModel(
+            WidgetConfigDefaults.CreateDefaultWindowColors(),
+            WidgetConfigDefaults.MaxPaletteColorCount);
+        WindowColors.PaletteChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+
+            if (!_isLoadingTheme)
+            {
+                RaiseThemePreviewChanged();
+            }
+        };
 
         var config = _stateManager.GetWidgetSnapshot(kind);
         _lastSavedTheme = WidgetConfigDefaults.CloneNormalizedTheme(config.Theme);
-        LoadFromTheme(config.Theme);
+        LoadFromTheme(config.Theme, raisePreview: false);
 
         if (IsMeterWidgetKind(kind))
         {
@@ -46,13 +54,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
         }
     }
 
+    public event Action<WidgetThemeConfig>? ThemePreviewChanged;
+
     public string WindowTitle => $"{DisplayName}の設定";
 
     public bool IsMeterWidget => IsMeterWidgetKind(_kind);
 
     public ColorPaletteViewModel WindowColors { get; }
-
-    public ColorPaletteViewModel TextColors { get; }
 
     public MeterWidgetSettingsViewModel? MeterSettings { get; }
 
@@ -92,9 +100,14 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
 
     public void ResetToDefaults()
     {
-        LoadFromTheme(WidgetConfigDefaults.CreateTheme());
+        LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
         MeterSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    public void RestoreSavedThemePreview()
+    {
+        ThemePreviewChanged?.Invoke(_lastSavedTheme.Clone());
     }
 
     public Color GetSelectedWindowColor()
@@ -102,22 +115,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
         return WindowColors.SelectedColor;
     }
 
-    public Color GetSelectedTextColor()
-    {
-        return TextColors.SelectedColor;
-    }
-
     public void ApplyWindowColor(Color color)
     {
         WindowColors.AddOrSelect(color);
-        TextColors.AddOrSelect(ColorUtilities.GetReadableTextColor(color));
-        OnPropertyChanged(nameof(HasUnsavedChanges));
-    }
-
-    public void ApplyTextColor(Color color)
-    {
-        TextColors.AddOrSelect(color);
-        OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
     private WidgetThemeConfig CreateTheme()
@@ -125,26 +125,41 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
         var theme = new WidgetThemeConfig
         {
             WindowColorIndex = WindowColors.SelectedIndex,
-            TextColorIndex = TextColors.SelectedIndex,
             WindowOpacity = Math.Clamp(
                 (int)Math.Round(WindowOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinWindowOpacity,
                 WidgetConfigDefaults.MaxWindowOpacity),
-            WindowColors = [.. WindowColors.GetHexColors()],
-            TextColors = [.. TextColors.GetHexColors()]
+            WindowColors = [.. WindowColors.GetHexColors()]
         };
 
         WidgetConfigDefaults.NormalizeTheme(theme);
         return theme;
     }
 
-    private void LoadFromTheme(WidgetThemeConfig theme)
+    private void LoadFromTheme(WidgetThemeConfig theme, bool raisePreview)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedTheme(theme);
 
-        WindowColors.Load(normalized.WindowColors, normalized.WindowColorIndex);
-        TextColors.Load(normalized.TextColors, normalized.TextColorIndex);
-        WindowOpacity = normalized.WindowOpacity;
+        _isLoadingTheme = true;
+        try
+        {
+            WindowColors.Load(normalized.WindowColors, normalized.WindowColorIndex);
+            WindowOpacity = normalized.WindowOpacity;
+        }
+        finally
+        {
+            _isLoadingTheme = false;
+        }
+
+        if (raisePreview)
+        {
+            RaiseThemePreviewChanged();
+        }
+    }
+
+    private void RaiseThemePreviewChanged()
+    {
+        ThemePreviewChanged?.Invoke(CreateTheme());
     }
 
     private static bool ThemeEquals(WidgetThemeConfig left, WidgetThemeConfig right)
@@ -153,10 +168,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
         WidgetConfigDefaults.NormalizeTheme(right);
 
         return left.WindowColorIndex == right.WindowColorIndex
-            && left.TextColorIndex == right.TextColorIndex
             && left.WindowOpacity == right.WindowOpacity
-            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase)
-            && left.TextColors.SequenceEqual(right.TextColors, StringComparer.OrdinalIgnoreCase);
+            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
     private static bool IsMeterWidgetKind(WidgetKind kind)
@@ -169,5 +182,10 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
     partial void OnWindowOpacityChanged(double value)
     {
         OnPropertyChanged(nameof(HasUnsavedChanges));
+
+        if (!_isLoadingTheme)
+        {
+            RaiseThemePreviewChanged();
+        }
     }
 }

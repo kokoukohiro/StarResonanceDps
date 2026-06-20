@@ -188,7 +188,7 @@
         </Style>
     </Window.Resources>
 
-    <Border Style="{StaticResource Panel.WindowFrame}">
+    <ContentControl Style="{StaticResource Panel.WindowFrame}">
         <Grid x:Name="KeyboardFocusSink"
               Focusable="True">
             <Grid.RowDefinitions>
@@ -218,12 +218,12 @@
                 </Button>
             </Grid>
 
-            <Border Grid.Row="1" Margin="8,1,8,7" Style="{StaticResource Panel.Root}">
+            <ContentControl Grid.Row="1" Margin="8,1,8,7" Style="{StaticResource Panel.Root}">
                 <Grid Margin="16,16" Background="Transparent">
                     <controls:ColorPicker x:Name="ColorPicker"
                                           Style="{StaticResource ColorPicker.Control}" />
                 </Grid>
-            </Border>
+            </ContentControl>
 
             <Grid Grid.Row="2" Margin="8,0,8,8">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -234,5 +234,5 @@
                 </StackPanel>
             </Grid>
         </Grid>
-    </Border>
+    </ContentControl>
 </Window>

@@ -17,6 +17,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
     public const string WindKnightKey = "WindKnight";
     public const string MarksmanKey = "Marksman";
     public const string TransformationKey = "Transformation";
+    public const string EnemyKey = "Enemy";
     public const string UnknownKey = "Unknown";
 
     private MeterWidgetSettingsConfig _lastSaved;
@@ -36,6 +37,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         WindKnightClassColors = CreateClassPalette(WindKnightKey);
         MarksmanClassColors = CreateClassPalette(MarksmanKey);
         TransformationClassColors = CreateClassPalette(TransformationKey);
+        EnemyClassColors = CreateClassPalette(EnemyKey);
         UnknownClassColors = CreateClassPalette(UnknownKey);
 
         foreach (var palette in GetAllPalettes())
@@ -59,6 +61,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
     public ColorPaletteViewModel WindKnightClassColors { get; }
     public ColorPaletteViewModel MarksmanClassColors { get; }
     public ColorPaletteViewModel TransformationClassColors { get; }
+    public ColorPaletteViewModel EnemyClassColors { get; }
     public ColorPaletteViewModel UnknownClassColors { get; }
 
     public MeterWidgetSettingsConfig CreateConfig()
@@ -83,6 +86,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         AddPalette(config, WindKnightKey, WindKnightClassColors);
         AddPalette(config, MarksmanKey, MarksmanClassColors);
         AddPalette(config, TransformationKey, TransformationClassColors);
+        AddPalette(config, EnemyKey, EnemyClassColors);
         AddPalette(config, UnknownKey, UnknownClassColors);
 
         WidgetConfigDefaults.NormalizeMeter(config);
@@ -127,6 +131,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
             WindKnightKey => WindKnightClassColors,
             MarksmanKey => MarksmanClassColors,
             TransformationKey => TransformationClassColors,
+            EnemyKey => EnemyClassColors,
             UnknownKey => UnknownClassColors,
             _ => UnknownClassColors
         };
@@ -145,6 +150,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         LoadPalette(normalized, WindKnightKey, WindKnightClassColors);
         LoadPalette(normalized, MarksmanKey, MarksmanClassColors);
         LoadPalette(normalized, TransformationKey, TransformationClassColors);
+        LoadPalette(normalized, EnemyKey, EnemyClassColors);
         LoadPalette(normalized, UnknownKey, UnknownClassColors);
         ClassColorOpacity = normalized.ClassColorOpacity;
     }
@@ -161,6 +167,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject
         yield return WindKnightClassColors;
         yield return MarksmanClassColors;
         yield return TransformationClassColors;
+        yield return EnemyClassColors;
         yield return UnknownClassColors;
     }
 

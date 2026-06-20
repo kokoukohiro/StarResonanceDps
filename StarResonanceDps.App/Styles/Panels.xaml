@@ -1,37 +1,110 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Style x:Key="Panel.WindowFrame" TargetType="Border">
+    <!--
+        Pure XAML rounded-outline surfaces.
+        Using only built-in ContentControl avoids the WPF designer creating a temporary
+        project to resolve a same-assembly custom control from this ResourceDictionary.
+    -->
+    <Style x:Key="Surface.RoundedOutline" TargetType="{x:Type ContentControl}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Border x:Name="OutlineLayer"
+                            Background="{TemplateBinding BorderBrush}"
+                            CornerRadius="{StaticResource Radius.Default}"
+                            SnapsToDevicePixels="True">
+                        <Border x:Name="SurfaceLayer"
+                                Margin="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource Radius.Button}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              SnapsToDevicePixels="True" />
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Surface.RoundedButtonOutline" TargetType="{x:Type ContentControl}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Border x:Name="OutlineLayer"
+                            Background="{TemplateBinding BorderBrush}"
+                            CornerRadius="{StaticResource Radius.Button}"
+                            SnapsToDevicePixels="True">
+                        <Border x:Name="SurfaceLayer"
+                                Margin="{TemplateBinding BorderThickness}"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="{StaticResource Radius.ButtonInner}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                              ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              SnapsToDevicePixels="True" />
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Panel.WindowFrame"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Surface.RoundedOutline}">
         <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <Style x:Key="Panel.Root" TargetType="Border">
+    <Style x:Key="Panel.Root"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Surface.RoundedOutline}">
         <Setter Property="Background" Value="{DynamicResource Brush.PanelBackground}" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Default}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <Style x:Key="Panel.WidgetCard" TargetType="Border">
-        <!-- Default card color. Per-widget settings can override this Background later. -->
-        <Setter Property="Background" Value="{DynamicResource Brush.CardBackground}" />
-        <Setter Property="CornerRadius" Value="{StaticResource Radius.Default}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-        <Setter Property="BorderThickness" Value="1" />
+    <Style x:Key="Panel.WidgetCard"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="Background" Value="{Binding ThemePalette.WindowSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{Binding ThemePalette.BorderSoftBrush}" />
         <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
-    <Style x:Key="Panel.SettingSection" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource Brush.CardBackground}" />
+    <Style x:Key="Panel.SettingSection"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Default}" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
     <Style x:Key="Panel.SettingFieldBase" TargetType="Border">
@@ -48,5 +121,4 @@
     </Style>
 
     <Style x:Key="Panel.SettingFieldLast" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}" />
-
 </ResourceDictionary>

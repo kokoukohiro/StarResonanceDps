@@ -115,7 +115,7 @@ public sealed class WidgetStateManager
 
     private static void Normalize(WidgetStateDocument document)
     {
-        document.SchemaVersion = document.SchemaVersion <= 0 ? 1 : document.SchemaVersion;
+        var sourceSchemaVersion = document.SchemaVersion <= 0 ? 1 : document.SchemaVersion;
         document.Widgets ??= new Dictionary<string, WidgetConfig>(StringComparer.OrdinalIgnoreCase);
 
         foreach (WidgetKind kind in Enum.GetValues<WidgetKind>())
@@ -127,8 +127,15 @@ public sealed class WidgetStateManager
                 continue;
             }
 
+            if (sourceSchemaVersion < WidgetConfigDefaults.CurrentSchemaVersion)
+            {
+                WidgetConfigDefaults.MigrateVersion1Defaults(config);
+            }
+
             WidgetConfigDefaults.Normalize(config);
         }
+
+        document.SchemaVersion = WidgetConfigDefaults.CurrentSchemaVersion;
     }
 
     private void SaveCore()

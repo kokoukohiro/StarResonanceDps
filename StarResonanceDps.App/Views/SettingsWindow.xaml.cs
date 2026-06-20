@@ -63,6 +63,8 @@ public partial class SettingsWindow : Window
                 e.Cancel = true;
                 return;
             }
+
+            ViewModel.RestoreSavedGlobalTheme();
         }
 
         base.OnClosing(e);
@@ -175,49 +177,23 @@ public partial class SettingsWindow : Window
 
     private void ColorOptionRadioButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement { DataContext: ColorOptionViewModel option })
-        {
-            return;
-        }
-
-        if (sender is FrameworkElement { Tag: "WindowColor" })
+        if (sender is FrameworkElement { DataContext: ColorOptionViewModel option })
         {
             ViewModel.ApplyWindowColor(option.Color);
-            return;
         }
-
-        option.Select();
     }
 
     private void ColorPickerButton_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not FrameworkElement { Tag: string target })
-        {
-            return;
-        }
-
-        var initialColor = target == "TextColor"
-            ? ViewModel.GetSelectedTextColor()
-            : ViewModel.GetSelectedWindowColor();
-
         var owner = Window.GetWindow(this);
-        var window = new ColorPickerWindow(initialColor);
+        var window = new ColorPickerWindow(ViewModel.GetSelectedWindowColor());
 
         if (owner is not null)
         {
             window.Owner = owner;
         }
 
-        if (window.ShowDialog() != true)
-        {
-            return;
-        }
-
-        if (target == "TextColor")
-        {
-            ViewModel.ApplyTextColor(window.SelectedColor);
-        }
-        else
+        if (window.ShowDialog() == true)
         {
             ViewModel.ApplyWindowColor(window.SelectedColor);
         }

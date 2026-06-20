@@ -5,9 +5,77 @@
              Height="68"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
-    <Border Margin="0,0,0,10"
-            Style="{StaticResource Panel.WidgetCard}"
-            Background="{Binding PanelBrush, TargetNullValue={StaticResource Brush.CardBackground}}">
+    <UserControl.Resources>
+        <Style x:Key="WidgetItem.IconButton" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="34" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <ContentControl x:Name="Root"
+                                                 Style="{StaticResource Surface.RoundedButtonOutline}"
+                                                 Background="{Binding DataContext.ThemePalette.ControlBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}"
+                                                 BorderBrush="{Binding DataContext.ThemePalette.BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"
+                                                 BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              IsHitTestVisible="False" />
+                        </ContentControl>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root"
+                                        Property="Background"
+                                        Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root"
+                                        Property="Background"
+                                        Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WidgetItem.IconFill"
+               TargetType="{x:Type Path}"
+               BasedOn="{StaticResource Icon.Fill}">
+            <Setter Property="Fill"
+                    Value="{Binding DataContext.ThemePalette.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+        </Style>
+
+        <Style x:Key="WidgetItem.IconStroke"
+               TargetType="{x:Type Path}"
+               BasedOn="{StaticResource Icon.Stroke}">
+            <Setter Property="Stroke"
+                    Value="{Binding DataContext.ThemePalette.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+        </Style>
+
+        <Style x:Key="WidgetItem.IconStartFill"
+               TargetType="{x:Type Path}"
+               BasedOn="{StaticResource WidgetItem.IconFill}">
+            <Setter Property="Width" Value="13.5" />
+            <Setter Property="Height" Value="13.5" />
+        </Style>
+
+        <Style x:Key="WidgetItem.IconStopFill"
+               TargetType="{x:Type Path}"
+               BasedOn="{StaticResource WidgetItem.IconFill}">
+            <Setter Property="Width" Value="12" />
+            <Setter Property="Height" Value="12" />
+        </Style>
+    </UserControl.Resources>
+
+    <ContentControl Style="{StaticResource Panel.WidgetCard}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -41,6 +109,7 @@
                        Grid.ColumnSpan="2"
                        Margin="0,0,147,0"
                        Style="{StaticResource Text.WidgetName}"
+                       Foreground="{Binding ThemePalette.TextPrimaryBrush}"
                        Text="{Binding DisplayName}" />
 
             <StackPanel Grid.Column="2"
@@ -49,13 +118,12 @@
                         Height="34"
                         VerticalAlignment="Center">
 
-                <!-- お気に入り -->
-                <Button Style="{DynamicResource Button.Icon}"
+                <Button Style="{StaticResource WidgetItem.IconButton}"
                         Command="{Binding ToggleFavoriteCommand}">
                     <Grid>
                         <Path Data="{DynamicResource Icon.Favorite}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Stroke}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconStroke}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsFavorite}" Value="True">
@@ -67,7 +135,7 @@
                         </Path>
                         <Path Data="{DynamicResource Icon.Favorite.Filled}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconFill}">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsFavorite}" Value="True">
@@ -80,13 +148,12 @@
                     </Grid>
                 </Button>
 
-                <!-- 固定 / 非固定 -->
-                <Button Style="{DynamicResource Button.Icon}"
+                <Button Style="{StaticResource WidgetItem.IconButton}"
                         Command="{Binding TogglePinCommand}">
                     <Grid>
                         <Path Data="{DynamicResource Icon.Pin.Unfixed}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconFill}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsPinned}" Value="True">
@@ -98,7 +165,7 @@
                         </Path>
                         <Path Data="{DynamicResource Icon.Pin.Fixed}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.Fill}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconFill}">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsPinned}" Value="True">
@@ -111,29 +178,23 @@
                     </Grid>
                 </Button>
 
-                <!-- ウィジェットを選択 -->
-                <Button Style="{DynamicResource Button.Icon}">
-                    <Path
-                        Style="{DynamicResource Icon.Stroke}"
-                        Data="{DynamicResource Icon.ExternalLink}" />
+                <Button Style="{StaticResource WidgetItem.IconButton}">
+                    <Path Style="{StaticResource WidgetItem.IconStroke}"
+                          Data="{DynamicResource Icon.ExternalLink}" />
                 </Button>
 
-                <!-- 設定 -->
-                <Button Style="{DynamicResource Button.Icon}"
+                <Button Style="{StaticResource WidgetItem.IconButton}"
                         Click="SettingsButton_Click">
-                    <Path
-                        Style="{DynamicResource Icon.Fill}"
-                        Data="{DynamicResource Icon.Settings}" />
+                    <Path Style="{StaticResource WidgetItem.IconFill}"
+                          Data="{DynamicResource Icon.Settings}" />
                 </Button>
 
-                <!-- 開始 / 停止 -->
-                <Button Style="{DynamicResource Button.Icon}"
+                <Button Style="{StaticResource WidgetItem.IconButton}"
                         Command="{Binding ToggleRunningCommand}">
                     <Grid>
-                        <!-- Start -->
                         <Path Data="{DynamicResource Icon.Start}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.StartFill}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconStartFill}">
                                     <Setter Property="Visibility" Value="Visible" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
@@ -144,10 +205,9 @@
                             </Path.Style>
                         </Path>
 
-                        <!-- Stop -->
                         <Path Data="{DynamicResource Icon.Stop}">
                             <Path.Style>
-                                <Style TargetType="Path" BasedOn="{StaticResource Icon.StopFill}">
+                                <Style TargetType="{x:Type Path}" BasedOn="{StaticResource WidgetItem.IconStopFill}">
                                     <Setter Property="Visibility" Value="Collapsed" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
@@ -161,5 +221,5 @@
                 </Button>
             </StackPanel>
         </Grid>
-    </Border>
+    </ContentControl>
 </UserControl>

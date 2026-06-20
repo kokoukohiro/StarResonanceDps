@@ -36,9 +36,7 @@ public sealed class SettingsConfig
     public int LanguageIndex { get; set; }
     public int NumberDisplayFormatIndex { get; set; }
     public int WindowColorIndex { get; set; }
-    public int TextColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
-    public List<string> TextColors { get; set; } = AppConfigDefaults.CreateDefaultTextColors();
 
     public SettingsConfig Clone()
     {
@@ -48,9 +46,7 @@ public sealed class SettingsConfig
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             WindowColorIndex = WindowColorIndex,
-            TextColorIndex = TextColorIndex,
-            WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
-            TextColors = TextColors is null ? AppConfigDefaults.CreateDefaultTextColors() : [.. TextColors]
+            WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors]
         };
     }
 }

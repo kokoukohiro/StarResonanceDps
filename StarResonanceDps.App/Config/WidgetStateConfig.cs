@@ -5,7 +5,7 @@ namespace StarResonanceDps.App.Config;
 
 public sealed class WidgetStateDocument
 {
-    public int SchemaVersion { get; set; } = 1;
+    public int SchemaVersion { get; set; } = WidgetConfigDefaults.CurrentSchemaVersion;
 
     public Dictionary<string, WidgetConfig> Widgets { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
@@ -40,20 +40,16 @@ public sealed class WidgetConfig
 public sealed class WidgetThemeConfig
 {
     public int WindowColorIndex { get; set; }
-    public int TextColorIndex { get; set; }
     public int WindowOpacity { get; set; } = 100;
     public List<string> WindowColors { get; set; } = WidgetConfigDefaults.CreateDefaultWindowColors();
-    public List<string> TextColors { get; set; } = WidgetConfigDefaults.CreateDefaultTextColors();
 
     public WidgetThemeConfig Clone()
     {
         return new WidgetThemeConfig
         {
             WindowColorIndex = WindowColorIndex,
-            TextColorIndex = TextColorIndex,
             WindowOpacity = WindowOpacity,
-            WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
-            TextColors = TextColors is null ? WidgetConfigDefaults.CreateDefaultTextColors() : [.. TextColors]
+            WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors]
         };
     }
 }
@@ -105,6 +101,7 @@ public sealed class MeterWidgetSettingsConfig
 
 public static class WidgetConfigDefaults
 {
+    public const int CurrentSchemaVersion = 2;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
@@ -115,17 +112,11 @@ public static class WidgetConfigDefaults
 
     private static readonly string[] DefaultWindowColorHexes =
     [
-        "#2297F4",
-        "#7C5CFF",
-        "#9FD14A",
-        "#FF9F2E",
-        "#F05284"
-    ];
-
-    private static readonly string[] DefaultTextColorHexes =
-    [
+        "#0B1624",
         "#FFFFFF",
-        "#000000"
+        "#FFF450",
+        "#E5A1B3",
+        "#CDECFF"
     ];
 
     public static readonly string[] ClassColorKeys =
@@ -140,10 +131,41 @@ public static class WidgetConfigDefaults
         "WindKnight",
         "Marksman",
         "Transformation",
+        "Enemy",
         "Unknown"
     ];
 
     private static readonly Dictionary<string, string[]> DefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ShieldKnight"] = ["#0F68B3", "#08406F"],
+        ["HeavyGuardian"] = ["#08A0DC", "#056482"],
+        ["VerdantOracle"] = ["#32BF0F", "#1D7410"],
+        ["SoulMusician"] = ["#1F9F0E", "#145F0A"],
+        ["FlameBerserker"] = ["#B33000", "#6F1F00"],
+        ["Stormblade"] = ["#6B39DE", "#3F2485"],
+        ["FrostMage"] = ["#5C82E1", "#355094"],
+        ["WindKnight"] = ["#11B5B2", "#0A6E6C"],
+        ["Marksman"] = ["#D4D116", "#8A8810"],
+        ["Transformation"] = ["#B06BE8", "#6E3A9C"],
+        ["Enemy"] = ["#D95757", "#7E3030"],
+        ["Unknown"] = ["#A8A8A8", "#707070"]
+    };
+
+    // Version 1 values shipped as the initial widget-state.json palette.  Keep this
+    // separately so migration only replaces the known defaults and never overwrites
+    // user-created colors.
+    private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "#2297F4",
+        "#7C5CFF",
+        "#9FD14A",
+        "#FF9F2E",
+        "#F05284",
+        "#000000",
+        "#FFFFFF"
+    };
+
+    private static readonly Dictionary<string, string[]> LegacyClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["ShieldKnight"] = ["#1E8EF5", "#0F4D87"],
         ["HeavyGuardian"] = ["#C95A13", "#78340D"],
@@ -154,9 +176,79 @@ public static class WidgetConfigDefaults
         ["FrostMage"] = ["#47B7FF", "#226F9E"],
         ["WindKnight"] = ["#1F9FDE", "#145F85"],
         ["Marksman"] = ["#D4D116", "#8A8810"],
-        ["Transformation"] = ["#B06BE8", "#6E3A9C"],
         ["Unknown"] = ["#A8A8A8", "#707070"]
     };
+
+    public static void MigrateVersion1Defaults(WidgetConfig config)
+    {
+        config.Theme ??= CreateTheme();
+        config.Meter ??= CreateMeterSettings();
+
+        if (UsesLegacyWindowColorPalette(config.Theme.WindowColors))
+        {
+            config.Theme.WindowColors = CreateDefaultWindowColors();
+            config.Theme.WindowColorIndex = MinColorIndex;
+        }
+
+        config.Meter.ClassColorPalettes ??= CreateDefaultClassColorPalettes();
+        config.Meter.ClassColorIndexes ??= CreateDefaultClassColorIndexes();
+
+        foreach (var (key, legacyPalette) in LegacyClassColorHexes)
+        {
+            if (!config.Meter.ClassColorPalettes.TryGetValue(key, out var palette)
+                || !ColorSequencesEqual(palette, legacyPalette))
+            {
+                continue;
+            }
+
+            config.Meter.ClassColorPalettes[key] = CreateDefaultClassColors(key);
+            config.Meter.ClassColorIndexes[key] = MinClassColorIndex;
+        }
+    }
+
+    private static bool UsesLegacyWindowColorPalette(IEnumerable<string>? colors)
+    {
+        if (colors is null)
+        {
+            return false;
+        }
+
+        var normalized = new List<string>();
+        foreach (var color in colors)
+        {
+            if (!TryNormalizeHexColor(color, out var value))
+            {
+                return false;
+            }
+
+            normalized.Add(value);
+        }
+
+        return normalized.Count == MaxPaletteColorCount
+            && normalized.All(LegacyWidgetWindowColorHexes.Contains);
+    }
+
+    private static bool ColorSequencesEqual(IEnumerable<string>? colors, IReadOnlyList<string> expected)
+    {
+        if (colors is null)
+        {
+            return false;
+        }
+
+        var normalized = new List<string>();
+        foreach (var color in colors)
+        {
+            if (!TryNormalizeHexColor(color, out var value))
+            {
+                return false;
+            }
+
+            normalized.Add(value);
+        }
+
+        return normalized.Count == expected.Count
+            && normalized.SequenceEqual(expected, StringComparer.OrdinalIgnoreCase);
+    }
 
     public static WidgetConfig Create(WidgetKind kind)
     {
@@ -175,10 +267,8 @@ public static class WidgetConfigDefaults
         return new WidgetThemeConfig
         {
             WindowColorIndex = 0,
-            TextColorIndex = 0,
             WindowOpacity = 100,
-            WindowColors = CreateDefaultWindowColors(),
-            TextColors = CreateDefaultTextColors()
+            WindowColors = CreateDefaultWindowColors()
         };
     }
 
@@ -195,11 +285,6 @@ public static class WidgetConfigDefaults
     public static List<string> CreateDefaultWindowColors()
     {
         return [.. DefaultWindowColorHexes];
-    }
-
-    public static List<string> CreateDefaultTextColors()
-    {
-        return [.. DefaultTextColorHexes];
     }
 
     public static Dictionary<string, int> CreateDefaultClassColorIndexes()
@@ -255,9 +340,7 @@ public static class WidgetConfigDefaults
     public static void NormalizeTheme(WidgetThemeConfig theme)
     {
         theme.WindowColors = NormalizeColorList(theme.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
-        theme.TextColors = NormalizeColorList(theme.TextColors, DefaultTextColorHexes, MaxPaletteColorCount);
         theme.WindowColorIndex = Math.Clamp(theme.WindowColorIndex, MinColorIndex, theme.WindowColors.Count - 1);
-        theme.TextColorIndex = Math.Clamp(theme.TextColorIndex, MinColorIndex, theme.TextColors.Count - 1);
         theme.WindowOpacity = Math.Clamp(theme.WindowOpacity, MinWindowOpacity, MaxWindowOpacity);
     }
 

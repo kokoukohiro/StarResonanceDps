@@ -16,7 +16,7 @@
                    FontWeight="SemiBold"
                    Margin="0,10,0,10" />
 
-        <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+        <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
             <StackPanel>
                 <Border Style="{StaticResource Panel.SettingField}">
                     <Grid>
@@ -27,9 +27,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.ShieldKnight}" />
+                                   Style="{StaticResource Icon.ProfessionMask.ShieldKnight}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -116,9 +116,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.HeavyGuardian}" />
+                                   Style="{StaticResource Icon.ProfessionMask.HeavyGuardian}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -205,9 +205,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.VerdantOracle}" />
+                                   Style="{StaticResource Icon.ProfessionMask.VerdantOracle}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -294,9 +294,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.SoulMusician}" />
+                                   Style="{StaticResource Icon.ProfessionMask.SoulMusician}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -383,9 +383,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.FlameBerserker}" />
+                                   Style="{StaticResource Icon.ProfessionMask.FlameBerserker}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -472,9 +472,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.Stormblade}" />
+                                   Style="{StaticResource Icon.ProfessionMask.Stormblade}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -561,9 +561,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.FrostMage}" />
+                                   Style="{StaticResource Icon.ProfessionMask.FrostMage}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -650,9 +650,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.WindKnight}" />
+                                   Style="{StaticResource Icon.ProfessionMask.WindKnight}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -739,9 +739,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.Marksman}" />
+                                   Style="{StaticResource Icon.ProfessionMask.Marksman}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -828,9 +828,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.Transformation}" />
+                                   Style="{StaticResource Icon.ProfessionMask.Transformation}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -917,9 +917,98 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="25"
+                            <Rectangle Width="25"
                                    Height="25"
-                                   Style="{StaticResource Icon.ProfessionImage.Unknown}" />
+                                   Style="{StaticResource Icon.ProfessionMask.Enemy}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Margin="10,0,0,0"
+                                       Text="エネミー"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+
+
+                            <ItemsControl ItemsSource="{Binding EnemyClassColors.Colors}">
+
+
+                                <ItemsControl.ItemsPanel>
+
+
+                                    <ItemsPanelTemplate>
+
+
+                                        <StackPanel Orientation="Horizontal" />
+
+
+                                    </ItemsPanelTemplate>
+
+
+                                </ItemsControl.ItemsPanel>
+
+
+                                <ItemsControl.ItemTemplate>
+
+
+                                    <DataTemplate>
+
+
+                                        <RadioButton GroupName="EnemyClassColor"
+
+
+                                                     Background="{Binding Brush}"
+
+
+                                                     Style="{StaticResource Button.ColorSwatchRadioButton}"
+
+
+                                                     IsChecked="{Binding IsSelected, Mode=OneWay}"
+
+
+                                                     Click="ColorOptionRadioButton_Click" />
+
+
+                                    </DataTemplate>
+
+
+                                </ItemsControl.ItemTemplate>
+
+
+                            </ItemsControl>
+
+
+                            <Button Content="色を選択"
+
+
+                                    Style="{StaticResource Button.Text}"
+
+
+                                    Tag="Enemy"
+
+
+                                    Click="ColorPickerButton_Click" />
+
+
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Rectangle Width="25"
+                                   Height="25"
+                                   Style="{StaticResource Icon.ProfessionMask.Unknown}" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -1035,6 +1124,6 @@
                     </Grid>
                 </Border>
             </StackPanel>
-        </Border>
+        </ContentControl>
     </StackPanel>
 </UserControl>

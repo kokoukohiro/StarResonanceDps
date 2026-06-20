@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <CornerRadius x:Key="Radius.Default">6</CornerRadius>
     <CornerRadius x:Key="Radius.Button">5</CornerRadius>
+    <CornerRadius x:Key="Radius.ButtonInner">4</CornerRadius>
 
     <Thickness x:Key="Padding.Card">14,0</Thickness>
-    <Thickness x:Key="Padding.Panel">28</Thickness>
 </ResourceDictionary>

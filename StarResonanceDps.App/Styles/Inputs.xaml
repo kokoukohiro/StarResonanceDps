@@ -5,7 +5,7 @@
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="4,0,8,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-        <Setter Property="Background" Value="#0D1A2A" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -15,12 +15,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBox}">
-                    <Border x:Name="Root"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{DynamicResource Radius.Default}"
-                            SnapsToDevicePixels="True">
+                    <ContentControl x:Name="Root"
+                                             Style="{StaticResource Surface.RoundedOutline}"
+                                             Background="{TemplateBinding Background}"
+                                             BorderBrush="{TemplateBinding BorderBrush}"
+                                             BorderThickness="{TemplateBinding BorderThickness}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -35,7 +34,7 @@
                             <Button x:Name="PART_CopyButton"
                                     Grid.Column="1"
                                     Width="32"
-                                    Height="32"
+                                    Height="30"
                                     Padding="0"
                                     Focusable="False"
                                     IsTabStop="False"
@@ -60,7 +59,7 @@
                                 </Button.Template>
                             </Button>
                         </Grid>
-                    </Border>
+                    </ContentControl>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
@@ -78,7 +77,7 @@
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="16,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-        <Setter Property="Background" Value="#0D1A2A" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -87,29 +86,25 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="{DynamicResource Radius.Default}"
-                        SnapsToDevicePixels="True">
-                        <ScrollViewer
-                            x:Name="PART_ContentHost"
-                            Margin="{TemplateBinding Padding}"
-                            VerticalAlignment="Center" />
-                    </Border>
+                    <ContentControl Style="{StaticResource Surface.RoundedOutline}"
+                                             Background="{TemplateBinding Background}"
+                                             BorderBrush="{TemplateBinding BorderBrush}"
+                                             BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center" />
+                    </ContentControl>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <Style x:Key="Input.SearchFrame" TargetType="Border">
+    <Style x:Key="Input.SearchFrame"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Surface.RoundedOutline}">
         <Setter Property="Height" Value="40" />
-        <Setter Property="Background" Value="#0D1A2A" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{DynamicResource Radius.Default}" />
-        <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
 
     <Style x:Key="Input.SearchInnerTextBox" TargetType="TextBox">
@@ -151,11 +146,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#18263A" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
                             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#20334E" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
                             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -193,7 +188,7 @@
 
                         <!-- マウスを置いた時は選択済み項目でも通常通り色変化させる -->
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#18263A" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
                             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -213,7 +208,7 @@
         <Setter Property="MinWidth" Value="150" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
-        <Setter Property="Background" Value="#0D1A2A" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="FontSize" Value="13" />
@@ -225,13 +220,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                TextElement.Foreground="{TemplateBinding Foreground}"
-                                CornerRadius="{DynamicResource Radius.Default}"
-                                SnapsToDevicePixels="True">
+                        <ContentControl x:Name="Root"
+                                                 Style="{StaticResource Surface.RoundedOutline}"
+                                                 Background="{TemplateBinding Background}"
+                                                 BorderBrush="{TemplateBinding BorderBrush}"
+                                                 BorderThickness="{TemplateBinding BorderThickness}"
+                                                 TextElement.Foreground="{TemplateBinding Foreground}">
                             <Grid Margin="12,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
@@ -240,17 +234,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Path Grid.Column="0"
-                                      Width="18"
-                                      Height="18"
-                                      Stretch="Uniform"
-                                      Fill="Transparent"
-                                      Stroke="{DynamicResource Brush.Icon}"
-                                      StrokeThickness="{DynamicResource Icon.StrokeThickness}"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      SnapsToDevicePixels="True"
-                                      VerticalAlignment="Center"
+                                      Style="{DynamicResource Icon.Stroke}"
                                       Data="{TemplateBinding Tag}" />
 
                                 <ContentPresenter Grid.Column="1"
@@ -264,18 +248,10 @@
                                 <Path Grid.Column="2"
                                       Width="14"
                                       Height="14"
-                                      Stretch="Uniform"
-                                      Fill="Transparent"
                                       Style="{DynamicResource Icon.Stroke}"
-                                      StrokeThickness="{DynamicResource Icon.StrokeThickness}"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      SnapsToDevicePixels="True"
-                                      VerticalAlignment="Center"
                                       Data="{DynamicResource Icon.ChevronDown}" />
                             </Grid>
-                        </Border>
+                        </ContentControl>
 
                         <ToggleButton x:Name="ToggleButton"
                                       Focusable="False"
@@ -299,23 +275,21 @@
                             <Grid MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                   MaxHeight="220"
                                   Margin="0,4,0,0">
-                                <Border Background="#0D1A2A"
-                                        BorderBrush="{DynamicResource Brush.Border}"
-                                        BorderThickness="1"
-                                        CornerRadius="{DynamicResource Radius.Default}"
-                                        Padding="4"
-                                        SnapsToDevicePixels="True">
+                                <ContentControl Style="{StaticResource Surface.RoundedOutline}"
+                                                         Background="{DynamicResource Brush.InputBackground}"
+                                                         BorderBrush="{DynamicResource Brush.Border}"
+                                                         Padding="4">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled">
                                         <ItemsPresenter />
                                     </ScrollViewer>
-                                </Border>
+                                </ContentControl>
                             </Grid>
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#102033" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
                             <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -329,7 +303,7 @@
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
-        <Setter Property="Background" Value="#0D1A2A" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="FontSize" Value="13" />
@@ -340,20 +314,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
-                        <Border x:Name="Root"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{DynamicResource Radius.Default}"
-                            SnapsToDevicePixels="True">
-                            <Path
-                            Width="18"
-                            Height="18"
-                            Stretch="Uniform"
-                            Fill="Transparent"
-                            Style="{DynamicResource Icon.Stroke}"
-                            Data="{TemplateBinding Tag}" />
-                        </Border>
+                        <ContentControl x:Name="Root"
+                                                 Style="{StaticResource Surface.RoundedOutline}"
+                                                 Background="{TemplateBinding Background}"
+                                                 BorderBrush="{TemplateBinding BorderBrush}"
+                                                 BorderThickness="{TemplateBinding BorderThickness}">
+                            <Path Style="{DynamicResource Icon.Stroke}"
+                                  Data="{TemplateBinding Tag}" />
+                        </ContentControl>
 
                         <ToggleButton x:Name="ToggleButton"
                                   Focusable="False"
@@ -377,24 +345,22 @@
                             <Grid MinWidth="180"
                               MaxHeight="220"
                               Margin="0,4,0,0">
-                                <Border Background="#0D1A2A"
-                                    BorderBrush="{DynamicResource Brush.Border}"
-                                    BorderThickness="1"
-                                    CornerRadius="{DynamicResource Radius.Default}"
-                                    Padding="4"
-                                    SnapsToDevicePixels="True">
+                                <ContentControl Style="{StaticResource Surface.RoundedOutline}"
+                                                         Background="{DynamicResource Brush.InputBackground}"
+                                                         BorderBrush="{DynamicResource Brush.Border}"
+                                                         Padding="4">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                              HorizontalScrollBarVisibility="Disabled">
+                                                  HorizontalScrollBarVisibility="Disabled">
                                         <ItemsPresenter />
                                     </ScrollViewer>
-                                </Border>
+                                </ContentControl>
                             </Grid>
                         </Popup>
                     </Grid>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#102033" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
                             <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -413,13 +379,12 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                TextElement.Foreground="{TemplateBinding Foreground}"
-                                CornerRadius="{DynamicResource Radius.Default}"
-                                SnapsToDevicePixels="True">
+                        <ContentControl x:Name="Root"
+                                                 Style="{StaticResource Surface.RoundedOutline}"
+                                                 Background="{TemplateBinding Background}"
+                                                 BorderBrush="{TemplateBinding BorderBrush}"
+                                                 BorderThickness="{TemplateBinding BorderThickness}"
+                                                 TextElement.Foreground="{TemplateBinding Foreground}">
                             <Grid Margin="12,0">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -436,18 +401,10 @@
                                 <Path Grid.Column="1"
                                       Width="12"
                                       Height="12"
-                                      Stretch="Uniform"
-                                      Fill="Transparent"
-                                      Stroke="{DynamicResource Brush.Icon}"
-                                      StrokeThickness="{DynamicResource Icon.StrokeThickness}"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      SnapsToDevicePixels="True"
-                                      VerticalAlignment="Center"
+                                      Style="{DynamicResource Icon.Stroke}"
                                       Data="{DynamicResource Icon.ChevronDown}" />
                             </Grid>
-                        </Border>
+                        </ContentControl>
 
                         <ToggleButton x:Name="ToggleButton"
                                       Focusable="False"
@@ -471,23 +428,21 @@
                             <Grid MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
                                   MaxHeight="220"
                                   Margin="0,4,0,0">
-                                <Border Background="#0D1A2A"
-                                        BorderBrush="{DynamicResource Brush.Border}"
-                                        BorderThickness="1"
-                                        CornerRadius="{DynamicResource Radius.Default}"
-                                        Padding="4"
-                                        SnapsToDevicePixels="True">
+                                <ContentControl Style="{StaticResource Surface.RoundedOutline}"
+                                                         Background="{DynamicResource Brush.InputBackground}"
+                                                         BorderBrush="{DynamicResource Brush.Border}"
+                                                         Padding="4">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled">
                                         <ItemsPresenter />
                                     </ScrollViewer>
-                                </Border>
+                                </ContentControl>
                             </Grid>
                         </Popup>
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="#102033" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
                             <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                         </Trigger>
                     </ControlTemplate.Triggers>

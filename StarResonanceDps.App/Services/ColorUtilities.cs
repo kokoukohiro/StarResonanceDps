@@ -30,6 +30,15 @@ public static class ColorUtilities
             + 0.0722 * ToLinear(color.B);
     }
 
+    public static Color Blend(Color from, Color to, double toWeight)
+    {
+        var weight = Math.Clamp(toWeight, 0d, 1d);
+        return Color.FromRgb(
+            BlendChannel(from.R, to.R, weight),
+            BlendChannel(from.G, to.G, weight),
+            BlendChannel(from.B, to.B, weight));
+    }
+
     public static string ToHex(Color color)
     {
         return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
@@ -73,4 +82,12 @@ public static class ColorUtilities
         color = Color.FromRgb(r, g, b);
         return true;
     }
+
+    private static byte BlendChannel(byte from, byte to, double toWeight)
+    {
+        var value = from + ((to - from) * toWeight);
+        return (byte)Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), byte.MinValue, byte.MaxValue);
+    }
+
+
 }

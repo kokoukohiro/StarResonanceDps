@@ -22,7 +22,7 @@
         <viewModels:MainViewModel />
     </Window.DataContext>
 
-    <Border Style="{StaticResource Panel.WindowFrame}">
+    <ContentControl Style="{StaticResource Panel.WindowFrame}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="44" />
@@ -32,5 +32,5 @@
             <controls:AppHeader Grid.Row="0" />
             <views:ManagerView Grid.Row="1" />
         </Grid>
-    </Border>
+    </ContentControl>
 </Window>

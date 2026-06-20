@@ -24,7 +24,7 @@
         <viewModels:SettingsViewModel />
     </Window.DataContext>
 
-    <Border Style="{StaticResource Panel.WindowFrame}">
+    <ContentControl Style="{StaticResource Panel.WindowFrame}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="44" />
@@ -42,7 +42,7 @@
                     <ColumnDefinition x:Name="SettingsExternalScrollBarColumn" Width="16" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource Panel.Root}">
+                <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
                     <StackPanel Margin="10">
                         <Button x:Name="BasicNavButton"
                                 Click="BasicNavButton_Click"
@@ -80,9 +80,9 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Border>
+                </ContentControl>
 
-                <Border Grid.Column="2" Style="{StaticResource Panel.Root}">
+                <ContentControl Grid.Column="2" Style="{StaticResource Panel.Root}">
                         <Grid Margin="26,22,18,18">
                             <ScrollViewer x:Name="ContentScrollViewer"
                                           Style="{StaticResource ScrollViewer.WidgetList}"
@@ -96,7 +96,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
@@ -121,7 +121,7 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
-                                </Border>
+                                </ContentControl>
 
                                 <TextBlock x:Name="DisplaySection"
                                            Text="表示設定"
@@ -129,7 +129,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
@@ -180,7 +180,7 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
-                                </Border>
+                                </ContentControl>
 
                                 <TextBlock x:Name="ThemeSection"
                                            Text="テーマ"
@@ -188,9 +188,9 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
                                     <StackPanel>
-                                        <Border Style="{StaticResource Panel.SettingField}">
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -227,45 +227,8 @@
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
-
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="文字の色"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <ItemsControl ItemsSource="{Binding TextColors.Colors}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <StackPanel Orientation="Horizontal" />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <RadioButton GroupName="TextColor"
-                                                                             Tag="TextColor"
-                                                                             Background="{Binding Brush}"
-                                                                             Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
-                                                                             Click="ColorOptionRadioButton_Click" />
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-                                                    <Button Grid.Column="2" Content="色を選択" Style="{StaticResource Button.Text}" Tag="TextColor" Click="ColorPickerButton_Click" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
                                     </StackPanel>
-                                </Border>
+                                </ContentControl>
 
                                 <TextBlock x:Name="UpdateSection"
                                            Text="アップデート"
@@ -273,7 +236,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
@@ -293,11 +256,11 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
-                                </Border>
+                                </ContentControl>
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
-                </Border>
+                </ContentControl>
 
                 <ScrollBar x:Name="SettingsExternalScrollBar"
                            Grid.Column="3"
@@ -315,5 +278,5 @@
                 </StackPanel>
             </Grid>
         </Grid>
-    </Border>
+    </ContentControl>
 </Window>

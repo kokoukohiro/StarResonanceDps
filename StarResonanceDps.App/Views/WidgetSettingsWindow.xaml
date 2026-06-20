@@ -21,7 +21,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
 
-    <Border Style="{StaticResource Panel.WindowFrame}">
+    <ContentControl Style="{StaticResource Panel.WindowFrame}">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="44" />
@@ -39,7 +39,7 @@
                     <ColumnDefinition x:Name="SettingsExternalScrollBarColumn" Width="16" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Style="{StaticResource Panel.Root}">
+                <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
                     <StackPanel Margin="10">
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
@@ -60,9 +60,9 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Border>
+                </ContentControl>
 
-                <Border Grid.Column="2" Style="{StaticResource Panel.Root}">
+                <ContentControl Grid.Column="2" Style="{StaticResource Panel.Root}">
                     <Grid Margin="26,22,18,18">
                         <ScrollViewer x:Name="ContentScrollViewer"
                                       Style="{StaticResource ScrollViewer.WidgetList}"
@@ -76,7 +76,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <Border Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
@@ -112,44 +112,6 @@
                                                     </ItemsControl>
 
                                                     <Button Content="色を選択" Style="{StaticResource Button.Text}" Tag="WindowColor" Click="ColorPickerButton_Click" />
-                                                </StackPanel>
-                                            </Grid>
-                                        </Border>
-
-                                        <Border Style="{StaticResource Panel.SettingField}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="文字の色"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <ItemsControl ItemsSource="{Binding TextColors.Colors}">
-                                                        <ItemsControl.ItemsPanel>
-                                                            <ItemsPanelTemplate>
-                                                                <StackPanel Orientation="Horizontal" />
-                                                            </ItemsPanelTemplate>
-                                                        </ItemsControl.ItemsPanel>
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <RadioButton GroupName="WidgetTextColor"
-                                                                             Tag="TextColor"
-                                                                             Background="{Binding Brush}"
-                                                                             Style="{StaticResource Button.ColorSwatchRadioButton}"
-                                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
-                                                                             Click="ColorOptionRadioButton_Click" />
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-
-                                                    <Button Content="色を選択" Style="{StaticResource Button.Text}" Tag="TextColor" Click="ColorPickerButton_Click" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -192,7 +154,7 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
-                                </Border>
+                                </ContentControl>
 
                                 <ContentControl x:Name="ClassColorsHost"
                                                 Content="{Binding MeterSettings}"
@@ -206,7 +168,7 @@
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
-                </Border>
+                </ContentControl>
 
                 <ScrollBar x:Name="SettingsExternalScrollBar"
                            Grid.Column="3"
@@ -228,5 +190,5 @@
                 </StackPanel>
             </Grid>
         </Grid>
-    </Border>
+    </ContentControl>
 </Window>

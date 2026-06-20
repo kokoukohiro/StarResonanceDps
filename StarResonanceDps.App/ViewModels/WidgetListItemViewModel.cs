@@ -1,7 +1,8 @@
-﻿using System.Windows.Media;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -25,16 +26,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private bool _isPinned;
 
     [ObservableProperty]
-    private int _windowColorIndex;
-
-    [ObservableProperty]
-    private int _textColorIndex;
-
-    [ObservableProperty]
     private int _windowOpacity = 100;
 
     [ObservableProperty]
-    private Brush? _panelBrush;
+    private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
 
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
 
@@ -80,10 +75,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
         var normalized = WidgetConfigDefaults.CloneNormalizedTheme(theme);
 
         _theme = normalized.Clone();
-        WindowColorIndex = normalized.WindowColorIndex;
-        TextColorIndex = normalized.TextColorIndex;
         WindowOpacity = normalized.WindowOpacity;
-        UpdatePanelBrush();
+
+        var selectedHex = normalized.WindowColors[
+            Math.Clamp(normalized.WindowColorIndex, 0, normalized.WindowColors.Count - 1)];
+
+        if (!ColorUtilities.TryParseHex(selectedHex, out var windowSurface))
+        {
+            windowSurface = Color.FromRgb(0x0B, 0x16, 0x24);
+        }
+
+        ThemePalette = ThemeColorPalette.Create(windowSurface);
     }
 
     [RelayCommand]
@@ -111,46 +113,5 @@ public partial class WidgetListItemViewModel : ViewModelBase
         OnPropertyChanged(nameof(StateText));
         OnPropertyChanged(nameof(StatusGlyph));
         OnPropertyChanged(nameof(IsRunning));
-    }
-
-    partial void OnWindowColorIndexChanged(int value)
-    {
-        UpdatePanelBrush();
-    }
-
-    private void UpdatePanelBrush()
-    {
-        WidgetConfigDefaults.NormalizeTheme(_theme);
-
-        if (_theme.WindowColorIndex <= 0 || _theme.WindowColors.Count == 0)
-        {
-            PanelBrush = null;
-            return;
-        }
-
-        var hex = _theme.WindowColors[Math.Clamp(_theme.WindowColorIndex, 0, _theme.WindowColors.Count - 1)];
-        PanelBrush = TryCreateBrush(hex, out var brush) ? brush : null;
-    }
-
-    private static bool TryCreateBrush(string hex, out SolidColorBrush brush)
-    {
-        brush = new SolidColorBrush(Colors.Transparent);
-
-        if (hex.StartsWith("#", StringComparison.Ordinal))
-        {
-            hex = hex[1..];
-        }
-
-        if (hex.Length != 6
-            || !byte.TryParse(hex[..2], System.Globalization.NumberStyles.HexNumber, null, out var r)
-            || !byte.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out var g)
-            || !byte.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out var b))
-        {
-            return false;
-        }
-
-        brush = new SolidColorBrush(Color.FromArgb(0x33, r, g, b));
-        brush.Freeze();
-        return true;
     }
 }
