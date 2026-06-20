@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -10,6 +11,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 {
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private SettingsConfig _lastSavedSettings;
+    private bool _isLoadingSettings;
 
     [ObservableProperty]
     private int _networkAdapterIndex;
@@ -27,7 +29,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
         var settings = _configManager.GetSettingsSnapshot();
         _lastSavedSettings = settings.Clone();
-        LoadFromSettings(settings);
+        LoadFromSettings(settings, applyLanguage: false);
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -57,13 +59,14 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     public void ResetToDefaults()
     {
-        LoadFromSettings(AppConfigDefaults.CreateSettings());
+        LoadFromSettings(AppConfigDefaults.CreateSettings(), applyLanguage: true);
         ApplyCurrentGlobalTheme();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
-    public void RestoreSavedGlobalTheme()
+    public void RestoreSavedSettingsPreview()
     {
+        LocalizationManager.Instance.ApplyLanguageIndex(_lastSavedSettings.LanguageIndex);
         ThemeManager.Instance.ApplyGlobalTheme(_lastSavedSettings);
     }
 
@@ -94,14 +97,27 @@ public sealed partial class SettingsViewModel : ViewModelBase
         return settings;
     }
 
-    private void LoadFromSettings(SettingsConfig settings)
+    private void LoadFromSettings(SettingsConfig settings, bool applyLanguage)
     {
         AppConfigDefaults.NormalizeSettings(settings);
 
-        NetworkAdapterIndex = settings.NetworkAdapterIndex;
-        LanguageIndex = settings.LanguageIndex;
-        NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
-        WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
+        _isLoadingSettings = true;
+        try
+        {
+            NetworkAdapterIndex = settings.NetworkAdapterIndex;
+            LanguageIndex = settings.LanguageIndex;
+            NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
+            WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
+        }
+        finally
+        {
+            _isLoadingSettings = false;
+        }
+
+        if (applyLanguage)
+        {
+            LocalizationManager.Instance.ApplyLanguageIndex(LanguageIndex);
+        }
     }
 
     private void ApplyCurrentGlobalTheme()
@@ -128,6 +144,11 @@ public sealed partial class SettingsViewModel : ViewModelBase
 
     partial void OnLanguageIndexChanged(int value)
     {
+        if (!_isLoadingSettings)
+        {
+            LocalizationManager.Instance.ApplyLanguageIndex(value);
+        }
+
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 

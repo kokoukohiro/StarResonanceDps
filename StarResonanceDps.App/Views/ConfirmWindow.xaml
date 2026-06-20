@@ -1,6 +1,7 @@
 <Window x:Class="StarResonanceDps.App.Views.ConfirmWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
         Width="370"
         Height="176"
         MinWidth="370"
@@ -64,11 +65,11 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Right">
                     <Button x:Name="YesButton"
-                            Content="はい"
+                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Yes]}"
                             Style="{StaticResource Button.Text}"
                             Click="YesButton_Click" />
                     <Button x:Name="NoButton"
-                            Content="いいえ"
+                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_No]}"
                             Margin="12,0,0,0"
                             Style="{StaticResource Button.Text}"
                             Click="NoButton_Click" />

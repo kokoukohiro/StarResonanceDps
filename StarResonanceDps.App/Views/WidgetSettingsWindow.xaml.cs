@@ -35,7 +35,7 @@ public partial class WidgetSettingsWindow : Window
         _widget = widget;
 
         InitializeComponent();
-        _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayName);
+        _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayNameResourceKey);
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
         DataContext = _viewModel;
 
@@ -56,15 +56,22 @@ public partial class WidgetSettingsWindow : Window
         }
     }
 
+    protected override void OnClosed(EventArgs e)
+    {
+        _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
+        _viewModel.Dispose();
+        base.OnClosed(e);
+    }
+
     protected override void OnClosing(CancelEventArgs e)
     {
         if (ViewModel.HasUnsavedChanges)
         {
             var confirmed = ConfirmWindow.Show(
                 this,
-                "未保存変更の破棄",
-                "保存されていない変更があります。",
-                "設定を保存せずに閉じますか？");
+                "Confirm_DiscardUnsaved_Title",
+                "Confirm_DiscardUnsaved_Message",
+                "Confirm_DiscardUnsaved_Detail");
 
             if (!confirmed)
             {
@@ -160,9 +167,9 @@ public partial class WidgetSettingsWindow : Window
     {
         var confirmed = ConfirmWindow.Show(
             this,
-            "設定の初期化",
-            "ウィジェット設定を初期化しますか？",
-            "このウィジェットの個別設定が初期値に戻ります。");
+            "Confirm_ResetWidgetSettings_Title",
+            "Confirm_ResetWidgetSettings_Message",
+            "Confirm_ResetWidgetSettings_Detail");
 
         if (!confirmed)
         {

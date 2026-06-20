@@ -2,6 +2,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Models;
 
@@ -12,6 +13,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public WidgetKind Kind { get; init; }
 
     public int OriginalIndex { get; init; }
+
+    public string DisplayNameResourceKey { get; init; } = string.Empty;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -35,10 +38,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public string StateText => State switch
     {
-        WidgetState.Running => "起動中",
-        WidgetState.Stopped => "停止中",
-        WidgetState.Error => "エラー",
-        _ => "不明"
+        WidgetState.Running => LocalizationManager.Instance.GetString("Widget_State_Running"),
+        WidgetState.Stopped => LocalizationManager.Instance.GetString("Widget_State_Stopped"),
+        WidgetState.Error => LocalizationManager.Instance.GetString("Widget_State_Error"),
+        _ => LocalizationManager.Instance.GetString("Widget_State_Unknown")
     };
 
     public string StatusGlyph => State switch
@@ -50,6 +53,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
     };
 
     public bool IsRunning => State == WidgetState.Running;
+
+    public void RefreshLocalizedText()
+    {
+        DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
+        OnPropertyChanged(nameof(StateText));
+    }
 
     public WidgetConfig CreateWidgetConfig()
     {

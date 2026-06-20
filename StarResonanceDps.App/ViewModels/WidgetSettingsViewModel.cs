@@ -2,15 +2,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class WidgetSettingsViewModel : ViewModelBase
+public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly WidgetStateManager _stateManager = WidgetStateManager.Instance;
     private readonly WidgetKind _kind;
+    private readonly string _displayNameResourceKey;
     private WidgetThemeConfig _lastSavedTheme;
     private bool _isLoadingTheme;
 
@@ -20,10 +22,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
     [ObservableProperty]
     private double _windowOpacity = 100;
 
-    public WidgetSettingsViewModel(WidgetKind kind, string displayName)
+    public WidgetSettingsViewModel(WidgetKind kind, string displayNameResourceKey)
     {
         _kind = kind;
-        DisplayName = displayName;
+        _displayNameResourceKey = displayNameResourceKey;
+        DisplayName = LocalizationManager.Instance.GetString(displayNameResourceKey);
         WindowColors = new ColorPaletteViewModel(
             WidgetConfigDefaults.CreateDefaultWindowColors(),
             WidgetConfigDefaults.MaxPaletteColorCount);
@@ -41,6 +44,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
         _lastSavedTheme = WidgetConfigDefaults.CloneNormalizedTheme(config.Theme);
         LoadFromTheme(config.Theme, raisePreview: false);
 
+        LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+
         if (IsMeterWidgetKind(kind))
         {
             MeterSettings = new MeterWidgetSettingsViewModel(config.Meter);
@@ -56,7 +61,18 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase
 
     public event Action<WidgetThemeConfig>? ThemePreviewChanged;
 
-    public string WindowTitle => $"{DisplayName}の設定";
+    public void Dispose()
+    {
+        LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+    }
+
+    private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
+    {
+        DisplayName = LocalizationManager.Instance.GetString(_displayNameResourceKey);
+        OnPropertyChanged(nameof(WindowTitle));
+    }
+
+    public string WindowTitle => LocalizationManager.Instance.Format("Window_WidgetSettings_Title", LocalizationManager.Instance.GetString(_displayNameResourceKey));
 
     public bool IsMeterWidget => IsMeterWidgetKind(_kind);
 

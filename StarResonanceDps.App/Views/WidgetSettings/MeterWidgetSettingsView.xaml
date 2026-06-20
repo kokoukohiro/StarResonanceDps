@@ -1,6 +1,7 @@
 <UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.MeterWidgetSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
@@ -10,7 +11,7 @@
 
     <StackPanel>
         <TextBlock x:Name="ClassColorsSection"
-                   Text="クラスカラー"
+                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}"
                    Foreground="{DynamicResource Brush.TextPrimary}"
                    FontSize="16"
                    FontWeight="SemiBold"
@@ -34,7 +35,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="神盾騎士"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_ShieldKnight]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -91,7 +92,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -123,7 +124,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="巨刃守護者"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_HeavyGuardian]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -180,7 +181,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -212,7 +213,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="森語者"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_VerdantOracle]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -269,7 +270,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -301,7 +302,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="霊魂楽手"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_SoulMusician]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -358,7 +359,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -390,7 +391,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="赤焔狂戦士"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_FlameBerserker]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -447,7 +448,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -479,7 +480,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="雷影剣士"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_Stormblade]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -536,7 +537,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -568,7 +569,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="氷魔導師"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_FrostMage]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -625,7 +626,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -657,7 +658,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="青嵐騎士"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_WindKnight]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -714,7 +715,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -746,7 +747,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="神射手"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_Marksman]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -803,7 +804,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -835,7 +836,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="変身"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_Transformation]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -892,7 +893,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -924,7 +925,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="エネミー"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_Enemy]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -981,7 +982,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -1013,7 +1014,7 @@
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Margin="10,0,0,0"
-                                       Text="不明"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Classes_Unknown]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />
@@ -1070,7 +1071,7 @@
                             </ItemsControl>
 
 
-                            <Button Content="色を選択"
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
 
 
                                     Style="{StaticResource Button.Text}"
@@ -1094,7 +1095,7 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock Text="クラスカラーの不透明度"
+                            <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_ClassColors_Opacity]}"
                                        Foreground="{DynamicResource Brush.TextPrimary}"
                                        FontSize="14"
                                        FontWeight="SemiBold" />

@@ -1,0 +1,261 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Window_Manager_Title" xml:space="preserve">
+    <value>Star Resonance DPS Manager</value>
+  </data>
+  <data name="Window_Settings_Title" xml:space="preserve">
+    <value>Star Resonance DPS Settings</value>
+  </data>
+  <data name="Window_WidgetSettings_Title" xml:space="preserve">
+    <value>{0} Settings</value>
+  </data>
+  <data name="Window_ColorPicker_Title" xml:space="preserve">
+    <value>Color Picker</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common_SelectColor" xml:space="preserve">
+    <value>Select color</value>
+  </data>
+  <data name="Navigation_Widgets" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Navigation_Plugins" xml:space="preserve">
+    <value>Plugins</value>
+  </data>
+  <data name="Navigation_Logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="Navigation_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Manager_WidgetSearch_Placeholder" xml:space="preserve">
+    <value>Search widgets...</value>
+  </data>
+  <data name="Manager_WidgetFilter_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Manager_WidgetFilter_Favorites" xml:space="preserve">
+    <value>Favorites</value>
+  </data>
+  <data name="Manager_WidgetFilter_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Manager_WidgetFilter_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Manager_WidgetSort_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Manager_WidgetSort_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Manager_WidgetSort_Favorite" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="Manager_WidgetSort_RunningState" xml:space="preserve">
+    <value>Running state</value>
+  </data>
+  <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
+    <value>Pinned</value>
+  </data>
+  <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
+    <value>Start all favorites</value>
+  </data>
+  <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
+    <value>Stop all</value>
+  </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>Basic Settings</value>
+  </data>
+  <data name="Settings_Section_Display_Title" xml:space="preserve">
+    <value>Display Settings</value>
+  </data>
+  <data name="Settings_Section_Theme_Title" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Settings_Section_Update_Title" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>Network Adapter</value>
+  </data>
+  <data name="NetworkAdapter_Ethernet" xml:space="preserve">
+    <value>Ethernet</value>
+  </data>
+  <data name="NetworkAdapter_WiFi" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
+  <data name="Settings_Language_Title" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings_Language_Auto" xml:space="preserve">
+    <value>Follow system</value>
+  </data>
+  <data name="Settings_Language_Japanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+  <data name="Settings_Language_Korean" xml:space="preserve">
+    <value>한국어</value>
+  </data>
+  <data name="Settings_Language_Chinese" xml:space="preserve">
+    <value>简体中文</value>
+  </data>
+  <data name="Settings_Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Settings_Display_NumberMode" xml:space="preserve">
+    <value>Number display mode</value>
+  </data>
+  <data name="NumberDisplay_KMB" xml:space="preserve">
+    <value>KMBT (Western)</value>
+  </data>
+  <data name="NumberDisplay_Wan" xml:space="preserve">
+    <value>Wan (East Asian)</value>
+  </data>
+  <data name="Settings_Theme_WindowColor" xml:space="preserve">
+    <value>Window Color</value>
+  </data>
+  <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
+    <value>Window Opacity</value>
+  </data>
+  <data name="Settings_Update_Check_Label" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Settings_Update_Check_Button" xml:space="preserve">
+    <value>Check</value>
+  </data>
+  <data name="ColorPicker_SelectedColor" xml:space="preserve">
+    <value>Selected color</value>
+  </data>
+  <data name="ColorPicker_RecentColors" xml:space="preserve">
+    <value>Recent colors</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Title" xml:space="preserve">
+    <value>Discard unsaved changes</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
+    <value>There are unsaved changes.</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
+    <value>Close without saving the settings?</value>
+  </data>
+  <data name="Confirm_ResetSettings_Title" xml:space="preserve">
+    <value>Reset settings</value>
+  </data>
+  <data name="Confirm_ResetSettings_Message" xml:space="preserve">
+    <value>Reset the settings?</value>
+  </data>
+  <data name="Confirm_ResetSettings_Detail" xml:space="preserve">
+    <value>All settings will return to their defaults.</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Title" xml:space="preserve">
+    <value>Reset widget settings</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Message" xml:space="preserve">
+    <value>Reset this widget settings?</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Detail" xml:space="preserve">
+    <value>This widget's individual settings will return to their defaults.</value>
+  </data>
+  <data name="Widget_State_Running" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Widget_State_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Widget_State_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Widget_State_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Menu_DpsMeter" xml:space="preserve">
+    <value>DPS Meter</value>
+  </data>
+  <data name="Menu_HpsMeter" xml:space="preserve">
+    <value>HPS Meter</value>
+  </data>
+  <data name="Menu_DtpsMeter" xml:space="preserve">
+    <value>DTPS Meter</value>
+  </data>
+  <data name="Menu_SkillDiary" xml:space="preserve">
+    <value>Skill Diary</value>
+  </data>
+  <data name="Menu_Training" xml:space="preserve">
+    <value>Training Mode</value>
+  </data>
+  <data name="Widget_PlayerInfoDebug" xml:space="preserve">
+    <value>PlayerInfo Debug</value>
+  </data>
+  <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
+    <value>Class Colors</value>
+  </data>
+  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
+    <value>Class Colors Opacity</value>
+  </data>
+  <data name="Classes_ShieldKnight" xml:space="preserve">
+    <value>Shield Knight</value>
+  </data>
+  <data name="Classes_HeavyGuardian" xml:space="preserve">
+    <value>Heavy Guardian</value>
+  </data>
+  <data name="Classes_VerdantOracle" xml:space="preserve">
+    <value>Verdant Oracle</value>
+  </data>
+  <data name="Classes_SoulMusician" xml:space="preserve">
+    <value>Soul Musician</value>
+  </data>
+  <data name="Classes_FlameBerserker" xml:space="preserve">
+    <value>Blazing Berserker</value>
+  </data>
+  <data name="Classes_Stormblade" xml:space="preserve">
+    <value>Stormblade</value>
+  </data>
+  <data name="Classes_FrostMage" xml:space="preserve">
+    <value>Frost Mage</value>
+  </data>
+  <data name="Classes_WindKnight" xml:space="preserve">
+    <value>Wind Knight</value>
+  </data>
+  <data name="Classes_Marksman" xml:space="preserve">
+    <value>Marksman</value>
+  </data>
+  <data name="Classes_Transformation" xml:space="preserve">
+    <value>Transformation</value>
+  </data>
+  <data name="Classes_Enemy" xml:space="preserve">
+    <value>Enemy</value>
+  </data>
+  <data name="Classes_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="Navigation_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+</root>

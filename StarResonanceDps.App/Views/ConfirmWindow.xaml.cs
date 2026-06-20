@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using StarResonanceDps.App.Localization;
 
 namespace StarResonanceDps.App.Views;
 
@@ -10,16 +11,17 @@ public partial class ConfirmWindow : Window
         InitializeComponent();
     }
 
-    public static bool Show(Window owner, string title, string message, string detail)
+    public static bool Show(Window owner, string titleResourceKey, string messageResourceKey, string detailResourceKey)
     {
+        var localization = LocalizationManager.Instance;
         var window = new ConfirmWindow
         {
             Owner = owner
         };
 
-        window.HeaderText.Text = title;
-        window.MessageText.Text = message;
-        window.DetailText.Text = detail;
+        window.HeaderText.Text = localization.GetString(titleResourceKey);
+        window.MessageText.Text = localization.GetString(messageResourceKey);
+        window.DetailText.Text = localization.GetString(detailResourceKey);
 
         return window.ShowDialog() == true;
     }

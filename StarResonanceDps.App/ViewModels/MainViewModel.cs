@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -31,27 +32,30 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        AddWidget(WidgetKind.DpsMeter, "DPSメーター", WidgetState.Running);
-        AddWidget(WidgetKind.HpsMeter, "HPSメーター", WidgetState.Running);
-        AddWidget(WidgetKind.DtpsMeter, "DTPSメーター", WidgetState.Stopped);
-        AddWidget(WidgetKind.SkillLog, "スキルログ", WidgetState.Running);
-        AddWidget(WidgetKind.TrainingMode, "トレーニングモード", WidgetState.Stopped);
-        AddWidget(WidgetKind.PlayerInfoDebug, "PlayerInfo Debug", WidgetState.Running);
+        AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter", WidgetState.Running);
+        AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter", WidgetState.Running);
+        AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter", WidgetState.Stopped);
+        AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary", WidgetState.Running);
+        AddWidget(WidgetKind.TrainingMode, "Menu_Training", WidgetState.Stopped);
+        AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerInfoDebug", WidgetState.Running);
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;
         ApplyWidgetSort();
+
+        LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
-    private void AddWidget(WidgetKind kind, string displayName, WidgetState state)
+    private void AddWidget(WidgetKind kind, string displayNameResourceKey, WidgetState state)
     {
         var widget = new WidgetListItemViewModel
         {
             Kind = kind,
-            DisplayName = displayName,
+            DisplayNameResourceKey = displayNameResourceKey,
             State = state,
             OriginalIndex = _widgetItems.Count
         };
+        widget.RefreshLocalizedText();
 
         _isLoadingWidgets = true;
         try
@@ -65,6 +69,16 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
         _widgetItems.Add(widget);
+    }
+
+    private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
+    {
+        foreach (var widget in _widgetItems)
+        {
+            widget.RefreshLocalizedText();
+        }
+
+        Widgets.Refresh();
     }
 
     private void OnWidgetPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -102,12 +116,7 @@ public sealed partial class MainViewModel : ViewModelBase
             return false;
         }
 
-        if (!MatchesSearchText(widget) || !MatchesFilter(widget))
-        {
-            return false;
-        }
-
-        return true;
+        return MatchesSearchText(widget) && MatchesFilter(widget);
     }
 
     private bool MatchesSearchText(WidgetListItemViewModel widget)

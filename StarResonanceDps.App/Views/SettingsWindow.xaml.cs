@@ -54,9 +54,9 @@ public partial class SettingsWindow : Window
         {
             var confirmed = ConfirmWindow.Show(
                 this,
-                "未保存変更の破棄",
-                "保存されていない変更があります。",
-                "設定を保存せずに閉じますか？");
+                "Confirm_DiscardUnsaved_Title",
+                "Confirm_DiscardUnsaved_Message",
+                "Confirm_DiscardUnsaved_Detail");
 
             if (!confirmed)
             {
@@ -64,7 +64,7 @@ public partial class SettingsWindow : Window
                 return;
             }
 
-            ViewModel.RestoreSavedGlobalTheme();
+            ViewModel.RestoreSavedSettingsPreview();
         }
 
         base.OnClosing(e);
@@ -162,9 +162,9 @@ public partial class SettingsWindow : Window
     {
         var confirmed = ConfirmWindow.Show(
             this,
-            "設定の初期化",
-            "設定を初期化しますか？",
-            "すべての設定項目が初期値に戻ります。");
+            "Confirm_ResetSettings_Title",
+            "Confirm_ResetSettings_Message",
+            "Confirm_ResetSettings_Detail");
 
         if (!confirmed)
         {

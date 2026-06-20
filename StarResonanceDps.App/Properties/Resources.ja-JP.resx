@@ -1,0 +1,261 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Window_Manager_Title" xml:space="preserve">
+    <value>Star Resonance DPS マネージャー</value>
+  </data>
+  <data name="Window_Settings_Title" xml:space="preserve">
+    <value>Star Resonance DPS 設定</value>
+  </data>
+  <data name="Window_WidgetSettings_Title" xml:space="preserve">
+    <value>{0}の設定</value>
+  </data>
+  <data name="Window_ColorPicker_Title" xml:space="preserve">
+    <value>カラーピッカー</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>はい</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>いいえ</value>
+  </data>
+  <data name="Common_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>初期化</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Common_SelectColor" xml:space="preserve">
+    <value>色を選択</value>
+  </data>
+  <data name="Navigation_Widgets" xml:space="preserve">
+    <value>ウィジェット</value>
+  </data>
+  <data name="Navigation_Plugins" xml:space="preserve">
+    <value>プラグイン</value>
+  </data>
+  <data name="Navigation_Logs" xml:space="preserve">
+    <value>ログ</value>
+  </data>
+  <data name="Navigation_Help" xml:space="preserve">
+    <value>ヘルプ</value>
+  </data>
+  <data name="Manager_WidgetSearch_Placeholder" xml:space="preserve">
+    <value>ウィジェットを検索...</value>
+  </data>
+  <data name="Manager_WidgetFilter_All" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="Manager_WidgetFilter_Favorites" xml:space="preserve">
+    <value>お気に入り</value>
+  </data>
+  <data name="Manager_WidgetFilter_Running" xml:space="preserve">
+    <value>起動中</value>
+  </data>
+  <data name="Manager_WidgetFilter_Stopped" xml:space="preserve">
+    <value>停止中</value>
+  </data>
+  <data name="Manager_WidgetSort_Default" xml:space="preserve">
+    <value>デフォルト</value>
+  </data>
+  <data name="Manager_WidgetSort_Name" xml:space="preserve">
+    <value>名前順</value>
+  </data>
+  <data name="Manager_WidgetSort_Favorite" xml:space="preserve">
+    <value>お気に入り</value>
+  </data>
+  <data name="Manager_WidgetSort_RunningState" xml:space="preserve">
+    <value>起動状態</value>
+  </data>
+  <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
+    <value>ピン留め</value>
+  </data>
+  <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
+    <value>すべてのお気に入りを起動</value>
+  </data>
+  <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
+    <value>すべてを停止</value>
+  </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>基本設定</value>
+  </data>
+  <data name="Settings_Section_Display_Title" xml:space="preserve">
+    <value>表示設定</value>
+  </data>
+  <data name="Settings_Section_Theme_Title" xml:space="preserve">
+    <value>テーマ</value>
+  </data>
+  <data name="Settings_Section_Update_Title" xml:space="preserve">
+    <value>アップデート</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>ネットワークアダプター</value>
+  </data>
+  <data name="NetworkAdapter_Ethernet" xml:space="preserve">
+    <value>Ethernet</value>
+  </data>
+  <data name="NetworkAdapter_WiFi" xml:space="preserve">
+    <value>Wi-Fi</value>
+  </data>
+  <data name="Settings_Language_Title" xml:space="preserve">
+    <value>言語</value>
+  </data>
+  <data name="Settings_Language_Auto" xml:space="preserve">
+    <value>システムと同じ</value>
+  </data>
+  <data name="Settings_Language_Japanese" xml:space="preserve">
+    <value>日本語</value>
+  </data>
+  <data name="Settings_Language_Korean" xml:space="preserve">
+    <value>한국어</value>
+  </data>
+  <data name="Settings_Language_Chinese" xml:space="preserve">
+    <value>简体中文</value>
+  </data>
+  <data name="Settings_Language_English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Settings_Display_NumberMode" xml:space="preserve">
+    <value>数値表示形式</value>
+  </data>
+  <data name="NumberDisplay_KMB" xml:space="preserve">
+    <value>英語表記（KMBT）</value>
+  </data>
+  <data name="NumberDisplay_Wan" xml:space="preserve">
+    <value>日本語表記（万億兆）</value>
+  </data>
+  <data name="Settings_Theme_WindowColor" xml:space="preserve">
+    <value>ウィンドウの色</value>
+  </data>
+  <data name="Settings_Theme_WindowOpacity" xml:space="preserve">
+    <value>ウィンドウの不透明度</value>
+  </data>
+  <data name="Settings_Update_Check_Label" xml:space="preserve">
+    <value>更新を確認</value>
+  </data>
+  <data name="Settings_Update_Check_Button" xml:space="preserve">
+    <value>確認</value>
+  </data>
+  <data name="ColorPicker_SelectedColor" xml:space="preserve">
+    <value>選択中の色</value>
+  </data>
+  <data name="ColorPicker_RecentColors" xml:space="preserve">
+    <value>最近使用した色</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Title" xml:space="preserve">
+    <value>未保存変更の破棄</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
+    <value>保存されていない変更があります。</value>
+  </data>
+  <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
+    <value>設定を保存せずに閉じますか？</value>
+  </data>
+  <data name="Confirm_ResetSettings_Title" xml:space="preserve">
+    <value>設定の初期化</value>
+  </data>
+  <data name="Confirm_ResetSettings_Message" xml:space="preserve">
+    <value>設定を初期化しますか？</value>
+  </data>
+  <data name="Confirm_ResetSettings_Detail" xml:space="preserve">
+    <value>すべての設定項目が初期値に戻ります。</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Title" xml:space="preserve">
+    <value>設定の初期化</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Message" xml:space="preserve">
+    <value>ウィジェット設定を初期化しますか？</value>
+  </data>
+  <data name="Confirm_ResetWidgetSettings_Detail" xml:space="preserve">
+    <value>このウィジェットの個別設定が初期値に戻ります。</value>
+  </data>
+  <data name="Widget_State_Running" xml:space="preserve">
+    <value>起動中</value>
+  </data>
+  <data name="Widget_State_Stopped" xml:space="preserve">
+    <value>停止中</value>
+  </data>
+  <data name="Widget_State_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="Widget_State_Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="Menu_DpsMeter" xml:space="preserve">
+    <value>DPSメーター</value>
+  </data>
+  <data name="Menu_HpsMeter" xml:space="preserve">
+    <value>HPSメーター</value>
+  </data>
+  <data name="Menu_DtpsMeter" xml:space="preserve">
+    <value>DTPSメーター</value>
+  </data>
+  <data name="Menu_SkillDiary" xml:space="preserve">
+    <value>スキルログ</value>
+  </data>
+  <data name="Menu_Training" xml:space="preserve">
+    <value>トレーニングモード</value>
+  </data>
+  <data name="Widget_PlayerInfoDebug" xml:space="preserve">
+    <value>PlayerInfo Debug</value>
+  </data>
+  <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
+    <value>クラスカラー</value>
+  </data>
+  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
+    <value>クラスカラーの不透明度</value>
+  </data>
+  <data name="Classes_ShieldKnight" xml:space="preserve">
+    <value>シールドファイター</value>
+  </data>
+  <data name="Classes_HeavyGuardian" xml:space="preserve">
+    <value>ヘヴィガーディアン</value>
+  </data>
+  <data name="Classes_VerdantOracle" xml:space="preserve">
+    <value>ヴァーダントオラクル</value>
+  </data>
+  <data name="Classes_SoulMusician" xml:space="preserve">
+    <value>ビートパフォーマー</value>
+  </data>
+  <data name="Classes_FlameBerserker" xml:space="preserve">
+    <value>ブレージングバーサーカー</value>
+  </data>
+  <data name="Classes_Stormblade" xml:space="preserve">
+    <value>ストームブレイド</value>
+  </data>
+  <data name="Classes_FrostMage" xml:space="preserve">
+    <value>フロストメイジ</value>
+  </data>
+  <data name="Classes_WindKnight" xml:space="preserve">
+    <value>ゲイルランサー</value>
+  </data>
+  <data name="Classes_Marksman" xml:space="preserve">
+    <value>ディバインアーチャー</value>
+  </data>
+  <data name="Classes_Transformation" xml:space="preserve">
+    <value>変身</value>
+  </data>
+  <data name="Classes_Enemy" xml:space="preserve">
+    <value>エネミー</value>
+  </data>
+  <data name="Classes_Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="Navigation_Settings" xml:space="preserve">
+    <value>設定</value>
+  </data>
+</root>

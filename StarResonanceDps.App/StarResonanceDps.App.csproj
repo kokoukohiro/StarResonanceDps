@@ -9,6 +9,43 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Images\1001.png" />
+    <None Remove="Assets\Images\1002.png" />
+    <None Remove="Assets\Images\1003.png" />
+    <None Remove="Assets\Images\1004.png" />
+    <None Remove="Assets\Images\1005.png" />
+    <None Remove="Assets\Images\1006.png" />
+    <None Remove="Assets\Images\1007.png" />
+    <None Remove="Assets\Images\1008.png" />
+    <None Remove="Assets\Images\1009.png" />
+    <None Remove="Assets\Images\1010.png" />
+    <None Remove="Assets\Images\1011.png" />
+    <None Remove="Assets\Images\1012.png" />
+    <None Remove="Assets\Images\1013.png" />
+    <None Remove="Assets\Images\1014.png" />
+    <None Remove="Assets\Images\1016.png" />
+    <None Remove="Assets\Images\1017.png" />
+    <None Remove="Assets\Images\1018.png" />
+    <None Remove="Assets\Images\1019.png" />
+    <None Remove="Assets\Images\1020.png" />
+    <None Remove="Assets\Images\2001.png" />
+    <None Remove="Assets\Images\2002.png" />
+    <None Remove="Assets\Images\2003.png" />
+    <None Remove="Assets\Images\2004.png" />
+    <None Remove="Assets\Images\2005.png" />
+    <None Remove="Assets\Images\2006.png" />
+    <None Remove="Assets\Images\2007.png" />
+    <None Remove="Assets\Images\2008.png" />
+    <None Remove="Assets\Images\2009.png" />
+    <None Remove="Assets\Images\2010.png" />
+    <None Remove="Assets\Images\2011.png" />
+    <None Remove="Assets\Images\2012.png" />
+    <None Remove="Assets\Images\2013.png" />
+    <None Remove="Assets\Images\2014.png" />
+    <None Remove="Assets\Images\2015.png" />
+    <None Remove="Assets\Images\323.png" />
+    <None Remove="Assets\Images\324.png" />
+    <None Remove="Assets\Images\325.png" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
     <None Remove="Assets\Images\common_attrattack.png" />
     <None Remove="Assets\Images\common_attrblock.png" />
@@ -45,6 +82,7 @@
     <None Remove="Assets\Images\common_icon20.png" />
     <None Remove="Assets\Images\common_icon21.png" />
     <None Remove="Assets\Images\com_icon_question.png" />
+    <None Remove="Assets\Images\com_icon_tab_90.png" />
     <None Remove="Assets\Images\hazard_sign_dark_high.png" />
     <None Remove="Assets\Images\hazard_sign_fire_high.png" />
     <None Remove="Assets\Images\hazard_sign_ice_high.png" />
@@ -54,6 +92,8 @@
     <None Remove="Assets\Images\hazard_sign_sen_high.png" />
     <None Remove="Assets\Images\hazard_sign_thunder_high.png" />
     <None Remove="Assets\Images\hazard_sign_wind_high.png" />
+    <None Remove="Assets\Images\head_photo_000.png" />
+    <None Remove="Assets\Images\idcard_common_01.png" />
     <None Remove="Assets\Images\profession_horizontal_01.png" />
     <None Remove="Assets\Images\profession_horizontal_02.png" />
     <None Remove="Assets\Images\profession_horizontal_03.png" />
@@ -76,6 +116,12 @@
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
     <None Remove="Assets\Images\trialroad_icon_survival.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Images\com_icon_tab_90.png" />
+    <Resource Include="Assets\Images\head_photo_000.png" />
+    <Resource Include="Assets\Images\idcard_common_01.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -108,6 +154,43 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Images\1001.png" />
+    <Resource Include="Assets\Images\1002.png" />
+    <Resource Include="Assets\Images\1003.png" />
+    <Resource Include="Assets\Images\1004.png" />
+    <Resource Include="Assets\Images\1005.png" />
+    <Resource Include="Assets\Images\1006.png" />
+    <Resource Include="Assets\Images\1007.png" />
+    <Resource Include="Assets\Images\1008.png" />
+    <Resource Include="Assets\Images\1009.png" />
+    <Resource Include="Assets\Images\1010.png" />
+    <Resource Include="Assets\Images\1011.png" />
+    <Resource Include="Assets\Images\1012.png" />
+    <Resource Include="Assets\Images\1013.png" />
+    <Resource Include="Assets\Images\1014.png" />
+    <Resource Include="Assets\Images\1016.png" />
+    <Resource Include="Assets\Images\1017.png" />
+    <Resource Include="Assets\Images\1018.png" />
+    <Resource Include="Assets\Images\1019.png" />
+    <Resource Include="Assets\Images\1020.png" />
+    <Resource Include="Assets\Images\2001.png" />
+    <Resource Include="Assets\Images\2002.png" />
+    <Resource Include="Assets\Images\2003.png" />
+    <Resource Include="Assets\Images\2004.png" />
+    <Resource Include="Assets\Images\2005.png" />
+    <Resource Include="Assets\Images\2006.png" />
+    <Resource Include="Assets\Images\2007.png" />
+    <Resource Include="Assets\Images\2008.png" />
+    <Resource Include="Assets\Images\2009.png" />
+    <Resource Include="Assets\Images\2010.png" />
+    <Resource Include="Assets\Images\2011.png" />
+    <Resource Include="Assets\Images\2012.png" />
+    <Resource Include="Assets\Images\2013.png" />
+    <Resource Include="Assets\Images\2014.png" />
+    <Resource Include="Assets\Images\2015.png" />
+    <Resource Include="Assets\Images\323.png" />
+    <Resource Include="Assets\Images\324.png" />
+    <Resource Include="Assets\Images\325.png" />
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\common_attrattack.png" />
     <Resource Include="Assets\Images\common_attrblock.png" />

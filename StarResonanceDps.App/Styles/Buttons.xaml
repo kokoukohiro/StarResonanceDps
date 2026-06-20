@@ -128,18 +128,21 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Grid SnapsToDevicePixels="True">
-                        <ContentControl x:Name="Root"
-                                        Style="{StaticResource Surface.RoundedButtonOutline}"
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        IsHitTestVisible="False" />
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          Margin="{TemplateBinding Padding}"
-                                          IsHitTestVisible="False" />
-                    </Grid>
+                    <Border Background="Transparent"
+                            SnapsToDevicePixels="True">
+                        <Grid SnapsToDevicePixels="True">
+                            <ContentControl x:Name="Root"
+                                            Style="{StaticResource Surface.RoundedButtonOutline}"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            IsHitTestVisible="False" />
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              IsHitTestVisible="False" />
+                        </Grid>
+                    </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
