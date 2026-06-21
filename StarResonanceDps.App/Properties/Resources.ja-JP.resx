@@ -90,6 +90,12 @@
   <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
     <value>すべてを停止</value>
   </data>
+  <data name="Manager_WidgetAction_PinAllRunning" xml:space="preserve">
+    <value>すべての起動中をピン留め</value>
+  </data>
+  <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
+    <value>すべてのピン留めを解除</value>
+  </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>
   </data>

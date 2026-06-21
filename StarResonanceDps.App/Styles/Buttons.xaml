@@ -123,8 +123,8 @@
     </Style>
 
     <Style x:Key="Button.WidgetWindowClose" TargetType="Button">
-        <Setter Property="Width" Value="34" />
-        <Setter Property="Height" Value="34" />
+        <Setter Property="Width" Value="35" />
+        <Setter Property="Height" Value="35" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />

@@ -36,6 +36,7 @@ public partial class WidgetWindow : Window
 
         Owner = owner;
         RestoreBounds(savedBounds, owner, widget.OriginalIndex);
+        ApplyPinState(widget.IsPinned);
 
         _saveBoundsTimer = new DispatcherTimer
         {
@@ -50,6 +51,14 @@ public partial class WidgetWindow : Window
     }
 
     public WidgetListItemViewModel Widget => _widget;
+
+    public void ApplyPinState(bool isPinned)
+    {
+        Topmost = isPinned;
+        ResizeMode = isPinned
+            ? ResizeMode.NoResize
+            : ResizeMode.CanResize;
+    }
 
     protected override void OnClosed(EventArgs e)
     {
@@ -134,10 +143,12 @@ public partial class WidgetWindow : Window
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed)
+        if (_widget.IsPinned || e.LeftButton != MouseButtonState.Pressed)
         {
-            DragMove();
+            return;
         }
+
+        DragMove();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

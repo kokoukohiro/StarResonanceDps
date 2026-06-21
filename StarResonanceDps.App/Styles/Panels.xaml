@@ -91,32 +91,17 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
     </Style>
 
-    <!-- Per-widget floating surface. The template intentionally has no outer outline. -->
-    <Style x:Key="Panel.WidgetWindowFrame" TargetType="{x:Type ContentControl}">
+    <!--
+        Per-widget floating non-text layer. The Border applies opacity once to its complete
+        background/divider/body layer, preventing the divider from compositing twice over the surface.
+    -->
+    <Style x:Key="Panel.WidgetWindowFrame" TargetType="{x:Type Border}">
         <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
+        <Setter Property="Opacity" Value="{Binding WidgetWindowPalette.NonTextOpacity}" />
+        <Setter Property="CornerRadius" Value="{StaticResource Radius.Default}" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-        <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="UseLayoutRounding" Value="True" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type ContentControl}">
-                    <Border Background="{TemplateBinding Background}"
-                            CornerRadius="{StaticResource Radius.Default}"
-                            Padding="{TemplateBinding Padding}"
-                            SnapsToDevicePixels="True">
-                        <ContentPresenter Content="{TemplateBinding Content}"
-                                          ContentTemplate="{TemplateBinding ContentTemplate}"
-                                          ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                          ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                          SnapsToDevicePixels="True" />
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style x:Key="Panel.WidgetCard"

@@ -32,10 +32,27 @@ public sealed class WidgetWindowManager
         Close(widget.Kind);
     }
 
+    public void ApplyWidgetPinState(WidgetListItemViewModel widget, bool bringToFront)
+    {
+        if (!_openWindows.TryGetValue(widget.Kind, out var window))
+        {
+            return;
+        }
+
+        window.ApplyPinState(widget.IsPinned);
+
+        if (widget.IsPinned && bringToFront)
+        {
+            window.Activate();
+        }
+    }
+
     private void Open(WidgetListItemViewModel widget)
     {
         if (_openWindows.TryGetValue(widget.Kind, out var existingWindow))
         {
+            existingWindow.ApplyPinState(widget.IsPinned);
+
             if (existingWindow.WindowState == WindowState.Minimized)
             {
                 existingWindow.WindowState = WindowState.Normal;

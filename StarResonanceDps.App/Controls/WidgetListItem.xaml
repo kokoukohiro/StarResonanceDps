@@ -175,11 +175,6 @@
                     </Grid>
                 </Button>
 
-                <Button Style="{StaticResource WidgetItem.IconButton}">
-                    <Path Style="{StaticResource WidgetItem.IconStroke}"
-                          Data="{DynamicResource Icon.ExternalLink}" />
-                </Button>
-
                 <Button Style="{StaticResource WidgetItem.IconButton}"
                         Click="SettingsButton_Click">
                     <Path Style="{StaticResource WidgetItem.IconFill}"

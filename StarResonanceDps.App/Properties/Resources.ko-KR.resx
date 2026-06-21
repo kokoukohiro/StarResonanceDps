@@ -90,6 +90,12 @@
   <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
     <value>모두 중지</value>
   </data>
+  <data name="Manager_WidgetAction_PinAllRunning" xml:space="preserve">
+    <value>실행 중인 모두 고정</value>
+  </data>
+  <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
+    <value>모든 고정 해제</value>
+  </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>기본 설정</value>
   </data>

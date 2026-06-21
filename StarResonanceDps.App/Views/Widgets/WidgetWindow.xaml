@@ -14,50 +14,71 @@
         WindowStartupLocation="Manual"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <ContentControl Style="{StaticResource Panel.WidgetWindowFrame}">
+    <Grid>
+        <!--
+            This layer owns every non-text element. Its parent Border applies the configured
+            opacity once after the opaque surface and divider have been composited together.
+        -->
+        <Border Style="{StaticResource Panel.WidgetWindowFrame}"
+                IsHitTestVisible="False">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="35" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Border BorderBrush="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" BorderThickness="0,0,0,1" />
+
+                    <!-- ×の表示。背景・分割線と同じOpacityレイヤー内で描画する。 -->
+                    <Grid Width="35"
+                          Height="35"
+                          HorizontalAlignment="Right"
+                          VerticalAlignment="Center">
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
+                                   Text="&#xE8BB;" />
+                    </Grid>
+                </Grid>
+
+                <!-- Future non-text widget body UI belongs in this layer. -->
+                <Grid Grid.Row="1" />
+            </Grid>
+        </Border>
+
+        <!-- Text and the close icon remain fully opaque. -->
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="36" />
+                <RowDefinition Height="35" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0"
-                    Background="Transparent"
-                    BorderBrush="{Binding WidgetWindowPalette.WidgetWindowBorderBrush}"
-                    BorderThickness="0,0,0,1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0"
-                            Background="Transparent"
-                            MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                        <TextBlock Margin="12,0,8,0"
-                                   VerticalAlignment="Center"
-                                   Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   TextTrimming="CharacterEllipsis"
-                                   Text="{Binding DisplayName}" />
-                    </Border>
+                <Border Grid.Column="0"
+                        Background="Transparent"
+                        MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <TextBlock Margin="12,0,8,0"
+                               VerticalAlignment="Center"
+                               Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis"
+                               Text="{Binding DisplayName}" />
+                </Border>
 
-                    <Button Grid.Column="1"
-                            Margin="0,1,1,1"
-                            Style="{StaticResource Button.WidgetWindowClose}"
-                            Foreground="{Binding WidgetWindowPalette.WidgetWindowNonTextBrush}"
-                            Click="CloseButton_Click">
-                        <TextBlock FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                                   FontSize="10"
-                                   Text="&#xE8BB;"
-                                   Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- Intentionally empty: each widget can provide its own body later. -->
-            <Grid Grid.Row="1" />
+                <Button Grid.Column="1"
+                        Style="{StaticResource Button.WidgetWindowClose}"
+                        Click="CloseButton_Click" />
+            </Grid>
         </Grid>
-    </ContentControl>
+    </Grid>
 </Window>

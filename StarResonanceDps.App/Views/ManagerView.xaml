@@ -142,6 +142,8 @@
                             SelectedIndex="{Binding BulkActionIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_StartAllFavorites]}" />
                             <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_StopAll]}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_PinAllRunning]}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_UnpinAll]}" />
                         </ComboBox>
                     </Grid>
 

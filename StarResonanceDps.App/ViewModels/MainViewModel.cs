@@ -101,6 +101,13 @@ public sealed partial class MainViewModel : ViewModelBase
         if (e.PropertyName is nameof(WidgetListItemViewModel.IsFavorite) or nameof(WidgetListItemViewModel.IsPinned))
         {
             _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned);
+
+            if (e.PropertyName == nameof(WidgetListItemViewModel.IsPinned))
+            {
+                _widgetWindowManager.ApplyWidgetPinState(
+                    widget,
+                    bringToFront: !_isBulkUpdatingWidgets);
+            }
         }
 
         if (e.PropertyName == nameof(WidgetListItemViewModel.State))
@@ -205,6 +212,18 @@ public sealed partial class MainViewModel : ViewModelBase
         UpdateWidgetStates(_widgetItems, WidgetState.Stopped);
     }
 
+    private void PinAllRunningWidgets()
+    {
+        UpdateWidgetPinStates(
+            _widgetItems.Where(widget => widget.State == WidgetState.Running),
+            isPinned: true);
+    }
+
+    private void UnpinAllWidgets()
+    {
+        UpdateWidgetPinStates(_widgetItems, isPinned: false);
+    }
+
     private void UpdateWidgetStates(IEnumerable<WidgetListItemViewModel> widgets, WidgetState state)
     {
         _isBulkUpdatingWidgets = true;
@@ -214,6 +233,25 @@ public sealed partial class MainViewModel : ViewModelBase
             foreach (var widget in widgets)
             {
                 widget.State = state;
+            }
+        }
+        finally
+        {
+            _isBulkUpdatingWidgets = false;
+        }
+
+        Widgets.Refresh();
+    }
+
+    private void UpdateWidgetPinStates(IEnumerable<WidgetListItemViewModel> widgets, bool isPinned)
+    {
+        _isBulkUpdatingWidgets = true;
+
+        try
+        {
+            foreach (var widget in widgets)
+            {
+                widget.IsPinned = isPinned;
             }
         }
         finally
@@ -249,6 +287,14 @@ public sealed partial class MainViewModel : ViewModelBase
 
             case 1:
                 StopAllWidgets();
+                break;
+
+            case 2:
+                PinAllRunningWidgets();
+                break;
+
+            case 3:
+                UnpinAllWidgets();
                 break;
 
             default:

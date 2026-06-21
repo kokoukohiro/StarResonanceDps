@@ -4,63 +4,61 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// Per-widget rendering colors for the floating widget window.
-/// The window surface, divider, and close icon use the configured window opacity;
-/// text stays opaque so it remains readable over a transparent widget surface.
+/// Non-text elements are rendered with opaque colors as one layer, then the configured
+/// window opacity is applied to that layer. Header text and the close icon stay opaque.
 /// </summary>
 public sealed class WidgetWindowThemePalette
 {
-    private const double DividerDarkenWeight = 0.45;
+    // Blend(from, to, 0.75) results in 25% text and 75% surface.
+    private const double DividerSurfaceWeight = 0.75;
+    private const double CloseSurfaceWeight = 0.50;
     private const double TextSurfaceWeight = 0.075;
 
     private WidgetWindowThemePalette(
         Color surface,
-        Color border,
+        Color divider,
         Color text,
-        Color nonText)
+        Color close,
+        double nonTextOpacity)
     {
         WidgetWindowSurface = surface;
-        WidgetWindowBorder = border;
+        WidgetWindowDivider = divider;
         WidgetWindowText = text;
-        WidgetWindowNonText = nonText;
+        WidgetWindowClose = close;
+        NonTextOpacity = nonTextOpacity;
 
         WidgetWindowSurfaceBrush = CreateBrush(WidgetWindowSurface);
-        WidgetWindowBorderBrush = CreateBrush(WidgetWindowBorder);
+        WidgetWindowDividerBrush = CreateBrush(WidgetWindowDivider);
         WidgetWindowTextBrush = CreateBrush(WidgetWindowText);
-        WidgetWindowNonTextBrush = CreateBrush(WidgetWindowNonText);
+        WidgetWindowCloseBrush = CreateBrush(WidgetWindowClose);
     }
 
     public Color WidgetWindowSurface { get; }
-    public Color WidgetWindowBorder { get; }
+    public Color WidgetWindowDivider { get; }
     public Color WidgetWindowText { get; }
-    public Color WidgetWindowNonText { get; }
+    public Color WidgetWindowClose { get; }
+
+    /// <summary>
+    /// Opacity shared by the widget window's background, divider, and future non-text body UI.
+    /// Text and the close icon intentionally do not use this value.
+    /// </summary>
+    public double NonTextOpacity { get; }
 
     public SolidColorBrush WidgetWindowSurfaceBrush { get; }
-    public SolidColorBrush WidgetWindowBorderBrush { get; }
+    public SolidColorBrush WidgetWindowDividerBrush { get; }
     public SolidColorBrush WidgetWindowTextBrush { get; }
-    public SolidColorBrush WidgetWindowNonTextBrush { get; }
+    public SolidColorBrush WidgetWindowCloseBrush { get; }
 
     public static WidgetWindowThemePalette Create(Color windowSurface, int opacityPercent)
     {
-        var opacity = Math.Clamp(opacityPercent, 0, 100);
-        var readableBase = ColorUtilities.GetReadableTextColor(windowSurface);
-        var text = ColorUtilities.Blend(readableBase, windowSurface, TextSurfaceWeight);
-        var divider = ColorUtilities.Blend(windowSurface, Colors.Black, DividerDarkenWeight);
+        var surface = Color.FromRgb(windowSurface.R, windowSurface.G, windowSurface.B);
+        var opacity = Math.Clamp(opacityPercent, 0, 100) / 100d;
+        var readableBase = ColorUtilities.GetReadableTextColor(surface);
+        var text = ColorUtilities.Blend(readableBase, surface, TextSurfaceWeight);
+        var divider = ColorUtilities.Blend(text, surface, DividerSurfaceWeight);
+        var close = ColorUtilities.Blend(text, surface, CloseSurfaceWeight);
 
-        return new WidgetWindowThemePalette(
-            WithOpacity(windowSurface, opacity),
-            WithOpacity(divider, opacity),
-            text,
-            WithOpacity(text, opacity));
-    }
-
-    private static Color WithOpacity(Color color, int opacityPercent)
-    {
-        var alpha = (byte)Math.Clamp(
-            (int)Math.Round(byte.MaxValue * (opacityPercent / 100d), MidpointRounding.AwayFromZero),
-            byte.MinValue,
-            byte.MaxValue);
-
-        return Color.FromArgb(alpha, color.R, color.G, color.B);
+        return new WidgetWindowThemePalette(surface, divider, text, close, opacity);
     }
 
     private static SolidColorBrush CreateBrush(Color color)
