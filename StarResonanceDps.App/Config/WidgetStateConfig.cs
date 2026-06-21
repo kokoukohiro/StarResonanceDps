@@ -14,6 +14,8 @@ public sealed class WidgetConfig
 {
     public bool IsFavorite { get; set; }
     public bool IsPinned { get; set; }
+    // Null is kept only for legacy documents that did not save the widget start state.
+    public WidgetState? State { get; set; }
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
     public MeterWidgetSettingsConfig Meter { get; set; } = WidgetConfigDefaults.CreateMeterSettings();
@@ -27,6 +29,7 @@ public sealed class WidgetConfig
         {
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
+            State = State,
             Theme = Theme?.Clone() ?? WidgetConfigDefaults.CreateTheme(),
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
             Meter = Meter?.Clone() ?? WidgetConfigDefaults.CreateMeterSettings(),
@@ -40,7 +43,7 @@ public sealed class WidgetConfig
 public sealed class WidgetThemeConfig
 {
     public int WindowColorIndex { get; set; }
-    public int WindowOpacity { get; set; } = 100;
+    public int WindowOpacity { get; set; } = 50;
     public List<string> WindowColors { get; set; } = WidgetConfigDefaults.CreateDefaultWindowColors();
 
     public WidgetThemeConfig Clone()
@@ -101,7 +104,7 @@ public sealed class MeterWidgetSettingsConfig
 
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
@@ -112,11 +115,8 @@ public static class WidgetConfigDefaults
 
     private static readonly string[] DefaultWindowColorHexes =
     [
-        "#0B1624",
-        "#FFFFFF",
-        "#FFF450",
-        "#E5A1B3",
-        "#CDECFF"
+        "#000000",
+        "#FFFFFF"
     ];
 
     public static readonly string[] ClassColorKeys =
@@ -256,6 +256,7 @@ public static class WidgetConfigDefaults
         {
             IsFavorite = false,
             IsPinned = false,
+            State = WidgetState.Stopped,
             Theme = CreateTheme(),
             Window = new WidgetWindowConfig(),
             Meter = CreateMeterSettings()
@@ -267,7 +268,7 @@ public static class WidgetConfigDefaults
         return new WidgetThemeConfig
         {
             WindowColorIndex = 0,
-            WindowOpacity = 100,
+            WindowOpacity = 50,
             WindowColors = CreateDefaultWindowColors()
         };
     }
@@ -333,6 +334,13 @@ public static class WidgetConfigDefaults
         config.Theme ??= CreateTheme();
         config.Window ??= new WidgetWindowConfig();
         config.Meter ??= CreateMeterSettings();
+
+        if (config.State is { } state
+            && state is not WidgetState.Stopped
+            && state is not WidgetState.Running)
+        {
+            config.State = WidgetState.Stopped;
+        }
         NormalizeTheme(config.Theme);
         NormalizeMeter(config.Meter);
     }

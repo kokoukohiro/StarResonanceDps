@@ -4,6 +4,7 @@ using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -12,6 +13,7 @@ public sealed partial class MainViewModel : ViewModelBase
 {
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
+    private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -32,12 +34,12 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter", WidgetState.Running);
-        AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter", WidgetState.Running);
-        AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter", WidgetState.Stopped);
-        AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary", WidgetState.Running);
-        AddWidget(WidgetKind.TrainingMode, "Menu_Training", WidgetState.Stopped);
-        AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerInfoDebug", WidgetState.Running);
+        AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
+        AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
+        AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter");
+        AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
+        AddWidget(WidgetKind.TrainingMode, "Menu_Training");
+        AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerInfoDebug");
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;
@@ -46,13 +48,13 @@ public sealed partial class MainViewModel : ViewModelBase
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
-    private void AddWidget(WidgetKind kind, string displayNameResourceKey, WidgetState state)
+    private void AddWidget(WidgetKind kind, string displayNameResourceKey)
     {
         var widget = new WidgetListItemViewModel
         {
             Kind = kind,
             DisplayNameResourceKey = displayNameResourceKey,
-            State = state,
+            State = WidgetState.Stopped,
             OriginalIndex = _widgetItems.Count
         };
         widget.RefreshLocalizedText();
@@ -60,7 +62,15 @@ public sealed partial class MainViewModel : ViewModelBase
         _isLoadingWidgets = true;
         try
         {
-            widget.ApplyWidgetConfig(_widgetStateManager.GetWidgetSnapshot(kind));
+            var persistedConfig = _widgetStateManager.GetWidgetSnapshot(kind);
+            widget.ApplyWidgetConfig(persistedConfig);
+
+            // Existing widget-state documents did not contain State. Persist the
+            // stopped initial state without changing any explicitly saved state.
+            if (persistedConfig.State is null)
+            {
+                _widgetStateManager.SaveWidgetState(kind, widget.State);
+            }
         }
         finally
         {
@@ -93,6 +103,12 @@ public sealed partial class MainViewModel : ViewModelBase
             _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned);
         }
 
+        if (e.PropertyName == nameof(WidgetListItemViewModel.State))
+        {
+            _widgetStateManager.SaveWidgetState(widget.Kind, widget.State);
+            _widgetWindowManager.ApplyWidgetState(widget);
+        }
+
         if (e.PropertyName is not (nameof(WidgetListItemViewModel.DisplayName)
             or nameof(WidgetListItemViewModel.State)
             or nameof(WidgetListItemViewModel.IsFavorite)
@@ -107,6 +123,14 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         Widgets.Refresh();
+    }
+
+    public void RestoreRunningWidgetWindows()
+    {
+        foreach (var widget in _widgetItems.Where(widget => widget.State == WidgetState.Running))
+        {
+            _widgetWindowManager.ApplyWidgetState(widget);
+        }
     }
 
     private bool FilterWidget(object item)

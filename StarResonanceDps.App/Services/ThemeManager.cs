@@ -40,23 +40,21 @@ public sealed class ThemeManager
             return;
         }
 
-        SetThemeColor(resources, "Color.WindowSurface", "Brush.WindowSurface", colors.WindowSurface);
-        SetThemeColor(resources, "Color.PanelBackground", "Brush.PanelBackground", colors.PanelBackground);
-        SetThemeColor(resources, "Color.Border", "Brush.Border", colors.Border);
-        SetThemeColor(resources, "Color.BorderSoft", "Brush.BorderSoft", colors.BorderSoft);
-        SetThemeColor(resources, "Color.ControlBackground", "Brush.ControlBackground", colors.ControlBackground);
-        SetThemeColor(resources, "Color.ControlActiveBackground", "Brush.ControlActiveBackground", colors.ControlActiveBackground);
-        SetThemeColor(resources, "Color.InputBackground", "Brush.InputBackground", colors.InputBackground);
-        SetThemeColor(resources, "Color.InputHoverBackground", "Brush.InputHoverBackground", colors.InputHoverBackground);
-        SetThemeColor(resources, "Color.TextPrimary", "Brush.TextPrimary", colors.TextPrimary);
-        SetThemeColor(resources, "Color.TextSecondary", "Brush.TextSecondary", colors.TextSecondary);
-        SetThemeColor(resources, "Color.TextMuted", "Brush.TextMuted", colors.TextMuted);
+        SetThemeBrush(resources, "Brush.WindowSurface", colors.WindowSurface);
+        SetThemeBrush(resources, "Brush.PanelBackground", colors.PanelBackground);
+        SetThemeBrush(resources, "Brush.Border", colors.Border);
+        SetThemeBrush(resources, "Brush.BorderSoft", colors.BorderSoft);
+        SetThemeBrush(resources, "Brush.ControlBackground", colors.ControlBackground);
+        SetThemeBrush(resources, "Brush.ControlActiveBackground", colors.ControlActiveBackground);
+        SetThemeBrush(resources, "Brush.InputBackground", colors.InputBackground);
+        SetThemeBrush(resources, "Brush.InputHoverBackground", colors.InputHoverBackground);
+        SetThemeBrush(resources, "Brush.TextPrimary", colors.TextPrimary);
+        SetThemeBrush(resources, "Brush.TextSecondary", colors.TextSecondary);
+        SetThemeBrush(resources, "Brush.TextMuted", colors.TextMuted);
     }
 
-    private static void SetThemeColor(ResourceDictionary resources, string colorKey, string brushKey, Color color)
+    private static void SetThemeBrush(ResourceDictionary resources, string brushKey, Color color)
     {
-        resources[colorKey] = color;
-
         if (resources[brushKey] is SolidColorBrush brush && !brush.IsFrozen)
         {
             brush.Color = color;

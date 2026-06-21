@@ -1,4 +1,4 @@
-namespace StarResonanceDps.App.Config;
+﻿namespace StarResonanceDps.App.Config;
 
 public static class AppConfigDefaults
 {
@@ -8,10 +8,7 @@ public static class AppConfigDefaults
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#0B1624",
-        "#FFFFFF",
-        "#FFF450",
-        "#E5A1B3",
-        "#CDECFF"
+        "#FFFFFF"
     ];
 
     public static AppConfig Create()

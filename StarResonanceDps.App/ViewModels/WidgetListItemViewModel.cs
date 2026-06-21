@@ -29,28 +29,16 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private bool _isPinned;
 
     [ObservableProperty]
-    private int _windowOpacity = 100;
+    private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
 
     [ObservableProperty]
-    private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
+    private WidgetWindowThemePalette _widgetWindowPalette = WidgetWindowThemePalette.Create(Color.FromRgb(0x0B, 0x16, 0x24), 50);
 
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
 
-    public string StateText => State switch
-    {
-        WidgetState.Running => LocalizationManager.Instance.GetString("Widget_State_Running"),
-        WidgetState.Stopped => LocalizationManager.Instance.GetString("Widget_State_Stopped"),
-        WidgetState.Error => LocalizationManager.Instance.GetString("Widget_State_Error"),
-        _ => LocalizationManager.Instance.GetString("Widget_State_Unknown")
-    };
-
-    public string StatusGlyph => State switch
-    {
-        WidgetState.Running => "●",
-        WidgetState.Stopped => "●",
-        WidgetState.Error => "●",
-        _ => "●"
-    };
+    public string StateText => State == WidgetState.Running
+        ? LocalizationManager.Instance.GetString("Widget_State_Running")
+        : LocalizationManager.Instance.GetString("Widget_State_Stopped");
 
     public bool IsRunning => State == WidgetState.Running;
 
@@ -66,6 +54,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
+            State = State,
             Theme = _theme.Clone()
         };
     }
@@ -76,6 +65,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         IsFavorite = config.IsFavorite;
         IsPinned = config.IsPinned;
+
+        if (config.State is { } state)
+        {
+            State = state;
+        }
+
         ApplyTheme(config.Theme);
     }
 
@@ -84,7 +79,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
         var normalized = WidgetConfigDefaults.CloneNormalizedTheme(theme);
 
         _theme = normalized.Clone();
-        WindowOpacity = normalized.WindowOpacity;
 
         var selectedHex = normalized.WindowColors[
             Math.Clamp(normalized.WindowColorIndex, 0, normalized.WindowColors.Count - 1)];
@@ -95,6 +89,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         ThemePalette = ThemeColorPalette.Create(windowSurface);
+        WidgetWindowPalette = WidgetWindowThemePalette.Create(windowSurface, normalized.WindowOpacity);
     }
 
     [RelayCommand]
@@ -120,7 +115,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
     partial void OnStateChanged(WidgetState value)
     {
         OnPropertyChanged(nameof(StateText));
-        OnPropertyChanged(nameof(StatusGlyph));
         OnPropertyChanged(nameof(IsRunning));
     }
 }

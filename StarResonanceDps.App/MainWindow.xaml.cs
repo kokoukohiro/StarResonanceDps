@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App;
 
@@ -23,7 +24,16 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Loaded += MainWindow_Loaded;
         SourceInitialized += MainWindow_SourceInitialized;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel viewModel)
+        {
+            viewModel.RestoreRunningWidgetWindows();
+        }
     }
 
     private void MainWindow_SourceInitialized(object? sender, EventArgs e)

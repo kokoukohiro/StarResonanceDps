@@ -291,12 +291,6 @@
   <data name="Widget_State_Stopped" xml:space="preserve">
     <value>已停止</value>
   </data>
-  <data name="Widget_State_Error" xml:space="preserve">
-    <value>错误</value>
-  </data>
-  <data name="Widget_State_Unknown" xml:space="preserve">
-    <value>未知</value>
-  </data>
   <data name="Menu_DpsMeter" xml:space="preserve">
     <value>DPS 计量器</value>
   </data>

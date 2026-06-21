@@ -97,9 +97,6 @@
                             <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
                                 <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Error}">
-                                <Setter Property="Fill" Value="{DynamicResource Brush.Danger}" />
-                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Ellipse.Style>

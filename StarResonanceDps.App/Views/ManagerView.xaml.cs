@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -8,6 +9,8 @@ namespace StarResonanceDps.App.Views;
 
 public partial class ManagerView : UserControl
 {
+    private const string HelpUrl = "https://github.com/kokoukohiro/StarResonanceDps";
+
     private bool _isSyncingExternalScrollBar;
 
     public ManagerView()
@@ -18,7 +21,52 @@ public partial class ManagerView : UserControl
 
     private void ManagerView_Loaded(object sender, RoutedEventArgs e)
     {
-        QueueUpdateExternalScrollBar();
+        WidgetsNavigationButton.IsChecked = true;
+    }
+
+    private void WidgetsNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Widgets);
+    }
+
+    private void PluginsNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Plugins);
+    }
+
+    private void LogsNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Logs);
+    }
+
+    private void HelpButton_Click(object sender, RoutedEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo(HelpUrl)
+        {
+            UseShellExecute = true
+        });
+    }
+
+    private void ShowNavigationContent(ManagerContent content)
+    {
+        WidgetContent.Visibility = content == ManagerContent.Widgets
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        PluginsContent.Visibility = content == ManagerContent.Plugins
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        LogsContent.Visibility = content == ManagerContent.Logs
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        if (content == ManagerContent.Widgets)
+        {
+            QueueUpdateExternalScrollBar();
+            return;
+        }
+
+        WidgetListExternalScrollBar.Visibility = Visibility.Collapsed;
+        WidgetListExternalScrollBarColumn.Width = new GridLength(8);
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -75,6 +123,13 @@ public partial class ManagerView : UserControl
 
     private void UpdateExternalScrollBar(ScrollViewer scrollViewer, ScrollBar scrollBar)
     {
+        if (WidgetContent.Visibility != Visibility.Visible)
+        {
+            scrollBar.Visibility = Visibility.Collapsed;
+            WidgetListExternalScrollBarColumn.Width = new GridLength(8);
+            return;
+        }
+
         _isSyncingExternalScrollBar = true;
 
         try
@@ -96,5 +151,12 @@ public partial class ManagerView : UserControl
         {
             _isSyncingExternalScrollBar = false;
         }
+    }
+
+    private enum ManagerContent
+    {
+        Widgets,
+        Plugins,
+        Logs
     }
 }

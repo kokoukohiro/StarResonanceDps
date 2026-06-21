@@ -1,37 +1,18 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!--
-        Color.WindowSurface is the only base color for the app theme.
-        ThemeManager recalculates every color marked as a derived theme color at startup
-        and whenever the global window-color palette is changed.
-    -->
-    <Color x:Key="Color.WindowSurface">#0B1624</Color>
-    <Color x:Key="Color.PanelBackground">#121D2B</Color>
-    <Color x:Key="Color.Border">#323B47</Color>
-    <Color x:Key="Color.BorderSoft">#212B38</Color>
-    <Color x:Key="Color.ControlBackground">#232D3A</Color>
-    <Color x:Key="Color.ControlActiveBackground">#303945</Color>
-    <Color x:Key="Color.InputBackground">#101B28</Color>
-    <Color x:Key="Color.InputHoverBackground">#1A2431</Color>
-    <Color x:Key="Color.TextPrimary">#EDEEEF</Color>
-    <Color x:Key="Color.TextSecondary">#A2A6AC</Color>
-    <Color x:Key="Color.TextMuted">#686F77</Color>
-    <Color x:Key="Color.Success">#43D978</Color>
-    <Color x:Key="Color.Stopped">#7C8796</Color>
-    <Color x:Key="Color.Danger">#F15D64</Color>
+    <!-- ThemeManager updates the derived application theme brushes directly. -->
+    <SolidColorBrush x:Key="Brush.WindowSurface" Color="#0B1624" />
+    <SolidColorBrush x:Key="Brush.PanelBackground" Color="#121D2B" />
+    <SolidColorBrush x:Key="Brush.Border" Color="#323B47" />
+    <SolidColorBrush x:Key="Brush.BorderSoft" Color="#212B38" />
+    <SolidColorBrush x:Key="Brush.ControlBackground" Color="#232D3A" />
+    <SolidColorBrush x:Key="Brush.ControlActiveBackground" Color="#303945" />
+    <SolidColorBrush x:Key="Brush.InputBackground" Color="#101B28" />
+    <SolidColorBrush x:Key="Brush.InputHoverBackground" Color="#1A2431" />
+    <SolidColorBrush x:Key="Brush.TextPrimary" Color="#EDEEEF" />
+    <SolidColorBrush x:Key="Brush.TextSecondary" Color="#A2A6AC" />
+    <SolidColorBrush x:Key="Brush.TextMuted" Color="#686F77" />
 
-    <SolidColorBrush x:Key="Brush.WindowSurface" Color="{StaticResource Color.WindowSurface}" />
-    <SolidColorBrush x:Key="Brush.PanelBackground" Color="{StaticResource Color.PanelBackground}" />
-    <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Border}" />
-    <SolidColorBrush x:Key="Brush.BorderSoft" Color="{StaticResource Color.BorderSoft}" />
-    <SolidColorBrush x:Key="Brush.ControlBackground" Color="{StaticResource Color.ControlBackground}" />
-    <SolidColorBrush x:Key="Brush.ControlActiveBackground" Color="{StaticResource Color.ControlActiveBackground}" />
-    <SolidColorBrush x:Key="Brush.InputBackground" Color="{StaticResource Color.InputBackground}" />
-    <SolidColorBrush x:Key="Brush.InputHoverBackground" Color="{StaticResource Color.InputHoverBackground}" />
-    <SolidColorBrush x:Key="Brush.TextPrimary" Color="{StaticResource Color.TextPrimary}" />
-    <SolidColorBrush x:Key="Brush.TextSecondary" Color="{StaticResource Color.TextSecondary}" />
-    <SolidColorBrush x:Key="Brush.TextMuted" Color="{StaticResource Color.TextMuted}" />
-    <SolidColorBrush x:Key="Brush.Success" Color="{StaticResource Color.Success}" />
-    <SolidColorBrush x:Key="Brush.Stopped" Color="{StaticResource Color.Stopped}" />
-    <SolidColorBrush x:Key="Brush.Danger" Color="{StaticResource Color.Danger}" />
+    <SolidColorBrush x:Key="Brush.Success" Color="#43D978" />
+    <SolidColorBrush x:Key="Brush.Stopped" Color="#7C8796" />
 </ResourceDictionary>

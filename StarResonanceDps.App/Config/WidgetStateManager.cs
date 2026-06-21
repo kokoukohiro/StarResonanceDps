@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using StarResonanceDps.Core.Models;
 
@@ -62,12 +62,40 @@ public sealed class WidgetStateManager
         }
     }
 
+    public void SaveWidgetState(WidgetKind kind, WidgetState state)
+    {
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.State = state;
+            WidgetConfigDefaults.Normalize(config);
+            SaveCore();
+        }
+    }
+
     public void SaveWidgetTheme(WidgetKind kind, WidgetThemeConfig theme)
     {
         lock (_syncRoot)
         {
             var config = GetOrCreateWidgetConfig(kind);
             config.Theme = WidgetConfigDefaults.CloneNormalizedTheme(theme);
+            WidgetConfigDefaults.Normalize(config);
+            SaveCore();
+        }
+    }
+
+    public void SaveWidgetWindowBounds(WidgetKind kind, double x, double y, double width, double height)
+    {
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.Window = new WidgetWindowConfig
+            {
+                X = x,
+                Y = y,
+                Width = width,
+                Height = height
+            };
             WidgetConfigDefaults.Normalize(config);
             SaveCore();
         }

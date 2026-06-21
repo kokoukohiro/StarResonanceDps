@@ -20,7 +20,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private string _displayName = string.Empty;
 
     [ObservableProperty]
-    private double _windowOpacity = 100;
+    private double _windowOpacity = 50;
 
     public WidgetSettingsViewModel(WidgetKind kind, string displayNameResourceKey)
     {
