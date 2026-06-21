@@ -271,13 +271,6 @@
         M5 17.2H10
     </Geometry>
 
-    <!-- External link -->
-    <Geometry x:Key="Icon.ExternalLink">
-        M12 6H6A2 2 0 0 0 4 8V18A2 2 0 0 0 6 20H16A2 2 0 0 0 18 18V12
-        M11 13L20 4
-        M15 4H20V9
-    </Geometry>
-
     <!-- Chevron down -->
     <Geometry x:Key="Icon.ChevronDown">
         M6 9L12 15L18 9
