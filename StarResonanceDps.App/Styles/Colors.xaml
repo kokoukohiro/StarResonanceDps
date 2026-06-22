@@ -12,7 +12,6 @@
     <SolidColorBrush x:Key="Brush.TextPrimary" Color="#EDEEEF" />
     <SolidColorBrush x:Key="Brush.TextSecondary" Color="#A2A6AC" />
     <SolidColorBrush x:Key="Brush.TextMuted" Color="#686F77" />
-
     <SolidColorBrush x:Key="Brush.Success" Color="#43D978" />
     <SolidColorBrush x:Key="Brush.Stopped" Color="#7C8796" />
 </ResourceDictionary>

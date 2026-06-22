@@ -1,9 +1,10 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Models;
 
@@ -12,6 +13,7 @@ namespace StarResonanceDps.App.ViewModels;
 public sealed partial class MainViewModel : ViewModelBase
 {
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
+    private readonly ObservableCollection<PluginListItemViewModel> _pluginItems = new();
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
 
@@ -32,6 +34,8 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public ICollectionView Widgets { get; }
 
+    public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
+
     public MainViewModel()
     {
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
@@ -45,7 +49,34 @@ public sealed partial class MainViewModel : ViewModelBase
         Widgets.Filter = FilterWidget;
         ApplyWidgetSort();
 
+        AddPluginItem(PluginKind.KeybindTool, "Plugin_KeybindTool");
+        AddPluginItem(PluginKind.ModuleTool, "Plugin_ModuleTool");
+        AddPluginAddItem();
+        PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+    }
+
+    private void AddPluginItem(PluginKind kind, string displayNameResourceKey)
+    {
+        var plugin = new PluginListItemViewModel
+        {
+            Kind = kind,
+            OriginalIndex = _pluginItems.Count,
+            DisplayNameResourceKey = displayNameResourceKey
+        };
+
+        plugin.RefreshLocalizedText();
+        _pluginItems.Add(plugin);
+    }
+
+    private void AddPluginAddItem()
+    {
+        _pluginItems.Add(new PluginListItemViewModel
+        {
+            OriginalIndex = _pluginItems.Count,
+            IsAddItem = true
+        });
     }
 
     private void AddWidget(WidgetKind kind, string displayNameResourceKey)
@@ -86,6 +117,11 @@ public sealed partial class MainViewModel : ViewModelBase
         foreach (var widget in _widgetItems)
         {
             widget.RefreshLocalizedText();
+        }
+
+        foreach (var plugin in _pluginItems)
+        {
+            plugin.RefreshLocalizedText();
         }
 
         Widgets.Refresh();

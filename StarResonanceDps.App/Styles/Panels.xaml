@@ -104,13 +104,24 @@
         <Setter Property="UseLayoutRounding" Value="True" />
     </Style>
 
-    <Style x:Key="Panel.WidgetCard"
+    <!--
+        Shared manager-list card structure. The widget list overrides colors from its
+        per-widget palette; plugin items use the global defaults below.
+    -->
+    <Style x:Key="Panel.ManagerItemCard"
            TargetType="{x:Type ContentControl}"
            BasedOn="{StaticResource Surface.RoundedOutline}">
         <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+        <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
+    </Style>
+
+    <Style x:Key="Panel.WidgetCard"
+           TargetType="{x:Type ContentControl}"
+           BasedOn="{StaticResource Panel.ManagerItemCard}">
         <Setter Property="Background" Value="{Binding ThemePalette.WindowSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{Binding ThemePalette.BorderSoftBrush}" />
-        <Setter Property="Padding" Value="{StaticResource Padding.Card}" />
     </Style>
 
     <Style x:Key="Panel.SettingSection"

@@ -271,11 +271,22 @@
         M5 17.2H10
     </Geometry>
 
+    <!-- Add -->
+    <Geometry x:Key="Icon.Add">
+        M12 5V19
+        M5 12H19
+    </Geometry>
+
     <!-- Chevron down -->
     <Geometry x:Key="Icon.ChevronDown">
         M6 9L12 15L18 9
     </Geometry>
 
+    <!-- Chevron right -->
+    <Geometry x:Key="Icon.ChevronRight">
+        M9 6L15 12L9 18
+    </Geometry>
+    
     <!-- More vertical / kebab menu -->
     <Geometry x:Key="Icon.MoreVertical">
         M12 4A1 1 0 1 1 12 6A1 1 0 1 1 12 4

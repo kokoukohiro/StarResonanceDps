@@ -258,4 +258,10 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>설정</value>
   </data>
+  <data name="Plugin_KeybindTool" xml:space="preserve">
+    <value>키 바인드 도구</value>
+  </data>
+  <data name="Plugin_ModuleTool" xml:space="preserve">
+    <value>모듈 도구</value>
+  </data>
 </root>
