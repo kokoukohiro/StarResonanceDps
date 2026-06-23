@@ -13,10 +13,12 @@ public sealed class ConfigManager
     };
 
     private readonly string _configPath;
+    private readonly string _legacyConfigPath;
 
     private ConfigManager()
     {
-        _configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+        _configPath = AppDataPaths.AppSettingsPath;
+        _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
     }
 
@@ -69,14 +71,15 @@ public sealed class ConfigManager
 
     private AppConfig LoadAppConfig()
     {
-        if (!File.Exists(_configPath))
+        var loadPath = GetReadableConfigPath();
+        if (loadPath is null)
         {
             return AppConfigDefaults.Create();
         }
 
         try
         {
-            var json = File.ReadAllText(_configPath);
+            var json = File.ReadAllText(loadPath);
             var root = JsonSerializer.Deserialize<AppSettingsRoot>(json, JsonOptions);
             var config = root?.Config ?? AppConfigDefaults.Create();
             AppConfigDefaults.Normalize(config);
@@ -86,6 +89,18 @@ public sealed class ConfigManager
         {
             return AppConfigDefaults.Create();
         }
+    }
+
+    private string? GetReadableConfigPath()
+    {
+        if (File.Exists(_configPath))
+        {
+            return _configPath;
+        }
+
+        return File.Exists(_legacyConfigPath)
+            ? _legacyConfigPath
+            : null;
     }
 
     private sealed class AppSettingsRoot

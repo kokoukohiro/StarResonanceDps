@@ -1,6 +1,10 @@
+using System.Collections;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Resources;
+using System.Threading;
 
 namespace StarResonanceDps.App.Localization;
 
@@ -12,9 +16,23 @@ public sealed class LocalizationManager : INotifyPropertyChanged
     public const int ChineseLanguageIndex = 3;
     public const int EnglishLanguageIndex = 4;
 
-    private static readonly ResourceManager ResourceManager = new(
-        "StarResonanceDps.App.Properties.Resources",
-        typeof(LocalizationManager).Assembly);
+    private const string EnglishCultureName = "en-US";
+    private const string NeutralResourceName = "StarResonanceDps.App.Properties.Resources.resources";
+    private const string JapaneseResourceName = "StarResonanceDps.App.Properties.Resources.ja-JP.resources";
+    private const string KoreanResourceName = "StarResonanceDps.App.Properties.Resources.ko-KR.resources";
+    private const string ChineseResourceName = "StarResonanceDps.App.Properties.Resources.zh-CN.resources";
+
+    private static readonly IReadOnlyDictionary<string, string> ResourceNamesByCulture =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["ja-JP"] = JapaneseResourceName,
+            ["ko-KR"] = KoreanResourceName,
+            ["zh-CN"] = ChineseResourceName,
+            [EnglishCultureName] = NeutralResourceName
+        };
+
+    private static readonly ConcurrentDictionary<string, Lazy<IReadOnlyDictionary<string, string>>> ResourceSets =
+        new(StringComparer.Ordinal);
 
     private readonly CultureInfo _systemDefaultCulture;
     private CultureInfo _currentCulture;
@@ -42,7 +60,22 @@ public sealed class LocalizationManager : INotifyPropertyChanged
             return string.Empty;
         }
 
-        return ResourceManager.GetString(key, _currentCulture) ?? key;
+        var localizedResources = GetResourceSet(_currentCulture);
+        if (localizedResources.TryGetValue(key, out var localizedValue))
+        {
+            return localizedValue;
+        }
+
+        if (!string.Equals(_currentCulture.Name, EnglishCultureName, StringComparison.OrdinalIgnoreCase))
+        {
+            var neutralResources = GetResourceSet(CultureInfo.GetCultureInfo(EnglishCultureName));
+            if (neutralResources.TryGetValue(key, out var neutralValue))
+            {
+                return neutralValue;
+            }
+        }
+
+        return key;
     }
 
     public string Format(string key, params object[] arguments)
@@ -68,6 +101,44 @@ public sealed class LocalizationManager : INotifyPropertyChanged
         CultureChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    private static IReadOnlyDictionary<string, string> GetResourceSet(CultureInfo culture)
+    {
+        var resourceName = ResourceNamesByCulture.TryGetValue(culture.Name, out var localizedResourceName)
+            ? localizedResourceName
+            : NeutralResourceName;
+
+        return ResourceSets.GetOrAdd(
+            resourceName,
+            static name => new Lazy<IReadOnlyDictionary<string, string>>(
+                () => LoadResourceSet(name),
+                LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+    }
+
+    private static IReadOnlyDictionary<string, string> LoadResourceSet(string resourceName)
+    {
+        var assembly = typeof(LocalizationManager).Assembly;
+        using var stream = assembly.GetManifestResourceStream(resourceName)
+            ?? throw new MissingManifestResourceException(
+                $"Embedded localization resource '{resourceName}' was not found in '{assembly.GetName().Name}'.");
+        using var reader = new ResourceReader(stream);
+
+        var resources = new Dictionary<string, string>(StringComparer.Ordinal);
+        IDictionaryEnumerator enumerator = reader.GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+            if (enumerator.Key is not string key || enumerator.Value is not string value)
+            {
+                throw new InvalidDataException(
+                    $"Embedded localization resource '{resourceName}' contains a non-string entry.");
+            }
+
+            resources.Add(key, value);
+        }
+
+        return resources;
+    }
+
     private CultureInfo ResolveCulture(int languageIndex)
     {
         return languageIndex switch
@@ -75,7 +146,7 @@ public sealed class LocalizationManager : INotifyPropertyChanged
             JapaneseLanguageIndex => CultureInfo.GetCultureInfo("ja-JP"),
             KoreanLanguageIndex => CultureInfo.GetCultureInfo("ko-KR"),
             ChineseLanguageIndex => CultureInfo.GetCultureInfo("zh-CN"),
-            EnglishLanguageIndex => CultureInfo.GetCultureInfo("en-US"),
+            EnglishLanguageIndex => CultureInfo.GetCultureInfo(EnglishCultureName),
             _ => ResolveSystemCulture(_systemDefaultCulture)
         };
     }
@@ -97,6 +168,6 @@ public sealed class LocalizationManager : INotifyPropertyChanged
             return CultureInfo.GetCultureInfo("zh-CN");
         }
 
-        return CultureInfo.GetCultureInfo("en-US");
+        return CultureInfo.GetCultureInfo(EnglishCultureName);
     }
 }

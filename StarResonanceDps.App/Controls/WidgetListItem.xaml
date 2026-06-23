@@ -1,7 +1,7 @@
 <UserControl x:Class="StarResonanceDps.App.Controls.WidgetListItem"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:models="clr-namespace:StarResonanceDps.Core.Models;assembly=StarResonanceDps.Core"
+             xmlns:models="clr-namespace:StarResonanceDps.App.Models.Widgets"
              Height="68"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">

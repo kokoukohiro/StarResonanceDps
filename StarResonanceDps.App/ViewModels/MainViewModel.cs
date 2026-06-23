@@ -4,9 +4,9 @@ using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.Models;
 using StarResonanceDps.App.Services;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -16,6 +16,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly ObservableCollection<PluginListItemViewModel> _pluginItems = new();
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
+    private readonly PluginManager _pluginManager = PluginManager.Instance;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -49,21 +50,24 @@ public sealed partial class MainViewModel : ViewModelBase
         Widgets.Filter = FilterWidget;
         ApplyWidgetSort();
 
-        AddPluginItem(PluginKind.KeybindTool, "Plugin_KeybindTool");
-        AddPluginItem(PluginKind.ModuleTool, "Plugin_ModuleTool");
+        foreach (var manifest in _pluginManager.DiscoverPlugins())
+        {
+            AddPluginItem(manifest);
+        }
+
         AddPluginAddItem();
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
-    private void AddPluginItem(PluginKind kind, string displayNameResourceKey)
+    private void AddPluginItem(PluginManifest manifest)
     {
         var plugin = new PluginListItemViewModel
         {
-            Kind = kind,
+            PluginId = manifest.Id,
             OriginalIndex = _pluginItems.Count,
-            DisplayNameResourceKey = displayNameResourceKey
+            DisplayNames = new Dictionary<string, string>(manifest.DisplayNames, StringComparer.OrdinalIgnoreCase)
         };
 
         plugin.RefreshLocalizedText();
@@ -96,7 +100,7 @@ public sealed partial class MainViewModel : ViewModelBase
             var persistedConfig = _widgetStateManager.GetWidgetSnapshot(kind);
             widget.ApplyWidgetConfig(persistedConfig);
 
-            // Existing widget-state documents did not contain State. Persist the
+            // Existing widgetstate documents did not contain State. Persist the
             // stopped initial state without changing any explicitly saved state.
             if (persistedConfig.State is null)
             {

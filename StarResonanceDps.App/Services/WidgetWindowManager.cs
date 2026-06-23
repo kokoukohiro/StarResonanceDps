@@ -5,7 +5,7 @@ using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Widgets;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Services;
 

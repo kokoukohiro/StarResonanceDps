@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.ViewModels;
 

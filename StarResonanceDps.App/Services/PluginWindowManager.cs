@@ -1,7 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using StarResonanceDps.App.Models;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Plugins;
 
@@ -9,7 +8,7 @@ namespace StarResonanceDps.App.Services;
 
 public sealed class PluginWindowManager
 {
-    private readonly Dictionary<PluginKind, PluginWindow> _openWindows = new();
+    private readonly Dictionary<string, PluginWindow> _openWindows = new(StringComparer.OrdinalIgnoreCase);
 
     private PluginWindowManager()
     {
@@ -17,29 +16,43 @@ public sealed class PluginWindowManager
 
     public static PluginWindowManager Instance { get; } = new();
 
-    public void Open(PluginListItemViewModel plugin)
+    public bool ActivateExisting(string pluginId)
     {
-        if (plugin.IsAddItem || plugin.Kind is not { } kind)
+        if (string.IsNullOrWhiteSpace(pluginId)
+            || !_openWindows.TryGetValue(pluginId, out var existingWindow))
+        {
+            return false;
+        }
+
+        if (existingWindow.WindowState == WindowState.Minimized)
+        {
+            existingWindow.WindowState = WindowState.Normal;
+        }
+
+        existingWindow.Activate();
+        return true;
+    }
+
+    public void Open(PluginListItemViewModel plugin, FrameworkElement content)
+    {
+        ArgumentNullException.ThrowIfNull(plugin);
+        ArgumentNullException.ThrowIfNull(content);
+
+        if (plugin.IsAddItem || string.IsNullOrWhiteSpace(plugin.PluginId))
         {
             return;
         }
 
-        if (_openWindows.TryGetValue(kind, out var existingWindow))
+        if (ActivateExisting(plugin.PluginId))
         {
-            if (existingWindow.WindowState == WindowState.Minimized)
-            {
-                existingWindow.WindowState = WindowState.Normal;
-            }
-
-            existingWindow.Activate();
             return;
         }
 
         var owner = Application.Current?.MainWindow;
-        var window = new PluginWindow(plugin, owner);
+        var window = new PluginWindow(plugin, content, owner);
         window.Closed += PluginWindow_Closed;
 
-        _openWindows.Add(kind, window);
+        _openWindows.Add(plugin.PluginId, window);
         window.Show();
     }
 
@@ -52,9 +65,9 @@ public sealed class PluginWindowManager
 
         window.Closed -= PluginWindow_Closed;
 
-        if (window.Plugin.Kind is { } kind)
+        if (!string.IsNullOrWhiteSpace(window.Plugin.PluginId))
         {
-            _openWindows.Remove(kind);
+            _openWindows.Remove(window.Plugin.PluginId);
         }
     }
 }

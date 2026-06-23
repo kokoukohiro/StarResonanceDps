@@ -1,18 +1,17 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.Models;
 using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class PluginListItemViewModel : ViewModelBase
 {
-    public PluginKind? Kind { get; init; }
+    public string PluginId { get; init; } = string.Empty;
 
     public int OriginalIndex { get; init; }
 
-    public string DisplayNameResourceKey { get; init; } = string.Empty;
+    public Dictionary<string, string> DisplayNames { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 
     public bool IsAddItem { get; init; }
 
@@ -21,19 +20,46 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
 
     public void RefreshLocalizedText()
     {
-        DisplayName = IsAddItem
-            ? string.Empty
-            : LocalizationManager.Instance.GetString(DisplayNameResourceKey);
+        if (IsAddItem)
+        {
+            DisplayName = string.Empty;
+            return;
+        }
+
+        var culture = LocalizationManager.Instance.CurrentCulture;
+        if (TryGetDisplayName(culture.Name, out var displayName)
+            || TryGetDisplayName(culture.TwoLetterISOLanguageName, out displayName)
+            || TryGetDisplayName("en-US", out displayName))
+        {
+            DisplayName = displayName!;
+            return;
+        }
+
+        DisplayName = DisplayNames.Values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))
+            ?? PluginId;
     }
 
     [RelayCommand(CanExecute = nameof(CanOpen))]
     private void Open()
     {
-        PluginWindowManager.Instance.Open(this);
+        PluginManager.Instance.Open(this);
     }
 
     private bool CanOpen()
     {
-        return !IsAddItem && Kind is not null;
+        return !IsAddItem && !string.IsNullOrWhiteSpace(PluginId);
+    }
+
+    private bool TryGetDisplayName(string cultureName, out string? displayName)
+    {
+        if (DisplayNames.TryGetValue(cultureName, out var value)
+            && !string.IsNullOrWhiteSpace(value))
+        {
+            displayName = value;
+            return true;
+        }
+
+        displayName = null;
+        return false;
     }
 }

@@ -4,7 +4,7 @@ using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.ViewModels;
 

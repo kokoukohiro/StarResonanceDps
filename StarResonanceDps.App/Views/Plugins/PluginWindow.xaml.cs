@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -21,9 +21,13 @@ public partial class PluginWindow : Window
 
     private const double ResizeBorderThickness = 8.0;
 
-    public PluginWindow(PluginListItemViewModel plugin, Window? owner)
+    public PluginWindow(PluginListItemViewModel plugin, FrameworkElement pluginContent, Window? owner)
     {
+        ArgumentNullException.ThrowIfNull(plugin);
+        ArgumentNullException.ThrowIfNull(pluginContent);
+
         Plugin = plugin;
+        PluginContent = pluginContent;
 
         InitializeComponent();
         DataContext = plugin;
@@ -35,6 +39,8 @@ public partial class PluginWindow : Window
     }
 
     public PluginListItemViewModel Plugin { get; }
+
+    public FrameworkElement PluginContent { get; }
 
     private void PluginWindow_SourceInitialized(object? sender, EventArgs e)
     {

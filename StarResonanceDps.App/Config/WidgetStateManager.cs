@@ -1,6 +1,6 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
 
@@ -14,12 +14,14 @@ public sealed class WidgetStateManager
     };
 
     private readonly string _statePath;
+    private readonly string _legacyStatePath;
     private readonly object _syncRoot = new();
     private WidgetStateDocument _document;
 
     private WidgetStateManager()
     {
-        _statePath = Path.Combine(AppContext.BaseDirectory, "widget-state.json");
+        _statePath = AppDataPaths.WidgetStatePath;
+        _legacyStatePath = AppDataPaths.GetLegacyWidgetStatePath();
         _document = Load();
     }
 
@@ -116,14 +118,15 @@ public sealed class WidgetStateManager
 
     private WidgetStateDocument Load()
     {
-        if (!File.Exists(_statePath))
+        var loadPath = GetReadableStatePath();
+        if (loadPath is null)
         {
             return CreateDefaultDocument();
         }
 
         try
         {
-            var json = File.ReadAllText(_statePath);
+            var json = File.ReadAllText(loadPath);
             var document = JsonSerializer.Deserialize<WidgetStateDocument>(json, JsonOptions) ?? CreateDefaultDocument();
             Normalize(document);
             return document;
@@ -164,6 +167,18 @@ public sealed class WidgetStateManager
         }
 
         document.SchemaVersion = WidgetConfigDefaults.CurrentSchemaVersion;
+    }
+
+    private string? GetReadableStatePath()
+    {
+        if (File.Exists(_statePath))
+        {
+            return _statePath;
+        }
+
+        return File.Exists(_legacyStatePath)
+            ? _legacyStatePath
+            : null;
     }
 
     private void SaveCore()

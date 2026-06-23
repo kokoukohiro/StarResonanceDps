@@ -1,4 +1,5 @@
-<Window x:Class="StarResonanceDps.App.Views.Plugins.PluginWindow"
+﻿<Window x:Class="StarResonanceDps.App.Views.Plugins.PluginWindow"
+        x:Name="PluginHostWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{Binding DisplayName}"
@@ -50,7 +51,7 @@
             <ContentControl Grid.Row="1"
                             Margin="8,1,8,8"
                             Style="{StaticResource Panel.Root}">
-                <Grid />
+                <ContentPresenter Content="{Binding PluginContent, ElementName=PluginHostWindow}" />
             </ContentControl>
         </Grid>
     </ContentControl>

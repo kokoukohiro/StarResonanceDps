@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-using StarResonanceDps.Core.Models;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
 
@@ -151,7 +151,7 @@ public static class WidgetConfigDefaults
         ["Unknown"] = ["#A8A8A8", "#707070"]
     };
 
-    // Version 1 values shipped as the initial widget-state.json palette.  Keep this
+    // Version 1 values shipped as the initial widgetstate.json palette.  Keep this
     // separately so migration only replaces the known defaults and never overwrites
     // user-created colors.
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)

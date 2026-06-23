@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>StarResonanceDps</AssemblyName>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
@@ -126,6 +127,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StarResonanceDps.Core\StarResonanceDps.Core.csproj" />
+    <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" />
+
+    <!-- Build the bundled development plugins without linking their implementations into the host. -->
+    <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj"
+                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -149,8 +157,32 @@
 
   <ItemGroup>
     <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <!--
+    Keep the editable ResX sources while embedding every localized binary .resources set
+    into the main application assembly. WithCulture=false prevents satellite assemblies
+    and their ja-JP / ko-KR / zh-CN output directories from being generated.
+  -->
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>StarResonanceDps.App.Properties.Resources.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ja-JP.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>StarResonanceDps.App.Properties.Resources.ja-JP.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ko-KR.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>StarResonanceDps.App.Properties.Resources.ko-KR.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.zh-CN.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>StarResonanceDps.App.Properties.Resources.zh-CN.resources</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
@@ -259,5 +291,60 @@
     <Resource Include="Assets\Images\trialroad_icon_attack.png" />
     <Resource Include="Assets\Images\trialroad_icon_survival.png" />
   </ItemGroup>
+
+  <!-- Remove stale satellite outputs from builds made before localized ResX resources were embedded. -->
+  <Target Name="RemoveObsoleteLocalizationSatelliteOutputs" AfterTargets="Build">
+    <ItemGroup>
+      <_LegacyLocalizationSatelliteAssemblies Include="$(OutDir)ja-JP\$(AssemblyName).resources.dll;$(OutDir)ko-KR\$(AssemblyName).resources.dll;$(OutDir)zh-CN\$(AssemblyName).resources.dll" />
+      <_OtherJapaneseCultureFiles Include="$(OutDir)ja-JP\*.*" Exclude="$(OutDir)ja-JP\$(AssemblyName).resources.dll" />
+      <_OtherKoreanCultureFiles Include="$(OutDir)ko-KR\*.*" Exclude="$(OutDir)ko-KR\$(AssemblyName).resources.dll" />
+      <_OtherChineseCultureFiles Include="$(OutDir)zh-CN\*.*" Exclude="$(OutDir)zh-CN\$(AssemblyName).resources.dll" />
+    </ItemGroup>
+
+    <Delete Files="@(_LegacyLocalizationSatelliteAssemblies)" />
+    <RemoveDir Directories="$(OutDir)ja-JP" Condition="'@(_OtherJapaneseCultureFiles)' == ''" />
+    <RemoveDir Directories="$(OutDir)ko-KR" Condition="'@(_OtherKoreanCultureFiles)' == ''" />
+    <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
+  </Target>
+
+  <!--
+    The two bundled plugins are built as real external DLLs.  The host consumes
+    only the SDK assembly; this target copies each plugin package into the same
+    runtime Plugins directory used by third-party plugins.
+  -->
+  <Target Name="CopyBundledPluginPackages" AfterTargets="Build">
+    <PropertyGroup>
+      <KeybindPluginBuildDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\net10.0-windows\</KeybindPluginBuildDirectory>
+      <ModulePluginBuildDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\net10.0-windows\</ModulePluginBuildDirectory>
+    </PropertyGroup>
+
+    <RemoveDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
+
+    <ItemGroup>
+      <_KeybindPluginFiles Include="$(KeybindPluginBuildDirectory)**\*.*"
+                           Exclude="$(KeybindPluginBuildDirectory)StarResonanceDps.PluginSdk.dll;$(KeybindPluginBuildDirectory)**\*.pdb;$(KeybindPluginBuildDirectory)**\*.xml;$(KeybindPluginBuildDirectory)plugin.json" />
+      <_ModulePluginFiles Include="$(ModulePluginBuildDirectory)**\*.*"
+                          Exclude="$(ModulePluginBuildDirectory)StarResonanceDps.PluginSdk.dll;$(ModulePluginBuildDirectory)**\*.pdb;$(ModulePluginBuildDirectory)**\*.xml;$(ModulePluginBuildDirectory)plugin.json" />
+      <_KeybindPluginManifest Include="$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\plugin.json" />
+      <_ModulePluginManifest Include="$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\plugin.json" />
+      <_KeybindPluginDestinationDirectories Include="@(_KeybindPluginFiles->'$(OutDir)Plugins\KeybindTool\%(RecursiveDir)')" />
+      <_ModulePluginDestinationDirectories Include="@(_ModulePluginFiles->'$(OutDir)Plugins\ModuleTool\%(RecursiveDir)')" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool;@(_KeybindPluginDestinationDirectories);@(_ModulePluginDestinationDirectories)" />
+
+    <Copy SourceFiles="@(_KeybindPluginFiles)"
+          DestinationFiles="@(_KeybindPluginFiles->'$(OutDir)Plugins\KeybindTool\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ModulePluginFiles)"
+          DestinationFiles="@(_ModulePluginFiles->'$(OutDir)Plugins\ModuleTool\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_KeybindPluginManifest)"
+          DestinationFolder="$(OutDir)Plugins\KeybindTool\"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ModulePluginManifest)"
+          DestinationFolder="$(OutDir)Plugins\ModuleTool\"
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

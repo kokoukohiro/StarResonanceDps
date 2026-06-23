@@ -1,0 +1,12 @@
+{
+  "id": "kokoukohiro.keybind-tool",
+  "apiVersion": 1,
+  "entryAssembly": "KeybindTool.dll",
+  "entryType": "StarResonanceDps.Plugins.KeybindTool.KeybindToolPlugin",
+  "displayNames": {
+    "ja-JP": "キーバインドツール",
+    "ko-KR": "키 바인드 도구",
+    "zh-CN": "按键绑定工具",
+    "en-US": "Keybind Tool"
+  }
+}

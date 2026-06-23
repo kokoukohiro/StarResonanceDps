@@ -1,4 +1,4 @@
-namespace StarResonanceDps.Core.Models;
+namespace StarResonanceDps.App.Models.Widgets;
 
 public enum WidgetState
 {
