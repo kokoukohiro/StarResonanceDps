@@ -1,4 +1,4 @@
-﻿namespace StarResonanceDps.PluginSdk;
+namespace StarResonanceDps.PluginSdk;
 
 public static class PluginSdkVersion
 {

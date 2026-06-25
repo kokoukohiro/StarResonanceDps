@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -156,8 +156,7 @@ public sealed class PluginManager
 
             var logger = new PluginDebugLogger(registration.Info.Id);
             var pluginDataDirectory = Path.Combine(_pluginDataDirectory, registration.Info.Id);
-            var settingsStore = new PluginSettingsStore(pluginDataDirectory, logger);
-            var context = new PluginHostContext(registration.Info.Id, pluginDataDirectory, settingsStore, logger);
+            var context = new PluginHostContext(registration.Info.Id, pluginDataDirectory, logger);
 
             plugin.Initialize(context);
 

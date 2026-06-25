@@ -1,6 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Controls;
+using System.Windows;
 using StarResonanceDps.PluginSdk;
+using StarResonanceDps.Plugins.KeybindTool.ViewModels;
+using StarResonanceDps.Plugins.KeybindTool.Views;
 
 [assembly: PluginRegistration(
     typeof(StarResonanceDps.Plugins.KeybindTool.KeybindToolPlugin),
@@ -30,9 +31,7 @@ public sealed class KeybindToolPlugin : IStarResonancePlugin
             throw new InvalidOperationException("The plugin has not been initialized.");
         }
 
-        // The shared PluginWindow owns all chrome. Feature-specific UI will be
-        // developed inside this DLL in later work.
-        return new Grid();
+        return new KeybindToolView(new KeybindToolViewModel(_context));
     }
 
     public void Shutdown()
