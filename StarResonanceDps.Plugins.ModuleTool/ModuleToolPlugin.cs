@@ -2,13 +2,20 @@
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
+[assembly: PluginRegistration(
+    typeof(StarResonanceDps.Plugins.ModuleTool.ModuleToolPlugin),
+    "kokoukohiro.module-tool",
+    PluginSdkVersion.Current)]
+[assembly: PluginDisplayName("ja-JP", "モジュールツール")]
+[assembly: PluginDisplayName("ko-KR", "모듈 도구")]
+[assembly: PluginDisplayName("zh-CN", "模块工具")]
+[assembly: PluginDisplayName("en-US", "Module Tool")]
+
 namespace StarResonanceDps.Plugins.ModuleTool;
 
 public sealed class ModuleToolPlugin : IStarResonancePlugin
 {
     private IPluginContext? _context;
-
-    public PluginDescriptor Descriptor { get; } = new("kokoukohiro.module-tool", PluginSdkVersion.Current);
 
     public void Initialize(IPluginContext context)
     {

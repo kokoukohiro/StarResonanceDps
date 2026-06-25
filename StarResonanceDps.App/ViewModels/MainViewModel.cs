@@ -6,7 +6,6 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Models.Widgets;
-using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -61,13 +60,13 @@ public sealed partial class MainViewModel : ViewModelBase
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
-    private void AddPluginItem(PluginManifest manifest)
+    private void AddPluginItem(PluginInfo pluginInfo)
     {
         var plugin = new PluginListItemViewModel
         {
-            PluginId = manifest.Id,
+            PluginId = pluginInfo.Id,
             OriginalIndex = _pluginItems.Count,
-            DisplayNames = new Dictionary<string, string>(manifest.DisplayNames, StringComparer.OrdinalIgnoreCase)
+            DisplayNames = new Dictionary<string, string>(pluginInfo.DisplayNames, StringComparer.OrdinalIgnoreCase)
         };
 
         plugin.RefreshLocalizedText();

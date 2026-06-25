@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -306,45 +306,29 @@
     <RemoveDir Directories="$(OutDir)ko-KR" Condition="'@(_OtherKoreanCultureFiles)' == ''" />
     <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
   </Target>
-
   <!--
-    The two bundled plugins are built as real external DLLs.  The host consumes
-    only the SDK assembly; this target copies each plugin package into the same
-    runtime Plugins directory used by third-party plugins.
+    Bundled plugins follow the same direct-DLL layout as external plugins.
+    Plugin metadata is embedded in each DLL, so plugin.json and per-plugin
+    package directories are not part of the runtime format.
   -->
-  <Target Name="CopyBundledPluginPackages" AfterTargets="Build">
+  <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
     <PropertyGroup>
-      <KeybindPluginBuildDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\net10.0-windows\</KeybindPluginBuildDirectory>
-      <ModulePluginBuildDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\net10.0-windows\</ModulePluginBuildDirectory>
+      <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(TargetFramework)\KeybindTool.dll</KeybindPluginAssembly>
+      <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(TargetFramework)\ModuleTool.dll</ModulePluginAssembly>
     </PropertyGroup>
 
+    <!-- Remove output from the previous package/manifest-based layout. -->
     <RemoveDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
+    <Delete Files="$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
-    <ItemGroup>
-      <_KeybindPluginFiles Include="$(KeybindPluginBuildDirectory)**\*.*"
-                           Exclude="$(KeybindPluginBuildDirectory)StarResonanceDps.PluginSdk.dll;$(KeybindPluginBuildDirectory)**\*.pdb;$(KeybindPluginBuildDirectory)**\*.xml;$(KeybindPluginBuildDirectory)plugin.json" />
-      <_ModulePluginFiles Include="$(ModulePluginBuildDirectory)**\*.*"
-                          Exclude="$(ModulePluginBuildDirectory)StarResonanceDps.PluginSdk.dll;$(ModulePluginBuildDirectory)**\*.pdb;$(ModulePluginBuildDirectory)**\*.xml;$(ModulePluginBuildDirectory)plugin.json" />
-      <_KeybindPluginManifest Include="$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\plugin.json" />
-      <_ModulePluginManifest Include="$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\plugin.json" />
-      <_KeybindPluginDestinationDirectories Include="@(_KeybindPluginFiles->'$(OutDir)Plugins\KeybindTool\%(RecursiveDir)')" />
-      <_ModulePluginDestinationDirectories Include="@(_ModulePluginFiles->'$(OutDir)Plugins\ModuleTool\%(RecursiveDir)')" />
-    </ItemGroup>
-
-    <MakeDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool;@(_KeybindPluginDestinationDirectories);@(_ModulePluginDestinationDirectories)" />
-
-    <Copy SourceFiles="@(_KeybindPluginFiles)"
-          DestinationFiles="@(_KeybindPluginFiles->'$(OutDir)Plugins\KeybindTool\%(RecursiveDir)%(Filename)%(Extension)')"
+    <MakeDir Directories="$(OutDir)Plugins" />
+    <Copy SourceFiles="$(KeybindPluginAssembly)"
+          DestinationFiles="$(OutDir)Plugins\KeybindTool.dll"
           SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_ModulePluginFiles)"
-          DestinationFiles="@(_ModulePluginFiles->'$(OutDir)Plugins\ModuleTool\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_KeybindPluginManifest)"
-          DestinationFolder="$(OutDir)Plugins\KeybindTool\"
-          SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_ModulePluginManifest)"
-          DestinationFolder="$(OutDir)Plugins\ModuleTool\"
+    <Copy SourceFiles="$(ModulePluginAssembly)"
+          DestinationFiles="$(OutDir)Plugins\ModuleTool.dll"
           SkipUnchangedFiles="true" />
   </Target>
+
 
 </Project>

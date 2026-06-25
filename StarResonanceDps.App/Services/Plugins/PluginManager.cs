@@ -1,7 +1,8 @@
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-using System.Text.Json;
+using System.Runtime.Loader;
 using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.ViewModels;
@@ -11,12 +12,6 @@ namespace StarResonanceDps.App.Services;
 
 public sealed class PluginManager
 {
-    private static readonly JsonSerializerOptions ManifestJsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
-    };
-
     private readonly string _pluginsDirectory;
     private readonly string _pluginDataDirectory;
     private readonly Dictionary<string, PluginRegistration> _registrations = new(StringComparer.OrdinalIgnoreCase);
@@ -32,11 +27,11 @@ public sealed class PluginManager
 
     public static PluginManager Instance { get; } = new();
 
-    public IReadOnlyList<PluginManifest> DiscoverPlugins()
+    public IReadOnlyList<PluginInfo> DiscoverPlugins()
     {
         if (_hasDiscoveredPlugins)
         {
-            return GetDiscoveredManifests();
+            return GetDiscoveredPlugins();
         }
 
         _hasDiscoveredPlugins = true;
@@ -46,13 +41,13 @@ public sealed class PluginManager
             return [];
         }
 
-        foreach (var pluginDirectory in Directory.EnumerateDirectories(_pluginsDirectory)
-                     .OrderBy(directory => Path.GetFileName(directory) ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+        foreach (var assemblyPath in Directory.EnumerateFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                     .OrderBy(path => Path.GetFileName(path) ?? string.Empty, StringComparer.OrdinalIgnoreCase))
         {
-            TryRegisterPlugin(pluginDirectory);
+            TryRegisterPlugin(assemblyPath);
         }
 
-        return GetDiscoveredManifests();
+        return GetDiscoveredPlugins();
     }
 
     public void Open(PluginListItemViewModel pluginItem)
@@ -100,52 +95,38 @@ public sealed class PluginManager
             }
             catch (Exception exception)
             {
-                WritePluginError(loadedPlugin.Registration.Manifest.Id, "Plugin shutdown failed.", exception);
+                WritePluginError(loadedPlugin.Registration.Info.Id, "Plugin shutdown failed.", exception);
             }
         }
 
         _loadedPlugins.Clear();
     }
 
-    private IReadOnlyList<PluginManifest> GetDiscoveredManifests()
+    private IReadOnlyList<PluginInfo> GetDiscoveredPlugins()
     {
         return _registrations.Values
-            .OrderBy(registration => registration.Manifest.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(registration => registration.Manifest)
+            .OrderBy(registration => registration.Info.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(registration => registration.Info)
             .ToArray();
     }
 
-    private void TryRegisterPlugin(string pluginDirectory)
+    private void TryRegisterPlugin(string assemblyPath)
     {
-        var manifestPath = Path.Combine(pluginDirectory, "plugin.json");
-        if (!File.Exists(manifestPath))
-        {
-            return;
-        }
-
         try
         {
-            var manifest = JsonSerializer.Deserialize<PluginManifest>(File.ReadAllText(manifestPath), ManifestJsonOptions)
-                ?? throw new InvalidOperationException("The manifest is empty.");
+            var fullAssemblyPath = Path.GetFullPath(assemblyPath);
+            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullAssemblyPath);
+            var registration = CreateRegistration(assembly);
 
-            NormalizeAndValidateManifest(manifest, pluginDirectory);
-
-            if (_registrations.ContainsKey(manifest.Id))
+            if (!_registrations.TryAdd(registration.Info.Id, registration))
             {
-                throw new InvalidOperationException($"A plugin with id '{manifest.Id}' is already registered.");
+                throw new InvalidOperationException($"A plugin with id '{registration.Info.Id}' is already registered.");
             }
-
-            var assemblyPath = GetAssemblyPathWithinPluginDirectory(pluginDirectory, manifest.EntryAssembly);
-            if (!File.Exists(assemblyPath))
-            {
-                throw new FileNotFoundException("The manifest entry assembly was not found.", assemblyPath);
-            }
-
-            _registrations.Add(manifest.Id, new PluginRegistration(manifest, pluginDirectory, assemblyPath));
         }
         catch (Exception exception)
         {
-            WritePluginError(Path.GetFileName(pluginDirectory), "Plugin manifest registration failed.", exception);
+            var pluginFileName = Path.GetFileNameWithoutExtension(assemblyPath) ?? "unknown";
+            WritePluginError(pluginFileName, "Plugin DLL registration failed.", exception);
         }
     }
 
@@ -168,44 +149,20 @@ public sealed class PluginManager
 
         try
         {
-            var loadContext = new PluginLoadContext(registration.AssemblyPath);
-            var assembly = loadContext.LoadFromAssemblyPath(registration.AssemblyPath);
-            var entryType = assembly.GetType(registration.Manifest.EntryType, throwOnError: true, ignoreCase: false)
-                ?? throw new InvalidOperationException("The manifest entry type could not be resolved.");
-
-            if (!typeof(IStarResonancePlugin).IsAssignableFrom(entryType))
-            {
-                throw new InvalidOperationException($"'{registration.Manifest.EntryType}' does not implement IStarResonancePlugin.");
-            }
-
-            if (Activator.CreateInstance(entryType) is not IStarResonancePlugin plugin)
+            if (Activator.CreateInstance(registration.EntryType) is not IStarResonancePlugin plugin)
             {
                 throw new InvalidOperationException("The plugin entry type could not be instantiated.");
             }
 
-            var descriptor = plugin.Descriptor
-                ?? throw new InvalidOperationException("The plugin descriptor is missing.");
-
-            if (!string.Equals(descriptor.Id, registration.Manifest.Id, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new InvalidOperationException("The plugin descriptor id does not match plugin.json.");
-            }
-
-            if (descriptor.ApiVersion != PluginSdkVersion.Current
-                || registration.Manifest.ApiVersion != PluginSdkVersion.Current)
-            {
-                throw new InvalidOperationException($"Unsupported plugin API version. Host supports {PluginSdkVersion.Current}.");
-            }
-
-            var logger = new PluginDebugLogger(registration.Manifest.Id);
-            var pluginDataDirectory = Path.Combine(_pluginDataDirectory, registration.Manifest.Id);
+            var logger = new PluginDebugLogger(registration.Info.Id);
+            var pluginDataDirectory = Path.Combine(_pluginDataDirectory, registration.Info.Id);
             var settingsStore = new PluginSettingsStore(pluginDataDirectory, logger);
-            var context = new PluginHostContext(registration.Manifest.Id, pluginDataDirectory, settingsStore, logger);
+            var context = new PluginHostContext(registration.Info.Id, pluginDataDirectory, settingsStore, logger);
 
             plugin.Initialize(context);
 
-            loadedPlugin = new LoadedPlugin(registration, loadContext, plugin);
-            _loadedPlugins.Add(registration.Manifest.Id, loadedPlugin);
+            loadedPlugin = new LoadedPlugin(registration, plugin);
+            _loadedPlugins.Add(registration.Info.Id, loadedPlugin);
             return true;
         }
         catch (Exception exception)
@@ -216,69 +173,79 @@ public sealed class PluginManager
         }
     }
 
-    private static void NormalizeAndValidateManifest(PluginManifest manifest, string pluginDirectory)
+    private static PluginRegistration CreateRegistration(Assembly assembly)
     {
-        manifest.Id = manifest.Id?.Trim() ?? string.Empty;
-        manifest.EntryAssembly = manifest.EntryAssembly?.Trim() ?? string.Empty;
-        manifest.EntryType = manifest.EntryType?.Trim() ?? string.Empty;
+        var registrationAttribute = assembly.GetCustomAttribute<PluginRegistrationAttribute>()
+            ?? throw new InvalidOperationException("The plugin registration attribute is missing.");
 
-        if (!IsValidPluginId(manifest.Id))
+        var pluginId = registrationAttribute.Id?.Trim() ?? string.Empty;
+        if (!IsValidPluginId(pluginId))
         {
             throw new InvalidOperationException("Plugin id is missing or contains unsupported characters.");
         }
 
-        if (manifest.ApiVersion != PluginSdkVersion.Current)
+        if (registrationAttribute.ApiVersion != PluginSdkVersion.Current)
         {
-            throw new InvalidOperationException($"Unsupported plugin API version '{manifest.ApiVersion}'.");
+            throw new InvalidOperationException($"Unsupported plugin API version '{registrationAttribute.ApiVersion}'.");
         }
 
-        if (string.IsNullOrWhiteSpace(manifest.EntryAssembly)
-            || Path.IsPathRooted(manifest.EntryAssembly))
+        var entryType = registrationAttribute.EntryType
+            ?? throw new InvalidOperationException("The plugin entry type is missing.");
+
+        if (!ReferenceEquals(entryType.Assembly, assembly))
         {
-            throw new InvalidOperationException("EntryAssembly must be a relative file path.");
+            throw new InvalidOperationException("The plugin entry type must be declared in the plugin DLL itself.");
         }
 
-        if (string.IsNullOrWhiteSpace(manifest.EntryType))
+        if (!entryType.IsClass
+            || entryType.IsAbstract
+            || !entryType.IsPublic
+            || entryType.ContainsGenericParameters)
         {
-            throw new InvalidOperationException("EntryType is required.");
+            throw new InvalidOperationException("The plugin entry type must be a public, non-abstract, non-generic class.");
         }
 
+        if (!typeof(IStarResonancePlugin).IsAssignableFrom(entryType))
+        {
+            throw new InvalidOperationException($"'{entryType.FullName}' does not implement IStarResonancePlugin.");
+        }
+
+        if (entryType.GetConstructor(Type.EmptyTypes) is null)
+        {
+            throw new InvalidOperationException("The plugin entry type must have a public parameterless constructor.");
+        }
+
+        var displayNames = ReadDisplayNames(assembly);
+        var info = new PluginInfo(pluginId, displayNames);
+        return new PluginRegistration(info, entryType);
+    }
+
+    private static IReadOnlyDictionary<string, string> ReadDisplayNames(Assembly assembly)
+    {
         var displayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        if (manifest.DisplayNames is not null)
+
+        foreach (var displayNameAttribute in assembly.GetCustomAttributes<PluginDisplayNameAttribute>())
         {
-            foreach (var (cultureName, displayName) in manifest.DisplayNames)
+            var cultureName = displayNameAttribute.CultureName?.Trim() ?? string.Empty;
+            var displayName = displayNameAttribute.DisplayName?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(cultureName) || string.IsNullOrWhiteSpace(displayName))
             {
-                if (!string.IsNullOrWhiteSpace(cultureName)
-                    && !string.IsNullOrWhiteSpace(displayName))
-                {
-                    displayNames[cultureName.Trim()] = displayName.Trim();
-                }
+                continue;
+            }
+
+            if (!displayNames.TryAdd(cultureName, displayName))
+            {
+                throw new InvalidOperationException($"The plugin contains duplicate display names for culture '{cultureName}'.");
             }
         }
 
         if (displayNames.Count == 0)
         {
-            throw new InvalidOperationException("At least one localized display name is required.");
+            throw new InvalidOperationException("At least one localized plugin display name is required.");
         }
 
-        manifest.DisplayNames = displayNames;
-
-        _ = GetAssemblyPathWithinPluginDirectory(pluginDirectory, manifest.EntryAssembly);
-    }
-
-    private static string GetAssemblyPathWithinPluginDirectory(string pluginDirectory, string relativeAssemblyPath)
-    {
-        var normalizedDirectory = Path.GetFullPath(pluginDirectory)
-            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var directoryPrefix = normalizedDirectory + Path.DirectorySeparatorChar;
-        var assemblyPath = Path.GetFullPath(Path.Combine(normalizedDirectory, relativeAssemblyPath));
-
-        if (!assemblyPath.StartsWith(directoryPrefix, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException("The entry assembly must stay inside its plugin directory.");
-        }
-
-        return assemblyPath;
+        return new ReadOnlyDictionary<string, string>(displayNames);
     }
 
     private static bool IsValidPluginId(string pluginId)
@@ -295,7 +262,7 @@ public sealed class PluginManager
         Debug.WriteLine($"[ERROR] [Plugin:{pluginId}] {message}{suffix}");
     }
 
-    private sealed record PluginRegistration(PluginManifest Manifest, string DirectoryPath, string AssemblyPath);
+    private sealed record PluginRegistration(PluginInfo Info, Type EntryType);
 
-    private sealed record LoadedPlugin(PluginRegistration Registration, PluginLoadContext LoadContext, IStarResonancePlugin Instance);
+    private sealed record LoadedPlugin(PluginRegistration Registration, IStarResonancePlugin Instance);
 }
