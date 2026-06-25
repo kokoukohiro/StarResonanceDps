@@ -58,7 +58,7 @@ internal sealed class BpsrKeybindSaveService
             session.InputAnchorOffset,
             definition.RelativeOffsets,
             KeybindCatalog.ControllerOffsetAliases,
-            definition.Name);
+            definition.Id);
 
         var resolved = candidates
             .Where(offset => IsControllerActionRecord(session.Data, offset))
@@ -78,7 +78,7 @@ internal sealed class BpsrKeybindSaveService
             session.InputAnchorOffset,
             definition.RelativeOffsets,
             KeybindCatalog.KeyMouseOffsetAliases,
-            definition.Name);
+            definition.Id);
 
         var resolved = candidates
             .Where(offset => IsKeyMouseActionRecord(session.Data, offset))

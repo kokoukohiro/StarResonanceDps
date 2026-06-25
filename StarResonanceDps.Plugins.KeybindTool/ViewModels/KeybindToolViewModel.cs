@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
@@ -20,12 +21,15 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private readonly IPluginContext _context;
     private readonly BpsrKeybindSaveService _saveService = new();
     private readonly string _layoutFilePath;
-    private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsByName;
-    private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsByName;
+    private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsById;
+    private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsById;
+    private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByLabel = new(StringComparer.Ordinal);
     private readonly IReadOnlyList<ControllerActionRowViewModel> _allControllerRows;
     private readonly IReadOnlyList<KeyMouseActionRowViewModel> _allKeyMouseRows;
 
     private KeybindSaveSession? _session;
+    private ControllerLayoutProfile? _controllerProfileCache;
+    private KeyMouseLayoutProfile? _keyMouseProfileCache;
     private DetectedSaveFile? _selectedDetectedSave;
     private string _selectedSaveFilePath = string.Empty;
     private string _statusText = "ファイル未選択";
@@ -34,6 +38,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private HelperBindingOption? _selectedHelper2;
     private PresetOption? _selectedPreset;
     private bool _isControllerMode = true;
+    private bool _controllerQuickWheelIndependent;
+    private bool _keyMouseQuickWheelIndependent;
     private bool _controllerPhotoModeIndependent;
     private bool _keyMousePhotoModeIndependent;
     private bool _keyMouseFishingModeIndependent;
@@ -53,28 +59,32 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
 
         ControllerMainActions = CreateControllerRows(KeybindModeGroup.Main);
+        ControllerQuickWheelActions = CreateControllerRows(KeybindModeGroup.QuickWheel);
         ControllerPhotoActions = CreateControllerRows(KeybindModeGroup.Photo);
         ControllerFishingActions = CreateControllerRows(KeybindModeGroup.Fishing);
+
         KeyMouseMainActions = CreateKeyMouseRows(KeybindModeGroup.Main);
+        KeyMouseQuickWheelActions = CreateKeyMouseRows(KeybindModeGroup.QuickWheel);
         KeyMousePhotoActions = CreateKeyMouseRows(KeybindModeGroup.Photo);
         KeyMouseFishingActions = CreateKeyMouseRows(KeybindModeGroup.Fishing);
 
         _allControllerRows = ControllerMainActions
+            .Concat(ControllerQuickWheelActions)
             .Concat(ControllerPhotoActions)
             .Concat(ControllerFishingActions)
             .ToArray();
 
         _allKeyMouseRows = KeyMouseMainActions
+            .Concat(KeyMouseQuickWheelActions)
             .Concat(KeyMousePhotoActions)
             .Concat(KeyMouseFishingActions)
             .ToArray();
 
-        _controllerRowsByName = _allControllerRows.ToDictionary(
-            row => row.Definition.Name,
+        _controllerRowsById = _allControllerRows.ToDictionary(
+            row => row.Definition.Id,
             StringComparer.Ordinal);
-
-        _keyMouseRowsByName = _allKeyMouseRows.ToDictionary(
-            row => row.Definition.Name,
+        _keyMouseRowsById = _allKeyMouseRows.ToDictionary(
+            row => row.Definition.Id,
             StringComparer.Ordinal);
 
         foreach (var row in _allControllerRows)
@@ -89,7 +99,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         RescanCommand = new RelayCommand(RescanDetectedSaves);
         SelectFileCommand = new RelayCommand(SelectSaveFile);
+        OpenSelectedFileLocationCommand = new RelayCommand(OpenSelectedFileLocation, () => HasSelectedSaveFile);
         LoadLayoutCommand = new RelayCommand(LoadLayout);
+        OpenLayoutFileLocationCommand = new RelayCommand(OpenLayoutFileLocation);
         ResetCommand = new RelayCommand(ResetValues, () => _session is not null);
         SaveCommand = new RelayCommand(SaveValues, () => CanSave);
 
@@ -97,6 +109,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             RefreshControllerDependentChoices();
             RefreshKeyMouseChoices();
+            RestoreIndependentSettingsFromLayoutFile();
             SynchronizeModeLinks();
         });
 
@@ -113,11 +126,15 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     public ObservableCollection<ControllerActionRowViewModel> ControllerMainActions { get; }
 
+    public ObservableCollection<ControllerActionRowViewModel> ControllerQuickWheelActions { get; }
+
     public ObservableCollection<ControllerActionRowViewModel> ControllerPhotoActions { get; }
 
     public ObservableCollection<ControllerActionRowViewModel> ControllerFishingActions { get; }
 
     public ObservableCollection<KeyMouseActionRowViewModel> KeyMouseMainActions { get; }
+
+    public ObservableCollection<KeyMouseActionRowViewModel> KeyMouseQuickWheelActions { get; }
 
     public ObservableCollection<KeyMouseActionRowViewModel> KeyMousePhotoActions { get; }
 
@@ -127,7 +144,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     public RelayCommand SelectFileCommand { get; }
 
+    public RelayCommand OpenSelectedFileLocationCommand { get; }
+
     public RelayCommand LoadLayoutCommand { get; }
+
+    public RelayCommand OpenLayoutFileLocationCommand { get; }
 
     public RelayCommand ResetCommand { get; }
 
@@ -145,7 +166,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 return;
             }
 
-            LoadSaveFile(value.FilePath, showErrors: true, statusMessage: $"{value.DisplayName}を読み込み完了");
+            LoadSaveFile(
+                value.FilePath,
+                showErrors: true,
+                statusMessage: $"{value.DisplayName}を読み込み完了");
         }
     }
 
@@ -162,6 +186,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         get => _statusText;
         private set => SetProperty(ref _statusText, value);
     }
+
+    public bool HasSelectedSaveFile => _session is not null;
 
     public string SelectedControllerType
     {
@@ -183,6 +209,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 RefreshControllerDependentChoices();
                 SynchronizeModeLinks();
             });
+            CacheCurrentActiveLayoutProfile();
             UpdateSaveState();
         }
     }
@@ -205,6 +232,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 RefreshActionHelperChoices();
                 SynchronizeModeLinks();
             });
+            CacheCurrentActiveLayoutProfile();
             UpdateSaveState();
         }
     }
@@ -227,6 +255,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 RefreshActionHelperChoices();
                 SynchronizeModeLinks();
             });
+            CacheCurrentActiveLayoutProfile();
             UpdateSaveState();
         }
     }
@@ -238,6 +267,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             if (SetProperty(ref _selectedPreset, value) && !_isSynchronizing)
             {
+                CacheCurrentActiveLayoutProfile();
                 UpdateSaveState();
             }
         }
@@ -271,6 +301,36 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    public bool ControllerQuickWheelIndependent
+    {
+        get => _controllerQuickWheelIndependent;
+        set
+        {
+            if (SetProperty(ref _controllerQuickWheelIndependent, value) && !_isSynchronizing)
+            {
+                HandleControllerIndependentChanged(
+                    value,
+                    ControllerQuickWheelActions,
+                    KeybindCatalog.ControllerQuickWheelLinks);
+            }
+        }
+    }
+
+    public bool KeyMouseQuickWheelIndependent
+    {
+        get => _keyMouseQuickWheelIndependent;
+        set
+        {
+            if (SetProperty(ref _keyMouseQuickWheelIndependent, value) && !_isSynchronizing)
+            {
+                HandleKeyMouseIndependentChanged(
+                    value,
+                    KeyMouseQuickWheelActions,
+                    KeybindCatalog.KeyMouseQuickWheelLinks);
+            }
+        }
+    }
+
     public bool ControllerPhotoModeIndependent
     {
         get => _controllerPhotoModeIndependent;
@@ -278,8 +338,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             if (SetProperty(ref _controllerPhotoModeIndependent, value) && !_isSynchronizing)
             {
-                RunSynchronizing(SynchronizeModeLinks);
-                UpdateSaveState();
+                HandleControllerIndependentChanged(
+                    value,
+                    ControllerPhotoActions,
+                    KeybindCatalog.ControllerPhotoModeLinks);
             }
         }
     }
@@ -291,8 +353,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             if (SetProperty(ref _keyMousePhotoModeIndependent, value) && !_isSynchronizing)
             {
-                RunSynchronizing(SynchronizeModeLinks);
-                UpdateSaveState();
+                HandleKeyMouseIndependentChanged(
+                    value,
+                    KeyMousePhotoActions,
+                    KeybindCatalog.KeyMousePhotoModeLinks);
             }
         }
     }
@@ -304,8 +368,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             if (SetProperty(ref _keyMouseFishingModeIndependent, value) && !_isSynchronizing)
             {
-                RunSynchronizing(SynchronizeModeLinks);
-                UpdateSaveState();
+                HandleKeyMouseIndependentChanged(
+                    value,
+                    KeyMouseFishingActions,
+                    KeybindCatalog.KeyMouseFishingModeLinks);
             }
         }
     }
@@ -322,13 +388,52 @@ internal sealed class KeybindToolViewModel : ObservableObject
         private set => SetProperty(ref _canSave, value);
     }
 
+    private void RestoreIndependentSettingsFromLayoutFile()
+    {
+        if (!File.Exists(_layoutFilePath))
+        {
+            return;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_layoutFilePath);
+            var layout = JsonSerializer.Deserialize<KeybindLayoutConfig>(json, JsonOptions);
+            if (layout is null)
+            {
+                return;
+            }
+
+            if (layout.ControllerProfile is not null)
+            {
+                _controllerQuickWheelIndependent = layout.ControllerProfile.QuickWheelIndependent;
+                _controllerPhotoModeIndependent = layout.ControllerProfile.PhotoModeIndependent;
+                OnPropertyChanged(nameof(ControllerQuickWheelIndependent));
+                OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
+            }
+
+            if (layout.KeyMouseProfile is not null)
+            {
+                _keyMouseQuickWheelIndependent = layout.KeyMouseProfile.QuickWheelIndependent;
+                _keyMousePhotoModeIndependent = layout.KeyMouseProfile.PhotoModeIndependent;
+                _keyMouseFishingModeIndependent = layout.KeyMouseProfile.FishingModeIndependent;
+                OnPropertyChanged(nameof(KeyMouseQuickWheelIndependent));
+                OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
+                OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
+            }
+        }
+        catch (Exception)
+        {
+            // 起動時は単独設定状態だけを補助的に復元する。
+            // 壊れた既存JSONは、通常の読み込み操作で明示的に通知する。
+        }
+    }
+
     private ObservableCollection<ControllerActionRowViewModel> CreateControllerRows(KeybindModeGroup group)
     {
         return new ObservableCollection<ControllerActionRowViewModel>(
             KeybindCatalog.GetControllerActions(group)
-                .Select(definition => new ControllerActionRowViewModel(
-                    definition,
-                    KeybindCatalog.GetDisplayActionName(definition.Name, group))));
+                .Select(definition => new ControllerActionRowViewModel(definition, definition.Name)));
     }
 
     private ObservableCollection<KeyMouseActionRowViewModel> CreateKeyMouseRows(KeybindModeGroup group)
@@ -337,8 +442,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
             KeybindCatalog.GetKeyMouseActions(group)
                 .Select(definition => new KeyMouseActionRowViewModel(
                     definition,
-                    KeybindCatalog.GetDisplayActionName(definition.Name, group),
-                    KeybindCatalog.UsesLControlPrefix(definition.Name))));
+                    definition.Name,
+                    KeybindCatalog.UsesLControlPrefix(definition))));
     }
 
     private void ActionRow_SelectionChanged(object? sender, EventArgs e)
@@ -349,6 +454,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
 
         RunSynchronizing(SynchronizeModeLinks);
+        CacheCurrentActiveLayoutProfile();
         UpdateSaveState();
     }
 
@@ -359,14 +465,20 @@ internal sealed class KeybindToolViewModel : ObservableObject
             return;
         }
 
-        _isControllerMode = isControllerMode;
-        OnPropertyChanged(nameof(IsControllerMode));
-        OnPropertyChanged(nameof(IsKeyMouseMode));
+        CacheCurrentActiveLayoutProfile();
 
-        if (!_isSynchronizing)
+        RunSynchronizing(() =>
         {
-            UpdateSaveState();
-        }
+            _isControllerMode = isControllerMode;
+            OnPropertyChanged(nameof(IsControllerMode));
+            OnPropertyChanged(nameof(IsKeyMouseMode));
+
+            ApplyCachedLayoutForCurrentInput();
+            SynchronizeModeLinks();
+        });
+
+        CacheCurrentActiveLayoutProfile();
+        UpdateSaveState();
     }
 
     private void RefreshControllerDependentChoices()
@@ -375,12 +487,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         var helper2Value = SelectedHelper2?.MainValue;
         var presetValue = SelectedPreset?.Value;
 
-        ReplaceCollection(
-            HelperOptions,
-            KeybindCatalog.GetHelperOptions(SelectedControllerType));
-        ReplaceCollection(
-            PresetOptions,
-            KeybindCatalog.GetPresetOptions(SelectedControllerType));
+        ReplaceCollection(HelperOptions, KeybindCatalog.GetHelperOptions(SelectedControllerType));
+        ReplaceCollection(PresetOptions, KeybindCatalog.GetPresetOptions(SelectedControllerType));
 
         _selectedHelper1 = FindByMainValue(HelperOptions, helper1Value);
         OnPropertyChanged(nameof(SelectedHelper1));
@@ -428,16 +536,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         if (SelectedHelper1 is not null)
         {
-            options.Add(new ActionHelperOption(
-                KeybindCatalog.ActionStateHelper1,
-                SelectedHelper1.Label));
+            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper1, SelectedHelper1.Label));
         }
 
         if (SelectedHelper2 is not null)
         {
-            options.Add(new ActionHelperOption(
-                KeybindCatalog.ActionStateHelper2,
-                SelectedHelper2.Label));
+            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper2, SelectedHelper2.Label));
         }
 
         foreach (var row in _allControllerRows)
@@ -457,9 +561,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         foreach (var row in _allKeyMouseRows)
         {
             var selected = row.SelectedKey;
-            var options = KeybindCatalog
-                .GetAllowedKeyMouseOptions(row.Definition)
-                .ToList();
+            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition).ToList();
 
             if (selected is not null
                 && options.All(option => option.InputType != selected.InputType || option.Value != selected.Value))
@@ -532,36 +634,46 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void SynchronizeModeLinks()
     {
-        SynchronizeControllerModeLinks(
+        if (IsKeyMouseMode)
+        {
+            SynchronizeKeyMouseLinkGroup(
+                KeyMouseQuickWheelActions,
+                KeybindCatalog.KeyMouseQuickWheelLinks,
+                KeyMouseQuickWheelIndependent);
+            SynchronizeKeyMouseLinkGroup(
+                KeyMousePhotoActions,
+                KeybindCatalog.KeyMousePhotoModeLinks,
+                KeyMousePhotoModeIndependent);
+            SynchronizeKeyMouseLinkGroup(
+                KeyMouseFishingActions,
+                KeybindCatalog.KeyMouseFishingModeLinks,
+                KeyMouseFishingModeIndependent);
+            return;
+        }
+
+        SynchronizeControllerLinkGroup(
+            ControllerQuickWheelActions,
+            KeybindCatalog.ControllerQuickWheelLinks,
+            ControllerQuickWheelIndependent);
+        SynchronizeControllerLinkGroup(
             ControllerPhotoActions,
             KeybindCatalog.ControllerPhotoModeLinks,
             ControllerPhotoModeIndependent);
-
-        SynchronizeControllerModeLinks(
+        SynchronizeControllerLinkGroup(
             ControllerFishingActions,
             KeybindCatalog.ControllerFishingModeLinks,
             independent: true);
-
-        SynchronizeKeyMouseModeLinks(
-            KeyMousePhotoActions,
-            KeybindCatalog.KeyMousePhotoModeLinks,
-            KeyMousePhotoModeIndependent);
-
-        SynchronizeKeyMouseModeLinks(
-            KeyMouseFishingActions,
-            KeybindCatalog.KeyMouseFishingModeLinks,
-            KeyMouseFishingModeIndependent);
     }
 
-    private void SynchronizeControllerModeLinks(
+    private void SynchronizeControllerLinkGroup(
         IEnumerable<ControllerActionRowViewModel> modeRows,
         IReadOnlyDictionary<string, string> links,
         bool independent)
     {
         foreach (var row in modeRows)
         {
-            if (links.TryGetValue(row.Definition.Name, out var sourceName)
-                && _controllerRowsByName.TryGetValue(sourceName, out var sourceRow))
+            if (links.TryGetValue(row.Definition.Id, out var sourceId)
+                && _controllerRowsById.TryGetValue(sourceId, out var sourceRow))
             {
                 if (!independent)
                 {
@@ -583,15 +695,15 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
-    private void SynchronizeKeyMouseModeLinks(
+    private void SynchronizeKeyMouseLinkGroup(
         IEnumerable<KeyMouseActionRowViewModel> modeRows,
         IReadOnlyDictionary<string, string> links,
         bool independent)
     {
         foreach (var row in modeRows)
         {
-            if (links.TryGetValue(row.Definition.Name, out var sourceName)
-                && _keyMouseRowsByName.TryGetValue(sourceName, out var sourceRow))
+            if (links.TryGetValue(row.Definition.Id, out var sourceId)
+                && _keyMouseRowsById.TryGetValue(sourceId, out var sourceRow))
             {
                 if (!independent)
                 {
@@ -614,9 +726,81 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    private void HandleControllerIndependentChanged(
+        bool independent,
+        IEnumerable<ControllerActionRowViewModel> modeRows,
+        IReadOnlyDictionary<string, string> links)
+    {
+        RunSynchronizing(() =>
+        {
+            if (independent)
+            {
+                RestoreControllerLinkedActionsFromSession(modeRows, links);
+            }
+
+            SynchronizeControllerLinkGroup(modeRows, links, independent);
+        });
+        CacheCurrentActiveLayoutProfile();
+        UpdateSaveState();
+    }
+
+    private void HandleKeyMouseIndependentChanged(
+        bool independent,
+        IEnumerable<KeyMouseActionRowViewModel> modeRows,
+        IReadOnlyDictionary<string, string> links)
+    {
+        RunSynchronizing(() =>
+        {
+            if (independent)
+            {
+                RestoreKeyMouseLinkedActionsFromSession(modeRows, links);
+            }
+
+            SynchronizeKeyMouseLinkGroup(modeRows, links, independent);
+        });
+        CacheCurrentActiveLayoutProfile();
+        UpdateSaveState();
+    }
+
+    private void RestoreControllerLinkedActionsFromSession(
+        IEnumerable<ControllerActionRowViewModel> modeRows,
+        IReadOnlyDictionary<string, string> links)
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
+        foreach (var row in modeRows)
+        {
+            if (links.ContainsKey(row.Definition.Id))
+            {
+                LoadControllerActionFromSession(row);
+            }
+        }
+    }
+
+    private void RestoreKeyMouseLinkedActionsFromSession(
+        IEnumerable<KeyMouseActionRowViewModel> modeRows,
+        IReadOnlyDictionary<string, string> links)
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
+        foreach (var row in modeRows)
+        {
+            if (links.ContainsKey(row.Definition.Id))
+            {
+                LoadKeyMouseActionFromSession(row);
+            }
+        }
+    }
+
     private void RescanDetectedSaves()
     {
-        var previousPath = _session?.FilePath;
+        var previousPath = _session?.FilePath ?? SelectedDetectedSave?.FilePath;
         var detected = ScanDetectedSaveFiles();
 
         RunSynchronizing(() =>
@@ -691,12 +875,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                     }
 
                     var saveFilePath = Path.Combine(uidDirectories[0], "localsave.bytes");
-                    if (!File.Exists(saveFilePath))
-                    {
-                        continue;
-                    }
-
-                    if (new FileInfo(saveFilePath).Length < 2048)
+                    if (!File.Exists(saveFilePath) || new FileInfo(saveFilePath).Length < 2048)
                     {
                         continue;
                     }
@@ -737,6 +916,58 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    private void OpenSelectedFileLocation()
+    {
+        OpenFileLocation(
+            _session?.FilePath,
+            "設定ファイルを先に選択してください。");
+    }
+
+    private void OpenLayoutFileLocation()
+    {
+        OpenFileLocation(
+            _layoutFilePath,
+            "キー設定プリセットの保存先を特定できません。");
+    }
+
+    private static void OpenFileLocation(string? filePath, string unavailableMessage)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            MessageBox.Show(unavailableMessage, "場所を開けません", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(filePath);
+            var directory = Path.GetDirectoryName(fullPath);
+            if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
+            {
+                MessageBox.Show(
+                    $"保存先フォルダが見つかりません。\n{directory}",
+                    "場所を開けません",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
+            var startInfo = File.Exists(fullPath)
+                ? new ProcessStartInfo("explorer.exe", $"/select,\"{fullPath}\"")
+                : new ProcessStartInfo(directory);
+            startInfo.UseShellExecute = true;
+            Process.Start(startInfo);
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(
+                $"保存先フォルダを開けませんでした。\n{exception.Message}",
+                "場所を開けません",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private void LoadSaveFile(string filePath, bool showErrors, string statusMessage)
     {
         try
@@ -746,17 +977,21 @@ internal sealed class KeybindToolViewModel : ObservableObject
             RunSynchronizing(() =>
             {
                 _session = session;
+                _controllerProfileCache = null;
+                _keyMouseProfileCache = null;
+                _customKeyMouseOptionsByLabel.Clear();
                 SelectedSaveFilePath = session.FilePath;
                 IsPresetSupported = session.IsPresetSupported;
+                OnPropertyChanged(nameof(HasSelectedSaveFile));
 
                 UpdateDetectedSelectionForPath(session.FilePath);
                 LoadValuesFromSession();
+                InitializeLayoutProfileCacheFromUi();
             });
 
             StatusText = session.IsPresetSupported
                 ? statusMessage
                 : $"{statusMessage}（確認/キャンセル設定はこのファイルでは編集できません）";
-
             UpdateSaveState();
         }
         catch (Exception exception)
@@ -767,6 +1002,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             {
                 SelectedSaveFilePath = string.Empty;
                 IsPresetSupported = false;
+                OnPropertyChanged(nameof(HasSelectedSaveFile));
                 StatusText = "読み込み失敗";
             }
 
@@ -790,8 +1026,19 @@ internal sealed class KeybindToolViewModel : ObservableObject
             return;
         }
 
+        LoadControllerValuesFromSession();
+        LoadKeyMouseValuesFromSession();
+        SynchronizeModeLinks();
+    }
+
+    private void LoadControllerValuesFromSession()
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
         RefreshControllerDependentChoices();
-        RefreshKeyMouseChoices();
 
         if (_session.IsPresetSupported && _session.PresetOffset is not null)
         {
@@ -826,51 +1073,79 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         foreach (var row in _allControllerRows)
         {
-            var offset = _saveService.GetControllerOffsets(_session, row.Definition).First();
-            var value = _saveService.ReadUInt32(_session, offset);
-            var option = row.ButtonOptions.FirstOrDefault(candidate => candidate.Value == value);
-            if (option is null)
-            {
-                var label = KeybindCatalog.GetControllerDisplayMap(SelectedControllerType)
-                    .TryGetValue(value, out var knownLabel)
-                    ? knownLabel
-                    : $"不明 (0x{value:X8})";
-                option = new ControllerInputOption(value, label);
-                row.EnsureButtonOption(option);
-            }
+            LoadControllerActionFromSession(row);
+        }
+    }
 
-            row.SelectedButton = option;
-
-            var state = _saveService.ReadUInt32(_session, offset + sizeof(uint));
-            var helperState = state is KeybindCatalog.ActionStateSingle
-                or KeybindCatalog.ActionStateHelper1
-                or KeybindCatalog.ActionStateHelper2
-                ? state
-                : KeybindCatalog.ActionStateSingle;
-            row.SelectHelperState(row.UsesHelper ? helperState : KeybindCatalog.ActionStateSingle);
+    private void LoadControllerActionFromSession(ControllerActionRowViewModel row)
+    {
+        if (_session is null)
+        {
+            return;
         }
 
+        var offset = _saveService.GetControllerOffsets(_session, row.Definition).First();
+        var value = _saveService.ReadUInt32(_session, offset);
+        var option = row.ButtonOptions.FirstOrDefault(candidate => candidate.Value == value);
+        if (option is null)
+        {
+            var label = KeybindCatalog.GetControllerDisplayMap(SelectedControllerType)
+                .TryGetValue(value, out var knownLabel)
+                ? knownLabel
+                : $"不明 (0x{value:X8})";
+            option = new ControllerInputOption(value, label);
+            row.EnsureButtonOption(option);
+        }
+
+        row.SelectedButton = option;
+
+        var state = _saveService.ReadUInt32(_session, offset + sizeof(uint));
+        var helperState = state is KeybindCatalog.ActionStateSingle
+            or KeybindCatalog.ActionStateHelper1
+            or KeybindCatalog.ActionStateHelper2
+            ? state
+            : KeybindCatalog.ActionStateSingle;
+        row.SelectHelperState(row.UsesHelper ? helperState : KeybindCatalog.ActionStateSingle);
+    }
+
+    private void LoadKeyMouseValuesFromSession()
+    {
+        if (_session is null)
+        {
+            return;
+        }
+
+        RefreshKeyMouseChoices();
         foreach (var row in _allKeyMouseRows)
         {
-            var offset = _saveService.GetKeyMouseOffsets(_session, row.Definition).First();
-            var inputType = _saveService.ReadInputType(_session, offset);
-            var value = _saveService.ReadUInt32(_session, offset);
+            LoadKeyMouseActionFromSession(row);
+        }
+    }
 
-            var option = row.KeyOptions.FirstOrDefault(candidate => candidate.InputType == inputType
-                && candidate.Value == value);
-            if (option is null)
-            {
-                option = new KeyMouseInputOption(
-                    inputType,
-                    value,
-                    $"不明 (type=0x{inputType:X8}, value=0x{value:X8})");
-                row.EnsureKeyOption(option);
-            }
-
-            row.SelectedKey = option;
+    private void LoadKeyMouseActionFromSession(KeyMouseActionRowViewModel row)
+    {
+        if (_session is null)
+        {
+            return;
         }
 
-        SynchronizeModeLinks();
+        var offset = _saveService.GetKeyMouseOffsets(_session, row.Definition).First();
+        var inputType = _saveService.ReadInputType(_session, offset);
+        var value = _saveService.ReadUInt32(_session, offset);
+
+        var option = row.KeyOptions.FirstOrDefault(candidate => candidate.InputType == inputType
+            && candidate.Value == value);
+        if (option is null)
+        {
+            option = new KeyMouseInputOption(
+                inputType,
+                value,
+                $"不明 (type=0x{inputType:X8}, value=0x{value:X8})");
+            RegisterCustomKeyMouseOption(option);
+            row.EnsureKeyOption(option);
+        }
+
+        row.SelectedKey = option;
     }
 
     private void ResetValues()
@@ -880,7 +1155,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
             return;
         }
 
-        RunSynchronizing(LoadValuesFromSession);
+        RunSynchronizing(() =>
+        {
+            _customKeyMouseOptionsByLabel.Clear();
+            LoadValuesFromSession();
+            InitializeLayoutProfileCacheFromUi();
+        });
         StatusText = "読み込み時の状態に戻しました";
         UpdateSaveState();
     }
@@ -905,9 +1185,13 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             RunSynchronizing(() =>
             {
-                ApplyLayout(layout);
+                CacheLoadedLayoutProfiles(
+                    layout.ControllerProfile ?? new ControllerLayoutProfile(),
+                    layout.KeyMouseProfile ?? new KeyMouseLayoutProfile());
+                ApplyCachedLayoutForCurrentInput();
                 SynchronizeModeLinks();
             });
+            CacheCurrentActiveLayoutProfile();
 
             StatusText = $"キー設定を読み込みました: {Path.GetFileName(_layoutFilePath)}";
             UpdateSaveState();
@@ -932,102 +1216,384 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
-    private void ApplyLayout(KeybindLayoutConfig layout)
+    private void InitializeLayoutProfileCacheFromUi()
     {
-        var controllerProfile = layout.ControllerProfile ?? new ControllerLayoutProfile();
-        var keyMouseProfile = layout.KeyMouseProfile ?? new KeyMouseLayoutProfile();
+        _controllerProfileCache = NormalizeControllerLayoutProfile(CollectControllerLayoutProfile());
+        _keyMouseProfileCache = NormalizeKeyMouseLayoutProfile(CollectKeyMouseLayoutProfile());
+    }
 
-        var controllerType = ControllerTypes.Contains(controllerProfile.ControllerType, StringComparer.OrdinalIgnoreCase)
-            ? controllerProfile.ControllerType
+    private void CacheCurrentActiveLayoutProfile()
+    {
+        if (_isSynchronizing)
+        {
+            return;
+        }
+
+        if (IsKeyMouseMode)
+        {
+            _keyMouseProfileCache = NormalizeKeyMouseLayoutProfile(CollectKeyMouseLayoutProfile());
+        }
+        else
+        {
+            _controllerProfileCache = NormalizeControllerLayoutProfile(CollectControllerLayoutProfile());
+        }
+    }
+
+    private void CacheLoadedLayoutProfiles(
+        ControllerLayoutProfile controllerProfile,
+        KeyMouseLayoutProfile keyMouseProfile)
+    {
+        _controllerProfileCache = MergeControllerLayoutProfile(_controllerProfileCache, controllerProfile);
+        _keyMouseProfileCache = MergeKeyMouseLayoutProfile(_keyMouseProfileCache, keyMouseProfile);
+    }
+
+    private void ApplyCachedLayoutForCurrentInput()
+    {
+        if (IsKeyMouseMode)
+        {
+            if (_keyMouseProfileCache is not null)
+            {
+                ApplyKeyMouseLayoutProfile(CloneKeyMouseLayoutProfile(_keyMouseProfileCache));
+            }
+
+            return;
+        }
+
+        if (_controllerProfileCache is not null)
+        {
+            ApplyControllerLayoutProfile(CloneControllerLayoutProfile(_controllerProfileCache));
+        }
+    }
+
+    private ControllerLayoutProfile CollectControllerLayoutProfile()
+    {
+        return new ControllerLayoutProfile
+        {
+            ControllerType = SelectedControllerType,
+            QuickWheelIndependent = ControllerQuickWheelIndependent,
+            PhotoModeIndependent = ControllerPhotoModeIndependent,
+            Keybind = new ControllerKeybindProfile
+            {
+                Helper1 = SelectedHelper1?.Label,
+                Helper2 = SelectedHelper2?.Label,
+                Preset = SelectedPreset?.Label
+            },
+            Actions = _allControllerRows.ToDictionary(
+                row => row.Definition.Id,
+                row => new ControllerActionLayout
+                {
+                    Helper = row.SelectedHelper?.Label,
+                    Button = row.SelectedButton?.Label
+                },
+                StringComparer.Ordinal)
+        };
+    }
+
+    private KeyMouseLayoutProfile CollectKeyMouseLayoutProfile()
+    {
+        return new KeyMouseLayoutProfile
+        {
+            QuickWheelIndependent = KeyMouseQuickWheelIndependent,
+            PhotoModeIndependent = KeyMousePhotoModeIndependent,
+            FishingModeIndependent = KeyMouseFishingModeIndependent,
+            Actions = _allKeyMouseRows.ToDictionary(
+                row => row.Definition.Id,
+                row => new KeyMouseActionLayout
+                {
+                    Key = row.SelectedKey?.Label
+                },
+                StringComparer.Ordinal)
+        };
+    }
+
+    private ControllerLayoutProfile NormalizeControllerLayoutProfile(ControllerLayoutProfile? source)
+    {
+        var normalized = CloneControllerLayoutProfile(source);
+        if (!ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase))
+        {
+            normalized.ControllerType = KeybindCatalog.DefaultControllerType;
+        }
+
+        NormalizeControllerLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.ControllerQuickWheelActions,
+            KeybindCatalog.ControllerQuickWheelLinks,
+            normalized.QuickWheelIndependent);
+        NormalizeControllerLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.ControllerPhotoActions,
+            KeybindCatalog.ControllerPhotoModeLinks,
+            normalized.PhotoModeIndependent);
+
+        return normalized;
+    }
+
+    private KeyMouseLayoutProfile NormalizeKeyMouseLayoutProfile(KeyMouseLayoutProfile? source)
+    {
+        var normalized = CloneKeyMouseLayoutProfile(source);
+        NormalizeKeyMouseLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.KeyMouseQuickWheelActions,
+            KeybindCatalog.KeyMouseQuickWheelLinks,
+            normalized.QuickWheelIndependent);
+        NormalizeKeyMouseLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.KeyMousePhotoActions,
+            KeybindCatalog.KeyMousePhotoModeLinks,
+            normalized.PhotoModeIndependent);
+        NormalizeKeyMouseLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.KeyMouseFishingActions,
+            KeybindCatalog.KeyMouseFishingModeLinks,
+            normalized.FishingModeIndependent);
+
+        return normalized;
+    }
+
+    private static void NormalizeControllerLinkGroup(
+        IDictionary<string, ControllerActionLayout> actions,
+        IEnumerable<ControllerActionDefinition> modeActions,
+        IReadOnlyDictionary<string, string> links,
+        bool independent)
+    {
+        if (independent)
+        {
+            return;
+        }
+
+        foreach (var action in modeActions)
+        {
+            if (!links.TryGetValue(action.Id, out var sourceId)
+                || !actions.TryGetValue(sourceId, out var source))
+            {
+                continue;
+            }
+
+            if (!actions.TryGetValue(action.Id, out var target))
+            {
+                target = new ControllerActionLayout();
+                actions[action.Id] = target;
+            }
+
+            if (source.Button is not null)
+            {
+                target.Button = source.Button;
+            }
+
+            if (action.UsesHelper && source.Helper is not null)
+            {
+                target.Helper = source.Helper;
+            }
+        }
+    }
+
+    private static void NormalizeKeyMouseLinkGroup(
+        IDictionary<string, KeyMouseActionLayout> actions,
+        IEnumerable<KeyMouseActionDefinition> modeActions,
+        IReadOnlyDictionary<string, string> links,
+        bool independent)
+    {
+        if (independent)
+        {
+            return;
+        }
+
+        foreach (var action in modeActions)
+        {
+            if (!links.TryGetValue(action.Id, out var sourceId)
+                || !actions.TryGetValue(sourceId, out var source))
+            {
+                continue;
+            }
+
+            if (!actions.TryGetValue(action.Id, out var target))
+            {
+                target = new KeyMouseActionLayout();
+                actions[action.Id] = target;
+            }
+
+            if (source.Key is not null)
+            {
+                target.Key = source.Key;
+            }
+        }
+    }
+
+    private ControllerLayoutProfile MergeControllerLayoutProfile(
+        ControllerLayoutProfile? baseline,
+        ControllerLayoutProfile overlay)
+    {
+        var merged = CloneControllerLayoutProfile(baseline);
+        if (!string.IsNullOrWhiteSpace(overlay.ControllerType))
+        {
+            merged.ControllerType = overlay.ControllerType;
+        }
+
+        merged.QuickWheelIndependent = overlay.QuickWheelIndependent;
+        merged.PhotoModeIndependent = overlay.PhotoModeIndependent;
+
+        if (overlay.Keybind is not null)
+        {
+            if (overlay.Keybind.Helper1 is not null)
+            {
+                merged.Keybind.Helper1 = overlay.Keybind.Helper1;
+            }
+
+            if (overlay.Keybind.Helper2 is not null)
+            {
+                merged.Keybind.Helper2 = overlay.Keybind.Helper2;
+            }
+
+            if (overlay.Keybind.Preset is not null)
+            {
+                merged.Keybind.Preset = overlay.Keybind.Preset;
+            }
+        }
+
+        foreach (var definition in KeybindCatalog.ControllerActions)
+        {
+            if (!TryGetProfileActionEntry(overlay.Actions, definition, out ControllerActionLayout? source)
+                || source is null)
+            {
+                continue;
+            }
+
+            if (!merged.Actions.TryGetValue(definition.Id, out var target))
+            {
+                target = new ControllerActionLayout();
+                merged.Actions[definition.Id] = target;
+            }
+
+            if (source.Button is not null)
+            {
+                target.Button = source.Button;
+            }
+
+            if (source.Helper is not null)
+            {
+                target.Helper = source.Helper;
+            }
+        }
+
+        return NormalizeControllerLayoutProfile(merged);
+    }
+
+    private KeyMouseLayoutProfile MergeKeyMouseLayoutProfile(
+        KeyMouseLayoutProfile? baseline,
+        KeyMouseLayoutProfile overlay)
+    {
+        var merged = CloneKeyMouseLayoutProfile(baseline);
+        merged.QuickWheelIndependent = overlay.QuickWheelIndependent;
+        merged.PhotoModeIndependent = overlay.PhotoModeIndependent;
+        merged.FishingModeIndependent = overlay.FishingModeIndependent;
+
+        foreach (var definition in KeybindCatalog.KeyMouseActions)
+        {
+            if (!TryGetProfileActionEntry(overlay.Actions, definition, out KeyMouseActionLayout? source)
+                || source?.Key is null)
+            {
+                continue;
+            }
+
+            if (!merged.Actions.TryGetValue(definition.Id, out var target))
+            {
+                target = new KeyMouseActionLayout();
+                merged.Actions[definition.Id] = target;
+            }
+
+            target.Key = source.Key;
+        }
+
+        return NormalizeKeyMouseLayoutProfile(merged);
+    }
+
+    private void ApplyControllerLayoutProfile(ControllerLayoutProfile profile)
+    {
+        var normalized = NormalizeControllerLayoutProfile(profile);
+        var controllerType = ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase)
+            ? normalized.ControllerType!
             : KeybindCatalog.DefaultControllerType;
+
+        _controllerQuickWheelIndependent = normalized.QuickWheelIndependent;
+        OnPropertyChanged(nameof(ControllerQuickWheelIndependent));
+        _controllerPhotoModeIndependent = normalized.PhotoModeIndependent;
+        OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
 
         _selectedControllerType = controllerType;
         OnPropertyChanged(nameof(SelectedControllerType));
-
         RefreshControllerDependentChoices();
 
         _selectedHelper1 = HelperOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, controllerProfile.Keybind?.Helper1, StringComparison.Ordinal));
+            string.Equals(option.Label, normalized.Keybind.Helper1, StringComparison.Ordinal));
         OnPropertyChanged(nameof(SelectedHelper1));
 
         _selectedHelper2 = HelperOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, controllerProfile.Keybind?.Helper2, StringComparison.Ordinal));
+            string.Equals(option.Label, normalized.Keybind.Helper2, StringComparison.Ordinal));
         OnPropertyChanged(nameof(SelectedHelper2));
 
         RefreshControllerActionChoices();
         RefreshActionHelperChoices();
 
         _selectedPreset = PresetOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, controllerProfile.Keybind?.Preset, StringComparison.Ordinal))
+            string.Equals(option.Label, normalized.Keybind.Preset, StringComparison.Ordinal))
             ?? PresetOptions.FirstOrDefault();
         OnPropertyChanged(nameof(SelectedPreset));
 
-        ApplyControllerActionLayout(controllerProfile.Actions);
-        ApplyKeyMouseActionLayout(keyMouseProfile.Actions);
-
-        _controllerPhotoModeIndependent = controllerProfile.PhotoModeIndependent;
-        OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
-
-        _keyMousePhotoModeIndependent = keyMouseProfile.PhotoModeIndependent;
-        OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
-
-        _keyMouseFishingModeIndependent = keyMouseProfile.FishingModeIndependent;
-        OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
-
-        SetInputMode(!string.Equals(
-            layout.InputDevice,
-            KeybindCatalog.KeyMouseInputDeviceName,
-            StringComparison.Ordinal));
-    }
-
-    private void ApplyControllerActionLayout(IReadOnlyDictionary<string, ControllerActionLayout>? actions)
-    {
-        if (actions is null)
+        foreach (var row in _allControllerRows)
         {
-            return;
-        }
-
-        foreach (var pair in actions)
-        {
-            if (!_controllerRowsByName.TryGetValue(pair.Key, out var row) || pair.Value is null)
+            if (!TryGetProfileActionEntry(normalized.Actions, row.Definition, out ControllerActionLayout? saved)
+                || saved is null)
             {
                 continue;
             }
 
-            var button = row.ButtonOptions.FirstOrDefault(option =>
-                string.Equals(option.Label, pair.Value.Button, StringComparison.Ordinal));
-            if (button is not null)
+            if (saved.Helper is not null)
             {
-                row.SelectedButton = button;
+                var helper = row.HelperOptions.FirstOrDefault(option =>
+                    string.Equals(option.Label, saved.Helper, StringComparison.Ordinal));
+                if (helper is not null)
+                {
+                    row.SelectedHelper = helper;
+                }
             }
 
-            var helper = row.HelperOptions.FirstOrDefault(option =>
-                string.Equals(option.Label, pair.Value.Helper, StringComparison.Ordinal));
-            if (helper is not null)
+            if (saved.Button is not null)
             {
-                row.SelectedHelper = helper;
+                var button = row.ButtonOptions.FirstOrDefault(option =>
+                    string.Equals(option.Label, saved.Button, StringComparison.Ordinal));
+                if (button is not null)
+                {
+                    row.SelectedButton = button;
+                }
             }
         }
     }
 
-    private void ApplyKeyMouseActionLayout(IReadOnlyDictionary<string, KeyMouseActionLayout>? actions)
+    private void ApplyKeyMouseLayoutProfile(KeyMouseLayoutProfile profile)
     {
-        if (actions is null)
-        {
-            return;
-        }
+        var normalized = NormalizeKeyMouseLayoutProfile(profile);
 
-        foreach (var pair in actions)
+        _keyMouseQuickWheelIndependent = normalized.QuickWheelIndependent;
+        OnPropertyChanged(nameof(KeyMouseQuickWheelIndependent));
+        _keyMousePhotoModeIndependent = normalized.PhotoModeIndependent;
+        OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
+        _keyMouseFishingModeIndependent = normalized.FishingModeIndependent;
+        OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
+
+        foreach (var row in _allKeyMouseRows)
         {
-            if (!_keyMouseRowsByName.TryGetValue(pair.Key, out var row) || pair.Value is null)
+            if (!TryGetProfileActionEntry(normalized.Actions, row.Definition, out KeyMouseActionLayout? saved)
+                || string.IsNullOrEmpty(saved?.Key))
             {
                 continue;
             }
 
             var key = row.KeyOptions.FirstOrDefault(option =>
-                string.Equals(option.Label, pair.Value.Key, StringComparison.Ordinal));
+                string.Equals(option.Label, saved.Key, StringComparison.Ordinal))
+                ?? ResolveCustomKeyMouseOption(saved.Key);
             if (key is not null)
             {
+                row.EnsureKeyOption(key);
                 row.SelectedKey = key;
             }
         }
@@ -1042,22 +1608,19 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         try
         {
+            CacheCurrentActiveLayoutProfile();
+            var controllerProfile = NormalizeControllerLayoutProfile(_controllerProfileCache);
+            var keyMouseProfile = NormalizeKeyMouseLayoutProfile(_keyMouseProfileCache);
             var data = _session.Data.ToArray();
 
-            if (IsControllerMode)
-            {
-                SaveControllerValues(data);
-            }
-            else
-            {
-                SaveKeyMouseValues(data);
-            }
+            SaveControllerProfile(data, controllerProfile);
+            SaveKeyMouseProfile(data, keyMouseProfile);
 
             _saveService.Save(_session.FilePath, data);
             _session.ReplaceData(data);
-            SaveLayoutFile();
-
-            RunSynchronizing(LoadValuesFromSession);
+            _controllerProfileCache = CloneControllerLayoutProfile(controllerProfile);
+            _keyMouseProfileCache = CloneKeyMouseLayoutProfile(keyMouseProfile);
+            SaveLayoutFile(controllerProfile, keyMouseProfile);
 
             StatusText = "保存しました";
             UpdateSaveState();
@@ -1082,66 +1645,124 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
-    private void SaveControllerValues(byte[] data)
-    {
-        if (_session is null
-            || SelectedHelper1 is null
-            || SelectedHelper2 is null
-            || (_session.IsPresetSupported && SelectedPreset is null))
-        {
-            throw new InvalidOperationException("ゲームパッド設定に未入力の項目があります。");
-        }
-
-        if (_session.IsPresetSupported && _session.PresetOffset is not null)
-        {
-            data[_session.PresetOffset.Value] = checked((byte)SelectedPreset!.Value);
-        }
-
-        _saveService.WriteUInt32(data, _session.Helper1Offset, SelectedHelper1.MainValue);
-        _saveService.WriteUInt32(data, _session.Helper2Offset, SelectedHelper2.MainValue);
-
-        foreach (var row in _allControllerRows)
-        {
-            if (row.SelectedButton is null || row.SelectedHelper is null)
-            {
-                throw new InvalidOperationException($"{row.DisplayName} に未設定の項目があります。");
-            }
-
-            var state = row.UsesHelper
-                ? row.SelectedHelper.StateValue
-                : KeybindCatalog.ActionStateSingle;
-
-            foreach (var offset in _saveService.GetWritableControllerOffsets(_session, row.Definition))
-            {
-                _saveService.WriteUInt32(data, offset, row.SelectedButton.Value);
-                _saveService.WriteUInt32(data, offset + sizeof(uint), state);
-            }
-        }
-    }
-
-    private void SaveKeyMouseValues(byte[] data)
+    private void SaveControllerProfile(byte[] data, ControllerLayoutProfile profile)
     {
         if (_session is null)
         {
             throw new InvalidOperationException("設定ファイルが読み込まれていません。");
         }
 
-        foreach (var row in _allKeyMouseRows)
+        var controllerType = profile.ControllerType;
+        if (!ControllerTypes.Contains(controllerType, StringComparer.OrdinalIgnoreCase))
         {
-            if (row.SelectedKey is null)
+            throw new InvalidOperationException("ゲームパッド種類の値が不正です。");
+        }
+
+        var labels = KeybindCatalog.GetControllerDisplayMap(controllerType);
+        var labelToValue = labels.ToDictionary(pair => pair.Value, pair => pair.Key, StringComparer.Ordinal);
+        var helperLabelToMainValue = new Dictionary<string, uint>(StringComparer.Ordinal)
+        {
+            [labels[17u]] = 0x01u,
+            [labels[18u]] = 0x02u,
+            [labels[5u]] = 0x04u,
+            [labels[6u]] = 0x08u
+        };
+        var presetLabelToValue = KeybindCatalog.GetPresetOptions(controllerType)
+            .ToDictionary(option => option.Label, option => option.Value, StringComparer.Ordinal);
+
+        var helper1Label = profile.Keybind.Helper1;
+        var helper2Label = profile.Keybind.Helper2;
+        var presetLabel = profile.Keybind.Preset;
+        if (helper1Label is null || !helperLabelToMainValue.TryGetValue(helper1Label, out var helper1Value))
+        {
+            throw new InvalidOperationException("補助キー1の値が不正です。");
+        }
+
+        if (helper2Label is null || !helperLabelToMainValue.TryGetValue(helper2Label, out var helper2Value))
+        {
+            throw new InvalidOperationException("補助キー2の値が不正です。");
+        }
+
+        uint presetValue = 0x01u;
+        if (_session.IsPresetSupported
+            && (presetLabel is null || !presetLabelToValue.TryGetValue(presetLabel, out presetValue)))
+        {
+            throw new InvalidOperationException("確認/キャンセルの値が不正です。");
+        }
+
+        var helperDisplayToState = new Dictionary<string, uint>(StringComparer.Ordinal)
+        {
+            [KeybindCatalog.HelperNoneLabel] = KeybindCatalog.ActionStateSingle,
+            [helper1Label] = KeybindCatalog.ActionStateHelper1,
+            [helper2Label] = KeybindCatalog.ActionStateHelper2
+        };
+
+        if (_session.IsPresetSupported && _session.PresetOffset is not null)
+        {
+            data[_session.PresetOffset.Value] = checked((byte)presetValue);
+        }
+
+        _saveService.WriteUInt32(data, _session.Helper1Offset, helper1Value);
+        _saveService.WriteUInt32(data, _session.Helper2Offset, helper2Value);
+
+        foreach (var definition in KeybindCatalog.ControllerActions)
+        {
+            if (!profile.Actions.TryGetValue(definition.Id, out var saved)
+                || string.IsNullOrEmpty(saved.Button)
+                || !labelToValue.TryGetValue(saved.Button, out var value))
             {
-                throw new InvalidOperationException($"{row.DisplayName} に未設定の項目があります。");
+                throw new InvalidOperationException($"{definition.Name} の値が不正です。");
             }
 
-            foreach (var offset in _saveService.GetWritableKeyMouseOffsets(_session, row.Definition))
+            uint state;
+            if (definition.UsesHelper)
             {
-                _saveService.WriteUInt32(data, offset - sizeof(uint), row.SelectedKey.InputType);
-                _saveService.WriteUInt32(data, offset, row.SelectedKey.Value);
+                if (string.IsNullOrEmpty(saved.Helper)
+                    || !helperDisplayToState.TryGetValue(saved.Helper, out state))
+                {
+                    throw new InvalidOperationException($"{definition.Name} の補助キー設定が不正です。");
+                }
+            }
+            else
+            {
+                state = KeybindCatalog.ActionStateSingle;
+            }
+
+            foreach (var offset in _saveService.GetWritableControllerOffsets(_session, definition))
+            {
+                _saveService.WriteUInt32(data, offset, value);
+                _saveService.WriteUInt32(data, offset + sizeof(uint), state);
             }
         }
     }
 
-    private void SaveLayoutFile()
+    private void SaveKeyMouseProfile(byte[] data, KeyMouseLayoutProfile profile)
+    {
+        if (_session is null)
+        {
+            throw new InvalidOperationException("設定ファイルが読み込まれていません。");
+        }
+
+        foreach (var definition in KeybindCatalog.KeyMouseActions)
+        {
+            if (!profile.Actions.TryGetValue(definition.Id, out var saved)
+                || string.IsNullOrEmpty(saved.Key)
+                || !TryResolveKeyMouseOption(saved.Key, out var option))
+            {
+                throw new InvalidOperationException($"{definition.Name} のキーが不正です。");
+            }
+
+            foreach (var offset in _saveService.GetWritableKeyMouseOffsets(_session, definition))
+            {
+                _saveService.WriteUInt32(data, offset - sizeof(uint), option.InputType);
+                _saveService.WriteUInt32(data, offset, option.Value);
+            }
+        }
+    }
+
+    private void SaveLayoutFile(
+        ControllerLayoutProfile controllerProfile,
+        KeyMouseLayoutProfile keyMouseProfile)
     {
         var directory = Path.GetDirectoryName(_layoutFilePath);
         if (string.IsNullOrWhiteSpace(directory))
@@ -1153,41 +1774,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         var layout = new KeybindLayoutConfig
         {
-            Version = 4,
+            Version = 6,
             InputDevice = IsKeyMouseMode
                 ? KeybindCatalog.KeyMouseInputDeviceName
-                : SelectedControllerType,
-            ControllerProfile = new ControllerLayoutProfile
-            {
-                ControllerType = SelectedControllerType,
-                PhotoModeIndependent = ControllerPhotoModeIndependent,
-                Keybind = new ControllerKeybindProfile
-                {
-                    Helper1 = SelectedHelper1?.Label ?? string.Empty,
-                    Helper2 = SelectedHelper2?.Label ?? string.Empty,
-                    Preset = SelectedPreset?.Label ?? string.Empty
-                },
-                Actions = _allControllerRows.ToDictionary(
-                    row => row.Definition.Name,
-                    row => new ControllerActionLayout
-                    {
-                        Helper = row.SelectedHelper?.Label ?? string.Empty,
-                        Button = row.SelectedButton?.Label ?? string.Empty
-                    },
-                    StringComparer.Ordinal)
-            },
-            KeyMouseProfile = new KeyMouseLayoutProfile
-            {
-                PhotoModeIndependent = KeyMousePhotoModeIndependent,
-                FishingModeIndependent = KeyMouseFishingModeIndependent,
-                Actions = _allKeyMouseRows.ToDictionary(
-                    row => row.Definition.Name,
-                    row => new KeyMouseActionLayout
-                    {
-                        Key = row.SelectedKey?.Label ?? string.Empty
-                    },
-                    StringComparer.Ordinal)
-            }
+                : controllerProfile.ControllerType,
+            ControllerProfile = CloneControllerLayoutProfile(controllerProfile),
+            KeyMouseProfile = CloneKeyMouseLayoutProfile(keyMouseProfile)
         };
 
         var temporaryPath = $"{_layoutFilePath}.tmp";
@@ -1206,13 +1798,56 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    private bool HasBlankRequiredFields()
+    {
+        if (_session is null)
+        {
+            return true;
+        }
+
+        CacheCurrentActiveLayoutProfile();
+        return !IsControllerProfileComplete(_controllerProfileCache)
+            || !IsKeyMouseProfileComplete(_keyMouseProfileCache);
+    }
+
+    private bool IsControllerProfileComplete(ControllerLayoutProfile? profile)
+    {
+        if (profile is null
+            || string.IsNullOrWhiteSpace(profile.Keybind.Helper1)
+            || string.IsNullOrWhiteSpace(profile.Keybind.Helper2)
+            || string.IsNullOrWhiteSpace(profile.Keybind.Preset))
+        {
+            return false;
+        }
+
+        foreach (var definition in KeybindCatalog.ControllerActions)
+        {
+            if (!profile.Actions.TryGetValue(definition.Id, out var saved)
+                || string.IsNullOrWhiteSpace(saved.Button)
+                || (definition.UsesHelper && string.IsNullOrWhiteSpace(saved.Helper)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsKeyMouseProfileComplete(KeyMouseLayoutProfile? profile)
+    {
+        if (profile is null)
+        {
+            return false;
+        }
+
+        return KeybindCatalog.KeyMouseActions.All(definition =>
+            profile.Actions.TryGetValue(definition.Id, out var saved)
+            && !string.IsNullOrWhiteSpace(saved.Key));
+    }
+
     private void UpdateDetectedSelectionForPath(string filePath)
     {
         var matching = DetectedSaveFiles.FirstOrDefault(item => PathsEqual(item.FilePath, filePath));
-        if (matching is null)
-        {
-            return;
-        }
 
         _isUpdatingDetectedSelection = true;
         try
@@ -1285,29 +1920,114 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void UpdateSaveState()
     {
-        CanSave = _session is not null
-            && (IsControllerMode
-                ? IsControllerSaveComplete()
-                : _allKeyMouseRows.All(row => row.SelectedKey is not null));
+        CanSave = !HasBlankRequiredFields();
 
         SaveCommand.RaiseCanExecuteChanged();
         ResetCommand.RaiseCanExecuteChanged();
+        OpenSelectedFileLocationCommand.RaiseCanExecuteChanged();
     }
 
-    private bool IsControllerSaveComplete()
+    private void RegisterCustomKeyMouseOption(KeyMouseInputOption option)
     {
-        if (SelectedHelper1 is null || SelectedHelper2 is null)
+        if (!KeybindCatalog.KeyMouseInputOptions.Any(known =>
+                known.InputType == option.InputType && known.Value == option.Value))
+        {
+            _customKeyMouseOptionsByLabel[option.Label] = option;
+        }
+    }
+
+    private KeyMouseInputOption? ResolveCustomKeyMouseOption(string label)
+    {
+        return _customKeyMouseOptionsByLabel.TryGetValue(label, out var option)
+            ? option
+            : null;
+    }
+
+    private bool TryResolveKeyMouseOption(string label, out KeyMouseInputOption option)
+    {
+        var known = KeybindCatalog.KeyMouseInputOptions.FirstOrDefault(candidate =>
+            string.Equals(candidate.Label, label, StringComparison.Ordinal));
+        if (known is not null)
+        {
+            option = known;
+            return true;
+        }
+
+        var custom = ResolveCustomKeyMouseOption(label);
+        if (custom is not null)
+        {
+            option = custom;
+            return true;
+        }
+
+        option = null!;
+        return false;
+    }
+
+    private static bool TryGetProfileActionEntry<TActionLayout>(
+        IReadOnlyDictionary<string, TActionLayout>? actions,
+        IKeybindActionDefinition definition,
+        out TActionLayout? layout)
+        where TActionLayout : class
+    {
+        layout = null;
+        if (actions is null)
         {
             return false;
         }
 
-        if (_session?.IsPresetSupported == true && SelectedPreset is null)
+        if (actions.TryGetValue(definition.Id, out layout) && layout is not null)
         {
-            return false;
+            return true;
         }
 
-        return _allControllerRows.All(row => row.SelectedButton is not null
-            && (!row.UsesHelper || row.SelectedHelper is not null));
+        return actions.TryGetValue(KeybindCatalog.GetLegacyLayoutActionKey(definition), out layout)
+            && layout is not null;
+    }
+
+    private static ControllerLayoutProfile CloneControllerLayoutProfile(ControllerLayoutProfile? source)
+    {
+        source ??= new ControllerLayoutProfile();
+        return new ControllerLayoutProfile
+        {
+            ControllerType = source.ControllerType,
+            QuickWheelIndependent = source.QuickWheelIndependent,
+            PhotoModeIndependent = source.PhotoModeIndependent,
+            Keybind = new ControllerKeybindProfile
+            {
+                Helper1 = source.Keybind?.Helper1,
+                Helper2 = source.Keybind?.Helper2,
+                Preset = source.Keybind?.Preset
+            },
+            Actions = source.Actions?.ToDictionary(
+                pair => pair.Key,
+                pair => new ControllerActionLayout
+                {
+                    Helper = pair.Value?.Helper,
+                    Button = pair.Value?.Button
+                },
+                StringComparer.Ordinal)
+                ?? new Dictionary<string, ControllerActionLayout>(StringComparer.Ordinal)
+        };
+    }
+
+    private static KeyMouseLayoutProfile CloneKeyMouseLayoutProfile(KeyMouseLayoutProfile? source)
+    {
+        source ??= new KeyMouseLayoutProfile();
+        return new KeyMouseLayoutProfile
+        {
+            QuickWheelIndependent = source.QuickWheelIndependent,
+            PhotoModeIndependent = source.PhotoModeIndependent,
+            FishingModeIndependent = source.FishingModeIndependent,
+            Actions = source.Actions?.ToDictionary(
+                pair => pair.Key,
+                pair => new KeyMouseActionLayout
+                {
+                    Key = pair.Value?.Key
+                },
+                StringComparer.Ordinal)
+                ?? new Dictionary<string, KeyMouseActionLayout>(StringComparer.Ordinal)
+        };
     }
 
     private void RunSynchronizing(Action action)

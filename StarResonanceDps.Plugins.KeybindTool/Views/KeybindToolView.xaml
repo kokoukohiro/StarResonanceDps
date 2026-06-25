@@ -84,13 +84,24 @@
             <Setter Property="SnapsToDevicePixels" Value="True" />
         </Style>
 
+        <Style x:Key="Keybind.PathTextBox" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+
         <Style x:Key="Keybind.DataGrid" TargetType="{x:Type DataGrid}">
             <Setter Property="AutoGenerateColumns" Value="False" />
             <Setter Property="CanUserAddRows" Value="False" />
             <Setter Property="CanUserDeleteRows" Value="False" />
             <Setter Property="CanUserReorderColumns" Value="False" />
             <Setter Property="CanUserResizeRows" Value="False" />
-            <Setter Property="CanUserSortColumns" Value="False" />
             <Setter Property="HeadersVisibility" Value="Column" />
             <Setter Property="GridLinesVisibility" Value="Horizontal" />
             <Setter Property="RowHeaderWidth" Value="0" />
@@ -122,37 +133,76 @@
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
 
-        <Style x:Key="Keybind.TabItem" TargetType="{x:Type TabItem}">
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Padding" Value="14,8" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TabItem}">
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="Transparent"
-                                BorderThickness="0,0,0,2"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Root"
-                                        Property="BorderBrush"
-                                        Value="{DynamicResource Brush.TextPrimary}" />
-                                <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <DataTemplate x:Key="Keybind.ControllerActionGrid">
+            <DataGrid Style="{StaticResource Keybind.DataGrid}"
+                      CellStyle="{StaticResource Keybind.DataGridCell}"
+                      ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
+                      MaxHeight="440"
+                      ItemsSource="{Binding}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="アクション"
+                                        Binding="{Binding DisplayName}"
+                                        IsReadOnly="True"
+                                        Width="*" />
+                    <DataGridTemplateColumn Header="補助キー" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
+                                          MinWidth="110"
+                                          ItemsSource="{Binding HelperOptions}"
+                                          DisplayMemberPath="Label"
+                                          SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
+                                          IsEnabled="{Binding IsEditable}"
+                                          Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="ボタン" Width="140">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
+                                          MinWidth="110"
+                                          ItemsSource="{Binding ButtonOptions}"
+                                          DisplayMemberPath="Label"
+                                          SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
+                                          IsEnabled="{Binding IsEditable}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Keybind.KeyMouseActionGrid">
+            <DataGrid Style="{StaticResource Keybind.DataGrid}"
+                      CellStyle="{StaticResource Keybind.DataGridCell}"
+                      ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
+                      MaxHeight="440"
+                      ItemsSource="{Binding}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="アクション"
+                                        Binding="{Binding DisplayName}"
+                                        IsReadOnly="True"
+                                        Width="*" />
+                    <DataGridTextColumn Header="固定"
+                                        Binding="{Binding LControlPrefixDisplay}"
+                                        IsReadOnly="True"
+                                        Width="80" />
+                    <DataGridTemplateColumn Header="キー" Width="170">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
+                                          MinWidth="140"
+                                          ItemsSource="{Binding KeyOptions}"
+                                          DisplayMemberPath="Label"
+                                          SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
+                                          IsEnabled="{Binding IsEditable}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -173,39 +223,36 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Row="0"
-                                   Grid.ColumnSpan="3"
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
                                    Text="設定ファイルを選択"
                                    Style="{StaticResource Keybind.SectionTitle}" />
 
-                        <ComboBox Grid.Row="1"
-                                  Grid.Column="0"
+                        <ComboBox Grid.Row="1" Grid.Column="0"
                                   Margin="0,0,8,0"
                                   Style="{StaticResource Keybind.ComboBox}"
                                   ItemsSource="{Binding DetectedSaveFiles}"
                                   SelectedItem="{Binding SelectedDetectedSave, Mode=TwoWay}"
                                   DisplayMemberPath="DisplayName" />
-
-                        <Button Grid.Row="1"
-                                Grid.Column="1"
+                        <Button Grid.Row="1" Grid.Column="1"
                                 Margin="0,0,8,0"
                                 Style="{StaticResource Keybind.Button}"
                                 Command="{Binding RescanCommand}"
                                 Content="再スキャン" />
 
-                        <Button Grid.Row="1"
-                                Grid.Column="2"
+                        <TextBox Grid.Row="2" Grid.Column="0"
+                                 Margin="0,8,8,0"
+                                 Style="{StaticResource Keybind.PathTextBox}"
+                                 Text="{Binding SelectedSaveFilePath, Mode=OneWay}" />
+                        <Button Grid.Row="2" Grid.Column="1"
+                                Margin="0,8,8,0"
                                 Style="{StaticResource Keybind.Button}"
                                 Command="{Binding SelectFileCommand}"
                                 Content="手動選択" />
-
-                        <TextBlock Grid.Row="2"
-                                   Grid.ColumnSpan="3"
-                                   Margin="0,10,0,0"
-                                   Text="{Binding SelectedSaveFilePath}"
-                                   TextWrapping="Wrap"
-                                   Foreground="{DynamicResource Brush.TextMuted}"
-                                   FontSize="12" />
+                        <Button Grid.Row="2" Grid.Column="2"
+                                Margin="0,8,0,0"
+                                Style="{StaticResource Keybind.Button}"
+                                Command="{Binding OpenSelectedFileLocationCommand}"
+                                Content="場所を開く" />
                     </Grid>
                 </Border>
 
@@ -214,8 +261,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
                         <StackPanel>
                             <TextBlock Text="キー設定プリセット"
                                        Style="{StaticResource Keybind.SectionTitle}" />
@@ -224,12 +271,18 @@
                                        FontSize="12"
                                        TextWrapping="Wrap" />
                         </StackPanel>
-
                         <Button Grid.Column="1"
+                                Margin="8,0,0,0"
                                 VerticalAlignment="Center"
                                 Style="{StaticResource Keybind.Button}"
                                 Command="{Binding LoadLayoutCommand}"
                                 Content="読み込み" />
+                        <Button Grid.Column="2"
+                                Margin="8,0,0,0"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource Keybind.Button}"
+                                Command="{Binding OpenLayoutFileLocationCommand}"
+                                Content="場所を開く" />
                     </Grid>
                 </Border>
 
@@ -265,52 +318,32 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Row="0"
-                                   Grid.ColumnSpan="2"
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
                                    Text="補助キー設定"
                                    Style="{StaticResource Keybind.SectionTitle}" />
-
-                        <TextBlock Grid.Row="1"
-                                   Text="コントローラ"
+                        <TextBlock Grid.Row="1" Text="コントローラ"
                                    Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="1"
-                                  Grid.Column="1"
+                        <ComboBox Grid.Row="1" Grid.Column="1"
                                   Style="{StaticResource Keybind.ComboBox}"
                                   ItemsSource="{Binding ControllerTypes}"
                                   SelectedItem="{Binding SelectedControllerType, Mode=TwoWay}" />
-
-                        <TextBlock Grid.Row="2"
-                                   Margin="0,10,0,0"
-                                   Text="補助キー1"
+                        <TextBlock Grid.Row="2" Margin="0,10,0,0" Text="補助キー1"
                                    Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="2"
-                                  Grid.Column="1"
-                                  Margin="0,10,0,0"
+                        <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,10,0,0"
                                   Style="{StaticResource Keybind.ComboBox}"
                                   ItemsSource="{Binding HelperOptions}"
                                   DisplayMemberPath="Label"
                                   SelectedItem="{Binding SelectedHelper1, Mode=TwoWay}" />
-
-                        <TextBlock Grid.Row="3"
-                                   Margin="0,10,0,0"
-                                   Text="補助キー2"
+                        <TextBlock Grid.Row="3" Margin="0,10,0,0" Text="補助キー2"
                                    Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="3"
-                                  Grid.Column="1"
-                                  Margin="0,10,0,0"
+                        <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,10,0,0"
                                   Style="{StaticResource Keybind.ComboBox}"
                                   ItemsSource="{Binding HelperOptions}"
                                   DisplayMemberPath="Label"
                                   SelectedItem="{Binding SelectedHelper2, Mode=TwoWay}" />
-
-                        <TextBlock Grid.Row="4"
-                                   Margin="0,10,0,0"
-                                   Text="確認/キャンセル"
+                        <TextBlock Grid.Row="4" Margin="0,10,0,0" Text="確認/キャンセル"
                                    Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="4"
-                                  Grid.Column="1"
-                                  Margin="0,10,0,0"
+                        <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,10,0,0"
                                   Style="{StaticResource Keybind.ComboBox}"
                                   ItemsSource="{Binding PresetOptions}"
                                   DisplayMemberPath="Label"
@@ -320,260 +353,84 @@
                 </Border>
 
                 <Border Style="{StaticResource Keybind.Section}">
-                    <TabControl>
-                        <TabItem Header="通常"
-                                 Style="{StaticResource Keybind.TabItem}">
-                            <Grid Margin="0,10,0,0">
-                                <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                          Height="440"
-                                          ItemsSource="{Binding ControllerMainActions}"
-                                          Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="アクション"
-                                                            Binding="{Binding DisplayName}"
-                                                            IsReadOnly="True"
-                                                            Width="*" />
-                                        <DataGridTemplateColumn Header="補助キー"
-                                                                Width="140">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                              MinWidth="110"
-                                                              ItemsSource="{Binding HelperOptions}"
-                                                              DisplayMemberPath="Label"
-                                                              SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
-                                                              IsEnabled="{Binding IsEditable}"
-                                                              Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                        <DataGridTemplateColumn Header="ボタン"
-                                                                Width="140">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                              MinWidth="110"
-                                                              ItemsSource="{Binding ButtonOptions}"
-                                                              DisplayMemberPath="Label"
-                                                              SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
-                                                              IsEnabled="{Binding IsEditable}" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
+                    <StackPanel>
+                        <TextBlock Text="通常キー設定" Style="{StaticResource Keybind.SectionTitle}" />
+                        <Grid>
+                            <ContentControl Content="{Binding ControllerMainActions}"
+                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
+                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <ContentControl Content="{Binding KeyMouseMainActions}"
+                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
+                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
-                                <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                          Height="440"
-                                          ItemsSource="{Binding KeyMouseMainActions}"
-                                          Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="アクション"
-                                                            Binding="{Binding DisplayName}"
-                                                            IsReadOnly="True"
-                                                            Width="*" />
-                                        <DataGridTextColumn Header="固定"
-                                                            Binding="{Binding LControlPrefixDisplay}"
-                                                            IsReadOnly="True"
-                                                            Width="80" />
-                                        <DataGridTemplateColumn Header="キー"
-                                                                Width="170">
-                                            <DataGridTemplateColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                              MinWidth="140"
-                                                              ItemsSource="{Binding KeyOptions}"
-                                                              DisplayMemberPath="Label"
-                                                              SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
-                                                              IsEnabled="{Binding IsEditable}" />
-                                                </DataTemplate>
-                                            </DataGridTemplateColumn.CellTemplate>
-                                        </DataGridTemplateColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </Grid>
-                        </TabItem>
+                <Border Style="{StaticResource Keybind.Section}">
+                    <StackPanel>
+                        <TextBlock Text="クイックホイールのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
+                        <CheckBox Content="クイックホイールのアクションを単独で設定する"
+                                  Margin="0,0,0,8"
+                                  Foreground="{DynamicResource Brush.TextPrimary}"
+                                  IsChecked="{Binding ControllerQuickWheelIndependent, Mode=TwoWay}"
+                                  Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <CheckBox Content="クイックホイールのアクションを単独で設定する"
+                                  Margin="0,0,0,8"
+                                  Foreground="{DynamicResource Brush.TextPrimary}"
+                                  IsChecked="{Binding KeyMouseQuickWheelIndependent, Mode=TwoWay}"
+                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <Grid>
+                            <ContentControl Content="{Binding ControllerQuickWheelActions}"
+                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
+                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <ContentControl Content="{Binding KeyMouseQuickWheelActions}"
+                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
+                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
-                        <TabItem Header="撮影モード"
-                                 Style="{StaticResource Keybind.TabItem}">
-                            <StackPanel Margin="0,10,0,0">
-                                <CheckBox Content="撮影モードのアクションを単独で設定する"
-                                          Margin="0,0,0,8"
-                                          Foreground="{DynamicResource Brush.TextPrimary}"
-                                          IsChecked="{Binding ControllerPhotoModeIndependent, Mode=TwoWay}"
-                                          Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <Border Style="{StaticResource Keybind.Section}">
+                    <StackPanel>
+                        <TextBlock Text="撮影モードのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
+                        <CheckBox Content="撮影モードのアクションを単独で設定する"
+                                  Margin="0,0,0,8"
+                                  Foreground="{DynamicResource Brush.TextPrimary}"
+                                  IsChecked="{Binding ControllerPhotoModeIndependent, Mode=TwoWay}"
+                                  Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <CheckBox Content="撮影モードのアクションを単独で設定する"
+                                  Margin="0,0,0,8"
+                                  Foreground="{DynamicResource Brush.TextPrimary}"
+                                  IsChecked="{Binding KeyMousePhotoModeIndependent, Mode=TwoWay}"
+                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <Grid>
+                            <ContentControl Content="{Binding ControllerPhotoActions}"
+                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
+                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <ContentControl Content="{Binding KeyMousePhotoActions}"
+                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
+                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
 
-                                <CheckBox Content="撮影モードのアクションを単独で設定する"
-                                          Margin="0,0,0,8"
-                                          Foreground="{DynamicResource Brush.TextPrimary}"
-                                          IsChecked="{Binding KeyMousePhotoModeIndependent, Mode=TwoWay}"
-                                          Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                                <Grid>
-                                    <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                              Height="440"
-                                              ItemsSource="{Binding ControllerPhotoActions}"
-                                              Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="アクション"
-                                                                Binding="{Binding DisplayName}"
-                                                                IsReadOnly="True"
-                                                                Width="*" />
-                                            <DataGridTemplateColumn Header="補助キー"
-                                                                    Width="140">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="110"
-                                                                  ItemsSource="{Binding HelperOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}"
-                                                                  Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                            <DataGridTemplateColumn Header="ボタン"
-                                                                    Width="140">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="110"
-                                                                  ItemsSource="{Binding ButtonOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-
-                                    <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                              Height="440"
-                                              ItemsSource="{Binding KeyMousePhotoActions}"
-                                              Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="アクション"
-                                                                Binding="{Binding DisplayName}"
-                                                                IsReadOnly="True"
-                                                                Width="*" />
-                                            <DataGridTextColumn Header="固定"
-                                                                Binding="{Binding LControlPrefixDisplay}"
-                                                                IsReadOnly="True"
-                                                                Width="80" />
-                                            <DataGridTemplateColumn Header="キー"
-                                                                    Width="170">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="140"
-                                                                  ItemsSource="{Binding KeyOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Grid>
-                            </StackPanel>
-                        </TabItem>
-
-                        <TabItem Header="釣りモード"
-                                 Style="{StaticResource Keybind.TabItem}">
-                            <StackPanel Margin="0,10,0,0">
-                                <CheckBox Content="釣りモードのアクションを単独で設定する"
-                                          Margin="0,0,0,8"
-                                          Foreground="{DynamicResource Brush.TextPrimary}"
-                                          IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}"
-                                          Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                                <Grid>
-                                    <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                              Height="440"
-                                              ItemsSource="{Binding ControllerFishingActions}"
-                                              Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="アクション"
-                                                                Binding="{Binding DisplayName}"
-                                                                IsReadOnly="True"
-                                                                Width="*" />
-                                            <DataGridTemplateColumn Header="補助キー"
-                                                                    Width="140">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="110"
-                                                                  ItemsSource="{Binding HelperOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}"
-                                                                  Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                            <DataGridTemplateColumn Header="ボタン"
-                                                                    Width="140">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="110"
-                                                                  ItemsSource="{Binding ButtonOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-
-                                    <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                                          CellStyle="{StaticResource Keybind.DataGridCell}"
-                                          ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                                              Height="440"
-                                              ItemsSource="{Binding KeyMouseFishingActions}"
-                                              Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="アクション"
-                                                                Binding="{Binding DisplayName}"
-                                                                IsReadOnly="True"
-                                                                Width="*" />
-                                            <DataGridTextColumn Header="固定"
-                                                                Binding="{Binding LControlPrefixDisplay}"
-                                                                IsReadOnly="True"
-                                                                Width="80" />
-                                            <DataGridTemplateColumn Header="キー"
-                                                                    Width="170">
-                                                <DataGridTemplateColumn.CellTemplate>
-                                                    <DataTemplate>
-                                                        <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                                                  MinWidth="140"
-                                                                  ItemsSource="{Binding KeyOptions}"
-                                                                  DisplayMemberPath="Label"
-                                                                  SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding IsEditable}" />
-                                                    </DataTemplate>
-                                                </DataGridTemplateColumn.CellTemplate>
-                                            </DataGridTemplateColumn>
-                                        </DataGrid.Columns>
-                                    </DataGrid>
-                                </Grid>
-                            </StackPanel>
-                        </TabItem>
-                    </TabControl>
+                <Border Style="{StaticResource Keybind.Section}">
+                    <StackPanel>
+                        <TextBlock Text="釣りモードのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
+                        <CheckBox Content="釣りモードのアクションを単独で設定する"
+                                  Margin="0,0,0,8"
+                                  Foreground="{DynamicResource Brush.TextPrimary}"
+                                  IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}"
+                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <Grid>
+                            <ContentControl Content="{Binding ControllerFishingActions}"
+                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
+                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <ContentControl Content="{Binding KeyMouseFishingActions}"
+                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
+                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </Grid>
+                    </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource Keybind.Section}">
@@ -583,20 +440,15 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-
                         <TextBlock VerticalAlignment="Center"
                                    Text="{Binding StatusText}"
                                    Foreground="{DynamicResource Brush.TextSecondary}"
                                    TextWrapping="Wrap" />
-
-                        <Button Grid.Column="1"
-                                Margin="8,0,0,0"
+                        <Button Grid.Column="1" Margin="8,0,0,0"
                                 Style="{StaticResource Keybind.Button}"
                                 Command="{Binding ResetCommand}"
                                 Content="リセット" />
-
-                        <Button Grid.Column="2"
-                                Margin="8,0,0,0"
+                        <Button Grid.Column="2" Margin="8,0,0,0"
                                 Style="{StaticResource Keybind.PrimaryButton}"
                                 Command="{Binding SaveCommand}"
                                 IsEnabled="{Binding CanSave}"
