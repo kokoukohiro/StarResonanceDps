@@ -19,12 +19,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private readonly IPluginContext _context;
     private readonly PluginLocalizer _texts;
-    private readonly BpsrKeybindSaveService _saveService = new();
+    private readonly BpsrKeybindSaveService _saveService;
     private readonly string _layoutFilePath;
     private readonly IReadOnlyList<string> _legacyLayoutFilePaths;
     private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsById;
     private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsById;
-    private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByLabel = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByStorageKey = new(StringComparer.Ordinal);
     private readonly IReadOnlyList<ControllerActionRowViewModel> _allControllerRows;
     private readonly IReadOnlyList<KeyMouseActionRowViewModel> _allKeyMouseRows;
 
@@ -58,15 +58,16 @@ internal sealed class KeybindToolViewModel : ObservableObject
             typeof(KeybindToolViewModel).Assembly,
             "StarResonanceDps.Plugins.KeybindTool.Properties.Resources");
         _texts.CultureChanged += Texts_CultureChanged;
+        _saveService = new BpsrKeybindSaveService(_texts);
 
-        // プリセットのファイル名はこのプラグイン自身が決める。
-        // 実際の保存先はホスト共通ストアが runtime\Plugins 直下へ固定する。
+        // The plugin owns its preset filename.
+        // The host settings store fixes the actual location under runtime\\Plugins.
         _layoutFilePath = _context.Settings.GetFilePath(KeybindCatalog.ButtonLayoutFileName);
         _legacyLayoutFilePaths = new[]
         {
-            // 直前の保存仕様: 実行ファイル直下。
+            // Previous storage location: the executable directory.
             Path.Combine(AppContext.BaseDirectory, KeybindCatalog.ButtonLayoutFileName),
-            // 旧プラグインデータ仕様: Data\PluginData\{PluginId}\ 配下。
+            // Previous plugin-data location: Data\\PluginData\\{PluginId}.
             Path.Combine(
                 AppContext.BaseDirectory,
                 "Data",
@@ -443,13 +444,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
                 OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
             }
-
-            MigrateLegacyLayoutFileIfNeeded(layoutFilePath, layout);
         }
         catch (Exception)
         {
-            // 起動時は単独設定状態だけを補助的に復元する。
-            // 壊れた既存JSONは、通常の読み込み操作で明示的に通知する。
+            // At startup, restore only the independent-mode flags as a convenience.
+            // A malformed layout is reported explicitly through the normal load command.
         }
     }
 
@@ -556,10 +555,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             if (selected is not null && options.All(option => option.Value != selected.Value))
             {
-                var label = KeybindCatalog.GetControllerDisplayMap(SelectedControllerType)
-                    .TryGetValue(selected.Value, out var currentLabel)
-                    ? currentLabel
-                    : selected.Label;
+                var label = KeybindCatalog.GetControllerInputDisplayLabel(
+                    SelectedControllerType,
+                    selected.Value,
+                    Texts);
                 options.Add(KeybindCatalog.CreateControllerInputOption(
                     SelectedControllerType,
                     selected.Value,
@@ -614,7 +613,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         foreach (var row in _allKeyMouseRows)
         {
             var selected = row.SelectedKey;
-            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition).ToList();
+            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition, Texts).ToList();
 
             if (selected is not null
                 && options.All(option => option.InputType != selected.InputType || option.Value != selected.Value))
@@ -945,7 +944,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            _context.Logger.Warning($"設定ファイルの検索中に一部のフォルダを読み込めませんでした。{exception.Message}");
+            _context.Logger.Warning($"Some folders could not be read while scanning settings files. {exception.Message}");
         }
 
         return result
@@ -1051,7 +1050,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 _session = session;
                 _controllerProfileCache = null;
                 _keyMouseProfileCache = null;
-                _customKeyMouseOptionsByLabel.Clear();
+                _customKeyMouseOptionsByStorageKey.Clear();
                 SelectedSaveFilePath = session.FilePath;
                 IsPresetSupported = session.IsPresetSupported;
                 OnPropertyChanged(nameof(HasSelectedSaveFile));
@@ -1070,7 +1069,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            _context.Logger.Error("キーバインド設定ファイルの読み込みに失敗しました。", exception);
+            _context.Logger.Error("Failed to load the keybind settings file.", exception);
 
             if (_session is null)
             {
@@ -1161,15 +1160,17 @@ internal sealed class KeybindToolViewModel : ObservableObject
         var option = row.ButtonOptions.FirstOrDefault(candidate => candidate.Value == value);
         if (option is null)
         {
-            var label = KeybindCatalog.GetControllerDisplayMap(SelectedControllerType)
-                .TryGetValue(value, out var knownLabel)
-                ? knownLabel
-                : Texts.Format("Keybind.Value.UnknownControllerInput", value);
+            var label = KeybindCatalog.GetControllerInputDisplayLabel(
+                SelectedControllerType,
+                value,
+                Texts);
+
             option = KeybindCatalog.CreateControllerInputOption(
                 SelectedControllerType,
                 value,
                 label,
                 Texts);
+
             row.EnsureButtonOption(option);
         }
 
@@ -1233,7 +1234,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         RunSynchronizing(() =>
         {
-            _customKeyMouseOptionsByLabel.Clear();
+            _customKeyMouseOptionsByStorageKey.Clear();
             LoadValuesFromSession();
             InitializeLayoutProfileCacheFromUi();
         });
@@ -1256,7 +1257,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
         try
         {
             var layout = ReadLayoutFile(layoutFilePath);
-            MigrateLegacyLayoutFileIfNeeded(layoutFilePath, layout);
 
             RunSynchronizing(() =>
             {
@@ -1268,6 +1268,13 @@ internal sealed class KeybindToolViewModel : ObservableObject
             });
             CacheCurrentActiveLayoutProfile();
 
+            if (!PathsEqual(layoutFilePath, _layoutFilePath))
+            {
+                SaveLayoutFile(
+                    NormalizeControllerLayoutProfile(_controllerProfileCache),
+                    NormalizeKeyMouseLayoutProfile(_keyMouseProfileCache));
+            }
+
             SetStatus("Keybind.Status.LayoutLoaded", Path.GetFileName(_layoutFilePath));
             UpdateSaveState();
 
@@ -1277,7 +1284,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            _context.Logger.Error("キー設定プリセットの読み込みに失敗しました。", exception);
+            _context.Logger.Error("Failed to load the key settings preset.", exception);
             SetStatus("Keybind.Status.LayoutLoadFailed");
             UpdateSaveState();
 
@@ -1310,25 +1317,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
             ?? throw new InvalidDataException(Texts["Keybind.Error.InvalidLayoutFile"]);
     }
 
-    private void MigrateLegacyLayoutFileIfNeeded(
-        string sourcePath,
-        KeybindLayoutConfig layout)
-    {
-        if (PathsEqual(sourcePath, _layoutFilePath))
-        {
-            return;
-        }
-
-        try
-        {
-            _context.Settings.Save(KeybindCatalog.ButtonLayoutFileName, layout);
-            File.Delete(sourcePath);
-        }
-        catch (Exception exception)
-        {
-            _context.Logger.Warning($"旧キー設定プリセットの移行に失敗しました。{exception.Message}");
-        }
-    }
 
     private void RemoveLegacyLayoutFiles()
     {
@@ -1343,7 +1331,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             }
             catch (Exception exception)
             {
-                _context.Logger.Warning($"旧キー設定プリセットの削除に失敗しました。{exception.Message}");
+                _context.Logger.Warning($"Failed to remove a previous key settings preset. {exception.Message}");
             }
         }
     }
@@ -1406,16 +1394,26 @@ internal sealed class KeybindToolViewModel : ObservableObject
             PhotoModeIndependent = ControllerPhotoModeIndependent,
             Keybind = new ControllerKeybindProfile
             {
-                Helper1 = SelectedHelper1?.Label,
-                Helper2 = SelectedHelper2?.Label,
-                Preset = SelectedPreset?.Label
+                Helper1 = SelectedHelper1 is null
+                    ? null
+                    : KeybindCatalog.GetHelperBindingStorageKey(SelectedHelper1.MainValue),
+                Helper2 = SelectedHelper2 is null
+                    ? null
+                    : KeybindCatalog.GetHelperBindingStorageKey(SelectedHelper2.MainValue),
+                Preset = SelectedPreset is null
+                    ? null
+                    : KeybindCatalog.GetPresetStorageKey(SelectedPreset.Value)
             },
             Actions = _allControllerRows.ToDictionary(
                 row => row.Definition.Id,
                 row => new ControllerActionLayout
                 {
-                    Helper = row.SelectedHelper?.Label,
-                    Button = row.SelectedButton?.Label
+                    Helper = row.SelectedHelper is null
+                        ? null
+                        : KeybindCatalog.GetActionHelperStorageKey(row.SelectedHelper.StateValue),
+                    Button = row.SelectedButton is null
+                        ? null
+                        : KeybindCatalog.GetControllerInputStorageKey(row.SelectedButton.Value)
                 },
                 StringComparer.Ordinal)
         };
@@ -1432,7 +1430,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 row => row.Definition.Id,
                 row => new KeyMouseActionLayout
                 {
-                    Key = row.SelectedKey?.Label
+                    Key = row.SelectedKey is null
+                        ? null
+                        : KeybindCatalog.GetKeyMouseInputStorageKey(
+                            row.SelectedKey.InputType,
+                            row.SelectedKey.Value)
                 },
                 StringComparer.Ordinal)
         };
@@ -1566,17 +1568,17 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         if (overlay.Keybind is not null)
         {
-            if (overlay.Keybind.Helper1 is not null)
+            if (KeybindCatalog.TryGetHelperBindingMainValue(overlay.Keybind.Helper1, out _))
             {
                 merged.Keybind.Helper1 = overlay.Keybind.Helper1;
             }
 
-            if (overlay.Keybind.Helper2 is not null)
+            if (KeybindCatalog.TryGetHelperBindingMainValue(overlay.Keybind.Helper2, out _))
             {
                 merged.Keybind.Helper2 = overlay.Keybind.Helper2;
             }
 
-            if (overlay.Keybind.Preset is not null)
+            if (KeybindCatalog.TryGetPresetValue(overlay.Keybind.Preset, out _))
             {
                 merged.Keybind.Preset = overlay.Keybind.Preset;
             }
@@ -1596,12 +1598,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 merged.Actions[definition.Id] = target;
             }
 
-            if (source.Button is not null)
+            if (KeybindCatalog.TryGetControllerInputValue(source.Button, out _))
             {
                 target.Button = source.Button;
             }
 
-            if (source.Helper is not null)
+            if (KeybindCatalog.TryGetActionHelperState(source.Helper, out _))
             {
                 target.Helper = source.Helper;
             }
@@ -1633,7 +1635,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 merged.Actions[definition.Id] = target;
             }
 
-            target.Key = source.Key;
+            if (KeybindCatalog.TryGetKeyMouseInputValue(source.Key, out _, out _))
+            {
+                target.Key = source.Key;
+            }
         }
 
         return NormalizeKeyMouseLayoutProfile(merged);
@@ -1655,20 +1660,28 @@ internal sealed class KeybindToolViewModel : ObservableObject
         OnPropertyChanged(nameof(SelectedControllerType));
         RefreshControllerDependentChoices();
 
-        _selectedHelper1 = HelperOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, normalized.Keybind.Helper1, StringComparison.Ordinal));
+        _selectedHelper1 = KeybindCatalog.TryGetHelperBindingMainValue(
+                normalized.Keybind.Helper1,
+                out var helper1MainValue)
+            ? FindByMainValue(HelperOptions, helper1MainValue)
+            : null;
         OnPropertyChanged(nameof(SelectedHelper1));
 
-        _selectedHelper2 = HelperOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, normalized.Keybind.Helper2, StringComparison.Ordinal));
+        _selectedHelper2 = KeybindCatalog.TryGetHelperBindingMainValue(
+                normalized.Keybind.Helper2,
+                out var helper2MainValue)
+            ? FindByMainValue(HelperOptions, helper2MainValue)
+            : null;
         OnPropertyChanged(nameof(SelectedHelper2));
 
         RefreshControllerActionChoices();
         RefreshActionHelperChoices();
 
-        _selectedPreset = PresetOptions.FirstOrDefault(option =>
-            string.Equals(option.Label, normalized.Keybind.Preset, StringComparison.Ordinal))
-            ?? PresetOptions.FirstOrDefault();
+        _selectedPreset = KeybindCatalog.TryGetPresetValue(
+                normalized.Keybind.Preset,
+                out var presetValue)
+            ? FindByValue(PresetOptions, presetValue)
+            : PresetOptions.FirstOrDefault();
         OnPropertyChanged(nameof(SelectedPreset));
 
         foreach (var row in _allControllerRows)
@@ -1679,24 +1692,29 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 continue;
             }
 
-            if (saved.Helper is not null)
+            if (KeybindCatalog.TryGetActionHelperState(saved.Helper, out var helperState))
             {
-                var helper = row.HelperOptions.FirstOrDefault(option =>
-                    string.Equals(option.Label, saved.Helper, StringComparison.Ordinal));
-                if (helper is not null)
-                {
-                    row.SelectedHelper = helper;
-                }
+                row.SelectHelperState(helperState);
             }
 
-            if (saved.Button is not null)
+            if (KeybindCatalog.TryGetControllerInputValue(saved.Button, out var buttonValue))
             {
-                var button = row.ButtonOptions.FirstOrDefault(option =>
-                    string.Equals(option.Label, saved.Button, StringComparison.Ordinal));
-                if (button is not null)
+                var button = row.ButtonOptions.FirstOrDefault(option => option.Value == buttonValue);
+                if (button is null)
                 {
-                    row.SelectedButton = button;
+                    var label = KeybindCatalog.GetControllerInputDisplayLabel(
+                        SelectedControllerType,
+                        buttonValue,
+                        Texts);
+                    button = KeybindCatalog.CreateControllerInputOption(
+                        SelectedControllerType,
+                        buttonValue,
+                        label,
+                        Texts);
+                    row.EnsureButtonOption(button);
                 }
+
+                row.SelectedButton = button;
             }
         }
     }
@@ -1720,14 +1738,28 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 continue;
             }
 
-            var key = row.KeyOptions.FirstOrDefault(option =>
-                string.Equals(option.Label, saved.Key, StringComparison.Ordinal))
-                ?? ResolveCustomKeyMouseOption(saved.Key);
-            if (key is not null)
+            if (!KeybindCatalog.TryGetKeyMouseInputValue(
+                    saved.Key,
+                    out var inputType,
+                    out var inputValue))
             {
-                row.EnsureKeyOption(key);
-                row.SelectedKey = key;
+                continue;
             }
+
+            var key = row.KeyOptions.FirstOrDefault(option =>
+                    option.InputType == inputType && option.Value == inputValue)
+                ?? ResolveCustomKeyMouseOption(saved.Key);
+            if (key is null)
+            {
+                key = KeybindCatalog.CreateKeyMouseInputOption(
+                    inputType,
+                    inputValue,
+                    Texts.Format("Keybind.Value.UnknownKeyMouseInput", inputType, inputValue));
+                RegisterCustomKeyMouseOption(key);
+            }
+
+            row.EnsureKeyOption(key);
+            row.SelectedKey = key;
         }
     }
 
@@ -1764,7 +1796,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            _context.Logger.Error("キーバインド設定の保存に失敗しました。", exception);
+            _context.Logger.Error("Failed to save keybind settings.", exception);
             SetStatus("Keybind.Status.SaveFailed");
             UpdateSaveState();
 
@@ -1778,53 +1810,31 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         if (_session is null)
         {
-            throw new InvalidOperationException("設定ファイルが読み込まれていません。");
+            throw new InvalidOperationException(Texts["Keybind.Error.SaveSessionNotLoaded"]);
         }
 
         var controllerType = profile.ControllerType;
         if (!ControllerTypes.Contains(controllerType, StringComparer.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("ゲームパッド種類の値が不正です。");
+            throw new InvalidOperationException(Texts["Keybind.Error.InvalidControllerType"]);
         }
 
-        var labels = KeybindCatalog.GetControllerDisplayMap(controllerType);
-        var labelToValue = labels.ToDictionary(pair => pair.Value, pair => pair.Key, StringComparer.Ordinal);
-        var helperLabelToMainValue = new Dictionary<string, uint>(StringComparer.Ordinal)
+        if (!KeybindCatalog.TryGetHelperBindingMainValue(profile.Keybind.Helper1, out var helper1Value))
         {
-            [labels[17u]] = 0x01u,
-            [labels[18u]] = 0x02u,
-            [labels[5u]] = 0x04u,
-            [labels[6u]] = 0x08u
-        };
-        var presetLabelToValue = KeybindCatalog.GetPresetOptions(controllerType, Texts)
-            .ToDictionary(option => option.Label, option => option.Value, StringComparer.Ordinal);
-
-        var helper1Label = profile.Keybind.Helper1;
-        var helper2Label = profile.Keybind.Helper2;
-        var presetLabel = profile.Keybind.Preset;
-        if (helper1Label is null || !helperLabelToMainValue.TryGetValue(helper1Label, out var helper1Value))
-        {
-            throw new InvalidOperationException("補助キー1の値が不正です。");
+            throw new InvalidOperationException(Texts["Keybind.Error.InvalidHelper1"]);
         }
 
-        if (helper2Label is null || !helperLabelToMainValue.TryGetValue(helper2Label, out var helper2Value))
+        if (!KeybindCatalog.TryGetHelperBindingMainValue(profile.Keybind.Helper2, out var helper2Value))
         {
-            throw new InvalidOperationException("補助キー2の値が不正です。");
+            throw new InvalidOperationException(Texts["Keybind.Error.InvalidHelper2"]);
         }
 
         uint presetValue = 0x01u;
         if (_session.IsPresetSupported
-            && (presetLabel is null || !presetLabelToValue.TryGetValue(presetLabel, out presetValue)))
+            && !KeybindCatalog.TryGetPresetValue(profile.Keybind.Preset, out presetValue))
         {
-            throw new InvalidOperationException("確認/キャンセルの値が不正です。");
+            throw new InvalidOperationException(Texts["Keybind.Error.InvalidPreset"]);
         }
-
-        var helperDisplayToState = new Dictionary<string, uint>(StringComparer.Ordinal)
-        {
-            [KeybindCatalog.HelperNoneLabel] = KeybindCatalog.ActionStateSingle,
-            [helper1Label] = KeybindCatalog.ActionStateHelper1,
-            [helper2Label] = KeybindCatalog.ActionStateHelper2
-        };
 
         if (_session.IsPresetSupported && _session.PresetOffset is not null)
         {
@@ -1837,19 +1847,21 @@ internal sealed class KeybindToolViewModel : ObservableObject
         foreach (var definition in KeybindCatalog.ControllerActions)
         {
             if (!profile.Actions.TryGetValue(definition.Id, out var saved)
-                || string.IsNullOrEmpty(saved.Button)
-                || !labelToValue.TryGetValue(saved.Button, out var value))
+                || !KeybindCatalog.TryGetControllerInputValue(saved.Button, out var value))
             {
-                throw new InvalidOperationException($"{definition.Name} の値が不正です。");
+                throw new InvalidOperationException(Texts.Format(
+                    "Keybind.Error.InvalidActionValue",
+                    Texts[KeybindCatalog.GetActionLocalizationKey(definition)]));
             }
 
             uint state;
             if (definition.UsesHelper)
             {
-                if (string.IsNullOrEmpty(saved.Helper)
-                    || !helperDisplayToState.TryGetValue(saved.Helper, out state))
+                if (!KeybindCatalog.TryGetActionHelperState(saved.Helper, out state))
                 {
-                    throw new InvalidOperationException($"{definition.Name} の補助キー設定が不正です。");
+                    throw new InvalidOperationException(Texts.Format(
+                        "Keybind.Error.InvalidActionHelper",
+                        Texts[KeybindCatalog.GetActionLocalizationKey(definition)]));
                 }
             }
             else
@@ -1869,7 +1881,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         if (_session is null)
         {
-            throw new InvalidOperationException("設定ファイルが読み込まれていません。");
+            throw new InvalidOperationException(Texts["Keybind.Error.SaveSessionNotLoaded"]);
         }
 
         foreach (var definition in KeybindCatalog.KeyMouseActions)
@@ -1878,7 +1890,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 || string.IsNullOrEmpty(saved.Key)
                 || !TryResolveKeyMouseOption(saved.Key, out var option))
             {
-                throw new InvalidOperationException($"{definition.Name} のキーが不正です。");
+                throw new InvalidOperationException(Texts.Format(
+                    "Keybind.Error.InvalidActionKey",
+                    Texts[KeybindCatalog.GetActionLocalizationKey(definition)]));
             }
 
             foreach (var offset in _saveService.GetWritableKeyMouseOffsets(_session, definition))
@@ -1895,10 +1909,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         var layout = new KeybindLayoutConfig
         {
-            Version = 6,
+            Version = 7,
             InputDevice = IsKeyMouseMode
-                ? KeybindCatalog.KeyMouseInputDeviceName
-                : controllerProfile.ControllerType,
+                ? KeybindCatalog.InputDeviceKeyMouse
+                : KeybindCatalog.InputDeviceController,
             ControllerProfile = CloneControllerLayoutProfile(controllerProfile),
             KeyMouseProfile = CloneKeyMouseLayoutProfile(keyMouseProfile)
         };
@@ -2041,28 +2055,37 @@ internal sealed class KeybindToolViewModel : ObservableObject
         if (!KeybindCatalog.KeyMouseInputOptions.Any(known =>
                 known.InputType == option.InputType && known.Value == option.Value))
         {
-            _customKeyMouseOptionsByLabel[option.Label] = option;
+            _customKeyMouseOptionsByStorageKey[
+                KeybindCatalog.GetKeyMouseInputStorageKey(option.InputType, option.Value)] = option;
         }
     }
 
-    private KeyMouseInputOption? ResolveCustomKeyMouseOption(string label)
+    private KeyMouseInputOption? ResolveCustomKeyMouseOption(string storageKey)
     {
-        return _customKeyMouseOptionsByLabel.TryGetValue(label, out var option)
+        return _customKeyMouseOptionsByStorageKey.TryGetValue(storageKey, out var option)
             ? option
             : null;
     }
 
-    private bool TryResolveKeyMouseOption(string label, out KeyMouseInputOption option)
+    private bool TryResolveKeyMouseOption(string storageKey, out KeyMouseInputOption option)
     {
-        var known = KeybindCatalog.KeyMouseInputOptions.FirstOrDefault(candidate =>
-            string.Equals(candidate.Label, label, StringComparison.Ordinal));
+        if (!KeybindCatalog.TryGetKeyMouseInputValue(storageKey, out var inputType, out var value))
+        {
+            option = null!;
+            return false;
+        }
+
+        var known = KeybindCatalog.CreateKnownKeyMouseInputOption(
+            inputType,
+            value,
+            Texts);
         if (known is not null)
         {
             option = known;
             return true;
         }
 
-        var custom = ResolveCustomKeyMouseOption(label);
+        var custom = ResolveCustomKeyMouseOption(storageKey);
         if (custom is not null)
         {
             option = custom;
@@ -2080,17 +2103,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         where TActionLayout : class
     {
         layout = null;
-        if (actions is null)
-        {
-            return false;
-        }
-
-        if (actions.TryGetValue(definition.Id, out layout) && layout is not null)
-        {
-            return true;
-        }
-
-        return actions.TryGetValue(KeybindCatalog.GetLegacyLayoutActionKey(definition), out layout)
+        return actions is not null
+            && actions.TryGetValue(definition.Id, out layout)
             && layout is not null;
     }
 

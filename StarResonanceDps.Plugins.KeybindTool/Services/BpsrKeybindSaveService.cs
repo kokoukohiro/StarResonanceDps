@@ -3,11 +3,14 @@ using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Text;
 using StarResonanceDps.Plugins.KeybindTool.Models;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.Plugins.KeybindTool.Services;
 
 internal sealed class BpsrKeybindSaveService
 {
+    private readonly PluginLocalizer _texts;
+
     private static readonly byte[] InputAnchor = Encoding.ASCII.GetBytes("BKRInputConfigData");
     private static readonly byte[] PresetAnchor = Encoding.ASCII.GetBytes("BKL_SETID_7001");
     private static readonly byte[] HelperPetWheelAnchor = Encoding.ASCII.GetBytes("PetWheel");
@@ -16,6 +19,11 @@ internal sealed class BpsrKeybindSaveService
     private const int Helper1FromPetWheelOffset = 0x1B;
     private const int Helper2FromPetWheelOffset = 0x1F;
 
+    public BpsrKeybindSaveService(PluginLocalizer texts)
+    {
+        _texts = texts ?? throw new ArgumentNullException(nameof(texts));
+    }
+
     public KeybindSaveSession Load(string filePath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
@@ -23,7 +31,7 @@ internal sealed class BpsrKeybindSaveService
         var raw = File.ReadAllBytes(filePath);
         var data = Decompress(raw);
 
-        var inputAnchorOffset = FindAnchor(data, InputAnchor, "必須データが見つかりません。");
+        var inputAnchorOffset = FindAnchor(data, InputAnchor, _texts["Keybind.Error.RequiredInputDataNotFound"]);
         var (helper1Offset, helper2Offset) = FindHelperOffsets(data);
 
         var presetAnchorOffset = FindAnchorOrNegative(data, PresetAnchor);
@@ -129,7 +137,7 @@ internal sealed class BpsrKeybindSaveService
         var directory = Path.GetDirectoryName(filePath);
         if (string.IsNullOrWhiteSpace(directory))
         {
-            throw new InvalidOperationException("設定ファイルの保存先を特定できません。");
+            throw new InvalidOperationException(_texts["Keybind.Error.SaveDirectoryUnavailable"]);
         }
 
         var temporaryPath = $"{filePath}.tmp";
@@ -197,9 +205,9 @@ internal sealed class BpsrKeybindSaveService
         return -1;
     }
 
-    private static (int Helper1Offset, int Helper2Offset) FindHelperOffsets(byte[] data)
+    private (int Helper1Offset, int Helper2Offset) FindHelperOffsets(byte[] data)
     {
-        var petWheelOffset = FindAnchor(data, HelperPetWheelAnchor, "補助キー設定が見つかりません。");
+        var petWheelOffset = FindAnchor(data, HelperPetWheelAnchor, _texts["Keybind.Error.HelperKeysNotFound"]);
         var helper1Offset = petWheelOffset + Helper1FromPetWheelOffset;
         var helper2Offset = petWheelOffset + Helper2FromPetWheelOffset;
 
@@ -211,18 +219,18 @@ internal sealed class BpsrKeybindSaveService
 
         if (!IsKnownHelperValue(helper1Value))
         {
-            throw new InvalidDataException("補助キー1の保存位置を特定できません。");
+            throw new InvalidDataException(_texts["Keybind.Error.Helper1OffsetNotFound"]);
         }
 
         if (!IsKnownHelperValue(helper2Value))
         {
-            throw new InvalidDataException("補助キー2の保存位置を特定できません。");
+            throw new InvalidDataException(_texts["Keybind.Error.Helper2OffsetNotFound"]);
         }
 
         return (helper1Offset, helper2Offset);
     }
 
-    private static void ValidateSessionLayout(
+    private void ValidateSessionLayout(
         byte[] data,
         int inputAnchorOffset,
         int helper1Offset,
@@ -285,7 +293,7 @@ internal sealed class BpsrKeybindSaveService
             .ToArray();
     }
 
-    private static bool IsControllerActionRecord(byte[] data, int valueOffset)
+    private bool IsControllerActionRecord(byte[] data, int valueOffset)
     {
         if (!HasRange(data, valueOffset - sizeof(uint), sizeof(uint) * 3))
         {
@@ -301,7 +309,7 @@ internal sealed class BpsrKeybindSaveService
                 or KeybindCatalog.ActionStateHelper2);
     }
 
-    private static bool IsKeyMouseActionRecord(byte[] data, int valueOffset)
+    private bool IsKeyMouseActionRecord(byte[] data, int valueOffset)
     {
         if (!HasRange(data, valueOffset - sizeof(uint), sizeof(uint) * 2))
         {
@@ -317,7 +325,7 @@ internal sealed class BpsrKeybindSaveService
         return KeybindCatalog.HelperMainToActionValue.ContainsKey(value);
     }
 
-    private static uint ReadUInt32(byte[] data, int offset)
+    private uint ReadUInt32(byte[] data, int offset)
     {
         EnsureRange(data, offset, sizeof(uint));
         return BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(offset, sizeof(uint)));
@@ -328,11 +336,11 @@ internal sealed class BpsrKeybindSaveService
         return offset >= 0 && length >= 0 && offset <= data.Length - length;
     }
 
-    private static void EnsureRange(byte[] data, int offset, int length)
+    private void EnsureRange(byte[] data, int offset, int length)
     {
         if (!HasRange(data, offset, length))
         {
-            throw new InvalidDataException("ファイルの形式が想定と異なります。");
+            throw new InvalidDataException(_texts["Keybind.Error.UnexpectedFileFormat"]);
         }
     }
 }

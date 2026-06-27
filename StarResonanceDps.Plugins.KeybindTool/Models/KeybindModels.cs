@@ -16,7 +16,7 @@ internal interface IKeybindActionDefinition
 
     KeybindModeGroup Group { get; }
 
-    string Name { get; }
+    string Key { get; }
 }
 
 internal sealed record KeybindInputVisual(string? IconUri, string? Text)
@@ -82,7 +82,7 @@ internal sealed record PresetOption(uint Value, string Label)
 internal sealed record ControllerActionDefinition(
     string Id,
     KeybindModeGroup Group,
-    string Name,
+    string Key,
     IReadOnlyList<int> RelativeOffsets,
     IReadOnlyList<uint> AllowedValues,
     bool HasExplicitAllowedValues,
@@ -91,14 +91,14 @@ internal sealed record ControllerActionDefinition(
 internal sealed record KeyMouseActionDefinition(
     string Id,
     KeybindModeGroup Group,
-    string Name,
+    string Key,
     IReadOnlyList<int> RelativeOffsets,
     IReadOnlyList<uint> AllowedInputTypes) : IKeybindActionDefinition;
 
 internal sealed class KeybindLayoutConfig
 {
     [JsonPropertyName("version")]
-    public int Version { get; set; } = 6;
+    public int Version { get; set; } = 1;
 
     [JsonPropertyName("input_device")]
     public string? InputDevice { get; set; }

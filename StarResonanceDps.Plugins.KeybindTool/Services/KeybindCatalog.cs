@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using StarResonanceDps.Plugins.KeybindTool.Models;
 using StarResonanceDps.PluginSdk;
 
@@ -7,7 +8,8 @@ namespace StarResonanceDps.Plugins.KeybindTool.Services;
 internal static class KeybindCatalog
 {
     public const string DefaultControllerType = "PlayStation";
-    public const string KeyMouseInputDeviceName = "キーボード/マウス";
+    public const string InputDeviceController = "Controller";
+    public const string InputDeviceKeyMouse = "KeyMouse";
 
     public const uint InputTypeKeyboard = 0x00000001u;
     public const uint InputTypeMouse = 0x00000002u;
@@ -26,386 +28,386 @@ internal static class KeybindCatalog
     public static readonly IReadOnlyList<ControllerInputOption> ControllerInputOptions =
         new ControllerInputOption[]
         {
-        new ControllerInputOption(0x1u, "L前後入力"),
-        new ControllerInputOption(0x2u, "L左右入力"),
-        new ControllerInputOption(0x3u, "R前後入力"),
-        new ControllerInputOption(0x4u, "R左右入力"),
-        new ControllerInputOption(0x5u, "L2"),
-        new ControllerInputOption(0x6u, "R2"),
-        new ControllerInputOption(0x7u, "×"),
-        new ControllerInputOption(0x8u, "〇"),
-        new ControllerInputOption(0xAu, "□"),
-        new ControllerInputOption(0xBu, "△"),
-        new ControllerInputOption(0xDu, "touchpad"),
-        new ControllerInputOption(0xEu, "option"),
-        new ControllerInputOption(0xFu, "share"),
-        new ControllerInputOption(0x11u, "L1"),
-        new ControllerInputOption(0x12u, "R1"),
-        new ControllerInputOption(0x13u, "L3"),
-        new ControllerInputOption(0x14u, "R3"),
-        new ControllerInputOption(0x17u, "↑"),
-        new ControllerInputOption(0x18u, "↓"),
-        new ControllerInputOption(0x19u, "←"),
-        new ControllerInputOption(0x1Au, "→"),
+            new(0x1u, "LeftStickVertical"),
+            new(0x2u, "LeftStickHorizontal"),
+            new(0x3u, "RightStickVertical"),
+            new(0x4u, "RightStickHorizontal"),
+            new(0x5u, "LeftTrigger"),
+            new(0x6u, "RightTrigger"),
+            new(0x7u, "FaceSouth"),
+            new(0x8u, "FaceEast"),
+            new(0xAu, "FaceWest"),
+            new(0xBu, "FaceNorth"),
+            new(0xDu, "SystemLeft"),
+            new(0xEu, "SystemRight"),
+            new(0xFu, "SystemCenter"),
+            new(0x11u, "LeftShoulder"),
+            new(0x12u, "RightShoulder"),
+            new(0x13u, "LeftStickPress"),
+            new(0x14u, "RightStickPress"),
+            new(0x17u, "DPadUp"),
+            new(0x18u, "DPadDown"),
+            new(0x19u, "DPadLeft"),
+            new(0x1Au, "DPadRight")
         };
 
     public static readonly IReadOnlyList<KeyMouseInputOption> KeyMouseInputOptions =
         new KeyMouseInputOption[]
         {
-        new KeyMouseInputOption(0x1u, 0x9u, "Tab"),
-        new KeyMouseInputOption(0x1u, 0xDu, "Enter"),
-        new KeyMouseInputOption(0x1u, 0x1Bu, "Esc"),
-        new KeyMouseInputOption(0x1u, 0x20u, "Space"),
-        new KeyMouseInputOption(0x1u, 0x27u, ":"),
-        new KeyMouseInputOption(0x1u, 0x2Cu, "<"),
-        new KeyMouseInputOption(0x1u, 0x2Du, "-"),
-        new KeyMouseInputOption(0x1u, 0x2Eu, ">"),
-        new KeyMouseInputOption(0x1u, 0x2Fu, "/"),
-        new KeyMouseInputOption(0x1u, 0x30u, "0"),
-        new KeyMouseInputOption(0x1u, 0x31u, "1"),
-        new KeyMouseInputOption(0x1u, 0x32u, "2"),
-        new KeyMouseInputOption(0x1u, 0x33u, "3"),
-        new KeyMouseInputOption(0x1u, 0x34u, "4"),
-        new KeyMouseInputOption(0x1u, 0x35u, "5"),
-        new KeyMouseInputOption(0x1u, 0x36u, "6"),
-        new KeyMouseInputOption(0x1u, 0x37u, "7"),
-        new KeyMouseInputOption(0x1u, 0x38u, "8"),
-        new KeyMouseInputOption(0x1u, 0x39u, "9"),
-        new KeyMouseInputOption(0x1u, 0x3Bu, ";"),
-        new KeyMouseInputOption(0x1u, 0x3Du, "^"),
-        new KeyMouseInputOption(0x1u, 0x5Bu, "@"),
-        new KeyMouseInputOption(0x1u, 0x5Cu, "]"),
-        new KeyMouseInputOption(0x1u, 0x5Du, "["),
-        new KeyMouseInputOption(0x1u, 0x60u, "~"),
-        new KeyMouseInputOption(0x1u, 0x61u, "A"),
-        new KeyMouseInputOption(0x1u, 0x62u, "B"),
-        new KeyMouseInputOption(0x1u, 0x63u, "C"),
-        new KeyMouseInputOption(0x1u, 0x64u, "D"),
-        new KeyMouseInputOption(0x1u, 0x65u, "E"),
-        new KeyMouseInputOption(0x1u, 0x66u, "F"),
-        new KeyMouseInputOption(0x1u, 0x67u, "G"),
-        new KeyMouseInputOption(0x1u, 0x68u, "H"),
-        new KeyMouseInputOption(0x1u, 0x69u, "I"),
-        new KeyMouseInputOption(0x1u, 0x6Au, "J"),
-        new KeyMouseInputOption(0x1u, 0x6Bu, "K"),
-        new KeyMouseInputOption(0x1u, 0x6Cu, "L"),
-        new KeyMouseInputOption(0x1u, 0x6Du, "M"),
-        new KeyMouseInputOption(0x1u, 0x6Eu, "N"),
-        new KeyMouseInputOption(0x1u, 0x6Fu, "O"),
-        new KeyMouseInputOption(0x1u, 0x70u, "P"),
-        new KeyMouseInputOption(0x1u, 0x71u, "Q"),
-        new KeyMouseInputOption(0x1u, 0x72u, "R"),
-        new KeyMouseInputOption(0x1u, 0x73u, "S"),
-        new KeyMouseInputOption(0x1u, 0x74u, "T"),
-        new KeyMouseInputOption(0x1u, 0x75u, "U"),
-        new KeyMouseInputOption(0x1u, 0x76u, "V"),
-        new KeyMouseInputOption(0x1u, 0x77u, "W"),
-        new KeyMouseInputOption(0x1u, 0x78u, "X"),
-        new KeyMouseInputOption(0x1u, 0x79u, "Y"),
-        new KeyMouseInputOption(0x1u, 0x7Au, "Z"),
-        new KeyMouseInputOption(0x1u, 0x100u, "Num0"),
-        new KeyMouseInputOption(0x1u, 0x101u, "Num1"),
-        new KeyMouseInputOption(0x1u, 0x102u, "Num2"),
-        new KeyMouseInputOption(0x1u, 0x103u, "Num3"),
-        new KeyMouseInputOption(0x1u, 0x104u, "Num4"),
-        new KeyMouseInputOption(0x1u, 0x105u, "Num5"),
-        new KeyMouseInputOption(0x1u, 0x106u, "Num6"),
-        new KeyMouseInputOption(0x1u, 0x107u, "Num7"),
-        new KeyMouseInputOption(0x1u, 0x108u, "Num8"),
-        new KeyMouseInputOption(0x1u, 0x109u, "Num9"),
-        new KeyMouseInputOption(0x1u, 0x111u, "↑"),
-        new KeyMouseInputOption(0x1u, 0x112u, "↓"),
-        new KeyMouseInputOption(0x1u, 0x113u, "→"),
-        new KeyMouseInputOption(0x1u, 0x114u, "←"),
-        new KeyMouseInputOption(0x1u, 0x11Au, "F1"),
-        new KeyMouseInputOption(0x1u, 0x11Bu, "F2"),
-        new KeyMouseInputOption(0x1u, 0x11Cu, "F3"),
-        new KeyMouseInputOption(0x1u, 0x11Du, "F4"),
-        new KeyMouseInputOption(0x1u, 0x11Eu, "F5"),
-        new KeyMouseInputOption(0x1u, 0x11Fu, "F6"),
-        new KeyMouseInputOption(0x1u, 0x120u, "F7"),
-        new KeyMouseInputOption(0x1u, 0x121u, "F8"),
-        new KeyMouseInputOption(0x1u, 0x122u, "F9"),
-        new KeyMouseInputOption(0x1u, 0x123u, "F10"),
-        new KeyMouseInputOption(0x1u, 0x124u, "F11"),
-        new KeyMouseInputOption(0x1u, 0x125u, "F12"),
-        new KeyMouseInputOption(0x1u, 0x12Fu, "R Shift"),
-        new KeyMouseInputOption(0x1u, 0x130u, "L Shift"),
-        new KeyMouseInputOption(0x1u, 0x131u, "R Ctrl"),
-        new KeyMouseInputOption(0x1u, 0x132u, "L Ctrl"),
-        new KeyMouseInputOption(0x1u, 0x133u, "R Alt"),
-        new KeyMouseInputOption(0x1u, 0x134u, "L Alt"),
-        new KeyMouseInputOption(0x2u, 0x0u, "マウス左クリック"),
-        new KeyMouseInputOption(0x2u, 0x1u, "マウス右クリック"),
-        new KeyMouseInputOption(0x2u, 0x2u, "マウス中央キー"),
-        new KeyMouseInputOption(0x2u, 0x3u, "マウスボタン3"),
-        new KeyMouseInputOption(0x2u, 0x4u, "マウスボタン4"),
-        new KeyMouseInputOption(0x2u, 0x5u, "マウスボタン5"),
-        new KeyMouseInputOption(0x2u, 0x6u, "マウスボタン6"),
-        new KeyMouseInputOption(0x2u, 0x7u, "マウススクロール"),
+            new(0x1u, 0x9u, "Tab"),
+            new(0x1u, 0xDu, "Enter"),
+            new(0x1u, 0x1Bu, "Esc"),
+            new(0x1u, 0x20u, "Space"),
+            new(0x1u, 0x27u, ":"),
+            new(0x1u, 0x2Cu, "<"),
+            new(0x1u, 0x2Du, "-"),
+            new(0x1u, 0x2Eu, ">"),
+            new(0x1u, 0x2Fu, "/"),
+            new(0x1u, 0x30u, "0"),
+            new(0x1u, 0x31u, "1"),
+            new(0x1u, 0x32u, "2"),
+            new(0x1u, 0x33u, "3"),
+            new(0x1u, 0x34u, "4"),
+            new(0x1u, 0x35u, "5"),
+            new(0x1u, 0x36u, "6"),
+            new(0x1u, 0x37u, "7"),
+            new(0x1u, 0x38u, "8"),
+            new(0x1u, 0x39u, "9"),
+            new(0x1u, 0x3Bu, ";"),
+            new(0x1u, 0x3Du, "^"),
+            new(0x1u, 0x5Bu, "@"),
+            new(0x1u, 0x5Cu, "]"),
+            new(0x1u, 0x5Du, "["),
+            new(0x1u, 0x60u, "~"),
+            new(0x1u, 0x61u, "A"),
+            new(0x1u, 0x62u, "B"),
+            new(0x1u, 0x63u, "C"),
+            new(0x1u, 0x64u, "D"),
+            new(0x1u, 0x65u, "E"),
+            new(0x1u, 0x66u, "F"),
+            new(0x1u, 0x67u, "G"),
+            new(0x1u, 0x68u, "H"),
+            new(0x1u, 0x69u, "I"),
+            new(0x1u, 0x6Au, "J"),
+            new(0x1u, 0x6Bu, "K"),
+            new(0x1u, 0x6Cu, "L"),
+            new(0x1u, 0x6Du, "M"),
+            new(0x1u, 0x6Eu, "N"),
+            new(0x1u, 0x6Fu, "O"),
+            new(0x1u, 0x70u, "P"),
+            new(0x1u, 0x71u, "Q"),
+            new(0x1u, 0x72u, "R"),
+            new(0x1u, 0x73u, "S"),
+            new(0x1u, 0x74u, "T"),
+            new(0x1u, 0x75u, "U"),
+            new(0x1u, 0x76u, "V"),
+            new(0x1u, 0x77u, "W"),
+            new(0x1u, 0x78u, "X"),
+            new(0x1u, 0x79u, "Y"),
+            new(0x1u, 0x7Au, "Z"),
+            new(0x1u, 0x100u, "Num0"),
+            new(0x1u, 0x101u, "Num1"),
+            new(0x1u, 0x102u, "Num2"),
+            new(0x1u, 0x103u, "Num3"),
+            new(0x1u, 0x104u, "Num4"),
+            new(0x1u, 0x105u, "Num5"),
+            new(0x1u, 0x106u, "Num6"),
+            new(0x1u, 0x107u, "Num7"),
+            new(0x1u, 0x108u, "Num8"),
+            new(0x1u, 0x109u, "Num9"),
+            new(0x1u, 0x111u, "↑"),
+            new(0x1u, 0x112u, "↓"),
+            new(0x1u, 0x113u, "→"),
+            new(0x1u, 0x114u, "←"),
+            new(0x1u, 0x11Au, "F1"),
+            new(0x1u, 0x11Bu, "F2"),
+            new(0x1u, 0x11Cu, "F3"),
+            new(0x1u, 0x11Du, "F4"),
+            new(0x1u, 0x11Eu, "F5"),
+            new(0x1u, 0x11Fu, "F6"),
+            new(0x1u, 0x120u, "F7"),
+            new(0x1u, 0x121u, "F8"),
+            new(0x1u, 0x122u, "F9"),
+            new(0x1u, 0x123u, "F10"),
+            new(0x1u, 0x124u, "F11"),
+            new(0x1u, 0x125u, "F12"),
+            new(0x1u, 0x12Fu, "R Shift"),
+            new(0x1u, 0x130u, "L Shift"),
+            new(0x1u, 0x131u, "R Ctrl"),
+            new(0x1u, 0x132u, "L Ctrl"),
+            new(0x1u, 0x133u, "R Alt"),
+            new(0x1u, 0x134u, "L Alt"),
+            new(0x2u, 0x0u, "LeftClick"),
+            new(0x2u, 0x1u, "RightClick"),
+            new(0x2u, 0x2u, "MiddleButton"),
+            new(0x2u, 0x3u, "Button3"),
+            new(0x2u, 0x4u, "Button4"),
+            new(0x2u, 0x5u, "Button5"),
+            new(0x2u, 0x6u, "Button6"),
+            new(0x2u, 0x7u, "ScrollWheel")
         };
 
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerMainActions =
         new ControllerActionDefinition[]
         {
-            CreateControllerAction(KeybindModeGroup.Main, "移動-前後", new[] { 0xB2 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "移動-左右", new[] { 0xC7 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "カメラ-前後", new[] { 0x60F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "カメラ-左右", new[] { 0x624 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "ジャンプ", new[] { 0x133 }),
-            CreateControllerAction(KeybindModeGroup.Main, "ダッシュ/回避", new[] { 0x1C7 }),
-            CreateControllerAction(KeybindModeGroup.Main, "環境共鳴能力1", new[] { 0x204 }),
-            CreateControllerAction(KeybindModeGroup.Main, "環境共鳴能力2", new[] { 0x227 }),
-            CreateControllerAction(KeybindModeGroup.Main, "通常攻撃", new[] { 0x27E }),
-            CreateControllerAction(KeybindModeGroup.Main, "特殊攻撃", new[] { 0x9E7 }),
-            CreateControllerAction(KeybindModeGroup.Main, "マスタリースキル1", new[] { 0x2D5 }),
-            CreateControllerAction(KeybindModeGroup.Main, "マスタリースキル2", new[] { 0x312 }),
-            CreateControllerAction(KeybindModeGroup.Main, "マスタリースキル3", new[] { 0x34F }),
-            CreateControllerAction(KeybindModeGroup.Main, "マスタリースキル4", new[] { 0x38C }),
-            CreateControllerAction(KeybindModeGroup.Main, "究極スキル", new[] { 0x9AA }),
-            CreateControllerAction(KeybindModeGroup.Main, "バトルイマジン1", new[] { 0xA24 }),
-            CreateControllerAction(KeybindModeGroup.Main, "バトルイマジン2", new[] { 0xA61 }),
-            CreateControllerAction(KeybindModeGroup.Main, "左でアイテム切り替え", new[] { 0x102D }),
-            CreateControllerAction(KeybindModeGroup.Main, "アイテム使用", new[] { 0x3C9 }),
-            CreateControllerAction(KeybindModeGroup.Main, "右でアイテム切り替え", new[] { 0x106A }),
-            CreateControllerAction(KeybindModeGroup.Main, "アクション", new[] { 0x551, 0x158F }),
-            CreateControllerAction(KeybindModeGroup.Main, "ロックオン/切り替え", new[] { 0x406 }),
-            CreateControllerAction(KeybindModeGroup.Main, "エクストラスキル", new[] { 0xA9E }),
-            CreateControllerAction(KeybindModeGroup.Main, "インタラクト解除", new[] { 0x45D }),
-            CreateControllerAction(KeybindModeGroup.Main, "クエスト追跡", new[] { 0x514 }),
-            CreateControllerAction(KeybindModeGroup.Main, "UI非表示", new[] { 0x4D7 }),
-            CreateControllerAction(KeybindModeGroup.Main, "クエストアイテムのクイック使用", new[] { 0x49A }),
-            CreateControllerAction(KeybindModeGroup.Main, "マップON/OFF", new[] { 0x690 }),
-            CreateControllerAction(KeybindModeGroup.Main, "クエスト", new[] { 0x6CD }),
-            CreateControllerAction(KeybindModeGroup.Main, "ソーシャルモード", new[] { 0x70A }),
-            CreateControllerAction(KeybindModeGroup.Main, "メニューを開く", new[] { 0x84D }),
-            CreateControllerAction(KeybindModeGroup.Main, "メニューを閉じる", new[] { 0x17CE }),
-            CreateControllerAction(KeybindModeGroup.Main, "カーソル移動-上下", new[] { 0x1F40 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "カーソル移動-左右", new[] { 0x1F63 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Main, "撮影", new[] { 0x76A }),
-            CreateControllerAction(KeybindModeGroup.Main, "ダンジョン退出", new[] { 0x810 }),
-            CreateControllerAction(KeybindModeGroup.Main, "アイテムを使用", new[] { 0x90D, 0x186B }),
-            CreateControllerAction(KeybindModeGroup.Main, "クイック操作", new[] { 0xBA4 }),
-            CreateControllerAction(KeybindModeGroup.Main, "乗り物召喚/解除", new[] { 0xB44 }),
-            CreateControllerAction(KeybindModeGroup.Main, "招待承認", new[] { 0xBE1, 0x1A89 }),
-            CreateControllerAction(KeybindModeGroup.Main, "招待拒否", new[] { 0xC1E, 0x1AC6 }),
-            CreateControllerAction(KeybindModeGroup.Main, "オートバトル", new[] { 0xCBB }),
-            CreateControllerAction(KeybindModeGroup.Main, "チャンネル", new[] { 0xC7E }),
-            CreateControllerAction(KeybindModeGroup.Main, "イラストガイド", new[] { 0xCF8 }),
-            CreateControllerAction(KeybindModeGroup.Main, "クイックホイール", new[] { 0xD35 }),
-            CreateControllerAction(KeybindModeGroup.Main, "クエスト切り替え（左）", new[] { 0xFB3 }),
-            CreateControllerAction(KeybindModeGroup.Main, "クエスト切り替え（右）", new[] { 0xFD6 }),
-            CreateControllerAction(KeybindModeGroup.Main, "ズームアウト", new[] { 0x58E }),
-            CreateControllerAction(KeybindModeGroup.Main, "ズームイン", new[] { 0x5A3 }),
-            CreateControllerAction(KeybindModeGroup.Main, "スキルパレットを開く", new[] { 0x1227, 0x1F7D }),
-            CreateControllerAction(KeybindModeGroup.Main, "ロールスキル1", new[] { 0x1133 }),
-            CreateControllerAction(KeybindModeGroup.Main, "ロールスキル2", new[] { 0x1170 }),
-            CreateControllerAction(KeybindModeGroup.Main, "ロールスキル3", new[] { 0x11AD }),
-            CreateControllerAction(KeybindModeGroup.Main, "ロールスキル4", new[] { 0x11EA }),
-            CreateControllerAction(KeybindModeGroup.Main, "ホーム設計図", new[] { 0x124A }),
+            CreateControllerAction(KeybindModeGroup.Main, "MoveForwardBack", new[] { 0xB2 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "MoveLeftRight", new[] { 0xC7 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "CameraForwardBack", new[] { 0x60F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "CameraLeftRight", new[] { 0x624 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "Jump", new[] { 0x133 }),
+            CreateControllerAction(KeybindModeGroup.Main, "DashDodge", new[] { 0x1C7 }),
+            CreateControllerAction(KeybindModeGroup.Main, "EnvironmentalResonance1", new[] { 0x204 }),
+            CreateControllerAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x227 }),
+            CreateControllerAction(KeybindModeGroup.Main, "NormalAttack", new[] { 0x27E }),
+            CreateControllerAction(KeybindModeGroup.Main, "SpecialAttack", new[] { 0x9E7 }),
+            CreateControllerAction(KeybindModeGroup.Main, "MasterySkill1", new[] { 0x2D5 }),
+            CreateControllerAction(KeybindModeGroup.Main, "MasterySkill2", new[] { 0x312 }),
+            CreateControllerAction(KeybindModeGroup.Main, "MasterySkill3", new[] { 0x34F }),
+            CreateControllerAction(KeybindModeGroup.Main, "MasterySkill4", new[] { 0x38C }),
+            CreateControllerAction(KeybindModeGroup.Main, "UltimateSkill", new[] { 0x9AA }),
+            CreateControllerAction(KeybindModeGroup.Main, "BattleImagine1", new[] { 0xA24 }),
+            CreateControllerAction(KeybindModeGroup.Main, "BattleImagine2", new[] { 0xA61 }),
+            CreateControllerAction(KeybindModeGroup.Main, "CycleItemsLeft", new[] { 0x102D }),
+            CreateControllerAction(KeybindModeGroup.Main, "UseItem", new[] { 0x3C9 }),
+            CreateControllerAction(KeybindModeGroup.Main, "CycleItemsRight", new[] { 0x106A }),
+            CreateControllerAction(KeybindModeGroup.Main, "Action", new[] { 0x551, 0x158F }),
+            CreateControllerAction(KeybindModeGroup.Main, "LockOnSwitch", new[] { 0x406 }),
+            CreateControllerAction(KeybindModeGroup.Main, "ExtraSkill", new[] { 0xA9E }),
+            CreateControllerAction(KeybindModeGroup.Main, "CancelInteraction", new[] { 0x45D }),
+            CreateControllerAction(KeybindModeGroup.Main, "TrackQuest", new[] { 0x514 }),
+            CreateControllerAction(KeybindModeGroup.Main, "HideUi", new[] { 0x4D7 }),
+            CreateControllerAction(KeybindModeGroup.Main, "QuickUseQuestItem", new[] { 0x49A }),
+            CreateControllerAction(KeybindModeGroup.Main, "MapOnOff", new[] { 0x690 }),
+            CreateControllerAction(KeybindModeGroup.Main, "Quests", new[] { 0x6CD }),
+            CreateControllerAction(KeybindModeGroup.Main, "SocialMode", new[] { 0x70A }),
+            CreateControllerAction(KeybindModeGroup.Main, "OpenMenu", new[] { 0x84D }),
+            CreateControllerAction(KeybindModeGroup.Main, "CloseMenu", new[] { 0x17CE }),
+            CreateControllerAction(KeybindModeGroup.Main, "CursorMoveUpDown", new[] { 0x1F40 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "CursorMoveLeftRight", new[] { 0x1F63 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Main, "TakePhoto", new[] { 0x76A }),
+            CreateControllerAction(KeybindModeGroup.Main, "LeaveDungeon", new[] { 0x810 }),
+            CreateControllerAction(KeybindModeGroup.Main, "UseItemAlternate", new[] { 0x90D, 0x186B }),
+            CreateControllerAction(KeybindModeGroup.Main, "QuickAction", new[] { 0xBA4 }),
+            CreateControllerAction(KeybindModeGroup.Main, "SummonDismissMount", new[] { 0xB44 }),
+            CreateControllerAction(KeybindModeGroup.Main, "AcceptInvite", new[] { 0xBE1, 0x1A89 }),
+            CreateControllerAction(KeybindModeGroup.Main, "DeclineInvite", new[] { 0xC1E, 0x1AC6 }),
+            CreateControllerAction(KeybindModeGroup.Main, "AutoBattle", new[] { 0xCBB }),
+            CreateControllerAction(KeybindModeGroup.Main, "Channel", new[] { 0xC7E }),
+            CreateControllerAction(KeybindModeGroup.Main, "IllustrationGuide", new[] { 0xCF8 }),
+            CreateControllerAction(KeybindModeGroup.Main, "QuickWheel", new[] { 0xD35 }),
+            CreateControllerAction(KeybindModeGroup.Main, "SwitchQuestLeft", new[] { 0xFB3 }),
+            CreateControllerAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFD6 }),
+            CreateControllerAction(KeybindModeGroup.Main, "ZoomOut", new[] { 0x58E }),
+            CreateControllerAction(KeybindModeGroup.Main, "ZoomIn", new[] { 0x5A3 }),
+            CreateControllerAction(KeybindModeGroup.Main, "OpenSkillPalette", new[] { 0x1227, 0x1F7D }),
+            CreateControllerAction(KeybindModeGroup.Main, "RoleSkill1", new[] { 0x1133 }),
+            CreateControllerAction(KeybindModeGroup.Main, "RoleSkill2", new[] { 0x1170 }),
+            CreateControllerAction(KeybindModeGroup.Main, "RoleSkill3", new[] { 0x11AD }),
+            CreateControllerAction(KeybindModeGroup.Main, "RoleSkill4", new[] { 0x11EA }),
+            CreateControllerAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x124A }),
         };
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerQuickWheelActions =
         new ControllerActionDefinition[]
         {
-            CreateControllerAction(KeybindModeGroup.QuickWheel, "クイックホイール切替（左）", new[] { 0x289C }, usesHelper: false),
-            CreateControllerAction(KeybindModeGroup.QuickWheel, "クイックホイール切替（右）", new[] { 0x28B1 }, usesHelper: false),
-            CreateControllerAction(KeybindModeGroup.QuickWheel, "クイックホイール編集", new[] { 0x28EE }, usesHelper: false),
-            CreateControllerAction(KeybindModeGroup.QuickWheel, "クイックホイールを閉じる", new[] { 0x292B }),
+            CreateControllerAction(KeybindModeGroup.QuickWheel, "SwitchQuickWheelLeft", new[] { 0x289C }, usesHelper: false),
+            CreateControllerAction(KeybindModeGroup.QuickWheel, "SwitchQuickWheelRight", new[] { 0x28B1 }, usesHelper: false),
+            CreateControllerAction(KeybindModeGroup.QuickWheel, "EditQuickWheel", new[] { 0x28EE }, usesHelper: false),
+            CreateControllerAction(KeybindModeGroup.QuickWheel, "CloseQuickWheel", new[] { 0x292B }),
         };
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerPhotoActions =
         new ControllerActionDefinition[]
         {
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラ移動-上下", new[] { 0x230E }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラ移動-左右", new[] { 0x2323 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラパン-前後", new[] { 0x239F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラパン-左右", new[] { 0x23B4 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "画面を非表示にする", new[] { 0x21B8 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "撮影", new[] { 0x213E }),
-            CreateControllerAction(KeybindModeGroup.Photo, "設定メニュー", new[] { 0x2688 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "参加者メニュー", new[] { 0x26C5 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カーソル呼出し", new[] { 0x27B8 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "メニューを閉じる", new[] { 0x226F }),
-            CreateControllerAction(KeybindModeGroup.Photo, "移動-前後", new[] { 0x2430 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "移動-左右", new[] { 0x2445 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラ-前後", new[] { 0x273A }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カメラ-左右", new[] { 0x274F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "ジャンプ", new[] { 0x205D }),
-            CreateControllerAction(KeybindModeGroup.Photo, "ダッシュ/回避", new[] { 0x217B }),
-            CreateControllerAction(KeybindModeGroup.Photo, "特殊攻撃", new[] { 0x24B1 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "マスタリースキル1", new[] { 0x24EE }),
-            CreateControllerAction(KeybindModeGroup.Photo, "マスタリースキル2", new[] { 0x252B }),
-            CreateControllerAction(KeybindModeGroup.Photo, "マスタリースキル3", new[] { 0x2568 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "マスタリースキル4", new[] { 0x25A5 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "究極スキル", new[] { 0x209A }),
-            CreateControllerAction(KeybindModeGroup.Photo, "乗り物召喚/解除", new[] { 0x25E2 }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カーソル移動-上下", new[] { 0x27FE }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "カーソル移動-左右", new[] { 0x2821 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Photo, "ズームアウト", new[] { 0x20EC }),
-            CreateControllerAction(KeybindModeGroup.Photo, "ズームイン", new[] { 0x2101 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraMoveUpDown", new[] { 0x230E }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraMoveLeftRight", new[] { 0x2323 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraPanForwardBack", new[] { 0x239F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraPanLeftRight", new[] { 0x23B4 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "HideInterface", new[] { 0x21B8 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "TakePhoto", new[] { 0x213E }),
+            CreateControllerAction(KeybindModeGroup.Photo, "SettingsMenu", new[] { 0x2688 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "ParticipantMenu", new[] { 0x26C5 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "ShowCursor", new[] { 0x27B8 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CloseMenu", new[] { 0x226F }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MoveForwardBack", new[] { 0x2430 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MoveLeftRight", new[] { 0x2445 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraForwardBack", new[] { 0x273A }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CameraLeftRight", new[] { 0x274F }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "Jump", new[] { 0x205D }),
+            CreateControllerAction(KeybindModeGroup.Photo, "DashDodge", new[] { 0x217B }),
+            CreateControllerAction(KeybindModeGroup.Photo, "SpecialAttack", new[] { 0x24B1 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MasterySkill1", new[] { 0x24EE }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MasterySkill2", new[] { 0x252B }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MasterySkill3", new[] { 0x2568 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "MasterySkill4", new[] { 0x25A5 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "UltimateSkill", new[] { 0x209A }),
+            CreateControllerAction(KeybindModeGroup.Photo, "SummonDismissMount", new[] { 0x25E2 }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CursorMoveUpDown", new[] { 0x27FE }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "CursorMoveLeftRight", new[] { 0x2821 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Photo, "ZoomOut", new[] { 0x20EC }),
+            CreateControllerAction(KeybindModeGroup.Photo, "ZoomIn", new[] { 0x2101 }),
         };
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerFishingActions =
         new ControllerActionDefinition[]
         {
-            CreateControllerAction(KeybindModeGroup.Fishing, "竿移動-前後", new[] { 0x2BB0 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "竿移動-左右", new[] { 0x2BC5 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "キャスト/竿を引く", new[] { 0x29A3 }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "釣り/図鑑", new[] { 0x29E0 }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "釣り/研究", new[] { 0x2A1D }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "釣り餌切替", new[] { 0x2A5A }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "竿切替", new[] { 0x2A97 }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "モード/ガイド", new[] { 0x2AD4 }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "設定", new[] { 0x2B11 }),
-            CreateControllerAction(KeybindModeGroup.Fishing, "メニューを閉じる", new[] { 0x2C3F }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "RodMoveForwardBack", new[] { 0x2BB0 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "RodMoveLeftRight", new[] { 0x2BC5 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "CastReelIn", new[] { 0x29A3 }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "FishingEncyclopedia", new[] { 0x29E0 }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "FishingResearch", new[] { 0x2A1D }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "SwitchBait", new[] { 0x2A5A }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "SwitchRod", new[] { 0x2A97 }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "ModeGuide", new[] { 0x2AD4 }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "Settings", new[] { 0x2B11 }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "CloseMenu", new[] { 0x2C3F }),
         };
 
     public static readonly IReadOnlyList<KeyMouseActionDefinition> KeyMouseMainActions =
         new KeyMouseActionDefinition[]
         {
-            CreateKeyMouseAction(KeybindModeGroup.Main, "移動-前", new[] { 0x59, 0x12BD }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "移動-後", new[] { 0x6E, 0x12D2 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "移動-左", new[] { 0x83, 0x12E7 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "移動-右", new[] { 0x98, 0x12FC }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "歩く/走る切替", new[] { 0x156, 0x1371 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ジャンプ", new[] { 0x119, 0x134E }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ダッシュ/回避1", new[] { 0x193, 0x13AE }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ダッシュ/回避2", new[] { 0x1AD }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "環境共鳴能力1", new[] { 0x1EA, 0x13D1 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "環境共鳴能力2", new[] { 0x241 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "通常攻撃", new[] { 0x264 }, allowedInputTypes: new[] { 0x2u }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "特殊攻撃", new[] { 0x9CD, 0x1934 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マスタリースキル1", new[] { 0x2BB, 0x143A }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マスタリースキル2", new[] { 0x2F8, 0x145D }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マスタリースキル3", new[] { 0x335, 0x1480 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マスタリースキル4", new[] { 0x372, 0x14A3 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "究極スキル", new[] { 0x990, 0x1911 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "バトルイマジン1", new[] { 0xA0A, 0x1957 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "バトルイマジン2", new[] { 0xA47, 0x197A }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "左でアイテム切り替え", new[] { 0x1013, 0x1E28 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "アイテム使用", new[] { 0x3AF, 0x14C6 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "右でアイテム切り替え", new[] { 0x1050, 0x1E4B }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "アクション", new[] { 0x537, 0x1598 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロックオン/切り替え1", new[] { 0x3EC, 0x14E9 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロックオン/切り替え2", new[] { 0x420 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "エクストラスキル", new[] { 0xA84, 0x199D }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "インタラクト解除", new[] { 0x443, 0x150C }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クエスト追跡", new[] { 0x4FA, 0x1575 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "UI非表示", new[] { 0x4BD, 0x1552 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クエストアイテムのクイック使用", new[] { 0x480, 0x152F }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "おすすめイベント", new[] { 0xB07, 0x1A06 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マップON/OFF", new[] { 0x676, 0x1679 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クエスト", new[] { 0x6B3, 0x169C }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ソーシャルモード", new[] { 0x6F0, 0x16BF }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "トーク", new[] { 0xC41, 0x1B0C }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "キャラクター", new[] { 0x72D, 0x16E2 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ギルド", new[] { 0xE70, 0x1CD3 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "チャット画面チャンネル切り替え-上", new[] { 0x108D }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "チャット画面チャンネル切り替え-下", new[] { 0x10B0 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "チャット入力チャンネル切り替え-左", new[] { 0x10D3 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "チャット入力チャンネル切り替え-右", new[] { 0x10F6 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "メニューを開く", new[] { 0x833 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "メニューを閉じる", new[] { 0x17B4 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "マウス呼出し", new[] { 0x870, 0x17F1 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "撮影", new[] { 0x750, 0x1705 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "所持品", new[] { 0x78D, 0x1728 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "パーティ", new[] { 0x7B0, 0x174B }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "シーズンセンター", new[] { 0x7D3, 0x176E }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ダンジョン退出", new[] { 0x7F6, 0x1791 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "アビリティ", new[] { 0x8D0, 0x1851 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "アイテムを使用", new[] { 0x8F3, 0x1874 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイック操作", new[] { 0xB8A, 0x1A6F }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "乗り物召喚/解除", new[] { 0xB2A, 0x1A29 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "パーティボイス切り替え", new[] { 0xB67, 0x1A4C }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "招待承認", new[] { 0xBC7, 0x1A92 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "招待拒否", new[] { 0xC04, 0x1ACF }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "オートバトル", new[] { 0xCA1, 0x1B52 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "チャンネル", new[] { 0xC64, 0x1B2F }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "イラストガイド", new[] { 0xCDE, 0x1B75 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール", new[] { 0xD1B, 0x1B98 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "オートラン", new[] { 0xF39, 0x1D9C }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クエスト切り替え（左）", new[] { 0xF99, 0x1DE2 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クエスト切り替え（右）", new[] { 0xFF0 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ホーム編集", new[] { 0xF16, 0x1D79 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ズームアウト/ズームイン", new[] { 0x574, 0x893, 0x15D5, 0x1814 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "スキルパレットを開く", new[] { 0x120D, 0x1F86 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロールスキル1", new[] { 0x1119 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロールスキル2", new[] { 0x1156 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロールスキル3", new[] { 0x1193 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ロールスキル4", new[] { 0x11D0 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "ホーム設計図", new[] { 0x1264, 0x1FDD }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "アテンドイマジンを召喚する", new[] { 0x1287, 0x2000 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット1", new[] { 0xD58, 0x1BBB }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット2", new[] { 0xD7B, 0x1BDE }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット3", new[] { 0xD9E, 0x1C01 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット4", new[] { 0xDC1, 0x1C24 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット5", new[] { 0xDE4, 0x1C47 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット6", new[] { 0xE07, 0x1C6A }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット7", new[] { 0xE2A, 0x1C8D }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "クイックホイール-スロット8", new[] { 0xE4D, 0x1CB0 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "スキル", new[] { 0xE93, 0x1CF6 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "装備", new[] { 0xEB6, 0x1D19 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MoveForward", new[] { 0x59, 0x12BD }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MoveBack", new[] { 0x6E, 0x12D2 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MoveLeft", new[] { 0x83, 0x12E7 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MoveRight", new[] { 0x98, 0x12FC }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ToggleWalkRun", new[] { 0x156, 0x1371 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Jump", new[] { 0x119, 0x134E }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "DashDodge1", new[] { 0x193, 0x13AE }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "DashDodge2", new[] { 0x1AD }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "EnvironmentalResonance1", new[] { 0x1EA, 0x13D1 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x241 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "NormalAttack", new[] { 0x264 }, allowedInputTypes: new[] { 0x2u }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SpecialAttack", new[] { 0x9CD, 0x1934 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MasterySkill1", new[] { 0x2BB, 0x143A }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MasterySkill2", new[] { 0x2F8, 0x145D }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MasterySkill3", new[] { 0x335, 0x1480 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MasterySkill4", new[] { 0x372, 0x14A3 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "UltimateSkill", new[] { 0x990, 0x1911 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "BattleImagine1", new[] { 0xA0A, 0x1957 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "BattleImagine2", new[] { 0xA47, 0x197A }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "CycleItemsLeft", new[] { 0x1013, 0x1E28 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "UseItem", new[] { 0x3AF, 0x14C6 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "CycleItemsRight", new[] { 0x1050, 0x1E4B }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Action", new[] { 0x537, 0x1598 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "LockOnSwitch1", new[] { 0x3EC, 0x14E9 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "LockOnSwitch2", new[] { 0x420 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ExtraSkill", new[] { 0xA84, 0x199D }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "CancelInteraction", new[] { 0x443, 0x150C }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "TrackQuest", new[] { 0x4FA, 0x1575 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "HideUi", new[] { 0x4BD, 0x1552 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickUseQuestItem", new[] { 0x480, 0x152F }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "RecommendedEvents", new[] { 0xB07, 0x1A06 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "MapOnOff", new[] { 0x676, 0x1679 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Quests", new[] { 0x6B3, 0x169C }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SocialMode", new[] { 0x6F0, 0x16BF }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Talk", new[] { 0xC41, 0x1B0C }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Character", new[] { 0x72D, 0x16E2 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Guild", new[] { 0xE70, 0x1CD3 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ChatChannelUp", new[] { 0x108D }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ChatChannelDown", new[] { 0x10B0 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ChatInputChannelLeft", new[] { 0x10D3 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ChatInputChannelRight", new[] { 0x10F6 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "OpenMenu", new[] { 0x833 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "CloseMenu", new[] { 0x17B4 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ShowMouseCursor", new[] { 0x870, 0x17F1 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "TakePhoto", new[] { 0x750, 0x1705 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Inventory", new[] { 0x78D, 0x1728 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Party", new[] { 0x7B0, 0x174B }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SeasonCenter", new[] { 0x7D3, 0x176E }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "LeaveDungeon", new[] { 0x7F6, 0x1791 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Abilities", new[] { 0x8D0, 0x1851 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "UseItemAlternate", new[] { 0x8F3, 0x1874 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickAction", new[] { 0xB8A, 0x1A6F }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SummonDismissMount", new[] { 0xB2A, 0x1A29 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "TogglePartyVoice", new[] { 0xB67, 0x1A4C }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "AcceptInvite", new[] { 0xBC7, 0x1A92 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "DeclineInvite", new[] { 0xC04, 0x1ACF }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "AutoBattle", new[] { 0xCA1, 0x1B52 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Channel", new[] { 0xC64, 0x1B2F }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "IllustrationGuide", new[] { 0xCDE, 0x1B75 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheel", new[] { 0xD1B, 0x1B98 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "AutoRun", new[] { 0xF39, 0x1D9C }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SwitchQuestLeft", new[] { 0xF99, 0x1DE2 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFF0 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "EditHome", new[] { 0xF16, 0x1D79 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "ZoomOutIn", new[] { 0x574, 0x893, 0x15D5, 0x1814 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "OpenSkillPalette", new[] { 0x120D, 0x1F86 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill1", new[] { 0x1119 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill2", new[] { 0x1156 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill3", new[] { 0x1193 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill4", new[] { 0x11D0 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x1264, 0x1FDD }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SummonAttendantImagine", new[] { 0x1287, 0x2000 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot1", new[] { 0xD58, 0x1BBB }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot2", new[] { 0xD7B, 0x1BDE }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot3", new[] { 0xD9E, 0x1C01 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot4", new[] { 0xDC1, 0x1C24 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot5", new[] { 0xDE4, 0x1C47 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot6", new[] { 0xE07, 0x1C6A }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot7", new[] { 0xE2A, 0x1C8D }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot8", new[] { 0xE4D, 0x1CB0 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Skills", new[] { 0xE93, 0x1CF6 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "Equipment", new[] { 0xEB6, 0x1D19 }),
         };
     public static readonly IReadOnlyList<KeyMouseActionDefinition> KeyMouseQuickWheelActions =
         new KeyMouseActionDefinition[]
         {
-            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "クイックホイール切替", new[] { 0x2882 }),
-            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "クイックホイール編集", new[] { 0x28D4 }),
-            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "クイックホイールを閉じる", new[] { 0x2911 }),
+            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "SwitchQuickWheel", new[] { 0x2882 }),
+            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "EditQuickWheel", new[] { 0x28D4 }),
+            CreateKeyMouseAction(KeybindModeGroup.QuickWheel, "CloseQuickWheel", new[] { 0x2911 }),
         };
     public static readonly IReadOnlyList<KeyMouseActionDefinition> KeyMousePhotoActions =
         new KeyMouseActionDefinition[]
         {
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラ移動-上", new[] { 0x22B5 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラ移動-下", new[] { 0x22CA }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラ移動-左", new[] { 0x22DF }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラ移動-右", new[] { 0x22F4 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラパン-前", new[] { 0x2346 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラパン-後", new[] { 0x235B }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラパン-左", new[] { 0x2370 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "カメラパン-右", new[] { 0x2385 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "ズームアウト", new[] { 0x20BD }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "ズームイン", new[] { 0x20D2 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "画面を非表示にする", new[] { 0x219E }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "撮影", new[] { 0x2124 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "設定メニュー", new[] { 0x266E }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "参加者メニュー", new[] { 0x26AB }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "移動-前", new[] { 0x23D7 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "移動-後", new[] { 0x23EC }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "移動-左", new[] { 0x2401 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "移動-右", new[] { 0x2416 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "ジャンプ", new[] { 0x2043 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "ダッシュ/回避", new[] { 0x2161 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "歩く/走る切替", new[] { 0x26E8 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "特殊攻撃", new[] { 0x2497 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "マスタリースキル1", new[] { 0x24D4 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "マスタリースキル2", new[] { 0x2511 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "マスタリースキル3", new[] { 0x254E }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "マスタリースキル4", new[] { 0x258B }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "究極スキル", new[] { 0x2080 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "乗り物召喚/解除", new[] { 0x25C8 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "終了", new[] { 0x2605 }),
-            CreateKeyMouseAction(KeybindModeGroup.Photo, "メニューを閉じる", new[] { 0x2255 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraMoveUp", new[] { 0x22B5 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraMoveDown", new[] { 0x22CA }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraMoveLeft", new[] { 0x22DF }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraMoveRight", new[] { 0x22F4 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraPanForward", new[] { 0x2346 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraPanBack", new[] { 0x235B }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraPanLeft", new[] { 0x2370 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CameraPanRight", new[] { 0x2385 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "ZoomOut", new[] { 0x20BD }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "ZoomIn", new[] { 0x20D2 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "HideInterface", new[] { 0x219E }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "TakePhoto", new[] { 0x2124 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "SettingsMenu", new[] { 0x266E }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "ParticipantMenu", new[] { 0x26AB }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MoveForward", new[] { 0x23D7 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MoveBack", new[] { 0x23EC }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MoveLeft", new[] { 0x2401 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MoveRight", new[] { 0x2416 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "Jump", new[] { 0x2043 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "DashDodge", new[] { 0x2161 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "ToggleWalkRun", new[] { 0x26E8 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "SpecialAttack", new[] { 0x2497 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MasterySkill1", new[] { 0x24D4 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MasterySkill2", new[] { 0x2511 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MasterySkill3", new[] { 0x254E }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "MasterySkill4", new[] { 0x258B }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "UltimateSkill", new[] { 0x2080 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "SummonDismissMount", new[] { 0x25C8 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "Exit", new[] { 0x2605 }),
+            CreateKeyMouseAction(KeybindModeGroup.Photo, "CloseMenu", new[] { 0x2255 }),
         };
     public static readonly IReadOnlyList<KeyMouseActionDefinition> KeyMouseFishingActions =
         new KeyMouseActionDefinition[]
         {
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "キャスト/竿を引く", new[] { 0x2989 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "竿移動-前", new[] { 0x2B57 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "竿移動-後", new[] { 0x2B6C }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "竿移動-左", new[] { 0x2B81 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "竿移動-右", new[] { 0x2B96 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "釣り/図鑑", new[] { 0x29C6 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "釣り/研究", new[] { 0x2A03 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "釣り餌切替", new[] { 0x2A40 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "竿切替", new[] { 0x2A7D }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "モード/ガイド", new[] { 0x2ABA }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "設定", new[] { 0x2AF7 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "マウス呼出し", new[] { 0x2B34 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "メニューを閉じる", new[] { 0x2C25 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "トーク", new[] { 0x2C62 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "チャット画面チャンネル切り替え-下", new[] { 0x2C85 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "チャット画面チャンネル切り替え-上", new[] { 0x2CA8 }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "チャット入力チャンネル切り替え-左", new[] { 0x2CCB }),
-            CreateKeyMouseAction(KeybindModeGroup.Fishing, "チャット入力チャンネル切り替え-右", new[] { 0x2CEE }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "CastReelIn", new[] { 0x2989 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "RodMoveForward", new[] { 0x2B57 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "RodMoveBack", new[] { 0x2B6C }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "RodMoveLeft", new[] { 0x2B81 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "RodMoveRight", new[] { 0x2B96 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "FishingEncyclopedia", new[] { 0x29C6 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "FishingResearch", new[] { 0x2A03 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "SwitchBait", new[] { 0x2A40 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "SwitchRod", new[] { 0x2A7D }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ModeGuide", new[] { 0x2ABA }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "Settings", new[] { 0x2AF7 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ShowMouseCursor", new[] { 0x2B34 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "CloseMenu", new[] { 0x2C25 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "Talk", new[] { 0x2C62 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatChannelUp", new[] { 0x2C85 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatChannelDown", new[] { 0x2CA8 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatInputChannelLeft", new[] { 0x2CCB }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatInputChannelRight", new[] { 0x2CEE }),
         };
 
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerActions =
@@ -422,30 +424,81 @@ internal static class KeybindCatalog
             .Concat(KeyMouseFishingActions)
             .ToArray();
 
-    public static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> ControllerDisplayMaps =
+    private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> ControllerInputResourceKeys =
         new ReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>>(
             new Dictionary<string, IReadOnlyDictionary<uint, string>>(StringComparer.OrdinalIgnoreCase)
             {
                 ["PlayStation"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "L前後入力", [2u] = "L左右入力", [3u] = "R前後入力", [4u] = "R左右入力",
-                    [5u] = "L2", [6u] = "R2", [7u] = "×", [8u] = "〇", [10u] = "□", [11u] = "△",
-                    [13u] = "touchpad", [14u] = "option", [15u] = "share", [17u] = "L1", [18u] = "R1",
-                    [19u] = "L3", [20u] = "R3", [23u] = "↑", [24u] = "↓", [25u] = "←", [26u] = "→"
+                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
+                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
+                    [3u] = "Keybind.Input.Controller.RightStickVertical",
+                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
+                    [5u] = "Keybind.Input.PlayStation.L2",
+                    [6u] = "Keybind.Input.PlayStation.R2",
+                    [7u] = "Keybind.Input.PlayStation.Cross",
+                    [8u] = "Keybind.Input.PlayStation.Circle",
+                    [10u] = "Keybind.Input.PlayStation.Square",
+                    [11u] = "Keybind.Input.PlayStation.Triangle",
+                    [13u] = "Keybind.Input.PlayStation.TouchPad",
+                    [14u] = "Keybind.Input.PlayStation.Options",
+                    [15u] = "Keybind.Input.PlayStation.Share",
+                    [17u] = "Keybind.Input.PlayStation.L1",
+                    [18u] = "Keybind.Input.PlayStation.R1",
+                    [19u] = "Keybind.Input.PlayStation.L3",
+                    [20u] = "Keybind.Input.PlayStation.R3",
+                    [23u] = "Keybind.Input.Controller.DPadUp",
+                    [24u] = "Keybind.Input.Controller.DPadDown",
+                    [25u] = "Keybind.Input.Controller.DPadLeft",
+                    [26u] = "Keybind.Input.Controller.DPadRight"
                 }),
                 ["Nintendo"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "L前後入力", [2u] = "L左右入力", [3u] = "R前後入力", [4u] = "R左右入力",
-                    [5u] = "ZL", [6u] = "ZR", [7u] = "B", [8u] = "A", [10u] = "Y", [11u] = "X",
-                    [13u] = "-", [14u] = "+", [15u] = "capture", [17u] = "L", [18u] = "R",
-                    [19u] = "LS", [20u] = "RS", [23u] = "↑", [24u] = "↓", [25u] = "←", [26u] = "→"
+                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
+                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
+                    [3u] = "Keybind.Input.Controller.RightStickVertical",
+                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
+                    [5u] = "Keybind.Input.Nintendo.ZL",
+                    [6u] = "Keybind.Input.Nintendo.ZR",
+                    [7u] = "Keybind.Input.Nintendo.B",
+                    [8u] = "Keybind.Input.Nintendo.A",
+                    [10u] = "Keybind.Input.Nintendo.Y",
+                    [11u] = "Keybind.Input.Nintendo.X",
+                    [13u] = "Keybind.Input.Nintendo.Minus",
+                    [14u] = "Keybind.Input.Nintendo.Plus",
+                    [15u] = "Keybind.Input.Nintendo.Capture",
+                    [17u] = "Keybind.Input.Nintendo.L",
+                    [18u] = "Keybind.Input.Nintendo.R",
+                    [19u] = "Keybind.Input.Nintendo.LeftStick",
+                    [20u] = "Keybind.Input.Nintendo.RightStick",
+                    [23u] = "Keybind.Input.Controller.DPadUp",
+                    [24u] = "Keybind.Input.Controller.DPadDown",
+                    [25u] = "Keybind.Input.Controller.DPadLeft",
+                    [26u] = "Keybind.Input.Controller.DPadRight"
                 }),
                 ["Xbox"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "L前後入力", [2u] = "L左右入力", [3u] = "R前後入力", [4u] = "R左右入力",
-                    [5u] = "LT", [6u] = "RT", [7u] = "A", [8u] = "B", [10u] = "X", [11u] = "Y",
-                    [13u] = "view", [14u] = "menu", [15u] = "xbox", [17u] = "LB", [18u] = "RB",
-                    [19u] = "LS", [20u] = "RS", [23u] = "↑", [24u] = "↓", [25u] = "←", [26u] = "→"
+                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
+                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
+                    [3u] = "Keybind.Input.Controller.RightStickVertical",
+                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
+                    [5u] = "Keybind.Input.Xbox.LT",
+                    [6u] = "Keybind.Input.Xbox.RT",
+                    [7u] = "Keybind.Input.Xbox.A",
+                    [8u] = "Keybind.Input.Xbox.B",
+                    [10u] = "Keybind.Input.Xbox.X",
+                    [11u] = "Keybind.Input.Xbox.Y",
+                    [13u] = "Keybind.Input.Xbox.View",
+                    [14u] = "Keybind.Input.Xbox.Menu",
+                    [15u] = "Keybind.Input.Xbox.Guide",
+                    [17u] = "Keybind.Input.Xbox.LB",
+                    [18u] = "Keybind.Input.Xbox.RB",
+                    [19u] = "Keybind.Input.Xbox.LeftStick",
+                    [20u] = "Keybind.Input.Xbox.RightStick",
+                    [23u] = "Keybind.Input.Controller.DPadUp",
+                    [24u] = "Keybind.Input.Controller.DPadDown",
+                    [25u] = "Keybind.Input.Controller.DPadLeft",
+                    [26u] = "Keybind.Input.Controller.DPadRight"
                 })
             });
 
@@ -453,18 +506,18 @@ internal static class KeybindCatalog
         new ReadOnlyDictionary<string, int[]>(
             new Dictionary<string, int[]>(StringComparer.Ordinal)
             {
-                [GetActionId(KeybindModeGroup.Main, "環境共鳴能力2")] = new[] { 0x241 },
-                [GetActionId(KeybindModeGroup.Main, "クエスト切り替え（右）")] = new[] { 0xFF0 },
-                [GetActionId(KeybindModeGroup.Main, "ホーム設計図")] = new[] { 0x1264 }
+                [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x241 },
+                [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFF0 },
+                [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
             });
 
     public static readonly IReadOnlyDictionary<string, int[]> KeyMouseOffsetAliases =
         new ReadOnlyDictionary<string, int[]>(
             new Dictionary<string, int[]>(StringComparer.Ordinal)
             {
-                [GetActionId(KeybindModeGroup.Main, "環境共鳴能力2")] = new[] { 0x227 },
-                [GetActionId(KeybindModeGroup.Main, "クエスト切り替え（右）")] = new[] { 0xFD6 },
-                [GetActionId(KeybindModeGroup.Main, "ホーム設計図")] = new[] { 0x124A }
+                [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
+                [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
+                [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A }
             });
 
     public static readonly IReadOnlyDictionary<uint, uint> HelperMainToActionValue =
@@ -479,33 +532,33 @@ internal static class KeybindCatalog
 
     private static readonly HashSet<string> KeyMouseLControlPrefixActionIds = new(StringComparer.Ordinal)
     {
-        GetActionId(KeybindModeGroup.Main, "UI非表示"),
-        GetActionId(KeybindModeGroup.Main, "パーティボイス切り替え"),
-        GetActionId(KeybindModeGroup.Main, "ロールスキル1"),
-        GetActionId(KeybindModeGroup.Main, "ロールスキル2"),
-        GetActionId(KeybindModeGroup.Main, "ロールスキル3"),
-        GetActionId(KeybindModeGroup.Main, "ロールスキル4")
+        GetActionId(KeybindModeGroup.Main, "HideUi"),
+        GetActionId(KeybindModeGroup.Main, "TogglePartyVoice"),
+        GetActionId(KeybindModeGroup.Main, "RoleSkill1"),
+        GetActionId(KeybindModeGroup.Main, "RoleSkill2"),
+        GetActionId(KeybindModeGroup.Main, "RoleSkill3"),
+        GetActionId(KeybindModeGroup.Main, "RoleSkill4")
     };
 
     public static readonly IReadOnlyDictionary<string, string> ControllerQuickWheelLinks =
-        CreateDirectLink(KeybindModeGroup.QuickWheel, "クイックホイールを閉じる", KeybindModeGroup.Main, "クイックホイール");
+        CreateDirectLink(KeybindModeGroup.QuickWheel, "CloseQuickWheel", KeybindModeGroup.Main, "QuickWheel");
 
     public static readonly IReadOnlyDictionary<string, string> KeyMouseQuickWheelLinks =
-        CreateDirectLink(KeybindModeGroup.QuickWheel, "クイックホイールを閉じる", KeybindModeGroup.Main, "クイックホイール");
+        CreateDirectLink(KeybindModeGroup.QuickWheel, "CloseQuickWheel", KeybindModeGroup.Main, "QuickWheel");
 
     public static readonly IReadOnlyDictionary<string, string> ControllerPhotoModeLinks =
         BuildModeLinks(
             ControllerMainActions,
             ControllerPhotoActions,
             new Dictionary<string, string>(StringComparer.Ordinal),
-            new HashSet<string>(StringComparer.Ordinal) { "撮影", "メニューを閉じる" });
+            new HashSet<string>(StringComparer.Ordinal) { "TakePhoto", "CloseMenu" });
 
     public static readonly IReadOnlyDictionary<string, string> ControllerFishingModeLinks =
         BuildModeLinks(
             ControllerMainActions,
             ControllerFishingActions,
             new Dictionary<string, string>(StringComparer.Ordinal),
-            new HashSet<string>(StringComparer.Ordinal) { "メニューを閉じる" });
+            new HashSet<string>(StringComparer.Ordinal) { "CloseMenu" });
 
     public static readonly IReadOnlyDictionary<string, string> KeyMousePhotoModeLinks =
         BuildModeLinks(
@@ -513,14 +566,14 @@ internal static class KeybindCatalog
             KeyMousePhotoActions,
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                ["カメラ-前"] = "カメラパン-前",
-                ["カメラ-後"] = "カメラパン-後",
-                ["カメラ-左"] = "カメラパン-左",
-                ["カメラ-右"] = "カメラパン-右",
-                ["ダッシュ/回避1"] = "ダッシュ/回避",
-                ["撮影"] = "終了"
+                ["CameraForward"] = "CameraPanForward",
+                ["CameraBack"] = "CameraPanBack",
+                ["CameraLeft"] = "CameraPanLeft",
+                ["CameraRight"] = "CameraPanRight",
+                ["DashDodge1"] = "DashDodge",
+                ["TakePhoto"] = "Exit"
             },
-            new HashSet<string>(StringComparer.Ordinal) { "撮影" });
+            new HashSet<string>(StringComparer.Ordinal) { "TakePhoto" });
 
     public static readonly IReadOnlyDictionary<string, string> KeyMouseFishingModeLinks =
         BuildModeLinks(
@@ -529,9 +582,435 @@ internal static class KeybindCatalog
             new Dictionary<string, string>(StringComparer.Ordinal),
             new HashSet<string>(StringComparer.Ordinal));
 
-    public static string GetActionId(KeybindModeGroup group, string name)
+    public static string GetActionId(KeybindModeGroup group, string key)
     {
-        var prefix = group switch
+        var prefix = GetActionGroupPrefix(group);
+        return $"{prefix}:{key}";
+    }
+
+
+    public static string GetActionLocalizationKey(IKeybindActionDefinition definition)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return $"Keybind.Action.{definition.Group}.{definition.Key}";
+    }
+
+
+    public static string GetControllerInputStorageKey(uint value)
+    {
+        return value switch
+        {
+            1u => "LeftStickVertical",
+            2u => "LeftStickHorizontal",
+            3u => "RightStickVertical",
+            4u => "RightStickHorizontal",
+            5u => "LeftTrigger",
+            6u => "RightTrigger",
+            7u => "FaceSouth",
+            8u => "FaceEast",
+            10u => "FaceWest",
+            11u => "FaceNorth",
+            13u => "SystemLeft",
+            14u => "SystemRight",
+            15u => "SystemCenter",
+            17u => "LeftShoulder",
+            18u => "RightShoulder",
+            19u => "LeftStickPress",
+            20u => "RightStickPress",
+            23u => "DPadUp",
+            24u => "DPadDown",
+            25u => "DPadLeft",
+            26u => "DPadRight",
+            _ => $"ControllerValue:0x{value:X8}"
+        };
+    }
+
+    public static bool TryGetControllerInputValue(string? storageKey, out uint value)
+    {
+        value = storageKey switch
+        {
+            "LeftStickVertical" => 1u,
+            "LeftStickHorizontal" => 2u,
+            "RightStickVertical" => 3u,
+            "RightStickHorizontal" => 4u,
+            "LeftTrigger" => 5u,
+            "RightTrigger" => 6u,
+            "FaceSouth" => 7u,
+            "FaceEast" => 8u,
+            "FaceWest" => 10u,
+            "FaceNorth" => 11u,
+            "SystemLeft" => 13u,
+            "SystemRight" => 14u,
+            "SystemCenter" => 15u,
+            "LeftShoulder" => 17u,
+            "RightShoulder" => 18u,
+            "LeftStickPress" => 19u,
+            "RightStickPress" => 20u,
+            "DPadUp" => 23u,
+            "DPadDown" => 24u,
+            "DPadLeft" => 25u,
+            "DPadRight" => 26u,
+            _ => 0u
+        };
+
+        return value != 0u
+            || TryParseTaggedUInt32(storageKey, "ControllerValue:", out value);
+    }
+
+    public static string GetHelperBindingStorageKey(uint mainValue)
+    {
+        return mainValue switch
+        {
+            0x01u => "LeftShoulder",
+            0x02u => "RightShoulder",
+            0x04u => "LeftTrigger",
+            0x08u => "RightTrigger",
+            _ => $"HelperValue:0x{mainValue:X8}"
+        };
+    }
+
+    public static bool TryGetHelperBindingMainValue(string? storageKey, out uint mainValue)
+    {
+        mainValue = storageKey switch
+        {
+            "LeftShoulder" => 0x01u,
+            "RightShoulder" => 0x02u,
+            "LeftTrigger" => 0x04u,
+            "RightTrigger" => 0x08u,
+            _ => 0u
+        };
+
+        return mainValue != 0u
+            || TryParseTaggedUInt32(storageKey, "HelperValue:", out mainValue);
+    }
+
+    public static string GetActionHelperStorageKey(uint stateValue)
+    {
+        return stateValue switch
+        {
+            ActionStateSingle => "Single",
+            ActionStateHelper1 => "Helper1",
+            ActionStateHelper2 => "Helper2",
+            _ => $"ActionState:0x{stateValue:X8}"
+        };
+    }
+
+    public static bool TryGetActionHelperState(string? storageKey, out uint stateValue)
+    {
+        stateValue = storageKey switch
+        {
+            "Single" => ActionStateSingle,
+            "Helper1" => ActionStateHelper1,
+            "Helper2" => ActionStateHelper2,
+            _ => 0u
+        };
+
+        return storageKey is "Single" or "Helper1" or "Helper2";
+    }
+
+    public static string GetPresetStorageKey(uint value)
+    {
+        return value switch
+        {
+            1u => "ConfirmCancelPreset1",
+            2u => "ConfirmCancelPreset2",
+            3u => "ConfirmCancelPreset3",
+            _ => $"ConfirmCancelPreset:0x{value:X8}"
+        };
+    }
+
+    public static bool TryGetPresetValue(string? storageKey, out uint value)
+    {
+        value = storageKey switch
+        {
+            "ConfirmCancelPreset1" => 1u,
+            "ConfirmCancelPreset2" => 2u,
+            "ConfirmCancelPreset3" => 3u,
+            _ => 0u
+        };
+
+        return value != 0u
+            || TryParseTaggedUInt32(storageKey, "ConfirmCancelPreset:", out value);
+    }
+
+    public static string GetKeyMouseInputStorageKey(uint inputType, uint value)
+    {
+        var typeName = inputType switch
+        {
+            InputTypeKeyboard => "Keyboard",
+            InputTypeMouse => "Mouse",
+            _ => $"InputType0x{inputType:X8}"
+        };
+
+        if (TryGetKnownKeyMouseStorageName(inputType, value, out var storageName))
+        {
+            return $"{typeName}:{storageName}";
+        }
+
+        return $"{typeName}:0x{value:X8}";
+    }
+
+    public static bool TryGetKeyMouseInputValue(
+        string? storageKey,
+        out uint inputType,
+        out uint value)
+    {
+        inputType = 0u;
+        value = 0u;
+        if (string.IsNullOrWhiteSpace(storageKey))
+        {
+            return false;
+        }
+
+        var separatorIndex = storageKey.IndexOf(':');
+        if (separatorIndex <= 0 || separatorIndex == storageKey.Length - 1)
+        {
+            return false;
+        }
+
+        var typeKey = storageKey[..separatorIndex];
+        var valueKey = storageKey[(separatorIndex + 1)..];
+
+        inputType = typeKey switch
+        {
+            "Keyboard" => InputTypeKeyboard,
+            "Mouse" => InputTypeMouse,
+            _ => 0u
+        };
+
+        if (inputType == InputTypeKeyboard)
+        {
+            return TryGetKeyboardInputValue(valueKey, out value)
+                || TryParsePrefixedHexUInt32(valueKey, out value);
+        }
+
+        if (inputType == InputTypeMouse)
+        {
+            return TryGetMouseInputValue(valueKey, out value)
+                || TryParsePrefixedHexUInt32(valueKey, out value);
+        }
+
+        if (!TryParseTaggedUInt32(typeKey, "InputType", out inputType))
+        {
+            return false;
+        }
+
+        return TryParsePrefixedHexUInt32(valueKey, out value);
+    }
+
+    private static bool TryGetKnownKeyMouseStorageName(
+        uint inputType,
+        uint value,
+        out string storageName)
+    {
+        if (inputType == InputTypeKeyboard)
+        {
+            storageName = GetKeyboardStorageName(value) ?? string.Empty;
+            return storageName.Length > 0;
+        }
+
+        if (inputType == InputTypeMouse)
+        {
+            storageName = GetMouseStorageName(value) ?? string.Empty;
+            return storageName.Length > 0;
+        }
+
+        storageName = string.Empty;
+        return false;
+    }
+
+    private static string? GetKeyboardStorageName(uint value)
+    {
+        if (value is >= 0x30u and <= 0x39u)
+        {
+            return ((char)value).ToString();
+        }
+
+        if (value is >= 0x61u and <= 0x7Au)
+        {
+            return char.ToUpperInvariant((char)value).ToString();
+        }
+
+        if (value is >= 0x100u and <= 0x109u)
+        {
+            return $"Num{value - 0x100u}";
+        }
+
+        if (value is >= 0x11Au and <= 0x125u)
+        {
+            return $"F{value - 0x119u}";
+        }
+
+        return value switch
+        {
+            0x9u => "Tab",
+            0xDu => "Enter",
+            0x1Bu => "Escape",
+            0x20u => "Space",
+            0x27u => "Colon",
+            0x2Cu => "LessThan",
+            0x2Du => "Minus",
+            0x2Eu => "GreaterThan",
+            0x2Fu => "Slash",
+            0x3Bu => "Semicolon",
+            0x3Du => "Caret",
+            0x5Bu => "At",
+            0x5Cu => "RightBracket",
+            0x5Du => "LeftBracket",
+            0x60u => "Tilde",
+            0x111u => "ArrowUp",
+            0x112u => "ArrowDown",
+            0x113u => "ArrowRight",
+            0x114u => "ArrowLeft",
+            0x12Fu => "RightShift",
+            0x130u => "LeftShift",
+            0x131u => "RightControl",
+            0x132u => "LeftControl",
+            0x133u => "RightAlt",
+            0x134u => "LeftAlt",
+            _ => null
+        };
+    }
+
+    private static bool TryGetKeyboardInputValue(string storageName, out uint value)
+    {
+        value = storageName switch
+        {
+            "Tab" => 0x9u,
+            "Enter" => 0xDu,
+            "Escape" => 0x1Bu,
+            "Space" => 0x20u,
+            "Colon" => 0x27u,
+            "LessThan" => 0x2Cu,
+            "Minus" => 0x2Du,
+            "GreaterThan" => 0x2Eu,
+            "Slash" => 0x2Fu,
+            "Semicolon" => 0x3Bu,
+            "Caret" => 0x3Du,
+            "At" => 0x5Bu,
+            "RightBracket" => 0x5Cu,
+            "LeftBracket" => 0x5Du,
+            "Tilde" => 0x60u,
+            "ArrowUp" => 0x111u,
+            "ArrowDown" => 0x112u,
+            "ArrowRight" => 0x113u,
+            "ArrowLeft" => 0x114u,
+            "RightShift" => 0x12Fu,
+            "LeftShift" => 0x130u,
+            "RightControl" => 0x131u,
+            "LeftControl" => 0x132u,
+            "RightAlt" => 0x133u,
+            "LeftAlt" => 0x134u,
+            _ => 0u
+        };
+
+        if (value != 0u)
+        {
+            return true;
+        }
+
+        if (storageName.Length == 1)
+        {
+            var character = storageName[0];
+            if (character is >= '0' and <= '9')
+            {
+                value = character;
+                return true;
+            }
+
+            if (character is >= 'A' and <= 'Z')
+            {
+                value = char.ToLowerInvariant(character);
+                return true;
+            }
+        }
+
+        if (storageName.Length == 4
+            && storageName.StartsWith("Num", StringComparison.Ordinal)
+            && storageName[3] is >= '0' and <= '9')
+        {
+            value = 0x100u + (uint)(storageName[3] - '0');
+            return true;
+        }
+
+        if (storageName.Length is 2 or 3
+            && storageName[0] == 'F'
+            && int.TryParse(storageName[1..], NumberStyles.None, CultureInfo.InvariantCulture, out var functionKey)
+            && functionKey is >= 1 and <= 12)
+        {
+            value = 0x119u + (uint)functionKey;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static string? GetMouseStorageName(uint value)
+    {
+        return value switch
+        {
+            0u => "LeftClick",
+            1u => "RightClick",
+            2u => "MiddleButton",
+            3u => "Button3",
+            4u => "Button4",
+            5u => "Button5",
+            6u => "Button6",
+            7u => "ScrollWheel",
+            _ => null
+        };
+    }
+
+    private static bool TryGetMouseInputValue(string storageName, out uint value)
+    {
+        value = storageName switch
+        {
+            "LeftClick" => 0u,
+            "RightClick" => 1u,
+            "MiddleButton" => 2u,
+            "Button3" => 3u,
+            "Button4" => 4u,
+            "Button5" => 5u,
+            "Button6" => 6u,
+            "ScrollWheel" => 7u,
+            _ => uint.MaxValue
+        };
+
+        return value != uint.MaxValue;
+    }
+
+    private static bool TryParsePrefixedHexUInt32(string value, out uint parsed)
+    {
+        parsed = 0u;
+        return value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+            && TryParseUInt32(value, out parsed);
+    }
+
+    private static bool TryParseTaggedUInt32(string? value, string prefix, out uint parsed)
+    {
+        parsed = 0u;
+        return !string.IsNullOrEmpty(value)
+            && value.StartsWith(prefix, StringComparison.Ordinal)
+            && TryParseUInt32(value[prefix.Length..], out parsed);
+    }
+
+    private static bool TryParseUInt32(string value, out uint parsed)
+    {
+        const NumberStyles hexadecimalStyles = NumberStyles.AllowHexSpecifier;
+        var number = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+            ? value[2..]
+            : value;
+
+        return uint.TryParse(
+            number,
+            hexadecimalStyles,
+            CultureInfo.InvariantCulture,
+            out parsed);
+    }
+
+    private static string GetActionGroupPrefix(KeybindModeGroup group)
+    {
+        return group switch
         {
             KeybindModeGroup.Main => "main",
             KeybindModeGroup.QuickWheel => "quick_wheel",
@@ -539,28 +1018,8 @@ internal static class KeybindCatalog
             KeybindModeGroup.Fishing => "fishing",
             _ => throw new ArgumentOutOfRangeException(nameof(group))
         };
-
-        return $"{prefix}:{name}";
     }
 
-    public static string GetLegacyLayoutActionKey(IKeybindActionDefinition definition)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-
-        return definition.Group switch
-        {
-            KeybindModeGroup.Photo when definition.Name == "終了" => "撮影モード撮影モード終了",
-            KeybindModeGroup.Photo => $"撮影モード{definition.Name}",
-            KeybindModeGroup.Fishing => $"釣りモード{definition.Name}",
-            _ => definition.Name
-        };
-    }
-
-    public static string GetActionLocalizationKey(IKeybindActionDefinition definition)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        return $"Keybind.Action.{definition.Group}.{definition.Name}";
-    }
 
     public static IReadOnlyList<ControllerInputOption> GetControllerOptions(
         string? controllerType,
@@ -568,13 +1027,13 @@ internal static class KeybindCatalog
     {
         ArgumentNullException.ThrowIfNull(texts);
 
-        var labels = GetControllerDisplayMap(controllerType);
+        var resourceKeys = GetControllerInputResourceMap(controllerType);
         return ControllerInputOptions
-            .Where(option => labels.ContainsKey(option.Value))
+            .Where(option => resourceKeys.ContainsKey(option.Value))
             .Select(option => CreateControllerInputOption(
                 controllerType,
                 option.Value,
-                labels[option.Value],
+                texts[resourceKeys[option.Value]],
                 texts))
             .ToArray();
     }
@@ -585,13 +1044,32 @@ internal static class KeybindCatalog
     {
         ArgumentNullException.ThrowIfNull(texts);
 
-        var labels = GetControllerDisplayMap(controllerType);
         return new[]
         {
-            CreateHelperBindingOption(controllerType, 0x01u, 17u, labels[17u], texts),
-            CreateHelperBindingOption(controllerType, 0x02u, 18u, labels[18u], texts),
-            CreateHelperBindingOption(controllerType, 0x04u, 5u, labels[5u], texts),
-            CreateHelperBindingOption(controllerType, 0x08u, 6u, labels[6u], texts)
+            CreateHelperBindingOption(
+                controllerType,
+                0x01u,
+                17u,
+                GetControllerInputDisplayLabel(controllerType, 17u, texts),
+                texts),
+            CreateHelperBindingOption(
+                controllerType,
+                0x02u,
+                18u,
+                GetControllerInputDisplayLabel(controllerType, 18u, texts),
+                texts),
+            CreateHelperBindingOption(
+                controllerType,
+                0x04u,
+                5u,
+                GetControllerInputDisplayLabel(controllerType, 5u, texts),
+                texts),
+            CreateHelperBindingOption(
+                controllerType,
+                0x08u,
+                6u,
+                GetControllerInputDisplayLabel(controllerType, 6u, texts),
+                texts)
         };
     }
 
@@ -626,9 +1104,9 @@ internal static class KeybindCatalog
             ? definition.AllowedValues
             : ControllerInputOptions.Select(option => option.Value).ToArray();
 
-        var labels = GetControllerDisplayMap(controllerType);
+        var resourceKeys = GetControllerInputResourceMap(controllerType);
         return allowedValues
-            .Where(labels.ContainsKey)
+            .Where(resourceKeys.ContainsKey)
             .Where(value => definition.HasExplicitAllowedValues
                 || !definition.UsesHelper
                 || blockedValues is null
@@ -636,22 +1114,45 @@ internal static class KeybindCatalog
             .Select(value => CreateControllerInputOption(
                 controllerType,
                 value,
-                labels[value],
+                texts[resourceKeys[value]],
                 texts))
             .ToArray();
     }
 
-    public static IReadOnlyList<KeyMouseInputOption> GetAllowedKeyMouseOptions(KeyMouseActionDefinition definition)
+    public static IReadOnlyList<KeyMouseInputOption> GetAllowedKeyMouseOptions(
+        KeyMouseActionDefinition definition,
+        PluginLocalizer texts)
     {
         ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(texts);
 
         var candidateOptions = definition.AllowedInputTypes.Count == 0
             ? KeyMouseInputOptions
             : KeyMouseInputOptions.Where(option => definition.AllowedInputTypes.Contains(option.InputType));
 
         return candidateOptions
-            .Select(option => CreateKeyMouseInputOption(option.InputType, option.Value, option.Label))
+            .Select(option => CreateKeyMouseInputOption(
+                option.InputType,
+                option.Value,
+                GetKeyMouseInputDisplayLabel(option, texts)))
             .ToArray();
+    }
+
+    public static KeyMouseInputOption? CreateKnownKeyMouseInputOption(
+        uint inputType,
+        uint value,
+        PluginLocalizer texts)
+    {
+        ArgumentNullException.ThrowIfNull(texts);
+
+        var option = KeyMouseInputOptions.FirstOrDefault(candidate =>
+            candidate.InputType == inputType && candidate.Value == value);
+        return option is null
+            ? null
+            : CreateKeyMouseInputOption(
+                option.InputType,
+                option.Value,
+                GetKeyMouseInputDisplayLabel(option, texts));
     }
 
     public static bool UsesLControlPrefix(KeyMouseActionDefinition definition)
@@ -660,11 +1161,24 @@ internal static class KeybindCatalog
         return KeyMouseLControlPrefixActionIds.Contains(definition.Id);
     }
 
-    public static IReadOnlyDictionary<uint, string> GetControllerDisplayMap(string? controllerType)
+    public static string GetControllerInputDisplayLabel(
+        string? controllerType,
+        uint value,
+        PluginLocalizer texts)
     {
-        return ControllerDisplayMaps.TryGetValue(controllerType ?? string.Empty, out var map)
+        ArgumentNullException.ThrowIfNull(texts);
+
+        var resourceKeys = GetControllerInputResourceMap(controllerType);
+        return resourceKeys.TryGetValue(value, out var resourceKey)
+            ? texts[resourceKey]
+            : texts.Format("Keybind.Value.UnknownControllerInput", value);
+    }
+
+    private static IReadOnlyDictionary<uint, string> GetControllerInputResourceMap(string? controllerType)
+    {
+        return ControllerInputResourceKeys.TryGetValue(controllerType ?? string.Empty, out var map)
             ? map
-            : ControllerDisplayMaps[DefaultControllerType];
+            : ControllerInputResourceKeys[DefaultControllerType];
     }
 
     public static IReadOnlyList<ControllerActionDefinition> GetControllerActions(KeybindModeGroup group)
@@ -698,9 +1212,14 @@ internal static class KeybindCatalog
         uint cancelButtonValue,
         PluginLocalizer texts)
     {
-        var labels = GetControllerDisplayMap(controllerType);
-        var confirmLabel = labels[confirmButtonValue];
-        var cancelLabel = labels[cancelButtonValue];
+        var confirmLabel = GetControllerInputDisplayLabel(
+            controllerType,
+            confirmButtonValue,
+            texts);
+        var cancelLabel = GetControllerInputDisplayLabel(
+            controllerType,
+            cancelButtonValue,
+            texts);
 
         return new PresetOption(presetValue, $"{confirmLabel} / {cancelLabel}")
         {
@@ -742,7 +1261,16 @@ internal static class KeybindCatalog
         };
     }
 
-    private static KeyMouseInputOption CreateKeyMouseInputOption(
+    private static string GetKeyMouseInputDisplayLabel(
+        KeyMouseInputOption option,
+        PluginLocalizer texts)
+    {
+        return option.InputType == InputTypeMouse
+            ? texts[$"Keybind.Input.Mouse.{option.Label}"]
+            : option.Label;
+    }
+
+    public static KeyMouseInputOption CreateKeyMouseInputOption(
         uint inputType,
         uint value,
         string label)
@@ -883,15 +1411,15 @@ internal static class KeybindCatalog
 
     private static ControllerActionDefinition CreateControllerAction(
         KeybindModeGroup group,
-        string name,
+        string key,
         IReadOnlyList<int> relativeOffsets,
         IReadOnlyList<uint>? allowedValues = null,
         bool usesHelper = true)
     {
         return new ControllerActionDefinition(
-            GetActionId(group, name),
+            GetActionId(group, key),
             group,
-            name,
+            key,
             relativeOffsets,
             allowedValues ?? Array.Empty<uint>(),
             allowedValues is not null,
@@ -900,28 +1428,28 @@ internal static class KeybindCatalog
 
     private static KeyMouseActionDefinition CreateKeyMouseAction(
         KeybindModeGroup group,
-        string name,
+        string key,
         IReadOnlyList<int> relativeOffsets,
         IReadOnlyList<uint>? allowedInputTypes = null)
     {
         return new KeyMouseActionDefinition(
-            GetActionId(group, name),
+            GetActionId(group, key),
             group,
-            name,
+            key,
             relativeOffsets,
             allowedInputTypes ?? Array.Empty<uint>());
     }
 
     private static IReadOnlyDictionary<string, string> CreateDirectLink(
         KeybindModeGroup modeGroup,
-        string modeName,
+        string modeKey,
         KeybindModeGroup sourceGroup,
-        string sourceName)
+        string sourceKey)
     {
         return new ReadOnlyDictionary<string, string>(
             new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [GetActionId(modeGroup, modeName)] = GetActionId(sourceGroup, sourceName)
+                [GetActionId(modeGroup, modeKey)] = GetActionId(sourceGroup, sourceKey)
             });
     }
 
@@ -929,38 +1457,38 @@ internal static class KeybindCatalog
         IReadOnlyList<TDefinition> normalActions,
         IReadOnlyList<TDefinition> modeActions,
         IReadOnlyDictionary<string, string> exceptionNormalToMode,
-        ISet<string> unlinkedModeNames)
+        ISet<string> unlinkedModeKeys)
         where TDefinition : IKeybindActionDefinition
     {
-        var normalIdsByName = normalActions.ToDictionary(
-            action => action.Name,
+        var normalIdsByKey = normalActions.ToDictionary(
+            action => action.Key,
             action => action.Id,
             StringComparer.Ordinal);
-        var modeIdsByName = modeActions.ToDictionary(
-            action => action.Name,
+        var modeIdsByKey = modeActions.ToDictionary(
+            action => action.Key,
             action => action.Id,
             StringComparer.Ordinal);
 
         var links = new Dictionary<string, string>(StringComparer.Ordinal);
-        var exceptionModeNames = exceptionNormalToMode.Values.ToHashSet(StringComparer.Ordinal);
+        var exceptionModeKeys = exceptionNormalToMode.Values.ToHashSet(StringComparer.Ordinal);
 
-        foreach (var (modeName, modeId) in modeIdsByName)
+        foreach (var (modeKey, modeId) in modeIdsByKey)
         {
-            if (unlinkedModeNames.Contains(modeName) || exceptionModeNames.Contains(modeName))
+            if (unlinkedModeKeys.Contains(modeKey) || exceptionModeKeys.Contains(modeKey))
             {
                 continue;
             }
 
-            if (normalIdsByName.TryGetValue(modeName, out var sourceId))
+            if (normalIdsByKey.TryGetValue(modeKey, out var sourceId))
             {
                 links[modeId] = sourceId;
             }
         }
 
-        foreach (var (normalName, modeName) in exceptionNormalToMode)
+        foreach (var (normalKey, modeKey) in exceptionNormalToMode)
         {
-            if (normalIdsByName.TryGetValue(normalName, out var sourceId)
-                && modeIdsByName.TryGetValue(modeName, out var modeId))
+            if (normalIdsByKey.TryGetValue(normalKey, out var sourceId)
+                && modeIdsByKey.TryGetValue(modeKey, out var modeId))
             {
                 links[modeId] = sourceId;
             }
