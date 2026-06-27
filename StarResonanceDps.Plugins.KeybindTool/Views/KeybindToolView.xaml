@@ -594,11 +594,17 @@
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
                                     Margin="0,0,0,12">
                         <StackPanel>
-                            <Border Style="{StaticResource Keybind.IndependentCheckBoxField}"
-                                    Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <CheckBox Content="{Binding Texts[Keybind.CheckBox.FishingIndependent]}"
-                                          Style="{StaticResource Keybind.IndependentCheckBox}"
-                                          IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}" />
+                            <Border Style="{StaticResource Keybind.IndependentCheckBoxField}">
+                                <Grid>
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.FishingIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding ControllerFishingModeIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.FishingIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
                             </Border>
                             <Grid>
                                 <ContentControl Content="{Binding ControllerFishingActions}"

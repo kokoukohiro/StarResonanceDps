@@ -258,6 +258,7 @@ internal static class KeybindCatalog
             CreateControllerAction(KeybindModeGroup.Fishing, "ModeGuide", new[] { 0x2AD4 }),
             CreateControllerAction(KeybindModeGroup.Fishing, "Settings", new[] { 0x2B11 }),
             CreateControllerAction(KeybindModeGroup.Fishing, "CloseMenu", new[] { 0x2C3F }),
+            CreateControllerAction(KeybindModeGroup.Fishing, "SocialMode", new[] { 0x2C02 }),
         };
 
     public static readonly IReadOnlyList<KeyMouseActionDefinition> KeyMouseMainActions =
@@ -403,6 +404,7 @@ internal static class KeybindCatalog
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "Settings", new[] { 0x2AF7 }),
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "ShowMouseCursor", new[] { 0x2B34 }),
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "CloseMenu", new[] { 0x2C25 }),
+            CreateKeyMouseAction(KeybindModeGroup.Fishing, "SocialMode", new[] { 0x2BE8 }),
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "Talk", new[] { 0x2C62 }),
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatChannelUp", new[] { 0x2C85 }),
             CreateKeyMouseAction(KeybindModeGroup.Fishing, "ChatChannelDown", new[] { 0x2CA8 }),
@@ -424,100 +426,131 @@ internal static class KeybindCatalog
             .Concat(KeyMouseFishingActions)
             .ToArray();
 
-    private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> ControllerInputResourceKeys =
+    private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> ControllerInputLabels =
         new ReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>>(
             new Dictionary<string, IReadOnlyDictionary<uint, string>>(StringComparer.OrdinalIgnoreCase)
             {
                 ["PlayStation"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
-                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
-                    [3u] = "Keybind.Input.Controller.RightStickVertical",
-                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
-                    [5u] = "Keybind.Input.PlayStation.L2",
-                    [6u] = "Keybind.Input.PlayStation.R2",
-                    [7u] = "Keybind.Input.PlayStation.Cross",
-                    [8u] = "Keybind.Input.PlayStation.Circle",
-                    [10u] = "Keybind.Input.PlayStation.Square",
-                    [11u] = "Keybind.Input.PlayStation.Triangle",
-                    [13u] = "Keybind.Input.PlayStation.TouchPad",
-                    [14u] = "Keybind.Input.PlayStation.Options",
-                    [15u] = "Keybind.Input.PlayStation.Share",
-                    [17u] = "Keybind.Input.PlayStation.L1",
-                    [18u] = "Keybind.Input.PlayStation.R1",
-                    [19u] = "Keybind.Input.PlayStation.L3",
-                    [20u] = "Keybind.Input.PlayStation.R3",
-                    [23u] = "Keybind.Input.Controller.DPadUp",
-                    [24u] = "Keybind.Input.Controller.DPadDown",
-                    [25u] = "Keybind.Input.Controller.DPadLeft",
-                    [26u] = "Keybind.Input.Controller.DPadRight"
+                    [1u] = "LeftStickVertical",
+                    [2u] = "LeftStickHorizontal",
+                    [3u] = "RightStickVertical",
+                    [4u] = "RightStickHorizontal",
+                    [5u] = "L2",
+                    [6u] = "R2",
+                    [7u] = "Cross",
+                    [8u] = "Circle",
+                    [10u] = "Square",
+                    [11u] = "Triangle",
+                    [13u] = "TouchPad",
+                    [14u] = "Options",
+                    [15u] = "Share",
+                    [17u] = "L1",
+                    [18u] = "R1",
+                    [19u] = "L3",
+                    [20u] = "R3",
+                    [23u] = "DPadUp",
+                    [24u] = "DPadDown",
+                    [25u] = "DPadLeft",
+                    [26u] = "DPadRight"
                 }),
                 ["Nintendo"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
-                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
-                    [3u] = "Keybind.Input.Controller.RightStickVertical",
-                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
-                    [5u] = "Keybind.Input.Nintendo.ZL",
-                    [6u] = "Keybind.Input.Nintendo.ZR",
-                    [7u] = "Keybind.Input.Nintendo.B",
-                    [8u] = "Keybind.Input.Nintendo.A",
-                    [10u] = "Keybind.Input.Nintendo.Y",
-                    [11u] = "Keybind.Input.Nintendo.X",
-                    [13u] = "Keybind.Input.Nintendo.Minus",
-                    [14u] = "Keybind.Input.Nintendo.Plus",
-                    [15u] = "Keybind.Input.Nintendo.Capture",
-                    [17u] = "Keybind.Input.Nintendo.L",
-                    [18u] = "Keybind.Input.Nintendo.R",
-                    [19u] = "Keybind.Input.Nintendo.LeftStick",
-                    [20u] = "Keybind.Input.Nintendo.RightStick",
-                    [23u] = "Keybind.Input.Controller.DPadUp",
-                    [24u] = "Keybind.Input.Controller.DPadDown",
-                    [25u] = "Keybind.Input.Controller.DPadLeft",
-                    [26u] = "Keybind.Input.Controller.DPadRight"
+                    [1u] = "LeftStickVertical",
+                    [2u] = "LeftStickHorizontal",
+                    [3u] = "RightStickVertical",
+                    [4u] = "RightStickHorizontal",
+                    [5u] = "ZL",
+                    [6u] = "ZR",
+                    [7u] = "B",
+                    [8u] = "A",
+                    [10u] = "Y",
+                    [11u] = "X",
+                    [13u] = "Minus",
+                    [14u] = "Plus",
+                    [15u] = "Capture",
+                    [17u] = "L",
+                    [18u] = "R",
+                    [19u] = "LeftStick",
+                    [20u] = "RightStick",
+                    [23u] = "DPadUp",
+                    [24u] = "DPadDown",
+                    [25u] = "DPadLeft",
+                    [26u] = "DPadRight"
                 }),
                 ["Xbox"] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
                 {
-                    [1u] = "Keybind.Input.Controller.LeftStickVertical",
-                    [2u] = "Keybind.Input.Controller.LeftStickHorizontal",
-                    [3u] = "Keybind.Input.Controller.RightStickVertical",
-                    [4u] = "Keybind.Input.Controller.RightStickHorizontal",
-                    [5u] = "Keybind.Input.Xbox.LT",
-                    [6u] = "Keybind.Input.Xbox.RT",
-                    [7u] = "Keybind.Input.Xbox.A",
-                    [8u] = "Keybind.Input.Xbox.B",
-                    [10u] = "Keybind.Input.Xbox.X",
-                    [11u] = "Keybind.Input.Xbox.Y",
-                    [13u] = "Keybind.Input.Xbox.View",
-                    [14u] = "Keybind.Input.Xbox.Menu",
-                    [15u] = "Keybind.Input.Xbox.Guide",
-                    [17u] = "Keybind.Input.Xbox.LB",
-                    [18u] = "Keybind.Input.Xbox.RB",
-                    [19u] = "Keybind.Input.Xbox.LeftStick",
-                    [20u] = "Keybind.Input.Xbox.RightStick",
-                    [23u] = "Keybind.Input.Controller.DPadUp",
-                    [24u] = "Keybind.Input.Controller.DPadDown",
-                    [25u] = "Keybind.Input.Controller.DPadLeft",
-                    [26u] = "Keybind.Input.Controller.DPadRight"
+                    [1u] = "LeftStickVertical",
+                    [2u] = "LeftStickHorizontal",
+                    [3u] = "RightStickVertical",
+                    [4u] = "RightStickHorizontal",
+                    [5u] = "LT",
+                    [6u] = "RT",
+                    [7u] = "A",
+                    [8u] = "B",
+                    [10u] = "X",
+                    [11u] = "Y",
+                    [13u] = "View",
+                    [14u] = "Menu",
+                    [15u] = "Xbox",
+                    [17u] = "LB",
+                    [18u] = "RB",
+                    [19u] = "LeftStick",
+                    [20u] = "RightStick",
+                    [23u] = "DPadUp",
+                    [24u] = "DPadDown",
+                    [25u] = "DPadLeft",
+                    [26u] = "DPadRight"
                 })
             });
 
-    public static readonly IReadOnlyDictionary<string, int[]> ControllerOffsetAliases =
-        new ReadOnlyDictionary<string, int[]>(
-            new Dictionary<string, int[]>(StringComparer.Ordinal)
+    public static readonly IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> ControllerBindingLayoutRelativeOffsets =
+        new ReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>(
+            new Dictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>
             {
-                [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x241 },
-                [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFF0 },
-                [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
+                [KeybindBindingDataLayout.BeforeUpdate] =
+                    new ReadOnlyDictionary<string, int[]>(
+                        new Dictionary<string, int[]>(StringComparer.Ordinal)
+                        {
+                            [GetActionId(KeybindModeGroup.Main, "Action")] = new[] { 0x551 },
+                            [GetActionId(KeybindModeGroup.Main, "UseItemAlternate")] = new[] { 0x90D },
+                            [GetActionId(KeybindModeGroup.Main, "AcceptInvite")] = new[] { 0xBE1 },
+                            [GetActionId(KeybindModeGroup.Main, "DeclineInvite")] = new[] { 0xC1E },
+                            [GetActionId(KeybindModeGroup.Main, "OpenSkillPalette")] = new[] { 0x1227 }
+                        }),
+                [KeybindBindingDataLayout.AfterUpdate] =
+                    new ReadOnlyDictionary<string, int[]>(
+                        new Dictionary<string, int[]>(StringComparer.Ordinal)
+                        {
+                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x241 },
+                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFF0 },
+                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
+                        })
             });
 
-    public static readonly IReadOnlyDictionary<string, int[]> KeyMouseOffsetAliases =
-        new ReadOnlyDictionary<string, int[]>(
-            new Dictionary<string, int[]>(StringComparer.Ordinal)
+    public static readonly IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> KeyMouseBindingLayoutRelativeOffsets =
+        new ReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>(
+            new Dictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>
             {
-                [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
-                [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
-                [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A }
+                [KeybindBindingDataLayout.BeforeUpdate] =
+                    new ReadOnlyDictionary<string, int[]>(
+                        new Dictionary<string, int[]>(StringComparer.Ordinal)
+                        {
+                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
+                        }),
+                [KeybindBindingDataLayout.AfterUpdate] =
+                    new ReadOnlyDictionary<string, int[]>(
+                        new Dictionary<string, int[]>(StringComparer.Ordinal)
+                        {
+                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
+                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
+                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A },
+                            [GetActionId(KeybindModeGroup.Main, "Action")] = new[] { 0x537 },
+                            [GetActionId(KeybindModeGroup.Main, "UseItemAlternate")] = new[] { 0x8F3 },
+                            [GetActionId(KeybindModeGroup.Main, "AcceptInvite")] = new[] { 0xBC7 },
+                            [GetActionId(KeybindModeGroup.Main, "DeclineInvite")] = new[] { 0xC04 },
+                            [GetActionId(KeybindModeGroup.Main, "OpenSkillPalette")] = new[] { 0x120D }
+                        })
             });
 
     public static readonly IReadOnlyDictionary<uint, uint> HelperMainToActionValue =
@@ -581,6 +614,107 @@ internal static class KeybindCatalog
             KeyMouseFishingActions,
             new Dictionary<string, string>(StringComparer.Ordinal),
             new HashSet<string>(StringComparer.Ordinal));
+
+    static KeybindCatalog()
+    {
+        ValidateBindingLayoutSlotOwnership();
+    }
+
+    public static IReadOnlyList<int> GetControllerRelativeOffsets(
+        ControllerActionDefinition definition,
+        KeybindBindingDataLayout layout)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return GetBindingRelativeOffsets(
+            definition.Id,
+            definition.RelativeOffsets,
+            ControllerBindingLayoutRelativeOffsets,
+            layout);
+    }
+
+    public static IReadOnlyList<int> GetKeyMouseRelativeOffsets(
+        KeyMouseActionDefinition definition,
+        KeybindBindingDataLayout layout)
+    {
+        ArgumentNullException.ThrowIfNull(definition);
+        return GetBindingRelativeOffsets(
+            definition.Id,
+            definition.RelativeOffsets,
+            KeyMouseBindingLayoutRelativeOffsets,
+            layout);
+    }
+
+    private static IReadOnlyList<int> GetBindingRelativeOffsets(
+        string actionId,
+        IReadOnlyList<int> defaultOffsets,
+        IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> layoutOverrides,
+        KeybindBindingDataLayout layout)
+    {
+        if (!layoutOverrides.TryGetValue(layout, out var perActionOverrides))
+        {
+            throw new ArgumentOutOfRangeException(nameof(layout));
+        }
+
+        return perActionOverrides.TryGetValue(actionId, out var offsets)
+            ? offsets
+            : defaultOffsets;
+    }
+
+    private static void ValidateBindingLayoutSlotOwnership()
+    {
+        foreach (var layout in new[]
+        {
+            KeybindBindingDataLayout.BeforeUpdate,
+            KeybindBindingDataLayout.AfterUpdate
+        })
+        {
+            var writeRanges = new List<(int Start, int End, string Device, string ActionId, int RelativeOffset)>();
+
+            foreach (var action in ControllerActions)
+            {
+                foreach (var relativeOffset in GetControllerRelativeOffsets(action, layout))
+                {
+                    writeRanges.Add((
+                        relativeOffset - sizeof(uint),
+                        relativeOffset + (sizeof(uint) * 2),
+                        "controller",
+                        action.Id,
+                        relativeOffset));
+                }
+            }
+
+            foreach (var action in KeyMouseActions)
+            {
+                foreach (var relativeOffset in GetKeyMouseRelativeOffsets(action, layout))
+                {
+                    writeRanges.Add((
+                        relativeOffset - sizeof(uint),
+                        relativeOffset + sizeof(uint),
+                        "keymouse",
+                        action.Id,
+                        relativeOffset));
+                }
+            }
+
+            for (var currentIndex = 0; currentIndex < writeRanges.Count; currentIndex++)
+            {
+                var current = writeRanges[currentIndex];
+                for (var otherIndex = currentIndex + 1; otherIndex < writeRanges.Count; otherIndex++)
+                {
+                    var other = writeRanges[otherIndex];
+                    if (Math.Max(current.Start, other.Start) >= Math.Min(current.End, other.End))
+                    {
+                        continue;
+                    }
+
+                    throw new InvalidOperationException(
+                        $"Keybind binding write ranges overlap: {layout} / "
+                        + $"{current.Device}:{current.ActionId}@0x{current.RelativeOffset:X5} / "
+                        + $"{other.Device}:{other.ActionId}@0x{other.RelativeOffset:X5}");
+                }
+            }
+        }
+    }
 
     public static string GetActionId(KeybindModeGroup group, string key)
     {
@@ -1027,13 +1161,13 @@ internal static class KeybindCatalog
     {
         ArgumentNullException.ThrowIfNull(texts);
 
-        var resourceKeys = GetControllerInputResourceMap(controllerType);
+        var inputLabels = GetControllerInputLabelMap(controllerType);
         return ControllerInputOptions
-            .Where(option => resourceKeys.ContainsKey(option.Value))
+            .Where(option => inputLabels.ContainsKey(option.Value))
             .Select(option => CreateControllerInputOption(
                 controllerType,
                 option.Value,
-                texts[resourceKeys[option.Value]],
+                inputLabels[option.Value],
                 texts))
             .ToArray();
     }
@@ -1104,9 +1238,9 @@ internal static class KeybindCatalog
             ? definition.AllowedValues
             : ControllerInputOptions.Select(option => option.Value).ToArray();
 
-        var resourceKeys = GetControllerInputResourceMap(controllerType);
+        var inputLabels = GetControllerInputLabelMap(controllerType);
         return allowedValues
-            .Where(resourceKeys.ContainsKey)
+            .Where(inputLabels.ContainsKey)
             .Where(value => definition.HasExplicitAllowedValues
                 || !definition.UsesHelper
                 || blockedValues is null
@@ -1114,17 +1248,15 @@ internal static class KeybindCatalog
             .Select(value => CreateControllerInputOption(
                 controllerType,
                 value,
-                texts[resourceKeys[value]],
+                inputLabels[value],
                 texts))
             .ToArray();
     }
 
     public static IReadOnlyList<KeyMouseInputOption> GetAllowedKeyMouseOptions(
-        KeyMouseActionDefinition definition,
-        PluginLocalizer texts)
+        KeyMouseActionDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
-        ArgumentNullException.ThrowIfNull(texts);
 
         var candidateOptions = definition.AllowedInputTypes.Count == 0
             ? KeyMouseInputOptions
@@ -1134,17 +1266,14 @@ internal static class KeybindCatalog
             .Select(option => CreateKeyMouseInputOption(
                 option.InputType,
                 option.Value,
-                GetKeyMouseInputDisplayLabel(option, texts)))
+                option.Label))
             .ToArray();
     }
 
     public static KeyMouseInputOption? CreateKnownKeyMouseInputOption(
         uint inputType,
-        uint value,
-        PluginLocalizer texts)
+        uint value)
     {
-        ArgumentNullException.ThrowIfNull(texts);
-
         var option = KeyMouseInputOptions.FirstOrDefault(candidate =>
             candidate.InputType == inputType && candidate.Value == value);
         return option is null
@@ -1152,7 +1281,7 @@ internal static class KeybindCatalog
             : CreateKeyMouseInputOption(
                 option.InputType,
                 option.Value,
-                GetKeyMouseInputDisplayLabel(option, texts));
+                option.Label);
     }
 
     public static bool UsesLControlPrefix(KeyMouseActionDefinition definition)
@@ -1168,17 +1297,17 @@ internal static class KeybindCatalog
     {
         ArgumentNullException.ThrowIfNull(texts);
 
-        var resourceKeys = GetControllerInputResourceMap(controllerType);
-        return resourceKeys.TryGetValue(value, out var resourceKey)
-            ? texts[resourceKey]
+        var inputLabels = GetControllerInputLabelMap(controllerType);
+        return inputLabels.TryGetValue(value, out var label)
+            ? label
             : texts.Format("Keybind.Value.UnknownControllerInput", value);
     }
 
-    private static IReadOnlyDictionary<uint, string> GetControllerInputResourceMap(string? controllerType)
+    private static IReadOnlyDictionary<uint, string> GetControllerInputLabelMap(string? controllerType)
     {
-        return ControllerInputResourceKeys.TryGetValue(controllerType ?? string.Empty, out var map)
+        return ControllerInputLabels.TryGetValue(controllerType ?? string.Empty, out var map)
             ? map
-            : ControllerInputResourceKeys[DefaultControllerType];
+            : ControllerInputLabels[DefaultControllerType];
     }
 
     public static IReadOnlyList<ControllerActionDefinition> GetControllerActions(KeybindModeGroup group)
@@ -1259,15 +1388,6 @@ internal static class KeybindCatalog
         {
             Visual = CreateControllerInputVisual(controllerType, controllerValue, label, texts)
         };
-    }
-
-    private static string GetKeyMouseInputDisplayLabel(
-        KeyMouseInputOption option,
-        PluginLocalizer texts)
-    {
-        return option.InputType == InputTypeMouse
-            ? texts[$"Keybind.Input.Mouse.{option.Label}"]
-            : option.Label;
     }
 
     public static KeyMouseInputOption CreateKeyMouseInputOption(

@@ -10,6 +10,12 @@ internal enum KeybindModeGroup
     Fishing
 }
 
+internal enum KeybindBindingDataLayout
+{
+    BeforeUpdate,
+    AfterUpdate
+}
+
 internal interface IKeybindActionDefinition
 {
     string Id { get; }
@@ -120,6 +126,9 @@ internal sealed class ControllerLayoutProfile
 
     [JsonPropertyName("photo_mode_independent")]
     public bool PhotoModeIndependent { get; set; }
+
+    [JsonPropertyName("fishing_mode_independent")]
+    public bool FishingModeIndependent { get; set; }
 
     [JsonPropertyName("keybind")]
     public ControllerKeybindProfile Keybind { get; set; } = new();

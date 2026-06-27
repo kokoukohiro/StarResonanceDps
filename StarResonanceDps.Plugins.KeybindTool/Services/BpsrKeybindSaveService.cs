@@ -32,6 +32,7 @@ internal sealed class BpsrKeybindSaveService
         var data = Decompress(raw);
 
         var inputAnchorOffset = FindAnchor(data, InputAnchor, _texts["Keybind.Error.RequiredInputDataNotFound"]);
+        var bindingDataLayout = DetectBindingDataLayout(data, inputAnchorOffset);
         var (helper1Offset, helper2Offset) = FindHelperOffsets(data);
 
         var presetAnchorOffset = FindAnchorOrNegative(data, PresetAnchor);
@@ -42,6 +43,7 @@ internal sealed class BpsrKeybindSaveService
         ValidateSessionLayout(
             data,
             inputAnchorOffset,
+            bindingDataLayout,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -50,6 +52,7 @@ internal sealed class BpsrKeybindSaveService
             filePath,
             data,
             inputAnchorOffset,
+            bindingDataLayout,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -62,17 +65,11 @@ internal sealed class BpsrKeybindSaveService
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(definition);
 
-        var candidates = GetOffsets(
+        return GetOffsets(
             session.InputAnchorOffset,
-            definition.RelativeOffsets,
-            KeybindCatalog.ControllerOffsetAliases,
-            definition.Id);
-
-        var resolved = candidates
-            .Where(offset => IsControllerActionRecord(session.Data, offset))
-            .ToArray();
-
-        return resolved.Length > 0 ? resolved : candidates;
+            KeybindCatalog.GetControllerRelativeOffsets(
+                definition,
+                session.BindingDataLayout));
     }
 
     public IReadOnlyList<int> GetKeyMouseOffsets(
@@ -82,49 +79,29 @@ internal sealed class BpsrKeybindSaveService
         ArgumentNullException.ThrowIfNull(session);
         ArgumentNullException.ThrowIfNull(definition);
 
-        var candidates = GetOffsets(
+        return GetOffsets(
             session.InputAnchorOffset,
-            definition.RelativeOffsets,
-            KeybindCatalog.KeyMouseOffsetAliases,
-            definition.Id);
-
-        var resolved = candidates
-            .Where(offset => IsKeyMouseActionRecord(session.Data, offset))
-            .ToArray();
-
-        return resolved.Length > 0 ? resolved : candidates;
-    }
-
-    public IReadOnlyList<int> GetWritableControllerOffsets(
-        KeybindSaveSession session,
-        ControllerActionDefinition definition)
-    {
-        return GetControllerOffsets(session, definition)
-            .Where(offset => IsControllerActionRecord(session.Data, offset))
-            .ToArray();
-    }
-
-    public IReadOnlyList<int> GetWritableKeyMouseOffsets(
-        KeybindSaveSession session,
-        KeyMouseActionDefinition definition)
-    {
-        return GetKeyMouseOffsets(session, definition)
-            .Where(offset => IsKeyMouseActionRecord(session.Data, offset))
-            .ToArray();
+            KeybindCatalog.GetKeyMouseRelativeOffsets(
+                definition,
+                session.BindingDataLayout));
     }
 
     public uint ReadUInt32(KeybindSaveSession session, int offset)
     {
+        ArgumentNullException.ThrowIfNull(session);
         return ReadUInt32(session.Data, offset);
     }
 
     public uint ReadInputType(KeybindSaveSession session, int valueOffset)
     {
+        ArgumentNullException.ThrowIfNull(session);
         return ReadUInt32(session.Data, valueOffset - sizeof(uint));
     }
 
     public void WriteUInt32(byte[] data, int offset, uint value)
     {
+        ArgumentNullException.ThrowIfNull(data);
+
         EnsureRange(data, offset, sizeof(uint));
         BinaryPrimitives.WriteUInt32LittleEndian(data.AsSpan(offset, sizeof(uint)), value);
     }
@@ -230,26 +207,111 @@ internal sealed class BpsrKeybindSaveService
         return (helper1Offset, helper2Offset);
     }
 
+    private static KeybindBindingDataLayout DetectBindingDataLayout(
+        byte[] data,
+        int inputAnchorOffset)
+    {
+        var beforeUpdateScore = ScoreBindingDataLayout(
+            data,
+            inputAnchorOffset,
+            KeybindBindingDataLayout.BeforeUpdate);
+        var afterUpdateScore = ScoreBindingDataLayout(
+            data,
+            inputAnchorOffset,
+            KeybindBindingDataLayout.AfterUpdate);
+
+        return afterUpdateScore > beforeUpdateScore
+            ? KeybindBindingDataLayout.AfterUpdate
+            : KeybindBindingDataLayout.BeforeUpdate;
+    }
+
+    private static int ScoreBindingDataLayout(
+        byte[] data,
+        int inputAnchorOffset,
+        KeybindBindingDataLayout layout)
+    {
+        var score = 0;
+
+        foreach (var action in KeybindCatalog.ControllerActions)
+        {
+            foreach (var relativeOffset in KeybindCatalog.GetControllerRelativeOffsets(action, layout))
+            {
+                var valueOffset = inputAnchorOffset + relativeOffset;
+                if (HasExpectedInputType(
+                    data,
+                    valueOffset,
+                    KeybindCatalog.InputTypeController))
+                {
+                    score++;
+                }
+            }
+        }
+
+        foreach (var action in KeybindCatalog.KeyMouseActions)
+        {
+            foreach (var relativeOffset in KeybindCatalog.GetKeyMouseRelativeOffsets(action, layout))
+            {
+                var valueOffset = inputAnchorOffset + relativeOffset;
+                if (HasExpectedInputType(
+                    data,
+                    valueOffset,
+                    KeybindCatalog.InputTypeKeyboard,
+                    KeybindCatalog.InputTypeMouse))
+                {
+                    score++;
+                }
+            }
+        }
+
+        return score;
+    }
+
+    private static bool HasExpectedInputType(
+        byte[] data,
+        int valueOffset,
+        params uint[] expectedTypes)
+    {
+        if (!HasRange(data, valueOffset - sizeof(uint), sizeof(uint) * 2))
+        {
+            return false;
+        }
+
+        var inputType = BinaryPrimitives.ReadUInt32LittleEndian(
+            data.AsSpan(valueOffset - sizeof(uint), sizeof(uint)));
+        return expectedTypes.Contains(inputType);
+    }
+
     private void ValidateSessionLayout(
         byte[] data,
         int inputAnchorOffset,
+        KeybindBindingDataLayout bindingDataLayout,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
     {
         foreach (var action in KeybindCatalog.ControllerActions)
         {
-            foreach (var offset in action.RelativeOffsets)
+            foreach (var relativeOffset in KeybindCatalog.GetControllerRelativeOffsets(
+                action,
+                bindingDataLayout))
             {
-                EnsureRange(data, inputAnchorOffset + offset - sizeof(uint), sizeof(uint) * 3);
+                EnsureRange(
+                    data,
+                    inputAnchorOffset + relativeOffset - sizeof(uint),
+                    sizeof(uint) * 3);
             }
         }
 
         foreach (var action in KeybindCatalog.KeyMouseActions)
         {
-            foreach (var offset in action.RelativeOffsets)
+            foreach (var relativeOffset in KeybindCatalog.GetKeyMouseRelativeOffsets(
+                action,
+                bindingDataLayout))
             {
-                EnsureRange(data, inputAnchorOffset + offset - sizeof(uint), sizeof(uint) * 2);
+                EnsureRange(
+                    data,
+                    inputAnchorOffset + relativeOffset - sizeof(uint),
+                    sizeof(uint) * 2);
             }
         }
 
@@ -264,60 +326,11 @@ internal sealed class BpsrKeybindSaveService
 
     private static IReadOnlyList<int> GetOffsets(
         int inputAnchorOffset,
-        IReadOnlyList<int> relativeOffsets,
-        IReadOnlyDictionary<string, int[]> aliases,
-        string actionName)
+        IReadOnlyList<int> relativeOffsets)
     {
-        var values = new List<int>(relativeOffsets.Count + 2);
-        foreach (var relativeOffset in relativeOffsets)
-        {
-            if (!values.Contains(relativeOffset))
-            {
-                values.Add(relativeOffset);
-            }
-        }
-
-        if (aliases.TryGetValue(actionName, out var aliasOffsets))
-        {
-            foreach (var aliasOffset in aliasOffsets)
-            {
-                if (!values.Contains(aliasOffset))
-                {
-                    values.Add(aliasOffset);
-                }
-            }
-        }
-
-        return values
+        return relativeOffsets
             .Select(relativeOffset => inputAnchorOffset + relativeOffset)
             .ToArray();
-    }
-
-    private bool IsControllerActionRecord(byte[] data, int valueOffset)
-    {
-        if (!HasRange(data, valueOffset - sizeof(uint), sizeof(uint) * 3))
-        {
-            return false;
-        }
-
-        var inputType = ReadUInt32(data, valueOffset - sizeof(uint));
-        var stateValue = ReadUInt32(data, valueOffset + sizeof(uint));
-
-        return inputType == KeybindCatalog.InputTypeController
-            && (stateValue is KeybindCatalog.ActionStateSingle
-                or KeybindCatalog.ActionStateHelper1
-                or KeybindCatalog.ActionStateHelper2);
-    }
-
-    private bool IsKeyMouseActionRecord(byte[] data, int valueOffset)
-    {
-        if (!HasRange(data, valueOffset - sizeof(uint), sizeof(uint) * 2))
-        {
-            return false;
-        }
-
-        var inputType = ReadUInt32(data, valueOffset - sizeof(uint));
-        return inputType is KeybindCatalog.InputTypeKeyboard or KeybindCatalog.InputTypeMouse;
     }
 
     private static bool IsKnownHelperValue(uint value)
@@ -351,6 +364,7 @@ internal sealed class KeybindSaveSession
         string filePath,
         byte[] data,
         int inputAnchorOffset,
+        KeybindBindingDataLayout bindingDataLayout,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
@@ -358,6 +372,7 @@ internal sealed class KeybindSaveSession
         FilePath = filePath;
         Data = data;
         InputAnchorOffset = inputAnchorOffset;
+        BindingDataLayout = bindingDataLayout;
         Helper1Offset = helper1Offset;
         Helper2Offset = helper2Offset;
         PresetOffset = presetOffset;
@@ -368,6 +383,8 @@ internal sealed class KeybindSaveSession
     public byte[] Data { get; private set; }
 
     public int InputAnchorOffset { get; }
+
+    public KeybindBindingDataLayout BindingDataLayout { get; }
 
     public int Helper1Offset { get; }
 

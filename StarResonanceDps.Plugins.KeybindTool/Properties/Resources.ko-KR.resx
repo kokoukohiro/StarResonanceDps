@@ -1,51 +1,110 @@
-<?xml version='1.0' encoding='utf-8'?>
-<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:schema id="root">
-    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xs:element name="root" ns1:IsDataSet="true">
-      <xs:complexType>
-        <xs:choice maxOccurs="unbounded">
-          <xs:element name="metadata">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" />
-              </xs:sequence>
-              <xs:attribute name="name" use="required" type="xsd:string" />
-              <xs:attribute name="type" type="xsd:string" />
-              <xs:attribute name="mimetype" type="xsd:string" />
-              <xs:attribute ref="xml:space" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="assembly">
-            <xs:complexType>
-              <xs:attribute name="alias" type="xsd:string" />
-              <xs:attribute name="name" type="xsd:string" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="data">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
-                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
-              </xs:sequence>
-              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
-              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
-              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
-              <xs:attribute ref="xml:space" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="resheader">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
-              </xs:sequence>
-              <xs:attribute name="name" type="xsd:string" use="required" />
-            </xs:complexType>
-          </xs:element>
-        </xs:choice>
-      </xs:complexType>
-    </xs:element>
-  </xs:schema>
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -59,31 +118,31 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Keybind.Action.Fishing.CastReelIn" xml:space="preserve">
-    <value>캐스팅 / 릴 감기</value>
+    <value>낚싯대 던지기/감기</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatChannelDown" xml:space="preserve">
-    <value>채팅 채널 전환 - 아래</value>
+    <value>채팅 채널 아래으로 전환</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatChannelUp" xml:space="preserve">
-    <value>채팅 채널 전환 - 위</value>
+    <value>채팅 채널 위으로 전환</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatInputChannelLeft" xml:space="preserve">
-    <value>채팅 입력 채널 전환 - 왼쪽</value>
+    <value>채팅 채널 왼쪽으로 전환</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatInputChannelRight" xml:space="preserve">
-    <value>채팅 입력 채널 전환 - 오른쪽</value>
+    <value>채팅 채널 오른쪽으로 전환</value>
   </data>
   <data name="Keybind.Action.Fishing.CloseMenu" xml:space="preserve">
     <value>메뉴 닫기</value>
   </data>
   <data name="Keybind.Action.Fishing.FishingEncyclopedia" xml:space="preserve">
-    <value>낚시 / 도감</value>
+    <value>낚시/도감</value>
   </data>
   <data name="Keybind.Action.Fishing.FishingResearch" xml:space="preserve">
-    <value>낚시 / 연구</value>
+    <value>낚시/연구</value>
   </data>
   <data name="Keybind.Action.Fishing.ModeGuide" xml:space="preserve">
-    <value>모드 / 가이드</value>
+    <value>콘텐츠/가이드</value>
   </data>
   <data name="Keybind.Action.Fishing.RodMoveBack" xml:space="preserve">
     <value>낚싯대 이동 - 뒤</value>
@@ -109,6 +168,9 @@
   <data name="Keybind.Action.Fishing.ShowMouseCursor" xml:space="preserve">
     <value>마우스 커서 표시</value>
   </data>
+  <data name="Keybind.Action.Fishing.SocialMode" xml:space="preserve">
+    <value>채팅</value>
+  </data>
   <data name="Keybind.Action.Fishing.SwitchBait" xml:space="preserve">
     <value>미끼 전환</value>
   </data>
@@ -125,19 +187,19 @@
     <value>초대 수락</value>
   </data>
   <data name="Keybind.Action.Main.Action" xml:space="preserve">
-    <value>액션</value>
+    <value>상호작용</value>
   </data>
   <data name="Keybind.Action.Main.AutoBattle" xml:space="preserve">
     <value>자동 전투</value>
   </data>
   <data name="Keybind.Action.Main.AutoRun" xml:space="preserve">
-    <value>자동 이동</value>
+    <value>자동 질주</value>
   </data>
   <data name="Keybind.Action.Main.BattleImagine1" xml:space="preserve">
-    <value>배틀 이매진 1</value>
+    <value>배틀 이매진1</value>
   </data>
   <data name="Keybind.Action.Main.BattleImagine2" xml:space="preserve">
-    <value>배틀 이매진 2</value>
+    <value>배틀 이매진2</value>
   </data>
   <data name="Keybind.Action.Main.CameraForwardBack" xml:space="preserve">
     <value>카메라 - 앞/뒤</value>
@@ -155,16 +217,16 @@
     <value>캐릭터</value>
   </data>
   <data name="Keybind.Action.Main.ChatChannelDown" xml:space="preserve">
-    <value>채팅 채널 전환 - 아래</value>
+    <value>채팅 채널 아래으로 전환</value>
   </data>
   <data name="Keybind.Action.Main.ChatChannelUp" xml:space="preserve">
-    <value>채팅 채널 전환 - 위</value>
+    <value>채팅 채널 위으로 전환</value>
   </data>
   <data name="Keybind.Action.Main.ChatInputChannelLeft" xml:space="preserve">
-    <value>채팅 입력 채널 전환 - 왼쪽</value>
+    <value>채팅 채널 왼쪽으로 전환</value>
   </data>
   <data name="Keybind.Action.Main.ChatInputChannelRight" xml:space="preserve">
-    <value>채팅 입력 채널 전환 - 오른쪽</value>
+    <value>채팅 채널 오른쪽으로 전환</value>
   </data>
   <data name="Keybind.Action.Main.CloseMenu" xml:space="preserve">
     <value>메뉴 닫기</value>
@@ -176,37 +238,37 @@
     <value>커서 이동 - 위/아래</value>
   </data>
   <data name="Keybind.Action.Main.CycleItemsLeft" xml:space="preserve">
-    <value>아이템 전환 - 왼쪽</value>
+    <value>왼쪽으로 아이템 전환</value>
   </data>
   <data name="Keybind.Action.Main.CycleItemsRight" xml:space="preserve">
-    <value>아이템 전환 - 오른쪽</value>
+    <value>오른쪽으로 아이템 전환</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge" xml:space="preserve">
-    <value>대시 / 회피</value>
+    <value>대시</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge1" xml:space="preserve">
-    <value>대시 / 회피 1</value>
+    <value>대시1</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge2" xml:space="preserve">
-    <value>대시 / 회피 2</value>
+    <value>대시2</value>
   </data>
   <data name="Keybind.Action.Main.DeclineInvite" xml:space="preserve">
     <value>초대 거절</value>
   </data>
   <data name="Keybind.Action.Main.EditHome" xml:space="preserve">
-    <value>홈 편집</value>
+    <value>가문 편집기 트리거</value>
   </data>
   <data name="Keybind.Action.Main.EnvironmentalResonance1" xml:space="preserve">
-    <value>환경 공명 능력 1</value>
+    <value>환경 공명 능력1</value>
   </data>
   <data name="Keybind.Action.Main.EnvironmentalResonance2" xml:space="preserve">
-    <value>환경 공명 능력 2</value>
+    <value>환경 공명 능력2</value>
   </data>
   <data name="Keybind.Action.Main.Equipment" xml:space="preserve">
     <value>장비</value>
   </data>
   <data name="Keybind.Action.Main.ExtraSkill" xml:space="preserve">
-    <value>엑스트라 스킬</value>
+    <value>추가 스킬</value>
   </data>
   <data name="Keybind.Action.Main.Guild" xml:space="preserve">
     <value>길드</value>
@@ -215,13 +277,13 @@
     <value>UI 숨기기</value>
   </data>
   <data name="Keybind.Action.Main.HomeBlueprint" xml:space="preserve">
-    <value>홈 설계도</value>
+    <value>가든 블루프린트</value>
   </data>
   <data name="Keybind.Action.Main.IllustrationGuide" xml:space="preserve">
-    <value>일러스트 가이드</value>
+    <value>이미지 가이드</value>
   </data>
   <data name="Keybind.Action.Main.Inventory" xml:space="preserve">
-    <value>소지품</value>
+    <value>가방</value>
   </data>
   <data name="Keybind.Action.Main.Jump" xml:space="preserve">
     <value>점프</value>
@@ -230,28 +292,28 @@
     <value>던전 나가기</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch" xml:space="preserve">
-    <value>록온 / 전환</value>
+    <value>고정/변경</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch1" xml:space="preserve">
-    <value>록온 / 전환 1</value>
+    <value>고정/변경1</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch2" xml:space="preserve">
-    <value>록온 / 전환 2</value>
+    <value>고정/변경2</value>
   </data>
   <data name="Keybind.Action.Main.MapOnOff" xml:space="preserve">
-    <value>지도 켜기/끄기</value>
+    <value>맵 열기/닫기</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill1" xml:space="preserve">
-    <value>마스터리 스킬 1</value>
+    <value>마스터리 스킬1</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill2" xml:space="preserve">
-    <value>마스터리 스킬 2</value>
+    <value>마스터리 스킬2</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill3" xml:space="preserve">
-    <value>마스터리 스킬 3</value>
+    <value>마스터리 스킬3</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill4" xml:space="preserve">
-    <value>마스터리 스킬 4</value>
+    <value>마스터리 스킬4</value>
   </data>
   <data name="Keybind.Action.Main.MoveBack" xml:space="preserve">
     <value>이동 - 뒤</value>
@@ -278,7 +340,7 @@
     <value>메뉴 열기</value>
   </data>
   <data name="Keybind.Action.Main.OpenSkillPalette" xml:space="preserve">
-    <value>스킬 팔레트 열기</value>
+    <value>스킬 서랍 열기</value>
   </data>
   <data name="Keybind.Action.Main.Party" xml:space="preserve">
     <value>파티</value>
@@ -287,103 +349,103 @@
     <value>퀘스트</value>
   </data>
   <data name="Keybind.Action.Main.QuickAction" xml:space="preserve">
-    <value>빠른 조작</value>
+    <value>빠른 설명</value>
   </data>
   <data name="Keybind.Action.Main.QuickUseQuestItem" xml:space="preserve">
     <value>퀘스트 아이템 빠른 사용</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheel" xml:space="preserve">
-    <value>퀵 휠</value>
+    <value>퀵 슬롯 표시/닫기</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot1" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 1</value>
+    <value>퀵 슬롯 1번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot2" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 2</value>
+    <value>퀵 슬롯 2번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot3" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 3</value>
+    <value>퀵 슬롯 3번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot4" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 4</value>
+    <value>퀵 슬롯 4번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot5" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 5</value>
+    <value>퀵 슬롯 5번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot6" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 6</value>
+    <value>퀵 슬롯 6번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot7" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 7</value>
+    <value>퀵 슬롯 7번</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot8" xml:space="preserve">
-    <value>퀵 휠 - 슬롯 8</value>
+    <value>퀵 슬롯 8번</value>
   </data>
   <data name="Keybind.Action.Main.RecommendedEvents" xml:space="preserve">
     <value>추천 이벤트</value>
   </data>
   <data name="Keybind.Action.Main.RoleSkill1" xml:space="preserve">
-    <value>역할 스킬 1</value>
+    <value>포지션 스킬1</value>
   </data>
   <data name="Keybind.Action.Main.RoleSkill2" xml:space="preserve">
-    <value>역할 스킬 2</value>
+    <value>포지션 스킬2</value>
   </data>
   <data name="Keybind.Action.Main.RoleSkill3" xml:space="preserve">
-    <value>역할 스킬 3</value>
+    <value>포지션 스킬3</value>
   </data>
   <data name="Keybind.Action.Main.RoleSkill4" xml:space="preserve">
-    <value>역할 스킬 4</value>
+    <value>포지션 스킬4</value>
   </data>
   <data name="Keybind.Action.Main.SeasonCenter" xml:space="preserve">
     <value>시즌 센터</value>
   </data>
   <data name="Keybind.Action.Main.ShowMouseCursor" xml:space="preserve">
-    <value>마우스 커서 표시</value>
+    <value>마우스 표시</value>
   </data>
   <data name="Keybind.Action.Main.Skills" xml:space="preserve">
     <value>스킬</value>
   </data>
   <data name="Keybind.Action.Main.SocialMode" xml:space="preserve">
-    <value>소셜 모드</value>
+    <value>채팅</value>
   </data>
   <data name="Keybind.Action.Main.SpecialAttack" xml:space="preserve">
     <value>특수 공격</value>
   </data>
   <data name="Keybind.Action.Main.SummonAttendantImagine" xml:space="preserve">
-    <value>어텐드 이매진 소환</value>
+    <value>펫 이매진 소환</value>
   </data>
   <data name="Keybind.Action.Main.SummonDismissMount" xml:space="preserve">
-    <value>탈것 소환 / 해제</value>
+    <value>라이드 이매진 소환/해제</value>
   </data>
   <data name="Keybind.Action.Main.SwitchQuestLeft" xml:space="preserve">
-    <value>퀘스트 전환 (왼쪽)</value>
+    <value>퀘스트 목록 왼쪽 이동</value>
   </data>
   <data name="Keybind.Action.Main.SwitchQuestRight" xml:space="preserve">
-    <value>퀘스트 전환 (오른쪽)</value>
+    <value>퀘스트 목록 오른쪽 이동</value>
   </data>
   <data name="Keybind.Action.Main.TakePhoto" xml:space="preserve">
     <value>촬영</value>
   </data>
   <data name="Keybind.Action.Main.Talk" xml:space="preserve">
-    <value>대화</value>
+    <value>빠른 채팅</value>
   </data>
   <data name="Keybind.Action.Main.TogglePartyVoice" xml:space="preserve">
     <value>파티 음성 전환</value>
   </data>
   <data name="Keybind.Action.Main.ToggleWalkRun" xml:space="preserve">
-    <value>걷기 / 달리기 전환</value>
+    <value>걷기/달리기 전환</value>
   </data>
   <data name="Keybind.Action.Main.TrackQuest" xml:space="preserve">
-    <value>퀘스트 추적</value>
+    <value>퀘스트 목표 추적</value>
   </data>
   <data name="Keybind.Action.Main.UltimateSkill" xml:space="preserve">
-    <value>궁극기</value>
+    <value>궁극 스킬</value>
   </data>
   <data name="Keybind.Action.Main.UseItem" xml:space="preserve">
     <value>아이템 사용</value>
   </data>
   <data name="Keybind.Action.Main.UseItemAlternate" xml:space="preserve">
-    <value>아이템 사용</value>
+    <value>아이템 빠른 사용</value>
   </data>
   <data name="Keybind.Action.Main.ZoomIn" xml:space="preserve">
     <value>확대</value>
@@ -392,7 +454,7 @@
     <value>축소</value>
   </data>
   <data name="Keybind.Action.Main.ZoomOutIn" xml:space="preserve">
-    <value>축소 / 확대</value>
+    <value>카메라 줌 아웃/줌 인</value>
   </data>
   <data name="Keybind.Action.Photo.CameraForwardBack" xml:space="preserve">
     <value>카메라 - 앞/뒤</value>
@@ -446,28 +508,28 @@
     <value>커서 이동 - 위/아래</value>
   </data>
   <data name="Keybind.Action.Photo.DashDodge" xml:space="preserve">
-    <value>대시 / 회피</value>
+    <value>대시</value>
   </data>
   <data name="Keybind.Action.Photo.Exit" xml:space="preserve">
     <value>종료</value>
   </data>
   <data name="Keybind.Action.Photo.HideInterface" xml:space="preserve">
-    <value>화면 UI 숨기기</value>
+    <value>인터페이스 숨기기</value>
   </data>
   <data name="Keybind.Action.Photo.Jump" xml:space="preserve">
     <value>점프</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill1" xml:space="preserve">
-    <value>마스터리 스킬 1</value>
+    <value>마스터리 스킬1</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill2" xml:space="preserve">
-    <value>마스터리 스킬 2</value>
+    <value>마스터리 스킬2</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill3" xml:space="preserve">
-    <value>마스터리 스킬 3</value>
+    <value>마스터리 스킬3</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill4" xml:space="preserve">
-    <value>마스터리 스킬 4</value>
+    <value>마스터리 스킬4</value>
   </data>
   <data name="Keybind.Action.Photo.MoveBack" xml:space="preserve">
     <value>이동 - 뒤</value>
@@ -500,16 +562,16 @@
     <value>특수 공격</value>
   </data>
   <data name="Keybind.Action.Photo.SummonDismissMount" xml:space="preserve">
-    <value>탈것 소환 / 해제</value>
+    <value>라이드 이매진 소환/해제</value>
   </data>
   <data name="Keybind.Action.Photo.TakePhoto" xml:space="preserve">
     <value>촬영</value>
   </data>
   <data name="Keybind.Action.Photo.ToggleWalkRun" xml:space="preserve">
-    <value>걷기 / 달리기 전환</value>
+    <value>걷기/달리기 전환</value>
   </data>
   <data name="Keybind.Action.Photo.UltimateSkill" xml:space="preserve">
-    <value>궁극기</value>
+    <value>궁극 스킬</value>
   </data>
   <data name="Keybind.Action.Photo.ZoomIn" xml:space="preserve">
     <value>확대</value>
@@ -521,10 +583,10 @@
     <value>퀵 휠 닫기</value>
   </data>
   <data name="Keybind.Action.QuickWheel.EditQuickWheel" xml:space="preserve">
-    <value>퀵 휠 편집</value>
+    <value>퀵 슬롯 편집</value>
   </data>
   <data name="Keybind.Action.QuickWheel.SwitchQuickWheel" xml:space="preserve">
-    <value>퀵 휠 전환</value>
+    <value>퀵 슬롯 전환</value>
   </data>
   <data name="Keybind.Action.QuickWheel.SwitchQuickWheelLeft" xml:space="preserve">
     <value>퀵 휠 전환 (왼쪽)</value>
@@ -575,22 +637,22 @@
     <value>좌/우</value>
   </data>
   <data name="Keybind.InputDevice.Controller" xml:space="preserve">
-    <value>게임패드</value>
+    <value>컨트롤러</value>
   </data>
   <data name="Keybind.InputDevice.KeyMouse" xml:space="preserve">
-    <value>키보드 / 마우스</value>
+    <value>키보드/마우스</value>
   </data>
   <data name="Keybind.Label.ConfirmCancel" xml:space="preserve">
-    <value>확인 / 취소</value>
+    <value>확인/취소</value>
   </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>컨트롤러</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
-    <value>보조 키 1</value>
+    <value>보조 키1</value>
   </data>
   <data name="Keybind.Label.Helper2" xml:space="preserve">
-    <value>보조 키 2</value>
+    <value>보조 키2</value>
   </data>
   <data name="Keybind.Message.DirectoryNotFound" xml:space="preserve">
     <value>폴더를 찾을 수 없습니다.
@@ -718,7 +780,6 @@
   <data name="Keybind.Value.UnknownPreset" xml:space="preserve">
     <value>알 수 없음 ({0})</value>
   </data>
-
   <data name="Keybind.Error.Helper1OffsetNotFound" xml:space="preserve">
     <value>보조 키 1의 저장 위치를 확인할 수 없습니다.</value>
   </data>
@@ -760,170 +821,5 @@
   </data>
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>파일 형식이 예상한 구성과 다릅니다.</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadDown" xml:space="preserve">
-    <value>↓</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadLeft" xml:space="preserve">
-    <value>←</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadRight" xml:space="preserve">
-    <value>→</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadUp" xml:space="preserve">
-    <value>↑</value>
-  </data>
-  <data name="Keybind.Input.Controller.LeftStickHorizontal" xml:space="preserve">
-    <value>L 스틱 좌/우 입력</value>
-  </data>
-  <data name="Keybind.Input.Controller.LeftStickVertical" xml:space="preserve">
-    <value>L 스틱 앞/뒤 입력</value>
-  </data>
-  <data name="Keybind.Input.Controller.RightStickHorizontal" xml:space="preserve">
-    <value>R 스틱 좌/우 입력</value>
-  </data>
-  <data name="Keybind.Input.Controller.RightStickVertical" xml:space="preserve">
-    <value>R 스틱 앞/뒤 입력</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button3" xml:space="preserve">
-    <value>마우스 버튼 3</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button4" xml:space="preserve">
-    <value>마우스 버튼 4</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button5" xml:space="preserve">
-    <value>마우스 버튼 5</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button6" xml:space="preserve">
-    <value>마우스 버튼 6</value>
-  </data>
-  <data name="Keybind.Input.Mouse.LeftClick" xml:space="preserve">
-    <value>마우스 왼쪽 클릭</value>
-  </data>
-  <data name="Keybind.Input.Mouse.MiddleButton" xml:space="preserve">
-    <value>마우스 가운데 버튼</value>
-  </data>
-  <data name="Keybind.Input.Mouse.RightClick" xml:space="preserve">
-    <value>마우스 오른쪽 클릭</value>
-  </data>
-  <data name="Keybind.Input.Mouse.ScrollWheel" xml:space="preserve">
-    <value>마우스 휠</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.A" xml:space="preserve">
-    <value>A</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.B" xml:space="preserve">
-    <value>B</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Capture" xml:space="preserve">
-    <value>capture</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.L" xml:space="preserve">
-    <value>L</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.LeftStick" xml:space="preserve">
-    <value>LS</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Minus" xml:space="preserve">
-    <value>-</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Plus" xml:space="preserve">
-    <value>+</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.R" xml:space="preserve">
-    <value>R</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.RightStick" xml:space="preserve">
-    <value>RS</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.X" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Y" xml:space="preserve">
-    <value>Y</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.ZL" xml:space="preserve">
-    <value>ZL</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.ZR" xml:space="preserve">
-    <value>ZR</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Circle" xml:space="preserve">
-    <value>○</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Cross" xml:space="preserve">
-    <value>×</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L1" xml:space="preserve">
-    <value>L1</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L2" xml:space="preserve">
-    <value>L2</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L3" xml:space="preserve">
-    <value>L3</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Options" xml:space="preserve">
-    <value>options</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R1" xml:space="preserve">
-    <value>R1</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R2" xml:space="preserve">
-    <value>R2</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R3" xml:space="preserve">
-    <value>R3</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Share" xml:space="preserve">
-    <value>share</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Square" xml:space="preserve">
-    <value>□</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.TouchPad" xml:space="preserve">
-    <value>touchpad</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Triangle" xml:space="preserve">
-    <value>△</value>
-  </data>
-  <data name="Keybind.Input.Xbox.A" xml:space="preserve">
-    <value>A</value>
-  </data>
-  <data name="Keybind.Input.Xbox.B" xml:space="preserve">
-    <value>B</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Guide" xml:space="preserve">
-    <value>xbox</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LB" xml:space="preserve">
-    <value>LB</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LT" xml:space="preserve">
-    <value>LT</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LeftStick" xml:space="preserve">
-    <value>LS</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Menu" xml:space="preserve">
-    <value>menu</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RB" xml:space="preserve">
-    <value>RB</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RT" xml:space="preserve">
-    <value>RT</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RightStick" xml:space="preserve">
-    <value>RS</value>
-  </data>
-  <data name="Keybind.Input.Xbox.View" xml:space="preserve">
-    <value>view</value>
-  </data>
-  <data name="Keybind.Input.Xbox.X" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Y" xml:space="preserve">
-    <value>Y</value>
   </data>
 </root>

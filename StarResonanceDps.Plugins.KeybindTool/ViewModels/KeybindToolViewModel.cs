@@ -44,6 +44,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private bool _keyMouseQuickWheelIndependent;
     private bool _controllerPhotoModeIndependent;
     private bool _keyMousePhotoModeIndependent;
+    private bool _controllerFishingModeIndependent;
     private bool _keyMouseFishingModeIndependent;
     private bool _isPresetSupported;
     private bool _isSynchronizing;
@@ -373,6 +374,21 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    public bool ControllerFishingModeIndependent
+    {
+        get => _controllerFishingModeIndependent;
+        set
+        {
+            if (SetProperty(ref _controllerFishingModeIndependent, value) && !_isSynchronizing)
+            {
+                HandleControllerIndependentChanged(
+                    value,
+                    ControllerFishingActions,
+                    KeybindCatalog.ControllerFishingModeLinks);
+            }
+        }
+    }
+
     public bool KeyMousePhotoModeIndependent
     {
         get => _keyMousePhotoModeIndependent;
@@ -431,8 +447,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
             {
                 _controllerQuickWheelIndependent = layout.ControllerProfile.QuickWheelIndependent;
                 _controllerPhotoModeIndependent = layout.ControllerProfile.PhotoModeIndependent;
+                _controllerFishingModeIndependent = layout.ControllerProfile.FishingModeIndependent;
                 OnPropertyChanged(nameof(ControllerQuickWheelIndependent));
                 OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
+                OnPropertyChanged(nameof(ControllerFishingModeIndependent));
             }
 
             if (layout.KeyMouseProfile is not null)
@@ -613,7 +631,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         foreach (var row in _allKeyMouseRows)
         {
             var selected = row.SelectedKey;
-            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition, Texts).ToList();
+            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition).ToList();
 
             if (selected is not null
                 && options.All(option => option.InputType != selected.InputType || option.Value != selected.Value))
@@ -714,7 +732,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         SynchronizeControllerLinkGroup(
             ControllerFishingActions,
             KeybindCatalog.ControllerFishingModeLinks,
-            independent: true);
+            ControllerFishingModeIndependent);
     }
 
     private void SynchronizeControllerLinkGroup(
@@ -1392,6 +1410,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             ControllerType = SelectedControllerType,
             QuickWheelIndependent = ControllerQuickWheelIndependent,
             PhotoModeIndependent = ControllerPhotoModeIndependent,
+            FishingModeIndependent = ControllerFishingModeIndependent,
             Keybind = new ControllerKeybindProfile
             {
                 Helper1 = SelectedHelper1 is null
@@ -1458,6 +1477,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
             KeybindCatalog.ControllerPhotoActions,
             KeybindCatalog.ControllerPhotoModeLinks,
             normalized.PhotoModeIndependent);
+        NormalizeControllerLinkGroup(
+            normalized.Actions,
+            KeybindCatalog.ControllerFishingActions,
+            KeybindCatalog.ControllerFishingModeLinks,
+            normalized.FishingModeIndependent);
 
         return normalized;
     }
@@ -1565,6 +1589,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         merged.QuickWheelIndependent = overlay.QuickWheelIndependent;
         merged.PhotoModeIndependent = overlay.PhotoModeIndependent;
+        merged.FishingModeIndependent = overlay.FishingModeIndependent;
 
         if (overlay.Keybind is not null)
         {
@@ -1655,6 +1680,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         OnPropertyChanged(nameof(ControllerQuickWheelIndependent));
         _controllerPhotoModeIndependent = normalized.PhotoModeIndependent;
         OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
+        _controllerFishingModeIndependent = normalized.FishingModeIndependent;
+        OnPropertyChanged(nameof(ControllerFishingModeIndependent));
 
         _selectedControllerType = controllerType;
         OnPropertyChanged(nameof(SelectedControllerType));
@@ -1869,8 +1896,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 state = KeybindCatalog.ActionStateSingle;
             }
 
-            foreach (var offset in _saveService.GetWritableControllerOffsets(_session, definition))
+            foreach (var offset in _saveService.GetControllerOffsets(_session, definition))
             {
+                _saveService.WriteUInt32(
+                    data,
+                    offset - sizeof(uint),
+                    KeybindCatalog.InputTypeController);
                 _saveService.WriteUInt32(data, offset, value);
                 _saveService.WriteUInt32(data, offset + sizeof(uint), state);
             }
@@ -1895,7 +1926,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                     Texts[KeybindCatalog.GetActionLocalizationKey(definition)]));
             }
 
-            foreach (var offset in _saveService.GetWritableKeyMouseOffsets(_session, definition))
+            foreach (var offset in _saveService.GetKeyMouseOffsets(_session, definition))
             {
                 _saveService.WriteUInt32(data, offset - sizeof(uint), option.InputType);
                 _saveService.WriteUInt32(data, offset, option.Value);
@@ -1909,7 +1940,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         var layout = new KeybindLayoutConfig
         {
-            Version = 7,
+            Version = 1,
             InputDevice = IsKeyMouseMode
                 ? KeybindCatalog.InputDeviceKeyMouse
                 : KeybindCatalog.InputDeviceController,
@@ -2077,8 +2108,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         var known = KeybindCatalog.CreateKnownKeyMouseInputOption(
             inputType,
-            value,
-            Texts);
+            value);
         if (known is not null)
         {
             option = known;
@@ -2116,6 +2146,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             ControllerType = source.ControllerType,
             QuickWheelIndependent = source.QuickWheelIndependent,
             PhotoModeIndependent = source.PhotoModeIndependent,
+            FishingModeIndependent = source.FishingModeIndependent,
             Keybind = new ControllerKeybindProfile
             {
                 Helper1 = source.Keybind?.Helper1,

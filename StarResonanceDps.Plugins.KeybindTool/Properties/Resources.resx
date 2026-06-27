@@ -1,51 +1,110 @@
-<?xml version='1.0' encoding='utf-8'?>
-<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:schema id="root">
-    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xs:element name="root" ns1:IsDataSet="true">
-      <xs:complexType>
-        <xs:choice maxOccurs="unbounded">
-          <xs:element name="metadata">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" />
-              </xs:sequence>
-              <xs:attribute name="name" use="required" type="xsd:string" />
-              <xs:attribute name="type" type="xsd:string" />
-              <xs:attribute name="mimetype" type="xsd:string" />
-              <xs:attribute ref="xml:space" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="assembly">
-            <xs:complexType>
-              <xs:attribute name="alias" type="xsd:string" />
-              <xs:attribute name="name" type="xsd:string" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="data">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
-                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
-              </xs:sequence>
-              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
-              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
-              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
-              <xs:attribute ref="xml:space" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="resheader">
-            <xs:complexType>
-              <xs:sequence>
-                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
-              </xs:sequence>
-              <xs:attribute name="name" type="xsd:string" use="required" />
-            </xs:complexType>
-          </xs:element>
-        </xs:choice>
-      </xs:complexType>
-    </xs:element>
-  </xs:schema>
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -59,31 +118,31 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Keybind.Action.Fishing.CastReelIn" xml:space="preserve">
-    <value>Cast / Reel In</value>
+    <value>Cast/Retrieve</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatChannelDown" xml:space="preserve">
-    <value>Chat Channel Down</value>
+    <value>Chat Channel - Switch Down</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatChannelUp" xml:space="preserve">
-    <value>Chat Channel Up</value>
+    <value>Chat Channel - Switch Up</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatInputChannelLeft" xml:space="preserve">
-    <value>Chat Input Channel Left</value>
+    <value>Chat Channel - Switch Left</value>
   </data>
   <data name="Keybind.Action.Fishing.ChatInputChannelRight" xml:space="preserve">
-    <value>Chat Input Channel Right</value>
+    <value>Chat Channel - Switch Right</value>
   </data>
   <data name="Keybind.Action.Fishing.CloseMenu" xml:space="preserve">
     <value>Close Menu</value>
   </data>
   <data name="Keybind.Action.Fishing.FishingEncyclopedia" xml:space="preserve">
-    <value>Fishing / Encyclopedia</value>
+    <value>Fishing/Archive</value>
   </data>
   <data name="Keybind.Action.Fishing.FishingResearch" xml:space="preserve">
-    <value>Fishing / Research</value>
+    <value>Fishing/Research</value>
   </data>
   <data name="Keybind.Action.Fishing.ModeGuide" xml:space="preserve">
-    <value>Mode / Guide</value>
+    <value>Guide</value>
   </data>
   <data name="Keybind.Action.Fishing.RodMoveBack" xml:space="preserve">
     <value>Rod Move Back</value>
@@ -109,6 +168,9 @@
   <data name="Keybind.Action.Fishing.ShowMouseCursor" xml:space="preserve">
     <value>Show Mouse Cursor</value>
   </data>
+  <data name="Keybind.Action.Fishing.SocialMode" xml:space="preserve">
+    <value>Chat</value>
+  </data>
   <data name="Keybind.Action.Fishing.SwitchBait" xml:space="preserve">
     <value>Switch Bait</value>
   </data>
@@ -119,13 +181,13 @@
     <value>Talk</value>
   </data>
   <data name="Keybind.Action.Main.Abilities" xml:space="preserve">
-    <value>Abilities</value>
+    <value>Talents</value>
   </data>
   <data name="Keybind.Action.Main.AcceptInvite" xml:space="preserve">
-    <value>Accept Invite</value>
+    <value>Accept Invitation</value>
   </data>
   <data name="Keybind.Action.Main.Action" xml:space="preserve">
-    <value>Action</value>
+    <value>Interact</value>
   </data>
   <data name="Keybind.Action.Main.AutoBattle" xml:space="preserve">
     <value>Auto Battle</value>
@@ -149,22 +211,22 @@
     <value>Cancel Interaction</value>
   </data>
   <data name="Keybind.Action.Main.Channel" xml:space="preserve">
-    <value>Channel</value>
+    <value>Line</value>
   </data>
   <data name="Keybind.Action.Main.Character" xml:space="preserve">
-    <value>Character</value>
+    <value>Profile</value>
   </data>
   <data name="Keybind.Action.Main.ChatChannelDown" xml:space="preserve">
-    <value>Chat Channel Down</value>
+    <value>Chat Channel - Switch Down</value>
   </data>
   <data name="Keybind.Action.Main.ChatChannelUp" xml:space="preserve">
-    <value>Chat Channel Up</value>
+    <value>Chat Channel - Switch Up</value>
   </data>
   <data name="Keybind.Action.Main.ChatInputChannelLeft" xml:space="preserve">
-    <value>Chat Input Channel Left</value>
+    <value>Chat Channel - Switch Left</value>
   </data>
   <data name="Keybind.Action.Main.ChatInputChannelRight" xml:space="preserve">
-    <value>Chat Input Channel Right</value>
+    <value>Chat Channel - Switch Right</value>
   </data>
   <data name="Keybind.Action.Main.CloseMenu" xml:space="preserve">
     <value>Close Menu</value>
@@ -176,25 +238,25 @@
     <value>Cursor Move Up/Down</value>
   </data>
   <data name="Keybind.Action.Main.CycleItemsLeft" xml:space="preserve">
-    <value>Cycle Items Left</value>
+    <value>Swipe Left</value>
   </data>
   <data name="Keybind.Action.Main.CycleItemsRight" xml:space="preserve">
-    <value>Cycle Items Right</value>
+    <value>Swipe Right</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge" xml:space="preserve">
-    <value>Dash / Dodge</value>
+    <value>Sprint</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge1" xml:space="preserve">
-    <value>Dash / Dodge 1</value>
+    <value>Sprint 1</value>
   </data>
   <data name="Keybind.Action.Main.DashDodge2" xml:space="preserve">
-    <value>Dash / Dodge 2</value>
+    <value>Sprint 2</value>
   </data>
   <data name="Keybind.Action.Main.DeclineInvite" xml:space="preserve">
-    <value>Decline Invite</value>
+    <value>Decline Invitation</value>
   </data>
   <data name="Keybind.Action.Main.EditHome" xml:space="preserve">
-    <value>Edit Home</value>
+    <value>Home Editing Entry</value>
   </data>
   <data name="Keybind.Action.Main.EnvironmentalResonance1" xml:space="preserve">
     <value>Environmental Resonance 1</value>
@@ -203,7 +265,7 @@
     <value>Environmental Resonance 2</value>
   </data>
   <data name="Keybind.Action.Main.Equipment" xml:space="preserve">
-    <value>Equipment</value>
+    <value>Gear</value>
   </data>
   <data name="Keybind.Action.Main.ExtraSkill" xml:space="preserve">
     <value>Extra Skill</value>
@@ -215,10 +277,10 @@
     <value>Hide UI</value>
   </data>
   <data name="Keybind.Action.Main.HomeBlueprint" xml:space="preserve">
-    <value>Home Blueprint</value>
+    <value>Homestead Blueprint</value>
   </data>
   <data name="Keybind.Action.Main.IllustrationGuide" xml:space="preserve">
-    <value>Illustration Guide</value>
+    <value>Illustrated Guide</value>
   </data>
   <data name="Keybind.Action.Main.Inventory" xml:space="preserve">
     <value>Inventory</value>
@@ -227,31 +289,31 @@
     <value>Jump</value>
   </data>
   <data name="Keybind.Action.Main.LeaveDungeon" xml:space="preserve">
-    <value>Leave Dungeon</value>
+    <value>Exit Dungeon</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch" xml:space="preserve">
-    <value>Lock On / Switch</value>
+    <value>Lock/Toggle</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch1" xml:space="preserve">
-    <value>Lock On / Switch 1</value>
+    <value>Lock/Toggle</value>
   </data>
   <data name="Keybind.Action.Main.LockOnSwitch2" xml:space="preserve">
     <value>Lock On / Switch 2</value>
   </data>
   <data name="Keybind.Action.Main.MapOnOff" xml:space="preserve">
-    <value>Map On/Off</value>
+    <value>Toggle Map</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill1" xml:space="preserve">
-    <value>Mastery Skill 1</value>
+    <value>Expertise Skill 1</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill2" xml:space="preserve">
-    <value>Mastery Skill 2</value>
+    <value>Skill 2</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill3" xml:space="preserve">
-    <value>Mastery Skill 3</value>
+    <value>Skill 3</value>
   </data>
   <data name="Keybind.Action.Main.MasterySkill4" xml:space="preserve">
-    <value>Mastery Skill 4</value>
+    <value>Skill 4</value>
   </data>
   <data name="Keybind.Action.Main.MoveBack" xml:space="preserve">
     <value>Move Back</value>
@@ -278,49 +340,49 @@
     <value>Open Menu</value>
   </data>
   <data name="Keybind.Action.Main.OpenSkillPalette" xml:space="preserve">
-    <value>Open Skill Palette</value>
+    <value>Open Skill Drawer</value>
   </data>
   <data name="Keybind.Action.Main.Party" xml:space="preserve">
-    <value>Party</value>
+    <value>Find Party</value>
   </data>
   <data name="Keybind.Action.Main.Quests" xml:space="preserve">
     <value>Quests</value>
   </data>
   <data name="Keybind.Action.Main.QuickAction" xml:space="preserve">
-    <value>Quick Action</value>
+    <value>Hotkeys</value>
   </data>
   <data name="Keybind.Action.Main.QuickUseQuestItem" xml:space="preserve">
-    <value>Quick Use Quest Item</value>
+    <value>Quick Use</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheel" xml:space="preserve">
-    <value>Quick Wheel</value>
+    <value>Open/Close Quick Wheel</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot1" xml:space="preserve">
-    <value>Quick Wheel - Slot 1</value>
+    <value>Quick Wheel Slot 1</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot2" xml:space="preserve">
-    <value>Quick Wheel - Slot 2</value>
+    <value>Quick Wheel Slot 2</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot3" xml:space="preserve">
-    <value>Quick Wheel - Slot 3</value>
+    <value>Quick Wheel Slot 3</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot4" xml:space="preserve">
-    <value>Quick Wheel - Slot 4</value>
+    <value>Quick Wheel Slot 4</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot5" xml:space="preserve">
-    <value>Quick Wheel - Slot 5</value>
+    <value>Quick Wheel Slot 5</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot6" xml:space="preserve">
-    <value>Quick Wheel - Slot 6</value>
+    <value>Quick Wheel Slot 6</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot7" xml:space="preserve">
-    <value>Quick Wheel - Slot 7</value>
+    <value>Quick Wheel Slot 7</value>
   </data>
   <data name="Keybind.Action.Main.QuickWheelSlot8" xml:space="preserve">
-    <value>Quick Wheel - Slot 8</value>
+    <value>Quick Wheel Slot 8</value>
   </data>
   <data name="Keybind.Action.Main.RecommendedEvents" xml:space="preserve">
-    <value>Recommended Events</value>
+    <value>Features</value>
   </data>
   <data name="Keybind.Action.Main.RoleSkill1" xml:space="preserve">
     <value>Role Skill 1</value>
@@ -335,55 +397,55 @@
     <value>Role Skill 4</value>
   </data>
   <data name="Keybind.Action.Main.SeasonCenter" xml:space="preserve">
-    <value>Season Center</value>
+    <value>Season Hub</value>
   </data>
   <data name="Keybind.Action.Main.ShowMouseCursor" xml:space="preserve">
-    <value>Show Mouse Cursor</value>
+    <value>Activate Mouse</value>
   </data>
   <data name="Keybind.Action.Main.Skills" xml:space="preserve">
     <value>Skills</value>
   </data>
   <data name="Keybind.Action.Main.SocialMode" xml:space="preserve">
-    <value>Social Mode</value>
+    <value>Chat</value>
   </data>
   <data name="Keybind.Action.Main.SpecialAttack" xml:space="preserve">
     <value>Special Attack</value>
   </data>
   <data name="Keybind.Action.Main.SummonAttendantImagine" xml:space="preserve">
-    <value>Summon Attendant Imagine</value>
+    <value>Summon Spirit Echo</value>
   </data>
   <data name="Keybind.Action.Main.SummonDismissMount" xml:space="preserve">
-    <value>Summon / Dismiss Mount</value>
+    <value>Summon/Dismiss Mount Imagine</value>
   </data>
   <data name="Keybind.Action.Main.SwitchQuestLeft" xml:space="preserve">
-    <value>Switch Quest (Left)</value>
+    <value>Quest Board Toggle Left</value>
   </data>
   <data name="Keybind.Action.Main.SwitchQuestRight" xml:space="preserve">
-    <value>Switch Quest (Right)</value>
+    <value>Quest Board Toggle Right</value>
   </data>
   <data name="Keybind.Action.Main.TakePhoto" xml:space="preserve">
-    <value>Take Photo</value>
+    <value>Take Photos</value>
   </data>
   <data name="Keybind.Action.Main.Talk" xml:space="preserve">
-    <value>Talk</value>
+    <value>Quick Chat</value>
   </data>
   <data name="Keybind.Action.Main.TogglePartyVoice" xml:space="preserve">
-    <value>Toggle Party Voice</value>
+    <value>Team Voice Chat Switch</value>
   </data>
   <data name="Keybind.Action.Main.ToggleWalkRun" xml:space="preserve">
-    <value>Toggle Walk / Run</value>
+    <value>Walk/Run Toggle</value>
   </data>
   <data name="Keybind.Action.Main.TrackQuest" xml:space="preserve">
-    <value>Track Quest</value>
+    <value>Track Target</value>
   </data>
   <data name="Keybind.Action.Main.UltimateSkill" xml:space="preserve">
-    <value>Ultimate Skill</value>
+    <value>Ultimate</value>
   </data>
   <data name="Keybind.Action.Main.UseItem" xml:space="preserve">
     <value>Use Item</value>
   </data>
   <data name="Keybind.Action.Main.UseItemAlternate" xml:space="preserve">
-    <value>Use Item</value>
+    <value>Item Use</value>
   </data>
   <data name="Keybind.Action.Main.ZoomIn" xml:space="preserve">
     <value>Zoom In</value>
@@ -392,7 +454,7 @@
     <value>Zoom Out</value>
   </data>
   <data name="Keybind.Action.Main.ZoomOutIn" xml:space="preserve">
-    <value>Zoom Out / Zoom In</value>
+    <value>Zoom Out/Zoom In</value>
   </data>
   <data name="Keybind.Action.Photo.CameraForwardBack" xml:space="preserve">
     <value>Camera Forward/Back</value>
@@ -446,28 +508,28 @@
     <value>Cursor Move Up/Down</value>
   </data>
   <data name="Keybind.Action.Photo.DashDodge" xml:space="preserve">
-    <value>Dash / Dodge</value>
+    <value>Sprint</value>
   </data>
   <data name="Keybind.Action.Photo.Exit" xml:space="preserve">
     <value>Exit</value>
   </data>
   <data name="Keybind.Action.Photo.HideInterface" xml:space="preserve">
-    <value>Hide Interface</value>
+    <value>Hide interface</value>
   </data>
   <data name="Keybind.Action.Photo.Jump" xml:space="preserve">
     <value>Jump</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill1" xml:space="preserve">
-    <value>Mastery Skill 1</value>
+    <value>Expertise Skill 1</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill2" xml:space="preserve">
-    <value>Mastery Skill 2</value>
+    <value>Skill 2</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill3" xml:space="preserve">
-    <value>Mastery Skill 3</value>
+    <value>Skill 3</value>
   </data>
   <data name="Keybind.Action.Photo.MasterySkill4" xml:space="preserve">
-    <value>Mastery Skill 4</value>
+    <value>Skill 4</value>
   </data>
   <data name="Keybind.Action.Photo.MoveBack" xml:space="preserve">
     <value>Move Back</value>
@@ -500,16 +562,16 @@
     <value>Special Attack</value>
   </data>
   <data name="Keybind.Action.Photo.SummonDismissMount" xml:space="preserve">
-    <value>Summon / Dismiss Mount</value>
+    <value>Summon/Dismiss Mount Imagine</value>
   </data>
   <data name="Keybind.Action.Photo.TakePhoto" xml:space="preserve">
-    <value>Take Photo</value>
+    <value>Capture</value>
   </data>
   <data name="Keybind.Action.Photo.ToggleWalkRun" xml:space="preserve">
-    <value>Toggle Walk / Run</value>
+    <value>Walk/Run Toggle </value>
   </data>
   <data name="Keybind.Action.Photo.UltimateSkill" xml:space="preserve">
-    <value>Ultimate Skill</value>
+    <value>Ultimate</value>
   </data>
   <data name="Keybind.Action.Photo.ZoomIn" xml:space="preserve">
     <value>Zoom In</value>
@@ -524,7 +586,7 @@
     <value>Edit Quick Wheel</value>
   </data>
   <data name="Keybind.Action.QuickWheel.SwitchQuickWheel" xml:space="preserve">
-    <value>Switch Quick Wheel</value>
+    <value>Switch quick wheel</value>
   </data>
   <data name="Keybind.Action.QuickWheel.SwitchQuickWheelLeft" xml:space="preserve">
     <value>Switch Quick Wheel (Left)</value>
@@ -575,22 +637,22 @@
     <value>Left/Right</value>
   </data>
   <data name="Keybind.InputDevice.Controller" xml:space="preserve">
-    <value>Gamepad</value>
+    <value>Controller</value>
   </data>
   <data name="Keybind.InputDevice.KeyMouse" xml:space="preserve">
-    <value>Keyboard / Mouse</value>
+    <value>Keyboard/Mouse</value>
   </data>
   <data name="Keybind.Label.ConfirmCancel" xml:space="preserve">
-    <value>Confirm / Cancel</value>
+    <value>Confirm/Cancel</value>
   </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>Controller</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
-    <value>Helper Key 1</value>
+    <value>Assist Key 1</value>
   </data>
   <data name="Keybind.Label.Helper2" xml:space="preserve">
-    <value>Helper Key 2</value>
+    <value>Assist Key 2</value>
   </data>
   <data name="Keybind.Message.DirectoryNotFound" xml:space="preserve">
     <value>The folder was not found.
@@ -718,7 +780,6 @@ Press Save to apply them to the game settings.</value>
   <data name="Keybind.Value.UnknownPreset" xml:space="preserve">
     <value>Unknown ({0})</value>
   </data>
-
   <data name="Keybind.Error.Helper1OffsetNotFound" xml:space="preserve">
     <value>The storage location for Helper Key 1 could not be determined.</value>
   </data>
@@ -760,170 +821,5 @@ Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>The file format does not match the expected layout.</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadDown" xml:space="preserve">
-    <value>↓</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadLeft" xml:space="preserve">
-    <value>←</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadRight" xml:space="preserve">
-    <value>→</value>
-  </data>
-  <data name="Keybind.Input.Controller.DPadUp" xml:space="preserve">
-    <value>↑</value>
-  </data>
-  <data name="Keybind.Input.Controller.LeftStickHorizontal" xml:space="preserve">
-    <value>L Stick Left/Right</value>
-  </data>
-  <data name="Keybind.Input.Controller.LeftStickVertical" xml:space="preserve">
-    <value>L Stick Forward/Back</value>
-  </data>
-  <data name="Keybind.Input.Controller.RightStickHorizontal" xml:space="preserve">
-    <value>R Stick Left/Right</value>
-  </data>
-  <data name="Keybind.Input.Controller.RightStickVertical" xml:space="preserve">
-    <value>R Stick Forward/Back</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button3" xml:space="preserve">
-    <value>Mouse Button 3</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button4" xml:space="preserve">
-    <value>Mouse Button 4</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button5" xml:space="preserve">
-    <value>Mouse Button 5</value>
-  </data>
-  <data name="Keybind.Input.Mouse.Button6" xml:space="preserve">
-    <value>Mouse Button 6</value>
-  </data>
-  <data name="Keybind.Input.Mouse.LeftClick" xml:space="preserve">
-    <value>Mouse Left Click</value>
-  </data>
-  <data name="Keybind.Input.Mouse.MiddleButton" xml:space="preserve">
-    <value>Mouse Middle Button</value>
-  </data>
-  <data name="Keybind.Input.Mouse.RightClick" xml:space="preserve">
-    <value>Mouse Right Click</value>
-  </data>
-  <data name="Keybind.Input.Mouse.ScrollWheel" xml:space="preserve">
-    <value>Mouse Scroll Wheel</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.A" xml:space="preserve">
-    <value>A</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.B" xml:space="preserve">
-    <value>B</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Capture" xml:space="preserve">
-    <value>capture</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.L" xml:space="preserve">
-    <value>L</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.LeftStick" xml:space="preserve">
-    <value>LS</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Minus" xml:space="preserve">
-    <value>-</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Plus" xml:space="preserve">
-    <value>+</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.R" xml:space="preserve">
-    <value>R</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.RightStick" xml:space="preserve">
-    <value>RS</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.X" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.Y" xml:space="preserve">
-    <value>Y</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.ZL" xml:space="preserve">
-    <value>ZL</value>
-  </data>
-  <data name="Keybind.Input.Nintendo.ZR" xml:space="preserve">
-    <value>ZR</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Circle" xml:space="preserve">
-    <value>○</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Cross" xml:space="preserve">
-    <value>×</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L1" xml:space="preserve">
-    <value>L1</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L2" xml:space="preserve">
-    <value>L2</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.L3" xml:space="preserve">
-    <value>L3</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Options" xml:space="preserve">
-    <value>options</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R1" xml:space="preserve">
-    <value>R1</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R2" xml:space="preserve">
-    <value>R2</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.R3" xml:space="preserve">
-    <value>R3</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Share" xml:space="preserve">
-    <value>share</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Square" xml:space="preserve">
-    <value>□</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.TouchPad" xml:space="preserve">
-    <value>touchpad</value>
-  </data>
-  <data name="Keybind.Input.PlayStation.Triangle" xml:space="preserve">
-    <value>△</value>
-  </data>
-  <data name="Keybind.Input.Xbox.A" xml:space="preserve">
-    <value>A</value>
-  </data>
-  <data name="Keybind.Input.Xbox.B" xml:space="preserve">
-    <value>B</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Guide" xml:space="preserve">
-    <value>xbox</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LB" xml:space="preserve">
-    <value>LB</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LT" xml:space="preserve">
-    <value>LT</value>
-  </data>
-  <data name="Keybind.Input.Xbox.LeftStick" xml:space="preserve">
-    <value>LS</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Menu" xml:space="preserve">
-    <value>menu</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RB" xml:space="preserve">
-    <value>RB</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RT" xml:space="preserve">
-    <value>RT</value>
-  </data>
-  <data name="Keybind.Input.Xbox.RightStick" xml:space="preserve">
-    <value>RS</value>
-  </data>
-  <data name="Keybind.Input.Xbox.View" xml:space="preserve">
-    <value>view</value>
-  </data>
-  <data name="Keybind.Input.Xbox.X" xml:space="preserve">
-    <value>X</value>
-  </data>
-  <data name="Keybind.Input.Xbox.Y" xml:space="preserve">
-    <value>Y</value>
   </data>
 </root>
