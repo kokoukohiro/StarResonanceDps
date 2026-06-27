@@ -19,15 +19,65 @@ internal interface IKeybindActionDefinition
     string Name { get; }
 }
 
-internal sealed record ControllerInputOption(uint Value, string Label);
+internal sealed record KeybindInputVisual(string? IconUri, string? Text)
+{
+    public bool HasIcon => !string.IsNullOrWhiteSpace(IconUri);
 
-internal sealed record KeyMouseInputOption(uint InputType, uint Value, string Label);
+    public bool HasText => !string.IsNullOrWhiteSpace(Text);
 
-internal sealed record HelperBindingOption(uint MainValue, string Label);
+    public static KeybindInputVisual TextOnly(string? text) => new(null, text);
+}
 
-internal sealed record ActionHelperOption(uint StateValue, string Label);
+internal sealed record ControllerInputOption(uint Value, string Label)
+{
+    public KeybindInputVisual Visual { get; init; } = KeybindInputVisual.TextOnly(Label);
 
-internal sealed record PresetOption(uint Value, string Label);
+    public override string ToString() => Label;
+}
+
+internal sealed record KeyMouseInputOption(uint InputType, uint Value, string Label)
+{
+    public KeybindInputVisual Visual { get; init; } = KeybindInputVisual.TextOnly(Label);
+
+    public override string ToString() => Label;
+}
+
+internal sealed record HelperBindingOption(uint MainValue, string Label)
+{
+    public KeybindInputVisual Visual { get; init; } = KeybindInputVisual.TextOnly(Label);
+
+    public override string ToString() => Label;
+}
+
+internal sealed record ActionHelperOption(uint StateValue, string Label)
+{
+    public KeybindInputVisual Visual { get; init; } = KeybindInputVisual.TextOnly(Label);
+
+    public override string ToString() => Label;
+}
+
+internal sealed record PresetOption(uint Value, string Label)
+{
+    private KeybindInputVisual? _confirmVisual;
+    private KeybindInputVisual? _cancelVisual;
+
+    // Known presets provide two icon visuals. Unknown values retain their label as text.
+    public KeybindInputVisual ConfirmVisual
+    {
+        get => _confirmVisual ?? KeybindInputVisual.TextOnly(Label);
+        init => _confirmVisual = value;
+    }
+
+    public KeybindInputVisual CancelVisual
+    {
+        get => _cancelVisual ?? KeybindInputVisual.TextOnly(null);
+        init => _cancelVisual = value;
+    }
+
+    public bool HasCancelVisual => CancelVisual.HasIcon || CancelVisual.HasText;
+
+    public override string ToString() => Label;
+}
 
 internal sealed record ControllerActionDefinition(
     string Id,

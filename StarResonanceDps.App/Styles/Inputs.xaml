@@ -279,8 +279,7 @@
                                                          Background="{DynamicResource Brush.InputBackground}"
                                                          BorderBrush="{DynamicResource Brush.Border}"
                                                          Padding="4">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                                  HorizontalScrollBarVisibility="Disabled">
+                                    <ScrollViewer Style="{StaticResource ScrollViewer.ComboBoxDropDown}">
                                         <ItemsPresenter />
                                     </ScrollViewer>
                                 </ContentControl>
@@ -349,8 +348,7 @@
                                                          Background="{DynamicResource Brush.InputBackground}"
                                                          BorderBrush="{DynamicResource Brush.Border}"
                                                          Padding="4">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                                  HorizontalScrollBarVisibility="Disabled">
+                                    <ScrollViewer Style="{StaticResource ScrollViewer.ComboBoxDropDown}">
                                         <ItemsPresenter />
                                     </ScrollViewer>
                                 </ContentControl>
@@ -432,8 +430,7 @@
                                                          Background="{DynamicResource Brush.InputBackground}"
                                                          BorderBrush="{DynamicResource Brush.Border}"
                                                          Padding="4">
-                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                                  HorizontalScrollBarVisibility="Disabled">
+                                    <ScrollViewer Style="{StaticResource ScrollViewer.ComboBoxDropDown}">
                                         <ItemsPresenter />
                                     </ScrollViewer>
                                 </ContentControl>

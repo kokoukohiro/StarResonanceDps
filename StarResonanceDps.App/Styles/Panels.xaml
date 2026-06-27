@@ -77,11 +77,53 @@
         </Setter>
     </Style>
 
+    <!--
+        The root surface is intentionally separate from Surface.RoundedOutline.
+        WindowState.Maximized must flatten only the outer window frame; ordinary
+        cards inside that window must keep their own rounded corners.
+    -->
+    <ControlTemplate x:Key="Panel.WindowFrameTemplate"
+                     TargetType="{x:Type ContentControl}">
+        <Border x:Name="OutlineLayer"
+                Background="{TemplateBinding BorderBrush}"
+                CornerRadius="{StaticResource Radius.Default}"
+                SnapsToDevicePixels="True">
+            <Border x:Name="SurfaceLayer"
+                    Margin="{TemplateBinding BorderThickness}"
+                    Background="{TemplateBinding Background}"
+                    CornerRadius="{StaticResource Radius.Button}"
+                    Padding="{TemplateBinding Padding}"
+                    SnapsToDevicePixels="True">
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  SnapsToDevicePixels="True" />
+            </Border>
+        </Border>
+        <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                         Value="{x:Static WindowState.Maximized}">
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter TargetName="OutlineLayer" Property="CornerRadius" Value="0" />
+                <Setter TargetName="SurfaceLayer" Property="CornerRadius" Value="0" />
+            </DataTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
     <Style x:Key="Panel.WindowFrame"
-           TargetType="{x:Type ContentControl}"
-           BasedOn="{StaticResource Surface.RoundedOutline}">
+           TargetType="{x:Type ContentControl}">
         <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template" Value="{StaticResource Panel.WindowFrameTemplate}" />
     </Style>
 
     <Style x:Key="Panel.Root"
@@ -102,6 +144,12 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="UseLayoutRounding" Value="True" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                         Value="{x:Static WindowState.Maximized}">
+                <Setter Property="CornerRadius" Value="0" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!--

@@ -7,6 +7,7 @@ internal sealed class ControllerActionRowViewModel : ObservableObject
 {
     private ControllerInputOption? _selectedButton;
     private ActionHelperOption? _selectedHelper;
+    private string _displayName;
     private bool _isEditable = true;
 
     public ControllerActionRowViewModel(
@@ -14,14 +15,23 @@ internal sealed class ControllerActionRowViewModel : ObservableObject
         string displayName)
     {
         Definition = definition ?? throw new ArgumentNullException(nameof(definition));
-        DisplayName = displayName ?? string.Empty;
+        _displayName = displayName ?? string.Empty;
     }
 
     public event EventHandler? SelectionChanged;
 
     public ControllerActionDefinition Definition { get; }
 
-    public string DisplayName { get; }
+    public string DisplayName
+    {
+        get => _displayName;
+        private set => SetProperty(ref _displayName, value);
+    }
+
+    public void RefreshDisplayName(string displayName)
+    {
+        DisplayName = displayName ?? string.Empty;
+    }
 
     public bool UsesHelper => Definition.UsesHelper;
 
@@ -58,6 +68,8 @@ internal sealed class ControllerActionRowViewModel : ObservableObject
         get => _isEditable;
         set => SetProperty(ref _isEditable, value);
     }
+
+    public bool IsLastInSection { get; set; }
 
     public void ReplaceButtonOptions(
         IEnumerable<ControllerInputOption> options,
@@ -123,6 +135,7 @@ internal sealed class ControllerActionRowViewModel : ObservableObject
 internal sealed class KeyMouseActionRowViewModel : ObservableObject
 {
     private KeyMouseInputOption? _selectedKey;
+    private string _displayName;
     private bool _isEditable = true;
 
     public KeyMouseActionRowViewModel(
@@ -131,7 +144,7 @@ internal sealed class KeyMouseActionRowViewModel : ObservableObject
         bool usesLControlPrefix)
     {
         Definition = definition ?? throw new ArgumentNullException(nameof(definition));
-        DisplayName = displayName ?? string.Empty;
+        _displayName = displayName ?? string.Empty;
         UsesLControlPrefix = usesLControlPrefix;
     }
 
@@ -139,7 +152,16 @@ internal sealed class KeyMouseActionRowViewModel : ObservableObject
 
     public KeyMouseActionDefinition Definition { get; }
 
-    public string DisplayName { get; }
+    public string DisplayName
+    {
+        get => _displayName;
+        private set => SetProperty(ref _displayName, value);
+    }
+
+    public void RefreshDisplayName(string displayName)
+    {
+        DisplayName = displayName ?? string.Empty;
+    }
 
     public bool UsesLControlPrefix { get; }
 
@@ -164,6 +186,8 @@ internal sealed class KeyMouseActionRowViewModel : ObservableObject
         get => _isEditable;
         set => SetProperty(ref _isEditable, value);
     }
+
+    public bool IsLastInSection { get; set; }
 
     public void ReplaceKeyOptions(
         IEnumerable<KeyMouseInputOption> options,

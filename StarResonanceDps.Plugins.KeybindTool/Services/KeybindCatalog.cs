@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using StarResonanceDps.Plugins.KeybindTool.Models;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.Plugins.KeybindTool.Services;
 
@@ -16,8 +17,8 @@ internal static class KeybindCatalog
     public const uint ActionStateHelper1 = 0x00000000u;
     public const uint ActionStateHelper2 = 0x00000001u;
 
-    public const string HelperNoneLabel = "割り当てなし";
-    public const string ButtonLayoutFileName = "bpsr_controller_helper_config.json";
+    public const string HelperNoneLabel = "——";
+    public const string ButtonLayoutFileName = "bpsr_key_config.json";
 
     public static readonly IReadOnlyList<string> ControllerTypes =
         new[] { "PlayStation", "Nintendo", "Xbox" };
@@ -143,7 +144,6 @@ internal static class KeybindCatalog
         new KeyMouseInputOption(0x2u, 0x6u, "マウスボタン6"),
         new KeyMouseInputOption(0x2u, 0x7u, "マウススクロール"),
         };
-
 
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerMainActions =
         new ControllerActionDefinition[]
@@ -449,15 +449,6 @@ internal static class KeybindCatalog
                 })
             });
 
-    public static readonly IReadOnlyDictionary<string, IReadOnlyList<PresetOption>> PresetOptions =
-        new ReadOnlyDictionary<string, IReadOnlyList<PresetOption>>(
-            new Dictionary<string, IReadOnlyList<PresetOption>>(StringComparer.OrdinalIgnoreCase)
-            {
-                ["PlayStation"] = new[] { new PresetOption(0x1u, "□ / ×"), new PresetOption(0x2u, "× / 〇"), new PresetOption(0x3u, "〇 / ×") },
-                ["Nintendo"] = new[] { new PresetOption(0x1u, "Y / B"), new PresetOption(0x2u, "B / A"), new PresetOption(0x3u, "A / B") },
-                ["Xbox"] = new[] { new PresetOption(0x1u, "X / A"), new PresetOption(0x2u, "A / B"), new PresetOption(0x3u, "B / A") }
-            });
-
     public static readonly IReadOnlyDictionary<string, int[]> ControllerOffsetAliases =
         new ReadOnlyDictionary<string, int[]>(
             new Dictionary<string, int[]>(StringComparer.Ordinal)
@@ -565,39 +556,72 @@ internal static class KeybindCatalog
         };
     }
 
-    public static IReadOnlyList<ControllerInputOption> GetControllerOptions(string? controllerType)
+    public static string GetActionLocalizationKey(IKeybindActionDefinition definition)
     {
+        ArgumentNullException.ThrowIfNull(definition);
+        return $"Keybind.Action.{definition.Group}.{definition.Name}";
+    }
+
+    public static IReadOnlyList<ControllerInputOption> GetControllerOptions(
+        string? controllerType,
+        PluginLocalizer texts)
+    {
+        ArgumentNullException.ThrowIfNull(texts);
+
         var labels = GetControllerDisplayMap(controllerType);
         return ControllerInputOptions
             .Where(option => labels.ContainsKey(option.Value))
-            .Select(option => new ControllerInputOption(option.Value, labels[option.Value]))
+            .Select(option => CreateControllerInputOption(
+                controllerType,
+                option.Value,
+                labels[option.Value],
+                texts))
             .ToArray();
     }
 
-    public static IReadOnlyList<HelperBindingOption> GetHelperOptions(string? controllerType)
+    public static IReadOnlyList<HelperBindingOption> GetHelperOptions(
+        string? controllerType,
+        PluginLocalizer texts)
     {
+        ArgumentNullException.ThrowIfNull(texts);
+
         var labels = GetControllerDisplayMap(controllerType);
         return new[]
         {
-            new HelperBindingOption(0x01u, labels[17u]),
-            new HelperBindingOption(0x02u, labels[18u]),
-            new HelperBindingOption(0x04u, labels[5u]),
-            new HelperBindingOption(0x08u, labels[6u])
+            CreateHelperBindingOption(controllerType, 0x01u, 17u, labels[17u], texts),
+            CreateHelperBindingOption(controllerType, 0x02u, 18u, labels[18u], texts),
+            CreateHelperBindingOption(controllerType, 0x04u, 5u, labels[5u], texts),
+            CreateHelperBindingOption(controllerType, 0x08u, 6u, labels[6u], texts)
         };
     }
 
-    public static IReadOnlyList<PresetOption> GetPresetOptions(string? controllerType)
+    public static IReadOnlyList<PresetOption> GetPresetOptions(
+        string? controllerType,
+        PluginLocalizer texts)
     {
-        return PresetOptions.TryGetValue(controllerType ?? string.Empty, out var options)
-            ? options
-            : PresetOptions[DefaultControllerType];
+        ArgumentNullException.ThrowIfNull(texts);
+
+        var resolvedType = ControllerTypes.Contains(controllerType, StringComparer.OrdinalIgnoreCase)
+            ? controllerType!
+            : DefaultControllerType;
+
+        return new[]
+        {
+            CreatePresetOption(resolvedType, 0x1u, 10u, 7u, texts),
+            CreatePresetOption(resolvedType, 0x2u, 7u, 8u, texts),
+            CreatePresetOption(resolvedType, 0x3u, 8u, 7u, texts)
+        };
     }
 
     public static IReadOnlyList<ControllerInputOption> GetAllowedControllerOptions(
         ControllerActionDefinition definition,
         string? controllerType,
-        ISet<uint>? blockedValues)
+        ISet<uint>? blockedValues,
+        PluginLocalizer texts)
     {
+        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(texts);
+
         var allowedValues = definition.AllowedValues.Count > 0
             ? definition.AllowedValues
             : ControllerInputOptions.Select(option => option.Value).ToArray();
@@ -609,20 +633,24 @@ internal static class KeybindCatalog
                 || !definition.UsesHelper
                 || blockedValues is null
                 || !blockedValues.Contains(value))
-            .Select(value => new ControllerInputOption(value, labels[value]))
+            .Select(value => CreateControllerInputOption(
+                controllerType,
+                value,
+                labels[value],
+                texts))
             .ToArray();
     }
 
     public static IReadOnlyList<KeyMouseInputOption> GetAllowedKeyMouseOptions(KeyMouseActionDefinition definition)
     {
-        if (definition.AllowedInputTypes.Count == 0)
-        {
-            return KeyMouseInputOptions;
-        }
+        ArgumentNullException.ThrowIfNull(definition);
 
-        var allowedTypes = new HashSet<uint>(definition.AllowedInputTypes);
-        return KeyMouseInputOptions
-            .Where(option => allowedTypes.Contains(option.InputType))
+        var candidateOptions = definition.AllowedInputTypes.Count == 0
+            ? KeyMouseInputOptions
+            : KeyMouseInputOptions.Where(option => definition.AllowedInputTypes.Contains(option.InputType));
+
+        return candidateOptions
+            .Select(option => CreateKeyMouseInputOption(option.InputType, option.Value, option.Label))
             .ToArray();
     }
 
@@ -661,6 +689,196 @@ internal static class KeybindCatalog
             KeybindModeGroup.Fishing => KeyMouseFishingActions,
             _ => throw new ArgumentOutOfRangeException(nameof(group))
         };
+    }
+
+    private static PresetOption CreatePresetOption(
+        string controllerType,
+        uint presetValue,
+        uint confirmButtonValue,
+        uint cancelButtonValue,
+        PluginLocalizer texts)
+    {
+        var labels = GetControllerDisplayMap(controllerType);
+        var confirmLabel = labels[confirmButtonValue];
+        var cancelLabel = labels[cancelButtonValue];
+
+        return new PresetOption(presetValue, $"{confirmLabel} / {cancelLabel}")
+        {
+            ConfirmVisual = CreateControllerInputVisual(
+                controllerType,
+                confirmButtonValue,
+                confirmLabel,
+                texts),
+            CancelVisual = CreateControllerInputVisual(
+                controllerType,
+                cancelButtonValue,
+                cancelLabel,
+                texts)
+        };
+    }
+
+    public static ControllerInputOption CreateControllerInputOption(
+        string? controllerType,
+        uint value,
+        string label,
+        PluginLocalizer texts)
+    {
+        return new ControllerInputOption(value, label)
+        {
+            Visual = CreateControllerInputVisual(controllerType, value, label, texts)
+        };
+    }
+
+    private static HelperBindingOption CreateHelperBindingOption(
+        string? controllerType,
+        uint mainValue,
+        uint controllerValue,
+        string label,
+        PluginLocalizer texts)
+    {
+        return new HelperBindingOption(mainValue, label)
+        {
+            Visual = CreateControllerInputVisual(controllerType, controllerValue, label, texts)
+        };
+    }
+
+    private static KeyMouseInputOption CreateKeyMouseInputOption(
+        uint inputType,
+        uint value,
+        string label)
+    {
+        return new KeyMouseInputOption(inputType, value, label)
+        {
+            Visual = CreateKeyMouseInputVisual(inputType, value, label)
+        };
+    }
+
+    private static KeybindInputVisual CreateControllerInputVisual(
+        string? controllerType,
+        uint value,
+        string label,
+        PluginLocalizer texts)
+    {
+        var commonVisual = GetCommonControllerVisual(value);
+        if (commonVisual is not null)
+        {
+            return commonVisual;
+        }
+
+        if (string.Equals(controllerType, "Nintendo", StringComparison.OrdinalIgnoreCase))
+        {
+            return value switch
+            {
+                1u => CreateAssetVisual(1009, texts["Keybind.Input.Axis.ForwardBack"]),
+                2u => CreateAssetVisual(1009, texts["Keybind.Input.Axis.LeftRight"]),
+                3u => CreateAssetVisual(1011, texts["Keybind.Input.Axis.ForwardBack"]),
+                4u => CreateAssetVisual(1011, texts["Keybind.Input.Axis.LeftRight"]),
+                5u => CreateAssetVisual(2016),
+                6u => CreateAssetVisual(2017),
+                7u => CreateAssetVisual(2002),
+                8u => CreateAssetVisual(2001),
+                10u => CreateAssetVisual(2004),
+                11u => CreateAssetVisual(1001),
+                13u => CreateAssetVisual(2021),
+                14u => CreateAssetVisual(2020),
+                15u => CreateAssetVisual(2022),
+                17u => CreateAssetVisual(2018),
+                18u => CreateAssetVisual(2019),
+                19u => CreateAssetVisual(2010),
+                20u => CreateAssetVisual(2012),
+                _ => KeybindInputVisual.TextOnly(label)
+            };
+        }
+
+        if (string.Equals(controllerType, "Xbox", StringComparison.OrdinalIgnoreCase))
+        {
+            return value switch
+            {
+                1u => CreateAssetVisual(2009, texts["Keybind.Input.Axis.ForwardBack"]),
+                2u => CreateAssetVisual(2009, texts["Keybind.Input.Axis.LeftRight"]),
+                3u => CreateAssetVisual(2011, texts["Keybind.Input.Axis.ForwardBack"]),
+                4u => CreateAssetVisual(2011, texts["Keybind.Input.Axis.LeftRight"]),
+                5u => CreateAssetVisual(2007),
+                6u => CreateAssetVisual(2008),
+                7u => CreateAssetVisual(2001),
+                8u => CreateAssetVisual(2002),
+                10u => CreateAssetVisual(1001),
+                11u => CreateAssetVisual(2004),
+                13u => CreateAssetVisual(2014),
+                14u => CreateAssetVisual(2013),
+                15u => CreateAssetVisual(2015),
+                17u => CreateAssetVisual(2005),
+                18u => CreateAssetVisual(2006),
+                19u => CreateAssetVisual(2010),
+                20u => CreateAssetVisual(2012),
+                _ => KeybindInputVisual.TextOnly(label)
+            };
+        }
+
+        return value switch
+        {
+            1u => CreateAssetVisual(1009, texts["Keybind.Input.Axis.ForwardBack"]),
+            2u => CreateAssetVisual(1009, texts["Keybind.Input.Axis.LeftRight"]),
+            3u => CreateAssetVisual(1011, texts["Keybind.Input.Axis.ForwardBack"]),
+            4u => CreateAssetVisual(1011, texts["Keybind.Input.Axis.LeftRight"]),
+            5u => CreateAssetVisual(1007),
+            6u => CreateAssetVisual(1008),
+            7u => CreateAssetVisual(2003),
+            8u => CreateAssetVisual(1002),
+            10u => CreateAssetVisual(1003),
+            11u => CreateAssetVisual(1004),
+            13u => CreateAssetVisual(1020),
+            14u => CreateAssetVisual(1013),
+            15u => CreateAssetVisual(1014),
+            17u => CreateAssetVisual(1005),
+            18u => CreateAssetVisual(1006),
+            19u => CreateAssetVisual(1010),
+            20u => CreateAssetVisual(1012),
+            _ => KeybindInputVisual.TextOnly(label)
+        };
+    }
+
+    private static KeybindInputVisual? GetCommonControllerVisual(uint value)
+    {
+        return value switch
+        {
+            23u => CreateAssetVisual(1016),
+            24u => CreateAssetVisual(1017),
+            25u => CreateAssetVisual(1018),
+            26u => CreateAssetVisual(1019),
+            _ => null
+        };
+    }
+
+    private static KeybindInputVisual CreateKeyMouseInputVisual(
+        uint inputType,
+        uint value,
+        string label)
+    {
+        if (inputType == InputTypeMouse)
+        {
+            return value switch
+            {
+                0u => CreateAssetVisual(323),
+                1u => CreateAssetVisual(324),
+                2u => CreateAssetVisual(326),
+                3u => CreateAssetVisual(320, "3"),
+                4u => CreateAssetVisual(320, "4"),
+                5u => CreateAssetVisual(320, "5"),
+                6u => CreateAssetVisual(320, "6"),
+                7u => CreateAssetVisual(325),
+                _ => KeybindInputVisual.TextOnly(label)
+            };
+        }
+
+        return KeybindInputVisual.TextOnly(label);
+    }
+
+    private static KeybindInputVisual CreateAssetVisual(int assetFileName, string? text = null)
+    {
+        return new KeybindInputVisual(
+            $"pack://application:,,,/KeybindTool;component/Assets/{assetFileName}.png",
+            text);
     }
 
     private static ControllerActionDefinition CreateControllerAction(

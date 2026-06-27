@@ -1,17 +1,21 @@
-﻿<Window x:Class="StarResonanceDps.App.Views.Plugins.PluginWindow"
+<Window x:Class="StarResonanceDps.App.Views.Plugins.PluginWindow"
         x:Name="PluginHostWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
+        xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
         Title="{Binding DisplayName}"
-        Width="520"
-        Height="320"
-        MinWidth="420"
-        MinHeight="240"
+        Icon="/Assets/Images/ApplicationIcon.ico"
+        behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
+        Width="780"
+        Height="640"
+        MinWidth="740"
+        MinHeight="480"
         WindowStyle="None"
         ResizeMode="CanResize"
         Background="Transparent"
         AllowsTransparency="True"
-        ShowInTaskbar="False"
+        ShowInTaskbar="True"
         WindowStartupLocation="Manual"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
@@ -22,37 +26,10 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Grid Grid.Row="0"
-                  Background="Transparent"
-                  MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+            <controls:AppHeader Grid.Row="0" />
 
-                <TextBlock Margin="18,0,0,0"
-                           VerticalAlignment="Center"
-                           Foreground="{DynamicResource Brush.TextPrimary}"
-                           FontSize="15"
-                           FontWeight="SemiBold"
-                           Text="{Binding DisplayName}" />
-
-                <Button Grid.Column="1"
-                        Style="{StaticResource Button.WindowCaption}"
-                        Click="CloseButton_Click">
-                    <TextBlock FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                               FontSize="10"
-                               Text="&#xE8BB;"
-                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
-                </Button>
-            </Grid>
-
-            <!-- ConfirmWindow body with its footer removed. The bottom margin matches the main window's content spacing. -->
-            <ContentControl Grid.Row="1"
-                            Margin="8,1,8,8"
-                            Style="{StaticResource Panel.Root}">
-                <ContentPresenter Content="{Binding PluginContent, ElementName=PluginHostWindow}" />
-            </ContentControl>
+            <ContentPresenter Grid.Row="1"
+                              Content="{Binding PluginContent, ElementName=PluginHostWindow}" />
         </Grid>
     </ContentControl>
 </Window>

@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Interop;
 using StarResonanceDps.App.ViewModels;
 
@@ -32,7 +31,8 @@ public partial class PluginWindow : Window
         InitializeComponent();
         DataContext = plugin;
 
-        Owner = owner;
+        // This is a top-level tool window, not an owned window. An owned WPF window is
+        // always kept above its owner, which prevented the manager from being brought forward.
         PositionRelativeToOwner(owner, plugin.OriginalIndex);
 
         SourceInitialized += PluginWindow_SourceInitialized;
@@ -108,19 +108,6 @@ public partial class PluginWindow : Window
 
         handled = true;
         return new IntPtr(hitTest);
-    }
-
-    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.LeftButton == MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
-    }
-
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
     }
 
     private void PositionRelativeToOwner(Window? owner, int originalIndex)

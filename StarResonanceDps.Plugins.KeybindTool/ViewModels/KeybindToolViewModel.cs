@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
-using System.Windows;
 using Microsoft.Win32;
 using StarResonanceDps.PluginSdk;
 using StarResonanceDps.Plugins.KeybindTool.Models;
@@ -19,8 +18,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
     };
 
     private readonly IPluginContext _context;
+    private readonly PluginLocalizer _texts;
     private readonly BpsrKeybindSaveService _saveService = new();
     private readonly string _layoutFilePath;
+    private readonly IReadOnlyList<string> _legacyLayoutFilePaths;
     private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsById;
     private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsById;
     private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByLabel = new(StringComparer.Ordinal);
@@ -32,7 +33,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private KeyMouseLayoutProfile? _keyMouseProfileCache;
     private DetectedSaveFile? _selectedDetectedSave;
     private string _selectedSaveFilePath = string.Empty;
-    private string _statusText = "ファイル未選択";
+    private string _statusText = string.Empty;
+    private Func<PluginLocalizer, string>? _statusTextFormatter;
     private string _selectedControllerType = KeybindCatalog.DefaultControllerType;
     private HelperBindingOption? _selectedHelper1;
     private HelperBindingOption? _selectedHelper2;
@@ -51,7 +53,27 @@ internal sealed class KeybindToolViewModel : ObservableObject
     public KeybindToolViewModel(IPluginContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        _layoutFilePath = Path.Combine(_context.PluginDataDirectory, KeybindCatalog.ButtonLayoutFileName);
+        _texts = new PluginLocalizer(
+            _context.Localization,
+            typeof(KeybindToolViewModel).Assembly,
+            "StarResonanceDps.Plugins.KeybindTool.Properties.Resources");
+        _texts.CultureChanged += Texts_CultureChanged;
+
+        // プリセットのファイル名はこのプラグイン自身が決める。
+        // 実際の保存先はホスト共通ストアが runtime\Plugins 直下へ固定する。
+        _layoutFilePath = _context.Settings.GetFilePath(KeybindCatalog.ButtonLayoutFileName);
+        _legacyLayoutFilePaths = new[]
+        {
+            // 直前の保存仕様: 実行ファイル直下。
+            Path.Combine(AppContext.BaseDirectory, KeybindCatalog.ButtonLayoutFileName),
+            // 旧プラグインデータ仕様: Data\PluginData\{PluginId}\ 配下。
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "Data",
+                "PluginData",
+                _context.PluginId,
+                KeybindCatalog.ButtonLayoutFileName)
+        };
 
         foreach (var controllerType in KeybindCatalog.ControllerTypes)
         {
@@ -113,10 +135,13 @@ internal sealed class KeybindToolViewModel : ObservableObject
             SynchronizeModeLinks();
         });
 
+        SetStatus("Keybind.Status.NoFileSelected");
         RescanDetectedSaves();
     }
 
     public ObservableCollection<DetectedSaveFile> DetectedSaveFiles { get; } = new();
+
+    public PluginLocalizer Texts => _texts;
 
     public ObservableCollection<string> ControllerTypes { get; } = new();
 
@@ -168,8 +193,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             LoadSaveFile(
                 value.FilePath,
-                showErrors: true,
-                statusMessage: $"{value.DisplayName}を読み込み完了");
+                true,
+                "Keybind.Status.LoadedSelected",
+                value.DisplayName);
         }
     }
 
@@ -390,19 +416,15 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void RestoreIndependentSettingsFromLayoutFile()
     {
-        if (!File.Exists(_layoutFilePath))
+        var layoutFilePath = GetExistingLayoutFilePath();
+        if (layoutFilePath is null)
         {
             return;
         }
 
         try
         {
-            var json = File.ReadAllText(_layoutFilePath);
-            var layout = JsonSerializer.Deserialize<KeybindLayoutConfig>(json, JsonOptions);
-            if (layout is null)
-            {
-                return;
-            }
+            var layout = ReadLayoutFile(layoutFilePath);
 
             if (layout.ControllerProfile is not null)
             {
@@ -421,6 +443,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
                 OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
             }
+
+            MigrateLegacyLayoutFileIfNeeded(layoutFilePath, layout);
         }
         catch (Exception)
         {
@@ -431,19 +455,35 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private ObservableCollection<ControllerActionRowViewModel> CreateControllerRows(KeybindModeGroup group)
     {
-        return new ObservableCollection<ControllerActionRowViewModel>(
+        var rows = new ObservableCollection<ControllerActionRowViewModel>(
             KeybindCatalog.GetControllerActions(group)
-                .Select(definition => new ControllerActionRowViewModel(definition, definition.Name)));
+                .Select(definition => new ControllerActionRowViewModel(
+                     definition,
+                     Texts[KeybindCatalog.GetActionLocalizationKey(definition)])));
+
+        if (rows.Count > 0)
+        {
+            rows[^1].IsLastInSection = true;
+        }
+
+        return rows;
     }
 
     private ObservableCollection<KeyMouseActionRowViewModel> CreateKeyMouseRows(KeybindModeGroup group)
     {
-        return new ObservableCollection<KeyMouseActionRowViewModel>(
+        var rows = new ObservableCollection<KeyMouseActionRowViewModel>(
             KeybindCatalog.GetKeyMouseActions(group)
                 .Select(definition => new KeyMouseActionRowViewModel(
                     definition,
-                    definition.Name,
+                    Texts[KeybindCatalog.GetActionLocalizationKey(definition)],
                     KeybindCatalog.UsesLControlPrefix(definition))));
+
+        if (rows.Count > 0)
+        {
+            rows[^1].IsLastInSection = true;
+        }
+
+        return rows;
     }
 
     private void ActionRow_SelectionChanged(object? sender, EventArgs e)
@@ -487,8 +527,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         var helper2Value = SelectedHelper2?.MainValue;
         var presetValue = SelectedPreset?.Value;
 
-        ReplaceCollection(HelperOptions, KeybindCatalog.GetHelperOptions(SelectedControllerType));
-        ReplaceCollection(PresetOptions, KeybindCatalog.GetPresetOptions(SelectedControllerType));
+        ReplaceCollection(HelperOptions, KeybindCatalog.GetHelperOptions(SelectedControllerType, Texts));
+        ReplaceCollection(PresetOptions, KeybindCatalog.GetPresetOptions(SelectedControllerType, Texts));
 
         _selectedHelper1 = FindByMainValue(HelperOptions, helper1Value);
         OnPropertyChanged(nameof(SelectedHelper1));
@@ -511,7 +551,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             var selected = row.SelectedButton;
             var options = KeybindCatalog
-                .GetAllowedControllerOptions(row.Definition, SelectedControllerType, blockedValues)
+                .GetAllowedControllerOptions(row.Definition, SelectedControllerType, blockedValues, Texts)
                 .ToList();
 
             if (selected is not null && options.All(option => option.Value != selected.Value))
@@ -520,7 +560,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
                     .TryGetValue(selected.Value, out var currentLabel)
                     ? currentLabel
                     : selected.Label;
-                options.Add(new ControllerInputOption(selected.Value, label));
+                options.Add(KeybindCatalog.CreateControllerInputOption(
+                    SelectedControllerType,
+                    selected.Value,
+                    label,
+                    Texts));
             }
 
             row.ReplaceButtonOptions(options, selected?.Value);
@@ -532,16 +576,25 @@ internal sealed class KeybindToolViewModel : ObservableObject
         var options = new List<ActionHelperOption>
         {
             new(KeybindCatalog.ActionStateSingle, KeybindCatalog.HelperNoneLabel)
+            {
+                Visual = KeybindInputVisual.TextOnly(Texts["Keybind.Value.Unassigned"])
+            }
         };
 
         if (SelectedHelper1 is not null)
         {
-            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper1, SelectedHelper1.Label));
+            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper1, SelectedHelper1.Label)
+            {
+                Visual = SelectedHelper1.Visual
+            });
         }
 
         if (SelectedHelper2 is not null)
         {
-            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper2, SelectedHelper2.Label));
+            options.Add(new ActionHelperOption(KeybindCatalog.ActionStateHelper2, SelectedHelper2.Label)
+            {
+                Visual = SelectedHelper2.Visual
+            });
         }
 
         foreach (var row in _allControllerRows)
@@ -829,7 +882,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             if (_session is null)
             {
-                StatusText = "設定ファイルが見つかりません、手動選択してください";
+                SetStatus("Keybind.Status.NoDetectedSave");
             }
 
             UpdateSaveState();
@@ -838,8 +891,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         LoadSaveFile(
             SelectedDetectedSave.FilePath,
-            showErrors: false,
-            statusMessage: $"{DetectedSaveFiles.Count}件の設定ファイルを検出、{SelectedDetectedSave.DisplayName}を選択中");
+            false,
+            "Keybind.Status.DetectedSelected",
+            DetectedSaveFiles.Count,
+            SelectedDetectedSave.DisplayName);
     }
 
     private IReadOnlyList<DetectedSaveFile> ScanDetectedSaveFiles()
@@ -902,8 +957,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         var dialog = new OpenFileDialog
         {
-            Title = "設定ファイルを選択",
-            Filter = "Bytes files (*.bytes)|*.bytes",
+            Title = Texts["Keybind.Dialog.SelectSaveFile.Title"],
+            Filter = Texts["Keybind.Dialog.SelectSaveFile.Filter"],
             InitialDirectory = ResolveDefaultOpenDirectory() ?? string.Empty,
             FileName = "localsave.bytes",
             CheckFileExists = true,
@@ -912,7 +967,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            LoadSaveFile(dialog.FileName, showErrors: true, statusMessage: "読み込み完了");
+            LoadSaveFile(
+                dialog.FileName,
+                true,
+                "Keybind.Status.LoadCompleted");
         }
     }
 
@@ -920,21 +978,23 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         OpenFileLocation(
             _session?.FilePath,
-            "設定ファイルを先に選択してください。");
+            "Keybind.Message.SelectFileFirst");
     }
 
     private void OpenLayoutFileLocation()
     {
         OpenFileLocation(
             _layoutFilePath,
-            "キー設定プリセットの保存先を特定できません。");
+            "Keybind.Message.LayoutLocationUnavailable");
     }
 
-    private static void OpenFileLocation(string? filePath, string unavailableMessage)
+    private void OpenFileLocation(string? filePath, string unavailableMessageResourceKey)
     {
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            MessageBox.Show(unavailableMessage, "場所を開けません", MessageBoxButton.OK, MessageBoxImage.Error);
+            ShowMessage(
+                "Keybind.Message.Title.OpenLocationError",
+                unavailableMessageResourceKey);
             return;
         }
 
@@ -944,11 +1004,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
             var directory = Path.GetDirectoryName(fullPath);
             if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             {
-                MessageBox.Show(
-                    $"保存先フォルダが見つかりません。\n{directory}",
-                    "場所を開けません",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                ShowMessage(
+                    "Keybind.Message.Title.OpenLocationError",
+                    "Keybind.Message.DirectoryNotFound",
+                    directory ?? string.Empty);
                 return;
             }
 
@@ -960,15 +1019,28 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            MessageBox.Show(
-                $"保存先フォルダを開けませんでした。\n{exception.Message}",
-                "場所を開けません",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            ShowMessage(
+                "Keybind.Message.Title.OpenLocationError",
+                "Keybind.Message.OpenDirectoryFailed",
+                exception.Message);
         }
     }
 
-    private void LoadSaveFile(string filePath, bool showErrors, string statusMessage)
+    private void ShowMessage(
+        string titleResourceKey,
+        string messageResourceKey,
+        params object?[] arguments)
+    {
+        _context.Messages.Show(
+            Texts[titleResourceKey],
+            Texts.Format(messageResourceKey, arguments));
+    }
+
+    private void LoadSaveFile(
+        string filePath,
+        bool showErrors,
+        string statusResourceKey,
+        params object?[] statusArguments)
     {
         try
         {
@@ -989,9 +1061,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 InitializeLayoutProfileCacheFromUi();
             });
 
-            StatusText = session.IsPresetSupported
-                ? statusMessage
-                : $"{statusMessage}（確認/キャンセル設定はこのファイルでは編集できません）";
+            SetStatus(texts => session.IsPresetSupported
+                ? texts.Format(statusResourceKey, statusArguments)
+                : texts.Format(
+                    "Keybind.Status.PresetUnsupported",
+                    texts.Format(statusResourceKey, statusArguments)));
             UpdateSaveState();
         }
         catch (Exception exception)
@@ -1003,18 +1077,16 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SelectedSaveFilePath = string.Empty;
                 IsPresetSupported = false;
                 OnPropertyChanged(nameof(HasSelectedSaveFile));
-                StatusText = "読み込み失敗";
+                SetStatus("Keybind.Status.LoadFailed");
             }
 
             UpdateSaveState();
 
             if (showErrors)
             {
-                MessageBox.Show(
-                    "ファイルの読み込みに失敗しました。\n対応していないファイルか、データが破損している可能性があります。",
-                    "読み込みエラー",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                ShowMessage(
+                    "Keybind.Message.Title.LoadError",
+                    "Keybind.Message.LoadErrorBody");
             }
         }
     }
@@ -1046,7 +1118,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             var preset = PresetOptions.FirstOrDefault(option => option.Value == presetValue);
             if (preset is null)
             {
-                preset = new PresetOption(presetValue, $"不明 (0x{presetValue:X2})");
+                preset = new PresetOption(presetValue, Texts.Format("Keybind.Value.UnknownPreset", presetValue));
                 PresetOptions.Add(preset);
             }
 
@@ -1092,8 +1164,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
             var label = KeybindCatalog.GetControllerDisplayMap(SelectedControllerType)
                 .TryGetValue(value, out var knownLabel)
                 ? knownLabel
-                : $"不明 (0x{value:X8})";
-            option = new ControllerInputOption(value, label);
+                : Texts.Format("Keybind.Value.UnknownControllerInput", value);
+            option = KeybindCatalog.CreateControllerInputOption(
+                SelectedControllerType,
+                value,
+                label,
+                Texts);
             row.EnsureButtonOption(option);
         }
 
@@ -1140,7 +1216,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             option = new KeyMouseInputOption(
                 inputType,
                 value,
-                $"不明 (type=0x{inputType:X8}, value=0x{value:X8})");
+                Texts.Format("Keybind.Value.UnknownKeyMouseInput", inputType, value));
             RegisterCustomKeyMouseOption(option);
             row.EnsureKeyOption(option);
         }
@@ -1161,27 +1237,26 @@ internal sealed class KeybindToolViewModel : ObservableObject
             LoadValuesFromSession();
             InitializeLayoutProfileCacheFromUi();
         });
-        StatusText = "読み込み時の状態に戻しました";
+        SetStatus("Keybind.Status.Reset");
         UpdateSaveState();
     }
 
     private void LoadLayout()
     {
-        if (!File.Exists(_layoutFilePath))
+        var layoutFilePath = GetExistingLayoutFilePath();
+        if (layoutFilePath is null)
         {
-            MessageBox.Show(
-                $"配置ファイルが見つかりません。\n{_layoutFilePath}",
-                "配置読み込みエラー",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            ShowMessage(
+                "Keybind.Message.Title.LayoutLoadError",
+                "Keybind.Message.LayoutFileMissing",
+                _layoutFilePath);
             return;
         }
 
         try
         {
-            var json = File.ReadAllText(_layoutFilePath);
-            var layout = JsonSerializer.Deserialize<KeybindLayoutConfig>(json, JsonOptions)
-                ?? throw new InvalidDataException("配置ファイルの形式が不正です。");
+            var layout = ReadLayoutFile(layoutFilePath);
+            MigrateLegacyLayoutFileIfNeeded(layoutFilePath, layout);
 
             RunSynchronizing(() =>
             {
@@ -1193,26 +1268,83 @@ internal sealed class KeybindToolViewModel : ObservableObject
             });
             CacheCurrentActiveLayoutProfile();
 
-            StatusText = $"キー設定を読み込みました: {Path.GetFileName(_layoutFilePath)}";
+            SetStatus("Keybind.Status.LayoutLoaded", Path.GetFileName(_layoutFilePath));
             UpdateSaveState();
 
-            MessageBox.Show(
-                "キー設定を読み込みました。\nゲーム設定へ反映するには、通常の保存ボタンを押してください。",
-                "配置読み込み",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            ShowMessage(
+                "Keybind.Message.Title.LayoutLoaded",
+                "Keybind.Message.LayoutLoadedBody");
         }
         catch (Exception exception)
         {
             _context.Logger.Error("キー設定プリセットの読み込みに失敗しました。", exception);
-            StatusText = "キー設定の読み込みに失敗しました";
+            SetStatus("Keybind.Status.LayoutLoadFailed");
             UpdateSaveState();
 
-            MessageBox.Show(
-                $"キー設定の読み込みに失敗しました。\n{exception.Message}",
-                "配置読み込みエラー",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            ShowMessage(
+                "Keybind.Message.Title.LayoutLoadError",
+                "Keybind.Message.LayoutLoadFailedBody",
+                exception.Message);
+        }
+    }
+
+    private string? GetExistingLayoutFilePath()
+    {
+        if (File.Exists(_layoutFilePath))
+        {
+            return _layoutFilePath;
+        }
+
+        return _legacyLayoutFilePaths.FirstOrDefault(File.Exists);
+    }
+
+    private KeybindLayoutConfig ReadLayoutFile(string filePath)
+    {
+        if (PathsEqual(filePath, _layoutFilePath))
+        {
+            return _context.Settings.Load<KeybindLayoutConfig>(KeybindCatalog.ButtonLayoutFileName);
+        }
+
+        var json = File.ReadAllText(filePath);
+        return JsonSerializer.Deserialize<KeybindLayoutConfig>(json, JsonOptions)
+            ?? throw new InvalidDataException(Texts["Keybind.Error.InvalidLayoutFile"]);
+    }
+
+    private void MigrateLegacyLayoutFileIfNeeded(
+        string sourcePath,
+        KeybindLayoutConfig layout)
+    {
+        if (PathsEqual(sourcePath, _layoutFilePath))
+        {
+            return;
+        }
+
+        try
+        {
+            _context.Settings.Save(KeybindCatalog.ButtonLayoutFileName, layout);
+            File.Delete(sourcePath);
+        }
+        catch (Exception exception)
+        {
+            _context.Logger.Warning($"旧キー設定プリセットの移行に失敗しました。{exception.Message}");
+        }
+    }
+
+    private void RemoveLegacyLayoutFiles()
+    {
+        foreach (var legacyPath in _legacyLayoutFilePaths)
+        {
+            try
+            {
+                if (File.Exists(legacyPath))
+                {
+                    File.Delete(legacyPath);
+                }
+            }
+            catch (Exception exception)
+            {
+                _context.Logger.Warning($"旧キー設定プリセットの削除に失敗しました。{exception.Message}");
+            }
         }
     }
 
@@ -1622,26 +1754,23 @@ internal sealed class KeybindToolViewModel : ObservableObject
             _keyMouseProfileCache = CloneKeyMouseLayoutProfile(keyMouseProfile);
             SaveLayoutFile(controllerProfile, keyMouseProfile);
 
-            StatusText = "保存しました";
+            SetStatus("Keybind.Status.Saved");
             UpdateSaveState();
 
-            MessageBox.Show(
-                $"保存しました。\nキー設定プリセットを作成しました。\n{_layoutFilePath}",
-                "保存完了",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            ShowMessage(
+                "Keybind.Message.Title.SaveCompleted",
+                "Keybind.Message.SaveCompletedBody",
+                _layoutFilePath);
         }
         catch (Exception exception)
         {
             _context.Logger.Error("キーバインド設定の保存に失敗しました。", exception);
-            StatusText = "保存失敗";
+            SetStatus("Keybind.Status.SaveFailed");
             UpdateSaveState();
 
-            MessageBox.Show(
-                "保存に失敗しました。入力内容を確認してください。",
-                "保存エラー",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            ShowMessage(
+                "Keybind.Message.Title.SaveError",
+                "Keybind.Message.SaveErrorBody");
         }
     }
 
@@ -1667,7 +1796,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             [labels[5u]] = 0x04u,
             [labels[6u]] = 0x08u
         };
-        var presetLabelToValue = KeybindCatalog.GetPresetOptions(controllerType)
+        var presetLabelToValue = KeybindCatalog.GetPresetOptions(controllerType, Texts)
             .ToDictionary(option => option.Label, option => option.Value, StringComparer.Ordinal);
 
         var helper1Label = profile.Keybind.Helper1;
@@ -1764,14 +1893,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
         ControllerLayoutProfile controllerProfile,
         KeyMouseLayoutProfile keyMouseProfile)
     {
-        var directory = Path.GetDirectoryName(_layoutFilePath);
-        if (string.IsNullOrWhiteSpace(directory))
-        {
-            throw new InvalidOperationException("キー設定プリセットの保存先を特定できません。");
-        }
-
-        Directory.CreateDirectory(directory);
-
         var layout = new KeybindLayoutConfig
         {
             Version = 6,
@@ -1782,20 +1903,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
             KeyMouseProfile = CloneKeyMouseLayoutProfile(keyMouseProfile)
         };
 
-        var temporaryPath = $"{_layoutFilePath}.tmp";
-        try
-        {
-            var json = JsonSerializer.Serialize(layout, JsonOptions);
-            File.WriteAllText(temporaryPath, json);
-            File.Move(temporaryPath, _layoutFilePath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath))
-            {
-                File.Delete(temporaryPath);
-            }
-        }
+        _context.Settings.Save(KeybindCatalog.ButtonLayoutFileName, layout);
+        RemoveLegacyLayoutFiles();
     }
 
     private bool HasBlankRequiredFields()
@@ -2028,6 +2137,56 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 StringComparer.Ordinal)
                 ?? new Dictionary<string, KeyMouseActionLayout>(StringComparer.Ordinal)
         };
+    }
+
+    private void Texts_CultureChanged(object? sender, EventArgs e)
+    {
+        RunSynchronizing(() =>
+        {
+            RefreshActionDisplayNames();
+            RefreshControllerDependentChoices();
+            RefreshKeyMouseChoices();
+            SynchronizeModeLinks();
+        });
+
+        RefreshStatusText();
+    }
+
+    private void RefreshActionDisplayNames()
+    {
+        foreach (var row in _allControllerRows)
+        {
+            row.RefreshDisplayName(Texts[KeybindCatalog.GetActionLocalizationKey(row.Definition)]);
+        }
+
+        foreach (var row in _allKeyMouseRows)
+        {
+            row.RefreshDisplayName(Texts[KeybindCatalog.GetActionLocalizationKey(row.Definition)]);
+        }
+    }
+
+    private void SetStatus(string resourceKey, params object?[] arguments)
+    {
+        SetStatus(texts => texts.Format(resourceKey, arguments));
+    }
+
+    private void SetStatus(Func<PluginLocalizer, string> formatter)
+    {
+        ArgumentNullException.ThrowIfNull(formatter);
+
+        _statusTextFormatter = formatter;
+        StatusText = formatter(Texts);
+    }
+
+    private void RefreshStatusText()
+    {
+        if (_statusTextFormatter is not null)
+        {
+            StatusText = _statusTextFormatter(Texts);
+            return;
+        }
+
+        SetStatus("Keybind.Status.NoFileSelected");
     }
 
     private void RunSynchronizing(Action action)

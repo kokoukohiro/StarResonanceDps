@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Plugins;
@@ -9,6 +10,7 @@ namespace StarResonanceDps.App.Services;
 public sealed class PluginWindowManager
 {
     private readonly Dictionary<string, PluginWindow> _openWindows = new(StringComparer.OrdinalIgnoreCase);
+    private Window? _managerWindow;
 
     private PluginWindowManager()
     {
@@ -48,12 +50,40 @@ public sealed class PluginWindowManager
             return;
         }
 
-        var owner = Application.Current?.MainWindow;
-        var window = new PluginWindow(plugin, content, owner);
+        var managerWindow = Application.Current?.MainWindow;
+        TrackManagerWindow(managerWindow);
+
+        var window = new PluginWindow(plugin, content, managerWindow);
         window.Closed += PluginWindow_Closed;
 
         _openWindows.Add(plugin.PluginId, window);
         window.Show();
+    }
+
+    private void TrackManagerWindow(Window? managerWindow)
+    {
+        if (managerWindow is null || ReferenceEquals(_managerWindow, managerWindow))
+        {
+            return;
+        }
+
+        if (_managerWindow is not null)
+        {
+            _managerWindow.Closed -= ManagerWindow_Closed;
+        }
+
+        _managerWindow = managerWindow;
+        _managerWindow.Closed += ManagerWindow_Closed;
+    }
+
+    private void ManagerWindow_Closed(object? sender, EventArgs eventArgs)
+    {
+        foreach (var window in _openWindows.Values.ToArray())
+        {
+            window.Close();
+        }
+
+        _managerWindow = null;
     }
 
     private void PluginWindow_Closed(object? sender, EventArgs e)

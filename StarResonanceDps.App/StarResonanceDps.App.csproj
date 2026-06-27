@@ -7,47 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>StarResonanceDps</AssemblyName>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Assets\Images\ApplicationIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Images\1001.png" />
-    <None Remove="Assets\Images\1002.png" />
-    <None Remove="Assets\Images\1003.png" />
-    <None Remove="Assets\Images\1004.png" />
-    <None Remove="Assets\Images\1005.png" />
-    <None Remove="Assets\Images\1006.png" />
-    <None Remove="Assets\Images\1007.png" />
-    <None Remove="Assets\Images\1008.png" />
-    <None Remove="Assets\Images\1009.png" />
-    <None Remove="Assets\Images\1010.png" />
-    <None Remove="Assets\Images\1011.png" />
-    <None Remove="Assets\Images\1012.png" />
-    <None Remove="Assets\Images\1013.png" />
-    <None Remove="Assets\Images\1014.png" />
-    <None Remove="Assets\Images\1016.png" />
-    <None Remove="Assets\Images\1017.png" />
-    <None Remove="Assets\Images\1018.png" />
-    <None Remove="Assets\Images\1019.png" />
-    <None Remove="Assets\Images\1020.png" />
-    <None Remove="Assets\Images\2001.png" />
-    <None Remove="Assets\Images\2002.png" />
-    <None Remove="Assets\Images\2003.png" />
-    <None Remove="Assets\Images\2004.png" />
-    <None Remove="Assets\Images\2005.png" />
-    <None Remove="Assets\Images\2006.png" />
-    <None Remove="Assets\Images\2007.png" />
-    <None Remove="Assets\Images\2008.png" />
-    <None Remove="Assets\Images\2009.png" />
-    <None Remove="Assets\Images\2010.png" />
-    <None Remove="Assets\Images\2011.png" />
-    <None Remove="Assets\Images\2012.png" />
-    <None Remove="Assets\Images\2013.png" />
-    <None Remove="Assets\Images\2014.png" />
-    <None Remove="Assets\Images\2015.png" />
-    <None Remove="Assets\Images\323.png" />
-    <None Remove="Assets\Images\324.png" />
-    <None Remove="Assets\Images\325.png" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
+    <None Remove="Assets\Images\ApplicationIcon.ico" />
     <None Remove="Assets\Images\common_attrattack.png" />
     <None Remove="Assets\Images\common_attrblock.png" />
     <None Remove="Assets\Images\common_attrdefense.png" />
@@ -130,10 +95,8 @@
     <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" />
 
     <!-- Build the bundled development plugins without linking their implementations into the host. -->
-    <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj"
-                      ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj"
-                      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -186,44 +149,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\Images\1001.png" />
-    <Resource Include="Assets\Images\1002.png" />
-    <Resource Include="Assets\Images\1003.png" />
-    <Resource Include="Assets\Images\1004.png" />
-    <Resource Include="Assets\Images\1005.png" />
-    <Resource Include="Assets\Images\1006.png" />
-    <Resource Include="Assets\Images\1007.png" />
-    <Resource Include="Assets\Images\1008.png" />
-    <Resource Include="Assets\Images\1009.png" />
-    <Resource Include="Assets\Images\1010.png" />
-    <Resource Include="Assets\Images\1011.png" />
-    <Resource Include="Assets\Images\1012.png" />
-    <Resource Include="Assets\Images\1013.png" />
-    <Resource Include="Assets\Images\1014.png" />
-    <Resource Include="Assets\Images\1016.png" />
-    <Resource Include="Assets\Images\1017.png" />
-    <Resource Include="Assets\Images\1018.png" />
-    <Resource Include="Assets\Images\1019.png" />
-    <Resource Include="Assets\Images\1020.png" />
-    <Resource Include="Assets\Images\2001.png" />
-    <Resource Include="Assets\Images\2002.png" />
-    <Resource Include="Assets\Images\2003.png" />
-    <Resource Include="Assets\Images\2004.png" />
-    <Resource Include="Assets\Images\2005.png" />
-    <Resource Include="Assets\Images\2006.png" />
-    <Resource Include="Assets\Images\2007.png" />
-    <Resource Include="Assets\Images\2008.png" />
-    <Resource Include="Assets\Images\2009.png" />
-    <Resource Include="Assets\Images\2010.png" />
-    <Resource Include="Assets\Images\2011.png" />
-    <Resource Include="Assets\Images\2012.png" />
-    <Resource Include="Assets\Images\2013.png" />
-    <Resource Include="Assets\Images\2014.png" />
-    <Resource Include="Assets\Images\2015.png" />
-    <Resource Include="Assets\Images\323.png" />
-    <Resource Include="Assets\Images\324.png" />
-    <Resource Include="Assets\Images\325.png" />
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
+    <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\common_attrattack.png" />
     <Resource Include="Assets\Images\common_attrblock.png" />
     <Resource Include="Assets\Images\common_attrdefense.png" />
@@ -322,12 +249,8 @@
     <Delete Files="$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
     <MakeDir Directories="$(OutDir)Plugins" />
-    <Copy SourceFiles="$(KeybindPluginAssembly)"
-          DestinationFiles="$(OutDir)Plugins\KeybindTool.dll"
-          SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ModulePluginAssembly)"
-          DestinationFiles="$(OutDir)Plugins\ModuleTool.dll"
-          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(OutDir)Plugins\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
 

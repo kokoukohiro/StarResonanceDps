@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -34,7 +34,8 @@ public partial class WidgetWindow : Window
         InitializeComponent();
         DataContext = widget;
 
-        Owner = owner;
+        // Widgets are top-level windows so the manager can be activated above every
+        // unpinned widget. Pinned widgets still use Topmost through ApplyPinState.
         RestoreBounds(savedBounds, owner, widget.OriginalIndex);
         ApplyPinState(widget.IsPinned);
 

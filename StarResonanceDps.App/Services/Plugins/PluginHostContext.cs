@@ -6,17 +6,25 @@ internal sealed class PluginHostContext : IPluginContext
 {
     public PluginHostContext(
         string pluginId,
-        string pluginDataDirectory,
+        IPluginSettingsStore settings,
+        IPluginMessageService messages,
+        IPluginLocalizationService localization,
         IPluginLogger logger)
     {
         PluginId = pluginId;
-        PluginDataDirectory = pluginDataDirectory;
-        Logger = logger;
+        Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        Messages = messages ?? throw new ArgumentNullException(nameof(messages));
+        Localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        Logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public string PluginId { get; }
 
-    public string PluginDataDirectory { get; }
+    public IPluginSettingsStore Settings { get; }
+
+    public IPluginMessageService Messages { get; }
+
+    public IPluginLocalizationService Localization { get; }
 
     public IPluginLogger Logger { get; }
 }

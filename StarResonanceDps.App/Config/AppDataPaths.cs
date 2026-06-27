@@ -12,7 +12,8 @@ public static class AppDataPaths
 
     public static string WidgetStatePath => Path.Combine(DataDirectory, "widgetstate.json");
 
-    public static string PluginDataDirectory => Path.Combine(DataDirectory, "PluginData");
+    // Plugin DLLs and every plugin-owned generated file share this one runtime directory.
+    public static string PluginsDirectory => Path.Combine(BaseDirectory, "Plugins");
 
     public static string GetLegacyAppSettingsPath()
     {

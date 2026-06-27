@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel;
 using System.Windows;
 using StarResonanceDps.App.Config;
@@ -101,9 +102,18 @@ public sealed class WidgetWindowManager
 
     private void ManagerWindow_Closing(object? sender, CancelEventArgs e)
     {
-        if (!e.Cancel)
+        if (e.Cancel)
         {
-            _isManagerClosing = true;
+            return;
+        }
+
+        _isManagerClosing = true;
+
+        // Widgets are intentionally no longer owned by the manager so the manager can be
+        // activated above every unpinned widget. Close them explicitly when the manager exits.
+        foreach (var window in _openWindows.Values.ToArray())
+        {
+            window.Close();
         }
     }
 

@@ -6,57 +6,66 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-        <Style x:Key="Keybind.Section" TargetType="{x:Type Border}">
-            <Setter Property="Margin" Value="0,0,0,12" />
-            <Setter Property="Padding" Value="14" />
-            <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-        </Style>
-
         <Style x:Key="Keybind.SectionTitle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontSize" Value="16" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,0,0,10" />
         </Style>
 
         <Style x:Key="Keybind.FieldLabel" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="Keybind.Button" TargetType="{x:Type Button}">
+        <Style x:Key="Keybind.ActionField"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource Panel.SettingField}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditable}" Value="False">
+                    <Setter Property="Opacity" Value="0.45" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsLastInSection}" Value="True">
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="Keybind.InputModeOption" TargetType="{x:Type RadioButton}">
             <Setter Property="Height" Value="32" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="5"
-                                SnapsToDevicePixels="True">
+                    <ControlTemplate TargetType="{x:Type RadioButton}">
+                        <ContentControl x:Name="Root"
+                                        Style="{StaticResource Surface.RoundedButtonOutline}"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}">
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </ContentControl>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root"
-                                        Property="Background"
-                                        Value="{DynamicResource Brush.ControlActiveBackground}" />
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+                                <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.45" />
@@ -67,395 +76,577 @@
             </Setter>
         </Style>
 
-        <Style x:Key="Keybind.PrimaryButton"
-               TargetType="{x:Type Button}"
-               BasedOn="{StaticResource Keybind.Button}">
-            <Setter Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+        <Style x:Key="Keybind.IndependentCheckBoxField"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource Panel.SettingField}">
+            <!-- The checkbox owns the complete field surface, including the horizontal padding. -->
+            <Setter Property="Padding" Value="0" />
         </Style>
 
-        <Style x:Key="Keybind.ComboBox" TargetType="{x:Type ComboBox}">
-            <Setter Property="Height" Value="32" />
-            <Setter Property="MinWidth" Value="132" />
-            <Setter Property="Padding" Value="8,0" />
+        <Style x:Key="Keybind.IndependentCheckBox" TargetType="{x:Type CheckBox}">
+            <Setter Property="Padding" Value="20,0" />
             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-        </Style>
-
-        <Style x:Key="Keybind.PathTextBox" TargetType="{x:Type TextBox}">
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Padding" Value="8,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-        </Style>
-
-        <Style x:Key="Keybind.DataGrid" TargetType="{x:Type DataGrid}">
-            <Setter Property="AutoGenerateColumns" Value="False" />
-            <Setter Property="CanUserAddRows" Value="False" />
-            <Setter Property="CanUserDeleteRows" Value="False" />
-            <Setter Property="CanUserReorderColumns" Value="False" />
-            <Setter Property="CanUserResizeRows" Value="False" />
-            <Setter Property="HeadersVisibility" Value="Column" />
-            <Setter Property="GridLinesVisibility" Value="Horizontal" />
-            <Setter Property="RowHeaderWidth" Value="0" />
-            <Setter Property="SelectionMode" Value="Single" />
-            <Setter Property="SelectionUnit" Value="FullRow" />
-            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-        </Style>
-
-        <Style x:Key="Keybind.DataGridCell" TargetType="{x:Type DataGridCell}">
-            <Setter Property="Padding" Value="8,4" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-        </Style>
-
-        <Style x:Key="Keybind.DataGridHeader" TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="Height" Value="32" />
-            <Setter Property="Padding" Value="8,0" />
-            <Setter Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Border x:Name="RowRoot"
+                                Padding="{TemplateBinding Padding}"
+                                Background="Transparent"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter Grid.Column="0"
+                                                  HorizontalAlignment="Left"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+                                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                                  RecognizesAccessKey="True"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
+                                                  TextElement.FontSize="{TemplateBinding FontSize}"
+                                                  TextElement.FontWeight="{TemplateBinding FontWeight}" />
+
+                                <Border x:Name="CheckBoxFrame"
+                                        Grid.Column="1"
+                                        Width="16"
+                                        Height="16"
+                                        Margin="16,0,0,0"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Background="Transparent"
+                                        BorderBrush="{DynamicResource Brush.BorderSoft}"
+                                        BorderThickness="1"
+                                        CornerRadius="2"
+                                        SnapsToDevicePixels="True">
+                                    <Path x:Name="CheckMark"
+                                          Width="10"
+                                          Height="8"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Data="M 0 3 L 3 6 L 10 0"
+                                          Stretch="Fill"
+                                          Stroke="{DynamicResource Brush.TextPrimary}"
+                                          StrokeEndLineCap="Square"
+                                          StrokeStartLineCap="Square"
+                                          StrokeThickness="1.8"
+                                          Visibility="Collapsed" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RowRoot" Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
+                                <Setter TargetName="CheckBoxFrame" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBoxFrame" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                                <Setter TargetName="CheckBoxFrame" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <DataTemplate x:Key="Keybind.ControllerActionGrid">
-            <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                      CellStyle="{StaticResource Keybind.DataGridCell}"
-                      ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                      MaxHeight="440"
-                      ItemsSource="{Binding}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="アクション"
-                                        Binding="{Binding DisplayName}"
-                                        IsReadOnly="True"
-                                        Width="*" />
-                    <DataGridTemplateColumn Header="補助キー" Width="140">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                          MinWidth="110"
-                                          ItemsSource="{Binding HelperOptions}"
-                                          DisplayMemberPath="Label"
-                                          SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsEditable}"
-                                          Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="ボタン" Width="140">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                          MinWidth="110"
-                                          ItemsSource="{Binding ButtonOptions}"
-                                          DisplayMemberPath="Label"
-                                          SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsEditable}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+        <DataTemplate x:Key="Keybind.InputVisual">
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        SnapsToDevicePixels="True">
+                <Image Width="14"
+                       Height="14"
+                       Stretch="Uniform"
+                       SnapsToDevicePixels="True"
+                       Source="{Binding IconUri}"
+                       Visibility="{Binding HasIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <TextBlock Text="{Binding Text}"
+                           VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Margin" Value="0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasIcon}" Value="True">
+                                    <Setter Property="Margin" Value="6,0,0,0" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding HasText}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
         </DataTemplate>
 
-        <DataTemplate x:Key="Keybind.KeyMouseActionGrid">
-            <DataGrid Style="{StaticResource Keybind.DataGrid}"
-                      CellStyle="{StaticResource Keybind.DataGridCell}"
-                      ColumnHeaderStyle="{StaticResource Keybind.DataGridHeader}"
-                      MaxHeight="440"
-                      ItemsSource="{Binding}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="アクション"
-                                        Binding="{Binding DisplayName}"
-                                        IsReadOnly="True"
-                                        Width="*" />
-                    <DataGridTextColumn Header="固定"
-                                        Binding="{Binding LControlPrefixDisplay}"
-                                        IsReadOnly="True"
-                                        Width="80" />
-                    <DataGridTemplateColumn Header="キー" Width="170">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <ComboBox Style="{StaticResource Keybind.ComboBox}"
-                                          MinWidth="140"
-                                          ItemsSource="{Binding KeyOptions}"
-                                          DisplayMemberPath="Label"
-                                          SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
-                                          IsEnabled="{Binding IsEditable}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+        <DataTemplate x:Key="Keybind.InputOptionVisual">
+            <ContentControl Content="{Binding Visual}"
+                            ContentTemplate="{StaticResource Keybind.InputVisual}" />
+        </DataTemplate>
+
+        <DataTemplate x:Key="Keybind.PresetOptionVisual">
+            <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        SnapsToDevicePixels="True">
+                <ContentControl Content="{Binding ConfirmVisual}"
+                                ContentTemplate="{StaticResource Keybind.InputVisual}" />
+
+                <TextBlock Text="/"
+                           Margin="8,0"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource Brush.TextSecondary}">
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasCancelVisual}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ContentControl Content="{Binding CancelVisual}"
+                                ContentTemplate="{StaticResource Keybind.InputVisual}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Keybind.ControllerActionList">
+            <ItemsControl ItemsSource="{Binding}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Keybind.ActionField}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding DisplayName}"
+                                           Style="{StaticResource Keybind.FieldLabel}"
+                                           Margin="0,0,16,0" />
+
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <ComboBox Width="180"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding HelperOptions}"
+                                              ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
+                                              SelectedItem="{Binding SelectedHelper, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsEditable}"
+                                              Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <TextBlock Text="+"
+                                               Margin="10,0"
+                                               Style="{StaticResource Keybind.FieldLabel}"
+                                               Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <ComboBox Width="180"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding ButtonOptions}"
+                                              ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
+                                              SelectedItem="{Binding SelectedButton, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsEditable}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DataTemplate>
+
+        <DataTemplate x:Key="Keybind.KeyMouseActionList">
+            <ItemsControl ItemsSource="{Binding}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Keybind.ActionField}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding DisplayName}"
+                                           Style="{StaticResource Keybind.FieldLabel}"
+                                           Margin="0,0,16,0" />
+
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding LControlPrefixDisplay}"
+                                               Style="{StaticResource Keybind.FieldLabel}"
+                                               Margin="0,0,10,0"
+                                               Visibility="{Binding UsesLControlPrefix, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <ComboBox Width="220"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding KeyOptions}"
+                                              ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
+                                              SelectedItem="{Binding SelectedKey, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsEditable}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      Padding="16">
-            <StackPanel>
-                <Border Style="{StaticResource Keybind.Section}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.ColumnSpan="3"
-                                   Text="設定ファイルを選択"
-                                   Style="{StaticResource Keybind.SectionTitle}" />
+        <Grid Grid.Row="0" Margin="8,1,0,7">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="ContentExternalScrollBarColumn" Width="16" />
+            </Grid.ColumnDefinitions>
 
-                        <ComboBox Grid.Row="1" Grid.Column="0"
-                                  Margin="0,0,8,0"
-                                  Style="{StaticResource Keybind.ComboBox}"
-                                  ItemsSource="{Binding DetectedSaveFiles}"
-                                  SelectedItem="{Binding SelectedDetectedSave, Mode=TwoWay}"
-                                  DisplayMemberPath="DisplayName" />
-                        <Button Grid.Row="1" Grid.Column="1"
-                                Margin="0,0,8,0"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding RescanCommand}"
-                                Content="再スキャン" />
-
-                        <TextBox Grid.Row="2" Grid.Column="0"
-                                 Margin="0,8,8,0"
-                                 Style="{StaticResource Keybind.PathTextBox}"
-                                 Text="{Binding SelectedSaveFilePath, Mode=OneWay}" />
-                        <Button Grid.Row="2" Grid.Column="1"
-                                Margin="0,8,8,0"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding SelectFileCommand}"
-                                Content="手動選択" />
-                        <Button Grid.Row="2" Grid.Column="2"
-                                Margin="0,8,0,0"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding OpenSelectedFileLocationCommand}"
-                                Content="場所を開く" />
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Keybind.Section}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+            <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
+                <Grid Margin="26,22,18,18">
+                    <ScrollViewer x:Name="ContentScrollViewer"
+                                  Style="{StaticResource ScrollViewer.WidgetList}"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  ScrollChanged="ContentScrollViewer_ScrollChanged"
+                                  SizeChanged="ContentScrollViewer_SizeChanged">
+                        <StackPanel x:Name="ContentStackPanel"
+                                    Margin="0,0,10,6"
+                                    SizeChanged="ContentStackPanel_SizeChanged">
+                    <TextBlock Text="{Binding Texts[Keybind.Section.SelectSaveFile]}"
+                               Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
                         <StackPanel>
-                            <TextBlock Text="キー設定プリセット"
-                                       Style="{StaticResource Keybind.SectionTitle}" />
-                            <TextBlock Text="{Binding LayoutFilePath}"
-                                       Foreground="{DynamicResource Brush.TextMuted}"
-                                       FontSize="12"
-                                       TextWrapping="Wrap" />
+                            <Border Style="{StaticResource Panel.SettingField}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <ComboBox Grid.Column="0"
+                                              Width="340"
+                                              HorizontalAlignment="Left"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding DetectedSaveFiles}"
+                                              SelectedItem="{Binding SelectedDetectedSave, Mode=TwoWay}"
+                                              DisplayMemberPath="DisplayName" />
+                                    <Button Grid.Column="1"
+                                            Margin="12,0,0,0"
+                                            Style="{StaticResource Button.Text}"
+                                            Command="{Binding RescanCommand}"
+                                            Content="{Binding Texts[Keybind.Button.Rescan]}" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                             Height="32"
+                                             Style="{StaticResource Input.SearchBox}"
+                                             Text="{Binding SelectedSaveFilePath, Mode=OneWay}"
+                                             IsReadOnly="True" />
+                                    <Button Grid.Column="1"
+                                            Margin="12,0,0,0"
+                                            Style="{StaticResource Button.Text}"
+                                            Command="{Binding SelectFileCommand}"
+                                            Content="{Binding Texts[Keybind.Button.ManualSelect]}" />
+                                    <Button Grid.Column="2"
+                                            Margin="12,0,0,0"
+                                            Style="{StaticResource Button.Text}"
+                                            Command="{Binding OpenSelectedFileLocationCommand}"
+                                            Content="{Binding Texts[Keybind.Button.OpenLocation]}" />
+                                </Grid>
+                            </Border>
                         </StackPanel>
-                        <Button Grid.Column="1"
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding LoadLayoutCommand}"
-                                Content="読み込み" />
-                        <Button Grid.Column="2"
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding OpenLayoutFileLocationCommand}"
-                                Content="場所を開く" />
-                    </Grid>
-                </Border>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <StackPanel>
-                        <TextBlock Text="入力デバイスを選択"
-                                   Style="{StaticResource Keybind.SectionTitle}" />
-                        <StackPanel Orientation="Horizontal">
-                            <RadioButton Content="ゲームパッド"
-                                         Margin="0,0,20,0"
-                                         GroupName="InputDevice"
-                                         Foreground="{DynamicResource Brush.TextPrimary}"
-                                         IsChecked="{Binding IsControllerMode, Mode=TwoWay}" />
-                            <RadioButton Content="キーボード/マウス"
-                                         GroupName="InputDevice"
-                                         Foreground="{DynamicResource Brush.TextPrimary}"
-                                         IsChecked="{Binding IsKeyMouseMode, Mode=TwoWay}" />
+                    <TextBlock Text="{Binding Texts[Keybind.Section.Preset]}"
+                               Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
+                        <Border Style="{StaticResource Panel.SettingFieldLast}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Text="{Binding LayoutFilePath}"
+                                           Style="{StaticResource Keybind.FieldLabel}"
+                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="0,0,16,0" />
+                                <Button Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding LoadLayoutCommand}"
+                                        Content="{Binding Texts[Keybind.Button.Load]}" />
+                                <Button Grid.Column="2"
+                                        Margin="12,0,0,0"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding OpenLayoutFileLocationCommand}"
+                                        Content="{Binding Texts[Keybind.Button.OpenLocation]}" />
+                            </Grid>
+                        </Border>
+                    </ContentControl>
+
+                    <TextBlock Text="{Binding Texts[Keybind.Section.InputDevice]}"
+                               Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
+                        <StackPanel>
+                            <Border Style="{StaticResource Panel.SettingField}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <RadioButton Grid.Column="0"
+                                                 Margin="0,0,6,0"
+                                                 Content="{Binding Texts[Keybind.InputDevice.Controller]}"
+                                                 GroupName="InputDevice"
+                                                 Style="{StaticResource Keybind.InputModeOption}"
+                                                 IsChecked="{Binding IsControllerMode, Mode=TwoWay}" />
+                                    <RadioButton Grid.Column="1"
+                                                 Margin="6,0,0,0"
+                                                 Content="{Binding Texts[Keybind.InputDevice.KeyMouse]}"
+                                                 GroupName="InputDevice"
+                                                 Style="{StaticResource Keybind.InputModeOption}"
+                                                 IsChecked="{Binding IsKeyMouseMode, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+
+                            <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                <Grid IsEnabled="{Binding IsControllerMode}">
+                                    <Grid.Style>
+                                        <Style TargetType="{x:Type Grid}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsControllerMode}" Value="False">
+                                                    <Setter Property="Opacity" Value="0.45" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="{Binding Texts[Keybind.Label.Controller]}"
+                                               Style="{StaticResource Keybind.FieldLabel}" />
+                                    <ComboBox Grid.Column="1"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding ControllerTypes}"
+                                              SelectedItem="{Binding SelectedControllerType, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}"
-                        Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
-                                   Text="補助キー設定"
-                                   Style="{StaticResource Keybind.SectionTitle}" />
-                        <TextBlock Grid.Row="1" Text="コントローラ"
-                                   Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="1" Grid.Column="1"
-                                  Style="{StaticResource Keybind.ComboBox}"
-                                  ItemsSource="{Binding ControllerTypes}"
-                                  SelectedItem="{Binding SelectedControllerType, Mode=TwoWay}" />
-                        <TextBlock Grid.Row="2" Margin="0,10,0,0" Text="補助キー1"
-                                   Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,10,0,0"
-                                  Style="{StaticResource Keybind.ComboBox}"
-                                  ItemsSource="{Binding HelperOptions}"
-                                  DisplayMemberPath="Label"
-                                  SelectedItem="{Binding SelectedHelper1, Mode=TwoWay}" />
-                        <TextBlock Grid.Row="3" Margin="0,10,0,0" Text="補助キー2"
-                                   Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,10,0,0"
-                                  Style="{StaticResource Keybind.ComboBox}"
-                                  ItemsSource="{Binding HelperOptions}"
-                                  DisplayMemberPath="Label"
-                                  SelectedItem="{Binding SelectedHelper2, Mode=TwoWay}" />
-                        <TextBlock Grid.Row="4" Margin="0,10,0,0" Text="確認/キャンセル"
-                                   Style="{StaticResource Keybind.FieldLabel}" />
-                        <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,10,0,0"
-                                  Style="{StaticResource Keybind.ComboBox}"
-                                  ItemsSource="{Binding PresetOptions}"
-                                  DisplayMemberPath="Label"
-                                  SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
-                                  IsEnabled="{Binding IsPresetSupported}" />
-                    </Grid>
-                </Border>
+                    <TextBlock Text="{Binding Texts[Keybind.Section.HelperKeys]}"
+                               Style="{StaticResource Keybind.SectionTitle}"
+                               Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22"
+                                    Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <Border Style="{StaticResource Panel.SettingField}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Texts[Keybind.Label.Helper1]}" Style="{StaticResource Keybind.FieldLabel}" />
+                                    <ComboBox Grid.Column="1"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding HelperOptions}"
+                                              ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
+                                              SelectedItem="{Binding SelectedHelper1, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource Panel.SettingField}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Texts[Keybind.Label.Helper2]}" Style="{StaticResource Keybind.FieldLabel}" />
+                                    <ComboBox Grid.Column="1"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding HelperOptions}"
+                                              ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
+                                              SelectedItem="{Binding SelectedHelper2, Mode=TwoWay}" />
+                                </Grid>
+                            </Border>
+                            <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Texts[Keybind.Label.ConfirmCancel]}" Style="{StaticResource Keybind.FieldLabel}" />
+                                    <ComboBox Grid.Column="1"
+                                              Style="{StaticResource Input.SettingsComboBox}"
+                                              ItemsSource="{Binding PresetOptions}"
+                                              ItemTemplate="{StaticResource Keybind.PresetOptionVisual}"
+                                              SelectedItem="{Binding SelectedPreset, Mode=TwoWay}"
+                                              IsEnabled="{Binding IsPresetSupported}" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <StackPanel>
-                        <TextBlock Text="通常キー設定" Style="{StaticResource Keybind.SectionTitle}" />
+                    <TextBlock Text="{Binding Texts[Keybind.Section.MainKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
                         <Grid>
                             <ContentControl Content="{Binding ControllerMainActions}"
-                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
+                                            ContentTemplate="{StaticResource Keybind.ControllerActionList}"
                                             Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                             <ContentControl Content="{Binding KeyMouseMainActions}"
-                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
+                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionList}"
                                             Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         </Grid>
-                    </StackPanel>
-                </Border>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <StackPanel>
-                        <TextBlock Text="クイックホイールのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
-                        <CheckBox Content="クイックホイールのアクションを単独で設定する"
-                                  Margin="0,0,0,8"
-                                  Foreground="{DynamicResource Brush.TextPrimary}"
-                                  IsChecked="{Binding ControllerQuickWheelIndependent, Mode=TwoWay}"
-                                  Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <CheckBox Content="クイックホイールのアクションを単独で設定する"
-                                  Margin="0,0,0,8"
-                                  Foreground="{DynamicResource Brush.TextPrimary}"
-                                  IsChecked="{Binding KeyMouseQuickWheelIndependent, Mode=TwoWay}"
-                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <Grid>
-                            <ContentControl Content="{Binding ControllerQuickWheelActions}"
-                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
-                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <ContentControl Content="{Binding KeyMouseQuickWheelActions}"
-                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
-                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                    <TextBlock Text="{Binding Texts[Keybind.Section.QuickWheelKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
+                        <StackPanel>
+                            <Border Style="{StaticResource Keybind.IndependentCheckBoxField}">
+                                <Grid>
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.QuickWheelIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding ControllerQuickWheelIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.QuickWheelIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding KeyMouseQuickWheelIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </Border>
+                            <Grid>
+                                <ContentControl Content="{Binding ControllerQuickWheelActions}"
+                                                ContentTemplate="{StaticResource Keybind.ControllerActionList}"
+                                                Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <ContentControl Content="{Binding KeyMouseQuickWheelActions}"
+                                                ContentTemplate="{StaticResource Keybind.KeyMouseActionList}"
+                                                Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </StackPanel>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <StackPanel>
-                        <TextBlock Text="撮影モードのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
-                        <CheckBox Content="撮影モードのアクションを単独で設定する"
-                                  Margin="0,0,0,8"
-                                  Foreground="{DynamicResource Brush.TextPrimary}"
-                                  IsChecked="{Binding ControllerPhotoModeIndependent, Mode=TwoWay}"
-                                  Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <CheckBox Content="撮影モードのアクションを単独で設定する"
-                                  Margin="0,0,0,8"
-                                  Foreground="{DynamicResource Brush.TextPrimary}"
-                                  IsChecked="{Binding KeyMousePhotoModeIndependent, Mode=TwoWay}"
-                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <Grid>
-                            <ContentControl Content="{Binding ControllerPhotoActions}"
-                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
-                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <ContentControl Content="{Binding KeyMousePhotoActions}"
-                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
-                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                    <TextBlock Text="{Binding Texts[Keybind.Section.PhotoModeKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,22">
+                        <StackPanel>
+                            <Border Style="{StaticResource Keybind.IndependentCheckBoxField}">
+                                <Grid>
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.PhotoIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding ControllerPhotoModeIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <CheckBox Content="{Binding Texts[Keybind.CheckBox.PhotoIndependent]}"
+                                              Style="{StaticResource Keybind.IndependentCheckBox}"
+                                              IsChecked="{Binding KeyMousePhotoModeIndependent, Mode=TwoWay}"
+                                              Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </Border>
+                            <Grid>
+                                <ContentControl Content="{Binding ControllerPhotoActions}"
+                                                ContentTemplate="{StaticResource Keybind.ControllerActionList}"
+                                                Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <ContentControl Content="{Binding KeyMousePhotoActions}"
+                                                ContentTemplate="{StaticResource Keybind.KeyMouseActionList}"
+                                                Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </StackPanel>
+                    </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <StackPanel>
-                        <TextBlock Text="釣りモードのキー設定" Style="{StaticResource Keybind.SectionTitle}" />
-                        <CheckBox Content="釣りモードのアクションを単独で設定する"
-                                  Margin="0,0,0,8"
-                                  Foreground="{DynamicResource Brush.TextPrimary}"
-                                  IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}"
-                                  Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <Grid>
-                            <ContentControl Content="{Binding ControllerFishingActions}"
-                                            ContentTemplate="{StaticResource Keybind.ControllerActionGrid}"
-                                            Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <ContentControl Content="{Binding KeyMouseFishingActions}"
-                                            ContentTemplate="{StaticResource Keybind.KeyMouseActionGrid}"
-                                            Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        </Grid>
-                    </StackPanel>
-                </Border>
+                    <TextBlock Text="{Binding Texts[Keybind.Section.FishingModeKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                    Margin="0,0,0,12">
+                        <StackPanel>
+                            <Border Style="{StaticResource Keybind.IndependentCheckBoxField}"
+                                    Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <CheckBox Content="{Binding Texts[Keybind.CheckBox.FishingIndependent]}"
+                                          Style="{StaticResource Keybind.IndependentCheckBox}"
+                                          IsChecked="{Binding KeyMouseFishingModeIndependent, Mode=TwoWay}" />
+                            </Border>
+                            <Grid>
+                                <ContentControl Content="{Binding ControllerFishingActions}"
+                                                ContentTemplate="{StaticResource Keybind.ControllerActionList}"
+                                                Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <ContentControl Content="{Binding KeyMouseFishingActions}"
+                                                ContentTemplate="{StaticResource Keybind.KeyMouseActionList}"
+                                                Visibility="{Binding IsKeyMouseMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Grid>
+                        </StackPanel>
+                    </ContentControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </ContentControl>
 
-                <Border Style="{StaticResource Keybind.Section}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding StatusText}"
-                                   Foreground="{DynamicResource Brush.TextSecondary}"
-                                   TextWrapping="Wrap" />
-                        <Button Grid.Column="1" Margin="8,0,0,0"
-                                Style="{StaticResource Keybind.Button}"
-                                Command="{Binding ResetCommand}"
-                                Content="リセット" />
-                        <Button Grid.Column="2" Margin="8,0,0,0"
-                                Style="{StaticResource Keybind.PrimaryButton}"
-                                Command="{Binding SaveCommand}"
-                                IsEnabled="{Binding CanSave}"
-                                Content="保存" />
-                    </Grid>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
+            <ScrollBar x:Name="ContentExternalScrollBar"
+                       Grid.Column="1"
+                       Margin="5,0,5,0"
+                       Orientation="Vertical"
+                       Style="{StaticResource ScrollBar.WidgetList}"
+                       ValueChanged="ContentExternalScrollBar_ValueChanged" />
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="8,0,8,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock VerticalAlignment="Center"
+                       Foreground="{DynamicResource Brush.TextSecondary}"
+                       FontSize="12"
+                       Text="{Binding StatusText}"
+                       TextTrimming="CharacterEllipsis"
+                       TextWrapping="NoWrap"
+                       Margin="0,0,16,0" />
+            <Button Grid.Column="1"
+                    Style="{StaticResource Button.Text}"
+                    Command="{Binding ResetCommand}"
+                    Content="{Binding Texts[Keybind.Button.Reset]}" />
+            <Button Grid.Column="2"
+                    Margin="12,0,0,0"
+                    Style="{StaticResource Button.Text}"
+                    Command="{Binding SaveCommand}"
+                    IsEnabled="{Binding CanSave}"
+                    Content="{Binding Texts[Keybind.Button.Save]}" />
+        </Grid>
     </Grid>
 </UserControl>

@@ -13,7 +13,6 @@ namespace StarResonanceDps.App.Services;
 public sealed class PluginManager
 {
     private readonly string _pluginsDirectory;
-    private readonly string _pluginDataDirectory;
     private readonly Dictionary<string, PluginRegistration> _registrations = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, LoadedPlugin> _loadedPlugins = new(StringComparer.OrdinalIgnoreCase);
 
@@ -21,8 +20,7 @@ public sealed class PluginManager
 
     private PluginManager()
     {
-        _pluginsDirectory = Path.Combine(AppDataPaths.BaseDirectory, "Plugins");
-        _pluginDataDirectory = AppDataPaths.PluginDataDirectory;
+        _pluginsDirectory = AppDataPaths.PluginsDirectory;
     }
 
     public static PluginManager Instance { get; } = new();
@@ -155,8 +153,9 @@ public sealed class PluginManager
             }
 
             var logger = new PluginDebugLogger(registration.Info.Id);
-            var pluginDataDirectory = Path.Combine(_pluginDataDirectory, registration.Info.Id);
-            var context = new PluginHostContext(registration.Info.Id, pluginDataDirectory, logger);
+            var settingsStore = new PluginSettingsStore(_pluginsDirectory, logger);
+            var messages = new PluginMessageService();
+            var context = new PluginHostContext(registration.Info.Id, settingsStore, messages, PluginLocalizationService.Instance, logger);
 
             plugin.Initialize(context);
 
