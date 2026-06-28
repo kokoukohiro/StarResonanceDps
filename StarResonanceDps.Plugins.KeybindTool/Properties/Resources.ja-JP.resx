@@ -646,7 +646,7 @@
     <value>確認/キャンセル</value>
   </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
-    <value>コントローラ</value>
+    <value>コントローラの種類</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
     <value>補助キー1</value>
@@ -685,7 +685,7 @@
 {0}</value>
   </data>
   <data name="Keybind.Message.SaveErrorBody" xml:space="preserve">
-    <value>保存に失敗しました。</value>
+    <value>キー設定プリセットまたはゲーム設定への保存に失敗しました。入力内容を確認してください。</value>
   </data>
   <data name="Keybind.Message.SelectFileFirst" xml:space="preserve">
     <value>先に設定ファイルを選択してください。</value>
@@ -731,6 +731,9 @@
   </data>
   <data name="Keybind.Section.SelectSaveFile" xml:space="preserve">
     <value>設定ファイルを選択</value>
+  </data>
+  <data name="Keybind.Hint.SaveFileLocation" xml:space="preserve">
+    <value>キー設定の設定ファイルは通常、次の場所にあります。&#xA;%USERPROFILE%\AppData\LocalLow\bokura\[アジア版やSteam版などのフォルダ]\&#xA;localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\localsave.bytes (2 KB以上)</value>
   </data>
   <data name="Keybind.Status.DetectedSelected" xml:space="preserve">
     <value>{0}件の設定ファイルを検出、{1}を選択中</value>
@@ -821,5 +824,51 @@
   </data>
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>ファイルの形式が想定と異なります。</value>
+  </data>
+  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
+    <value>bokura直下のサーバーフォルダ名から保存規則を特定できません。</value>
+  </data>
+  <data name="Keybind.Group.Main" xml:space="preserve">
+    <value>通常</value>
+  </data>
+  <data name="Keybind.Group.QuickWheel" xml:space="preserve">
+    <value>クイックホイール</value>
+  </data>
+  <data name="Keybind.Group.Photo" xml:space="preserve">
+    <value>撮影モード</value>
+  </data>
+  <data name="Keybind.Group.Fishing" xml:space="preserve">
+    <value>釣りモード</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveIntro" xml:space="preserve">
+    <value>キー設定プリセットと、保存可能な項目はゲーム設定ファイルへ保存しました。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveSkipped" xml:space="preserve">
+    <value>以下の項目は不正または未生成の保存先を検出したため書き換えていません。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveRecovery" xml:space="preserve">
+    <value>ゲーム内でキー設定をデフォルトに戻した後、ゲームを完全に終了してください。
+その後、このツールでキー設定プリセットを読み込み、もう一度保存してください。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveNote" xml:space="preserve">
+    <value>※このエラーは、ゲーム側の更新で対象項目が実装されるまで解消しない可能性があります。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveItems" xml:space="preserve">
+    <value>今回スキップした項目:</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveTarget" xml:space="preserve">
+    <value>・{0}: {1} &gt; {2}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveControllerOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}, state=0x{2:X8}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveKeyMouseOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}</value>
+  </data>
+  <data name="Keybind.Message.Title.PartialSave" xml:space="preserve">
+    <value>一部のキーを保存できませんでした</value>
+  </data>
+  <data name="Keybind.Status.PartialSaved" xml:space="preserve">
+    <value>一部のキーをスキップして保存しました</value>
   </data>
 </root>

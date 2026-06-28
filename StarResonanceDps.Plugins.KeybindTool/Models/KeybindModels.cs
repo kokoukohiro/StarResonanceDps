@@ -10,10 +10,38 @@ internal enum KeybindModeGroup
     Fishing
 }
 
-internal enum KeybindBindingDataLayout
+internal enum KeybindServerProfile
 {
-    BeforeUpdate,
-    AfterUpdate
+    China,
+    Asia,
+    Global,
+    Taiwan
+}
+
+internal enum KeybindSaveTargetDevice
+{
+    Controller,
+    KeyMouse
+}
+
+internal sealed record KeybindInvalidWriteOffset(
+    int RelativeOffset,
+    uint InputType,
+    uint? StateValue);
+
+internal sealed record KeybindInvalidWriteTarget(
+    KeybindSaveTargetDevice Device,
+    string ActionId,
+    KeybindModeGroup Group,
+    string ActionKey,
+    IReadOnlyList<KeybindInvalidWriteOffset> InvalidOffsets);
+
+internal sealed record KeybindWriteTargetValidation(
+    IReadOnlyList<KeybindInvalidWriteTarget> InvalidTargets,
+    IReadOnlySet<string> ControllerActionIdsToSkip,
+    IReadOnlySet<string> KeyMouseActionIdsToSkip)
+{
+    public bool HasInvalidTargets => InvalidTargets.Count != 0;
 }
 
 internal interface IKeybindActionDefinition

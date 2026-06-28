@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Plugins;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Services;
 
@@ -35,7 +36,10 @@ public sealed class PluginWindowManager
         return true;
     }
 
-    public void Open(PluginListItemViewModel plugin, FrameworkElement content)
+    public void Open(
+        PluginListItemViewModel plugin,
+        FrameworkElement content,
+        PluginWindowOptions? windowOptions)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(content);
@@ -53,7 +57,7 @@ public sealed class PluginWindowManager
         var managerWindow = Application.Current?.MainWindow;
         TrackManagerWindow(managerWindow);
 
-        var window = new PluginWindow(plugin, content, managerWindow);
+        var window = new PluginWindow(plugin, content, managerWindow, windowOptions);
         window.Closed += PluginWindow_Closed;
 
         _openWindows.Add(plugin.PluginId, window);

@@ -75,7 +75,11 @@ public sealed class PluginManager
                 throw new InvalidOperationException("CreateContent returned null.");
             }
 
-            PluginWindowManager.Instance.Open(pluginItem, content);
+            var windowOptions = loadedPlugin.Instance is IPluginWindowOptionsProvider windowOptionsProvider
+                ? windowOptionsProvider.GetWindowOptions()
+                : null;
+
+            PluginWindowManager.Instance.Open(pluginItem, content, windowOptions);
         }
         catch (Exception exception)
         {

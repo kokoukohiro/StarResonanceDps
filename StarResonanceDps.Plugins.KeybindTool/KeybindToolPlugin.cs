@@ -14,9 +14,20 @@ using StarResonanceDps.Plugins.KeybindTool.Views;
 
 namespace StarResonanceDps.Plugins.KeybindTool;
 
-public sealed class KeybindToolPlugin : IStarResonancePlugin
+public sealed class KeybindToolPlugin : IStarResonancePlugin, IPluginWindowOptionsProvider
 {
+    private static readonly PluginWindowOptions WindowOptions = new(
+        width: 582,
+        height: 760,
+        minWidth: 500,
+        minHeight: 45);
+
     private IPluginContext? _context;
+
+    public PluginWindowOptions GetWindowOptions()
+    {
+        return WindowOptions;
+    }
 
     public void Initialize(IPluginContext context)
     {

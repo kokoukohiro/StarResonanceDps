@@ -13,9 +13,20 @@ using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.Plugins.ModuleTool;
 
-public sealed class ModuleToolPlugin : IStarResonancePlugin
+public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOptionsProvider
 {
+    private static readonly PluginWindowOptions WindowOptions = new(
+        width: 780,
+        height: 640,
+        minWidth: 740,
+        minHeight: 480);
+
     private IPluginContext? _context;
+
+    public PluginWindowOptions GetWindowOptions()
+    {
+        return WindowOptions;
+    }
 
     public void Initialize(IPluginContext context)
     {

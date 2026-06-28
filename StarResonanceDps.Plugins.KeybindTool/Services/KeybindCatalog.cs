@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using StarResonanceDps.Plugins.KeybindTool.Models;
@@ -157,7 +158,7 @@ internal static class KeybindCatalog
             CreateControllerAction(KeybindModeGroup.Main, "Jump", new[] { 0x133 }),
             CreateControllerAction(KeybindModeGroup.Main, "DashDodge", new[] { 0x1C7 }),
             CreateControllerAction(KeybindModeGroup.Main, "EnvironmentalResonance1", new[] { 0x204 }),
-            CreateControllerAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x227 }),
+            CreateControllerAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x241 }),
             CreateControllerAction(KeybindModeGroup.Main, "NormalAttack", new[] { 0x27E }),
             CreateControllerAction(KeybindModeGroup.Main, "SpecialAttack", new[] { 0x9E7 }),
             CreateControllerAction(KeybindModeGroup.Main, "MasterySkill1", new[] { 0x2D5 }),
@@ -170,7 +171,7 @@ internal static class KeybindCatalog
             CreateControllerAction(KeybindModeGroup.Main, "CycleItemsLeft", new[] { 0x102D }),
             CreateControllerAction(KeybindModeGroup.Main, "UseItem", new[] { 0x3C9 }),
             CreateControllerAction(KeybindModeGroup.Main, "CycleItemsRight", new[] { 0x106A }),
-            CreateControllerAction(KeybindModeGroup.Main, "Action", new[] { 0x551, 0x158F }),
+            CreateControllerAction(KeybindModeGroup.Main, "Action", new[] { 0x551 }),
             CreateControllerAction(KeybindModeGroup.Main, "LockOnSwitch", new[] { 0x406 }),
             CreateControllerAction(KeybindModeGroup.Main, "ExtraSkill", new[] { 0xA9E }),
             CreateControllerAction(KeybindModeGroup.Main, "CancelInteraction", new[] { 0x45D }),
@@ -186,25 +187,25 @@ internal static class KeybindCatalog
             CreateControllerAction(KeybindModeGroup.Main, "CursorMoveLeftRight", new[] { 0x1F63 }, allowedValues: new[] { 0x1u, 0x2u, 0x3u, 0x4u }),
             CreateControllerAction(KeybindModeGroup.Main, "TakePhoto", new[] { 0x76A }),
             CreateControllerAction(KeybindModeGroup.Main, "LeaveDungeon", new[] { 0x810 }),
-            CreateControllerAction(KeybindModeGroup.Main, "UseItemAlternate", new[] { 0x90D, 0x186B }),
+            CreateControllerAction(KeybindModeGroup.Main, "UseItemAlternate", new[] { 0x90D }),
             CreateControllerAction(KeybindModeGroup.Main, "QuickAction", new[] { 0xBA4 }),
             CreateControllerAction(KeybindModeGroup.Main, "SummonDismissMount", new[] { 0xB44 }),
-            CreateControllerAction(KeybindModeGroup.Main, "AcceptInvite", new[] { 0xBE1, 0x1A89 }),
-            CreateControllerAction(KeybindModeGroup.Main, "DeclineInvite", new[] { 0xC1E, 0x1AC6 }),
+            CreateControllerAction(KeybindModeGroup.Main, "AcceptInvite", new[] { 0xBE1 }),
+            CreateControllerAction(KeybindModeGroup.Main, "DeclineInvite", new[] { 0xC1E }),
             CreateControllerAction(KeybindModeGroup.Main, "AutoBattle", new[] { 0xCBB }),
             CreateControllerAction(KeybindModeGroup.Main, "Channel", new[] { 0xC7E }),
             CreateControllerAction(KeybindModeGroup.Main, "IllustrationGuide", new[] { 0xCF8 }),
             CreateControllerAction(KeybindModeGroup.Main, "QuickWheel", new[] { 0xD35 }),
             CreateControllerAction(KeybindModeGroup.Main, "SwitchQuestLeft", new[] { 0xFB3 }),
-            CreateControllerAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFD6 }),
+            CreateControllerAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFF0 }),
             CreateControllerAction(KeybindModeGroup.Main, "ZoomOut", new[] { 0x58E }),
             CreateControllerAction(KeybindModeGroup.Main, "ZoomIn", new[] { 0x5A3 }),
-            CreateControllerAction(KeybindModeGroup.Main, "OpenSkillPalette", new[] { 0x1227, 0x1F7D }),
+            CreateControllerAction(KeybindModeGroup.Main, "OpenSkillPalette", new[] { 0x1227 }),
             CreateControllerAction(KeybindModeGroup.Main, "RoleSkill1", new[] { 0x1133 }),
             CreateControllerAction(KeybindModeGroup.Main, "RoleSkill2", new[] { 0x1170 }),
             CreateControllerAction(KeybindModeGroup.Main, "RoleSkill3", new[] { 0x11AD }),
             CreateControllerAction(KeybindModeGroup.Main, "RoleSkill4", new[] { 0x11EA }),
-            CreateControllerAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x124A }),
+            CreateControllerAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x1264 }),
         };
     public static readonly IReadOnlyList<ControllerActionDefinition> ControllerQuickWheelActions =
         new ControllerActionDefinition[]
@@ -273,7 +274,7 @@ internal static class KeybindCatalog
             CreateKeyMouseAction(KeybindModeGroup.Main, "DashDodge1", new[] { 0x193, 0x13AE }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "DashDodge2", new[] { 0x1AD }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "EnvironmentalResonance1", new[] { 0x1EA, 0x13D1 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x241 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "EnvironmentalResonance2", new[] { 0x227 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "NormalAttack", new[] { 0x264 }, allowedInputTypes: new[] { 0x2u }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "SpecialAttack", new[] { 0x9CD, 0x1934 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "MasterySkill1", new[] { 0x2BB, 0x143A }),
@@ -326,7 +327,7 @@ internal static class KeybindCatalog
             CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheel", new[] { 0xD1B, 0x1B98 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "AutoRun", new[] { 0xF39, 0x1D9C }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "SwitchQuestLeft", new[] { 0xF99, 0x1DE2 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFF0 }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "SwitchQuestRight", new[] { 0xFD6 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "EditHome", new[] { 0xF16, 0x1D79 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "ZoomOutIn", new[] { 0x574, 0x893, 0x15D5, 0x1814 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "OpenSkillPalette", new[] { 0x120D, 0x1F86 }),
@@ -334,7 +335,7 @@ internal static class KeybindCatalog
             CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill2", new[] { 0x1156 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill3", new[] { 0x1193 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "RoleSkill4", new[] { 0x11D0 }),
-            CreateKeyMouseAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x1264, 0x1FDD }),
+            CreateKeyMouseAction(KeybindModeGroup.Main, "HomeBlueprint", new[] { 0x124A }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "SummonAttendantImagine", new[] { 0x1287, 0x2000 }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot1", new[] { 0xD58, 0x1BBB }),
             CreateKeyMouseAction(KeybindModeGroup.Main, "QuickWheelSlot2", new[] { 0xD7B, 0x1BDE }),
@@ -504,53 +505,36 @@ internal static class KeybindCatalog
                 })
             });
 
-    public static readonly IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> ControllerBindingLayoutRelativeOffsets =
-        new ReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>(
-            new Dictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>
+    private static readonly (string Marker, KeybindServerProfile Profile)[] ServerProfileFolderMarkers =
+    {
+        ("starasia", KeybindServerProfile.Asia),
+        ("startw", KeybindServerProfile.Taiwan),
+        ("bpsr", KeybindServerProfile.Global),
+        ("star", KeybindServerProfile.China)
+    };
+
+    private static readonly IReadOnlyDictionary<KeybindServerProfile, ServerProfileDefinition> ServerProfiles =
+        new ReadOnlyDictionary<KeybindServerProfile, ServerProfileDefinition>(
+            new Dictionary<KeybindServerProfile, ServerProfileDefinition>
             {
-                [KeybindBindingDataLayout.BeforeUpdate] =
+                [KeybindServerProfile.China] = ServerProfileDefinition.Baseline,
+                [KeybindServerProfile.Asia] = new ServerProfileDefinition(
                     new ReadOnlyDictionary<string, int[]>(
                         new Dictionary<string, int[]>(StringComparer.Ordinal)
                         {
-                            [GetActionId(KeybindModeGroup.Main, "Action")] = new[] { 0x551 },
-                            [GetActionId(KeybindModeGroup.Main, "UseItemAlternate")] = new[] { 0x90D },
-                            [GetActionId(KeybindModeGroup.Main, "AcceptInvite")] = new[] { 0xBE1 },
-                            [GetActionId(KeybindModeGroup.Main, "DeclineInvite")] = new[] { 0xC1E },
-                            [GetActionId(KeybindModeGroup.Main, "OpenSkillPalette")] = new[] { 0x1227 }
+                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
+                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
+                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A }
                         }),
-                [KeybindBindingDataLayout.AfterUpdate] =
                     new ReadOnlyDictionary<string, int[]>(
                         new Dictionary<string, int[]>(StringComparer.Ordinal)
                         {
                             [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x241 },
                             [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFF0 },
                             [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
-                        })
-            });
-
-    public static readonly IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> KeyMouseBindingLayoutRelativeOffsets =
-        new ReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>(
-            new Dictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>>
-            {
-                [KeybindBindingDataLayout.BeforeUpdate] =
-                    new ReadOnlyDictionary<string, int[]>(
-                        new Dictionary<string, int[]>(StringComparer.Ordinal)
-                        {
-                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
-                        }),
-                [KeybindBindingDataLayout.AfterUpdate] =
-                    new ReadOnlyDictionary<string, int[]>(
-                        new Dictionary<string, int[]>(StringComparer.Ordinal)
-                        {
-                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
-                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
-                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A },
-                            [GetActionId(KeybindModeGroup.Main, "Action")] = new[] { 0x537 },
-                            [GetActionId(KeybindModeGroup.Main, "UseItemAlternate")] = new[] { 0x8F3 },
-                            [GetActionId(KeybindModeGroup.Main, "AcceptInvite")] = new[] { 0xBC7 },
-                            [GetActionId(KeybindModeGroup.Main, "DeclineInvite")] = new[] { 0xC04 },
-                            [GetActionId(KeybindModeGroup.Main, "OpenSkillPalette")] = new[] { 0x120D }
-                        })
+                        })),
+                [KeybindServerProfile.Global] = ServerProfileDefinition.Baseline,
+                [KeybindServerProfile.Taiwan] = ServerProfileDefinition.Baseline
             });
 
     public static readonly IReadOnlyDictionary<uint, uint> HelperMainToActionValue =
@@ -617,62 +601,108 @@ internal static class KeybindCatalog
 
     static KeybindCatalog()
     {
-        ValidateBindingLayoutSlotOwnership();
+        ValidateServerProfileSlotOwnership();
+    }
+
+    public static bool TryResolveServerProfile(string filePath, out KeybindServerProfile serverProfile)
+    {
+        serverProfile = default;
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            return false;
+        }
+
+        DirectoryInfo? currentDirectory;
+        try
+        {
+            currentDirectory = new FileInfo(Path.GetFullPath(filePath)).Directory;
+        }
+        catch
+        {
+            currentDirectory = new FileInfo(filePath).Directory;
+        }
+
+        for (var current = currentDirectory; current is not null; current = current.Parent)
+        {
+            var parent = current.Parent;
+            if (parent is null)
+            {
+                break;
+            }
+
+            if (!string.Equals(parent.Name, "bokura", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var serverFolderName = current.Name;
+            foreach (var (marker, profile) in ServerProfileFolderMarkers)
+            {
+                if (serverFolderName.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                {
+                    serverProfile = profile;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return false;
     }
 
     public static IReadOnlyList<int> GetControllerRelativeOffsets(
         ControllerActionDefinition definition,
-        KeybindBindingDataLayout layout)
+        KeybindServerProfile serverProfile)
     {
         ArgumentNullException.ThrowIfNull(definition);
-        return GetBindingRelativeOffsets(
+        return GetServerProfileRelativeOffsets(
             definition.Id,
             definition.RelativeOffsets,
-            ControllerBindingLayoutRelativeOffsets,
-            layout);
+            serverProfile,
+            controller: true);
     }
 
     public static IReadOnlyList<int> GetKeyMouseRelativeOffsets(
         KeyMouseActionDefinition definition,
-        KeybindBindingDataLayout layout)
+        KeybindServerProfile serverProfile)
     {
         ArgumentNullException.ThrowIfNull(definition);
-        return GetBindingRelativeOffsets(
+        return GetServerProfileRelativeOffsets(
             definition.Id,
             definition.RelativeOffsets,
-            KeyMouseBindingLayoutRelativeOffsets,
-            layout);
+            serverProfile,
+            controller: false);
     }
 
-    private static IReadOnlyList<int> GetBindingRelativeOffsets(
+    private static IReadOnlyList<int> GetServerProfileRelativeOffsets(
         string actionId,
         IReadOnlyList<int> defaultOffsets,
-        IReadOnlyDictionary<KeybindBindingDataLayout, IReadOnlyDictionary<string, int[]>> layoutOverrides,
-        KeybindBindingDataLayout layout)
+        KeybindServerProfile serverProfile,
+        bool controller)
     {
-        if (!layoutOverrides.TryGetValue(layout, out var perActionOverrides))
+        if (!ServerProfiles.TryGetValue(serverProfile, out var profile))
         {
-            throw new ArgumentOutOfRangeException(nameof(layout));
+            throw new ArgumentOutOfRangeException(nameof(serverProfile));
         }
 
-        return perActionOverrides.TryGetValue(actionId, out var offsets)
+        var overrides = controller
+            ? profile.ControllerRelativeOffsetOverrides
+            : profile.KeyMouseRelativeOffsetOverrides;
+        return overrides.TryGetValue(actionId, out var offsets)
             ? offsets
             : defaultOffsets;
     }
 
-    private static void ValidateBindingLayoutSlotOwnership()
+    private static void ValidateServerProfileSlotOwnership()
     {
-        foreach (var layout in new[]
-        {
-            KeybindBindingDataLayout.BeforeUpdate,
-            KeybindBindingDataLayout.AfterUpdate
-        })
+        foreach (var serverProfile in Enum.GetValues<KeybindServerProfile>())
         {
             var writeRanges = new List<(int Start, int End, string Device, string ActionId, int RelativeOffset)>();
 
             foreach (var action in ControllerActions)
             {
-                foreach (var relativeOffset in GetControllerRelativeOffsets(action, layout))
+                foreach (var relativeOffset in GetControllerRelativeOffsets(action, serverProfile))
                 {
                     writeRanges.Add((
                         relativeOffset - sizeof(uint),
@@ -685,7 +715,7 @@ internal static class KeybindCatalog
 
             foreach (var action in KeyMouseActions)
             {
-                foreach (var relativeOffset in GetKeyMouseRelativeOffsets(action, layout))
+                foreach (var relativeOffset in GetKeyMouseRelativeOffsets(action, serverProfile))
                 {
                     writeRanges.Add((
                         relativeOffset - sizeof(uint),
@@ -708,7 +738,7 @@ internal static class KeybindCatalog
                     }
 
                     throw new InvalidOperationException(
-                        $"Keybind binding write ranges overlap: {layout} / "
+                        $"Keybind binding write ranges overlap: {serverProfile} / "
                         + $"{current.Device}:{current.ActionId}@0x{current.RelativeOffset:X5} / "
                         + $"{other.Device}:{other.ActionId}@0x{other.RelativeOffset:X5}");
                 }
@@ -726,7 +756,13 @@ internal static class KeybindCatalog
     public static string GetActionLocalizationKey(IKeybindActionDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
-        return $"Keybind.Action.{definition.Group}.{definition.Key}";
+        return GetActionLocalizationKey(definition.Group, definition.Key);
+    }
+
+    public static string GetActionLocalizationKey(KeybindModeGroup group, string key)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        return $"Keybind.Action.{group}.{key}";
     }
 
 
@@ -1527,6 +1563,15 @@ internal static class KeybindCatalog
         return new KeybindInputVisual(
             $"pack://application:,,,/KeybindTool;component/Assets/{assetFileName}.png",
             text);
+    }
+
+    private sealed record ServerProfileDefinition(
+        IReadOnlyDictionary<string, int[]> ControllerRelativeOffsetOverrides,
+        IReadOnlyDictionary<string, int[]> KeyMouseRelativeOffsetOverrides)
+    {
+        public static readonly ServerProfileDefinition Baseline = new(
+            new ReadOnlyDictionary<string, int[]>(new Dictionary<string, int[]>(StringComparer.Ordinal)),
+            new ReadOnlyDictionary<string, int[]>(new Dictionary<string, int[]>(StringComparer.Ordinal)));
     }
 
     private static ControllerActionDefinition CreateControllerAction(

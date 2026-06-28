@@ -598,10 +598,10 @@
     <value>Load</value>
   </data>
   <data name="Keybind.Button.ManualSelect" xml:space="preserve">
-    <value>Select File</value>
+    <value>Browse</value>
   </data>
   <data name="Keybind.Button.OpenLocation" xml:space="preserve">
-    <value>Open Location</value>
+    <value>Open Folder</value>
   </data>
   <data name="Keybind.Button.Rescan" xml:space="preserve">
     <value>Rescan</value>
@@ -631,7 +631,7 @@
     <value>The key settings file format is invalid.</value>
   </data>
   <data name="Keybind.Input.Axis.ForwardBack" xml:space="preserve">
-    <value>Forward/Back</value>
+    <value>Fwd/Back</value>
   </data>
   <data name="Keybind.Input.Axis.LeftRight" xml:space="preserve">
     <value>Left/Right</value>
@@ -646,7 +646,7 @@
     <value>Confirm/Cancel</value>
   </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
-    <value>Controller</value>
+    <value>Controller Type</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
     <value>Assist Key 1</value>
@@ -685,7 +685,7 @@ Press Save to apply them to the game settings.</value>
 {0}</value>
   </data>
   <data name="Keybind.Message.SaveErrorBody" xml:space="preserve">
-    <value>Failed to save.</value>
+    <value>The key settings preset or game settings could not be saved. Check the selected inputs.</value>
   </data>
   <data name="Keybind.Message.SelectFileFirst" xml:space="preserve">
     <value>Select a settings file first.</value>
@@ -731,6 +731,9 @@ Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Section.SelectSaveFile" xml:space="preserve">
     <value>Select Settings File</value>
+  </data>
+  <data name="Keybind.Hint.SaveFileLocation" xml:space="preserve">
+    <value>The key settings file is usually located here:&#xA;%USERPROFILE%\AppData\LocalLow\bokura\[server folder, such as BPSR or StarASIA]\&#xA;localsave\Env1\[number folder]\[character UID folder]\localsave.bytes (at least 2 KB)</value>
   </data>
   <data name="Keybind.Status.DetectedSelected" xml:space="preserve">
     <value>{0} settings file(s) detected; {1} selected</value>
@@ -821,5 +824,50 @@ Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>The file format does not match the expected layout.</value>
+  </data>
+  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
+    <value>The server profile could not be determined from the folder directly under bokura.</value>
+  </data>
+  <data name="Keybind.Group.Main" xml:space="preserve">
+    <value>Main</value>
+  </data>
+  <data name="Keybind.Group.QuickWheel" xml:space="preserve">
+    <value>Quick Wheel</value>
+  </data>
+  <data name="Keybind.Group.Photo" xml:space="preserve">
+    <value>Photo Mode</value>
+  </data>
+  <data name="Keybind.Group.Fishing" xml:space="preserve">
+    <value>Fishing Mode</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveIntro" xml:space="preserve">
+    <value>The key settings preset and all valid items were saved to the game settings file.</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveSkipped" xml:space="preserve">
+    <value>The following items were not changed because their save targets are invalid or have not been generated.</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveRecovery" xml:space="preserve">
+    <value>Reset the game's key settings to default, close the game completely, then load the key settings preset and save again.</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveNote" xml:space="preserve">
+    <value>This may remain unavailable until the game implements the target item.</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveItems" xml:space="preserve">
+    <value>Items skipped this time:</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveTarget" xml:space="preserve">
+    <value>• {0}: {1} &gt; {2}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveControllerOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}, state=0x{2:X8}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveKeyMouseOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}</value>
+  </data>
+  <data name="Keybind.Message.Title.PartialSave" xml:space="preserve">
+    <value>Some Keys Were Not Saved</value>
+  </data>
+  <data name="Keybind.Status.PartialSaved" xml:space="preserve">
+    <value>Saved with some keys skipped</value>
   </data>
 </root>

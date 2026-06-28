@@ -8,14 +8,14 @@
 
         <Style x:Key="Keybind.SectionTitle" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="0,0,0,10" />
         </Style>
 
         <Style x:Key="Keybind.FieldLabel" TargetType="{x:Type TextBlock}">
             <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
@@ -63,7 +63,7 @@
                                 <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                                <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
                                 <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                                 <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
                             </Trigger>
@@ -169,8 +169,8 @@
             <StackPanel Orientation="Horizontal"
                         VerticalAlignment="Center"
                         SnapsToDevicePixels="True">
-                <Image Width="14"
-                       Height="14"
+                <Image Width="18"
+                       Height="18"
                        Stretch="Uniform"
                        SnapsToDevicePixels="True"
                        Source="{Binding IconUri}"
@@ -245,7 +245,7 @@
                                 <StackPanel Grid.Column="1"
                                             Orientation="Horizontal"
                                             VerticalAlignment="Center">
-                                    <ComboBox Width="180"
+                                    <ComboBox Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding HelperOptions}"
                                               ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
@@ -256,7 +256,7 @@
                                                Margin="10,0"
                                                Style="{StaticResource Keybind.FieldLabel}"
                                                Visibility="{Binding UsesHelper, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <ComboBox Width="180"
+                                    <ComboBox Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding ButtonOptions}"
                                               ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
@@ -292,7 +292,7 @@
                                                Style="{StaticResource Keybind.FieldLabel}"
                                                Margin="0,0,10,0"
                                                Visibility="{Binding UsesLControlPrefix, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <ComboBox Width="220"
+                                    <ComboBox Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding KeyOptions}"
                                               ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
@@ -320,7 +320,7 @@
             </Grid.ColumnDefinitions>
 
             <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
-                <Grid Margin="26,22,18,18">
+                <Grid Margin="16,16,8,16">
                     <ScrollViewer x:Name="ContentScrollViewer"
                                   Style="{StaticResource ScrollViewer.WidgetList}"
                                   VerticalScrollBarVisibility="Hidden"
@@ -333,62 +333,67 @@
                     <TextBlock Text="{Binding Texts[Keybind.Section.SelectSaveFile]}"
                                Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Padding="20,12,20,12"
+                                    Margin="0,0,0,10">
                         <StackPanel>
-                            <Border Style="{StaticResource Panel.SettingField}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                    <ComboBox Grid.Column="0"
-                                              Width="340"
-                                              HorizontalAlignment="Left"
-                                              Style="{StaticResource Input.SettingsComboBox}"
-                                              ItemsSource="{Binding DetectedSaveFiles}"
-                                              SelectedItem="{Binding SelectedDetectedSave, Mode=TwoWay}"
-                                              DisplayMemberPath="DisplayName" />
-                                    <Button Grid.Column="1"
-                                            Margin="12,0,0,0"
-                                            Style="{StaticResource Button.Text}"
-                                            Command="{Binding RescanCommand}"
-                                            Content="{Binding Texts[Keybind.Button.Rescan]}" />
-                                </Grid>
-                            </Border>
+                                <ComboBox Grid.Column="0"
+                                          Width="Auto"
+                                          HorizontalAlignment="Stretch"
+                                          Style="{StaticResource Input.SettingsComboBox}"
+                                          ItemsSource="{Binding DetectedSaveFiles}"
+                                          SelectedItem="{Binding SelectedDetectedSave, Mode=TwoWay}"
+                                          DisplayMemberPath="DisplayName" />
+                                <Button Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding RescanCommand}"
+                                        Content="{Binding Texts[Keybind.Button.Rescan]}" />
+                            </Grid>
 
-                            <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                    <TextBox Grid.Column="0"
-                                             Height="32"
-                                             Style="{StaticResource Input.SearchBox}"
-                                             Text="{Binding SelectedSaveFilePath, Mode=OneWay}"
-                                             IsReadOnly="True" />
-                                    <Button Grid.Column="1"
-                                            Margin="12,0,0,0"
-                                            Style="{StaticResource Button.Text}"
-                                            Command="{Binding SelectFileCommand}"
-                                            Content="{Binding Texts[Keybind.Button.ManualSelect]}" />
-                                    <Button Grid.Column="2"
-                                            Margin="12,0,0,0"
-                                            Style="{StaticResource Button.Text}"
-                                            Command="{Binding OpenSelectedFileLocationCommand}"
-                                            Content="{Binding Texts[Keybind.Button.OpenLocation]}" />
-                                </Grid>
-                            </Border>
+                                <TextBox Grid.Column="0"
+                                         Height="32"
+                                         Style="{StaticResource Input.PathBox}"
+                                         Text="{Binding SelectedSaveFilePath, Mode=OneWay}"
+                                         IsReadOnly="True" />
+                                <Button Grid.Column="1"
+                                        Margin="12,0,0,0"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding SelectFileCommand}"
+                                        Content="{Binding Texts[Keybind.Button.ManualSelect]}" />
+                                <Button Grid.Column="2"
+                                        Margin="12,0,0,0"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding OpenSelectedFileLocationCommand}"
+                                        Content="{Binding Texts[Keybind.Button.OpenLocation]}" />
+                            </Grid>
+
+                            <TextBlock Margin="0,12,0,0"
+                                       MinWidth="600"
+                                       HorizontalAlignment="Stretch"
+                                       TextAlignment="Left"
+                                       Style="{StaticResource Text.Subtitle}"
+                                       Text="{Binding Texts[Keybind.Hint.SaveFileLocation]}"
+                                       TextWrapping="Wrap" />
                         </StackPanel>
                     </ContentControl>
 
                     <TextBlock Text="{Binding Texts[Keybind.Section.Preset]}"
                                Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Margin="0,0,0,10">
                         <Border Style="{StaticResource Panel.SettingFieldLast}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -419,54 +424,55 @@
                     <TextBlock Text="{Binding Texts[Keybind.Section.InputDevice]}"
                                Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Padding="20,12,20,12"
+                                    Margin="0,0,0,10">
                         <StackPanel>
-                            <Border Style="{StaticResource Panel.SettingField}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                                    <RadioButton Grid.Column="0"
-                                                 Margin="0,0,6,0"
-                                                 Content="{Binding Texts[Keybind.InputDevice.Controller]}"
-                                                 GroupName="InputDevice"
-                                                 Style="{StaticResource Keybind.InputModeOption}"
-                                                 IsChecked="{Binding IsControllerMode, Mode=TwoWay}" />
-                                    <RadioButton Grid.Column="1"
-                                                 Margin="6,0,0,0"
-                                                 Content="{Binding Texts[Keybind.InputDevice.KeyMouse]}"
-                                                 GroupName="InputDevice"
-                                                 Style="{StaticResource Keybind.InputModeOption}"
-                                                 IsChecked="{Binding IsKeyMouseMode, Mode=TwoWay}" />
-                                </Grid>
-                            </Border>
+                                <RadioButton Grid.Column="0"
+                                             Margin="0,0,6,0"
+                                             Content="{Binding Texts[Keybind.InputDevice.Controller]}"
+                                             GroupName="InputDevice"
+                                             Style="{StaticResource Keybind.InputModeOption}"
+                                             IsChecked="{Binding IsControllerMode, Mode=TwoWay}" />
+                                <RadioButton Grid.Column="1"
+                                             Margin="6,0,0,0"
+                                             Content="{Binding Texts[Keybind.InputDevice.KeyMouse]}"
+                                             GroupName="InputDevice"
+                                             Style="{StaticResource Keybind.InputModeOption}"
+                                             IsChecked="{Binding IsKeyMouseMode, Mode=TwoWay}" />
+                            </Grid>
 
-                            <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                <Grid IsEnabled="{Binding IsControllerMode}">
-                                    <Grid.Style>
-                                        <Style TargetType="{x:Type Grid}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsControllerMode}" Value="False">
-                                                    <Setter Property="Opacity" Value="0.45" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <Grid Margin="0,12,0,0"
+                                  IsEnabled="{Binding IsControllerMode}">
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsControllerMode}" Value="False">
+                                                <Setter Property="Opacity" Value="0.45" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
 
-                                    <TextBlock Text="{Binding Texts[Keybind.Label.Controller]}"
-                                               Style="{StaticResource Keybind.FieldLabel}" />
-                                    <ComboBox Grid.Column="1"
-                                              Style="{StaticResource Input.SettingsComboBox}"
-                                              ItemsSource="{Binding ControllerTypes}"
-                                              SelectedItem="{Binding SelectedControllerType, Mode=TwoWay}" />
-                                </Grid>
-                            </Border>
+                                <TextBlock Text="{Binding Texts[Keybind.Label.Controller]}"
+                                           Style="{StaticResource Keybind.FieldLabel}" />
+                                <ComboBox Grid.Column="1"
+                                          Width="Auto"
+                                          Margin="6,0,0,0"
+                                          HorizontalAlignment="Stretch"
+                                          Style="{StaticResource Input.SettingsComboBox}"
+                                          ItemsSource="{Binding ControllerTypes}"
+                                          SelectedItem="{Binding SelectedControllerType, Mode=TwoWay}" />
+                            </Grid>
                         </StackPanel>
                     </ContentControl>
 
@@ -474,7 +480,7 @@
                                Style="{StaticResource Keybind.SectionTitle}"
                                Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22"
+                                    Margin="0,0,0,10"
                                     Visibility="{Binding IsControllerMode, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel>
                             <Border Style="{StaticResource Panel.SettingField}">
@@ -485,6 +491,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Texts[Keybind.Label.Helper1]}" Style="{StaticResource Keybind.FieldLabel}" />
                                     <ComboBox Grid.Column="1"
+                                              Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding HelperOptions}"
                                               ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
@@ -499,6 +506,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Texts[Keybind.Label.Helper2]}" Style="{StaticResource Keybind.FieldLabel}" />
                                     <ComboBox Grid.Column="1"
+                                              Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding HelperOptions}"
                                               ItemTemplate="{StaticResource Keybind.InputOptionVisual}"
@@ -513,6 +521,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Texts[Keybind.Label.ConfirmCancel]}" Style="{StaticResource Keybind.FieldLabel}" />
                                     <ComboBox Grid.Column="1"
+                                              Width="120"
                                               Style="{StaticResource Input.SettingsComboBox}"
                                               ItemsSource="{Binding PresetOptions}"
                                               ItemTemplate="{StaticResource Keybind.PresetOptionVisual}"
@@ -525,7 +534,7 @@
 
                     <TextBlock Text="{Binding Texts[Keybind.Section.MainKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Margin="0,0,0,10">
                         <Grid>
                             <ContentControl Content="{Binding ControllerMainActions}"
                                             ContentTemplate="{StaticResource Keybind.ControllerActionList}"
@@ -538,7 +547,7 @@
 
                     <TextBlock Text="{Binding Texts[Keybind.Section.QuickWheelKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Margin="0,0,0,10">
                         <StackPanel>
                             <Border Style="{StaticResource Keybind.IndependentCheckBoxField}">
                                 <Grid>
@@ -565,7 +574,7 @@
 
                     <TextBlock Text="{Binding Texts[Keybind.Section.PhotoModeKeySettings]}" Style="{StaticResource Keybind.SectionTitle}" />
                     <ContentControl Style="{StaticResource Panel.SettingSection}"
-                                    Margin="0,0,0,22">
+                                    Margin="0,0,0,10">
                         <StackPanel>
                             <Border Style="{StaticResource Keybind.IndependentCheckBoxField}">
                                 <Grid>
@@ -638,11 +647,11 @@
 
             <TextBlock VerticalAlignment="Center"
                        Foreground="{DynamicResource Brush.TextSecondary}"
-                       FontSize="12"
+                       FontSize="13"
                        Text="{Binding StatusText}"
                        TextTrimming="CharacterEllipsis"
                        TextWrapping="NoWrap"
-                       Margin="0,0,16,0" />
+                       Margin="4,0,16,0" />
             <Button Grid.Column="1"
                     Style="{StaticResource Button.Text}"
                     Command="{Binding ResetCommand}"

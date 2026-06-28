@@ -202,10 +202,10 @@
     <value>战斗幻想2</value>
   </data>
   <data name="Keybind.Action.Main.CameraForwardBack" xml:space="preserve">
-    <value>镜头 - 前/后</value>
+    <value>镜头-前/后</value>
   </data>
   <data name="Keybind.Action.Main.CameraLeftRight" xml:space="preserve">
-    <value>镜头 - 左/右</value>
+    <value>镜头-左/右</value>
   </data>
   <data name="Keybind.Action.Main.CancelInteraction" xml:space="preserve">
     <value>解除交互</value>
@@ -646,7 +646,7 @@
     <value>确认/取消</value>
   </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
-    <value>控制器</value>
+    <value>控制器类型</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
     <value>辅助按键1</value>
@@ -685,7 +685,7 @@
 {0}</value>
   </data>
   <data name="Keybind.Message.SaveErrorBody" xml:space="preserve">
-    <value>保存失败。</value>
+    <value>键位设置预设或游戏设置保存失败。请检查输入内容。</value>
   </data>
   <data name="Keybind.Message.SelectFileFirst" xml:space="preserve">
     <value>请先选择设置文件。</value>
@@ -731,6 +731,9 @@
   </data>
   <data name="Keybind.Section.SelectSaveFile" xml:space="preserve">
     <value>选择设置文件</value>
+  </data>
+  <data name="Keybind.Hint.SaveFileLocation" xml:space="preserve">
+    <value>键位设置文件通常位于以下位置：&#xA;%USERPROFILE%\AppData\LocalLow\bokura\[服务器文件夹，例如 BPSR 或 StarASIA]\&#xA;localsave\Env1\[数字文件夹]\[角色 UID 文件夹]\localsave.bytes（至少 2 KB）</value>
   </data>
   <data name="Keybind.Status.DetectedSelected" xml:space="preserve">
     <value>检测到 {0} 个设置文件，当前选择 {1}</value>
@@ -821,5 +824,51 @@
   </data>
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>文件格式与预期布局不一致。</value>
+  </data>
+  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
+    <value>无法从 bokura 目录下的服务器文件夹名称确定保存规则。</value>
+  </data>
+  <data name="Keybind.Group.Main" xml:space="preserve">
+    <value>常规</value>
+  </data>
+  <data name="Keybind.Group.QuickWheel" xml:space="preserve">
+    <value>快捷轮盘</value>
+  </data>
+  <data name="Keybind.Group.Photo" xml:space="preserve">
+    <value>拍照模式</value>
+  </data>
+  <data name="Keybind.Group.Fishing" xml:space="preserve">
+    <value>钓鱼模式</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveIntro" xml:space="preserve">
+    <value>键位设置预设和可保存的项目已保存到游戏设置文件。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveSkipped" xml:space="preserve">
+    <value>检测到以下项目的保存位置无效或尚未生成，因此未进行写入。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveRecovery" xml:space="preserve">
+    <value>请先在游戏中将键位设置恢复为默认值，然后完全退出游戏。
+之后在此工具中读取键位设置预设，再次保存。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveNote" xml:space="preserve">
+    <value>※ 在游戏更新实现相应项目之前，此错误可能无法消除。</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveItems" xml:space="preserve">
+    <value>本次跳过的项目：</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveTarget" xml:space="preserve">
+    <value>• {0}: {1} &gt; {2}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveControllerOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}, state=0x{2:X8}</value>
+  </data>
+  <data name="Keybind.Message.PartialSaveKeyMouseOffset" xml:space="preserve">
+    <value>  +0x{0:X5}: type=0x{1:X8}</value>
+  </data>
+  <data name="Keybind.Message.Title.PartialSave" xml:space="preserve">
+    <value>部分按键未能保存</value>
+  </data>
+  <data name="Keybind.Status.PartialSaved" xml:space="preserve">
+    <value>已跳过部分按键并保存</value>
   </data>
 </root>

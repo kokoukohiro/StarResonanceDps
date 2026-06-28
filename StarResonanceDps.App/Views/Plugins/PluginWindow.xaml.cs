@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Interop;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Views.Plugins;
 
@@ -20,7 +21,11 @@ public partial class PluginWindow : Window
 
     private const double ResizeBorderThickness = 8.0;
 
-    public PluginWindow(PluginListItemViewModel plugin, FrameworkElement pluginContent, Window? owner)
+    public PluginWindow(
+        PluginListItemViewModel plugin,
+        FrameworkElement pluginContent,
+        Window? owner,
+        PluginWindowOptions? windowOptions)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(pluginContent);
@@ -29,6 +34,7 @@ public partial class PluginWindow : Window
         PluginContent = pluginContent;
 
         InitializeComponent();
+        ApplyInitialWindowOptions(windowOptions);
         DataContext = plugin;
 
         // This is a top-level tool window, not an owned window. An owned WPF window is
@@ -41,6 +47,19 @@ public partial class PluginWindow : Window
     public PluginListItemViewModel Plugin { get; }
 
     public FrameworkElement PluginContent { get; }
+
+    private void ApplyInitialWindowOptions(PluginWindowOptions? windowOptions)
+    {
+        if (windowOptions is null)
+        {
+            return;
+        }
+
+        MinWidth = windowOptions.MinWidth;
+        MinHeight = windowOptions.MinHeight;
+        Width = windowOptions.Width;
+        Height = windowOptions.Height;
+    }
 
     private void PluginWindow_SourceInitialized(object? sender, EventArgs e)
     {

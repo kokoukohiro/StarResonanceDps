@@ -178,7 +178,7 @@
         <Setter Property="Height" Value="30" />
         <Setter Property="Width" Value="88" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-        <Setter Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Cursor" Value="Hand" />
@@ -205,11 +205,11 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
                             <Setter TargetName="Root" Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlBackground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
