@@ -188,6 +188,9 @@ internal sealed class ControllerActionLayout
 
 internal sealed class KeyMouseLayoutProfile
 {
+    [JsonPropertyName("keyboard_layout")]
+    public string? KeyboardLayout { get; set; }
+
     [JsonPropertyName("quick_wheel_independent")]
     public bool QuickWheelIndependent { get; set; }
 

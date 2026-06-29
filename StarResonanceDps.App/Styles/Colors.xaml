@@ -1,7 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- ThemeManager updates the derived application theme brushes directly. -->
-    <SolidColorBrush x:Key="Brush.WindowSurface" Color="#0B1624" />
+    <SolidColorBrush x:Key="Brush.WindowSurface" Color="#1F1F1F" />
     <SolidColorBrush x:Key="Brush.PanelBackground" Color="#121D2B" />
     <SolidColorBrush x:Key="Brush.Border" Color="#323B47" />
     <SolidColorBrush x:Key="Brush.BorderSoft" Color="#212B38" />

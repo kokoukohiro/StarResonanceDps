@@ -23,6 +23,13 @@ public partial class KeybindToolView : UserControl
     private void KeybindToolView_Loaded(object sender, RoutedEventArgs e)
     {
         QueueUpdateExternalScrollBar();
+
+        if (DataContext is KeybindToolViewModel viewModel)
+        {
+            Dispatcher.BeginInvoke(
+                viewModel.ShowPendingInitialPresetUnavailableMessage,
+                DispatcherPriority.ContextIdle);
+        }
     }
 
     private void ContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)

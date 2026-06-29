@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -645,8 +645,27 @@
   <data name="Keybind.Label.ConfirmCancel" xml:space="preserve">
     <value>確認/キャンセル</value>
   </data>
+  <data name="Keybind.Label.ActionHelper" xml:space="preserve">
+    <value>補助キー</value>
+  </data>
+  <data name="Keybind.Label.Button" xml:space="preserve">
+    <value>ボタン</value>
+  </data>
+  <data name="Keybind.Label.Key" xml:space="preserve">
+    <value>キー</value>
+  </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
-    <value>コントローラの種類</value>
+    <value>ゲームパッドの種類</value>
+  </data>
+
+  <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
+    <value>キーボードのレイアウト</value>
+  </data>
+  <data name="Keybind.KeyboardLayout.Japanese" xml:space="preserve">
+    <value>日本語キーボード (106/109 キー)</value>
+  </data>
+  <data name="Keybind.KeyboardLayout.English" xml:space="preserve">
+    <value>英語キーボード (101/102 キー)</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
     <value>補助キー1</value>
@@ -655,43 +674,58 @@
     <value>補助キー2</value>
   </data>
   <data name="Keybind.Message.DirectoryNotFound" xml:space="preserve">
-    <value>フォルダが見つかりません。
-{0}</value>
+    <value>フォルダが見つかりません。</value>
   </data>
   <data name="Keybind.Message.LayoutFileMissing" xml:space="preserve">
-    <value>キー設定ファイルが見つかりません。
-{0}</value>
+    <value>キー設定プリセットが見つかりません。</value>
   </data>
   <data name="Keybind.Message.LayoutLoadFailedBody" xml:space="preserve">
-    <value>キー設定の読み込みに失敗しました。
-{0}</value>
+    <value>キー設定プリセットの読み込みに失敗しました。</value>
   </data>
   <data name="Keybind.Message.LayoutLoadedBody" xml:space="preserve">
-    <value>キー設定を読み込みました。
-ゲーム設定へ反映するには、保存を押してください。</value>
+    <value>キー設定を読み込みました。</value>
   </data>
-  <data name="Keybind.Message.LayoutLocationUnavailable" xml:space="preserve">
-    <value>キー設定ファイルの保存場所を開けません。</value>
+  <data name="Keybind.Message.LayoutLoadedDetail" xml:space="preserve">
+    <value>ゲーム設定へ反映するには、保存を押してください。</value>
   </data>
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>設定ファイルの読み込みに失敗しました。</value>
   </data>
+  <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
+    <value>一部のキー設定は編集できません</value>
+  </data>
+  <data name="Keybind.Message.PresetUnavailableBody" xml:space="preserve">
+    <value>確認/キャンセルは編集できません。</value>
+  </data>
+  <data name="Keybind.Message.PresetUnavailableDetail" xml:space="preserve">
+    <value>この設定ファイルでは、確認/キャンセル設定がゲーム内でまだ一度も編集されていないため、このツールでは確認/キャンセルを編集できません。ほかの項目はそのまま編集できます。</value>
+  </data>
   <data name="Keybind.Message.OpenDirectoryFailed" xml:space="preserve">
-    <value>フォルダを開けませんでした。
-{0}</value>
+    <value>フォルダを開けませんでした。</value>
   </data>
   <data name="Keybind.Message.SaveCompletedBody" xml:space="preserve">
-    <value>ゲームの設定とキー設定を保存しました。
-{0}</value>
+    <value>キー設定プリセットを作成しました。</value>
   </data>
   <data name="Keybind.Message.SaveErrorBody" xml:space="preserve">
-    <value>キー設定プリセットまたはゲーム設定への保存に失敗しました。入力内容を確認してください。</value>
+    <value>キー設定プリセットまたはゲーム設定ファイルを書き込めませんでした。</value>
+  </data>
+  <data name="Keybind.Message.SaveErrorDetail" xml:space="preserve">
+    <value>保存先フォルダへの書き込み権限、空き容量、同期ソフトやセキュリティソフトによるファイル使用を確認してください。</value>
+  </data>
+  <data name="Keybind.Message.IncompleteSettings" xml:space="preserve">
+    <value>未設定のキーがあります。</value>
+  </data>
+  <data name="Keybind.Message.IncompleteSettingsItem" xml:space="preserve">
+    <value>• {0}: {1}</value>
   </data>
   <data name="Keybind.Message.SelectFileFirst" xml:space="preserve">
-    <value>先に設定ファイルを選択してください。</value>
+    <value>設定ファイルが選択されていません。</value>
+  </data>
+  <data name="Keybind.Message.SelectFileFirstSaveDetail" xml:space="preserve">
+    <value>ゲーム設定に反映するには、設定ファイルを選択してから保存してください。</value>
   </data>
   <data name="Keybind.Message.Title.LayoutLoadError" xml:space="preserve">
-    <value>キー設定読み込みエラー</value>
+    <value>キー設定プリセット読み込みエラー</value>
   </data>
   <data name="Keybind.Message.Title.LayoutLoaded" xml:space="preserve">
     <value>キー設定を読み込みました</value>
@@ -733,7 +767,9 @@
     <value>設定ファイルを選択</value>
   </data>
   <data name="Keybind.Hint.SaveFileLocation" xml:space="preserve">
-    <value>キー設定の設定ファイルは通常、次の場所にあります。&#xA;%USERPROFILE%\AppData\LocalLow\bokura\[アジア版やSteam版などのフォルダ]\&#xA;localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\localsave.bytes (2 KB以上)</value>
+    <value>キー設定の設定ファイルは通常、次の場所にあります。
+%USERPROFILE%\AppData\LocalLow\bokura\[アジア版やSteam版などのフォルダ]\
+localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\localsave.bytes (2 KB以上)</value>
   </data>
   <data name="Keybind.Status.DetectedSelected" xml:space="preserve">
     <value>{0}件の設定ファイルを検出、{1}を選択中</value>
@@ -758,9 +794,6 @@
   </data>
   <data name="Keybind.Status.NoFileSelected" xml:space="preserve">
     <value>ファイル未選択</value>
-  </data>
-  <data name="Keybind.Status.PresetUnsupported" xml:space="preserve">
-    <value>{0}（この設定ファイルでは確認/キャンセルを編集できません）</value>
   </data>
   <data name="Keybind.Status.Reset" xml:space="preserve">
     <value>読み込み時の値へリセットしました</value>
@@ -841,20 +874,13 @@
     <value>釣りモード</value>
   </data>
   <data name="Keybind.Message.PartialSaveIntro" xml:space="preserve">
-    <value>キー設定プリセットと、保存可能な項目はゲーム設定ファイルへ保存しました。</value>
-  </data>
-  <data name="Keybind.Message.PartialSaveSkipped" xml:space="preserve">
     <value>以下の項目は不正または未生成の保存先を検出したため書き換えていません。</value>
   </data>
   <data name="Keybind.Message.PartialSaveRecovery" xml:space="preserve">
-    <value>ゲーム内でキー設定をデフォルトに戻した後、ゲームを完全に終了してください。
-その後、このツールでキー設定プリセットを読み込み、もう一度保存してください。</value>
+    <value>ゲーム内でキー設定をデフォルトに戻してゲームを完全に終了した後、このツールでキー設定プリセットを読み込み、もう一度保存してください。</value>
   </data>
   <data name="Keybind.Message.PartialSaveNote" xml:space="preserve">
     <value>※このエラーは、ゲーム側の更新で対象項目が実装されるまで解消しない可能性があります。</value>
-  </data>
-  <data name="Keybind.Message.PartialSaveItems" xml:space="preserve">
-    <value>今回スキップした項目:</value>
   </data>
   <data name="Keybind.Message.PartialSaveTarget" xml:space="preserve">
     <value>・{0}: {1} &gt; {2}</value>
@@ -867,8 +893,5 @@
   </data>
   <data name="Keybind.Message.Title.PartialSave" xml:space="preserve">
     <value>一部のキーを保存できませんでした</value>
-  </data>
-  <data name="Keybind.Status.PartialSaved" xml:space="preserve">
-    <value>一部のキーをスキップして保存しました</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -645,8 +645,27 @@
   <data name="Keybind.Label.ConfirmCancel" xml:space="preserve">
     <value>Confirm/Cancel</value>
   </data>
+  <data name="Keybind.Label.ActionHelper" xml:space="preserve">
+    <value>Assist Key</value>
+  </data>
+  <data name="Keybind.Label.Button" xml:space="preserve">
+    <value>Button</value>
+  </data>
+  <data name="Keybind.Label.Key" xml:space="preserve">
+    <value>Key</value>
+  </data>
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>Controller Type</value>
+  </data>
+
+  <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
+    <value>Keyboard Layout</value>
+  </data>
+  <data name="Keybind.KeyboardLayout.Japanese" xml:space="preserve">
+    <value>Japanese Keyboard (106/109 keys)</value>
+  </data>
+  <data name="Keybind.KeyboardLayout.English" xml:space="preserve">
+    <value>English Keyboard (101/102 keys)</value>
   </data>
   <data name="Keybind.Label.Helper1" xml:space="preserve">
     <value>Assist Key 1</value>
@@ -655,43 +674,58 @@
     <value>Assist Key 2</value>
   </data>
   <data name="Keybind.Message.DirectoryNotFound" xml:space="preserve">
-    <value>The folder was not found.
-{0}</value>
+    <value>The folder was not found.</value>
   </data>
   <data name="Keybind.Message.LayoutFileMissing" xml:space="preserve">
-    <value>The key settings file was not found.
-{0}</value>
+    <value>The key settings preset was not found.</value>
   </data>
   <data name="Keybind.Message.LayoutLoadFailedBody" xml:space="preserve">
-    <value>Failed to load key settings.
-{0}</value>
+    <value>Failed to load the key settings preset.</value>
   </data>
   <data name="Keybind.Message.LayoutLoadedBody" xml:space="preserve">
-    <value>Key settings were loaded.
-Press Save to apply them to the game settings.</value>
+    <value>Key settings were loaded.</value>
   </data>
-  <data name="Keybind.Message.LayoutLocationUnavailable" xml:space="preserve">
-    <value>The key settings file location cannot be opened.</value>
+  <data name="Keybind.Message.LayoutLoadedDetail" xml:space="preserve">
+    <value>Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>Failed to load the settings file.</value>
   </data>
+  <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
+    <value>Some Key Settings Cannot Be Edited</value>
+  </data>
+  <data name="Keybind.Message.PresetUnavailableBody" xml:space="preserve">
+    <value>Confirm/Cancel cannot be edited.</value>
+  </data>
+  <data name="Keybind.Message.PresetUnavailableDetail" xml:space="preserve">
+    <value>The confirm/cancel setting in this settings file has not yet been changed in the game, so it cannot be edited in this tool. Other items can still be edited.</value>
+  </data>
   <data name="Keybind.Message.OpenDirectoryFailed" xml:space="preserve">
-    <value>Could not open the folder.
-{0}</value>
+    <value>Could not open the folder.</value>
   </data>
   <data name="Keybind.Message.SaveCompletedBody" xml:space="preserve">
-    <value>Game settings and key settings were saved.
-{0}</value>
+    <value>Created the key settings preset.</value>
   </data>
   <data name="Keybind.Message.SaveErrorBody" xml:space="preserve">
-    <value>The key settings preset or game settings could not be saved. Check the selected inputs.</value>
+    <value>The key settings preset or game settings file could not be written.</value>
+  </data>
+  <data name="Keybind.Message.SaveErrorDetail" xml:space="preserve">
+    <value>Check write permissions for the destination folder, available disk space, and whether sync or security software is using the file.</value>
+  </data>
+  <data name="Keybind.Message.IncompleteSettings" xml:space="preserve">
+    <value>Some required key assignments are not set.</value>
+  </data>
+  <data name="Keybind.Message.IncompleteSettingsItem" xml:space="preserve">
+    <value>• {0}: {1}</value>
   </data>
   <data name="Keybind.Message.SelectFileFirst" xml:space="preserve">
-    <value>Select a settings file first.</value>
+    <value>A settings file has not been selected.</value>
+  </data>
+  <data name="Keybind.Message.SelectFileFirstSaveDetail" xml:space="preserve">
+    <value>To apply the settings to the game, select a settings file and then save.</value>
   </data>
   <data name="Keybind.Message.Title.LayoutLoadError" xml:space="preserve">
-    <value>Key Settings Load Error</value>
+    <value>Key Settings Preset Load Error</value>
   </data>
   <data name="Keybind.Message.Title.LayoutLoaded" xml:space="preserve">
     <value>Key Settings Loaded</value>
@@ -733,7 +767,9 @@ Press Save to apply them to the game settings.</value>
     <value>Select Settings File</value>
   </data>
   <data name="Keybind.Hint.SaveFileLocation" xml:space="preserve">
-    <value>The key settings file is usually located here:&#xA;%USERPROFILE%\AppData\LocalLow\bokura\[server folder, such as BPSR or StarASIA]\&#xA;localsave\Env1\[number folder]\[character UID folder]\localsave.bytes (at least 2 KB)</value>
+    <value>The key settings file is usually located here:
+%USERPROFILE%\AppData\LocalLow\bokura\[server folder, such as BPSR or StarASIA]\
+localsave\Env1\[number folder]\[character UID folder]\localsave.bytes (at least 2 KB)</value>
   </data>
   <data name="Keybind.Status.DetectedSelected" xml:space="preserve">
     <value>{0} settings file(s) detected; {1} selected</value>
@@ -758,9 +794,6 @@ Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Status.NoFileSelected" xml:space="preserve">
     <value>No file selected</value>
-  </data>
-  <data name="Keybind.Status.PresetUnsupported" xml:space="preserve">
-    <value>{0} (Confirm/cancel cannot be edited in this settings file.)</value>
   </data>
   <data name="Keybind.Status.Reset" xml:space="preserve">
     <value>Reset to the loaded values</value>
@@ -841,19 +874,13 @@ Press Save to apply them to the game settings.</value>
     <value>Fishing Mode</value>
   </data>
   <data name="Keybind.Message.PartialSaveIntro" xml:space="preserve">
-    <value>The key settings preset and all valid items were saved to the game settings file.</value>
-  </data>
-  <data name="Keybind.Message.PartialSaveSkipped" xml:space="preserve">
-    <value>The following items were not changed because their save targets are invalid or have not been generated.</value>
+    <value>The following items were not changed because invalid or ungenerated save targets were detected.</value>
   </data>
   <data name="Keybind.Message.PartialSaveRecovery" xml:space="preserve">
-    <value>Reset the game's key settings to default, close the game completely, then load the key settings preset and save again.</value>
+    <value>Reset the game's key settings to default, completely close the game, then load the key settings preset in this tool and save again.</value>
   </data>
   <data name="Keybind.Message.PartialSaveNote" xml:space="preserve">
     <value>This may remain unavailable until the game implements the target item.</value>
-  </data>
-  <data name="Keybind.Message.PartialSaveItems" xml:space="preserve">
-    <value>Items skipped this time:</value>
   </data>
   <data name="Keybind.Message.PartialSaveTarget" xml:space="preserve">
     <value>• {0}: {1} &gt; {2}</value>
@@ -866,8 +893,5 @@ Press Save to apply them to the game settings.</value>
   </data>
   <data name="Keybind.Message.Title.PartialSave" xml:space="preserve">
     <value>Some Keys Were Not Saved</value>
-  </data>
-  <data name="Keybind.Status.PartialSaved" xml:space="preserve">
-    <value>Saved with some keys skipped</value>
   </data>
 </root>

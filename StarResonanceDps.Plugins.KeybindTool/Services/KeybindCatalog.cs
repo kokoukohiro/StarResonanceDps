@@ -9,6 +9,9 @@ namespace StarResonanceDps.Plugins.KeybindTool.Services;
 internal static class KeybindCatalog
 {
     public const string DefaultControllerType = "PlayStation";
+    public const string KeyboardLayoutJapanese = "Japanese";
+    public const string KeyboardLayoutEnglish = "English";
+    public const string DefaultKeyboardLayout = KeyboardLayoutEnglish;
     public const string InputDeviceController = "Controller";
     public const string InputDeviceKeyMouse = "KeyMouse";
 
@@ -25,6 +28,9 @@ internal static class KeybindCatalog
 
     public static readonly IReadOnlyList<string> ControllerTypes =
         new[] { "PlayStation", "Nintendo", "Xbox" };
+
+    public static readonly IReadOnlyList<string> KeyboardLayouts =
+        new[] { KeyboardLayoutEnglish, KeyboardLayoutJapanese };
 
     public static readonly IReadOnlyList<ControllerInputOption> ControllerInputOptions =
         new ControllerInputOption[]
@@ -59,10 +65,10 @@ internal static class KeybindCatalog
             new(0x1u, 0xDu, "Enter"),
             new(0x1u, 0x1Bu, "Esc"),
             new(0x1u, 0x20u, "Space"),
-            new(0x1u, 0x27u, ":"),
-            new(0x1u, 0x2Cu, "<"),
+            new(0x1u, 0x27u, "'"),
+            new(0x1u, 0x2Cu, ","),
             new(0x1u, 0x2Du, "-"),
-            new(0x1u, 0x2Eu, ">"),
+            new(0x1u, 0x2Eu, "."),
             new(0x1u, 0x2Fu, "/"),
             new(0x1u, 0x30u, "0"),
             new(0x1u, 0x31u, "1"),
@@ -75,11 +81,11 @@ internal static class KeybindCatalog
             new(0x1u, 0x38u, "8"),
             new(0x1u, 0x39u, "9"),
             new(0x1u, 0x3Bu, ";"),
-            new(0x1u, 0x3Du, "^"),
-            new(0x1u, 0x5Bu, "@"),
-            new(0x1u, 0x5Cu, "]"),
-            new(0x1u, 0x5Du, "["),
-            new(0x1u, 0x60u, "~"),
+            new(0x1u, 0x3Du, "="),
+            new(0x1u, 0x5Bu, "["),
+            new(0x1u, 0x5Cu, "\\"),
+            new(0x1u, 0x5Du, "]"),
+            new(0x1u, 0x60u, "`"),
             new(0x1u, 0x61u, "A"),
             new(0x1u, 0x62u, "B"),
             new(0x1u, 0x63u, "C"),
@@ -426,6 +432,23 @@ internal static class KeybindCatalog
             .Concat(KeyMousePhotoActions)
             .Concat(KeyMouseFishingActions)
             .ToArray();
+
+    private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> KeyboardInputLabelOverrides =
+        new ReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>>(
+            new Dictionary<string, IReadOnlyDictionary<uint, string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                [KeyboardLayoutJapanese] = new ReadOnlyDictionary<uint, string>(new Dictionary<uint, string>
+                {
+                    [0x27u] = ":",
+                    [0x2Cu] = "<",
+                    [0x2Eu] = ">",
+                    [0x3Du] = "^",
+                    [0x5Bu] = "@",
+                    [0x5Cu] = "]",
+                    [0x5Du] = "[",
+                    [0x60u] = "~"
+                })
+            });
 
     private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>> ControllerInputLabels =
         new ReadOnlyDictionary<string, IReadOnlyDictionary<uint, string>>(
@@ -1190,6 +1213,17 @@ internal static class KeybindCatalog
         };
     }
 
+    public static bool IsKnownKeyboardLayout(string? keyboardLayout)
+    {
+        return KeyboardLayouts.Contains(keyboardLayout, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static string NormalizeKeyboardLayout(string? keyboardLayout)
+    {
+        return IsKnownKeyboardLayout(keyboardLayout)
+            ? keyboardLayout!
+            : DefaultKeyboardLayout;
+    }
 
     public static IReadOnlyList<ControllerInputOption> GetControllerOptions(
         string? controllerType,
@@ -1290,7 +1324,8 @@ internal static class KeybindCatalog
     }
 
     public static IReadOnlyList<KeyMouseInputOption> GetAllowedKeyMouseOptions(
-        KeyMouseActionDefinition definition)
+        KeyMouseActionDefinition definition,
+        string? keyboardLayout)
     {
         ArgumentNullException.ThrowIfNull(definition);
 
@@ -1302,13 +1337,14 @@ internal static class KeybindCatalog
             .Select(option => CreateKeyMouseInputOption(
                 option.InputType,
                 option.Value,
-                option.Label))
+                GetKeyMouseInputDisplayLabel(keyboardLayout, option)))
             .ToArray();
     }
 
     public static KeyMouseInputOption? CreateKnownKeyMouseInputOption(
         uint inputType,
-        uint value)
+        uint value,
+        string? keyboardLayout)
     {
         var option = KeyMouseInputOptions.FirstOrDefault(candidate =>
             candidate.InputType == inputType && candidate.Value == value);
@@ -1317,7 +1353,7 @@ internal static class KeybindCatalog
             : CreateKeyMouseInputOption(
                 option.InputType,
                 option.Value,
-                option.Label);
+                GetKeyMouseInputDisplayLabel(keyboardLayout, option));
     }
 
     public static bool UsesLControlPrefix(KeyMouseActionDefinition definition)
@@ -1344,6 +1380,22 @@ internal static class KeybindCatalog
         return ControllerInputLabels.TryGetValue(controllerType ?? string.Empty, out var map)
             ? map
             : ControllerInputLabels[DefaultControllerType];
+    }
+
+    private static string GetKeyMouseInputDisplayLabel(
+        string? keyboardLayout,
+        KeyMouseInputOption option)
+    {
+        if (option.InputType == InputTypeKeyboard
+            && KeyboardInputLabelOverrides.TryGetValue(
+                NormalizeKeyboardLayout(keyboardLayout),
+                out var overrides)
+            && overrides.TryGetValue(option.Value, out var label))
+        {
+            return label;
+        }
+
+        return option.Label;
     }
 
     public static IReadOnlyList<ControllerActionDefinition> GetControllerActions(KeybindModeGroup group)

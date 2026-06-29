@@ -36,6 +36,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private string _statusText = string.Empty;
     private Func<PluginLocalizer, string>? _statusTextFormatter;
     private string _selectedControllerType = KeybindCatalog.DefaultControllerType;
+    private string _selectedKeyboardLayout = KeybindCatalog.DefaultKeyboardLayout;
     private HelperBindingOption? _selectedHelper1;
     private HelperBindingOption? _selectedHelper2;
     private PresetOption? _selectedPreset;
@@ -49,7 +50,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private bool _isPresetSupported;
     private bool _isSynchronizing;
     private bool _isUpdatingDetectedSelection;
-    private bool _canSave;
+    private bool _pendingInitialPresetUnavailableMessage;
 
     public KeybindToolViewModel(IPluginContext context)
     {
@@ -76,11 +77,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 _context.PluginId,
                 KeybindCatalog.ButtonLayoutFileName)
         };
-
-        foreach (var controllerType in KeybindCatalog.ControllerTypes)
-        {
-            ControllerTypes.Add(controllerType);
-        }
 
         ControllerMainActions = CreateControllerRows(KeybindModeGroup.Main);
         ControllerQuickWheelActions = CreateControllerRows(KeybindModeGroup.QuickWheel);
@@ -127,25 +123,23 @@ internal sealed class KeybindToolViewModel : ObservableObject
         LoadLayoutCommand = new RelayCommand(LoadLayout);
         OpenLayoutFileLocationCommand = new RelayCommand(OpenLayoutFileLocation);
         ResetCommand = new RelayCommand(ResetValues, () => _session is not null);
-        SaveCommand = new RelayCommand(SaveValues, () => CanSave);
+        SaveCommand = new RelayCommand(SaveValues);
 
         RunSynchronizing(() =>
         {
+            RestoreLayoutSettingsFromLayoutFile();
             RefreshControllerDependentChoices();
             RefreshKeyMouseChoices();
-            RestoreIndependentSettingsFromLayoutFile();
             SynchronizeModeLinks();
         });
 
         SetStatus("Keybind.Status.NoFileSelected");
-        RescanDetectedSaves();
+        InitializeDetectedSaves();
     }
 
     public ObservableCollection<DetectedSaveFile> DetectedSaveFiles { get; } = new();
 
     public PluginLocalizer Texts => _texts;
-
-    public ObservableCollection<string> ControllerTypes { get; } = new();
 
     public ObservableCollection<HelperBindingOption> HelperOptions { get; } = new();
 
@@ -222,7 +216,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         get => _selectedControllerType;
         set
         {
-            if (!ControllerTypes.Contains(value, StringComparer.OrdinalIgnoreCase))
+            if (!KeybindCatalog.ControllerTypes.Contains(value, StringComparer.OrdinalIgnoreCase))
             {
                 value = KeybindCatalog.DefaultControllerType;
             }
@@ -238,7 +232,29 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SynchronizeModeLinks();
             });
             CacheCurrentActiveLayoutProfile();
-            UpdateSaveState();
+            UpdateCommandState();
+        }
+    }
+
+    public string SelectedKeyboardLayout
+    {
+        get => _selectedKeyboardLayout;
+        set
+        {
+            value = KeybindCatalog.NormalizeKeyboardLayout(value);
+
+            if (!SetProperty(ref _selectedKeyboardLayout, value) || _isSynchronizing)
+            {
+                return;
+            }
+
+            RunSynchronizing(() =>
+            {
+                RefreshKeyMouseChoices();
+                SynchronizeModeLinks();
+            });
+            CacheCurrentActiveLayoutProfile();
+            UpdateCommandState();
         }
     }
 
@@ -261,7 +277,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SynchronizeModeLinks();
             });
             CacheCurrentActiveLayoutProfile();
-            UpdateSaveState();
+            UpdateCommandState();
         }
     }
 
@@ -284,7 +300,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SynchronizeModeLinks();
             });
             CacheCurrentActiveLayoutProfile();
-            UpdateSaveState();
+            UpdateCommandState();
         }
     }
 
@@ -296,7 +312,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             if (SetProperty(ref _selectedPreset, value) && !_isSynchronizing)
             {
                 CacheCurrentActiveLayoutProfile();
-                UpdateSaveState();
+                UpdateCommandState();
             }
         }
     }
@@ -425,13 +441,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         private set => SetProperty(ref _isPresetSupported, value);
     }
 
-    public bool CanSave
-    {
-        get => _canSave;
-        private set => SetProperty(ref _canSave, value);
-    }
-
-    private void RestoreIndependentSettingsFromLayoutFile()
+    private void RestoreLayoutSettingsFromLayoutFile()
     {
         var layoutFilePath = GetExistingLayoutFilePath();
         if (layoutFilePath is null)
@@ -445,9 +455,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             if (layout.ControllerProfile is not null)
             {
-                _controllerQuickWheelIndependent = layout.ControllerProfile.QuickWheelIndependent;
-                _controllerPhotoModeIndependent = layout.ControllerProfile.PhotoModeIndependent;
-                _controllerFishingModeIndependent = layout.ControllerProfile.FishingModeIndependent;
+                var profile = NormalizeControllerLayoutProfile(layout.ControllerProfile);
+                _selectedControllerType = profile.ControllerType!;
+                _controllerQuickWheelIndependent = profile.QuickWheelIndependent;
+                _controllerPhotoModeIndependent = profile.PhotoModeIndependent;
+                _controllerFishingModeIndependent = profile.FishingModeIndependent;
+                OnPropertyChanged(nameof(SelectedControllerType));
                 OnPropertyChanged(nameof(ControllerQuickWheelIndependent));
                 OnPropertyChanged(nameof(ControllerPhotoModeIndependent));
                 OnPropertyChanged(nameof(ControllerFishingModeIndependent));
@@ -455,9 +468,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             if (layout.KeyMouseProfile is not null)
             {
-                _keyMouseQuickWheelIndependent = layout.KeyMouseProfile.QuickWheelIndependent;
-                _keyMousePhotoModeIndependent = layout.KeyMouseProfile.PhotoModeIndependent;
-                _keyMouseFishingModeIndependent = layout.KeyMouseProfile.FishingModeIndependent;
+                var profile = NormalizeKeyMouseLayoutProfile(layout.KeyMouseProfile);
+                _selectedKeyboardLayout = profile.KeyboardLayout!;
+                _keyMouseQuickWheelIndependent = profile.QuickWheelIndependent;
+                _keyMousePhotoModeIndependent = profile.PhotoModeIndependent;
+                _keyMouseFishingModeIndependent = profile.FishingModeIndependent;
+                OnPropertyChanged(nameof(SelectedKeyboardLayout));
                 OnPropertyChanged(nameof(KeyMouseQuickWheelIndependent));
                 OnPropertyChanged(nameof(KeyMousePhotoModeIndependent));
                 OnPropertyChanged(nameof(KeyMouseFishingModeIndependent));
@@ -465,7 +481,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception)
         {
-            // At startup, restore only the independent-mode flags as a convenience.
+            // At startup, restore the input-selection values and independent-mode flags as a convenience.
             // A malformed layout is reported explicitly through the normal load command.
         }
     }
@@ -512,7 +528,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         RunSynchronizing(SynchronizeModeLinks);
         CacheCurrentActiveLayoutProfile();
-        UpdateSaveState();
+        UpdateCommandState();
     }
 
     private void SetInputMode(bool isControllerMode)
@@ -535,7 +551,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         });
 
         CacheCurrentActiveLayoutProfile();
-        UpdateSaveState();
+        UpdateCommandState();
     }
 
     private void RefreshControllerDependentChoices()
@@ -631,7 +647,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
         foreach (var row in _allKeyMouseRows)
         {
             var selected = row.SelectedKey;
-            var options = KeybindCatalog.GetAllowedKeyMouseOptions(row.Definition).ToList();
+            var options = KeybindCatalog
+                .GetAllowedKeyMouseOptions(row.Definition, SelectedKeyboardLayout)
+                .ToList();
 
             if (selected is not null
                 && options.All(option => option.InputType != selected.InputType || option.Value != selected.Value))
@@ -811,7 +829,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             SynchronizeControllerLinkGroup(modeRows, links, independent);
         });
         CacheCurrentActiveLayoutProfile();
-        UpdateSaveState();
+        UpdateCommandState();
     }
 
     private void HandleKeyMouseIndependentChanged(
@@ -829,7 +847,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             SynchronizeKeyMouseLinkGroup(modeRows, links, independent);
         });
         CacheCurrentActiveLayoutProfile();
-        UpdateSaveState();
+        UpdateCommandState();
     }
 
     private void RestoreControllerLinkedActionsFromSession(
@@ -868,7 +886,17 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
+    private void InitializeDetectedSaves()
+    {
+        RefreshDetectedSaves(queueInitialPresetUnavailableMessage: true);
+    }
+
     private void RescanDetectedSaves()
+    {
+        RefreshDetectedSaves(queueInitialPresetUnavailableMessage: false);
+    }
+
+    private void RefreshDetectedSaves(bool queueInitialPresetUnavailableMessage)
     {
         var previousPath = _session?.FilePath ?? SelectedDetectedSave?.FilePath;
         var detected = ScanDetectedSaveFiles();
@@ -902,7 +930,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SetStatus("Keybind.Status.NoDetectedSave");
             }
 
-            UpdateSaveState();
+            UpdateCommandState();
             return;
         }
 
@@ -912,6 +940,13 @@ internal sealed class KeybindToolViewModel : ObservableObject
             "Keybind.Status.DetectedSelected",
             DetectedSaveFiles.Count,
             SelectedDetectedSave.DisplayName);
+
+        if (queueInitialPresetUnavailableMessage
+            && _session is { IsPresetSupported: false } session
+            && PathsEqual(session.FilePath, SelectedDetectedSave.FilePath))
+        {
+            _pendingInitialPresetUnavailableMessage = true;
+        }
     }
 
     private IReadOnlyList<DetectedSaveFile> ScanDetectedSaveFiles()
@@ -993,35 +1028,29 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void OpenSelectedFileLocation()
     {
-        OpenFileLocation(
-            _session?.FilePath,
-            "Keybind.Message.SelectFileFirst");
+        var session = _session;
+        if (session is null)
+        {
+            return;
+        }
+
+        OpenFileLocation(session.FilePath);
     }
 
     private void OpenLayoutFileLocation()
     {
-        OpenFileLocation(
-            _layoutFilePath,
-            "Keybind.Message.LayoutLocationUnavailable");
+        OpenFileLocation(_layoutFilePath);
     }
 
-    private void OpenFileLocation(string? filePath, string unavailableMessageResourceKey)
+    private void OpenFileLocation(string filePath)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            ShowMessage(
-                "Keybind.Message.Title.OpenLocationError",
-                unavailableMessageResourceKey);
-            return;
-        }
-
         try
         {
             var fullPath = Path.GetFullPath(filePath);
             var directory = Path.GetDirectoryName(fullPath);
             if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             {
-                ShowMessage(
+                ShowMessageWithDetail(
                     "Keybind.Message.Title.OpenLocationError",
                     "Keybind.Message.DirectoryNotFound",
                     directory ?? string.Empty);
@@ -1036,7 +1065,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.OpenLocationError",
                 "Keybind.Message.OpenDirectoryFailed",
                 exception.Message);
@@ -1045,12 +1074,42 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void ShowMessage(
         string titleResourceKey,
-        string messageResourceKey,
-        params object?[] arguments)
+        string messageResourceKey)
     {
         _context.Messages.Show(
             Texts[titleResourceKey],
-            Texts.Format(messageResourceKey, arguments));
+            Texts[messageResourceKey]);
+    }
+
+    private void ShowMessageWithDetail(
+        string titleResourceKey,
+        string messageResourceKey,
+        string? detail)
+    {
+        _context.Messages.Show(
+            Texts[titleResourceKey],
+            Texts[messageResourceKey],
+            string.IsNullOrWhiteSpace(detail) ? null : detail);
+    }
+
+    internal void ShowPendingInitialPresetUnavailableMessage()
+    {
+        if (!_pendingInitialPresetUnavailableMessage)
+        {
+            return;
+        }
+
+        _pendingInitialPresetUnavailableMessage = false;
+
+        if (_session is null || _session.IsPresetSupported)
+        {
+            return;
+        }
+
+        ShowMessageWithDetail(
+            "Keybind.Message.Title.PresetUnavailable",
+            "Keybind.Message.PresetUnavailableBody",
+            Texts["Keybind.Message.PresetUnavailableDetail"]);
     }
 
     private void LoadSaveFile(
@@ -1078,12 +1137,16 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 InitializeLayoutProfileCacheFromUi();
             });
 
-            SetStatus(texts => session.IsPresetSupported
-                ? texts.Format(statusResourceKey, statusArguments)
-                : texts.Format(
-                    "Keybind.Status.PresetUnsupported",
-                    texts.Format(statusResourceKey, statusArguments)));
-            UpdateSaveState();
+            SetStatus(statusResourceKey, statusArguments);
+            UpdateCommandState();
+
+            if (!session.IsPresetSupported && showErrors)
+            {
+                ShowMessageWithDetail(
+                    "Keybind.Message.Title.PresetUnavailable",
+                    "Keybind.Message.PresetUnavailableBody",
+                    Texts["Keybind.Message.PresetUnavailableDetail"]);
+            }
         }
         catch (Exception exception)
         {
@@ -1097,7 +1160,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SetStatus("Keybind.Status.LoadFailed");
             }
 
-            UpdateSaveState();
+            UpdateCommandState();
 
             if (showErrors)
             {
@@ -1257,7 +1320,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             InitializeLayoutProfileCacheFromUi();
         });
         SetStatus("Keybind.Status.Reset");
-        UpdateSaveState();
+        UpdateCommandState();
     }
 
     private void LoadLayout()
@@ -1265,7 +1328,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         var layoutFilePath = GetExistingLayoutFilePath();
         if (layoutFilePath is null)
         {
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.LayoutLoadError",
                 "Keybind.Message.LayoutFileMissing",
                 _layoutFilePath);
@@ -1294,19 +1357,20 @@ internal sealed class KeybindToolViewModel : ObservableObject
             }
 
             SetStatus("Keybind.Status.LayoutLoaded", Path.GetFileName(_layoutFilePath));
-            UpdateSaveState();
+            UpdateCommandState();
 
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.LayoutLoaded",
-                "Keybind.Message.LayoutLoadedBody");
+                "Keybind.Message.LayoutLoadedBody",
+                Texts["Keybind.Message.LayoutLoadedDetail"]);
         }
         catch (Exception exception)
         {
             _context.Logger.Error("Failed to load the key settings preset.", exception);
             SetStatus("Keybind.Status.LayoutLoadFailed");
-            UpdateSaveState();
+            UpdateCommandState();
 
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.LayoutLoadError",
                 "Keybind.Message.LayoutLoadFailedBody",
                 exception.Message);
@@ -1442,6 +1506,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         return new KeyMouseLayoutProfile
         {
+            KeyboardLayout = SelectedKeyboardLayout,
             QuickWheelIndependent = KeyMouseQuickWheelIndependent,
             PhotoModeIndependent = KeyMousePhotoModeIndependent,
             FishingModeIndependent = KeyMouseFishingModeIndependent,
@@ -1462,7 +1527,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private ControllerLayoutProfile NormalizeControllerLayoutProfile(ControllerLayoutProfile? source)
     {
         var normalized = CloneControllerLayoutProfile(source);
-        if (!ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase))
+        if (!KeybindCatalog.ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase))
         {
             normalized.ControllerType = KeybindCatalog.DefaultControllerType;
         }
@@ -1489,6 +1554,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private KeyMouseLayoutProfile NormalizeKeyMouseLayoutProfile(KeyMouseLayoutProfile? source)
     {
         var normalized = CloneKeyMouseLayoutProfile(source);
+        normalized.KeyboardLayout = KeybindCatalog.NormalizeKeyboardLayout(normalized.KeyboardLayout);
         NormalizeKeyMouseLinkGroup(
             normalized.Actions,
             KeybindCatalog.KeyMouseQuickWheelActions,
@@ -1642,6 +1708,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
         KeyMouseLayoutProfile overlay)
     {
         var merged = CloneKeyMouseLayoutProfile(baseline);
+        if (KeybindCatalog.IsKnownKeyboardLayout(overlay.KeyboardLayout))
+        {
+            merged.KeyboardLayout = overlay.KeyboardLayout;
+        }
+
         merged.QuickWheelIndependent = overlay.QuickWheelIndependent;
         merged.PhotoModeIndependent = overlay.PhotoModeIndependent;
         merged.FishingModeIndependent = overlay.FishingModeIndependent;
@@ -1672,7 +1743,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private void ApplyControllerLayoutProfile(ControllerLayoutProfile profile)
     {
         var normalized = NormalizeControllerLayoutProfile(profile);
-        var controllerType = ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase)
+        var controllerType = KeybindCatalog.ControllerTypes.Contains(normalized.ControllerType, StringComparer.OrdinalIgnoreCase)
             ? normalized.ControllerType!
             : KeybindCatalog.DefaultControllerType;
 
@@ -1750,6 +1821,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
     {
         var normalized = NormalizeKeyMouseLayoutProfile(profile);
 
+        _selectedKeyboardLayout = normalized.KeyboardLayout!;
+        OnPropertyChanged(nameof(SelectedKeyboardLayout));
+        RefreshKeyMouseChoices();
+
         _keyMouseQuickWheelIndependent = normalized.QuickWheelIndependent;
         OnPropertyChanged(nameof(KeyMouseQuickWheelIndependent));
         _keyMousePhotoModeIndependent = normalized.PhotoModeIndependent;
@@ -1792,14 +1867,34 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void SaveValues()
     {
-        if (_session is null || !CanSave)
+        if (_session is null)
         {
+            SetStatus("Keybind.Status.SaveFailed");
+            UpdateCommandState();
+
+            ShowMessageWithDetail(
+                "Keybind.Message.Title.SaveError",
+                "Keybind.Message.SelectFileFirst",
+                Texts["Keybind.Message.SelectFileFirstSaveDetail"]);
+            return;
+        }
+
+        CacheCurrentActiveLayoutProfile();
+        var incompleteFields = GetIncompleteRequiredFieldDescriptions();
+        if (incompleteFields.Count != 0)
+        {
+            SetStatus("Keybind.Status.SaveFailed");
+            UpdateCommandState();
+
+            ShowMessageWithDetail(
+                "Keybind.Message.Title.SaveError",
+                "Keybind.Message.IncompleteSettings",
+                string.Join(Environment.NewLine, incompleteFields));
             return;
         }
 
         try
         {
-            CacheCurrentActiveLayoutProfile();
             var controllerProfile = NormalizeControllerLayoutProfile(_controllerProfileCache);
             var keyMouseProfile = NormalizeKeyMouseLayoutProfile(_keyMouseProfileCache);
 
@@ -1826,18 +1921,19 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
             if (writeTargetValidation.HasInvalidTargets)
             {
-                SetStatus("Keybind.Status.PartialSaved");
-                UpdateSaveState();
-                _context.Messages.Show(
-                    Texts["Keybind.Message.Title.PartialSave"],
-                    BuildPartialSaveMessage(writeTargetValidation.InvalidTargets));
+                SetStatus("Keybind.Status.Saved");
+                UpdateCommandState();
+                ShowMessageWithDetail(
+                    "Keybind.Message.Title.PartialSave",
+                    "Keybind.Message.PartialSaveIntro",
+                    BuildPartialSaveDetail(writeTargetValidation.InvalidTargets));
                 return;
             }
 
             SetStatus("Keybind.Status.Saved");
-            UpdateSaveState();
+            UpdateCommandState();
 
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.SaveCompleted",
                 "Keybind.Message.SaveCompletedBody",
                 _layoutFilePath);
@@ -1846,11 +1942,12 @@ internal sealed class KeybindToolViewModel : ObservableObject
         {
             _context.Logger.Error("Failed to save keybind settings.", exception);
             SetStatus("Keybind.Status.SaveFailed");
-            UpdateSaveState();
+            UpdateCommandState();
 
-            ShowMessage(
+            ShowMessageWithDetail(
                 "Keybind.Message.Title.SaveError",
-                "Keybind.Message.SaveErrorBody");
+                "Keybind.Message.SaveErrorBody",
+                Texts["Keybind.Message.SaveErrorDetail"]);
         }
     }
 
@@ -1865,7 +1962,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
 
         var controllerType = profile.ControllerType;
-        if (!ControllerTypes.Contains(controllerType, StringComparer.OrdinalIgnoreCase))
+        if (!KeybindCatalog.ControllerTypes.Contains(controllerType, StringComparer.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(Texts["Keybind.Error.InvalidControllerType"]);
         }
@@ -1985,19 +2082,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
         RemoveLegacyLayoutFiles();
     }
 
-    private string BuildPartialSaveMessage(IReadOnlyList<KeybindInvalidWriteTarget> invalidTargets)
+    private string BuildPartialSaveDetail(IReadOnlyList<KeybindInvalidWriteTarget> invalidTargets)
     {
-        var lines = new List<string>
-        {
-            Texts["Keybind.Message.PartialSaveIntro"],
-            Texts["Keybind.Message.PartialSaveSkipped"],
-            string.Empty,
-            Texts["Keybind.Message.PartialSaveRecovery"],
-            string.Empty,
-            Texts["Keybind.Message.PartialSaveNote"],
-            string.Empty,
-            Texts["Keybind.Message.PartialSaveItems"]
-        };
+        var lines = new List<string>();
 
         foreach (var target in invalidTargets)
         {
@@ -2027,6 +2114,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
             }
         }
 
+        lines.Add(string.Empty);
+        lines.Add(Texts["Keybind.Message.PartialSaveRecovery"]);
+        lines.Add(Texts["Keybind.Message.PartialSaveNote"]);
+
         return string.Join(Environment.NewLine, lines);
     }
 
@@ -2042,51 +2133,106 @@ internal sealed class KeybindToolViewModel : ObservableObject
         };
     }
 
-    private bool HasBlankRequiredFields()
+    private IReadOnlyList<string> GetIncompleteRequiredFieldDescriptions()
     {
-        if (_session is null)
-        {
-            return true;
-        }
-
-        CacheCurrentActiveLayoutProfile();
-        return !IsControllerProfileComplete(_controllerProfileCache)
-            || !IsKeyMouseProfileComplete(_keyMouseProfileCache);
+        var descriptions = new List<string>();
+        AppendIncompleteControllerFieldDescriptions(descriptions, _controllerProfileCache);
+        AppendIncompleteKeyMouseFieldDescriptions(descriptions, _keyMouseProfileCache);
+        return descriptions;
     }
 
-    private bool IsControllerProfileComplete(ControllerLayoutProfile? profile)
+    private void AppendIncompleteControllerFieldDescriptions(
+        ICollection<string> descriptions,
+        ControllerLayoutProfile? profile)
     {
-        if (profile is null
-            || string.IsNullOrWhiteSpace(profile.Keybind.Helper1)
-            || string.IsNullOrWhiteSpace(profile.Keybind.Helper2)
-            || string.IsNullOrWhiteSpace(profile.Keybind.Preset))
+        var device = Texts["Keybind.InputDevice.Controller"];
+        var keybind = profile?.Keybind;
+
+        if (string.IsNullOrWhiteSpace(keybind?.Helper1))
         {
-            return false;
+            AddIncompleteField(descriptions, device, Texts["Keybind.Label.Helper1"]);
+        }
+
+        if (string.IsNullOrWhiteSpace(keybind?.Helper2))
+        {
+            AddIncompleteField(descriptions, device, Texts["Keybind.Label.Helper2"]);
+        }
+
+        if (string.IsNullOrWhiteSpace(keybind?.Preset))
+        {
+            AddIncompleteField(descriptions, device, Texts["Keybind.Label.ConfirmCancel"]);
         }
 
         foreach (var definition in KeybindCatalog.ControllerActions)
         {
-            if (!profile.Actions.TryGetValue(definition.Id, out var saved)
-                || string.IsNullOrWhiteSpace(saved.Button)
-                || (definition.UsesHelper && string.IsNullOrWhiteSpace(saved.Helper)))
+            ControllerActionLayout? saved = null;
+            if (profile is not null)
             {
-                return false;
+                profile.Actions.TryGetValue(definition.Id, out saved);
+            }
+
+            var group = GetModeGroupDisplayName(definition.Group);
+            var action = Texts[KeybindCatalog.GetActionLocalizationKey(definition)];
+
+            if (string.IsNullOrWhiteSpace(saved?.Button))
+            {
+                AddIncompleteField(
+                    descriptions,
+                    device,
+                    group,
+                    action,
+                    Texts["Keybind.Label.Button"]);
+            }
+
+            if (definition.UsesHelper && string.IsNullOrWhiteSpace(saved?.Helper))
+            {
+                AddIncompleteField(
+                    descriptions,
+                    device,
+                    group,
+                    action,
+                    Texts["Keybind.Label.ActionHelper"]);
             }
         }
-
-        return true;
     }
 
-    private static bool IsKeyMouseProfileComplete(KeyMouseLayoutProfile? profile)
+    private void AppendIncompleteKeyMouseFieldDescriptions(
+        ICollection<string> descriptions,
+        KeyMouseLayoutProfile? profile)
     {
-        if (profile is null)
-        {
-            return false;
-        }
+        var device = Texts["Keybind.InputDevice.KeyMouse"];
 
-        return KeybindCatalog.KeyMouseActions.All(definition =>
-            profile.Actions.TryGetValue(definition.Id, out var saved)
-            && !string.IsNullOrWhiteSpace(saved.Key));
+        foreach (var definition in KeybindCatalog.KeyMouseActions)
+        {
+            KeyMouseActionLayout? saved = null;
+            if (profile is not null)
+            {
+                profile.Actions.TryGetValue(definition.Id, out saved);
+            }
+
+            if (!string.IsNullOrWhiteSpace(saved?.Key))
+            {
+                continue;
+            }
+
+            AddIncompleteField(
+                descriptions,
+                device,
+                GetModeGroupDisplayName(definition.Group),
+                Texts[KeybindCatalog.GetActionLocalizationKey(definition)],
+                Texts["Keybind.Label.Key"]);
+        }
+    }
+
+    private void AddIncompleteField(
+        ICollection<string> descriptions,
+        string device,
+        params string[] pathSegments)
+    {
+        descriptions.Add(Texts.Format(
+            "Keybind.Message.IncompleteSettingsItem",
+            device,
+            string.Join(" > ", pathSegments)));
     }
 
     private void UpdateDetectedSelectionForPath(string filePath)
@@ -2162,11 +2308,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
-    private void UpdateSaveState()
+    private void UpdateCommandState()
     {
-        CanSave = !HasBlankRequiredFields();
-
-        SaveCommand.RaiseCanExecuteChanged();
         ResetCommand.RaiseCanExecuteChanged();
         OpenSelectedFileLocationCommand.RaiseCanExecuteChanged();
     }
@@ -2198,7 +2341,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         var known = KeybindCatalog.CreateKnownKeyMouseInputOption(
             inputType,
-            value);
+            value,
+            SelectedKeyboardLayout);
         if (known is not null)
         {
             option = known;
@@ -2260,6 +2404,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         source ??= new KeyMouseLayoutProfile();
         return new KeyMouseLayoutProfile
         {
+            KeyboardLayout = source.KeyboardLayout,
             QuickWheelIndependent = source.QuickWheelIndependent,
             PhotoModeIndependent = source.PhotoModeIndependent,
             FishingModeIndependent = source.FishingModeIndependent,

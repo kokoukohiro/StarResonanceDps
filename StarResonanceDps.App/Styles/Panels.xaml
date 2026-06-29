@@ -186,6 +186,11 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.45" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <Style x:Key="Panel.SettingField" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}">

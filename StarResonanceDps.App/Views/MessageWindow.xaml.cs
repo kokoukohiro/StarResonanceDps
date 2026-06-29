@@ -12,6 +12,11 @@ public partial class MessageWindow : Window
 
     public static void Show(Window? owner, string title, string message)
     {
+        Show(owner, title, message, null);
+    }
+
+    public static void Show(Window? owner, string title, string message, string? detail)
+    {
         ArgumentNullException.ThrowIfNull(title);
         ArgumentNullException.ThrowIfNull(message);
 
@@ -25,6 +30,10 @@ public partial class MessageWindow : Window
 
         window.HeaderText.Text = title;
         window.MessageText.Text = message;
+        window.DetailText.Text = detail ?? string.Empty;
+        window.DetailText.Visibility = string.IsNullOrWhiteSpace(detail)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         window.ShowDialog();
     }
 

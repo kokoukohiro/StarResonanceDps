@@ -6,8 +6,6 @@
         Height="176"
         MinWidth="370"
         MinHeight="176"
-        MaxWidth="370"
-        MaxHeight="176"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
