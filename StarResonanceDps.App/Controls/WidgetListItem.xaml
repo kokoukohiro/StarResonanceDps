@@ -15,35 +15,66 @@
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Focusable" Value="False" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Background"
+                    Value="{Binding DataContext.ThemePalette.ControlBackgroundBrush, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="BorderBrush"
+                    Value="{Binding DataContext.ThemePalette.BorderBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
-                        <ContentControl x:Name="Root"
-                                                 Style="{StaticResource Surface.RoundedButtonOutline}"
-                                                 Background="{Binding DataContext.ThemePalette.ControlBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}"
-                                                 BorderBrush="{Binding DataContext.ThemePalette.BorderBrush, RelativeSource={RelativeSource TemplatedParent}}"
-                                                 BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="OutlineLayer"
+                                    Background="Transparent"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{DynamicResource Radius.Button}">
+                                <Border x:Name="BackgroundLayer"
+                                        Background="{TemplateBinding Background}"
+                                        CornerRadius="{DynamicResource Radius.ButtonInner}" />
+                            </Border>
+
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center"
                                               Margin="{TemplateBinding Padding}"
                                               IsHitTestVisible="False" />
-                        </ContentControl>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root"
-                                        Property="Background"
-                                        Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root"
-                                        Property="Background"
-                                        Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource TemplatedParent}}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background"
+                            Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource Self}}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background"
+                            Value="{Binding DataContext.ThemePalette.ControlActiveBackgroundBrush, RelativeSource={RelativeSource Self}}" />
+                </Trigger>
+
+                <DataTrigger Binding="{Binding DataContext.HasBackgroundImage, RelativeSource={RelativeSource Self}}"
+                             Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.WidgetCardImageButtonBackground}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource Brush.WidgetCardImageButtonBorder}" />
+                </DataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.HasBackgroundImage, RelativeSource={RelativeSource Self}}"
+                                   Value="True" />
+                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}"
+                                   Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource Brush.WidgetCardImageButtonActiveBackground}" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding DataContext.HasBackgroundImage, RelativeSource={RelativeSource Self}}"
+                                   Value="True" />
+                        <Condition Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}"
+                                   Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource Brush.WidgetCardImageButtonActiveBackground}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="WidgetItem.IconFill"
@@ -51,6 +82,11 @@
                BasedOn="{StaticResource Icon.Fill}">
             <Setter Property="Fill"
                     Value="{Binding DataContext.ThemePalette.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasBackgroundImage}" Value="True">
+                    <Setter Property="Fill" Value="{DynamicResource Brush.TextPrimary}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="WidgetItem.IconStroke"
@@ -58,6 +94,11 @@
                BasedOn="{StaticResource Icon.Stroke}">
             <Setter Property="Stroke"
                     Value="{Binding DataContext.ThemePalette.TextPrimaryBrush, RelativeSource={RelativeSource AncestorType={x:Type Button}}}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasBackgroundImage}" Value="True">
+                    <Setter Property="Stroke" Value="{DynamicResource Brush.TextPrimary}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="WidgetItem.IconStartFill"
@@ -105,9 +146,18 @@
             <TextBlock Grid.Column="1"
                        Grid.ColumnSpan="2"
                        Margin="0,0,147,0"
-                       Style="{StaticResource Text.WidgetName}"
-                       Foreground="{Binding ThemePalette.TextPrimaryBrush}"
-                       Text="{Binding DisplayName}" />
+                       Text="{Binding DisplayName}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetName}">
+                        <Setter Property="Foreground" Value="{Binding ThemePalette.TextPrimaryBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasBackgroundImage}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
 
             <StackPanel Grid.Column="2"
                         Grid.ColumnSpan="2"

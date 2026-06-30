@@ -657,7 +657,6 @@
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>手柄类型</value>
   </data>
-
   <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
     <value>键盘布局</value>
   </data>
@@ -805,7 +804,7 @@ localsave\Env1\[数字文件夹]\[角色 UID 文件夹]\localsave.bytes（至少
     <value>已保存</value>
   </data>
   <data name="Keybind.Value.Unassigned" xml:space="preserve">
-    <value>——</value>
+    <value>———</value>
   </data>
   <data name="Keybind.Value.UnknownControllerInput" xml:space="preserve">
     <value>未知 ({0})</value>

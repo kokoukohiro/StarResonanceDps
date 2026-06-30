@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.ViewModels;
@@ -48,6 +49,7 @@ public partial class WidgetWindow : Window
         Loaded += WidgetWindow_Loaded;
         LocationChanged += WidgetWindow_BoundsChanged;
         SizeChanged += WidgetWindow_SizeChanged;
+        StateChanged += WidgetWindow_StateChanged;
         SourceInitialized += WidgetWindow_SourceInitialized;
     }
 
@@ -72,6 +74,7 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_Loaded(object sender, RoutedEventArgs e)
     {
         _isRestoringBounds = false;
+        UpdateWindowRootClip();
     }
 
     private void WidgetWindow_SourceInitialized(object? sender, EventArgs e)
@@ -164,7 +167,36 @@ public partial class WidgetWindow : Window
 
     private void WidgetWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        UpdateWindowRootClip();
         ScheduleBoundsSave();
+    }
+
+    private void WidgetWindow_StateChanged(object? sender, EventArgs e)
+    {
+        UpdateWindowRootClip();
+    }
+
+    private void UpdateWindowRootClip()
+    {
+        if (WindowState == WindowState.Maximized)
+        {
+            WindowRoot.Clip = null;
+            return;
+        }
+
+        if (WindowRoot.ActualWidth <= 0 || WindowRoot.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var cornerRadius = TryFindResource("Radius.Default") is CornerRadius configuredRadius
+            ? configuredRadius.TopLeft
+            : 6d;
+
+        WindowRoot.Clip = new RectangleGeometry(
+            new Rect(0, 0, WindowRoot.ActualWidth, WindowRoot.ActualHeight),
+            cornerRadius,
+            cornerRadius);
     }
 
     private void ScheduleBoundsSave()

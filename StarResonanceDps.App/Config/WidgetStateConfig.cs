@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
@@ -45,6 +45,9 @@ public sealed class WidgetThemeConfig
     public int WindowColorIndex { get; set; }
     public int WindowOpacity { get; set; } = 50;
     public List<string> WindowColors { get; set; } = WidgetConfigDefaults.CreateDefaultWindowColors();
+    public string? BackgroundImagePath { get; set; }
+    public string? BackgroundImageAverageColor { get; set; }
+    public string? BackgroundImageAverageColorSourcePath { get; set; }
 
     public WidgetThemeConfig Clone()
     {
@@ -52,7 +55,10 @@ public sealed class WidgetThemeConfig
         {
             WindowColorIndex = WindowColorIndex,
             WindowOpacity = WindowOpacity,
-            WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors]
+            WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
+            BackgroundImagePath = BackgroundImagePath,
+            BackgroundImageAverageColor = BackgroundImageAverageColor,
+            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath
         };
     }
 }
@@ -115,8 +121,8 @@ public static class WidgetConfigDefaults
 
     private static readonly string[] DefaultWindowColorHexes =
     [
-        "#000000",
-        "#FFFFFF"
+        "#1F1F1F",
+        "#FCFCFC"
     ];
 
     public static readonly string[] ClassColorKeys =
@@ -350,6 +356,23 @@ public static class WidgetConfigDefaults
         theme.WindowColors = NormalizeColorList(theme.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         theme.WindowColorIndex = Math.Clamp(theme.WindowColorIndex, MinColorIndex, theme.WindowColors.Count - 1);
         theme.WindowOpacity = Math.Clamp(theme.WindowOpacity, MinWindowOpacity, MaxWindowOpacity);
+        theme.BackgroundImagePath = string.IsNullOrWhiteSpace(theme.BackgroundImagePath)
+            ? null
+            : theme.BackgroundImagePath.Trim();
+
+        if (theme.BackgroundImagePath is null)
+        {
+            theme.BackgroundImageAverageColor = null;
+            theme.BackgroundImageAverageColorSourcePath = null;
+            return;
+        }
+
+        theme.BackgroundImageAverageColor = TryNormalizeHexColor(theme.BackgroundImageAverageColor, out var averageColor)
+            ? averageColor
+            : null;
+        theme.BackgroundImageAverageColorSourcePath = string.IsNullOrWhiteSpace(theme.BackgroundImageAverageColorSourcePath)
+            ? null
+            : theme.BackgroundImageAverageColorSourcePath.Trim();
     }
 
     public static void NormalizeMeter(MeterWidgetSettingsConfig meter)

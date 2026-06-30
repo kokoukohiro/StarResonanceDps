@@ -120,6 +120,42 @@
                                             </Grid>
                                         </Border>
 
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="320" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Theme_BackgroundImage]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <Grid Grid.Column="2" VerticalAlignment="Center">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="10" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBox Grid.Column="0"
+                                                             Height="32"
+                                                             IsReadOnly="True"
+                                                             Style="{StaticResource Input.PathBox}"
+                                                             Text="{Binding BackgroundImagePath, Mode=OneWay}" />
+
+                                                    <Button Grid.Column="2"
+                                                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Theme_SelectImage]}"
+                                                            Style="{StaticResource Button.Text}"
+                                                            Click="SelectBackgroundImageButton_Click" />
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
                                         <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>

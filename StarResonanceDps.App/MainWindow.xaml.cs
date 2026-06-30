@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -21,9 +22,18 @@ public partial class MainWindow : Window
 
     private const double ResizeBorderThickness = 8.0;
 
+    private static readonly bool IsInDesignMode =
+        DesignerProperties.GetIsInDesignMode(new DependencyObject());
+
     public MainWindow()
     {
         InitializeComponent();
+
+        if (!IsInDesignMode)
+        {
+            DataContext = new MainViewModel();
+        }
+
         Loaded += MainWindow_Loaded;
         SourceInitialized += MainWindow_SourceInitialized;
     }

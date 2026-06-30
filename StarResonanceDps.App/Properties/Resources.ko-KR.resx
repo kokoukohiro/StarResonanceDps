@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -258,4 +258,4 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>설정</value>
   </data>
-</root>
+<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>배경 이미지</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>이미지 선택</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>이미지 파일</value></data></root>

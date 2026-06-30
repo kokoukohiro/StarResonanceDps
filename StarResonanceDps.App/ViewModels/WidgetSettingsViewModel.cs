@@ -5,6 +5,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -21,6 +22,15 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private double _windowOpacity = 50;
+
+    [ObservableProperty]
+    private string? _backgroundImagePath;
+
+    [ObservableProperty]
+    private string? _backgroundImageAverageColor;
+
+    [ObservableProperty]
+    private string? _backgroundImageAverageColorSourcePath;
 
     public WidgetSettingsViewModel(WidgetKind kind, string displayNameResourceKey)
     {
@@ -133,8 +143,56 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public void ApplyWindowColor(Color color)
     {
-        WindowColors.AddOrSelect(color);
+        var previousLoadingState = _isLoadingTheme;
+        _isLoadingTheme = true;
+
+        try
+        {
+            WindowColors.AddOrSelect(color);
+            BackgroundImagePath = null;
+            BackgroundImageAverageColor = null;
+            BackgroundImageAverageColorSourcePath = null;
+        }
+        finally
+        {
+            _isLoadingTheme = previousLoadingState;
+        }
+
+        if (!previousLoadingState)
+        {
+            RaiseThemePreviewChanged();
+        }
     }
+
+    public void SetBackgroundImagePath(string? path)
+    {
+        var normalizedPath = string.IsNullOrWhiteSpace(path)
+            ? null
+            : path.Trim();
+        var previousLoadingState = _isLoadingTheme;
+        _isLoadingTheme = true;
+
+        try
+        {
+            BackgroundImagePath = normalizedPath;
+            BackgroundImageAverageColorSourcePath = normalizedPath;
+            BackgroundImageAverageColor = normalizedPath is not null
+                && BackgroundImageColorAnalyzer.TryCalculateAverageColor(normalizedPath, out var averageColor)
+                    ? ColorUtilities.ToHex(averageColor)
+                    : null;
+        }
+        finally
+        {
+            _isLoadingTheme = previousLoadingState;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+        if (!previousLoadingState)
+        {
+            RaiseThemePreviewChanged();
+        }
+    }
+
 
     private WidgetThemeConfig CreateTheme()
     {
@@ -145,7 +203,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
                 (int)Math.Round(WindowOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinWindowOpacity,
                 WidgetConfigDefaults.MaxWindowOpacity),
-            WindowColors = [.. WindowColors.GetHexColors()]
+            WindowColors = [.. WindowColors.GetHexColors()],
+            BackgroundImagePath = string.IsNullOrWhiteSpace(BackgroundImagePath)
+                ? null
+                : BackgroundImagePath.Trim(),
+            BackgroundImageAverageColor = BackgroundImageAverageColor,
+            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath
         };
 
         WidgetConfigDefaults.NormalizeTheme(theme);
@@ -161,6 +224,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         {
             WindowColors.Load(normalized.WindowColors, normalized.WindowColorIndex);
             WindowOpacity = normalized.WindowOpacity;
+            BackgroundImagePath = normalized.BackgroundImagePath;
+            BackgroundImageAverageColor = normalized.BackgroundImageAverageColor;
+            BackgroundImageAverageColorSourcePath = normalized.BackgroundImageAverageColorSourcePath;
         }
         finally
         {
@@ -185,6 +251,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
         return left.WindowColorIndex == right.WindowColorIndex
             && left.WindowOpacity == right.WindowOpacity
+            && string.Equals(left.BackgroundImagePath, right.BackgroundImagePath, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(left.BackgroundImageAverageColor, right.BackgroundImageAverageColor, StringComparison.OrdinalIgnoreCase)
+            && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -196,6 +265,31 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     }
 
     partial void OnWindowOpacityChanged(double value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+
+        if (!_isLoadingTheme)
+        {
+            RaiseThemePreviewChanged();
+        }
+    }
+
+    partial void OnBackgroundImagePathChanged(string? value)
+    {
+        NotifyBackgroundImageChanged();
+    }
+
+    partial void OnBackgroundImageAverageColorChanged(string? value)
+    {
+        NotifyBackgroundImageChanged();
+    }
+
+    partial void OnBackgroundImageAverageColorSourcePathChanged(string? value)
+    {
+        NotifyBackgroundImageChanged();
+    }
+
+    private void NotifyBackgroundImageChanged()
     {
         OnPropertyChanged(nameof(HasUnsavedChanges));
 

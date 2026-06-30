@@ -17,18 +17,35 @@
         WindowStartupLocation="Manual"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <Grid>
+    <Grid x:Name="WindowRoot">
         <!--
             This layer owns every non-text element. Its parent Border applies the configured
             opacity once after the opaque surface and divider have been composited together.
         -->
         <Border Style="{StaticResource Panel.WidgetWindowFrame}"
                 IsHitTestVisible="False">
-            <Grid>
+            <Grid ClipToBounds="True">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="35" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
+
+                <Image Grid.RowSpan="2"
+                       Source="{Binding BackgroundImagePath}"
+                       Stretch="UniformToFill"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasBackgroundImage}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
 
                 <Grid Grid.Row="0">
                     <Border BorderBrush="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" BorderThickness="0,0,0,1" />

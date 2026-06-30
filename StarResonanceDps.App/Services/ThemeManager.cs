@@ -6,6 +6,8 @@ namespace StarResonanceDps.App.Services;
 
 public sealed class ThemeManager
 {
+    private const byte WidgetCardImageButtonAlpha = 0x80;
+
     private static readonly Lazy<ThemeManager> LazyInstance = new(() => new ThemeManager());
 
     private ThemeManager()
@@ -46,6 +48,9 @@ public sealed class ThemeManager
         SetThemeBrush(resources, "Brush.BorderSoft", colors.BorderSoft);
         SetThemeBrush(resources, "Brush.ControlBackground", colors.ControlBackground);
         SetThemeBrush(resources, "Brush.ControlActiveBackground", colors.ControlActiveBackground);
+        SetThemeBrush(resources, "Brush.WidgetCardImageButtonBackground", WithAlpha(colors.ControlBackground));
+        SetThemeBrush(resources, "Brush.WidgetCardImageButtonActiveBackground", WithAlpha(colors.ControlActiveBackground));
+        SetThemeBrush(resources, "Brush.WidgetCardImageButtonBorder", WithAlpha(colors.Border));
         SetThemeBrush(resources, "Brush.InputBackground", colors.InputBackground);
         SetThemeBrush(resources, "Brush.InputHoverBackground", colors.InputHoverBackground);
         SetThemeBrush(resources, "Brush.TextPrimary", colors.TextPrimary);
@@ -62,5 +67,10 @@ public sealed class ThemeManager
         }
 
         resources[brushKey] = new SolidColorBrush(color);
+    }
+
+    private static Color WithAlpha(Color color)
+    {
+        return Color.FromArgb(WidgetCardImageButtonAlpha, color.R, color.G, color.B);
     }
 }

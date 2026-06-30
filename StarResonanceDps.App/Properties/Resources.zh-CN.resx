@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -304,4 +304,4 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>设置</value>
   </data>
-</root>
+<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>背景图像</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>选择图像</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>图像文件</value></data></root>

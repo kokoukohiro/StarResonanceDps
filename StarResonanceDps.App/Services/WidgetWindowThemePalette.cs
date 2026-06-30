@@ -49,14 +49,20 @@ public sealed class WidgetWindowThemePalette
     public SolidColorBrush WidgetWindowTextBrush { get; }
     public SolidColorBrush WidgetWindowCloseBrush { get; }
 
-    public static WidgetWindowThemePalette Create(Color windowSurface, int opacityPercent)
+    public static WidgetWindowThemePalette Create(
+        Color windowSurface,
+        int opacityPercent,
+        Color? backgroundImageAverageColor = null)
     {
         var surface = Color.FromRgb(windowSurface.R, windowSurface.G, windowSurface.B);
+        var contrastSource = backgroundImageAverageColor is { } imageColor
+            ? Color.FromRgb(imageColor.R, imageColor.G, imageColor.B)
+            : surface;
         var opacity = Math.Clamp(opacityPercent, 0, 100) / 100d;
-        var readableBase = ColorUtilities.GetReadableTextColor(surface);
-        var text = ColorUtilities.Blend(readableBase, surface, TextSurfaceWeight);
-        var divider = ColorUtilities.Blend(text, surface, DividerSurfaceWeight);
-        var close = ColorUtilities.Blend(text, surface, CloseSurfaceWeight);
+        var readableBase = ColorUtilities.GetReadableTextColor(contrastSource);
+        var text = ColorUtilities.Blend(readableBase, contrastSource, TextSurfaceWeight);
+        var divider = ColorUtilities.Blend(text, contrastSource, DividerSurfaceWeight);
+        var close = ColorUtilities.Blend(text, contrastSource, CloseSurfaceWeight);
 
         return new WidgetWindowThemePalette(surface, divider, text, close, opacity);
     }

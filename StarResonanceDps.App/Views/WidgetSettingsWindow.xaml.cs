@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Microsoft.Win32;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views;
@@ -203,6 +205,23 @@ public partial class WidgetSettingsWindow : Window
             ViewModel.ApplyWindowColor(window.SelectedColor);
         }
     }
+
+    private void SelectBackgroundImageButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = $"{LocalizationManager.Instance.GetString("Settings_Theme_BackgroundImage_Filter")}|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.webp",
+            CheckFileExists = true,
+            Multiselect = false,
+            FileName = ViewModel.BackgroundImagePath ?? string.Empty
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            ViewModel.SetBackgroundImagePath(dialog.FileName);
+        }
+    }
+
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {

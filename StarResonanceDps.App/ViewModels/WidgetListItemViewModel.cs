@@ -1,3 +1,4 @@
+using System.IO;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -33,6 +34,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     [ObservableProperty]
     private WidgetWindowThemePalette _widgetWindowPalette = WidgetWindowThemePalette.Create(Color.FromRgb(0x0B, 0x16, 0x24), 50);
+
+    [ObservableProperty]
+    private string? _backgroundImagePath;
+
+    [ObservableProperty]
+    private bool _hasBackgroundImage;
 
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
 
@@ -88,8 +95,29 @@ public partial class WidgetListItemViewModel : ViewModelBase
             windowSurface = Color.FromRgb(0x0B, 0x16, 0x24);
         }
 
+        var hasBackgroundImage = !string.IsNullOrWhiteSpace(normalized.BackgroundImagePath)
+            && File.Exists(normalized.BackgroundImagePath);
+        Color? backgroundImageAverageColor = null;
+        if (hasBackgroundImage
+            && string.Equals(
+                normalized.BackgroundImageAverageColorSourcePath,
+                normalized.BackgroundImagePath,
+                StringComparison.OrdinalIgnoreCase)
+            && ColorUtilities.TryParseHex(normalized.BackgroundImageAverageColor, out var parsedAverageColor))
+        {
+            backgroundImageAverageColor = parsedAverageColor;
+        }
+
         ThemePalette = ThemeColorPalette.Create(windowSurface);
-        WidgetWindowPalette = WidgetWindowThemePalette.Create(windowSurface, normalized.WindowOpacity);
+        WidgetWindowPalette = WidgetWindowThemePalette.Create(
+            windowSurface,
+            normalized.WindowOpacity,
+            backgroundImageAverageColor);
+
+        HasBackgroundImage = hasBackgroundImage;
+        BackgroundImagePath = hasBackgroundImage
+            ? normalized.BackgroundImagePath
+            : null;
     }
 
     [RelayCommand]

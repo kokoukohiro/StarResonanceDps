@@ -8,7 +8,7 @@ public static class AppConfigDefaults
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#1F1F1F",
-        "#FFFFFF"
+        "#FCFCFC"
     ];
 
     public static AppConfig Create()

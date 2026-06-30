@@ -657,7 +657,6 @@
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>ゲームパッドの種類</value>
   </data>
-
   <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
     <value>キーボードのレイアウト</value>
   </data>
@@ -805,7 +804,7 @@ localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\lo
     <value>保存しました</value>
   </data>
   <data name="Keybind.Value.Unassigned" xml:space="preserve">
-    <value>——</value>
+    <value>———</value>
   </data>
   <data name="Keybind.Value.UnknownControllerInput" xml:space="preserve">
     <value>不明 ({0})</value>

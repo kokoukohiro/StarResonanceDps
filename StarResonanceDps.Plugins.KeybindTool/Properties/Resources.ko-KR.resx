@@ -657,7 +657,6 @@
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>컨트롤러 종류</value>
   </data>
-
   <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
     <value>키보드 레이아웃</value>
   </data>
@@ -805,7 +804,7 @@ localsave\Env1\[숫자 폴더]\[캐릭터 UID 폴더]\localsave.bytes (2KB 이�
     <value>저장했습니다</value>
   </data>
   <data name="Keybind.Value.Unassigned" xml:space="preserve">
-    <value>——</value>
+    <value>———</value>
   </data>
   <data name="Keybind.Value.UnknownControllerInput" xml:space="preserve">
     <value>알 수 없음 ({0})</value>

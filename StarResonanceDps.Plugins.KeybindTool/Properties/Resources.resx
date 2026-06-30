@@ -657,7 +657,6 @@
   <data name="Keybind.Label.Controller" xml:space="preserve">
     <value>Controller Type</value>
   </data>
-
   <data name="Keybind.Label.KeyboardLayout" xml:space="preserve">
     <value>Keyboard Layout</value>
   </data>
@@ -805,7 +804,7 @@ localsave\Env1\[number folder]\[character UID folder]\localsave.bytes (at least 
     <value>Saved</value>
   </data>
   <data name="Keybind.Value.Unassigned" xml:space="preserve">
-    <value>——</value>
+    <value>———</value>
   </data>
   <data name="Keybind.Value.UnknownControllerInput" xml:space="preserve">
     <value>Unknown ({0})</value>
