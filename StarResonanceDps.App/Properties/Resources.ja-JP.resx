@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -111,11 +111,11 @@
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>
   </data>
-  <data name="NetworkAdapter_Ethernet" xml:space="preserve">
-    <value>Ethernet</value>
+  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
+    <value>ネットワークアダプターが見つかりません</value>
   </data>
-  <data name="NetworkAdapter_WiFi" xml:space="preserve">
-    <value>Wi-Fi</value>
+  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
+    <value>使用中のネットワークアダプターを特定できませんでした。インターネット接続を確認してからアプリを再起動してください。</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>言語</value>

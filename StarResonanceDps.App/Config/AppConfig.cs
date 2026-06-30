@@ -1,4 +1,4 @@
-namespace StarResonanceDps.App.Config;
+﻿namespace StarResonanceDps.App.Config;
 
 public sealed class AppConfig
 {
@@ -32,7 +32,6 @@ public sealed class ColorPickerConfig
 
 public sealed class SettingsConfig
 {
-    public int NetworkAdapterIndex { get; set; }
     public int LanguageIndex { get; set; }
     public int NumberDisplayFormatIndex { get; set; }
     public int WindowColorIndex { get; set; }
@@ -42,7 +41,6 @@ public sealed class SettingsConfig
     {
         return new SettingsConfig
         {
-            NetworkAdapterIndex = NetworkAdapterIndex,
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             WindowColorIndex = WindowColorIndex,

@@ -2,6 +2,7 @@
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App;
 
@@ -12,6 +13,7 @@ public partial class App : Application
         var settings = ConfigManager.Instance.GetSettingsSnapshot();
         LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
         ThemeManager.Instance.ApplyGlobalTheme(settings);
+        NetworkAdapterSession.Instance.Initialize();
         base.OnStartup(e);
     }
 

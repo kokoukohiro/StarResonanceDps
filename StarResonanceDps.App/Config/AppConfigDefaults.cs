@@ -25,7 +25,6 @@ public static class AppConfigDefaults
     {
         return new SettingsConfig
         {
-            NetworkAdapterIndex = 0,
             LanguageIndex = 0,
             NumberDisplayFormatIndex = 0,
             WindowColorIndex = 0,
@@ -70,7 +69,6 @@ public static class AppConfigDefaults
 
     public static void NormalizeSettings(SettingsConfig settings)
     {
-        settings.NetworkAdapterIndex = Clamp(settings.NetworkAdapterIndex, 0, 1);
         settings.LanguageIndex = Clamp(settings.LanguageIndex, 0, 4);
         settings.NumberDisplayFormatIndex = Clamp(settings.NumberDisplayFormatIndex, 0, 1);
 

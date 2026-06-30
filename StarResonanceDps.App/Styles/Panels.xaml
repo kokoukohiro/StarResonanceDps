@@ -193,7 +193,7 @@
                                 SnapsToDevicePixels="True">
                             <Grid ClipToBounds="True">
                                 <Border x:Name="WidgetBackgroundImageLayer"
-                                        Width="200"
+                                        Width="220"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Stretch"
                                         CornerRadius="0,5,5,0"
@@ -207,7 +207,7 @@
                                 </Border>
 
                                 <Border x:Name="WidgetBackgroundFadeLayer"
-                                        Width="200"
+                                        Width="220"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Stretch"
                                         CornerRadius="0,5,5,0"

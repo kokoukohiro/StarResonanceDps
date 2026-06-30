@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -111,11 +111,11 @@
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>네트워크 어댑터</value>
   </data>
-  <data name="NetworkAdapter_Ethernet" xml:space="preserve">
-    <value>Ethernet</value>
+  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
+    <value>네트워크 어댑터를 찾을 수 없습니다</value>
   </data>
-  <data name="NetworkAdapter_WiFi" xml:space="preserve">
-    <value>Wi-Fi</value>
+  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
+    <value>현재 사용 중인 네트워크 어댑터를 확인할 수 없습니다. 인터넷 연결을 확인한 후 앱을 다시 시작하세요.</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>언어</value>

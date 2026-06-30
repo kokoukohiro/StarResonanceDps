@@ -1,20 +1,32 @@
+﻿using System.ComponentModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class SettingsViewModel : ViewModelBase
 {
+    private static readonly bool IsInDesignMode =
+        DesignerProperties.GetIsInDesignMode(new DependencyObject());
+
     private readonly ConfigManager _configManager = ConfigManager.Instance;
+    private readonly NetworkAdapterSession _networkAdapterSession = NetworkAdapterSession.Instance;
     private SettingsConfig _lastSavedSettings;
     private bool _isLoadingSettings;
+    private bool _isLoadingNetworkAdapters;
 
     [ObservableProperty]
-    private int _networkAdapterIndex;
+    private IReadOnlyList<NetworkAdapterInfo> _availableNetworkAdapters = [];
+
+    [ObservableProperty]
+    private NetworkAdapterInfo? _selectedNetworkAdapter;
 
     [ObservableProperty]
     private int _languageIndex;
@@ -30,6 +42,7 @@ public sealed partial class SettingsViewModel : ViewModelBase
         var settings = _configManager.GetSettingsSnapshot();
         _lastSavedSettings = settings.Clone();
         LoadFromSettings(settings, applyLanguage: false);
+        LoadNetworkAdapters();
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -86,7 +99,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
     {
         var settings = new SettingsConfig
         {
-            NetworkAdapterIndex = NetworkAdapterIndex,
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
@@ -104,7 +116,6 @@ public sealed partial class SettingsViewModel : ViewModelBase
         _isLoadingSettings = true;
         try
         {
-            NetworkAdapterIndex = settings.NetworkAdapterIndex;
             LanguageIndex = settings.LanguageIndex;
             NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
@@ -130,16 +141,39 @@ public sealed partial class SettingsViewModel : ViewModelBase
         AppConfigDefaults.NormalizeSettings(left);
         AppConfigDefaults.NormalizeSettings(right);
 
-        return left.NetworkAdapterIndex == right.NetworkAdapterIndex
-            && left.LanguageIndex == right.LanguageIndex
+        return left.LanguageIndex == right.LanguageIndex
             && left.NumberDisplayFormatIndex == right.NumberDisplayFormatIndex
             && left.WindowColorIndex == right.WindowColorIndex
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
-    partial void OnNetworkAdapterIndexChanged(int value)
+    private void LoadNetworkAdapters()
     {
-        OnPropertyChanged(nameof(HasUnsavedChanges));
+        if (IsInDesignMode)
+        {
+            return;
+        }
+
+        _isLoadingNetworkAdapters = true;
+        try
+        {
+            AvailableNetworkAdapters = _networkAdapterSession.AvailableAdapters;
+            SelectedNetworkAdapter = _networkAdapterSession.SelectedAdapter;
+        }
+        finally
+        {
+            _isLoadingNetworkAdapters = false;
+        }
+    }
+
+    partial void OnSelectedNetworkAdapterChanged(NetworkAdapterInfo? value)
+    {
+        if (_isLoadingNetworkAdapters || value is null)
+        {
+            return;
+        }
+
+        _networkAdapterSession.SelectAdapter(value);
     }
 
     partial void OnLanguageIndexChanged(int value)

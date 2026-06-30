@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+﻿<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -157,11 +157,11 @@
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>监听网卡</value>
   </data>
-  <data name="NetworkAdapter_Ethernet" xml:space="preserve">
-    <value>Ethernet</value>
+  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
+    <value>未找到网络适配器</value>
   </data>
-  <data name="NetworkAdapter_WiFi" xml:space="preserve">
-    <value>Wi-Fi</value>
+  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
+    <value>无法确定当前使用的网络适配器。请确认网络连接后重新启动应用。</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>语言</value>
