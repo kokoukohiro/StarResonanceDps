@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Channels;
 using PacketDotNet;
 using SharpPcap;
+using StarResonanceDps.Core.Combat;
 using StarResonanceDps.Core.Logging;
 using StarResonanceDps.Core.Models;
 
@@ -10,12 +11,6 @@ namespace StarResonanceDps.Core.Services;
 
 public sealed class PlayerRosterCaptureService : IDisposable
 {
-    private const ulong WorldNotificationServiceId = 1664308034;
-    private const uint EnterSceneMethodId = 3;
-    private const uint SyncNearEntitiesMethodId = 6;
-    private const uint SyncContainerDataMethodId = 21;
-    private const uint SyncDungeonDataMethodId = 23;
-
     private static readonly string[] GameProcessNames =
     [
         "star.exe",
@@ -78,8 +73,7 @@ public sealed class PlayerRosterCaptureService : IDisposable
         }
 
         run?.Dispose();
-        _playerRosterStore.Clear();
-        _diagnosticLog.Information("Capture", "Player-roster packet capture service stopped.");
+        _diagnosticLog.Information("Capture", "Game packet capture service stopped.");
     }
 
     public void Dispose()
@@ -109,7 +103,6 @@ public sealed class PlayerRosterCaptureService : IDisposable
         }
 
         previousRun?.Dispose();
-        _playerRosterStore.Clear();
 
         var selectedAdapter = _networkAdapterSession.SelectedAdapter;
         if (selectedAdapter is null)
@@ -173,7 +166,7 @@ public sealed class PlayerRosterCaptureService : IDisposable
         private readonly PlayerRosterStore _playerRosterStore;
         private readonly PacketDiagnosticLogStore _diagnosticLog;
         private readonly GameProcessPortWatcher _gameConnectionWatcher;
-        private readonly ZdpsPlayerRosterProcessor _playerRosterProcessor;
+        private readonly GameNotificationProcessor _notificationProcessor;
         private readonly CancellationTokenSource _cancellation = new();
         private readonly Channel<TcpSegment> _segments = Channel.CreateUnbounded<TcpSegment>(
             new UnboundedChannelOptions
@@ -201,7 +194,12 @@ public sealed class PlayerRosterCaptureService : IDisposable
         private long _enterSceneCount;
         private long _syncNearEntitiesCount;
         private long _syncContainerDataCount;
+        private long _syncContainerDirtyDataCount;
         private long _syncDungeonDataCount;
+        private long _syncDungeonDirtyDataCount;
+        private long _syncNearDeltaInfoCount;
+        private long _syncToMeDeltaInfoCount;
+        private long _combatEventCount;
         private long _rosterUpdateCount;
         private long _mapChangeCount;
         private long _noCharacterEntityMessageCount;
@@ -219,7 +217,7 @@ public sealed class PlayerRosterCaptureService : IDisposable
             _playerRosterStore = playerRosterStore;
             _diagnosticLog = diagnosticLog;
             _gameConnectionWatcher = new GameProcessPortWatcher(GameProcessNames, OnGameConnectionWatcherFailure);
-            _playerRosterProcessor = new ZdpsPlayerRosterProcessor(_playerRosterStore);
+            _notificationProcessor = new GameNotificationProcessor(GameCombatStore.Instance);
             _diagnosticTimer = new Timer(WriteActivitySummary, null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             _processorTask = Task.Run(ProcessSegmentsAsync);
         }
@@ -309,10 +307,9 @@ public sealed class PlayerRosterCaptureService : IDisposable
             }
 
             Interlocked.Exchange(ref _resetRequested, 1);
-            ClearPlayerRoster();
             _diagnosticLog.Information(
                 "PlayerRoster",
-                "The roster was cleared because no active TCP connection belongs to a supported game process.");
+                "No active TCP connection belongs to a supported game process. The last player roster and map are retained until newer game data arrives.");
         }
 
         private void ApplyCaptureFilter()
@@ -417,7 +414,7 @@ public sealed class PlayerRosterCaptureService : IDisposable
                             segment.Flow.DestinationAddress,
                             segment.Flow.DestinationPort);
 
-                        if (!isGameConnection && snapshot.ConnectionCount == 0)
+                        if (!isGameConnection)
                         {
                             snapshot = _gameConnectionWatcher.RefreshNow();
                             if (connectionSnapshotVersion != snapshot.Version)
@@ -499,74 +496,75 @@ public sealed class PlayerRosterCaptureService : IDisposable
                     $"Notify observed. ServiceId={serviceId}, MethodId={methodId}, PayloadBytes={payload.Length}.");
             }
 
-            if (serviceId != WorldNotificationServiceId)
+            var outcome = _notificationProcessor.Process(
+                serviceId,
+                methodId,
+                payload,
+                DateTimeOffset.UtcNow);
+            if (outcome.Result == GameNotificationProcessResult.Ignored)
             {
                 return;
             }
 
-            ZdpsPlayerRosterProcessOutcome outcome;
-            string source;
-            switch (methodId)
+            switch (outcome.Source)
             {
-                case EnterSceneMethodId:
+                case "EnterScene":
                     Interlocked.Increment(ref _enterSceneCount);
-                    outcome = _playerRosterProcessor.ProcessEnterScene(payload);
-                    source = "EnterScene";
                     break;
 
-                case SyncNearEntitiesMethodId:
+                case "SyncNearEntities":
                     Interlocked.Increment(ref _syncNearEntitiesCount);
-                    outcome = _playerRosterProcessor.ProcessSyncNearEntities(payload);
-                    source = "SyncNearEntities";
                     break;
 
-                case SyncContainerDataMethodId:
+                case "SyncContainerData":
                     Interlocked.Increment(ref _syncContainerDataCount);
-                    outcome = _playerRosterProcessor.ProcessSyncContainerData(payload);
-                    source = "SyncContainerData";
+                    Interlocked.Increment(ref _mapChangeCount);
                     break;
 
-                case SyncDungeonDataMethodId:
+                case "SyncContainerDirtyData":
+                    Interlocked.Increment(ref _syncContainerDirtyDataCount);
+                    break;
+
+                case "SyncDungeonData":
                     Interlocked.Increment(ref _syncDungeonDataCount);
-                    outcome = _playerRosterProcessor.ProcessSyncDungeonData(payload);
-                    source = "SyncDungeonData";
                     break;
 
-                default:
-                    return;
+                case "SyncDungeonDirtyData":
+                    Interlocked.Increment(ref _syncDungeonDirtyDataCount);
+                    break;
+
+                case "SyncNearDeltaInfo":
+                    Interlocked.Increment(ref _syncNearDeltaInfoCount);
+                    break;
+
+                case "SyncToMeDeltaInfo":
+                    Interlocked.Increment(ref _syncToMeDeltaInfoCount);
+                    break;
             }
 
             Volatile.Write(ref _lastRosterSize, outcome.VisibleRosterSize);
-            if (outcome.MapChanged)
+            Interlocked.Add(ref _combatEventCount, outcome.CombatEventCount);
+
+            if (outcome.Result == GameNotificationProcessResult.InvalidPayload)
             {
-                Interlocked.Increment(ref _mapChangeCount);
-                _diagnosticLog.Information(
-                    "PlayerRoster",
-                    $"{source} reset the player-list scene context. MapName={outcome.MapName}, Players={outcome.VisibleRosterSize}.");
+                Interlocked.Increment(ref _rosterParseFailureCount);
+                _diagnosticLog.Warning(
+                    "Game",
+                    $"{outcome.Source} payload could not be decoded. PayloadBytes={payload.Length}.");
+                return;
             }
 
-            switch (outcome.Result)
+            if (outcome.Source == "SyncContainerData")
             {
-                case ZdpsPlayerRosterProcessResult.RosterUpdated:
-                    Interlocked.Add(ref _rosterUpdateCount, outcome.ChangedPlayerCount);
-                    _diagnosticLog.Information(
-                        "PlayerRoster",
-                        $"{source} updated the player roster. Players={outcome.VisibleRosterSize}, ChangedPlayers={outcome.ChangedPlayerCount}.");
-                    return;
+                var current = _playerRosterStore.Current;
+                _diagnosticLog.Information(
+                    "PlayerRoster",
+                    $"Game context was replaced. MapName={current.MapName}, Players={outcome.VisibleRosterSize}.");
+            }
 
-                case ZdpsPlayerRosterProcessResult.NoRelevantData:
-                    Interlocked.Increment(ref _noCharacterEntityMessageCount);
-                    return;
-
-                case ZdpsPlayerRosterProcessResult.InvalidPayload:
-                    Interlocked.Increment(ref _rosterParseFailureCount);
-                    _diagnosticLog.Warning(
-                        "PlayerRoster",
-                        $"{source} payload could not be decoded. PayloadBytes={payload.Length}.");
-                    return;
-
-                default:
-                    return;
+            if (outcome.VisibleRosterSize > 0)
+            {
+                Interlocked.Increment(ref _rosterUpdateCount);
             }
         }
 
@@ -609,7 +607,12 @@ public sealed class PlayerRosterCaptureService : IDisposable
             var enterScene = Interlocked.Exchange(ref _enterSceneCount, 0);
             var syncNearEntities = Interlocked.Exchange(ref _syncNearEntitiesCount, 0);
             var syncContainerData = Interlocked.Exchange(ref _syncContainerDataCount, 0);
+            var syncContainerDirtyData = Interlocked.Exchange(ref _syncContainerDirtyDataCount, 0);
             var syncDungeonData = Interlocked.Exchange(ref _syncDungeonDataCount, 0);
+            var syncDungeonDirtyData = Interlocked.Exchange(ref _syncDungeonDirtyDataCount, 0);
+            var syncNearDeltaInfo = Interlocked.Exchange(ref _syncNearDeltaInfoCount, 0);
+            var syncToMeDeltaInfo = Interlocked.Exchange(ref _syncToMeDeltaInfoCount, 0);
+            var combatEvents = Interlocked.Exchange(ref _combatEventCount, 0);
             var rosterUpdates = Interlocked.Exchange(ref _rosterUpdateCount, 0);
             var mapChanges = Interlocked.Exchange(ref _mapChangeCount, 0);
             var noCharacterEntityMessages = Interlocked.Exchange(ref _noCharacterEntityMessageCount, 0);
@@ -619,13 +622,7 @@ public sealed class PlayerRosterCaptureService : IDisposable
 
             _diagnosticLog.Information(
                 "Capture",
-                $"Activity ({DiagnosticInterval.TotalSeconds:0}s): Filter={_appliedFilter ?? "None"}, Captured={capturedPackets}, IPv4Tcp={ipv4TcpPackets}, PayloadSegments={payloadSegments}, GameSegments={gameConnectionSegments}, IgnoredSegments={ignoredConnectionSegments}, Queued={queuedSegments}, QueueDrops={queueDrops}, GameProcesses={snapshot.TargetProcessCount}, GameConnections={snapshot.ConnectionCount}, GamePorts={FormatPorts(snapshot.TcpPorts)}, ActiveFlows={Volatile.Read(ref _activeFlowCount)}, Notify={decodedNotifies}, EnterScene={enterScene}, SyncNearEntities={syncNearEntities}, SyncContainerData={syncContainerData}, SyncDungeonData={syncDungeonData}, RosterUpdates={rosterUpdates}, MapChanges={mapChanges}, NoCharacterEntities={noCharacterEntityMessages}, ParserFailures={rosterParseFailures}, ProtocolFailures={protocolFailures}, TcpGapRecoveries={gapRecoveries}, RosterSize={Volatile.Read(ref _lastRosterSize)}, PacketFailures={packetFailures}.");
-        }
-
-        private void ClearPlayerRoster()
-        {
-            _playerRosterProcessor.Reset();
-            Volatile.Write(ref _lastRosterSize, 0);
+                $"Activity ({DiagnosticInterval.TotalSeconds:0}s): Filter={_appliedFilter ?? "None"}, Captured={capturedPackets}, IPv4Tcp={ipv4TcpPackets}, PayloadSegments={payloadSegments}, GameSegments={gameConnectionSegments}, IgnoredSegments={ignoredConnectionSegments}, Queued={queuedSegments}, QueueDrops={queueDrops}, GameProcesses={snapshot.TargetProcessCount}, GameConnections={snapshot.ConnectionCount}, GamePorts={FormatPorts(snapshot.TcpPorts)}, ActiveFlows={Volatile.Read(ref _activeFlowCount)}, Notify={decodedNotifies}, EnterScene={enterScene}, SyncNearEntities={syncNearEntities}, SyncContainerData={syncContainerData}, SyncContainerDirtyData={syncContainerDirtyData}, SyncDungeonData={syncDungeonData}, SyncDungeonDirtyData={syncDungeonDirtyData}, SyncNearDeltaInfo={syncNearDeltaInfo}, SyncToMeDeltaInfo={syncToMeDeltaInfo}, CombatEvents={combatEvents}, RosterUpdates={rosterUpdates}, MapChanges={mapChanges}, NoCharacterEntities={noCharacterEntityMessages}, ParserFailures={rosterParseFailures}, ProtocolFailures={protocolFailures}, TcpGapRecoveries={gapRecoveries}, RosterSize={Volatile.Read(ref _lastRosterSize)}, PacketFailures={packetFailures}.");
         }
 
         private string GetDeviceDisplayName()

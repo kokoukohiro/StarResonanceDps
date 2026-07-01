@@ -13,7 +13,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Data\zdps_scene_names.json" />
+    <EmbeddedResource Include="Data\game_scene_names.json" />
+    <EmbeddedResource Include="Data\SceneTable.json" />
+    <EmbeddedResource Include="Data\DungeonsTable.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Protocols\Game\GameCombatPacketParser.cs" />
+    <Compile Remove="Protocols\Game\GameDirtyPacketParser.cs" />
+    <Compile Remove="Protocols\Game\GameDungeonContextReader.cs" />
+    <Compile Remove="Protocols\Game\GamePlayerRoster.cs" />
+    <Compile Remove="Protocols\Game\GameWireReader.cs" />
   </ItemGroup>
 
   <ItemGroup>

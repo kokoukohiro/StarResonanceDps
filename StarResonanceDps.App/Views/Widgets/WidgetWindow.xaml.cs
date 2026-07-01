@@ -81,7 +81,7 @@ public partial class WidgetWindow : Window
     {
         _isRestoringBounds = false;
         UpdateWindowRootClip();
-        UpdatePlayerListScrollBar();
+        QueuePlayerListScrollBarUpdate();
     }
 
     private void WidgetWindow_SourceInitialized(object? sender, EventArgs e)
@@ -175,7 +175,7 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateWindowRootClip();
-        UpdatePlayerListScrollBar();
+        QueuePlayerListScrollBarUpdate();
         ScheduleBoundsSave();
     }
 
@@ -212,6 +212,13 @@ public partial class WidgetWindow : Window
         UpdatePlayerListScrollBar();
     }
 
+    private void QueuePlayerListScrollBarUpdate()
+    {
+        Dispatcher.BeginInvoke(
+            UpdatePlayerListScrollBar,
+            DispatcherPriority.Loaded);
+    }
+
     private void PlayerListScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_isSynchronizingPlayerListScrollBar)
@@ -233,11 +240,16 @@ public partial class WidgetWindow : Window
         _isSynchronizingPlayerListScrollBar = true;
         try
         {
+            var maximum = Math.Max(PlayerListScrollViewer.ScrollableHeight, 0);
+            var viewport = Math.Max(PlayerListScrollViewer.ViewportHeight, 0);
+
             PlayerListScrollBar.Minimum = 0;
-            PlayerListScrollBar.Maximum = PlayerListScrollViewer.ScrollableHeight;
-            PlayerListScrollBar.ViewportSize = PlayerListScrollViewer.ViewportHeight;
-            PlayerListScrollBar.Value = PlayerListScrollViewer.VerticalOffset;
-            PlayerListScrollBar.Visibility = PlayerListScrollViewer.ScrollableHeight > 0
+            PlayerListScrollBar.Maximum = maximum;
+            PlayerListScrollBar.ViewportSize = viewport;
+            PlayerListScrollBar.LargeChange = Math.Max(viewport * 0.9, 1);
+            PlayerListScrollBar.SmallChange = 42;
+            PlayerListScrollBar.Value = Math.Min(PlayerListScrollViewer.VerticalOffset, maximum);
+            PlayerListScrollBar.Visibility = maximum > 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         }

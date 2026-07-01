@@ -156,8 +156,20 @@
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
                     <Grid Width="{StaticResource ScrollBar.WidgetList.Width}" Background="Transparent">
                         <Track x:Name="PART_Track"
+                               Minimum="{TemplateBinding Minimum}"
+                               Maximum="{TemplateBinding Maximum}"
+                               Value="{Binding Value, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                               ViewportSize="{TemplateBinding ViewportSize}"
                                Orientation="{TemplateBinding Orientation}"
                                IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.LineUpCommand"
+                                              Style="{StaticResource ScrollBar.WidgetListRepeatButton}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.LineDownCommand"
+                                              Style="{StaticResource ScrollBar.WidgetListRepeatButton}" />
+                            </Track.IncreaseRepeatButton>
                             <Track.Thumb>
                                 <Thumb Background="{TemplateBinding Background}"
                                        Style="{StaticResource ScrollBar.WidgetWindowThumb}" />
