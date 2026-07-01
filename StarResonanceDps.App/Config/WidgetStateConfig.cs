@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
@@ -118,6 +118,11 @@ public static class WidgetConfigDefaults
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
+
+    private const double PlayerListInitialWindowWidth = 360d;
+    private const double PlayerListInitialWindowHeight = 400d;
+    private const double PlayerDetailInitialWindowWidth = 400d;
+    private const double PlayerDetailInitialWindowHeight = 230d;
 
     private static readonly string[] DefaultWindowColorHexes =
     [
@@ -264,8 +269,26 @@ public static class WidgetConfigDefaults
             IsPinned = false,
             State = WidgetState.Stopped,
             Theme = CreateTheme(),
-            Window = new WidgetWindowConfig(),
+            Window = CreateDefaultWindowConfig(kind),
             Meter = CreateMeterSettings()
+        };
+    }
+
+    private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
+    {
+        return kind switch
+        {
+            WidgetKind.PlayerInfoDebug => new WidgetWindowConfig
+            {
+                Width = PlayerListInitialWindowWidth,
+                Height = PlayerListInitialWindowHeight
+            },
+            WidgetKind.PlayerDetail => new WidgetWindowConfig
+            {
+                Width = PlayerDetailInitialWindowWidth,
+                Height = PlayerDetailInitialWindowHeight
+            },
+            _ => new WidgetWindowConfig()
         };
     }
 
@@ -317,7 +340,7 @@ public static class WidgetConfigDefaults
     public static WidgetConfig CloneNormalized(WidgetKind kind, WidgetConfig? config)
     {
         var normalized = (config ?? Create(kind)).Clone();
-        Normalize(normalized);
+        Normalize(kind, normalized);
         return normalized;
     }
 
@@ -349,6 +372,24 @@ public static class WidgetConfigDefaults
         }
         NormalizeTheme(config.Theme);
         NormalizeMeter(config.Meter);
+    }
+
+    public static void Normalize(WidgetKind kind, WidgetConfig config)
+    {
+        Normalize(config);
+
+        switch (kind)
+        {
+            case WidgetKind.PlayerInfoDebug:
+                config.Window.Width ??= PlayerListInitialWindowWidth;
+                config.Window.Height ??= PlayerListInitialWindowHeight;
+                break;
+
+            case WidgetKind.PlayerDetail:
+                config.Window.Width ??= PlayerDetailInitialWindowWidth;
+                config.Window.Height ??= PlayerDetailInitialWindowHeight;
+                break;
+        }
     }
 
     public static void NormalizeTheme(WidgetThemeConfig theme)

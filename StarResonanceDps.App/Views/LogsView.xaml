@@ -1,7 +1,28 @@
-﻿<UserControl x:Class="StarResonanceDps.App.Views.LogsView"
+<UserControl x:Class="StarResonanceDps.App.Views.LogsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
-    <Grid Background="Transparent" />
+    <Grid Margin="24,20,24,20">
+        <ContentControl Style="{StaticResource Panel.ManagerItemCard}"
+                        Margin="0">
+            <ScrollViewer x:Name="PacketDiagnosticsScrollViewer"
+                          Style="{StaticResource ScrollViewer.WidgetList}"
+                          VerticalScrollBarVisibility="Hidden">
+                <TextBox x:Name="PacketDiagnosticsTextBox"
+                         Margin="16"
+                         Padding="0"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{DynamicResource Brush.TextSecondary}"
+                         FontSize="13"
+                         TextOptions.TextFormattingMode="Display"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         HorizontalScrollBarVisibility="Disabled"
+                         VerticalScrollBarVisibility="Disabled" />
+            </ScrollViewer>
+        </ContentControl>
+    </Grid>
 </UserControl>

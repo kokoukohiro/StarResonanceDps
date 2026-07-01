@@ -225,8 +225,8 @@ public partial class WidgetSettingsWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        var theme = ViewModel.SaveSettings();
-        _widget.ApplyTheme(theme);
+        var config = ViewModel.SaveSettings();
+        _widget.ApplyWidgetConfig(config);
         Close();
     }
 

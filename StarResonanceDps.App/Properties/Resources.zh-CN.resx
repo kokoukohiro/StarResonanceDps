@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:schema id="root">
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -256,8 +256,8 @@
   <data name="Menu_Training" xml:space="preserve">
     <value>打桩模式</value>
   </data>
-  <data name="Widget_PlayerInfoDebug" xml:space="preserve">
-    <value>PlayerInfo 调试</value>
+  <data name="Widget_PlayerList" xml:space="preserve">
+    <value>玩家列表</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>职业颜色</value>
@@ -304,4 +304,105 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>设置</value>
   </data>
-<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>背景图像</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>选择图像</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>图像文件</value></data></root>
+<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>背景图像</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>选择图像</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>图像文件</value></data>
+
+  <data name="ClassSpec_Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightRecovery" xml:space="preserve">
+    <value>防盾</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightShield" xml:space="preserve">
+    <value>光盾</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianEarthfort" xml:space="preserve">
+    <value>岩盾</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianBlock" xml:space="preserve">
+    <value>格挡</value>
+  </data>
+  <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
+    <value>居合</value>
+  </data>
+  <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
+    <value>月刃</value>
+  </data>
+  <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
+    <value>重装</value>
+  </data>
+  <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
+    <value>空枪</value>
+  </data>
+  <data name="ClassSpec_FrostMageIcicle" xml:space="preserve">
+    <value>冰矛</value>
+  </data>
+  <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
+    <value>射线</value>
+  </data>
+  <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
+    <value>狼弓</value>
+  </data>
+  <data name="ClassSpec_MarksmanFalconry" xml:space="preserve">
+    <value>鹰弓</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleSmite" xml:space="preserve">
+    <value>惩击</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
+    <value>愈合</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
+    <value>狂音</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
+    <value>协奏</value>
+  </data>
+  <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
+    <value>无相</value>
+  </data>
+  <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
+    <value>赤红</value>
+  </data>
+  <data name="Widget_PlayerDetail" xml:space="preserve">
+    <value>玩家详情</value>
+  </data>
+  <data name="PlayerDetail_Hp" xml:space="preserve">
+    <value>生命</value>
+  </data>
+  <data name="PlayerDetail_MaxHp" xml:space="preserve">
+    <value>最大生命</value>
+  </data>
+  <data name="PlayerDetail_Strength" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="PlayerDetail_Agility" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="PlayerDetail_Intellect" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="PlayerDetail_Endurance" xml:space="preserve">
+    <value>耐力</value>
+  </data>
+  <data name="PlayerDetail_Armor" xml:space="preserve">
+    <value>护甲</value>
+  </data>
+  <data name="PlayerDetail_Crit" xml:space="preserve">
+    <value>暴击</value>
+  </data>
+  <data name="PlayerDetail_Haste" xml:space="preserve">
+    <value>急速</value>
+  </data>
+  <data name="PlayerDetail_Luck" xml:space="preserve">
+    <value>幸运</value>
+  </data>
+  <data name="PlayerDetail_Mastery" xml:space="preserve">
+    <value>精通</value>
+  </data>
+  <data name="PlayerDetail_Versatility" xml:space="preserve">
+    <value>全能</value>
+  </data>
+  <data name="PlayerDetail_Block" xml:space="preserve">
+    <value>格挡</value>
+  </data>
+</root>

@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using SharpPcap;
+using StarResonanceDps.Core.Logging;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.Services;
@@ -12,6 +13,7 @@ public sealed class NetworkAdapterSession
 
     private static readonly Lazy<NetworkAdapterSession> LazyInstance = new(() => new NetworkAdapterSession());
 
+    private readonly PacketDiagnosticLogStore _diagnosticLog = PacketDiagnosticLogStore.Instance;
     private IReadOnlyList<NetworkAdapterInfo> _availableAdapters = [];
 
     private NetworkAdapterSession()
@@ -28,6 +30,8 @@ public sealed class NetworkAdapterSession
 
     public bool HasAutomaticSelection { get; private set; }
 
+    public event EventHandler? SelectedAdapterChanged;
+
     public void Initialize()
     {
         if (IsInitialized)
@@ -36,8 +40,25 @@ public sealed class NetworkAdapterSession
         }
 
         _availableAdapters = GetNetworkAdapters();
+        _diagnosticLog.Information(
+            "Adapter",
+            $"Capture-device enumeration completed. Candidates={_availableAdapters.Count}.");
+
         SelectedAdapter = FindAutomaticSelection(_availableAdapters);
         HasAutomaticSelection = SelectedAdapter is not null;
+        if (SelectedAdapter is null)
+        {
+            _diagnosticLog.Warning(
+                "Adapter",
+                "Automatic capture-adapter selection did not find a route-matched capture device.");
+        }
+        else
+        {
+            _diagnosticLog.Information(
+                "Adapter",
+                $"Automatically selected capture adapter: {SelectedAdapter.DisplayName}.");
+        }
+
         IsInitialized = true;
     }
 
@@ -50,6 +71,7 @@ public sealed class NetworkAdapterSession
 
         if (adapter is null)
         {
+            _diagnosticLog.Warning("Adapter", "Ignoring an empty capture-adapter selection.");
             return false;
         }
 
@@ -58,14 +80,24 @@ public sealed class NetworkAdapterSession
 
         if (selected is null)
         {
+            _diagnosticLog.Warning(
+                "Adapter",
+                $"Ignoring a capture-adapter selection that is not in the current device list: {adapter.DisplayName}.");
             return false;
         }
 
+        if (string.Equals(SelectedAdapter?.DeviceName, selected.DeviceName, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
         SelectedAdapter = selected;
+        _diagnosticLog.Information("Adapter", $"Selected capture adapter: {selected.DisplayName}.");
+        SelectedAdapterChanged?.Invoke(this, EventArgs.Empty);
         return true;
     }
 
-    private static IReadOnlyList<NetworkAdapterInfo> GetNetworkAdapters()
+    private IReadOnlyList<NetworkAdapterInfo> GetNetworkAdapters()
     {
         try
         {
@@ -75,8 +107,9 @@ public sealed class NetworkAdapterSession
                     device.Description ?? device.Name))
                 .ToList();
         }
-        catch
+        catch (Exception exception)
         {
+            _diagnosticLog.Error("Adapter", "Capture-device enumeration failed.", exception);
             return [];
         }
     }

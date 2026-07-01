@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -210,8 +210,8 @@
   <data name="Menu_Training" xml:space="preserve">
     <value>훈련 모드</value>
   </data>
-  <data name="Widget_PlayerInfoDebug" xml:space="preserve">
-    <value>PlayerInfo 디버그</value>
+  <data name="Widget_PlayerList" xml:space="preserve">
+    <value>플레이어 목록</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>직업 색상</value>
@@ -258,4 +258,99 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>설정</value>
   </data>
-<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>배경 이미지</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>이미지 선택</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>이미지 파일</value></data></root>
+<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>배경 이미지</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>이미지 선택</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>이미지 파일</value></data>
+
+  <data name="ClassSpec_Unknown" xml:space="preserve">
+    <value>알 수 없음</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightRecovery" xml:space="preserve">
+    <value>신성</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightShield" xml:space="preserve">
+    <value>광휘</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianEarthfort" xml:space="preserve">
+    <value>암석</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianBlock" xml:space="preserve">
+    <value>가드</value>
+  </data>
+  <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
+    <value>발도</value>
+  </data>
+  <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
+    <value>월광</value>
+  </data>
+  <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
+    <value>땅창</value>
+  </data>
+  <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
+    <value>날창</value>
+  </data>
+  <data name="ClassSpec_FrostMageIcicle" xml:space="preserve">
+    <value>얼창</value>
+  </data>
+  <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
+    <value>얼빔</value>
+  </data>
+  <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
+    <value>늑활</value>
+  </data>
+  <data name="ClassSpec_MarksmanFalconry" xml:space="preserve">
+    <value>매활</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleSmite" xml:space="preserve">
+    <value>심판</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
+    <value>치유</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
+    <value>음파</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
+    <value>협주</value>
+  </data>
+  <data name="Widget_PlayerDetail" xml:space="preserve">
+    <value>플레이어 상세</value>
+  </data>
+  <data name="PlayerDetail_Hp" xml:space="preserve">
+    <value>HP</value>
+  </data>
+  <data name="PlayerDetail_MaxHp" xml:space="preserve">
+    <value>최대 HP</value>
+  </data>
+  <data name="PlayerDetail_Strength" xml:space="preserve">
+    <value>힘</value>
+  </data>
+  <data name="PlayerDetail_Agility" xml:space="preserve">
+    <value>민첩</value>
+  </data>
+  <data name="PlayerDetail_Intellect" xml:space="preserve">
+    <value>지능</value>
+  </data>
+  <data name="PlayerDetail_Endurance" xml:space="preserve">
+    <value>지구력</value>
+  </data>
+  <data name="PlayerDetail_Armor" xml:space="preserve">
+    <value>방어</value>
+  </data>
+  <data name="PlayerDetail_Crit" xml:space="preserve">
+    <value>치명타</value>
+  </data>
+  <data name="PlayerDetail_Haste" xml:space="preserve">
+    <value>가속</value>
+  </data>
+  <data name="PlayerDetail_Luck" xml:space="preserve">
+    <value>행운</value>
+  </data>
+  <data name="PlayerDetail_Mastery" xml:space="preserve">
+    <value>숙련</value>
+  </data>
+  <data name="PlayerDetail_Versatility" xml:space="preserve">
+    <value>만능</value>
+  </data>
+  <data name="PlayerDetail_Block" xml:space="preserve">
+    <value>막기</value>
+  </data>
+</root>

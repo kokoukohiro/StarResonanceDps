@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -15,10 +15,12 @@ public partial class App : Application
         ThemeManager.Instance.ApplyGlobalTheme(settings);
         NetworkAdapterSession.Instance.Initialize();
         base.OnStartup(e);
+        PlayerRosterCaptureService.Instance.Start();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
+        PlayerRosterCaptureService.Instance.Stop();
         PluginManager.Instance.ShutdownAll();
         base.OnExit(e);
     }

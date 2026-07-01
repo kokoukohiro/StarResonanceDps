@@ -12,7 +12,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition x:Name="WidgetListExternalScrollBarColumn" Width="16" />
+            <ColumnDefinition x:Name="ManagerContentExternalScrollBarColumn" Width="16" />
         </Grid.ColumnDefinitions>
 
         <ContentControl Grid.Column="0" Margin="8,1,6,8" Style="{StaticResource Panel.Root}">
@@ -170,11 +170,11 @@
             </Grid>
         </ContentControl>
 
-        <ScrollBar x:Name="WidgetListExternalScrollBar"
+        <ScrollBar x:Name="ManagerContentExternalScrollBar"
                    Grid.Column="2"
                    Margin="5,4,5,8"
                    Orientation="Vertical"
                    Style="{StaticResource ScrollBar.WidgetList}"
-                   ValueChanged="WidgetListExternalScrollBar_ValueChanged" />
+                   ValueChanged="ManagerContentExternalScrollBar_ValueChanged" />
     </Grid>
 </UserControl>

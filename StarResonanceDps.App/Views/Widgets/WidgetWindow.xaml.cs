@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -27,6 +28,7 @@ public partial class WidgetWindow : Window
     private readonly WidgetListItemViewModel _widget;
     private readonly DispatcherTimer _saveBoundsTimer;
     private bool _isRestoringBounds = true;
+    private bool _isSynchronizingPlayerListScrollBar;
 
     public WidgetWindow(WidgetListItemViewModel widget, WidgetWindowConfig savedBounds, Window? owner)
     {
@@ -34,6 +36,8 @@ public partial class WidgetWindow : Window
 
         InitializeComponent();
         DataContext = widget;
+        PlayerListScrollViewer.ScrollChanged += PlayerListScrollViewer_ScrollChanged;
+        PlayerListScrollBar.ValueChanged += PlayerListScrollBar_ValueChanged;
 
         // Widgets are top-level windows so the manager can be activated above every
         // unpinned widget. Pinned widgets still use Topmost through ApplyPinState.
@@ -68,6 +72,8 @@ public partial class WidgetWindow : Window
         SaveBounds();
         _saveBoundsTimer.Stop();
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
+        PlayerListScrollViewer.ScrollChanged -= PlayerListScrollViewer_ScrollChanged;
+        PlayerListScrollBar.ValueChanged -= PlayerListScrollBar_ValueChanged;
         base.OnClosed(e);
     }
 
@@ -75,6 +81,7 @@ public partial class WidgetWindow : Window
     {
         _isRestoringBounds = false;
         UpdateWindowRootClip();
+        UpdatePlayerListScrollBar();
     }
 
     private void WidgetWindow_SourceInitialized(object? sender, EventArgs e)
@@ -168,6 +175,7 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateWindowRootClip();
+        UpdatePlayerListScrollBar();
         ScheduleBoundsSave();
     }
 
@@ -197,6 +205,46 @@ public partial class WidgetWindow : Window
             new Rect(0, 0, WindowRoot.ActualWidth, WindowRoot.ActualHeight),
             cornerRadius,
             cornerRadius);
+    }
+
+    private void PlayerListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        UpdatePlayerListScrollBar();
+    }
+
+    private void PlayerListScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isSynchronizingPlayerListScrollBar)
+        {
+            return;
+        }
+
+        PlayerListScrollViewer.ScrollToVerticalOffset(e.NewValue);
+    }
+
+    private void UpdatePlayerListScrollBar()
+    {
+        if (!_widget.IsPlayerList || !IsLoaded)
+        {
+            PlayerListScrollBar.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        _isSynchronizingPlayerListScrollBar = true;
+        try
+        {
+            PlayerListScrollBar.Minimum = 0;
+            PlayerListScrollBar.Maximum = PlayerListScrollViewer.ScrollableHeight;
+            PlayerListScrollBar.ViewportSize = PlayerListScrollViewer.ViewportHeight;
+            PlayerListScrollBar.Value = PlayerListScrollViewer.VerticalOffset;
+            PlayerListScrollBar.Visibility = PlayerListScrollViewer.ScrollableHeight > 0
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+        finally
+        {
+            _isSynchronizingPlayerListScrollBar = false;
+        }
     }
 
     private void ScheduleBoundsSave()

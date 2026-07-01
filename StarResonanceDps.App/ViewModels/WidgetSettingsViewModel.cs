@@ -56,7 +56,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
-        if (IsMeterWidgetKind(kind))
+        if (SupportsClassColorSettings(kind))
         {
             MeterSettings = new MeterWidgetSettingsViewModel(config.Meter);
             MeterSettings.PropertyChanged += (_, e) =>
@@ -84,7 +84,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public string WindowTitle => LocalizationManager.Instance.Format("Window_WidgetSettings_Title", LocalizationManager.Instance.GetString(_displayNameResourceKey));
 
-    public bool IsMeterWidget => IsMeterWidgetKind(_kind);
+    public bool HasClassColorSettings => SupportsClassColorSettings(_kind);
 
     public ColorPaletteViewModel WindowColors { get; }
 
@@ -105,7 +105,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         ResetToDefaults();
     }
 
-    public WidgetThemeConfig SaveSettings()
+    public WidgetConfig SaveSettings()
     {
         var config = _stateManager.GetWidgetSnapshot(_kind);
         var theme = CreateTheme();
@@ -121,7 +121,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
         OnPropertyChanged(nameof(HasUnsavedChanges));
-        return theme;
+        return config.Clone();
     }
 
     public void ResetToDefaults()
@@ -257,11 +257,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
-    private static bool IsMeterWidgetKind(WidgetKind kind)
+    private static bool SupportsClassColorSettings(WidgetKind kind)
     {
         return kind is WidgetKind.DpsMeter
             or WidgetKind.HpsMeter
-            or WidgetKind.DtpsMeter;
+            or WidgetKind.DtpsMeter
+            or WidgetKind.PlayerInfoDebug;
     }
 
     partial void OnWindowOpacityChanged(double value)

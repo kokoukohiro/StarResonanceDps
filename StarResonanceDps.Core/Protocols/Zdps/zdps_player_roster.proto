@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package zproto;
+option csharp_namespace = "StarResonanceDps.Core.Protocols.Zdps";
+
+enum EEntityType {
+  EntErrType = 0;
+  EntChar = 10;
+}
+
+enum EAttrType {
+  AttrNone = 0;
+  AttrName = 1;
+  AttrProfessionId = 220;
+}
+
+message Attr {
+  int32 id = 1;
+  bytes raw_data = 2;
+}
+
+message AttrCollection {
+  int64 uuid = 1;
+  repeated Attr attrs = 2;
+}
+
+message Entity {
+  int64 uuid = 1;
+  EEntityType ent_type = 2;
+  AttrCollection attrs = 3;
+}
+
+message DisappearEntity {
+  int64 uuid = 1;
+  int32 type = 2;
+}
+
+message SyncNearEntities {
+  repeated Entity appear = 1;
+  repeated DisappearEntity disappear = 2;
+}
+
+message EnterScene {
+  EnterSceneInfo enter_scene_info = 1;
+}
+
+message EnterSceneInfo {
+  AttrCollection scene_attrs = 1;
+  Entity player_ent = 2;
+  string scene_guid = 3;
+  string connect_guid = 4;
+  AttrCollection subscene_attrs = 5;
+}
+
+message SyncContainerData {
+  CharSerialize v_data = 1;
+}
+
+message CharSerialize {
+  int64 char_id = 1;
+  CharBaseInfo char_base = 2;
+  SceneData scene_data = 3;
+  UserFightAttr attr = 16;
+  ProfessionList profession_list = 61;
+}
+
+message CharBaseInfo {
+  int64 char_id = 1;
+  string name = 5;
+  int32 fight_point = 35;
+}
+
+message SceneData {
+  uint32 map_id = 1;
+  uint32 channel_id = 2;
+  uint32 level_map_id = 6;
+  uint32 line_id = 15;
+}
+
+message UserFightAttr {
+  int64 cur_hp = 1;
+  int64 max_hp = 2;
+}
+
+message ProfessionList {
+  int32 cur_profession_id = 1;
+}

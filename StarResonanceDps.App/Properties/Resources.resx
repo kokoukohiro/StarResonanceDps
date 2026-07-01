@@ -1,4 +1,4 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8'?>
 <root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   
   <xs:schema id="root">
@@ -257,8 +257,8 @@
   <data name="Menu_Training" xml:space="preserve">
     <value>Training Mode</value>
   </data>
-  <data name="Widget_PlayerInfoDebug" xml:space="preserve">
-    <value>PlayerInfo Debug</value>
+  <data name="Widget_PlayerList" xml:space="preserve">
+    <value>Player List</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>Class Colors</value>
@@ -305,4 +305,105 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>Settings</value>
   </data>
-<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>Background Image</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>Select Image</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>Image Files</value></data></root>
+<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>Background Image</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>Select Image</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>Image Files</value></data>
+
+  <data name="ClassSpec_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightRecovery" xml:space="preserve">
+    <value>Recovery</value>
+  </data>
+  <data name="ClassSpec_ShieldKnightShield" xml:space="preserve">
+    <value>Shield</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianEarthfort" xml:space="preserve">
+    <value>Earthfort</value>
+  </data>
+  <data name="ClassSpec_HeavyGuardianBlock" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
+    <value>IaidoSlash</value>
+  </data>
+  <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
+    <value>MoonStrike</value>
+  </data>
+  <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
+    <value>VanGuard</value>
+  </data>
+  <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
+    <value>Skyward</value>
+  </data>
+  <data name="ClassSpec_FrostMageIcicle" xml:space="preserve">
+    <value>Icicle</value>
+  </data>
+  <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
+    <value>FrostBeam</value>
+  </data>
+  <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
+    <value>Wildpack</value>
+  </data>
+  <data name="ClassSpec_MarksmanFalconry" xml:space="preserve">
+    <value>Falconry</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleSmite" xml:space="preserve">
+    <value>Smite</value>
+  </data>
+  <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
+    <value>LifeBind</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
+    <value>Dissonance</value>
+  </data>
+  <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
+    <value>Concerto</value>
+  </data>
+  <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
+    <value>Formless</value>
+  </data>
+  <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
+    <value>Crimson</value>
+  </data>
+  <data name="Widget_PlayerDetail" xml:space="preserve">
+    <value>Player Details</value>
+  </data>
+  <data name="PlayerDetail_Hp" xml:space="preserve">
+    <value>HP</value>
+  </data>
+  <data name="PlayerDetail_MaxHp" xml:space="preserve">
+    <value>Max HP</value>
+  </data>
+  <data name="PlayerDetail_Strength" xml:space="preserve">
+    <value>Strength</value>
+  </data>
+  <data name="PlayerDetail_Agility" xml:space="preserve">
+    <value>Agility</value>
+  </data>
+  <data name="PlayerDetail_Intellect" xml:space="preserve">
+    <value>Intellect</value>
+  </data>
+  <data name="PlayerDetail_Endurance" xml:space="preserve">
+    <value>Endurance</value>
+  </data>
+  <data name="PlayerDetail_Armor" xml:space="preserve">
+    <value>Armor</value>
+  </data>
+  <data name="PlayerDetail_Crit" xml:space="preserve">
+    <value>Crit</value>
+  </data>
+  <data name="PlayerDetail_Haste" xml:space="preserve">
+    <value>Haste</value>
+  </data>
+  <data name="PlayerDetail_Luck" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="PlayerDetail_Mastery" xml:space="preserve">
+    <value>Mastery</value>
+  </data>
+  <data name="PlayerDetail_Versatility" xml:space="preserve">
+    <value>Versatility</value>
+  </data>
+  <data name="PlayerDetail_Block" xml:space="preserve">
+    <value>Block</value>
+  </data>
+</root>

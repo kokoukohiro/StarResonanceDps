@@ -7,5 +7,6 @@ public enum WidgetKind
     DtpsMeter,
     SkillLog,
     TrainingMode,
-    PlayerInfoDebug
+    PlayerInfoDebug,
+    PlayerDetail
 }

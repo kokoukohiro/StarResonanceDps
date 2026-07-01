@@ -126,4 +126,91 @@
         </Setter>
     </Style>
 
+
+
+    <Style x:Key="ScrollBar.WidgetWindowThumb" TargetType="{x:Type Thumb}">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border Background="{TemplateBinding Background}"
+                            CornerRadius="3"
+                            SnapsToDevicePixels="True" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollBar.WidgetWindow" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Width" Value="{StaticResource ScrollBar.WidgetList.Width}" />
+        <Setter Property="MinWidth" Value="{StaticResource ScrollBar.WidgetList.Width}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="ContextMenuService.IsEnabled" Value="False" />
+        <Setter Property="ContextMenu" Value="{x:Null}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid Width="{StaticResource ScrollBar.WidgetList.Width}" Background="Transparent">
+                        <Track x:Name="PART_Track"
+                               Orientation="{TemplateBinding Orientation}"
+                               IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb Background="{TemplateBinding Background}"
+                                       Style="{StaticResource ScrollBar.WidgetWindowThumb}" />
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollViewer.WidgetWindow" TargetType="{x:Type ScrollViewer}">
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="CanContentScroll" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollViewer}">
+                    <Grid SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <ScrollContentPresenter x:Name="PART_ScrollContentPresenter"
+                                                Grid.Column="0"
+                                                CanContentScroll="{TemplateBinding CanContentScroll}"
+                                                CanHorizontallyScroll="False"
+                                                CanVerticallyScroll="False"
+                                                Content="{TemplateBinding Content}"
+                                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                                Cursor="{TemplateBinding Cursor}"
+                                                Margin="{TemplateBinding Padding}" />
+
+                        <ScrollBar x:Name="PART_VerticalScrollBar"
+                                   Grid.Column="1"
+                                   Style="{StaticResource ScrollBar.WidgetWindow}"
+                                   AutomationProperties.AutomationId="VerticalScrollBar"
+                                   Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                   Cursor="Arrow"
+                                   Maximum="{TemplateBinding ScrollableHeight}"
+                                   Minimum="0"
+                                   Opacity="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                   Orientation="Vertical"
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
+                                   Value="{Binding VerticalOffset, Mode=OneWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                   ViewportSize="{TemplateBinding ViewportHeight}"
+                                   IsTabStop="False" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

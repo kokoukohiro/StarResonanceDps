@@ -59,7 +59,7 @@ public sealed class WidgetStateManager
             var config = GetOrCreateWidgetConfig(kind);
             config.IsFavorite = isFavorite;
             config.IsPinned = isPinned;
-            WidgetConfigDefaults.Normalize(config);
+            WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }
     }
@@ -70,7 +70,7 @@ public sealed class WidgetStateManager
         {
             var config = GetOrCreateWidgetConfig(kind);
             config.State = state;
-            WidgetConfigDefaults.Normalize(config);
+            WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }
     }
@@ -81,7 +81,7 @@ public sealed class WidgetStateManager
         {
             var config = GetOrCreateWidgetConfig(kind);
             config.Theme = WidgetConfigDefaults.CloneNormalizedTheme(theme);
-            WidgetConfigDefaults.Normalize(config);
+            WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }
     }
@@ -98,7 +98,7 @@ public sealed class WidgetStateManager
                 Width = width,
                 Height = height
             };
-            WidgetConfigDefaults.Normalize(config);
+            WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }
     }
@@ -163,7 +163,7 @@ public sealed class WidgetStateManager
                 WidgetConfigDefaults.MigrateVersion1Defaults(config);
             }
 
-            WidgetConfigDefaults.Normalize(config);
+            WidgetConfigDefaults.Normalize(kind, config);
         }
 
         document.SchemaVersion = WidgetConfigDefaults.CurrentSchemaVersion;

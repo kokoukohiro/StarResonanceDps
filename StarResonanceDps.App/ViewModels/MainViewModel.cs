@@ -1,11 +1,14 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 using System.Windows.Data;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -16,6 +19,10 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
     private readonly PluginManager _pluginManager = PluginManager.Instance;
+    private readonly PlayerRosterStore _playerRosterStore = PlayerRosterStore.Instance;
+
+    private WidgetListItemViewModel? _playerListWidget;
+    private WidgetListItemViewModel? _playerDetailWidget;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -38,12 +45,15 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
+        var playerListWidget = AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerList");
+        _playerListWidget = playerListWidget;
+        _playerDetailWidget = AddWidget(WidgetKind.PlayerDetail, "Widget_PlayerDetail");
+        playerListWidget.PlayerDetailRequested += PlayerListWidget_PlayerDetailRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
         AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter");
         AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
         AddWidget(WidgetKind.TrainingMode, "Menu_Training");
-        AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerInfoDebug");
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;
@@ -58,6 +68,9 @@ public sealed partial class MainViewModel : ViewModelBase
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        _playerRosterStore.RosterChanged += PlayerRosterStore_RosterChanged;
+        var roster = _playerRosterStore.Current;
+        UpdatePlayerList(roster.Entries, roster.MapName);
     }
 
     private void AddPluginItem(PluginInfo pluginInfo)
@@ -82,7 +95,7 @@ public sealed partial class MainViewModel : ViewModelBase
         });
     }
 
-    private void AddWidget(WidgetKind kind, string displayNameResourceKey)
+    private WidgetListItemViewModel AddWidget(WidgetKind kind, string displayNameResourceKey)
     {
         var widget = new WidgetListItemViewModel
         {
@@ -113,6 +126,35 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
         _widgetItems.Add(widget);
+        return widget;
+    }
+
+    private void PlayerRosterStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
+    {
+        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(() => UpdatePlayerList(e.Snapshot, e.MapName));
+            return;
+        }
+
+        UpdatePlayerList(e.Snapshot, e.MapName);
+    }
+
+    private void UpdatePlayerList(IReadOnlyList<PlayerRosterEntry> snapshot, string mapName)
+    {
+        _playerListWidget?.UpdatePlayerRoster(snapshot, mapName);
+        _playerDetailWidget?.UpdatePlayerRoster(snapshot, mapName);
+    }
+
+    private void PlayerListWidget_PlayerDetailRequested(long characterId)
+    {
+        if (_playerDetailWidget is null)
+        {
+            return;
+        }
+
+        _playerDetailWidget.SelectPlayer(characterId);
+        _playerDetailWidget.State = WidgetState.Running;
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -151,6 +193,11 @@ public sealed partial class MainViewModel : ViewModelBase
 
         if (e.PropertyName == nameof(WidgetListItemViewModel.State))
         {
+            if (widget.Kind == WidgetKind.PlayerDetail && widget.State == WidgetState.Stopped)
+            {
+                widget.ResetSelectedPlayer();
+            }
+
             _widgetStateManager.SaveWidgetState(widget.Kind, widget.State);
             _widgetWindowManager.ApplyWidgetState(widget);
         }

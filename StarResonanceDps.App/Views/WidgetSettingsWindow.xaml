@@ -57,7 +57,7 @@
                         <Button x:Name="ClassColorsNavButton"
                                 Click="ClassColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding IsMeterWidget, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasClassColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}" />
@@ -198,7 +198,7 @@
 
                                 <ContentControl x:Name="ClassColorsHost"
                                                 Content="{Binding MeterSettings}"
-                                                Visibility="{Binding IsMeterWidget, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                Visibility="{Binding HasClassColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:MeterWidgetSettingsView />

@@ -1,16 +1,24 @@
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
 
 public partial class WidgetListItemViewModel : ViewModelBase
 {
+    private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
+    private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+    private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
+    private MeterWidgetSettingsConfig _meterSettings = WidgetConfigDefaults.CreateMeterSettings();
+    private long? _selectedPlayerCharacterId;
+
     public WidgetKind Kind { get; init; }
 
     public int OriginalIndex { get; init; }
@@ -41,7 +49,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
     [ObservableProperty]
     private bool _hasBackgroundImage;
 
-    private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
+    [ObservableProperty]
+    private string _mapName = string.Empty;
+
+    [ObservableProperty]
+    private PlayerDetailEntry? _selectedPlayerDetail;
+
+    public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
+
+    public bool IsPlayerList => Kind == WidgetKind.PlayerInfoDebug;
+
+    public bool IsPlayerDetail => Kind == WidgetKind.PlayerDetail;
 
     public string StateText => State == WidgetState.Running
         ? LocalizationManager.Instance.GetString("Widget_State_Running")
@@ -49,10 +67,19 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsRunning => State == WidgetState.Running;
 
+    public event Action<long>? PlayerDetailRequested;
+
+    public WidgetListItemViewModel()
+    {
+        PlayerListEntries = new ReadOnlyObservableCollection<PlayerListEntry>(_playerListEntries);
+    }
+
     public void RefreshLocalizedText()
     {
         DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
         OnPropertyChanged(nameof(StateText));
+        RefreshPlayerListEntries();
+        RefreshPlayerDetail();
     }
 
     public WidgetConfig CreateWidgetConfig()
@@ -62,13 +89,14 @@ public partial class WidgetListItemViewModel : ViewModelBase
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
             State = State,
-            Theme = _theme.Clone()
+            Theme = _theme.Clone(),
+            Meter = _meterSettings.Clone()
         };
     }
 
     public void ApplyWidgetConfig(WidgetConfig config)
     {
-        WidgetConfigDefaults.Normalize(config);
+        WidgetConfigDefaults.Normalize(Kind, config);
 
         IsFavorite = config.IsFavorite;
         IsPinned = config.IsPinned;
@@ -78,7 +106,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
             State = state;
         }
 
+        _meterSettings = config.Meter.Clone();
         ApplyTheme(config.Theme);
+        RefreshPlayerListEntries();
+        RefreshPlayerDetail();
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)
@@ -120,6 +151,53 @@ public partial class WidgetListItemViewModel : ViewModelBase
             : null;
     }
 
+    public void UpdatePlayerRoster(IReadOnlyList<PlayerRosterEntry> playerRoster, string mapName)
+    {
+        if (!IsPlayerList && !IsPlayerDetail)
+        {
+            return;
+        }
+
+        MapName = mapName ?? string.Empty;
+        _playerRoster = playerRoster
+            .Select(entry => new PlayerRosterEntry(
+                entry.CharacterId,
+                entry.Name,
+                entry.ProfessionId,
+                entry.CombatPower,
+                entry.SeasonStrength,
+                entry.CurrentHp,
+                entry.MaxHp,
+                entry.ClassSpec,
+                entry.IsSelf,
+                entry.CombatAttributes))
+            .ToArray();
+        RefreshPlayerListEntries();
+        RefreshPlayerDetail();
+    }
+
+    public void SelectPlayer(long characterId)
+    {
+        if (!IsPlayerDetail)
+        {
+            return;
+        }
+
+        _selectedPlayerCharacterId = characterId;
+        RefreshPlayerDetail();
+    }
+
+    public void ResetSelectedPlayer()
+    {
+        if (!IsPlayerDetail)
+        {
+            return;
+        }
+
+        _selectedPlayerCharacterId = null;
+        RefreshPlayerDetail();
+    }
+
     [RelayCommand]
     private void ToggleFavorite()
     {
@@ -140,9 +218,60 @@ public partial class WidgetListItemViewModel : ViewModelBase
             : WidgetState.Running;
     }
 
+    [RelayCommand]
+    private void RequestPlayerDetail(PlayerListEntry? player)
+    {
+        if (!IsPlayerList || player is null)
+        {
+            return;
+        }
+
+        PlayerDetailRequested?.Invoke(player.CharacterId);
+    }
+
     partial void OnStateChanged(WidgetState value)
     {
         OnPropertyChanged(nameof(StateText));
         OnPropertyChanged(nameof(IsRunning));
+    }
+
+    private void RefreshPlayerListEntries()
+    {
+        if (!IsPlayerList)
+        {
+            return;
+        }
+
+        var nextEntries = _playerRoster
+            .Select(entry => PlayerListEntry.Create(entry, _meterSettings))
+            .ToArray();
+
+        _playerListEntries.Clear();
+        foreach (var entry in nextEntries)
+        {
+            _playerListEntries.Add(entry);
+        }
+    }
+
+    private void RefreshPlayerDetail()
+    {
+        if (!IsPlayerDetail)
+        {
+            return;
+        }
+
+        var selectedPlayer = _selectedPlayerCharacterId is { } characterId
+            ? _playerRoster.FirstOrDefault(entry => entry.CharacterId == characterId)
+            : _playerRoster.FirstOrDefault(entry => entry.IsSelf);
+
+        if (selectedPlayer is null && _selectedPlayerCharacterId.HasValue)
+        {
+            _selectedPlayerCharacterId = null;
+            selectedPlayer = _playerRoster.FirstOrDefault(entry => entry.IsSelf);
+        }
+
+        SelectedPlayerDetail = selectedPlayer is null
+            ? null
+            : PlayerDetailEntry.Create(selectedPlayer);
     }
 }

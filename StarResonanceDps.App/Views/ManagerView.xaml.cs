@@ -16,6 +16,8 @@ public partial class ManagerView : UserControl
     public ManagerView()
     {
         InitializeComponent();
+        LogsContent.ContentScrollViewer.ScrollChanged += LogsContentScrollViewer_ScrollChanged;
+        LogsContent.ContentScrollViewer.SizeChanged += LogsContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
     }
 
@@ -59,14 +61,7 @@ public partial class ManagerView : UserControl
             ? Visibility.Visible
             : Visibility.Collapsed;
 
-        if (content == ManagerContent.Widgets)
-        {
-            QueueUpdateExternalScrollBar();
-            return;
-        }
-
-        WidgetListExternalScrollBar.Visibility = Visibility.Collapsed;
-        WidgetListExternalScrollBarColumn.Width = new GridLength(8);
+        QueueUpdateExternalScrollBar();
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -91,7 +86,7 @@ public partial class ManagerView : UserControl
 
     private void WidgetListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        UpdateExternalScrollBar(WidgetListScrollViewer, WidgetListExternalScrollBar);
+        UpdateExternalScrollBar();
     }
 
     private void WidgetListScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -104,29 +99,41 @@ public partial class ManagerView : UserControl
         QueueUpdateExternalScrollBar();
     }
 
-    private void WidgetListExternalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void LogsContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        UpdateExternalScrollBar();
+    }
+
+    private void LogsContentScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        QueueUpdateExternalScrollBar();
+    }
+
+    private void ManagerContentExternalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         if (_isSyncingExternalScrollBar || !IsLoaded)
         {
             return;
         }
 
-        WidgetListScrollViewer.ScrollToVerticalOffset(e.NewValue);
+        GetActiveScrollViewer()?.ScrollToVerticalOffset(e.NewValue);
     }
 
     private void QueueUpdateExternalScrollBar()
     {
         Dispatcher.BeginInvoke(
-            () => UpdateExternalScrollBar(WidgetListScrollViewer, WidgetListExternalScrollBar),
+            UpdateExternalScrollBar,
             DispatcherPriority.Loaded);
     }
 
-    private void UpdateExternalScrollBar(ScrollViewer scrollViewer, ScrollBar scrollBar)
+    private void UpdateExternalScrollBar()
     {
-        if (WidgetContent.Visibility != Visibility.Visible)
+        var scrollViewer = GetActiveScrollViewer();
+
+        if (scrollViewer is null)
         {
-            scrollBar.Visibility = Visibility.Collapsed;
-            WidgetListExternalScrollBarColumn.Width = new GridLength(8);
+            ManagerContentExternalScrollBar.Visibility = Visibility.Collapsed;
+            ManagerContentExternalScrollBarColumn.Width = new GridLength(8);
             return;
         }
 
@@ -135,15 +142,17 @@ public partial class ManagerView : UserControl
         try
         {
             var maximum = Math.Max(scrollViewer.ScrollableHeight, 0);
-            scrollBar.Maximum = maximum;
-            scrollBar.ViewportSize = Math.Max(scrollViewer.ViewportHeight, 0);
-            scrollBar.LargeChange = Math.Max(scrollViewer.ViewportHeight * 0.9, 1);
-            scrollBar.SmallChange = 48;
-            scrollBar.Value = Math.Min(scrollViewer.VerticalOffset, maximum);
-            var isScrollBarVisible = maximum > 0;
+            ManagerContentExternalScrollBar.Maximum = maximum;
+            ManagerContentExternalScrollBar.ViewportSize = Math.Max(scrollViewer.ViewportHeight, 0);
+            ManagerContentExternalScrollBar.LargeChange = Math.Max(scrollViewer.ViewportHeight * 0.9, 1);
+            ManagerContentExternalScrollBar.SmallChange = 48;
+            ManagerContentExternalScrollBar.Value = Math.Min(scrollViewer.VerticalOffset, maximum);
 
-            scrollBar.Visibility = isScrollBarVisible ? Visibility.Visible : Visibility.Collapsed;
-            WidgetListExternalScrollBarColumn.Width = isScrollBarVisible
+            var isScrollBarVisible = maximum > 0;
+            ManagerContentExternalScrollBar.Visibility = isScrollBarVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            ManagerContentExternalScrollBarColumn.Width = isScrollBarVisible
                 ? new GridLength(16)
                 : new GridLength(8);
         }
@@ -151,6 +160,18 @@ public partial class ManagerView : UserControl
         {
             _isSyncingExternalScrollBar = false;
         }
+    }
+
+    private ScrollViewer? GetActiveScrollViewer()
+    {
+        if (WidgetContent.Visibility == Visibility.Visible)
+        {
+            return WidgetListScrollViewer;
+        }
+
+        return LogsContent.Visibility == Visibility.Visible
+            ? LogsContent.ContentScrollViewer
+            : null;
     }
 
     private enum ManagerContent
