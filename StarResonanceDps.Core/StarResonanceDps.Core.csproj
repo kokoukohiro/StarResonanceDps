@@ -17,18 +17,22 @@
     <EmbeddedResource Include="Data\SceneTable.json" />
     <EmbeddedResource Include="Data\DungeonsTable.json" />
   </ItemGroup>
-
   <ItemGroup>
-    <Compile Remove="Protocols\Game\GameCombatPacketParser.cs" />
-    <Compile Remove="Protocols\Game\GameDirtyPacketParser.cs" />
-    <Compile Remove="Protocols\Game\GameDungeonContextReader.cs" />
-    <Compile Remove="Protocols\Game\GamePlayerRoster.cs" />
-    <Compile Remove="Protocols\Game\GameWireReader.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Google.Protobuf" Version="3.33.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.9" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Extensions.ObjectPool" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="PacketDotNet" Version="1.4.9-pre49" />
+    <PackageReference Include="protobuf-net" Version="3.2.56" />
+    <PackageReference Include="protobuf-net.Core" Version="3.3.0-g6785ecbb35" />
+    <PackageReference Include="Serilog" Version="4.3.1-dev-02387" />
+    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="SharpPcap" Version="6.3.1" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.0" />
+    <PackageReference Include="ZLinq" Version="1.5.4" />
     <PackageReference Include="ZstdSharp.Port" Version="0.8.6" />
   </ItemGroup>
 

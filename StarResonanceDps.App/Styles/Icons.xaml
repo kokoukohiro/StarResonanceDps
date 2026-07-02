@@ -1,15 +1,12 @@
-﻿<ResourceDictionary
+<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Common icon size -->
     <sys:Double x:Key="Icon.Size">18</sys:Double>
 
-    <!-- Common stroke width for stroke-based icons -->
     <sys:Double x:Key="Icon.StrokeThickness">1.7</sys:Double>
 
-    <!-- Profession image icons -->
     <sys:Double x:Key="Icon.Profession.Size">20</sys:Double>
 
     <BitmapImage x:Key="Icon.Profession.ShieldKnight" UriSource="/Assets/Images/profession_horizontal_hud01.png" />
@@ -25,7 +22,6 @@
     <BitmapImage x:Key="Icon.Profession.Enemy" UriSource="/Assets/Images/com_icon_tab_90.png" />
     <BitmapImage x:Key="Icon.Profession.Unknown" UriSource="/Assets/Images/com_icon_question.png" />
 
-    <!-- PNG profession icons are alpha masks, colored by the current text theme. -->
     <Style x:Key="Icon.ProfessionMask" TargetType="{x:Type Rectangle}">
         <Setter Property="Width" Value="{DynamicResource Icon.Profession.Size}" />
         <Setter Property="Height" Value="{DynamicResource Icon.Profession.Size}" />
@@ -131,7 +127,6 @@
         </Setter>
     </Style>
 
-    <!-- Fill-based icon style -->
     <Style x:Key="Icon.Fill" TargetType="{x:Type Path}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Width" Value="{DynamicResource Icon.Size}" />
@@ -142,19 +137,16 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
-    <!-- Start icon style -->
     <Style x:Key="Icon.StartFill" TargetType="{x:Type Path}" BasedOn="{StaticResource Icon.Fill}">
         <Setter Property="Width" Value="13.5" />
         <Setter Property="Height" Value="13.5" />
     </Style>
 
-    <!-- Stop icon style -->
     <Style x:Key="Icon.StopFill" TargetType="{x:Type Path}" BasedOn="{StaticResource Icon.Fill}">
         <Setter Property="Width" Value="12" />
         <Setter Property="Height" Value="12" />
     </Style>
 
-    <!-- Stroke-based icon style -->
     <Style x:Key="Icon.Stroke" TargetType="{x:Type Path}">
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="Width" Value="{DynamicResource Icon.Size}" />
@@ -170,7 +162,6 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
-    <!-- Widget / 2x2 grid -->
     <Geometry x:Key="Icon.Widget">
         F0 M4.5 3H9.5A1.5 1.5 0 0 1 11 4.5V9.5A1.5 1.5 0 0 1 9.5 11H4.5A1.5 1.5 0 0 1 3 9.5V4.5A1.5 1.5 0 0 1 4.5 3Z
         M4.6 4.6H9.4V9.4H4.6Z
@@ -185,12 +176,10 @@
         M14.6 14.6H19.4V19.4H14.6Z
     </Geometry>
 
-    <!-- Plugin / puzzle -->
     <Geometry x:Key="Icon.Plugin">
         M4 7h3a1 1 0 0 0 1-1V5a2 2 0 0 1 4 0v1a1 1 0 0 0 1 1h3a1 1 0 0 1 1 1v3a1 1 0 0 0 1 1h1a2 2 0 0 1 0 4h-1a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-1a2 2 0 0 0-4 0v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a2 2 0 0 0 0-4H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1
     </Geometry>
 
-    <!-- Log / document -->
     <Geometry x:Key="Icon.Log">
         M5 1.5H15A1.6 1.6 0 0 1 17 3.1V16.9A1.6 1.6 0 0 1 15.4 18.5H4.6A1.6 1.6 0 0 1 3 16.9V3.1A1.6 1.6 0 0 1 4.6 1.5Z
         M7.1 6H12.9
@@ -198,33 +187,27 @@
         M7.1 14H10
     </Geometry>
 
-    <!-- Help -->
     <Geometry x:Key="Icon.Help">
         M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2m0 2a8 8 0 1 0 0 16a8 8 0 0 0 0-16m0 12a1 1 0 1 1 0 2a1 1 0 0 1 0-2m0-9.5a3.625 3.625 0 0 1 1.348 6.99a.8.8 0 0 0-.305.201c-.044.05-.051.114-.05.18L13 14a1 1 0 0 1-1.993.117L11 14v-.25c0-1.153.93-1.845 1.604-2.116a1.626 1.626 0 1 0-2.229-1.509a1 1 0 1 1-2 0A3.625 3.625 0 0 1 12 6.5
     </Geometry>
 
-    <!-- Copy -->
     <Geometry x:Key="Icon.Copy">
         M7 9.667A2.667 2.667 0 0 1 9.667 7h8.666A2.667 2.667 0 0 1 21 9.667v8.666A2.667 2.667 0 0 1 18.333 21H9.667A2.667 2.667 0 0 1 7 18.333z
         M4.012 16.737A2 2 0 0 1 3 15V5c0-1.1.9-2 2-2h10c.75 0 1.158.385 1.5 1
     </Geometry>
 
-    <!-- Settings -->
     <Geometry x:Key="Icon.Settings">
         M7.199 2H8.8a.2.2 0 0 1 .2.2c0 1.808 1.958 2.939 3.524 2.034a.2.2 0 0 1 .271.073l.802 1.388a.2.2 0 0 1-.073.272c-1.566.904-1.566 3.164 0 4.069a.2.2 0 0 1 .073.271l-.802 1.388a.2.2 0 0 1-.271.073C10.958 10.863 9 11.993 9 13.8a.2.2 0 0 1-.199.2H7.2a.2.2 0 0 1-.2-.2c0-1.808-1.958-2.938-3.524-2.034a.2.2 0 0 1-.272-.073l-.8-1.388a.2.2 0 0 1 .072-.271c1.566-.905 1.566-3.165 0-4.07a.2.2 0 0 1-.073-.27l.801-1.389a.2.2 0 0 1 .272-.072C5.042 5.138 7 4.007 7 2.199c0-.11.089-.199.199-.199M5.5 2.2c0-.94.76-1.7 1.699-1.7H8.8c.94 0 1.7.76 1.7 1.7a.85.85 0 0 0 1.274.735a1.7 1.7 0 0 1 2.32.622l.802 1.388c.469.813.19 1.851-.622 2.32a.85.85 0 0 0 0 1.472a1.7 1.7 0 0 1 .622 2.32l-.802 1.388a1.7 1.7 0 0 1-2.32.622a.85.85 0 0 0-1.274.735c0 .939-.76 1.7-1.699 1.7H7.2a1.7 1.7 0 0 1-1.699-1.7a.85.85 0 0 0-1.274-.735a1.7 1.7 0 0 1-2.32-.622l-.802-1.388a1.7 1.7 0 0 1 .622-2.32a.85.85 0 0 0 0-1.471a1.7 1.7 0 0 1-.622-2.32l.801-1.389a1.7 1.7 0 0 1 2.32-.622A.85.85 0 0 0 5.5 2.2m4 5.8a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0M11 8a3 3 0 1 1-6 0a3 3 0 0 1 6 0
     </Geometry>
 
-    <!-- Favorite -->
     <Geometry x:Key="Icon.Favorite">
         M9.153 5.408C10.42 3.136 11.053 2 12 2s1.58 1.136 2.847 3.408l.328.588c.36.646.54.969.82 1.182s.63.292 1.33.45l.636.144c2.46.557 3.689.835 3.982 1.776c.292.94-.546 1.921-2.223 3.882l-.434.507c-.476.557-.715.836-.822 1.18c-.107.345-.071.717.001 1.46l.066.677c.253 2.617.38 3.925-.386 4.506s-1.918.051-4.22-1.009l-.597-.274c-.654-.302-.981-.452-1.328-.452s-.674.15-1.328.452l-.596.274c-2.303 1.06-3.455 1.59-4.22 1.01c-.767-.582-.64-1.89-.387-4.507l.066-.676c.072-.744.108-1.116 0-1.46c-.106-.345-.345-.624-.821-1.18l-.434-.508c-1.677-1.96-2.515-2.941-2.223-3.882S3.58 8.328 6.04 7.772l.636-.144c.699-.158 1.048-.237 1.329-.45s.46-.536.82-1.182z
     </Geometry>
 
-    <!-- Favorite / filled -->
     <Geometry x:Key="Icon.Favorite.Filled">
         M9.153 5.408C10.42 3.136 11.053 2 12 2s1.58 1.136 2.847 3.408l.328.588c.36.646.54.969.82 1.182s.63.292 1.33.45l.636.144c2.46.557 3.689.835 3.982 1.776c.292.94-.546 1.921-2.223 3.882l-.434.507c-.476.557-.715.836-.822 1.18c-.107.345-.071.717.001 1.46l.066.677c.253 2.617.38 3.925-.386 4.506s-1.918.051-4.22-1.009l-.597-.274c-.654-.302-.981-.452-1.328-.452s-.674.15-1.328.452l-.596.274c-2.303 1.06-3.455 1.59-4.22 1.01c-.767-.582-.64-1.89-.387-4.507l.066-.676c.072-.744.108-1.116 0-1.46c-.106-.345-.345-.624-.821-1.18l-.434-.508c-1.677-1.96-2.515-2.941-2.223-3.882S3.58 8.328 6.04 7.772l.636-.144c.699-.158 1.048-.237 1.329-.45s.46-.536.82-1.182z
     </Geometry>
 
-    <!-- Pin / outline / E864 from old iconfont.ttf -->
     <GeometryGroup x:Key="Icon.Pin.Unfixed" FillRule="EvenOdd">
         <GeometryGroup.Transform>
             <ScaleTransform ScaleY="-1" CenterY="386" />
@@ -234,7 +217,6 @@
         M620 698L585 618L431 463L259 450L563 147L575 314L731 471L811 506Z" />
     </GeometryGroup>
 
-    <!-- Pin / filled / E863 from old iconfont.ttf -->
     <GeometryGroup x:Key="Icon.Pin.Fixed" FillRule="EvenOdd">
         <GeometryGroup.Transform>
             <ScaleTransform ScaleY="-1" CenterY="386" />
@@ -243,65 +225,53 @@
         M649 765Q662 760 671 750L863 558Q876 545 881 528Q886 511 883 493Q880 475 868.5 461Q857 447 841 439L773 409L646 282L636 142Q634 120 621 103Q608 86 588 78.5Q568 71 547 75.5Q526 80 511 95L387 219L176 7L125 59L335 271L208 399Q192 414 187.5 435Q183 456 190.5 476Q198 496 215 509Q232 522 254 523L398 534L523 659L553 727Q565 755 593 766Q621 777 649 765Z" />
     </GeometryGroup>
 
-    <!-- Stop -->
     <Geometry x:Key="Icon.Stop">
         M6.2 5H13.8A1.2 1.2 0 0 1 15 6.2V13.8A1.2 1.2 0 0 1 13.8 15H6.2A1.2 1.2 0 0 1 5 13.8V6.2A1.2 1.2 0 0 1 6.2 5Z
     </Geometry>
 
-    <!-- Start -->
     <Geometry x:Key="Icon.Start">
         M6 4.7c0-.95 1.04-1.53 1.85-1.03l8.1 5.02c.76.47.76 1.57 0 2.04l-8.1 5.02C7.04 16.25 6 15.67 6 14.72z
     </Geometry>
 
-    <!-- Search -->
     <Geometry x:Key="Icon.Search">
         M21 21L16.657 16.657
         M16.657 16.657A8 8 0 1 0 5.343 5.343A8 8 0 0 0 16.657 16.657
     </Geometry>
 
-    <!-- Filter -->
     <Geometry x:Key="Icon.Filter">
         M4 3H20A1 1 0 0 1 21 4V5.586A1 1 0 0 1 20.707 6.293L14.293 12.707A1 1 0 0 0 14 13.414V19.719A1 1 0 0 1 12.757 20.689L10.757 20.189A1 1 0 0 1 10 19.219V13.414A1 1 0 0 0 9.707 12.707L3.293 6.293A1 1 0 0 1 3 5.586V4A1 1 0 0 1 4 3
     </Geometry>
 
-    <!-- Sort -->
     <Geometry x:Key="Icon.Sort">
         M5 7H18
         M5 12.1H14
         M5 17.2H10
     </Geometry>
 
-    <!-- Add -->
     <Geometry x:Key="Icon.Add">
         M12 5V19
         M5 12H19
     </Geometry>
 
-    <!-- Chevron down -->
     <Geometry x:Key="Icon.ChevronDown">
         M6 9L12 15L18 9
     </Geometry>
 
-    <!-- Chevron right -->
     <Geometry x:Key="Icon.ChevronRight">
         M9 6L15 12L9 18
     </Geometry>
-    
-    <!-- More vertical / kebab menu -->
+
     <Geometry x:Key="Icon.MoreVertical">
         M12 4A1 1 0 1 1 12 6A1 1 0 1 1 12 4
         M12 11A1 1 0 1 1 12 13A1 1 0 1 1 12 11
         M12 18A1 1 0 1 1 12 20A1 1 0 1 1 12 18
     </Geometry>
 
-
-    <!-- Window -->
     <Geometry x:Key="Icon.Window">
         M5 5H18A1 1 0 0 1 19 6V18A1 1 0 0 1 18 19H5A1 1 0 0 1 4 18V6A1 1 0 0 1 5 5Z
         M4 9H19
     </Geometry>
 
-    <!-- Theme / palette -->
     <GeometryGroup x:Key="Icon.Theme" FillRule="Nonzero">
         <Geometry>
             M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5c0 .12.05.23.13.33c.41.47.64 1.06.64 1.67A2.5 2.5 0 0 1 12 22m0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65a2.5 2.5 0 0 1 2.5-2.5H16c2.21 0 4-1.79 4-4c0-3.86-3.59-7-8-7
@@ -313,12 +283,10 @@
         <EllipseGeometry Center="17.5,11.5" RadiusX="1.5" RadiusY="1.5" />
     </GeometryGroup>
 
-    <!-- Update / refresh -->
     <Geometry x:Key="Icon.Update">
         M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4
     </Geometry>
 
-    <!-- Sliders -->
     <Geometry x:Key="Icon.Sliders">
         M7.5 5a1.5 1.5 0 1 1-3 0a1.5 1.5 0 0 1 3 0m1.405.75a3.001 3.001 0 0 1-5.81 0H1.747a.75.75 0 0 1 0-1.5h1.348a3.001 3.001 0 0 1 5.81 0h5.345a.75.75 0 0 1 0 1.5zm-7.158 4.5h5.345a3.001 3.001 0 0 1 5.811 0h1.347a.75.75 0 1 1 0 1.5h-1.347a3.001 3.001 0 0 1-5.81 0H1.746a.75.75 0 0 1 0-1.5m8.25-.75a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3
     </Geometry>

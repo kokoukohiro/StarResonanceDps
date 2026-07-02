@@ -14,7 +14,7 @@ public sealed class WidgetConfig
 {
     public bool IsFavorite { get; set; }
     public bool IsPinned { get; set; }
-    // Null is kept only for legacy documents that did not save the widget start state.
+
     public WidgetState? State { get; set; }
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
@@ -162,9 +162,6 @@ public static class WidgetConfigDefaults
         ["Unknown"] = ["#A8A8A8", "#707070"]
     };
 
-    // Version 1 values shipped as the initial widgetstate.json palette.  Keep this
-    // separately so migration only replaces the known defaults and never overwrites
-    // user-created colors.
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         "#2297F4",

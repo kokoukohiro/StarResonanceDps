@@ -24,7 +24,7 @@ internal static class KeybindCatalog
     public const uint ActionStateHelper2 = 0x00000001u;
 
     public const string HelperNoneLabel = "——";
-    public const string ButtonLayoutFileName = "bpsr_key_config.json";
+    public const string ButtonLayoutFileName = "keybind_config.json";
 
     public static readonly IReadOnlyList<string> ControllerTypes =
         new[] { "PlayStation", "Nintendo", "Xbox" };
@@ -775,7 +775,6 @@ internal static class KeybindCatalog
         return $"{prefix}:{key}";
     }
 
-
     public static string GetActionLocalizationKey(IKeybindActionDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
@@ -787,7 +786,6 @@ internal static class KeybindCatalog
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
         return $"Keybind.Action.{group}.{key}";
     }
-
 
     public static string GetControllerInputStorageKey(uint value)
     {

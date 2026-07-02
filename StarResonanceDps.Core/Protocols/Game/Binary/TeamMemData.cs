@@ -49,7 +49,6 @@ public class TeamMemData : BlobType
                 SceneId = blob.ReadInt();
                 return true;
             case Zproto.TeamMemData.VoiceIsOpenFieldNumber:
-                // TODO: Implement blob.ReadBool();
                 return false;
             case Zproto.TeamMemData.GroupIdFieldNumber:
                 GroupId = blob.ReadInt();

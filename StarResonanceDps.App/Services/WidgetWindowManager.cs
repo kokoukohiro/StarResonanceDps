@@ -109,8 +109,6 @@ public sealed class WidgetWindowManager
 
         _isManagerClosing = true;
 
-        // Widgets are intentionally no longer owned by the manager so the manager can be
-        // activated above every unpinned widget. Close them explicitly when the manager exits.
         foreach (var window in _openWindows.Values.ToArray())
         {
             window.Close();
@@ -127,8 +125,6 @@ public sealed class WidgetWindowManager
         window.Closed -= WidgetWindow_Closed;
         _openWindows.Remove(window.Widget.Kind);
 
-        // Closing the manager also closes its owned widget windows. Keep their saved
-        // running state so the same windows are restored on the next app launch.
         if (!_isManagerClosing && window.Widget.State == WidgetState.Running)
         {
             window.Widget.State = WidgetState.Stopped;

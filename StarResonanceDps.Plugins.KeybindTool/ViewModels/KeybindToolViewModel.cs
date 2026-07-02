@@ -19,9 +19,10 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private readonly IPluginContext _context;
     private readonly PluginLocalizer _texts;
-    private readonly BpsrKeybindSaveService _saveService;
+    private readonly KeybindSaveService _saveService;
     private readonly string _layoutFilePath;
     private readonly IReadOnlyList<string> _legacyLayoutFilePaths;
+    private readonly IReadOnlyList<string> _legacyLayoutSearchDirectories;
     private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsById;
     private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsById;
     private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByStorageKey = new(StringComparer.Ordinal);
@@ -60,16 +61,14 @@ internal sealed class KeybindToolViewModel : ObservableObject
             typeof(KeybindToolViewModel).Assembly,
             "StarResonanceDps.Plugins.KeybindTool.Properties.Resources");
         _texts.CultureChanged += Texts_CultureChanged;
-        _saveService = new BpsrKeybindSaveService(_texts);
+        _saveService = new KeybindSaveService(_texts);
 
-        // The plugin owns its preset filename.
-        // The host settings store fixes the actual location under runtime\\Plugins.
         _layoutFilePath = _context.Settings.GetFilePath(KeybindCatalog.ButtonLayoutFileName);
         _legacyLayoutFilePaths = new[]
         {
-            // Previous storage location: the executable directory.
+
             Path.Combine(AppContext.BaseDirectory, KeybindCatalog.ButtonLayoutFileName),
-            // Previous plugin-data location: Data\\PluginData\\{PluginId}.
+
             Path.Combine(
                 AppContext.BaseDirectory,
                 "Data",
@@ -77,6 +76,15 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 _context.PluginId,
                 KeybindCatalog.ButtonLayoutFileName)
         };
+        _legacyLayoutSearchDirectories = new[]
+        {
+            Path.GetDirectoryName(_layoutFilePath) ?? string.Empty,
+            AppContext.BaseDirectory,
+            Path.Combine(AppContext.BaseDirectory, "Data", "PluginData", _context.PluginId)
+        }
+        .Where(Directory.Exists)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
 
         ControllerMainActions = CreateControllerRows(KeybindModeGroup.Main);
         ControllerQuickWheelActions = CreateControllerRows(KeybindModeGroup.QuickWheel);
@@ -481,8 +489,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception)
         {
-            // At startup, restore the input-selection values and independent-mode flags as a convenience.
-            // A malformed layout is reported explicitly through the normal load command.
+
         }
     }
 
@@ -1384,7 +1391,48 @@ internal sealed class KeybindToolViewModel : ObservableObject
             return _layoutFilePath;
         }
 
-        return _legacyLayoutFilePaths.FirstOrDefault(File.Exists);
+        var knownLegacyPath = _legacyLayoutFilePaths.FirstOrDefault(File.Exists);
+        return knownLegacyPath ?? FindMatchingStoredLayoutFile();
+    }
+
+    private string? FindMatchingStoredLayoutFile()
+    {
+        var candidates = _legacyLayoutSearchDirectories
+            .SelectMany(directory => Directory.EnumerateFiles(directory, "*.json", SearchOption.TopDirectoryOnly))
+            .Where(path => !PathsEqual(path, _layoutFilePath))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Where(IsStoredLayoutFile)
+            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return candidates.Length == 1 ? candidates[0] : null;
+    }
+
+    private static bool IsStoredLayoutFile(string filePath)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(File.ReadAllText(filePath));
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            return document.RootElement.TryGetProperty("controller_profile", out _)
+                && document.RootElement.TryGetProperty("keymouse_profile", out _);
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
     }
 
     private KeybindLayoutConfig ReadLayoutFile(string filePath)
@@ -1399,10 +1447,16 @@ internal sealed class KeybindToolViewModel : ObservableObject
             ?? throw new InvalidDataException(Texts["Keybind.Error.InvalidLayoutFile"]);
     }
 
-
     private void RemoveLegacyLayoutFiles()
     {
-        foreach (var legacyPath in _legacyLayoutFilePaths)
+        var legacyPaths = _legacyLayoutFilePaths
+            .Append(FindMatchingStoredLayoutFile())
+            .Where(path => !string.IsNullOrWhiteSpace(path))
+            .Where(path => !PathsEqual(path!, _layoutFilePath))
+            .Select(path => path!)
+            .Distinct(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var legacyPath in legacyPaths)
         {
             try
             {
@@ -1413,7 +1467,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             }
             catch (Exception exception)
             {
-                _context.Logger.Warning($"Failed to remove a previous key settings preset. {exception.Message}");
+                _context.Logger.Warning($"Failed to remove a prior key settings preset. {exception.Message}");
             }
         }
     }
@@ -1898,8 +1952,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
             var controllerProfile = NormalizeControllerLayoutProfile(_controllerProfileCache);
             var keyMouseProfile = NormalizeKeyMouseLayoutProfile(_keyMouseProfileCache);
 
-            // Persist the complete selected configuration first. If one or more byte targets
-            // are not yet generated by the game, the user can still restore the selection later.
             SaveLayoutFile(controllerProfile, keyMouseProfile);
 
             var writeTargetValidation = _saveService.ValidateWriteTargets(_session);

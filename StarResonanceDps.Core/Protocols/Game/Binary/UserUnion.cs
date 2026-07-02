@@ -15,7 +15,6 @@ public class UserUnion : BlobType
     public List<long>? CollectedIds;
     public long? ActiveAwardResetTime;
     public List<int>? ReceivedAwardIds;
-    //...
 
     public UserUnion()
     {

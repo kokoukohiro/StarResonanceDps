@@ -17,13 +17,12 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary
         public uint? LevelReviveId;
         public Dictionary<uint, uint>? RecordId;
         public uint? PlaneId;
-        public bool? CanSwitchLayer; // Unsupported
+        public bool? CanSwitchLayer;
         public Position? BeforeFallPos;
-        public string SceneGUID; // Unsupported
-        public string DungeonGUID; // Unsupported
+        public string SceneGUID;
+        public string DungeonGUID;
         public uint? LineId;
         public uint? VisualLayerConfigId;
-        //public SceneData? LastSceneData; // Unsupported (unsure if this is safe to do currently)
         public int? SceneAreaId;
         public int? LevelAreaId;
         public int? BeforeFallSceneAreaId;
@@ -60,7 +59,6 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary
                     PlaneId = blob.ReadUInt();
                     return true;
                 case Zproto.SceneData.CanSwitchLayerFieldNumber:
-                    // TODO: Implement blob.ReadBool()
                     return false;
                 case Zproto.SceneData.BeforeFallPosFieldNumber:
                     BeforeFallPos = new(blob);

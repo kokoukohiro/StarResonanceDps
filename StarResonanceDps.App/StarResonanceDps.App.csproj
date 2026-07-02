@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -94,7 +94,6 @@
     <ProjectReference Include="..\StarResonanceDps.Core\StarResonanceDps.Core.csproj" />
     <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" />
 
-    <!-- Build the bundled development plugins without linking their implementations into the host. -->
     <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
@@ -124,11 +123,6 @@
     </None>
   </ItemGroup>
 
-  <!--
-    Keep the editable ResX sources while embedding every localized binary .resources set
-    into the main application assembly. WithCulture=false prevents satellite assemblies
-    and their ja-JP / ko-KR / zh-CN output directories from being generated.
-  -->
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <WithCulture>false</WithCulture>
@@ -219,7 +213,6 @@
     <Resource Include="Assets\Images\trialroad_icon_survival.png" />
   </ItemGroup>
 
-  <!-- Remove stale satellite outputs from builds made before localized ResX resources were embedded. -->
   <Target Name="RemoveObsoleteLocalizationSatelliteOutputs" AfterTargets="Build">
     <ItemGroup>
       <_LegacyLocalizationSatelliteAssemblies Include="$(OutDir)ja-JP\$(AssemblyName).resources.dll;$(OutDir)ko-KR\$(AssemblyName).resources.dll;$(OutDir)zh-CN\$(AssemblyName).resources.dll" />
@@ -233,18 +226,13 @@
     <RemoveDir Directories="$(OutDir)ko-KR" Condition="'@(_OtherKoreanCultureFiles)' == ''" />
     <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
   </Target>
-  <!--
-    Bundled plugins follow the same direct-DLL layout as external plugins.
-    Plugin metadata is embedded in each DLL, so plugin.json and per-plugin
-    package directories are not part of the runtime format.
-  -->
+
   <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
     <PropertyGroup>
       <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(TargetFramework)\KeybindTool.dll</KeybindPluginAssembly>
       <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(TargetFramework)\ModuleTool.dll</ModulePluginAssembly>
     </PropertyGroup>
 
-    <!-- Remove output from the previous package/manifest-based layout. -->
     <RemoveDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
     <Delete Files="$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
@@ -253,5 +241,11 @@
     <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
+  <ItemGroup>
+    <None Include="..\StarResonanceDps.Core\Data\CombatRuntime\**\*.json">
+      <Link>Data\CombatRuntime\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>

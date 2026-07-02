@@ -18,7 +18,6 @@ public class CharBaseInfo : BlobType
     public float? Y;
     public float? Z;
     public float? Dir;
-    // FaceData
     public uint? CardId;
     public long? CreateTime;
     public long? OnlineTime;
@@ -29,7 +28,6 @@ public class CharBaseInfo : BlobType
     public Zproto.EBodySize? BodySize;
     public UserUnion? UnionInfo;
     public List<int>? PersonalState;
-    // AvatarInfo
     public ulong? TotalOnlineTime;
     public string? OpenId;
     public int? SDKType;
@@ -44,7 +42,6 @@ public class CharBaseInfo : BlobType
     public long? LastOfflineTime;
     public int? DayAccDurTime;
     public long? LastAccDurTimestamp;
-    //public long? SaveSerial; // Removed
     public long? LastOnlineTime;
 
     public CharBaseInfo()
@@ -78,13 +75,10 @@ public class CharBaseInfo : BlobType
                 Gender = (Zproto.EGender)blob.ReadInt();
                 return true;
             case Zproto.CharBaseInfo.IsDeletedFieldNumber:
-                // TODO: Implement blob.ReadBool();
                 return false;
             case Zproto.CharBaseInfo.IsForbidFieldNumber:
-                // TODO: Implement blob.ReadBool();
                 return false;
             case Zproto.CharBaseInfo.IsMuteFieldNumber:
-                // TODO: Implement blob.ReadBool();
                 return false;
             case Zproto.CharBaseInfo.XFieldNumber:
                 X = blob.ReadFloat();
@@ -99,7 +93,6 @@ public class CharBaseInfo : BlobType
                 Dir = blob.ReadFloat();
                 return true;
             case Zproto.CharBaseInfo.FaceDataFieldNumber:
-                // TODO: Implement FaceData
                 return false;
             case Zproto.CharBaseInfo.CardIdFieldNumber:
                 CardId = blob.ReadUInt();
@@ -132,7 +125,6 @@ public class CharBaseInfo : BlobType
                 PersonalState = blob.ReadList<int>();
                 return true;
             case Zproto.CharBaseInfo.AvatarInfoFieldNumber:
-                // TODO: Implement AvatarInfo
                 return false;
             case Zproto.CharBaseInfo.TotalOnlineTimeFieldNumber:
                 TotalOnlineTime = blob.ReadULong();

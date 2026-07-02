@@ -10,11 +10,8 @@ public class ProfessionList : BlobType
 {
     public int? CurProfessionId;
     public List<int>? CurAssistProfessions;
-    // ProfessionInfo
-    // AoyiSkillInfoMap
     public uint? TotalTalentPoints;
     public uint? TotalTalentResetCount;
-    // TalentList
 
     public ProfessionList()
     {

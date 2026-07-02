@@ -45,7 +45,6 @@ public class CharTeam : BlobType
                 CharIds = blob.ReadList<long>();
                 return true;
             case Zproto.CharTeam.IsMatchingFieldNumber:
-                // TODO: Implement blob.ReadBool();
                 return false;
             case Zproto.CharTeam.CharTeamVersionFieldNumber:
                 CharTeamVersion = blob.ReadInt();

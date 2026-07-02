@@ -13,9 +13,10 @@ public sealed record PacketDiagnosticLogEntry(
     DateTimeOffset Timestamp,
     PacketDiagnosticLogLevel Level,
     string Source,
-    string Message)
+    string Message,
+    string? DisplayTextOverride = null)
 {
-    public string DisplayText => $"{Timestamp:HH:mm:ss.fff} [{GetLevelText(Level)}] [{Source}] {Message}";
+    public string DisplayText => DisplayTextOverride ?? $"{Timestamp:HH:mm:ss.fff} [{GetLevelText(Level)}] [{Source}] {Message}";
 
     private static string GetLevelText(PacketDiagnosticLogLevel level)
     {
@@ -98,6 +99,19 @@ public sealed class PacketDiagnosticLogStore
         Write(PacketDiagnosticLogLevel.Error, source, message, exception);
     }
 
+    public void AppendDisplayText(string displayText)
+    {
+        ArgumentNullException.ThrowIfNull(displayText);
+
+        var normalizedDisplayText = displayText.TrimEnd('\r', '\n');
+        Enqueue(new PacketDiagnosticLogEntry(
+            DateTimeOffset.Now,
+            PacketDiagnosticLogLevel.Information,
+            string.Empty,
+            string.Empty,
+            normalizedDisplayText));
+    }
+
     private void Write(
         PacketDiagnosticLogLevel level,
         string source,
@@ -111,6 +125,15 @@ public sealed class PacketDiagnosticLogStore
             resolvedMessage = $"{resolvedMessage}{Environment.NewLine}{exception}";
         }
 
+        Enqueue(new PacketDiagnosticLogEntry(
+            DateTimeOffset.Now,
+            level,
+            resolvedSource,
+            resolvedMessage));
+    }
+
+    private void Enqueue(PacketDiagnosticLogEntry entry)
+    {
         lock (_sync)
         {
             while (_entries.Count >= MaximumEntryCount)
@@ -118,11 +141,7 @@ public sealed class PacketDiagnosticLogStore
                 _entries.Dequeue();
             }
 
-            _entries.Enqueue(new PacketDiagnosticLogEntry(
-                DateTimeOffset.Now,
-                level,
-                resolvedSource,
-                resolvedMessage));
+            _entries.Enqueue(entry);
         }
 
         EntriesChanged?.Invoke(this, EventArgs.Empty);

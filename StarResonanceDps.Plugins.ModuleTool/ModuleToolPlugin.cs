@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
@@ -41,9 +41,7 @@ public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOption
             throw new InvalidOperationException("The plugin has not been initialized.");
         }
 
-        // The shared PluginWindow owns all chrome. Feature-specific UI will be
-        // developed inside this DLL in later work.
-        return new Grid();
+                return new Grid();
     }
 
     public void Shutdown()

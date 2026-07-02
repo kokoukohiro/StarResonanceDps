@@ -41,7 +41,6 @@ public class BlobType
         var index = blob.ReadInt();
         while (0 < index)
         {
-            //Debug.WriteLine($"Parsing field {index} at {blob.Offset}");
             if (!ParseField(index, ref blob))
             {
                 blob.Offset = offset + size;
@@ -61,17 +60,4 @@ public class BlobType
         return false;
     }
 
-    /*private string GetFieldPath(int index)
-    {
-        var lastParent = Parent;
-        List<string> parts = [];
-        do {
-            parts.Add(lastParent?.DebugName ?? $"{index}");
-            lastParent = lastParent.Parent;
-        } while (lastParent != null);
-
-        parts.Reverse();
-        var path = string.Join(".", parts);
-        return path;
-    }*/
 }

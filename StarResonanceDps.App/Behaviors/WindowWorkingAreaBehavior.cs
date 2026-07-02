@@ -6,11 +6,6 @@ using System.Windows.Media;
 
 namespace StarResonanceDps.App.Behaviors;
 
-/// <summary>
-/// Makes a borderless WPF window maximize into the current monitor work area.
-/// The calculation also accounts for an optional outer visual margin, so a window
-/// can keep a normal-state shadow without leaving a visible gap while maximized.
-/// </summary>
 public static class WindowWorkingAreaBehavior
 {
     private const int WmGetMinMaxInfo = 0x0024;
@@ -168,9 +163,6 @@ public static class WindowWorkingAreaBehavior
             return;
         }
 
-        // This mirrors the old project behaviour: any normal-state visual margin is
-        // moved outside the work area while maximized, keeping the content flush with
-        // the work area instead of leaving a transparent border around the window.
         var outerMargin = GetOuterWindowMargin(window);
         var leftMargin = ToDevicePixels(outerMargin.Left, transform.M11);
         var topMargin = ToDevicePixels(outerMargin.Top, transform.M22);

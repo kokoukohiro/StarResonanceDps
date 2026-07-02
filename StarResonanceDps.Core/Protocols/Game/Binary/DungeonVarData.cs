@@ -8,7 +8,6 @@ public class DungeonVarData : BlobType
     public string Name = "";
     public int Value;
 
-
     public DungeonVarData()
     {
     }
@@ -24,15 +23,11 @@ public class DungeonVarData : BlobType
             case Zproto.DungeonVarData.NameFieldNumber:
                 Name = blob.ReadString();
 
-                //System.Diagnostics.Debug.WriteLine($"DungeonVarData.Name={name}");
                 return true;
             case Zproto.DungeonVarData.ValueFieldNumber:
-                //int value = blob.ReadInt();
-                //kvp[lastName] = value;
 
                 Value = blob.ReadInt();
 
-                //System.Diagnostics.Debug.WriteLine($"DungeonVarData.Value={value}");
                 return true;
             default:
                 return false;

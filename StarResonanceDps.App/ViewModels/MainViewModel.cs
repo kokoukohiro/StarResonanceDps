@@ -68,6 +68,7 @@ public sealed partial class MainViewModel : ViewModelBase
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+
         _playerRosterStore.RosterChanged += PlayerRosterStore_RosterChanged;
         var roster = _playerRosterStore.Current;
         UpdatePlayerList(roster.Entries, roster.MapName);
@@ -112,8 +113,6 @@ public sealed partial class MainViewModel : ViewModelBase
             var persistedConfig = _widgetStateManager.GetWidgetSnapshot(kind);
             widget.ApplyWidgetConfig(persistedConfig);
 
-            // Existing widgetstate documents did not contain State. Persist the
-            // stopped initial state without changing any explicitly saved state.
             if (persistedConfig.State is null)
             {
                 _widgetStateManager.SaveWidgetState(kind, widget.State);
@@ -129,6 +128,17 @@ public sealed partial class MainViewModel : ViewModelBase
         return widget;
     }
 
+    private void PlayerListWidget_PlayerDetailRequested(long characterId)
+    {
+        if (_playerDetailWidget is null)
+        {
+            return;
+        }
+
+        _playerDetailWidget.SelectPlayer(characterId);
+        _playerDetailWidget.State = WidgetState.Running;
+    }
+
     private void PlayerRosterStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
     {
         if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
@@ -140,21 +150,10 @@ public sealed partial class MainViewModel : ViewModelBase
         UpdatePlayerList(e.Snapshot, e.MapName);
     }
 
-    private void UpdatePlayerList(IReadOnlyList<PlayerRosterEntry> snapshot, string mapName)
+    private void UpdatePlayerList(IReadOnlyList<PlayerRosterEntry> roster, string mapName)
     {
-        _playerListWidget?.UpdatePlayerRoster(snapshot, mapName);
-        _playerDetailWidget?.UpdatePlayerRoster(snapshot, mapName);
-    }
-
-    private void PlayerListWidget_PlayerDetailRequested(long characterId)
-    {
-        if (_playerDetailWidget is null)
-        {
-            return;
-        }
-
-        _playerDetailWidget.SelectPlayer(characterId);
-        _playerDetailWidget.State = WidgetState.Running;
+        _playerListWidget?.UpdatePlayerRoster(roster, mapName);
+        _playerDetailWidget?.UpdatePlayerRoster(roster, mapName);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
