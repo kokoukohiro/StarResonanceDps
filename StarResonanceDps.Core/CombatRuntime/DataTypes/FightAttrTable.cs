@@ -14,9 +14,9 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     public class FightAttr
     {
         public int Id { get; set; }
-        public string EnumName { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public string EnumName { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Type { get; set; } = null!;
         public bool IsClass { get; set; }
         public bool IsSyncMe { get; set; }
         public bool IsSyncAoi { get; set; }
@@ -30,14 +30,14 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int AttrPer { get; set; }
         public int AttrExPer { get; set; }
         public int AttrNumType { get; set; }
-        public string OfficialName { get; set; }
-        public string TipTemplate { get; set; }
-        public string AttrDes { get; set; }
+        public string OfficialName { get; set; } = null!;
+        public string TipTemplate { get; set; } = null!;
+        public string AttrDes { get; set; } = null!;
         public int BuffShowAttrHUD { get; set; }
 
-        public string Icon { get; set; }
+        public string Icon { get; set; } = null!;
         public int BaseAttr;
-        public List<int> RecomProfessionId { get; set; }
+        public List<int> RecomProfessionId { get; set; } = null!;
         public bool IsAssess { get; set; }
     }
 }

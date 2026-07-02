@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace StarResonanceDps.Core.CombatRuntime
 {
-    public class ThreadSafeOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue>
+    public class ThreadSafeOrderedDictionary<TKey, TValue> : IDictionary<TKey, TValue> where TKey : notnull
     {
         private readonly OrderedDictionary _innerDictionary;
         private readonly ReaderWriterLockSlim _readerWriterLock;
@@ -76,10 +76,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (_innerDictionary.Contains(key))
                 {
-                    value = (TValue)_innerDictionary[key];
+                    value = (TValue)_innerDictionary[key]!;
                     return true;
                 }
-                value = default(TValue);
+                value = default!;
                 return false;
             }
             finally
@@ -95,7 +95,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    return (TValue)_innerDictionary[key];
+                    return (TValue)_innerDictionary[key]!;
                 }
                 finally
                 {
@@ -123,7 +123,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 _readerWriterLock.EnterReadLock();
                 try
                 {
-                    return (TValue)_innerDictionary[key];
+                    return (TValue)_innerDictionary[key]!;
                 }
                 finally
                 {
@@ -193,7 +193,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     var values = new List<TValue>();
                     foreach (DictionaryEntry entry in _innerDictionary)
                     {
-                        values.Add((TValue)entry.Value);
+                        values.Add((TValue)entry.Value!);
                     }
                     return values;
                 }
@@ -213,7 +213,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var list = new List<KeyValuePair<TKey, TValue>>();
                 foreach (DictionaryEntry entry in _innerDictionary)
                 {
-                    list.Add(new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value));
+                    list.Add(new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value!));
                 }
                 return list.GetEnumerator();
             }
@@ -277,7 +277,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 int i = arrayIndex;
                 foreach (DictionaryEntry entry in _innerDictionary)
                 {
-                    array[i++] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value);
+                    array[i++] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value!);
                 }
             }
             finally

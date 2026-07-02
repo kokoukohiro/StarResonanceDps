@@ -16,9 +16,9 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int Id { get; set; }
         public int PerfectLibId { get; set; }
         public int PartLevel { get; set; }
-        public List<int> PerfectPart { get; set; }
-        public List<List<int>> Probability { get; set; }
+        public List<int> PerfectPart { get; set; } = null!;
+        public List<List<int>> Probability { get; set; } = null!;
         public int MinimumGuarantee { get; set; }
-        public List<int> PerfectType { get; set; }
+        public List<int> PerfectType { get; set; } = null!;
     }
 }

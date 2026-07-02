@@ -10,14 +10,14 @@ public class BasicData : BlobType
 {
     public long? CharId;
     public long? ShowId;
-    public string Name;
+    public string Name = null!;
     public int? Gender;
     public Zproto.EBodySize? BodySize;
     public int? Level;
     public int? SceneId;
     public List<int>? PersonalState;
     public long? OfflineTime;
-    public string SceneGuid;
+    public string SceneGuid = null!;
     public long? CreateTime;
     public uint? CurTalentPoolId;
     public uint? BotAiId;

@@ -17,8 +17,7 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
         public static string GetLocalizedOld(string key, bool KeyIfEmptyValue = false)
         {
-            Strings.TryGetValue(key, out var value);
-            if (value.TryGetValue(CurrentLocale, out var localizedString))
+            if (Strings.TryGetValue(key, out var value) && value.TryGetValue(CurrentLocale, out var localizedString))
             {
                 return localizedString;
             }

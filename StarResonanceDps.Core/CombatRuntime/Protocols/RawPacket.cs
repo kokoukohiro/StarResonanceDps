@@ -4,7 +4,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Protocols;
 
 public class RawPacket
 {
-    public byte[] Data { get; set; }
+    public byte[] Data { get; set; } = null!;
     public int Len { get; set; }
     public DateTime LastPacketTime { get; set; } = DateTime.MinValue;
 

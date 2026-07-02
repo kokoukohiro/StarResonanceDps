@@ -78,6 +78,6 @@ public class Utils
     public class ProcessCacheEntry
     {
         public int ProcessId;
-        public string ProcessName;
+        public string ProcessName = null!;
     }
 }

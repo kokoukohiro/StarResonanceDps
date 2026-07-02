@@ -8,7 +8,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class DungeonAffixData : BlobType
 {
-    public List<uint> AffixData;
+    public List<uint> AffixData = null!;
 
     public DungeonAffixData()
     {

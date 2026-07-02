@@ -14,11 +14,11 @@ namespace StarResonanceDps.Core.CombatRuntime
     {
         public static long PlayerUUID { get; set; }
         public static long PlayerUID { get; set; }
-        public static string AccountId { get; set; }
-        public static string PlayerName { get; set; }
+        public static string AccountId { get; set; } = null!;
+        public static string PlayerName { get; set; } = null!;
         public static int ProfessionId { get; set; }
-        public static string ProfessionName { get; set; }
-        public static string SubProfessionName { get; set; }
+        public static string ProfessionName { get; set; } = null!;
+        public static string SubProfessionName { get; set; } = null!;
 
         public static int PlayerMeterPlacement { get; set; }
 
@@ -53,7 +53,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string appStringsFile = Path.Combine(Utils.DATA_DIR_NAME, "AppStrings.json");
             if (File.Exists(appStringsFile))
             {
-                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(appStringsFile));
+                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(appStringsFile))!;
                 AppStrings.Strings = appStrings.ToFrozenDictionary();
                 Log.Information("Loaded AppStrings.json");
             }
@@ -63,7 +63,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string monsterTableFile = Path.Combine(Utils.DATA_DIR_NAME, "MonsterTable.json");
             if (File.Exists(monsterTableFile))
             {
-                var monsters = JsonConvert.DeserializeObject<Dictionary<string, Monster>>(File.ReadAllText(monsterTableFile));
+                var monsters = JsonConvert.DeserializeObject<Dictionary<string, Monster>>(File.ReadAllText(monsterTableFile))!;
                 HelperMethods.DataTables.Monsters.Data = monsters;
                 Log.Information("Loaded MonsterTable.json");
             }
@@ -71,7 +71,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string skillTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillTable.json");
             if (File.Exists(skillTableFile))
             {
-                var skills = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillTableFile));
+                var skills = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillTableFile))!;
                 HelperMethods.DataTables.Skills.Data = skills;
                 Log.Information("Loaded SkillTable.json");
                 foreach (var skill in HelperMethods.DataTables.Skills.Data)
@@ -91,7 +91,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string modTableFile = Path.Combine(Utils.DATA_DIR_NAME, "ModTable.json");
             if (File.Exists(modTableFile))
             {
-                var modules = JsonConvert.DeserializeObject<Dictionary<int, ModuleData>>(File.ReadAllText(modTableFile));
+                var modules = JsonConvert.DeserializeObject<Dictionary<int, ModuleData>>(File.ReadAllText(modTableFile))!;
                 HelperMethods.DataTables.Modules.Data = modules;
                 Log.Information("Loaded ModTable.json");
             }
@@ -99,7 +99,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string modEffectTableFile = Path.Combine(Utils.DATA_DIR_NAME, "ModEffectTable.json");
             if (File.Exists(modEffectTableFile))
             {
-                var modEffects = JsonConvert.DeserializeObject<Dictionary<int, EffectData>>(File.ReadAllText(modEffectTableFile));
+                var modEffects = JsonConvert.DeserializeObject<Dictionary<int, EffectData>>(File.ReadAllText(modEffectTableFile))!;
                 HelperMethods.DataTables.ModEffects.Data = modEffects;
                 Log.Information("Loaded ModEffectTable.json");
             }
@@ -107,7 +107,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string ModLinkEffectsFile = Path.Combine(Utils.DATA_DIR_NAME, "ModLinkEffectTable.json");
             if (File.Exists(modEffectTableFile))
             {
-                var modLinkEffects = JsonConvert.DeserializeObject<Dictionary<int, ModLinkEffect>>(File.ReadAllText(ModLinkEffectsFile));
+                var modLinkEffects = JsonConvert.DeserializeObject<Dictionary<int, ModLinkEffect>>(File.ReadAllText(ModLinkEffectsFile))!;
                 HelperMethods.DataTables.ModLinkEffects.Data = modLinkEffects;
                 Log.Information("Loaded ModLinkEffectTable.json");
             }
@@ -117,7 +117,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string skillFightLevelTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillFightLevelTable.json");
             if (File.Exists(skillTableFile))
             {
-                var skillFightLevels = JsonConvert.DeserializeObject<Dictionary<string, SkillFightLevel>>(File.ReadAllText(skillFightLevelTableFile));
+                var skillFightLevels = JsonConvert.DeserializeObject<Dictionary<string, SkillFightLevel>>(File.ReadAllText(skillFightLevelTableFile))!;
                 HelperMethods.DataTables.SkillFightLevels.Data = skillFightLevels;
                 Log.Information("Loaded SkillFightLevelTable.json");
             }
@@ -125,7 +125,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string targetTableFile = Path.Combine(Utils.DATA_DIR_NAME, "TargetTable.json");
             if (File.Exists(targetTableFile))
             {
-                var targets = JsonConvert.DeserializeObject<Dictionary<string, Target>>(File.ReadAllText(targetTableFile));
+                var targets = JsonConvert.DeserializeObject<Dictionary<string, Target>>(File.ReadAllText(targetTableFile))!;
                 HelperMethods.DataTables.Targets.Data = targets;
                 Log.Information("Loaded TargetTable.json");
             }
@@ -133,7 +133,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string sceneTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SceneTable.json");
             if (File.Exists(sceneTableFile))
             {
-                var scenes = JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(sceneTableFile));
+                var scenes = JsonConvert.DeserializeObject<Dictionary<string, Scene>>(File.ReadAllText(sceneTableFile))!;
                 HelperMethods.DataTables.Scenes.Data = scenes;
                 Log.Information("Loaded SceneTable.json");
             }
@@ -141,7 +141,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string dungeonsTableFile = Path.Combine(Utils.DATA_DIR_NAME, "DungeonsTable.json");
             if (File.Exists(dungeonsTableFile))
             {
-                var dungeons = JsonConvert.DeserializeObject<Dictionary<string, Dungeons>>(File.ReadAllText(dungeonsTableFile));
+                var dungeons = JsonConvert.DeserializeObject<Dictionary<string, Dungeons>>(File.ReadAllText(dungeonsTableFile))!;
                 HelperMethods.DataTables.Dungeons.Data = dungeons;
                 Log.Information("Loaded DungeonsTable.json");
             }
@@ -149,7 +149,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string buffTableFile = Path.Combine(Utils.DATA_DIR_NAME, "BuffTable.json");
             if (File.Exists(buffTableFile))
             {
-                var buffs = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffTableFile));
+                var buffs = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffTableFile))!;
                 HelperMethods.DataTables.Buffs.Data = buffs;
                 Log.Information("Loaded BuffTable.json");
                 foreach (var buff in HelperMethods.DataTables.Buffs.Data)
@@ -171,7 +171,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string sceneEventDungeonConfigTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SceneEventDuneonConfigTable.json");
             if (File.Exists(sceneEventDungeonConfigTableFile))
             {
-                var sceneEventDungeonConfigs = JsonConvert.DeserializeObject<Dictionary<string, SceneEventDungeonConfig>>(File.ReadAllText(sceneEventDungeonConfigTableFile));
+                var sceneEventDungeonConfigs = JsonConvert.DeserializeObject<Dictionary<string, SceneEventDungeonConfig>>(File.ReadAllText(sceneEventDungeonConfigTableFile))!;
                 HelperMethods.DataTables.SceneEventDungeonConfigs.Data = sceneEventDungeonConfigs;
                 Log.Information("Loaded SceneEventDuneonConfigTable.json");
             }
@@ -179,7 +179,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string fightAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, "FightAttrTable.json");
             if (File.Exists(fightAttrTableFile))
             {
-                var fightAttrs = JsonConvert.DeserializeObject<Dictionary<string, FightAttr>>(File.ReadAllText(fightAttrTableFile));
+                var fightAttrs = JsonConvert.DeserializeObject<Dictionary<string, FightAttr>>(File.ReadAllText(fightAttrTableFile))!;
                 HelperMethods.DataTables.FightAttrs.Data = fightAttrs;
                 Log.Information("Loaded FightAttrTable.json");
             }
@@ -187,7 +187,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string itemTableFile = Path.Combine(Utils.DATA_DIR_NAME, "ItemTable.json");
             if (File.Exists(itemTableFile))
             {
-                var items = JsonConvert.DeserializeObject<Dictionary<string, Item>>(File.ReadAllText(itemTableFile));
+                var items = JsonConvert.DeserializeObject<Dictionary<string, Item>>(File.ReadAllText(itemTableFile))!;
                 HelperMethods.DataTables.Items.Data = items;
                 Log.Information("Loaded ItemTable.json");
             }
@@ -195,7 +195,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipTable.json");
             if (File.Exists(equipTableFile))
             {
-                var equips = JsonConvert.DeserializeObject<Dictionary<string, Equip>>(File.ReadAllText(equipTableFile));
+                var equips = JsonConvert.DeserializeObject<Dictionary<string, Equip>>(File.ReadAllText(equipTableFile))!;
                 HelperMethods.DataTables.Equips.Data = equips;
                 Log.Information("Loaded EquipTable.json");
             }
@@ -203,7 +203,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipAttrLibTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipAttrLibTable.json");
             if (File.Exists(equipAttrLibTableFile))
             {
-                var equipAttrLibs = JsonConvert.DeserializeObject<Dictionary<string, EquipAttrLib>>(File.ReadAllText(equipAttrLibTableFile));
+                var equipAttrLibs = JsonConvert.DeserializeObject<Dictionary<string, EquipAttrLib>>(File.ReadAllText(equipAttrLibTableFile))!;
                 HelperMethods.DataTables.EquipAttrLibs.Data = equipAttrLibs;
                 Log.Information("Loaded EquipAttrLibTable.json");
             }
@@ -211,7 +211,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipAttrSchoolLibTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipAttrSchoolLibTable.json");
             if (File.Exists(equipAttrSchoolLibTableFile))
             {
-                var equipAttrSchoolLib = JsonConvert.DeserializeObject<Dictionary<string, EquipAttrSchoolLib>>(File.ReadAllText(equipAttrSchoolLibTableFile));
+                var equipAttrSchoolLib = JsonConvert.DeserializeObject<Dictionary<string, EquipAttrSchoolLib>>(File.ReadAllText(equipAttrSchoolLibTableFile))!;
                 HelperMethods.DataTables.EquipAttrSchoolLibs.Data = equipAttrSchoolLib;
                 Log.Information("Loaded EquipAttrSchoolLibTable.json");
             }
@@ -219,7 +219,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipEnchantTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipEnchantTable.json");
             if (File.Exists(equipEnchantTableFile))
             {
-                var equipEnchants = JsonConvert.DeserializeObject<Dictionary<string, EquipEnchant>>(File.ReadAllText(equipEnchantTableFile));
+                var equipEnchants = JsonConvert.DeserializeObject<Dictionary<string, EquipEnchant>>(File.ReadAllText(equipEnchantTableFile))!;
                 HelperMethods.DataTables.EquipEnchants.Data = equipEnchants;
                 Log.Information("Loaded EquipEnchantTable.json");
             }
@@ -227,7 +227,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipPerfectLibTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipPerfectLibTable.json");
             if (File.Exists(equipPerfectLibTableFile))
             {
-                var equipPerfectLibs = JsonConvert.DeserializeObject<Dictionary<string, EquipPerfectLib>>(File.ReadAllText(equipPerfectLibTableFile));
+                var equipPerfectLibs = JsonConvert.DeserializeObject<Dictionary<string, EquipPerfectLib>>(File.ReadAllText(equipPerfectLibTableFile))!;
                 HelperMethods.DataTables.EquipPerfectLibs.Data = equipPerfectLibs;
                 Log.Information("Loaded EquipPerfectLibTable.json");
             }
@@ -235,7 +235,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string equipBreakThroughTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipBreakThroughTable.json");
             if (File.Exists(equipBreakThroughTableFile))
             {
-                var equipBreakThroughs = JsonConvert.DeserializeObject<Dictionary<string, EquipBreakThrough>>(File.ReadAllText(equipBreakThroughTableFile));
+                var equipBreakThroughs = JsonConvert.DeserializeObject<Dictionary<string, EquipBreakThrough>>(File.ReadAllText(equipBreakThroughTableFile))!;
                 HelperMethods.DataTables.EquipBreakThroughs.Data = equipBreakThroughs;
                 Log.Information("Loaded EquipBreakThroughTable.json");
             }
@@ -243,7 +243,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string dbmTableFile = Path.Combine(Utils.DATA_DIR_NAME, "DbmTable.json");
             if (File.Exists(dbmTableFile))
             {
-                var dbms = JsonConvert.DeserializeObject<Dictionary<string, Dbm>>(File.ReadAllText(dbmTableFile));
+                var dbms = JsonConvert.DeserializeObject<Dictionary<string, Dbm>>(File.ReadAllText(dbmTableFile))!;
                 HelperMethods.DataTables.Dbms.Data = dbms;
                 Log.Information("Loaded DbmTable.json");
             }
@@ -251,7 +251,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string tempAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, "TempAttrTable.json");
             if (File.Exists(tempAttrTableFile))
             {
-                var tempAttrs = JsonConvert.DeserializeObject<Dictionary<string, TempAttr>>(File.ReadAllText(tempAttrTableFile));
+                var tempAttrs = JsonConvert.DeserializeObject<Dictionary<string, TempAttr>>(File.ReadAllText(tempAttrTableFile))!;
                 HelperMethods.DataTables.TempAttrs.Data = tempAttrs;
                 Log.Information("Loaded TempAttrTable.json");
             }
@@ -259,7 +259,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string AttrDescriptionFile = Path.Combine(Utils.DATA_DIR_NAME, "AttrDescription.json");
             if (File.Exists(AttrDescriptionFile))
             {
-                var attrDescriptions = JsonConvert.DeserializeObject<Dictionary<string, AttrDescription>>(File.ReadAllText(AttrDescriptionFile));
+                var attrDescriptions = JsonConvert.DeserializeObject<Dictionary<string, AttrDescription>>(File.ReadAllText(AttrDescriptionFile))!;
                 HelperMethods.DataTables.AttrDescriptions.Data = attrDescriptions;
                 Log.Information("Loaded AttrDescription.json");
             }
@@ -267,7 +267,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string DummyTableFile = Path.Combine(Utils.DATA_DIR_NAME, "DummyTable.json");
             if (File.Exists(DummyTableFile))
             {
-                var dummys = JsonConvert.DeserializeObject<Dictionary<string, Dummy>>(File.ReadAllText(DummyTableFile));
+                var dummys = JsonConvert.DeserializeObject<Dictionary<string, Dummy>>(File.ReadAllText(DummyTableFile))!;
                 HelperMethods.DataTables.Dummys.Data = dummys;
                 Log.Information("Loaded DummyTable.json");
             }
@@ -275,7 +275,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string dummyOverridesFile = Path.Combine(Utils.DATA_DIR_NAME, "DummyOverrides.en.json");
             if (File.Exists(dummyOverridesFile))
             {
-                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Dummy>>(File.ReadAllText(dummyOverridesFile));
+                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Dummy>>(File.ReadAllText(dummyOverridesFile))!;
                 foreach (var item in overrides)
                 {
                     if (HelperMethods.DataTables.Dummys.Data.TryGetValue(item.Key, out var dummy))
@@ -302,7 +302,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string appStringsExFile = Path.Combine(Utils.DATA_DIR_NAME, "AppStrings.en.json");
             if (File.Exists(appStringsExFile))
             {
-                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsExFile));
+                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsExFile))!;
                 AppStrings.Locs = appStrings.ToFrozenDictionary();
                 Log.Information("Loaded AppStrings.en.json");
             }
@@ -312,7 +312,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 string appStringsLocFile = Path.Combine(Utils.DATA_DIR_NAME, $"AppStrings.{Settings.Instance.Language}.json");
                 if (File.Exists(appStringsLocFile))
                 {
-                    var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsLocFile));
+                    var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsLocFile))!;
                     Dictionary<string, string> combinedLocs = AppStrings.Locs.ToDictionary();
                     foreach (var loc in appStrings)
                     {
@@ -349,7 +349,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string skillOverridesFile = Path.Combine(Utils.DATA_DIR_NAME, fileName);
             if (File.Exists(skillOverridesFile))
             {
-                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillOverridesFile));
+                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillOverridesFile))!;
                 foreach (var item in overrides)
                 {
                     if (HelperMethods.DataTables.Skills.Data.TryGetValue(item.Key, out var skill))
@@ -423,7 +423,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string buffOverridesFile = Path.Combine(Utils.DATA_DIR_NAME, fileName);
             if (File.Exists(buffOverridesFile))
             {
-                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffOverridesFile));
+                var overrides = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffOverridesFile))!;
                 foreach (var item in overrides)
                 {
                     if (HelperMethods.DataTables.Buffs.Data.TryGetValue(item.Key, out var buff))

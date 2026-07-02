@@ -19,8 +19,8 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary
         public uint? PlaneId;
         public bool? CanSwitchLayer;
         public Position? BeforeFallPos;
-        public string SceneGUID;
-        public string DungeonGUID;
+        public string SceneGUID = null!;
+        public string DungeonGUID = null!;
         public uint? LineId;
         public uint? VisualLayerConfigId;
         public int? SceneAreaId;

@@ -15,7 +15,7 @@ public class CharTeam : BlobType
     public List<long>? CharIds;
     public bool? IsMatching;
     public int? CharTeamVersion;
-    public Dictionary<long, TeamMemData> TeamMemberData;
+    public Dictionary<long, TeamMemData> TeamMemberData = null!;
 
     public CharTeam()
     {

@@ -10,7 +10,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Database
             return objectType.Equals(typeof(Dictionary<string, object>));
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             var jo = JObject.Load(reader);
             var result = new Dictionary<string, object>();
@@ -36,19 +36,19 @@ namespace StarResonanceDps.Core.CombatRuntime.Database
                         JTokenType.Boolean => (bool)prop.Value,
                         JTokenType.String => (string)prop.Value,
                         JTokenType.Null => null,
-                        _ => prop.Value.ToObject<object>()
+                        _ => prop.Value.ToObject<object>()!
                     };
 
-                    result[prop.Name] = value;
+                    result[prop.Name] = value!;
                 }
             }
 
             return result;
         }
 
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
-            writer.WriteValue((int)value);
+            writer.WriteValue((int)value!);
         }
     }
 }

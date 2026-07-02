@@ -4,7 +4,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class BlobType
 {
-    public virtual string DebugName => null;
+    public virtual string? DebugName => null;
 
     public BlobType()
     {

@@ -10,7 +10,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Protocols
         public ushort DstPort = dstPort;
 
         public IPEndPoint SrcEp => IPEndPoint.Parse($"{SrcIP}:{SrcPort}");
-        public IPEndPoint DestEp => IPEndPoint.Parse($"{DstIP}:{dstPort}");
+        public IPEndPoint DestEp => IPEndPoint.Parse($"{DstIP}:{DstPort}");
 
         public string GetId()
         {

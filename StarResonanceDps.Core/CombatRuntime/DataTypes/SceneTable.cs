@@ -14,40 +14,40 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
     public class Scene
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
+        public string Id { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public int SceneType { get; set; }
         public int SceneSubType { get; set; }
         public int ParentId { get; set; }
         public bool IsShereParentSceneData { get; set; }
         public int SceneResourceId { get; set; }
-        public List<string> SceneUI { get; set; }
+        public List<string> SceneUI { get; set; } = null!;
         public Vector2 MapSize { get; set; }
         public Vector2  MapOffset { get; set; }
-        public List<List<int>> MapEntryCondition { get; set; }
-        public List<string> AudioBank { get; set; }
+        public List<List<int>> MapEntryCondition { get; set; } = null!;
+        public List<string> AudioBank { get; set; } = null!;
         public int BornId { get; set; }
-        public List<int> ReviveTableId { get; set; }
-        public List<string> BGM { get; set; }
-        public string LoadingBGM { get; set; }
+        public List<int> ReviveTableId { get; set; } = null!;
+        public List<string> BGM { get; set; } = null!;
+        public string LoadingBGM { get; set; } = null!;
         public float FallDis { get; set; }
         public int Weather { get; set; }
         public int DayAndNight { get; set; }
         public int CutsceneId { get; set; }
         public int MainUI { get; set; }
         public bool CanChangeLayer { get; set; }
-        public List<int> PreloadCutscenes { get; set; }
-        public List<int> PreloadEPFlows { get; set; }
+        public List<int> PreloadCutscenes { get; set; } = null!;
+        public List<int> PreloadEPFlows { get; set; } = null!;
         public int EPFlowId { get; set; }
         public int ShowMiniMap { get; set; }
         public int MiniMapRatio { get; set; }
-        public List<int> SubScene { get; set; }
-        public string AmbEvent { get; set; }
-        public string ReverEvent { get; set; }
+        public List<int> SubScene { get; set; } = null!;
+        public string AmbEvent { get; set; } = null!;
+        public string ReverEvent { get; set; } = null!;
         public int DefaultSceneArea { get; set; }
         public int MoveSyncConfigId { get; set; }
         public bool HaveWater { get; set; }
-        public List<string> FootstepFxOverride { get; set; }
+        public List<string> FootstepFxOverride { get; set; } = null!;
 
     }
 }

@@ -8,7 +8,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class DungeonPlayerList : BlobType
 {
-    public Dictionary<uint, DungeonPlayerInfo> PlayerInfos;
+    public Dictionary<uint, DungeonPlayerInfo> PlayerInfos = null!;
 
     public DungeonPlayerList()
     {

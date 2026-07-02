@@ -4,7 +4,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class DungeonVar : BlobType
 {
-    public List<DungeonVarData> Data;
+    public List<DungeonVarData> Data = null!;
 
     public DungeonVar()
     {

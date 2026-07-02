@@ -7,7 +7,7 @@ public class NotifyId(ulong serviceId, uint methoidId)
 
     public override bool Equals(object? obj)
     {
-        return ServiceId == ((NotifyId)obj).ServiceId && MethodId == ((NotifyId)obj).MethodId;
+        return obj is NotifyId other && ServiceId == other.ServiceId && MethodId == other.MethodId;
     }
 
     public override int GetHashCode()

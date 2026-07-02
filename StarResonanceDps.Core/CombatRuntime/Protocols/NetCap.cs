@@ -14,14 +14,14 @@ namespace StarResonanceDps.Core.CombatRuntime.Protocols;
 
 public class NetCap
 {
-    private NetCapConfig Config;
-    public ICaptureDevice CaptureDevice;
-    public TcpReassembler TcpReassempler;
+    private NetCapConfig Config = null!;
+    public ICaptureDevice CaptureDevice = null!;
+    public TcpReassembler TcpReassempler = null!;
 
     private CancellationTokenSource CancelTokenSrc = new();
     public ObjectPool<RawPacket> RawPacketPool = ObjectPool.Create(new DefaultPooledObjectPolicy<RawPacket>());
     public ConcurrentQueue<RawPacket> RawPacketQueue = new();
-    private Task PacketParseTask;
+    private Task PacketParseTask = null!;
     private byte[] DecompressionScratchBuffer = new byte[1024 * 1024];
     private Decompressor _decompressor = new();
     private Dictionary<NotifyId, Action<ReadOnlySpan<byte>, ExtraPacketData>> NotifyHandlers = new();

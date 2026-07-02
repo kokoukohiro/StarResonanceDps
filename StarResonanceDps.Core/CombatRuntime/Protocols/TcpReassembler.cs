@@ -13,7 +13,7 @@ public class TcpReassembler
     public static ILogger Log = Serilog.Log.ForContext<TcpReassembler>();
 
     public static TimeSpan ConnectionCleanUpInterval = TimeSpan.FromSeconds(60);
-    public Action<TcpConnection> OnNewConnection;
+    public Action<TcpConnection>? OnNewConnection;
     public ConcurrentDictionary<IPEndPoint, TcpConnection> Connections = new();
     public DateTime LastConnectionCleanUpTime = DateTime.Now;
 
@@ -195,10 +195,11 @@ public class TcpReassembler
                 consumedSomething = false;
 
                 var packetsToRemove = new List<uint>();
+                var expectedSeq = NextExpectedSeq!.Value;
 
-                if (Packets.TryGetValue(NextExpectedSeq.Value, out var exactFrag))
+                if (Packets.TryGetValue(expectedSeq, out var exactFrag))
                 {
-                    Packets.Remove(NextExpectedSeq.Value);
+                    Packets.Remove(expectedSeq);
                     PushPacketSegment(exactFrag);
                     consumedSomething = true;
                     continue;
@@ -206,10 +207,10 @@ public class TcpReassembler
 
                 foreach (var packet in Packets)
                 {
-                    if (SeqLt(packet.Value.SequenceNumber, NextExpectedSeq.Value) &&
-                        SeqGt(packet.Value.SequenceNumber + (uint)packet.Value.PayloadData.Length, NextExpectedSeq.Value))
+                    if (SeqLt(packet.Value.SequenceNumber, expectedSeq) &&
+                        SeqGt(packet.Value.SequenceNumber + (uint)packet.Value.PayloadData.Length, expectedSeq))
                     {
-                        uint skip = NextExpectedSeq.Value - packet.Value.SequenceNumber;
+                        uint skip = expectedSeq - packet.Value.SequenceNumber;
 
                         var data = packet.Value.PayloadData[(int)skip..];
                         LastPacketTime = packet.Value.ArriveTime;

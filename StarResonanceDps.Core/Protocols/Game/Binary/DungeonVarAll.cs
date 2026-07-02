@@ -33,7 +33,7 @@ public class DungeonVarAll : BlobType
     public static implicit operator Zproto.DungeonVarAll(DungeonVarAll dungeonVarAll)
     {
         var varAll = new Zproto.DungeonVarAll();
-        foreach (var item in dungeonVarAll.DungeonVarAllMap)
+        foreach (var item in dungeonVarAll.DungeonVarAllMap!)
         {
             varAll.DungeonVarAllMap.Add(item.Key, item.Value);
         }

@@ -84,11 +84,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                             if (Equals(args.ErrorContext.Member, "Lines"))
                             {
                                 Serilog.Log.Error($"Ignoring error deserializing EntityCache:\n{args.ErrorContext.Error.Message}");
-                                erroredState = (EntityCacheFile)args.CurrentObject;
+                                erroredState = (EntityCacheFile)args.CurrentObject!;
                             }
                             args.ErrorContext.Handled = true;
                         };
-                        Cache = (EntityCacheFile)serializer.Deserialize(file, typeof(EntityCacheFile));
+                        Cache = (EntityCacheFile)serializer.Deserialize(file, typeof(EntityCacheFile))!;
 
                         if (erroredState != null)
                         {

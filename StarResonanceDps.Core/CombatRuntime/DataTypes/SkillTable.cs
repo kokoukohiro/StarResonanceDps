@@ -14,12 +14,12 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     public class Skill
     {
         public int Id { get; set; }
-        public string NameDesign { get; set; }
-        public string Desc { get; set; }
-        public string Name { get; set; }
+        public string NameDesign { get; set; } = null!;
+        public string Desc { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public int SkillLevelGroup { get; set; }
-        public List<int> SkillPreloadGroup { get; set; }
-        public List<int> EffectIDs { get; set; }
+        public List<int> SkillPreloadGroup { get; set; } = null!;
+        public List<int> EffectIDs { get; set; } = null!;
         public int SkillType { get; set; }
         public int SlotPassiveType { get; set; }
         public bool FaceTarget { get; set; }
@@ -32,7 +32,7 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int SkillDamType { get; set; }
         public int SwitchSkillId { get; set; }
         public bool IsAoe { get; set; }
-        public string Icon { get; set; }
+        public string Icon { get; set; } = null!;
         public int NextSkillId { get; set; }
         public int SlotType { get; set; }
         public bool LongPressOpen { get; set; }
@@ -53,10 +53,10 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public bool WeaponReturn { get; set; }
         public float SkillRootShift { get; set; }
         public int CoolTimeType { get; set; }
-        public List<int> NecessaryParts { get; set; }
-        public List<int> ExcludeParts { get; set; }
-        public List<string> SkillAreaArray { get; set; }
-        public List<List<float>> SwitchSkillInfo { get; set; }
+        public List<int> NecessaryParts { get; set; } = null!;
+        public List<int> ExcludeParts { get; set; } = null!;
+        public List<string> SkillAreaArray { get; set; } = null!;
+        public List<List<float>> SwitchSkillInfo { get; set; } = null!;
         public int EnergyChargeTime { get; set; }
         public int MaxEnergyChargeNum { get; set; }
         public float ContinuesSkillDelayTime { get; set; }
@@ -68,7 +68,7 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public bool IsDangerSkill { get; set; }
         public bool IsPassiveDesc { get; set; }
         public bool IsSearchEnemie { get; set; }
-        public string SearchEnemieFilterName { get; set; }
+        public string SearchEnemieFilterName { get; set; } = null!;
         public bool ExtendedSightRange { get; set; }
         public bool DontPlaySelectTargetEffect { get; set; }
         public bool RockerDir { get; set; }
@@ -76,22 +76,22 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public bool IsHideReplaceEffect { get; set; }
         public bool ChangeWpInSkill { get; set; }
         public bool IsTanlentContinuedBegin { get; set; }
-        public List<float> UIWarningParam { get; set; }
+        public List<float> UIWarningParam { get; set; } = null!;
         public bool InheritMotionSpeed { get; set; }
-        public List<int> SlotPositionId { get; set; }
-        public List<List<int>> UnlockCondition { get; set; }
-        public string SkillTalk { get; set; }
+        public List<int> SlotPositionId { get; set; } = null!;
+        public List<List<int>> UnlockCondition { get; set; } = null!;
+        public string SkillTalk { get; set; } = null!;
         public float SkillTalkTime { get; set; }
         public int SkillLabel { get; set; }
         public bool DeathToward { get; set; }
-        public List<List<float>> SingOrGuideTime { get; set; }
+        public List<List<float>> SingOrGuideTime { get; set; } = null!;
         public int VehicleSkillType { get; set; }
         public bool SyncStageFlag { get; set; }
         public bool NotInterruptDashing { get; set; }
         public int PCBgColour { get; set; }
         public float CancelLockDis { get; set; }
         public bool IsInheritMoveSpeed { get; set; }
-        public List<float> IndicatorParam { get; set; }
+        public List<float> IndicatorParam { get; set; } = null!;
         public bool CheckGB { get; set; }
         public int SkillLogicCheck { get; set; }
         public bool IsIgnoreDel { get; set; }

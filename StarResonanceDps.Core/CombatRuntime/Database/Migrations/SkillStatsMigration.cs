@@ -31,7 +31,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
 
                     try
                     {
-                        var fullEncounter = DB.LoadEncounter(encounter.EncounterId);
+                        var fullEncounter = DB.LoadEncounter(encounter.EncounterId)!;
                         foreach (var entity in fullEncounter.Entities.Values)
                         {
                             foreach (var skillStat in entity.SkillStats)
@@ -96,9 +96,9 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
                                         new Zproto.Vec3(),
                                         null,
                                         null,
-                                        new StarResonanceDps.Core.CombatRuntime.Protocols.ExtraPacketData(snapshot.Timestamp.Value),
+                                        new StarResonanceDps.Core.CombatRuntime.Protocols.ExtraPacketData(snapshot.Timestamp!.Value),
                                         0.0,
-                                        snapshot.Timestamp.Value);
+                                        snapshot.Timestamp!.Value);
 
                                     entity.SkillMetrics[skillStat.Key] = metrics;
                                 }

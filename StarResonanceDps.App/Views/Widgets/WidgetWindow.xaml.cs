@@ -41,7 +41,7 @@ public partial class WidgetWindow : Window
 
         // Widgets are top-level windows so the manager can be activated above every
         // unpinned widget. Pinned widgets still use Topmost through ApplyPinState.
-        RestoreBounds(savedBounds, owner, widget.OriginalIndex);
+        ApplySavedBounds(savedBounds, owner, widget.OriginalIndex);
         ApplyPinState(widget.IsPinned);
 
         _saveBoundsTimer = new DispatcherTimer
@@ -297,7 +297,7 @@ public partial class WidgetWindow : Window
             ActualHeight);
     }
 
-    private void RestoreBounds(WidgetWindowConfig savedBounds, Window? owner, int originalIndex)
+    private void ApplySavedBounds(WidgetWindowConfig savedBounds, Window? owner, int originalIndex)
     {
         if (IsFinitePositive(savedBounds.Width) && IsFinitePositive(savedBounds.Height))
         {

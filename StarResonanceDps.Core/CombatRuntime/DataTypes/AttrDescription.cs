@@ -9,8 +9,8 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
     public class AttrDescription
     {
-        public string Id { get; set; }
-        public string Description { get; set; }
+        public string Id { get; set; } = null!;
+        public string Description { get; set; } = null!;
 
         public string DescriptionDecisionResolve(List<int> Decisions, out List<int> DecisionFormats)
         {

@@ -257,7 +257,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 DeferredEncounterEndFinalTime = null;
 
-                EncounterManager.SignalEncounterEndFinal(DeferredEncounterEndFinalData);
+                EncounterManager.SignalEncounterEndFinal(DeferredEncounterEndFinalData!);
 
             }
         }

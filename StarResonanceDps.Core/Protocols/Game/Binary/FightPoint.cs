@@ -9,7 +9,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 public class FightPoint : BlobType
 {
     public int? TotalFightPoint;
-    public Dictionary<int, FightPointData> FightPointData;
+    public Dictionary<int, FightPointData> FightPointData = null!;
 
     public FightPoint()
     {

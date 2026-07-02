@@ -2,7 +2,7 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class DungeonTarget : BlobType
 {
-    public Dictionary<int, DungeonTargetData> TargetData;
+    public Dictionary<int, DungeonTargetData> TargetData = null!;
 
     public DungeonTarget()
     {

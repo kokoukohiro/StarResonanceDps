@@ -4,7 +4,7 @@ namespace StarResonanceDps.Core.CombatRuntime
     {
         public int BattleId { get; set; }
         public uint SceneId { get; set; }
-        public string SceneName { get; set; }
+        public string SceneName { get; set; } = null!;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public TimeSpan Duration => EndTime - StartTime;

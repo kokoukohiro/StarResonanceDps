@@ -19,21 +19,21 @@ namespace StarResonanceDps.Core.CombatRuntime
     {
         public static int SelectedEncounter = -1;
 
-        public static Encounter? Current = null;
+        public static Encounter Current = null!;
 
         public static int CurrentBattleId = 0;
         public static uint LevelMapId { get; private set; }
         public static bool AllowSceneUpdate = true;
 
-        public static string SceneName { get; private set; }
+        public static string SceneName { get; private set; } = null!;
         public delegate void BattleStartEventHandler(EventArgs e);
-        public static event BattleStartEventHandler BattleStart;
+        public static event BattleStartEventHandler? BattleStart;
         public delegate void EncounterStartEventHandler(EncounterStartEventArgs e);
-        public static event EncounterStartEventHandler EncounterStart;
+        public static event EncounterStartEventHandler? EncounterStart;
         public delegate void EncounterEndEventHandler(EventArgs e);
-        public static event EncounterEndEventHandler EncounterEnd;
+        public static event EncounterEndEventHandler? EncounterEnd;
         public delegate void EncounterEndFinalEventHandler(EncounterEndFinalData e);
-        public static event EncounterEndFinalEventHandler EncounterEndFinal;
+        public static event EncounterEndFinalEventHandler? EncounterEndFinal;
 
         public static CancellationTokenSource UpdateTruePerValuesCTS = new CancellationTokenSource();
 
@@ -481,13 +481,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ulong EncounterId { get; set; }
         public int BattleId { get; set; }
         public uint SceneId { get; set; }
-        public string SceneName { get; set; }
-        public string SceneSubName { get; set; }
+        public string SceneName { get; set; } = null!;
+        public string SceneSubName { get; set; } = null!;
         public long BossUUID { get; set; }
         public long BossAttrId { get; set; }
-        public string BossName { get; set; }
+        public string BossName { get; set; } = null!;
         public int BossHpPct { get; set; }
-        public string Note { get; set; }
+        public string Note { get; set; } = null!;
 
         public DateTime StartTime { get; private set; }
         public DateTime EndTime { get; private set; }
@@ -510,21 +510,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool IsWipe { get; set; } = false;
 
         public delegate void SkillActivatedEventHandler(object sender, SkillActivatedEventArgs e);
-        public event SkillActivatedEventHandler SkillActivated;
+        public event SkillActivatedEventHandler? SkillActivated;
         public delegate void HpUpdatedEventHandler(object sender, HpUpdatedEventArgs e);
-        public event HpUpdatedEventHandler BossHpUpdated;
-        public event HpUpdatedEventHandler EntityHpUpdated;
+        public event HpUpdatedEventHandler? BossHpUpdated;
+        public event HpUpdatedEventHandler? EntityHpUpdated;
         public delegate void ThreatListUpdatedEventHandler(object sender, ThreatListUpdatedEventArgs e);
-        public event ThreatListUpdatedEventHandler EntityThreatListUpdated;
+        public event ThreatListUpdatedEventHandler? EntityThreatListUpdated;
         public delegate void BuffUpdatedEventHandler(object sender, BuffUpdatedEventArgs e);
-        public event BuffUpdatedEventHandler BuffUpdated;
+        public event BuffUpdatedEventHandler? BuffUpdated;
         public delegate void AttributeUpdatedEventHandler(object sender, AttributeUpdatedEventArgs e);
-        public event AttributeUpdatedEventHandler AttributeUpdated;
+        public event AttributeUpdatedEventHandler? AttributeUpdated;
         public delegate void SceneEventEventHandler(object sender, SceneEventEventArgs e);
-        public event SceneEventEventHandler SceneEvent;
+        public event SceneEventEventHandler? SceneEvent;
 
         public EncounterExData ExData { get; set; } = new();
-        public byte[] ExDataBlob { get; set; }
+        public byte[] ExDataBlob { get; set; } = null!;
 
         public List<long> BossUUIDs { get; set; } = new();
         public EDungeonState DungeonState { get; set; } = EDungeonState.DungeonStateNull;
@@ -624,7 +624,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (etype == EEntityType.EntMonster)
                 {
-                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(attr_id.ToString(), out var monsterEntry))
+                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(attr_id.ToString()!, out var monsterEntry))
                     {
                         entity.SetName(monsterEntry.Name);
                         entity.SetMonsterType(monsterEntry.MonsterType);
@@ -633,7 +633,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 else if (entity.EntityType == EEntityType.EntDummy)
                 {
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString(), out var dummyEntry))
+                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString()!, out var dummyEntry))
                     {
                         entity.SetName(dummyEntry.Name);
                     }
@@ -652,7 +652,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (entity.EntityType == EEntityType.EntMonster)
                 {
-                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(value.ToString(), out var monsterEntry))
+                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(value.ToString()!, out var monsterEntry))
                     {
                         entity.SetName(monsterEntry.Name);
                         entity.SetMonsterType(monsterEntry.MonsterType);
@@ -661,7 +661,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 else if (entity.EntityType == EEntityType.EntDummy)
                 {
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(value.ToString(), out var dummyEntry))
+                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(value.ToString()!, out var dummyEntry))
                     {
                         entity.SetName(dummyEntry.Name);
                     }
@@ -1232,17 +1232,17 @@ namespace StarResonanceDps.Core.CombatRuntime
     public class EncounterBossDataCache
     {
         public long UUID;
-        public string Name;
+        public string Name = null!;
         public long Hp;
         public long MaxHp;
-        public Dictionary<string, object> Attrs;
+        public Dictionary<string, object> Attrs = null!;
     }
 
     public class TempAttributesContainer
     {
         public int Id;
         public int Value;
-        public DataTypes.TempAttr TempAttr;
+        public DataTypes.TempAttr TempAttr = null!;
     }
 
     public class SceneEventEventArgs : EventArgs
@@ -1260,8 +1260,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
     public class SceneEventNoticeTipEventArgs : SceneEventEventArgs
     {
-        public string MessageId;
-        public string ExtraId;
+        public string MessageId = null!;
+        public string ExtraId = null!;
     }
 
     public class Entity : System.ICloneable
@@ -1269,12 +1269,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public long UUID { get; set; }
         public long UID { get; set; }
         public EEntityType EntityType { get; private set; }
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
         public int AbilityScore { get; private set; } = 0;
         public int ProfessionId { get; private set; } = 0;
-        public string Profession { get; private set; }
+        public string Profession { get; private set; } = null!;
         public int SubProfessionId { get; private set; } = 0;
-        public string SubProfession { get; private set; }
+        public string SubProfession { get; private set; } = null!;
         public int Level { get; set; } = 0;
         public Vector3 Position { get; private set; } = new();
 
@@ -1324,11 +1324,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         public EEntityType SummonerEntityType { get; set; } = EEntityType.EntErrType;
 
         public delegate void SkillActivatedEventHandler(object sender, SkillActivatedEventArgs e);
-        public event SkillActivatedEventHandler SkillActivated;
+        public event SkillActivatedEventHandler? SkillActivated;
         public delegate void HpUpdatedEventHandler(object sender, HpUpdatedEventArgs e);
-        public event HpUpdatedEventHandler HpUpdated;
+        public event HpUpdatedEventHandler? HpUpdated;
         public delegate void ThreatListUpdatedEventHandler(object sender, ThreatListUpdatedEventArgs e);
-        public event ThreatListUpdatedEventHandler ThreatListUpdated;
+        public event ThreatListUpdatedEventHandler? ThreatListUpdated;
 
         public object Clone()
         {
@@ -1377,11 +1377,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         [JsonConstructor]
-        public Entity(long uuid, string name = null, Encounter encounter = null)
+        public Entity(long uuid, string? name = null, Encounter? encounter = null)
         {
             UUID = uuid;
             UID = Utils.UuidToEntityId(uuid);
-            Name = name;
+            Name = name!;
 
             if (encounter != null)
             {
@@ -1488,7 +1488,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attr_id != null)
                 {
                     UID = (int)attr_id;
-                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(attr_id.ToString(), out var monsterEntry))
+                    if (HelperMethods.DataTables.Monsters.Data.TryGetValue(attr_id.ToString()!, out var monsterEntry))
                     {
                         SetName(monsterEntry.Name);
                         SetMonsterType(monsterEntry.MonsterType);
@@ -1501,7 +1501,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attr_id != null)
                 {
                     UID = (int)attr_id;
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString(), out var dummyEntry))
+                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString()!, out var dummyEntry))
                     {
                         SetName(dummyEntry.Name);
                     }
@@ -2124,13 +2124,13 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public bool IsHpUpdatedHandlerSubscribed(HpUpdatedEventHandler handler)
         {
-            Delegate[] invocationList = HpUpdated?.GetInvocationList();
+            Delegate[]? invocationList = HpUpdated?.GetInvocationList();
             return invocationList != null && invocationList.Contains(handler);
         }
 
         public bool IsThreatListUpdatedHandlerSubscribed(ThreatListUpdatedEventHandler handler)
         {
-            Delegate[] invocationList = ThreatListUpdated?.GetInvocationList();
+            Delegate[]? invocationList = ThreatListUpdated?.GetInvocationList();
             return invocationList != null && invocationList.Contains(handler);
         }
 
@@ -2318,7 +2318,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int Layer { get; set; }
         public int Duration { get; set; }
         public int SourceConfigId { get; set; }
-        public string EntityCasterName { get; set; }
+        public string EntityCasterName { get; set; } = null!;
         public DateTime UpdateDateTime { get; set; }
         public DateTime? CreationDateTime { get; set; }
     }
@@ -2327,8 +2327,8 @@ namespace StarResonanceDps.Core.CombatRuntime
     {
         public long EntityUuid { get; set; }
         public Entity? Entity { get; set; }
-        public string AttributeName { get; set; }
-        public object AttributeValue { get; set; }
+        public string AttributeName { get; set; } = null!;
+        public object AttributeValue { get; set; } = null!;
     }
 
     public enum ESkillType : int
@@ -2406,7 +2406,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
     public class CombatStats : System.ICloneable
     {
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
         public ESkillType SkillType { get; private set; } = ESkillType.Unknown;
         public int Id { get; private set; }
         public int Level { get; private set; }
@@ -2878,19 +2878,19 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int BaseId { get; private set; }
         public int Level { get; private set; }
         public long FireUuid { get; private set; }
-        public string EntityCasterName { get; private set; }
+        public string EntityCasterName { get; private set; } = null!;
         public int Layer { get; private set; }
         public int Duration { get; private set; }
         public int SourceConfigId { get; private set; }
-        public string Name { get; private set; }
+        public string Name { get; private set; } = null!;
         [JsonIgnore]
         public string Description { get; private set; } = "";
-        public string Icon { get; private set; }
+        public string Icon { get; private set; } = null!;
         public int BuffAbilityType { get; private set; }
         public int BuffAbilitySubType { get; private set; }
         public TimeSpan EventAddTime { get; private set; }
         public TimeSpan EventRemoveTime { get; private set; }
-        public string AttributeName { get; private set; }
+        public string AttributeName { get; private set; } = null!;
         public object? Data { get; private set; }
         public DateTime AddDateTime { get; private set; }
         public DateTime RemoveDateTime { get; private set; }
@@ -2918,8 +2918,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     Name = buffTableData.Name;
                     Icon = buffTableData.GetIconName();
-                    BuffType = buffTableData.BuffType.Value;
-                    BuffPriority = buffTableData.BuffPriority.Value;
+                    BuffType = buffTableData.BuffType!.Value;
+                    BuffPriority = buffTableData.BuffPriority!.Value;
                     BuffVisibility = buffTableData.Visible;
                     BuffAbilityType = buffTableData.BuffAbilityType;
                     BuffAbilitySubType = buffTableData.BuffAbilitySubType;
@@ -3000,8 +3000,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     Name = buffTableData.Name;
                     Icon = buffTableData.GetIconName();
 
-                    BuffType = buffTableData.BuffType.Value;
-                    BuffPriority = buffTableData.BuffPriority.Value;
+                    BuffType = buffTableData.BuffType!.Value;
+                    BuffPriority = buffTableData.BuffPriority!.Value;
                     BuffVisibility = buffTableData.Visible;
                     BuffAbilityType = buffTableData.BuffAbilityType;
                     BuffAbilitySubType = buffTableData.BuffAbilitySubType;

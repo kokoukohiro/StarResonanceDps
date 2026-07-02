@@ -17,8 +17,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static string DbFilePath = Path.Combine(Utils.DATA_DIR_NAME, DbFileName);
         public static MigrationStatus MigrationStatus = new MigrationStatus();
 
-        private static SqliteConnection DbConn;
-        private static ILogger Log;
+        private static SqliteConnection DbConn = null!;
+        private static ILogger Log = null!;
         private static ZstdSharp.Compressor Compressor = new ZstdSharp.Compressor();
         private static ZstdSharp.Decompressor Decompressor = new ZstdSharp.Decompressor();
         private static object DBLock = new object();
@@ -159,7 +159,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
             ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-            encounter.ExDataBlob = null;
+            encounter.ExDataBlob = null!;
 
             var entityBlob = DbConn.QuerySingleOrDefault<EntityBlobTable>(DBSchema.Entities.SelectByEncounterId, new { EncounterId = encounterId });
             if (entityBlob?.Data != null)
@@ -208,19 +208,19 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
                 ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-                encounter.ExDataBlob = null;
+                encounter.ExDataBlob = null!;
             }
             return encounters;
         }
 
-        public static EncounterExData GetEncounterExDataForBattle(int battleId)
+        public static EncounterExData? GetEncounterExDataForBattle(int battleId)
         {
             try
             {
                 var encounter = DB.DbConn.QueryFirst<Encounter>(DBSchema.Encounter.SelectOneByBattleId, new { BattleId = battleId });
                 var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
                 ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-                encounter.ExDataBlob = null;
+                encounter.ExDataBlob = null!;
 
                 return encounter.ExData;
             }
@@ -330,7 +330,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             foreach (var encounter in encountersSum)
             {
                 var encounterFull = LoadEncounter(encounter.EncounterId);
-                encounters.Add(encounterFull);
+                encounters.Add(encounterFull!);
             }
 
             return encounters;

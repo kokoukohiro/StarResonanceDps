@@ -110,7 +110,7 @@ public class BlobReader
         return bytes.Length == 0 ? string.Empty : System.Text.Encoding.UTF8.GetString(bytes);
     }
 
-    public Dictionary<T, X> ReadHashMap<T, X>()
+    public Dictionary<T, X> ReadHashMap<T, X>() where T : notnull
     {
         int add = ReadInt();
         int remove = 0;
@@ -246,10 +246,10 @@ public class BlobReader
         if (typeof(T).IsSubclassOf(typeof(BlobType)))
         {
             var item = Activator.CreateInstance(typeof(T)) as BlobType;
-            item.Read(ref blob);
-            return (T)(object)item;
+            item!.Read(ref blob);
+            return (T)(object)item!;
         }
 
-        return default;
+        return default!;
     }
 }

@@ -17,7 +17,7 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int Id { get; set; }
         public int EnchantId { get; set; }
         public int EnchantType { get; set; }
-        public List<int> EnchantItemList { get; set; }
-        public List<int> RecommendedGem { get; set; }
+        public List<int> EnchantItemList { get; set; } = null!;
+        public List<int> RecommendedGem { get; set; } = null!;
     }
 }

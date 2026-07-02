@@ -940,10 +940,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                                 }
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, changeInfo.Layer, (int)changeInfo.Duration, 0, creationTime, extraData);
                             }
-                            else if (logicEffect.EffectType == null)
-                            {
-                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, 0, 0, 0, null, extraData);
-                            }
                         }
                     }
                     else
@@ -1046,13 +1042,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                bool isCrit = syncDamageInfo.TypeFlag != null && ((syncDamageInfo.TypeFlag & 1) == 1);
+                bool isCrit = (syncDamageInfo.TypeFlag & 1) == 1;
                 bool isHeal = syncDamageInfo.Type == EDamageType.Heal;
                 var luckyValue = syncDamageInfo.LuckyValue;
-                bool isLucky = luckyValue != null && luckyValue != 0;
+                bool isLucky = luckyValue != 0;
                 long hpLessen = syncDamageInfo.HpLessenValue;
 
-                bool isCauseLucky = syncDamageInfo.TypeFlag != null && ((syncDamageInfo.TypeFlag & 0B100) == 0B100);
+                bool isCauseLucky = (syncDamageInfo.TypeFlag & 0B100) == 0B100;
 
                 bool isMiss = syncDamageInfo.IsMiss;
 
@@ -1170,11 +1166,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             BattleStateMachine.CheckDeferredCalls();
 
-            if (false)
-            {
-                EncounterManager.StartNewMap();
-                EncounterManager.EnterDungeon(true);
-            }
             BattleStateMachine.StartNewMap();
             PlayerRosterProjection.BeginMap();
 
@@ -1185,7 +1176,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var vData = syncContainerData.VData;
-            if (vData.CharId == null || vData.CharId == 0)
+            if (vData.CharId == 0)
             {
                 return;
             }
@@ -1660,7 +1651,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (dun?.Damage != null)
             {
-                foreach (var item in dun.Damage.Damages)
+                foreach (var item in dun.Damage.Damages!)
                 {
                     System.Diagnostics.Debug.WriteLine($"dun.Damage.Damages = {item.Key}, {item.Value}");
                 }
@@ -1668,10 +1659,10 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (dun?.DungeonPioneer != null)
             {
-                foreach (var item in dun?.DungeonPioneer?.CompletedTargetThisTime)
+                foreach (var item in dun.DungeonPioneer.CompletedTargetThisTime!)
                 {
                     var CompletedTargetListIdx = 0;
-                    foreach (var completedTargetList in item.Value.CompletedTargetList)
+                    foreach (var completedTargetList in item.Value.CompletedTargetList!)
                     {
                         System.Diagnostics.Debug.WriteLine($"[{item.Key}]CompletedTargetList[{CompletedTargetListIdx}] = {completedTargetList.Key}, {completedTargetList.Value}");
                         CompletedTargetListIdx++;
@@ -1688,7 +1679,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 int dungeonVarDataIdx = 0;
-                foreach (var dungeonVarData in dun.DungeonVar.Data)
+                foreach (var dungeonVarData in dun.DungeonVar.Data!)
                 {
 
                     dungeonVarDataIdx++;
@@ -1727,7 +1718,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 int dungeonVarAllMapIdx = 0;
-                foreach (var dungeonVarAllMap in dun.DungeonVarAll.DungeonVarAllMap)
+                foreach (var dungeonVarAllMap in dun.DungeonVarAll.DungeonVarAllMap!)
                 {
                     int dungeonVarDataIdx = 0;
                     foreach (var dungeonVarData in dungeonVarAllMap.Value.Data)

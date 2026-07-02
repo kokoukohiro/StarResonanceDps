@@ -14,29 +14,29 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     public class Equip
     {
         public int Id { get; set; }
-        public string Model { get; set; }
+        public string Model { get; set; } = null!;
         public int EquipPart { get; set; }
-        public List<int> EquipProfession { get; set; }
+        public List<int> EquipProfession { get; set; } = null!;
         public int EquipType { get; set; }
         public int FashionMId { get; set; }
         public int FashionFId { get; set; }
         public int WeaponSkinId { get; set; }
         public int EquipGs { get; set; }
-        public List<List<int>> WearCondition { get; set; }
-        public List<int> PerfectUpperLimit { get; set; }
+        public List<List<int>> WearCondition { get; set; } = null!;
+        public List<int> PerfectUpperLimit { get; set; } = null!;
         public int PerfectLibId { get; set; }
-        public List<int> BasicAttrLibId { get; set; }
-        public List<int> AdvancedAttrLibId { get; set; }
+        public List<int> BasicAttrLibId { get; set; } = null!;
+        public List<int> AdvancedAttrLibId { get; set; } = null!;
         public bool IsAllowAdvancedAttrSame { get; set; }
-        public List<int> RecastingAttrLibId { get; set; }
+        public List<int> RecastingAttrLibId { get; set; } = null!;
         public int DecomposeId { get; set; }
         public int EnchantId { get; set; }
         public int EquipNameGroupId { get; set; }
         public int QualitychiIdType { get; set; }
-        public List<int> QualityChildAttrLibId { get; set; }
-        public List<int> RecastType { get; set; }
+        public List<int> QualityChildAttrLibId { get; set; } = null!;
+        public List<int> RecastType { get; set; } = null!;
         public int SuitId { get; set; }
-        public List<int> SeasonId { get; set; }
+        public List<int> SeasonId { get; set; } = null!;
         public int TransformId { get; set; }
     }
 }

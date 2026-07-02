@@ -35,7 +35,7 @@ public static class TcpHelper {
                     IntPtr currentPtr = tcpTablePtr + Marshal.SizeOf(typeof(uint));
 
                     for (int i = 0; i < tcpTableLength / Marshal.SizeOf(typeof(TcpRow)); i++) {
-                        tcpRow = (TcpRow)Marshal.PtrToStructure(currentPtr, typeof(TcpRow));
+                        tcpRow = Marshal.PtrToStructure<TcpRow>(currentPtr);
                         if (tcpRow.RemoteAddress != "0.0.0.0") {tcpRows.Add(tcpRow);}
                         currentPtr += Marshal.SizeOf(typeof(TcpRow));
                     }

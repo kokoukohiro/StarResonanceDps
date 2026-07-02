@@ -15,6 +15,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     {
         public int Id { get; set; }
         public int CountCDTime { get; set; }
-        public string Content { get; set; }
+        public string Content { get; set; } = null!;
     }
 }

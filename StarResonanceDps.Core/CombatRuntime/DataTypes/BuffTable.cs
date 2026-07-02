@@ -14,31 +14,31 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
     public class Buff
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
         public int Level { get; set; }
-        public string NameDesign { get; set; }
-        public string Note { get; set; }
-        public string Name { get; set; }
-        public string Icon { get; set; }
-        public string Desc { get; set; }
+        public string NameDesign { get; set; } = null!;
+        public string Note { get; set; } = null!;
+        public string Name { get; set; } = null!;
+        public string Icon { get; set; } = null!;
+        public string Desc { get; set; } = null!;
         public Enum.EBuffType? BuffType { get; set; }
         public Enum.EBuffPriority? BuffPriority { get; set; }
         public int TipsDescription { get; set; }
         public int Visible { get; set; }
-        public List<int> RepeatAddRule { get; set; }
-        public List<List<float>> DestroyParam { get; set; }
+        public List<int> RepeatAddRule { get; set; } = null!;
+        public List<List<float>> DestroyParam { get; set; } = null!;
         public bool DeleteDead { get; set; }
         public bool DeleteOffline { get; set; }
         public bool DeleteChangeScene { get; set; }
         public bool DeleteChangeVisualLayer { get; set; }
         public bool DeleteWeaponChange { get; set; }
         public bool DeleteSourceDead { get; set; }
-        public List<int> Tags { get; set; }
-        public List<int> SpecialAttr { get; set; }
+        public List<int> Tags { get; set; } = null!;
+        public List<int> SpecialAttr { get; set; } = null!;
         public int BuffAbilityType { get; set; }
         public int BuffAbilitySubType { get; set; }
         public bool IsClientBuff { get; set; }
-        public string ShowHUDIcon { get; set; }
+        public string ShowHUDIcon { get; set; } = null!;
         public int HudSwitch { get; set; }
         public int TimeRefreshType { get; set; }
         public int PlayType { get; set; }

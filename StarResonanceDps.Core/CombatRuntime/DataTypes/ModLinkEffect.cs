@@ -7,9 +7,9 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
     public class ModLinkEffect
     {
-        public string Id { get; set; }
+        public string Id { get; set; } = null!;
         public int LinkTime { get; set; }
-        public List<List<int>> LinkLevelEffect { get; set; }
+        public List<List<int>> LinkLevelEffect { get; set; } = null!;
         public int FightValue { get; set; }
     }
 }

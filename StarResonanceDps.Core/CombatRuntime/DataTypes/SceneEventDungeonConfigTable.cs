@@ -10,6 +10,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int DungeonId { get; set; }
         public int BaseRatio { get; set; }
         public int LimitTime { get; set; }
-        public List<List<int>> ScoreRank { get; set; }
+        public List<List<int>> ScoreRank { get; set; } = null!;
     }
 }

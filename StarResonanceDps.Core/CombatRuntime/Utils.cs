@@ -260,7 +260,8 @@ public static class Utils
             EGameCapturePreference.HaoPlaySeaSteam => "HaoPlay SEA Steam",
             EGameCapturePreference.XDGSteam => "XDG Steam",
             EGameCapturePreference.WeGame => "WeGame",
-            EGameCapturePreference.Custom => "Custom"
+            EGameCapturePreference.Custom => "Custom",
+            _ => throw new ArgumentOutOfRangeException(nameof(pref), pref, null)
         };
 
         return gamePrefName;
@@ -279,7 +280,8 @@ public static class Utils
             EGameCapturePreference.HaoPlaySeaSteam => ["StarSEA_STEAM"],
             EGameCapturePreference.XDGSteam => ["StarASIA_STEAM"],
             EGameCapturePreference.WeGame => ["Star"],
-            EGameCapturePreference.Custom => [Settings.Instance.GameCaptureCustomExeName]
+            EGameCapturePreference.Custom => [Settings.Instance.GameCaptureCustomExeName],
+            _ => throw new ArgumentOutOfRangeException(nameof(pref), pref, null)
         };
 
         return exeNameToCapture;
