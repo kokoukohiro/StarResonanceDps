@@ -15,8 +15,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+    private readonly ConfigManager _configManager = ConfigManager.Instance;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
-    private MeterWidgetSettingsConfig _meterSettings = WidgetConfigDefaults.CreateMeterSettings();
     private long? _selectedPlayerCharacterId;
 
     public WidgetKind Kind { get; init; }
@@ -89,8 +89,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
             State = State,
-            Theme = _theme.Clone(),
-            Meter = _meterSettings.Clone()
+            Theme = _theme.Clone()
         };
     }
 
@@ -106,7 +105,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
             State = state;
         }
 
-        _meterSettings = config.Meter.Clone();
         ApplyTheme(config.Theme);
         RefreshPlayerListEntries();
         RefreshPlayerDetail();
@@ -242,8 +240,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
+        var classColors = _configManager.GetSettingsSnapshot().ClassColors;
         var nextEntries = _playerRoster
-            .Select(entry => PlayerListEntry.Create(entry, _meterSettings))
+            .Select(entry => PlayerListEntry.Create(entry, classColors))
             .ToArray();
 
         _playerListEntries.Clear();

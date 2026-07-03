@@ -88,6 +88,9 @@
   <data name="Common_SelectColor" xml:space="preserve">
     <value>选择颜色</value>
   </data>
+  <data name="Common_Copy" xml:space="preserve">
+    <value>复制</value>
+  </data>
   <data name="Navigation_Widgets" xml:space="preserve">
     <value>小组件</value>
   </data>
@@ -102,18 +105,6 @@
   </data>
   <data name="Manager_WidgetSearch_Placeholder" xml:space="preserve">
     <value>搜索小组件...</value>
-  </data>
-  <data name="Manager_WidgetFilter_All" xml:space="preserve">
-    <value>全部</value>
-  </data>
-  <data name="Manager_WidgetFilter_Favorites" xml:space="preserve">
-    <value>收藏</value>
-  </data>
-  <data name="Manager_WidgetFilter_Running" xml:space="preserve">
-    <value>运行中</value>
-  </data>
-  <data name="Manager_WidgetFilter_Stopped" xml:space="preserve">
-    <value>已停止</value>
   </data>
   <data name="Manager_WidgetSort_Default" xml:space="preserve">
     <value>默认</value>
@@ -142,9 +133,6 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>解除所有固定</value>
   </data>
-  <data name="Settings_Section_Basic_Title" xml:space="preserve">
-    <value>基础设置</value>
-  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>显示设置</value>
   </data>
@@ -153,15 +141,6 @@
   </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>更新</value>
-  </data>
-  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
-    <value>监听网卡</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
-    <value>未找到网络适配器</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
-    <value>无法确定当前使用的网络适配器。请确认网络连接后重新启动应用。</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>语言</value>
@@ -182,13 +161,25 @@
     <value>English</value>
   </data>
   <data name="Settings_Display_NumberMode" xml:space="preserve">
-    <value>计数显示类型</value>
+    <value>数值</value>
   </data>
   <data name="NumberDisplay_KMB" xml:space="preserve">
     <value>三位计数法 (KMBT)</value>
   </data>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>四位计数法 (万亿兆)</value>
+  </data>
+    <data name="Settings_Display_PlayerName" xml:space="preserve">
+    <value>玩家名称</value>
+  </data>
+  <data name="PlayerNameDisplay_Show" xml:space="preserve">
+    <value>显示</value>
+  </data>
+  <data name="PlayerNameDisplay_Hide" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
+    <value>隐藏其他玩家</value>
   </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>窗体颜色</value>
@@ -261,9 +252,6 @@
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>职业颜色</value>
-  </data>
-  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>职业颜色不透明度</value>
   </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>神盾骑士</value>

@@ -1,4 +1,4 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -36,10 +36,10 @@ public sealed class PlayerListEntry
 
     public SolidColorBrush ClassBrush { get; }
 
-    public static PlayerListEntry Create(PlayerRosterEntry player, MeterWidgetSettingsConfig meterSettings)
+    public static PlayerListEntry Create(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
     {
         var professionKey = GetProfessionKey(player.ProfessionId);
-        var classColor = GetClassColor(meterSettings, professionKey);
+        var classColor = GetClassColor(classColors, professionKey);
         var classSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         var displayName = $"{player.Name}（{player.CombatPower}-{player.SeasonStrength}）";
 
@@ -49,7 +49,7 @@ public sealed class PlayerListEntry
             classSpecDisplayName,
             displayName,
             GetHealthRatio(player.CurrentHp, player.MaxHp),
-            CreateBrush(classColor, meterSettings.ClassColorOpacity));
+            CreateBrush(classColor));
     }
 
     private static string GetProfessionKey(int professionId)
@@ -79,14 +79,14 @@ public sealed class PlayerListEntry
         return Math.Clamp(currentHp / (double)maxHp, 0d, 1d);
     }
 
-    private static Color GetClassColor(MeterWidgetSettingsConfig meterSettings, string professionKey)
+    private static Color GetClassColor(ClassColorSettingsConfig classColors, string professionKey)
     {
-        var palette = meterSettings.ClassColorPalettes.TryGetValue(professionKey, out var colors)
+        var palette = classColors.ClassColorPalettes.TryGetValue(professionKey, out var colors)
             ? colors
-            : WidgetConfigDefaults.CreateDefaultClassColors(professionKey);
-        var selectedIndex = meterSettings.ClassColorIndexes.TryGetValue(professionKey, out var index)
+            : AppConfigDefaults.CreateDefaultClassColors(professionKey);
+        var selectedIndex = classColors.ClassColorIndexes.TryGetValue(professionKey, out var index)
             ? index
-            : WidgetConfigDefaults.MinClassColorIndex;
+            : AppConfigDefaults.MinClassColorIndex;
         var selectedColor = palette.Count == 0
             ? "#A8A8A8"
             : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
@@ -96,10 +96,9 @@ public sealed class PlayerListEntry
             : Color.FromRgb(0xA8, 0xA8, 0xA8);
     }
 
-    private static SolidColorBrush CreateBrush(Color color, int opacityPercent)
+    private static SolidColorBrush CreateBrush(Color color)
     {
-        var alpha = checked((byte)Math.Round(color.A * Math.Clamp(opacityPercent, 0, 100) / 100d));
-        var brush = new SolidColorBrush(Color.FromArgb(alpha, color.R, color.G, color.B));
+        var brush = new SolidColorBrush(color);
         brush.Freeze();
         return brush;
     }

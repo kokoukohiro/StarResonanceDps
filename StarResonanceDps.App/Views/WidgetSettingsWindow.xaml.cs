@@ -160,10 +160,6 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(ThemeSection);
     }
 
-    private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(ClassColorsHost);
-    }
 
     private void ResetButton_Click(object sender, RoutedEventArgs e)
     {

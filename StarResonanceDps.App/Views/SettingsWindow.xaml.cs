@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,6 +46,12 @@ public partial class SettingsWindow : Window
         {
             source.AddHook(WndProc);
         }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        ViewModel.Dispose();
+        base.OnClosed(e);
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -138,11 +144,6 @@ public partial class SettingsWindow : Window
         return new Point(x, y);
     }
 
-    private void BasicNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(BasicSection);
-    }
-
     private void DisplayNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(DisplaySection);
@@ -151,6 +152,11 @@ public partial class SettingsWindow : Window
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);
+    }
+
+    private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ClassColorsSection);
     }
 
     private void UpdateNavButton_Click(object sender, RoutedEventArgs e)

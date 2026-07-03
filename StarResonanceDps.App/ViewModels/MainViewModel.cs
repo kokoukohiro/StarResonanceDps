@@ -16,6 +16,7 @@ public sealed partial class MainViewModel : ViewModelBase
 {
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
     private readonly ObservableCollection<PluginListItemViewModel> _pluginItems = new();
+    private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
     private readonly PluginManager _pluginManager = PluginManager.Instance;
@@ -26,9 +27,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _searchText = string.Empty;
-
-    [ObservableProperty]
-    private int _widgetFilterIndex;
 
     [ObservableProperty]
     private int _widgetSortIndex;
@@ -68,6 +66,7 @@ public sealed partial class MainViewModel : ViewModelBase
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        _configManager.SettingsChanged += ConfigManager_SettingsChanged;
 
         _playerRosterStore.RosterChanged += PlayerRosterStore_RosterChanged;
         var roster = _playerRosterStore.Current;
@@ -156,6 +155,23 @@ public sealed partial class MainViewModel : ViewModelBase
         _playerDetailWidget?.UpdatePlayerRoster(roster, mapName);
     }
 
+    private void ConfigManager_SettingsChanged(object? sender, EventArgs e)
+    {
+        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(RefreshPlayerRosterPresentation);
+            return;
+        }
+
+        RefreshPlayerRosterPresentation();
+    }
+
+    private void RefreshPlayerRosterPresentation()
+    {
+        var roster = _playerRosterStore.Current;
+        UpdatePlayerList(roster.Entries, roster.MapName);
+    }
+
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         foreach (var widget in _widgetItems)
@@ -232,7 +248,7 @@ public sealed partial class MainViewModel : ViewModelBase
             return false;
         }
 
-        return MatchesSearchText(widget) && MatchesFilter(widget);
+        return MatchesSearchText(widget);
     }
 
     private bool MatchesSearchText(WidgetListItemViewModel widget)
@@ -242,16 +258,6 @@ public sealed partial class MainViewModel : ViewModelBase
             || widget.DisplayName.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
     }
 
-    private bool MatchesFilter(WidgetListItemViewModel widget)
-    {
-        return WidgetFilterIndex switch
-        {
-            1 => widget.IsFavorite,
-            2 => widget.State == WidgetState.Running,
-            3 => widget.State == WidgetState.Stopped,
-            _ => true
-        };
-    }
 
     private void ApplyWidgetSort()
     {
@@ -348,11 +354,6 @@ public sealed partial class MainViewModel : ViewModelBase
     }
 
     partial void OnSearchTextChanged(string value)
-    {
-        Widgets.Refresh();
-    }
-
-    partial void OnWidgetFilterIndexChanged(int value)
     {
         Widgets.Refresh();
     }

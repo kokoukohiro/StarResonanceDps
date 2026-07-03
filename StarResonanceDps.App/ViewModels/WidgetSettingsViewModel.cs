@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.ViewModels.WidgetSettings;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 
@@ -55,18 +54,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         LoadFromTheme(config.Theme, raisePreview: false);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
-
-        if (SupportsClassColorSettings(kind))
-        {
-            MeterSettings = new MeterWidgetSettingsViewModel(config.Meter);
-            MeterSettings.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName == nameof(MeterWidgetSettingsViewModel.HasUnsavedChanges))
-                {
-                    OnPropertyChanged(nameof(HasUnsavedChanges));
-                }
-            };
-        }
     }
 
     public event Action<WidgetThemeConfig>? ThemePreviewChanged;
@@ -84,14 +71,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public string WindowTitle => LocalizationManager.Instance.Format("Window_WidgetSettings_Title", LocalizationManager.Instance.GetString(_displayNameResourceKey));
 
-    public bool HasClassColorSettings => SupportsClassColorSettings(_kind);
-
     public ColorPaletteViewModel WindowColors { get; }
 
-    public MeterWidgetSettingsViewModel? MeterSettings { get; }
-
-    public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
-        || (MeterSettings?.HasUnsavedChanges ?? false);
+    public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme);
 
     [RelayCommand]
     private void Save()
@@ -110,16 +92,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         var config = _stateManager.GetWidgetSnapshot(_kind);
         var theme = CreateTheme();
         config.Theme = theme;
-
-        if (MeterSettings is not null)
-        {
-            config.Meter = MeterSettings.CreateConfig();
-        }
-
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
-        MeterSettings?.MarkSaved(config.Meter);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -127,7 +102,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public void ResetToDefaults()
     {
         LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
-        MeterSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -193,7 +167,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         }
     }
 
-
     private WidgetThemeConfig CreateTheme()
     {
         var theme = new WidgetThemeConfig
@@ -255,14 +228,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             && string.Equals(left.BackgroundImageAverageColor, right.BackgroundImageAverageColor, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
-    }
-
-    private static bool SupportsClassColorSettings(WidgetKind kind)
-    {
-        return kind is WidgetKind.DpsMeter
-            or WidgetKind.HpsMeter
-            or WidgetKind.DtpsMeter
-            or WidgetKind.PlayerInfoDebug;
     }
 
     partial void OnWindowOpacityChanged(double value)

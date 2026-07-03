@@ -4,8 +4,6 @@
         xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
         xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
         xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
-        xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
-        xmlns:widgetSettingsViews="clr-namespace:StarResonanceDps.App.Views.WidgetSettings"
         Title="{Binding WindowTitle}"
         Icon="/Assets/Images/ApplicationIcon.ico"
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
@@ -20,10 +18,6 @@
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <Window.Resources>
-        <converters:IndexToBooleanConverter x:Key="IndexToBooleanConverter" />
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </Window.Resources>
 
     <ContentControl Style="{StaticResource Panel.WindowFrame}">
         <Grid>
@@ -51,16 +45,6 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Theme}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}" />
-                            </StackPanel>
-                        </Button>
-
-                        <Button x:Name="ClassColorsNavButton"
-                                Click="ClassColorsNavButton_Click"
-                                Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasClassColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -194,16 +178,6 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
-                                </ContentControl>
-
-                                <ContentControl x:Name="ClassColorsHost"
-                                                Content="{Binding MeterSettings}"
-                                                Visibility="{Binding HasClassColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <ContentControl.ContentTemplate>
-                                        <DataTemplate>
-                                            <widgetSettingsViews:MeterWidgetSettingsView />
-                                        </DataTemplate>
-                                    </ContentControl.ContentTemplate>
                                 </ContentControl>
                             </StackPanel>
                         </ScrollViewer>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -105,7 +105,6 @@
     <Folder Include="Styles\" />
     <Folder Include="ViewModels\" />
     <Folder Include="ViewModels\WidgetSettings\" />
-    <Folder Include="Views\WidgetSettings\" />
     <Folder Include="Views\Widgets\" />
   </ItemGroup>
 
@@ -246,6 +245,13 @@
       <Link>Data\CombatRuntime\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Views\WidgetSettings\**" />
+    <EmbeddedResource Remove="Views\WidgetSettings\**" />
+    <None Remove="Views\WidgetSettings\**" />
+    <Page Remove="Views\WidgetSettings\**" />
   </ItemGroup>
 
 </Project>

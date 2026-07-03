@@ -3,10 +3,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Threading;
-using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.Views;
-using StarResonanceDps.Core.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App;
@@ -29,8 +25,6 @@ public partial class MainWindow : Window
     private static readonly bool IsInDesignMode =
         DesignerProperties.GetIsInDesignMode(new DependencyObject());
 
-    private bool _hasShownNetworkAdapterUnavailableMessage;
-
     public MainWindow()
     {
         InitializeComponent();
@@ -50,25 +44,6 @@ public partial class MainWindow : Window
         {
             viewModel.RestoreRunningWidgetWindows();
         }
-
-        QueueNetworkAdapterUnavailableMessage();
-    }
-
-    private void QueueNetworkAdapterUnavailableMessage()
-    {
-        if (_hasShownNetworkAdapterUnavailableMessage
-            || NetworkAdapterSession.Instance.HasAutomaticSelection)
-        {
-            return;
-        }
-
-        _hasShownNetworkAdapterUnavailableMessage = true;
-        Dispatcher.BeginInvoke(
-            () => MessageWindow.Show(
-                this,
-                LocalizationManager.Instance.GetString("Message_NetworkAdapterUnavailable_Title"),
-                LocalizationManager.Instance.GetString("Message_NetworkAdapterUnavailable_Message")),
-            DispatcherPriority.ContextIdle);
     }
 
     private void MainWindow_SourceInitialized(object? sender, EventArgs e)

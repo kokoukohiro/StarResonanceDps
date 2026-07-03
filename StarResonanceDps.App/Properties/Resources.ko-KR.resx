@@ -42,6 +42,9 @@
   <data name="Common_SelectColor" xml:space="preserve">
     <value>색상 선택</value>
   </data>
+  <data name="Common_Copy" xml:space="preserve">
+    <value>복사</value>
+  </data>
   <data name="Navigation_Widgets" xml:space="preserve">
     <value>위젯</value>
   </data>
@@ -56,18 +59,6 @@
   </data>
   <data name="Manager_WidgetSearch_Placeholder" xml:space="preserve">
     <value>위젯 검색...</value>
-  </data>
-  <data name="Manager_WidgetFilter_All" xml:space="preserve">
-    <value>전체</value>
-  </data>
-  <data name="Manager_WidgetFilter_Favorites" xml:space="preserve">
-    <value>즐겨찾기</value>
-  </data>
-  <data name="Manager_WidgetFilter_Running" xml:space="preserve">
-    <value>실행 중</value>
-  </data>
-  <data name="Manager_WidgetFilter_Stopped" xml:space="preserve">
-    <value>중지됨</value>
   </data>
   <data name="Manager_WidgetSort_Default" xml:space="preserve">
     <value>기본</value>
@@ -96,9 +87,6 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>모든 고정 해제</value>
   </data>
-  <data name="Settings_Section_Basic_Title" xml:space="preserve">
-    <value>기본 설정</value>
-  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>표시 설정</value>
   </data>
@@ -107,15 +95,6 @@
   </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>업데이트</value>
-  </data>
-  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
-    <value>네트워크 어댑터</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
-    <value>네트워크 어댑터를 찾을 수 없습니다</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
-    <value>현재 사용 중인 네트워크 어댑터를 확인할 수 없습니다. 인터넷 연결을 확인한 후 앱을 다시 시작하세요.</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>언어</value>
@@ -136,13 +115,25 @@
     <value>English</value>
   </data>
   <data name="Settings_Display_NumberMode" xml:space="preserve">
-    <value>숫자 표시 방식</value>
+    <value>숫자</value>
   </data>
   <data name="NumberDisplay_KMB" xml:space="preserve">
     <value>서양식 (KMBT)</value>
   </data>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>동아시아식 (만억조)</value>
+  </data>
+    <data name="Settings_Display_PlayerName" xml:space="preserve">
+    <value>플레이어 이름</value>
+  </data>
+  <data name="PlayerNameDisplay_Show" xml:space="preserve">
+    <value>표시</value>
+  </data>
+  <data name="PlayerNameDisplay_Hide" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+  <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
+    <value>자신 이외 숨기기</value>
   </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>창 색상</value>
@@ -215,9 +206,6 @@
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>직업 색상</value>
-  </data>
-  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>직업 색상 불투명도</value>
   </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>쉴드 나이트</value>

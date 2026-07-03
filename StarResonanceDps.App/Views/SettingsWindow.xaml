@@ -4,7 +4,7 @@
         xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
         xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
         xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
-        xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+        xmlns:settingsViews="clr-namespace:StarResonanceDps.App.Views.Settings"
         xmlns:viewModels="clr-namespace:StarResonanceDps.App.ViewModels"
         Title="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Window_Settings_Title]}"
         Icon="/Assets/Images/ApplicationIcon.ico"
@@ -20,9 +20,6 @@
         WindowStartupLocation="CenterOwner"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <Window.Resources>
-        <converters:IndexToBooleanConverter x:Key="IndexToBooleanConverter" />
-    </Window.Resources>
 
     <Window.DataContext>
         <viewModels:SettingsViewModel />
@@ -48,20 +45,11 @@
 
                 <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
                     <StackPanel Margin="10">
-                        <Button x:Name="BasicNavButton"
-                                Click="BasicNavButton_Click"
-                                Style="{StaticResource Button.Sidebar}">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Basic_Title]}" />
-                            </StackPanel>
-                        </Button>
-
                         <Button x:Name="DisplayNavButton"
                                 Click="DisplayNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Window}" />
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}" />
                             </StackPanel>
                         </Button>
@@ -72,6 +60,15 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Theme}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button x:Name="ClassColorsNavButton"
+                                Click="ClassColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}" />
                             </StackPanel>
                         </Button>
 
@@ -94,38 +91,6 @@
                                           ScrollChanged="ContentScrollViewer_ScrollChanged"
                                           SizeChanged="ContentScrollViewer_SizeChanged">
                                 <StackPanel Margin="0,0,10,6">
-                                <TextBlock x:Name="BasicSection"
-                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Basic_Title]}"
-                                           Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
-                                    <StackPanel>
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_NetworkAdapter_Label]}"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <ComboBox Grid.Column="1"
-                                                          Style="{StaticResource Input.SettingsComboBox}"
-                                                          DisplayMemberPath="DisplayName"
-                                                          ItemsSource="{Binding AvailableNetworkAdapters}"
-                                                          SelectedItem="{Binding SelectedNetworkAdapter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Grid>
-                                        </Border>
-                                    </StackPanel>
-                                </ContentControl>
-
                                 <TextBlock x:Name="DisplaySection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
@@ -160,7 +125,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                        <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -179,6 +144,30 @@
                                                           SelectedIndex="{Binding NumberDisplayFormatIndex, Mode=TwoWay}">
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NumberDisplay_KMB]}" />
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NumberDisplay_Wan]}" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_PlayerName]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <ComboBox Grid.Column="1"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          SelectedIndex="{Binding PlayerNameDisplayModeIndex, Mode=TwoWay}">
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_HideOthers]}" />
                                                 </ComboBox>
                                             </Grid>
                                         </Border>
@@ -230,7 +219,24 @@
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
+
                                     </StackPanel>
+                                </ContentControl>
+
+                                <TextBlock x:Name="ClassColorsSection"
+                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,10" />
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                    <ContentControl Content="{Binding ClassColors}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <settingsViews:ClassColorSettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </ContentControl>
 
                                 <TextBlock x:Name="UpdateSection"

@@ -1,18 +1,17 @@
 using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.App.ViewModels;
-using StarResonanceDps.App.ViewModels.WidgetSettings;
 
-namespace StarResonanceDps.App.Views.WidgetSettings;
+namespace StarResonanceDps.App.Views.Settings;
 
-public partial class MeterWidgetSettingsView : UserControl
+public partial class ClassColorSettingsView : UserControl
 {
-    public MeterWidgetSettingsView()
+    public ClassColorSettingsView()
     {
         InitializeComponent();
     }
 
-    private MeterWidgetSettingsViewModel ViewModel => (MeterWidgetSettingsViewModel)DataContext;
+    private ClassColorSettingsViewModel ViewModel => (ClassColorSettingsViewModel)DataContext;
 
     private void ColorOptionRadioButton_Click(object sender, RoutedEventArgs e)
     {

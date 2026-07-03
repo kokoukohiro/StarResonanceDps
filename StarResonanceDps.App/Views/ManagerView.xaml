@@ -102,7 +102,6 @@
                             <ColumnDefinition Width="*" MinWidth="160" />
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
                         <controls:SearchBox Grid.Column="0"
@@ -111,19 +110,7 @@
 
                         <ComboBox Grid.Column="1"
                                   Margin="8,0,0,0"
-                                  Width="120"
-                                  Style="{StaticResource Input.SelectBox}"
-                                  Tag="{DynamicResource Icon.Filter}"
-                                  SelectedIndex="{Binding WidgetFilterIndex, Mode=TwoWay}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetFilter_All]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetFilter_Favorites]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetFilter_Running]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetFilter_Stopped]}" />
-                        </ComboBox>
-
-                        <ComboBox Grid.Column="2"
-                                  Margin="8,0,0,0"
-                                  Width="120"
+                                  Width="140"
                                   Style="{StaticResource Input.SelectBox}"
                                   Tag="{DynamicResource Icon.Sort}"
                                   SelectedIndex="{Binding WidgetSortIndex, Mode=TwoWay}">
@@ -135,7 +122,7 @@
                         </ComboBox>
 
                         <ComboBox
-                            Grid.Column="3"
+                            Grid.Column="2"
                             Margin="8,0,0,0"
                             Style="{StaticResource Input.IconOnlySelectBox}"
                             Tag="{DynamicResource Icon.MoreVertical}"

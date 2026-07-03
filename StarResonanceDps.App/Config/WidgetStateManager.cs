@@ -158,9 +158,14 @@ public sealed class WidgetStateManager
                 continue;
             }
 
-            if (sourceSchemaVersion < WidgetConfigDefaults.CurrentSchemaVersion)
+            if (sourceSchemaVersion < 3)
             {
                 WidgetConfigDefaults.MigrateVersion1Defaults(config);
+            }
+
+            if (sourceSchemaVersion < WidgetConfigDefaults.CurrentSchemaVersion)
+            {
+                WidgetConfigDefaults.RemoveObsoleteSettings(config);
             }
 
             WidgetConfigDefaults.Normalize(kind, config);

@@ -1,5 +1,110 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -42,6 +147,9 @@
   <data name="Common_SelectColor" xml:space="preserve">
     <value>色を選択</value>
   </data>
+  <data name="Common_Copy" xml:space="preserve">
+    <value>コピー</value>
+  </data>
   <data name="Navigation_Widgets" xml:space="preserve">
     <value>ウィジェット</value>
   </data>
@@ -56,18 +164,6 @@
   </data>
   <data name="Manager_WidgetSearch_Placeholder" xml:space="preserve">
     <value>ウィジェットを検索...</value>
-  </data>
-  <data name="Manager_WidgetFilter_All" xml:space="preserve">
-    <value>すべて</value>
-  </data>
-  <data name="Manager_WidgetFilter_Favorites" xml:space="preserve">
-    <value>お気に入り</value>
-  </data>
-  <data name="Manager_WidgetFilter_Running" xml:space="preserve">
-    <value>起動中</value>
-  </data>
-  <data name="Manager_WidgetFilter_Stopped" xml:space="preserve">
-    <value>停止中</value>
   </data>
   <data name="Manager_WidgetSort_Default" xml:space="preserve">
     <value>デフォルト</value>
@@ -96,9 +192,6 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>すべてのピン留めを解除</value>
   </data>
-  <data name="Settings_Section_Basic_Title" xml:space="preserve">
-    <value>基本設定</value>
-  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>表示設定</value>
   </data>
@@ -107,15 +200,6 @@
   </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>アップデート</value>
-  </data>
-  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
-    <value>ネットワークアダプター</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Title" xml:space="preserve">
-    <value>ネットワークアダプターが見つかりません</value>
-  </data>
-  <data name="Message_NetworkAdapterUnavailable_Message" xml:space="preserve">
-    <value>使用中のネットワークアダプターを特定できませんでした。インターネット接続を確認してからアプリを再起動してください。</value>
   </data>
   <data name="Settings_Language_Title" xml:space="preserve">
     <value>言語</value>
@@ -136,13 +220,25 @@
     <value>English</value>
   </data>
   <data name="Settings_Display_NumberMode" xml:space="preserve">
-    <value>数値表示形式</value>
+    <value>数値</value>
   </data>
   <data name="NumberDisplay_KMB" xml:space="preserve">
     <value>英語表記（KMBT）</value>
   </data>
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>日本語表記（万億兆）</value>
+  </data>
+    <data name="Settings_Display_PlayerName" xml:space="preserve">
+    <value>プレイヤー名</value>
+  </data>
+  <data name="PlayerNameDisplay_Show" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="PlayerNameDisplay_Hide" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
+    <value>自分以外非表示</value>
   </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>ウィンドウの色</value>
@@ -216,9 +312,6 @@
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>クラスカラー</value>
   </data>
-  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>クラスカラーの不透明度</value>
-  </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>シールドファイター</value>
   </data>
@@ -258,8 +351,15 @@
   <data name="Navigation_Settings" xml:space="preserve">
     <value>設定</value>
   </data>
-<data name="Settings_Theme_BackgroundImage" xml:space="preserve"><value>背景画像</value></data><data name="Settings_Theme_SelectImage" xml:space="preserve"><value>画像を選択</value></data><data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve"><value>画像ファイル</value></data>
-
+  <data name="Settings_Theme_BackgroundImage" xml:space="preserve">
+    <value>背景画像</value>
+  </data>
+  <data name="Settings_Theme_SelectImage" xml:space="preserve">
+    <value>画像を選択</value>
+  </data>
+  <data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve">
+    <value>画像ファイル</value>
+  </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>不明</value>
   </data>

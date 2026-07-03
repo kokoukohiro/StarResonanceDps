@@ -26,6 +26,8 @@ public sealed class ConfigManager
 
     public AppConfig AppConfig { get; }
 
+    public event EventHandler? SettingsChanged;
+
     public SettingsConfig GetSettingsSnapshot()
     {
         AppConfigDefaults.Normalize(AppConfig);
@@ -42,6 +44,7 @@ public sealed class ConfigManager
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
         Save();
+        SettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SaveColorPicker(ColorPickerConfig colorPicker)
