@@ -10,4 +10,7 @@ public sealed record PlayerRosterEntry(
     long MaxHp = 0,
     PlayerClassSpec ClassSpec = PlayerClassSpec.Unknown,
     bool IsSelf = false,
-    PlayerCombatAttributes CombatAttributes = default);
+    PlayerCombatAttributes CombatAttributes = default,
+    int SubProfessionId = 0,
+    int Level = 0,
+    int SeasonLevel = 0);

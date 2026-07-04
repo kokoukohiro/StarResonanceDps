@@ -104,7 +104,6 @@
     <Folder Include="Services\" />
     <Folder Include="Styles\" />
     <Folder Include="ViewModels\" />
-    <Folder Include="ViewModels\WidgetSettings\" />
     <Folder Include="Views\Widgets\" />
   </ItemGroup>
 
@@ -248,9 +247,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\WidgetSettings\**" />
     <Compile Remove="Views\WidgetSettings\**" />
+    <EmbeddedResource Remove="ViewModels\WidgetSettings\**" />
     <EmbeddedResource Remove="Views\WidgetSettings\**" />
+    <None Remove="ViewModels\WidgetSettings\**" />
     <None Remove="Views\WidgetSettings\**" />
+    <Page Remove="ViewModels\WidgetSettings\**" />
     <Page Remove="Views\WidgetSettings\**" />
   </ItemGroup>
 

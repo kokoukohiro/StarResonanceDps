@@ -1,18 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using StarResonanceDps.App.Config;
-using StarResonanceDps.App.ViewModels;
-using StarResonanceDps.App.Views.Widgets;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
+using StarResonanceDps.App.Views.Widgets;
 
 namespace StarResonanceDps.App.Services;
 
 public sealed class WidgetWindowManager
 {
-    private readonly Dictionary<WidgetKind, WidgetWindow> _openWindows = new();
+    private const double PlayerWindowCascadeOffset = 20d;
+
+    private readonly Dictionary<WidgetKind, WidgetWindow> _openSingleWindows = new();
+    private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
+    private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
     private Window? _managerWindow;
     private bool _isManagerClosing;
 
@@ -24,6 +30,12 @@ public sealed class WidgetWindowManager
 
     public void ApplyWidgetState(WidgetListItemViewModel widget)
     {
+        if (IsPlayerWindowWidget(widget.Kind))
+        {
+            ApplyPlayerWindowWidgetState(widget);
+            return;
+        }
+
         if (widget.State == WidgetState.Running)
         {
             Open(widget);
@@ -35,7 +47,26 @@ public sealed class WidgetWindowManager
 
     public void ApplyWidgetPinState(WidgetListItemViewModel widget, bool bringToFront)
     {
-        if (!_openWindows.TryGetValue(widget.Kind, out var window))
+        if (IsPlayerWindowWidget(widget.Kind))
+        {
+            var playerWindows = _openPlayerWindows
+                .Where(session => ReferenceEquals(session.Widget, widget))
+                .ToArray();
+
+            foreach (var playerWindow in playerWindows)
+            {
+                playerWindow.Window.ApplyPinState(widget.IsPinned);
+            }
+
+            if (widget.IsPinned && bringToFront && playerWindows.LastOrDefault() is { } lastPlayerWindow)
+            {
+                Activate(lastPlayerWindow.Window);
+            }
+
+            return;
+        }
+
+        if (!_openSingleWindows.TryGetValue(widget.Kind, out var window))
         {
             return;
         }
@@ -44,22 +75,58 @@ public sealed class WidgetWindowManager
 
         if (widget.IsPinned && bringToFront)
         {
-            window.Activate();
+            Activate(window);
         }
+    }
+
+    public void OpenPlayerWindow(WidgetListItemViewModel playerWidget, long characterId)
+    {
+        if (!IsPlayerWindowWidget(playerWidget.Kind))
+        {
+            return;
+        }
+
+        TrackPlayerWidget(playerWidget);
+
+        var existingWindow = _openPlayerWindows
+            .FirstOrDefault(session =>
+                ReferenceEquals(session.Widget, playerWidget)
+                && session.ViewModel.RepresentsPlayer(characterId));
+
+        if (existingWindow is not null)
+        {
+            RestoreAndActivate(existingWindow.Window);
+            return;
+        }
+
+        CreatePlayerWindow(playerWidget, characterId);
+    }
+
+    private void ApplyPlayerWindowWidgetState(WidgetListItemViewModel widget)
+    {
+        TrackPlayerWidget(widget);
+
+        if (widget.State == WidgetState.Running)
+        {
+            if (_openPlayerWindows.Any(session => ReferenceEquals(session.Widget, widget)))
+            {
+                UpdatePlayerWindowCount(widget);
+                return;
+            }
+
+            CreatePlayerWindow(widget, requestedCharacterId: null);
+            return;
+        }
+
+        ClosePlayerWindows(widget);
     }
 
     private void Open(WidgetListItemViewModel widget)
     {
-        if (_openWindows.TryGetValue(widget.Kind, out var existingWindow))
+        if (_openSingleWindows.TryGetValue(widget.Kind, out var existingWindow))
         {
             existingWindow.ApplyPinState(widget.IsPinned);
-
-            if (existingWindow.WindowState == WindowState.Minimized)
-            {
-                existingWindow.WindowState = WindowState.Normal;
-            }
-
-            existingWindow.Activate();
+            RestoreAndActivate(existingWindow);
             return;
         }
 
@@ -67,21 +134,216 @@ public sealed class WidgetWindowManager
         TrackManagerWindow(owner);
 
         var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
-        var window = new WidgetWindow(widget, savedBounds, owner);
+        var widgetContent = CreateWidgetContent(widget);
+        var window = new WidgetWindow(widget, widgetContent, savedBounds, owner);
         window.Closed += WidgetWindow_Closed;
 
-        _openWindows.Add(widget.Kind, window);
+        _openSingleWindows.Add(widget.Kind, window);
         window.Show();
+    }
+
+    private void CreatePlayerWindow(WidgetListItemViewModel playerWidget, long? requestedCharacterId)
+    {
+        var owner = Application.Current?.MainWindow;
+        TrackManagerWindow(owner);
+
+        var roster = PlayerRosterPresentationStore.Instance.Current.Entries;
+        var initialPlayer = ResolvePlayer(requestedCharacterId, roster);
+        var playerWindowViewModel = CreatePlayerWindowViewModel(
+            playerWidget,
+            requestedCharacterId,
+            initialPlayer);
+        var content = CreatePlayerWindowContent(playerWindowViewModel);
+        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(playerWidget.Kind).Window;
+        var window = new WidgetWindow(
+            playerWidget,
+            content,
+            savedBounds,
+            owner,
+            playerWindowViewModel.HeaderText);
+        window.Closed += WidgetWindow_Closed;
+
+        var cascadeIndex = _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, playerWidget));
+        ApplyPlayerWindowCascade(window, cascadeIndex);
+
+        _openPlayerWindows.Add(new PlayerWidgetWindowSession(playerWidget, playerWindowViewModel, window));
+        UpdatePlayerWindowCount(playerWidget);
+
+        window.Show();
+
+        if (playerWidget.State != WidgetState.Running)
+        {
+            playerWidget.State = WidgetState.Running;
+        }
+    }
+
+    private static PlayerWidgetWindowViewModel CreatePlayerWindowViewModel(
+        WidgetListItemViewModel playerWidget,
+        long? requestedCharacterId,
+        PlayerRosterEntry? initialPlayer)
+    {
+        return playerWidget.Kind switch
+        {
+            WidgetKind.PlayerInfo => new PlayerInfoWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer),
+            WidgetKind.PlayerStatus => new PlayerStatusWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer),
+            WidgetKind.PlayerEquipment => new PlayerEquipmentWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer),
+            _ => throw new ArgumentOutOfRangeException(nameof(playerWidget))
+        };
+    }
+
+    private static FrameworkElement CreatePlayerWindowContent(PlayerWidgetWindowViewModel playerWindowViewModel)
+    {
+        return playerWindowViewModel switch
+        {
+            PlayerInfoWidgetViewModel infoViewModel => new PlayerInfoWidgetView
+            {
+                DataContext = infoViewModel
+            },
+            PlayerStatusWidgetViewModel statusViewModel => new PlayerStatusWidgetView
+            {
+                DataContext = statusViewModel
+            },
+            PlayerEquipmentWidgetViewModel equipmentViewModel => new PlayerEquipmentWidgetView
+            {
+                DataContext = equipmentViewModel
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(playerWindowViewModel))
+        };
+    }
+
+    private static FrameworkElement? CreateWidgetContent(WidgetListItemViewModel widget)
+    {
+        return widget.Kind switch
+        {
+            WidgetKind.PlayerInfoDebug => new PlayerListWidgetView(),
+            _ => null
+        };
     }
 
     private void Close(WidgetKind kind)
     {
-        if (!_openWindows.TryGetValue(kind, out var window))
+        if (!_openSingleWindows.TryGetValue(kind, out var window))
         {
             return;
         }
 
         window.Close();
+    }
+
+    private void ClosePlayerWindows(WidgetListItemViewModel playerWidget)
+    {
+        foreach (var playerWindow in _openPlayerWindows
+                     .Where(session => ReferenceEquals(session.Widget, playerWidget))
+                     .Select(session => session.Window)
+                     .ToArray())
+        {
+            playerWindow.Close();
+        }
+
+        UpdatePlayerWindowCount(playerWidget);
+    }
+
+    private void TrackPlayerWidget(WidgetListItemViewModel playerWidget)
+    {
+        if (_trackedPlayerWidgets.TryGetValue(playerWidget.Kind, out var trackedWidget)
+            && ReferenceEquals(trackedWidget, playerWidget))
+        {
+            return;
+        }
+
+        if (trackedWidget is not null)
+        {
+            trackedWidget.PlayerWindowPresentationChanged -= PlayerWidget_PresentationChanged;
+        }
+
+        _trackedPlayerWidgets[playerWidget.Kind] = playerWidget;
+        playerWidget.PlayerWindowPresentationChanged += PlayerWidget_PresentationChanged;
+    }
+
+    public void UpdatePlayerWindowPresentations(IReadOnlyList<PlayerRosterEntry> roster)
+    {
+        var playersByCharacterId = roster
+            .Where(player => player.CharacterId != 0)
+            .ToDictionary(player => player.CharacterId);
+        var selfPlayer = roster.FirstOrDefault(player => player.IsSelf);
+
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            playerWindow.ViewModel.UpdatePlayerFromRoster(playersByCharacterId, selfPlayer);
+            playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
+        }
+    }
+
+    private void PlayerWidget_PresentationChanged(object? sender, EventArgs e)
+    {
+        if (sender is not WidgetListItemViewModel playerWidget)
+        {
+            return;
+        }
+
+        foreach (var playerWindow in _openPlayerWindows
+                     .Where(session => ReferenceEquals(session.Widget, playerWidget))
+                     .ToArray())
+        {
+            playerWindow.ViewModel.RefreshPlayerPresentation();
+            playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
+        }
+    }
+
+    private static PlayerRosterEntry? ResolvePlayer(
+        long? requestedCharacterId,
+        IReadOnlyList<PlayerRosterEntry> roster)
+    {
+        return requestedCharacterId is { } characterId
+            ? roster.FirstOrDefault(player => player.CharacterId == characterId)
+            : roster.FirstOrDefault(player => player.IsSelf);
+    }
+
+    private void UpdatePlayerWindowCount(WidgetListItemViewModel playerWidget)
+    {
+        playerWidget.SetOpenPlayerWindowCount(
+            _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, playerWidget)));
+    }
+
+    private static bool IsPlayerWindowWidget(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerInfo or WidgetKind.PlayerStatus or WidgetKind.PlayerEquipment;
+    }
+
+    private static void RestoreAndActivate(WidgetWindow window)
+    {
+        if (window.WindowState == WindowState.Minimized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        Activate(window);
+    }
+
+    private static void Activate(WidgetWindow window)
+    {
+        window.Activate();
+    }
+
+    private static void ApplyPlayerWindowCascade(WidgetWindow window, int cascadeIndex)
+    {
+        if (cascadeIndex <= 0)
+        {
+            return;
+        }
+
+        var offset = PlayerWindowCascadeOffset * cascadeIndex;
+        window.Left += offset;
+        window.Top += offset;
     }
 
     private void TrackManagerWindow(Window? managerWindow)
@@ -109,7 +371,9 @@ public sealed class WidgetWindowManager
 
         _isManagerClosing = true;
 
-        foreach (var window in _openWindows.Values.ToArray())
+        foreach (var window in _openSingleWindows.Values
+                     .Concat(_openPlayerWindows.Select(session => session.Window))
+                     .ToArray())
         {
             window.Close();
         }
@@ -123,11 +387,49 @@ public sealed class WidgetWindowManager
         }
 
         window.Closed -= WidgetWindow_Closed;
-        _openWindows.Remove(window.Widget.Kind);
+
+        var playerWindow = _openPlayerWindows.FirstOrDefault(
+            session => ReferenceEquals(session.Window, window));
+
+        if (playerWindow is not null)
+        {
+            _openPlayerWindows.Remove(playerWindow);
+            UpdatePlayerWindowCount(playerWindow.Widget);
+
+            if (!_isManagerClosing
+                && playerWindow.Widget.State == WidgetState.Running
+                && !_openPlayerWindows.Any(session => ReferenceEquals(session.Widget, playerWindow.Widget)))
+            {
+                playerWindow.Widget.State = WidgetState.Stopped;
+            }
+
+            return;
+        }
+
+        _openSingleWindows.Remove(window.Widget.Kind);
 
         if (!_isManagerClosing && window.Widget.State == WidgetState.Running)
         {
             window.Widget.State = WidgetState.Stopped;
         }
+    }
+
+    private sealed class PlayerWidgetWindowSession
+    {
+        public PlayerWidgetWindowSession(
+            WidgetListItemViewModel widget,
+            PlayerWidgetWindowViewModel viewModel,
+            WidgetWindow window)
+        {
+            Widget = widget;
+            ViewModel = viewModel;
+            Window = window;
+        }
+
+        public WidgetListItemViewModel Widget { get; }
+
+        public PlayerWidgetWindowViewModel ViewModel { get; }
+
+        public WidgetWindow Window { get; }
     }
 }

@@ -4,6 +4,8 @@ using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -77,6 +79,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     public void RestoreSavedSettingsPreview()
     {
         LocalizationManager.Instance.ApplyLanguageIndex(_lastSavedSettings.LanguageIndex);
+        ApplyPlayerNameDisplayModePreview(_lastSavedSettings.PlayerNameDisplayModeIndex);
         ThemeManager.Instance.ApplyGlobalTheme(_lastSavedSettings);
     }
 
@@ -126,6 +129,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             _isLoadingSettings = false;
         }
 
+        ApplyPlayerNameDisplayModePreview(PlayerNameDisplayModeIndex);
+
         if (applyLanguage)
         {
             LocalizationManager.Instance.ApplyLanguageIndex(LanguageIndex);
@@ -135,6 +140,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     private void ApplyCurrentGlobalTheme()
     {
         ThemeManager.Instance.ApplyGlobalTheme(CreateSettings());
+    }
+
+    private static void ApplyPlayerNameDisplayModePreview(int playerNameDisplayModeIndex)
+    {
+        PlayerRosterPresentationStore.Instance.SetNameDisplayMode(
+            (PlayerNameDisplayMode)playerNameDisplayModeIndex);
     }
 
     private static bool SettingsEquals(SettingsConfig left, SettingsConfig right)
@@ -200,6 +211,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     partial void OnPlayerNameDisplayModeIndexChanged(int value)
     {
+        if (!_isLoadingSettings)
+        {
+            ApplyPlayerNameDisplayModePreview(value);
+        }
+
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 }

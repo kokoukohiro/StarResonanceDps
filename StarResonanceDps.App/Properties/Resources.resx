@@ -376,13 +376,13 @@
     <value>Block</value>
   </data>
   <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
-    <value>IaidoSlash</value>
+    <value>Iaido</value>
   </data>
   <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
-    <value>MoonStrike</value>
+    <value>Moonstrike</value>
   </data>
   <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
-    <value>VanGuard</value>
+    <value>Vanguard</value>
   </data>
   <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
     <value>Skyward</value>
@@ -391,7 +391,7 @@
     <value>Icicle</value>
   </data>
   <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
-    <value>FrostBeam</value>
+    <value>Frostbeam</value>
   </data>
   <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
     <value>Wildpack</value>
@@ -403,7 +403,7 @@
     <value>Smite</value>
   </data>
   <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
-    <value>LifeBind</value>
+    <value>Lifebind</value>
   </data>
   <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
     <value>Dissonance</value>
@@ -417,46 +417,67 @@
   <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
     <value>Crimson</value>
   </data>
-  <data name="Widget_PlayerDetail" xml:space="preserve">
-    <value>Player Details</value>
+  <data name="Widget_PlayerStatus" xml:space="preserve">
+    <value>Status</value>
   </data>
-  <data name="PlayerDetail_Hp" xml:space="preserve">
+  <data name="PlayerStatus_Hp" xml:space="preserve">
     <value>HP</value>
   </data>
-  <data name="PlayerDetail_MaxHp" xml:space="preserve">
+  <data name="PlayerStatus_MaxHp" xml:space="preserve">
     <value>Max HP</value>
   </data>
-  <data name="PlayerDetail_Strength" xml:space="preserve">
+  <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>Strength</value>
   </data>
-  <data name="PlayerDetail_Agility" xml:space="preserve">
+  <data name="PlayerStatus_Agility" xml:space="preserve">
     <value>Agility</value>
   </data>
-  <data name="PlayerDetail_Intellect" xml:space="preserve">
+  <data name="PlayerStatus_Intellect" xml:space="preserve">
     <value>Intellect</value>
   </data>
-  <data name="PlayerDetail_Endurance" xml:space="preserve">
+  <data name="PlayerStatus_Endurance" xml:space="preserve">
     <value>Endurance</value>
   </data>
-  <data name="PlayerDetail_Armor" xml:space="preserve">
+  <data name="PlayerStatus_Armor" xml:space="preserve">
     <value>Armor</value>
   </data>
-  <data name="PlayerDetail_Crit" xml:space="preserve">
+  <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>Crit</value>
   </data>
-  <data name="PlayerDetail_Haste" xml:space="preserve">
+  <data name="PlayerStatus_Haste" xml:space="preserve">
     <value>Haste</value>
   </data>
-  <data name="PlayerDetail_Luck" xml:space="preserve">
+  <data name="PlayerStatus_Luck" xml:space="preserve">
     <value>Luck</value>
   </data>
-  <data name="PlayerDetail_Mastery" xml:space="preserve">
+  <data name="PlayerStatus_Mastery" xml:space="preserve">
     <value>Mastery</value>
   </data>
-  <data name="PlayerDetail_Versatility" xml:space="preserve">
+  <data name="PlayerStatus_Versatility" xml:space="preserve">
     <value>Versatility</value>
   </data>
-  <data name="PlayerDetail_Block" xml:space="preserve">
+  <data name="PlayerStatus_Block" xml:space="preserve">
     <value>Block</value>
+  </data>
+  <data name="Widget_PlayerInfo" xml:space="preserve">
+    <value>Player Info</value>
+  </data>
+  <data name="Widget_PlayerEquipment" xml:space="preserve">
+    <value>Equipment Info</value>
+  </data>
+  <data name="PlayerInfo_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="PlayerInfo_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="PlayerInfo_AbilityScore" xml:space="preserve">
+    <value>Ability Score</value>
+  </data>
+  <data name="PlayerInfo_Profession" xml:space="preserve">
+    <value>Profession</value>
+  </data>
+  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
+    <value>ProfessionSpec</value>
   </data>
 </root>

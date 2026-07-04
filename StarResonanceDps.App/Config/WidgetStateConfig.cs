@@ -101,7 +101,7 @@ public sealed class WidgetWindowConfig
 
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 4;
+    public const int CurrentSchemaVersion = 5;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
@@ -109,8 +109,12 @@ public static class WidgetConfigDefaults
 
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
-    private const double PlayerDetailInitialWindowWidth = 400d;
-    private const double PlayerDetailInitialWindowHeight = 230d;
+    private const double PlayerInfoInitialWindowWidth = 360d;
+    private const double PlayerInfoInitialWindowHeight = 200d;
+    private const double PlayerStatusInitialWindowWidth = 400d;
+    private const double PlayerStatusInitialWindowHeight = 230d;
+    private const double PlayerEquipmentInitialWindowWidth = 400d;
+    private const double PlayerEquipmentInitialWindowHeight = 230d;
 
     private static readonly string[] DefaultWindowColorHexes =
     [
@@ -188,10 +192,20 @@ public static class WidgetConfigDefaults
                 Width = PlayerListInitialWindowWidth,
                 Height = PlayerListInitialWindowHeight
             },
-            WidgetKind.PlayerDetail => new WidgetWindowConfig
+            WidgetKind.PlayerInfo => new WidgetWindowConfig
             {
-                Width = PlayerDetailInitialWindowWidth,
-                Height = PlayerDetailInitialWindowHeight
+                Width = PlayerInfoInitialWindowWidth,
+                Height = PlayerInfoInitialWindowHeight
+            },
+            WidgetKind.PlayerStatus => new WidgetWindowConfig
+            {
+                Width = PlayerStatusInitialWindowWidth,
+                Height = PlayerStatusInitialWindowHeight
+            },
+            WidgetKind.PlayerEquipment => new WidgetWindowConfig
+            {
+                Width = PlayerEquipmentInitialWindowWidth,
+                Height = PlayerEquipmentInitialWindowHeight
             },
             _ => new WidgetWindowConfig()
         };
@@ -253,9 +267,19 @@ public static class WidgetConfigDefaults
                 config.Window.Height ??= PlayerListInitialWindowHeight;
                 break;
 
-            case WidgetKind.PlayerDetail:
-                config.Window.Width ??= PlayerDetailInitialWindowWidth;
-                config.Window.Height ??= PlayerDetailInitialWindowHeight;
+            case WidgetKind.PlayerInfo:
+                config.Window.Width ??= PlayerInfoInitialWindowWidth;
+                config.Window.Height ??= PlayerInfoInitialWindowHeight;
+                break;
+
+            case WidgetKind.PlayerStatus:
+                config.Window.Width ??= PlayerStatusInitialWindowWidth;
+                config.Window.Height ??= PlayerStatusInitialWindowHeight;
+                break;
+
+            case WidgetKind.PlayerEquipment:
+                config.Window.Width ??= PlayerEquipmentInitialWindowWidth;
+                config.Window.Height ??= PlayerEquipmentInitialWindowHeight;
                 break;
         }
     }

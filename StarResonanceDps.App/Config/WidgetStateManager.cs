@@ -148,6 +148,7 @@ public sealed class WidgetStateManager
     {
         var sourceSchemaVersion = document.SchemaVersion <= 0 ? 1 : document.SchemaVersion;
         document.Widgets ??= new Dictionary<string, WidgetConfig>(StringComparer.OrdinalIgnoreCase);
+        MigratePlayerStatusWidgetConfig(document.Widgets);
 
         foreach (WidgetKind kind in Enum.GetValues<WidgetKind>())
         {
@@ -172,6 +173,20 @@ public sealed class WidgetStateManager
         }
 
         document.SchemaVersion = WidgetConfigDefaults.CurrentSchemaVersion;
+    }
+
+    private static void MigratePlayerStatusWidgetConfig(Dictionary<string, WidgetConfig> widgets)
+    {
+        const string legacyKey = "PlayerDetail";
+        var statusKey = WidgetConfigDefaults.GetKey(WidgetKind.PlayerStatus);
+
+        if (widgets.TryGetValue(legacyKey, out var legacyConfig)
+            && !widgets.ContainsKey(statusKey))
+        {
+            widgets[statusKey] = legacyConfig;
+        }
+
+        widgets.Remove(legacyKey);
     }
 
     private string? GetReadableStatePath()

@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -6,67 +7,56 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
-public sealed class PlayerListEntry
+public sealed partial class PlayerListEntry : ObservableObject
 {
-    private PlayerListEntry(
-        long characterId,
-        string professionKey,
-        string classSpecDisplayName,
-        string displayName,
-        double healthRatio,
-        SolidColorBrush classBrush)
+    private PlayerListEntry(long characterId)
     {
         CharacterId = characterId;
-        ProfessionKey = professionKey;
-        ClassSpecDisplayName = classSpecDisplayName;
-        DisplayName = displayName;
-        HealthRatio = healthRatio;
-        ClassBrush = classBrush;
     }
 
     public long CharacterId { get; }
 
-    public string ProfessionKey { get; }
+    [ObservableProperty]
+    private string _professionKey = string.Empty;
 
-    public string ClassSpecDisplayName { get; }
+    [ObservableProperty]
+    private string _classSpecDisplayName = string.Empty;
 
-    public string DisplayName { get; }
+    [ObservableProperty]
+    private string _displayName = string.Empty;
 
-    public double HealthRatio { get; }
+    [ObservableProperty]
+    private double _healthRatio;
 
-    public SolidColorBrush ClassBrush { get; }
+    [ObservableProperty]
+    private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
+
+    public bool IsHealthFull => HealthRatio >= 1d;
 
     public static PlayerListEntry Create(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
     {
-        var professionKey = GetProfessionKey(player.ProfessionId);
-        var classColor = GetClassColor(classColors, professionKey);
-        var classSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
-        var displayName = $"{player.Name}（{player.CombatPower}-{player.SeasonStrength}）";
-
-        return new PlayerListEntry(
-            player.CharacterId,
-            professionKey,
-            classSpecDisplayName,
-            displayName,
-            GetHealthRatio(player.CurrentHp, player.MaxHp),
-            CreateBrush(classColor));
+        var entry = new PlayerListEntry(player.CharacterId);
+        entry.Update(player, classColors);
+        return entry;
     }
 
-    private static string GetProfessionKey(int professionId)
+    public void Update(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
     {
-        return professionId switch
+        ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
+        ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
+        DisplayName = $"{player.Name}（{player.CombatPower}-S{player.SeasonStrength}）";
+        HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
+
+        var classColor = GetClassColor(classColors, ProfessionKey);
+        if (ClassBrush.Color != classColor)
         {
-            1 => "Stormblade",
-            2 => "FrostMage",
-            3 => "FlameBerserker",
-            4 => "WindKnight",
-            5 => "VerdantOracle",
-            9 => "HeavyGuardian",
-            11 => "Marksman",
-            12 => "ShieldKnight",
-            13 => "SoulMusician",
-            _ => "Unknown"
-        };
+            ClassBrush = CreateBrush(classColor);
+        }
+    }
+
+    partial void OnHealthRatioChanged(double value)
+    {
+        OnPropertyChanged(nameof(IsHealthFull));
     }
 
     private static double GetHealthRatio(long currentHp, long maxHp)

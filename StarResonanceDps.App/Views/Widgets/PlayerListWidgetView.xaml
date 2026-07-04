@@ -1,0 +1,234 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerListWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <converters:HealthRatioToWidthConverter x:Key="PlayerList.HealthRatioToWidthConverter" />
+    </UserControl.Resources>
+
+    <Grid>
+        <ScrollViewer x:Name="PlayerListScrollViewer"
+                      Margin="10,8,0,0"
+                      VerticalScrollBarVisibility="Hidden"
+                      HorizontalScrollBarVisibility="Disabled"
+                      CanContentScroll="False"
+                      ScrollChanged="PlayerListScrollViewer_ScrollChanged">
+            <ItemsControl ItemsSource="{Binding PlayerListEntries}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Height="42"
+                                Margin="0,0,0,5"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                IsTabStop="False"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                Click="PlayerListItem_Click"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch">
+                            <Button.ContextMenu>
+                                <ContextMenu Style="{StaticResource Menu.TextSelectionContextMenu}"
+                                             DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                             Placement="Bottom">
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
+                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
+                                              Command="{Binding RequestPlayerInfoCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
+                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
+                                              Command="{Binding RequestPlayerStatusCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
+                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
+                                              Command="{Binding RequestPlayerEquipmentCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid SnapsToDevicePixels="True">
+                                                    <Border x:Name="InteractionBackground"
+                                                            Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                                            Opacity="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                                            Visibility="Collapsed" />
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0">
+                                    <Rectangle Width="26"
+                                               Height="26"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Fill="{Binding ClassBrush}">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                                <Setter Property="OpacityMask">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="ShieldKnight">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.ShieldKnight}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="HeavyGuardian">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.HeavyGuardian}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="VerdantOracle">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.VerdantOracle}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="SoulMusician">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.SoulMusician}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="FlameBerserker">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.FlameBerserker}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="Stormblade">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.Stormblade}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="FrostMage">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.FrostMage}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="WindKnight">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.WindKnight}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="Marksman">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.Marksman}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+
+                                    <TextBlock Margin="0,27,0,0"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"
+                                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                               FontSize="10"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding ClassSpecDisplayName}"
+                                               TextAlignment="Center"
+                                               TextTrimming="CharacterEllipsis" />
+                                </Grid>
+
+                                <Grid Grid.Column="1" Margin="6,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0"
+                                               VerticalAlignment="Top"
+                                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding DisplayName}"
+                                               TextTrimming="CharacterEllipsis" />
+
+                                    <Border Grid.Row="1"
+                                            Width="138"
+                                            Height="10"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Top"
+                                            Background="#FF000000"
+                                            CornerRadius="5"
+                                            Padding="1">
+                                        <Grid x:Name="HealthFillHost"
+                                              Height="8"
+                                              VerticalAlignment="Center">
+                                            <Grid.Clip>
+                                                <RectangleGeometry Rect="0,0,136,8" RadiusX="4" RadiusY="4" />
+                                            </Grid.Clip>
+                                            <Border Height="8"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center"
+                                                    Background="#FF1CE6A7">
+                                                <Border.Width>
+                                                    <MultiBinding Converter="{StaticResource PlayerList.HealthRatioToWidthConverter}">
+                                                        <Binding Path="HealthRatio" />
+                                                        <Binding ElementName="HealthFillHost" Path="ActualWidth" />
+                                                    </MultiBinding>
+                                                </Border.Width>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

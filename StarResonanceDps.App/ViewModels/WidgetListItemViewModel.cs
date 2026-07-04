@@ -1,5 +1,5 @@
-using System.Collections.ObjectModel;
 using System.IO;
+using System.Collections.ObjectModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,10 +14,11 @@ namespace StarResonanceDps.App.ViewModels;
 public partial class WidgetListItemViewModel : ViewModelBase
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
-    private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+    private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
-    private long? _selectedPlayerCharacterId;
+    private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+    private long _playerListMapGeneration = -1;
 
     public WidgetKind Kind { get; init; }
 
@@ -53,13 +54,23 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private string _mapName = string.Empty;
 
     [ObservableProperty]
-    private PlayerDetailEntry? _selectedPlayerDetail;
+    private int _openPlayerWindowCount;
 
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
     public bool IsPlayerList => Kind == WidgetKind.PlayerInfoDebug;
 
-    public bool IsPlayerDetail => Kind == WidgetKind.PlayerDetail;
+    public bool IsPlayerInfo => Kind == WidgetKind.PlayerInfo;
+
+    public bool IsPlayerStatus => Kind == WidgetKind.PlayerStatus;
+
+    public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
+
+    public bool IsPlayerWindowWidget => IsPlayerInfo || IsPlayerStatus || IsPlayerEquipment;
+
+    public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
+
+    public bool ShowsFooter => IsPlayerList;
 
     public string StateText => State == WidgetState.Running
         ? LocalizationManager.Instance.GetString("Widget_State_Running")
@@ -67,7 +78,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsRunning => State == WidgetState.Running;
 
-    public event Action<long>? PlayerDetailRequested;
+    public event Action<WidgetKind, long>? PlayerWindowRequested;
+
+    public event EventHandler? PlayerWindowPresentationChanged;
 
     public WidgetListItemViewModel()
     {
@@ -78,8 +91,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     {
         DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
         OnPropertyChanged(nameof(StateText));
-        RefreshPlayerListEntries();
-        RefreshPlayerDetail();
+        SynchronizePlayerListEntries(resetEntries: false);
+        RaisePlayerWindowPresentationChanged();
     }
 
     public WidgetConfig CreateWidgetConfig()
@@ -106,8 +119,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         ApplyTheme(config.Theme);
-        RefreshPlayerListEntries();
-        RefreshPlayerDetail();
+        SynchronizePlayerListEntries(resetEntries: false);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)
@@ -149,51 +161,27 @@ public partial class WidgetListItemViewModel : ViewModelBase
             : null;
     }
 
-    public void UpdatePlayerRoster(IReadOnlyList<PlayerRosterEntry> playerRoster, string mapName)
+    public void UpdatePlayerRoster(
+        IReadOnlyList<PlayerRosterEntry> playerRoster,
+        string mapName,
+        long mapGeneration)
     {
-        if (!IsPlayerList && !IsPlayerDetail)
+        if (!IsPlayerList)
         {
             return;
         }
 
         MapName = mapName ?? string.Empty;
-        _playerRoster = playerRoster
-            .Select(entry => new PlayerRosterEntry(
-                entry.CharacterId,
-                entry.Name,
-                entry.ProfessionId,
-                entry.CombatPower,
-                entry.SeasonStrength,
-                entry.CurrentHp,
-                entry.MaxHp,
-                entry.ClassSpec,
-                entry.IsSelf,
-                entry.CombatAttributes))
-            .ToArray();
-        RefreshPlayerListEntries();
-        RefreshPlayerDetail();
+        _playerRoster = playerRoster;
+
+        var resetEntries = _playerListMapGeneration != mapGeneration;
+        _playerListMapGeneration = mapGeneration;
+        SynchronizePlayerListEntries(resetEntries);
     }
 
-    public void SelectPlayer(long characterId)
+    public void SetOpenPlayerWindowCount(int count)
     {
-        if (!IsPlayerDetail)
-        {
-            return;
-        }
-
-        _selectedPlayerCharacterId = characterId;
-        RefreshPlayerDetail();
-    }
-
-    public void ResetSelectedPlayer()
-    {
-        if (!IsPlayerDetail)
-        {
-            return;
-        }
-
-        _selectedPlayerCharacterId = null;
-        RefreshPlayerDetail();
+        OpenPlayerWindowCount = Math.Max(count, 0);
     }
 
     [RelayCommand]
@@ -217,14 +205,21 @@ public partial class WidgetListItemViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RequestPlayerDetail(PlayerListEntry? player)
+    private void RequestPlayerInfo(PlayerListEntry? player)
     {
-        if (!IsPlayerList || player is null)
-        {
-            return;
-        }
+        RequestPlayerWindow(WidgetKind.PlayerInfo, player);
+    }
 
-        PlayerDetailRequested?.Invoke(player.CharacterId);
+    [RelayCommand]
+    private void RequestPlayerStatus(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.PlayerStatus, player);
+    }
+
+    [RelayCommand]
+    private void RequestPlayerEquipment(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
     }
 
     partial void OnStateChanged(WidgetState value)
@@ -233,7 +228,22 @@ public partial class WidgetListItemViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsRunning));
     }
 
-    private void RefreshPlayerListEntries()
+    partial void OnOpenPlayerWindowCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(HasOpenPlayerWindows));
+    }
+
+    private void RequestPlayerWindow(WidgetKind kind, PlayerListEntry? player)
+    {
+        if (!IsPlayerList || player is null)
+        {
+            return;
+        }
+
+        PlayerWindowRequested?.Invoke(kind, player.CharacterId);
+    }
+
+    private void SynchronizePlayerListEntries(bool resetEntries)
     {
         if (!IsPlayerList)
         {
@@ -241,36 +251,75 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         var classColors = _configManager.GetSettingsSnapshot().ClassColors;
-        var nextEntries = _playerRoster
-            .Select(entry => PlayerListEntry.Create(entry, classColors))
-            .ToArray();
 
-        _playerListEntries.Clear();
-        foreach (var entry in nextEntries)
+        if (resetEntries)
         {
-            _playerListEntries.Add(entry);
+            _playerListEntriesByCharacterId.Clear();
+            _playerListEntries.Clear();
+        }
+        else
+        {
+            var activeCharacterIds = _playerRoster
+                .Select(entry => entry.CharacterId)
+                .ToHashSet();
+
+            for (var index = _playerListEntries.Count - 1; index >= 0; index--)
+            {
+                var entry = _playerListEntries[index];
+                if (activeCharacterIds.Contains(entry.CharacterId))
+                {
+                    continue;
+                }
+
+                _playerListEntriesByCharacterId.Remove(entry.CharacterId);
+                _playerListEntries.RemoveAt(index);
+            }
+        }
+
+        for (var targetIndex = 0; targetIndex < _playerRoster.Count; targetIndex++)
+        {
+            var player = _playerRoster[targetIndex];
+            if (!_playerListEntriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
+            {
+                entry = PlayerListEntry.Create(player, classColors);
+                _playerListEntriesByCharacterId.Add(player.CharacterId, entry);
+                _playerListEntries.Insert(targetIndex, entry);
+                continue;
+            }
+
+            entry.Update(player, classColors);
+
+            if (_playerListEntries[targetIndex].CharacterId == player.CharacterId)
+            {
+                continue;
+            }
+
+            var currentIndex = FindPlayerListEntryIndex(player.CharacterId, targetIndex + 1);
+            if (currentIndex >= 0)
+            {
+                _playerListEntries.Move(currentIndex, targetIndex);
+            }
         }
     }
 
-    private void RefreshPlayerDetail()
+    private int FindPlayerListEntryIndex(long characterId, int startIndex)
     {
-        if (!IsPlayerDetail)
+        for (var index = startIndex; index < _playerListEntries.Count; index++)
         {
-            return;
+            if (_playerListEntries[index].CharacterId == characterId)
+            {
+                return index;
+            }
         }
 
-        var selectedPlayer = _selectedPlayerCharacterId is { } characterId
-            ? _playerRoster.FirstOrDefault(entry => entry.CharacterId == characterId)
-            : _playerRoster.FirstOrDefault(entry => entry.IsSelf);
+        return -1;
+    }
 
-        if (selectedPlayer is null && _selectedPlayerCharacterId.HasValue)
+    private void RaisePlayerWindowPresentationChanged()
+    {
+        if (IsPlayerWindowWidget)
         {
-            _selectedPlayerCharacterId = null;
-            selectedPlayer = _playerRoster.FirstOrDefault(entry => entry.IsSelf);
+            PlayerWindowPresentationChanged?.Invoke(this, EventArgs.Empty);
         }
-
-        SelectedPlayerDetail = selectedPlayer is null
-            ? null
-            : PlayerDetailEntry.Create(selectedPlayer);
     }
 }

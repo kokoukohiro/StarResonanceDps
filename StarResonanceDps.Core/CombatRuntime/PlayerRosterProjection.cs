@@ -95,6 +95,7 @@ internal static class PlayerRosterProjection
                 "AttrSeasonStrengthExAdd",
                 "AttrSeasonStrengthPer",
                 "AttrSeasonStrengthExPer");
+        var subProfessionId = entity.SubProfessionId;
 
         RosterStore.Upsert(new PlayerRosterEntry(
             characterId,
@@ -104,9 +105,12 @@ internal static class PlayerRosterProjection
             seasonStrength,
             entity.Hp,
             entity.MaxHp,
-            PlayerClassSpecResolver.FromSkillId(GetInt(entity, "AttrSkillId")),
+            PlayerClassSpecResolver.FromSubProfessionId(subProfessionId),
             isSelf,
-            combatAttributes));
+            combatAttributes,
+            subProfessionId,
+            entity.Level,
+            ToInt32(entity.SeasonLevel)));
     }
 
     private static int GetFirstNonZeroInt(Entity entity, params string[] keys)

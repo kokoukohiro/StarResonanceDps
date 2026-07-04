@@ -1,5 +1,7 @@
 using System.IO;
 using System.Text.Json;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.Config;
 
@@ -20,6 +22,7 @@ public sealed class ConfigManager
         _configPath = AppDataPaths.AppSettingsPath;
         _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
+        ApplyPlayerNameDisplayMode();
     }
 
     public static ConfigManager Instance => LazyInstance.Value;
@@ -43,6 +46,7 @@ public sealed class ConfigManager
     public void SaveSettings(SettingsConfig settings)
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
+        ApplyPlayerNameDisplayMode();
         Save();
         SettingsChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -70,6 +74,12 @@ public sealed class ConfigManager
 
         var json = JsonSerializer.Serialize(root, JsonOptions);
         File.WriteAllText(_configPath, json);
+    }
+
+    private void ApplyPlayerNameDisplayMode()
+    {
+        PlayerRosterPresentationStore.Instance.SetNameDisplayMode(
+            (PlayerNameDisplayMode)AppConfig.Settings.PlayerNameDisplayModeIndex);
     }
 
     private AppConfig LoadAppConfig()

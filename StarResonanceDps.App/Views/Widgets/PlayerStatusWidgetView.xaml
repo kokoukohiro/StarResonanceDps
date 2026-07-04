@@ -1,0 +1,31 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerStatusWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <Grid Margin="12,8,12,8" DataContext="{Binding PlayerStatus}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0">
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding HpText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding MaxHpText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding AttackText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding PrimaryStatText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding EnduranceText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding ArmorText}" />
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Margin="16,0,0,0">
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding CriticalText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding HasteText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding LuckText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding MasteryText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding VersatilityText}" />
+            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding BlockText}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

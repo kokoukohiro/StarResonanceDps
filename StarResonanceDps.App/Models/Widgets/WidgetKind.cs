@@ -8,5 +8,7 @@ public enum WidgetKind
     SkillLog,
     TrainingMode,
     PlayerInfoDebug,
-    PlayerDetail
+    PlayerInfo,
+    PlayerStatus,
+    PlayerEquipment
 }

@@ -299,46 +299,67 @@
   <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
     <value>협주</value>
   </data>
-  <data name="Widget_PlayerDetail" xml:space="preserve">
-    <value>플레이어 상세</value>
+  <data name="Widget_PlayerStatus" xml:space="preserve">
+    <value>상태</value>
   </data>
-  <data name="PlayerDetail_Hp" xml:space="preserve">
+  <data name="PlayerStatus_Hp" xml:space="preserve">
     <value>HP</value>
   </data>
-  <data name="PlayerDetail_MaxHp" xml:space="preserve">
+  <data name="PlayerStatus_MaxHp" xml:space="preserve">
     <value>최대 HP</value>
   </data>
-  <data name="PlayerDetail_Strength" xml:space="preserve">
+  <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>힘</value>
   </data>
-  <data name="PlayerDetail_Agility" xml:space="preserve">
+  <data name="PlayerStatus_Agility" xml:space="preserve">
     <value>민첩</value>
   </data>
-  <data name="PlayerDetail_Intellect" xml:space="preserve">
+  <data name="PlayerStatus_Intellect" xml:space="preserve">
     <value>지능</value>
   </data>
-  <data name="PlayerDetail_Endurance" xml:space="preserve">
+  <data name="PlayerStatus_Endurance" xml:space="preserve">
     <value>지구력</value>
   </data>
-  <data name="PlayerDetail_Armor" xml:space="preserve">
+  <data name="PlayerStatus_Armor" xml:space="preserve">
     <value>방어</value>
   </data>
-  <data name="PlayerDetail_Crit" xml:space="preserve">
+  <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>치명타</value>
   </data>
-  <data name="PlayerDetail_Haste" xml:space="preserve">
+  <data name="PlayerStatus_Haste" xml:space="preserve">
     <value>가속</value>
   </data>
-  <data name="PlayerDetail_Luck" xml:space="preserve">
+  <data name="PlayerStatus_Luck" xml:space="preserve">
     <value>행운</value>
   </data>
-  <data name="PlayerDetail_Mastery" xml:space="preserve">
+  <data name="PlayerStatus_Mastery" xml:space="preserve">
     <value>숙련</value>
   </data>
-  <data name="PlayerDetail_Versatility" xml:space="preserve">
+  <data name="PlayerStatus_Versatility" xml:space="preserve">
     <value>만능</value>
   </data>
-  <data name="PlayerDetail_Block" xml:space="preserve">
+  <data name="PlayerStatus_Block" xml:space="preserve">
     <value>막기</value>
+  </data>
+  <data name="Widget_PlayerInfo" xml:space="preserve">
+    <value>플레이어 정보</value>
+  </data>
+  <data name="Widget_PlayerEquipment" xml:space="preserve">
+    <value>장비 정보</value>
+  </data>
+  <data name="PlayerInfo_Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="PlayerInfo_Level" xml:space="preserve">
+    <value>레벨</value>
+  </data>
+  <data name="PlayerInfo_AbilityScore" xml:space="preserve">
+    <value>전투력</value>
+  </data>
+  <data name="PlayerInfo_Profession" xml:space="preserve">
+    <value>직업</value>
+  </data>
+  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
+    <value>직업 특성</value>
   </data>
 </root>

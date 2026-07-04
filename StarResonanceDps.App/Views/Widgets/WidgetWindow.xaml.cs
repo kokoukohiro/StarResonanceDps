@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -25,22 +26,45 @@ public partial class WidgetWindow : Window
 
     private const double ResizeBorderThickness = 8.0;
 
-    private readonly WidgetListItemViewModel _widget;
-    private readonly DispatcherTimer _saveBoundsTimer;
-    private bool _isRestoringBounds = true;
-    private bool _isSynchronizingPlayerListScrollBar;
+    public static readonly DependencyProperty HeaderTextProperty = DependencyProperty.Register(
+        nameof(HeaderText),
+        typeof(string),
+        typeof(WidgetWindow),
+        new PropertyMetadata(string.Empty));
 
-    public WidgetWindow(WidgetListItemViewModel widget, WidgetWindowConfig savedBounds, Window? owner)
+    private readonly WidgetListItemViewModel _widget;
+    private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
+    private readonly DispatcherTimer _saveBoundsTimer;
+    private readonly bool _usesWidgetDisplayNameForHeader;
+    private bool _isRestoringBounds = true;
+    private bool _isSynchronizingContentScrollBar;
+
+    public WidgetWindow(
+        WidgetListItemViewModel widget,
+        FrameworkElement? widgetContent,
+        WidgetWindowConfig savedBounds,
+        Window? owner,
+        string? headerText = null)
     {
         _widget = widget;
+        _usesWidgetDisplayNameForHeader = string.IsNullOrWhiteSpace(headerText);
 
         InitializeComponent();
         DataContext = widget;
-        PlayerListScrollViewer.ScrollChanged += PlayerListScrollViewer_ScrollChanged;
-        PlayerListScrollBar.ValueChanged += PlayerListScrollBar_ValueChanged;
+        HeaderText = _usesWidgetDisplayNameForHeader
+            ? widget.DisplayName
+            : headerText!;
+        WidgetContentHost.Content = widgetContent;
+        _widget.PropertyChanged += Widget_PropertyChanged;
 
-        // Widgets are top-level windows so the manager can be activated above every
-        // unpinned widget. Pinned widgets still use Topmost through ApplyPinState.
+        _verticalScrollContent = widgetContent as IWidgetVerticalScrollContent;
+        if (_verticalScrollContent is not null)
+        {
+            Grid.SetColumnSpan(WidgetContentHost, 1);
+            _verticalScrollContent.VerticalScrollMetricsChanged += VerticalScrollContent_VerticalScrollMetricsChanged;
+            WidgetContentScrollBar.ValueChanged += WidgetContentScrollBar_ValueChanged;
+        }
+
         ApplySavedBounds(savedBounds, owner, widget.OriginalIndex);
         ApplyPinState(widget.IsPinned);
 
@@ -59,12 +83,27 @@ public partial class WidgetWindow : Window
 
     public WidgetListItemViewModel Widget => _widget;
 
+    public string HeaderText
+    {
+        get => (string)GetValue(HeaderTextProperty);
+        private set => SetValue(HeaderTextProperty, value);
+    }
+
+    public void SetHeaderText(string headerText)
+    {
+        HeaderText = string.IsNullOrWhiteSpace(headerText)
+            ? _widget.DisplayName
+            : headerText;
+    }
+
     public void ApplyPinState(bool isPinned)
     {
         Topmost = isPinned;
         ResizeMode = isPinned
             ? ResizeMode.NoResize
             : ResizeMode.CanResize;
+
+        QueueContentScrollBarUpdate();
     }
 
     protected override void OnClosed(EventArgs e)
@@ -72,8 +111,14 @@ public partial class WidgetWindow : Window
         SaveBounds();
         _saveBoundsTimer.Stop();
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
-        PlayerListScrollViewer.ScrollChanged -= PlayerListScrollViewer_ScrollChanged;
-        PlayerListScrollBar.ValueChanged -= PlayerListScrollBar_ValueChanged;
+        _widget.PropertyChanged -= Widget_PropertyChanged;
+
+        if (_verticalScrollContent is not null)
+        {
+            _verticalScrollContent.VerticalScrollMetricsChanged -= VerticalScrollContent_VerticalScrollMetricsChanged;
+            WidgetContentScrollBar.ValueChanged -= WidgetContentScrollBar_ValueChanged;
+        }
+
         base.OnClosed(e);
     }
 
@@ -81,7 +126,7 @@ public partial class WidgetWindow : Window
     {
         _isRestoringBounds = false;
         UpdateWindowRootClip();
-        QueuePlayerListScrollBarUpdate();
+        QueueContentScrollBarUpdate();
     }
 
     private void WidgetWindow_SourceInitialized(object? sender, EventArgs e)
@@ -167,6 +212,15 @@ public partial class WidgetWindow : Window
         Close();
     }
 
+    private void Widget_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (_usesWidgetDisplayNameForHeader
+            && e.PropertyName == nameof(WidgetListItemViewModel.DisplayName))
+        {
+            HeaderText = _widget.DisplayName;
+        }
+    }
+
     private void WidgetWindow_BoundsChanged(object? sender, EventArgs e)
     {
         ScheduleBoundsSave();
@@ -175,7 +229,7 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         UpdateWindowRootClip();
-        QueuePlayerListScrollBarUpdate();
+        QueueContentScrollBarUpdate();
         ScheduleBoundsSave();
     }
 
@@ -207,55 +261,62 @@ public partial class WidgetWindow : Window
             cornerRadius);
     }
 
-    private void PlayerListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    private void VerticalScrollContent_VerticalScrollMetricsChanged(object? sender, EventArgs e)
     {
-        UpdatePlayerListScrollBar();
+        UpdateContentScrollBar();
     }
 
-    private void QueuePlayerListScrollBarUpdate()
+    private void QueueContentScrollBarUpdate()
     {
+        if (_verticalScrollContent is null)
+        {
+            WidgetContentScrollBar.Visibility = Visibility.Collapsed;
+            return;
+        }
+
         Dispatcher.BeginInvoke(
-            UpdatePlayerListScrollBar,
+            UpdateContentScrollBar,
             DispatcherPriority.Loaded);
     }
 
-    private void PlayerListScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void WidgetContentScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_isSynchronizingPlayerListScrollBar)
+        if (_isSynchronizingContentScrollBar || _verticalScrollContent is null)
         {
             return;
         }
 
-        PlayerListScrollViewer.ScrollToVerticalOffset(e.NewValue);
+        _verticalScrollContent.SetVerticalScrollOffset(e.NewValue);
     }
 
-    private void UpdatePlayerListScrollBar()
+    private void UpdateContentScrollBar()
     {
-        if (!_widget.IsPlayerList || !IsLoaded)
+        if (_verticalScrollContent is null || !IsLoaded)
         {
-            PlayerListScrollBar.Visibility = Visibility.Collapsed;
+            WidgetContentScrollBar.Visibility = Visibility.Collapsed;
             return;
         }
 
-        _isSynchronizingPlayerListScrollBar = true;
+        var metrics = _verticalScrollContent.GetVerticalScrollMetrics();
+        var maximum = Math.Max(metrics.Maximum, 0);
+        var viewport = Math.Max(metrics.ViewportSize, 0);
+
+        _isSynchronizingContentScrollBar = true;
         try
         {
-            var maximum = Math.Max(PlayerListScrollViewer.ScrollableHeight, 0);
-            var viewport = Math.Max(PlayerListScrollViewer.ViewportHeight, 0);
-
-            PlayerListScrollBar.Minimum = 0;
-            PlayerListScrollBar.Maximum = maximum;
-            PlayerListScrollBar.ViewportSize = viewport;
-            PlayerListScrollBar.LargeChange = Math.Max(viewport * 0.9, 1);
-            PlayerListScrollBar.SmallChange = 42;
-            PlayerListScrollBar.Value = Math.Min(PlayerListScrollViewer.VerticalOffset, maximum);
-            PlayerListScrollBar.Visibility = maximum > 0
+            WidgetContentScrollBar.Minimum = 0;
+            WidgetContentScrollBar.Maximum = maximum;
+            WidgetContentScrollBar.ViewportSize = viewport;
+            WidgetContentScrollBar.LargeChange = Math.Max(metrics.LargeChange, 1);
+            WidgetContentScrollBar.SmallChange = Math.Max(metrics.SmallChange, 1);
+            WidgetContentScrollBar.Value = Math.Clamp(metrics.Value, 0, maximum);
+            WidgetContentScrollBar.Visibility = maximum > 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         }
         finally
         {
-            _isSynchronizingPlayerListScrollBar = false;
+            _isSynchronizingContentScrollBar = false;
         }
     }
 

@@ -125,23 +125,55 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Ellipse Grid.Column="0"
-                     Width="13"
-                     Height="13"
-                     Margin="0,0,14,0"
-                     VerticalAlignment="Center"
-                     SnapsToDevicePixels="True">
-                <Ellipse.Style>
-                    <Style TargetType="Ellipse">
-                        <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
-                                <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Ellipse.Style>
-            </Ellipse>
+            <Grid Grid.Column="0"
+                  Margin="0,0,14,0"
+                  VerticalAlignment="Center">
+                <Ellipse Width="13"
+                         Height="13"
+                         HorizontalAlignment="Left"
+                         SnapsToDevicePixels="True">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsPlayerWindowWidget}" Value="True" />
+                                        <Condition Binding="{Binding HasOpenPlayerWindows}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
+                </Ellipse>
+
+                <Path x:Name="PlayerWindowCountBadgePath"
+                      HorizontalAlignment="Left"
+                      VerticalAlignment="Center"
+                      Fill="{DynamicResource Brush.Success}"
+                      Stretch="None"
+                      UseLayoutRounding="True"
+                      SnapsToDevicePixels="True">
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsPlayerWindowWidget}" Value="True" />
+                                        <Condition Binding="{Binding HasOpenPlayerWindows}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+            </Grid>
 
             <TextBlock Grid.Column="1"
                        Grid.ColumnSpan="2"

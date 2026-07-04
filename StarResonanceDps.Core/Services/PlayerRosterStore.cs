@@ -13,6 +13,7 @@ public sealed class PlayerRosterStore
     private readonly Dictionary<long, PlayerRosterEntry> _entries = [];
     private IReadOnlyList<PlayerRosterEntry> _snapshot = Array.AsReadOnly(Array.Empty<PlayerRosterEntry>());
     private string _mapName = string.Empty;
+    private long _mapGeneration;
 
     private PlayerRosterStore()
     {
@@ -39,7 +40,7 @@ public sealed class PlayerRosterStore
         {
             lock (_sync)
             {
-                return new PlayerRosterSnapshot(_snapshot, _mapName);
+                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapGeneration);
             }
         }
     }
@@ -47,8 +48,12 @@ public sealed class PlayerRosterStore
     public void BeginMap()
     {
         PublishIfChanged(
-            () => _entries.Clear(),
-            forcePublish: false);
+            () =>
+            {
+                _mapGeneration++;
+                _entries.Clear();
+            },
+            forcePublish: true);
     }
 
     public void UpdateMapName(string? mapName)
@@ -119,10 +124,11 @@ public sealed class PlayerRosterStore
         PublishIfChanged(
             () =>
             {
+                _mapGeneration++;
                 _entries.Clear();
                 _mapName = string.Empty;
             },
-            forcePublish: false);
+            forcePublish: true);
     }
 
     private void PublishIfChanged(Action update, bool forcePublish)
@@ -133,19 +139,21 @@ public sealed class PlayerRosterStore
         {
             var previousEntries = _snapshot;
             var previousMapName = _mapName;
+            var previousMapGeneration = _mapGeneration;
 
             update();
 
             var nextSnapshot = CreateSnapshotNoLock();
             if (!forcePublish
                 && previousEntries.SequenceEqual(nextSnapshot)
-                && string.Equals(previousMapName, _mapName, StringComparison.Ordinal))
+                && string.Equals(previousMapName, _mapName, StringComparison.Ordinal)
+                && previousMapGeneration == _mapGeneration)
             {
                 return;
             }
 
             _snapshot = nextSnapshot;
-            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName);
+            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapGeneration);
         }
 
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot!));
@@ -173,15 +181,23 @@ public sealed class PlayerRosterStore
             entry.MaxHp,
             entry.ClassSpec,
             entry.IsSelf,
-            entry.CombatAttributes);
+            entry.CombatAttributes,
+            entry.SubProfessionId,
+            entry.Level,
+            entry.SeasonLevel);
     }
 }
 
-public sealed record PlayerRosterSnapshot(IReadOnlyList<PlayerRosterEntry> Entries, string MapName);
+public sealed record PlayerRosterSnapshot(
+    IReadOnlyList<PlayerRosterEntry> Entries,
+    string MapName,
+    long MapGeneration);
 
 public sealed class PlayerRosterChangedEventArgs(PlayerRosterSnapshot roster) : EventArgs
 {
     public IReadOnlyList<PlayerRosterEntry> Snapshot { get; } = roster.Entries;
 
     public string MapName { get; } = roster.MapName;
+
+    public long MapGeneration { get; } = roster.MapGeneration;
 }

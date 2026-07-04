@@ -20,10 +20,16 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
     private readonly PluginManager _pluginManager = PluginManager.Instance;
-    private readonly PlayerRosterStore _playerRosterStore = PlayerRosterStore.Instance;
+    private readonly PlayerRosterPresentationStore _playerRosterStore = PlayerRosterPresentationStore.Instance;
+    private readonly object _playerRosterUpdateSync = new();
+
+    private PlayerRosterSnapshot? _pendingPlayerRosterSnapshot;
+    private bool _isPlayerRosterUpdateQueued;
 
     private WidgetListItemViewModel? _playerListWidget;
-    private WidgetListItemViewModel? _playerDetailWidget;
+    private WidgetListItemViewModel? _playerInfoWidget;
+    private WidgetListItemViewModel? _playerStatusWidget;
+    private WidgetListItemViewModel? _playerEquipmentWidget;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -45,8 +51,10 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
-        _playerDetailWidget = AddWidget(WidgetKind.PlayerDetail, "Widget_PlayerDetail");
-        playerListWidget.PlayerDetailRequested += PlayerListWidget_PlayerDetailRequested;
+        _playerInfoWidget = AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
+        _playerEquipmentWidget = AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
+        _playerStatusWidget = AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
+        playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
         AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter");
@@ -68,9 +76,9 @@ public sealed partial class MainViewModel : ViewModelBase
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         _configManager.SettingsChanged += ConfigManager_SettingsChanged;
 
-        _playerRosterStore.RosterChanged += PlayerRosterStore_RosterChanged;
+        _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
         var roster = _playerRosterStore.Current;
-        UpdatePlayerList(roster.Entries, roster.MapName);
+        ApplyPlayerRosterSnapshot(roster);
     }
 
     private void AddPluginItem(PluginInfo pluginInfo)
@@ -127,32 +135,77 @@ public sealed partial class MainViewModel : ViewModelBase
         return widget;
     }
 
-    private void PlayerListWidget_PlayerDetailRequested(long characterId)
+    private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)
     {
-        if (_playerDetailWidget is null)
+        var widget = kind switch
         {
+            WidgetKind.PlayerInfo => _playerInfoWidget,
+            WidgetKind.PlayerStatus => _playerStatusWidget,
+            WidgetKind.PlayerEquipment => _playerEquipmentWidget,
+            _ => null
+        };
+
+        if (widget is not null)
+        {
+            _widgetWindowManager.OpenPlayerWindow(widget, characterId);
+        }
+    }
+
+    private void PlayerRosterPresentationStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
+    {
+        QueuePlayerRosterSnapshot(new PlayerRosterSnapshot(
+            e.Snapshot,
+            e.MapName,
+            e.MapGeneration));
+    }
+
+    private void QueuePlayerRosterSnapshot(PlayerRosterSnapshot roster)
+    {
+        lock (_playerRosterUpdateSync)
+        {
+            _pendingPlayerRosterSnapshot = roster;
+            if (_isPlayerRosterUpdateQueued)
+            {
+                return;
+            }
+
+            _isPlayerRosterUpdateQueued = true;
+        }
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            ProcessPendingPlayerRosterSnapshot();
             return;
         }
 
-        _playerDetailWidget.SelectPlayer(characterId);
-        _playerDetailWidget.State = WidgetState.Running;
+        dispatcher.BeginInvoke(ProcessPendingPlayerRosterSnapshot);
     }
 
-    private void PlayerRosterStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
+    private void ProcessPendingPlayerRosterSnapshot()
     {
-        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        PlayerRosterSnapshot? roster;
+
+        lock (_playerRosterUpdateSync)
         {
-            dispatcher.BeginInvoke(() => UpdatePlayerList(e.Snapshot, e.MapName));
-            return;
+            roster = _pendingPlayerRosterSnapshot;
+            _pendingPlayerRosterSnapshot = null;
+            _isPlayerRosterUpdateQueued = false;
         }
 
-        UpdatePlayerList(e.Snapshot, e.MapName);
+        if (roster is not null)
+        {
+            ApplyPlayerRosterSnapshot(roster);
+        }
     }
 
-    private void UpdatePlayerList(IReadOnlyList<PlayerRosterEntry> roster, string mapName)
+    private void ApplyPlayerRosterSnapshot(PlayerRosterSnapshot roster)
     {
-        _playerListWidget?.UpdatePlayerRoster(roster, mapName);
-        _playerDetailWidget?.UpdatePlayerRoster(roster, mapName);
+        _playerListWidget?.UpdatePlayerRoster(
+            roster.Entries,
+            roster.MapName,
+            roster.MapGeneration);
+        _widgetWindowManager.UpdatePlayerWindowPresentations(roster.Entries);
     }
 
     private void ConfigManager_SettingsChanged(object? sender, EventArgs e)
@@ -168,8 +221,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void RefreshPlayerRosterPresentation()
     {
-        var roster = _playerRosterStore.Current;
-        UpdatePlayerList(roster.Entries, roster.MapName);
+        QueuePlayerRosterSnapshot(_playerRosterStore.Current);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -208,11 +260,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
         if (e.PropertyName == nameof(WidgetListItemViewModel.State))
         {
-            if (widget.Kind == WidgetKind.PlayerDetail && widget.State == WidgetState.Stopped)
-            {
-                widget.ResetSelectedPlayer();
-            }
-
             _widgetStateManager.SaveWidgetState(widget.Kind, widget.State);
             _widgetWindowManager.ApplyWidgetState(widget);
         }
@@ -257,7 +304,6 @@ public sealed partial class MainViewModel : ViewModelBase
         return string.IsNullOrEmpty(searchText)
             || widget.DisplayName.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
     }
-
 
     private void ApplyWidgetSort()
     {

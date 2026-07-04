@@ -4,9 +4,9 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
-public sealed class PlayerDetailEntry
+public sealed class PlayerStatusEntry
 {
-    private PlayerDetailEntry(
+    private PlayerStatusEntry(
         string hpText,
         string maxHpText,
         string attackText,
@@ -58,35 +58,35 @@ public sealed class PlayerDetailEntry
 
     public string BlockText { get; }
 
-    public static PlayerDetailEntry Create(PlayerRosterEntry player)
+    public static PlayerStatusEntry Create(PlayerRosterEntry player)
     {
         var attributes = player.CombatAttributes;
         var localization = LocalizationManager.Instance;
         var (primaryStatKey, primaryStatValue) = GetPrimaryStat(player.ProfessionId, attributes);
         var isMagicalProfession = player.ProfessionId is 2 or 5 or 13;
 
-        return new PlayerDetailEntry(
-            $"{localization.GetString("PlayerDetail_Hp")}: {FormatInteger(player.CurrentHp)} ({FormatPercent(GetHealthPercent(player.CurrentHp, player.MaxHp))}%)",
-            $"{localization.GetString("PlayerDetail_MaxHp")}: {FormatInteger(player.MaxHp)}",
+        return new PlayerStatusEntry(
+            $"{localization.GetString("PlayerStatus_Hp")}: {FormatInteger(player.CurrentHp)} ({FormatPercent(GetHealthPercent(player.CurrentHp, player.MaxHp))}%)",
+            $"{localization.GetString("PlayerStatus_MaxHp")}: {FormatInteger(player.MaxHp)}",
             $"{(isMagicalProfession ? "MATK" : "ATK")}: {FormatInteger(isMagicalProfession ? attributes.MagicalAttack : attributes.PhysicalAttack)}",
             $"{localization.GetString(primaryStatKey)}: {FormatInteger(primaryStatValue)}",
-            $"{localization.GetString("PlayerDetail_Endurance")}: {FormatInteger(attributes.Endurance)}",
-            $"{localization.GetString("PlayerDetail_Armor")}: {FormatInteger(attributes.Armor)}",
-            $"{localization.GetString("PlayerDetail_Crit")}: {FormatPercent(attributes.CriticalPercent / 100d)}% ({FormatInteger(attributes.Critical)})",
-            $"{localization.GetString("PlayerDetail_Haste")}: {FormatPercent(attributes.HastePercent / 100d)}% ({FormatInteger(attributes.Haste)})",
-            $"{localization.GetString("PlayerDetail_Luck")}: {FormatPercent(attributes.LuckPercent / 100d)}% ({FormatInteger(attributes.Luck)})",
-            $"{localization.GetString("PlayerDetail_Mastery")}: {FormatPercent(attributes.MasteryPercent / 100d)}% ({FormatInteger(attributes.Mastery)})",
-            $"{localization.GetString("PlayerDetail_Versatility")}: {FormatPercent(attributes.VersatilityPercent / 100d)}% ({FormatInteger(attributes.Versatility)})",
-            $"{localization.GetString("PlayerDetail_Block")}: {FormatPercent(attributes.BlockPercent / 100d)}%");
+            $"{localization.GetString("PlayerStatus_Endurance")}: {FormatInteger(attributes.Endurance)}",
+            $"{localization.GetString("PlayerStatus_Armor")}: {FormatInteger(attributes.Armor)}",
+            $"{localization.GetString("PlayerStatus_Crit")}: {FormatPercent(attributes.CriticalPercent / 100d)}% ({FormatInteger(attributes.Critical)})",
+            $"{localization.GetString("PlayerStatus_Haste")}: {FormatPercent(attributes.HastePercent / 100d)}% ({FormatInteger(attributes.Haste)})",
+            $"{localization.GetString("PlayerStatus_Luck")}: {FormatPercent(attributes.LuckPercent / 100d)}% ({FormatInteger(attributes.Luck)})",
+            $"{localization.GetString("PlayerStatus_Mastery")}: {FormatPercent(attributes.MasteryPercent / 100d)}% ({FormatInteger(attributes.Mastery)})",
+            $"{localization.GetString("PlayerStatus_Versatility")}: {FormatPercent(attributes.VersatilityPercent / 100d)}% ({FormatInteger(attributes.Versatility)})",
+            $"{localization.GetString("PlayerStatus_Block")}: {FormatPercent(attributes.BlockPercent / 100d)}%");
     }
 
     private static (string LabelKey, int Value) GetPrimaryStat(int professionId, PlayerCombatAttributes attributes)
     {
         return professionId switch
         {
-            1 or 11 => ("PlayerDetail_Agility", attributes.Dexterity),
-            2 or 5 or 13 => ("PlayerDetail_Intellect", attributes.Intelligence),
-            _ => ("PlayerDetail_Strength", attributes.Strength)
+            1 or 11 => ("PlayerStatus_Agility", attributes.Dexterity),
+            2 or 5 or 13 => ("PlayerStatus_Intellect", attributes.Intelligence),
+            _ => ("PlayerStatus_Strength", attributes.Strength)
         };
     }
 
