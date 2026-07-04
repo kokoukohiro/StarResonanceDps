@@ -12,7 +12,7 @@
 
     <Grid>
         <ScrollViewer x:Name="PlayerListScrollViewer"
-                      Margin="10,8,0,0"
+                      Margin="5,5,0,5"
                       VerticalScrollBarVisibility="Hidden"
                       HorizontalScrollBarVisibility="Disabled"
                       CanContentScroll="False"
@@ -25,31 +25,31 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Height="42"
-                                Margin="0,0,0,5"
+                        <Button Height="44"
                                 Padding="0"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 Focusable="False"
                                 IsTabStop="False"
+                                ContextMenuService.IsEnabled="False"
+                                PreviewMouseRightButtonDown="PlayerListItem_PreviewMouseRightButtonDown"
                                 Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
                                 Click="PlayerListItem_Click"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch">
                             <Button.ContextMenu>
-                                <ContextMenu Style="{StaticResource Menu.TextSelectionContextMenu}"
-                                             DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
-                                             Placement="Bottom">
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                             IsOpen="{Binding PlacementTarget.DataContext.IsPlayerSelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                             Placement="MousePoint"
+                                             Opened="PlayerSelectionContextMenu_Opened"
+                                             Closed="PlayerSelectionContextMenu_Closed">
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
-                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
                                               Command="{Binding RequestPlayerInfoCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
-                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
                                               Command="{Binding RequestPlayerStatusCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
-                                              Style="{StaticResource Menu.TextSelectionContextMenuItem}"
                                               Command="{Binding RequestPlayerEquipmentCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                 </ContextMenu>
@@ -76,21 +76,28 @@
                                                     <Trigger Property="IsPressed" Value="True">
                                                         <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
                                                     </Trigger>
+                                                    <DataTrigger Binding="{Binding IsPlayerSelectionMenuOpen}" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Style>
                             </Button.Style>
-                            <Grid>
+                            <Grid VerticalAlignment="Center">
+                                <Grid.RenderTransform>
+                                    <TranslateTransform X="4" />
+                                </Grid.RenderTransform>
+
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="42" />
+                                    <ColumnDefinition Width="33" />
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid Grid.Column="0">
-                                    <Rectangle Width="26"
-                                               Height="26"
+                                    <Rectangle Width="25"
+                                               Height="25"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
                                                Fill="{Binding ClassBrush}">
@@ -171,7 +178,7 @@
                                         </Rectangle.Style>
                                     </Rectangle>
 
-                                    <TextBlock Margin="0,27,0,0"
+                                    <TextBlock Margin="0,21,0,0"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
                                                Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
@@ -184,20 +191,20 @@
 
                                 <Grid Grid.Column="1" Margin="6,0,0,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="20" />
+                                        <RowDefinition Height="23" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0"
                                                VerticalAlignment="Top"
                                                Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
-                                               FontSize="14"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                Text="{Binding DisplayName}"
                                                TextTrimming="CharacterEllipsis" />
 
                                     <Border Grid.Row="1"
-                                            Width="138"
+                                            Width="122"
                                             Height="10"
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Top"
@@ -208,7 +215,7 @@
                                               Height="8"
                                               VerticalAlignment="Center">
                                             <Grid.Clip>
-                                                <RectangleGeometry Rect="0,0,136,8" RadiusX="4" RadiusY="4" />
+                                                <RectangleGeometry Rect="0,0,120,8" RadiusX="4" RadiusY="4" />
                                             </Grid.Clip>
                                             <Border Height="8"
                                                     HorizontalAlignment="Left"

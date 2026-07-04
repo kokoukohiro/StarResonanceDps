@@ -17,6 +17,104 @@
         WindowStartupLocation="Manual"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
+    <Window.Resources>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="Foreground" Value="{Binding WidgetWindowPalette.WidgetWindowTextBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
+        </Style>
+    </Window.Resources>
+
     <Grid x:Name="WindowRoot">
         <Border x:Name="WidgetWindowFrame"
                 Style="{StaticResource Panel.WidgetWindowFrame}">
@@ -28,7 +126,7 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition x:Name="WidgetFrameScrollBarColumn" Width="16" />
                 </Grid.ColumnDefinitions>
 
                 <Image Grid.RowSpan="3"
@@ -72,7 +170,7 @@
                            Grid.Row="1"
                            Grid.Column="1"
                            Width="6"
-                           Margin="0,8,10,0"
+                           Margin="5"
                            HorizontalAlignment="Right"
                            VerticalAlignment="Stretch"
                            Background="{Binding WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
@@ -109,7 +207,7 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
+                <ColumnDefinition x:Name="WidgetContentScrollBarColumn" Width="16" />
             </Grid.ColumnDefinitions>
 
             <Grid x:Name="WidgetHeader"
@@ -123,10 +221,10 @@
                 <Border Grid.Column="0"
                         Background="Transparent"
                         MouseLeftButtonDown="Header_MouseLeftButtonDown">
-                    <TextBlock Margin="12,0,8,0"
+                    <TextBlock Margin="10,0,8,0"
                                VerticalAlignment="Center"
                                Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
-                               FontSize="14"
+                               FontSize="13"
                                FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"
                                Text="{Binding HeaderText, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
@@ -159,10 +257,10 @@
                     </Style>
                 </Grid.Style>
 
-                <TextBlock Margin="12,0,8,0"
+                <TextBlock Margin="10,0,8,0"
                            VerticalAlignment="Center"
                            Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
-                           FontSize="14"
+                           FontSize="13"
                            FontWeight="SemiBold"
                            Text="{Binding MapName}"
                            TextAlignment="Left"

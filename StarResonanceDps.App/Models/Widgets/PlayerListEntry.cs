@@ -31,6 +31,9 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
 
+    [ObservableProperty]
+    private bool _isPlayerSelectionMenuOpen;
+
     public bool IsHealthFull => HealthRatio >= 1d;
 
     public static PlayerListEntry Create(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
@@ -44,7 +47,7 @@ public sealed partial class PlayerListEntry : ObservableObject
     {
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
-        DisplayName = $"{player.Name}（{player.CombatPower}-S{player.SeasonStrength}）";
+        DisplayName = $"{player.Name}({player.CombatPower}-S{player.SeasonStrength})";
         HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
 
         var classColor = GetClassColor(classColors, ProfessionKey);

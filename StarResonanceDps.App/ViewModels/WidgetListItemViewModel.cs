@@ -254,6 +254,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         if (resetEntries)
         {
+            foreach (var entry in _playerListEntries)
+            {
+                entry.IsPlayerSelectionMenuOpen = false;
+            }
+
             _playerListEntriesByCharacterId.Clear();
             _playerListEntries.Clear();
         }
@@ -271,6 +276,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
                     continue;
                 }
 
+                entry.IsPlayerSelectionMenuOpen = false;
                 _playerListEntriesByCharacterId.Remove(entry.CharacterId);
                 _playerListEntries.RemoveAt(index);
             }

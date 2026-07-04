@@ -52,8 +52,8 @@ public sealed partial class MainViewModel : ViewModelBase
         var playerListWidget = AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
         _playerInfoWidget = AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
-        _playerEquipmentWidget = AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
         _playerStatusWidget = AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
+        _playerEquipmentWidget = AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");

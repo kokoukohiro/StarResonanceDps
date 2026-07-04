@@ -271,6 +271,7 @@ public partial class WidgetWindow : Window
         if (_verticalScrollContent is null)
         {
             WidgetContentScrollBar.Visibility = Visibility.Collapsed;
+            WidgetContentScrollBarColumn.Width = new GridLength(5);
             return;
         }
 
@@ -294,6 +295,7 @@ public partial class WidgetWindow : Window
         if (_verticalScrollContent is null || !IsLoaded)
         {
             WidgetContentScrollBar.Visibility = Visibility.Collapsed;
+            WidgetContentScrollBarColumn.Width = new GridLength(5);
             return;
         }
 
@@ -310,9 +312,16 @@ public partial class WidgetWindow : Window
             WidgetContentScrollBar.LargeChange = Math.Max(metrics.LargeChange, 1);
             WidgetContentScrollBar.SmallChange = Math.Max(metrics.SmallChange, 1);
             WidgetContentScrollBar.Value = Math.Clamp(metrics.Value, 0, maximum);
-            WidgetContentScrollBar.Visibility = maximum > 0
+
+            var isScrollBarVisible = maximum > 0;
+
+            WidgetContentScrollBar.Visibility = isScrollBarVisible
                 ? Visibility.Visible
                 : Visibility.Collapsed;
+
+            WidgetContentScrollBarColumn.Width = isScrollBarVisible
+                ? new GridLength(16)
+                : new GridLength(5);
         }
         finally
         {
