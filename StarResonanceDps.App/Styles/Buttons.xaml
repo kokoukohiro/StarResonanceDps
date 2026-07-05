@@ -243,7 +243,7 @@
                             <Ellipse.Effect>
                                 <DropShadowEffect
                                     Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
-                                    Opacity="0.5"
+                                    Opacity="1"
                                     ShadowDepth="0"
                                     BlurRadius="5" />
                             </Ellipse.Effect>
@@ -259,7 +259,7 @@
                             <Ellipse.Effect>
                                 <DropShadowEffect
                                     Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
-                                    Opacity="0.5"
+                                    Opacity="1"
                                     ShadowDepth="0"
                                     BlurRadius="5" />
                             </Ellipse.Effect>
@@ -306,7 +306,7 @@
                             <Ellipse.Effect>
                                 <DropShadowEffect
                                     Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
-                                    Opacity="0.5"
+                                    Opacity="1"
                                     ShadowDepth="0"
                                     BlurRadius="5" />
                             </Ellipse.Effect>

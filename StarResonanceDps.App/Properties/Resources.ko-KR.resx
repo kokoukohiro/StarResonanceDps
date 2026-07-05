@@ -365,4 +365,49 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>직업 색상 불투명도</value>
   </data>
+<data name="Meter_Total" xml:space="preserve">
+    <value>합계</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
+    <value>빠른 프리셋</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
+    <value>필드 추가</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
+    <value>사용자 지정 형식 문자열</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
+    <value>지우기</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
+    <value>미리 보기</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
+    <value>기본</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
+    <value>간단</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
+    <value>상세</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
+    <value>이름만</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
+    <value>없음</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>시즌 강도</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
+    <value>시즌 레벨</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+    <value>플레이어 UID</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
+    <value>예시 플레이어</value>
+  </data>
 </root>

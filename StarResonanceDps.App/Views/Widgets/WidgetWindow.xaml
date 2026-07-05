@@ -51,11 +51,16 @@
             </Setter>
         </Style>
 
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
                TargetType="{x:Type MenuItem}">
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
-            <Setter Property="Foreground" Value="{Binding WidgetWindowPalette.WidgetWindowTextBrush}" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -152,18 +157,41 @@
                       Grid.ColumnSpan="2">
                     <Border BorderBrush="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" BorderThickness="0,0,0,1" />
 
-                    <Grid Width="30"
-                          Height="30"
-                          HorizontalAlignment="Right"
-                          VerticalAlignment="Center">
-                        <TextBlock HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                                   FontSize="10"
-                                   FontWeight="SemiBold"
-                                   Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
-                                   Text="&#xE8BB;" />
-                    </Grid>
+                    <StackPanel HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal"
+                                    Visibility="{Binding IsMeter, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <Grid Width="35" Height="30">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
+                                           Text="&#xE81C;" />
+                            </Grid>
+                            <Grid Width="35" Height="30">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
+                                           Text="&#xE72C;" />
+                            </Grid>
+                        </StackPanel>
+
+                        <Grid Width="30" Height="30">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
+                                       Text="&#xE8BB;" />
+                        </Grid>
+                    </StackPanel>
                 </Grid>
 
                 <ScrollBar x:Name="WidgetContentScrollBar"
@@ -223,16 +251,23 @@
                         MouseLeftButtonDown="Header_MouseLeftButtonDown">
                     <TextBlock Margin="10,0,8,0"
                                VerticalAlignment="Center"
-                               Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
+                               Style="{StaticResource Text.WidgetWindow}"
                                FontSize="13"
                                FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"
                                Text="{Binding HeaderText, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                 </Border>
 
-                <Button Grid.Column="1"
-                        Style="{StaticResource Button.WidgetWindowClose}"
-                        Click="CloseButton_Click" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <StackPanel Orientation="Horizontal"
+                                Visibility="{Binding IsMeter, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Button Style="{StaticResource Button.WidgetWindowClose}" />
+                        <Button Style="{StaticResource Button.WidgetWindowClose}"
+                                Click="MeterResetButton_Click" />
+                    </StackPanel>
+                    <Button Style="{StaticResource Button.WidgetWindowClose}"
+                            Click="CloseButton_Click" />
+                </StackPanel>
             </Grid>
 
             <ContentControl x:Name="WidgetContentHost"
@@ -257,14 +292,70 @@
                     </Style>
                 </Grid.Style>
 
-                <TextBlock Margin="10,0,8,0"
-                           VerticalAlignment="Center"
-                           Foreground="{Binding WidgetWindowPalette.WidgetWindowTextBrush}"
-                           FontSize="13"
-                           FontWeight="SemiBold"
-                           Text="{Binding MapName}"
-                           TextAlignment="Left"
-                           TextTrimming="CharacterEllipsis" />
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlayerList}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <TextBlock Margin="10,0,8,0"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource Text.WidgetWindow}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Text="{Binding MapName}"
+                               TextAlignment="Left"
+                               TextTrimming="CharacterEllipsis" />
+                </Grid>
+
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsMeter}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Margin="10,0,8,0"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource Text.WidgetWindow}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Text="{Binding Content.DataContext.ElapsedText, ElementName=WidgetContentHost}" />
+
+                    <StackPanel Grid.Column="2"
+                                Margin="8,0,10,0"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center"
+                                   Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding Content.DataContext.PartyMetricText, ElementName=WidgetContentHost}" />
+                        <TextBlock Margin="16,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding Content.DataContext.TotalText, ElementName=WidgetContentHost}" />
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

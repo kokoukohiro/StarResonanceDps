@@ -13,6 +13,24 @@
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
     </Style>
 
+    <DropShadowEffect x:Key="Effect.WidgetWindowTextShadow"
+                      Color="Black"
+                      Opacity="1"
+                      ShadowDepth="0"
+                      BlurRadius="5" />
+
+    <Style x:Key="Text.WidgetWindow" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Effect" Value="{StaticResource Effect.WidgetWindowTextShadow}" />
+    </Style>
+
+    <Style x:Key="Text.WidgetWindowSubtitle"
+           TargetType="TextBlock"
+           BasedOn="{StaticResource Text.WidgetWindow}">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+    </Style>
+
     <Style x:Key="Text.WidgetName" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
         <Setter Property="FontSize" Value="16" />

@@ -157,6 +157,11 @@ public partial class WidgetSettingsWindow : Window
         return new Point(x, y);
     }
 
+    private void DisplaySettingsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(DisplaySettingsHost);
+    }
+
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);

@@ -16,13 +16,14 @@ public sealed class ConfigManager
 
     private readonly string _configPath;
     private readonly string _legacyConfigPath;
+    private SettingsConfig? _settingsPreview;
 
     private ConfigManager()
     {
         _configPath = AppDataPaths.AppSettingsPath;
         _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
-        ApplyPlayerNameDisplayMode();
+        ApplyPlayerNameDisplayMode(AppConfig.Settings);
     }
 
     public static ConfigManager Instance => LazyInstance.Value;
@@ -31,10 +32,31 @@ public sealed class ConfigManager
 
     public event EventHandler? SettingsChanged;
 
+    public event EventHandler? SettingsPreviewChanged;
+
     public SettingsConfig GetSettingsSnapshot()
     {
         AppConfigDefaults.Normalize(AppConfig);
-        return AppConfig.Settings.Clone();
+        return AppConfigDefaults.CloneNormalizedSettings(_settingsPreview ?? AppConfig.Settings);
+    }
+
+    public void SetSettingsPreview(SettingsConfig settings)
+    {
+        _settingsPreview = AppConfigDefaults.CloneNormalizedSettings(settings);
+        ApplyPlayerNameDisplayMode(_settingsPreview);
+        SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ClearSettingsPreview()
+    {
+        if (_settingsPreview is null)
+        {
+            return;
+        }
+
+        _settingsPreview = null;
+        ApplyPlayerNameDisplayMode(AppConfig.Settings);
+        SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public ColorPickerConfig GetColorPickerSnapshot()
@@ -79,9 +101,11 @@ public sealed class ConfigManager
     public void SaveSettings(SettingsConfig settings)
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
-        ApplyPlayerNameDisplayMode();
+        _settingsPreview = null;
+        ApplyPlayerNameDisplayMode(AppConfig.Settings);
         Save();
         SettingsChanged?.Invoke(this, EventArgs.Empty);
+        SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void SaveColorPicker(ColorPickerConfig colorPicker)
@@ -109,10 +133,10 @@ public sealed class ConfigManager
         File.WriteAllText(_configPath, json);
     }
 
-    private void ApplyPlayerNameDisplayMode()
+    private static void ApplyPlayerNameDisplayMode(SettingsConfig settings)
     {
         PlayerRosterPresentationStore.Instance.SetNameDisplayMode(
-            (PlayerNameDisplayMode)AppConfig.Settings.PlayerNameDisplayModeIndex);
+            (PlayerNameDisplayMode)settings.PlayerNameDisplayModeIndex);
     }
 
     private AppConfig LoadAppConfig()

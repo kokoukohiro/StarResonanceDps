@@ -66,11 +66,18 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
 
+    public bool IsMeter => Kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+
     public bool IsPlayerWindowWidget => IsPlayerInfo || IsPlayerStatus || IsPlayerEquipment;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
-    public bool ShowsFooter => IsPlayerList;
+    public bool ShowsFooter => IsPlayerList || IsMeter;
+
+    public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedMeter(Kind, _meter);
+    }
 
     public string StateText => State == WidgetState.Running
         ? LocalizationManager.Instance.GetString("Widget_State_Running")
@@ -81,6 +88,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event Action<WidgetKind, long>? PlayerWindowRequested;
 
     public event EventHandler? PlayerWindowPresentationChanged;
+
+    public event EventHandler? MeterSettingsChanged;
 
     public WidgetListItemViewModel()
     {
@@ -128,6 +137,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
+        MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyMeterSettingsPreview(MeterWidgetSettingsConfig meter)
@@ -139,6 +149,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, meter);
         SynchronizePlayerListEntries(resetEntries: false);
+        MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

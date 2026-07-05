@@ -181,7 +181,7 @@
                                     <TextBlock Margin="0,21,0,0"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
-                                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                               Style="{StaticResource Text.WidgetWindow}"
                                                FontSize="10"
                                                FontWeight="SemiBold"
                                                Text="{Binding ClassSpecDisplayName}"
@@ -197,8 +197,8 @@
 
                                     <TextBlock Grid.Row="0"
                                                VerticalAlignment="Top"
-                                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
-                                               FontSize="13"
+                                               Style="{StaticResource Text.WidgetWindow}"
+                                               FontSize="12"
                                                FontWeight="SemiBold"
                                                Text="{Binding DisplayName}"
                                                TextTrimming="CharacterEllipsis" />

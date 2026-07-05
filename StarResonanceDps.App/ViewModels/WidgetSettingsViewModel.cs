@@ -108,6 +108,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasMeterSettings => MeterSettings is not null;
 
+    public bool HasMeterDisplaySettings => _kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false);
 

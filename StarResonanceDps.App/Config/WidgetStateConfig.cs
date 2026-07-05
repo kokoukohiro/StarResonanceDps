@@ -84,6 +84,8 @@ public sealed class WidgetWindowConfig
 
 public sealed class MeterWidgetSettingsConfig
 {
+    public string PlayerInfoFormatString { get; set; } = WidgetConfigDefaults.DefaultMeterPlayerInfoFormatString;
+
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
@@ -94,6 +96,7 @@ public sealed class MeterWidgetSettingsConfig
     {
         return new MeterWidgetSettingsConfig
         {
+            PlayerInfoFormatString = PlayerInfoFormatString,
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
@@ -118,6 +121,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
+    public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
 
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
@@ -272,6 +276,11 @@ public static class WidgetConfigDefaults
                 Width = PlayerListInitialWindowWidth,
                 Height = PlayerListInitialWindowHeight
             },
+            WidgetKind.DpsMeter or WidgetKind.HpsMeter => new WidgetWindowConfig
+            {
+                Width = PlayerListInitialWindowWidth,
+                Height = PlayerListInitialWindowHeight
+            },
             WidgetKind.PlayerInfo => new WidgetWindowConfig
             {
                 Width = PlayerInfoInitialWindowWidth,
@@ -305,6 +314,7 @@ public static class WidgetConfigDefaults
     {
         return new MeterWidgetSettingsConfig
         {
+            PlayerInfoFormatString = DefaultMeterPlayerInfoFormatString,
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorIndexes = CreateDefaultClassColorIndexes(),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
@@ -393,6 +403,12 @@ public static class WidgetConfigDefaults
                 config.Window.Height ??= PlayerListInitialWindowHeight;
                 break;
 
+            case WidgetKind.DpsMeter:
+            case WidgetKind.HpsMeter:
+                config.Window.Width ??= PlayerListInitialWindowWidth;
+                config.Window.Height ??= PlayerListInitialWindowHeight;
+                break;
+
             case WidgetKind.PlayerInfo:
                 config.Window.Width ??= PlayerInfoInitialWindowWidth;
                 config.Window.Height ??= PlayerInfoInitialWindowHeight;
@@ -436,6 +452,7 @@ public static class WidgetConfigDefaults
 
     public static void NormalizeMeter(WidgetKind kind, MeterWidgetSettingsConfig meter)
     {
+        meter.PlayerInfoFormatString ??= DefaultMeterPlayerInfoFormatString;
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;

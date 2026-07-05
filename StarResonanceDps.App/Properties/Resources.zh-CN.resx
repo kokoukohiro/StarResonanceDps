@@ -417,4 +417,49 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>职业颜色不透明度</value>
   </data>
+<data name="Meter_Total" xml:space="preserve">
+    <value>合计</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
+    <value>快捷预设</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
+    <value>添加字段</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
+    <value>自定义格式字符串</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
+    <value>简洁</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
+    <value>详细</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
+    <value>仅名称</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>赛季强度</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
+    <value>赛季等级</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+    <value>玩家 UID</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
+    <value>示例玩家</value>
+  </data>
 </root>

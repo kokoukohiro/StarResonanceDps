@@ -166,17 +166,19 @@
 
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Grid Width="32"
-                                                    Height="32"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Top">
+                                                <Grid Width="22"
+                                                      Height="22"
+                                                      ClipToBounds="False"
+                                                      SnapsToDevicePixels="True"
+                                                      Margin="-5,0,0,10"
+                                                      UseLayoutRounding="True">
                                                     <Button Width="22"
-                                                        Height="22"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Top"
-                                                        Background="{Binding Brush}"
-                                                        Style="{StaticResource Button.ColorSwatchButton}"
-                                                        Click="RecentColorButton_Click" />
+                                                            Height="22"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Background="{Binding Brush}"
+                                                            Style="{StaticResource Button.ColorSwatchButton}"
+                                                            Click="RecentColorButton_Click" />
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>

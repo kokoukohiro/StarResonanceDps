@@ -1,11 +1,9 @@
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
-using StarResonanceDps.Core.Models;
-using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -27,11 +25,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     public SettingsViewModel()
     {
         WindowColors = new ColorPaletteViewModel(AppConfigDefaults.CreateDefaultWindowColors(), AppConfigDefaults.MaxPaletteColorCount);
-        WindowColors.PaletteChanged += (_, _) => OnPropertyChanged(nameof(HasUnsavedChanges));
+        WindowColors.PaletteChanged += WindowColors_PaletteChanged;
 
         var settings = _configManager.GetSettingsSnapshot();
         _lastSavedSettings = settings.Clone();
-        LoadFromSettings(settings, applyLanguage: false);
+        LoadFromSettings(settings, applyLanguage: false, applyPreview: false);
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -40,6 +38,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
+        _configManager.ClearSettingsPreview();
+        WindowColors.PaletteChanged -= WindowColors_PaletteChanged;
     }
 
     [RelayCommand]
@@ -65,7 +65,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public void ResetToDefaults()
     {
-        LoadFromSettings(AppConfigDefaults.CreateSettings(), applyLanguage: true);
+        LoadFromSettings(AppConfigDefaults.CreateSettings(), applyLanguage: true, applyPreview: true);
         ApplyCurrentGlobalTheme();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
@@ -73,7 +73,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     public void RestoreSavedSettingsPreview()
     {
         LocalizationManager.Instance.ApplyLanguageIndex(_lastSavedSettings.LanguageIndex);
-        ApplyPlayerNameDisplayModePreview(_lastSavedSettings.PlayerNameDisplayModeIndex);
+        _configManager.ClearSettingsPreview();
         ThemeManager.Instance.ApplyGlobalTheme(_lastSavedSettings);
     }
 
@@ -85,8 +85,6 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     public void ApplyWindowColor(Color color)
     {
         WindowColors.AddOrSelect(color);
-        ApplyCurrentGlobalTheme();
-        OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
     private SettingsConfig CreateSettings()
@@ -104,7 +102,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         return settings;
     }
 
-    private void LoadFromSettings(SettingsConfig settings, bool applyLanguage)
+    private void LoadFromSettings(SettingsConfig settings, bool applyLanguage, bool applyPreview)
     {
         AppConfigDefaults.NormalizeSettings(settings);
 
@@ -121,23 +119,38 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             _isLoadingSettings = false;
         }
 
-        ApplyPlayerNameDisplayModePreview(PlayerNameDisplayModeIndex);
-
         if (applyLanguage)
         {
             LocalizationManager.Instance.ApplyLanguageIndex(LanguageIndex);
         }
+
+        if (applyPreview)
+        {
+            ApplySettingsPreview();
+        }
+    }
+
+    private void WindowColors_PaletteChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+
+        if (_isLoadingSettings)
+        {
+            return;
+        }
+
+        ApplySettingsPreview();
+        ApplyCurrentGlobalTheme();
+    }
+
+    private void ApplySettingsPreview()
+    {
+        _configManager.SetSettingsPreview(CreateSettings());
     }
 
     private void ApplyCurrentGlobalTheme()
     {
         ThemeManager.Instance.ApplyGlobalTheme(CreateSettings());
-    }
-
-    private static void ApplyPlayerNameDisplayModePreview(int playerNameDisplayModeIndex)
-    {
-        PlayerRosterPresentationStore.Instance.SetNameDisplayMode(
-            (PlayerNameDisplayMode)playerNameDisplayModeIndex);
     }
 
     private static bool SettingsEquals(SettingsConfig left, SettingsConfig right)
@@ -157,6 +170,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         if (!_isLoadingSettings)
         {
             LocalizationManager.Instance.ApplyLanguageIndex(value);
+            ApplySettingsPreview();
         }
 
         OnPropertyChanged(nameof(HasUnsavedChanges));
@@ -164,6 +178,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     partial void OnNumberDisplayFormatIndexChanged(int value)
     {
+        if (!_isLoadingSettings)
+        {
+            ApplySettingsPreview();
+        }
+
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -171,7 +190,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     {
         if (!_isLoadingSettings)
         {
-            ApplyPlayerNameDisplayModePreview(value);
+            ApplySettingsPreview();
         }
 
         OnPropertyChanged(nameof(HasUnsavedChanges));

@@ -483,4 +483,49 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>クラスカラーの不透明度</value>
   </data>
+<data name="Meter_Total" xml:space="preserve">
+    <value>合計</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
+    <value>クイックプリセット</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
+    <value>フィールドを追加</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
+    <value>カスタマイズ文字列</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
+    <value>クリア</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
+    <value>プレビュー</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
+    <value>デフォルト</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
+    <value>シンプル</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
+    <value>詳細</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
+    <value>名前のみ</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>シーズン強度</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
+    <value>シーズンレベル</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+    <value>プレイヤーUID</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
+    <value>サンプルプレイヤー</value>
+  </data>
 </root>

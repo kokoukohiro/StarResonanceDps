@@ -40,6 +40,15 @@
 
                 <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
                     <StackPanel Margin="10">
+                        <Button x:Name="DisplaySettingsNavButton"
+                                Click="DisplaySettingsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -68,6 +77,16 @@
                                       ScrollChanged="ContentScrollViewer_ScrollChanged"
                                       SizeChanged="ContentScrollViewer_SizeChanged">
                             <StackPanel Margin="0,0,10,6">
+                                <ContentControl x:Name="DisplaySettingsHost"
+                                                Content="{Binding MeterSettings}"
+                                                Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:MeterWidgetDisplaySettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
                                 <TextBlock x:Name="ThemeSection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}"
                                            Foreground="{DynamicResource Brush.TextPrimary}"

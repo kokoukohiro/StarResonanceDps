@@ -6,11 +6,11 @@
              SnapsToDevicePixels="True">
     <Grid Margin="12,8,12,8" DataContext="{Binding PlayerInfo}">
         <StackPanel>
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.InfoWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerInfoWidgetView}}}" Text="{Binding NameText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.InfoWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerInfoWidgetView}}}" Text="{Binding LevelText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.InfoWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerInfoWidgetView}}}" Text="{Binding AbilityScoreText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.InfoWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerInfoWidgetView}}}" Text="{Binding ProfessionText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.InfoWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerInfoWidgetView}}}" Text="{Binding ProfessionSpecText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding NameText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding LevelText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding AbilityScoreText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding ProfessionText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding ProfessionSpecText}" />
         </StackPanel>
     </Grid>
 </UserControl>

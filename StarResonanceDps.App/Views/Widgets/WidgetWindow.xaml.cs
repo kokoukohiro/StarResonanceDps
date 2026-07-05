@@ -36,6 +36,7 @@ public partial class WidgetWindow : Window
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
+    private readonly Action? _meterResetAction;
     private bool _isRestoringBounds = true;
     private bool _isSynchronizingContentScrollBar;
 
@@ -44,10 +45,12 @@ public partial class WidgetWindow : Window
         FrameworkElement? widgetContent,
         WidgetWindowConfig savedBounds,
         Window? owner,
-        string? headerText = null)
+        string? headerText = null,
+        Action? meterResetAction = null)
     {
         _widget = widget;
         _usesWidgetDisplayNameForHeader = string.IsNullOrWhiteSpace(headerText);
+        _meterResetAction = meterResetAction;
 
         InitializeComponent();
         DataContext = widget;
@@ -117,6 +120,11 @@ public partial class WidgetWindow : Window
         {
             _verticalScrollContent.VerticalScrollMetricsChanged -= VerticalScrollContent_VerticalScrollMetricsChanged;
             WidgetContentScrollBar.ValueChanged -= WidgetContentScrollBar_ValueChanged;
+        }
+
+        if (WidgetContentHost.Content is FrameworkElement { DataContext: IDisposable disposable })
+        {
+            disposable.Dispose();
         }
 
         base.OnClosed(e);
@@ -210,6 +218,11 @@ public partial class WidgetWindow : Window
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void MeterResetButton_Click(object sender, RoutedEventArgs e)
+    {
+        _meterResetAction?.Invoke();
     }
 
     private void Widget_PropertyChanged(object? sender, PropertyChangedEventArgs e)

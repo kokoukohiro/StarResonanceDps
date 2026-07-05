@@ -483,4 +483,49 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>Class Colors Opacity</value>
   </data>
+<data name="Meter_Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
+    <value>Quick Presets</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
+    <value>Add Fields</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
+    <value>Custom Format String</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
+    <value>Detailed</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
+    <value>Name Only</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>Season Strength</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
+    <value>Season Level</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+    <value>Player UID</value>
+  </data>
+  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
+    <value>Example Player</value>
+  </data>
 </root>

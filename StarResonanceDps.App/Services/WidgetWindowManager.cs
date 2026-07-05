@@ -6,6 +6,7 @@ using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using StarResonanceDps.App.Views.Widgets;
@@ -135,7 +136,15 @@ public sealed class WidgetWindowManager
 
         var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
         var widgetContent = CreateWidgetContent(widget);
-        var window = new WidgetWindow(widget, widgetContent, savedBounds, owner);
+        Action? meterResetAction = widget.IsMeter
+            ? MeterSnapshotProvider.ResetCurrentEncounter
+            : null;
+        var window = new WidgetWindow(
+            widget,
+            widgetContent,
+            savedBounds,
+            owner,
+            meterResetAction: meterResetAction);
         window.Closed += WidgetWindow_Closed;
 
         _openSingleWindows.Add(widget.Kind, window);
@@ -225,6 +234,14 @@ public sealed class WidgetWindowManager
         return widget.Kind switch
         {
             WidgetKind.PlayerInfoDebug => new PlayerListWidgetView(),
+            WidgetKind.DpsMeter => new MeterWidgetView
+            {
+                DataContext = new MeterWidgetViewModel(widget, MeterSnapshotKind.Damage)
+            },
+            WidgetKind.HpsMeter => new MeterWidgetView
+            {
+                DataContext = new MeterWidgetViewModel(widget, MeterSnapshotKind.Healing)
+            },
             _ => null
         };
     }

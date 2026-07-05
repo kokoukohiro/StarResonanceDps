@@ -11,21 +11,21 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0">
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding HpText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding MaxHpText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding AttackText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding PrimaryStatText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding EnduranceText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding ArmorText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding HpText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding MaxHpText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding AttackText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding PrimaryStatText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding EnduranceText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding ArmorText}" />
         </StackPanel>
 
         <StackPanel Grid.Column="1" Margin="16,0,0,0">
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding CriticalText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding HasteText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding LuckText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding MasteryText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding VersatilityText}" />
-            <TextBlock Style="{StaticResource Text.Subtitle}" Foreground="{Binding DataContext.StatusWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerStatusWidgetView}}}" Text="{Binding BlockText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding CriticalText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding HasteText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding LuckText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding MasteryText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding VersatilityText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding BlockText}" />
         </StackPanel>
     </Grid>
 </UserControl>
