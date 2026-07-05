@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using Zproto;
@@ -96,6 +97,7 @@ internal static class PlayerRosterProjection
                 "AttrSeasonStrengthPer",
                 "AttrSeasonStrengthExPer");
         var subProfessionId = entity.SubProfessionId;
+        var equipmentData = GetEquipmentData(entity);
 
         RosterStore.Upsert(new PlayerRosterEntry(
             characterId,
@@ -110,7 +112,38 @@ internal static class PlayerRosterProjection
             combatAttributes,
             subProfessionId,
             entity.Level,
-            ToInt32(entity.SeasonLevel)));
+            ToInt32(entity.SeasonLevel),
+            equipmentData));
+    }
+
+    private static PlayerEquipmentData? GetEquipmentData(Entity entity)
+    {
+        var rawData = entity.GetAttrKV("AttrEquipData");
+        if (rawData is null)
+        {
+            return null;
+        }
+
+        if (rawData is JArray serializedItems)
+        {
+            var parsedItems = serializedItems.ToObject<List<EquipNine>>();
+            return parsedItems is null
+                ? PlayerEquipmentData.Invalid
+                : CreateEquipmentData(parsedItems);
+        }
+
+        if (rawData is IEnumerable<EquipNine> items)
+        {
+            return CreateEquipmentData(items);
+        }
+
+        return PlayerEquipmentData.Invalid;
+    }
+
+    private static PlayerEquipmentData CreateEquipmentData(IEnumerable<EquipNine> items)
+    {
+        return PlayerEquipmentData.Create(
+            items.Select(item => new PlayerEquipmentItem(item.Slot, item.EquipID)));
     }
 
     private static int GetFirstNonZeroInt(Entity entity, params string[] keys)

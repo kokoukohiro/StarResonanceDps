@@ -184,7 +184,8 @@ public sealed class PlayerRosterStore
             entry.CombatAttributes,
             entry.SubProfessionId,
             entry.Level,
-            entry.SeasonLevel);
+            entry.SeasonLevel,
+            entry.EquipmentData);
     }
 }
 

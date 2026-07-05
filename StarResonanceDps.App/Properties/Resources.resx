@@ -480,4 +480,7 @@
   <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
     <value>ProfessionSpec</value>
   </data>
+  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
+    <value>Class Colors Opacity</value>
+  </data>
 </root>

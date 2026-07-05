@@ -43,6 +43,39 @@ public sealed class ConfigManager
         return AppConfig.ColorPicker.Clone();
     }
 
+    public MeterWidgetSettingsConfig? TakeLegacyClassColorSettings()
+    {
+        var extensionData = AppConfig.Settings.ExtensionData;
+        var classColorsKey = extensionData?
+            .Keys
+            .FirstOrDefault(key => string.Equals(key, "ClassColors", StringComparison.OrdinalIgnoreCase));
+        if (extensionData is null
+            || classColorsKey is null
+            || !extensionData.TryGetValue(classColorsKey, out var value)
+            || value.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
+        {
+            return null;
+        }
+
+        MeterWidgetSettingsConfig? settings = null;
+        try
+        {
+            settings = JsonSerializer.Deserialize<MeterWidgetSettingsConfig>(value.GetRawText(), JsonOptions);
+        }
+        catch (JsonException)
+        {
+        }
+
+        extensionData.Remove(classColorsKey);
+        if (extensionData.Count == 0)
+        {
+            AppConfig.Settings.ExtensionData = null;
+        }
+
+        Save();
+        return settings;
+    }
+
     public void SaveSettings(SettingsConfig settings)
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);

@@ -245,16 +245,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="ViewModels\WidgetSettings\**" />
-    <Compile Remove="Views\WidgetSettings\**" />
-    <EmbeddedResource Remove="ViewModels\WidgetSettings\**" />
-    <EmbeddedResource Remove="Views\WidgetSettings\**" />
-    <None Remove="ViewModels\WidgetSettings\**" />
-    <None Remove="Views\WidgetSettings\**" />
-    <Page Remove="ViewModels\WidgetSettings\**" />
-    <Page Remove="Views\WidgetSettings\**" />
-  </ItemGroup>
-
+  
 </Project>

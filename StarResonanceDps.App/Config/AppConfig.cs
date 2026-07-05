@@ -1,4 +1,7 @@
-﻿namespace StarResonanceDps.App.Config;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace StarResonanceDps.App.Config;
 
 public sealed class AppConfig
 {
@@ -30,29 +33,6 @@ public sealed class ColorPickerConfig
     }
 }
 
-public sealed class ClassColorSettingsConfig
-{
-    public Dictionary<string, int> ClassColorIndexes { get; set; } = AppConfigDefaults.CreateDefaultClassColorIndexes();
-
-    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = AppConfigDefaults.CreateDefaultClassColorPalettes();
-
-    public ClassColorSettingsConfig Clone()
-    {
-        return new ClassColorSettingsConfig
-        {
-            ClassColorIndexes = ClassColorIndexes is null
-                ? AppConfigDefaults.CreateDefaultClassColorIndexes()
-                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
-            ClassColorPalettes = ClassColorPalettes is null
-                ? AppConfigDefaults.CreateDefaultClassColorPalettes()
-                : ClassColorPalettes.ToDictionary(
-                    pair => pair.Key,
-                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
-                    StringComparer.OrdinalIgnoreCase)
-        };
-    }
-}
-
 public sealed class SettingsConfig
 {
     public int LanguageIndex { get; set; }
@@ -60,7 +40,9 @@ public sealed class SettingsConfig
     public int PlayerNameDisplayModeIndex { get; set; }
     public int WindowColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
-    public ClassColorSettingsConfig ClassColors { get; set; } = AppConfigDefaults.CreateClassColorSettings();
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement>? ExtensionData { get; set; }
 
     public SettingsConfig Clone()
     {
@@ -71,7 +53,20 @@ public sealed class SettingsConfig
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
-            ClassColors = ClassColors?.Clone() ?? AppConfigDefaults.CreateClassColorSettings()
+            ExtensionData = CloneExtensionData(ExtensionData)
         };
+    }
+
+    private static Dictionary<string, JsonElement>? CloneExtensionData(Dictionary<string, JsonElement>? source)
+    {
+        if (source is null || source.Count == 0)
+        {
+            return null;
+        }
+
+        return source.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value.Clone(),
+            StringComparer.OrdinalIgnoreCase);
     }
 }

@@ -1,7 +1,314 @@
 <UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerEquipmentWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
              UseLayoutRounding="True"
-             SnapsToDevicePixels="True">
-    <Grid />
+             SnapsToDevicePixels="True"
+             Loaded="PlayerEquipmentWidgetView_Loaded"
+             Unloaded="PlayerEquipmentWidgetView_Unloaded"
+             SizeChanged="PlayerEquipmentWidgetView_SizeChanged"
+             DataContextChanged="PlayerEquipmentWidgetView_DataContextChanged">
+    <Grid>
+        <ScrollViewer x:Name="EquipmentScrollViewer"
+                      Margin="8"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden"
+                      ScrollChanged="EquipmentScrollViewer_ScrollChanged">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,0,0,8">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasEquipmentData}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <TextBlock VerticalAlignment="Center"
+                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                               FontSize="12"
+                               Text="Show Basic Attributes: " />
+                    <CheckBox Margin="4,0,12,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding ShowBasicAttributes}" />
+
+                    <TextBlock VerticalAlignment="Center"
+                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                               FontSize="12"
+                               Text="Show Advanced Attributes: " />
+                    <CheckBox Margin="4,0,12,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding ShowAdvancedAttributes}" />
+
+                    <TextBlock VerticalAlignment="Center"
+                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                               FontSize="12"
+                               Text="Show Unknown Attributes: " />
+                    <CheckBox Margin="4,0,0,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding ShowUnknownAttributes}" />
+                </StackPanel>
+
+                <TextBlock VerticalAlignment="Center"
+                           Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                           FontSize="12"
+                           Text="No Gear Data To Load">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasNoEquipmentData}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <TextBlock VerticalAlignment="Center"
+                           Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                           FontSize="12"
+                           Text="No Gear Data Format Invalid">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasInvalidEquipmentData}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <ItemsControl ItemsSource="{Binding EquipmentSlots}">
+                    <ItemsControl.Style>
+                        <Style TargetType="ItemsControl">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasEquipmentData}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ItemsControl.Style>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,0,0,8"
+                                    Padding="8"
+                                    BorderBrush="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                    BorderThickness="1"
+                                    CornerRadius="4">
+                                <StackPanel>
+                                    <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Text="{Binding SlotText}" />
+
+                                    <TextBlock x:Name="UnknownItemText"
+                                               Margin="0,4,0,0"
+                                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                               FontSize="12"
+                                               Text="{Binding UnknownItemText}" />
+
+                                    <StackPanel x:Name="KnownItemContent"
+                                                Margin="0,4,0,0"
+                                                Visibility="Collapsed">
+                                        <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                   FontSize="12"
+                                                   Text="Note: Items below Mythic and Legendary Quality may have wrong Advanced Attributes">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ShowQualityWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                   FontSize="12"
+                                                   Text="Note: Unknown player spec, showing first spec attribute list">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ShowUnknownSpecWarning}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <StackPanel Margin="0,2,0,0"
+                                                    Orientation="Horizontal">
+                                            <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                       FontSize="12"
+                                                       Text="{Binding ItemText}" />
+                                            <TextBlock Margin="8,0,0,0"
+                                                       Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                       FontSize="12"
+                                                       Text="{Binding GearScoreText}" />
+                                        </StackPanel>
+
+                                        <StackPanel Margin="0,4,0,0"
+                                                    Orientation="Horizontal">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasBreakthroughs}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                       FontSize="12"
+                                                       Text="Break Through:" />
+                                            <ComboBox Margin="6,0,0,0"
+                                                      MinWidth="110"
+                                                      DisplayMemberPath="DisplayText"
+                                                      ItemsSource="{Binding BreakthroughOptions}"
+                                                      SelectedItem="{Binding SelectedBreakthrough}" />
+                                        </StackPanel>
+
+                                        <StackPanel Margin="0,4,0,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.ShowBasicAttributes, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Text="Basic Attributes" />
+                                            <ItemsControl Margin="12,2,0,0"
+                                                          ItemsSource="{Binding BasicAttributes}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                                       FontSize="12"
+                                                                       Text="{Binding Name}" />
+                                                            <TextBlock Margin="6,0,0,0"
+                                                                       Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                                       Opacity="0.65"
+                                                                       FontSize="12"
+                                                                       Text="{Binding RangeText}" />
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+
+                                        <StackPanel Margin="0,4,0,0">
+                                            <StackPanel.Style>
+                                                <Style TargetType="StackPanel">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding DataContext.ShowAdvancedAttributes, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </StackPanel.Style>
+                                            <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Text="Advanced Attributes" />
+                                            <StackPanel Margin="12,2,0,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.ShowUnknownAttributes, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                               FontSize="12"
+                                                               Text="Rare Attribute:" />
+                                                    <TextBlock Margin="6,0,0,0"
+                                                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                               Opacity="0.65"
+                                                               FontSize="12"
+                                                               Text="&lt;UNKNOWN&gt;" />
+                                                </StackPanel>
+
+                                                <ItemsControl ItemsSource="{Binding AdvancedAttributes}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                                           FontSize="12"
+                                                                           Text="{Binding Name}" />
+                                                                <TextBlock Margin="6,0,0,0"
+                                                                           Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                                           Opacity="0.65"
+                                                                           FontSize="12"
+                                                                           Text="{Binding RangeText}" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <StackPanel.Style>
+                                                        <Style TargetType="StackPanel">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DataContext.ShowUnknownAttributes, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Style>
+                                                    <TextBlock Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                               FontSize="12"
+                                                               Text="Reforged Attribute:" />
+                                                    <TextBlock Margin="6,0,0,0"
+                                                               Foreground="{Binding DataContext.EquipmentWidget.WidgetWindowPalette.WidgetWindowTextBrush, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerEquipmentWidgetView}}}"
+                                                               Opacity="0.65"
+                                                               FontSize="12"
+                                                               Text="&lt;UNKNOWN&gt;" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding HasKnownItem}" Value="True">
+                                    <Setter TargetName="UnknownItemText"
+                                                    Property="Visibility"
+                                                    Value="Collapsed" />
+                                    <Setter TargetName="KnownItemContent"
+                                                    Property="Visibility"
+                                                    Value="Visible" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </UserControl>

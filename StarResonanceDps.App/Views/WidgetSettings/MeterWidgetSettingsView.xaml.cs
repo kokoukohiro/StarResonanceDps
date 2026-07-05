@@ -1,17 +1,18 @@
 using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.ViewModels.WidgetSettings;
 
-namespace StarResonanceDps.App.Views.Settings;
+namespace StarResonanceDps.App.Views.WidgetSettings;
 
-public partial class ClassColorSettingsView : UserControl
+public partial class MeterWidgetSettingsView : UserControl
 {
-    public ClassColorSettingsView()
+    public MeterWidgetSettingsView()
     {
         InitializeComponent();
     }
 
-    private ClassColorSettingsViewModel ViewModel => (ClassColorSettingsViewModel)DataContext;
+    private MeterWidgetSettingsViewModel ViewModel => (MeterWidgetSettingsViewModel)DataContext;
 
     private void ColorOptionRadioButton_Click(object sender, RoutedEventArgs e)
     {
@@ -30,7 +31,6 @@ public partial class ClassColorSettingsView : UserControl
 
         var owner = Window.GetWindow(this);
         var window = new ColorPickerWindow(ViewModel.GetSelectedClassColor(classKey));
-
         if (owner is not null)
         {
             window.Owner = owner;

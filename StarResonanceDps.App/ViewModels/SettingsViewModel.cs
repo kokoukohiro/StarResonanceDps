@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
@@ -30,22 +30,16 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         WindowColors.PaletteChanged += (_, _) => OnPropertyChanged(nameof(HasUnsavedChanges));
 
         var settings = _configManager.GetSettingsSnapshot();
-        ClassColors = new ClassColorSettingsViewModel(settings.ClassColors);
-        ClassColors.SettingsChanged += ClassColors_SettingsChanged;
         _lastSavedSettings = settings.Clone();
         LoadFromSettings(settings, applyLanguage: false);
     }
 
     public ColorPaletteViewModel WindowColors { get; }
 
-    public ClassColorSettingsViewModel ClassColors { get; }
-
     public bool HasUnsavedChanges => !SettingsEquals(CreateSettings(), _lastSavedSettings);
 
     public void Dispose()
     {
-        ClassColors.SettingsChanged -= ClassColors_SettingsChanged;
-        ClassColors.Dispose();
     }
 
     [RelayCommand]
@@ -103,8 +97,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
-            WindowColors = [.. WindowColors.GetHexColors()],
-            ClassColors = ClassColors.CreateConfig()
+            WindowColors = [.. WindowColors.GetHexColors()]
         };
 
         AppConfigDefaults.NormalizeSettings(settings);
@@ -122,7 +115,6 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
-            ClassColors.Load(settings.ClassColors);
         }
         finally
         {
@@ -157,41 +149,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.NumberDisplayFormatIndex == right.NumberDisplayFormatIndex
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
-            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase)
-            && ClassColorsEqual(left.ClassColors, right.ClassColors);
-    }
-
-    private static bool ClassColorsEqual(ClassColorSettingsConfig left, ClassColorSettingsConfig right)
-    {
-        var normalizedLeft = AppConfigDefaults.CloneNormalizedClassColorSettings(left);
-        var normalizedRight = AppConfigDefaults.CloneNormalizedClassColorSettings(right);
-
-        foreach (var key in AppConfigDefaults.ClassColorKeys)
-        {
-            if (!normalizedLeft.ClassColorIndexes.TryGetValue(key, out var leftIndex)
-                || !normalizedRight.ClassColorIndexes.TryGetValue(key, out var rightIndex)
-                || leftIndex != rightIndex)
-            {
-                return false;
-            }
-
-            var leftColors = normalizedLeft.ClassColorPalettes[key];
-            var rightColors = normalizedRight.ClassColorPalettes[key];
-            if (!leftColors.SequenceEqual(rightColors, StringComparer.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void ClassColors_SettingsChanged(object? sender, EventArgs e)
-    {
-        if (!_isLoadingSettings)
-        {
-            OnPropertyChanged(nameof(HasUnsavedChanges));
-        }
+            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
     partial void OnLanguageIndexChanged(int value)

@@ -233,20 +233,37 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type RadioButton}">
                     <Grid Width="{TemplateBinding Width}"
-                      Height="{TemplateBinding Height}"
-                      SnapsToDevicePixels="True"
-                      UseLayoutRounding="True">
-                        <!-- 選択時の白リング。Strokeではなく塗り円で作る -->
-                        <Ellipse x:Name="SelectionRing"
-                             Fill="{DynamicResource Brush.TextPrimary}"
-                             Opacity="0"
-                             SnapsToDevicePixels="True" />
-
-                        <!-- 色本体。通常時は全体表示、選択時だけ少し内側へ縮める -->
+                          Height="{TemplateBinding Height}"
+                          SnapsToDevicePixels="True"
+                          UseLayoutRounding="True">
                         <Ellipse x:Name="ColorCircle"
-                             Margin="0"
-                             Fill="{TemplateBinding Background}"
-                             SnapsToDevicePixels="True" />
+                                 Margin="0"
+                                 Fill="{TemplateBinding Background}"
+                                 SnapsToDevicePixels="True">
+                            <Ellipse.Effect>
+                                <DropShadowEffect
+                                    Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                    Opacity="0.5"
+                                    ShadowDepth="0"
+                                    BlurRadius="5" />
+                            </Ellipse.Effect>
+                        </Ellipse>
+
+                        <Ellipse x:Name="SelectionRing"
+                                 Fill="Transparent"
+                                 Stroke="{DynamicResource Brush.TextPrimary}"
+                                 StrokeThickness="2"
+                                 Opacity="0"
+                                 IsHitTestVisible="False"
+                                 SnapsToDevicePixels="True">
+                            <Ellipse.Effect>
+                                <DropShadowEffect
+                                    Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                    Opacity="0.5"
+                                    ShadowDepth="0"
+                                    BlurRadius="5" />
+                            </Ellipse.Effect>
+                        </Ellipse>
                     </Grid>
 
                     <ControlTemplate.Triggers>
@@ -258,6 +275,7 @@
                         <Trigger Property="IsChecked" Value="True">
                             <Setter TargetName="SelectionRing" Property="Opacity" Value="1" />
                             <Setter TargetName="ColorCircle" Property="Margin" Value="2" />
+                            <Setter TargetName="ColorCircle" Property="Effect" Value="{x:Null}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -284,7 +302,15 @@
                         <Ellipse x:Name="ColorCircle"
                                  Margin="0"
                                  Fill="{TemplateBinding Background}"
-                                 SnapsToDevicePixels="True" />
+                                 SnapsToDevicePixels="True">
+                            <Ellipse.Effect>
+                                <DropShadowEffect
+                                    Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                    Opacity="0.5"
+                                    ShadowDepth="0"
+                                    BlurRadius="5" />
+                            </Ellipse.Effect>
+                        </Ellipse>
                     </Grid>
 
                     <ControlTemplate.Triggers>

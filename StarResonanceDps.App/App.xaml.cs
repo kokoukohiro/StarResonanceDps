@@ -12,7 +12,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         ManagerTraceOutput.Configure();
-        var settings = ConfigManager.Instance.GetSettingsSnapshot();
+        var configManager = ConfigManager.Instance;
+        var legacyClassColors = configManager.TakeLegacyClassColorSettings();
+        if (legacyClassColors is not null)
+        {
+            WidgetStateManager.Instance.MigrateLegacyPlayerListClassColors(legacyClassColors);
+        }
+
+        var settings = configManager.GetSettingsSnapshot();
         LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
         ThemeManager.Instance.ApplyGlobalTheme(settings);
         base.OnStartup(e);

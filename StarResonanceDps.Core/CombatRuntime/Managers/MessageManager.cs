@@ -1249,8 +1249,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            PlayerRosterProjection.UpsertSelf(playerUuid);
-
             if (vData.Equip != null)
             {
                 List<Zproto.EquipNine> playerEquips = new();
@@ -1269,6 +1267,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 EncounterManager.Current.SetAttrKV(playerUuid, "AttrEquipData", playerEquips);
             }
+
+            PlayerRosterProjection.UpsertSelf(playerUuid);
         }
 
         public static void ProcessSyncContainerDirtyData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)

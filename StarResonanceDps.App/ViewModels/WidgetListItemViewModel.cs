@@ -15,8 +15,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
-    private readonly ConfigManager _configManager = ConfigManager.Instance;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
+    private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerInfoDebug);
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private long _playerListMapGeneration = -1;
 
@@ -102,7 +102,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
             State = State,
-            Theme = _theme.Clone()
+            Theme = _theme.Clone(),
+            Meter = WidgetConfigDefaults.SupportsMeterSettings(Kind)
+                ? _meter.Clone()
+                : null
         };
     }
 
@@ -119,6 +122,22 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         ApplyTheme(config.Theme);
+        if (WidgetConfigDefaults.SupportsMeterSettings(Kind))
+        {
+            _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, config.Meter);
+        }
+
+        SynchronizePlayerListEntries(resetEntries: false);
+    }
+
+    public void ApplyMeterSettingsPreview(MeterWidgetSettingsConfig meter)
+    {
+        if (!WidgetConfigDefaults.SupportsMeterSettings(Kind))
+        {
+            return;
+        }
+
+        _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, meter);
         SynchronizePlayerListEntries(resetEntries: false);
     }
 
@@ -250,8 +269,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
-        var classColors = _configManager.GetSettingsSnapshot().ClassColors;
-
         if (resetEntries)
         {
             foreach (var entry in _playerListEntries)
@@ -287,13 +304,13 @@ public partial class WidgetListItemViewModel : ViewModelBase
             var player = _playerRoster[targetIndex];
             if (!_playerListEntriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
             {
-                entry = PlayerListEntry.Create(player, classColors);
+                entry = PlayerListEntry.Create(player, _meter);
                 _playerListEntriesByCharacterId.Add(player.CharacterId, entry);
                 _playerListEntries.Insert(targetIndex, entry);
                 continue;
             }
 
-            entry.Update(player, classColors);
+            entry.Update(player, _meter);
 
             if (_playerListEntries[targetIndex].CharacterId == player.CharacterId)
             {

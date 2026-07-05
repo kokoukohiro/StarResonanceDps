@@ -1,10 +1,9 @@
-﻿<Window x:Class="StarResonanceDps.App.Views.SettingsWindow"
+<Window x:Class="StarResonanceDps.App.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
         xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
         xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
-        xmlns:settingsViews="clr-namespace:StarResonanceDps.App.Views.Settings"
         xmlns:viewModels="clr-namespace:StarResonanceDps.App.ViewModels"
         Title="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Window_Settings_Title]}"
         Icon="/Assets/Images/ApplicationIcon.ico"
@@ -63,14 +62,6 @@
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="ClassColorsNavButton"
-                                Click="ClassColorsNavButton_Click"
-                                Style="{StaticResource Button.Sidebar}">
-                            <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}" />
-                            </StackPanel>
-                        </Button>
 
                         <Button x:Name="UpdateNavButton"
                                 Click="UpdateNavButton_Click"
@@ -223,21 +214,6 @@
                                     </StackPanel>
                                 </ContentControl>
 
-                                <TextBlock x:Name="ClassColorsSection"
-                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}"
-                                           Foreground="{DynamicResource Brush.TextPrimary}"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
-                                    <ContentControl Content="{Binding ClassColors}">
-                                        <ContentControl.ContentTemplate>
-                                            <DataTemplate>
-                                                <settingsViews:ClassColorSettingsView />
-                                            </DataTemplate>
-                                        </ContentControl.ContentTemplate>
-                                    </ContentControl>
-                                </ContentControl>
 
                                 <TextBlock x:Name="UpdateSection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Update_Title]}"

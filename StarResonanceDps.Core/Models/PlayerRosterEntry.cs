@@ -13,4 +13,5 @@ public sealed record PlayerRosterEntry(
     PlayerCombatAttributes CombatAttributes = default,
     int SubProfessionId = 0,
     int Level = 0,
-    int SeasonLevel = 0);
+    int SeasonLevel = 0,
+    PlayerEquipmentData? EquipmentData = null);

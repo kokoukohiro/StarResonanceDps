@@ -52,6 +52,17 @@ public sealed class WidgetStateManager
         }
     }
 
+    public void MigrateLegacyPlayerListClassColors(MeterWidgetSettingsConfig meter)
+    {
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(WidgetKind.PlayerInfoDebug);
+            config.Meter = WidgetConfigDefaults.CloneNormalizedMeter(WidgetKind.PlayerInfoDebug, meter);
+            WidgetConfigDefaults.Normalize(WidgetKind.PlayerInfoDebug, config);
+            SaveCore();
+        }
+    }
+
     public void SaveWidgetFlags(WidgetKind kind, bool isFavorite, bool isPinned)
     {
         lock (_syncRoot)
@@ -162,11 +173,6 @@ public sealed class WidgetStateManager
             if (sourceSchemaVersion < 3)
             {
                 WidgetConfigDefaults.MigrateVersion1Defaults(config);
-            }
-
-            if (sourceSchemaVersion < WidgetConfigDefaults.CurrentSchemaVersion)
-            {
-                WidgetConfigDefaults.RemoveObsoleteSettings(config);
             }
 
             WidgetConfigDefaults.Normalize(kind, config);

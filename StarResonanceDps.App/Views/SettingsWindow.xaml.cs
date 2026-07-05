@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -154,10 +154,6 @@ public partial class SettingsWindow : Window
         ScrollToSection(ThemeSection);
     }
 
-    private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(ClassColorsSection);
-    }
 
     private void UpdateNavButton_Click(object sender, RoutedEventArgs e)
     {

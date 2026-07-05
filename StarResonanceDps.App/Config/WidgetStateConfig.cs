@@ -18,6 +18,7 @@ public sealed class WidgetConfig
     public WidgetState? State { get; set; }
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
+    public MeterWidgetSettingsConfig? Meter { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
@@ -31,29 +32,11 @@ public sealed class WidgetConfig
             State = State,
             Theme = Theme?.Clone() ?? WidgetConfigDefaults.CreateTheme(),
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
-            ExtensionData = CloneExtensionData(ExtensionData)
+            Meter = Meter?.Clone(),
+            ExtensionData = ExtensionData is null
+                ? null
+                : new Dictionary<string, object>(ExtensionData, StringComparer.OrdinalIgnoreCase)
         };
-    }
-
-    private static Dictionary<string, object>? CloneExtensionData(Dictionary<string, object>? source)
-    {
-        if (source is null)
-        {
-            return null;
-        }
-
-        var clone = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-        foreach (var pair in source)
-        {
-            if (string.Equals(pair.Key, "Meter", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            clone[pair.Key] = pair.Value;
-        }
-
-        return clone.Count == 0 ? null : clone;
     }
 }
 
@@ -99,13 +82,42 @@ public sealed class WidgetWindowConfig
     }
 }
 
+public sealed class MeterWidgetSettingsConfig
+{
+    public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfoDebug);
+
+    public MeterWidgetSettingsConfig Clone()
+    {
+        return new MeterWidgetSettingsConfig
+        {
+            ClassColorOpacity = ClassColorOpacity,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfoDebug)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 5;
+    public const int CurrentSchemaVersion = 6;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
     public const int MaxWindowOpacity = 100;
+    public const int MinClassColorIndex = 0;
+    public const int MinClassColorOpacity = 0;
+    public const int MaxClassColorOpacity = 100;
 
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
@@ -122,6 +134,66 @@ public static class WidgetConfigDefaults
         "#FCFCFC"
     ];
 
+    public static readonly string[] ClassColorKeys =
+    [
+        "ShieldKnight",
+        "HeavyGuardian",
+        "VerdantOracle",
+        "SoulMusician",
+        "FlameBerserker",
+        "Stormblade",
+        "FrostMage",
+        "WindKnight",
+        "Marksman",
+        "Transformation",
+        "Unknown"
+    ];
+
+    private static readonly Dictionary<string, string[]> PlayerListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ShieldKnight"] = ["#68A6CD", "#0F68B3"],
+        ["HeavyGuardian"] = ["#68A6CD", "#08A0DC"],
+        ["VerdantOracle"] = ["#83C49A", "#32BF0F"],
+        ["SoulMusician"] = ["#83C49A", "#1F9F0E"],
+        ["FlameBerserker"] = ["#DB8787", "#B33000"],
+        ["Stormblade"] = ["#DB8787", "#6B39DE"],
+        ["FrostMage"] = ["#DB8787", "#5C82E1"],
+        ["WindKnight"] = ["#DB8787", "#11B5B2"],
+        ["Marksman"] = ["#DB8787", "#D4D116"],
+        ["Transformation"] = ["#FFFFFF", "#B06BE8"],
+        ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
+    };
+
+    private static readonly Dictionary<string, string[]> MeterDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ShieldKnight"] = ["#0F68B3", "#08406F"],
+        ["HeavyGuardian"] = ["#08A0DC", "#056482"],
+        ["VerdantOracle"] = ["#32BF0F", "#1D7410"],
+        ["SoulMusician"] = ["#1F9F0E", "#145F0A"],
+        ["FlameBerserker"] = ["#B33000", "#6F1F00"],
+        ["Stormblade"] = ["#6B39DE", "#3F2485"],
+        ["FrostMage"] = ["#5C82E1", "#355094"],
+        ["WindKnight"] = ["#11B5B2", "#0A6E6C"],
+        ["Marksman"] = ["#D4D116", "#8A8810"],
+        ["Transformation"] = ["#B06BE8", "#6E3A9C"],
+        ["Unknown"] = ["#A8A8A8", "#707070"]
+    };
+
+    private static readonly Dictionary<string, string[]> HpsMeterDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["ShieldKnight"] = ["#63B64D", "#395F2C"],
+        ["HeavyGuardian"] = ["#24B78E", "#0F5F4A"],
+        ["VerdantOracle"] = ["#45D52C", "#227A20"],
+        ["SoulMusician"] = ["#20A860", "#145B39"],
+        ["FlameBerserker"] = ["#A4BF2A", "#63721D"],
+        ["Stormblade"] = ["#10C576", "#0A6C44"],
+        ["FrostMage"] = ["#76D8B0", "#467E68"],
+        ["WindKnight"] = ["#19C7BA", "#0E726B"],
+        ["Marksman"] = ["#C0D829", "#728119"],
+        ["Transformation"] = ["#7AD957", "#4B7F37"],
+        ["Unknown"] = ["#8BB58C", "#566F57"]
+    };
+
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         "#2297F4",
@@ -133,6 +205,18 @@ public static class WidgetConfigDefaults
         "#FFFFFF"
     };
 
+    public static bool SupportsMeterSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerInfoDebug
+            or WidgetKind.DpsMeter
+            or WidgetKind.HpsMeter;
+    }
+
+    public static bool UsesMeterClassColorOpacity(WidgetKind kind)
+    {
+        return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+    }
+
     public static void MigrateVersion1Defaults(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -142,11 +226,6 @@ public static class WidgetConfigDefaults
             config.Theme.WindowColors = CreateDefaultWindowColors();
             config.Theme.WindowColorIndex = MinColorIndex;
         }
-    }
-
-    public static void RemoveObsoleteSettings(WidgetConfig config)
-    {
-        config.ExtensionData?.Remove("Meter");
     }
 
     private static bool UsesLegacyWindowColorPalette(IEnumerable<string>? colors)
@@ -179,7 +258,8 @@ public static class WidgetConfigDefaults
             IsPinned = false,
             State = WidgetState.Stopped,
             Theme = CreateTheme(),
-            Window = CreateDefaultWindowConfig(kind)
+            Window = CreateDefaultWindowConfig(kind),
+            Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null
         };
     }
 
@@ -221,9 +301,46 @@ public static class WidgetConfigDefaults
         };
     }
 
+    public static MeterWidgetSettingsConfig CreateMeterSettings(WidgetKind kind)
+    {
+        return new MeterWidgetSettingsConfig
+        {
+            ClassColorOpacity = MaxClassColorOpacity,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
+        };
+    }
+
     public static List<string> CreateDefaultWindowColors()
     {
         return [.. DefaultWindowColorHexes];
+    }
+
+    public static Dictionary<string, int> CreateDefaultClassColorIndexes()
+    {
+        return ClassColorKeys.ToDictionary(key => key, _ => MinClassColorIndex, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultClassColorPalettes(WidgetKind kind)
+    {
+        return ClassColorKeys.ToDictionary(
+            key => key,
+            key => CreateDefaultClassColors(kind, key),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
+    {
+        var source = kind switch
+        {
+            WidgetKind.PlayerInfoDebug => PlayerListDefaultClassColorHexes,
+            WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
+            _ => MeterDefaultClassColorHexes
+        };
+
+        return source.TryGetValue(key, out var colors)
+            ? [.. colors]
+            : ["#A8A8A8", "#707070"];
     }
 
     public static WidgetConfig CloneNormalized(WidgetKind kind, WidgetConfig? config)
@@ -240,11 +357,17 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    public static MeterWidgetSettingsConfig CloneNormalizedMeter(WidgetKind kind, MeterWidgetSettingsConfig? meter)
+    {
+        var normalized = (meter ?? CreateMeterSettings(kind)).Clone();
+        NormalizeMeter(kind, normalized);
+        return normalized;
+    }
+
     public static void Normalize(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
         config.Window ??= new WidgetWindowConfig();
-        RemoveObsoleteSettings(config);
 
         if (config.State is { } state
             && state is not WidgetState.Stopped
@@ -259,6 +382,9 @@ public static class WidgetConfigDefaults
     public static void Normalize(WidgetKind kind, WidgetConfig config)
     {
         Normalize(config);
+        config.Meter = SupportsMeterSettings(kind)
+            ? CloneNormalizedMeter(kind, config.Meter)
+            : null;
 
         switch (kind)
         {
@@ -306,6 +432,36 @@ public static class WidgetConfigDefaults
         theme.BackgroundImageAverageColorSourcePath = string.IsNullOrWhiteSpace(theme.BackgroundImageAverageColorSourcePath)
             ? null
             : theme.BackgroundImageAverageColorSourcePath.Trim();
+    }
+
+    public static void NormalizeMeter(WidgetKind kind, MeterWidgetSettingsConfig meter)
+    {
+        meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
+            ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
+            : MaxClassColorOpacity;
+        meter.ClassColorIndexes ??= CreateDefaultClassColorIndexes();
+        meter.ClassColorPalettes ??= CreateDefaultClassColorPalettes(kind);
+
+        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var key in ClassColorKeys)
+        {
+            var defaultColors = CreateDefaultClassColors(kind, key);
+            var sourceColors = meter.ClassColorPalettes.TryGetValue(key, out var colors)
+                ? colors
+                : defaultColors;
+            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+            normalizedPalettes[key] = palette;
+
+            var selectedIndex = meter.ClassColorIndexes.TryGetValue(key, out var index)
+                ? index
+                : MinClassColorIndex;
+            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+        }
+
+        meter.ClassColorIndexes = normalizedIndexes;
+        meter.ClassColorPalettes = normalizedPalettes;
     }
 
     public static string GetKey(WidgetKind kind)

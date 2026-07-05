@@ -57,7 +57,6 @@ public sealed partial class MainViewModel : ViewModelBase
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
-        AddWidget(WidgetKind.DtpsMeter, "Menu_DtpsMeter");
         AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
         AddWidget(WidgetKind.TrainingMode, "Menu_Training");
 

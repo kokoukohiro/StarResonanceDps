@@ -228,7 +228,7 @@
   <data name="NumberDisplay_Wan" xml:space="preserve">
     <value>日本語表記（万億兆）</value>
   </data>
-    <data name="Settings_Display_PlayerName" xml:space="preserve">
+  <data name="Settings_Display_PlayerName" xml:space="preserve">
     <value>プレイヤー名</value>
   </data>
   <data name="PlayerNameDisplay_Show" xml:space="preserve">
@@ -325,7 +325,7 @@
     <value>ビートパフォーマー</value>
   </data>
   <data name="Classes_FlameBerserker" xml:space="preserve">
-    <value>ブレージングバーサーカー</value>
+    <value>ツインストライカー</value>
   </data>
   <data name="Classes_Stormblade" xml:space="preserve">
     <value>ストームブレイド</value>
@@ -412,10 +412,10 @@
     <value>響奏型</value>
   </data>
   <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
-    <value>無相型</value>
+    <value>双炎型</value>
   </data>
   <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
-    <value>赤紅型</value>
+    <value>炎舞型</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>ステータス</value>
@@ -479,5 +479,8 @@
   </data>
   <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
     <value>職業特化</value>
+  </data>
+  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
+    <value>クラスカラーの不透明度</value>
   </data>
 </root>

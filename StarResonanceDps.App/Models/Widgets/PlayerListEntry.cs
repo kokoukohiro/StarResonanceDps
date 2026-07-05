@@ -36,14 +36,14 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     public bool IsHealthFull => HealthRatio >= 1d;
 
-    public static PlayerListEntry Create(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
+    public static PlayerListEntry Create(PlayerRosterEntry player, MeterWidgetSettingsConfig classColors)
     {
         var entry = new PlayerListEntry(player.CharacterId);
         entry.Update(player, classColors);
         return entry;
     }
 
-    public void Update(PlayerRosterEntry player, ClassColorSettingsConfig classColors)
+    public void Update(PlayerRosterEntry player, MeterWidgetSettingsConfig classColors)
     {
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
@@ -72,14 +72,14 @@ public sealed partial class PlayerListEntry : ObservableObject
         return Math.Clamp(currentHp / (double)maxHp, 0d, 1d);
     }
 
-    private static Color GetClassColor(ClassColorSettingsConfig classColors, string professionKey)
+    private static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)
     {
         var palette = classColors.ClassColorPalettes.TryGetValue(professionKey, out var colors)
             ? colors
-            : AppConfigDefaults.CreateDefaultClassColors(professionKey);
+            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerInfoDebug, professionKey);
         var selectedIndex = classColors.ClassColorIndexes.TryGetValue(professionKey, out var index)
             ? index
-            : AppConfigDefaults.MinClassColorIndex;
+            : WidgetConfigDefaults.MinClassColorIndex;
         var selectedColor = palette.Count == 0
             ? "#A8A8A8"
             : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];

@@ -39,6 +39,7 @@ public partial class WidgetSettingsWindow : Window
         InitializeComponent();
         _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayNameResourceKey);
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
+        _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -61,6 +62,7 @@ public partial class WidgetSettingsWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
+        _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -81,7 +83,7 @@ public partial class WidgetSettingsWindow : Window
                 return;
             }
 
-            ViewModel.RestoreSavedThemePreview();
+            ViewModel.RestoreSavedPreviews();
         }
 
         base.OnClosing(e);
@@ -160,6 +162,10 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(ThemeSection);
     }
 
+    private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ClassColorsHost);
+    }
 
     private void ResetButton_Click(object sender, RoutedEventArgs e)
     {

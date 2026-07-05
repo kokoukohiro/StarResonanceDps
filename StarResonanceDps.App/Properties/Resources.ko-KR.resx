@@ -362,4 +362,7 @@
   <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
     <value>직업 특성</value>
   </data>
+  <data name="Settings_ClassColors_Opacity" xml:space="preserve">
+    <value>직업 색상 불투명도</value>
+  </data>
 </root>

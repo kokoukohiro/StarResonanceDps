@@ -1,10 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.ComponentModel;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.App.ViewModels.WidgetSettings;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -53,14 +55,43 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         _lastSavedTheme = WidgetConfigDefaults.CloneNormalizedTheme(config.Theme);
         LoadFromTheme(config.Theme, raisePreview: false);
 
+        if (WidgetConfigDefaults.SupportsMeterSettings(kind))
+        {
+            MeterSettings = new MeterWidgetSettingsViewModel(kind, config.Meter);
+            MeterSettings.PropertyChanged += MeterSettings_PropertyChanged;
+            MeterSettings.PreviewChanged += MeterSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
     public event Action<WidgetThemeConfig>? ThemePreviewChanged;
 
+    public event Action<MeterWidgetSettingsConfig>? MeterPreviewChanged;
+
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+
+        if (MeterSettings is not null)
+        {
+            MeterSettings.PropertyChanged -= MeterSettings_PropertyChanged;
+            MeterSettings.PreviewChanged -= MeterSettings_PreviewChanged;
+            MeterSettings.Dispose();
+        }
+    }
+
+    private void MeterSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MeterWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void MeterSettings_PreviewChanged(MeterWidgetSettingsConfig config)
+    {
+        MeterPreviewChanged?.Invoke(config);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -73,7 +104,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public ColorPaletteViewModel WindowColors { get; }
 
-    public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme);
+    public MeterWidgetSettingsViewModel? MeterSettings { get; }
+
+    public bool HasMeterSettings => MeterSettings is not null;
+
+    public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
+        || (MeterSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -92,9 +128,15 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         var config = _stateManager.GetWidgetSnapshot(_kind);
         var theme = CreateTheme();
         config.Theme = theme;
+        if (MeterSettings is not null)
+        {
+            config.Meter = MeterSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
+        MeterSettings?.MarkSaved(config.Meter);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -102,12 +144,14 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public void ResetToDefaults()
     {
         LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
+        MeterSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
-    public void RestoreSavedThemePreview()
+    public void RestoreSavedPreviews()
     {
         ThemePreviewChanged?.Invoke(_lastSavedTheme.Clone());
+        MeterSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()
