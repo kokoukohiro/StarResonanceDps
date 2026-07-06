@@ -496,7 +496,7 @@
     <value>Preview: </value>
   </data>
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
-    <value>Example Player</value>
+    <value>Player1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>PlayerName</value>

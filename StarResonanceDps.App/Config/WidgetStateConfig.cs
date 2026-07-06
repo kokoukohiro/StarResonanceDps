@@ -113,7 +113,7 @@ public sealed class MeterWidgetSettingsConfig
 
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 7;
+    public const int CurrentSchemaVersion = 1;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;

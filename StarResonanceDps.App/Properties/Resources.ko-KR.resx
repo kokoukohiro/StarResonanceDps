@@ -490,7 +490,7 @@
     <value>실시간 미리보기：</value>
   </data>
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
-    <value>예시 플레이어</value>
+    <value>Player1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>플레이어 이름</value>
