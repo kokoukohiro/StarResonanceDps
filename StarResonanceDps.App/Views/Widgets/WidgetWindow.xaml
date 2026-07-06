@@ -10,115 +10,12 @@
         MinWidth="240"
         MinHeight="100"
         WindowStyle="None"
-        ResizeMode="CanResize"
         Background="Transparent"
         AllowsTransparency="True"
         ShowInTaskbar="True"
         WindowStartupLocation="Manual"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <Window.Resources>
-        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
-        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
-
-        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
-               TargetType="{x:Type ContextMenu}">
-            <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="4" />
-            <Setter Property="HasDropShadow" Value="False" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-            <Setter Property="UseLayoutRounding" Value="True" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ContextMenu}">
-                        <Grid>
-                            <Border Background="{TemplateBinding Background}"
-                                    CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
-                            <Border BorderBrush="{TemplateBinding BorderBrush}"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
-                            <StackPanel Margin="{TemplateBinding Padding}"
-                                        IsItemsHost="True"
-                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
-            <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                       Text="{Binding}" />
-        </DataTemplate>
-
-        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
-               TargetType="{x:Type MenuItem}">
-            <Setter Property="Height" Value="24" />
-            <Setter Property="Padding" Value="6,0" />
-            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-            <Setter Property="UseLayoutRounding" Value="True" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type MenuItem}">
-                        <Grid SnapsToDevicePixels="True">
-                            <Border x:Name="InteractionBackground"
-                                    Background="{Binding WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
-                                    CornerRadius="{TemplateBinding Tag}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}"
-                                    Visibility="Collapsed" />
-                            <ContentPresenter Margin="{TemplateBinding Padding}"
-                                              Content="{TemplateBinding Header}"
-                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
-                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
-                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                              RecognizesAccessKey="True" />
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="InteractionBackground"
-                                        Property="Visibility"
-                                        Value="Visible" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.45" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
-               TargetType="{x:Type MenuItem}"
-               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
-            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
-        </Style>
-
-        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
-               TargetType="{x:Type MenuItem}"
-               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
-            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
-        </Style>
-
-        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
-               TargetType="{x:Type MenuItem}"
-               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
-            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
-        </Style>
-    </Window.Resources>
 
     <Grid x:Name="WindowRoot">
         <Border x:Name="WidgetWindowFrame"
@@ -160,37 +57,14 @@
                     <StackPanel HorizontalAlignment="Right"
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal">
-                        <StackPanel Orientation="Horizontal"
-                                    Visibility="{Binding IsMeter, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <Grid Width="35" Height="30">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                                           FontSize="10"
-                                           FontWeight="SemiBold"
-                                           Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
-                                           Text="&#xE81C;" />
-                            </Grid>
-                            <Grid Width="35" Height="30">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                                           FontSize="10"
-                                           FontWeight="SemiBold"
-                                           Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
-                                           Text="&#xE72C;" />
-                            </Grid>
-                        </StackPanel>
+                        <ContentControl x:Name="WidgetHeaderChromeActionsHost"
+                                        HorizontalContentAlignment="Stretch"
+                                        VerticalContentAlignment="Stretch"
+                                        IsHitTestVisible="False" />
 
-                        <Grid Width="30" Height="30">
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
-                                       FontSize="10"
-                                       FontWeight="SemiBold"
-                                       Foreground="{Binding WidgetWindowPalette.WidgetWindowCloseBrush}"
-                                       Text="&#xE8BB;" />
-                        </Grid>
+                        <ContentControl Width="30"
+                                        Style="{StaticResource ContentControl.WidgetWindowHeaderGlyph}"
+                                        Content="&#xE8BB;" />
                     </StackPanel>
                 </Grid>
 
@@ -208,22 +82,13 @@
                            Style="{StaticResource ScrollBar.WidgetWindow}"
                            Visibility="Collapsed" />
 
-                <Border Grid.Row="2"
+                <Border x:Name="WidgetFooterFrame"
+                        Grid.Row="2"
                         Grid.ColumnSpan="2"
                         Height="30"
                         BorderBrush="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}"
-                        BorderThickness="0,1,0,0">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowsFooter}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                </Border>
+                        BorderThickness="0,1,0,0"
+                        Visibility="Collapsed" />
             </Grid>
         </Border>
 
@@ -244,6 +109,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.Column="0"
@@ -258,16 +124,14 @@
                                Text="{Binding HeaderText, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                 </Border>
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <StackPanel Orientation="Horizontal"
-                                Visibility="{Binding IsMeter, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Button Style="{StaticResource Button.WidgetWindowClose}" />
-                        <Button Style="{StaticResource Button.WidgetWindowClose}"
-                                Click="MeterResetButton_Click" />
-                    </StackPanel>
-                    <Button Style="{StaticResource Button.WidgetWindowClose}"
-                            Click="CloseButton_Click" />
-                </StackPanel>
+                <ContentControl x:Name="WidgetHeaderActionsHost"
+                                Grid.Column="1"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch" />
+
+                <Button Grid.Column="2"
+                        Style="{StaticResource Button.WidgetWindowHeaderIcon}"
+                        Click="CloseButton_Click" />
             </Grid>
 
             <ContentControl x:Name="WidgetContentHost"
@@ -277,86 +141,13 @@
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Stretch" />
 
-            <Grid Grid.Row="2"
-                  Grid.ColumnSpan="2"
-                  Height="30"
-                  IsHitTestVisible="False">
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowsFooter}" Value="True">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsPlayerList}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-
-                    <TextBlock Margin="10,0,8,0"
-                               VerticalAlignment="Center"
-                               Style="{StaticResource Text.WidgetWindow}"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Text="{Binding MapName}"
-                               TextAlignment="Left"
-                               TextTrimming="CharacterEllipsis" />
-                </Grid>
-
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsMeter}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <TextBlock Grid.Column="0"
-                               Margin="10,0,8,0"
-                               VerticalAlignment="Center"
-                               Style="{StaticResource Text.WidgetWindow}"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Text="{Binding Content.DataContext.ElapsedText, ElementName=WidgetContentHost}" />
-
-                    <StackPanel Grid.Column="2"
-                                Margin="8,0,10,0"
-                                Orientation="Horizontal"
-                                VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center"
-                                   Style="{StaticResource Text.WidgetWindow}"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Text="{Binding Content.DataContext.PartyMetricText, ElementName=WidgetContentHost}" />
-                        <TextBlock Margin="16,0,0,0"
-                                   VerticalAlignment="Center"
-                                   Style="{StaticResource Text.WidgetWindow}"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Text="{Binding Content.DataContext.TotalText, ElementName=WidgetContentHost}" />
-                    </StackPanel>
-                </Grid>
-            </Grid>
+            <ContentControl x:Name="WidgetFooterHost"
+                            Grid.Row="2"
+                            Grid.ColumnSpan="2"
+                            Height="30"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"
+                            Visibility="Collapsed" />
         </Grid>
     </Grid>
 </Window>

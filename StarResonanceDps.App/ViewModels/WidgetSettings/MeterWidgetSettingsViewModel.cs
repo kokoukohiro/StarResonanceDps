@@ -11,38 +11,27 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDisposable
 {
-    private static readonly (string Format, string LabelResourceKey)[] PlayerInfoFormatPresetDefinitions =
-    [
-        ("{Name} - {Spec} ({PowerLevel}-{SeasonStrength})", "Settings_MeterPlayerInfo_Preset_Default"),
-        ("{Name} ({PowerLevel})", "Settings_MeterPlayerInfo_Preset_Simple"),
-        ("{Name} - {Spec} [S{SeasonStrength} Lv{SeasonLevel}] ({PowerLevel})", "Settings_MeterPlayerInfo_Preset_Detailed"),
-        ("{Name}", "Settings_MeterPlayerInfo_Preset_NameOnly"),
-        (string.Empty, "Settings_MeterPlayerInfo_Preset_None")
-    ];
-
     private static readonly (string Key, string LabelResourceKey, string Placeholder)[] PlayerInfoFormatFieldDefinitions =
     [
-        ("Name", "PlayerInfo_Name", "{Name}"),
-        ("Spec", "PlayerInfo_ProfessionSpec", "{Spec}"),
-        ("PowerLevel", "PlayerInfo_AbilityScore", "{PowerLevel}"),
-        ("SeasonStrength", "Settings_MeterPlayerInfo_SeasonStrength", "{SeasonStrength}"),
-        ("SeasonLevel", "Settings_MeterPlayerInfo_SeasonLevel", "{SeasonLevel}"),
-        ("Uid", "Settings_MeterPlayerInfo_PlayerUid", "{Uid}")
+        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}"),
+        ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
+        ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
+        ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", "{SeasonStrength}"),
+        ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", "{SeasonLevel}"),
+        ("Uid", "Settings_PlayerInfo_Field_PlayerUid", "{Uid}")
     ];
 
     private readonly WidgetKind _kind;
     private readonly Dictionary<string, MeterClassColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ObservableCollection<MeterPlayerInfoFormatPreset> _playerInfoFormatPresets = [];
     private readonly ObservableCollection<MeterPlayerInfoFormatField> _availablePlayerInfoFormatFields = [];
     private MeterWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
-    private bool _isSyncingPlayerInfoFormatPreset;
 
     [ObservableProperty]
     private string _playerInfoFormatString = WidgetConfigDefaults.DefaultMeterPlayerInfoFormatString;
 
     [ObservableProperty]
-    private MeterPlayerInfoFormatPreset? _selectedPlayerInfoFormatPreset;
+    private MeterPlayerInfoFormatField? _selectedPlayerInfoFormatField;
 
     [ObservableProperty]
     private string _formatPreview = string.Empty;
@@ -67,11 +56,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         Items = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
-        PlayerInfoFormatPresets = new ReadOnlyObservableCollection<MeterPlayerInfoFormatPreset>(_playerInfoFormatPresets);
         AvailablePlayerInfoFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availablePlayerInfoFormatFields);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
-        RebuildPlayerInfoFormatOptions();
+        RebuildPlayerInfoFormatFields();
         _lastSaved = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
         Load(_lastSaved);
     }
@@ -79,8 +67,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public event Action<MeterWidgetSettingsConfig>? PreviewChanged;
 
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> Items { get; }
-
-    public ReadOnlyObservableCollection<MeterPlayerInfoFormatPreset> PlayerInfoFormatPresets { get; }
 
     public ReadOnlyObservableCollection<MeterPlayerInfoFormatField> AvailablePlayerInfoFormatFields { get; }
 
@@ -103,20 +89,14 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     }
 
     [RelayCommand]
-    private void AddPlayerInfoFormatField(MeterPlayerInfoFormatField? field)
+    private void AddPlayerInfoFormatField()
     {
-        if (field is null)
+        if (SelectedPlayerInfoFormatField is null)
         {
             return;
         }
 
-        PlayerInfoFormatString += field.Placeholder;
-    }
-
-    [RelayCommand]
-    private void ClearPlayerInfoFormat()
-    {
-        PlayerInfoFormatString = string.Empty;
+        PlayerInfoFormatString += SelectedPlayerInfoFormatField.Placeholder;
     }
 
     public MeterWidgetSettingsConfig CreateConfig()
@@ -189,7 +169,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 item.Colors.Load(colors, selectedIndex);
             }
 
-            PlayerInfoFormatString = normalized.PlayerInfoFormatString;
+            PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             ClassColorOpacity = normalized.ClassColorOpacity;
         }
         finally
@@ -198,7 +178,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         RefreshFormatPreview();
-        SyncPlayerInfoFormatPreset();
     }
 
     private MeterClassColorItemViewModel GetItem(string key)
@@ -236,15 +215,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         return true;
     }
 
-    private void RebuildPlayerInfoFormatOptions()
+    private void RebuildPlayerInfoFormatFields()
     {
-        _playerInfoFormatPresets.Clear();
-        foreach (var definition in PlayerInfoFormatPresetDefinitions)
-        {
-            _playerInfoFormatPresets.Add(new MeterPlayerInfoFormatPreset(
-                definition.Format,
-                LocalizationManager.Instance.GetString(definition.LabelResourceKey)));
-        }
+        var selectedKey = SelectedPlayerInfoFormatField?.Key;
 
         _availablePlayerInfoFormatFields.Clear();
         foreach (var definition in PlayerInfoFormatFieldDefinitions)
@@ -254,34 +227,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 LocalizationManager.Instance.GetString(definition.LabelResourceKey),
                 definition.Placeholder));
         }
+
+        SelectedPlayerInfoFormatField = _availablePlayerInfoFormatFields
+            .FirstOrDefault(field => string.Equals(field.Key, selectedKey, StringComparison.Ordinal))
+            ?? _availablePlayerInfoFormatFields.FirstOrDefault();
     }
 
     private void RefreshFormatPreview()
     {
-        FormatPreview = MeterPlayerInfoFormatter.FormatPreview(PlayerInfoFormatString);
-    }
-
-    private void SyncPlayerInfoFormatPreset()
-    {
-        var match = PlayerInfoFormatPresets
-            .FirstOrDefault(preset => !string.IsNullOrEmpty(preset.Format)
-                && string.Equals(preset.Format, PlayerInfoFormatString, StringComparison.Ordinal))
-            ?? PlayerInfoFormatPresets.FirstOrDefault(preset => string.IsNullOrEmpty(preset.Format));
-
-        if (ReferenceEquals(SelectedPlayerInfoFormatPreset, match))
-        {
-            return;
-        }
-
-        _isSyncingPlayerInfoFormatPreset = true;
-        try
-        {
-            SelectedPlayerInfoFormatPreset = match;
-        }
-        finally
-        {
-            _isSyncingPlayerInfoFormatPreset = false;
-        }
+        FormatPreview = PlayerInfoFormatFormatter.FormatPreview(PlayerInfoFormatString);
     }
 
     private void Colors_PaletteChanged(object? sender, EventArgs e)
@@ -296,9 +250,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             item.RefreshDisplayName();
         }
 
-        RebuildPlayerInfoFormatOptions();
+        RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
-        SyncPlayerInfoFormatPreset();
     }
 
     private void NotifyChanged()
@@ -319,35 +272,51 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     partial void OnPlayerInfoFormatStringChanged(string value)
     {
+        var normalized = NormalizeFormatString(value);
+        if (!string.Equals(value, normalized, StringComparison.Ordinal))
+        {
+            PlayerInfoFormatString = normalized;
+            return;
+        }
+
         RefreshFormatPreview();
-        SyncPlayerInfoFormatPreset();
         NotifyChanged();
-    }
-
-    partial void OnSelectedPlayerInfoFormatPresetChanged(MeterPlayerInfoFormatPreset? value)
-    {
-        if (value is null || _isSyncingPlayerInfoFormatPreset || _isLoading)
-        {
-            return;
-        }
-
-        if (string.Equals(PlayerInfoFormatString, value.Format, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        PlayerInfoFormatString = value.Format;
     }
 
     partial void OnClassColorOpacityChanged(double value)
     {
         NotifyChanged();
     }
+
+    private static string NormalizeFormatString(string? value)
+    {
+        return (value ?? string.Empty)
+            .Replace("\r\n", " ", StringComparison.Ordinal)
+            .Replace('\r', ' ')
+            .Replace('\n', ' ');
+    }
 }
 
-public sealed record MeterPlayerInfoFormatPreset(string Format, string DisplayName);
+public sealed class MeterPlayerInfoFormatField
+{
+    public MeterPlayerInfoFormatField( string key, string displayName, string placeholder)
+    {
+        Key = key;
+        DisplayName = displayName;
+        Placeholder = placeholder;
+    }
 
-public sealed record MeterPlayerInfoFormatField(string Key, string DisplayName, string Placeholder);
+    public string Key { get; }
+
+    public string DisplayName { get; }
+
+    public string Placeholder { get; }
+
+    public override string ToString()
+    {
+        return DisplayName;
+    }
+}
 
 public sealed class MeterClassColorItemViewModel : ObservableObject
 {

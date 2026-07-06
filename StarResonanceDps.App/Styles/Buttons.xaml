@@ -122,7 +122,33 @@
         </Setter>
     </Style>
 
-    <Style x:Key="Button.WidgetWindowClose" TargetType="Button">
+    <Style x:Key="ContentControl.WidgetWindowHeaderGlyph"
+           TargetType="{x:Type ContentControl}">
+        <Setter Property="Height" Value="30" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value>
+                <DataTemplate>
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontFamily="Segoe MDL2 Assets, Segoe Fluent Icons"
+                               FontSize="{Binding FontSize,
+                                                  RelativeSource={RelativeSource AncestorType={x:Type ContentControl}}}"
+                               FontWeight="SemiBold"
+                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowCloseBrush,
+                                                    RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                               Text="{Binding}" />
+                </DataTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Button.WidgetWindowHeaderIcon"
+           TargetType="Button">
         <Setter Property="Width" Value="35" />
         <Setter Property="Height" Value="35" />
         <Setter Property="Padding" Value="0" />

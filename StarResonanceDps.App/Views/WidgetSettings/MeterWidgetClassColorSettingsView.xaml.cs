@@ -5,9 +5,9 @@ using StarResonanceDps.App.ViewModels.WidgetSettings;
 
 namespace StarResonanceDps.App.Views.WidgetSettings;
 
-public partial class MeterWidgetSettingsView : UserControl
+public partial class MeterWidgetClassColorSettingsView : UserControl
 {
-    public MeterWidgetSettingsView()
+    public MeterWidgetClassColorSettingsView()
     {
         InitializeComponent();
     }

@@ -1,0 +1,16 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerListWidgetFooterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <Grid>
+        <TextBlock Margin="10,0,8,0"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource Text.WidgetWindow}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   Text="{Binding MapName}"
+                   TextAlignment="Left"
+                   TextTrimming="CharacterEllipsis" />
+    </Grid>
+</UserControl>

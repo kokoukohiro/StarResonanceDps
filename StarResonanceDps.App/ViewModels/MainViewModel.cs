@@ -49,7 +49,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        var playerListWidget = AddWidget(WidgetKind.PlayerInfoDebug, "Widget_PlayerList");
+        var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
         _playerInfoWidget = AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         _playerStatusWidget = AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");

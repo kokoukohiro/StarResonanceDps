@@ -6,8 +6,8 @@ using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
-using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Services;
 using StarResonanceDps.App.Views.Widgets;
 
@@ -135,16 +135,15 @@ public sealed class WidgetWindowManager
         TrackManagerWindow(owner);
 
         var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
-        var widgetContent = CreateWidgetContent(widget);
-        Action? meterResetAction = widget.IsMeter
-            ? MeterSnapshotProvider.ResetCurrentEncounter
-            : null;
+        var composition = CreateWidgetWindowComposition(widget);
         var window = new WidgetWindow(
             widget,
-            widgetContent,
+            composition.Content,
             savedBounds,
             owner,
-            meterResetAction: meterResetAction);
+            headerChromeActions: composition.HeaderChromeActions,
+            headerActions: composition.HeaderActions,
+            footerContent: composition.FooterContent);
         window.Closed += WidgetWindow_Closed;
 
         _openSingleWindows.Add(widget.Kind, window);
@@ -229,21 +228,41 @@ public sealed class WidgetWindowManager
         };
     }
 
-    private static FrameworkElement? CreateWidgetContent(WidgetListItemViewModel widget)
+    private static WidgetWindowComposition CreateWidgetWindowComposition(WidgetListItemViewModel widget)
     {
         return widget.Kind switch
         {
-            WidgetKind.PlayerInfoDebug => new PlayerListWidgetView(),
-            WidgetKind.DpsMeter => new MeterWidgetView
-            {
-                DataContext = new MeterWidgetViewModel(widget, MeterSnapshotKind.Damage)
-            },
-            WidgetKind.HpsMeter => new MeterWidgetView
-            {
-                DataContext = new MeterWidgetViewModel(widget, MeterSnapshotKind.Healing)
-            },
-            _ => null
+            WidgetKind.PlayerList => new WidgetWindowComposition(
+                new PlayerListWidgetView(),
+                null,
+                null,
+                new PlayerListWidgetFooterView()),
+            WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
+            WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
+            _ => new WidgetWindowComposition(null, null, null, null)
         };
+    }
+
+    private static WidgetWindowComposition CreateMeterWidgetComposition(
+        WidgetListItemViewModel widget,
+        MeterSnapshotKind kind)
+    {
+        var viewModel = new MeterWidgetViewModel(widget, kind);
+
+        return new WidgetWindowComposition(
+            new MeterWidgetView
+            {
+                DataContext = viewModel
+            },
+            new MeterWidgetHeaderGlyphsView(),
+            new MeterWidgetHeaderActionsView
+            {
+                DataContext = viewModel
+            },
+            new MeterWidgetFooterView
+            {
+                DataContext = viewModel
+            });
     }
 
     private void Close(WidgetKind kind)
@@ -449,4 +468,10 @@ public sealed class WidgetWindowManager
 
         public WidgetWindow Window { get; }
     }
+    private sealed record WidgetWindowComposition(
+        FrameworkElement? Content,
+        FrameworkElement? HeaderChromeActions,
+        FrameworkElement? HeaderActions,
+        FrameworkElement? FooterContent);
+
 }

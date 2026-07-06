@@ -10,7 +10,7 @@
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
         Width="760"
         Height="640"
-        MinWidth="640"
+        MinWidth="694"
         MinHeight="45"
         WindowStyle="None"
         ResizeMode="CanResize"
@@ -136,9 +136,9 @@
                                         <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="134" />
                                                     <ColumnDefinition Width="12" />
-                                                    <ColumnDefinition Width="320" />
+                                                    <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
@@ -156,6 +156,7 @@
                                                     </Grid.ColumnDefinitions>
 
                                                     <TextBox Grid.Column="0"
+                                                             Width="Auto"
                                                              Height="32"
                                                              IsReadOnly="True"
                                                              Style="{StaticResource Input.PathBox}"
@@ -214,7 +215,7 @@
                                                 Visibility="{Binding HasMeterSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:MeterWidgetSettingsView />
+                                            <widgetSettingsViews:MeterWidgetClassColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

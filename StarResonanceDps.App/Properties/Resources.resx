@@ -483,49 +483,37 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>Class Colors Opacity</value>
   </data>
-<data name="Meter_Total" xml:space="preserve">
+  <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
-    <value>Quick Presets</value>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
-    <value>Add Fields</value>
+  <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
+    <value>Player Name Customization</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
-    <value>Custom Format String</value>
+  <data name="Settings_PlayerInfo_Preview" xml:space="preserve">
+    <value>Preview: </value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
-    <value>Clear</value>
+  <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
+    <value>Example Player</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
-    <value>Preview</value>
+  <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
+    <value>PlayerName</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
-    <value>Default</value>
+  <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
+    <value>Class Spec</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
-    <value>Simple</value>
+  <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
+    <value>Power</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
-    <value>Detailed</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
-    <value>Name Only</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
-    <value>None</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+  <data name="Settings_PlayerInfo_Field_SeasonStrength" xml:space="preserve">
     <value>Season Strength</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
+  <data name="Settings_PlayerInfo_Field_SeasonLevel" xml:space="preserve">
     <value>Season Level</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+  <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>Player UID</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
-    <value>Example Player</value>
   </data>
 </root>

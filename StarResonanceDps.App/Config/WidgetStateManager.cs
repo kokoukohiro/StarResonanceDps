@@ -13,6 +13,8 @@ public sealed class WidgetStateManager
         PropertyNameCaseInsensitive = true
     };
 
+    private const string LegacyPlayerListWidgetKey = "PlayerInfoDebug";
+
     private readonly string _statePath;
     private readonly string _legacyStatePath;
     private readonly object _syncRoot = new();
@@ -56,9 +58,9 @@ public sealed class WidgetStateManager
     {
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(WidgetKind.PlayerInfoDebug);
-            config.Meter = WidgetConfigDefaults.CloneNormalizedMeter(WidgetKind.PlayerInfoDebug, meter);
-            WidgetConfigDefaults.Normalize(WidgetKind.PlayerInfoDebug, config);
+            var config = GetOrCreateWidgetConfig(WidgetKind.PlayerList);
+            config.Meter = WidgetConfigDefaults.CloneNormalizedMeter(WidgetKind.PlayerList, meter);
+            WidgetConfigDefaults.Normalize(WidgetKind.PlayerList, config);
             SaveCore();
         }
     }
@@ -160,6 +162,7 @@ public sealed class WidgetStateManager
         var sourceSchemaVersion = document.SchemaVersion <= 0 ? 1 : document.SchemaVersion;
         document.Widgets ??= new Dictionary<string, WidgetConfig>(StringComparer.OrdinalIgnoreCase);
         MigratePlayerStatusWidgetConfig(document.Widgets);
+        MigrateLegacyPlayerListWidgetConfig(document.Widgets);
 
         foreach (WidgetKind kind in Enum.GetValues<WidgetKind>())
         {
@@ -173,6 +176,11 @@ public sealed class WidgetStateManager
             if (sourceSchemaVersion < 3)
             {
                 WidgetConfigDefaults.MigrateVersion1Defaults(config);
+            }
+
+            if (sourceSchemaVersion < 7 && kind == WidgetKind.PlayerList)
+            {
+                WidgetConfigDefaults.MigratePlayerListFormatDefault(config);
             }
 
             WidgetConfigDefaults.Normalize(kind, config);
@@ -193,6 +201,19 @@ public sealed class WidgetStateManager
         }
 
         widgets.Remove(legacyKey);
+    }
+
+    private static void MigrateLegacyPlayerListWidgetConfig(Dictionary<string, WidgetConfig> widgets)
+    {
+        var playerListKey = WidgetConfigDefaults.GetKey(WidgetKind.PlayerList);
+
+        if (widgets.TryGetValue(LegacyPlayerListWidgetKey, out var legacyConfig)
+            && !widgets.ContainsKey(playerListKey))
+        {
+            widgets[playerListKey] = legacyConfig;
+        }
+
+        widgets.Remove(LegacyPlayerListWidgetKey);
     }
 
     private string? GetReadableStatePath()

@@ -84,13 +84,13 @@ public sealed class WidgetWindowConfig
 
 public sealed class MeterWidgetSettingsConfig
 {
-    public string PlayerInfoFormatString { get; set; } = WidgetConfigDefaults.DefaultMeterPlayerInfoFormatString;
+    public string? PlayerInfoFormatString { get; set; }
 
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
 
-    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfoDebug);
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerList);
 
     public MeterWidgetSettingsConfig Clone()
     {
@@ -102,7 +102,7 @@ public sealed class MeterWidgetSettingsConfig
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = ClassColorPalettes is null
-                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfoDebug)
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerList)
                 : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
@@ -113,7 +113,7 @@ public sealed class MeterWidgetSettingsConfig
 
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 6;
+    public const int CurrentSchemaVersion = 7;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
@@ -122,6 +122,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
 
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
@@ -211,7 +212,7 @@ public static class WidgetConfigDefaults
 
     public static bool SupportsMeterSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.PlayerInfoDebug
+        return kind is WidgetKind.PlayerList
             or WidgetKind.DpsMeter
             or WidgetKind.HpsMeter;
     }
@@ -230,6 +231,20 @@ public static class WidgetConfigDefaults
             config.Theme.WindowColors = CreateDefaultWindowColors();
             config.Theme.WindowColorIndex = MinColorIndex;
         }
+    }
+
+    public static void MigratePlayerListFormatDefault(WidgetConfig config)
+    {
+        if (config.Meter is not { } meter
+            || !string.Equals(
+                meter.PlayerInfoFormatString,
+                DefaultMeterPlayerInfoFormatString,
+                StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        meter.PlayerInfoFormatString = DefaultPlayerListPlayerInfoFormatString;
     }
 
     private static bool UsesLegacyWindowColorPalette(IEnumerable<string>? colors)
@@ -271,7 +286,7 @@ public static class WidgetConfigDefaults
     {
         return kind switch
         {
-            WidgetKind.PlayerInfoDebug => new WidgetWindowConfig
+            WidgetKind.PlayerList => new WidgetWindowConfig
             {
                 Width = PlayerListInitialWindowWidth,
                 Height = PlayerListInitialWindowHeight
@@ -314,7 +329,7 @@ public static class WidgetConfigDefaults
     {
         return new MeterWidgetSettingsConfig
         {
-            PlayerInfoFormatString = DefaultMeterPlayerInfoFormatString,
+            PlayerInfoFormatString = GetDefaultPlayerInfoFormatString(kind),
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorIndexes = CreateDefaultClassColorIndexes(),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
@@ -324,6 +339,13 @@ public static class WidgetConfigDefaults
     public static List<string> CreateDefaultWindowColors()
     {
         return [.. DefaultWindowColorHexes];
+    }
+
+    public static string GetDefaultPlayerInfoFormatString(WidgetKind kind)
+    {
+        return kind == WidgetKind.PlayerList
+            ? DefaultPlayerListPlayerInfoFormatString
+            : DefaultMeterPlayerInfoFormatString;
     }
 
     public static Dictionary<string, int> CreateDefaultClassColorIndexes()
@@ -343,7 +365,7 @@ public static class WidgetConfigDefaults
     {
         var source = kind switch
         {
-            WidgetKind.PlayerInfoDebug => PlayerListDefaultClassColorHexes,
+            WidgetKind.PlayerList => PlayerListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
         };
@@ -398,7 +420,7 @@ public static class WidgetConfigDefaults
 
         switch (kind)
         {
-            case WidgetKind.PlayerInfoDebug:
+            case WidgetKind.PlayerList:
                 config.Window.Width ??= PlayerListInitialWindowWidth;
                 config.Window.Height ??= PlayerListInitialWindowHeight;
                 break;
@@ -452,7 +474,7 @@ public static class WidgetConfigDefaults
 
     public static void NormalizeMeter(WidgetKind kind, MeterWidgetSettingsConfig meter)
     {
-        meter.PlayerInfoFormatString ??= DefaultMeterPlayerInfoFormatString;
+        meter.PlayerInfoFormatString ??= GetDefaultPlayerInfoFormatString(kind);
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;

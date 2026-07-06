@@ -10,7 +10,7 @@
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
         Width="760"
         Height="640"
-        MinWidth="640"
+        MinWidth="694"
         MinHeight="45"
         WindowStyle="None"
         ResizeMode="CanResize"

@@ -57,7 +57,7 @@ public sealed partial class MeterPlayerEntry : ObservableObject
     {
         Rank = rank;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
-        DisplayName = MeterPlayerInfoFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
+        DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
         ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F0}%";
         BarRatio = player.BarRatio;
 

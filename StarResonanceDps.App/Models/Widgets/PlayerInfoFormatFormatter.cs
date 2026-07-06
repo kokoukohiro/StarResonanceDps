@@ -5,7 +5,7 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
-public static partial class MeterPlayerInfoFormatter
+public static partial class PlayerInfoFormatFormatter
 {
     private const string HiddenPlayerName = "*****";
 
@@ -14,13 +14,67 @@ public static partial class MeterPlayerInfoFormatter
         string? formatString,
         PlayerNameDisplayMode nameDisplayMode)
     {
-        var format = string.IsNullOrWhiteSpace(formatString)
-            ? "{Name} - {Spec} ({PowerLevel}-S{SeasonStrength})"
-            : formatString;
-        var result = format;
+        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
+        return Format(
+            new PlayerInfoFormatData(
+                player.UserId,
+                player.Name,
+                classSpec,
+                player.AbilityScore,
+                player.SeasonStrength,
+                player.SeasonLevel,
+                player.IsSelf),
+            formatString,
+            nameDisplayMode);
+    }
+
+    public static string Format(
+        PlayerRosterEntry player,
+        string? formatString,
+        PlayerNameDisplayMode nameDisplayMode)
+    {
+        return Format(
+            new PlayerInfoFormatData(
+                player.CharacterId,
+                player.Name,
+                player.ClassSpec,
+                player.CombatPower,
+                player.SeasonStrength,
+                player.SeasonLevel,
+                player.IsSelf),
+            formatString,
+            nameDisplayMode);
+    }
+
+    public static string FormatPreview(string? formatString)
+    {
+        return Format(
+            new PlayerInfoFormatData(
+                123456789,
+                LocalizationManager.Instance.GetString("Settings_PlayerInfo_PreviewName"),
+                PlayerClassSpec.FrostMageIcicle,
+                25000,
+                8,
+                50,
+                true),
+            formatString,
+            PlayerNameDisplayMode.Show);
+    }
+
+    private static string Format(
+        PlayerInfoFormatData player,
+        string? formatString,
+        PlayerNameDisplayMode nameDisplayMode)
+    {
+        if (string.IsNullOrEmpty(formatString))
+        {
+            return string.Empty;
+        }
+
+        var result = formatString;
 
         result = GetNameRegex().Replace(result, GetName(player, nameDisplayMode));
-        result = GetSpecRegex().Replace(result, GetSpec(player));
+        result = GetSpecRegex().Replace(result, LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}"));
         result = GetPowerLevelRegex().Replace(result, player.AbilityScore.ToString());
         result = GetSeasonStrengthRegex().Replace(result, player.SeasonStrength.ToString());
         result = GetSeasonLevelRegex().Replace(result, player.SeasonLevel.ToString());
@@ -35,29 +89,9 @@ public static partial class MeterPlayerInfoFormatter
         return result.Trim();
     }
 
-    public static string FormatPreview(string? formatString)
+    private static string GetName(PlayerInfoFormatData player, PlayerNameDisplayMode nameDisplayMode)
     {
-        var previewPlayer = new MeterPlayerSnapshot(
-            CharacterId: 123456789,
-            UserId: 123456789,
-            Name: LocalizationManager.Instance.GetString("Settings_MeterPlayerInfo_PreviewName"),
-            ProfessionId: 2,
-            SubProfessionId: 02_00_01,
-            AbilityScore: 25000,
-            SeasonStrength: 8,
-            SeasonLevel: 50,
-            IsSelf: true,
-            TotalValue: 0,
-            ValuePerSecond: 0,
-            Contribution: 0,
-            BarRatio: 0);
-
-        return Format(previewPlayer, formatString, PlayerNameDisplayMode.Show);
-    }
-
-    private static string GetName(MeterPlayerSnapshot player, PlayerNameDisplayMode nameDisplayMode)
-    {
-        if (ShouldHideName(player, nameDisplayMode))
+        if (ShouldHideName(player.IsSelf, nameDisplayMode))
         {
             return HiddenPlayerName;
         }
@@ -67,20 +101,14 @@ public static partial class MeterPlayerInfoFormatter
             : player.Name;
     }
 
-    private static bool ShouldHideName(MeterPlayerSnapshot player, PlayerNameDisplayMode nameDisplayMode)
+    private static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)
     {
         return nameDisplayMode switch
         {
             PlayerNameDisplayMode.Hide => true,
-            PlayerNameDisplayMode.HideOthers => !player.IsSelf,
+            PlayerNameDisplayMode.HideOthers => !isSelf,
             _ => false
         };
-    }
-
-    private static string GetSpec(MeterPlayerSnapshot player)
-    {
-        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
-        return LocalizationManager.Instance.GetString($"ClassSpec_{classSpec}");
     }
 
     [GeneratedRegex(@"\{Name\}", RegexOptions.IgnoreCase)]
@@ -115,4 +143,13 @@ public static partial class MeterPlayerInfoFormatter
 
     [GeneratedRegex(@"^\s*-\s*|\s*-\s*$")]
     private static partial Regex GetLeadingOrTrailingHyphenRegex();
+
+    private readonly record struct PlayerInfoFormatData(
+        long UserId,
+        string Name,
+        PlayerClassSpec ClassSpec,
+        int AbilityScore,
+        int SeasonStrength,
+        int SeasonLevel,
+        bool IsSelf);
 }

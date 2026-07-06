@@ -1,19 +1,9 @@
 <UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.MeterWidgetDisplaySettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:StarResonanceDps.App.Views.WidgetSettings"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
-    <UserControl.Resources>
-        <Style x:Key="MeterWidgetDisplaySettings.AddFieldButton"
-               TargetType="{x:Type Button}"
-               BasedOn="{StaticResource Button.Text}">
-            <Setter Property="Margin" Value="0,0,6,6" />
-            <Setter Property="Padding" Value="8,4" />
-        </Style>
-    </UserControl.Resources>
-
     <StackPanel>
         <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
                    Foreground="{DynamicResource Brush.TextPrimary}"
@@ -21,132 +11,89 @@
                    FontWeight="SemiBold"
                    Margin="0,0,0,10" />
 
-        <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
-            <StackPanel>
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="260" />
-                        </Grid.ColumnDefinitions>
+        <ContentControl Style="{StaticResource Panel.SettingSection}"
+                        Margin="0,0,0,12"
+                        Padding="20,11,20,11">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="134" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_MeterPlayerInfo_QuickPresets]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
+                <TextBlock Grid.Row="0"
+                           VerticalAlignment="Center"
+                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Customization]}"
+                           Foreground="{DynamicResource Brush.TextPrimary}"
+                           FontSize="14"
+                           FontWeight="SemiBold" />
 
-                        <ComboBox Grid.Column="2"
-                                  DisplayMemberPath="DisplayName"
-                                  ItemsSource="{Binding PlayerInfoFormatPresets}"
-                                  SelectedItem="{Binding SelectedPlayerInfoFormatPreset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}" />
+                <TextBox Grid.Row="0"
+                         Grid.Column="2"
+                         Height="32"
+                         Style="{StaticResource Input.PathBox}"
+                         Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalContentAlignment="Center" />
+
+                <Grid Grid.Row="1"
+                      Grid.ColumnSpan="4"
+                      Margin="0,4,0,0"
+                      VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="146" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Brush.TextSecondary}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance},
+                               Path=[Settings_PlayerInfo_Preview]}" />
+
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Brush.TextSecondary}"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Text="{Binding FormatPreview}"
+                               TextTrimming="CharacterEllipsis" />
+                </Grid>
+
+                <Grid Grid.Row="2"
+                      Grid.ColumnSpan="4"
+                      Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="146" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="1" x:Name="PlayerInfoFormatFieldHost">
+                        <ComboBox Width="{Binding ActualWidth, ElementName=PlayerInfoFormatFieldHost}"
+                                  MaxWidth="220"
+                                  HorizontalAlignment="Right"
+                                  ItemsSource="{Binding AvailablePlayerInfoFormatFields}"
+                                  SelectedItem="{Binding SelectedPlayerInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                        </ComboBox>
                     </Grid>
-                </Border>
 
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="260" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Top"
-                                   Margin="0,6,0,0"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_MeterPlayerInfo_AddFields]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <ItemsControl Grid.Column="2"
-                                      HorizontalAlignment="Right"
-                                      ItemsSource="{Binding AvailablePlayerInfoFormatFields}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <WrapPanel />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding DataContext.AddPlayerInfoFormatFieldCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
-                                            CommandParameter="{Binding}"
-                                            Style="{StaticResource MeterWidgetDisplaySettings.AddFieldButton}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Margin="0,0,4,0" Text="+" />
-                                            <TextBlock Text="{Binding DisplayName}" />
-                                        </StackPanel>
-                                    </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="260" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Top"
-                                   Margin="0,6,0,0"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_MeterPlayerInfo_FormatString]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <Grid Grid.Column="2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="10" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <TextBox Grid.Column="0"
-                                     MinHeight="32"
-                                     Style="{StaticResource Input.PathBox}"
-                                     Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                     TextWrapping="Wrap"
-                                     VerticalContentAlignment="Center" />
-                            <Button Grid.Column="2"
-                                    Command="{Binding ClearPlayerInfoFormatCommand}"
-                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_MeterPlayerInfo_Clear]}"
-                                    Style="{StaticResource Button.Text}" />
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="12" />
-                            <ColumnDefinition Width="260" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Top"
-                                   Margin="0,6,0,0"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_MeterPlayerInfo_Preview]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <TextBox Grid.Column="2"
-                                 Focusable="False"
-                                 IsHitTestVisible="False"
-                                 IsReadOnly="True"
-                                 MinHeight="32"
-                                 Style="{StaticResource Input.PathBox}"
-                                 Text="{Binding FormatPreview, Mode=OneWay}"
-                                 TextWrapping="Wrap"
-                                 VerticalContentAlignment="Center" />
-                    </Grid>
-                </Border>
-            </StackPanel>
+                    <Button Grid.Column="3"
+                            Command="{Binding AddPlayerInfoFormatFieldCommand}"
+                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                            MinWidth="64"
+                            Style="{StaticResource Button.Text}" />
+                </Grid>
+            </Grid>
         </ContentControl>
     </StackPanel>
 </UserControl>

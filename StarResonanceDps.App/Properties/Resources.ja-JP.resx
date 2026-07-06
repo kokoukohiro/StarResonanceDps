@@ -483,49 +483,37 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>クラスカラーの不透明度</value>
   </data>
-<data name="Meter_Total" xml:space="preserve">
+  <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_QuickPresets" xml:space="preserve">
-    <value>クイックプリセット</value>
+  <data name="Common_Add" xml:space="preserve">
+    <value>追加</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_AddFields" xml:space="preserve">
-    <value>フィールドを追加</value>
+  <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
+    <value>プレイヤー名カスタマイズ</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_FormatString" xml:space="preserve">
-    <value>カスタマイズ文字列</value>
+  <data name="Settings_PlayerInfo_Preview" xml:space="preserve">
+    <value>プレビュー：</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Clear" xml:space="preserve">
-    <value>クリア</value>
+  <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
+    <value>サンプルプレイヤー</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preview" xml:space="preserve">
-    <value>プレビュー</value>
+  <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
+    <value>プレイヤー名</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Default" xml:space="preserve">
-    <value>デフォルト</value>
+  <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
+    <value>クラス</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Simple" xml:space="preserve">
-    <value>シンプル</value>
+  <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
+    <value>能力スコア</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_Preset_Detailed" xml:space="preserve">
-    <value>詳細</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_Preset_NameOnly" xml:space="preserve">
-    <value>名前のみ</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_Preset_None" xml:space="preserve">
-    <value>なし</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_SeasonStrength" xml:space="preserve">
+  <data name="Settings_PlayerInfo_Field_SeasonStrength" xml:space="preserve">
     <value>シーズン強度</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_SeasonLevel" xml:space="preserve">
-    <value>シーズンレベル</value>
+  <data name="Settings_PlayerInfo_Field_SeasonLevel" xml:space="preserve">
+    <value>レベル</value>
   </data>
-  <data name="Settings_MeterPlayerInfo_PlayerUid" xml:space="preserve">
+  <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>プレイヤーUID</value>
-  </data>
-  <data name="Settings_MeterPlayerInfo_PreviewName" xml:space="preserve">
-    <value>サンプルプレイヤー</value>
   </data>
 </root>

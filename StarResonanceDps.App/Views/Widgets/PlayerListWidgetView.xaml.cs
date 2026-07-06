@@ -184,12 +184,7 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void ApplyPlayerSelectionMenuStyles(ContextMenu menu)
     {
-        if (Window.GetWindow(this) is not WidgetWindow window)
-        {
-            return;
-        }
-
-        if (window.TryFindResource(PlayerSelectionContextMenuStyleKey) is Style contextMenuStyle)
+        if (TryFindResource(PlayerSelectionContextMenuStyleKey) is Style contextMenuStyle)
         {
             menu.Style = contextMenuStyle;
         }
@@ -204,7 +199,7 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
                 _ => PlayerSelectionContextMenuMiddleItemStyleKey
             };
 
-            if (window.TryFindResource(styleKey) is Style menuItemStyle)
+            if (TryFindResource(styleKey) is Style menuItemStyle)
             {
                 menuItems[index].Style = menuItemStyle;
             }

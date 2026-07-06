@@ -16,7 +16,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
-    private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerInfoDebug);
+    private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private long _playerListMapGeneration = -1;
 
@@ -58,7 +58,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
-    public bool IsPlayerList => Kind == WidgetKind.PlayerInfoDebug;
+    public bool IsPlayerList => Kind == WidgetKind.PlayerList;
 
     public bool IsPlayerInfo => Kind == WidgetKind.PlayerInfo;
 
@@ -66,13 +66,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
 
-    public bool IsMeter => Kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
-
     public bool IsPlayerWindowWidget => IsPlayerInfo || IsPlayerStatus || IsPlayerEquipment;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
-
-    public bool ShowsFooter => IsPlayerList || IsMeter;
 
     public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
     {
@@ -310,18 +306,21 @@ public partial class WidgetListItemViewModel : ViewModelBase
             }
         }
 
+        var globalSettings = ConfigManager.Instance.GetSettingsSnapshot();
+        var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
+
         for (var targetIndex = 0; targetIndex < _playerRoster.Count; targetIndex++)
         {
             var player = _playerRoster[targetIndex];
             if (!_playerListEntriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
             {
-                entry = PlayerListEntry.Create(player, _meter);
+                entry = PlayerListEntry.Create(player, _meter, playerNameDisplayMode);
                 _playerListEntriesByCharacterId.Add(player.CharacterId, entry);
                 _playerListEntries.Insert(targetIndex, entry);
                 continue;
             }
 
-            entry.Update(player, _meter);
+            entry.Update(player, _meter, playerNameDisplayMode);
 
             if (_playerListEntries[targetIndex].CharacterId == player.CharacterId)
             {

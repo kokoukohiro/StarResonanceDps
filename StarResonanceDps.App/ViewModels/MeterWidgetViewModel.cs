@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
@@ -22,10 +23,16 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private string _elapsedText = "00:00:00";
 
     [ObservableProperty]
-    private string _partyMetricText = string.Empty;
+    private string _partyMetricLabel = string.Empty;
 
     [ObservableProperty]
-    private string _totalText = string.Empty;
+    private string _partyMetricValueText = string.Empty;
+
+    [ObservableProperty]
+    private string _totalLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _totalValueText = string.Empty;
 
     public MeterWidgetViewModel(WidgetListItemViewModel widget, MeterSnapshotKind kind)
     {
@@ -79,9 +86,10 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         var snapshot = MeterSnapshotProvider.GetSnapshot(_kind);
 
         ElapsedText = FormatDuration(snapshot.Duration);
-        var label = _kind == MeterSnapshotKind.Damage ? "DPS" : "HPS";
-        PartyMetricText = $"{label}: {MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex)}";
-        TotalText = $"{LocalizationManager.Instance.GetString("Meter_Total")}: {MeterNumberFormatter.Format(snapshot.TotalValue, numberDisplayFormatIndex)}";
+        PartyMetricLabel = _kind == MeterSnapshotKind.Damage ? "DPS:" : "HPS:";
+        PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
+        TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
+        TotalValueText = MeterNumberFormatter.Format(snapshot.TotalValue, numberDisplayFormatIndex);
 
         var activeCharacterIds = snapshot.Players
             .Select(player => player.CharacterId)
@@ -122,6 +130,12 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 _entries.Move(currentIndex, index);
             }
         }
+    }
+
+    [RelayCommand]
+    private void ResetEncounter()
+    {
+        MeterSnapshotProvider.ResetCurrentEncounter();
     }
 
     private int FindEntryIndex(long characterId, int startIndex)

@@ -36,7 +36,6 @@ public partial class WidgetWindow : Window
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
-    private readonly Action? _meterResetAction;
     private bool _isRestoringBounds = true;
     private bool _isSynchronizingContentScrollBar;
 
@@ -46,11 +45,12 @@ public partial class WidgetWindow : Window
         WidgetWindowConfig savedBounds,
         Window? owner,
         string? headerText = null,
-        Action? meterResetAction = null)
+        FrameworkElement? headerChromeActions = null,
+        FrameworkElement? headerActions = null,
+        FrameworkElement? footerContent = null)
     {
         _widget = widget;
         _usesWidgetDisplayNameForHeader = string.IsNullOrWhiteSpace(headerText);
-        _meterResetAction = meterResetAction;
 
         InitializeComponent();
         DataContext = widget;
@@ -58,6 +58,9 @@ public partial class WidgetWindow : Window
             ? widget.DisplayName
             : headerText!;
         WidgetContentHost.Content = widgetContent;
+        WidgetHeaderChromeActionsHost.Content = headerChromeActions;
+        WidgetHeaderActionsHost.Content = headerActions;
+        SetFooterContent(footerContent);
         _widget.PropertyChanged += Widget_PropertyChanged;
 
         _verticalScrollContent = widgetContent as IWidgetVerticalScrollContent;
@@ -102,11 +105,19 @@ public partial class WidgetWindow : Window
     public void ApplyPinState(bool isPinned)
     {
         Topmost = isPinned;
-        ResizeMode = isPinned
-            ? ResizeMode.NoResize
-            : ResizeMode.CanResize;
-
         QueueContentScrollBarUpdate();
+    }
+
+    private void SetFooterContent(FrameworkElement? footerContent)
+    {
+        WidgetFooterHost.Content = footerContent;
+
+        var visibility = footerContent is null
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        WidgetFooterFrame.Visibility = visibility;
+        WidgetFooterHost.Visibility = visibility;
     }
 
     protected override void OnClosed(EventArgs e)
@@ -147,7 +158,7 @@ public partial class WidgetWindow : Window
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg != WmNcHitTest || ResizeMode == ResizeMode.NoResize || WindowState == WindowState.Maximized)
+        if (msg != WmNcHitTest || WindowState == WindowState.Maximized)
         {
             return IntPtr.Zero;
         }
@@ -207,7 +218,7 @@ public partial class WidgetWindow : Window
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (_widget.IsPinned || e.LeftButton != MouseButtonState.Pressed)
+        if (e.LeftButton != MouseButtonState.Pressed)
         {
             return;
         }
@@ -218,11 +229,6 @@ public partial class WidgetWindow : Window
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
         Close();
-    }
-
-    private void MeterResetButton_Click(object sender, RoutedEventArgs e)
-    {
-        _meterResetAction?.Invoke();
     }
 
     private void Widget_PropertyChanged(object? sender, PropertyChangedEventArgs e)

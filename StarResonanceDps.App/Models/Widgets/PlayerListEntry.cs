@@ -36,21 +36,30 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     public bool IsHealthFull => HealthRatio >= 1d;
 
-    public static PlayerListEntry Create(PlayerRosterEntry player, MeterWidgetSettingsConfig classColors)
+    public static PlayerListEntry Create(
+        PlayerRosterEntry player,
+        MeterWidgetSettingsConfig settings,
+        PlayerNameDisplayMode playerNameDisplayMode)
     {
         var entry = new PlayerListEntry(player.CharacterId);
-        entry.Update(player, classColors);
+        entry.Update(player, settings, playerNameDisplayMode);
         return entry;
     }
 
-    public void Update(PlayerRosterEntry player, MeterWidgetSettingsConfig classColors)
+    public void Update(
+        PlayerRosterEntry player,
+        MeterWidgetSettingsConfig settings,
+        PlayerNameDisplayMode playerNameDisplayMode)
     {
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
-        DisplayName = $"{player.Name}({player.CombatPower}-S{player.SeasonStrength})";
+        DisplayName = PlayerInfoFormatFormatter.Format(
+            player,
+            settings.PlayerInfoFormatString,
+            playerNameDisplayMode);
         HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
 
-        var classColor = GetClassColor(classColors, ProfessionKey);
+        var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
         {
             ClassBrush = CreateBrush(classColor);
@@ -76,7 +85,7 @@ public sealed partial class PlayerListEntry : ObservableObject
     {
         var palette = classColors.ClassColorPalettes.TryGetValue(professionKey, out var colors)
             ? colors
-            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerInfoDebug, professionKey);
+            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerList, professionKey);
         var selectedIndex = classColors.ClassColorIndexes.TryGetValue(professionKey, out var index)
             ? index
             : WidgetConfigDefaults.MinClassColorIndex;

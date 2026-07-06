@@ -1,0 +1,12 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.MeterWidgetHeaderActionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <StackPanel Orientation="Horizontal">
+        <Button Style="{StaticResource Button.WidgetWindowHeaderIcon}" />
+
+        <Button Style="{StaticResource Button.WidgetWindowHeaderIcon}"
+                Command="{Binding ResetEncounterCommand}" />
+    </StackPanel>
+</UserControl>
