@@ -5,12 +5,14 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes;
 
 public class Settings
 {
+    public const string AutomaticNetCaptureDeviceName = "Auto";
+
     public static Settings Instance = new();
     private static string SETTINGS_FILE_NAME = "Settings.json";
 
     public int Version { get; set; } = 0;
     public string Language { get; set; } = "en";
-    public string NetCaptureDeviceName { get; set; } = "";
+    public string NetCaptureDeviceName { get; set; } = AutomaticNetCaptureDeviceName;
     public bool NormalizeMeterContributions { get; set; } = true;
     public bool UseShortWidthNumberFormatting { get; set; } = true;
     public bool ShowClassIconsInMeters { get; set; } = true;
@@ -90,8 +92,11 @@ public class Settings
 
     public void Apply()
     {
-        MessageManager.NetCaptureDeviceName = NetCaptureDeviceName;
-
+        MessageManager.NetCaptureDeviceName = IsAutomaticNetCaptureDeviceName(NetCaptureDeviceName)
+            ? string.Empty
+            : NetCaptureDeviceName;
+        MessageManager.GameCapturePreference = GameCapturePreference;
+        MessageManager.GameCaptureCustomExeName = Path.GetFileNameWithoutExtension(GameCaptureCustomExeName ?? string.Empty);
     }
 
     public static void Load()
@@ -129,7 +134,23 @@ public class Settings
             name => name.EndsWith("WebsiteURL", StringComparison.OrdinalIgnoreCase),
             nameof(ApplicationWebsiteUrl));
 
-        return settingsObject.ToObject<Settings>() ?? new Settings();
+        var settings = settingsObject.ToObject<Settings>() ?? new Settings();
+        settings.NormalizePersistedValues();
+        return settings;
+    }
+
+    public static bool IsAutomaticNetCaptureDeviceName(string? deviceName)
+    {
+        return string.IsNullOrWhiteSpace(deviceName)
+            || string.Equals(deviceName.Trim(), AutomaticNetCaptureDeviceName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void NormalizePersistedValues()
+    {
+        if (IsAutomaticNetCaptureDeviceName(NetCaptureDeviceName))
+        {
+            NetCaptureDeviceName = AutomaticNetCaptureDeviceName;
+        }
     }
 
     private static void RenamePersistedProperty(

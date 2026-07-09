@@ -14,6 +14,109 @@
                   ShadowDepth="2"
                   BlurRadius="5" />
 
+
+
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
+        </Style>
+
         <Style x:Key="MeterWidget.ProfessionIconMask"
                TargetType="{x:Type Rectangle}"
                BasedOn="{StaticResource Icon.ProfessionMask}">
@@ -118,9 +221,65 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid Height="31"
-                              SnapsToDevicePixels="True"
-                              UseLayoutRounding="True">
+                        <Button Height="31"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                IsTabStop="False"
+                                ContextMenuService.IsEnabled="False"
+                                PreviewMouseRightButtonDown="MeterItem_PreviewMouseRightButtonDown"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}"
+                                Click="MeterItem_Click"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch">
+                            <Button.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                             IsOpen="{Binding PlacementTarget.DataContext.IsPlayerSelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                             Placement="MousePoint"
+                                             Opened="PlayerSelectionContextMenu_Opened"
+                                             Closed="PlayerSelectionContextMenu_Closed">
+                                    <MenuItem Header="{Binding ContributionMenuText}"
+                                              Command="{Binding RequestContributionCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding TimelineMenuText}"
+                                              Command="{Binding RequestTimelineCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid SnapsToDevicePixels="True">
+                                                    <Border x:Name="InteractionBackground"
+                                                            Background="{Binding DataContext.Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}"
+                                                            Opacity="{Binding DataContext.Widget.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}"
+                                                            Visibility="Collapsed" />
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsPlayerSelectionMenuOpen}" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <Grid SnapsToDevicePixels="True"
+                                  UseLayoutRounding="True">
                             <Grid x:Name="BarArea"
                                   Margin="1"
                                   ClipToBounds="True">
@@ -180,7 +339,8 @@
                                            Text="{Binding ValueText}"
                                            TextAlignment="Right" />
                             </Grid>
-                        </Grid>
+                            </Grid>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

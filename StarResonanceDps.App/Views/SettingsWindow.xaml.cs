@@ -1,10 +1,14 @@
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views;
@@ -38,6 +42,60 @@ public partial class SettingsWindow : Window
     private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
     {
         QueueUpdateExternalScrollBar();
+        QueueNpcapWarning();
+    }
+
+
+    private void QueueNpcapWarning()
+    {
+        Dispatcher.BeginInvoke((Action)ShowNpcapWarningIfNeeded, DispatcherPriority.ContextIdle);
+    }
+
+    private void ShowNpcapWarningIfNeeded()
+    {
+        var version = NpcapVersionProbe.GetVersion();
+        string? message = null;
+        string? detail = null;
+        var localization = LocalizationManager.Instance;
+
+        if (version == new Version())
+        {
+            message = localization.GetString("Confirm_NpcapMissing_Message");
+            detail = localization.GetString("Confirm_NpcapMissing_Detail");
+        }
+        else if (version < new Version(1, 86))
+        {
+            message = localization.GetString("Confirm_NpcapOutdated_Message");
+            detail = localization.Format("Confirm_NpcapOutdated_Detail", version);
+        }
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return;
+        }
+
+        var confirmed = ConfirmWindow.ShowText(
+            this,
+            localization.GetString("Confirm_NpcapUpdate_Title"),
+            message,
+            detail ?? string.Empty);
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://npcap.com/",
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+        }
     }
 
     private void SettingsWindow_SourceInitialized(object? sender, EventArgs e)
@@ -56,6 +114,8 @@ public partial class SettingsWindow : Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
+        CommitGameCaptureCustomExeNameEdit();
+
         if (ViewModel.HasUnsavedChanges)
         {
             var confirmed = ConfirmWindow.Show(
@@ -144,6 +204,11 @@ public partial class SettingsWindow : Window
         return new Point(x, y);
     }
 
+    private void BasicNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BasicSection);
+    }
+
     private void DisplayNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(DisplaySection);
@@ -203,8 +268,26 @@ public partial class SettingsWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
+        CommitGameCaptureCustomExeNameEdit();
         ViewModel.SaveSettings();
         Close();
+    }
+
+    private void GameCaptureCustomExeNameTextBox_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter || sender is not TextBox textBox)
+        {
+            return;
+        }
+
+        textBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+        Keyboard.ClearFocus();
+        e.Handled = true;
+    }
+
+    private void CommitGameCaptureCustomExeNameEdit()
+    {
+        GameCaptureCustomExeNameTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
     }
 
     private void ScrollToSection(FrameworkElement target)

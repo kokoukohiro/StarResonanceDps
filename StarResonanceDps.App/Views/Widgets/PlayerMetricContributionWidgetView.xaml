@@ -1,0 +1,177 @@
+﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerMetricContributionWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="PlayerMetricContributionWidgetView_Loaded"
+             SizeChanged="PlayerMetricContributionWidgetView_SizeChanged">
+    <UserControl.Resources>
+        <Style x:Key="MetricSkillStatisticText"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="MetricSkillStatisticHeaderText"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource MetricSkillStatisticText}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Opacity" Value="0.8" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="26" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0"
+              MinWidth="680"
+              Margin="0,0,0,1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="*" MinWidth="110" />
+                <ColumnDefinition Width="84" />
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="68" />
+                <ColumnDefinition Width="62" />
+                <ColumnDefinition Width="82" />
+                <ColumnDefinition Width="54" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="ID" />
+            <TextBlock Grid.Column="1"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_SkillName]}" />
+            <TextBlock Grid.Column="2"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding TotalValueHeader}" />
+            <TextBlock Grid.Column="3"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding ActivePerSecondHeader}" />
+            <TextBlock Grid.Column="4"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding EncounterPerSecondHeader}" />
+            <TextBlock Grid.Column="5"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_HitCount]}" />
+            <TextBlock Grid.Column="6"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_CritRate]}" />
+            <TextBlock Grid.Column="7"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_AveragePerHit]}" />
+            <TextBlock Grid.Column="8"
+                       HorizontalAlignment="Right"
+                       Style="{StaticResource MetricSkillStatisticHeaderText}"
+                       Text="{Binding ShareHeader}" />
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <ScrollViewer x:Name="ContributionScrollViewer"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Hidden"
+                          CanContentScroll="False"
+                          ScrollChanged="ContributionScrollViewer_ScrollChanged">
+                <ItemsControl MinWidth="680"
+                              ItemsSource="{Binding SkillEntries}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Height="25"
+                                    BorderBrush="{Binding DataContext.PlayerWidget.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    BorderThickness="0,0,0,1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="58" />
+                                        <ColumnDefinition Width="*" MinWidth="110" />
+                                        <ColumnDefinition Width="84" />
+                                        <ColumnDefinition Width="58" />
+                                        <ColumnDefinition Width="58" />
+                                        <ColumnDefinition Width="68" />
+                                        <ColumnDefinition Width="62" />
+                                        <ColumnDefinition Width="82" />
+                                        <ColumnDefinition Width="54" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               Margin="2,0,4,0"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding SkillIdText}" />
+                                    <TextBlock Grid.Column="1"
+                                               Margin="2,0,6,0"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding SkillName}" />
+                                    <TextBlock Grid.Column="2"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding TotalValueText}" />
+                                    <TextBlock Grid.Column="3"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding ActivePerSecondText}" />
+                                    <TextBlock Grid.Column="4"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding EncounterPerSecondText}" />
+                                    <TextBlock Grid.Column="5"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding HitCountText}" />
+                                    <TextBlock Grid.Column="6"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding CritRateText}" />
+                                    <TextBlock Grid.Column="7"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding AverageValueText}" />
+                                    <TextBlock Grid.Column="8"
+                                               Margin="4,0"
+                                               HorizontalAlignment="Right"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding ShareText}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Opacity="0.7"
+                       Text="{Binding NoDataText}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock"
+                           BasedOn="{StaticResource Text.WidgetWindow}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasMetricData}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Grid>
+    </Grid>
+</UserControl>

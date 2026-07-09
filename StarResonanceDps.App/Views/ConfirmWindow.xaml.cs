@@ -14,14 +14,23 @@ public partial class ConfirmWindow : Window
     public static bool Show(Window owner, string titleResourceKey, string messageResourceKey, string detailResourceKey)
     {
         var localization = LocalizationManager.Instance;
+        return ShowText(
+            owner,
+            localization.GetString(titleResourceKey),
+            localization.GetString(messageResourceKey),
+            localization.GetString(detailResourceKey));
+    }
+
+    public static bool ShowText(Window owner, string title, string message, string detail)
+    {
         var window = new ConfirmWindow
         {
             Owner = owner
         };
 
-        window.HeaderText.Text = localization.GetString(titleResourceKey);
-        window.MessageText.Text = localization.GetString(messageResourceKey);
-        window.DetailText.Text = localization.GetString(detailResourceKey);
+        window.HeaderText.Text = title;
+        window.MessageText.Text = message;
+        window.DetailText.Text = detail;
 
         return window.ShowDialog() == true;
     }

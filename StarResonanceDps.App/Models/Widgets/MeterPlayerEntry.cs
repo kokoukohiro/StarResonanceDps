@@ -16,6 +16,8 @@ public sealed partial class MeterPlayerEntry : ObservableObject
 
     public long CharacterId { get; }
 
+    public long PlayerId { get; private set; }
+
     [ObservableProperty]
     private int _rank;
 
@@ -33,6 +35,9 @@ public sealed partial class MeterPlayerEntry : ObservableObject
 
     [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
+
+    [ObservableProperty]
+    private bool _isPlayerSelectionMenuOpen;
 
     public static MeterPlayerEntry Create(
         MeterPlayerSnapshot player,
@@ -56,6 +61,7 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         PlayerNameDisplayMode playerNameDisplayMode)
     {
         Rank = rank;
+        PlayerId = player.UserId != 0 ? player.UserId : player.CharacterId;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
         ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F0}%";

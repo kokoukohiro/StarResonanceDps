@@ -612,6 +612,7 @@ public class ColorPicker : Control
         if (e.Key == Key.Enter)
         {
             ApplyHexInput();
+            Keyboard.ClearFocus();
             e.Handled = true;
         }
     }

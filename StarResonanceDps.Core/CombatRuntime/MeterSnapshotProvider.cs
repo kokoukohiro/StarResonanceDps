@@ -1,4 +1,5 @@
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
+using ZLinq;
 using Zproto;
 
 namespace StarResonanceDps.Core.CombatRuntime;
@@ -30,6 +31,29 @@ public sealed record MeterSnapshot(
     ulong TotalValue,
     double ValuePerSecond,
     IReadOnlyList<MeterPlayerSnapshot> Players);
+
+public sealed record MetricTimelinePoint(double Seconds, double ValuePerSecond);
+
+public sealed record MetricTimelineSnapshot(
+    ulong TotalValue,
+    IReadOnlyList<MetricTimelinePoint> Points);
+
+public sealed record MetricSkillTableRowSnapshot(
+    int SkillId,
+    string Name,
+    ulong TotalValue,
+    double ValuePerSecondActive,
+    double ValuePerSecond,
+    ulong HitCount,
+    double CritRate,
+    double AverageValue,
+    double Percentage);
+
+public sealed record MetricSkillTableSnapshot(
+    ulong TotalValue,
+    IReadOnlyList<MetricSkillTableRowSnapshot> Entries);
+
+public sealed record MeterPlayerIdentity(string Name, long UserId);
 
 public static class MeterSnapshotProvider
 {
@@ -76,6 +100,165 @@ public static class MeterSnapshotProvider
             totalValue,
             players.Sum(player => player.ValuePerSecond),
             players);
+    }
+
+    public static MeterPlayerIdentity? GetPlayerIdentity(long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
+        {
+            return null;
+        }
+
+        var userId = entity.UID != 0
+            ? entity.UID
+            : Utils.UuidToEntityId(entityUuid);
+        return new MeterPlayerIdentity(entity.Name ?? string.Empty, userId);
+    }
+
+    public static MetricTimelineSnapshot GetPlayerTimeline(
+        MeterSnapshotKind kind,
+        long characterId,
+        int aggregationIntervalSeconds)
+    {
+        var intervalSeconds = NormalizeTimelineAggregationIntervalSeconds(aggregationIntervalSeconds);
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return new MetricTimelineSnapshot(0UL, Array.Empty<MetricTimelinePoint>());
+        }
+
+        var stats = kind == MeterSnapshotKind.Damage
+            ? entity.DamageStats
+            : entity.HealingStats;
+        var snapshots = stats.GetSkillSnapshotsCopy()
+            .Where(snapshot => IsIncludedSnapshot(kind, snapshot))
+            .Where(snapshot => snapshot.Timestamp.HasValue)
+            .OrderBy(snapshot => snapshot.Timestamp)
+            .ToArray();
+
+        var totalValue = GetPlayerTotalValue(entity, kind);
+        if (snapshots.Length == 0)
+        {
+            return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
+        }
+
+        var startTime = encounter.ExData.FirstDamageTimeStamp
+            ?? stats.StartTime
+            ?? snapshots[0].Timestamp!.Value;
+        var endTime = encounter.EndTime == DateTime.MinValue
+            ? DateTime.UtcNow
+            : encounter.EndTime;
+        var lastSnapshotTime = snapshots[^1].Timestamp!.Value;
+
+        if (endTime < lastSnapshotTime)
+        {
+            endTime = lastSnapshotTime;
+        }
+
+        if (endTime < startTime)
+        {
+            startTime = snapshots[0].Timestamp!.Value;
+        }
+
+        var elapsedSeconds = Math.Max((endTime - startTime).TotalSeconds, 0d);
+        var sampleCount = (int)Math.Floor(elapsedSeconds);
+        if (sampleCount == 0)
+        {
+            return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
+        }
+
+        var perSecondValues = new double[sampleCount];
+        foreach (var snapshot in snapshots)
+        {
+            var seconds = Math.Max((snapshot.Timestamp!.Value - startTime).TotalSeconds, 0d);
+            var sampleIndex = Math.Max((int)Math.Ceiling(seconds) - 1, 0);
+            if (sampleIndex < sampleCount)
+            {
+                perSecondValues[sampleIndex] += Math.Max(snapshot.Value, 0L);
+            }
+        }
+
+        var points = new MetricTimelinePoint[sampleCount];
+        var rollingValue = 0d;
+        for (var index = 0; index < sampleCount; index++)
+        {
+            rollingValue += perSecondValues[index];
+            if (index >= intervalSeconds)
+            {
+                rollingValue -= perSecondValues[index - intervalSeconds];
+            }
+
+            var windowSeconds = Math.Min(index + 1, intervalSeconds);
+            points[index] = new MetricTimelinePoint(index + 1, rollingValue / windowSeconds);
+        }
+
+        return new MetricTimelineSnapshot(totalValue, points);
+    }
+
+    private static int NormalizeTimelineAggregationIntervalSeconds(int aggregationIntervalSeconds)
+    {
+        return aggregationIntervalSeconds is 5 or 3 or 2 or 1
+            ? aggregationIntervalSeconds
+            : 10;
+    }
+
+    public static MetricSkillTableSnapshot GetPlayerSkillTable(MeterSnapshotKind kind, long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return new MetricSkillTableSnapshot(0UL, Array.Empty<MetricSkillTableRowSnapshot>());
+        }
+
+        IReadOnlyList<KeyValuePair<int, CombatStats>> skillStats = kind switch
+        {
+            MeterSnapshotKind.Damage => (IReadOnlyList<KeyValuePair<int, CombatStats>>)entity.SkillMetrics
+                .AsValueEnumerable()
+                .Where(entry => entry.Value.Damage.ValueTotal > 0UL)
+                .OrderByDescending(entry => entry.Value.Damage.ValueTotal)
+                .Select(entry => new KeyValuePair<int, CombatStats>(entry.Key, entry.Value.Damage))
+                .ToList(),
+            MeterSnapshotKind.Healing => (IReadOnlyList<KeyValuePair<int, CombatStats>>)entity.SkillMetrics
+                .AsValueEnumerable()
+                .Where(entry => entry.Value.Healing.ValueTotal > 0UL)
+                .OrderByDescending(entry => entry.Value.Healing.ValueTotal)
+                .Select(entry => new KeyValuePair<int, CombatStats>(entry.Key, entry.Value.Healing))
+                .ToList(),
+            _ => Array.Empty<KeyValuePair<int, CombatStats>>()
+        };
+
+        var entityTotalValue = GetPlayerTotalValue(entity, kind);
+        if (skillStats.Count == 0 || entityTotalValue == 0UL)
+        {
+            return new MetricSkillTableSnapshot(entityTotalValue, Array.Empty<MetricSkillTableRowSnapshot>());
+        }
+
+        var rows = new MetricSkillTableRowSnapshot[skillStats.Count];
+        for (var index = 0; index < skillStats.Count; index++)
+        {
+            var stat = skillStats[index];
+            var value = stat.Value;
+            var percentage = value.ValueTotal > 0UL
+                ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
+                : 0d;
+
+            rows[index] = new MetricSkillTableRowSnapshot(
+                stat.Key,
+                value.Name ?? string.Empty,
+                value.ValueTotal,
+                value.ValuePerSecondActive,
+                value.ValuePerSecond,
+                value.HitsCount,
+                value.CritRate,
+                value.ValueAverage,
+                percentage);
+        }
+
+        return new MetricSkillTableSnapshot(entityTotalValue, rows);
     }
 
     public static void ResetCurrentEncounter()
@@ -131,6 +314,58 @@ public static class MeterSnapshotProvider
             AppState.PlayerMeterValuePerSecond = player.ValuePerSecond;
             return;
         }
+    }
+
+    private static bool IsIncludedSnapshot(MeterSnapshotKind kind, SkillSnapshot snapshot)
+    {
+        return snapshot.Value > 0
+            && (kind != MeterSnapshotKind.Damage || snapshot.DamageType != EDamageType.Immune);
+    }
+
+    private static bool TryResolvePlayerEntity(
+        Encounter encounter,
+        long characterId,
+        out long entityUuid,
+        out Entity entity)
+    {
+        if (encounter.Entities.TryGetValue(characterId, out var resolvedEntity)
+            && resolvedEntity.EntityType == EEntityType.EntChar)
+        {
+            entityUuid = characterId;
+            entity = resolvedEntity;
+            return true;
+        }
+
+        foreach (var pair in encounter.Entities)
+        {
+            if (pair.Value.EntityType != EEntityType.EntChar)
+            {
+                continue;
+            }
+
+            var playerId = pair.Value.UID != 0
+                ? pair.Value.UID
+                : Utils.UuidToEntityId(pair.Key);
+            if (playerId != characterId)
+            {
+                continue;
+            }
+
+            entityUuid = pair.Key;
+            entity = pair.Value;
+            return true;
+        }
+
+        entityUuid = 0;
+        entity = null!;
+        return false;
+    }
+
+    private static ulong GetPlayerTotalValue(Entity entity, MeterSnapshotKind kind)
+    {
+        return kind == MeterSnapshotKind.Damage
+            ? entity.TotalDamage
+            : entity.TotalHealing;
     }
 
     private static Encounter? ResolveActiveEncounter()

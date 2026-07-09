@@ -192,6 +192,15 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>모든 고정 해제</value>
   </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>기본 설정</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>네트워크 어댑터</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Auto" xml:space="preserve">
+    <value>자동</value>
+  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>표시 설정</value>
   </data>
@@ -480,6 +489,21 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
   </data>
+  <data name="Widget_NoMetricData" xml:space="preserve">
+    <value>데이터 없음</value>
+  </data>
+  <data name="Widget_HpsGraph" xml:space="preserve">
+    <value>순간 HPS 그래프</value>
+  </data>
+  <data name="Widget_HealingContribution" xml:space="preserve">
+    <value>치유 비율</value>
+  </data>
+  <data name="Widget_DpsGraph" xml:space="preserve">
+    <value>순간 DPS 그래프</value>
+  </data>
+  <data name="Widget_DamageContribution" xml:space="preserve">
+    <value>피해 비율</value>
+  </data>
   <data name="Common_Add" xml:space="preserve">
     <value>추가</value>
   </data>
@@ -509,5 +533,80 @@
   </data>
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>플레이어 UID</value>
+  </data>
+  <data name="Metric_SkillName" xml:space="preserve">
+    <value>스킬 이름</value>
+  </data>
+  <data name="Metric_Damage" xml:space="preserve">
+    <value>피해</value>
+  </data>
+  <data name="Metric_Healing" xml:space="preserve">
+    <value>치유</value>
+  </data>
+  <data name="Metric_ActiveDps" xml:space="preserve">
+    <value>aDPS</value>
+  </data>
+  <data name="Metric_EncounterDps" xml:space="preserve">
+    <value>eDPS</value>
+  </data>
+  <data name="Metric_ActiveHps" xml:space="preserve">
+    <value>aHPS</value>
+  </data>
+  <data name="Metric_EncounterHps" xml:space="preserve">
+    <value>eHPS</value>
+  </data>
+  <data name="Metric_HitCount" xml:space="preserve">
+    <value>타격 수</value>
+  </data>
+  <data name="Metric_CritRate" xml:space="preserve">
+    <value>치명타율</value>
+  </data>
+  <data name="Metric_AveragePerHit" xml:space="preserve">
+    <value>평균 타격</value>
+  </data>
+  <data name="Metric_DamageShare" xml:space="preserve">
+    <value>피해 %</value>
+  </data>
+  <data name="Metric_HealingShare" xml:space="preserve">
+    <value>치유 %</value>
+  </data>
+  <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
+    <value>Npcap 업데이트</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
+    <value>Npcap을 설치하시겠습니까?</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
+    <value>Npcap이 설치되어 있지 않거나 버전을 감지할 수 없습니다. 네트워크 패킷을 캡처하려면 Npcap을 설치하세요.</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
+    <value>Npcap을 업데이트하시겠습니까?</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
+    <value>Npcap 버전({0})이 1.86보다 낮습니다. 문제를 방지하려면 1.86 이상으로 업데이트하는 것을 강력히 권장합니다.</value>
+  </data>
+  <data name="Metric_InstantDps" xml:space="preserve">
+    <value>순간 DPS</value>
+  </data>
+  <data name="Metric_InstantHps" xml:space="preserve">
+    <value>순간 HPS</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
+    <value>게임 실행 파일</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Auto" xml:space="preserve">
+    <value>자동</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Custom" xml:space="preserve">
+    <value>사용자 지정</value>
+  </data>
+  <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
+    <value>사용자 지정 실행 파일 이름</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+    <value>실시간 집계 간격</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}초</value>
   </data>
 </root>

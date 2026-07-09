@@ -192,6 +192,15 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>Unpin all</value>
   </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>Network Adapter</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>Display</value>
   </data>
@@ -486,6 +495,21 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
   </data>
+  <data name="Widget_NoMetricData" xml:space="preserve">
+    <value>No data</value>
+  </data>
+  <data name="Widget_HpsGraph" xml:space="preserve">
+    <value>Instant HPS Graph</value>
+  </data>
+  <data name="Widget_HealingContribution" xml:space="preserve">
+    <value>Healing Contribution</value>
+  </data>
+  <data name="Widget_DpsGraph" xml:space="preserve">
+    <value>Instant DPS Graph</value>
+  </data>
+  <data name="Widget_DamageContribution" xml:space="preserve">
+    <value>Damage Contribution</value>
+  </data>
   <data name="Common_Add" xml:space="preserve">
     <value>Add</value>
   </data>
@@ -515,5 +539,80 @@
   </data>
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>Player UID</value>
+  </data>
+  <data name="Metric_SkillName" xml:space="preserve">
+    <value>Skill Name</value>
+  </data>
+  <data name="Metric_Damage" xml:space="preserve">
+    <value>Damage</value>
+  </data>
+  <data name="Metric_Healing" xml:space="preserve">
+    <value>Healing</value>
+  </data>
+  <data name="Metric_ActiveDps" xml:space="preserve">
+    <value>aDPS</value>
+  </data>
+  <data name="Metric_EncounterDps" xml:space="preserve">
+    <value>eDPS</value>
+  </data>
+  <data name="Metric_ActiveHps" xml:space="preserve">
+    <value>aHPS</value>
+  </data>
+  <data name="Metric_EncounterHps" xml:space="preserve">
+    <value>eHPS</value>
+  </data>
+  <data name="Metric_HitCount" xml:space="preserve">
+    <value>Hit Count</value>
+  </data>
+  <data name="Metric_CritRate" xml:space="preserve">
+    <value>Crit Rate</value>
+  </data>
+  <data name="Metric_AveragePerHit" xml:space="preserve">
+    <value>Avg Per Hit</value>
+  </data>
+  <data name="Metric_DamageShare" xml:space="preserve">
+    <value>DMG %</value>
+  </data>
+  <data name="Metric_HealingShare" xml:space="preserve">
+    <value>HEAL %</value>
+  </data>
+  <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
+    <value>Npcap update</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
+    <value>Install Npcap?</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
+    <value>Npcap is not installed, or its version could not be detected. Please install Npcap to capture network packets.</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
+    <value>Update Npcap?</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
+    <value>Npcap version ({0}) is below 1.86. It is strongly recommended to update to this version, or higher, to avoid problems.</value>
+  </data>
+  <data name="Metric_InstantDps" xml:space="preserve">
+    <value>Instant DPS</value>
+  </data>
+  <data name="Metric_InstantHps" xml:space="preserve">
+    <value>Instant HPS</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
+    <value>Game Executable</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
+    <value>Custom Executable Name</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+    <value>Real-time aggregation interval</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0} seconds</value>
   </data>
 </root>

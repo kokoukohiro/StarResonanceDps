@@ -62,12 +62,21 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MeterSettings.PreviewChanged += MeterSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsMetricTimelineSettings(kind))
+        {
+            MetricTimelineSettings = new MetricTimelineWidgetSettingsViewModel(config.MetricTimeline);
+            MetricTimelineSettings.PropertyChanged += MetricTimelineSettings_PropertyChanged;
+            MetricTimelineSettings.PreviewChanged += MetricTimelineSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
     public event Action<WidgetThemeConfig>? ThemePreviewChanged;
 
     public event Action<MeterWidgetSettingsConfig>? MeterPreviewChanged;
+
+    public event Action<MetricTimelineWidgetSettingsConfig>? MetricTimelinePreviewChanged;
 
     public void Dispose()
     {
@@ -78,6 +87,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MeterSettings.PropertyChanged -= MeterSettings_PropertyChanged;
             MeterSettings.PreviewChanged -= MeterSettings_PreviewChanged;
             MeterSettings.Dispose();
+        }
+
+        if (MetricTimelineSettings is not null)
+        {
+            MetricTimelineSettings.PropertyChanged -= MetricTimelineSettings_PropertyChanged;
+            MetricTimelineSettings.PreviewChanged -= MetricTimelineSettings_PreviewChanged;
+            MetricTimelineSettings.Dispose();
         }
     }
 
@@ -94,6 +110,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MeterPreviewChanged?.Invoke(config);
     }
 
+    private void MetricTimelineSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MetricTimelineWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void MetricTimelineSettings_PreviewChanged(MetricTimelineWidgetSettingsConfig config)
+    {
+        MetricTimelinePreviewChanged?.Invoke(config);
+    }
+
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         DisplayName = LocalizationManager.Instance.GetString(_displayNameResourceKey);
@@ -106,12 +135,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public MeterWidgetSettingsViewModel? MeterSettings { get; }
 
+    public MetricTimelineWidgetSettingsViewModel? MetricTimelineSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     public bool HasMeterDisplaySettings => HasMeterSettings;
 
+    public bool HasMetricTimelineDisplaySettings => MetricTimelineSettings is not null;
+
+    public bool HasDisplaySettings => HasMeterDisplaySettings || HasMetricTimelineDisplaySettings;
+
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
-        || (MeterSettings?.HasUnsavedChanges ?? false);
+        || (MeterSettings?.HasUnsavedChanges ?? false)
+        || (MetricTimelineSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -135,10 +171,16 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.Meter = MeterSettings.CreateConfig();
         }
 
+        if (MetricTimelineSettings is not null)
+        {
+            config.MetricTimeline = MetricTimelineSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
+        MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -147,6 +189,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     {
         LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
         MeterSettings?.ResetToDefaults();
+        MetricTimelineSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -154,6 +197,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     {
         ThemePreviewChanged?.Invoke(_lastSavedTheme.Clone());
         MeterSettings?.RestoreSavedPreview();
+        MetricTimelineSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

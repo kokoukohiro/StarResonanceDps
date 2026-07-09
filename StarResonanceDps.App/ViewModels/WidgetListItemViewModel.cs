@@ -17,6 +17,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
+    private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private long _playerListMapGeneration = -1;
 
@@ -66,13 +67,24 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
 
-    public bool IsPlayerWindowWidget => IsPlayerInfo || IsPlayerStatus || IsPlayerEquipment;
+    public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
+        or WidgetKind.PlayerStatus
+        or WidgetKind.PlayerEquipment
+        or WidgetKind.DamageContribution
+        or WidgetKind.DpsGraph
+        or WidgetKind.HealingContribution
+        or WidgetKind.HpsGraph;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
     public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedMeter(Kind, _meter);
+    }
+
+    public MetricTimelineWidgetSettingsConfig GetMetricTimelineSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedMetricTimeline(_metricTimeline);
     }
 
     public string StateText => State == WidgetState.Running
@@ -110,6 +122,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
             Theme = _theme.Clone(),
             Meter = WidgetConfigDefaults.SupportsMeterSettings(Kind)
                 ? _meter.Clone()
+                : null,
+            MetricTimeline = WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind)
+                ? _metricTimeline.Clone()
                 : null
         };
     }
@@ -132,6 +147,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
             _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, config.Meter);
         }
 
+        if (WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        {
+            _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(config.MetricTimeline);
+            RaisePlayerWindowPresentationChanged();
+        }
+
         SynchronizePlayerListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -146,6 +167,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
         _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, meter);
         SynchronizePlayerListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyMetricTimelineSettingsPreview(MetricTimelineWidgetSettingsConfig metricTimeline)
+    {
+        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        {
+            return;
+        }
+
+        _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(metricTimeline);
+        RaisePlayerWindowPresentationChanged();
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

@@ -192,6 +192,15 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>解除所有固定</value>
   </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>基础设置</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>监听网卡</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>显示设置</value>
   </data>
@@ -486,6 +495,21 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
   </data>
+  <data name="Widget_NoMetricData" xml:space="preserve">
+    <value>暂无数据</value>
+  </data>
+  <data name="Widget_HpsGraph" xml:space="preserve">
+    <value>瞬时HPS图表</value>
+  </data>
+  <data name="Widget_HealingContribution" xml:space="preserve">
+    <value>治疗占比</value>
+  </data>
+  <data name="Widget_DpsGraph" xml:space="preserve">
+    <value>瞬时DPS图表</value>
+  </data>
+  <data name="Widget_DamageContribution" xml:space="preserve">
+    <value>伤害占比</value>
+  </data>
   <data name="Common_Add" xml:space="preserve">
     <value>添加</value>
   </data>
@@ -515,5 +539,80 @@
   </data>
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>玩家UID</value>
+  </data>
+  <data name="Metric_SkillName" xml:space="preserve">
+    <value>技能名称</value>
+  </data>
+  <data name="Metric_Damage" xml:space="preserve">
+    <value>伤害</value>
+  </data>
+  <data name="Metric_Healing" xml:space="preserve">
+    <value>治疗</value>
+  </data>
+  <data name="Metric_ActiveDps" xml:space="preserve">
+    <value>aDPS</value>
+  </data>
+  <data name="Metric_EncounterDps" xml:space="preserve">
+    <value>eDPS</value>
+  </data>
+  <data name="Metric_ActiveHps" xml:space="preserve">
+    <value>aHPS</value>
+  </data>
+  <data name="Metric_EncounterHps" xml:space="preserve">
+    <value>eHPS</value>
+  </data>
+  <data name="Metric_HitCount" xml:space="preserve">
+    <value>命中次数</value>
+  </data>
+  <data name="Metric_CritRate" xml:space="preserve">
+    <value>暴击率</value>
+  </data>
+  <data name="Metric_AveragePerHit" xml:space="preserve">
+    <value>平均单次</value>
+  </data>
+  <data name="Metric_DamageShare" xml:space="preserve">
+    <value>伤害 %</value>
+  </data>
+  <data name="Metric_HealingShare" xml:space="preserve">
+    <value>治疗 %</value>
+  </data>
+  <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
+    <value>Npcap更新</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
+    <value>是否安装 Npcap？</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
+    <value>未安装 Npcap，或无法检测到 Npcap 版本。要捕获网络数据包，请安装 Npcap。</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
+    <value>是否更新 Npcap？</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
+    <value>Npcap 版本（{0}）低于 1.86。为避免问题，强烈建议更新到 1.86 或更高版本。</value>
+  </data>
+  <data name="Metric_InstantDps" xml:space="preserve">
+    <value>瞬时DPS</value>
+  </data>
+  <data name="Metric_InstantHps" xml:space="preserve">
+    <value>瞬时HPS</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
+    <value>游戏执行文件</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
+    <value>自定义执行文件名</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+    <value>实时聚合间隔</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}秒</value>
   </data>
 </root>

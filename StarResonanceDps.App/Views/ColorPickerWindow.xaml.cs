@@ -75,7 +75,6 @@ public partial class ColorPickerWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        ColorPicker.CommitTextInput();
         MoveFocusToSink();
     }
 

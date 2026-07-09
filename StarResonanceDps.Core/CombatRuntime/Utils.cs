@@ -269,6 +269,11 @@ public static class Utils
 
     public static string[] GameCapturePreferenceToExeNames(EGameCapturePreference pref)
     {
+        return GameCapturePreferenceToExeNames(pref, Settings.Instance.GameCaptureCustomExeName);
+    }
+
+    public static string[] GameCapturePreferenceToExeNames(EGameCapturePreference pref, string customExeName)
+    {
         string[] exeNameToCapture = pref switch
         {
             EGameCapturePreference.Auto => ["BPSR", "BPSR_STEAM", "BPSR_EPIC", "StarSEA", "StarASIA", "StarSEA_STEAM", "StarASIA_STEAM", "Star"],
@@ -280,7 +285,7 @@ public static class Utils
             EGameCapturePreference.HaoPlaySeaSteam => ["StarSEA_STEAM"],
             EGameCapturePreference.XDGSteam => ["StarASIA_STEAM"],
             EGameCapturePreference.WeGame => ["Star"],
-            EGameCapturePreference.Custom => [Settings.Instance.GameCaptureCustomExeName],
+            EGameCapturePreference.Custom => [customExeName],
             _ => throw new ArgumentOutOfRangeException(nameof(pref), pref, null)
         };
 

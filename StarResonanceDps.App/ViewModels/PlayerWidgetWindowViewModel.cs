@@ -21,10 +21,19 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     public WidgetListItemViewModel PlayerWidget { get; }
 
+    protected long? SelectedCharacterId => _requestedCharacterId ?? _representedCharacterId;
+
     public string HeaderText
     {
         get => _headerText;
         private set => SetProperty(ref _headerText, value);
+    }
+
+    protected void SetHeaderText(string playerName, long playerUid)
+    {
+        HeaderText = string.IsNullOrWhiteSpace(playerName)
+            ? PlayerWidget.DisplayName
+            : $"{PlayerWidget.DisplayName} - {playerName}(UID:{playerUid})";
     }
 
     public bool RepresentsPlayer(long characterId)
@@ -83,8 +92,12 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     private void RefreshHeaderText()
     {
-        HeaderText = _selectedPlayer is null
-            ? PlayerWidget.DisplayName
-            : $"{PlayerWidget.DisplayName} - {_selectedPlayer.Name}(UID:{_selectedPlayer.CharacterId})";
+        if (_selectedPlayer is null)
+        {
+            HeaderText = PlayerWidget.DisplayName;
+            return;
+        }
+
+        SetHeaderText(_selectedPlayer.Name, _selectedPlayer.CharacterId);
     }
 }

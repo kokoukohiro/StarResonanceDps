@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -28,6 +28,22 @@ public sealed class WidgetWindowManager
     }
 
     public static WidgetWindowManager Instance { get; } = new();
+
+    public void RegisterPlayerWindowWidget(WidgetListItemViewModel widget)
+    {
+        if (IsPlayerWindowWidget(widget.Kind))
+        {
+            TrackPlayerWidget(widget);
+        }
+    }
+
+    public void OpenPlayerWindow(WidgetKind kind, long characterId)
+    {
+        if (_trackedPlayerWidgets.TryGetValue(kind, out var playerWidget))
+        {
+            OpenPlayerWindow(playerWidget, characterId);
+        }
+    }
 
     public void ApplyWidgetState(WidgetListItemViewModel widget)
     {
@@ -169,6 +185,7 @@ public sealed class WidgetWindowManager
             savedBounds,
             owner,
             playerWindowViewModel.HeaderText);
+        playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         window.Closed += WidgetWindow_Closed;
 
         var cascadeIndex = _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, playerWidget));
@@ -204,6 +221,30 @@ public sealed class WidgetWindowManager
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
+            WidgetKind.DamageContribution => new PlayerMetricWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Damage,
+                PlayerMetricDisplayMode.Contribution),
+            WidgetKind.DpsGraph => new PlayerMetricWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Damage,
+                PlayerMetricDisplayMode.Timeline),
+            WidgetKind.HealingContribution => new PlayerMetricWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Healing,
+                PlayerMetricDisplayMode.Contribution),
+            WidgetKind.HpsGraph => new PlayerMetricWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Healing,
+                PlayerMetricDisplayMode.Timeline),
             _ => throw new ArgumentOutOfRangeException(nameof(playerWidget))
         };
     }
@@ -224,11 +265,19 @@ public sealed class WidgetWindowManager
             {
                 DataContext = equipmentViewModel
             },
+            PlayerMetricWidgetViewModel { IsContribution: true } metricViewModel => new PlayerMetricContributionWidgetView
+            {
+                DataContext = metricViewModel
+            },
+            PlayerMetricWidgetViewModel metricViewModel => new PlayerMetricTimelineWidgetView
+            {
+                DataContext = metricViewModel
+            },
             _ => throw new ArgumentOutOfRangeException(nameof(playerWindowViewModel))
         };
     }
 
-    private static WidgetWindowComposition CreateWidgetWindowComposition(WidgetListItemViewModel widget)
+    private WidgetWindowComposition CreateWidgetWindowComposition(WidgetListItemViewModel widget)
     {
         return widget.Kind switch
         {
@@ -243,11 +292,11 @@ public sealed class WidgetWindowManager
         };
     }
 
-    private static WidgetWindowComposition CreateMeterWidgetComposition(
+    private WidgetWindowComposition CreateMeterWidgetComposition(
         WidgetListItemViewModel widget,
         MeterSnapshotKind kind)
     {
-        var viewModel = new MeterWidgetViewModel(widget, kind);
+        var viewModel = new MeterWidgetViewModel(widget, kind, OpenPlayerWindow);
 
         return new WidgetWindowComposition(
             new MeterWidgetView
@@ -319,6 +368,19 @@ public sealed class WidgetWindowManager
         }
     }
 
+    private void PlayerWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(PlayerWidgetWindowViewModel.HeaderText)
+            || sender is not PlayerWidgetWindowViewModel playerWindowViewModel)
+        {
+            return;
+        }
+
+        var session = _openPlayerWindows.FirstOrDefault(
+            candidate => ReferenceEquals(candidate.ViewModel, playerWindowViewModel));
+        session?.Window.SetHeaderText(playerWindowViewModel.HeaderText);
+    }
+
     private void PlayerWidget_PresentationChanged(object? sender, EventArgs e)
     {
         if (sender is not WidgetListItemViewModel playerWidget)
@@ -352,7 +414,13 @@ public sealed class WidgetWindowManager
 
     private static bool IsPlayerWindowWidget(WidgetKind kind)
     {
-        return kind is WidgetKind.PlayerInfo or WidgetKind.PlayerStatus or WidgetKind.PlayerEquipment;
+        return kind is WidgetKind.PlayerInfo
+            or WidgetKind.PlayerStatus
+            or WidgetKind.PlayerEquipment
+            or WidgetKind.DamageContribution
+            or WidgetKind.DpsGraph
+            or WidgetKind.HealingContribution
+            or WidgetKind.HpsGraph;
     }
 
     private static void RestoreAndActivate(WidgetWindow window)
@@ -429,6 +497,13 @@ public sealed class WidgetWindowManager
 
         if (playerWindow is not null)
         {
+            playerWindow.ViewModel.PropertyChanged -= PlayerWindowViewModel_PropertyChanged;
+
+            if (playerWindow.ViewModel is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+
             _openPlayerWindows.Remove(playerWindow);
             UpdatePlayerWindowCount(playerWindow.Widget);
 

@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
@@ -19,6 +19,7 @@ public sealed class WidgetConfig
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
     public MeterWidgetSettingsConfig? Meter { get; set; }
+    public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
@@ -33,6 +34,7 @@ public sealed class WidgetConfig
             Theme = Theme?.Clone() ?? WidgetConfigDefaults.CreateTheme(),
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
             Meter = Meter?.Clone(),
+            MetricTimeline = MetricTimeline?.Clone(),
             ExtensionData = ExtensionData is null
                 ? null
                 : new Dictionary<string, object>(ExtensionData, StringComparer.OrdinalIgnoreCase)
@@ -82,6 +84,19 @@ public sealed class WidgetWindowConfig
     }
 }
 
+public sealed class MetricTimelineWidgetSettingsConfig
+{
+    public int AggregationIntervalSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineAggregationIntervalSeconds;
+
+    public MetricTimelineWidgetSettingsConfig Clone()
+    {
+        return new MetricTimelineWidgetSettingsConfig
+        {
+            AggregationIntervalSeconds = AggregationIntervalSeconds
+        };
+    }
+}
+
 public sealed class MeterWidgetSettingsConfig
 {
     public string? PlayerInfoFormatString { get; set; }
@@ -121,6 +136,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
+    public const int DefaultMetricTimelineAggregationIntervalSeconds = 10;
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
 
@@ -132,6 +148,12 @@ public static class WidgetConfigDefaults
     private const double PlayerStatusInitialWindowHeight = 230d;
     private const double PlayerEquipmentInitialWindowWidth = 400d;
     private const double PlayerEquipmentInitialWindowHeight = 230d;
+    private const double MetricContributionInitialWindowWidth = 980d;
+    private const double MetricContributionInitialWindowHeight = 360d;
+    private const double MetricTimelineInitialWindowWidth = 980d;
+    private const double MetricTimelineInitialWindowHeight = 420d;
+
+    public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [10, 5, 3, 2, 1];
 
     private static readonly string[] DefaultWindowColorHexes =
     [
@@ -222,6 +244,11 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
     }
 
+    public static bool SupportsMetricTimelineSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.DpsGraph or WidgetKind.HpsGraph;
+    }
+
     public static void MigrateVersion1Defaults(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -278,7 +305,8 @@ public static class WidgetConfigDefaults
             State = WidgetState.Stopped,
             Theme = CreateTheme(),
             Window = CreateDefaultWindowConfig(kind),
-            Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null
+            Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
+            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null
         };
     }
 
@@ -311,6 +339,16 @@ public static class WidgetConfigDefaults
                 Width = PlayerEquipmentInitialWindowWidth,
                 Height = PlayerEquipmentInitialWindowHeight
             },
+            WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
+            {
+                Width = MetricContributionInitialWindowWidth,
+                Height = MetricContributionInitialWindowHeight
+            },
+            WidgetKind.DpsGraph or WidgetKind.HpsGraph => new WidgetWindowConfig
+            {
+                Width = MetricTimelineInitialWindowWidth,
+                Height = MetricTimelineInitialWindowHeight
+            },
             _ => new WidgetWindowConfig()
         };
     }
@@ -322,6 +360,14 @@ public static class WidgetConfigDefaults
             WindowColorIndex = 0,
             WindowOpacity = 50,
             WindowColors = CreateDefaultWindowColors()
+        };
+    }
+
+    public static MetricTimelineWidgetSettingsConfig CreateMetricTimelineSettings()
+    {
+        return new MetricTimelineWidgetSettingsConfig
+        {
+            AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds
         };
     }
 
@@ -396,6 +442,13 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    public static MetricTimelineWidgetSettingsConfig CloneNormalizedMetricTimeline(MetricTimelineWidgetSettingsConfig? metricTimeline)
+    {
+        var normalized = (metricTimeline ?? CreateMetricTimelineSettings()).Clone();
+        NormalizeMetricTimeline(normalized);
+        return normalized;
+    }
+
     public static void Normalize(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -416,6 +469,9 @@ public static class WidgetConfigDefaults
         Normalize(config);
         config.Meter = SupportsMeterSettings(kind)
             ? CloneNormalizedMeter(kind, config.Meter)
+            : null;
+        config.MetricTimeline = SupportsMetricTimelineSettings(kind)
+            ? CloneNormalizedMetricTimeline(config.MetricTimeline)
             : null;
 
         switch (kind)
@@ -445,6 +501,16 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= PlayerEquipmentInitialWindowWidth;
                 config.Window.Height ??= PlayerEquipmentInitialWindowHeight;
                 break;
+            case WidgetKind.DamageContribution:
+            case WidgetKind.HealingContribution:
+                config.Window.Width ??= MetricContributionInitialWindowWidth;
+                config.Window.Height ??= MetricContributionInitialWindowHeight;
+                break;
+            case WidgetKind.DpsGraph:
+            case WidgetKind.HpsGraph:
+                config.Window.Width ??= MetricTimelineInitialWindowWidth;
+                config.Window.Height ??= MetricTimelineInitialWindowHeight;
+                break;
         }
     }
 
@@ -470,6 +536,14 @@ public static class WidgetConfigDefaults
         theme.BackgroundImageAverageColorSourcePath = string.IsNullOrWhiteSpace(theme.BackgroundImageAverageColorSourcePath)
             ? null
             : theme.BackgroundImageAverageColorSourcePath.Trim();
+    }
+
+    public static void NormalizeMetricTimeline(MetricTimelineWidgetSettingsConfig metricTimeline)
+    {
+        if (!MetricTimelineAggregationIntervals.Contains(metricTimeline.AggregationIntervalSeconds))
+        {
+            metricTimeline.AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds;
+        }
     }
 
     public static void NormalizeMeter(WidgetKind kind, MeterWidgetSettingsConfig meter)

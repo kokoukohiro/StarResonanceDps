@@ -50,7 +50,6 @@ public sealed class CombatRuntimeHost
                 if (bestDefaultDevice is not null)
                 {
                     MessageManager.NetCaptureDeviceName = bestDefaultDevice.Name;
-                    Settings.Instance.NetCaptureDeviceName = bestDefaultDevice.Name;
                 }
             }
 

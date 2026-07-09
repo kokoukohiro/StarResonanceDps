@@ -43,9 +43,9 @@
                         <Button x:Name="DisplaySettingsNavButton"
                                 Click="DisplaySettingsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Window}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}" />
                             </StackPanel>
                         </Button>
@@ -77,15 +77,25 @@
                                       ScrollChanged="ContentScrollViewer_ScrollChanged"
                                       SizeChanged="ContentScrollViewer_SizeChanged">
                             <StackPanel Margin="0,0,10,6">
-                                <ContentControl x:Name="DisplaySettingsHost"
-                                                Content="{Binding MeterSettings}"
-                                                Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                    <ContentControl.ContentTemplate>
-                                        <DataTemplate>
-                                            <widgetSettingsViews:MeterWidgetDisplaySettingsView />
-                                        </DataTemplate>
-                                    </ContentControl.ContentTemplate>
-                                </ContentControl>
+                                <StackPanel x:Name="DisplaySettingsHost">
+                                    <ContentControl Content="{Binding MeterSettings}"
+                                                    Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:MeterWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+
+                                    <ContentControl Content="{Binding MetricTimelineSettings}"
+                                                    Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:MetricTimelineWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                </StackPanel>
 
                                 <TextBlock x:Name="ThemeSection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}"

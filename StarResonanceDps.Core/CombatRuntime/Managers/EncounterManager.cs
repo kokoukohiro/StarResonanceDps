@@ -2456,6 +2456,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         public double InactiveTime = 0.0;
 
         public List<SkillSnapshot> SkillSnapshots { get; private set; } = new();
+        private readonly object _skillSnapshotsGate = new();
+
+        public SkillSnapshot[] GetSkillSnapshotsCopy()
+        {
+            lock (_skillSnapshotsGate)
+            {
+                return SkillSnapshots.ToArray();
+            }
+        }
 
         public object Clone()
         {
@@ -2704,7 +2713,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 snapshot.IsImmune = true;
             }
 
-            SkillSnapshots.Add(snapshot);
+            lock (_skillSnapshotsGate)
+            {
+                SkillSnapshots.Add(snapshot);
+            }
         }
 
         public void MergeCombatStats(CombatStats newCombatStats)
@@ -2824,9 +2836,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            foreach (var newSnapshot in newCombatStats.SkillSnapshots)
+            var snapshots = newCombatStats.GetSkillSnapshotsCopy();
+            lock (_skillSnapshotsGate)
             {
-                SkillSnapshots.Add((SkillSnapshot)newSnapshot.Clone());
+                foreach (var newSnapshot in snapshots)
+                {
+                    SkillSnapshots.Add((SkillSnapshot)newSnapshot.Clone());
+                }
             }
         }
     }

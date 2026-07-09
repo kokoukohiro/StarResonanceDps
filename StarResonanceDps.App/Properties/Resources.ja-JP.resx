@@ -192,6 +192,15 @@
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>すべてのピン留めを解除</value>
   </data>
+  <data name="Settings_Section_Basic_Title" xml:space="preserve">
+    <value>基本設定</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
+    <value>ネットワークアダプター</value>
+  </data>
+  <data name="Settings_NetworkAdapter_Auto" xml:space="preserve">
+    <value>自動</value>
+  </data>
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>表示設定</value>
   </data>
@@ -486,6 +495,21 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
   </data>
+  <data name="Widget_NoMetricData" xml:space="preserve">
+    <value>データなし</value>
+  </data>
+  <data name="Widget_HpsGraph" xml:space="preserve">
+    <value>瞬間HPSグラフ</value>
+  </data>
+  <data name="Widget_HealingContribution" xml:space="preserve">
+    <value>ヒール割合</value>
+  </data>
+  <data name="Widget_DpsGraph" xml:space="preserve">
+    <value>瞬間DPSグラフ</value>
+  </data>
+  <data name="Widget_DamageContribution" xml:space="preserve">
+    <value>与ダメ割合</value>
+  </data>
   <data name="Common_Add" xml:space="preserve">
     <value>追加</value>
   </data>
@@ -515,5 +539,80 @@
   </data>
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>プレイヤーUID</value>
+  </data>
+  <data name="Metric_SkillName" xml:space="preserve">
+    <value>スキル名</value>
+  </data>
+  <data name="Metric_Damage" xml:space="preserve">
+    <value>ダメージ</value>
+  </data>
+  <data name="Metric_Healing" xml:space="preserve">
+    <value>ヒール</value>
+  </data>
+  <data name="Metric_ActiveDps" xml:space="preserve">
+    <value>aDPS</value>
+  </data>
+  <data name="Metric_EncounterDps" xml:space="preserve">
+    <value>eDPS</value>
+  </data>
+  <data name="Metric_ActiveHps" xml:space="preserve">
+    <value>aHPS</value>
+  </data>
+  <data name="Metric_EncounterHps" xml:space="preserve">
+    <value>eHPS</value>
+  </data>
+  <data name="Metric_HitCount" xml:space="preserve">
+    <value>ヒット数</value>
+  </data>
+  <data name="Metric_CritRate" xml:space="preserve">
+    <value>会心率</value>
+  </data>
+  <data name="Metric_AveragePerHit" xml:space="preserve">
+    <value>平均ヒット</value>
+  </data>
+  <data name="Metric_DamageShare" xml:space="preserve">
+    <value>与ダメ %</value>
+  </data>
+  <data name="Metric_HealingShare" xml:space="preserve">
+    <value>ヒール %</value>
+  </data>
+  <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
+    <value>Npcap更新</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
+    <value>Npcapをインストールしますか？</value>
+  </data>
+  <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
+    <value>Npcapがインストールされていないか、バージョンを検出できませんでした。ネットワークパケットをキャプチャするにはNpcapをインストールしてください。</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
+    <value>Npcapを更新しますか？</value>
+  </data>
+  <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
+    <value>Npcapのバージョン（{0}）は1.86未満です。問題を避けるため、1.86以上へ更新することを強くおすすめします。</value>
+  </data>
+  <data name="Metric_InstantDps" xml:space="preserve">
+    <value>瞬間DPS</value>
+  </data>
+  <data name="Metric_InstantHps" xml:space="preserve">
+    <value>瞬間HPS</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
+    <value>ゲーム実行ファイル</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Auto" xml:space="preserve">
+    <value>自動</value>
+  </data>
+  <data name="Settings_GameCapturePreference_Custom" xml:space="preserve">
+    <value>カスタム</value>
+  </data>
+  <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
+    <value>カスタム実行ファイル名</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+    <value>リアルタイム集計間隔</value>
+  </data>
+  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}秒</value>
   </data>
 </root>

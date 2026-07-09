@@ -40,6 +40,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayNameResourceKey);
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
+        _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -63,6 +64,7 @@ public partial class WidgetSettingsWindow : Window
     {
         _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
+        _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }

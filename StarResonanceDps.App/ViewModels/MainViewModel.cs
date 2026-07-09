@@ -27,9 +27,6 @@ public sealed partial class MainViewModel : ViewModelBase
     private bool _isPlayerRosterUpdateQueued;
 
     private WidgetListItemViewModel? _playerListWidget;
-    private WidgetListItemViewModel? _playerInfoWidget;
-    private WidgetListItemViewModel? _playerStatusWidget;
-    private WidgetListItemViewModel? _playerEquipmentWidget;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -51,12 +48,16 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
-        _playerInfoWidget = AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
-        _playerStatusWidget = AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
-        _playerEquipmentWidget = AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
+        AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
+        AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
+        AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
+        AddWidget(WidgetKind.DamageContribution, "Widget_DamageContribution");
+        AddWidget(WidgetKind.DpsGraph, "Widget_DpsGraph");
+        AddWidget(WidgetKind.HealingContribution, "Widget_HealingContribution");
+        AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
         AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
         AddWidget(WidgetKind.TrainingMode, "Menu_Training");
 
@@ -131,23 +132,13 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
         _widgetItems.Add(widget);
+        _widgetWindowManager.RegisterPlayerWindowWidget(widget);
         return widget;
     }
 
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)
     {
-        var widget = kind switch
-        {
-            WidgetKind.PlayerInfo => _playerInfoWidget,
-            WidgetKind.PlayerStatus => _playerStatusWidget,
-            WidgetKind.PlayerEquipment => _playerEquipmentWidget,
-            _ => null
-        };
-
-        if (widget is not null)
-        {
-            _widgetWindowManager.OpenPlayerWindow(widget, characterId);
-        }
+        _widgetWindowManager.OpenPlayerWindow(kind, characterId);
     }
 
     private void PlayerRosterPresentationStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)

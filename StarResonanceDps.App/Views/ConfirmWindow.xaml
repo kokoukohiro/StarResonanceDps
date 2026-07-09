@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
         Width="370"
-        Height="176"
         MinWidth="370"
         MinHeight="176"
+        SizeToContent="WidthAndHeight"
         WindowStyle="None"
         ResizeMode="NoResize"
         Background="Transparent"
@@ -49,12 +49,14 @@
                                Foreground="{DynamicResource Brush.TextPrimary}"
                                FontSize="14"
                                FontWeight="SemiBold"
+                               MaxWidth="520"
                                TextWrapping="Wrap" />
                     <TextBlock x:Name="DetailText"
                                Margin="0,10,0,0"
                                Foreground="{DynamicResource Brush.TextSecondary}"
                                FontSize="13"
                                LineHeight="21"
+                               MaxWidth="520"
                                TextWrapping="Wrap" />
                 </StackPanel>
             </ContentControl>

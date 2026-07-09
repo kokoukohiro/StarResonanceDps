@@ -20,6 +20,8 @@ namespace StarResonanceDps.Core.CombatRuntime
     {
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
+        public static EGameCapturePreference GameCapturePreference = EGameCapturePreference.Auto;
+        public static string GameCaptureCustomExeName = "";
 
         public static void InitializeCapturing()
         {
@@ -31,8 +33,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap = new NetCap();
             netCap.Init(new NetCapConfig()
             {
-                CaptureDeviceName = Settings.Instance.NetCaptureDeviceName,
-                ExeNames = Utils.GameCapturePreferenceToExeNames(Settings.Instance.GameCapturePreference)
+                CaptureDeviceName = NetCaptureDeviceName,
+                ExeNames = Utils.GameCapturePreferenceToExeNames(GameCapturePreference, GameCaptureCustomExeName)
             });
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.EnterScene, ProcessEnterScene);

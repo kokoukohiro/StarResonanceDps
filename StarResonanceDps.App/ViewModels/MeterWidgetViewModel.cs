@@ -18,6 +18,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private readonly Dictionary<long, MeterPlayerEntry> _entriesByCharacterId = [];
     private readonly DispatcherTimer _refreshTimer;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
+    private readonly Action<WidgetKind, long> _requestPlayerWindow;
 
     [ObservableProperty]
     private string _elapsedText = "00:00:00";
@@ -34,10 +35,14 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _totalValueText = string.Empty;
 
-    public MeterWidgetViewModel(WidgetListItemViewModel widget, MeterSnapshotKind kind)
+    public MeterWidgetViewModel(
+        WidgetListItemViewModel widget,
+        MeterSnapshotKind kind,
+        Action<WidgetKind, long> requestPlayerWindow)
     {
         _widget = widget;
         _kind = kind;
+        _requestPlayerWindow = requestPlayerWindow;
         Entries = new ReadOnlyObservableCollection<MeterPlayerEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -46,6 +51,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         _refreshTimer.Tick += RefreshTimer_Tick;
         _widget.MeterSettingsChanged += Widget_MeterSettingsChanged;
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
+        LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         Refresh();
         _refreshTimer.Start();
     }
@@ -60,7 +66,18 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _widget.MeterSettingsChanged -= Widget_MeterSettingsChanged;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
+        LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
+
+    public string ContributionMenuText => LocalizationManager.Instance.GetString(
+        _kind == MeterSnapshotKind.Damage
+            ? "Widget_DamageContribution"
+            : "Widget_HealingContribution");
+
+    public string TimelineMenuText => LocalizationManager.Instance.GetString(
+        _kind == MeterSnapshotKind.Damage
+            ? "Widget_DpsGraph"
+            : "Widget_HpsGraph");
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
@@ -74,6 +91,13 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {
+        Refresh();
+    }
+
+    private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(ContributionMenuText));
+        OnPropertyChanged(nameof(TimelineMenuText));
         Refresh();
     }
 
@@ -103,6 +127,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 continue;
             }
 
+            entry.IsPlayerSelectionMenuOpen = false;
             _entriesByCharacterId.Remove(entry.CharacterId);
             _entries.RemoveAt(index);
         }
@@ -136,6 +161,34 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private void ResetEncounter()
     {
         MeterSnapshotProvider.ResetCurrentEncounter();
+    }
+
+    [RelayCommand]
+    private void RequestContribution(MeterPlayerEntry? player)
+    {
+        RequestPlayerWindow(
+            _kind == MeterSnapshotKind.Damage
+                ? WidgetKind.DamageContribution
+                : WidgetKind.HealingContribution,
+            player);
+    }
+
+    [RelayCommand]
+    private void RequestTimeline(MeterPlayerEntry? player)
+    {
+        RequestPlayerWindow(
+            _kind == MeterSnapshotKind.Damage
+                ? WidgetKind.DpsGraph
+                : WidgetKind.HpsGraph,
+            player);
+    }
+
+    private void RequestPlayerWindow(WidgetKind widgetKind, MeterPlayerEntry? player)
+    {
+        if (player is not null)
+        {
+            _requestPlayerWindow(widgetKind, player.PlayerId);
+        }
     }
 
     private int FindEntryIndex(long characterId, int startIndex)
