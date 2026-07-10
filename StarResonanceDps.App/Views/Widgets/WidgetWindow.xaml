@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
         Title="{Binding HeaderText, RelativeSource={RelativeSource Self}}"
-        Icon="/Assets/Images/ApplicationIcon.ico"
+        Icon="pack://application:,,,/Assets/Images/ApplicationIcon.ico"
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
         Width="340"
         Height="200"

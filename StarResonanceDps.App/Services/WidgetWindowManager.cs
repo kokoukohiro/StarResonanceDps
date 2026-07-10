@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -221,12 +221,31 @@ public sealed class WidgetWindowManager
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
+            WidgetKind.SkillInfo => new PlayerSkillInfoWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer),
+            WidgetKind.BuffList => new PlayerBuffListWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                PlayerBuffListKind.Buff),
+            WidgetKind.DebuffList => new PlayerBuffListWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                PlayerBuffListKind.Debuff),
             WidgetKind.DamageContribution => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Damage,
                 PlayerMetricDisplayMode.Contribution),
+            WidgetKind.DamageSummary => new PlayerMetricSummaryWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Damage),
             WidgetKind.DpsGraph => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -239,6 +258,11 @@ public sealed class WidgetWindowManager
                 initialPlayer,
                 MeterSnapshotKind.Healing,
                 PlayerMetricDisplayMode.Contribution),
+            WidgetKind.HealingSummary => new PlayerMetricSummaryWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                MeterSnapshotKind.Healing),
             WidgetKind.HpsGraph => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -265,9 +289,21 @@ public sealed class WidgetWindowManager
             {
                 DataContext = equipmentViewModel
             },
+            PlayerSkillInfoWidgetViewModel skillInfoViewModel => new PlayerSkillInfoWidgetView
+            {
+                DataContext = skillInfoViewModel
+            },
+            PlayerBuffListWidgetViewModel buffListViewModel => new PlayerBuffListWidgetView
+            {
+                DataContext = buffListViewModel
+            },
             PlayerMetricWidgetViewModel { IsContribution: true } metricViewModel => new PlayerMetricContributionWidgetView
             {
                 DataContext = metricViewModel
+            },
+            PlayerMetricSummaryWidgetViewModel summaryViewModel => new PlayerMetricSummaryWidgetView
+            {
+                DataContext = summaryViewModel
             },
             PlayerMetricWidgetViewModel metricViewModel => new PlayerMetricTimelineWidgetView
             {
@@ -417,9 +453,14 @@ public sealed class WidgetWindowManager
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerStatus
             or WidgetKind.PlayerEquipment
+            or WidgetKind.SkillInfo
+            or WidgetKind.BuffList
+            or WidgetKind.DebuffList
             or WidgetKind.DamageContribution
+            or WidgetKind.DamageSummary
             or WidgetKind.DpsGraph
             or WidgetKind.HealingContribution
+            or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph;
     }
 

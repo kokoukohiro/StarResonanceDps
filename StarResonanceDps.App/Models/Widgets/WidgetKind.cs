@@ -11,8 +11,13 @@ public enum WidgetKind
     PlayerInfo,
     PlayerStatus,
     PlayerEquipment,
+    BuffList,
+    DebuffList,
     DamageContribution,
     DpsGraph,
     HealingContribution,
-    HpsGraph
+    HpsGraph,
+    DamageSummary,
+    HealingSummary,
+    SkillInfo
 }

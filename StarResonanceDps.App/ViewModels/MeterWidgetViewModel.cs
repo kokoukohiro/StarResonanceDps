@@ -71,6 +71,11 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     public string ContributionMenuText => LocalizationManager.Instance.GetString(
         _kind == MeterSnapshotKind.Damage
+            ? "Widget_DamageSkillDetails"
+            : "Widget_HealingSkillDetails");
+
+    public string SummaryMenuText => LocalizationManager.Instance.GetString(
+        _kind == MeterSnapshotKind.Damage
             ? "Widget_DamageContribution"
             : "Widget_HealingContribution");
 
@@ -97,6 +102,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(ContributionMenuText));
+        OnPropertyChanged(nameof(SummaryMenuText));
         OnPropertyChanged(nameof(TimelineMenuText));
         Refresh();
     }
@@ -170,6 +176,16 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
             _kind == MeterSnapshotKind.Damage
                 ? WidgetKind.DamageContribution
                 : WidgetKind.HealingContribution,
+            player);
+    }
+
+    [RelayCommand]
+    private void RequestSummary(MeterPlayerEntry? player)
+    {
+        RequestPlayerWindow(
+            _kind == MeterSnapshotKind.Damage
+                ? WidgetKind.DamageSummary
+                : WidgetKind.HealingSummary,
             player);
     }
 

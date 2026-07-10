@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using ZLinq;
 using Zproto;
@@ -8,6 +9,12 @@ public enum MeterSnapshotKind
 {
     Damage,
     Healing
+}
+
+public enum PlayerBuffListKind
+{
+    Buff,
+    Debuff
 }
 
 public sealed record MeterPlayerSnapshot(
@@ -52,6 +59,47 @@ public sealed record MetricSkillTableRowSnapshot(
 public sealed record MetricSkillTableSnapshot(
     ulong TotalValue,
     IReadOnlyList<MetricSkillTableRowSnapshot> Entries);
+
+public sealed record PlayerMetricSummarySnapshot(
+    ulong TotalValue,
+    double ValuePerSecondActive,
+    double ValuePerSecond,
+    ulong ExtraTotalValue,
+    ulong HitsCount,
+    double CritRate,
+    double LuckyRate,
+    uint CritCount,
+    ulong ImmuneCount,
+    bool ShowsImmuneCount,
+    ulong NormalValue,
+    ulong CritValue,
+    ulong LuckyValue,
+    uint LuckyCount,
+    double AverageValue,
+    ulong CastsCount,
+    double? CastsPerMinute,
+    double? CastsPerSecond);
+
+
+public sealed record PlayerBuffSnapshot(
+    long Uuid,
+    string Key,
+    string Name,
+    string IconName,
+    int Layer,
+    double? RemainingSeconds);
+
+public sealed record PlayerSkillInfoSnapshot(
+    int SkillId,
+    string Name,
+    string IconName,
+    int CurrentLevel,
+    int Tier,
+    bool IsImagine);
+
+internal sealed record PlayerBuffCandidate(
+    PlayerBuffSnapshot Snapshot,
+    TimeSpan EffectiveRemoveTime);
 
 public sealed record MeterPlayerIdentity(string Name, long UserId);
 
@@ -115,6 +163,110 @@ public static class MeterSnapshotProvider
             ? entity.UID
             : Utils.UuidToEntityId(entityUuid);
         return new MeterPlayerIdentity(entity.Name ?? string.Empty, userId);
+    }
+
+
+    public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerBuffs(long characterId, PlayerBuffListKind kind)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return Array.Empty<PlayerBuffSnapshot>();
+        }
+
+        var currentEncounterTime = encounter.GetDuration();
+        var buffEvents = entity.BuffEvents.Values.ToArray();
+        var entriesByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
+        var entryKeys = new List<string>(buffEvents.Length);
+
+        for (var index = buffEvents.Length - 1; index >= 0; index--)
+        {
+            var buffEvent = buffEvents[index];
+            if (buffEvent.Duration < 0 || !IsIncludedBuff(kind, buffEvent))
+            {
+                continue;
+            }
+
+            var name = ResolveBuffName(buffEvent);
+            if (string.IsNullOrWhiteSpace(name) && buffEvent.BaseId <= 0)
+            {
+                continue;
+            }
+
+            if (!TryResolveBuffTiming(buffEvent, currentEncounterTime, out var effectiveRemoveTime, out var remainingSeconds))
+            {
+                continue;
+            }
+
+            var key = ResolveBuffSnapshotKey(buffEvent);
+            var snapshot = new PlayerBuffSnapshot(
+                buffEvent.Uuid,
+                key,
+                name,
+                ResolveBuffIconName(buffEvent),
+                buffEvent.Layer,
+                remainingSeconds);
+            var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
+
+            if (!entriesByKey.TryGetValue(key, out var existing))
+            {
+                entriesByKey.Add(key, candidate);
+                entryKeys.Add(key);
+                continue;
+            }
+
+            if (candidate.EffectiveRemoveTime > existing.EffectiveRemoveTime)
+            {
+                entriesByKey[key] = candidate;
+            }
+        }
+
+        return entryKeys
+            .Select(key => entriesByKey[key].Snapshot)
+            .ToArray();
+    }
+
+    public static IReadOnlyList<PlayerSkillInfoSnapshot> GetPlayerSkillInfo(long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return Array.Empty<PlayerSkillInfoSnapshot>();
+        }
+
+        var rawSkillList = entity.GetAttrKV("AttrSkillLevelIdList");
+        IReadOnlyList<DataTypes.Skills.SkillLevelInfo> skillLevels = rawSkillList switch
+        {
+            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
+            JArray jsonArray =>
+                (IReadOnlyList<DataTypes.Skills.SkillLevelInfo>?)
+                jsonArray.ToObject<List<DataTypes.Skills.SkillLevelInfo>>()
+                ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
+            _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
+        };
+
+        if (skillLevels.Count == 0)
+        {
+            return Array.Empty<PlayerSkillInfoSnapshot>();
+        }
+
+        var snapshots = new PlayerSkillInfoSnapshot[skillLevels.Count];
+        for (var index = 0; index < skillLevels.Count; index++)
+        {
+            var skillLevel = skillLevels[index];
+            var iconName = CombatDataCatalog.GetSkillIconName(skillLevel.SkillId, skillLevel.Icon);
+            snapshots[index] = new PlayerSkillInfoSnapshot(
+                skillLevel.SkillId,
+                CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
+                iconName,
+                skillLevel.CurrentLevel,
+                skillLevel.Tier,
+                CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName));
+        }
+
+        return snapshots;
     }
 
     public static MetricTimelineSnapshot GetPlayerTimeline(
@@ -205,6 +357,80 @@ public static class MeterSnapshotProvider
             : 10;
     }
 
+    public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return CreateEmptyMetricSummary(kind);
+        }
+
+        var stats = kind == MeterSnapshotKind.Damage
+            ? entity.DamageStats
+            : entity.HealingStats;
+        var extraTotal = kind == MeterSnapshotKind.Damage
+            ? entity.TotalShieldBreak
+            : entity.TotalOverhealing;
+        var castsPerMinute = default(double?);
+        var castsPerSecond = default(double?);
+
+        if (entity.FirstCombatActionTime is { } firstAction
+            && entity.LastCombatActionTime is { } lastAction)
+        {
+            var activeDuration = lastAction - firstAction;
+            if (activeDuration.TotalSeconds > 0d)
+            {
+                var totalCasts = (double)entity.TotalCasts;
+                castsPerSecond = Math.Round(totalCasts / activeDuration.TotalSeconds, 2);
+                castsPerMinute = Math.Round(totalCasts / activeDuration.TotalMinutes, 2);
+            }
+        }
+
+        return new PlayerMetricSummarySnapshot(
+            stats.ValueTotal,
+            stats.ValuePerSecondActive,
+            stats.ValuePerSecond,
+            extraTotal,
+            stats.HitsCount,
+            stats.CritRate,
+            stats.LuckyRate,
+            stats.CritCount,
+            stats.ImmuneCount,
+            kind == MeterSnapshotKind.Damage,
+            stats.ValueNormalTotal,
+            stats.ValueCritTotal,
+            stats.ValueLuckyTotal,
+            stats.LuckyCount,
+            stats.ValueAverage,
+            entity.TotalCasts,
+            castsPerMinute,
+            castsPerSecond);
+    }
+
+    private static PlayerMetricSummarySnapshot CreateEmptyMetricSummary(MeterSnapshotKind kind)
+    {
+        return new PlayerMetricSummarySnapshot(
+            0UL,
+            0d,
+            0d,
+            0UL,
+            0UL,
+            0d,
+            0d,
+            0U,
+            0UL,
+            kind == MeterSnapshotKind.Damage,
+            0UL,
+            0UL,
+            0UL,
+            0U,
+            0d,
+            0UL,
+            null,
+            null);
+    }
+
     public static MetricSkillTableSnapshot GetPlayerSkillTable(MeterSnapshotKind kind, long characterId)
     {
         var encounter = ResolveActiveEncounter();
@@ -292,6 +518,87 @@ public static class MeterSnapshotProvider
                 EncounterManager.EnterDungeon(true, EncounterStartReason.NewObjective);
             }
         });
+    }
+
+
+
+    private static bool IsIncludedBuff(PlayerBuffListKind kind, BuffEvent buffEvent)
+    {
+        return kind switch
+        {
+            PlayerBuffListKind.Buff => buffEvent.BuffType is DataTypes.Enum.EBuffType.Gain
+                or DataTypes.Enum.EBuffType.GainRecovery,
+            PlayerBuffListKind.Debuff => buffEvent.BuffType == DataTypes.Enum.EBuffType.Debuff,
+            _ => false
+        };
+    }
+
+    private static string ResolveBuffName(BuffEvent buffEvent)
+    {
+        return buffEvent.BaseId > 0
+            ? CombatDataCatalog.GetBuffName(buffEvent.BaseId, buffEvent.Name)
+            : buffEvent.Name ?? string.Empty;
+    }
+
+    private static string ResolveBuffIconName(BuffEvent buffEvent)
+    {
+        return CombatDataCatalog.GetBuffIconName(
+            buffEvent.BaseId,
+            buffEvent.SourceConfigId,
+            buffEvent.Icon);
+    }
+
+    private static string ResolveBuffSnapshotKey(BuffEvent buffEvent)
+    {
+        if (buffEvent.BaseId > 0)
+        {
+            return $"base:{buffEvent.BaseId}";
+        }
+
+        return $"uuid:{buffEvent.Uuid}";
+    }
+
+    private static bool TryResolveBuffTiming(
+        BuffEvent buffEvent,
+        TimeSpan currentEncounterTime,
+        out TimeSpan effectiveRemoveTime,
+        out double remainingSeconds)
+    {
+        if (buffEvent.EventRemoveTime > TimeSpan.Zero)
+        {
+            effectiveRemoveTime = buffEvent.EventRemoveTime;
+        }
+        else if (buffEvent.EventAddTime > TimeSpan.Zero && buffEvent.Duration > 0)
+        {
+            effectiveRemoveTime = buffEvent.EventAddTime + TimeSpan.FromMilliseconds(buffEvent.Duration);
+        }
+        else if (buffEvent.AddDateTime != DateTime.MinValue && buffEvent.Duration > 0)
+        {
+            var remainingWallClockSeconds = (buffEvent.AddDateTime + TimeSpan.FromMilliseconds(buffEvent.Duration) - DateTime.Now).TotalSeconds;
+            if (remainingWallClockSeconds <= 0d)
+            {
+                effectiveRemoveTime = TimeSpan.Zero;
+                remainingSeconds = 0d;
+                return false;
+            }
+
+            effectiveRemoveTime = currentEncounterTime + TimeSpan.FromSeconds(remainingWallClockSeconds);
+        }
+        else
+        {
+            effectiveRemoveTime = TimeSpan.Zero;
+            remainingSeconds = 0d;
+            return false;
+        }
+
+        remainingSeconds = (effectiveRemoveTime - currentEncounterTime).TotalSeconds;
+        if (remainingSeconds <= 0d)
+        {
+            remainingSeconds = 0d;
+            return false;
+        }
+
+        return true;
     }
 
     private static void UpdatePlayerMeterState(IReadOnlyList<MeterPlayerSnapshot> players)

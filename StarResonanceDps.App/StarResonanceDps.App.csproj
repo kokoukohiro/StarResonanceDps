@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -225,12 +225,14 @@
     <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
   </Target>
 
-  <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
-    <PropertyGroup>
-      <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(TargetFramework)\KeybindTool.dll</KeybindPluginAssembly>
-      <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(TargetFramework)\ModuleTool.dll</ModulePluginAssembly>
-    </PropertyGroup>
+  <PropertyGroup>
+    <BundledPluginOutputSubdirectory>$(TargetFramework)</BundledPluginOutputSubdirectory>
+    <BundledPluginOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">$(TargetFramework)\$(RuntimeIdentifier)</BundledPluginOutputSubdirectory>
+    <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\KeybindTool.dll</KeybindPluginAssembly>
+    <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\ModuleTool.dll</ModulePluginAssembly>
+  </PropertyGroup>
 
+  <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
     <RemoveDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
     <Delete Files="$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
@@ -239,10 +241,29 @@
     <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
+  <Target Name="CopyBundledPluginAssembliesToPublish" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)Plugins\KeybindTool;$(PublishDir)Plugins\ModuleTool" />
+    <Delete Files="$(PublishDir)Plugins\plugin.json;$(PublishDir)Plugins\KeybindTool.deps.json;$(PublishDir)Plugins\ModuleTool.deps.json;$(PublishDir)Plugins\KeybindTool.runtimeconfig.json;$(PublishDir)Plugins\ModuleTool.runtimeconfig.json" />
+
+    <MakeDir Directories="$(PublishDir)Plugins" />
+    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(PublishDir)Plugins\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(PublishDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
+  </Target>
+
   <ItemGroup>
     <None Include="..\StarResonanceDps.Core\Data\CombatRuntime\**\*.json">
       <Link>Data\CombatRuntime\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\Images\**\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
   </ItemGroup>
   

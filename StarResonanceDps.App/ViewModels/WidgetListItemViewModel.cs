@@ -70,9 +70,14 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.PlayerEquipment
+        or WidgetKind.SkillInfo
+        or WidgetKind.BuffList
+        or WidgetKind.DebuffList
         or WidgetKind.DamageContribution
+        or WidgetKind.DamageSummary
         or WidgetKind.DpsGraph
         or WidgetKind.HealingContribution
+        or WidgetKind.HealingSummary
         or WidgetKind.HpsGraph;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
@@ -242,6 +247,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         OpenPlayerWindowCount = Math.Max(count, 0);
     }
 
+    public void RefreshPlayerListEntries()
+    {
+        SynchronizePlayerListEntries(resetEntries: false);
+    }
+
     [RelayCommand]
     private void ToggleFavorite()
     {
@@ -278,6 +288,24 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private void RequestPlayerEquipment(PlayerListEntry? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
+    }
+
+    [RelayCommand]
+    private void RequestSkillInfo(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.SkillInfo, player);
+    }
+
+    [RelayCommand]
+    private void RequestBuffList(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.BuffList, player);
+    }
+
+    [RelayCommand]
+    private void RequestDebuffList(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.DebuffList, player);
     }
 
     partial void OnStateChanged(WidgetState value)

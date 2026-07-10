@@ -502,13 +502,25 @@
     <value>瞬时HPS图表</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
-    <value>治疗占比</value>
+    <value>治疗详情</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>瞬时DPS图表</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
-    <value>伤害占比</value>
+    <value>伤害详情</value>
+  </data>
+  <data name="Widget_BuffList" xml:space="preserve">
+    <value>增益列表</value>
+  </data>
+  <data name="Widget_DebuffList" xml:space="preserve">
+    <value>减益列表</value>
+  </data>
+  <data name="Widget_NoBuffData" xml:space="preserve">
+    <value>无增益</value>
+  </data>
+  <data name="Widget_NoDebuffData" xml:space="preserve">
+    <value>无减益</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>添加</value>
@@ -614,5 +626,92 @@
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0}秒</value>
+  </data>
+  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+    <value>技能详情（伤害）</value>
+  </data>
+  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+    <value>技能详情（治疗）</value>
+  </data>
+  <data name="Metric_LabelValueFormat" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Metric_TotalValue" xml:space="preserve">
+    <value>总{0}: {1}</value>
+  </data>
+  <data name="Metric_TotalPerSecond" xml:space="preserve">
+    <value>总{0}: {1}</value>
+  </data>
+  <data name="Metric_Dps" xml:space="preserve">
+    <value>DPS</value>
+  </data>
+  <data name="Metric_Hps" xml:space="preserve">
+    <value>HPS</value>
+  </data>
+  <data name="Metric_TotalShieldBreak" xml:space="preserve">
+    <value>总破盾</value>
+  </data>
+  <data name="Metric_TotalOverheal" xml:space="preserve">
+    <value>总过量治疗</value>
+  </data>
+  <data name="Metric_TotalHits" xml:space="preserve">
+    <value>总命中数</value>
+  </data>
+  <data name="Metric_TotalCritRate" xml:space="preserve">
+    <value>总暴击率</value>
+  </data>
+  <data name="Metric_TotalLuckyRate" xml:space="preserve">
+    <value>总幸运率</value>
+  </data>
+  <data name="Metric_TotalCrits" xml:space="preserve">
+    <value>总暴击数</value>
+  </data>
+  <data name="Metric_TotalImmunes" xml:space="preserve">
+    <value>总免疫数</value>
+  </data>
+  <data name="Metric_TotalNormalDamage" xml:space="preserve">
+    <value>总普通伤害</value>
+  </data>
+  <data name="Metric_TotalNormalHealing" xml:space="preserve">
+    <value>总普通治疗</value>
+  </data>
+  <data name="Metric_TotalCritDamage" xml:space="preserve">
+    <value>总暴击伤害</value>
+  </data>
+  <data name="Metric_TotalCritHealing" xml:space="preserve">
+    <value>总暴击治疗</value>
+  </data>
+  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
+    <value>总幸运伤害</value>
+  </data>
+  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
+    <value>总幸运治疗</value>
+  </data>
+  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
+    <value>总幸运触发数</value>
+  </data>
+  <data name="Metric_TotalAverageDamage" xml:space="preserve">
+    <value>总平均伤害</value>
+  </data>
+  <data name="Metric_TotalAverageHealing" xml:space="preserve">
+    <value>总平均治疗</value>
+  </data>
+  <data name="Metric_TotalCasts" xml:space="preserve">
+    <value>总施放数</value>
+  </data>
+  <data name="Metric_CastsPerMinute" xml:space="preserve">
+    <value>每分钟施放</value>
+  </data>
+  <data name="Widget_SkillInfo" xml:space="preserve">
+    <value>技能信息</value>
+  </data>
+  <data name="Widget_NoSkillInfoData" xml:space="preserve">
+    <value>暂无技能信息。</value>
+  </data>
+  <data name="SkillInfo_Level" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="SkillInfo_Tier" xml:space="preserve">
+    <value>阶位</value>
   </data>
 </root>

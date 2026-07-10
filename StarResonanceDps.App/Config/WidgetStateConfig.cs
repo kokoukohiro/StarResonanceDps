@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.Config;
@@ -148,8 +148,14 @@ public static class WidgetConfigDefaults
     private const double PlayerStatusInitialWindowHeight = 230d;
     private const double PlayerEquipmentInitialWindowWidth = 400d;
     private const double PlayerEquipmentInitialWindowHeight = 230d;
+    private const double PlayerSkillInfoInitialWindowWidth = 620d;
+    private const double PlayerSkillInfoInitialWindowHeight = 360d;
+    private const double PlayerBuffListInitialWindowWidth = 360d;
+    private const double PlayerBuffListInitialWindowHeight = 92d;
     private const double MetricContributionInitialWindowWidth = 980d;
     private const double MetricContributionInitialWindowHeight = 360d;
+    private const double MetricSummaryInitialWindowWidth = 720d;
+    private const double MetricSummaryInitialWindowHeight = 180d;
     private const double MetricTimelineInitialWindowWidth = 980d;
     private const double MetricTimelineInitialWindowHeight = 420d;
 
@@ -339,10 +345,25 @@ public static class WidgetConfigDefaults
                 Width = PlayerEquipmentInitialWindowWidth,
                 Height = PlayerEquipmentInitialWindowHeight
             },
+            WidgetKind.SkillInfo => new WidgetWindowConfig
+            {
+                Width = PlayerSkillInfoInitialWindowWidth,
+                Height = PlayerSkillInfoInitialWindowHeight
+            },
+            WidgetKind.BuffList or WidgetKind.DebuffList => new WidgetWindowConfig
+            {
+                Width = PlayerBuffListInitialWindowWidth,
+                Height = PlayerBuffListInitialWindowHeight
+            },
             WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
             {
                 Width = MetricContributionInitialWindowWidth,
                 Height = MetricContributionInitialWindowHeight
+            },
+            WidgetKind.DamageSummary or WidgetKind.HealingSummary => new WidgetWindowConfig
+            {
+                Width = MetricSummaryInitialWindowWidth,
+                Height = MetricSummaryInitialWindowHeight
             },
             WidgetKind.DpsGraph or WidgetKind.HpsGraph => new WidgetWindowConfig
             {
@@ -501,10 +522,24 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= PlayerEquipmentInitialWindowWidth;
                 config.Window.Height ??= PlayerEquipmentInitialWindowHeight;
                 break;
+            case WidgetKind.SkillInfo:
+                config.Window.Width ??= PlayerSkillInfoInitialWindowWidth;
+                config.Window.Height ??= PlayerSkillInfoInitialWindowHeight;
+                break;
+            case WidgetKind.BuffList:
+            case WidgetKind.DebuffList:
+                config.Window.Width ??= PlayerBuffListInitialWindowWidth;
+                config.Window.Height ??= PlayerBuffListInitialWindowHeight;
+                break;
             case WidgetKind.DamageContribution:
             case WidgetKind.HealingContribution:
                 config.Window.Width ??= MetricContributionInitialWindowWidth;
                 config.Window.Height ??= MetricContributionInitialWindowHeight;
+                break;
+            case WidgetKind.DamageSummary:
+            case WidgetKind.HealingSummary:
+                config.Window.Width ??= MetricSummaryInitialWindowWidth;
+                config.Window.Height ??= MetricSummaryInitialWindowHeight;
                 break;
             case WidgetKind.DpsGraph:
             case WidgetKind.HpsGraph:

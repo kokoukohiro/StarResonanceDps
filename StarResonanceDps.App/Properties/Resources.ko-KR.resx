@@ -334,7 +334,7 @@
     <value>비트 퍼포머</value>
   </data>
   <data name="Classes_FlameBerserker" xml:space="preserve">
-    <value>블레이징 버서커</value>
+    <value>트윈 스트라이커</value>
   </data>
   <data name="Classes_Stormblade" xml:space="preserve">
     <value>스톰 블레이드</value>
@@ -420,6 +420,12 @@
   <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
     <value>협주</value>
   </data>
+  <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
+    <value>무상</value>
+  </data>
+  <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
+    <value>적홍</value>
+  </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>상태</value>
   </data>
@@ -496,13 +502,25 @@
     <value>순간 HPS 그래프</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
-    <value>치유 비율</value>
+    <value>치유 상세</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>순간 DPS 그래프</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
-    <value>피해 비율</value>
+    <value>피해 상세</value>
+  </data>
+  <data name="Widget_BuffList" xml:space="preserve">
+    <value>버프 목록</value>
+  </data>
+  <data name="Widget_DebuffList" xml:space="preserve">
+    <value>디버프 목록</value>
+  </data>
+  <data name="Widget_NoBuffData" xml:space="preserve">
+    <value>버프 없음</value>
+  </data>
+  <data name="Widget_NoDebuffData" xml:space="preserve">
+    <value>디버프 없음</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>추가</value>
@@ -608,5 +626,92 @@
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0}초</value>
+  </data>
+  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+    <value>스킬 상세（피해）</value>
+  </data>
+  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+    <value>스킬 상세（치유）</value>
+  </data>
+  <data name="Metric_LabelValueFormat" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Metric_TotalValue" xml:space="preserve">
+    <value>총 {0}: {1}</value>
+  </data>
+  <data name="Metric_TotalPerSecond" xml:space="preserve">
+    <value>총 {0}: {1}</value>
+  </data>
+  <data name="Metric_Dps" xml:space="preserve">
+    <value>DPS</value>
+  </data>
+  <data name="Metric_Hps" xml:space="preserve">
+    <value>HPS</value>
+  </data>
+  <data name="Metric_TotalShieldBreak" xml:space="preserve">
+    <value>총 실드 파괴</value>
+  </data>
+  <data name="Metric_TotalOverheal" xml:space="preserve">
+    <value>총 초과 치유</value>
+  </data>
+  <data name="Metric_TotalHits" xml:space="preserve">
+    <value>총 적중 수</value>
+  </data>
+  <data name="Metric_TotalCritRate" xml:space="preserve">
+    <value>총 치명타율</value>
+  </data>
+  <data name="Metric_TotalLuckyRate" xml:space="preserve">
+    <value>총 행운율</value>
+  </data>
+  <data name="Metric_TotalCrits" xml:space="preserve">
+    <value>총 치명타 수</value>
+  </data>
+  <data name="Metric_TotalImmunes" xml:space="preserve">
+    <value>총 면역 수</value>
+  </data>
+  <data name="Metric_TotalNormalDamage" xml:space="preserve">
+    <value>총 일반 피해</value>
+  </data>
+  <data name="Metric_TotalNormalHealing" xml:space="preserve">
+    <value>총 일반 치유</value>
+  </data>
+  <data name="Metric_TotalCritDamage" xml:space="preserve">
+    <value>총 치명타 피해</value>
+  </data>
+  <data name="Metric_TotalCritHealing" xml:space="preserve">
+    <value>총 치명타 치유</value>
+  </data>
+  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
+    <value>총 행운 피해</value>
+  </data>
+  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
+    <value>총 행운 치유</value>
+  </data>
+  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
+    <value>총 행운 발동 수</value>
+  </data>
+  <data name="Metric_TotalAverageDamage" xml:space="preserve">
+    <value>총 평균 피해</value>
+  </data>
+  <data name="Metric_TotalAverageHealing" xml:space="preserve">
+    <value>총 평균 치유</value>
+  </data>
+  <data name="Metric_TotalCasts" xml:space="preserve">
+    <value>총 시전 수</value>
+  </data>
+  <data name="Metric_CastsPerMinute" xml:space="preserve">
+    <value>분당 시전</value>
+  </data>
+  <data name="Widget_SkillInfo" xml:space="preserve">
+    <value>스킬 정보</value>
+  </data>
+  <data name="Widget_NoSkillInfoData" xml:space="preserve">
+    <value>스킬 정보가 없습니다.</value>
+  </data>
+  <data name="SkillInfo_Level" xml:space="preserve">
+    <value>레벨</value>
+  </data>
+  <data name="SkillInfo_Tier" xml:space="preserve">
+    <value>티어</value>
   </data>
 </root>

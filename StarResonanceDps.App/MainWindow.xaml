@@ -6,7 +6,7 @@
         xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
         xmlns:views="clr-namespace:StarResonanceDps.App.Views"
         Title="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Window_Manager_Title]}"
-        Icon="/Assets/Images/ApplicationIcon.ico"
+        Icon="pack://application:,,,/Assets/Images/ApplicationIcon.ico"
         behaviors:WindowWorkingAreaBehavior.ConstrainMaximizeToWorkingArea="True"
         Width="780"
         Height="600"

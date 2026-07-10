@@ -153,6 +153,15 @@
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
                                               Command="{Binding RequestPlayerEquipmentCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_SkillInfo]}"
+                                              Command="{Binding RequestSkillInfoCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
+                                              Command="{Binding RequestBuffListCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
+                                              Command="{Binding RequestDebuffListCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Button.Style>

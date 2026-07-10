@@ -334,7 +334,7 @@
     <value>Soul Musician</value>
   </data>
   <data name="Classes_FlameBerserker" xml:space="preserve">
-    <value>Blazing Berserker</value>
+    <value>Twin Striker</value>
   </data>
   <data name="Classes_Stormblade" xml:space="preserve">
     <value>Stormblade</value>
@@ -502,13 +502,25 @@
     <value>Instant HPS Graph</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
-    <value>Healing Contribution</value>
+    <value>Healing Details</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>Instant DPS Graph</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
-    <value>Damage Contribution</value>
+    <value>Damage Details</value>
+  </data>
+  <data name="Widget_BuffList" xml:space="preserve">
+    <value>Buff List</value>
+  </data>
+  <data name="Widget_DebuffList" xml:space="preserve">
+    <value>Debuff List</value>
+  </data>
+  <data name="Widget_NoBuffData" xml:space="preserve">
+    <value>No buffs</value>
+  </data>
+  <data name="Widget_NoDebuffData" xml:space="preserve">
+    <value>No debuffs</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>Add</value>
@@ -614,5 +626,92 @@
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0} seconds</value>
+  </data>
+  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+    <value>Skill Details (Damage)</value>
+  </data>
+  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+    <value>Skill Details (Healing)</value>
+  </data>
+  <data name="Metric_LabelValueFormat" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Metric_TotalValue" xml:space="preserve">
+    <value>Total {0}: {1}</value>
+  </data>
+  <data name="Metric_TotalPerSecond" xml:space="preserve">
+    <value>Total {0}: {1}</value>
+  </data>
+  <data name="Metric_Dps" xml:space="preserve">
+    <value>DPS</value>
+  </data>
+  <data name="Metric_Hps" xml:space="preserve">
+    <value>HPS</value>
+  </data>
+  <data name="Metric_TotalShieldBreak" xml:space="preserve">
+    <value>Total Shield Break</value>
+  </data>
+  <data name="Metric_TotalOverheal" xml:space="preserve">
+    <value>Total Overheal</value>
+  </data>
+  <data name="Metric_TotalHits" xml:space="preserve">
+    <value>Total Hits</value>
+  </data>
+  <data name="Metric_TotalCritRate" xml:space="preserve">
+    <value>Total Crit Rate</value>
+  </data>
+  <data name="Metric_TotalLuckyRate" xml:space="preserve">
+    <value>Total Lucky Rate</value>
+  </data>
+  <data name="Metric_TotalCrits" xml:space="preserve">
+    <value>Total Crits</value>
+  </data>
+  <data name="Metric_TotalImmunes" xml:space="preserve">
+    <value>Total Immunes</value>
+  </data>
+  <data name="Metric_TotalNormalDamage" xml:space="preserve">
+    <value>Total Normal Damage</value>
+  </data>
+  <data name="Metric_TotalNormalHealing" xml:space="preserve">
+    <value>Total Normal Healing</value>
+  </data>
+  <data name="Metric_TotalCritDamage" xml:space="preserve">
+    <value>Total Crit Damage</value>
+  </data>
+  <data name="Metric_TotalCritHealing" xml:space="preserve">
+    <value>Total Crit Healing</value>
+  </data>
+  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
+    <value>Total Lucky Damage</value>
+  </data>
+  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
+    <value>Total Lucky Healing</value>
+  </data>
+  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
+    <value>Total Lucky Strikes</value>
+  </data>
+  <data name="Metric_TotalAverageDamage" xml:space="preserve">
+    <value>Total Average Damage</value>
+  </data>
+  <data name="Metric_TotalAverageHealing" xml:space="preserve">
+    <value>Total Average Healing</value>
+  </data>
+  <data name="Metric_TotalCasts" xml:space="preserve">
+    <value>Total Casts</value>
+  </data>
+  <data name="Metric_CastsPerMinute" xml:space="preserve">
+    <value>Casts Per Min</value>
+  </data>
+  <data name="Widget_SkillInfo" xml:space="preserve">
+    <value>Skill Information</value>
+  </data>
+  <data name="Widget_NoSkillInfoData" xml:space="preserve">
+    <value>No skill information available.</value>
+  </data>
+  <data name="SkillInfo_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="SkillInfo_Tier" xml:space="preserve">
+    <value>Tier</value>
   </data>
 </root>

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Threading;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Localization;
 
@@ -41,6 +42,7 @@ public sealed class LocalizationManager : INotifyPropertyChanged
     {
         _systemDefaultCulture = CultureInfo.CurrentUICulture;
         _currentCulture = ResolveSystemCulture(_systemDefaultCulture);
+        CombatDataCatalog.SetCulture(_currentCulture.Name);
     }
 
     public static LocalizationManager Instance { get; } = new();
@@ -96,6 +98,7 @@ public sealed class LocalizationManager : INotifyPropertyChanged
         CultureInfo.CurrentUICulture = culture;
         CultureInfo.DefaultThreadCurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
+        CombatDataCatalog.SetCulture(culture.Name);
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
         CultureChanged?.Invoke(this, EventArgs.Empty);

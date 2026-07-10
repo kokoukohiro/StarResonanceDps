@@ -382,7 +382,7 @@ public sealed partial class PlayerEquipmentSlotEntry : ObservableObject
                 if (!usedTipsDescription)
                 {
                     result.Add(new PlayerEquipmentAttributeEntry(
-                        buff.Desc,
+                        CombatDataCatalog.GetBuffDescription(effect[1], buff.Desc),
                         effectValues[0],
                         effectValues[1],
                         0));
