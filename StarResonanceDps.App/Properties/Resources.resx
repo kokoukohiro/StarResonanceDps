@@ -703,7 +703,7 @@
     <value>Casts Per Min</value>
   </data>
   <data name="Widget_SkillInfo" xml:space="preserve">
-    <value>Skill Information</value>
+    <value>Skill Info</value>
   </data>
   <data name="Widget_NoSkillInfoData" xml:space="preserve">
     <value>No skill information available.</value>
@@ -713,5 +713,29 @@
   </data>
   <data name="SkillInfo_Tier" xml:space="preserve">
     <value>Tier</value>
+  </data>
+  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
+    <value>3-Minute Benchmark</value>
+  </data>
+  <data name="Meter_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Meter_StopBenchmark" xml:space="preserve">
+    <value>Stop Benchmark</value>
+  </data>
+  <data name="Meter_BenchmarkInProgress" xml:space="preserve">
+    <value>[Benchmarking]</value>
+  </data>
+  <data name="Meter_EndBenchmark" xml:space="preserve">
+    <value>End Benchmark</value>
+  </data>
+  <data name="Meter_BenchmarkCompleted" xml:space="preserve">
+    <value>[Benchmark Complete]</value>
+  </data>
+  <data name="Manager_WidgetAction_History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Window_History_Title" xml:space="preserve">
+    <value>History</value>
   </data>
 </root>

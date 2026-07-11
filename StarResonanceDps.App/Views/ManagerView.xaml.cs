@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views;
 
@@ -12,6 +13,7 @@ public partial class ManagerView : UserControl
     private const string HelpUrl = "https://github.com/kokoukohiro/StarResonanceDps";
 
     private bool _isSyncingExternalScrollBar;
+    private MainViewModel? _viewModel;
 
     public ManagerView()
     {
@@ -19,11 +21,44 @@ public partial class ManagerView : UserControl
         LogsContent.ContentScrollViewer.ScrollChanged += LogsContentScrollViewer_ScrollChanged;
         LogsContent.ContentScrollViewer.SizeChanged += LogsContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
+        Unloaded += ManagerView_Unloaded;
     }
 
     private void ManagerView_Loaded(object sender, RoutedEventArgs e)
     {
+        AttachViewModel();
         WidgetsNavigationButton.IsChecked = true;
+    }
+
+    private void ManagerView_Unloaded(object sender, RoutedEventArgs e)
+    {
+        DetachViewModel();
+    }
+
+    private void AttachViewModel()
+    {
+        var viewModel = DataContext as MainViewModel;
+        if (ReferenceEquals(_viewModel, viewModel))
+        {
+            return;
+        }
+
+        DetachViewModel();
+        _viewModel = viewModel;
+
+        if (_viewModel is not null)
+        {
+            _viewModel.HistoryWindowRequested += ViewModel_HistoryWindowRequested;
+        }
+    }
+
+    private void DetachViewModel()
+    {
+        if (_viewModel is not null)
+        {
+            _viewModel.HistoryWindowRequested -= ViewModel_HistoryWindowRequested;
+            _viewModel = null;
+        }
     }
 
     private void WidgetsNavigationButton_Checked(object sender, RoutedEventArgs e)
@@ -66,22 +101,48 @@ public partial class ManagerView : UserControl
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        var managerWindow = Window.GetWindow(this);
+        ShowManagerDialog(new SettingsWindow());
+    }
 
-        var settingsWindow = new SettingsWindow();
+    private void WidgetActionComboBox_DropDownClosed(object sender, EventArgs e)
+    {
+        if (sender is not ComboBox comboBox)
+        {
+            return;
+        }
+
+        if (DataContext is MainViewModel viewModel)
+        {
+            viewModel.WidgetActionIndex = -1;
+        }
+
+        comboBox.SetCurrentValue(Selector.SelectedIndexProperty, -1);
+        comboBox.Items.MoveCurrentToPosition(-1);
+    }
+
+    private void ViewModel_HistoryWindowRequested(object? sender, EventArgs e)
+    {
+        Dispatcher.BeginInvoke(
+            () => ShowManagerDialog(new HistoryWindow()),
+            DispatcherPriority.ContextIdle);
+    }
+
+    private void ShowManagerDialog(Window dialog)
+    {
+        var managerWindow = Window.GetWindow(this);
 
         if (managerWindow is not null)
         {
             const double leftOffset = 24;
             const double topOffset = 72;
 
-            settingsWindow.Owner = managerWindow;
-            settingsWindow.WindowStartupLocation = WindowStartupLocation.Manual;
-            settingsWindow.Left = managerWindow.Left + leftOffset;
-            settingsWindow.Top = managerWindow.Top + topOffset;
+            dialog.Owner = managerWindow;
+            dialog.WindowStartupLocation = WindowStartupLocation.Manual;
+            dialog.Left = managerWindow.Left + leftOffset;
+            dialog.Top = managerWindow.Top + topOffset;
         }
 
-        settingsWindow.ShowDialog();
+        dialog.ShowDialog();
     }
 
     private void WidgetListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)

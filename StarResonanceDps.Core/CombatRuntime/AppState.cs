@@ -28,6 +28,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool IsBenchmarkMode { get; set; }
         public static int BenchmarkTime { get; set; }
         public static bool HasBenchmarkBegun { get; set; }
+        internal static bool IsBenchmarkCompleting { get; set; }
+        public static bool IsBenchmarkCompleted { get; set; }
+        public static DateTime? BenchmarkCompletionTime { get; set; }
         public static bool BenchmarkSingleTarget { get; set; }
         public static long BenchmarkSingleTargetUUID { get; set; }
 

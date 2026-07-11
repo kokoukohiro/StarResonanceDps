@@ -714,4 +714,28 @@
   <data name="SkillInfo_Tier" xml:space="preserve">
     <value>티어</value>
   </data>
+  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
+    <value>3분 측정</value>
+  </data>
+  <data name="Meter_Reset" xml:space="preserve">
+    <value>리셋</value>
+  </data>
+  <data name="Meter_StopBenchmark" xml:space="preserve">
+    <value>측정 중지</value>
+  </data>
+  <data name="Meter_BenchmarkInProgress" xml:space="preserve">
+    <value>[측정 중]</value>
+  </data>
+  <data name="Meter_EndBenchmark" xml:space="preserve">
+    <value>측정 종료</value>
+  </data>
+  <data name="Meter_BenchmarkCompleted" xml:space="preserve">
+    <value>[측정 완료]</value>
+  </data>
+  <data name="Manager_WidgetAction_History" xml:space="preserve">
+    <value>기록</value>
+  </data>
+  <data name="Window_History_Title" xml:space="preserve">
+    <value>기록</value>
+  </data>
 </root>

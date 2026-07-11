@@ -22,6 +22,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         static KeyValuePair<DungeonTargetData, DateTime>? PreviousDungeonTargetData = null;
         static KeyValuePair<DungeonVar, DateTime>? PreviousDungeonVar = null;
         static bool NewEncounterOnNextEncounterEnd = false;
+        static readonly object BenchmarkCompletionSync = new();
+        static System.Threading.Timer? BenchmarkCompletionTimer;
 
         public static void StartNewMap()
         {
@@ -223,26 +225,99 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalData = data;
         }
 
-        public static void CheckDeferredCalls()
+        public static void StartBenchmarkCompletionTimer()
         {
-            if (AppState.IsBenchmarkMode && AppState.HasBenchmarkBegun)
+            lock (BenchmarkCompletionSync)
             {
-                if (EncounterManager.Current.GetDuration().TotalSeconds >= AppState.BenchmarkTime)
+                BenchmarkCompletionTimer?.Dispose();
+                BenchmarkCompletionTimer = null;
+
+                if (!AppState.IsBenchmarkMode
+                    || !AppState.HasBenchmarkBegun
+                    || AppState.IsBenchmarkCompleting
+                    || AppState.IsBenchmarkCompleted)
                 {
-                    AppState.HasBenchmarkBegun = false;
-                    AppState.IsBenchmarkMode = false;
-
-                    var endData = new EncounterEndFinalData() { BattleId = EncounterManager.CurrentBattleId, EncounterId = (ulong)EncounterManager.Current.EncounterId, Reason = EncounterStartReason.BenchmarkEnd, Encounter = EncounterManager.Current };
-                    SetDeferredEncounterEndFinalData(DateTime.Now, endData);
-
-                    DeferredEncounterEndFinalTime = null;
-
-                    EncounterManager.SignalEncounterEndFinal(endData);
-                    EncounterManager.EnterDungeon(false, EncounterStartReason.BenchmarkEnd);
-
                     return;
                 }
+
+                var completionTime = EncounterManager.Current.StartTime.AddSeconds(AppState.BenchmarkTime);
+                var dueTime = completionTime - DateTime.Now;
+                if (dueTime < TimeSpan.Zero)
+                {
+                    dueTime = TimeSpan.Zero;
+                }
+
+                BenchmarkCompletionTimer = new System.Threading.Timer(
+                    static _ => CompleteBenchmarkIfElapsed(DateTime.Now),
+                    null,
+                    dueTime,
+                    System.Threading.Timeout.InfiniteTimeSpan);
             }
+        }
+
+        public static void CancelBenchmarkCompletionTimer()
+        {
+            lock (BenchmarkCompletionSync)
+            {
+                BenchmarkCompletionTimer?.Dispose();
+                BenchmarkCompletionTimer = null;
+                AppState.IsBenchmarkCompleting = false;
+            }
+        }
+
+        public static void CompleteBenchmarkIfElapsed(DateTime currentTime)
+        {
+            if (!AppState.IsBenchmarkMode
+                || !AppState.HasBenchmarkBegun
+                || AppState.IsBenchmarkCompleting
+                || AppState.IsBenchmarkCompleted)
+            {
+                return;
+            }
+
+            lock (BenchmarkCompletionSync)
+            {
+                if (!AppState.IsBenchmarkMode
+                    || !AppState.HasBenchmarkBegun
+                    || AppState.IsBenchmarkCompleting
+                    || AppState.IsBenchmarkCompleted)
+                {
+                    return;
+                }
+
+                var completionTime = EncounterManager.Current.StartTime.AddSeconds(AppState.BenchmarkTime);
+                if (currentTime < completionTime)
+                {
+                    BenchmarkCompletionTimer?.Change(
+                        completionTime - currentTime,
+                        System.Threading.Timeout.InfiniteTimeSpan);
+                    return;
+                }
+
+                AppState.IsBenchmarkCompleting = true;
+                BenchmarkCompletionTimer?.Dispose();
+                BenchmarkCompletionTimer = null;
+
+                try
+                {
+                    EncounterManager.FreezeCurrentBenchmarkMetrics(completionTime);
+                    AppState.BenchmarkCompletionTime = completionTime;
+                    AppState.IsBenchmarkCompleted = true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to complete benchmark");
+                }
+                finally
+                {
+                    AppState.IsBenchmarkCompleting = false;
+                }
+            }
+        }
+
+        public static void CheckDeferredCalls()
+        {
+            CompleteBenchmarkIfElapsed(DateTime.Now);
 
             if (DeferredEncounterStartTime.HasValue && DateTime.Now.CompareTo(DeferredEncounterStartTime) >= 0)
             {

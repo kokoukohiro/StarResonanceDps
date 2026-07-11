@@ -35,7 +35,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private int _widgetSortIndex;
 
     [ObservableProperty]
-    private int _bulkActionIndex = -1;
+    private int _widgetActionIndex = -1;
 
     private bool _isBulkUpdatingWidgets;
     private bool _isLoadingWidgets;
@@ -43,6 +43,8 @@ public sealed partial class MainViewModel : ViewModelBase
     public ICollectionView Widgets { get; }
 
     public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
+
+    public event EventHandler? HistoryWindowRequested;
 
     public MainViewModel()
     {
@@ -404,7 +406,7 @@ public sealed partial class MainViewModel : ViewModelBase
         ApplyWidgetSort();
     }
 
-    partial void OnBulkActionIndexChanged(int value)
+    partial void OnWidgetActionIndexChanged(int value)
     {
         switch (value)
         {
@@ -424,10 +426,12 @@ public sealed partial class MainViewModel : ViewModelBase
                 UnpinAllWidgets();
                 break;
 
+            case 4:
+                HistoryWindowRequested?.Invoke(this, EventArgs.Empty);
+                break;
+
             default:
                 return;
         }
-
-        BulkActionIndex = -1;
     }
 }

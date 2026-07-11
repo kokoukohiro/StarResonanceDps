@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using ZLinq;
 using Zproto;
@@ -38,6 +39,12 @@ public sealed record MeterSnapshot(
     ulong TotalValue,
     double ValuePerSecond,
     IReadOnlyList<MeterPlayerSnapshot> Players);
+
+public sealed record BenchmarkStateSnapshot(
+    bool IsActive,
+    bool HasBegun,
+    bool IsCompleted,
+    bool IsEncounterSavingPaused);
 
 public sealed record MetricTimelinePoint(double Seconds, double ValuePerSecond);
 
@@ -144,7 +151,7 @@ public static class MeterSnapshotProvider
 
         return new MeterSnapshot(
             kind,
-            encounter.GetDuration(),
+            ResolveMetricDuration(encounter),
             totalValue,
             players.Sum(player => player.ValuePerSecond),
             players);
@@ -300,9 +307,7 @@ public static class MeterSnapshotProvider
         var startTime = encounter.ExData.FirstDamageTimeStamp
             ?? stats.StartTime
             ?? snapshots[0].Timestamp!.Value;
-        var endTime = encounter.EndTime == DateTime.MinValue
-            ? DateTime.UtcNow
-            : encounter.EndTime;
+        var endTime = ResolveMetricEndTime(encounter);
         var lastSnapshotTime = snapshots[^1].Timestamp!.Value;
 
         if (endTime < lastSnapshotTime)
@@ -487,13 +492,74 @@ public static class MeterSnapshotProvider
         return new MetricSkillTableSnapshot(entityTotalValue, rows);
     }
 
+    public static BenchmarkStateSnapshot GetBenchmarkState()
+    {
+        return new BenchmarkStateSnapshot(
+            AppState.IsBenchmarkMode,
+            AppState.HasBenchmarkBegun,
+            AppState.IsBenchmarkCompleted,
+            AppState.IsEncounterSavingPaused);
+    }
+
+    public static bool TryStartBenchmark(int durationSeconds)
+    {
+        if (durationSeconds < 5
+            || AppState.IsEncounterSavingPaused
+            || AppState.IsBenchmarkMode)
+        {
+            return false;
+        }
+
+        BattleStateMachine.CancelBenchmarkCompletionTimer();
+        AppState.BenchmarkTime = durationSeconds;
+        AppState.BenchmarkSingleTargetUUID = 0;
+        AppState.IsBenchmarkCompleting = false;
+        AppState.IsBenchmarkCompleted = false;
+        AppState.BenchmarkCompletionTime = null;
+        AppState.IsBenchmarkMode = true;
+        ResetCurrentEncounter();
+        return true;
+    }
+
+    public static bool TryStopBenchmark()
+    {
+        if (!AppState.IsBenchmarkMode)
+        {
+            return false;
+        }
+
+        var wasCompleted = AppState.IsBenchmarkCompleted;
+        var completionTime = AppState.BenchmarkCompletionTime;
+        BattleStateMachine.CancelBenchmarkCompletionTimer();
+
+        if (wasCompleted && completionTime is { } completedAt)
+        {
+            EncounterManager.SetCurrentBenchmarkEndTime(completedAt);
+        }
+
+        AppState.HasBenchmarkBegun = false;
+        AppState.IsBenchmarkMode = false;
+
+        try
+        {
+            EncounterManager.EnterDungeon(wasCompleted, EncounterStartReason.BenchmarkEnd);
+        }
+        finally
+        {
+            AppState.IsBenchmarkCompleting = false;
+            AppState.IsBenchmarkCompleted = false;
+            AppState.BenchmarkCompletionTime = null;
+        }
+
+        return true;
+    }
+
     public static void ResetCurrentEncounter()
     {
         if (AppState.IsBenchmarkMode && AppState.HasBenchmarkBegun)
         {
-            AppState.HasBenchmarkBegun = false;
-            AppState.IsBenchmarkMode = false;
-            EncounterManager.EnterDungeon(false, EncounterStartReason.BenchmarkEnd);
+            Log.Information($"Manual early ending of Benchmark at {DateTime.Now}");
+            TryStopBenchmark();
             return;
         }
 
@@ -507,6 +573,7 @@ public static class MeterSnapshotProvider
         {
             if (AppState.IsBenchmarkMode)
             {
+                Log.Information($"Starting new Benchmark encounter at {DateTime.Now}");
                 EncounterManager.EnterDungeon(true, EncounterStartReason.BenchmarkStart);
             }
             else if (isOpenWorld)
@@ -520,6 +587,34 @@ public static class MeterSnapshotProvider
         });
     }
 
+
+    private static TimeSpan ResolveMetricDuration(Encounter encounter)
+    {
+        if (ReferenceEquals(encounter, EncounterManager.Current)
+            && AppState.IsBenchmarkMode
+            && AppState.IsBenchmarkCompleted
+            && AppState.BenchmarkCompletionTime is { } completionTime)
+        {
+            return completionTime.Subtract(encounter.StartTime).Duration();
+        }
+
+        return encounter.GetDuration();
+    }
+
+    private static DateTime ResolveMetricEndTime(Encounter encounter)
+    {
+        if (ReferenceEquals(encounter, EncounterManager.Current)
+            && AppState.IsBenchmarkMode
+            && AppState.IsBenchmarkCompleted
+            && AppState.BenchmarkCompletionTime is { } completionTime)
+        {
+            return completionTime.ToUniversalTime();
+        }
+
+        return encounter.EndTime == DateTime.MinValue
+            ? DateTime.UtcNow
+            : encounter.EndTime;
+    }
 
 
     private static bool IsIncludedBuff(PlayerBuffListKind kind, BuffEvent buffEvent)

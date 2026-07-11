@@ -10,13 +10,24 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Column="0"
-                   Margin="10,0,8,0"
-                   VerticalAlignment="Center"
-                   Style="{StaticResource Text.WidgetWindow}"
-                   FontSize="13"
-                   FontWeight="SemiBold"
-                   Text="{Binding ElapsedText}" />
+        <StackPanel Grid.Column="0"
+                    Margin="10,0,8,0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+            <TextBlock VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding ElapsedText}" />
+
+            <TextBlock Margin="8,0,0,0"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding BenchmarkStatusText}"
+                       Visibility="{Binding IsBenchmarkActive, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </StackPanel>
 
         <Grid Grid.Column="2"
               Margin="8,0,10,0"

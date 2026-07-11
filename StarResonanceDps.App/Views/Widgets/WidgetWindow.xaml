@@ -58,11 +58,12 @@
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal">
                         <ContentControl x:Name="WidgetHeaderChromeActionsHost"
+                                        Width="{Binding ActualWidth, ElementName=WidgetHeaderActionsHost}"
                                         HorizontalContentAlignment="Stretch"
                                         VerticalContentAlignment="Stretch"
                                         IsHitTestVisible="False" />
 
-                        <ContentControl Width="30"
+                        <ContentControl Width="{Binding ActualWidth, ElementName=CloseButton}"
                                         Style="{StaticResource ContentControl.WidgetWindowHeaderGlyph}"
                                         Content="&#xE8BB;" />
                     </StackPanel>
@@ -129,7 +130,8 @@
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch" />
 
-                <Button Grid.Column="2"
+                <Button x:Name="CloseButton"
+                        Grid.Column="2"
                         Style="{StaticResource Button.WidgetWindowHeaderIcon}"
                         Click="CloseButton_Click" />
             </Grid>

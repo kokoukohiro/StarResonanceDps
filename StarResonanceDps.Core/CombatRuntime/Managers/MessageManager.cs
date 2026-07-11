@@ -866,6 +866,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            BattleStateMachine.CompleteBenchmarkIfElapsed(DateTime.Now);
+
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
             long targetUid = Utils.UuidToEntityId(targetUuid);
             var attrCollection = delta.Attrs;
@@ -980,6 +982,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             extraData.ArrivalTime = originalArrivalTime;
+
+            if (AppState.IsBenchmarkMode
+                && (AppState.IsBenchmarkCompleting || AppState.IsBenchmarkCompleted))
+            {
+                BattleStateMachine.CheckDeferredCalls();
+                return;
+            }
 
             var skillEffect = delta.SkillEffects;
 
@@ -1098,6 +1107,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                             AppState.HasBenchmarkBegun = true;
 
                             EncounterManager.EnterDungeon(false, EncounterStartReason.BenchmarkStart);
+                            BattleStateMachine.StartBenchmarkCompletionTimer();
                         }
 
                         if (AppState.BenchmarkSingleTarget && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntMonster && !isHeal)

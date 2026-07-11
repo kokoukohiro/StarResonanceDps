@@ -714,4 +714,28 @@
   <data name="SkillInfo_Tier" xml:space="preserve">
     <value>ティア</value>
   </data>
+  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
+    <value>3分計測</value>
+  </data>
+  <data name="Meter_Reset" xml:space="preserve">
+    <value>リセット</value>
+  </data>
+  <data name="Meter_StopBenchmark" xml:space="preserve">
+    <value>計測停止</value>
+  </data>
+  <data name="Meter_BenchmarkInProgress" xml:space="preserve">
+    <value>[計測中]</value>
+  </data>
+  <data name="Meter_EndBenchmark" xml:space="preserve">
+    <value>計測終了</value>
+  </data>
+  <data name="Meter_BenchmarkCompleted" xml:space="preserve">
+    <value>[計測完了]</value>
+  </data>
+  <data name="Manager_WidgetAction_History" xml:space="preserve">
+    <value>履歴</value>
+  </data>
+  <data name="Window_History_Title" xml:space="preserve">
+    <value>履歴</value>
+  </data>
 </root>

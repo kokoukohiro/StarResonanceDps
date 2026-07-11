@@ -301,13 +301,13 @@
     <value>已停止</value>
   </data>
   <data name="Menu_DpsMeter" xml:space="preserve">
-    <value>DPS 计量器</value>
+    <value>DPS计量器</value>
   </data>
   <data name="Menu_HpsMeter" xml:space="preserve">
-    <value>HPS 计量器</value>
+    <value>HPS计量器</value>
   </data>
   <data name="Menu_DtpsMeter" xml:space="preserve">
-    <value>DTPS 计量器</value>
+    <value>DTPS计量器</value>
   </data>
   <data name="Menu_SkillDiary" xml:space="preserve">
     <value>技能日志</value>
@@ -713,5 +713,29 @@
   </data>
   <data name="SkillInfo_Tier" xml:space="preserve">
     <value>阶位</value>
+  </data>
+  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
+    <value>3分钟测量</value>
+  </data>
+  <data name="Meter_Reset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Meter_StopBenchmark" xml:space="preserve">
+    <value>停止测量</value>
+  </data>
+  <data name="Meter_BenchmarkInProgress" xml:space="preserve">
+    <value>[测量中]</value>
+  </data>
+  <data name="Meter_EndBenchmark" xml:space="preserve">
+    <value>结束测量</value>
+  </data>
+  <data name="Meter_BenchmarkCompleted" xml:space="preserve">
+    <value>[测量完成]</value>
+  </data>
+  <data name="Manager_WidgetAction_History" xml:space="preserve">
+    <value>历史记录</value>
+  </data>
+  <data name="Window_History_Title" xml:space="preserve">
+    <value>历史记录</value>
   </data>
 </root>

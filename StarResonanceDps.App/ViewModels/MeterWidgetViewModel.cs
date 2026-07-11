@@ -12,6 +12,8 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 {
+    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
+
     private readonly WidgetListItemViewModel _widget;
     private readonly MeterSnapshotKind _kind;
     private readonly ObservableCollection<MeterPlayerEntry> _entries = [];
@@ -19,6 +21,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private readonly DispatcherTimer _refreshTimer;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly Action<WidgetKind, long> _requestPlayerWindow;
+    private bool _isBenchmarkUiFrozen;
 
     [ObservableProperty]
     private string _elapsedText = "00:00:00";
@@ -34,6 +37,18 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private string _totalValueText = string.Empty;
+
+    [ObservableProperty]
+    private bool _canToggleThreeMinuteBenchmark;
+
+    [ObservableProperty]
+    private bool _isBenchmarkActive;
+
+    [ObservableProperty]
+    private string _benchmarkStatusText = string.Empty;
+
+    [ObservableProperty]
+    private string _threeMinuteBenchmarkActionText = string.Empty;
 
     public MeterWidgetViewModel(
         WidgetListItemViewModel widget,
@@ -109,13 +124,35 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     private void Refresh()
     {
+        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
+        if (benchmarkState.IsCompleted && _isBenchmarkUiFrozen)
+        {
+            return;
+        }
+
+        _isBenchmarkUiFrozen = benchmarkState.IsCompleted;
+
         var settings = _widget.GetMeterSettingsSnapshot();
         var globalSettings = _configManager.GetSettingsSnapshot();
         var numberDisplayFormatIndex = globalSettings.NumberDisplayFormatIndex;
         var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
         var snapshot = MeterSnapshotProvider.GetSnapshot(_kind);
 
-        ElapsedText = FormatDuration(snapshot.Duration);
+        ElapsedText = benchmarkState.IsActive && !benchmarkState.HasBegun
+            ? "00:00:00"
+            : FormatDuration(snapshot.Duration);
+        IsBenchmarkActive = benchmarkState.IsActive;
+        CanToggleThreeMinuteBenchmark = benchmarkState.IsActive || !benchmarkState.IsEncounterSavingPaused;
+        BenchmarkStatusText = LocalizationManager.Instance.GetString(
+            benchmarkState.IsCompleted
+                ? "Meter_BenchmarkCompleted"
+                : "Meter_BenchmarkInProgress");
+        ThreeMinuteBenchmarkActionText = LocalizationManager.Instance.GetString(
+            benchmarkState.IsCompleted
+                ? "Meter_EndBenchmark"
+                : benchmarkState.IsActive
+                    ? "Meter_StopBenchmark"
+                    : "Meter_ThreeMinuteBenchmark");
         PartyMetricLabel = _kind == MeterSnapshotKind.Damage ? "DPS:" : "HPS:";
         PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
@@ -161,6 +198,22 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 _entries.Move(currentIndex, index);
             }
         }
+    }
+
+    [RelayCommand]
+    private void ToggleThreeMinuteBenchmark()
+    {
+        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
+        if (benchmarkState.IsActive)
+        {
+            MeterSnapshotProvider.TryStopBenchmark();
+        }
+        else
+        {
+            MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
+        }
+
+        Refresh();
     }
 
     [RelayCommand]

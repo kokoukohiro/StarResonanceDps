@@ -339,7 +339,10 @@ public sealed class WidgetWindowManager
             {
                 DataContext = viewModel
             },
-            new MeterWidgetHeaderGlyphsView(),
+            new MeterWidgetHeaderLabelsView
+            {
+                DataContext = viewModel
+            },
             new MeterWidgetHeaderActionsView
             {
                 DataContext = viewModel

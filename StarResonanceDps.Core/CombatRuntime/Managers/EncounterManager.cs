@@ -46,12 +46,19 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void EnterDungeon(bool force = false, EncounterStartReason reason = EncounterStartReason.None)
         {
+            if (AppState.IsBenchmarkMode
+                && (AppState.IsBenchmarkCompleting || AppState.IsBenchmarkCompleted)
+                && reason != EncounterStartReason.BenchmarkEnd)
+            {
+                return;
+            }
+
             string priorBossName = "";
             int priorEncounterPhase = 0;
 
             if (Current != null)
             {
-                bool hasStatsBeenRecorded = Current.HasStatsBeenRecorded();
+                bool hasStatsBeenRecorded = Current.HasStatsBeenRecorded(reason == EncounterStartReason.BenchmarkEnd);
                 if (force || (Current.EndTime == DateTime.MinValue && hasStatsBeenRecorded))
                 {
 
@@ -126,7 +133,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (Current != null)
             {
                 currentDifficulty = Current.ExData.DungeonDifficulty;
-                if (Settings.Instance.SkipSavingEncountersWithNoCombatData && !Current.HasStatsBeenRecorded())
+                if (Settings.Instance.SkipSavingEncountersWithNoCombatData
+                    && !Current.HasStatsBeenRecorded(reason == EncounterStartReason.BenchmarkEnd))
                 {
                     nextEncounterIdModifier = 0;
                 }
@@ -281,7 +289,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             if (Current != null && Current.EndTime == DateTime.MinValue)
             {
-                Current.SetEndTime(DateTime.Now);
+                Current.SetEndTime(
+                    AppState.IsBenchmarkCompleted && AppState.BenchmarkCompletionTime is { } completionTime
+                        ? completionTime
+                        : DateTime.Now);
             }
 
             UpdateTruePerValuesCTS.Cancel();
@@ -377,6 +388,22 @@ namespace StarResonanceDps.Core.CombatRuntime
                     RecalculateEncounterPerValues();
                 }
             }
+        }
+
+        public static void FreezeCurrentBenchmarkMetrics(DateTime completionTime)
+        {
+            if (Current == null)
+            {
+                return;
+            }
+
+            UpdateTruePerValuesCTS.Cancel();
+            RecalculateEncounterPerValues(completionTime.ToUniversalTime());
+        }
+
+        public static void SetCurrentBenchmarkEndTime(DateTime completionTime)
+        {
+            Current?.SetEndTime(completionTime);
         }
 
         public static void RecalculateEncounterPerValues(DateTime? nowTime = null)
@@ -693,12 +720,16 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (key == "AttrSkillId")
             {
-                OnSkillActivated(new SkillActivatedEventArgs { CasterUuid = uuid, SkillId = (int)value, ActivationDateTime = DateTime.Now });
-                entity.RegisterSkillActivation((int)value);
+                if (!IsBenchmarkMetricCaptureStopped())
+                {
+                    OnSkillActivated(new SkillActivatedEventArgs { CasterUuid = uuid, SkillId = (int)value, ActivationDateTime = DateTime.Now });
+                    entity.RegisterSkillActivation((int)value);
+                }
             }
             else if (key == "AttrState")
             {
-                if ((EActorState)value == EActorState.ActorStateDead)
+                if (!IsBenchmarkMetricCaptureStopped()
+                    && (EActorState)value == EActorState.ActorStateDead)
                 {
                     entity.IncrementDeaths();
                     if (entity.EntityType == EEntityType.EntChar)
@@ -955,6 +986,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetTimedOutState(bool state)
         {
             ExData.IsTimedOut = state;
+        }
+
+        private static bool IsBenchmarkMetricCaptureStopped()
+        {
+            return AppState.IsBenchmarkMode
+                && (AppState.IsBenchmarkCompleting || AppState.IsBenchmarkCompleted);
         }
 
         public object? GetAttrKV(long uuid, string key)

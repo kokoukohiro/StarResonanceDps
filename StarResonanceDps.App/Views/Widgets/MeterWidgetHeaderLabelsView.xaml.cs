@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
-public partial class MeterWidgetHeaderGlyphsView : UserControl
+public partial class MeterWidgetHeaderLabelsView : UserControl
 {
-    public MeterWidgetHeaderGlyphsView()
+    public MeterWidgetHeaderLabelsView()
     {
         InitializeComponent();
     }
