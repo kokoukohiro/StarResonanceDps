@@ -70,6 +70,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.PlayerEquipment
+        or WidgetKind.ImagineRoleSkillInfo
         or WidgetKind.SkillInfo
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
@@ -288,6 +289,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private void RequestPlayerEquipment(PlayerListEntry? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
+    }
+
+    [RelayCommand]
+    private void RequestImagineRoleSkillInfo(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.ImagineRoleSkillInfo, player);
     }
 
     [RelayCommand]

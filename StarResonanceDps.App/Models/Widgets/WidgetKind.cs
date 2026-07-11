@@ -6,7 +6,6 @@ public enum WidgetKind
     HpsMeter,
     DtpsMeter,
     SkillLog,
-    TrainingMode,
     PlayerList,
     PlayerInfo,
     PlayerStatus,
@@ -19,5 +18,6 @@ public enum WidgetKind
     HpsGraph,
     DamageSummary,
     HealingSummary,
-    SkillInfo
+    SkillInfo,
+    ImagineRoleSkillInfo
 }

@@ -1241,6 +1241,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 AppState.ProfessionName = professionName;
             }
 
+            PlayerSkillLevelStateStore.ReplaceSelfSkillLevels(
+                professionList,
+                vData.DutyList);
+
             var sceneData = vData.SceneData;
             if (sceneData != null)
             {

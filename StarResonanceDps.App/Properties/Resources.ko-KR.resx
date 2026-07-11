@@ -312,9 +312,6 @@
   <data name="Menu_SkillDiary" xml:space="preserve">
     <value>스킬 기록</value>
   </data>
-  <data name="Menu_Training" xml:space="preserve">
-    <value>훈련 모드</value>
-  </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>플레이어 목록</value>
   </data>
@@ -726,9 +723,6 @@
   <data name="Meter_BenchmarkInProgress" xml:space="preserve">
     <value>[측정 중]</value>
   </data>
-  <data name="Meter_EndBenchmark" xml:space="preserve">
-    <value>측정 종료</value>
-  </data>
   <data name="Meter_BenchmarkCompleted" xml:space="preserve">
     <value>[측정 완료]</value>
   </data>
@@ -737,5 +731,8 @@
   </data>
   <data name="Window_History_Title" xml:space="preserve">
     <value>기록</value>
+  </data>
+  <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
+    <value>이매진·롤 스킬 정보</value>
   </data>
 </root>

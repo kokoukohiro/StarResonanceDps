@@ -242,6 +242,8 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             _skillEntries.Add(new MetricSkillTableEntry(
                 entry.SkillId.ToString(CultureInfo.CurrentCulture),
                 entry.Name,
+                entry.IconName,
+                entry.IsImagine,
                 MeterNumberFormatter.Format(entry.TotalValue, numberDisplayFormatIndex),
                 MeterNumberFormatter.Format(entry.ValuePerSecondActive, numberDisplayFormatIndex),
                 MeterNumberFormatter.Format(entry.ValuePerSecond, numberDisplayFormatIndex),

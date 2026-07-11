@@ -312,9 +312,6 @@
   <data name="Menu_SkillDiary" xml:space="preserve">
     <value>Skill Diary</value>
   </data>
-  <data name="Menu_Training" xml:space="preserve">
-    <value>Training Mode</value>
-  </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>Player List</value>
   </data>
@@ -726,9 +723,6 @@
   <data name="Meter_BenchmarkInProgress" xml:space="preserve">
     <value>[Benchmarking]</value>
   </data>
-  <data name="Meter_EndBenchmark" xml:space="preserve">
-    <value>End Benchmark</value>
-  </data>
   <data name="Meter_BenchmarkCompleted" xml:space="preserve">
     <value>[Benchmark Complete]</value>
   </data>
@@ -737,5 +731,8 @@
   </data>
   <data name="Window_History_Title" xml:space="preserve">
     <value>History</value>
+  </data>
+  <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
+    <value>Imagine &amp; Role Skill Information</value>
   </data>
 </root>

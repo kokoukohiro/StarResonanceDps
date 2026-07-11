@@ -53,6 +53,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
+        AddWidget(WidgetKind.ImagineRoleSkillInfo, "Widget_ImagineRoleSkillInfo");
         AddWidget(WidgetKind.SkillInfo, "Widget_SkillInfo");
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
@@ -66,7 +67,6 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.HealingSummary, "Widget_HealingContribution");
         AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
         AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
-        AddWidget(WidgetKind.TrainingMode, "Menu_Training");
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;

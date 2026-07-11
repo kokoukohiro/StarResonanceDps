@@ -14,6 +14,8 @@ public static class CombatDataCatalog
         new Dictionary<int, Skill>().ToFrozenDictionary();
     private static FrozenDictionary<int, Buff> _buffs =
         new Dictionary<int, Buff>().ToFrozenDictionary();
+    private static FrozenDictionary<int, FrozenDictionary<int, float>> _skillCooldownsByLevel =
+        new Dictionary<int, FrozenDictionary<int, float>>().ToFrozenDictionary();
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -36,6 +38,7 @@ public static class CombatDataCatalog
         {
             _skills = LoadNumericCatalog(HelperMethods.DataTables.Skills.Data);
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
+            _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillNames = LoadLocalizedText("skills");
             _buffNames = LoadLocalizedText("buffs");
             _buffDescriptions = LoadLocalizedText("buff-descriptions");
@@ -129,15 +132,98 @@ public static class CombatDataCatalog
     {
         if (_skills.TryGetValue(skillId, out var skill))
         {
-            if (skill.IsImagineSlot())
-            {
-                return true;
-            }
-
-            fallbackIcon = FirstNonEmpty(skill.Icon, fallbackIcon);
+            return skill.IsImagineSlot();
         }
 
         return fallbackIcon?.Contains("skill_aoyi", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    public static bool IsSkillRole(int skillId)
+    {
+        return _skills.TryGetValue(skillId, out var skill)
+            && skill.IsRoleSlot();
+    }
+
+    public static double GetSkillPveCooldownSeconds(int skillId, int currentLevel, int tier)
+    {
+        if (!_skills.TryGetValue(skillId, out var skill))
+        {
+            return 0;
+        }
+
+        var cooldownSeconds = ResolveSkillPveCooldownSeconds(skill, currentLevel);
+        if (cooldownSeconds <= 60 || !skill.IsImagineSlot())
+        {
+            return cooldownSeconds;
+        }
+
+        return tier switch
+        {
+            >= 3 and <= 4 => MathF.Ceiling(cooldownSeconds * 0.8333f),
+            >= 5 and <= 6 => MathF.Ceiling(cooldownSeconds * 0.6666f),
+            _ => cooldownSeconds
+        };
+    }
+
+    private static FrozenDictionary<int, FrozenDictionary<int, float>> LoadSkillCooldowns()
+    {
+        var cooldownsBySkill = new Dictionary<int, Dictionary<int, float>>();
+
+        foreach (var skillFightLevel in HelperMethods.DataTables.SkillFightLevels.Data.Values)
+        {
+            if (skillFightLevel.SkillId <= 0 || skillFightLevel.Level <= 0)
+            {
+                continue;
+            }
+
+            if (!cooldownsBySkill.TryGetValue(skillFightLevel.SkillId, out var cooldownsByLevel))
+            {
+                cooldownsByLevel = new Dictionary<int, float>();
+                cooldownsBySkill.Add(skillFightLevel.SkillId, cooldownsByLevel);
+            }
+
+            cooldownsByLevel.TryAdd(skillFightLevel.Level, skillFightLevel.PVECoolTime);
+        }
+
+        return cooldownsBySkill
+            .ToDictionary(
+                pair => pair.Key,
+                pair => pair.Value.ToFrozenDictionary())
+            .ToFrozenDictionary();
+    }
+
+    private static float ResolveSkillPveCooldownSeconds(Skill skill, int currentLevel)
+    {
+        if (_skillCooldownsByLevel.TryGetValue(skill.Id, out var cooldownsByLevel)
+            && cooldownsByLevel.Count > 0)
+        {
+            var normalizedLevel = Math.Max(currentLevel, 1);
+            if (cooldownsByLevel.TryGetValue(normalizedLevel, out var exactCooldown))
+            {
+                return exactCooldown;
+            }
+
+            var lowerLevel = cooldownsByLevel.Keys
+                .Where(level => level <= normalizedLevel)
+                .DefaultIfEmpty(0)
+                .Max();
+            if (lowerLevel > 0)
+            {
+                return cooldownsByLevel[lowerLevel];
+            }
+
+            return cooldownsByLevel.OrderBy(pair => pair.Key).First().Value;
+        }
+
+        if (skill.EffectIDs is { Count: > 0 }
+            && HelperMethods.DataTables.SkillFightLevels.Data.TryGetValue(
+                skill.EffectIDs[0].ToString(),
+                out var firstSkillFightLevel))
+        {
+            return firstSkillFightLevel.PVECoolTime;
+        }
+
+        return 0;
     }
 
     private static FrozenDictionary<int, T> LoadNumericCatalog<T>(IReadOnlyDictionary<string, T> source)

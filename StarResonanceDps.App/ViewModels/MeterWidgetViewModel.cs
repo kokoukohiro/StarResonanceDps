@@ -148,11 +148,9 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 ? "Meter_BenchmarkCompleted"
                 : "Meter_BenchmarkInProgress");
         ThreeMinuteBenchmarkActionText = LocalizationManager.Instance.GetString(
-            benchmarkState.IsCompleted
-                ? "Meter_EndBenchmark"
-                : benchmarkState.IsActive
-                    ? "Meter_StopBenchmark"
-                    : "Meter_ThreeMinuteBenchmark");
+            benchmarkState.IsActive
+                ? "Meter_StopBenchmark"
+                : "Meter_ThreeMinuteBenchmark");
         PartyMetricLabel = _kind == MeterSnapshotKind.Damage ? "DPS:" : "HPS:";
         PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";

@@ -55,6 +55,8 @@ public sealed record MetricTimelineSnapshot(
 public sealed record MetricSkillTableRowSnapshot(
     int SkillId,
     string Name,
+    string IconName,
+    bool IsImagine,
     ulong TotalValue,
     double ValuePerSecondActive,
     double ValuePerSecond,
@@ -103,6 +105,20 @@ public sealed record PlayerSkillInfoSnapshot(
     int CurrentLevel,
     int Tier,
     bool IsImagine);
+
+public sealed record PlayerCooldownSkillSnapshot(
+    int SkillId,
+    string Name,
+    string IconName,
+    int CurrentLevel,
+    int Tier,
+    bool IsImagine,
+    double CooldownSeconds);
+
+public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
+    long EntityUuid,
+    IReadOnlyList<PlayerCooldownSkillSnapshot> ImagineSkills,
+    IReadOnlyList<PlayerCooldownSkillSnapshot> RoleSkills);
 
 internal sealed record PlayerBuffCandidate(
     PlayerBuffSnapshot Snapshot,
@@ -243,16 +259,7 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerSkillInfoSnapshot>();
         }
 
-        var rawSkillList = entity.GetAttrKV("AttrSkillLevelIdList");
-        IReadOnlyList<DataTypes.Skills.SkillLevelInfo> skillLevels = rawSkillList switch
-        {
-            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
-            JArray jsonArray =>
-                (IReadOnlyList<DataTypes.Skills.SkillLevelInfo>?)
-                jsonArray.ToObject<List<DataTypes.Skills.SkillLevelInfo>>()
-                ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
-            _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
-        };
+        var skillLevels = ResolvePlayerSkillLevels(entity);
 
         if (skillLevels.Count == 0)
         {
@@ -274,6 +281,76 @@ public static class MeterSnapshotProvider
         }
 
         return snapshots;
+    }
+
+    public static PlayerImagineRoleSkillLoadoutSnapshot GetPlayerImagineRoleSkills(long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
+        {
+            return new PlayerImagineRoleSkillLoadoutSnapshot(
+                0,
+                Array.Empty<PlayerCooldownSkillSnapshot>(),
+                Array.Empty<PlayerCooldownSkillSnapshot>());
+        }
+
+        var skillLevels = ResolvePlayerSkillLevels(entity);
+        var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
+        var roleSkills = new List<PlayerCooldownSkillSnapshot>(4);
+        var includedSkillIds = new HashSet<int>();
+
+        foreach (var skillLevel in skillLevels)
+        {
+            if (skillLevel.SkillId <= 0
+                || skillLevel.CurrentLevel <= 0
+                || !includedSkillIds.Add(skillLevel.SkillId))
+            {
+                continue;
+            }
+
+            var iconName = CombatDataCatalog.GetSkillIconName(skillLevel.SkillId, skillLevel.Icon);
+            var isImagine = CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName);
+            var isRole = CombatDataCatalog.IsSkillRole(skillLevel.SkillId);
+
+            if ((!isImagine || imagineSkills.Count >= 2)
+                && (!isRole || roleSkills.Count >= 4))
+            {
+                continue;
+            }
+
+            var displayLevel = ResolvePlayerSkillDisplayLevel(entityUuid, skillLevel);
+            var snapshot = new PlayerCooldownSkillSnapshot(
+                skillLevel.SkillId,
+                CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
+                iconName,
+                displayLevel,
+                skillLevel.Tier,
+                isImagine,
+                CombatDataCatalog.GetSkillPveCooldownSeconds(
+                    skillLevel.SkillId,
+                    skillLevel.CurrentLevel,
+                    skillLevel.Tier));
+
+            if (isImagine && imagineSkills.Count < 2)
+            {
+                imagineSkills.Add(snapshot);
+            }
+            else if (isRole && roleSkills.Count < 4)
+            {
+                roleSkills.Add(snapshot);
+            }
+
+            if (imagineSkills.Count == 2 && roleSkills.Count == 4)
+            {
+                break;
+            }
+        }
+
+        return new PlayerImagineRoleSkillLoadoutSnapshot(
+            entityUuid,
+            imagineSkills,
+            roleSkills);
     }
 
     public static MetricTimelineSnapshot GetPlayerTimeline(
@@ -477,9 +554,12 @@ public static class MeterSnapshotProvider
                 ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
                 : 0d;
 
+            var iconName = CombatDataCatalog.GetSkillIconName(stat.Key);
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
                 value.Name ?? string.Empty,
+                iconName,
+                CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
                 value.ValueTotal,
                 value.ValuePerSecondActive,
                 value.ValuePerSecond,
@@ -722,6 +802,41 @@ public static class MeterSnapshotProvider
     {
         return snapshot.Value > 0
             && (kind != MeterSnapshotKind.Damage || snapshot.DamageType != EDamageType.Immune);
+    }
+
+    private static int ResolvePlayerSkillDisplayLevel(
+        long entityUuid,
+        DataTypes.Skills.SkillLevelInfo skillLevel)
+    {
+        var isSelf = entityUuid != 0
+            && (entityUuid == MessageManager.currentUserUuid
+                || entityUuid == AppState.PlayerUUID
+                || (AppState.PlayerUID != 0
+                    && Utils.UuidToEntityId(entityUuid) == AppState.PlayerUID));
+        if (isSelf
+            && PlayerSkillLevelStateStore.TryGetSelfSkillLevel(
+                skillLevel.SkillId,
+                out var selfLevel))
+        {
+            return selfLevel;
+        }
+
+        return skillLevel.Tier > 0
+            ? skillLevel.Tier
+            : Math.Max(skillLevel.CurrentLevel, 1);
+    }
+
+    private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(Entity entity)
+    {
+        return entity.GetAttrKV("AttrSkillLevelIdList") switch
+        {
+            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
+            JArray jsonArray =>
+                (IReadOnlyList<DataTypes.Skills.SkillLevelInfo>?)
+                jsonArray.ToObject<List<DataTypes.Skills.SkillLevelInfo>>()
+                ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
+            _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
+        };
     }
 
     private static bool TryResolvePlayerEntity(
