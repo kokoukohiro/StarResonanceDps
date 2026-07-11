@@ -38,12 +38,10 @@ public partial class App : Application
         ThemeManager.Instance.ApplyGlobalTheme(settings);
         base.OnStartup(e);
         CombatRuntimeHost.Instance.Initialize();
-        SkillCooldownTracker.Instance.Initialize();
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
-        SkillCooldownTracker.Instance.Shutdown();
         CombatRuntimeHost.Instance.Shutdown();
         PluginManager.Instance.ShutdownAll();
         ReleaseSingleInstance();

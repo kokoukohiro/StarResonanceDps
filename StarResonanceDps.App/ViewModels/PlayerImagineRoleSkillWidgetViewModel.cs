@@ -113,16 +113,15 @@ public sealed class PlayerImagineRoleSkillWidgetViewModel : PlayerWidgetWindowVi
         IReadOnlyList<PlayerCooldownSkillSnapshot> snapshots,
         long entityUuid)
     {
-        var now = DateTime.Now;
         for (var index = 0; index < entries.Count; index++)
         {
             var snapshot = index < snapshots.Count
                 ? snapshots[index]
                 : null;
-            var activationTime = snapshot is null || entityUuid == 0
+            var remainingSeconds = snapshot is null || entityUuid == 0
                 ? null
-                : SkillCooldownTracker.Instance.GetLastActivationTime(entityUuid, snapshot.SkillId);
-            entries[index].Update(snapshot, activationTime, now);
+                : SkillCooldownTracker.Instance.GetRemainingSeconds(entityUuid, snapshot.SkillId);
+            entries[index].Update(snapshot, remainingSeconds);
         }
     }
 }

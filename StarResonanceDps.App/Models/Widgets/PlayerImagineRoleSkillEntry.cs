@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
@@ -20,8 +21,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
 
     public void Update(
         PlayerCooldownSkillSnapshot? snapshot,
-        DateTime? activationTime,
-        DateTime now)
+        double? remainingSeconds)
     {
         if (snapshot is null)
         {
@@ -35,36 +35,14 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
         NameLevelText = $"{snapshot.Name} Lv.{snapshot.CurrentLevel}";
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName, snapshot.IsImagine);
 
-        if (activationTime is null || snapshot.CooldownSeconds <= 0)
+        if (remainingSeconds is not > 0)
         {
             CooldownText = string.Empty;
             HasCooldown = false;
             return;
         }
 
-        var remainingSeconds = snapshot.CooldownSeconds
-            - now.Subtract(activationTime.Value).TotalSeconds;
-        if (remainingSeconds <= 0)
-        {
-            CooldownText = string.Empty;
-            HasCooldown = false;
-            return;
-        }
-
-        CooldownText = FormatDuration(remainingSeconds);
+        CooldownText = remainingSeconds.Value.ToString("0.00", CultureInfo.InvariantCulture) + "s";
         HasCooldown = true;
-    }
-
-    private static string FormatDuration(double seconds)
-    {
-        var roundedSeconds = Math.Max(1, (int)Math.Ceiling(seconds));
-        if (roundedSeconds < 60)
-        {
-            return $"{roundedSeconds}s";
-        }
-
-        var minutes = roundedSeconds / 60;
-        var remainderSeconds = roundedSeconds % 60;
-        return $"{minutes}m{remainderSeconds:00}s";
     }
 }

@@ -44,6 +44,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncNearDeltaInfo, ProcessSyncNearDeltaInfo);
 
+            netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncServerTime, ProcessSyncServerTime);
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncToMeDeltaInfo, ProcessSyncToMeDeltaInfo);
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncNearEntities, ProcessSyncNearEntities);
@@ -89,6 +90,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 netCap.Stop();
             }
+
+            SkillCooldownStateStore.Reset();
         }
 
         public static SharpPcap.LibPcap.LibPcapLiveDevice? TryFindBestNetworkDevice()
@@ -566,6 +569,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrSkillId:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
+                    case EAttrType.AttrCdAcceleratePct:
+                        {
+                            var accelerationPct = isNoValue ? 0 : reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, accelerationPct);
+                            if (uuid == currentUserUuid || uuid == AppState.PlayerUUID)
+                            {
+                                SkillCooldownStateStore.UpdateSelfAcceleration(uuid, accelerationPct);
+                            }
+                            break;
+                        }
                     case EAttrType.AttrProfessionId:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
@@ -1147,6 +1160,19 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static long currentUserUuid = 0;
 
+        public static void ProcessSyncServerTime(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            if (payloadBuffer.Length == 0)
+            {
+                return;
+            }
+
+            var syncServerTime = SyncServerTime.Parser.ParseFrom(payloadBuffer);
+            SkillCooldownStateStore.UpdateServerTime(
+                syncServerTime.ClientMilliseconds,
+                syncServerTime.ServerMilliseconds);
+        }
+
         public static void ProcessSyncToMeDeltaInfo(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             var syncToMeDeltaInfo = SyncToMeDeltaInfo.Parser.ParseFrom(payloadBuffer);
@@ -1158,6 +1184,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 AppState.PlayerUUID = uuid;
                 AppState.PlayerUID = Utils.UuidToEntityId(uuid);
             }
+
+            SkillCooldownStateStore.SetSelfPlayer(uuid);
+            SkillCooldownStateStore.UpdateSelfCooldowns(uuid, aoiSyncToMeDelta.SyncSkillCDs);
+
             var aoiSyncDelta = aoiSyncToMeDelta.BaseDelta;
             if (aoiSyncDelta == null)
             {
@@ -1195,6 +1225,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             long playerUuid = Utils.EntityIdToUuid(vData.CharId, (long)EEntityType.EntChar, false, false);
 
+            SkillCooldownStateStore.SetSelfPlayer(playerUuid);
             AppState.PlayerUID = vData.CharId;
             if (!string.IsNullOrEmpty(vData.CharBase.AccountId))
             {
