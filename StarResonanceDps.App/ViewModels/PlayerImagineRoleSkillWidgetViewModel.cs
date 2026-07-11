@@ -120,7 +120,11 @@ public sealed class PlayerImagineRoleSkillWidgetViewModel : PlayerWidgetWindowVi
                 : null;
             var remainingSeconds = snapshot is null || entityUuid == 0
                 ? null
-                : SkillCooldownTracker.Instance.GetRemainingSeconds(entityUuid, snapshot.SkillId);
+                : SkillCooldownTracker.Instance.GetRemainingSeconds(
+                    entityUuid,
+                    snapshot.SkillId,
+                    snapshot.CooldownSeconds,
+                    snapshot.IsImagine);
             entries[index].Update(snapshot, remainingSeconds);
         }
     }

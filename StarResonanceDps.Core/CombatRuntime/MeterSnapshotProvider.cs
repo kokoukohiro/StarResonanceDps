@@ -113,6 +113,7 @@ public sealed record PlayerCooldownSkillSnapshot(
     int CurrentLevel,
     int Tier,
     bool IsImagine,
+    bool ShowLevel,
     double CooldownSeconds);
 
 public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
@@ -320,6 +321,8 @@ public static class MeterSnapshotProvider
             }
 
             var displayLevel = ResolvePlayerSkillDisplayLevel(entityUuid, skillLevel);
+            var showLevel = !isRole
+                || !CombatDataCatalog.IsSingleLevelSkill(skillLevel.SkillId);
             var snapshot = new PlayerCooldownSkillSnapshot(
                 skillLevel.SkillId,
                 CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
@@ -327,9 +330,10 @@ public static class MeterSnapshotProvider
                 displayLevel,
                 skillLevel.Tier,
                 isImagine,
+                showLevel,
                 CombatDataCatalog.GetSkillPveCooldownSeconds(
                     skillLevel.SkillId,
-                    skillLevel.CurrentLevel,
+                    displayLevel,
                     skillLevel.Tier));
 
             if (isImagine && imagineSkills.Count < 2)

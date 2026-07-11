@@ -32,7 +32,9 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
             return;
         }
 
-        NameLevelText = $"{snapshot.Name} Lv.{snapshot.CurrentLevel}";
+        NameLevelText = snapshot.ShowLevel
+            ? $"{snapshot.Name} Lv.{snapshot.CurrentLevel}"
+            : snapshot.Name;
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName, snapshot.IsImagine);
 
         if (remainingSeconds is not > 0)
@@ -42,7 +44,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
             return;
         }
 
-        CooldownText = remainingSeconds.Value.ToString("0.00", CultureInfo.InvariantCulture) + "s";
+        CooldownText = remainingSeconds.Value.ToString("0.0", CultureInfo.InvariantCulture) + "s";
         HasCooldown = true;
     }
 }

@@ -144,6 +144,13 @@ public static class CombatDataCatalog
             && skill.IsRoleSlot();
     }
 
+    public static bool IsSingleLevelSkill(int skillId)
+    {
+        return _skillCooldownsByLevel.TryGetValue(skillId, out var cooldownsByLevel)
+            && cooldownsByLevel.Count > 0
+            && cooldownsByLevel.Keys.Max() == 1;
+    }
+
     public static double GetSkillPveCooldownSeconds(int skillId, int currentLevel, int tier)
     {
         if (!_skills.TryGetValue(skillId, out var skill))
