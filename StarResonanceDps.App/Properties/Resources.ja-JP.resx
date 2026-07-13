@@ -315,8 +315,14 @@
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>プレイヤーリスト</value>
   </data>
+  <data name="Widget_EntityList" xml:space="preserve">
+    <value>エンティティリスト</value>
+  </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>クラスカラー</value>
+  </data>
+  <data name="Settings_Section_IconColors_Title" xml:space="preserve">
+    <value>アイコンカラー</value>
   </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>シールドファイター</value>
@@ -350,6 +356,15 @@
   </data>
   <data name="Classes_Enemy" xml:space="preserve">
     <value>エネミー</value>
+  </data>
+  <data name="Classes_Monster" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="Classes_Elite" xml:space="preserve">
+    <value>精鋭</value>
+  </data>
+  <data name="Classes_Boss" xml:space="preserve">
+    <value>ボス</value>
   </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>不明</value>
@@ -523,7 +538,10 @@
     <value>追加</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
-    <value>プレイヤー名カスタマイズ</value>
+    <value>プレイヤー名</value>
+  </data>
+  <data name="Settings_EntityInfo_Customization" xml:space="preserve">
+    <value>エンティティ名</value>
   </data>
   <data name="Settings_PlayerInfo_Preview" xml:space="preserve">
     <value>プレビュー：</value>
@@ -531,8 +549,17 @@
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
     <value>Player1</value>
   </data>
+  <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
+    <value>エンティティ1</value>
+  </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>プレイヤー名</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
+    <value>名前</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
+    <value>レベル</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
     <value>クラス</value>

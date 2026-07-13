@@ -29,6 +29,12 @@ public sealed partial class PlayerListEntry : ObservableObject
     private double _healthRatio;
 
     [ObservableProperty]
+    private string _healthText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isNpc;
+
+    [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
 
     [ObservableProperty]
@@ -53,11 +59,20 @@ public sealed partial class PlayerListEntry : ObservableObject
     {
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
+        IsNpc = player.IsNpc;
+
+        var displayPlayer = IsNpc
+            ? player with
+            {
+                Name = LocalizationManager.Instance.GetString($"Classes_{ProfessionKey}")
+            }
+            : player;
         DisplayName = PlayerInfoFormatFormatter.Format(
-            player,
+            displayPlayer,
             settings.PlayerInfoFormatString,
             playerNameDisplayMode);
         HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
+        HealthText = FormatValuePair(player.CurrentHp, player.MaxHp);
 
         var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
@@ -79,6 +94,12 @@ public sealed partial class PlayerListEntry : ObservableObject
         }
 
         return Math.Clamp(currentHp / (double)maxHp, 0d, 1d);
+    }
+
+
+    private static string FormatValuePair(long currentValue, long maxValue)
+    {
+        return $"{currentValue}/{maxValue}";
     }
 
     private static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)

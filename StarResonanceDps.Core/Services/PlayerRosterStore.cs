@@ -75,11 +75,17 @@ public sealed class PlayerRosterStore
             () =>
             {
                 var normalized = Clone(entry);
-                if (_entries.TryGetValue(normalized.CharacterId, out var existing)
-                    && existing.IsSelf
-                    && !normalized.IsSelf)
+                if (_entries.TryGetValue(normalized.CharacterId, out var existing))
                 {
-                    normalized = normalized with { IsSelf = true };
+                    if (existing.IsSelf && !normalized.IsSelf)
+                    {
+                        normalized = normalized with { IsSelf = true };
+                    }
+
+                    if (existing.IsNpc && !normalized.IsNpc)
+                    {
+                        normalized = normalized with { IsNpc = true };
+                    }
                 }
 
                 _entries[normalized.CharacterId] = normalized;
@@ -185,7 +191,8 @@ public sealed class PlayerRosterStore
             entry.SubProfessionId,
             entry.Level,
             entry.SeasonLevel,
-            entry.EquipmentData);
+            entry.EquipmentData,
+            entry.IsNpc);
     }
 }
 

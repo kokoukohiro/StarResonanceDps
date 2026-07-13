@@ -28,7 +28,7 @@
 
                 <TextBlock Grid.Row="0"
                            VerticalAlignment="Center"
-                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Customization]}"
+                           Text="{Binding PlayerInfoCustomizationTitle}"
                            Foreground="{DynamicResource Brush.TextPrimary}"
                            FontSize="14"
                            FontWeight="SemiBold" />

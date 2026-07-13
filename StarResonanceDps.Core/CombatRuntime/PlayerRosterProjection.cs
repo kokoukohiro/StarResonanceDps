@@ -54,6 +54,8 @@ internal static class PlayerRosterProjection
             return;
         }
 
+        var isNpc = !isSelf && GetInt(entity, "AttrId") > 0;
+
         var characterId = entity.UID != 0 ? entity.UID : Utils.UuidToEntityId(playerUuid);
         if (characterId == 0)
         {
@@ -113,7 +115,8 @@ internal static class PlayerRosterProjection
             subProfessionId,
             entity.Level,
             ToInt32(entity.SeasonLevel),
-            equipmentData));
+            equipmentData,
+            isNpc));
     }
 
     private static PlayerEquipmentData? GetEquipmentData(Entity entity)

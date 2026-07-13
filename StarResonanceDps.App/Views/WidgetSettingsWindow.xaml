@@ -63,7 +63,7 @@
                                 Visibility="{Binding HasMeterSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MeterSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

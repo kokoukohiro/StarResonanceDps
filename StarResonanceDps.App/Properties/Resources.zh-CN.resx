@@ -315,8 +315,14 @@
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>玩家列表</value>
   </data>
+  <data name="Widget_EntityList" xml:space="preserve">
+    <value>实体列表</value>
+  </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>职业颜色</value>
+  </data>
+  <data name="Settings_Section_IconColors_Title" xml:space="preserve">
+    <value>图标颜色</value>
   </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>神盾骑士</value>
@@ -350,6 +356,15 @@
   </data>
   <data name="Classes_Enemy" xml:space="preserve">
     <value>敌方</value>
+  </data>
+  <data name="Classes_Monster" xml:space="preserve">
+    <value>普通</value>
+  </data>
+  <data name="Classes_Elite" xml:space="preserve">
+    <value>精英</value>
+  </data>
+  <data name="Classes_Boss" xml:space="preserve">
+    <value>首领</value>
   </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>未知职业</value>
@@ -523,7 +538,10 @@
     <value>添加</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
-    <value>玩家名称自定义</value>
+    <value>玩家名称</value>
+  </data>
+  <data name="Settings_EntityInfo_Customization" xml:space="preserve">
+    <value>实体名称</value>
   </data>
   <data name="Settings_PlayerInfo_Preview" xml:space="preserve">
     <value>预览：</value>
@@ -531,8 +549,17 @@
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
     <value>Player1</value>
   </data>
+  <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
+    <value>实体1</value>
+  </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>玩家名</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
+    <value>等级</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
     <value>职业流派</value>

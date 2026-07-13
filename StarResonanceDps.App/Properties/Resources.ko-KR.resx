@@ -315,8 +315,14 @@
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>플레이어 목록</value>
   </data>
+  <data name="Widget_EntityList" xml:space="preserve">
+    <value>엔티티 목록</value>
+  </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
     <value>직업 색상</value>
+  </data>
+  <data name="Settings_Section_IconColors_Title" xml:space="preserve">
+    <value>아이콘 색상</value>
   </data>
   <data name="Classes_ShieldKnight" xml:space="preserve">
     <value>쉴드 나이트</value>
@@ -350,6 +356,15 @@
   </data>
   <data name="Classes_Enemy" xml:space="preserve">
     <value>적</value>
+  </data>
+  <data name="Classes_Monster" xml:space="preserve">
+    <value>일반</value>
+  </data>
+  <data name="Classes_Elite" xml:space="preserve">
+    <value>정예</value>
+  </data>
+  <data name="Classes_Boss" xml:space="preserve">
+    <value>보스</value>
   </data>
   <data name="Classes_Unknown" xml:space="preserve">
     <value>알 수 없음</value>
@@ -523,7 +538,10 @@
     <value>추가</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
-    <value>플레이어 이름 사용자 지정</value>
+    <value>플레이어 이름</value>
+  </data>
+  <data name="Settings_EntityInfo_Customization" xml:space="preserve">
+    <value>엔티티 이름</value>
   </data>
   <data name="Settings_PlayerInfo_Preview" xml:space="preserve">
     <value>실시간 미리보기：</value>
@@ -531,8 +549,17 @@
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
     <value>Player1</value>
   </data>
+  <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
+    <value>엔티티1</value>
+  </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>플레이어 이름</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
+    <value>레벨</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
     <value>클래스</value>

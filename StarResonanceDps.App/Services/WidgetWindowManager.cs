@@ -330,6 +330,11 @@ public sealed class WidgetWindowManager
                 null,
                 null,
                 new PlayerListWidgetFooterView()),
+            WidgetKind.EntityList => new WidgetWindowComposition(
+                new EntityListWidgetView(),
+                null,
+                null,
+                new PlayerListWidgetFooterView()),
             WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
             _ => new WidgetWindowComposition(null, null, null, null)

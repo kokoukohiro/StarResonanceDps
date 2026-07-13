@@ -15,11 +15,15 @@ public partial class WidgetListItemViewModel : ViewModelBase
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
+    private readonly ObservableCollection<EntityListEntry> _entityListEntries = [];
+    private readonly Dictionary<long, EntityListEntry> _entityListEntriesByUuid = [];
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+    private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private long _playerListMapGeneration = -1;
+    private long _entityListMapGeneration = -1;
 
     public WidgetKind Kind { get; init; }
 
@@ -59,7 +63,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
+    public ReadOnlyObservableCollection<EntityListEntry> EntityListEntries { get; }
+
     public bool IsPlayerList => Kind == WidgetKind.PlayerList;
+
+    public bool IsEntityList => Kind == WidgetKind.EntityList;
 
     public bool IsPlayerInfo => Kind == WidgetKind.PlayerInfo;
 
@@ -108,6 +116,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public WidgetListItemViewModel()
     {
         PlayerListEntries = new ReadOnlyObservableCollection<PlayerListEntry>(_playerListEntries);
+        EntityListEntries = new ReadOnlyObservableCollection<EntityListEntry>(_entityListEntries);
     }
 
     public void RefreshLocalizedText()
@@ -115,6 +124,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
         OnPropertyChanged(nameof(StateText));
         SynchronizePlayerListEntries(resetEntries: false);
+        SynchronizeEntityListEntries(resetEntries: false);
         RaisePlayerWindowPresentationChanged();
     }
 
@@ -160,6 +170,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
+        SynchronizeEntityListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -172,6 +183,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, meter);
         SynchronizePlayerListEntries(resetEntries: false);
+        SynchronizeEntityListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -241,6 +253,24 @@ public partial class WidgetListItemViewModel : ViewModelBase
         var resetEntries = _playerListMapGeneration != mapGeneration;
         _playerListMapGeneration = mapGeneration;
         SynchronizePlayerListEntries(resetEntries);
+    }
+
+    public void UpdateNearbyEntities(
+        IReadOnlyList<NearbyEntityEntry> nearbyEntities,
+        string mapName,
+        long mapGeneration)
+    {
+        if (!IsEntityList)
+        {
+            return;
+        }
+
+        MapName = mapName ?? string.Empty;
+        _nearbyEntities = nearbyEntities;
+
+        var resetEntries = _entityListMapGeneration != mapGeneration;
+        _entityListMapGeneration = mapGeneration;
+        SynchronizeEntityListEntries(resetEntries);
     }
 
     public void SetOpenPlayerWindowCount(int count)
@@ -407,6 +437,76 @@ public partial class WidgetListItemViewModel : ViewModelBase
         for (var index = startIndex; index < _playerListEntries.Count; index++)
         {
             if (_playerListEntries[index].CharacterId == characterId)
+            {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    private void SynchronizeEntityListEntries(bool resetEntries)
+    {
+        if (!IsEntityList)
+        {
+            return;
+        }
+
+        if (resetEntries)
+        {
+            _entityListEntriesByUuid.Clear();
+            _entityListEntries.Clear();
+        }
+        else
+        {
+            var activeEntityUuids = _nearbyEntities
+                .Select(entry => entry.EntityUuid)
+                .ToHashSet();
+
+            for (var index = _entityListEntries.Count - 1; index >= 0; index--)
+            {
+                var entry = _entityListEntries[index];
+                if (activeEntityUuids.Contains(entry.EntityUuid))
+                {
+                    continue;
+                }
+
+                _entityListEntriesByUuid.Remove(entry.EntityUuid);
+                _entityListEntries.RemoveAt(index);
+            }
+        }
+
+        for (var targetIndex = 0; targetIndex < _nearbyEntities.Count; targetIndex++)
+        {
+            var entity = _nearbyEntities[targetIndex];
+            if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
+            {
+                entry = EntityListEntry.Create(entity, _meter);
+                _entityListEntriesByUuid.Add(entity.EntityUuid, entry);
+                _entityListEntries.Insert(targetIndex, entry);
+                continue;
+            }
+
+            entry.Update(entity, _meter);
+
+            if (_entityListEntries[targetIndex].EntityUuid == entity.EntityUuid)
+            {
+                continue;
+            }
+
+            var currentIndex = FindEntityListEntryIndex(entity.EntityUuid, targetIndex + 1);
+            if (currentIndex >= 0)
+            {
+                _entityListEntries.Move(currentIndex, targetIndex);
+            }
+        }
+    }
+
+    private int FindEntityListEntryIndex(long entityUuid, int startIndex)
+    {
+        for (var index = startIndex; index < _entityListEntries.Count; index++)
+        {
+            if (_entityListEntries[index].EntityUuid == entityUuid)
             {
                 return index;
             }

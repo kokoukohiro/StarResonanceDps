@@ -137,6 +137,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
     public const int DefaultMetricTimelineAggregationIntervalSeconds = 10;
+    public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
 
@@ -184,6 +185,14 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
+    public static readonly string[] EntityClassColorKeys =
+    [
+        "Monster",
+        "Elite",
+        "Boss",
+        "Unknown"
+    ];
+
     private static readonly Dictionary<string, string[]> PlayerListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["ShieldKnight"] = ["#68A6CD", "#0F68B3"],
@@ -196,6 +205,14 @@ public static class WidgetConfigDefaults
         ["WindKnight"] = ["#DB8787", "#11B5B2"],
         ["Marksman"] = ["#DB8787", "#D4D116"],
         ["Transformation"] = ["#FFFFFF", "#B06BE8"],
+        ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
+    };
+
+    private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["Monster"] = ["#FFFFFF", "#FFB15C"],
+        ["Elite"] = ["#FFFFFF", "#C490FF"],
+        ["Boss"] = ["#FFFFFF", "#FF6A6A"],
         ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
     };
 
@@ -243,6 +260,7 @@ public static class WidgetConfigDefaults
     public static bool SupportsMeterSettings(WidgetKind kind)
     {
         return kind is WidgetKind.PlayerList
+            or WidgetKind.EntityList
             or WidgetKind.DpsMeter
             or WidgetKind.HpsMeter;
     }
@@ -322,7 +340,7 @@ public static class WidgetConfigDefaults
     {
         return kind switch
         {
-            WidgetKind.PlayerList => new WidgetWindowConfig
+            WidgetKind.PlayerList or WidgetKind.EntityList => new WidgetWindowConfig
             {
                 Width = PlayerListInitialWindowWidth,
                 Height = PlayerListInitialWindowHeight
@@ -405,7 +423,7 @@ public static class WidgetConfigDefaults
         {
             PlayerInfoFormatString = GetDefaultPlayerInfoFormatString(kind),
             ClassColorOpacity = MaxClassColorOpacity,
-            ClassColorIndexes = CreateDefaultClassColorIndexes(),
+            ClassColorIndexes = CreateDefaultClassColorIndexes(kind),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
         };
     }
@@ -417,19 +435,30 @@ public static class WidgetConfigDefaults
 
     public static string GetDefaultPlayerInfoFormatString(WidgetKind kind)
     {
-        return kind == WidgetKind.PlayerList
-            ? DefaultPlayerListPlayerInfoFormatString
-            : DefaultMeterPlayerInfoFormatString;
+        return kind switch
+        {
+            WidgetKind.EntityList => DefaultEntityInfoFormatString,
+            WidgetKind.PlayerList => DefaultPlayerListPlayerInfoFormatString,
+            _ => DefaultMeterPlayerInfoFormatString
+        };
     }
 
-    public static Dictionary<string, int> CreateDefaultClassColorIndexes()
+    public static IReadOnlyList<string> GetClassColorKeys(WidgetKind kind)
     {
-        return ClassColorKeys.ToDictionary(key => key, _ => MinClassColorIndex, StringComparer.OrdinalIgnoreCase);
+        return kind == WidgetKind.EntityList
+            ? EntityClassColorKeys
+            : ClassColorKeys;
+    }
+
+    public static Dictionary<string, int> CreateDefaultClassColorIndexes(WidgetKind kind = WidgetKind.PlayerList)
+    {
+        return GetClassColorKeys(kind)
+            .ToDictionary(key => key, _ => MinClassColorIndex, StringComparer.OrdinalIgnoreCase);
     }
 
     public static Dictionary<string, List<string>> CreateDefaultClassColorPalettes(WidgetKind kind)
     {
-        return ClassColorKeys.ToDictionary(
+        return GetClassColorKeys(kind).ToDictionary(
             key => key,
             key => CreateDefaultClassColors(kind, key),
             StringComparer.OrdinalIgnoreCase);
@@ -440,6 +469,7 @@ public static class WidgetConfigDefaults
         var source = kind switch
         {
             WidgetKind.PlayerList => PlayerListDefaultClassColorHexes,
+            WidgetKind.EntityList => EntityListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
         };
@@ -505,6 +535,7 @@ public static class WidgetConfigDefaults
         switch (kind)
         {
             case WidgetKind.PlayerList:
+            case WidgetKind.EntityList:
                 config.Window.Width ??= PlayerListInitialWindowWidth;
                 config.Window.Height ??= PlayerListInitialWindowHeight;
                 break;
@@ -598,13 +629,13 @@ public static class WidgetConfigDefaults
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;
-        meter.ClassColorIndexes ??= CreateDefaultClassColorIndexes();
+        meter.ClassColorIndexes ??= CreateDefaultClassColorIndexes(kind);
         meter.ClassColorPalettes ??= CreateDefaultClassColorPalettes(kind);
 
         var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var key in ClassColorKeys)
+        foreach (var key in GetClassColorKeys(kind))
         {
             var defaultColors = CreateDefaultClassColors(kind, key);
             var sourceColors = meter.ClassColorPalettes.TryGetValue(key, out var colors)

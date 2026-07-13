@@ -21,6 +21,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         ("Uid", "Settings_PlayerInfo_Field_PlayerUid", "{Uid}")
     ];
 
+    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] EntityInfoFormatFieldDefinitions =
+    [
+        ("Name", "Settings_EntityInfo_Field_Name", "{Name}"),
+        ("Level", "Settings_EntityInfo_Field_Level", "{Level}")
+    ];
+
     private readonly WidgetKind _kind;
     private readonly Dictionary<string, MeterClassColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<MeterPlayerInfoFormatField> _availablePlayerInfoFormatFields = [];
@@ -43,14 +49,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     {
         _kind = kind;
         var items = new ObservableCollection<MeterClassColorItemViewModel>();
-        foreach (var key in WidgetConfigDefaults.ClassColorKeys)
+        var classColorKeys = WidgetConfigDefaults.GetClassColorKeys(_kind);
+        for (var index = 0; index < classColorKeys.Count; index++)
         {
+            var key = classColorKeys[index];
             var colors = new ColorPaletteViewModel(
                 WidgetConfigDefaults.CreateDefaultClassColors(_kind, key),
                 WidgetConfigDefaults.MaxPaletteColorCount);
             colors.PaletteChanged += Colors_PaletteChanged;
 
-            var item = new MeterClassColorItemViewModel(key, colors);
+            var item = new MeterClassColorItemViewModel(key, colors, index == classColorKeys.Count - 1);
             _itemsByKey.Add(key, item);
             items.Add(item);
         }
@@ -69,6 +77,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> Items { get; }
 
     public ReadOnlyObservableCollection<MeterPlayerInfoFormatField> AvailablePlayerInfoFormatFields { get; }
+
+    public string PlayerInfoCustomizationTitle => LocalizationManager.Instance.GetString(
+        _kind == WidgetKind.EntityList
+            ? "Settings_EntityInfo_Customization"
+            : "Settings_PlayerInfo_Customization");
+
+    public string ClassColorSectionTitle => LocalizationManager.Instance.GetString(
+        _kind == WidgetKind.EntityList
+            ? "Settings_Section_IconColors_Title"
+            : "Settings_Section_ClassColors_Title");
 
     public bool UsesMeterClassColorIconBackground => WidgetConfigDefaults.UsesMeterClassColorOpacity(_kind);
 
@@ -187,7 +205,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             : _itemsByKey["Unknown"];
     }
 
-    private static bool SettingsEqual(MeterWidgetSettingsConfig left, MeterWidgetSettingsConfig right)
+    private bool SettingsEqual(MeterWidgetSettingsConfig left, MeterWidgetSettingsConfig right)
     {
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.ClassColorOpacity != right.ClassColorOpacity)
@@ -195,7 +213,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             return false;
         }
 
-        foreach (var key in WidgetConfigDefaults.ClassColorKeys)
+        foreach (var key in WidgetConfigDefaults.GetClassColorKeys(_kind))
         {
             if (!left.ClassColorIndexes.TryGetValue(key, out var leftIndex)
                 || !right.ClassColorIndexes.TryGetValue(key, out var rightIndex)
@@ -220,7 +238,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         var selectedKey = SelectedPlayerInfoFormatField?.Key;
 
         _availablePlayerInfoFormatFields.Clear();
-        foreach (var definition in PlayerInfoFormatFieldDefinitions)
+        var definitions = _kind == WidgetKind.EntityList
+            ? EntityInfoFormatFieldDefinitions
+            : PlayerInfoFormatFieldDefinitions;
+        foreach (var definition in definitions)
         {
             _availablePlayerInfoFormatFields.Add(new MeterPlayerInfoFormatField(
                 definition.Key,
@@ -235,7 +256,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     private void RefreshFormatPreview()
     {
-        FormatPreview = PlayerInfoFormatFormatter.FormatPreview(PlayerInfoFormatString);
+        FormatPreview = _kind == WidgetKind.EntityList
+            ? EntityInfoFormatFormatter.FormatPreview(PlayerInfoFormatString)
+            : PlayerInfoFormatFormatter.FormatPreview(PlayerInfoFormatString);
     }
 
     private void Colors_PaletteChanged(object? sender, EventArgs e)
@@ -250,6 +273,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             item.RefreshDisplayName();
         }
 
+        OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
+        OnPropertyChanged(nameof(ClassColorSectionTitle));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
     }
@@ -299,7 +324,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
 public sealed class MeterPlayerInfoFormatField
 {
-    public MeterPlayerInfoFormatField( string key, string displayName, string placeholder)
+    public MeterPlayerInfoFormatField(string key, string displayName, string placeholder)
     {
         Key = key;
         DisplayName = displayName;
@@ -320,15 +345,18 @@ public sealed class MeterPlayerInfoFormatField
 
 public sealed class MeterClassColorItemViewModel : ObservableObject
 {
-    public MeterClassColorItemViewModel(string key, ColorPaletteViewModel colors)
+    public MeterClassColorItemViewModel(string key, ColorPaletteViewModel colors, bool isLast)
     {
         Key = key;
         Colors = colors;
+        IsLast = isLast;
     }
 
     public string Key { get; }
 
     public ColorPaletteViewModel Colors { get; }
+
+    public bool IsLast { get; }
 
     public string DisplayName => LocalizationManager.Instance.GetString($"Classes_{Key}");
 

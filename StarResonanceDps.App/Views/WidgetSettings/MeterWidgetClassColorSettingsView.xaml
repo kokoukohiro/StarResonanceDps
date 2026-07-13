@@ -86,6 +86,27 @@
                         </Setter.Value>
                     </Setter>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding Key}" Value="Monster">
+                    <Setter Property="OpacityMask">
+                        <Setter.Value>
+                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Monster}" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Key}" Value="Elite">
+                    <Setter Property="OpacityMask">
+                        <Setter.Value>
+                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Elite}" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Key}" Value="Boss">
+                    <Setter Property="OpacityMask">
+                        <Setter.Value>
+                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Boss}" Stretch="Uniform" />
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding Key}" Value="Unknown">
                     <Setter Property="OpacityMask">
                         <Setter.Value>
@@ -102,8 +123,8 @@
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding (ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType={x:Type ContentPresenter}}}"
-                                   Value="10" />
+                        <Condition Binding="{Binding IsLast}"
+                                   Value="True" />
                         <Condition Binding="{Binding DataContext.HasClassColorOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetClassColorSettingsView}}}"
                                    Value="False" />
                     </MultiDataTrigger.Conditions>
@@ -125,7 +146,7 @@
     </UserControl.Resources>
 
     <StackPanel>
-        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_ClassColors_Title]}"
+        <TextBlock Text="{Binding ClassColorSectionTitle}"
                    Foreground="{DynamicResource Brush.TextPrimary}"
                    FontSize="16"
                    FontWeight="SemiBold"
@@ -133,7 +154,7 @@
 
         <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
             <StackPanel>
-                <ItemsControl ItemsSource="{Binding Items}" AlternationCount="11">
+                <ItemsControl ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Style="{StaticResource MeterWidgetClassColorSettings.FinalField}">

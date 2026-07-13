@@ -21,12 +21,17 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
     private readonly PluginManager _pluginManager = PluginManager.Instance;
     private readonly PlayerRosterPresentationStore _playerRosterStore = PlayerRosterPresentationStore.Instance;
+    private readonly NearbyEntityStore _nearbyEntityStore = NearbyEntityStore.Instance;
     private readonly object _playerRosterUpdateSync = new();
+    private readonly object _nearbyEntityUpdateSync = new();
 
     private PlayerRosterSnapshot? _pendingPlayerRosterSnapshot;
+    private NearbyEntitySnapshot? _pendingNearbyEntitySnapshot;
     private bool _isPlayerRosterUpdateQueued;
+    private bool _isNearbyEntityUpdateQueued;
 
     private WidgetListItemViewModel? _playerListWidget;
+    private WidgetListItemViewModel? _entityListWidget;
 
     [ObservableProperty]
     private string _searchText = string.Empty;
@@ -50,6 +55,7 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
+        _entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
@@ -84,8 +90,11 @@ public sealed partial class MainViewModel : ViewModelBase
         _configManager.SettingsChanged += ConfigManager_SettingsChanged;
 
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
+        _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
+
         var roster = _playerRosterStore.Current;
         ApplyPlayerRosterSnapshot(roster);
+        ApplyNearbyEntitySnapshot(_nearbyEntityStore.Current);
     }
 
     private void AddPluginItem(PluginInfo pluginInfo)
@@ -203,6 +212,62 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapName,
             roster.MapGeneration);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster.Entries);
+    }
+
+    private void NearbyEntityStore_EntitiesChanged(object? sender, NearbyEntitiesChangedEventArgs e)
+    {
+        QueueNearbyEntitySnapshot(new NearbyEntitySnapshot(
+            e.Snapshot,
+            e.MapName,
+            e.MapGeneration));
+    }
+
+    private void QueueNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)
+    {
+        lock (_nearbyEntityUpdateSync)
+        {
+            _pendingNearbyEntitySnapshot = snapshot;
+            if (_isNearbyEntityUpdateQueued)
+            {
+                return;
+            }
+
+            _isNearbyEntityUpdateQueued = true;
+        }
+
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            ProcessPendingNearbyEntitySnapshot();
+            return;
+        }
+
+        dispatcher.BeginInvoke(ProcessPendingNearbyEntitySnapshot);
+    }
+
+    private void ProcessPendingNearbyEntitySnapshot()
+    {
+        NearbyEntitySnapshot? snapshot;
+
+        lock (_nearbyEntityUpdateSync)
+        {
+            snapshot = _pendingNearbyEntitySnapshot;
+            _pendingNearbyEntitySnapshot = null;
+            _isNearbyEntityUpdateQueued = false;
+        }
+
+        if (snapshot is not null)
+        {
+            ApplyNearbyEntitySnapshot(snapshot);
+        }
+    }
+
+    private void ApplyNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)
+    {
+        _entityListWidget?.UpdateNearbyEntities(
+            snapshot.Entries,
+            snapshot.MapName,
+            snapshot.MapGeneration);
     }
 
     private void ConfigManager_SettingsChanged(object? sender, EventArgs e)

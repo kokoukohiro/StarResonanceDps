@@ -14,4 +14,5 @@ public sealed record PlayerRosterEntry(
     int SubProfessionId = 0,
     int Level = 0,
     int SeasonLevel = 0,
-    PlayerEquipmentData? EquipmentData = null);
+    PlayerEquipmentData? EquipmentData = null,
+    bool IsNpc = false);

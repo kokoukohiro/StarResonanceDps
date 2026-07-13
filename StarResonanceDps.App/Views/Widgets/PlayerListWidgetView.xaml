@@ -302,14 +302,19 @@
                                                TextTrimming="CharacterEllipsis" />
                                 </Grid>
 
-                                <Grid Grid.Column="1" Margin="6,0,0,0">
+                                <Grid Grid.Column="1"
+                                      Height="34"
+                                      Margin="6,0,0,0"
+                                      VerticalAlignment="Center"
+                                      ClipToBounds="False">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="23" />
-                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="11" />
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Grid.Row="0"
-                                               VerticalAlignment="Top"
+                                               HorizontalAlignment="Left"
+                                               VerticalAlignment="Center"
                                                Style="{StaticResource Text.WidgetWindow}"
                                                FontSize="12"
                                                FontWeight="SemiBold"
@@ -328,21 +333,51 @@
                                               Height="8"
                                               VerticalAlignment="Center">
                                             <Grid.Clip>
-                                                <RectangleGeometry Rect="0,0,120,8" RadiusX="4" RadiusY="4" />
+                                                <RectangleGeometry Rect="0,0,120,8"
+                                                                   RadiusX="4"
+                                                                   RadiusY="4" />
                                             </Grid.Clip>
+
                                             <Border Height="8"
                                                     HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center"
-                                                    Background="#FF1CE6A7">
+                                                    VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="{x:Type Border}">
+                                                        <Setter Property="Background" Value="#FF1CE6A7" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsNpc}" Value="True">
+                                                                <Setter Property="Background" Value="#FFABABAB" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
                                                 <Border.Width>
                                                     <MultiBinding Converter="{StaticResource PlayerList.HealthRatioToWidthConverter}">
                                                         <Binding Path="HealthRatio" />
-                                                        <Binding ElementName="HealthFillHost" Path="ActualWidth" />
+                                                        <Binding ElementName="HealthFillHost"
+                                                                 Path="ActualWidth" />
                                                     </MultiBinding>
                                                 </Border.Width>
                                             </Border>
                                         </Grid>
                                     </Border>
+
+                                    <Canvas Grid.Row="1"
+                                            Panel.ZIndex="1"
+                                            Width="122"
+                                            Height="10"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Top"
+                                            ClipToBounds="False"
+                                            IsHitTestVisible="False">
+                                        <TextBlock Canvas.Top="-3"
+                                                   Width="122"
+                                                   Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding HealthText}"
+                                                   TextAlignment="Center" />
+                                    </Canvas>
                                 </Grid>
                             </Grid>
                         </Button>

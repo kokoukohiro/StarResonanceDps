@@ -11,6 +11,7 @@ using Zproto;
 using Google.Protobuf.Collections;
 using System.Numerics;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
+using StarResonanceDps.Core.Services;
 using System.Collections.Concurrent;
 using ZLinq;
 
@@ -92,6 +93,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             SkillCooldownStateStore.Reset();
+            NearbyEntityStore.Instance.Clear();
         }
 
         public static SharpPcap.LibPcap.LibPcapLiveDevice? TryFindBestNetworkDevice()
@@ -144,6 +146,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (vData.EnterSceneInfo.PlayerEnt != null)
                 {
+                    NearbyEntityProjection.SetSelfEntity(vData.EnterSceneInfo.PlayerEnt.Uuid);
+
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
                         ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
@@ -232,6 +236,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EncounterManager.SetSceneId(vData.VRequest.Data.SceneData.LevelMapId);
                     EncounterManager.Current.SetChannelLineNumber(vData.VRequest.Data.SceneData.LineId);
                     PlayerRosterProjection.UpdateMapName();
+                    NearbyEntityProjection.UpdateMapName();
                     EncounterManager.AllowSceneUpdate = false;
                 }
             }
@@ -582,6 +587,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrProfessionId:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
+                    case EAttrType.AttrCamp:
+                        {
+                            var camp = isNoValue ? 0 : reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, camp);
+                            NearbyEntityProjection.UpdateCamp(uuid, !isNoValue, camp);
+                            break;
+                        }
                     case EAttrType.AttrFightPoint:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
@@ -602,6 +614,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                         break;
                     case EAttrType.AttrMaxHp:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
+                        break;
+                    case EAttrType.AttrMaxStunned:
+                    case EAttrType.AttrStunned:
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrAttack:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
@@ -801,11 +817,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void ProcessSyncNearEntities(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
-
             var syncNearEntities = SyncNearEntities.Parser.ParseFrom(payloadBuffer);
-            if (syncNearEntities.Appear == null || syncNearEntities.Appear.Count == 0)
+
+            foreach (var disappearedEntity in syncNearEntities.Disappear)
             {
-                return;
+                NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
             }
 
             foreach (var entity in syncNearEntities.Appear)
@@ -825,14 +841,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 var attrCollection = entity.Attrs;
-                if (attrCollection?.Attrs == null)
+                if (attrCollection?.Attrs != null)
                 {
-                    continue;
+                    ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                 }
 
-                ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                 PlayerRosterProjection.UpsertPlayer(entity.Uuid);
-
+                NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
 
             if (IsWipeCheckQueued)
@@ -884,9 +899,18 @@ namespace StarResonanceDps.Core.CombatRuntime
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
             long targetUid = Utils.UuidToEntityId(targetUuid);
             var attrCollection = delta.Attrs;
+            HashSet<EAttrType> changedAttributes = [];
 
             if (attrCollection?.Attrs != null && attrCollection.Attrs.Any())
             {
+                foreach (var attr in attrCollection.Attrs)
+                {
+                    if (attr.Id != 0 && attr.RawData != null)
+                    {
+                        changedAttributes.Add((EAttrType)attr.Id);
+                    }
+                }
+
                 ProcessAttrs(targetUuid, attrCollection.Attrs);
             }
 
@@ -895,6 +919,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ProcessTempAttrs(targetUuid, delta.TempAttrs.Attrs);
             }
 
+            NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes);
             PlayerRosterProjection.UpsertPlayer(targetUuid);
 
             if (AppState.IsEncounterSavingPaused && Settings.Instance.MinimalProcessingWhileEncounterSavingPaused)
@@ -1185,6 +1210,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 AppState.PlayerUID = Utils.UuidToEntityId(uuid);
             }
 
+            NearbyEntityProjection.SetSelfEntity(uuid);
             SkillCooldownStateStore.SetSelfPlayer(uuid);
             SkillCooldownStateStore.UpdateSelfCooldowns(uuid, aoiSyncToMeDelta.SyncSkillCDs);
 
@@ -1210,6 +1236,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             BattleStateMachine.StartNewMap();
             PlayerRosterProjection.BeginMap();
+            NearbyEntityProjection.BeginMap();
 
             var syncContainerData = SyncContainerData.Parser.ParseFrom(payloadBuffer);
             if (syncContainerData?.VData == null)
@@ -1225,6 +1252,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             long playerUuid = Utils.EntityIdToUuid(vData.CharId, (long)EEntityType.EntChar, false, false);
 
+            NearbyEntityProjection.SetSelfEntity(playerUuid);
             SkillCooldownStateStore.SetSelfPlayer(playerUuid);
             AppState.PlayerUID = vData.CharId;
             if (!string.IsNullOrEmpty(vData.CharBase.AccountId))
@@ -1284,6 +1312,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.SetSceneId(sceneData.LevelMapId);
                 EncounterManager.Current.SetChannelLineNumber(sceneData.LineId);
                 PlayerRosterProjection.UpdateMapName();
+                NearbyEntityProjection.UpdateMapName();
             }
 
             var seasonRoleLevelData = vData.SeasonRoleLevelData;
