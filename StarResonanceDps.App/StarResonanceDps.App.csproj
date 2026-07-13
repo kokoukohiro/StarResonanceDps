@@ -148,15 +148,6 @@
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
-    <Resource Include="Assets\Images\profession_horizontal_01.png" />
-    <Resource Include="Assets\Images\profession_horizontal_02.png" />
-    <Resource Include="Assets\Images\profession_horizontal_03.png" />
-    <Resource Include="Assets\Images\profession_horizontal_04.png" />
-    <Resource Include="Assets\Images\profession_horizontal_05.png" />
-    <Resource Include="Assets\Images\profession_horizontal_06.png" />
-    <Resource Include="Assets\Images\profession_horizontal_07.png" />
-    <Resource Include="Assets\Images\profession_horizontal_08.png" />
-    <Resource Include="Assets\Images\profession_horizontal_09.png" />
     <Resource Include="Assets\Images\profession_horizontal_hud00.png" />
     <Resource Include="Assets\Images\profession_horizontal_hud01.png" />
     <Resource Include="Assets\Images\profession_horizontal_hud02.png" />
