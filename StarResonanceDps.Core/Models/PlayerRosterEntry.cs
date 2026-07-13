@@ -15,4 +15,7 @@ public sealed record PlayerRosterEntry(
     int Level = 0,
     int SeasonLevel = 0,
     PlayerEquipmentData? EquipmentData = null,
-    bool IsNpc = false);
+    bool IsNpc = false,
+    long CurrentShield = 0,
+    int CurrentStamina = 0,
+    int MaxStamina = 0);

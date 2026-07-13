@@ -12,88 +12,159 @@
                    Margin="0,0,0,10" />
 
         <ContentControl Style="{StaticResource Panel.SettingSection}"
-                        Margin="0,0,0,12"
-                        Padding="20,11,20,11">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="134" />
-                    <ColumnDefinition Width="12" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+                        Margin="0,0,0,12">
+            <StackPanel>
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Padding" Value="20,11,20,11" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsHealthValueSettings}" Value="False">
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
 
-                <TextBlock Grid.Row="0"
-                           VerticalAlignment="Center"
-                           Text="{Binding PlayerInfoCustomizationTitle}"
-                           Foreground="{DynamicResource Brush.TextPrimary}"
-                           FontSize="14"
-                           FontWeight="SemiBold" />
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="134" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-                <TextBox Grid.Row="0"
-                         Grid.Column="2"
-                         Height="32"
-                         Style="{StaticResource Input.PathBox}"
-                         Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         VerticalContentAlignment="Center" />
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding PlayerInfoCustomizationTitle}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
 
-                <Grid Grid.Row="1"
-                      Grid.ColumnSpan="4"
-                      Margin="0,4,0,0"
-                      VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="146" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                        <TextBox Grid.Row="0"
+                                 Grid.Column="2"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center" />
 
-                    <TextBlock Grid.Column="1"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource Brush.TextSecondary}"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance},
-                               Path=[Settings_PlayerInfo_Preview]}" />
+                        <Grid Grid.Row="1"
+                              Grid.ColumnSpan="4"
+                              Margin="0,4,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="2"
-                               VerticalAlignment="Center"
-                               Foreground="{DynamicResource Brush.TextSecondary}"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Text="{Binding FormatPreview}"
-                               TextTrimming="CharacterEllipsis" />
-                </Grid>
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Preview]}" />
 
-                <Grid Grid.Row="2"
-                      Grid.ColumnSpan="4"
-                      Margin="0,12,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="146" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding FormatPreview}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
 
-                    <Grid Grid.Column="1" x:Name="PlayerInfoFormatFieldHost">
-                        <ComboBox Width="{Binding ActualWidth, ElementName=PlayerInfoFormatFieldHost}"
-                                  MaxWidth="220"
-                                  HorizontalAlignment="Right"
-                                  ItemsSource="{Binding AvailablePlayerInfoFormatFields}"
-                                  SelectedItem="{Binding SelectedPlayerInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="4"
+                              Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="1" x:Name="PlayerInfoFormatFieldHost">
+                                <ComboBox Width="{Binding ActualWidth, ElementName=PlayerInfoFormatFieldHost}"
+                                          MaxWidth="220"
+                                          HorizontalAlignment="Right"
+                                          ItemsSource="{Binding AvailablePlayerInfoFormatFields}"
+                                          SelectedItem="{Binding SelectedPlayerInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource Input.SettingsComboBox}" />
+                            </Grid>
+
+                            <Button Grid.Column="3"
+                                    Command="{Binding AddPlayerInfoFormatFieldCommand}"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Visibility="{Binding ShowsHealthValueSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsStaminaGaugeSetting}" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_HealthValue]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding HealthValueDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_AddShield]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_SeparateShield]}" />
                         </ComboBox>
                     </Grid>
+                </Border>
 
-                    <Button Grid.Column="3"
-                            Command="{Binding AddPlayerInfoFormatFieldCommand}"
-                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
-                            MinWidth="64"
-                            Style="{StaticResource Button.Text}" />
-                </Grid>
-            </Grid>
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsStaminaGaugeSetting, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_StaminaGauge]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding StaminaGaugeDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[StaminaGaugeDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[StaminaGaugeDisplay_Hide]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+            </StackPanel>
         </ContentControl>
     </StackPanel>
 </UserControl>

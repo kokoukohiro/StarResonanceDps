@@ -229,6 +229,22 @@ public static class Utils
         EntCount = 23
     }
 
+    public static long GetCurrentShield(Entity entity)
+    {
+        if (entity.GetAttrKV("AttrShieldList") is not IEnumerable<ShieldInfo> shields)
+        {
+            return 0L;
+        }
+
+        long total = 0L;
+        foreach (var shield in shields)
+        {
+            total += shield.Value;
+        }
+
+        return total;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long UuidToEntityId(long uuid) => uuid >> 16;
 

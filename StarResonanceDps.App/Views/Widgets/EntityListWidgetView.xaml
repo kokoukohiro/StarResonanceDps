@@ -175,52 +175,85 @@
                                                                    RadiusY="4" />
                                             </Grid.Clip>
 
-                                            <Grid HorizontalAlignment="Left"
-                                                  ClipToBounds="True">
-                                                <Grid.Width>
-                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
-                                                        <Binding Path="HealthRatio" />
-                                                        <Binding ElementName="EntityHealthFillHost"
-                                                                 Path="ActualWidth" />
-                                                    </MultiBinding>
-                                                </Grid.Width>
+                                            <Canvas Width="120" Height="8">
+                                                <Grid Panel.ZIndex="0"
+                                                      Canvas.Left="0"
+                                                      Height="8"
+                                                      ClipToBounds="True">
+                                                    <Grid.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Grid.Width>
 
-                                                <Border Width="120"
+                                                    <Border Width="120"
+                                                            Height="8"
+                                                            HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="{x:Type Border}">
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0.5"
+                                                                                             EndPoint="1,0.5">
+                                                                            <GradientStop Color="#FFFF0900" Offset="0" />
+                                                                            <GradientStop Color="#FFFF0900" Offset="0.05" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="0.95" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="1" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding UsesFriendlyHealthBar}" Value="True">
+                                                                        <Setter Property="Background" Value="#FF1CE6A7" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsInvulnerable}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFA8A8A8" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                </Grid>
+
+                                                <Border Panel.ZIndex="1"
                                                         Height="8"
-                                                        HorizontalAlignment="Left">
-                                                    <Border.Style>
-                                                        <Style TargetType="{x:Type Border}">
-                                                            <Setter Property="Background">
-                                                                <Setter.Value>
-                                                                    <LinearGradientBrush StartPoint="0,0.5"
-                                                                                         EndPoint="1,0.5">
-                                                                        <GradientStop Color="#FFFF0900"
-                                                                                      Offset="0" />
-                                                                        <GradientStop Color="#FFFF0900"
-                                                                                      Offset="0.05" />
-                                                                        <GradientStop Color="#FFFF8604"
-                                                                                      Offset="0.95" />
-                                                                        <GradientStop Color="#FFFF8604"
-                                                                                      Offset="1" />
-                                                                    </LinearGradientBrush>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding UsesFriendlyHealthBar}" Value="True">
-                                                                    <Setter Property="Background" Value="#FF1CE6A7" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding IsInvulnerable}" Value="True">
-                                                                    <Setter Property="Background" Value="#FFA8A8A8" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
+                                                        Background="#FFFEFEFE">
+                                                    <Canvas.Left>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Canvas.Left>
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldVisibleRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
                                                 </Border>
-                                            </Grid>
+
+                                                <Border Panel.ZIndex="2"
+                                                        Height="8"
+                                                        Background="#FFFEFEFE">
+                                                    <Canvas.Left>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldOverflowStartRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Canvas.Left>
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldOverflowRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
+                                                </Border>
+                                            </Canvas>
                                         </Grid>
                                     </Border>
 
-                                    <Canvas Panel.ZIndex="1"
+                                    <Canvas Panel.ZIndex="3"
                                             Width="122"
                                             Height="10"
                                             HorizontalAlignment="Left"

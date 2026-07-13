@@ -550,6 +550,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             System.Diagnostics.Debug.WriteLine($"ProcessSyncHitInfo");
         }
         public static bool IsWipeCheckQueued = false;
+        private static readonly HashSet<EAttrType> ShieldListChangedAttributes = [EAttrType.AttrShieldList];
+
         public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
         {
             foreach (var attr in attrs)
@@ -938,6 +940,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var originalArrivalTime = extraData.ArrivalTime;
 
             long buffBasedShieldBreakValue = 0;
+            bool shieldListChangedByBuffRemoval = false;
 
             List<int> EventHandledBuffs = new();
             List<int> LogicHandledBuffs = new();
@@ -1012,11 +1015,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     attrShieldList.Remove(match);
 
                                     targetEntity.SetAttrKV("AttrShieldList", attrShieldList);
+                                    shieldListChangedByBuffRemoval = true;
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            if (shieldListChangedByBuffRemoval)
+            {
+                NearbyEntityProjection.RefreshEntity(targetUuid, ShieldListChangedAttributes);
+                PlayerRosterProjection.UpsertPlayer(targetUuid);
             }
 
             extraData.ArrivalTime = originalArrivalTime;

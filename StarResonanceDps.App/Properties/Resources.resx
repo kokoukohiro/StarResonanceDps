@@ -762,4 +762,22 @@
   <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
     <value>Imagine &amp; Role Skill Information</value>
   </data>
+  <data name="Settings_Display_HealthValue" xml:space="preserve">
+    <value>HP value</value>
+  </data>
+  <data name="HealthValueDisplay_AddShield" xml:space="preserve">
+    <value>Add shield amount</value>
+  </data>
+  <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
+    <value>Show shield separately</value>
+  </data>
+  <data name="Settings_Display_StaminaGauge" xml:space="preserve">
+    <value>Stamina gauge</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Hide" xml:space="preserve">
+    <value>Hide</value>
+  </data>
 </root>

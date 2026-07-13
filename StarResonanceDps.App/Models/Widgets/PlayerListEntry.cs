@@ -29,7 +29,25 @@ public sealed partial class PlayerListEntry : ObservableObject
     private double _healthRatio;
 
     [ObservableProperty]
+    private double _shieldVisibleRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowStartRatio = 1d;
+
+    [ObservableProperty]
     private string _healthText = string.Empty;
+
+    [ObservableProperty]
+    private bool _showStaminaGauge;
+
+    [ObservableProperty]
+    private double _staminaRatio;
+
+    [ObservableProperty]
+    private string _staminaText = string.Empty;
 
     [ObservableProperty]
     private bool _isNpc;
@@ -71,8 +89,19 @@ public sealed partial class PlayerListEntry : ObservableObject
             displayPlayer,
             settings.PlayerInfoFormatString,
             playerNameDisplayMode);
-        HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
-        HealthText = FormatValuePair(player.CurrentHp, player.MaxHp);
+
+        HealthRatio = GetRatio(player.CurrentHp, player.MaxHp, 1d);
+        UpdateShieldGeometry(player.CurrentHp, player.MaxHp, player.CurrentShield);
+        HealthText = FormatHealthText(
+            player.CurrentHp,
+            player.MaxHp,
+            player.CurrentShield,
+            settings.HealthValueDisplayModeIndex);
+
+        ShowStaminaGauge = settings.StaminaGaugeDisplayModeIndex
+            == WidgetConfigDefaults.VisibleStaminaGaugeDisplayModeIndex;
+        StaminaRatio = GetRatio(player.CurrentStamina, player.MaxStamina, 0d);
+        StaminaText = FormatValuePair(player.CurrentStamina, player.MaxStamina);
 
         var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
@@ -86,16 +115,62 @@ public sealed partial class PlayerListEntry : ObservableObject
         OnPropertyChanged(nameof(IsHealthFull));
     }
 
-    private static double GetHealthRatio(long currentHp, long maxHp)
+    private void UpdateShieldGeometry(long currentHp, long maxHp, long currentShield)
     {
         if (maxHp <= 0)
         {
-            return 1d;
+            ShieldVisibleRatio = 0d;
+            ShieldOverflowRatio = 0d;
+            ShieldOverflowStartRatio = 1d;
+            return;
         }
 
-        return Math.Clamp(currentHp / (double)maxHp, 0d, 1d);
+        var displayedHp = Math.Clamp(currentHp, 0L, maxHp);
+        var shield = Math.Max(currentShield, 0L);
+        var availableHealthCapacity = maxHp - displayedHp;
+        var foldsEntireShield = shield > availableHealthCapacity;
+
+        var visibleShield = foldsEntireShield
+            ? 0L
+            : shield;
+
+        var overflowShield = foldsEntireShield
+            ? Math.Min(shield, maxHp)
+            : 0L;
+
+        ShieldVisibleRatio = visibleShield / (double)maxHp;
+        ShieldOverflowRatio = overflowShield / (double)maxHp;
+        ShieldOverflowStartRatio = 1d - ShieldOverflowRatio;
     }
 
+    private static double GetRatio(long currentValue, long maxValue, double valueWhenMaximumIsUnavailable)
+    {
+        if (maxValue <= 0)
+        {
+            return valueWhenMaximumIsUnavailable;
+        }
+
+        return Math.Clamp(currentValue / (double)maxValue, 0d, 1d);
+    }
+
+    private static string FormatHealthText(
+        long currentHp,
+        long maxHp,
+        long currentShield,
+        int displayModeIndex)
+    {
+        var shield = Math.Max(currentShield, 0L);
+        return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
+            ? $"{currentHp}({shield})/{maxHp}"
+            : $"{AddSaturating(currentHp, shield)}/{maxHp}";
+    }
+
+    private static long AddSaturating(long value, long nonNegativeAddition)
+    {
+        return nonNegativeAddition > 0 && value > long.MaxValue - nonNegativeAddition
+            ? long.MaxValue
+            : value + nonNegativeAddition;
+    }
 
     private static string FormatValuePair(long currentValue, long maxValue)
     {

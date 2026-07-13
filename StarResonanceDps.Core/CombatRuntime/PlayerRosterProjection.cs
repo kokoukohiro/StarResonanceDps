@@ -116,7 +116,10 @@ internal static class PlayerRosterProjection
             entity.Level,
             ToInt32(entity.SeasonLevel),
             equipmentData,
-            isNpc));
+            isNpc,
+            Utils.GetCurrentShield(entity),
+            GetInt(entity, "AttrOriginEnergy"),
+            GetInt(entity, "AttrMaxOriginEnergy")));
     }
 
     private static PlayerEquipmentData? GetEquipmentData(Entity entity)

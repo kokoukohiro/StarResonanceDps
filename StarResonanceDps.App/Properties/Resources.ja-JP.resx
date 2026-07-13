@@ -762,4 +762,22 @@
   <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
     <value>イマジン・ロールスキル情報</value>
   </data>
+  <data name="Settings_Display_HealthValue" xml:space="preserve">
+    <value>HP数値</value>
+  </data>
+  <data name="HealthValueDisplay_AddShield" xml:space="preserve">
+    <value>バリア量加算表示</value>
+  </data>
+  <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
+    <value>バリア量個別表示</value>
+  </data>
+  <data name="Settings_Display_StaminaGauge" xml:space="preserve">
+    <value>スタミナゲージ</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Show" xml:space="preserve">
+    <value>表示</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Hide" xml:space="preserve">
+    <value>非表示</value>
+  </data>
 </root>

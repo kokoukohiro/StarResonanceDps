@@ -43,6 +43,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private string _formatPreview = string.Empty;
 
     [ObservableProperty]
+    private int _healthValueDisplayModeIndex = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
+
+    [ObservableProperty]
+    private int _staminaGaugeDisplayModeIndex = WidgetConfigDefaults.DefaultStaminaGaugeDisplayModeIndex;
+
+    [ObservableProperty]
     private double _classColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public MeterWidgetSettingsViewModel(WidgetKind kind, MeterWidgetSettingsConfig? config)
@@ -94,6 +100,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool HasClassColorOpacity => UsesMeterClassColorIconBackground;
 
+    public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
+
+    public bool ShowsStaminaGaugeSetting => _kind == WidgetKind.PlayerList;
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -122,6 +132,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         var config = new MeterWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
+            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            StaminaGaugeDisplayModeIndex = StaminaGaugeDisplayModeIndex,
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -188,6 +200,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             }
 
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
+            HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
+            StaminaGaugeDisplayModeIndex = normalized.StaminaGaugeDisplayModeIndex;
             ClassColorOpacity = normalized.ClassColorOpacity;
         }
         finally
@@ -208,6 +222,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private bool SettingsEqual(MeterWidgetSettingsConfig left, MeterWidgetSettingsConfig right)
     {
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
+            || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
+            || left.StaminaGaugeDisplayModeIndex != right.StaminaGaugeDisplayModeIndex
             || left.ClassColorOpacity != right.ClassColorOpacity)
         {
             return false;
@@ -305,6 +321,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         RefreshFormatPreview();
+        NotifyChanged();
+    }
+
+    partial void OnHealthValueDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnStaminaGaugeDisplayModeIndexChanged(int value)
+    {
         NotifyChanged();
     }
 
