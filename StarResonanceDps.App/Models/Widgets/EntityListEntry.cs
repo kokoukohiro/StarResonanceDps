@@ -32,6 +32,15 @@ public sealed partial class EntityListEntry : ObservableObject
     private double _healthRatio;
 
     [ObservableProperty]
+    private double _shieldVisibleRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowStartRatio = 1d;
+
+    [ObservableProperty]
     private string _healthText = string.Empty;
 
     [ObservableProperty]
@@ -55,6 +64,9 @@ public sealed partial class EntityListEntry : ObservableObject
     [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
 
+    [ObservableProperty]
+    private bool _isEntitySelectionMenuOpen;
+
     public bool UsesFriendlyHealthBar => CampRelation != EntityCampRelation.Hostile;
 
     public static EntityListEntry Create(
@@ -74,7 +86,12 @@ public sealed partial class EntityListEntry : ObservableObject
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
         DisplayName = EntityInfoFormatFormatter.Format(entity, settings.PlayerInfoFormatString);
         HealthRatio = GetRatio(entity.CurrentHp, entity.MaxHp);
-        HealthText = FormatValuePair(entity.CurrentHp, entity.MaxHp);
+        UpdateShieldGeometry(entity.CurrentHp, entity.MaxHp, entity.CurrentShield);
+        HealthText = FormatHealthText(
+            entity.CurrentHp,
+            entity.MaxHp,
+            entity.CurrentShield,
+            settings.HealthValueDisplayModeIndex);
         HasBreakGauge = entity.MaxBreak > 0;
         BreakRatio = HasBreakGauge ? GetRatio(entity.CurrentBreak, entity.MaxBreak) : 0d;
         BreakText = HasBreakGauge ? FormatValuePair(entity.CurrentBreak, entity.MaxBreak) : string.Empty;
@@ -92,6 +109,34 @@ public sealed partial class EntityListEntry : ObservableObject
     partial void OnCampRelationChanged(EntityCampRelation value)
     {
         OnPropertyChanged(nameof(UsesFriendlyHealthBar));
+    }
+
+    private void UpdateShieldGeometry(long currentHp, long maxHp, long currentShield)
+    {
+        if (maxHp <= 0)
+        {
+            ShieldVisibleRatio = 0d;
+            ShieldOverflowRatio = 0d;
+            ShieldOverflowStartRatio = 1d;
+            return;
+        }
+
+        var displayedHp = Math.Clamp(currentHp, 0L, maxHp);
+        var shield = Math.Max(currentShield, 0L);
+        var availableHealthCapacity = maxHp - displayedHp;
+        var foldsEntireShield = shield > availableHealthCapacity;
+
+        var visibleShield = foldsEntireShield
+            ? 0L
+            : shield;
+
+        var overflowShield = foldsEntireShield
+            ? Math.Min(shield, maxHp)
+            : 0L;
+
+        ShieldVisibleRatio = visibleShield / (double)maxHp;
+        ShieldOverflowRatio = overflowShield / (double)maxHp;
+        ShieldOverflowStartRatio = 1d - ShieldOverflowRatio;
     }
 
     private static string GetClassificationKey(NearbyEntityEntry entity)
@@ -118,6 +163,25 @@ public sealed partial class EntityListEntry : ObservableObject
         }
 
         return Math.Clamp(currentValue / (double)maxValue, 0d, 1d);
+    }
+
+    private static string FormatHealthText(
+        long currentHp,
+        long maxHp,
+        long currentShield,
+        int displayModeIndex)
+    {
+        var shield = Math.Max(currentShield, 0L);
+        return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
+            ? $"{currentHp}({shield})/{maxHp}"
+            : $"{AddSaturating(currentHp, shield)}/{maxHp}";
+    }
+
+    private static long AddSaturating(long value, long nonNegativeAddition)
+    {
+        return nonNegativeAddition > 0 && value > long.MaxValue - nonNegativeAddition
+            ? long.MaxValue
+            : value + nonNegativeAddition;
     }
 
     private static string FormatValuePair(long currentValue, long maxValue)

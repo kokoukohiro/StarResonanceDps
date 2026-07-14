@@ -59,9 +59,7 @@ public static class PlayerSkillLevelStateStore
                 continue;
             }
 
-            var level = pair.Value.RemodelLevel > 0
-                ? pair.Value.RemodelLevel
-                : pair.Value.Level;
+            var level = pair.Value.Level;
             if (level <= 0)
             {
                 continue;

@@ -19,6 +19,10 @@ namespace StarResonanceDps.Core.CombatRuntime
 {
     public static class MessageManager
     {
+        private const double OriginEnergyRawScale = 100d;
+        private const string CurrentStaminaSnapshotAttribute = "CurrentStaminaSnapshot";
+        private const string MaxStaminaSnapshotAttribute = "MaxStaminaSnapshot";
+
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
         public static EGameCapturePreference GameCapturePreference = EGameCapturePreference.Auto;
@@ -550,6 +554,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             System.Diagnostics.Debug.WriteLine($"ProcessSyncHitInfo");
         }
         public static bool IsWipeCheckQueued = false;
+        private static readonly HashSet<EAttrType> ShieldListChangedAttributes = [EAttrType.AttrShieldList];
+
         public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
         {
             foreach (var attr in attrs)
@@ -615,6 +621,26 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrMaxHp:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
                         break;
+                    case EAttrType.AttrOriginEnergy:
+                        {
+                            var rawOriginEnergy = isNoValue ? 0 : reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, rawOriginEnergy);
+                            EncounterManager.Current.SetAttrKV(
+                                uuid,
+                                CurrentStaminaSnapshotAttribute,
+                                Math.Max(rawOriginEnergy / OriginEnergyRawScale, 0d));
+                            break;
+                        }
+                    case EAttrType.AttrMaxOriginEnergy:
+                        {
+                            var rawMaxOriginEnergy = isNoValue ? 0 : reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, rawMaxOriginEnergy);
+                            EncounterManager.Current.SetAttrKV(
+                                uuid,
+                                MaxStaminaSnapshotAttribute,
+                                Math.Max(rawMaxOriginEnergy / OriginEnergyRawScale, 0d));
+                            break;
+                        }
                     case EAttrType.AttrMaxStunned:
                     case EAttrType.AttrStunned:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
@@ -938,6 +964,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var originalArrivalTime = extraData.ArrivalTime;
 
             long buffBasedShieldBreakValue = 0;
+            bool shieldListChangedByBuffRemoval = false;
 
             List<int> EventHandledBuffs = new();
             List<int> LogicHandledBuffs = new();
@@ -1012,11 +1039,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     attrShieldList.Remove(match);
 
                                     targetEntity.SetAttrKV("AttrShieldList", attrShieldList);
+                                    shieldListChangedByBuffRemoval = true;
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            if (shieldListChangedByBuffRemoval)
+            {
+                NearbyEntityProjection.RefreshEntity(targetUuid, ShieldListChangedAttributes);
+                PlayerRosterProjection.UpsertPlayer(targetUuid);
             }
 
             extraData.ArrivalTime = originalArrivalTime;
@@ -1276,6 +1310,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.Current.SetAttrKV(playerUuid, "AttrMaxHp", vData.Attr.MaxHp);
             }
 
+            if (vData.Attr != null)
+            {
+                EncounterManager.Current.SetAttrKV(
+                    playerUuid,
+                    CurrentStaminaSnapshotAttribute,
+                    Math.Max(vData.Attr.OriginEnergy, 0f));
+            }
+
             if (vData.CharBase != null)
             {
                 if (!string.IsNullOrEmpty(vData.CharBase.Name))
@@ -1399,6 +1441,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     if (ser.Attr.MaxHp != null)
                     {
                         EncounterManager.Current.SetAttrKV(currentUserUuid, "AttrMaxHp", ser.Attr.MaxHp);
+                    }
+                    if (ser.Attr.OriginEnergy != null)
+                    {
+                        EncounterManager.Current.SetAttrKV(
+                            currentUserUuid,
+                            CurrentStaminaSnapshotAttribute,
+                            Math.Max(ser.Attr.OriginEnergy.Value, 0f));
                     }
                 }
 

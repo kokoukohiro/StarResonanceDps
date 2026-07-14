@@ -55,7 +55,8 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
-        _entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
+        var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
+        _entityListWidget = entityListWidget;
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
@@ -64,6 +65,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
+        entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
         AddWidget(WidgetKind.DamageContribution, "Widget_DamageSkillDetails");
@@ -155,6 +157,11 @@ public sealed partial class MainViewModel : ViewModelBase
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)
     {
         _widgetWindowManager.OpenPlayerWindow(kind, characterId);
+    }
+
+    private void EntityListWidget_EntityWindowRequested(WidgetKind kind, EntityListEntry entity)
+    {
+        _widgetWindowManager.OpenEntityWindow(kind, entity);
     }
 
     private void PlayerRosterPresentationStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
@@ -264,10 +271,16 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void ApplyNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)
     {
-        _entityListWidget?.UpdateNearbyEntities(
+        if (_entityListWidget is not { } entityListWidget)
+        {
+            return;
+        }
+
+        entityListWidget.UpdateNearbyEntities(
             snapshot.Entries,
             snapshot.MapName,
             snapshot.MapGeneration);
+        _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries);
     }
 
     private void ConfigManager_SettingsChanged(object? sender, EventArgs e)

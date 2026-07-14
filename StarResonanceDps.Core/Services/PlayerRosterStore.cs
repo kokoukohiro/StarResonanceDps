@@ -192,7 +192,20 @@ public sealed class PlayerRosterStore
             entry.Level,
             entry.SeasonLevel,
             entry.EquipmentData,
-            entry.IsNpc);
+            entry.IsNpc,
+<<<<<<< HEAD
+<<<<<<< HEAD
+            entry.CurrentShield);
+=======
+            entry.CurrentShield,
+            entry.CurrentStamina,
+            entry.MaxStamina);
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+            entry.CurrentShield,
+            entry.CurrentStamina,
+            entry.MaxStamina);
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     }
 }
 

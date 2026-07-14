@@ -3,10 +3,112 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <UserControl.Resources>
         <converters:HealthRatioToWidthConverter x:Key="EntityList.RatioToWidthConverter" />
+
+        <CornerRadius x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.LastCornerRadius}" />
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -31,8 +133,25 @@
                                 Focusable="False"
                                 IsTabStop="False"
                                 ContextMenuService.IsEnabled="False"
+                                PreviewMouseRightButtonDown="EntityListItem_PreviewMouseRightButtonDown"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                                Click="EntityListItem_Click"
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch">
+                            <Button.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                             IsOpen="{Binding PlacementTarget.DataContext.IsEntitySelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                             Placement="MousePoint"
+                                             Opened="EntitySelectionContextMenu_Opened"
+                                             Closed="EntitySelectionContextMenu_Closed">
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
+                                              Command="{Binding RequestEntityBuffListCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
+                                              Command="{Binding RequestEntityDebuffListCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Template">
@@ -55,6 +174,9 @@
                                                     <Trigger Property="IsPressed" Value="True">
                                                         <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
                                                     </Trigger>
+                                                    <DataTrigger Binding="{Binding IsEntitySelectionMenuOpen}" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
                                         </Setter.Value>
@@ -121,106 +243,416 @@
                                                TextAlignment="Center"
                                                TextTrimming="CharacterEllipsis" />
                                 </Grid>
-
+                                
                                 <Grid Grid.Column="1"
                                       Height="34"
                                       Margin="6,0,0,0"
                                       VerticalAlignment="Center"
                                       ClipToBounds="False">
-                                    <Grid VerticalAlignment="Top">
+                                    <Grid.Resources>
+                                        <DataTemplate x:Key="EntityHealthRowTemplate">
+                                            <Grid Height="10"
+                                                  ClipToBounds="False">
+                                                <Border Width="122"
+                                                        Height="10"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center"
+                                                        Background="#FF000000"
+                                                        CornerRadius="5"
+                                                        Padding="1">
+                                                    <Grid x:Name="EntityHealthFillHost"
+                                                          Height="8"
+                                                          VerticalAlignment="Center">
+                                                        <Grid.Clip>
+                                                            <RectangleGeometry Rect="0,0,120,8"
+                                                                               RadiusX="4"
+                                                                               RadiusY="4" />
+                                                        </Grid.Clip>
+
+                                                        <Canvas Width="120"
+                                                                Height="8">
+                                                            <Grid Panel.ZIndex="0"
+                                                                  Canvas.Left="0"
+                                                                  Height="8"
+                                                                  ClipToBounds="True">
+                                                                <Grid.Width>
+                                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                        <Binding Path="HealthRatio" />
+                                                                        <Binding ElementName="EntityHealthFillHost"
+                                                                                 Path="ActualWidth" />
+                                                                    </MultiBinding>
+                                                                </Grid.Width>
+
+                                                                <Border Width="120"
+                                                                        Height="8"
+                                                                        HorizontalAlignment="Left">
+                                                                    <Border.Style>
+                                                                        <Style TargetType="{x:Type Border}">
+                                                                            <Setter Property="Background">
+                                                                                <Setter.Value>
+                                                                                    <LinearGradientBrush StartPoint="0,0.5"
+                                                                                                         EndPoint="1,0.5">
+                                                                                        <GradientStop Color="#FFFF0900"
+                                                                                                      Offset="0" />
+                                                                                        <GradientStop Color="#FFFF0900"
+                                                                                                      Offset="0.05" />
+                                                                                        <GradientStop Color="#FFFF8604"
+                                                                                                      Offset="0.95" />
+                                                                                        <GradientStop Color="#FFFF8604"
+                                                                                                      Offset="1" />
+                                                                                    </LinearGradientBrush>
+                                                                                </Setter.Value>
+                                                                            </Setter>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding UsesFriendlyHealthBar}"
+                                                                                             Value="True">
+                                                                                    <Setter Property="Background"
+                                                                                            Value="#FF1CE6A7" />
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding IsInvulnerable}"
+                                                                                             Value="True">
+                                                                                    <Setter Property="Background"
+                                                                                            Value="#FFA8A8A8" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Border.Style>
+                                                                </Border>
+                                                            </Grid>
+
+                                                            <Border Panel.ZIndex="1"
+                                                                    Height="8"
+                                                                    Background="#FFFEFEFE">
+                                                                <Canvas.Left>
+                                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                        <Binding Path="HealthRatio" />
+                                                                        <Binding ElementName="EntityHealthFillHost"
+                                                                                 Path="ActualWidth" />
+                                                                    </MultiBinding>
+                                                                </Canvas.Left>
+                                                                <Border.Width>
+                                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                        <Binding Path="ShieldVisibleRatio" />
+                                                                        <Binding ElementName="EntityHealthFillHost"
+                                                                                 Path="ActualWidth" />
+                                                                    </MultiBinding>
+                                                                </Border.Width>
+                                                            </Border>
+
+                                                            <Border Panel.ZIndex="2"
+                                                                    Height="8"
+                                                                    Background="#FFFEFEFE">
+                                                                <Canvas.Left>
+                                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                        <Binding Path="ShieldOverflowStartRatio" />
+                                                                        <Binding ElementName="EntityHealthFillHost"
+                                                                                 Path="ActualWidth" />
+                                                                    </MultiBinding>
+                                                                </Canvas.Left>
+                                                                <Border.Width>
+                                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                        <Binding Path="ShieldOverflowRatio" />
+                                                                        <Binding ElementName="EntityHealthFillHost"
+                                                                                 Path="ActualWidth" />
+                                                                    </MultiBinding>
+                                                                </Border.Width>
+                                                            </Border>
+                                                        </Canvas>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Canvas Panel.ZIndex="3"
+                                                        Width="122"
+                                                        Height="10"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center"
+                                                        ClipToBounds="False"
+                                                        IsHitTestVisible="False">
+                                                    <TextBlock Canvas.Top="-3"
+                                                               Width="122"
+                                                               Style="{StaticResource Text.WidgetWindow}"
+                                                               FontSize="11"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding HealthText}"
+                                                               TextAlignment="Center" />
+                                                </Canvas>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </Grid.Resources>
+
+                                    <!-- ブレイクゲージなし：実際の23 + 11構造 -->
+                                    <Grid>
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
-                                                <Setter Property="Height" Value="23" />
+                                                <Setter Property="Visibility"
+                                                        Value="Visible" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasBreakGauge}" Value="True">
-                                                        <Setter Property="Height" Value="12" />
+                                                    <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility"
+                                                                Value="Collapsed" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Grid.Style>
 
-                                        <TextBlock HorizontalAlignment="Left"
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="23" />
+                                            <RowDefinition Height="11" />
+                                        </Grid.RowDefinitions>
+
+                                        <TextBlock Grid.Row="0"
+                                                   HorizontalAlignment="Left"
                                                    VerticalAlignment="Center"
                                                    Style="{StaticResource Text.WidgetWindow}"
                                                    FontSize="12"
                                                    FontWeight="SemiBold"
                                                    Text="{Binding DisplayName}"
                                                    TextTrimming="CharacterEllipsis" />
+
+                                        <ContentPresenter Grid.Row="1"
+                                                          Content="{Binding}"
+                                                          ContentTemplate="{StaticResource EntityHealthRowTemplate}" />
                                     </Grid>
 
-                                    <Border Width="122"
-                                            Height="10"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
-                                            Background="#FF000000"
-                                            CornerRadius="5"
-                                            Padding="1">
-                                        <Border.Style>
-                                            <Style TargetType="{x:Type Border}">
-                                                <Setter Property="Margin" Value="0" />
+                                    <!-- ブレイクゲージあり：実際の12 + 11 + 11構造 -->
+                                    <Grid Margin="0,-4,0,0">
+                                        <Grid.Style>
+                                            <Style TargetType="{x:Type Grid}">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasBreakGauge}" Value="True">
-                                                        <Setter Property="Margin" Value="0,0,0,11" />
+                                                    <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility"
+                                                                Value="Visible" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
-                                        </Border.Style>
+                                        </Grid.Style>
 
-                                        <Grid x:Name="EntityHealthFillHost"
-                                              Height="8"
-                                              VerticalAlignment="Center">
-                                            <Grid.Clip>
-                                                <RectangleGeometry Rect="0,0,120,8"
-                                                                   RadiusX="4"
-                                                                   RadiusY="4" />
-                                            </Grid.Clip>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="15" />
+                                            <RowDefinition Height="10" />
+                                            <RowDefinition Height="10" />
+                                        </Grid.RowDefinitions>
 
-                                            <Grid HorizontalAlignment="Left"
-                                                  ClipToBounds="True">
-                                                <Grid.Width>
-                                                    <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
-                                                        <Binding Path="HealthRatio" />
-                                                        <Binding ElementName="EntityHealthFillHost"
-                                                                 Path="ActualWidth" />
-                                                    </MultiBinding>
-                                                </Grid.Width>
+<<<<<<< HEAD
+<<<<<<< HEAD
+                                        <TextBlock Grid.Row="0"
+                                                   HorizontalAlignment="Left"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding DisplayName}"
+                                                   TextTrimming="CharacterEllipsis" />
 
-                                                <Border Width="120"
-                                                        Height="8"
-                                                        HorizontalAlignment="Left">
+                                        <ContentPresenter Grid.Row="1"
+                                                          Content="{Binding}"
+                                                          ContentTemplate="{StaticResource EntityHealthRowTemplate}" />
+
+                                        <Border Grid.Row="2"
+                                                Width="122"
+                                                Height="10"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Background="#FF000000"
+                                                CornerRadius="5"
+                                                Padding="1">
+                                            <Grid x:Name="BreakFillHost"
+                                                  Height="8"
+                                                  VerticalAlignment="Center">
+                                                <Grid.Clip>
+                                                    <RectangleGeometry Rect="0,0,120,8"
+                                                                       RadiusX="4"
+                                                                       RadiusY="4" />
+                                                </Grid.Clip>
+
+                                                <Border Height="8"
+                                                        HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center">
                                                     <Border.Style>
                                                         <Style TargetType="{x:Type Border}">
-                                                            <Setter Property="Background">
-                                                                <Setter.Value>
-                                                                    <LinearGradientBrush StartPoint="0,0.5"
-                                                                                         EndPoint="1,0.5">
-                                                                        <GradientStop Color="#FFFF0900"
-                                                                                      Offset="0" />
-                                                                        <GradientStop Color="#FFFF0900"
-                                                                                      Offset="0.05" />
-                                                                        <GradientStop Color="#FFFF8604"
-                                                                                      Offset="0.95" />
-                                                                        <GradientStop Color="#FFFF8604"
-                                                                                      Offset="1" />
-                                                                    </LinearGradientBrush>
-                                                                </Setter.Value>
-                                                            </Setter>
+                                                            <Setter Property="Background"
+                                                                    Value="#FFF7E8D3" />
                                                             <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding UsesFriendlyHealthBar}" Value="True">
-                                                                    <Setter Property="Background" Value="#FF1CE6A7" />
-                                                                </DataTrigger>
-                                                                <DataTrigger Binding="{Binding IsInvulnerable}" Value="True">
-                                                                    <Setter Property="Background" Value="#FFA8A8A8" />
+                                                                <DataTrigger Binding="{Binding IsBreakLocked}"
+                                                                             Value="True">
+                                                                    <Setter Property="Background"
+                                                                            Value="#FFA8A8A8" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
+
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="BreakRatio" />
+                                                            <Binding ElementName="BreakFillHost"
+                                                                     Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
                                                 </Border>
                                             </Grid>
+                                        </Border>
+
+                                        <Canvas Grid.Row="2"
+                                                Panel.ZIndex="1"
+                                                Width="122"
+                                                Height="10"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                ClipToBounds="False"
+                                                IsHitTestVisible="False">
+                                            <TextBlock Canvas.Top="-3"
+                                                       Width="122"
+                                                       Style="{StaticResource Text.WidgetWindow}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       Text="{Binding BreakText}"
+                                                       TextAlignment="Center" />
+                                        </Canvas>
+                                    </Grid>
+=======
+                                            <Canvas Width="120" Height="8">
+                                                <Grid Panel.ZIndex="0"
+                                                      Canvas.Left="0"
+                                                      Height="8"
+                                                      ClipToBounds="True">
+                                                    <Grid.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Grid.Width>
+
+                                                    <Border Width="120"
+                                                            Height="8"
+                                                            HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="{x:Type Border}">
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0.5"
+                                                                                             EndPoint="1,0.5">
+                                                                            <GradientStop Color="#FFFF0900" Offset="0" />
+                                                                            <GradientStop Color="#FFFF0900" Offset="0.05" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="0.95" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="1" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding UsesFriendlyHealthBar}" Value="True">
+                                                                        <Setter Property="Background" Value="#FF1CE6A7" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsInvulnerable}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFA8A8A8" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                </Grid>
+
+                                                <Border Panel.ZIndex="1"
+                                                        Height="8"
+                                                        Background="#FFFEFEFE">
+                                                    <Canvas.Left>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Canvas.Left>
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldVisibleRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
+                                                </Border>
+=======
+                                            <Canvas Width="120" Height="8">
+                                                <Grid Panel.ZIndex="0"
+                                                      Canvas.Left="0"
+                                                      Height="8"
+                                                      ClipToBounds="True">
+                                                    <Grid.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Grid.Width>
+
+                                                    <Border Width="120"
+                                                            Height="8"
+                                                            HorizontalAlignment="Left">
+                                                        <Border.Style>
+                                                            <Style TargetType="{x:Type Border}">
+                                                                <Setter Property="Background">
+                                                                    <Setter.Value>
+                                                                        <LinearGradientBrush StartPoint="0,0.5"
+                                                                                             EndPoint="1,0.5">
+                                                                            <GradientStop Color="#FFFF0900" Offset="0" />
+                                                                            <GradientStop Color="#FFFF0900" Offset="0.05" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="0.95" />
+                                                                            <GradientStop Color="#FFFF8604" Offset="1" />
+                                                                        </LinearGradientBrush>
+                                                                    </Setter.Value>
+                                                                </Setter>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding UsesFriendlyHealthBar}" Value="True">
+                                                                        <Setter Property="Background" Value="#FF1CE6A7" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding IsInvulnerable}" Value="True">
+                                                                        <Setter Property="Background" Value="#FFA8A8A8" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                </Grid>
+
+                                                <Border Panel.ZIndex="1"
+                                                        Height="8"
+                                                        Background="#FFFEFEFE">
+                                                    <Canvas.Left>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="HealthRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Canvas.Left>
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldVisibleRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
+                                                </Border>
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+
+                                                <Border Panel.ZIndex="2"
+                                                        Height="8"
+                                                        Background="#FFFEFEFE">
+                                                    <Canvas.Left>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldOverflowStartRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Canvas.Left>
+                                                    <Border.Width>
+                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                            <Binding Path="ShieldOverflowRatio" />
+                                                            <Binding ElementName="EntityHealthFillHost" Path="ActualWidth" />
+                                                        </MultiBinding>
+                                                    </Border.Width>
+                                                </Border>
+                                            </Canvas>
                                         </Grid>
                                     </Border>
 
-                                    <Canvas Panel.ZIndex="1"
+                                    <Canvas Panel.ZIndex="3"
                                             Width="122"
                                             Height="10"
                                             HorizontalAlignment="Left"
@@ -304,6 +736,7 @@
                                                    Text="{Binding BreakText}"
                                                    TextAlignment="Center" />
                                     </Canvas>
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
                                 </Grid>
                             </Grid>
                         </Button>

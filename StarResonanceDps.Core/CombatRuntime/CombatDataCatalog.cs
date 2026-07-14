@@ -144,11 +144,34 @@ public static class CombatDataCatalog
             && skill.IsRoleSlot();
     }
 
-    public static bool IsSingleLevelSkill(int skillId)
+    public static bool HasLevelDependentCooldown(int skillId)
     {
         return _skillCooldownsByLevel.TryGetValue(skillId, out var cooldownsByLevel)
-            && cooldownsByLevel.Count > 0
-            && cooldownsByLevel.Keys.Max() == 1;
+            && cooldownsByLevel.Count > 1
+            && cooldownsByLevel.Values.Distinct().Skip(1).Any();
+    }
+
+    public static int GetSkillMaxCharges(int skillId)
+    {
+        return _skills.TryGetValue(skillId, out var skill)
+            && skill.MaxEnergyChargeNum > 1
+                ? skill.MaxEnergyChargeNum
+                : 0;
+    }
+
+    public static double GetSkillChargeCooldownSeconds(int skillId, int tier)
+    {
+        if (!_skills.TryGetValue(skillId, out var skill)
+            || skill.MaxEnergyChargeNum <= 1
+            || skill.EnergyChargeTime <= 0)
+        {
+            return 0;
+        }
+
+        return ApplyImagineTierCooldownReduction(
+            skill,
+            skill.EnergyChargeTime / 1000d,
+            tier);
     }
 
     public static double GetSkillPveCooldownSeconds(int skillId, int currentLevel, int tier)
@@ -158,7 +181,17 @@ public static class CombatDataCatalog
             return 0;
         }
 
-        var cooldownSeconds = ResolveSkillPveCooldownSeconds(skill, currentLevel);
+        return ApplyImagineTierCooldownReduction(
+            skill,
+            ResolveSkillPveCooldownSeconds(skill, currentLevel),
+            tier);
+    }
+
+    private static double ApplyImagineTierCooldownReduction(
+        Skill skill,
+        double cooldownSeconds,
+        int tier)
+    {
         if (cooldownSeconds <= 60 || !skill.IsImagineSlot())
         {
             return cooldownSeconds;
@@ -166,8 +199,8 @@ public static class CombatDataCatalog
 
         return tier switch
         {
-            >= 3 and <= 4 => MathF.Ceiling(cooldownSeconds * 0.8333f),
-            >= 5 and <= 6 => MathF.Ceiling(cooldownSeconds * 0.6666f),
+            >= 3 and <= 4 => Math.Ceiling(cooldownSeconds * 0.8333d),
+            >= 5 and <= 6 => Math.Ceiling(cooldownSeconds * 0.6666d),
             _ => cooldownSeconds
         };
     }

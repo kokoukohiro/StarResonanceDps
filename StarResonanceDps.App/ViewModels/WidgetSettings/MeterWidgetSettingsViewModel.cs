@@ -43,6 +43,21 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private string _formatPreview = string.Empty;
 
     [ObservableProperty]
+    private int _healthValueDisplayModeIndex = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
+
+    [ObservableProperty]
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    private int _staminaGaugeDisplayModeIndex = WidgetConfigDefaults.DefaultStaminaGaugeDisplayModeIndex;
+
+    [ObservableProperty]
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+    private int _staminaGaugeDisplayModeIndex = WidgetConfigDefaults.DefaultStaminaGaugeDisplayModeIndex;
+
+    [ObservableProperty]
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     private double _classColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public MeterWidgetSettingsViewModel(WidgetKind kind, MeterWidgetSettingsConfig? config)
@@ -94,6 +109,18 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool HasClassColorOpacity => UsesMeterClassColorIconBackground;
 
+    public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+    public bool ShowsStaminaGaugeSetting => _kind == WidgetKind.PlayerList;
+
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+    public bool ShowsStaminaGaugeSetting => _kind == WidgetKind.PlayerList;
+
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -122,6 +149,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         var config = new MeterWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
+            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+            StaminaGaugeDisplayModeIndex = StaminaGaugeDisplayModeIndex,
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+            StaminaGaugeDisplayModeIndex = StaminaGaugeDisplayModeIndex,
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -188,6 +224,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             }
 
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
+            HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+            StaminaGaugeDisplayModeIndex = normalized.StaminaGaugeDisplayModeIndex;
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+            StaminaGaugeDisplayModeIndex = normalized.StaminaGaugeDisplayModeIndex;
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
             ClassColorOpacity = normalized.ClassColorOpacity;
         }
         finally
@@ -208,6 +253,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private bool SettingsEqual(MeterWidgetSettingsConfig left, MeterWidgetSettingsConfig right)
     {
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
+            || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+            || left.StaminaGaugeDisplayModeIndex != right.StaminaGaugeDisplayModeIndex
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+            || left.StaminaGaugeDisplayModeIndex != right.StaminaGaugeDisplayModeIndex
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
             || left.ClassColorOpacity != right.ClassColorOpacity)
         {
             return false;
@@ -307,6 +361,25 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         RefreshFormatPreview();
         NotifyChanged();
     }
+
+    partial void OnHealthValueDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+    partial void OnStaminaGaugeDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+<<<<<<< HEAD
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
 
     partial void OnClassColorOpacityChanged(double value)
     {

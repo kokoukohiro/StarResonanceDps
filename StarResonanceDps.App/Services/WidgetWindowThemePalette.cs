@@ -17,35 +17,40 @@ public sealed class WidgetWindowThemePalette
 
     private WidgetWindowThemePalette(
         Color surface,
+        Color menuSurface,
         Color divider,
         Color close,
         Color scrollThumb,
         double nonTextOpacity)
     {
         WidgetWindowSurface = surface;
+        WidgetWindowMenuSurface = menuSurface;
         WidgetWindowDivider = divider;
         WidgetWindowClose = close;
         WidgetWindowScrollThumb = scrollThumb;
         NonTextOpacity = nonTextOpacity;
 
         WidgetWindowSurfaceBrush = CreateBrush(WidgetWindowSurface);
+        WidgetWindowMenuSurfaceBrush = CreateBrush(WidgetWindowMenuSurface);
         WidgetWindowDividerBrush = CreateBrush(WidgetWindowDivider);
         WidgetWindowCloseBrush = CreateBrush(WidgetWindowClose);
         WidgetWindowScrollThumbBrush = CreateBrush(WidgetWindowScrollThumb);
     }
 
     public Color WidgetWindowSurface { get; }
+    public Color WidgetWindowMenuSurface { get; }
     public Color WidgetWindowDivider { get; }
     public Color WidgetWindowClose { get; }
     public Color WidgetWindowScrollThumb { get; }
 
     /// <summary>
-    /// Opacity shared by the widget window's background, divider, scroll thumb, and future non-text body UI.
+    /// Opacity shared by the widget window's background, menus, divider, scroll thumb, and future non-text body UI.
     /// The close icon intentionally does not use this value.
     /// </summary>
     public double NonTextOpacity { get; }
 
     public SolidColorBrush WidgetWindowSurfaceBrush { get; }
+    public SolidColorBrush WidgetWindowMenuSurfaceBrush { get; }
     public SolidColorBrush WidgetWindowDividerBrush { get; }
     public SolidColorBrush WidgetWindowCloseBrush { get; }
     public SolidColorBrush WidgetWindowScrollThumbBrush { get; }
@@ -56,20 +61,26 @@ public sealed class WidgetWindowThemePalette
         Color? backgroundImageAverageColor = null)
     {
         var surface = Color.FromRgb(windowSurface.R, windowSurface.G, windowSurface.B);
-        var contrastSource = backgroundImageAverageColor is { } imageColor
+        var menuSurface = backgroundImageAverageColor is { } imageColor
             ? Color.FromRgb(imageColor.R, imageColor.G, imageColor.B)
             : surface;
         var opacity = Math.Clamp(opacityPercent, 0, 100) / 100d;
-        var readableBase = ColorUtilities.GetReadableTextColor(contrastSource);
+        var readableBase = ColorUtilities.GetReadableTextColor(menuSurface);
         var nonTextContrast = ColorUtilities.Blend(
             readableBase,
-            contrastSource,
+            menuSurface,
             NonTextContrastSurfaceWeight);
-        var divider = ColorUtilities.Blend(nonTextContrast, contrastSource, DividerSurfaceWeight);
-        var close = ColorUtilities.Blend(nonTextContrast, contrastSource, CloseSurfaceWeight);
-        var scrollThumb = ColorUtilities.Blend(nonTextContrast, contrastSource, ScrollThumbSurfaceWeight);
+        var divider = ColorUtilities.Blend(nonTextContrast, menuSurface, DividerSurfaceWeight);
+        var close = ColorUtilities.Blend(nonTextContrast, menuSurface, CloseSurfaceWeight);
+        var scrollThumb = ColorUtilities.Blend(nonTextContrast, menuSurface, ScrollThumbSurfaceWeight);
 
-        return new WidgetWindowThemePalette(surface, divider, close, scrollThumb, opacity);
+        return new WidgetWindowThemePalette(
+            surface,
+            menuSurface,
+            divider,
+            close,
+            scrollThumb,
+            opacity);
     }
 
     private static SolidColorBrush CreateBrush(Color color)

@@ -109,6 +109,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public event Action<WidgetKind, long>? PlayerWindowRequested;
 
+    public event Action<WidgetKind, EntityListEntry>? EntityWindowRequested;
+
     public event EventHandler? PlayerWindowPresentationChanged;
 
     public event EventHandler? MeterSettingsChanged;
@@ -345,6 +347,18 @@ public partial class WidgetListItemViewModel : ViewModelBase
         RequestPlayerWindow(WidgetKind.DebuffList, player);
     }
 
+    [RelayCommand]
+    private void RequestEntityBuffList(EntityListEntry? entity)
+    {
+        RequestEntityWindow(WidgetKind.BuffList, entity);
+    }
+
+    [RelayCommand]
+    private void RequestEntityDebuffList(EntityListEntry? entity)
+    {
+        RequestEntityWindow(WidgetKind.DebuffList, entity);
+    }
+
     partial void OnStateChanged(WidgetState value)
     {
         OnPropertyChanged(nameof(StateText));
@@ -364,6 +378,16 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         PlayerWindowRequested?.Invoke(kind, player.CharacterId);
+    }
+
+    private void RequestEntityWindow(WidgetKind kind, EntityListEntry? entity)
+    {
+        if (!IsEntityList || entity is null)
+        {
+            return;
+        }
+
+        EntityWindowRequested?.Invoke(kind, entity);
     }
 
     private void SynchronizePlayerListEntries(bool resetEntries)
@@ -454,6 +478,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         if (resetEntries)
         {
+            foreach (var entry in _entityListEntries)
+            {
+                entry.IsEntitySelectionMenuOpen = false;
+            }
+
             _entityListEntriesByUuid.Clear();
             _entityListEntries.Clear();
         }
@@ -471,6 +500,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
                     continue;
                 }
 
+                entry.IsEntitySelectionMenuOpen = false;
                 _entityListEntriesByUuid.Remove(entry.EntityUuid);
                 _entityListEntries.RemoveAt(index);
             }

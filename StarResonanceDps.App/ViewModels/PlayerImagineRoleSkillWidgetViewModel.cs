@@ -118,14 +118,16 @@ public sealed class PlayerImagineRoleSkillWidgetViewModel : PlayerWidgetWindowVi
             var snapshot = index < snapshots.Count
                 ? snapshots[index]
                 : null;
-            var remainingSeconds = snapshot is null || entityUuid == 0
-                ? null
-                : SkillCooldownTracker.Instance.GetRemainingSeconds(
+            var cooldownState = snapshot is null || entityUuid == 0
+                ? default
+                : SkillCooldownTracker.Instance.GetDisplayState(
                     entityUuid,
                     snapshot.SkillId,
                     snapshot.CooldownSeconds,
-                    snapshot.IsImagine);
-            entries[index].Update(snapshot, remainingSeconds);
+                    snapshot.IsImagine,
+                    snapshot.MaxCharges,
+                    snapshot.ChargeCooldownSeconds);
+            entries[index].Update(snapshot, cooldownState);
         }
     }
 }

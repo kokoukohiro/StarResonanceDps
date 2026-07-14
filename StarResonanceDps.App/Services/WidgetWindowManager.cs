@@ -19,6 +19,7 @@ public sealed class WidgetWindowManager
 
     private readonly Dictionary<WidgetKind, WidgetWindow> _openSingleWindows = new();
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
+    private readonly List<EntityBuffListWindowSession> _openEntityBuffWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
     private Window? _managerWindow;
     private bool _isManagerClosing;
@@ -45,6 +46,31 @@ public sealed class WidgetWindowManager
         }
     }
 
+    public void OpenEntityWindow(WidgetKind kind, EntityListEntry entity)
+    {
+        if (kind is not (WidgetKind.BuffList or WidgetKind.DebuffList)
+            || !_trackedPlayerWidgets.TryGetValue(kind, out var widget))
+        {
+            return;
+        }
+
+        TrackPlayerWidget(widget);
+
+        var existingWindow = _openEntityBuffWindows
+            .FirstOrDefault(session =>
+                ReferenceEquals(session.Widget, widget)
+                && session.ViewModel.RepresentsEntity(entity.EntityUuid));
+
+        if (existingWindow is not null)
+        {
+            existingWindow.ViewModel.UpdateEntity(entity);
+            RestoreAndActivate(existingWindow.Window);
+            return;
+        }
+
+        CreateEntityBuffWindow(widget, entity);
+    }
+
     public void ApplyWidgetState(WidgetListItemViewModel widget)
     {
         if (IsPlayerWindowWidget(widget.Kind))
@@ -66,18 +92,22 @@ public sealed class WidgetWindowManager
     {
         if (IsPlayerWindowWidget(widget.Kind))
         {
-            var playerWindows = _openPlayerWindows
+            var targetWindows = _openPlayerWindows
                 .Where(session => ReferenceEquals(session.Widget, widget))
+                .Select(session => session.Window)
+                .Concat(_openEntityBuffWindows
+                    .Where(session => ReferenceEquals(session.Widget, widget))
+                    .Select(session => session.Window))
                 .ToArray();
 
-            foreach (var playerWindow in playerWindows)
+            foreach (var targetWindow in targetWindows)
             {
-                playerWindow.Window.ApplyPinState(widget.IsPinned);
+                targetWindow.ApplyPinState(widget.IsPinned);
             }
 
-            if (widget.IsPinned && bringToFront && playerWindows.LastOrDefault() is { } lastPlayerWindow)
+            if (widget.IsPinned && bringToFront && targetWindows.LastOrDefault() is { } lastTargetWindow)
             {
-                Activate(lastPlayerWindow.Window);
+                Activate(lastTargetWindow);
             }
 
             return;
@@ -125,7 +155,7 @@ public sealed class WidgetWindowManager
 
         if (widget.State == WidgetState.Running)
         {
-            if (_openPlayerWindows.Any(session => ReferenceEquals(session.Widget, widget)))
+            if (HasOpenTargetWindows(widget))
             {
                 UpdatePlayerWindowCount(widget);
                 return;
@@ -188,7 +218,7 @@ public sealed class WidgetWindowManager
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         window.Closed += WidgetWindow_Closed;
 
-        var cascadeIndex = _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, playerWidget));
+        var cascadeIndex = CountOpenTargetWindows(playerWidget);
         ApplyPlayerWindowCascade(window, cascadeIndex);
 
         _openPlayerWindows.Add(new PlayerWidgetWindowSession(playerWidget, playerWindowViewModel, window));
@@ -199,6 +229,45 @@ public sealed class WidgetWindowManager
         if (playerWidget.State != WidgetState.Running)
         {
             playerWidget.State = WidgetState.Running;
+        }
+    }
+
+    private void CreateEntityBuffWindow(
+        WidgetListItemViewModel widget,
+        EntityListEntry entity)
+    {
+        var owner = Application.Current?.MainWindow;
+        TrackManagerWindow(owner);
+
+        var kind = widget.Kind == WidgetKind.BuffList
+            ? PlayerBuffListKind.Buff
+            : PlayerBuffListKind.Debuff;
+        var viewModel = new EntityBuffListWidgetViewModel(widget, entity, kind);
+        var content = new PlayerBuffListWidgetView
+        {
+            DataContext = viewModel
+        };
+        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
+        var window = new WidgetWindow(
+            widget,
+            content,
+            savedBounds,
+            owner,
+            viewModel.HeaderText);
+        viewModel.PropertyChanged += EntityBuffListWindowViewModel_PropertyChanged;
+        window.Closed += WidgetWindow_Closed;
+
+        var cascadeIndex = CountOpenTargetWindows(widget);
+        ApplyPlayerWindowCascade(window, cascadeIndex);
+
+        _openEntityBuffWindows.Add(new EntityBuffListWindowSession(widget, viewModel, window));
+        UpdatePlayerWindowCount(widget);
+
+        window.Show();
+
+        if (widget.State != WidgetState.Running)
+        {
+            widget.State = WidgetState.Running;
         }
     }
 
@@ -378,12 +447,15 @@ public sealed class WidgetWindowManager
 
     private void ClosePlayerWindows(WidgetListItemViewModel playerWidget)
     {
-        foreach (var playerWindow in _openPlayerWindows
+        foreach (var targetWindow in _openPlayerWindows
                      .Where(session => ReferenceEquals(session.Widget, playerWidget))
                      .Select(session => session.Window)
+                     .Concat(_openEntityBuffWindows
+                         .Where(session => ReferenceEquals(session.Widget, playerWidget))
+                         .Select(session => session.Window))
                      .ToArray())
         {
-            playerWindow.Close();
+            targetWindow.Close();
         }
 
         UpdatePlayerWindowCount(playerWidget);
@@ -420,6 +492,22 @@ public sealed class WidgetWindowManager
         }
     }
 
+    public void UpdateEntityWindowPresentations(IReadOnlyList<EntityListEntry> entities)
+    {
+        var entitiesByUuid = entities.ToDictionary(entity => entity.EntityUuid);
+
+        foreach (var entityWindow in _openEntityBuffWindows.ToArray())
+        {
+            if (!entitiesByUuid.TryGetValue(entityWindow.ViewModel.EntityUuid, out var entity))
+            {
+                continue;
+            }
+
+            entityWindow.ViewModel.UpdateEntity(entity);
+            entityWindow.Window.SetHeaderText(entityWindow.ViewModel.HeaderText);
+        }
+    }
+
     private void PlayerWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(PlayerWidgetWindowViewModel.HeaderText)
@@ -431,6 +519,19 @@ public sealed class WidgetWindowManager
         var session = _openPlayerWindows.FirstOrDefault(
             candidate => ReferenceEquals(candidate.ViewModel, playerWindowViewModel));
         session?.Window.SetHeaderText(playerWindowViewModel.HeaderText);
+    }
+
+    private void EntityBuffListWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(EntityBuffListWidgetViewModel.HeaderText)
+            || sender is not EntityBuffListWidgetViewModel viewModel)
+        {
+            return;
+        }
+
+        var session = _openEntityBuffWindows.FirstOrDefault(
+            candidate => ReferenceEquals(candidate.ViewModel, viewModel));
+        session?.Window.SetHeaderText(viewModel.HeaderText);
     }
 
     private void PlayerWidget_PresentationChanged(object? sender, EventArgs e)
@@ -447,6 +548,14 @@ public sealed class WidgetWindowManager
             playerWindow.ViewModel.RefreshPlayerPresentation();
             playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
         }
+
+        foreach (var entityWindow in _openEntityBuffWindows
+                     .Where(session => ReferenceEquals(session.Widget, playerWidget))
+                     .ToArray())
+        {
+            entityWindow.ViewModel.RefreshPresentation();
+            entityWindow.Window.SetHeaderText(entityWindow.ViewModel.HeaderText);
+        }
     }
 
     private static PlayerRosterEntry? ResolvePlayer(
@@ -460,8 +569,18 @@ public sealed class WidgetWindowManager
 
     private void UpdatePlayerWindowCount(WidgetListItemViewModel playerWidget)
     {
-        playerWidget.SetOpenPlayerWindowCount(
-            _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, playerWidget)));
+        playerWidget.SetOpenPlayerWindowCount(CountOpenTargetWindows(playerWidget));
+    }
+
+    private int CountOpenTargetWindows(WidgetListItemViewModel widget)
+    {
+        return _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, widget))
+            + _openEntityBuffWindows.Count(session => ReferenceEquals(session.Widget, widget));
+    }
+
+    private bool HasOpenTargetWindows(WidgetListItemViewModel widget)
+    {
+        return CountOpenTargetWindows(widget) > 0;
     }
 
     private static bool IsPlayerWindowWidget(WidgetKind kind)
@@ -535,6 +654,7 @@ public sealed class WidgetWindowManager
 
         foreach (var window in _openSingleWindows.Values
                      .Concat(_openPlayerWindows.Select(session => session.Window))
+                     .Concat(_openEntityBuffWindows.Select(session => session.Window))
                      .ToArray())
         {
             window.Close();
@@ -567,9 +687,29 @@ public sealed class WidgetWindowManager
 
             if (!_isManagerClosing
                 && playerWindow.Widget.State == WidgetState.Running
-                && !_openPlayerWindows.Any(session => ReferenceEquals(session.Widget, playerWindow.Widget)))
+                && !HasOpenTargetWindows(playerWindow.Widget))
             {
                 playerWindow.Widget.State = WidgetState.Stopped;
+            }
+
+            return;
+        }
+
+        var entityWindow = _openEntityBuffWindows.FirstOrDefault(
+            session => ReferenceEquals(session.Window, window));
+
+        if (entityWindow is not null)
+        {
+            entityWindow.ViewModel.PropertyChanged -= EntityBuffListWindowViewModel_PropertyChanged;
+            entityWindow.ViewModel.Dispose();
+            _openEntityBuffWindows.Remove(entityWindow);
+            UpdatePlayerWindowCount(entityWindow.Widget);
+
+            if (!_isManagerClosing
+                && entityWindow.Widget.State == WidgetState.Running
+                && !HasOpenTargetWindows(entityWindow.Widget))
+            {
+                entityWindow.Widget.State = WidgetState.Stopped;
             }
 
             return;
@@ -601,6 +741,26 @@ public sealed class WidgetWindowManager
 
         public WidgetWindow Window { get; }
     }
+
+    private sealed class EntityBuffListWindowSession
+    {
+        public EntityBuffListWindowSession(
+            WidgetListItemViewModel widget,
+            EntityBuffListWidgetViewModel viewModel,
+            WidgetWindow window)
+        {
+            Widget = widget;
+            ViewModel = viewModel;
+            Window = window;
+        }
+
+        public WidgetListItemViewModel Widget { get; }
+
+        public EntityBuffListWidgetViewModel ViewModel { get; }
+
+        public WidgetWindow Window { get; }
+    }
+
     private sealed record WidgetWindowComposition(
         FrameworkElement? Content,
         FrameworkElement? HeaderChromeActions,

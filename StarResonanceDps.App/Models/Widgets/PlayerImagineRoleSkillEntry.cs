@@ -8,10 +8,16 @@ namespace StarResonanceDps.App.Models.Widgets;
 public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
 {
     [ObservableProperty]
-    private string _nameLevelText = string.Empty;
+    private string _nameDisplayText = string.Empty;
 
     [ObservableProperty]
     private string? _iconPath;
+
+    [ObservableProperty]
+    private string _chargeCountText = string.Empty;
+
+    [ObservableProperty]
+    private bool _hasChargeCount;
 
     [ObservableProperty]
     private string _cooldownText = string.Empty;
@@ -21,22 +27,36 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
 
     public void Update(
         PlayerCooldownSkillSnapshot? snapshot,
-        double? remainingSeconds)
+        SkillCooldownDisplayState cooldownState)
     {
         if (snapshot is null)
         {
-            NameLevelText = string.Empty;
+            NameDisplayText = string.Empty;
             IconPath = null;
+            ChargeCountText = string.Empty;
+            HasChargeCount = false;
             CooldownText = string.Empty;
             HasCooldown = false;
             return;
         }
 
-        NameLevelText = snapshot.ShowLevel
-            ? $"{snapshot.Name} Lv.{snapshot.CurrentLevel}"
-            : snapshot.Name;
+        NameDisplayText = snapshot.IsImagine
+            ? $"{snapshot.Name} Tier{snapshot.Tier}"
+            : snapshot.ShowLevel
+                ? $"{snapshot.Name} Lv.{snapshot.CurrentLevel}"
+                : snapshot.Name;
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName, snapshot.IsImagine);
 
+        HasChargeCount = snapshot.MaxCharges > 1;
+        ChargeCountText = HasChargeCount
+            ? Math.Clamp(
+                    cooldownState.AvailableCharges ?? snapshot.MaxCharges,
+                    0,
+                    snapshot.MaxCharges)
+                .ToString(CultureInfo.InvariantCulture)
+            : string.Empty;
+
+        var remainingSeconds = cooldownState.CooldownRemainingSeconds;
         if (remainingSeconds is not > 0)
         {
             CooldownText = string.Empty;
@@ -44,7 +64,8 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
             return;
         }
 
-        CooldownText = remainingSeconds.Value.ToString("0.0", CultureInfo.InvariantCulture) + "s";
+        CooldownText = remainingSeconds.Value
+            .ToString("0.0", CultureInfo.InvariantCulture) + "s";
         HasCooldown = true;
     }
 }

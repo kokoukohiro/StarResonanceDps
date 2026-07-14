@@ -18,16 +18,35 @@
                            Style="{StaticResource Text.WidgetWindow}"
                            FontSize="9"
                            FontWeight="SemiBold"
-                           Text="{Binding NameLevelText}"
+                           Text="{Binding NameDisplayText}"
                            TextAlignment="Center"
                            TextWrapping="Wrap" />
-                <Image Grid.Row="1"
-                       Width="52"
-                       Height="52"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                       Stretch="Uniform" />
+                <Grid Grid.Row="1"
+                      Width="52"
+                      Height="52"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center">
+                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                           Stretch="Uniform" />
+                    <TextBlock Margin="0,0,0,1"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Bottom"
+                               FontSize="15"
+                               FontWeight="Bold"
+                               Text="{Binding ChargeCountText}"
+                               TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasChargeCount}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
                 <TextBlock Grid.Row="2"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"

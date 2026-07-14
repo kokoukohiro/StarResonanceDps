@@ -29,7 +29,25 @@ public sealed partial class PlayerListEntry : ObservableObject
     private double _healthRatio;
 
     [ObservableProperty]
+    private double _shieldVisibleRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowRatio;
+
+    [ObservableProperty]
+    private double _shieldOverflowStartRatio = 1d;
+
+    [ObservableProperty]
     private string _healthText = string.Empty;
+
+    [ObservableProperty]
+    private bool _showStaminaGauge;
+
+    [ObservableProperty]
+    private double _staminaRatio;
+
+    [ObservableProperty]
+    private string _staminaText = string.Empty;
 
     [ObservableProperty]
     private bool _isNpc;
@@ -71,8 +89,36 @@ public sealed partial class PlayerListEntry : ObservableObject
             displayPlayer,
             settings.PlayerInfoFormatString,
             playerNameDisplayMode);
-        HealthRatio = GetHealthRatio(player.CurrentHp, player.MaxHp);
-        HealthText = FormatValuePair(player.CurrentHp, player.MaxHp);
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+        HealthRatio = GetRatio(player.CurrentHp, player.MaxHp);
+=======
+        HealthRatio = GetRatio(player.CurrentHp, player.MaxHp, 1d);
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+        HealthRatio = GetRatio(player.CurrentHp, player.MaxHp, 1d);
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+        UpdateShieldGeometry(player.CurrentHp, player.MaxHp, player.CurrentShield);
+        HealthText = FormatHealthText(
+            player.CurrentHp,
+            player.MaxHp,
+            player.CurrentShield,
+            settings.HealthValueDisplayModeIndex);
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+
+        ShowStaminaGauge = settings.StaminaGaugeDisplayModeIndex
+            == WidgetConfigDefaults.VisibleStaminaGaugeDisplayModeIndex;
+        StaminaRatio = GetRatio(player.CurrentStamina, player.MaxStamina, 0d);
+        StaminaText = FormatValuePair(player.CurrentStamina, player.MaxStamina);
+<<<<<<< HEAD
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
 
         var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
@@ -86,20 +132,97 @@ public sealed partial class PlayerListEntry : ObservableObject
         OnPropertyChanged(nameof(IsHealthFull));
     }
 
-    private static double GetHealthRatio(long currentHp, long maxHp)
+    private void UpdateShieldGeometry(long currentHp, long maxHp, long currentShield)
     {
         if (maxHp <= 0)
         {
-            return 1d;
+            ShieldVisibleRatio = 0d;
+            ShieldOverflowRatio = 0d;
+            ShieldOverflowStartRatio = 1d;
+            return;
         }
 
-        return Math.Clamp(currentHp / (double)maxHp, 0d, 1d);
+        var displayedHp = Math.Clamp(currentHp, 0L, maxHp);
+        var shield = Math.Max(currentShield, 0L);
+        var availableHealthCapacity = maxHp - displayedHp;
+        var foldsEntireShield = shield > availableHealthCapacity;
+
+        var visibleShield = foldsEntireShield
+            ? 0L
+            : shield;
+
+        var overflowShield = foldsEntireShield
+            ? Math.Min(shield, maxHp)
+            : 0L;
+
+        ShieldVisibleRatio = visibleShield / (double)maxHp;
+        ShieldOverflowRatio = overflowShield / (double)maxHp;
+        ShieldOverflowStartRatio = 1d - ShieldOverflowRatio;
     }
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+    private static double GetRatio(long currentValue, long maxValue)
+=======
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+    private static double GetRatio(long currentValue, long maxValue, double valueWhenMaximumIsUnavailable)
+    {
+        if (maxValue <= 0)
+        {
+            return valueWhenMaximumIsUnavailable;
+        }
+
+        return Math.Clamp(currentValue / (double)maxValue, 0d, 1d);
+    }
+
+    private static string FormatHealthText(
+        long currentHp,
+        long maxHp,
+        long currentShield,
+        int displayModeIndex)
+    {
+        var shield = Math.Max(currentShield, 0L);
+        return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
+            ? $"{currentHp}({shield})/{maxHp}"
+            : $"{AddSaturating(currentHp, shield)}/{maxHp}";
+    }
+
+    private static long AddSaturating(long value, long nonNegativeAddition)
+    {
+        return nonNegativeAddition > 0 && value > long.MaxValue - nonNegativeAddition
+            ? long.MaxValue
+            : value + nonNegativeAddition;
+    }
 
     private static string FormatValuePair(long currentValue, long maxValue)
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     {
-        return $"{currentValue}/{maxValue}";
+        if (maxValue <= 0)
+        {
+            return 0d;
+        }
+
+        return Math.Clamp(currentValue / (double)maxValue, 0d, 1d);
+    }
+
+    private static string FormatHealthText(
+        long currentHp,
+        long maxHp,
+        long currentShield,
+        int displayModeIndex)
+    {
+        var shield = Math.Max(currentShield, 0L);
+        return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
+            ? $"{currentHp}({shield})/{maxHp}"
+            : $"{AddSaturating(currentHp, shield)}/{maxHp}";
+    }
+
+    private static long AddSaturating(long value, long nonNegativeAddition)
+    {
+        return nonNegativeAddition > 0 && value > long.MaxValue - nonNegativeAddition
+            ? long.MaxValue
+            : value + nonNegativeAddition;
     }
 
     private static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)

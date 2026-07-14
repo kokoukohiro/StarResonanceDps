@@ -17,7 +17,8 @@ public sealed record NearbyEntityEntry(
     int MaxBreak,
     bool IsInvulnerable,
     bool IsBreakLocked,
-    EntityCampRelation CampRelation);
+    EntityCampRelation CampRelation,
+    long CurrentShield);
 
 public enum EntityCampRelation
 {

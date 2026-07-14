@@ -762,4 +762,31 @@
   <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
     <value>이매진·롤 스킬 정보</value>
   </data>
+  <data name="Settings_Display_HealthValue" xml:space="preserve">
+    <value>HP 수치</value>
+  </data>
+  <data name="HealthValueDisplay_AddShield" xml:space="preserve">
+    <value>실드 수치 합산 표시</value>
+  </data>
+  <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
+    <value>실드 수치 개별 표시</value>
+  </data>
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+  <data name="Settings_Display_StaminaGauge" xml:space="preserve">
+    <value>스태미나 게이지</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Show" xml:space="preserve">
+    <value>표시</value>
+  </data>
+  <data name="StaminaGaugeDisplay_Hide" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+<<<<<<< HEAD
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
+=======
+>>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
 </root>

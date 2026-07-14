@@ -122,7 +122,8 @@ internal static class NearbyEntityProjection
             GetInt(entity, "AttrMaxStunned"),
             GetInt(entity, "AttrCanLessenHp") > 0,
             GetInt(entity, "AttrIsLockStunned") > 0,
-            NearbyEntityCampState.GetRelation(entityUuid));
+            NearbyEntityCampState.GetRelation(entityUuid),
+            Utils.GetCurrentShield(entity));
     }
 
     private static NearbyEntityEntry MergeChangedFields(
@@ -167,6 +168,11 @@ internal static class NearbyEntityProjection
         if (changedAttributes.Contains(EAttrType.AttrMaxHp))
         {
             updated = updated with { MaxHp = entity.MaxHp };
+        }
+
+        if (changedAttributes.Contains(EAttrType.AttrShieldList))
+        {
+            updated = updated with { CurrentShield = Utils.GetCurrentShield(entity) };
         }
 
         if (changedAttributes.Contains(EAttrType.AttrStunned))

@@ -115,7 +115,9 @@ public sealed record PlayerCooldownSkillSnapshot(
     int Tier,
     bool IsImagine,
     bool ShowLevel,
-    double CooldownSeconds);
+    double CooldownSeconds,
+    int MaxCharges,
+    double ChargeCooldownSeconds);
 
 public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
     long EntityUuid,
@@ -200,6 +202,26 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
+        return CreateBuffSnapshots(encounter, entity, kind);
+    }
+
+    public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind)
+    {
+        var encounter = EncounterManager.Current;
+        if (encounter is null
+            || !encounter.Entities.TryGetValue(entityUuid, out var entity))
+        {
+            return Array.Empty<PlayerBuffSnapshot>();
+        }
+
+        return CreateBuffSnapshots(encounter, entity, kind);
+    }
+
+    private static IReadOnlyList<PlayerBuffSnapshot> CreateBuffSnapshots(
+        Encounter encounter,
+        Entity entity,
+        PlayerBuffListKind kind)
+    {
         var currentEncounterTime = encounter.GetDuration();
         var buffEvents = entity.BuffEvents.Values.ToArray();
         var entriesByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
@@ -305,7 +327,6 @@ public static class MeterSnapshotProvider
         foreach (var skillLevel in skillLevels)
         {
             if (skillLevel.SkillId <= 0
-                || skillLevel.CurrentLevel <= 0
                 || !includedSkillIds.Add(skillLevel.SkillId))
             {
                 continue;
@@ -321,21 +342,31 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            var displayLevel = ResolvePlayerSkillDisplayLevel(entityUuid, skillLevel);
-            var showLevel = !isRole
-                || !CombatDataCatalog.IsSingleLevelSkill(skillLevel.SkillId);
+            var currentLevel = ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel);
+            var showLevel = isRole
+                && CombatDataCatalog.HasLevelDependentCooldown(skillLevel.SkillId);
+            var maxCharges = isImagine
+                ? CombatDataCatalog.GetSkillMaxCharges(skillLevel.SkillId)
+                : 0;
+            var chargeCooldownSeconds = maxCharges > 1
+                ? CombatDataCatalog.GetSkillChargeCooldownSeconds(
+                    skillLevel.SkillId,
+                    skillLevel.Tier)
+                : 0d;
             var snapshot = new PlayerCooldownSkillSnapshot(
                 skillLevel.SkillId,
                 CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
                 iconName,
-                displayLevel,
+                currentLevel,
                 skillLevel.Tier,
                 isImagine,
                 showLevel,
                 CombatDataCatalog.GetSkillPveCooldownSeconds(
                     skillLevel.SkillId,
-                    displayLevel,
-                    skillLevel.Tier));
+                    currentLevel,
+                    skillLevel.Tier),
+                maxCharges,
+                chargeCooldownSeconds);
 
             if (isImagine && imagineSkills.Count < 2)
             {
@@ -809,7 +840,7 @@ public static class MeterSnapshotProvider
             && (kind != MeterSnapshotKind.Damage || snapshot.DamageType != EDamageType.Immune);
     }
 
-    private static int ResolvePlayerSkillDisplayLevel(
+    private static int ResolvePlayerSkillCurrentLevel(
         long entityUuid,
         DataTypes.Skills.SkillLevelInfo skillLevel)
     {
@@ -826,9 +857,7 @@ public static class MeterSnapshotProvider
             return selfLevel;
         }
 
-        return skillLevel.Tier > 0
-            ? skillLevel.Tier
-            : Math.Max(skillLevel.CurrentLevel, 1);
+        return skillLevel.CurrentLevel;
     }
 
     private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(Entity entity)
