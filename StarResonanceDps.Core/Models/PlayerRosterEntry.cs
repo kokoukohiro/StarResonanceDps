@@ -16,16 +16,4 @@ public sealed record PlayerRosterEntry(
     int SeasonLevel = 0,
     PlayerEquipmentData? EquipmentData = null,
     bool IsNpc = false,
-<<<<<<< HEAD
-<<<<<<< HEAD
     long CurrentShield = 0);
-=======
-    long CurrentShield = 0,
-    int CurrentStamina = 0,
-    int MaxStamina = 0);
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-    long CurrentShield = 0,
-    int CurrentStamina = 0,
-    int MaxStamina = 0);
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895

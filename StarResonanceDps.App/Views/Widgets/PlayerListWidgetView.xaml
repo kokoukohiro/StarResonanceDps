@@ -307,28 +307,12 @@
                                       Margin="6,0,0,0"
                                       VerticalAlignment="Center"
                                       ClipToBounds="False">
-<<<<<<< HEAD
-<<<<<<< HEAD
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="22" />
                                         <RowDefinition Height="12" />
                                     </Grid.RowDefinitions>
 
                                     <Grid Grid.Row="0">
-=======
-                                    <Grid VerticalAlignment="Top">
-                                        <Grid.Style>
-                                            <Style TargetType="{x:Type Grid}">
-                                                <Setter Property="Height" Value="23" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowStaminaGauge}" Value="True">
-                                                        <Setter Property="Height" Value="12" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Grid.Style>
-
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
                                         <TextBlock HorizontalAlignment="Left"
                                                    VerticalAlignment="Center"
                                                    Style="{StaticResource Text.WidgetWindow}"
@@ -338,55 +322,14 @@
                                                    TextTrimming="CharacterEllipsis" />
                                     </Grid>
 
-                                    <Border Width="122"
+                                    <Border Grid.Row="1"
+                                            Width="122"
                                             Height="10"
                                             HorizontalAlignment="Left"
-<<<<<<< HEAD
                                             VerticalAlignment="Center"
-=======
-                                            VerticalAlignment="Bottom"
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-                                    <Grid VerticalAlignment="Top">
-                                        <Grid.Style>
-                                            <Style TargetType="{x:Type Grid}">
-                                                <Setter Property="Height" Value="23" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowStaminaGauge}" Value="True">
-                                                        <Setter Property="Height" Value="12" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Grid.Style>
-
-                                        <TextBlock HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   Style="{StaticResource Text.WidgetWindow}"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding DisplayName}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </Grid>
-
-                                    <Border Width="122"
-                                            Height="10"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
                                             Background="#FF000000"
                                             CornerRadius="5"
                                             Padding="1">
-                                        <Border.Style>
-                                            <Style TargetType="{x:Type Border}">
-                                                <Setter Property="Margin" Value="0" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowStaminaGauge}" Value="True">
-                                                        <Setter Property="Margin" Value="0,0,0,11" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-
                                         <Grid x:Name="HealthFillHost"
                                               Height="8"
                                               VerticalAlignment="Center">
@@ -452,8 +395,6 @@
                                                     </Border.Width>
                                                 </Border>
                                             </Canvas>
-<<<<<<< HEAD
-<<<<<<< HEAD
                                         </Grid>
                                     </Border>
 
@@ -463,88 +404,14 @@
                                             Height="10"
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Center"
-=======
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-                                        </Grid>
-                                    </Border>
-
-                                    <Canvas Panel.ZIndex="3"
-                                            Width="122"
-                                            Height="10"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
                                             ClipToBounds="False"
                                             IsHitTestVisible="False">
-                                        <Canvas.Style>
-                                            <Style TargetType="{x:Type Canvas}">
-                                                <Setter Property="Margin" Value="0" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ShowStaminaGauge}" Value="True">
-                                                        <Setter Property="Margin" Value="0,0,0,11" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Canvas.Style>
-
                                         <TextBlock Canvas.Top="-3"
                                                    Width="122"
                                                    Style="{StaticResource Text.WidgetWindow}"
                                                    FontSize="11"
                                                    FontWeight="SemiBold"
                                                    Text="{Binding HealthText}"
-                                                   TextAlignment="Center" />
-                                    </Canvas>
-
-                                    <Border Width="122"
-                                            Height="10"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
-                                            Background="#FF000000"
-                                            CornerRadius="5"
-                                            Padding="1"
-                                            Visibility="{Binding ShowStaminaGauge, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid x:Name="StaminaFillHost"
-                                              Height="8"
-                                              VerticalAlignment="Center">
-                                            <Grid.Clip>
-                                                <RectangleGeometry Rect="0,0,120,8"
-                                                                   RadiusX="4"
-                                                                   RadiusY="4" />
-                                            </Grid.Clip>
-
-                                            <Border Height="8"
-                                                    HorizontalAlignment="Left"
-                                                    VerticalAlignment="Center"
-                                                    Background="#FFFFAE35">
-                                                <Border.Width>
-                                                    <MultiBinding Converter="{StaticResource PlayerList.HealthRatioToWidthConverter}">
-                                                        <Binding Path="StaminaRatio" />
-                                                        <Binding ElementName="StaminaFillHost" Path="ActualWidth" />
-                                                    </MultiBinding>
-                                                </Border.Width>
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-
-                                    <Canvas Panel.ZIndex="3"
-                                            Width="122"
-                                            Height="10"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Bottom"
-<<<<<<< HEAD
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-                                            ClipToBounds="False"
-                                            IsHitTestVisible="False"
-                                            Visibility="{Binding ShowStaminaGauge, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <TextBlock Canvas.Top="-3"
-                                                   Width="122"
-                                                   Style="{StaticResource Text.WidgetWindow}"
-                                                   FontSize="11"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding StaminaText}"
                                                    TextAlignment="Center" />
                                     </Canvas>
                                 </Grid>

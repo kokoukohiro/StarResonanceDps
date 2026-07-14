@@ -103,16 +103,6 @@ public sealed class MeterWidgetSettingsConfig
 
     public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    public int StaminaGaugeDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultStaminaGaugeDisplayModeIndex;
-
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-    public int StaminaGaugeDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultStaminaGaugeDisplayModeIndex;
-
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
@@ -125,14 +115,6 @@ public sealed class MeterWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-            StaminaGaugeDisplayModeIndex = StaminaGaugeDisplayModeIndex,
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-            StaminaGaugeDisplayModeIndex = StaminaGaugeDisplayModeIndex,
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
@@ -160,16 +142,6 @@ public static class WidgetConfigDefaults
     public const int DefaultMetricTimelineAggregationIntervalSeconds = 10;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    public const int VisibleStaminaGaugeDisplayModeIndex = 0;
-    public const int DefaultStaminaGaugeDisplayModeIndex = 1;
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-    public const int VisibleStaminaGaugeDisplayModeIndex = 0;
-    public const int DefaultStaminaGaugeDisplayModeIndex = 1;
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
@@ -456,14 +428,6 @@ public static class WidgetConfigDefaults
         {
             PlayerInfoFormatString = GetDefaultPlayerInfoFormatString(kind),
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-            StaminaGaugeDisplayModeIndex = DefaultStaminaGaugeDisplayModeIndex,
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
-            StaminaGaugeDisplayModeIndex = DefaultStaminaGaugeDisplayModeIndex,
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorIndexes = CreateDefaultClassColorIndexes(kind),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
@@ -672,21 +636,6 @@ public static class WidgetConfigDefaults
             meter.HealthValueDisplayModeIndex,
             DefaultHealthValueDisplayModeIndex,
             SeparateShieldHealthValueDisplayModeIndex);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-        meter.StaminaGaugeDisplayModeIndex = kind == WidgetKind.PlayerList
-            ? Math.Clamp(
-                meter.StaminaGaugeDisplayModeIndex,
-                VisibleStaminaGaugeDisplayModeIndex,
-                DefaultStaminaGaugeDisplayModeIndex)
-            : DefaultStaminaGaugeDisplayModeIndex;
-<<<<<<< HEAD
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;

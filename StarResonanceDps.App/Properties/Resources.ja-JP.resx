@@ -771,22 +771,4 @@
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>バリア量個別表示</value>
   </data>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-  <data name="Settings_Display_StaminaGauge" xml:space="preserve">
-    <value>スタミナゲージ</value>
-  </data>
-  <data name="StaminaGaugeDisplay_Show" xml:space="preserve">
-    <value>表示</value>
-  </data>
-  <data name="StaminaGaugeDisplay_Hide" xml:space="preserve">
-    <value>非表示</value>
-  </data>
-<<<<<<< HEAD
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
-=======
->>>>>>> 656ba58aed03dfd1d866638627a100317eef1895
 </root>
