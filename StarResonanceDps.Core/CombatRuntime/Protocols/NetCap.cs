@@ -25,7 +25,12 @@ public class NetCap
     private byte[] DecompressionScratchBuffer = new byte[1024 * 1024];
     private Decompressor _decompressor = new();
     private Dictionary<NotifyId, Action<ReadOnlySpan<byte>, ExtraPacketData>> NotifyHandlers = new();
+    private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyHandlers = new();
+    private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyReturnHandlers = new();
+    private ConcurrentDictionary<uint, ProxyId> ProxyReturnsDictionary = new();
     private Action<NotifyId, ReadOnlySpan<byte>, ExtraPacketData>? UnhandledHandler = null;
+    private Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData>? UnhandledProxyHandler = null;
+    private Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData>? UnhandledProxyReturnHandler = null;
     public ulong NumSeenPackets = 0;
     public DateTime LastPacketSeenAt = DateTime.MinValue;
     public int NumConnectionReaders = 0;
@@ -45,6 +50,8 @@ public class NetCap
 
     public void Start()
     {
+        ProxyReturnsDictionary.Clear();
+
         if (!string.IsNullOrEmpty(DebugCaptureFile) && IsDebugCaptureFileMode)
         {
             CaptureDevice = new CaptureFileReaderDevice(DebugCaptureFile);
@@ -76,6 +83,26 @@ public class NetCap
     public void RegisterNotifyHandler(ulong serviceId, uint methodId, Action<ReadOnlySpan<byte>, ExtraPacketData> handler)
     {
         NotifyHandlers.Add(new NotifyId(serviceId, methodId), handler);
+    }
+
+    public void RegisterUnhandledProxyHandler(Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
+    {
+        UnhandledProxyHandler = handler;
+    }
+
+    public void RegisterUnhandledProxyReturnHandler(Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
+    {
+        UnhandledProxyReturnHandler = handler;
+    }
+
+    public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
+    {
+        ProxyHandlers.Add(new ProxyId(serviceId, methodId), handler);
+    }
+
+    public void RegisterProxyReturnHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
+    {
+        ProxyReturnHandlers.Add(new ProxyId(serviceId, methodId), handler);
     }
 
     public void RegisterMatchNotifyHandler(ServiceMethods.MatchNtf methodId, Action<ReadOnlySpan<byte>, ExtraPacketData> handler)
@@ -230,12 +257,16 @@ public class NetCap
                     ParseFrameDown(msgPayload, isCompressed, lastPacketTime);
                     break;
                 case MsgTypeId.Call:
+                    ParseCall(msgPayload, isCompressed, lastPacketTime);
                     break;
                 case MsgTypeId.Return:
+                    ParseReturn(msgPayload, isCompressed, lastPacketTime);
+                    break;
+                case MsgTypeId.FrameUp:
+                    ParseFrameUp(msgPayload, isCompressed, lastPacketTime);
                     break;
                 case MsgTypeId.None:
                 case MsgTypeId.Echo:
-                case MsgTypeId.FrameUp:
                 case MsgTypeId.UNK1:
                 case MsgTypeId.UNK2:
                     break;
@@ -299,6 +330,162 @@ public class NetCap
             UnhandledHandler(id, msgData, extraData);
         }
 
+    }
+
+
+    private void ParseCall(ReadOnlySpan<byte> data, bool isCompressed, DateTime lastPacketTime)
+    {
+        if (data.Length < 20)
+        {
+            return;
+        }
+
+        var proxyServiceId = BinaryPrimitives.ReadUInt64BigEndian(data);
+        var returnUid = BinaryPrimitives.ReadUInt32BigEndian(data[12..]);
+        var proxyMethodId = BinaryPrimitives.ReadUInt32BigEndian(data[16..]);
+        var msgData = data[20..];
+
+        var id = new ProxyId((uint)proxyServiceId, proxyMethodId);
+        ProxyReturnsDictionary.AddOrUpdate(returnUid, id, (_, _) => id);
+        DispatchProxyCall(id, msgData, returnUid, lastPacketTime);
+    }
+
+    private void ParseFrameUp(ReadOnlySpan<byte> data, bool isCompressed, DateTime lastPacketTime)
+    {
+        if (data.Length < 4)
+        {
+            return;
+        }
+
+        var offset = 4;
+        while (offset < data.Length)
+        {
+            if (data.Length - offset < 18)
+            {
+                return;
+            }
+
+            var length = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+            if (length < 18
+                || length > int.MaxValue
+                || length > data.Length - offset)
+            {
+                return;
+            }
+
+            var endPos = offset + (int)length;
+            if (endPos > data.Length)
+            {
+                return;
+            }
+
+            offset += 4;
+            var flags = BinaryPrimitives.ReadUInt16BigEndian(data[offset..]);
+            offset += 2;
+            offset += 4;
+            var proxyServiceId = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+            offset += 4;
+
+            uint returnUid;
+            uint proxyMethodId;
+            if (flags == 2)
+            {
+                if (endPos - offset < 8)
+                {
+                    return;
+                }
+
+                returnUid = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+                offset += 4;
+                proxyMethodId = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+                offset += 4;
+            }
+            else
+            {
+                if (endPos - offset < 12)
+                {
+                    return;
+                }
+
+                offset += 4;
+                returnUid = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+                offset += 4;
+                proxyMethodId = BinaryPrimitives.ReadUInt32BigEndian(data[offset..]);
+                offset += 4;
+            }
+
+            var msgData = data[offset..endPos];
+            var id = new ProxyId(proxyServiceId, proxyMethodId);
+            if (flags != 2)
+            {
+                ProxyReturnsDictionary.AddOrUpdate(returnUid, id, (_, _) => id);
+            }
+
+            DispatchProxyCall(id, msgData, returnUid, lastPacketTime);
+            offset = endPos;
+        }
+    }
+
+    private void ParseReturn(ReadOnlySpan<byte> data, bool isCompressed, DateTime lastPacketTime)
+    {
+        if (data.Length < 12)
+        {
+            return;
+        }
+
+        var returnUid = BinaryPrimitives.ReadUInt32BigEndian(data[4..]);
+        var msgData = data[12..];
+        if (isCompressed)
+        {
+            msgData = Decompress(msgData);
+            if (msgData.IsEmpty)
+            {
+                return;
+            }
+        }
+
+        var protoStart = 0;
+        var searchLength = Math.Min(msgData.Length, 4);
+        for (var index = 0; index < searchLength; index++)
+        {
+            if (msgData[index] == 0x0A)
+            {
+                protoStart = index;
+            }
+        }
+
+        if (!ProxyReturnsDictionary.TryRemove(returnUid, out var id))
+        {
+            return;
+        }
+
+        var finalData = msgData[protoStart..];
+        var extraData = new ExtraPacketData(lastPacketTime);
+        if (ProxyReturnHandlers.TryGetValue(id, out var handler))
+        {
+            handler(finalData, returnUid, extraData);
+        }
+        else
+        {
+            UnhandledProxyReturnHandler?.Invoke(id, finalData, returnUid, extraData);
+        }
+    }
+
+    private void DispatchProxyCall(
+        ProxyId id,
+        ReadOnlySpan<byte> data,
+        uint returnUid,
+        DateTime lastPacketTime)
+    {
+        var extraData = new ExtraPacketData(lastPacketTime);
+        if (ProxyHandlers.TryGetValue(id, out var handler))
+        {
+            handler(data, returnUid, extraData);
+        }
+        else
+        {
+            UnhandledProxyHandler?.Invoke(id, data, returnUid, extraData);
+        }
     }
 
     private ReadOnlySpan<byte> Decompress(ReadOnlySpan<byte> data)

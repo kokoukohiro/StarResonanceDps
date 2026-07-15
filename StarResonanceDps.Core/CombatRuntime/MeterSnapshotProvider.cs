@@ -276,14 +276,14 @@ public static class MeterSnapshotProvider
 
     public static IReadOnlyList<PlayerSkillInfoSnapshot> GetPlayerSkillInfo(long characterId)
     {
-        var encounter = ResolveActiveEncounter();
+        var encounter = ResolvePlayerDetailEncounter();
         if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
             return Array.Empty<PlayerSkillInfoSnapshot>();
         }
 
-        var skillLevels = ResolvePlayerSkillLevels(entity);
+        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity);
 
         if (skillLevels.Count == 0)
         {
@@ -309,7 +309,7 @@ public static class MeterSnapshotProvider
 
     public static PlayerImagineRoleSkillLoadoutSnapshot GetPlayerImagineRoleSkills(long characterId)
     {
-        var encounter = ResolveActiveEncounter();
+        var encounter = ResolvePlayerDetailEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
@@ -319,7 +319,7 @@ public static class MeterSnapshotProvider
                 Array.Empty<PlayerCooldownSkillSnapshot>());
         }
 
-        var skillLevels = ResolvePlayerSkillLevels(entity);
+        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity);
         var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
         var roleSkills = new List<PlayerCooldownSkillSnapshot>(4);
         var includedSkillIds = new HashSet<int>();
@@ -844,12 +844,8 @@ public static class MeterSnapshotProvider
         long entityUuid,
         DataTypes.Skills.SkillLevelInfo skillLevel)
     {
-        var isSelf = entityUuid != 0
-            && (entityUuid == MessageManager.currentUserUuid
-                || entityUuid == AppState.PlayerUUID
-                || (AppState.PlayerUID != 0
-                    && Utils.UuidToEntityId(entityUuid) == AppState.PlayerUID));
-        if (isSelf
+        if (IsSelfEntity(entityUuid)
+            && !CombatDataCatalog.IsSkillRole(skillLevel.SkillId)
             && PlayerSkillLevelStateStore.TryGetSelfSkillLevel(
                 skillLevel.SkillId,
                 out var selfLevel))
@@ -860,9 +856,27 @@ public static class MeterSnapshotProvider
         return skillLevel.CurrentLevel;
     }
 
-    private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(Entity entity)
+    private static bool IsSelfEntity(long entityUuid)
     {
-        return entity.GetAttrKV("AttrSkillLevelIdList") switch
+        return entityUuid != 0
+            && (entityUuid == MessageManager.currentUserUuid
+                || entityUuid == AppState.PlayerUUID
+                || (AppState.PlayerUID != 0
+                    && Utils.UuidToEntityId(entityUuid) == AppState.PlayerUID));
+    }
+
+    private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(
+        long entityUuid,
+        Entity entity)
+    {
+        if (IsSelfEntity(entityUuid)
+            && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
+                out var currentSkillLevels))
+        {
+            return currentSkillLevels;
+        }
+
+        var receivedSkillLevels = entity.GetAttrKV("AttrSkillLevelIdList") switch
         {
             List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
             JArray jsonArray =>
@@ -871,6 +885,19 @@ public static class MeterSnapshotProvider
                 ?? Array.Empty<DataTypes.Skills.SkillLevelInfo>(),
             _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
         };
+
+        if (IsSelfEntity(entityUuid)
+            || !PlayerSkillLevelStateStore.TryGetRoleSkillIdsForProfession(
+                entity.ProfessionId,
+                out var currentRoleSkillIds))
+        {
+            return receivedSkillLevels;
+        }
+
+        return receivedSkillLevels
+            .Where(skill => !CombatDataCatalog.IsSkillRole(skill.SkillId)
+                || currentRoleSkillIds.Contains(skill.SkillId))
+            .ToArray();
     }
 
     private static bool TryResolvePlayerEntity(
@@ -917,6 +944,11 @@ public static class MeterSnapshotProvider
         return kind == MeterSnapshotKind.Damage
             ? entity.TotalDamage
             : entity.TotalHealing;
+    }
+
+    private static Encounter? ResolvePlayerDetailEncounter()
+    {
+        return AppState.OpenedHistoricalEncounter ?? EncounterManager.Current;
     }
 
     private static Encounter? ResolveActiveEncounter()

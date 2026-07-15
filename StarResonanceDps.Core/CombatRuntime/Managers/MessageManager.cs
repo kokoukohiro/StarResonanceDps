@@ -22,6 +22,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const double OriginEnergyRawScale = 100d;
         private const string CurrentStaminaSnapshotAttribute = "CurrentStaminaSnapshot";
         private const string MaxStaminaSnapshotAttribute = "MaxStaminaSnapshot";
+        private const uint WorldProxyServiceId = 103198054;
+        private const uint ResetProfessionTalentMethodId = 0x3100F;
+        private const uint SaveProjectMethodId = 0x44001;
+        private const uint SwitchProjectMethodId = 0x44002;
+        private const uint SyncProjectListMethodId = 0x44005;
+        private static readonly ConcurrentDictionary<uint, int> PendingResetProfessionIds = new();
+        private static readonly ConcurrentDictionary<uint, int> PendingSaveProjectIds = new();
+        private static readonly ConcurrentDictionary<uint, int> PendingSwitchProjectIds = new();
 
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
@@ -85,6 +93,14 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterNotifyHandler((ulong)EServiceId.SocialNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.SocialNtf.NotifySocialData, ProcessNotifySocialData);
 
+            netCap.RegisterProxyHandler(WorldProxyServiceId, ResetProfessionTalentMethodId, ProcessResetProfessionTalentCall);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, ResetProfessionTalentMethodId, ProcessResetProfessionTalentReturn);
+            netCap.RegisterProxyHandler(WorldProxyServiceId, SaveProjectMethodId, ProcessSaveProjectCall);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SaveProjectMethodId, ProcessSaveProjectReturn);
+            netCap.RegisterProxyHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectCall);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectReturn);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SyncProjectListMethodId, ProcessSyncProjectListReturn);
+
             netCap.Start();
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
         }
@@ -96,6 +112,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 netCap.Stop();
             }
 
+            PendingResetProfessionIds.Clear();
+            PendingSaveProjectIds.Clear();
+            PendingSwitchProjectIds.Clear();
             SkillCooldownStateStore.Reset();
             NearbyEntityStore.Instance.Clear();
         }
@@ -556,6 +575,252 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool IsWipeCheckQueued = false;
         private static readonly HashSet<EAttrType> ShieldListChangedAttributes = [EAttrType.AttrShieldList];
 
+        private static bool IsSelfPlayer(long uuid)
+        {
+            return uuid == currentUserUuid
+                || uuid == AppState.PlayerUUID
+                || (AppState.PlayerUID != 0
+                    && Utils.UuidToEntityId(uuid) == AppState.PlayerUID);
+        }
+
+        private static void UpdateProfessionId(long uuid, int professionId)
+        {
+            EncounterManager.Current.SetAttrKV(uuid, "AttrProfessionId", professionId);
+
+            if (!IsSelfPlayer(uuid))
+            {
+                return;
+            }
+
+            PlayerSkillLevelStateStore.SetSelfCurrentProfessionId(professionId);
+            AppState.ProfessionId = professionId;
+            AppState.ProfessionName = Professions.GetProfessionNameFromId(professionId);
+            RefreshSelfSpecState(uuid);
+        }
+
+        private static void RefreshSelfSpecState(long uuid)
+        {
+            if (uuid == 0)
+            {
+                return;
+            }
+
+            var entity = EncounterManager.Current.GetOrCreateEntity(uuid);
+            if (!PlayerSkillLevelStateStore.TryGetSelfClassSpec(
+                entity.ProfessionId,
+                out _,
+                out var subProfessionId))
+            {
+                return;
+            }
+
+            if (subProfessionId > 0)
+            {
+                entity.SetSubProfessionId(subProfessionId);
+            }
+            else
+            {
+                entity.SetSubProfessionUnknown();
+            }
+
+            PlayerRosterProjection.UpsertSelf(uuid);
+        }
+
+        private static void RefreshSelfProjectState()
+        {
+            var uuid = currentUserUuid != 0
+                ? currentUserUuid
+                : AppState.PlayerUUID;
+            if (uuid == 0)
+            {
+                return;
+            }
+
+            if (PlayerSkillLevelStateStore.TryGetSelfCurrentProfessionId(
+                out var professionId))
+            {
+                UpdateProfessionId(uuid, professionId);
+            }
+            else
+            {
+                RefreshSelfSpecState(uuid);
+            }
+        }
+
+        private static void ProcessResetProfessionTalentCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            try
+            {
+                var request = World.Types.ResetProfessionTalent.Parser
+                    .ParseFrom(payloadBuffer)
+                    .VRequest;
+                if (request?.ProfessionId > 0)
+                {
+                    PendingResetProfessionIds[returnUid] = request.ProfessionId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse profession talent reset request");
+            }
+        }
+
+        private static void ProcessResetProfessionTalentReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            if (!PendingResetProfessionIds.TryRemove(returnUid, out var professionId))
+            {
+                return;
+            }
+
+            try
+            {
+                var response = World.Types.ResetProfessionTalent_Ret.Parser
+                    .ParseFrom(payloadBuffer);
+                if (response.Ret != EErrorCode.ErrSuccess)
+                {
+                    return;
+                }
+
+                PlayerSkillLevelStateStore.SetSelfTalentStage(professionId, 0);
+                RefreshSelfProjectState();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse profession talent reset response");
+            }
+        }
+
+        private static void ProcessSaveProjectCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            try
+            {
+                var request = World.Types.SaveProject.Parser
+                    .ParseFrom(payloadBuffer)
+                    .VRequest;
+                if (request?.ProjectId > 0)
+                {
+                    PendingSaveProjectIds[returnUid] = request.ProjectId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse project save request");
+            }
+        }
+
+        private static void ProcessSaveProjectReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            PendingSaveProjectIds.TryRemove(returnUid, out var requestedProjectId);
+
+            try
+            {
+                var response = SaveProjectReply.Parser.ParseFrom(payloadBuffer);
+                if (response.ErrCode != EErrorCode.ErrSuccess)
+                {
+                    return;
+                }
+
+                var projectId = response.SavedProjectId > 0
+                    ? response.SavedProjectId
+                    : requestedProjectId;
+                PlayerSkillLevelStateStore.ApplySelfSavedProjectState(
+                    projectId,
+                    response.CurrentProjectSyncData,
+                    response.SyncData);
+                RefreshSelfProjectState();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse project save response");
+            }
+        }
+
+        private static void ProcessSwitchProjectCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            try
+            {
+                var request = World.Types.SwitchProject.Parser
+                    .ParseFrom(payloadBuffer)
+                    .VRequest;
+                if (request?.NewProjectId > 0)
+                {
+                    PendingSwitchProjectIds[returnUid] = request.NewProjectId;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse project switch request");
+            }
+        }
+
+        private static void ProcessSwitchProjectReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            if (!PendingSwitchProjectIds.TryRemove(returnUid, out var projectId))
+            {
+                return;
+            }
+
+            try
+            {
+                var response = SwitchProjectReply.Parser.ParseFrom(payloadBuffer);
+                if (response.ErrCode != EErrorCode.ErrSuccess)
+                {
+                    return;
+                }
+
+                PlayerSkillLevelStateStore.ApplySelfProjectState(
+                    projectId,
+                    response.CurrentProjectSyncData);
+                RefreshSelfProjectState();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse project switch response");
+            }
+        }
+
+        private static void ProcessSyncProjectListReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            try
+            {
+                var response = SyncProjectListReply.Parser.ParseFrom(payloadBuffer);
+                if (response.ErrCode != EErrorCode.ErrSuccess)
+                {
+                    return;
+                }
+
+                PlayerSkillLevelStateStore.ReplaceSelfProjectList(
+                    response.SyncData,
+                    response.CurrentProjectSyncData);
+                RefreshSelfProjectState();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse project list response");
+            }
+        }
+
         public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
         {
             foreach (var attr in attrs)
@@ -591,7 +856,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrProfessionId:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        UpdateProfessionId(
+                            uuid,
+                            isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrCamp:
                         {
@@ -772,7 +1039,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrSkillLevelIdList:
                         if (isNoValue)
                         {
-                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, new List<DataTypes.Skills.SkillLevelInfo>());
+                            var emptySkillLevels = new List<DataTypes.Skills.SkillLevelInfo>();
+                            if (IsSelfPlayer(uuid))
+                            {
+                                PlayerSkillLevelStateStore.UpdateSelfRawSkillLevels(
+                                    emptySkillLevels);
+                            }
+
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, emptySkillLevels);
                             break;
                         }
 
@@ -786,6 +1060,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                             reader.ReadMessage(info);
                             skillLevelInfoList.Add(new DataTypes.Skills.SkillLevelInfo(info));
                         }
+                        if (IsSelfPlayer(uuid))
+                        {
+                            PlayerSkillLevelStateStore.UpdateSelfRawSkillLevels(
+                                skillLevelInfoList);
+                        }
+
                         EncounterManager.Current.SetAttrKV(uuid, "AttrSkillLevelIdList", skillLevelInfoList);
                         break;
                     case EAttrType.AttrTeamId:
@@ -1336,15 +1616,18 @@ namespace StarResonanceDps.Core.CombatRuntime
             var professionList = vData.ProfessionList;
             if (professionList != null && professionList.CurProfessionId != 0)
             {
-                var professionName = Professions.GetProfessionNameFromId(professionList.CurProfessionId);
-                EncounterManager.Current.SetProfessionId(playerUuid, professionList.CurProfessionId);
-                AppState.ProfessionId = professionList.CurProfessionId;
-                AppState.ProfessionName = professionName;
+                UpdateProfessionId(playerUuid, professionList.CurProfessionId);
             }
 
             PlayerSkillLevelStateStore.ReplaceSelfSkillLevels(
                 professionList,
                 vData.DutyList);
+            if (vData.CurProjectIdInfo?.CurrentProfessionProjectId > 0)
+            {
+                PlayerSkillLevelStateStore.SetSelfCurrentProjectId(
+                    vData.CurProjectIdInfo.CurrentProfessionProjectId);
+            }
+            RefreshSelfSpecState(playerUuid);
 
             var sceneData = vData.SceneData;
             if (sceneData != null)
@@ -1451,13 +1734,28 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                if (ser.ProfessionList != null)
+                if (ser.ProfessionList is not null)
                 {
-                    if (ser.ProfessionList.CurProfessionId != null)
+                    if (ser.ProfessionList.CurProfessionId is { } professionId)
                     {
-                        EncounterManager.Current.SetProfessionId(currentUserUuid, (int)ser.ProfessionList.CurProfessionId);
+                        UpdateProfessionId(currentUserUuid, professionId);
                     }
+
+                    PlayerSkillLevelStateStore.ApplySelfProfessionListChanges(
+                        ser.ProfessionList);
                 }
+
+                if (ser.CurrentProjectIdInfo?.CurrentProfessionProjectId is { } projectId)
+                {
+                    PlayerSkillLevelStateStore.SetSelfCurrentProjectId(projectId);
+                }
+
+                if (ser.DutyList is not null)
+                {
+                    PlayerSkillLevelStateStore.ApplySelfDutyListChanges(ser.DutyList);
+                }
+
+                RefreshSelfSpecState(currentUserUuid);
 
                 if (ser.SceneData != null)
                 {

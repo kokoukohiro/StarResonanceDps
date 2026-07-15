@@ -14,6 +14,8 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
     public UserFightAttr? Attr;
     public SeasonRankList? SeasonRankList;
     public ProfessionList? ProfessionList;
+    public CurrentProfessionProjectIdInfo? CurrentProjectIdInfo;
+    public DutyList? DutyList;
     public FightPoint? FightPoint;
     public SeasonRoleLevelData? SeasonRoleLevelData;
 
@@ -38,6 +40,12 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
                 return true;
             case Zproto.CharSerialize.ProfessionListFieldNumber:
                 ProfessionList = new(blob);
+                return true;
+            case Zproto.CharSerialize.CurProjectIdInfoFieldNumber:
+                CurrentProjectIdInfo = new(blob);
+                return true;
+            case Zproto.CharSerialize.DutyListFieldNumber:
+                DutyList = new(blob);
                 return true;
             case Zproto.CharSerialize.FightPointFieldNumber:
                 FightPoint = new(blob);

@@ -14,7 +14,13 @@ public static partial class PlayerInfoFormatFormatter
         string? formatString,
         PlayerNameDisplayMode nameDisplayMode)
     {
-        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
+        var classSpec = player.IsSelf
+            && PlayerSkillLevelStateStore.TryGetSelfClassSpec(
+                player.ProfessionId,
+                out var currentClassSpec,
+                out _)
+            ? currentClassSpec
+            : PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
         return Format(
             new PlayerInfoFormatData(
                 player.UserId,

@@ -99,6 +99,7 @@ internal static class PlayerRosterProjection
                 "AttrSeasonStrengthPer",
                 "AttrSeasonStrengthExPer");
         var subProfessionId = entity.SubProfessionId;
+        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(subProfessionId);
         var equipmentData = GetEquipmentData(entity);
 
         RosterStore.Upsert(new PlayerRosterEntry(
@@ -109,7 +110,7 @@ internal static class PlayerRosterProjection
             seasonStrength,
             entity.Hp,
             entity.MaxHp,
-            PlayerClassSpecResolver.FromSubProfessionId(subProfessionId),
+            classSpec,
             isSelf,
             combatAttributes,
             subProfessionId,

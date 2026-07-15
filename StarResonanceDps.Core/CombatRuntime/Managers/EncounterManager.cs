@@ -1562,15 +1562,37 @@ namespace StarResonanceDps.Core.CombatRuntime
             ProfessionId = id;
             Profession = Professions.GetProfessionNameFromId(id);
 
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && id != 0)
+            var subProfessionBaseId = Professions.GetProfessionIdFromSubProfessionId(SubProfessionId);
+            var clearSubProfession = SubProfessionId != 0 && subProfessionBaseId != id;
+            if (clearSubProfession)
             {
-                cached.ProfessionId = id;
+                SubProfessionId = 0;
+                SubProfession = string.Empty;
+            }
+
+            var cached = EntityCache.Instance.GetOrCreate(UUID);
+            if (cached != null)
+            {
+                if (id != 0)
+                {
+                    cached.ProfessionId = id;
+                }
+
+                if (clearSubProfession)
+                {
+                    cached.SubProfessionId = 0;
+                }
             }
         }
 
         public void SetSubProfessionId(int id)
         {
+            if (id <= 0)
+            {
+                SetSubProfessionUnknown();
+                return;
+            }
+
             SubProfessionId = id;
             SubProfession = Professions.GetSubProfessionNameFromId(id);
 
@@ -1589,6 +1611,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     cached.ProfessionId = profId;
                 }
+            }
+        }
+
+        public void SetSubProfessionUnknown()
+        {
+            SubProfessionId = 0;
+            SubProfession = string.Empty;
+
+            var cached = EntityCache.Instance.GetOrCreate(UUID);
+            if (cached is not null)
+            {
+                cached.SubProfessionId = 0;
             }
         }
 

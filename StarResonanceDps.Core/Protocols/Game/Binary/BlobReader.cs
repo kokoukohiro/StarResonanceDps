@@ -167,6 +167,55 @@ public class BlobReader
         return hashMap;
     }
 
+    public BlobHashMapDelta<T, X> ReadHashMapDelta<T, X>() where T : notnull
+    {
+        int add = ReadInt();
+        if (add == -4)
+        {
+            return new BlobHashMapDelta<T, X>(false, [], [], []);
+        }
+
+        bool replacesExisting = false;
+        int remove = 0;
+        int update = 0;
+        if (add == -1)
+        {
+            replacesExisting = true;
+            add = ReadInt();
+        }
+        else
+        {
+            remove = ReadInt();
+            update = ReadInt();
+        }
+
+        var added = new Dictionary<T, X>();
+        for (int i = 0; i < add; i++)
+        {
+            var key = ReadType<T>(this);
+            added[key] = ReadType<X>(this);
+        }
+
+        var removed = new List<T>(Math.Max(remove, 0));
+        for (int i = 0; i < remove; i++)
+        {
+            removed.Add(ReadType<T>(this));
+        }
+
+        var updated = new Dictionary<T, X>();
+        for (int i = 0; i < update; i++)
+        {
+            var key = ReadType<T>(this);
+            updated[key] = ReadType<X>(this);
+        }
+
+        return new BlobHashMapDelta<T, X>(
+            replacesExisting,
+            added,
+            removed,
+            updated);
+    }
+
     public List<T> ReadList<T>()
     {
         int count = ReadInt();
