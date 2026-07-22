@@ -857,9 +857,6 @@ localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\lo
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>ファイルの形式が想定と異なります。</value>
   </data>
-  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
-    <value>bokura直下のサーバーフォルダ名から保存規則を特定できません。</value>
-  </data>
   <data name="Keybind.Group.Main" xml:space="preserve">
     <value>通常</value>
   </data>

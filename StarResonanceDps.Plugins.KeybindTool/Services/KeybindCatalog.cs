@@ -1,4 +1,3 @@
-using System.IO;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using StarResonanceDps.Plugins.KeybindTool.Models;
@@ -528,38 +527,6 @@ internal static class KeybindCatalog
                 })
             });
 
-    private static readonly (string Marker, KeybindServerProfile Profile)[] ServerProfileFolderMarkers =
-    {
-        ("starasia", KeybindServerProfile.Asia),
-        ("startw", KeybindServerProfile.Taiwan),
-        ("bpsr", KeybindServerProfile.Global),
-        ("star", KeybindServerProfile.China)
-    };
-
-    private static readonly IReadOnlyDictionary<KeybindServerProfile, ServerProfileDefinition> ServerProfiles =
-        new ReadOnlyDictionary<KeybindServerProfile, ServerProfileDefinition>(
-            new Dictionary<KeybindServerProfile, ServerProfileDefinition>
-            {
-                [KeybindServerProfile.China] = ServerProfileDefinition.Baseline,
-                [KeybindServerProfile.Asia] = new ServerProfileDefinition(
-                    new ReadOnlyDictionary<string, int[]>(
-                        new Dictionary<string, int[]>(StringComparer.Ordinal)
-                        {
-                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x227 },
-                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFD6 },
-                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x124A }
-                        }),
-                    new ReadOnlyDictionary<string, int[]>(
-                        new Dictionary<string, int[]>(StringComparer.Ordinal)
-                        {
-                            [GetActionId(KeybindModeGroup.Main, "EnvironmentalResonance2")] = new[] { 0x241 },
-                            [GetActionId(KeybindModeGroup.Main, "SwitchQuestRight")] = new[] { 0xFF0 },
-                            [GetActionId(KeybindModeGroup.Main, "HomeBlueprint")] = new[] { 0x1264 }
-                        })),
-                [KeybindServerProfile.Global] = ServerProfileDefinition.Baseline,
-                [KeybindServerProfile.Taiwan] = ServerProfileDefinition.Baseline
-            });
-
     public static readonly IReadOnlyDictionary<uint, uint> HelperMainToActionValue =
         new ReadOnlyDictionary<uint, uint>(
             new Dictionary<uint, uint>
@@ -624,147 +591,54 @@ internal static class KeybindCatalog
 
     static KeybindCatalog()
     {
-        ValidateServerProfileSlotOwnership();
+        ValidateSlotOwnership();
     }
 
-    public static bool TryResolveServerProfile(string filePath, out KeybindServerProfile serverProfile)
+    private static void ValidateSlotOwnership()
     {
-        serverProfile = default;
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            return false;
-        }
+        var writeRanges = new List<(int Start, int End, string Device, string ActionId, int RelativeOffset)>();
 
-        DirectoryInfo? currentDirectory;
-        try
+        foreach (var action in ControllerActions)
         {
-            currentDirectory = new FileInfo(Path.GetFullPath(filePath)).Directory;
-        }
-        catch
-        {
-            currentDirectory = new FileInfo(filePath).Directory;
-        }
-
-        for (var current = currentDirectory; current is not null; current = current.Parent)
-        {
-            var parent = current.Parent;
-            if (parent is null)
+            foreach (var relativeOffset in action.RelativeOffsets)
             {
-                break;
+                writeRanges.Add((
+                    relativeOffset - sizeof(uint),
+                    relativeOffset + (sizeof(uint) * 2),
+                    "controller",
+                    action.Id,
+                    relativeOffset));
             }
+        }
 
-            if (!string.Equals(parent.Name, "bokura", StringComparison.OrdinalIgnoreCase))
+        foreach (var action in KeyMouseActions)
+        {
+            foreach (var relativeOffset in action.RelativeOffsets)
             {
-                continue;
+                writeRanges.Add((
+                    relativeOffset - sizeof(uint),
+                    relativeOffset + sizeof(uint),
+                    "keymouse",
+                    action.Id,
+                    relativeOffset));
             }
+        }
 
-            var serverFolderName = current.Name;
-            foreach (var (marker, profile) in ServerProfileFolderMarkers)
+        for (var currentIndex = 0; currentIndex < writeRanges.Count; currentIndex++)
+        {
+            var current = writeRanges[currentIndex];
+            for (var otherIndex = currentIndex + 1; otherIndex < writeRanges.Count; otherIndex++)
             {
-                if (serverFolderName.Contains(marker, StringComparison.OrdinalIgnoreCase))
+                var other = writeRanges[otherIndex];
+                if (Math.Max(current.Start, other.Start) >= Math.Min(current.End, other.End))
                 {
-                    serverProfile = profile;
-                    return true;
+                    continue;
                 }
-            }
 
-            return false;
-        }
-
-        return false;
-    }
-
-    public static IReadOnlyList<int> GetControllerRelativeOffsets(
-        ControllerActionDefinition definition,
-        KeybindServerProfile serverProfile)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        return GetServerProfileRelativeOffsets(
-            definition.Id,
-            definition.RelativeOffsets,
-            serverProfile,
-            controller: true);
-    }
-
-    public static IReadOnlyList<int> GetKeyMouseRelativeOffsets(
-        KeyMouseActionDefinition definition,
-        KeybindServerProfile serverProfile)
-    {
-        ArgumentNullException.ThrowIfNull(definition);
-        return GetServerProfileRelativeOffsets(
-            definition.Id,
-            definition.RelativeOffsets,
-            serverProfile,
-            controller: false);
-    }
-
-    private static IReadOnlyList<int> GetServerProfileRelativeOffsets(
-        string actionId,
-        IReadOnlyList<int> defaultOffsets,
-        KeybindServerProfile serverProfile,
-        bool controller)
-    {
-        if (!ServerProfiles.TryGetValue(serverProfile, out var profile))
-        {
-            throw new ArgumentOutOfRangeException(nameof(serverProfile));
-        }
-
-        var overrides = controller
-            ? profile.ControllerRelativeOffsetOverrides
-            : profile.KeyMouseRelativeOffsetOverrides;
-        return overrides.TryGetValue(actionId, out var offsets)
-            ? offsets
-            : defaultOffsets;
-    }
-
-    private static void ValidateServerProfileSlotOwnership()
-    {
-        foreach (var serverProfile in Enum.GetValues<KeybindServerProfile>())
-        {
-            var writeRanges = new List<(int Start, int End, string Device, string ActionId, int RelativeOffset)>();
-
-            foreach (var action in ControllerActions)
-            {
-                foreach (var relativeOffset in GetControllerRelativeOffsets(action, serverProfile))
-                {
-                    writeRanges.Add((
-                        relativeOffset - sizeof(uint),
-                        relativeOffset + (sizeof(uint) * 2),
-                        "controller",
-                        action.Id,
-                        relativeOffset));
-                }
-            }
-
-            foreach (var action in KeyMouseActions)
-            {
-                foreach (var relativeOffset in GetKeyMouseRelativeOffsets(action, serverProfile))
-                {
-                    writeRanges.Add((
-                        relativeOffset - sizeof(uint),
-                        relativeOffset + sizeof(uint),
-                        "keymouse",
-                        action.Id,
-                        relativeOffset));
-                }
-            }
-
-            for (var currentIndex = 0; currentIndex < writeRanges.Count; currentIndex++)
-            {
-                var current = writeRanges[currentIndex];
-                for (var otherIndex = currentIndex + 1; otherIndex < writeRanges.Count; otherIndex++)
-                {
-                    var other = writeRanges[otherIndex];
-                    if (Math.Max(current.Start, other.Start) >= Math.Min(current.End, other.End))
-                    {
-                        continue;
-                    }
-
-                    throw new InvalidOperationException(
-                        $"Keybind binding write ranges overlap: {serverProfile} / "
-                        + $"{current.Device}:{current.ActionId}@0x{current.RelativeOffset:X5} / "
-                        + $"{other.Device}:{other.ActionId}@0x{other.RelativeOffset:X5}");
-                }
+                throw new InvalidOperationException(
+                    "Keybind binding write ranges overlap: "
+                    + $"{current.Device}:{current.ActionId}@0x{current.RelativeOffset:X5} / "
+                    + $"{other.Device}:{other.ActionId}@0x{other.RelativeOffset:X5}");
             }
         }
     }
@@ -1613,15 +1487,6 @@ internal static class KeybindCatalog
         return new KeybindInputVisual(
             $"pack://application:,,,/KeybindTool;component/Assets/{assetFileName}.png",
             text);
-    }
-
-    private sealed record ServerProfileDefinition(
-        IReadOnlyDictionary<string, int[]> ControllerRelativeOffsetOverrides,
-        IReadOnlyDictionary<string, int[]> KeyMouseRelativeOffsetOverrides)
-    {
-        public static readonly ServerProfileDefinition Baseline = new(
-            new ReadOnlyDictionary<string, int[]>(new Dictionary<string, int[]>(StringComparer.Ordinal)),
-            new ReadOnlyDictionary<string, int[]>(new Dictionary<string, int[]>(StringComparer.Ordinal)));
     }
 
     private static ControllerActionDefinition CreateControllerAction(

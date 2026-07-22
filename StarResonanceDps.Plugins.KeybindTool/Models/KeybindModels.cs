@@ -10,14 +10,6 @@ internal enum KeybindModeGroup
     Fishing
 }
 
-internal enum KeybindServerProfile
-{
-    China,
-    Asia,
-    Global,
-    Taiwan
-}
-
 internal enum KeybindSaveTargetDevice
 {
     Controller,

@@ -67,7 +67,7 @@ public sealed partial class EntityListEntry : ObservableObject
     [ObservableProperty]
     private bool _isEntitySelectionMenuOpen;
 
-    public bool UsesFriendlyHealthBar => CampRelation != EntityCampRelation.Hostile;
+    public bool UsesFriendlyHealthBar => CampRelation == EntityCampRelation.Friendly;
 
     public static EntityListEntry Create(
         NearbyEntityEntry entity,

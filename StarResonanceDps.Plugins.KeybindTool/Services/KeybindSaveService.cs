@@ -32,11 +32,6 @@ internal sealed class KeybindSaveService
         var data = Decompress(raw);
 
         var inputAnchorOffset = FindAnchor(data, InputAnchor, _texts["Keybind.Error.RequiredInputDataNotFound"]);
-        if (!KeybindCatalog.TryResolveServerProfile(filePath, out var serverProfile))
-        {
-            throw new InvalidDataException(_texts["Keybind.Error.ServerProfileNotFound"]);
-        }
-
         var (helper1Offset, helper2Offset) = FindHelperOffsets(data);
 
         var presetAnchorOffset = FindAnchorOrNegative(data, PresetAnchor);
@@ -47,7 +42,6 @@ internal sealed class KeybindSaveService
         ValidateSessionLayout(
             data,
             inputAnchorOffset,
-            serverProfile,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -56,7 +50,6 @@ internal sealed class KeybindSaveService
             filePath,
             data,
             inputAnchorOffset,
-            serverProfile,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -71,9 +64,7 @@ internal sealed class KeybindSaveService
 
         return GetOffsets(
             session.InputAnchorOffset,
-            KeybindCatalog.GetControllerRelativeOffsets(
-                definition,
-                session.ServerProfile));
+            definition.RelativeOffsets);
     }
 
     public IReadOnlyList<int> GetKeyMouseOffsets(
@@ -85,9 +76,7 @@ internal sealed class KeybindSaveService
 
         return GetOffsets(
             session.InputAnchorOffset,
-            KeybindCatalog.GetKeyMouseRelativeOffsets(
-                definition,
-                session.ServerProfile));
+            definition.RelativeOffsets);
     }
 
     public KeybindWriteTargetValidation ValidateWriteTargets(KeybindSaveSession session)
@@ -344,16 +333,13 @@ internal sealed class KeybindSaveService
     private void ValidateSessionLayout(
         byte[] data,
         int inputAnchorOffset,
-        KeybindServerProfile serverProfile,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
     {
         foreach (var action in KeybindCatalog.ControllerActions)
         {
-            foreach (var relativeOffset in KeybindCatalog.GetControllerRelativeOffsets(
-                action,
-                serverProfile))
+            foreach (var relativeOffset in action.RelativeOffsets)
             {
                 EnsureRange(
                     data,
@@ -364,9 +350,7 @@ internal sealed class KeybindSaveService
 
         foreach (var action in KeybindCatalog.KeyMouseActions)
         {
-            foreach (var relativeOffset in KeybindCatalog.GetKeyMouseRelativeOffsets(
-                action,
-                serverProfile))
+            foreach (var relativeOffset in action.RelativeOffsets)
             {
                 EnsureRange(
                     data,
@@ -429,7 +413,6 @@ internal sealed class KeybindSaveSession
         string filePath,
         byte[] data,
         int inputAnchorOffset,
-        KeybindServerProfile serverProfile,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
@@ -437,7 +420,6 @@ internal sealed class KeybindSaveSession
         FilePath = filePath;
         Data = data;
         InputAnchorOffset = inputAnchorOffset;
-        ServerProfile = serverProfile;
         Helper1Offset = helper1Offset;
         Helper2Offset = helper2Offset;
         PresetOffset = presetOffset;
@@ -448,8 +430,6 @@ internal sealed class KeybindSaveSession
     public byte[] Data { get; private set; }
 
     public int InputAnchorOffset { get; }
-
-    public KeybindServerProfile ServerProfile { get; }
 
     public int Helper1Offset { get; }
 

@@ -799,9 +799,6 @@ localsave\Env1\[number folder]\[character UID folder]\localsave.bytes (at least 
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>The file format does not match the expected layout.</value>
   </data>
-  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
-    <value>The server profile could not be determined from the folder directly under bokura.</value>
-  </data>
   <data name="Keybind.Group.Main" xml:space="preserve">
     <value>Main</value>
   </data>

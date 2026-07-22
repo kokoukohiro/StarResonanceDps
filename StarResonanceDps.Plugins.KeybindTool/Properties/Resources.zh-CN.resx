@@ -799,9 +799,6 @@ localsave\Env1\[数字文件夹]\[角色 UID 文件夹]\localsave.bytes（至少
   <data name="Keybind.Error.UnexpectedFileFormat" xml:space="preserve">
     <value>文件格式与预期布局不一致。</value>
   </data>
-  <data name="Keybind.Error.ServerProfileNotFound" xml:space="preserve">
-    <value>无法从 bokura 目录下的服务器文件夹名称确定保存规则。</value>
-  </data>
   <data name="Keybind.Group.Main" xml:space="preserve">
     <value>常规</value>
   </data>
