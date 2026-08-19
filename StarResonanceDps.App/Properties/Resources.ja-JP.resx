@@ -748,10 +748,10 @@
     <value>計測停止</value>
   </data>
   <data name="Meter_BenchmarkInProgress" xml:space="preserve">
-    <value>[計測中]</value>
+    <value>[集計中]</value>
   </data>
   <data name="Meter_BenchmarkCompleted" xml:space="preserve">
-    <value>[計測完了]</value>
+    <value>[集計完了]</value>
   </data>
   <data name="Manager_WidgetAction_History" xml:space="preserve">
     <value>履歴</value>

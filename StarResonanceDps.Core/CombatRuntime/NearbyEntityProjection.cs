@@ -72,9 +72,20 @@ internal static class NearbyEntityProjection
             ? NearbyEntityCampState.GetRelation(entityUuid)
             : (EntityCampRelation?)null;
 
-        EntityStore.Refresh(
-            entityUuid,
-            existing => MergeChangedFields(existing, entity, changedAttributes, campRelation));
+        if (EntityStore.TryRefresh(
+                entityUuid,
+                existing => MergeChangedFields(existing, entity, changedAttributes, campRelation)))
+        {
+            return;
+        }
+
+        if (IsHudHidden(entity))
+        {
+            EntityStore.Remove(entityUuid);
+            return;
+        }
+
+        EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity));
     }
 
     public static void RemoveEntity(long entityUuid)

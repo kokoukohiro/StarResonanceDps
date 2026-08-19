@@ -61,22 +61,24 @@ public sealed class NearbyEntityStore
         Upsert(entry, requireExistingEntry: true);
     }
 
-    internal void Refresh(
+    internal bool TryRefresh(
         long entityUuid,
         Func<NearbyEntityEntry, NearbyEntityEntry> update)
     {
         if (entityUuid == 0)
         {
-            return;
+            return false;
         }
 
         ArgumentNullException.ThrowIfNull(update);
 
+        var refreshed = false;
         PublishIfChanged(
             () =>
             {
                 if (_entries.TryGetValue(entityUuid, out var existing))
                 {
+                    refreshed = true;
                     var updated = update(existing);
                     _entries[entityUuid] = updated with
                     {
@@ -86,6 +88,8 @@ public sealed class NearbyEntityStore
                 }
             },
             forcePublish: false);
+
+        return refreshed;
     }
 
     private void Upsert(NearbyEntityEntry entry, bool requireExistingEntry)

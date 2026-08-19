@@ -1353,7 +1353,43 @@ namespace StarResonanceDps.Core.CombatRuntime
         public List<ThreatInfo> ThreatInfoList { get; private set; } = new();
         public ConcurrentQueue<List<ThreatInfo>> RecentThreatInfoListHistory { get; private set; } = new();
 
-        public Dictionary<string, object> Attributes { get; set; } = new();
+        private const int NpcEvidenceUnknown = 0;
+        private const int NpcEvidenceAbsent = 1;
+        private const int NpcEvidencePresent = 2;
+
+        private int _npcEvidenceState = NpcEvidenceUnknown;
+        private Dictionary<string, object> _attributes = new();
+
+        public Dictionary<string, object> Attributes
+        {
+            get => _attributes;
+            set
+            {
+                _attributes = value ?? new Dictionary<string, object>();
+                Volatile.Write(ref _npcEvidenceState, NpcEvidenceUnknown);
+            }
+        }
+
+        [JsonIgnore]
+        internal bool HasNpcEvidence
+        {
+            get
+            {
+                var state = Volatile.Read(ref _npcEvidenceState);
+                if (state != NpcEvidenceUnknown)
+                {
+                    return state == NpcEvidencePresent;
+                }
+
+                var hasNpcEvidence = HasPositiveAttribute("AttrId")
+                    || HasPositiveAttribute("TeamMemberBotAiId")
+                    || GrpcTeamManager.IsKnownTeamNpc(UUID);
+                Volatile.Write(
+                    ref _npcEvidenceState,
+                    hasNpcEvidence ? NpcEvidencePresent : NpcEvidenceAbsent);
+                return hasNpcEvidence;
+            }
+        }
 
         [JsonIgnore]
         public Dictionary<int, TempAttributesContainer> TempAttributes { get; set; } = new();
@@ -2173,13 +2209,38 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public void SetAttrKV(string key, object value)
         {
+            var npcEvidenceChanged = (key is "AttrId" or "TeamMemberBotAiId")
+                && (!Attributes.TryGetValue(key, out var existingValue)
+                    || !Equals(existingValue, value));
+
             Attributes[key] = value;
+
+            if (npcEvidenceChanged)
+            {
+                Volatile.Write(ref _npcEvidenceState, NpcEvidenceUnknown);
+            }
         }
 
         public object? GetAttrKV(string key)
         {
             var value = Attributes.TryGetValue(key, out var val) ? val : null;
             return value;
+        }
+
+        private bool HasPositiveAttribute(string key)
+        {
+            return GetAttrKV(key) switch
+            {
+                int value => value > 0,
+                long value => value > 0,
+                uint value => value > 0,
+                ulong value => value > 0,
+                short value => value > 0,
+                ushort value => value > 0,
+                byte value => value > 0,
+                sbyte value => value > 0,
+                _ => false
+            };
         }
 
         public void SetTempAttrKV(int key, TempAttributesContainer value)
@@ -2269,14 +2330,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var newAttr in newEntity.Attributes)
             {
-                if (Attributes.ContainsKey(newAttr.Key))
-                {
-                    Attributes[newAttr.Key] = newAttr.Value;
-                }
-                else
-                {
-                    Attributes.Add(newAttr.Key, newAttr.Value);
-                }
+                SetAttrKV(newAttr.Key, newAttr.Value);
             }
 
             foreach (var newSkillMetrics in newEntity.SkillMetrics)

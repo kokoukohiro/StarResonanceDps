@@ -43,6 +43,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 throw new InvalidOperationException();
             }
 
+            GrpcTeamManager.ResetMemberState();
+
             netCap = new NetCap();
             netCap.Init(new NetCapConfig()
             {
@@ -116,6 +118,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             PendingSaveProjectIds.Clear();
             PendingSwitchProjectIds.Clear();
             SkillCooldownStateStore.Reset();
+            GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
         }
 
@@ -1349,6 +1352,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            HashSet<long> rosterPlayersToUpsert = [];
+
             foreach (var syncDamageInfo in skillEffect.Damages)
             {
 
@@ -1491,7 +1496,22 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EncounterManager.Current.AddTakenDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
                 }
 
+                if (isAttackerPlayer)
+                {
+                    rosterPlayersToUpsert.Add(attackerUuid);
+                }
+
+                if (isTargetPlayer)
+                {
+                    rosterPlayersToUpsert.Add(targetUuid);
+                }
+
                 buffBasedShieldBreakValue = 0;
+            }
+
+            foreach (var playerUuid in rosterPlayersToUpsert)
+            {
+                PlayerRosterProjection.UpsertPlayer(playerUuid);
             }
 
             BattleStateMachine.CheckDeferredCalls();

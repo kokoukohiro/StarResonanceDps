@@ -25,11 +25,13 @@ public static partial class PlayerInfoFormatFormatter
             new PlayerInfoFormatData(
                 player.UserId,
                 player.Name,
+                player.ProfessionId,
                 classSpec,
                 player.AbilityScore,
                 player.SeasonStrength,
                 player.SeasonLevel,
-                player.IsSelf),
+                player.IsSelf,
+                player.IsNpc),
             formatString,
             nameDisplayMode);
     }
@@ -43,11 +45,13 @@ public static partial class PlayerInfoFormatFormatter
             new PlayerInfoFormatData(
                 player.CharacterId,
                 player.Name,
+                player.ProfessionId,
                 player.ClassSpec,
                 player.CombatPower,
                 player.SeasonStrength,
                 player.SeasonLevel,
-                player.IsSelf),
+                player.IsSelf,
+                player.IsNpc),
             formatString,
             nameDisplayMode);
     }
@@ -58,11 +62,13 @@ public static partial class PlayerInfoFormatFormatter
             new PlayerInfoFormatData(
                 123456789,
                 LocalizationManager.Instance.GetString("Settings_PlayerInfo_PreviewName"),
+                2,
                 PlayerClassSpec.FrostMageIcicle,
                 25000,
                 8,
                 50,
-                true),
+                true,
+                false),
             formatString,
             PlayerNameDisplayMode.Show);
     }
@@ -100,6 +106,12 @@ public static partial class PlayerInfoFormatFormatter
         if (ShouldHideName(player.IsSelf, nameDisplayMode))
         {
             return HiddenPlayerName;
+        }
+
+        if (player.IsNpc)
+        {
+            var professionKey = PlayerProfession.GetKey(player.ProfessionId);
+            return LocalizationManager.Instance.GetString($"Classes_{professionKey}");
         }
 
         return string.IsNullOrWhiteSpace(player.Name)
@@ -153,9 +165,11 @@ public static partial class PlayerInfoFormatFormatter
     private readonly record struct PlayerInfoFormatData(
         long UserId,
         string Name,
+        int ProfessionId,
         PlayerClassSpec ClassSpec,
         int AbilityScore,
         int SeasonStrength,
         int SeasonLevel,
-        bool IsSelf);
+        bool IsSelf,
+        bool IsNpc);
 }

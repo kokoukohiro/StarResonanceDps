@@ -54,7 +54,18 @@ internal static class PlayerRosterProjection
             return;
         }
 
-        var isNpc = !isSelf && GetInt(entity, "AttrId") > 0;
+        GrpcTeamManager.ApplyKnownMemberData(playerUuid, entity);
+
+        var isNpc = !isSelf && entity.HasNpcEvidence;
+        var hp = entity.Hp;
+        var maxHp = entity.MaxHp;
+        if (!isSelf
+            && !isNpc
+            && GrpcTeamManager.TryGetFastSyncHealthFallback(entity, out var fallbackHp, out var fallbackMaxHp))
+        {
+            hp = fallbackHp;
+            maxHp = fallbackMaxHp;
+        }
 
         var characterId = entity.UID != 0 ? entity.UID : Utils.UuidToEntityId(playerUuid);
         if (characterId == 0)
@@ -63,10 +74,6 @@ internal static class PlayerRosterProjection
         }
 
         var name = entity.Name ?? string.Empty;
-        if (!isSelf && string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
 
         var combatAttributes = new PlayerCombatAttributes(
             PhysicalAttack: GetInt(entity, "AttrAttack"),
@@ -108,8 +115,8 @@ internal static class PlayerRosterProjection
             entity.ProfessionId,
             entity.AbilityScore != 0 ? entity.AbilityScore : GetInt(entity, "AttrFightPoint"),
             seasonStrength,
-            entity.Hp,
-            entity.MaxHp,
+            hp,
+            maxHp,
             classSpec,
             isSelf,
             combatAttributes,

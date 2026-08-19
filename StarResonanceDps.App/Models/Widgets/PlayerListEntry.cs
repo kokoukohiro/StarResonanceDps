@@ -70,14 +70,8 @@ public sealed partial class PlayerListEntry : ObservableObject
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         IsNpc = player.IsNpc;
 
-        var displayPlayer = IsNpc
-            ? player with
-            {
-                Name = LocalizationManager.Instance.GetString($"Classes_{ProfessionKey}")
-            }
-            : player;
         DisplayName = PlayerInfoFormatFormatter.Format(
-            displayPlayer,
+            player,
             settings.PlayerInfoFormatString,
             playerNameDisplayMode);
 
@@ -113,19 +107,20 @@ public sealed partial class PlayerListEntry : ObservableObject
 
         var displayedHp = Math.Clamp(currentHp, 0L, maxHp);
         var shield = Math.Max(currentShield, 0L);
-        var availableHealthCapacity = maxHp - displayedHp;
-        var foldsEntireShield = shield > availableHealthCapacity;
+        var shieldGaugeCapacity = (double)maxHp * 2d;
+        var availableShieldCapacity = (maxHp - displayedHp) * 2d;
+        var foldsEntireShield = shield > availableShieldCapacity;
 
         var visibleShield = foldsEntireShield
-            ? 0L
+            ? 0d
             : shield;
 
         var overflowShield = foldsEntireShield
-            ? Math.Min(shield, maxHp)
-            : 0L;
+            ? Math.Min(shield, shieldGaugeCapacity)
+            : 0d;
 
-        ShieldVisibleRatio = visibleShield / (double)maxHp;
-        ShieldOverflowRatio = overflowShield / (double)maxHp;
+        ShieldVisibleRatio = visibleShield / shieldGaugeCapacity;
+        ShieldOverflowRatio = overflowShield / shieldGaugeCapacity;
         ShieldOverflowStartRatio = 1d - ShieldOverflowRatio;
     }
 

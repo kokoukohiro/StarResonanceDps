@@ -29,6 +29,7 @@ public sealed record MeterPlayerSnapshot(
     int Level,
     int SeasonLevel,
     bool IsSelf,
+    bool IsNpc,
     ulong TotalValue,
     double ValuePerSecond,
     double Contribution,
@@ -994,6 +995,7 @@ public static class MeterSnapshotProvider
         var valuePerSecond = kind == MeterSnapshotKind.Damage
             ? entity.DamageStats.ValuePerSecond
             : entity.HealingStats.ValuePerSecond;
+        var isSelf = IsSelf(entity);
         return new MeterPlayerSnapshot(
             characterId,
             entity.UID,
@@ -1004,7 +1006,8 @@ public static class MeterSnapshotProvider
             ToInt32(entity.SeasonStrength),
             entity.Level,
             ToInt32(entity.SeasonLevel),
-            IsSelf(entity),
+            isSelf,
+            !isSelf && entity.HasNpcEvidence,
             totalValue,
             valuePerSecond,
             0d,

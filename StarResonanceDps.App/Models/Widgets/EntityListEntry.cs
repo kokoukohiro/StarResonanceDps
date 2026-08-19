@@ -123,19 +123,20 @@ public sealed partial class EntityListEntry : ObservableObject
 
         var displayedHp = Math.Clamp(currentHp, 0L, maxHp);
         var shield = Math.Max(currentShield, 0L);
-        var availableHealthCapacity = maxHp - displayedHp;
-        var foldsEntireShield = shield > availableHealthCapacity;
+        var shieldGaugeCapacity = (double)maxHp * 2d;
+        var availableShieldCapacity = (maxHp - displayedHp) * 2d;
+        var foldsEntireShield = shield > availableShieldCapacity;
 
         var visibleShield = foldsEntireShield
-            ? 0L
+            ? 0d
             : shield;
 
         var overflowShield = foldsEntireShield
-            ? Math.Min(shield, maxHp)
-            : 0L;
+            ? Math.Min(shield, shieldGaugeCapacity)
+            : 0d;
 
-        ShieldVisibleRatio = visibleShield / (double)maxHp;
-        ShieldOverflowRatio = overflowShield / (double)maxHp;
+        ShieldVisibleRatio = visibleShield / shieldGaugeCapacity;
+        ShieldOverflowRatio = overflowShield / shieldGaugeCapacity;
         ShieldOverflowStartRatio = 1d - ShieldOverflowRatio;
     }
 

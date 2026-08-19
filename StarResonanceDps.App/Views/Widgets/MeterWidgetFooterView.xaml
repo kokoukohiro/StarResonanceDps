@@ -18,6 +18,7 @@
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
+                       Typography.NumeralAlignment="Tabular"
                        Text="{Binding ElapsedText}" />
 
             <TextBlock Margin="8,0,0,0"
