@@ -103,6 +103,8 @@ public sealed class MeterWidgetSettingsConfig
 
     public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
+    public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
+
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
@@ -115,6 +117,7 @@ public sealed class MeterWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            PartyDisplayModeIndex = PartyDisplayModeIndex,
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
@@ -142,6 +145,8 @@ public static class WidgetConfigDefaults
     public const int DefaultMetricTimelineAggregationIntervalSeconds = 10;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
+    public const int DefaultPartyDisplayModeIndex = 0;
+    public const int MaxPartyDisplayModeIndex = 2;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
@@ -428,6 +433,7 @@ public static class WidgetConfigDefaults
         {
             PlayerInfoFormatString = GetDefaultPlayerInfoFormatString(kind),
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
+            PartyDisplayModeIndex = DefaultPartyDisplayModeIndex,
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorIndexes = CreateDefaultClassColorIndexes(kind),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
@@ -636,6 +642,10 @@ public static class WidgetConfigDefaults
             meter.HealthValueDisplayModeIndex,
             DefaultHealthValueDisplayModeIndex,
             SeparateShieldHealthValueDisplayModeIndex);
+        meter.PartyDisplayModeIndex = Math.Clamp(
+            meter.PartyDisplayModeIndex,
+            DefaultPartyDisplayModeIndex,
+            MaxPartyDisplayModeIndex);
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;

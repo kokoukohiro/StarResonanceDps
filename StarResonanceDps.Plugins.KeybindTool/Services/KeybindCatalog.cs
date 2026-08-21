@@ -146,10 +146,10 @@ internal static class KeybindCatalog
             new(0x2u, 0x0u, "LeftClick"),
             new(0x2u, 0x1u, "RightClick"),
             new(0x2u, 0x2u, "MiddleButton"),
-            new(0x2u, 0x3u, "Button3"),
-            new(0x2u, 0x4u, "Button4"),
-            new(0x2u, 0x5u, "Button5"),
-            new(0x2u, 0x6u, "Button6"),
+            new(0x2u, 0x3u, "M3"),
+            new(0x2u, 0x4u, "M4"),
+            new(0x2u, 0x5u, "M5"),
+            new(0x2u, 0x6u, "M6"),
             new(0x2u, 0x7u, "ScrollWheel")
         };
 

@@ -441,11 +441,11 @@
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="PlayerStatus_Hp" xml:space="preserve">
-    <value>HP</value>
-  </data>
   <data name="PlayerStatus_MaxHp" xml:space="preserve">
     <value>Max HP</value>
+  </data>
+  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
+    <value>ATK</value>
   </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>Strength</value>
@@ -770,5 +770,17 @@
   </data>
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>Show shield separately</value>
+  </data>
+  <data name="Settings_Display_Party" xml:space="preserve">
+    <value>Party display</value>
+  </data>
+  <data name="PartyDisplay_All" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="PartyDisplay_MembersOnly" xml:space="preserve">
+    <value>Party members only</value>
+  </data>
+  <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
+    <value>Non-party members</value>
   </data>
 </root>

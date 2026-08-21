@@ -15,9 +15,18 @@ internal sealed class KeybindSaveService
     private static readonly byte[] PresetAnchor = Encoding.ASCII.GetBytes("BKL_SETID_7001");
     private static readonly byte[] HelperPetWheelAnchor = Encoding.ASCII.GetBytes("PetWheel");
 
+    private static readonly InputSectionDefinition[] InputSectionDefinitions =
+    {
+        new("play", Encoding.ASCII.GetBytes("Play"), 0x00036),
+        new("ui", Encoding.ASCII.GetBytes("UI"), 0x0129C),
+        new("take_photo_common", Encoding.ASCII.GetBytes("TakePhotoCommon"), 0x02015),
+        new("expression", Encoding.ASCII.GetBytes("Expression"), 0x02859),
+        new("fishing", Encoding.ASCII.GetBytes("Fishing"), 0x02940),
+        new("default", Encoding.ASCII.GetBytes("Default"), 0x02D03),
+        new("band_performance", Encoding.ASCII.GetBytes("BandPerformance"), 0x02D3E)
+    };
+
     private const int PresetRelativeOffset = 0x17;
-    private const int Helper1FromPetWheelOffset = 0x1B;
-    private const int Helper2FromPetWheelOffset = 0x1F;
 
     public KeybindSaveService(PluginLocalizer texts)
     {
@@ -32,7 +41,8 @@ internal sealed class KeybindSaveService
         var data = Decompress(raw);
 
         var inputAnchorOffset = FindAnchor(data, InputAnchor, _texts["Keybind.Error.RequiredInputDataNotFound"]);
-        var (helper1Offset, helper2Offset) = FindHelperOffsets(data);
+        var inputSectionAnchorOffsets = FindInputSectionAnchorOffsets(data, inputAnchorOffset);
+        var (helper1Offset, helper2Offset) = FindHelperOffsets(data, inputAnchorOffset);
 
         var presetAnchorOffset = FindAnchorOrNegative(data, PresetAnchor);
         var presetOffset = presetAnchorOffset >= 0
@@ -41,7 +51,7 @@ internal sealed class KeybindSaveService
 
         ValidateSessionLayout(
             data,
-            inputAnchorOffset,
+            inputSectionAnchorOffsets,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -50,6 +60,7 @@ internal sealed class KeybindSaveService
             filePath,
             data,
             inputAnchorOffset,
+            inputSectionAnchorOffsets,
             helper1Offset,
             helper2Offset,
             presetOffset);
@@ -63,7 +74,7 @@ internal sealed class KeybindSaveService
         ArgumentNullException.ThrowIfNull(definition);
 
         return GetOffsets(
-            session.InputAnchorOffset,
+            session.InputSectionAnchorOffsets,
             definition.RelativeOffsets);
     }
 
@@ -75,7 +86,7 @@ internal sealed class KeybindSaveService
         ArgumentNullException.ThrowIfNull(definition);
 
         return GetOffsets(
-            session.InputAnchorOffset,
+            session.InputSectionAnchorOffsets,
             definition.RelativeOffsets);
     }
 
@@ -289,12 +300,18 @@ internal sealed class KeybindSaveService
 
     private static int FindAnchorOrNegative(byte[] data, byte[] anchor)
     {
+        return FindAnchorOrNegative(data, anchor, 0);
+    }
+
+    private static int FindAnchorOrNegative(byte[] data, byte[] anchor, int searchOffset)
+    {
         if (anchor.Length == 0 || data.Length < anchor.Length)
         {
             return -1;
         }
 
-        for (var offset = 0; offset <= data.Length - anchor.Length; offset++)
+        var startOffset = Math.Max(0, searchOffset);
+        for (var offset = startOffset; offset <= data.Length - anchor.Length; offset++)
         {
             if (data.AsSpan(offset, anchor.Length).SequenceEqual(anchor))
             {
@@ -305,14 +322,46 @@ internal sealed class KeybindSaveService
         return -1;
     }
 
-    private (int Helper1Offset, int Helper2Offset) FindHelperOffsets(byte[] data)
+    private IReadOnlyDictionary<string, int> FindInputSectionAnchorOffsets(
+        byte[] data,
+        int inputAnchorOffset)
     {
-        var petWheelOffset = FindAnchor(data, HelperPetWheelAnchor, _texts["Keybind.Error.HelperKeysNotFound"]);
-        var helper1Offset = petWheelOffset + Helper1FromPetWheelOffset;
-        var helper2Offset = petWheelOffset + Helper2FromPetWheelOffset;
+        var positions = new Dictionary<string, int>(StringComparer.Ordinal);
+        var searchOffset = inputAnchorOffset;
 
-        EnsureRange(data, helper1Offset, sizeof(uint));
-        EnsureRange(data, helper2Offset, sizeof(uint));
+        foreach (var section in InputSectionDefinitions)
+        {
+            var offset = FindAnchorOrNegative(data, section.Anchor, searchOffset);
+            if (offset < 0)
+            {
+                throw new InvalidDataException(_texts["Keybind.Error.UnexpectedFileFormat"]);
+            }
+
+            positions[section.Id] = offset;
+            searchOffset = offset + section.Anchor.Length;
+        }
+
+        return positions;
+    }
+
+    private (int Helper1Offset, int Helper2Offset) FindHelperOffsets(
+        byte[] data,
+        int inputAnchorOffset)
+    {
+        var petWheelOffset = FindAnchorOrNegative(data, HelperPetWheelAnchor, inputAnchorOffset);
+        if (petWheelOffset < 0)
+        {
+            throw new InvalidDataException(_texts["Keybind.Error.HelperKeysNotFound"]);
+        }
+
+        var helper1Offset = data.Length - (sizeof(uint) * 2);
+        var helper2Offset = data.Length - sizeof(uint);
+        if (helper1Offset <= petWheelOffset
+            || !HasRange(data, helper1Offset, sizeof(uint))
+            || !HasRange(data, helper2Offset, sizeof(uint)))
+        {
+            throw new InvalidDataException(_texts["Keybind.Error.HelperKeysNotFound"]);
+        }
 
         var helper1Value = ReadUInt32(data, helper1Offset);
         var helper2Value = ReadUInt32(data, helper2Offset);
@@ -332,29 +381,29 @@ internal sealed class KeybindSaveService
 
     private void ValidateSessionLayout(
         byte[] data,
-        int inputAnchorOffset,
+        IReadOnlyDictionary<string, int> inputSectionAnchorOffsets,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
     {
         foreach (var action in KeybindCatalog.ControllerActions)
         {
-            foreach (var relativeOffset in action.RelativeOffsets)
+            foreach (var offset in GetOffsets(inputSectionAnchorOffsets, action.RelativeOffsets))
             {
                 EnsureRange(
                     data,
-                    inputAnchorOffset + relativeOffset - sizeof(uint),
+                    offset - sizeof(uint),
                     sizeof(uint) * 3);
             }
         }
 
         foreach (var action in KeybindCatalog.KeyMouseActions)
         {
-            foreach (var relativeOffset in action.RelativeOffsets)
+            foreach (var offset in GetOffsets(inputSectionAnchorOffsets, action.RelativeOffsets))
             {
                 EnsureRange(
                     data,
-                    inputAnchorOffset + relativeOffset - sizeof(uint),
+                    offset - sizeof(uint),
                     sizeof(uint) * 2);
             }
         }
@@ -368,13 +417,36 @@ internal sealed class KeybindSaveService
         }
     }
 
-    private static IReadOnlyList<int> GetOffsets(
-        int inputAnchorOffset,
-        IReadOnlyList<int> relativeOffsets)
+    private IReadOnlyList<int> GetOffsets(
+        IReadOnlyDictionary<string, int> inputSectionAnchorOffsets,
+        IReadOnlyList<int> legacyRelativeOffsets)
     {
-        return relativeOffsets
-            .Select(relativeOffset => inputAnchorOffset + relativeOffset)
+        return legacyRelativeOffsets
+            .Select(relativeOffset => ResolveInputOffset(inputSectionAnchorOffsets, relativeOffset))
             .ToArray();
+    }
+
+    private int ResolveInputOffset(
+        IReadOnlyDictionary<string, int> inputSectionAnchorOffsets,
+        int legacyRelativeOffset)
+    {
+        var section = InputSectionDefinitions[0];
+        foreach (var candidate in InputSectionDefinitions)
+        {
+            if (legacyRelativeOffset < candidate.LegacyRelativeOffset)
+            {
+                break;
+            }
+
+            section = candidate;
+        }
+
+        if (!inputSectionAnchorOffsets.TryGetValue(section.Id, out var sectionAnchorOffset))
+        {
+            throw new InvalidDataException(_texts["Keybind.Error.UnexpectedFileFormat"]);
+        }
+
+        return sectionAnchorOffset + legacyRelativeOffset - section.LegacyRelativeOffset;
     }
 
     private static bool IsKnownHelperValue(uint value)
@@ -407,12 +479,18 @@ internal sealed class KeybindSaveService
     }
 }
 
+internal sealed record InputSectionDefinition(
+    string Id,
+    byte[] Anchor,
+    int LegacyRelativeOffset);
+
 internal sealed class KeybindSaveSession
 {
     public KeybindSaveSession(
         string filePath,
         byte[] data,
         int inputAnchorOffset,
+        IReadOnlyDictionary<string, int> inputSectionAnchorOffsets,
         int helper1Offset,
         int helper2Offset,
         int? presetOffset)
@@ -420,6 +498,7 @@ internal sealed class KeybindSaveSession
         FilePath = filePath;
         Data = data;
         InputAnchorOffset = inputAnchorOffset;
+        InputSectionAnchorOffsets = inputSectionAnchorOffsets;
         Helper1Offset = helper1Offset;
         Helper2Offset = helper2Offset;
         PresetOffset = presetOffset;
@@ -430,6 +509,8 @@ internal sealed class KeybindSaveSession
     public byte[] Data { get; private set; }
 
     public int InputAnchorOffset { get; }
+
+    public IReadOnlyDictionary<string, int> InputSectionAnchorOffsets { get; }
 
     public int Helper1Offset { get; }
 

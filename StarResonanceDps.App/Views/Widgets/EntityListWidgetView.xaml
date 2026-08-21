@@ -198,7 +198,8 @@
                                                Height="25"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
-                                               Fill="{Binding ClassBrush}">
+                                               Fill="{Binding ClassBrush}"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
                                                 <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />

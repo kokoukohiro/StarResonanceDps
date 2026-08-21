@@ -439,13 +439,13 @@
     <value>炎舞</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
-    <value>ステータス</value>
-  </data>
-  <data name="PlayerStatus_Hp" xml:space="preserve">
-    <value>HP</value>
+    <value>ステータス詳細</value>
   </data>
   <data name="PlayerStatus_MaxHp" xml:space="preserve">
     <value>最大HP</value>
+  </data>
+  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
+    <value>物理攻撃力</value>
   </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>筋力</value>
@@ -457,28 +457,28 @@
     <value>知力</value>
   </data>
   <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>耐久</value>
+    <value>耐久力</value>
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>防御</value>
+    <value>物理防御力</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>会心</value>
   </data>
   <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>急速</value>
+    <value>ファスト</value>
   </data>
   <data name="PlayerStatus_Luck" xml:space="preserve">
     <value>幸運</value>
   </data>
   <data name="PlayerStatus_Mastery" xml:space="preserve">
-    <value>熟練</value>
+    <value>器用さ</value>
   </data>
   <data name="PlayerStatus_Versatility" xml:space="preserve">
-    <value>全能</value>
+    <value>万能</value>
   </data>
   <data name="PlayerStatus_Block" xml:space="preserve">
-    <value>ブロック</value>
+    <value>レジスト</value>
   </data>
   <data name="Widget_PlayerInfo" xml:space="preserve">
     <value>プレイヤー情報</value>
@@ -770,5 +770,17 @@
   </data>
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>バリア量個別表示</value>
+  </data>
+  <data name="Settings_Display_Party" xml:space="preserve">
+    <value>パーティ表示設定</value>
+  </data>
+  <data name="PartyDisplay_All" xml:space="preserve">
+    <value>すべて表示</value>
+  </data>
+  <data name="PartyDisplay_MembersOnly" xml:space="preserve">
+    <value>パーティメンバーのみ</value>
+  </data>
+  <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
+    <value>パーティメンバー以外</value>
   </data>
 </root>

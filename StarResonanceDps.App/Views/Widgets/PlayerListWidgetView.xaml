@@ -147,9 +147,6 @@
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
                                               Command="{Binding RequestPlayerInfoCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
-                                              Command="{Binding RequestPlayerStatusCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
                                               Command="{Binding RequestPlayerEquipmentCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
@@ -213,7 +210,8 @@
                                                Height="25"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Top"
-                                               Fill="{Binding ClassBrush}">
+                                               Fill="{Binding ClassBrush}"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
                                                 <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
@@ -313,7 +311,17 @@
                                     </Grid.RowDefinitions>
 
                                     <Grid Grid.Row="0">
-                                        <TextBlock HorizontalAlignment="Left"
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <ContentControl Content="{Binding PartyNumberText}"
+                                                        Style="{StaticResource Icon.PartyNumber}"
+                                                        Visibility="{Binding IsPartyMember, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                        <TextBlock Grid.Column="1"
+                                                   HorizontalAlignment="Left"
                                                    VerticalAlignment="Center"
                                                    Style="{StaticResource Text.WidgetWindow}"
                                                    FontSize="12"

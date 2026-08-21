@@ -9,20 +9,66 @@
 
     <sys:Double x:Key="Icon.Profession.Size">20</sys:Double>
 
-    <BitmapImage x:Key="Icon.Profession.ShieldKnight" UriSource="/Assets/Images/profession_horizontal_hud01.png" />
-    <BitmapImage x:Key="Icon.Profession.HeavyGuardian" UriSource="/Assets/Images/profession_horizontal_hud06.png" />
-    <BitmapImage x:Key="Icon.Profession.VerdantOracle" UriSource="/Assets/Images/profession_horizontal_hud04.png" />
-    <BitmapImage x:Key="Icon.Profession.SoulMusician" UriSource="/Assets/Images/profession_horizontal_hud08.png" />
-    <BitmapImage x:Key="Icon.Profession.FlameBerserker" UriSource="/Assets/Images/profession_horizontal_hud09.png" />
-    <BitmapImage x:Key="Icon.Profession.Stormblade" UriSource="/Assets/Images/profession_horizontal_hud03.png" />
-    <BitmapImage x:Key="Icon.Profession.FrostMage" UriSource="/Assets/Images/profession_horizontal_hud05.png" />
-    <BitmapImage x:Key="Icon.Profession.WindKnight" UriSource="/Assets/Images/profession_horizontal_hud02.png" />
-    <BitmapImage x:Key="Icon.Profession.Marksman" UriSource="/Assets/Images/profession_horizontal_hud07.png" />
+    <DropShadowEffect x:Key="Effect.ProfessionIconShadow"
+                  Color="#000000"
+                  Opacity="0.5"
+                  ShadowDepth="2"
+                  BlurRadius="5" />
+
+    <BitmapImage x:Key="Icon.Profession.ShieldKnight" UriSource="/Assets/Images/profession_horizontal_01.png" />
+    <BitmapImage x:Key="Icon.Profession.HeavyGuardian" UriSource="/Assets/Images/profession_horizontal_06.png" />
+    <BitmapImage x:Key="Icon.Profession.VerdantOracle" UriSource="/Assets/Images/profession_horizontal_04.png" />
+    <BitmapImage x:Key="Icon.Profession.SoulMusician" UriSource="/Assets/Images/profession_horizontal_08.png" />
+    <BitmapImage x:Key="Icon.Profession.FlameBerserker" UriSource="/Assets/Images/profession_horizontal_09.png" />
+    <BitmapImage x:Key="Icon.Profession.Stormblade" UriSource="/Assets/Images/profession_horizontal_03.png" />
+    <BitmapImage x:Key="Icon.Profession.FrostMage" UriSource="/Assets/Images/profession_horizontal_05.png" />
+    <BitmapImage x:Key="Icon.Profession.WindKnight" UriSource="/Assets/Images/profession_horizontal_02.png" />
+    <BitmapImage x:Key="Icon.Profession.Marksman" UriSource="/Assets/Images/profession_horizontal_07.png" />
     <BitmapImage x:Key="Icon.Profession.Transformation" UriSource="/Assets/Images/profession_horizontal_hud00.png" />
     <BitmapImage x:Key="Icon.Profession.Boss" UriSource="/Assets/Images/com_icon_tab_146.png" />
     <BitmapImage x:Key="Icon.Profession.Elite" UriSource="/Assets/Images/com_icon_tab_147.png" />
     <BitmapImage x:Key="Icon.Profession.Monster" UriSource="/Assets/Images/com_icon_tab_148.png" />
     <BitmapImage x:Key="Icon.Profession.Unknown" UriSource="/Assets/Images/com_icon_question.png" />
+    <BitmapImage x:Key="Icon.PartyNumberFrame" UriSource="/Assets/Images/team_num_frame.png" />
+
+    <Style x:Key="Icon.PartyNumber" TargetType="{x:Type ContentControl}">
+        <Setter Property="Width" Value="14" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Margin" Value="0,0,1,0" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <TranslateTransform X="-1" Y="1" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContentControl}">
+                    <Grid>
+                        <Image Source="{StaticResource Icon.PartyNumberFrame}"
+                               Stretch="Fill"
+                               RenderTransformOrigin="0.5,0.5">
+                            <Image.RenderTransform>
+                                <ScaleTransform ScaleX="-1" ScaleY="1" />
+                            </Image.RenderTransform>
+                        </Image>
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="10"
+                                   FontFamily="{StaticResource Font.NotoSansJP}"
+                                   FontWeight="SemiBold"
+                                   TextOptions.TextRenderingMode="Aliased"
+                                   Foreground="#C0000000"
+                                   Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                   TextAlignment="Center">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform Y="-3" />
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="Icon.ProfessionMask" TargetType="{x:Type Rectangle}">
         <Setter Property="Width" Value="{DynamicResource Icon.Profession.Size}" />

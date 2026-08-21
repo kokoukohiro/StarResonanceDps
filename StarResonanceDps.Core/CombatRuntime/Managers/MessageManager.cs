@@ -24,6 +24,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const string MaxStaminaSnapshotAttribute = "MaxStaminaSnapshot";
         private const uint WorldProxyServiceId = 103198054;
         private const uint ResetProfessionTalentMethodId = 0x3100F;
+        private const uint GetTeamInfoMethodId = 0x4C01F;
         private const uint SaveProjectMethodId = 0x44001;
         private const uint SwitchProjectMethodId = 0x44002;
         private const uint SyncProjectListMethodId = 0x44005;
@@ -76,6 +77,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NoticeUpdateTeamMemberInfo, ProcessNoticeUpdateTeamMemberInfo);
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NotifyJoinTeam, ProcessNotifyJoinTeam);
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NotifyLeaveTeam, ProcessNotifyLeaveTeam);
+            netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NotifyTeamGroupUpdate, ProcessNotifyTeamGroupUpdate);
 
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NotifyBeTransferLeader, ProcessNotifyBeTransferLeader);
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcTeamNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcTeamNtf.NoticeTeamDissolve, ProcessNoticeTeamDissolve);
@@ -102,6 +104,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.RegisterProxyHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectCall);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SyncProjectListMethodId, ProcessSyncProjectListReturn);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
 
             netCap.Start();
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
@@ -184,7 +187,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                         ProcessTempAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.TempAttrs.Attrs);
                     }
 
-                    PlayerRosterProjection.UpsertPlayer(vData.EnterSceneInfo.PlayerEnt.Uuid);
+                    PlayerRosterProjection.UpsertSelf(vData.EnterSceneInfo.PlayerEnt.Uuid);
                 }
 
                 if (vData.EnterSceneInfo.SceneAttrs != null)
@@ -254,6 +257,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var vData = SocialNtf.Types.NotifySocialData.Parser.ParseFrom(payloadBuffer);
+
+            if (vData != null)
+            {
+                GrpcTeamManager.ProcessSocialTeamData(vData.VRequest?.Data);
+            }
 
             if (EncounterManager.AllowSceneUpdate)
             {
@@ -334,6 +342,22 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             GrpcTeamManager.ProcessNotifyLeaveTeam(vData, extraData);
+        }
+
+        public static void ProcessNotifyTeamGroupUpdate(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            if (payloadBuffer.Length == 0)
+            {
+                return;
+            }
+
+            var vData = GrpcTeamNtf.Types.NotifyTeamGroupUpdate.Parser.ParseFrom(payloadBuffer);
+            if (vData == null)
+            {
+                return;
+            }
+
+            GrpcTeamManager.ProcessNotifyTeamGroupUpdate(vData, extraData);
         }
 
         public static void ProcessNotifyBeTransferLeader(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -824,6 +848,22 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        private static void ProcessGetTeamInfoReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            try
+            {
+                var response = GetTeamInfoReply.Parser.ParseFrom(payloadBuffer);
+                GrpcTeamManager.ProcessGetTeamInfo(response, extraData);
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to parse team information response");
+            }
+        }
+
         public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
         {
             foreach (var attr in attrs)
@@ -1072,7 +1112,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.SetAttrKV(uuid, "AttrSkillLevelIdList", skillLevelInfoList);
                         break;
                     case EAttrType.AttrTeamId:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
+                        var teamId = isNoValue ? 0L : reader.ReadInt64();
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, teamId);
+                        GrpcTeamManager.ProcessEntityTeamId(uuid, teamId);
                         break;
                     case EAttrType.AttrStateTime:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
@@ -1130,6 +1172,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var disappearedEntity in syncNearEntities.Disappear)
             {
+                PlayerRosterProjection.RemoveNearbyPlayer(disappearedEntity.Uuid);
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
             }
 
@@ -1155,7 +1198,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                 }
 
-                PlayerRosterProjection.UpsertPlayer(entity.Uuid);
+                PlayerRosterProjection.AddOrUpdateNearbyPlayer(entity.Uuid);
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
 
@@ -1229,7 +1272,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes);
-            PlayerRosterProjection.UpsertPlayer(targetUuid);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(targetUuid);
 
             if (AppState.IsEncounterSavingPaused && Settings.Instance.MinimalProcessingWhileEncounterSavingPaused)
             {
@@ -1689,7 +1732,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.Current.SetAttrKV(playerUuid, "AttrEquipData", playerEquips);
             }
 
-            PlayerRosterProjection.UpsertSelf(playerUuid);
+            PlayerRosterProjection.RebuildRoster();
         }
 
         public static void ProcessSyncContainerDirtyData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)

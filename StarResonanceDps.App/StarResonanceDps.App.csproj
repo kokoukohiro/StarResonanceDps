@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
     <None Remove="Assets\Images\ApplicationIcon.ico" />
     <None Remove="Assets\Images\common_attrattack.png" />
@@ -72,21 +73,14 @@
     <None Remove="Assets\Images\profession_horizontal_08.png" />
     <None Remove="Assets\Images\profession_horizontal_09.png" />
     <None Remove="Assets\Images\profession_horizontal_hud00.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud01.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud02.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud03.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud04.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud05.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud06.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud07.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud08.png" />
-    <None Remove="Assets\Images\profession_horizontal_hud09.png" />
+    <None Remove="Assets\Images\team_num_frame.png" />
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
     <None Remove="Assets\Images\trialroad_icon_survival.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
     <Resource Include="Assets\Images\com_icon_tab_146.png" />
     <Resource Include="Assets\Images\com_icon_tab_147.png" />
     <Resource Include="Assets\Images\com_icon_tab_148.png" />
@@ -148,16 +142,17 @@
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
+    <Resource Include="Assets\Images\profession_horizontal_01.png" />
+    <Resource Include="Assets\Images\profession_horizontal_02.png" />
+    <Resource Include="Assets\Images\profession_horizontal_03.png" />
+    <Resource Include="Assets\Images\profession_horizontal_04.png" />
+    <Resource Include="Assets\Images\profession_horizontal_05.png" />
+    <Resource Include="Assets\Images\profession_horizontal_06.png" />
+    <Resource Include="Assets\Images\profession_horizontal_07.png" />
+    <Resource Include="Assets\Images\profession_horizontal_08.png" />
+    <Resource Include="Assets\Images\profession_horizontal_09.png" />
     <Resource Include="Assets\Images\profession_horizontal_hud00.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud01.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud02.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud03.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud04.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud05.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud06.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud07.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud08.png" />
-    <Resource Include="Assets\Images\profession_horizontal_hud09.png" />
+    <Resource Include="Assets\Images\team_num_frame.png" />
   </ItemGroup>
 
   <Target Name="RemoveObsoleteLocalizationSatelliteOutputs" AfterTargets="Build">

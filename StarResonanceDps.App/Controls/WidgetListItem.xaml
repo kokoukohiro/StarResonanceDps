@@ -141,7 +141,7 @@
                                 </DataTrigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsPlayerWindowWidget}" Value="True" />
+                                        <Condition Binding="{Binding ShowsPlayerWindowCountBadge}" Value="True" />
                                         <Condition Binding="{Binding HasOpenPlayerWindows}" Value="True" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -164,7 +164,7 @@
                             <Style.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsPlayerWindowWidget}" Value="True" />
+                                        <Condition Binding="{Binding ShowsPlayerWindowCountBadge}" Value="True" />
                                         <Condition Binding="{Binding HasOpenPlayerWindows}" Value="True" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Visibility" Value="Visible" />

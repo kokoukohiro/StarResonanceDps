@@ -13,7 +13,7 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
         WidgetListItemViewModel statusWidget,
         long? requestedCharacterId,
         PlayerRosterEntry? initialPlayer)
-        : base(statusWidget, requestedCharacterId)
+        : base(statusWidget, requestedCharacterId, showPlayerIdentityInHeader: false)
     {
         InitializePlayer(initialPlayer);
     }

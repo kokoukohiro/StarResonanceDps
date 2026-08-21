@@ -81,11 +81,6 @@ public sealed class PlayerRosterStore
                     {
                         normalized = normalized with { IsSelf = true };
                     }
-
-                    if (existing.IsNpc && !normalized.IsNpc)
-                    {
-                        normalized = normalized with { IsNpc = true };
-                    }
                 }
 
                 _entries[normalized.CharacterId] = normalized;
@@ -193,7 +188,9 @@ public sealed class PlayerRosterStore
             entry.SeasonLevel,
             entry.EquipmentData,
             entry.IsNpc,
-            entry.CurrentShield);
+            entry.CurrentShield,
+            entry.IsPartyMember,
+            entry.PartyNumber);
     }
 }
 

@@ -1,0 +1,556 @@
+using StarResonanceDps.Core.Models;
+
+namespace StarResonanceDps.Core.Services;
+
+public enum PartyMembershipState
+{
+    Unknown,
+    Member,
+    NonMember
+}
+
+public sealed record PartyMemberSupplement(
+    string Name = "",
+    int ProfessionId = 0,
+    int CombatPower = 0,
+    int SeasonStrength = 0,
+    int Level = 0,
+    int SeasonLevel = 0,
+    PlayerEquipmentData? EquipmentData = null,
+    bool IsNpc = false,
+    long CurrentHp = 0,
+    long MaxHp = 0);
+
+public sealed record PartyMemberPosition(int GroupId, int? GroupSlot);
+
+public sealed class PartyStateSnapshot
+{
+    private readonly HashSet<long> _memberIds;
+
+    internal PartyStateSnapshot(
+        long teamId,
+        bool hasCompleteMembership,
+        IReadOnlyList<long> orderedCharacterIds,
+        IReadOnlySet<long> memberIds,
+        IReadOnlySet<long> knownNonMemberIds,
+        IReadOnlyDictionary<long, PartyMemberSupplement> supplements,
+        IReadOnlyDictionary<long, PartyMemberPosition> positions)
+    {
+        TeamId = teamId;
+        HasCompleteMembership = hasCompleteMembership;
+        OrderedCharacterIds = orderedCharacterIds;
+        KnownNonMemberIds = knownNonMemberIds;
+        Supplements = supplements;
+        Positions = positions;
+        _memberIds = memberIds.ToHashSet();
+    }
+
+    public long TeamId { get; }
+
+    public bool HasCompleteMembership { get; }
+
+    public IReadOnlyList<long> OrderedCharacterIds { get; }
+
+    public IReadOnlySet<long> MemberIds => _memberIds;
+
+    public IReadOnlySet<long> KnownNonMemberIds { get; }
+
+    public IReadOnlyDictionary<long, PartyMemberSupplement> Supplements { get; }
+
+    public IReadOnlyDictionary<long, PartyMemberPosition> Positions { get; }
+
+    public int? GetPartyNumber(long characterId)
+    {
+        if (!_memberIds.Contains(characterId)
+            || !Positions.TryGetValue(characterId, out var position)
+            || position.GroupId < 1
+            || position.GroupSlot is not int groupSlot
+            || groupSlot < 1
+            || groupSlot > 5)
+        {
+            return null;
+        }
+
+        return ((position.GroupId - 1) * 5) + groupSlot;
+    }
+
+    public PartyMembershipState GetMembership(long characterId)
+    {
+        if (characterId != 0 && _memberIds.Contains(characterId))
+        {
+            return PartyMembershipState.Member;
+        }
+
+        return HasCompleteMembership || KnownNonMemberIds.Contains(characterId)
+            ? PartyMembershipState.NonMember
+            : PartyMembershipState.Unknown;
+    }
+
+    public bool ShouldInclude(long characterId, bool isSelf, PartyDisplayMode mode)
+    {
+        if (isSelf)
+        {
+            return mode != PartyDisplayMode.NonPartyMembersOnly;
+        }
+
+        var membership = GetMembership(characterId);
+        return mode switch
+        {
+            PartyDisplayMode.PartyMembersOnly => membership == PartyMembershipState.Member,
+            PartyDisplayMode.NonPartyMembersOnly => membership == PartyMembershipState.NonMember,
+            _ => true
+        };
+    }
+
+    public bool TryGetSupplement(long characterId, out PartyMemberSupplement supplement)
+    {
+        if (GetMembership(characterId) == PartyMembershipState.Member
+            && Supplements.TryGetValue(characterId, out var found))
+        {
+            supplement = found;
+            return true;
+        }
+
+        supplement = null!;
+        return false;
+    }
+}
+
+public sealed class PartyStateStore
+{
+    private static readonly Lazy<PartyStateStore> LazyInstance = new(() => new PartyStateStore());
+
+    private readonly object _sync = new();
+    private readonly HashSet<long> _memberIds = [];
+    private readonly HashSet<long> _knownNonMemberIds = [];
+    private readonly Dictionary<long, PartyMemberSupplement> _supplements = [];
+    private readonly Dictionary<long, PartyMemberPosition> _positions = [];
+    private long _teamId;
+    private bool _hasCompleteMembership;
+    private PartyStateSnapshot _current;
+
+    private PartyStateStore()
+    {
+        _current = CreateSnapshotNoLock();
+    }
+
+    public static PartyStateStore Instance => LazyInstance.Value;
+
+    public event EventHandler? Changed;
+
+    public PartyStateSnapshot Current
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _current;
+            }
+        }
+    }
+
+    public void ResetUnknown()
+    {
+        PublishIfChanged(() =>
+        {
+            _teamId = 0;
+            _hasCompleteMembership = false;
+            _memberIds.Clear();
+            _knownNonMemberIds.Clear();
+            _supplements.Clear();
+            _positions.Clear();
+        });
+    }
+
+    public void SetNoParty()
+    {
+        PublishIfChanged(() =>
+        {
+            _teamId = 0;
+            _hasCompleteMembership = true;
+            _memberIds.Clear();
+            _knownNonMemberIds.Clear();
+            _supplements.Clear();
+            _positions.Clear();
+        });
+    }
+
+    public void ApplyAuthoritativeMembership(
+        long teamId,
+        bool isFivePersonParty,
+        IEnumerable<(int GroupId, IEnumerable<long> CharacterIds)> groups)
+    {
+        ArgumentNullException.ThrowIfNull(groups);
+
+        var materializedGroups = groups
+            .OrderBy(group => group.GroupId)
+            .Select(group => (
+                GroupId: group.GroupId,
+                CharacterIds: group.CharacterIds.ToArray()))
+            .ToArray();
+        var orderedIds = materializedGroups
+            .SelectMany(group => group.CharacterIds)
+            .Where(characterId => characterId > 0)
+            .Distinct()
+            .ToArray();
+
+        PublishIfChanged(() =>
+        {
+            if (_teamId != 0 && teamId != 0 && _teamId != teamId)
+            {
+                _supplements.Clear();
+                _knownNonMemberIds.Clear();
+            }
+
+            _teamId = teamId;
+            _hasCompleteMembership = true;
+            _memberIds.Clear();
+            _memberIds.UnionWith(orderedIds);
+            _positions.Clear();
+            foreach (var group in materializedGroups)
+            {
+                var seenCharacterIds = new HashSet<long>();
+                for (var index = 0; index < group.CharacterIds.Length; index++)
+                {
+                    var characterId = group.CharacterIds[index];
+                    if (characterId <= 0 || !seenCharacterIds.Add(characterId))
+                    {
+                        continue;
+                    }
+
+                    var groupId = isFivePersonParty ? 1 : group.GroupId;
+                    _positions[characterId] = new PartyMemberPosition(groupId, index + 1);
+                }
+            }
+            _knownNonMemberIds.ExceptWith(orderedIds);
+            RemoveNonMemberSupplementsNoLock();
+        });
+    }
+
+    public void ApplyCompleteMembership(
+        long teamId,
+        bool isFivePersonParty,
+        IEnumerable<long> characterIds,
+        IEnumerable<(long CharacterId, int GroupId)>? groupAssignments = null)
+    {
+        ArgumentNullException.ThrowIfNull(characterIds);
+        var memberIds = characterIds
+            .Where(characterId => characterId > 0)
+            .Distinct()
+            .ToArray();
+        var assignedGroups = (groupAssignments ?? [])
+            .Where(assignment => assignment.CharacterId > 0 && assignment.GroupId > 0)
+            .GroupBy(assignment => assignment.CharacterId)
+            .ToDictionary(group => group.Key, group => group.First().GroupId);
+
+        PublishIfChanged(() =>
+        {
+            if (_teamId != 0 && teamId != 0 && _teamId != teamId)
+            {
+                _supplements.Clear();
+                _knownNonMemberIds.Clear();
+                _positions.Clear();
+            }
+
+            _teamId = teamId;
+            _hasCompleteMembership = true;
+            _memberIds.Clear();
+            _memberIds.UnionWith(memberIds);
+            foreach (var characterId in _positions.Keys.Where(characterId => !_memberIds.Contains(characterId)).ToArray())
+            {
+                _positions.Remove(characterId);
+            }
+
+            foreach (var characterId in memberIds)
+            {
+                var groupId = isFivePersonParty
+                    ? 1
+                    : assignedGroups.GetValueOrDefault(characterId);
+                if (groupId <= 0)
+                {
+                    _positions.Remove(characterId);
+                    continue;
+                }
+
+                var existingSlot = _positions.TryGetValue(characterId, out var existing)
+                    && existing.GroupId == groupId
+                        ? existing.GroupSlot
+                        : null;
+                _positions[characterId] = new PartyMemberPosition(groupId, existingSlot);
+            }
+            _knownNonMemberIds.ExceptWith(memberIds);
+            RemoveNonMemberSupplementsNoLock();
+        });
+    }
+
+    public void ApplyKnownMembers(long teamId, IEnumerable<long> characterIds)
+    {
+        ArgumentNullException.ThrowIfNull(characterIds);
+        var knownIds = characterIds
+            .Where(characterId => characterId > 0)
+            .Distinct()
+            .ToArray();
+        if (knownIds.Length == 0 && teamId == 0)
+        {
+            return;
+        }
+
+        PublishIfChanged(() =>
+        {
+            PrepareKnownMemberUpdateNoLock(teamId);
+
+            foreach (var characterId in knownIds)
+            {
+                if (!_hasCompleteMembership)
+                {
+                    _memberIds.Add(characterId);
+                }
+
+                if (_memberIds.Contains(characterId))
+                {
+                    _knownNonMemberIds.Remove(characterId);
+                }
+            }
+        });
+    }
+
+    public void MarkNonMember(long characterId)
+    {
+        if (characterId <= 0)
+        {
+            return;
+        }
+
+        PublishIfChanged(() =>
+        {
+            _memberIds.Remove(characterId);
+            _supplements.Remove(characterId);
+            _positions.Remove(characterId);
+            _knownNonMemberIds.Add(characterId);
+        });
+    }
+
+    public void RemoveMember(long characterId)
+    {
+        if (characterId <= 0)
+        {
+            return;
+        }
+
+        PublishIfChanged(() =>
+        {
+            _memberIds.Remove(characterId);
+            _supplements.Remove(characterId);
+            _positions.Remove(characterId);
+            _knownNonMemberIds.Add(characterId);
+        });
+    }
+
+    public void UpdateSupplement(long teamId, long characterId, Func<PartyMemberSupplement, PartyMemberSupplement> update)
+    {
+        ArgumentNullException.ThrowIfNull(update);
+        if (characterId <= 0)
+        {
+            return;
+        }
+
+        PublishIfChanged(() =>
+        {
+            PrepareKnownMemberUpdateNoLock(teamId);
+            if (!_hasCompleteMembership)
+            {
+                _memberIds.Add(characterId);
+            }
+
+            if (!_memberIds.Contains(characterId))
+            {
+                return;
+            }
+
+            _knownNonMemberIds.Remove(characterId);
+
+            var current = _supplements.TryGetValue(characterId, out var existing)
+                ? existing
+                : new PartyMemberSupplement();
+            _supplements[characterId] = update(current);
+        }, raiseChanged: false);
+    }
+
+    private void PrepareKnownMemberUpdateNoLock(long teamId)
+    {
+        if (_teamId != 0 && teamId != 0 && _teamId != teamId)
+        {
+            _memberIds.Clear();
+            _supplements.Clear();
+            _positions.Clear();
+            _knownNonMemberIds.Clear();
+            _hasCompleteMembership = false;
+        }
+
+        if (teamId != 0)
+        {
+            _teamId = teamId;
+        }
+    }
+
+    private void PublishIfChanged(Action update, bool raiseChanged = true)
+    {
+        var changed = false;
+
+        lock (_sync)
+        {
+            var previous = _current;
+            update();
+            var next = CreateSnapshotNoLock();
+            changed = !SnapshotsEqual(previous, next);
+            if (changed)
+            {
+                _current = next;
+            }
+        }
+
+        if (changed && raiseChanged)
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private PartyStateSnapshot CreateSnapshotNoLock()
+    {
+        var positions = BuildEffectivePositionsNoLock();
+        var orderedIds = _memberIds
+            .GroupBy(characterId => positions.TryGetValue(characterId, out var position) ? position.GroupId : int.MaxValue)
+            .OrderBy(group => group.Key)
+            .SelectMany(group => OrderGroupNoLock(group.Key, group, positions))
+            .ToArray();
+
+        return new PartyStateSnapshot(
+            _teamId,
+            _hasCompleteMembership,
+            Array.AsReadOnly(orderedIds),
+            new HashSet<long>(_memberIds),
+            new HashSet<long>(_knownNonMemberIds),
+            new System.Collections.ObjectModel.ReadOnlyDictionary<long, PartyMemberSupplement>(
+                new Dictionary<long, PartyMemberSupplement>(_supplements)),
+            new System.Collections.ObjectModel.ReadOnlyDictionary<long, PartyMemberPosition>(positions));
+    }
+
+    private IEnumerable<long> OrderGroupNoLock(
+        int groupId,
+        IEnumerable<long> characterIds,
+        IReadOnlyDictionary<long, PartyMemberPosition> positions)
+    {
+        var groupPositions = characterIds
+            .Select(characterId => (CharacterId: characterId, Position: positions.GetValueOrDefault(characterId)))
+            .ToArray();
+        if (groupId == 1 && groupPositions.Length == 5)
+        {
+            var npcMembers = groupPositions
+                .Where(item => _supplements.TryGetValue(item.CharacterId, out var supplement) && supplement.IsNpc)
+                .OrderBy(item => item.CharacterId)
+                .ToArray();
+            if (npcMembers.Length > 0)
+            {
+                var humanMembers = groupPositions
+                    .Where(item => !_supplements.TryGetValue(item.CharacterId, out var supplement) || !supplement.IsNpc)
+                    .ToArray();
+                var orderedHumanIds = humanMembers.All(item => item.Position?.GroupSlot is not null)
+                    ? humanMembers
+                        .OrderBy(item => item.Position!.GroupSlot)
+                        .ThenBy(item => item.CharacterId)
+                        .Select(item => item.CharacterId)
+                    : humanMembers
+                        .OrderBy(item => item.CharacterId)
+                        .Select(item => item.CharacterId);
+
+                return orderedHumanIds.Concat(npcMembers.Select(item => item.CharacterId));
+            }
+        }
+
+        if (groupPositions.All(item => item.Position?.GroupSlot is not null))
+        {
+            return groupPositions
+                .OrderBy(item => item.Position!.GroupSlot)
+                .ThenBy(item => item.CharacterId)
+                .Select(item => item.CharacterId);
+        }
+
+        var unknownMembers = groupPositions
+            .Where(item => item.Position?.GroupSlot is null)
+            .OrderBy(item => item.CharacterId)
+            .ToArray();
+        var confirmedMembers = groupPositions
+            .Where(item => item.Position?.GroupSlot is not null)
+            .OrderBy(item => item.Position!.GroupSlot)
+            .ToArray();
+        var hasNpcTailOrder = groupId == 1
+            && groupPositions.Length == 5
+            && confirmedMembers.Length > 0
+            && confirmedMembers.All(item =>
+                _supplements.TryGetValue(item.CharacterId, out var supplement) && supplement.IsNpc)
+            && confirmedMembers.Select(item => item.Position!.GroupSlot!.Value)
+                .SequenceEqual(Enumerable.Range(unknownMembers.Length + 1, confirmedMembers.Length));
+
+        return hasNpcTailOrder
+            ? unknownMembers.Select(item => item.CharacterId)
+                .Concat(confirmedMembers.Select(item => item.CharacterId))
+            : groupPositions.OrderBy(item => item.CharacterId).Select(item => item.CharacterId);
+    }
+
+    private Dictionary<long, PartyMemberPosition> BuildEffectivePositionsNoLock()
+    {
+        var positions = _positions
+            .Where(pair => _memberIds.Contains(pair.Key))
+            .ToDictionary(pair => pair.Key, pair => pair.Value);
+
+        if (_memberIds.Count != 5
+            || positions.Count != 5
+            || positions.Values.Any(position => position.GroupId != 1 || position.GroupSlot is not null))
+        {
+            return positions;
+        }
+
+        var npcIds = _memberIds
+            .Where(characterId => _supplements.TryGetValue(characterId, out var supplement) && supplement.IsNpc)
+            .OrderBy(characterId => characterId)
+            .ToArray();
+        if (npcIds.Length == 0)
+        {
+            return positions;
+        }
+
+        var humanIds = _memberIds.Except(npcIds).OrderBy(characterId => characterId).ToArray();
+        for (var index = 0; index < npcIds.Length; index++)
+        {
+            positions[npcIds[index]] = new PartyMemberPosition(1, humanIds.Length + index + 1);
+        }
+
+        if (humanIds.Length == 1)
+        {
+            positions[humanIds[0]] = new PartyMemberPosition(1, 1);
+        }
+
+        return positions;
+    }
+
+    private void RemoveNonMemberSupplementsNoLock()
+    {
+        foreach (var characterId in _supplements.Keys.Where(characterId => !_memberIds.Contains(characterId)).ToArray())
+        {
+            _supplements.Remove(characterId);
+        }
+    }
+
+    private static bool SnapshotsEqual(PartyStateSnapshot left, PartyStateSnapshot right)
+    {
+        return left.TeamId == right.TeamId
+            && left.HasCompleteMembership == right.HasCompleteMembership
+            && left.OrderedCharacterIds.SequenceEqual(right.OrderedCharacterIds)
+            && left.MemberIds.SetEquals(right.MemberIds)
+            && left.KnownNonMemberIds.SetEquals(right.KnownNonMemberIds)
+            && left.Supplements.Count == right.Supplements.Count
+            && left.Supplements.All(pair => right.Supplements.TryGetValue(pair.Key, out var value) && pair.Value == value)
+            && left.Positions.Count == right.Positions.Count
+            && left.Positions.All(pair => right.Positions.TryGetValue(pair.Key, out var value) && pair.Value == value);
+    }
+}

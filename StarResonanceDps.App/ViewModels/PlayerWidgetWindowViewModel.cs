@@ -6,16 +6,19 @@ namespace StarResonanceDps.App.ViewModels;
 public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 {
     private readonly long? _requestedCharacterId;
+    private readonly bool _showPlayerIdentityInHeader;
     private long? _representedCharacterId;
     private PlayerRosterEntry? _selectedPlayer;
     private string _headerText = string.Empty;
 
     protected PlayerWidgetWindowViewModel(
         WidgetListItemViewModel playerWidget,
-        long? requestedCharacterId)
+        long? requestedCharacterId,
+        bool showPlayerIdentityInHeader = true)
     {
         PlayerWidget = playerWidget;
         _requestedCharacterId = requestedCharacterId;
+        _showPlayerIdentityInHeader = showPlayerIdentityInHeader;
         RefreshHeaderText();
     }
 
@@ -92,7 +95,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     private void RefreshHeaderText()
     {
-        if (_selectedPlayer is null)
+        if (_selectedPlayer is null || !_showPlayerIdentityInHeader)
         {
             HeaderText = PlayerWidget.DisplayName;
             return;

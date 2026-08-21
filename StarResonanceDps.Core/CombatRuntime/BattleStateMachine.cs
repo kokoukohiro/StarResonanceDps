@@ -62,7 +62,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (dungeonState == EDungeonState.DungeonStateNull)
             {
 
-                                EncounterManager.EnterDungeon();
+                EncounterManager.EnterDungeon();
+                PlayerRosterProjection.ResetNearbyPlayers();
 
                 if (Settings.Instance.PersistEncounterSavingPauseStateBetweenMaps)
                 {

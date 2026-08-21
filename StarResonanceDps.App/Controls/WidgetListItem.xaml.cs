@@ -76,7 +76,7 @@ public partial class WidgetListItem : UserControl
 
     private void UpdatePlayerWindowCountBadge()
     {
-        if (_playerWindowBadgeWidget is not { IsPlayerWindowWidget: true })
+        if (_playerWindowBadgeWidget is not { ShowsPlayerWindowCountBadge: true })
         {
             PlayerWindowCountBadgePath.Data = Geometry.Empty;
             return;

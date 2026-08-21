@@ -22,7 +22,7 @@
                             <Setter Property="Padding" Value="20,11,20,11" />
                             <Setter Property="BorderThickness" Value="0,0,0,1" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowsHealthValueSettings}" Value="False">
+                                <DataTrigger Binding="{Binding HasAdditionalDisplaySettings}" Value="False">
                                     <Setter Property="BorderThickness" Value="0" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -109,8 +109,17 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
-                        Visibility="{Binding ShowsHealthValueSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Visibility="{Binding ShowsHealthValueSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldLast}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsPartyDisplaySettings}" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -128,6 +137,30 @@
                                   Style="{StaticResource Input.SettingsComboBox}">
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_AddShield]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_SeparateShield]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsPartyDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Party]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding PartyDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_MembersOnly]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_NonMembersOnly]}" />
                         </ComboBox>
                     </Grid>
                 </Border>

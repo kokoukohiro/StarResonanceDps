@@ -1,6 +1,7 @@
 using StarResonanceDps.Core.CombatRuntime.Protocols;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Zproto;
@@ -9,48 +10,170 @@ namespace StarResonanceDps.Core.CombatRuntime
 {
     public static class GrpcTeamManager
     {
-        private const string TeamFastSyncSceneIdAttribute = "TeamMemberFastSyncSceneId";
-        private const string TeamFastSyncStateAttribute = "TeamMemberFastSyncState";
-        private const string TeamFastSyncSceneAreaIdAttribute = "TeamMemberFastSyncSceneAreaId";
-        private const string TeamFastSyncDirectionAttribute = "TeamMemberFastSyncDirection";
-        private const string TeamFastSyncPositionXAttribute = "TeamMemberFastSyncPositionX";
-        private const string TeamFastSyncPositionYAttribute = "TeamMemberFastSyncPositionY";
-        private const string TeamFastSyncPositionZAttribute = "TeamMemberFastSyncPositionZ";
-        private const string TeamFastSyncHpAttribute = "TeamMemberFastSyncHp";
-        private const string TeamFastSyncMaxHpAttribute = "TeamMemberFastSyncMaxHp";
-        private const string TeamMemberBotAiIdAttribute = "TeamMemberBotAiId";
-
-        private static readonly ConcurrentDictionary<long, TeamMemberFastSyncData> PendingFastSyncData = new();
-        private static readonly ConcurrentDictionary<long, EquipNine[]> PendingEquipmentData = new();
-        private static readonly ConcurrentDictionary<long, uint> KnownTeamBotAiIds = new();
+        private static readonly PartyStateStore PartyState = PartyStateStore.Instance;
+        private static ETeamMemberType? _currentTeamMemberType;
 
         internal static void ResetMemberState()
         {
-            PendingFastSyncData.Clear();
-            PendingEquipmentData.Clear();
-            KnownTeamBotAiIds.Clear();
+            AppState.PartyTeamId = 0;
+            _currentTeamMemberType = null;
+            PartyState.ResetUnknown();
         }
 
-        internal static bool IsKnownTeamNpc(long entityUuid)
+        internal static void ProcessEntityTeamId(long entityUuid, long teamId)
         {
-            return entityUuid != 0
-                && KnownTeamBotAiIds.TryGetValue(entityUuid, out var botAiId)
-                && botAiId > 0;
+            var characterId = Utils.UuidToEntityId(entityUuid);
+            var isSelf = entityUuid == MessageManager.currentUserUuid
+                || entityUuid == AppState.PlayerUUID
+                || (AppState.PlayerUID != 0 && characterId == AppState.PlayerUID);
+            var party = PartyState.Current;
+
+            if (isSelf)
+            {
+                var hasKnownPartyMember = party.MemberIds.Any(memberId => memberId != characterId);
+                if (teamId == 0
+                    && (AppState.PartyTeamId > 0 || party.TeamId > 0 || hasKnownPartyMember))
+                {
+                    PlayerRosterProjection.RebuildRoster();
+                    return;
+                }
+
+                if (teamId == 0 || (AppState.PartyTeamId != 0 && AppState.PartyTeamId != teamId))
+                {
+                    _currentTeamMemberType = null;
+                }
+
+                AppState.PartyTeamId = teamId;
+                if (teamId == 0)
+                {
+                    PartyState.SetNoParty();
+                }
+                else
+                {
+                    PartyState.ApplyKnownMembers(teamId, [characterId]);
+                }
+
+                PlayerRosterProjection.RebuildRoster();
+                return;
+            }
+
+            if (!party.HasCompleteMembership)
+            {
+                if (teamId != 0 && teamId == AppState.PartyTeamId)
+                {
+                    PartyState.ApplyKnownMembers(teamId, [characterId]);
+                }
+                else if (AppState.PartyTeamId != 0)
+                {
+                    PartyState.MarkNonMember(characterId);
+                }
+
+                PlayerRosterProjection.RebuildRoster();
+                return;
+            }
+
+            PlayerRosterProjection.UpsertPlayer(entityUuid);
         }
 
-        internal static void ApplyKnownMemberData(long entityUuid, Entity entity)
+        internal static void ProcessGetTeamInfo(GetTeamInfoReply reply, ExtraPacketData extraData)
         {
-            if (!IsLiveOtherPlayer(entityUuid, entity))
+            if (reply.ErrCode != EErrorCode.ErrSuccess)
             {
                 return;
             }
 
-            if (KnownTeamBotAiIds.TryGetValue(entityUuid, out var botAiId) && botAiId > 0)
+            var baseInfo = reply.BaseInfo;
+            if (baseInfo == null || baseInfo.TeamId <= 0)
             {
-                SetSourceAttributeIfChanged(entity, TeamMemberBotAiIdAttribute, botAiId);
+                ResetMemberState();
+                PartyState.SetNoParty();
+                PlayerRosterProjection.RebuildRoster();
+                return;
             }
 
-            ApplyPendingMemberData(entityUuid, entity);
+            var teamId = baseInfo.TeamId;
+            if (AppState.PartyTeamId != 0 && AppState.PartyTeamId != teamId)
+            {
+                ResetMemberState();
+            }
+
+            AppState.PartyTeamId = teamId;
+            _currentTeamMemberType = baseInfo.TeamMemberType;
+
+            var groups = baseInfo.TeamMemberGroupInfos.Values.ToArray();
+            var memberIds = groups
+                .SelectMany(group => group.CharIds)
+                .Concat(reply.MemberData.Select(member => member.CharId))
+                .Concat(reply.MemberFastSyncData.Keys)
+                .Where(characterId => characterId > 0)
+                .Distinct()
+                .ToArray();
+            PartyState.ApplyCompleteMembership(
+                teamId,
+                _currentTeamMemberType == ETeamMemberType.Five,
+                memberIds);
+
+            foreach (var member in reply.MemberData)
+            {
+                ApplyTeamMemberSocialData(member);
+            }
+
+            foreach (var memberSyncData in reply.MemberFastSyncData)
+            {
+                ApplyTeamMemberFastSyncData(memberSyncData.Key, memberSyncData.Value);
+            }
+
+            if (groups.Length > 0)
+            {
+                ApplyAuthoritativeMembership(teamId, _currentTeamMemberType, groups);
+            }
+            PublishCurrentTeam(teamId);
+        }
+
+        internal static void ProcessSocialTeamData(SocialData? socialData)
+        {
+            var teamData = socialData?.TeamData;
+            if (socialData == null
+                || AppState.PlayerUID == 0
+                || socialData.CharId != AppState.PlayerUID
+                || teamData == null
+                || teamData.TeamId <= 0
+                || !teamData.CharIds.Contains(AppState.PlayerUID))
+            {
+                return;
+            }
+
+            var teamId = teamData.TeamId;
+            if (AppState.PartyTeamId != 0 && AppState.PartyTeamId != teamId)
+            {
+                ResetMemberState();
+            }
+
+            AppState.PartyTeamId = teamId;
+            _currentTeamMemberType = teamData.TeamMemberType;
+
+            var memberIds = teamData.CharIds
+                .Where(characterId => characterId > 0)
+                .Distinct()
+                .ToArray();
+            var memberIdSet = memberIds.ToHashSet();
+            var groupAssignments = teamData.TeamMemberData.Values
+                .Where(member => memberIdSet.Contains(member.CharId) && member.GroupId > 0)
+                .Select(member => (member.CharId, member.GroupId));
+            PartyState.ApplyCompleteMembership(
+                teamId,
+                _currentTeamMemberType == ETeamMemberType.Five,
+                memberIds,
+                groupAssignments);
+            foreach (var member in teamData.TeamMemberData.Values)
+            {
+                if (memberIdSet.Contains(member.CharId))
+                {
+                    ApplyTeamMemberSocialData(member);
+                }
+            }
+
+            PublishCurrentTeam(teamId);
         }
 
         public static void ProcessNoticeUpdateTeamInfo(GrpcTeamNtf.Types.NoticeUpdateTeamInfo vData, ExtraPacketData extraData)
@@ -62,6 +185,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             AppState.PartyTeamId = teamId;
+            _currentTeamMemberType = vData.VRequest.BaseInfo.TeamMemberType;
+            ApplyAuthoritativeMembership(
+                teamId,
+                _currentTeamMemberType,
+                vData.VRequest.BaseInfo.TeamMemberGroupInfos.Values);
+            PlayerRosterProjection.RebuildRoster();
             if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
             {
                 EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", teamId);
@@ -70,22 +199,24 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void ProcessNoticeUpdateTeamMemberInfo(GrpcTeamNtf.Types.NoticeUpdateTeamMemberInfo vData, ExtraPacketData extraData)
         {
-            HashSet<long> rosterPlayersToUpsert = [];
+            PartyState.ApplyKnownMembers(
+                AppState.PartyTeamId,
+                vData.VRequest.TeamMemberSocialDatas.Select(member => member.CharId)
+                    .Concat(vData.VRequest.TeamMemberSyncDatas.Select(member => member.CharId)));
 
             foreach (var member in vData.VRequest.TeamMemberSocialDatas)
             {
-                ApplyTeamMemberSocialData(member, rosterPlayersToUpsert);
+                ApplyTeamMemberSocialData(member);
             }
 
             foreach (var fastSyncData in vData.VRequest.TeamMemberSyncDatas)
             {
                 ApplyTeamMemberFastSyncData(
                     fastSyncData.CharId,
-                    fastSyncData,
-                    rosterPlayersToUpsert);
+                    fastSyncData);
             }
 
-            PublishRosterChanges(rosterPlayersToUpsert);
+            PlayerRosterProjection.RebuildRoster();
         }
 
         public static void ProcessNotifyJoinTeam(GrpcTeamNtf.Types.NotifyJoinTeam vData, ExtraPacketData extraData)
@@ -97,61 +228,65 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             AppState.PartyTeamId = teamId;
-            if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
-            {
-                EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", teamId);
-            }
+            _currentTeamMemberType = vData.VRequest.BaseInfo.TeamMemberType;
 
-            HashSet<long> rosterPlayersToUpsert = [];
+            var groups = vData.VRequest.BaseInfo.TeamMemberGroupInfos.Values.ToArray();
+            PartyState.ApplyCompleteMembership(
+                teamId,
+                _currentTeamMemberType == ETeamMemberType.Five,
+                groups.SelectMany(group => group.CharIds));
 
             foreach (var member in vData.VRequest.MemberData)
             {
-                ApplyTeamMemberSocialData(member, rosterPlayersToUpsert);
+                ApplyTeamMemberSocialData(member);
             }
 
             foreach (var memberSyncData in vData.VRequest.MemberSyncDatas)
             {
                 ApplyTeamMemberFastSyncData(
                     memberSyncData.Key,
-                    memberSyncData.Value,
-                    rosterPlayersToUpsert);
+                    memberSyncData.Value);
             }
 
-            PublishRosterChanges(rosterPlayersToUpsert);
+            ApplyAuthoritativeMembership(
+                teamId,
+                _currentTeamMemberType,
+                groups);
+            PublishCurrentTeam(teamId);
         }
 
         public static void ProcessNotifyLeaveTeam(GrpcTeamNtf.Types.NotifyLeaveTeam vData, ExtraPacketData extraData)
         {
-            var leavingUuid = vData.VRequest.CharId > 0
-                ? Utils.EntityIdToUuid(vData.VRequest.CharId, (long)EEntityType.EntChar, false, false)
-                : 0;
-
-            if (leavingUuid != 0)
+            if (vData.VRequest.CharId > 0)
             {
-                PendingFastSyncData.TryRemove(leavingUuid, out _);
-                PendingEquipmentData.TryRemove(leavingUuid, out _);
-                KnownTeamBotAiIds.TryRemove(leavingUuid, out _);
+                PartyState.RemoveMember(vData.VRequest.CharId);
             }
 
             if (vData.VRequest.CharId == AppState.PlayerUID)
             {
                 ResetMemberState();
                 AppState.PartyTeamId = 0;
+                PartyState.SetNoParty();
                 if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
                 {
                     EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", 0);
                 }
             }
+
+            PlayerRosterProjection.RebuildRoster();
         }
 
         public static void ProcessNoticeTeamDissolve(GrpcTeamNtf.Types.NoticeTeamDissolve vData, ExtraPacketData extraData)
         {
             ResetMemberState();
             AppState.PartyTeamId = 0;
+            PartyState.SetNoParty();
             if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
             {
                 EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", 0);
             }
+
+            PlayerRosterProjection.RebuildRoster();
         }
 
         public static void ProcessNotifyBeTransferLeader(GrpcTeamNtf.Types.NotifyBeTransferLeader vData, ExtraPacketData extraData)
@@ -163,10 +298,27 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             AppState.PartyTeamId = teamId;
+            _currentTeamMemberType = vData.VRequest.LeaderData.TeamData.TeamMemberType;
+            PartyState.ApplyKnownMembers(teamId, vData.VRequest.LeaderData.TeamData.CharIds);
+            PlayerRosterProjection.RebuildRoster();
             if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
             {
                 EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", teamId);
             }
+        }
+
+        public static void ProcessNotifyTeamGroupUpdate(GrpcTeamNtf.Types.NotifyTeamGroupUpdate vData, ExtraPacketData extraData)
+        {
+            if (vData.VRequest.ErrCode != EErrorCode.ErrSuccess)
+            {
+                return;
+            }
+
+            ApplyAuthoritativeMembership(
+                AppState.PartyTeamId,
+                _currentTeamMemberType,
+                vData.VRequest.TeamMemberGroupInfos.Values);
+            PlayerRosterProjection.RebuildRoster();
         }
 
         public static void ProcessNotifyTeamActivityState(GrpcTeamNtf.Types.NotifyTeamActivityState vData, ExtraPacketData extraData)
@@ -237,156 +389,54 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         }
 
-        private static void ApplyTeamMemberSocialData(TeamMemData member, HashSet<long> rosterPlayersToUpsert)
+        private static void ApplyTeamMemberSocialData(TeamMemData member)
         {
             if (member.CharId <= 0 || member.SocialData == null)
             {
                 return;
             }
 
-            var entityUuid = Utils.EntityIdToUuid(member.CharId, (long)EEntityType.EntChar, false, false);
-            if (entityUuid == 0)
-            {
-                return;
-            }
-
             var socialData = member.SocialData;
-            var cached = EntityCache.Instance.GetOrCreate(entityUuid);
-            var npcEvidenceChanged = false;
-
-            if (socialData.BasicData != null)
-            {
-                if (socialData.BasicData.BotAiId > 0)
-                {
-                    npcEvidenceChanged = !KnownTeamBotAiIds.TryGetValue(entityUuid, out var knownBotAiId)
-                        || knownBotAiId != socialData.BasicData.BotAiId;
-                    KnownTeamBotAiIds[entityUuid] = socialData.BasicData.BotAiId;
-                }
-
-                var name = socialData.BasicData.Name;
-                if (!string.IsNullOrEmpty(name))
-                {
-                    cached.Name = name;
-                }
-
-                if (socialData.BasicData.Level > 0)
-                {
-                    cached.Level = socialData.BasicData.Level;
-                }
-
-                if (socialData.BasicData.SeasonLevel > 0)
-                {
-                    cached.SeasonLevel = socialData.BasicData.SeasonLevel;
-                }
-            }
-
-            if (socialData.UserAttrData != null && socialData.UserAttrData.FightPoint > 0)
-            {
-                cached.AbilityScore = ToInt32Saturating(socialData.UserAttrData.FightPoint);
-            }
-
-            if (socialData.ProfessionData != null && socialData.ProfessionData.ProfessionId > 0)
-            {
-                cached.ProfessionId = socialData.ProfessionData.ProfessionId;
-            }
-
             var receivedEquipment = socialData.EquipData != null
                 && socialData.EquipData.EquipInfos.Count > 0
-                    ? CloneEquipment(socialData.EquipData.EquipInfos)
+                    ? PlayerEquipmentData.Create(
+                        socialData.EquipData.EquipInfos.Select(
+                            item => new PlayerEquipmentItem(item.Slot, item.EquipID)))
                     : null;
 
-            if (!TryGetLiveOtherPlayer(entityUuid, out var entity))
-            {
-                if (receivedEquipment != null)
+            PartyState.UpdateSupplement(
+                AppState.PartyTeamId,
+                member.CharId,
+                current => current with
                 {
-                    PendingEquipmentData[entityUuid] = receivedEquipment;
-                }
-
-                return;
-            }
-
-            var rosterChanged = false;
-            var encounter = EncounterManager.Current!;
-
-            if (socialData.BasicData != null)
-            {
-                if (socialData.BasicData.BotAiId > 0)
-                {
-                    SetSourceAttributeIfChanged(
-                        entity,
-                        TeamMemberBotAiIdAttribute,
-                        socialData.BasicData.BotAiId);
-                }
-
-                if (!string.IsNullOrEmpty(socialData.BasicData.Name))
-                {
-                    rosterChanged |= SetAttributeIfChanged(
-                        encounter,
-                        entity,
-                        "AttrName",
-                        socialData.BasicData.Name);
-                }
-
-                if (socialData.BasicData.Level > 0)
-                {
-                    rosterChanged |= SetAttributeIfChanged(
-                        encounter,
-                        entity,
-                        "AttrLevel",
-                        socialData.BasicData.Level);
-                }
-
-                if (socialData.BasicData.SeasonLevel > 0)
-                {
-                    rosterChanged |= SetAttributeIfChanged(
-                        encounter,
-                        entity,
-                        "AttrSeasonLevel",
-                        socialData.BasicData.SeasonLevel);
-                }
-            }
-
-            if (socialData.UserAttrData != null && socialData.UserAttrData.FightPoint > 0)
-            {
-                rosterChanged |= SetAttributeIfChanged(
-                    encounter,
-                    entity,
-                    "AttrFightPoint",
-                    ToInt32Saturating(socialData.UserAttrData.FightPoint));
-            }
-
-            if (socialData.ProfessionData != null && socialData.ProfessionData.ProfessionId > 0)
-            {
-                rosterChanged |= SetAttributeIfChanged(
-                    encounter,
-                    entity,
-                    "AttrProfessionId",
-                    socialData.ProfessionData.ProfessionId);
-            }
-
-            if (receivedEquipment != null)
-            {
-                PendingEquipmentData.TryRemove(entityUuid, out _);
-                rosterChanged |= ApplyEquipmentData(entityUuid, entity, receivedEquipment);
-            }
-            else
-            {
-                rosterChanged |= ApplyPendingEquipmentData(entityUuid, entity);
-            }
-
-            rosterChanged |= ApplyPendingFastSyncData(entityUuid, entity);
-            rosterChanged |= npcEvidenceChanged;
-
-            if (rosterChanged)
-            {
-                rosterPlayersToUpsert.Add(entityUuid);
-            }
+                    Name = !string.IsNullOrEmpty(socialData.BasicData?.Name)
+                        ? socialData.BasicData.Name
+                        : current.Name,
+                    Level = socialData.BasicData?.Level > 0
+                        ? socialData.BasicData.Level
+                        : current.Level,
+                    SeasonLevel = socialData.BasicData?.SeasonLevel > 0
+                        ? socialData.BasicData.SeasonLevel
+                        : current.SeasonLevel,
+                    CombatPower = socialData.UserAttrData?.FightPoint > 0
+                        ? ToInt32Saturating(socialData.UserAttrData.FightPoint)
+                        : current.CombatPower,
+                    SeasonStrength = socialData.UserAttrData?.SeasonStrength > 0
+                        ? socialData.UserAttrData.SeasonStrength
+                        : current.SeasonStrength,
+                    ProfessionId = socialData.ProfessionData?.ProfessionId > 0
+                        ? socialData.ProfessionData.ProfessionId
+                        : current.ProfessionId,
+                    EquipmentData = receivedEquipment ?? current.EquipmentData,
+                    IsNpc = socialData.BasicData != null
+                        ? socialData.BasicData.BotAiId > 0
+                        : current.IsNpc
+                });
         }
 
         private static void ApplyTeamMemberFastSyncData(
             long fallbackCharId,
-            TeamMemberFastSyncData fastSyncData,
-            HashSet<long> rosterPlayersToUpsert)
+            TeamMemberFastSyncData fastSyncData)
         {
             var charId = fastSyncData.CharId > 0 ? fastSyncData.CharId : fallbackCharId;
             if (charId <= 0)
@@ -394,260 +444,55 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            var entityUuid = Utils.EntityIdToUuid(charId, (long)EEntityType.EntChar, false, false);
-            if (entityUuid == 0)
-            {
-                return;
-            }
-
-            if (!TryGetLiveOtherPlayer(entityUuid, out var entity))
-            {
-                PendingFastSyncData[entityUuid] = fastSyncData.Clone();
-                return;
-            }
-
-            PendingFastSyncData.TryRemove(entityUuid, out _);
-            if (ApplyFastSyncData(entity, fastSyncData))
-            {
-                rosterPlayersToUpsert.Add(entityUuid);
-            }
-        }
-
-        private static bool ApplyFastSyncData(Entity entity, TeamMemberFastSyncData fastSyncData)
-        {
-            SetSourceAttributeIfChanged(entity, TeamFastSyncSceneIdAttribute, fastSyncData.SceneId);
-            SetSourceAttributeIfChanged(entity, TeamFastSyncStateAttribute, fastSyncData.State);
-            SetSourceAttributeIfChanged(entity, TeamFastSyncSceneAreaIdAttribute, fastSyncData.SceneAreaId);
-            var fastSyncHpChanged = SetSourceAttributeIfChanged(
-                entity,
-                TeamFastSyncHpAttribute,
-                fastSyncData.Hp);
-            var fastSyncMaxHpChanged = SetSourceAttributeIfChanged(
-                entity,
-                TeamFastSyncMaxHpAttribute,
-                fastSyncData.MaxHp);
-
-            if (fastSyncData.Position != null)
-            {
-                SetSourceAttributeIfChanged(
-                    entity,
-                    TeamFastSyncPositionXAttribute,
-                    fastSyncData.Position.X);
-                SetSourceAttributeIfChanged(
-                    entity,
-                    TeamFastSyncPositionYAttribute,
-                    fastSyncData.Position.Y);
-                SetSourceAttributeIfChanged(
-                    entity,
-                    TeamFastSyncPositionZAttribute,
-                    fastSyncData.Position.Z);
-                SetSourceAttributeIfChanged(
-                    entity,
-                    TeamFastSyncDirectionAttribute,
-                    fastSyncData.Position.Dir);
-            }
-
-            if (!TryGetFastSyncHealthFallback(entity, out _, out _))
-            {
-                return false;
-            }
-
-            return fastSyncMaxHpChanged
-                || (!TryGetNonNegativeInt64(entity.GetAttrKV("AttrHp"), out _)
-                    && fastSyncHpChanged);
-        }
-
-        private static void ApplyPendingMemberData(long entityUuid, Entity entity)
-        {
-            ApplyPendingEquipmentData(entityUuid, entity);
-            ApplyPendingFastSyncData(entityUuid, entity);
-        }
-
-        private static bool ApplyPendingEquipmentData(long entityUuid, Entity entity)
-        {
-            return PendingEquipmentData.TryRemove(entityUuid, out var equipment)
-                && ApplyEquipmentData(entityUuid, entity, equipment);
-        }
-
-        private static bool ApplyPendingFastSyncData(long entityUuid, Entity entity)
-        {
-            return PendingFastSyncData.TryRemove(entityUuid, out var fastSyncData)
-                && ApplyFastSyncData(entity, fastSyncData);
-        }
-
-        internal static bool TryGetFastSyncHealthFallback(
-            Entity entity,
-            out long hp,
-            out long maxHp)
-        {
-            hp = 0;
-            maxHp = 0;
-
-            if (entity.HasNpcEvidence
-                || TryGetPositiveInt64(entity.GetAttrKV("AttrMaxHp"), out _))
-            {
-                return false;
-            }
-
-            if (!TryGetPositiveInt64(entity.GetAttrKV(TeamFastSyncMaxHpAttribute), out maxHp)
-                || (!TryGetNonNegativeInt64(entity.GetAttrKV("AttrHp"), out hp)
-                    && !TryGetNonNegativeInt64(entity.GetAttrKV(TeamFastSyncHpAttribute), out hp)))
-            {
-                hp = 0;
-                maxHp = 0;
-                return false;
-            }
-
-            return true;
-        }
-
-        private static bool ApplyEquipmentData(long entityUuid, Entity entity, IReadOnlyList<EquipNine> equipment)
-        {
-            if (equipment.Count == 0 || EquipmentMatches(entity.GetAttrKV("AttrEquipData"), equipment))
-            {
-                return false;
-            }
-
-            if (EncounterManager.Current is not { } encounter)
-            {
-                return false;
-            }
-
-            encounter.SetAttrKV(
-                entityUuid,
-                "AttrEquipData",
-                equipment.Select(item => item.Clone()).ToList());
-            return true;
-        }
-
-        private static bool SetAttributeIfChanged(Encounter encounter, Entity entity, string key, object value)
-        {
-            if (Equals(entity.GetAttrKV(key), value))
-            {
-                return false;
-            }
-
-            encounter.SetAttrKV(entity.UUID, key, value);
-            return true;
-        }
-
-        private static bool SetSourceAttributeIfChanged(Entity entity, string key, object value)
-        {
-            if (Equals(entity.GetAttrKV(key), value))
-            {
-                return false;
-            }
-
-            entity.SetAttrKV(key, value);
-            return true;
-        }
-
-        private static bool TryGetPositiveInt64(object? value, out long result)
-        {
-            if (TryGetNonNegativeInt64(value, out result) && result > 0)
-            {
-                return true;
-            }
-
-            result = 0;
-            return false;
-        }
-
-        private static bool TryGetNonNegativeInt64(object? value, out long result)
-        {
-            switch (value)
-            {
-                case long integer when integer >= 0:
-                    result = integer;
-                    return true;
-                case int integer when integer >= 0:
-                    result = integer;
-                    return true;
-                case uint integer:
-                    result = integer;
-                    return true;
-                case ulong integer when integer <= long.MaxValue:
-                    result = (long)integer;
-                    return true;
-                case short integer when integer >= 0:
-                    result = integer;
-                    return true;
-                case ushort integer:
-                    result = integer;
-                    return true;
-                case byte integer:
-                    result = integer;
-                    return true;
-                case sbyte integer when integer >= 0:
-                    result = integer;
-                    return true;
-                default:
-                    result = 0;
-                    return false;
-            }
-        }
-
-        private static bool TryGetLiveOtherPlayer(long entityUuid, out Entity entity)
-        {
-            entity = null!;
-            var encounter = EncounterManager.Current;
-            return encounter != null
-                && encounter.Entities.TryGetValue(entityUuid, out entity)
-                && IsLiveOtherPlayer(entityUuid, entity);
-        }
-
-        private static bool IsLiveOtherPlayer(long entityUuid, Entity entity)
-        {
-            if (entity.EntityType != EEntityType.EntChar)
-            {
-                return false;
-            }
-
-            if (entityUuid == AppState.PlayerUUID)
-            {
-                return false;
-            }
-
-            return AppState.PlayerUID == 0 || Utils.UuidToEntityId(entityUuid) != AppState.PlayerUID;
-        }
-
-        private static void PublishRosterChanges(HashSet<long> rosterPlayersToUpsert)
-        {
-            foreach (var entityUuid in rosterPlayersToUpsert)
-            {
-                PlayerRosterProjection.UpsertPlayer(entityUuid);
-            }
-        }
-
-        private static EquipNine[] CloneEquipment(IEnumerable<EquipNine> equipment)
-        {
-            return equipment.Select(item => item.Clone()).ToArray();
-        }
-
-        private static bool EquipmentMatches(object? rawEquipment, IReadOnlyList<EquipNine> equipment)
-        {
-            if (rawEquipment is not IEnumerable<EquipNine> currentEquipment)
-            {
-                return false;
-            }
-
-            using var currentEnumerator = currentEquipment.GetEnumerator();
-            for (var index = 0; index < equipment.Count; index++)
-            {
-                if (!currentEnumerator.MoveNext())
+            PartyState.UpdateSupplement(
+                AppState.PartyTeamId,
+                charId,
+                current => current with
                 {
-                    return false;
-                }
+                    CurrentHp = fastSyncData.Hp,
+                    MaxHp = fastSyncData.MaxHp > 0 ? fastSyncData.MaxHp : current.MaxHp
+                });
+        }
 
-                var current = currentEnumerator.Current;
-                var expected = equipment[index];
-                if (current.Slot != expected.Slot || current.EquipID != expected.EquipID)
-                {
-                    return false;
-                }
+        private static void ApplyAuthoritativeMembership(
+            long teamId,
+            ETeamMemberType? teamMemberType,
+            IEnumerable<TeamMemberGroupInfo> groups)
+        {
+            ApplyAuthoritativeMembership(
+                teamId,
+                teamMemberType,
+                groups.Select(group => (
+                    group.GroupId,
+                    CharacterIds: (IEnumerable<long>)group.CharIds)));
+        }
+
+        private static void ApplyAuthoritativeMembership(
+            long teamId,
+            ETeamMemberType? teamMemberType,
+            IEnumerable<(int GroupId, IEnumerable<long> CharacterIds)> groups)
+        {
+            var materializedGroups = groups
+                .Select(group => (
+                    group.GroupId,
+                    CharacterIds: group.CharacterIds.ToArray()))
+                .ToArray();
+
+            PartyState.ApplyAuthoritativeMembership(
+                teamId,
+                teamMemberType == ETeamMemberType.Five,
+                materializedGroups.Select(group => (
+                    group.GroupId,
+                    CharacterIds: (IEnumerable<long>)group.CharacterIds)));
+        }
+
+        private static void PublishCurrentTeam(long teamId)
+        {
+            PlayerRosterProjection.RebuildRoster();
+            if (AppState.PlayerUUID != 0 && EncounterManager.Current != null)
+            {
+                EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", teamId);
             }
-
-            return !currentEnumerator.MoveNext();
         }
 
         private static int ToInt32Saturating(long value)

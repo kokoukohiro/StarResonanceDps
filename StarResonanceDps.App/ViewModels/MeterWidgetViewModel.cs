@@ -136,7 +136,9 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         var globalSettings = _configManager.GetSettingsSnapshot();
         var numberDisplayFormatIndex = globalSettings.NumberDisplayFormatIndex;
         var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
-        var snapshot = MeterSnapshotProvider.GetSnapshot(_kind);
+        var snapshot = MeterSnapshotProvider.GetSnapshot(
+            _kind,
+            (PartyDisplayMode)settings.PartyDisplayModeIndex);
 
         ElapsedText = benchmarkState.IsActive && !benchmarkState.HasBegun
             ? "00:00:00"

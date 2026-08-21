@@ -7,7 +7,6 @@ namespace StarResonanceDps.App.Models.Widgets;
 public sealed class PlayerStatusEntry
 {
     private PlayerStatusEntry(
-        string hpText,
         string maxHpText,
         string attackText,
         string primaryStatText,
@@ -20,7 +19,6 @@ public sealed class PlayerStatusEntry
         string versatilityText,
         string blockText)
     {
-        HpText = hpText;
         MaxHpText = maxHpText;
         AttackText = attackText;
         PrimaryStatText = primaryStatText;
@@ -33,8 +31,6 @@ public sealed class PlayerStatusEntry
         VersatilityText = versatilityText;
         BlockText = blockText;
     }
-
-    public string HpText { get; }
 
     public string MaxHpText { get; }
 
@@ -66,9 +62,8 @@ public sealed class PlayerStatusEntry
         var isMagicalProfession = player.ProfessionId is 2 or 5 or 13;
 
         return new PlayerStatusEntry(
-            $"{localization.GetString("PlayerStatus_Hp")}: {FormatInteger(player.CurrentHp)} ({FormatPercent(GetHealthPercent(player.CurrentHp, player.MaxHp))}%)",
             $"{localization.GetString("PlayerStatus_MaxHp")}: {FormatInteger(player.MaxHp)}",
-            $"{(isMagicalProfession ? "MATK" : "ATK")}: {FormatInteger(isMagicalProfession ? attributes.MagicalAttack : attributes.PhysicalAttack)}",
+            $"{(isMagicalProfession ? "MATK" : localization.GetString("PlayerStatus_PhysicalAttack"))}: {FormatInteger(isMagicalProfession ? attributes.MagicalAttack : attributes.PhysicalAttack)}",
             $"{localization.GetString(primaryStatKey)}: {FormatInteger(primaryStatValue)}",
             $"{localization.GetString("PlayerStatus_Endurance")}: {FormatInteger(attributes.Endurance)}",
             $"{localization.GetString("PlayerStatus_Armor")}: {FormatInteger(attributes.Armor)}",
@@ -88,16 +83,6 @@ public sealed class PlayerStatusEntry
             2 or 5 or 13 => ("PlayerStatus_Intellect", attributes.Intelligence),
             _ => ("PlayerStatus_Strength", attributes.Strength)
         };
-    }
-
-    private static double GetHealthPercent(long currentHp, long maxHp)
-    {
-        if (maxHp <= 0)
-        {
-            return 0d;
-        }
-
-        return Math.Round(currentHp / (double)maxHp, 2) * 100d;
     }
 
     private static string FormatInteger(long value)

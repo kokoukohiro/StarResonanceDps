@@ -1353,11 +1353,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public List<ThreatInfo> ThreatInfoList { get; private set; } = new();
         public ConcurrentQueue<List<ThreatInfo>> RecentThreatInfoListHistory { get; private set; } = new();
 
-        private const int NpcEvidenceUnknown = 0;
-        private const int NpcEvidenceAbsent = 1;
-        private const int NpcEvidencePresent = 2;
-
-        private int _npcEvidenceState = NpcEvidenceUnknown;
         private Dictionary<string, object> _attributes = new();
 
         public Dictionary<string, object> Attributes
@@ -1366,28 +1361,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             set
             {
                 _attributes = value ?? new Dictionary<string, object>();
-                Volatile.Write(ref _npcEvidenceState, NpcEvidenceUnknown);
-            }
-        }
-
-        [JsonIgnore]
-        internal bool HasNpcEvidence
-        {
-            get
-            {
-                var state = Volatile.Read(ref _npcEvidenceState);
-                if (state != NpcEvidenceUnknown)
-                {
-                    return state == NpcEvidencePresent;
-                }
-
-                var hasNpcEvidence = HasPositiveAttribute("AttrId")
-                    || HasPositiveAttribute("TeamMemberBotAiId")
-                    || GrpcTeamManager.IsKnownTeamNpc(UUID);
-                Volatile.Write(
-                    ref _npcEvidenceState,
-                    hasNpcEvidence ? NpcEvidencePresent : NpcEvidenceAbsent);
-                return hasNpcEvidence;
             }
         }
 
@@ -2068,11 +2041,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             RegisterSkillData(ESkillType.Damage, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
 
-            var subProfessionId = Professions.GetSubProfessionIdBySkillId(skillId);
-            if (subProfessionId != 0)
-            {
-                SetSubProfessionId((int)subProfessionId);
-            }
+            UpdateSubProfessionFromSkill(skillId);
         }
 
         public void AddHealing(
@@ -2097,11 +2066,19 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             RegisterSkillData(ESkillType.Healing, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, overhealing, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
 
-            var subProfessionId = Professions.GetSubProfessionIdBySkillId(skillId);
-            if (subProfessionId != 0)
+            UpdateSubProfessionFromSkill(skillId);
+        }
+
+        private void UpdateSubProfessionFromSkill(int skillId)
+        {
+            var subProfessionId = (int)Professions.GetSubProfessionIdBySkillId(skillId);
+            if (subProfessionId <= 0 || subProfessionId == SubProfessionId)
             {
-                SetSubProfessionId((int)subProfessionId);
+                return;
             }
+
+            SetSubProfessionId(subProfessionId);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
         }
 
         public void AddTakenDamage(
@@ -2209,16 +2186,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public void SetAttrKV(string key, object value)
         {
-            var npcEvidenceChanged = (key is "AttrId" or "TeamMemberBotAiId")
-                && (!Attributes.TryGetValue(key, out var existingValue)
-                    || !Equals(existingValue, value));
-
             Attributes[key] = value;
-
-            if (npcEvidenceChanged)
-            {
-                Volatile.Write(ref _npcEvidenceState, NpcEvidenceUnknown);
-            }
         }
 
         public object? GetAttrKV(string key)

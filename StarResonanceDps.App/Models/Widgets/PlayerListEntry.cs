@@ -44,6 +44,12 @@ public sealed partial class PlayerListEntry : ObservableObject
     private bool _isNpc;
 
     [ObservableProperty]
+    private bool _isPartyMember;
+
+    [ObservableProperty]
+    private string _partyNumberText = string.Empty;
+
+    [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
 
     [ObservableProperty]
@@ -69,6 +75,10 @@ public sealed partial class PlayerListEntry : ObservableObject
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         IsNpc = player.IsNpc;
+        IsPartyMember = player.IsPartyMember;
+        PartyNumberText = player.IsPartyMember
+            ? player.PartyNumber?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"
+            : string.Empty;
 
         DisplayName = PlayerInfoFormatFormatter.Format(
             player,

@@ -135,6 +135,21 @@ public sealed class WidgetWindowManager
 
         TrackPlayerWidget(playerWidget);
 
+        if (playerWidget.Kind == WidgetKind.PlayerStatus)
+        {
+            var openStatusWindow = _openPlayerWindows
+                .FirstOrDefault(session => ReferenceEquals(session.Widget, playerWidget));
+
+            if (openStatusWindow is not null)
+            {
+                RestoreAndActivate(openStatusWindow.Window);
+                return;
+            }
+
+            CreatePlayerWindow(playerWidget, requestedCharacterId: null);
+            return;
+        }
+
         var existingWindow = _openPlayerWindows
             .FirstOrDefault(session =>
                 ReferenceEquals(session.Widget, playerWidget)

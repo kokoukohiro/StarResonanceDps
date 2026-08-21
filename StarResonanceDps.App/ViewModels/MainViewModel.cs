@@ -21,6 +21,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly WidgetWindowManager _widgetWindowManager = WidgetWindowManager.Instance;
     private readonly PluginManager _pluginManager = PluginManager.Instance;
     private readonly PlayerRosterPresentationStore _playerRosterStore = PlayerRosterPresentationStore.Instance;
+    private readonly PartyStateStore _partyStateStore = PartyStateStore.Instance;
     private readonly NearbyEntityStore _nearbyEntityStore = NearbyEntityStore.Instance;
     private readonly object _playerRosterUpdateSync = new();
     private readonly object _nearbyEntityUpdateSync = new();
@@ -92,6 +93,7 @@ public sealed partial class MainViewModel : ViewModelBase
         _configManager.SettingsChanged += ConfigManager_SettingsChanged;
 
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
+        _partyStateStore.Changed += PartyStateStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
 
         var roster = _playerRosterStore.Current;
@@ -170,6 +172,11 @@ public sealed partial class MainViewModel : ViewModelBase
             e.Snapshot,
             e.MapName,
             e.MapGeneration));
+    }
+
+    private void PartyStateStore_Changed(object? sender, EventArgs e)
+    {
+        QueuePlayerRosterSnapshot(_playerRosterStore.Current);
     }
 
     private void QueuePlayerRosterSnapshot(PlayerRosterSnapshot roster)

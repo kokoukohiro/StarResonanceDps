@@ -1,6 +1,8 @@
 using Newtonsoft.Json.Linq;
 using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
+using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 using ZLinq;
 using Zproto;
 
@@ -133,7 +135,9 @@ public sealed record MeterPlayerIdentity(string Name, long UserId);
 
 public static class MeterSnapshotProvider
 {
-    public static MeterSnapshot GetSnapshot(MeterSnapshotKind kind)
+    public static MeterSnapshot GetSnapshot(
+        MeterSnapshotKind kind,
+        PartyDisplayMode partyDisplayMode = PartyDisplayMode.All)
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null)
@@ -152,13 +156,19 @@ public static class MeterSnapshotProvider
 
         UpdatePlayerMeterState(source);
 
-        var totalValue = kind == MeterSnapshotKind.Damage
-            ? encounter.TotalDamage
-            : encounter.TotalHealing;
-        var topValue = source.Length == 0
+        var party = PartyStateStore.Instance.Current;
+        var visibleSource = source
+            .Where(player => party.ShouldInclude(player.UserId, player.IsSelf, partyDisplayMode))
+            .ToArray();
+        var totalValue = partyDisplayMode == PartyDisplayMode.All
+            ? kind == MeterSnapshotKind.Damage
+                ? encounter.TotalDamage
+                : encounter.TotalHealing
+            : visibleSource.Aggregate(0UL, (total, player) => total + player.TotalValue);
+        var topValue = visibleSource.Length == 0
             ? 0UL
-            : source[0].TotalValue;
-        var players = source
+            : visibleSource[0].TotalValue;
+        var players = visibleSource
             .Select(player => player with
             {
                 Contribution = totalValue == 0
@@ -187,10 +197,8 @@ public static class MeterSnapshotProvider
             return null;
         }
 
-        var userId = entity.UID != 0
-            ? entity.UID
-            : Utils.UuidToEntityId(entityUuid);
-        return new MeterPlayerIdentity(entity.Name ?? string.Empty, userId);
+        var source = PlayerDataSourceResolver.Resolve(entity, IsSelf(entity));
+        return new MeterPlayerIdentity(source.Name, source.CharacterId);
     }
 
 
@@ -996,18 +1004,19 @@ public static class MeterSnapshotProvider
             ? entity.DamageStats.ValuePerSecond
             : entity.HealingStats.ValuePerSecond;
         var isSelf = IsSelf(entity);
+        var source = PlayerDataSourceResolver.Resolve(entity, isSelf);
         return new MeterPlayerSnapshot(
             characterId,
-            entity.UID,
-            entity.Name ?? string.Empty,
-            entity.ProfessionId,
-            entity.SubProfessionId,
-            entity.AbilityScore,
-            ToInt32(entity.SeasonStrength),
-            entity.Level,
-            ToInt32(entity.SeasonLevel),
+            source.CharacterId,
+            source.Name,
+            source.ProfessionId,
+            source.SubProfessionId,
+            source.CombatPower,
+            source.SeasonStrength,
+            source.Level,
+            source.SeasonLevel,
             isSelf,
-            !isSelf && entity.HasNpcEvidence,
+            source.IsNpc,
             totalValue,
             valuePerSecond,
             0d,
@@ -1023,13 +1032,4 @@ public static class MeterSnapshotProvider
                 || (AppState.PlayerUID != 0 && Utils.UuidToEntityId(uuid) == AppState.PlayerUID));
     }
 
-    private static int ToInt32(long value)
-    {
-        return value switch
-        {
-            > int.MaxValue => int.MaxValue,
-            < int.MinValue => int.MinValue,
-            _ => (int)value
-        };
-    }
 }

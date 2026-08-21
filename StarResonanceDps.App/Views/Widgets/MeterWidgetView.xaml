@@ -8,14 +8,6 @@
     <UserControl.Resources>
         <converters:HealthRatioToWidthConverter x:Key="MeterWidget.RatioToWidthConverter" />
 
-        <DropShadowEffect x:Key="MeterWidget.ProfessionIconShadow"
-                  Color="#000000"
-                  Opacity="0.5"
-                  ShadowDepth="2"
-                  BlurRadius="5" />
-
-
-
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
@@ -322,7 +314,7 @@
                                            VerticalAlignment="Center"
                                            Style="{StaticResource MeterWidget.ProfessionIconMask}"
                                            Fill="White"
-                                           Effect="{StaticResource MeterWidget.ProfessionIconShadow}" />
+                                           Effect="{StaticResource Effect.ProfessionIconShadow}" />
 
                                 <TextBlock Grid.Column="3"
                                            Margin="5,0,6,0"

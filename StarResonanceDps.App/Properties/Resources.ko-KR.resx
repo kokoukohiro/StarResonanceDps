@@ -439,13 +439,13 @@
     <value>적홍</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
-    <value>상태</value>
-  </data>
-  <data name="PlayerStatus_Hp" xml:space="preserve">
-    <value>HP</value>
+    <value>능력치 상세 정보</value>
   </data>
   <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>최대 HP</value>
+    <value>최대 체력</value>
+  </data>
+  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
+    <value>물리 공격</value>
   </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>힘</value>
@@ -457,16 +457,16 @@
     <value>지능</value>
   </data>
   <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>지구력</value>
+    <value>내구력</value>
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>방어</value>
+    <value>물리 방어</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>치명타</value>
   </data>
   <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>가속</value>
+    <value>속공</value>
   </data>
   <data name="PlayerStatus_Luck" xml:space="preserve">
     <value>행운</value>
@@ -770,5 +770,17 @@
   </data>
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>실드 수치 개별 표시</value>
+  </data>
+  <data name="Settings_Display_Party" xml:space="preserve">
+    <value>파티 표시 설정</value>
+  </data>
+  <data name="PartyDisplay_All" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="PartyDisplay_MembersOnly" xml:space="preserve">
+    <value>파티 멤버만</value>
+  </data>
+  <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
+    <value>파티 멤버 외</value>
   </data>
 </root>

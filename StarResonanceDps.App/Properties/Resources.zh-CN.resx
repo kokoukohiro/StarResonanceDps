@@ -439,13 +439,13 @@
     <value>赤红</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
-    <value>状态</value>
-  </data>
-  <data name="PlayerStatus_Hp" xml:space="preserve">
-    <value>生命</value>
+    <value>属性详情</value>
   </data>
   <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>最大生命</value>
+    <value>生命上限</value>
+  </data>
+  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
+    <value>物理攻击</value>
   </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>力量</value>
@@ -460,7 +460,7 @@
     <value>耐力</value>
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>护甲</value>
+    <value>物理防御</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>暴击</value>
@@ -770,5 +770,17 @@
   </data>
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>护盾量单独显示</value>
+  </data>
+  <data name="Settings_Display_Party" xml:space="preserve">
+    <value>队伍显示设置</value>
+  </data>
+  <data name="PartyDisplay_All" xml:space="preserve">
+    <value>全部显示</value>
+  </data>
+  <data name="PartyDisplay_MembersOnly" xml:space="preserve">
+    <value>仅队伍成员</value>
+  </data>
+  <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
+    <value>非队伍成员</value>
   </data>
 </root>

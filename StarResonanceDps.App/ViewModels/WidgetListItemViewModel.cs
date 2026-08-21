@@ -8,6 +8,7 @@ using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -90,6 +91,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
         or WidgetKind.HpsGraph;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
+
+    public bool ShowsPlayerWindowCountBadge => IsPlayerWindowWidget && !IsPlayerStatus;
 
     public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
     {
@@ -312,12 +315,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RequestPlayerStatus(PlayerListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerStatus, player);
-    }
-
-    [RelayCommand]
     private void RequestPlayerEquipment(PlayerListEntry? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
@@ -397,6 +394,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
+        var visibleRoster = GetVisiblePlayerRoster();
+
         if (resetEntries)
         {
             foreach (var entry in _playerListEntries)
@@ -409,7 +408,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
         else
         {
-            var activeCharacterIds = _playerRoster
+            var activeCharacterIds = visibleRoster
                 .Select(entry => entry.CharacterId)
                 .ToHashSet();
 
@@ -430,9 +429,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
         var globalSettings = ConfigManager.Instance.GetSettingsSnapshot();
         var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
 
-        for (var targetIndex = 0; targetIndex < _playerRoster.Count; targetIndex++)
+        for (var targetIndex = 0; targetIndex < visibleRoster.Count; targetIndex++)
         {
-            var player = _playerRoster[targetIndex];
+            var player = visibleRoster[targetIndex];
             if (!_playerListEntriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
             {
                 entry = PlayerListEntry.Create(player, _meter, playerNameDisplayMode);
@@ -454,6 +453,31 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 _playerListEntries.Move(currentIndex, targetIndex);
             }
         }
+    }
+
+    private IReadOnlyList<PlayerRosterEntry> GetVisiblePlayerRoster()
+    {
+        var mode = (PartyDisplayMode)_meter.PartyDisplayModeIndex;
+        var party = PartyStateStore.Instance.Current;
+        var visibleRoster = _playerRoster
+            .Where(entry => party.ShouldInclude(entry.CharacterId, entry.IsSelf, mode))
+            .ToArray();
+        if (mode == PartyDisplayMode.NonPartyMembersOnly)
+        {
+            return visibleRoster;
+        }
+
+        var entriesByCharacterId = visibleRoster
+            .GroupBy(entry => entry.CharacterId)
+            .ToDictionary(group => group.Key, group => group.Last());
+        var orderedPartyEntries = party.OrderedCharacterIds
+            .Where(entriesByCharacterId.ContainsKey)
+            .Select(characterId => entriesByCharacterId[characterId])
+            .ToArray();
+        var partyCharacterIds = party.OrderedCharacterIds.ToHashSet();
+        return orderedPartyEntries
+            .Concat(visibleRoster.Where(entry => !partyCharacterIds.Contains(entry.CharacterId)))
+            .ToArray();
     }
 
     private int FindPlayerListEntryIndex(long characterId, int startIndex)
