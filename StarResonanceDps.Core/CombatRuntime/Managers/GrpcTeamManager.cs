@@ -112,6 +112,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 teamId,
                 _currentTeamMemberType == ETeamMemberType.Five,
                 memberIds);
+            PartyState.ApplyMemberEnterTimes(
+                teamId,
+                reply.MemberData.Select(member => (member.CharId, member.EnterTime)));
 
             foreach (var member in reply.MemberData)
             {
@@ -165,6 +168,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 _currentTeamMemberType == ETeamMemberType.Five,
                 memberIds,
                 groupAssignments);
+            PartyState.ApplyMemberEnterTimes(
+                teamId,
+                teamData.TeamMemberData.Values
+                    .Where(member => memberIdSet.Contains(member.CharId))
+                    .Select(member => (member.CharId, member.EnterTime)));
             foreach (var member in teamData.TeamMemberData.Values)
             {
                 if (memberIdSet.Contains(member.CharId))
@@ -203,6 +211,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 AppState.PartyTeamId,
                 vData.VRequest.TeamMemberSocialDatas.Select(member => member.CharId)
                     .Concat(vData.VRequest.TeamMemberSyncDatas.Select(member => member.CharId)));
+            PartyState.ApplyMemberEnterTimes(
+                AppState.PartyTeamId,
+                vData.VRequest.TeamMemberSocialDatas.Select(member => (member.CharId, member.EnterTime)));
 
             foreach (var member in vData.VRequest.TeamMemberSocialDatas)
             {
@@ -235,6 +246,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 teamId,
                 _currentTeamMemberType == ETeamMemberType.Five,
                 groups.SelectMany(group => group.CharIds));
+            PartyState.ApplyMemberEnterTimes(
+                teamId,
+                vData.VRequest.MemberData.Select(member => (member.CharId, member.EnterTime)));
 
             foreach (var member in vData.VRequest.MemberData)
             {
@@ -449,7 +463,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 charId,
                 current => current with
                 {
-                    CurrentHp = fastSyncData.Hp,
+                    CurrentHp = fastSyncData.Hp > 0 || fastSyncData.MaxHp > 0
+                        ? Math.Max(fastSyncData.Hp, 0)
+                        : current.CurrentHp,
                     MaxHp = fastSyncData.MaxHp > 0 ? fastSyncData.MaxHp : current.MaxHp
                 });
         }

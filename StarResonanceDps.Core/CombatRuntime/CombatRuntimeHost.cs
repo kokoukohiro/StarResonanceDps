@@ -85,17 +85,6 @@ public sealed class CombatRuntimeHost
             DB.CloseAndSave();
             Settings.Save();
 
-            var writingTimeout = System.Diagnostics.Stopwatch.StartNew();
-            while (EntityCache.Instance.IsWritingFile)
-            {
-                Thread.Sleep(10);
-                if (writingTimeout.Elapsed.TotalSeconds >= 6)
-                {
-                    Log.Warning("EntityCache writing exceeded the shutdown timeout.");
-                    break;
-                }
-            }
-
             if (Settings.Instance.UseDatabaseForEncounterHistory
                 && Settings.Instance.DatabaseRetentionPolicyDays > 0)
             {

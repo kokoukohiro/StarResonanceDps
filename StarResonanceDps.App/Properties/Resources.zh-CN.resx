@@ -759,9 +759,6 @@
   <data name="Window_History_Title" xml:space="preserve">
     <value>历史记录</value>
   </data>
-  <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
-    <value>幻想与职责技能信息</value>
-  </data>
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP数值</value>
   </data>
@@ -771,8 +768,8 @@
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>护盾量单独显示</value>
   </data>
-  <data name="Settings_Display_Party" xml:space="preserve">
-    <value>队伍显示设置</value>
+  <data name="Settings_Display_Filter" xml:space="preserve">
+    <value>筛选设置</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>全部显示</value>
@@ -782,5 +779,8 @@
   </data>
   <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
     <value>非队伍成员</value>
+  </data>
+  <data name="PartyDisplay_SelfOnly" xml:space="preserve">
+    <value>仅自己</value>
   </data>
 </root>

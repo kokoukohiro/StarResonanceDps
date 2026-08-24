@@ -107,15 +107,22 @@ public static class CombatDataCatalog
         return fallbackIcon?.Trim() ?? string.Empty;
     }
 
-    public static string GetBuffIconName(int buffId, int sourceSkillId, string? fallbackIcon = null)
+    public static string GetBuffOwnIconName(int buffId)
     {
         if (_buffs.TryGetValue(buffId, out var buff))
         {
-            var buffIcon = FirstNonEmpty(buff.ShowHUDIcon, buff.Icon);
-            if (!string.IsNullOrEmpty(buffIcon))
-            {
-                return buffIcon;
-            }
+            return FirstNonEmpty(buff.ShowHUDIcon, buff.Icon);
+        }
+
+        return string.Empty;
+    }
+
+    public static string GetBuffIconName(int buffId, int sourceSkillId, string? fallbackIcon = null)
+    {
+        var buffIcon = GetBuffOwnIconName(buffId);
+        if (!string.IsNullOrEmpty(buffIcon))
+        {
+            return buffIcon;
         }
 
         if (sourceSkillId > 0

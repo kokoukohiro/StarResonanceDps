@@ -4,5 +4,6 @@ public enum PartyDisplayMode
 {
     All = 0,
     PartyMembersOnly = 1,
-    NonPartyMembersOnly = 2
+    NonPartyMembersOnly = 2,
+    SelfOnly = 3
 }

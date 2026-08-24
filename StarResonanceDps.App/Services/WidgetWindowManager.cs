@@ -305,10 +305,6 @@ public sealed class WidgetWindowManager
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
-            WidgetKind.ImagineRoleSkillInfo => new PlayerImagineRoleSkillWidgetViewModel(
-                playerWidget,
-                requestedCharacterId,
-                initialPlayer),
             WidgetKind.SkillInfo => new PlayerSkillInfoWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -376,10 +372,6 @@ public sealed class WidgetWindowManager
             PlayerEquipmentWidgetViewModel equipmentViewModel => new PlayerEquipmentWidgetView
             {
                 DataContext = equipmentViewModel
-            },
-            PlayerImagineRoleSkillWidgetViewModel imagineRoleSkillViewModel => new PlayerImagineRoleSkillWidgetView
-            {
-                DataContext = imagineRoleSkillViewModel
             },
             PlayerSkillInfoWidgetViewModel skillInfoViewModel => new PlayerSkillInfoWidgetView
             {
@@ -603,7 +595,6 @@ public sealed class WidgetWindowManager
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerStatus
             or WidgetKind.PlayerEquipment
-            or WidgetKind.ImagineRoleSkillInfo
             or WidgetKind.SkillInfo
             or WidgetKind.BuffList
             or WidgetKind.DebuffList

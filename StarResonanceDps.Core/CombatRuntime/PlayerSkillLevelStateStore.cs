@@ -25,12 +25,10 @@ public static class PlayerSkillLevelStateStore
     private static readonly Dictionary<int, int> ProjectProfessionIds = [];
     private static Dictionary<int, SkillState> _selfImagineSkills = [];
     private static Dictionary<int, SkillState> _selfRawSelectedImagineSkills = [];
-    private static Dictionary<int, int> _selfCurrentProjectSkillSlots = [];
     private static int _selfCurrentProfessionId;
     private static int _selfCurrentDutyId;
     private static int _selfCurrentProjectId;
     private static bool _hasSelfDutyState;
-    private static bool _hasSelfCurrentProjectSkillSlots;
     private static FrozenDictionary<int, int> _selfSkillLevels =
         new Dictionary<int, int>().ToFrozenDictionary();
     private static DataTypes.Skills.SkillLevelInfo[] _selfCurrentSkillLevels = [];
@@ -47,8 +45,6 @@ public static class PlayerSkillLevelStateStore
             ProjectProfessionIds.Clear();
             _selfImagineSkills = [];
             _selfRawSelectedImagineSkills = [];
-            _selfCurrentProjectSkillSlots = [];
-            _hasSelfCurrentProjectSkillSlots = false;
             _selfCurrentProjectId = 0;
             _selfCurrentProfessionId = professionList?.CurProfessionId ?? 0;
 
@@ -318,12 +314,6 @@ public static class PlayerSkillLevelStateStore
 
         lock (StateLock)
         {
-            if (_selfCurrentProfessionId != professionId)
-            {
-                _selfCurrentProjectSkillSlots = [];
-                _hasSelfCurrentProjectSkillSlots = false;
-            }
-
             _selfCurrentProfessionId = professionId;
             PublishState();
         }
@@ -338,12 +328,6 @@ public static class PlayerSkillLevelStateStore
 
         lock (StateLock)
         {
-            if (_selfCurrentProjectId != projectId)
-            {
-                _selfCurrentProjectSkillSlots = [];
-                _hasSelfCurrentProjectSkillSlots = false;
-            }
-
             _selfCurrentProjectId = projectId;
             PublishState();
         }
@@ -486,13 +470,6 @@ public static class PlayerSkillLevelStateStore
             }
         }
 
-        if (projectSyncData is not null)
-        {
-            _selfCurrentProjectSkillSlots = projectSyncData.CurrentSkillIdList
-                .Where(pair => pair.Value > 0)
-                .ToDictionary(pair => pair.Key, pair => pair.Value);
-            _hasSelfCurrentProjectSkillSlots = true;
-        }
     }
 
     private static ProfessionState CreateProfessionState(Zproto.ProfessionInfo professionInfo)
@@ -692,20 +669,7 @@ public static class PlayerSkillLevelStateStore
 
     private static IEnumerable<SkillState> EnumerateSelectedImagineSkills()
     {
-        IEnumerable<int> selectedSkillIds;
-        if (_hasSelfCurrentProjectSkillSlots)
-        {
-            selectedSkillIds = _selfCurrentProjectSkillSlots
-                .OrderBy(pair => pair.Key)
-                .Select(pair => pair.Value)
-                .Where(skillId => CombatDataCatalog.IsSkillImagine(skillId));
-        }
-        else
-        {
-            selectedSkillIds = _selfRawSelectedImagineSkills.Keys;
-        }
-
-        foreach (var skillId in selectedSkillIds.Distinct())
+        foreach (var skillId in _selfRawSelectedImagineSkills.Keys.Distinct())
         {
             if (_selfImagineSkills.TryGetValue(skillId, out var imagineSkill))
             {
@@ -724,33 +688,6 @@ public static class PlayerSkillLevelStateStore
 
     private static PlayerRoleSkillLevelState[] BuildCurrentRoleSkillLevels()
     {
-        if (_hasSelfCurrentProjectSkillSlots)
-        {
-            var selectedRoleSkills = new List<PlayerRoleSkillLevelState>(4);
-            var includedSkillIds = new HashSet<int>();
-            foreach (var skillId in _selfCurrentProjectSkillSlots
-                .OrderBy(pair => pair.Key)
-                .Select(pair => pair.Value))
-            {
-                if (!CombatDataCatalog.IsSkillRole(skillId)
-                    || !includedSkillIds.Add(skillId))
-                {
-                    continue;
-                }
-
-                var state = FindDutySkill(skillId);
-                selectedRoleSkills.Add(new PlayerRoleSkillLevelState(
-                    skillId,
-                    state.Level,
-                    state.Tier));
-            }
-
-            if (selectedRoleSkills.Count > 0)
-            {
-                return [.. selectedRoleSkills];
-            }
-        }
-
         if (!_hasSelfDutyState)
         {
             return [];
@@ -786,22 +723,6 @@ public static class PlayerSkillLevelStateStore
                 skill.Level,
                 skill.Tier))
             .ToArray();
-    }
-
-    private static SkillState FindDutySkill(int skillId)
-    {
-        foreach (var dutyState in SelfDutyStates.Values)
-        {
-            foreach (var skill in dutyState.Skills.Values)
-            {
-                if (skill.SkillId == skillId)
-                {
-                    return skill;
-                }
-            }
-        }
-
-        return new SkillState(skillId, 0, 0);
     }
 
     private static IEnumerable<SkillState> EnumerateSelectedDutySkills(DutyState dutyState)

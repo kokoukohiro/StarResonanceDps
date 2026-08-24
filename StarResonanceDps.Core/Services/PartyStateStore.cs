@@ -30,6 +30,7 @@ public sealed class PartyStateSnapshot
     internal PartyStateSnapshot(
         long teamId,
         bool hasCompleteMembership,
+        bool isFivePersonParty,
         IReadOnlyList<long> orderedCharacterIds,
         IReadOnlySet<long> memberIds,
         IReadOnlySet<long> knownNonMemberIds,
@@ -38,6 +39,7 @@ public sealed class PartyStateSnapshot
     {
         TeamId = teamId;
         HasCompleteMembership = hasCompleteMembership;
+        IsFivePersonParty = isFivePersonParty;
         OrderedCharacterIds = orderedCharacterIds;
         KnownNonMemberIds = knownNonMemberIds;
         Supplements = supplements;
@@ -48,6 +50,8 @@ public sealed class PartyStateSnapshot
     public long TeamId { get; }
 
     public bool HasCompleteMembership { get; }
+
+    public bool IsFivePersonParty { get; }
 
     public IReadOnlyList<long> OrderedCharacterIds { get; }
 
@@ -61,17 +65,57 @@ public sealed class PartyStateSnapshot
 
     public int? GetPartyNumber(long characterId)
     {
-        if (!_memberIds.Contains(characterId)
-            || !Positions.TryGetValue(characterId, out var position)
-            || position.GroupId < 1
-            || position.GroupSlot is not int groupSlot
-            || groupSlot < 1
-            || groupSlot > 5)
+        if (!_memberIds.Contains(characterId))
         {
             return null;
         }
 
-        return ((position.GroupId - 1) * 5) + groupSlot;
+        if (IsFivePersonParty)
+        {
+            if (HasCompleteMembership
+                && _memberIds.Count == 1
+                && (!Supplements.TryGetValue(characterId, out var singleSupplement) || !singleSupplement.IsNpc))
+            {
+                return 1;
+            }
+
+            var orderedIndex = -1;
+            for (var index = 0; index < OrderedCharacterIds.Count; index++)
+            {
+                if (OrderedCharacterIds[index] == characterId)
+                {
+                    orderedIndex = index;
+                    break;
+                }
+            }
+
+            if (orderedIndex >= 0)
+            {
+                var isNpc = Supplements.TryGetValue(characterId, out var supplement) && supplement.IsNpc;
+                if (isNpc)
+                {
+                    return orderedIndex + 1;
+                }
+
+                var humanOrderIsAuthoritative = OrderedCharacterIds
+                    .Where(memberId => !Supplements.TryGetValue(memberId, out var memberSupplement) || !memberSupplement.IsNpc)
+                    .All(memberId => Positions.TryGetValue(memberId, out var memberPosition)
+                        && memberPosition.GroupId == 1
+                        && memberPosition.GroupSlot is >= 1 and <= 5);
+                return humanOrderIsAuthoritative ? orderedIndex + 1 : null;
+            }
+        }
+
+        if (Positions.TryGetValue(characterId, out var position)
+            && position.GroupId >= 1
+            && position.GroupSlot is int groupSlot
+            && groupSlot >= 1
+            && groupSlot <= 5)
+        {
+            return ((position.GroupId - 1) * 5) + groupSlot;
+        }
+
+        return null;
     }
 
     public PartyMembershipState GetMembership(long characterId)
@@ -88,6 +132,11 @@ public sealed class PartyStateSnapshot
 
     public bool ShouldInclude(long characterId, bool isSelf, PartyDisplayMode mode)
     {
+        if (mode == PartyDisplayMode.SelfOnly)
+        {
+            return isSelf;
+        }
+
         if (isSelf)
         {
             return mode != PartyDisplayMode.NonPartyMembersOnly;
@@ -125,8 +174,10 @@ public sealed class PartyStateStore
     private readonly HashSet<long> _knownNonMemberIds = [];
     private readonly Dictionary<long, PartyMemberSupplement> _supplements = [];
     private readonly Dictionary<long, PartyMemberPosition> _positions = [];
+    private readonly Dictionary<long, uint> _enterTimes = [];
     private long _teamId;
     private bool _hasCompleteMembership;
+    private bool _isFivePersonParty;
     private PartyStateSnapshot _current;
 
     private PartyStateStore()
@@ -155,10 +206,12 @@ public sealed class PartyStateStore
         {
             _teamId = 0;
             _hasCompleteMembership = false;
+            _isFivePersonParty = false;
             _memberIds.Clear();
             _knownNonMemberIds.Clear();
             _supplements.Clear();
             _positions.Clear();
+            _enterTimes.Clear();
         });
     }
 
@@ -168,10 +221,12 @@ public sealed class PartyStateStore
         {
             _teamId = 0;
             _hasCompleteMembership = true;
+            _isFivePersonParty = false;
             _memberIds.Clear();
             _knownNonMemberIds.Clear();
             _supplements.Clear();
             _positions.Clear();
+            _enterTimes.Clear();
         });
     }
 
@@ -200,10 +255,12 @@ public sealed class PartyStateStore
             {
                 _supplements.Clear();
                 _knownNonMemberIds.Clear();
+                _enterTimes.Clear();
             }
 
             _teamId = teamId;
             _hasCompleteMembership = true;
+            _isFivePersonParty = isFivePersonParty;
             _memberIds.Clear();
             _memberIds.UnionWith(orderedIds);
             _positions.Clear();
@@ -250,10 +307,12 @@ public sealed class PartyStateStore
                 _supplements.Clear();
                 _knownNonMemberIds.Clear();
                 _positions.Clear();
+                _enterTimes.Clear();
             }
 
             _teamId = teamId;
             _hasCompleteMembership = true;
+            _isFivePersonParty = isFivePersonParty;
             _memberIds.Clear();
             _memberIds.UnionWith(memberIds);
             foreach (var characterId in _positions.Keys.Where(characterId => !_memberIds.Contains(characterId)).ToArray())
@@ -280,6 +339,32 @@ public sealed class PartyStateStore
             }
             _knownNonMemberIds.ExceptWith(memberIds);
             RemoveNonMemberSupplementsNoLock();
+        });
+    }
+
+    /// <summary>
+    /// メンバーの加入時刻を取り込む。5人PTの表示順はこの値の昇順で決まる
+    /// (TeamMemberGroupInfos.CharIds の配列位置は5人PTでは表示順ではない)。
+    /// 再加入で EnterTime は更新されるため、常に上書きする。
+    /// </summary>
+    public void ApplyMemberEnterTimes(long teamId, IEnumerable<(long CharacterId, uint EnterTime)> enterTimes)
+    {
+        ArgumentNullException.ThrowIfNull(enterTimes);
+        var materialized = enterTimes
+            .Where(entry => entry.CharacterId > 0 && entry.EnterTime > 0)
+            .ToArray();
+        if (materialized.Length == 0)
+        {
+            return;
+        }
+
+        PublishIfChanged(() =>
+        {
+            PrepareKnownMemberUpdateNoLock(teamId);
+            foreach (var entry in materialized)
+            {
+                _enterTimes[entry.CharacterId] = entry.EnterTime;
+            }
         });
     }
 
@@ -326,6 +411,7 @@ public sealed class PartyStateStore
             _memberIds.Remove(characterId);
             _supplements.Remove(characterId);
             _positions.Remove(characterId);
+            _enterTimes.Remove(characterId);
             _knownNonMemberIds.Add(characterId);
         });
     }
@@ -342,6 +428,7 @@ public sealed class PartyStateStore
             _memberIds.Remove(characterId);
             _supplements.Remove(characterId);
             _positions.Remove(characterId);
+            _enterTimes.Remove(characterId);
             _knownNonMemberIds.Add(characterId);
         });
     }
@@ -383,8 +470,10 @@ public sealed class PartyStateStore
             _memberIds.Clear();
             _supplements.Clear();
             _positions.Clear();
+            _enterTimes.Clear();
             _knownNonMemberIds.Clear();
             _hasCompleteMembership = false;
+            _isFivePersonParty = false;
         }
 
         if (teamId != 0)
@@ -427,6 +516,7 @@ public sealed class PartyStateStore
         return new PartyStateSnapshot(
             _teamId,
             _hasCompleteMembership,
+            _isFivePersonParty,
             Array.AsReadOnly(orderedIds),
             new HashSet<long>(_memberIds),
             new HashSet<long>(_knownNonMemberIds),
@@ -443,7 +533,7 @@ public sealed class PartyStateStore
         var groupPositions = characterIds
             .Select(characterId => (CharacterId: characterId, Position: positions.GetValueOrDefault(characterId)))
             .ToArray();
-        if (groupId == 1 && groupPositions.Length == 5)
+        if (_isFivePersonParty && groupId == 1)
         {
             var npcMembers = groupPositions
                 .Where(item => _supplements.TryGetValue(item.CharacterId, out var supplement) && supplement.IsNpc)
@@ -499,6 +589,11 @@ public sealed class PartyStateStore
 
     private Dictionary<long, PartyMemberPosition> BuildEffectivePositionsNoLock()
     {
+        if (TryBuildFivePersonEnterTimePositionsNoLock(out var enterTimePositions))
+        {
+            return enterTimePositions;
+        }
+
         var positions = _positions
             .Where(pair => _memberIds.Contains(pair.Key))
             .ToDictionary(pair => pair.Key, pair => pair.Value);
@@ -533,6 +628,48 @@ public sealed class PartyStateStore
         return positions;
     }
 
+    /// <summary>
+    /// 5人PTの表示スロットを EnterTime 昇順から導出する。
+    /// 実測(2026-08-24)では、メンバーが再加入して加入順が入れ替わった際に
+    /// TeamMemberGroupInfos.CharIds の配列位置は更新されず、ゲームUIの番号だけが入れ替わった。
+    /// CharTeam.CharIds のワイヤ順も EnterTime 昇順と一致していた。
+    /// _positions 自体は書き換えず、ここで導出値を上書きするだけなので、
+    /// EnterTime が揃わない場合は従来の並び順にそのまま戻る。
+    /// NPC を含む編成は既存ロジックに委ねる。
+    /// </summary>
+    private bool TryBuildFivePersonEnterTimePositionsNoLock(
+        out Dictionary<long, PartyMemberPosition> positions)
+    {
+        positions = [];
+        if (!_isFivePersonParty || _memberIds.Count == 0)
+        {
+            return false;
+        }
+
+        var hasNpcMember = _memberIds.Any(characterId =>
+            _supplements.TryGetValue(characterId, out var supplement) && supplement.IsNpc);
+        if (hasNpcMember)
+        {
+            return false;
+        }
+
+        if (!_memberIds.All(characterId => _enterTimes.ContainsKey(characterId)))
+        {
+            return false;
+        }
+
+        var orderedIds = _memberIds
+            .OrderBy(characterId => _enterTimes[characterId])
+            .ThenBy(characterId => characterId)
+            .ToArray();
+        for (var index = 0; index < orderedIds.Length; index++)
+        {
+            positions[orderedIds[index]] = new PartyMemberPosition(1, index + 1);
+        }
+
+        return true;
+    }
+
     private void RemoveNonMemberSupplementsNoLock()
     {
         foreach (var characterId in _supplements.Keys.Where(characterId => !_memberIds.Contains(characterId)).ToArray())
@@ -545,6 +682,7 @@ public sealed class PartyStateStore
     {
         return left.TeamId == right.TeamId
             && left.HasCompleteMembership == right.HasCompleteMembership
+            && left.IsFivePersonParty == right.IsFivePersonParty
             && left.OrderedCharacterIds.SequenceEqual(right.OrderedCharacterIds)
             && left.MemberIds.SetEquals(right.MemberIds)
             && left.KnownNonMemberIds.SetEquals(right.KnownNonMemberIds)

@@ -146,7 +146,7 @@ public static class WidgetConfigDefaults
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
-    public const int MaxPartyDisplayModeIndex = 2;
+    public const int MaxPartyDisplayModeIndex = 3;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
@@ -159,8 +159,6 @@ public static class WidgetConfigDefaults
     private const double PlayerStatusInitialWindowHeight = 230d;
     private const double PlayerEquipmentInitialWindowWidth = 400d;
     private const double PlayerEquipmentInitialWindowHeight = 230d;
-    private const double PlayerImagineRoleSkillInitialWindowWidth = 632d;
-    private const double PlayerImagineRoleSkillInitialWindowHeight = 160d;
     private const double PlayerSkillInfoInitialWindowWidth = 620d;
     private const double PlayerSkillInfoInitialWindowHeight = 360d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
@@ -375,11 +373,6 @@ public static class WidgetConfigDefaults
                 Width = PlayerEquipmentInitialWindowWidth,
                 Height = PlayerEquipmentInitialWindowHeight
             },
-            WidgetKind.ImagineRoleSkillInfo => new WidgetWindowConfig
-            {
-                Width = PlayerImagineRoleSkillInitialWindowWidth,
-                Height = PlayerImagineRoleSkillInitialWindowHeight
-            },
             WidgetKind.SkillInfo => new WidgetWindowConfig
             {
                 Width = PlayerSkillInfoInitialWindowWidth,
@@ -571,10 +564,6 @@ public static class WidgetConfigDefaults
             case WidgetKind.PlayerEquipment:
                 config.Window.Width ??= PlayerEquipmentInitialWindowWidth;
                 config.Window.Height ??= PlayerEquipmentInitialWindowHeight;
-                break;
-            case WidgetKind.ImagineRoleSkillInfo:
-                config.Window.Width ??= PlayerImagineRoleSkillInitialWindowWidth;
-                config.Window.Height ??= PlayerImagineRoleSkillInitialWindowHeight;
                 break;
             case WidgetKind.SkillInfo:
                 config.Window.Width ??= PlayerSkillInfoInitialWindowWidth;

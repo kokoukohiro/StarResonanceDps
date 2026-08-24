@@ -265,7 +265,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 BattleStateMachine.SetDeferredEncounterEndFinalData(DateTime.Now.AddSeconds(5), new EncounterEndFinalData() { EncounterId = Current.EncounterId, BattleId = Current.BattleId, Reason = reason, Encounter = Current });
             }
 
-            EntityCache.Instance.Save();
         }
 
         static void CheckTimeOutStatus(EncounterStartReason reason)
@@ -302,7 +301,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 DB.InsertEncounter(Current);
             }
 
-            EntityCache.Instance.FinalSave();
         }
 
         public static void SignalEncounterEndFinal(EncounterEndFinalData data)

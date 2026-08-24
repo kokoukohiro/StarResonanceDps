@@ -36,9 +36,9 @@ internal static class PlayerDataSourceResolver
         Entity? metadataEntity,
         bool isSelf)
     {
+        var party = PartyStateStore.Instance.Current;
         PartyMemberSupplement? partySupplement = null;
-        if (!isSelf
-            && PartyStateStore.Instance.Current.TryGetSupplement(characterId, out var supplement))
+        if (!isSelf && party.TryGetSupplement(characterId, out var supplement))
         {
             partySupplement = supplement;
         }
@@ -105,13 +105,22 @@ internal static class PlayerDataSourceResolver
             && TryGetPositiveInt64(nearbyEntity.GetAttrKV("AttrMaxHp"), out _);
         if (!isSelf
             && !hasNearbyMaxHp
-            && partySupplement is { MaxHp: > 0 })
+            && partySupplement is not null)
         {
-            maxHp = partySupplement.MaxHp;
-            currentHp = nearbyEntity is not null
-                && TryGetNonNegativeInt64(nearbyEntity.GetAttrKV("AttrHp"), out var nearbyHp)
-                    ? nearbyHp
-                    : Math.Max(partySupplement.CurrentHp, 0);
+            if (partySupplement.MaxHp > 0)
+            {
+                maxHp = partySupplement.MaxHp;
+            }
+
+            if (nearbyEntity is not null
+                && TryGetNonNegativeInt64(nearbyEntity.GetAttrKV("AttrHp"), out var nearbyHp))
+            {
+                currentHp = nearbyHp;
+            }
+            else if (partySupplement.MaxHp > 0 || !partySupplement.IsNpc)
+            {
+                currentHp = Math.Max(partySupplement.CurrentHp, 0);
+            }
         }
 
         return new PlayerDataSourceSnapshot(

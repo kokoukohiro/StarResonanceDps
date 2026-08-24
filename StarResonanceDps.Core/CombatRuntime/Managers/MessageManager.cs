@@ -638,6 +638,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 out _,
                 out var subProfessionId))
             {
+                entity.SetSubProfessionUnknown();
+                PlayerRosterProjection.UpsertSelf(uuid);
                 return;
             }
 

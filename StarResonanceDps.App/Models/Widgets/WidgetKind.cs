@@ -19,6 +19,5 @@ public enum WidgetKind
     DamageSummary,
     HealingSummary,
     SkillInfo,
-    ImagineRoleSkillInfo,
-    EntityList
+    EntityList = 18
 }

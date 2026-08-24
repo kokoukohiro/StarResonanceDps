@@ -122,6 +122,10 @@ public sealed record PlayerCooldownSkillSnapshot(
     int MaxCharges,
     double ChargeCooldownSeconds);
 
+public sealed record PlayerSkillEffectSnapshot(
+    PlayerBuffSnapshot? Buff,
+    PlayerBuffSnapshot? Debuff);
+
 public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
     long EntityUuid,
     IReadOnlyList<PlayerCooldownSkillSnapshot> ImagineSkills,
@@ -244,6 +248,12 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
+            var iconName = ResolveBuffOwnIconName(buffEvent);
+            if (string.IsNullOrWhiteSpace(iconName))
+            {
+                continue;
+            }
+
             var name = ResolveBuffName(buffEvent);
             if (string.IsNullOrWhiteSpace(name) && buffEvent.BaseId <= 0)
             {
@@ -260,7 +270,7 @@ public static class MeterSnapshotProvider
                 buffEvent.Uuid,
                 key,
                 name,
-                ResolveBuffIconName(buffEvent),
+                iconName,
                 buffEvent.Layer,
                 remainingSeconds);
             var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
@@ -322,12 +332,102 @@ public static class MeterSnapshotProvider
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
-            return new PlayerImagineRoleSkillLoadoutSnapshot(
-                0,
-                Array.Empty<PlayerCooldownSkillSnapshot>(),
-                Array.Empty<PlayerCooldownSkillSnapshot>());
+            return EmptyPlayerImagineRoleSkillLoadout();
         }
 
+        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity);
+    }
+
+    public static bool TryGetPlayerListImagineRoleSkillSourceState(
+        long characterId,
+        long preferredEntityUuid,
+        out long entityUuid,
+        out int professionId,
+        out object? skillSourceToken,
+        out object? roleFilterToken)
+    {
+        entityUuid = 0;
+        professionId = 0;
+        skillSourceToken = null;
+        roleFilterToken = null;
+
+        var encounter = ResolvePlayerDetailEncounter();
+        if (encounter is null)
+        {
+            return false;
+        }
+
+        Entity entity;
+        if (preferredEntityUuid != 0
+            && TryResolvePlayerEntityByUuid(
+                encounter,
+                characterId,
+                preferredEntityUuid,
+                out entity))
+        {
+            entityUuid = preferredEntityUuid;
+        }
+        else if (PlayerRosterProjection.TryGetPlayerEntityUuid(characterId, out var rosterEntityUuid)
+            && TryResolvePlayerEntityByUuid(
+                encounter,
+                characterId,
+                rosterEntityUuid,
+                out entity))
+        {
+            entityUuid = rosterEntityUuid;
+        }
+        else
+        {
+            if (AppState.OpenedHistoricalEncounter is null
+                || !TryResolvePlayerEntity(
+                    encounter,
+                    characterId,
+                    out entityUuid,
+                    out entity))
+            {
+                return false;
+            }
+        }
+
+        professionId = entity.ProfessionId;
+        if (IsSelfEntity(entityUuid)
+            && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
+                out var currentSkillLevels))
+        {
+            skillSourceToken = currentSkillLevels;
+            roleFilterToken = currentSkillLevels;
+            return true;
+        }
+
+        skillSourceToken = entity.GetAttrKV("AttrSkillLevelIdList");
+        PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
+            out var roleFilterSkillLevels);
+        roleFilterToken = roleFilterSkillLevels;
+        return true;
+    }
+
+    public static PlayerImagineRoleSkillLoadoutSnapshot GetPlayerListImagineRoleSkills(
+        long characterId,
+        long entityUuid)
+    {
+        var encounter = ResolvePlayerDetailEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntityByUuid(
+                encounter,
+                characterId,
+                entityUuid,
+                out var entity))
+        {
+            return EmptyPlayerImagineRoleSkillLoadout();
+        }
+
+        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity);
+    }
+
+    private static PlayerImagineRoleSkillLoadoutSnapshot CreatePlayerImagineRoleSkillLoadout(
+        long entityUuid,
+        Entity entity)
+    {
         var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity);
         var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
         var roleSkills = new List<PlayerCooldownSkillSnapshot>(4);
@@ -396,6 +496,418 @@ public static class MeterSnapshotProvider
             entityUuid,
             imagineSkills,
             roleSkills);
+    }
+
+    private static PlayerImagineRoleSkillLoadoutSnapshot EmptyPlayerImagineRoleSkillLoadout()
+    {
+        return new PlayerImagineRoleSkillLoadoutSnapshot(
+            0,
+            Array.Empty<PlayerCooldownSkillSnapshot>(),
+            Array.Empty<PlayerCooldownSkillSnapshot>());
+    }
+
+    public static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> GetPlayerSkillEffects(
+        long characterId,
+        IReadOnlyCollection<int> skillIds)
+    {
+        if (skillIds.Count == 0)
+        {
+            return new Dictionary<int, PlayerSkillEffectSnapshot>();
+        }
+
+        var encounter = ResolvePlayerDetailEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        {
+            return new Dictionary<int, PlayerSkillEffectSnapshot>();
+        }
+
+        return CreateSkillEffectSnapshots(
+            encounter,
+            entity,
+            skillIds.ToHashSet());
+    }
+
+    public static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> GetPlayerListSkillEffects(
+        long characterId,
+        long entityUuid,
+        IReadOnlySet<int> skillIds)
+    {
+        if (skillIds.Count == 0 || entityUuid == 0)
+        {
+            return new Dictionary<int, PlayerSkillEffectSnapshot>();
+        }
+
+        var encounter = ResolvePlayerDetailEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntityByUuid(
+                encounter,
+                characterId,
+                entityUuid,
+                out var entity))
+        {
+            return new Dictionary<int, PlayerSkillEffectSnapshot>();
+        }
+
+        return CreateSkillEffectSnapshots(
+            encounter,
+            entity,
+            skillIds);
+    }
+
+    private static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> CreateSkillEffectSnapshots(
+        Encounter encounter,
+        Entity entity,
+        IReadOnlySet<int> trackedSkillIds)
+    {
+        var currentEncounterTime = encounter.GetDuration();
+        var buffEvents = entity.BuffEvents.Values.ToArray();
+        var runtimeSourceParentsByBaseId = BuildRuntimeSourceParentsByBaseId(
+            entity,
+            buffEvents);
+        var candidatesBySkill = new Dictionary<
+            int,
+            (PlayerBuffCandidate? Buff, PlayerBuffCandidate? Debuff)>();
+        var resolvedTrackedSkillIdsBySourceConfigId = new Dictionary<int, int>();
+
+        foreach (var buffEvent in buffEvents)
+        {
+            if (buffEvent.Duration < 0 || buffEvent.SourceConfigId <= 0)
+            {
+                continue;
+            }
+
+            if (!resolvedTrackedSkillIdsBySourceConfigId.TryGetValue(
+                    buffEvent.SourceConfigId,
+                    out var trackedSkillId))
+            {
+                trackedSkillId = ResolveTrackedSourceSkillId(
+                    buffEvent.SourceConfigId,
+                    trackedSkillIds,
+                    runtimeSourceParentsByBaseId);
+                resolvedTrackedSkillIdsBySourceConfigId[buffEvent.SourceConfigId] = trackedSkillId;
+            }
+
+            if (trackedSkillId <= 0)
+            {
+                continue;
+            }
+
+            var isBuff = IsIncludedBuff(PlayerBuffListKind.Buff, buffEvent);
+            var isDebuff = IsIncludedBuff(PlayerBuffListKind.Debuff, buffEvent);
+            if (!isBuff && !isDebuff)
+            {
+                continue;
+            }
+
+            var iconName = ResolveBuffOwnIconName(buffEvent);
+            if (string.IsNullOrWhiteSpace(iconName))
+            {
+                continue;
+            }
+
+            var name = ResolveBuffName(buffEvent);
+            if (string.IsNullOrWhiteSpace(name) && buffEvent.BaseId <= 0)
+            {
+                continue;
+            }
+
+            if (!TryResolveBuffTiming(
+                    buffEvent,
+                    currentEncounterTime,
+                    out var effectiveRemoveTime,
+                    out var remainingSeconds))
+            {
+                continue;
+            }
+
+            candidatesBySkill.TryGetValue(trackedSkillId, out var candidates);
+
+            var key = ResolveBuffSnapshotKey(buffEvent);
+            var snapshot = new PlayerBuffSnapshot(
+                buffEvent.Uuid,
+                key,
+                name,
+                iconName,
+                buffEvent.Layer,
+                remainingSeconds);
+            var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
+
+            if (isDebuff)
+            {
+                if (candidates.Debuff is null
+                    || candidate.EffectiveRemoveTime > candidates.Debuff.EffectiveRemoveTime)
+                {
+                    candidates.Debuff = candidate;
+                }
+            }
+            else if (candidates.Buff is null
+                     || candidate.EffectiveRemoveTime > candidates.Buff.EffectiveRemoveTime)
+            {
+                candidates.Buff = candidate;
+            }
+
+            candidatesBySkill[trackedSkillId] = candidates;
+        }
+
+        return candidatesBySkill.ToDictionary(
+            pair => pair.Key,
+            pair => new PlayerSkillEffectSnapshot(
+                pair.Value.Buff?.Snapshot,
+                pair.Value.Debuff?.Snapshot));
+    }
+
+    private static int ResolveTrackedSourceSkillId(
+        int sourceConfigId,
+        IReadOnlySet<int> trackedSkillIds,
+        IReadOnlyDictionary<int, HashSet<int>> runtimeSourceParentsByBaseId)
+    {
+        if (sourceConfigId <= 0)
+        {
+            return 0;
+        }
+
+        var directTrackedSkillId = ResolveTrackedSourceSkillDirectly(
+            sourceConfigId,
+            trackedSkillIds);
+        if (directTrackedSkillId > 0)
+        {
+            return directTrackedSkillId;
+        }
+
+        var pendingSourceIds = new Queue<int>();
+        var visitedSourceIds = new HashSet<int>();
+        var resolvedTrackedSkillIds = new HashSet<int>();
+        pendingSourceIds.Enqueue(sourceConfigId);
+
+        while (pendingSourceIds.Count > 0)
+        {
+            var currentSourceId = pendingSourceIds.Dequeue();
+            if (currentSourceId <= 0 || !visitedSourceIds.Add(currentSourceId))
+            {
+                continue;
+            }
+
+            if (currentSourceId != sourceConfigId)
+            {
+                var resolvedTrackedSkillId = ResolveTrackedSourceSkillDirectly(
+                    currentSourceId,
+                    trackedSkillIds);
+                if (resolvedTrackedSkillId > 0)
+                {
+                    resolvedTrackedSkillIds.Add(resolvedTrackedSkillId);
+                    if (resolvedTrackedSkillIds.Count > 1)
+                    {
+                        return 0;
+                    }
+                }
+            }
+
+            if (HelperMethods.DataTables.Skills.Data.TryGetValue(
+                    currentSourceId.ToString(),
+                    out var sourceSkill))
+            {
+                EnqueuePositiveSourceId(
+                    pendingSourceIds,
+                    sourceSkill.SkillLevelGroup,
+                    currentSourceId);
+                EnqueuePositiveSourceId(
+                    pendingSourceIds,
+                    sourceSkill.SwitchSkillId,
+                    currentSourceId);
+                EnqueuePositiveSourceId(
+                    pendingSourceIds,
+                    sourceSkill.NextSkillId,
+                    currentSourceId);
+            }
+
+            if (runtimeSourceParentsByBaseId.TryGetValue(
+                    currentSourceId,
+                    out var runtimeParents))
+            {
+                foreach (var runtimeParent in runtimeParents)
+                {
+                    EnqueuePositiveSourceId(
+                        pendingSourceIds,
+                        runtimeParent,
+                        currentSourceId);
+                }
+            }
+        }
+
+        return resolvedTrackedSkillIds.Count == 1
+            ? resolvedTrackedSkillIds.First()
+            : 0;
+    }
+
+    private static int ResolveTrackedSourceSkillDirectly(
+        int sourceConfigId,
+        IReadOnlySet<int> trackedSkillIds)
+    {
+        if (trackedSkillIds.Contains(sourceConfigId))
+        {
+            return sourceConfigId;
+        }
+
+        HelperMethods.DataTables.Skills.Data.TryGetValue(
+            sourceConfigId.ToString(),
+            out var sourceSkill);
+
+        if (sourceSkill is not null)
+        {
+            if (sourceSkill.SkillLevelGroup > 0
+                && trackedSkillIds.Contains(sourceSkill.SkillLevelGroup))
+            {
+                return sourceSkill.SkillLevelGroup;
+            }
+
+            if (sourceSkill.SwitchSkillId > 0
+                && trackedSkillIds.Contains(sourceSkill.SwitchSkillId))
+            {
+                return sourceSkill.SwitchSkillId;
+            }
+
+            if (sourceSkill.NextSkillId > 0
+                && trackedSkillIds.Contains(sourceSkill.NextSkillId))
+            {
+                return sourceSkill.NextSkillId;
+            }
+        }
+
+        var reverseLinkedTrackedSkillId = 0;
+        foreach (var trackedSkillId in trackedSkillIds)
+        {
+            if (!HelperMethods.DataTables.Skills.Data.TryGetValue(
+                    trackedSkillId.ToString(),
+                    out var trackedSkill)
+                || (trackedSkill.SwitchSkillId != sourceConfigId
+                    && trackedSkill.NextSkillId != sourceConfigId))
+            {
+                continue;
+            }
+
+            if (reverseLinkedTrackedSkillId > 0
+                && reverseLinkedTrackedSkillId != trackedSkillId)
+            {
+                return 0;
+            }
+
+            reverseLinkedTrackedSkillId = trackedSkillId;
+        }
+
+        if (reverseLinkedTrackedSkillId > 0)
+        {
+            return reverseLinkedTrackedSkillId;
+        }
+
+        return ResolveTrackedSourceSkillBySharedImagineIcon(
+            sourceSkill,
+            trackedSkillIds);
+    }
+
+    private static int ResolveTrackedSourceSkillBySharedImagineIcon(
+        DataTypes.Skill? sourceSkill,
+        IReadOnlySet<int> trackedSkillIds)
+    {
+        if (sourceSkill is null)
+        {
+            return 0;
+        }
+
+        var sourceIcon = NormalizeSkillFamilyIcon(sourceSkill.GetIconName());
+        if (string.IsNullOrWhiteSpace(sourceIcon)
+            || !sourceIcon.Contains("skill_aoyi", StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+
+        var matchedTrackedSkillId = 0;
+        foreach (var trackedSkillId in trackedSkillIds)
+        {
+            if (!HelperMethods.DataTables.Skills.Data.TryGetValue(
+                    trackedSkillId.ToString(),
+                    out var trackedSkill)
+                || !string.Equals(
+                    sourceIcon,
+                    NormalizeSkillFamilyIcon(trackedSkill.GetIconName()),
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (matchedTrackedSkillId > 0 && matchedTrackedSkillId != trackedSkillId)
+            {
+                return 0;
+            }
+
+            matchedTrackedSkillId = trackedSkillId;
+        }
+
+        return matchedTrackedSkillId;
+    }
+
+    private static Dictionary<int, HashSet<int>> BuildRuntimeSourceParentsByBaseId(
+        Entity entity,
+        IReadOnlyCollection<BuffEvent> buffEvents)
+    {
+        var result = new Dictionary<int, HashSet<int>>();
+
+        foreach (var buffEvent in buffEvents)
+        {
+            AddRuntimeSourceParent(result, buffEvent);
+        }
+
+        foreach (var buffEvent in entity.RecentBuffEventHistory.Values)
+        {
+            AddRuntimeSourceParent(result, buffEvent);
+        }
+
+        return result;
+    }
+
+    private static void AddRuntimeSourceParent(
+        Dictionary<int, HashSet<int>> runtimeSourceParentsByBaseId,
+        BuffEvent buffEvent)
+    {
+        if (buffEvent.BaseId <= 0
+            || buffEvent.SourceConfigId <= 0
+            || buffEvent.BaseId == buffEvent.SourceConfigId)
+        {
+            return;
+        }
+
+        if (!runtimeSourceParentsByBaseId.TryGetValue(buffEvent.BaseId, out var sourceIds))
+        {
+            sourceIds = new HashSet<int>();
+            runtimeSourceParentsByBaseId.Add(buffEvent.BaseId, sourceIds);
+        }
+
+        sourceIds.Add(buffEvent.SourceConfigId);
+    }
+
+    private static void EnqueuePositiveSourceId(
+        Queue<int> sourceIds,
+        int sourceId,
+        int currentSourceId)
+    {
+        if (sourceId > 0 && sourceId != currentSourceId)
+        {
+            sourceIds.Enqueue(sourceId);
+        }
+    }
+
+    private static string NormalizeSkillFamilyIcon(string? iconName)
+    {
+        if (string.IsNullOrWhiteSpace(iconName))
+        {
+            return string.Empty;
+        }
+
+        var normalized = iconName.Trim().Replace('\\', '/');
+        var separatorIndex = normalized.LastIndexOf('/');
+        return separatorIndex >= 0
+            ? normalized[(separatorIndex + 1)..]
+            : normalized;
     }
 
     public static MetricTimelineSnapshot GetPlayerTimeline(
@@ -760,12 +1272,11 @@ public static class MeterSnapshotProvider
             : buffEvent.Name ?? string.Empty;
     }
 
-    private static string ResolveBuffIconName(BuffEvent buffEvent)
+    private static string ResolveBuffOwnIconName(BuffEvent buffEvent)
     {
-        return CombatDataCatalog.GetBuffIconName(
-            buffEvent.BaseId,
-            buffEvent.SourceConfigId,
-            buffEvent.Icon);
+        return buffEvent.BaseId > 0
+            ? CombatDataCatalog.GetBuffOwnIconName(buffEvent.BaseId)
+            : string.Empty;
     }
 
     private static string ResolveBuffSnapshotKey(BuffEvent buffEvent)
@@ -907,6 +1418,33 @@ public static class MeterSnapshotProvider
             .Where(skill => !CombatDataCatalog.IsSkillRole(skill.SkillId)
                 || currentRoleSkillIds.Contains(skill.SkillId))
             .ToArray();
+    }
+
+    private static bool TryResolvePlayerEntityByUuid(
+        Encounter encounter,
+        long characterId,
+        long entityUuid,
+        out Entity entity)
+    {
+        if (entityUuid == 0
+            || !encounter.Entities.TryGetValue(entityUuid, out var resolvedEntity)
+            || resolvedEntity.EntityType != EEntityType.EntChar)
+        {
+            entity = null!;
+            return false;
+        }
+
+        var playerId = resolvedEntity.UID != 0
+            ? resolvedEntity.UID
+            : Utils.UuidToEntityId(entityUuid);
+        if (playerId != characterId)
+        {
+            entity = null!;
+            return false;
+        }
+
+        entity = resolvedEntity;
+        return true;
     }
 
     private static bool TryResolvePlayerEntity(

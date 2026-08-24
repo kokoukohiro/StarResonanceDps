@@ -150,7 +150,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Party]}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
@@ -161,6 +161,7 @@
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_All]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_MembersOnly]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_NonMembersOnly]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_SelfOnly]}" />
                         </ComboBox>
                     </Grid>
                 </Border>

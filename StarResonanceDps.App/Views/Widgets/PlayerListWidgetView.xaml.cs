@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
@@ -14,6 +16,8 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
     private const string PlayerSelectionContextMenuMiddleItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle";
     private const string PlayerSelectionContextMenuLastItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Last";
 
+    private readonly DispatcherTimer _skillRefreshTimer;
+    private readonly DispatcherTimer _skillEffectRefreshTimer;
     private ContextMenu? _openPlayerSelectionMenu;
     private PlayerListEntry? _openPlayerSelectionEntry;
 
@@ -22,6 +26,16 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
     public PlayerListWidgetView()
     {
         InitializeComponent();
+        _skillRefreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(250)
+        };
+        _skillRefreshTimer.Tick += SkillRefreshTimer_Tick;
+        _skillEffectRefreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(1)
+        };
+        _skillEffectRefreshTimer.Tick += SkillEffectRefreshTimer_Tick;
         Loaded += PlayerListWidgetView_Loaded;
         Unloaded += PlayerListWidgetView_Unloaded;
         SizeChanged += PlayerListWidgetView_SizeChanged;
@@ -52,12 +66,35 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void PlayerListWidgetView_Loaded(object sender, RoutedEventArgs e)
     {
+        _skillRefreshTimer.Start();
+        _skillEffectRefreshTimer.Start();
+        RefreshSkillEntries(refreshEffects: true);
         NotifyVerticalScrollMetricsChanged();
     }
 
     private void PlayerListWidgetView_Unloaded(object sender, RoutedEventArgs e)
     {
+        _skillRefreshTimer.Stop();
+        _skillEffectRefreshTimer.Stop();
         ClosePlayerSelectionMenu();
+    }
+
+    private void SkillRefreshTimer_Tick(object? sender, EventArgs e)
+    {
+        RefreshSkillEntries(refreshEffects: false);
+    }
+
+    private void SkillEffectRefreshTimer_Tick(object? sender, EventArgs e)
+    {
+        RefreshSkillEntries(refreshEffects: true);
+    }
+
+    private void RefreshSkillEntries(bool refreshEffects)
+    {
+        if (DataContext is WidgetListItemViewModel viewModel)
+        {
+            viewModel.RefreshPlayerListSkillEntries(refreshEffects);
+        }
     }
 
     private void PlayerListWidgetView_SizeChanged(object sender, SizeChangedEventArgs e)

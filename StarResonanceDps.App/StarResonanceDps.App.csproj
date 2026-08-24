@@ -77,6 +77,8 @@
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
     <None Remove="Assets\Images\trialroad_icon_survival.png" />
+    <None Remove="Assets\Images\weap_role_skill_bg_01.png" />
+    <None Remove="Assets\Images\weap_role_skill_bg_02.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -201,6 +203,11 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Images\weap_role_skill_bg_01.png" />
+    <Resource Include="Assets\Images\weap_role_skill_bg_02.png" />
   </ItemGroup>
 
   <ItemGroup>

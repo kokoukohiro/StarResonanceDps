@@ -759,9 +759,6 @@
   <data name="Window_History_Title" xml:space="preserve">
     <value>기록</value>
   </data>
-  <data name="Widget_ImagineRoleSkillInfo" xml:space="preserve">
-    <value>이매진·롤 스킬 정보</value>
-  </data>
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP 수치</value>
   </data>
@@ -771,8 +768,8 @@
   <data name="HealthValueDisplay_SeparateShield" xml:space="preserve">
     <value>실드 수치 개별 표시</value>
   </data>
-  <data name="Settings_Display_Party" xml:space="preserve">
-    <value>파티 표시 설정</value>
+  <data name="Settings_Display_Filter" xml:space="preserve">
+    <value>필터 설정</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>모두 표시</value>
@@ -782,5 +779,8 @@
   </data>
   <data name="PartyDisplay_NonMembersOnly" xml:space="preserve">
     <value>파티 멤버 외</value>
+  </data>
+  <data name="PartyDisplay_SelfOnly" xml:space="preserve">
+    <value>본인만</value>
   </data>
 </root>

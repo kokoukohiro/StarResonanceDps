@@ -15,8 +15,8 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
-            <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
-            <Setter Property="BorderBrush" Value="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="Background" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="BorderBrush" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="4" />
             <Setter Property="HasDropShadow" Value="False" />
@@ -28,11 +28,11 @@
                         <Grid>
                             <Border Background="{TemplateBinding Background}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding PlacementTarget.Tag.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource TemplatedParent}}" />
                             <Border BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding PlacementTarget.Tag.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource TemplatedParent}}" />
                             <StackPanel Margin="{TemplateBinding Padding}"
                                         IsItemsHost="True"
                                         KeyboardNavigation.DirectionalNavigation="Cycle" />
@@ -109,6 +109,171 @@
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
         </Style>
+
+        <Style x:Key="ToolTip.WidgetWindowPlayerListInfo" TargetType="{x:Type ToolTip}">
+            <Setter Property="Background" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="BorderBrush" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToolTip}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding PlacementTarget.Tag.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding PlacementTarget.Tag.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="PlayerList.SkillEffectTemplate">
+            <Grid Width="18"
+                  Height="18"
+                  Margin="1,0,0,0"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}">
+                <Grid.ToolTip>
+                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                             Style="{StaticResource ToolTip.WidgetWindowPlayerListInfo}">
+                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="12"
+                                   Text="{Binding Name}" />
+                    </ToolTip>
+                </Grid.ToolTip>
+                <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                       Stretch="Uniform"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Style="{StaticResource Text.WidgetWindow}"
+                           FontSize="11"
+                           FontWeight="SemiBold"
+                           Typography.NumeralAlignment="Tabular"
+                           Text="{Binding DurationText}"
+                           TextAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="PlayerList.SkillSlotTemplate">
+            <Grid Width="42"
+                  ClipToBounds="False"
+                  ToolTipService.IsEnabled="{Binding HasSkill}"
+                  Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}">
+                <Grid.ToolTip>
+                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                             Style="{StaticResource ToolTip.WidgetWindowPlayerListInfo}">
+                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="12"
+                                   Text="{Binding NameDisplayText}" />
+                    </ToolTip>
+                </Grid.ToolTip>
+
+                <Grid Width="32"
+                      HorizontalAlignment="Left">
+                    <Image Width="31"
+                           Style="{StaticResource Icon.PlayerListSkillFrame}"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                           Stretch="Uniform"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Width" Value="27" />
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="-0.2" Y="1.3" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding UsesImagineAsset}" Value="True">
+                                        <Setter Property="Width" Value="25" />
+                                        <Setter Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="-1.2" Y="2.1" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                </Grid>
+
+                <ContentPresenter Content="{Binding DebuffEntry}"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Top"
+                                  Margin="22,0,0,0"
+                                  ContentTemplate="{StaticResource PlayerList.SkillEffectTemplate}" />
+
+                <ContentPresenter Content="{Binding BuffEntry}"
+                                  HorizontalAlignment="Left"
+                                  VerticalAlignment="Bottom"
+                                  Margin="22,0,0,0"
+                                  ContentTemplate="{StaticResource PlayerList.SkillEffectTemplate}" />
+
+                <Grid Width="32"
+                      HorizontalAlignment="Left"
+                      Panel.ZIndex="1">
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Typography.NumeralAlignment="Tabular"
+                               Text="{Binding ChargeCountText}"
+                               TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding HasChargeCount}" Value="True" />
+                                            <Condition Binding="{Binding HasCooldown}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform X="-0.5" Y="1" />
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Typography.NumeralAlignment="Tabular"
+                               Text="{Binding CooldownText}"
+                               TextAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasCooldown}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform X="-0.5" Y="1" />
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Grid>
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <Grid>
@@ -149,9 +314,6 @@
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
                                               Command="{Binding RequestPlayerEquipmentCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                                    <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_ImagineRoleSkillInfo]}"
-                                              Command="{Binding RequestImagineRoleSkillInfoCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_SkillInfo]}"
                                               Command="{Binding RequestSkillInfoCommand}"
@@ -202,7 +364,9 @@
 
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="33" />
+                                    <ColumnDefinition Width="128" />
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid Grid.Column="0">
@@ -423,6 +587,29 @@
                                                    TextAlignment="Center" />
                                     </Canvas>
                                 </Grid>
+                                <StackPanel Grid.Column="2"
+                                            Margin="10,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                    <ItemsControl ItemsSource="{Binding ImagineSkillEntries}"
+                                                  ItemTemplate="{StaticResource PlayerList.SkillSlotTemplate}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                    <ItemsControl Margin="2,0,0,0"
+                                                  ItemsSource="{Binding RoleSkillEntries}"
+                                                  ItemTemplate="{StaticResource PlayerList.SkillSlotTemplate}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
                             </Grid>
                         </Button>
                     </DataTemplate>

@@ -64,6 +64,7 @@
                                        Style="{StaticResource Text.WidgetWindow}"
                                        FontSize="15"
                                        FontWeight="Bold"
+                                       Typography.NumeralAlignment="Tabular"
                                        Text="{Binding LayerText}"
                                        TextAlignment="Center" />
 
@@ -73,6 +74,7 @@
                                        Style="{StaticResource Text.WidgetWindow}"
                                        FontSize="8"
                                        FontWeight="SemiBold"
+                                       Typography.NumeralAlignment="Tabular"
                                        Text="{Binding DurationText}"
                                        TextAlignment="Center" />
                         </Grid>

@@ -95,6 +95,10 @@
     "BuffType": 1,
     "Id": "2033000"
   },
+  "2100401": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "2100401"
+  },
   "2100406": {
     "BuffType": 1,
     "Id": "2100406"
@@ -108,7 +112,13 @@
     "Id": "2100409"
   },
   "2100410": {
+    "BuffType": 1,
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
     "Id": "2100410"
+  },
+  "2100411": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "2100411"
   },
   "2100412": {
     "Id": "2100412"
@@ -128,6 +138,14 @@
   "2110057": {
     "BuffType": 0,
     "Id": "2110057"
+  },
+  "2110061": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "2110061"
+  },
+  "2110066": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "2110066"
   },
   "2110081": {
     "BuffType": 1,
@@ -150,6 +168,18 @@
   },
   "2110099": {
     "Id": "2110099"
+  },
+  "2110115": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
+    "Id": "2110115"
+  },
+  "2110116": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
+    "Id": "2110116"
+  },
+  "2110123": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom",
+    "Id": "2110123"
   },
   "2110125": {
     "BuffType": 1,
@@ -612,6 +642,10 @@
     "BuffType": 1,
     "Id": "2201200"
   },
+  "2201201": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "2201201"
+  },
   "2201210": {
     "BuffType": 1,
     "Id": "2201210"
@@ -1028,6 +1062,10 @@
     "BuffType": 1,
     "Id": "2202240"
   },
+  "2202241": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04",
+    "Id": "2202241"
+  },
   "2202250": {
     "BuffType": 1,
     "Id": "2202250"
@@ -1332,6 +1370,10 @@
     "BuffType": 1,
     "Id": "2203160"
   },
+  "2203161": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird",
+    "Id": "2203161"
+  },
   "2203170": {
     "BuffType": 1,
     "Id": "2203170"
@@ -1614,6 +1656,10 @@
   "2204100": {
     "BuffType": 1,
     "Id": "2204100"
+  },
+  "2204101": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
+    "Id": "2204101"
   },
   "2204110": {
     "BuffType": 1,
@@ -1912,6 +1958,10 @@
   "2205130": {
     "BuffType": 1,
     "Id": "2205130"
+  },
+  "2205131": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
+    "Id": "2205131"
   },
   "2205132": {
     "BuffType": 1,
@@ -2324,6 +2374,10 @@
   "2206330": {
     "BuffType": 1,
     "Id": "2206330"
+  },
+  "2206331": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "2206331"
   },
   "2206340": {
     "BuffType": 1,
@@ -4686,6 +4740,10 @@
   "50047": {
     "Id": "50047"
   },
+  "50049": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "50049"
+  },
   "50056": {
     "BuffType": 1,
     "Id": "50056"
@@ -5034,6 +5092,18 @@
     "BuffType": 1,
     "Id": "683602"
   },
+  "683858": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "683858"
+  },
+  "683859": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "683859"
+  },
+  "683861": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "683861"
+  },
   "701008": {
     "Id": "701008"
   },
@@ -5042,6 +5112,10 @@
   },
   "701010": {
     "Id": "701010"
+  },
+  "701018": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "701018"
   },
   "702009": {
     "Id": "702009"
@@ -5279,6 +5353,22 @@
   "829320": {
     "Id": "829320"
   },
+  "833016": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom",
+    "Id": "833016"
+  },
+  "833201": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
+    "Id": "833201"
+  },
+  "833204": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
+    "Id": "833204"
+  },
+  "835008": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird",
+    "Id": "835008"
+  },
   "840007": {
     "Id": "840007"
   },
@@ -5297,6 +5387,14 @@
   },
   "880672": {
     "Id": "880672"
+  },
+  "881554": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "881554"
+  },
+  "881556": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "881556"
   },
   "881563": {
     "Id": "881563"
@@ -5430,6 +5528,14 @@
   "883646": {
     "Id": "883646"
   },
+  "883719": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "883719"
+  },
+  "883721": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
+    "Id": "883721"
+  },
   "883801": {
     "Id": "883801"
   },
@@ -5470,6 +5576,10 @@
   "883825": {
     "BuffType": 1,
     "Id": "883825"
+  },
+  "883826": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
+    "Id": "883826"
   },
   "883827": {
     "Id": "883827"
@@ -5542,6 +5652,10 @@
   "974005": {
     "Id": "974005"
   },
+  "974301": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
+    "Id": "974301"
+  },
   "974320": {
     "BuffType": 0,
     "Id": "974320"
@@ -5592,6 +5706,14 @@
   "996401": {
     "BuffType": 0,
     "Id": "996401"
+  },
+  "997047": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04",
+    "Id": "997047"
+  },
+  "997110": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "997110"
   },
   "997200": {
     "BuffType": 1,
@@ -5737,5 +5859,9 @@
   },
   "998461": {
     "Id": "998461"
+  },
+  "999995": {
+    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
+    "Id": "999995"
   }
 }

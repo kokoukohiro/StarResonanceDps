@@ -10,7 +10,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 public static class Utils
 {
     public static readonly string DATA_DIR_NAME = Path.Combine("Data", "CombatRuntime");
-    private static readonly string[] PersistedRuntimeFileNames = ["Settings.json", "EntityCache.json"];
+    private static readonly string[] PersistedRuntimeFileNames = ["Settings.json"];
     public static Version AppVersion { get; set; } = typeof(Utils).Assembly.GetName().Version ?? new Version(0, 0);
 
     public static void MigratePersistedRuntimeFiles()

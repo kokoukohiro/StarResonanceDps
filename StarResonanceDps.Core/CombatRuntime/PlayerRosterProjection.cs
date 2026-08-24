@@ -7,14 +7,30 @@ namespace StarResonanceDps.Core.CombatRuntime;
 internal static class PlayerRosterProjection
 {
     private static readonly object NearbyPlayerSync = new();
+    private static readonly object PlayerEntitySync = new();
     private static readonly HashSet<long> NearbyPlayerUuids = [];
+    private static readonly Dictionary<long, long> PlayerEntityUuidsByCharacterId = [];
     private static readonly PlayerRosterStore RosterStore = PlayerRosterStore.Instance;
 
     public static void BeginMap()
     {
+        PreserveHumanPartySupplements();
+
+        long[] previousNearbyPlayerUuids;
         lock (NearbyPlayerSync)
         {
+            previousNearbyPlayerUuids = [.. NearbyPlayerUuids];
             NearbyPlayerUuids.Clear();
+        }
+
+        foreach (var playerUuid in previousNearbyPlayerUuids)
+        {
+            ClearTransientHumanSubProfession(playerUuid);
+        }
+
+        lock (PlayerEntitySync)
+        {
+            PlayerEntityUuidsByCharacterId.Clear();
         }
 
         RosterStore.BeginMap();
@@ -54,6 +70,21 @@ internal static class PlayerRosterProjection
 
     public static void RemoveNearbyPlayer(long playerUuid)
     {
+        if (TryGetCharacterEntity(playerUuid, out var entity))
+        {
+            var characterId = entity.UID != 0
+                ? entity.UID
+                : Utils.UuidToEntityId(playerUuid);
+            var party = PartyStateStore.Instance.Current;
+            if (characterId > 0
+                && !IsSelf(playerUuid, characterId)
+                && party.GetMembership(characterId) == PartyMembershipState.Member
+                && TryCreateEntry(characterId, entity, entity, isSelf: false, out var nearbyEntry))
+            {
+                RefreshPartyMemberSupplementFromNearby(nearbyEntry, entity);
+            }
+        }
+
         var removed = false;
         lock (NearbyPlayerSync)
         {
@@ -62,15 +93,23 @@ internal static class PlayerRosterProjection
 
         if (removed)
         {
+            ClearTransientHumanSubProfession(playerUuid);
             RebuildRoster();
         }
     }
 
     public static void ResetNearbyPlayers()
     {
+        long[] previousNearbyPlayerUuids;
         lock (NearbyPlayerSync)
         {
+            previousNearbyPlayerUuids = [.. NearbyPlayerUuids];
             NearbyPlayerUuids.Clear();
+        }
+
+        foreach (var playerUuid in previousNearbyPlayerUuids)
+        {
+            ClearTransientHumanSubProfession(playerUuid);
         }
 
         RebuildRoster();
@@ -79,6 +118,14 @@ internal static class PlayerRosterProjection
     public static void UpsertPlayer(long playerUuid)
     {
         UpsertPlayer(playerUuid, isSelfHint: false);
+    }
+
+    internal static bool TryGetPlayerEntityUuid(long characterId, out long entityUuid)
+    {
+        lock (PlayerEntitySync)
+        {
+            return PlayerEntityUuidsByCharacterId.TryGetValue(characterId, out entityUuid);
+        }
     }
 
     public static void RebuildRoster()
@@ -128,6 +175,7 @@ internal static class PlayerRosterProjection
         }
 
         var entries = new List<PlayerRosterEntry>(characterIds.Count);
+        var entityUuidsByCharacterId = new Dictionary<long, long>();
         var existingSelf = RosterStore.Current.Entries.FirstOrDefault(entry => entry.IsSelf);
         foreach (var characterId in characterIds)
         {
@@ -174,7 +222,25 @@ internal static class PlayerRosterProjection
 
             if (TryCreateEntry(characterId, nearbyEntity, metadataEntity, isSelf, out var entry))
             {
+                if (nearbyEntity is not null)
+                {
+                    RefreshPartyMemberSupplementFromNearby(entry, nearbyEntity);
+                }
+
                 entries.Add(entry);
+                var resolvedEntityUuid = nearbyEntity?.UUID ?? metadataEntity?.UUID ?? 0;
+                if (resolvedEntityUuid != 0)
+                {
+                    entityUuidsByCharacterId[characterId] = resolvedEntityUuid;
+                }
+            }
+        }
+
+        lock (PlayerEntitySync)
+        {
+            foreach (var pair in entityUuidsByCharacterId)
+            {
+                PlayerEntityUuidsByCharacterId[pair.Key] = pair.Value;
             }
         }
 
@@ -216,6 +282,15 @@ internal static class PlayerRosterProjection
         var nearbyEntity = isSelf || isNearby ? entity : null;
         if (TryCreateEntry(characterId, nearbyEntity, entity, isSelf, out var entry))
         {
+            if (nearbyEntity is not null)
+            {
+                RefreshPartyMemberSupplementFromNearby(entry, nearbyEntity);
+            }
+
+            lock (PlayerEntitySync)
+            {
+                PlayerEntityUuidsByCharacterId[characterId] = playerUuid;
+            }
             RosterStore.Upsert(entry);
         }
     }
@@ -277,6 +352,141 @@ internal static class PlayerRosterProjection
             party.GetMembership(characterId) == PartyMembershipState.Member,
             party.GetPartyNumber(characterId));
         return true;
+    }
+
+    private static void RefreshPartyMemberSupplementFromNearby(
+        PlayerRosterEntry player,
+        Entity nearbyEntity)
+    {
+        var partyStore = PartyStateStore.Instance;
+        var party = partyStore.Current;
+        if (party.TeamId <= 0
+            || !player.IsPartyMember
+            || player.IsSelf
+            || player.CharacterId <= 0)
+        {
+            return;
+        }
+
+        var knownSupplement = party.TryGetSupplement(player.CharacterId, out var existingSupplement)
+            ? existingSupplement
+            : new PartyMemberSupplement();
+        if (knownSupplement.IsNpc)
+        {
+            return;
+        }
+
+        var observedCurrentHp = nearbyEntity.GetAttrKV("AttrHp") is long currentHpValue
+            ? currentHpValue
+            : -1;
+        var observedMaxHp = nearbyEntity.GetAttrKV("AttrMaxHp") is long maxHpValue
+            ? maxHpValue
+            : 0;
+        var hasCurrentHp = observedCurrentHp >= 0;
+        var hasMaxHp = observedMaxHp > 0;
+
+        var name = !string.IsNullOrEmpty(player.Name) ? player.Name : knownSupplement.Name;
+        var professionId = player.ProfessionId > 0 ? player.ProfessionId : knownSupplement.ProfessionId;
+        var combatPower = player.CombatPower > 0 ? player.CombatPower : knownSupplement.CombatPower;
+        var seasonStrength = player.SeasonStrength > 0 ? player.SeasonStrength : knownSupplement.SeasonStrength;
+        var level = player.Level > 0 ? player.Level : knownSupplement.Level;
+        var seasonLevel = player.SeasonLevel > 0 ? player.SeasonLevel : knownSupplement.SeasonLevel;
+        var equipmentData = player.EquipmentData ?? knownSupplement.EquipmentData;
+        var currentHp = hasCurrentHp ? observedCurrentHp : knownSupplement.CurrentHp;
+        var maxHp = hasMaxHp ? observedMaxHp : knownSupplement.MaxHp;
+
+        if (name == knownSupplement.Name
+            && professionId == knownSupplement.ProfessionId
+            && combatPower == knownSupplement.CombatPower
+            && seasonStrength == knownSupplement.SeasonStrength
+            && level == knownSupplement.Level
+            && seasonLevel == knownSupplement.SeasonLevel
+            && object.Equals(equipmentData, knownSupplement.EquipmentData)
+            && currentHp == knownSupplement.CurrentHp
+            && maxHp == knownSupplement.MaxHp)
+        {
+            return;
+        }
+
+        partyStore.UpdateSupplement(
+            party.TeamId,
+            player.CharacterId,
+            current => current with
+            {
+                Name = !string.IsNullOrEmpty(player.Name) ? player.Name : current.Name,
+                ProfessionId = player.ProfessionId > 0 ? player.ProfessionId : current.ProfessionId,
+                CombatPower = player.CombatPower > 0 ? player.CombatPower : current.CombatPower,
+                SeasonStrength = player.SeasonStrength > 0 ? player.SeasonStrength : current.SeasonStrength,
+                Level = player.Level > 0 ? player.Level : current.Level,
+                SeasonLevel = player.SeasonLevel > 0 ? player.SeasonLevel : current.SeasonLevel,
+                EquipmentData = player.EquipmentData ?? current.EquipmentData,
+                CurrentHp = hasCurrentHp ? observedCurrentHp : current.CurrentHp,
+                MaxHp = hasMaxHp ? observedMaxHp : current.MaxHp
+            });
+    }
+
+    private static void PreserveHumanPartySupplements()
+    {
+        var partyStore = PartyStateStore.Instance;
+        var party = partyStore.Current;
+        if (party.TeamId <= 0)
+        {
+            return;
+        }
+
+        foreach (var player in RosterStore.Current.Entries)
+        {
+            if (!player.IsPartyMember || player.IsSelf || player.IsNpc || player.CharacterId <= 0)
+            {
+                continue;
+            }
+
+            partyStore.UpdateSupplement(
+                party.TeamId,
+                player.CharacterId,
+                current => current with
+                {
+                    Name = !string.IsNullOrEmpty(player.Name) ? player.Name : current.Name,
+                    ProfessionId = player.ProfessionId > 0 ? player.ProfessionId : current.ProfessionId,
+                    CombatPower = player.CombatPower > 0 ? player.CombatPower : current.CombatPower,
+                    SeasonStrength = player.SeasonStrength > 0 ? player.SeasonStrength : current.SeasonStrength,
+                    Level = player.Level > 0 ? player.Level : current.Level,
+                    SeasonLevel = player.SeasonLevel > 0 ? player.SeasonLevel : current.SeasonLevel,
+                    EquipmentData = player.EquipmentData ?? current.EquipmentData,
+                    CurrentHp = player.MaxHp > 0 ? Math.Max(player.CurrentHp, 0) : current.CurrentHp,
+                    MaxHp = player.MaxHp > 0 ? player.MaxHp : current.MaxHp
+                });
+        }
+    }
+
+    private static void ClearTransientHumanSubProfession(long playerUuid)
+    {
+        var characterId = Utils.UuidToEntityId(playerUuid);
+        if (characterId <= 0)
+        {
+            return;
+        }
+
+        var party = PartyStateStore.Instance.Current;
+        if (party.TryGetSupplement(characterId, out var supplement) && supplement.IsNpc)
+        {
+            return;
+        }
+
+        var encounter = EncounterManager.Current;
+        if (encounter is not null
+            && encounter.Entities.TryGetValue(playerUuid, out var entity)
+            && IsCharacterEntity(entity))
+        {
+            entity.SetSubProfessionUnknown();
+            return;
+        }
+
+        var cached = EntityCache.Instance.Get(playerUuid);
+        if (cached is not null)
+        {
+            cached.SubProfessionId = 0;
+        }
     }
 
     private static bool TryGetCharacterEntity(long playerUuid, out Entity entity)

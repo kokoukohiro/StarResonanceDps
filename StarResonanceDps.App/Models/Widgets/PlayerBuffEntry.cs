@@ -47,14 +47,7 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         }
 
         var roundedSeconds = Math.Max(0, (int)Math.Ceiling(seconds.Value));
-        if (roundedSeconds < 60)
-        {
-            return $"{roundedSeconds}s";
-        }
-
-        var minutes = roundedSeconds / 60;
-        var remainderSeconds = roundedSeconds % 60;
-        return $"{minutes}m{remainderSeconds:00}s";
+        return roundedSeconds.ToString();
     }
 
 
