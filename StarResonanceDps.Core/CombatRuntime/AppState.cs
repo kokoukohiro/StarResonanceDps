@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.DataTypes;
+﻿using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using Newtonsoft.Json;
 using Serilog;
 using System;
@@ -293,10 +293,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             var startupTime = loadTime.Elapsed.TotalSeconds;
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
-
-            EntityCache.Instance.Initialize();
-
-            Serilog.Log.Debug($"Took {Math.Round(loadTime.Elapsed.TotalSeconds - startupTime, 4)}s to initialize EntityCache.");
 
             loadTime.Stop();
         }

@@ -18,6 +18,13 @@ public static class SkillCooldownStateStore
     private static long _clientServerTimeDeltaMilliseconds;
     private static bool _hasClientServerTimeDelta;
 
+    /// <summary>
+    /// ゲーム側がクールダウンを一括リセットしたとき(ダンジョン開始・マップ移動)に発火する。
+    /// 自分の残CDはサーバから真値が再送されるので購読不要だが、
+    /// 他プレイヤーの残CDはアプリ側の推測値なので、購読側で破棄しないと残り続ける。
+    /// </summary>
+    public static event Action? CooldownsResetByGame;
+
     public static void Reset()
     {
         lock (Sync)
@@ -28,6 +35,22 @@ public static class SkillCooldownStateStore
             _clientServerTimeDeltaMilliseconds = 0;
             _hasClientServerTimeDelta = false;
         }
+
+        CooldownsResetByGame?.Invoke();
+    }
+
+    /// <summary>
+    /// ゲーム側のクールダウン一括リセットを通知する。
+    /// 自分の状態(サーバ時刻差・自UUID)は保持したまま、推測値の購読者にだけ破棄を促す。
+    /// </summary>
+    public static void NotifyCooldownsResetByGame()
+    {
+        lock (Sync)
+        {
+            SelfCooldowns.Clear();
+        }
+
+        CooldownsResetByGame?.Invoke();
     }
 
     public static void SetSelfPlayer(long uuid)

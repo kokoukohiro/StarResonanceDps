@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.DataTypes;
+﻿using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using Serilog;
 using System;
 using System.Collections.Concurrent;
@@ -43,6 +43,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             EncounterManager.StartNewMap();
             EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
 
+            // マップが変わるとゲーム側のクールダウンはリセットされる。
+            SkillCooldownStateStore.NotifyCooldownsResetByGame();
+
+            // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
+            Services.ActiveBuffStore.Instance.Clear();
+
             if (!Settings.Instance.PersistEncounterSavingPauseStateBetweenMaps)
             {
                 AppState.IsEncounterSavingPaused = false;
@@ -72,6 +78,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
+                // ダンジョン開始でゲーム側のクールダウンはリセットされる。
+                // 自分の残CDはサーバ真値なので勝手に戻るが、他プレイヤーの推測値は明示的に捨てる。
+                SkillCooldownStateStore.NotifyCooldownsResetByGame();
 
                 if (EncounterManager.Current.HasStatsBeenRecorded())
                 {

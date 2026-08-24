@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.Models;
+﻿using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.Services;
 
@@ -19,7 +19,8 @@ public sealed record PartyMemberSupplement(
     PlayerEquipmentData? EquipmentData = null,
     bool IsNpc = false,
     long CurrentHp = 0,
-    long MaxHp = 0);
+    long MaxHp = 0,
+    bool HasTrustedSocialData = false);
 
 public sealed record PartyMemberPosition(int GroupId, int? GroupSlot);
 

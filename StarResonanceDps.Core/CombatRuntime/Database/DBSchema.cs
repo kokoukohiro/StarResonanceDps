@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using System.Data;
 
 namespace StarResonanceDps.Core.CombatRuntime
@@ -11,7 +11,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             conn.Execute(Entities.CreateTable);
             conn.Execute(Battles.CreateTable);
             conn.Execute(DbData.CreateTable);
-            conn.Execute(EntityCache.CreateTable);
         }
 
         public static class Encounter
@@ -145,33 +144,5 @@ namespace StarResonanceDps.Core.CombatRuntime
                 INSERT INTO DbData (Version) SELECT (1.2) WHERE NOT EXISTS (SELECT 1 FROM DbData)";
         }
 
-        public static class EntityCache
-        {
-            public const string CreateTable = @"
-                CREATE TABLE IF NOT EXISTS EntityCache (
-                    UUID INTEGER PRIMARY KEY,
-                    UID INTEGER NOT NULL,
-                    Name TEXT NOT NULL,
-                    Level INTEGER NOT NULL,
-                    AbilityScore INTEGER NOT NULL,
-                    ProfessionId INTEGER NOT NULL,
-                    SubProfessionId INTEGER NOT NULL
-                );";
-
-            public const string InsertOrReplace = @"
-                INSERT OR REPLACE INTO EntityCache
-                (UUID, UID, Name, Level, AbilityScore, ProfessionId, SubProfessionId)
-                VALUES (@UUID, @UID, @Name, @Level, @AbilityScore, @ProfessionId, @SubProfessionId);";
-
-            public const string SelectAll = @"SELECT * FROM EntityCache;";
-            public const string SelectByUUID = @"SELECT * FROM EntityCache WHERE UUID = @UUID;";
-            public const string SelectByUID = @"SELECT * FROM EntityCache WHERE UID = @UID;";
-            public const string GetOrCreateDefaultByUUID = @"
-                INSERT INTO EntityCache (UUID, UID, Name, Level, AbilityScore, ProfessionId, SubProfessionId)
-                SELECT @UUID, (@UID >> 16), '', 0, 0, 0, 0
-                WHERE NOT EXISTS (SELECT 1 FROM EntityCache WHERE UUID = @UUID);
-
-                SELECT * FROM EntityCache WHERE UUID = @UUID;";
-        }
     }
 }

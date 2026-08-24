@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.Models;
+﻿using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using Zproto;
 
@@ -395,7 +395,10 @@ internal static class PlayerRosterProjection
         var currentHp = hasCurrentHp ? observedCurrentHp : knownSupplement.CurrentHp;
         var maxHp = hasMaxHp ? observedMaxHp : knownSupplement.MaxHp;
 
-        if (name == knownSupplement.Name
+        // 値が一致していても、まだ「確かなソースで取得済み」の印が付いていなければ書き込む。
+        // ここで印を付けておかないと、後から NotifySocialData の古い内容で上書きされてしまう。
+        if (knownSupplement.HasTrustedSocialData
+            && name == knownSupplement.Name
             && professionId == knownSupplement.ProfessionId
             && combatPower == knownSupplement.CombatPower
             && seasonStrength == knownSupplement.SeasonStrength
@@ -421,7 +424,9 @@ internal static class PlayerRosterProjection
                 SeasonLevel = player.SeasonLevel > 0 ? player.SeasonLevel : current.SeasonLevel,
                 EquipmentData = player.EquipmentData ?? current.EquipmentData,
                 CurrentHp = hasCurrentHp ? observedCurrentHp : current.CurrentHp,
-                MaxHp = hasMaxHp ? observedMaxHp : current.MaxHp
+                MaxHp = hasMaxHp ? observedMaxHp : current.MaxHp,
+                // AOIでの実測は最も確かなソース。以後 NotifySocialData の古い内容で上書きさせない。
+                HasTrustedSocialData = true
             });
     }
 
@@ -482,11 +487,8 @@ internal static class PlayerRosterProjection
             return;
         }
 
-        var cached = EntityCache.Instance.Get(playerUuid);
-        if (cached is not null)
-        {
-            cached.SubProfessionId = 0;
-        }
+        // Entity 側の推定値は破棄するが、保持している補完値は残す。
+        // マップ切替で observable でなくなっただけで、特化が変わったわけではない。
     }
 
     private static bool TryGetCharacterEntity(long playerUuid, out Entity entity)

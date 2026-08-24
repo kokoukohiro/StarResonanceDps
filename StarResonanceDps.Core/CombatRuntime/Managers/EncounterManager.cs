@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.Protocols;
+﻿using StarResonanceDps.Core.CombatRuntime.Protocols;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using Newtonsoft.Json;
 using ProtoBuf;
@@ -1441,79 +1441,20 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             SetEntityType((EEntityType)Utils.UuidToEntityType(uuid));
 
-            var cached = EntityCache.Instance.GetOrCreate(uuid);
-            if (cached != null)
-            {
-                if (UID > 0)
-                {
-
-                    UpdateUID(UID, cached);
-                }
-
-                if (string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(cached.Name))
-                {
-                    SetName(cached.Name);
-                }
-
-                if (AbilityScore == 0 && cached.AbilityScore != 0)
-                {
-                    SetAbilityScore(cached.AbilityScore);
-                }
-
-                if (Level == 0 && cached.Level != 0)
-                {
-                    SetLevel(cached.Level);
-                }
-
-                if (ProfessionId == 0 && cached.ProfessionId != 0)
-                {
-                    SetProfessionId(cached.ProfessionId);
-                }
-
-                if (SubProfessionId == 0 && cached.SubProfessionId != 0)
-                {
-                    SetSubProfessionId(cached.SubProfessionId);
-                }
-
-                if (SeasonLevel == 0 && cached.SeasonLevel != 0)
-                {
-                    SetSeasonLevel(cached.SeasonLevel);
-                }
-
-                if (SeasonStrength == 0 && cached.SeasonStrength != 0)
-                {
-                    SetSeasonStrength(cached.SeasonStrength);
-                }
-            }
+            // キャッシュから初期値を流し込まない。ここで注入すると、その値が Entity のライブ値と
+            // 見分けられなくなり、PlayerDataSourceResolver の優先順位(ライブ > パーティ情報 > 補完)を
+            // 追い越して新しい情報を握り潰す。補完が要るものは PartyMemberCache から明示的に引く。
 
         }
 
-        public void UpdateUID(long uid, EntityCacheLine? cached = null)
+        public void UpdateUID(long uid)
         {
             UID = uid;
-            if (cached != null)
-            {
-                cached.UID = uid;
-            }
-            else
-            {
-                var newCached = EntityCache.Instance.GetOrCreate(UUID);
-                if (newCached != null)
-                {
-                    newCached.UID = uid;
-                }
-            }
         }
 
         public void SetName(string name)
         {
             Name = name;
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && !string.IsNullOrEmpty(name))
-            {
-                cached.Name = name;
-            }
         }
 
         public void SetEntityType(EEntityType type)
@@ -1556,12 +1497,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetAbilityScore(int abilityScore)
         {
             AbilityScore = abilityScore;
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && abilityScore != 0)
-            {
-                cached.AbilityScore = abilityScore;
-            }
         }
 
         public void SetProfessionId(int id)
@@ -1575,20 +1510,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 SubProfessionId = 0;
                 SubProfession = string.Empty;
-            }
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null)
-            {
-                if (id != 0)
-                {
-                    cached.ProfessionId = id;
-                }
-
-                if (clearSubProfession)
-                {
-                    cached.SubProfessionId = 0;
-                }
+                Services.PartyMemberCache.Instance.ClearSubProfession(Utils.UuidToEntityId(UUID));
             }
         }
 
@@ -1610,15 +1532,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Profession = Professions.GetProfessionNameFromId(profId);
             }
 
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && id != 0)
-            {
-                cached.SubProfessionId = id;
-                if (cached.ProfessionId != profId)
-                {
-                    cached.ProfessionId = profId;
-                }
-            }
+            // 特化はサーバから届かず戦闘観測からの推定なので、AOI外へ出ると失われる。
+            // 自分以外のパーティメンバーの分だけ補完用に保持する(判定はキャッシュ側)。
+            Services.PartyMemberCache.Instance.SetSubProfession(Utils.UuidToEntityId(UUID), id);
         }
 
         public void SetSubProfessionUnknown()
@@ -1626,44 +1542,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             SubProfessionId = 0;
             SubProfession = string.Empty;
 
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached is not null)
-            {
-                cached.SubProfessionId = 0;
-            }
+            // ここは「もう観測できない」であって「特化が変わった」ではない。
+            // マップ切替でも呼ばれるため、ここでキャッシュを消すと補完の意味が無くなる。
         }
 
         public void SetLevel(int level)
         {
             Level = level;
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && level != 0)
-            {
-                cached.Level = level;
-            }
         }
 
         public void SetSeasonLevel(int level)
         {
             SeasonLevel = level;
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && level != 0)
-            {
-                cached.SeasonLevel = level;
-            }
         }
 
         public void SetSeasonStrength(int strength)
         {
             SeasonStrength = strength;
-
-            var cached = EntityCache.Instance.GetOrCreate(UUID);
-            if (cached != null && strength != 0)
-            {
-                cached.SeasonStrength = strength;
-            }
         }
 
         public void SetPosition(Vector3 position)
@@ -1896,13 +1791,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             statTracker.UUID = otherUuid;
 
-            if (EntityCache.Instance.Cache.Lines.TryGetValue(otherUuid, out var cachedEntityLine))
-            {
-                statTracker.UID = cachedEntityLine.UID;
-                statTracker.Name = cachedEntityLine.Name;
-                statTracker.ProfessionId = cachedEntityLine.ProfessionId;
-                statTracker.SubProfessionId = cachedEntityLine.SubProfessionId;
-            }
+            // 出所も鮮度も分からない値で名前や職業を埋めない。
+            // 情報が来ていないなら空欄のままにして、欠落が見える状態にする。
 
             TrackedStats trackers;
             if (skillType == ESkillType.Damage)
@@ -2121,6 +2011,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 BuffEvents[(ulong)buffUuid] = buffEvent;
                 AddRecentBuffEventHistory(buffUuid, buffEvent);
+
+                // ライブ表示用の状態はエンカウンター境界を跨いで保持する。
+                Services.ActiveBuffStore.Instance.Remove(UUID, (ulong)buffUuid);
             }
             else
             {
@@ -2157,6 +2050,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 BuffEvents[(ulong)buffUuid] = buffEvent;
                 AddRecentBuffEventHistory(buffUuid, buffEvent);
+
+                // ライブ表示用の状態はエンカウンター境界を跨いで保持する。
+                Services.ActiveBuffStore.Instance.AddOrUpdate(UUID, (ulong)buffUuid, buffEvent);
             }
         }
 

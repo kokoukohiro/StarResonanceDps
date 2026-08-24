@@ -144,9 +144,7 @@ internal static class PlayerDataSourceResolver
                     : partySupplement is { CombatPower: > 0 }
                         ? partySupplement.CombatPower
                         : metadataCombatPower,
-            nearbyEntity is { SubProfessionId: > 0 }
-                ? nearbyEntity.SubProfessionId
-                : metadataEntity?.SubProfessionId ?? 0,
+            ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf),
             isSelf
                 ? nearbySeasonStrength
                 : nearbySeasonStrength > 0
@@ -174,6 +172,37 @@ internal static class PlayerDataSourceResolver
             GetEquipmentData(nearbyEntity)
                 ?? partySupplement?.EquipmentData
                 ?? GetEquipmentData(metadataEntity));
+    }
+
+    /// <summary>
+    /// 職業特化を解決する。特化はサーバから届く値ではなく特化スキルの使用を観測した推定値で、
+    /// マップを読み直すと不明に戻る。自分は <c>PlayerSkillLevelStateStore</c> から即座に確定できるので
+    /// キャッシュを参照しない。自分以外のパーティメンバーだけ補完する。
+    /// </summary>
+    private static int ResolveSubProfessionId(
+        long characterId,
+        Entity? nearbyEntity,
+        Entity? metadataEntity,
+        bool isSelf)
+    {
+        if (nearbyEntity is { SubProfessionId: > 0 })
+        {
+            return nearbyEntity.SubProfessionId;
+        }
+
+        if (metadataEntity is { SubProfessionId: > 0 })
+        {
+            return metadataEntity.SubProfessionId;
+        }
+
+        if (isSelf)
+        {
+            return 0;
+        }
+
+        return PartyMemberCache.Instance.TryGetSubProfession(characterId, out var cached)
+            ? cached
+            : 0;
     }
 
     public static int GetInt(Entity? entity, string key)

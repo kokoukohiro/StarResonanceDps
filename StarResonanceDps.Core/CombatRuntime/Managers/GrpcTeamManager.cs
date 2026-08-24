@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.Protocols;
+﻿using StarResonanceDps.Core.CombatRuntime.Protocols;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using System;
@@ -118,7 +118,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var member in reply.MemberData)
             {
-                ApplyTeamMemberSocialData(member);
+                ApplyTeamMemberSocialData(member, "GetTeamInfo");
             }
 
             foreach (var memberSyncData in reply.MemberFastSyncData)
@@ -177,7 +177,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (memberIdSet.Contains(member.CharId))
                 {
-                    ApplyTeamMemberSocialData(member);
+                    ApplyTeamMemberSocialData(member, "NotifySocialData");
                 }
             }
 
@@ -217,7 +217,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var member in vData.VRequest.TeamMemberSocialDatas)
             {
-                ApplyTeamMemberSocialData(member);
+                ApplyTeamMemberSocialData(member, "NoticeUpdateTeamMemberInfo");
             }
 
             foreach (var fastSyncData in vData.VRequest.TeamMemberSyncDatas)
@@ -252,7 +252,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var member in vData.VRequest.MemberData)
             {
-                ApplyTeamMemberSocialData(member);
+                ApplyTeamMemberSocialData(member, "NotifyJoinTeam");
             }
 
             foreach (var memberSyncData in vData.VRequest.MemberSyncDatas)
@@ -403,9 +403,26 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         }
 
-        private static void ApplyTeamMemberSocialData(TeamMemData member)
+        /// <summary>
+        /// NotifySocialData に同梱されるメンバーのsocial dataは、サーバ側の非正規化スナップショットで、
+        /// メンバーがクラスを変更しても追従しない。実測(2026-08-25)では、AOI実測と GetTeamInfo が
+        /// 現在値を返している間も、この経路だけが変更前の職業を送り続けて表示を巻き戻していた。
+        /// より確かなソースから取得済みの場合は、この経路の内容を採用しない。
+        /// まだ何も無い場合は、空欄よりましなので初期値として使う。
+        /// </summary>
+        private const string StaleSocialDataSource = "NotifySocialData";
+
+        private static void ApplyTeamMemberSocialData(TeamMemData member, string source)
         {
             if (member.CharId <= 0 || member.SocialData == null)
+            {
+                return;
+            }
+
+            var isTrustedSource = !string.Equals(source, StaleSocialDataSource, StringComparison.Ordinal);
+            if (!isTrustedSource
+                && PartyState.Current.TryGetSupplement(member.CharId, out var existing)
+                && existing.HasTrustedSocialData)
             {
                 return;
             }
@@ -444,7 +461,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EquipmentData = receivedEquipment ?? current.EquipmentData,
                     IsNpc = socialData.BasicData != null
                         ? socialData.BasicData.BotAiId > 0
-                        : current.IsNpc
+                        : current.IsNpc,
+                    HasTrustedSocialData = current.HasTrustedSocialData || isTrustedSource
                 });
         }
 

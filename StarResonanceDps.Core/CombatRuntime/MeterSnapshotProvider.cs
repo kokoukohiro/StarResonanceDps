@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using StarResonanceDps.Core.Models;
@@ -236,7 +236,7 @@ public static class MeterSnapshotProvider
         PlayerBuffListKind kind)
     {
         var currentEncounterTime = encounter.GetDuration();
-        var buffEvents = entity.BuffEvents.Values.ToArray();
+        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
         var entriesByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
         var entryKeys = new List<string>(buffEvents.Length);
 
@@ -260,7 +260,12 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            if (!TryResolveBuffTiming(buffEvent, currentEncounterTime, out var effectiveRemoveTime, out var remainingSeconds))
+            TimeSpan effectiveRemoveTime;
+            double remainingSeconds;
+            var timingResolved = isLive
+                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
+                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
+            if (!timingResolved)
             {
                 continue;
             }
@@ -302,7 +307,7 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerSkillInfoSnapshot>();
         }
 
-        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity);
+        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity, characterId);
 
         if (skillLevels.Count == 0)
         {
@@ -335,7 +340,7 @@ public static class MeterSnapshotProvider
             return EmptyPlayerImagineRoleSkillLoadout();
         }
 
-        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity);
+        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity, characterId);
     }
 
     public static bool TryGetPlayerListImagineRoleSkillSourceState(
@@ -357,7 +362,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        Entity entity;
+        Entity? entity;
         if (preferredEntityUuid != 0
             && TryResolvePlayerEntityByUuid(
                 encounter,
@@ -376,20 +381,33 @@ public static class MeterSnapshotProvider
         {
             entityUuid = rosterEntityUuid;
         }
+        else if (AppState.OpenedHistoricalEncounter is not null
+            && TryResolvePlayerEntity(
+                encounter,
+                characterId,
+                out entityUuid,
+                out entity))
+        {
+            // 履歴閲覧時はそのエンカウンターの記録をそのまま使う。
+        }
+        else if (PartyMemberCache.Instance.TryGetSkillLevels(characterId, out _))
+        {
+            // AOI外のパーティメンバーは Entity が存在しないことがある。
+            // 保持しているスキル一覧があるなら、それを表示元として続行する。
+            entity = null;
+            entityUuid = preferredEntityUuid;
+        }
         else
         {
-            if (AppState.OpenedHistoricalEncounter is null
-                || !TryResolvePlayerEntity(
-                    encounter,
-                    characterId,
-                    out entityUuid,
-                    out entity))
-            {
-                return false;
-            }
+            return false;
         }
 
-        professionId = entity.ProfessionId;
+        professionId = entity?.ProfessionId ?? 0;
+        if (professionId <= 0
+            && PartyStateStore.Instance.Current.TryGetSupplement(characterId, out var supplement))
+        {
+            professionId = supplement.ProfessionId;
+        }
         if (IsSelfEntity(entityUuid)
             && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
                 out var currentSkillLevels))
@@ -399,7 +417,15 @@ public static class MeterSnapshotProvider
             return true;
         }
 
-        skillSourceToken = entity.GetAttrKV("AttrSkillLevelIdList");
+        // 変更検知のトークンは実際の表示元と一致させる。
+        // Entity 側に一覧が無いときは保持している一覧が表示元になるので、そちらを指す。
+        skillSourceToken = entity?.GetAttrKV("AttrSkillLevelIdList");
+        if (skillSourceToken is null
+            && PartyMemberCache.Instance.TryGetSkillLevels(characterId, out var cachedSkillLevels))
+        {
+            skillSourceToken = cachedSkillLevels;
+        }
+
         PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
             out var roleFilterSkillLevels);
         roleFilterToken = roleFilterSkillLevels;
@@ -411,24 +437,23 @@ public static class MeterSnapshotProvider
         long entityUuid)
     {
         var encounter = ResolvePlayerDetailEncounter();
-        if (encounter is null
-            || !TryResolvePlayerEntityByUuid(
-                encounter,
-                characterId,
-                entityUuid,
-                out var entity))
+        Entity? entity = null;
+        if (encounter is not null)
         {
-            return EmptyPlayerImagineRoleSkillLoadout();
+            TryResolvePlayerEntityByUuid(encounter, characterId, entityUuid, out entity);
         }
 
-        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity);
+        // AOI外のパーティメンバーは Entity が存在しないことがある。
+        // その場合でも保持しているスキル一覧から組み立てる。
+        return CreatePlayerImagineRoleSkillLoadout(entityUuid, entity, characterId);
     }
 
     private static PlayerImagineRoleSkillLoadoutSnapshot CreatePlayerImagineRoleSkillLoadout(
         long entityUuid,
-        Entity entity)
+        Entity? entity,
+        long characterId)
     {
-        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity);
+        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity, characterId);
         var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
         var roleSkills = new List<PlayerCooldownSkillSnapshot>(4);
         var includedSkillIds = new HashSet<int>();
@@ -454,9 +479,9 @@ public static class MeterSnapshotProvider
             var currentLevel = ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel);
             var showLevel = isRole
                 && CombatDataCatalog.HasLevelDependentCooldown(skillLevel.SkillId);
-            var maxCharges = isImagine
-                ? CombatDataCatalog.GetSkillMaxCharges(skillLevel.SkillId)
-                : 0;
+            // スタック数はイマジン固有ではない。ロールスキルにも複数チャージのものがある
+            // (例: 3612 不屈の闘志 = MaxEnergyChargeNum 2)。
+            var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillLevel.SkillId);
             var chargeCooldownSeconds = maxCharges > 1
                 ? CombatDataCatalog.GetSkillChargeCooldownSeconds(
                     skillLevel.SkillId,
@@ -561,7 +586,7 @@ public static class MeterSnapshotProvider
         IReadOnlySet<int> trackedSkillIds)
     {
         var currentEncounterTime = encounter.GetDuration();
-        var buffEvents = entity.BuffEvents.Values.ToArray();
+        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
         var runtimeSourceParentsByBaseId = BuildRuntimeSourceParentsByBaseId(
             entity,
             buffEvents);
@@ -612,11 +637,12 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            if (!TryResolveBuffTiming(
-                    buffEvent,
-                    currentEncounterTime,
-                    out var effectiveRemoveTime,
-                    out var remainingSeconds))
+            TimeSpan effectiveRemoveTime;
+            double remainingSeconds;
+            var timingResolved = isLive
+                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
+                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
+            if (!timingResolved)
             {
                 continue;
             }
@@ -861,6 +887,11 @@ public static class MeterSnapshotProvider
         {
             AddRuntimeSourceParent(result, buffEvent);
         }
+
+        // 既に切れた/解除されたバフの対応も逆引きには必要。
+        // エンカウンターが作り直されると entity 側の履歴は空になるため、
+        // 境界を跨いで蓄積しているストア側の索引を合流させる。
+        Services.ActiveBuffStore.Instance.CopySourceParentsInto(entity.UUID, result);
 
         return result;
     }
@@ -1289,6 +1320,58 @@ public static class MeterSnapshotProvider
         return $"uuid:{buffEvent.Uuid}";
     }
 
+    /// <summary>
+    /// ライブ表示中か(履歴のエンカウンターを開いていないか)。
+    /// ライブ中のバフは <see cref="Services.ActiveBuffStore"/> から読み、
+    /// エンカウンター境界で表示が消えないようにする。
+    /// </summary>
+    private static bool IsLivePlayerDetail()
+    {
+        return AppState.OpenedHistoricalEncounter is null;
+    }
+
+    /// <summary>
+    /// 表示用のバフ取得。ライブ中はエンカウンターに閉じ込められていないストアだけを参照する。
+    /// ストアが空なら空のまま返す。エンカウンター経路へのフォールバックは意図的に持たない
+    /// (故障時に従来経路で正常に見えてしまうと、ストア側の不具合が発見できなくなるため)。
+    /// 履歴のエンカウンターを開いているときだけ、そのエンカウンターの記録を見る。
+    /// </summary>
+    private static BuffEvent[] ResolveDisplayBuffEvents(Entity entity, out bool useLiveTiming)
+    {
+        useLiveTiming = IsLivePlayerDetail();
+        return useLiveTiming
+            ? [.. Services.ActiveBuffStore.Instance.GetActive(entity.UUID)]
+            : [.. entity.BuffEvents.Values];
+    }
+
+    /// <summary>
+    /// ライブ表示用の残り時間。基準は <see cref="Services.ActiveBuffStore"/> が持つ観測時刻。
+    /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の時刻が入る経路があってローカル時計とずれ、
+    /// <see cref="BuffEvent.EventAddTime"/> はエンカウンター相対で境界を跨げないため、どちらも使えない。
+    /// </summary>
+    private static bool TryResolveLiveBuffTiming(
+        long entityUuid,
+        BuffEvent buffEvent,
+        out TimeSpan orderingKey,
+        out double remainingSeconds)
+    {
+        if (!Services.ActiveBuffStore.Instance.TryGetRemainingSeconds(
+                entityUuid,
+                (ulong)buffEvent.Uuid,
+                out remainingSeconds))
+        {
+            orderingKey = TimeSpan.Zero;
+            remainingSeconds = 0d;
+            return false;
+        }
+
+        // 持続時間不明のものは残り時間を出さないが、表示は残すので最後尾に並べる。
+        orderingKey = remainingSeconds > 0d
+            ? TimeSpan.FromSeconds(remainingSeconds)
+            : TimeSpan.MaxValue;
+        return true;
+    }
+
     private static bool TryResolveBuffTiming(
         BuffEvent buffEvent,
         TimeSpan currentEncounterTime,
@@ -1387,7 +1470,8 @@ public static class MeterSnapshotProvider
 
     private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(
         long entityUuid,
-        Entity entity)
+        Entity? entity,
+        long characterId)
     {
         if (IsSelfEntity(entityUuid)
             && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
@@ -1396,7 +1480,7 @@ public static class MeterSnapshotProvider
             return currentSkillLevels;
         }
 
-        var receivedSkillLevels = entity.GetAttrKV("AttrSkillLevelIdList") switch
+        var receivedSkillLevels = entity?.GetAttrKV("AttrSkillLevelIdList") switch
         {
             List<DataTypes.Skills.SkillLevelInfo> typedList => typedList,
             JArray jsonArray =>
@@ -1406,9 +1490,28 @@ public static class MeterSnapshotProvider
             _ => Array.Empty<DataTypes.Skills.SkillLevelInfo>()
         };
 
+        // AOI外へ出ると AttrSkillLevelIdList が届かなくなるので、
+        // 自分以外のパーティメンバーは保持しておいた分で補完する。
+        if (receivedSkillLevels.Count == 0
+            && !IsSelfEntity(entityUuid)
+            && PartyMemberCache.Instance.TryGetSkillLevels(
+                characterId,
+                out var cachedSkillLevels))
+        {
+            receivedSkillLevels = cachedSkillLevels;
+        }
+
+        // AOI外だと Entity が無い場合がある。職業はパーティのsocial dataからライブで引ける。
+        var professionId = entity?.ProfessionId ?? 0;
+        if (professionId <= 0
+            && PartyStateStore.Instance.Current.TryGetSupplement(characterId, out var supplement))
+        {
+            professionId = supplement.ProfessionId;
+        }
+
         if (IsSelfEntity(entityUuid)
             || !PlayerSkillLevelStateStore.TryGetRoleSkillIdsForProfession(
-                entity.ProfessionId,
+                professionId,
                 out var currentRoleSkillIds))
         {
             return receivedSkillLevels;

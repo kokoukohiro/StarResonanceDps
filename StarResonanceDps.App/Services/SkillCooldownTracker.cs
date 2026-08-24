@@ -37,6 +37,7 @@ public sealed class SkillCooldownTracker
 
             _isInitialized = true;
             EncounterManager.EncounterStart += EncounterManager_EncounterStart;
+            SkillCooldownStateStore.CooldownsResetByGame += SkillCooldownStateStore_CooldownsResetByGame;
             AttachToCurrentEncounter();
         }
     }
@@ -51,6 +52,7 @@ public sealed class SkillCooldownTracker
             }
 
             EncounterManager.EncounterStart -= EncounterManager_EncounterStart;
+            SkillCooldownStateStore.CooldownsResetByGame -= SkillCooldownStateStore_CooldownsResetByGame;
             if (_subscribedEncounter is not null)
             {
                 _subscribedEncounter.SkillActivated -= Encounter_SkillActivated;
@@ -132,6 +134,15 @@ public sealed class SkillCooldownTracker
         return remainingSeconds > 0
             ? remainingSeconds
             : null;
+    }
+
+    /// <summary>
+    /// ゲーム側がクールダウンを一括リセットしたときに、他プレイヤーの推測値の元になる
+    /// 発動履歴を破棄する。自分の残CDはサーバ真値なのでここでは何もしない。
+    /// </summary>
+    private void SkillCooldownStateStore_CooldownsResetByGame()
+    {
+        _activationHistories.Clear();
     }
 
     private void EncounterManager_EncounterStart(EncounterStartEventArgs e)

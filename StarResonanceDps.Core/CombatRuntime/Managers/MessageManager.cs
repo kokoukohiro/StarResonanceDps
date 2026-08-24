@@ -123,6 +123,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             SkillCooldownStateStore.Reset();
             GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
+            ActiveBuffStore.Instance.Clear();
+            PartyMemberCache.Instance.Clear();
         }
 
         public static SharpPcap.LibPcap.LibPcapLiveDevice? TryFindBestNetworkDevice()
@@ -1112,6 +1114,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
 
                         EncounterManager.Current.SetAttrKV(uuid, "AttrSkillLevelIdList", skillLevelInfoList);
+
+                        // AOI同期でしか届かないので、相手がマップ外へ出ると取得できなくなる。
+                        // 自分以外のパーティメンバーの分だけ補完用に保持する(判定はキャッシュ側)。
+                        PartyMemberCache.Instance.SetSkillLevels(
+                            Utils.UuidToEntityId(uuid),
+                            skillLevelInfoList);
                         break;
                     case EAttrType.AttrTeamId:
                         var teamId = isNoValue ? 0L : reader.ReadInt64();
