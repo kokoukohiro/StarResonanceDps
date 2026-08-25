@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.Protocols;
+﻿using StarResonanceDps.Core.CombatRuntime.Protocols;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -251,6 +251,99 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// NotifySocialData に同梱される「自分自身」のソーシャル情報を取り込む。
+        ///
+        /// <para>
+        /// 名前・職業・レベル・戦闘力は本来フルコンテナ(SyncContainerData)で届くが、
+        /// それはマップをロードした瞬間にしか流れないため、ロード済みマップの途中で
+        /// アプリを起動すると永久に受け取れず、自分の行だけ空のままになる。
+        /// 周辺プレイヤーは視界進入のたびに全属性が届くので埋まるため、自分だけ取り残される。
+        /// </para>
+        ///
+        /// <para>
+        /// この経路は途中起動でも定期的に届く。他プレイヤーに対して
+        /// ApplyTeamMemberSocialData がやっているのと同じ内容を、自分にも適用する。
+        /// </para>
+        ///
+        /// <para>
+        /// 値が既にある場合は上書きしない。この経路の内容が古い可能性は否定できないため、
+        /// 欠落を埋める用途に限定する。
+        /// </para>
+        /// </summary>
+        private static void ApplySelfSocialData(SocialData? socialData)
+        {
+            if (socialData is null || socialData.CharId <= 0)
+            {
+                return;
+            }
+
+            if (AppState.PlayerUID != 0 && socialData.CharId != AppState.PlayerUID)
+            {
+                return;
+            }
+
+            var selfUuid = currentUserUuid != 0
+                ? currentUserUuid
+                : AppState.PlayerUUID != 0
+                    ? AppState.PlayerUUID
+                    : Utils.EntityIdToUuid(socialData.CharId, (long)EEntityType.EntChar, false, false);
+            if (selfUuid == 0 || EncounterManager.Current is null)
+            {
+                return;
+            }
+
+            var entity = EncounterManager.Current.GetOrCreateEntity(selfUuid);
+            var changed = false;
+
+            if (string.IsNullOrEmpty(entity.Name)
+                && !string.IsNullOrEmpty(socialData.BasicData?.Name))
+            {
+                entity.SetName(socialData.BasicData.Name);
+                changed = true;
+            }
+
+            if (entity.ProfessionId == 0 && socialData.ProfessionData?.ProfessionId > 0)
+            {
+                entity.SetProfessionId(socialData.ProfessionData.ProfessionId);
+                changed = true;
+            }
+
+            if (entity.Level == 0 && socialData.BasicData?.Level > 0)
+            {
+                entity.SetLevel(socialData.BasicData.Level);
+                changed = true;
+            }
+
+            if (entity.SeasonLevel == 0 && socialData.BasicData?.SeasonLevel > 0)
+            {
+                entity.SetSeasonLevel(socialData.BasicData.SeasonLevel);
+                changed = true;
+            }
+
+            if (entity.AbilityScore == 0 && socialData.UserAttrData?.FightPoint > 0)
+            {
+                entity.SetAbilityScore(ToInt32Saturating(socialData.UserAttrData.FightPoint));
+                changed = true;
+            }
+
+            if (entity.SeasonStrength == 0 && socialData.UserAttrData?.SeasonStrength > 0)
+            {
+                entity.SetSeasonStrength(socialData.UserAttrData.SeasonStrength);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                PlayerRosterProjection.UpsertSelf(selfUuid);
+            }
+        }
+
+        private static int ToInt32Saturating(long value)
+        {
+            return value > int.MaxValue ? int.MaxValue : (int)value;
+        }
+
         public static void ProcessNotifySocialData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             if (payloadBuffer.Length == 0)
@@ -262,6 +355,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (vData != null)
             {
+                ApplySelfSocialData(vData.VRequest?.Data);
                 GrpcTeamManager.ProcessSocialTeamData(vData.VRequest?.Data);
             }
 
@@ -269,10 +363,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (vData?.VRequest?.Data?.SceneData != null)
                 {
-                    EncounterManager.SetSceneId(vData.VRequest.Data.SceneData.LevelMapId);
-                    EncounterManager.Current.SetChannelLineNumber(vData.VRequest.Data.SceneData.LineId);
-                    PlayerRosterProjection.UpdateMapName();
-                    NearbyEntityProjection.UpdateMapName();
+                    ApplySceneData(
+                        vData.VRequest.Data.SceneData.LevelMapId,
+                        vData.VRequest.Data.SceneData.LineId,
+                        vData.VRequest.Data.SceneData.SceneGuid);
                     EncounterManager.AllowSceneUpdate = false;
                 }
             }
@@ -624,34 +718,26 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerSkillLevelStateStore.SetSelfCurrentProfessionId(professionId);
             AppState.ProfessionId = professionId;
             AppState.ProfessionName = Professions.GetProfessionNameFromId(professionId);
-            RefreshSelfSpecState(uuid);
+            RefreshSelfRosterEntry(uuid);
         }
 
-        private static void RefreshSelfSpecState(long uuid)
+        /// <summary>
+        /// 職業・タレント・スキルの更新後に自分の行を作り直す。
+        ///
+        /// <para>
+        /// ここで特化は決めない。以前は <c>ProfessionTalentInfo.TalentStageCfgId</c> から
+        /// 特化を導いていたが、この値は「どのタレントツリーを選んでいるか」であって
+        /// 「特化アビリティを装着しているか」ではない。実測(2026-08-25)では、
+        /// アビリティ未装着でツリーだけ剛守のとき `TalentStageCfgId = 114` が返り続け、
+        /// 装着していない剛守を表示し続けていた。
+        /// 特化は自分も他人と同じく特化マーカーバフだけで決める。
+        /// </para>
+        /// </summary>
+        private static void RefreshSelfRosterEntry(long uuid)
         {
             if (uuid == 0)
             {
                 return;
-            }
-
-            var entity = EncounterManager.Current.GetOrCreateEntity(uuid);
-            if (!PlayerSkillLevelStateStore.TryGetSelfClassSpec(
-                entity.ProfessionId,
-                out _,
-                out var subProfessionId))
-            {
-                entity.SetSubProfessionUnknown();
-                PlayerRosterProjection.UpsertSelf(uuid);
-                return;
-            }
-
-            if (subProfessionId > 0)
-            {
-                entity.SetSubProfessionId(subProfessionId);
-            }
-            else
-            {
-                entity.SetSubProfessionUnknown();
             }
 
             PlayerRosterProjection.UpsertSelf(uuid);
@@ -674,7 +760,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else
             {
-                RefreshSelfSpecState(uuid);
+                RefreshSelfRosterEntry(uuid);
             }
         }
 
@@ -1208,6 +1294,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                 }
 
+                ApplyAppearBuffSnapshot(entity);
+
                 PlayerRosterProjection.AddOrUpdateNearbyPlayer(entity.Uuid);
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
@@ -1219,6 +1307,53 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             BattleStateMachine.CheckDeferredCalls();
+        }
+
+        /// <summary>
+        /// AOI出現メッセージが運ぶ全バフスナップショット(<c>Entity.BuffInfos</c>, field 7)を
+        /// 特化判定へ渡す。
+        ///
+        /// <para>
+        /// 差分(<c>AoiSyncDelta.BuffEffect</c>)は「見ている間に付いたバフ」しか運ばないので、
+        /// 既に付いている特化マーカーバフは差分だけでは永久に届かない。
+        /// このスナップショットが唯一「いま何を持っているか」を全部運ぶ経路で、
+        /// 「マーカーが1つも無い = アビリティ未装着」を確定できるのもここだけ。
+        /// </para>
+        ///
+        /// <para>
+        /// ここで扱うのは特化判定だけ。バフ表示側(<c>ActiveBuffStore</c>)へは流していない。
+        /// </para>
+        /// </summary>
+        private static void ApplyAppearBuffSnapshot(Zproto.Entity entity)
+        {
+            // 特化を持つのはプレイヤーだけ。モンスターまで通すと診断ログが埋まる。
+            if (Utils.UuidToEntityType(entity.Uuid) != (long)EEntityType.EntChar)
+            {
+                return;
+            }
+
+            var buffInfos = entity.BuffInfos?.BuffInfos;
+            if (buffInfos == null || buffInfos.Count == 0)
+            {
+                return;
+            }
+
+            var snapshot = new List<(int BaseId, int BuffUuid)>(buffInfos.Count);
+            for (var index = 0; index < buffInfos.Count; index++)
+            {
+                var buffInfo = buffInfos[index];
+                if (buffInfo.BaseId > 0)
+                {
+                    snapshot.Add((buffInfo.BaseId, buffInfo.BuffUuid));
+                }
+            }
+
+            if (snapshot.Count == 0)
+            {
+                return;
+            }
+
+            EncounterManager.Current.GetOrCreateEntity(entity.Uuid).ApplyBuffSnapshotForSpec(snapshot);
         }
 
         public static void ProcessSyncNearDeltaInfo(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -1304,6 +1439,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             List<int> EventHandledBuffs = new();
             List<int> LogicHandledBuffs = new();
+            var sawBuffAdd = false;
             if (delta.BuffEffect != null)
             {
                 for (int buffIdx = 0; buffIdx < delta.BuffEffect.BuffEffects.Count; buffIdx++)
@@ -1330,6 +1466,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                                     creationTime = dto.UtcDateTime;
                                 }
+                                sawBuffAdd = true;
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData);
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
@@ -1381,6 +1518,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
                     }
                 }
+            }
+
+            // 自分は SyncNearEntities.Appear に出ないので、他人のような全バフスナップショットが届かない。
+            // 代わりに自分のコンテナ同期が、起動時とシーン切替のたびに全バフを1デルタで送ってくる。
+            // 自分のバフは付与も除去も取りこぼさないので、流れ始めた時点で完全な像を持っている。
+            // これが立たないと「マーカーが無い = アビリティ未装着」を自分について確定できない。
+            if (sawBuffAdd && IsSelfPlayer(targetUuid))
+            {
+                EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived();
             }
 
             if (shieldListChangedByBuffRemoval)
@@ -1617,13 +1763,44 @@ namespace StarResonanceDps.Core.CombatRuntime
             BattleStateMachine.CheckDeferredCalls();
         }
 
+        /// <summary>
+        /// シーン情報を反映する。シーンが切り替わっていればプレイヤー/エンティティのリストをリセットする。
+        ///
+        /// <para>
+        /// 判定は (LevelMapId, SceneGuid) の組。LevelMapId だけでは同一マップのチャンネル切替を、
+        /// SceneGuid だけでは同一 GUID のままのマップ往復を取りこぼす。
+        /// </para>
+        ///
+        /// <para>
+        /// 同じシーンで何度呼ばれてもリセットは一度だけ。フルコンテナと NotifySocialData の
+        /// 両方から呼ばれるため、後着側で再度消さないようにするのが目的。
+        /// </para>
+        /// </summary>
+        private static void ApplySceneData(uint levelMapId, uint lineId, string? sceneGuid)
+        {
+            if (EncounterManager.TryBeginScene(levelMapId, sceneGuid))
+            {
+                PlayerRosterProjection.BeginMap();
+                NearbyEntityProjection.BeginMap();
+            }
+
+            EncounterManager.SetSceneId(levelMapId);
+            EncounterManager.SetChannelLineId(lineId);
+            EncounterManager.Current.SetChannelLineNumber(lineId);
+            PlayerRosterProjection.UpdateMapName();
+            NearbyEntityProjection.UpdateMapName();
+        }
+
         public static void ProcessSyncContainerData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             BattleStateMachine.CheckDeferredCalls();
 
             BattleStateMachine.StartNewMap();
-            PlayerRosterProjection.BeginMap();
-            NearbyEntityProjection.BeginMap();
+
+            // ここでの無条件リセットは廃止した。フルコンテナはシーン切替の5〜12秒後に届くため、
+            // その間に到着した周辺プレイヤー(SyncNearEntities.Appear)をまとめて消してしまい、
+            // 彼らは二度と Appear を送らないのでリストから失われていた(2026-08-25 実測)。
+            // リセットはシーン識別子の変化を契機に ApplySceneData 側で行う。
 
             var syncContainerData = SyncContainerData.Parser.ParseFrom(payloadBuffer);
             if (syncContainerData?.VData == null)
@@ -1700,17 +1877,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 PlayerSkillLevelStateStore.SetSelfCurrentProjectId(
                     vData.CurProjectIdInfo.CurrentProfessionProjectId);
             }
-            RefreshSelfSpecState(playerUuid);
+            RefreshSelfRosterEntry(playerUuid);
 
             var sceneData = vData.SceneData;
             if (sceneData != null)
             {
                 System.Diagnostics.Debug.WriteLine($"ProcessSyncContainerData.SceneData:\n{sceneData}");
 
-                EncounterManager.SetSceneId(sceneData.LevelMapId);
-                EncounterManager.Current.SetChannelLineNumber(sceneData.LineId);
-                PlayerRosterProjection.UpdateMapName();
-                NearbyEntityProjection.UpdateMapName();
+                ApplySceneData(sceneData.LevelMapId, sceneData.LineId, sceneData.SceneGuid);
             }
 
             var seasonRoleLevelData = vData.SeasonRoleLevelData;
@@ -1828,7 +2002,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     PlayerSkillLevelStateStore.ApplySelfDutyListChanges(ser.DutyList);
                 }
 
-                RefreshSelfSpecState(currentUserUuid);
+                RefreshSelfRosterEntry(currentUserUuid);
 
                 if (ser.SceneData != null)
                 {

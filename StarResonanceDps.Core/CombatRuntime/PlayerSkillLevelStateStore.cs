@@ -1,4 +1,4 @@
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 using StarResonanceDps.Core.CombatRuntime.DataTypes.Enums;
 using StarResonanceDps.Core.Models;
 using BinaryDutyInfo = StarResonanceDps.Core.Protocols.Game.Binary.DutyInfo;
@@ -353,37 +353,6 @@ public static class PlayerSkillLevelStateStore
         {
             professionId = _selfCurrentProfessionId;
             return professionId > 0;
-        }
-    }
-
-    public static bool TryGetSelfClassSpec(
-        int professionId,
-        out PlayerClassSpec classSpec,
-        out int subProfessionId)
-    {
-        lock (StateLock)
-        {
-            classSpec = PlayerClassSpec.Unknown;
-            subProfessionId = 0;
-            if (professionId <= 0)
-            {
-                return false;
-            }
-
-            if (!SelfTalentStageIds.TryGetValue(professionId, out var talentStageId))
-            {
-                return false;
-            }
-
-            if (talentStageId == 0)
-            {
-                return true;
-            }
-
-            subProfessionId = DataTypes.Professions.GetSubProfessionIdFromTalentId(
-                talentStageId);
-            classSpec = PlayerClassSpecResolver.FromSubProfessionId(subProfessionId);
-            return true;
         }
     }
 

@@ -26,6 +26,52 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool AllowSceneUpdate = true;
 
         public static string SceneName { get; private set; } = null!;
+
+        /// <summary>
+        /// チャンネル(回線)番号。チャンネルの無い場所では 0。
+        /// 実測(2026-08-25)で SceneData.LineId がそのままチャンネル番号だったことを確認済み。
+        /// エンカウンターは頻繁に作り直されるため、Encounter ではなくここで保持する。
+        /// </summary>
+        public static uint ChannelLineId { get; private set; }
+
+        /// <summary>マップ名。チャンネルがある場所ではチャンネル番号を付ける。</summary>
+        public static string SceneDisplayName => ChannelLineId > 0 && !string.IsNullOrEmpty(SceneName)
+            ? $"{SceneName} ch{ChannelLineId}"
+            : SceneName ?? string.Empty;
+
+        private static uint _currentSceneLevelMapId;
+        private static string _currentSceneGuid = string.Empty;
+
+        /// <summary>
+        /// シーンが切り替わったかを判定し、切り替わっていれば内部の識別子を更新して true を返す。
+        ///
+        /// <para>
+        /// 実測(2026-08-25)で分かった各値の性質:
+        /// LevelMapId はマップ移動で変わるがチャンネル切替では変わらない。
+        /// SceneGuid はチャンネル切替で変わるが、同一シーン間の往復では変わらないことがある。
+        /// LevelUuid はマップごとの固定値で、チャンネル切替では変わらない。
+        /// MapId / ChannelId / PlaneId は常に固定値で使えない。
+        /// したがって (LevelMapId, SceneGuid) の組でないと取りこぼす。
+        /// </para>
+        /// </summary>
+        public static bool TryBeginScene(uint levelMapId, string? sceneGuid)
+        {
+            var normalizedGuid = sceneGuid ?? string.Empty;
+            if (_currentSceneLevelMapId == levelMapId
+                && string.Equals(_currentSceneGuid, normalizedGuid, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            _currentSceneLevelMapId = levelMapId;
+            _currentSceneGuid = normalizedGuid;
+            return true;
+        }
+
+        public static void SetChannelLineId(uint lineId)
+        {
+            ChannelLineId = lineId;
+        }
         public delegate void BattleStartEventHandler(EventArgs e);
         public static event BattleStartEventHandler? BattleStart;
         public delegate void EncounterStartEventHandler(EncounterStartEventArgs e);
@@ -339,6 +385,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void SetSceneId(uint levelMapId, bool force = false)
         {
+
             if (!AllowSceneUpdate && !force)
             {
                 return;
@@ -1165,6 +1212,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                 CreationDateTime = creationTime,
             });
             GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData);
+
+            // 特化マーカーバフはタレントが本人に付ける常時バフなので、
+            // 紐付け先は術者ではなくバフを持っているエンティティ本人。
+            // 付与(装着・シーン切替時の再付与)と除去(アビリティを外した)の両方を見る。
+            if (buffEventType == EBuffEventType.BuffEventRemove)
+            {
+                GetOrCreateEntity(entityUuid).ClearSubProfessionFromMarkerBuffUuid(buffUuid);
+            }
+            else if (baseId > 0)
+            {
+                GetOrCreateEntity(entityUuid).UpdateSubProfessionFromMarkerBuff(baseId, buffUuid);
+            }
         }
 
         protected virtual void OnSkillActivated(SkillActivatedEventArgs e)
@@ -1310,6 +1369,35 @@ namespace StarResonanceDps.Core.CombatRuntime
         public string Profession { get; private set; } = null!;
         public int SubProfessionId { get; private set; } = 0;
         public string SubProfession { get; private set; } = null!;
+
+        /// <summary>
+        /// いま乗っている特化マーカーバフのID。0 なら未観測。
+        /// 立っている間はスキルIDからの推定で特化を上書きさせない。
+        /// </summary>
+        public int SpecMarkerBuffId { get; private set; } = 0;
+
+        /// <summary>
+        /// 上のマーカーバフの実体UUID。除去イベントは BaseId を運ばないため、これで突き合わせる。
+        /// </summary>
+        public int SpecMarkerBuffUuid { get; private set; } = 0;
+
+        /// <summary>
+        /// このエンティティの全バフスナップショット(AOI出現時の <c>Entity.BuffInfos</c>)を受信済みか。
+        ///
+        /// <para>
+        /// 「マーカーバフが無い＝アビリティ未装着」と言えるのは、
+        /// 全バフを一度に受け取った上でそこに無かったときだけ。
+        /// スナップショット未受信の「無い」は単に未観測であって、未装着ではない。
+        /// </para>
+        /// </summary>
+        public bool HasBuffSnapshot { get; private set; } = false;
+
+        /// <summary>
+        /// 特化が「アビリティ未装着」と確定できる状態か。
+        /// 職業が判明していて、全バフスナップショットを受信済みで、マーカーが乗っていない場合のみ true。
+        /// </summary>
+        public bool IsSpecAbilityUnequipped =>
+            ProfessionId > 0 && HasBuffSnapshot && SpecMarkerBuffId == 0 && SubProfessionId == 0;
         public int Level { get; set; } = 0;
         public Vector3 Position { get; private set; } = new();
 
@@ -1508,8 +1596,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var clearSubProfession = SubProfessionId != 0 && subProfessionBaseId != id;
             if (clearSubProfession)
             {
-                SubProfessionId = 0;
-                SubProfession = string.Empty;
+                SetSubProfessionUnknown();
                 Services.PartyMemberCache.Instance.ClearSubProfession(Utils.UuidToEntityId(UUID));
             }
         }
@@ -1532,8 +1619,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Profession = Professions.GetProfessionNameFromId(profId);
             }
 
-            // 特化はサーバから届かず戦闘観測からの推定なので、AOI外へ出ると失われる。
-            // 自分以外のパーティメンバーの分だけ補完用に保持する(判定はキャッシュ側)。
+            // AOI外に出ると観測できなくなるので、自分以外のパーティメンバーの分だけ控える。
+            // 自分かどうか・パーティ内かどうかの判定はキャッシュ側が持つ。
             Services.PartyMemberCache.Instance.SetSubProfession(Utils.UuidToEntityId(UUID), id);
         }
 
@@ -1542,8 +1629,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             SubProfessionId = 0;
             SubProfession = string.Empty;
 
-            // ここは「もう観測できない」であって「特化が変わった」ではない。
-            // マップ切替でも呼ばれるため、ここでキャッシュを消すと補完の意味が無くなる。
+            // 特化を「観測できていない」に戻すときは、その根拠だったマーカーと
+            // スナップショット受信済みフラグも一緒に落とす。
+            // スナップショットだけ残すと「受信済みなのにマーカーが無い」= 未装着確定、という
+            // 実際には確かめていない結論が立ってしまう。
+            SpecMarkerBuffId = 0;
+            SpecMarkerBuffUuid = 0;
+            HasBuffSnapshot = false;
         }
 
         public void SetLevel(int level)
@@ -1670,6 +1762,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             TotalCasts++;
+
             OnSkillActivated(new SkillActivatedEventArgs { CasterUuid = UUID, SkillId = skillId, ActivationDateTime = DateTime.Now });
         }
 
@@ -1928,8 +2021,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             DamageStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
 
             RegisterSkillData(ESkillType.Damage, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
-
-            UpdateSubProfessionFromSkill(skillId);
         }
 
         public void AddHealing(
@@ -1953,19 +2044,139 @@ namespace StarResonanceDps.Core.CombatRuntime
             HealingStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
 
             RegisterSkillData(ESkillType.Healing, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, overhealing, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
-
-            UpdateSubProfessionFromSkill(skillId);
         }
 
-        private void UpdateSubProfessionFromSkill(int skillId)
+        /// <summary>
+        /// 特化マーカーバフから特化を確定する。
+        ///
+        /// <para>
+        /// マーカーバフはアビリティを装着している間ずっと乗っている常時バフなので、
+        /// これが届いた時点で特化は推定ではなく確定になる。届く経路は3つ:
+        /// AOI出現時の全バフスナップショット、シーン切替時の再付与、装着時の付与。
+        /// </para>
+        ///
+        /// <para>マーカーではないバフIDは 0 が返るので何も起きない。</para>
+        /// </summary>
+        public void UpdateSubProfessionFromMarkerBuff(int baseId, int buffUuid)
         {
-            var subProfessionId = (int)Professions.GetSubProfessionIdBySkillId(skillId);
-            if (subProfessionId <= 0 || subProfessionId == SubProfessionId)
+            var subProfessionId = (int)Professions.GetSubProfessionIdBySpecMarkerBuffId(baseId);
+            if (subProfessionId <= 0)
+            {
+                return;
+            }
+
+            SpecMarkerBuffId = baseId;
+            SpecMarkerBuffUuid = buffUuid;
+
+            if (SubProfessionId == subProfessionId)
             {
                 return;
             }
 
             SetSubProfessionId(subProfessionId);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+        }
+
+        /// <summary>
+        /// AOI出現時に届く全バフスナップショット(<c>Entity.BuffInfos</c>)を特化判定に反映する。
+        ///
+        /// <para>
+        /// スナップショットは「いまこのエンティティが持っている全バフ」なので、
+        /// この中にマーカーが無いことは「アビリティ未装着」を意味する。
+        /// 差分(Add/Remove)だけでは未装着を確定できないため、この経路だけが
+        /// <see cref="IsSpecAbilityUnequipped"/> を成立させる。
+        /// </para>
+        /// </summary>
+        /// <summary>
+        /// 自分のバフ集合を受信したことを記録する。
+        ///
+        /// <para>
+        /// 自分は <c>SyncNearEntities.Appear</c> に出てこないので、他人のような
+        /// 全バフスナップショットは届かない。代わりに自分のコンテナ同期
+        /// (<c>SyncToMeDeltaInfo</c>)が、アプリ起動時とシーン切替のたびに
+        /// 全バフを1デルタでまとめて送ってくる(実測 2026-08-25: 起動時52件、シーン切替時52件)。
+        /// </para>
+        ///
+        /// <para>
+        /// 根拠が他人とは違う点に注意。他人は「一括スナップショットを受け取った」が根拠だが、
+        /// 自分は「自分のコンテナなので付与も除去も取りこぼさない」が根拠。
+        /// つまり自分については、バフ集合が流れ始めた時点で以後ずっと完全な像を持っている。
+        /// </para>
+        /// </summary>
+        public void MarkSelfBuffStreamReceived()
+        {
+            if (HasBuffSnapshot)
+            {
+                return;
+            }
+
+            HasBuffSnapshot = true;
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+        }
+
+        public void ApplyBuffSnapshotForSpec(IReadOnlyList<(int BaseId, int BuffUuid)> buffs)
+        {
+            var markerBaseId = 0;
+            var markerBuffUuid = 0;
+            for (var index = 0; index < buffs.Count; index++)
+            {
+                if ((int)Professions.GetSubProfessionIdBySpecMarkerBuffId(buffs[index].BaseId) > 0)
+                {
+                    markerBaseId = buffs[index].BaseId;
+                    markerBuffUuid = buffs[index].BuffUuid;
+                    break;
+                }
+            }
+
+            if (markerBaseId != 0)
+            {
+                UpdateSubProfessionFromMarkerBuff(markerBaseId, markerBuffUuid);
+                HasBuffSnapshot = true;
+                return;
+            }
+
+            // スナップショットにマーカーが1つも無い = アビリティ未装着(ゲーム内呼称「クラスR1」)。
+            var hadSpec = SpecMarkerBuffId != 0 || SubProfessionId != 0;
+
+            // 先に特化を落としてから受信済みフラグを立てる。
+            // SetSubProfessionUnknown はフラグも落とすので、順序を逆にすると未装着を確定できない。
+            SetSubProfessionUnknown();
+            HasBuffSnapshot = true;
+            Services.PartyMemberCache.Instance.SetSpecAbilityUnequipped(Utils.UuidToEntityId(UUID));
+
+            if (hadSpec)
+            {
+                PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+            }
+        }
+
+        /// <summary>
+        /// 特化マーカーバフが外れたことを反映する。
+        ///
+        /// <para>
+        /// 除去イベントは <c>BuffUuid</c> しか運ばず <c>BaseId</c> は 0 で届くため、
+        /// 付与時に控えておいたバフ実体のUUIDと突き合わせる。
+        /// いま乗っているマーカーと同じ実体のときだけ落とすので、
+        /// 特化切替で旧マーカーの除去が新マーカーの付与より後に届いても新しい方は消えない。
+        /// </para>
+        ///
+        /// <para>アビリティを外したときに古い特化を表示し続けないよう、ここは握り潰さない。</para>
+        /// </summary>
+        public void ClearSubProfessionFromMarkerBuffUuid(int buffUuid)
+        {
+            if (buffUuid == 0 || SpecMarkerBuffUuid != buffUuid)
+            {
+                return;
+            }
+
+            SetSubProfessionUnknown();
+
+            // 付与から除去まで見届けているので、これは「観測できない」ではなく
+            // 「今は何も付いていない」の直接観測。スナップショット受信済みと同じ扱いにして未装着を出す。
+            // 特化を切り替えた場合は直後に新しいマーカーの付与が届いて上書きされる。
+            HasBuffSnapshot = true;
+            Services.PartyMemberCache.Instance.SetSpecAbilityUnequipped(Utils.UuidToEntityId(UUID));
+
             PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
         }
 

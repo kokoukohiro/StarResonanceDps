@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.Models;
+﻿using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using Zproto;
 
@@ -32,7 +32,7 @@ internal static class NearbyEntityProjection
 
     public static void UpdateMapName()
     {
-        EntityStore.UpdateMapName(EncounterManager.SceneName);
+        EntityStore.UpdateMapName(EncounterManager.SceneDisplayName);
     }
 
     public static void AddOrUpdateAppearedEntity(long entityUuid)

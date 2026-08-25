@@ -14,17 +14,23 @@ namespace StarResonanceDps.Core.Services;
 /// 追い越して更新を握り潰す事故になる(旧 EntityCache がまさにそれだった)。
 /// </para>
 ///
-/// <para>保持するのは次の2種類だけ:</para>
+/// <para>保持するのは次の2種類だけ。どちらもAOI同期でしか届かず、相手がAOI外に出ると取れなくなる:</para>
 /// <list type="bullet">
 ///   <item>
-///     <b>職業特化(SubProfessionId)</b> — サーバから届く値ではなく、特化スキルの使用を
-///     観測して推定している。マップを読み直すと不明に戻るため保持する。
+///     <b>習得スキル一覧(AttrSkillLevelIdList)</b> — イマジン/ロールスキルの表示元。
 ///   </item>
 ///   <item>
-///     <b>習得スキル一覧(AttrSkillLevelIdList)</b> — イマジン/ロールスキルの表示元。
-///     AOI同期でしか届かないため、相手がマップ外に出ると取得できなくなる。
+///     <b>職業特化</b> — 特化マーカーバフの観測結果。「特化が確定した」と
+///     「アビリティ未装着が確定した」の両方を持つ。
 ///   </item>
 /// </list>
+///
+/// <para>
+/// 特化キャッシュはスキル一覧と同じ扱い。観測したら入れ、AOI外で観測できない間だけ補完に使い、
+/// パーティから外れたら捨てる。以前スキルIDから推定していた頃と違い、いま入るのは
+/// マーカーバフで確定した値だけなので、推定値が居座る問題は起きない。
+/// アビリティを外したことを観測したときは「未装着」として上書きするので、古い特化も残らない。
+/// </para>
 ///
 /// <para>
 /// 対象は自分以外のパーティメンバーのみ。自分は常に完全なライブ値が取れるので一切キャッシュしない。
@@ -49,6 +55,9 @@ public sealed class PartyMemberCache
 
     public static PartyMemberCache Instance => LazyInstance.Value;
 
+    /// <summary>
+    /// マーカーバフで確定した特化を記録する。
+    /// </summary>
     public void SetSubProfession(long characterId, int subProfessionId)
     {
         if (subProfessionId <= 0 || !IsCacheableMember(characterId))
@@ -60,10 +69,39 @@ public sealed class PartyMemberCache
         {
             var entry = GetOrCreateNoLock(characterId);
             entry.SubProfessionId = subProfessionId;
+            entry.SpecAbilityUnequipped = false;
             entry.SubProfessionObservedAt = DateTime.Now;
         }
     }
 
+    /// <summary>
+    /// アビリティ未装着(クラスR1)が確定したことを記録する。
+    ///
+    /// <para>
+    /// 「マーカーが観測できていない」ではなく「マーカーが無いことを確認した」ときだけ呼ぶこと。
+    /// 全バフスナップショットにマーカーが1つも無かった場合と、マーカーの除去を見届けた場合の2つ。
+    /// </para>
+    /// </summary>
+    public void SetSpecAbilityUnequipped(long characterId)
+    {
+        if (!IsCacheableMember(characterId))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            var entry = GetOrCreateNoLock(characterId);
+            entry.SubProfessionId = 0;
+            entry.SpecAbilityUnequipped = true;
+            entry.SubProfessionObservedAt = DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// 職業が変わったなど、記録している特化が無効になったときに捨てる。
+    /// 「観測できなくなった」だけのときは呼ばない(それはAOI外の通常状態で、補完すべき場面そのもの)。
+    /// </summary>
     public void ClearSubProfession(long characterId)
     {
         if (characterId <= 0)
@@ -76,6 +114,7 @@ public sealed class PartyMemberCache
             if (_entriesByCharacterId.TryGetValue(characterId, out var entry))
             {
                 entry.SubProfessionId = 0;
+                entry.SpecAbilityUnequipped = false;
                 entry.SubProfessionObservedAt = default;
             }
         }
@@ -99,6 +138,20 @@ public sealed class PartyMemberCache
 
             subProfessionId = entry.SubProfessionId;
             return true;
+        }
+    }
+
+    public bool IsSpecAbilityUnequipped(long characterId)
+    {
+        if (!IsCacheableMember(characterId))
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            return _entriesByCharacterId.TryGetValue(characterId, out var entry)
+                && entry.SpecAbilityUnequipped;
         }
     }
 
@@ -207,6 +260,8 @@ public sealed class PartyMemberCache
     private sealed class CacheEntry
     {
         public int SubProfessionId { get; set; }
+
+        public bool SpecAbilityUnequipped { get; set; }
 
         public DateTime SubProfessionObservedAt { get; set; }
 

@@ -1,4 +1,4 @@
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using Zproto;
@@ -17,6 +17,7 @@ internal sealed record PlayerDataSourceSnapshot(
     long CurrentHp,
     long MaxHp,
     bool IsNpc,
+    bool IsSpecAbilityUnequipped,
     PlayerEquipmentData? EquipmentData);
 
 internal static class PlayerDataSourceResolver
@@ -169,15 +170,20 @@ internal static class PlayerDataSourceResolver
             currentHp,
             maxHp,
             !isSelf && partySupplement?.IsNpc == true,
+            ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf),
             GetEquipmentData(nearbyEntity)
                 ?? partySupplement?.EquipmentData
                 ?? GetEquipmentData(metadataEntity));
     }
 
     /// <summary>
-    /// 職業特化を解決する。特化はサーバから届く値ではなく特化スキルの使用を観測した推定値で、
-    /// マップを読み直すと不明に戻る。自分は <c>PlayerSkillLevelStateStore</c> から即座に確定できるので
-    /// キャッシュを参照しない。自分以外のパーティメンバーだけ補完する。
+    /// 職業特化を解決する。
+    ///
+    /// <para>
+    /// 真値は特化マーカーバフの観測結果で、エンティティが持っている値。相手がAOI外に出ると
+    /// 観測できなくなるので、自分以外のパーティメンバーだけキャッシュから補完する
+    /// (イマジン/ロールスキルと同じ扱い)。自分はキャッシュを見ない。
+    /// </para>
     /// </summary>
     private static int ResolveSubProfessionId(
         long characterId,
@@ -203,6 +209,30 @@ internal static class PlayerDataSourceResolver
         return PartyMemberCache.Instance.TryGetSubProfession(characterId, out var cached)
             ? cached
             : 0;
+    }
+
+    /// <summary>
+    /// 特化アビリティ未装着が確定しているか。
+    ///
+    /// <para>
+    /// 「マーカーバフが無い」だけでは未装着と言えない。単に観測していないだけの可能性がある。
+    /// 全バフスナップショットを受け取った上でマーカーが1つも無かったときだけ true になる
+    /// (<see cref="Entity.IsSpecAbilityUnequipped"/>)。
+    /// </para>
+    /// </summary>
+    private static bool ResolveSpecAbilityUnequipped(
+        long characterId,
+        Entity? nearbyEntity,
+        Entity? metadataEntity,
+        bool isSelf)
+    {
+        if (nearbyEntity?.IsSpecAbilityUnequipped == true
+            || metadataEntity?.IsSpecAbilityUnequipped == true)
+        {
+            return true;
+        }
+
+        return !isSelf && PartyMemberCache.Instance.IsSpecAbilityUnequipped(characterId);
     }
 
     public static int GetInt(Entity? entity, string key)

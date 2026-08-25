@@ -20,7 +20,17 @@ public enum PlayerClassSpec
     SoulMusicianDissonance,
     SoulMusicianConcerto,
     FlameBerserkerFormless,
-    FlameBerserkerCrimson
+    FlameBerserkerCrimson,
+
+    /// <summary>
+    /// 特化アビリティ未装着。ゲーム内の呼称は「クラスR1」(TalentStage 0)。
+    ///
+    /// <para>
+    /// <see cref="Unknown"/> とは別物。Unknown は「まだ観測できていない」で、
+    /// これは「全バフスナップショットを受け取った上でマーカーが無かった」= 確定した未装着。
+    /// </para>
+    /// </summary>
+    Rank1
 }
 
 public static class PlayerClassSpecResolver

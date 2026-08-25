@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
@@ -14,13 +14,9 @@ public static partial class PlayerInfoFormatFormatter
         string? formatString,
         PlayerNameDisplayMode nameDisplayMode)
     {
-        var classSpec = player.IsSelf
-            && PlayerSkillLevelStateStore.TryGetSelfClassSpec(
-                player.ProfessionId,
-                out var currentClassSpec,
-                out _)
-            ? currentClassSpec
-            : PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
+        // 自分も他人と同じ経路。特化は特化マーカーバフだけで決まるので、
+        // 自分だけタレントから引き直す必要はない。
+        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
         return Format(
             new PlayerInfoFormatData(
                 player.UserId,

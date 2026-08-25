@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -178,52 +178,46 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
             _ => 0
         };
 
-        public static SubProfessionId GetSubProfessionIdBySkillId(int skillId) => skillId switch
+        /// <summary>
+        /// 特化マーカーバフから特化を引く。
+        ///
+        /// <para>
+        /// 各特化のアビリティは、装着している間ずっと乗り続ける固有の常時バフを1つ付与する
+        /// (TalentStageTable の RootId → TalentTable.TalentEffect の <c>[3, buffId, 1]</c>)。
+        /// 持続時間は無期限(<c>DestroyParam: []</c>)なので、スキルを撃たなくても、
+        /// 命中しなくても、戦闘していなくても特化が確定する。
+        /// </para>
+        ///
+        /// <para>
+        /// 以前はスキルIDから特化を推定していたが、その方式は捨てた。各職とも特殊攻撃を置換するのは
+        /// 片方の特化だけで、もう片方(雷刃・氷牙・双炎・烈風・威咲・剛身・狼弓・光砕・狂音)は
+        /// 素のスキルIDのままアビリティ未装着と区別がつかず、未装着を誤って特化と判定していた。
+        /// マーカーバフは「アビリティを装着しているか」そのものなので誤検出しない。
+        /// </para>
+        ///
+        /// <para>シーン切替で一度削除され、新シーンで再付与される(<c>DeleteChangeScene: true</c>)。</para>
+        /// </summary>
+        public static SubProfessionId GetSubProfessionIdBySpecMarkerBuffId(int buffId) => buffId switch
         {
-            0 => SubProfessionId.SubProfession_Unknown,
-            1714 or 1734 => SubProfessionId.SubProfession_Iaido,
-            1715 or 1740 or 1741 or 179906 => SubProfessionId.SubProfession_Moonstrike,
-            120901 or 120902 => SubProfessionId.SubProfession_Icicle,
-            1241 => SubProfessionId.SubProfession_Frostbeam,
-            35107 or 35108 or 35109 or 160102 => SubProfessionId.SubProfession_FormlessExpertise,
-            1606 or 1621 or 1622 or 1623 => SubProfessionId.SubProfession_CrimsonExpertise,
-            1405 or 1418 => SubProfessionId.SubProfession_Vanguard,
-            1419 => SubProfessionId.SubProfession_Skyward,
-            1518 or 1541 or 21402 => SubProfessionId.SubProfession_Smite,
-            20301 => SubProfessionId.SubProfession_Lifebind,
-            199902 => SubProfessionId.SubProfession_Earthfort,
-            1930 or 1931 or 1934 or 1935 => SubProfessionId.SubProfession_Block,
-            2292 or 1700820 or 1700825 or 1700827 => SubProfessionId.SubProfession_Wildpack,
-            220112 or 2203622 or 220106 => SubProfessionId.SubProfession_Falconry,
-            2405 => SubProfessionId.SubProfession_Recovery,
-            2406 => SubProfessionId.SubProfession_Shield,
-            2321 or 2335 => SubProfessionId.SubProfession_Dissonance,
-            2301 or 2336 or 2361 or 55302 => SubProfessionId.SubProfession_Concerto,
+            2200320 => SubProfessionId.SubProfession_Iaido,              // 雷刃型
+            2200590 => SubProfessionId.SubProfession_Moonstrike,         // 月影型
+            2204300 => SubProfessionId.SubProfession_Icicle,             // 氷牙型
+            2204120 => SubProfessionId.SubProfession_Frostbeam,          // 霜天型
+            2208130 => SubProfessionId.SubProfession_FormlessExpertise,  // 双炎型
+            2208430 => SubProfessionId.SubProfession_CrimsonExpertise,   // 炎舞型
+            2205300 => SubProfessionId.SubProfession_Vanguard,           // 烈風型
+            2205290 => SubProfessionId.SubProfession_Skyward,            // 乱風型
+            2202110 => SubProfessionId.SubProfession_Smite,              // 威咲型
+            2202340 => SubProfessionId.SubProfession_Lifebind,           // 森癒型
+            2201330 => SubProfessionId.SubProfession_Earthfort,          // 剛身型
+            2201320 => SubProfessionId.SubProfession_Block,              // 剛守型
+            2203260 => SubProfessionId.SubProfession_Wildpack,           // 狼弓型
+            2203290 => SubProfessionId.SubProfession_Falconry,           // 鷹弓型
+            2206090 => SubProfessionId.SubProfession_Recovery,           // 光砕型
+            2206190 => SubProfessionId.SubProfession_Shield,             // 光盾型
+            2207090 => SubProfessionId.SubProfession_Dissonance,         // 狂音型
+            2207180 => SubProfessionId.SubProfession_Concerto,           // 響奏型
             _ => SubProfessionId.SubProfession_Unknown
-        };
-
-        public static string GetSubProfessionNameBySkillId(int skillId) => skillId switch
-        {
-            0 => AppStrings.GetLocalized("SubProfession_Unknown"),
-            1714 or 1734 or 1739 or 179908 => AppStrings.GetLocalized("SubProfession_Iaido"),
-            1715 or 1740 or 1741 or 179906 => AppStrings.GetLocalized("SubProfession_Moonstrike"),
-            120901 or 120902 => AppStrings.GetLocalized("SubProfession_Icicle"),
-            1241 => AppStrings.GetLocalized("SubProfession_Frostbeam"),
-            35107 or 35108 or 35109 or 160102 => AppStrings.GetLocalized("SubProfession_FormlessExpertise"),
-            1606 or 1621 or 1622 or 1623 => AppStrings.GetLocalized("SubProfession_CrimsonExpertise"),
-            1405 or 1418 => AppStrings.GetLocalized("SubProfession_Vanguard"),
-            1419 => AppStrings.GetLocalized("SubProfession_Skyward"),
-            1518 or 1541 or 21402 => AppStrings.GetLocalized("SubProfession_Smite"),
-            20301 => AppStrings.GetLocalized("SubProfession_Lifebind"),
-            199902 => AppStrings.GetLocalized("SubProfession_Earthfort"),
-            1930 or 1931 or 1934 or 1935 => AppStrings.GetLocalized("SubProfession_Block"),
-            2292 or 1700820 or 1700825 or 1700827 => AppStrings.GetLocalized("SubProfession_Wildpack"),
-            220112 or 2203622 or 220106 => AppStrings.GetLocalized("SubProfession_Falconry"),
-            2405 => AppStrings.GetLocalized("SubProfession_Recovery"),
-            2406 => AppStrings.GetLocalized("SubProfession_Shield"),
-            2306 => AppStrings.GetLocalized("SubProfession_Dissonance"),
-            2307 or 2361 or 55302 => AppStrings.GetLocalized("SubProfession_Concerto"),
-            _ => ""
         };
 
         public static Vector4 ProfessionColors(string professionName)

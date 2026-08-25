@@ -67,8 +67,11 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes.Enums
             SubProfession_Icicle = 104,
             SubProfession_Frostbeam = 105,
 
-            SubProfession_FormlessExpertise = 124,
-            SubProfession_CrimsonExpertise = 125,
+            // 赤炎の狂戦士(prof 3)だけ他職の連番から外れている。
+            // ProfessionSystemTable の ShowTalentStage が正解: prof3 = [128, 129]。
+            // 他の8職は 101/102, 104/105, 107/108, 110/111, 113/114, 116/117, 119/120, 122/123。
+            SubProfession_FormlessExpertise = 128,
+            SubProfession_CrimsonExpertise = 129,
 
             Profession_WindKnight = 106,
             SubProfession_Vanguard = 107,

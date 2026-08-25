@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,8 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class CharSerialize(BlobReader blob) : BlobType(ref blob)
 {
+    public override string? DebugName => "CharSerialize";
+
     public int? CharId;
     public CharBaseInfo? CharBaseInfo;
     public SceneData? SceneData;

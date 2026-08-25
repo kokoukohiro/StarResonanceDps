@@ -63,6 +63,72 @@ public class BlobReader
         AddOffset(4);
         return val;
     }
+
+    /// <summary>
+    /// 未対応フィールドの値がネストしたblobなら、その値だけを読み飛ばす。
+    ///
+    /// <para>
+    /// このフォーマットはフィールドごとの型タグも長さ接頭辞も持たないため、
+    /// 未知フィールドの値は本来スキップできない。ただしネストしたblobだけは
+    /// 先頭が開始タグ(-2)とサイズを持つので、そこだけは正確に飛ばせる。
+    /// </para>
+    ///
+    /// <para>
+    /// スキップ後に終端タグ(-3)を検証し、想定と違えば位置を元に戻して false を返す。
+    /// 位置がずれたまま読み進めて壊れた値を拾うより、打ち切って失われたと分かる方がよい。
+    /// </para>
+    /// </summary>
+    public bool TrySkipNestedBlob()
+    {
+        var restoreOffset = Offset;
+
+        if (!CanRead(4))
+        {
+            Offset = restoreOffset;
+            return false;
+        }
+
+        if (ReadInt() != -2)
+        {
+            Offset = restoreOffset;
+            return false;
+        }
+
+        if (!CanRead(4))
+        {
+            Offset = restoreOffset;
+            return false;
+        }
+
+        var size = ReadInt();
+        if (size == -3)
+        {
+            // 空のblob。開始タグと -3 だけで値は終わっている。
+            return true;
+        }
+
+        if (size < 0 || !CanRead(size + 4))
+        {
+            Offset = restoreOffset;
+            return false;
+        }
+
+        Offset += size;
+        if (ReadInt() != -3)
+        {
+            Offset = restoreOffset;
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CanRead(int byteCount)
+    {
+        return byteCount >= 0
+            && Offset >= 0
+            && Offset <= Buff.Length - byteCount;
+    }
     
     public uint ReadUInt()
     {

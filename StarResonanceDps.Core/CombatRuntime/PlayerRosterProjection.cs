@@ -38,7 +38,7 @@ internal static class PlayerRosterProjection
 
     public static void UpdateMapName()
     {
-        RosterStore.UpdateMapName(EncounterManager.SceneName);
+        RosterStore.UpdateMapName(EncounterManager.SceneDisplayName);
     }
 
     public static void UpsertSelf(long playerUuid)
@@ -340,7 +340,11 @@ internal static class PlayerRosterProjection
             source.SeasonStrength,
             source.CurrentHp,
             source.MaxHp,
-            PlayerClassSpecResolver.FromSubProfessionId(source.SubProfessionId),
+            source.SubProfessionId > 0
+                ? PlayerClassSpecResolver.FromSubProfessionId(source.SubProfessionId)
+                : source.IsSpecAbilityUnequipped
+                    ? PlayerClassSpec.Rank1
+                    : PlayerClassSpec.Unknown,
             isSelf,
             combatAttributes,
             source.SubProfessionId,

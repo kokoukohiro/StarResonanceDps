@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -380,6 +380,9 @@
   </data>
   <data name="Settings_Theme_BackgroundImage_Filter" xml:space="preserve">
     <value>画像ファイル</value>
+  </data>
+  <data name="ClassSpec_Rank1" xml:space="preserve">
+    <value>Rank1</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>不明</value>
