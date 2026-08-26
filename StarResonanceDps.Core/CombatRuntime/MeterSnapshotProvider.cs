@@ -26,6 +26,7 @@ public sealed record MeterPlayerSnapshot(
     string Name,
     int ProfessionId,
     int SubProfessionId,
+    PlayerClassSpec ClassSpec,
     int AbilityScore,
     int SeasonStrength,
     int Level,
@@ -1509,18 +1510,11 @@ public static class MeterSnapshotProvider
             professionId = supplement.ProfessionId;
         }
 
-        if (IsSelfEntity(entityUuid)
-            || !PlayerSkillLevelStateStore.TryGetRoleSkillIdsForProfession(
-                professionId,
-                out var currentRoleSkillIds))
-        {
-            return receivedSkillLevels;
-        }
-
-        return receivedSkillLevels
-            .Where(skill => !CombatDataCatalog.IsSkillRole(skill.SkillId)
-                || currentRoleSkillIds.Contains(skill.SkillId))
-            .ToArray();
+        // ここでは絞らない。この戻り値はスキルリストウィジェット(全スキル一覧)にも使われ、
+        // そこでは習得済みを全部出すのが正しい。
+        // 「装備中の4枠」を出すのはプレイヤーリスト側だけなので、
+        // ロールスキルの絞り込みは CreatePlayerImagineRoleSkillLoadout で行う。
+        return receivedSkillLevels;
     }
 
     private static bool TryResolvePlayerEntityByUuid(
@@ -1652,6 +1646,9 @@ public static class MeterSnapshotProvider
             source.Name,
             source.ProfessionId,
             source.SubProfessionId,
+            PlayerClassSpecResolver.Resolve(
+                source.SubProfessionId,
+                source.IsSpecAbilityUnequipped),
             source.CombatPower,
             source.SeasonStrength,
             source.Level,

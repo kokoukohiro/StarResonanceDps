@@ -1,4 +1,4 @@
-namespace StarResonanceDps.Core.Models;
+﻿namespace StarResonanceDps.Core.Models;
 
 public enum PlayerClassSpec
 {
@@ -35,6 +35,25 @@ public enum PlayerClassSpec
 
 public static class PlayerClassSpecResolver
 {
+    /// <summary>
+    /// 表示用の特化を解決する。特化の判定は Core で完結させ、ウィジェット側で組み立てない。
+    ///
+    /// <para>
+    /// <see cref="PlayerClassSpec.Rank1"/>(アビリティ未装着)は <c>SubProfessionId</c> だけからは
+    /// 導けない。0 は「未装着」と「まだ観測していない」の両方を意味するため、
+    /// 未装着が確定したかどうかのフラグと組にして初めて区別できる。
+    /// </para>
+    /// </summary>
+    public static PlayerClassSpec Resolve(int subProfessionId, bool isSpecAbilityUnequipped)
+    {
+        if (subProfessionId > 0)
+        {
+            return FromSubProfessionId(subProfessionId);
+        }
+
+        return isSpecAbilityUnequipped ? PlayerClassSpec.Rank1 : PlayerClassSpec.Unknown;
+    }
+
     public static PlayerClassSpec FromSubProfessionId(int subProfessionId)
     {
         return subProfessionId switch

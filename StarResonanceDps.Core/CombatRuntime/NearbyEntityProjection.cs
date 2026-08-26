@@ -10,6 +10,7 @@ internal static class NearbyEntityProjection
 
     public static void BeginMap()
     {
+        Diagnostics.SceneResetProbe.CaptureReset("エンティティリスト", EntityStore.Current.Entries.Count);
         NearbyEntityCampState.BeginMap();
         EntityStore.BeginMap();
     }

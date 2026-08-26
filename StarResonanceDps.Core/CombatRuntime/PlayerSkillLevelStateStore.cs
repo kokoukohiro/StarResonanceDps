@@ -157,6 +157,7 @@ public static class PlayerSkillLevelStateStore
                     {
                         SelfTalentStageIds[pair.Key] = stageId;
                     }
+
                 }
             }
 
@@ -379,28 +380,6 @@ public static class PlayerSkillLevelStateStore
         {
             roleSkillLevels = _selfRoleSkillLevels;
             return roleSkillLevels.Count > 0;
-        }
-    }
-
-    public static bool TryGetRoleSkillIdsForProfession(
-        int professionId,
-        out IReadOnlySet<int> skillIds)
-    {
-        lock (StateLock)
-        {
-            var dutyId = ResolveDutyIdForProfession(professionId);
-
-            if (dutyId == 0 || !SelfDutyStates.TryGetValue(dutyId, out var dutyState))
-            {
-                skillIds = Array.Empty<int>().ToFrozenSet();
-                return false;
-            }
-
-            skillIds = dutyState.Skills.Values
-                .Select(skill => skill.SkillId)
-                .Where(skillId => skillId > 0)
-                .ToFrozenSet();
-            return skillIds.Count > 0;
         }
     }
 
@@ -696,7 +675,16 @@ public static class PlayerSkillLevelStateStore
 
     private static IEnumerable<SkillState> EnumerateSelectedDutySkills(DutyState dutyState)
     {
-        if (dutyState.Slots.Count == 0 || dutyState.Skills.Count <= 4)
+        // スロット割り当てが空 = 1つも装備していない。
+        // 実測(2026-08-25): フルコンテナは全職務のスロットを同時に運んでおり、装備0の職務だけが
+        // 空で届く(duty2=4件・duty3=0件が同一パケットで到着)。1つ装備すると即座に1件で届く。
+        // つまり空は「未受信」ではなく「装備なし」。習得済みで埋めない。
+        if (dutyState.Slots.Count == 0)
+        {
+            return [];
+        }
+
+        if (dutyState.Skills.Count <= 4)
         {
             return dutyState.Skills
                 .OrderBy(pair => pair.Key)

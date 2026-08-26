@@ -27,6 +27,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void StartNewMap()
         {
+            Diagnostics.SceneResetProbe.CaptureStartNewMap();
             Log.Information($"{DateTime.Now} - BattleStateMachine.StartNewMap");
             PreviousDungeonTargetData = null;
             DeferredEncounterStartTime = null;

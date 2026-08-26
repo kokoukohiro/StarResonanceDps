@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.Models;
+﻿using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.CombatRuntime;
 
@@ -93,6 +93,8 @@ internal static class NearbyEntityCampState
 
     private static EntityCampRelation GetRelationNoLock(long entityUuid)
     {
+        // 3つ揃わないと判定できない。自分の陣営は EnterScene でしか届かないため、
+        // ロード済みマップで起動するとマップ移動まで揃わない(2026-08-26 調査、CLAUDE.md 参照)。
         if (_selfEntityUuid == 0
             || !Camps.TryGetValue(_selfEntityUuid, out var selfCamp)
             || !Camps.TryGetValue(entityUuid, out var entityCamp))

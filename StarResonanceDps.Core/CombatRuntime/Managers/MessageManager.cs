@@ -65,6 +65,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncNearEntities, ProcessSyncNearEntities);
 
+            // 計測専用。これまでハンドラが無く中身を一度も見ていない通知。
+            netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.NotifyBuffChange, ProcessNotifyBuffChange);
+
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncSceneEvents, ProcessSyncSceneEvents);
 
             netCap.RegisterNotifyHandler(936649811, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldActivityNtf.SyncHitInfo, ProcessSyncHitInfo);
@@ -359,15 +362,37 @@ namespace StarResonanceDps.Core.CombatRuntime
                 GrpcTeamManager.ProcessSocialTeamData(vData.VRequest?.Data);
             }
 
-            if (EncounterManager.AllowSceneUpdate)
+            if (vData?.VRequest?.Data?.SceneData is { } socialScene)
             {
-                if (vData?.VRequest?.Data?.SceneData != null)
+                // AllowSceneUpdate は「同じシーンの繰り返し通知」を抑えるための関門。
+                // NotifySocialData は social のスナップショットであってシーン通知ではなく、
+                // 中身が食い違ったまま何度も飛んでくるため、無条件に流すと表示が暴れる。
+                //
+                // ただし別のマップ/チャンネルへ移った通知は抑制対象ではない。
+                // 関門を再武装するのはフルコンテナ到着(StartNewMap)だけなので、
+                // フルコンテナが来ない切替(実測: ギルドハウス levelMapId=12000)では
+                // 関門が閉じたままになり、移動通知が5回届いても全部捨てていた。
+                // その結果リストは刷新されず、マップ名も古いままだった(2026-08-26 実測)。
+                var isSceneChange = socialScene.LevelMapId != EncounterManager.LevelMapId
+                    || socialScene.LineId != EncounterManager.ChannelLineId;
+
+                if (isSceneChange || EncounterManager.AllowSceneUpdate)
                 {
                     ApplySceneData(
-                        vData.VRequest.Data.SceneData.LevelMapId,
-                        vData.VRequest.Data.SceneData.LineId,
-                        vData.VRequest.Data.SceneData.SceneGuid);
+                        socialScene.LevelMapId,
+                        socialScene.LineId,
+                        socialScene.SceneGuid,
+                        "NotifySocialData",
+                        resetForSceneChange: isSceneChange);
                     EncounterManager.AllowSceneUpdate = false;
+                }
+                else
+                {
+                    Diagnostics.SceneResetProbe.CaptureSkipped(
+                        "NotifySocialData",
+                        socialScene.LevelMapId,
+                        socialScene.LineId,
+                        socialScene.SceneGuid);
                 }
             }
         }
@@ -989,10 +1014,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrProfessionId:
-                        UpdateProfessionId(
-                            uuid,
-                            isNoValue ? 0 : reader.ReadInt32());
-                        break;
+                        {
+                            var incomingProfessionId = isNoValue ? 0 : reader.ReadInt32();
+                            if (IsSelfPlayer(uuid))
+                            {
+                            }
+
+                            UpdateProfessionId(uuid, incomingProfessionId);
+                            break;
+                        }
                     case EAttrType.AttrCamp:
                         {
                             var camp = isNoValue ? 0 : reader.ReadInt32();
@@ -1294,6 +1324,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                 }
 
+
                 ApplyAppearBuffSnapshot(entity);
 
                 PlayerRosterProjection.AddOrUpdateNearbyPlayer(entity.Uuid);
@@ -1338,13 +1369,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            var snapshot = new List<(int BaseId, int BuffUuid)>(buffInfos.Count);
+            // FireUuid(術者)と FightSourceType も運ぶ。どちらも特化判定の採用条件。
+            var snapshot = new List<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType)>(buffInfos.Count);
             for (var index = 0; index < buffInfos.Count; index++)
             {
                 var buffInfo = buffInfos[index];
                 if (buffInfo.BaseId > 0)
                 {
-                    snapshot.Add((buffInfo.BaseId, buffInfo.BuffUuid));
+                    snapshot.Add((
+                        buffInfo.BaseId,
+                        buffInfo.BuffUuid,
+                        buffInfo.FireUuid,
+                        buffInfo.FightSourceInfo?.FightSourceType ?? 0));
                 }
             }
 
@@ -1411,6 +1447,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ProcessAttrs(targetUuid, attrCollection.Attrs);
             }
 
+
             if (delta.TempAttrs != null && delta.TempAttrs.Attrs.Any())
             {
                 ProcessTempAttrs(targetUuid, delta.TempAttrs.Attrs);
@@ -1440,6 +1477,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             List<int> EventHandledBuffs = new();
             List<int> LogicHandledBuffs = new();
             var sawBuffAdd = false;
+            var selfBuffAddCount = 0;
+            var selfBuffAddIds = new List<int>();
             if (delta.BuffEffect != null)
             {
                 for (int buffIdx = 0; buffIdx < delta.BuffEffect.BuffEffects.Count; buffIdx++)
@@ -1467,7 +1506,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     creationTime = dto.UtcDateTime;
                                 }
                                 sawBuffAdd = true;
-                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData);
+                                selfBuffAddCount++;
+
+                                // 打ち切らない。以前は先頭12件で切っていたが、
+                                // 表に無いIDこそ探しているので、切ると探索の窓が塞がる。
+                                selfBuffAddIds.Add(buffInfo.BaseId);
+                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, buffInfo.FightSourceInfo?.FightSourceType ?? 0);
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
                             {
@@ -1776,19 +1820,56 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 両方から呼ばれるため、後着側で再度消さないようにするのが目的。
         /// </para>
         /// </summary>
-        private static void ApplySceneData(uint levelMapId, uint lineId, string? sceneGuid)
+        private static void ApplySceneData(
+            uint levelMapId,
+            uint lineId,
+            string? sceneGuid,
+            string source,
+            bool resetForSceneChange)
         {
-            if (EncounterManager.TryBeginScene(levelMapId, sceneGuid))
+            Diagnostics.SceneResetProbe.CaptureSceneData(
+                source, levelMapId, lineId, sceneGuid, EncounterManager.AllowSceneUpdate, resetForSceneChange);
+
+            // 先にシーンを反映してから刷新する。StartNewMap の中の DB.StartBattle が
+            // LevelMapId / SceneName を読むため、逆順だと古いマップ名で battle 行が作られる。
+            //
+            // ここへ来た時点で「反映してよい通知」と呼び出し側が判断済みなので、
+            // SetSceneId 側の AllowSceneUpdate 関門は通す。
+            EncounterManager.SetSceneId(levelMapId, force: true);
+            EncounterManager.SetChannelLineId(lineId);
+
+            if (resetForSceneChange)
             {
+                // メーター(DPS/HPS)・プレイヤーリスト・エンティティリストを揃えて刷新する。
+                // メーターだけ ProcessSyncContainerData に置いたままだと、
+                // フルコンテナが来ない切替(実測: ギルドハウス)でメーターだけ取り残される。
+                BattleStateMachine.StartNewMap();
                 PlayerRosterProjection.BeginMap();
                 NearbyEntityProjection.BeginMap();
             }
 
-            EncounterManager.SetSceneId(levelMapId);
-            EncounterManager.SetChannelLineId(lineId);
+            // StartNewMap は Current を作り直すので、チャンネル番号はその後に入れる。
             EncounterManager.Current.SetChannelLineNumber(lineId);
             PlayerRosterProjection.UpdateMapName();
             NearbyEntityProjection.UpdateMapName();
+        }
+
+        /// <summary>
+        /// 計測専用のハンドラ。<c>NotifyBuffChange</c> の中身を記録するだけで、状態は一切変えない。
+        /// </summary>
+        private static void ProcessNotifyBuffChange(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            try
+            {
+                var notify = NotifyBuffChange.Parser.ParseFrom(payloadBuffer);
+                if (notify != null)
+                {
+                }
+            }
+            catch
+            {
+                // 診断のみ。本来の処理へは伝播させない。
+            }
         }
 
         public static void ProcessSyncContainerData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -1797,10 +1878,16 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             BattleStateMachine.StartNewMap();
 
-            // ここでの無条件リセットは廃止した。フルコンテナはシーン切替の5〜12秒後に届くため、
-            // その間に到着した周辺プレイヤー(SyncNearEntities.Appear)をまとめて消してしまい、
-            // 彼らは二度と Appear を送らないのでリストから失われていた(2026-08-25 実測)。
-            // リセットはシーン識別子の変化を契機に ApplySceneData 側で行う。
+            // メーター(StartNewMap)と同じ契機・同じ無条件リセットに揃える。
+            // 3つとも消したあとは継続的に埋め直される: メーターは戦闘イベント、
+            // プレイヤーリストとエンティティリストは AOIデルタ
+            // (AddOrUpdateNearbyPlayer / RefreshEntity の UpsertAppeared)。
+            // Appear の再送を待つ必要はない。
+            //
+            // シーン識別子の変化を条件にした刷新は、AllowSceneUpdate と TryBeginScene という
+            // 2つの取りこぼし経路を作り、マップ切替でリストが刷新されない再発を招いた。
+            PlayerRosterProjection.BeginMap();
+            NearbyEntityProjection.BeginMap();
 
             var syncContainerData = SyncContainerData.Parser.ParseFrom(payloadBuffer);
             if (syncContainerData?.VData == null)
@@ -1884,7 +1971,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 System.Diagnostics.Debug.WriteLine($"ProcessSyncContainerData.SceneData:\n{sceneData}");
 
-                ApplySceneData(sceneData.LevelMapId, sceneData.LineId, sceneData.SceneGuid);
+                ApplySceneData(
+                    sceneData.LevelMapId,
+                    sceneData.LineId,
+                    sceneData.SceneGuid,
+                    "フルコンテナ",
+                    resetForSceneChange: false);
             }
 
             var seasonRoleLevelData = vData.SeasonRoleLevelData;

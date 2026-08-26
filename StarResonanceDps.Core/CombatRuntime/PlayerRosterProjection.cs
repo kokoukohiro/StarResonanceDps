@@ -23,6 +23,9 @@ internal static class PlayerRosterProjection
             NearbyPlayerUuids.Clear();
         }
 
+        Diagnostics.SceneResetProbe.CaptureReset(
+            "プレイヤーリスト", previousNearbyPlayerUuids.Length);
+
         foreach (var playerUuid in previousNearbyPlayerUuids)
         {
             ClearTransientHumanSubProfession(playerUuid);
@@ -340,11 +343,9 @@ internal static class PlayerRosterProjection
             source.SeasonStrength,
             source.CurrentHp,
             source.MaxHp,
-            source.SubProfessionId > 0
-                ? PlayerClassSpecResolver.FromSubProfessionId(source.SubProfessionId)
-                : source.IsSpecAbilityUnequipped
-                    ? PlayerClassSpec.Rank1
-                    : PlayerClassSpec.Unknown,
+            PlayerClassSpecResolver.Resolve(
+                source.SubProfessionId,
+                source.IsSpecAbilityUnequipped),
             isSelf,
             combatAttributes,
             source.SubProfessionId,

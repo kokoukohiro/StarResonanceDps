@@ -14,15 +14,14 @@ public static partial class PlayerInfoFormatFormatter
         string? formatString,
         PlayerNameDisplayMode nameDisplayMode)
     {
-        // 自分も他人と同じ経路。特化は特化マーカーバフだけで決まるので、
-        // 自分だけタレントから引き直す必要はない。
-        var classSpec = PlayerClassSpecResolver.FromSubProfessionId(player.SubProfessionId);
+        // 特化は Core で解決済みのものをそのまま使う。ここで SubProfessionId から
+        // 組み立て直すと Rank1(アビリティ未装着)を表現できず、メーターだけ「不明」になる。
         return Format(
             new PlayerInfoFormatData(
                 player.UserId,
                 player.Name,
                 player.ProfessionId,
-                classSpec,
+                player.ClassSpec,
                 player.AbilityScore,
                 player.SeasonStrength,
                 player.SeasonLevel,
