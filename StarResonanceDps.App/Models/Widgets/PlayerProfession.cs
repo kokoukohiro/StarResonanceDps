@@ -15,6 +15,9 @@ public static class PlayerProfession
             11 => "Marksman",
             12 => "ShieldKnight",
             13 => "SoulMusician",
+            // 変身クラス。ゲーム側の ProfessionTable.ProfessionIcon が
+            // 8/14/15 とも profession_horizontal_hud00 で同じなので、1つのキーに束ねる。
+            8 or 14 or 15 => "Transformation",
             _ => "Unknown"
         };
     }

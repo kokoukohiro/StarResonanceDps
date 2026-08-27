@@ -21,13 +21,10 @@ public static class PlayerSkillLevelStateStore
     private static readonly object StateLock = new();
     private static readonly Dictionary<int, ProfessionState> SelfProfessionStates = [];
     private static readonly Dictionary<int, DutyState> SelfDutyStates = [];
-    private static readonly Dictionary<int, int> SelfTalentStageIds = [];
-    private static readonly Dictionary<int, int> ProjectProfessionIds = [];
     private static Dictionary<int, SkillState> _selfImagineSkills = [];
     private static Dictionary<int, SkillState> _selfRawSelectedImagineSkills = [];
     private static int _selfCurrentProfessionId;
     private static int _selfCurrentDutyId;
-    private static int _selfCurrentProjectId;
     private static bool _hasSelfDutyState;
     private static FrozenDictionary<int, int> _selfSkillLevels =
         new Dictionary<int, int>().ToFrozenDictionary();
@@ -41,11 +38,8 @@ public static class PlayerSkillLevelStateStore
         lock (StateLock)
         {
             SelfProfessionStates.Clear();
-            SelfTalentStageIds.Clear();
-            ProjectProfessionIds.Clear();
             _selfImagineSkills = [];
             _selfRawSelectedImagineSkills = [];
-            _selfCurrentProjectId = 0;
             _selfCurrentProfessionId = professionList?.CurProfessionId ?? 0;
 
             if (professionList is not null)
@@ -53,11 +47,6 @@ public static class PlayerSkillLevelStateStore
                 foreach (var pair in professionList.ProfessionList_)
                 {
                     SelfProfessionStates[pair.Key] = CreateProfessionState(pair.Value);
-                }
-
-                foreach (var pair in professionList.TalentList)
-                {
-                    SelfTalentStageIds[pair.Key] = pair.Value.TalentStageCfgId;
                 }
 
                 foreach (var pair in professionList.AoyiSkillInfoMap)
@@ -134,33 +123,6 @@ public static class PlayerSkillLevelStateStore
                 ApplySkillMapChanges(_selfImagineSkills, imagineChanges);
             }
 
-            if (professionList.TalentInfoChanges is { } talentChanges)
-            {
-                if (talentChanges.ReplacesExisting)
-                {
-                    SelfTalentStageIds.Clear();
-                }
-
-                foreach (var professionId in talentChanges.Removed)
-                {
-                    SelfTalentStageIds.Remove(professionId);
-                }
-
-                foreach (var pair in talentChanges.Added)
-                {
-                    SelfTalentStageIds[pair.Key] = pair.Value.TalentStageCfgId ?? 0;
-                }
-
-                foreach (var pair in talentChanges.Updated)
-                {
-                    if (pair.Value.TalentStageCfgId is { } stageId)
-                    {
-                        SelfTalentStageIds[pair.Key] = stageId;
-                    }
-
-                }
-            }
-
             PublishState();
         }
     }
@@ -235,77 +197,6 @@ public static class PlayerSkillLevelStateStore
         }
     }
 
-    public static void ReplaceSelfProjectList(
-        ProfessionProjectList? projectList,
-        ProjectExtraSyncData? currentProjectSyncData)
-    {
-        lock (StateLock)
-        {
-            ProjectProfessionIds.Clear();
-            ProfessionProjectCommonSyncData? currentProjectCommonData = null;
-            if (projectList is not null)
-            {
-                foreach (var pair in projectList.ProfessionProjectList_)
-                {
-                    ProjectProfessionIds[pair.Key] = pair.Value.ProfessionId;
-                }
-
-                _selfCurrentProjectId = projectList.CurrentProjectId;
-                projectList.ProfessionProjectList_.TryGetValue(
-                    _selfCurrentProjectId,
-                    out currentProjectCommonData);
-            }
-
-            ApplyCurrentProjectStateLocked(
-                _selfCurrentProjectId,
-                currentProjectSyncData,
-                currentProjectCommonData);
-            PublishState();
-        }
-    }
-
-    public static void ApplySelfProjectState(
-        int projectId,
-        ProjectExtraSyncData? projectSyncData,
-        ProfessionProjectCommonSyncData? commonSyncData = null)
-    {
-        lock (StateLock)
-        {
-            if (commonSyncData is not null && projectId > 0)
-            {
-                ProjectProfessionIds[projectId] = commonSyncData.ProfessionId;
-            }
-
-            _selfCurrentProjectId = projectId;
-            ApplyCurrentProjectStateLocked(projectId, projectSyncData, commonSyncData);
-            PublishState();
-        }
-    }
-
-    public static void ApplySelfSavedProjectState(
-        int projectId,
-        ProjectExtraSyncData? currentProjectSyncData,
-        ProfessionProjectCommonSyncData? savedProjectData)
-    {
-        lock (StateLock)
-        {
-            if (savedProjectData is not null && projectId > 0)
-            {
-                ProjectProfessionIds[projectId] = savedProjectData.ProfessionId;
-            }
-
-            if (projectId > 0 && projectId == _selfCurrentProjectId)
-            {
-                ApplyCurrentProjectStateLocked(
-                    projectId,
-                    currentProjectSyncData,
-                    savedProjectData);
-            }
-
-            PublishState();
-        }
-    }
-
     public static void SetSelfCurrentProfessionId(int professionId)
     {
         if (professionId <= 0)
@@ -316,34 +207,6 @@ public static class PlayerSkillLevelStateStore
         lock (StateLock)
         {
             _selfCurrentProfessionId = professionId;
-            PublishState();
-        }
-    }
-
-    public static void SetSelfCurrentProjectId(int projectId)
-    {
-        if (projectId <= 0)
-        {
-            return;
-        }
-
-        lock (StateLock)
-        {
-            _selfCurrentProjectId = projectId;
-            PublishState();
-        }
-    }
-
-    public static void SetSelfTalentStage(int professionId, int talentStageId)
-    {
-        if (professionId <= 0)
-        {
-            return;
-        }
-
-        lock (StateLock)
-        {
-            SelfTalentStageIds[professionId] = talentStageId;
             PublishState();
         }
     }
@@ -381,43 +244,6 @@ public static class PlayerSkillLevelStateStore
             roleSkillLevels = _selfRoleSkillLevels;
             return roleSkillLevels.Count > 0;
         }
-    }
-
-    private static void ApplyCurrentProjectStateLocked(
-        int projectId,
-        ProjectExtraSyncData? projectSyncData,
-        ProfessionProjectCommonSyncData? commonSyncData)
-    {
-        var professionId = commonSyncData?.ProfessionId ?? 0;
-        if (professionId <= 0 && projectId > 0)
-        {
-            ProjectProfessionIds.TryGetValue(projectId, out professionId);
-        }
-
-        var hasTalentState = projectSyncData?.CurrentTalentIdList is not null
-            || commonSyncData is not null;
-        var talentStageId = projectSyncData?.CurrentTalentIdList?.TalentStageCfgId
-            ?? commonSyncData?.CurrentTalentStageCfgId
-            ?? 0;
-        if (professionId <= 0 && talentStageId > 0)
-        {
-            professionId = DataTypes.Professions.GetProfessionIdFromTalentId(talentStageId);
-        }
-
-        if (professionId > 0)
-        {
-            if (projectId > 0)
-            {
-                ProjectProfessionIds[projectId] = professionId;
-            }
-
-            _selfCurrentProfessionId = professionId;
-            if (hasTalentState)
-            {
-                SelfTalentStageIds[professionId] = talentStageId;
-            }
-        }
-
     }
 
     private static ProfessionState CreateProfessionState(Zproto.ProfessionInfo professionInfo)

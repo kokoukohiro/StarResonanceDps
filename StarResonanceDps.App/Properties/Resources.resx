@@ -382,7 +382,16 @@
     <value>Image Files</value>
   </data>
   <data name="ClassSpec_Rank1" xml:space="preserve">
-    <value>Rank1</value>
+    <value>Class I</value>
+  </data>
+  <data name="ClassSpec_TransformDorothy" xml:space="preserve">
+    <value>Dorothy</value>
+  </data>
+  <data name="ClassSpec_TransformLucy" xml:space="preserve">
+    <value>Lucy</value>
+  </data>
+  <data name="ClassSpec_TransformNatsu" xml:space="preserve">
+    <value>Natsu</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>Unknown</value>

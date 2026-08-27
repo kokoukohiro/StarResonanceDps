@@ -17,8 +17,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static string AccountId { get; set; } = null!;
         public static string PlayerName { get; set; } = null!;
         public static int ProfessionId { get; set; }
-        public static string ProfessionName { get; set; } = null!;
-        public static string SubProfessionName { get; set; } = null!;
 
         public static int PlayerMeterPlacement { get; set; }
 

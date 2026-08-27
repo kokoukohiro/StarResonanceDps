@@ -382,7 +382,16 @@
     <value>画像ファイル</value>
   </data>
   <data name="ClassSpec_Rank1" xml:space="preserve">
-    <value>Rank1</value>
+    <value>クラスR1</value>
+  </data>
+  <data name="ClassSpec_TransformDorothy" xml:space="preserve">
+    <value>ドロシー</value>
+  </data>
+  <data name="ClassSpec_TransformLucy" xml:space="preserve">
+    <value>ルーシィ</value>
+  </data>
+  <data name="ClassSpec_TransformNatsu" xml:space="preserve">
+    <value>ナツ</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>不明</value>

@@ -344,6 +344,7 @@ internal static class PlayerRosterProjection
             source.CurrentHp,
             source.MaxHp,
             PlayerClassSpecResolver.Resolve(
+                source.ProfessionId,
                 source.SubProfessionId,
                 source.IsSpecAbilityUnequipped),
             isSelf,

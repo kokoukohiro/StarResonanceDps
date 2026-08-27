@@ -165,12 +165,17 @@ public sealed class ActiveBuffStore
     }
 
     /// <summary>
-    /// 残り秒数を返す。持続時間が不明(0以下)のものは <paramref name="remainingSeconds"/> が 0 のまま true を返す
-    /// (表示は残すが残り時間は出さない)。期限切れは false。
+    /// 残り秒数を返す。期限切れは false。
+    ///
+    /// <para>
+    /// 持続時間が 0 以下で届いたものは <paramref name="remainingSeconds"/> に <c>null</c> を入れて
+    /// true を返す。<b>「残り0秒」と「持続時間が無い」を同じ 0 で表すと区別できない</b>ため、
+    /// 後者は null で表す(表示側は数字を出さない)。
+    /// </para>
     /// </summary>
-    public bool TryGetRemainingSeconds(long entityUuid, ulong buffUuid, out double remainingSeconds)
+    public bool TryGetRemainingSeconds(long entityUuid, ulong buffUuid, out double? remainingSeconds)
     {
-        remainingSeconds = 0d;
+        remainingSeconds = null;
         if (entityUuid == 0)
         {
             return false;
@@ -192,16 +197,17 @@ public sealed class ActiveBuffStore
 
         if (entry.DurationMilliseconds <= 0)
         {
+            // 持続時間なし。null のまま true を返し、表示は残す。
             return true;
         }
 
-        remainingSeconds = entry.GetRemainingSeconds(DateTime.Now);
-        if (remainingSeconds <= 0d)
+        var seconds = entry.GetRemainingSeconds(DateTime.Now);
+        if (seconds <= 0d)
         {
-            remainingSeconds = 0d;
             return false;
         }
 
+        remainingSeconds = seconds;
         return true;
     }
 

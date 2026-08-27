@@ -38,47 +38,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
             }
         }
 
-        public static string GetProfessionNameFromId(int professionId) => professionId switch
-        {
-            0 => AppStrings.GetLocalized("Profession_Unknown"),
-            1 => AppStrings.GetLocalized("Profession_Stormblade"),
-            2 => AppStrings.GetLocalized("Profession_FrostMage"),
-            3 => AppStrings.GetLocalized("Profession_TwinStriker"),
-            4 => AppStrings.GetLocalized("Profession_WindKnight"),
-            5 => AppStrings.GetLocalized("Profession_VerdantOracle"),
-            8 => "Thunder Flash Hand Cannon",
-            9 => AppStrings.GetLocalized("Profession_HeavyGuardian"),
-            10 => "Dark Spirit Dance Ritual Blade",
-            11 => AppStrings.GetLocalized("Profession_Marksman"),
-            12 => AppStrings.GetLocalized("Profession_ShieldKnight"),
-            13 => AppStrings.GetLocalized("Profession_BeatPerformer"),
-            _ => ""
-        };
-
-        public static string GetSubProfessionNameFromId(int subProfessionId) => subProfessionId switch
-        {
-            00_00_00 => AppStrings.GetLocalized("SubProfession_Unknown"),
-            01_00_01 => AppStrings.GetLocalized("SubProfession_Iaido"),
-            01_00_02 => AppStrings.GetLocalized("SubProfession_Moonstrike"),
-            02_00_01 => AppStrings.GetLocalized("SubProfession_Icicle"),
-            02_00_02 => AppStrings.GetLocalized("SubProfession_Frostbeam"),
-            03_00_01 => AppStrings.GetLocalized("SubProfession_FormlessExpertise"),
-            03_00_02 => AppStrings.GetLocalized("SubProfession_CrimsonExpertise"),
-            04_00_01 => AppStrings.GetLocalized("SubProfession_Vanguard"),
-            04_00_02 => AppStrings.GetLocalized("SubProfession_Skyward"),
-            05_00_01 => AppStrings.GetLocalized("SubProfession_Smite"),
-            05_00_02 => AppStrings.GetLocalized("SubProfession_Lifebind"),
-            09_00_01 => AppStrings.GetLocalized("SubProfession_Earthfort"),
-            09_00_02 => AppStrings.GetLocalized("SubProfession_Block"),
-            11_00_01 => AppStrings.GetLocalized("SubProfession_Wildpack"),
-            11_00_02 => AppStrings.GetLocalized("SubProfession_Falconry"),
-            12_00_01 => AppStrings.GetLocalized("SubProfession_Recovery"),
-            12_00_02 => AppStrings.GetLocalized("SubProfession_Shield"),
-            13_00_01 => AppStrings.GetLocalized("SubProfession_Dissonance"),
-            13_00_02 => AppStrings.GetLocalized("SubProfession_Concerto"),
-            _ => ""
-        };
-
         public static int GetProfessionIdFromSubProfessionId(int subProfessionId) => subProfessionId switch
         {
             (int)SubProfessionId.SubProfession_Unknown => (int)EProfessionId.Profession_Unknown,
@@ -134,35 +93,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
             (int)SubProfessionId.SubProfession_Concerto => (int)ETalentId.SubProfession_Concerto,
             _ => (int)ETalentId.Unknown
         };
-
-        public static int GetSubProfessionIdFromTalentId(int talentId) => talentId switch
-        {
-            (int)ETalentId.SubProfession_Iaido => (int)SubProfessionId.SubProfession_Iaido,
-            (int)ETalentId.SubProfession_Moonstrike => (int)SubProfessionId.SubProfession_Moonstrike,
-            (int)ETalentId.SubProfession_Icicle => (int)SubProfessionId.SubProfession_Icicle,
-            (int)ETalentId.SubProfession_Frostbeam => (int)SubProfessionId.SubProfession_Frostbeam,
-            (int)ETalentId.SubProfession_FormlessExpertise => (int)SubProfessionId.SubProfession_FormlessExpertise,
-            (int)ETalentId.SubProfession_CrimsonExpertise => (int)SubProfessionId.SubProfession_CrimsonExpertise,
-            (int)ETalentId.SubProfession_Vanguard => (int)SubProfessionId.SubProfession_Vanguard,
-            (int)ETalentId.SubProfession_Skyward => (int)SubProfessionId.SubProfession_Skyward,
-            (int)ETalentId.SubProfession_Smite => (int)SubProfessionId.SubProfession_Smite,
-            (int)ETalentId.SubProfession_Lifebind => (int)SubProfessionId.SubProfession_Lifebind,
-            (int)ETalentId.SubProfession_Earthfort => (int)SubProfessionId.SubProfession_Earthfort,
-            (int)ETalentId.SubProfession_Block => (int)SubProfessionId.SubProfession_Block,
-            (int)ETalentId.SubProfession_Wildpack => (int)SubProfessionId.SubProfession_Wildpack,
-            (int)ETalentId.SubProfession_Falconry => (int)SubProfessionId.SubProfession_Falconry,
-            (int)ETalentId.SubProfession_Recovery => (int)SubProfessionId.SubProfession_Recovery,
-            (int)ETalentId.SubProfession_Shield => (int)SubProfessionId.SubProfession_Shield,
-            (int)ETalentId.SubProfession_Dissonance => (int)SubProfessionId.SubProfession_Dissonance,
-            (int)ETalentId.SubProfession_Concerto => (int)SubProfessionId.SubProfession_Concerto,
-            _ => (int)SubProfessionId.SubProfession_Unknown
-        };
-
-        public static int GetProfessionIdFromTalentId(int talentId)
-        {
-            return GetProfessionIdFromSubProfessionId(
-                GetSubProfessionIdFromTalentId(talentId));
-        }
 
         public static int GetBaseProfessionIdBySkillId(int skillId) => skillId switch
         {

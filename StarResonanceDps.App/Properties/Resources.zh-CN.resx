@@ -384,6 +384,15 @@
   <data name="ClassSpec_Rank1" xml:space="preserve">
     <value>一阶</value>
   </data>
+  <data name="ClassSpec_TransformDorothy" xml:space="preserve">
+    <value>陶洛斯</value>
+  </data>
+  <data name="ClassSpec_TransformLucy" xml:space="preserve">
+    <value>露西</value>
+  </data>
+  <data name="ClassSpec_TransformNatsu" xml:space="preserve">
+    <value>纳兹</value>
+  </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>未知</value>
   </data>

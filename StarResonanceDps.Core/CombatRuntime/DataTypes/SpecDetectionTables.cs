@@ -287,7 +287,6 @@ public static class SpecDetectionTables
         2204100  => (SubProfessionId.SubProfession_Frostbeam,          8), // 霜天  根から8 node=268001  冰凌之约
         2204110  => (SubProfessionId.SubProfession_Frostbeam,          5), // 霜天  根から5 node=211017  寒风凝聚
         2204120  => (SubProfessionId.SubProfession_Frostbeam,          0), // 霜天  根から0 node=212017  射线流
-        2204130  => (SubProfessionId.SubProfession_Icicle,             2), // 氷牙  根から2 node=214011  滝流雪影
         2204140  => (SubProfessionId.SubProfession_Icicle,            11), // 氷牙  根から11 node=219011  冰霜彗星
         2204150  => (SubProfessionId.SubProfession_Icicle,             9), // 氷牙  根から9 node=249001  冻结星辰
         2204160  => (SubProfessionId.SubProfession_Icicle,             7), // 氷牙  根から7 node=247002  冰矛连弹

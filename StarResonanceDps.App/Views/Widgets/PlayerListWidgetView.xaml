@@ -448,6 +448,13 @@
                                                             </Setter.Value>
                                                         </Setter>
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding ProfessionKey}" Value="Transformation">
+                                                        <Setter Property="OpacityMask">
+                                                            <Setter.Value>
+                                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.Transformation}" Stretch="Uniform" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </Rectangle.Style>

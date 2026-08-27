@@ -1432,9 +1432,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public string Name { get; set; } = null!;
         public int AbilityScore { get; set; }
         public int ProfessionId { get; set; }
-        public string Profession { get; set; } = null!;
         public int SubProfessionId { get; set; }
-        public string SubProfession { get; set; } = null!;
 
         /// <summary>いま乗っている特化マーカーバフのID。0 なら未観測。</summary>
         public int SpecMarkerBuffId { get; set; }
@@ -1473,9 +1471,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public string Name { get => _identity.Name; private set => _identity.Name = value; }
         public int AbilityScore { get => _identity.AbilityScore; private set => _identity.AbilityScore = value; }
         public int ProfessionId { get => _identity.ProfessionId; private set => _identity.ProfessionId = value; }
-        public string Profession { get => _identity.Profession; private set => _identity.Profession = value; }
         public int SubProfessionId { get => _identity.SubProfessionId; private set => _identity.SubProfessionId = value; }
-        public string SubProfession { get => _identity.SubProfession; private set => _identity.SubProfession = value; }
 
         public int SpecMarkerBuffId { get => _identity.SpecMarkerBuffId; private set => _identity.SpecMarkerBuffId = value; }
         public int SpecMarkerBuffUuid { get => _identity.SpecMarkerBuffUuid; private set => _identity.SpecMarkerBuffUuid = value; }
@@ -1691,7 +1687,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetProfessionId(int id)
         {
             ProfessionId = id;
-            Profession = Professions.GetProfessionNameFromId(id);
 
             var subProfessionBaseId = Professions.GetProfessionIdFromSubProfessionId(SubProfessionId);
             var clearSubProfession = SubProfessionId != 0 && subProfessionBaseId != id;
@@ -1710,14 +1705,23 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 変身クラス(8/14/15)の間は、いかなる特化変更も受け付けない。
+            // これらは特化(クラスR2)を持たず、表示は職業IDから固定で決まる。
+            //
+            // ここで弾かないと職業ごと戻される。この直後の分岐が
+            // 「特化が属する職」で ProfessionId を書き換えるため、変身中に
+            // タレントバフや置換後スキルを1つ拾っただけで元のクラスに戻ってしまう。
+            if (Models.PlayerClassSpecResolver.TryResolveTransformation(ProfessionId, out _))
+            {
+                return;
+            }
+
             SubProfessionId = id;
-            SubProfession = Professions.GetSubProfessionNameFromId(id);
 
             int profId = Professions.GetProfessionIdFromSubProfessionId(id);
             if (ProfessionId != profId)
             {
                 ProfessionId = profId;
-                Profession = Professions.GetProfessionNameFromId(profId);
             }
 
             // AOI外に出ると観測できなくなるので、自分以外のパーティメンバーの分だけ控える。
@@ -1728,7 +1732,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetSubProfessionUnknown()
         {
             SubProfessionId = 0;
-            SubProfession = string.Empty;
 
             // 特化を「観測できていない」に戻すときは、その根拠だったマーカーと
             // スナップショット受信済みフラグも一緒に落とす。

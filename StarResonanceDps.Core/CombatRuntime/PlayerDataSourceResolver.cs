@@ -191,6 +191,16 @@ internal static class PlayerDataSourceResolver
         Entity? metadataEntity,
         bool isSelf)
     {
+        // 変身クラス(8/14/15)は特化を持たない。キャッシュも見ない。
+        // Entity 側の関門だけでは、変身前の特化がキャッシュから補完されて残ってしまう。
+        var professionId = nearbyEntity is { ProfessionId: > 0 }
+            ? nearbyEntity.ProfessionId
+            : metadataEntity?.ProfessionId ?? 0;
+        if (Models.PlayerClassSpecResolver.TryResolveTransformation(professionId, out _))
+        {
+            return 0;
+        }
+
         if (nearbyEntity is { SubProfessionId: > 0 })
         {
             return nearbyEntity.SubProfessionId;

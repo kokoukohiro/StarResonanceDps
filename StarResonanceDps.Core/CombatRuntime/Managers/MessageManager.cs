@@ -23,14 +23,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const string CurrentStaminaSnapshotAttribute = "CurrentStaminaSnapshot";
         private const string MaxStaminaSnapshotAttribute = "MaxStaminaSnapshot";
         private const uint WorldProxyServiceId = 103198054;
-        private const uint ResetProfessionTalentMethodId = 0x3100F;
         private const uint GetTeamInfoMethodId = 0x4C01F;
-        private const uint SaveProjectMethodId = 0x44001;
-        private const uint SwitchProjectMethodId = 0x44002;
-        private const uint SyncProjectListMethodId = 0x44005;
-        private static readonly ConcurrentDictionary<uint, int> PendingResetProfessionIds = new();
-        private static readonly ConcurrentDictionary<uint, int> PendingSaveProjectIds = new();
-        private static readonly ConcurrentDictionary<uint, int> PendingSwitchProjectIds = new();
 
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
@@ -100,13 +93,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterNotifyHandler((ulong)EServiceId.SocialNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.SocialNtf.NotifySocialData, ProcessNotifySocialData);
 
-            netCap.RegisterProxyHandler(WorldProxyServiceId, ResetProfessionTalentMethodId, ProcessResetProfessionTalentCall);
-            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, ResetProfessionTalentMethodId, ProcessResetProfessionTalentReturn);
-            netCap.RegisterProxyHandler(WorldProxyServiceId, SaveProjectMethodId, ProcessSaveProjectCall);
-            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SaveProjectMethodId, ProcessSaveProjectReturn);
-            netCap.RegisterProxyHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectCall);
-            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SwitchProjectMethodId, ProcessSwitchProjectReturn);
-            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, SyncProjectListMethodId, ProcessSyncProjectListReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
 
             netCap.Start();
@@ -120,9 +106,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 netCap.Stop();
             }
 
-            PendingResetProfessionIds.Clear();
-            PendingSaveProjectIds.Clear();
-            PendingSwitchProjectIds.Clear();
             SkillCooldownStateStore.Reset();
             GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
@@ -742,7 +725,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             PlayerSkillLevelStateStore.SetSelfCurrentProfessionId(professionId);
             AppState.ProfessionId = professionId;
-            AppState.ProfessionName = Professions.GetProfessionNameFromId(professionId);
             RefreshSelfRosterEntry(uuid);
         }
 
@@ -766,201 +748,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             PlayerRosterProjection.UpsertSelf(uuid);
-        }
-
-        private static void RefreshSelfProjectState()
-        {
-            var uuid = currentUserUuid != 0
-                ? currentUserUuid
-                : AppState.PlayerUUID;
-            if (uuid == 0)
-            {
-                return;
-            }
-
-            if (PlayerSkillLevelStateStore.TryGetSelfCurrentProfessionId(
-                out var professionId))
-            {
-                UpdateProfessionId(uuid, professionId);
-            }
-            else
-            {
-                RefreshSelfRosterEntry(uuid);
-            }
-        }
-
-        private static void ProcessResetProfessionTalentCall(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            try
-            {
-                var request = World.Types.ResetProfessionTalent.Parser
-                    .ParseFrom(payloadBuffer)
-                    .VRequest;
-                if (request?.ProfessionId > 0)
-                {
-                    PendingResetProfessionIds[returnUid] = request.ProfessionId;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse profession talent reset request");
-            }
-        }
-
-        private static void ProcessResetProfessionTalentReturn(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            if (!PendingResetProfessionIds.TryRemove(returnUid, out var professionId))
-            {
-                return;
-            }
-
-            try
-            {
-                var response = World.Types.ResetProfessionTalent_Ret.Parser
-                    .ParseFrom(payloadBuffer);
-                if (response.Ret != EErrorCode.ErrSuccess)
-                {
-                    return;
-                }
-
-                PlayerSkillLevelStateStore.SetSelfTalentStage(professionId, 0);
-                RefreshSelfProjectState();
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse profession talent reset response");
-            }
-        }
-
-        private static void ProcessSaveProjectCall(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            try
-            {
-                var request = World.Types.SaveProject.Parser
-                    .ParseFrom(payloadBuffer)
-                    .VRequest;
-                if (request?.ProjectId > 0)
-                {
-                    PendingSaveProjectIds[returnUid] = request.ProjectId;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse project save request");
-            }
-        }
-
-        private static void ProcessSaveProjectReturn(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            PendingSaveProjectIds.TryRemove(returnUid, out var requestedProjectId);
-
-            try
-            {
-                var response = SaveProjectReply.Parser.ParseFrom(payloadBuffer);
-                if (response.ErrCode != EErrorCode.ErrSuccess)
-                {
-                    return;
-                }
-
-                var projectId = response.SavedProjectId > 0
-                    ? response.SavedProjectId
-                    : requestedProjectId;
-                PlayerSkillLevelStateStore.ApplySelfSavedProjectState(
-                    projectId,
-                    response.CurrentProjectSyncData,
-                    response.SyncData);
-                RefreshSelfProjectState();
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse project save response");
-            }
-        }
-
-        private static void ProcessSwitchProjectCall(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            try
-            {
-                var request = World.Types.SwitchProject.Parser
-                    .ParseFrom(payloadBuffer)
-                    .VRequest;
-                if (request?.NewProjectId > 0)
-                {
-                    PendingSwitchProjectIds[returnUid] = request.NewProjectId;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse project switch request");
-            }
-        }
-
-        private static void ProcessSwitchProjectReturn(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            if (!PendingSwitchProjectIds.TryRemove(returnUid, out var projectId))
-            {
-                return;
-            }
-
-            try
-            {
-                var response = SwitchProjectReply.Parser.ParseFrom(payloadBuffer);
-                if (response.ErrCode != EErrorCode.ErrSuccess)
-                {
-                    return;
-                }
-
-                PlayerSkillLevelStateStore.ApplySelfProjectState(
-                    projectId,
-                    response.CurrentProjectSyncData);
-                RefreshSelfProjectState();
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse project switch response");
-            }
-        }
-
-        private static void ProcessSyncProjectListReturn(
-            ReadOnlySpan<byte> payloadBuffer,
-            uint returnUid,
-            ExtraPacketData extraData)
-        {
-            try
-            {
-                var response = SyncProjectListReply.Parser.ParseFrom(payloadBuffer);
-                if (response.ErrCode != EErrorCode.ErrSuccess)
-                {
-                    return;
-                }
-
-                PlayerSkillLevelStateStore.ReplaceSelfProjectList(
-                    response.SyncData,
-                    response.CurrentProjectSyncData);
-                RefreshSelfProjectState();
-            }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse project list response");
-            }
         }
 
         private static void ProcessGetTeamInfoReturn(
@@ -1959,11 +1746,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerSkillLevelStateStore.ReplaceSelfSkillLevels(
                 professionList,
                 vData.DutyList);
-            if (vData.CurProjectIdInfo?.CurrentProfessionProjectId > 0)
-            {
-                PlayerSkillLevelStateStore.SetSelfCurrentProjectId(
-                    vData.CurProjectIdInfo.CurrentProfessionProjectId);
-            }
             RefreshSelfRosterEntry(playerUuid);
 
             var sceneData = vData.SceneData;
@@ -2082,11 +1864,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     PlayerSkillLevelStateStore.ApplySelfProfessionListChanges(
                         ser.ProfessionList);
-                }
-
-                if (ser.CurrentProjectIdInfo?.CurrentProfessionProjectId is { } projectId)
-                {
-                    PlayerSkillLevelStateStore.SetSelfCurrentProjectId(projectId);
                 }
 
                 if (ser.DutyList is not null)

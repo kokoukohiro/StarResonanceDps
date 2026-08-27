@@ -262,7 +262,7 @@ public static class MeterSnapshotProvider
             }
 
             TimeSpan effectiveRemoveTime;
-            double remainingSeconds;
+            double? remainingSeconds;
             var timingResolved = isLive
                 ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
                 : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
@@ -639,7 +639,7 @@ public static class MeterSnapshotProvider
             }
 
             TimeSpan effectiveRemoveTime;
-            double remainingSeconds;
+            double? remainingSeconds;
             var timingResolved = isLive
                 ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
                 : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
@@ -1354,7 +1354,7 @@ public static class MeterSnapshotProvider
         long entityUuid,
         BuffEvent buffEvent,
         out TimeSpan orderingKey,
-        out double remainingSeconds)
+        out double? remainingSeconds)
     {
         if (!Services.ActiveBuffStore.Instance.TryGetRemainingSeconds(
                 entityUuid,
@@ -1362,13 +1362,13 @@ public static class MeterSnapshotProvider
                 out remainingSeconds))
         {
             orderingKey = TimeSpan.Zero;
-            remainingSeconds = 0d;
+            remainingSeconds = null;
             return false;
         }
 
-        // 持続時間不明のものは残り時間を出さないが、表示は残すので最後尾に並べる。
-        orderingKey = remainingSeconds > 0d
-            ? TimeSpan.FromSeconds(remainingSeconds)
+        // 持続時間なし(null)のものは残り時間を出さないが、表示は残すので最後尾に並べる。
+        orderingKey = remainingSeconds is > 0d
+            ? TimeSpan.FromSeconds(remainingSeconds.Value)
             : TimeSpan.MaxValue;
         return true;
     }
@@ -1377,8 +1377,9 @@ public static class MeterSnapshotProvider
         BuffEvent buffEvent,
         TimeSpan currentEncounterTime,
         out TimeSpan effectiveRemoveTime,
-        out double remainingSeconds)
+        out double? remainingSeconds)
     {
+        remainingSeconds = null;
         if (buffEvent.EventRemoveTime > TimeSpan.Zero)
         {
             effectiveRemoveTime = buffEvent.EventRemoveTime;
@@ -1393,7 +1394,6 @@ public static class MeterSnapshotProvider
             if (remainingWallClockSeconds <= 0d)
             {
                 effectiveRemoveTime = TimeSpan.Zero;
-                remainingSeconds = 0d;
                 return false;
             }
 
@@ -1402,17 +1402,16 @@ public static class MeterSnapshotProvider
         else
         {
             effectiveRemoveTime = TimeSpan.Zero;
-            remainingSeconds = 0d;
             return false;
         }
 
-        remainingSeconds = (effectiveRemoveTime - currentEncounterTime).TotalSeconds;
-        if (remainingSeconds <= 0d)
+        var seconds = (effectiveRemoveTime - currentEncounterTime).TotalSeconds;
+        if (seconds <= 0d)
         {
-            remainingSeconds = 0d;
             return false;
         }
 
+        remainingSeconds = seconds;
         return true;
     }
 
@@ -1647,6 +1646,7 @@ public static class MeterSnapshotProvider
             source.ProfessionId,
             source.SubProfessionId,
             PlayerClassSpecResolver.Resolve(
+                source.ProfessionId,
                 source.SubProfessionId,
                 source.IsSpecAbilityUnequipped),
             source.CombatPower,
