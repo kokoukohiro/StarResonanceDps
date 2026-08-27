@@ -207,6 +207,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>テーマ</value>
   </data>
+  <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
+    <value>ロールスキル</value>
+  </data>
+  <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
+    <value>※他人が習得済みのロールスキルを表示します（表示されていても装備中とは限りません）</value>
+  </data>
+  <data name="Settings_Switch_On" xml:space="preserve">
+    <value>オン</value>
+  </data>
+  <data name="Settings_Switch_Off" xml:space="preserve">
+    <value>オフ</value>
+  </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>アップデート</value>
   </data>
@@ -562,7 +574,7 @@
     <value>Player1</value>
   </data>
   <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
-    <value>エンティティ1</value>
+    <value>Entity1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>プレイヤー名</value>

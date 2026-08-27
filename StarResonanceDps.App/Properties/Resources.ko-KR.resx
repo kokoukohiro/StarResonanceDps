@@ -207,6 +207,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>테마</value>
   </data>
+  <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
+    <value>역할 스킬</value>
+  </data>
+  <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
+    <value>※다른 플레이어가 습득한 역할 스킬을 표시합니다(표시되어 있어도 장착 중이라고는 할 수 없습니다)</value>
+  </data>
+  <data name="Settings_Switch_On" xml:space="preserve">
+    <value>켜기</value>
+  </data>
+  <data name="Settings_Switch_Off" xml:space="preserve">
+    <value>끄기</value>
+  </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>업데이트</value>
   </data>
@@ -562,7 +574,7 @@
     <value>Player1</value>
   </data>
   <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
-    <value>엔티티1</value>
+    <value>Entity1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>플레이어 이름</value>

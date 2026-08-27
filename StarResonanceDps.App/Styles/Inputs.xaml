@@ -469,6 +469,53 @@
     </Style>
 
 
+    <!--
+        オン/オフのスイッチ。色は Input.ValueSlider に合わせる。
+        溝 = Brush.BorderSoft、バー/つまみ = Brush.TextSecondary。
+    -->
+    <Style x:Key="Input.Switch" TargetType="{x:Type ToggleButton}">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="18" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <!-- 枠線はオンの充填色と同じ。オンのときは枠線を消す。 -->
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.TextSecondary}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToggleButton}">
+                    <Grid>
+                        <Border x:Name="Track"
+                                CornerRadius="9"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="2"
+                                SnapsToDevicePixels="True" />
+                        <Grid x:Name="ThumbHost"
+                              Margin="3,0,3,0"
+                              HorizontalAlignment="Left"
+                              SnapsToDevicePixels="True">
+                            <Ellipse x:Name="Thumb"
+                                     Width="12"
+                                     Height="12"
+                                     Fill="{TemplateBinding Foreground}"
+                                     SnapsToDevicePixels="True" />
+                        </Grid>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource Brush.TextSecondary}" />
+                            <Setter TargetName="Track" Property="BorderThickness" Value="0" />
+                            <Setter TargetName="ThumbHost" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Thumb" Property="Fill" Value="{DynamicResource Brush.InputBackground}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Input.ValueSlider" TargetType="{x:Type Slider}">
         <Setter Property="Minimum" Value="0" />
         <Setter Property="Maximum" Value="100" />

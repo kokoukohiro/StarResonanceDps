@@ -164,6 +164,11 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(DisplaySettingsHost);
     }
 
+    private void OtherRoleSkillsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(OtherRoleSkillsSection);
+    }
+
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);

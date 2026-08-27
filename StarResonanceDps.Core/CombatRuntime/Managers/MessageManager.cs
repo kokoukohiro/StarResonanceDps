@@ -974,6 +974,28 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
                         EncounterManager.Current.SetAttrKV(uuid, "AttrHateList", hateList);
                         break;
+                    case EAttrType.AttrSlot:
+                        {
+                            var slotPayload = isNoValue ? [] : attr.RawData.ToByteArray();
+                            var isSelfSlot = IsSelfPlayer(uuid);
+
+                            // 自分のアクションバー。枠番号つきで全枠が届く唯一の経路。
+                            // 他人には届かないので、自分のときだけ取り込む。
+                            if (isSelfSlot && slotPayload.Length > 0)
+                            {
+                                var actionBar = Zproto.Slot.Parser.ParseFrom(slotPayload);
+                                var slotMap = new Dictionary<int, int>(actionBar.Slots.Count);
+                                foreach (var slotPair in actionBar.Slots)
+                                {
+                                    // 空枠は skillId=0 のまま入れる。落とすと枠の位置が失われる。
+                                    slotMap[slotPair.Key] = slotPair.Value.SkillId;
+                                }
+
+                                PlayerSkillLevelStateStore.ReplaceSelfActionBarSlots(slotMap);
+                            }
+
+                            break;
+                        }
                     case EAttrType.AttrSeasonLevel:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;

@@ -127,10 +127,21 @@ public sealed record PlayerSkillEffectSnapshot(
     PlayerBuffSnapshot? Buff,
     PlayerBuffSnapshot? Debuff);
 
+/// <param name="RoleSlotCount">
+/// ロールスキルの枠数。<b>自分と他人で意味が違う。</b>
+///
+/// <para>
+/// 自分は装備スロットが分かるので 4 枠固定。装備していない枠は空欄として出す。
+/// 他人は AOI の <c>AttrSkillLevelIdList</c>(習得済みの集合)しか届かず、
+/// そこから装備状態を判別できない(CLAUDE.md「他プレイヤーの装備中ロールスキルも取得不可能」)。
+/// 空欄を出す根拠が無いので、習得できていた数だけ枠を作る。
+/// </para>
+/// </param>
 public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
     long EntityUuid,
-    IReadOnlyList<PlayerCooldownSkillSnapshot> ImagineSkills,
-    IReadOnlyList<PlayerCooldownSkillSnapshot> RoleSkills);
+    IReadOnlyList<PlayerCooldownSkillSnapshot?> ImagineSkills,
+    IReadOnlyList<PlayerCooldownSkillSnapshot?> RoleSkills,
+    int RoleSlotCount);
 
 internal sealed record PlayerBuffCandidate(
     PlayerBuffSnapshot Snapshot,
@@ -454,9 +465,21 @@ public static class MeterSnapshotProvider
         Entity? entity,
         long characterId)
     {
+        // 自分はアクションバー(AttrSlot)から枠番号ごと組み立てる。
+        // 並び順と空欄がゲームと一致するのはこの経路だけ。
+        var isSelf = IsSelfEntity(entityUuid);
+        if (isSelf)
+        {
+            return CreateSelfActionBarLoadout(entityUuid);
+        }
+
         var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity, characterId);
+
+        // 他人は習得済みの集合しか届かず装備を判別できないので、上限を設けず取れた数だけ返す。
+        const int SelfRoleSlotCount = 4;
+
         var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
-        var roleSkills = new List<PlayerCooldownSkillSnapshot>(4);
+        var roleSkills = new List<PlayerCooldownSkillSnapshot>();
         var includedSkillIds = new HashSet<int>();
 
         foreach (var skillLevel in skillLevels)
@@ -471,8 +494,9 @@ public static class MeterSnapshotProvider
             var isImagine = CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName);
             var isRole = CombatDataCatalog.IsSkillRole(skillLevel.SkillId);
 
+            var roleFull = isSelf && roleSkills.Count >= SelfRoleSlotCount;
             if ((!isImagine || imagineSkills.Count >= 2)
-                && (!isRole || roleSkills.Count >= 4))
+                && (!isRole || roleFull))
             {
                 continue;
             }
@@ -507,21 +531,115 @@ public static class MeterSnapshotProvider
             {
                 imagineSkills.Add(snapshot);
             }
-            else if (isRole && roleSkills.Count < 4)
+            else if (isRole && !roleFull)
             {
                 roleSkills.Add(snapshot);
             }
 
-            if (imagineSkills.Count == 2 && roleSkills.Count == 4)
+            if (isSelf
+                && imagineSkills.Count == 2
+                && roleSkills.Count == SelfRoleSlotCount)
             {
                 break;
             }
+
+            // 他人はロールスキルに上限が無いので打ち切らない。
         }
 
         return new PlayerImagineRoleSkillLoadoutSnapshot(
             entityUuid,
             imagineSkills,
-            roleSkills);
+            roleSkills,
+            isSelf ? SelfRoleSlotCount : roleSkills.Count);
+    }
+
+    /// <summary>
+    /// イマジンの枠番号。実測(2026-08-28)で 7 と 8。
+    /// クライアントの enum にある <c>ResonanceSkillSlot_left / _right</c> と数が一致する。
+    /// </summary>
+    private static readonly int[] SelfImagineSlotIds = [7, 8];
+
+    /// <summary>ロールスキルの枠番号。実測(2026-08-28)で 21〜24。</summary>
+    private static readonly int[] SelfRoleSlotIds = [21, 22, 23, 24];
+
+    /// <summary>
+    /// 自分のイマジン/ロール枠を、アクションバーの枠番号どおりに組み立てる。
+    ///
+    /// <para>
+    /// 空枠は <c>null</c> のまま返す。<b>詰めない。</b> 詰めると並び順がゲームとずれる。
+    /// </para>
+    ///
+    /// <para>
+    /// <c>AttrSkillLevelIdList</c>(習得済みの集合)へは落ちない。同じ AOI 属性でありながら
+    /// 枠も装備状態も持たない下位互換なので、自分の枠を作るのに使う理由が無い。
+    /// アクションバーが未受信なら空で返し、埋めない。
+    /// </para>
+    /// </summary>
+    private static PlayerImagineRoleSkillLoadoutSnapshot CreateSelfActionBarLoadout(long entityUuid)
+    {
+        if (!PlayerSkillLevelStateStore.HasSelfActionBarSlots)
+        {
+            // 未受信。それらしい値で埋めると、受信できていないことが空欄と同じ見た目になる。
+            return new PlayerImagineRoleSkillLoadoutSnapshot(
+                entityUuid,
+                Array.Empty<PlayerCooldownSkillSnapshot?>(),
+                Array.Empty<PlayerCooldownSkillSnapshot?>(),
+                0);
+        }
+
+        var imagineSkills = BuildSelfActionBarSlots(entityUuid, SelfImagineSlotIds);
+        var roleSkills = BuildSelfActionBarSlots(entityUuid, SelfRoleSlotIds);
+        return new PlayerImagineRoleSkillLoadoutSnapshot(
+            entityUuid,
+            imagineSkills,
+            roleSkills,
+            roleSkills.Length);
+    }
+
+    private static PlayerCooldownSkillSnapshot?[] BuildSelfActionBarSlots(
+        long entityUuid,
+        IReadOnlyList<int> slotIds)
+    {
+        var result = new PlayerCooldownSkillSnapshot?[slotIds.Count];
+        for (var index = 0; index < slotIds.Count; index++)
+        {
+            var skillId = PlayerSkillLevelStateStore.GetSelfActionBarSkillId(slotIds[index]);
+            result[index] = skillId > 0
+                ? CreateSelfSlotSnapshot(entityUuid, skillId)
+                : null;
+        }
+
+        return result;
+    }
+
+    private static PlayerCooldownSkillSnapshot CreateSelfSlotSnapshot(long entityUuid, int skillId)
+    {
+        PlayerSkillLevelStateStore.TryGetSelfLearnedSkill(skillId, out var learnedLevel, out var tier);
+        var skillLevel = new DataTypes.Skills.SkillLevelInfo
+        {
+            SkillId = skillId,
+            CurrentLevel = learnedLevel,
+            Tier = tier
+        };
+
+        var iconName = CombatDataCatalog.GetSkillIconName(skillId, string.Empty);
+        var isImagine = CombatDataCatalog.IsSkillImagine(skillId, iconName);
+        var isRole = CombatDataCatalog.IsSkillRole(skillId);
+        var currentLevel = ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel);
+        var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillId);
+        return new PlayerCooldownSkillSnapshot(
+            skillId,
+            CombatDataCatalog.GetSkillName(skillId, string.Empty),
+            iconName,
+            currentLevel,
+            tier,
+            isImagine,
+            isRole && CombatDataCatalog.HasLevelDependentCooldown(skillId),
+            CombatDataCatalog.GetSkillPveCooldownSeconds(skillId, currentLevel, tier),
+            maxCharges,
+            maxCharges > 1
+                ? CombatDataCatalog.GetSkillChargeCooldownSeconds(skillId, tier)
+                : 0d);
     }
 
     private static PlayerImagineRoleSkillLoadoutSnapshot EmptyPlayerImagineRoleSkillLoadout()
@@ -529,7 +647,8 @@ public static class MeterSnapshotProvider
         return new PlayerImagineRoleSkillLoadoutSnapshot(
             0,
             Array.Empty<PlayerCooldownSkillSnapshot>(),
-            Array.Empty<PlayerCooldownSkillSnapshot>());
+            Array.Empty<PlayerCooldownSkillSnapshot>(),
+            0);
     }
 
     public static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> GetPlayerSkillEffects(

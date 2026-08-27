@@ -13,11 +13,24 @@ public sealed partial class PlayerListEntry : ObservableObject
 {
     private readonly ObservableCollection<PlayerImagineRoleSkillEntry> _imagineSkillEntries = [];
     private readonly ObservableCollection<PlayerImagineRoleSkillEntry> _roleSkillEntries = [];
-    private IReadOnlyList<PlayerCooldownSkillSnapshot> _imagineSkillSnapshots =
-        Array.Empty<PlayerCooldownSkillSnapshot>();
-    private IReadOnlyList<PlayerCooldownSkillSnapshot> _roleSkillSnapshots =
-        Array.Empty<PlayerCooldownSkillSnapshot>();
+    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _imagineSkillSnapshots =
+        Array.Empty<PlayerCooldownSkillSnapshot?>();
+    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _roleSkillSnapshots =
+        Array.Empty<PlayerCooldownSkillSnapshot?>();
+    private const int SelfRoleSlotCount = 4;
+
     private readonly HashSet<int> _trackedSkillIds = [];
+
+    /// <summary>
+    /// 他人のロールスキル表示設定。設定が変わると別インスタンスが渡ってくるので、
+    /// 参照の一致で「設定が変わったか」を判定する。<b>自分には適用しない。</b>
+    /// </summary>
+    private IReadOnlyDictionary<string, bool>? _otherRoleSkillVisibility;
+    private IReadOnlyDictionary<string, bool>? _appliedRoleSkillVisibility;
+    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _filteredRoleSkillSnapshots =
+        Array.Empty<PlayerCooldownSkillSnapshot?>();
+    private bool _isSelf;
+    private int _roleSlotCount;
     private long _skillEntityUuid;
     private int _skillProfessionId;
     private object? _skillSourceToken;
@@ -28,7 +41,9 @@ public sealed partial class PlayerListEntry : ObservableObject
     {
         CharacterId = characterId;
         FillSkillSlots(_imagineSkillEntries, 2, isImagine: true);
-        FillSkillSlots(_roleSkillEntries, 4, isImagine: false);
+        // 自分はここで作った4枠のまま動かさない(装備スロットが分かるので空欄を出せる)。
+        // 他人だけ RefreshSkillDisplay で取得できた数に合わせて増減させる。
+        FillSkillSlots(_roleSkillEntries, SelfRoleSlotCount, isImagine: false);
         ImagineSkillEntries = new ReadOnlyObservableCollection<PlayerImagineRoleSkillEntry>(_imagineSkillEntries);
         RoleSkillEntries = new ReadOnlyObservableCollection<PlayerImagineRoleSkillEntry>(_roleSkillEntries);
     }
@@ -96,6 +111,8 @@ public sealed partial class PlayerListEntry : ObservableObject
         MeterWidgetSettingsConfig settings,
         PlayerNameDisplayMode playerNameDisplayMode)
     {
+        _isSelf = player.IsSelf;
+        _otherRoleSkillVisibility = settings.OtherRoleSkillVisibility;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         IsNpc = player.IsNpc;
@@ -126,10 +143,22 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     public void RefreshSkillDisplay(bool refreshEffects)
     {
-        if (RefreshSkillLoadoutIfChanged())
+        var loadoutChanged = RefreshSkillLoadoutIfChanged();
+        var filterChanged = !ReferenceEquals(_appliedRoleSkillVisibility, _otherRoleSkillVisibility);
+        if (loadoutChanged || filterChanged)
         {
+            ApplyRoleSkillVisibility();
+
+            // 自分の枠は触らない。コンストラクタで作った4枠のままにする。
+            if (!_isSelf)
+            {
+                SyncSkillSlotCount(
+                    _roleSkillEntries,
+                    _filteredRoleSkillSnapshots.Count,
+                    isImagine: false);
+            }
             UpdateSkillMetadata(_imagineSkillEntries, _imagineSkillSnapshots);
-            UpdateSkillMetadata(_roleSkillEntries, _roleSkillSnapshots);
+            UpdateSkillMetadata(_roleSkillEntries, _filteredRoleSkillSnapshots);
         }
 
         UpdateSkillCooldowns(
@@ -138,7 +167,7 @@ public sealed partial class PlayerListEntry : ObservableObject
             _skillEntityUuid);
         UpdateSkillCooldowns(
             _roleSkillEntries,
-            _roleSkillSnapshots,
+            _filteredRoleSkillSnapshots,
             _skillEntityUuid);
 
         if (!refreshEffects)
@@ -152,6 +181,43 @@ public sealed partial class PlayerListEntry : ObservableObject
             _trackedSkillIds);
         UpdateSkillEffects(_imagineSkillEntries, effectsBySkillId);
         UpdateSkillEffects(_roleSkillEntries, effectsBySkillId);
+    }
+
+    /// <summary>
+    /// 他人のロールスキル枠に、表示オンのものだけを残す。
+    ///
+    /// <para>
+    /// <b>自分は対象外。</b> 自分はアクションバーの枠をそのまま出すので、
+    /// ここで間引くと枠の位置がゲームとずれる。
+    /// </para>
+    /// </summary>
+    private void ApplyRoleSkillVisibility()
+    {
+        _appliedRoleSkillVisibility = _otherRoleSkillVisibility;
+
+        if (_isSelf || _otherRoleSkillVisibility is null)
+        {
+            _filteredRoleSkillSnapshots = _roleSkillSnapshots;
+            return;
+        }
+
+        var visible = new List<PlayerCooldownSkillSnapshot?>(_roleSkillSnapshots.Count);
+        foreach (var snapshot in _roleSkillSnapshots)
+        {
+            if (snapshot is null)
+            {
+                continue;
+            }
+
+            var key = snapshot.SkillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            // 設定に無いスキルは既定どおり表示する。設定は20件ぶんしか持たない。
+            if (!_otherRoleSkillVisibility.TryGetValue(key, out var isVisible) || isVisible)
+            {
+                visible.Add(snapshot);
+            }
+        }
+
+        _filteredRoleSkillSnapshots = visible;
     }
 
     private bool RefreshSkillLoadoutIfChanged()
@@ -185,6 +251,7 @@ public sealed partial class PlayerListEntry : ObservableObject
         _roleFilterToken = roleFilterToken;
         _imagineSkillSnapshots = snapshot.ImagineSkills;
         _roleSkillSnapshots = snapshot.RoleSkills;
+        _roleSlotCount = snapshot.RoleSlotCount;
         RebuildTrackedSkillIds();
         _skillLoadoutInitialized = true;
         return true;
@@ -199,8 +266,9 @@ public sealed partial class PlayerListEntry : ObservableObject
         _skillProfessionId = 0;
         _skillSourceToken = null;
         _roleFilterToken = null;
-        _imagineSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot>();
-        _roleSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot>();
+        _imagineSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot?>();
+        _roleSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot?>();
+        _roleSlotCount = 0;
         _trackedSkillIds.Clear();
         _skillLoadoutInitialized = false;
         return changed;
@@ -211,7 +279,7 @@ public sealed partial class PlayerListEntry : ObservableObject
         _trackedSkillIds.Clear();
         foreach (var snapshot in _imagineSkillSnapshots)
         {
-            if (snapshot.SkillId > 0)
+            if (snapshot is { SkillId: > 0 })
             {
                 _trackedSkillIds.Add(snapshot.SkillId);
             }
@@ -219,7 +287,7 @@ public sealed partial class PlayerListEntry : ObservableObject
 
         foreach (var snapshot in _roleSkillSnapshots)
         {
-            if (snapshot.SkillId > 0)
+            if (snapshot is { SkillId: > 0 })
             {
                 _trackedSkillIds.Add(snapshot.SkillId);
             }
@@ -237,9 +305,29 @@ public sealed partial class PlayerListEntry : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 枠の数を <paramref name="count"/> に合わせる。増減は末尾で行い、
+    /// 既存の枠のインスタンスは作り直さない(表示のちらつきを避けるため)。
+    /// </summary>
+    private static void SyncSkillSlotCount(
+        ObservableCollection<PlayerImagineRoleSkillEntry> entries,
+        int count,
+        bool isImagine)
+    {
+        while (entries.Count > count)
+        {
+            entries.RemoveAt(entries.Count - 1);
+        }
+
+        while (entries.Count < count)
+        {
+            entries.Add(new PlayerImagineRoleSkillEntry(isImagine));
+        }
+    }
+
     private static void UpdateSkillMetadata(
         IReadOnlyList<PlayerImagineRoleSkillEntry> entries,
-        IReadOnlyList<PlayerCooldownSkillSnapshot> snapshots)
+        IReadOnlyList<PlayerCooldownSkillSnapshot?> snapshots)
     {
         for (var index = 0; index < entries.Count; index++)
         {
@@ -249,7 +337,7 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     private static void UpdateSkillCooldowns(
         IReadOnlyList<PlayerImagineRoleSkillEntry> entries,
-        IReadOnlyList<PlayerCooldownSkillSnapshot> snapshots,
+        IReadOnlyList<PlayerCooldownSkillSnapshot?> snapshots,
         long entityUuid)
     {
         for (var index = 0; index < entries.Count; index++)

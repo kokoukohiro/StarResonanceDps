@@ -111,6 +111,13 @@ public sealed class MeterWidgetSettingsConfig
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerList);
 
+    /// <summary>
+    /// 他人のロールスキルを表示するか。キーはスキルID。
+    /// オンにしたものだけを他人のプレイヤーリストに出す。<b>自分は対象外。</b>
+    /// </summary>
+    public Dictionary<string, bool> OtherRoleSkillVisibility { get; set; } =
+        WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility();
+
     public MeterWidgetSettingsConfig Clone()
     {
         return new MeterWidgetSettingsConfig
@@ -127,7 +134,10 @@ public sealed class MeterWidgetSettingsConfig
                 : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
-                    StringComparer.OrdinalIgnoreCase)
+                    StringComparer.OrdinalIgnoreCase),
+            OtherRoleSkillVisibility = OtherRoleSkillVisibility is null
+                ? WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility()
+                : new Dictionary<string, bool>(OtherRoleSkillVisibility, StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -171,6 +181,53 @@ public static class WidgetConfigDefaults
     private const double MetricTimelineInitialWindowHeight = 420d;
 
     public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [10, 5, 3, 2, 1];
+
+    /// <summary>
+    /// 設定に並べるロールスキル。全20種。
+    ///
+    /// <para>
+    /// 3021〜3028 は全職務共通で、レベルを4段階持つ(<c>SkillFightLevelTable</c> で確認)。
+    /// 残り12件は職務専用で、ゲームのスキル表で <c>SlotPositionId</c> に 21〜24 を持つもの。
+    /// </para>
+    /// </summary>
+    public static IReadOnlyList<int> OtherRoleSkillIds { get; } =
+    [
+        3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028,
+        3611, 3612, 3613, 3614,
+        3011, 3012, 3013, 3014,
+        3311, 3312, 3313, 3314
+    ];
+
+    /// <summary>
+    /// 既定でオンにするロールスキル。
+    ///
+    /// <para>
+    /// 3021 Thunderfall Grasp / 3027 Blessing of Life / 3028 Guardian's Boundary /
+    /// 3312 Renewal Prayer の4件。
+    /// </para>
+    /// </summary>
+    private static readonly int[] DefaultVisibleOtherRoleSkillIds = [3021, 3027, 3028, 3312];
+
+    /// <summary>既定でオンかどうか。</summary>
+    public static bool IsOtherRoleSkillVisibleByDefault(int skillId)
+    {
+        return Array.IndexOf(DefaultVisibleOtherRoleSkillIds, skillId) >= 0;
+    }
+
+    /// <summary>既定は上の4件だけオン。残りはオフ。</summary>
+    public static Dictionary<string, bool> CreateDefaultOtherRoleSkillVisibility()
+    {
+        var result = new Dictionary<string, bool>(
+            OtherRoleSkillIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var skillId in OtherRoleSkillIds)
+        {
+            result[skillId.ToString(System.Globalization.CultureInfo.InvariantCulture)] =
+                IsOtherRoleSkillVisibleByDefault(skillId);
+        }
+
+        return result;
+    }
 
     private static readonly string[] DefaultWindowColorHexes =
     [
@@ -640,6 +697,20 @@ public static class WidgetConfigDefaults
             : MaxClassColorOpacity;
         meter.ClassColorIndexes ??= CreateDefaultClassColorIndexes(kind);
         meter.ClassColorPalettes ??= CreateDefaultClassColorPalettes(kind);
+
+        // 20件ぶんのキーを必ず揃える。設定に無いスキルはそのスキルの既定値で埋める。
+        var normalizedRoleSkills = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        foreach (var skillId in OtherRoleSkillIds)
+        {
+            var key = skillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            normalizedRoleSkills[key] =
+                meter.OtherRoleSkillVisibility is not null
+                && meter.OtherRoleSkillVisibility.TryGetValue(key, out var visible)
+                    ? visible
+                    : IsOtherRoleSkillVisibleByDefault(skillId);
+        }
+
+        meter.OtherRoleSkillVisibility = normalizedRoleSkills;
 
         var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);

@@ -31,6 +31,23 @@ public static class PlayerSkillLevelStateStore
     private static DataTypes.Skills.SkillLevelInfo[] _selfCurrentSkillLevels = [];
     private static PlayerRoleSkillLevelState[] _selfRoleSkillLevels = [];
 
+    /// <summary>
+    /// 自分のアクションバー。<c>{枠番号 → スキルID}</c> をそのまま持つ。
+    ///
+    /// <para>
+    /// 出どころは AOI属性 <c>AttrSlot</c>(226)。自分にしか届かず、毎回 全枠が丸ごと来る
+    /// (実測 2026-08-28: 9回とも31枠。空枠も <c>skillId=0</c> として枠ごと入っている)。
+    /// フルコンテナの <c>CharSerialize.Slots</c> は同じ瞬間に21枠しか運ばず、
+    /// 一部の空枠が欠け、さらに特化の置換前スキルIDを持っていた(slot2 が 1922 対 1930)ため
+    /// 採用していない。
+    /// </para>
+    ///
+    /// <para><b>空枠は 0 のまま残す。</b> 落とすと枠の位置が失われる。</para>
+    /// </summary>
+    private static FrozenDictionary<int, int> _selfActionBarSlots =
+        new Dictionary<int, int>().ToFrozenDictionary();
+    private static bool _hasSelfActionBarSlots;
+
     public static void ReplaceSelfSkillLevels(
         Zproto.ProfessionList? professionList,
         Zproto.DutyList? dutyList)
@@ -209,6 +226,98 @@ public static class PlayerSkillLevelStateStore
             _selfCurrentProfessionId = professionId;
             PublishState();
         }
+    }
+
+    /// <summary>
+    /// 自分のアクションバーを丸ごと差し替える。<c>AttrSlot</c> は毎回全枠を運ぶので、
+    /// 差分を持たず置き換えるだけでよい。
+    /// </summary>
+    public static void ReplaceSelfActionBarSlots(IReadOnlyDictionary<int, int> slots)
+    {
+        ArgumentNullException.ThrowIfNull(slots);
+
+        Volatile.Write(ref _selfActionBarSlots, slots.ToFrozenDictionary());
+        Volatile.Write(ref _hasSelfActionBarSlots, true);
+    }
+
+    /// <summary>
+    /// アクションバーを一度でも受信したか。
+    ///
+    /// <para>
+    /// 未受信と「全枠が空」を区別するために要る。未受信のときに空欄を並べると、
+    /// 受信できていないことが空欄と同じ見た目になって気付けない。
+    /// </para>
+    /// </summary>
+    public static bool HasSelfActionBarSlots => Volatile.Read(ref _hasSelfActionBarSlots);
+
+    /// <summary>
+    /// 枠番号のスキルID。枠が無い場合も 0 を返すので、
+    /// 呼び出し側は <see cref="HasSelfActionBarSlots"/> で受信済みかを先に見ること。
+    /// </summary>
+    public static int GetSelfActionBarSkillId(int slotId)
+    {
+        return Volatile.Read(ref _selfActionBarSlots).TryGetValue(slotId, out var skillId)
+            ? skillId
+            : 0;
+    }
+
+    /// <summary>
+    /// 習得済みのプール(職業・職務・イマジン)からレベルと改造値を引く。
+    ///
+    /// <para>
+    /// アクションバーは「どの枠に何が入っているか」しか持たないので、
+    /// レベルはここから補う。<b>装備の選択には関与しない。</b>
+    /// </para>
+    /// </summary>
+    public static bool TryGetSelfLearnedSkill(int skillId, out int level, out int tier)
+    {
+        level = 0;
+        tier = 0;
+        if (skillId <= 0)
+        {
+            return false;
+        }
+
+        lock (StateLock)
+        {
+            foreach (var skill in _selfImagineSkills.Values)
+            {
+                if (skill.SkillId == skillId)
+                {
+                    level = skill.Level;
+                    tier = skill.Tier;
+                    return true;
+                }
+            }
+
+            foreach (var duty in SelfDutyStates.Values)
+            {
+                foreach (var skill in duty.Skills.Values)
+                {
+                    if (skill.SkillId == skillId)
+                    {
+                        level = skill.Level;
+                        tier = skill.Tier;
+                        return true;
+                    }
+                }
+            }
+
+            foreach (var profession in SelfProfessionStates.Values)
+            {
+                foreach (var skill in profession.Skills.Values)
+                {
+                    if (skill.SkillId == skillId)
+                    {
+                        level = skill.Level;
+                        tier = skill.Tier;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public static bool TryGetSelfCurrentProfessionId(out int professionId)

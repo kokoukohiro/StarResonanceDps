@@ -207,6 +207,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>Theme</value>
   </data>
+  <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
+    <value>Role skills</value>
+  </data>
+  <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
+    <value>Note: Shows role skills other players have learned (a skill shown here is not necessarily equipped).</value>
+  </data>
+  <data name="Settings_Switch_On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Settings_Switch_Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
   <data name="Settings_Section_Update_Title" xml:space="preserve">
     <value>Update</value>
   </data>

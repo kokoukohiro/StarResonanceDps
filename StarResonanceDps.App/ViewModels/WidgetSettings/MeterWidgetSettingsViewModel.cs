@@ -30,6 +30,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private readonly WidgetKind _kind;
     private readonly Dictionary<string, MeterClassColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<MeterPlayerInfoFormatField> _availablePlayerInfoFormatFields = [];
+    private readonly ObservableCollection<OtherRoleSkillItemViewModel> _otherRoleSkills = [];
     private MeterWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
 
@@ -70,6 +71,17 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         Items = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
+
+        var roleSkillIds = WidgetConfigDefaults.OtherRoleSkillIds;
+        for (var index = 0; index < roleSkillIds.Count; index++)
+        {
+            _otherRoleSkills.Add(new OtherRoleSkillItemViewModel(
+                roleSkillIds[index],
+                index == roleSkillIds.Count - 1,
+                OnOtherRoleSkillVisibilityChanged));
+        }
+
+        OtherRoleSkills = new ReadOnlyObservableCollection<OtherRoleSkillItemViewModel>(_otherRoleSkills);
         AvailablePlayerInfoFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availablePlayerInfoFormatFields);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
@@ -77,6 +89,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         _lastSaved = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
         Load(_lastSaved);
     }
+
+    public ReadOnlyObservableCollection<OtherRoleSkillItemViewModel> OtherRoleSkills { get; }
+
+    /// <summary>「他人のロールスキル」設定を出すのはプレイヤーリストだけ。</summary>
+    public bool ShowsOtherRoleSkillSettings => _kind == WidgetKind.PlayerList;
 
     public event Action<MeterWidgetSettingsConfig>? PreviewChanged;
 
@@ -150,6 +167,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             config.ClassColorPalettes[item.Key] = [.. item.Colors.GetHexColors()];
         }
 
+        config.OtherRoleSkillVisibility = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        foreach (var skill in _otherRoleSkills)
+        {
+            config.OtherRoleSkillVisibility[skill.Key] = skill.IsVisible;
+        }
+
         WidgetConfigDefaults.NormalizeMeter(_kind, config);
         return config;
     }
@@ -201,6 +224,13 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 item.Colors.Load(colors, selectedIndex);
             }
 
+            foreach (var skill in _otherRoleSkills)
+            {
+                skill.LoadVisibility(
+                    !normalized.OtherRoleSkillVisibility.TryGetValue(skill.Key, out var visible)
+                    || visible);
+            }
+
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
@@ -248,6 +278,17 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             }
         }
 
+        foreach (var skillId in WidgetConfigDefaults.OtherRoleSkillIds)
+        {
+            var key = skillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if (!left.OtherRoleSkillVisibility.TryGetValue(key, out var leftVisible)
+                || !right.OtherRoleSkillVisibility.TryGetValue(key, out var rightVisible)
+                || leftVisible != rightVisible)
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -284,11 +325,25 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         NotifyChanged();
     }
 
+    /// <summary>
+    /// スイッチを触った瞬間に呼ぶ。既存の色設定と同じ経路で、
+    /// プレビュー反映と「未保存あり」の判定を更新する。
+    /// </summary>
+    private void OnOtherRoleSkillVisibilityChanged()
+    {
+        NotifyChanged();
+    }
+
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         foreach (var item in Items)
         {
             item.RefreshDisplayName();
+        }
+
+        foreach (var skill in _otherRoleSkills)
+        {
+            skill.RefreshMetadata();
         }
 
         OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
