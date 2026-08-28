@@ -1,4 +1,4 @@
-namespace StarResonanceDps.App.Models.Widgets;
+﻿namespace StarResonanceDps.App.Models.Widgets;
 
 public enum WidgetKind
 {
@@ -18,6 +18,5 @@ public enum WidgetKind
     HpsGraph,
     DamageSummary,
     HealingSummary,
-    SkillInfo,
     EntityList = 18
 }

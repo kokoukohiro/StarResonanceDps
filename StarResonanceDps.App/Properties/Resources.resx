@@ -762,18 +762,6 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>Casts Per Min</value>
   </data>
-  <data name="Widget_SkillInfo" xml:space="preserve">
-    <value>Skill Info</value>
-  </data>
-  <data name="Widget_NoSkillInfoData" xml:space="preserve">
-    <value>No skill information available.</value>
-  </data>
-  <data name="SkillInfo_Level" xml:space="preserve">
-    <value>Level</value>
-  </data>
-  <data name="SkillInfo_Tier" xml:space="preserve">
-    <value>Tier</value>
-  </data>
   <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
     <value>3-Minute Benchmark</value>
   </data>

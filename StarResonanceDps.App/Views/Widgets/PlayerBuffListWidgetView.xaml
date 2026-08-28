@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerBuffListWidgetView"
+﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerBuffListWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              UseLayoutRounding="True"
@@ -64,7 +64,6 @@
                                        Style="{StaticResource Text.WidgetWindow}"
                                        FontSize="15"
                                        FontWeight="Bold"
-                                       Typography.NumeralAlignment="Tabular"
                                        Text="{Binding LayerText}"
                                        TextAlignment="Center" />
 
@@ -74,7 +73,6 @@
                                        Style="{StaticResource Text.WidgetWindow}"
                                        FontSize="8"
                                        FontWeight="SemiBold"
-                                       Typography.NumeralAlignment="Tabular"
                                        Text="{Binding DurationText}"
                                        TextAlignment="Center" />
                         </Grid>

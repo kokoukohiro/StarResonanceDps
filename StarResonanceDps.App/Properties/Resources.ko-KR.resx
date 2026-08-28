@@ -762,18 +762,6 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>분당 시전</value>
   </data>
-  <data name="Widget_SkillInfo" xml:space="preserve">
-    <value>스킬 정보</value>
-  </data>
-  <data name="Widget_NoSkillInfoData" xml:space="preserve">
-    <value>스킬 정보가 없습니다.</value>
-  </data>
-  <data name="SkillInfo_Level" xml:space="preserve">
-    <value>레벨</value>
-  </data>
-  <data name="SkillInfo_Tier" xml:space="preserve">
-    <value>티어</value>
-  </data>
   <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
     <value>3분 측정</value>
   </data>

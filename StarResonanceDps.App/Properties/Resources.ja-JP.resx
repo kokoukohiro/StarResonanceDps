@@ -762,18 +762,6 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>毎分キャスト</value>
   </data>
-  <data name="Widget_SkillInfo" xml:space="preserve">
-    <value>スキル情報</value>
-  </data>
-  <data name="Widget_NoSkillInfoData" xml:space="preserve">
-    <value>スキル情報がありません。</value>
-  </data>
-  <data name="SkillInfo_Level" xml:space="preserve">
-    <value>レベル</value>
-  </data>
-  <data name="SkillInfo_Tier" xml:space="preserve">
-    <value>ティア</value>
-  </data>
   <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
     <value>3分計測</value>
   </data>

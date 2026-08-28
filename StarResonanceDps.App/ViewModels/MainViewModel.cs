@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
@@ -61,7 +61,6 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
-        AddWidget(WidgetKind.SkillInfo, "Widget_SkillInfo");
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;

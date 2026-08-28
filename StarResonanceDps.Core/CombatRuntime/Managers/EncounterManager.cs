@@ -148,7 +148,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 CheckTimeOutStatus(reason);
 
-                if (Current.TotalDamage > 0)
+                // 終了時点の秒間値を確定させる。回復だけのエンカウンターも対象。
+                if (Current.TotalDamage > 0 || Current.TotalHealing > 0)
                 {
 
                     RecalculateEncounterPerValues(Current.EndTime.ToUniversalTime());
@@ -433,7 +434,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             while (!cancellationTokenSource.IsCancellationRequested && await timer.WaitForNextTickAsync())
             {
-                if (Current != null && Current.TotalDamage > 0)
+                // 回復だけのエンカウンターでも回す。ダメージだけを見ていると、
+                // 毎秒の再計算が一度も走らず HPS が最後の回復イベントの値で凍る
+                // (秒間値を時間とともに落とすのはこのループの仕事で、AddData は
+                // イベントが届いた瞬間しか計算しない)。
+                if (Current != null && (Current.TotalDamage > 0 || Current.TotalHealing > 0))
                 {
                     RecalculateEncounterPerValues();
                 }
@@ -485,12 +490,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     entity.Value.HealingStats.RecalculatePerSecond(now);
                 }
 
-                entity.Value.TakenStats.InactiveTime = inactiveTime;
-                if (entity.Value.TakenStats.ValueTotal > 0)
-                {
-                    entity.Value.TakenStats.RecalculatePerSecond(now);
-                }
-
                 foreach (var skill in entity.Value.SkillMetrics)
                 {
                     skill.Value.Damage.InactiveTime = inactiveTime;
@@ -505,11 +504,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         skill.Value.Healing.RecalculatePerSecond(now);
                     }
 
-                    skill.Value.Taken.InactiveTime = inactiveTime;
-                    if (skill.Value.Taken.ValueTotal > 0)
-                    {
-                        skill.Value.Taken.RecalculatePerSecond(now);
-                    }
                 }
             }
         }
@@ -1227,9 +1221,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 保持者に付けると回復を受けた人まで同じ特化になる。
             //
             // 除去は見ない。「あることしか示さない」判定なので、消えても未装着の根拠にならない。
-            if (buffEventType != EBuffEventType.BuffEventRemove && baseId > 0)
+            if (buffEventType == EBuffEventType.BuffEventRemove)
             {
-                ApplySpecFromTalentBuff(baseId, fireUuid, fightSourceType);
+                ApplySpecMarkerRemoval(entityUuid, buffUuid);
+            }
+            else if (baseId > 0)
+            {
+                ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType);
             }
         }
 
@@ -1255,10 +1253,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>あることしか示さない。除去は見ない。</para>
         /// </summary>
-        public void ApplySpecFromTalentBuff(int observedBuffId, long fireUuid, int fightSourceType)
+        public void ApplySpecFromTalentBuff(int observedBuffId, int buffUuid, long fireUuid, int fightSourceType)
         {
             if (!DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
-                    observedBuffId, out _, out var spec, out _))
+                    observedBuffId, out var grantedBuffId, out var spec, out var distanceFromRoot))
             {
                 return;
             }
@@ -1270,7 +1268,50 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            GetOrCreateEntity(fireUuid).UpdateSubProfessionFromTalentBuff((int)spec);
+            // 除去を突き合わせられるのはマーカー本体(ツリーの根)だけ。距離1以上の派生バフは
+            // procで付いたり消えたりするので、それが消えても未装着の根拠にならない。
+            var isMarker = distanceFromRoot == 0;
+            GetOrCreateEntity(fireUuid).UpdateSubProfessionFromTalentBuff(
+                (int)spec,
+                isMarker ? grantedBuffId : 0,
+                isMarker ? buffUuid : 0);
+        }
+
+        /// <summary>
+        /// 特化マーカーバフの除去を受けて、特化を未装着(クラスR1)へ戻す。
+        ///
+        /// <para>
+        /// 除去イベントは <c>BaseId</c> を運ばない(0 で届く)ので、付与時に控えた
+        /// バフ実体UUIDとの一致でしか判定できない。控えてあるのはマーカー本体だけなので、
+        /// 派生バフが消えただけで特化を落とすことはない。
+        /// </para>
+        ///
+        /// <para>
+        /// <b>保持者(<paramref name="entityUuid"/>)で突き合わせる。</b> 除去イベントは術者を
+        /// 運ばないため、マーカーが「自分のアビリティが自分に付けるバフ」で保持者＝術者である
+        /// ことを前提にしている。<b>この前提は実測していない。</b>
+        /// </para>
+        /// </summary>
+        private void ApplySpecMarkerRemoval(long entityUuid, int buffUuid)
+        {
+            if (entityUuid == 0 || buffUuid == 0)
+            {
+                return;
+            }
+
+            // ここでエンティティを作らない。見たことのない相手の除去は突き合わせようがない。
+            if (!Entities.TryGetValue(entityUuid, out var entity)
+                || !entity.ClearSubProfessionFromMarkerRemoval(buffUuid))
+            {
+                return;
+            }
+
+            // 保持している補完値も同時に落とす。落とさないと、次の解決でキャッシュが
+            // 古い特化を返して元に戻ってしまう(自分はキャッシュを読まないので影響しない)。
+            var characterId = Utils.UuidToEntityId(entityUuid);
+            Services.PartyMemberCache.Instance.SetSpecAbilityUnequipped(characterId);
+            Services.MeterPlayerSpecCache.Instance.SetSpecAbilityUnequipped(characterId);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(entityUuid);
         }
 
         protected virtual void OnSkillActivated(SkillActivatedEventArgs e)
@@ -1588,10 +1629,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     SubProfessionId = tracker.Value.SubProfessionId,
                     DidDamage = tracker.Value.DidDamage,
                     DidHealing = tracker.Value.DidHealing,
-                    DidTaken = tracker.Value.DidTaken,
                     Damage = (TrackedStats)tracker.Value.Damage.Clone(),
                     Healing = (TrackedStats)tracker.Value.Healing.Clone(),
-                    Taken = (TrackedStats)tracker.Value.Taken.Clone(),
                 };
                 ((Entity)cloned).InteractedEntities.AddOrUpdate(tracker.Key, statTracker, (key, value) => statTracker);
             }
@@ -1985,6 +2024,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 combatStats.AddData(otherUuid, skillId, skillLevel, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
             }
 
+            // 被ダメは加害者ごとの集計を持たない。合計値を出す予定が無く、
+            // 「いつ・誰が・どのスキルで・いくら」は TakenStats.SkillSnapshots が
+            // 1イベント単位で持っているので、そちらで足りる。
+            if (skillType == ESkillType.Taken)
+            {
+                return;
+            }
+
             if (!InteractedEntities.TryGetValue(otherUuid, out var statTracker))
             {
                 statTracker = new();
@@ -2005,11 +2052,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 statTracker.DidHealing = true;
                 trackers = statTracker.Healing;
-            }
-            else if (skillType == ESkillType.Taken)
-            {
-                statTracker.DidTaken = true;
-                trackers = statTracker.Taken;
             }
             else
             {
@@ -2179,17 +2221,56 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// タレント由来のバフから特化を確定する。<b>このエンティティが術者であること</b>は
         /// 呼び出し側(<see cref="EncounterManager.ApplySpecFromTalentBuff"/>)が保証する。
         ///
-        /// <para>あることしか示さない。除去は見ない。</para>
+        /// <para>
+        /// <paramref name="markerBuffUuid"/> が 0 以外なら、それはマーカー本体(ツリーの根)。
+        /// 除去を突き合わせるために実体UUIDを控える。
+        /// <b>特化が変わらない再付与でも控え直す</b>ので、シーン切替の再付与にも追従する。
+        /// </para>
         /// </summary>
-        public void UpdateSubProfessionFromTalentBuff(int subProfessionId)
+        public void UpdateSubProfessionFromTalentBuff(int subProfessionId, int markerBuffId, int markerBuffUuid)
         {
-            if (subProfessionId <= 0 || SubProfessionId == subProfessionId)
+            if (subProfessionId <= 0)
+            {
+                return;
+            }
+
+            if (markerBuffUuid != 0)
+            {
+                SpecMarkerBuffId = markerBuffId;
+                SpecMarkerBuffUuid = markerBuffUuid;
+            }
+
+            if (SubProfessionId == subProfessionId)
             {
                 return;
             }
 
             SetSubProfessionId(subProfessionId);
             PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+        }
+
+        /// <summary>
+        /// 控えてあるマーカーバフが除去されたら、特化を未装着(クラスR1)へ戻す。
+        /// 一致しなければ何もしないで <c>false</c>。
+        ///
+        /// <para>
+        /// <b><see cref="SetSubProfessionUnknown"/> は使えない。</b> あれは
+        /// <see cref="HasBuffSnapshot"/> も落とすので <see cref="IsSpecAbilityUnequipped"/> が
+        /// 成立せず、クラスR1ではなく「観測できていない」になる。ここは
+        /// 「全部見えている状態でマーカーだけ消えた」と分かっているので、受信済みフラグは残す。
+        /// </para>
+        /// </summary>
+        public bool ClearSubProfessionFromMarkerRemoval(int buffUuid)
+        {
+            if (buffUuid == 0 || SpecMarkerBuffUuid != buffUuid)
+            {
+                return false;
+            }
+
+            SubProfessionId = 0;
+            SpecMarkerBuffId = 0;
+            SpecMarkerBuffUuid = 0;
+            return true;
         }
 
         /// <summary>
@@ -2215,7 +2296,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             for (var index = 0; index < buffs.Count; index++)
             {
                 manager?.ApplySpecFromTalentBuff(
-                    buffs[index].BaseId, buffs[index].FireUuid, buffs[index].FightSourceType);
+                    buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid, buffs[index].FightSourceType);
             }
 
             // 自分が術者のタレントバフが1件も無かった＝未装着。PTメンバーぶんはキャッシュにも残す。
@@ -2506,13 +2587,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     {
                         foundInteracted.DidHealing = newInteractedEntities.Value.DidHealing;
                     }
-                    if (!foundInteracted.DidTaken)
-                    {
-                        foundInteracted.DidTaken = newInteractedEntities.Value.DidTaken;
-                    }
                     foundInteracted.Damage.MergeTrackedStats(newInteractedEntities.Value.Damage);
                     foundInteracted.Healing.MergeTrackedStats(newInteractedEntities.Value.Healing);
-                    foundInteracted.Taken.MergeTrackedStats(newInteractedEntities.Value.Taken);
                 }
                 else
                 {
@@ -2525,10 +2601,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                         SubProfessionId = newInteractedEntities.Value.SubProfessionId,
                         DidDamage = newInteractedEntities.Value.DidDamage,
                         DidHealing = newInteractedEntities.Value.DidHealing,
-                        DidTaken = newInteractedEntities.Value.DidTaken,
                         Damage = (TrackedStats)newInteractedEntities.Value.Damage.Clone(),
                         Healing = (TrackedStats)newInteractedEntities.Value.Healing.Clone(),
-                        Taken = (TrackedStats)newInteractedEntities.Value.Taken.Clone(),
                     };
                     InteractedEntities.TryAdd(newInteractedEntities.Key, statTracker);
                 }
@@ -2619,10 +2693,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int SubProfessionId { get; set; } = 0;
         public bool DidDamage { get; set; } = false;
         public bool DidHealing { get; set; } = false;
-        public bool DidTaken { get; set; } = false;
         public TrackedStats Damage { get; set; } = new();
         public TrackedStats Healing { get; set; } = new();
-        public TrackedStats Taken { get; set; } = new();
     }
 
     public class TrackedStats : System.ICloneable

@@ -1,10 +1,11 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
@@ -71,11 +72,15 @@ public partial class MeterWidgetView : UserControl, IWidgetVerticalScrollContent
         NotifyVerticalScrollMetricsChanged();
     }
 
+    /// <summary>
+    /// 左クリックはメニューを開かず、その行のスキル詳細(与ダメ/ヒール)を直接開く。
+    /// メニューは右クリック側が担う。
+    /// </summary>
     private void MeterItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button)
+        if (sender is Button { Tag: MeterWidgetViewModel viewModel, DataContext: MeterPlayerEntry entry })
         {
-            OpenPlayerSelectionMenu(button);
+            viewModel.RequestContributionCommand.Execute(entry);
         }
     }
 

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -79,7 +79,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.PlayerEquipment
-        or WidgetKind.SkillInfo
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
         or WidgetKind.DamageContribution
@@ -327,15 +326,15 @@ public partial class WidgetListItemViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RequestPlayerEquipment(PlayerListEntry? player)
+    private void RequestPlayerStatus(PlayerListEntry? player)
     {
-        RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
+        RequestPlayerWindow(WidgetKind.PlayerStatus, player);
     }
 
     [RelayCommand]
-    private void RequestSkillInfo(PlayerListEntry? player)
+    private void RequestPlayerEquipment(PlayerListEntry? player)
     {
-        RequestPlayerWindow(WidgetKind.SkillInfo, player);
+        RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
     }
 
     [RelayCommand]

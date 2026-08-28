@@ -328,7 +328,7 @@
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
-                                                    <Setter Property="Foreground" Value="#FFD000" />
+                                                        <Setter Property="Foreground" Value="#F9CD04" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>

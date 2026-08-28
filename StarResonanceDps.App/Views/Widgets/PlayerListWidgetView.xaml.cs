@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -107,11 +107,15 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
         NotifyVerticalScrollMetricsChanged();
     }
 
+    /// <summary>
+    /// 左クリックはメニューを開かず、その行のプレイヤー情報ウィジェットを直接開く。
+    /// メニューは右クリック側が担う。
+    /// </summary>
     private void PlayerListItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button)
+        if (sender is Button { Tag: WidgetListItemViewModel widget, DataContext: PlayerListEntry entry })
         {
-            OpenPlayerSelectionMenu(button);
+            widget.RequestPlayerInfoCommand.Execute(entry);
         }
     }
 
@@ -226,7 +230,11 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
             menu.Style = contextMenuStyle;
         }
 
-        var menuItems = menu.Items.OfType<MenuItem>().ToArray();
+        // 隠れている項目は数に入れない。自分の行だけに出る「ステータス詳細」を
+        // Collapsed のまま数えると、見えていない項目に先頭/末尾の角丸が当たる。
+        var menuItems = menu.Items.OfType<MenuItem>()
+            .Where(item => item.Visibility == Visibility.Visible)
+            .ToArray();
         for (var index = 0; index < menuItems.Length; index++)
         {
             var styleKey = index switch

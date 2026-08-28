@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -305,10 +305,6 @@ public sealed class WidgetWindowManager
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
-            WidgetKind.SkillInfo => new PlayerSkillInfoWidgetViewModel(
-                playerWidget,
-                requestedCharacterId,
-                initialPlayer),
             WidgetKind.BuffList => new PlayerBuffListWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -372,10 +368,6 @@ public sealed class WidgetWindowManager
             PlayerEquipmentWidgetViewModel equipmentViewModel => new PlayerEquipmentWidgetView
             {
                 DataContext = equipmentViewModel
-            },
-            PlayerSkillInfoWidgetViewModel skillInfoViewModel => new PlayerSkillInfoWidgetView
-            {
-                DataContext = skillInfoViewModel
             },
             PlayerBuffListWidgetViewModel buffListViewModel => new PlayerBuffListWidgetView
             {
@@ -595,7 +587,6 @@ public sealed class WidgetWindowManager
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerStatus
             or WidgetKind.PlayerEquipment
-            or WidgetKind.SkillInfo
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
             or WidgetKind.DamageContribution

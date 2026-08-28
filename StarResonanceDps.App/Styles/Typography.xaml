@@ -1,17 +1,28 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Style x:Key="Text.Title" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
-        <Setter Property="FontSize" Value="28" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-    </Style>
+    <!--
+        ウィジェットの基底フォント。数字を等幅で出すために要る。
 
-    <Style x:Key="Text.Subtitle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
-    </Style>
+        既定フォントは OS の MessageFont(実測: Yu Gothic UI)で、その Semibold フェイスは
+        数字がプロポーショナル(0=555 / 1=402)。しかも tnum を持たないため
+        Typography.NumeralAlignment="Tabular" が黙って無視される。これが桁が揃わない原因。
+
+        Segoe UI Semibold も既定の字幅は同じだが tnum を持つので、Tabular と
+        組み合わせて初めて揃う。フォント指定と Tabular はセット。片方だけでは効かない。
+
+        2つ目に和文フォントを直書きしないのは、zh-CN / ko-KR に日本語書体が当たるのを
+        避けるため。合成フォント Global User Interface は言語ごとに割り当てを持っていて、
+        ja なら Yu Gothic UI(いまと同じ書体)、zh-hans なら Microsoft YaHei UI、
+        ko なら Malgun Gothic へ落ちる。その言語判定には FrameworkElement.Language が要る
+        ので、LocalizationManager がカルチャから設定している。
+    -->
+    <FontFamily x:Key="Font.ProjectDefault">
+        Segoe UI, Global User Interface
+    </FontFamily>
+
+    <FontFamily x:Key="Font.NotoSansJP">
+        /StarResonanceDps;component/Assets/Fonts/#Noto Sans JP
+    </FontFamily>
 
     <DropShadowEffect x:Key="Effect.WidgetWindowTextShadow"
                       Color="Black"
@@ -22,6 +33,8 @@
     <Style x:Key="Text.WidgetWindow" TargetType="TextBlock">
         <Setter Property="Foreground" Value="White" />
         <Setter Property="Effect" Value="{StaticResource Effect.WidgetWindowTextShadow}" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.ProjectDefault}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
 
     <Style x:Key="Text.WidgetWindowSubtitle"
@@ -36,9 +49,8 @@
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="FontFamily" Value="{StaticResource Font.ProjectDefault}" />
+        <Setter Property="Typography.NumeralAlignment" Value="Tabular" />
     </Style>
-
-    <FontFamily x:Key="Font.NotoSansJP">
-        /StarResonanceDps;component/Assets/Fonts/#Noto Sans JP
-    </FontFamily>
+    
 </ResourceDictionary>

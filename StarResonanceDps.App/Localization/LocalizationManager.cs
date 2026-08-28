@@ -1,10 +1,12 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Threading;
+using System.Windows;
+using System.Windows.Markup;
 using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Localization;
@@ -35,6 +37,8 @@ public sealed class LocalizationManager : INotifyPropertyChanged
     private static readonly ConcurrentDictionary<string, Lazy<IReadOnlyDictionary<string, string>>> ResourceSets =
         new(StringComparer.Ordinal);
 
+    private static bool _frameworkLanguageDefaultApplied;
+
     private readonly CultureInfo _systemDefaultCulture;
     private CultureInfo _currentCulture;
 
@@ -43,6 +47,7 @@ public sealed class LocalizationManager : INotifyPropertyChanged
         _systemDefaultCulture = CultureInfo.CurrentUICulture;
         _currentCulture = ResolveSystemCulture(_systemDefaultCulture);
         CombatDataCatalog.SetCulture(_currentCulture.Name);
+        ApplyFrameworkLanguage(_currentCulture);
     }
 
     public static LocalizationManager Instance { get; } = new();
@@ -99,9 +104,53 @@ public sealed class LocalizationManager : INotifyPropertyChanged
         CultureInfo.DefaultThreadCurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
         CombatDataCatalog.SetCulture(culture.Name);
+        ApplyFrameworkLanguage(culture);
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
         CultureChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// WPF の <see cref="FrameworkElement.Language"/> を UI カルチャに合わせる。
+    ///
+    /// <para>
+    /// 合成フォント <c>Global User Interface</c> は CJK の割り当てを言語ごとに持っていて、
+    /// どれを使うかはこの値で決まる。既定のままだと <c>en-US</c> 扱いになり、
+    /// 中国語・韓国語の利用者にも日本語書体(Yu Gothic UI)が当たってしまう。
+    /// </para>
+    ///
+    /// <para>
+    /// 既定値の差し替え(<c>OverrideMetadata</c>)は型ごとに一度しか呼べないので、
+    /// 初回だけそれで既定を決め、以後は開いている Window へ直接入れる
+    /// (実行中に言語を切り替えたときのため)。
+    /// </para>
+    /// </summary>
+    private static void ApplyFrameworkLanguage(CultureInfo culture)
+    {
+        if (string.IsNullOrEmpty(culture.IetfLanguageTag))
+        {
+            return;
+        }
+
+        var language = XmlLanguage.GetLanguage(culture.IetfLanguageTag);
+
+        if (!_frameworkLanguageDefaultApplied)
+        {
+            _frameworkLanguageDefaultApplied = true;
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(language));
+        }
+
+        if (Application.Current?.Windows is not { } windows)
+        {
+            return;
+        }
+
+        foreach (Window window in windows)
+        {
+            window.Language = language;
+        }
     }
 
     private static IReadOnlyDictionary<string, string> GetResourceSet(CultureInfo culture)

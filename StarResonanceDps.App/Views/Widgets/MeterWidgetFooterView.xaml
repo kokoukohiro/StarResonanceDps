@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.Widgets.MeterWidgetFooterView"
+﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.MeterWidgetFooterView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              UseLayoutRounding="True"
@@ -18,7 +18,6 @@
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
-                       Typography.NumeralAlignment="Tabular"
                        Text="{Binding ElapsedText}" />
 
             <TextBlock Margin="8,0,0,0"

@@ -103,14 +103,6 @@ public sealed record PlayerBuffSnapshot(
     int Layer,
     double? RemainingSeconds);
 
-public sealed record PlayerSkillInfoSnapshot(
-    int SkillId,
-    string Name,
-    string IconName,
-    int CurrentLevel,
-    int Tier,
-    bool IsImagine);
-
 public sealed record PlayerCooldownSkillSnapshot(
     int SkillId,
     string Name,
@@ -330,39 +322,6 @@ public static class MeterSnapshotProvider
         return entryKeys
             .Select(key => entriesByKey[key].Snapshot)
             .ToArray();
-    }
-
-    public static IReadOnlyList<PlayerSkillInfoSnapshot> GetPlayerSkillInfo(long characterId)
-    {
-        var encounter = ResolvePlayerDetailEncounter();
-        if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
-        {
-            return Array.Empty<PlayerSkillInfoSnapshot>();
-        }
-
-        var skillLevels = ResolvePlayerSkillLevels(entityUuid, entity, characterId);
-
-        if (skillLevels.Count == 0)
-        {
-            return Array.Empty<PlayerSkillInfoSnapshot>();
-        }
-
-        var snapshots = new PlayerSkillInfoSnapshot[skillLevels.Count];
-        for (var index = 0; index < skillLevels.Count; index++)
-        {
-            var skillLevel = skillLevels[index];
-            var iconName = CombatDataCatalog.GetSkillIconName(skillLevel.SkillId, skillLevel.Icon);
-            snapshots[index] = new PlayerSkillInfoSnapshot(
-                skillLevel.SkillId,
-                CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
-                iconName,
-                skillLevel.CurrentLevel,
-                skillLevel.Tier,
-                CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName));
-        }
-
-        return snapshots;
     }
 
     public static PlayerImagineRoleSkillLoadoutSnapshot GetPlayerImagineRoleSkills(long characterId)

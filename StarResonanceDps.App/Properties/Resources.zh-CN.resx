@@ -762,18 +762,6 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>每分钟施放</value>
   </data>
-  <data name="Widget_SkillInfo" xml:space="preserve">
-    <value>技能信息</value>
-  </data>
-  <data name="Widget_NoSkillInfoData" xml:space="preserve">
-    <value>暂无技能信息。</value>
-  </data>
-  <data name="SkillInfo_Level" xml:space="preserve">
-    <value>等级</value>
-  </data>
-  <data name="SkillInfo_Tier" xml:space="preserve">
-    <value>阶位</value>
-  </data>
   <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
     <value>3分钟测量</value>
   </data>
