@@ -21,6 +21,14 @@ public sealed partial class MeterPlayerEntry : ObservableObject
     [ObservableProperty]
     private int _rank;
 
+    /// <summary>自分の行か。</summary>
+    [ObservableProperty]
+    private bool _isSelf;
+
+    /// <summary>自分の行を強調表示するか。設定「自分の表示」が強調表示のときだけ true。</summary>
+    [ObservableProperty]
+    private bool _isSelfHighlighted;
+
     [ObservableProperty]
     private string _professionKey = "Unknown";
 
@@ -61,6 +69,9 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         PlayerNameDisplayMode playerNameDisplayMode)
     {
         Rank = rank;
+        IsSelf = player.IsSelf;
+        IsSelfHighlighted = player.IsSelf
+            && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
         PlayerId = player.UserId != 0 ? player.UserId : player.CharacterId;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
@@ -88,6 +99,10 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
             ? parsed
             : Color.FromRgb(0xA8, 0xA8, 0xA8);
+
+        // レンズフィルター。設定画面の色見本は素のままにしたいので、ここだけで掛ける。
+        color = ClassColorFilter.Apply(color, settings);
+
         var opacity = Math.Clamp(settings.ClassColorOpacity, WidgetConfigDefaults.MinClassColorOpacity, WidgetConfigDefaults.MaxClassColorOpacity);
 
         return Color.FromArgb(

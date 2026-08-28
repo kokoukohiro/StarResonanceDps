@@ -105,6 +105,9 @@ public sealed class MeterWidgetSettingsConfig
 
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
+    /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示。</summary>
+    public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
@@ -118,6 +121,26 @@ public sealed class MeterWidgetSettingsConfig
     public Dictionary<string, bool> OtherRoleSkillVisibility { get; set; } =
         WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility();
 
+    /// <summary>
+    /// クラスカラーにフィルター(レンズ)を掛けるか。
+    /// 掛かるのはウィジェットの表示だけで、<b>設定画面の色見本は素のまま</b>。
+    /// </summary>
+    /// <remarks>
+    /// <c>null</c> は「設定されていない」。ウィジェット種別ごとの既定は
+    /// <see cref="WidgetConfigDefaults.NormalizeMeter"/> で埋める。
+    /// bool のままだと、この設定が無かった頃のファイルと「明示的にオフ」を区別できない。
+    /// </remarks>
+    public bool? ClassColorFilterEnabled { get; set; }
+
+    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
+    public List<string>? ClassColorFilterColors { get; set; }
+
+    public int ClassColorFilterColorIndex { get; set; }
+
+    /// <summary>フィルター色をどれだけ反映するか(0〜100)。レンズの濃さ。</summary>
+    public int ClassColorFilterStrength { get; set; } =
+        WidgetConfigDefaults.DefaultClassColorFilterStrength;
+
     public MeterWidgetSettingsConfig Clone()
     {
         return new MeterWidgetSettingsConfig
@@ -125,6 +148,7 @@ public sealed class MeterWidgetSettingsConfig
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
+            SelfDisplayModeIndex = SelfDisplayModeIndex,
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
@@ -137,7 +161,11 @@ public sealed class MeterWidgetSettingsConfig
                     StringComparer.OrdinalIgnoreCase),
             OtherRoleSkillVisibility = OtherRoleSkillVisibility is null
                 ? WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility()
-                : new Dictionary<string, bool>(OtherRoleSkillVisibility, StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, bool>(OtherRoleSkillVisibility, StringComparer.OrdinalIgnoreCase),
+            ClassColorFilterEnabled = ClassColorFilterEnabled,
+            ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
+            ClassColorFilterColorIndex = ClassColorFilterColorIndex,
+            ClassColorFilterStrength = ClassColorFilterStrength
         };
     }
 }
@@ -157,6 +185,11 @@ public static class WidgetConfigDefaults
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
     public const int MaxPartyDisplayModeIndex = 3;
+    public const int DefaultSelfDisplayModeIndex = 0;
+    public const int MaxSelfDisplayModeIndex = 1;
+    public const int MinClassColorFilterStrength = 0;
+    public const int MaxClassColorFilterStrength = 100;
+    public const int DefaultClassColorFilterStrength = 50;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
@@ -296,20 +329,7 @@ public static class WidgetConfigDefaults
         ["Unknown"] = ["#A8A8A8", "#707070"]
     };
 
-    private static readonly Dictionary<string, string[]> HpsMeterDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["ShieldKnight"] = ["#63B64D", "#395F2C"],
-        ["HeavyGuardian"] = ["#24B78E", "#0F5F4A"],
-        ["VerdantOracle"] = ["#45D52C", "#227A20"],
-        ["SoulMusician"] = ["#20A860", "#145B39"],
-        ["FlameBerserker"] = ["#A4BF2A", "#63721D"],
-        ["Stormblade"] = ["#10C576", "#0A6C44"],
-        ["FrostMage"] = ["#76D8B0", "#467E68"],
-        ["WindKnight"] = ["#19C7BA", "#0E726B"],
-        ["Marksman"] = ["#C0D829", "#728119"],
-        ["Transformation"] = ["#7AD957", "#4B7F37"],
-        ["Unknown"] = ["#8BB58C", "#566F57"]
-    };
+    private static readonly Dictionary<string, string[]> HpsMeterDefaultClassColorHexes = MeterDefaultClassColorHexes;
 
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -485,6 +505,9 @@ public static class WidgetConfigDefaults
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
             PartyDisplayModeIndex = DefaultPartyDisplayModeIndex,
             ClassColorOpacity = MaxClassColorOpacity,
+            ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(kind),
+            ClassColorFilterColors = CreateDefaultClassColorFilterColors(kind),
+            ClassColorFilterStrength = DefaultClassColorFilterStrength,
             ClassColorIndexes = CreateDefaultClassColorIndexes(kind),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
         };
@@ -512,10 +535,21 @@ public static class WidgetConfigDefaults
             : ClassColorKeys;
     }
 
+    /// <summary>
+    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーだけ2枠目。
+    /// </summary>
+    public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
+    {
+        return kind == WidgetKind.HpsMeter
+            && string.Equals(key, "SoulMusician", StringComparison.OrdinalIgnoreCase)
+            ? MinClassColorIndex + 1
+            : MinClassColorIndex;
+    }
+
     public static Dictionary<string, int> CreateDefaultClassColorIndexes(WidgetKind kind = WidgetKind.PlayerList)
     {
         return GetClassColorKeys(kind)
-            .ToDictionary(key => key, _ => MinClassColorIndex, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(key => key, key => GetDefaultClassColorIndex(kind, key), StringComparer.OrdinalIgnoreCase);
     }
 
     public static Dictionary<string, List<string>> CreateDefaultClassColorPalettes(WidgetKind kind)
@@ -524,6 +558,26 @@ public static class WidgetConfigDefaults
             key => key,
             key => CreateDefaultClassColors(kind, key),
             StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>クラスカラーのフィルターを持つウィジェット。</summary>
+    public static bool UsesClassColorFilter(WidgetKind kind)
+    {
+        return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+    }
+
+    /// <summary>フィルターの既定の有効/無効。HPSだけ既定で有効。</summary>
+    public static bool IsClassColorFilterEnabledByDefault(WidgetKind kind)
+    {
+        return kind == WidgetKind.HpsMeter;
+    }
+
+    /// <summary>フィルター色の既定パレット。DPSは赤系、HPSは緑系。</summary>
+    public static List<string> CreateDefaultClassColorFilterColors(WidgetKind kind)
+    {
+        return kind == WidgetKind.HpsMeter
+            ? ["#43D978", "#227A20"]
+            : ["#B33000", "#6F1F00"];
     }
 
     public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
@@ -692,6 +746,27 @@ public static class WidgetConfigDefaults
             meter.PartyDisplayModeIndex,
             DefaultPartyDisplayModeIndex,
             MaxPartyDisplayModeIndex);
+        meter.SelfDisplayModeIndex = Math.Clamp(
+            meter.SelfDisplayModeIndex,
+            DefaultSelfDisplayModeIndex,
+            MaxSelfDisplayModeIndex);
+
+        // クラスカラーのフィルター。持たないウィジェットでは常に無効に倒す。
+        var filterDefaults = CreateDefaultClassColorFilterColors(kind);
+        meter.ClassColorFilterEnabled = UsesClassColorFilter(kind)
+            && (meter.ClassColorFilterEnabled ?? IsClassColorFilterEnabledByDefault(kind));
+        meter.ClassColorFilterColors = NormalizeColorList(
+            meter.ClassColorFilterColors ?? filterDefaults,
+            filterDefaults,
+            MaxPaletteColorCount);
+        meter.ClassColorFilterColorIndex = Math.Clamp(
+            meter.ClassColorFilterColorIndex,
+            MinClassColorIndex,
+            meter.ClassColorFilterColors.Count - 1);
+        meter.ClassColorFilterStrength = Math.Clamp(
+            meter.ClassColorFilterStrength,
+            MinClassColorFilterStrength,
+            MaxClassColorFilterStrength);
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;
@@ -726,7 +801,7 @@ public static class WidgetConfigDefaults
 
             var selectedIndex = meter.ClassColorIndexes.TryGetValue(key, out var index)
                 ? index
-                : MinClassColorIndex;
+                : GetDefaultClassColorIndex(kind, key);
             normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
         }
 

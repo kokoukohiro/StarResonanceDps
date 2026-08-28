@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
@@ -29,13 +29,22 @@ public sealed partial class PlayerListEntry : ObservableObject
     private IReadOnlyDictionary<string, bool>? _appliedRoleSkillVisibility;
     private IReadOnlyList<PlayerCooldownSkillSnapshot?> _filteredRoleSkillSnapshots =
         Array.Empty<PlayerCooldownSkillSnapshot?>();
-    private bool _isSelf;
     private int _roleSlotCount;
     private long _skillEntityUuid;
     private int _skillProfessionId;
     private object? _skillSourceToken;
     private object? _roleFilterToken;
     private bool _skillLoadoutInitialized;
+
+    // HPテキストは HP更新(Update)とデバフ更新(RefreshSkillDisplay)の
+    // どちらからでも組み立て直す。呼ばれるタイミングが別なので値を控えておく。
+    private long _currentHp;
+    private long _maxHp;
+    private long _currentShield;
+    private int _healthValueDisplayModeIndex;
+
+    /// <summary>蘇生不可デバフの残り秒。取れていなければ <c>null</c>。</summary>
+    private double? _reviveBlockSeconds;
 
     private PlayerListEntry(long characterId)
     {
@@ -93,6 +102,14 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private bool _isPlayerSelectionMenuOpen;
 
+    /// <summary>自分の行か。</summary>
+    [ObservableProperty]
+    private bool _isSelf;
+
+    /// <summary>自分の行を強調表示するか。設定「自分の表示」が強調表示のときだけ true。</summary>
+    [ObservableProperty]
+    private bool _isSelfHighlighted;
+
     public bool IsHealthFull => HealthRatio >= 1d;
 
     public static PlayerListEntry Create(
@@ -111,7 +128,9 @@ public sealed partial class PlayerListEntry : ObservableObject
         MeterWidgetSettingsConfig settings,
         PlayerNameDisplayMode playerNameDisplayMode)
     {
-        _isSelf = player.IsSelf;
+        IsSelf = player.IsSelf;
+        IsSelfHighlighted = player.IsSelf
+            && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
         _otherRoleSkillVisibility = settings.OtherRoleSkillVisibility;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
@@ -128,11 +147,11 @@ public sealed partial class PlayerListEntry : ObservableObject
 
         HealthRatio = GetRatio(player.CurrentHp, player.MaxHp);
         UpdateShieldGeometry(player.CurrentHp, player.MaxHp, player.CurrentShield);
-        HealthText = FormatHealthText(
-            player.CurrentHp,
-            player.MaxHp,
-            player.CurrentShield,
-            settings.HealthValueDisplayModeIndex);
+        _currentHp = player.CurrentHp;
+        _maxHp = player.MaxHp;
+        _currentShield = player.CurrentShield;
+        _healthValueDisplayModeIndex = settings.HealthValueDisplayModeIndex;
+        UpdateHealthText();
 
         var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
@@ -150,7 +169,7 @@ public sealed partial class PlayerListEntry : ObservableObject
             ApplyRoleSkillVisibility();
 
             // 自分の枠は触らない。コンストラクタで作った4枠のままにする。
-            if (!_isSelf)
+            if (!IsSelf)
             {
                 SyncSkillSlotCount(
                     _roleSkillEntries,
@@ -181,6 +200,15 @@ public sealed partial class PlayerListEntry : ObservableObject
             _trackedSkillIds);
         UpdateSkillEffects(_imagineSkillEntries, effectsBySkillId);
         UpdateSkillEffects(_roleSkillEntries, effectsBySkillId);
+
+        // 蘇生不可はスキル枠のバッジには出さず、HPテキストのほうへ回す。
+        _reviveBlockSeconds = MeterSnapshotProvider.TryGetReviveBlockSeconds(
+            CharacterId,
+            _skillEntityUuid,
+            out var reviveBlockSeconds)
+            ? reviveBlockSeconds
+            : null;
+        UpdateHealthText();
     }
 
     /// <summary>
@@ -195,7 +223,7 @@ public sealed partial class PlayerListEntry : ObservableObject
     {
         _appliedRoleSkillVisibility = _otherRoleSkillVisibility;
 
-        if (_isSelf || _otherRoleSkillVisibility is null)
+        if (IsSelf || _otherRoleSkillVisibility is null)
         {
             _filteredRoleSkillSnapshots = _roleSkillSnapshots;
             return;
@@ -416,6 +444,34 @@ public sealed partial class PlayerListEntry : ObservableObject
         }
 
         return Math.Clamp(currentValue / (double)maxValue, 0d, 1d);
+    }
+
+    /// <summary>
+    /// HPバーのテキスト。<b>HPが優先。</b>
+    ///
+    /// <para>
+    /// 死んでいて、かつ蘇生不可デバフの残り秒が取れているときだけ差し替える。
+    /// 残り秒が取れないのはデバフの持続が分からない状態なので、
+    /// そのまま出すと切れた後も表示が残る。その場合はHPのまま。
+    /// </para>
+    /// </summary>
+    private void UpdateHealthText()
+    {
+        if (_currentHp <= 0 && _reviveBlockSeconds is { } seconds)
+        {
+            var roundedSeconds = Math.Max(0, (int)Math.Ceiling(seconds));
+            HealthText = string.Format(
+                System.Globalization.CultureInfo.CurrentCulture,
+                LocalizationManager.Instance.GetString("PlayerList_ReviveBlocked"),
+                roundedSeconds);
+            return;
+        }
+
+        HealthText = FormatHealthText(
+            _currentHp,
+            _maxHp,
+            _currentShield,
+            _healthValueDisplayModeIndex);
     }
 
     private static string FormatHealthText(

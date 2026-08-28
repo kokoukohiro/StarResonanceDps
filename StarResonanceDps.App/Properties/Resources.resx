@@ -528,6 +528,18 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>Class Colors Opacity</value>
   </data>
+  <data name="PlayerList_ReviveBlocked" xml:space="preserve">
+    <value>No Revive ({0})</value>
+  </data>
+  <data name="Settings_ClassColors_Filter" xml:space="preserve">
+    <value>Class Color Filter</value>
+  </data>
+  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
+    <value>Filter Color</value>
+  </data>
+  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
+    <value>Filter Strength</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
   </data>
@@ -794,6 +806,15 @@
   </data>
   <data name="Settings_Display_Filter" xml:space="preserve">
     <value>Filter settings</value>
+  </data>
+  <data name="Settings_Display_SelfDisplay" xml:space="preserve">
+    <value>Self display</value>
+  </data>
+  <data name="SelfDisplay_Highlight" xml:space="preserve">
+    <value>Highlight</value>
+  </data>
+  <data name="SelfDisplay_Normal" xml:space="preserve">
+    <value>Normal</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>Show all</value>

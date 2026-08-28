@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -50,7 +50,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private int _partyDisplayModeIndex = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
     [ObservableProperty]
+    private int _selfDisplayModeIndex = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+
+    [ObservableProperty]
     private double _classColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
+
+    [ObservableProperty]
+    private bool _classColorFilterEnabled;
+
+    [ObservableProperty]
+    private double _classColorFilterStrength = WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
     public MeterWidgetSettingsViewModel(WidgetKind kind, MeterWidgetSettingsConfig? config)
     {
@@ -71,6 +80,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         Items = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
+
+        ClassColorFilterColors = new ColorPaletteViewModel(
+            WidgetConfigDefaults.CreateDefaultClassColorFilterColors(_kind),
+            WidgetConfigDefaults.MaxPaletteColorCount);
+        ClassColorFilterColors.PaletteChanged += Colors_PaletteChanged;
 
         var roleSkillIds = WidgetConfigDefaults.OtherRoleSkillIds;
         for (var index = 0; index < roleSkillIds.Count; index++)
@@ -117,11 +131,29 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool HasClassColorOpacity => UsesMeterClassColorIconBackground;
 
+    /// <summary>フィルター色のパレット。クラスカラーと同じ枠を使う。</summary>
+    public ColorPaletteViewModel ClassColorFilterColors { get; }
+
+    /// <summary>「クラスカラーのフィルター」のスイッチを出すか。</summary>
+    public bool ShowsClassColorFilterSettings => WidgetConfigDefaults.UsesClassColorFilter(_kind);
+
+    /// <summary>フィルターの色と強さを出すか。スイッチがオフのときは隠す。</summary>
+    public bool ShowsClassColorFilterOptions => ShowsClassColorFilterSettings && ClassColorFilterEnabled;
+
+    /// <summary>スイッチの右に出す ON / OFF。</summary>
+    public string ClassColorFilterStateText => LocalizationManager.Instance.GetString(
+        ClassColorFilterEnabled ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
 
     public bool ShowsPartyDisplaySettings => _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
-    public bool HasAdditionalDisplaySettings => ShowsHealthValueSettings || ShowsPartyDisplaySettings;
+    /// <summary>「自分の表示」を出すのはプレイヤーリストとメーター2種。</summary>
+    public bool ShowsSelfDisplaySettings =>
+        _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+
+    public bool HasAdditionalDisplaySettings =>
+        ShowsHealthValueSettings || ShowsPartyDisplaySettings || ShowsSelfDisplaySettings;
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -133,6 +165,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         {
             item.Colors.PaletteChanged -= Colors_PaletteChanged;
         }
+
+        ClassColorFilterColors.PaletteChanged -= Colors_PaletteChanged;
     }
 
     [RelayCommand]
@@ -153,10 +187,18 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
+            SelfDisplayModeIndex = SelfDisplayModeIndex,
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
                 WidgetConfigDefaults.MaxClassColorOpacity),
+            ClassColorFilterEnabled = ClassColorFilterEnabled,
+            ClassColorFilterColors = [.. ClassColorFilterColors.GetHexColors()],
+            ClassColorFilterColorIndex = ClassColorFilterColors.SelectedIndex,
+            ClassColorFilterStrength = Math.Clamp(
+                (int)Math.Round(ClassColorFilterStrength, MidpointRounding.AwayFromZero),
+                WidgetConfigDefaults.MinClassColorFilterStrength,
+                WidgetConfigDefaults.MaxClassColorFilterStrength),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -206,6 +248,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         GetItem(key).Colors.AddOrSelect(color);
     }
 
+    public Color GetSelectedClassColorFilterColor()
+    {
+        return ClassColorFilterColors.SelectedColor;
+    }
+
+    public void ApplyClassColorFilterColor(Color color)
+    {
+        ClassColorFilterColors.AddOrSelect(color);
+    }
+
     private void Load(MeterWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
@@ -234,7 +286,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
+            SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
             ClassColorOpacity = normalized.ClassColorOpacity;
+            ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
+            ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
+            ClassColorFilterStrength = normalized.ClassColorFilterStrength;
         }
         finally
         {
@@ -256,7 +312,14 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
-            || left.ClassColorOpacity != right.ClassColorOpacity)
+            || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
+            || left.ClassColorOpacity != right.ClassColorOpacity
+            || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
+            || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
+            || left.ClassColorFilterStrength != right.ClassColorFilterStrength
+            || !(left.ClassColorFilterColors ?? []).SequenceEqual(
+                right.ClassColorFilterColors ?? [],
+                StringComparer.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -348,6 +411,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
         OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
         OnPropertyChanged(nameof(ClassColorSectionTitle));
+        OnPropertyChanged(nameof(ClassColorFilterStateText));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
     }
@@ -391,7 +455,25 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         NotifyChanged();
     }
 
+    partial void OnSelfDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
     partial void OnClassColorOpacityChanged(double value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnClassColorFilterEnabledChanged(bool value)
+    {
+        // オフの間は「フィルターカラー」「フィルターの強さ」の行ごと消す。
+        OnPropertyChanged(nameof(ShowsClassColorFilterOptions));
+        OnPropertyChanged(nameof(ClassColorFilterStateText));
+        NotifyChanged();
+    }
+
+    partial void OnClassColorFilterStrengthChanged(double value)
     {
         NotifyChanged();
     }

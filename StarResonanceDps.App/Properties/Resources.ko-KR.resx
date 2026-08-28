@@ -528,6 +528,18 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>직업 색상 불투명도</value>
   </data>
+  <data name="PlayerList_ReviveBlocked" xml:space="preserve">
+    <value>부활 불가({0})</value>
+  </data>
+  <data name="Settings_ClassColors_Filter" xml:space="preserve">
+    <value>직업 색상 필터</value>
+  </data>
+  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
+    <value>필터 색상</value>
+  </data>
+  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
+    <value>필터 강도</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
   </data>
@@ -794,6 +806,15 @@
   </data>
   <data name="Settings_Display_Filter" xml:space="preserve">
     <value>필터 설정</value>
+  </data>
+  <data name="Settings_Display_SelfDisplay" xml:space="preserve">
+    <value>자신 표시</value>
+  </data>
+  <data name="SelfDisplay_Highlight" xml:space="preserve">
+    <value>강조 표시</value>
+  </data>
+  <data name="SelfDisplay_Normal" xml:space="preserve">
+    <value>일반 표시</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>모두 표시</value>

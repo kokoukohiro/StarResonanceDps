@@ -41,4 +41,19 @@ public partial class MeterWidgetClassColorSettingsView : UserControl
             ViewModel.ApplyClassColor(classKey, window.SelectedColor);
         }
     }
+
+    private void ClassColorFilterPickerButton_Click(object sender, RoutedEventArgs e)
+    {
+        var owner = Window.GetWindow(this);
+        var window = new ColorPickerWindow(ViewModel.GetSelectedClassColorFilterColor());
+        if (owner is not null)
+        {
+            window.Owner = owner;
+        }
+
+        if (window.ShowDialog() == true)
+        {
+            ViewModel.ApplyClassColorFilterColor(window.SelectedColor);
+        }
+    }
 }

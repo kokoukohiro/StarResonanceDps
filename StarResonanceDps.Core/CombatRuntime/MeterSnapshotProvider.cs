@@ -151,6 +151,28 @@ public sealed record MeterPlayerIdentity(string Name, long UserId);
 
 public static class MeterSnapshotProvider
 {
+    /// <summary>
+    /// 蘇生不可デバフ(<c>虚弱·祈愿禁止</c> / <c>Weakened: Wish Sealed</c>)。
+    ///
+    /// <para>
+    /// 説明文が「この間は 奥義！ライフブレス と 復活の祈り を再度かけられない」。
+    /// ワイヤの <c>Duration</c> は 60000ms(実測)。テーブルの <c>DestroyParam</c> は
+    /// <c>[[0,0]]</c> なので、持続時間はパケット側からしか分からない。
+    /// </para>
+    ///
+    /// <para>
+    /// 2026-08-29 の実測で、復活系スキル 3つ(2900240 / 2900241 / 3312)すべてから
+    /// <b>同じ BaseId</b> で届くことを確認した(22件、他の発生元からは0件)。
+    /// 3027(Blessing of Life)は発火機会が無く未確認。
+    /// </para>
+    ///
+    /// <para>
+    /// 同時に届く <c>2110032</c> / <c>2110093</c> / <c>2100412</c> は
+    /// いずれも自前アイコンが無く表示経路で落ちるので、扱う必要がない。
+    /// </para>
+    /// </summary>
+    private const int ReviveBlockDebuffBaseId = 2110057;
+
     public static MeterSnapshot GetSnapshot(
         MeterSnapshotKind kind,
         PartyDisplayMode partyDisplayMode = PartyDisplayMode.All)
@@ -697,13 +719,81 @@ public static class MeterSnapshotProvider
         return CreateSkillEffectSnapshots(
             encounter,
             entity,
-            skillIds);
+            skillIds,
+            hideReviveBlockDebuff: true);
+    }
+
+    /// <summary>
+    /// 蘇生不可デバフの残り秒。
+    ///
+    /// <para>
+    /// <b>スキル枠を経由しない。</b> エンティティが保持しているバフを直接見るので、
+    /// そのプレイヤーが復活スキルを装備しているかに関係なく拾える。
+    /// スキル枠経由(<see cref="CreateSkillEffectSnapshots"/>)は
+    /// <c>trackedSkillIds</c> に当たったものしか残さないため、装備者しか出せない。
+    /// </para>
+    ///
+    /// <para>
+    /// 残り秒が出せないバフは <c>false</c> を返す。持続が分からないものを
+    /// 蘇生不可として表示すると、切れた後も出しっぱなしになる。
+    /// </para>
+    /// </summary>
+    public static bool TryGetReviveBlockSeconds(
+        long characterId,
+        long entityUuid,
+        out double remainingSeconds)
+    {
+        remainingSeconds = 0d;
+        var encounter = ResolvePlayerDetailEncounter();
+        if (encounter is null
+            || entityUuid == 0
+            || !TryResolvePlayerEntityByUuid(encounter, characterId, entityUuid, out var entity))
+        {
+            return false;
+        }
+
+        var currentEncounterTime = encounter.GetDuration();
+        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
+        var found = false;
+        var latestRemoveTime = TimeSpan.MinValue;
+
+        for (var index = 0; index < buffEvents.Length; index++)
+        {
+            var buffEvent = buffEvents[index];
+            if (buffEvent.BaseId != ReviveBlockDebuffBaseId || buffEvent.Duration < 0)
+            {
+                continue;
+            }
+
+            TimeSpan effectiveRemoveTime;
+            double? seconds;
+            var timingResolved = isLive
+                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out seconds)
+                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out seconds);
+            if (!timingResolved || seconds is null)
+            {
+                continue;
+            }
+
+            // 重ね掛けされたら遅く切れるほうを採る。バッジの選び方と同じ。
+            if (found && effectiveRemoveTime <= latestRemoveTime)
+            {
+                continue;
+            }
+
+            latestRemoveTime = effectiveRemoveTime;
+            remainingSeconds = seconds.Value;
+            found = true;
+        }
+
+        return found;
     }
 
     private static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> CreateSkillEffectSnapshots(
         Encounter encounter,
         Entity entity,
-        IReadOnlySet<int> trackedSkillIds)
+        IReadOnlySet<int> trackedSkillIds,
+        bool hideReviveBlockDebuff = false)
     {
         var currentEncounterTime = encounter.GetDuration();
         var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
@@ -718,6 +808,12 @@ public static class MeterSnapshotProvider
         foreach (var buffEvent in buffEvents)
         {
             if (buffEvent.Duration < 0 || buffEvent.SourceConfigId <= 0)
+            {
+                continue;
+            }
+
+            // 蘇生不可はスキル枠のバッジには出さない。HPテキストのほうで扱う。
+            if (hideReviveBlockDebuff && buffEvent.BaseId == ReviveBlockDebuffBaseId)
             {
                 continue;
             }

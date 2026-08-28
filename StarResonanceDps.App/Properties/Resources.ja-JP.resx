@@ -528,6 +528,18 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>クラスカラーの不透明度</value>
   </data>
+  <data name="PlayerList_ReviveBlocked" xml:space="preserve">
+    <value>蘇生不可({0})</value>
+  </data>
+  <data name="Settings_ClassColors_Filter" xml:space="preserve">
+    <value>クラスカラーのフィルター</value>
+  </data>
+  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
+    <value>フィルターカラー</value>
+  </data>
+  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
+    <value>フィルターの強さ</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
   </data>
@@ -794,6 +806,15 @@
   </data>
   <data name="Settings_Display_Filter" xml:space="preserve">
     <value>フィルター設定</value>
+  </data>
+  <data name="Settings_Display_SelfDisplay" xml:space="preserve">
+    <value>自分の表示</value>
+  </data>
+  <data name="SelfDisplay_Highlight" xml:space="preserve">
+    <value>強調表示</value>
+  </data>
+  <data name="SelfDisplay_Normal" xml:space="preserve">
+    <value>通常表示</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>すべて表示</value>

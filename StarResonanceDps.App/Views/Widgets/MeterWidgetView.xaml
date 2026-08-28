@@ -319,11 +319,21 @@
                                 <TextBlock Grid.Column="3"
                                            Margin="5,0,6,0"
                                            VerticalAlignment="Center"
-                                           Style="{StaticResource Text.WidgetWindow}"
                                            FontSize="12"
                                            FontWeight="SemiBold"
                                            Text="{Binding DisplayName}"
-                                           TextTrimming="CharacterEllipsis" />
+                                           TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Style>
+                                        <!-- 自分の行だけ色を変える。影は Text.WidgetWindow のまま。 -->
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
+                                                    <Setter Property="Foreground" Value="#FFD000" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
 
                                 <TextBlock Grid.Column="4"
                                            Margin="4,0,5,0"

@@ -100,8 +100,14 @@ internal static class PlayerDataSourceResolver
             metadataSeasonLevel = GetInt(metadataEntity, "AttrSeasonLevel");
         }
 
-        var currentHp = nearbyEntity?.Hp ?? 0;
-        var maxHp = nearbyEntity?.MaxHp ?? 0;
+        // AOI外だと nearbyEntity が無い。エンカウンターに残るエンティティが最後に観測したHPを
+        // 持っているので、そこから拾う。PT外はこれが唯一の経路。
+        //
+        // hasNearbyMaxHp は nearbyEntity 基準のままにしてある。PTメンバーでは
+        // 下の social data(AOI外でもライブに届く)が引き続き勝つ。
+        var hpEntity = nearbyEntity ?? metadataEntity;
+        var currentHp = hpEntity?.Hp ?? 0;
+        var maxHp = hpEntity?.MaxHp ?? 0;
         var hasNearbyMaxHp = nearbyEntity is not null
             && TryGetPositiveInt64(nearbyEntity.GetAttrKV("AttrMaxHp"), out _);
         if (!isSelf
@@ -216,9 +222,59 @@ internal static class PlayerDataSourceResolver
             return 0;
         }
 
-        return PartyMemberCache.Instance.TryGetSubProfession(characterId, out var cached)
-            ? cached
-            : 0;
+        return TryResolveCachedSpec(characterId, out var cached, out _) ? cached : 0;
+    }
+
+    /// <summary>
+    /// 保持している特化から補完する。<b>特化IDと未装着フラグを必ず同じソースから返す。</b>
+    ///
+    /// <para>
+    /// 別々に引くと、片方がパーティのキャッシュ・もう片方がメーターのキャッシュに当たって
+    /// 「特化はXだが未装着」という成立しない組み合わせが出る。
+    /// </para>
+    ///
+    /// <para>
+    /// 順序はパーティ(<see cref="PartyMemberCache"/>)が先。在籍中はそちらのほうが
+    /// 更新機会が多く、パーティを抜けるまで生きる。次に
+    /// <see cref="MeterPlayerSpecCache"/>(AOI外でもメーターに残る人ぶん)。
+    /// </para>
+    /// </summary>
+    private static bool TryResolveCachedSpec(
+        long characterId,
+        out int subProfessionId,
+        out bool isSpecAbilityUnequipped)
+    {
+        var partyCache = PartyMemberCache.Instance;
+        if (partyCache.TryGetSubProfession(characterId, out subProfessionId))
+        {
+            isSpecAbilityUnequipped = false;
+            return true;
+        }
+
+        if (partyCache.IsSpecAbilityUnequipped(characterId))
+        {
+            subProfessionId = 0;
+            isSpecAbilityUnequipped = true;
+            return true;
+        }
+
+        var meterCache = MeterPlayerSpecCache.Instance;
+        if (meterCache.TryGetSubProfession(characterId, out subProfessionId))
+        {
+            isSpecAbilityUnequipped = false;
+            return true;
+        }
+
+        if (meterCache.IsSpecAbilityUnequipped(characterId))
+        {
+            subProfessionId = 0;
+            isSpecAbilityUnequipped = true;
+            return true;
+        }
+
+        subProfessionId = 0;
+        isSpecAbilityUnequipped = false;
+        return false;
     }
 
     /// <summary>
@@ -242,7 +298,9 @@ internal static class PlayerDataSourceResolver
             return true;
         }
 
-        return !isSelf && PartyMemberCache.Instance.IsSpecAbilityUnequipped(characterId);
+        return !isSelf
+            && TryResolveCachedSpec(characterId, out _, out var cachedUnequipped)
+            && cachedUnequipped;
     }
 
     public static int GetInt(Entity? entity, string key)

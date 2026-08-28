@@ -31,6 +31,10 @@ internal static class PlayerRosterProjection
             ClearTransientHumanSubProfession(playerUuid);
         }
 
+        // マップ/チャンネルが変わったらAOI外の特化は持ち越さない。
+        // 上のループがこのキャッシュへ書き込む側なので、必ずループの後で捨てる。
+        MeterPlayerSpecCache.Instance.Clear();
+
         lock (PlayerEntitySync)
         {
             PlayerEntityUuidsByCharacterId.Clear();
@@ -177,6 +181,15 @@ internal static class PlayerRosterProjection
             AddCharacterId(characterId);
         }
 
+        // AOI外でもメーターに残っている人。ここで候補に入れないと下の関門まで届かない。
+        foreach (var pair in metadataPlayersByCharacterId)
+        {
+            if (HasMeterStats(pair.Value))
+            {
+                AddCharacterId(pair.Key);
+            }
+        }
+
         var entries = new List<PlayerRosterEntry>(characterIds.Count);
         var entityUuidsByCharacterId = new Dictionary<long, long>();
         var existingSelf = RosterStore.Current.Entries.FirstOrDefault(entry => entry.IsSelf);
@@ -212,7 +225,12 @@ internal static class PlayerRosterProjection
             }
 
             var isPartyMember = party.GetMembership(characterId) == PartyMembershipState.Member;
-            if (!isSelf && !isPartyMember && nearbyEntity is null)
+            // AOI外でもメーターに残る人はリストにも残す。エンカウンターが作り直されて
+            // 統計が0になれば、メーターと同時にここからも消える。
+            if (!isSelf
+                && !isPartyMember
+                && nearbyEntity is null
+                && !HasMeterStats(metadataEntity))
             {
                 continue;
             }
@@ -277,7 +295,7 @@ internal static class PlayerRosterProjection
         var isPartyMember = PartyStateStore.Instance.Current.GetMembership(characterId)
             == PartyMembershipState.Member;
         var isNearby = IsNearbyPlayer(playerUuid);
-        if (!isSelf && !isPartyMember && !isNearby)
+        if (!isSelf && !isPartyMember && !isNearby && !HasMeterStats(entity))
         {
             return;
         }
@@ -489,12 +507,56 @@ internal static class PlayerRosterProjection
             && encounter.Entities.TryGetValue(playerUuid, out var entity)
             && IsCharacterEntity(entity))
         {
+            CaptureMeterPlayerSpec(entity);
             entity.SetSubProfessionUnknown();
             return;
         }
 
         // Entity 側の推定値は破棄するが、保持している補完値は残す。
         // マップ切替で observable でなくなっただけで、特化が変わったわけではない。
+    }
+
+    /// <summary>
+    /// AOI外へ出る直前の特化を控える。<b>メーターに残り続ける人だけ</b>が対象。
+    ///
+    /// <para>
+    /// 「分からない」も含めて必ず現在値で置き換える。何も書かずに素通りさせると、
+    /// 職業変更などでエンティティ側が不明に戻った後も、キャッシュだけ古い特化を持ち続ける。
+    /// </para>
+    /// </summary>
+    private static void CaptureMeterPlayerSpec(Entity entity)
+    {
+        if (!HasMeterStats(entity))
+        {
+            return;
+        }
+
+        var characterId = entity.UID != 0
+            ? entity.UID
+            : Utils.UuidToEntityId(entity.UUID);
+        var cache = MeterPlayerSpecCache.Instance;
+        if (entity.SubProfessionId > 0)
+        {
+            cache.SetSubProfession(characterId, entity.SubProfessionId);
+        }
+        else if (entity.IsSpecAbilityUnequipped)
+        {
+            cache.SetSpecAbilityUnequipped(characterId);
+        }
+        else
+        {
+            cache.Remove(characterId);
+        }
+    }
+
+    /// <summary>
+    /// メーター(DPS/HPS)に出る条件。<see cref="MeterSnapshotProvider"/> の
+    /// <c>TotalValue &gt; 0</c> と同じ。どちらかの値を持っていれば片方のメーターには出る。
+    /// </summary>
+    private static bool HasMeterStats(Entity? entity)
+    {
+        return entity is not null
+            && (entity.TotalDamage > 0 || entity.TotalHealing > 0);
     }
 
     private static bool TryGetCharacterEntity(long playerUuid, out Entity entity)

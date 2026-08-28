@@ -528,6 +528,18 @@
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>职业颜色不透明度</value>
   </data>
+  <data name="PlayerList_ReviveBlocked" xml:space="preserve">
+    <value>无法复活({0})</value>
+  </data>
+  <data name="Settings_ClassColors_Filter" xml:space="preserve">
+    <value>职业颜色滤镜</value>
+  </data>
+  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
+    <value>滤镜颜色</value>
+  </data>
+  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
+    <value>滤镜强度</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
   </data>
@@ -794,6 +806,15 @@
   </data>
   <data name="Settings_Display_Filter" xml:space="preserve">
     <value>筛选设置</value>
+  </data>
+  <data name="Settings_Display_SelfDisplay" xml:space="preserve">
+    <value>自己显示</value>
+  </data>
+  <data name="SelfDisplay_Highlight" xml:space="preserve">
+    <value>高亮显示</value>
+  </data>
+  <data name="SelfDisplay_Normal" xml:space="preserve">
+    <value>普通显示</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>全部显示</value>
