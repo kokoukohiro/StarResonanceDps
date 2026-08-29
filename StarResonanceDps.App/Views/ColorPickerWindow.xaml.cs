@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -42,6 +42,12 @@ public partial class ColorPickerWindow : Window, INotifyPropertyChanged
         : Visibility.Collapsed;
 
     public Color SelectedColor { get; private set; }
+
+    /// <summary>
+    /// OKで閉じたか。<see cref="Window.DialogResult"/> は <see cref="Window.ShowDialog"/> で
+    /// 表示した窓にしか設定できないため、非モーダル表示に合わせて自前で持つ。
+    /// </summary>
+    public bool IsConfirmed { get; private set; }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -126,7 +132,8 @@ public partial class ColorPickerWindow : Window, INotifyPropertyChanged
             RecentColors = [.. RecentColors.GetHexColors()]
         });
 
-        DialogResult = true;
+        IsConfirmed = true;
+        Close();
     }
 
     private void OnPropertyChanged(string propertyName)

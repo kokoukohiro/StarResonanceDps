@@ -1,7 +1,8 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views.WidgetSettings;
 
@@ -36,10 +37,13 @@ public partial class MeterWidgetClassColorSettingsView : UserControl
             window.Owner = owner;
         }
 
-        if (window.ShowDialog() == true)
+        OwnerModalWindow.Show(window, owner, () =>
         {
-            ViewModel.ApplyClassColor(classKey, window.SelectedColor);
-        }
+            if (window.IsConfirmed)
+            {
+                ViewModel.ApplyClassColor(classKey, window.SelectedColor);
+            }
+        });
     }
 
     private void ClassColorFilterPickerButton_Click(object sender, RoutedEventArgs e)
@@ -51,9 +55,12 @@ public partial class MeterWidgetClassColorSettingsView : UserControl
             window.Owner = owner;
         }
 
-        if (window.ShowDialog() == true)
+        OwnerModalWindow.Show(window, owner, () =>
         {
-            ViewModel.ApplyClassColorFilterColor(window.SelectedColor);
-        }
+            if (window.IsConfirmed)
+            {
+                ViewModel.ApplyClassColorFilterColor(window.SelectedColor);
+            }
+        });
     }
 }

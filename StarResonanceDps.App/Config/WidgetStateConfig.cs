@@ -51,6 +51,18 @@ public sealed class WidgetThemeConfig
     public string? BackgroundImageAverageColor { get; set; }
     public string? BackgroundImageAverageColorSourcePath { get; set; }
 
+    /// <summary>非アクティブ時にヘッダーを隠すか。隠している間はドラッグ領域も消える。</summary>
+    public bool HideHeaderWhenInactive { get; set; }
+
+    /// <summary>非アクティブ時にフッターを隠すか。</summary>
+    public bool HideFooterWhenInactive { get; set; }
+
+    /// <summary>
+    /// ピン留め中はクリックしてもフォーカスを奪わないか(<c>WS_EX_NOACTIVATE</c>)。
+    /// この状態ではアクティブにならないので、アクティブ時の不透明度の底上げも起きない。
+    /// </summary>
+    public bool NoActivateWhenPinned { get; set; }
+
     public WidgetThemeConfig Clone()
     {
         return new WidgetThemeConfig
@@ -60,7 +72,10 @@ public sealed class WidgetThemeConfig
             WindowColors = WindowColors is null ? WidgetConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             BackgroundImagePath = BackgroundImagePath,
             BackgroundImageAverageColor = BackgroundImageAverageColor,
-            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath
+            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
+            HideHeaderWhenInactive = HideHeaderWhenInactive,
+            HideFooterWhenInactive = HideFooterWhenInactive,
+            NoActivateWhenPinned = NoActivateWhenPinned
         };
     }
 }
@@ -551,6 +566,22 @@ public static class WidgetConfigDefaults
             key => key,
             key => CreateDefaultClassColors(kind, key),
             StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// フッターを持つウィジェット。持たないウィジェットでは「非アクティブ時フッターを隠す」を出さない。
+    ///
+    /// <para>
+    /// <b>実際にフッターを作っているのは <c>WidgetWindowManager.CreateWidgetWindowComposition</c>。</b>
+    /// 増減させたらここも合わせること。
+    /// </para>
+    /// </summary>
+    public static bool HasFooter(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerList
+            or WidgetKind.EntityList
+            or WidgetKind.DpsMeter
+            or WidgetKind.HpsMeter;
     }
 
     /// <summary>クラスカラーのフィルターを持つウィジェット。</summary>

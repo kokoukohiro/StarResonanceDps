@@ -204,6 +204,18 @@
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>显示设置</value>
   </data>
+  <data name="Settings_Section_Window_Title" xml:space="preserve">
+    <value>窗口设置</value>
+  </data>
+  <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
+    <value>未激活时隐藏标题栏</value>
+  </data>
+  <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
+    <value>未激活时隐藏底栏</value>
+  </data>
+  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
+    <value>置顶时不激活</value>
+  </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>主题</value>
   </data>

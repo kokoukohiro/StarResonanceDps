@@ -1,10 +1,11 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Controls;
 
@@ -136,6 +137,6 @@ public partial class WidgetListItem : UserControl
             settingsWindow.Top = owner.Top + topOffset;
         }
 
-        settingsWindow.ShowDialog();
+        OwnerModalWindow.Show(settingsWindow, owner);
     }
 }

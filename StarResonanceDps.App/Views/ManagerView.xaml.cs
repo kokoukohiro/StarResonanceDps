@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views;
 
@@ -142,7 +143,7 @@ public partial class ManagerView : UserControl
             dialog.Top = managerWindow.Top + topOffset;
         }
 
-        dialog.ShowDialog();
+        OwnerModalWindow.Show(dialog, managerWindow);
     }
 
     private void WidgetListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)

@@ -28,11 +28,11 @@
                         <Grid>
                             <Border Background="{TemplateBinding Background}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding WidgetWindowPalette.MenuOpacity}" />
                             <Border BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding WidgetWindowPalette.MenuOpacity}" />
                             <StackPanel Margin="{TemplateBinding Padding}"
                                         IsItemsHost="True"
                                         KeyboardNavigation.DirectionalNavigation="Cycle" />
@@ -67,7 +67,7 @@
                             <Border x:Name="InteractionBackground"
                                     Background="{Binding WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
                                     CornerRadius="{TemplateBinding Tag}"
-                                    Opacity="{Binding WidgetWindowPalette.NonTextOpacity}"
+                                    Opacity="{Binding WidgetWindowPalette.MenuOpacity}"
                                     Visibility="Collapsed" />
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               Content="{TemplateBinding Header}"
@@ -167,8 +167,18 @@
                                                 <Grid SnapsToDevicePixels="True">
                                                     <Border x:Name="InteractionBackground"
                                                             Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
-                                                            Opacity="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
-                                                            Visibility="Collapsed" />
+                                                            Visibility="Collapsed">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                        <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
                                                     <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                                       Content="{TemplateBinding Content}"

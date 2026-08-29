@@ -8,7 +8,7 @@
         Width="340"
         Height="200"
         MinWidth="240"
-        MinHeight="100"
+        MinHeight="60"
         WindowStyle="None"
         Background="Transparent"
         AllowsTransparency="True"

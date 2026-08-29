@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
@@ -260,10 +260,13 @@ public partial class SettingsWindow : Window
             window.Owner = owner;
         }
 
-        if (window.ShowDialog() == true)
+        OwnerModalWindow.Show(window, owner, () =>
         {
-            ViewModel.ApplyWindowColor(window.SelectedColor);
-        }
+            if (window.IsConfirmed)
+            {
+                ViewModel.ApplyWindowColor(window.SelectedColor);
+            }
+        });
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)

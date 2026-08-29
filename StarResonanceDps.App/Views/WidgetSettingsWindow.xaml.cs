@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views;
 
@@ -159,6 +160,11 @@ public partial class WidgetSettingsWindow : Window
         return new Point(x, y);
     }
 
+    private void WindowSettingsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(WindowSettingsHost);
+    }
+
     private void DisplaySettingsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(DisplaySettingsHost);
@@ -214,10 +220,13 @@ public partial class WidgetSettingsWindow : Window
             window.Owner = owner;
         }
 
-        if (window.ShowDialog() == true)
+        OwnerModalWindow.Show(window, owner, () =>
         {
-            ViewModel.ApplyWindowColor(window.SelectedColor);
-        }
+            if (window.IsConfirmed)
+            {
+                ViewModel.ApplyWindowColor(window.SelectedColor);
+            }
+        });
     }
 
     private void SelectBackgroundImageButton_Click(object sender, RoutedEventArgs e)

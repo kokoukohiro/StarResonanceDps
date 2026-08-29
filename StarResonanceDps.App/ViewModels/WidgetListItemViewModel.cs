@@ -47,6 +47,18 @@ public partial class WidgetListItemViewModel : ViewModelBase
     [ObservableProperty]
     private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
 
+    /// <summary>非アクティブ時にヘッダーを隠すか。ウィンドウ側が読む。</summary>
+    [ObservableProperty]
+    private bool _hideHeaderWhenInactive;
+
+    /// <summary>非アクティブ時にフッターを隠すか。ウィンドウ側が読む。</summary>
+    [ObservableProperty]
+    private bool _hideFooterWhenInactive;
+
+    /// <summary>ピン留め中はアクティブにしないか。ウィンドウ側が読む。</summary>
+    [ObservableProperty]
+    private bool _noActivateWhenPinned;
+
     [ObservableProperty]
     private WidgetWindowThemePalette _widgetWindowPalette = WidgetWindowThemePalette.Create(Color.FromRgb(0x0B, 0x16, 0x24), 50);
 
@@ -238,6 +250,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
         BackgroundImagePath = hasBackgroundImage
             ? normalized.BackgroundImagePath
             : null;
+
+        HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
+        HideFooterWhenInactive = normalized.HideFooterWhenInactive;
+        NoActivateWhenPinned = normalized.NoActivateWhenPinned;
     }
 
     public void UpdatePlayerRoster(

@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.Widgets.MeterWidgetView"
+﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.MeterWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
@@ -27,11 +27,11 @@
                         <Grid>
                             <Border Background="{TemplateBinding Background}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
                             <Border BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="{StaticResource Radius.Default}"
-                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}" />
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
                             <StackPanel Margin="{TemplateBinding Padding}"
                                         IsItemsHost="True"
                                         KeyboardNavigation.DirectionalNavigation="Cycle" />
@@ -66,7 +66,7 @@
                             <Border x:Name="InteractionBackground"
                                     Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
                                     CornerRadius="{TemplateBinding Tag}"
-                                    Opacity="{Binding Widget.WidgetWindowPalette.NonTextOpacity}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
                                     Visibility="Collapsed" />
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               Content="{TemplateBinding Header}"
@@ -250,8 +250,18 @@
                                                 <Grid SnapsToDevicePixels="True">
                                                     <Border x:Name="InteractionBackground"
                                                             Background="{Binding DataContext.Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}"
-                                                            Opacity="{Binding DataContext.Widget.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}"
-                                                            Visibility="Collapsed" />
+                                                            Visibility="Collapsed">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Opacity" Value="{Binding DataContext.Widget.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                        <Setter Property="Opacity" Value="{Binding DataContext.Widget.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
                                                     <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                                       Content="{TemplateBinding Content}"

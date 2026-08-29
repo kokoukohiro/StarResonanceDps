@@ -145,6 +145,14 @@
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="UseLayoutRounding" Value="True" />
         <Style.Triggers>
+            <!--
+                アクティブの間だけ不透明度を確保する。設定が最小近くのままだと
+                スクロールバー・ヘッダー/フッターの分割線・ボタンの影が見えず操作できない。
+                パレットを作り直さずトリガーで切り替えるのは、作り直すと一瞬消えて見えるため。
+            -->
+            <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                <Setter Property="Opacity" Value="{Binding WidgetWindowPalette.ActiveNonTextOpacity}" />
+            </DataTrigger>
             <DataTrigger Binding="{Binding HasBackgroundImage}" Value="True">
                 <Setter Property="Background" Value="Transparent" />
             </DataTrigger>

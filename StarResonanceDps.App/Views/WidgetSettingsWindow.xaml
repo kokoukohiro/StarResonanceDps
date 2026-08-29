@@ -1,4 +1,4 @@
-<Window x:Class="StarResonanceDps.App.Views.WidgetSettingsWindow"
+﻿<Window x:Class="StarResonanceDps.App.Views.WidgetSettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
@@ -40,12 +40,21 @@
 
                 <ContentControl Grid.Column="0" Style="{StaticResource Panel.Root}">
                     <StackPanel Margin="10">
+                        <Button x:Name="WindowSettingsNavButton"
+                                Click="WindowSettingsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasWindowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Window}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Window_Title]}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="DisplaySettingsNavButton"
                                 Click="DisplaySettingsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
                                 Visibility="{Binding HasDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Window}" />
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}" />
                             </StackPanel>
                         </Button>
@@ -54,7 +63,7 @@
                                 Style="{StaticResource Button.Sidebar}"
                                 Visibility="{Binding MeterSettings.ShowsOtherRoleSkillSettings, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.Sliders}" />
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Spark}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Title]}" />
                             </StackPanel>
                         </Button>
@@ -86,6 +95,18 @@
                                       ScrollChanged="ContentScrollViewer_ScrollChanged"
                                       SizeChanged="ContentScrollViewer_SizeChanged">
                             <StackPanel Margin="0,0,10,6">
+                                <!-- ウィンドウの枠とフォーカスの設定。全ウィジェット共通なので先頭に置く。 -->
+                                <StackPanel x:Name="WindowSettingsHost"
+                                            Visibility="{Binding HasWindowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl Content="{Binding}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:WidgetWindowSettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                </StackPanel>
+
                                 <StackPanel x:Name="DisplaySettingsHost">
                                     <ContentControl Content="{Binding MeterSettings}"
                                                     Visibility="{Binding HasMeterDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">

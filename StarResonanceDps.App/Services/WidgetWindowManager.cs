@@ -105,7 +105,14 @@ public sealed class WidgetWindowManager
                 targetWindow.ApplyPinState(widget.IsPinned);
             }
 
-            if (widget.IsPinned && bringToFront && targetWindows.LastOrDefault() is { } lastTargetWindow)
+            // 「ピン留め中アクティブにしない」が有効なら前面化だけにする。
+            // WS_EX_NOACTIVATE が防ぐのはクリックによるアクティブ化で、
+            // ここで Activate() を呼ぶとフォーカスを奪ってしまう。
+            // Topmost は ApplyPinState で先に効いているので前面には出る。
+            if (widget.IsPinned
+                && bringToFront
+                && !widget.NoActivateWhenPinned
+                && targetWindows.LastOrDefault() is { } lastTargetWindow)
             {
                 Activate(lastTargetWindow);
             }
@@ -120,7 +127,7 @@ public sealed class WidgetWindowManager
 
         window.ApplyPinState(widget.IsPinned);
 
-        if (widget.IsPinned && bringToFront)
+        if (widget.IsPinned && bringToFront && !widget.NoActivateWhenPinned)
         {
             Activate(window);
         }

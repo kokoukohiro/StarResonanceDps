@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.ComponentModel;
 using System.Windows.Media;
@@ -257,6 +257,36 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         }
     }
 
+    /// <summary>非アクティブ時にヘッダーを隠す。</summary>
+    [ObservableProperty]
+    private bool _hideHeaderWhenInactive;
+
+    /// <summary>非アクティブ時にフッターを隠す。</summary>
+    [ObservableProperty]
+    private bool _hideFooterWhenInactive;
+
+    /// <summary>ピン留め中アクティブにしない。</summary>
+    [ObservableProperty]
+    private bool _noActivateWhenPinned;
+
+    /// <summary>ウィンドウの枠とフォーカスの設定。<b>全ウィジェットで出す。</b></summary>
+    public bool HasWindowSettings => true;
+
+    /// <summary>「非アクティブ時フッターを隠す」を出すか。フッターを持つウィジェットだけ。</summary>
+    public bool HasFooterSetting => WidgetConfigDefaults.HasFooter(_kind);
+
+    /// <summary>スイッチの右に出す ON / OFF。</summary>
+    public string HideHeaderWhenInactiveStateText => GetSwitchStateText(HideHeaderWhenInactive);
+
+    public string HideFooterWhenInactiveStateText => GetSwitchStateText(HideFooterWhenInactive);
+
+    public string NoActivateWhenPinnedStateText => GetSwitchStateText(NoActivateWhenPinned);
+
+    private static string GetSwitchStateText(bool isOn)
+    {
+        return LocalizationManager.Instance.GetString(isOn ? "Settings_Switch_On" : "Settings_Switch_Off");
+    }
+
     private WidgetThemeConfig CreateTheme()
     {
         var theme = new WidgetThemeConfig
@@ -271,7 +301,10 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
                 ? null
                 : BackgroundImagePath.Trim(),
             BackgroundImageAverageColor = BackgroundImageAverageColor,
-            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath
+            BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
+            HideHeaderWhenInactive = HideHeaderWhenInactive,
+            HideFooterWhenInactive = HideFooterWhenInactive,
+            NoActivateWhenPinned = NoActivateWhenPinned
         };
 
         WidgetConfigDefaults.NormalizeTheme(theme);
@@ -290,6 +323,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BackgroundImagePath = normalized.BackgroundImagePath;
             BackgroundImageAverageColor = normalized.BackgroundImageAverageColor;
             BackgroundImageAverageColorSourcePath = normalized.BackgroundImageAverageColorSourcePath;
+            HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
+            HideFooterWhenInactive = normalized.HideFooterWhenInactive;
+            NoActivateWhenPinned = normalized.NoActivateWhenPinned;
         }
         finally
         {
@@ -317,7 +353,39 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             && string.Equals(left.BackgroundImagePath, right.BackgroundImagePath, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.BackgroundImageAverageColor, right.BackgroundImageAverageColor, StringComparison.OrdinalIgnoreCase)
             && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
+            && left.HideHeaderWhenInactive == right.HideHeaderWhenInactive
+            && left.HideFooterWhenInactive == right.HideFooterWhenInactive
+            && left.NoActivateWhenPinned == right.NoActivateWhenPinned
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
+    }
+
+    partial void OnHideHeaderWhenInactiveChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HideHeaderWhenInactiveStateText));
+        NotifyWindowDisplaySettingChanged();
+    }
+
+    partial void OnHideFooterWhenInactiveChanged(bool value)
+    {
+        OnPropertyChanged(nameof(HideFooterWhenInactiveStateText));
+        NotifyWindowDisplaySettingChanged();
+    }
+
+    partial void OnNoActivateWhenPinnedChanged(bool value)
+    {
+        OnPropertyChanged(nameof(NoActivateWhenPinnedStateText));
+        NotifyWindowDisplaySettingChanged();
+    }
+
+    /// <summary>スイッチを触った瞬間にプレビューへ反映する。既存のテーマ設定と同じ経路。</summary>
+    private void NotifyWindowDisplaySettingChanged()
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+
+        if (!_isLoadingTheme)
+        {
+            RaiseThemePreviewChanged();
+        }
     }
 
     partial void OnWindowOpacityChanged(double value)

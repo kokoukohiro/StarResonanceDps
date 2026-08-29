@@ -204,6 +204,18 @@
   <data name="Settings_Section_Display_Title" xml:space="preserve">
     <value>Display</value>
   </data>
+  <data name="Settings_Section_Window_Title" xml:space="preserve">
+    <value>Window</value>
+  </data>
+  <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
+    <value>Hide header when inactive</value>
+  </data>
+  <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
+    <value>Hide footer when inactive</value>
+  </data>
+  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
+    <value>Do not activate while pinned</value>
+  </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>Theme</value>
   </data>
