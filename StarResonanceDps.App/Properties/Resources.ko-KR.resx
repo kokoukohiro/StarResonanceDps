@@ -208,13 +208,10 @@
     <value>창 설정</value>
   </data>
   <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
-    <value>비활성 시 헤더 숨기기</value>
+    <value>고정 중 헤더 숨기기</value>
   </data>
   <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
-    <value>비활성 시 푸터 숨기기</value>
-  </data>
-  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
-    <value>고정 중 활성화하지 않음</value>
+    <value>고정 중 푸터 숨기기</value>
   </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>테마</value>
@@ -866,5 +863,8 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>포션</value>
+  </data>
+  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
+    <value>창을 항상 위에 표시</value>
   </data>
 </root>

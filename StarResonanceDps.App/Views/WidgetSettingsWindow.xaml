@@ -277,7 +277,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingField}">
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="134" />
@@ -314,43 +314,6 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Theme_WindowOpacity]}"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <Grid Grid.Column="1" Width="260" VerticalAlignment="Center">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="10" />
-                                                        <ColumnDefinition Width="35" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Slider Grid.Column="0"
-                                                            IsSnapToTickEnabled="True"
-                                                            TickFrequency="1"
-                                                            Style="{StaticResource Input.ValueSlider}"
-                                                            Value="{Binding WindowOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                                                    <TextBlock Grid.Column="2"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Right"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold"
-                                                               Text="{Binding WindowOpacity, StringFormat={}{0:0}%}" />
-                                                </Grid>
-                                            </Grid>
-                                        </Border>
                                     </StackPanel>
                                 </ContentControl>
 

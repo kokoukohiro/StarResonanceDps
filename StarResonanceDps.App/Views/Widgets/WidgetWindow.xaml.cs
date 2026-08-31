@@ -48,7 +48,7 @@ public partial class WidgetWindow : Window
     private bool _isRestoringBounds = true;
     private bool _isSynchronizingContentScrollBar;
 
-    /// <summary>フッターに中身があるか。非アクティブ時に隠す判定と合わせて可視状態を決める。</summary>
+    /// <summary>フッターに中身があるか。ピン留め中に隠す判定と合わせて可視状態を決める。</summary>
     private bool _hasFooterContent;
 
     private bool _isPinned;
@@ -96,6 +96,7 @@ public partial class WidgetWindow : Window
         }
 
         ApplySavedBounds(savedBounds, owner, widget.OriginalIndex);
+        ApplyAlwaysOnTopState(widget.AlwaysOnTop);
         ApplyPinState(widget.IsPinned);
 
         _saveBoundsTimer = new DispatcherTimer
@@ -126,12 +127,22 @@ public partial class WidgetWindow : Window
             : headerText;
     }
 
+    /// <summary>
+    /// ピン留めは「配置を終えて以後は触らない」状態。<b>最前面表示とは別の軸</b>。
+    /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効く。
+    /// </summary>
     public void ApplyPinState(bool isPinned)
     {
         _isPinned = isPinned;
-        Topmost = isPinned;
         ApplyNoActivateState();
+        ApplyInactiveChromeVisibility();
         QueueContentScrollBarUpdate();
+    }
+
+    /// <summary>最前面表示。ピン留めとは独立した設定。</summary>
+    public void ApplyAlwaysOnTopState(bool alwaysOnTop)
+    {
+        Topmost = alwaysOnTop;
     }
 
     /// <summary>
@@ -148,7 +159,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var noActivate = _isPinned && _widget.NoActivateWhenPinned;
+        var noActivate = _isPinned;
         var exStyle = GetWindowLong(handle, GwlExStyle);
         var updated = noActivate
             ? exStyle | WsExNoActivate
@@ -161,7 +172,7 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// 非アクティブ時にヘッダー/フッターを隠す設定を反映する。
+    /// ピン留め中にヘッダー/フッターを隠す設定を反映する。
     ///
     /// <para>
     /// ヘッダーは枠側(<c>FrameHeaderRow</c>)と中身側(<c>ContentHeaderRow</c>)の2層に分かれているので
@@ -170,7 +181,7 @@ public partial class WidgetWindow : Window
     /// </para>
     /// </summary>
     /// <summary>
-    /// 非アクティブ時にヘッダー/フッターを隠す設定を反映する。
+    /// ピン留め中にヘッダー/フッターを隠す設定を反映する。
     ///
     /// <para>
     /// <b>窓の矩形は動かさない。</b> 行を畳んで窓を縮める形にすると、
@@ -188,8 +199,8 @@ public partial class WidgetWindow : Window
     /// </summary>
     private void ApplyInactiveChromeVisibility()
     {
-        var hideHeader = _widget.HideHeaderWhenInactive && !IsActive;
-        var hideFooter = _hasFooterContent && _widget.HideFooterWhenInactive && !IsActive;
+        var hideHeader = _widget.HideHeaderWhenInactive && _isPinned;
+        var hideFooter = _hasFooterContent && _widget.HideFooterWhenInactive && _isPinned;
 
         FrameHeaderChrome.Visibility = hideHeader ? Visibility.Collapsed : Visibility.Visible;
         WidgetHeader.Visibility = hideHeader ? Visibility.Collapsed : Visibility.Visible;
@@ -230,7 +241,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var hidden = _widget.HideFooterWhenInactive && !IsActive;
+        var hidden = _widget.HideFooterWhenInactive && _isPinned;
         WidgetFooterFrame.Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
         WidgetFooterHost.Visibility = hidden ? Visibility.Hidden : Visibility.Visible;
     }
@@ -295,7 +306,7 @@ public partial class WidgetWindow : Window
         // WS_EX_NOACTIVATE だけでは足りない。クリックすると WM_MOUSEACTIVATE が来て、
         // 既定では MA_ACTIVATE が返るのでフォーカスを奪ってしまう。
         // ここで MA_NOACTIVATE を返して、入力だけ受け取り活性化はしない状態にする。
-        if (msg == WmMouseActivate && _isPinned && _widget.NoActivateWhenPinned)
+        if (msg == WmMouseActivate && _isPinned)
         {
             handled = true;
             return new IntPtr(MaNoActivate);
@@ -369,7 +380,7 @@ public partial class WidgetWindow : Window
         // DragMove() は WM_SYSCOMMAND(SC_MOVE) を送って OS の移動ループに入るため、
         // その中で必ずアクティブ化される。WM_MOUSEACTIVATE を潰しても別経路なので通る。
         // 「ピン留め中アクティブにしない」が効いている間だけ、自前でドラッグする。
-        if (_isPinned && _widget.NoActivateWhenPinned)
+        if (_isPinned)
         {
             BeginManualDrag(sender as IInputElement, e);
             return;
@@ -450,9 +461,9 @@ public partial class WidgetWindow : Window
         {
             ApplyInactiveChromeVisibility();
         }
-        else if (e.PropertyName == nameof(WidgetListItemViewModel.NoActivateWhenPinned))
+        else if (e.PropertyName == nameof(WidgetListItemViewModel.AlwaysOnTop))
         {
-            ApplyNoActivateState();
+            ApplyAlwaysOnTopState(_widget.AlwaysOnTop);
         }
     }
 

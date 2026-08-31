@@ -208,13 +208,10 @@
     <value>窗口设置</value>
   </data>
   <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
-    <value>未激活时隐藏标题栏</value>
+    <value>固定时隐藏标题栏</value>
   </data>
   <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
-    <value>未激活时隐藏底栏</value>
-  </data>
-  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
-    <value>置顶时不激活</value>
+    <value>固定时隐藏底栏</value>
   </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>主题</value>
@@ -866,5 +863,8 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>药剂</value>
+  </data>
+  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
+    <value>窗口置顶显示</value>
   </data>
 </root>

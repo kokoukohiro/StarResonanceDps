@@ -301,22 +301,22 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         }
     }
 
-    /// <summary>非アクティブ時にヘッダーを隠す。</summary>
+    /// <summary>ピン留め中にヘッダーを隠す。</summary>
     [ObservableProperty]
-    private bool _hideHeaderWhenInactive;
+    private bool _hideHeaderWhenInactive = true;
 
-    /// <summary>非アクティブ時にフッターを隠す。</summary>
+    /// <summary>ウィンドウを最前面に表示する。既定は有効。</summary>
+    [ObservableProperty]
+    private bool _alwaysOnTop = true;
+
+    /// <summary>ピン留め中フッターを隠す。</summary>
     [ObservableProperty]
     private bool _hideFooterWhenInactive;
-
-    /// <summary>ピン留め中アクティブにしない。</summary>
-    [ObservableProperty]
-    private bool _noActivateWhenPinned;
 
     /// <summary>ウィンドウの枠とフォーカスの設定。<b>全ウィジェットで出す。</b></summary>
     public bool HasWindowSettings => true;
 
-    /// <summary>「非アクティブ時フッターを隠す」を出すか。フッターを持つウィジェットだけ。</summary>
+    /// <summary>「ピン留め中フッターを隠す」を出すか。フッターを持つウィジェットだけ。</summary>
     public bool HasFooterSetting => WidgetConfigDefaults.HasFooter(_kind);
 
     /// <summary>スイッチの右に出す ON / OFF。</summary>
@@ -324,7 +324,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public string HideFooterWhenInactiveStateText => GetSwitchStateText(HideFooterWhenInactive);
 
-    public string NoActivateWhenPinnedStateText => GetSwitchStateText(NoActivateWhenPinned);
+    public string AlwaysOnTopStateText => GetSwitchStateText(AlwaysOnTop);
 
     private static string GetSwitchStateText(bool isOn)
     {
@@ -346,9 +346,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
                 : BackgroundImagePath.Trim(),
             BackgroundImageAverageColor = BackgroundImageAverageColor,
             BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
+            AlwaysOnTop = AlwaysOnTop,
             HideHeaderWhenInactive = HideHeaderWhenInactive,
-            HideFooterWhenInactive = HideFooterWhenInactive,
-            NoActivateWhenPinned = NoActivateWhenPinned
+            HideFooterWhenInactive = HideFooterWhenInactive
         };
 
         WidgetConfigDefaults.NormalizeTheme(theme);
@@ -369,7 +369,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BackgroundImageAverageColorSourcePath = normalized.BackgroundImageAverageColorSourcePath;
             HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
             HideFooterWhenInactive = normalized.HideFooterWhenInactive;
-            NoActivateWhenPinned = normalized.NoActivateWhenPinned;
+            AlwaysOnTop = normalized.AlwaysOnTop ?? true;
         }
         finally
         {
@@ -399,7 +399,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
             && left.HideHeaderWhenInactive == right.HideHeaderWhenInactive
             && left.HideFooterWhenInactive == right.HideFooterWhenInactive
-            && left.NoActivateWhenPinned == right.NoActivateWhenPinned
+            && (left.AlwaysOnTop ?? true) == (right.AlwaysOnTop ?? true)
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -415,9 +415,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         NotifyWindowDisplaySettingChanged();
     }
 
-    partial void OnNoActivateWhenPinnedChanged(bool value)
+    partial void OnAlwaysOnTopChanged(bool value)
     {
-        OnPropertyChanged(nameof(NoActivateWhenPinnedStateText));
+        OnPropertyChanged(nameof(AlwaysOnTopStateText));
         NotifyWindowDisplaySettingChanged();
     }
 

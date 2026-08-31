@@ -208,13 +208,10 @@
     <value>Window</value>
   </data>
   <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
-    <value>Hide header when inactive</value>
+    <value>Hide Header While Pinned</value>
   </data>
   <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
-    <value>Hide footer when inactive</value>
-  </data>
-  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
-    <value>Do not activate while pinned</value>
+    <value>Hide Footer While Pinned</value>
   </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>Theme</value>
@@ -866,5 +863,8 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>Potion</value>
+  </data>
+  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
+    <value>Always on Top</value>
   </data>
 </root>

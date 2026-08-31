@@ -208,13 +208,10 @@
     <value>ウィンドウ設定</value>
   </data>
   <data name="Settings_Window_HideHeaderWhenInactive" xml:space="preserve">
-    <value>非アクティブ時ヘッダーを隠す</value>
+    <value>ピン留め中ヘッダーを隠す</value>
   </data>
   <data name="Settings_Window_HideFooterWhenInactive" xml:space="preserve">
-    <value>非アクティブ時フッターを隠す</value>
-  </data>
-  <data name="Settings_Window_NoActivateWhenPinned" xml:space="preserve">
-    <value>ピン留め中アクティブにしない</value>
+    <value>ピン留め中フッターを隠す</value>
   </data>
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>テーマ</value>
@@ -866,5 +863,8 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>薬剤</value>
+  </data>
+  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
+    <value>ウィンドウを最前面に表示</value>
   </data>
 </root>

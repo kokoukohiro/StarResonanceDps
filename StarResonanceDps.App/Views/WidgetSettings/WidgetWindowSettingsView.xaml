@@ -41,6 +41,70 @@
 
                         <TextBlock Grid.Column="0"
                                    Style="{StaticResource WidgetWindowSettings.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_AlwaysOnTop]}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding AlwaysOnTop, Mode=TwoWay}" />
+                            <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
+                                       Text="{Binding AlwaysOnTopStateText}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource WidgetWindowSettings.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Theme_WindowOpacity]}" />
+
+                        <Grid Grid.Column="1" Width="260" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="35" />
+                            </Grid.ColumnDefinitions>
+
+                            <Slider Grid.Column="0"
+                                    IsSnapToTickEnabled="True"
+                                    TickFrequency="1"
+                                    Style="{StaticResource Input.ValueSlider}"
+                                    Value="{Binding WindowOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding WindowOpacity, StringFormat={}{0:0}%}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+                <!-- フッターを持たないウィジェットではこれが最後の行になる。 -->
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasFooterSetting}" Value="False">
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource WidgetWindowSettings.Label}"
                                    Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_HideHeaderWhenInactive]}" />
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -53,7 +117,7 @@
                 </Border>
 
                 <!-- フッターを持たないウィジェットでは出さない。 -->
-                <Border Style="{StaticResource Panel.SettingField}"
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
                         Visibility="{Binding HasFooterSetting, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -74,25 +138,6 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0"
-                                   Style="{StaticResource WidgetWindowSettings.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_NoActivateWhenPinned]}" />
-
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding NoActivateWhenPinned, Mode=TwoWay}" />
-                            <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
-                                       Text="{Binding NoActivateWhenPinnedStateText}" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
             </StackPanel>
         </ContentControl>
     </StackPanel>
