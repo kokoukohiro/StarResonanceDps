@@ -97,6 +97,7 @@ public sealed record PlayerMetricSummarySnapshot(
 
 public sealed record PlayerBuffSnapshot(
     long Uuid,
+    int BaseId,
     string Key,
     string Name,
     string IconName,
@@ -232,6 +233,21 @@ public static class MeterSnapshotProvider
     }
 
 
+    /// <summary>
+    /// 自分の素性。
+    ///
+    /// <para>
+    /// <b>ロスターに載るのを待たない。</b>自分のIDは <c>AppState.PlayerUID</c> が常に持っているので、
+    /// プレイヤー一覧の投影が空でも(街で待機中など)名前を引ける。
+    /// 自分を対象にした窓のタイトルがロスター次第で出たり出なかったりするのを避ける。
+    /// </para>
+    /// </summary>
+    public static MeterPlayerIdentity? GetSelfPlayerIdentity()
+    {
+        var characterId = AppState.PlayerUID;
+        return characterId == 0 ? null : GetPlayerIdentity(characterId);
+    }
+
     public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerBuffs(long characterId, PlayerBuffListKind kind)
     {
         var encounter = ResolveActiveEncounter();
@@ -299,6 +315,7 @@ public static class MeterSnapshotProvider
             var key = ResolveBuffSnapshotKey(buffEvent);
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
+                buffEvent.BaseId,
                 key,
                 name,
                 iconName,
@@ -763,6 +780,7 @@ public static class MeterSnapshotProvider
             int,
             (PlayerBuffCandidate? Buff, PlayerBuffCandidate? Debuff)>();
         var resolvedTrackedSkillIdsBySourceConfigId = new Dictionary<int, int>();
+        var resolvedTrackedSkillIdsBySummonUuid = new Dictionary<long, int>();
 
         foreach (var buffEvent in buffEvents)
         {
@@ -786,6 +804,17 @@ public static class MeterSnapshotProvider
                     trackedSkillIds,
                     runtimeSourceParentsByBaseId);
                 resolvedTrackedSkillIdsBySourceConfigId[buffEvent.SourceConfigId] = trackedSkillId;
+            }
+
+            if (trackedSkillId <= 0)
+            {
+                // 召喚したエンティティが付けたバフは、鎖が装備中スキルまで届かない。
+                // 術者側から辿り直す。
+                trackedSkillId = ResolveTrackedSkillFromSummonCaster(
+                    encounter,
+                    buffEvent.FireUuid,
+                    trackedSkillIds,
+                    resolvedTrackedSkillIdsBySummonUuid);
             }
 
             if (trackedSkillId <= 0)
@@ -827,6 +856,7 @@ public static class MeterSnapshotProvider
             var key = ResolveBuffSnapshotKey(buffEvent);
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
+                buffEvent.BaseId,
                 key,
                 name,
                 iconName,
@@ -939,6 +969,121 @@ public static class MeterSnapshotProvider
         return resolvedTrackedSkillIds.Count == 1
             ? resolvedTrackedSkillIds.First()
             : 0;
+    }
+
+    /// <summary>
+    /// 召喚エンティティが付けたバフを、召喚元のスキルへ帰属させる。
+    ///
+    /// <para>
+    /// 実測(2026-09-01、3903 奥义！炽炎战斧)では、バフ <c>2110065</c> の
+    /// <c>SourceConfigId</c> が <c>2110064</c>(スキルではなく<b>バフ</b>ID)で、
+    /// <c>SkillLevelGroup</c> 等の鎖もそこで途切れる。<c>BuffTable.SkillId</c> も 0。
+    /// 静的にも実行時にも装備中スキルへ繋がる経路が無い。
+    /// </para>
+    ///
+    /// <para>
+    /// 一方、召喚体側のテーブルは元スキルを指している。
+    /// <c>MonsterTable[3000009].BornSkillId = 390301</c> で、これは
+    /// <c>SkillTable[3903].EffectIDs</c> に入っているエフェクトID。ここを辿る。
+    /// </para>
+    ///
+    /// <para>
+    /// 術者が召喚体かどうかは <b>UUIDのビット</b>(<see cref="Utils.IsSummonByUuid"/>)で判る。
+    /// 推測ではなく、テーブルとワイヤに書かれた参照だけを辿る。
+    /// 複数の装備中スキルに当たったときは<b>帰属させない</b>(既存の鎖と同じ方針)。
+    /// </para>
+    /// </summary>
+    private static int ResolveTrackedSkillFromSummonCaster(
+        Encounter encounter,
+        long fireUuid,
+        IReadOnlySet<int> trackedSkillIds,
+        Dictionary<long, int> resolvedBySummonUuid)
+    {
+        if (fireUuid == 0 || !Utils.IsSummonByUuid(fireUuid))
+        {
+            return 0;
+        }
+
+        if (resolvedBySummonUuid.TryGetValue(fireUuid, out var cached))
+        {
+            return cached;
+        }
+
+        var resolved = 0;
+
+        if (encounter.Entities.TryGetValue(fireUuid, out var caster)
+            && caster.UID > 0
+            && HelperMethods.DataTables.Monsters.Data.TryGetValue(
+                caster.UID.ToString(),
+                out var monster))
+        {
+            var summonSkillIds = new HashSet<int>();
+            if (monster.BornSkillId > 0)
+            {
+                summonSkillIds.Add(monster.BornSkillId);
+            }
+
+            if (monster.SkillIds is not null)
+            {
+                foreach (var summonSkillId in monster.SkillIds)
+                {
+                    if (summonSkillId > 0)
+                    {
+                        summonSkillIds.Add(summonSkillId);
+                    }
+                }
+            }
+
+            foreach (var trackedSkillId in trackedSkillIds)
+            {
+                if (!SummonBelongsToSkill(trackedSkillId, summonSkillIds))
+                {
+                    continue;
+                }
+
+                if (resolved > 0 && resolved != trackedSkillId)
+                {
+                    resolved = 0;
+                    break;
+                }
+
+                resolved = trackedSkillId;
+            }
+        }
+
+        resolvedBySummonUuid[fireUuid] = resolved;
+        return resolved;
+    }
+
+    /// <summary>
+    /// 召喚体が持つスキル/エフェクトIDが、その装備中スキルのものか。
+    /// エフェクトIDは <c>SkillTable.EffectIDs</c> の逆引きで確認する
+    /// (<c>エフェクトID / 100</c> のような規則には頼らない)。
+    /// </summary>
+    private static bool SummonBelongsToSkill(int trackedSkillId, HashSet<int> summonSkillIds)
+    {
+        if (summonSkillIds.Contains(trackedSkillId))
+        {
+            return true;
+        }
+
+        if (!HelperMethods.DataTables.Skills.Data.TryGetValue(
+                trackedSkillId.ToString(),
+                out var trackedSkill)
+            || trackedSkill.EffectIDs is null)
+        {
+            return false;
+        }
+
+        foreach (var effectId in trackedSkill.EffectIDs)
+        {
+            if (summonSkillIds.Contains(effectId))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int ResolveTrackedSourceSkillDirectly(

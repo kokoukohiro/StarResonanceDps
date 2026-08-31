@@ -63,6 +63,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
+        AddWidget(WidgetKind.BuffDebuffCard, "Widget_BuffDebuffCard");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");

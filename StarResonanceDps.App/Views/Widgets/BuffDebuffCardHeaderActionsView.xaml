@@ -1,0 +1,38 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.BuffDebuffCardHeaderActionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        押せるだけの層。文字は Opacity=0 で、見える文字は
+        BuffDebuffCardHeaderLabelsView(枠側)が同じ幅で描く。
+    -->
+    <StackPanel Orientation="Horizontal">
+        <Button Width="Auto"
+                Height="30"
+                Style="{StaticResource Button.WidgetWindowHeaderIcon}"
+                Command="{Binding ZoomOutCommand}">
+            <Border Margin="8,0">
+                <TextBlock Opacity="0"
+                           IsHitTestVisible="False"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffDebuffCard_ZoomOut]}" />
+            </Border>
+        </Button>
+
+        <Button Width="Auto"
+                Height="30"
+                Style="{StaticResource Button.WidgetWindowHeaderIcon}"
+                Command="{Binding ZoomInCommand}">
+            <Border Margin="8,0">
+                <TextBlock Opacity="0"
+                           IsHitTestVisible="False"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffDebuffCard_ZoomIn]}" />
+            </Border>
+        </Button>
+    </StackPanel>
+</UserControl>

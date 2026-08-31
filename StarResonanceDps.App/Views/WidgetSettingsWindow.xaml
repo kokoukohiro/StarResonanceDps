@@ -125,6 +125,15 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
+
+                                    <ContentControl Content="{Binding BuffCardSettings}"
+                                                    Visibility="{Binding HasBuffCardDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:BuffCardWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </StackPanel>
 
                                 <StackPanel x:Name="OtherRoleSkillsSection"

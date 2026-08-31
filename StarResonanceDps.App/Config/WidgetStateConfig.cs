@@ -20,6 +20,17 @@ public sealed class WidgetConfig
     public WidgetWindowConfig Window { get; set; } = new();
     public MeterWidgetSettingsConfig? Meter { get; set; }
     public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
+    public BuffCardWidgetSettingsConfig? BuffCard { get; set; }
+
+    /// <summary>
+    /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
+    ///
+    /// <para>
+    /// これが無いと、状態が Running のウィジェットは再起動のたびに
+    /// <b>自分の窓1枚</b>として作り直される(対象の指定が失われる)。
+    /// </para>
+    /// </summary>
+    public List<WidgetOpenTargetConfig>? OpenTargets { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
@@ -35,6 +46,8 @@ public sealed class WidgetConfig
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
             Meter = Meter?.Clone(),
             MetricTimeline = MetricTimeline?.Clone(),
+            BuffCard = BuffCard?.Clone(),
+            OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
                 : new Dictionary<string, object>(ExtensionData, StringComparer.OrdinalIgnoreCase)
@@ -108,6 +121,113 @@ public sealed class MetricTimelineWidgetSettingsConfig
         return new MetricTimelineWidgetSettingsConfig
         {
             AggregationIntervalSeconds = AggregationIntervalSeconds
+        };
+    }
+}
+
+/// <summary>
+/// 開いていたウィンドウ1枚ぶんの対象。
+///
+/// <para>
+/// プレイヤーとモンスターの両方を1つの型で表す。<see cref="EntityId"/> が 0 以外なら
+/// モンスター、そうでなければプレイヤー。
+/// </para>
+/// </summary>
+public sealed class WidgetOpenTargetConfig
+{
+    /// <summary>
+    /// プレイヤーのID。<c>null</c> は「自分」。
+    /// <b>解決後の自分のIDではなく、窓を開いたときの指定をそのまま保存する。</b>
+    /// 解決後の値を保存すると、キャラを変えたときに前のキャラの窓として復元される。
+    /// </summary>
+    public long? CharacterId { get; set; }
+
+    /// <summary>
+    /// モンスターの種別ID(<c>MonsterTable</c> のキー)。0 ならプレイヤーの窓。
+    /// 実体IDは再起動で消えるので、種別で捕まえ直す。
+    /// </summary>
+    public long EntityId { get; set; }
+
+    /// <summary>
+    /// 最後に分かっていた対象の名前。<b>復元直後にタイトルを正しく出すために持つ。</b>
+    /// これが無いと、対象がAOIに現れるまでタイトルがウィジェット名だけになる。
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// 実際に観測したプレイヤーのUID。<b>表示用</b>で、対象の指定ではない。
+    ///
+    /// <para>
+    /// 自分の窓は <see cref="CharacterId"/> が <c>null</c>(＝「自分」という指定)なので、
+    /// これが無いとタイトルに出すUIDが分からない。かといって <see cref="CharacterId"/> を
+    /// 観測値で埋めてしまうと、キャラを変えたときに<b>前のキャラ固定の窓として復元される</b>。
+    /// 指定と観測値は別に持つ。
+    /// </para>
+    /// </summary>
+    public long? ResolvedCharacterId { get; set; }
+
+    /// <summary>バフ・デバフカード専用。<c>PlayerBuffListKind</c> の値。</summary>
+    public int? BuffListKind { get; set; }
+
+    /// <summary>バフ・デバフカード専用。まとまりを追う窓では <c>null</c>。</summary>
+    public string? BuffKey { get; set; }
+
+    /// <summary>
+    /// バフ・デバフカード専用。最後に分かっていたバフ名。<b>復元直後のタイトルに使う。</b>
+    ///
+    /// <para>
+    /// 個別のバフを追うカードは、そのバフが失効しているとタイトルを組み直せない。
+    /// まとまり(料理・薬剤)を追うカードは名前が静的なので、これが無くても出る。
+    /// </para>
+    /// </summary>
+    public string? BuffName { get; set; }
+
+    /// <summary>
+    /// バフ・デバフカード専用。<c>BuffGroup</c> の値。0(None)なら個別のバフを追う窓。
+    /// </summary>
+    public int? BuffGroup { get; set; }
+
+    public bool IsEntity => EntityId != 0;
+
+    public WidgetOpenTargetConfig Clone()
+    {
+        return new WidgetOpenTargetConfig
+        {
+            CharacterId = CharacterId,
+            EntityId = EntityId,
+            Name = Name,
+            ResolvedCharacterId = ResolvedCharacterId,
+            BuffListKind = BuffListKind,
+            BuffKey = BuffKey,
+            BuffName = BuffName,
+            BuffGroup = BuffGroup
+        };
+    }
+}
+
+public sealed class BuffCardWidgetSettingsConfig
+{
+    public string? BuffInfoFormatString { get; set; }
+
+    /// <summary>
+    /// 倍率(%)。キーは <c>{対象ID}:{バフキー}</c>。
+    ///
+    /// <para>
+    /// 対象IDはプレイヤーなら <c>CharacterId</c>、モンスターなら
+    /// <c>NearbyEntityEntry.EntityId</c>(= <c>MonsterTable</c> のキー = <b>種別</b>)。
+    /// どちらも再起動をまたいで同じ値になる。
+    /// </para>
+    /// </summary>
+    public Dictionary<string, int> Scales { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public BuffCardWidgetSettingsConfig Clone()
+    {
+        return new BuffCardWidgetSettingsConfig
+        {
+            BuffInfoFormatString = BuffInfoFormatString,
+            Scales = Scales is null
+                ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -208,6 +328,12 @@ public static class WidgetConfigDefaults
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
+    public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
+
+    public const int MinBuffCardScale = 100;
+    public const int MaxBuffCardScale = 1000;
+    public const int DefaultBuffCardScale = 200;
+    public const int BuffCardScaleStep = 25;
 
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
@@ -218,7 +344,10 @@ public static class WidgetConfigDefaults
     private const double PlayerEquipmentInitialWindowWidth = 400d;
     private const double PlayerEquipmentInitialWindowHeight = 230d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
-    private const double PlayerBuffListInitialWindowHeight = 92d;
+    // 1行1件になったので、初回に開いた時点で数行ぶんが見える高さにする(1行34px)。
+    private const double PlayerBuffListInitialWindowHeight = 240d;
+    private const double BuffDebuffCardInitialWindowWidth = 260d;
+    private const double BuffDebuffCardInitialWindowHeight = 260d;
     private const double MetricContributionInitialWindowWidth = 980d;
     private const double MetricContributionInitialWindowHeight = 360d;
     private const double MetricSummaryInitialWindowWidth = 720d;
@@ -373,6 +502,30 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.DpsGraph or WidgetKind.HpsGraph;
     }
 
+    public static bool SupportsBuffCardSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.BuffDebuffCard;
+    }
+
+    /// <summary>
+    /// 開いていた窓の対象を保存する種別か。プレイヤー用ウィンドウだけが持つ。
+    /// <see cref="WidgetKind.PlayerStatus"/> は常に自分1枚なので対象外。
+    /// </summary>
+    public static bool SupportsOpenTargets(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerInfo
+            or WidgetKind.PlayerEquipment
+            or WidgetKind.BuffList
+            or WidgetKind.DebuffList
+            or WidgetKind.BuffDebuffCard
+            or WidgetKind.DamageContribution
+            or WidgetKind.DamageSummary
+            or WidgetKind.DpsGraph
+            or WidgetKind.HealingContribution
+            or WidgetKind.HealingSummary
+            or WidgetKind.HpsGraph;
+    }
+
     public static void MigrateVersion1Defaults(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -468,6 +621,11 @@ public static class WidgetConfigDefaults
                 Width = PlayerBuffListInitialWindowWidth,
                 Height = PlayerBuffListInitialWindowHeight
             },
+            WidgetKind.BuffDebuffCard => new WidgetWindowConfig
+            {
+                Width = BuffDebuffCardInitialWindowWidth,
+                Height = BuffDebuffCardInitialWindowHeight
+            },
             WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
             {
                 Width = MetricContributionInitialWindowWidth,
@@ -502,6 +660,14 @@ public static class WidgetConfigDefaults
         return new MetricTimelineWidgetSettingsConfig
         {
             AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds
+        };
+    }
+
+    public static BuffCardWidgetSettingsConfig CreateBuffCardSettings()
+    {
+        return new BuffCardWidgetSettingsConfig
+        {
+            BuffInfoFormatString = DefaultBuffInfoFormatString
         };
     }
 
@@ -647,6 +813,13 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    public static BuffCardWidgetSettingsConfig CloneNormalizedBuffCard(BuffCardWidgetSettingsConfig? buffCard)
+    {
+        var normalized = (buffCard ?? CreateBuffCardSettings()).Clone();
+        NormalizeBuffCard(normalized);
+        return normalized;
+    }
+
     public static void Normalize(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -670,6 +843,12 @@ public static class WidgetConfigDefaults
             : null;
         config.MetricTimeline = SupportsMetricTimelineSettings(kind)
             ? CloneNormalizedMetricTimeline(config.MetricTimeline)
+            : null;
+        config.BuffCard = SupportsBuffCardSettings(kind)
+            ? CloneNormalizedBuffCard(config.BuffCard)
+            : null;
+        config.OpenTargets = SupportsOpenTargets(kind)
+            ? config.OpenTargets
             : null;
 
         switch (kind)
@@ -704,6 +883,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.DebuffList:
                 config.Window.Width ??= PlayerBuffListInitialWindowWidth;
                 config.Window.Height ??= PlayerBuffListInitialWindowHeight;
+                break;
+            case WidgetKind.BuffDebuffCard:
+                config.Window.Width ??= BuffDebuffCardInitialWindowWidth;
+                config.Window.Height ??= BuffDebuffCardInitialWindowHeight;
                 break;
             case WidgetKind.DamageContribution:
             case WidgetKind.HealingContribution:
@@ -753,6 +936,26 @@ public static class WidgetConfigDefaults
         {
             metricTimeline.AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds;
         }
+    }
+
+    public static void NormalizeBuffCard(BuffCardWidgetSettingsConfig buffCard)
+    {
+        buffCard.BuffInfoFormatString ??= DefaultBuffInfoFormatString;
+        buffCard.Scales ??= new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var key in buffCard.Scales.Keys.ToList())
+        {
+            buffCard.Scales[key] = ClampBuffCardScale(buffCard.Scales[key]);
+        }
+    }
+
+    public static int ClampBuffCardScale(int scale)
+    {
+        var stepped = (int)Math.Round(
+            (double)scale / BuffCardScaleStep,
+            MidpointRounding.AwayFromZero) * BuffCardScaleStep;
+
+        return Math.Clamp(stepped, MinBuffCardScale, MaxBuffCardScale);
     }
 
     public static void NormalizeMeter(WidgetKind kind, MeterWidgetSettingsConfig meter)

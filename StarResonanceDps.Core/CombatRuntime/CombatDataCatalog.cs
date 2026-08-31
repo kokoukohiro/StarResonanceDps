@@ -1,4 +1,4 @@
-using System.Collections.Frozen;
+﻿using System.Collections.Frozen;
 using Newtonsoft.Json;
 using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
@@ -115,6 +115,49 @@ public static class CombatDataCatalog
         }
 
         return string.Empty;
+    }
+
+    /// <summary>料理バフのアイコン。</summary>
+    private const string CuisineBuffIconName = "buff_food_up";
+
+    /// <summary>薬剤バフのアイコン。</summary>
+    private const string PotionBuffIconName = "buff_agentia_up";
+
+    /// <summary>
+    /// 消費アイテム系バフのタグ。
+    /// <c>美食的加护</c>・虚蚀战利品・丰收宴・禁药・沉梦抗性 などはこれを持たない。
+    /// </summary>
+    private const int ConsumableBuffTag = 100;
+
+    /// <summary>
+    /// 個別に扱わず1つのまとまりとして見るバフか。<b>アイコンとタグの両方</b>で判定する。
+    ///
+    /// <para>
+    /// アイコンだけだと別系統が混ざる(<c>buff_food_up</c> には 美食的加护 と 丰收宴 が、
+    /// <c>buff_agentia_up</c> には 禁药 と 沉梦抗性 が入る)。タグ100 を併せると
+    /// 料理は <c>2032011</c>〜<c>2032284</c> の136件、薬剤は <c>2033011</c>〜<c>2033189</c> の
+    /// 162件ちょうどになる。ゲーム側の表示名もそれぞれ1語に丸められている。
+    /// </para>
+    /// </summary>
+    public static BuffGroup GetBuffGroup(int buffId)
+    {
+        if (!_buffs.TryGetValue(buffId, out var buff)
+            || buff.Tags is null
+            || !buff.Tags.Contains(ConsumableBuffTag))
+        {
+            return BuffGroup.None;
+        }
+
+        var icon = FirstNonEmpty(buff.ShowHUDIcon, buff.Icon);
+
+        if (icon.Contains(CuisineBuffIconName, StringComparison.OrdinalIgnoreCase))
+        {
+            return BuffGroup.Cuisine;
+        }
+
+        return icon.Contains(PotionBuffIconName, StringComparison.OrdinalIgnoreCase)
+            ? BuffGroup.Potion
+            : BuffGroup.None;
     }
 
     public static string GetBuffIconName(int buffId, int sourceSkillId, string? fallbackIcon = null)

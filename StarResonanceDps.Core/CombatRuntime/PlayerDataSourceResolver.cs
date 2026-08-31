@@ -37,9 +37,15 @@ internal static class PlayerDataSourceResolver
         Entity? metadataEntity,
         bool isSelf)
     {
+        // PT補完は自分にも使う。<b>ただし最後の手段</b>で、空の項目しか埋めない。
+        //
+        // 実測(2026-09-01、ロード済みマップで起動→PT画面を開くだけ)では、自分の
+        // 名前・職・戦闘力・Lv・シーズン値は11秒ほどで自力で埋まるが、
+        // HP/最大HP は AttrHp/AttrMaxHp が来ないため<b>マップ移動まで永久に0</b>だった。
+        // PT側は最初から 533714/533714 を持っている。
         var party = PartyStateStore.Instance.Current;
         PartyMemberSupplement? partySupplement = null;
-        if (!isSelf && party.TryGetSupplement(characterId, out var supplement))
+        if (party.TryGetSupplement(characterId, out var supplement))
         {
             partySupplement = supplement;
         }
@@ -110,8 +116,7 @@ internal static class PlayerDataSourceResolver
         var maxHp = hpEntity?.MaxHp ?? 0;
         var hasNearbyMaxHp = nearbyEntity is not null
             && TryGetPositiveInt64(nearbyEntity.GetAttrKV("AttrMaxHp"), out _);
-        if (!isSelf
-            && !hasNearbyMaxHp
+        if (!hasNearbyMaxHp
             && partySupplement is not null)
         {
             if (partySupplement.MaxHp > 0)
@@ -134,45 +139,35 @@ internal static class PlayerDataSourceResolver
             characterId,
             !string.IsNullOrEmpty(nearbyName)
                 ? nearbyName
-                : !isSelf && partySupplement is { Name.Length: > 0 }
+                : partySupplement is { Name.Length: > 0 }
                     ? partySupplement.Name
                     : metadataName,
-            isSelf
+            nearbyProfessionId > 0
                 ? nearbyProfessionId
-                : nearbyProfessionId > 0
-                    ? nearbyProfessionId
-                    : partySupplement is { ProfessionId: > 0 }
-                        ? partySupplement.ProfessionId
-                        : metadataProfessionId,
-            isSelf
+                : partySupplement is { ProfessionId: > 0 }
+                    ? partySupplement.ProfessionId
+                    : metadataProfessionId,
+            nearbyCombatPower > 0
                 ? nearbyCombatPower
-                : nearbyCombatPower > 0
-                    ? nearbyCombatPower
-                    : partySupplement is { CombatPower: > 0 }
-                        ? partySupplement.CombatPower
-                        : metadataCombatPower,
+                : partySupplement is { CombatPower: > 0 }
+                    ? partySupplement.CombatPower
+                    : metadataCombatPower,
             ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf),
-            isSelf
+            nearbySeasonStrength > 0
                 ? nearbySeasonStrength
-                : nearbySeasonStrength > 0
-                    ? nearbySeasonStrength
-                    : partySupplement is { SeasonStrength: > 0 }
-                        ? partySupplement.SeasonStrength
-                        : metadataSeasonStrength,
-            isSelf
+                : partySupplement is { SeasonStrength: > 0 }
+                    ? partySupplement.SeasonStrength
+                    : metadataSeasonStrength,
+            nearbyLevel > 0
                 ? nearbyLevel
-                : nearbyLevel > 0
-                    ? nearbyLevel
-                    : partySupplement is { Level: > 0 }
-                        ? partySupplement.Level
-                        : metadataLevel,
-            isSelf
+                : partySupplement is { Level: > 0 }
+                    ? partySupplement.Level
+                    : metadataLevel,
+            nearbySeasonLevel > 0
                 ? nearbySeasonLevel
-                : nearbySeasonLevel > 0
-                    ? nearbySeasonLevel
-                    : partySupplement is { SeasonLevel: > 0 }
-                        ? partySupplement.SeasonLevel
-                        : metadataSeasonLevel,
+                : partySupplement is { SeasonLevel: > 0 }
+                    ? partySupplement.SeasonLevel
+                    : metadataSeasonLevel,
             currentHp,
             maxHp,
             !isSelf && partySupplement?.IsNpc == true,

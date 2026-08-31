@@ -59,9 +59,38 @@ public sealed class ActiveBuffStore
                 _buffsByEntity.Add(entityUuid, buffs);
             }
 
-            buffs[buffUuid] = new ActiveBuffEntry(buffEvent, DateTime.Now, buffEvent.Duration);
+            buffs[buffUuid] = new ActiveBuffEntry(
+                buffEvent,
+                ResolveObservedAt(buffEvent),
+                buffEvent.Duration);
             RecordSourceParentNoLock(entityUuid, buffEvent);
         }
+    }
+
+    /// <summary>
+    /// 残り時間の起点。<b>サーバが送ってきた付与時刻を使う。</b>
+    ///
+    /// <para>
+    /// 受信時刻を起点にすると、マップ移動のたびに自分の全バフが1デルタで再送されるので、
+    /// そのたびに残り時間が <c>Duration</c> 満額へ巻き戻る(料理なら1800秒に戻る)。
+    /// 付与時刻は再送されても同じ値なので巻き戻らない。
+    /// </para>
+    ///
+    /// <para>
+    /// 付与時刻が無い場合(<c>createTime</c> が0、またはパケット到着時刻とのズレ判定で
+    /// 弾かれた場合)は <see cref="BuffEvent.AddDateTime"/> に到着時刻が入っているので、
+    /// 結果的に従来と同じ起点になる。<b>いずれもUTC</b>で、この型の時刻はすべてUTCで揃える。
+    /// </para>
+    /// </summary>
+    private static DateTime ResolveObservedAt(BuffEvent buffEvent)
+    {
+        var addedAt = buffEvent.AddDateTime;
+
+        return addedAt == default
+            ? DateTime.UtcNow
+            : addedAt.Kind == DateTimeKind.Utc
+                ? addedAt
+                : addedAt.ToUniversalTime();
     }
 
     private void RecordSourceParentNoLock(long entityUuid, BuffEvent buffEvent)
@@ -160,7 +189,7 @@ public sealed class ActiveBuffStore
             entries = [.. buffs.Values];
         }
 
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         return [.. entries.Where(entry => !entry.IsExpired(now)).Select(entry => entry.BuffEvent)];
     }
 
@@ -201,7 +230,7 @@ public sealed class ActiveBuffStore
             return true;
         }
 
-        var seconds = entry.GetRemainingSeconds(DateTime.Now);
+        var seconds = entry.GetRemainingSeconds(DateTime.UtcNow);
         if (seconds <= 0d)
         {
             return false;
@@ -234,6 +263,7 @@ public sealed class ActiveBuffStore
         }
     }
 
+    /// <param name="ObservedAt">バフが付いた時刻。<b>UTC</b>。</param>
     private sealed record ActiveBuffEntry(
         BuffEvent BuffEvent,
         DateTime ObservedAt,

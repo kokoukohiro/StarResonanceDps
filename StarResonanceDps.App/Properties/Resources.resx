@@ -573,14 +573,11 @@
   <data name="Widget_BuffList" xml:space="preserve">
     <value>Buff List</value>
   </data>
+  <data name="Widget_BuffDurationFormat" xml:space="preserve">
+    <value>{0}s</value>
+  </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>Debuff List</value>
-  </data>
-  <data name="Widget_NoBuffData" xml:space="preserve">
-    <value>No buffs</value>
-  </data>
-  <data name="Widget_NoDebuffData" xml:space="preserve">
-    <value>No debuffs</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>Add</value>
@@ -827,5 +824,47 @@
   </data>
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>Self only</value>
+  </data>
+  <data name="Widget_BuffDebuffCard" xml:space="preserve">
+    <value>Buff &amp; Debuff Card</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomOut" xml:space="preserve">
+    <value>Shrink</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomIn" xml:space="preserve">
+    <value>Enlarge</value>
+  </data>
+  <data name="Settings_BuffInfo_Customization" xml:space="preserve">
+    <value>Buff Name</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewBuffName" xml:space="preserve">
+    <value>Buff1</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewName" xml:space="preserve">
+    <value>Player1</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_BuffName" xml:space="preserve">
+    <value>Buff Name</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Level" xml:space="preserve">
+    <value>Level</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_NewLine" xml:space="preserve">
+    <value>Line Break</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
+    <value>Buff ({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
+    <value>Debuff ({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
+    <value>Cuisine</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
+    <value>Potion</value>
   </data>
 </root>

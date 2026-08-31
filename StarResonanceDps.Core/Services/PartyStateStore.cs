@@ -321,22 +321,32 @@ public sealed class PartyStateStore
                 _positions.Remove(characterId);
             }
 
+            // 位置は権威側(TeamMemberGroupInfos)だけが決める。
+            //
+            // ここへ来る経路(コンテナ同期・GetTeamInfo の前半)は TeamMemData.GroupId しか持たず、
+            // グループ内の順番を持たない。実測(2026-09-01)では 20人PT で権威側が
+            // 「グループ2の3番目 / グループ3の4番目」(ゲーム表示は 8 と 14)と言っているのに対し、
+            // コンテナは2人とも「グループ1」と言ってきた。この値で上書きすると
+            // グループIDが食い違って順番が捨てられ、10秒ごとに番号が ? に戻る。
+            //
+            // したがって既存の位置には触らない。持っていないメンバーにだけ、
+            // グループIDだけを記録する(順番は権威側が来るまで空)。
             foreach (var characterId in memberIds)
             {
+                if (_positions.ContainsKey(characterId))
+                {
+                    continue;
+                }
+
                 var groupId = isFivePersonParty
                     ? 1
                     : assignedGroups.GetValueOrDefault(characterId);
                 if (groupId <= 0)
                 {
-                    _positions.Remove(characterId);
                     continue;
                 }
 
-                var existingSlot = _positions.TryGetValue(characterId, out var existing)
-                    && existing.GroupId == groupId
-                        ? existing.GroupSlot
-                        : null;
-                _positions[characterId] = new PartyMemberPosition(groupId, existingSlot);
+                _positions[characterId] = new PartyMemberPosition(groupId, null);
             }
             _knownNonMemberIds.ExceptWith(memberIds);
             RemoveNonMemberSupplementsNoLock();

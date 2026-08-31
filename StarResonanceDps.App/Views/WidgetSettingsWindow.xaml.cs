@@ -42,6 +42,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
+        _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -66,6 +67,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
+        _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }

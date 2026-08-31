@@ -573,14 +573,11 @@
   <data name="Widget_BuffList" xml:space="preserve">
     <value>버프 목록</value>
   </data>
+  <data name="Widget_BuffDurationFormat" xml:space="preserve">
+    <value>{0}초</value>
+  </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>디버프 목록</value>
-  </data>
-  <data name="Widget_NoBuffData" xml:space="preserve">
-    <value>버프 없음</value>
-  </data>
-  <data name="Widget_NoDebuffData" xml:space="preserve">
-    <value>디버프 없음</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>추가</value>
@@ -827,5 +824,47 @@
   </data>
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>본인만</value>
+  </data>
+  <data name="Widget_BuffDebuffCard" xml:space="preserve">
+    <value>버프·디버프 카드</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomOut" xml:space="preserve">
+    <value>축소</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomIn" xml:space="preserve">
+    <value>확대</value>
+  </data>
+  <data name="Settings_BuffInfo_Customization" xml:space="preserve">
+    <value>버프 이름</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewBuffName" xml:space="preserve">
+    <value>버프1</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewName" xml:space="preserve">
+    <value>플레이어1</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_BuffName" xml:space="preserve">
+    <value>버프 이름</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Name" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Level" xml:space="preserve">
+    <value>레벨</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_NewLine" xml:space="preserve">
+    <value>줄바꿈</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
+    <value>버프({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
+    <value>디버프({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
+    <value>요리</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
+    <value>포션</value>
   </data>
 </root>

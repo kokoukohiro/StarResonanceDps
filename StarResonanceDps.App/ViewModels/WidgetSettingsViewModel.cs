@@ -69,6 +69,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MetricTimelineSettings.PreviewChanged += MetricTimelineSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsBuffCardSettings(kind))
+        {
+            BuffCardSettings = new BuffCardWidgetSettingsViewModel(config.BuffCard);
+            BuffCardSettings.PropertyChanged += BuffCardSettings_PropertyChanged;
+            BuffCardSettings.PreviewChanged += BuffCardSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -77,6 +84,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<MeterWidgetSettingsConfig>? MeterPreviewChanged;
 
     public event Action<MetricTimelineWidgetSettingsConfig>? MetricTimelinePreviewChanged;
+
+    public event Action<BuffCardWidgetSettingsConfig>? BuffCardPreviewChanged;
 
     public void Dispose()
     {
@@ -95,6 +104,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MetricTimelineSettings.PreviewChanged -= MetricTimelineSettings_PreviewChanged;
             MetricTimelineSettings.Dispose();
         }
+
+        if (BuffCardSettings is not null)
+        {
+            BuffCardSettings.PropertyChanged -= BuffCardSettings_PropertyChanged;
+            BuffCardSettings.PreviewChanged -= BuffCardSettings_PreviewChanged;
+            BuffCardSettings.Dispose();
+        }
+    }
+
+    private void BuffCardSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BuffCardWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void BuffCardSettings_PreviewChanged(BuffCardWidgetSettingsConfig config)
+    {
+        BuffCardPreviewChanged?.Invoke(config);
     }
 
     private void MeterSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -137,17 +166,24 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public MetricTimelineWidgetSettingsViewModel? MetricTimelineSettings { get; }
 
+    public BuffCardWidgetSettingsViewModel? BuffCardSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     public bool HasMeterDisplaySettings => HasMeterSettings;
 
     public bool HasMetricTimelineDisplaySettings => MetricTimelineSettings is not null;
 
-    public bool HasDisplaySettings => HasMeterDisplaySettings || HasMetricTimelineDisplaySettings;
+    public bool HasBuffCardDisplaySettings => BuffCardSettings is not null;
+
+    public bool HasDisplaySettings => HasMeterDisplaySettings
+        || HasMetricTimelineDisplaySettings
+        || HasBuffCardDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
-        || (MetricTimelineSettings?.HasUnsavedChanges ?? false);
+        || (MetricTimelineSettings?.HasUnsavedChanges ?? false)
+        || (BuffCardSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -176,11 +212,17 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.MetricTimeline = MetricTimelineSettings.CreateConfig();
         }
 
+        if (BuffCardSettings is not null)
+        {
+            config.BuffCard = BuffCardSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
         MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
+        BuffCardSettings?.MarkSaved(config.BuffCard);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -190,6 +232,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
         MeterSettings?.ResetToDefaults();
         MetricTimelineSettings?.ResetToDefaults();
+        BuffCardSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -198,6 +241,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         ThemePreviewChanged?.Invoke(_lastSavedTheme.Clone());
         MeterSettings?.RestoreSavedPreview();
         MetricTimelineSettings?.RestoreSavedPreview();
+        BuffCardSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

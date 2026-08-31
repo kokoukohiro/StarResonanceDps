@@ -1,19 +1,24 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisposable
+public sealed partial class EntityBuffListWidgetViewModel
+    : ViewModelBase, IEntityWidgetWindowViewModel, IDisposable
 {
     private readonly WidgetListItemViewModel _widget;
-    private readonly long _entityUuid;
-    private EntityListEntry _entity;
+    private readonly EntityWindowTarget _target;
     private readonly PlayerBuffListKind _kind;
+
+    /// <summary>行をクリックしたときにバフ・デバフカードを開く経路。</summary>
+    private readonly Action<EntityWindowTarget, PlayerBuffListKind, string, int>? _openCard;
+
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
     private readonly DispatcherTimer _refreshTimer;
     private bool _isDisposed;
@@ -29,55 +34,63 @@ public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisp
 
     public EntityBuffListWidgetViewModel(
         WidgetListItemViewModel widget,
-        EntityListEntry entity,
-        PlayerBuffListKind kind)
+        EntityWindowTarget target,
+        PlayerBuffListKind kind,
+        Action<EntityWindowTarget, PlayerBuffListKind, string, int>? openCard = null)
     {
         _widget = widget;
-        _entityUuid = entity.EntityUuid;
-        _entity = entity;
+        _target = target;
         _kind = kind;
+        _openCard = openCard;
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
         };
         _refreshTimer.Tick += RefreshTimer_Tick;
-        _entity.PropertyChanged += Entity_PropertyChanged;
+        _target.Changed += Target_Changed;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         RefreshPresentation();
         Refresh();
         _refreshTimer.Start();
     }
 
-    public long EntityUuid => _entityUuid;
+    public long EntityId => _target.EntityId;
+
+    public long EntityUuid => _target.EntityUuid;
+
+    public bool IsEntityAcquired => _target.IsAcquired;
+
+    public string TargetName => _target.Name;
 
     public ReadOnlyObservableCollection<PlayerBuffEntry> Entries { get; }
 
     public bool RepresentsEntity(long entityUuid)
     {
-        return EntityUuid == entityUuid;
+        return _target.Represents(entityUuid);
     }
 
-    public void UpdateEntity(EntityListEntry entity)
+    [RelayCommand]
+    private void OpenCard(PlayerBuffEntry? entry)
     {
-        if (entity.EntityUuid != EntityUuid
-            || ReferenceEquals(_entity, entity))
+        if (entry is null)
         {
             return;
         }
 
-        _entity.PropertyChanged -= Entity_PropertyChanged;
-        _entity = entity;
-        _entity.PropertyChanged += Entity_PropertyChanged;
-        RefreshPresentation();
-        Refresh();
+        _openCard?.Invoke(_target, _kind, entry.Key, entry.BaseId);
+    }
+
+    public bool TryApplyEntity(EntityListEntry entity)
+    {
+        return _target.TryApply(entity);
     }
 
     public void RefreshPresentation()
     {
-        HeaderText = string.IsNullOrWhiteSpace(_entity.DisplayName)
+        HeaderText = string.IsNullOrWhiteSpace(_target.DisplayName)
             ? _widget.DisplayName
-            : $"{_widget.DisplayName} - {_entity.DisplayName}";
+            : $"{_widget.DisplayName} - {_target.DisplayName}";
     }
 
     public void Dispose()
@@ -90,7 +103,8 @@ public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisp
         _isDisposed = true;
         _refreshTimer.Stop();
         _refreshTimer.Tick -= RefreshTimer_Tick;
-        _entity.PropertyChanged -= Entity_PropertyChanged;
+        _target.Changed -= Target_Changed;
+        _target.Dispose();
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
@@ -99,12 +113,10 @@ public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisp
         Refresh();
     }
 
-    private void Entity_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void Target_Changed(object? sender, EventArgs e)
     {
-        if (e.PropertyName == nameof(EntityListEntry.DisplayName))
-        {
-            RefreshPresentation();
-        }
+        RefreshPresentation();
+        Refresh();
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -120,15 +132,7 @@ public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisp
             return;
         }
 
-        RefreshNoDataText();
         SynchronizeEntries(MeterSnapshotProvider.GetEntityBuffs(EntityUuid, _kind));
-    }
-
-    private void RefreshNoDataText()
-    {
-        NoDataText = LocalizationManager.Instance.GetString(_kind == PlayerBuffListKind.Buff
-            ? "Widget_NoBuffData"
-            : "Widget_NoDebuffData");
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
@@ -165,7 +169,6 @@ public sealed partial class EntityBuffListWidgetViewModel : ViewModelBase, IDisp
             }
         }
 
-        HasEntries = _entries.Count > 0;
     }
 
     private int FindEntryIndex(string key)

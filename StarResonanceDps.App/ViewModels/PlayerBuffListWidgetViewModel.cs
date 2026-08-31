@@ -1,6 +1,7 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
@@ -11,6 +12,10 @@ namespace StarResonanceDps.App.ViewModels;
 public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
     private readonly PlayerBuffListKind _kind;
+
+    /// <summary>行をクリックしたときにバフ・デバフカードを開く経路。</summary>
+    private readonly Action<long, PlayerBuffListKind, string, int>? _openCard;
+
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
     private readonly DispatcherTimer _refreshTimer;
     private bool _isDisposed;
@@ -25,10 +30,12 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,
         PlayerRosterEntry? initialPlayer,
-        PlayerBuffListKind kind)
+        PlayerBuffListKind kind,
+        Action<long, PlayerBuffListKind, string, int>? openCard = null)
         : base(playerWidget, requestedCharacterId)
     {
         _kind = kind;
+        _openCard = openCard;
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -61,6 +68,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         Refresh();
     }
 
+    [RelayCommand]
+    private void OpenCard(PlayerBuffEntry? entry)
+    {
+        if (entry is null || SelectedCharacterId is not { } characterId)
+        {
+            return;
+        }
+
+        _openCard?.Invoke(characterId, _kind, entry.Key, entry.BaseId);
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -78,8 +96,6 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             return;
         }
 
-        RefreshNoDataText();
-
         if (SelectedCharacterId is not { } characterId)
         {
             SynchronizeEntries(Array.Empty<PlayerBuffSnapshot>());
@@ -93,13 +109,6 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         }
 
         SynchronizeEntries(MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind));
-    }
-
-    private void RefreshNoDataText()
-    {
-        NoDataText = LocalizationManager.Instance.GetString(_kind == PlayerBuffListKind.Buff
-            ? "Widget_NoBuffData"
-            : "Widget_NoDebuffData");
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
@@ -136,7 +145,6 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             }
         }
 
-        HasEntries = _entries.Count > 0;
     }
 
     private int FindEntryIndex(string key)

@@ -18,5 +18,6 @@ public enum WidgetKind
     HpsGraph,
     DamageSummary,
     HealingSummary,
-    EntityList = 18
+    EntityList = 18,
+    BuffDebuffCard = 19
 }

@@ -1,4 +1,4 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -18,6 +18,17 @@ public sealed partial class EntityListEntry : ObservableObject
     }
 
     public long EntityUuid { get; }
+
+    /// <summary>
+    /// モンスターの種別ID(<c>MonsterTable</c> のキー)。<c>AttrId</c> 由来なので
+    /// <b>再起動をまたいでも同じ値</b>。<c>EntityUuid</c> は実体ごとの値で別物。
+    /// </summary>
+    public long EntityId { get; private set; }
+
+    /// <summary>書式を通していない素の名前。</summary>
+    public string Name { get; private set; } = string.Empty;
+
+    public int Level { get; private set; }
 
     [ObservableProperty]
     private string _classificationKey = "Unknown";
@@ -82,6 +93,9 @@ public sealed partial class EntityListEntry : ObservableObject
         NearbyEntityEntry entity,
         MeterWidgetSettingsConfig settings)
     {
+        EntityId = entity.EntityId;
+        Name = entity.Name;
+        Level = entity.Level;
         ClassificationKey = GetClassificationKey(entity);
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
         DisplayName = EntityInfoFormatFormatter.Format(entity, settings.PlayerInfoFormatString);

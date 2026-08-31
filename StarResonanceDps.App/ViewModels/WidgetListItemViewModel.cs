@@ -21,6 +21,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
+    private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private long _playerListMapGeneration = -1;
@@ -88,11 +89,14 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
 
+    public bool IsBuffDebuffCard => Kind == WidgetKind.BuffDebuffCard;
+
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.PlayerEquipment
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
+        or WidgetKind.BuffDebuffCard
         or WidgetKind.DamageContribution
         or WidgetKind.DamageSummary
         or WidgetKind.DpsGraph
@@ -112,6 +116,39 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public MetricTimelineWidgetSettingsConfig GetMetricTimelineSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedMetricTimeline(_metricTimeline);
+    }
+
+    public BuffCardWidgetSettingsConfig GetBuffCardSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedBuffCard(_buffCard);
+    }
+
+    /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
+    public string BuffInfoFormatString =>
+        _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
+
+    /// <summary>保存済みの倍率。無ければ既定(200%)。</summary>
+    public int GetBuffCardScale(string scaleKey)
+    {
+        return !string.IsNullOrWhiteSpace(scaleKey)
+            && _buffCard.Scales.TryGetValue(scaleKey, out var scale)
+            ? WidgetConfigDefaults.ClampBuffCardScale(scale)
+            : WidgetConfigDefaults.DefaultBuffCardScale;
+    }
+
+    /// <summary>
+    /// 倍率を1件だけ書き戻す。<b>設定一式は触らない</b>ので、開いている他のカードに影響しない。
+    /// </summary>
+    public void SaveBuffCardScale(string scaleKey, int scale)
+    {
+        if (!IsBuffDebuffCard || string.IsNullOrWhiteSpace(scaleKey))
+        {
+            return;
+        }
+
+        var normalized = WidgetConfigDefaults.ClampBuffCardScale(scale);
+        _buffCard.Scales[scaleKey] = normalized;
+        WidgetStateManager.Instance.SaveBuffCardScale(Kind, scaleKey, normalized);
     }
 
     public string StateText => State == WidgetState.Running
@@ -156,6 +193,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             MetricTimeline = WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind)
                 ? _metricTimeline.Clone()
+                : null,
+            BuffCard = WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
+                ? _buffCard.Clone()
                 : null
         };
     }
@@ -181,6 +221,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
         if (WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
         {
             _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(config.MetricTimeline);
+            RaisePlayerWindowPresentationChanged();
+        }
+
+        if (WidgetConfigDefaults.SupportsBuffCardSettings(Kind))
+        {
+            _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(config.BuffCard);
             RaisePlayerWindowPresentationChanged();
         }
 
@@ -210,6 +256,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
 
         _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(metricTimeline);
+        RaisePlayerWindowPresentationChanged();
+    }
+
+    public void ApplyBuffCardSettingsPreview(BuffCardWidgetSettingsConfig buffCard)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffCardSettings(Kind))
+        {
+            return;
+        }
+
+        _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(buffCard);
         RaisePlayerWindowPresentationChanged();
     }
 

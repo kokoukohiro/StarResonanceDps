@@ -169,17 +169,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         ClassColorFilterColors.PaletteChanged -= Colors_PaletteChanged;
     }
 
-    [RelayCommand]
-    private void AddPlayerInfoFormatField()
-    {
-        if (SelectedPlayerInfoFormatField is null)
-        {
-            return;
-        }
-
-        PlayerInfoFormatString += SelectedPlayerInfoFormatField.Placeholder;
-    }
-
     public MeterWidgetSettingsConfig CreateConfig()
     {
         var config = new MeterWidgetSettingsConfig

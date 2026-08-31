@@ -48,12 +48,15 @@
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <TextBox Grid.Row="0"
+                        <TextBox x:Name="PlayerInfoFormatTextBox"
+                                 Grid.Row="0"
                                  Grid.Column="2"
                                  Height="32"
                                  Style="{StaticResource Input.PathBox}"
                                  Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                 VerticalContentAlignment="Center" />
+                                 VerticalContentAlignment="Center"
+                                 Loaded="PlayerInfoFormatTextBox_Loaded"
+                                 TextChanged="PlayerInfoFormatTextBox_TextChanged" />
 
                         <Grid Grid.Row="1"
                               Grid.ColumnSpan="4"
@@ -101,7 +104,7 @@
                             </Grid>
 
                             <Button Grid.Column="3"
-                                    Command="{Binding AddPlayerInfoFormatFieldCommand}"
+                                    Click="AddPlayerInfoFormatField_Click"
                                     Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
                                     MinWidth="64"
                                     Style="{StaticResource Button.Text}" />

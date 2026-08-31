@@ -1,0 +1,54 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.BuffDebuffCardWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        中身だけを拡大する。RenderTransform はレイアウトに影響しないので、
+        ウィンドウの大きさは倍率を変えても動かない(はみ出したぶんは隠れる)。
+        原点を中央にしてあるので、アイコンとテキストの位置関係もそのまま拡大される。
+
+        バフを見失っているときは Visibility で丸ごと消す。空ウィンドウになるのが正しい挙動。
+    -->
+    <Grid>
+        <StackPanel HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderTransformOrigin="0.5,0.5"
+                    Visibility="{Binding HasBuff, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel.RenderTransform>
+                <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
+            </StackPanel.RenderTransform>
+
+            <TextBlock Margin="0,0,0,0"
+                       HorizontalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="8"
+                       FontWeight="SemiBold"
+                       Text="{Binding DisplayText}"
+                       TextAlignment="Center" />
+
+            <Grid Width="32"
+                  HorizontalAlignment="Center">
+                <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                       Stretch="Uniform"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Style="{StaticResource Text.WidgetWindow}"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           Text="{Binding LayerText}"
+                           TextAlignment="Center" />
+            </Grid>
+
+            <TextBlock Margin="0,-4,0,0"
+                       HorizontalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       Text="{Binding DurationText}"
+                       TextAlignment="Center" />
+        </StackPanel>
+    </Grid>
+</UserControl>

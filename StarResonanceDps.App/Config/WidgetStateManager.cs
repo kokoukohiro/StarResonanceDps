@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using StarResonanceDps.App.Models.Widgets;
 
@@ -111,6 +111,52 @@ public sealed class WidgetStateManager
                 Width = width,
                 Height = height
             };
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
+    /// 開いていた窓の対象一覧を保存する。窓が増減したときだけ呼ぶ。
+    /// </summary>
+    public void SaveWidgetOpenTargets(WidgetKind kind, IReadOnlyList<WidgetOpenTargetConfig> targets)
+    {
+        if (!WidgetConfigDefaults.SupportsOpenTargets(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.OpenTargets = targets.Count == 0
+                ? null
+                : targets.Select(target => target.Clone()).ToList();
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
+    /// バフ・デバフカードの倍率を1件だけ保存する。
+    ///
+    /// <para>
+    /// 拡大縮小はウィンドウごとに独立していて、他のウィンドウの値を巻き込みたくない。
+    /// 設定一式を書き戻す形にすると、開いている別のカードが持っている値を上書きしてしまう。
+    /// </para>
+    /// </summary>
+    public void SaveBuffCardScale(WidgetKind kind, string scaleKey, int scale)
+    {
+        if (string.IsNullOrWhiteSpace(scaleKey))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffCard ??= WidgetConfigDefaults.CreateBuffCardSettings();
+            config.BuffCard.Scales[scaleKey] = WidgetConfigDefaults.ClampBuffCardScale(scale);
             WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }

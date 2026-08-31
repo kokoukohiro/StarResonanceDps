@@ -573,14 +573,11 @@
   <data name="Widget_BuffList" xml:space="preserve">
     <value>增益列表</value>
   </data>
+  <data name="Widget_BuffDurationFormat" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>
-  </data>
-  <data name="Widget_NoBuffData" xml:space="preserve">
-    <value>无增益</value>
-  </data>
-  <data name="Widget_NoDebuffData" xml:space="preserve">
-    <value>无减益</value>
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>添加</value>
@@ -827,5 +824,47 @@
   </data>
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>仅自己</value>
+  </data>
+  <data name="Widget_BuffDebuffCard" xml:space="preserve">
+    <value>增益减益卡片</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomOut" xml:space="preserve">
+    <value>缩小</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_ZoomIn" xml:space="preserve">
+    <value>放大</value>
+  </data>
+  <data name="Settings_BuffInfo_Customization" xml:space="preserve">
+    <value>增益名称</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewBuffName" xml:space="preserve">
+    <value>增益1</value>
+  </data>
+  <data name="Settings_BuffInfo_PreviewName" xml:space="preserve">
+    <value>玩家1</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_BuffName" xml:space="preserve">
+    <value>增益名称</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Level" xml:space="preserve">
+    <value>等级</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_NewLine" xml:space="preserve">
+    <value>换行</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
+    <value>增益({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
+    <value>减益({0})</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
+    <value>料理</value>
+  </data>
+  <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
+    <value>药剂</value>
   </data>
 </root>
