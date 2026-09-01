@@ -74,6 +74,18 @@ public sealed class WidgetWindowManager
         CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
     }
 
+    /// <summary>
+    /// アプリ起動時の復元をこの区間で囲む。<b>この間に作った窓には置き直しの猶予を与えない</b>
+    /// (<see cref="WidgetWindow.SuppressInitialGrace"/>)。
+    /// 復元は連続して窓を開くので、猶予を与えても直後に隣の窓へアクティブを奪われて終わる。
+    /// </summary>
+    private bool _isRestoringStartupWindows;
+
+    public void BeginStartupRestore() => _isRestoringStartupWindows = true;
+
+    /// <summary><see cref="BeginStartupRestore"/> の区間を閉じる。</summary>
+    public void EndStartupRestore() => _isRestoringStartupWindows = false;
+
     public void ApplyWidgetState(WidgetListItemViewModel widget)
     {
         if (IsPlayerWindowWidget(widget.Kind))
@@ -269,7 +281,8 @@ public sealed class WidgetWindowManager
                 target.Name,
                 buffGroup,
                 target.ResolvedCharacterId,
-                target.BuffName);
+                target.BuffName,
+                target.Window);
             return;
         }
 
@@ -277,7 +290,7 @@ public sealed class WidgetWindowManager
 
         if (widget.Kind != WidgetKind.BuffDebuffCard)
         {
-            CreateEntityBuffWindow(widget, entityTarget);
+            CreateEntityBuffWindow(widget, entityTarget, target.Window);
             return;
         }
 
@@ -292,7 +305,8 @@ public sealed class WidgetWindowManager
             buffListKind ?? PlayerBuffListKind.Buff,
             target.BuffKey,
             buffGroup,
-            target.BuffName);
+            target.BuffName,
+            target.Window);
     }
 
     /// <summary>
@@ -330,7 +344,8 @@ public sealed class WidgetWindowManager
                 BuffListKind = card is null ? null : (int)card.BuffListKind,
                 BuffKey = card?.RequestedBuffKey,
                 BuffName = card?.LastKnownBuffName,
-                BuffGroup = card is null ? null : (int)card.Group
+                BuffGroup = card is null ? null : (int)card.Group,
+                Window = session.Window.GetCurrentBounds()
             });
         }
 
@@ -349,7 +364,8 @@ public sealed class WidgetWindowManager
                 BuffListKind = card is null ? null : (int)card.BuffListKind,
                 BuffKey = card?.RequestedBuffKey,
                 BuffName = card?.LastKnownBuffName,
-                BuffGroup = card is null ? null : (int)card.Group
+                BuffGroup = card is null ? null : (int)card.Group,
+                Window = session.Window.GetCurrentBounds()
             });
         }
 
@@ -430,7 +446,7 @@ public sealed class WidgetWindowManager
         window.Closed += WidgetWindow_Closed;
 
         _openSingleWindows.Add(widget.Kind, window);
-        window.Show();
+        ShowWidgetWindow(window);
     }
 
     private void CreatePlayerWindow(
@@ -441,7 +457,8 @@ public sealed class WidgetWindowManager
         string? savedPlayerName = null,
         BuffGroup buffGroup = BuffGroup.None,
         long? savedPlayerUid = null,
-        string? savedBuffName = null)
+        string? savedBuffName = null,
+        WidgetWindowConfig? savedWindowBounds = null)
     {
         var owner = Application.Current?.MainWindow;
         TrackManagerWindow(owner);
@@ -468,7 +485,8 @@ public sealed class WidgetWindowManager
 
         var content = CreatePlayerWindowContent(playerWindowViewModel);
         var headerActions = CreatePlayerWindowHeaderActions(playerWindowViewModel);
-        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(playerWidget.Kind).Window;
+        var savedBounds = savedWindowBounds
+            ?? WidgetStateManager.Instance.GetWidgetSnapshot(playerWidget.Kind).Window;
         var window = new WidgetWindow(
             playerWidget,
             content,
@@ -480,15 +498,19 @@ public sealed class WidgetWindowManager
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
         window.Closed += WidgetWindow_Closed;
+        window.SaveWindowBoundsOverride = () => SaveOpenTargets(playerWidget);
 
-        var cascadeIndex = CountOpenTargetWindows(playerWidget);
-        ApplyPlayerWindowCascade(window, cascadeIndex);
+        // 復元した位置があるならカスケードで動かさない。
+        if (savedWindowBounds is null)
+        {
+            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(playerWidget));
+        }
 
         _openPlayerWindows.Add(new PlayerWidgetWindowSession(playerWidget, playerWindowViewModel, window));
         UpdatePlayerWindowCount(playerWidget);
         SaveOpenTargets(playerWidget);
 
-        window.Show();
+        ShowWidgetWindow(window);
 
         if (playerWidget.State != WidgetState.Running)
         {
@@ -498,7 +520,8 @@ public sealed class WidgetWindowManager
 
     private void CreateEntityBuffWindow(
         WidgetListItemViewModel widget,
-        EntityWindowTarget target)
+        EntityWindowTarget target,
+        WidgetWindowConfig? savedWindowBounds = null)
     {
         var kind = widget.Kind == WidgetKind.BuffList
             ? PlayerBuffListKind.Buff
@@ -513,7 +536,8 @@ public sealed class WidgetWindowManager
                 DataContext = viewModel
             },
             headerActions: null,
-            headerChromeActions: null);
+            headerChromeActions: null,
+            savedWindowBounds);
     }
 
     private void CreateEntityBuffCardWindow(
@@ -522,7 +546,8 @@ public sealed class WidgetWindowManager
         PlayerBuffListKind kind,
         string? buffKey,
         BuffGroup group,
-        string? savedBuffName = null)
+        string? savedBuffName = null,
+        WidgetWindowConfig? savedWindowBounds = null)
     {
         var viewModel = new EntityBuffDebuffCardWidgetViewModel(widget, target, kind, buffKey, group);
         viewModel.SeedLastKnownBuffName(savedBuffName);
@@ -542,7 +567,8 @@ public sealed class WidgetWindowManager
             new BuffDebuffCardHeaderLabelsView
             {
                 DataContext = viewModel
-            });
+            },
+            savedWindowBounds);
     }
 
     private void CreateEntityWindow(
@@ -550,12 +576,14 @@ public sealed class WidgetWindowManager
         IEntityWidgetWindowViewModel viewModel,
         FrameworkElement content,
         FrameworkElement? headerActions,
-        FrameworkElement? headerChromeActions)
+        FrameworkElement? headerChromeActions,
+        WidgetWindowConfig? savedWindowBounds = null)
     {
         var owner = Application.Current?.MainWindow;
         TrackManagerWindow(owner);
 
-        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
+        var savedBounds = savedWindowBounds
+            ?? WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
         var window = new WidgetWindow(
             widget,
             content,
@@ -566,15 +594,18 @@ public sealed class WidgetWindowManager
             headerActions: headerActions);
         viewModel.PropertyChanged += EntityBuffListWindowViewModel_PropertyChanged;
         window.Closed += WidgetWindow_Closed;
+        window.SaveWindowBoundsOverride = () => SaveOpenTargets(widget);
 
-        var cascadeIndex = CountOpenTargetWindows(widget);
-        ApplyPlayerWindowCascade(window, cascadeIndex);
+        if (savedWindowBounds is null)
+        {
+            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
+        }
 
         _openEntityBuffWindows.Add(new EntityBuffListWindowSession(widget, viewModel, window));
         UpdatePlayerWindowCount(widget);
         SaveOpenTargets(widget);
 
-        window.Show();
+        ShowWidgetWindow(window);
 
         if (widget.State != WidgetState.Running)
         {
@@ -984,6 +1015,16 @@ public sealed class WidgetWindowManager
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph;
+    }
+
+    private void ShowWidgetWindow(WidgetWindow window)
+    {
+        if (_isRestoringStartupWindows)
+        {
+            window.SuppressInitialGrace();
+        }
+
+        window.Show();
     }
 
     private static void RestoreAndActivate(WidgetWindow window)

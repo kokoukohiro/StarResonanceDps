@@ -41,6 +41,36 @@ public readonly record struct BuffDebuffCardContent(
     }
 
     /// <summary>
+    /// 失効したあとに残す表示値。<b>名前の行だけを組み、アイコン・残り時間・重ね数は出さない。</b>
+    ///
+    /// <para>
+    /// 出す文字列は生きているときと同じ書式で組み直す。控えた文字列を使い回すと、
+    /// 失効中に書式を変えても反映されない。
+    /// </para>
+    ///
+    /// <para>
+    /// バフ名が一度も分かっていなければ <see cref="Empty"/>。何も出さないのが正しい。
+    /// </para>
+    /// </summary>
+    public static BuffDebuffCardContent CreateNameOnly(
+        string lastKnownBuffName,
+        string targetName,
+        int level,
+        string? formatString)
+    {
+        if (string.IsNullOrWhiteSpace(lastKnownBuffName))
+        {
+            return Empty;
+        }
+
+        return new BuffDebuffCardContent(
+            BuffInfoFormatFormatter.Format(lastKnownBuffName, targetName, level, formatString),
+            string.Empty,
+            string.Empty,
+            null);
+    }
+
+    /// <summary>
     /// 倍率の保存キー。まとまりを追う窓は <c>{対象ID}:group:{まとまり}</c>、
     /// 個別のバフを追う窓は <c>{対象ID}:{バフキー}</c>。
     ///

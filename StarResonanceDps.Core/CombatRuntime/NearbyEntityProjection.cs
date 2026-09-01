@@ -44,7 +44,7 @@ internal static class NearbyEntityProjection
             return;
         }
 
-        if (IsHudHidden(entity))
+        if (IsHiddenEntity(entityUuid))
         {
             EntityStore.Remove(entityUuid);
             return;
@@ -63,7 +63,7 @@ internal static class NearbyEntityProjection
             return;
         }
 
-        if (changedAttributes.Contains(EAttrType.AttrId) && IsHudHidden(entity))
+        if (changedAttributes.Contains(EAttrType.AttrId) && IsHiddenEntity(entityUuid))
         {
             EntityStore.Remove(entityUuid);
             return;
@@ -80,7 +80,7 @@ internal static class NearbyEntityProjection
             return;
         }
 
-        if (IsHudHidden(entity))
+        if (IsHiddenEntity(entityUuid))
         {
             EntityStore.Remove(entityUuid);
             return;
@@ -227,13 +227,32 @@ internal static class NearbyEntityProjection
         EntityStore.UpdateCampRelations(relations);
     }
 
-    private static bool IsHudHidden(Entity entity)
+    /// <summary>
+    /// 一覧に出さないエンティティか。<b>召喚体を除く。</b>
+    ///
+    /// <para>
+    /// 判定は <b>UUIDのビット15</b>(<see cref="Utils.IsSummonByUuid"/>)。ワイヤ側の情報なので、
+    /// <c>MonsterTable</c> に載っていない相手でも判定できる。
+    /// </para>
+    ///
+    /// <para>
+    /// 以前は <c>MonsterTable.HudShowParam[0] == 0</c> で除外していたが、実測(2026-09-01)で
+    /// <b>ボスがこれに当たって一度も表示されていなかった</b>(Light·Tonatiuh 102701、
+    /// Rin·Izcorgiky 102101 など)。アンパックを更新しても値は変わらず(共通3038件で差分0)、
+    /// 表が古いのではなく判定が合っていなかった。<c>HudShowParam</c> の意味は Lua にも proto にも
+    /// 定義が無く追えていない。
+    /// </para>
+    ///
+    /// <para>
+    /// 召喚ビットで見ると実測どおりに分かれる。立っているのは他プレイヤーのイマジン召喚
+    /// (`3000027` 等)、効果の実体(燃烧地面・时空立场・奶环 等)、そして
+    /// <b>何も無い場所に湧いて素性が分からなかった `3110008` と `Monster 25`</b>。
+    /// 立っていないのはボス・取り巻き・クリスタル・訓練ダミー・設置物とプレイヤー。
+    /// </para>
+    /// </summary>
+    private static bool IsHiddenEntity(long entityUuid)
     {
-        var attrId = ToInt32(entity.GetAttrKV("AttrId"));
-        return attrId > 0
-            && HelperMethods.DataTables.Monsters.Data.TryGetValue(attrId.ToString(), out var monster)
-            && monster.HudShowParam is { Count: > 0 }
-            && monster.HudShowParam[0] == 0;
+        return Utils.IsSummonByUuid(entityUuid);
     }
 
     private static EEntityType ResolveEntityType(long entityUuid, Entity entity)

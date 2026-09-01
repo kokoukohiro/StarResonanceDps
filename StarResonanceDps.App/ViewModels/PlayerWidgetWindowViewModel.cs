@@ -1,5 +1,6 @@
 ﻿using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.Services;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -69,14 +70,19 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     /// </summary>
     public void SeedLastKnownPlayer(string? playerName, long playerUid)
     {
-        if (!string.IsNullOrWhiteSpace(_lastKnownPlayerName)
-            || string.IsNullOrWhiteSpace(playerName)
-            || playerUid == 0)
+        if (playerUid == 0
+            || (!string.IsNullOrWhiteSpace(_lastKnownPlayerName) && _lastKnownPlayerUid != 0))
         {
             return;
         }
 
-        _lastKnownPlayerName = playerName;
+        // 名前が保存されていなくてもUIDは入れる。名前の無い相手でも素性を出せるように。
+        if (string.IsNullOrWhiteSpace(_lastKnownPlayerName)
+            && !string.IsNullOrWhiteSpace(playerName))
+        {
+            _lastKnownPlayerName = playerName;
+        }
+
         _lastKnownPlayerUid = playerUid;
         RefreshHeaderText();
     }
@@ -208,14 +214,25 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     /// </summary>
     private void RenderHeaderText()
     {
-        if (!_showPlayerIdentityInHeader
-            || string.IsNullOrWhiteSpace(_lastKnownPlayerName))
+        var hasName = !string.IsNullOrWhiteSpace(_lastKnownPlayerName);
+
+        if (!_showPlayerIdentityInHeader || (!hasName && _lastKnownPlayerUid == 0))
         {
             HeaderText = HeaderPrefix;
             return;
         }
 
-        HeaderText = $"{HeaderPrefix} - {_lastKnownPlayerName}(UID:{_lastKnownPlayerUid})";
+        var isSelf = _requestedCharacterId is null
+            || (AppState.PlayerUID != 0 && _lastKnownPlayerUid == AppState.PlayerUID);
+
+        // 名前の出し方はプレイヤー一覧・メーターと同じ規則へ通す。
+        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字になるので、
+        // タイトル専用の分岐は要らない。
+        HeaderText = $"{HeaderPrefix} - {PlayerInfoFormatFormatter.GetDisplayName(
+            _lastKnownPlayerName,
+            _lastKnownPlayerUid,
+            isSelf,
+            PlayerRosterPresentationStore.Instance.NameDisplayMode)}";
     }
 
     /// <summary>
@@ -246,19 +263,44 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         RememberPlayer(identity.Name, identity.UserId);
     }
 
+    /// <summary>
+    /// 素性を覚える。<b>名前とUIDは別々に扱う。</b>
+    ///
+    /// <para>
+    /// 名前がまだ取れていない相手でもUIDは分かるので、UIDだけでも記憶する。
+    /// そうしないと「名前の無い相手」でタイトルから素性が丸ごと消える。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>伏せ字は名前として記憶しない。</b>ロスターは名前を伏せる設定のとき
+    /// <c>Name</c> を伏せ字に差し替えて渡すので、そのまま覚えると
+    /// 表示を戻したあとも伏せ字が残る。
+    /// </para>
+    /// </summary>
     private void RememberPlayer(string? playerName, long playerUid)
     {
-        if (string.IsNullOrWhiteSpace(playerName))
+        var name = string.Equals(
+            playerName,
+            PlayerRosterPresentationStore.HiddenPlayerName,
+            StringComparison.Ordinal)
+                ? null
+                : playerName;
+
+        var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownPlayerName)
+            && _lastKnownPlayerUid == 0;
+
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            return;
+            _lastKnownPlayerName = name;
         }
 
-        var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownPlayerName);
+        if (playerUid != 0)
+        {
+            _lastKnownPlayerUid = playerUid;
+        }
 
-        _lastKnownPlayerName = playerName;
-        _lastKnownPlayerUid = playerUid;
-
-        if (wasUnknown)
+        if (wasUnknown
+            && (!string.IsNullOrWhiteSpace(_lastKnownPlayerName) || _lastKnownPlayerUid != 0))
         {
             SavedTargetInfoResolved?.Invoke(this, EventArgs.Empty);
         }

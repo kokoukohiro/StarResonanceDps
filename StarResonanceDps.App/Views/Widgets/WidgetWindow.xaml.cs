@@ -53,6 +53,34 @@ public partial class WidgetWindow : Window
 
     private bool _isPinned;
 
+    /// <summary>
+    /// 開いた直後の猶予。<b>まだ一度も非アクティブになっていない間だけ真。</b>
+    ///
+    /// <para>
+    /// この間はピン留めの制約(アクティブにしない・ヘッダー/フッターを隠す)を一切掛けない。
+    /// 掛けたままだとドラッグ領域が無く、開いた窓を置き直せないため。
+    /// <b>一度でも非アクティブになったら二度と戻らない。</b>
+    /// </para>
+    ///
+    /// <para>
+    /// アプリ起動時の復元では与えない(<see cref="SuppressInitialGrace"/>)。
+    /// 置き直しの猶予は、その場で開いた窓にだけ要る。
+    /// </para>
+    /// </summary>
+    private bool _isInitialGrace = true;
+
+    /// <summary>
+    /// 猶予の終了判定を始めてよいか。<b>開いた直後の一括生成が終わるまでは偽。</b>
+    ///
+    /// <para>
+    /// 窓を続けて開くと、後から開いた窓が前の窓のアクティブを奪う。
+    /// その非アクティブ化まで数えると、最後に開いた1枚以外は開いた瞬間に猶予が終わり、
+    /// 触ってもいないのに動かせなくなる。生成が一段落する
+    /// (ディスパッチャが <see cref="DispatcherPriority.Background"/> まで降りる)まで数えない。
+    /// </para>
+    /// </summary>
+    private bool _isGraceArmed;
+
     /// <summary>手動ドラッグ中か。<see cref="DragMove"/> が使えないときだけ使う。</summary>
     private bool _isManualDragging;
 
@@ -114,6 +142,25 @@ public partial class WidgetWindow : Window
 
     public WidgetListItemViewModel Widget => _widget;
 
+    /// <summary>ピン留めの制約をいま掛けているか。開いた直後の猶予中は掛けない。</summary>
+    private bool IsPinBehaviorActive => _isPinned && !_isInitialGrace;
+
+    /// <summary>
+    /// 開いた直後の猶予を与えない。アプリ起動時の復元で開く窓に使う。
+    /// <b><see cref="Window.Show"/> の前に呼ぶこと。</b>
+    /// </summary>
+    public void SuppressInitialGrace()
+    {
+        if (!_isInitialGrace)
+        {
+            return;
+        }
+
+        _isInitialGrace = false;
+        ApplyNoActivateState();
+        ApplyInactiveChromeVisibility();
+    }
+
     public string HeaderText
     {
         get => (string)GetValue(HeaderTextProperty);
@@ -159,7 +206,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var noActivate = _isPinned;
+        var noActivate = IsPinBehaviorActive;
         var exStyle = GetWindowLong(handle, GwlExStyle);
         var updated = noActivate
             ? exStyle | WsExNoActivate
@@ -199,8 +246,9 @@ public partial class WidgetWindow : Window
     /// </summary>
     private void ApplyInactiveChromeVisibility()
     {
-        var hideHeader = _widget.HideHeaderWhenInactive && _isPinned;
-        var hideFooter = _hasFooterContent && _widget.HideFooterWhenInactive && _isPinned;
+        var pinned = IsPinBehaviorActive;
+        var hideHeader = _widget.HideHeaderWhenInactive && pinned;
+        var hideFooter = _hasFooterContent && _widget.HideFooterWhenInactive && pinned;
 
         FrameHeaderChrome.Visibility = hideHeader ? Visibility.Collapsed : Visibility.Visible;
         WidgetHeader.Visibility = hideHeader ? Visibility.Collapsed : Visibility.Visible;
@@ -241,7 +289,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var hidden = _widget.HideFooterWhenInactive && _isPinned;
+        var hidden = _widget.HideFooterWhenInactive && IsPinBehaviorActive;
         WidgetFooterFrame.Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
         WidgetFooterHost.Visibility = hidden ? Visibility.Hidden : Visibility.Visible;
     }
@@ -280,6 +328,12 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_Loaded(object sender, RoutedEventArgs e)
     {
         _isRestoringBounds = false;
+
+        // 続けて開かれる窓が出そろってから、猶予の終了判定を始める。
+        Dispatcher.BeginInvoke(
+            DispatcherPriority.Background,
+            new Action(() => _isGraceArmed = true));
+
         UpdateWindowRootClip();
         QueueContentScrollBarUpdate();
     }
@@ -306,7 +360,7 @@ public partial class WidgetWindow : Window
         // WS_EX_NOACTIVATE だけでは足りない。クリックすると WM_MOUSEACTIVATE が来て、
         // 既定では MA_ACTIVATE が返るのでフォーカスを奪ってしまう。
         // ここで MA_NOACTIVATE を返して、入力だけ受け取り活性化はしない状態にする。
-        if (msg == WmMouseActivate && _isPinned)
+        if (msg == WmMouseActivate && IsPinBehaviorActive)
         {
             handled = true;
             return new IntPtr(MaNoActivate);
@@ -380,7 +434,7 @@ public partial class WidgetWindow : Window
         // DragMove() は WM_SYSCOMMAND(SC_MOVE) を送って OS の移動ループに入るため、
         // その中で必ずアクティブ化される。WM_MOUSEACTIVATE を潰しても別経路なので通る。
         // 「ピン留め中アクティブにしない」が効いている間だけ、自前でドラッグする。
-        if (_isPinned)
+        if (IsPinBehaviorActive)
         {
             BeginManualDrag(sender as IInputElement, e);
             return;
@@ -476,6 +530,15 @@ public partial class WidgetWindow : Window
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
+
+        if (_isInitialGrace && _isGraceArmed)
+        {
+            // 開いた直後の猶予はここで終わる。以後はピン留めの制約が通常どおり掛かる。
+            // 一度も触られていない窓(隣の窓が開いて奪われただけ)はここへ来ない。
+            _isInitialGrace = false;
+            ApplyNoActivateState();
+        }
+
         ApplyInactiveChromeVisibility();
     }
 
@@ -604,6 +667,16 @@ public partial class WidgetWindow : Window
         SaveBounds();
     }
 
+    /// <summary>
+    /// この窓ぶんの位置を保存する経路。<c>null</c> なら種別ごとの位置へ保存する。
+    ///
+    /// <para>
+    /// 同じウィジェットを複数開くと、種別ごとの位置では最後に動かした窓が全部を上書きし、
+    /// 次の起動で全員が同じ場所に出る。1枚ずつ持つ窓はこちらへ流す。
+    /// </para>
+    /// </summary>
+    public Action? SaveWindowBoundsOverride { get; set; }
+
     private void SaveBounds()
     {
         if (_isRestoringBounds
@@ -617,12 +690,30 @@ public partial class WidgetWindow : Window
             return;
         }
 
+        if (SaveWindowBoundsOverride is not null)
+        {
+            SaveWindowBoundsOverride();
+            return;
+        }
+
         WidgetStateManager.Instance.SaveWidgetWindowBounds(
             _widget.Kind,
             Left,
             Top,
             ActualWidth,
             ActualHeight);
+    }
+
+    /// <summary>いまの位置と大きさ。保存用。</summary>
+    public WidgetWindowConfig GetCurrentBounds()
+    {
+        return new WidgetWindowConfig
+        {
+            X = Left,
+            Y = Top,
+            Width = ActualWidth,
+            Height = ActualHeight
+        };
     }
 
     /// <summary>掴める最小の領域(px)。これだけ仮想画面内に残っていれば動かさない。</summary>

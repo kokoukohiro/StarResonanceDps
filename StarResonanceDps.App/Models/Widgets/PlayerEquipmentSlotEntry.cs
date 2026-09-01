@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
@@ -357,8 +357,9 @@ public sealed partial class PlayerEquipmentSlotEntry : ObservableObject
                 }
 
                 var effectValues = attribute.Value.AttrEffectConfig[index];
-                var usedTipsDescription = false;
 
+                // 説明文は AttrDescription からしか作らない。実測(2026-09-01)で
+                // type=3 の450件すべてが TipsDescription を持ち、すべて引けている。
                 if (buff.TipsDescription > 0
                     && HelperMethods.DataTables.AttrDescriptions.Data.TryGetValue(
                         buff.TipsDescription.ToString(),
@@ -375,17 +376,7 @@ public sealed partial class PlayerEquipmentSlotEntry : ObservableObject
                             effectValues[0],
                             effectValues[1],
                             formats.First()));
-                        usedTipsDescription = true;
                     }
-                }
-
-                if (!usedTipsDescription)
-                {
-                    result.Add(new PlayerEquipmentAttributeEntry(
-                        CombatDataCatalog.GetBuffDescription(effect[1], buff.Desc),
-                        effectValues[0],
-                        effectValues[1],
-                        0));
                 }
             }
         }

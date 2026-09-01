@@ -94,11 +94,16 @@ public sealed partial class EntityListEntry : ObservableObject
         MeterWidgetSettingsConfig settings)
     {
         EntityId = entity.EntityId;
-        Name = entity.Name;
+
+        // 名前は<b>ここで</b>言語別に引く。Core の投影側で解決すると、
+        // 投影した時点の言語で焼き付いて言語切替に追従しなくなる。
+        // 言語を切り替えると WidgetListItemViewModel が全エントリに Update を掛け直すので、
+        // ここを通していれば自動で入れ替わる。
+        Name = CombatDataCatalog.GetMonsterName(entity.EntityId, entity.Name);
         Level = entity.Level;
         ClassificationKey = GetClassificationKey(entity);
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
-        DisplayName = EntityInfoFormatFormatter.Format(entity, settings.PlayerInfoFormatString);
+        DisplayName = EntityInfoFormatFormatter.Format(Name, entity.Level, settings.PlayerInfoFormatString);
         HealthRatio = GetRatio(entity.CurrentHp, entity.MaxHp);
         UpdateShieldGeometry(entity.CurrentHp, entity.MaxHp, entity.CurrentShield);
         HealthText = FormatHealthText(

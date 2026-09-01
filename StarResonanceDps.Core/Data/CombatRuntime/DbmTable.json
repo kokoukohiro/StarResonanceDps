@@ -518,5 +518,145 @@
     "Id": 10330014,
     "CountCDTime": 10,
     "Content": "Trial of Bonds"
+  },
+  "10330016": {
+    "Id": 10330016,
+    "CountCDTime": 5,
+    "Content": "Illusionary Projection"
+  },
+  "17021301": {
+    "Id": 17021301,
+    "CountCDTime": 15,
+    "Content": "​Void Corruption Purge"
+  },
+  "47011901": {
+    "Id": 47011901,
+    "CountCDTime": 15,
+    "Content": "Hruga's Shadow"
+  },
+  "47011401": {
+    "Id": 47011401,
+    "CountCDTime": 10,
+    "Content": "Bonded Dark Spirit"
+  },
+  "47013201": {
+    "Id": 47013201,
+    "CountCDTime": 15,
+    "Content": "Voidscar Dissolution"
+  },
+  "14019101": {
+    "Id": 14019101,
+    "CountCDTime": 10,
+    "Content": "Lightning Storm"
+  },
+  "14019901": {
+    "Id": 14019901,
+    "CountCDTime": 10,
+    "Content": "Dragon Soul Awakening"
+  },
+  "10360004": {
+    "Id": 10360004,
+    "CountCDTime": 15,
+    "Content": "Summon Black Hole"
+  },
+  "10360010": {
+    "Id": 10360010,
+    "CountCDTime": 20,
+    "Content": "Celestial Summoning"
+  },
+  "10360011": {
+    "Id": 10360011,
+    "CountCDTime": 20,
+    "Content": "Celestial Rotation"
+  },
+  "10360012": {
+    "Id": 10360012,
+    "CountCDTime": 20,
+    "Content": "Darkfall"
+  },
+  "10360013": {
+    "Id": 10360013,
+    "CountCDTime": 20,
+    "Content": "Light or Dark"
+  },
+  "10360014": {
+    "Id": 10360014,
+    "CountCDTime": 20,
+    "Content": ""
+  },
+  "10360015": {
+    "Id": 10360015,
+    "CountCDTime": 20,
+    "Content": ""
+  },
+  "10350001": {
+    "Id": 10350001,
+    "CountCDTime": 15,
+    "Content": "Lightfall Collapse"
+  },
+  "10350003": {
+    "Id": 10350003,
+    "CountCDTime": 10,
+    "Content": "Illusory Lightform"
+  },
+  "10350011": {
+    "Id": 10350011,
+    "CountCDTime": 15,
+    "Content": "Skyflare"
+  },
+  "10350014": {
+    "Id": 10350014,
+    "CountCDTime": 10,
+    "Content": "Light Strike"
+  },
+  "10350015": {
+    "Id": 10350015,
+    "CountCDTime": 15,
+    "Content": "Sky Awakening"
+  },
+  "10350016": {
+    "Id": 10350016,
+    "CountCDTime": 10,
+    "Content": "Light's Admonition"
+  },
+  "10350018": {
+    "Id": 10350018,
+    "CountCDTime": 20,
+    "Content": "Ascension"
+  },
+  "339510301": {
+    "Id": 339510301,
+    "CountCDTime": 15,
+    "Content": ""
+  },
+  "339510303": {
+    "Id": 339510303,
+    "CountCDTime": 20,
+    "Content": ""
+  },
+  "339510305": {
+    "Id": 339510305,
+    "CountCDTime": 15,
+    "Content": ""
+  },
+  "339510307": {
+    "Id": 339510307,
+    "CountCDTime": 10,
+    "Content": ""
+  },
+  "340000501": {
+    "Id": 340000501,
+    "CountCDTime": 18,
+    "Content": ""
+  },
+  "340002301": {
+    "Id": 340002301,
+    "CountCDTime": 18,
+    "Content": ""
+  },
+  "340002501": {
+    "Id": 340002501,
+    "CountCDTime": 20,
+    "Content": ""
   }
 }

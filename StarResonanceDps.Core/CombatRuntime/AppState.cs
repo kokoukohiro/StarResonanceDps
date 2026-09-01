@@ -51,16 +51,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             System.Diagnostics.Stopwatch loadTime = new();
             loadTime.Start();
 
-            string appStringsFile = Path.Combine(Utils.DATA_DIR_NAME, "AppStrings.json");
-            if (File.Exists(appStringsFile))
-            {
-                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(File.ReadAllText(appStringsFile))!;
-                AppStrings.Strings = appStrings.ToFrozenDictionary();
-                Log.Information("Loaded AppStrings.json");
-            }
-
-            LoadAppStringsTable();
-
             string monsterTableFile = Path.Combine(Utils.DATA_DIR_NAME, "MonsterTable.json");
             if (File.Exists(monsterTableFile))
             {
@@ -293,45 +283,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
 
             loadTime.Stop();
-        }
-
-        public static void LoadAppStringsTable()
-        {
-
-            string appStringsExFile = Path.Combine(Utils.DATA_DIR_NAME, "AppStrings.en.json");
-            if (File.Exists(appStringsExFile))
-            {
-                var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsExFile))!;
-                AppStrings.Locs = appStrings.ToFrozenDictionary();
-                Log.Information("Loaded AppStrings.en.json");
-            }
-
-            if (!string.IsNullOrEmpty(Settings.Instance.Language) && Settings.Instance.Language != "en")
-            {
-                string appStringsLocFile = Path.Combine(Utils.DATA_DIR_NAME, $"AppStrings.{Settings.Instance.Language}.json");
-                if (File.Exists(appStringsLocFile))
-                {
-                    var appStrings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(appStringsLocFile))!;
-                    Dictionary<string, string> combinedLocs = AppStrings.Locs.ToDictionary();
-                    foreach (var loc in appStrings)
-                    {
-                        if (combinedLocs.TryGetValue(loc.Key, out var value))
-                        {
-                            value = loc.Value;
-                        }
-                        else
-                        {
-                            combinedLocs.Add(loc.Key, loc.Value);
-                        }
-                    }
-                    AppStrings.Locs = combinedLocs.ToFrozenDictionary();
-                    Log.Information($"Loaded {$"AppStrings.{Settings.Instance.Language}.json"}");
-                }
-                else
-                {
-                    Log.Error($"Failed to loaded {$"AppStrings.{Settings.Instance.Language}.json"}");
-                }
-            }
         }
 
         public static void LoadSkillOverridesTable()

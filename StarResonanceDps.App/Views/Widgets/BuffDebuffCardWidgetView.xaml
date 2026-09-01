@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.Widgets.BuffDebuffCardWidgetView"
+﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.BuffDebuffCardWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              UseLayoutRounding="True"
@@ -8,13 +8,17 @@
         ウィンドウの大きさは倍率を変えても動かない(はみ出したぶんは隠れる)。
         原点を中央にしてあるので、アイコンとテキストの位置関係もそのまま拡大される。
 
-        バフを見失っているときは Visibility で丸ごと消す。空ウィンドウになるのが正しい挙動。
+        バフを見失っても名前の行だけは残す。アイコン・重ね数・残り時間は HasBuff で消す。
+        名前も一度も分かっていなければ全部消えて空ウィンドウになる。
+
+        消すのは Hidden で、Collapsed にはしない。畳むと StackPanel が縮み、
+        中央揃えのぶんだけ残った名前が動いてしまう。アイコン枠に高さを固定してあるのも同じ理由で、
+        どの状態でも組み全体の大きさが変わらないようにしてある。
     -->
     <Grid>
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    RenderTransformOrigin="0.5,0.5"
-                    Visibility="{Binding HasBuff, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    RenderTransformOrigin="0.5,0.5">
             <StackPanel.RenderTransform>
                 <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
             </StackPanel.RenderTransform>
@@ -25,10 +29,13 @@
                        FontSize="8"
                        FontWeight="SemiBold"
                        Text="{Binding DisplayText}"
-                       TextAlignment="Center" />
+                       TextAlignment="Center"
+                       Visibility="{Binding HasDisplayText, Converter={StaticResource BooleanToVisibilityHiddenConverter}}" />
 
             <Grid Width="32"
-                  HorizontalAlignment="Center">
+                  Height="32"
+                  HorizontalAlignment="Center"
+                  Visibility="{Binding HasBuff, Converter={StaticResource BooleanToVisibilityHiddenConverter}}">
                 <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
                        Stretch="Uniform"
                        RenderOptions.BitmapScalingMode="HighQuality" />
@@ -48,7 +55,8 @@
                        FontSize="12"
                        FontWeight="SemiBold"
                        Text="{Binding DurationText}"
-                       TextAlignment="Center" />
+                       TextAlignment="Center"
+                       Visibility="{Binding HasBuff, Converter={StaticResource BooleanToVisibilityHiddenConverter}}" />
         </StackPanel>
     </Grid>
 </UserControl>

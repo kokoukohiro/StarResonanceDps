@@ -1,16 +1,10 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using StarResonanceDps.App.Localization;
-using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
 public static partial class EntityInfoFormatFormatter
 {
-    public static string Format(NearbyEntityEntry entity, string? formatString)
-    {
-        return Format(entity.Name, entity.Level, formatString);
-    }
-
     public static string FormatPreview(string? formatString)
     {
         return Format(
@@ -19,7 +13,7 @@ public static partial class EntityInfoFormatFormatter
             formatString);
     }
 
-    private static string Format(string name, int level, string? formatString)
+    public static string Format(string name, int level, string? formatString)
     {
         var result = string.IsNullOrEmpty(formatString)
             ? name

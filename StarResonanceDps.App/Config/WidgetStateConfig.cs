@@ -194,6 +194,17 @@ public sealed class WidgetOpenTargetConfig
     /// </summary>
     public int? BuffGroup { get; set; }
 
+    /// <summary>
+    /// この窓の位置と大きさ。<b>ウィンドウ1枚ごと</b>に持つ。
+    ///
+    /// <para>
+    /// <c>WidgetConfig.Window</c> は種別ごとに1組しか無いため、同じウィジェットを複数開くと
+    /// 最後に動かした窓が全部を上書きし、次の起動で全員が同じ位置に出る。
+    /// <c>null</c> のときは従来どおり種別の位置とカスケードを使う。
+    /// </para>
+    /// </summary>
+    public WidgetWindowConfig? Window { get; set; }
+
     public bool IsEntity => EntityId != 0;
 
     public WidgetOpenTargetConfig Clone()
@@ -207,7 +218,8 @@ public sealed class WidgetOpenTargetConfig
             BuffListKind = BuffListKind,
             BuffKey = BuffKey,
             BuffName = BuffName,
-            BuffGroup = BuffGroup
+            BuffGroup = BuffGroup,
+            Window = Window?.Clone()
         };
     }
 }

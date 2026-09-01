@@ -96,6 +96,31 @@ public static partial class PlayerInfoFormatFormatter
         return result.Trim();
     }
 
+    /// <summary>
+    /// 相手の名前の表示値。<b>書式を通さない表示からも使う</b>
+    /// (ウィンドウのタイトル、バフ・デバフカードの本文)。
+    ///
+    /// <para>
+    /// 規則はプレイヤー一覧・メーターと同じ。伏せる設定なら伏せ字、
+    /// <b>名前がまだ取れていなければUID</b>、それ以外は名前そのもの。
+    /// </para>
+    /// </summary>
+    public static string GetDisplayName(
+        string? name,
+        long userId,
+        bool isSelf,
+        PlayerNameDisplayMode nameDisplayMode)
+    {
+        if (ShouldHideName(isSelf, nameDisplayMode))
+        {
+            return HiddenPlayerName;
+        }
+
+        return string.IsNullOrWhiteSpace(name)
+            ? $"UID:{userId}"
+            : name;
+    }
+
     private static string GetName(PlayerInfoFormatData player, PlayerNameDisplayMode nameDisplayMode)
     {
         if (ShouldHideName(player.IsSelf, nameDisplayMode))
@@ -109,9 +134,7 @@ public static partial class PlayerInfoFormatFormatter
             return LocalizationManager.Instance.GetString($"Classes_{professionKey}");
         }
 
-        return string.IsNullOrWhiteSpace(player.Name)
-            ? $"UID:{player.UserId}"
-            : player.Name;
+        return GetDisplayName(player.Name, player.UserId, player.IsSelf, nameDisplayMode);
     }
 
     private static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)

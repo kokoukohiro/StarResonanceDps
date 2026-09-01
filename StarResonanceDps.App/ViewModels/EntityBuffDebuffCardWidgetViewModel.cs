@@ -52,6 +52,10 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     [ObservableProperty]
     private bool _hasBuff;
 
+    /// <summary>名前の行を出すか。<b>失効しても名前だけは残す</b>ので、<see cref="HasBuff"/> とは別。</summary>
+    [ObservableProperty]
+    private bool _hasDisplayText;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Scale))]
     [NotifyCanExecuteChangedFor(nameof(ZoomInCommand))]
@@ -255,7 +259,14 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
 
         if (snapshot is null)
         {
-            ApplyContent(BuffDebuffCardContent.Empty, hasBuff: false);
+            // 失効。アイコンと残り時間は消すが、名前の行は残す。
+            ApplyContent(
+                BuffDebuffCardContent.CreateNameOnly(
+                    _lastKnownBuffName,
+                    _target.Name,
+                    _target.Level,
+                    _widget.BuffInfoFormatString),
+                hasBuff: false);
             return;
         }
 
@@ -278,6 +289,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         LayerText = content.LayerText;
         IconPath = content.IconPath;
         HasBuff = hasBuff;
+        HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);
 
         SynchronizeScaleKey(
             BuffDebuffCardContent.CreateScaleKey(_target.EntityId, _group, _requestedBuffKey));

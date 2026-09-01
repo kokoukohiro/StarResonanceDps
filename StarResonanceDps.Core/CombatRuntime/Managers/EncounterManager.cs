@@ -402,21 +402,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 HelperMethods.DataTables.Dungeons.Data.TryGetValue(LevelMapId.ToString(), out var dungeon);
 
-                if (dungeon != null && dungeon.PlayType == 17)
-                {
-                    SceneName = dungeon.Name;
-                }
-                else
-                {
-                    if (HelperMethods.DataTables.Scenes.Data.TryGetValue(levelMapId.ToString(), out var scene))
-                    {
-                        SceneName = scene.Name;
-                    }
-                    else
-                    {
-                        SceneName = "";
-                    }
-                }
+                // 生テーブルの名前は英語1言語ぶん。表示中の言語で引き直す。
+                // 引けなければ生テーブルの名前へ落ちる。
+                var fallback = dungeon is { PlayType: 17 }
+                    ? dungeon.Name
+                    : HelperMethods.DataTables.Scenes.Data.TryGetValue(levelMapId.ToString(), out var scene)
+                        ? scene.Name
+                        : string.Empty;
+
+                SceneName = CombatDataCatalog.GetSceneName(levelMapId, fallback);
             }
             else
             {

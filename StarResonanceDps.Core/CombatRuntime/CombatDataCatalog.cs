@@ -22,7 +22,10 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _buffNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> _buffDescriptions =
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     private static string _cultureName = "en-US";
@@ -41,7 +44,8 @@ public static class CombatDataCatalog
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillNames = LoadLocalizedText("skills");
             _buffNames = LoadLocalizedText("buffs");
-            _buffDescriptions = LoadLocalizedText("buff-descriptions");
+            _monsterNames = LoadLocalizedText("monsters");
+            _sceneNames = LoadLocalizedText("scenes");
         }
     }
 
@@ -57,7 +61,6 @@ public static class CombatDataCatalog
         {
             var fallback = FirstNonEmpty(pair.Value.Name, pair.Value.NameDesign);
             pair.Value.Name = ResolveText(_buffNames, "en-US", pair.Key, fallback);
-            pair.Value.Desc = ResolveText(_buffDescriptions, "en-US", pair.Key, pair.Value.Desc);
         }
     }
 
@@ -85,16 +88,33 @@ public static class CombatDataCatalog
         return ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId, fallback);
     }
 
-    public static string GetBuffDescription(int buffId, string? fallbackDescription = null)
+    /// <summary>
+    /// モンスター名。<b>表示中の言語で引く。</b>
+    ///
+    /// <para>
+    /// 引数は <c>AttrId</c>(<c>MonsterTable</c> のキー＝種別ID)。エンティティ側が持っている
+    /// 名前は起動時に英語で焼き付くので、言語切替に追従させるにはここを通す。
+    /// </para>
+    /// </summary>
+    public static string GetMonsterName(long monsterId, string? fallbackName = null)
     {
-        var fallback = fallbackDescription;
-        if (string.IsNullOrWhiteSpace(fallback)
-            && _buffs.TryGetValue(buffId, out var buff))
-        {
-            fallback = buff.Desc;
-        }
+        return monsterId is > 0 and <= int.MaxValue
+            ? ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId, fallbackName)
+            : fallbackName?.Trim() ?? string.Empty;
+    }
 
-        return ResolveText(_buffDescriptions, Volatile.Read(ref _cultureName), buffId, fallback);
+    /// <summary>
+    /// シーン/ダンジョン名。<b>表示中の言語で引く。</b>
+    ///
+    /// <para>
+    /// 引数は <c>LevelMapId</c>。履歴は名前ではなくIDを保持し、表示時にここで引き直す。
+    /// </para>
+    /// </summary>
+    public static string GetSceneName(long levelMapId, string? fallbackName = null)
+    {
+        return levelMapId is > 0 and <= int.MaxValue
+            ? ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId, fallbackName)
+            : fallbackName?.Trim() ?? string.Empty;
     }
 
     public static string GetSkillIconName(int skillId, string? fallbackIcon = null)

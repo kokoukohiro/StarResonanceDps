@@ -59,38 +59,30 @@ public sealed class ActiveBuffStore
                 _buffsByEntity.Add(entityUuid, buffs);
             }
 
+            // 起点は受信時刻。サーバの付与時刻を絶対時刻として使うと、
+            // 通信遅延と時計のずれがそのまま差し引かれ、
+            // 持続の短いバフが受信した瞬間に期限切れになる(実測: 1.1秒のバフが全滅)。
+            //
+            // ただし<b>同じバフ実体の再送では起点を据え置く</b>。マップ移動のたびに
+            // 自分の全バフが1デルタで再送されるので、毎回受信時刻で置き直すと
+            // 残り時間が満額へ巻き戻る(料理なら1800秒に戻る)。
+            //
+            // 同一実体かどうかは、サーバの付与時刻と持続時間が両方一致するかで見る。
+            // 掛け直しなら付与時刻が変わるので、そのときは受信時刻から数え直す。
+            var serverAddTime = buffEvent.AddDateTime;
+            var observedAt = buffs.TryGetValue(buffUuid, out var existing)
+                && existing.ServerAddTime == serverAddTime
+                && existing.DurationMilliseconds == buffEvent.Duration
+                    ? existing.ObservedAt
+                    : DateTime.UtcNow;
+
             buffs[buffUuid] = new ActiveBuffEntry(
                 buffEvent,
-                ResolveObservedAt(buffEvent),
-                buffEvent.Duration);
+                observedAt,
+                buffEvent.Duration,
+                serverAddTime);
             RecordSourceParentNoLock(entityUuid, buffEvent);
         }
-    }
-
-    /// <summary>
-    /// 残り時間の起点。<b>サーバが送ってきた付与時刻を使う。</b>
-    ///
-    /// <para>
-    /// 受信時刻を起点にすると、マップ移動のたびに自分の全バフが1デルタで再送されるので、
-    /// そのたびに残り時間が <c>Duration</c> 満額へ巻き戻る(料理なら1800秒に戻る)。
-    /// 付与時刻は再送されても同じ値なので巻き戻らない。
-    /// </para>
-    ///
-    /// <para>
-    /// 付与時刻が無い場合(<c>createTime</c> が0、またはパケット到着時刻とのズレ判定で
-    /// 弾かれた場合)は <see cref="BuffEvent.AddDateTime"/> に到着時刻が入っているので、
-    /// 結果的に従来と同じ起点になる。<b>いずれもUTC</b>で、この型の時刻はすべてUTCで揃える。
-    /// </para>
-    /// </summary>
-    private static DateTime ResolveObservedAt(BuffEvent buffEvent)
-    {
-        var addedAt = buffEvent.AddDateTime;
-
-        return addedAt == default
-            ? DateTime.UtcNow
-            : addedAt.Kind == DateTimeKind.Utc
-                ? addedAt
-                : addedAt.ToUniversalTime();
     }
 
     private void RecordSourceParentNoLock(long entityUuid, BuffEvent buffEvent)
@@ -263,11 +255,15 @@ public sealed class ActiveBuffStore
         }
     }
 
-    /// <param name="ObservedAt">バフが付いた時刻。<b>UTC</b>。</param>
+    /// <param name="ObservedAt">残り時間の起点。受信時刻。<b>UTC</b>。</param>
+    /// <param name="ServerAddTime">
+    /// サーバが送ってきた付与時刻。<b>同一実体の判定にだけ使う</b>(残り時間の計算には使わない)。
+    /// </param>
     private sealed record ActiveBuffEntry(
         BuffEvent BuffEvent,
         DateTime ObservedAt,
-        int DurationMilliseconds)
+        int DurationMilliseconds,
+        DateTime ServerAddTime)
     {
         public double GetRemainingSeconds(DateTime now)
         {

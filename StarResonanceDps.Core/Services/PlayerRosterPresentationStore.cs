@@ -1,10 +1,11 @@
-using StarResonanceDps.Core.Models;
+﻿using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.Services;
 
 public sealed class PlayerRosterPresentationStore
 {
-    private const string HiddenPlayerName = "*****";
+    /// <summary>名前を伏せるときの表示。<b>UIDもまとめてこれ1つに置き換える。</b></summary>
+    public const string HiddenPlayerName = "*****";
 
     private static readonly Lazy<PlayerRosterPresentationStore> LazyInstance = new(() => new PlayerRosterPresentationStore());
 
@@ -37,6 +38,25 @@ public sealed class PlayerRosterPresentationStore
             lock (_sync)
             {
                 return new PlayerRosterSnapshot(_snapshot, _mapName, _mapGeneration);
+            }
+        }
+    }
+
+    /// <summary>
+    /// いまの名前の表示方法。ウィンドウのタイトルなど、
+    /// ロスターの投影を通らない表示から使う。
+    ///
+    /// <para>
+    /// 設定のプレビュー適用もここを通るので、<b>プレイヤー一覧と同じ瞬間に切り替わる</b>。
+    /// </para>
+    /// </summary>
+    public PlayerNameDisplayMode NameDisplayMode
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _nameDisplayMode;
             }
         }
     }

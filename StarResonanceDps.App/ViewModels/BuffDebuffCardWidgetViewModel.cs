@@ -6,6 +6,7 @@ using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -58,6 +59,10 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
     [ObservableProperty]
     private bool _hasBuff;
+
+    /// <summary>名前の行を出すか。<b>失効しても名前だけは残す</b>ので、<see cref="HasBuff"/> とは別。</summary>
+    [ObservableProperty]
+    private bool _hasDisplayText;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Scale))]
@@ -250,15 +255,32 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             RefreshHeader();
         }
 
+        // 名前の出し方はプレイヤー一覧・メーターと同じ規則へ通す。
+        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字。
+        var targetName = PlayerInfoFormatFormatter.GetDisplayName(
+            _player?.Name ?? playerIdentity?.Name,
+            playerIdentity?.UserId ?? characterId,
+            _player?.IsSelf ?? (AppState.PlayerUID != 0 && characterId == AppState.PlayerUID),
+            PlayerRosterPresentationStore.Instance.NameDisplayMode);
+
         if (snapshot is null)
         {
-            ApplyContent(BuffDebuffCardContent.Empty, string.Empty, characterId, hasBuff: false);
+            // 失効。アイコンと残り時間は消すが、名前の行は残す。
+            ApplyContent(
+                BuffDebuffCardContent.CreateNameOnly(
+                    _lastKnownBuffName,
+                    targetName,
+                    _player?.Level ?? 0,
+                    PlayerWidget.BuffInfoFormatString),
+                string.Empty,
+                characterId,
+                hasBuff: false);
             return;
         }
 
         var content = BuffDebuffCardContent.Create(
             snapshot,
-            _player?.Name ?? playerIdentity?.Name ?? string.Empty,
+            targetName,
             _player?.Level ?? 0,
             PlayerWidget.BuffInfoFormatString);
 
@@ -282,6 +304,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         LayerText = content.LayerText;
         IconPath = content.IconPath;
         HasBuff = hasBuff;
+        HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);
 
         SynchronizeScaleKey(BuffDebuffCardContent.CreateScaleKey(characterId, _group, buffKey));
     }

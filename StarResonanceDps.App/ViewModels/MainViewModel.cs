@@ -363,9 +363,18 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public void RestoreRunningWidgetWindows()
     {
-        foreach (var widget in _widgetItems.Where(widget => widget.State == WidgetState.Running))
+        _widgetWindowManager.BeginStartupRestore();
+
+        try
         {
-            _widgetWindowManager.ApplyWidgetState(widget);
+            foreach (var widget in _widgetItems.Where(widget => widget.State == WidgetState.Running))
+            {
+                _widgetWindowManager.ApplyWidgetState(widget);
+            }
+        }
+        finally
+        {
+            _widgetWindowManager.EndStartupRestore();
         }
     }
 

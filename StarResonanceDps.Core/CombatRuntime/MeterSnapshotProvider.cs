@@ -1465,7 +1465,9 @@ public static class MeterSnapshotProvider
             var iconName = CombatDataCatalog.GetSkillIconName(stat.Key);
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
-                value.Name ?? string.Empty,
+                // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
+                // 記録された名前はフォールバックとして渡す。
+                CombatDataCatalog.GetSkillName(stat.Key, value.Name),
                 iconName,
                 CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
                 value.ValueTotal,
