@@ -34,11 +34,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public static uint ChannelLineId { get; private set; }
 
-        /// <summary>マップ名。チャンネルがある場所ではチャンネル番号を付ける。</summary>
-        public static string SceneDisplayName => ChannelLineId > 0 && !string.IsNullOrEmpty(SceneName)
-            ? $"{SceneName} ch{ChannelLineId}"
-            : SceneName ?? string.Empty;
-
 
         /// <summary>
         /// チャンネル番号を反映する。
@@ -398,28 +393,59 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             LevelMapId = levelMapId;
-            if (levelMapId > 0)
-            {
-                HelperMethods.DataTables.Dungeons.Data.TryGetValue(LevelMapId.ToString(), out var dungeon);
 
-                // 生テーブルの名前は英語1言語ぶん。表示中の言語で引き直す。
-                // 引けなければ生テーブルの名前へ落ちる。
-                var fallback = dungeon is { PlayType: 17 }
-                    ? dungeon.Name
-                    : HelperMethods.DataTables.Scenes.Data.TryGetValue(levelMapId.ToString(), out var scene)
-                        ? scene.Name
-                        : string.Empty;
-
-                SceneName = CombatDataCatalog.GetSceneName(levelMapId, fallback);
-            }
-            else
-            {
-                SceneName = "";
-            }
+            // 生テーブルの名前は英語1言語ぶん。表示中の言語で引き直す。
+            SceneName = levelMapId > 0
+                ? CombatDataCatalog.GetSceneName(levelMapId, ResolveSceneFallbackName(levelMapId))
+                : "";
 
             Current.SceneId = LevelMapId;
             Current.SceneName = SceneName;
             DB.UpdateBattleInfo(CurrentBattleId, LevelMapId, SceneName);
+        }
+
+        /// <summary>
+        /// 生テーブルのシーン名。<b>英語1言語ぶんしか無い</b>ので、
+        /// 翻訳テーブルから引けなかったときの落とし先にだけ使う。
+        /// </summary>
+        private static string ResolveSceneFallbackName(uint levelMapId)
+        {
+            HelperMethods.DataTables.Dungeons.Data.TryGetValue(levelMapId.ToString(), out var dungeon);
+
+            return dungeon is { PlayType: 17 }
+                ? dungeon.Name
+                : HelperMethods.DataTables.Scenes.Data.TryGetValue(levelMapId.ToString(), out var scene)
+                    ? scene.Name
+                    : string.Empty;
+        }
+
+        /// <summary>
+        /// シーン名を表示中の言語で引き直し、投影へ流し直す。<b>言語を切り替えたときに呼ぶ。</b>
+        ///
+        /// <para>
+        /// <see cref="SceneName"/> は解決済みの文字列を持っているので、
+        /// <c>CombatDataCatalog</c> の言語を変えただけでは追従しない。
+        /// </para>
+        ///
+        /// <para>
+        /// エンカウンター側(<c>Current.SceneName</c>)とDBは<b>履歴なので触らない</b>。
+        /// 履歴は <c>SceneId</c> を持っていて、表示時に引き直す方針。
+        /// </para>
+        /// </summary>
+        public static void RefreshSceneName()
+        {
+            if (LevelMapId == 0)
+            {
+                return;
+            }
+
+            SceneName = CombatDataCatalog.GetSceneName(
+                LevelMapId,
+                ResolveSceneFallbackName(LevelMapId));
+
+            // 投影は internal なので App からは触れない。ここまでを1つの操作にする。
+            PlayerRosterProjection.UpdateMapName();
+            NearbyEntityProjection.UpdateMapName();
         }
 
         public static async void UpdateTruePerValues(CancellationTokenSource cancellationTokenSource)

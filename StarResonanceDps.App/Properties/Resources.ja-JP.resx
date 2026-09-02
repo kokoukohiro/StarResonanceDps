@@ -867,4 +867,28 @@
   <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
     <value>ウィンドウを最前面に表示</value>
   </data>
+  <data name="Map_ChannelFormat" xml:space="preserve">
+    <value>ch{0}</value>
+  </data>
+  <data name="Settings_Display_InternalId" xml:space="preserve">
+    <value>内部ID</value>
+  </data>
+  <data name="InternalIdDisplay_Hidden" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="InternalIdDisplay_All" xml:space="preserve">
+    <value>すべて表示</value>
+  </data>
+  <data name="InternalIdDisplay_SkillOnly" xml:space="preserve">
+    <value>スキルIDのみ表示</value>
+  </data>
+  <data name="InternalIdDisplay_BuffOnly" xml:space="preserve">
+    <value>バフIDのみ表示</value>
+  </data>
+  <data name="InternalIdDisplay_EntityOnly" xml:space="preserve">
+    <value>エンティティIDのみ表示</value>
+  </data>
+  <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
+    <value>マップIDのみ表示</value>
+  </data>
 </root>

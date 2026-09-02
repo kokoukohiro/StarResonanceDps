@@ -1,5 +1,6 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 
@@ -23,7 +24,7 @@ public sealed class ConfigManager
         _configPath = AppDataPaths.AppSettingsPath;
         _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
-        ApplyPlayerNameDisplayMode(AppConfig.Settings);
+        ApplyDisplaySettings(AppConfig.Settings);
     }
 
     public static ConfigManager Instance => LazyInstance.Value;
@@ -43,7 +44,7 @@ public sealed class ConfigManager
     public void SetSettingsPreview(SettingsConfig settings)
     {
         _settingsPreview = AppConfigDefaults.CloneNormalizedSettings(settings);
-        ApplyPlayerNameDisplayMode(_settingsPreview);
+        ApplyDisplaySettings(_settingsPreview);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -55,7 +56,7 @@ public sealed class ConfigManager
         }
 
         _settingsPreview = null;
-        ApplyPlayerNameDisplayMode(AppConfig.Settings);
+        ApplyDisplaySettings(AppConfig.Settings);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -102,7 +103,7 @@ public sealed class ConfigManager
     {
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
         _settingsPreview = null;
-        ApplyPlayerNameDisplayMode(AppConfig.Settings);
+        ApplyDisplaySettings(AppConfig.Settings);
         Save();
         SettingsChanged?.Invoke(this, EventArgs.Empty);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
@@ -131,6 +132,18 @@ public sealed class ConfigManager
 
         var json = JsonSerializer.Serialize(root, JsonOptions);
         File.WriteAllText(_configPath, json);
+    }
+
+    private static void ApplyDisplaySettings(SettingsConfig settings)
+    {
+        ApplyPlayerNameDisplayMode(settings);
+        ApplyInternalIdDisplayMode(settings);
+    }
+
+    private static void ApplyInternalIdDisplayMode(SettingsConfig settings)
+    {
+        CombatDataCatalog.SetInternalIdDisplay(
+            (InternalIdDisplayMode)settings.InternalIdDisplayModeIndex);
     }
 
     private static void ApplyPlayerNameDisplayMode(SettingsConfig settings)

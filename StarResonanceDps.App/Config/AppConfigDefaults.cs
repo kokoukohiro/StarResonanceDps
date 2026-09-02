@@ -1,4 +1,4 @@
-namespace StarResonanceDps.App.Config;
+﻿namespace StarResonanceDps.App.Config;
 
 public static class AppConfigDefaults
 {
@@ -28,6 +28,7 @@ public static class AppConfigDefaults
             LanguageIndex = 0,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
+            InternalIdDisplayModeIndex = 0,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors()
         };
@@ -73,6 +74,7 @@ public static class AppConfigDefaults
         settings.LanguageIndex = Clamp(settings.LanguageIndex, 0, 4);
         settings.NumberDisplayFormatIndex = Clamp(settings.NumberDisplayFormatIndex, 0, 1);
         settings.PlayerNameDisplayModeIndex = Clamp(settings.PlayerNameDisplayModeIndex, 0, 2);
+        settings.InternalIdDisplayModeIndex = Clamp(settings.InternalIdDisplayModeIndex, 0, 5);
         settings.WindowColors = NormalizeColorList(settings.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         settings.WindowColorIndex = Clamp(settings.WindowColorIndex, 0, settings.WindowColors.Count - 1);
     }

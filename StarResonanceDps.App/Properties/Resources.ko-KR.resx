@@ -867,4 +867,28 @@
   <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
     <value>창을 항상 위에 표시</value>
   </data>
+  <data name="Map_ChannelFormat" xml:space="preserve">
+    <value>ch{0}</value>
+  </data>
+  <data name="Settings_Display_InternalId" xml:space="preserve">
+    <value>내부 ID</value>
+  </data>
+  <data name="InternalIdDisplay_Hidden" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+  <data name="InternalIdDisplay_All" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="InternalIdDisplay_SkillOnly" xml:space="preserve">
+    <value>스킬 ID만 표시</value>
+  </data>
+  <data name="InternalIdDisplay_BuffOnly" xml:space="preserve">
+    <value>버프 ID만 표시</value>
+  </data>
+  <data name="InternalIdDisplay_EntityOnly" xml:space="preserve">
+    <value>엔티티 ID만 표시</value>
+  </data>
+  <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
+    <value>맵 ID만 표시</value>
+  </data>
 </root>

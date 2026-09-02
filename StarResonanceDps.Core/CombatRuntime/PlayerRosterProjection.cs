@@ -45,7 +45,7 @@ internal static class PlayerRosterProjection
 
     public static void UpdateMapName()
     {
-        RosterStore.UpdateMapName(EncounterManager.SceneDisplayName);
+        RosterStore.UpdateMapName(EncounterManager.SceneName, EncounterManager.ChannelLineId);
     }
 
     public static void UpsertSelf(long playerUuid)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using StarResonanceDps.Core.Models;
@@ -13,6 +13,7 @@ public sealed class PlayerRosterStore
     private readonly Dictionary<long, PlayerRosterEntry> _entries = [];
     private IReadOnlyList<PlayerRosterEntry> _snapshot = Array.AsReadOnly(Array.Empty<PlayerRosterEntry>());
     private string _mapName = string.Empty;
+    private uint _mapChannel;
     private long _mapGeneration;
 
     private PlayerRosterStore()
@@ -40,7 +41,7 @@ public sealed class PlayerRosterStore
         {
             lock (_sync)
             {
-                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapGeneration);
+                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
             }
         }
     }
@@ -56,11 +57,19 @@ public sealed class PlayerRosterStore
             forcePublish: true);
     }
 
-    public void UpdateMapName(string? mapName)
+    /// <summary>
+    /// マップ名とチャンネル番号。<b>合成した文字列にはしない。</b>
+    /// 「ch1」の表記は言語ごとに違う(中国語は「1线」)ので、組み立ては翻訳資源を持つ App 側でやる。
+    /// </summary>
+    public void UpdateMapName(string? mapName, uint mapChannel)
     {
         var normalizedMapName = mapName ?? string.Empty;
         PublishIfChanged(
-            () => _mapName = normalizedMapName,
+            () =>
+            {
+                _mapName = normalizedMapName;
+                _mapChannel = mapChannel;
+            },
             forcePublish: false);
     }
 
@@ -140,6 +149,7 @@ public sealed class PlayerRosterStore
         {
             var previousEntries = _snapshot;
             var previousMapName = _mapName;
+            var previousMapChannel = _mapChannel;
             var previousMapGeneration = _mapGeneration;
 
             update();
@@ -148,13 +158,14 @@ public sealed class PlayerRosterStore
             if (!forcePublish
                 && previousEntries.SequenceEqual(nextSnapshot)
                 && string.Equals(previousMapName, _mapName, StringComparison.Ordinal)
+                && previousMapChannel == _mapChannel
                 && previousMapGeneration == _mapGeneration)
             {
                 return;
             }
 
             _snapshot = nextSnapshot;
-            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapGeneration);
+            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
         }
 
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot!));
@@ -197,11 +208,15 @@ public sealed class PlayerRosterStore
 public sealed record PlayerRosterSnapshot(
     IReadOnlyList<PlayerRosterEntry> Entries,
     string MapName,
+    uint MapChannel,
     long MapGeneration);
 
 public sealed class PlayerRosterChangedEventArgs(PlayerRosterSnapshot roster) : EventArgs
 {
     public IReadOnlyList<PlayerRosterEntry> Snapshot { get; } = roster.Entries;
+
+    /// <summary>チャンネル番号。チャンネルの無い場所では 0。</summary>
+    public uint MapChannel { get; } = roster.MapChannel;
 
     public string MapName { get; } = roster.MapName;
 

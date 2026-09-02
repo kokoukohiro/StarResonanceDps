@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
@@ -92,10 +92,12 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
         SkillId = snapshot.SkillId;
         HasSkill = true;
         UsesImagineAsset = snapshot.IsImagine || snapshot.ShowLevel;
+        // 表記は G で統一する。ただし<b>数字の出所は2つで違う</b> —
+        // イマジンは改造段階(Tier)、イマジン式ロールスキルはレベル(CDがレベル依存のため)。
         NameDisplayText = snapshot.IsImagine
-            ? $"{snapshot.Name} Tier{snapshot.Tier}"
+            ? $"{snapshot.Name} G{snapshot.Tier}"
             : snapshot.ShowLevel
-                ? $"{snapshot.Name} Lv.{snapshot.CurrentLevel}"
+                ? $"{snapshot.Name} G{snapshot.CurrentLevel}"
                 : snapshot.Name;
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName, snapshot.IsImagine);
         HasChargeCount = snapshot.MaxCharges > 1;

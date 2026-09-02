@@ -867,4 +867,28 @@
   <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
     <value>窗口置顶显示</value>
   </data>
+  <data name="Map_ChannelFormat" xml:space="preserve">
+    <value>{0}线</value>
+  </data>
+  <data name="Settings_Display_InternalId" xml:space="preserve">
+    <value>内部ID</value>
+  </data>
+  <data name="InternalIdDisplay_Hidden" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="InternalIdDisplay_All" xml:space="preserve">
+    <value>全部显示</value>
+  </data>
+  <data name="InternalIdDisplay_SkillOnly" xml:space="preserve">
+    <value>仅显示技能ID</value>
+  </data>
+  <data name="InternalIdDisplay_BuffOnly" xml:space="preserve">
+    <value>仅显示Buff ID</value>
+  </data>
+  <data name="InternalIdDisplay_EntityOnly" xml:space="preserve">
+    <value>仅显示实体ID</value>
+  </data>
+  <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
+    <value>仅显示地图ID</value>
+  </data>
 </root>

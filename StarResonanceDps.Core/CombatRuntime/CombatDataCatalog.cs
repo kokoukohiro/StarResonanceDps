@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
+using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.CombatRuntime;
 
@@ -30,9 +31,45 @@ public static class CombatDataCatalog
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     private static string _cultureName = "en-US";
 
+    /// <summary>
+    /// 参照した内部IDを名前に添えるか。<c>int</c> で持つのは <see cref="Volatile"/> で読み書きするため。
+    /// </summary>
+    private static int _internalIdDisplayMode = (int)InternalIdDisplayMode.Hidden;
+
     public static void SetCulture(string? cultureName)
     {
         Volatile.Write(ref _cultureName, NormalizeCultureName(cultureName));
+    }
+
+    public static void SetInternalIdDisplay(InternalIdDisplayMode mode)
+    {
+        Volatile.Write(ref _internalIdDisplayMode, (int)mode);
+    }
+
+    /// <summary>
+    /// 参照した内部IDを名前に添える。<b>書式は全言語で半角括弧。</b>
+    ///
+    /// <para>
+    /// テーブルに無くて生テーブル名へ落ちた場合も付ける。「どのIDを引いたか」を見るためのもので、
+    /// 引けなかったときこそIDが要る(欠けているエントリを特定できる)。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>名前が空のときは付けない。</b>「名前が無い」ことを見て表示を落としている箇所があるので、
+    /// そこを <c>(123)</c> で埋めると挙動が変わる。
+    /// </para>
+    /// </summary>
+    private static string AppendInternalId(string name, InternalIdDisplayMode kind, long id)
+    {
+        if (id <= 0 || string.IsNullOrEmpty(name))
+        {
+            return name;
+        }
+
+        var mode = (InternalIdDisplayMode)Volatile.Read(ref _internalIdDisplayMode);
+        return mode == InternalIdDisplayMode.All || mode == kind
+            ? $"{name}({id})"
+            : name;
     }
 
     public static void Load()
@@ -73,7 +110,10 @@ public static class CombatDataCatalog
             fallback = FirstNonEmpty(skill.Name, skill.NameDesign);
         }
 
-        return ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId, fallback);
+        return AppendInternalId(
+            ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId, fallback),
+            InternalIdDisplayMode.SkillOnly,
+            skillId);
     }
 
     public static string GetBuffName(int buffId, string? fallbackName = null)
@@ -85,7 +125,10 @@ public static class CombatDataCatalog
             fallback = FirstNonEmpty(buff.Name, buff.NameDesign);
         }
 
-        return ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId, fallback);
+        return AppendInternalId(
+            ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId, fallback),
+            InternalIdDisplayMode.BuffOnly,
+            buffId);
     }
 
     /// <summary>
@@ -99,7 +142,10 @@ public static class CombatDataCatalog
     public static string GetMonsterName(long monsterId, string? fallbackName = null)
     {
         return monsterId is > 0 and <= int.MaxValue
-            ? ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId, fallbackName)
+            ? AppendInternalId(
+                ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId, fallbackName),
+                InternalIdDisplayMode.EntityOnly,
+                monsterId)
             : fallbackName?.Trim() ?? string.Empty;
     }
 
@@ -113,7 +159,10 @@ public static class CombatDataCatalog
     public static string GetSceneName(long levelMapId, string? fallbackName = null)
     {
         return levelMapId is > 0 and <= int.MaxValue
-            ? ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId, fallbackName)
+            ? AppendInternalId(
+                ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId, fallbackName),
+                InternalIdDisplayMode.MapOnly,
+                levelMapId)
             : fallbackName?.Trim() ?? string.Empty;
     }
 

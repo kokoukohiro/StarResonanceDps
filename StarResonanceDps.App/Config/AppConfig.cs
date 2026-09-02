@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace StarResonanceDps.App.Config;
@@ -38,6 +38,7 @@ public sealed class SettingsConfig
     public int LanguageIndex { get; set; }
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
+    public int InternalIdDisplayModeIndex { get; set; }
     public int WindowColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
 
@@ -51,6 +52,7 @@ public sealed class SettingsConfig
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
+            InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             ExtensionData = CloneExtensionData(ExtensionData)

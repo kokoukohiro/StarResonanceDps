@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
@@ -49,6 +49,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private int _playerNameDisplayModeIndex;
+
+    [ObservableProperty]
+    private int _internalIdDisplayModeIndex;
 
     public SettingsViewModel()
     {
@@ -139,6 +142,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             LanguageIndex = LanguageIndex,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
+            InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()]
         };
@@ -157,6 +161,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             LanguageIndex = settings.LanguageIndex;
             NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
+            InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
         }
         finally
@@ -389,6 +394,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         return left.LanguageIndex == right.LanguageIndex
             && left.NumberDisplayFormatIndex == right.NumberDisplayFormatIndex
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
+            && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
@@ -447,6 +453,16 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     partial void OnPlayerNameDisplayModeIndexChanged(int value)
+    {
+        if (!_isLoadingSettings)
+        {
+            ApplySettingsPreview();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnInternalIdDisplayModeIndexChanged(int value)
     {
         if (!_isLoadingSettings)
         {

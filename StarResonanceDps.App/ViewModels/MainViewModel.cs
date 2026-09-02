@@ -7,6 +7,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 
@@ -90,6 +91,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         _configManager.SettingsChanged += ConfigManager_SettingsChanged;
+        _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
 
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
         _partyStateStore.Changed += PartyStateStore_Changed;
@@ -170,6 +172,7 @@ public sealed partial class MainViewModel : ViewModelBase
         QueuePlayerRosterSnapshot(new PlayerRosterSnapshot(
             e.Snapshot,
             e.MapName,
+            e.MapChannel,
             e.MapGeneration));
     }
 
@@ -223,6 +226,7 @@ public sealed partial class MainViewModel : ViewModelBase
         _playerListWidget?.UpdatePlayerRoster(
             roster.Entries,
             roster.MapName,
+            roster.MapChannel,
             roster.MapGeneration);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster.Entries);
     }
@@ -232,6 +236,7 @@ public sealed partial class MainViewModel : ViewModelBase
         QueueNearbyEntitySnapshot(new NearbyEntitySnapshot(
             e.Snapshot,
             e.MapName,
+            e.MapChannel,
             e.MapGeneration));
     }
 
@@ -285,6 +290,7 @@ public sealed partial class MainViewModel : ViewModelBase
         entityListWidget.UpdateNearbyEntities(
             snapshot.Entries,
             snapshot.MapName,
+            snapshot.MapChannel,
             snapshot.MapGeneration);
         _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries);
     }
@@ -307,6 +313,34 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
+        RefreshLocalizedPresentation();
+    }
+
+    /// <summary>
+    /// 設定のプレビュー適用。<b>内部IDの表示切り替えを言語切替と同じ扱いで即反映させる</b>ため、
+    /// 保存だけでなくプレビューでも組み直す(保存時も同じイベントが上がる)。
+    /// </summary>
+    private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
+    {
+        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(RefreshLocalizedPresentation);
+            return;
+        }
+
+        RefreshLocalizedPresentation();
+    }
+
+    /// <summary>
+    /// 表示中の文字列を組み直す。言語切替と、内部IDの表示切り替えの両方から呼ぶ。
+    /// </summary>
+    private void RefreshLocalizedPresentation()
+    {
+        // シーン名は Core が解決済みの文字列で持っているので、言語や表示設定を変えただけでは
+        // 追従しない。引き直して投影へ流し直させる。チャンネルの接尾辞は App 側で組むので、
+        // これでマップ表示が丸ごと組み直される。
+        EncounterManager.RefreshSceneName();
+
         foreach (var widget in _widgetItems)
         {
             widget.RefreshLocalizedText();

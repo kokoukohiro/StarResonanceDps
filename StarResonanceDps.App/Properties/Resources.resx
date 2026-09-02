@@ -867,4 +867,28 @@
   <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
     <value>Always on Top</value>
   </data>
+  <data name="Map_ChannelFormat" xml:space="preserve">
+    <value>ch{0}</value>
+  </data>
+  <data name="Settings_Display_InternalId" xml:space="preserve">
+    <value>Internal ID</value>
+  </data>
+  <data name="InternalIdDisplay_Hidden" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="InternalIdDisplay_All" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="InternalIdDisplay_SkillOnly" xml:space="preserve">
+    <value>Skill IDs only</value>
+  </data>
+  <data name="InternalIdDisplay_BuffOnly" xml:space="preserve">
+    <value>Buff IDs only</value>
+  </data>
+  <data name="InternalIdDisplay_EntityOnly" xml:space="preserve">
+    <value>Entity IDs only</value>
+  </data>
+  <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
+    <value>Map IDs only</value>
+  </data>
 </root>

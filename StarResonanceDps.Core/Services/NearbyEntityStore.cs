@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime;
+﻿using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.Core.Services;
@@ -11,6 +11,7 @@ public sealed class NearbyEntityStore
     private readonly Dictionary<long, NearbyEntityEntry> _entries = [];
     private IReadOnlyList<NearbyEntityEntry> _snapshot = Array.AsReadOnly(Array.Empty<NearbyEntityEntry>());
     private string _mapName = string.Empty;
+    private uint _mapChannel;
     private long _mapGeneration;
 
     private NearbyEntityStore()
@@ -27,7 +28,7 @@ public sealed class NearbyEntityStore
         {
             lock (_sync)
             {
-                return new NearbyEntitySnapshot(_snapshot, _mapName, _mapGeneration);
+                return new NearbyEntitySnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
             }
         }
     }
@@ -43,11 +44,19 @@ public sealed class NearbyEntityStore
             forcePublish: true);
     }
 
-    public void UpdateMapName(string? mapName)
+    /// <summary>
+    /// マップ名とチャンネル番号。<b>合成した文字列にはしない。</b>
+    /// 「ch1」の表記は言語ごとに違う(中国語は「1线」)ので、組み立ては翻訳資源を持つ App 側でやる。
+    /// </summary>
+    public void UpdateMapName(string? mapName, uint mapChannel)
     {
         var normalizedMapName = mapName ?? string.Empty;
         PublishIfChanged(
-            () => _mapName = normalizedMapName,
+            () =>
+            {
+                _mapName = normalizedMapName;
+                _mapChannel = mapChannel;
+            },
             forcePublish: false);
     }
 
@@ -161,6 +170,7 @@ public sealed class NearbyEntityStore
         {
             var previousEntries = _snapshot;
             var previousMapName = _mapName;
+            var previousMapChannel = _mapChannel;
             var previousMapGeneration = _mapGeneration;
 
             update();
@@ -169,13 +179,14 @@ public sealed class NearbyEntityStore
             if (!forcePublish
                 && previousEntries.SequenceEqual(nextSnapshot)
                 && string.Equals(previousMapName, _mapName, StringComparison.Ordinal)
+                && previousMapChannel == _mapChannel
                 && previousMapGeneration == _mapGeneration)
             {
                 return;
             }
 
             _snapshot = nextSnapshot;
-            changedSnapshot = new NearbyEntitySnapshot(_snapshot, _mapName, _mapGeneration);
+            changedSnapshot = new NearbyEntitySnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
         }
 
         EntitiesChanged?.Invoke(this, new NearbyEntitiesChangedEventArgs(changedSnapshot!));
@@ -205,11 +216,15 @@ public sealed class NearbyEntityStore
 public sealed record NearbyEntitySnapshot(
     IReadOnlyList<NearbyEntityEntry> Entries,
     string MapName,
+    uint MapChannel,
     long MapGeneration);
 
 public sealed class NearbyEntitiesChangedEventArgs(NearbyEntitySnapshot snapshot) : EventArgs
 {
     public IReadOnlyList<NearbyEntityEntry> Snapshot { get; } = snapshot.Entries;
+
+    /// <summary>チャンネル番号。チャンネルの無い場所では 0。</summary>
+    public uint MapChannel { get; } = snapshot.MapChannel;
 
     public string MapName { get; } = snapshot.MapName;
 

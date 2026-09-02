@@ -24,6 +24,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
+    private string _mapSceneName = string.Empty;
+    private uint _mapChannel;
     private long _playerListMapGeneration = -1;
     private long _entityListMapGeneration = -1;
 
@@ -171,9 +173,28 @@ public partial class WidgetListItemViewModel : ViewModelBase
         EntityListEntries = new ReadOnlyObservableCollection<EntityListEntry>(_entityListEntries);
     }
 
+    /// <summary>
+    /// マップ名を組み立てる。チャンネルの表記は言語ごとに違う(中国語は「1线」)ので、
+    /// <b>素の名前と番号を控えておき、言語が変わったら組み直す。</b>
+    /// </summary>
+    private void ApplyMapName(string? mapName, uint mapChannel)
+    {
+        _mapSceneName = mapName ?? string.Empty;
+        _mapChannel = mapChannel;
+        RenderMapName();
+    }
+
+    private void RenderMapName()
+    {
+        MapName = _mapChannel > 0 && !string.IsNullOrEmpty(_mapSceneName)
+            ? $"{_mapSceneName} {LocalizationManager.Instance.Format("Map_ChannelFormat", _mapChannel)}"
+            : _mapSceneName;
+    }
+
     public void RefreshLocalizedText()
     {
         DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
+        RenderMapName();
         OnPropertyChanged(nameof(StateText));
         SynchronizePlayerListEntries(resetEntries: false);
         SynchronizeEntityListEntries(resetEntries: false);
@@ -316,6 +337,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public void UpdatePlayerRoster(
         IReadOnlyList<PlayerRosterEntry> playerRoster,
         string mapName,
+        uint mapChannel,
         long mapGeneration)
     {
         if (!IsPlayerList)
@@ -323,7 +345,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
-        MapName = mapName ?? string.Empty;
+        ApplyMapName(mapName, mapChannel);
         _playerRoster = playerRoster;
 
         var resetEntries = _playerListMapGeneration != mapGeneration;
@@ -334,6 +356,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public void UpdateNearbyEntities(
         IReadOnlyList<NearbyEntityEntry> nearbyEntities,
         string mapName,
+        uint mapChannel,
         long mapGeneration)
     {
         if (!IsEntityList)
@@ -341,7 +364,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
-        MapName = mapName ?? string.Empty;
+        ApplyMapName(mapName, mapChannel);
         _nearbyEntities = nearbyEntities;
 
         var resetEntries = _entityListMapGeneration != mapGeneration;

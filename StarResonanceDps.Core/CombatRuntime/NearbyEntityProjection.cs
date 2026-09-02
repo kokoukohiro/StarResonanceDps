@@ -33,7 +33,7 @@ internal static class NearbyEntityProjection
 
     public static void UpdateMapName()
     {
-        EntityStore.UpdateMapName(EncounterManager.SceneDisplayName);
+        EntityStore.UpdateMapName(EncounterManager.SceneName, EncounterManager.ChannelLineId);
     }
 
     public static void AddOrUpdateAppearedEntity(long entityUuid)
