@@ -26,6 +26,16 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    private static FrozenDictionary<int, int> _skillSourceMap = FrozenDictionary<int, int>.Empty;
+
+    private static FrozenDictionary<int, int> _buffSourceMap = FrozenDictionary<int, int>.Empty;
+
+    private static FrozenSet<int> _skillKeys = FrozenSet<int>.Empty;
+
+    private static FrozenSet<int> _buffKeys = FrozenSet<int>.Empty;
+
+    private static FrozenDictionary<int, int> _attrSourceMap = FrozenDictionary<int, int>.Empty;
+
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -83,50 +93,273 @@ public static class CombatDataCatalog
             _buffNames = LoadLocalizedText("buffs");
             _monsterNames = LoadLocalizedText("monsters");
             _sceneNames = LoadLocalizedText("scenes");
+            _skillSourceMap = LoadSourceMap("SkillSourceMap");
+            _buffSourceMap = LoadSourceMap("BuffSourceMap");
+            _skillKeys = LoadLocalizedKeys("skills");
+            _buffKeys = LoadLocalizedKeys("buffs");
+            _attrSourceMap = LoadAttrSourceMap();
         }
     }
 
-    public static void ApplyEnglishNamesToLegacyTables()
+    /// <summary>
+    /// ダメージ属性ID → 親スキルID。<c>SkillEffectTable.SkillAttrDes</c> の式に出る
+    /// 合成キーを <c>DamageAttrTable.TypeEnum</c> で解いて、その式を持つスキルを親とする。
+    ///
+    /// <para>
+    /// 弾ID規則(<c>SkillId × 100 + Level</c>)と違い、<b>どのスキルの効果として書かれているか</b>を
+    /// そのまま読む。両者は同じ整数を別の意味で使うことがあり、実測19件で行き先が食い違った
+    /// (<c>230101</c> は弾規則だと <c>2301 琴弦撩拨</c>、式の上では <c>2308 聚合乐章</c>)。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>親が複数に割れる子は入れない。</b> プレイヤーの技とNPC版が同じダメージ属性を
+    /// 共有していることがあり、術者を見ないと決まらない。決め切れないものは畳まない。
+    /// </para>
+    /// </summary>
+    private static FrozenDictionary<int, int> LoadAttrSourceMap()
     {
-        foreach (var pair in _skills)
+        var typeEnumByKey = new Dictionary<string, int>();
+        foreach (var pair in HelperMethods.DataTables.DamageAttrs.Data)
         {
-            var fallback = FirstNonEmpty(pair.Value.Name, pair.Value.NameDesign);
-            pair.Value.Name = ResolveText(_skillNames, "en-US", pair.Key, fallback);
+            if (pair.Value.TypeEnum != 0)
+            {
+                typeEnumByKey[pair.Key] = pair.Value.TypeEnum;
+            }
         }
 
-        foreach (var pair in _buffs)
+        var parents = new Dictionary<int, int>();
+        var split = new HashSet<int>();
+
+        foreach (var pair in HelperMethods.DataTables.SkillEffects.Data)
         {
-            var fallback = FirstNonEmpty(pair.Value.Name, pair.Value.NameDesign);
-            pair.Value.Name = ResolveText(_buffNames, "en-US", pair.Key, fallback);
+            var parent = pair.Value.SkillId;
+            if (parent == 0 || pair.Value.SkillAttrDes is null)
+            {
+                continue;
+            }
+
+            foreach (var row in pair.Value.SkillAttrDes)
+            {
+                if (row is null)
+                {
+                    continue;
+                }
+
+                foreach (var cell in row)
+                {
+                    foreach (var key in ExtractBracedKeys(cell))
+                    {
+                        if (!typeEnumByKey.TryGetValue(key, out var child)
+                            || child == 0
+                            || child == parent)
+                        {
+                            continue;
+                        }
+
+                        if (parents.TryGetValue(child, out var known))
+                        {
+                            if (known != parent)
+                            {
+                                split.Add(child);
+                            }
+                        }
+                        else
+                        {
+                            parents[child] = parent;
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach (var child in split)
+        {
+            parents.Remove(child);
+        }
+
+        Log.Information(
+            "Loaded {Count} attr sources ({Split} split, dropped)",
+            parents.Count,
+            split.Count);
+        return parents.ToFrozenDictionary();
+    }
+
+    /// <summary>
+    /// <c>{123456}</c> の形で式に埋め込まれた合成キーを拾う。
+    ///
+    /// <para>
+    /// <b>式は入れ子になっている。</b> 実データは
+    /// <c>{*skillpara.damageMerge({122950102},{1},"PVEDamageRadio","up")*}</c> の形で、
+    /// 外側の <c>{*</c> と内側の <c>{数字}</c> が混ざる。最初の <c>{</c> と最初の <c>}</c> を
+    /// 対にすると内側を取り逃すので、<b>「<c>{</c> の直後が数字で、数字の直後が <c>}</c>」</b>
+    /// という形だけを拾う。
+    /// </para>
+    /// </summary>
+    private static IEnumerable<string> ExtractBracedKeys(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            yield break;
+        }
+
+        for (var index = 0; index < text.Length; index++)
+        {
+            if (text[index] != '{')
+            {
+                continue;
+            }
+
+            var start = index + 1;
+            var end = start;
+            while (end < text.Length && char.IsAsciiDigit(text[end]))
+            {
+                end++;
+            }
+
+            if (end > start && end < text.Length && text[end] == '}')
+            {
+                yield return text[start..end];
+                index = end;
+            }
         }
     }
 
-    public static string GetSkillName(int skillId, string? fallbackName = null)
+    /// <summary>
+    /// ダメージ属性IDから親スキルへ。畳み込みの<b>最後の手段</b>で、
+    /// 対応表・4言語テーブル・種別ごとの解決・召喚体のどれでも表に届かなかったときだけ引く。
+    /// </summary>
+    public static bool TryResolveAttrSource(int id, out int parentSkillId)
+        => _attrSourceMap.TryGetValue(id, out parentSkillId);
+
+    /// <summary>
+    /// 4言語テーブルに<b>キーとして載っているID</b>。値が空でも数える。
+    ///
+    /// <para>
+    /// 畳み込みの停止条件はこちらで、名前解決とは別。
+    /// 「IDはあるが訳が無い」は正当な状態で、そのIDは素のまま表示する意思表示として扱う。
+    ///
+    /// <para>
+    /// <see cref="LoadLocalizedText"/> と別に読むのは、あちらが空値を落とすため
+    /// 「そのIDが登録されているか」を答えられないから。空値を落とすのは
+    /// <see cref="ResolveText"/> が空欄で zh-CN へ落ちる仕様に必要で、そちらは正しい。
+    /// </para>
+    /// </para>
+    /// </summary>
+    private static FrozenSet<int> LoadLocalizedKeys(string dataName)
     {
-        var fallback = fallbackName;
-        if (string.IsNullOrWhiteSpace(fallback)
-            && _skills.TryGetValue(skillId, out var skill))
+        var keys = new HashSet<int>();
+
+        foreach (var cultureName in SupportedCultures)
         {
-            fallback = FirstNonEmpty(skill.Name, skill.NameDesign);
+            var path = Path.Combine(
+                Utils.DATA_DIR_NAME,
+                "Localization",
+                $"{dataName}.{cultureName}.json");
+            if (!File.Exists(path))
+            {
+                continue;
+            }
+
+            var raw = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(path));
+            if (raw is null)
+            {
+                continue;
+            }
+
+            foreach (var pair in raw)
+            {
+                if (int.TryParse(pair.Key, out var id))
+                {
+                    keys.Add(id);
+                }
+            }
         }
 
+        Log.Information("Loaded {Count} {DataName} keys", keys.Count, dataName);
+        return keys.ToFrozenSet();
+    }
+
+    /// <summary>
+    /// 観測ID → 親スキルID。<c>Data/Mappings/</c> の手書きの対応表。
+    ///
+    /// <para>
+    /// 畳み込みの<b>1段目</b>。実行時の鎖より先に引く。鎖はバフ実体が届いているかに左右されるが、
+    /// この表は届いていなくても答えを持っているので、同じスキルが行として割れなくなる。
+    /// </para>
+    /// </summary>
+    public static bool TryResolveSkillSource(int id, out int parentSkillId)
+        => _skillSourceMap.TryGetValue(id, out parentSkillId);
+
+    /// <summary>
+    /// バフID → 親スキルID。<c>SkillSourceMap</c> と<b>種別で分けてある</b>ので、
+    /// バフとして届いたIDはこちらだけを引く。
+    ///
+    /// <para>
+    /// <c>SkillTable</c> と <c>BuffTable</c> は90個のIDが重複するため、両方を引くと
+    /// 同じIDがどちらの意味で解決されるか呼び出し元次第になる。分けておけば
+    /// <c>DamageSource</c> で一意に決まる。
+    /// </para>
+    /// </summary>
+    public static bool TryResolveBuffSource(int id, out int parentSkillId)
+        => _buffSourceMap.TryGetValue(id, out parentSkillId);
+
+    /// <summary>
+    /// そのIDが<b>4言語テーブルにキーとして載っている</b>か。畳み込みの停止条件。
+    ///
+    /// <para>
+    /// 載っている＝「素のまま表示すると決めたID」で、そこから先へは登らない。
+    /// <b>値が空でも止める。</b>「IDはあるが訳が無い」は正当な状態で、
+    /// 訳の有無で畳み方が変わってはいけない。
+    /// </para>
+    ///
+    /// <para>
+    /// どのIDを載せるかはテーブルを作るときの判断で、実行時には理由を問わない。
+    /// 枠に置けるかどうかもその判断材料の1つでしかないので、ここでは見ない。
+    /// </para>
+    /// </summary>
+    public static bool HasSkillKey(int skillId) => _skillKeys.Contains(skillId);
+
+    /// <inheritdoc cref="HasSkillKey"/>
+    public static bool HasBuffKey(int buffId) => _buffKeys.Contains(buffId);
+
+    private static FrozenDictionary<int, int> LoadSourceMap(string dataName)
+    {
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", $"{dataName}.json");
+        if (!File.Exists(path))
+        {
+            Log.Warning("Missing source mapping {DataName}", dataName);
+            return FrozenDictionary<int, int>.Empty;
+        }
+
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, int>>(File.ReadAllText(path));
+        var map = new Dictionary<int, int>();
+        if (raw is not null)
+        {
+            foreach (var pair in raw)
+            {
+                if (int.TryParse(pair.Key, out var id) && pair.Value != 0 && pair.Value != id)
+                {
+                    map[id] = pair.Value;
+                }
+            }
+        }
+
+        Log.Information("Loaded {Count} source mappings from {DataName}", map.Count, dataName);
+        return map.ToFrozenDictionary();
+    }
+
+    public static string GetSkillName(int skillId)
+    {
         return AppendInternalId(
-            ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId, fallback),
+            ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId),
             InternalIdDisplayMode.SkillOnly,
             skillId);
     }
 
-    public static string GetBuffName(int buffId, string? fallbackName = null)
+    public static string GetBuffName(int buffId)
     {
-        var fallback = fallbackName;
-        if (string.IsNullOrWhiteSpace(fallback)
-            && _buffs.TryGetValue(buffId, out var buff))
-        {
-            fallback = FirstNonEmpty(buff.Name, buff.NameDesign);
-        }
-
         return AppendInternalId(
-            ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId, fallback),
+            ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId),
             InternalIdDisplayMode.BuffOnly,
             buffId);
     }
@@ -139,14 +372,14 @@ public static class CombatDataCatalog
     /// 名前は起動時に英語で焼き付くので、言語切替に追従させるにはここを通す。
     /// </para>
     /// </summary>
-    public static string GetMonsterName(long monsterId, string? fallbackName = null)
+    public static string GetMonsterName(long monsterId)
     {
         return monsterId is > 0 and <= int.MaxValue
             ? AppendInternalId(
-                ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId, fallbackName),
+                ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId),
                 InternalIdDisplayMode.EntityOnly,
                 monsterId)
-            : fallbackName?.Trim() ?? string.Empty;
+            : string.Empty;
     }
 
     /// <summary>
@@ -156,14 +389,14 @@ public static class CombatDataCatalog
     /// 引数は <c>LevelMapId</c>。履歴は名前ではなくIDを保持し、表示時にここで引き直す。
     /// </para>
     /// </summary>
-    public static string GetSceneName(long levelMapId, string? fallbackName = null)
+    public static string GetSceneName(long levelMapId)
     {
         return levelMapId is > 0 and <= int.MaxValue
             ? AppendInternalId(
-                ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId, fallbackName),
+                ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId),
                 InternalIdDisplayMode.MapOnly,
                 levelMapId)
-            : fallbackName?.Trim() ?? string.Empty;
+            : string.Empty;
     }
 
     public static string GetSkillIconName(int skillId, string? fallbackIcon = null)
@@ -441,24 +674,32 @@ public static class CombatDataCatalog
     private static string ResolveText(
         IReadOnlyDictionary<string, FrozenDictionary<int, string>> localizedNames,
         string cultureName,
-        int id,
-        string? fallbackName)
+        int id)
     {
+        // 「キーが無い」ではなく「空欄」で落とす。テーブルはIDを全言語ぶん持ち、
+        // 訳が用意できていない言語だけ空文字にしてある。
         var normalizedCulture = NormalizeCultureName(cultureName);
         if (localizedNames.TryGetValue(normalizedCulture, out var currentNames)
-            && currentNames.TryGetValue(id, out var currentName))
+            && currentNames.TryGetValue(id, out var currentName)
+            && !string.IsNullOrWhiteSpace(currentName))
         {
             return currentName;
         }
 
-        if (!string.Equals(normalizedCulture, "en-US", StringComparison.OrdinalIgnoreCase)
-            && localizedNames.TryGetValue("en-US", out var englishNames)
-            && englishNames.TryGetValue(id, out var englishName))
+        // 受け皿は zh-CN ただ1つ。en-US を挟まないのは、言語ごとに違う受け皿へ落ちると
+        // 「どの言語のテーブルが欠けているのか」が分からなくなるため。
+        //
+        // 記録時の名前(CombatStats.Name)も使わない。あれは同梱 SkillTable/BuffTable 由来で、
+        // 英語と中国語が混ざっており表示言語に追従しない。名前は翻訳テーブルだけが決める。
+        if (!string.Equals(normalizedCulture, "zh-CN", StringComparison.OrdinalIgnoreCase)
+            && localizedNames.TryGetValue("zh-CN", out var chineseNames)
+            && chineseNames.TryGetValue(id, out var chineseName)
+            && !string.IsNullOrWhiteSpace(chineseName))
         {
-            return englishName;
+            return chineseName;
         }
 
-        return fallbackName?.Trim() ?? string.Empty;
+        return string.Empty;
     }
 
     private static string NormalizeCultureName(string? cultureName)

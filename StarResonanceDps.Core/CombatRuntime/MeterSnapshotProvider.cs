@@ -512,7 +512,7 @@ public static class MeterSnapshotProvider
                 : 0d;
             var snapshot = new PlayerCooldownSkillSnapshot(
                 skillLevel.SkillId,
-                CombatDataCatalog.GetSkillName(skillLevel.SkillId, skillLevel.Name),
+                CombatDataCatalog.GetSkillName(skillLevel.SkillId),
                 iconName,
                 currentLevel,
                 skillLevel.Tier,
@@ -627,7 +627,7 @@ public static class MeterSnapshotProvider
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillId);
         return new PlayerCooldownSkillSnapshot(
             skillId,
-            CombatDataCatalog.GetSkillName(skillId, string.Empty),
+            CombatDataCatalog.GetSkillName(skillId),
             iconName,
             currentLevel,
             tier,
@@ -1462,14 +1462,22 @@ public static class MeterSnapshotProvider
                 ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
                 : 0d;
 
-            var iconName = CombatDataCatalog.GetSkillIconName(stat.Key);
+            // 畳み先が決まらなかったバフは、スキルIDではなくバフIDのまま行になる。
+            // SkillTable と BuffTable は90IDが重複するので、種別を見ないと取り違える。
+            var isBuffSource = entity.SkillMetrics.TryGetValue(stat.Key, out var sourceContainer)
+                && sourceContainer.IsBuffSource;
+            var iconName = isBuffSource
+                ? CombatDataCatalog.GetBuffOwnIconName(stat.Key)
+                : CombatDataCatalog.GetSkillIconName(stat.Key);
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
                 // 記録された名前はフォールバックとして渡す。
-                CombatDataCatalog.GetSkillName(stat.Key, value.Name),
+                isBuffSource
+                    ? CombatDataCatalog.GetBuffName(stat.Key)
+                    : CombatDataCatalog.GetSkillName(stat.Key),
                 iconName,
-                CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
+                !isBuffSource && CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
                 value.ValueTotal,
                 value.ValuePerSecondActive,
                 value.ValuePerSecond,
@@ -1621,8 +1629,8 @@ public static class MeterSnapshotProvider
     private static string ResolveBuffName(BuffEvent buffEvent)
     {
         return buffEvent.BaseId > 0
-            ? CombatDataCatalog.GetBuffName(buffEvent.BaseId, buffEvent.Name)
-            : buffEvent.Name ?? string.Empty;
+            ? CombatDataCatalog.GetBuffName(buffEvent.BaseId)
+            : string.Empty;
     }
 
     private static string ResolveBuffOwnIconName(BuffEvent buffEvent)

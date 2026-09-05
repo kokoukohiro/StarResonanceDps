@@ -197,8 +197,8 @@
   </Target>
 
   <ItemGroup>
-    <None Include="..\StarResonanceDps.Core\Data\CombatRuntime\**\*.json">
-      <Link>Data\CombatRuntime\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <None Include="..\StarResonanceDps.Core\Data\**\*.json">
+      <Link>Data\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

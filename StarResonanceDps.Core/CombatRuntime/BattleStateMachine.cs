@@ -27,7 +27,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static void StartNewMap()
         {
-            Diagnostics.SceneResetProbe.CaptureStartNewMap();
             Log.Information($"{DateTime.Now} - BattleStateMachine.StartNewMap");
             PreviousDungeonTargetData = null;
             DeferredEncounterStartTime = null;
@@ -49,6 +48,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
             Services.ActiveBuffStore.Instance.Clear();
+            Services.BuffSourceIndex.Instance.Clear();
 
             if (!Settings.Instance.PersistEncounterSavingPauseStateBetweenMaps)
             {

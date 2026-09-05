@@ -394,29 +394,12 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             LevelMapId = levelMapId;
 
-            // 生テーブルの名前は英語1言語ぶん。表示中の言語で引き直す。
-            SceneName = levelMapId > 0
-                ? CombatDataCatalog.GetSceneName(levelMapId, ResolveSceneFallbackName(levelMapId))
-                : "";
+            // 名前は翻訳テーブルだけが決める。生テーブルは持たない。
+            SceneName = levelMapId > 0 ? CombatDataCatalog.GetSceneName(levelMapId) : "";
 
             Current.SceneId = LevelMapId;
             Current.SceneName = SceneName;
             DB.UpdateBattleInfo(CurrentBattleId, LevelMapId, SceneName);
-        }
-
-        /// <summary>
-        /// 生テーブルのシーン名。<b>英語1言語ぶんしか無い</b>ので、
-        /// 翻訳テーブルから引けなかったときの落とし先にだけ使う。
-        /// </summary>
-        private static string ResolveSceneFallbackName(uint levelMapId)
-        {
-            HelperMethods.DataTables.Dungeons.Data.TryGetValue(levelMapId.ToString(), out var dungeon);
-
-            return dungeon is { PlayType: 17 }
-                ? dungeon.Name
-                : HelperMethods.DataTables.Scenes.Data.TryGetValue(levelMapId.ToString(), out var scene)
-                    ? scene.Name
-                    : string.Empty;
         }
 
         /// <summary>
@@ -439,9 +422,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            SceneName = CombatDataCatalog.GetSceneName(
-                LevelMapId,
-                ResolveSceneFallbackName(LevelMapId));
+            SceneName = CombatDataCatalog.GetSceneName(LevelMapId);
 
             // 投影は internal なので App からは触れない。ここまでを1つの操作にする。
             PlayerRosterProjection.UpdateMapName();
@@ -724,10 +705,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 else if (entity.EntityType == EEntityType.EntDummy)
                 {
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString()!, out var dummyEntry))
-                    {
-                        entity.SetName(dummyEntry.Name);
-                    }
+                    entity.SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(attr_id)));
                 }
             }
         }
@@ -752,10 +730,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 else if (entity.EntityType == EEntityType.EntDummy)
                 {
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(value.ToString()!, out var dummyEntry))
-                    {
-                        entity.SetName(dummyEntry.Name);
-                    }
+                    entity.SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(value)));
                 }
             }
             else if (key == "AttrName")
@@ -786,8 +761,18 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (!IsBenchmarkMetricCaptureStopped())
                 {
-                    OnSkillActivated(new SkillActivatedEventArgs { CasterUuid = uuid, SkillId = (int)value, ActivationDateTime = DateTime.Now });
-                    entity.RegisterSkillActivation((int)value);
+
+                    // AttrSkillId は詠唱中のスキルIDを持つ属性で、詠唱が終わると
+                    // 「値なし」で飛んでくる。MessageManager がそれを 0 に変換しているので、
+                    // 0 は「撃った」ではなく「詠唱が終わった」の合図。
+                    // そのまま通すと SkillMetrics[0] が作られ TotalCasts も水増しされる
+                    // (ダメージ側は skillId == 0 を弾いているのに、ここだけ弾いていなかった)。
+                    var activatedSkillId = (int)value;
+                    if (activatedSkillId > 0)
+                    {
+                        OnSkillActivated(new SkillActivatedEventArgs { CasterUuid = uuid, SkillId = activatedSkillId, ActivationDateTime = DateTime.Now });
+                        entity.RegisterSkillActivation(activatedSkillId);
+                    }
                 }
             }
             else if (key == "AttrState")
@@ -1079,8 +1064,37 @@ namespace StarResonanceDps.Core.CombatRuntime
             entity.RegisterSkillActivation(skillId);
         }
 
+        /// <summary>
+        /// 畳めずバフIDのまま記録した行に印を付ける。
+        /// 記録(<c>AddDamage</c> 等)の後に呼ぶこと。行が無ければ何もしない。
+        /// </summary>
+        public void MarkBuffSourcedSkill(long entityUuid, int skillId)
+        {
+            if (entityUuid == 0 || skillId == 0)
+            {
+                return;
+            }
+
+            if (Entities.TryGetValue(entityUuid, out var entity)
+                && entity.SkillMetrics.TryGetValue(skillId, out var container))
+            {
+                container.IsBuffSource = true;
+            }
+        }
+
+        /// <param name="identitySkillId">
+        /// 特化判定に使う<b>ゲームが実際に発動したスキルID</b>。判定できないときは 0。
+        ///
+        /// <para>
+        /// <paramref name="skillId"/> は表示・集計用に畳んだIDなので、ここには使えない。
+        /// 畳み込みは弾・バフ・コンボ段を1つのIDへ寄せるため、置換後スキル表が想定していない
+        /// 入力まで当たるようになる。実測(2026-09-05)では、安可(Encore)が味方を attacker として
+        /// 発生させるギターの通常攻撃 <c>230401</c> が <c>2304</c> を経てコンボ先頭 <c>2301</c> へ畳まれ、
+        /// 味方16人を響奏(と職業ビートパフォーマー)にしていた。
+        /// </para>
+        /// </param>
         public void AddDamage(
-            long attackerUuid, long targetUuid, int skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
+            long attackerUuid, long targetUuid, int skillId, int identitySkillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
             bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
         {
@@ -1118,7 +1132,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // ダメージは RegisterSkillActivation を通らない別経路なので、ここでも引く。
             // 詠唱の属性を取りこぼした場合の受け皿。同じ特化なら中で何もしない。
-            attacker.UpdateSubProfessionFromReplacedSkill(skillId);
+            // 渡すのは畳む前の生のスキルID。理由は identitySkillId の説明を見ること。
+            attacker.UpdateSubProfessionFromReplacedSkill(identitySkillId);
             attacker.AddDamage(targetUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damagePos, extraPacketData);
         }
 
@@ -1207,7 +1222,14 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         }
 
-        public void NotifyBuffEvent(long entityUuid, EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, int layer, int duration, int sourceConfigId, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0)
+        /// <param name="carriesBuffInfo">
+        /// このイベントが <c>BuffInfo</c>(または <c>BuffChange</c>)を伴っていたか。
+        /// <b><c>false</c> なら <c>baseId</c> 以下の値は「サーバが送ってこなかった」ことを表すゼロ</b>で、
+        /// バフの実際の状態ではない。バフ効果は <c>LogicEffect</c> を持たない回があり
+        /// (実測25分で57,320件・種別は <c>BuffEventAddTo</c> の再送が大半)、
+        /// そこで持続や層を書き込むと、時限バフが持続0＝無期限に化けて消えなくなる。
+        /// </param>
+        public void NotifyBuffEvent(long entityUuid, EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, int layer, int duration, int sourceConfigId, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0, bool carriesBuffInfo = true)
         {
             string entityCasterName = "";
             if (fireUuid > 0)
@@ -1234,7 +1256,19 @@ namespace StarResonanceDps.Core.CombatRuntime
                 UpdateDateTime = extraPacketData.ArrivalTime,
                 CreationDateTime = creationTime,
             });
-            GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData);
+            GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData, fightSourceType, carriesBuffInfo);
+
+            // 発生源の畳み込みで引く索引。生きている実体だけを持つ。
+            // 時刻は DateTime.Now で揃える(パケット到着時刻は基準が別なので混ぜない)。
+            if (buffEventType == EBuffEventType.BuffEventRemove)
+            {
+                Services.BuffSourceIndex.Instance.Remove(entityUuid, buffUuid);
+            }
+            else
+            {
+                Services.BuffSourceIndex.Instance.Add(
+                    fireUuid, entityUuid, buffUuid, baseId, fightSourceType, sourceConfigId, duration, DateTime.Now);
+            }
 
             // 強化する9特化は、特化アビリティ本体が付与するバフ(と、その実行時変種)で判定する。
             // 紐付け先は保持者ではなく術者(FireUuid)。味方に配られるバフは受け手が保持するので、
@@ -1247,7 +1281,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (baseId > 0)
             {
-                ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType);
+                ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType, entityUuid, sourceConfigId);
             }
         }
 
@@ -1273,7 +1307,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>あることしか示さない。除去は見ない。</para>
         /// </summary>
-        public void ApplySpecFromTalentBuff(int observedBuffId, int buffUuid, long fireUuid, int fightSourceType)
+        public void ApplySpecFromTalentBuff(int observedBuffId, int buffUuid, long fireUuid, int fightSourceType, long holderUuid = 0, int sourceConfigId = 0)
         {
             if (!DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
                     observedBuffId, out var grantedBuffId, out var spec, out var distanceFromRoot))
@@ -1291,7 +1325,34 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 除去を突き合わせられるのはマーカー本体(ツリーの根)だけ。距離1以上の派生バフは
             // procで付いたり消えたりするので、それが消えても未装着の根拠にならない。
             var isMarker = distanceFromRoot == 0;
-            GetOrCreateEntity(fireUuid).UpdateSubProfessionFromTalentBuff(
+            var target = GetOrCreateEntity(fireUuid);
+
+            // 常設の食い違い検知。枝タレント(距離1以上)が、控えてあるマーカーと違う特化を
+            // 書こうとしたら記録する。判定表か10刻み丸めの誤りで、実測ではこれで
+            // 2204241 と 2201612 を捕まえた。
+            //
+            // マーカー自身(距離0)は除く。クラス変更でも、ビルドプリセットの一括配信でも
+            // 別のマーカーが正当に来るため、食い違いの証拠にならない。
+            if (!isMarker
+                && target.SpecMarkerBuffId != 0
+                && DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
+                    target.SpecMarkerBuffId, out _, out var markerSpec, out _)
+                && markerSpec != spec)
+            {
+                Diagnostics.SpecConflictProbe.CaptureTalentConflict(
+                    observedBuffId,
+                    grantedBuffId,
+                    spec.ToString(),
+                    distanceFromRoot,
+                    fightSourceType,
+                    sourceConfigId,
+                    target.SpecMarkerBuffId,
+                    markerSpec.ToString(),
+                    fireUuid,
+                    holderUuid);
+            }
+
+            target.UpdateSubProfessionFromTalentBuff(
                 (int)spec,
                 isMarker ? grantedBuffId : 0,
                 isMarker ? buffUuid : 0);
@@ -1730,10 +1791,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attr_id != null)
                 {
                     UID = (int)attr_id;
-                    if (HelperMethods.DataTables.Dummys.Data.TryGetValue(attr_id.ToString()!, out var dummyEntry))
-                    {
-                        SetName(dummyEntry.Name);
-                    }
+                    SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(attr_id)));
                 }
             }
         }
@@ -1913,11 +1971,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 container = new();
 
-                if (HelperMethods.DataTables.Skills.Data.TryGetValue(skillId.ToString(), out var skill))
-                {
-                    container.Damage.SetName(skill.Name);
-                    container.Healing.SetName(skill.Name);
-                }
+                // 名前は翻訳テーブルだけが決める。生テーブルの Name は言語が混ざっていて追従しない。
+                var registeredName = CombatDataCatalog.GetSkillName(skillId);
+                container.Damage.SetName(registeredName);
+                container.Healing.SetName(registeredName);
 
                 container.Damage.RegisterActivation();
                 container.Healing.RegisterActivation();
@@ -1946,10 +2003,10 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 combatStats.SetSkillType(skillType);
 
+                combatStats.SetName(CombatDataCatalog.GetSkillName(skillId));
+
                 if (HelperMethods.DataTables.Skills.Data.TryGetValue(skillId.ToString(), out var skill))
                 {
-                    combatStats.SetName(skill.Name);
-
                     var attrSkillLevelIdList = GetAttrKV("AttrSkillLevelIdList");
                     if (attrSkillLevelIdList != null)
                     {
@@ -2015,10 +2072,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     Serilog.Log.Warning($"RegisterSkillData SkillId {skillId} was an Unknown skill type and was not updated.");
                 }
 
-                if (string.IsNullOrEmpty(combatStats.Name) && HelperMethods.DataTables.Skills.Data.TryGetValue(skillId.ToString(), out var skill))
+                if (string.IsNullOrEmpty(combatStats.Name))
                 {
-                    combatStats.SetName(skill.Name);
+                    combatStats.SetName(CombatDataCatalog.GetSkillName(skillId));
+                }
 
+                if (HelperMethods.DataTables.Skills.Data.TryGetValue(skillId.ToString(), out var skill))
+                {
                     var attrSkillLevelIdList = GetAttrKV("AttrSkillLevelIdList");
                     if (attrSkillLevelIdList != null)
                     {
@@ -2227,10 +2287,22 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void UpdateSubProfessionFromReplacedSkill(int skillId)
         {
-            var subProfessionId = (int)DataTypes.SpecDetectionTables.GetSubProfessionIdByReplacedSkillId(skillId);
+            var resolved = DataTypes.SpecDetectionTables.GetSubProfessionIdByReplacedSkillId(skillId);
+            var subProfessionId = (int)resolved;
             if (subProfessionId <= 0 || SubProfessionId == subProfessionId)
             {
                 return;
+            }
+
+            // 常設の食い違い検知。置換後スキルが示す特化と、控えてあるマーカーが違うなら記録する。
+            // 味方に発生させるスキル(安可など)を自分のものとして数えていると、この形で出る。
+            if (SpecMarkerBuffId != 0
+                && DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(
+                    SpecMarkerBuffId, out _, out var markerSpec, out _)
+                && markerSpec != resolved)
+            {
+                Diagnostics.SpecConflictProbe.CaptureReplacedSkillConflict(
+                    skillId, resolved.ToString(), SpecMarkerBuffId, markerSpec.ToString(), UUID);
             }
 
             SetSubProfessionId(subProfessionId);
@@ -2309,14 +2381,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </para>
         /// </summary>
         public void ApplyBuffSnapshotForSpec(
-            IReadOnlyList<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType)> buffs)
+            IReadOnlyList<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType, int SourceConfigId)> buffs)
         {
             HasBuffSnapshot = true;
             var manager = EncounterManager.Current;
             for (var index = 0; index < buffs.Count; index++)
             {
                 manager?.ApplySpecFromTalentBuff(
-                    buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid, buffs[index].FightSourceType);
+                    buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid, buffs[index].FightSourceType,
+                    UUID, buffs[index].SourceConfigId);
             }
 
             // 自分が術者のタレントバフが1件も無かった＝未装着。PTメンバーぶんはキャッシュにも残す。
@@ -2371,7 +2444,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             RegisterSkillData(ESkillType.Taken, attackerUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, victimPos, extraPacketData);
         }
 
-        public void NotifyBuffEvent(EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, TimeSpan encounterTime, DateTime? creationTime, ExtraPacketData extraPacketData)
+        /// <param name="carriesBuffInfo">
+        /// このイベントが <c>BuffInfo</c>(または <c>BuffChange</c>)を伴っていたか。
+        /// <c>false</c> のとき渡ってくる 0 は「送られてこなかった」という意味なので、
+        /// 既に知っているバフの持続・層・付与時刻を上書きしない。
+        /// </param>
+        public void NotifyBuffEvent(EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, TimeSpan encounterTime, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0, bool carriesBuffInfo = true)
         {
             if (buffEventType == EBuffEventType.BuffEventRemove)
             {
@@ -2395,30 +2473,37 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else
             {
-                if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
+                var isKnownBuff = BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent);
+                if (!isKnownBuff)
                 {
-                    buffEvent = new BuffEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId);
+                    buffEvent = new BuffEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, fightSourceType);
                 }
-                else
+                else if (carriesBuffInfo)
                 {
-                    buffEvent.SetEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId);
+                    buffEvent.SetEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, fightSourceType);
                 }
 
-                if (creationTime != null)
+                // BuffInfo を伴わない回は、持続・層・付与時刻を「知らされていない」まま据え置く。
+                // ここで書き込むと、10秒のバフが持続0(=無期限)に化けて除去が来るまで消えなくなり、
+                // 付与時刻が毎回ずれることで ActiveBuffStore の同一実体判定も落ちて残り時間が巻き戻る。
+                if (!isKnownBuff || carriesBuffInfo)
                 {
-                    var diff = extraPacketData.ArrivalTime.Subtract(creationTime.Value).TotalSeconds;
-                    if (diff < -5 || diff > 0)
+                    if (creationTime != null)
                     {
-                        buffEvent.SetAddTime(encounterTime.Duration(), creationTime.Value);
+                        var diff = extraPacketData.ArrivalTime.Subtract(creationTime.Value).TotalSeconds;
+                        if (diff < -5 || diff > 0)
+                        {
+                            buffEvent.SetAddTime(encounterTime.Duration(), creationTime.Value);
+                        }
+                        else
+                        {
+                            buffEvent.SetAddTime(encounterTime.Duration(), extraPacketData.ArrivalTime);
+                        }
                     }
                     else
                     {
                         buffEvent.SetAddTime(encounterTime.Duration(), extraPacketData.ArrivalTime);
                     }
-                }
-                else
-                {
-                    buffEvent.SetAddTime(encounterTime.Duration(), extraPacketData.ArrivalTime);
                 }
 
                 if (Settings.Instance.LimitEncounterBuffTrackingInOpenWorld && BattleStateMachine.IsInOpenWorld() && BuffEvents.Count > 99)
@@ -2702,6 +2787,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         public CombatStats Damage = new();
         public CombatStats Healing = new();
         public CombatStats Taken = new();
+
+        /// <summary>
+        /// この鍵がスキルIDではなくバフIDであることを示す。
+        /// 畳み先が決まらなかったバフは生のIDのまま行になるので、名前を
+        /// <c>GetSkillName</c> ではなく <c>GetBuffName</c> で引く必要がある。
+        /// <c>SkillTable</c> と <c>BuffTable</c> は90IDが重複するため、種別を持たないと取り違える。
+        /// </summary>
+        public bool IsBuffSource { get; set; }
     }
 
     public class StatTracker
@@ -3254,6 +3347,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int Layer { get; private set; }
         public int Duration { get; private set; }
         public int SourceConfigId { get; private set; }
+
+        /// <summary>
+        /// この実体を作ったものの種別(<c>EFightSource</c>)。<c>SourceConfigId</c> の中身が
+        /// スキルIDかバフIDかはこれで決まるので、片方だけでは発生源を辿れない。
+        /// </summary>
+        public int FightSourceType { get; private set; }
         public string Name { get; private set; } = null!;
         [JsonIgnore]
         public string Description { get; private set; } = "";
@@ -3273,8 +3372,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         [JsonConstructor]
-        public BuffEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId)
+        public BuffEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, int fightSourceType = 0)
         {
+            FightSourceType = fightSourceType;
             Uuid = uuid;
             BaseId = baseId;
             Level = level;
@@ -3339,8 +3439,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             Description = value;
         }
 
-        public void SetEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId)
+        public void SetEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, int fightSourceType = 0)
         {
+            FightSourceType = fightSourceType;
             Uuid = uuid;
             if (baseId > 0)
             {

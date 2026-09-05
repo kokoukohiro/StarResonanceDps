@@ -11,12 +11,6 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
     private PlayerEquipmentData? _lastEquipmentData;
 
     [ObservableProperty]
-    private bool _showBasicAttributes;
-
-    [ObservableProperty]
-    private bool _showAdvancedAttributes = true;
-
-    [ObservableProperty]
     private bool _showUnknownAttributes;
 
     [ObservableProperty]

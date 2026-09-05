@@ -165,7 +165,10 @@ public static class SpecDetectionTables
         2201580  => (SubProfessionId.SubProfession_Block,              3), // 剛守  根から3 node=956001  壁垒怒火
         2201590  => (SubProfessionId.SubProfession_Block,              7), // 剛守  根から7 node=964001  格挡庇护
         2201600  => (SubProfessionId.SubProfession_Block,              7), // 剛守  根から7 node=958001  魔法格挡
-        2201610  => (SubProfessionId.SubProfession_Block,              3), // 剛守  根から3 node=907011  岩之心
+        // 2201610 岩心(Rock Heart, node=907011) は除外。10刻み丸めで同じ扱いになる 2201612 が
+        // 別バフ「岩属性強化(有効中は岩属性ボーナス+10%)」で、剛守10件・剛身5件と両特化から出るため
+        // (2026-09-05 実測)。2201610 と 2201611 自体は剛守の保持者からしか出ていないが、
+        // 丸めの前で弾く仕組みが無いのでキーごと外す。再生成しても復活させないこと。
         2201620  => (SubProfessionId.SubProfession_Block,              5), // 剛守  根から5 node=6064  轰拳
         2201630  => (SubProfessionId.SubProfession_Block,              7), // 剛守  根から7 node=966001  轰拳激怒
         2201640  => (SubProfessionId.SubProfession_Block,             13), // 剛守  根から13 node=913016  岩拳回复
@@ -295,7 +298,11 @@ public static class SpecDetectionTables
         2204190  => (SubProfessionId.SubProfession_Icicle,            10), // 氷牙  根から10 node=221011  冰川怒潮
         2204200  => (SubProfessionId.SubProfession_Icicle,            10), // 氷牙  根から10 node=215011  极寒之矛
         2204230  => (SubProfessionId.SubProfession_Frostbeam,          6), // 霜天  根から6 node=234001  玄冰无界
-        2204240  => (SubProfessionId.SubProfession_Icicle,             7), // 氷牙  根から7 node=226026  冰霜冲击
+        // 2204240 氷霜衝撃(Frost Shock, node=226026) は除外。両特化が共通で発動できるタレントスキルで、
+        // 特化を区別できない(2026-09-05 ユーザー調査)。実測もそれを裏付ける:
+        // 2204240 は氷牙のマーカー保持者から2件、丸めで同じ扱いになる 2204241 は霜天の保持者から18件。
+        // Star-Unpack の TalentTreeTable では node=226026 が wt=2/bd=0(氷牙)の1ノードにしか現れないため、
+        // 静的データからは共通と判別できない。再生成しても復活させないこと。
         2204260  => (SubProfessionId.SubProfession_Frostbeam,          7), // 霜天  根から7 node=228026  冰息宁静
         2204290  => (SubProfessionId.SubProfession_Frostbeam,          5), // 霜天  根から5 node=231003  冰光共鸣
         2204300  => (SubProfessionId.SubProfession_Icicle,             0), // 氷牙  根から0 node=233002  冰矛流
@@ -582,4 +589,4 @@ public static class SpecDetectionTables
         distanceFromRoot = distance;
         return true;
     }
-}
+}

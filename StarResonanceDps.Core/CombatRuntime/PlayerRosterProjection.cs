@@ -23,9 +23,6 @@ internal static class PlayerRosterProjection
             NearbyPlayerUuids.Clear();
         }
 
-        Diagnostics.SceneResetProbe.CaptureReset(
-            "プレイヤーリスト", previousNearbyPlayerUuids.Length);
-
         foreach (var playerUuid in previousNearbyPlayerUuids)
         {
             ClearTransientHumanSubProfession(playerUuid);

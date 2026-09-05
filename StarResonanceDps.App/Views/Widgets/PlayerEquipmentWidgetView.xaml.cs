@@ -77,9 +77,7 @@ public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScr
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(PlayerEquipmentWidgetViewModel.ShowBasicAttributes)
-            or nameof(PlayerEquipmentWidgetViewModel.ShowAdvancedAttributes)
-            or nameof(PlayerEquipmentWidgetViewModel.ShowUnknownAttributes)
+        if (e.PropertyName is nameof(PlayerEquipmentWidgetViewModel.ShowUnknownAttributes)
             or nameof(PlayerEquipmentWidgetViewModel.EquipmentDataState))
         {
             Dispatcher.BeginInvoke(NotifyVerticalScrollMetricsChanged);

@@ -110,6 +110,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
             ActiveBuffStore.Instance.Clear();
+            BuffSourceIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
         }
 
@@ -368,14 +369,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         "NotifySocialData",
                         resetForSceneChange: isSceneChange);
                     EncounterManager.AllowSceneUpdate = false;
-                }
-                else
-                {
-                    Diagnostics.SceneResetProbe.CaptureSkipped(
-                        "NotifySocialData",
-                        socialScene.LevelMapId,
-                        socialScene.LineId,
-                        socialScene.SceneGuid);
                 }
             }
         }
@@ -1179,7 +1172,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // FireUuid(術者)と FightSourceType も運ぶ。どちらも特化判定の採用条件。
-            var snapshot = new List<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType)>(buffInfos.Count);
+            // SourceConfigId は判定が食い違ったときに正体を割り出す唯一の手掛かりなので一緒に持つ。
+            var snapshot = new List<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType, int SourceConfigId)>(buffInfos.Count);
             for (var index = 0; index < buffInfos.Count; index++)
             {
                 var buffInfo = buffInfos[index];
@@ -1189,7 +1183,21 @@ namespace StarResonanceDps.Core.CombatRuntime
                         buffInfo.BaseId,
                         buffInfo.BuffUuid,
                         buffInfo.FireUuid,
-                        buffInfo.FightSourceInfo?.FightSourceType ?? 0));
+                        buffInfo.FightSourceInfo?.FightSourceType ?? 0,
+                        buffInfo.FightSourceInfo?.SourceConfigId ?? 0));
+
+                    // 発生源の畳み込みで引く索引へも入れる。AOIに入った時点で既に
+                    // 乗っているバフはこの経路でしか届かず、BuffEffect には出てこない。
+                    Services.BuffSourceIndex.Instance.Add(
+                        buffInfo.FireUuid,
+                        entity.Uuid,
+                        buffInfo.BuffUuid,
+                        buffInfo.BaseId,
+                        buffInfo.FightSourceInfo?.FightSourceType ?? 0,
+                        buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                        buffInfo.Duration,
+                        DateTime.Now);
+
                 }
             }
 
@@ -1286,8 +1294,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             List<int> EventHandledBuffs = new();
             List<int> LogicHandledBuffs = new();
             var sawBuffAdd = false;
-            var selfBuffAddCount = 0;
-            var selfBuffAddIds = new List<int>();
             if (delta.BuffEffect != null)
             {
                 for (int buffIdx = 0; buffIdx < delta.BuffEffect.BuffEffects.Count; buffIdx++)
@@ -1295,6 +1301,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     var buffEffect = delta.BuffEffect.BuffEffects[buffIdx];
                     EventHandledBuffs.Add(buffEffect.BuffUuid);
+
 
                     if (buffEffect.LogicEffect != null && buffEffect.LogicEffect.Count > 0)
                     {
@@ -1315,11 +1322,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     creationTime = dto.UtcDateTime;
                                 }
                                 sawBuffAdd = true;
-                                selfBuffAddCount++;
 
-                                // 打ち切らない。以前は先頭12件で切っていたが、
-                                // 表に無いIDこそ探しているので、切ると探索の窓が塞がる。
-                                selfBuffAddIds.Add(buffInfo.BaseId);
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, buffInfo.FightSourceInfo?.FightSourceType ?? 0);
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
@@ -1333,6 +1336,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                                     creationTime = dto.UtcDateTime;
                                 }
+
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, changeInfo.Layer, (int)changeInfo.Duration, 0, creationTime, extraData);
                             }
                         }
@@ -1342,7 +1346,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                         if (!LogicHandledBuffs.Contains(buffEffect.BuffUuid))
                         {
-                            EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, 0, 0, 0, null, extraData);
+                            // LogicEffect が無い回。baseId 以下はサーバが送ってこなかったぶんの 0 で、
+                            // バフの状態ではない。carriesBuffInfo: false で「知らない」ことを伝える。
+                            EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, 0, 0, 0, null, extraData, carriesBuffInfo: false);
                         }
                     }
 
@@ -1409,8 +1415,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             foreach (var syncDamageInfo in skillEffect.Damages)
             {
 
-                int skillId = syncDamageInfo.OwnerId;
-                if (skillId == 0)
+                if (syncDamageInfo.OwnerId == 0)
                 {
                     continue;
                 }
@@ -1421,6 +1426,40 @@ namespace StarResonanceDps.Core.CombatRuntime
                     continue;
                 }
                 bool isAttackerPlayer = (Utils.UuidToEntityType(attackerUuid) == (long)EEntityType.EntChar);
+
+                // 召喚体が出した一撃は、その種別ID(AttrId)がそのままスキルIDになる。
+                // 実測で49,105件のうち91.3%が SkillTable に直接、6.8%が SkillFightLevelTable 経由。
+                var summonAttrId = 0;
+                if (Utils.IsSummonByUuid(syncDamageInfo.AttackerUuid)
+                    && EncounterManager.Current.Entities.TryGetValue(
+                        syncDamageInfo.AttackerUuid, out var summonEntity)
+                    && summonEntity.UID > 0)
+                {
+                    summonAttrId = (int)summonEntity.UID;
+                }
+
+                // OwnerId の中身は DamageSource で変わる(スキルID / 弾ID / バフID)。
+                // 表示に使うIDへ畳む。バフは実体を見ないと親が決まらないため、
+                // バフの処理をこのメソッドの前段で済ませてある順序に依存している。
+                var foldedSource = SkillSourceResolver.Resolve(
+                    syncDamageInfo.DamageSource,
+                    syncDamageInfo.OwnerId,
+                    syncDamageInfo.AttackerUuid,
+                    summonAttrId,
+                    DateTime.Now);
+                int skillId = foldedSource.Id;
+
+                // 職業・特化の判定には、畳んだIDではなく「ゲームが実際に発動したスキルID」を使う。
+                // 畳み込みは弾・バフ・コンボ段を1つの表示IDへ寄せるので、判定表が想定していない
+                // 入力まで当たるようになる(実測: 安可が味方に発生させる 230401 が
+                // 2304 を経てコンボ先頭 2301 へ畳まれ、味方16人を響奏にしていた)。
+                //
+                // Skill 由来に限るのは、OwnerId がスキルIDを名乗るのがこのときだけだから。
+                // 弾・バフ由来の生IDをそのまま渡すと、SkillTable と BuffTable で重複する
+                // 90個のIDに当たる(置換後スキル表の 2301 は BuffTable にも存在する)。
+                var identitySkillId = syncDamageInfo.DamageSource == EDamageSource.Skill
+                    ? syncDamageInfo.OwnerId
+                    : 0;
 
                 if (syncDamageInfo.TopSummonerId != 0)
                 {
@@ -1433,7 +1472,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (isAttackerPlayer && attackerUuid != 0)
                 {
                     EncounterManager.Current.SetEntityType(attackerUuid, EEntityType.EntChar);
-                    var professionId = Professions.GetBaseProfessionIdBySkillId(skillId);
+                    // 特化判定と同じ理由で、こちらも畳む前の生のスキルIDで引く。
+                    // 畳んだIDだと 2301 → 職業13(ビートパフォーマー)が味方に付く。
+                    var professionId = foldedSource.IsBuffSource
+                        ? 0
+                        : Professions.GetBaseProfessionIdBySkillId(identitySkillId);
                     if (professionId != 0 && EncounterManager.Current.GetOrCreateEntity(attackerUuid).ProfessionId <= 0)
                     {
                         EncounterManager.Current.SetProfessionId(attackerUuid, professionId);
@@ -1542,10 +1585,19 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     if (attackerUuid != targetUuid)
                     {
-                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
+                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
                     }
 
                     EncounterManager.Current.AddTakenDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
+                }
+
+                // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。
+                // SkillTable と BuffTable は90IDが重複するので、種別を持たないと取り違える。
+                if (foldedSource.IsBuffSource)
+                {
+                    EncounterManager.Current.MarkBuffSourcedSkill(
+                        isHeal ? (isAttackerPlayer ? attackerUuid : 0) : attackerUuid, skillId);
+                    EncounterManager.Current.MarkBuffSourcedSkill(targetUuid, skillId);
                 }
 
                 if (isAttackerPlayer)
@@ -1636,9 +1688,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             string source,
             bool resetForSceneChange)
         {
-            Diagnostics.SceneResetProbe.CaptureSceneData(
-                source, levelMapId, lineId, sceneGuid, EncounterManager.AllowSceneUpdate, resetForSceneChange);
-
             // 先にシーンを反映してから刷新する。StartNewMap の中の DB.StartBattle が
             // LevelMapId / SceneName を読むため、逆順だと古いマップ名で battle 行が作られる。
             //

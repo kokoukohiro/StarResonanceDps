@@ -11,11 +11,6 @@
     <Folder Include="Statistics\" />
     <Folder Include="Logging\" />
   </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Data\SceneTable.json" />
-    <EmbeddedResource Include="Data\DungeonsTable.json" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
     <PackageReference Include="Google.Protobuf" Version="3.33.0" />

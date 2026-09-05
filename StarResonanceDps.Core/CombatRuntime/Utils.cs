@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.DataTypes;
+﻿using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using System.IO.Hashing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,7 +9,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 
 public static class Utils
 {
-    public static readonly string DATA_DIR_NAME = Path.Combine("Data", "CombatRuntime");
+    public const string DATA_DIR_NAME = "Data";
     private static readonly string[] PersistedRuntimeFileNames = ["Settings.json"];
     public static Version AppVersion { get; set; } = typeof(Utils).Assembly.GetName().Version ?? new Version(0, 0);
 
@@ -17,8 +17,12 @@ public static class Utils
     {
         Directory.CreateDirectory(DATA_DIR_NAME);
 
-        var dataRoot = Path.GetDirectoryName(DATA_DIR_NAME);
-        if (string.IsNullOrWhiteSpace(dataRoot) || !Directory.Exists(dataRoot))
+        // 旧レイアウトは Data/CombatRuntime/ の下に Settings.json と戦闘履歴DBを置いていた。
+        // データ一式を Data/ 直下へ移した(2026-09-04)ので、引っ越し元は Data の子ディレクトリ側になる。
+        // ここを親ディレクトリのままにすると DATA_DIR_NAME の親が空文字になり、
+        // 既存ユーザーの設定と履歴が旧フォルダに取り残される。
+        var dataRoot = DATA_DIR_NAME;
+        if (!Directory.Exists(dataRoot))
         {
             return;
         }

@@ -10,7 +10,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes.Skills
     public class SkillLevelInfo
     {
         public int SkillId = 0;
-        public string Name = "";
         public int CurrentLevel = 0;
         public int Tier = 0;
         public string Icon = "";
@@ -28,7 +27,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes.Skills
 
             if (HelperMethods.DataTables.Skills.Data.TryGetValue(SkillId.ToString(), out var skill))
             {
-                Name = skill.Name;
                 Icon = skill.Icon;
             }
         }

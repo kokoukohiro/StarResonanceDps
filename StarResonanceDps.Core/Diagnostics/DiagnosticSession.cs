@@ -19,6 +19,18 @@ public static class DiagnosticSession
     public static string Stamp { get; } =
         DateTime.Now.ToString("yyyy-MM-dd_HHmmss", CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// 常設プローブの出力先。<c>Logs</c> 直下には一時計測やアプリのログも並ぶので、
+    /// <b>出たら見るべきものだけ</b>をここへ分ける。
+    ///
+    /// <para>
+    /// 常設プローブは検知が1件も無ければファイルを作らない。
+    /// このフォルダにファイルがあること自体が検知の合図になる。
+    /// </para>
+    /// </summary>
+    public static string ResidentLogDirectory { get; } =
+        Path.Combine(AppContext.BaseDirectory, "Logs", "Resident");
+
     private static readonly HashSet<string> HeaderWritten = [];
     private static readonly Dictionary<string, (long Uuid, long CharId)> LastIdentity = [];
 
