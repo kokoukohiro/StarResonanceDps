@@ -1,364 +1,91 @@
 {
-  "2100401": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "2100401"
-  },
-  "2100410": {
-    "BuffType": 1,
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "2100410"
-  },
-  "2100411": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "2100411"
-  },
-  "2110061": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "2110061"
-  },
-  "2110066": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "2110066"
-  },
-  "2110115": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
-    "Id": "2110115"
-  },
-  "2110116": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
-    "Id": "2110116"
-  },
-  "2110123": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom",
-    "Id": "2110123"
-  },
-  "2200601": {
-    "BuffType": 1,
-    "Id": "2200601"
-  },
-  "2200641": {
-    "BuffType": 1,
-    "Id": "2200641"
-  },
-  "2201201": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "2201201"
-  },
-  "2201501": {
-    "BuffType": 1,
-    "Id": "2201501"
-  },
-  "2202201": {
-    "BuffType": 1,
-    "Id": "2202201"
-  },
-  "2202241": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04",
-    "Id": "2202241"
-  },
-  "2202262": {
-    "BuffType": 1,
-    "Id": "2202262"
-  },
-  "2203161": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird",
-    "Id": "2203161"
-  },
-  "2203441": {
-    "BuffType": 1,
-    "Id": "2203441"
-  },
-  "2204101": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
-    "Id": "2204101"
-  },
-  "2205131": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
-    "Id": "2205131"
-  },
-  "2206171": {
-    "BuffType": 1,
-    "Id": "2206171"
-  },
-  "2206331": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "2206331"
-  },
-  "2206461": {
-    "BuffType": 1,
-    "Id": "2206461"
-  },
-  "2207241": {
-    "BuffType": 1,
-    "Id": "2207241"
-  },
-  "2401130": {
-    "BuffType": 1,
-    "Id": "2401130"
-  },
-  "2401140": {
-    "BuffType": 1,
-    "Id": "2401140"
-  },
-  "2401260": {
-    "BuffType": 1,
-    "Id": "2401260"
-  },
-  "2401270": {
-    "BuffType": 1,
-    "Id": "2401270"
-  },
-  "2401271": {
-    "BuffType": 1,
-    "Id": "2401271"
-  },
-  "2402260": {
-    "BuffType": 1,
-    "Id": "2402260"
-  },
-  "2402270": {
-    "BuffType": 1,
-    "Id": "2402270"
-  },
-  "2403140": {
-    "BuffType": 1,
-    "Id": "2403140"
-  },
-  "2403150": {
-    "BuffType": 1,
-    "Id": "2403150"
-  },
-  "2403270": {
-    "BuffType": 1,
-    "Id": "2403270"
-  },
-  "2403280": {
-    "BuffType": 1,
-    "Id": "2403280"
-  },
-  "2404150": {
-    "BuffType": 1,
-    "Id": "2404150"
-  },
-  "2404160": {
-    "BuffType": 1,
-    "Id": "2404160"
-  },
-  "2404260": {
-    "BuffType": 1,
-    "Id": "2404260"
-  },
-  "2404270": {
-    "BuffType": 1,
-    "Id": "2404270"
-  },
-  "2405150": {
-    "BuffType": 1,
-    "Id": "2405150"
-  },
-  "2405160": {
-    "BuffType": 1,
-    "Id": "2405160"
-  },
-  "2405250": {
-    "BuffType": 1,
-    "Id": "2405250"
-  },
-  "2405260": {
-    "BuffType": 1,
-    "Id": "2405260"
-  },
-  "2406150": {
-    "BuffType": 1,
-    "Id": "2406150"
-  },
-  "2406160": {
-    "BuffType": 1,
-    "Id": "2406160"
-  },
-  "2406270": {
-    "BuffType": 1,
-    "Id": "2406270"
-  },
-  "2406280": {
-    "BuffType": 1,
-    "Id": "2406280"
-  },
-  "2407140": {
-    "BuffType": 1,
-    "Id": "2407140"
-  },
-  "2407150": {
-    "BuffType": 1,
-    "Id": "2407150"
-  },
-  "2407250": {
-    "BuffType": 1,
-    "Id": "2407250"
-  },
-  "2407260": {
-    "BuffType": 1,
-    "Id": "2407260"
-  },
-  "2407270": {
-    "BuffType": 1,
-    "Id": "2407270"
-  },
-  "2407280": {
-    "BuffType": 1,
-    "Id": "2407280"
-  },
-  "2407290": {
-    "BuffType": 1,
-    "Id": "2407290"
-  },
-  "2408130": {
-    "BuffType": 1,
-    "Id": "2408130"
-  },
-  "2408140": {
-    "BuffType": 1,
-    "Id": "2408140"
-  },
-  "2408260": {
-    "BuffType": 1,
-    "Id": "2408260"
-  },
-  "2408270": {
-    "BuffType": 1,
-    "Id": "2408270"
-  },
-  "3053401": {
-    "BuffType": 1,
-    "Id": "3053401"
-  },
-  "50049": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "50049"
-  },
-  "510902": {
-    "BuffType": 1,
-    "Id": "510902"
-  },
-  "55412": {
-    "BuffType": 1,
-    "Id": "55412"
-  },
-  "680101": {
-    "BuffType": 1,
-    "Id": "680101"
-  },
-  "680201": {
-    "BuffType": 1,
-    "Id": "680201"
-  },
-  "680401": {
-    "BuffType": 1,
-    "Id": "680401"
-  },
-  "680501": {
-    "BuffType": 1,
-    "Id": "680501"
-  },
-  "680701": {
-    "BuffType": 1,
-    "Id": "680701"
-  },
-  "682501": {
-    "BuffType": 1,
-    "Id": "682501"
-  },
-  "682503": {
-    "BuffType": 1,
-    "Id": "682503"
-  },
-  "682505": {
-    "BuffType": 1,
-    "Id": "682505"
-  },
-  "683858": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "683858"
-  },
-  "683859": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "683859"
-  },
-  "683861": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "683861"
-  },
-  "701018": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "701018"
-  },
-  "827206": {
-    "BuffType": 1,
-    "Id": "827206"
-  },
-  "829201": {
-    "Icon": "ui/atlas/hud/buff/buff_blue_cd",
-    "Id": "829201"
-  },
-  "829210": {
-    "Icon": "ui/atlas/hud/buff/buff_blue_cd",
-    "Id": "829210"
-  },
-  "833016": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom",
-    "Id": "833016"
-  },
-  "833201": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
-    "Id": "833201"
-  },
-  "833204": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
-    "Id": "833204"
-  },
-  "835008": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird",
-    "Id": "835008"
-  },
-  "881554": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "881554"
-  },
-  "881556": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "881556"
-  },
-  "883719": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "883719"
-  },
-  "883721": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion",
-    "Id": "883721"
-  },
-  "883826": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral",
-    "Id": "883826"
-  },
-  "974301": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget",
-    "Id": "974301"
-  },
-  "974343": {
-    "BuffType": 1,
-    "Icon": "ui/atlas/buff/buff_fairytail_icon001",
-    "Id": "974343"
-  },
-  "997047": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04",
-    "Id": "997047"
-  },
-  "997110": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "997110"
-  },
-  "999995": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea",
-    "Id": "999995"
-  }
+  "50049": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "50049"},
+  "55412": {"BuffType": 1, "Id": "55412"},
+  "680101": {"BuffType": 1, "Id": "680101"},
+  "680201": {"BuffType": 1, "Id": "680201"},
+  "680401": {"BuffType": 1, "Id": "680401"},
+  "680501": {"BuffType": 1, "Id": "680501"},
+  "680701": {"BuffType": 1, "Id": "680701"},
+  "682501": {"BuffType": 1, "Id": "682501"},
+  "682503": {"BuffType": 1, "Id": "682503"},
+  "682505": {"BuffType": 1, "Id": "682505"},
+  "683858": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "683858"},
+  "683859": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "683859"},
+  "683861": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "683861"},
+  "701018": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "701018"},
+  "827206": {"BuffType": 1, "Id": "827206"},
+  "829201": {"Icon": "ui/atlas/hud/buff/buff_blue_cd", "Id": "829201"},
+  "829210": {"Icon": "ui/atlas/hud/buff/buff_blue_cd", "Id": "829210"},
+  "833016": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom", "Id": "833016"},
+  "833201": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral", "Id": "833201"},
+  "833204": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral", "Id": "833204"},
+  "835008": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird", "Id": "835008"},
+  "881554": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "881554"},
+  "881556": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "881556"},
+  "883719": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "883719"},
+  "883721": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "883721"},
+  "883826": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral", "Id": "883826"},
+  "974301": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget", "Id": "974301"},
+  "974343": {"BuffType": 1, "Icon": "ui/atlas/buff/buff_fairytail_icon001", "Id": "974343"},
+  "997047": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04", "Id": "997047"},
+  "997110": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "997110"},
+  "999995": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "999995"},
+  "2100401": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "2100401"},
+  "2100410": {"BuffType": 1, "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "2100410"},
+  "2100411": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "2100411"},
+  "2110061": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "2110061"},
+  "2110066": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "2110066"},
+  "2110115": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget", "Id": "2110115"},
+  "2110116": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget", "Id": "2110116"},
+  "2110123": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom", "Id": "2110123"},
+  "2200601": {"BuffType": 1, "Id": "2200601"},
+  "2200641": {"BuffType": 1, "Id": "2200641"},
+  "2201201": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion", "Id": "2201201"},
+  "2201501": {"BuffType": 1, "Id": "2201501"},
+  "2202201": {"BuffType": 1, "Id": "2202201"},
+  "2202241": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04", "Id": "2202241"},
+  "2202262": {"BuffType": 1, "Id": "2202262"},
+  "2203161": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird", "Id": "2203161"},
+  "2203441": {"BuffType": 1, "Id": "2203441"},
+  "2204101": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget", "Id": "2204101"},
+  "2205131": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral", "Id": "2205131"},
+  "2206171": {"BuffType": 1, "Id": "2206171"},
+  "2206331": {"Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea", "Id": "2206331"},
+  "2206461": {"BuffType": 1, "Id": "2206461"},
+  "2207241": {"BuffType": 1, "Id": "2207241"},
+  "2401130": {"BuffType": 1, "Id": "2401130"},
+  "2401140": {"BuffType": 1, "Id": "2401140"},
+  "2401260": {"BuffType": 1, "Id": "2401260"},
+  "2401270": {"BuffType": 1, "Id": "2401270"},
+  "2401271": {"BuffType": 1, "Id": "2401271"},
+  "2402260": {"BuffType": 1, "Id": "2402260"},
+  "2402270": {"BuffType": 1, "Id": "2402270"},
+  "2403140": {"BuffType": 1, "Id": "2403140"},
+  "2403150": {"BuffType": 1, "Id": "2403150"},
+  "2403270": {"BuffType": 1, "Id": "2403270"},
+  "2403280": {"BuffType": 1, "Id": "2403280"},
+  "2404150": {"BuffType": 1, "Id": "2404150"},
+  "2404160": {"BuffType": 1, "Id": "2404160"},
+  "2404260": {"BuffType": 1, "Id": "2404260"},
+  "2404270": {"BuffType": 1, "Id": "2404270"},
+  "2405150": {"BuffType": 1, "Id": "2405150"},
+  "2405160": {"BuffType": 1, "Id": "2405160"},
+  "2405250": {"BuffType": 1, "Id": "2405250"},
+  "2405260": {"BuffType": 1, "Id": "2405260"},
+  "2406150": {"BuffType": 1, "Id": "2406150"},
+  "2406160": {"BuffType": 1, "Id": "2406160"},
+  "2406270": {"BuffType": 1, "Id": "2406270"},
+  "2406280": {"BuffType": 1, "Id": "2406280"},
+  "2407140": {"BuffType": 1, "Id": "2407140"},
+  "2407150": {"BuffType": 1, "Id": "2407150"},
+  "2407250": {"BuffType": 1, "Id": "2407250"},
+  "2407260": {"BuffType": 1, "Id": "2407260"},
+  "2407270": {"BuffType": 1, "Id": "2407270"},
+  "2407280": {"BuffType": 1, "Id": "2407280"},
+  "2407290": {"BuffType": 1, "Id": "2407290"},
+  "2408130": {"BuffType": 1, "Id": "2408130"},
+  "2408140": {"BuffType": 1, "Id": "2408140"},
+  "2408260": {"BuffType": 1, "Id": "2408260"},
+  "2408270": {"BuffType": 1, "Id": "2408270"},
+  "3053401": {"BuffType": 1, "Id": "3053401"}
 }

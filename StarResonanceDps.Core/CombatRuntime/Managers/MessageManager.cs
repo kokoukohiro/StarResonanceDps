@@ -110,7 +110,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
             ActiveBuffStore.Instance.Clear();
-            BuffSourceIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
         }
 
@@ -1185,19 +1184,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         buffInfo.FireUuid,
                         buffInfo.FightSourceInfo?.FightSourceType ?? 0,
                         buffInfo.FightSourceInfo?.SourceConfigId ?? 0));
-
-                    // 発生源の畳み込みで引く索引へも入れる。AOIに入った時点で既に
-                    // 乗っているバフはこの経路でしか届かず、BuffEffect には出てこない。
-                    Services.BuffSourceIndex.Instance.Add(
-                        buffInfo.FireUuid,
-                        entity.Uuid,
-                        buffInfo.BuffUuid,
-                        buffInfo.BaseId,
-                        buffInfo.FightSourceInfo?.FightSourceType ?? 0,
-                        buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
-                        buffInfo.Duration,
-                        DateTime.Now);
-
                 }
             }
 
@@ -1427,26 +1413,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 bool isAttackerPlayer = (Utils.UuidToEntityType(attackerUuid) == (long)EEntityType.EntChar);
 
-                // 召喚体が出した一撃は、その種別ID(AttrId)がそのままスキルIDになる。
-                // 実測で49,105件のうち91.3%が SkillTable に直接、6.8%が SkillFightLevelTable 経由。
-                var summonAttrId = 0;
-                if (Utils.IsSummonByUuid(syncDamageInfo.AttackerUuid)
-                    && EncounterManager.Current.Entities.TryGetValue(
-                        syncDamageInfo.AttackerUuid, out var summonEntity)
-                    && summonEntity.UID > 0)
-                {
-                    summonAttrId = (int)summonEntity.UID;
-                }
-
                 // OwnerId の中身は DamageSource で変わる(スキルID / 弾ID / バフID)。
-                // 表示に使うIDへ畳む。バフは実体を見ないと親が決まらないため、
-                // バフの処理をこのメソッドの前段で済ませてある順序に依存している。
+                // 表示に使うIDへ畳む。畳み先を決めるのは対応表と4言語テーブルだけで、
+                // 実行時の情報(バフ実体・召喚体の AttrId など)は見ない。
                 var foldedSource = SkillSourceResolver.Resolve(
                     syncDamageInfo.DamageSource,
-                    syncDamageInfo.OwnerId,
-                    syncDamageInfo.AttackerUuid,
-                    summonAttrId,
-                    DateTime.Now);
+                    syncDamageInfo.OwnerId);
                 int skillId = foldedSource.Id;
 
                 // 職業・特化の判定には、畳んだIDではなく「ゲームが実際に発動したスキルID」を使う。

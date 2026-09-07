@@ -1258,18 +1258,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             });
             GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData, fightSourceType, carriesBuffInfo);
 
-            // 発生源の畳み込みで引く索引。生きている実体だけを持つ。
-            // 時刻は DateTime.Now で揃える(パケット到着時刻は基準が別なので混ぜない)。
-            if (buffEventType == EBuffEventType.BuffEventRemove)
-            {
-                Services.BuffSourceIndex.Instance.Remove(entityUuid, buffUuid);
-            }
-            else
-            {
-                Services.BuffSourceIndex.Instance.Add(
-                    fireUuid, entityUuid, buffUuid, baseId, fightSourceType, sourceConfigId, duration, DateTime.Now);
-            }
-
             // 強化する9特化は、特化アビリティ本体が付与するバフ(と、その実行時変種)で判定する。
             // 紐付け先は保持者ではなく術者(FireUuid)。味方に配られるバフは受け手が保持するので、
             // 保持者に付けると回復を受けた人まで同じ特化になる。

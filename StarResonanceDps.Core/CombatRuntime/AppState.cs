@@ -71,30 +71,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
 
 
-            string skillAoyiTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillAoyiTable.json");
-            if (File.Exists(skillAoyiTableFile))
-            {
-                var skillAoyis = JsonConvert.DeserializeObject<Dictionary<string, SkillAoyi>>(File.ReadAllText(skillAoyiTableFile))!;
-                HelperMethods.DataTables.SkillAoyis.Data = skillAoyis;
-                Log.Information("Loaded SkillAoyiTable.json");
-            }
-
-            string skillEffectTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillEffectTable.json");
-            if (File.Exists(skillEffectTableFile))
-            {
-                var skillEffects = JsonConvert.DeserializeObject<Dictionary<string, SkillEffect>>(File.ReadAllText(skillEffectTableFile))!;
-                HelperMethods.DataTables.SkillEffects.Data = skillEffects;
-                Log.Information("Loaded SkillEffectTable.json");
-            }
-
-            string damageAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, "DamageAttrTable.json");
-            if (File.Exists(damageAttrTableFile))
-            {
-                var damageAttrs = JsonConvert.DeserializeObject<Dictionary<string, DamageAttr>>(File.ReadAllText(damageAttrTableFile))!;
-                HelperMethods.DataTables.DamageAttrs.Data = damageAttrs;
-                Log.Information("Loaded DamageAttrTable.json");
-            }
-
             string skillFightLevelTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillFightLevelTable.json");
             if (File.Exists(skillTableFile))
             {

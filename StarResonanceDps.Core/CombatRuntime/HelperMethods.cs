@@ -10,9 +10,6 @@ public class HelperMethods
         public static SkillTable Skills = new SkillTable();
         public static BuffTable Buffs = new BuffTable();
         public static SkillFightLevelTable SkillFightLevels = new SkillFightLevelTable();
-        public static SkillAoyiTable SkillAoyis = new SkillAoyiTable();
-        public static SkillEffectTable SkillEffects = new SkillEffectTable();
-        public static DamageAttrTable DamageAttrs = new DamageAttrTable();
         public static SceneEventDungeonConfigTable SceneEventDungeonConfigs = new SceneEventDungeonConfigTable();
         public static ItemTable Items = new ItemTable();
         public static EquipTable Equips = new EquipTable();

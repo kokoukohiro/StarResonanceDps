@@ -26,15 +26,12 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    private static FrozenDictionary<int, int> _skillSourceMap = FrozenDictionary<int, int>.Empty;
+    /// <summary>発生源ID → ゲーム内メーターの行名。<c>Data/Localization/recount.*.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _recountNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    private static FrozenDictionary<int, int> _buffSourceMap = FrozenDictionary<int, int>.Empty;
-
-    private static FrozenSet<int> _skillKeys = FrozenSet<int>.Empty;
-
-    private static FrozenSet<int> _buffKeys = FrozenSet<int>.Empty;
-
-    private static FrozenDictionary<int, int> _attrSourceMap = FrozenDictionary<int, int>.Empty;
+    private static FrozenDictionary<int, int> _recountSourceMap = FrozenDictionary<int, int>.Empty;
 
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -93,234 +90,173 @@ public static class CombatDataCatalog
             _buffNames = LoadLocalizedText("buffs");
             _monsterNames = LoadLocalizedText("monsters");
             _sceneNames = LoadLocalizedText("scenes");
-            _skillSourceMap = LoadSourceMap("SkillSourceMap");
-            _buffSourceMap = LoadSourceMap("BuffSourceMap");
-            _skillKeys = LoadLocalizedKeys("skills");
-            _buffKeys = LoadLocalizedKeys("buffs");
-            _attrSourceMap = LoadAttrSourceMap();
+            // 畳みマッピングを先に読む。上書きが「畳まれて消えるID」を指していたら
+            // 効かないので、読み込み時に警告を出すために要る。
+            _recountSourceMap = LoadSourceMap("RecountSourceMap");
+            _recountNames = LoadLocalizedText("recount", "RecountOverrides");
+            _buffNameAliases = LoadNameAliases("BuffNameAlias");
+            _nameSuffixes = LoadNameSuffixes();
         }
     }
 
     /// <summary>
-    /// ダメージ属性ID → 親スキルID。<c>SkillEffectTable.SkillAttrDes</c> の式に出る
-    /// 合成キーを <c>DamageAttrTable.TypeEnum</c> で解いて、その式を持つスキルを親とする。
+    /// 行名に接尾辞を足すID。<c>Data/Mappings/BuffNameAlias.json</c>。イマジンのパッシブ用。
     ///
     /// <para>
-    /// 弾ID規則(<c>SkillId × 100 + Level</c>)と違い、<b>どのスキルの効果として書かれているか</b>を
-    /// そのまま読む。両者は同じ整数を別の意味で使うことがあり、実測19件で行き先が食い違った
-    /// (<c>230101</c> は弾規則だと <c>2301 琴弦撩拨</c>、式の上では <c>2308 聚合乐章</c>)。
+    /// パッシブは<b>ゲーム内メーターでは本体イマジンと同じ行</b>に入る。こちらは分離して出す仕様なので、
+    /// <c>RecountSourceMap</c> から除外したうえで、行名(＝本体の名前)に接尾辞を足して読み分ける。
+    /// <b>IDは変えない</b>ので集計も分かれたままになる。
     /// </para>
     ///
     /// <para>
-    /// <b>親が複数に割れる子は入れない。</b> プレイヤーの技とNPC版が同じダメージ属性を
-    /// 共有していることがあり、術者を見ないと決まらない。決め切れないものは畳まない。
+    /// 行名が既に本体の名前なので、借りる先のIDは持たない。<b>接尾辞だけ。</b>
+    /// </para>
+    ///
+    /// <para>
+    /// <b>表示時にだけ効く。</b> 記録側(<c>CombatStats.Name</c>)は触らないので、
+    /// 後から表や接尾辞を変えれば過去のエンカウンターにも反映される。
     /// </para>
     /// </summary>
-    private static FrozenDictionary<int, int> LoadAttrSourceMap()
+    private static FrozenDictionary<int, NameAlias> _buffNameAliases =
+        FrozenDictionary<int, NameAlias>.Empty;
+
+    /// <summary>接尾辞キー → 言語 → 文字列。<c>Data/Mappings/NameSuffixes.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<string, string>> _nameSuffixes =
+        FrozenDictionary<string, FrozenDictionary<string, string>>.Empty;
+
+    /// <param name="Suffix">接尾辞のキー。<c>NameSuffixes.json</c> を引く。</param>
+    private readonly record struct NameAlias(string Suffix);
+
+    private sealed class NameAliasEntry
     {
-        var typeEnumByKey = new Dictionary<string, int>();
-        foreach (var pair in HelperMethods.DataTables.DamageAttrs.Data)
-        {
-            if (pair.Value.TypeEnum != 0)
-            {
-                typeEnumByKey[pair.Key] = pair.Value.TypeEnum;
-            }
-        }
-
-        var parents = new Dictionary<int, int>();
-        var split = new HashSet<int>();
-
-        foreach (var pair in HelperMethods.DataTables.SkillEffects.Data)
-        {
-            var parent = pair.Value.SkillId;
-            if (parent == 0 || pair.Value.SkillAttrDes is null)
-            {
-                continue;
-            }
-
-            foreach (var row in pair.Value.SkillAttrDes)
-            {
-                if (row is null)
-                {
-                    continue;
-                }
-
-                foreach (var cell in row)
-                {
-                    foreach (var key in ExtractBracedKeys(cell))
-                    {
-                        if (!typeEnumByKey.TryGetValue(key, out var child)
-                            || child == 0
-                            || child == parent)
-                        {
-                            continue;
-                        }
-
-                        if (parents.TryGetValue(child, out var known))
-                        {
-                            if (known != parent)
-                            {
-                                split.Add(child);
-                            }
-                        }
-                        else
-                        {
-                            parents[child] = parent;
-                        }
-                    }
-                }
-            }
-        }
-
-        foreach (var child in split)
-        {
-            parents.Remove(child);
-        }
-
-        Log.Information(
-            "Loaded {Count} attr sources ({Split} split, dropped)",
-            parents.Count,
-            split.Count);
-        return parents.ToFrozenDictionary();
+        public string? Suffix { get; set; }
     }
 
-    /// <summary>
-    /// <c>{123456}</c> の形で式に埋め込まれた合成キーを拾う。
-    ///
-    /// <para>
-    /// <b>式は入れ子になっている。</b> 実データは
-    /// <c>{*skillpara.damageMerge({122950102},{1},"PVEDamageRadio","up")*}</c> の形で、
-    /// 外側の <c>{*</c> と内側の <c>{数字}</c> が混ざる。最初の <c>{</c> と最初の <c>}</c> を
-    /// 対にすると内側を取り逃すので、<b>「<c>{</c> の直後が数字で、数字の直後が <c>}</c>」</b>
-    /// という形だけを拾う。
-    /// </para>
-    /// </summary>
-    private static IEnumerable<string> ExtractBracedKeys(string? text)
+    private static FrozenDictionary<int, NameAlias> LoadNameAliases(string dataName)
     {
-        if (string.IsNullOrEmpty(text))
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", $"{dataName}.json");
+        if (!File.Exists(path))
         {
-            yield break;
+            return FrozenDictionary<int, NameAlias>.Empty;
         }
 
-        for (var index = 0; index < text.Length; index++)
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, NameAliasEntry>>(
+            File.ReadAllText(path));
+        var map = new Dictionary<int, NameAlias>();
+        if (raw is not null)
         {
-            if (text[index] != '{')
-            {
-                continue;
-            }
-
-            var start = index + 1;
-            var end = start;
-            while (end < text.Length && char.IsAsciiDigit(text[end]))
-            {
-                end++;
-            }
-
-            if (end > start && end < text.Length && text[end] == '}')
-            {
-                yield return text[start..end];
-                index = end;
-            }
-        }
-    }
-
-    /// <summary>
-    /// ダメージ属性IDから親スキルへ。畳み込みの<b>最後の手段</b>で、
-    /// 対応表・4言語テーブル・種別ごとの解決・召喚体のどれでも表に届かなかったときだけ引く。
-    /// </summary>
-    public static bool TryResolveAttrSource(int id, out int parentSkillId)
-        => _attrSourceMap.TryGetValue(id, out parentSkillId);
-
-    /// <summary>
-    /// 4言語テーブルに<b>キーとして載っているID</b>。値が空でも数える。
-    ///
-    /// <para>
-    /// 畳み込みの停止条件はこちらで、名前解決とは別。
-    /// 「IDはあるが訳が無い」は正当な状態で、そのIDは素のまま表示する意思表示として扱う。
-    ///
-    /// <para>
-    /// <see cref="LoadLocalizedText"/> と別に読むのは、あちらが空値を落とすため
-    /// 「そのIDが登録されているか」を答えられないから。空値を落とすのは
-    /// <see cref="ResolveText"/> が空欄で zh-CN へ落ちる仕様に必要で、そちらは正しい。
-    /// </para>
-    /// </para>
-    /// </summary>
-    private static FrozenSet<int> LoadLocalizedKeys(string dataName)
-    {
-        var keys = new HashSet<int>();
-
-        foreach (var cultureName in SupportedCultures)
-        {
-            var path = Path.Combine(
-                Utils.DATA_DIR_NAME,
-                "Localization",
-                $"{dataName}.{cultureName}.json");
-            if (!File.Exists(path))
-            {
-                continue;
-            }
-
-            var raw = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(path));
-            if (raw is null)
-            {
-                continue;
-            }
-
             foreach (var pair in raw)
             {
-                if (int.TryParse(pair.Key, out var id))
+                if (int.TryParse(pair.Key, out var id)
+                    && pair.Value is not null
+                    && !string.IsNullOrWhiteSpace(pair.Value.Suffix))
                 {
-                    keys.Add(id);
+                    map[id] = new NameAlias(pair.Value.Suffix);
                 }
             }
         }
 
-        Log.Information("Loaded {Count} {DataName} keys", keys.Count, dataName);
-        return keys.ToFrozenSet();
+        Log.Information("Loaded {Count} {DataName} entries", map.Count, dataName);
+        return map.ToFrozenDictionary();
+    }
+
+    private static FrozenDictionary<string, FrozenDictionary<string, string>> LoadNameSuffixes()
+    {
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", "NameSuffixes.json");
+        if (!File.Exists(path))
+        {
+            return FrozenDictionary<string, FrozenDictionary<string, string>>.Empty;
+        }
+
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
+            File.ReadAllText(path));
+        var map = new Dictionary<string, FrozenDictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        if (raw is not null)
+        {
+            foreach (var pair in raw)
+            {
+                map[pair.Key] = pair.Value.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        return map.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
     /// <summary>
-    /// 観測ID → 親スキルID。<c>Data/Mappings/</c> の手書きの対応表。
+    /// メーターの行に出す名前。<b>ゲーム内メーターの見出し表だけが決める。</b>
     ///
     /// <para>
-    /// 畳み込みの<b>1段目</b>。実行時の鎖より先に引く。鎖はバフ実体が届いているかに左右されるが、
-    /// この表は届いていなくても答えを持っているので、同じスキルが行として割れなくなる。
+    /// <c>skills</c> / <c>buffs</c> の4言語テーブルは引かない。あちらは装備中スキル枠や
+    /// バフ/デバフウィジェットのためのもので、メーターの行とは対象も粒度も違う。
+    /// </para>
+    ///
+    /// <para>
+    /// 別名表にあるIDは接尾辞を足す(イマジンのパッシブ)。
+    /// <b>名前が空なら接尾辞も付けない。</b>
+    /// 接尾辞だけの行が出ると、名前が取れていないことが見えなくなる。
     /// </para>
     /// </summary>
-    public static bool TryResolveSkillSource(int id, out int parentSkillId)
-        => _skillSourceMap.TryGetValue(id, out parentSkillId);
+    public static string GetSourceDisplayName(int id, bool isBuffSource)
+    {
+        // 名前・接尾辞・内部ID注記の3つを、この順で組み立てる。
+        //
+        // <b>注記は最後に1回だけ、行自身のIDで付ける。</b> GetSkillName / GetBuffName は
+        // 注記込みで返すので、それを土台にすると「借り先のID + 接尾辞」という順序になり、
+        // 注記が行のIDを指さなくなる(実際 3210050 の行が "…(3903)（パッシブ）" と出ていた)。
+        var body = ResolveText(_recountNames, Volatile.Read(ref _cultureName), id);
+
+        // イマジンのパッシブ。行名は既に本体イマジンの名前なので、借りる先は要らない。
+        // 接尾辞だけを足して本体と読み分ける(ゲームは統合するが、こちらは分離して出す)。
+        //
+        // <b>名前が空なら接尾辞も付けない。</b>
+        // 接尾辞だけの行が出ると、名前が取れていないことが見えなくなる。
+        if (!string.IsNullOrEmpty(body) && _buffNameAliases.TryGetValue(id, out var alias))
+        {
+            body += ResolveSuffix(alias.Suffix);
+        }
+
+        return AppendInternalId(
+            body,
+            isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
+            id);
+    }
+
+    private static string ResolveSuffix(string suffixKey)
+    {
+        if (string.IsNullOrEmpty(suffixKey)
+            || !_nameSuffixes.TryGetValue(suffixKey, out var byCulture))
+        {
+            return string.Empty;
+        }
+
+        var culture = NormalizeCultureName(Volatile.Read(ref _cultureName));
+        if (byCulture.TryGetValue(culture, out var text) && !string.IsNullOrWhiteSpace(text))
+        {
+            return text;
+        }
+
+        // 受け皿は zh-CN ただ1つ。名前の解決と同じ規則に揃える。
+        return byCulture.TryGetValue("zh-CN", out var chinese) ? chinese : string.Empty;
+    }
 
     /// <summary>
-    /// バフID → 親スキルID。<c>SkillSourceMap</c> と<b>種別で分けてある</b>ので、
-    /// バフとして届いたIDはこちらだけを引く。
+    /// 発生源ID → 同じメーター行の最若ID。<c>Data/Mappings/RecountSourceMap.json</c>。
     ///
     /// <para>
-    /// <c>SkillTable</c> と <c>BuffTable</c> は90個のIDが重複するため、両方を引くと
-    /// 同じIDがどちらの意味で解決されるか呼び出し元次第になる。分けておけば
-    /// <c>DamageSource</c> で一意に決まる。
+    /// ゲーム内メーターは <c>RecountTable</c> の1行に複数の構成IDをまとめる。この表は
+    /// その行の所属から生成したもので、<b>手書きの判断は入っていない</b>。
+    /// 畳み先は行の最若ID。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>イマジンのパッシブは入れていない。</b> 行の上では本体と同じ行に居るが、
+    /// こちらは分離して出す仕様なので、畳むと本体に統合されてしまう。
+    /// 代わりに <c>BuffNameAlias</c> が接尾辞を付ける。
     /// </para>
     /// </summary>
-    public static bool TryResolveBuffSource(int id, out int parentSkillId)
-        => _buffSourceMap.TryGetValue(id, out parentSkillId);
+    public static bool TryResolveRecountSource(int id, out int rowLeadId)
+        => _recountSourceMap.TryGetValue(id, out rowLeadId);
 
-    /// <summary>
-    /// そのIDが<b>4言語テーブルにキーとして載っている</b>か。畳み込みの停止条件。
-    ///
-    /// <para>
-    /// 載っている＝「素のまま表示すると決めたID」で、そこから先へは登らない。
-    /// <b>値が空でも止める。</b>「IDはあるが訳が無い」は正当な状態で、
-    /// 訳の有無で畳み方が変わってはいけない。
-    /// </para>
-    ///
-    /// <para>
-    /// どのIDを載せるかはテーブルを作るときの判断で、実行時には理由を問わない。
-    /// 枠に置けるかどうかもその判断材料の1つでしかないので、ここでは見ない。
-    /// </para>
-    /// </summary>
-    public static bool HasSkillKey(int skillId) => _skillKeys.Contains(skillId);
-
-    /// <inheritdoc cref="HasSkillKey"/>
-    public static bool HasBuffKey(int buffId) => _buffKeys.Contains(buffId);
 
     private static FrozenDictionary<int, int> LoadSourceMap(string dataName)
     {
@@ -397,6 +333,34 @@ public static class CombatDataCatalog
                 InternalIdDisplayMode.MapOnly,
                 levelMapId)
             : string.Empty;
+    }
+
+    /// <summary>
+    /// メーターの行のアイコン。
+    ///
+    /// <para>
+    /// <b>畳み先のIDは、届いたときの種別と一致するとは限らない。</b>
+    /// 行の最若IDがバフで、そこへスキルとして届いたIDが畳まれることがある(実測で112行中5行)。
+    /// そこで<b>IDがどちらの生テーブルに載っているか</b>で決め、
+    /// 両方に載っている(90件)か、どちらにも無いときだけ届いた種別に従う。
+    /// </para>
+    /// </summary>
+    public static string GetSourceIconName(int id, bool arrivedAsBuff)
+    {
+        var inSkillTable = _skills.ContainsKey(id);
+        var inBuffTable = _buffs.ContainsKey(id);
+
+        if (inSkillTable && !inBuffTable)
+        {
+            return GetSkillIconName(id);
+        }
+
+        if (inBuffTable && !inSkillTable)
+        {
+            return GetBuffOwnIconName(id);
+        }
+
+        return arrivedAsBuff ? GetBuffOwnIconName(id) : GetSkillIconName(id);
     }
 
     public static string GetSkillIconName(int skillId, string? fallbackIcon = null)
@@ -632,9 +596,82 @@ public static class CombatDataCatalog
         return result.ToFrozenDictionary();
     }
 
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(string dataName)
+    /// <summary>
+    /// 生成物の名前テーブルに手修正を重ねる表。<c>Data/Overrides/{name}.json</c>。
+    ///
+    /// <para>
+    /// 形は <c>{ "発生源ID": { "言語": "名前" } }</c>。
+    /// 書いた言語だけ差し替え、書かない言語は生成値のまま。
+    /// <b>空文字は「生成値を消す」</b>で、以後は通常どおり zh-CN へ落ちる。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>言語名の打ち間違いを黙って無視しない。</b> 未知のキーはログにエラーを出して飛ばす。
+    /// 静かに効かないのが一番困る失敗なので、必ずログに出す。
+    /// </para>
+    /// </summary>
+    private static Dictionary<string, Dictionary<int, string>> LoadLocalizedOverrides(string dataName)
+    {
+        var result = SupportedCultures.ToDictionary(
+            culture => culture,
+            _ => new Dictionary<int, string>(),
+            StringComparer.OrdinalIgnoreCase);
+
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", $"{dataName}.json");
+        if (!File.Exists(path))
+        {
+            return result;
+        }
+
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
+            File.ReadAllText(path));
+        if (raw is null)
+        {
+            return result;
+        }
+
+        var applied = 0;
+        foreach (var entry in raw)
+        {
+            if (!int.TryParse(entry.Key, out var id))
+            {
+                Log.Error("{DataName}: キーがIDではないので飛ばす \"{Key}\"", dataName, entry.Key);
+                continue;
+            }
+
+            foreach (var pair in entry.Value ?? [])
+            {
+                if (!result.TryGetValue(pair.Key, out var byId))
+                {
+                    Log.Error(
+                        "{DataName}: {Id} に未知のキー \"{Key}\"。言語は {Cultures}",
+                        dataName, entry.Key, pair.Key, string.Join(" / ", SupportedCultures));
+                    continue;
+                }
+
+                byId[id] = (pair.Value ?? string.Empty).Trim();
+                applied++;
+            }
+
+            // 畳まれて消えるIDへ書いても表示されない。静かな空振りになるので警告する。
+            if (_recountSourceMap.TryGetValue(id, out var rowLeadId))
+            {
+                Log.Warning(
+                    "{DataName}: {Id} は {RowLeadId} へ畳まれるので効かない。{RowLeadId} に書くこと",
+                    dataName, id, rowLeadId, rowLeadId);
+            }
+        }
+
+        Log.Information("Loaded {Count} {DataName} overrides for {Ids} ids", applied, dataName, raw.Count);
+        return result;
+    }
+
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(
+        string dataName,
+        string? overridesName = null)
     {
         var result = new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase);
+        var overrides = overridesName is null ? null : LoadLocalizedOverrides(overridesName);
 
         foreach (var cultureName in SupportedCultures)
         {
@@ -663,6 +700,22 @@ public static class CombatDataCatalog
             else
             {
                 Log.Warning("Missing {DataName} localization for {CultureName}", dataName, cultureName);
+            }
+
+            // 手修正を重ねる。空文字は生成値を消す指示。
+            if (overrides is not null && overrides.TryGetValue(cultureName, out var overridesById))
+            {
+                foreach (var pair in overridesById)
+                {
+                    if (string.IsNullOrEmpty(pair.Value))
+                    {
+                        names.Remove(pair.Key);
+                    }
+                    else
+                    {
+                        names[pair.Key] = pair.Value;
+                    }
+                }
             }
 
             result[cultureName] = names.ToFrozenDictionary();

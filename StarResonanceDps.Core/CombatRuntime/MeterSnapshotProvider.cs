@@ -285,7 +285,9 @@ public static class MeterSnapshotProvider
         for (var index = buffEvents.Length - 1; index >= 0; index--)
         {
             var buffEvent = buffEvents[index];
-            if (buffEvent.Duration < 0 || !IsIncludedBuff(kind, buffEvent))
+            if (buffEvent.Duration < 0
+                || !IsIncludedBuff(kind, buffEvent)
+                || IsHiddenFromBuffBar(buffEvent))
             {
                 continue;
             }
@@ -784,7 +786,9 @@ public static class MeterSnapshotProvider
 
         foreach (var buffEvent in buffEvents)
         {
-            if (buffEvent.Duration < 0 || buffEvent.SourceConfigId <= 0)
+            if (buffEvent.Duration < 0
+                || buffEvent.SourceConfigId <= 0
+                || IsHiddenFromBuffBar(buffEvent))
             {
                 continue;
             }
@@ -1462,20 +1466,16 @@ public static class MeterSnapshotProvider
                 ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
                 : 0d;
 
-            // 畳み先が決まらなかったバフは、スキルIDではなくバフIDのまま行になる。
-            // SkillTable と BuffTable は90IDが重複するので、種別を見ないと取り違える。
+            // バフとして届いたかどうか。名前には影響しない(見出し表は種別を区別しない)が、
+            // アイコンの引き先と内部ID注記の表示区分に要る。
             var isBuffSource = entity.SkillMetrics.TryGetValue(stat.Key, out var sourceContainer)
                 && sourceContainer.IsBuffSource;
-            var iconName = isBuffSource
-                ? CombatDataCatalog.GetBuffOwnIconName(stat.Key)
-                : CombatDataCatalog.GetSkillIconName(stat.Key);
+            var iconName = CombatDataCatalog.GetSourceIconName(stat.Key, isBuffSource);
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
-                // 記録された名前はフォールバックとして渡す。
-                isBuffSource
-                    ? CombatDataCatalog.GetBuffName(stat.Key)
-                    : CombatDataCatalog.GetSkillName(stat.Key),
+                // 別名表にあるIDは、借りた名前＋接尾辞になる(IDと集計は元のまま)。
+                CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource),
                 iconName,
                 !isBuffSource && CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
                 value.ValueTotal,
@@ -1614,6 +1614,26 @@ public static class MeterSnapshotProvider
             : encounter.EndTime;
     }
 
+
+    /// <summary>
+    /// ゲーム内のバフバーが出さないバフか。
+    ///
+    /// <para>
+    /// ゲームのバフバー(<c>Abnormal_stateView</c>)は
+    /// <c>buffVm:GetEntityBuffList(entity, EBuffPriority.NotShow, ShowBuffCountMax)</c> を呼び、
+    /// <c>BuffPriority == NotShow</c> のバフを出さない。自分のバーもボスHPバーのバーも同じ関数で、
+    /// 対象エンティティが違うだけ。
+    /// </para>
+    ///
+    /// <para>
+    /// アプリはこれまでアイコンの有無だけで判定しており、<b>ゲームが出さない473種</b>
+    /// (計数・マーカー・移動アクションの有効化など)まで出していた。実測(ログ188本)では
+    /// 表示していたバフ事象の26.4%がこれに当たる。逆にゲームが出してアプリが出さないものは0件で、
+    /// ゲーム側はアプリの厳密な部分集合。
+    /// </para>
+    /// </summary>
+    private static bool IsHiddenFromBuffBar(BuffEvent buffEvent)
+        => buffEvent.BuffPriority == DataTypes.Enum.EBuffPriority.NotShow;
 
     private static bool IsIncludedBuff(PlayerBuffListKind kind, BuffEvent buffEvent)
     {
