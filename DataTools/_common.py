@@ -72,20 +72,14 @@ def write_localized(basename, values_by_lang, keys):
     畳み込みの停止条件が言語で変わってしまうため。足りない側は空文字で埋め、
     表示時に zh-CN へ落ちるのに任せる。
 
-    **既存の名前は消さない。** 新しい値が空のときは既存値を残す。
-    テーブルには入力側が持っていない名前が入っており、素直に作り直すと失われる。
+    **完全な上書き。** 出力は入力だけで決まる。前の出力は読まない。
+    入力に名前が無ければ空になる。
     """
     keys = sorted(keys, key=int)
     for lang in LANGS:
         path = os.path.join(LOCALIZATION, "%s.%s.json" % (basename, lang))
-        current = load(path) or {}
         fresh = values_by_lang.get(lang, {})
-        merged = {}
-        for key in keys:
-            value = (fresh.get(key) or "").strip()
-            merged[key] = value if value else (current.get(key) or "").strip()
+        merged = {key: (fresh.get(key) or "").strip() for key in keys}
         dump(path, merged)
-        kept = sum(1 for k in keys if not (fresh.get(k) or "").strip() and merged[k])
-        print("  %s.%-6s %5d鍵 / 名前あり %5d%s"
-              % (basename, lang, len(keys), sum(1 for v in merged.values() if v),
-                 " (うち既存値を維持 %d)" % kept if kept else ""))
+        print("  %s.%-6s %5d鍵 / 名前あり %5d"
+              % (basename, lang, len(keys), sum(1 for v in merged.values() if v)))
