@@ -245,10 +245,15 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             ? BuffDebuffCardContent.FindByGroup(snapshots, _group)
             : BuffDebuffCardContent.FindByKey(snapshots, _requestedBuffKey ?? string.Empty);
 
-        if (snapshot is not null && !string.IsNullOrWhiteSpace(snapshot.Name))
+        // 控えるのは内部ID注記を付けない名前。snapshot.Name は注記込みのことがあり、
+        // それを保存すると ID 表示を切ったあともタイトルに残る。
+        var rememberedName = snapshot is null
+            ? string.Empty
+            : CombatDataCatalog.GetBuffNameWithoutInternalId(snapshot.BaseId);
+        if (!string.IsNullOrWhiteSpace(rememberedName))
         {
             var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownBuffName);
-            _lastKnownBuffName = snapshot.Name;
+            _lastKnownBuffName = rememberedName;
             RefreshHeaderText();
 
             if (wasUnknown)

@@ -26,7 +26,7 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    /// <summary>発生源ID → ゲーム内メーターの行名。<c>Data/Localization/recount.*.json</c>。</summary>
+    /// <summary>発生源ID → ゲーム内メーターの行名。<c>Data/Localization/recounts.*.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _recountNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -62,21 +62,29 @@ public static class CombatDataCatalog
     /// </para>
     ///
     /// <para>
-    /// <b>名前が空のときは付けない。</b>「名前が無い」ことを見て表示を落としている箇所があるので、
-    /// そこを <c>(123)</c> で埋めると挙動が変わる。
+    /// <b>名前が空でもIDだけ出す。</b> 空のままだとどのIDの行か分からず、
+    /// 「テーブルに無いID」と「テーブルにあるが名前が空のID」も見分けが付かない。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>この注記が付いた文字列を記憶・保存しない。</b> 注記は表示設定なので、
+    /// 保存すると設定を切ったあとも残る。控える値は注記を付けない getter から取る。
     /// </para>
     /// </summary>
     private static string AppendInternalId(string name, InternalIdDisplayMode kind, long id)
     {
-        if (id <= 0 || string.IsNullOrEmpty(name))
+        if (id <= 0)
         {
             return name;
         }
 
         var mode = (InternalIdDisplayMode)Volatile.Read(ref _internalIdDisplayMode);
-        return mode == InternalIdDisplayMode.All || mode == kind
-            ? $"{name}({id})"
-            : name;
+        if (mode != InternalIdDisplayMode.All && mode != kind)
+        {
+            return name;
+        }
+
+        return string.IsNullOrEmpty(name) ? $"({id})" : $"{name}({id})";
     }
 
     public static void Load()
@@ -93,7 +101,7 @@ public static class CombatDataCatalog
             // 畳みマッピングを先に読む。上書きが「畳まれて消えるID」を指していたら
             // 効かないので、読み込み時に警告を出すために要る。
             _recountSourceMap = LoadSourceMap("RecountSourceMap");
-            _recountNames = LoadLocalizedText("recount", "RecountOverrides");
+            _recountNames = LoadLocalizedText("recounts", "RecountOverrides");
             _buffNameAliases = LoadNameAliases("BuffNameAlias");
             _nameSuffixes = LoadNameSuffixes();
         }
@@ -290,6 +298,19 @@ public static class CombatDataCatalog
             ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId),
             InternalIdDisplayMode.SkillOnly,
             skillId);
+    }
+
+    /// <summary>
+    /// 内部ID注記を付けないバフ名。<b>記憶・保存する値にはこちらを使う。</b>
+    ///
+    /// <para>
+    /// 注記は表示設定なので、付いたまま控えると設定を切ったあとも残る。
+    /// 名前が取れていなければ空を返すので、「まだ分かっていない」の判定にも使える。
+    /// </para>
+    /// </summary>
+    public static string GetBuffNameWithoutInternalId(int buffId)
+    {
+        return ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId);
     }
 
     public static string GetBuffName(int buffId)

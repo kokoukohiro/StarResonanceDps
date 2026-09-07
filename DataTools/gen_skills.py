@@ -14,21 +14,20 @@
 **判定はこの枠番号だけで行う。** ID帯で絞ると、同じ枠に置けるのに範囲から外れるIDが
 枠に名無しで出る。
 
-枠の判定は同梱の `Data/SkillTable.json` で行う。アプリの実行時判定と同じ表を使うため。
+枠の判定は zh-CN の入力で行う。枠番号は言語に依存しないので、どれか1つに固定する。
 名前だけを各言語の入力から取る。
 """
-import os
-
-from _common import DATA, LANGS, load, name_of, table, write_localized
+from _common import LANGS, name_of, table, write_localized
 
 IMAGINE_SLOTS = (7, 8)
 ROLE_SLOTS = (21, 22, 23, 24)
 
+# 枠の判定に使う言語。中身は言語で変わらないので固定でよい。
+SLOT_SOURCE_LANG = "zh-CN"
+
 
 def main():
-    skill_table = load(os.path.join(DATA, "SkillTable.json"))
-    if skill_table is None:
-        raise FileNotFoundError(os.path.join(DATA, "SkillTable.json"))
+    skill_table = table(LANGS[SLOT_SOURCE_LANG], "SkillTable")
 
     def slots(row):
         return row.get("SlotPositionId") or []
@@ -36,7 +35,7 @@ def main():
     imagine = {i for i, row in skill_table.items() if any(s in slots(row) for s in IMAGINE_SLOTS)}
     role = {i for i, row in skill_table.items() if any(s in slots(row) for s in ROLE_SLOTS)}
     keys = imagine | role
-    print("イマジン(slot 7/8) %d件 / ロール(slot 21-24) %d件 → 鍵 %d件"
+    print("イマジン(slot 7/8) %d / ロール(slot 21-24) %d → 鍵 %d"
           % (len(imagine), len(role), len(keys)))
 
     tables = {lang: table(lang_dir, "SkillTable") for lang, lang_dir in LANGS.items()}

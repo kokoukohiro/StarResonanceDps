@@ -235,10 +235,16 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             : BuffDebuffCardContent.FindByKey(snapshots, _requestedBuffKey ?? string.Empty);
 
         // タイトルはバフ名を含むので、バフを解決してから組む。
-        if (snapshot is not null && !string.IsNullOrWhiteSpace(snapshot.Name))
+        //
+        // 控えるのは内部ID注記を付けない名前。snapshot.Name は注記込みのことがあり、
+        // それを保存すると ID 表示を切ったあともタイトルに残る。
+        var rememberedName = snapshot is null
+            ? string.Empty
+            : CombatDataCatalog.GetBuffNameWithoutInternalId(snapshot.BaseId);
+        if (!string.IsNullOrWhiteSpace(rememberedName))
         {
             var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownBuffName);
-            _lastKnownBuffName = snapshot.Name;
+            _lastKnownBuffName = rememberedName;
 
             if (wasUnknown)
             {

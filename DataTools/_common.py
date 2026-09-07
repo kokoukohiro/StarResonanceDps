@@ -12,7 +12,7 @@ SOLUTION = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 入力の置き場。環境変数があればそれを使い、無ければリポジトリの隣の JSONS を見る。
 # 中身は「言語フォルダ → ZTable → *.json」。リポジトリには含まれないので各自で用意する。
 TABLES_ENV = "BPSR_TABLES"
-UNPACK = os.environ.get(TABLES_ENV) or os.path.join(os.path.dirname(SOLUTION), "JSONS")
+TABLES_DIR = os.environ.get(TABLES_ENV) or os.path.join(os.path.dirname(SOLUTION), "JSONS")
 
 DATA = os.path.join(SOLUTION, "StarResonanceDps.Core", "Data")
 LOCALIZATION = os.path.join(DATA, "Localization")
@@ -36,11 +36,11 @@ def load(path):
 
 def table(lang_dir, name):
     """入力テーブルを読む。無ければ、どこを設定すればよいか示して止まる。"""
-    path = os.path.join(UNPACK, lang_dir, "ZTable", name + ".json")
+    path = os.path.join(TABLES_DIR, lang_dir, "ZTable", name + ".json")
     data = load(path)
     if data is None:
         raise FileNotFoundError(
-            "%s が無い。入力の置き場は環境変数 %s か、_common.py の UNPACK で設定する"
+            "%s が無い。入力の置き場は環境変数 %s か、_common.py の TABLES_DIR で設定する"
             % (path, TABLES_ENV))
     return data
 

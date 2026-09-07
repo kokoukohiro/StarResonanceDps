@@ -1,3 +1,5 @@
 {
-  "50037": { "en-US": "Countercrush (Counter Storm)" }
+  "50037": { "en-US": "Countercrush (Counter Storm)" },
+  "3003213": { "zh-CN": "虚妄裁定" ,"en-US": "Shattered Illusion","ja-JP": "虚妄断罪","ko-KR": "허상의 판결"},
+  "3003250": { "zh-CN": "虚妄裁定-稳态自愈" ,"en-US": "Shattered Illusion - Stasis Recovery","ja-JP": "虚妄断罪-安定自己治癒","ko-KR": "허상의 판결・안정 자가 치유"}
 }
