@@ -1,13 +1,13 @@
 """
-ゲーム内メーターの見出し表と、その行畳みマッピングを生成する。
+メーターの行の見出しを持つ表から、発生源ID → 行名と、行畳みマッピングを作る。
 
   Data/Localization/recount.{言語}.json  … 発生源ID → メーターの行名
   Data/Mappings/RecountSourceMap.json    … 発生源ID → 畳み先ID
   Data/Mappings/BuffNameAlias.json       … 見出し表に載るイマジンのパッシブへ絞る
 
-各言語は自前の ZTable フォルダだけで完結させる。cn/en(中国サーバー)は366行、
-jp/kr(アジアサーバー)は349行で版が違い、DamageId の一致は 106/366 しかない。
-Id は単なる連番なので行の同一性の根拠にならない。言語をまたいだ行の照合はしない。
+各言語は自前のフォルダだけで完結させる。言語によってテーブルの版が違い、
+行数も `DamageId` も一致しない。`Id` は単なる連番なので行の同一性の根拠にならない。
+**言語をまたいで行を突き合わせない。**
 """
 import collections
 import os
@@ -17,14 +17,12 @@ from _common import DATA, LANGS, MAPPINGS, dump, load, table
 # 総括行(その他)。抱えるIDが突出して多い行として特定し、この名前で検算する。
 CATCHALL = {"zh-CN": "其他", "en-US": "Other", "ja-JP": "その他", "ko-KR": "기타"}
 
-# 各職ブロックの先頭に繰り返し出る見出し。職ごとの別物なので同名でも畳まない。
-# 判別は「同じ名前が3行以上に出る」。実測で該当はこの2種だけで、他は全部2行。
+# 職ごとに1つずつ持つ見出しは、同名でも別物なので畳まない。
+# 判別は「同じ名前がこの本数以上の行に出る」。
 PER_CLASS_ROW_THRESHOLD = 3
 
-# ゲーム内で同じものと確認した組。訳が食い違うので自動判定には載らない。
-#   149904 は 1424 の連撃段。ja/ko はどちらも「刹那」だが zh は 刹那 / 刹那连击 と分ける。
-# 逆に 1930 と 50037 は en がどちらも Countercrush だが、ゲーム内では別物なので畳まない
-# (50037 の ja「レジスト反撃」はスクリーンショットで確認した値。1930 は別行の「護刃の衝撃」)。
+# 訳が食い違うため自動判定には載らないが、実物では同じと分かっている組。
+# 逆に、一部の言語だけ同名でも実物では別物のものは、ここに入れない。
 CONFIRMED_SAME = {"149904": "1424"}
 
 
@@ -57,7 +55,7 @@ def build_rows(lang, lang_dir):
     print("%-6s 行%3d / 鍵%5d / 総括行 key=%-4s %-6s ID%4d件 → 空欄"
           % (lang, len(recount), len(row_of), catchall, got, len(by_row[catchall])))
 
-    # 総括行は行名を空にする。この1行だけで鍵の8割を占め、個別の名前を持たない。
+    # 総括行は行名を空にする。鍵の大半を占め、個別の名前を持たない。
     names = {i: ("" if k == catchall else (recount[k].get("RecountName") or "").strip())
              for i, k in row_of.items()}
     return names, by_row, catchall
@@ -87,7 +85,7 @@ def main():
 
     mapping, conflicts = {}, []
     # 同じ行に属するIDを、その行の最若IDへ寄せる。
-    # 行の構成は zh-CN(最新版)を権威にし、そこに無いIDだけ ja-JP で補う。
+    # 行の構成は zh-CN を権威にし、そこに無いIDだけ ja-JP で補う。
     for lang in ("zh-CN", "ja-JP"):
         by_row, catchall = rows[lang]
         for row_key, members in by_row.items():
@@ -116,13 +114,13 @@ def main():
     # --- 同名の別行も畳む ---------------------------------------------------
     # ゲーム内メーターは同名の行を2つ出さない。同名＝同じダメージソース。
     #
-    #  (1) 全言語で名前が食い違わないときだけ畳む。ja/ko だけ同名(刹那)や en だけ同名
-    #      (Countercrush)は訳が足りていないだけで別物。畳むと表示言語で粒度が変わる。
-    #      片方だけ名前が無いのは「食い違い」ではないので畳む(1432/31901)。
-    #  (2) 3行以上に出る名前は職ブロックの見出しなので畳まない。
+    #  (1) 全言語で名前が食い違わないときだけ畳む。一部の言語だけ同名になるのは
+    #      訳が足りていないだけで別物のことがあり、畳むと表示言語で粒度が変わる。
+    #      片方だけ名前が無いのは「食い違い」ではないので畳む。
+    #  (2) 職ごとに1つずつ持つ見出し(PER_CLASS_ROW_THRESHOLD 行以上)は畳まない。
     #
     # 畳み先は「名前を持つ言語が最も多いID」。同数なら最若ID。単純に最若へ寄せると、
-    # 名前の無いIDが畳み先になって行名が消える(1432 は zh/en に名前が無い)。
+    # 名前の無いIDが畳み先になって行名が消えることがある。
     rest = [i for i in all_ids
             if i not in mapping and i not in alias
             and any((names[l].get(i) or "").strip() for l in LANGS)]
@@ -156,8 +154,7 @@ def main():
             raise AssertionError("CONFIRMED_SAME のIDが見出し表に無い: %s → %s" % (src, dst))
         mapping[src] = int(dst)
 
-    # 畳み先がさらに畳まれることがある(行畳み → 同名畳み)。
-    # 例: 55356 → 55355(同じ行の最若) → 21427(同名の別行)。
+    # 行畳みの結果がさらに同名畳みの対象になり、2段になることがある。
     # 実行時は1ホップしか引かないので、ここで連鎖を潰す。
     for src in list(mapping):
         seen, dst = {src}, mapping[src]

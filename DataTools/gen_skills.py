@@ -8,15 +8,14 @@
 枠ウィジェットはイマジンとロールしか表示しない
 (`ResolvePlayerSkillLevels` も `CreateSelfActionBarLoadout` もクラススキルを通す前に落とす)。
 
-  イマジン  Skill.IsImagineSlot() = SlotPositionId に 7 か 8   → 141件
-  ロール    Skill.IsRoleSlot()    = SlotPositionId に 21〜24   →  20件
-                                    (職務専用12 + 全職務共通 3021〜3028 の8)
+  イマジン  Skill.IsImagineSlot() = SlotPositionId に 7 か 8
+  ロール    Skill.IsRoleSlot()    = SlotPositionId に 21〜24
 
-イマジンは `39xx` 帯の95件だけではない。`2350` `3000` `1002xxx` `2900xxx` 等も同じ枠判定に
-入るので、落とすと枠に名無しで出る。
+**判定はこの枠番号だけで行う。** ID帯で絞ると、同じ枠に置けるのに範囲から外れるIDが
+枠に名無しで出る。
 
-枠の判定は<b>同梱の `Data/SkillTable.json`</b>(cn の生ファイル)で行う。アプリの実行時判定と
-同じ表を使うため。名前だけを各言語の unpack から取る。
+枠の判定は同梱の `Data/SkillTable.json` で行う。アプリの実行時判定と同じ表を使うため。
+名前だけを各言語の入力から取る。
 """
 import os
 

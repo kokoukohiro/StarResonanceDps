@@ -5,20 +5,14 @@
 
 エンティティリストやメーターで `AttrId` から表示名を引くのに使う。
 
-鍵は **`MonsterTable` ∪ `DummyTable` ∪ `NpcTable`** の和集合（4言語ぶんの和）。
-名前はこの順で「本物の名前」を持つ最初の表から取る。同じIDが複数の表にあり、
-名前が食い違うことがあるため順序が要る（実測148件）。
+鍵は **`MonsterTable` ∪ `DummyTable` ∪ `NpcTable`** の和集合(4言語ぶんの和)。
+名前は SOURCE_TABLES の順で「本物の名前」を持つ最初の表から取る。
+同じIDが複数の表にあって名前が食い違うことがあるので順序が要る。
 
-```
-52   DummyTable=共鸣技能卷心菜法师弱   NpcTable=西尔维      → NpcTable(Dummy 側は本物の名前でない)
-108  MonsterTable=寒霜食人魔          DummyTable=雷        → MonsterTable
-```
-
-> **`MonsterTable` を丸ごと差し替えてはいけない。** 新しい unpack のほうが名前を失う。
-> 3表で埋まるのは zh-CN で6938件だが、テーブルには472件それ以上の名前が入っている
-> （`变身专用-虚蚀蒂娜` など、いまの unpack では空になっているもの）。
+> **`MonsterTable` を丸ごと差し替えない。入力側のほうが名前を失っていることがある。**
+> 3表で埋まる数より、テーブルに入っている名前のほうが多い。
 > `_common.write_localized` の「既存の名前は消さない」規則がこれを守る。
-> **既存の値を捨てて作り直さないこと。**
+> **既存の値を捨てて作り直さない。**
 """
 from _common import LANGS, name_of, table, write_localized
 

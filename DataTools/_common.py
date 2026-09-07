@@ -1,28 +1,28 @@
 # DataTools 共通。パスと入出力だけを持つ。
 #
-# 各ツールは単体で実行できる。呼び出しは DataTools を作業ディレクトリにしなくてよい
-# (このファイルからの相対でリポジトリの位置を求める)。
+# 各ツールは単体で実行できる。作業ディレクトリはどこでもよい
+# (このファイルの位置からリポジトリを求める)。
 import io
 import json
 import os
 
-# …\StarResonanceDps\DataTools\_common.py → …\StarResonanceDps
+# …/StarResonanceDps/DataTools/_common.py → …/StarResonanceDps
 SOLUTION = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORKSPACE = os.path.dirname(SOLUTION)
 
-# 一次データ。2026-09-07 に構成が変わり、言語フォルダは Ztable の下へ移った。
-# 外側の Ztable は t が小文字、その下の ZTable は大文字。
-UNPACK = os.path.join(WORKSPACE, "Star-Unpack", "Ztable")
+# 入力の置き場。環境変数があればそれを使い、無ければリポジトリの隣の JSONS を見る。
+# 中身は「言語フォルダ → ZTable → *.json」。リポジトリには含まれないので各自で用意する。
+TABLES_ENV = "BPSR_TABLES"
+UNPACK = os.environ.get(TABLES_ENV) or os.path.join(os.path.dirname(SOLUTION), "JSONS")
 
 DATA = os.path.join(SOLUTION, "StarResonanceDps.Core", "Data")
 LOCALIZATION = os.path.join(DATA, "Localization")
 MAPPINGS = os.path.join(DATA, "Mappings")
 
-# 表示言語 → Star-Unpack のフォルダ名。
-# cn / en は中国サーバー、jp / kr はアジアサーバーのビルドで、テーブルの版が違う。
+# 表示言語 → 入力側のフォルダ名。
+# 言語ごとにテーブルの版が違うことがあり、収録IDも一致しない。
 LANGS = {"zh-CN": "cn", "en-US": "en", "ja-JP": "jp", "ko-KR": "kr"}
 
-# 訳が用意されていない行に入っているゲーム側のプレースホルダ。名前として扱わない。
+# 未翻訳の行に入っている埋め草。名前として扱わない。
 PLACEHOLDERS = {"场地标记01", "气刃突刺计数"}
 
 
@@ -35,11 +35,13 @@ def load(path):
 
 
 def table(lang_dir, name):
-    """Star-Unpack の ZTable を読む。"""
+    """入力テーブルを読む。無ければ、どこを設定すればよいか示して止まる。"""
     path = os.path.join(UNPACK, lang_dir, "ZTable", name + ".json")
     data = load(path)
     if data is None:
-        raise FileNotFoundError(path)
+        raise FileNotFoundError(
+            "%s が無い。入力の置き場は環境変数 %s か、_common.py の UNPACK で設定する"
+            % (path, TABLES_ENV))
     return data
 
 
@@ -51,13 +53,13 @@ def dump(path, obj):
 
 
 def named(value):
-    """名前として使える文字列か。空とプレースホルダは名前ではない。"""
+    """名前として使える文字列か。空と埋め草は名前ではない。"""
     text = (value or "").strip()
     return bool(text) and text not in PLACEHOLDERS
 
 
 def name_of(row):
-    """ZTable の1行から名前を取る。プレースホルダは空にする。"""
+    """入力の1行から名前を取る。埋め草は空にする。"""
     text = ((row or {}).get("Name") or "").strip()
     return "" if text in PLACEHOLDERS else text
 
@@ -71,8 +73,7 @@ def write_localized(basename, values_by_lang, keys):
     表示時に zh-CN へ落ちるのに任せる。
 
     **既存の名前は消さない。** 新しい値が空のときは既存値を残す。
-    テーブルには旧プロジェクトからの移植や実測で入れた名前があり、
-    unpack から素直に作り直すと失われる(実測: skills の zh 16件 / en 5件)。
+    テーブルには入力側が持っていない名前が入っており、素直に作り直すと失われる。
     """
     keys = sorted(keys, key=int)
     for lang in LANGS:

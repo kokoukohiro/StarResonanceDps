@@ -3,11 +3,10 @@
 
   Data/Localization/scenes.{言語}.json
 
-`SceneTable.Name` が本体。`SceneTable` に無いシーンIDだけ `DungeonsTable` で補う
-(実測でこれに当たるのは `1721 弥妄·流月之野` の1件)。
+`SceneTable.Name` が本体。`SceneTable` に無いシーンIDだけ `DungeonsTable` で補う。
 
-鍵は4言語の和集合。cn/en の `SceneTable` は704件、アジア版は612件しかないので、
-アジア版に無い行は空文字で入り、表示時に zh-CN へ落ちる。
+鍵は4言語の和集合。言語によって `SceneTable` の収録数に差があるので、
+無い行は空文字で入り、表示時に zh-CN へ落ちる。
 """
 from _common import LANGS, name_of, table, write_localized
 
