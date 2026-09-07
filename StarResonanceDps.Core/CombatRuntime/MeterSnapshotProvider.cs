@@ -1619,17 +1619,14 @@ public static class MeterSnapshotProvider
     /// ゲーム内のバフバーが出さないバフか。
     ///
     /// <para>
-    /// ゲームのバフバー(<c>Abnormal_stateView</c>)は
-    /// <c>buffVm:GetEntityBuffList(entity, EBuffPriority.NotShow, ShowBuffCountMax)</c> を呼び、
-    /// <c>BuffPriority == NotShow</c> のバフを出さない。自分のバーもボスHPバーのバーも同じ関数で、
-    /// 対象エンティティが違うだけ。
+    /// ゲーム内のバフ表示は <c>BuffPriority</c> が <c>NotShow</c> のバフを出さない。
+    /// 自分のバーもボスHPバーのバーも同じ条件で、対象エンティティが違うだけ。
     /// </para>
     ///
     /// <para>
-    /// アプリはこれまでアイコンの有無だけで判定しており、<b>ゲームが出さない473種</b>
-    /// (計数・マーカー・移動アクションの有効化など)まで出していた。実測(ログ188本)では
-    /// 表示していたバフ事象の26.4%がこれに当たる。逆にゲームが出してアプリが出さないものは0件で、
-    /// ゲーム側はアプリの厳密な部分集合。
+    /// 以前はアイコンの有無だけで判定しており、ゲームが出さないもの
+    /// (計数・マーカー・移動アクションの有効化など)まで出していた。
+    /// 逆にゲームが出してこちらが出さないものは無く、ゲーム側は厳密な部分集合。
     /// </para>
     /// </summary>
     private static bool IsHiddenFromBuffBar(BuffEvent buffEvent)

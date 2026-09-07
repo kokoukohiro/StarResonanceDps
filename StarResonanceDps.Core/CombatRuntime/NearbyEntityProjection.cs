@@ -235,11 +235,10 @@ internal static class NearbyEntityProjection
     /// </para>
     ///
     /// <para>
-    /// 以前は <c>MonsterTable.HudShowParam[0] == 0</c> で除外していたが、実測(2026-09-01)で
-    /// <b>ボスがこれに当たって一度も表示されていなかった</b>(Light·Tonatiuh 102701、
-    /// Rin·Izcorgiky 102101 など)。アンパックを更新しても値は変わらず(共通3038件で差分0)、
-    /// 表が古いのではなく判定が合っていなかった。<c>HudShowParam</c> の意味は Lua にも proto にも
-    /// 定義が無く追えていない。
+    /// 以前は <c>MonsterTable.HudShowParam[0] == 0</c> で除外していたが、実測で
+    /// <b>ボスがこれに当たって一度も表示されていなかった</b>。テーブルを新しくしても
+    /// この値は変わらないので、表が古いのではなく判定が合っていなかった。
+    /// <c>HudShowParam</c> の意味は追えていない。
     /// </para>
     ///
     /// <para>
