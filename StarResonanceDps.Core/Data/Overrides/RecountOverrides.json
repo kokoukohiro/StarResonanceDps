@@ -2,13 +2,15 @@
   "1222": { "zh-CN": "幻影冲锋" ,"en-US": "Phantom Dash","ja-JP": "ファントムダッシュ","ko-KR": "환영 돌진"},
   "1850": { "zh-CN": "雷爆溟灭-奥义！幻象共鸣" ,"en-US": "Thunderburst Oblivion - Arcane! Illusion Resonance","ja-JP": "雷裂滅・奥義！幻影共鳴","ko-KR": "뇌폭명멸 - 오의! 환상 공명"},
   "1851": { "zh-CN": "雷域-奥义！幻象共鸣" ,"en-US": "Thunder Zone - Arcane! Illusion Resonance","ja-JP": "雷領域・奥義！幻影共鳴","ko-KR": "번개 영역 - 오의! 환상 공명"},
+  "35106": { "zh-CN": "生命吸取" ,"en-US": "Life Steal","ja-JP": "HP吸収","ko-KR": "생명 흡수"},
   "45300": { "zh-CN": "连锁闪电-奥义！幻象共鸣" ,"en-US": "Chain Lightning - Arcane! Illusion Resonance","ja-JP": "チェインサンダー・奥義！幻影共鳴","ko-KR": "연쇄 번개 - 오의! 환상 공명"},
-  "50037": { "en-US": "Countercrush (Counter Storm)" },
   "180301": { "zh-CN": "雷鸣电闪-奥义！幻象共鸣" ,"en-US": "Thunderclap Arcane - Arcane! Illusion Resonance","ja-JP": "サンダースマッシュ・奥義！幻影共鳴","ko-KR": "천둥번개 - 오의! 환상 공명"},
   "391009": { "zh-CN": "雷弹穿行-奥义！幻象共鸣" ,"en-US": "Thunder Traverse - Arcane! Illusion Resonance","ja-JP": "トラッキングサンダー・奥義！幻影共鳴","ko-KR": "뇌탄 관통 - 오의! 환상 공명"},
   "2031106": { "zh-CN": "幸运一击" ,"en-US": "Lucky Strike","ja-JP": "幸運の一撃","ko-KR": "행운의 일격"},
   "2031108": { "zh-CN": "幸运一击" ,"en-US": "Lucky Strike","ja-JP": "幸運の一撃","ko-KR": "행운의 일격"},
+  "2202112": { "zh-CN": "溢出治疗" ,"en-US": "Overhealing","ja-JP": "オーバーヒール","ko-KR": "초과 치유"},
   "2900441": { "zh-CN": "雷电重炮-奥义！幻象共鸣" ,"en-US": "Thunder Cannon - Arcane! Illusion Resonance","ja-JP": "サンダーヘビーキャノン・奥義！幻影共鳴","ko-KR": "번개 대포 - 오의! 환상 공명"},
   "3003213": { "zh-CN": "虚妄裁定" ,"en-US": "Shattered Illusion","ja-JP": "虚妄断罪","ko-KR": "허상의 판결"},
-  "3003250": { "zh-CN": "虚妄裁定-稳态自愈" ,"en-US": "Shattered Illusion - Stasis Recovery","ja-JP": "虚妄断罪-安定自己治癒","ko-KR": "허상의 판결・안정 자가 치유"}
+  "3003250": { "zh-CN": "虚妄裁定-稳态自愈" ,"en-US": "Shattered Illusion - Stasis Recovery","ja-JP": "虚妄断罪-安定自己治癒","ko-KR": "허상의 판결・안정 자가 치유"},
+  "3059191": { "zh-CN": "神盾稳态G2" ,"en-US": "Shield Knight Stasis G2","ja-JP": "シールドファイター・恒常性G2","ko-KR": "쉴드 나이트 안정 G2"}
 }
