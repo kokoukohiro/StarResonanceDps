@@ -69,11 +69,11 @@ export BPSR_TABLES=<置き場所>     # bash
 
 | ツール | 出力 |
 |---|---|
-| `gen_recounts.py` | `Data/Localization/recounts.{4言語}.json` |
-| `gen_buffs.py` | `Data/Localization/buffs.{4言語}.json` |
-| `gen_skills.py` | `Data/Localization/skills.{4言語}.json` |
-| `gen_scenes.py` | `Data/Localization/scenes.{4言語}.json` |
-| `gen_monsters.py` | `Data/Localization/monsters.{4言語}.json` |
+| `gen_recounts.py` | `Data/Localization/recounts.{cn,en,jp,kr}.json` |
+| `gen_buffs.py` | `Data/Localization/buffs.{cn,en,jp,kr}.json` |
+| `gen_skills.py` | `Data/Localization/skills.{cn,en,jp,kr}.json` |
+| `gen_scenes.py` | `Data/Localization/scenes.{cn,en,jp,kr}.json` |
+| `gen_monsters.py` | `Data/Localization/monsters.{cn,en,jp,kr}.json` |
 
 ## 全ツール共通の仕様
 
