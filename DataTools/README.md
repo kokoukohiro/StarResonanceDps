@@ -20,7 +20,7 @@ python gen_monsters.py    # モンスター・NPC・訓練用ダミーの名前
 
 **言語別の JSON テーブル一式が要る。リポジトリには含まれない。** 各自で用意する。
 
-`StarResonanceTool`(https://github.com/PotRooms/StarResonanceTool)の内部コードに手を入れると、
+[StarResonanceTool](https://github.com/PotRooms/StarResonanceTool)の内部コードに手を入れると、
 言語別の Ztable を取り出せる。
 
 期待する構成は「出所 → `Ztable` → 言語フォルダ → `ZTable` → `*.json`」。
