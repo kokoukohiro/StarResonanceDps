@@ -125,12 +125,26 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
+            <!--
+                停止/実行の丸(13)と起動数バッジ(高さ16・幅は桁数で伸びる)が入れ替わる枠。
+                **枠を固定して中の2つを中央揃えにしてある。**
+
+                Auto のままだと列幅が子の大きさで変わるので、入れ替わるたびに
+                右のウィジェット名が押される。両方 Left 揃えだと左端を軸に伸びて中心も動く。
+
+                幅はバッジの高さと同じ16。2桁になると錠剤が左右へ2〜3pxずつはみ出すが、
+                中心対称なので不自然にならず、名前の位置も動かない。
+                枠を広げて2桁を収める案は、常に名前が右へ寄るので採らなかった(2026-09-12)。
+            -->
             <Grid Grid.Column="0"
-                  Margin="0,0,14,0"
+                  Width="16"
+                  Height="16"
+                  Margin="0,0,12,0"
                   VerticalAlignment="Center">
                 <Ellipse Width="13"
                          Height="13"
-                         HorizontalAlignment="Left"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
                          SnapsToDevicePixels="True">
                     <Ellipse.Style>
                         <Style TargetType="Ellipse">
@@ -152,7 +166,7 @@
                 </Ellipse>
 
                 <Path x:Name="PlayerWindowCountBadgePath"
-                      HorizontalAlignment="Left"
+                      HorizontalAlignment="Center"
                       VerticalAlignment="Center"
                       Fill="{DynamicResource Brush.Success}"
                       Stretch="None"

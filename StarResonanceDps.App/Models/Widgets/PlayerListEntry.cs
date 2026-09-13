@@ -90,6 +90,13 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private bool _isNpc;
 
+    /// <summary>
+    /// いま値が供給されているか。false は「キャッシュしか無い」状態で、HPバーを
+    /// NPCと同じ灰色にする。AOIかパーティから届き直せば緑へ戻る。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isLive = true;
+
     [ObservableProperty]
     private bool _isPartyMember;
 
@@ -135,6 +142,7 @@ public sealed partial class PlayerListEntry : ObservableObject
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         IsNpc = player.IsNpc;
+        IsLive = player.IsLive;
         IsPartyMember = player.IsPartyMember;
         PartyNumberText = player.IsPartyMember
             ? player.PartyNumber?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "？"

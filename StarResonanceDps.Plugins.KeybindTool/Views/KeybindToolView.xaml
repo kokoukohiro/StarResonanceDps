@@ -381,11 +381,18 @@
                                         Content="{Binding Texts[Keybind.Button.OpenLocation]}" />
                             </Grid>
 
+                            <!--
+                                本体の TextBlock は属性を直書きする方式で揃っている(104件中97件)。
+                                ここも同じにしてある。共有リソースのキーに依存すると、
+                                本体側で「未使用」と判定されて消えたときに開けなくなる(実際に起きた)。
+                            -->
                             <TextBlock Margin="0,12,0,0"
                                        MinWidth="600"
                                        HorizontalAlignment="Stretch"
                                        TextAlignment="Left"
-                                       Style="{StaticResource Text.Subtitle}"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       TextOptions.TextFormattingMode="Display"
                                        Text="{Binding Texts[Keybind.Hint.SaveFileLocation]}"
                                        TextWrapping="Wrap" />
                         </StackPanel>

@@ -11,6 +11,18 @@ public sealed class PlayerRosterStore
 
     private readonly object _sync = new();
     private readonly Dictionary<long, PlayerRosterEntry> _entries = [];
+
+    /// <summary>
+    /// 初めて現れた順。<b>行はソートせず、新しい行を末尾に足すためにこれが要る。</b>
+    ///
+    /// <para>
+    /// <see cref="_entries"/> は <see cref="Replace"/> のたびに丸ごと入れ替わるうえ、
+    /// <c>Dictionary</c> の列挙順は契約ではない(削除で空いた枠に新しい要素が入る)。
+    /// だから順序はストア側で明示的に持つ。居なくなったら番号も捨てる。
+    /// </para>
+    /// </summary>
+    private readonly Dictionary<long, long> _firstSeenOrderByCharacterId = [];
+    private long _nextFirstSeenOrder;
     private IReadOnlyList<PlayerRosterEntry> _snapshot = Array.AsReadOnly(Array.Empty<PlayerRosterEntry>());
     private string _mapName = string.Empty;
     private uint _mapChannel;
@@ -53,6 +65,7 @@ public sealed class PlayerRosterStore
             {
                 _mapGeneration++;
                 _entries.Clear();
+                ClearFirstSeenOrderNoLock();
             },
             forcePublish: true);
     }
@@ -93,6 +106,7 @@ public sealed class PlayerRosterStore
                 }
 
                 _entries[normalized.CharacterId] = normalized;
+                EnsureFirstSeenOrderNoLock(normalized.CharacterId);
             },
             forcePublish: false);
     }
@@ -119,6 +133,16 @@ public sealed class PlayerRosterStore
                 foreach (var entry in nextEntries)
                 {
                     _entries[entry.CharacterId] = entry;
+                    EnsureFirstSeenOrderNoLock(entry.CharacterId);
+                }
+
+                // 居なくなった人の番号は捨てる。戻ってきたら末尾に付き直す。
+                foreach (var characterId in _firstSeenOrderByCharacterId.Keys.ToArray())
+                {
+                    if (!_entries.ContainsKey(characterId))
+                    {
+                        _firstSeenOrderByCharacterId.Remove(characterId);
+                    }
                 }
 
                 if (mapName is not null)
@@ -136,6 +160,7 @@ public sealed class PlayerRosterStore
             {
                 _mapGeneration++;
                 _entries.Clear();
+                ClearFirstSeenOrderNoLock();
                 _mapName = string.Empty;
             },
             forcePublish: true);
@@ -171,14 +196,62 @@ public sealed class PlayerRosterStore
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot!));
     }
 
+    /// <summary>
+    /// 並びは <b>自分 → パーティ(PT順) → PT外の灰色 → PT外のライブ(初出順)</b>。
+    ///
+    /// <para>
+    /// <b>名前や値でソートしない。</b> 新しい行は必ず末尾に付く。
+    /// 勝手に並べ替わると、見ている行が動いて追えなくなる。
+    /// </para>
+    /// </summary>
     private IReadOnlyList<PlayerRosterEntry> CreateSnapshotNoLock()
     {
         return Array.AsReadOnly(_entries.Values
             .Select(Clone)
-            .OrderByDescending(entry => entry.IsSelf)
-            .ThenBy(entry => entry.Name, StringComparer.Ordinal)
-            .ThenBy(entry => entry.CharacterId)
+            .OrderBy(GetGroupRank)
+            // パーティ内だけは PT番号順。番号が無い人はその後ろへ初出順で続く。
+            .ThenBy(entry => entry.IsPartyMember && entry.PartyNumber.HasValue
+                ? entry.PartyNumber!.Value
+                : int.MaxValue)
+            .ThenBy(GetFirstSeenOrderNoLock)
             .ToArray());
+    }
+
+    private static int GetGroupRank(PlayerRosterEntry entry)
+    {
+        if (entry.IsSelf)
+        {
+            return 0;
+        }
+
+        if (entry.IsPartyMember)
+        {
+            return 1;
+        }
+
+        // 灰色(キャッシュしか無い行)はライブより上。
+        return entry.IsLive ? 3 : 2;
+    }
+
+    private long GetFirstSeenOrderNoLock(PlayerRosterEntry entry)
+    {
+        return _firstSeenOrderByCharacterId.TryGetValue(entry.CharacterId, out var order)
+            ? order
+            : long.MaxValue;
+    }
+
+    private void EnsureFirstSeenOrderNoLock(long characterId)
+    {
+        if (characterId != 0 && !_firstSeenOrderByCharacterId.ContainsKey(characterId))
+        {
+            _firstSeenOrderByCharacterId[characterId] = _nextFirstSeenOrder++;
+        }
+    }
+
+    private void ClearFirstSeenOrderNoLock()
+    {
+        _firstSeenOrderByCharacterId.Clear();
+        _nextFirstSeenOrder = 0;
     }
 
     private static PlayerRosterEntry Clone(PlayerRosterEntry entry)
@@ -201,7 +274,8 @@ public sealed class PlayerRosterStore
             entry.IsNpc,
             entry.CurrentShield,
             entry.IsPartyMember,
-            entry.PartyNumber);
+            entry.PartyNumber,
+            entry.IsLive);
     }
 }
 

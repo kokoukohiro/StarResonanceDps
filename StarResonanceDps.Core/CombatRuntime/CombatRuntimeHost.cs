@@ -37,12 +37,20 @@ public sealed class CombatRuntimeHost
                 return;
             }
 
-            Utils.MigratePersistedRuntimeFiles();
-            Settings.Load();
+            // 設定は App 側が持っている。Core にファイルを読む口は無いので、
+            // 呼ぶ前に CombatRuntimeSettings.Apply を通してもらう必要がある。
+            // 忘れると既定値(キャプチャ自動・分割あり・保持なし)で黙って動いてしまうため、
+            // ここで落とす。
+            if (!CombatRuntimeSettings.HasBeenApplied)
+            {
+                throw new InvalidOperationException(
+                    "CombatRuntimeSettings.Apply を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
+            }
+
+            Utils.EnsureDataDirectory();
             ConfigureLogging();
             DB.Init();
             AppState.LoadDataTables();
-            Settings.Instance.Apply();
 
             if (string.IsNullOrEmpty(MessageManager.NetCaptureDeviceName))
             {
@@ -83,12 +91,11 @@ public sealed class CombatRuntimeHost
             }
 
             DB.CloseAndSave();
-            Settings.Save();
 
-            if (Settings.Instance.UseDatabaseForEncounterHistory
-                && Settings.Instance.DatabaseRetentionPolicyDays > 0)
+            // 0 は無期限。掃除を回さない。
+            if (CombatRuntimeSettings.DatabaseRetentionPolicyDays > 0)
             {
-                DB.ClearOldEncounters(Settings.Instance.DatabaseRetentionPolicyDays);
+                DB.ClearOldEncounters(CombatRuntimeSettings.DatabaseRetentionPolicyDays);
             }
 
             _isInitialized = false;
@@ -100,13 +107,8 @@ public sealed class CombatRuntimeHost
         var loggerConfiguration = new LoggerConfiguration()
             .MinimumLevel.Verbose()
             .Enrich.FromLogContext()
-            .WriteTo.Sink(new ManagerLogSink(PacketDiagnosticLogStore.Instance));
-
-        if (Settings.Instance.LogToFile)
-        {
-            loggerConfiguration = loggerConfiguration.WriteTo.File(
-                Path.Combine(Utils.DATA_DIR_NAME, "combat-runtime.log"));
-        }
+            .WriteTo.Sink(new ManagerLogSink(PacketDiagnosticLogStore.Instance))
+            .WriteTo.File(Path.Combine(Utils.DATA_DIR_NAME, "CombatRuntime.log"));
 
         Log.Logger = loggerConfiguration.CreateLogger();
     }

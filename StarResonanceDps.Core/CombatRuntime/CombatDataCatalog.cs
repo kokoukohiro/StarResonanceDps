@@ -26,12 +26,13 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    /// <summary>発生源ID → ゲーム内メーターの行名。<c>Data/Localization/recounts.*.json</c>。</summary>
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> _recountNames =
-        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+    /// <summary>行代表キー → ゲーム内メーターの行名。<c>Data/Localization/recounts.*.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<long, string>> _recountNames =
+        new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    private static FrozenDictionary<int, int> _recountSourceMap = FrozenDictionary<int, int>.Empty;
+    /// <summary>発生源キー → 行代表キー。<c>recounts.*.json</c> の行構成に手修正を重ねたもの。</summary>
+    private static FrozenDictionary<long, long> _recountRows = FrozenDictionary<long, long>.Empty;
 
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -87,6 +88,32 @@ public static class CombatDataCatalog
         return string.IsNullOrEmpty(name) ? $"({id})" : $"{name}({id})";
     }
 
+    /// <summary>
+    /// メーターの行に内部IDを添える。書式は <c>ownerId:枝番</c> で、生成物・手修正の鍵と同じ。
+    ///
+    /// <para>
+    /// <b>枝番まで出す。</b> 同じ <c>ownerId</c> が別の行に分かれることがあり、
+    /// <c>ownerId</c> だけだと 臣鷹出撃 と 臣鷹の雷撃衝撃 がどちらも <c>(2203291)</c> になって
+    /// 見分けが付かない。
+    /// </para>
+    /// </summary>
+    private static string AppendSourceInternalId(string name, InternalIdDisplayMode kind, long rowKey)
+    {
+        if (rowKey == 0)
+        {
+            return name;
+        }
+
+        var mode = (InternalIdDisplayMode)Volatile.Read(ref _internalIdDisplayMode);
+        if (mode != InternalIdDisplayMode.All && mode != kind)
+        {
+            return name;
+        }
+
+        var text = FormatSourceKey(rowKey);
+        return string.IsNullOrEmpty(name) ? $"({text})" : $"{name}({text})";
+    }
+
     public static void Load()
     {
         lock (Sync)
@@ -98,97 +125,65 @@ public static class CombatDataCatalog
             _buffNames = LoadLocalizedText("buffs");
             _monsterNames = LoadLocalizedText("monsters");
             _sceneNames = LoadLocalizedText("scenes");
-            // 畳みマッピングを先に読む。上書きが「畳まれて消えるID」を指していたら
-            // 効かないので、読み込み時に警告を出すために要る。
-            _recountSourceMap = LoadSourceMap("RecountSourceMap");
-            _recountNames = LoadLocalizedText("recounts", "RecountOverrides");
-            _buffNameAliases = LoadNameAliases("BuffNameAlias");
-            _nameSuffixes = LoadNameSuffixes();
+            LoadRecounts();
         }
     }
 
     /// <summary>
-    /// 行名に接尾辞を足すID。<c>Data/Mappings/BuffNameAlias.json</c>。イマジンのパッシブ用。
+    /// 発生源キーを作る。<b>ゲーム内メーターの行はこの粒度で決まる。</b>
     ///
     /// <para>
-    /// パッシブは<b>ゲーム内メーターでは本体イマジンと同じ行</b>に入る。こちらは分離して出す仕様なので、
-    /// <c>RecountSourceMap</c> から除外したうえで、行名(＝本体の名前)に接尾辞を足して読み分ける。
-    /// <b>IDは変えない</b>ので集計も分かれたままになる。
+    /// ゲームは <c>RecountTable.DamageId</c> で行を引く。<c>DamageId</c> はワイヤに乗っていないが、
+    /// <c>SyncDamageInfo</c> の <c>OwnerId</c> と <c>HitEventId</c> の組が <c>DamageId</c> と
+    /// 1対1で対応する(<c>DamageId</c> の <c>TypeEnum</c> が <c>OwnerId</c>、下2桁が <c>HitEventId</c>)。
     /// </para>
     ///
     /// <para>
-    /// 行名が既に本体の名前なので、借りる先のIDは持たない。<b>接尾辞だけ。</b>
+    /// <b><c>OwnerId</c> だけでは粗すぎる。</b> 同じ <c>OwnerId</c> の枝が別の行に入る例が26〜28種あり、
+    /// 枝番を見ないとどちらか一方の行が消える(<c>2203291</c> が 臣鷹出撃 と 臣鷹の雷撃衝撃 にまたがる)。
     /// </para>
     ///
     /// <para>
-    /// <b>表示時にだけ効く。</b> 記録側(<c>CombatStats.Name</c>)は触らないので、
-    /// 後から表や接尾辞を変えれば過去のエンカウンターにも反映される。
+    /// 詰め方は32bitシフト。<b>桁を食い合わないので、枝番がどんな値でも別の鍵と衝突しない。</b>
     /// </para>
     /// </summary>
-    private static FrozenDictionary<int, NameAlias> _buffNameAliases =
-        FrozenDictionary<int, NameAlias>.Empty;
+    public static long MakeSourceKey(int ownerId, int branch)
+        => ((long)ownerId << 32) | (uint)branch;
 
-    /// <summary>接尾辞キー → 言語 → 文字列。<c>Data/Mappings/NameSuffixes.json</c>。</summary>
-    private static FrozenDictionary<string, FrozenDictionary<string, string>> _nameSuffixes =
-        FrozenDictionary<string, FrozenDictionary<string, string>>.Empty;
+    /// <summary>発生源キーの <c>OwnerId</c> 側。</summary>
+    public static int SourceKeyOwnerId(long key) => (int)(key >> 32);
 
-    /// <param name="Suffix">接尾辞のキー。<c>NameSuffixes.json</c> を引く。</param>
-    private readonly record struct NameAlias(string Suffix);
+    /// <summary>発生源キーの枝番(<c>HitEventId</c>)側。</summary>
+    public static int SourceKeyBranch(long key) => unchecked((int)(uint)key);
 
-    private sealed class NameAliasEntry
+    /// <summary>発生源キーの表示形。ファイルの鍵と同じ <c>ownerId:枝番</c>。</summary>
+    public static string FormatSourceKey(long key)
+        => $"{SourceKeyOwnerId(key)}:{SourceKeyBranch(key)}";
+
+    private static bool TryParseSourceKey(string text, out long key)
     {
-        public string? Suffix { get; set; }
+        key = 0;
+        var separator = text.IndexOf(':');
+        if (separator <= 0
+            || !int.TryParse(text.AsSpan(0, separator), out var ownerId)
+            || !int.TryParse(text.AsSpan(separator + 1), out var branch))
+        {
+            return false;
+        }
+
+        key = MakeSourceKey(ownerId, branch);
+        return true;
     }
 
-    private static FrozenDictionary<int, NameAlias> LoadNameAliases(string dataName)
-    {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", $"{dataName}.json");
-        if (!File.Exists(path))
-        {
-            return FrozenDictionary<int, NameAlias>.Empty;
-        }
-
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, NameAliasEntry>>(
-            File.ReadAllText(path));
-        var map = new Dictionary<int, NameAlias>();
-        if (raw is not null)
-        {
-            foreach (var pair in raw)
-            {
-                if (int.TryParse(pair.Key, out var id)
-                    && pair.Value is not null
-                    && !string.IsNullOrWhiteSpace(pair.Value.Suffix))
-                {
-                    map[id] = new NameAlias(pair.Value.Suffix);
-                }
-            }
-        }
-
-        Log.Information("Loaded {Count} {DataName} entries", map.Count, dataName);
-        return map.ToFrozenDictionary();
-    }
-
-    private static FrozenDictionary<string, FrozenDictionary<string, string>> LoadNameSuffixes()
-    {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", "NameSuffixes.json");
-        if (!File.Exists(path))
-        {
-            return FrozenDictionary<string, FrozenDictionary<string, string>>.Empty;
-        }
-
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
-            File.ReadAllText(path));
-        var map = new Dictionary<string, FrozenDictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-        if (raw is not null)
-        {
-            foreach (var pair in raw)
-            {
-                map[pair.Key] = pair.Value.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-            }
-        }
-
-        return map.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    }
+    /// <summary>
+    /// 内部ID注記を付けないメーターの行名。<b>記録・保存する値にはこちらを使う。</b>
+    ///
+    /// <para>
+    /// 注記は表示設定なので、付いたまま保存すると設定を切ったあとも残る。
+    /// </para>
+    /// </summary>
+    public static string GetSourceName(long rowKey)
+        => ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey);
 
     /// <summary>
     /// メーターの行に出す名前。<b>ゲーム内メーターの見出し表だけが決める。</b>
@@ -199,97 +194,354 @@ public static class CombatDataCatalog
     /// </para>
     ///
     /// <para>
-    /// 別名表にあるIDは接尾辞を足す(イマジンのパッシブ)。
-    /// <b>名前が空なら接尾辞も付けない。</b>
-    /// 接尾辞だけの行が出ると、名前が取れていないことが見えなくなる。
+    /// 引数は<b>畳んだあとの行代表キー</b>。注記もそのキーで付けるので、
+    /// 「どの行か」と「注記のID」が必ず一致する。
     /// </para>
     /// </summary>
-    public static string GetSourceDisplayName(int id, bool isBuffSource)
+    public static string GetSourceDisplayName(long rowKey, bool isBuffSource)
     {
-        // 名前・接尾辞・内部ID注記の3つを、この順で組み立てる。
-        //
-        // <b>注記は最後に1回だけ、行自身のIDで付ける。</b> GetSkillName / GetBuffName は
-        // 注記込みで返すので、それを土台にすると「借り先のID + 接尾辞」という順序になり、
-        // 注記が行のIDを指さなくなる(実際 3210050 の行が "…(3903)（パッシブ）" と出ていた)。
-        var body = ResolveText(_recountNames, Volatile.Read(ref _cultureName), id);
-
-        // イマジンのパッシブ。行名は既に本体イマジンの名前なので、借りる先は要らない。
-        // 接尾辞だけを足して本体と読み分ける(ゲームは統合するが、こちらは分離して出す)。
-        //
-        // <b>名前が空なら接尾辞も付けない。</b>
-        // 接尾辞だけの行が出ると、名前が取れていないことが見えなくなる。
-        if (!string.IsNullOrEmpty(body) && _buffNameAliases.TryGetValue(id, out var alias))
-        {
-            body += ResolveSuffix(alias.Suffix);
-        }
-
-        return AppendInternalId(
-            body,
+        return AppendSourceInternalId(
+            ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey),
             isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
-            id);
-    }
-
-    private static string ResolveSuffix(string suffixKey)
-    {
-        if (string.IsNullOrEmpty(suffixKey)
-            || !_nameSuffixes.TryGetValue(suffixKey, out var byCulture))
-        {
-            return string.Empty;
-        }
-
-        var culture = NormalizeCultureName(Volatile.Read(ref _cultureName));
-        if (byCulture.TryGetValue(culture, out var text) && !string.IsNullOrWhiteSpace(text))
-        {
-            return text;
-        }
-
-        // 受け皿は zh-CN ただ1つ。名前の解決と同じ規則に揃える。
-        return byCulture.TryGetValue("zh-CN", out var chinese) ? chinese : string.Empty;
+            rowKey);
     }
 
     /// <summary>
-    /// 発生源ID → 同じメーター行の最若ID。<c>Data/Mappings/RecountSourceMap.json</c>。
+    /// 発生源キー → 行代表キー。<c>recounts.*.json</c> の行構成に手修正を重ねたもの。
     ///
     /// <para>
-    /// ゲーム内メーターは <c>RecountTable</c> の1行に複数の構成IDをまとめる。この表は
-    /// その行の所属から生成したもので、<b>手書きの判断は入っていない</b>。
-    /// 畳み先は行の最若ID。
-    /// </para>
-    ///
-    /// <para>
-    /// <b>イマジンのパッシブは入れていない。</b> 行の上では本体と同じ行に居るが、
-    /// こちらは分離して出す仕様なので、畳むと本体に統合されてしまう。
-    /// 代わりに <c>BuffNameAlias</c> が接尾辞を付ける。
+    /// ゲーム内メーターは <c>RecountTable</c> の1行に複数の <c>DamageId</c> をまとめる。
+    /// 生成物はその所属をそのまま写したもので、<b>手書きの判断は入っていない</b>。
+    /// 判断が要るぶんは <c>Data/Overrides/RecountOverrides.json</c> にある。
     /// </para>
     /// </summary>
-    public static bool TryResolveRecountSource(int id, out int rowLeadId)
-        => _recountSourceMap.TryGetValue(id, out rowLeadId);
+    public static bool TryResolveRecountRow(long key, out long rowKey)
+        => _recountRows.TryGetValue(key, out rowKey);
 
-
-    private static FrozenDictionary<int, int> LoadSourceMap(string dataName)
+    /// <param name="Row">
+    /// 行の出入り。別の鍵ならその鍵の行へ入れる(追加)、<c>null</c> なら行から外して単独にする(削除)。
+    /// 省略したら生成物のまま。
+    /// </param>
+    /// <param name="RowSpecified">
+    /// <c>Row</c> が書かれていたか。<c>null</c> は「外す」という指示なので、
+    /// 「書かなかった」と区別しないと省略が全部「外す」になる。
+    /// </param>
+    /// <param name="Name">言語 → 名前。書いた言語だけ差し替え、空文字は生成値を消す。</param>
+    private sealed class RecountOverrideEntry
     {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Mappings", $"{dataName}.json");
-        if (!File.Exists(path))
+        public string? Row { get; set; }
+
+        public bool RowSpecified { get; set; }
+
+        public Dictionary<string, string>? Name { get; set; }
+    }
+
+    /// <summary>
+    /// 行構成・行名・手修正をまとめて読む。
+    ///
+    /// <list type="number">
+    ///   <item>生成物 <c>recounts.*.json</c> の行から、行の集まりを作る</item>
+    ///   <item>手修正の <c>Row</c> を当てる。<b>外すほうを先に</b>当てないと、外した鍵へ寄せられない</item>
+    ///   <item>行代表を取り直す。外した鍵が代表だった行は代表が変わる</item>
+    ///   <item>生成物の名前を行代表へ配り、手修正の <c>Name</c> を重ねる</item>
+    /// </list>
+    /// </summary>
+    private static void LoadRecounts()
+    {
+        // 生成物は生の見出し表と同じ形。行ごとに RecountName と、その行に属する発生源キーの一覧。
+        // 項目名は SourceId。中身は TypeEnum:枝番 で、生の DamageId とは別の値。
+        var byCulture = new Dictionary<string, Dictionary<string, RecountRow>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var cultureName in SupportedCultures)
         {
-            Log.Warning("Missing source mapping {DataName}", dataName);
-            return FrozenDictionary<int, int>.Empty;
+            var path = Path.Combine(
+                Utils.DATA_DIR_NAME, "Localization", $"recounts.{cultureName}.json");
+            if (!File.Exists(path))
+            {
+                Log.Warning("Missing recounts localization for {CultureName}", cultureName);
+                byCulture[cultureName] = [];
+                continue;
+            }
+
+            byCulture[cultureName] =
+                JsonConvert.DeserializeObject<Dictionary<string, RecountRow>>(File.ReadAllText(path)) ?? [];
         }
 
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, int>>(File.ReadAllText(path));
-        var map = new Dictionary<int, int>();
-        if (raw is not null)
+        // 行の構成はどの言語でも同じ。名前の受け皿でもある zh-CN を土台にする。
+        var layout = byCulture.TryGetValue("zh-CN", out var chinese) && chinese.Count > 0
+            ? chinese
+            : byCulture.Values.FirstOrDefault(rows => rows.Count > 0) ?? [];
+
+        var groups = new Dictionary<long, HashSet<long>>();
+        var groupOf = new Dictionary<long, long>();
+        // 鍵 → 元の行。手修正で行から外した鍵が、外れたあとも元の行名を土台にできる。
+        var originRow = new Dictionary<long, string>();
+
+        foreach (var row in layout)
         {
-            foreach (var pair in raw)
+            long? head = null;
+            foreach (var text in row.Value.SourceId ?? [])
             {
-                if (int.TryParse(pair.Key, out var id) && pair.Value != 0 && pair.Value != id)
+                if (!TryParseSourceKey(text, out var key))
                 {
-                    map[id] = pair.Value;
+                    Log.Error("recounts: 行 {Row} の \"{Key}\" が ownerId:枝番 の形でない", row.Key, text);
+                    continue;
+                }
+
+                originRow[key] = row.Key;
+                if (head is null)
+                {
+                    groups[key] = [key];
+                    groupOf[key] = key;
+                    head = key;
+                }
+                else
+                {
+                    Join(groups, groupOf, key, head.Value);
                 }
             }
         }
 
-        Log.Information("Loaded {Count} source mappings from {DataName}", map.Count, dataName);
-        return map.ToFrozenDictionary();
+        var overrides = LoadRecountOverrides();
+
+        // 外すほうを先に。寄せ先が「外したばかりの鍵」であることがある(パッシブ2件がこの形)。
+        foreach (var entry in overrides)
+        {
+            if (entry.Value.RowSpecified && entry.Value.Row is null)
+            {
+                Detach(groups, groupOf, entry.Key);
+            }
+        }
+
+        foreach (var entry in overrides)
+        {
+            if (!entry.Value.RowSpecified || entry.Value.Row is null)
+            {
+                continue;
+            }
+
+            if (!TryParseSourceKey(entry.Value.Row, out var target))
+            {
+                Log.Error("RecountOverrides: {Key} の Row \"{Row}\" が ownerId:枝番 の形でない",
+                    FormatSourceKey(entry.Key), entry.Value.Row);
+                continue;
+            }
+
+            Join(groups, groupOf, entry.Key, target);
+        }
+
+        // 行代表は行の最小キー。ownerId → 枝番 の順で比べる。
+        var repOf = new Dictionary<long, long>();
+        var membersOfRep = new Dictionary<long, List<long>>();
+        foreach (var group in groups)
+        {
+            var members = group.Value.OrderBy(k => SourceKeyOwnerId(k)).ThenBy(SourceKeyBranch).ToList();
+            var rep = members[0];
+            membersOfRep[rep] = members;
+            foreach (var key in members)
+            {
+                repOf[key] = rep;
+            }
+        }
+
+        _recountRows = repOf.ToFrozenDictionary();
+        _recountNames = BuildRecountNames(membersOfRep, originRow, byCulture, repOf, overrides);
+        Log.Information("Loaded {Keys} recount keys / {Rows} rows / {Overrides} overrides",
+            repOf.Count, groups.Count, overrides.Count);
+    }
+
+    /// <param name="RecountName">行名。</param>
+    /// <param name="SourceId">
+    /// その行に属する発生源キー(<c>ownerId:枝番</c>)。
+    /// <b><c>DamageId</c> とは別の値</b>なので、生の見出し表と同じ名前は使わない。
+    /// </param>
+    private sealed class RecountRow
+    {
+        public string? RecountName { get; set; }
+
+        public List<string>? SourceId { get; set; }
+    }
+
+    private static void Join(
+        Dictionary<long, HashSet<long>> groups,
+        Dictionary<long, long> groupOf,
+        long key,
+        long target)
+    {
+        // 先に今いる行から抜く。抜き忘れると空になった行が残り、
+        // 代表を取り直すときにその行が「鍵ひとつだけの行」として復活してしまう。
+        Remove(groups, groupOf, key);
+
+        // 寄せ先がまだどの行にも属していなければ、その鍵だけの行を先に作る。
+        if (!groupOf.TryGetValue(target, out var groupId))
+        {
+            groupId = target;
+            groups[groupId] = [target];
+            groupOf[target] = groupId;
+        }
+
+        groups[groupId].Add(key);
+        groupOf[key] = groupId;
+    }
+
+    private static void Detach(
+        Dictionary<long, HashSet<long>> groups,
+        Dictionary<long, long> groupOf,
+        long key)
+    {
+        Remove(groups, groupOf, key);
+        groups[key] = [key];
+        groupOf[key] = key;
+    }
+
+    private static void Remove(
+        Dictionary<long, HashSet<long>> groups,
+        Dictionary<long, long> groupOf,
+        long key)
+    {
+        if (!groupOf.TryGetValue(key, out var groupId) || !groups.TryGetValue(groupId, out var members))
+        {
+            return;
+        }
+
+        members.Remove(key);
+        groupOf.Remove(key);
+
+        if (members.Count == 0)
+        {
+            groups.Remove(groupId);
+            return;
+        }
+
+        // 行の識別子はメンバーの鍵そのもの。その鍵を抜いたら残りのメンバーで付け直す。
+        // 付け直さないと、抜いた鍵で行を作り直したときに残りのメンバーごと消える
+        // (幻影共鳴の行から先頭の 1850:1 を外して、残り4件が名無しになった)。
+        if (groupId == key)
+        {
+            groups.Remove(groupId);
+            var next = members.First();
+            groups[next] = members;
+            foreach (var member in members)
+            {
+                groupOf[member] = next;
+            }
+        }
+    }
+
+    private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides()
+    {
+        var result = new Dictionary<long, RecountOverrideEntry>();
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "RecountOverrides.json");
+        if (!File.Exists(path))
+        {
+            return result;
+        }
+
+        // Row に null が書かれたのか、そもそも書かれなかったのかを見分けるため、
+        // 一度 JObject で受けてからキーの有無を見る。
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, Newtonsoft.Json.Linq.JObject>>(
+            File.ReadAllText(path));
+        foreach (var pair in raw ?? [])
+        {
+            if (!TryParseSourceKey(pair.Key, out var key))
+            {
+                Log.Error("RecountOverrides: 鍵が ownerId:枝番 の形でないので飛ばす \"{Key}\"", pair.Key);
+                continue;
+            }
+
+            var rowToken = pair.Value["Row"];
+            var entry = new RecountOverrideEntry
+            {
+                RowSpecified = rowToken is not null,
+                Row = rowToken?.Type == Newtonsoft.Json.Linq.JTokenType.String
+                    ? (string?)rowToken
+                    : null,
+            };
+
+            if (pair.Value["Name"] is Newtonsoft.Json.Linq.JObject names)
+            {
+                entry.Name = [];
+                foreach (var name in names)
+                {
+                    // 言語名の打ち間違いは静かに効かないので、必ず出す。
+                    if (!SupportedCultures.Contains(name.Key, StringComparer.OrdinalIgnoreCase))
+                    {
+                        Log.Error(
+                            "RecountOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                            pair.Key, name.Key, string.Join(" / ", SupportedCultures));
+                        continue;
+                    }
+
+                    entry.Name[name.Key] = ((string?)name.Value)?.Trim() ?? string.Empty;
+                }
+            }
+
+            result[key] = entry;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 行代表キー → 表示名を、言語ごとに組む。
+    ///
+    /// <para>
+    /// 生成物は行ごとに名前を持つので、<b>行代表がどの行から来たか</b>で引く。
+    /// 手修正で行が組み替わると、代表が生成物に無い鍵になることがある(総括行から戻した鍵)。
+    /// そのときは同じ行の別のメンバーの元の行名で埋める。
+    /// </para>
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<long, string>> BuildRecountNames(
+        Dictionary<long, List<long>> membersOfRep,
+        Dictionary<long, string> originRow,
+        Dictionary<string, Dictionary<string, RecountRow>> byCulture,
+        Dictionary<long, long> repOf,
+        Dictionary<long, RecountOverrideEntry> overrides)
+    {
+        var result = new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var cultureName in SupportedCultures)
+        {
+            var rows = byCulture.TryGetValue(cultureName, out var forCulture) ? forCulture : [];
+            var names = new Dictionary<long, string>();
+
+            foreach (var group in membersOfRep)
+            {
+                foreach (var member in group.Value)
+                {
+                    if (originRow.TryGetValue(member, out var rowId)
+                        && rows.TryGetValue(rowId, out var row)
+                        && !string.IsNullOrWhiteSpace(row.RecountName))
+                    {
+                        names[group.Key] = row.RecountName.Trim();
+                        break;
+                    }
+                }
+            }
+
+            foreach (var entry in overrides)
+            {
+                if (entry.Value.Name is null
+                    || !entry.Value.Name.TryGetValue(cultureName, out var text))
+                {
+                    continue;
+                }
+
+                // 名前は行のもの。畳まれる鍵に書いても行代表へ届く。
+                var rep = repOf.TryGetValue(entry.Key, out var known) ? known : entry.Key;
+                if (string.IsNullOrEmpty(text))
+                {
+                    names.Remove(rep);
+                }
+                else
+                {
+                    names[rep] = text;
+                }
+            }
+
+            result[cultureName] = names.ToFrozenDictionary();
+        }
+
+        return result.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
     public static string GetSkillName(int skillId)
@@ -354,34 +606,6 @@ public static class CombatDataCatalog
                 InternalIdDisplayMode.MapOnly,
                 levelMapId)
             : string.Empty;
-    }
-
-    /// <summary>
-    /// メーターの行のアイコン。
-    ///
-    /// <para>
-    /// <b>畳み先のIDは、届いたときの種別と一致するとは限らない。</b>
-    /// 行の最若IDがバフで、そこへスキルとして届いたIDが畳まれることがある(実測で112行中5行)。
-    /// そこで<b>IDがどちらの生テーブルに載っているか</b>で決め、
-    /// 両方に載っている(90件)か、どちらにも無いときだけ届いた種別に従う。
-    /// </para>
-    /// </summary>
-    public static string GetSourceIconName(int id, bool arrivedAsBuff)
-    {
-        var inSkillTable = _skills.ContainsKey(id);
-        var inBuffTable = _buffs.ContainsKey(id);
-
-        if (inSkillTable && !inBuffTable)
-        {
-            return GetSkillIconName(id);
-        }
-
-        if (inBuffTable && !inSkillTable)
-        {
-            return GetBuffOwnIconName(id);
-        }
-
-        return arrivedAsBuff ? GetBuffOwnIconName(id) : GetSkillIconName(id);
     }
 
     public static string GetSkillIconName(int skillId, string? fallbackIcon = null)
@@ -631,68 +855,10 @@ public static class CombatDataCatalog
     /// 静かに効かないのが一番困る失敗なので、必ずログに出す。
     /// </para>
     /// </summary>
-    private static Dictionary<string, Dictionary<int, string>> LoadLocalizedOverrides(string dataName)
-    {
-        var result = SupportedCultures.ToDictionary(
-            culture => culture,
-            _ => new Dictionary<int, string>(),
-            StringComparer.OrdinalIgnoreCase);
-
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", $"{dataName}.json");
-        if (!File.Exists(path))
-        {
-            return result;
-        }
-
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(
-            File.ReadAllText(path));
-        if (raw is null)
-        {
-            return result;
-        }
-
-        var applied = 0;
-        foreach (var entry in raw)
-        {
-            if (!int.TryParse(entry.Key, out var id))
-            {
-                Log.Error("{DataName}: キーがIDではないので飛ばす \"{Key}\"", dataName, entry.Key);
-                continue;
-            }
-
-            foreach (var pair in entry.Value ?? [])
-            {
-                if (!result.TryGetValue(pair.Key, out var byId))
-                {
-                    Log.Error(
-                        "{DataName}: {Id} に未知のキー \"{Key}\"。言語は {Cultures}",
-                        dataName, entry.Key, pair.Key, string.Join(" / ", SupportedCultures));
-                    continue;
-                }
-
-                byId[id] = (pair.Value ?? string.Empty).Trim();
-                applied++;
-            }
-
-            // 畳まれて消えるIDへ書いても表示されない。静かな空振りになるので警告する。
-            if (_recountSourceMap.TryGetValue(id, out var rowLeadId))
-            {
-                Log.Warning(
-                    "{DataName}: {Id} は {RowLeadId} へ畳まれるので効かない。{RowLeadId} に書くこと",
-                    dataName, id, rowLeadId, rowLeadId);
-            }
-        }
-
-        Log.Information("Loaded {Count} {DataName} overrides for {Ids} ids", applied, dataName, raw.Count);
-        return result;
-    }
-
     private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(
-        string dataName,
-        string? overridesName = null)
+        string dataName)
     {
         var result = new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase);
-        var overrides = overridesName is null ? null : LoadLocalizedOverrides(overridesName);
 
         foreach (var cultureName in SupportedCultures)
         {
@@ -723,32 +889,17 @@ public static class CombatDataCatalog
                 Log.Warning("Missing {DataName} localization for {CultureName}", dataName, cultureName);
             }
 
-            // 手修正を重ねる。空文字は生成値を消す指示。
-            if (overrides is not null && overrides.TryGetValue(cultureName, out var overridesById))
-            {
-                foreach (var pair in overridesById)
-                {
-                    if (string.IsNullOrEmpty(pair.Value))
-                    {
-                        names.Remove(pair.Key);
-                    }
-                    else
-                    {
-                        names[pair.Key] = pair.Value;
-                    }
-                }
-            }
-
             result[cultureName] = names.ToFrozenDictionary();
         }
 
         return result.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     }
 
-    private static string ResolveText(
-        IReadOnlyDictionary<string, FrozenDictionary<int, string>> localizedNames,
+    private static string ResolveText<TKey>(
+        IReadOnlyDictionary<string, FrozenDictionary<TKey, string>> localizedNames,
         string cultureName,
-        int id)
+        TKey id)
+        where TKey : notnull
     {
         // 「キーが無い」ではなく「空欄」で落とす。テーブルはIDを全言語ぶん持ち、
         // 訳が用意できていない言語だけ空文字にしてある。

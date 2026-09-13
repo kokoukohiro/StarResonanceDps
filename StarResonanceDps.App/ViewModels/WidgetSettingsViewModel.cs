@@ -305,10 +305,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _hideHeaderWhenInactive = true;
 
-    /// <summary>ウィンドウを最前面に表示する。既定は有効。</summary>
-    [ObservableProperty]
-    private bool _alwaysOnTop = true;
-
     /// <summary>ピン留め中フッターを隠す。</summary>
     [ObservableProperty]
     private bool _hideFooterWhenInactive;
@@ -323,8 +319,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public string HideHeaderWhenInactiveStateText => GetSwitchStateText(HideHeaderWhenInactive);
 
     public string HideFooterWhenInactiveStateText => GetSwitchStateText(HideFooterWhenInactive);
-
-    public string AlwaysOnTopStateText => GetSwitchStateText(AlwaysOnTop);
 
     private static string GetSwitchStateText(bool isOn)
     {
@@ -346,7 +340,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
                 : BackgroundImagePath.Trim(),
             BackgroundImageAverageColor = BackgroundImageAverageColor,
             BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
-            AlwaysOnTop = AlwaysOnTop,
             HideHeaderWhenInactive = HideHeaderWhenInactive,
             HideFooterWhenInactive = HideFooterWhenInactive
         };
@@ -369,7 +362,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BackgroundImageAverageColorSourcePath = normalized.BackgroundImageAverageColorSourcePath;
             HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
             HideFooterWhenInactive = normalized.HideFooterWhenInactive;
-            AlwaysOnTop = normalized.AlwaysOnTop ?? true;
         }
         finally
         {
@@ -399,7 +391,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             && string.Equals(left.BackgroundImageAverageColorSourcePath, right.BackgroundImageAverageColorSourcePath, StringComparison.OrdinalIgnoreCase)
             && left.HideHeaderWhenInactive == right.HideHeaderWhenInactive
             && left.HideFooterWhenInactive == right.HideFooterWhenInactive
-            && (left.AlwaysOnTop ?? true) == (right.AlwaysOnTop ?? true)
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -412,12 +403,6 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     partial void OnHideFooterWhenInactiveChanged(bool value)
     {
         OnPropertyChanged(nameof(HideFooterWhenInactiveStateText));
-        NotifyWindowDisplaySettingChanged();
-    }
-
-    partial void OnAlwaysOnTopChanged(bool value)
-    {
-        OnPropertyChanged(nameof(AlwaysOnTopStateText));
         NotifyWindowDisplaySettingChanged();
     }
 

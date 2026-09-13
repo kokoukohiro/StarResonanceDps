@@ -7,6 +7,17 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 public sealed partial class PlayerBuffEntry : ObservableObject
 {
+    /// <summary>
+    /// 残り時間が分からないときにバッジへ出す文字。
+    /// <b>アイコンに重ねる1文字の枠</b>なので記号1つ。4言語とも同じなのでリソースは持たない。
+    /// </summary>
+    private const string UnknownDurationBadgeText = "?";
+
+    /// <summary>
+    /// 一覧の列で数字の位置に差し込む文字。単位は <c>Widget_BuffDurationFormat</c> のものが付く。
+    /// </summary>
+    private const string UnknownDurationListText = "??";
+
     public PlayerBuffEntry(PlayerBuffSnapshot snapshot)
     {
         Key = snapshot.Key;
@@ -44,8 +55,8 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         Name = snapshot.Name ?? string.Empty;
         // 1スタックは数字を出さない。重なっているときだけ意味がある。
         LayerText = snapshot.Layer > 1 ? snapshot.Layer.ToString() : string.Empty;
-        DurationText = FormatDuration(snapshot.RemainingSeconds);
-        DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds);
+        DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
+        DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
     }
 
@@ -57,8 +68,14 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     /// 単位付きが要る一覧側は <see cref="DurationWithUnitText"/> を見る。
     /// </para>
     /// </summary>
-    private static string FormatDuration(double? seconds)
+    private static string FormatDuration(double? seconds, bool isUnknown)
     {
+        if (isUnknown)
+        {
+            // アイコンに重ねる枠なので1文字。記号なので4言語とも同じで、リソースは持たない。
+            return UnknownDurationBadgeText;
+        }
+
         var roundedSeconds = RoundSeconds(seconds);
 
         return roundedSeconds is null
@@ -75,19 +92,30 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     /// 持続時間が分からないバフ(空文字)では単位も自然に消える。
     /// </para>
     /// </summary>
-    private static string FormatDurationWithUnit(double? seconds)
+    private static string FormatDurationWithUnit(double? seconds, bool isUnknown)
     {
-        var roundedSeconds = RoundSeconds(seconds);
-
-        if (roundedSeconds is null)
+        // 数字の位置に「??」を差し込む。単位は既存フォーマットのものが付くので、
+        // en は ??s、ja/zh は ??秒、ko は ??초 になる。リソースの追加は要らない。
+        object value;
+        if (isUnknown)
         {
-            return string.Empty;
+            value = UnknownDurationListText;
+        }
+        else
+        {
+            var roundedSeconds = RoundSeconds(seconds);
+            if (roundedSeconds is null)
+            {
+                return string.Empty;
+            }
+
+            value = roundedSeconds.Value;
         }
 
         return string.Format(
             System.Globalization.CultureInfo.CurrentCulture,
             LocalizationManager.Instance.GetString("Widget_BuffDurationFormat"),
-            roundedSeconds.Value);
+            value);
     }
 
     private static int? RoundSeconds(double? seconds)

@@ -65,16 +65,6 @@ public sealed class WidgetThemeConfig
     public string? BackgroundImageAverageColorSourcePath { get; set; }
 
     /// <summary>
-    /// ウィンドウを最前面に表示するか。<b>ピン留めとは独立</b>。
-    ///
-    /// <para>
-    /// <c>null</c> は「設定されていない」。この項目が無かった頃のファイルと区別するために
-    /// bool? にしてある。既定は有効。
-    /// </para>
-    /// </summary>
-    public bool? AlwaysOnTop { get; set; }
-
-    /// <summary>
     /// ピン留め中にヘッダーを隠すか。隠している間はドラッグ領域も消える。
     /// <b>保存キーは旧名のまま</b>(変えると保存済みの設定が失われる)。
     /// </summary>
@@ -93,7 +83,6 @@ public sealed class WidgetThemeConfig
             BackgroundImagePath = BackgroundImagePath,
             BackgroundImageAverageColor = BackgroundImageAverageColor,
             BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
-            AlwaysOnTop = AlwaysOnTop,
             HideHeaderWhenInactive = HideHeaderWhenInactive,
             HideFooterWhenInactive = HideFooterWhenInactive
         };
@@ -671,7 +660,6 @@ public static class WidgetConfigDefaults
             WindowColorIndex = 0,
             WindowOpacity = 50,
             WindowColors = CreateDefaultWindowColors(),
-            AlwaysOnTop = true,
             HideHeaderWhenInactive = true
         };
     }
@@ -929,9 +917,6 @@ public static class WidgetConfigDefaults
 
     public static void NormalizeTheme(WidgetThemeConfig theme)
     {
-        // この項目が無かった頃のファイルには入っていない。既定は有効。
-        theme.AlwaysOnTop ??= true;
-
         theme.WindowColors = NormalizeColorList(theme.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         theme.WindowColorIndex = Math.Clamp(theme.WindowColorIndex, MinColorIndex, theme.WindowColors.Count - 1);
         theme.WindowOpacity = Math.Clamp(theme.WindowOpacity, MinWindowOpacity, MaxWindowOpacity);

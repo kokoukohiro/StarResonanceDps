@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
@@ -52,6 +53,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private int _internalIdDisplayModeIndex;
+
+    // --- 集計設定 ---
+
+    [ObservableProperty]
+    private bool _splitEncountersOnNewPhases = true;
+
+    [ObservableProperty]
+    private bool _keepPastEncounterInMeterUntilNextDamage;
+
+    /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
+    [ObservableProperty]
+    private int _databaseRetentionPolicyDays;
 
     public SettingsViewModel()
     {
@@ -144,7 +157,17 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
-            WindowColors = [.. WindowColors.GetHexColors()]
+            WindowColors = [.. WindowColors.GetHexColors()],
+            SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
+            KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
+            DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
+
+            // キャプチャ3項目はこの画面では SettingsConfig 経由で編集しない
+            // (NetworkAdapterSession が持ち、保存も別経路)。ただしここで落とすと
+            // AppConfig.Settings 側が既定値に戻ってしまうので、現在値を持ち回す。
+            NetCaptureDeviceName = CombatRuntimeSettings.NetCaptureDeviceName,
+            GameCapturePreference = CombatRuntimeSettings.GameCapturePreference,
+            GameCaptureCustomExeName = CombatRuntimeSettings.GameCaptureCustomExeName
         };
 
         AppConfigDefaults.NormalizeSettings(settings);
@@ -163,6 +186,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
             InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
+            SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
+            KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
+            DatabaseRetentionPolicyDays = settings.DatabaseRetentionPolicyDays;
         }
         finally
         {
@@ -193,9 +219,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         {
             _networkAdapterSession.Initialize();
             AvailableNetworkAdapters = CreateNetworkAdapterOptions(_networkAdapterSession.AvailableAdapters);
-            _lastSavedNetworkAdapterDeviceName = NormalizeAdapterDeviceName(Settings.Instance.NetCaptureDeviceName);
-            _lastSavedGameCapturePreference = Settings.Instance.GameCapturePreference;
-            _lastSavedGameCaptureCustomExeName = NormalizeCustomExeName(Settings.Instance.GameCaptureCustomExeName);
+            _lastSavedNetworkAdapterDeviceName = NormalizeAdapterDeviceName(CombatRuntimeSettings.NetCaptureDeviceName);
+            _lastSavedGameCapturePreference = CombatRuntimeSettings.GameCapturePreference;
+            _lastSavedGameCaptureCustomExeName = NormalizeCustomExeName(CombatRuntimeSettings.GameCaptureCustomExeName);
             LoadCaptureSettingsFromValues(
                 _lastSavedNetworkAdapterDeviceName,
                 _lastSavedGameCapturePreference,
@@ -249,9 +275,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             gameCapturePreference,
             gameCaptureCustomExeName);
 
-        networkAdapterDeviceName = NormalizeAdapterDeviceName(Settings.Instance.NetCaptureDeviceName);
-        gameCapturePreference = Settings.Instance.GameCapturePreference;
-        gameCaptureCustomExeName = NormalizeCustomExeName(Settings.Instance.GameCaptureCustomExeName);
+        networkAdapterDeviceName = NormalizeAdapterDeviceName(CombatRuntimeSettings.NetCaptureDeviceName);
+        gameCapturePreference = CombatRuntimeSettings.GameCapturePreference;
+        gameCaptureCustomExeName = NormalizeCustomExeName(CombatRuntimeSettings.GameCaptureCustomExeName);
 
         _lastSavedNetworkAdapterDeviceName = networkAdapterDeviceName;
         _lastSavedGameCapturePreference = gameCapturePreference;
@@ -328,7 +354,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     private NetworkAdapterOption? FindNetworkAdapterOption(string? deviceName)
     {
         var normalizedDeviceName = NormalizeAdapterDeviceName(deviceName);
-        if (Settings.IsAutomaticNetCaptureDeviceName(normalizedDeviceName))
+        if (CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(normalizedDeviceName))
         {
             return FindAutomaticNetworkAdapterOption();
         }
@@ -376,8 +402,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     private static string NormalizeAdapterDeviceName(string? deviceName)
     {
-        return Settings.IsAutomaticNetCaptureDeviceName(deviceName)
-            ? Settings.AutomaticNetCaptureDeviceName
+        return CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(deviceName)
+            ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
             : deviceName!.Trim();
     }
 
@@ -396,6 +422,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
             && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
+            && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
+            && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
+            && left.DatabaseRetentionPolicyDays == right.DatabaseRetentionPolicyDays
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -441,6 +470,26 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
+
+    // 集計設定はプレビューを持たない。戦闘の区切り方やDBの掃除は「下見」できる類ではなく、
+    // 保存したときにだけ効かせる。未保存の印だけ更新する。
+    partial void OnSplitEncountersOnNewPhasesChanged(bool value) => OnPropertyChanged(nameof(HasUnsavedChanges));
+
+    partial void OnKeepPastEncounterInMeterUntilNextDamageChanged(bool value) => OnPropertyChanged(nameof(HasUnsavedChanges));
+
+    partial void OnDatabaseRetentionPolicyDaysChanged(int value)
+    {
+        OnPropertyChanged(nameof(DatabaseRetentionPolicyDaysText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>スライダーの右に出す文字。<b>0 は日数ではなく「無期限」</b>なので数字を出さない。</summary>
+    public string DatabaseRetentionPolicyDaysText =>
+        DatabaseRetentionPolicyDays <= 0
+            ? LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Forever")
+            : string.Format(
+                LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Value"),
+                DatabaseRetentionPolicyDays);
 
     partial void OnNumberDisplayFormatIndexChanged(int value)
     {

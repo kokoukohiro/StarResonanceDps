@@ -24,7 +24,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
                 foreach (var encounter in encounters)
                 {
                     processedEncounters++;
-                    if (!encounter.HasStatsBeenRecorded(true))
+                    if (!encounter.HasStatsBeenRecorded())
                     {
                         continue;
                     }

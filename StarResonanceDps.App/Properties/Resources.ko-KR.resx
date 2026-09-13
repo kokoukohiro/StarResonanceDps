@@ -783,12 +783,6 @@
   <data name="Meter_BenchmarkCompleted" xml:space="preserve">
     <value>[측정 완료]</value>
   </data>
-  <data name="Manager_WidgetAction_History" xml:space="preserve">
-    <value>기록</value>
-  </data>
-  <data name="Window_History_Title" xml:space="preserve">
-    <value>기록</value>
-  </data>
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP 수치</value>
   </data>
@@ -864,9 +858,6 @@
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>포션</value>
   </data>
-  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
-    <value>창을 항상 위에 표시</value>
-  </data>
   <data name="Map_ChannelFormat" xml:space="preserve">
     <value>ch{0}</value>
   </data>
@@ -890,5 +881,44 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>맵 ID만 표시</value>
+  </data>
+  <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
+    <value>집계 설정</value>
+  </data>
+  <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
+    <value>새 페이즈로 전투 분할</value>
+  </data>
+  <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
+    <value>다음 피해까지 유지</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
+    <value>기록 보관 기간</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
+    <value>무기한</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
+    <value>{0}일</value>
+  </data>
+  <data name="Navigation_Aggregation" xml:space="preserve">
+    <value>집계</value>
+  </data>
+  <data name="Aggregation_StatusLive" xml:space="preserve">
+    <value>집계 중</value>
+  </data>
+  <data name="Aggregation_StatusBenchmark" xml:space="preserve">
+    <value>3분 측정 중</value>
+  </data>
+  <data name="Aggregation_StatusHistory" xml:space="preserve">
+    <value>기록 표시 중</value>
+  </data>
+  <data name="Aggregation_Viewing" xml:space="preserve">
+    <value>표시 중</value>
+  </data>
+  <data name="Aggregation_NoHistory" xml:space="preserve">
+    <value>기록이 없습니다</value>
+  </data>
+  <data name="Aggregation_EncounterPhase" xml:space="preserve">
+    <value>페이즈 {0}</value>
   </data>
 </root>

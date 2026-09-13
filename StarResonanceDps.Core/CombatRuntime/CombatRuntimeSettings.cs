@@ -1,0 +1,115 @@
+using StarResonanceDps.Core.CombatRuntime.DataTypes;
+
+namespace StarResonanceDps.Core.CombatRuntime;
+
+/// <summary>
+/// Core が実行時に読む設定。
+///
+/// <para>
+/// <b>ファイルI/Oを持たない。</b> 永続化は App の <c>AppSettings.json</c> が受け持ち、
+/// 起動時と設定の保存時に <see cref="Apply"/> で流し込む。Core は App を参照できないので、
+/// 値は必ず外から入れてもらう。
+/// </para>
+///
+/// <para>
+/// 以前は Core 側に <c>Settings.json</c>(69項目)があったが、2026-09-12 に撤去した。
+/// 実際に消費されていたのは18項目で、うち51項目は参照ゼロ、5項目は分岐に到達しなかった。
+/// 残した6項目だけがここに在る。
+/// </para>
+///
+/// <para>
+/// <b>ここに項目を足すときは、UIも一緒に作ること。</b> 値を変える手段が無い設定は、
+/// 既定値を直書きするのと変わらない。撤去した51項目はそうなっていた。
+/// </para>
+/// </summary>
+public static class CombatRuntimeSettings
+{
+    /// <summary>ネットワークアダプターの自動選択を表す名前。</summary>
+    public const string AutomaticNetCaptureDeviceName = "Auto";
+
+    /// <summary>
+    /// <see cref="Apply"/> が一度でも呼ばれたか。<c>CombatRuntimeHost.Initialize</c> の関門に使う。
+    /// 呼ばずに動かすと、既定値で動いているのか設定どおりなのかが区別できない。
+    /// </summary>
+    public static bool HasBeenApplied { get; private set; }
+
+    /// <summary>選んだキャプチャ用アダプター。<c>Auto</c> と空白は自動選択。</summary>
+    public static string NetCaptureDeviceName { get; private set; } = AutomaticNetCaptureDeviceName;
+
+    /// <summary>ゲームの実行ファイルの特定方法。</summary>
+    public static EGameCapturePreference GameCapturePreference { get; private set; }
+
+    /// <summary><see cref="EGameCapturePreference.Custom"/> のときに使う実行ファイル名(拡張子なし)。</summary>
+    public static string GameCaptureCustomExeName { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// ダンジョンの目標が切り替わったらエンカウンターを分けるか。
+    /// <c>BattleStateMachine</c> がフェーズの境目で <c>StopEncounter</c> / 新規開始を行う。
+    /// </summary>
+    public static bool SplitEncountersOnNewPhases { get; private set; } = true;
+
+    /// <summary>
+    /// 新しいエンカウンターが始まっても、次のダメージが入るまで前の結果を見せ続けるか。
+    /// <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が見る。
+    /// </summary>
+    public static bool KeepPastEncounterInMeterUntilNextDamage { get; private set; }
+
+    /// <summary>
+    /// 戦闘履歴を残す日数。<b>0 は無期限</b>で、そのときは掃除を行わない。
+    /// アプリ終了時に <c>DB.ClearOldEncounters</c> を通す。
+    /// </summary>
+    public static int DatabaseRetentionPolicyDays { get; private set; }
+
+    /// <summary>
+    /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。
+    /// </summary>
+    public static void Apply(
+        string? netCaptureDeviceName,
+        EGameCapturePreference gameCapturePreference,
+        string? gameCaptureCustomExeName,
+        bool splitEncountersOnNewPhases,
+        bool keepPastEncounterInMeterUntilNextDamage,
+        int databaseRetentionPolicyDays)
+    {
+        ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
+
+        SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
+        KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
+        DatabaseRetentionPolicyDays = databaseRetentionPolicyDays;
+        HasBeenApplied = true;
+    }
+
+    /// <summary>
+    /// キャプチャの3項目だけを差し替える。アダプターを選び直したときに
+    /// <c>NetworkAdapterSession</c> から呼ぶ。
+    ///
+    /// <para>
+    /// <b>ここでは保存しない。</b> ファイルへ書くのは App の仕事で、
+    /// <c>NetworkAdapterSession.CaptureSettingsPersistRequested</c> がその合図になる。
+    /// </para>
+    /// </summary>
+    public static void ApplyCaptureSettings(
+        string? netCaptureDeviceName,
+        EGameCapturePreference gameCapturePreference,
+        string? gameCaptureCustomExeName)
+    {
+        NetCaptureDeviceName = IsAutomaticNetCaptureDeviceName(netCaptureDeviceName)
+            ? AutomaticNetCaptureDeviceName
+            : netCaptureDeviceName!.Trim();
+        GameCapturePreference = gameCapturePreference;
+        GameCaptureCustomExeName = Path.GetFileNameWithoutExtension(gameCaptureCustomExeName ?? string.Empty);
+
+        MessageManager.NetCaptureDeviceName = IsAutomaticNetCaptureDeviceName(NetCaptureDeviceName)
+            ? string.Empty
+            : NetCaptureDeviceName;
+        MessageManager.GameCapturePreference = GameCapturePreference;
+        MessageManager.GameCaptureCustomExeName = GameCaptureCustomExeName;
+    }
+
+    /// <summary>空・空白・<c>Auto</c> はどれも自動選択として扱う。</summary>
+    public static bool IsAutomaticNetCaptureDeviceName(string? deviceName)
+    {
+        return string.IsNullOrWhiteSpace(deviceName)
+            || string.Equals(deviceName.Trim(), AutomaticNetCaptureDeviceName, StringComparison.OrdinalIgnoreCase);
+    }
+}

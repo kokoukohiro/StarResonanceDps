@@ -33,7 +33,7 @@
               MinWidth="680"
               Margin="0,0,0,1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="58" />
+                <ColumnDefinition Width="80" />
                 <ColumnDefinition Width="*" MinWidth="110" />
                 <ColumnDefinition Width="84" />
                 <ColumnDefinition Width="58" />
@@ -95,7 +95,8 @@
                                     BorderThickness="0,0,0,1">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="58" />
+                                        <!-- ID列は ownerId:枝番 を出すので、ownerId だけのときより広く要る -->
+                                        <ColumnDefinition Width="80" />
                                         <ColumnDefinition Width="*" MinWidth="110" />
                                         <ColumnDefinition Width="84" />
                                         <ColumnDefinition Width="58" />
@@ -110,25 +111,10 @@
                                                Margin="2,0,4,0"
                                                Style="{StaticResource MetricSkillStatisticText}"
                                                Text="{Binding SkillIdText}" />
-                                    <Grid Grid.Column="1"
-                                          Margin="2,0,6,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="22" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-
-                                        <Image Grid.Column="0"
-                                               Width="20"
-                                               Height="20"
-                                               HorizontalAlignment="Left"
-                                               VerticalAlignment="Center"
-                                               Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                                               Stretch="Uniform" />
-                                        <TextBlock Grid.Column="1"
-                                                   Margin="4,0,0,0"
-                                                   Style="{StaticResource MetricSkillStatisticText}"
-                                                   Text="{Binding SkillName}" />
-                                    </Grid>
+                                    <TextBlock Grid.Column="1"
+                                               Margin="2,0,6,0"
+                                               Style="{StaticResource MetricSkillStatisticText}"
+                                               Text="{Binding SkillName}" />
                                     <TextBlock Grid.Column="2"
                                                Margin="4,0"
                                                HorizontalAlignment="Right"

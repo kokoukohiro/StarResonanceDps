@@ -51,8 +51,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
 
-    public event EventHandler? HistoryWindowRequested;
-
     public MainViewModel()
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
@@ -551,10 +549,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
             case 3:
                 UnpinAllWidgets();
-                break;
-
-            case 4:
-                HistoryWindowRequested?.Invoke(this, EventArgs.Empty);
                 break;
 
             default:

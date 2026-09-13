@@ -12,7 +12,7 @@ public sealed class NetworkAdapterSession
 
     private readonly PacketDiagnosticLogStore _diagnosticLog = PacketDiagnosticLogStore.Instance;
     private IReadOnlyList<NetworkAdapterInfo> _availableAdapters = [];
-    private string _activeNetCaptureDeviceName = Settings.AutomaticNetCaptureDeviceName;
+    private string _activeNetCaptureDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName;
     private EGameCapturePreference _activeGameCapturePreference = EGameCapturePreference.Auto;
     private string _activeGameCaptureCustomExeName = string.Empty;
 
@@ -30,13 +30,19 @@ public sealed class NetworkAdapterSession
 
     public event EventHandler? SelectedAdapterChanged;
 
+    /// <summary>
+    /// キャプチャ設定が変わったので保存してほしい、という合図。**Core は自分で保存しない。**
+    /// App がこれを購読して <c>AppSettings.json</c> へ書く。
+    /// </summary>
+    public event EventHandler? CaptureSettingsPersistRequested;
+
     public void Initialize()
     {
         _availableAdapters = GetNetworkAdapters();
         NormalizePersistedAdapterSelection();
-        _activeNetCaptureDeviceName = Settings.Instance.NetCaptureDeviceName;
-        _activeGameCapturePreference = Settings.Instance.GameCapturePreference;
-        _activeGameCaptureCustomExeName = NormalizeGameCaptureCustomExeName(Settings.Instance.GameCaptureCustomExeName);
+        _activeNetCaptureDeviceName = CombatRuntimeSettings.NetCaptureDeviceName;
+        _activeGameCapturePreference = CombatRuntimeSettings.GameCapturePreference;
+        _activeGameCaptureCustomExeName = NormalizeGameCaptureCustomExeName(CombatRuntimeSettings.GameCaptureCustomExeName);
         SelectedAdapter = FindSelectedAdapter(_activeNetCaptureDeviceName);
         ApplyRuntimeCaptureSettings();
         IsInitialized = true;
@@ -97,13 +103,13 @@ public sealed class NetworkAdapterSession
         EnsureInitialized();
 
         var normalizedDeviceName = NormalizePersistedDeviceName(networkAdapterDeviceName);
-        if (!Settings.IsAutomaticNetCaptureDeviceName(normalizedDeviceName)
+        if (!CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(normalizedDeviceName)
             && FindPersistedSelection(_availableAdapters, normalizedDeviceName) is null)
         {
             _diagnosticLog.Warning(
                 "Adapter",
                 $"Falling back to automatic capture-adapter selection because the selected device is not in the current device list: {normalizedDeviceName}.");
-            normalizedDeviceName = Settings.AutomaticNetCaptureDeviceName;
+            normalizedDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName;
         }
 
         var normalizedCustomExeName = NormalizeGameCaptureCustomExeName(customExeName);
@@ -150,21 +156,21 @@ public sealed class NetworkAdapterSession
 
     private void NormalizePersistedAdapterSelection()
     {
-        var deviceName = NormalizePersistedDeviceName(Settings.Instance.NetCaptureDeviceName);
-        if (Settings.IsAutomaticNetCaptureDeviceName(deviceName))
+        var deviceName = NormalizePersistedDeviceName(CombatRuntimeSettings.NetCaptureDeviceName);
+        if (CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(deviceName))
         {
-            Settings.Instance.NetCaptureDeviceName = Settings.AutomaticNetCaptureDeviceName;
+            SetCaptureDeviceName(CombatRuntimeSettings.AutomaticNetCaptureDeviceName);
             return;
         }
 
         if (FindPersistedSelection(_availableAdapters, deviceName) is not null)
         {
-            Settings.Instance.NetCaptureDeviceName = deviceName;
+            SetCaptureDeviceName(deviceName);
             return;
         }
 
-        Settings.Instance.NetCaptureDeviceName = Settings.AutomaticNetCaptureDeviceName;
-        Settings.Save();
+        SetCaptureDeviceName(CombatRuntimeSettings.AutomaticNetCaptureDeviceName);
+        CaptureSettingsPersistRequested?.Invoke(this, EventArgs.Empty);
         _diagnosticLog.Warning(
             "Adapter",
             $"Falling back to automatic capture-adapter selection because the persisted device is not in the current device list: {deviceName}.");
@@ -187,7 +193,7 @@ public sealed class NetworkAdapterSession
         IReadOnlyList<NetworkAdapterInfo> captureAdapters,
         string deviceName)
     {
-        if (Settings.IsAutomaticNetCaptureDeviceName(deviceName))
+        if (CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(deviceName))
         {
             return null;
         }
@@ -205,8 +211,8 @@ public sealed class NetworkAdapterSession
 
     private static string NormalizePersistedDeviceName(string? deviceName)
     {
-        return Settings.IsAutomaticNetCaptureDeviceName(deviceName)
-            ? Settings.AutomaticNetCaptureDeviceName
+        return CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(deviceName)
+            ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
             : deviceName!.Trim();
     }
 
@@ -215,12 +221,31 @@ public sealed class NetworkAdapterSession
         return Path.GetFileNameWithoutExtension(customExeName ?? string.Empty);
     }
 
+    /// <summary>
+    /// いま選んでいるキャプチャ設定を Core へ移し、<b>保存を App に依頼する</b>。
+    ///
+    /// <para>
+    /// Core はファイルへ書かない(2026-09-12 に <c>Settings.json</c> を撤去した)。
+    /// 保存先は App の <c>AppSettings.json</c> で、購読側が
+    /// <see cref="CombatRuntimeSettings"/> から現在値を読んで書き出す。
+    /// </para>
+    /// </summary>
     private void PersistActiveCaptureSettings()
     {
-        Settings.Instance.NetCaptureDeviceName = _activeNetCaptureDeviceName;
-        Settings.Instance.GameCapturePreference = _activeGameCapturePreference;
-        Settings.Instance.GameCaptureCustomExeName = _activeGameCaptureCustomExeName;
-        Settings.Save();
+        CombatRuntimeSettings.ApplyCaptureSettings(
+            _activeNetCaptureDeviceName,
+            _activeGameCapturePreference,
+            _activeGameCaptureCustomExeName);
+        CaptureSettingsPersistRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>アダプター名だけを差し替える。種別とカスタム名は今の値を保つ。</summary>
+    private static void SetCaptureDeviceName(string deviceName)
+    {
+        CombatRuntimeSettings.ApplyCaptureSettings(
+            deviceName,
+            CombatRuntimeSettings.GameCapturePreference,
+            CombatRuntimeSettings.GameCaptureCustomExeName);
     }
 
     private void ApplyRuntimeCaptureSettings()
@@ -232,7 +257,7 @@ public sealed class NetworkAdapterSession
 
     private static string ResolveRuntimeCaptureDeviceName(string persistedDeviceName)
     {
-        if (!Settings.IsAutomaticNetCaptureDeviceName(persistedDeviceName))
+        if (!CombatRuntimeSettings.IsAutomaticNetCaptureDeviceName(persistedDeviceName))
         {
             return persistedDeviceName;
         }

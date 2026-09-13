@@ -80,6 +80,37 @@ public static class SkillCooldownStateStore
         }
     }
 
+    /// <summary>
+    /// いまのサーバ時刻(Unixミリ秒)。<c>SyncServerTime</c> をまだ受け取っていなければ false。
+    ///
+    /// <para>
+    /// サーバ由来の絶対時刻(バフの <c>CreateTime</c>、CDの <c>BeginTime</c>)から
+    /// <b>既に経過した分</b>を出すのに要る。ローカル時計との差を挟まずに引くと、
+    /// 通信遅延と時計のずれがそのまま乗る(→ CLAUDE.md「バフの残り時間の起点は受信時刻」)。
+    /// </para>
+    ///
+    /// <para>
+    /// 差の出所は <c>SyncServerTime</c> の <c>ClientMilliseconds - ServerMilliseconds</c>。
+    /// <c>ClientMilliseconds</c> がこの端末の Unix ミリ秒であることは、
+    /// <see cref="ResolveInitialProgressMilliseconds"/> が同じ式で本番のCD表示を出していることによる。
+    /// </para>
+    /// </summary>
+    public static bool TryGetServerNowUnixMilliseconds(out long serverNowUnixMilliseconds)
+    {
+        lock (Sync)
+        {
+            if (!_hasClientServerTimeDelta)
+            {
+                serverNowUnixMilliseconds = 0;
+                return false;
+            }
+
+            serverNowUnixMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                - _clientServerTimeDeltaMilliseconds;
+            return true;
+        }
+    }
+
     public static void UpdateSelfCooldowns(long uuid, IEnumerable<SkillCD> cooldowns)
     {
         if (uuid == 0)

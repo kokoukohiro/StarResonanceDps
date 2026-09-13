@@ -50,10 +50,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
     [ObservableProperty]
     private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
 
-    /// <summary>ウィンドウを最前面に表示するか。ウィンドウ側が読む。</summary>
-    [ObservableProperty]
-    private bool _alwaysOnTop = true;
-
     /// <summary>ピン留め中にヘッダーを隠すか。ウィンドウ側が読む。</summary>
     [ObservableProperty]
     private bool _hideHeaderWhenInactive = true;
@@ -329,7 +325,6 @@ public partial class WidgetListItemViewModel : ViewModelBase
             ? normalized.BackgroundImagePath
             : null;
 
-        AlwaysOnTop = normalized.AlwaysOnTop ?? true;
         HideHeaderWhenInactive = normalized.HideHeaderWhenInactive;
         HideFooterWhenInactive = normalized.HideFooterWhenInactive;
     }

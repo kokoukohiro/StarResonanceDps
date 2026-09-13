@@ -37,8 +37,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 DbConn.Dispose();
             }
 
-            var useFileDb = Settings.Instance.UseDatabaseForEncounterHistory;
-            DbConn = new SqliteConnection($"Data Source={(useFileDb ? DbFilePath : ":memory:")}");
+            DbConn = new SqliteConnection($"Data Source={DbFilePath}");
             DbConn.Open();
 
             DBSchema.CreateTables(DbConn);
@@ -187,7 +186,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                GC.Collect(2);
+                // GC.Collect(2) はここに置かない。**世代2のフル回収は呼び出し元を止める。**
+                // この経路は履歴を選んだUIスレッドから走るので、そのぶん丸ごと固まる。
+                //
+                // 実測(2026-09-12、CombatRuntime.log):
+                //   blob 6.1MB → 3.9〜5.1秒 / 2.0MB → 1.3〜1.7秒 と blob に比例するが、
+                //   **blob 8.5KB の Enc 7 が 0.99秒と1.67秒**かかっていた。
+                //   小さい blob で1秒以上取られていたぶんは、ほぼこの強制GC。
+                // 一時バッファの回収はランタイムに任せる。
             }
             else
             {

@@ -356,8 +356,21 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // フルコンテナが来ない切替(実測: ギルドハウス levelMapId=12000)では
                 // 関門が閉じたままになり、移動通知が5回届いても全部捨てていた。
                 // その結果リストは刷新されず、マップ名も古いままだった(2026-08-26 実測)。
-                var isSceneChange = socialScene.LevelMapId != EncounterManager.LevelMapId
-                    || socialScene.LineId != EncounterManager.ChannelLineId;
+                //
+                // LevelMapId が 0 なのは「まだシーン通知を一度も受け取っていない」状態。
+                // ロード済みのまま起動すると 0 → 実マップ と変わるが、これは移動ではなく初回確定。
+                // 移動として扱うと StartNewMap → EnterDungeon が走り、起動時のエンカウンター
+                // (SceneId=0 / SceneName 空)をその場で保存してしまう。
+                // 実測(2026-09-12): 起動から最初のシーン通知まで 6〜24 秒あり、その間の戦闘で
+                // HasStatsBeenRecorded() が真になるため、マップ名の無い履歴が3件できていた
+                // (Enc 5/8/10。いずれも Capture device started の直後に始まり、
+                //  BattleStateMachine.StartNewMap の時点で保存されている)。
+                //
+                // 0 を「未受信」の番兵にしてよい根拠: Battles 23行のうち SceneId=0 は5行で、
+                // 全部アプリ起動の行。セッション途中に 0 が届いた形跡は無い(ユーザー確認済み)。
+                var isSceneChange = EncounterManager.LevelMapId != 0
+                    && (socialScene.LevelMapId != EncounterManager.LevelMapId
+                        || socialScene.LineId != EncounterManager.ChannelLineId);
 
                 if (isSceneChange || EncounterManager.AllowSceneUpdate)
                 {
@@ -1126,7 +1139,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
 
-                ApplyAppearBuffSnapshot(entity);
+                ApplyAppearBuffSnapshot(entity, extraData);
 
                 PlayerRosterProjection.AddOrUpdateNearbyPlayer(entity.Uuid);
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
@@ -1153,10 +1166,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </para>
         ///
         /// <para>
-        /// ここで扱うのは特化判定だけ。バフ表示側(<c>ActiveBuffStore</c>)へは流していない。
+        /// <b>特化判定と表示の両方へ渡す。</b> 差分は「見ている間に付いたバフ」しか運ばないので、
+        /// 流さないと<b>自分が見る前から乗っているバフが他人では一生表示されない</b>。
+        /// 持続の長い料理(1800秒)・薬剤ほど当たりやすく、マップ切替で
+        /// <c>ActiveBuffStore.Clear()</c> したあとも復活しない、という見え方になっていた。
+        /// 自分は <c>SyncToMeDeltaInfo</c> がイベントとして全部送ってくるので影響を受けない。
+        /// </para>
+        ///
+        /// <para>
+        /// 残り時間の起点は <c>NotifyBuffEvent</c> 側の既存の2段に任せる —
+        /// 付与時刻と受信時刻の選別と、同一実体(<c>BuffUuid</c>＋付与時刻＋持続が一致)なら
+        /// 観測時刻を据え置く扱い。<b>後者があるので、出現のたびに再送されても
+        /// 残り時間は満額へ巻き戻らない。</b>
         /// </para>
         /// </summary>
-        private static void ApplyAppearBuffSnapshot(Zproto.Entity entity)
+        private static void ApplyAppearBuffSnapshot(Zproto.Entity entity, ExtraPacketData extraData)
         {
             // 特化を持つのはプレイヤーだけ。モンスターまで通すと診断ログが埋まる。
             if (Utils.UuidToEntityType(entity.Uuid) != (long)EEntityType.EntChar)
@@ -1176,15 +1200,39 @@ namespace StarResonanceDps.Core.CombatRuntime
             for (var index = 0; index < buffInfos.Count; index++)
             {
                 var buffInfo = buffInfos[index];
-                if (buffInfo.BaseId > 0)
+                if (buffInfo.BaseId <= 0)
                 {
-                    snapshot.Add((
-                        buffInfo.BaseId,
-                        buffInfo.BuffUuid,
-                        buffInfo.FireUuid,
-                        buffInfo.FightSourceInfo?.FightSourceType ?? 0,
-                        buffInfo.FightSourceInfo?.SourceConfigId ?? 0));
+                    continue;
                 }
+
+                snapshot.Add((
+                    buffInfo.BaseId,
+                    buffInfo.BuffUuid,
+                    buffInfo.FireUuid,
+                    buffInfo.FightSourceInfo?.FightSourceType ?? 0,
+                    buffInfo.FightSourceInfo?.SourceConfigId ?? 0));
+
+                // 差分の BuffEffectAddBuff と同じ入口・同じ引数へ渡す。
+                // CreateTime の変換も向こうと揃える(Unixミリ秒 → UTC)。
+                DateTime? creationTime = null;
+                if (buffInfo.CreateTime > 0)
+                {
+                    creationTime = DateTimeOffset.FromUnixTimeMilliseconds(buffInfo.CreateTime).UtcDateTime;
+                }
+
+                EncounterManager.Current.NotifyBuffEvent(
+                    entity.Uuid,
+                    EBuffEventType.BuffEventAddTo,
+                    buffInfo.BuffUuid,
+                    buffInfo.BaseId,
+                    buffInfo.Level,
+                    buffInfo.FireUuid,
+                    buffInfo.Layer,
+                    buffInfo.Duration,
+                    buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                    creationTime,
+                    extraData,
+                    buffInfo.FightSourceInfo?.FightSourceType ?? 0);
             }
 
             if (snapshot.Count == 0)
@@ -1259,11 +1307,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes);
             PlayerRosterProjection.AddOrUpdateNearbyPlayer(targetUuid);
 
-            if (AppState.IsEncounterSavingPaused && Settings.Instance.MinimalProcessingWhileEncounterSavingPaused)
-            {
-                BattleStateMachine.CheckDeferredCalls();
-                return;
-            }
 
             var lastDungeonState = BattleStateMachine.DungeonStateHistory.LastOrDefault();
             if (lastDungeonState.Key == EDungeonState.DungeonStateSettlement || lastDungeonState.Key == EDungeonState.DungeonStateVote)
@@ -1414,12 +1457,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                 bool isAttackerPlayer = (Utils.UuidToEntityType(attackerUuid) == (long)EEntityType.EntChar);
 
                 // OwnerId の中身は DamageSource で変わる(スキルID / 弾ID / バフID)。
-                // 表示に使うIDへ畳む。畳み先を決めるのは対応表と4言語テーブルだけで、
+                // 表示に使うキーへ畳む。畳み先を決めるのは行対応表と4言語テーブルだけで、
                 // 実行時の情報(バフ実体・召喚体の AttrId など)は見ない。
+                //
+                // HitEventId が要る。ゲームの行は DamageId の粒度で決まっており、
+                // その下2桁がこの値にあたる。OwnerId だけだと別の行が1行に潰れる。
                 var foldedSource = SkillSourceResolver.Resolve(
                     syncDamageInfo.DamageSource,
-                    syncDamageInfo.OwnerId);
-                int skillId = foldedSource.Id;
+                    syncDamageInfo.OwnerId,
+                    syncDamageInfo.HitEventId);
+                long skillId = foldedSource.Key;
 
                 // 職業・特化の判定には、畳んだIDではなく「ゲームが実際に発動したスキルID」を使う。
                 // 畳み込みは弾・バフ・コンボ段を1つの表示IDへ寄せるので、判定表が想定していない
@@ -1665,7 +1712,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             //
             // ここへ来た時点で「反映してよい通知」と呼び出し側が判断済みなので、
             // SetSceneId 側の AllowSceneUpdate 関門は通す。
-            EncounterManager.SetSceneId(levelMapId, force: true);
+            //
+            // ただし resetForSceneChange のときは、この直後の StartNewMap → EnterDungeon が
+            // 「移動前のマップで戦ったエンカウンター」をそのまま保存し、その battle 行も閉じる。
+            // 移動先のシーンをそこへ押すと保存直前に書き換えることになるので、
+            // 開いている記録は触らせない(新しい Current へは EnterDungeon が押す)。
+            EncounterManager.SetSceneId(
+                levelMapId,
+                force: true,
+                updateOpenRecords: !resetForSceneChange);
             EncounterManager.SetChannelLineId(lineId);
 
             if (resetForSceneChange)
@@ -1674,6 +1729,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // メーターだけ ProcessSyncContainerData に置いたままだと、
                 // フルコンテナが来ない切替(実測: ギルドハウス)でメーターだけ取り残される。
                 BattleStateMachine.StartNewMap();
+
+                // StartNewMap の中の EnterDungeon が属性を新しいエンカウンターへ運ぶ。
+                // バリアはマップ移動で消える(ゲーム仕様)のに更新が来ないので、運んだ直後に落とす。
+                // ここはマップ移動だと確定している唯一の場所。
+                EncounterManager.ClearCarriedOverShields();
+
                 PlayerRosterProjection.BeginMap();
                 NearbyEntityProjection.BeginMap();
             }
@@ -2000,10 +2061,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static void CheckForWipe()
         {
 
-            if (!Settings.Instance.UseAutomaticWipeDetection)
-            {
-                return;
-            }
 
             if (currentUserUuid != 0)
             {
@@ -2052,146 +2109,28 @@ namespace StarResonanceDps.Core.CombatRuntime
                     return;
                 }
 
-                if (!Settings.Instance.UseLegacyWipeDetection)
+                // 全滅の印は復活不可デバフ 510072。付与から1秒経っていれば新しい戦闘へ切り替える。
+                // 状態遷移(Dead→Resurrection→TelePort)から推測する旧方式は 2026-09-12 に撤去した。
+                var currentEncounterDuration = EncounterManager.Current.GetDuration();
+                var characterList = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.EntityType == EEntityType.EntChar);
+                foreach (var character in characterList)
                 {
-                    var currentEncounterDuration = EncounterManager.Current.GetDuration();
-                    var characterList = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.EntityType == EEntityType.EntChar);
-                    foreach (var character in characterList)
+                    if (character.Value.RecentBuffEventHistory.Count > 0)
                     {
-                        if (character.Value.RecentBuffEventHistory.Count > 0)
+                        foreach (var recentBuff in character.Value.RecentBuffEventHistory)
                         {
-                            foreach (var recentBuff in character.Value.RecentBuffEventHistory)
-                            {
-                                if (recentBuff.Value.BaseId == 510072)
-                                {
-
-                                    EncounterManager.Current.SetWipeState(true);
-
-                                    if (recentBuff.Value.EventAddTime.Add(TimeSpan.FromSeconds(1.0)).TotalSeconds <= currentEncounterDuration.TotalSeconds)
-                                    {
-                                        Log.Debug($"Encounter Wipe Reset buff was found and duration was hit, creating a new Encounter now");
-                                        EncounterManager.Current.SetWipeState(true);
-                                        EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return;
-                }
-
-                bool useNoTeleportWipePattern = Settings.Instance.SkipTeleportStateCheckInAutomaticWipeDetection;
-                bool isStateWipePattern = false;
-                int stateCount = PlayerStateHistory.Count();
-                if (useNoTeleportWipePattern == false && stateCount >= 3 && PlayerStateHistory.ElementAt(stateCount - 1) == EActorState.ActorStateTelePort)
-                {
-                    if (PlayerStateHistory.ElementAt(stateCount - 2) == EActorState.ActorStateResurrection)
-                    {
-                        if (PlayerStateHistory.ElementAt(stateCount - 3) == EActorState.ActorStateDead)
-                        {
-                            isStateWipePattern = true;
-                        }
-                    }
-                    else if (PlayerStateHistory.ElementAt(stateCount - 2) == EActorState.ActorStateDead)
-                    {
-                        isStateWipePattern = true;
-                    }
-                }
-                else if (useNoTeleportWipePattern && stateCount >= 2 && PlayerStateHistory.ElementAt(stateCount - 1) == EActorState.ActorStateResurrection)
-                {
-                    if (PlayerStateHistory.ElementAt(stateCount - 2) == EActorState.ActorStateDead)
-                    {
-                        isStateWipePattern = true;
-                    }
-                }
-
-                if (EncounterManager.Current.HasStatsBeenRecorded())
-                {
-                    var characterList = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.EntityType == EEntityType.EntChar);
-                    bool areAllCharactersDead = true;
-                    foreach (var character in characterList)
-                    {
-                        var charState = character.Value.GetAttrKV("AttrState");
-                        if (charState != null)
-                        {
-                            EActorState actorState = (EActorState)charState;
-                            if (actorState != EActorState.ActorStateDead && actorState != EActorState.ActorStateResurrection && character.Value.Hp > 0)
+                            if (recentBuff.Value.BaseId == 510072)
                             {
 
-                                if (actorState == EActorState.ActorStateTelePort && character.Value.RecentHpHistory.Count > 0)
-                                {
-                                    long lowestHp = character.Value.MaxHp;
-
-                                    int stackSize = character.Value.RecentHpHistory.Count > 3 ? 3 : character.Value.RecentHpHistory.Count;
-                                    for (int i = 0; i < stackSize; i++)
-                                    {
-                                        long historicalHp = character.Value.RecentHpHistory.ElementAt(i);
-                                        if (historicalHp < lowestHp)
-                                        {
-                                            lowestHp = historicalHp;
-                                        }
-                                    }
-
-                                    if (lowestHp == 0)
-                                    {
-
-                                        continue;
-                                    }
-                                }
-
-                                areAllCharactersDead = false;
-                            }
-                        }
-                        else if (character.Value.Hp > 0 || character.Value.MaxHp == 0)
-                        {
-                            areAllCharactersDead = false;
-                        }
-                    }
-                    if (areAllCharactersDead && !isStateWipePattern)
-                    {
-                        Log.Debug($"All characters were reported as actively dead in current Encounter. Overriding isStateWipePattern to true.");
-                        isStateWipePattern = true;
-                    }
-                    if (!Settings.Instance.DisableWipeRecalculationOverwriting && !areAllCharactersDead && isStateWipePattern)
-                    {
-                        Log.Debug($"Not all characters were reported as actively dead in current Encounter. Overriding isStateWipePattern to false.");
-                        isStateWipePattern = false;
-                    }
-                }
-                else
-                {
-
-                    isStateWipePattern = false;
-                    if (EncounterManager.Current.IsWipe)
-                    {
-                        EncounterManager.Current.SetWipeState(false);
-                    }
-                }
-
-                if (isStateWipePattern)
-                {
-
-                    var bosses = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.MonsterType == EMonsterType.Boss);
-
-                    if (bosses.Count() > 0)
-                    {
-                        int bossesAtMaxHp = 0;
-                        foreach (var boss in bosses)
-                        {
-
-                            long? hp = boss.Value.GetAttrKV("AttrHp") as long?;
-                            long? maxHp = boss.Value.GetAttrKV("AttrMaxHp") as long?;
-                            var bossState = boss.Value.GetAttrKV("AttrState");
-                                                        if ((bossState != null && (EActorState)bossState == EActorState.ActorStateBorn) || (boss.Value.RecentHpHistory.Count > 1 && (hp != null && maxHp != null && hp > 0 && maxHp > 0 && hp >= maxHp)))
-                            {
                                 EncounterManager.Current.SetWipeState(true);
-                                System.Diagnostics.Debug.WriteLine($"We've hit a wipe (bossesAtMaxHp = {bossesAtMaxHp})! Start up a new encounter");
-                                EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
-                            }
-                            else
-                            {
-                                System.Diagnostics.Debug.WriteLine($"We didn't hit a wipe yet {boss.Value.UUID} - {boss.Value.Name} {hp} / {maxHp}");
+
+                                if (recentBuff.Value.EventAddTime.Add(TimeSpan.FromSeconds(1.0)).TotalSeconds <= currentEncounterDuration.TotalSeconds)
+                                {
+                                    Log.Debug($"Encounter Wipe Reset buff was found and duration was hit, creating a new Encounter now");
+                                    EncounterManager.Current.SetWipeState(true);
+                                    EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
+                                    return;
+                                }
                             }
                         }
                     }

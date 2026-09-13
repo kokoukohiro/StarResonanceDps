@@ -1,16 +1,347 @@
 {
-  "1222": { "zh-CN": "幻影冲锋" ,"en-US": "Phantom Dash","ja-JP": "ファントムダッシュ","ko-KR": "환영 돌진"},
-  "1850": { "zh-CN": "雷爆溟灭-奥义！幻象共鸣" ,"en-US": "Thunderburst Oblivion - Arcane! Illusion Resonance","ja-JP": "雷裂滅・奥義！幻影共鳴","ko-KR": "뇌폭명멸 - 오의! 환상 공명"},
-  "1851": { "zh-CN": "雷域-奥义！幻象共鸣" ,"en-US": "Thunder Zone - Arcane! Illusion Resonance","ja-JP": "雷領域・奥義！幻影共鳴","ko-KR": "번개 영역 - 오의! 환상 공명"},
-  "35106": { "zh-CN": "生命吸取" ,"en-US": "Life Steal","ja-JP": "HP吸収","ko-KR": "생명 흡수"},
-  "45300": { "zh-CN": "连锁闪电-奥义！幻象共鸣" ,"en-US": "Chain Lightning - Arcane! Illusion Resonance","ja-JP": "チェインサンダー・奥義！幻影共鳴","ko-KR": "연쇄 번개 - 오의! 환상 공명"},
-  "180301": { "zh-CN": "雷鸣电闪-奥义！幻象共鸣" ,"en-US": "Thunderclap Arcane - Arcane! Illusion Resonance","ja-JP": "サンダースマッシュ・奥義！幻影共鳴","ko-KR": "천둥번개 - 오의! 환상 공명"},
-  "391009": { "zh-CN": "雷弹穿行-奥义！幻象共鸣" ,"en-US": "Thunder Traverse - Arcane! Illusion Resonance","ja-JP": "トラッキングサンダー・奥義！幻影共鳴","ko-KR": "뇌탄 관통 - 오의! 환상 공명"},
-  "2031106": { "zh-CN": "幸运一击" ,"en-US": "Lucky Strike","ja-JP": "幸運の一撃","ko-KR": "행운의 일격"},
-  "2031108": { "zh-CN": "幸运一击" ,"en-US": "Lucky Strike","ja-JP": "幸運の一撃","ko-KR": "행운의 일격"},
-  "2202112": { "zh-CN": "溢出治疗" ,"en-US": "Overhealing","ja-JP": "オーバーヒール","ko-KR": "초과 치유"},
-  "2900441": { "zh-CN": "雷电重炮-奥义！幻象共鸣" ,"en-US": "Thunder Cannon - Arcane! Illusion Resonance","ja-JP": "サンダーヘビーキャノン・奥義！幻影共鳴","ko-KR": "번개 대포 - 오의! 환상 공명"},
-  "3003213": { "zh-CN": "虚妄裁定" ,"en-US": "Shattered Illusion","ja-JP": "虚妄断罪","ko-KR": "허상의 판결"},
-  "3003250": { "zh-CN": "虚妄裁定-稳态自愈" ,"en-US": "Shattered Illusion - Stasis Recovery","ja-JP": "虚妄断罪-安定自己治癒","ko-KR": "허상의 판결・안정 자가 치유"},
-  "3059191": { "zh-CN": "神盾稳态G2" ,"en-US": "Shield Knight Stasis G2","ja-JP": "シールドファイター・恒常性G2","ko-KR": "쉴드 나이트 안정 G2"}
+  "1222:1": {
+    "Name": {
+      "zh-CN": "幻影冲锋",
+      "en-US": "Phantom Dash",
+      "ja-JP": "ファントムダッシュ",
+      "ko-KR": "환영 돌진"
+    }
+  },
+  "1223:1": {
+    "Row": "1222:1"
+  },
+  "1432:1": {
+    "Row": "31901:3"
+  },
+  "1850:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "雷爆溟灭-奥义！幻象共鸣",
+      "en-US": "Thunderburst Oblivion - Arcane! Illusion Resonance",
+      "ja-JP": "雷裂滅・奥義！幻影共鳴",
+      "ko-KR": "뇌폭명멸 - 오의! 환상 공명"
+    }
+  },
+  "1851:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "雷域-奥义！幻象共鸣",
+      "en-US": "Thunder Zone - Arcane! Illusion Resonance",
+      "ja-JP": "雷領域・奥義！幻影共鳴",
+      "ko-KR": "번개 영역 - 오의! 환상 공명"
+    }
+  },
+  "1903:0": {
+    "Row": "1901:0"
+  },
+  "1904:0": {
+    "Row": "1901:0"
+  },
+  "2426:2": {
+    "Row": "2413:2"
+  },
+  "2426:3": {
+    "Row": "2413:3"
+  },
+  "2426:4": {
+    "Row": "2413:4"
+  },
+  "2426:5": {
+    "Row": "2413:5"
+  },
+  "2453:1": {
+    "Row": "2421:1"
+  },
+  "3614:2": {
+    "Name": {
+      "zh-CN": "能量回流",
+      "en-US": "Energy Reflux",
+      "ja-JP": "エネルギー回流",
+      "ko-KR": "에너지 역류"
+    }
+  },
+  "35106:3": {
+    "Name": {
+      "zh-CN": "生命吸取",
+      "en-US": "Life Steal",
+      "ja-JP": "HP吸収",
+      "ko-KR": "생명 흡수"
+    }
+  },
+  "45300:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "连锁闪电-奥义！幻象共鸣",
+      "en-US": "Chain Lightning - Arcane! Illusion Resonance",
+      "ja-JP": "チェインサンダー・奥義！幻影共鳴",
+      "ko-KR": "연쇄 번개 - 오의! 환상 공명"
+    }
+  },
+  "45300:5": {
+    "Row": "45300:1"
+  },
+  "45301:4": {
+    "Row": "45300:1"
+  },
+  "45301:7": {
+    "Row": "45300:1"
+  },
+  "121501:1": {
+    "Row": "1216:1"
+  },
+  "149904:1": {
+    "Row": "1424:1"
+  },
+  "150101:1": {
+    "Row": "21418:4"
+  },
+  "180301:0": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "雷鸣电闪-奥义！幻象共鸣",
+      "en-US": "Thunderclap Arcane - Arcane! Illusion Resonance",
+      "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
+      "ko-KR": "천둥번개 - 오의! 환상 공명"
+    }
+  },
+  "391009:0": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "雷弹穿行-奥义！幻象共鸣",
+      "en-US": "Thunder Traverse - Arcane! Illusion Resonance",
+      "ja-JP": "トラッキングサンダー・奥義！幻影共鳴",
+      "ko-KR": "뇌탄 관통 - 오의! 환상 공명"
+    }
+  },
+  "2031106:3": {
+    "Name": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    }
+  },
+  "2031106:4": {
+    "Name": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    }
+  },
+  "2031108:3": {
+    "Name": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    }
+  },
+  "2031108:4": {
+    "Name": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    }
+  },
+  "2201493:3": {
+    "Row": "2201491:3"
+  },
+  "2202112:3": {
+    "Name": {
+      "zh-CN": "溢出治疗",
+      "en-US": "Overhealing",
+      "ja-JP": "オーバーヒール",
+      "ko-KR": "초과 치유"
+    }
+  },
+  "2203311:1": {
+    "Row": "220108:1"
+  },
+  "2203531:1": {
+    "Row": "2296:2"
+  },
+  "2206680:5": {
+    "Row": "2206290:5"
+  },
+  "2900441:9": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "雷电重炮-奥义！幻象共鸣",
+      "en-US": "Thunder Cannon - Arcane! Illusion Resonance",
+      "ja-JP": "サンダーヘビーキャノン・奥義！幻影共鳴",
+      "ko-KR": "번개 대포 - 오의! 환상 공명"
+    }
+  },
+  "2900441:10": {
+    "Row": "2900441:9"
+  },
+  "2900441:11": {
+    "Row": "2900441:9"
+  },
+  "3001170:5": {
+    "Row": "701002:1"
+  },
+  "3003213:1": {
+    "Name": {
+      "zh-CN": "虚妄裁定",
+      "en-US": "Shattered Illusion",
+      "ja-JP": "虚妄断罪",
+      "ko-KR": "허상의 판결"
+    }
+  },
+  "3003250:3": {
+    "Name": {
+      "zh-CN": "虚妄裁定-稳态自愈",
+      "en-US": "Shattered Illusion - Stasis Recovery",
+      "ja-JP": "虚妄断罪-安定自己治癒",
+      "ko-KR": "허상의 판결・안정 자가 치유"
+    }
+  },
+  "3054440:6": {
+    "Row": "2421:1"
+  },
+  "3059191:3": {
+    "Name": {
+      "zh-CN": "神盾稳态G2",
+      "en-US": "Shield Knight Stasis G2",
+      "ja-JP": "シールドファイター・恒常性G2",
+      "ko-KR": "쉴드 나이트 안정 G2"
+    }
+  },
+  "3200034:3": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！治疗爆弹(被动)",
+      "en-US": "Stunt! Healing Bomb - Passive",
+      "ja-JP": "絶技！ヒールボム(パッシブ)",
+      "ko-KR": "비기! 치료 폭탄(패시브)"
+    }
+  },
+  "3210021:3": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！流星陨落(被动)",
+      "en-US": "Arcane! Meteor Shower - Passive",
+      "ja-JP": "奥義！メテオフォール(パッシブ)",
+      "ko-KR": "오의! 유성의 몰락(패시브)"
+    }
+  },
+  "3210022:3": {
+    "Row": "3210021:3"
+  },
+  "3210031:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！雷霆天引(被动)",
+      "en-US": "Arcane! Thunderfall Grasp - Passive",
+      "ja-JP": "奥義！サンダーコール(パッシブ)",
+      "ko-KR": "오의! 하늘을 울리는 번개(패시브)"
+    }
+  },
+  "3210051:2": {
+    "Name": {
+      "zh-CN": "奥义！炽炎战斧(被动)",
+      "en-US": "Arcane! Blazing Axe - Passive",
+      "ja-JP": "奥義！炎のバトルアクス(パッシブ)",
+      "ko-KR": "오의! 작열의 전투도끼(패시브)"
+    }
+  },
+  "3210061:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！超会心(被动)",
+      "en-US": "Stunt! Super Critical - Passive",
+      "ja-JP": "絶技！超会心(パッシブ)",
+      "ko-KR": "비기! 초회심(패시브)"
+    }
+  },
+  "3210081:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！强压之雷(被动)",
+      "en-US": "Stunt! Thunder Suppress - Passive",
+      "ja-JP": "絶技！サンダープレッシャー(パッシブ)",
+      "ko-KR": "비기! 강압의 번개(패시브)"
+    }
+  },
+  "3210092:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！静默潮汐(被动)",
+      "en-US": "Arcane! Silent Tide - Passive",
+      "ja-JP": "奥義！サイレントサージ(パッシブ)",
+      "ko-KR": "오의! 고요한 조수(패시브)"
+    }
+  },
+  "3210101:2": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！脉冲祝祷(被动)",
+      "en-US": "Arcane! Pulse Benediction - Passive",
+      "ja-JP": "奥義！パルスの祈り(パッシブ)",
+      "ko-KR": "오의! 축복의 파동(패시브)"
+    }
+  },
+  "3210161:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！全场轰炸(被动)",
+      "en-US": "Stunt! Carpet Bombing - Passive",
+      "ja-JP": "絶技！全域爆撃(パッシブ)",
+      "ko-KR": "비기! 필드 폭격(패시브)"
+    }
+  },
+  "3210171:3": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！卷心菜霹雳闪(被动)",
+      "en-US": "Stunt! Cabbage Blitz - Passive",
+      "ja-JP": "絶技！甘藍稲妻落とし(パッシブ)",
+      "ko-KR": "비기! 양배추 벽력 섬광(패시브)"
+    }
+  },
+  "3210210:3": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！精准点射(被动)",
+      "en-US": "Arcane! Precision Burst - Passive",
+      "ja-JP": "奥義！精密点射(パッシブ)",
+      "ko-KR": "오의! 정밀 점사(패시브)"
+    }
+  },
+  "3210231:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！疾风连喰(被动)",
+      "en-US": "Arcane! Swift Devour - Passive",
+      "ja-JP": "奥義！暴食の嵐(パッシブ)",
+      "ko-KR": "오의! 질풍의 포식(패시브)"
+    }
+  },
+  "3210262:1": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！双星角斗(被动)",
+      "en-US": "Arcane! Twin Star Duel - Passive"
+    }
+  },
+  "3210290:4": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！逆刃极冻斩(被动)",
+      "en-US": "Arcane! Glacial Reverse Blade - Passive"
+    }
+  },
+  "3210300:3": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "奥义！泡影之息(被动)",
+      "en-US": "Arcane! Breath of Illusions - Passive"
+    }
+  },
+  "3913001:3": {
+    "Row": "391301:0"
+  }
 }

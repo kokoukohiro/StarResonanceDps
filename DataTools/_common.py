@@ -21,7 +21,6 @@ SOURCES = ("StarASIA", "Star")
 
 DATA = os.path.join(SOLUTION, "StarResonanceDps.Core", "Data")
 LOCALIZATION = os.path.join(DATA, "Localization")
-MAPPINGS = os.path.join(DATA, "Mappings")
 
 # 表示言語 → 入力側のフォルダ名。
 # 言語ごとにテーブルの版が違うことがあり、収録IDも一致しない。
@@ -43,13 +42,22 @@ def _path(source, lang_dir, name):
     return os.path.join(TABLES_DIR, source, "Ztable", lang_dir, "ZTable", name + ".json")
 
 
+def table_of_source(source, lang_dir, name):
+    """
+    出所を名指しで生テーブルを読む。無ければ None。
+
+    **行が実IDで引けないテーブル用。** `RecountTable` の鍵は行番号で、出所が違えば
+    同じ番号が別の行を指す(実測で `DamageId` の一致は349件中106件)。合併すると
+    無関係な行が混ざるので、出所ごとに組み立ててから行の対応を取る。
+    """
+    return load(_path(source, lang_dir, name))
+
+
 def tables_by_source(lang_dir, name):
     """
-    出所ごとの生テーブルを `SOURCES` の順で返す。
+    出所ごとの生テーブルを `SOURCES` の順で返す。`table` の下請け。
 
-    **行が実IDで引けないテーブルはこちらを使う。** `RecountTable` の鍵は行番号で、
-    出所が違えば同じ番号が別の行を指す(実測で `DamageId` の一致は349件中106件)。
-    合併すると無関係な行が混ざる。
+    どこにも無ければ、置き場の設定方法を示して止まる。
     """
     found = [(s, load(_path(s, lang_dir, name))) for s in SOURCES]
     found = [(s, t) for s, t in found if t is not None]
@@ -67,7 +75,7 @@ def table(lang_dir, name):
     鍵は和集合。**行は先の出所が勝ち**、後ろは無い行を足すだけ。
     そのうえで、採った行の**空欄の文字列項目**だけを別の出所で補う。
 
-    **鍵が実IDのテーブル専用。** 行番号で引くものは `tables_by_source` を使う。
+    **鍵が実IDのテーブル専用。** 行番号で引くものは `table_of_source` を使う。
     """
     found = tables_by_source(lang_dir, name)
     merged = {}

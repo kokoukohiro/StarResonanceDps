@@ -240,10 +240,9 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         foreach (var entry in entries)
         {
             _skillEntries.Add(new MetricSkillTableEntry(
-                entry.SkillId.ToString(CultureInfo.CurrentCulture),
+                // ownerId:枝番。生成物・手修正のファイルの鍵と同じ形。
+                entry.SkillIdText,
                 entry.Name,
-                entry.IconName,
-                entry.IsImagine,
                 MeterNumberFormatter.Format(entry.TotalValue, numberDisplayFormatIndex),
                 MeterNumberFormatter.Format(entry.ValuePerSecondActive, numberDisplayFormatIndex),
                 MeterNumberFormatter.Format(entry.ValuePerSecond, numberDisplayFormatIndex),

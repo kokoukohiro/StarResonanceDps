@@ -41,18 +41,41 @@
 
                         <TextBlock Grid.Column="0"
                                    Style="{StaticResource WidgetWindowSettings.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_AlwaysOnTop]}" />
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_HideHeaderWhenInactive]}" />
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                             <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding AlwaysOnTop, Mode=TwoWay}" />
+                                          IsChecked="{Binding HideHeaderWhenInactive, Mode=TwoWay}" />
                             <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
-                                       Text="{Binding AlwaysOnTopStateText}" />
+                                       Text="{Binding HideHeaderWhenInactiveStateText}" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingField}">
+                <!-- フッターを持たないウィジェットでは出さない。 -->
+                <Border Style="{StaticResource Panel.SettingField}"
+                        Visibility="{Binding HasFooterSetting, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource WidgetWindowSettings.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_HideFooterWhenInactive]}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding HideFooterWhenInactive, Mode=TwoWay}" />
+                            <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
+                                       Text="{Binding HideFooterWhenInactiveStateText}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 不透明度が常に最後の行。フッターの有無で変わらない。 -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -84,57 +107,6 @@
                                        FontWeight="SemiBold"
                                        Text="{Binding WindowOpacity, StringFormat={}{0:0}%}" />
                         </Grid>
-                    </Grid>
-                </Border>
-                <!-- フッターを持たないウィジェットではこれが最後の行になる。 -->
-                <Border>
-                    <Border.Style>
-                        <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding HasFooterSetting}" Value="False">
-                                    <Setter Property="BorderThickness" Value="0" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0"
-                                   Style="{StaticResource WidgetWindowSettings.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_HideHeaderWhenInactive]}" />
-
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding HideHeaderWhenInactive, Mode=TwoWay}" />
-                            <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
-                                       Text="{Binding HideHeaderWhenInactiveStateText}" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <!-- フッターを持たないウィジェットでは出さない。 -->
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
-                        Visibility="{Binding HasFooterSetting, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0"
-                                   Style="{StaticResource WidgetWindowSettings.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Window_HideFooterWhenInactive]}" />
-
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding HideFooterWhenInactive, Mode=TwoWay}" />
-                            <TextBlock Style="{StaticResource WidgetWindowSettings.StateText}"
-                                       Text="{Binding HideFooterWhenInactiveStateText}" />
-                        </StackPanel>
                     </Grid>
                 </Border>
 

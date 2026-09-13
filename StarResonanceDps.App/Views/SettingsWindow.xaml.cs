@@ -214,6 +214,11 @@ public partial class SettingsWindow : Window
         ScrollToSection(DisplaySection);
     }
 
+    private void AggregationNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(AggregationSection);
+    }
+
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);

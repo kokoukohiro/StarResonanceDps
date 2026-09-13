@@ -1,0 +1,138 @@
+<UserControl x:Class="StarResonanceDps.App.Views.AggregationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <!--
+            ボタン2種(上の操作ボタン・履歴の行)は Styles/Buttons.xaml の
+            Button.AggregationAction / Button.AggregationRow。
+            **枠は Surface.RoundedOutline が持つ**ので、ここには置かない。
+
+            残すのはこのビューの中でしか意味を持たないピルだけ。
+        -->
+
+        <!--
+            「表示中」のピル。角丸トークン(6/5/4)は角丸の四角用なので、
+            ここだけ高さの半分を直接入れて完全な丸にする。
+        -->
+        <Style x:Key="Aggregation.ViewingPill" TargetType="{x:Type Border}">
+            <Setter Property="Height" Value="26" />
+            <Setter Property="CornerRadius" Value="13" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Margin" Value="16,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="24,20,24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--
+            見出しと、エンカウンターへの操作2つ。
+            **見出しは状態を出すだけで押せない。** ライブへ戻すのは選択中の行をもう一度押す操作で、
+            ここに入口を二重に置かない。
+        -->
+        <Grid Grid.Row="0" Margin="8,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       VerticalAlignment="Center"
+                       FontSize="24"
+                       FontWeight="SemiBold"
+                       TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource Brush.TextPrimary}"
+                       Text="{Binding StatusText}" />
+
+            <StackPanel Grid.Column="1"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                <Button Style="{StaticResource Button.AggregationAction}"
+                        Command="{Binding ToggleThreeMinuteBenchmarkCommand}"
+                        Content="{Binding ThreeMinuteBenchmarkText}" />
+                <Button Style="{StaticResource Button.AggregationAction}"
+                        Margin="8,0,0,0"
+                        Command="{Binding ResetEncounterCommand}"
+                        Content="{Binding ResetText}" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 行1つ目が来る位置に合わせて置く。 -->
+        <TextBlock Grid.Row="1"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   FontSize="16"
+                   Foreground="{DynamicResource Brush.TextMuted}"
+                   Text="{Binding EmptyText}">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding HasEntries}" Value="False">
+                            <Setter Property="Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <ScrollViewer x:Name="HistoryScrollViewer"
+                      Grid.Row="1"
+                      Style="{StaticResource ScrollViewer.WidgetList}"
+                      VerticalScrollBarVisibility="Hidden">
+            <ItemsControl ItemsSource="{Binding Entries}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!-- 選択中の行をもう一度押すと解除。判定はビューモデル側。 -->
+                        <Button Style="{StaticResource Button.AggregationRow}"
+                                Command="{Binding DataContext.SelectEntryCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                CommandParameter="{Binding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="154" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    Margin="4,0,0,0"
+                                    FontSize="16"
+                                    Foreground="{DynamicResource Brush.TextPrimary}"
+                                    Text="{Binding TimeText}" />
+
+                                <TextBlock Grid.Column="1"
+                                    Style="{StaticResource Text.WidgetName}"
+                                    TextTrimming="CharacterEllipsis"
+                                    Text="{Binding SceneText}" />
+
+                                <Border Grid.Column="2" Style="{StaticResource Aggregation.ViewingPill}">
+                                    <TextBlock VerticalAlignment="Center"
+                                               FontSize="13"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource Brush.TextSecondary}"
+                                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Aggregation_Viewing]}" />
+                                </Border>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

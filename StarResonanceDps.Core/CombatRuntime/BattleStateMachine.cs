@@ -49,10 +49,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
             Services.ActiveBuffStore.Instance.Clear();
 
-            if (!Settings.Instance.PersistEncounterSavingPauseStateBetweenMaps)
-            {
-                AppState.IsEncounterSavingPaused = false;
-            }
         }
 
         public static void DungeonStateHistoryAdd(EDungeonState dungeonState)
@@ -60,10 +56,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             DungeonStateHistory.Enqueue(new KeyValuePair<EDungeonState, DateTime>(dungeonState, DateTime.Now));
             Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonStateHistoryAdd: {dungeonState}");
 
-            if (dungeonState != EDungeonState.DungeonStateNull)
-            {
-                AppState.IsEncounterSavingPaused = false;
-            }
 
             if (dungeonState == EDungeonState.DungeonStateNull)
             {
@@ -71,10 +63,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.EnterDungeon();
                 PlayerRosterProjection.ResetNearbyPlayers();
 
-                if (Settings.Instance.PersistEncounterSavingPauseStateBetweenMaps)
-                {
-                    AppState.IsEncounterSavingPaused = AppState.WasEncounterSavingPaused;
-                }
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
@@ -144,7 +132,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             PreviousDungeonTargetData = newDungeonTargetData;
 
-            if (Settings.Instance.SplitEncountersOnNewPhases)
+            if (CombatRuntimeSettings.SplitEncountersOnNewPhases)
             {
                 if (dungeonTargetData.Complete == 0 && dungeonTargetData.Nums == 0)
                 {

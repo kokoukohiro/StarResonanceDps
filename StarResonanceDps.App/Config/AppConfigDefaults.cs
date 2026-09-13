@@ -1,4 +1,7 @@
-﻿namespace StarResonanceDps.App.Config;
+﻿using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.CombatRuntime.DataTypes;
+
+namespace StarResonanceDps.App.Config;
 
 public static class AppConfigDefaults
 {
@@ -26,6 +29,12 @@ public static class AppConfigDefaults
         return new SettingsConfig
         {
             LanguageIndex = 0,
+            NetCaptureDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName,
+            GameCapturePreference = EGameCapturePreference.Auto,
+            GameCaptureCustomExeName = string.Empty,
+            SplitEncountersOnNewPhases = true,
+            KeepPastEncounterInMeterUntilNextDamage = false,
+            DatabaseRetentionPolicyDays = 0,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
@@ -77,6 +86,14 @@ public static class AppConfigDefaults
         settings.InternalIdDisplayModeIndex = Clamp(settings.InternalIdDisplayModeIndex, 0, 5);
         settings.WindowColors = NormalizeColorList(settings.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         settings.WindowColorIndex = Clamp(settings.WindowColorIndex, 0, settings.WindowColors.Count - 1);
+
+        settings.NetCaptureDeviceName = string.IsNullOrWhiteSpace(settings.NetCaptureDeviceName)
+            ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
+            : settings.NetCaptureDeviceName.Trim();
+        settings.GameCaptureCustomExeName = settings.GameCaptureCustomExeName?.Trim() ?? string.Empty;
+
+        // 0 は無期限。ZDPS のスライダーに合わせて上限は30日。
+        settings.DatabaseRetentionPolicyDays = Clamp(settings.DatabaseRetentionPolicyDays, 0, 30);
     }
 
     public static void NormalizeColorPicker(ColorPickerConfig colorPicker)

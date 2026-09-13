@@ -32,8 +32,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool BenchmarkSingleTarget { get; set; }
         public static long BenchmarkSingleTargetUUID { get; set; }
 
-        public static bool IsEncounterSavingPaused { get; set; } = false;
-        public static bool WasEncounterSavingPaused { get; set; } = false;
 
         public static bool MousePassthrough { get; set; } = false;
 
@@ -46,12 +44,24 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static Encounter? ActiveEncounter = null;
         public static Encounter? OpenedHistoricalEncounter = null;
 
+        /// <summary>
+        /// アンパックした ZTable をそのまま置くフォルダ。<c>Data/</c> 直下は設定と実行時の
+        /// 生成物(<c>Settings.json</c> / <c>AppSettings.json</c> / <c>WidgetSettings.json</c> /
+        /// 戦闘履歴DB / ログ)が並ぶので、生データはここへ分けてある。
+        ///
+        /// <para>
+        /// <b>中身は加工しないこと。</b> 間引きや書き換えをすると、アンパックを取り直したときに
+        /// 何が自前の変更だったのか分からなくなる。絞り込みは読む側で行う。
+        /// </para>
+        /// </summary>
+        public const string RawTableDirectoryName = "Raw";
+
         public static void LoadDataTables()
         {
             System.Diagnostics.Stopwatch loadTime = new();
             loadTime.Start();
 
-            string monsterTableFile = Path.Combine(Utils.DATA_DIR_NAME, "MonsterTable.json");
+            string monsterTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "MonsterTable.json");
             if (File.Exists(monsterTableFile))
             {
                 var monsters = JsonConvert.DeserializeObject<Dictionary<string, Monster>>(File.ReadAllText(monsterTableFile))!;
@@ -59,7 +69,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Log.Information("Loaded MonsterTable.json");
             }
 
-            string skillTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillTable.json");
+            string skillTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SkillTable.json");
             if (File.Exists(skillTableFile))
             {
                 var skills = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillTableFile))!;
@@ -71,7 +81,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
 
 
-            string skillFightLevelTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SkillFightLevelTable.json");
+            string skillFightLevelTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SkillFightLevelTable.json");
             if (File.Exists(skillTableFile))
             {
                 var skillFightLevels = JsonConvert.DeserializeObject<Dictionary<string, SkillFightLevel>>(File.ReadAllText(skillFightLevelTableFile))!;
@@ -82,7 +92,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
 
 
-            string buffTableFile = Path.Combine(Utils.DATA_DIR_NAME, "BuffTable.json");
+            string buffTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "BuffTable.json");
             if (File.Exists(buffTableFile))
             {
                 var buffs = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffTableFile))!;
@@ -93,7 +103,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             LoadBuffOverridesTable();
             CombatDataCatalog.Load();
 
-            string sceneEventDungeonConfigTableFile = Path.Combine(Utils.DATA_DIR_NAME, "SceneEventDuneonConfigTable.json");
+            string sceneEventDungeonConfigTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SceneEventDuneonConfigTable.json");
             if (File.Exists(sceneEventDungeonConfigTableFile))
             {
                 var sceneEventDungeonConfigs = JsonConvert.DeserializeObject<Dictionary<string, SceneEventDungeonConfig>>(File.ReadAllText(sceneEventDungeonConfigTableFile))!;
@@ -102,7 +112,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
 
-            string itemTableFile = Path.Combine(Utils.DATA_DIR_NAME, "ItemTable.json");
+            string itemTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "ItemTable.json");
             if (File.Exists(itemTableFile))
             {
                 var items = JsonConvert.DeserializeObject<Dictionary<string, Item>>(File.ReadAllText(itemTableFile))!;
@@ -110,7 +120,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Log.Information("Loaded ItemTable.json");
             }
 
-            string equipTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipTable.json");
+            string equipTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "EquipTable.json");
             if (File.Exists(equipTableFile))
             {
                 var equips = JsonConvert.DeserializeObject<Dictionary<string, Equip>>(File.ReadAllText(equipTableFile))!;
@@ -122,7 +132,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
 
 
-            string equipBreakThroughTableFile = Path.Combine(Utils.DATA_DIR_NAME, "EquipBreakThroughTable.json");
+            string equipBreakThroughTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "EquipBreakThroughTable.json");
             if (File.Exists(equipBreakThroughTableFile))
             {
                 var equipBreakThroughs = JsonConvert.DeserializeObject<Dictionary<string, EquipBreakThrough>>(File.ReadAllText(equipBreakThroughTableFile))!;
@@ -131,7 +141,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
 
-            string tempAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, "TempAttrTable.json");
+            string tempAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "TempAttrTable.json");
             if (File.Exists(tempAttrTableFile))
             {
                 var tempAttrs = JsonConvert.DeserializeObject<Dictionary<string, TempAttr>>(File.ReadAllText(tempAttrTableFile))!;

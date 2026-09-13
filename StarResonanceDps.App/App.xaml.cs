@@ -6,6 +6,7 @@ using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.Logging;
 using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App;
 
@@ -26,7 +27,18 @@ public partial class App : Application
         }
 
         ManagerTraceOutput.Configure();
+
+        // 設定ファイルの改名(appsettings→AppSettings / widgetstate→WidgetSettings)は
+        // ConfigManager と WidgetStateManager のどちらに触れるより前に済ませる。
+        // どちらも遅延生成の singleton で、最初の参照で旧名のまま読み込んでしまう。
+        AppDataPaths.MigrateLegacyFileNames();
+
         var configManager = ConfigManager.Instance;
+
+        // アダプターを選び直したときの保存は Core からは行えない(Core にファイルの口が無い)。
+        // 合図だけ受け取って、こちらで AppSettings.json へ書く。
+        NetworkAdapterSession.Instance.CaptureSettingsPersistRequested +=
+            (_, _) => configManager.PersistCaptureSettingsFromRuntime();
         var legacyClassColors = configManager.TakeLegacyClassColorSettings();
         if (legacyClassColors is not null)
         {

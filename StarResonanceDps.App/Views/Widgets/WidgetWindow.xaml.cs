@@ -89,6 +89,9 @@ public partial class WidgetWindow : Window
 
     private IInputElement? _manualDragCaptureTarget;
 
+    /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
+    private readonly WidgetWindowConfig _restoredBounds;
+
     public WidgetWindow(
         WidgetListItemViewModel widget,
         FrameworkElement? widgetContent,
@@ -123,8 +126,12 @@ public partial class WidgetWindow : Window
             WidgetContentScrollBar.ValueChanged += WidgetContentScrollBar_ValueChanged;
         }
 
+        // まだ測れていないときに返す値。窓を出す前に保存を要求されることがある
+        // (対象ごとに開く窓は Show() の前に SaveOpenTargets が走る)ので、
+        // そこで 0 を書かせないために復元に使った値を控えておく。
+        _restoredBounds = savedBounds.Clone();
+
         ApplySavedBounds(savedBounds, owner, widget.OriginalIndex);
-        ApplyAlwaysOnTopState(widget.AlwaysOnTop);
         ApplyPinState(widget.IsPinned);
 
         _saveBoundsTimer = new DispatcherTimer
@@ -175,21 +182,22 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// ピン留めは「配置を終えて以後は触らない」状態。<b>最前面表示とは別の軸</b>。
-    /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効く。
+    /// ピン留めは「配置を終えて以後は触らない」状態。
+    /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効き、
+    /// <b>最前面表示もここに含める</b>(2026-09-12 に独立した設定から統合した)。
+    ///
+    /// <para>
+    /// <b>最前面は猶予(<see cref="IsPinBehaviorActive"/>)ではなくピン留めそのものに従わせる。</b>
+    /// 猶予中は窓を配置している最中なので、そこで最前面を外すとゲームの裏へ落ちる。
+    /// </para>
     /// </summary>
     public void ApplyPinState(bool isPinned)
     {
         _isPinned = isPinned;
+        Topmost = isPinned;
         ApplyNoActivateState();
         ApplyInactiveChromeVisibility();
         QueueContentScrollBarUpdate();
-    }
-
-    /// <summary>最前面表示。ピン留めとは独立した設定。</summary>
-    public void ApplyAlwaysOnTopState(bool alwaysOnTop)
-    {
-        Topmost = alwaysOnTop;
     }
 
     /// <summary>
@@ -515,10 +523,6 @@ public partial class WidgetWindow : Window
         {
             ApplyInactiveChromeVisibility();
         }
-        else if (e.PropertyName == nameof(WidgetListItemViewModel.AlwaysOnTop))
-        {
-            ApplyAlwaysOnTopState(_widget.AlwaysOnTop);
-        }
     }
 
     protected override void OnActivated(EventArgs e)
@@ -704,15 +708,33 @@ public partial class WidgetWindow : Window
             ActualHeight);
     }
 
-    /// <summary>いまの位置と大きさ。保存用。</summary>
+    /// <summary>
+    /// いまの位置と大きさ。保存用。
+    ///
+    /// <para>
+    /// <b>まだ測れていない項目は、復元に使った値をそのまま返す。</b>
+    /// この窓を <c>Show()</c> する前に <c>SaveOpenTargets</c> が走る経路があり
+    /// (窓を作った直後・対象名が判明したとき・別の窓が閉じたとき)、そこでは
+    /// <see cref="FrameworkElement.ActualWidth"/> がまだ 0 になっている。
+    /// </para>
+    ///
+    /// <para>
+    /// 素通しで 0 を書くと、復元側 <c>ApplySavedBounds</c> が正の有限値しか採らないため
+    /// <b>大きさだけが既定に戻る</b>。位置は <c>Left</c>/<c>Top</c> がコンストラクタで
+    /// 入るので残り、「位置は覚えているのにリサイズだけ忘れる」という形で出る。
+    /// </para>
+    /// </summary>
     public WidgetWindowConfig GetCurrentBounds()
     {
+        var hasMeasuredSize = IsFinitePositive(ActualWidth) && IsFinitePositive(ActualHeight);
+        var hasPosition = double.IsFinite(Left) && double.IsFinite(Top);
+
         return new WidgetWindowConfig
         {
-            X = Left,
-            Y = Top,
-            Width = ActualWidth,
-            Height = ActualHeight
+            X = hasPosition ? Left : _restoredBounds.X,
+            Y = hasPosition ? Top : _restoredBounds.Y,
+            Width = hasMeasuredSize ? ActualWidth : _restoredBounds.Width,
+            Height = hasMeasuredSize ? ActualHeight : _restoredBounds.Height
         };
     }
 

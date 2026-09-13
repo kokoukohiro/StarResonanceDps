@@ -18,7 +18,8 @@ internal sealed record PlayerDataSourceSnapshot(
     long MaxHp,
     bool IsNpc,
     bool IsSpecAbilityUnequipped,
-    PlayerEquipmentData? EquipmentData);
+    PlayerEquipmentData? EquipmentData,
+    bool IsLive);
 
 internal static class PlayerDataSourceResolver
 {
@@ -174,7 +175,18 @@ internal static class PlayerDataSourceResolver
             ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf),
             GetEquipmentData(nearbyEntity)
                 ?? partySupplement?.EquipmentData
-                ?? GetEquipmentData(metadataEntity));
+                ?? GetEquipmentData(metadataEntity),
+            // いま値が供給されているか(=ライブ)。キャッシュしか無い行は表示側で灰色にする。
+            //
+            // 判定はパーティを特別扱いしない。<see cref="PartyStateStore.PartyStateSnapshot.TryGetSupplement"/> は
+            // 在籍中のメンバーにしか返さないので、PT外では自動的に「AOIにいるか」だけになる。
+            //   nearbyEntity … AOIの実測値
+            //   partySupplement … TeamMemberFastSyncData がHPを供給する。AOIとは独立に届く
+            //   metadataEntity … 最後の観測値が居残っているだけ。これしか無ければキャッシュ
+            //
+            // <b>自分だけは常にライブ。</b> 作り直した直後のエンカウンターには自分の
+            // エンティティがまだ無く、導出だと一瞬だけ灰に落ちる。
+            isSelf || nearbyEntity is not null || partySupplement is not null);
     }
 
     /// <summary>

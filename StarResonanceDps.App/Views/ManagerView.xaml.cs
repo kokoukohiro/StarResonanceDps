@@ -14,57 +14,30 @@ public partial class ManagerView : UserControl
     private const string HelpUrl = "https://github.com/kokoukohiro/StarResonanceDps";
 
     private bool _isSyncingExternalScrollBar;
-    private MainViewModel? _viewModel;
 
     public ManagerView()
     {
         InitializeComponent();
-        LogsContent.ContentScrollViewer.ScrollChanged += LogsContentScrollViewer_ScrollChanged;
-        LogsContent.ContentScrollViewer.SizeChanged += LogsContentScrollViewer_SizeChanged;
+        LogsContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
+        LogsContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
+        AggregationContent.ContentScrollViewer.ScrollChanged += ContentScrollViewer_ScrollChanged;
+        AggregationContent.ContentScrollViewer.SizeChanged += ContentScrollViewer_SizeChanged;
         Loaded += ManagerView_Loaded;
-        Unloaded += ManagerView_Unloaded;
     }
 
     private void ManagerView_Loaded(object sender, RoutedEventArgs e)
     {
-        AttachViewModel();
         WidgetsNavigationButton.IsChecked = true;
-    }
-
-    private void ManagerView_Unloaded(object sender, RoutedEventArgs e)
-    {
-        DetachViewModel();
-    }
-
-    private void AttachViewModel()
-    {
-        var viewModel = DataContext as MainViewModel;
-        if (ReferenceEquals(_viewModel, viewModel))
-        {
-            return;
-        }
-
-        DetachViewModel();
-        _viewModel = viewModel;
-
-        if (_viewModel is not null)
-        {
-            _viewModel.HistoryWindowRequested += ViewModel_HistoryWindowRequested;
-        }
-    }
-
-    private void DetachViewModel()
-    {
-        if (_viewModel is not null)
-        {
-            _viewModel.HistoryWindowRequested -= ViewModel_HistoryWindowRequested;
-            _viewModel = null;
-        }
     }
 
     private void WidgetsNavigationButton_Checked(object sender, RoutedEventArgs e)
     {
         ShowNavigationContent(ManagerContent.Widgets);
+    }
+
+    private void AggregationNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Aggregation);
     }
 
     private void PluginsNavigationButton_Checked(object sender, RoutedEventArgs e)
@@ -88,6 +61,9 @@ public partial class ManagerView : UserControl
     private void ShowNavigationContent(ManagerContent content)
     {
         WidgetContent.Visibility = content == ManagerContent.Widgets
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        AggregationContent.Visibility = content == ManagerContent.Aggregation
             ? Visibility.Visible
             : Visibility.Collapsed;
         PluginsContent.Visibility = content == ManagerContent.Plugins
@@ -119,13 +95,6 @@ public partial class ManagerView : UserControl
 
         comboBox.SetCurrentValue(Selector.SelectedIndexProperty, -1);
         comboBox.Items.MoveCurrentToPosition(-1);
-    }
-
-    private void ViewModel_HistoryWindowRequested(object? sender, EventArgs e)
-    {
-        Dispatcher.BeginInvoke(
-            () => ShowManagerDialog(new HistoryWindow()),
-            DispatcherPriority.ContextIdle);
     }
 
     private void ShowManagerDialog(Window dialog)
@@ -161,12 +130,12 @@ public partial class ManagerView : UserControl
         QueueUpdateExternalScrollBar();
     }
 
-    private void LogsContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    private void ContentScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
         UpdateExternalScrollBar();
     }
 
-    private void LogsContentScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+    private void ContentScrollViewer_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         QueueUpdateExternalScrollBar();
     }
@@ -231,6 +200,11 @@ public partial class ManagerView : UserControl
             return WidgetListScrollViewer;
         }
 
+        if (AggregationContent.Visibility == Visibility.Visible)
+        {
+            return AggregationContent.ContentScrollViewer;
+        }
+
         return LogsContent.Visibility == Visibility.Visible
             ? LogsContent.ContentScrollViewer
             : null;
@@ -239,6 +213,7 @@ public partial class ManagerView : UserControl
     private enum ManagerContent
     {
         Widgets,
+        Aggregation,
         Plugins,
         Logs
     }

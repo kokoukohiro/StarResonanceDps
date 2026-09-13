@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.CombatRuntime.DataTypes;
 
 namespace StarResonanceDps.App.Config;
 
@@ -36,6 +38,22 @@ public sealed class ColorPickerConfig
 public sealed class SettingsConfig
 {
     public int LanguageIndex { get; set; }
+
+    // --- 基本設定(キャプチャ) ---
+    // Core は AppSettings.json を読めないので、起動時と保存時に
+    // CombatRuntimeSettings.Apply で流し込む。
+
+    public string NetCaptureDeviceName { get; set; } = CombatRuntimeSettings.AutomaticNetCaptureDeviceName;
+    public EGameCapturePreference GameCapturePreference { get; set; } = EGameCapturePreference.Auto;
+    public string GameCaptureCustomExeName { get; set; } = string.Empty;
+
+    // --- 集計設定 ---
+
+    public bool SplitEncountersOnNewPhases { get; set; } = true;
+    public bool KeepPastEncounterInMeterUntilNextDamage { get; set; }
+
+    /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
+    public int DatabaseRetentionPolicyDays { get; set; }
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }
@@ -50,6 +68,12 @@ public sealed class SettingsConfig
         return new SettingsConfig
         {
             LanguageIndex = LanguageIndex,
+            NetCaptureDeviceName = NetCaptureDeviceName,
+            GameCapturePreference = GameCapturePreference,
+            GameCaptureCustomExeName = GameCaptureCustomExeName,
+            SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
+            KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
+            DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,

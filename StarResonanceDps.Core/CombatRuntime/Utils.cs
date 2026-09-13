@@ -10,79 +10,19 @@ namespace StarResonanceDps.Core.CombatRuntime;
 public static class Utils
 {
     public const string DATA_DIR_NAME = "Data";
-    private static readonly string[] PersistedRuntimeFileNames = ["Settings.json"];
     public static Version AppVersion { get; set; } = typeof(Utils).Assembly.GetName().Version ?? new Version(0, 0);
 
-    public static void MigratePersistedRuntimeFiles()
+    /// <summary>
+    /// <c>Data/</c> が無ければ作る。<c>DB</c> もログもここへ書くので、最初に触る側が用意する。
+    ///
+    /// <para>
+    /// 以前あった旧レイアウト(<c>Data/CombatRuntime/</c>)からの引っ越しは 2026-09-12 に撤去した。
+    /// 開発段階で配布していないため、移す対象が存在しない。
+    /// </para>
+    /// </summary>
+    public static void EnsureDataDirectory()
     {
         Directory.CreateDirectory(DATA_DIR_NAME);
-
-        // 旧レイアウトは Data/CombatRuntime/ の下に Settings.json と戦闘履歴DBを置いていた。
-        // データ一式を Data/ 直下へ移した(2026-09-04)ので、引っ越し元は Data の子ディレクトリ側になる。
-        // ここを親ディレクトリのままにすると DATA_DIR_NAME の親が空文字になり、
-        // 既存ユーザーの設定と履歴が旧フォルダに取り残される。
-        var dataRoot = DATA_DIR_NAME;
-        if (!Directory.Exists(dataRoot))
-        {
-            return;
-        }
-
-        var targetDirectory = Path.GetFullPath(DATA_DIR_NAME);
-        var candidateDirectories = Directory.EnumerateDirectories(dataRoot)
-            .Where(path => !string.Equals(Path.GetFullPath(path), targetDirectory, StringComparison.OrdinalIgnoreCase))
-            .Where(path => File.Exists(Path.Combine(path, "Settings.json")))
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        if (candidateDirectories.Length != 1)
-        {
-            return;
-        }
-
-        var sourceDirectory = candidateDirectories[0];
-        foreach (var fileName in PersistedRuntimeFileNames)
-        {
-            CopyFileIfMissing(Path.Combine(sourceDirectory, fileName), Path.Combine(DATA_DIR_NAME, fileName));
-        }
-
-        var sourceDatabase = Directory.EnumerateFiles(sourceDirectory, "*.db", SearchOption.TopDirectoryOnly)
-            .OrderByDescending(path => new FileInfo(path).Length)
-            .FirstOrDefault();
-        if (sourceDatabase is null)
-        {
-            return;
-        }
-
-        var targetDatabase = Path.Combine(DATA_DIR_NAME, "CombatHistory.db");
-        CopyFileIfMissing(sourceDatabase, targetDatabase);
-        CopyFileIfMissing(sourceDatabase + "-wal", targetDatabase + "-wal");
-        CopyFileIfMissing(sourceDatabase + "-shm", targetDatabase + "-shm");
-
-        if (!File.Exists(targetDatabase))
-        {
-            return;
-        }
-
-        try
-        {
-            Directory.Delete(sourceDirectory, recursive: true);
-        }
-        catch (IOException)
-        {
-
-        }
-        catch (UnauthorizedAccessException)
-        {
-
-        }
-    }
-
-    private static void CopyFileIfMissing(string sourcePath, string destinationPath)
-    {
-        if (File.Exists(sourcePath) && !File.Exists(destinationPath))
-        {
-            File.Copy(sourcePath, destinationPath);
-        }
     }
 
     public static string BytesToString<T>(T number)
@@ -97,37 +37,6 @@ public static class Utils
         double absoluteValue = Math.Abs(value);
         int place = Convert.ToInt32(Math.Floor(Math.Log(absoluteValue, 1024)));
         double shortNumber = Math.Round(absoluteValue / Math.Pow(1024, place), 2);
-
-        string fmt = "";
-        if (place > 0)
-        {
-            fmt = "N2";
-        }
-        return $"{(Math.Sign(value) * shortNumber).ToString(fmt)}{suf[place]}";
-    }
-
-    public static string NumberToShorthand<T>(T number)
-    {
-        string[] suf = { "", "K", "M", "B", "t", "q", "Q", "s", "S", "o", "n", "d", "U", "D", "T" };
-        double value = Convert.ToDouble(number);
-        if (value == 0)
-        {
-            return "0" + suf[0];
-        }
-
-        double absoluteValue = Math.Abs(value);
-        int place = Convert.ToInt32(Math.Floor(Math.Log(absoluteValue, 1000)));
-        double shortNumber = Math.Round(absoluteValue / Math.Pow(1000, place), 2);
-
-        if (place < 0 || place > suf.Length)
-        {
-            return $"{value}";
-        }
-
-        if (Settings.Instance.UseShortWidthNumberFormatting)
-        {
-            return place == 0 ? ((long)value).ToString() : shortNumber.ToString($"N2") + suf[place];
-        }
 
         string fmt = "";
         if (place > 0)
@@ -289,7 +198,7 @@ public static class Utils
 
     public static string[] GameCapturePreferenceToExeNames(EGameCapturePreference pref)
     {
-        return GameCapturePreferenceToExeNames(pref, Settings.Instance.GameCaptureCustomExeName);
+        return GameCapturePreferenceToExeNames(pref, CombatRuntimeSettings.GameCaptureCustomExeName);
     }
 
     public static string[] GameCapturePreferenceToExeNames(EGameCapturePreference pref, string customExeName)

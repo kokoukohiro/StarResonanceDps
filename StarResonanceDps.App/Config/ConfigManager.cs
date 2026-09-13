@@ -25,6 +25,7 @@ public sealed class ConfigManager
         _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
         ApplyDisplaySettings(AppConfig.Settings);
+        ApplyRuntimeSettings(AppConfig.Settings);
     }
 
     public static ConfigManager Instance => LazyInstance.Value;
@@ -104,6 +105,7 @@ public sealed class ConfigManager
         AppConfig.Settings = AppConfigDefaults.CloneNormalizedSettings(settings);
         _settingsPreview = null;
         ApplyDisplaySettings(AppConfig.Settings);
+        ApplyRuntimeSettings(AppConfig.Settings);
         Save();
         SettingsChanged?.Invoke(this, EventArgs.Empty);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
@@ -132,6 +134,33 @@ public sealed class ConfigManager
 
         var json = JsonSerializer.Serialize(root, JsonOptions);
         File.WriteAllText(_configPath, json);
+    }
+
+    /// <summary>
+    /// Core が読む設定を流し込む。<b>プレビューでは呼ばない。</b>
+    /// 見た目の下見でキャプチャ先が切り替わったり、戦闘の区切り方が変わっては困る。
+    /// </summary>
+    private static void ApplyRuntimeSettings(SettingsConfig settings)
+    {
+        CombatRuntimeSettings.Apply(
+            settings.NetCaptureDeviceName,
+            settings.GameCapturePreference,
+            settings.GameCaptureCustomExeName,
+            settings.SplitEncountersOnNewPhases,
+            settings.KeepPastEncounterInMeterUntilNextDamage,
+            settings.DatabaseRetentionPolicyDays);
+    }
+
+    /// <summary>
+    /// <c>NetworkAdapterSession</c> がアダプターを選び直したときに呼ぶ。
+    /// Core が持っている現在値を <c>AppSettings.json</c> へ写して保存する。
+    /// </summary>
+    public void PersistCaptureSettingsFromRuntime()
+    {
+        AppConfig.Settings.NetCaptureDeviceName = CombatRuntimeSettings.NetCaptureDeviceName;
+        AppConfig.Settings.GameCapturePreference = CombatRuntimeSettings.GameCapturePreference;
+        AppConfig.Settings.GameCaptureCustomExeName = CombatRuntimeSettings.GameCaptureCustomExeName;
+        Save();
     }
 
     private static void ApplyDisplaySettings(SettingsConfig settings)

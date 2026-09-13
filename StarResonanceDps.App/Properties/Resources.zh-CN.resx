@@ -769,7 +769,7 @@
     <value>每分钟施放</value>
   </data>
   <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
-    <value>3分钟测量</value>
+    <value>3分测量</value>
   </data>
   <data name="Meter_Reset" xml:space="preserve">
     <value>重置</value>
@@ -782,12 +782,6 @@
   </data>
   <data name="Meter_BenchmarkCompleted" xml:space="preserve">
     <value>[测量完成]</value>
-  </data>
-  <data name="Manager_WidgetAction_History" xml:space="preserve">
-    <value>历史记录</value>
-  </data>
-  <data name="Window_History_Title" xml:space="preserve">
-    <value>历史记录</value>
   </data>
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP数值</value>
@@ -864,9 +858,6 @@
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>药剂</value>
   </data>
-  <data name="Settings_Window_AlwaysOnTop" xml:space="preserve">
-    <value>窗口置顶显示</value>
-  </data>
   <data name="Map_ChannelFormat" xml:space="preserve">
     <value>{0}线</value>
   </data>
@@ -890,5 +881,44 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>仅显示地图ID</value>
+  </data>
+  <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
+    <value>统计设置</value>
+  </data>
+  <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
+    <value>新阶段分割战斗</value>
+  </data>
+  <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
+    <value>保留至下次伤害</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
+    <value>历史保留期限</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
+    <value>不限</value>
+  </data>
+  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
+    <value>{0}天</value>
+  </data>
+  <data name="Navigation_Aggregation" xml:space="preserve">
+    <value>统计</value>
+  </data>
+  <data name="Aggregation_Viewing" xml:space="preserve">
+    <value>显示中</value>
+  </data>
+  <data name="Aggregation_NoHistory" xml:space="preserve">
+    <value>无历史记录</value>
+  </data>
+  <data name="Aggregation_EncounterPhase" xml:space="preserve">
+    <value>阶段{0}</value>
+  </data>
+  <data name="Aggregation_StatusLive" xml:space="preserve">
+    <value>统计中</value>
+  </data>
+  <data name="Aggregation_StatusBenchmark" xml:space="preserve">
+    <value>3分测量中</value>
+  </data>
+  <data name="Aggregation_StatusHistory" xml:space="preserve">
+    <value>历史显示中</value>
   </data>
 </root>

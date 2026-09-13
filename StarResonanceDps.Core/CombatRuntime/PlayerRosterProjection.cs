@@ -135,7 +135,15 @@ internal static class PlayerRosterProjection
     public static void RebuildRoster()
     {
         var party = PartyStateStore.Instance.Current;
+
+        // AOIの実体は常にライブ側から引く。行の中身(HP・バフ・スキル枠)は全部ライブで、
+        // 履歴を開いても止まらない。
         var encounter = EncounterManager.Current;
+
+        // <b>メーターUIに乗っている人は、履歴表示中かどうかに関わらずリストにも居なければならない。</b>
+        // だから「メーターの人」はメーターが映しているエンカウンターから取る。
+        // ライブ供給が無ければ行は灰色(IsLive=false)になるだけで、固まるわけではない。
+        var meterEncounter = AppState.OpenedHistoricalEncounter ?? encounter;
         long[] nearbyPlayerUuids;
         lock (NearbyPlayerSync)
         {
@@ -147,7 +155,7 @@ internal static class PlayerRosterProjection
             .Where(player => player.CharacterId > 0)
             .GroupBy(player => player.CharacterId)
             .ToDictionary(group => group.Key, group => group.Last().EntityUuid);
-        var metadataPlayersByCharacterId = encounter?.Entities.Values
+        var metadataPlayersByCharacterId = meterEncounter?.Entities.Values
             .Where(IsCharacterEntity)
             .Select(entity => (
                 Entity: entity,
@@ -216,9 +224,13 @@ internal static class PlayerRosterProjection
                 metadataEntity = nearbyEntity;
             }
 
-            if (metadataEntity is null)
+            // 素性が履歴の記録から来たか。履歴のHPは「その戦闘が終わった時点の値」で
+            // いまの状態ではないので、表示では最大値に置く(下の useHistoryHealth)。
+            var isMetadataFromHistory = false;
+            if (metadataEntity is null
+                && metadataPlayersByCharacterId.TryGetValue(characterId, out metadataEntity))
             {
-                metadataPlayersByCharacterId.TryGetValue(characterId, out metadataEntity);
+                isMetadataFromHistory = !ReferenceEquals(meterEncounter, encounter);
             }
 
             var isPartyMember = party.GetMembership(characterId) == PartyMembershipState.Member;
@@ -238,7 +250,13 @@ internal static class PlayerRosterProjection
                 continue;
             }
 
-            if (TryCreateEntry(characterId, nearbyEntity, metadataEntity, isSelf, out var entry))
+            if (TryCreateEntry(
+                characterId,
+                nearbyEntity,
+                metadataEntity,
+                isSelf,
+                out var entry,
+                useHistoryHealth: isMetadataFromHistory))
             {
                 if (nearbyEntity is not null)
                 {
@@ -313,12 +331,18 @@ internal static class PlayerRosterProjection
         }
     }
 
+    /// <param name="useHistoryHealth">
+    /// 素性の出所が履歴の記録のとき true。<b>そのときHPは無条件に最大値にする。</b>
+    /// 履歴に入っているのは「その戦闘が終わった時点の値」で、いまの状態ではない。
+    /// AOIやパーティから供給が戻れば(=この行が緑になれば)実値に切り替わる。
+    /// </param>
     private static bool TryCreateEntry(
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
         bool isSelf,
-        out PlayerRosterEntry entry)
+        out PlayerRosterEntry entry,
+        bool useHistoryHealth = false)
     {
         if (characterId == 0)
         {
@@ -356,7 +380,7 @@ internal static class PlayerRosterProjection
             source.ProfessionId,
             source.CombatPower,
             source.SeasonStrength,
-            source.CurrentHp,
+            useHistoryHealth ? source.MaxHp : source.CurrentHp,
             source.MaxHp,
             PlayerClassSpecResolver.Resolve(
                 source.ProfessionId,
@@ -371,7 +395,8 @@ internal static class PlayerRosterProjection
             source.IsNpc,
             nearbyEntity is null ? 0 : Utils.GetCurrentShield(nearbyEntity),
             party.GetMembership(characterId) == PartyMembershipState.Member,
-            party.GetPartyNumber(characterId));
+            party.GetPartyNumber(characterId),
+            source.IsLive);
         return true;
     }
 

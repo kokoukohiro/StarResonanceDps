@@ -63,7 +63,7 @@
                                 Style="{StaticResource Button.Sidebar}"
                                 Visibility="{Binding MeterSettings.ShowsOtherRoleSkillSettings, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Spark}" />
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.RoleSkills}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Title]}" />
                             </StackPanel>
                         </Button>

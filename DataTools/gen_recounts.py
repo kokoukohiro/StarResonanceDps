@@ -1,27 +1,66 @@
 """
-メーターの行の見出しを持つ表から、発生源ID → 行名を作る。
+メーターの行の見出し表を、発生源キーで引ける形に写す。
 
   Data/Localization/recounts.{言語}.json
 
-**出所も言語も、それぞれ自前のフォルダだけで完結させる。**
-`RecountTable` の鍵は行番号なので、版が違えば同じ番号が別の行を指す。
-`Id` は単なる連番で行の同一性の根拠にならない。合併してよいのは
-「発生源ID → 行名」を作り終えたあとだけ。
+**生の見出し表と同じ形にする。** 行ごとに `RecountName` と、その行に属する発生源キーの一覧。
+行の構成はそのまま写す。
 
-畳み込み(`Data/Mappings/RecountSourceMap.json`)と手修正(`Data/Overrides/RecountOverrides.json`)は
-**手動編集のファイル**で、このツールは読みも書きもしない。
+**項目名は `SourceId`。`DamageId` にはしない。** 中身は `DamageId` そのものではなく
+`TypeEnum:枝番` で、生の `DamageId`(`117010101` など)とは別の値だから。
+同じ名前にすると、生の表と見比べたときに値が食い違って見える。
+
+```json
+{ "3": { "RecountName": "翔舞", "SourceId": ["1401:1", "1401:4", "1402:1"] } }
+```
+
+こうすると名前を鍵ごとに繰り返さずに済み、畳み込みの対応表を別に持つ必要もない。
+行の所属と行名が同じ1か所に入る。
+
+**発生源キーは `ownerId:枝番`。** ゲーム内メーターは `RecountTable.DamageId` で行を引く
+(`ui/model/dps_data.luac` が `RecountTableMap[DamageId] = 行` を組む)。`DamageId` はワイヤに
+乗っていないが、`SyncDamageInfo` の `OwnerId` と `HitEventId` の組が `DamageId` と1対1で対応する。
+
+  DamageId → DamageAttrTable.TypeEnum = ownerId
+  DamageId の下2桁                    = 枝番(HitEventId)
+
+`TypeEnum` だけを鍵にすると粗すぎる。同じ `TypeEnum` の `DamageId` が別の行に入る例が
+26〜28種あり、どちらか一方の行が消える(`2203291` が 猎鹰出击 と 猎鹰闪电冲击 の2行にまたがる)。
+
+**行構成は `Star`、名前は `StarASIA` が権威。** 出所ごとに得意が違う。
+`Star` のほうが行構成が新しく被覆も広いが、jp/kr の `RecountName` 列が壊れている。
+
+**総括行(其他)は落とす。** 鍵の大半を占め、個別の名前を持たない。落とせば表に無い鍵と
+同じ扱いになり、実行時は名前が空のまま内部ID注記だけが出る。
+
+畳み込みの手修正(`Data/Overrides/RecountOverrides.json`)は**手動編集のファイル**で、
+このツールは読みも書きもしない。
 """
 import collections
 import os
 
-from _common import DATA, LANGS, SOURCES, dump, name_of, tables_by_source
+from _common import DATA, LANGS, dump, name_of, table_of_source
 
-# 総括行(その他)。抱えるIDが突出して多い行として特定し、この名前で検算する。
+# 行構成を決める出所。収録IDが多く、行の統合もこちらが新しい。
+STRUCTURE = "Star"
+# 名前を取る出所。先にあるほうが勝ち、空欄だけ後ろで補う。
+NAME_SOURCES = ("StarASIA", "Star")
+
+# 総括行(その他)。抱える鍵が突出して多い行として特定し、この名前で検算する。
 CATCHALL = {"zh-CN": "其他", "en-US": "Other", "ja-JP": "その他", "ko-KR": "기타"}
 
 
-def build_names(lang, lang_dir, source, recount, damage_attr):
-    """1つの出所の表から「発生源ID → 行名」を作る。総括行の行名は空にする。"""
+def build_rows(source, lang_dir):
+    """
+    1つの出所の表から「発生源キー → 行番号」と「行番号 → 鍵の一覧」を作る。
+
+    総括行は落とす。落とせなかった(検算に失敗した)ときは None を返す。
+    """
+    recount = table_of_source(source, lang_dir, "RecountTable")
+    damage_attr = table_of_source(source, lang_dir, "DamageAttrTable")
+    if recount is None or damage_attr is None:
+        return None
+
     by_row = collections.defaultdict(list)
     row_of = {}
     for row_key in sorted(recount, key=int):
@@ -29,63 +68,106 @@ def build_names(lang, lang_dir, source, recount, damage_attr):
             attr = damage_attr.get(str(damage_id))
             if not attr:
                 continue
-            # TypeEnum を「生のまま」鍵にする。親スキルへ畳むと弾IDが鍵から消え、
-            # 別途「弾ID規則」が要る。生のまま入れれば弾IDも直接載る。
             type_enum = str(attr.get("TypeEnum"))
-            if not type_enum or type_enum == "None" or type_enum in row_of:
+            if not type_enum or type_enum == "None":
                 continue
-            row_of[type_enum] = row_key
-            by_row[row_key].append(type_enum)
+            # 枝番は DamageId の下2桁。ワイヤの HitEventId と一致する。
+            key = "%s:%d" % (type_enum, int(damage_id) % 100)
+            row_of[key] = row_key
+            by_row[row_key].append(key)
 
-    # 総括行を「抱えるIDが突出して多い行」として特定し、名前で検算する。
-    #
-    # **落ちたらその出所×言語の名前列は使えない。** 行の中身(`DamageId`)は正しくても
-    # 名前列だけが詰まっていることがあり(実測: 366行に294件ぶんが詰まっている)、
-    # そのまま採るとIDと名前の対応が丸ごとずれる。名前は捨て、鍵も他の出所に任せる。
     catchall = max(by_row, key=lambda k: len(by_row[k]))
+    return row_of, by_row, catchall, recount
+
+
+def name_column(source, lang, lang_dir):
+    """
+    1つの出所×言語の行名を返す。総括行の名前で検算し、落ちたら None。
+
+    **落ちた列は使わない。** 行の中身は正しくても名前列だけが詰まっていることがあり
+    (実測: `Star` の jp/kr は366行に294件ぶんが入り、総括行の名前が空)、
+    そのまま採るとIDと名前の対応が丸ごとずれる。
+    """
+    built = build_rows(source, lang_dir)
+    if built is None:
+        return None
+    _, by_row, catchall, recount = built
     got = name_of(recount[catchall], "RecountName")
-    named = sum(1 for k in recount if name_of(recount[k], "RecountName"))
     if got != CATCHALL[lang]:
-        print("  ★%-8s %-6s 総括行の検算に失敗 key=%s name=%r (行%d / 名前あり%d) → この出所の名前は使わない"
+        named = sum(1 for k in recount if name_of(recount[k], "RecountName"))
+        print("  ★%-9s %-6s 総括行の検算に失敗 key=%s name=%r (行%d / 名前あり%d) → この列は使わない"
               % (source, lang, catchall, got, len(recount), named))
         return None
-
-    print("  %-9s %-6s 行%3d / 鍵%5d / 総括行 key=%-4s %-6s ID%4d → 空欄"
-          % (source, lang, len(recount), len(row_of), catchall, got, len(by_row[catchall])))
-
-    # 総括行は行名を空にする。鍵の大半を占め、個別の名前を持たない。
-    return {i: ("" if k == catchall else name_of(recount[k], "RecountName"))
-            for i, k in row_of.items()}
+    return {k: name_of(recount[k], "RecountName") for k in recount}
 
 
 def main():
+    base = build_rows(STRUCTURE, LANGS["zh-CN"])
+    if base is None:
+        raise SystemExit("%s の行構成を組めない" % STRUCTURE)
+    row_of, by_row, catchall, _ = base
+    row_of = {k: r for k, r in row_of.items() if r != catchall}
+    by_row = {r: ks for r, ks in by_row.items() if r != catchall}
+    print("行構成 %s  鍵%d / 行%d (総括行 key=%s の鍵%d件は落とす)"
+          % (STRUCTURE, len(row_of), len(by_row), catchall, len(base[1][catchall])))
+
+    # 鍵の並び順。ownerId → 枝番 の順で数として比べる。
+    def as_pair(key):
+        owner, branch = key.split(":")
+        return int(owner), int(branch)
+
+    # 名前を配る出所の行構成。行の対応は鍵の重なりで取る。
+    others = {}
+    for source in NAME_SOURCES:
+        if source == STRUCTURE:
+            continue
+        built = build_rows(source, LANGS["zh-CN"])
+        if built is None:
+            continue
+        o_row_of, o_by_row, o_catchall, _ = built
+        # STRUCTURE の行 → その出所の行。共有する鍵が最も多い行に対応づける。
+        link = {}
+        for r, ks in by_row.items():
+            votes = collections.Counter(o_row_of[k] for k in ks if k in o_row_of)
+            votes.pop(o_catchall, None)
+            if votes:
+                link[r] = votes.most_common(1)[0][0]
+        others[source] = link
+        print("  %-9s の行に対応づいた %s の行 %d / %d" % (source, STRUCTURE, len(link), len(by_row)))
+
     names = {}
     for lang, lang_dir in LANGS.items():
-        recounts = dict(tables_by_source(lang_dir, "RecountTable"))
-        attrs = dict(tables_by_source(lang_dir, "DamageAttrTable"))
-        merged = {}
-        # 出所ごとに独立して作り、あとから重ねる。
-        # **先の出所が持つ鍵は上書きしない。** 総括行の空欄は意図した状態なので、
-        # 「空だから補う」を当てると後ろの出所が埋め戻してしまう。
-        for source in SOURCES:
-            if source not in recounts or source not in attrs:
+        columns = []
+        for source in NAME_SOURCES:
+            column = name_column(source, lang, lang_dir)
+            if column is None:
                 continue
-            built = build_names(lang, lang_dir, source, recounts[source], attrs[source])
-            if built is None:
-                continue
-            for key, value in built.items():
-                merged.setdefault(key, value)
-        names[lang] = merged
+            link = others.get(source)
+            columns.append((source, column, link))
 
-    all_ids = sorted(set().union(*[set(v) for v in names.values()]), key=int)
+        per_row = {}
+        for r in by_row:
+            text = ""
+            for source, column, link in columns:
+                # 名前を配る出所では行番号が違う。対応表で読み替える。
+                key = r if link is None else link.get(r)
+                if key is None:
+                    continue
+                text = column.get(key) or ""
+                if text:
+                    break
+            per_row[r] = text
+        names[lang] = per_row
+        print("  %-6s 名前あり %3d / %d 行" % (lang, sum(1 for v in per_row.values() if v), len(per_row)))
 
-    # ここは write_localized を使わない。総括行の空欄は意図した状態で、
-    # 「既存値を残す」規則を当てると消せなくなる。
+    # 生の見出し表と同じ形で書く。行ごとに名前と、その行に属する発生源キーの一覧。
+    keys_of_row = {r: sorted(ks, key=as_pair) for r, ks in by_row.items()}
     for lang in LANGS:
         dump(os.path.join(DATA, "Localization", "recounts.%s.json" % lang),
-             {i: names[lang].get(i, "") for i in all_ids})
+             {r: {"RecountName": names[lang][r], "SourceId": keys_of_row[r]}
+              for r in sorted(by_row, key=int)})
 
-    print("\nrecounts 鍵 %d" % len(all_ids))
+    print("\nrecounts 鍵 %d / 行 %d" % (len(row_of), len(by_row)))
 
 
 if __name__ == "__main__":

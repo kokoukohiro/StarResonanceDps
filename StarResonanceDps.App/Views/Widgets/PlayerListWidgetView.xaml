@@ -546,6 +546,14 @@
                                                                 <DataTrigger Binding="{Binding IsNpc}" Value="True">
                                                                     <Setter Property="Background" Value="#FFABABAB" />
                                                                 </DataTrigger>
+                                                                <!--
+                                                                    キャッシュしか無い行(AOIにもパーティにもいない。
+                                                                    メーター残留・履歴のみ)は NPC と同じ灰色。
+                                                                    供給が戻れば IsLive が true になり緑へ戻る。
+                                                                -->
+                                                                <DataTrigger Binding="{Binding IsLive}" Value="False">
+                                                                    <Setter Property="Background" Value="#FFABABAB" />
+                                                                </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>

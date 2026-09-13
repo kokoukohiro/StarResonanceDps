@@ -247,6 +247,155 @@
         </Setter>
     </Style>
 
+    <!--
+        集計タブの2つ。**ウィジェットカード・プラグインカードと同じ見た目**
+        (面 Brush.WindowSurface / 枠 Brush.BorderSoft 1px / 角丸 外6・内5)で、高さだけ役割で分ける。
+
+        枠は Surface.RoundedOutline に任せる。Button.Text が Surface.RoundedButtonOutline を
+        使うのと同じ形で、**枠の2層 Border をテンプレートへ書き写さない**。
+        角丸が 外6・内5 なので、当てるのは ButtonOutline ではなく RoundedOutline のほう。
+    -->
+
+    <!-- 3分計測 / リセット。高さは検索欄(Input.SearchFrame)に合わせてある。 -->
+    <Style x:Key="Button.AggregationAction" TargetType="{x:Type Button}">
+        <Setter Property="Height" Value="38" />
+        <Setter Property="MinWidth" Value="96" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <!-- 面を持つ根が要る。中身は当たり判定を持たないので、ここが受ける。 -->
+                    <Border Background="Transparent" SnapsToDevicePixels="True">
+                        <Grid SnapsToDevicePixels="True">
+                            <ContentControl x:Name="Root"
+                                            Style="{StaticResource Surface.RoundedOutline}"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            IsHitTestVisible="False" />
+
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              IsHitTestVisible="False" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Cursor" Value="Arrow" />
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--
+        履歴の1行。
+
+        **選択しても面の色は変えない。** 示すのは左端の帯と、行の右に出る「表示中」のピルの2つ。
+
+        選択状態は行の DataContext(EncounterHistoryItem)の IsSelected をそのまま読む。
+        この行を作るのは集計タブの ItemTemplate 1か所だけなので、Tag を経由させる理由がない。
+    -->
+    <Style x:Key="Button.AggregationRow" TargetType="{x:Type Button}">
+        <Setter Property="Height" Value="56" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border Background="Transparent" SnapsToDevicePixels="True">
+                        <Grid SnapsToDevicePixels="True">
+                            <ContentControl x:Name="Root"
+                                            Style="{StaticResource Surface.RoundedOutline}"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            IsHitTestVisible="False" />
+
+                            <!--
+                                枠の上ではなく内側へ置く。枠は Root が外周に描くので、
+                                同じ位置に重ねると帯が枠線を塗り潰す。
+                                厚みを直接書かず BorderThickness に追従させる。
+                            -->
+                            <Grid Margin="{TemplateBinding BorderThickness}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="6" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!--
+                                    選択中の左端。線ではなく**面の左の角丸をそのまま塗る**。
+                                    高さいっぱいに伸ばし、左の角だけ面と同じ 5 で丸める。
+
+                                    **角丸はトークンを使えない。** Radius.Button は4隅ぶんの
+                                    CornerRadius なので、左2隅だけという指定ができない。
+                                    Surface.RoundedOutline の内側の角丸を変えたらここも直す。
+
+                                    **幅は角丸の半径(5)以上が要る。** 下回ると WPF が半径を
+                                    幅に合わせて縮めるので、面の角と曲がり方が揃わない。
+
+                                    枠は選択していなくても場所を取る。
+                                    出し入れで文字が横にずれないようにするため。
+                                -->
+                                <Border x:Name="Accent"
+                                        Grid.Column="0"
+                                        Background="Transparent"
+                                        CornerRadius="5,0,0,5" />
+
+                                <ContentPresenter Grid.Column="1"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  IsHitTestVisible="False" />
+                            </Grid>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
+                        </Trigger>
+                        <!--
+                            選択中は面をホバーと同じ色で据え置く。**ホバーより後ろに置くこと** —
+                            同じ Background を両方が設定するので、後ろの方が勝つ。
+                            解除すれば設定ごと外れ、カーソルが乗っていればホバーの色に戻る。
+                        -->
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
+                            <Setter TargetName="Accent" Property="Background" Value="{DynamicResource Brush.TextMuted}" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Button.ColorSwatchRadioButton" TargetType="{x:Type RadioButton}">
         <Setter Property="Width" Value="22" />
         <Setter Property="Height" Value="22" />

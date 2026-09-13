@@ -48,8 +48,7 @@ public sealed record MeterSnapshot(
 public sealed record BenchmarkStateSnapshot(
     bool IsActive,
     bool HasBegun,
-    bool IsCompleted,
-    bool IsEncounterSavingPaused);
+    bool IsCompleted);
 
 public sealed record MetricTimelinePoint(double Seconds, double ValuePerSecond);
 
@@ -58,10 +57,9 @@ public sealed record MetricTimelineSnapshot(
     IReadOnlyList<MetricTimelinePoint> Points);
 
 public sealed record MetricSkillTableRowSnapshot(
-    int SkillId,
+    long SkillId,
+    string SkillIdText,
     string Name,
-    string IconName,
-    bool IsImagine,
     ulong TotalValue,
     double ValuePerSecondActive,
     double ValuePerSecond,
@@ -102,7 +100,12 @@ public sealed record PlayerBuffSnapshot(
     string Name,
     string IconName,
     int Layer,
-    double? RemainingSeconds);
+    double? RemainingSeconds,
+    /// <summary>
+    /// 残り時間を名乗れない状態。<b><see cref="RemainingSeconds"/> の null(持続時間なし)とは別物。</b>
+    /// 表示側は空欄ではなく「?」を出す。
+    /// </summary>
+    bool IsRemainingUnknown = false);
 
 public sealed record PlayerCooldownSkillSnapshot(
     int SkillId,
@@ -248,16 +251,20 @@ public static class MeterSnapshotProvider
         return characterId == 0 ? null : GetPlayerIdentity(characterId);
     }
 
+    /// <summary>
+    /// バフ/デバフリストとカードが読む。<b>履歴を開いても固めない</b> —
+    /// バフの変化はDBから復元できないので、止めても意味のある絵にならない。
+    /// </summary>
     public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerBuffs(long characterId, PlayerBuffListKind kind)
     {
-        var encounter = ResolveActiveEncounter();
+        var encounter = ResolvePlayerDetailEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(encounter, entity, kind);
+        return CreateBuffSnapshots(entity, kind);
     }
 
     public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind)
@@ -269,20 +276,20 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(encounter, entity, kind);
+        return CreateBuffSnapshots(entity, kind);
     }
 
     private static IReadOnlyList<PlayerBuffSnapshot> CreateBuffSnapshots(
-        Encounter encounter,
         Entity entity,
         PlayerBuffListKind kind)
     {
-        var currentEncounterTime = encounter.GetDuration();
-        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
+        var buffEvents = ResolveDisplayBuffEvents(entity);
         var entriesByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
         var entryKeys = new List<string>(buffEvents.Length);
 
-        for (var index = buffEvents.Length - 1; index >= 0; index--)
+        // 初出順(古い順)で回す。ソートせず、新しいバフが末尾に付く並びにする。
+        // ストアが初出順で返すので、ここで逆順にすると並びが反転する。
+        for (var index = 0; index < buffEvents.Length; index++)
         {
             var buffEvent = buffEvents[index];
             if (buffEvent.Duration < 0
@@ -306,9 +313,9 @@ public static class MeterSnapshotProvider
 
             TimeSpan effectiveRemoveTime;
             double? remainingSeconds;
-            var timingResolved = isLive
-                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
-                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
+            bool remainingUnknown;
+            var timingResolved = TryResolveLiveBuffTiming(
+                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown);
             if (!timingResolved)
             {
                 continue;
@@ -322,7 +329,8 @@ public static class MeterSnapshotProvider
                 name,
                 iconName,
                 buffEvent.Layer,
-                remainingSeconds);
+                remainingSeconds,
+                remainingUnknown);
             var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
 
             if (!entriesByKey.TryGetValue(key, out var existing))
@@ -368,14 +376,12 @@ public static class MeterSnapshotProvider
         skillSourceToken = null;
         roleFilterToken = null;
 
+        // ライブが null でも打ち切らない。下のメーター側からの拾い直しへ進む。
         var encounter = ResolvePlayerDetailEncounter();
-        if (encounter is null)
-        {
-            return false;
-        }
 
-        Entity? entity;
-        if (preferredEntityUuid != 0
+        Entity? entity = null;
+        if (encounter is not null
+            && preferredEntityUuid != 0
             && TryResolvePlayerEntityByUuid(
                 encounter,
                 characterId,
@@ -384,7 +390,8 @@ public static class MeterSnapshotProvider
         {
             entityUuid = preferredEntityUuid;
         }
-        else if (PlayerRosterProjection.TryGetPlayerEntityUuid(characterId, out var rosterEntityUuid)
+        else if (encounter is not null
+            && PlayerRosterProjection.TryGetPlayerEntityUuid(characterId, out var rosterEntityUuid)
             && TryResolvePlayerEntityByUuid(
                 encounter,
                 characterId,
@@ -393,14 +400,11 @@ public static class MeterSnapshotProvider
         {
             entityUuid = rosterEntityUuid;
         }
-        else if (AppState.OpenedHistoricalEncounter is not null
-            && TryResolvePlayerEntity(
-                encounter,
-                characterId,
-                out entityUuid,
-                out entity))
+        else if (ResolveFallbackDetailEncounter() is { } fallbackEncounter
+            && TryResolvePlayerEntity(fallbackEncounter, characterId, out var fallbackEntityUuid, out entity))
         {
-            // 履歴閲覧時はそのエンカウンターの記録をそのまま使う。
+            // ライブに居ない灰色の行。メーターが映しているエンカウンターに枠が残っている。
+            entityUuid = fallbackEntityUuid;
         }
         else if (PartyMemberCache.Instance.TryGetSkillLevels(characterId, out _))
         {
@@ -448,12 +452,9 @@ public static class MeterSnapshotProvider
         long characterId,
         long entityUuid)
     {
-        var encounter = ResolvePlayerDetailEncounter();
-        Entity? entity = null;
-        if (encounter is not null)
-        {
-            TryResolvePlayerEntityByUuid(encounter, characterId, entityUuid, out entity);
-        }
+        // ライブに居なければメーターのエンカウンターから拾う。
+        // 履歴にしか居ない灰色の行でも、枠はDBに残っているので出せる。
+        TryResolveDetailEntity(characterId, entityUuid, out var entity, out _);
 
         // AOI外のパーティメンバーは Entity が存在しないことがある。
         // その場合でも保持しているスキル一覧から組み立てる。
@@ -730,8 +731,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        var currentEncounterTime = encounter.GetDuration();
-        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
+        var buffEvents = ResolveDisplayBuffEvents(entity);
         var found = false;
         var latestRemoveTime = TimeSpan.MinValue;
 
@@ -745,10 +745,10 @@ public static class MeterSnapshotProvider
 
             TimeSpan effectiveRemoveTime;
             double? seconds;
-            var timingResolved = isLive
-                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out seconds)
-                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out seconds);
-            if (!timingResolved || seconds is null)
+            var timingResolved = TryResolveLiveBuffTiming(
+                entity.UUID, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown);
+            // 経過が分からないものはカウントに使わない。出すと切れた後も残る。
+            if (!timingResolved || secondsUnknown || seconds is null)
             {
                 continue;
             }
@@ -773,8 +773,7 @@ public static class MeterSnapshotProvider
         IReadOnlySet<int> trackedSkillIds,
         bool hideReviveBlockDebuff = false)
     {
-        var currentEncounterTime = encounter.GetDuration();
-        var buffEvents = ResolveDisplayBuffEvents(entity, out var isLive);
+        var buffEvents = ResolveDisplayBuffEvents(entity);
         var runtimeSourceParentsByBaseId = BuildRuntimeSourceParentsByBaseId(
             entity,
             buffEvents);
@@ -847,9 +846,9 @@ public static class MeterSnapshotProvider
 
             TimeSpan effectiveRemoveTime;
             double? remainingSeconds;
-            var timingResolved = isLive
-                ? TryResolveLiveBuffTiming(entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds)
-                : TryResolveBuffTiming(buffEvent, currentEncounterTime, out effectiveRemoveTime, out remainingSeconds);
+            bool remainingUnknown;
+            var timingResolved = TryResolveLiveBuffTiming(
+                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown);
             if (!timingResolved)
             {
                 continue;
@@ -865,7 +864,8 @@ public static class MeterSnapshotProvider
                 name,
                 iconName,
                 buffEvent.Layer,
-                remainingSeconds);
+                remainingSeconds,
+                remainingUnknown);
             var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
 
             if (isDebuff)
@@ -1434,21 +1434,21 @@ public static class MeterSnapshotProvider
             return new MetricSkillTableSnapshot(0UL, Array.Empty<MetricSkillTableRowSnapshot>());
         }
 
-        IReadOnlyList<KeyValuePair<int, CombatStats>> skillStats = kind switch
+        IReadOnlyList<KeyValuePair<long, CombatStats>> skillStats = kind switch
         {
-            MeterSnapshotKind.Damage => (IReadOnlyList<KeyValuePair<int, CombatStats>>)entity.SkillMetrics
+            MeterSnapshotKind.Damage => (IReadOnlyList<KeyValuePair<long, CombatStats>>)entity.SkillMetrics
                 .AsValueEnumerable()
                 .Where(entry => entry.Value.Damage.ValueTotal > 0UL)
                 .OrderByDescending(entry => entry.Value.Damage.ValueTotal)
-                .Select(entry => new KeyValuePair<int, CombatStats>(entry.Key, entry.Value.Damage))
+                .Select(entry => new KeyValuePair<long, CombatStats>(entry.Key, entry.Value.Damage))
                 .ToList(),
-            MeterSnapshotKind.Healing => (IReadOnlyList<KeyValuePair<int, CombatStats>>)entity.SkillMetrics
+            MeterSnapshotKind.Healing => (IReadOnlyList<KeyValuePair<long, CombatStats>>)entity.SkillMetrics
                 .AsValueEnumerable()
                 .Where(entry => entry.Value.Healing.ValueTotal > 0UL)
                 .OrderByDescending(entry => entry.Value.Healing.ValueTotal)
-                .Select(entry => new KeyValuePair<int, CombatStats>(entry.Key, entry.Value.Healing))
+                .Select(entry => new KeyValuePair<long, CombatStats>(entry.Key, entry.Value.Healing))
                 .ToList(),
-            _ => Array.Empty<KeyValuePair<int, CombatStats>>()
+            _ => Array.Empty<KeyValuePair<long, CombatStats>>()
         };
 
         var entityTotalValue = GetPlayerTotalValue(entity, kind);
@@ -1466,18 +1466,34 @@ public static class MeterSnapshotProvider
                 ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
                 : 0d;
 
-            // バフとして届いたかどうか。名前には影響しない(見出し表は種別を区別しない)が、
-            // アイコンの引き先と内部ID注記の表示区分に要る。
+            // バフとして届いたかどうか。名前には影響しない(見出し表は種別を区別しない)。
+            // 内部ID注記の表示区分にだけ効く。
             var isBuffSource = entity.SkillMetrics.TryGetValue(stat.Key, out var sourceContainer)
                 && sourceContainer.IsBuffSource;
-            var iconName = CombatDataCatalog.GetSourceIconName(stat.Key, isBuffSource);
+            var rowKeyText = CombatDataCatalog.FormatSourceKey(stat.Key);
+
+            // 名前が入っていない行を常設で拾う。スキル詳細ウィジェットの行はここでしか
+            // 作られないので、ここに置けば取りこぼしが構造的に起きない。
+            //
+            // 判定は注記を付ける前の生名で行う。表示名は空欄でも "(2203531:1)" の注記が付いて
+            // 空文字にならず、しかも注記は表示設定で消えるので、表示名で見ると設定次第で検知が変わる。
+            if (string.IsNullOrEmpty(CombatDataCatalog.GetSourceName(stat.Key)))
+            {
+                Diagnostics.BlankSourceNameProbe.Capture(
+                    stat.Key,
+                    rowKeyText,
+                    isBuffSource,
+                    kind == MeterSnapshotKind.Healing,
+                    value.ValueTotal,
+                    value.HitsCount,
+                    characterId);
+            }
+
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
+                rowKeyText,
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
-                // 別名表にあるIDは、借りた名前＋接尾辞になる(IDと集計は元のまま)。
                 CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource),
-                iconName,
-                !isBuffSource && CombatDataCatalog.IsSkillImagine(stat.Key, iconName),
                 value.ValueTotal,
                 value.ValuePerSecondActive,
                 value.ValuePerSecond,
@@ -1495,14 +1511,12 @@ public static class MeterSnapshotProvider
         return new BenchmarkStateSnapshot(
             AppState.IsBenchmarkMode,
             AppState.HasBenchmarkBegun,
-            AppState.IsBenchmarkCompleted,
-            AppState.IsEncounterSavingPaused);
+            AppState.IsBenchmarkCompleted);
     }
 
     public static bool TryStartBenchmark(int durationSeconds)
     {
         if (durationSeconds < 5
-            || AppState.IsEncounterSavingPaused
             || AppState.IsBenchmarkMode)
         {
             return false;
@@ -1561,10 +1575,6 @@ public static class MeterSnapshotProvider
             return;
         }
 
-        if (AppState.IsEncounterSavingPaused)
-        {
-            return;
-        }
 
         var isOpenWorld = BattleStateMachine.IsInOpenWorld();
         Task.Factory.StartNew(() =>
@@ -1599,6 +1609,30 @@ public static class MeterSnapshotProvider
         return encounter.GetDuration();
     }
 
+    /// <summary>
+    /// タイムラインの終端。<b>必ず UTC で返す。</b>
+    ///
+    /// <para>
+    /// <see cref="Encounter"/> は<b>基準の違う時刻を同居させている</b>。
+    /// <c>StartTime</c> / <c>EndTime</c> は <c>DateTime.Now</c>(ローカル)、
+    /// <c>ExData.FirstDamageTimeStamp</c> と <c>SkillSnapshot.Timestamp</c> は
+    /// パケットの到着時刻(UTC)。<see cref="GetPlayerTimeline"/> は後者を起点にするので、
+    /// 終端をローカルのまま渡すと<b>差が時差ぶん膨らむ</b>。
+    /// </para>
+    ///
+    /// <para>
+    /// 実測(2026-09-12、JST): 3分計測の記録が
+    /// <c>EndTime 16:13:53(ローカル) − FirstDamageTimeStamp 07:10:53(UTC) = 32,580秒</c> になり、
+    /// 180点のはずのグラフが 32,580 点を毎回作っていた(横軸も 32580s と表示)。
+    /// ライブは <c>DateTime.UtcNow</c>、計測完了は <c>ToUniversalTime()</c> で
+    /// 元から UTC だったため、<b>履歴を開いたときだけ</b>起きる。
+    /// </para>
+    ///
+    /// <para>
+    /// <c>Encounter.GetDuration()</c> は同じ引き算を
+    /// <c>EndTime.ToUniversalTime()</c> で揃えている。こちらだけ変換が抜けていた。
+    /// </para>
+    /// </summary>
     private static DateTime ResolveMetricEndTime(Encounter encounter)
     {
         if (ReferenceEquals(encounter, EncounterManager.Current)
@@ -1611,7 +1645,7 @@ public static class MeterSnapshotProvider
 
         return encounter.EndTime == DateTime.MinValue
             ? DateTime.UtcNow
-            : encounter.EndTime;
+            : encounter.EndTime.ToUniversalTime();
     }
 
 
@@ -1668,27 +1702,17 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// ライブ表示中か(履歴のエンカウンターを開いていないか)。
-    /// ライブ中のバフは <see cref="Services.ActiveBuffStore"/> から読み、
-    /// エンカウンター境界で表示が消えないようにする。
-    /// </summary>
-    private static bool IsLivePlayerDetail()
-    {
-        return AppState.OpenedHistoricalEncounter is null;
-    }
-
-    /// <summary>
-    /// 表示用のバフ取得。ライブ中はエンカウンターに閉じ込められていないストアだけを参照する。
+    /// 表示用のバフ取得。<b>常に <see cref="Services.ActiveBuffStore"/> だけを見る。</b>
+    /// あのストアはエンカウンターに閉じ込められていないので、境界で表示が消えない。
+    ///
+    /// <para>
     /// ストアが空なら空のまま返す。エンカウンター経路へのフォールバックは意図的に持たない
     /// (故障時に従来経路で正常に見えてしまうと、ストア側の不具合が発見できなくなるため)。
-    /// 履歴のエンカウンターを開いているときだけ、そのエンカウンターの記録を見る。
+    /// </para>
     /// </summary>
-    private static BuffEvent[] ResolveDisplayBuffEvents(Entity entity, out bool useLiveTiming)
+    private static BuffEvent[] ResolveDisplayBuffEvents(Entity entity)
     {
-        useLiveTiming = IsLivePlayerDetail();
-        return useLiveTiming
-            ? [.. Services.ActiveBuffStore.Instance.GetActive(entity.UUID)]
-            : [.. entity.BuffEvents.Values];
+        return [.. Services.ActiveBuffStore.Instance.GetActive(entity.UUID)];
     }
 
     /// <summary>
@@ -1700,64 +1724,26 @@ public static class MeterSnapshotProvider
         long entityUuid,
         BuffEvent buffEvent,
         out TimeSpan orderingKey,
-        out double? remainingSeconds)
+        out double? remainingSeconds,
+        out bool remainingUnknown)
     {
         if (!Services.ActiveBuffStore.Instance.TryGetRemainingSeconds(
                 entityUuid,
                 (ulong)buffEvent.Uuid,
-                out remainingSeconds))
+                out remainingSeconds,
+                out remainingUnknown))
         {
             orderingKey = TimeSpan.Zero;
             remainingSeconds = null;
+            remainingUnknown = false;
             return false;
         }
 
-        // 持続時間なし(null)のものは残り時間を出さないが、表示は残すので最後尾に並べる。
+        // 持続時間なし(null)のものと経過が分からないものは残り時間を出さないが、
+        // 表示は残すので最後尾に並べる。
         orderingKey = remainingSeconds is > 0d
             ? TimeSpan.FromSeconds(remainingSeconds.Value)
             : TimeSpan.MaxValue;
-        return true;
-    }
-
-    private static bool TryResolveBuffTiming(
-        BuffEvent buffEvent,
-        TimeSpan currentEncounterTime,
-        out TimeSpan effectiveRemoveTime,
-        out double? remainingSeconds)
-    {
-        remainingSeconds = null;
-        if (buffEvent.EventRemoveTime > TimeSpan.Zero)
-        {
-            effectiveRemoveTime = buffEvent.EventRemoveTime;
-        }
-        else if (buffEvent.EventAddTime > TimeSpan.Zero && buffEvent.Duration > 0)
-        {
-            effectiveRemoveTime = buffEvent.EventAddTime + TimeSpan.FromMilliseconds(buffEvent.Duration);
-        }
-        else if (buffEvent.AddDateTime != DateTime.MinValue && buffEvent.Duration > 0)
-        {
-            var remainingWallClockSeconds = (buffEvent.AddDateTime + TimeSpan.FromMilliseconds(buffEvent.Duration) - DateTime.Now).TotalSeconds;
-            if (remainingWallClockSeconds <= 0d)
-            {
-                effectiveRemoveTime = TimeSpan.Zero;
-                return false;
-            }
-
-            effectiveRemoveTime = currentEncounterTime + TimeSpan.FromSeconds(remainingWallClockSeconds);
-        }
-        else
-        {
-            effectiveRemoveTime = TimeSpan.Zero;
-            return false;
-        }
-
-        var seconds = (effectiveRemoveTime - currentEncounterTime).TotalSeconds;
-        if (seconds <= 0d)
-        {
-            return false;
-        }
-
-        remainingSeconds = seconds;
         return true;
     }
 
@@ -1935,9 +1921,65 @@ public static class MeterSnapshotProvider
             : entity.TotalHealing;
     }
 
+    /// <summary>
+    /// プレイヤーリストとバフ系が見るエンカウンター。<b>常にライブ。</b>
+    ///
+    /// <para>
+    /// HP・バフ・スキル枠はDBから復元できないので、履歴を開いても固める意味がない。
+    /// 履歴に追従するのは <see cref="ResolveActiveEncounter"/> を通る4系統だけ
+    /// (メーター2種 / スキル詳細 / ヒール・ダメージ詳細 / グラフ)。
+    /// </para>
+    /// </summary>
     private static Encounter? ResolvePlayerDetailEncounter()
     {
-        return AppState.OpenedHistoricalEncounter ?? EncounterManager.Current;
+        return EncounterManager.Current;
+    }
+
+    /// <summary>
+    /// ライブに居ない人の受け皿。<b>メーターが映しているエンカウンター。</b>
+    ///
+    /// <para>
+    /// 履歴にしか居ない灰色の行でも、イマジン/ロールと特化はDBに残っている
+    /// (<c>Entity.Attributes</c> は public プロパティ、<c>SubProfessionId</c> は private setter 付きで
+    /// どちらも blob に載る)。ライブで引けなかったときだけここから拾う。
+    /// <b>ライブが先。</b> 逆にすると、AOIに居る人まで履歴の値で固まる。
+    /// </para>
+    /// </summary>
+    private static Encounter? ResolveFallbackDetailEncounter()
+    {
+        return AppState.OpenedHistoricalEncounter;
+    }
+
+    /// <summary>
+    /// ライブ → メーターのエンカウンター の順で実体を引く。
+    /// <paramref name="isFromFallback"/> は「ライブでは見つからず、履歴から拾った」を表す。
+    /// </summary>
+    private static bool TryResolveDetailEntity(
+        long characterId,
+        long entityUuid,
+        out Entity? entity,
+        out bool isFromFallback)
+    {
+        entity = null;
+        isFromFallback = false;
+
+        var live = ResolvePlayerDetailEncounter();
+        if (live is not null
+            && TryResolvePlayerEntityByUuid(live, characterId, entityUuid, out entity))
+        {
+            return true;
+        }
+
+        var fallback = ResolveFallbackDetailEncounter();
+        if (fallback is not null
+            && TryResolvePlayerEntity(fallback, characterId, out _, out entity))
+        {
+            isFromFallback = true;
+            return true;
+        }
+
+        entity = null;
+        return false;
     }
 
     private static Encounter? ResolveActiveEncounter()
@@ -1945,7 +1987,7 @@ public static class MeterSnapshotProvider
         Encounter? activeEncounter = AppState.OpenedHistoricalEncounter;
         var currentEncounter = EncounterManager.Current;
 
-        if (Settings.Instance.KeepPastEncounterInMeterUntilNextDamage)
+        if (CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage)
         {
             if ((AppState.ActiveEncounter is null && currentEncounter is not null)
                 || (AppState.ActiveEncounter is not null && AppState.ActiveEncounter.Entities.IsEmpty))

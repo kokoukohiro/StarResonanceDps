@@ -9,6 +9,13 @@ public sealed class NearbyEntityStore
 
     private readonly object _sync = new();
     private readonly Dictionary<long, NearbyEntityEntry> _entries = [];
+
+    /// <summary>
+    /// 初めて現れた順。<b>同じランクの中はソートせず、新しいエンティティを末尾に足す。</b>
+    /// <c>Dictionary</c> の列挙順は契約ではない(削除で空いた枠に新しい要素が入る)ので、順序は明示的に持つ。
+    /// </summary>
+    private readonly Dictionary<long, long> _firstSeenOrderByEntityUuid = [];
+    private long _nextFirstSeenOrder;
     private IReadOnlyList<NearbyEntityEntry> _snapshot = Array.AsReadOnly(Array.Empty<NearbyEntityEntry>());
     private string _mapName = string.Empty;
     private uint _mapChannel;
@@ -40,6 +47,8 @@ public sealed class NearbyEntityStore
             {
                 _mapGeneration++;
                 _entries.Clear();
+                _firstSeenOrderByEntityUuid.Clear();
+                _nextFirstSeenOrder = 0;
             },
             forcePublish: true);
     }
@@ -114,6 +123,7 @@ public sealed class NearbyEntityStore
                 if (!requireExistingEntry || _entries.ContainsKey(entry.EntityUuid))
                 {
                     _entries[entry.EntityUuid] = entry with { Name = entry.Name ?? string.Empty };
+                    EnsureFirstSeenOrderNoLock(entry.EntityUuid);
                 }
             },
             forcePublish: false);
@@ -127,7 +137,11 @@ public sealed class NearbyEntityStore
         }
 
         PublishIfChanged(
-            () => _entries.Remove(entityUuid),
+            () =>
+            {
+                _entries.Remove(entityUuid);
+                _firstSeenOrderByEntityUuid.Remove(entityUuid);
+            },
             forcePublish: false);
     }
 
@@ -157,6 +171,8 @@ public sealed class NearbyEntityStore
             {
                 _mapGeneration++;
                 _entries.Clear();
+                _firstSeenOrderByEntityUuid.Clear();
+                _nextFirstSeenOrder = 0;
                 _mapName = string.Empty;
             },
             forcePublish: true);
@@ -196,9 +212,23 @@ public sealed class NearbyEntityStore
     {
         return Array.AsReadOnly(_entries.Values
             .OrderBy(GetSortRank)
-            .ThenBy(entry => entry.Name, StringComparer.Ordinal)
-            .ThenBy(entry => entry.EntityUuid)
+            .ThenBy(GetFirstSeenOrderNoLock)
             .ToArray());
+    }
+
+    private long GetFirstSeenOrderNoLock(NearbyEntityEntry entry)
+    {
+        return _firstSeenOrderByEntityUuid.TryGetValue(entry.EntityUuid, out var order)
+            ? order
+            : long.MaxValue;
+    }
+
+    private void EnsureFirstSeenOrderNoLock(long entityUuid)
+    {
+        if (entityUuid != 0 && !_firstSeenOrderByEntityUuid.ContainsKey(entityUuid))
+        {
+            _firstSeenOrderByEntityUuid[entityUuid] = _nextFirstSeenOrder++;
+        }
     }
 
     private static int GetSortRank(NearbyEntityEntry entry)

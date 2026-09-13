@@ -788,19 +788,15 @@ public sealed class WidgetWindowManager
     {
         var viewModel = new MeterWidgetViewModel(widget, kind, OpenPlayerWindow);
 
+        // ヘッダーに 3分計測 / リセット は置かない。どちらも EncounterManager.Current
+        // ただ1つに効く操作で、ウィジェットごとの機能ではないため、集計タブへ移した。
         return new WidgetWindowComposition(
             new MeterWidgetView
             {
                 DataContext = viewModel
             },
-            new MeterWidgetHeaderLabelsView
-            {
-                DataContext = viewModel
-            },
-            new MeterWidgetHeaderActionsView
-            {
-                DataContext = viewModel
-            },
+            null,
+            null,
             new MeterWidgetFooterView
             {
                 DataContext = viewModel

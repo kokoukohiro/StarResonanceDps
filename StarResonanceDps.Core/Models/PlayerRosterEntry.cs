@@ -18,4 +18,5 @@ public sealed record PlayerRosterEntry(
     bool IsNpc = false,
     long CurrentShield = 0,
     bool IsPartyMember = false,
-    int? PartyNumber = null);
+    int? PartyNumber = null,
+    bool IsLive = true);
