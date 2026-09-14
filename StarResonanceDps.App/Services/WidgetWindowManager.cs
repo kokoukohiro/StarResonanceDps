@@ -778,6 +778,14 @@ public sealed class WidgetWindowManager
                 new PlayerListWidgetFooterView()),
             WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
+            WidgetKind.TakenDamageLog => new WidgetWindowComposition(
+                new TakenDamageLogWidgetView
+                {
+                    DataContext = new TakenDamageLogWidgetViewModel()
+                },
+                null,
+                null,
+                null),
             _ => new WidgetWindowComposition(null, null, null, null)
         };
     }
@@ -788,15 +796,21 @@ public sealed class WidgetWindowManager
     {
         var viewModel = new MeterWidgetViewModel(widget, kind, OpenPlayerWindow);
 
-        // ヘッダーに 3分計測 / リセット は置かない。どちらも EncounterManager.Current
-        // ただ1つに効く操作で、ウィジェットごとの機能ではないため、集計タブへ移した。
+        // ヘッダーの文字ボタンは2層で1組。**片方だけ渡すと文字の無いボタンか、押せない文字が残る。**
+        // Labels が枠側で文字を描き(IsHitTestVisible=False)、Actions が中身を透明にして当たり判定だけ持つ。
         return new WidgetWindowComposition(
             new MeterWidgetView
             {
                 DataContext = viewModel
             },
-            null,
-            null,
+            new MeterWidgetHeaderLabelsView
+            {
+                DataContext = viewModel
+            },
+            new MeterWidgetHeaderActionsView
+            {
+                DataContext = viewModel
+            },
             new MeterWidgetFooterView
             {
                 DataContext = viewModel

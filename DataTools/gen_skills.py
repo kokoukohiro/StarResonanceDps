@@ -1,27 +1,28 @@
 """
-装備中スキル枠用のスキル名テーブルを生成する。
+スキル名テーブルを生成する。
 
   Data/Localization/skills.{言語}.json
 
-**収録するのは枠に置けるIDだけ。** メーターの行名は見出し表(recounts)が決めるので、
-このテーブルに要るのはスキル枠ウィジェットが名前を引くIDだけ。
+**`SkillTable` の全行を収録する。** 使い道を決めて絞らない。
+スキル枠(イマジン・ロール)に加えて、モンスターの技など枠に置かれないスキルも名前を引ける。
 
-  イマジン  Icon に `skill_aoyi` を含む
-  ロール    SlotPositionId に 21〜24
+鍵は出所と言語の和集合。版差でどれか1つにしか無い行でも落とさない。
 
-**イマジンは枠番号で判定しない。** 変身の解除スキルは `SlotPositionId` が空なのに、
-変身中は実際にイマジン枠へ入る。枠ウィジェットはテーブルの枠指定を見ず、
-実行時の枠の中身(`AttrSlot`)をそのまま出すので、枠指定は「名前が要るか」の
-判断材料にならない。アイコンのほうが実態に合う。
-
-ロールは枠番号のままでよい。アイコンで判定しても同じ集合になるが、意図が明確。
-
-鍵は出所と言語の和集合。版差でどれか1つにしか無い枠でも落とさない。
+未翻訳の行は埋め草(`_common.PLACEHOLDERS`)が入っているので空にする。
+ただし埋め草と同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`)。
 """
 from _common import LANGS, name_of, table, write_localized
 
-IMAGINE_ICON = "skill_aoyi"
-ROLE_SLOTS = (21, 22, 23, 24)
+# 埋め草と同じ文字列が本物の名前になっている行。
+# 1101 は連番の「フィールドマーク」01〜06 の先頭で、他言語には訳語が入っている。
+# 埋め草として空にすると zh-CN だけ名前が消え、表示時の落とし先も失う。
+GENUINE_PLACEHOLDER_NAME_IDS = {"1101"}
+
+
+def skill_name(skill_id, row):
+    if skill_id in GENUINE_PLACEHOLDER_NAME_IDS:
+        return ((row or {}).get("Name") or "").strip()
+    return name_of(row)
 
 
 def main():
@@ -29,15 +30,12 @@ def main():
 
     keys = set()
     for lang, skill_table in tables.items():
-        imagine = {i for i, r in skill_table.items() if IMAGINE_ICON in (r.get("Icon") or "")}
-        role = {i for i, r in skill_table.items()
-                if any(s in (r.get("SlotPositionId") or []) for s in ROLE_SLOTS)}
-        keys |= imagine | role
-        print("%-6s イマジン(アイコン) %d / ロール(slot 21-24) %d" % (lang, len(imagine), len(role)))
+        keys |= set(skill_table)
+        print("%-6s 行 %d" % (lang, len(skill_table)))
     print("→ 和集合 %d" % len(keys))
     print("")
 
-    values = {lang: {i: name_of(t.get(i)) for i in keys} for lang, t in tables.items()}
+    values = {lang: {i: skill_name(i, t.get(i)) for i in keys} for lang, t in tables.items()}
     write_localized("skills", values, keys)
 
 

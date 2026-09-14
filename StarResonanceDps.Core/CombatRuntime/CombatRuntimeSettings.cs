@@ -12,14 +12,8 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </para>
 ///
 /// <para>
-/// 以前は Core 側に <c>Settings.json</c>(69項目)があったが、2026-09-12 に撤去した。
-/// 実際に消費されていたのは18項目で、うち51項目は参照ゼロ、5項目は分岐に到達しなかった。
-/// 残した6項目だけがここに在る。
-/// </para>
-///
-/// <para>
 /// <b>ここに項目を足すときは、UIも一緒に作ること。</b> 値を変える手段が無い設定は、
-/// 既定値を直書きするのと変わらない。撤去した51項目はそうなっていた。
+/// 既定値を直書きするのと変わらない。
 /// </para>
 /// </summary>
 public static class CombatRuntimeSettings
@@ -55,6 +49,14 @@ public static class CombatRuntimeSettings
     public static bool KeepPastEncounterInMeterUntilNextDamage { get; private set; }
 
     /// <summary>
+    /// 履歴を開いている間にライブ側でイベント(戦闘・エンカウンターの作り直し)が起きたら、
+    /// ライブへ戻すか。<c>EncounterHistoryProvider.NotifyLiveEncounterEvent</c> が見る。
+    /// <b>3分計測とリセットもこの設定に従う</b>(どちらもエンカウンターの作り直しとして届く)。
+    /// </summary>
+    public static bool ClearHistorySelectionOnNextEvent { get; private set; } = true;
+
+
+    /// <summary>
     /// 戦闘履歴を残す日数。<b>0 は無期限</b>で、そのときは掃除を行わない。
     /// アプリ終了時に <c>DB.ClearOldEncounters</c> を通す。
     /// </summary>
@@ -69,12 +71,14 @@ public static class CombatRuntimeSettings
         string? gameCaptureCustomExeName,
         bool splitEncountersOnNewPhases,
         bool keepPastEncounterInMeterUntilNextDamage,
+        bool clearHistorySelectionOnNextEvent,
         int databaseRetentionPolicyDays)
     {
         ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
 
         SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
         KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
+        ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;
         DatabaseRetentionPolicyDays = databaseRetentionPolicyDays;
         HasBeenApplied = true;
     }

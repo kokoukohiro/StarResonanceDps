@@ -107,7 +107,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
@@ -208,7 +208,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
@@ -318,26 +318,54 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
-                                        <Border Style="{StaticResource Panel.SettingField}">
-                                            <Grid>
+                                        <!-- 2行ぶんの高さ。既定54 + 注記の行(13px)と間隔4 で 75。 -->
+                                        <Border Style="{StaticResource Panel.SettingField}" Height="75">
+                                            <Grid VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_SplitOnPhases]}"
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_SplitOnPhases]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!-- 注記の体裁はウィジェット設定「ロールスキル」の見出しに合わせてある。 -->
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_SplitOnPhases_Description]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <!-- スイッチは行0に置く。注記が折り返しても1行目に貼り付いたまま。 -->
+                                                <StackPanel Grid.Row="0"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding SplitEncountersOnNewPhases, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
-                                                               FontWeight="SemiBold" />
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding SplitEncountersOnNewPhasesStateText}" />
                                                 </StackPanel>
-
-                                                <ToggleButton Grid.Column="1"
-                                                              VerticalAlignment="Center"
-                                                              Style="{StaticResource Input.Switch}"
-                                                              IsChecked="{Binding SplitEncountersOnNewPhases, Mode=TwoWay}" />
                                             </Grid>
                                         </Border>
 
@@ -348,17 +376,52 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_KeepPastResult]}"
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_KeepPastResult]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding KeepPastEncounterInMeterUntilNextDamage, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
-                                                               FontWeight="SemiBold" />
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding KeepPastEncounterInMeterUntilNextDamageStateText}" />
                                                 </StackPanel>
+                                            </Grid>
+                                        </Border>
 
-                                                <ToggleButton Grid.Column="1"
-                                                              VerticalAlignment="Center"
-                                                              Style="{StaticResource Input.Switch}"
-                                                              IsChecked="{Binding KeepPastEncounterInMeterUntilNextDamage, Mode=TwoWay}" />
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_ClearHistoryOnNextEvent]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding ClearHistorySelectionOnNextEvent, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding ClearHistorySelectionOnNextEventStateText}" />
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
 
@@ -369,36 +432,27 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_RetentionDays]}"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_RetentionDays]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
 
-                                                <Grid Grid.Column="1" Width="260" VerticalAlignment="Center">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="12" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Slider Grid.Column="0"
-                                                            Minimum="0"
-                                                            Maximum="30"
-                                                            IsSnapToTickEnabled="True"
-                                                            TickFrequency="1"
-                                                            Style="{StaticResource Input.ValueSlider}"
-                                                            Value="{Binding DatabaseRetentionPolicyDays, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                                                    <TextBlock Grid.Column="2"
-                                                               MinWidth="56"
-                                                               VerticalAlignment="Center"
-                                                               HorizontalAlignment="Right"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               Text="{Binding DatabaseRetentionPolicyDaysText}" />
-                                                </Grid>
+                                                <!-- 選択肢はビューモデルが持つ。値は日数そのもので 0 が無期限。 -->
+                                                <!-- DisplayMemberPath は Input.SettingsComboBox では効かない。ItemTemplate を使うこと。 -->
+                                                <ComboBox Grid.Column="1"
+                                                          Width="220"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          ItemsSource="{Binding RetentionPolicyOptions}"
+                                                          SelectedValuePath="Days"
+                                                          SelectedValue="{Binding DatabaseRetentionPolicyDays, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
                                             </Grid>
                                         </Border>
 
@@ -411,7 +465,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,22">
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
                                         <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>

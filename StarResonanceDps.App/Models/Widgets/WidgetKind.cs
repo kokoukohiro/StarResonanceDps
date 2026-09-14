@@ -5,7 +5,7 @@ public enum WidgetKind
     DpsMeter,
     HpsMeter,
     DtpsMeter,
-    SkillLog,
+    TakenDamageLog,
     PlayerList,
     PlayerInfo,
     PlayerStatus,

@@ -404,11 +404,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// NotifySocialData に同梱されるメンバーのsocial dataは、サーバ側の非正規化スナップショットで、
-        /// メンバーがクラスを変更しても追従しない。実測(2026-08-25)では、AOI実測と GetTeamInfo が
-        /// 現在値を返している間も、この経路だけが変更前の職業を送り続けて表示を巻き戻していた。
-        /// より確かなソースから取得済みの場合は、この経路の内容を採用しない。
-        /// まだ何も無い場合は、空欄よりましなので初期値として使う。
+        /// NotifySocialData に同梱されるメンバーの social data はサーバ側の非正規化スナップショットで、
+        /// <b>メンバーがクラスを変更しても追従しない。</b>AOI や GetTeamInfo が現在値を返していても、
+        /// この経路だけ変更前の職業を送り続けて表示を巻き戻す。
+        /// より確かなソースから取得済みなら採用せず、まだ何も無いときだけ初期値として使う。
         /// </summary>
         private const string StaleSocialDataSource = "NotifySocialData";
 

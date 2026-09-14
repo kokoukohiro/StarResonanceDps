@@ -51,6 +51,7 @@ public sealed class SettingsConfig
 
     public bool SplitEncountersOnNewPhases { get; set; } = true;
     public bool KeepPastEncounterInMeterUntilNextDamage { get; set; }
+    public bool ClearHistorySelectionOnNextEvent { get; set; } = true;
 
     /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
     public int DatabaseRetentionPolicyDays { get; set; }
@@ -73,6 +74,7 @@ public sealed class SettingsConfig
             GameCaptureCustomExeName = GameCaptureCustomExeName,
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
+            ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
             DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,

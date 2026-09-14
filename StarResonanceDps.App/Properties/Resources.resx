@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Window_Manager_Title" xml:space="preserve">
-    <value>Star Resonance DPS Manager</value>
+    <value>Don't Check My DPS</value>
   </data>
   <data name="Window_Settings_Title" xml:space="preserve">
-    <value>Star Resonance DPS Settings</value>
+    <value>Settings</value>
   </data>
   <data name="Window_WidgetSettings_Title" xml:space="preserve">
     <value>{0} Settings</value>
@@ -330,8 +330,32 @@
   <data name="Menu_DtpsMeter" xml:space="preserve">
     <value>DTPS Meter</value>
   </data>
-  <data name="Menu_SkillDiary" xml:space="preserve">
-    <value>Skill Diary</value>
+  <data name="Widget_TakenDamageLog" xml:space="preserve">
+    <value>Damage Taken Log</value>
+  </data>
+  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+    <value>{0} is casting {1}</value>
+  </data>
+  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+    <value>{0} is readying {1}</value>
+  </data>
+  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+    <value>{0}'s {1}</value>
+  </data>
+  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
+    <value>{0} took {1} damage ({2}/{3})</value>
+  </data>
+  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
+    <value>{0} took {1} damage</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+    <value>Attack</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+    <value>something</value>
+  </data>
+  <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
+    <value>Note: No effect while viewing history.</value>
   </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>Player List</value>
@@ -886,10 +910,13 @@
     <value>Aggregation</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>Split On New Phases</value>
+    <value>Split Aggregation by Phase</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
-    <value>Hold Until Next Damage</value>
+    <value>Hold Results Until Next Event</value>
+  </data>
+  <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
+    <value>Exit History View on Next Event</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>History Retention</value>
@@ -920,5 +947,8 @@
   </data>
   <data name="Aggregation_EncounterPhase" xml:space="preserve">
     <value>Phase {0}</value>
+  </data>
+  <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
+    <value>Note: e.g. entering a boss room in a dungeon.</value>
   </data>
 </root>

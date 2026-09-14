@@ -1,0 +1,67 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.TakenDamageLogWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="TakenDamageLogWidgetView_Loaded"
+             SizeChanged="TakenDamageLogWidgetView_SizeChanged">
+    <UserControl.Resources>
+        <Style x:Key="TakenDamageLog.LineText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="Margin" Value="0,1,0,1" />
+        </Style>
+    </UserControl.Resources>
+
+    <!--
+        1エンカウンターで数万行になるので仮想化する。仮想化はリスト自身のテンプレートの中に
+        ScrollViewer が無いと効かない(外側に ScrollViewer を置くと全行が実体化する)。
+    -->
+    <ItemsControl x:Name="LogItemsControl"
+                  Margin="8,4,8,4"
+                  ItemsSource="{Binding Entries}"
+                  Grid.IsSharedSizeScope="True"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  VirtualizingPanel.ScrollUnit="Pixel">
+        <ItemsControl.Template>
+            <ControlTemplate TargetType="ItemsControl">
+                <ScrollViewer x:Name="LogScrollViewer"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Hidden"
+                              CanContentScroll="True"
+                              Focusable="False">
+                    <ItemsPresenter />
+                </ScrollViewer>
+            </ControlTemplate>
+        </ItemsControl.Template>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <VirtualizingStackPanel />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <!-- 時刻の列は行をまたいで幅を揃える。被弾行は時刻が空で、本文が技の行と同じ位置から始まる。 -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="TakenDamageLogTime" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Style="{StaticResource TakenDamageLog.LineText}"
+                               Margin="0,1,8,1"
+                               Text="{Binding TimeText}" />
+
+                    <TextBlock Grid.Column="1"
+                               Style="{StaticResource TakenDamageLog.LineText}"
+                               Text="{Binding Text}" />
+                </Grid>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

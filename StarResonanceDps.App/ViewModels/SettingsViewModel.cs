@@ -62,13 +62,27 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _keepPastEncounterInMeterUntilNextDamage;
 
+    [ObservableProperty]
+    private bool _clearHistorySelectionOnNextEvent = true;
+
     /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
     [ObservableProperty]
     private int _databaseRetentionPolicyDays;
 
+    /// <summary>
+    /// 保持期間の選択肢。**値は日数そのもので、0 が無期限。**
+    /// 選べる値をここだけで決めているので、増やすならこの配列に足す
+    /// (<c>AppConfigDefaults.Normalize</c> の上限とずれないようにすること)。
+    /// </summary>
+    private static readonly int[] RetentionPolicyDayChoices = [1, 3, 7, 30, 0];
+
+    private readonly ObservableCollection<RetentionPolicyOption> _retentionPolicyOptions = [];
+
     public SettingsViewModel()
     {
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        RetentionPolicyOptions = new ReadOnlyObservableCollection<RetentionPolicyOption>(_retentionPolicyOptions);
+        RebuildRetentionPolicyOptions();
         GameCapturePreferences = new ReadOnlyObservableCollection<GameCapturePreferenceOption>(
             new ObservableCollection<GameCapturePreferenceOption>(CreateGameCapturePreferences()));
         WindowColors = new ColorPaletteViewModel(AppConfigDefaults.CreateDefaultWindowColors(), AppConfigDefaults.MaxPaletteColorCount);
@@ -160,6 +174,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WindowColors = [.. WindowColors.GetHexColors()],
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
+            ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
             DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
 
             // キャプチャ3項目はこの画面では SettingsConfig 経由で編集しない
@@ -188,6 +203,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
+            ClearHistorySelectionOnNextEvent = settings.ClearHistorySelectionOnNextEvent;
             DatabaseRetentionPolicyDays = settings.DatabaseRetentionPolicyDays;
         }
         finally
@@ -322,6 +338,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         {
             option.RefreshDisplayName();
         }
+
+        // ON / OFF は言語で変わるので、開いたまま切り替えられても追従させる
+        // (言語の選択肢はこの画面の中にあるので、開いたままの切り替えが普通に起きる)。
+        OnPropertyChanged(nameof(SplitEncountersOnNewPhasesStateText));
+        OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
+        OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
+
+        RebuildRetentionPolicyOptions();
     }
 
     private void ApplySettingsPreview()
@@ -424,6 +448,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.WindowColorIndex == right.WindowColorIndex
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
+            && left.ClearHistorySelectionOnNextEvent == right.ClearHistorySelectionOnNextEvent
             && left.DatabaseRetentionPolicyDays == right.DatabaseRetentionPolicyDays
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
@@ -473,23 +498,74 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     // 集計設定はプレビューを持たない。戦闘の区切り方やDBの掃除は「下見」できる類ではなく、
     // 保存したときにだけ効かせる。未保存の印だけ更新する。
-    partial void OnSplitEncountersOnNewPhasesChanged(bool value) => OnPropertyChanged(nameof(HasUnsavedChanges));
-
-    partial void OnKeepPastEncounterInMeterUntilNextDamageChanged(bool value) => OnPropertyChanged(nameof(HasUnsavedChanges));
-
-    partial void OnDatabaseRetentionPolicyDaysChanged(int value)
+    partial void OnSplitEncountersOnNewPhasesChanged(bool value)
     {
-        OnPropertyChanged(nameof(DatabaseRetentionPolicyDaysText));
+        OnPropertyChanged(nameof(SplitEncountersOnNewPhasesStateText));
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
-    /// <summary>スライダーの右に出す文字。<b>0 は日数ではなく「無期限」</b>なので数字を出さない。</summary>
-    public string DatabaseRetentionPolicyDaysText =>
-        DatabaseRetentionPolicyDays <= 0
+    partial void OnKeepPastEncounterInMeterUntilNextDamageChanged(bool value)
+    {
+        OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnClearHistorySelectionOnNextEventChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>スイッチの右に出す ON / OFF。ウィジェット設定と同じ形。</summary>
+    public string SplitEncountersOnNewPhasesStateText => GetSwitchStateText(SplitEncountersOnNewPhases);
+
+    public string KeepPastEncounterInMeterUntilNextDamageStateText =>
+        GetSwitchStateText(KeepPastEncounterInMeterUntilNextDamage);
+
+    public string ClearHistorySelectionOnNextEventStateText =>
+        GetSwitchStateText(ClearHistorySelectionOnNextEvent);
+
+    private static string GetSwitchStateText(bool isOn)
+    {
+        return LocalizationManager.Instance.GetString(isOn ? "Settings_Switch_On" : "Settings_Switch_Off");
+    }
+
+    partial void OnDatabaseRetentionPolicyDaysChanged(int value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    public ReadOnlyObservableCollection<RetentionPolicyOption> RetentionPolicyOptions { get; }
+
+    /// <summary>
+    /// 選択肢を作り直す。**言語切替のたびに呼ぶ** — 文言が言語で変わるので、
+    /// 作りっぱなしだと開いたまま切り替えたときに古い言語のまま残る。
+    /// </summary>
+    private void RebuildRetentionPolicyOptions()
+    {
+        // 作り直すと SelectedValue の参照先が消えるので、選択を戻せるよう控えておく。
+        // 通知を出さない ＝ 空欄のままになる。控えた値を押し直して選び直させる。
+        var selected = DatabaseRetentionPolicyDays;
+
+        _retentionPolicyOptions.Clear();
+        foreach (var days in RetentionPolicyDayChoices)
+        {
+            _retentionPolicyOptions.Add(new RetentionPolicyOption(days, FormatRetentionPolicy(days)));
+        }
+
+        DatabaseRetentionPolicyDays = selected;
+        OnPropertyChanged(nameof(DatabaseRetentionPolicyDays));
+    }
+
+    /// <summary><b>0 は日数ではなく「無期限」</b>なので数字を出さない。</summary>
+    private static string FormatRetentionPolicy(int days)
+    {
+        return days <= 0
             ? LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Forever")
             : string.Format(
                 LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Value"),
-                DatabaseRetentionPolicyDays);
+                days);
+    }
 
     partial void OnNumberDisplayFormatIndexChanged(int value)
     {

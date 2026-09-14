@@ -48,8 +48,8 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
 
                                     if (skillStat.Value.SkillType == ESkillType.Taken)
                                     {
-                                        combatStats = metrics.Taken;
-                                        skillType = ESkillType.Taken;
+                                        // 被ダメはスキル単位の統計を持たない。
+                                        continue;
                                     }
                                     else if (snapshot.DamageType == Zproto.EDamageType.Normal)
                                     {
@@ -93,12 +93,10 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
                                         snapshot.DamageType,
                                         snapshot.DamageMode,
                                         snapshot.IsKill,
-                                        new Zproto.Vec3(),
-                                        null,
-                                        null,
                                         new StarResonanceDps.Core.CombatRuntime.Protocols.ExtraPacketData(snapshot.Timestamp!.Value),
                                         0.0,
-                                        snapshot.Timestamp!.Value);
+                                        snapshot.Timestamp!.Value,
+                                        default);
 
                                     entity.SkillMetrics[skillStat.Key] = metrics;
                                 }

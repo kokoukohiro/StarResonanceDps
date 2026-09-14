@@ -65,8 +65,8 @@ public static class AppDataPaths
     /// </para>
     ///
     /// <para>
-    /// 改名自体は <see cref="File.Move(string,string)"/> 一回でよい。大文字小文字だけの
-    /// 違いでも通ることを実測で確認済み(NTFS 上の同一ボリューム内)。
+    /// 改名自体は <see cref="File.Move(string,string)"/> 一回でよい。
+    /// 同一ボリューム内なら大文字小文字だけの違いでも通る。
     /// </para>
     /// </summary>
     private static void RenameInDataDirectory(string legacyName, string currentName)

@@ -28,8 +28,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static string SceneName { get; private set; } = null!;
 
         /// <summary>
-        /// チャンネル(回線)番号。チャンネルの無い場所では 0。
-        /// 実測(2026-08-25)で SceneData.LineId がそのままチャンネル番号だったことを確認済み。
+        /// チャンネル(回線)番号。チャンネルの無い場所では 0。出所は <c>SceneData.LineId</c>。
         /// エンカウンターは頻繁に作り直されるため、Encounter ではなくここで保持する。
         /// </summary>
         public static uint ChannelLineId { get; private set; }
@@ -39,9 +38,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// チャンネル番号を反映する。
         ///
         /// <para>
-        /// なお <c>SceneData.SceneGuid</c> はシーンのキーに使えない。実測(2026-08-26):
-        /// マップ 8 → 12000 へ移った通知が 8 側の guid を載せたまま届き(遅れる)、
-        /// 同じマップ 12000 が別々の guid で届く回もあった(一定しない)。
+        /// <b><c>SceneData.SceneGuid</c> はシーンのキーに使えない</b> — 移動元の guid を
+        /// 載せたまま遅れて届いたり、同じマップが別々の guid で届いたりする。
         /// シーン変化の判定は <c>LevelMapId</c> と <c>LineId</c> で行うこと。
         /// </para>
         /// </summary>
@@ -174,14 +172,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             Current = new Encounter(CurrentBattleId);
             Current.EncounterId = DB.GetNextEncounterId() + nextEncounterIdModifier;
             System.Diagnostics.Debug.WriteLine($"Created new encounter for EncounterId {Current.EncounterId} + ({nextEncounterIdModifier})");
-            // Force を除外しない。Force は3か所から来るが、素性を捨ててよい根拠が無い(2026-08-26 調査):
-            //   StartNewMap(マップ切替) … 周囲は総入れ替えだが、統計ゼロのエンティティはメーターの
-            //                             TotalValue > 0 フィルタで出ないので引き継いでも害が無い。
-            //                             一方で自分の素性まで捨てており、特化が失われていた。
-            //   ダンジョン開始         … 同じ場所・同じ顔ぶれ。捨てる理由が無い
-            //   手動リセット(野外)     … 同上。しかもダンジョン内では NewObjective(引き継ぐ)になり、
-            //                             同じ操作なのに場所で挙動が変わっていた
-            // reason == Force が実際に効いていたのはこの除外だけで、区切りの強制は別引数の force が担う。
+            // **Force も引き継ぐ。** 素性を捨ててよい区切りは無い。
+            // 区切りの強制は reason ではなく別引数の force が担う。
             if (priorEncounter != null && reason != EncounterStartReason.None)
             {
 
@@ -192,10 +184,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     newChar.SetHpValuesNoUpdate(priorChar.Value.Hp, priorChar.Value.MaxHp);
                     newChar.Attributes = priorChar.Value.Attributes.ToDictionary();
 
-                    // 素性(名前・職業・特化・マーカー等)を丸ごと引き継ぐ。
-                    // 統計は新品のままにして、素性だけ残すのがここの目的。
-                    // Attributes だけ運んでいた頃は、Attributes に無い特化とマーカーが
-                    // フェーズ区切りのたびに失われていた(2026-08-26 実測)。
+                    // 素性(名前・職業・特化・マーカー等)を丸ごと引き継ぐ。統計は新品のまま。
+                    // **Attributes のコピーだけでは足りない** — 特化とマーカーはそこに入らない。
                     newChar.CopyIdentityFrom(priorChar.Value);
                 }
 
@@ -215,6 +205,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                             {
                                 Current.SetAttrKV(priorBoss.Key, "AttrId", (int)attrId);
                             }
+                        }
+                    }
+
+                    // 全滅リセットの直後に目標が切り替わると、ボスはまだキャッシュのままで実体に戻っていない。
+                    // 実体だけを運ぶとキャッシュごと失われ、出現時にしか届かない AttrId が無くなるので、残ったキャッシュも渡す。
+                    foreach (var (uuid, bossCache) in priorEncounter.PreviousBossCache)
+                    {
+                        if (bossCache.Hp > 0 && !Current.Entities.ContainsKey(uuid))
+                        {
+                            Current.PreviousBossCache[uuid] = bossCache;
                         }
                     }
                 }
@@ -280,6 +280,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             AllowSceneUpdate = true;
+
+            // エンカウンターの作り直しも「次のイベント」。3分計測・リセット・マップ移動・
+            // フェーズ分割は全部ここを通るので、ボタン側に専用の解除を書かない。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
             Serilog.Log.Debug("EncounterManager sending OnEncounterStart event");
             OnEncounterStart(new EncounterStartEventArgs() { Reason = reason });
         }
@@ -433,19 +438,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <b>マップ移動のときだけ呼ぶ。</b>持ち越されたバリアを落とす。
         ///
         /// <para>
-        /// エンカウンターを作り直すとき、素性を保つために属性の辞書を丸ごとコピーしている
-        /// (<c>newChar.Attributes = priorChar.Value.Attributes.ToDictionary()</c>)。
-        /// そこに <c>AttrShieldList</c> が含まれるので、バリアも一緒に運ばれてしまう。
-        /// <b>ゲーム側はマップ移動でバリアを消すが、消えたことを伝える属性更新が来ない</b>ため、
-        /// 運ばれた古い値が上書きされず、表示が永久に残る。
+        /// 作り直しで属性の辞書ごと運ぶので <c>AttrShieldList</c> も引き継がれるが、
+        /// <b>ゲーム側はマップ移動でバリアを消しても、消えたことを伝える属性更新を送ってこない。</b>
+        /// 上書きされないまま表示が残るため、ここで空にする。
         /// </para>
         ///
         /// <para>
-        /// <b>属性の持ち越し自体はやめられない。</b> あれを外すと、
-        /// フェーズ区切りのたびに素性が失われていた頃へ戻る(2026-08-26 の修正)。
-        /// <b>区切りの理由でも分けられない</b> — <c>Force</c> はマップ移動・ダンジョン開始・
-        /// 手動リセットの3つから来るが、後ろ2つではバリアは消えない。
-        /// だからマップ移動だと確定している呼び出し元からだけ叩く。
+        /// 属性の持ち越しは外せない(特化とマーカーが失われる)。
+        /// <c>Force</c> はダンジョン開始と手動リセットからも来て、そちらではバリアは消えないので、
+        /// <b>区切りの理由では分けられない。</b>マップ移動だと確定している呼び出し元からだけ叩く。
         /// </para>
         /// </summary>
         public static void ClearCarriedOverShields()
@@ -685,8 +686,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ulong TotalNpcHealing { get; set; } = 0;
         public ulong TotalOverhealing { get; set; } = 0;
         public ulong TotalNpcOverhealing { get; set; } = 0;
-        public ulong TotalTakenDamage { get; set; } = 0;
-        public ulong TotalNpcTakenDamage { get; set; } = 0;
         public ulong TotalDeaths { get; set; } = 0;
         public ulong TotalNpcDeaths { get; set; } = 0;
         public bool IsWipe { get; set; } = false;
@@ -712,6 +711,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         public EDungeonState DungeonState { get; set; } = EDungeonState.DungeonStateNull;
         public uint ChannelLine { get; set; } = 0;
         public Dictionary<long, EncounterBossDataCache> PreviousBossCache = new();
+
+        // 被ダメログの並び。記録した順に積むだけで、DB には入れない。
+        // DB から読んだエンカウンターは空なので、最初に読まれたときにスナップショットの Sequence から組み直す。
+        private readonly object _takenDamageLogGate = new();
+        private readonly List<TakenDamageLogRecord> _takenDamageLog = [];
+        private bool _takenDamageLogRebuiltFromSnapshots;
+        private long _takenDamageLogSequence;
 
         public Encounter()
         {
@@ -947,10 +953,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     UpdateCasterSkillTierLevel(0, entity, (int)value);
                 }
             }
-            else if (key == "AttrPos")
-            {
-                entity.SetPosition(((Zproto.Vec3)value).ToVector3());
-            }
             else if (key == "AttrHateList")
             {
                 if(!entity.IsThreatListUpdatedHandlerSubscribed(OnEntityThreatListUpdated))
@@ -986,7 +988,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             entity.SetTempAttrKV(key, value);
         }
 
-        public void AddSceneEvent(Zproto.EventData sceneEvent)
+        public void AddSceneEvent(Zproto.EventData sceneEvent, ExtraPacketData extraPacketData)
         {
             if (sceneEvent.EventType == (int)WorldEventType.BossDbm)
             {
@@ -1033,6 +1035,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
+                AddSkillAnnouncement(skillId, extraPacketData);
                 OnSceneEvent(this, new SceneEventBossDbmEventArgs() { EventType = WorldEventType.BossDbm, SkillId = skillId, Duration = duration, Insertion = insertion, Timestamp = timestamp });
             }
             else if (sceneEvent.EventType == (int)WorldEventType.NoticeTip)
@@ -1177,16 +1180,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// このエンカウンターに記録すべき戦闘があったか。**ダメージか回復が1でもあれば真。**
         ///
         /// <para>
-        /// 以前は <c>includeHealingAndTaken</c> で広い判定/狭い判定を切り替えていたが、
-        /// <b>どちらも使えなかった</b>ので 2026-09-12 にフラグごと外した。狭いほう(ダメージのみ)は
-        /// 回復だけの戦闘を落とし、2026-08-29 の「回復だけだと HPS が凍る」不具合の原因だった。
-        /// 広いほうは被ダメも数えるが、被ダメメーターを作らない方針なので表示しない値まで拾う。
-        /// </para>
-        ///
-        /// <para>
-        /// 実データ728件で確かめたところ、<b>被ダメを数えても結果は1件も変わらない</b>
-        /// (落ちるのは 473件 → 465件で、差の8件はすべて回復のみの記録)。
-        /// 被ダメとシールド破壊は外し、ダメージと回復の4本にしてある。
+        /// <b>ダメージだけで判定しない</b> — 回復のみの戦闘が落ちる。
+        /// <b>被ダメも数えない</b> — 被ダメメーターを作らない方針なので、表示しない値で真になる。
+        /// 見るのは <c>TotalDamage</c> / <c>TotalNpcDamage</c> / <c>TotalHealing</c> /
+        /// <c>TotalNpcHealing</c> の4本。
         /// </para>
         /// </summary>
         public bool HasStatsBeenRecorded()
@@ -1222,18 +1219,19 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 特化判定に使う<b>ゲームが実際に発動したスキルID</b>。判定できないときは 0。
         ///
         /// <para>
-        /// <paramref name="skillId"/> は表示・集計用に畳んだIDなので、ここには使えない。
-        /// 畳み込みは弾・バフ・コンボ段を1つのIDへ寄せるため、置換後スキル表が想定していない
-        /// 入力まで当たるようになる。実測(2026-09-05)では、安可(Encore)が味方を attacker として
-        /// 発生させるギターの通常攻撃 <c>230401</c> が <c>2304</c> を経てコンボ先頭 <c>2301</c> へ畳まれ、
-        /// 味方16人を響奏(と職業ビートパフォーマー)にしていた。
+        /// <b><paramref name="skillId"/> を渡してはいけない。</b>あちらは表示・集計用に
+        /// 弾・バフ・コンボ段を1つへ畳んだIDで、置換後スキル表が想定していない入力まで当たる。
+        /// 味方に発生させるスキル(安可など)が畳まれて表に当たると、その人の特化と職業を書き換える。
         /// </para>
         /// </param>
         public void AddDamage(
             long attackerUuid, long targetUuid, long skillId, int identitySkillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
+            // 戦闘は「次のイベント」なので履歴表示を解除する。開いていなければ即戻る。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
             LastUpdate = extraPacketData.ArrivalTime;
 
             ExData.FirstDamageTimeStamp ??= LastUpdate;
@@ -1270,18 +1268,27 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 詠唱の属性を取りこぼした場合の受け皿。同じ特化なら中で何もしない。
             // 渡すのは畳む前の生のスキルID。理由は identitySkillId の説明を見ること。
             attacker.UpdateSubProfessionFromReplacedSkill(identitySkillId);
-            attacker.AddDamage(targetUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damagePos, extraPacketData);
+            attacker.AddDamage(targetUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
+
+            if (damage > 0 && damageType != EDamageType.Immune)
+            {
+                attacker.DamageStats.AddPerSecondValue(ExData.FirstDamageTimeStamp.Value, extraPacketData.ArrivalTime, damage);
+            }
         }
 
         public void AddHealing(
             long attackerUuid, long targetUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
             // ダメージが1件も無いと回復を丸ごと捨てる門がここにあったが、削除した。
             // FirstDamageTimeStamp は AddDamage でしか立たないため、回復だけを続けても
             // 永久に null のままで門を抜けられず、HPSメーターが起動しなかった。
             // メーターがDPS/HPSに分かれた今、HPS側だけを見ていると何も出ない不具合になる。
+
+            // 戦闘は「次のイベント」なので履歴表示を解除する。開いていなければ即戻る。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
             LastUpdate = extraPacketData.ArrivalTime;
 
             ExData.FirstDamageTimeStamp ??= LastUpdate;
@@ -1324,33 +1331,223 @@ namespace StarResonanceDps.Core.CombatRuntime
                 TotalOverhealing += (ulong)overhealing;
             }
 
-            entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, effectiveHealing, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damagePos, extraPacketData);
+            entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, effectiveHealing, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
+
+            if (damage > 0)
+            {
+                entity.HealingStats.AddPerSecondValue(ExData.FirstDamageTimeStamp.Value, extraPacketData.ArrivalTime, damage);
+            }
         }
 
+        /// <param name="ownerId">
+        /// <c>SyncDamageInfo.OwnerId</c> の生の値。<paramref name="skillId"/> はメーター用に畳んだ鍵なので、
+        /// 被ダメログの技名はこちらと <paramref name="damageSource"/> で引く。
+        /// </param>
+        /// <param name="buffSourceSkillId">
+        /// バフ由来のとき、そのバフを付けた技(<see cref="Services.BuffInstanceIndex.TryResolveSourceSkill"/>)。決まらなければ 0。
+        /// </param>
+        /// <param name="summonSourceSkillId">
+        /// ダメージを出した実体(仮想体など)を出した技(<see cref="Services.SummonSourceIndex"/>)。決まらなければ 0。
+        /// </param>
         public void AddTakenDamage(
-            long attackerUuid, long targetUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
+            long attackerUuid, long targetUuid, long skillId, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
             LastUpdate = extraPacketData.ArrivalTime;
 
-            var targetType = (EEntityType)Utils.UuidToEntityType(targetUuid);
-            if (targetType == EEntityType.EntMonster)
+            var targetEntity = GetOrCreateEntity(targetUuid);
+
+            // 記録するのは被ダメログに載る「プレイヤーがプレイヤー以外から受けた」ぶんだけ。
+            // モンスターの被ダメとプレイヤー同士のぶんは読み手が無い。戦闘中かどうかの判定だけは全員に効かせる。
+            if ((EEntityType)Utils.UuidToEntityType(targetUuid) != EEntityType.EntChar
+                || (EEntityType)Utils.UuidToEntityType(attackerUuid) == EEntityType.EntChar)
             {
-                if (damageType != EDamageType.Immune)
-                {
-                    TotalNpcTakenDamage += (ulong)damage;
-                }
+                targetEntity.RecalculateInactiveTime(extraPacketData.ArrivalTime);
+                return;
             }
-            else
+
+            var snapshot = targetEntity.AddTakenDamage(attackerUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData,
+                new SkillSnapshotStamp(
+                    NextTakenDamageLogSequence(),
+                    targetEntity.GetAttrKV("AttrHp") as long?,
+                    targetEntity.GetAttrKV("AttrMaxHp") as long?,
+                    ownerId,
+                    damageSource,
+                    buffSourceSkillId,
+                    summonSourceSkillId));
+
+            AppendTakenDamageLog(targetUuid, snapshot);
+        }
+
+        /// <summary>
+        /// 技の開始を被ダメログの詠唱として残す。<b>詠唱バーを持つ技</b>と<b>戦闘画面の警告の技</b>だけで、
+        /// プレイヤーとプレイヤーの召喚物は対象外(被ダメと同じく、召喚物は大元の召喚者として扱う)。
+        /// </summary>
+        /// <param name="skillLevel">技の開始と同じ差分で届く <c>AttrSkillLevel</c>。届いていなければ 0。</param>
+        public void AddSkillCast(long entityUuid, int skillId, int skillLevel, ExtraPacketData extraPacketData)
+        {
+            if (skillId <= 0)
             {
-                if (damageType != EDamageType.Immune)
+                return;
+            }
+
+            if (!CombatDataCatalog.HasSingOrGuideTime(skillId))
+            {
+                // 警告の技かは技レベルで決まるので、レベルが無ければ判定できない。
+                if (skillLevel <= 0)
                 {
-                    TotalTakenDamage += (ulong)damage;
+                    Serilog.Log.Warning("AttrSkillLevel が届いていない技の開始 uuid={EntityUuid} skillId={SkillId}。警告の技かを判定できないので記録しない",
+                        entityUuid, skillId);
+                    return;
+                }
+
+                if (!CombatDataCatalog.IsWarningSkill(skillId, skillLevel))
+                {
+                    return;
                 }
             }
 
-            GetOrCreateEntity(targetUuid).AddTakenDamage(attackerUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damagePos, extraPacketData);
+            var casterUuid = GetOrCreateEntity(entityUuid).GetAttrKV("AttrTopSummonerId") is long topSummonerUuid
+                && topSummonerUuid != 0
+                    ? topSummonerUuid
+                    : entityUuid;
+            if ((EEntityType)Utils.UuidToEntityType(casterUuid) == EEntityType.EntChar)
+            {
+                return;
+            }
+
+            var cast = new SkillCastRecord
+            {
+                SkillId = skillId,
+                Timestamp = extraPacketData.ArrivalTime,
+                Sequence = NextTakenDamageLogSequence(),
+            };
+            GetOrCreateEntity(casterUuid).AddSkillCast(cast);
+
+            lock (_takenDamageLogGate)
+            {
+                _takenDamageLog.Add(TakenDamageLogRecord.ForCast(casterUuid, cast));
+            }
+        }
+
+        /// <summary>
+        /// ボス大技の予告を被ダメログの予告行として残す。通知の番号(<c>DbmTable.Id</c>)から技を引き、
+        /// 周囲にいるモンスターからその技を持つものを構えた側とする。
+        /// </summary>
+        public void AddSkillAnnouncement(int dbmId, ExtraPacketData extraPacketData)
+        {
+            if (dbmId <= 0)
+            {
+                return;
+            }
+
+            var ownerMonsterId = 0;
+            if (CombatDataCatalog.TryResolveDbmSkillId(dbmId, out var skillId))
+            {
+                Services.NearbyMonsterIndex.Instance.TryFindMonsterId(
+                    monsterId => CombatDataCatalog.MonsterHasSkill(monsterId, skillId),
+                    out ownerMonsterId);
+            }
+
+            var announcement = new SkillAnnouncementRecord
+            {
+                SkillId = skillId,
+                OwnerMonsterId = ownerMonsterId,
+                Timestamp = extraPacketData.ArrivalTime,
+                Sequence = NextTakenDamageLogSequence(),
+            };
+
+            lock (_takenDamageLogGate)
+            {
+                ExData.SkillAnnouncements.Add(announcement);
+                _takenDamageLog.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+            }
+        }
+
+        private long NextTakenDamageLogSequence()
+        {
+            return Interlocked.Increment(ref _takenDamageLogSequence);
+        }
+
+        private void AppendTakenDamageLog(long targetUuid, SkillSnapshot? snapshot)
+        {
+            // TakenStats は必ずスナップショットを作る。null はその前提が崩れたということ。
+            if (snapshot is null)
+            {
+                throw new InvalidOperationException(
+                    $"Taken damage log snapshot was not recorded (target={targetUuid}).");
+            }
+
+            lock (_takenDamageLogGate)
+            {
+                _takenDamageLog.Add(TakenDamageLogRecord.ForHit(targetUuid, snapshot));
+            }
+        }
+
+        /// <summary>
+        /// 被ダメログの <paramref name="startIndex"/> 番目以降を返す。ライブ中は差分の追記に使う。
+        ///
+        /// <para>
+        /// <b>DB から読んだエンカウンターは並びを持たない</b>ので、実行中のエンカウンター以外で空なら
+        /// 1回だけ、予告とプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
+        /// </para>
+        /// </summary>
+        public TakenDamageLogRecord[] GetTakenDamageLogRecords(int startIndex)
+        {
+            lock (_takenDamageLogGate)
+            {
+                if (_takenDamageLog.Count == 0
+                    && !_takenDamageLogRebuiltFromSnapshots
+                    && !ReferenceEquals(this, EncounterManager.Current))
+                {
+                    _takenDamageLogRebuiltFromSnapshots = true;
+                    RebuildTakenDamageLogFromSnapshots();
+                }
+
+                if (startIndex >= _takenDamageLog.Count)
+                {
+                    return [];
+                }
+
+                return _takenDamageLog.GetRange(startIndex, _takenDamageLog.Count - startIndex).ToArray();
+            }
+        }
+
+        private void RebuildTakenDamageLogFromSnapshots()
+        {
+            var records = new List<TakenDamageLogRecord>();
+            foreach (var announcement in ExData.SkillAnnouncements)
+            {
+                records.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+            }
+
+            foreach (var (uuid, entity) in Entities)
+            {
+                foreach (var cast in entity.GetSkillCastsCopy())
+                {
+                    records.Add(TakenDamageLogRecord.ForCast(uuid, cast));
+                }
+
+                if ((EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntChar)
+                {
+                    continue;
+                }
+
+                foreach (var snapshot in entity.TakenStats.GetSkillSnapshotsCopy())
+                {
+                    // 0 は通し番号を持たない古い記録で、並べる順が決まらない。
+                    if (snapshot.Sequence == 0)
+                    {
+                        continue;
+                    }
+
+                    records.Add(TakenDamageLogRecord.ForHit(uuid, snapshot));
+                }
+            }
+
+            records.Sort((left, right) => left.Sequence.CompareTo(right.Sequence));
+            _takenDamageLog.AddRange(records);
         }
 
         public void AddShieldGained(long entityUuid, long shieldBuffUuid, long value, long initialValue, long maxValue = 0)
@@ -1361,9 +1558,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <param name="carriesBuffInfo">
         /// このイベントが <c>BuffInfo</c>(または <c>BuffChange</c>)を伴っていたか。
         /// <b><c>false</c> なら <c>baseId</c> 以下の値は「サーバが送ってこなかった」ことを表すゼロ</b>で、
-        /// バフの実際の状態ではない。バフ効果は <c>LogicEffect</c> を持たない回があり
-        /// (実測25分で57,320件・種別は <c>BuffEventAddTo</c> の再送が大半)、
-        /// そこで持続や層を書き込むと、時限バフが持続0＝無期限に化けて消えなくなる。
+        /// バフの実際の状態ではない。<c>LogicEffect</c> を持たない回は珍しくないので、
+        /// ここで持続や層を書き込むと時限バフが持続0＝無期限に化けて消えなくなる。
         /// </param>
         public void NotifyBuffEvent(long entityUuid, EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, int layer, int duration, int sourceConfigId, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0, bool carriesBuffInfo = true)
         {
@@ -1413,20 +1609,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// タレント由来のバフから、<b>そのバフを張った本人</b>の特化を確定する。全18特化ぶん。
         ///
         /// <para>
-        /// 帰属先は保持者ではなく術者(<c>BuffInfo.FireUuid</c>)。プロトコル上バフの術者を
-        /// 名乗るフィールドはこれ1つで、実測でも正しい。既存ログの却下76件を独立経路
-        /// (<c>SyncDamageInfo.OwnerId</c> 由来の特化・武器バフ由来の職)と突き合わせた結果、
-        /// 術者≠保持者の13件が13/13、術者＝保持者の55件が49/49 一致し、矛盾0だった
-        /// (2026-08-27)。味方に配られる 威咲 2202112 溢出治疗 も、術者として本人が
-        /// 正しく記録されている。
+        /// <b>帰属先は保持者ではなく術者(<c>BuffInfo.FireUuid</c>)。</b>
+        /// プロトコル上バフの術者を名乗るフィールドはこれ1つ。
+        /// 味方に配られるバフでも、術者として出した本人が入る。
         /// </para>
         ///
         /// <para>
-        /// <c>FightSourceType</c> は採用条件にしない。同じ実測で却下された76件は
-        /// srcType=1 が67件・srcType=0 が9件で、<b>srcType=6 は1件も無い</b>にもかかわらず
-        /// 62/62 正しかった。以前は「受け手が術者として記録されるので術者では弾けない」という
-        /// 前提で srcType==6 を足していたが、その前提自体が実測で否定された。
-        /// 観測のためログには残す。
+        /// <b><c>FightSourceType</c> を採用条件にしない。</b><c>srcType==6</c> を必須にすると
+        /// 強化側のツリー副産物が全部落ちる。観測のためログには残す。
         /// </para>
         ///
         /// <para>あることしか示さない。除去は見ない。</para>
@@ -1447,7 +1637,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 変種バフ(+1〜+9)は、ワイヤが名乗る親で特化を引き直す。10刻み丸めは推定でしかなく、
-            // 別ツリーの下流効果が隣の特化のバフに化ける(実測 2208281 刀数判定 / 2206261 裁决)。
+            // 別ツリーの下流効果が隣の特化のバフに化けることがある。
             //
             // 書き換えるのは特化だけ。grantedBuffId / distanceFromRoot / isMarker は観測ID由来の
             // ままにする — 親がマーカー本体のことがあり(2203291 の親は鷹弓の根 2203290)、
@@ -1464,8 +1654,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var target = GetOrCreateEntity(fireUuid);
 
             // 常設の食い違い検知。枝タレント(距離1以上)が、控えてあるマーカーと違う特化を
-            // 書こうとしたら記録する。判定表か10刻み丸めの誤りで、実測ではこれで
-            // 2204241 と 2201612 を捕まえた。
+            // 書こうとしたら記録する。鳴ったら判定表か10刻み丸めの誤り。
             //
             // マーカー自身(距離0)は除く。クラス変更でも、ビルドプリセットの一括配信でも
             // 別のマーカーが正当に来るため、食い違いの証拠にならない。
@@ -1506,7 +1695,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <para>
         /// <b>保持者(<paramref name="entityUuid"/>)で突き合わせる。</b> 除去イベントは術者を
         /// 運ばないため、マーカーが「自分のアビリティが自分に付けるバフ」で保持者＝術者である
-        /// ことを前提にしている。<b>この前提は実測していない。</b>
+        /// ことを前提にしている。<b>この前提は未検証。</b>
         /// </para>
         /// </summary>
         private void ApplySpecMarkerRemoval(long entityUuid, int buffUuid)
@@ -1624,6 +1813,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int BenchmarkTime { get; set; } = 0;
         [ProtoMember(7)]
         public DateTime? FirstDamageTimeStamp { get; set; } = null;
+        /// <summary>被ダメログの予告行(<see cref="Encounter.AddSkillAnnouncement"/>)。実体に属さないのでここに持つ。</summary>
+        [ProtoMember(8)]
+        public List<SkillAnnouncementRecord> SkillAnnouncements { get; set; } = [];
 
         public EncounterExData() { }
     }
@@ -1675,7 +1867,7 @@ namespace StarResonanceDps.Core.CombatRuntime
     /// <para>
     /// <b>素性を足すときは必ずここに足すこと。</b> record のコピーで丸ごと運ばれるので、
     /// 引き継ぎ側に書き足す必要はない。<see cref="Entity"/> に直接プロパティを足すと運ばれず、
-    /// 作り直しのたびに失われる(2026-08-26: 特化とマーカーがこれで消えていた)。
+    /// 作り直しのたびに失われる。
     /// </para>
     ///
     /// <para>Hp / MaxHp は戦闘中に変わる値なので素性に含めない。従来どおり個別に引き継ぐ。</para>
@@ -1754,24 +1946,62 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool IsSpecAbilityUnequipped =>
             ProfessionId > 0 && HasBuffSnapshot && SubProfessionId == 0;
         public int Level { get => _identity.Level; set => _identity.Level = value; }
-        public Vector3 Position { get; private set; } = new();
 
         public long SeasonLevel { get => _identity.SeasonLevel; set => _identity.SeasonLevel = value; }
         public long SeasonStrength { get => _identity.SeasonStrength; set => _identity.SeasonStrength = value; }
 
         public CombatStats DamageStats { get; set; } = new();
         public CombatStats HealingStats { get; set; } = new();
-        public CombatStats TakenStats { get; set; } = new();
+
+        private CombatStats _takenStats = null!;
+
+        /// <summary>
+        /// 被ダメログの材料。<b>スナップショットを溜めるのはこの統計だけ</b>で、
+        /// 入るのは「プレイヤーがプレイヤー以外から受けた」ぶんだけ(<see cref="Encounter.AddTakenDamage"/>)。
+        /// 記録の印はセッターで押すので、コンストラクタもセッターを通して入れる。
+        /// </summary>
+        public CombatStats TakenStats
+        {
+            get => _takenStats;
+            set
+            {
+                value.EnableSkillSnapshotRecording();
+                _takenStats = value;
+            }
+        }
+
+        /// <summary>
+        /// このエンティティが始めた詠唱。被ダメログの詠唱行の材料で、
+        /// <see cref="Encounter.AddSkillCast"/> がプレイヤー以外の詠唱バーを持つ技だけを積む。
+        /// </summary>
+        public List<SkillCastRecord> SkillCasts { get; private set; } = new();
+        private readonly object _skillCastsGate = new();
+
+        public bool ShouldSerializeSkillCasts() => SkillCasts.Count > 0;
+
+        public void AddSkillCast(SkillCastRecord cast)
+        {
+            lock (_skillCastsGate)
+            {
+                SkillCasts.Add(cast);
+            }
+        }
+
+        public SkillCastRecord[] GetSkillCastsCopy()
+        {
+            lock (_skillCastsGate)
+            {
+                return SkillCasts.ToArray();
+            }
+        }
 
         public ConcurrentDictionary<long, CombatStats> SkillStats { get; set; } = new();
         public ConcurrentDictionary<long, MetricsContainer> SkillMetrics { get; set; } = new();
-        public ConcurrentDictionary<long, StatTracker> InteractedEntities { get; set; } = new();
 
         public ulong TotalDamage { get; set; } = 0;
         public ulong TotalShieldBreak { get; set; } = 0;
         public ulong TotalHealing { get; set; } = 0;
         public ulong TotalOverhealing { get; set; } = 0;
-        public ulong TotalTakenDamage { get; set; } = 0;
         public ulong TotalShield { get; set; } = 0;
         public ulong TotalCasts { get; set; } = 0;
         public ulong TotalDeaths { get; set; } = 0;
@@ -1829,27 +2059,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var metrics = new MetricsContainer
                 {
                     Damage = (CombatStats)container.Value.Damage.Clone(),
-                    Healing = (CombatStats)container.Value.Healing.Clone(),
-                    Taken = (CombatStats)container.Value.Taken.Clone()
+                    Healing = (CombatStats)container.Value.Healing.Clone()
                 };
                 ((Entity)cloned).SkillMetrics.AddOrUpdate(container.Key, metrics, (key, value) => metrics);
-            }
-
-            foreach (var tracker in this.InteractedEntities)
-            {
-                var statTracker = new StatTracker
-                {
-                    UUID = tracker.Value.UUID,
-                    UID = tracker.Value.UID,
-                    Name = tracker.Value.Name,
-                    ProfessionId = tracker.Value.ProfessionId,
-                    SubProfessionId = tracker.Value.SubProfessionId,
-                    DidDamage = tracker.Value.DidDamage,
-                    DidHealing = tracker.Value.DidHealing,
-                    Damage = (TrackedStats)tracker.Value.Damage.Clone(),
-                    Healing = (TrackedStats)tracker.Value.Healing.Clone(),
-                };
-                ((Entity)cloned).InteractedEntities.AddOrUpdate(tracker.Key, statTracker, (key, value) => statTracker);
             }
             return cloned;
         }
@@ -1867,6 +2079,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             UUID = uuid;
             UID = Utils.UuidToEntityId(uuid);
             Name = name!;
+            TakenStats = new CombatStats();
 
             if (encounter != null)
             {
@@ -1877,6 +2090,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                     Attributes = foundEnt.Attrs.ToDictionary();
 
                     encounter.PreviousBossCache.Remove(uuid);
+                }
+
+                // AttrId は出現時にしか届かず、区切りをまたいで運ばれない敵もいる。周囲にいる敵なら索引から戻す。
+                // 索引はいまの周囲を表すので、実行中のエンカウンターの実体にだけ入れる。
+                if (ReferenceEquals(encounter, EncounterManager.Current)
+                    && (EEntityType)Utils.UuidToEntityType(uuid) == EEntityType.EntMonster
+                    && !Attributes.ContainsKey("AttrId")
+                    && Services.NearbyMonsterIndex.Instance.TryGetMonsterId(uuid, out var nearbyMonsterId))
+                {
+                    Attributes["AttrId"] = nearbyMonsterId;
                 }
             }
 
@@ -2082,11 +2305,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             SeasonStrength = strength;
         }
 
-        public void SetPosition(Vector3 position)
-        {
-            Position = position;
-        }
-
         public void SetHpNoUpdate(long hp)
         {
             Hp = hp;
@@ -2203,7 +2421,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SkillActivated?.Invoke(this, e);
         }
 
-        public void RegisterSkillData(ESkillType skillType, long otherUuid, long skillId, int skillLevel, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, Vec3 damagePos, Vector3? instigatorPos, Vector3? targetPos, ExtraPacketData extraPacketData)
+        public void RegisterSkillData(ESkillType skillType, long otherUuid, long skillId, int skillLevel, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, ExtraPacketData extraPacketData)
         {
             if(!SkillMetrics.TryGetValue(skillId, out var container))
             {
@@ -2249,16 +2467,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     container.Healing = combatStats;
                 }
-                else if (skillType == ESkillType.Taken)
-                {
-                    container.Taken = combatStats;
-                }
                 else
                 {
                     Serilog.Log.Warning($"RegisterSkillData SkillId {skillId} was an Unknown skill type and was not registered.");
                 }
 
-                combatStats.AddData(otherUuid, skillId, skillLevel, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
+                combatStats.AddData(otherUuid, skillId, skillLevel, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData, GetInactiveTime(), FirstCombatActionTime, default);
 
                 SkillMetrics.TryAdd(skillId, container);
             }
@@ -2272,10 +2486,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 else if (skillType == ESkillType.Healing)
                 {
                     combatStats = container.Healing;
-                }
-                else if (skillType == ESkillType.Taken)
-                {
-                    combatStats = container.Taken;
                 }
                 else
                 {
@@ -2313,88 +2523,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                combatStats.AddData(otherUuid, skillId, skillLevel, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
+                combatStats.AddData(otherUuid, skillId, skillLevel, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData, GetInactiveTime(), FirstCombatActionTime, default);
             }
-
-            // 被ダメは加害者ごとの集計を持たない。合計値を出す予定が無く、
-            // 「いつ・誰が・どのスキルで・いくら」は TakenStats.SkillSnapshots が
-            // 1イベント単位で持っているので、そちらで足りる。
-            if (skillType == ESkillType.Taken)
-            {
-                return;
-            }
-
-            if (!InteractedEntities.TryGetValue(otherUuid, out var statTracker))
-            {
-                statTracker = new();
-            }
-
-            statTracker.UUID = otherUuid;
-
-            // 出所も鮮度も分からない値で名前や職業を埋めない。
-            // 情報が来ていないなら空欄のままにして、欠落が見える状態にする。
-
-            TrackedStats trackers;
-            if (skillType == ESkillType.Damage)
-            {
-                statTracker.DidDamage = true;
-                trackers = statTracker.Damage;
-            }
-            else if (skillType == ESkillType.Healing)
-            {
-                statTracker.DidHealing = true;
-                trackers = statTracker.Healing;
-            }
-            else
-            {
-                trackers = new();
-            }
-
-            if (damageType == EDamageType.Immune)
-            {
-                trackers.ImmuneCount++;
-            }
-            else if (damageType == EDamageType.Miss)
-            {
-                trackers.MissCount++;
-            }
-            else
-            {
-                trackers.TotalValue += (ulong)value;
-
-                if (trackers.MinValue > value)
-                {
-                    trackers.MinValue = value;
-                }
-                if (trackers.MaxValue < (ulong)value)
-                {
-                    trackers.MaxValue = (ulong)value;
-                }
-
-                trackers.HitCount++;
-
-                if (isCrit)
-                {
-                    trackers.CritCount++;
-                    trackers.TotalCritValue += (ulong)value;
-                }
-
-                if (isCauseLucky)
-                {
-                    trackers.LuckyCount++;
-                }
-                if (isLucky)
-                {
-                    trackers.TotalLuckyValue += (ulong)value;
-                }
-
-                if (!isCrit && !isLucky)
-                {
-                    trackers.NormalCount++;
-                }
-            }
-
-            InteractedEntities[otherUuid] = statTracker;
         }
 
         public void RecalculateInactiveTime(DateTime now, bool skipSave = false)
@@ -2438,7 +2568,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public void AddDamage(long targetUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
             RecalculateInactiveTime(extraPacketData.ArrivalTime);
 
@@ -2452,40 +2582,24 @@ namespace StarResonanceDps.Core.CombatRuntime
                 TotalShieldBreak += (ulong)shieldBreak;
             }
 
-            Vector3? instigatorPos = Position;
-            Vector3? targetPos = null;
-            var targetEntity = EncounterManager.Current.GetOrCreateEntity(targetUuid);
-            if (targetEntity != null)
-            {
-                targetPos = targetEntity.Position;
-            }
+            DamageStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData, GetInactiveTime(), FirstCombatActionTime, default);
 
-            DamageStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
-
-            RegisterSkillData(ESkillType.Damage, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
+            RegisterSkillData(ESkillType.Damage, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData);
         }
 
         public void AddHealing(
             long targetUuid, long skillId, int skillLevel, long damage, long overhealing, long effectiveHealing, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
             RecalculateInactiveTime(extraPacketData.ArrivalTime);
 
             TotalHealing += (ulong)damage;
             TotalOverhealing += (ulong)overhealing;
 
-            Vector3? instigatorPos = Position;
-            Vector3? targetPos = null;
-            var targetEntity = EncounterManager.Current.GetOrCreateEntity(targetUuid);
-            if (targetEntity != null)
-            {
-                targetPos = targetEntity.Position;
-            }
+            HealingStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData, GetInactiveTime(), FirstCombatActionTime, default);
 
-            HealingStats.AddData(targetUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
-
-            RegisterSkillData(ESkillType.Healing, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, overhealing, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, extraPacketData);
+            RegisterSkillData(ESkillType.Healing, targetUuid, skillId, skillLevel, damage, isCrit, isLucky, overhealing, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData);
         }
 
         /// <summary>
@@ -2616,10 +2730,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 自分のバフ集合を受信したとみなした瞬間を記録する。
         ///
         /// <para>
-        /// <b>いまは計測専用。</b> かつては「自分のRank1」の根拠にしていたが、
-        /// 自分のバフ追加を含むデルタなら何でも立ってしまい、
-        /// ダンジョンのスタックバフ1件で「全バフを見た」と主張していた(実測 2026-08-26)。
-        /// Rank1 を出さなくなったのでこのフラグは表示に影響しない。
+        /// <b>いまは計測専用で、表示には効かない。</b>
+        /// <b>「全バフを受信した」の根拠に使ってはいけない</b> — 自分のバフ追加を含むデルタなら
+        /// 何でも立つので、スタックバフ1件でも真になる。
         /// </para>
         /// </summary>
         public void MarkSelfBuffStreamReceived()
@@ -2632,28 +2745,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             HasBuffSnapshot = true;
         }
 
-        public void AddTakenDamage(
+        public SkillSnapshot? AddTakenDamage(
             long attackerUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, Vec3 damagePos, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData,
+            SkillSnapshotStamp stamp)
         {
             RecalculateInactiveTime(extraPacketData.ArrivalTime);
 
-            if (damageType != EDamageType.Immune)
-            {
-                TotalTakenDamage += (ulong)damage;
-            }
-
-            Vector3? victimPos = Position;
-            Vector3? instigatorPos = null;
-            var instigatorEntity = EncounterManager.Current.GetOrCreateEntity(attackerUuid);
-            if (instigatorEntity != null)
-            {
-                instigatorPos = instigatorEntity.Position;
-            }
-
-            TakenStats.AddData(attackerUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak,isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, victimPos, extraPacketData, GetInactiveTime(), FirstCombatActionTime);
-            RegisterSkillData(ESkillType.Taken, attackerUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, victimPos, extraPacketData);
+            return TakenStats.AddData(attackerUuid, skillId, skillLevel, damage, isCrit, isLucky, hpLessen, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, extraPacketData, GetInactiveTime(), FirstCombatActionTime, stamp);
         }
 
         /// <param name="carriesBuffInfo">
@@ -2811,7 +2911,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             TotalShieldBreak += newEntity.TotalShieldBreak;
             TotalHealing += newEntity.TotalHealing;
             TotalOverhealing += newEntity.TotalOverhealing;
-            TotalTakenDamage += newEntity.TotalTakenDamage;
             TotalShield += newEntity.TotalShield;
             TotalCasts += newEntity.TotalCasts;
             TotalDeaths += newEntity.TotalDeaths;
@@ -2864,7 +2963,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     foundSkill.Damage.MergeCombatStats(newSkillMetrics.Value.Damage);
                     foundSkill.Healing.MergeCombatStats(newSkillMetrics.Value.Healing);
-                    foundSkill.Taken.MergeCombatStats(newSkillMetrics.Value.Taken);
                 }
                 else
                 {
@@ -2872,43 +2970,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     {
                         Damage = (CombatStats)newSkillMetrics.Value.Damage.Clone(),
                         Healing = (CombatStats)newSkillMetrics.Value.Healing.Clone(),
-                        Taken = (CombatStats)newSkillMetrics.Value.Taken.Clone(),
                     };
                     SkillMetrics.TryAdd(newSkillMetrics.Key, metrics);
-                }
-            }
-
-            foreach (var newInteractedEntities in newEntity.InteractedEntities)
-            {
-                InteractedEntities.TryGetValue(newInteractedEntities.Key, out var foundInteracted);
-                if (foundInteracted != null)
-                {
-                    if (!foundInteracted.DidDamage)
-                    {
-                        foundInteracted.DidDamage = newInteractedEntities.Value.DidDamage;
-                    }
-                    if (!foundInteracted.DidHealing)
-                    {
-                        foundInteracted.DidHealing = newInteractedEntities.Value.DidHealing;
-                    }
-                    foundInteracted.Damage.MergeTrackedStats(newInteractedEntities.Value.Damage);
-                    foundInteracted.Healing.MergeTrackedStats(newInteractedEntities.Value.Healing);
-                }
-                else
-                {
-                    var statTracker = new StatTracker
-                    {
-                        UUID = newInteractedEntities.Value.UUID,
-                        UID = newInteractedEntities.Value.UID,
-                        Name = newInteractedEntities.Value.Name,
-                        ProfessionId = newInteractedEntities.Value.ProfessionId,
-                        SubProfessionId = newInteractedEntities.Value.SubProfessionId,
-                        DidDamage = newInteractedEntities.Value.DidDamage,
-                        DidHealing = newInteractedEntities.Value.DidHealing,
-                        Damage = (TrackedStats)newInteractedEntities.Value.Damage.Clone(),
-                        Healing = (TrackedStats)newInteractedEntities.Value.Healing.Clone(),
-                    };
-                    InteractedEntities.TryAdd(newInteractedEntities.Key, statTracker);
                 }
             }
         }
@@ -2983,73 +3046,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
     public class MetricsContainer
     {
-        private CombatStats _damage = null!;
-        private CombatStats _healing = null!;
-        private CombatStats _taken = null!;
+        /// <summary>スキル単位の与ダメージ統計。</summary>
+        public CombatStats Damage { get; set; } = new();
 
-        public MetricsContainer()
-        {
-            // プロパティ経由で入れる。フィールド初期化子や自動プロパティの初期化子は
-            // 裏のフィールドへ直接書くのでセッターを通らず、記録を止める印が押されない。
-            Damage = new CombatStats();
-            Healing = new CombatStats();
-            Taken = new CombatStats();
-        }
-
-        /// <summary>
-        /// スキル単位の与ダメージ統計。
-        /// <b>ここに入る <see cref="CombatStats"/> はスナップショットを溜めない。</b>
-        /// </summary>
-        public CombatStats Damage
-        {
-            get => _damage;
-            set => _damage = StopSkillSnapshotRecording(value);
-        }
-
-        /// <summary>
-        /// スキル単位の回復統計。
-        /// <b>ここに入る <see cref="CombatStats"/> はスナップショットを溜めない。</b>
-        /// </summary>
-        public CombatStats Healing
-        {
-            get => _healing;
-            set => _healing = StopSkillSnapshotRecording(value);
-        }
-
-        /// <summary>
-        /// スキル単位の被ダメージ統計。
-        /// <b>ここに入る <see cref="CombatStats"/> はスナップショットを溜めない。</b>
-        /// </summary>
-        public CombatStats Taken
-        {
-            get => _taken;
-            set => _taken = StopSkillSnapshotRecording(value);
-        }
-
-        /// <summary>
-        /// この容器に入る統計のスナップショット記録を止める。
-        ///
-        /// <para>
-        /// 中身は <c>Entity.DamageStats</c> / <c>HealingStats</c> / <c>TakenStats</c> が持つ一覧の
-        /// <b>完全な複製</b>で(実測でレコード数が3対とも一致)、<b>読み手が1つも無い</b>。
-        /// グラフは <c>Entity.DamageStats</c> / <c>HealingStats</c> を、被ダメログの材料は
-        /// <c>Entity.TakenStats</c> を見るので、こちらは誰も参照しない。
-        /// それでいて blob の 41.9%(実測: Enc2 で 114MB / 272MB)を占め、
-        /// 履歴を開くときの復元時間を押し上げていた。
-        /// </para>
-        ///
-        /// <para>
-        /// <b>入口をセッター1か所に絞ってあるのは、入れ忘れを構造的に起こさないため。</b>
-        /// 生成箇所は <c>RegisterSkillData</c> / <c>Entity.Clone</c> / <c>Entity.MergeEntity</c> /
-        /// 旧マイグレーションに散っており、しかも <c>CombatStats.Clone()</c> は
-        /// <c>MemberwiseClone</c> なので印もそのまま複製される。
-        /// </para>
-        /// </summary>
-        private static CombatStats StopSkillSnapshotRecording(CombatStats stats)
-        {
-            stats.DisableSkillSnapshotRecording();
-            return stats;
-        }
+        /// <summary>スキル単位の回復統計。</summary>
+        public CombatStats Healing { get; set; } = new();
 
         /// <summary>
         /// この鍵がスキルIDではなくバフIDであることを示す。
@@ -3058,62 +3059,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <c>SkillTable</c> と <c>BuffTable</c> は90IDが重複するため、種別を持たないと取り違える。
         /// </summary>
         public bool IsBuffSource { get; set; }
-    }
-
-    public class StatTracker
-    {
-        public long UUID { get; set; } = 0;
-        public long UID { get; set; } = 0;
-        public string Name { get; set; } = "";
-        public int ProfessionId { get; set; } = 0;
-        public int SubProfessionId { get; set; } = 0;
-        public bool DidDamage { get; set; } = false;
-        public bool DidHealing { get; set; } = false;
-        public TrackedStats Damage { get; set; } = new();
-        public TrackedStats Healing { get; set; } = new();
-    }
-
-    public class TrackedStats : System.ICloneable
-    {
-        public ulong TotalValue { get; set; }
-        public ulong TotalCritValue { get; set; }
-        public ulong TotalLuckyValue { get; set; }
-        public ulong HitCount { get; set; }
-        public ulong NormalCount { get; set; }
-        public ulong CritCount { get; set; }
-        public ulong MissCount { get; set; }
-        public ulong LuckyCount { get; set; }
-        public ulong ImmuneCount { get; set; }
-        public ulong MaxValue { get; set; }
-        public long MinValue { get; set; }
-
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
-
-        public void MergeTrackedStats (TrackedStats newTrackedStats)
-        {
-            TotalValue += newTrackedStats.TotalValue;
-            TotalCritValue += newTrackedStats.TotalCritValue;
-            TotalLuckyValue += newTrackedStats.TotalLuckyValue;
-            HitCount += newTrackedStats.HitCount;
-            NormalCount += newTrackedStats.NormalCount;
-            CritCount += newTrackedStats.CritCount;
-            MissCount += newTrackedStats.MissCount;
-            LuckyCount += newTrackedStats.LuckyCount;
-            ImmuneCount += newTrackedStats.ImmuneCount;
-
-            if (newTrackedStats.MaxValue > MaxValue)
-            {
-                MaxValue = newTrackedStats.MaxValue;
-            }
-
-            if (newTrackedStats.MinValue < MinValue)
-            {
-                MinValue = newTrackedStats.MinValue;
-            }
-        }
     }
 
     public class CombatStats : System.ICloneable
@@ -3174,28 +3119,17 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public List<SkillSnapshot> SkillSnapshots { get; private set; } = new();
         private readonly object _skillSnapshotsGate = new();
-        private bool _recordsSkillSnapshots = true;
+        private bool _recordsSkillSnapshots;
 
         /// <summary>
-        /// この統計でのスナップショット収集をやめる。<b><see cref="MetricsContainer"/> の
-        /// Damage / Healing / Taken 専用</b>で、あちらのセッターからしか呼ばれない。
-        /// 溜めるのも直列化するのも止まる(<see cref="ShouldSerializeSkillSnapshots"/>)。
+        /// この統計でスナップショットを溜める。<b><see cref="Entity.TakenStats"/> 専用</b>で、
+        /// あちらのセッターからしか呼ばれない。<b>既定は溜めない</b> —
+        /// 与ダメ・回復のグラフは <see cref="PerSecondTotals"/> で足り、スキル単位の統計には読み手が無い。
+        /// 印は <see cref="Clone"/>(MemberwiseClone)でそのまま複製される。
         /// </summary>
-        public void DisableSkillSnapshotRecording()
+        public void EnableSkillSnapshotRecording()
         {
-            _recordsSkillSnapshots = false;
-
-            lock (_skillSnapshotsGate)
-            {
-                // 既に溜まっているぶん(旧 blob の読み込みなど)も落とす。
-                // <b>Clear() ではなく差し替える。</b> <see cref="Clone"/> は MemberwiseClone なので
-                // 複製元と一覧の<b>参照を共有する</b>。Clear() だと複製側を止めたつもりで
-                // 複製元の中身まで消える。
-                if (SkillSnapshots.Count > 0)
-                {
-                    SkillSnapshots = new List<SkillSnapshot>();
-                }
-            }
+            _recordsSkillSnapshots = true;
         }
 
         /// <summary>
@@ -3209,6 +3143,54 @@ namespace StarResonanceDps.Core.CombatRuntime
             lock (_skillSnapshotsGate)
             {
                 return SkillSnapshots.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// 瞬間DPS/HPSグラフの材料。キーは <see cref="EncounterExData.FirstDamageTimeStamp"/> からの
+        /// 1秒の区切り(<c>max(ceil(経過秒) - 1, 0)</c>)、値はその1秒に入った合計。
+        ///
+        /// <para>
+        /// グラフは1秒ごとの合計しか使わないので、1件ずつは持たない。
+        /// 溜めるのはエンティティ直下の <c>DamageStats</c> / <c>HealingStats</c> だけで、
+        /// 足す条件(値が正、ダメージなら <c>Immune</c> 以外)は呼び出し側が決める。
+        /// </para>
+        /// </summary>
+        public Dictionary<int, long> PerSecondTotals { get; private set; } = new();
+
+        /// <summary>
+        /// <see cref="PerSecondTotals"/> に足したイベントのうち、最も遅い到着時刻。
+        /// グラフの終端がこれより前なら、ここまで伸ばす。
+        /// </summary>
+        public DateTime? LastPerSecondTimestamp { get; private set; }
+
+        private readonly object _perSecondTotalsGate = new();
+
+        public bool ShouldSerializePerSecondTotals() => PerSecondTotals.Count > 0;
+
+        public bool ShouldSerializeLastPerSecondTimestamp() => LastPerSecondTimestamp.HasValue;
+
+        public void AddPerSecondValue(DateTime timelineStart, DateTime timestamp, long value)
+        {
+            var seconds = Math.Max((timestamp - timelineStart).TotalSeconds, 0d);
+            var second = Math.Max((int)Math.Ceiling(seconds) - 1, 0);
+
+            lock (_perSecondTotalsGate)
+            {
+                PerSecondTotals[second] = PerSecondTotals.GetValueOrDefault(second) + value;
+                if (LastPerSecondTimestamp is not { } last || timestamp > last)
+                {
+                    LastPerSecondTimestamp = timestamp;
+                }
+            }
+        }
+
+        public KeyValuePair<int, long>[] GetPerSecondTotalsCopy(out DateTime? lastTimestamp)
+        {
+            lock (_perSecondTotalsGate)
+            {
+                lastTimestamp = LastPerSecondTimestamp;
+                return PerSecondTotals.ToArray();
             }
         }
 
@@ -3304,7 +3286,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        public void AddData(long otherUuid, long skillId, int level, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, Vec3 damagePos, Vector3? instigatorPos, Vector3? targetPos, ExtraPacketData extraPacketData, double inactiveTime, DateTime? startTime)
+        public SkillSnapshot? AddData(long otherUuid, long skillId, int level, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, ExtraPacketData extraPacketData, double inactiveTime, DateTime? startTime, SkillSnapshotStamp stamp)
         {
             DateTime now = extraPacketData.ArrivalTime;
             InactiveTime = inactiveTime;
@@ -3407,7 +3389,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            AddSnapshot(otherUuid, skillId, level, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, damagePos, instigatorPos, targetPos, now);
+            return AddSnapshot(otherUuid, skillId, level, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, now, stamp);
         }
 
         public void SetSummonData(long uuid, int level)
@@ -3416,13 +3398,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             TierLevel = level;
         }
 
-        public void AddSnapshot(long otherUuid, long id, int level, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, Vec3 damagePos, Vector3? instigatorPos, Vector3? targetPos, DateTime timestamp)
+        public SkillSnapshot? AddSnapshot(long otherUuid, long id, int level, long value, bool isCrit, bool isLucky, long hpLessenValue, long shieldBreak, bool isCauseLucky, EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode, bool isDead, DateTime timestamp, SkillSnapshotStamp stamp)
         {
-            // 記録しない統計(MetricsContainer 配下)では作りもしない。
+            // 記録しない統計(TakenStats 以外)では作りもしない。
             // 実行中のメモリと blob の両方に効く。
             if (!_recordsSkillSnapshots)
             {
-                return;
+                return null;
             }
 
             var snapshot = new SkillSnapshot()
@@ -3442,9 +3424,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                 DamageMode = damageMode,
                 IsKill = isDead,
                 Timestamp = timestamp,
-                HitPosition = damagePos.ToVector3(),
-                InstigatorPos = instigatorPos,
-                TargetPos = targetPos,
+                Sequence = stamp.Sequence,
+                TargetHp = stamp.TargetHp,
+                TargetMaxHp = stamp.TargetMaxHp,
+                OwnerId = stamp.OwnerId,
+                DamageSource = stamp.DamageSource,
+                BuffSourceSkillId = stamp.BuffSourceSkillId,
+                SummonSourceSkillId = stamp.SummonSourceSkillId,
             };
 
             if (damageType == EDamageType.Miss)
@@ -3465,6 +3451,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 SkillSnapshots.Add(snapshot);
             }
+
+            return snapshot;
         }
 
         public void MergeCombatStats(CombatStats newCombatStats)
@@ -3584,7 +3572,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            // 記録しない統計(MetricsContainer 配下)には取り込まない。
+            // 記録しない統計(TakenStats 以外)には取り込まない。
             // 突き合わせは同種同士(entity 直下 ↔ entity 直下 / SkillMetrics[k].X ↔ SkillMetrics[k].X)
             // なので相手も空だが、一覧への書き手はここと AddSnapshot の2つだけなので両方で閉じる。
             if (_recordsSkillSnapshots)
@@ -3628,11 +3616,38 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool IsImmune { get; set; }
 
         public DateTime? Timestamp { get; set; } = null;
-        public Vector3 HitPosition { get; set; }
 
-        public Vector3? InstigatorPos { get; set; } = null;
+        /// <summary>
+        /// エンカウンター内の通し番号。被ダメログがエンティティをまたいで並べ直すのに使う。
+        /// <b>0 は通し番号を持たない古い記録</b>で、ログには載らない。
+        /// </summary>
+        public long Sequence { get; set; }
 
-        public Vector3? TargetPos { get; set; } = null;
+        /// <summary>イベント後の対象の HP。被ダメログの被弾行に出す。</summary>
+        public long? TargetHp { get; set; }
+
+        /// <summary>
+        /// <c>SyncDamageInfo.OwnerId</c> の生の値。<see cref="DamageSource"/> が <c>Buff</c> ならバフID、
+        /// <c>Bullet</c> / <c>FakeBullet</c> なら弾ID、それ以外はスキルID。
+        /// <see cref="Id"/> はメーター用に畳んだ鍵なので、被ダメログの技名はこちらで引く。
+        /// </summary>
+        public int OwnerId { get; set; }
+
+        public EDamageSource DamageSource { get; set; }
+
+        /// <summary>
+        /// バフ由来のとき、記録した瞬間に生きていた実体から引いたそのバフの付与元の技ID。決まらなければ 0。
+        /// 実体は後から残らないので、表示時には引き直せない。
+        /// </summary>
+        public int BuffSourceSkillId { get; set; }
+
+        /// <summary>
+        /// ダメージを出した実体(仮想体など)を出した技ID。実体の出現時に決めて控えたもの。決まらなければ 0。
+        /// バフ経由のものは被弾の頃にはバフが除去されているので、表示時には引き直せない。
+        /// </summary>
+        public int SummonSourceSkillId { get; set; }
+
+        public long? TargetMaxHp { get; set; }
 
         public object Clone()
         {

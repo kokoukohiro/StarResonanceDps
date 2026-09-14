@@ -7,10 +7,12 @@
 ```bash
 cd StarResonanceDps/DataTools
 python gen_recounts.py    # メーターの行名
-python gen_buffs.py       # バフ/デバフウィジェットのバフ名
-python gen_skills.py      # 装備中スキル枠のスキル名
+python gen_buffs.py       # バフ名(BuffTable の全行)
+python gen_skills.py      # スキル名(SkillTable の全行)
+python gen_dbms.py        # ボス大技の予告(DbmTable)の技名
 python gen_scenes.py      # シーン名
 python gen_monsters.py    # モンスター・NPCの名前
+python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -24,11 +26,15 @@ python gen_monsters.py    # モンスター・NPCの名前
 言語別の Ztable を取り出せる。
 
 期待する構成は「出所 → `Ztable` → 言語フォルダ → `ZTable` → `*.json`」。
+`gen_skill_warnings.py` は同じツールの出力の `Unk`(出所ごと)と `Bundles`(共通)も読む。
 
 ```
 JSONS/
   StarASIA/Ztable/{cn,en,jp,kr}/ZTable/*.json
+  StarASIA/Unk/*.bin
   Star/Ztable/{cn,en,jp,kr}/ZTable/*.json
+  Star/Unk/*.bin
+  Bundles/*.ab
 ```
 
 既定ではリポジトリの隣の `JSONS` を見る。別の場所に置くなら環境変数で指す。
@@ -43,24 +49,29 @@ export BPSR_TABLES=<置き場所>     # bash
 
 ### 出所は項目で使い分ける
 
-**行構成は `Ztable（Star）`、名前は `Ztable（StarASIA）` が権威。** 同じ表でも良いほうが違う。
+**見出し表(`gen_recounts.py`)の行構成は `Ztable（Star）` だけで組む。** 行名は下の言語別の土台に従う。
 
 `Ztable（Star）` のほうが行構成が新しく、被覆も広い。実測で名前が出るイベントが
 94.73% → 96.80% に上がり、`StarASIA` にしか無い鍵は1件だけだった。
-一方で `Ztable（Star）` は jp/kr の行名の列が壊れているので、名前は `StarASIA` から取る。
+一方で `Ztable（Star）` は jp/kr の行名の列が壊れているので、jp/kr の行名は `StarASIA` から取る
+(壊れた列は総括行の検算で弾かれる)。
 
-**この使い分けは見出し表(`gen_recounts.py`)だけ。** 他のツールは下記のとおり。
+### 土台は言語で分ける — cn / en は `Ztable（Star）`、jp / kr は `Ztable（StarASIA）`
 
-### 名前は `Ztable（StarASIA）` が土台、`Ztable（Star）` が補う
+`Ztable（Star）` は中国サーバー、`Ztable（StarASIA）` はアジアサーバーのビルドで、版が違う。
+**それぞれのサーバーの言語は、そのサーバーの表を土台にする**(`_common.sources_for`)。
 
-**`Ztable（StarASIA）` は4言語とも名前がよく埋まっている。**
-`Ztable（Star）` は収録IDが多いぶん、cn/en 以外の名前が抜けていることがある。
+| 言語フォルダ | 土台 | 補う側 |
+|---|---|---|
+| cn / en | `Star` | `StarASIA` |
+| jp / kr | `StarASIA` | `Star` |
 
-そこで**行は `StarASIA` が勝ち、`Star` は無い行を足すだけ**。
-そのうえで、採った行の**空欄の文字列項目**だけを相手側で補う(`_common.table`)。
+**行は土台が勝ち、補う側は無い行を足すだけ。** そのうえで、採った行の**空欄の文字列項目**だけを
+補う側で埋める(`_common.table`)。版によって同じIDの値が食い違うときも土台を採る。
 
-版によって同じIDの値が食い違うことがあるが、そのときも `StarASIA` を採る。
-実測で `BuffPriority` が5件、メーターの行の所属が2件ぶん分かれた。
+cn / en を `StarASIA` 土台から切り替えたとき(2026-09-14)に変わった名前は、zh-CN / en-US だけで
+buffs 5 / 3件(空 → 名前あり)、dbms 2 / 1件、monsters 10 / 12件、recounts の行名 5 / 7件。
+ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべて不変。
 
 ### 行番号で引くテーブルは合併しない
 
@@ -73,7 +84,7 @@ export BPSR_TABLES=<置き場所>     # bash
 **言語をまたぐときも同じ。** 行数も収録IDも一致しないので、
 名前を引く言語ごとに、同じ出所の同じ行を指していることを確かめてから取る。
 
-**各ツールが読むのは入力側の JSON だけ。** 手動編集ファイルは読みも書きもしない。
+**各ツールが読むのは入力側だけ。** 手動編集ファイルは読みも書きもしない。
 
 ## 出力
 
@@ -82,8 +93,10 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_recounts.py` | `Data/Localization/recounts.{cn,en,jp,kr}.json` |
 | `gen_buffs.py` | `Data/Localization/buffs.{cn,en,jp,kr}.json` |
 | `gen_skills.py` | `Data/Localization/skills.{cn,en,jp,kr}.json` |
+| `gen_dbms.py` | `Data/Localization/dbms.{cn,en,jp,kr}.json` |
 | `gen_scenes.py` | `Data/Localization/scenes.{cn,en,jp,kr}.json` |
 | `gen_monsters.py` | `Data/Localization/monsters.{cn,en,jp,kr}.json` |
+| `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
 
 ## 全ツール共通の仕様
 
@@ -191,10 +204,10 @@ DamageId の下2桁                    = 枝番(HitEventId)
 
 ### 行構成と名前で出所を使い分ける
 
-行の組み立ては `Ztable（Star）` だけで行い、名前は `Ztable（StarASIA）` から載せる。
-行の対応は**共有する鍵の数**で取る（行番号は版で違う）。
+行の組み立ては `Ztable（Star）` だけで行う。行名は言語別の土台(cn / en は `Star`、jp / kr は `StarASIA`)から載せ、
+空欄だけもう一方で補う。`StarASIA` の行との対応は**共有する鍵の数**で取る（行番号は版で違う）。
 
-`StarASIA` に対応の無い行はその出所の名前を使う。jp/kr が空欄のまま残るが、
+`StarASIA` に対応の無い行は `Star` の名前を使う。jp/kr が空欄のまま残る(`Star` の jp/kr の列は検算で弾く)が、
 表示時に zh-CN へ落ちるので読める。
 
 ### 総括行は落とす
@@ -230,34 +243,60 @@ DamageId の下2桁                    = 枝番(HitEventId)
 
 ## gen_buffs.py
 
-**`BuffPriority` が 0 のバフは収録しない。** ゲーム内のバフ表示と対象をそろえるため。
+**`BuffTable` の全行**を収録する。`BuffPriority` で絞らない。
+
+バフ/デバフウィジェットに出るバフに加えて、ゲームがバフバーに出さないバフも名前を引ける。
+被ダメログは発生源がバフのダメージ(`OwnerId` がバフID)の名前をここから引く。
 
 言語によって収録数に差があるので、鍵は和集合。
 
-> **表示条件そのものはこのファイルで判定しない。**
-> 同梱 `Data/BuffTable.json` で判定する（`MeterSnapshotProvider.IsHiddenFromBuffBar`）。
-> 言語別テーブルで判定すると、片方にしか無いバフが特定の表示言語でだけ出なくなる。
+> **表示条件はこのファイルで判定しない。**
+> 同梱 `Data/Raw/BuffTable.json` の `BuffPriority` で判定する（`MeterSnapshotProvider.IsHiddenFromBuffBar`）。
+> 名前テーブルに載っていることは、バフバーに出ることを意味しない。
+
+**`201` も空にする。** 埋め草 `气刃突刺计数` は `BuffTable` の先頭行 `201` の名前だが、
+`201` 自身も4言語とも中国語のままで訳が無い。`gen_skills.py` の `1101`(他言語に訳語がある)とは事情が違う。
+
+---
+
+## gen_dbms.py
+
+ボス大技の予告(`DbmTable`)の `Content` を、**技IDを鍵に**書く。ゲームが予告に出す正式な技名で、
+`SkillTable.Name` が埋め草の技にも名前がある。
+
+`DbmTable.Id` は技IDそのものか、ある技の `SkillTable.EffectIDs` の要素。後者は持ち主の技IDへ寄せる。
+どちらにも当たらない行は入れず、一覧を出す(Star の `339510303` / `339510305` / `339510307`)。
+
+`DbmTable` の1行が複数の技に当たるか、1つの技に複数の行が当たったら止まる。
+`EffectIDs` の要素を複数の技が共有すること自体は、`DbmTable` に無い番号では普通にある(`14046001` など)。
+
+**StarASIA の cn 版に仮名の混じった行がある**(`17020801` 终焉の前奏 / `17021101` 虚蚀の圆舞)。
+cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆舞` が出る。
 
 ---
 
 ## gen_skills.py
 
-**枠に置けるIDだけ**を収録する。
+**`SkillTable` の全行**を収録する。使い道を決めて絞らない。
 
-メーターの行名は見出し表が決めるので、このテーブルに要るのはスキル枠ウィジェットが
-名前を引くIDだけ。
+スキル枠(イマジン・ロール)に加えて、モンスターの技など枠に置かれないスキルも名前を引ける。
+以前は枠に置けるIDだけに絞っていたが、絞り込みの条件は使い道が増えるたびに漏れる。
 
-```
-イマジン  Icon に skill_aoyi を含む
-ロール    SlotPositionId に 21〜24
-```
+モンスターの技の大半は未翻訳で、名前が埋め草 `场地标记01` になっている。これは空になる
+(→「プレースホルダは名前として扱わない」)。
 
-**イマジンは枠番号で判定しない。** 変身の解除スキルは `SlotPositionId` が空なのに、
-変身中は実際にイマジン枠へ入る。枠ウィジェットはテーブルの枠指定を見ず、
-実行時の枠の中身(`AttrSlot`)をそのまま出すので、**枠指定は「名前が要るか」の
-判断材料にならない**。アイコンのほうが実態に合う。
+### 埋め草と同じ文字列が本物の名前になっている行
 
-ロールは枠番号のままでよい。アイコンで判定しても同じ集合になるが、意図が明確。
+**`1101` の zh-CN `场地标记01` は本物の名前。** 連番の「フィールドマーク」01〜06 の先頭で、
+他言語には訳語が入っている(`Marker 1` / `フィールドマーク01` / `필드 표시01`)。
+埋め草として空にすると zh-CN だけ名前が消え、表示時の落とし先も失うので、
+`gen_skills.GENUINE_PLACEHOLDER_NAME_IDS` に持たせて `Name` をそのまま使う。
+
+**`_common.PLACEHOLDERS` 側で例外にしないこと。** バフなど他の生成器にも効いてしまう。
+
+**埋め草の出所は各テーブルの先頭行の名前。** `SkillTable` の先頭は `1101 场地标记01`、
+`BuffTable` の先頭は `201 气刃突刺计数` で(StarASIA・Star とも)、未翻訳の行にはこの名前がそのまま入っている。
+`201` は4言語とも訳が無いので、`gen_buffs.py` は例外にしない。
 
 ---
 
@@ -266,6 +305,47 @@ DamageId の下2桁                    = 枝番(HitEventId)
 `SceneTable.Name` が本体。`SceneTable` に無いシーンIDだけ `DungeonsTable` で補う。
 
 言語によって収録数に差がある。無い行は空文字で入り、表示時に zh-CN へ落ちる。
+
+---
+
+## gen_skill_warnings.py
+
+戦闘画面の警告バーを出す技を、**技レベルID(技ID×100＋レベル)の配列**で書く。名前は持たない。
+被ダメログは、この一覧にある技の開始を詠唱として出す。
+
+### 判定
+
+`show_data` の技辞書で、**スロット52に項目を持つ技レベル**を収録する。
+同じ技でもレベルによって持たないことがあるので、技IDではなく技レベルIDで持つ。
+
+### 入力の探し方
+
+1. 出所ごとの `Unk/*.bin` から、中身に `->>>> bundleHash:` を含むアドレス一覧を探す。1本に決まらなければ止まる
+2. アドレス一覧を読む
+   - アドレス行 `address:<アドレス> ->>>> hash:<数字> ->>>> bundleHash:<数字>`(アドレスは空白を含むことがある)。行数が見出し `AddressCount` と違えば止まる
+   - バンドルの一覧(見出し `DepsDictCount` のあとの `bundleHash:<数字>` の行)。行数か異なる番号の数が見出しと違えば止まる
+3. **バンドルの一覧が `Bundles` に全部そろうアドレス一覧を使う。** `Bundles` は出所共通なので、どの出所の一覧と対応しているかをファイルの有無で決める
+   - そろう一覧が無ければ止まる
+   - そろう一覧が複数あり、`bin/datas/show_data` の番号が違えば止まる(どちらを使うか決められない)
+4. その一覧の `bin/datas/show_data` の番号で `Bundles/<番号>.ab`(UnityFS)を開き、TextAsset `show_data` を取り出す。無ければ止まる
+
+バンドルの番号は版で変わるので直書きしない。**止まったときは出力を書かない**(前の出力が残る)。
+
+### `show_data` の形
+
+先頭 `06` のあと、整数キーの辞書が 技 → バフ → 弾 の順に並ぶ。各辞書は `int32` 件数とレコード。
+
+| 部分 | 形 |
+|---|---|
+| レコード | `int32` キー / `int32 0` / `45` / `byte` 中身のある枠の数 / 枠×68 |
+| 枠 | `int32 -1`(空)か、`int32` 件数と項目 |
+| 型4 | `ff` `uint16` `uint16` `ff`。中身を直接持つときは `ff` の代わりに `10` で始まる50バイト |
+| 型5 | `ff` `uint16` `uint16` 文字列 `ff` |
+| 型6 | `ff` `uint16` `uint16` 文字列 文字列 `ff` |
+| 型8 | `ff` `uint16` `uint16` 文字列 文字列 `ff` `uint16` `ff` |
+| 文字列 | 先頭の `int32` が `-1` なら無し、0以上なら4バイトの値、それ以外は `~値` がバイト長で `int32` 文字数と UTF-8 が続く |
+
+**読めない形、件数・枠数・区切りの食い違いがあれば止まる。** 辞書を1件も飛ばさない。
 
 ---
 

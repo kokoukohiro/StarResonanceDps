@@ -37,10 +37,9 @@ public enum PlayerClassSpec
     /// <c>SubProfessionId</c> ではなく職業IDから固定で決まる。
     ///
     /// <para>
-    /// 一次データでの裏取り(2026-08-27): <c>TalentStageTable</c> の
-    /// 124-126 / 130-132 / 133-135 は全て <c>RootId=0</c> の「クラスR1」で、R2 が存在しない。
-    /// 名前は <c>SkillAoyiTable.ResonanceObject</c>(共鳴対象)と、そこから
-    /// <c>MonsterId</c> を辿った <c>MonsterTable.Name</c> の2経路で一致した。
+    /// 根拠は <c>TalentStageTable</c> — この3クラスの行は全て <c>RootId=0</c> の「クラスR1」で、
+    /// R2 のエントリが存在しない。名前は <c>ProfessionTable</c> に無く、
+    /// <c>SkillAoyiTable.ResonanceObject</c> から引く。
     /// </para>
     /// </summary>
     TransformDorothy,

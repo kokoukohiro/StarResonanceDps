@@ -534,7 +534,7 @@
                                       Canvas 自身の DesiredSize は 0 なのでレイアウトへは影響しない
                                     ・最後に置いたうえで Panel.ZIndex も明示する。列0の中に入れると、
                                       後から描かれる列1(HPバー)の下に潜る
-                                    ・幅44は英語の最長 "Unknown"(43.32px @ FontSize=10 SemiBold) に合わせた実測値
+                                    ・幅44は英語の最長 "Unknown"(43.32px @ FontSize=10 SemiBold) に合わせてある
                                     ・Canvas.Left の -5.5 はアイコン中心(列0の中心 x=16.5)に
                                       44px の中心を合わせる値。ScrollViewer から移した 5px の余地に収まるので、HPバーには重ならない
                                 -->

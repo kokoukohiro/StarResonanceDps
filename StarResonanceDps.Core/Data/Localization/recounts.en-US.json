@@ -81,7 +81,7 @@
     ]
   },
   "12": {
-    "RecountName": "Instant Edge",
+    "RecountName": "Instant Edge Combo",
     "SourceId": [
       "149904:1"
     ]
@@ -406,7 +406,7 @@
     ]
   },
   "58": {
-    "RecountName": "Moonblades",
+    "RecountName": "MoonBlades",
     "SourceId": [
       "44601:3",
       "44701:3"
@@ -580,7 +580,7 @@
     ]
   },
   "80": {
-    "RecountName": "​Quadraflare​",
+    "RecountName": "Quadraflare",
     "SourceId": [
       "2294:1",
       "55235:1",
@@ -660,13 +660,13 @@
     ]
   },
   "93": {
-    "RecountName": "Wild Wolf - Basic Attack",
+    "RecountName": "Wild Wolf - Basic Attack - Sweep",
     "SourceId": [
       "1700827:1"
     ]
   },
   "94": {
-    "RecountName": "Wild Wolf - Coordinated Attack",
+    "RecountName": "Wild Wolf - Coordinated Attack - Bite",
     "SourceId": [
       "1700820:2"
     ]
@@ -1749,7 +1749,7 @@
     ]
   },
   "246": {
-    "RecountName": "Wildfire Dance - Final Form",
+    "RecountName": "Wildfire Dance - Final Slash",
     "SourceId": [
       "1622:1"
     ]
@@ -2361,7 +2361,7 @@
     ]
   },
   "335": {
-    "RecountName": "Fantasia Impact",
+    "RecountName": "Disillusion Impact",
     "SourceId": [
       "7998:1"
     ]

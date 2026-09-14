@@ -23,6 +23,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static ZstdSharp.Decompressor Decompressor = new ZstdSharp.Decompressor();
         private static object DBLock = new object();
         private static readonly RuntimeSerializationBinder SerializationBinder = new();
+        private static readonly EncounterBlobContractResolver BlobContractResolver = new();
         private static readonly List<BaseMigration> Migrations = [
                 new SkillStatsMigration()
             ];
@@ -115,10 +116,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                             {
                                 Formatting = Formatting.None,
                                 TypeNameHandling = TypeNameHandling.All,
+                                ContractResolver = BlobContractResolver,
                             };
                             lock (encounter.Entities)
                             {
-                                serializer.Serialize(writer, encounter.Entities);
+                                serializer.Serialize(writer, SelectPersistedEntities(encounter));
                             }
                             writer.Flush();
                         }
@@ -133,6 +135,39 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 return entityBlob;
             }
+        }
+
+        /// <summary>
+        /// blob に書くエンティティ。プレイヤー全員と、被ダメログに出てくる加害者・詠唱した敵だけ。
+        /// それ以外(弾・設置物・被ダメログに出ないモンスターなど)は履歴で読まれない。
+        /// 書く項目は <see cref="EncounterBlobContractResolver"/> が決める。
+        /// </summary>
+        private static ConcurrentDictionary<long, Entity> SelectPersistedEntities(Encounter encounter)
+        {
+            var persisted = new ConcurrentDictionary<long, Entity>();
+            foreach (var (uuid, entity) in encounter.Entities)
+            {
+                if (entity.EntityType != Zproto.EEntityType.EntChar)
+                {
+                    if (entity.GetSkillCastsCopy().Length > 0)
+                    {
+                        persisted[uuid] = entity;
+                    }
+
+                    continue;
+                }
+
+                persisted[uuid] = entity;
+                foreach (var snapshot in entity.TakenStats.GetSkillSnapshotsCopy())
+                {
+                    if (encounter.Entities.TryGetValue(snapshot.OtherUUID, out var attacker))
+                    {
+                        persisted[snapshot.OtherUUID] = attacker;
+                    }
+                }
+            }
+
+            return persisted;
         }
 
         public static void UpdateEncounterWipeState(ulong encounterId, bool isWipe)
@@ -188,12 +223,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 // GC.Collect(2) はここに置かない。**世代2のフル回収は呼び出し元を止める。**
                 // この経路は履歴を選んだUIスレッドから走るので、そのぶん丸ごと固まる。
-                //
-                // 実測(2026-09-12、CombatRuntime.log):
-                //   blob 6.1MB → 3.9〜5.1秒 / 2.0MB → 1.3〜1.7秒 と blob に比例するが、
-                //   **blob 8.5KB の Enc 7 が 0.99秒と1.67秒**かかっていた。
-                //   小さい blob で1秒以上取られていたぶんは、ほぼこの強制GC。
-                // 一時バッファの回収はランタイムに任せる。
+                // blob が小さくても1秒以上持っていかれる。一時バッファの回収はランタイムに任せる。
             }
             else
             {

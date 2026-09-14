@@ -3,12 +3,12 @@
     <!--
         ウィジェットの基底フォント。数字を等幅で出すために要る。
 
-        既定フォントは OS の MessageFont(実測: Yu Gothic UI)で、その Semibold フェイスは
-        数字がプロポーショナル(0=555 / 1=402)。しかも tnum を持たないため
-        Typography.NumeralAlignment="Tabular" が黙って無視される。これが桁が揃わない原因。
+        既定フォントは OS の MessageFont(日本語環境では Yu Gothic UI)。その Semibold フェイスは
+        数字がプロポーショナルなうえ tnum を持たないため、
+        Typography.NumeralAlignment="Tabular" が黙って無視される。
 
-        Segoe UI Semibold も既定の字幅は同じだが tnum を持つので、Tabular と
-        組み合わせて初めて揃う。フォント指定と Tabular はセット。片方だけでは効かない。
+        Segoe UI Semibold も既定の字幅は同じだが tnum を持つので Tabular が効く。
+        **フォント指定と Tabular はセット。片方だけでは揃わない。**
 
         2つ目に和文フォントを直書きしないのは、zh-CN / ko-KR に日本語書体が当たるのを
         避けるため。合成フォント Global User Interface は言語ごとに割り当てを持っていて、

@@ -73,7 +73,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.HealingContribution, "Widget_HealingSkillDetails");
         AddWidget(WidgetKind.HealingSummary, "Widget_HealingContribution");
         AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
-        AddWidget(WidgetKind.SkillLog, "Menu_SkillDiary");
+        AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;

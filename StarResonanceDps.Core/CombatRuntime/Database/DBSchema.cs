@@ -20,12 +20,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                     BattleId, SceneId, SceneName, SceneSubName, BossUUID, BossAttrId, BossName, BossHpPct, Note, StartTime, EndTime, LastUpdate,
                     TotalDamage, TotalNpcDamage, TotalShieldBreak, TotalNpcShieldBreak,
                     TotalHealing, TotalNpcHealing, TotalOverhealing, TotalNpcOverhealing,
-                    TotalTakenDamage, TotalNpcTakenDamage, TotalDeaths, TotalNpcDeaths, IsWipe, ExDataBlob
+                    TotalDeaths, TotalNpcDeaths, IsWipe, ExDataBlob
                 ) VALUES (
                     @BattleId, @SceneId, @SceneName, @SceneSubName, @BossUUID, @BossAttrId, @BossName, @BossHpPct, @Note, @StartTime, @EndTime, @LastUpdate,
                     @TotalDamage, @TotalNpcDamage, @TotalShieldBreak, @TotalNpcShieldBreak,
                     @TotalHealing, @TotalNpcHealing, @TotalOverhealing, @TotalNpcOverhealing,
-                    @TotalTakenDamage, @TotalNpcTakenDamage, @TotalDeaths, @TotalNpcDeaths, @IsWipe, @ExDataBlob
+                    @TotalDeaths, @TotalNpcDeaths, @IsWipe, @ExDataBlob
                 );
                 SELECT last_insert_rowid();";
 
@@ -68,8 +68,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     TotalNpcHealing INTEGER DEFAULT 0,
                     TotalOverhealing INTEGER DEFAULT 0,
                     TotalNpcOverhealing INTEGER DEFAULT 0,
-                    TotalTakenDamage INTEGER DEFAULT 0,
-                    TotalNpcTakenDamage INTEGER DEFAULT 0,
                     TotalDeaths INTEGER DEFAULT 0,
                     TotalNpcDeaths INTEGER DEFAULT 0,
                     IsWipe INTEGER DEFAULT 0,

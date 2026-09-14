@@ -634,7 +634,7 @@ public static class WidgetConfigDefaults
                 Width = BuffDebuffCardInitialWindowWidth,
                 Height = BuffDebuffCardInitialWindowHeight
             },
-            WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
+            WidgetKind.DamageContribution or WidgetKind.HealingContribution or WidgetKind.TakenDamageLog => new WidgetWindowConfig
             {
                 Width = MetricContributionInitialWindowWidth,
                 Height = MetricContributionInitialWindowHeight
@@ -899,6 +899,7 @@ public static class WidgetConfigDefaults
                 break;
             case WidgetKind.DamageContribution:
             case WidgetKind.HealingContribution:
+            case WidgetKind.TakenDamageLog:
                 config.Window.Width ??= MetricContributionInitialWindowWidth;
                 config.Window.Height ??= MetricContributionInitialWindowHeight;
                 break;

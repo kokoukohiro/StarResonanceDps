@@ -26,6 +26,22 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary>技ID → ボス大技の予告(<c>DbmTable</c>)の名前。<c>Data/Localization/dbms.*.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _dbmNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// <c>SkillTable.EffectIDs</c> の要素 → その要素を持つ技ID。予告の通知が技IDではなくエフェクトIDを運ぶときに引く。
+    /// 複数の技が同じ要素を持つものは持ち主が決まらないので入れない。
+    /// </summary>
+    private static FrozenDictionary<int, int> _skillIdByEffectId = FrozenDictionary<int, int>.Empty;
+    /// <summary>技ID → その技を <c>MonsterTable.SkillIds</c> に持つモンスターの種別ID。</summary>
+    private static FrozenDictionary<int, FrozenSet<int>> _monsterIdsBySkillId = FrozenDictionary<int, FrozenSet<int>>.Empty;
+    /// <summary>
+    /// 戦闘画面の警告バーを出す技の技レベルID(技ID×100＋レベル)。<c>Data/Generated/SkillWarnings.json</c>。
+    /// <c>DataTools/gen_skill_warnings.py</c> が生成する。
+    /// </summary>
+    private static FrozenSet<int> _warningSkillLevelIds = FrozenSet<int>.Empty;
     /// <summary>行代表キー → ゲーム内メーターの行名。<c>Data/Localization/recounts.*.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<long, string>> _recountNames =
         new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase)
@@ -124,6 +140,10 @@ public static class CombatDataCatalog
             _skillNames = LoadLocalizedText("skills");
             _buffNames = LoadLocalizedText("buffs");
             _monsterNames = LoadLocalizedText("monsters");
+            _dbmNames = LoadLocalizedText("dbms");
+            _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
+            _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
+            _warningSkillLevelIds = LoadWarningSkillLevels();
             _sceneNames = LoadLocalizedText("scenes");
             LoadRecounts();
         }
@@ -552,6 +572,112 @@ public static class CombatDataCatalog
             skillId);
     }
 
+    /// <summary>内部ID注記を付けない技名。名前が取れていなければ空を返す。</summary>
+    public static string GetSkillNameWithoutInternalId(int skillId)
+    {
+        return ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId);
+    }
+
+    /// <summary>
+    /// ボス大技の予告(<c>DbmTable</c>)に載っている技の名前。内部ID注記は付けない。載っていなければ空。
+    ///
+    /// <para>
+    /// ゲームが予告に出す正式な技名で、<c>SkillTable.Name</c> が埋め草の技にも名前がある。
+    /// 鍵は技ID(生成時に <c>EffectIDs</c> の要素から持ち主の技へ寄せてある)。
+    /// </para>
+    /// </summary>
+    public static string GetDbmNameWithoutInternalId(int skillId)
+    {
+        return ResolveText(_dbmNames, Volatile.Read(ref _cultureName), skillId);
+    }
+
+    /// <summary>
+    /// 弾(<c>Bullet</c> / <c>FakeBullet</c> 由来のダメージの <c>OwnerId</c>)から親の技IDを引く。
+    ///
+    /// <para>
+    /// <c>OwnerId</c> は <c>BulletTable</c> の番号で、<c>BulletTable</c> には技を指す項目が無い。
+    /// <c>SkillTable</c> にその番号があればその技、無ければ <c>SkillFightLevelTable</c> の同じ番号の行の
+    /// <c>SkillId</c>(<c>SkillTable</c> にあるもの)を親とする。どちらにも無ければ辿れない。
+    /// </para>
+    /// </summary>
+    public static bool TryResolveBulletParentSkillId(int bulletId, out int skillId)
+    {
+        if (_skills.ContainsKey(bulletId))
+        {
+            skillId = bulletId;
+            return true;
+        }
+
+        if (HelperMethods.DataTables.SkillFightLevels.Data.TryGetValue(
+                bulletId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var fightLevel)
+            && _skills.ContainsKey(fightLevel.SkillId))
+        {
+            skillId = fightLevel.SkillId;
+            return true;
+        }
+
+        skillId = 0;
+        return false;
+    }
+
+    /// <summary>呼び出し側で決めた名前(空のときの代わりの名前など)に、技の内部ID注記を添える。</summary>
+    public static string AppendSkillInternalId(string name, int skillId)
+    {
+        return AppendInternalId(name, InternalIdDisplayMode.SkillOnly, skillId);
+    }
+
+    /// <summary>呼び出し側で決めた名前に、バフの内部ID注記を添える。</summary>
+    public static string AppendBuffInternalId(string name, int buffId)
+    {
+        return AppendInternalId(name, InternalIdDisplayMode.BuffOnly, buffId);
+    }
+
+    /// <summary>
+    /// 詠唱(または誘導)のバーを持つ技か。<c>SkillTable.SingOrGuideTime</c> の先頭要素の全体秒数が 0 より大きい。
+    ///
+    /// <para>
+    /// サーバは「詠唱中」を送らない。ゲームは技の開始とこの設定から詠唱バーを出す(2026-09-14 実測)。
+    /// </para>
+    /// </summary>
+    public static bool HasSingOrGuideTime(int skillId)
+    {
+        return _skills.TryGetValue(skillId, out var skill)
+            && skill.SingOrGuideTime is [[> 0f, ..], ..];
+    }
+
+    /// <summary>
+    /// 戦闘画面の警告バーを出す技か(<c>Data/Generated/SkillWarnings.json</c>)。
+    /// <b>技レベルで決まる</b>(同じ技でもレベルによって持たないことがある)ので、技IDとレベルの両方で引く。
+    /// </summary>
+    public static bool IsWarningSkill(int skillId, int skillLevel)
+    {
+        var skillLevelId = (long)skillId * 100 + skillLevel;
+        return skillLevelId <= int.MaxValue && _warningSkillLevelIds.Contains((int)skillLevelId);
+    }
+
+    /// <summary>
+    /// ボス大技の予告の通知(<c>DbmTable.Id</c>)から技IDを引く。
+    /// <c>SkillTable</c> にその番号があればその技、無ければその番号を <c>EffectIDs</c> に持つ技。
+    /// </summary>
+    public static bool TryResolveDbmSkillId(int dbmId, out int skillId)
+    {
+        if (_skills.ContainsKey(dbmId))
+        {
+            skillId = dbmId;
+            return true;
+        }
+
+        return _skillIdByEffectId.TryGetValue(dbmId, out skillId);
+    }
+
+    /// <summary>モンスター(種別ID)が <c>MonsterTable.SkillIds</c> にその技を持つか。</summary>
+    public static bool MonsterHasSkill(int monsterId, int skillId)
+    {
+        return _monsterIdsBySkillId.TryGetValue(skillId, out var monsterIds)
+            && monsterIds.Contains(monsterId);
+    }
+
     /// <summary>
     /// 内部ID注記を付けないバフ名。<b>記憶・保存する値にはこちらを使う。</b>
     ///
@@ -839,6 +965,62 @@ public static class CombatDataCatalog
         }
 
         return result.ToFrozenDictionary();
+    }
+
+    private static FrozenDictionary<int, int> BuildSkillIdByEffectId(FrozenDictionary<int, Skill> skills)
+    {
+        var owners = new Dictionary<int, HashSet<int>>();
+        foreach (var (skillId, skill) in skills)
+        {
+            foreach (var effectId in skill.EffectIDs ?? [])
+            {
+                if (!owners.TryGetValue(effectId, out var skillIds))
+                {
+                    skillIds = [];
+                    owners[effectId] = skillIds;
+                }
+
+                skillIds.Add(skillId);
+            }
+        }
+
+        return owners
+            .Where(pair => pair.Value.Count == 1)
+            .ToFrozenDictionary(pair => pair.Key, pair => pair.Value.First());
+    }
+
+    private static FrozenDictionary<int, FrozenSet<int>> BuildMonsterIdsBySkillId()
+    {
+        var result = new Dictionary<int, HashSet<int>>();
+        foreach (var (key, monster) in HelperMethods.DataTables.Monsters.Data)
+        {
+            if (!int.TryParse(key, out var monsterId))
+            {
+                continue;
+            }
+
+            foreach (var skillId in monster.SkillIds ?? [])
+            {
+                if (!result.TryGetValue(skillId, out var monsterIds))
+                {
+                    monsterIds = [];
+                    result[skillId] = monsterIds;
+                }
+
+                monsterIds.Add(monsterId);
+            }
+        }
+
+        return result.ToFrozenDictionary(pair => pair.Key, pair => pair.Value.ToFrozenSet());
+    }
+
+    /// <summary>形は技レベルIDの配列。同梱の生成物なので、無ければ読み込みごと失敗させる。</summary>
+    private static FrozenSet<int> LoadWarningSkillLevels()
+    {
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Generated", "SkillWarnings.json");
+        var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
+            ?? throw new InvalidDataException($"{path} is empty.");
+        return skillLevelIds.ToFrozenSet();
     }
 
     /// <summary>

@@ -324,10 +324,8 @@ public sealed class PartyStateStore
             // 位置は権威側(TeamMemberGroupInfos)だけが決める。
             //
             // ここへ来る経路(コンテナ同期・GetTeamInfo の前半)は TeamMemData.GroupId しか持たず、
-            // グループ内の順番を持たない。実測(2026-09-01)では 20人PT で権威側が
-            // 「グループ2の3番目 / グループ3の4番目」(ゲーム表示は 8 と 14)と言っているのに対し、
-            // コンテナは2人とも「グループ1」と言ってきた。この値で上書きすると
-            // グループIDが食い違って順番が捨てられ、10秒ごとに番号が ? に戻る。
+            // グループ内の順番を持たない。しかもそのグループIDが権威側と食い違うことがあり、
+            // 上書きすると順番ごと捨てられて番号が ? に戻る。
             //
             // したがって既存の位置には触らない。持っていないメンバーにだけ、
             // グループIDだけを記録する(順番は権威側が来るまで空)。
@@ -641,12 +639,10 @@ public sealed class PartyStateStore
 
     /// <summary>
     /// 5人PTの表示スロットを EnterTime 昇順から導出する。
-    /// 実測(2026-08-24)では、メンバーが再加入して加入順が入れ替わった際に
-    /// TeamMemberGroupInfos.CharIds の配列位置は更新されず、ゲームUIの番号だけが入れ替わった。
-    /// CharTeam.CharIds のワイヤ順も EnterTime 昇順と一致していた。
-    /// _positions 自体は書き換えず、ここで導出値を上書きするだけなので、
-    /// EnterTime が揃わない場合は従来の並び順にそのまま戻る。
-    /// NPC を含む編成は既存ロジックに委ねる。
+    /// <b><c>TeamMemberGroupInfos.CharIds</c> の配列位置は5人PTの表示順ではない</b> —
+    /// 加入順が入れ替わってもあの配列は更新されない。
+    /// <c>_positions</c> は書き換えず導出値を上書きするだけなので、
+    /// EnterTime が揃わなければ従来の並び順に戻る。NPC を含む編成は既存ロジックに委ねる。
     /// </summary>
     private bool TryBuildFivePersonEnterTimePositionsNoLock(
         out Dictionary<long, PartyMemberPosition> positions)

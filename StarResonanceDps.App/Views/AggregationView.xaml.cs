@@ -49,6 +49,10 @@ public partial class AggregationView : UserControl
         // 前のエンカウンターが DB に入るのは EnterDungeon の中で、EncounterStart は
         // その直後に上がる。つまりこれが「1件増えた」の合図。
         EncounterManager.EncounterStart += EncounterManager_EncounterStart;
+
+        // 選択はこのタブの外からも変わる(戦闘とエンカウンターの作り直しによる自動解除)。
+        // 購読しないと「表示中」が残る。
+        EncounterHistoryProvider.SelectionChanged += EncounterHistoryProvider_SelectionChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         // 内部IDの表示切り替えは行名(シーン名)に効くのに、一覧を組み直す合図が
@@ -68,6 +72,7 @@ public partial class AggregationView : UserControl
         }
 
         EncounterManager.EncounterStart -= EncounterManager_EncounterStart;
+        EncounterHistoryProvider.SelectionChanged -= EncounterHistoryProvider_SelectionChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
         ConfigManager.Instance.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         _isSubscribed = false;
@@ -129,6 +134,20 @@ public partial class AggregationView : UserControl
 
         _needsReload = false;
         _viewModel.Reload();
+    }
+
+    /// <summary>
+    /// スナップショットを作るスレッドから上がることがあるので、UIスレッドへ渡し直す。
+    /// </summary>
+    private void EncounterHistoryProvider_SelectionChanged()
+    {
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(_viewModel.SyncSelection);
+            return;
+        }
+
+        _viewModel.SyncSelection();
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)

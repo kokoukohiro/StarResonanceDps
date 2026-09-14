@@ -148,6 +148,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool ShowsPartyDisplaySettings => _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
+    /// <summary>
+    /// フィルター行の注記「履歴表示中では効果ありません」を出すか。
+    /// 履歴表示中にフィルターを無視するのはメーター2種だけで、プレイヤーリストは常にライブの画面なので効き続ける。
+    /// </summary>
+    public bool ShowsPartyDisplayHistoryNote => _kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+
     /// <summary>「自分の表示」を出すのはプレイヤーリストとメーター2種。</summary>
     public bool ShowsSelfDisplaySettings =>
         _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;

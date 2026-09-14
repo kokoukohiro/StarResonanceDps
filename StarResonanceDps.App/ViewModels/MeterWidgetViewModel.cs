@@ -12,6 +12,8 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 {
+    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
+
     private readonly WidgetListItemViewModel _widget;
     private readonly MeterSnapshotKind _kind;
     private readonly ObservableCollection<MeterPlayerEntry> _entries = [];
@@ -41,6 +43,10 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private string _benchmarkStatusText = string.Empty;
+
+    /// <summary>ヘッダーのボタンに出す文言。計測中は「計測停止」に変わる。</summary>
+    [ObservableProperty]
+    private string _threeMinuteBenchmarkActionText = string.Empty;
 
     public MeterWidgetViewModel(
         WidgetListItemViewModel widget,
@@ -140,6 +146,10 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
             benchmarkState.IsCompleted
                 ? "Meter_BenchmarkCompleted"
                 : "Meter_BenchmarkInProgress");
+        ThreeMinuteBenchmarkActionText = LocalizationManager.Instance.GetString(
+            benchmarkState.IsActive
+                ? "Meter_StopBenchmark"
+                : "Meter_ThreeMinuteBenchmark");
         PartyMetricLabel = _kind == MeterSnapshotKind.Damage ? "DPS:" : "HPS:";
         PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
@@ -185,6 +195,28 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 _entries.Move(currentIndex, index);
             }
         }
+    }
+
+    [RelayCommand]
+    private void ToggleThreeMinuteBenchmark()
+    {
+        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
+        if (benchmarkState.IsActive)
+        {
+            MeterSnapshotProvider.TryStopBenchmark();
+        }
+        else
+        {
+            MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
+        }
+
+        Refresh();
+    }
+
+    [RelayCommand]
+    private void ResetEncounter()
+    {
+        MeterSnapshotProvider.ResetCurrentEncounter();
     }
 
     [RelayCommand]
@@ -238,7 +270,8 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         return -1;
     }
 
-    private static string FormatDuration(TimeSpan duration)
+    /// <summary>メーターのタイマーの書式。被ダメログの時刻も同じ書式で出す。</summary>
+    internal static string FormatDuration(TimeSpan duration)
     {
         if (duration < TimeSpan.Zero)
         {

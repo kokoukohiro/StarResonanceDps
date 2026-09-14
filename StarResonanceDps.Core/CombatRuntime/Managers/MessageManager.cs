@@ -110,6 +110,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             GrpcTeamManager.ResetMemberState();
             NearbyEntityStore.Instance.Clear();
             ActiveBuffStore.Instance.Clear();
+            BuffInstanceIndex.Instance.Clear();
+            SummonSourceIndex.Instance.Clear();
+            NearbyMonsterIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
         }
 
@@ -233,7 +236,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var evt in vData.Evt.Events)
             {
-                EncounterManager.Current.AddSceneEvent(evt);
+                EncounterManager.Current.AddSceneEvent(evt, extraData);
             }
         }
 
@@ -351,23 +354,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // NotifySocialData は social のスナップショットであってシーン通知ではなく、
                 // 中身が食い違ったまま何度も飛んでくるため、無条件に流すと表示が暴れる。
                 //
-                // ただし別のマップ/チャンネルへ移った通知は抑制対象ではない。
-                // 関門を再武装するのはフルコンテナ到着(StartNewMap)だけなので、
-                // フルコンテナが来ない切替(実測: ギルドハウス levelMapId=12000)では
-                // 関門が閉じたままになり、移動通知が5回届いても全部捨てていた。
-                // その結果リストは刷新されず、マップ名も古いままだった(2026-08-26 実測)。
+                // **別のマップ/チャンネルへ移った通知は抑制しない。** 関門を再武装するのは
+                // フルコンテナ到着(StartNewMap)だけなので、フルコンテナが来ない切替
+                // (ギルドハウス levelMapId=12000 など)では関門が閉じたままになり、
+                // 移動通知を全部捨ててしまう。
                 //
-                // LevelMapId が 0 なのは「まだシーン通知を一度も受け取っていない」状態。
-                // ロード済みのまま起動すると 0 → 実マップ と変わるが、これは移動ではなく初回確定。
-                // 移動として扱うと StartNewMap → EnterDungeon が走り、起動時のエンカウンター
-                // (SceneId=0 / SceneName 空)をその場で保存してしまう。
-                // 実測(2026-09-12): 起動から最初のシーン通知まで 6〜24 秒あり、その間の戦闘で
-                // HasStatsBeenRecorded() が真になるため、マップ名の無い履歴が3件できていた
-                // (Enc 5/8/10。いずれも Capture device started の直後に始まり、
-                //  BattleStateMachine.StartNewMap の時点で保存されている)。
-                //
-                // 0 を「未受信」の番兵にしてよい根拠: Battles 23行のうち SceneId=0 は5行で、
-                // 全部アプリ起動の行。セッション途中に 0 が届いた形跡は無い(ユーザー確認済み)。
+                // **LevelMapId == 0 は「まだシーン通知を一度も受け取っていない」状態。**
+                // 0 → 実マップ は移動ではなく初回確定なので、ここを移動として扱わない。
+                // 扱うと StartNewMap → EnterDungeon が走り、起動時のエンカウンターを
+                // SceneId=0 / SceneName 空のまま保存してしまう。
                 var isSceneChange = EncounterManager.LevelMapId != 0
                     && (socialScene.LevelMapId != EncounterManager.LevelMapId
                         || socialScene.LineId != EncounterManager.ChannelLineId);
@@ -737,12 +732,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 職業・タレント・スキルの更新後に自分の行を作り直す。
         ///
         /// <para>
-        /// ここで特化は決めない。以前は <c>ProfessionTalentInfo.TalentStageCfgId</c> から
-        /// 特化を導いていたが、この値は「どのタレントツリーを選んでいるか」であって
-        /// 「特化アビリティを装着しているか」ではない。実測(2026-08-25)では、
-        /// アビリティ未装着でツリーだけ剛守のとき `TalentStageCfgId = 114` が返り続け、
-        /// 装着していない剛守を表示し続けていた。
-        /// 特化は自分も他人と同じく特化マーカーバフだけで決める。
+        /// <b>ここで特化は決めない。</b> <c>ProfessionTalentInfo.TalentStageCfgId</c> は
+        /// 「どのタレントツリーを選んでいるか」であって「特化アビリティを装着しているか」ではなく、
+        /// 未装着でもツリーの値を返し続ける。特化は自分も他人と同じく特化マーカーバフだけで決める。
         /// </para>
         /// </summary>
         private static void RefreshSelfRosterEntry(long uuid)
@@ -768,6 +760,75 @@ namespace StarResonanceDps.Core.CombatRuntime
             catch (Exception ex)
             {
                 Log.Debug(ex, "Failed to parse team information response");
+            }
+        }
+
+        /// <summary>
+        /// プレイヤー以外の実体に出した元(<c>AttrFightSourceInfo</c>)が届いたら、出した技を <see cref="SummonSourceIndex"/> に控える。
+        /// 技ならその技、バフならこの瞬間に生きているバフの付与元の技。どちらでもないか引けなければ控えを消す。
+        /// 属性を当てた後に呼ぶ(同じ束で届いた最上位の召喚者を使う)。
+        /// </summary>
+        private static void RecordSummonSource(long uuid, RepeatedField<Attr> attrs, DateTime arrivalTime)
+        {
+            if (Utils.UuidToEntityType(uuid) == (long)EEntityType.EntChar)
+            {
+                return;
+            }
+
+            foreach (var attr in attrs)
+            {
+                if ((EAttrType)attr.Id != EAttrType.AttrFightSourceInfo || attr.RawData == null)
+                {
+                    continue;
+                }
+
+                var sourceSkillId = 0;
+                if (attr.RawData.Length > 0)
+                {
+                    var source = FightSourceInfo.Parser.ParseFrom(attr.RawData);
+                    if (source.FightSourceType == (int)EFightSource.Skill)
+                    {
+                        sourceSkillId = source.SourceConfigId;
+                    }
+                    else if (source.FightSourceType == (int)EFightSource.Buff)
+                    {
+                        var topSummonerUuid = EncounterManager.Current.GetAttrKV(uuid, "AttrTopSummonerId") as long? ?? 0;
+                        if (BuffInstanceIndex.Instance.TryResolveSourceSkill(source.SourceConfigId, uuid, topSummonerUuid, arrivalTime, out var buffSourceSkillId))
+                        {
+                            sourceSkillId = buffSourceSkillId;
+                        }
+                    }
+                }
+
+                if (sourceSkillId > 0)
+                {
+                    SummonSourceIndex.Instance.Set(uuid, sourceSkillId);
+                }
+                else
+                {
+                    SummonSourceIndex.Instance.Remove(uuid);
+                }
+            }
+        }
+
+        /// <summary>
+        /// モンスターの種別ID(<c>AttrId</c>)が届いたら <see cref="NearbyMonsterIndex"/> に入れる。属性を当てた後に呼ぶ。
+        /// </summary>
+        private static void RecordNearbyMonster(long uuid, RepeatedField<Attr> attrs)
+        {
+            if (Utils.UuidToEntityType(uuid) != (long)EEntityType.EntMonster
+                || !attrs.Any(attr => (EAttrType)attr.Id == EAttrType.AttrId && attr.RawData != null))
+            {
+                return;
+            }
+
+            if (EncounterManager.Current.GetAttrKV(uuid, "AttrId") is int monsterId && monsterId > 0)
+            {
+                NearbyMonsterIndex.Instance.Set(uuid, monsterId);
+            }
+            else
+            {
+                NearbyMonsterIndex.Instance.Remove(uuid);
             }
         }
 
@@ -1114,6 +1175,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 PlayerRosterProjection.RemoveNearbyPlayer(disappearedEntity.Uuid);
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
+                SummonSourceIndex.Instance.Remove(disappearedEntity.Uuid);
+                NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
             }
 
             foreach (var entity in syncNearEntities.Appear)
@@ -1136,6 +1199,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attrCollection?.Attrs != null)
                 {
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs);
+                    RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
+                    RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
                 }
 
 
@@ -1182,6 +1247,23 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static void ApplyAppearBuffSnapshot(Zproto.Entity entity, ExtraPacketData extraData)
         {
+            // 付与元の索引には敵も含めて入れる。見る前から乗っているバフはこの経路でしか届かない。
+            if (entity.BuffInfos?.BuffInfos is { } appearBuffInfos)
+            {
+                foreach (var appearBuffInfo in appearBuffInfos)
+                {
+                    BuffInstanceIndex.Instance.Add(
+                        entity.Uuid,
+                        appearBuffInfo.BuffUuid,
+                        appearBuffInfo.BaseId,
+                        appearBuffInfo.FireUuid,
+                        appearBuffInfo.FightSourceInfo?.FightSourceType ?? -1,
+                        appearBuffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                        appearBuffInfo.Duration,
+                        extraData.ArrivalTime);
+                }
+            }
+
             // 特化を持つのはプレイヤーだけ。モンスターまで通すと診断ログが埋まる。
             if (Utils.UuidToEntityType(entity.Uuid) != (long)EEntityType.EntChar)
             {
@@ -1296,6 +1378,17 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 ProcessAttrs(targetUuid, attrCollection.Attrs);
+                RecordSummonSource(targetUuid, attrCollection.Attrs, extraData.ArrivalTime);
+                RecordNearbyMonster(targetUuid, attrCollection.Attrs);
+
+                // 技の開始は AttrSkillId に値が入ったデルタで分かる。終了は値なし(0)で届く。
+                if (changedAttributes.Contains(EAttrType.AttrSkillId)
+                    && EncounterManager.Current.GetAttrKV(targetUuid, "AttrSkillId") is int castSkillId
+                    && castSkillId > 0)
+                {
+                    var castSkillLevel = EncounterManager.Current.GetAttrKV(targetUuid, "AttrSkillLevel") is int level ? level : 0;
+                    EncounterManager.Current.AddSkillCast(targetUuid, castSkillId, castSkillLevel, extraData);
+                }
             }
 
 
@@ -1351,6 +1444,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     creationTime = dto.UtcDateTime;
                                 }
                                 sawBuffAdd = true;
+                                BuffInstanceIndex.Instance.Add(
+                                    targetUuid,
+                                    buffEffect.BuffUuid,
+                                    buffInfo.BaseId,
+                                    buffInfo.FireUuid,
+                                    buffInfo.FightSourceInfo?.FightSourceType ?? -1,
+                                    buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                                    buffInfo.Duration,
+                                    extraData.ArrivalTime);
 
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, buffInfo.FightSourceInfo?.FightSourceType ?? 0);
                             }
@@ -1383,6 +1485,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (buffEffect.Type == EBuffEventType.BuffEventRemove)
                     {
+                        BuffInstanceIndex.Instance.Remove(targetUuid, buffEffect.BuffUuid);
                         if (EncounterManager.Current.Entities.TryGetValue(targetUuid, out var targetEntity))
                         {
                             List<ShieldInfo>? attrShieldList = targetEntity.GetAttrKV("AttrShieldList") as List<ShieldInfo>;
@@ -1470,8 +1573,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 // 職業・特化の判定には、畳んだIDではなく「ゲームが実際に発動したスキルID」を使う。
                 // 畳み込みは弾・バフ・コンボ段を1つの表示IDへ寄せるので、判定表が想定していない
-                // 入力まで当たるようになる(実測: 安可が味方に発生させる 230401 が
-                // 2304 を経てコンボ先頭 2301 へ畳まれ、味方16人を響奏にしていた)。
+                // 入力まで当たるようになる。味方に発生させるスキルが畳まれて表に当たると、
+                // その人の特化と職業を書き換えてしまう。
                 //
                 // Skill 由来に限るのは、OwnerId がスキルIDを名乗るのがこのときだけだから。
                 // 弾・バフ由来の生IDをそのまま渡すと、SkillTable と BuffTable で重複する
@@ -1598,16 +1701,41 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (isHeal)
                 {
-                    EncounterManager.Current.AddHealing((isAttackerPlayer ? attackerUuid : 0), targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
+                    EncounterManager.Current.AddHealing((isAttackerPlayer ? attackerUuid : 0), targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                 }
                 else
                 {
                     if (attackerUuid != targetUuid)
                     {
-                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
+                        EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
 
-                    EncounterManager.Current.AddTakenDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, syncDamageInfo.DamagePos, extraData);
+                    // バフ由来の被ダメは、そのバフを付けた技をいま生きている実体から控える。
+                    // 表示するころには実体が残っていないので、記録の瞬間にしか決まらない。
+                    var buffSourceSkillId = 0;
+                    if (syncDamageInfo.DamageSource == EDamageSource.Buff
+                        && !isAttackerPlayer
+                        && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar
+                        && BuffInstanceIndex.Instance.TryResolveSourceSkill(
+                            syncDamageInfo.OwnerId,
+                            syncDamageInfo.AttackerUuid,
+                            attackerUuid,
+                            extraData.ArrivalTime,
+                            out var resolvedBuffSourceSkillId))
+                    {
+                        buffSourceSkillId = resolvedBuffSourceSkillId;
+                    }
+
+                    // 仮想体などが出した被ダメは、その実体を出した技を控えから引く(出現時に決めてある)。
+                    var summonSourceSkillId = 0;
+                    if (!isAttackerPlayer
+                        && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar
+                        && SummonSourceIndex.Instance.TryGet(syncDamageInfo.AttackerUuid, out var resolvedSummonSourceSkillId))
+                    {
+                        summonSourceSkillId = resolvedSummonSourceSkillId;
+                    }
+
+                    EncounterManager.Current.AddTakenDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                 }
 
                 // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。

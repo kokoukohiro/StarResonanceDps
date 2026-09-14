@@ -401,8 +401,6 @@
     <!--
         輪郭式(元SVGは fill="none" stroke="currentColor")。Icon.Stroke と組で使う。設定画面の「集計設定」。
         元SVGの <g> にある2本の path を1つの Geometry に連結してある。
-
-        同心の弧2本。以前ここに入れていた図形は 2026-09-13 に総入れ替えしている。
     -->
     <Geometry x:Key="Icon.AggregationSettings">
         M6 4v4

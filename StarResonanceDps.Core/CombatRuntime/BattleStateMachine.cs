@@ -48,6 +48,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
             Services.ActiveBuffStore.Instance.Clear();
+            Services.BuffInstanceIndex.Instance.Clear();
+            Services.SummonSourceIndex.Instance.Clear();
+            Services.NearbyMonsterIndex.Instance.Clear();
 
         }
 
@@ -111,6 +114,17 @@ namespace StarResonanceDps.Core.CombatRuntime
                     if (firstObjective.Key.TargetId != 0 && PreviousDungeonTargetData.Value.Key.TargetId != 0 && PreviousDungeonTargetData.Value.Key.TargetId != firstObjective.Key.TargetId && firstObjective.Key.TargetId == dungeonTargetData.TargetId)
                     {
                         PreviousDungeonTargetData = newDungeonTargetData;
+
+                        // 最初の目標がボス選択のダンジョンでは、次のフェーズの目標が届いた直後にボス選択がもう一度届く。
+                        // そこでリスタートとして作り直すと、敵を運ばないエンカウンターを挟むことになり、
+                        // 予約中の目標切替がそこからボスを運んで、出現時にしか届かない AttrId を失う。
+                        // 目標切替が予約中なら、区切りはその予約に任せる。
+                        if (DeferredEncounterStartTime.HasValue && DeferredEncounterStartReason == EncounterStartReason.NewObjective)
+                        {
+                            Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonTargetDataHistoryAdd: RestartCheckHit skipped (NewObjective is deferred)");
+                            return;
+                        }
+
                         Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonTargetDataHistoryAdd: RestartCheckHit!");
 
                         EncounterManager.StopEncounter();

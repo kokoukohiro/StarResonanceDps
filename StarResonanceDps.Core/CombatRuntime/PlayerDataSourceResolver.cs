@@ -39,11 +39,8 @@ internal static class PlayerDataSourceResolver
         bool isSelf)
     {
         // PT補完は自分にも使う。<b>ただし最後の手段</b>で、空の項目しか埋めない。
-        //
-        // 実測(2026-09-01、ロード済みマップで起動→PT画面を開くだけ)では、自分の
-        // 名前・職・戦闘力・Lv・シーズン値は11秒ほどで自力で埋まるが、
-        // HP/最大HP は AttrHp/AttrMaxHp が来ないため<b>マップ移動まで永久に0</b>だった。
-        // PT側は最初から 533714/533714 を持っている。
+        // ロード済みで起動すると自分の HP/最大HP は AttrHp/AttrMaxHp が来ず、
+        // マップ移動まで 0 のままになる。PT側は最初から値を持っている。
         var party = PartyStateStore.Instance.Current;
         PartyMemberSupplement? partySupplement = null;
         if (party.TryGetSupplement(characterId, out var supplement))
@@ -180,7 +177,7 @@ internal static class PlayerDataSourceResolver
             //
             // 判定はパーティを特別扱いしない。<see cref="PartyStateStore.PartyStateSnapshot.TryGetSupplement"/> は
             // 在籍中のメンバーにしか返さないので、PT外では自動的に「AOIにいるか」だけになる。
-            //   nearbyEntity … AOIの実測値
+            //   nearbyEntity … AOIから届いている現在値
             //   partySupplement … TeamMemberFastSyncData がHPを供給する。AOIとは独立に届く
             //   metadataEntity … 最後の観測値が居残っているだけ。これしか無ければキャッシュ
             //

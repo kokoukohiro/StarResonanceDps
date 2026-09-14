@@ -23,14 +23,13 @@ namespace StarResonanceDps.Core.CombatRuntime;
 ///
 /// <para>
 /// <b><c>OwnerId</c> だけを鍵にしてはいけない。</b> 同じ <c>OwnerId</c> の枝が別の行に入る例が
-/// 26〜28種あり、枝番を見ないと片方の行が消える。実測(ログ10本 109万イベント)で
-/// <c>OwnerId</c> だけだと1,329件(0.12%)が別の行に落ちていた。
+/// 26〜28種あり、枝番を見ないと片方の行が消える。
 /// </para>
 ///
 /// <para>
-/// <b>実行時の情報からは畳まない。</b> 以前はバフ実体の <c>FightSourceInfo</c>・
-/// コンボの <c>NextSkillId</c>・召喚体の <c>AttrId</c>・ダメージ属性の式も辿っていたが、
-/// ゲーム内の実挙動と食い違うことが実測で分かった(2026-09-06)。
+/// <b>実行時の情報からは畳まない。</b> バフ実体の <c>FightSourceInfo</c>・コンボの
+/// <c>NextSkillId</c>・召喚体の <c>AttrId</c>・ダメージ属性の式は、
+/// どれもゲーム内の行と食い違う。見出し表だけを使うこと。
 /// </para>
 /// </summary>
 public static class SkillSourceResolver

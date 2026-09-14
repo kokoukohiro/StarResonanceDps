@@ -22,7 +22,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// 出所は <c>EncounterExData.BenchmarkTime</c> で、書き込みは <c>EnterDungeon</c> の
 /// <c>if (AppState.IsBenchmarkMode)</c> の中だけ。<c>TryStopBenchmark</c> は
 /// <c>IsBenchmarkMode = false</c> を先に立ててから次のエンカウンターを作るので、
-/// <b>計測本体の1件にしか付かない</b>(実測: DB13件のうち計測の1件だけ 180、残りは 0)。
+/// <b>計測本体の1件にしか付かない。</b>
 /// </param>
 public sealed record EncounterHistoryEntry(
     ulong EncounterId,
@@ -48,6 +48,41 @@ public static class EncounterHistoryProvider
 {
     /// <summary>いま履歴を開いているならその ID。ライブを見ているなら <c>null</c>。</summary>
     public static ulong? SelectedEncounterId => AppState.OpenedHistoricalEncounter?.EncounterId;
+
+    /// <summary>
+    /// 選択が変わったときに上がる。<b>自動でライブへ戻したときも上がる</b>ので、
+    /// 一覧を出している側はこれを購読して「表示中」を出し直すこと。
+    /// パケット処理スレッドから来ることがあるので、UI へは渡し直す。
+    /// </summary>
+    public static event Action? SelectionChanged;
+
+    /// <summary>
+    /// ライブ側でイベントが起きたので履歴表示を解除する。
+    /// **設定が OFF か、履歴を開いていなければ何もしない。**
+    ///
+    /// <para>
+    /// 呼ぶのは <c>Encounter.AddDamage</c> / <c>AddHealing</c>(戦闘)と
+    /// <c>EncounterManager.EnterDungeon</c> の末尾(エンカウンターの作り直し)。
+    /// 3分計測・リセット・マップ移動・フェーズ分割は全部 <c>EnterDungeon</c> を通るので、
+    /// <b>ボタン側に専用の解除を書かない。</b>
+    /// </para>
+    ///
+    /// <para>
+    /// <b>押し込み式にする理由。</b> <c>MeterSnapshotProvider.ResolveActiveEncounter</c> から
+    /// 引きに行くと、あれを呼ぶのはメーター・スキル詳細・詳細・グラフのウィジェット4種の
+    /// 更新だけなので、<b>1枚も開いていないと一度も走らず集計タブの「表示中」が残る。</b>
+    /// </para>
+    /// </summary>
+    public static void NotifyLiveEncounterEvent()
+    {
+        if (!CombatRuntimeSettings.ClearHistorySelectionOnNextEvent
+            || AppState.OpenedHistoricalEncounter is null)
+        {
+            return;
+        }
+
+        SelectLive();
+    }
 
     /// <summary>
     /// 保存済みエンカウンターを新しい順に返す。
@@ -94,6 +129,7 @@ public static class EncounterHistoryProvider
 
         AppState.OpenedHistoricalEncounter = encounter;
         PlayerRosterProjection.RebuildRoster();
+        SelectionChanged?.Invoke();
         return true;
     }
 
@@ -102,5 +138,6 @@ public static class EncounterHistoryProvider
     {
         AppState.OpenedHistoricalEncounter = null;
         PlayerRosterProjection.RebuildRoster();
+        SelectionChanged?.Invoke();
     }
 }

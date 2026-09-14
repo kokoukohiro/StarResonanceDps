@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Window_Manager_Title" xml:space="preserve">
-    <value>Star Resonance DPS マネージャー</value>
+    <value>お願い、DPS見ないで…</value>
   </data>
   <data name="Window_Settings_Title" xml:space="preserve">
-    <value>Star Resonance DPS 設定</value>
+    <value>設定</value>
   </data>
   <data name="Window_WidgetSettings_Title" xml:space="preserve">
     <value>{0}の設定</value>
@@ -330,8 +330,32 @@
   <data name="Menu_DtpsMeter" xml:space="preserve">
     <value>DTPSメーター</value>
   </data>
-  <data name="Menu_SkillDiary" xml:space="preserve">
-    <value>スキルログ</value>
+  <data name="Widget_TakenDamageLog" xml:space="preserve">
+    <value>被ダメログ</value>
+  </data>
+  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+    <value>{0}が{1}を唱えている</value>
+  </data>
+  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+    <value>{0}が{1}を構えている</value>
+  </data>
+  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+    <value>{0}の{1}</value>
+  </data>
+  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
+    <value>{0}に{1}ダメージ({2}/{3})</value>
+  </data>
+  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
+    <value>{0}に{1}ダメージ</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+    <value>攻撃</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+    <value>何か</value>
+  </data>
+  <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
+    <value>※履歴表示中では効果ありません</value>
   </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>プレイヤーリスト</value>
@@ -886,10 +910,13 @@
     <value>集計設定</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>新フェーズで戦闘を分割</value>
+    <value>フェーズで集計を分割</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
-    <value>次のダメージまで保持</value>
+    <value>次のイベントまで結果を保持</value>
+  </data>
+  <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
+    <value>次のイベントで履歴表示を解除</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>履歴の保持期間</value>
@@ -920,5 +947,8 @@
   </data>
   <data name="Aggregation_EncounterPhase" xml:space="preserve">
     <value>フェーズ{0}</value>
+  </data>
+  <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
+    <value>※ダンジョンでボス部屋進入など</value>
   </data>
 </root>

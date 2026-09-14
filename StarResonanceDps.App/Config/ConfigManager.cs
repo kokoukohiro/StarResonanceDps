@@ -148,6 +148,7 @@ public sealed class ConfigManager
             settings.GameCaptureCustomExeName,
             settings.SplitEncountersOnNewPhases,
             settings.KeepPastEncounterInMeterUntilNextDamage,
+            settings.ClearHistorySelectionOnNextEvent,
             settings.DatabaseRetentionPolicyDays);
     }
 

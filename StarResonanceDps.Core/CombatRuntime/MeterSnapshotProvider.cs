@@ -145,6 +145,48 @@ internal sealed record PlayerBuffCandidate(
 
 public sealed record MeterPlayerIdentity(string Name, long UserId);
 
+/// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。</summary>
+public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf);
+
+/// <summary>
+/// 被ダメログの1件(予告か詠唱か被弾)。
+///
+/// <para>
+/// <see cref="Elapsed"/> はメーターのタイマーと同じ起点(<c>Encounter.StartTime</c>)からの経過、
+/// <see cref="Timestamp"/> はパケットの到着時刻(UTC)。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
+/// </para>
+///
+/// <para>
+/// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、ダメージを与えた敵。<see cref="Target"/> と HP は被弾のときだけ入る
+/// (HP は記録時点で属性を持っていなければ入らない)。
+/// <see cref="SourceName"/> は内部ID注記を付けない名前で、名前が無ければ空。
+/// <see cref="SourceId"/> は届いた <c>OwnerId</c> そのもの。<see cref="IsBuffSource"/> が真ならバフID、
+/// 偽なら技IDか弾ID(弾のときの <see cref="SourceName"/> は親の技の名前)。
+/// </para>
+/// </summary>
+public sealed record TakenDamageLogLine(
+    TakenDamageLogRecordKind Kind,
+    long Sequence,
+    TimeSpan Elapsed,
+    DateTime Timestamp,
+    TakenDamageLogParty Attacker,
+    TakenDamageLogParty? Target,
+    int SourceId,
+    bool IsBuffSource,
+    string SourceName,
+    long Value,
+    long? TargetHp,
+    long? TargetMaxHp);
+
+/// <summary>
+/// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
+/// <see cref="Encounter"/> が前回と違えば、呼び出し側は持っている行を捨てて読み直す。
+/// </summary>
+public sealed record TakenDamageLogSnapshot(
+    Encounter? Encounter,
+    int NextIndex,
+    IReadOnlyList<TakenDamageLogLine> Lines);
+
 public static class MeterSnapshotProvider
 {
     /// <summary>
@@ -152,19 +194,14 @@ public static class MeterSnapshotProvider
     ///
     /// <para>
     /// 説明文が「この間は 奥義！ライフブレス と 復活の祈り を再度かけられない」。
-    /// ワイヤの <c>Duration</c> は 60000ms(実測)。テーブルの <c>DestroyParam</c> は
-    /// <c>[[0,0]]</c> なので、持続時間はパケット側からしか分からない。
+    /// <b>持続時間はパケットの <c>Duration</c> からしか分からない</b> —
+    /// テーブルの <c>DestroyParam</c> は <c>[[0,0]]</c>。
     /// </para>
     ///
     /// <para>
-    /// 2026-08-29 の実測で、復活系スキル 3つ(2900240 / 2900241 / 3312)すべてから
-    /// <b>同じ BaseId</b> で届くことを確認した(22件、他の発生元からは0件)。
-    /// 3027(Blessing of Life)は発火機会が無く未確認。
-    /// </para>
-    ///
-    /// <para>
+    /// 復活系スキルはどれもこの同じ BaseId を出すので、発生元ごとに分ける必要はない。
     /// 同時に届く <c>2110032</c> / <c>2110093</c> / <c>2100412</c> は
-    /// いずれも自前アイコンが無く表示経路で落ちるので、扱う必要がない。
+    /// いずれも自前アイコンが無く表示経路で落ちる。
     /// </para>
     /// </summary>
     private const int ReviveBlockDebuffBaseId = 2110057;
@@ -190,11 +227,16 @@ public static class MeterSnapshotProvider
 
         UpdatePlayerMeterState(source);
 
+        // 履歴表示中はフィルターを掛けない。判定に使えるのは今のパーティ状態だけで、
+        // 履歴当時の所属は保存していない。
+        var effectivePartyDisplayMode = AppState.OpenedHistoricalEncounter is null
+            ? partyDisplayMode
+            : PartyDisplayMode.All;
         var party = PartyStateStore.Instance.Current;
         var visibleSource = source
-            .Where(player => party.ShouldInclude(player.UserId, player.IsSelf, partyDisplayMode))
+            .Where(player => party.ShouldInclude(player.UserId, player.IsSelf, effectivePartyDisplayMode))
             .ToArray();
-        var totalValue = partyDisplayMode == PartyDisplayMode.All
+        var totalValue = effectivePartyDisplayMode == PartyDisplayMode.All
             ? kind == MeterSnapshotKind.Damage
                 ? encounter.TotalDamage
                 : encounter.TotalHealing
@@ -220,6 +262,189 @@ public static class MeterSnapshotProvider
             totalValue,
             players.Sum(player => player.ValuePerSecond),
             players);
+    }
+
+    /// <summary>
+    /// 被ダメログを <paramref name="startIndex"/> 件目から返す。表示中のエンカウンターは
+    /// メーターと同じく <see cref="ResolveActiveEncounter"/> で決まるので、履歴表示にも追従する。
+    ///
+    /// <para>
+    /// 表示中のエンカウンターが <paramref name="knownEncounter"/> と違えば先頭から返す。
+    /// 名前はこの呼び出しの時点の言語と内部ID表示で引く。
+    /// </para>
+    /// </summary>
+    public static TakenDamageLogSnapshot GetTakenDamageLog(Encounter? knownEncounter, int startIndex)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null)
+        {
+            return new TakenDamageLogSnapshot(null, 0, Array.Empty<TakenDamageLogLine>());
+        }
+
+        if (!ReferenceEquals(encounter, knownEncounter))
+        {
+            startIndex = 0;
+        }
+
+        var records = encounter.GetTakenDamageLogRecords(startIndex);
+        var parties = new Dictionary<long, TakenDamageLogParty>();
+        var lines = new TakenDamageLogLine[records.Length];
+
+        // メーターのタイマーと同じ起点。StartTime はローカル、Timestamp はパケットの到着時刻(UTC)なので揃えてから引く。
+        var encounterStart = encounter.StartTime.ToUniversalTime();
+
+        for (var index = 0; index < records.Length; index++)
+        {
+            var record = records[index];
+            if (record.Kind == TakenDamageLogRecordKind.Announcement)
+            {
+                var announcement = record.Announcement!;
+                lines[index] = new TakenDamageLogLine(
+                    record.Kind,
+                    announcement.Sequence,
+                    announcement.Timestamp - encounterStart,
+                    announcement.Timestamp,
+                    new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(announcement.OwnerMonsterId), false, false),
+                    null,
+                    announcement.SkillId,
+                    false,
+                    ResolveTakenDamageSkillName(announcement.SkillId),
+                    0,
+                    null,
+                    null);
+                continue;
+            }
+
+            if (record.Kind == TakenDamageLogRecordKind.Cast)
+            {
+                var cast = record.Cast!;
+                lines[index] = new TakenDamageLogLine(
+                    record.Kind,
+                    cast.Sequence,
+                    cast.Timestamp - encounterStart,
+                    cast.Timestamp,
+                    ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
+                    null,
+                    cast.SkillId,
+                    false,
+                    ResolveTakenDamageSkillName(cast.SkillId),
+                    0,
+                    null,
+                    null);
+                continue;
+            }
+
+            var snapshot = record.Hit!;
+            var isBuffSource = snapshot.DamageSource == Zproto.EDamageSource.Buff;
+            lines[index] = new TakenDamageLogLine(
+                record.Kind,
+                snapshot.Sequence,
+                snapshot.Timestamp!.Value - encounterStart,
+                snapshot.Timestamp.Value,
+                ResolveTakenDamageLogParty(encounter, snapshot.OtherUUID, parties),
+                ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
+                snapshot.OwnerId,
+                isBuffSource,
+                ResolveTakenDamageSourceName(snapshot.DamageSource, snapshot.OwnerId, snapshot.BuffSourceSkillId, snapshot.SummonSourceSkillId),
+                snapshot.Value,
+                snapshot.TargetHp,
+                snapshot.TargetMaxHp);
+        }
+
+        return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines);
+    }
+
+    /// <summary>
+    /// 被ダメの発生源の名前。<c>OwnerId</c> の中身は <c>DamageSource</c> で変わる。
+    ///
+    /// <list type="bullet">
+    ///   <item>バフ — バフID。記録時に付与元の技(<paramref name="buffSourceSkillId"/>)が決まっていれば技として引き、
+    ///   無いか名前が空なら <c>buffs</c> で引く</item>
+    ///   <item>弾(<c>Bullet</c> / <c>FakeBullet</c>) — <c>BulletTable</c> の番号。親の技へ辿って技として引き、辿れなければ空</item>
+    ///   <item>それ以外 — 技ID</item>
+    /// </list>
+    ///
+    /// <para>
+    /// ここまでで名前が空なら、ダメージを出した実体(仮想体など)を出した技(<paramref name="summonSourceSkillId"/>)の名前にする。
+    /// ボスの予告の技は仮想体を出すだけで、ダメージは名前の無い仮想体の技で届くことが多い。
+    /// </para>
+    ///
+    /// <para>
+    /// 弾の番号を <c>skills</c> でそのまま引くと、同じ番号の無関係な技の名前が出る
+    /// (<c>3920</c> は弾 普攻假子弹 / 技 奥義！ライフブレス)。
+    /// </para>
+    /// </summary>
+    private static string ResolveTakenDamageSourceName(Zproto.EDamageSource damageSource, int ownerId, int buffSourceSkillId, int summonSourceSkillId)
+    {
+        var name = damageSource switch
+        {
+            Zproto.EDamageSource.Buff => ResolveTakenDamageBuffName(ownerId, buffSourceSkillId),
+            Zproto.EDamageSource.Bullet or Zproto.EDamageSource.FakeBullet =>
+                CombatDataCatalog.TryResolveBulletParentSkillId(ownerId, out var parentSkillId)
+                    ? ResolveTakenDamageSkillName(parentSkillId)
+                    : string.Empty,
+            _ => ResolveTakenDamageSkillName(ownerId)
+        };
+
+        // 当たった技そのものに名前が無いときだけ、ダメージを出した実体(仮想体など)を出した技の名前にする。
+        return string.IsNullOrEmpty(name) && summonSourceSkillId > 0
+            ? ResolveTakenDamageSkillName(summonSourceSkillId)
+            : name;
+    }
+
+    private static string ResolveTakenDamageBuffName(int buffId, int buffSourceSkillId)
+    {
+        var sourceSkillName = buffSourceSkillId > 0
+            ? ResolveTakenDamageSkillName(buffSourceSkillId)
+            : string.Empty;
+        return string.IsNullOrEmpty(sourceSkillName)
+            ? CombatDataCatalog.GetBuffNameWithoutInternalId(buffId)
+            : sourceSkillName;
+    }
+
+    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>skills</c>。</summary>
+    private static string ResolveTakenDamageSkillName(int skillId)
+    {
+        var dbmName = CombatDataCatalog.GetDbmNameWithoutInternalId(skillId);
+        return string.IsNullOrEmpty(dbmName)
+            ? CombatDataCatalog.GetSkillNameWithoutInternalId(skillId)
+            : dbmName;
+    }
+
+    private static TakenDamageLogParty ResolveTakenDamageLogParty(
+        Encounter encounter,
+        long uuid,
+        Dictionary<long, TakenDamageLogParty> cache)
+    {
+        if (cache.TryGetValue(uuid, out var cached))
+        {
+            return cached;
+        }
+
+        var isPlayer = Utils.UuidToEntityType(uuid) == (long)EEntityType.EntChar;
+        TakenDamageLogParty party;
+        if (!encounter.Entities.TryGetValue(uuid, out var entity))
+        {
+            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid));
+        }
+        else if (isPlayer)
+        {
+            var isSelf = IsSelf(entity);
+            var source = PlayerDataSourceResolver.Resolve(entity, isSelf);
+            party = new TakenDamageLogParty(uuid, source.CharacterId, source.Name, true, isSelf);
+        }
+        else
+        {
+            // モンスター名は種別ID(AttrId)から表示言語で引く。属性が無ければ名前は空のまま。
+            var attrId = entity.GetAttrKV("AttrId");
+            var name = attrId is null
+                ? string.Empty
+                : CombatDataCatalog.GetMonsterName(Convert.ToInt64(attrId));
+            party = new TakenDamageLogParty(uuid, 0, name, false, false);
+        }
+
+        cache[uuid] = party;
+        return party;
     }
 
     public static MeterPlayerIdentity? GetPlayerIdentity(long characterId)
@@ -555,8 +780,8 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// イマジンの枠番号。実測(2026-08-28)で 7 と 8。
-    /// クライアントの enum にある <c>ResonanceSkillSlot_left / _right</c> と数が一致する。
+    /// イマジンの枠番号 7 / 8。クライアントの enum
+    /// <c>ResonanceSkillSlot_left / _right</c> に対応する。
     /// </summary>
     private static readonly int[] SelfImagineSlotIds = [7, 8];
 
@@ -979,16 +1204,14 @@ public static class MeterSnapshotProvider
     /// 召喚エンティティが付けたバフを、召喚元のスキルへ帰属させる。
     ///
     /// <para>
-    /// 実測(2026-09-01、3903 奥义！炽炎战斧)では、バフ <c>2110065</c> の
-    /// <c>SourceConfigId</c> が <c>2110064</c>(スキルではなく<b>バフ</b>ID)で、
-    /// <c>SkillLevelGroup</c> 等の鎖もそこで途切れる。<c>BuffTable.SkillId</c> も 0。
-    /// 静的にも実行時にも装備中スキルへ繋がる経路が無い。
+    /// 召喚を伴うイマジンのバフは <c>SourceConfigId</c> が<b>バフID</b>を指すので、
+    /// <c>SkillLevelGroup</c> 等の既存の鎖はそこで途切れる(<c>BuffTable.SkillId</c> も 0)。
     /// </para>
     ///
     /// <para>
-    /// 一方、召喚体側のテーブルは元スキルを指している。
-    /// <c>MonsterTable[3000009].BornSkillId = 390301</c> で、これは
-    /// <c>SkillTable[3903].EffectIDs</c> に入っているエフェクトID。ここを辿る。
+    /// 繋がるのは召喚体側のテーブル。<c>MonsterTable.BornSkillId</c> が
+    /// <c>SkillTable.EffectIDs</c> に入っているエフェクトIDなので、そこを逆引きする。
+    /// <b><c>エフェクトID / 100</c> の規則には頼らない。</b>
     /// </para>
     ///
     /// <para>
@@ -1281,32 +1504,23 @@ public static class MeterSnapshotProvider
         var stats = kind == MeterSnapshotKind.Damage
             ? entity.DamageStats
             : entity.HealingStats;
-        var snapshots = stats.GetSkillSnapshotsCopy()
-            .Where(snapshot => IsIncludedSnapshot(kind, snapshot))
-            .Where(snapshot => snapshot.Timestamp.HasValue)
-            .OrderBy(snapshot => snapshot.Timestamp)
-            .ToArray();
+        var totals = stats.GetPerSecondTotalsCopy(out var lastTimestamp);
 
         var totalValue = GetPlayerTotalValue(entity, kind);
-        if (snapshots.Length == 0)
+        if (totals.Length == 0 || lastTimestamp is not { } lastValueTime)
         {
             return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
         }
 
+        // 秒の区切りは記録時に FirstDamageTimeStamp から切ってある。起点が無いのに合計があるなら記録側が壊れている。
         var startTime = encounter.ExData.FirstDamageTimeStamp
-            ?? stats.StartTime
-            ?? snapshots[0].Timestamp!.Value;
+            ?? throw new InvalidOperationException(
+                $"Per-second totals exist without FirstDamageTimeStamp (encounter={encounter.EncounterId}).");
         var endTime = ResolveMetricEndTime(encounter);
-        var lastSnapshotTime = snapshots[^1].Timestamp!.Value;
 
-        if (endTime < lastSnapshotTime)
+        if (endTime < lastValueTime)
         {
-            endTime = lastSnapshotTime;
-        }
-
-        if (endTime < startTime)
-        {
-            startTime = snapshots[0].Timestamp!.Value;
+            endTime = lastValueTime;
         }
 
         var elapsedSeconds = Math.Max((endTime - startTime).TotalSeconds, 0d);
@@ -1317,13 +1531,11 @@ public static class MeterSnapshotProvider
         }
 
         var perSecondValues = new double[sampleCount];
-        foreach (var snapshot in snapshots)
+        foreach (var (second, value) in totals)
         {
-            var seconds = Math.Max((snapshot.Timestamp!.Value - startTime).TotalSeconds, 0d);
-            var sampleIndex = Math.Max((int)Math.Ceiling(seconds) - 1, 0);
-            if (sampleIndex < sampleCount)
+            if (second < sampleCount)
             {
-                perSecondValues[sampleIndex] += Math.Max(snapshot.Value, 0L);
+                perSecondValues[second] += value;
             }
         }
 
@@ -1615,22 +1827,14 @@ public static class MeterSnapshotProvider
     /// <para>
     /// <see cref="Encounter"/> は<b>基準の違う時刻を同居させている</b>。
     /// <c>StartTime</c> / <c>EndTime</c> は <c>DateTime.Now</c>(ローカル)、
-    /// <c>ExData.FirstDamageTimeStamp</c> と <c>SkillSnapshot.Timestamp</c> は
+    /// <c>ExData.FirstDamageTimeStamp</c> と <c>CombatStats.LastPerSecondTimestamp</c> は
     /// パケットの到着時刻(UTC)。<see cref="GetPlayerTimeline"/> は後者を起点にするので、
     /// 終端をローカルのまま渡すと<b>差が時差ぶん膨らむ</b>。
     /// </para>
     ///
     /// <para>
-    /// 実測(2026-09-12、JST): 3分計測の記録が
-    /// <c>EndTime 16:13:53(ローカル) − FirstDamageTimeStamp 07:10:53(UTC) = 32,580秒</c> になり、
-    /// 180点のはずのグラフが 32,580 点を毎回作っていた(横軸も 32580s と表示)。
-    /// ライブは <c>DateTime.UtcNow</c>、計測完了は <c>ToUniversalTime()</c> で
-    /// 元から UTC だったため、<b>履歴を開いたときだけ</b>起きる。
-    /// </para>
-    ///
-    /// <para>
-    /// <c>Encounter.GetDuration()</c> は同じ引き算を
-    /// <c>EndTime.ToUniversalTime()</c> で揃えている。こちらだけ変換が抜けていた。
+    /// ライブと3分計測の完了時は元から UTC なので、<b>崩れるのは履歴を開いたときだけ。</b>
+    /// <c>Encounter.GetDuration()</c> も同じ引き算を <c>EndTime.ToUniversalTime()</c> で揃えている。
     /// </para>
     /// </summary>
     private static DateTime ResolveMetricEndTime(Encounter encounter)
@@ -1658,9 +1862,8 @@ public static class MeterSnapshotProvider
     /// </para>
     ///
     /// <para>
-    /// 以前はアイコンの有無だけで判定しており、ゲームが出さないもの
-    /// (計数・マーカー・移動アクションの有効化など)まで出していた。
-    /// 逆にゲームが出してこちらが出さないものは無く、ゲーム側は厳密な部分集合。
+    /// <b>アイコンの有無で判定しない。</b> 計数・マーカー・移動アクションの有効化など、
+    /// アイコンを持っていてもゲームが出さないバフが多数ある。
     /// </para>
     /// </summary>
     private static bool IsHiddenFromBuffBar(BuffEvent buffEvent)
@@ -1767,12 +1970,6 @@ public static class MeterSnapshotProvider
             AppState.PlayerMeterValuePerSecond = player.ValuePerSecond;
             return;
         }
-    }
-
-    private static bool IsIncludedSnapshot(MeterSnapshotKind kind, SkillSnapshot snapshot)
-    {
-        return snapshot.Value > 0
-            && (kind != MeterSnapshotKind.Damage || snapshot.DamageType != EDamageType.Immune);
     }
 
     private static int ResolvePlayerSkillCurrentLevel(

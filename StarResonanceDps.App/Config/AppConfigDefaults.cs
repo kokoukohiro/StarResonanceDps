@@ -34,6 +34,7 @@ public static class AppConfigDefaults
             GameCaptureCustomExeName = string.Empty,
             SplitEncountersOnNewPhases = true,
             KeepPastEncounterInMeterUntilNextDamage = false,
+            ClearHistorySelectionOnNextEvent = true,
             DatabaseRetentionPolicyDays = 0,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,

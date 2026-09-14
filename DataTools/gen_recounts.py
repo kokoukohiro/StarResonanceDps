@@ -27,8 +27,8 @@
 `TypeEnum` だけを鍵にすると粗すぎる。同じ `TypeEnum` の `DamageId` が別の行に入る例が
 26〜28種あり、どちらか一方の行が消える(`2203291` が 猎鹰出击 と 猎鹰闪电冲击 の2行にまたがる)。
 
-**行構成は `Star`、名前は `StarASIA` が権威。** 出所ごとに得意が違う。
-`Star` のほうが行構成が新しく被覆も広いが、jp/kr の `RecountName` 列が壊れている。
+**行構成は `Star`。名前は cn / en が `Star`、jp / kr が `StarASIA` を土台にする**(`_common.sources_for`)。
+`Star` のほうが行構成が新しく被覆も広いが、jp/kr の `RecountName` 列が壊れている(総括行の検算で弾く)。
 
 **総括行(其他)は落とす。** 鍵の大半を占め、個別の名前を持たない。落とせば表に無い鍵と
 同じ扱いになり、実行時は名前が空のまま内部ID注記だけが出る。
@@ -39,12 +39,10 @@
 import collections
 import os
 
-from _common import DATA, LANGS, dump, name_of, table_of_source
+from _common import DATA, LANGS, SOURCES, dump, name_of, sources_for, table_of_source
 
 # 行構成を決める出所。収録IDが多く、行の統合もこちらが新しい。
 STRUCTURE = "Star"
-# 名前を取る出所。先にあるほうが勝ち、空欄だけ後ろで補う。
-NAME_SOURCES = ("StarASIA", "Star")
 
 # 総括行(その他)。抱える鍵が突出して多い行として特定し、この名前で検算する。
 CATCHALL = {"zh-CN": "其他", "en-US": "Other", "ja-JP": "その他", "ko-KR": "기타"}
@@ -118,7 +116,7 @@ def main():
 
     # 名前を配る出所の行構成。行の対応は鍵の重なりで取る。
     others = {}
-    for source in NAME_SOURCES:
+    for source in SOURCES:
         if source == STRUCTURE:
             continue
         built = build_rows(source, LANGS["zh-CN"])
@@ -138,7 +136,8 @@ def main():
     names = {}
     for lang, lang_dir in LANGS.items():
         columns = []
-        for source in NAME_SOURCES:
+        # 名前を取る出所。先にあるほうが勝ち、空欄だけ後ろで補う。
+        for source in sources_for(lang_dir):
             column = name_column(source, lang, lang_dir)
             if column is None:
                 continue

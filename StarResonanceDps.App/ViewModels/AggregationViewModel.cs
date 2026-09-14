@@ -89,7 +89,7 @@ public sealed partial class AggregationViewModel : ObservableObject
 
     /// <summary>
     /// ライブへ戻す。**コマンドにはしない** — 画面に「ライブへ戻す」ボタンは無く、
-    /// 呼ぶのは <see cref="SelectEntry"/> のトグルと、3分計測 / リセット の3か所だけ。
+    /// 呼ぶのは <see cref="SelectEntry"/> のトグル1か所だけ。
     /// </summary>
     private void SelectLive()
     {
@@ -125,10 +125,6 @@ public sealed partial class AggregationViewModel : ObservableObject
     [RelayCommand]
     private void ToggleThreeMinuteBenchmark()
     {
-        // 履歴を開いたままだと、操作は効くのに画面はその戦闘に固定されたままで
-        // 何も起きていないように見える。先にライブへ戻してから効かせる。
-        SelectLive();
-
         if (MeterSnapshotProvider.GetBenchmarkState().IsActive)
         {
             MeterSnapshotProvider.TryStopBenchmark();
@@ -144,8 +140,17 @@ public sealed partial class AggregationViewModel : ObservableObject
     [RelayCommand]
     private void ResetEncounter()
     {
-        SelectLive();
         MeterSnapshotProvider.ResetCurrentEncounter();
+    }
+
+    /// <summary>
+    /// 選択が外から変わったときに、一覧の「表示中」を合わせ直す。
+    /// 戦闘とエンカウンターの作り直しによる自動解除がここを通る。
+    /// **通らないと「表示中」が残ったままになる。**
+    /// </summary>
+    public void SyncSelection()
+    {
+        ApplySelection(EncounterHistoryProvider.SelectedEncounterId);
     }
 
     private void ApplySelection(ulong? encounterId)

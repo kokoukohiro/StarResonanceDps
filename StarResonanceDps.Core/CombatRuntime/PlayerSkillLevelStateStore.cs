@@ -36,10 +36,9 @@ public static class PlayerSkillLevelStateStore
     ///
     /// <para>
     /// 出どころは AOI属性 <c>AttrSlot</c>(226)。自分にしか届かず、毎回 全枠が丸ごと来る
-    /// (実測 2026-08-28: 9回とも31枠。空枠も <c>skillId=0</c> として枠ごと入っている)。
-    /// フルコンテナの <c>CharSerialize.Slots</c> は同じ瞬間に21枠しか運ばず、
-    /// 一部の空枠が欠け、さらに特化の置換前スキルIDを持っていた(slot2 が 1922 対 1930)ため
-    /// 採用していない。
+    /// (空枠も <c>skillId=0</c> として枠ごと入っている)。
+    /// <b>フルコンテナの <c>CharSerialize.Slots</c> は使えない</b> — 空枠を一部落とすうえ、
+    /// 特化の置換が反映されていない置換前のスキルIDを持っている。
     /// </para>
     ///
     /// <para><b>空枠は 0 のまま残す。</b> 落とすと枠の位置が失われる。</para>
@@ -610,10 +609,9 @@ public static class PlayerSkillLevelStateStore
 
     private static IEnumerable<SkillState> EnumerateSelectedDutySkills(DutyState dutyState)
     {
-        // スロット割り当てが空 = 1つも装備していない。
-        // 実測(2026-08-25): フルコンテナは全職務のスロットを同時に運んでおり、装備0の職務だけが
-        // 空で届く(duty2=4件・duty3=0件が同一パケットで到着)。1つ装備すると即座に1件で届く。
-        // つまり空は「未受信」ではなく「装備なし」。習得済みで埋めない。
+        // **スロット割り当てが空 = 1つも装備していない。「未受信」ではない。**
+        // フルコンテナは全職務のスロットを同時に運び、装備0の職務だけが空で届く。
+        // 習得済みの一覧で埋めないこと。
         if (dutyState.Slots.Count == 0)
         {
             return [];

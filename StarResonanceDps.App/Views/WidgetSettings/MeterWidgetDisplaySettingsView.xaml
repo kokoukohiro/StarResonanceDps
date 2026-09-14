@@ -144,21 +144,47 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingField}"
-                        Visibility="{Binding ShowsPartyDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid>
+                <Border Visibility="{Binding ShowsPartyDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingField}">
+                            <Style.Triggers>
+                                <!-- 注記を出すときだけ2行分の高さにする。 -->
+                                <DataTrigger Binding="{Binding ShowsPartyDisplayHistoryNote}" Value="True">
+                                    <Setter Property="Height" Value="75" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock VerticalAlignment="Center"
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
                                    Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <ComboBox Grid.Column="1"
+                        <TextBlock Grid.Row="1"
+                                   Margin="0,4,0,0"
+                                   Visibility="{Binding ShowsPartyDisplayHistoryNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter_HistoryNote]}"
+                                   Foreground="{DynamicResource Brush.TextSecondary}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+
+                        <ComboBox Grid.Row="0"
+                                  Grid.Column="1"
                                   SelectedIndex="{Binding PartyDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Style="{StaticResource Input.SettingsComboBox}">
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_All]}" />

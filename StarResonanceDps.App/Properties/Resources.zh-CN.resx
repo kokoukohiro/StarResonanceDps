@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Window_Manager_Title" xml:space="preserve">
-    <value>星痕共鸣 DPS 管理器</value>
+    <value>别查我DPS</value>
   </data>
   <data name="Window_Settings_Title" xml:space="preserve">
-    <value>星痕共鸣 DPS 设置</value>
+    <value>设置</value>
   </data>
   <data name="Window_WidgetSettings_Title" xml:space="preserve">
     <value>{0} 设置</value>
@@ -330,8 +330,32 @@
   <data name="Menu_DtpsMeter" xml:space="preserve">
     <value>DTPS计量器</value>
   </data>
-  <data name="Menu_SkillDiary" xml:space="preserve">
-    <value>技能日志</value>
+  <data name="Widget_TakenDamageLog" xml:space="preserve">
+    <value>承受伤害日志</value>
+  </data>
+  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+    <value>{0}正在咏唱{1}</value>
+  </data>
+  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+    <value>{0}正在准备{1}</value>
+  </data>
+  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+    <value>{0}的{1}</value>
+  </data>
+  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
+    <value>{0}受到{1}伤害({2}/{3})</value>
+  </data>
+  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
+    <value>{0}受到{1}伤害</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+    <value>攻击</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+    <value>某个技能</value>
+  </data>
+  <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
+    <value>※历史显示中无效</value>
   </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>玩家列表</value>
@@ -886,10 +910,13 @@
     <value>统计设置</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>新阶段分割战斗</value>
+    <value>按阶段分割统计</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
-    <value>保留至下次伤害</value>
+    <value>保留结果至下次事件</value>
+  </data>
+  <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
+    <value>下次事件时退出历史显示</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>历史保留期限</value>
@@ -903,6 +930,15 @@
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>统计</value>
   </data>
+  <data name="Aggregation_StatusLive" xml:space="preserve">
+    <value>统计中</value>
+  </data>
+  <data name="Aggregation_StatusBenchmark" xml:space="preserve">
+    <value>3分测量中</value>
+  </data>
+  <data name="Aggregation_StatusHistory" xml:space="preserve">
+    <value>历史显示中</value>
+  </data>
   <data name="Aggregation_Viewing" xml:space="preserve">
     <value>显示中</value>
   </data>
@@ -912,13 +948,7 @@
   <data name="Aggregation_EncounterPhase" xml:space="preserve">
     <value>阶段{0}</value>
   </data>
-  <data name="Aggregation_StatusLive" xml:space="preserve">
-    <value>统计中</value>
-  </data>
-  <data name="Aggregation_StatusBenchmark" xml:space="preserve">
-    <value>3分测量中</value>
-  </data>
-  <data name="Aggregation_StatusHistory" xml:space="preserve">
-    <value>历史显示中</value>
+  <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
+    <value>※例如在副本中进入BOSS房间等</value>
   </data>
 </root>

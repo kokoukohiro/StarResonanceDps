@@ -225,7 +225,7 @@ public sealed class NetworkAdapterSession
     /// いま選んでいるキャプチャ設定を Core へ移し、<b>保存を App に依頼する</b>。
     ///
     /// <para>
-    /// Core はファイルへ書かない(2026-09-12 に <c>Settings.json</c> を撤去した)。
+    /// <b>Core はファイルへ書かない。</b>
     /// 保存先は App の <c>AppSettings.json</c> で、購読側が
     /// <see cref="CombatRuntimeSettings"/> から現在値を読んで書き出す。
     /// </para>

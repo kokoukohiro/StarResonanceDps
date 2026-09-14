@@ -14,11 +14,6 @@ public static class Utils
 
     /// <summary>
     /// <c>Data/</c> が無ければ作る。<c>DB</c> もログもここへ書くので、最初に触る側が用意する。
-    ///
-    /// <para>
-    /// 以前あった旧レイアウト(<c>Data/CombatRuntime/</c>)からの引っ越しは 2026-09-12 に撤去した。
-    /// 開発段階で配布していないため、移す対象が存在しない。
-    /// </para>
     /// </summary>
     public static void EnsureDataDirectory()
     {

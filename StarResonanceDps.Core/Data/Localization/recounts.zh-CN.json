@@ -81,7 +81,7 @@
     ]
   },
   "12": {
-    "RecountName": "刹那",
+    "RecountName": "刹那连击",
     "SourceId": [
       "149904:1"
     ]
@@ -660,13 +660,13 @@
     ]
   },
   "93": {
-    "RecountName": "野狼普通攻击",
+    "RecountName": "野狼普通攻击·横扫",
     "SourceId": [
       "1700827:1"
     ]
   },
   "94": {
-    "RecountName": "野狼协同攻击",
+    "RecountName": "野狼协同攻击·撕咬",
     "SourceId": [
       "1700820:2"
     ]
@@ -1749,7 +1749,7 @@
     ]
   },
   "246": {
-    "RecountName": "迷狂炎舞·终式",
+    "RecountName": "迷狂炎舞·最后一斩",
     "SourceId": [
       "1622:1"
     ]
@@ -2361,7 +2361,7 @@
     ]
   },
   "335": {
-    "RecountName": "幻想冲击",
+    "RecountName": "幻灭冲击",
     "SourceId": [
       "7998:1"
     ]

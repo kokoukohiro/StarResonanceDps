@@ -94,7 +94,7 @@
 
                             <Grid VerticalAlignment="Center">
                                 <!--
-                                    全列固定幅。名前の160は実測に合わせた値
+                                    全列固定幅。名前の160は最長の名前に合わせてある
                                     (この書体・FontSize=12・SemiBold で最長 "Imagine - Return To Caster" が145.1px)。
                                 -->
                                 <Grid.ColumnDefinitions>
