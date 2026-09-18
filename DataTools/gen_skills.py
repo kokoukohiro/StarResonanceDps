@@ -1,7 +1,7 @@
 """
 スキル名テーブルを生成する。
 
-  Data/Localization/skills.{言語}.json
+  Data/Localization/SkillNames.json
 
 **`SkillTable` の全行を収録する。** 使い道を決めて絞らない。
 スキル枠(イマジン・ロール)に加えて、モンスターの技など枠に置かれないスキルも名前を引ける。
@@ -36,7 +36,7 @@ def main():
     print("")
 
     values = {lang: {i: skill_name(i, t.get(i)) for i in keys} for lang, t in tables.items()}
-    write_localized("skills", values, keys)
+    write_localized("SkillNames", values, keys)
 
 
 if __name__ == "__main__":

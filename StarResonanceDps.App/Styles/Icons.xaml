@@ -29,6 +29,16 @@
     <BitmapImage x:Key="Icon.Profession.Elite" UriSource="/Assets/Images/com_icon_tab_147.png" />
     <BitmapImage x:Key="Icon.Profession.Monster" UriSource="/Assets/Images/com_icon_tab_148.png" />
     <BitmapImage x:Key="Icon.Profession.Unknown" UriSource="/Assets/Images/com_icon_question.png" />
+    <!-- ダメージの属性。キーの末尾は EDamageProperty の名前。 -->
+    <BitmapImage x:Key="Icon.DamageProperty.General" UriSource="/Assets/Images/hazard_sign_no_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Fire" UriSource="/Assets/Images/hazard_sign_fire_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Water" UriSource="/Assets/Images/hazard_sign_ice_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Electricity" UriSource="/Assets/Images/hazard_sign_thunder_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Wood" UriSource="/Assets/Images/hazard_sign_sen_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Wind" UriSource="/Assets/Images/hazard_sign_wind_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Rock" UriSource="/Assets/Images/hazard_sign_rock_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Light" UriSource="/Assets/Images/hazard_sign_light_high.png" />
+    <BitmapImage x:Key="Icon.DamageProperty.Dark" UriSource="/Assets/Images/hazard_sign_dark_high.png" />
     <BitmapImage x:Key="Icon.PartyNumberFrame" UriSource="/Assets/Images/team_num_frame.png" />
     <BitmapImage x:Key="Icon.RoleSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_01.png" />
     <BitmapImage x:Key="Icon.ImagineSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_02.png" />

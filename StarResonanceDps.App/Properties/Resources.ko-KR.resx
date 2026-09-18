@@ -343,16 +343,46 @@
     <value>{0}의 {1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}에게 {1} 피해({2}/{3})</value>
+    <value>{0}에게 {1}{2} 피해({3}/{4})</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}에게 {1} 피해</value>
+    <value>{0}에게 {1}{2} 피해</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
   </data>
+  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+    <value>시스템</value>
+  </data>
   <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
     <value>무언가</value>
+  </data>
+  <data name="DamageProperty_General" xml:space="preserve">
+    <value>무속성</value>
+  </data>
+  <data name="DamageProperty_Fire" xml:space="preserve">
+    <value>불 원소</value>
+  </data>
+  <data name="DamageProperty_Water" xml:space="preserve">
+    <value>얼음 원소</value>
+  </data>
+  <data name="DamageProperty_Electricity" xml:space="preserve">
+    <value>번개 원소</value>
+  </data>
+  <data name="DamageProperty_Wood" xml:space="preserve">
+    <value>나무 원소</value>
+  </data>
+  <data name="DamageProperty_Wind" xml:space="preserve">
+    <value>바람 원소</value>
+  </data>
+  <data name="DamageProperty_Rock" xml:space="preserve">
+    <value>바위 원소</value>
+  </data>
+  <data name="DamageProperty_Light" xml:space="preserve">
+    <value>빛 원소</value>
+  </data>
+  <data name="DamageProperty_Dark" xml:space="preserve">
+    <value>어둠 원소</value>
   </data>
   <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
     <value>※기록 표시 중에는 적용되지 않습니다</value>
@@ -437,6 +467,9 @@
   </data>
   <data name="ClassSpec_TransformNatsu" xml:space="preserve">
     <value>나츠</value>
+  </data>
+  <data name="ClassSpec_TransformMean" xml:space="preserve">
+    <value>민</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>알 수 없음</value>
@@ -916,7 +949,7 @@
     <value>다음 이벤트까지 결과 유지</value>
   </data>
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
-    <value>다음 이벤트에서 기록 표시 해제</value>
+    <value>기록 표시 자동 해제</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>기록 보관 기간</value>
@@ -944,9 +977,6 @@
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>기록이 없습니다</value>
-  </data>
-  <data name="Aggregation_EncounterPhase" xml:space="preserve">
-    <value>페이즈 {0}</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※던전에서 보스 방 진입 등</value>

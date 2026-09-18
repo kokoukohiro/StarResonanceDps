@@ -14,9 +14,9 @@ public enum BuffGroup
 {
     None = 0,
 
-    /// <summary>料理。<c>2032011</c>〜<c>2032284</c> の136件。</summary>
+    /// <summary>料理。<c>2032011</c>〜<c>2032284</c>。</summary>
     Cuisine = 1,
 
-    /// <summary>薬剤。<c>2033011</c>〜<c>2033189</c> の162件。</summary>
+    /// <summary>薬剤。<c>2033011</c>〜<c>2033189</c>。</summary>
     Potion = 2
 }

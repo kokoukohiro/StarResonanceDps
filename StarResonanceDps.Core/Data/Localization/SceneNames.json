@@ -1,0 +1,4250 @@
+{
+  "1": {
+    "zh-CN": "login",
+    "en-US": "login",
+    "ja-JP": "login",
+    "ko-KR": "login"
+  },
+  "7": {
+    "zh-CN": "阿斯特里亚平原",
+    "en-US": "Asteria Plains",
+    "ja-JP": "アステリア平原",
+    "ko-KR": "아스테리아 평원"
+  },
+  "8": {
+    "zh-CN": "阿斯特里斯",
+    "en-US": "Asterleeds",
+    "ja-JP": "アステルリーズ",
+    "ko-KR": "아스텔리즈"
+  },
+  "9": {
+    "zh-CN": "巴哈马尔高原",
+    "en-US": "Bahamar Highlands",
+    "ja-JP": "バハマール高原",
+    "ko-KR": "바하마르 고원"
+  },
+  "10": {
+    "zh-CN": "蒙特诺尔溪谷",
+    "en-US": "Montegnor Valley",
+    "ja-JP": "モンテノール渓谷",
+    "ko-KR": "몬테놀 계곡"
+  },
+  "11": {
+    "zh-CN": "游星岛",
+    "en-US": "Starland",
+    "ja-JP": "スターリー島",
+    "ko-KR": "유성도"
+  },
+  "71": {
+    "zh-CN": "花明的森林",
+    "en-US": "Duskdye Woods",
+    "ja-JP": "花明かりの森",
+    "ko-KR": "꽃빛의 숲"
+  },
+  "72": {
+    "zh-CN": "溺光的森林",
+    "en-US": "Everfall Forest",
+    "ja-JP": "雨止まぬ森",
+    "ko-KR": "빛이 사라진 숲"
+  },
+  "73": {
+    "zh-CN": "风啸的峡谷",
+    "en-US": "Windhowl Canyon",
+    "ja-JP": "風鳴りの峡谷",
+    "ko-KR": "하울링 협곡"
+  },
+  "74": {
+    "zh-CN": "地下街区",
+    "en-US": "Underground District",
+    "ja-JP": "地下集落",
+    "ko-KR": "지하 거리"
+  },
+  "75": {
+    "zh-CN": "黯蓝深窟",
+    "en-US": "Skimmer's Lair",
+    "ja-JP": "黒藍の深窟",
+    "ko-KR": "검푸른 심연"
+  },
+  "76": {
+    "zh-CN": "幻花弥漫之地",
+    "en-US": "Land of Crimson Illusion",
+    "ja-JP": "幻の花の咲き乱れる地",
+    "ko-KR": "환상꽃이 가득한 땅"
+  },
+  "91": {
+    "zh-CN": "陷落回廊",
+    "en-US": "Sunken Corridor",
+    "ja-JP": "フィエル回廊",
+    "ko-KR": "가라앉은 회랑"
+  },
+  "92": {
+    "zh-CN": "晦暗之底",
+    "en-US": "Gloomy Depths",
+    "ja-JP": "暗闇の底",
+    "ko-KR": "어둠의 밑바닥"
+  },
+  "93": {
+    "zh-CN": "月影之野",
+    "en-US": "Moonshadow Wilds",
+    "ja-JP": "月影の野",
+    "ko-KR": "달그림자 들판"
+  },
+  "94": {
+    "zh-CN": "迷星之径",
+    "en-US": "Stray Starway",
+    "ja-JP": "迷星の径",
+    "ko-KR": "길잃은 별의 통로"
+  },
+  "95": {
+    "zh-CN": "夕照的林野",
+    "en-US": "Sunset Wilds",
+    "ja-JP": "落日古道",
+    "ko-KR": "노을이 비치는 숲"
+  },
+  "101": {
+    "zh-CN": "沐光林道",
+    "en-US": "Sunlit Trail",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "102": {
+    "zh-CN": "绯染的树林",
+    "en-US": "Crimson Woods",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "103": {
+    "zh-CN": "流金沙湾",
+    "en-US": "Golden Sand Beach",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "1001": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "1002": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "1011": {
+    "zh-CN": "不稳定空间·蒂娜·精神之界",
+    "en-US": "Unstable - Tina's Mindrealm",
+    "ja-JP": "不安定な空間・ティナ・精神領域",
+    "ko-KR": "불안정 공간・티나・정신 세계"
+  },
+  "1021": {
+    "zh-CN": "不稳定空间·蒂娜·精神之界",
+    "en-US": "Unstable - Tina's Mindrealm",
+    "ja-JP": "不安定な空間・ティナ・精神領域",
+    "ko-KR": "불안정 공간・티나・정신 세계"
+  },
+  "1031": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "1032": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "1033": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "1101": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "1102": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "1111": {
+    "zh-CN": "不稳定空间·巨塔遗迹",
+    "en-US": "Unstable - Towering Ruin",
+    "ja-JP": "不安定な空間・巨塔の遺跡",
+    "ko-KR": "불안정 공간・거탑 유적"
+  },
+  "1112": {
+    "zh-CN": "不稳定空间·巨塔遗迹",
+    "en-US": "Unstable - Towering Ruin",
+    "ja-JP": "不安定な空間・巨塔の遺跡",
+    "ko-KR": "불안정 공간・거탑 유적"
+  },
+  "1121": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "1122": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "1123": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "1150": {
+    "zh-CN": "蚀·巨塔遗迹",
+    "en-US": "Void - Towering Ruin",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "1151": {
+    "zh-CN": "蚀·巨塔遗迹",
+    "en-US": "Void - Towering Ruin",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "1152": {
+    "zh-CN": "蚀·巨塔遗迹",
+    "en-US": "Void - Towering Ruin",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "1153": {
+    "zh-CN": "不稳定空间·蚀·巨塔遗迹",
+    "en-US": "Unstable Space - Void - Towering Ruin",
+    "ja-JP": "不安定な空間・蝕・巨塔の遺跡",
+    "ko-KR": "불안정 공간・침식・거탑 유적"
+  },
+  "1154": {
+    "zh-CN": "不稳定空间·蚀·巨塔遗迹",
+    "en-US": "Unstable Space - Void - Towering Ruin",
+    "ja-JP": "不安定な空間・蝕・巨塔の遺跡",
+    "ko-KR": "불안정 공간・침식・거탑 유적"
+  },
+  "1201": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1202": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1211": {
+    "zh-CN": "不稳定空间·巨龙爪痕",
+    "en-US": "Unstable - Dragon Claw Valley",
+    "ja-JP": "不安定な空間・巨竜の爪痕",
+    "ko-KR": "불안정 공간・거룡의 발톱"
+  },
+  "1212": {
+    "zh-CN": "不稳定空间·巨龙爪痕",
+    "en-US": "Unstable - Dragon Claw Valley",
+    "ja-JP": "不安定な空間・巨竜の爪痕",
+    "ko-KR": "불안정 공간・거룡의 발톱"
+  },
+  "1221": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1222": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1223": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1231": {
+    "zh-CN": "不稳定空间·弥妄·巨龙爪痕",
+    "en-US": "Unstable - Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "不安定な空間・巨竜の爪痕",
+    "ko-KR": "불안정 공간・거룡의 발톱"
+  },
+  "1232": {
+    "zh-CN": "不稳定空间·弥妄·巨龙爪痕",
+    "en-US": "Unstable - Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "不安定な空間・巨竜の爪痕",
+    "ko-KR": "불안정 공간・거룡의 발톱"
+  },
+  "1233": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1234": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1235": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "1301": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "1302": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "1311": {
+    "zh-CN": "不稳定空间·黯影堡垒",
+    "en-US": "Unstable - Dark Mist Fortress",
+    "ja-JP": "不安定な空間・暗霧要塞",
+    "ko-KR": "불안정 공간・검은 안개 요새"
+  },
+  "1321": {
+    "zh-CN": "不稳定空间·黯影堡垒",
+    "en-US": "Unstable - Dark Mist Fortress",
+    "ja-JP": "不安定な空間・暗霧要塞",
+    "ko-KR": "불안정 공간・검은 안개 요새"
+  },
+  "1331": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "1332": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "1333": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "1341": {
+    "zh-CN": "不稳定空间·弥妄·黯影堡垒",
+    "en-US": "Unstable - Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "不安定な空間・迷妄・暗霧要塞",
+    "ko-KR": "불안정 공간・미망・검은 안개 요새"
+  },
+  "1342": {
+    "zh-CN": "不稳定空间·弥妄·黯影堡垒",
+    "en-US": "Unstable - Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "不安定な空間・迷妄・暗霧要塞",
+    "ko-KR": "불안정 공간・미망・검은 안개 요새"
+  },
+  "1343": {
+    "zh-CN": "弥妄·黯影堡垒",
+    "en-US": "Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "迷妄・暗霧要塞",
+    "ko-KR": "미망・검은 안개 요새"
+  },
+  "1344": {
+    "zh-CN": "弥妄·黯影堡垒",
+    "en-US": "Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "迷妄・暗霧要塞",
+    "ko-KR": "미망・검은 안개 요새"
+  },
+  "1399": {
+    "zh-CN": "关卡任务测试",
+    "en-US": "Level quest test",
+    "ja-JP": "ステージクエストテスト",
+    "ko-KR": "스테이지 퀘스트 테스트"
+  },
+  "1401": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1402": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1403": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1411": {
+    "zh-CN": "不稳定空间·幻华流月之野",
+    "en-US": "Unstable - Illusory Moonveil Wilds",
+    "ja-JP": "不安定な空間・幻華流月の野",
+    "ko-KR": "불안정 공간・환상의 빛이 흐르는 들판"
+  },
+  "1412": {
+    "zh-CN": "不稳定空间·幻华流月之野",
+    "en-US": "Unstable - Illusory Moonveil Wilds",
+    "ja-JP": "不安定な空間・幻華流月の野",
+    "ko-KR": "불안정 공간・환상의 빛이 흐르는 들판"
+  },
+  "1421": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1422": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1423": {
+    "zh-CN": "幻华流月之野",
+    "en-US": "Illusory Moonveil Wilds",
+    "ja-JP": "幻華流月の野",
+    "ko-KR": "환상의 빛이 흐르는 들판"
+  },
+  "1501": {
+    "zh-CN": "岩蛇巢穴",
+    "en-US": "Rock Serpent Lair",
+    "ja-JP": "ロックスネークの巣",
+    "ko-KR": "바위뱀 소굴"
+  },
+  "1502": {
+    "zh-CN": "岩蛇巢穴",
+    "en-US": "Rock Serpent Lair",
+    "ja-JP": "ロックスネークの巣",
+    "ko-KR": "바위뱀 소굴"
+  },
+  "1511": {
+    "zh-CN": "不稳定空间·岩蛇巢穴",
+    "en-US": "Unstable - Rock Serpent Lair",
+    "ja-JP": "不安定な空間・ロックスネークの巣",
+    "ko-KR": "불안정 공간・바위뱀 소굴"
+  },
+  "1521": {
+    "zh-CN": "不稳定空间·岩蛇巢穴",
+    "en-US": "Unstable - Rock Serpent Lair",
+    "ja-JP": "不安定な空間・ロックスネークの巣",
+    "ko-KR": "불안정 공간・바위뱀 소굴"
+  },
+  "1531": {
+    "zh-CN": "岩蛇巢穴",
+    "en-US": "Rock Serpent Lair",
+    "ja-JP": "ロックスネークの巣",
+    "ko-KR": "바위뱀 소굴"
+  },
+  "1532": {
+    "zh-CN": "岩蛇巢穴",
+    "en-US": "Rock Serpent Lair",
+    "ja-JP": "ロックスネークの巣",
+    "ko-KR": "바위뱀 소굴"
+  },
+  "1533": {
+    "zh-CN": "岩蛇巢穴",
+    "en-US": "Rock Serpent Lair",
+    "ja-JP": "ロックスネークの巣",
+    "ko-KR": "바위뱀 소굴"
+  },
+  "1611": {
+    "zh-CN": "不稳定空间·蚀·蒂娜精神之界",
+    "en-US": "Unstable Space - Void - Tina's Mindrealm",
+    "ja-JP": "不安定な空間・蝕・ティナの精神領域",
+    "ko-KR": "불안정 공간・침식・티나의 정신 세계"
+  },
+  "1621": {
+    "zh-CN": "不稳定空间·蚀·蒂娜精神之界",
+    "en-US": "Unstable Space - Void - Tina's Mindrealm",
+    "ja-JP": "不安定な空間・蝕・ティナの精神領域",
+    "ko-KR": "불안정 공간・침식・티나의 정신 세계"
+  },
+  "1631": {
+    "zh-CN": "蚀·蒂娜精神之界",
+    "en-US": "Void - Tina's Mindrealm",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "1632": {
+    "zh-CN": "蚀·蒂娜精神之界",
+    "en-US": "Void - Tina's Mindrealm",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "1633": {
+    "zh-CN": "蚀·蒂娜精神之界",
+    "en-US": "Void - Tina's Mindrealm",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "1711": {
+    "zh-CN": "不稳定空间·弥妄·流月之野",
+    "en-US": "Unstable - Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "不安定な空間・迷妄・流月の野",
+    "ko-KR": "불안정 공간・미망・달의 들판"
+  },
+  "1712": {
+    "zh-CN": "不稳定空间·弥妄·流月之野",
+    "en-US": "Unstable - Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "不安定な空間・迷妄・流月の野",
+    "ko-KR": "불안정 공간・미망・달의 들판"
+  },
+  "1721": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・달의 들판"
+  },
+  "1722": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・달의 들판"
+  },
+  "1723": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・달의 들판"
+  },
+  "1901": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
+  },
+  "1911": {
+    "zh-CN": "不稳定空间·远天的神槛",
+    "en-US": "Unstable - Cavern Zero",
+    "ja-JP": "不安定な空間・遠天の神檻",
+    "ko-KR": "불안정 공간・먼 하늘의 신단"
+  },
+  "1912": {
+    "zh-CN": "不稳定空间·远天的神槛",
+    "en-US": "Unstable - Cavern Zero",
+    "ja-JP": "不安定な空間・遠天の神檻",
+    "ko-KR": "불안정 공간・먼 하늘의 신단"
+  },
+  "1931": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
+  },
+  "1932": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
+  },
+  "5000": {
+    "zh-CN": "内容机制测试场景",
+    "en-US": "Content mechanism test scene",
+    "ja-JP": "コンテンツメカニズムテストシーン",
+    "ko-KR": "콘텐츠 메커니즘 테스트 필드"
+  },
+  "5002": {
+    "zh-CN": "源之海",
+    "en-US": "Sea of Origin",
+    "ja-JP": "起源の海",
+    "ko-KR": "근원의 바다"
+  },
+  "5033": {
+    "zh-CN": "塔之遗迹",
+    "en-US": "Tower Ruins",
+    "ja-JP": "塔の遺跡",
+    "ko-KR": "탑 유적"
+  },
+  "5200": {
+    "zh-CN": "拉蒙德办公室",
+    "en-US": "Lamond's Office",
+    "ja-JP": "ラモンドの執務室",
+    "ko-KR": "라몬드 사무실"
+  },
+  "5206": {
+    "zh-CN": "阿斯特里斯",
+    "en-US": "Asterleeds",
+    "ja-JP": "アステルリーズ",
+    "ko-KR": "아스텔리즈"
+  },
+  "5211": {
+    "zh-CN": "拉蒙德办公室",
+    "en-US": "Lamond's Office",
+    "ja-JP": "ラモンドの執務室",
+    "ko-KR": "라몬드 사무실"
+  },
+  "5220": {
+    "zh-CN": "阿斯特里斯",
+    "en-US": "Asterleeds",
+    "ja-JP": "アステルリーズ",
+    "ko-KR": "아스텔리즈"
+  },
+  "5401": {
+    "zh-CN": "卡尼曼森林",
+    "en-US": "Kanamia Forest",
+    "ja-JP": "カナミアの森",
+    "ko-KR": "카나미아 숲"
+  },
+  "5403": {
+    "zh-CN": "第一勇士试炼",
+    "en-US": "Kanamia Brave Trial",
+    "ja-JP": "ナダニの試練",
+    "ko-KR": "제1용사의 시련"
+  },
+  "5501": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "5602": {
+    "zh-CN": "法法菈家",
+    "en-US": "Fafala's Home",
+    "ja-JP": "ファルファラの家",
+    "ko-KR": "파파라의 집"
+  },
+  "5603": {
+    "zh-CN": "法法菈家",
+    "en-US": "Fafala's Home",
+    "ja-JP": "ファルファラの家",
+    "ko-KR": "파파라의 집"
+  },
+  "5604": {
+    "zh-CN": "法法菈家",
+    "en-US": "Fafala's Home",
+    "ja-JP": "ファルファラの家",
+    "ko-KR": "파파라의 집"
+  },
+  "5811": {
+    "zh-CN": "冶炼炉管道",
+    "en-US": "Smelting Furnace Pipes",
+    "ja-JP": "精錬炉のパイプライン",
+    "ko-KR": "제련로 배관"
+  },
+  "5812": {
+    "zh-CN": "冰之玉响",
+    "en-US": "Frostjade Staff",
+    "ja-JP": "進むべき道",
+    "ko-KR": "영롱한 얼음의 메아리"
+  },
+  "5813": {
+    "zh-CN": "矿场深处的遗迹",
+    "en-US": "Ruins Deep Within the Mine",
+    "ja-JP": "鉱山深部の遺跡",
+    "ko-KR": "광산 깊은 곳 유적"
+  },
+  "5900": {
+    "zh-CN": "环海石礁",
+    "en-US": "Sea-Ringed Reef",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "5901": {
+    "zh-CN": "隐雾猎场",
+    "en-US": "Mistveil Hunting Ground",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "5910": {
+    "zh-CN": "诅咒的煌墓",
+    "en-US": "Cursed Radiant Tomb",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "5920": {
+    "zh-CN": "梦境",
+    "en-US": "Dreamscape",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "6001": {
+    "zh-CN": "英雄本功能测试副本",
+    "en-US": "Heroic Dungeon Test Dungeon",
+    "ja-JP": "ヒロイックダンジョン機能テストダンジョン",
+    "ko-KR": "영웅 던전 기능 테스트 던전"
+  },
+  "6005": {
+    "zh-CN": "不稳定空间·哥布林巢穴",
+    "en-US": "Unstable - Goblin Lair",
+    "ja-JP": "不安定な空間・ゴブリンの巣窟",
+    "ko-KR": "불안정 공간・고블린 소굴"
+  },
+  "6006": {
+    "zh-CN": "不稳定空间·哥布林巢穴",
+    "en-US": "Unstable - Goblin Lair",
+    "ja-JP": "不安定な空間・ゴブリンの巣窟",
+    "ko-KR": "불안정 공간・고블린 소굴"
+  },
+  "6007": {
+    "zh-CN": "哥布林巢穴",
+    "en-US": "Goblin Lair",
+    "ja-JP": "ゴブリンの巣窟",
+    "ko-KR": "고블린 소굴"
+  },
+  "6008": {
+    "zh-CN": "哥布林巢穴",
+    "en-US": "Goblin Lair",
+    "ja-JP": "ゴブリンの巣窟",
+    "ko-KR": "고블린 소굴"
+  },
+  "6009": {
+    "zh-CN": "哥布林巢穴",
+    "en-US": "Goblin Lair",
+    "ja-JP": "ゴブリンの巣窟",
+    "ko-KR": "고블린 소굴"
+  },
+  "6011": {
+    "zh-CN": "不稳定空间·卡尼曼试炼",
+    "en-US": "Unstable - Kanamia Trial",
+    "ja-JP": "不安定な空間・カナミアの試練",
+    "ko-KR": "불안정 공간・카나미아 시련"
+  },
+  "6012": {
+    "zh-CN": "不稳定空间·卡尼曼试炼",
+    "en-US": "Unstable - Kanamia Trial",
+    "ja-JP": "不安定な空間・カナミアの試練",
+    "ko-KR": "불안정 공간・카나미아 시련"
+  },
+  "6021": {
+    "zh-CN": "卡尼曼试炼",
+    "en-US": "Kanamia Trial",
+    "ja-JP": "カナミアの試練",
+    "ko-KR": "카나미아 시련"
+  },
+  "6022": {
+    "zh-CN": "卡尼曼试炼",
+    "en-US": "Kanamia Trial",
+    "ja-JP": "カナミアの試練",
+    "ko-KR": "카나미아 시련"
+  },
+  "6023": {
+    "zh-CN": "卡尼曼试炼",
+    "en-US": "Kanamia Trial",
+    "ja-JP": "カナミアの試練",
+    "ko-KR": "카나미아 시련"
+  },
+  "6031": {
+    "zh-CN": "不稳定空间·卡尼曼试炼",
+    "en-US": "Unstable - Kanamia Trial",
+    "ja-JP": "不安定な空間・カナミアの試練",
+    "ko-KR": "불안정 공간・카나미아 시련"
+  },
+  "6032": {
+    "zh-CN": "不稳定空间·卡尼曼试炼",
+    "en-US": "Unstable - Kanamia Trial",
+    "ja-JP": "不安定な空間・カナミアの試練",
+    "ko-KR": "불안정 공간・카나미아 시련"
+  },
+  "6040": {
+    "zh-CN": "群青环抱无音之都",
+    "en-US": "Verdant Embrace of Soundless City",
+    "ja-JP": "群青に覆われた音無き都",
+    "ko-KR": "군청빛이 감싼 소리 없는 도시"
+  },
+  "6041": {
+    "zh-CN": "不稳定空间·无音之都",
+    "en-US": "Unstable - Soundless City",
+    "ja-JP": "不安定な空間・音無き都",
+    "ko-KR": "불안정 공간・소리 없는 도시"
+  },
+  "6042": {
+    "zh-CN": "不稳定空间·无音之都",
+    "en-US": "Unstable - Soundless City",
+    "ja-JP": "不安定な空間・音無き都",
+    "ko-KR": "불안정 공간・소리 없는 도시"
+  },
+  "6043": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6044": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6045": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6111": {
+    "zh-CN": "不稳定空间·荒灵祭所",
+    "en-US": "Unstable - Wraith Shrine",
+    "ja-JP": "不安定な空間・荒魂の祭殿",
+    "ko-KR": "불안정 공간・황령 제단"
+  },
+  "6112": {
+    "zh-CN": "不稳定空间·荒灵祭所",
+    "en-US": "Unstable - Wraith Shrine",
+    "ja-JP": "不安定な空間・荒魂の祭殿",
+    "ko-KR": "불안정 공간・황령 제단"
+  },
+  "6121": {
+    "zh-CN": "荒灵祭所",
+    "en-US": "Wraith Shrine",
+    "ja-JP": "荒魂の祭殿",
+    "ko-KR": "황령 제단"
+  },
+  "6122": {
+    "zh-CN": "荒灵祭所",
+    "en-US": "Wraith Shrine",
+    "ja-JP": "荒魂の祭殿",
+    "ko-KR": "황령 제단"
+  },
+  "6123": {
+    "zh-CN": "荒灵祭所",
+    "en-US": "Wraith Shrine",
+    "ja-JP": "荒魂の祭殿",
+    "ko-KR": "황령 제단"
+  },
+  "6211": {
+    "zh-CN": "不稳定空间·衰败深处",
+    "en-US": "Unstable - Depths of Decay",
+    "ja-JP": "不安定な空間・衰亡の深淵",
+    "ko-KR": "불안정 공간・쇠락의 심연"
+  },
+  "6212": {
+    "zh-CN": "不稳定空间·衰败深处",
+    "en-US": "Unstable - Depths of Decay",
+    "ja-JP": "不安定な空間・衰亡の深淵",
+    "ko-KR": "불안정 공간・쇠락의 심연"
+  },
+  "6221": {
+    "zh-CN": "衰败深处",
+    "en-US": "Depths of Decay",
+    "ja-JP": "衰亡の深淵",
+    "ko-KR": "쇠락의 심연"
+  },
+  "6222": {
+    "zh-CN": "衰败深处",
+    "en-US": "Depths of Decay",
+    "ja-JP": "衰亡の深淵",
+    "ko-KR": "쇠락의 심연"
+  },
+  "6223": {
+    "zh-CN": "衰败深处",
+    "en-US": "Depths of Decay",
+    "ja-JP": "衰亡の深淵",
+    "ko-KR": "쇠락의 심연"
+  },
+  "6311": {
+    "zh-CN": "不稳定空间·噬光牢笼",
+    "en-US": "Unstable - Devourer Cage",
+    "ja-JP": "不安定な空間・光亡き牢",
+    "ko-KR": "불안정 공간・빛을 삼키는 감옥"
+  },
+  "6321": {
+    "zh-CN": "不稳定空间·噬光牢笼",
+    "en-US": "Unstable - Devourer Cage",
+    "ja-JP": "不安定な空間・光亡き牢",
+    "ko-KR": "불안정 공간・빛을 삼키는 감옥"
+  },
+  "6331": {
+    "zh-CN": "噬光牢笼",
+    "en-US": "Devourer Cage",
+    "ja-JP": "光亡き牢",
+    "ko-KR": "빛을 삼키는 감옥"
+  },
+  "6332": {
+    "zh-CN": "噬光牢笼",
+    "en-US": "Devourer Cage",
+    "ja-JP": "光亡き牢",
+    "ko-KR": "빛을 삼키는 감옥"
+  },
+  "6333": {
+    "zh-CN": "噬光牢笼",
+    "en-US": "Devourer Cage",
+    "ja-JP": "光亡き牢",
+    "ko-KR": "빛을 삼키는 감옥"
+  },
+  "6411": {
+    "zh-CN": "不稳定空间·无音之都",
+    "en-US": "Unstable - Soundless City",
+    "ja-JP": "不安定な空間・音無き都",
+    "ko-KR": "불안정 공간・소리 없는 도시"
+  },
+  "6412": {
+    "zh-CN": "不稳定空间·无音之都",
+    "en-US": "Unstable - Soundless City",
+    "ja-JP": "不安定な空間・音無き都",
+    "ko-KR": "불안정 공간・소리 없는 도시"
+  },
+  "6421": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6422": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6423": {
+    "zh-CN": "无音之都",
+    "en-US": "Soundless City",
+    "ja-JP": "音無き都",
+    "ko-KR": "소리 없는 도시"
+  },
+  "6511": {
+    "zh-CN": "不稳定空间·诅咒的煌墓",
+    "en-US": "Unstable Space - Cursed Radiant Tomb",
+    "ja-JP": "不安定な空間・呪われし煌墓",
+    "ko-KR": "불안정 공간・저주받은 무덤"
+  },
+  "6512": {
+    "zh-CN": "不稳定空间·诅咒的煌墓",
+    "en-US": "Unstable Space - Cursed Radiant Tomb",
+    "ja-JP": "不安定な空間・呪われし煌墓",
+    "ko-KR": "불안정 공간・저주받은 무덤"
+  },
+  "6513": {
+    "zh-CN": "诅咒的煌墓",
+    "en-US": "Cursed Radiant Tomb",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "6514": {
+    "zh-CN": "诅咒的煌墓",
+    "en-US": "Cursed Radiant Tomb",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "6515": {
+    "zh-CN": "诅咒的煌墓",
+    "en-US": "Cursed Radiant Tomb",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "6521": {
+    "zh-CN": "不稳定空间·机化处理所",
+    "en-US": "Unstable Space - Mech Facility",
+    "ja-JP": "不安定な空間・機械化工場",
+    "ko-KR": "불안정 공간・기계화 처리소"
+  },
+  "6522": {
+    "zh-CN": "不稳定空间·机化处理所",
+    "en-US": "Unstable Space - Mech Facility",
+    "ja-JP": "不安定な空間・機械化工場",
+    "ko-KR": "불안정 공간・기계화 처리소"
+  },
+  "6523": {
+    "zh-CN": "机化处理所",
+    "en-US": "Mech Facility",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "6524": {
+    "zh-CN": "机化处理所",
+    "en-US": "Mech Facility",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "6525": {
+    "zh-CN": "机化处理所",
+    "en-US": "Mech Facility",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "6541": {
+    "zh-CN": "不稳定空间·隐雾猎场",
+    "en-US": "Unstable Space - Mistveil Hunting Ground",
+    "ja-JP": "不安定な空間・霧海の猟場",
+    "ko-KR": "불안정 공간・안개 속 사냥터"
+  },
+  "6542": {
+    "zh-CN": "不稳定空间·隐雾猎场",
+    "en-US": "Unstable Space - Mistveil Hunting Ground",
+    "ja-JP": "不安定な空間・霧海の猟場",
+    "ko-KR": "불안정 공간・안개 속 사냥터"
+  },
+  "6543": {
+    "zh-CN": "隐雾猎场",
+    "en-US": "Mistveil Hunting Ground",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "6544": {
+    "zh-CN": "隐雾猎场",
+    "en-US": "Mistveil Hunting Ground",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "6545": {
+    "zh-CN": "隐雾猎场",
+    "en-US": "Mistveil Hunting Ground",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "6561": {
+    "zh-CN": "不稳定空间·环海石礁",
+    "en-US": "Unstable Space - Sea-Ringed Reef",
+    "ja-JP": "不安定な空間・珊瑚岩の谷",
+    "ko-KR": "불안정 공간・환해 암초 지대"
+  },
+  "6562": {
+    "zh-CN": "不稳定空间·环海石礁",
+    "en-US": "Unstable Space - Sea-Ringed Reef",
+    "ja-JP": "不安定な空間・珊瑚岩の谷",
+    "ko-KR": "불안정 공간・환해 암초 지대"
+  },
+  "6563": {
+    "zh-CN": "环海石礁",
+    "en-US": "Sea-Ringed Reef",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "6564": {
+    "zh-CN": "环海石礁",
+    "en-US": "Sea-Ringed Reef",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "6565": {
+    "zh-CN": "环海石礁",
+    "en-US": "Sea-Ringed Reef",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "6591": {
+    "zh-CN": "不稳定空间·镜中的审判",
+    "en-US": "Unstable - Mirror Judgment",
+    "ja-JP": "不安定な空間・ミラーパニッシュ",
+    "ko-KR": "불안정 공간・거울 속의 심판"
+  },
+  "6592": {
+    "zh-CN": "不稳定空间·镜中的审判",
+    "en-US": "Unstable - Mirror Judgment",
+    "ja-JP": "不安定な空間・ミラーパニッシュ",
+    "ko-KR": "불안정 공간・거울 속의 심판"
+  },
+  "6593": {
+    "zh-CN": "镜中的审判",
+    "en-US": "Mirror Judgment",
+    "ja-JP": "ミラーパニッシュ",
+    "ko-KR": "거울 속의 심판"
+  },
+  "6594": {
+    "zh-CN": "镜中的审判",
+    "en-US": "Mirror Judgment",
+    "ja-JP": "ミラーパニッシュ",
+    "ko-KR": "거울 속의 심판"
+  },
+  "6610": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "バレンコート",
+    "ko-KR": "황폐한 정원"
+  },
+  "6611": {
+    "zh-CN": "不稳定空间·荒芜之庭",
+    "en-US": "Unstable - Barren Courtyard",
+    "ja-JP": "不安定な空間・バレンコート",
+    "ko-KR": "불안정 공간・황폐한 정원"
+  },
+  "6612": {
+    "zh-CN": "不稳定空间·荒芜之庭",
+    "en-US": "Unstable - Barren Courtyard",
+    "ja-JP": "不安定な空間・バレンコート",
+    "ko-KR": "불안정 공간・황폐한 정원"
+  },
+  "6613": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "バレンコート",
+    "ko-KR": "황폐한 정원"
+  },
+  "6614": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "バレンコート",
+    "ko-KR": "황폐한 정원"
+  },
+  "6615": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "バレンコート",
+    "ko-KR": "황폐한 정원"
+  },
+  "7001": {
+    "zh-CN": "多人跑酷",
+    "en-US": "Parkour",
+    "ja-JP": "マルチパルクール",
+    "ko-KR": "멀티 파쿠르"
+  },
+  "7002": {
+    "zh-CN": "多人跑酷",
+    "en-US": "Parkour",
+    "ja-JP": "マルチパルクール",
+    "ko-KR": "멀티 파쿠르"
+  },
+  "7003": {
+    "zh-CN": "废都障碍赛",
+    "en-US": "Wasteland Race",
+    "ja-JP": "廃都障害レース",
+    "ko-KR": "폐허 도시 장애물 레이스"
+  },
+  "7004": {
+    "zh-CN": "环城坐骑赛",
+    "en-US": "City Rally",
+    "ja-JP": "マウントレース",
+    "ko-KR": "도시 일주 라이드 레이스"
+  },
+  "7050": {
+    "zh-CN": "哥布林大暴走",
+    "en-US": "Goblin Rampage",
+    "ja-JP": "ゴブリン大暴走",
+    "ko-KR": "고블린 대폭주"
+  },
+  "7051": {
+    "zh-CN": "哥布林大暴走",
+    "en-US": "Goblin Rampage",
+    "ja-JP": "ゴブリン大暴走",
+    "ko-KR": "고블린 대폭주"
+  },
+  "7052": {
+    "zh-CN": "哥布林大暴走",
+    "en-US": "Goblin Rampage",
+    "ja-JP": "ゴブリン大暴走",
+    "ko-KR": "고블린 대폭주"
+  },
+  "7053": {
+    "zh-CN": "哥布林大暴走",
+    "en-US": "Goblin Rampage",
+    "ja-JP": "ゴブリン大暴走",
+    "ko-KR": "고블린 대폭주"
+  },
+  "7054": {
+    "zh-CN": "哥布林大暴走",
+    "en-US": "Goblin Rampage",
+    "ja-JP": "ゴブリン大暴走",
+    "ko-KR": "고블린 대폭주"
+  },
+  "7055": {
+    "zh-CN": "讨伐哥布林巫师",
+    "en-US": "Defeat the Goblin Mage",
+    "ja-JP": "エルダーゴブリン討伐",
+    "ko-KR": "고블린 샤먼 토벌하기"
+  },
+  "7056": {
+    "zh-CN": "讨伐哥布林巫师",
+    "en-US": "Defeat the Goblin Mage",
+    "ja-JP": "エルダーゴブリン討伐",
+    "ko-KR": "고블린 샤먼 토벌하기"
+  },
+  "7057": {
+    "zh-CN": "讨伐哥布林巫师",
+    "en-US": "Defeat the Goblin Mage",
+    "ja-JP": "エルダーゴブリン討伐",
+    "ko-KR": "고블린 샤먼 토벌하기"
+  },
+  "7058": {
+    "zh-CN": "讨伐哥布林巫师",
+    "en-US": "Defeat the Goblin Mage",
+    "ja-JP": "エルダーゴブリン討伐",
+    "ko-KR": "고블린 샤먼 토벌하기"
+  },
+  "7060": {
+    "zh-CN": "安德拉峡谷保卫战",
+    "en-US": "Canyon Battle",
+    "ja-JP": "アンドラ峡谷防衛戦",
+    "ko-KR": "안드라 협곡 방어전"
+  },
+  "7061": {
+    "zh-CN": "安德拉峡谷保卫战",
+    "en-US": "Canyon Battle",
+    "ja-JP": "アンドラ峡谷防衛戦",
+    "ko-KR": "안드라 협곡 방어전"
+  },
+  "7065": {
+    "zh-CN": "快递紧急运输",
+    "en-US": "Urgent Delivery",
+    "ja-JP": "緊急輸送",
+    "ko-KR": "긴급 택배 운송"
+  },
+  "7070": {
+    "zh-CN": "调查光桥平台",
+    "en-US": "Light Bridge",
+    "ja-JP": "光の足場の調査",
+    "ko-KR": "빛의 다리 조사"
+  },
+  "7071": {
+    "zh-CN": "调查光桥平台",
+    "en-US": "Light Bridge",
+    "ja-JP": "光の足場の調査",
+    "ko-KR": "빛의 다리 조사"
+  },
+  "7072": {
+    "zh-CN": "调查光桥平台",
+    "en-US": "Light Bridge",
+    "ja-JP": "光の足場の調査",
+    "ko-KR": "빛의 다리 조사"
+  },
+  "7073": {
+    "zh-CN": "调查光桥平台",
+    "en-US": "Light Bridge",
+    "ja-JP": "光の足場の調査",
+    "ko-KR": "빛의 다리 조사"
+  },
+  "7075": {
+    "zh-CN": "亚人生态问答",
+    "en-US": "Demi-Human Q&A",
+    "ja-JP": "亜人生態クイズ",
+    "ko-KR": "아인족 생태 문답"
+  },
+  "7076": {
+    "zh-CN": "亚人生态问答",
+    "en-US": "Demi-Human Q&A",
+    "ja-JP": "亜人生態クイズ",
+    "ko-KR": "아인족 생태 문답"
+  },
+  "7077": {
+    "zh-CN": "亚人生态问答",
+    "en-US": "Demi-Human Q&A",
+    "ja-JP": "亜人生態クイズ",
+    "ko-KR": "아인족 생태 문답"
+  },
+  "7080": {
+    "zh-CN": "风元素乱流",
+    "en-US": "Wind Turbulence",
+    "ja-JP": "風属性乱流",
+    "ko-KR": "바람 원소 난류"
+  },
+  "7085": {
+    "zh-CN": "小猪快跑",
+    "en-US": "Boars Run",
+    "ja-JP": "走れウリボ",
+    "ko-KR": "우리보 달리기"
+  },
+  "7090": {
+    "zh-CN": "抑制虚蚀喷涌",
+    "en-US": "Suppress the Eruption",
+    "ja-JP": "虚蝕噴出の抑制",
+    "ko-KR": "허무의 침식 분출 억제"
+  },
+  "7095": {
+    "zh-CN": "躲避蜘蛛雷挑战",
+    "en-US": "Spider Mine",
+    "ja-JP": "サンダースパイダー回避チャレンジ",
+    "ko-KR": "거미 지뢰 피하기 도전"
+  },
+  "7101": {
+    "zh-CN": "青空试炼",
+    "en-US": "Sky Trial",
+    "ja-JP": "青空の試練",
+    "ko-KR": "푸른 하늘의 시련"
+  },
+  "7102": {
+    "zh-CN": "青空试炼",
+    "en-US": "Sky Trial",
+    "ja-JP": "青空の試練",
+    "ko-KR": "푸른 하늘의 시련"
+  },
+  "7103": {
+    "zh-CN": "青空试炼",
+    "en-US": "Sky Trial",
+    "ja-JP": "青空の試練",
+    "ko-KR": "푸른 하늘의 시련"
+  },
+  "7150": {
+    "zh-CN": "世界主宰",
+    "en-US": "World Dominator",
+    "ja-JP": "世界の支配者",
+    "ko-KR": "세계의 지배자"
+  },
+  "7151": {
+    "zh-CN": "世界主宰",
+    "en-US": "World Dominator",
+    "ja-JP": "世界の支配者",
+    "ko-KR": "세계의 지배자"
+  },
+  "7152": {
+    "zh-CN": "世界主宰",
+    "en-US": "World Dominator",
+    "ja-JP": "世界の支配者",
+    "ko-KR": "세계의 지배자"
+  },
+  "8001": {
+    "zh-CN": "村庄保卫战",
+    "en-US": "Village Defense Battle",
+    "ja-JP": "村防衛戦",
+    "ko-KR": "마을 방어전"
+  },
+  "8002": {
+    "zh-CN": "机像擂台",
+    "en-US": "Golem Arena",
+    "ja-JP": "ゴーレムリング",
+    "ko-KR": "골렘 경기장"
+  },
+  "8005": {
+    "zh-CN": "快递紧急运输",
+    "en-US": "Urgent Delivery",
+    "ja-JP": "緊急輸送",
+    "ko-KR": "긴급 택배 운송"
+  },
+  "8006": {
+    "zh-CN": "快递紧急运输",
+    "en-US": "Urgent Delivery",
+    "ja-JP": "緊急輸送",
+    "ko-KR": "긴급 택배 운송"
+  },
+  "8020": {
+    "zh-CN": "亚人对决",
+    "en-US": "Demi-Human Duel",
+    "ja-JP": "亜人対決",
+    "ko-KR": "아인족 대결"
+  },
+  "8021": {
+    "zh-CN": "亚人对决",
+    "en-US": "Demi-Human Duel",
+    "ja-JP": "亜人対決",
+    "ko-KR": "아인족 대결"
+  },
+  "8051": {
+    "zh-CN": "毒沼侵蚀之隙",
+    "en-US": "Toxic Mire Breach",
+    "ja-JP": "毒沼の間隙",
+    "ko-KR": "독늪에 침식된 균열"
+  },
+  "8052": {
+    "zh-CN": "错乱之隙",
+    "en-US": "Rift of Chaos",
+    "ja-JP": "錯乱の隙を突け",
+    "ko-KR": "착란의 균열"
+  },
+  "8053": {
+    "zh-CN": "废弃之地·浅疫",
+    "en-US": "Wasteland: Tainted",
+    "ja-JP": "棄てられた地・軽汚染",
+    "ko-KR": "버려진 땅・역병 표층"
+  },
+  "8054": {
+    "zh-CN": "废弃之地·深疫",
+    "en-US": "Wasteland: Corrupted",
+    "ja-JP": "棄てられた地・重汚染",
+    "ko-KR": "버려진 땅・역병 심부"
+  },
+  "9000": {
+    "zh-CN": "躲避蜘蛛雷挑战",
+    "en-US": "Spider Mine",
+    "ja-JP": "サンダースパイダー回避チャレンジ",
+    "ko-KR": "거미 지뢰 피하기 도전"
+  },
+  "9001": {
+    "zh-CN": "气球捕获大作战",
+    "en-US": "Balloon Capture",
+    "ja-JP": "バルーン大作戦",
+    "ko-KR": "풍선 포획 대작전"
+  },
+  "9002": {
+    "zh-CN": "驱逐年兽",
+    "en-US": "Defeat the Year Demon",
+    "ja-JP": "歳魔撃退",
+    "ko-KR": "새해 몬스터 물리치기"
+  },
+  "9200": {
+    "zh-CN": "神龙枷所：适格者特训",
+    "en-US": "Dragon Shackles: Adept's Trial",
+    "ja-JP": "神竜の枷：適格者試練",
+    "ko-KR": "드래곤 프리즌: 적격자 특훈"
+  },
+  "9201": {
+    "zh-CN": "千梦织灵",
+    "en-US": "Loom of Dreams​",
+    "ja-JP": "千夢織霊",
+    "ko-KR": "꿈 엮기"
+  },
+  "9202": {
+    "zh-CN": "沉梦林谷·简单",
+    "en-US": "Slumberdream Valley (Easy)",
+    "ja-JP": "夢沈みの森谷・イージー",
+    "ko-KR": "침몽의 숲 골짜기・이지"
+  },
+  "9203": {
+    "zh-CN": "沉梦林谷·困难",
+    "en-US": "Slumberdream Valley (Hard)",
+    "ja-JP": "夢沈みの森谷・ハード",
+    "ko-KR": "침몽의 숲 골짜기・하드"
+  },
+  "9204": {
+    "zh-CN": "沉梦林谷·噩梦",
+    "en-US": "Slumberdream Valley (Nightmare)",
+    "ja-JP": "夢沈みの森谷・ナイトメア",
+    "ko-KR": "침몽의 숲 골짜기・나이트메어"
+  },
+  "9205": {
+    "zh-CN": "弥妄栖林·简单",
+    "en-US": "Illusion-Shroud Woods (Easy)",
+    "ja-JP": "迷妄の森・イージー",
+    "ko-KR": "미망의 숲・노멀"
+  },
+  "9206": {
+    "zh-CN": "弥妄栖林·困难",
+    "en-US": "Illusion-Shroud Woods (Hard)",
+    "ja-JP": "迷妄の森・ハード",
+    "ko-KR": "미망의 숲・하드"
+  },
+  "9207": {
+    "zh-CN": "弥妄栖林·噩梦",
+    "en-US": "Illusion-Shroud Woods (Nightmare)",
+    "ja-JP": "迷妄の森・ナイトメア",
+    "ko-KR": "미망의 숲・나이트메어"
+  },
+  "9300": {
+    "zh-CN": "千梦织灵·异梦净除",
+    "en-US": "Loom of Dreams​: Nightmare Purge",
+    "ja-JP": "千夢織霊・悪夢浄化",
+    "ko-KR": "꿈 엮기 의식・변이된 꿈 정화"
+  },
+  "10001": {
+    "zh-CN": "方形练习场1",
+    "en-US": "Square Practice Field 1",
+    "ja-JP": "四角い練習場1",
+    "ko-KR": "사각 연습장1"
+  },
+  "10002": {
+    "zh-CN": "方形练习场2",
+    "en-US": "Square Practice Field 2",
+    "ja-JP": "四角い練習場2",
+    "ko-KR": "사각 연습장2"
+  },
+  "10003": {
+    "zh-CN": "空副本1",
+    "en-US": "Empty Copy 1",
+    "ja-JP": "空のダンジョン1",
+    "ko-KR": "빈 던전 1"
+  },
+  "10004": {
+    "zh-CN": "空副本2",
+    "en-US": "Empty Copy 2",
+    "ja-JP": "空のダンジョン2",
+    "ko-KR": "빈 던전 2"
+  },
+  "10005": {
+    "zh-CN": "测试逻辑专用副本",
+    "en-US": "Test Logic Special Copy",
+    "ja-JP": "ロジックテスト専用ダンジョン",
+    "ko-KR": "로직 테스트 전용 던전"
+  },
+  "10010": {
+    "zh-CN": "3C测试场景",
+    "en-US": "3C Test Scene",
+    "ja-JP": "3Cテストマップ",
+    "ko-KR": "3C 테스트 필드"
+  },
+  "10020": {
+    "zh-CN": "表演用的测试场景1",
+    "en-US": "Performance Test Scene 1",
+    "ja-JP": "パフォーマンス用テストシーン1",
+    "ko-KR": "연출용 테스트 필드1"
+  },
+  "10021": {
+    "zh-CN": "表演用的测试场景2",
+    "en-US": "Performance Test Scene 2",
+    "ja-JP": "パフォーマンス用テストシーン2",
+    "ko-KR": "연출용 테스트 필드2"
+  },
+  "10030": {
+    "zh-CN": "Zone测试场景",
+    "en-US": "Zone Test Scene",
+    "ja-JP": "ゾーンテストフィールド",
+    "ko-KR": "존 테스트 필드"
+  },
+  "11001": {
+    "zh-CN": "不思议的追逃游戏",
+    "en-US": "Wondrous Tag",
+    "ja-JP": "チェイスゲーム",
+    "ko-KR": "신비한 술래잡기"
+  },
+  "11002": {
+    "zh-CN": "不思议的追逃游戏",
+    "en-US": "Wondrous Tag",
+    "ja-JP": "不思議なチェイスゲーム",
+    "ko-KR": "신비한 술래잡기"
+  },
+  "12000": {
+    "zh-CN": "协会活动中心",
+    "en-US": "Guild Center",
+    "ja-JP": "ギルド活動所",
+    "ko-KR": "길드 이벤트 센터"
+  },
+  "12011": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12012": {
+    "zh-CN": "协会狩猎·普通",
+    "en-US": "Guild Hunt - Normal",
+    "ja-JP": "ギルドハント・ノーマル",
+    "ko-KR": "길드 사냥・노멀"
+  },
+  "12013": {
+    "zh-CN": "协会狩猎·简单",
+    "en-US": "Guild Hunt - Easy",
+    "ja-JP": "ギルドハント・イージー",
+    "ko-KR": "길드 사냥・이지"
+  },
+  "12014": {
+    "zh-CN": "协会狩猎·普通",
+    "en-US": "Guild Hunt - Normal",
+    "ja-JP": "ギルドハント・ノーマル",
+    "ko-KR": "길드 사냥・노멀"
+  },
+  "12015": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12016": {
+    "zh-CN": "噬光牢笼共享",
+    "en-US": "Devourer Cage Sharing",
+    "ja-JP": "光亡き牢-共有",
+    "ko-KR": "빛을 삼키는 감옥 공유"
+  },
+  "12017": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12018": {
+    "zh-CN": "协会狩猎·普通",
+    "en-US": "Guild Hunt - Normal",
+    "ja-JP": "ギルドハント・ノーマル",
+    "ko-KR": "길드 사냥・노멀"
+  },
+  "12019": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12022": {
+    "zh-CN": "协会狩猎·普通",
+    "en-US": "Guild Hunt - Normal",
+    "ja-JP": "ギルドハント・ノーマル",
+    "ko-KR": "길드 사냥・노멀"
+  },
+  "12023": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12024": {
+    "zh-CN": "协会狩猎·普通",
+    "en-US": "Guild Hunt - Normal",
+    "ja-JP": "ギルドハント・ノーマル",
+    "ko-KR": "길드 사냥・노멀"
+  },
+  "12025": {
+    "zh-CN": "协会狩猎·困难",
+    "en-US": "Guild Hunt - Hard",
+    "ja-JP": "ギルドハント・ハード",
+    "ko-KR": "길드 사냥・하드"
+  },
+  "12030": {
+    "zh-CN": "小伊的故事",
+    "en-US": "Ee-chan's Story",
+    "ja-JP": "イーの物語",
+    "ko-KR": "이짱의 이야기"
+  },
+  "12040": {
+    "zh-CN": "小伊别盯我！",
+    "en-US": "Ee-chan, Don't Stare at Me!",
+    "ja-JP": "見ないでイー！",
+    "ko-KR": "이짱, 쳐다보지 마!"
+  },
+  "12050": {
+    "zh-CN": "巨型机像讨伐战",
+    "en-US": "Giant Golem Crusade",
+    "ja-JP": "巨大ゴーレム討伐戦",
+    "ko-KR": "초대형 골렘 토벌전"
+  },
+  "12051": {
+    "zh-CN": "巨型机像讨伐战",
+    "en-US": "Giant Golem Crusade",
+    "ja-JP": "巨大ゴーレム討伐戦",
+    "ko-KR": "초대형 골렘 토벌전"
+  },
+  "12052": {
+    "zh-CN": "巨型机像讨伐战",
+    "en-US": "Giant Golem Crusade",
+    "ja-JP": "巨大ゴーレム討伐戦",
+    "ko-KR": "초대형 골렘 토벌전"
+  },
+  "12100": {
+    "zh-CN": "沉梦的裂隙",
+    "en-US": "Rift of Slumberdream",
+    "ja-JP": "夢沈みの亀裂",
+    "ko-KR": "침몽의 균열"
+  },
+  "13001": {
+    "zh-CN": "回溯！虚空浮岛·神龙枷所",
+    "en-US": "Backtrack! Floating Island - Dragon Shackles",
+    "ja-JP": "回帰！虚空の浮島・神竜の鎖",
+    "ko-KR": "회귀! 허공의 부유섬・드래곤 프리즌"
+  },
+  "13002": {
+    "zh-CN": "血战！虚空浮岛·神龙枷所",
+    "en-US": "Brutal! Floating Island",
+    "ja-JP": "血戦！虚空の浮島・神竜の枷",
+    "ko-KR": "혈전! 허공의 부유섬・드래곤 프리즌"
+  },
+  "13003": {
+    "zh-CN": "决战！虚空浮岛·神龙枷所",
+    "en-US": "Purge! Floating Island",
+    "ja-JP": "決戦！虚空の浮島・神竜の枷",
+    "ko-KR": "결전! 허공의 부유섬・드래곤 프리즌"
+  },
+  "13011": {
+    "zh-CN": "回溯！幻花沉眠之地",
+    "en-US": "Backtrack! Dreambloom Ruins",
+    "ja-JP": "回帰！幻花沈む地",
+    "ko-KR": "회귀! 환상꽃이 잠든 땅"
+  },
+  "13012": {
+    "zh-CN": "血战！幻花沉眠之地",
+    "en-US": "Brutal! Dreambloom Ruins",
+    "ja-JP": "血戦！幻花沈む地",
+    "ko-KR": "혈전! 환상꽃이 잠든 땅"
+  },
+  "13013": {
+    "zh-CN": "决战！幻花沉眠之地",
+    "en-US": "Purge! Dreambloom Ruins",
+    "ja-JP": "決戦！幻花沈む地",
+    "ko-KR": "결전! 환상꽃이 잠든 땅"
+  },
+  "13021": {
+    "zh-CN": "回溯！遗忘幻梦之野",
+    "en-US": "Rewind! Field of Forgotten Illusions",
+    "ja-JP": "激闘！忘られし幻夢の野",
+    "ko-KR": "격투! 잊혀진 환상꿈의 들판"
+  },
+  "13022": {
+    "zh-CN": "血战！遗忘幻梦之野",
+    "en-US": "Brutal! Field of Forgotten Illusions",
+    "ja-JP": "血戦！忘られし幻夢の野",
+    "ko-KR": "혈전! 잊혀진 환상꿈의 들판"
+  },
+  "13023": {
+    "zh-CN": "决战！遗忘幻梦之野",
+    "en-US": "Purge! Field of Forgotten Illusions",
+    "ja-JP": "決戦！忘られし幻夢の野",
+    "ko-KR": "결전! 잊혀진 환상꿈의 들판"
+  },
+  "13031": {
+    "zh-CN": "血战！苍穹之上，昼夜尽头",
+    "en-US": "Brutal! Twilight's Edge",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "13032": {
+    "zh-CN": "决战！苍穹之上，昼夜尽头",
+    "en-US": "Purge! Twilight's Edge",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "13033": {
+    "zh-CN": "连战！苍穹之上，昼夜尽头",
+    "en-US": "Relentless! Twilight's Edge",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "14001": {
+    "zh-CN": "翼鲸调查区·一",
+    "en-US": "Winged Whale Investigation Area I",
+    "ja-JP": "翼鯨調査エリア・一",
+    "ko-KR": "날개고래 조사 구역・1"
+  },
+  "14002": {
+    "zh-CN": "翼鲸调查区·二",
+    "en-US": "Winged Whale Investigation Area II",
+    "ja-JP": "翼鯨調査エリア・二",
+    "ko-KR": "날개고래 조사 구역・2"
+  },
+  "15001": {
+    "zh-CN": "记忆1：普通·怪物讨伐",
+    "en-US": "Memory 1 - Normal",
+    "ja-JP": "記憶1：初級・モンスター討伐",
+    "ko-KR": "기억 1: 노멀・몬스터 토벌"
+  },
+  "15002": {
+    "zh-CN": "记忆13：进阶·怪物讨伐",
+    "en-US": "Memory 13 - Advanced",
+    "ja-JP": "記憶13：中級・モンスター討伐",
+    "ko-KR": "기억 13: 승급・몬스터 토벌"
+  },
+  "15003": {
+    "zh-CN": "记忆9：普通·怪物讨伐",
+    "en-US": "Memory 9 - Normal",
+    "ja-JP": "記憶9：初級・モンスター討伐",
+    "ko-KR": "기억 9: 노멀・몬스터 토벌"
+  },
+  "15004": {
+    "zh-CN": "记忆7：普通·怪物讨伐",
+    "en-US": "Memory 7 - Normal",
+    "ja-JP": "記憶7：初級・モンスター討伐",
+    "ko-KR": "기억 7: 노멀・몬스터 토벌"
+  },
+  "15005": {
+    "zh-CN": "记忆31：普通·怪物讨伐",
+    "en-US": "Memory 31 - Normal",
+    "ja-JP": "記憶31：初級・モンスター討伐",
+    "ko-KR": "기억 31: 노멀・몬스터 토벌"
+  },
+  "15006": {
+    "zh-CN": "记忆32：普通·怪物讨伐",
+    "en-US": "Memory 32 - Normal",
+    "ja-JP": "記憶32：初級・モンスター討伐",
+    "ko-KR": "기억 32: 노멀・몬스터 토벌"
+  },
+  "15007": {
+    "zh-CN": "记忆18：普通·怪物讨伐",
+    "en-US": "Memory 18 - Normal",
+    "ja-JP": "記憶18：初級・モンスター討伐",
+    "ko-KR": "기억 18: 노멀・몬스터 토벌"
+  },
+  "15008": {
+    "zh-CN": "记忆22：普通·怪物讨伐",
+    "en-US": "Memory 22 - Normal",
+    "ja-JP": "記憶22：初級・モンスター討伐",
+    "ko-KR": "기억 22: 노멀・몬스터 토벌"
+  },
+  "15009": {
+    "zh-CN": "记忆24：普通·怪物讨伐",
+    "en-US": "Memory 24 - Normal",
+    "ja-JP": "記憶24：初級・モンスター討伐",
+    "ko-KR": "기억 24: 노멀・몬스터 토벌"
+  },
+  "15010": {
+    "zh-CN": "记忆48：普通·怪物讨伐",
+    "en-US": "Memory 48 - Normal",
+    "ja-JP": "記憶48：初級・モンスター討伐",
+    "ko-KR": "기억 48: 노멀・몬스터 토벌"
+  },
+  "15011": {
+    "zh-CN": "记忆16：普通·怪物讨伐",
+    "en-US": "Memory 16 - Normal",
+    "ja-JP": "記憶16：初級・モンスター討伐",
+    "ko-KR": "기억 16: 노멀・몬스터 토벌"
+  },
+  "15012": {
+    "zh-CN": "记忆42：普通·怪物讨伐",
+    "en-US": "Memory 42 - Normal",
+    "ja-JP": "記憶42：初級・モンスター討伐",
+    "ko-KR": "기억 42: 노멀・몬스터 토벌"
+  },
+  "15501": {
+    "zh-CN": "记忆3：进阶·强敌对决",
+    "en-US": "Memory 3 - Advanced",
+    "ja-JP": "記憶3：中級・強敵対決",
+    "ko-KR": "기억 3: 승급・강적 대결"
+  },
+  "15502": {
+    "zh-CN": "记忆49：进阶·强敌对决",
+    "en-US": "Memory 49 - Advanced",
+    "ja-JP": "記憶49：中級・強敵対決",
+    "ko-KR": "기억 49: 승급・강적 대결"
+  },
+  "15503": {
+    "zh-CN": "记忆23：普通·强敌对决",
+    "en-US": "Memory 23 - Normal",
+    "ja-JP": "記憶23：初級・強敵対決",
+    "ko-KR": "기억 23: 노멀・강적 대결"
+  },
+  "15504": {
+    "zh-CN": "记忆15：专家·强敌对决",
+    "en-US": "Memory 15 - Expert",
+    "ja-JP": "記憶15：上級・強敵対決",
+    "ko-KR": "기억 15: 전문가・강적 대결"
+  },
+  "15505": {
+    "zh-CN": "记忆50：专家·强敌对决",
+    "en-US": "Memory 50 - Expert",
+    "ja-JP": "記憶50：上級・強敵対決",
+    "ko-KR": "기억 50: 전문가・강적 대결"
+  },
+  "15506": {
+    "zh-CN": "记忆30：专家·强敌对决",
+    "en-US": "Memory 30 - Expert",
+    "ja-JP": "記憶30：上級・強敵対決",
+    "ko-KR": "기억 30: 전문가・강적 대결"
+  },
+  "15507": {
+    "zh-CN": "记忆45：普通·强敌对决",
+    "en-US": "Memory 45 - Normal",
+    "ja-JP": "記憶45：初級・強敵対決",
+    "ko-KR": "기억 45: 노멀・강적 대결"
+  },
+  "15508": {
+    "zh-CN": "记忆40：专家·强敌对决",
+    "en-US": "Memory 40 - Expert",
+    "ja-JP": "記憶40：上級・強敵対決",
+    "ko-KR": "기억 40: 전문가・강적 대결"
+  },
+  "16001": {
+    "zh-CN": "记忆2：普通·空间求生",
+    "en-US": "Memory 2 - Normal",
+    "ja-JP": "記憶2：初級・空間サバイバル",
+    "ko-KR": "기억 2: 노멀・공간 생존"
+  },
+  "16002": {
+    "zh-CN": "记忆14：进阶·空间求生",
+    "en-US": "Memory 14 - Advanced",
+    "ja-JP": "記憶14：中級・空間サバイバル",
+    "ko-KR": "기억 14: 승급・공간 생존"
+  },
+  "16003": {
+    "zh-CN": "记忆20：普通·空间求生",
+    "en-US": "Memory 20 - Normal",
+    "ja-JP": "記憶20：初級・空間サバイバル",
+    "ko-KR": "기억 20: 노멀・공간 생존"
+  },
+  "16004": {
+    "zh-CN": "记忆36：普通·空间求生",
+    "en-US": "Memory 36 - Normal",
+    "ja-JP": "記憶36：初級・空間サバイバル",
+    "ko-KR": "기억 36: 노멀・공간 생존"
+  },
+  "16005": {
+    "zh-CN": "大秘境生存验证模板",
+    "en-US": "Great Dungeon Survival Verification Template",
+    "ja-JP": "大秘境生存検証テンプレート",
+    "ko-KR": "대비경 생존 검증 템플릿"
+  },
+  "16006": {
+    "zh-CN": "大秘境生存验证模板",
+    "en-US": "Great Dungeon Survival Verification Template",
+    "ja-JP": "大秘境生存検証テンプレート",
+    "ko-KR": "대비경 생존 검증 템플릿"
+  },
+  "16501": {
+    "zh-CN": "记忆4：普通·治愈净化",
+    "en-US": "Memory 4 - Normal",
+    "ja-JP": "記憶4：初級・治癒浄化",
+    "ko-KR": "기억 4: 노멀・치유 정화"
+  },
+  "16502": {
+    "zh-CN": "记忆34：普通·治愈净化",
+    "en-US": "Memory 34 - Normal",
+    "ja-JP": "記憶34：初級・治癒浄化",
+    "ko-KR": "기억 34: 노멀・치유 정화"
+  },
+  "16503": {
+    "zh-CN": "记忆41：普通·治愈净化",
+    "en-US": "Memory 41 - Normal",
+    "ja-JP": "記憶41：初級・治癒浄化",
+    "ko-KR": "기억 41: 노멀・치유 정화"
+  },
+  "16504": {
+    "zh-CN": "记忆28：进阶·治愈净化",
+    "en-US": "Memory 28 - Advanced",
+    "ja-JP": "記憶28：中級・治癒浄化",
+    "ko-KR": "기억 28: 승급・치유 정화"
+  },
+  "17001": {
+    "zh-CN": "记忆38：普通·怪物悬赏",
+    "en-US": "Memory 38 - Normal",
+    "ja-JP": "記憶38：初級・モンスター懸賞",
+    "ko-KR": "기억 38: 노멀・몬스터 수배"
+  },
+  "17002": {
+    "zh-CN": "记忆46：进阶·怪物悬赏",
+    "en-US": "Memory 46 - Advanced",
+    "ja-JP": "記憶46：中級・モンスター懸賞",
+    "ko-KR": "기억 46: 승급・몬스터 수배"
+  },
+  "17003": {
+    "zh-CN": "记忆11：普通·怪物悬赏",
+    "en-US": "Memory 11 - Normal",
+    "ja-JP": "記憶11：初級・モンスター懸賞",
+    "ko-KR": "기억 11: 노멀・몬스터 수배"
+  },
+  "17004": {
+    "zh-CN": "记忆17：普通·怪物悬赏",
+    "en-US": "Memory 17 - Normal",
+    "ja-JP": "記憶17：初級・モンスター懸賞",
+    "ko-KR": "기억 17: 노멀・몬스터 수배"
+  },
+  "17501": {
+    "zh-CN": "记忆35：普通·领地夺取",
+    "en-US": "Memory 35 - Normal",
+    "ja-JP": "記憶35：初級・領地奪取",
+    "ko-KR": "기억 35: 노멀・영지 쟁탈"
+  },
+  "17502": {
+    "zh-CN": "记忆26：进阶·领地夺取",
+    "en-US": "Memory 26 - Advanced",
+    "ja-JP": "記憶26：中級・領地奪取",
+    "ko-KR": "기억 26: 승급・영지 쟁탈"
+  },
+  "17503": {
+    "zh-CN": "记忆47：普通·领地夺取",
+    "en-US": "Memory 47 - Normal",
+    "ja-JP": "記憶47：初級・領地奪取",
+    "ko-KR": "기억 47: 노멀・영지 쟁탈"
+  },
+  "17504": {
+    "zh-CN": "记忆10：普通·领地夺取",
+    "en-US": "Memory 10 - Normal",
+    "ja-JP": "記憶10：初級・領地奪取",
+    "ko-KR": "기억 10: 노멀・영지 쟁탈"
+  },
+  "17505": {
+    "zh-CN": "记忆19：普通·领地夺取",
+    "en-US": "Memory 19 - Normal",
+    "ja-JP": "記憶19：初級・領地奪取",
+    "ko-KR": "기억 19: 노멀・영지 쟁탈"
+  },
+  "18001": {
+    "zh-CN": "记忆6：普通·团队守护",
+    "en-US": "Memory 6 - Normal",
+    "ja-JP": "記憶6：初級・パーティ防衛",
+    "ko-KR": "기억 6: 노멀・단체 수호"
+  },
+  "18002": {
+    "zh-CN": "记忆21：普通·团队守护",
+    "en-US": "Memory 21 - Normal",
+    "ja-JP": "記憶21：初級・パーティ防衛",
+    "ko-KR": "기억 21: 노멀・단체 수호"
+  },
+  "18003": {
+    "zh-CN": "记忆44：普通·团队守护",
+    "en-US": "Memory 44 - Normal",
+    "ja-JP": "記憶44：初級・パーティ防衛",
+    "ko-KR": "기억 44: 노멀・단체 수호"
+  },
+  "18004": {
+    "zh-CN": "记忆39：进阶·团队守护",
+    "en-US": "Memory 39 - Advanced",
+    "ja-JP": "記憶39：中級・パーティ防衛",
+    "ko-KR": "기억 39: 승급・단체 수호"
+  },
+  "18501": {
+    "zh-CN": "记忆8：普通·团队辅助",
+    "en-US": "Memory 8 - Normal",
+    "ja-JP": "記憶8：初級・パーティ支援",
+    "ko-KR": "기억 8: 노멀・단체 지원"
+  },
+  "18502": {
+    "zh-CN": "记忆27：普通·团队辅助",
+    "en-US": "Memory 27 - Normal",
+    "ja-JP": "記憶27：初級・パーティ支援",
+    "ko-KR": "기억 27: 노멀・단체 지원"
+  },
+  "18503": {
+    "zh-CN": "记忆43：普通·团队辅助",
+    "en-US": "Memory 43 - Normal",
+    "ja-JP": "記憶43：初級・パーティ支援",
+    "ko-KR": "기억 43: 노멀・단체 지원"
+  },
+  "18504": {
+    "zh-CN": "记忆37：进阶·团队辅助",
+    "en-US": "Memory 37 - Advanced",
+    "ja-JP": "記憶37：中級・パーティ支援",
+    "ko-KR": "기억 37: 승급・단체 지원"
+  },
+  "19001": {
+    "zh-CN": "记忆5：普通·输出试炼",
+    "en-US": "Memory 5 - Normal",
+    "ja-JP": "記憶5：初級・火力トライアル",
+    "ko-KR": "기억 5: 노멀・공격 시련"
+  },
+  "19002": {
+    "zh-CN": "记忆12：普通·输出试炼",
+    "en-US": "Memory 12 - Normal",
+    "ja-JP": "記憶12：初級・火力トライアル",
+    "ko-KR": "기억 12: 노멀・공격 시련"
+  },
+  "19003": {
+    "zh-CN": "记忆25：普通·输出试炼",
+    "en-US": "Memory 25 - Normal",
+    "ja-JP": "記憶25：初級・火力トライアル",
+    "ko-KR": "기억 25: 노멀・공격 시련"
+  },
+  "19004": {
+    "zh-CN": "记忆29：进阶·输出试炼",
+    "en-US": "Memory 29 - Advanced",
+    "ja-JP": "記憶29：中級・火力トライアル",
+    "ko-KR": "기억 29: 승급・공격 시련"
+  },
+  "19005": {
+    "zh-CN": "记忆33：普通·输出试炼",
+    "en-US": "Memory 33 - Normal",
+    "ja-JP": "記憶33：初級・火力トライアル",
+    "ko-KR": "기억 33: 노멀・공격 시련"
+  },
+  "20101": {
+    "zh-CN": "守护之路1：团队守护",
+    "en-US": "Guardian 1",
+    "ja-JP": "防御の道1：パーティ防衛",
+    "ko-KR": "수호의 길 1: 단체 수호"
+  },
+  "20102": {
+    "zh-CN": "守护之路10：团队守护",
+    "en-US": "Guardian 10",
+    "ja-JP": "防御の道10：パーティ防衛",
+    "ko-KR": "수호의 길 10: 단체 수호"
+  },
+  "20201": {
+    "zh-CN": "守护之路2：团队守护",
+    "en-US": "Guardian 2",
+    "ja-JP": "防御の道2：パーティ防衛",
+    "ko-KR": "수호의 길 2: 단체 수호"
+  },
+  "20202": {
+    "zh-CN": "守护之路22：团队守护",
+    "en-US": "Guardian 22",
+    "ja-JP": "防御の道22：パーティ防衛",
+    "ko-KR": "수호의 길 22: 단체 수호"
+  },
+  "20301": {
+    "zh-CN": "守护之路4：团队守护",
+    "en-US": "Guardian 4",
+    "ja-JP": "防御の道4：パーティ防衛",
+    "ko-KR": "수호의 길 4: 단체 수호"
+  },
+  "20302": {
+    "zh-CN": "守护之路13：团队守护",
+    "en-US": "Guardian 13",
+    "ja-JP": "防御の道13：パーティ防衛",
+    "ko-KR": "수호의 길 13: 단체 수호"
+  },
+  "20303": {
+    "zh-CN": "守护之路25：团队守护",
+    "en-US": "Guardian 25",
+    "ja-JP": "防御の道25：パーティ防衛",
+    "ko-KR": "수호의 길 25: 단체 수호"
+  },
+  "20401": {
+    "zh-CN": "守护之路5：职责试炼",
+    "en-US": "Guardian 5",
+    "ja-JP": "防御の道5：役割試練",
+    "ko-KR": "수호의 길 5: 포지션 시련"
+  },
+  "20402": {
+    "zh-CN": "守护之路16：职责试炼",
+    "en-US": "Guardian 16",
+    "ja-JP": "防御の道16：役割試練",
+    "ko-KR": "수호의 길 16: 포지션 시련"
+  },
+  "20501": {
+    "zh-CN": "守护之路7：团队守护",
+    "en-US": "Guardian 7",
+    "ja-JP": "防御の道7：パーティ防衛",
+    "ko-KR": "수호의 길 7: 단체 수호"
+  },
+  "20502": {
+    "zh-CN": "守护之路19：团队守护",
+    "en-US": "Guardian 19",
+    "ja-JP": "防御の道19：パーティ防衛",
+    "ko-KR": "수호의 길 19: 단체 수호"
+  },
+  "20701": {
+    "zh-CN": "守护之路14：团队守护",
+    "en-US": "Guardian 14",
+    "ja-JP": "防御の道14：パーティ防衛",
+    "ko-KR": "수호의 길 14: 단체 수호"
+  },
+  "20702": {
+    "zh-CN": "守护之路20：团队守护",
+    "en-US": "Guardian 20",
+    "ja-JP": "防御の道20：パーティ防衛",
+    "ko-KR": "수호의 길 20: 단체 수호"
+  },
+  "20801": {
+    "zh-CN": "守护之路8：团队守护",
+    "en-US": "Guardian 8",
+    "ja-JP": "防御の道8：パーティ防衛",
+    "ko-KR": "수호의 길 8: 단체 수호"
+  },
+  "20802": {
+    "zh-CN": "守护之路17：团队守护",
+    "en-US": "Guardian 17",
+    "ja-JP": "防御の道17：パーティ防衛",
+    "ko-KR": "수호의 길 17: 단체 수호"
+  },
+  "20803": {
+    "zh-CN": "守护之路26：团队守护",
+    "en-US": "Guardian 26",
+    "ja-JP": "防御の道26：パーティ防衛",
+    "ko-KR": "수호의 길 26: 단체 수호"
+  },
+  "21201": {
+    "zh-CN": "守护之路23：团队守护",
+    "en-US": "Guardian 23",
+    "ja-JP": "防御の道23：パーティ防衛",
+    "ko-KR": "수호의 길 23: 단체 수호"
+  },
+  "21202": {
+    "zh-CN": "守护之路29：团队守护",
+    "en-US": "Guardian 29",
+    "ja-JP": "防御の道29：パーティ防衛",
+    "ko-KR": "수호의 길 29: 단체 수호"
+  },
+  "21301": {
+    "zh-CN": "守护之路6：攻防试炼",
+    "en-US": "Guardian 6",
+    "ja-JP": "防御の道6：攻防試練",
+    "ko-KR": "수호의 길 6: 공방 시련"
+  },
+  "21302": {
+    "zh-CN": "守护之路12：攻防试炼",
+    "en-US": "Guardian 12",
+    "ja-JP": "防御の道12：攻防試練",
+    "ko-KR": "수호의 길 12: 공방 시련"
+  },
+  "21303": {
+    "zh-CN": "守护之路18：攻防试炼",
+    "en-US": "Guardian 18",
+    "ja-JP": "防御の道18：攻防試練",
+    "ko-KR": "수호의 길 18: 공방 시련"
+  },
+  "21304": {
+    "zh-CN": "守护之路24：攻防试炼",
+    "en-US": "Guardian 24",
+    "ja-JP": "防御の道24：攻防試練",
+    "ko-KR": "수호의 길 24: 공방 시련"
+  },
+  "21305": {
+    "zh-CN": "守护之路30：攻防试炼",
+    "en-US": "Guardian 30",
+    "ja-JP": "防御の道30：攻防試練",
+    "ko-KR": "수호의 길 30: 공방 시련"
+  },
+  "21306": {
+    "zh-CN": "守护之路3：攻防试炼",
+    "en-US": "Guardian 3",
+    "ja-JP": "防御の道3：攻防試練",
+    "ko-KR": "수호의 길 3: 공방 시련"
+  },
+  "21307": {
+    "zh-CN": "守护之路9：攻防试炼",
+    "en-US": "Guardian 9",
+    "ja-JP": "防御の道9：攻防試練",
+    "ko-KR": "수호의 길 9: 공방 시련"
+  },
+  "21308": {
+    "zh-CN": "守护之路15：攻防试炼",
+    "en-US": "Guardian 15",
+    "ja-JP": "防御の道15：攻防試練",
+    "ko-KR": "수호의 길 15: 공방 시련"
+  },
+  "21309": {
+    "zh-CN": "守护之路21：攻防试炼",
+    "en-US": "Guardian 21",
+    "ja-JP": "防御の道21：攻防試練",
+    "ko-KR": "수호의 길 21: 공방 시련"
+  },
+  "21310": {
+    "zh-CN": "守护之路27：攻防试炼",
+    "en-US": "Guardian 27",
+    "ja-JP": "防御の道27：攻防試練",
+    "ko-KR": "수호의 길 27: 공방 시련"
+  },
+  "21401": {
+    "zh-CN": "守护之路11：职责试炼",
+    "en-US": "Guardian 11",
+    "ja-JP": "防御の道11：役割試練",
+    "ko-KR": "수호의 길 11: 포지션 시련"
+  },
+  "21402": {
+    "zh-CN": "守护之路28：职责试炼",
+    "en-US": "Guardian 28",
+    "ja-JP": "防御の道28：役割試練",
+    "ko-KR": "수호의 길 28: 포지션 시련"
+  },
+  "22101": {
+    "zh-CN": "力量之路17：怪物讨伐",
+    "en-US": "Attack 17",
+    "ja-JP": "力の道17：モンスター討伐",
+    "ko-KR": "힘의 길 17: 몬스터 토벌"
+  },
+  "22201": {
+    "zh-CN": "力量之路10：怪物讨伐",
+    "en-US": "Attack 10",
+    "ja-JP": "力の道10：モンスター討伐",
+    "ko-KR": "힘의 길 10: 몬스터 토벌"
+  },
+  "22202": {
+    "zh-CN": "力量之路23：怪物讨伐",
+    "en-US": "Attack 23",
+    "ja-JP": "力の道23：モンスター討伐",
+    "ko-KR": "힘의 길 23: 몬스터 토벌"
+  },
+  "22301": {
+    "zh-CN": "力量之路11：怪物讨伐",
+    "en-US": "Attack 11",
+    "ja-JP": "力の道11：モンスター討伐",
+    "ko-KR": "힘의 길 11: 몬스터 토벌"
+  },
+  "22401": {
+    "zh-CN": "力量之路13：木桩试炼",
+    "en-US": "Attack 13",
+    "ja-JP": "力の道13：訓練用ダミー試練",
+    "ko-KR": "힘의 길 13: 더미 시련"
+  },
+  "22402": {
+    "zh-CN": "力量之路19：木桩试炼",
+    "en-US": "Attack 19",
+    "ja-JP": "力の道19：訓練用ダミー試練",
+    "ko-KR": "힘의 길 19: 더미 시련"
+  },
+  "22501": {
+    "zh-CN": "力量之路6：怪物讨伐",
+    "en-US": "Attack 6",
+    "ja-JP": "力の道6：モンスター討伐",
+    "ko-KR": "힘의 길 6: 몬스터 토벌"
+  },
+  "22502": {
+    "zh-CN": "力量之路12：怪物讨伐",
+    "en-US": "Attack 12",
+    "ja-JP": "力の道12：モンスター討伐",
+    "ko-KR": "힘의 길 12: 몬스터 토벌"
+  },
+  "22503": {
+    "zh-CN": "力量之路18：怪物讨伐",
+    "en-US": "Attack 18",
+    "ja-JP": "力の道18：モンスター討伐",
+    "ko-KR": "힘의 길 18: 몬스터 토벌"
+  },
+  "22504": {
+    "zh-CN": "力量之路24：怪物讨伐",
+    "en-US": "Attack 24",
+    "ja-JP": "力の道24：モンスター討伐",
+    "ko-KR": "힘의 길 24: 몬스터 토벌"
+  },
+  "22505": {
+    "zh-CN": "力量之路30：怪物讨伐",
+    "en-US": "Attack 30",
+    "ja-JP": "力の道30：モンスター討伐",
+    "ko-KR": "힘의 길 30: 몬스터 토벌"
+  },
+  "22601": {
+    "zh-CN": "力量之路7：怪物讨伐",
+    "en-US": "Attack 7",
+    "ja-JP": "力の道7：モンスター討伐",
+    "ko-KR": "힘의 길 7: 몬스터 토벌"
+  },
+  "22602": {
+    "zh-CN": "力量之路14：怪物讨伐",
+    "en-US": "Attack 14",
+    "ja-JP": "力の道14：モンスター討伐",
+    "ko-KR": "힘의 길 14: 몬스터 토벌"
+  },
+  "22701": {
+    "zh-CN": "力量之路8：怪物讨伐",
+    "en-US": "Attack 8",
+    "ja-JP": "力の道8：モンスター討伐",
+    "ko-KR": "힘의 길 8: 몬스터 토벌"
+  },
+  "22702": {
+    "zh-CN": "力量之路26：怪物讨伐",
+    "en-US": "Attack 26",
+    "ja-JP": "力の道26：モンスター討伐",
+    "ko-KR": "힘의 길 26: 몬스터 토벌"
+  },
+  "23101": {
+    "zh-CN": "力量之路3：木桩试炼",
+    "en-US": "Attack 3",
+    "ja-JP": "力の道3：訓練用ダミー試練",
+    "ko-KR": "힘의 길 3: 더미 시련"
+  },
+  "23102": {
+    "zh-CN": "力量之路9：木桩试炼",
+    "en-US": "Attack 9",
+    "ja-JP": "力の道9：訓練用ダミー試練",
+    "ko-KR": "힘의 길 9: 더미 시련"
+  },
+  "23103": {
+    "zh-CN": "力量之路15：木桩试炼",
+    "en-US": "Attack 15",
+    "ja-JP": "力の道15：訓練用ダミー試練",
+    "ko-KR": "힘의 길 15: 더미 시련"
+  },
+  "23104": {
+    "zh-CN": "力量之路21：木桩试炼",
+    "en-US": "Attack 21",
+    "ja-JP": "力の道21：訓練用ダミー試練",
+    "ko-KR": "힘의 길 21: 더미 시련"
+  },
+  "23105": {
+    "zh-CN": "力量之路27：木桩试炼",
+    "en-US": "Attack 27",
+    "ja-JP": "力の道27：訓練用ダミー試練",
+    "ko-KR": "힘의 길 27: 더미 시련"
+  },
+  "23201": {
+    "zh-CN": "力量之路4：怪物讨伐",
+    "en-US": "Attack 4",
+    "ja-JP": "力の道4：モンスター討伐",
+    "ko-KR": "힘의 길 4: 몬스터 토벌"
+  },
+  "23301": {
+    "zh-CN": "力量之路1：怪物讨伐",
+    "en-US": "Attack 1",
+    "ja-JP": "力の道1：モンスター討伐",
+    "ko-KR": "힘의 길 1: 몬스터 토벌"
+  },
+  "23302": {
+    "zh-CN": "力量之路20：怪物讨伐",
+    "en-US": "Attack 20",
+    "ja-JP": "力の道20：モンスター討伐",
+    "ko-KR": "힘의 길 20: 몬스터 토벌"
+  },
+  "23401": {
+    "zh-CN": "力量之路2：怪物讨伐",
+    "en-US": "Attack 2",
+    "ja-JP": "力の道2：モンスター討伐",
+    "ko-KR": "힘의 길 2: 몬스터 토벌"
+  },
+  "23501": {
+    "zh-CN": "力量之路5：怪物讨伐",
+    "en-US": "Attack 5",
+    "ja-JP": "力の道5：モンスター討伐",
+    "ko-KR": "힘의 길 5: 몬스터 토벌"
+  },
+  "23502": {
+    "zh-CN": "力量之路25：怪物讨伐",
+    "en-US": "Attack 25",
+    "ja-JP": "力の道25：モンスター討伐",
+    "ko-KR": "힘의 길 25: 몬스터 토벌"
+  },
+  "23601": {
+    "zh-CN": "力量之路16：怪物讨伐",
+    "en-US": "Attack 16",
+    "ja-JP": "力の道16：モンスター討伐",
+    "ko-KR": "힘의 길 16: 몬스터 토벌"
+  },
+  "23602": {
+    "zh-CN": "力量之路28：怪物讨伐",
+    "en-US": "Attack 28",
+    "ja-JP": "力の道28：モンスター討伐",
+    "ko-KR": "힘의 길 28: 몬스터 토벌"
+  },
+  "23701": {
+    "zh-CN": "力量之路22：怪物讨伐",
+    "en-US": "Attack 22",
+    "ja-JP": "力の道22：モンスター討伐",
+    "ko-KR": "힘의 길 22: 몬스터 토벌"
+  },
+  "23702": {
+    "zh-CN": "力量之路29：怪物讨伐",
+    "en-US": "Attack 29",
+    "ja-JP": "力の道29：モンスター討伐",
+    "ko-KR": "힘의 길 29: 몬스터 토벌"
+  },
+  "24101": {
+    "zh-CN": "辅助之路3：团队治疗",
+    "en-US": "Support 3",
+    "ja-JP": "支援の道3：パーティ回復",
+    "ko-KR": "지원의 길 3: 단체 치료"
+  },
+  "24102": {
+    "zh-CN": "辅助之路6：团队治疗",
+    "en-US": "Support 6",
+    "ja-JP": "支援の道6：パーティ回復",
+    "ko-KR": "지원의 길 6: 단체 치료"
+  },
+  "24103": {
+    "zh-CN": "辅助之路9：团队治疗",
+    "en-US": "Support 9",
+    "ja-JP": "支援の道9：パーティ回復",
+    "ko-KR": "지원의 길 9: 단체 치료"
+  },
+  "24104": {
+    "zh-CN": "辅助之路12：团队治疗",
+    "en-US": "Support 12",
+    "ja-JP": "支援の道12：パーティ回復",
+    "ko-KR": "지원의 길 12: 단체 치료"
+  },
+  "24105": {
+    "zh-CN": "辅助之路15：团队治疗",
+    "en-US": "Support 15",
+    "ja-JP": "支援の道15：パーティ回復",
+    "ko-KR": "지원의 길 15: 단체 치료"
+  },
+  "24106": {
+    "zh-CN": "辅助之路18：团队治疗",
+    "en-US": "Support 18",
+    "ja-JP": "支援の道18：パーティ回復",
+    "ko-KR": "지원의 길 18: 단체 치료"
+  },
+  "24107": {
+    "zh-CN": "辅助之路21：团队治疗",
+    "en-US": "Support 21",
+    "ja-JP": "支援の道21：パーティ回復",
+    "ko-KR": "지원의 길 21: 단체 치료"
+  },
+  "24108": {
+    "zh-CN": "辅助之路24：团队治疗",
+    "en-US": "Support 24",
+    "ja-JP": "支援の道24：パーティ回復",
+    "ko-KR": "지원의 길 24: 단체 치료"
+  },
+  "24109": {
+    "zh-CN": "辅助之路27：团队治疗",
+    "en-US": "Support 27",
+    "ja-JP": "支援の道27：パーティ回復",
+    "ko-KR": "지원의 길 27: 단체 치료"
+  },
+  "24110": {
+    "zh-CN": "辅助之路30：团队治疗",
+    "en-US": "Support 30",
+    "ja-JP": "支援の道30：パーティ回復",
+    "ko-KR": "지원의 길 30: 단체 치료"
+  },
+  "24201": {
+    "zh-CN": "辅助之路2：团队治疗",
+    "en-US": "Support 2",
+    "ja-JP": "支援の道2：パーティ回復",
+    "ko-KR": "지원의 길 2: 단체 치료"
+  },
+  "24202": {
+    "zh-CN": "辅助之路10：团队治疗",
+    "en-US": "Support 10",
+    "ja-JP": "支援の道10：パーティ回復",
+    "ko-KR": "지원의 길 10: 단체 치료"
+  },
+  "24203": {
+    "zh-CN": "辅助之路17：团队治疗",
+    "en-US": "Support 17",
+    "ja-JP": "支援の道17：パーティ回復",
+    "ko-KR": "지원의 길 17: 단체 치료"
+  },
+  "24204": {
+    "zh-CN": "辅助之路25：团队治疗",
+    "en-US": "Support 25",
+    "ja-JP": "支援の道25：パーティ回復",
+    "ko-KR": "지원의 길 25: 단체 치료"
+  },
+  "24301": {
+    "zh-CN": "辅助之路5：团队治疗",
+    "en-US": "Support 5",
+    "ja-JP": "支援の道5：パーティ回復",
+    "ko-KR": "지원의 길 5: 단체 치료"
+  },
+  "24302": {
+    "zh-CN": "辅助之路14：团队治疗",
+    "en-US": "Support 14",
+    "ja-JP": "支援の道14：パーティ回復",
+    "ko-KR": "지원의 길 14: 단체 치료"
+  },
+  "24303": {
+    "zh-CN": "辅助之路20：团队治疗",
+    "en-US": "Support 20",
+    "ja-JP": "支援の道20：パーティ回復",
+    "ko-KR": "지원의 길 20: 단체 치료"
+  },
+  "24304": {
+    "zh-CN": "辅助之路29：团队治疗",
+    "en-US": "Support 29",
+    "ja-JP": "支援の道29：パーティ回復",
+    "ko-KR": "지원의 길 29: 단체 치료"
+  },
+  "24401": {
+    "zh-CN": "辅助之路4：团队治疗",
+    "en-US": "Support 4",
+    "ja-JP": "支援の道4：パーティ回復",
+    "ko-KR": "지원의 길 4: 단체 치료"
+  },
+  "24402": {
+    "zh-CN": "辅助之路11：团队治疗",
+    "en-US": "Support 11",
+    "ja-JP": "支援の道11：パーティ回復",
+    "ko-KR": "지원의 길 11: 단체 치료"
+  },
+  "24403": {
+    "zh-CN": "辅助之路19：团队治疗",
+    "en-US": "Support 19",
+    "ja-JP": "支援の道19：パーティ回復",
+    "ko-KR": "지원의 길 19: 단체 치료"
+  },
+  "24404": {
+    "zh-CN": "辅助之路23：团队治疗",
+    "en-US": "Support 23",
+    "ja-JP": "支援の道23：パーティ回復",
+    "ko-KR": "지원의 길 23: 단체 치료"
+  },
+  "24501": {
+    "zh-CN": "辅助之路7：团队治疗",
+    "en-US": "Support 7",
+    "ja-JP": "支援の道7：パーティ回復",
+    "ko-KR": "지원의 길 7: 단체 치료"
+  },
+  "24502": {
+    "zh-CN": "辅助之路16：团队治疗",
+    "en-US": "Support 16",
+    "ja-JP": "支援の道16：パーティ回復",
+    "ko-KR": "지원의 길 16: 단체 치료"
+  },
+  "24503": {
+    "zh-CN": "辅助之路22：团队治疗",
+    "en-US": "Support 22",
+    "ja-JP": "支援の道22：パーティ回復",
+    "ko-KR": "지원의 길 22: 단체 치료"
+  },
+  "24504": {
+    "zh-CN": "辅助之路28：团队治疗",
+    "en-US": "Support 28",
+    "ja-JP": "支援の道28：パーティ回復",
+    "ko-KR": "지원의 길 28: 단체 치료"
+  },
+  "24601": {
+    "zh-CN": "辅助之路1：团队治疗",
+    "en-US": "Support 1",
+    "ja-JP": "支援の道1：パーティ回復",
+    "ko-KR": "지원의 길 1: 단체 치료"
+  },
+  "24602": {
+    "zh-CN": "辅助之路8：团队治疗",
+    "en-US": "Support 8",
+    "ja-JP": "支援の道8：パーティ回復",
+    "ko-KR": "지원의 길 8: 단체 치료"
+  },
+  "24603": {
+    "zh-CN": "辅助之路13：团队治疗",
+    "en-US": "Support 13",
+    "ja-JP": "支援の道13：パーティ回復",
+    "ko-KR": "지원의 길 13: 단체 치료"
+  },
+  "24604": {
+    "zh-CN": "辅助之路26：团队治疗",
+    "en-US": "Support 26",
+    "ja-JP": "支援の道26：パーティ回復",
+    "ko-KR": "지원의 길 26: 단체 치료"
+  },
+  "24650": {
+    "zh-CN": "守护之路31：木桩试炼",
+    "en-US": "Guardian 31",
+    "ja-JP": "防御の道31：訓練用ダミー試練",
+    "ko-KR": "방어의 길 31: 더미 시련"
+  },
+  "24651": {
+    "zh-CN": "力量之路31：木桩试炼",
+    "en-US": "Attack 31",
+    "ja-JP": "力の道31：訓練用ダミー試練",
+    "ko-KR": "힘의 길 31: 더미 시련"
+  },
+  "24652": {
+    "zh-CN": "辅助之路31：木桩试炼",
+    "en-US": "Support 31",
+    "ja-JP": "支援の道31：訓練用ダミー試練",
+    "ko-KR": "지원의 길 31: 더미 시련"
+  },
+  "30001": {
+    "zh-CN": "家园庭院",
+    "en-US": "Homestead Courtyard",
+    "ja-JP": "ホームガーデン",
+    "ko-KR": "가든 정원"
+  },
+  "30101": {
+    "zh-CN": "司第门遗迹1层",
+    "en-US": "Floor 1",
+    "ja-JP": "レグディニス遺跡1層",
+    "ko-KR": "시디문 유적 1층"
+  },
+  "30102": {
+    "zh-CN": "司第门遗迹2层",
+    "en-US": "Floor 2",
+    "ja-JP": "レグディニス遺跡2層",
+    "ko-KR": "시디문 유적 2층"
+  },
+  "30103": {
+    "zh-CN": "司第门遗迹3层",
+    "en-US": "Floor 3",
+    "ja-JP": "レグディニス遺跡3層",
+    "ko-KR": "시디문 유적 3층"
+  },
+  "30104": {
+    "zh-CN": "司第门遗迹4层",
+    "en-US": "Floor 4",
+    "ja-JP": "レグディニス遺跡4層",
+    "ko-KR": "시디문 유적 4층"
+  },
+  "30105": {
+    "zh-CN": "司第门遗迹5层",
+    "en-US": "Floor 5",
+    "ja-JP": "レグディニス遺跡5層",
+    "ko-KR": "시디문 유적 5층"
+  },
+  "30106": {
+    "zh-CN": "司第门遗迹6层",
+    "en-US": "Floor 6",
+    "ja-JP": "レグディニス遺跡6層",
+    "ko-KR": "시디문 유적 6층"
+  },
+  "30107": {
+    "zh-CN": "司第门遗迹7层",
+    "en-US": "Floor 7",
+    "ja-JP": "レグディニス遺跡7層",
+    "ko-KR": "시디문 유적 7층"
+  },
+  "30108": {
+    "zh-CN": "司第门遗迹8层",
+    "en-US": "Floor 8",
+    "ja-JP": "レグディニス遺跡8層",
+    "ko-KR": "시디문 유적 8층"
+  },
+  "30109": {
+    "zh-CN": "司第门遗迹9层",
+    "en-US": "Floor 9",
+    "ja-JP": "レグディニス遺跡9層",
+    "ko-KR": "시디문 유적 9층"
+  },
+  "30110": {
+    "zh-CN": "司第门遗迹10层",
+    "en-US": "Floor 10",
+    "ja-JP": "レグディニス遺跡10層",
+    "ko-KR": "시디문 유적 10층"
+  },
+  "30111": {
+    "zh-CN": "司第门遗迹11层",
+    "en-US": "Floor 11",
+    "ja-JP": "レグディニス遺跡11層",
+    "ko-KR": "시디문 유적 11층"
+  },
+  "30112": {
+    "zh-CN": "司第门遗迹12层",
+    "en-US": "Floor 12",
+    "ja-JP": "レグディニス遺跡12層",
+    "ko-KR": "시디문 유적 12층"
+  },
+  "30113": {
+    "zh-CN": "司第门遗迹13层",
+    "en-US": "Floor 13",
+    "ja-JP": "レグディニス遺跡13層",
+    "ko-KR": "시디문 유적 13층"
+  },
+  "30114": {
+    "zh-CN": "司第门遗迹14层",
+    "en-US": "Floor 14",
+    "ja-JP": "レグディニス遺跡14層",
+    "ko-KR": "시디문 유적 14층"
+  },
+  "30115": {
+    "zh-CN": "司第门遗迹15层",
+    "en-US": "Floor 15",
+    "ja-JP": "レグディニス遺跡15層",
+    "ko-KR": "시디문 유적 15층"
+  },
+  "30116": {
+    "zh-CN": "司第门遗迹16层",
+    "en-US": "Floor 16",
+    "ja-JP": "レグディニス遺跡16層",
+    "ko-KR": "시디문 유적 16층"
+  },
+  "30117": {
+    "zh-CN": "司第门遗迹17层",
+    "en-US": "Floor 17",
+    "ja-JP": "レグディニス遺跡17層",
+    "ko-KR": "시디문 유적 17층"
+  },
+  "30118": {
+    "zh-CN": "司第门遗迹18层",
+    "en-US": "Floor 18",
+    "ja-JP": "レグディニス遺跡18層",
+    "ko-KR": "시디문 유적 18층"
+  },
+  "30119": {
+    "zh-CN": "司第门遗迹19层",
+    "en-US": "Floor 19",
+    "ja-JP": "レグディニス遺跡19層",
+    "ko-KR": "시디문 유적 19층"
+  },
+  "30120": {
+    "zh-CN": "司第门遗迹20层",
+    "en-US": "Floor 20",
+    "ja-JP": "レグディニス遺跡20層",
+    "ko-KR": "시디문 유적 20층"
+  },
+  "30121": {
+    "zh-CN": "司第门遗迹21层",
+    "en-US": "Floor 21",
+    "ja-JP": "レグディニス遺跡21層",
+    "ko-KR": "시디문 유적 21층"
+  },
+  "30122": {
+    "zh-CN": "司第门遗迹22层",
+    "en-US": "Floor 22",
+    "ja-JP": "レグディニス遺跡22層",
+    "ko-KR": "시디문 유적 22층"
+  },
+  "30123": {
+    "zh-CN": "司第门遗迹23层",
+    "en-US": "Floor 23",
+    "ja-JP": "レグディニス遺跡23層",
+    "ko-KR": "시디문 유적 23층"
+  },
+  "30124": {
+    "zh-CN": "司第门遗迹24层",
+    "en-US": "Floor 24",
+    "ja-JP": "レグディニス遺跡24層",
+    "ko-KR": "시디문 유적 24층"
+  },
+  "30125": {
+    "zh-CN": "司第门遗迹25层",
+    "en-US": "Floor 25",
+    "ja-JP": "レグディニス遺跡25層",
+    "ko-KR": "시디문 유적 25층"
+  },
+  "30126": {
+    "zh-CN": "司第门遗迹26层",
+    "en-US": "Floor 26",
+    "ja-JP": "レグディニス遺跡26層",
+    "ko-KR": "시디문 유적 26층"
+  },
+  "30127": {
+    "zh-CN": "司第门遗迹27层",
+    "en-US": "Floor 27",
+    "ja-JP": "レグディニス遺跡27層",
+    "ko-KR": "시디문 유적 27층"
+  },
+  "30128": {
+    "zh-CN": "司第门遗迹28层",
+    "en-US": "Floor 28",
+    "ja-JP": "レグディニス遺跡28層",
+    "ko-KR": "시디문 유적 28층"
+  },
+  "30129": {
+    "zh-CN": "司第门遗迹29层",
+    "en-US": "Floor 29",
+    "ja-JP": "レグディニス遺跡29層",
+    "ko-KR": "시디문 유적 29층"
+  },
+  "30130": {
+    "zh-CN": "司第门遗迹30层",
+    "en-US": "Floor 30",
+    "ja-JP": "レグディニス遺跡30層",
+    "ko-KR": "시디문 유적 30층"
+  },
+  "30131": {
+    "zh-CN": "司第门遗迹31层",
+    "en-US": "Floor 31",
+    "ja-JP": "レグディニス遺跡31層",
+    "ko-KR": "시디문 유적 31층"
+  },
+  "30132": {
+    "zh-CN": "司第门遗迹32层",
+    "en-US": "Floor 32",
+    "ja-JP": "レグディニス遺跡32層",
+    "ko-KR": "시디문 유적 32층"
+  },
+  "30133": {
+    "zh-CN": "司第门遗迹33层",
+    "en-US": "Floor 33",
+    "ja-JP": "レグディニス遺跡33層",
+    "ko-KR": "시디문 유적 33층"
+  },
+  "30134": {
+    "zh-CN": "司第门遗迹34层",
+    "en-US": "Floor 34",
+    "ja-JP": "レグディニス遺跡34層",
+    "ko-KR": "시디문 유적 34층"
+  },
+  "30135": {
+    "zh-CN": "司第门遗迹35层",
+    "en-US": "Floor 35",
+    "ja-JP": "レグディニス遺跡35層",
+    "ko-KR": "시디문 유적 35층"
+  },
+  "30136": {
+    "zh-CN": "司第门遗迹36层",
+    "en-US": "Floor 36",
+    "ja-JP": "レグディニス遺跡36層",
+    "ko-KR": "시디문 유적 36층"
+  },
+  "30137": {
+    "zh-CN": "司第门遗迹37层",
+    "en-US": "Floor 37",
+    "ja-JP": "レグディニス遺跡37層",
+    "ko-KR": "시디문 유적 37층"
+  },
+  "30138": {
+    "zh-CN": "司第门遗迹38层",
+    "en-US": "Floor 38",
+    "ja-JP": "レグディニス遺跡38層",
+    "ko-KR": "시디문 유적 38층"
+  },
+  "30139": {
+    "zh-CN": "司第门遗迹39层",
+    "en-US": "Floor 39",
+    "ja-JP": "レグディニス遺跡39層",
+    "ko-KR": "시디문 유적 39층"
+  },
+  "30140": {
+    "zh-CN": "司第门遗迹40层",
+    "en-US": "Floor 40",
+    "ja-JP": "レグディニス遺跡40層",
+    "ko-KR": "시디문 유적 40층"
+  },
+  "30141": {
+    "zh-CN": "司第门遗迹41层",
+    "en-US": "Floor 41",
+    "ja-JP": "レグディニス遺跡41層",
+    "ko-KR": "시디문 유적 41층"
+  },
+  "30142": {
+    "zh-CN": "司第门遗迹42层",
+    "en-US": "Floor 42",
+    "ja-JP": "レグディニス遺跡42層",
+    "ko-KR": "시디문 유적 42층"
+  },
+  "30143": {
+    "zh-CN": "司第门遗迹43层",
+    "en-US": "Floor 43",
+    "ja-JP": "レグディニス遺跡43層",
+    "ko-KR": "시디문 유적 43층"
+  },
+  "30144": {
+    "zh-CN": "司第门遗迹44层",
+    "en-US": "Floor 44",
+    "ja-JP": "レグディニス遺跡44層",
+    "ko-KR": "시디문 유적 44층"
+  },
+  "30145": {
+    "zh-CN": "司第门遗迹45层",
+    "en-US": "Floor 45",
+    "ja-JP": "レグディニス遺跡45層",
+    "ko-KR": "시디문 유적 45층"
+  },
+  "30146": {
+    "zh-CN": "司第门遗迹46层",
+    "en-US": "Floor 46",
+    "ja-JP": "レグディニス遺跡46層",
+    "ko-KR": "시디문 유적 46층"
+  },
+  "30147": {
+    "zh-CN": "司第门遗迹47层",
+    "en-US": "Floor 47",
+    "ja-JP": "レグディニス遺跡47層",
+    "ko-KR": "시디문 유적 47층"
+  },
+  "30148": {
+    "zh-CN": "司第门遗迹48层",
+    "en-US": "Floor 48",
+    "ja-JP": "レグディニス遺跡48層",
+    "ko-KR": "시디문 유적 48층"
+  },
+  "30149": {
+    "zh-CN": "司第门遗迹49层",
+    "en-US": "Floor 49",
+    "ja-JP": "レグディニス遺跡49層",
+    "ko-KR": "시디문 유적 49층"
+  },
+  "30150": {
+    "zh-CN": "司第门遗迹50层",
+    "en-US": "Floor 50",
+    "ja-JP": "レグディニス遺跡50層",
+    "ko-KR": "시디문 유적 50층"
+  },
+  "30151": {
+    "zh-CN": "司第门遗迹51层",
+    "en-US": "Floor 51",
+    "ja-JP": "レグディニス遺跡51層",
+    "ko-KR": "시디문 유적 51층"
+  },
+  "30152": {
+    "zh-CN": "司第门遗迹52层",
+    "en-US": "Floor 52",
+    "ja-JP": "レグディニス遺跡52層",
+    "ko-KR": "시디문 유적 52층"
+  },
+  "30153": {
+    "zh-CN": "司第门遗迹53层",
+    "en-US": "Floor 53",
+    "ja-JP": "レグディニス遺跡53層",
+    "ko-KR": "시디문 유적 53층"
+  },
+  "30154": {
+    "zh-CN": "司第门遗迹54层",
+    "en-US": "Floor 54",
+    "ja-JP": "レグディニス遺跡54層",
+    "ko-KR": "시디문 유적 54층"
+  },
+  "30155": {
+    "zh-CN": "司第门遗迹55层",
+    "en-US": "Floor 55",
+    "ja-JP": "レグディニス遺跡55層",
+    "ko-KR": "시디문 유적 55층"
+  },
+  "30156": {
+    "zh-CN": "司第门遗迹56层",
+    "en-US": "Floor 56",
+    "ja-JP": "レグディニス遺跡56層",
+    "ko-KR": "시디문 유적 56층"
+  },
+  "30157": {
+    "zh-CN": "司第门遗迹57层",
+    "en-US": "Floor 57",
+    "ja-JP": "レグディニス遺跡57層",
+    "ko-KR": "시디문 유적 57층"
+  },
+  "30158": {
+    "zh-CN": "司第门遗迹58层",
+    "en-US": "Floor 58",
+    "ja-JP": "レグディニス遺跡58層",
+    "ko-KR": "시디문 유적 58층"
+  },
+  "30159": {
+    "zh-CN": "司第门遗迹59层",
+    "en-US": "Floor 59",
+    "ja-JP": "レグディニス遺跡59層",
+    "ko-KR": "시디문 유적 59층"
+  },
+  "30160": {
+    "zh-CN": "司第门遗迹60层",
+    "en-US": "Floor 60",
+    "ja-JP": "レグディニス遺跡60層",
+    "ko-KR": "시디문 유적 60층"
+  },
+  "30161": {
+    "zh-CN": "司第门遗迹61层",
+    "en-US": "Floor 61",
+    "ja-JP": "レグディニス遺跡61層",
+    "ko-KR": "시디문 유적 61층"
+  },
+  "30162": {
+    "zh-CN": "司第门遗迹62层",
+    "en-US": "Floor 62",
+    "ja-JP": "レグディニス遺跡62層",
+    "ko-KR": "시디문 유적 62층"
+  },
+  "30163": {
+    "zh-CN": "司第门遗迹63层",
+    "en-US": "Floor 63",
+    "ja-JP": "レグディニス遺跡63層",
+    "ko-KR": "시디문 유적 63층"
+  },
+  "30164": {
+    "zh-CN": "司第门遗迹64层",
+    "en-US": "Floor 64",
+    "ja-JP": "レグディニス遺跡64層",
+    "ko-KR": "시디문 유적 64층"
+  },
+  "30165": {
+    "zh-CN": "司第门遗迹65层",
+    "en-US": "Floor 65",
+    "ja-JP": "レグディニス遺跡65層",
+    "ko-KR": "시디문 유적 65층"
+  },
+  "30166": {
+    "zh-CN": "司第门遗迹66层",
+    "en-US": "Floor 66",
+    "ja-JP": "レグディニス遺跡66層",
+    "ko-KR": "시디문 유적 66층"
+  },
+  "30167": {
+    "zh-CN": "司第门遗迹67层",
+    "en-US": "Floor 67",
+    "ja-JP": "レグディニス遺跡67層",
+    "ko-KR": "시디문 유적 67층"
+  },
+  "30168": {
+    "zh-CN": "司第门遗迹68层",
+    "en-US": "Floor 68",
+    "ja-JP": "レグディニス遺跡68層",
+    "ko-KR": "시디문 유적 68층"
+  },
+  "30169": {
+    "zh-CN": "司第门遗迹69层",
+    "en-US": "Floor 69",
+    "ja-JP": "レグディニス遺跡69層",
+    "ko-KR": "시디문 유적 69층"
+  },
+  "30170": {
+    "zh-CN": "司第门遗迹70层",
+    "en-US": "Floor 70",
+    "ja-JP": "レグディニス遺跡70層",
+    "ko-KR": "시디문 유적 70층"
+  },
+  "30171": {
+    "zh-CN": "司第门遗迹71层",
+    "en-US": "Floor 71",
+    "ja-JP": "レグディニス遺跡71層",
+    "ko-KR": "시디문 유적 71층"
+  },
+  "30172": {
+    "zh-CN": "司第门遗迹72层",
+    "en-US": "Floor 72",
+    "ja-JP": "レグディニス遺跡72層",
+    "ko-KR": "시디문 유적 72층"
+  },
+  "30173": {
+    "zh-CN": "司第门遗迹73层",
+    "en-US": "Floor 73",
+    "ja-JP": "レグディニス遺跡73層",
+    "ko-KR": "시디문 유적 73층"
+  },
+  "30174": {
+    "zh-CN": "司第门遗迹74层",
+    "en-US": "Floor 74",
+    "ja-JP": "レグディニス遺跡74層",
+    "ko-KR": "시디문 유적 74층"
+  },
+  "30175": {
+    "zh-CN": "司第门遗迹75层",
+    "en-US": "Floor 75",
+    "ja-JP": "レグディニス遺跡75層",
+    "ko-KR": "시디문 유적 75층"
+  },
+  "30200": {
+    "zh-CN": "司第门遗迹100层-事件01",
+    "en-US": "Floor 100 - Event 01",
+    "ja-JP": "レグディニス遺跡100層-イベント01",
+    "ko-KR": "시디문 유적 100층 - 이벤트 01"
+  },
+  "31101": {
+    "zh-CN": "司第门遗迹1层",
+    "en-US": "Floor 1",
+    "ja-JP": "レグディニス遺跡1層",
+    "ko-KR": "시디문 유적 1층"
+  },
+  "31102": {
+    "zh-CN": "司第门遗迹2层",
+    "en-US": "Floor 2",
+    "ja-JP": "レグディニス遺跡2層",
+    "ko-KR": "시디문 유적 2층"
+  },
+  "31103": {
+    "zh-CN": "司第门遗迹3层",
+    "en-US": "Floor 3",
+    "ja-JP": "レグディニス遺跡3層",
+    "ko-KR": "시디문 유적 3층"
+  },
+  "31104": {
+    "zh-CN": "司第门遗迹4层",
+    "en-US": "Floor 4",
+    "ja-JP": "レグディニス遺跡4層",
+    "ko-KR": "시디문 유적 4층"
+  },
+  "31105": {
+    "zh-CN": "司第门遗迹5层",
+    "en-US": "Floor 5",
+    "ja-JP": "レグディニス遺跡5層",
+    "ko-KR": "시디문 유적 5층"
+  },
+  "31106": {
+    "zh-CN": "司第门遗迹6层",
+    "en-US": "Floor 6",
+    "ja-JP": "レグディニス遺跡6層",
+    "ko-KR": "시디문 유적 6층"
+  },
+  "31107": {
+    "zh-CN": "司第门遗迹7层",
+    "en-US": "Floor 7",
+    "ja-JP": "レグディニス遺跡7層",
+    "ko-KR": "시디문 유적 7층"
+  },
+  "31108": {
+    "zh-CN": "司第门遗迹8层",
+    "en-US": "Floor 8",
+    "ja-JP": "レグディニス遺跡8層",
+    "ko-KR": "시디문 유적 8층"
+  },
+  "31109": {
+    "zh-CN": "司第门遗迹9层",
+    "en-US": "Floor 9",
+    "ja-JP": "レグディニス遺跡9層",
+    "ko-KR": "시디문 유적 9층"
+  },
+  "31110": {
+    "zh-CN": "司第门遗迹10层",
+    "en-US": "Floor 10",
+    "ja-JP": "レグディニス遺跡10層",
+    "ko-KR": "시디문 유적 10층"
+  },
+  "31111": {
+    "zh-CN": "司第门遗迹11层",
+    "en-US": "Floor 11",
+    "ja-JP": "レグディニス遺跡11層",
+    "ko-KR": "시디문 유적 11층"
+  },
+  "31112": {
+    "zh-CN": "司第门遗迹12层",
+    "en-US": "Floor 12",
+    "ja-JP": "レグディニス遺跡12層",
+    "ko-KR": "시디문 유적 12층"
+  },
+  "31113": {
+    "zh-CN": "司第门遗迹13层",
+    "en-US": "Floor 13",
+    "ja-JP": "レグディニス遺跡13層",
+    "ko-KR": "시디문 유적 13층"
+  },
+  "31114": {
+    "zh-CN": "司第门遗迹14层",
+    "en-US": "Floor 14",
+    "ja-JP": "レグディニス遺跡14層",
+    "ko-KR": "시디문 유적 14층"
+  },
+  "31115": {
+    "zh-CN": "司第门遗迹15层",
+    "en-US": "Floor 15",
+    "ja-JP": "レグディニス遺跡15層",
+    "ko-KR": "시디문 유적 15층"
+  },
+  "31116": {
+    "zh-CN": "司第门遗迹16层",
+    "en-US": "Floor 16",
+    "ja-JP": "レグディニス遺跡16層",
+    "ko-KR": "시디문 유적 16층"
+  },
+  "31117": {
+    "zh-CN": "司第门遗迹17层",
+    "en-US": "Floor 17",
+    "ja-JP": "レグディニス遺跡17層",
+    "ko-KR": "시디문 유적 17층"
+  },
+  "31118": {
+    "zh-CN": "司第门遗迹18层",
+    "en-US": "Floor 18",
+    "ja-JP": "レグディニス遺跡18層",
+    "ko-KR": "시디문 유적 18층"
+  },
+  "31119": {
+    "zh-CN": "司第门遗迹19层",
+    "en-US": "Floor 19",
+    "ja-JP": "レグディニス遺跡19層",
+    "ko-KR": "시디문 유적 19층"
+  },
+  "31120": {
+    "zh-CN": "司第门遗迹20层",
+    "en-US": "Floor 20",
+    "ja-JP": "レグディニス遺跡20層",
+    "ko-KR": "시디문 유적 20층"
+  },
+  "31121": {
+    "zh-CN": "司第门遗迹21层",
+    "en-US": "Floor 21",
+    "ja-JP": "レグディニス遺跡21層",
+    "ko-KR": "시디문 유적 21층"
+  },
+  "31122": {
+    "zh-CN": "司第门遗迹22层",
+    "en-US": "Floor 22",
+    "ja-JP": "レグディニス遺跡22層",
+    "ko-KR": "시디문 유적 22층"
+  },
+  "31123": {
+    "zh-CN": "司第门遗迹23层",
+    "en-US": "Floor 23",
+    "ja-JP": "レグディニス遺跡23層",
+    "ko-KR": "시디문 유적 23층"
+  },
+  "31124": {
+    "zh-CN": "司第门遗迹24层",
+    "en-US": "Floor 24",
+    "ja-JP": "レグディニス遺跡24層",
+    "ko-KR": "시디문 유적 24층"
+  },
+  "31125": {
+    "zh-CN": "司第门遗迹25层",
+    "en-US": "Floor 25",
+    "ja-JP": "レグディニス遺跡25層",
+    "ko-KR": "시디문 유적 25층"
+  },
+  "31126": {
+    "zh-CN": "司第门遗迹26层",
+    "en-US": "Floor 26",
+    "ja-JP": "レグディニス遺跡26層",
+    "ko-KR": "시디문 유적 26층"
+  },
+  "31127": {
+    "zh-CN": "司第门遗迹27层",
+    "en-US": "Floor 27",
+    "ja-JP": "レグディニス遺跡27層",
+    "ko-KR": "시디문 유적 27층"
+  },
+  "31128": {
+    "zh-CN": "司第门遗迹28层",
+    "en-US": "Floor 28",
+    "ja-JP": "レグディニス遺跡28層",
+    "ko-KR": "시디문 유적 28층"
+  },
+  "31129": {
+    "zh-CN": "司第门遗迹29层",
+    "en-US": "Floor 29",
+    "ja-JP": "レグディニス遺跡29層",
+    "ko-KR": "시디문 유적 29층"
+  },
+  "31130": {
+    "zh-CN": "司第门遗迹30层",
+    "en-US": "Floor 30",
+    "ja-JP": "レグディニス遺跡30層",
+    "ko-KR": "시디문 유적 30층"
+  },
+  "31131": {
+    "zh-CN": "司第门遗迹31层",
+    "en-US": "Floor 31",
+    "ja-JP": "レグディニス遺跡31層",
+    "ko-KR": "시디문 유적 31층"
+  },
+  "31132": {
+    "zh-CN": "司第门遗迹32层",
+    "en-US": "Floor 32",
+    "ja-JP": "レグディニス遺跡32層",
+    "ko-KR": "시디문 유적 32층"
+  },
+  "31133": {
+    "zh-CN": "司第门遗迹33层",
+    "en-US": "Floor 33",
+    "ja-JP": "レグディニス遺跡33層",
+    "ko-KR": "시디문 유적 33층"
+  },
+  "31134": {
+    "zh-CN": "司第门遗迹34层",
+    "en-US": "Floor 34",
+    "ja-JP": "レグディニス遺跡34層",
+    "ko-KR": "시디문 유적 34층"
+  },
+  "31135": {
+    "zh-CN": "司第门遗迹35层",
+    "en-US": "Floor 35",
+    "ja-JP": "レグディニス遺跡35層",
+    "ko-KR": "시디문 유적 35층"
+  },
+  "31136": {
+    "zh-CN": "司第门遗迹36层",
+    "en-US": "Floor 36",
+    "ja-JP": "レグディニス遺跡36層",
+    "ko-KR": "시디문 유적 36층"
+  },
+  "31137": {
+    "zh-CN": "司第门遗迹37层",
+    "en-US": "Floor 37",
+    "ja-JP": "レグディニス遺跡37層",
+    "ko-KR": "시디문 유적 37층"
+  },
+  "31138": {
+    "zh-CN": "司第门遗迹38层",
+    "en-US": "Floor 38",
+    "ja-JP": "レグディニス遺跡38層",
+    "ko-KR": "시디문 유적 38층"
+  },
+  "31139": {
+    "zh-CN": "司第门遗迹39层",
+    "en-US": "Floor 39",
+    "ja-JP": "レグディニス遺跡39層",
+    "ko-KR": "시디문 유적 39층"
+  },
+  "31140": {
+    "zh-CN": "司第门遗迹40层",
+    "en-US": "Floor 40",
+    "ja-JP": "レグディニス遺跡40層",
+    "ko-KR": "시디문 유적 40층"
+  },
+  "31141": {
+    "zh-CN": "司第门遗迹41层",
+    "en-US": "Floor 41",
+    "ja-JP": "レグディニス遺跡41層",
+    "ko-KR": "시디문 유적 41층"
+  },
+  "31142": {
+    "zh-CN": "司第门遗迹42层",
+    "en-US": "Floor 42",
+    "ja-JP": "レグディニス遺跡42層",
+    "ko-KR": "시디문 유적 42층"
+  },
+  "31143": {
+    "zh-CN": "司第门遗迹43层",
+    "en-US": "Floor 43",
+    "ja-JP": "レグディニス遺跡43層",
+    "ko-KR": "시디문 유적 43층"
+  },
+  "31144": {
+    "zh-CN": "司第门遗迹44层",
+    "en-US": "Floor 44",
+    "ja-JP": "レグディニス遺跡44層",
+    "ko-KR": "시디문 유적 44층"
+  },
+  "31145": {
+    "zh-CN": "司第门遗迹45层",
+    "en-US": "Floor 45",
+    "ja-JP": "レグディニス遺跡45層",
+    "ko-KR": "시디문 유적 45층"
+  },
+  "31146": {
+    "zh-CN": "司第门遗迹46层",
+    "en-US": "Floor 46",
+    "ja-JP": "レグディニス遺跡46層",
+    "ko-KR": "시디문 유적 46층"
+  },
+  "31147": {
+    "zh-CN": "司第门遗迹47层",
+    "en-US": "Floor 47",
+    "ja-JP": "レグディニス遺跡47層",
+    "ko-KR": "시디문 유적 47층"
+  },
+  "31148": {
+    "zh-CN": "司第门遗迹48层",
+    "en-US": "Floor 48",
+    "ja-JP": "レグディニス遺跡48層",
+    "ko-KR": "시디문 유적 48층"
+  },
+  "31149": {
+    "zh-CN": "司第门遗迹49层",
+    "en-US": "Floor 49",
+    "ja-JP": "レグディニス遺跡49層",
+    "ko-KR": "시디문 유적 49층"
+  },
+  "31150": {
+    "zh-CN": "司第门遗迹50层",
+    "en-US": "Floor 50",
+    "ja-JP": "レグディニス遺跡50層",
+    "ko-KR": "시디문 유적 50층"
+  },
+  "31151": {
+    "zh-CN": "司第门遗迹51层",
+    "en-US": "Floor 51",
+    "ja-JP": "レグディニス遺跡51層",
+    "ko-KR": "시디문 유적 51층"
+  },
+  "31152": {
+    "zh-CN": "司第门遗迹52层",
+    "en-US": "Floor 52",
+    "ja-JP": "レグディニス遺跡52層",
+    "ko-KR": "시디문 유적 52층"
+  },
+  "31153": {
+    "zh-CN": "司第门遗迹53层",
+    "en-US": "Floor 53",
+    "ja-JP": "レグディニス遺跡53層",
+    "ko-KR": "시디문 유적 53층"
+  },
+  "31154": {
+    "zh-CN": "司第门遗迹54层",
+    "en-US": "Floor 54",
+    "ja-JP": "レグディニス遺跡54層",
+    "ko-KR": "시디문 유적 54층"
+  },
+  "31155": {
+    "zh-CN": "司第门遗迹55层",
+    "en-US": "Floor 55",
+    "ja-JP": "レグディニス遺跡55層",
+    "ko-KR": "시디문 유적 55층"
+  },
+  "31156": {
+    "zh-CN": "司第门遗迹56层",
+    "en-US": "Floor 56",
+    "ja-JP": "レグディニス遺跡56層",
+    "ko-KR": "시디문 유적 56층"
+  },
+  "31157": {
+    "zh-CN": "司第门遗迹57层",
+    "en-US": "Floor 57",
+    "ja-JP": "レグディニス遺跡57層",
+    "ko-KR": "시디문 유적 57층"
+  },
+  "31158": {
+    "zh-CN": "司第门遗迹58层",
+    "en-US": "Floor 58",
+    "ja-JP": "レグディニス遺跡58層",
+    "ko-KR": "시디문 유적 58층"
+  },
+  "31159": {
+    "zh-CN": "司第门遗迹59层",
+    "en-US": "Floor 59",
+    "ja-JP": "レグディニス遺跡59層",
+    "ko-KR": "시디문 유적 59층"
+  },
+  "31160": {
+    "zh-CN": "司第门遗迹60层",
+    "en-US": "Floor 60",
+    "ja-JP": "レグディニス遺跡60層",
+    "ko-KR": "시디문 유적 60층"
+  },
+  "31161": {
+    "zh-CN": "司第门遗迹61层",
+    "en-US": "Floor 61",
+    "ja-JP": "レグディニス遺跡61層",
+    "ko-KR": "시디문 유적 61층"
+  },
+  "31162": {
+    "zh-CN": "司第门遗迹62层",
+    "en-US": "Floor 62",
+    "ja-JP": "レグディニス遺跡62層",
+    "ko-KR": "시디문 유적 62층"
+  },
+  "31163": {
+    "zh-CN": "司第门遗迹63层",
+    "en-US": "Floor 63",
+    "ja-JP": "レグディニス遺跡63層",
+    "ko-KR": "시디문 유적 63층"
+  },
+  "31164": {
+    "zh-CN": "司第门遗迹64层",
+    "en-US": "Floor 64",
+    "ja-JP": "レグディニス遺跡64層",
+    "ko-KR": "시디문 유적 64층"
+  },
+  "31165": {
+    "zh-CN": "司第门遗迹65层",
+    "en-US": "Floor 65",
+    "ja-JP": "レグディニス遺跡65層",
+    "ko-KR": "시디문 유적 65층"
+  },
+  "31166": {
+    "zh-CN": "司第门遗迹66层",
+    "en-US": "Floor 66",
+    "ja-JP": "レグディニス遺跡66層",
+    "ko-KR": "시디문 유적 66층"
+  },
+  "31167": {
+    "zh-CN": "司第门遗迹67层",
+    "en-US": "Floor 67",
+    "ja-JP": "レグディニス遺跡67層",
+    "ko-KR": "시디문 유적 67층"
+  },
+  "31168": {
+    "zh-CN": "司第门遗迹68层",
+    "en-US": "Floor 68",
+    "ja-JP": "レグディニス遺跡68層",
+    "ko-KR": "시디문 유적 68층"
+  },
+  "31169": {
+    "zh-CN": "司第门遗迹69层",
+    "en-US": "Floor 69",
+    "ja-JP": "レグディニス遺跡69層",
+    "ko-KR": "시디문 유적 69층"
+  },
+  "31170": {
+    "zh-CN": "司第门遗迹70层",
+    "en-US": "Floor 70",
+    "ja-JP": "レグディニス遺跡70層",
+    "ko-KR": "시디문 유적 70층"
+  },
+  "31171": {
+    "zh-CN": "司第门遗迹71层",
+    "en-US": "Floor 71",
+    "ja-JP": "レグディニス遺跡71層",
+    "ko-KR": "시디문 유적 71층"
+  },
+  "31172": {
+    "zh-CN": "司第门遗迹72层",
+    "en-US": "Floor 72",
+    "ja-JP": "レグディニス遺跡72層",
+    "ko-KR": "시디문 유적 72층"
+  },
+  "31173": {
+    "zh-CN": "司第门遗迹73层",
+    "en-US": "Floor 73",
+    "ja-JP": "レグディニス遺跡73層",
+    "ko-KR": "시디문 유적 73층"
+  },
+  "31174": {
+    "zh-CN": "司第门遗迹74层",
+    "en-US": "Floor 74",
+    "ja-JP": "レグディニス遺跡74層",
+    "ko-KR": "시디문 유적 74층"
+  },
+  "31175": {
+    "zh-CN": "司第门遗迹75层",
+    "en-US": "Floor 75",
+    "ja-JP": "レグディニス遺跡75層",
+    "ko-KR": "시디문 유적 75층"
+  },
+  "32101": {
+    "zh-CN": "司第门遗迹1层",
+    "en-US": "Floor 1",
+    "ja-JP": "レグディニス遺跡1層",
+    "ko-KR": "시디문 유적 1층"
+  },
+  "32102": {
+    "zh-CN": "司第门遗迹2层",
+    "en-US": "Floor 2",
+    "ja-JP": "レグディニス遺跡2層",
+    "ko-KR": "시디문 유적 2층"
+  },
+  "32103": {
+    "zh-CN": "司第门遗迹3层",
+    "en-US": "Floor 3",
+    "ja-JP": "レグディニス遺跡3層",
+    "ko-KR": "시디문 유적 3층"
+  },
+  "32104": {
+    "zh-CN": "司第门遗迹4层",
+    "en-US": "Floor 4",
+    "ja-JP": "レグディニス遺跡4層",
+    "ko-KR": "시디문 유적 4층"
+  },
+  "32105": {
+    "zh-CN": "司第门遗迹5层",
+    "en-US": "Floor 5",
+    "ja-JP": "レグディニス遺跡5層",
+    "ko-KR": "시디문 유적 5층"
+  },
+  "32106": {
+    "zh-CN": "司第门遗迹6层",
+    "en-US": "Floor 6",
+    "ja-JP": "レグディニス遺跡6層",
+    "ko-KR": "시디문 유적 6층"
+  },
+  "32107": {
+    "zh-CN": "司第门遗迹7层",
+    "en-US": "Floor 7",
+    "ja-JP": "レグディニス遺跡7層",
+    "ko-KR": "시디문 유적 7층"
+  },
+  "32108": {
+    "zh-CN": "司第门遗迹8层",
+    "en-US": "Floor 8",
+    "ja-JP": "レグディニス遺跡8層",
+    "ko-KR": "시디문 유적 8층"
+  },
+  "32109": {
+    "zh-CN": "司第门遗迹9层",
+    "en-US": "Floor 9",
+    "ja-JP": "レグディニス遺跡9層",
+    "ko-KR": "시디문 유적 9층"
+  },
+  "32110": {
+    "zh-CN": "司第门遗迹10层",
+    "en-US": "Floor 10",
+    "ja-JP": "レグディニス遺跡10層",
+    "ko-KR": "시디문 유적 10층"
+  },
+  "32111": {
+    "zh-CN": "司第门遗迹11层",
+    "en-US": "Floor 11",
+    "ja-JP": "レグディニス遺跡11層",
+    "ko-KR": "시디문 유적 11층"
+  },
+  "32112": {
+    "zh-CN": "司第门遗迹12层",
+    "en-US": "Floor 12",
+    "ja-JP": "レグディニス遺跡12層",
+    "ko-KR": "시디문 유적 12층"
+  },
+  "32113": {
+    "zh-CN": "司第门遗迹13层",
+    "en-US": "Floor 13",
+    "ja-JP": "レグディニス遺跡13層",
+    "ko-KR": "시디문 유적 13층"
+  },
+  "32114": {
+    "zh-CN": "司第门遗迹14层",
+    "en-US": "Floor 14",
+    "ja-JP": "レグディニス遺跡14層",
+    "ko-KR": "시디문 유적 14층"
+  },
+  "32115": {
+    "zh-CN": "司第门遗迹15层",
+    "en-US": "Floor 15",
+    "ja-JP": "レグディニス遺跡15層",
+    "ko-KR": "시디문 유적 15층"
+  },
+  "32116": {
+    "zh-CN": "司第门遗迹16层",
+    "en-US": "Floor 16",
+    "ja-JP": "レグディニス遺跡16層",
+    "ko-KR": "시디문 유적 16층"
+  },
+  "32117": {
+    "zh-CN": "司第门遗迹17层",
+    "en-US": "Floor 17",
+    "ja-JP": "レグディニス遺跡17層",
+    "ko-KR": "시디문 유적 17층"
+  },
+  "32118": {
+    "zh-CN": "司第门遗迹18层",
+    "en-US": "Floor 18",
+    "ja-JP": "レグディニス遺跡18層",
+    "ko-KR": "시디문 유적 18층"
+  },
+  "32119": {
+    "zh-CN": "司第门遗迹19层",
+    "en-US": "Floor 19",
+    "ja-JP": "レグディニス遺跡19層",
+    "ko-KR": "시디문 유적 19층"
+  },
+  "32120": {
+    "zh-CN": "司第门遗迹20层",
+    "en-US": "Floor 20",
+    "ja-JP": "レグディニス遺跡20層",
+    "ko-KR": "시디문 유적 20층"
+  },
+  "32121": {
+    "zh-CN": "司第门遗迹21层",
+    "en-US": "Floor 21",
+    "ja-JP": "レグディニス遺跡21層",
+    "ko-KR": "시디문 유적 21층"
+  },
+  "32122": {
+    "zh-CN": "司第门遗迹22层",
+    "en-US": "Floor 22",
+    "ja-JP": "レグディニス遺跡22層",
+    "ko-KR": "시디문 유적 22층"
+  },
+  "32123": {
+    "zh-CN": "司第门遗迹23层",
+    "en-US": "Floor 23",
+    "ja-JP": "レグディニス遺跡23層",
+    "ko-KR": "시디문 유적 23층"
+  },
+  "32124": {
+    "zh-CN": "司第门遗迹24层",
+    "en-US": "Floor 24",
+    "ja-JP": "レグディニス遺跡24層",
+    "ko-KR": "시디문 유적 24층"
+  },
+  "32125": {
+    "zh-CN": "司第门遗迹25层",
+    "en-US": "Floor 25",
+    "ja-JP": "レグディニス遺跡25層",
+    "ko-KR": "시디문 유적 25층"
+  },
+  "32126": {
+    "zh-CN": "司第门遗迹26层",
+    "en-US": "Floor 26",
+    "ja-JP": "レグディニス遺跡26層",
+    "ko-KR": "시디문 유적 26층"
+  },
+  "32127": {
+    "zh-CN": "司第门遗迹27层",
+    "en-US": "Floor 27",
+    "ja-JP": "レグディニス遺跡27層",
+    "ko-KR": "시디문 유적 27층"
+  },
+  "32128": {
+    "zh-CN": "司第门遗迹28层",
+    "en-US": "Floor 28",
+    "ja-JP": "レグディニス遺跡28層",
+    "ko-KR": "시디문 유적 28층"
+  },
+  "32129": {
+    "zh-CN": "司第门遗迹29层",
+    "en-US": "Floor 29",
+    "ja-JP": "レグディニス遺跡29層",
+    "ko-KR": "시디문 유적 29층"
+  },
+  "32130": {
+    "zh-CN": "司第门遗迹30层",
+    "en-US": "Floor 30",
+    "ja-JP": "レグディニス遺跡30層",
+    "ko-KR": "시디문 유적 30층"
+  },
+  "32131": {
+    "zh-CN": "司第门遗迹31层",
+    "en-US": "Floor 31",
+    "ja-JP": "レグディニス遺跡31層",
+    "ko-KR": "시디문 유적 31층"
+  },
+  "32132": {
+    "zh-CN": "司第门遗迹32层",
+    "en-US": "Floor 32",
+    "ja-JP": "レグディニス遺跡32層",
+    "ko-KR": "시디문 유적 32층"
+  },
+  "32133": {
+    "zh-CN": "司第门遗迹33层",
+    "en-US": "Floor 33",
+    "ja-JP": "レグディニス遺跡33層",
+    "ko-KR": "시디문 유적 33층"
+  },
+  "32134": {
+    "zh-CN": "司第门遗迹34层",
+    "en-US": "Floor 34",
+    "ja-JP": "レグディニス遺跡34層",
+    "ko-KR": "시디문 유적 34층"
+  },
+  "32135": {
+    "zh-CN": "司第门遗迹35层",
+    "en-US": "Floor 35",
+    "ja-JP": "レグディニス遺跡35層",
+    "ko-KR": "시디문 유적 35층"
+  },
+  "32136": {
+    "zh-CN": "司第门遗迹36层",
+    "en-US": "Floor 36",
+    "ja-JP": "レグディニス遺跡36層",
+    "ko-KR": "시디문 유적 36층"
+  },
+  "32137": {
+    "zh-CN": "司第门遗迹37层",
+    "en-US": "Floor 37",
+    "ja-JP": "レグディニス遺跡37層",
+    "ko-KR": "시디문 유적 37층"
+  },
+  "32138": {
+    "zh-CN": "司第门遗迹38层",
+    "en-US": "Floor 38",
+    "ja-JP": "レグディニス遺跡38層",
+    "ko-KR": "시디문 유적 38층"
+  },
+  "32139": {
+    "zh-CN": "司第门遗迹39层",
+    "en-US": "Floor 39",
+    "ja-JP": "レグディニス遺跡39層",
+    "ko-KR": "시디문 유적 39층"
+  },
+  "32140": {
+    "zh-CN": "司第门遗迹40层",
+    "en-US": "Floor 40",
+    "ja-JP": "レグディニス遺跡40層",
+    "ko-KR": "시디문 유적 40층"
+  },
+  "32141": {
+    "zh-CN": "司第门遗迹41层",
+    "en-US": "Floor 41",
+    "ja-JP": "レグディニス遺跡41層",
+    "ko-KR": "시디문 유적 41층"
+  },
+  "32142": {
+    "zh-CN": "司第门遗迹42层",
+    "en-US": "Floor 42",
+    "ja-JP": "レグディニス遺跡42層",
+    "ko-KR": "시디문 유적 42층"
+  },
+  "32143": {
+    "zh-CN": "司第门遗迹43层",
+    "en-US": "Floor 43",
+    "ja-JP": "レグディニス遺跡43層",
+    "ko-KR": "시디문 유적 43층"
+  },
+  "32144": {
+    "zh-CN": "司第门遗迹44层",
+    "en-US": "Floor 44",
+    "ja-JP": "レグディニス遺跡44層",
+    "ko-KR": "시디문 유적 44층"
+  },
+  "32145": {
+    "zh-CN": "司第门遗迹45层",
+    "en-US": "Floor 45",
+    "ja-JP": "レグディニス遺跡45層",
+    "ko-KR": "시디문 유적 45층"
+  },
+  "32146": {
+    "zh-CN": "司第门遗迹46层",
+    "en-US": "Floor 46",
+    "ja-JP": "レグディニス遺跡46層",
+    "ko-KR": "시디문 유적 46층"
+  },
+  "32147": {
+    "zh-CN": "司第门遗迹47层",
+    "en-US": "Floor 47",
+    "ja-JP": "レグディニス遺跡47層",
+    "ko-KR": "시디문 유적 47층"
+  },
+  "32148": {
+    "zh-CN": "司第门遗迹48层",
+    "en-US": "Floor 48",
+    "ja-JP": "レグディニス遺跡48層",
+    "ko-KR": "시디문 유적 48층"
+  },
+  "32149": {
+    "zh-CN": "司第门遗迹49层",
+    "en-US": "Floor 49",
+    "ja-JP": "レグディニス遺跡49層",
+    "ko-KR": "시디문 유적 49층"
+  },
+  "32150": {
+    "zh-CN": "司第门遗迹50层",
+    "en-US": "Floor 50",
+    "ja-JP": "レグディニス遺跡50層",
+    "ko-KR": "시디문 유적 50층"
+  },
+  "32151": {
+    "zh-CN": "司第门遗迹51层",
+    "en-US": "Floor 51",
+    "ja-JP": "レグディニス遺跡51層",
+    "ko-KR": "시디문 유적 51층"
+  },
+  "32152": {
+    "zh-CN": "司第门遗迹52层",
+    "en-US": "Floor 52",
+    "ja-JP": "レグディニス遺跡52層",
+    "ko-KR": "시디문 유적 52층"
+  },
+  "32153": {
+    "zh-CN": "司第门遗迹53层",
+    "en-US": "Floor 53",
+    "ja-JP": "レグディニス遺跡53層",
+    "ko-KR": "시디문 유적 53층"
+  },
+  "32154": {
+    "zh-CN": "司第门遗迹54层",
+    "en-US": "Floor 54",
+    "ja-JP": "レグディニス遺跡54層",
+    "ko-KR": "시디문 유적 54층"
+  },
+  "32155": {
+    "zh-CN": "司第门遗迹55层",
+    "en-US": "Floor 55",
+    "ja-JP": "レグディニス遺跡55層",
+    "ko-KR": "시디문 유적 55층"
+  },
+  "32156": {
+    "zh-CN": "司第门遗迹56层",
+    "en-US": "Floor 56",
+    "ja-JP": "レグディニス遺跡56層",
+    "ko-KR": "시디문 유적 56층"
+  },
+  "32157": {
+    "zh-CN": "司第门遗迹57层",
+    "en-US": "Floor 57",
+    "ja-JP": "レグディニス遺跡57層",
+    "ko-KR": "시디문 유적 57층"
+  },
+  "32158": {
+    "zh-CN": "司第门遗迹58层",
+    "en-US": "Floor 58",
+    "ja-JP": "レグディニス遺跡58層",
+    "ko-KR": "시디문 유적 58층"
+  },
+  "32159": {
+    "zh-CN": "司第门遗迹59层",
+    "en-US": "Floor 59",
+    "ja-JP": "レグディニス遺跡59層",
+    "ko-KR": "시디문 유적 59층"
+  },
+  "32160": {
+    "zh-CN": "司第门遗迹60层",
+    "en-US": "Floor 60",
+    "ja-JP": "レグディニス遺跡60層",
+    "ko-KR": "시디문 유적 60층"
+  },
+  "33101": {
+    "zh-CN": "司第门遗迹1层",
+    "en-US": "Floor 1",
+    "ja-JP": "レグディニス遺跡1層",
+    "ko-KR": "시디문 유적 1층"
+  },
+  "33102": {
+    "zh-CN": "司第门遗迹2层",
+    "en-US": "Floor 2",
+    "ja-JP": "レグディニス遺跡2層",
+    "ko-KR": "시디문 유적 2층"
+  },
+  "33103": {
+    "zh-CN": "司第门遗迹3层",
+    "en-US": "Floor 3",
+    "ja-JP": "レグディニス遺跡3層",
+    "ko-KR": "시디문 유적 3층"
+  },
+  "33104": {
+    "zh-CN": "司第门遗迹4层",
+    "en-US": "Floor 4",
+    "ja-JP": "レグディニス遺跡4層",
+    "ko-KR": "시디문 유적 4층"
+  },
+  "33105": {
+    "zh-CN": "司第门遗迹5层",
+    "en-US": "Floor 5",
+    "ja-JP": "レグディニス遺跡5層",
+    "ko-KR": "시디문 유적 5층"
+  },
+  "33106": {
+    "zh-CN": "司第门遗迹6层",
+    "en-US": "Floor 6",
+    "ja-JP": "レグディニス遺跡6層",
+    "ko-KR": "시디문 유적 6층"
+  },
+  "33107": {
+    "zh-CN": "司第门遗迹7层",
+    "en-US": "Floor 7",
+    "ja-JP": "レグディニス遺跡7層",
+    "ko-KR": "시디문 유적 7층"
+  },
+  "33108": {
+    "zh-CN": "司第门遗迹8层",
+    "en-US": "Floor 8",
+    "ja-JP": "レグディニス遺跡8層",
+    "ko-KR": "시디문 유적 8층"
+  },
+  "33109": {
+    "zh-CN": "司第门遗迹9层",
+    "en-US": "Floor 9",
+    "ja-JP": "レグディニス遺跡9層",
+    "ko-KR": "시디문 유적 9층"
+  },
+  "33110": {
+    "zh-CN": "司第门遗迹10层",
+    "en-US": "Floor 10",
+    "ja-JP": "レグディニス遺跡10層",
+    "ko-KR": "시디문 유적 10층"
+  },
+  "33111": {
+    "zh-CN": "司第门遗迹11层",
+    "en-US": "Floor 11",
+    "ja-JP": "レグディニス遺跡11層",
+    "ko-KR": "시디문 유적 11층"
+  },
+  "33112": {
+    "zh-CN": "司第门遗迹12层",
+    "en-US": "Floor 12",
+    "ja-JP": "レグディニス遺跡12層",
+    "ko-KR": "시디문 유적 12층"
+  },
+  "33113": {
+    "zh-CN": "司第门遗迹13层",
+    "en-US": "Floor 13",
+    "ja-JP": "レグディニス遺跡13層",
+    "ko-KR": "시디문 유적 13층"
+  },
+  "33114": {
+    "zh-CN": "司第门遗迹14层",
+    "en-US": "Floor 14",
+    "ja-JP": "レグディニス遺跡14層",
+    "ko-KR": "시디문 유적 14층"
+  },
+  "33115": {
+    "zh-CN": "司第门遗迹15层",
+    "en-US": "Floor 15",
+    "ja-JP": "レグディニス遺跡15層",
+    "ko-KR": "시디문 유적 15층"
+  },
+  "33116": {
+    "zh-CN": "司第门遗迹16层",
+    "en-US": "Floor 16",
+    "ja-JP": "レグディニス遺跡16層",
+    "ko-KR": "시디문 유적 16층"
+  },
+  "33117": {
+    "zh-CN": "司第门遗迹17层",
+    "en-US": "Floor 17",
+    "ja-JP": "レグディニス遺跡17層",
+    "ko-KR": "시디문 유적 17층"
+  },
+  "33118": {
+    "zh-CN": "司第门遗迹18层",
+    "en-US": "Floor 18",
+    "ja-JP": "レグディニス遺跡18層",
+    "ko-KR": "시디문 유적 18층"
+  },
+  "33119": {
+    "zh-CN": "司第门遗迹19层",
+    "en-US": "Floor 19",
+    "ja-JP": "レグディニス遺跡19層",
+    "ko-KR": "시디문 유적 19층"
+  },
+  "33120": {
+    "zh-CN": "司第门遗迹20层",
+    "en-US": "Floor 20",
+    "ja-JP": "レグディニス遺跡20層",
+    "ko-KR": "시디문 유적 20층"
+  },
+  "33121": {
+    "zh-CN": "司第门遗迹21层",
+    "en-US": "Floor 21",
+    "ja-JP": "レグディニス遺跡21層",
+    "ko-KR": "시디문 유적 21층"
+  },
+  "33122": {
+    "zh-CN": "司第门遗迹22层",
+    "en-US": "Floor 22",
+    "ja-JP": "レグディニス遺跡22層",
+    "ko-KR": "시디문 유적 22층"
+  },
+  "33123": {
+    "zh-CN": "司第门遗迹23层",
+    "en-US": "Floor 23",
+    "ja-JP": "レグディニス遺跡23層",
+    "ko-KR": "시디문 유적 23층"
+  },
+  "33124": {
+    "zh-CN": "司第门遗迹24层",
+    "en-US": "Floor 24",
+    "ja-JP": "レグディニス遺跡24層",
+    "ko-KR": "시디문 유적 24층"
+  },
+  "33125": {
+    "zh-CN": "司第门遗迹25层",
+    "en-US": "Floor 25",
+    "ja-JP": "レグディニス遺跡25層",
+    "ko-KR": "시디문 유적 25층"
+  },
+  "33126": {
+    "zh-CN": "司第门遗迹26层",
+    "en-US": "Floor 26",
+    "ja-JP": "レグディニス遺跡26層",
+    "ko-KR": "시디문 유적 26층"
+  },
+  "33127": {
+    "zh-CN": "司第门遗迹27层",
+    "en-US": "Floor 27",
+    "ja-JP": "レグディニス遺跡27層",
+    "ko-KR": "시디문 유적 27층"
+  },
+  "33128": {
+    "zh-CN": "司第门遗迹28层",
+    "en-US": "Floor 28",
+    "ja-JP": "レグディニス遺跡28層",
+    "ko-KR": "시디문 유적 28층"
+  },
+  "33129": {
+    "zh-CN": "司第门遗迹29层",
+    "en-US": "Floor 29",
+    "ja-JP": "レグディニス遺跡29層",
+    "ko-KR": "시디문 유적 29층"
+  },
+  "33130": {
+    "zh-CN": "司第门遗迹30层",
+    "en-US": "Floor 30",
+    "ja-JP": "レグディニス遺跡30層",
+    "ko-KR": "시디문 유적 30층"
+  },
+  "33131": {
+    "zh-CN": "司第门遗迹31层",
+    "en-US": "Floor 31",
+    "ja-JP": "レグディニス遺跡31層",
+    "ko-KR": "시디문 유적 31층"
+  },
+  "33132": {
+    "zh-CN": "司第门遗迹32层",
+    "en-US": "Floor 32",
+    "ja-JP": "レグディニス遺跡32層",
+    "ko-KR": "시디문 유적 32층"
+  },
+  "33133": {
+    "zh-CN": "司第门遗迹33层",
+    "en-US": "Floor 33",
+    "ja-JP": "レグディニス遺跡33層",
+    "ko-KR": "시디문 유적 33층"
+  },
+  "33134": {
+    "zh-CN": "司第门遗迹34层",
+    "en-US": "Floor 34",
+    "ja-JP": "レグディニス遺跡34層",
+    "ko-KR": "시디문 유적 34층"
+  },
+  "33135": {
+    "zh-CN": "司第门遗迹35层",
+    "en-US": "Floor 35",
+    "ja-JP": "レグディニス遺跡35層",
+    "ko-KR": "시디문 유적 35층"
+  },
+  "33136": {
+    "zh-CN": "司第门遗迹36层",
+    "en-US": "Floor 36",
+    "ja-JP": "レグディニス遺跡36層",
+    "ko-KR": "시디문 유적 36층"
+  },
+  "33137": {
+    "zh-CN": "司第门遗迹37层",
+    "en-US": "Floor 37",
+    "ja-JP": "レグディニス遺跡37層",
+    "ko-KR": "시디문 유적 37층"
+  },
+  "33138": {
+    "zh-CN": "司第门遗迹38层",
+    "en-US": "Floor 38",
+    "ja-JP": "レグディニス遺跡38層",
+    "ko-KR": "시디문 유적 38층"
+  },
+  "33139": {
+    "zh-CN": "司第门遗迹39层",
+    "en-US": "Floor 39",
+    "ja-JP": "レグディニス遺跡39層",
+    "ko-KR": "시디문 유적 39층"
+  },
+  "33140": {
+    "zh-CN": "司第门遗迹40层",
+    "en-US": "Floor 40",
+    "ja-JP": "レグディニス遺跡40層",
+    "ko-KR": "시디문 유적 40층"
+  },
+  "33141": {
+    "zh-CN": "司第门遗迹41层",
+    "en-US": "Floor 41",
+    "ja-JP": "レグディニス遺跡41層",
+    "ko-KR": "시디문 유적 41층"
+  },
+  "33142": {
+    "zh-CN": "司第门遗迹42层",
+    "en-US": "Floor 42",
+    "ja-JP": "レグディニス遺跡42層",
+    "ko-KR": "시디문 유적 42층"
+  },
+  "33143": {
+    "zh-CN": "司第门遗迹43层",
+    "en-US": "Floor 43",
+    "ja-JP": "レグディニス遺跡43層",
+    "ko-KR": "시디문 유적 43층"
+  },
+  "33144": {
+    "zh-CN": "司第门遗迹44层",
+    "en-US": "Floor 44",
+    "ja-JP": "レグディニス遺跡44層",
+    "ko-KR": "시디문 유적 44층"
+  },
+  "33145": {
+    "zh-CN": "司第门遗迹45层",
+    "en-US": "Floor 45",
+    "ja-JP": "レグディニス遺跡45層",
+    "ko-KR": "시디문 유적 45층"
+  },
+  "33146": {
+    "zh-CN": "司第门遗迹46层",
+    "en-US": "Floor 46",
+    "ja-JP": "レグディニス遺跡46層",
+    "ko-KR": "시디문 유적 46층"
+  },
+  "33147": {
+    "zh-CN": "司第门遗迹47层",
+    "en-US": "Floor 47",
+    "ja-JP": "レグディニス遺跡47層",
+    "ko-KR": "시디문 유적 47층"
+  },
+  "33148": {
+    "zh-CN": "司第门遗迹48层",
+    "en-US": "Floor 48",
+    "ja-JP": "レグディニス遺跡48層",
+    "ko-KR": "시디문 유적 48층"
+  },
+  "33149": {
+    "zh-CN": "司第门遗迹49层",
+    "en-US": "Floor 49",
+    "ja-JP": "レグディニス遺跡49層",
+    "ko-KR": "시디문 유적 49층"
+  },
+  "33150": {
+    "zh-CN": "司第门遗迹50层",
+    "en-US": "Floor 50",
+    "ja-JP": "レグディニス遺跡50層",
+    "ko-KR": "시디문 유적 50층"
+  },
+  "33151": {
+    "zh-CN": "司第门遗迹51层",
+    "en-US": "Floor 51",
+    "ja-JP": "レグディニス遺跡51層",
+    "ko-KR": "시디문 유적 51층"
+  },
+  "33152": {
+    "zh-CN": "司第门遗迹52层",
+    "en-US": "Floor 52",
+    "ja-JP": "レグディニス遺跡52層",
+    "ko-KR": "시디문 유적 52층"
+  },
+  "33153": {
+    "zh-CN": "司第门遗迹53层",
+    "en-US": "Floor 53",
+    "ja-JP": "レグディニス遺跡53層",
+    "ko-KR": "시디문 유적 53층"
+  },
+  "33154": {
+    "zh-CN": "司第门遗迹54层",
+    "en-US": "Floor 54",
+    "ja-JP": "レグディニス遺跡54層",
+    "ko-KR": "시디문 유적 54층"
+  },
+  "33155": {
+    "zh-CN": "司第门遗迹55层",
+    "en-US": "Floor 55",
+    "ja-JP": "レグディニス遺跡55層",
+    "ko-KR": "시디문 유적 55층"
+  },
+  "33156": {
+    "zh-CN": "司第门遗迹56层",
+    "en-US": "Floor 56",
+    "ja-JP": "レグディニス遺跡56層",
+    "ko-KR": "시디문 유적 56층"
+  },
+  "33157": {
+    "zh-CN": "司第门遗迹57层",
+    "en-US": "Floor 57",
+    "ja-JP": "レグディニス遺跡57層",
+    "ko-KR": "시디문 유적 57층"
+  },
+  "33158": {
+    "zh-CN": "司第门遗迹58层",
+    "en-US": "Floor 58",
+    "ja-JP": "レグディニス遺跡58層",
+    "ko-KR": "시디문 유적 58층"
+  },
+  "33159": {
+    "zh-CN": "司第门遗迹59层",
+    "en-US": "Floor 59",
+    "ja-JP": "レグディニス遺跡59層",
+    "ko-KR": "시디문 유적 59층"
+  },
+  "33160": {
+    "zh-CN": "司第门遗迹60层",
+    "en-US": "Floor 60",
+    "ja-JP": "レグディニス遺跡60層",
+    "ko-KR": "시디문 유적 60층"
+  },
+  "40001": {
+    "zh-CN": "家园房屋",
+    "en-US": "Homestead House",
+    "ja-JP": "ホームハウス",
+    "ko-KR": "가든 주택"
+  },
+  "51002": {
+    "zh-CN": "法法菈家",
+    "en-US": "Fafala's Home",
+    "ja-JP": "ファルファラの家",
+    "ko-KR": "파파라의 집"
+  },
+  "51004": {
+    "zh-CN": "法法菈家",
+    "en-US": "Fafala's Home",
+    "ja-JP": "ファルファラの家",
+    "ko-KR": "파파라의 집"
+  },
+  "60000": {
+    "zh-CN": "追踪！深海中的鱼影",
+    "en-US": "Track! The Deep-Sea Fish Shadow",
+    "ja-JP": "追跡！深海の魚影",
+    "ko-KR": "추적! 심해의 물고기 그림자"
+  },
+  "60001": {
+    "zh-CN": "白浪的初现",
+    "en-US": "First White Waves",
+    "ja-JP": "白波の現れ",
+    "ko-KR": "하얀 파도의 출현"
+  },
+  "60002": {
+    "zh-CN": "雾海的追影",
+    "en-US": "Foggy Sea Shadows",
+    "ja-JP": "霧海の追影",
+    "ko-KR": "안개 바다의 추적"
+  },
+  "60003": {
+    "zh-CN": "深潮的异动",
+    "en-US": "Deep Tide Anomaly",
+    "ja-JP": "深き潮の異変",
+    "ko-KR": "심해의 이변"
+  },
+  "60004": {
+    "zh-CN": "狂澜的终局",
+    "en-US": "Raging Sea Finale",
+    "ja-JP": "狂瀾の終局",
+    "ko-KR": "격랑의 종막"
+  },
+  "171001": {
+    "zh-CN": "孤岛",
+    "en-US": "Isolated Island",
+    "ja-JP": "孤島",
+    "ko-KR": "외딴섬"
+  }
+}

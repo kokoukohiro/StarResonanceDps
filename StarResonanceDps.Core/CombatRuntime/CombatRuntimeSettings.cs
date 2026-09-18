@@ -40,7 +40,7 @@ public static class CombatRuntimeSettings
     /// ダンジョンの目標が切り替わったらエンカウンターを分けるか。
     /// <c>BattleStateMachine</c> がフェーズの境目で <c>StopEncounter</c> / 新規開始を行う。
     /// </summary>
-    public static bool SplitEncountersOnNewPhases { get; private set; } = true;
+    public static bool SplitEncountersOnNewPhases { get; private set; }
 
     /// <summary>
     /// 新しいエンカウンターが始まっても、次のダメージが入るまで前の結果を見せ続けるか。
@@ -60,7 +60,7 @@ public static class CombatRuntimeSettings
     /// 戦闘履歴を残す日数。<b>0 は無期限</b>で、そのときは掃除を行わない。
     /// アプリ終了時に <c>DB.ClearOldEncounters</c> を通す。
     /// </summary>
-    public static int DatabaseRetentionPolicyDays { get; private set; }
+    public static int DatabaseRetentionPolicyDays { get; private set; } = 30;
 
     /// <summary>
     /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。

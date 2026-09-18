@@ -8,15 +8,6 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// 記録した時点の <c>GetSceneName</c> の出力。**言語も内部ID注記も当時のまま固定**なので、
 /// 表示には使わない。<paramref name="SceneId"/> から引き直せなかったときの受け皿。
 /// </param>
-/// <param name="SceneSubName">
-/// 記録した時点の <c>"Phase {n}"</c>。**英語のまま固定**なので表示には使わない。
-/// <paramref name="PhaseNumber"/> が 0 のときだけの受け皿。
-/// </param>
-/// <param name="PhaseNumber">
-/// フェーズ区切り(NewObjective)で分割された何本目か。分割していなければ 0。
-/// 出所は <c>EncounterExData.EncounterPhase</c> で、<c>SceneSubName</c> の2つの書き手が
-/// <b>必ず対で書く</b>ので同じ数字。文字列をパースせずにここから組み立てる。
-/// </param>
 /// <param name="BenchmarkSeconds">
 /// 3分計測の記録なら計測秒数、そうでなければ 0。
 /// 出所は <c>EncounterExData.BenchmarkTime</c> で、書き込みは <c>EnterDungeon</c> の
@@ -24,15 +15,18 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// <c>IsBenchmarkMode = false</c> を先に立ててから次のエンカウンターを作るので、
 /// <b>計測本体の1件にしか付かない。</b>
 /// </param>
+/// <param name="DungeonDifficulty">
+/// ダンジョン同期で届いた難易度(マスターの段階)。出所は <c>EncounterExData.DungeonDifficulty</c>。
+/// シーン名を引き直すときに難易度名を選ぶのに使う。
+/// </param>
 public sealed record EncounterHistoryEntry(
     ulong EncounterId,
     DateTime StartTime,
     uint SceneId,
     string SceneName,
-    string? SceneSubName,
     bool IsWipe,
-    int PhaseNumber,
-    int BenchmarkSeconds);
+    int BenchmarkSeconds,
+    int DungeonDifficulty);
 
 /// <summary>
 /// 集計タブが読む、保存済みエンカウンターの一覧と選択。
@@ -104,11 +98,10 @@ public static class EncounterHistoryProvider
                 encounter.StartTime,
                 encounter.SceneId,
                 encounter.SceneName ?? string.Empty,
-                string.IsNullOrWhiteSpace(encounter.SceneSubName) ? null : encounter.SceneSubName,
                 encounter.IsWipe,
                 // LoadEncounterSummaries が全行の ExData を復元済みなので追加の読み込みは無い。
-                encounter.ExData.EncounterPhase,
-                encounter.ExData.BenchmarkTime));
+                encounter.ExData.BenchmarkTime,
+                encounter.ExData.DungeonDifficulty));
         }
 
         return entries;

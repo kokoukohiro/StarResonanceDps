@@ -11,9 +11,9 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// <c>Timestamp</c> はパケットの到着時刻なので、同じパケットのイベントどうしで順序が決まらない。
 /// </param>
 /// <param name="TargetHp">
-/// 対象のイベント後の HP。<c>ProcessAoiSyncDelta</c> は属性を当ててから
-/// ダメージを処理し、結果の HP は同じデルタで届く(2026-09-13 実測)ので、記録時点の
-/// <c>AttrHp</c> がそのままイベント後の値になる。
+/// 対象の HP。同期で届く HP は、その同期の被弾・回復を全部当てた後の1つだけなので、
+/// 同期の中で被ダメログに載る最後の被弾にだけ入れ、それ以外の被弾は null。
+/// <c>TargetMaxHp</c> と <c>TargetShield</c> も同じ。
 /// </param>
 /// <param name="OwnerId">
 /// <c>SyncDamageInfo.OwnerId</c> の生の値。<c>DamageSource</c> によってスキルIDかバフIDになる。
@@ -29,6 +29,7 @@ public readonly record struct SkillSnapshotStamp(
     long Sequence,
     long? TargetHp,
     long? TargetMaxHp,
+    long? TargetShield,
     int OwnerId,
     EDamageSource DamageSource,
     int BuffSourceSkillId,

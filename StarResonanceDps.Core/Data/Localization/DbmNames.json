@@ -1,0 +1,800 @@
+{
+  "101403": {
+    "zh-CN": "冰霜重击",
+    "en-US": "Frost Slam",
+    "ja-JP": "凝霜の重撃",
+    "ko-KR": "서리 강타"
+  },
+  "101407": {
+    "zh-CN": "天气切换",
+    "en-US": "Weather Switch",
+    "ja-JP": "天候切り替え",
+    "ko-KR": "날씨 전환"
+  },
+  "101408": {
+    "zh-CN": "极寒回旋",
+    "en-US": "Glacier Spin",
+    "ja-JP": "極寒の旋回",
+    "ko-KR": "극한 회전"
+  },
+  "101409": {
+    "zh-CN": "雪崩",
+    "en-US": "Avalanche",
+    "ja-JP": "雪崩",
+    "ko-KR": "눈사태"
+  },
+  "101410": {
+    "zh-CN": "零度雪域",
+    "en-US": "Zero-degree Snowfield",
+    "ja-JP": "零度の雪域",
+    "ko-KR": "빙점 설역"
+  },
+  "101416": {
+    "zh-CN": "冰封之器",
+    "en-US": "Frozen Weapon",
+    "ja-JP": "氷結の器",
+    "ko-KR": "빙결의 기물"
+  },
+  "101418": {
+    "zh-CN": "锥心冰矛",
+    "en-US": "Heart-piercing Lance",
+    "ja-JP": "氷槍",
+    "ko-KR": "심장을 꿰뚫는 얼음 창"
+  },
+  "111061": {
+    "zh-CN": "苍穹崩裂",
+    "en-US": "Sky Shatter",
+    "ja-JP": "スカイクラッシュ",
+    "ko-KR": "천공 붕괴"
+  },
+  "111087": {
+    "zh-CN": "次元放逐",
+    "en-US": "Dimensional Banishment",
+    "ja-JP": "次元追放",
+    "ko-KR": "차원 추방"
+  },
+  "111103": {
+    "zh-CN": "超导波动·幻",
+    "en-US": "Superconductor Surge - Illusion",
+    "ja-JP": "超伝導波動・幻",
+    "ko-KR": "초전도 파동・환"
+  },
+  "111105": {
+    "zh-CN": "黏着弹·幻",
+    "en-US": "Sticky Bomb - Illusion",
+    "ja-JP": "粘着弾・幻",
+    "ko-KR": "점착탄・환"
+  },
+  "140136": {
+    "zh-CN": "风灵召唤",
+    "en-US": "Wind Spirit Summon",
+    "ja-JP": "風元素召喚",
+    "ko-KR": "바람 영혼 소환"
+  },
+  "140137": {
+    "zh-CN": "雷霆风暴",
+    "en-US": "Lightning Storm",
+    "ja-JP": "サンダーストーム",
+    "ko-KR": "번개 폭풍"
+  },
+  "140142": {
+    "zh-CN": "雷霆风暴",
+    "en-US": "Lightning Storm",
+    "ja-JP": "サンダーストーム",
+    "ko-KR": "번개 폭풍"
+  },
+  "140144": {
+    "zh-CN": "裂雷",
+    "en-US": "Thunder Split",
+    "ja-JP": "分裂サンダー",
+    "ko-KR": "갈라진 번개"
+  },
+  "140191": {
+    "zh-CN": "雷霆风暴",
+    "en-US": "Lightning Storm",
+    "ja-JP": "サンダーストーム",
+    "ko-KR": "번개 폭풍"
+  },
+  "140199": {
+    "zh-CN": "龙魂觉醒",
+    "en-US": "Dragon Soul Awakening",
+    "ja-JP": "竜魂覚醒",
+    "ko-KR": "용혼 각성"
+  },
+  "170108": {
+    "zh-CN": "虚蚀烙印",
+    "en-US": "Void Corruption Mark",
+    "ja-JP": "虚蝕の烙印",
+    "ko-KR": "허무의 침식 낙인"
+  },
+  "170207": {
+    "zh-CN": "虚蚀碎裂贯穿",
+    "en-US": "Void Corruption: Fracture",
+    "ja-JP": "虚蝕ペネトレイト",
+    "ko-KR": "허무의 침식 파쇄 관통"
+  },
+  "170208": {
+    "zh-CN": "终焉前奏",
+    "en-US": "Prelude to Oblivion",
+    "ja-JP": "終焉の前奏",
+    "ko-KR": "종언의 전주"
+  },
+  "170209": {
+    "zh-CN": "虚蚀烙印",
+    "en-US": "Void Corruption Mark",
+    "ja-JP": "虚蝕の烙印",
+    "ko-KR": "허무의 침식 낙인"
+  },
+  "170210": {
+    "zh-CN": "虚蚀半灭死域",
+    "en-US": "Void Corruption: Decimation",
+    "ja-JP": "半死の虚蝕フィールド",
+    "ko-KR": "허무의 침식 반멸 사역"
+  },
+  "170211": {
+    "zh-CN": "虚蚀圆舞",
+    "en-US": "Void Corruption Waltz",
+    "ja-JP": "虚蝕のワルツ",
+    "ko-KR": "허무의 침식 댄스"
+  },
+  "170213": {
+    "zh-CN": "虚蚀灭迹",
+    "en-US": "​Void Corruption Purge",
+    "ja-JP": "虚蝕の滅跡",
+    "ko-KR": "허무의 침식 소멸"
+  },
+  "170256": {
+    "zh-CN": "虚蚀穿刺",
+    "en-US": "Void Corruption Thrust",
+    "ja-JP": "虚蝕の刺突",
+    "ko-KR": "허무의 침식 관통 찌르기"
+  },
+  "300011": {
+    "zh-CN": "虚蚀净化",
+    "en-US": "Void Purify",
+    "ja-JP": "虚蝕浄化",
+    "ko-KR": "허무의 침식 정화"
+  },
+  "300031": {
+    "zh-CN": "虚蚀印记",
+    "en-US": "Void Sigil",
+    "ja-JP": "虚蝕発印",
+    "ko-KR": "침식 인장"
+  },
+  "300060": {
+    "zh-CN": "心像巨大化",
+    "en-US": "Reverie Megamorph",
+    "ja-JP": "心像巨大化",
+    "ko-KR": "심상 거대화"
+  },
+  "470114": {
+    "zh-CN": "伴生暗灵",
+    "en-US": "Bonded Dark Spirit",
+    "ja-JP": "伴生の暗霊",
+    "ko-KR": "공생 어둠의 정령"
+  },
+  "470119": {
+    "zh-CN": "赫鲁加之影",
+    "en-US": "Hruga's Shadow",
+    "ja-JP": "ヘルガの影",
+    "ko-KR": "헤루가의 그림자"
+  },
+  "470132": {
+    "zh-CN": "虚痕剥解",
+    "en-US": "Voidscar Dissolution",
+    "ja-JP": "虚痕の剥解",
+    "ko-KR": "허무의 낙인 해체"
+  },
+  "3320110": {
+    "zh-CN": "遁地",
+    "en-US": "Burrow",
+    "ja-JP": "地中潜り",
+    "ko-KR": "땅속에 숨기"
+  },
+  "3320111": {
+    "zh-CN": "死亡尖啸",
+    "en-US": "Death Wail",
+    "ja-JP": "死の叫び",
+    "ko-KR": "죽음의 비명"
+  },
+  "3320120": {
+    "zh-CN": "能量吸收",
+    "en-US": "Energy Drain",
+    "ja-JP": "エネルギー吸収",
+    "ko-KR": "에너지 흡수"
+  },
+  "3320122": {
+    "zh-CN": "聚能吐息",
+    "en-US": "Focused Breath",
+    "ja-JP": "集束ブレス",
+    "ko-KR": "에너지 집중 숨결"
+  },
+  "3330108": {
+    "zh-CN": "毁灭征兆",
+    "en-US": "Omen of Destruction",
+    "ja-JP": "破滅の兆し",
+    "ko-KR": "멸망의 징조"
+  },
+  "3330110": {
+    "zh-CN": "恨意连击",
+    "en-US": "Malice Combo",
+    "ja-JP": "悪意連撃",
+    "ko-KR": "증오의 연격"
+  },
+  "3330114": {
+    "zh-CN": "净化爆破",
+    "en-US": "Purification Burst",
+    "ja-JP": "浄化爆破",
+    "ko-KR": "정화 폭파"
+  },
+  "3340102": {
+    "zh-CN": "贯穿箭",
+    "en-US": "Piercing Arrow",
+    "ja-JP": "貫通矢",
+    "ko-KR": "관통의 화살"
+  },
+  "3340130": {
+    "zh-CN": "捉迷藏",
+    "en-US": "Hide-and-Seek",
+    "ja-JP": "かくれんぼ",
+    "ko-KR": "숨바꼭질"
+  },
+  "3340131": {
+    "zh-CN": "猜猜我在哪",
+    "en-US": "Guess Where I Am!",
+    "ja-JP": "ど～こだ？",
+    "ko-KR": "어느 게 진짜일까?"
+  },
+  "3340224": {
+    "zh-CN": "绝赞演奏",
+    "en-US": "Brilliant Performance",
+    "ja-JP": "グレートセッション",
+    "ko-KR": "절정의 연주"
+  },
+  "3350111": {
+    "zh-CN": "灾祸蔓延",
+    "en-US": "Spreading Calamity",
+    "ja-JP": "災禍拡散",
+    "ko-KR": "재해 확산"
+  },
+  "3350113": {
+    "zh-CN": "梦魇缠绕",
+    "en-US": "Haunting Nightmare",
+    "ja-JP": "纏わりつく悪夢",
+    "ko-KR": "옭매는 악몽"
+  },
+  "3350125": {
+    "zh-CN": "迷途梦境",
+    "en-US": "Wayward Dream",
+    "ja-JP": "迷える夢",
+    "ko-KR": "길 잃은 꿈"
+  },
+  "3380101": {
+    "zh-CN": "散裂风刃",
+    "en-US": "Shatterwind",
+    "ja-JP": "散風カッター",
+    "ko-KR": "파쇄의 바람"
+  },
+  "3380102": {
+    "zh-CN": "强力咬合",
+    "en-US": "Mighty Bite",
+    "ja-JP": "強力な噛みつき",
+    "ko-KR": "강력한 물어뜯기"
+  },
+  "3380104": {
+    "zh-CN": "狩猎",
+    "en-US": "Hunting",
+    "ja-JP": "狩猟",
+    "ko-KR": "사냥"
+  },
+  "3380105": {
+    "zh-CN": "混合连击",
+    "en-US": "Hybrid Combo",
+    "ja-JP": "ミックスコンボ",
+    "ko-KR": "혼합 콤보"
+  },
+  "3380106": {
+    "zh-CN": "膨胀龙卷",
+    "en-US": "Tornado Expanse",
+    "ja-JP": "膨張トルネード",
+    "ko-KR": "팽창 회오리"
+  },
+  "3380108": {
+    "zh-CN": "风刃呼唤",
+    "en-US": "Wind Blade Cry",
+    "ja-JP": "風刃召喚",
+    "ko-KR": "바람 칼날의 부름"
+  },
+  "3380109": {
+    "zh-CN": "压缩飓风",
+    "en-US": "Crush Cyclone",
+    "ja-JP": "圧縮ハリケーン",
+    "ko-KR": "압축 돌풍"
+  },
+  "3380110": {
+    "zh-CN": "伺机飞扑",
+    "en-US": "Opportunistic Pounce",
+    "ja-JP": "隙を突く飛びかかり",
+    "ko-KR": "틈을 노린 급습"
+  },
+  "3390101": {
+    "zh-CN": "崩解光束",
+    "en-US": "Disintegration Beam",
+    "ja-JP": "崩壊ビーム",
+    "ko-KR": "붕괴 광선"
+  },
+  "3395103": {
+    "zh-CN": "金曜神祭",
+    "en-US": "Golden Sacrifice",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3395166": {
+    "zh-CN": "灭烬时针",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3395177": {
+    "zh-CN": "心如永昼，谒彼诸天",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3395178": {
+    "zh-CN": "名启归愿，信者皆苦",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3395179": {
+    "zh-CN": "影似澄炼，喻形成殇",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3400005": {
+    "zh-CN": "冰华万象",
+    "en-US": "Frost Kaleidoscope",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3400023": {
+    "zh-CN": "暴风雪",
+    "en-US": "Blizzard",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3400025": {
+    "zh-CN": "冰之狂想曲",
+    "en-US": "Ice Rhapsody",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "4001007": {
+    "zh-CN": "电光火石",
+    "en-US": "Lightning Flash",
+    "ja-JP": "電光石火",
+    "ko-KR": "전광석화"
+  },
+  "4001032": {
+    "zh-CN": "盾卫冲锋",
+    "en-US": "Shield Guard Charge",
+    "ja-JP": "ガードチャージ",
+    "ko-KR": "방패병 돌격"
+  },
+  "4040008": {
+    "zh-CN": "灵魂分裂",
+    "en-US": "Soul Split",
+    "ja-JP": "魂分裂",
+    "ko-KR": "영혼 분열"
+  },
+  "4040010": {
+    "zh-CN": "灵魂湮灭",
+    "en-US": "Soul Annihilation",
+    "ja-JP": "霊魂消滅",
+    "ko-KR": "영혼 소멸"
+  },
+  "4040014": {
+    "zh-CN": "魂池祭祷",
+    "en-US": "Soul Pool Prayer",
+    "ja-JP": "魂の泉での祈り",
+    "ko-KR": "비운의 못 기도"
+  },
+  "4040016": {
+    "zh-CN": "撼山裂地斩！",
+    "en-US": "Mountain Shattering!",
+    "ja-JP": "クエイクスラッシュ！",
+    "ko-KR": "천지 가르기!"
+  },
+  "4050006": {
+    "zh-CN": "斩杀之匕",
+    "en-US": "Dagger of Execution",
+    "ja-JP": "処刑の短剣",
+    "ko-KR": "참살의 비수"
+  },
+  "4050010": {
+    "zh-CN": "亡灵还魂",
+    "en-US": "Undead Revival",
+    "ja-JP": "亡霊反魂",
+    "ko-KR": "망령 환혼"
+  },
+  "4050011": {
+    "zh-CN": "缚魂之链",
+    "en-US": "Shackles of Souls",
+    "ja-JP": "魂拘束の鎖",
+    "ko-KR": "영혼 속박의 사슬"
+  },
+  "4050012": {
+    "zh-CN": "感染激光",
+    "en-US": "Infected Laser",
+    "ja-JP": "感染レーザー",
+    "ko-KR": "감염 레이저"
+  },
+  "4050013": {
+    "zh-CN": "恶灵之门",
+    "en-US": "Gate of Wraith",
+    "ja-JP": "悪霊の門",
+    "ko-KR": "악령의 문"
+  },
+  "6920003": {
+    "zh-CN": "恶疫蔓延",
+    "en-US": "Malice Spreading",
+    "ja-JP": "汚染拡大",
+    "ko-KR": "역병 확산"
+  },
+  "6920007": {
+    "zh-CN": "恶疫之种",
+    "en-US": "Blight Seed",
+    "ja-JP": "汚染源",
+    "ko-KR": "역병의 씨앗"
+  },
+  "6920010": {
+    "zh-CN": "恶之俯冲",
+    "en-US": "Wicked Dive",
+    "ja-JP": "イビルダイブ",
+    "ko-KR": "사악한 강하"
+  },
+  "10240110": {
+    "zh-CN": "解放虚蚀之力",
+    "en-US": "Unleash Void Corruption Power",
+    "ja-JP": "虚蝕の力解放",
+    "ko-KR": "침식의 힘 해방"
+  },
+  "10240130": {
+    "zh-CN": "虚蚀毁灭",
+    "en-US": "Erosive Annihilation",
+    "ja-JP": "虚蝕壊滅",
+    "ko-KR": "허무의 침식 섬멸"
+  },
+  "10240131": {
+    "zh-CN": "虚蚀放逐",
+    "en-US": "Void Corruption Banishment",
+    "ja-JP": "虚蝕追放",
+    "ko-KR": "허무의 침식 방출"
+  },
+  "10240132": {
+    "zh-CN": "束缚解除",
+    "en-US": "Unbound",
+    "ja-JP": "束縛解除",
+    "ko-KR": "속박 제거"
+  },
+  "10270116": {
+    "zh-CN": "时空坍缩",
+    "en-US": "Spacetime Collapse",
+    "ja-JP": "時空崩壊",
+    "ko-KR": "시공간 붕괴"
+  },
+  "10270117": {
+    "zh-CN": "虚空双契",
+    "en-US": "Voidbound Pact",
+    "ja-JP": "虚空の二重契約",
+    "ko-KR": "허공의 이중 계약"
+  },
+  "10270118": {
+    "zh-CN": "净化之光·散",
+    "en-US": "Purifying Light - Scatter",
+    "ja-JP": "浄化の光・散",
+    "ko-KR": "정화의 빛・분산"
+  },
+  "10270119": {
+    "zh-CN": "时空闪击",
+    "en-US": "Spacetime Blitz",
+    "ja-JP": "時空の閃撃",
+    "ko-KR": "시공간 섬격"
+  },
+  "10270120": {
+    "zh-CN": "时空的终焉",
+    "en-US": "End of Spacetime",
+    "ja-JP": "時空の終焉",
+    "ko-KR": "시공간의 종언"
+  },
+  "10270122": {
+    "zh-CN": "芒辉之种",
+    "en-US": "Radiant Seed",
+    "ja-JP": "輝きの種",
+    "ko-KR": "광휘의 씨앗"
+  },
+  "10270123": {
+    "zh-CN": "净化之光·聚",
+    "en-US": "Purifying Light - Focus",
+    "ja-JP": "浄化の光・集",
+    "ko-KR": "정화의 빛・응집"
+  },
+  "10270124": {
+    "zh-CN": "净化之光·散·聚",
+    "en-US": "Purifying Light - Scatter & Focus",
+    "ja-JP": "浄化の光・散・集",
+    "ko-KR": "정화의 빛・분산・응집"
+  },
+  "10270125": {
+    "zh-CN": "净化之光·聚·散",
+    "en-US": "Purifying Light - Focus & Scatter",
+    "ja-JP": "浄化の光・集・散",
+    "ko-KR": "정화의 빛・응집・분산"
+  },
+  "10281202": {
+    "zh-CN": "裁定时刻",
+    "en-US": "Judgment Hour",
+    "ja-JP": "裁きの時",
+    "ko-KR": "판정의 순간"
+  },
+  "10281203": {
+    "zh-CN": "幻影之舞·冲",
+    "en-US": "Phantom Dance - Dash",
+    "ja-JP": "幻影の舞・衝",
+    "ko-KR": "환영의 춤・돌격"
+  },
+  "10281204": {
+    "zh-CN": "誓死守护",
+    "en-US": "Vow of Valor",
+    "ja-JP": "決死の防御",
+    "ko-KR": "필사의 수호"
+  },
+  "10281205": {
+    "zh-CN": "领地驱逐指令",
+    "en-US": "Territory Banish",
+    "ja-JP": "追放命令",
+    "ko-KR": "영지 추방 지령"
+  },
+  "10281206": {
+    "zh-CN": "领地共鸣",
+    "en-US": "Territory Resonance",
+    "ja-JP": "領地共鳴",
+    "ko-KR": "영지 공명"
+  },
+  "10281207": {
+    "zh-CN": "炎影湮灭",
+    "en-US": "Solunar Annihilation",
+    "ja-JP": "炎影殲滅",
+    "ko-KR": "염영 소멸"
+  },
+  "10290111": {
+    "zh-CN": "碎地重拳",
+    "en-US": "Earthshatter Fist",
+    "ja-JP": "裂地の重拳",
+    "ko-KR": "대지 분쇄의 강권"
+  },
+  "10290114": {
+    "zh-CN": "裂石风暴",
+    "en-US": "Shatterstone Storm",
+    "ja-JP": "つぶての嵐",
+    "ko-KR": "바위 파편 폭풍"
+  },
+  "10290124": {
+    "zh-CN": "碎地重拳·连袭",
+    "en-US": "Earthshatter Fist - Chain",
+    "ja-JP": "裂地の重拳・連撃",
+    "ko-KR": "대지 분쇄의 강권・연속 공격"
+  },
+  "10300105": {
+    "zh-CN": "烬灭轨迹",
+    "en-US": "Cinderfall Trail",
+    "ja-JP": "殲滅の軌跡",
+    "ko-KR": "진멸의 궤적"
+  },
+  "10300106": {
+    "zh-CN": "大炎戒",
+    "en-US": "Inferno Ring",
+    "ja-JP": "業炎の戒め",
+    "ko-KR": "대염계"
+  },
+  "10300107": {
+    "zh-CN": "迷乱",
+    "en-US": "Bewilderment",
+    "ja-JP": "混乱",
+    "ko-KR": "어지러운 혼란"
+  },
+  "10300108": {
+    "zh-CN": "终焉化身",
+    "en-US": "Avatar of the End",
+    "ja-JP": "終焉の化身",
+    "ko-KR": "종언의 화신"
+  },
+  "10300204": {
+    "zh-CN": "炎弧斩",
+    "en-US": "Arc Slash",
+    "ja-JP": "炎弧斬",
+    "ko-KR": "염호참"
+  },
+  "10300205": {
+    "zh-CN": "蚀花刻印",
+    "en-US": "Erosion Bloom's Seal",
+    "ja-JP": "蝕花の刻印",
+    "ko-KR": "잠식된 꽃의 각인"
+  },
+  "10300206": {
+    "zh-CN": "红莲圆舞",
+    "en-US": "Lotus Dance",
+    "ja-JP": "紅蓮円舞",
+    "ko-KR": "홍련의 왈츠"
+  },
+  "10300214": {
+    "zh-CN": "蚀心之种",
+    "en-US": "Corroding Seed",
+    "ja-JP": "蝕心の種",
+    "ko-KR": "잠식의 씨앗"
+  },
+  "10300305": {
+    "zh-CN": "断狱刻印",
+    "en-US": "Abyssal Seal",
+    "ja-JP": "裁きの刻印",
+    "ko-KR": "단옥 각인"
+  },
+  "10310010": {
+    "zh-CN": "幻·终焉奇点",
+    "en-US": "Illusion - Terminus Singularity",
+    "ja-JP": "幻・終焉の特異点",
+    "ko-KR": "환상・종언의 특이점"
+  },
+  "10310011": {
+    "zh-CN": "湮灭光束",
+    "en-US": "Annihilation Beam",
+    "ja-JP": "殲滅ビーム",
+    "ko-KR": "소멸 광선"
+  },
+  "10310012": {
+    "zh-CN": "幻骸同调",
+    "en-US": "Illusory Sync",
+    "ja-JP": "幻骸の同調",
+    "ko-KR": "환영 동기화"
+  },
+  "10320001": {
+    "zh-CN": "幻·歼灭轨道炮",
+    "en-US": "Illusion - Obliteration Railgun",
+    "ja-JP": "幻・殲滅レールガン",
+    "ko-KR": "환・섬멸 궤도포"
+  },
+  "10320005": {
+    "zh-CN": "崩解震荡",
+    "en-US": "Disintegration Shockwave",
+    "ja-JP": "崩壊ショック",
+    "ko-KR": "붕괴 충격"
+  },
+  "10330009": {
+    "zh-CN": "预置的归途",
+    "en-US": "Preset Return",
+    "ja-JP": "定められた帰途",
+    "ko-KR": "예정된 귀환"
+  },
+  "10330010": {
+    "zh-CN": "因果折跃",
+    "en-US": "Causality Warp",
+    "ja-JP": "因果のワープ",
+    "ko-KR": "인과의 점프"
+  },
+  "10330011": {
+    "zh-CN": "终焉交响",
+    "en-US": "Final Symphony",
+    "ja-JP": "終焉の交響曲",
+    "ko-KR": "종언 교향곡"
+  },
+  "10330012": {
+    "zh-CN": "神之放逐",
+    "en-US": "Divine Banishment",
+    "ja-JP": "神の追放",
+    "ko-KR": "신의 추방"
+  },
+  "10330013": {
+    "zh-CN": "累刑宣告",
+    "en-US": "Cumulative Sentence",
+    "ja-JP": "累刑宣告",
+    "ko-KR": "가중 선고"
+  },
+  "10330014": {
+    "zh-CN": "连结试炼",
+    "en-US": "Trial of Bonds",
+    "ja-JP": "連結の試練",
+    "ko-KR": "연결의 시련"
+  },
+  "10330016": {
+    "zh-CN": "幻象映射",
+    "en-US": "Illusionary Projection",
+    "ja-JP": "幻象の投影",
+    "ko-KR": "환영 투영"
+  },
+  "10350001": {
+    "zh-CN": "光陨坍塌",
+    "en-US": "Lightfall Collapse",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350003": {
+    "zh-CN": "幻光拟形",
+    "en-US": "Illusory Lightform",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350011": {
+    "zh-CN": "穹顶耀斑",
+    "en-US": "Skyflare",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350014": {
+    "zh-CN": "天光打击",
+    "en-US": "Light Strike",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350015": {
+    "zh-CN": "苍穹觉醒",
+    "en-US": "Sky Awakening",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350016": {
+    "zh-CN": "天光告诫",
+    "en-US": "Light's Admonition",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10350018": {
+    "zh-CN": "扬升",
+    "en-US": "Ascension",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360004": {
+    "zh-CN": "召唤黑洞",
+    "en-US": "Summon Black Hole",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360010": {
+    "zh-CN": "天体召唤",
+    "en-US": "Celestial Summoning",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360011": {
+    "zh-CN": "天体旋转",
+    "en-US": "Celestial Rotation",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360012": {
+    "zh-CN": "黑暗降临",
+    "en-US": "Darkfall",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360013": {
+    "zh-CN": "光暗抉择",
+    "en-US": "Light or Dark",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360014": {
+    "zh-CN": "神鸟降世",
+    "en-US": "Divine Bird Descends",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "10360015": {
+    "zh-CN": "空间穿梭",
+    "en-US": "Spatial Translocation",
+    "ja-JP": "",
+    "ko-KR": ""
+  }
+}

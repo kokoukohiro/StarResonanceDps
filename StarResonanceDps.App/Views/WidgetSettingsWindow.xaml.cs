@@ -43,6 +43,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
+        _viewModel.TakenDamageLogPreviewChanged += _widget.ApplyTakenDamageLogSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -68,6 +69,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
+        _viewModel.TakenDamageLogPreviewChanged -= _widget.ApplyTakenDamageLogSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }

@@ -21,6 +21,7 @@ public sealed class WidgetConfig
     public MeterWidgetSettingsConfig? Meter { get; set; }
     public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
     public BuffCardWidgetSettingsConfig? BuffCard { get; set; }
+    public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
 
     /// <summary>
     /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
@@ -47,6 +48,7 @@ public sealed class WidgetConfig
             Meter = Meter?.Clone(),
             MetricTimeline = MetricTimeline?.Clone(),
             BuffCard = BuffCard?.Clone(),
+            TakenDamageLog = TakenDamageLog?.Clone(),
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
@@ -117,6 +119,23 @@ public sealed class MetricTimelineWidgetSettingsConfig
         return new MetricTimelineWidgetSettingsConfig
         {
             AggregationIntervalSeconds = AggregationIntervalSeconds
+        };
+    }
+}
+
+public sealed class TakenDamageLogWidgetSettingsConfig
+{
+    /// <summary>
+    /// 被弾行の HP の出し方。0=バリア量加算表示 / 1=バリア量個別表示。
+    /// プレイヤーリスト・エンティティリストと同じ規則。
+    /// </summary>
+    public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
+
+    public TakenDamageLogWidgetSettingsConfig Clone()
+    {
+        return new TakenDamageLogWidgetSettingsConfig
+        {
+            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex
         };
     }
 }
@@ -343,6 +362,7 @@ public static class WidgetConfigDefaults
     public const int DefaultBuffCardScale = 200;
     public const int BuffCardScaleStep = 25;
 
+
     private const double PlayerListInitialWindowWidth = 360d;
     private const double PlayerListInitialWindowHeight = 400d;
     private const double PlayerInfoInitialWindowWidth = 360d;
@@ -515,6 +535,11 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.BuffDebuffCard;
     }
 
+    public static bool SupportsTakenDamageLogSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.TakenDamageLog;
+    }
+
     /// <summary>
     /// 開いていた窓の対象を保存する種別か。プレイヤー用ウィンドウだけが持つ。
     /// <see cref="WidgetKind.PlayerStatus"/> は常に自分1枚なので対象外。
@@ -591,7 +616,8 @@ public static class WidgetConfigDefaults
             Theme = CreateTheme(),
             Window = CreateDefaultWindowConfig(kind),
             Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
-            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null
+            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null,
+            TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null
         };
     }
 
@@ -677,6 +703,14 @@ public static class WidgetConfigDefaults
         return new BuffCardWidgetSettingsConfig
         {
             BuffInfoFormatString = DefaultBuffInfoFormatString
+        };
+    }
+
+    public static TakenDamageLogWidgetSettingsConfig CreateTakenDamageLogSettings()
+    {
+        return new TakenDamageLogWidgetSettingsConfig
+        {
+            HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex
         };
     }
 
@@ -829,6 +863,13 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    public static TakenDamageLogWidgetSettingsConfig CloneNormalizedTakenDamageLog(TakenDamageLogWidgetSettingsConfig? takenDamageLog)
+    {
+        var normalized = (takenDamageLog ?? CreateTakenDamageLogSettings()).Clone();
+        NormalizeTakenDamageLog(normalized);
+        return normalized;
+    }
+
     public static void Normalize(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -855,6 +896,9 @@ public static class WidgetConfigDefaults
             : null;
         config.BuffCard = SupportsBuffCardSettings(kind)
             ? CloneNormalizedBuffCard(config.BuffCard)
+            : null;
+        config.TakenDamageLog = SupportsTakenDamageLogSettings(kind)
+            ? CloneNormalizedTakenDamageLog(config.TakenDamageLog)
             : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
@@ -957,6 +1001,14 @@ public static class WidgetConfigDefaults
         {
             buffCard.Scales[key] = ClampBuffCardScale(buffCard.Scales[key]);
         }
+    }
+
+    public static void NormalizeTakenDamageLog(TakenDamageLogWidgetSettingsConfig takenDamageLog)
+    {
+        takenDamageLog.HealthValueDisplayModeIndex = Math.Clamp(
+            takenDamageLog.HealthValueDisplayModeIndex,
+            DefaultHealthValueDisplayModeIndex,
+            SeparateShieldHealthValueDisplayModeIndex);
     }
 
     public static int ClampBuffCardScale(int scale)

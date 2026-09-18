@@ -21,6 +21,7 @@ public sealed class WidgetWindowManager
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
     private readonly List<EntityBuffListWindowSession> _openEntityBuffWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
+    private WidgetListItemViewModel? _playerListWidget;
     private Window? _managerWindow;
     private bool _isManagerClosing;
 
@@ -36,6 +37,12 @@ public sealed class WidgetWindowManager
         {
             TrackPlayerWidget(widget);
         }
+    }
+
+    /// <summary>プレイヤーリストのウィジェット。被ダメログのクラスアイコンがこの設定のクラスカラーを使う。</summary>
+    public void RegisterPlayerListWidget(WidgetListItemViewModel widget)
+    {
+        _playerListWidget = widget;
     }
 
     public void OpenPlayerWindow(WidgetKind kind, long characterId)
@@ -781,7 +788,9 @@ public sealed class WidgetWindowManager
             WidgetKind.TakenDamageLog => new WidgetWindowComposition(
                 new TakenDamageLogWidgetView
                 {
-                    DataContext = new TakenDamageLogWidgetViewModel()
+                    DataContext = new TakenDamageLogWidgetViewModel(
+                        widget,
+                        _playerListWidget ?? throw new InvalidOperationException("Player list widget is not registered."))
                 },
                 null,
                 null,

@@ -139,7 +139,7 @@ public sealed partial class PlayerListEntry : ObservableObject
         IsSelfHighlighted = player.IsSelf
             && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
         _otherRoleSkillVisibility = settings.OtherRoleSkillVisibility;
-        ProfessionKey = PlayerProfession.GetKey(player.ProfessionId);
+        ProfessionKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
         ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
         IsNpc = player.IsNpc;
         IsLive = player.IsLive;
@@ -489,8 +489,11 @@ public sealed partial class PlayerListEntry : ObservableObject
         int displayModeIndex)
     {
         var shield = Math.Max(currentShield, 0L);
+        // バリア量個別表示でも、バリアが無いときは括弧を出さない。
         return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
-            ? $"{currentHp}({shield})/{maxHp}"
+            ? shield > 0
+                ? $"{currentHp}({shield})/{maxHp}"
+                : $"{currentHp}/{maxHp}"
             : $"{AddSaturating(currentHp, shield)}/{maxHp}";
     }
 
@@ -501,7 +504,8 @@ public sealed partial class PlayerListEntry : ObservableObject
             : value + nonNegativeAddition;
     }
 
-    private static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)
+    /// <summary>プレイヤーリストのクラス色。被ダメログのクラスアイコンも同じ設定から引く。</summary>
+    internal static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)
     {
         var palette = classColors.ClassColorPalettes.TryGetValue(professionKey, out var colors)
             ? colors

@@ -55,6 +55,7 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
+        _widgetWindowManager.RegisterPlayerListWidget(playerListWidget);
         var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         _entityListWidget = entityListWidget;
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
@@ -67,13 +68,13 @@ public sealed partial class MainViewModel : ViewModelBase
         entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
+        AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
         AddWidget(WidgetKind.DamageContribution, "Widget_DamageSkillDetails");
         AddWidget(WidgetKind.DamageSummary, "Widget_DamageContribution");
         AddWidget(WidgetKind.DpsGraph, "Widget_DpsGraph");
         AddWidget(WidgetKind.HealingContribution, "Widget_HealingSkillDetails");
         AddWidget(WidgetKind.HealingSummary, "Widget_HealingContribution");
         AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
-        AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;

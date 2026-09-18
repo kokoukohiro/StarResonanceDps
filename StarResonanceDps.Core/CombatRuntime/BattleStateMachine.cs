@@ -50,6 +50,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.ActiveBuffStore.Instance.Clear();
             Services.BuffInstanceIndex.Instance.Clear();
             Services.SummonSourceIndex.Instance.Clear();
+            Services.SourceLandingResolver.Instance.Clear();
             Services.NearbyMonsterIndex.Instance.Clear();
 
         }

@@ -128,15 +128,49 @@ public sealed class BuffInstanceIndex
     /// <para>
     /// 保持者は条件にしない。被弾した本人に乗っていない実体が多い(召喚体が自分に掛けて持つオーラなど)。
     /// </para>
+    ///
+    /// <para>
+    /// <paramref name="fireUuid"/> は最初に当たった候補の術者。付与元の技のレベルをこの術者から引く。
+    /// </para>
     /// </summary>
     public bool TryResolveSourceSkill(
         int baseId,
         long attackerRawUuid,
         long attackerUuid,
         DateTime arrivalTime,
-        out int skillId)
+        out int skillId,
+        out long fireUuid)
     {
         skillId = 0;
+        fireUuid = 0;
+        if (!TryResolveSource(baseId, attackerRawUuid, attackerUuid, arrivalTime, out var fightSourceType, out var sourceConfigId, out var firstFireUuid)
+            || fightSourceType != (int)EFightSource.Skill
+            || sourceConfigId <= 0)
+        {
+            return false;
+        }
+
+        skillId = sourceConfigId;
+        fireUuid = firstFireUuid;
+        return true;
+    }
+
+    /// <summary>
+    /// <see cref="TryResolveSourceSkill"/> の付与元を種類を問わず返す版。候補の選び方と「そろわなければ false」は同じ。
+    /// <paramref name="fireUuid"/> は最初に当たった候補の術者。
+    /// </summary>
+    public bool TryResolveSource(
+        int baseId,
+        long attackerRawUuid,
+        long attackerUuid,
+        DateTime arrivalTime,
+        out int fightSourceType,
+        out int sourceConfigId,
+        out long fireUuid)
+    {
+        fightSourceType = 0;
+        sourceConfigId = 0;
+        fireUuid = 0;
         lock (_sync)
         {
             if (!_keysByBaseId.TryGetValue(baseId, out var keys))
@@ -145,6 +179,7 @@ public sealed class BuffInstanceIndex
             }
 
             (int FightSourceType, int SourceConfigId)? source = null;
+            long firstFireUuid = 0;
             foreach (var key in keys)
             {
                 var instance = _instances[key];
@@ -158,6 +193,7 @@ public sealed class BuffInstanceIndex
                 if (source is null)
                 {
                     source = candidate;
+                    firstFireUuid = instance.FireUuid;
                 }
                 else if (source.Value != candidate)
                 {
@@ -165,14 +201,14 @@ public sealed class BuffInstanceIndex
                 }
             }
 
-            if (source is null
-                || source.Value.FightSourceType != (int)EFightSource.Skill
-                || source.Value.SourceConfigId <= 0)
+            if (source is null)
             {
                 return false;
             }
 
-            skillId = source.Value.SourceConfigId;
+            fightSourceType = source.Value.FightSourceType;
+            sourceConfigId = source.Value.SourceConfigId;
+            fireUuid = firstFireUuid;
             return true;
         }
     }

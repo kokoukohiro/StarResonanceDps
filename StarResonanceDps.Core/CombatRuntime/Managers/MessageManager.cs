@@ -112,6 +112,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             ActiveBuffStore.Instance.Clear();
             BuffInstanceIndex.Instance.Clear();
             SummonSourceIndex.Instance.Clear();
+            SourceLandingResolver.Instance.Clear();
             NearbyMonsterIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
         }
@@ -144,15 +145,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             return null;
         }
 
-        public static void ProcessUnhandled(NotifyId notifyId, ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
-        {
-            System.Diagnostics.Debug.WriteLine($"ProcessUnhandled ServiceId:{(EServiceId)notifyId.ServiceId} MethodId:{notifyId.MethodId} Payload.Length:{payloadBuffer.Length}");
-            if (payloadBuffer.Length == 0)
-            {
-                return;
-            }
-        }
-
         public static void ProcessEnterScene(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             if (payloadBuffer.Length == 0)
@@ -170,7 +162,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
-                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
+                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, isFullSnapshot: true);
                     }
 
                     if (vData.EnterSceneInfo.PlayerEnt.TempAttrs != null)
@@ -292,7 +284,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 changed = true;
             }
 
-            if (entity.ProfessionId == 0 && socialData.ProfessionData?.ProfessionId > 0)
+            if (entity.ProfessionId == 0 && socialData.ProfessionData?.ProfessionId > 0 && !IsTransformed(entity.UUID))
             {
                 entity.SetProfessionId(socialData.ProfessionData.ProfessionId);
                 changed = true;
@@ -706,12 +698,66 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool IsWipeCheckQueued = false;
         private static readonly HashSet<EAttrType> ShieldListChangedAttributes = [EAttrType.AttrShieldList];
 
-        private static bool IsSelfPlayer(long uuid)
+        internal static bool IsSelfPlayer(long uuid)
         {
             return uuid == currentUserUuid
                 || uuid == AppState.PlayerUUID
                 || (AppState.PlayerUID != 0
                     && Utils.UuidToEntityId(uuid) == AppState.PlayerUID);
+        }
+
+        /// <summary>
+        /// 変身中か。変身中は職業IDの属性(AttrProfessionId)だけが職業を決める。
+        /// ソーシャル・コンテナ・ダメージの技の経路は変身前のクラスを運んでくるので、変身中は書かない。
+        /// ミーンは変身のバフ、ドロシー・ルーシィ・ナツは変身クラスの職業IDで判断する。
+        /// </summary>
+        private static bool IsTransformed(long uuid)
+        {
+            if (Models.PlayerClassSpecResolver.HasMeanTransformBuff(uuid))
+            {
+                return true;
+            }
+
+            return EncounterManager.Current.Entities.TryGetValue(uuid, out var entity)
+                && Models.PlayerClassSpecResolver.TryResolveTransformation(entity.ProfessionId, out _);
+        }
+
+        /// <summary>変身の属性(AttrShapeshiftType)が値ありで最後に届いた実体。</summary>
+        private static readonly HashSet<long> ShapeshiftedEntities = [];
+
+        /// <summary>
+        /// この取り込みの時点で変身中か。1回の取り込みの中で、差し替えの値が変身の属性より先に並ぶことがあるので、
+        /// 先に全体から変身の属性を探して決める。差分に変身の属性が無ければ前の状態のまま。
+        /// </summary>
+        private static bool ResolveShapeshifted(long uuid, RepeatedField<Attr> attrs, bool isFullSnapshot)
+        {
+            foreach (var attr in attrs)
+            {
+                if (attr.Id != (int)EAttrType.AttrShapeshiftType)
+                {
+                    continue;
+                }
+
+                var type = attr.RawData is { Length: > 0 }
+                    ? new Google.Protobuf.CodedInputStream(attr.RawData.ToByteArray()).ReadInt32()
+                    : 0;
+                if (type != 0)
+                {
+                    ShapeshiftedEntities.Add(uuid);
+                    return true;
+                }
+
+                ShapeshiftedEntities.Remove(uuid);
+                return false;
+            }
+
+            if (isFullSnapshot)
+            {
+                ShapeshiftedEntities.Remove(uuid);
+                return false;
+            }
+
+            return ShapeshiftedEntities.Contains(uuid);
         }
 
         private static void UpdateProfessionId(long uuid, int professionId)
@@ -793,7 +839,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     else if (source.FightSourceType == (int)EFightSource.Buff)
                     {
                         var topSummonerUuid = EncounterManager.Current.GetAttrKV(uuid, "AttrTopSummonerId") as long? ?? 0;
-                        if (BuffInstanceIndex.Instance.TryResolveSourceSkill(source.SourceConfigId, uuid, topSummonerUuid, arrivalTime, out var buffSourceSkillId))
+                        if (BuffInstanceIndex.Instance.TryResolveSourceSkill(source.SourceConfigId, uuid, topSummonerUuid, arrivalTime, out var buffSourceSkillId, out _))
                         {
                             sourceSkillId = buffSourceSkillId;
                         }
@@ -802,13 +848,48 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (sourceSkillId > 0)
                 {
-                    SummonSourceIndex.Instance.Set(uuid, sourceSkillId);
+                    var summonerUuid = EncounterManager.Current.GetAttrKV(uuid, "AttrSummonerId") as long? ?? 0;
+                    SummonSourceIndex.Instance.Set(uuid, sourceSkillId, summonerUuid);
                 }
                 else
                 {
                     SummonSourceIndex.Instance.Remove(uuid);
                 }
             }
+        }
+
+        /// <summary>
+        /// プレイヤー以外の実体の出どころ(付与元と召喚者)を <see cref="SourceLandingResolver"/> に控える。属性を当てた後に呼ぶ。
+        /// 出現(<paramref name="isAppear"/>)で付与元が無ければ、同じ UUID の前の控えを消す。
+        /// </summary>
+        private static void RecordSourceLanding(long uuid, RepeatedField<Attr>? attrs, DateTime arrivalTime, bool isAppear)
+        {
+            if (Utils.UuidToEntityType(uuid) == (long)EEntityType.EntChar)
+            {
+                return;
+            }
+
+            FightSourceInfo? source = null;
+            if (attrs != null)
+            {
+                foreach (var attr in attrs)
+                {
+                    if ((EAttrType)attr.Id == EAttrType.AttrFightSourceInfo && attr.RawData is { Length: > 0 })
+                    {
+                        source = FightSourceInfo.Parser.ParseFrom(attr.RawData);
+                    }
+                }
+            }
+
+            if (source == null && !isAppear)
+            {
+                return;
+            }
+
+            var summonerUuid = EncounterManager.Current.GetAttrKV(uuid, "AttrSummonerId") as long? ?? 0;
+            var topSummonerUuid = EncounterManager.Current.GetAttrKV(uuid, "AttrTopSummonerId") as long? ?? 0;
+            var attrId = EncounterManager.Current.GetAttrKV(uuid, "AttrId") is { } attrIdValue ? Convert.ToInt32(attrIdValue) : 0;
+            SourceLandingResolver.Instance.RecordEntity(uuid, attrId, source, summonerUuid, topSummonerUuid, arrivalTime, isAppear);
         }
 
         /// <summary>
@@ -832,8 +913,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
+        /// <param name="isFullSnapshot">出現・EnterScene の全属性の写しか(変身の属性が無ければ変身していない)。</param>
+        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs, bool isFullSnapshot = false)
         {
+            // 変身中はサーバーが能力スコア・シーズン強度・レベル・シーズンレベルを変身体の値に差し替えてくるので、変身前の値のまま持つ。
+            var isShapeshifted = ResolveShapeshifted(uuid, attrs, isFullSnapshot);
+
             foreach (var attr in attrs)
             {
                 if (attr.Id == 0 || attr.RawData == null)
@@ -884,10 +969,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrFightPoint:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        if (!isShapeshifted)
+                        {
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        }
                         break;
                     case EAttrType.AttrLevel:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        if (!isShapeshifted)
+                        {
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        }
                         break;
                     case EAttrType.AttrRankLevel:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
@@ -1063,10 +1154,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrSeasonLevel:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        if (!isShapeshifted)
+                        {
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        }
                         break;
                     case EAttrType.AttrSeasonStrength:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        if (!isShapeshifted)
+                        {
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
+                        }
                         break;
                     case EAttrType.AttrSeasonStrengthAdd:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
@@ -1177,6 +1274,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
                 SummonSourceIndex.Instance.Remove(disappearedEntity.Uuid);
                 NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
+                ShapeshiftedEntities.Remove(disappearedEntity.Uuid);
             }
 
             foreach (var entity in syncNearEntities.Appear)
@@ -1198,10 +1296,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var attrCollection = entity.Attrs;
                 if (attrCollection?.Attrs != null)
                 {
-                    ProcessAttrs(entity.Uuid, attrCollection.Attrs);
+                    ProcessAttrs(entity.Uuid, attrCollection.Attrs, isFullSnapshot: true);
                     RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
                 }
+
+                RecordSourceLanding(entity.Uuid, attrCollection?.Attrs, extraData.ArrivalTime, isAppear: true);
 
 
                 ApplyAppearBuffSnapshot(entity, extraData);
@@ -1270,6 +1370,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 出現時の一覧は全件なので、一覧に無い項目は見えない間に消えたもの。
+            // 一覧そのものが届いていない出現では、何が付いているか分からないので触らない。
+            if (entity.BuffInfos is { } appearBuffList)
+            {
+                ActiveBuffStore.Instance.RemoveMissingFromSnapshot(
+                    entity.Uuid,
+                    appearBuffList.BuffInfos.Select(info => (ulong)info.BuffUuid).ToHashSet());
+            }
+
             var buffInfos = entity.BuffInfos?.BuffInfos;
             if (buffInfos == null || buffInfos.Count == 0)
             {
@@ -1314,7 +1423,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     buffInfo.FightSourceInfo?.SourceConfigId ?? 0,
                     creationTime,
                     extraData,
-                    buffInfo.FightSourceInfo?.FightSourceType ?? 0);
+                    BuffEventPayload.BuffInfo,
+                    buffInfo.FightSourceInfo?.FightSourceType);
             }
 
             if (snapshot.Count == 0)
@@ -1379,6 +1489,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 ProcessAttrs(targetUuid, attrCollection.Attrs);
                 RecordSummonSource(targetUuid, attrCollection.Attrs, extraData.ArrivalTime);
+                RecordSourceLanding(targetUuid, attrCollection.Attrs, extraData.ArrivalTime, isAppear: false);
                 RecordNearbyMonster(targetUuid, attrCollection.Attrs);
 
                 // 技の開始は AttrSkillId に値が入ったデルタで分かる。終了は値なし(0)で届く。
@@ -1413,8 +1524,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             long buffBasedShieldBreakValue = 0;
             bool shieldListChangedByBuffRemoval = false;
 
-            List<int> EventHandledBuffs = new();
-            List<int> LogicHandledBuffs = new();
             var sawBuffAdd = false;
             if (delta.BuffEffect != null)
             {
@@ -1422,15 +1531,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
 
                     var buffEffect = delta.BuffEffect.BuffEffects[buffIdx];
-                    EventHandledBuffs.Add(buffEffect.BuffUuid);
 
+                    // この効果を付与・層の変化として処理したか。
+                    var handledByLogicEffect = false;
 
                     if (buffEffect.LogicEffect != null && buffEffect.LogicEffect.Count > 0)
                     {
                         for (int logicIdx = 0; logicIdx < buffEffect.LogicEffect.Count; logicIdx++)
                         {
-                            LogicHandledBuffs.Add(buffEffect.BuffUuid);
-
                             var logicEffect = buffEffect.LogicEffect[logicIdx];
                             var reader = new Google.Protobuf.CodedInputStream(logicEffect.RawData.ToByteArray());
                             if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectAddBuff)
@@ -1454,7 +1562,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     buffInfo.Duration,
                                     extraData.ArrivalTime);
 
-                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, buffInfo.FightSourceInfo?.FightSourceType ?? 0);
+                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo.FightSourceType);
+                                handledByLogicEffect = true;
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
                             {
@@ -1468,19 +1577,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     creationTime = dto.UtcDateTime;
                                 }
 
-                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, changeInfo.Layer, (int)changeInfo.Duration, 0, creationTime, extraData);
+                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, changeInfo.Layer, (int)changeInfo.Duration, 0, creationTime, extraData, BuffEventPayload.BuffChange, fightSourceType: null);
+                                handledByLogicEffect = true;
                             }
                         }
                     }
-                    else
-                    {
 
-                        if (!LogicHandledBuffs.Contains(buffEffect.BuffUuid))
-                        {
-                            // LogicEffect が無い回。baseId 以下はサーバが送ってこなかったぶんの 0 で、
-                            // バフの状態ではない。carriesBuffInfo: false で「知らない」ことを伝える。
-                            EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, 0, 0, 0, null, extraData, carriesBuffInfo: false);
-                        }
+                    // 付与・層の変化として処理できなかった効果は、中身なしの通知として必ず流す。
+                    // ここを LogicEffect の有無で切ると、演出などの LogicEffect が付いた除去が
+                    // どこにも届かず、そのバフが消えない。同じデルタに同じ buffUuid が二度出る回も同じ。
+                    // baseId 以下はサーバが送ってこなかったぶんの 0 で、バフの状態ではない。
+                    // 既知のバフの値を上書きしないことは BuffEventPayload.None が担う。
+                    if (!handledByLogicEffect)
+                    {
+                        EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, 0, 0, 0, 0, 0, 0, null, extraData, BuffEventPayload.None, fightSourceType: null);
                     }
 
                     if (buffEffect.Type == EBuffEventType.BuffEventRemove)
@@ -1542,10 +1652,32 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 被ダメログの加害者を先に決めて、この同期で被ダメログに載る最後の被弾を求める。
+            // 加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
+            var damages = skillEffect.Damages;
+            var takenDamageLogActors = new long[damages.Count];
+            var lastLoggedTakenDamageIndex = -1;
+            for (var index = 0; index < damages.Count; index++)
+            {
+                var damageInfo = damages[index];
+                if (damageInfo.OwnerId == 0 || damageInfo.Type == EDamageType.Heal)
+                {
+                    continue;
+                }
+
+                takenDamageLogActors[index] = EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
+                if (Encounter.IsTakenDamageLogged(takenDamageLogActors[index], targetUuid))
+                {
+                    lastLoggedTakenDamageIndex = index;
+                }
+            }
+
             HashSet<long> rosterPlayersToUpsert = [];
 
+            var damageIndex = -1;
             foreach (var syncDamageInfo in skillEffect.Damages)
             {
+                damageIndex++;
 
                 if (syncDamageInfo.OwnerId == 0)
                 {
@@ -1599,7 +1731,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     var professionId = foldedSource.IsBuffSource
                         ? 0
                         : Professions.GetBaseProfessionIdBySkillId(identitySkillId);
-                    if (professionId != 0 && EncounterManager.Current.GetOrCreateEntity(attackerUuid).ProfessionId <= 0)
+                    if (professionId != 0
+                        && EncounterManager.Current.GetOrCreateEntity(attackerUuid).ProfessionId <= 0
+                        && !IsTransformed(attackerUuid))
                     {
                         EncounterManager.Current.SetProfessionId(attackerUuid, professionId);
                     }
@@ -1713,29 +1847,29 @@ namespace StarResonanceDps.Core.CombatRuntime
                     // バフ由来の被ダメは、そのバフを付けた技をいま生きている実体から控える。
                     // 表示するころには実体が残っていないので、記録の瞬間にしか決まらない。
                     var buffSourceSkillId = 0;
-                    if (syncDamageInfo.DamageSource == EDamageSource.Buff
-                        && !isAttackerPlayer
-                        && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar
-                        && BuffInstanceIndex.Instance.TryResolveSourceSkill(
-                            syncDamageInfo.OwnerId,
-                            syncDamageInfo.AttackerUuid,
-                            attackerUuid,
-                            extraData.ArrivalTime,
-                            out var resolvedBuffSourceSkillId))
-                    {
-                        buffSourceSkillId = resolvedBuffSourceSkillId;
-                    }
-
-                    // 仮想体などが出した被ダメは、その実体を出した技を控えから引く(出現時に決めてある)。
                     var summonSourceSkillId = 0;
-                    if (!isAttackerPlayer
-                        && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar
-                        && SummonSourceIndex.Instance.TryGet(syncDamageInfo.AttackerUuid, out var resolvedSummonSourceSkillId))
+                    if (!isAttackerPlayer && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar)
                     {
-                        summonSourceSkillId = resolvedSummonSourceSkillId;
+                        if (syncDamageInfo.DamageSource == EDamageSource.Buff
+                            && BuffInstanceIndex.Instance.TryResolveSourceSkill(
+                                syncDamageInfo.OwnerId,
+                                syncDamageInfo.AttackerUuid,
+                                attackerUuid,
+                                extraData.ArrivalTime,
+                                out var resolvedBuffSourceSkillId,
+                                out _))
+                        {
+                            buffSourceSkillId = resolvedBuffSourceSkillId;
+                        }
+
+                        // 仮想体などが出した被ダメは、その実体を出した技を控えから引く(出現時に決めてある)。
+                        if (SummonSourceIndex.Instance.TryGet(syncDamageInfo.AttackerUuid, out var summonSource))
+                        {
+                            summonSourceSkillId = summonSource.SkillId;
+                        }
                     }
 
-                    EncounterManager.Current.AddTakenDamage(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
+                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damageIndex == lastLoggedTakenDamageIndex, extraData);
                 }
 
                 // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。
@@ -1745,6 +1879,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EncounterManager.Current.MarkBuffSourcedSkill(
                         isHeal ? (isAttackerPlayer ? attackerUuid : 0) : attackerUuid, skillId);
                     EncounterManager.Current.MarkBuffSourcedSkill(targetUuid, skillId);
+                }
+
+                // 見出し表で名前を持たない行の出どころを決める(検知ログも兼ねる)。
+                // 印を付けた後に呼ぶので、バフ由来かどうかも正しく残る。
+                if (isAttackerPlayer)
+                {
+                    EncounterManager.Current.ResolveSourceLanding(
+                        attackerUuid,
+                        skillId,
+                        isHeal,
+                        syncDamageInfo.DamageSource,
+                        syncDamageInfo.OwnerId,
+                        syncDamageInfo.AttackerUuid,
+                        extraData.ArrivalTime);
                 }
 
                 if (isAttackerPlayer)
@@ -1781,6 +1929,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SkillCooldownStateStore.UpdateServerTime(
                 syncServerTime.ClientMilliseconds,
                 syncServerTime.ServerMilliseconds);
+            ActiveBuffStore.Instance.ResolveUnknownElapsed();
         }
 
         public static void ProcessSyncToMeDeltaInfo(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -1855,7 +2004,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 // メーター(DPS/HPS)・プレイヤーリスト・エンティティリストを揃えて刷新する。
                 // メーターだけ ProcessSyncContainerData に置いたままだと、
-                // フルコンテナが来ない切替(実測: ギルドハウス)でメーターだけ取り残される。
+                // フルコンテナが来ない切替(ギルドハウスなど)でメーターだけ取り残される。
                 BattleStateMachine.StartNewMap();
 
                 // StartNewMap の中の EnterDungeon が属性を新しいエンカウンターへ運ぶ。
@@ -1970,7 +2119,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var professionList = vData.ProfessionList;
-            if (professionList != null && professionList.CurProfessionId != 0)
+            if (professionList != null && professionList.CurProfessionId != 0 && !IsTransformed(playerUuid))
             {
                 UpdateProfessionId(playerUuid, professionList.CurProfessionId);
             }
@@ -2089,7 +2238,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (ser.ProfessionList is not null)
                 {
-                    if (ser.ProfessionList.CurProfessionId is { } professionId)
+                    if (ser.ProfessionList.CurProfessionId is { } professionId && !IsTransformed(currentUserUuid))
                     {
                         UpdateProfessionId(currentUserUuid, professionId);
                     }
@@ -2153,7 +2302,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (vData.DungeonSceneInfo != null)
             {
-                EncounterManager.Current.SetDungeonDifficulty(vData.DungeonSceneInfo.Difficulty);
+                EncounterManager.ApplyDungeonDifficulty(vData.DungeonSceneInfo.Difficulty);
             }
 
             EncounterManager.Current.DungeonState = vData.FlowInfo.State;
@@ -2238,7 +2387,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 // 全滅の印は復活不可デバフ 510072。付与から1秒経っていれば新しい戦闘へ切り替える。
-                // 状態遷移(Dead→Resurrection→TelePort)から推測する旧方式は 2026-09-12 に撤去した。
+                // 状態遷移(Dead→Resurrection→TelePort)からは推測しない。
                 var currentEncounterDuration = EncounterManager.Current.GetDuration();
                 var characterList = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.EntityType == EEntityType.EntChar);
                 foreach (var character in characterList)

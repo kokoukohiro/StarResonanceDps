@@ -192,8 +192,11 @@ public sealed partial class EntityListEntry : ObservableObject
         int displayModeIndex)
     {
         var shield = Math.Max(currentShield, 0L);
+        // バリア量個別表示でも、バリアが無いときは括弧を出さない。
         return displayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
-            ? $"{currentHp}({shield})/{maxHp}"
+            ? shield > 0
+                ? $"{currentHp}({shield})/{maxHp}"
+                : $"{currentHp}/{maxHp}"
             : $"{AddSaturating(currentHp, shield)}/{maxHp}";
     }
 

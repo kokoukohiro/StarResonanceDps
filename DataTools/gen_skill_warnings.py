@@ -3,15 +3,17 @@
 
   Data/Generated/SkillWarnings.json
 
-中身は技レベルID(技ID×100＋レベル)の配列。名前は持たない(`skills.*.json` から引く)。
+中身は技レベルID(技ID×100＋レベル)の配列。名前は持たない(`SkillNames.json` から引く)。
 
 **`show_data` の技辞書で、スロット52に項目を持つ技レベルが警告バーを出す。**
 
 `show_data` は `Bundles` の `<番号>.ab` に入ったテキストアセット。番号は版で変わるので、
 アドレス一覧(`Unk/*.bin`)の `bin/datas/show_data` の行から引く。
 
-アドレス一覧は出所ごとにあり、`Bundles` は共通。**バンドルの一覧が `Bundles` に全部そろう出所の一覧を使う。**
-そろう一覧が無いとき、そろう一覧が複数あって `show_data` の番号が違うときは止まる。
+アドレス一覧と `Bundles` は出所ごとにある。**出力は上位の版の `Star` で作る。**
+ほかの出所(`StarASIA`)も読み、`Star` に無い技レベルが1件でもあれば書かずに止まる
+(版の並びが逆転したときに取りこぼさないため)。
+出所のバンドルの一覧が、その出所の `Bundles` に全部そろわなければ止まる。
 
 読めない形、件数・枠数・区切りの食い違いがあれば止まる。
 """
@@ -20,7 +22,10 @@ import os
 import re
 import struct
 
-from _common import BUNDLES_DIR, GENERATED, SOURCES, dump, unk_dir
+from _common import GENERATED, SOURCES, bundles_dir, dump, unk_dir
+
+# 出力を作る出所。ほかの出所の警告の技を全部含んでいることを実行のたびに確かめる。
+PRIMARY_SOURCE = "Star"
 
 SHOW_DATA_ADDRESS = "bin/datas/show_data"
 SHOW_DATA_ASSET = "show_data"
@@ -85,34 +90,27 @@ def read_address_list(path, data):
     return addresses, set(bundles)
 
 
-def present_bundles():
-    """`Bundles` にある `<番号>.ab` の番号。"""
-    if not os.path.isdir(BUNDLES_DIR):
-        raise FileNotFoundError("%s が無い" % BUNDLES_DIR)
-    return {int(name[:-3]) for name in os.listdir(BUNDLES_DIR) if re.fullmatch(r"\d+\.ab", name)}
+def present_bundles(source):
+    """その出所の `Bundles` にある `<番号>.ab` の番号。"""
+    directory = bundles_dir(source)
+    if not os.path.isdir(directory):
+        raise FileNotFoundError("%s が無い" % directory)
+    return {int(name[:-3]) for name in os.listdir(directory) if re.fullmatch(r"\d+\.ab", name)}
 
 
-def choose_show_data_bundle():
-    """バンドルの一覧が `Bundles` に全部そろう出所の一覧から、`show_data` のバンドル番号を決める。"""
-    present = present_bundles()
-    complete = {}
-    for source in SOURCES:
-        path, data = find_address_list(source)
-        addresses, bundles = read_address_list(path, data)
-        if SHOW_DATA_ADDRESS not in addresses:
-            raise ValueError("%s に %s の行が無い" % (path, SHOW_DATA_ADDRESS))
-        missing = len(bundles - present)
-        number = addresses[SHOW_DATA_ADDRESS]
-        print("%-8s %s アドレス %d / バンドル %d(Bundles に無い %d)/ %s は %d"
-              % (source, os.path.basename(path), len(addresses), len(bundles), missing, SHOW_DATA_ADDRESS, number))
-        if missing == 0:
-            complete[source] = number
-    if not complete:
-        raise ValueError("バンドルの一覧が Bundles に全部そろうアドレス一覧が無い")
-    if len(set(complete.values())) != 1:
-        raise ValueError("Bundles に全部そろうアドレス一覧が複数あり、%s の番号が違う: %s" % (SHOW_DATA_ADDRESS, complete))
-    print("→ 使う一覧 %s" % " / ".join(complete))
-    return next(iter(complete.values()))
+def show_data_bundle_path(source):
+    """その出所のアドレス一覧から `show_data` のバンドルを引く。一覧が同じ出所の `Bundles` に全部そろわなければ止まる。"""
+    path, data = find_address_list(source)
+    addresses, bundles = read_address_list(path, data)
+    if SHOW_DATA_ADDRESS not in addresses:
+        raise ValueError("%s に %s の行が無い" % (path, SHOW_DATA_ADDRESS))
+    missing = len(bundles - present_bundles(source))
+    number = addresses[SHOW_DATA_ADDRESS]
+    print("%-8s %s アドレス %d / バンドル %d(Bundles に無い %d)/ %s は %d"
+          % (source, os.path.basename(path), len(addresses), len(bundles), missing, SHOW_DATA_ADDRESS, number))
+    if missing:
+        raise ValueError("%s のバンドルの一覧が %s に %d 個そろわない" % (source, bundles_dir(source), missing))
+    return os.path.join(bundles_dir(source), "%d.ab" % number)
 
 
 # ---------------------------------------------------------------------------
@@ -370,8 +368,9 @@ def read_show_data(data):
 # ---------------------------------------------------------------------------
 
 
-def main():
-    bundle_path = os.path.join(BUNDLES_DIR, "%d.ab" % choose_show_data_bundle())
+def warning_levels_of(source):
+    """その出所の `show_data` で、スロット52に項目を持つ技レベル。"""
+    bundle_path = show_data_bundle_path(source)
     assets = {}
     for serialized in read_unityfs(bundle_path).values():
         for name, body in text_assets(serialized).items():
@@ -389,10 +388,27 @@ def main():
               % (name, len(records), WARNING_SLOT, sum(1 for s in records.values() if WARNING_SLOT in s)))
 
     skills = dictionaries[0][1]
-    warning_levels = sorted(key for key, slots in skills.items() if WARNING_SLOT in slots)
+    return sorted(key for key, slots in skills.items() if WARNING_SLOT in slots)
+
+
+def main():
+    levels = {PRIMARY_SOURCE: warning_levels_of(PRIMARY_SOURCE)}
+    for source in SOURCES:
+        if source != PRIMARY_SOURCE:
+            levels[source] = warning_levels_of(source)
+
+    primary = set(levels[PRIMARY_SOURCE])
+    for source, found in levels.items():
+        extra = sorted(set(found) - primary)
+        if extra:
+            raise ValueError("%s にだけある警告の技レベルが %d 件: %s(%s で作ると取りこぼす)"
+                             % (source, len(extra), extra, PRIMARY_SOURCE))
+        print("%-8s 警告の技 %d 件(%s に無いもの 0)" % (source, len(found), PRIMARY_SOURCE))
+
+    warning_levels = levels[PRIMARY_SOURCE]
     path = os.path.join(GENERATED, "SkillWarnings.json")
     dump(path, warning_levels)
-    print("→ %s %d 件" % (os.path.relpath(path, GENERATED), len(warning_levels)))
+    print("→ %s %d 件(%s)" % (os.path.relpath(path, GENERATED), len(warning_levels), PRIMARY_SOURCE))
 
 
 if __name__ == "__main__":

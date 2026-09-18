@@ -343,16 +343,46 @@
     <value>{0}'s {1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0} took {1} damage ({2}/{3})</value>
+    <value>{0} took {1}{2} damage ({3}/{4})</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0} took {1} damage</value>
+    <value>{0} took {1}{2} damage</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
   </data>
+  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+    <value>System</value>
+  </data>
   <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
     <value>something</value>
+  </data>
+  <data name="DamageProperty_General" xml:space="preserve">
+    <value>Non-elemental</value>
+  </data>
+  <data name="DamageProperty_Fire" xml:space="preserve">
+    <value>Fire</value>
+  </data>
+  <data name="DamageProperty_Water" xml:space="preserve">
+    <value>Ice</value>
+  </data>
+  <data name="DamageProperty_Electricity" xml:space="preserve">
+    <value>Thunder</value>
+  </data>
+  <data name="DamageProperty_Wood" xml:space="preserve">
+    <value>Forest</value>
+  </data>
+  <data name="DamageProperty_Wind" xml:space="preserve">
+    <value>Wind</value>
+  </data>
+  <data name="DamageProperty_Rock" xml:space="preserve">
+    <value>Rock</value>
+  </data>
+  <data name="DamageProperty_Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="DamageProperty_Dark" xml:space="preserve">
+    <value>Dark</value>
   </data>
   <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
     <value>Note: No effect while viewing history.</value>
@@ -437,6 +467,9 @@
   </data>
   <data name="ClassSpec_TransformNatsu" xml:space="preserve">
     <value>Natsu</value>
+  </data>
+  <data name="ClassSpec_TransformMean" xml:space="preserve">
+    <value>Bee</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>Unknown</value>
@@ -916,7 +949,7 @@
     <value>Hold Results Until Next Event</value>
   </data>
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
-    <value>Exit History View on Next Event</value>
+    <value>Auto-exit History View</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>History Retention</value>
@@ -944,9 +977,6 @@
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>No history</value>
-  </data>
-  <data name="Aggregation_EncounterPhase" xml:space="preserve">
-    <value>Phase {0}</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>Note: e.g. entering a boss room in a dungeon.</value>

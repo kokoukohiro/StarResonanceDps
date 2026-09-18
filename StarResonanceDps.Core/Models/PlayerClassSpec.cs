@@ -44,11 +44,52 @@ public enum PlayerClassSpec
     /// </summary>
     TransformDorothy,
     TransformLucy,
-    TransformNatsu
+    TransformNatsu,
+
+    /// <summary>
+    /// イマジン「絶技！ミーンに変身」(技 3941)で変身している間。
+    ///
+    /// <para>
+    /// この変身では職業IDが値なし(0)で届き、変身クラスの職業IDが無い。
+    /// 変身のバフ <see cref="PlayerClassSpecResolver.MeanTransformBuffId"/> が乗っている間だけこれになる。
+    /// </para>
+    /// </summary>
+    TransformMean
 }
 
 public static class PlayerClassSpecResolver
 {
+    /// <summary>ミーンに変身している間だけ乗るバフ(变异蜂-变身)。</summary>
+    public const int MeanTransformBuffId = 2110101;
+
+    /// <summary>その実体にミーンの変身のバフが今乗っているか。外れるか時間切れになれば false。</summary>
+    public static bool HasMeanTransformBuff(long entityUuid)
+    {
+        if (entityUuid == 0)
+        {
+            return false;
+        }
+
+        foreach (var buff in Services.ActiveBuffStore.Instance.GetActive(entityUuid))
+        {
+            if (buff.BaseId == MeanTransformBuffId)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>変身している間の特化か(アイコンは変身のものにそろえる)。</summary>
+    public static bool IsTransformation(PlayerClassSpec spec)
+    {
+        return spec is PlayerClassSpec.TransformDorothy
+            or PlayerClassSpec.TransformLucy
+            or PlayerClassSpec.TransformNatsu
+            or PlayerClassSpec.TransformMean;
+    }
+
     /// <summary>
     /// 表示用の特化を解決する。特化の判定は Core で完結させ、ウィジェット側で組み立てない。
     ///
@@ -58,11 +99,19 @@ public static class PlayerClassSpecResolver
     /// 未装着が確定したかどうかのフラグと組にして初めて区別できる。
     /// </para>
     /// </summary>
+    /// <param name="hasMeanTransformBuff">ミーンの変身のバフが乗っているか(<see cref="HasMeanTransformBuff"/>)。</param>
     public static PlayerClassSpec Resolve(
         int professionId,
         int subProfessionId,
-        bool isSpecAbilityUnequipped)
+        bool isSpecAbilityUnequipped,
+        bool hasMeanTransformBuff)
     {
+        // ミーンの変身は職業IDを持たないので、バフで決める。
+        if (hasMeanTransformBuff)
+        {
+            return PlayerClassSpec.TransformMean;
+        }
+
         // 変身クラスは特化を持たない。職業IDだけで決まり、SubProfessionId は見ない。
         if (TryResolveTransformation(professionId, out var transformation))
         {

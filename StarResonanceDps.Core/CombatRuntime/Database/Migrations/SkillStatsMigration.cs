@@ -89,7 +89,8 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
                                         snapshot.Value,
                                         0,
                                         snapshot.IsCauseLucky,
-                                        snapshot.DamageElement,
+                                        snapshot.DamageElement
+                                            ?? throw new InvalidDataException($"Skill snapshot has no damage element (skill={skillStat.Key})."),
                                         snapshot.DamageType,
                                         snapshot.DamageMode,
                                         snapshot.IsKill,

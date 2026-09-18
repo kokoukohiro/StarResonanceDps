@@ -134,6 +134,15 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
+
+                                    <ContentControl Content="{Binding TakenDamageLogSettings}"
+                                                    Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:TakenDamageLogWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </StackPanel>
 
                                 <StackPanel x:Name="OtherRoleSkillsSection"

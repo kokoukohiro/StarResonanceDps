@@ -145,8 +145,8 @@ internal sealed record PlayerBuffCandidate(
 
 public sealed record MeterPlayerIdentity(string Name, long UserId);
 
-/// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。</summary>
-public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf);
+/// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
+public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false);
 
 /// <summary>
 /// 被ダメログの1件(予告か詠唱か被弾)。
@@ -163,6 +163,10 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// <see cref="SourceId"/> は届いた <c>OwnerId</c> そのもの。<see cref="IsBuffSource"/> が真ならバフID、
 /// 偽なら技IDか弾ID(弾のときの <see cref="SourceName"/> は親の技の名前)。
 /// </para>
+///
+/// <para>
+/// <see cref="DamageElement"/> は被弾の属性。予告・詠唱と、属性を保存していなかった頃の被弾は <c>null</c>。
+/// </para>
 /// </summary>
 public sealed record TakenDamageLogLine(
     TakenDamageLogRecordKind Kind,
@@ -176,7 +180,9 @@ public sealed record TakenDamageLogLine(
     string SourceName,
     long Value,
     long? TargetHp,
-    long? TargetMaxHp);
+    long? TargetMaxHp,
+    long? TargetShield,
+    EDamageProperty? DamageElement);
 
 /// <summary>
 /// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
@@ -304,12 +310,14 @@ public static class MeterSnapshotProvider
                     announcement.Sequence,
                     announcement.Timestamp - encounterStart,
                     announcement.Timestamp,
-                    new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(announcement.OwnerMonsterId), false, false),
+                    new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(announcement.OwnerMonsterId), false, false, false, 0, PlayerClassSpec.Unknown),
                     null,
                     announcement.SkillId,
                     false,
                     ResolveTakenDamageSkillName(announcement.SkillId),
                     0,
+                    null,
+                    null,
                     null,
                     null);
                 continue;
@@ -330,6 +338,8 @@ public static class MeterSnapshotProvider
                     ResolveTakenDamageSkillName(cast.SkillId),
                     0,
                     null,
+                    null,
+                    null,
                     null);
                 continue;
             }
@@ -348,7 +358,9 @@ public static class MeterSnapshotProvider
                 ResolveTakenDamageSourceName(snapshot.DamageSource, snapshot.OwnerId, snapshot.BuffSourceSkillId, snapshot.SummonSourceSkillId),
                 snapshot.Value,
                 snapshot.TargetHp,
-                snapshot.TargetMaxHp);
+                snapshot.TargetMaxHp,
+                snapshot.TargetShield,
+                snapshot.DamageElement);
         }
 
         return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines);
@@ -359,7 +371,7 @@ public static class MeterSnapshotProvider
     ///
     /// <list type="bullet">
     ///   <item>バフ — バフID。記録時に付与元の技(<paramref name="buffSourceSkillId"/>)が決まっていれば技として引き、
-    ///   無いか名前が空なら <c>buffs</c> で引く</item>
+    ///   無いか名前が空なら <c>BuffNames</c> で引く</item>
     ///   <item>弾(<c>Bullet</c> / <c>FakeBullet</c>) — <c>BulletTable</c> の番号。親の技へ辿って技として引き、辿れなければ空</item>
     ///   <item>それ以外 — 技ID</item>
     /// </list>
@@ -370,7 +382,7 @@ public static class MeterSnapshotProvider
     /// </para>
     ///
     /// <para>
-    /// 弾の番号を <c>skills</c> でそのまま引くと、同じ番号の無関係な技の名前が出る
+    /// 弾の番号を <c>SkillNames</c> でそのまま引くと、同じ番号の無関係な技の名前が出る
     /// (<c>3920</c> は弾 普攻假子弹 / 技 奥義！ライフブレス)。
     /// </para>
     /// </summary>
@@ -402,7 +414,7 @@ public static class MeterSnapshotProvider
             : sourceSkillName;
     }
 
-    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>skills</c>。</summary>
+    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。</summary>
     private static string ResolveTakenDamageSkillName(int skillId)
     {
         var dbmName = CombatDataCatalog.GetDbmNameWithoutInternalId(skillId);
@@ -425,22 +437,40 @@ public static class MeterSnapshotProvider
         TakenDamageLogParty party;
         if (!encounter.Entities.TryGetValue(uuid, out var entity))
         {
-            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid));
+            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid), false, 0, PlayerClassSpec.Unknown);
         }
         else if (isPlayer)
         {
             var isSelf = IsSelf(entity);
             var source = PlayerDataSourceResolver.Resolve(entity, isSelf);
-            party = new TakenDamageLogParty(uuid, source.CharacterId, source.Name, true, isSelf);
+            // NPC は名前ではなく職業名を出す(プレイヤーリストと同じ規則)。判定と職業IDは表示側が使う。
+            party = new TakenDamageLogParty(
+                uuid,
+                source.CharacterId,
+                source.Name,
+                true,
+                isSelf,
+                source.IsNpc,
+                source.ProfessionId,
+                PlayerClassSpecResolver.Resolve(
+                    source.ProfessionId,
+                    source.SubProfessionId,
+                    source.IsSpecAbilityUnequipped,
+                    PlayerClassSpecResolver.HasMeanTransformBuff(uuid)));
         }
         else
         {
-            // モンスター名は種別ID(AttrId)から表示言語で引く。属性が無ければ名前は空のまま。
+            // 名前はモンスターの実体だけ、種別ID(AttrId)から表示言語で引く。
+            // 同じ番号が仮想体や NPC では別のものを指すので、モンスター以外と属性が無いものは名前を空のままにする。
+            // 仮想体が加害者として残るのは親(召喚者)を特定できなかったときだけなので(Encounter.ResolveTakenDamageLogActor)、
+            // 仕掛けそのものを指す名前を出す。
             var attrId = entity.GetAttrKV("AttrId");
-            var name = attrId is null
+            var entityType = (EEntityType)Utils.UuidToEntityType(uuid);
+            var isSystem = entityType == EEntityType.EntDummy;
+            var name = attrId is null || entityType != EEntityType.EntMonster
                 ? string.Empty
                 : CombatDataCatalog.GetMonsterName(Convert.ToInt64(attrId));
-            party = new TakenDamageLogParty(uuid, 0, name, false, false);
+            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem);
         }
 
         cache[uuid] = party;
@@ -779,13 +809,10 @@ public static class MeterSnapshotProvider
             isSelf ? SelfRoleSlotCount : roleSkills.Count);
     }
 
-    /// <summary>
-    /// イマジンの枠番号 7 / 8。クライアントの enum
-    /// <c>ResonanceSkillSlot_left / _right</c> に対応する。
-    /// </summary>
+    /// <summary>イマジンの枠番号 7 / 8(左 / 右)。</summary>
     private static readonly int[] SelfImagineSlotIds = [7, 8];
 
-    /// <summary>ロールスキルの枠番号。実測(2026-08-28)で 21〜24。</summary>
+    /// <summary>ロールスキルの枠番号 21〜24。</summary>
     private static readonly int[] SelfRoleSlotIds = [21, 22, 23, 24];
 
     /// <summary>
@@ -1005,7 +1032,7 @@ public static class MeterSnapshotProvider
         var candidatesBySkill = new Dictionary<
             int,
             (PlayerBuffCandidate? Buff, PlayerBuffCandidate? Debuff)>();
-        var resolvedTrackedSkillIdsBySourceConfigId = new Dictionary<int, int>();
+        var resolvedTrackedSkillIdsBySource = new Dictionary<Services.BuffSource, int>();
         var resolvedTrackedSkillIdsBySummonUuid = new Dictionary<long, int>();
 
         foreach (var buffEvent in buffEvents)
@@ -1023,15 +1050,14 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            if (!resolvedTrackedSkillIdsBySourceConfigId.TryGetValue(
-                    buffEvent.SourceConfigId,
-                    out var trackedSkillId))
+            var source = new Services.BuffSource(buffEvent.FightSourceType, buffEvent.SourceConfigId);
+            if (!resolvedTrackedSkillIdsBySource.TryGetValue(source, out var trackedSkillId))
             {
                 trackedSkillId = ResolveTrackedSourceSkillId(
-                    buffEvent.SourceConfigId,
+                    source,
                     trackedSkillIds,
                     runtimeSourceParentsByBaseId);
-                resolvedTrackedSkillIdsBySourceConfigId[buffEvent.SourceConfigId] = trackedSkillId;
+                resolvedTrackedSkillIdsBySource[source] = trackedSkillId;
             }
 
             if (trackedSkillId <= 0)
@@ -1091,7 +1117,9 @@ public static class MeterSnapshotProvider
                 buffEvent.Layer,
                 remainingSeconds,
                 remainingUnknown);
-            var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
+            // 持続なし・経過不明は、残り時間を持つバフに譲る。同点なら先に並ぶものが残る。
+            var badgeOrderingKey = effectiveRemoveTime == TimeSpan.MaxValue ? TimeSpan.Zero : effectiveRemoveTime;
+            var candidate = new PlayerBuffCandidate(snapshot, badgeOrderingKey);
 
             if (isDebuff)
             {
@@ -1117,80 +1145,91 @@ public static class MeterSnapshotProvider
                 pair.Value.Debuff?.Snapshot));
     }
 
+    /// <summary>
+    /// バフの付与元から、装備中のスキル(イマジン・ロール)を辿る。
+    ///
+    /// <para>
+    /// <b>付与元は種類と番号の組で扱う。</b>スキルの表とバフの表は番号が重なるので、番号だけで引くと
+    /// バフの番号をスキルとして、スキルの番号をバフとして辿ってしまう。
+    /// スキルの表(装備中との一致・<c>SkillLevelGroup</c> などのつながり・同じイマジンアイコン)を引くのは技のときだけ、
+    /// 実行時の親の対応を辿るのはバフのときだけ。弾・タレントなど他の種類はそこで止め、帰属させない。
+    /// </para>
+    /// </summary>
     private static int ResolveTrackedSourceSkillId(
-        int sourceConfigId,
+        Services.BuffSource source,
         IReadOnlySet<int> trackedSkillIds,
-        IReadOnlyDictionary<int, HashSet<int>> runtimeSourceParentsByBaseId)
+        IReadOnlyDictionary<int, HashSet<Services.BuffSource>> runtimeSourceParentsByBaseId)
     {
-        if (sourceConfigId <= 0)
+        if (source.SourceConfigId <= 0 || !IsTraceableSourceType(source.FightSourceType))
         {
             return 0;
         }
 
-        var directTrackedSkillId = ResolveTrackedSourceSkillDirectly(
-            sourceConfigId,
-            trackedSkillIds);
-        if (directTrackedSkillId > 0)
+        if (source.FightSourceType == (int)EFightSource.Skill)
         {
-            return directTrackedSkillId;
+            var directTrackedSkillId = ResolveTrackedSourceSkillDirectly(
+                source.SourceConfigId,
+                trackedSkillIds);
+            if (directTrackedSkillId > 0)
+            {
+                return directTrackedSkillId;
+            }
         }
 
-        var pendingSourceIds = new Queue<int>();
-        var visitedSourceIds = new HashSet<int>();
+        var pendingSources = new Queue<Services.BuffSource>();
+        var visitedSources = new HashSet<Services.BuffSource>();
         var resolvedTrackedSkillIds = new HashSet<int>();
-        pendingSourceIds.Enqueue(sourceConfigId);
+        pendingSources.Enqueue(source);
 
-        while (pendingSourceIds.Count > 0)
+        while (pendingSources.Count > 0)
         {
-            var currentSourceId = pendingSourceIds.Dequeue();
-            if (currentSourceId <= 0 || !visitedSourceIds.Add(currentSourceId))
+            var current = pendingSources.Dequeue();
+            if (!visitedSources.Add(current))
             {
                 continue;
             }
 
-            if (currentSourceId != sourceConfigId)
+            if (current.FightSourceType == (int)EFightSource.Skill)
             {
-                var resolvedTrackedSkillId = ResolveTrackedSourceSkillDirectly(
-                    currentSourceId,
-                    trackedSkillIds);
-                if (resolvedTrackedSkillId > 0)
+                if (current != source)
                 {
-                    resolvedTrackedSkillIds.Add(resolvedTrackedSkillId);
-                    if (resolvedTrackedSkillIds.Count > 1)
+                    var resolvedTrackedSkillId = ResolveTrackedSourceSkillDirectly(
+                        current.SourceConfigId,
+                        trackedSkillIds);
+                    if (resolvedTrackedSkillId > 0)
                     {
-                        return 0;
+                        resolvedTrackedSkillIds.Add(resolvedTrackedSkillId);
+                        if (resolvedTrackedSkillIds.Count > 1)
+                        {
+                            return 0;
+                        }
                     }
                 }
-            }
 
-            if (HelperMethods.DataTables.Skills.Data.TryGetValue(
-                    currentSourceId.ToString(),
-                    out var sourceSkill))
-            {
-                EnqueuePositiveSourceId(
-                    pendingSourceIds,
-                    sourceSkill.SkillLevelGroup,
-                    currentSourceId);
-                EnqueuePositiveSourceId(
-                    pendingSourceIds,
-                    sourceSkill.SwitchSkillId,
-                    currentSourceId);
-                EnqueuePositiveSourceId(
-                    pendingSourceIds,
-                    sourceSkill.NextSkillId,
-                    currentSourceId);
+                if (HelperMethods.DataTables.Skills.Data.TryGetValue(
+                        current.SourceConfigId.ToString(),
+                        out var sourceSkill))
+                {
+                    EnqueueLinkedSkill(pendingSources, sourceSkill.SkillLevelGroup, current.SourceConfigId);
+                    EnqueueLinkedSkill(pendingSources, sourceSkill.SwitchSkillId, current.SourceConfigId);
+                    EnqueueLinkedSkill(pendingSources, sourceSkill.NextSkillId, current.SourceConfigId);
+                }
+
+                continue;
             }
 
             if (runtimeSourceParentsByBaseId.TryGetValue(
-                    currentSourceId,
+                    current.SourceConfigId,
                     out var runtimeParents))
             {
                 foreach (var runtimeParent in runtimeParents)
                 {
-                    EnqueuePositiveSourceId(
-                        pendingSourceIds,
-                        runtimeParent,
-                        currentSourceId);
+                    if (runtimeParent.SourceConfigId > 0
+                        && IsTraceableSourceType(runtimeParent.FightSourceType)
+                        && runtimeParent != current)
+                    {
+                        pendingSources.Enqueue(runtimeParent);
+                    }
                 }
             }
         }
@@ -1198,6 +1237,23 @@ public static class MeterSnapshotProvider
         return resolvedTrackedSkillIds.Count == 1
             ? resolvedTrackedSkillIds.First()
             : 0;
+    }
+
+    private static bool IsTraceableSourceType(int fightSourceType)
+    {
+        return fightSourceType == (int)EFightSource.Skill
+            || fightSourceType == (int)EFightSource.Buff;
+    }
+
+    private static void EnqueueLinkedSkill(
+        Queue<Services.BuffSource> sources,
+        int linkedSkillId,
+        int currentSkillId)
+    {
+        if (linkedSkillId > 0 && linkedSkillId != currentSkillId)
+        {
+            sources.Enqueue(new Services.BuffSource((int)EFightSource.Skill, linkedSkillId));
+        }
     }
 
     /// <summary>
@@ -1419,11 +1475,11 @@ public static class MeterSnapshotProvider
         return matchedTrackedSkillId;
     }
 
-    private static Dictionary<int, HashSet<int>> BuildRuntimeSourceParentsByBaseId(
+    private static Dictionary<int, HashSet<Services.BuffSource>> BuildRuntimeSourceParentsByBaseId(
         Entity entity,
         IReadOnlyCollection<BuffEvent> buffEvents)
     {
-        var result = new Dictionary<int, HashSet<int>>();
+        var result = new Dictionary<int, HashSet<Services.BuffSource>>();
 
         foreach (var buffEvent in buffEvents)
         {
@@ -1444,34 +1500,23 @@ public static class MeterSnapshotProvider
     }
 
     private static void AddRuntimeSourceParent(
-        Dictionary<int, HashSet<int>> runtimeSourceParentsByBaseId,
+        Dictionary<int, HashSet<Services.BuffSource>> runtimeSourceParentsByBaseId,
         BuffEvent buffEvent)
     {
         if (buffEvent.BaseId <= 0
             || buffEvent.SourceConfigId <= 0
-            || buffEvent.BaseId == buffEvent.SourceConfigId)
+            || (buffEvent.FightSourceType == (int)EFightSource.Buff && buffEvent.BaseId == buffEvent.SourceConfigId))
         {
             return;
         }
 
-        if (!runtimeSourceParentsByBaseId.TryGetValue(buffEvent.BaseId, out var sourceIds))
+        if (!runtimeSourceParentsByBaseId.TryGetValue(buffEvent.BaseId, out var sources))
         {
-            sourceIds = new HashSet<int>();
-            runtimeSourceParentsByBaseId.Add(buffEvent.BaseId, sourceIds);
+            sources = new HashSet<Services.BuffSource>();
+            runtimeSourceParentsByBaseId.Add(buffEvent.BaseId, sources);
         }
 
-        sourceIds.Add(buffEvent.SourceConfigId);
-    }
-
-    private static void EnqueuePositiveSourceId(
-        Queue<int> sourceIds,
-        int sourceId,
-        int currentSourceId)
-    {
-        if (sourceId > 0 && sourceId != currentSourceId)
-        {
-            sourceIds.Enqueue(sourceId);
-        }
+        sources.Add(new Services.BuffSource(buffEvent.FightSourceType, buffEvent.SourceConfigId));
     }
 
     private static string NormalizeSkillFamilyIcon(string? iconName)
@@ -1680,32 +1725,17 @@ public static class MeterSnapshotProvider
 
             // バフとして届いたかどうか。名前には影響しない(見出し表は種別を区別しない)。
             // 内部ID注記の表示区分にだけ効く。
-            var isBuffSource = entity.SkillMetrics.TryGetValue(stat.Key, out var sourceContainer)
-                && sourceContainer.IsBuffSource;
+            var hasContainer = entity.SkillMetrics.TryGetValue(stat.Key, out var sourceContainer);
+            var isBuffSource = hasContainer && sourceContainer!.IsBuffSource;
+            // 見出し表で名前が空の行は、記録時に付与元をたどった着地先の名前を出す。
+            var landing = hasContainer ? sourceContainer!.Landing : SourceLanding.None;
             var rowKeyText = CombatDataCatalog.FormatSourceKey(stat.Key);
-
-            // 名前が入っていない行を常設で拾う。スキル詳細ウィジェットの行はここでしか
-            // 作られないので、ここに置けば取りこぼしが構造的に起きない。
-            //
-            // 判定は注記を付ける前の生名で行う。表示名は空欄でも "(2203531:1)" の注記が付いて
-            // 空文字にならず、しかも注記は表示設定で消えるので、表示名で見ると設定次第で検知が変わる。
-            if (string.IsNullOrEmpty(CombatDataCatalog.GetSourceName(stat.Key)))
-            {
-                Diagnostics.BlankSourceNameProbe.Capture(
-                    stat.Key,
-                    rowKeyText,
-                    isBuffSource,
-                    kind == MeterSnapshotKind.Healing,
-                    value.ValueTotal,
-                    value.HitsCount,
-                    characterId);
-            }
 
             rows[index] = new MetricSkillTableRowSnapshot(
                 stat.Key,
                 rowKeyText,
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
-                CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource),
+                CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource, landing),
                 value.ValueTotal,
                 value.ValuePerSecondActive,
                 value.ValuePerSecond,
@@ -1946,7 +1976,7 @@ public static class MeterSnapshotProvider
         // 表示は残すので最後尾に並べる。
         orderingKey = remainingSeconds is > 0d
             ? TimeSpan.FromSeconds(remainingSeconds.Value)
-            : TimeSpan.MaxValue;
+            : remainingSeconds == 0d ? TimeSpan.Zero : TimeSpan.MaxValue;
         return true;
     }
 
@@ -2233,7 +2263,8 @@ public static class MeterSnapshotProvider
             PlayerClassSpecResolver.Resolve(
                 source.ProfessionId,
                 source.SubProfessionId,
-                source.IsSpecAbilityUnequipped),
+                source.IsSpecAbilityUnequipped,
+                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID)),
             source.CombatPower,
             source.SeasonStrength,
             source.Level,

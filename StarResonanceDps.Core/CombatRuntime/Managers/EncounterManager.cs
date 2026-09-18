@@ -159,7 +159,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 currentDifficulty = Current.ExData.DungeonDifficulty;
                 // 戦闘データの無いエンカウンターは保存もせず、採番も進めない。
-                // 実測(728件)で65%が空で、履歴の一覧がそれで埋まるため 2026-09-12 に固定した。
+                // 保存すると履歴の一覧が空の記録で埋まる。
                 nextEncounterIdModifier = Current.HasStatsBeenRecorded() ? 1UL : 0UL;
             }
 
@@ -251,8 +251,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (LevelMapId > 0)
             {
-                SetSceneId(LevelMapId, true);
+                // シーン名は難易度から難易度名を引くので、難易度を先に入れる。
                 Current.SetDungeonDifficulty(currentDifficulty);
+                SetSceneId(LevelMapId, true);
             }
 
             if (AppState.IsBenchmarkMode)
@@ -430,7 +431,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     displayed.Level,
                     displayed.SeasonLevel,
                     displayed.SeasonStrength,
-                    displayed.MaxHp);
+                    displayed.MaxHp,
+                    displayed.IsNpc);
             }
         }
 
@@ -501,7 +503,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             LevelMapId = levelMapId;
 
             // 名前は翻訳テーブルだけが決める。生テーブルは持たない。
-            SceneName = levelMapId > 0 ? CombatDataCatalog.GetSceneName(levelMapId) : "";
+            SceneName = levelMapId > 0 ? CombatDataCatalog.GetSceneName(levelMapId, Current.ExData.DungeonDifficulty) : "";
 
             if (!updateOpenRecords)
             {
@@ -533,9 +535,35 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            SceneName = CombatDataCatalog.GetSceneName(LevelMapId);
+            SceneName = CombatDataCatalog.GetSceneName(LevelMapId, Current.ExData.DungeonDifficulty);
 
             // 投影は internal なので App からは触れない。ここまでを1つの操作にする。
+            PlayerRosterProjection.UpdateMapName();
+            NearbyEntityProjection.UpdateMapName();
+        }
+
+        /// <summary>
+        /// ダンジョン同期で届いた難易度を現在のエンカウンターへ入れる。<b>変わったらマップ名を組み立て直す。</b>
+        ///
+        /// <para>
+        /// 難易度はシーン切替の後に届くので、そのときのマップ名には難易度名が付いていない。
+        /// 現在のエンカウンターのシーン名と投影のマップ名の両方を直す。
+        /// </para>
+        /// </summary>
+        public static void ApplyDungeonDifficulty(int difficulty)
+        {
+            if (Current.ExData.DungeonDifficulty == difficulty)
+            {
+                return;
+            }
+
+            Current.SetDungeonDifficulty(difficulty);
+            if (LevelMapId == 0)
+            {
+                return;
+            }
+
+            SetSceneId(LevelMapId, force: true);
             PlayerRosterProjection.UpdateMapName();
             NearbyEntityProjection.UpdateMapName();
         }
@@ -829,16 +857,25 @@ namespace StarResonanceDps.Core.CombatRuntime
                         UpdateEncounterBossData(entity, (int)attr_id);
                     }
                 }
-                else if (entity.EntityType == EEntityType.EntDummy)
-                {
-                    entity.SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(attr_id)));
-                }
             }
         }
 
         public void SetAttrKV(long uuid, string key, object value)
         {
             var entity = GetOrCreateEntity(uuid);
+
+            // 死亡状態のプレイヤーの HP は 0。ダメージの無い即死では、サーバは死亡中も
+            // 死ぬ前の HP を送ってくるので、届いた値をそのまま書くと死んだ人に HP が残る。
+            // 復活では状態が先に死亡から外れ、HP はその後に届く。
+            if (key == "AttrHp"
+                && (EEntityType)Utils.UuidToEntityType(uuid) == EEntityType.EntChar
+                && entity.GetAttrKV("AttrState") is EActorState.ActorStateDead
+                && value is long hpValue
+                && hpValue != 0)
+            {
+                value = 0L;
+            }
+
             entity.SetAttrKV(key, value);
 
             if (key == "AttrId" && entity.EntityType != EEntityType.EntChar)
@@ -853,10 +890,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         entity.SetMonsterType(monsterEntry.MonsterType);
                         UpdateEncounterBossData(entity, (int)value);
                     }
-                }
-                else if (entity.EntityType == EEntityType.EntDummy)
-                {
-                    entity.SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(value)));
                 }
             }
             else if (key == "AttrName")
@@ -915,7 +948,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                     {
                         IncrementNpcDeaths();
                     }
+                }
 
+                // 3分計測の記録停止中も HP は 0 にする。止めるのは死亡数の数え上げだけ。
+                if ((EActorState)value == EActorState.ActorStateDead)
+                {
                     SetAttrKV(uuid, "AttrHp", 0L);
                 }
             }
@@ -1215,6 +1252,79 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 見出し表で名前を持たない行の出どころ(着地先)を決めて控える。
+        /// 着かなかったもの・技に着いたもの・着地先が食い違ったものは常設の検知ログ(<c>BlankSourceNameProbe</c>)へ送る。
+        /// 記録(<c>AddDamage</c> 等)と <see cref="MarkBuffSourcedSkill"/> の後に、プレイヤーの記録にだけ呼ぶこと。
+        ///
+        /// <para>
+        /// 対象はスキル詳細ウィジェットに行が出る条件(その種別の累計が 0 より大きい)の行だけ。
+        /// 名前の有無は注記を付ける前の生名で見る。表示名は空欄でも内部ID注記が付いて空文字にならず、
+        /// 注記は表示設定で消えるので、表示名で見ると設定次第で結果が変わる。
+        /// </para>
+        ///
+        /// <para>
+        /// 着地先は最初に着いた先で決め、上書きしない。
+        /// </para>
+        /// </summary>
+        public void ResolveSourceLanding(
+            long entityUuid,
+            long skillId,
+            bool isHealing,
+            EDamageSource damageSource,
+            int ownerId,
+            long attackerRawUuid,
+            DateTime arrivalTime)
+        {
+            if (!Entities.TryGetValue(entityUuid, out var entity)
+                || !entity.SkillMetrics.TryGetValue(skillId, out var container))
+            {
+                return;
+            }
+
+            var stats = isHealing ? container.Healing : container.Damage;
+            if (stats.ValueTotal == 0UL
+                || !string.IsNullOrEmpty(CombatDataCatalog.GetSourceName(skillId)))
+            {
+                return;
+            }
+
+            var landing = Services.SourceLandingResolver.Instance.Resolve(
+                damageSource, ownerId, attackerRawUuid, entityUuid, arrivalTime, out var trace);
+            var keyText = CombatDataCatalog.FormatSourceKey(skillId);
+
+            if (container.LandingKind != SourceLandingKind.None)
+            {
+                if (landing.Kind != SourceLandingKind.None && landing != container.Landing)
+                {
+                    Diagnostics.BlankSourceNameProbe.CaptureConflict(
+                        skillId, keyText, isHealing, entity.UID, container.Landing, landing, trace);
+                }
+
+                return;
+            }
+
+            if (landing.Kind != SourceLandingKind.None)
+            {
+                container.LandingKind = landing.Kind;
+                container.LandingId = landing.Id;
+            }
+
+            if (landing.Kind != SourceLandingKind.RogueEntry)
+            {
+                Diagnostics.BlankSourceNameProbe.Capture(
+                    skillId,
+                    keyText,
+                    container.IsBuffSource,
+                    isHealing,
+                    stats.ValueTotal,
+                    stats.HitsCount,
+                    entity.UID,
+                    landing,
+                    trace);
+            }
+        }
+
         /// <param name="identitySkillId">
         /// 特化判定に使う<b>ゲームが実際に発動したスキルID</b>。判定できないときは 0。
         ///
@@ -1281,10 +1391,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
             bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
-            // ダメージが1件も無いと回復を丸ごと捨てる門がここにあったが、削除した。
-            // FirstDamageTimeStamp は AddDamage でしか立たないため、回復だけを続けても
-            // 永久に null のままで門を抜けられず、HPSメーターが起動しなかった。
-            // メーターがDPS/HPSに分かれた今、HPS側だけを見ていると何も出ない不具合になる。
+            // ダメージの有無で回復を捨てる門を置かない。FirstDamageTimeStamp は AddDamage でしか
+            // 立たないので、それを条件にすると回復だけの戦闘で HPS メーターが起動しない。
 
             // 戦闘は「次のイベント」なので履歴表示を解除する。開いていなければ即戻る。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -1349,19 +1457,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <param name="summonSourceSkillId">
         /// ダメージを出した実体(仮想体など)を出した技(<see cref="Services.SummonSourceIndex"/>)。決まらなければ 0。
         /// </param>
+        /// <param name="isLastLoggedInSync">
+        /// 同じ同期の中で被ダメログに載る最後の被弾か。同期で届く HP は被弾・回復を全部当てた後の1つだけなので、
+        /// HP・最大HP・バリアはこの被弾にだけ載せる。
+        /// </param>
         public void AddTakenDamage(
             long attackerUuid, long targetUuid, long skillId, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, bool isLastLoggedInSync, ExtraPacketData extraPacketData)
         {
             LastUpdate = extraPacketData.ArrivalTime;
 
             var targetEntity = GetOrCreateEntity(targetUuid);
 
-            // 記録するのは被ダメログに載る「プレイヤーがプレイヤー以外から受けた」ぶんだけ。
-            // モンスターの被ダメとプレイヤー同士のぶんは読み手が無い。戦闘中かどうかの判定だけは全員に効かせる。
-            if ((EEntityType)Utils.UuidToEntityType(targetUuid) != EEntityType.EntChar
-                || (EEntityType)Utils.UuidToEntityType(attackerUuid) == EEntityType.EntChar)
+            // 戦闘中かどうかの判定だけは全員に効かせる。
+            if (!IsTakenDamageLogged(attackerUuid, targetUuid))
             {
                 targetEntity.RecalculateInactiveTime(extraPacketData.ArrivalTime);
                 return;
@@ -1370,8 +1480,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             var snapshot = targetEntity.AddTakenDamage(attackerUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData,
                 new SkillSnapshotStamp(
                     NextTakenDamageLogSequence(),
-                    targetEntity.GetAttrKV("AttrHp") as long?,
-                    targetEntity.GetAttrKV("AttrMaxHp") as long?,
+                    isLastLoggedInSync ? targetEntity.GetAttrKV("AttrHp") as long? : null,
+                    isLastLoggedInSync ? targetEntity.GetAttrKV("AttrMaxHp") as long? : null,
+                    isLastLoggedInSync ? Utils.GetCurrentShield(targetEntity) : null,
                     ownerId,
                     damageSource,
                     buffSourceSkillId,
@@ -1381,8 +1492,60 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// 被ダメログに載る被弾か。対象がプレイヤーで、被ダメログの加害者(<see cref="ResolveTakenDamageLogActor"/>)が
+        /// 0(加害者なし)でもプレイヤーでもないもの。モンスターの被ダメとプレイヤー同士のぶんは読み手が無い。
+        /// </summary>
+        internal static bool IsTakenDamageLogged(long attackerUuid, long targetUuid)
+        {
+            return attackerUuid != 0
+                && (EEntityType)Utils.UuidToEntityType(targetUuid) == EEntityType.EntChar
+                && (EEntityType)Utils.UuidToEntityType(attackerUuid) != EEntityType.EntChar;
+        }
+
+        /// <summary>
+        /// 被ダメログに載せる加害者・詠唱者を決める。召喚体は大元の召喚者へ寄せるが、
+        /// <b>プレイヤーから見えて表に名前がある召喚体は、その召喚体自身</b>にする。
+        ///
+        /// <para>
+        /// 見えるかは実体の種類で決める。モンスター(<c>MonsterTable</c>)は全行が見た目のモデルを持ち、
+        /// 仮想体(<c>DummyTable</c>)はモデルを指す項目を持たない。弾なども見える実体ではない。
+        /// </para>
+        ///
+        /// <para>
+        /// 大元の召喚者がプレイヤーなら、召喚体の名前に関係なくプレイヤーを返す(被ダメログの対象外にするため)。
+        /// </para>
+        /// </summary>
+        internal long ResolveTakenDamageLogActor(long rawUuid, long topSummonerUuid)
+        {
+            if (topSummonerUuid == 0 || topSummonerUuid == rawUuid)
+            {
+                return rawUuid;
+            }
+
+            if ((EEntityType)Utils.UuidToEntityType(topSummonerUuid) == EEntityType.EntChar
+                || (EEntityType)Utils.UuidToEntityType(rawUuid) != EEntityType.EntMonster)
+            {
+                return topSummonerUuid;
+            }
+
+            int monsterId;
+            if (Entities.TryGetValue(rawUuid, out var summoned) && summoned.GetAttrKV("AttrId") is int attrId && attrId > 0)
+            {
+                monsterId = attrId;
+            }
+            else if (!Services.NearbyMonsterIndex.Instance.TryGetMonsterId(rawUuid, out monsterId))
+            {
+                Serilog.Log.Warning("召喚体の AttrId が届いていない uuid={SummonUuid}。名前があるか分からないので大元の召喚者 {TopSummonerUuid} に寄せる",
+                    rawUuid, topSummonerUuid);
+                return topSummonerUuid;
+            }
+
+            return CombatDataCatalog.HasMonsterName(monsterId) ? rawUuid : topSummonerUuid;
+        }
+
+        /// <summary>
         /// 技の開始を被ダメログの詠唱として残す。<b>詠唱バーを持つ技</b>と<b>戦闘画面の警告の技</b>だけで、
-        /// プレイヤーとプレイヤーの召喚物は対象外(被ダメと同じく、召喚物は大元の召喚者として扱う)。
+        /// プレイヤーとプレイヤーの召喚物は対象外。召喚物の扱いは <see cref="ResolveTakenDamageLogActor"/>。
         /// </summary>
         /// <param name="skillLevel">技の開始と同じ差分で届く <c>AttrSkillLevel</c>。届いていなければ 0。</param>
         public void AddSkillCast(long entityUuid, int skillId, int skillLevel, ExtraPacketData extraPacketData)
@@ -1408,10 +1571,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            var casterUuid = GetOrCreateEntity(entityUuid).GetAttrKV("AttrTopSummonerId") is long topSummonerUuid
-                && topSummonerUuid != 0
-                    ? topSummonerUuid
-                    : entityUuid;
+            var topSummonerUuid = GetOrCreateEntity(entityUuid).GetAttrKV("AttrTopSummonerId") is long summonerUuid
+                ? summonerUuid
+                : 0;
+            var casterUuid = ResolveTakenDamageLogActor(entityUuid, topSummonerUuid);
             if ((EEntityType)Utils.UuidToEntityType(casterUuid) == EEntityType.EntChar)
             {
                 return;
@@ -1561,7 +1724,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// バフの実際の状態ではない。<c>LogicEffect</c> を持たない回は珍しくないので、
         /// ここで持続や層を書き込むと時限バフが持続0＝無期限に化けて消えなくなる。
         /// </param>
-        public void NotifyBuffEvent(long entityUuid, EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, int layer, int duration, int sourceConfigId, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0, bool carriesBuffInfo = true)
+        /// <param name="payload">通知が運んだ中身。ライブ表示の項目を新しく作れるのは <see cref="BuffEventPayload.BuffInfo"/> だけ。</param>
+        /// <param name="fightSourceType">付与元の種類。<c>null</c> は「この通知は運んでいない」で、記録済みの値を上書きしない。</param>
+        public void NotifyBuffEvent(long entityUuid, EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, int layer, int duration, int sourceConfigId, DateTime? creationTime, ExtraPacketData extraPacketData, BuffEventPayload payload, int? fightSourceType)
         {
             string entityCasterName = "";
             if (fireUuid > 0)
@@ -1588,7 +1753,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 UpdateDateTime = extraPacketData.ArrivalTime,
                 CreationDateTime = creationTime,
             });
-            GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData, fightSourceType, carriesBuffInfo);
+            GetOrCreateEntity(entityUuid).NotifyBuffEvent(buffEventType, buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, DateTime.Now.Subtract(EncounterManager.Current.StartTime), creationTime, extraPacketData, payload, fightSourceType);
 
             // 強化する9特化は、特化アビリティ本体が付与するバフ(と、その実行時変種)で判定する。
             // 紐付け先は保持者ではなく術者(FireUuid)。味方に配られるバフは受け手が保持するので、
@@ -1601,7 +1766,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (baseId > 0)
             {
-                ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType, entityUuid, sourceConfigId);
+                ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType ?? -1, entityUuid, sourceConfigId);
             }
         }
 
@@ -1896,6 +2061,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public bool HasBuffSnapshot { get; set; }
 
+        /// <summary>
+        /// NPC(助っ人)か。判定はパーティの社交データ(<c>BotAiId</c>)だけが持っていて実体には届かないので、
+        /// 保存の直前に表示している値を焼き付ける(<see cref="Entity.ApplyDisplayedIdentityForRecord"/>)。
+        /// 履歴では社交データが無く、これが唯一の根拠になる。
+        /// </summary>
+        public bool IsNpc { get; set; }
+
         public int Level { get; set; }
         public long SeasonLevel { get; set; }
         public long SeasonStrength { get; set; }
@@ -1926,6 +2098,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int SpecMarkerBuffId { get => _identity.SpecMarkerBuffId; private set => _identity.SpecMarkerBuffId = value; }
         public int SpecMarkerBuffUuid { get => _identity.SpecMarkerBuffUuid; private set => _identity.SpecMarkerBuffUuid = value; }
         public bool HasBuffSnapshot { get => _identity.HasBuffSnapshot; private set => _identity.HasBuffSnapshot = value; }
+
+        /// <summary>NPC(助っ人)か。保存の直前に焼き付ける。履歴ではここだけが根拠。</summary>
+        public bool IsNpc { get => _identity.IsNpc; private set => _identity.IsNpc = value; }
 
         /// <summary>
         /// 特化が「アビリティ未装着」(ゲーム内呼称 クラスR1)と確定できる状態か。
@@ -2150,7 +2325,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (attr_id != null)
                 {
                     UID = (int)attr_id;
-                    SetName(CombatDataCatalog.GetMonsterName(Convert.ToInt64(attr_id)));
                 }
             }
         }
@@ -2236,8 +2410,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             int level,
             long seasonLevel,
             long seasonStrength,
-            long maxHp)
+            long maxHp,
+            bool isNpc)
         {
+            // NPC かどうかはパーティの社交データ(BotAiId)だけが持っていて、実体には届かない。
+            // 履歴では社交データが無くなるので、表示に出している値と一緒にここで焼き付ける。
+            IsNpc = isNpc;
+
             if (!string.IsNullOrEmpty(name))
             {
                 Name = name;
@@ -2761,8 +2940,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <c>false</c> のとき渡ってくる 0 は「送られてこなかった」という意味なので、
         /// 既に知っているバフの持続・層・付与時刻を上書きしない。
         /// </param>
-        public void NotifyBuffEvent(EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, TimeSpan encounterTime, DateTime? creationTime, ExtraPacketData extraPacketData, int fightSourceType = 0, bool carriesBuffInfo = true)
+        public void NotifyBuffEvent(EBuffEventType buffEventType, int buffUuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, TimeSpan encounterTime, DateTime? creationTime, ExtraPacketData extraPacketData, BuffEventPayload payload, int? fightSourceType)
         {
+            var carriesBuffInfo = payload != BuffEventPayload.None;
             if (buffEventType == EBuffEventType.BuffEventRemove)
             {
                 if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
@@ -2783,7 +2963,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var isKnownBuff = BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent);
                 if (!isKnownBuff)
                 {
-                    buffEvent = new BuffEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, fightSourceType);
+                    buffEvent = new BuffEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, fightSourceType ?? BuffEvent.UnknownFightSourceType);
                 }
                 else if (carriesBuffInfo)
                 {
@@ -2819,7 +2999,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // ライブ表示用の状態はエンカウンター境界を跨いで保持する。
                 // creationTime はサーバが名乗る付与時刻。ストア側が「もう何秒経ったか」を
                 // 差し引くのに使う(AOI出現で受け取る、見る前から乗っているバフのため)。
-                Services.ActiveBuffStore.Instance.AddOrUpdate(UUID, (ulong)buffUuid, buffEvent, creationTime);
+                Services.ActiveBuffStore.Instance.AddOrUpdate(
+                    UUID, (ulong)buffUuid, buffEvent, creationTime, createsInstance: payload == BuffEventPayload.BuffInfo);
             }
         }
 
@@ -3059,6 +3240,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <c>SkillTable</c> と <c>BuffTable</c> は90IDが重複するため、種別を持たないと取り違える。
         /// </summary>
         public bool IsBuffSource { get; set; }
+
+        /// <summary>
+        /// 見出し表で名前を持たない行の着地先の種類(<see cref="Services.SourceLandingResolver"/>)。
+        /// 最初に着いた先で決め、上書きしない。履歴でも同じ名前を出すので保存する。
+        /// </summary>
+        public SourceLandingKind LandingKind { get; set; }
+
+        /// <summary>着地先のID。<see cref="LandingKind"/> が特性ならバフID、技なら技ID。</summary>
+        public int LandingId { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public SourceLanding Landing => new(LandingKind, LandingId);
     }
 
     public class CombatStats : System.ICloneable
@@ -3427,6 +3620,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Sequence = stamp.Sequence,
                 TargetHp = stamp.TargetHp,
                 TargetMaxHp = stamp.TargetMaxHp,
+                TargetShield = stamp.TargetShield,
                 OwnerId = stamp.OwnerId,
                 DamageSource = stamp.DamageSource,
                 BuffSourceSkillId = stamp.BuffSourceSkillId,
@@ -3602,7 +3796,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         public long HpLessen { get; set; }
         public long ShieldBreak { get; set; }
 
-        public EDamageProperty DamageElement { get; set; }
+        /// <summary>属性。<c>null</c> は属性を保存していなかった頃の記録で、無属性とは別物。</summary>
+        public EDamageProperty? DamageElement { get; set; }
         public EDamageType DamageType { get; set; }
         public EDamageMode DamageMode { get; set; }
 
@@ -3649,10 +3844,26 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public long? TargetMaxHp { get; set; }
 
+        /// <summary>イベント後の対象のバリア量。被ダメログの被弾行に HP と一緒に出す。</summary>
+        public long? TargetShield { get; set; }
+
         public object Clone()
         {
             return this.MemberwiseClone();
         }
+    }
+
+    /// <summary>バフの通知が運んだ中身。</summary>
+    public enum BuffEventPayload
+    {
+        /// <summary>中身なし。持続・層・付与時刻を知らされていない。</summary>
+        None,
+
+        /// <summary>付与(<c>BuffInfo</c>)。ライブ表示の項目を新しく作れるのはこれだけ。</summary>
+        BuffInfo,
+
+        /// <summary>層・持続の変化(<c>BuffChange</c>)。既にある項目を更新するだけ。</summary>
+        BuffChange,
     }
 
     public class BuffEvent
@@ -3672,8 +3883,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// この実体を作ったものの種別(<c>EFightSource</c>)。<c>SourceConfigId</c> の中身が
         /// スキルIDかバフIDかはこれで決まるので、片方だけでは発生源を辿れない。
+        /// 中身付きの付与を一度も受け取っていない実体は <see cref="UnknownFightSourceType"/>。
         /// </summary>
         public int FightSourceType { get; private set; }
+
+        /// <summary>付与元の種類をまだ知らない。<c>EFightSource</c> に負の値は無い。</summary>
+        public const int UnknownFightSourceType = -1;
         public string Name { get; private set; } = null!;
         [JsonIgnore]
         public string Description { get; private set; } = "";
@@ -3760,9 +3975,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             Description = value;
         }
 
-        public void SetEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, int fightSourceType = 0)
+        /// <param name="fightSourceType">
+        /// <c>null</c> は通知が種類を運んでいない(層の変化の通知など)。記録済みの種類を 0(技)で上書きしない。
+        /// </param>
+        public void SetEvent(int uuid, int baseId, int level, long fireUuid, string entityCasterName, int layer, int duration, int sourceConfigId, int? fightSourceType)
         {
-            FightSourceType = fightSourceType;
+            if (fightSourceType is { } providedFightSourceType)
+            {
+                FightSourceType = providedFightSourceType;
+            }
             Uuid = uuid;
             if (baseId > 0)
             {

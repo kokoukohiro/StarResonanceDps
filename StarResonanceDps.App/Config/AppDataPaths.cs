@@ -5,7 +5,7 @@ namespace StarResonanceDps.App.Config;
 
 public static class AppDataPaths
 {
-    // 旧いファイル名。2026-09-11 に Core の Settings.json と綴りを揃えた。
+    // 旧いファイル名。
     private const string LegacyAppSettingsFileName = "appsettings.json";
     private const string LegacyWidgetSettingsFileName = "widgetstate.json";
 

@@ -22,6 +22,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
+    private TakenDamageLogWidgetSettingsConfig _takenDamageLog = WidgetConfigDefaults.CreateTakenDamageLogSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -121,6 +122,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedBuffCard(_buffCard);
     }
 
+    public TakenDamageLogWidgetSettingsConfig GetTakenDamageLogSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(_takenDamageLog);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -162,6 +168,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event EventHandler? PlayerWindowPresentationChanged;
 
     public event EventHandler? MeterSettingsChanged;
+
+    public event EventHandler? TakenDamageLogSettingsChanged;
 
     public WidgetListItemViewModel()
     {
@@ -213,6 +221,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             BuffCard = WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
                 ? _buffCard.Clone()
+                : null,
+            TakenDamageLog = WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind)
+                ? _takenDamageLog.Clone()
                 : null
         };
     }
@@ -245,6 +256,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(config.BuffCard);
             RaisePlayerWindowPresentationChanged();
+        }
+
+        if (WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind))
+        {
+            _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config.TakenDamageLog);
+            TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -285,6 +302,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(buffCard);
         RaisePlayerWindowPresentationChanged();
+    }
+
+    public void ApplyTakenDamageLogSettingsPreview(TakenDamageLogWidgetSettingsConfig takenDamageLog)
+    {
+        if (!WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind))
+        {
+            return;
+        }
+
+        _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(takenDamageLog);
+        TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

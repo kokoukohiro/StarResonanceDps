@@ -49,12 +49,12 @@ public sealed class SettingsConfig
 
     // --- 集計設定 ---
 
-    public bool SplitEncountersOnNewPhases { get; set; } = true;
+    public bool SplitEncountersOnNewPhases { get; set; }
     public bool KeepPastEncounterInMeterUntilNextDamage { get; set; }
     public bool ClearHistorySelectionOnNextEvent { get; set; } = true;
 
     /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
-    public int DatabaseRetentionPolicyDays { get; set; }
+    public int DatabaseRetentionPolicyDays { get; set; } = 30;
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }

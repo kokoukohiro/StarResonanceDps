@@ -28,9 +28,6 @@ public class NetCap
     private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyHandlers = new();
     private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyReturnHandlers = new();
     private ConcurrentDictionary<uint, ProxyId> ProxyReturnsDictionary = new();
-    private Action<NotifyId, ReadOnlySpan<byte>, ExtraPacketData>? UnhandledHandler = null;
-    private Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData>? UnhandledProxyHandler = null;
-    private Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData>? UnhandledProxyReturnHandler = null;
     public ulong NumSeenPackets = 0;
     public DateTime LastPacketSeenAt = DateTime.MinValue;
     public int NumConnectionReaders = 0;
@@ -75,24 +72,9 @@ public class NetCap
         Log.Information("Capture device started");
     }
 
-    public void RegisterUnhandledHandler(Action<NotifyId, ReadOnlySpan<byte>, ExtraPacketData> handler)
-    {
-        UnhandledHandler = handler;
-    }
-
     public void RegisterNotifyHandler(ulong serviceId, uint methodId, Action<ReadOnlySpan<byte>, ExtraPacketData> handler)
     {
         NotifyHandlers.Add(new NotifyId(serviceId, methodId), handler);
-    }
-
-    public void RegisterUnhandledProxyHandler(Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
-    {
-        UnhandledProxyHandler = handler;
-    }
-
-    public void RegisterUnhandledProxyReturnHandler(Action<ProxyId, ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
-    {
-        UnhandledProxyReturnHandler = handler;
     }
 
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
@@ -324,11 +306,6 @@ public class NetCap
             var extraData = new ExtraPacketData(lastPacketTime);
             handler(msgData, extraData);
         }
-        else if (UnhandledHandler != null)
-        {
-            var extraData = new ExtraPacketData(lastPacketTime);
-            UnhandledHandler(id, msgData, extraData);
-        }
 
     }
 
@@ -465,10 +442,6 @@ public class NetCap
         {
             handler(finalData, returnUid, extraData);
         }
-        else
-        {
-            UnhandledProxyReturnHandler?.Invoke(id, finalData, returnUid, extraData);
-        }
     }
 
     private void DispatchProxyCall(
@@ -481,10 +454,6 @@ public class NetCap
         if (ProxyHandlers.TryGetValue(id, out var handler))
         {
             handler(data, returnUid, extraData);
-        }
-        else
-        {
-            UnhandledProxyHandler?.Invoke(id, data, returnUid, extraData);
         }
     }
 

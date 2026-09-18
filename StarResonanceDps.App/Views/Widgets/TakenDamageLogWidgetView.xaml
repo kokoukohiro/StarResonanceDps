@@ -1,6 +1,8 @@
 <UserControl x:Class="StarResonanceDps.App.Views.Widgets.TakenDamageLogWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:viewModels="clr-namespace:StarResonanceDps.App.ViewModels"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              Loaded="TakenDamageLogWidgetView_Loaded"
@@ -14,6 +16,52 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
             <Setter Property="Margin" Value="0,1,0,1" />
         </Style>
+
+        <!--
+            行の中のアイコン。大きさの違う画像を同じ見た目にそろえるため、正方形の枠の中に中央寄せで置く。
+            影はプレイヤーリストのクラスアイコンと同じ。TIPS の色は Tag(ウィジェット)の窓のパレットから取る。
+        -->
+        <DataTemplate DataType="{x:Type viewModels:TakenDamageLogClassIconSegment}">
+            <Grid Width="16"
+                  Height="16"
+                  Margin="0,0,2,0"
+                  Background="Transparent"
+                  Tag="{Binding Widget}">
+                <Grid.ToolTip>
+                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="12"
+                                   Text="{Binding SpecName}" />
+                    </ToolTip>
+                </Grid.ToolTip>
+                <Rectangle Fill="{Binding ClassBrush}"
+                           OpacityMask="{Binding IconMask}"
+                           Effect="{StaticResource Effect.ProfessionIconShadow}"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type viewModels:TakenDamageLogAttributeIconSegment}">
+            <Grid Width="16"
+                  Height="16"
+                  Margin="1,0"
+                  Background="Transparent"
+                  Tag="{Binding Widget}">
+                <Grid.ToolTip>
+                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="12"
+                                   Text="{Binding Name}" />
+                    </ToolTip>
+                </Grid.ToolTip>
+                <Image Source="{Binding Icon}"
+                       Stretch="Uniform"
+                       Effect="{StaticResource Effect.ProfessionIconShadow}"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <!--
@@ -59,7 +107,7 @@
 
                     <TextBlock Grid.Column="1"
                                Style="{StaticResource TakenDamageLog.LineText}"
-                               Text="{Binding Text}" />
+                               behaviors:TextSegmentsBehavior.Segments="{Binding Segments}" />
                 </Grid>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

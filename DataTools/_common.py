@@ -16,7 +16,7 @@ TABLES_ENV = "BPSR_TABLES"
 TABLES_DIR = os.environ.get(TABLES_ENV) or os.path.join(os.path.dirname(SOLUTION), "JSONS")
 
 # 出所。**言語フォルダごとに土台が違う**。先にあるほうが土台で、後ろは空欄を補うだけ。
-# cn / en は中国サーバー由来の Star、jp / kr はアジアサーバー由来の StarASIA が土台。
+# cn / en は Star、jp / kr は StarASIA が土台(その言語が入っているビルドの表)。
 SOURCES = ("StarASIA", "Star")
 SOURCES_BY_LANG_DIR = {
     "cn": ("Star", "StarASIA"),
@@ -36,8 +36,9 @@ def unk_dir(source):
     return os.path.join(TABLES_DIR, source, "Unk")
 
 
-# 出所共通の入力 `Bundles`(`<番号>.ab`)。
-BUNDLES_DIR = os.path.join(TABLES_DIR, "Bundles")
+def bundles_dir(source):
+    """出所ごとの入力 `Bundles`(`<番号>.ab`)。同じ出所のアドレス一覧と対になる。"""
+    return os.path.join(TABLES_DIR, source, "Bundles")
 
 DATA = os.path.join(SOLUTION, "StarResonanceDps.Core", "Data")
 LOCALIZATION = os.path.join(DATA, "Localization")
@@ -68,7 +69,7 @@ def table_of_source(source, lang_dir, name):
     出所を名指しで生テーブルを読む。無ければ None。
 
     **行が実IDで引けないテーブル用。** `RecountTable` の鍵は行番号で、出所が違えば
-    同じ番号が別の行を指す(実測で `DamageId` の一致は349件中106件)。合併すると
+    同じ番号が別の行を指す。合併すると
     無関係な行が混ざるので、出所ごとに組み立ててから行の対応を取る。
     """
     return load(_path(source, lang_dir, name))
@@ -131,22 +132,27 @@ def name_of(row, field="Name"):
     return "" if text in PLACEHOLDERS else text
 
 
-def write_localized(basename, values_by_lang, keys):
-    """
-    4言語ぶんの `{basename}.{言語}.json` を書く。
+def per_lang(values_by_lang, key):
+    """1つの鍵の4言語ぶんの名前。`{ "zh-CN": ..., "en-US": ..., "ja-JP": ..., "ko-KR": ... }` の順で、無い言語は空文字。"""
+    return {lang: (values_by_lang.get(lang, {}).get(key) or "").strip() for lang in LANGS}
 
-    鍵は全言語で同じにする。版差で収録IDが違っても、鍵集合が言語で変わると
-    畳み込みの停止条件が言語で変わってしまうため。足りない側は空文字で埋め、
+
+def write_localized(basename, values_by_lang, keys, sort_key=int):
+    """
+    `{basename}.json` を書く。形は `{ "鍵": { "zh-CN": ..., "en-US": ..., "ja-JP": ..., "ko-KR": ... } }`。
+
+    どの鍵も4言語をすべて持つ。版差で収録IDが違っても、鍵集合が言語で変わると
+    畳み込みの停止条件が言語で変わってしまうため。足りない言語は空文字で入り、
     表示時に zh-CN へ落ちるのに任せる。
 
     **完全な上書き。** 出力は入力だけで決まる。前の出力は読まない。
     入力に名前が無ければ空になる。
+
+    `sort_key` は鍵の並べ方。鍵が数字だけでないテーブルで渡す。
     """
-    keys = sorted(keys, key=int)
-    for lang in LANGS:
-        path = os.path.join(LOCALIZATION, "%s.%s.json" % (basename, lang))
-        fresh = values_by_lang.get(lang, {})
-        merged = {key: (fresh.get(key) or "").strip() for key in keys}
-        dump(path, merged)
-        print("  %s.%-6s %5d鍵 / 名前あり %5d"
-              % (basename, lang, len(keys), sum(1 for v in merged.values() if v)))
+    keys = sorted(keys, key=sort_key)
+    merged = {key: per_lang(values_by_lang, key) for key in keys}
+    dump(os.path.join(LOCALIZATION, "%s.json" % basename), merged)
+    print("  %s %5d鍵 / 名前あり %s"
+          % (basename, len(keys),
+             " / ".join("%s %d" % (lang, sum(1 for names in merged.values() if names[lang])) for lang in LANGS)))

@@ -204,38 +204,22 @@ public sealed partial class EncounterHistoryItem : ObservableObject
     ///
     /// <para>
     /// 注記は<b>半角括弧で詰めて末尾に足す</b>(スペースを入れない)。
-    /// フェーズは <c>PhaseNumber</c> から組み立てる —
-    /// DBの <c>SceneSubName</c> は <c>"Phase 2"</c> の英語で固定されていて訳せない。
-    /// 3分計測はボタンと同じ <c>Meter_ThreeMinuteBenchmark</c>。
-    /// どちらも言語を切り替えると一緒に変わる(<see cref="RefreshTexts"/> が再通知する)。
+    /// 3分計測はボタンと同じ <c>Meter_ThreeMinuteBenchmark</c>で、
+    /// 言語を切り替えると一緒に変わる(<see cref="RefreshTexts"/> が再通知する)。
+    /// フェーズで分けた記録も注記を付けず、同じ名前で出す。
     /// </para>
     /// </summary>
     public string SceneText
     {
         get
         {
-            var resolved = CombatDataCatalog.GetSceneName(_entry.SceneId);
+            var resolved = CombatDataCatalog.GetSceneName(_entry.SceneId, _entry.DungeonDifficulty);
             if (string.IsNullOrWhiteSpace(resolved))
             {
                 resolved = _entry.SceneName;
             }
 
             var text = resolved;
-
-            if (_entry.PhaseNumber > 0)
-            {
-                var phase = string.Format(
-                    CultureInfo.CurrentCulture,
-                    LocalizationManager.Instance.GetString("Aggregation_EncounterPhase"),
-                    _entry.PhaseNumber);
-                text += $"({phase})";
-            }
-            else if (!string.IsNullOrWhiteSpace(_entry.SceneSubName))
-            {
-                // 数字が取れないのに記録だけある形。通常は起きない(書き手が必ず対で書く)が、
-                // 黙って落とさずに保存された値をそのまま出す。
-                text += $"({_entry.SceneSubName})";
-            }
 
             if (_entry.BenchmarkSeconds > 0)
             {

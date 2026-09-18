@@ -35,11 +35,12 @@ public sealed class ActiveBuffStore
     private long _nextFirstSeenOrder;
 
     /// <summary>
-    /// エンティティごとの BaseId -> SourceConfigId の対応。バフからスキルを逆引きする多段解決に使う。
+    /// エンティティごとの BaseId -> 付与元(種類と番号)の対応。バフからスキルを逆引きする多段解決に使う。
     /// 期限切れや解除で消えたバフの分も残す(索引であって表示ソースではない)。
     /// これが痩せると、直接一致しないスキル(ロールスキル等)の紐付けが解決できなくなる。
+    /// <b>種類を落とさない。</b>付与元の番号はスキルの表とバフの表で重なるので、番号だけでは辿り先が決まらない。
     /// </summary>
-    private readonly Dictionary<long, Dictionary<int, HashSet<int>>> _sourceParentsByEntity = [];
+    private readonly Dictionary<long, Dictionary<int, HashSet<BuffSource>>> _sourceParentsByEntity = [];
 
     private ActiveBuffStore()
     {
@@ -53,7 +54,11 @@ public sealed class ActiveBuffStore
     /// AOI出現のスナップショットは「見る前から乗っているバフ」を運ぶので、これが無いと
     /// 料理・薬剤が入ってきた瞬間に満額から数え直しになる。
     /// </param>
-    public void AddOrUpdate(long entityUuid, ulong buffUuid, BuffEvent buffEvent, DateTime? serverCreateTimeUtc = null)
+    /// <param name="createsInstance">
+    /// バフの中身(<c>BuffInfo</c>)を伴う付与か。<b>項目を新しく作るのはこのときだけ。</b>
+    /// 層の変化などの通知は、除去済みの実体へ後から届いても項目を作り直さない。
+    /// </param>
+    public void AddOrUpdate(long entityUuid, ulong buffUuid, BuffEvent buffEvent, DateTime? serverCreateTimeUtc, bool createsInstance)
     {
         if (entityUuid == 0 || buffEvent is null)
         {
@@ -64,8 +69,17 @@ public sealed class ActiveBuffStore
         {
             if (!_buffsByEntity.TryGetValue(entityUuid, out var buffs))
             {
+                if (!createsInstance)
+                {
+                    return;
+                }
+
                 buffs = [];
                 _buffsByEntity.Add(entityUuid, buffs);
+            }
+            else if (!createsInstance && !buffs.ContainsKey(buffUuid))
+            {
+                return;
             }
 
             // 起点は受信時刻。サーバの付与時刻を絶対時刻として使うと、
@@ -113,9 +127,78 @@ public sealed class ActiveBuffStore
                 observedAt,
                 buffEvent.Duration,
                 serverAddTime,
+                serverCreateTimeUtc ?? existing?.ServerCreateTimeUtc,
                 existing?.FirstSeenOrder ?? _nextFirstSeenOrder++,
                 remainingUnknown);
             RecordSourceParentNoLock(entityUuid, buffEvent);
+        }
+    }
+
+    /// <summary>
+    /// サーバ時刻を受け取った後に呼ぶ。経過不明のまま入った項目の起点を、サーバの付与時刻から計算し直す。
+    /// 直さないと「?」のまま時間切れの保険も効かない。
+    /// </summary>
+    public void ResolveUnknownElapsed()
+    {
+        lock (_sync)
+        {
+            foreach (var buffs in _buffsByEntity.Values)
+            {
+                foreach (var buffUuid in buffs.Keys.ToArray())
+                {
+                    var entry = buffs[buffUuid];
+                    if (!entry.RemainingUnknown)
+                    {
+                        continue;
+                    }
+
+                    var elapsed = ResolveElapsedNoLock(entry.ServerCreateTimeUtc, entry.DurationMilliseconds);
+                    if (!elapsed.Known)
+                    {
+                        continue;
+                    }
+
+                    buffs[buffUuid] = entry with
+                    {
+                        ObservedAt = DateTime.UtcNow.AddMilliseconds(-elapsed.Milliseconds),
+                        RemainingUnknown = false,
+                    };
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 出現時に届いた全バフの一覧で、その保持者の項目を置き換える。一覧に無い項目は消す。
+    /// 一覧にある項目の追加・更新は、呼び出し側が通常の付与と同じ入口で行う。
+    /// </summary>
+    public void RemoveMissingFromSnapshot(long entityUuid, IReadOnlySet<ulong> snapshotBuffUuids)
+    {
+        ArgumentNullException.ThrowIfNull(snapshotBuffUuids);
+        if (entityUuid == 0)
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            if (!_buffsByEntity.TryGetValue(entityUuid, out var buffs))
+            {
+                return;
+            }
+
+            foreach (var buffUuid in buffs.Keys.ToArray())
+            {
+                if (!snapshotBuffUuids.Contains(buffUuid))
+                {
+                    buffs.Remove(buffUuid);
+                }
+            }
+
+            if (buffs.Count == 0)
+            {
+                _buffsByEntity.Remove(entityUuid);
+            }
         }
     }
 
@@ -157,7 +240,7 @@ public sealed class ActiveBuffStore
     {
         if (buffEvent.BaseId <= 0
             || buffEvent.SourceConfigId <= 0
-            || buffEvent.BaseId == buffEvent.SourceConfigId)
+            || (buffEvent.FightSourceType == (int)Zproto.EFightSource.Buff && buffEvent.BaseId == buffEvent.SourceConfigId))
         {
             return;
         }
@@ -168,19 +251,19 @@ public sealed class ActiveBuffStore
             _sourceParentsByEntity.Add(entityUuid, parents);
         }
 
-        if (!parents.TryGetValue(buffEvent.BaseId, out var sourceIds))
+        if (!parents.TryGetValue(buffEvent.BaseId, out var sources))
         {
-            sourceIds = [];
-            parents.Add(buffEvent.BaseId, sourceIds);
+            sources = [];
+            parents.Add(buffEvent.BaseId, sources);
         }
 
-        sourceIds.Add(buffEvent.SourceConfigId);
+        sources.Add(new BuffSource(buffEvent.FightSourceType, buffEvent.SourceConfigId));
     }
 
     /// <summary>
-    /// 蓄積した BaseId -> SourceConfigId の対応を呼び出し側の索引へ合流させる。
+    /// 蓄積した BaseId -> 付与元の対応を呼び出し側の索引へ合流させる。
     /// </summary>
-    public void CopySourceParentsInto(long entityUuid, Dictionary<int, HashSet<int>> target)
+    public void CopySourceParentsInto(long entityUuid, Dictionary<int, HashSet<BuffSource>> target)
     {
         ArgumentNullException.ThrowIfNull(target);
         if (entityUuid == 0)
@@ -350,6 +433,9 @@ public sealed class ActiveBuffStore
     /// <param name="ServerAddTime">
     /// サーバが送ってきた付与時刻。<b>同一実体の判定にだけ使う</b>(残り時間の計算には使わない)。
     /// </param>
+    /// <param name="ServerCreateTimeUtc">
+    /// サーバが名乗る付与時刻(<c>BuffInfo.CreateTime</c>)。経過不明の項目を、サーバ時刻が届いた後に計算し直すのに使う。
+    /// </param>
     /// <param name="FirstSeenOrder">
     /// 初めて現れた順。<b>バフはソートせず、新しいものを末尾に出すためにこれが要る。</b>
     /// 入れ物が <c>Dictionary</c> で、除去で空いた枠に新しいバフが入るため列挙順は当てにできない。
@@ -364,6 +450,7 @@ public sealed class ActiveBuffStore
         DateTime ObservedAt,
         int DurationMilliseconds,
         DateTime ServerAddTime,
+        DateTime? ServerCreateTimeUtc,
         long FirstSeenOrder,
         bool RemainingUnknown)
     {
@@ -373,14 +460,19 @@ public sealed class ActiveBuffStore
         }
 
         /// <summary>
-        /// 持続時間不明(0以下)は無期限扱いで残す。
+        /// 持続を過ぎたら消す。除去の通知が届かなかったときの最後の保険で、保持者が見えているかは問わない。
+        /// 持続時間なし(0以下)は時間では消えない。
         /// <b>経過が分からない項目も時間では消さない</b> — 起点が当てにならないので、
-        /// そこから数えた期限も当てにならない。除去は <c>BuffEventRemove</c> か
-        /// マップ切替の <c>Clear</c> に任せる。
+        /// そこから数えた期限も当てにならない。サーバ時刻が届けば計算し直される。
         /// </summary>
         public bool IsExpired(DateTime now)
         {
-            return !RemainingUnknown && DurationMilliseconds > 0 && GetRemainingSeconds(now) <= 0d;
+            return !RemainingUnknown
+                && DurationMilliseconds > 0
+                && GetRemainingSeconds(now) <= 0d;
         }
     }
 }
+
+/// <summary>バフ実体の付与元。<c>SourceConfigId</c> の中身はスキルIDかバフIDかを種類(<c>EFightSource</c>)で決める。</summary>
+public readonly record struct BuffSource(int FightSourceType, int SourceConfigId);

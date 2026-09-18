@@ -476,14 +476,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 死亡状態の同期は HP を運んでいても 0 として控える。ダメージの無い即死では、
+            // サーバは死亡中も死ぬ前の HP を送ってくる。
+            var isDead = fastSyncData.State == (int)EActorState.ActorStateDead;
+
             PartyState.UpdateSupplement(
                 AppState.PartyTeamId,
                 charId,
                 current => current with
                 {
-                    CurrentHp = fastSyncData.Hp > 0 || fastSyncData.MaxHp > 0
-                        ? Math.Max(fastSyncData.Hp, 0)
-                        : current.CurrentHp,
+                    CurrentHp = isDead
+                        ? 0
+                        : fastSyncData.Hp > 0 || fastSyncData.MaxHp > 0
+                            ? Math.Max(fastSyncData.Hp, 0)
+                            : current.CurrentHp,
                     MaxHp = fastSyncData.MaxHp > 0 ? fastSyncData.MaxHp : current.MaxHp
                 });
         }

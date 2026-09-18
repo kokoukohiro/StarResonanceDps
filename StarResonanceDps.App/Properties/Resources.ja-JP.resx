@@ -343,16 +343,46 @@
     <value>{0}の{1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}に{1}ダメージ({2}/{3})</value>
+    <value>{0}に{1}{2}ダメージ({3}/{4})</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}に{1}ダメージ</value>
+    <value>{0}に{1}{2}ダメージ</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻撃</value>
   </data>
+  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+    <value>システム</value>
+  </data>
   <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
     <value>何か</value>
+  </data>
+  <data name="DamageProperty_General" xml:space="preserve">
+    <value>無属性</value>
+  </data>
+  <data name="DamageProperty_Fire" xml:space="preserve">
+    <value>火属性</value>
+  </data>
+  <data name="DamageProperty_Water" xml:space="preserve">
+    <value>氷属性</value>
+  </data>
+  <data name="DamageProperty_Electricity" xml:space="preserve">
+    <value>雷属性</value>
+  </data>
+  <data name="DamageProperty_Wood" xml:space="preserve">
+    <value>森属性</value>
+  </data>
+  <data name="DamageProperty_Wind" xml:space="preserve">
+    <value>風属性</value>
+  </data>
+  <data name="DamageProperty_Rock" xml:space="preserve">
+    <value>岩属性</value>
+  </data>
+  <data name="DamageProperty_Light" xml:space="preserve">
+    <value>光属性</value>
+  </data>
+  <data name="DamageProperty_Dark" xml:space="preserve">
+    <value>闇属性</value>
   </data>
   <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
     <value>※履歴表示中では効果ありません</value>
@@ -437,6 +467,9 @@
   </data>
   <data name="ClassSpec_TransformNatsu" xml:space="preserve">
     <value>ナツ</value>
+  </data>
+  <data name="ClassSpec_TransformMean" xml:space="preserve">
+    <value>ミーン</value>
   </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>不明</value>
@@ -916,7 +949,7 @@
     <value>次のイベントまで結果を保持</value>
   </data>
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
-    <value>次のイベントで履歴表示を解除</value>
+    <value>履歴表示を自動解除</value>
   </data>
   <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
     <value>履歴の保持期間</value>
@@ -944,9 +977,6 @@
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>履歴がありません</value>
-  </data>
-  <data name="Aggregation_EncounterPhase" xml:space="preserve">
-    <value>フェーズ{0}</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※ダンジョンでボス部屋進入など</value>

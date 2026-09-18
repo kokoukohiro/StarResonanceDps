@@ -38,13 +38,13 @@ public sealed class PlayerInfoEntry
             $"{localization.GetString("PlayerInfo_Name")}: {player.Name}",
             $"{localization.GetString("PlayerInfo_Level")}: {FormatInteger(player.Level)} (+{FormatInteger(player.SeasonLevel)})",
             $"{localization.GetString("PlayerInfo_AbilityScore")}: {FormatInteger(player.CombatPower)} (+{FormatInteger(player.SeasonStrength)})",
-            $"{localization.GetString("PlayerInfo_Profession")}: {GetProfessionDisplayName(player.ProfessionId, localization)}",
+            $"{localization.GetString("PlayerInfo_Profession")}: {GetProfessionDisplayName(player.ProfessionId, player.ClassSpec, localization)}",
             $"{localization.GetString("PlayerInfo_ProfessionSpec")}: {GetProfessionSpecDisplayName(player.ClassSpec, localization)}");
     }
 
-    private static string GetProfessionDisplayName(int professionId, LocalizationManager localization)
+    private static string GetProfessionDisplayName(int professionId, PlayerClassSpec classSpec, LocalizationManager localization)
     {
-        var professionKey = PlayerProfession.GetKey(professionId);
+        var professionKey = PlayerProfession.GetKey(professionId, classSpec);
         if (professionId != 0 && string.Equals(professionKey, "Unknown", StringComparison.Ordinal))
         {
             return FormatInteger(professionId);

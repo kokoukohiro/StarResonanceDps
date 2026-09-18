@@ -121,6 +121,27 @@ public static partial class PlayerInfoFormatFormatter
             : name;
     }
 
+    /// <summary>
+    /// 相手の名前の表示値。<b>NPC は名前ではなく職業名を出す</b>(プレイヤー一覧と同じ規則)。
+    /// </summary>
+    public static string GetDisplayName(
+        string? name,
+        long userId,
+        bool isSelf,
+        bool isNpc,
+        int professionId,
+        PlayerNameDisplayMode nameDisplayMode)
+    {
+        if (ShouldHideName(isSelf, nameDisplayMode))
+        {
+            return HiddenPlayerName;
+        }
+
+        return isNpc
+            ? LocalizationManager.Instance.GetString($"Classes_{PlayerProfession.GetKey(professionId)}")
+            : GetDisplayName(name, userId, isSelf, nameDisplayMode);
+    }
+
     private static string GetName(PlayerInfoFormatData player, PlayerNameDisplayMode nameDisplayMode)
     {
         if (ShouldHideName(player.IsSelf, nameDisplayMode))
@@ -128,13 +149,13 @@ public static partial class PlayerInfoFormatFormatter
             return HiddenPlayerName;
         }
 
-        if (player.IsNpc)
-        {
-            var professionKey = PlayerProfession.GetKey(player.ProfessionId);
-            return LocalizationManager.Instance.GetString($"Classes_{professionKey}");
-        }
-
-        return GetDisplayName(player.Name, player.UserId, player.IsSelf, nameDisplayMode);
+        return GetDisplayName(
+            player.Name,
+            player.UserId,
+            player.IsSelf,
+            player.IsNpc,
+            player.ProfessionId,
+            nameDisplayMode);
     }
 
     private static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)

@@ -385,7 +385,8 @@ internal static class PlayerRosterProjection
             PlayerClassSpecResolver.Resolve(
                 source.ProfessionId,
                 source.SubProfessionId,
-                source.IsSpecAbilityUnequipped),
+                source.IsSpecAbilityUnequipped,
+                nearbyEntity is not null && PlayerClassSpecResolver.HasMeanTransformBuff(nearbyEntity.UUID)),
             isSelf,
             combatAttributes,
             source.SubProfessionId,

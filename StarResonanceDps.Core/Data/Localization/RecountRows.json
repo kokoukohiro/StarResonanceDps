@@ -1,0 +1,4303 @@
+{
+  "2": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031104:3",
+      "2031104:4"
+    ]
+  },
+  "3": {
+    "RecountName": {
+      "zh-CN": "风华翔舞",
+      "en-US": "Windborne Grace",
+      "ja-JP": "翔舞",
+      "ko-KR": "바람의 춤"
+    },
+    "SourceId": [
+      "1401:1",
+      "1401:4",
+      "1401:5",
+      "1402:1",
+      "1402:3",
+      "1403:1",
+      "1403:2",
+      "1403:3",
+      "1404:1"
+    ]
+  },
+  "4": {
+    "RecountName": {
+      "zh-CN": "疾风刺",
+      "en-US": "Gale Thrust",
+      "ja-JP": "烈風撃",
+      "ko-KR": "질풍 찌르기"
+    },
+    "SourceId": [
+      "1418:1",
+      "1418:2",
+      "1418:3",
+      "1418:6",
+      "1418:7",
+      "1418:8",
+      "1418:9"
+    ]
+  },
+  "5": {
+    "RecountName": {
+      "zh-CN": "翔返",
+      "en-US": "Skyfall",
+      "ja-JP": "飛燕乱",
+      "ko-KR": "공중 반격"
+    },
+    "SourceId": [
+      "1419:2"
+    ]
+  },
+  "6": {
+    "RecountName": {
+      "zh-CN": "风神·破阵之风",
+      "en-US": "Typhoon Cleave",
+      "ja-JP": "風陣・豪嵐破",
+      "ko-KR": "풍신・파괴의 바람"
+    },
+    "SourceId": [
+      "1409:4",
+      "1426:4"
+    ]
+  },
+  "7": {
+    "RecountName": {
+      "zh-CN": "风姿卓绝",
+      "en-US": "Galeform",
+      "ja-JP": "風姿卓絶",
+      "ko-KR": "비범한 풍모"
+    },
+    "SourceId": [
+      "1420:3",
+      "1420:6"
+    ]
+  },
+  "8": {
+    "RecountName": {
+      "zh-CN": "螺旋击刺",
+      "en-US": "Spiral Thrust",
+      "ja-JP": "螺旋撃",
+      "ko-KR": "나선 찌르기"
+    },
+    "SourceId": [
+      "1421:2",
+      "1421:3"
+    ]
+  },
+  "9": {
+    "RecountName": {
+      "zh-CN": "破追",
+      "en-US": "Breach Pursuit",
+      "ja-JP": "破追",
+      "ko-KR": "체이싱"
+    },
+    "SourceId": [
+      "1422:3",
+      "1427:4"
+    ]
+  },
+  "10": {
+    "RecountName": {
+      "zh-CN": "飞鸟投",
+      "en-US": "Falcon Toss",
+      "ja-JP": "飛鳥投",
+      "ko-KR": "팔콘 토스"
+    },
+    "SourceId": [
+      "1425:7",
+      "149905:1"
+    ]
+  },
+  "11": {
+    "RecountName": {
+      "zh-CN": "刹那",
+      "en-US": "Instant Edge",
+      "ja-JP": "刹那",
+      "ko-KR": "찰나"
+    },
+    "SourceId": [
+      "1424:1",
+      "1424:2"
+    ]
+  },
+  "12": {
+    "RecountName": {
+      "zh-CN": "刹那连击",
+      "en-US": "Instant Edge Combo",
+      "ja-JP": "刹那",
+      "ko-KR": "찰나"
+    },
+    "SourceId": [
+      "149904:1"
+    ]
+  },
+  "13": {
+    "RecountName": {
+      "zh-CN": "勇气风环",
+      "en-US": "Valor Cyclone",
+      "ja-JP": "勇心風環",
+      "ko-KR": "윈드 오라"
+    },
+    "SourceId": [
+      "31901:3",
+      "31901:5",
+      "2205450:4"
+    ]
+  },
+  "14": {
+    "RecountName": {
+      "zh-CN": "锐利冲击",
+      "en-US": "Sharp Impact",
+      "ja-JP": "鋭利衝",
+      "ko-KR": "예리한 찌르기"
+    },
+    "SourceId": [
+      "1431:6",
+      "1431:8",
+      "149907:1"
+    ]
+  },
+  "15": {
+    "RecountName": {
+      "zh-CN": "护佑之风",
+      "en-US": "Aegis Gale",
+      "ja-JP": "護風",
+      "ko-KR": "윈드 프로텍션"
+    },
+    "SourceId": [
+      "1423:1",
+      "1437:1"
+    ]
+  },
+  "16": {
+    "RecountName": {
+      "zh-CN": "神影螺旋",
+      "en-US": "Vortex Strike",
+      "ja-JP": "瞬影螺旋",
+      "ko-KR": "그림자 나선"
+    },
+    "SourceId": [
+      "1434:2",
+      "140301:0"
+    ]
+  },
+  "17": {
+    "RecountName": {
+      "zh-CN": "龙击炮",
+      "en-US": "Drake Cannon",
+      "ja-JP": "龍撃陣",
+      "ko-KR": "용격포"
+    },
+    "SourceId": [
+      "1435:1",
+      "140401:0"
+    ]
+  },
+  "18": {
+    "RecountName": {
+      "zh-CN": "风螺旋",
+      "en-US": "Wind Spiral",
+      "ja-JP": "スパイラルウィンド",
+      "ko-KR": "나선 선풍"
+    },
+    "SourceId": [
+      "149901:1"
+    ]
+  },
+  "19": {
+    "RecountName": {
+      "zh-CN": "疾驰锋刃",
+      "en-US": "Swift Blade",
+      "ja-JP": "疾馳鋒刃",
+      "ko-KR": "신속의 창"
+    },
+    "SourceId": [
+      "1411:1",
+      "1411:2"
+    ]
+  },
+  "20": {
+    "RecountName": {
+      "zh-CN": "龙卷风",
+      "en-US": "Tornado",
+      "ja-JP": "竜巻",
+      "ko-KR": "토네이도"
+    },
+    "SourceId": [
+      "140501:0",
+      "149903:2"
+    ]
+  },
+  "21": {
+    "RecountName": {
+      "zh-CN": "大龙卷风",
+      "en-US": "Grand Tornado",
+      "ja-JP": "大竜巻",
+      "ko-KR": "대형 토네이도"
+    },
+    "SourceId": [
+      "149908:1"
+    ]
+  },
+  "22": {
+    "RecountName": {
+      "zh-CN": "极·岚切",
+      "en-US": "Azure Sever",
+      "ja-JP": "嵐斬",
+      "ko-KR": "궁극・폭풍 가르기"
+    },
+    "SourceId": [
+      "1433:7",
+      "149906:1"
+    ]
+  },
+  "23": {
+    "RecountName": {
+      "zh-CN": "风裂扩散",
+      "en-US": "Wind Rift Diffusion",
+      "ja-JP": "風傷拡散",
+      "ko-KR": "바람 가르기 확산"
+    },
+    "SourceId": [
+      "2205060:3"
+    ]
+  },
+  "24": {
+    "RecountName": {
+      "zh-CN": "撕裂",
+      "en-US": "Rend",
+      "ja-JP": "ティア",
+      "ko-KR": "파열"
+    },
+    "SourceId": [
+      "2205071:3"
+    ]
+  },
+  "25": {
+    "RecountName": {
+      "zh-CN": "长矛贯穿",
+      "en-US": "Spear Thrust",
+      "ja-JP": "ペネトレイトスピア",
+      "ko-KR": "스피어 피어싱"
+    },
+    "SourceId": [
+      "149902:1"
+    ]
+  },
+  "26": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은 빛 반격"
+    },
+    "SourceId": [
+      "1294:2"
+    ]
+  },
+  "27": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031102:3",
+      "2031102:4"
+    ]
+  },
+  "28": {
+    "RecountName": {
+      "zh-CN": "雨打潮生",
+      "en-US": "Raincall Surge",
+      "ja-JP": "レインフォール",
+      "ko-KR": "레인폴"
+    },
+    "SourceId": [
+      "1203:1",
+      "120201:0",
+      "120301:0",
+      "120401:0",
+      "120501:0"
+    ]
+  },
+  "29": {
+    "RecountName": {
+      "zh-CN": "冰霜之矛",
+      "en-US": "Frost Lance",
+      "ja-JP": "フロストファング",
+      "ko-KR": "프로스트 스피어"
+    },
+    "SourceId": [
+      "120902:0"
+    ]
+  },
+  "30": {
+    "RecountName": {
+      "zh-CN": "寒冰射线",
+      "en-US": "Frostbeam",
+      "ja-JP": "フロストレイ",
+      "ko-KR": "프로스트 레이"
+    },
+    "SourceId": [
+      "1241:4"
+    ]
+  },
+  "31": {
+    "RecountName": {
+      "zh-CN": "极寒·冰雪颂歌",
+      "en-US": "Glacier Hymn",
+      "ja-JP": "極光・グレイシアルアンセム",
+      "ko-KR": "극한・글레이셜 앤섬"
+    },
+    "SourceId": [
+      "1248:2",
+      "1263:1"
+    ]
+  },
+  "32": {
+    "RecountName": {
+      "zh-CN": "陨星风暴",
+      "en-US": "Meteor Storm",
+      "ja-JP": "メテオストーム",
+      "ko-KR": "메테오 스톰"
+    },
+    "SourceId": [
+      "1260:1",
+      "1260:2",
+      "1260:3",
+      "1262:1",
+      "1262:3",
+      "1262:4",
+      "1262:5"
+    ]
+  },
+  "33": {
+    "RecountName": {
+      "zh-CN": "清滝绕珠",
+      "en-US": "Crystal Veil",
+      "ja-JP": "ウォータースフィア",
+      "ko-KR": "워터 볼"
+    },
+    "SourceId": [
+      "1216:1",
+      "121501:0"
+    ]
+  },
+  "34": {
+    "RecountName": {
+      "zh-CN": "寒冰风暴",
+      "en-US": "Blizzard",
+      "ja-JP": "ブリザード",
+      "ko-KR": "블리자드"
+    },
+    "SourceId": [
+      "1257:1",
+      "1261:1"
+    ]
+  },
+  "35": {
+    "RecountName": {
+      "zh-CN": "水之涡流",
+      "en-US": "Maelstrom",
+      "ja-JP": "メイルストローム",
+      "ko-KR": "메일스트롬"
+    },
+    "SourceId": [
+      "1250:1",
+      "1250:4"
+    ]
+  },
+  "36": {
+    "RecountName": {
+      "zh-CN": "冻结寒风",
+      "en-US": "Frozen Gale",
+      "ja-JP": "フローズンストーム",
+      "ko-KR": "프로즌 게일"
+    },
+    "SourceId": [
+      "1240:1",
+      "1240:2"
+    ]
+  },
+  "38": {
+    "RecountName": {
+      "zh-CN": "浪潮汇聚",
+      "en-US": "Tidepool",
+      "ja-JP": "タイドプール",
+      "ko-KR": "타이드풀"
+    },
+    "SourceId": [
+      "1256:1",
+      "1256:2"
+    ]
+  },
+  "39": {
+    "RecountName": {
+      "zh-CN": "寒冰庇护",
+      "en-US": "Frost Shelter",
+      "ja-JP": "アイスガード",
+      "ko-KR": "아이스 가드"
+    },
+    "SourceId": [
+      "1245:5",
+      "27009:3"
+    ]
+  },
+  "40": {
+    "RecountName": {
+      "zh-CN": "冰箭",
+      "en-US": "Ice Arrow",
+      "ja-JP": "アイスボルト",
+      "ko-KR": "아이스 애로우"
+    },
+    "SourceId": [
+      "121301:0",
+      "121302:0"
+    ]
+  },
+  "41": {
+    "RecountName": {
+      "zh-CN": "贯穿冰矛",
+      "en-US": "Piercing Ice Lance",
+      "ja-JP": "貫通アイススピア",
+      "ko-KR": "피어싱 아이스 스피어"
+    },
+    "SourceId": [
+      "120901:0"
+    ]
+  },
+  "42": {
+    "RecountName": {
+      "zh-CN": "冰霜彗星",
+      "en-US": "Frost Comet",
+      "ja-JP": "氷の彗星",
+      "ko-KR": "프로스트 코멧"
+    },
+    "SourceId": [
+      "1259:1"
+    ]
+  },
+  "43": {
+    "RecountName": {
+      "zh-CN": "霜爆",
+      "en-US": "Frost Explosion",
+      "ja-JP": "霜爆",
+      "ko-KR": "서리 폭발"
+    },
+    "SourceId": [
+      "2204081:1"
+    ]
+  },
+  "44": {
+    "RecountName": {
+      "zh-CN": "冰冷脉冲",
+      "en-US": "Cold Pulse",
+      "ja-JP": "コールドパルス",
+      "ko-KR": "콜드 펄스"
+    },
+    "SourceId": [
+      "2204320:4"
+    ]
+  },
+  "45": {
+    "RecountName": {
+      "zh-CN": "冰晶坠落",
+      "en-US": "Icy Bolt",
+      "ja-JP": "落氷",
+      "ko-KR": "아이스 볼트"
+    },
+    "SourceId": [
+      "1258:1"
+    ]
+  },
+  "46": {
+    "RecountName": {
+      "zh-CN": "冰霜冲击",
+      "en-US": "Frost Shock",
+      "ja-JP": "アイスブラスト",
+      "ko-KR": "프로스트 쇼크"
+    },
+    "SourceId": [
+      "2204241:1"
+    ]
+  },
+  "47": {
+    "RecountName": {
+      "zh-CN": "冰魔G11-寒冰风暴",
+      "en-US": "Frost Mage G11 - Blizzard",
+      "ja-JP": "氷魔G11-ブリザード",
+      "ko-KR": "프로스트 메이지 G11 - 블리자드"
+    },
+    "SourceId": [
+      "3052112:1"
+    ]
+  },
+  "48": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "1795:2"
+    ]
+  },
+  "49": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031101:3",
+      "2031101:4"
+    ]
+  },
+  "50": {
+    "RecountName": {
+      "zh-CN": "我流刀法·诛恶",
+      "en-US": "Judgment Cut",
+      "ja-JP": "刃影",
+      "ko-KR": "아류도법・멸악"
+    },
+    "SourceId": [
+      "1701:1",
+      "1702:1",
+      "1702:3",
+      "1703:1",
+      "1703:3",
+      "1703:4",
+      "1704:2"
+    ]
+  },
+  "51": {
+    "RecountName": {
+      "zh-CN": "居合斩",
+      "en-US": "Iaido Slash",
+      "ja-JP": "雷刃抜刀",
+      "ko-KR": "발도"
+    },
+    "SourceId": [
+      "1714:1",
+      "1714:2",
+      "1714:11"
+    ]
+  },
+  "52": {
+    "RecountName": {
+      "zh-CN": "月影",
+      "en-US": "Moonstrike",
+      "ja-JP": "月影殺",
+      "ko-KR": "월영"
+    },
+    "SourceId": [
+      "1715:2",
+      "1715:3",
+      "1715:5",
+      "1715:7",
+      "1715:9",
+      "1715:10",
+      "1715:12",
+      "1715:15"
+    ]
+  },
+  "53": {
+    "RecountName": {
+      "zh-CN": "极诣·大破灭连斩",
+      "en-US": "Oblivion Combo",
+      "ja-JP": "奥義・破刃連斬",
+      "ko-KR": "극의・대파멸연참"
+    },
+    "SourceId": [
+      "1713:2",
+      "1713:8",
+      "1728:2",
+      "1728:8",
+      "1728:11"
+    ]
+  },
+  "54": {
+    "RecountName": {
+      "zh-CN": "一闪",
+      "en-US": "Flash Strike",
+      "ja-JP": "一閃",
+      "ko-KR": "일섬"
+    },
+    "SourceId": [
+      "1717:1"
+    ]
+  },
+  "55": {
+    "RecountName": {
+      "zh-CN": "飞雷神",
+      "en-US": "Raijin Dash",
+      "ja-JP": "飛雷",
+      "ko-KR": "비뢰신"
+    },
+    "SourceId": [
+      "1718:2"
+    ]
+  },
+  "56": {
+    "RecountName": {
+      "zh-CN": "超高出力",
+      "en-US": "Overdrive",
+      "ja-JP": "彼岸",
+      "ko-KR": "초고출력"
+    },
+    "SourceId": [
+      "1705:1",
+      "1705:3",
+      "1705:4",
+      "1705:5",
+      "1705:6",
+      "1705:8"
+    ]
+  },
+  "57": {
+    "RecountName": {
+      "zh-CN": "镰车",
+      "en-US": "Scythe Wheel",
+      "ja-JP": "旋廻鎌",
+      "ko-KR": "차륜의 낫"
+    },
+    "SourceId": [
+      "1719:4",
+      "1719:5"
+    ]
+  },
+  "58": {
+    "RecountName": {
+      "zh-CN": "月刃",
+      "en-US": "MoonBlades",
+      "ja-JP": "月刃",
+      "ko-KR": "월광의 낫"
+    },
+    "SourceId": [
+      "44601:3",
+      "44701:3"
+    ]
+  },
+  "59": {
+    "RecountName": {
+      "zh-CN": "月刃回旋",
+      "en-US": "Moonblade Whirl",
+      "ja-JP": "月刃旋回",
+      "ko-KR": "월광의 낫 회전"
+    },
+    "SourceId": [
+      "179906:1"
+    ]
+  },
+  "60": {
+    "RecountName": {
+      "zh-CN": "霹雳连斩",
+      "en-US": "Thundercut",
+      "ja-JP": "迅雷連斬",
+      "ko-KR": "벽력연참"
+    },
+    "SourceId": [
+      "1724:3",
+      "1724:4",
+      "1724:6",
+      "1724:7",
+      "1724:8",
+      "1724:20",
+      "1724:21",
+      "1724:26",
+      "1724:27",
+      "1724:28",
+      "1724:29",
+      "1724:30",
+      "1724:31",
+      "1724:32",
+      "1724:33",
+      "1724:34",
+      "1724:35",
+      "1724:36",
+      "1724:37",
+      "1724:38",
+      "1724:39",
+      "1724:40",
+      "1724:41",
+      "1724:42",
+      "1724:43"
+    ]
+  },
+  "62": {
+    "RecountName": {
+      "zh-CN": "千雷闪影之意",
+      "en-US": "Stormflash",
+      "ja-JP": "千雷",
+      "ko-KR": "천뢰섬영의 의지"
+    },
+    "SourceId": [
+      "1732:1"
+    ]
+  },
+  "63": {
+    "RecountName": {
+      "zh-CN": "心眼",
+      "en-US": "True Sight",
+      "ja-JP": "心眼",
+      "ko-KR": "심안"
+    },
+    "SourceId": [
+      "1720:3",
+      "1720:5",
+      "1744:3",
+      "1744:5"
+    ]
+  },
+  "64": {
+    "RecountName": {
+      "zh-CN": "坠龙闪",
+      "en-US": "Dracoflash",
+      "ja-JP": "墜竜閃",
+      "ko-KR": "용섬"
+    },
+    "SourceId": [
+      "1735:3",
+      "1735:5",
+      "1735:6"
+    ]
+  },
+  "65": {
+    "RecountName": {
+      "zh-CN": "神影斩",
+      "en-US": "Phantom Slash",
+      "ja-JP": "瞬影斬",
+      "ko-KR": "그림자 베기"
+    },
+    "SourceId": [
+      "1736:2",
+      "179904:1"
+    ]
+  },
+  "66": {
+    "RecountName": {
+      "zh-CN": "雷切",
+      "en-US": "Thunder Cut",
+      "ja-JP": "雷閃",
+      "ko-KR": "뇌절"
+    },
+    "SourceId": [
+      "155101:0",
+      "155102:0"
+    ]
+  },
+  "67": {
+    "RecountName": {
+      "zh-CN": "霹雳升龙斩",
+      "en-US": "Thundercleave",
+      "ja-JP": "霹靂墜斬",
+      "ko-KR": "벽력승룡참"
+    },
+    "SourceId": [
+      "1742:1",
+      "1742:2",
+      "1742:3",
+      "1742:8"
+    ]
+  },
+  "68": {
+    "RecountName": {
+      "zh-CN": "雷霆之镰",
+      "en-US": "Storm Scythe",
+      "ja-JP": "雷霆鎌",
+      "ko-KR": "뇌전의 낫"
+    },
+    "SourceId": [
+      "1733:4",
+      "1733:6",
+      "1740:1",
+      "1741:1"
+    ]
+  },
+  "69": {
+    "RecountName": {
+      "zh-CN": "神罚之镰",
+      "en-US": "Divine Sickle",
+      "ja-JP": "審罰鎌",
+      "ko-KR": "신벌의 낫"
+    },
+    "SourceId": [
+      "1737:1",
+      "1737:6",
+      "1737:12",
+      "179911:1"
+    ]
+  },
+  "70": {
+    "RecountName": {
+      "zh-CN": "缭乱兜割",
+      "en-US": "Chaos Breaker",
+      "ja-JP": "繚乱兜割",
+      "ko-KR": "흩날리는 칼날"
+    },
+    "SourceId": [
+      "1738:1",
+      "1738:5"
+    ]
+  },
+  "71": {
+    "RecountName": {
+      "zh-CN": "看破斩",
+      "en-US": "Piercing Slash",
+      "ja-JP": "看破",
+      "ko-KR": "간파 베기"
+    },
+    "SourceId": [
+      "1739:1",
+      "179902:1"
+    ]
+  },
+  "72": {
+    "RecountName": {
+      "zh-CN": "刃风界域",
+      "en-US": "Bladewind Domain",
+      "ja-JP": "刃域",
+      "ko-KR": "검풍 영역"
+    },
+    "SourceId": [
+      "179907:1",
+      "179907:2",
+      "179907:3",
+      "179907:4"
+    ]
+  },
+  "73": {
+    "RecountName": {
+      "zh-CN": "雷击",
+      "en-US": "Thunderstrike",
+      "ja-JP": "雷撃",
+      "ko-KR": "뇌격"
+    },
+    "SourceId": [
+      "179908:1"
+    ]
+  },
+  "74": {
+    "RecountName": {
+      "zh-CN": "雷爆",
+      "en-US": "Thunderburst",
+      "ja-JP": "雷烈",
+      "ko-KR": "뇌폭"
+    },
+    "SourceId": [
+      "179910:1"
+    ]
+  },
+  "75": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "2211:2"
+    ]
+  },
+  "76": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031109:3",
+      "2031109:4"
+    ]
+  },
+  "77": {
+    "RecountName": {
+      "zh-CN": "弹无虚发",
+      "en-US": "Bullseye",
+      "ja-JP": "ブルズアイ",
+      "ko-KR": "백발백중"
+    },
+    "SourceId": [
+      "220101:0",
+      "220103:0"
+    ]
+  },
+  "78": {
+    "RecountName": {
+      "zh-CN": "暴风箭矢",
+      "en-US": "Storm Arrow",
+      "ja-JP": "ハウリングボルト",
+      "ko-KR": "스톰 애로우"
+    },
+    "SourceId": [
+      "220104:0"
+    ]
+  },
+  "79": {
+    "RecountName": {
+      "zh-CN": "二连矢",
+      "en-US": "Double Arrow",
+      "ja-JP": "ストライクボルト",
+      "ko-KR": "더블 애로우"
+    },
+    "SourceId": [
+      "220106:0"
+    ]
+  },
+  "80": {
+    "RecountName": {
+      "zh-CN": "光意·四连矢",
+      "en-US": "Quadraflare",
+      "ja-JP": "クアッドブラスト",
+      "ko-KR": "빛의 의지・쿼드러플 애로우"
+    },
+    "SourceId": [
+      "2294:1",
+      "55235:1",
+      "220111:0",
+      "220203:0"
+    ]
+  },
+  "81": {
+    "RecountName": {
+      "zh-CN": "锐眼·光能巨箭",
+      "en-US": "Luminary Bolt",
+      "ja-JP": "鋭眼・ディバインボルト",
+      "ko-KR": "꿰뚫는 눈・샤이닝 애로우"
+    },
+    "SourceId": [
+      "2295:2",
+      "220301:0",
+      "220302:0"
+    ]
+  },
+  "82": {
+    "RecountName": {
+      "zh-CN": "光能爆炸",
+      "en-US": "Photon Explosion",
+      "ja-JP": "閃心爆発",
+      "ko-KR": "라이트 익스플로전"
+    },
+    "SourceId": [
+      "2291:1"
+    ]
+  },
+  "83": {
+    "RecountName": {
+      "zh-CN": "怒涛射击",
+      "en-US": "Torrent Volley",
+      "ja-JP": "レイジショット",
+      "ko-KR": "래피드 샷"
+    },
+    "SourceId": [
+      "220102:0"
+    ]
+  },
+  "84": {
+    "RecountName": {
+      "zh-CN": "光意·怒涛射击",
+      "en-US": "Lumi Torrent",
+      "ja-JP": "レイジブラスト",
+      "ko-KR": "빛의 의지・래피드 샷"
+    },
+    "SourceId": [
+      "2240:3"
+    ]
+  },
+  "86": {
+    "RecountName": {
+      "zh-CN": "箭雨",
+      "en-US": "Arrow Rain",
+      "ja-JP": "アローレイン",
+      "ko-KR": "화살비"
+    },
+    "SourceId": [
+      "2289:1"
+    ]
+  },
+  "87": {
+    "RecountName": {
+      "zh-CN": "聚能射击",
+      "en-US": "Powerdraw",
+      "ja-JP": "チャージショット",
+      "ko-KR": "차지 샷"
+    },
+    "SourceId": [
+      "2233:3"
+    ]
+  },
+  "88": {
+    "RecountName": {
+      "zh-CN": "光能轰炸",
+      "en-US": "Radiance Barrage",
+      "ja-JP": "エナジーショット",
+      "ko-KR": "라이트 봄버"
+    },
+    "SourceId": [
+      "55240:3",
+      "55240:4"
+    ]
+  },
+  "89": {
+    "RecountName": {
+      "zh-CN": "威慑射击",
+      "en-US": "Deter Shot",
+      "ja-JP": "ディスラプトショット",
+      "ko-KR": "위협 사격"
+    },
+    "SourceId": [
+      "220109:0"
+    ]
+  },
+  "90": {
+    "RecountName": {
+      "zh-CN": "爆炸射击",
+      "en-US": "Blast Shot",
+      "ja-JP": "ブラストショット",
+      "ko-KR": "익스플로전 샷"
+    },
+    "SourceId": [
+      "55231:2",
+      "220110:0"
+    ]
+  },
+  "91": {
+    "RecountName": {
+      "zh-CN": "野狼飞扑",
+      "en-US": "Wild Wolf - Pounce",
+      "ja-JP": "臣狼アサルト",
+      "ko-KR": "늑대 돌진"
+    },
+    "SourceId": [
+      "1700825:2",
+      "1700826:2"
+    ]
+  },
+  "92": {
+    "RecountName": {
+      "zh-CN": "猎鹰俯冲攻击",
+      "en-US": "Falcon Dive",
+      "ja-JP": "臣鷹ダイブ",
+      "ko-KR": "팔콘 강하 공격"
+    },
+    "SourceId": [
+      "101112:1"
+    ]
+  },
+  "93": {
+    "RecountName": {
+      "zh-CN": "野狼普通攻击·横扫",
+      "en-US": "Wild Wolf - Basic Attack - Sweep",
+      "ja-JP": "臣狼の通常攻撃",
+      "ko-KR": "늑대 일반 공격"
+    },
+    "SourceId": [
+      "1700827:1"
+    ]
+  },
+  "94": {
+    "RecountName": {
+      "zh-CN": "野狼协同攻击·撕咬",
+      "en-US": "Wild Wolf - Coordinated Attack - Bite",
+      "ja-JP": "臣狼の協力攻撃",
+      "ko-KR": "늑대 협동 공격"
+    },
+    "SourceId": [
+      "1700820:2"
+    ]
+  },
+  "95": {
+    "RecountName": {
+      "zh-CN": "野狼扫尾",
+      "en-US": "Wild Wolf - Tail Sweep",
+      "ja-JP": "臣狼の掃撃",
+      "ko-KR": "늑대 꼬리 휩쓸기"
+    },
+    "SourceId": [
+      "1700824:2"
+    ]
+  },
+  "96": {
+    "RecountName": {
+      "zh-CN": "幻影魔狼",
+      "en-US": "Phantom Direwolves",
+      "ja-JP": "幻影魔狼",
+      "ko-KR": "환영 늑대 마수"
+    },
+    "SourceId": [
+      "2292:2"
+    ]
+  },
+  "97": {
+    "RecountName": {
+      "zh-CN": "光追箭矢",
+      "en-US": "Lightseeker Arrow",
+      "ja-JP": "閃追矢",
+      "ko-KR": "샤이닝 애로우"
+    },
+    "SourceId": [
+      "220105:0"
+    ]
+  },
+  "98": {
+    "RecountName": {
+      "zh-CN": "生命流失",
+      "en-US": "Bleed",
+      "ja-JP": "HP流失",
+      "ko-KR": "출혈"
+    },
+    "SourceId": [
+      "2203091:2",
+      "2203101:2",
+      "2203102:2",
+      "2203141:2",
+      "2203302:2"
+    ]
+  },
+  "99": {
+    "RecountName": {
+      "zh-CN": "猎鹰出击",
+      "en-US": "Falcon Strike",
+      "ja-JP": "臣鷹出撃",
+      "ko-KR": "팔콘 출격"
+    },
+    "SourceId": [
+      "2203291:7"
+    ]
+  },
+  "100": {
+    "RecountName": {
+      "zh-CN": "内爆",
+      "en-US": "Implosion",
+      "ja-JP": "内部破裂",
+      "ko-KR": "내폭"
+    },
+    "SourceId": [
+      "2203521:5"
+    ]
+  },
+  "101": {
+    "RecountName": {
+      "zh-CN": "幻影猎鹰",
+      "en-US": "Phantom Falcon",
+      "ja-JP": "幻影の臣鷹",
+      "ko-KR": "환영 팔콘"
+    },
+    "SourceId": [
+      "2296:2",
+      "220113:0",
+      "2203531:1"
+    ]
+  },
+  "102": {
+    "RecountName": {
+      "zh-CN": "天界雄鹰",
+      "en-US": "Celestial Eagle",
+      "ja-JP": "天界の臣鷹",
+      "ko-KR": "천공의 매"
+    },
+    "SourceId": [
+      "2352:1",
+      "2352:3"
+    ]
+  },
+  "103": {
+    "RecountName": {
+      "zh-CN": "猎鹰闪电冲击",
+      "en-US": "Falcon Lightning Strike",
+      "ja-JP": "臣鷹の雷撃衝撃",
+      "ko-KR": "팔콘 섬광 돌진"
+    },
+    "SourceId": [
+      "2203291:9"
+    ]
+  },
+  "104": {
+    "RecountName": {
+      "zh-CN": "践踏",
+      "en-US": "Stomp",
+      "ja-JP": "踏撃",
+      "ko-KR": "짓밟기"
+    },
+    "SourceId": [
+      "2203512:1"
+    ]
+  },
+  "105": {
+    "RecountName": {
+      "zh-CN": "光棱",
+      "en-US": "Light Prism",
+      "ja-JP": "光のプリズム",
+      "ko-KR": "라이트 프리즘"
+    },
+    "SourceId": [
+      "2203621:1",
+      "2203621:5",
+      "2203622:4",
+      "2203622:7"
+    ]
+  },
+  "106": {
+    "RecountName": {
+      "zh-CN": "光能箭矢",
+      "en-US": "Photon Arrow",
+      "ja-JP": "閃心矢",
+      "ko-KR": "루미너스 애로우"
+    },
+    "SourceId": [
+      "220112:0"
+    ]
+  },
+  "107": {
+    "RecountName": {
+      "zh-CN": "魔法箭矢",
+      "en-US": "Magic Arrow",
+      "ja-JP": "マジックアロー",
+      "ko-KR": "매직 애로우"
+    },
+    "SourceId": [
+      "220107:0"
+    ]
+  },
+  "108": {
+    "RecountName": {
+      "zh-CN": "爆炸箭矢",
+      "en-US": "Explosive Arrow",
+      "ja-JP": "爆裂矢",
+      "ko-KR": "폭발 화살"
+    },
+    "SourceId": [
+      "220108:0",
+      "220108:1"
+    ]
+  },
+  "109": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "1912:2"
+    ]
+  },
+  "110": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031107:3",
+      "2031107:4"
+    ]
+  },
+  "111": {
+    "RecountName": {
+      "zh-CN": "止战之锋",
+      "en-US": "Halberd's Edge",
+      "ja-JP": "止戦刃",
+      "ko-KR": "종전의 칼끝"
+    },
+    "SourceId": [
+      "1901:2",
+      "1902:2",
+      "1903:2",
+      "1903:3",
+      "1904:2",
+      "1933:2"
+    ]
+  },
+  "112": {
+    "RecountName": {
+      "zh-CN": "护盾猛击",
+      "en-US": "Shield Bash",
+      "ja-JP": "砕刃の猛撃",
+      "ko-KR": "실드 배쉬"
+    },
+    "SourceId": [
+      "1922:2"
+    ]
+  },
+  "113": {
+    "RecountName": {
+      "zh-CN": "护盾连击",
+      "en-US": "Shield Combo",
+      "ja-JP": "盾連撃",
+      "ko-KR": "실드 콤보"
+    },
+    "SourceId": [
+      "1932:2",
+      "1932:3"
+    ]
+  },
+  "114": {
+    "RecountName": {
+      "zh-CN": "格挡冲击",
+      "en-US": "Countercrush",
+      "ja-JP": "護刃の衝撃",
+      "ko-KR": "블로킹 스트라이크"
+    },
+    "SourceId": [
+      "1930:1",
+      "1930:4",
+      "1930:7",
+      "1930:8",
+      "1930:9",
+      "1930:10"
+    ]
+  },
+  "115": {
+    "RecountName": {
+      "zh-CN": "岩御·崩裂回环",
+      "en-US": "Cracking Echo",
+      "ja-JP": "岩堅・崩裂の廻刃",
+      "ko-KR": "바위 수호・붕괴의 고리"
+    },
+    "SourceId": [
+      "1907:3"
+    ]
+  },
+  "116": {
+    "RecountName": {
+      "zh-CN": "碎星冲",
+      "en-US": "Star Shatter",
+      "ja-JP": "砕星衝",
+      "ko-KR": "별 쪼개기"
+    },
+    "SourceId": [
+      "1924:2"
+    ]
+  },
+  "117": {
+    "RecountName": {
+      "zh-CN": "砂石斗篷",
+      "en-US": "Sandshroud",
+      "ja-JP": "砂塵外套",
+      "ko-KR": "모래 장막"
+    },
+    "SourceId": [
+      "1927:2",
+      "50049:4"
+    ]
+  },
+  "119": {
+    "RecountName": {
+      "zh-CN": "砂岩之握",
+      "en-US": "Sandgrip",
+      "ja-JP": "砂岩握",
+      "ko-KR": "움켜쥐는 사암"
+    },
+    "SourceId": [
+      "50033:1"
+    ]
+  },
+  "120": {
+    "RecountName": {
+      "zh-CN": "岩怒之击",
+      "en-US": "Granite Fury",
+      "ja-JP": "岩塊撃",
+      "ko-KR": "분노의 바위"
+    },
+    "SourceId": [
+      "1937:2",
+      "1939:2"
+    ]
+  },
+  "121": {
+    "RecountName": {
+      "zh-CN": "怒爆",
+      "en-US": "Rage Burst",
+      "ja-JP": "憤怒の剛撃",
+      "ko-KR": "분노 폭발"
+    },
+    "SourceId": [
+      "1925:1",
+      "1940:1"
+    ]
+  },
+  "122": {
+    "RecountName": {
+      "zh-CN": "勇者壁垒",
+      "en-US": "Brave Bastion",
+      "ja-JP": "勇壮砦壁",
+      "ko-KR": "영웅의 방벽"
+    },
+    "SourceId": [
+      "2201350:3"
+    ]
+  },
+  "123": {
+    "RecountName": {
+      "zh-CN": "砂岩守护",
+      "en-US": "Sandward",
+      "ja-JP": "堅石守護",
+      "ko-KR": "사암의 수호"
+    },
+    "SourceId": [
+      "1923:12",
+      "1923:13"
+    ]
+  },
+  "124": {
+    "RecountName": {
+      "zh-CN": "怒击",
+      "en-US": "Rageblow",
+      "ja-JP": "怒撃",
+      "ko-KR": "노격"
+    },
+    "SourceId": [
+      "1935:1"
+    ]
+  },
+  "125": {
+    "RecountName": {
+      "zh-CN": "碎星崩裂",
+      "en-US": "Starfall",
+      "ja-JP": "砕星の鉄槌",
+      "ko-KR": "별 부수기"
+    },
+    "SourceId": [
+      "1941:2"
+    ]
+  },
+  "126": {
+    "RecountName": {
+      "zh-CN": "崩裂",
+      "en-US": "Rupture",
+      "ja-JP": "断裂の鉄槌",
+      "ko-KR": "붕괴"
+    },
+    "SourceId": [
+      "1942:2"
+    ]
+  },
+  "127": {
+    "RecountName": {
+      "zh-CN": "地崩山摧",
+      "en-US": "Terra Sunder",
+      "ja-JP": "地崩の山摧",
+      "ko-KR": "대지 붕괴"
+    },
+    "SourceId": [
+      "199902:1",
+      "199902:2",
+      "2201570:3"
+    ]
+  },
+  "128": {
+    "RecountName": {
+      "zh-CN": "巨岩轰击",
+      "en-US": "Stone Fist",
+      "ja-JP": "巨岩の轟撃",
+      "ko-KR": "거암 강타"
+    },
+    "SourceId": [
+      "199903:1"
+    ]
+  },
+  "129": {
+    "RecountName": {
+      "zh-CN": "弱点打击",
+      "en-US": "Weakness Strike",
+      "ja-JP": "弱点攻撃",
+      "ko-KR": "약점 타격"
+    },
+    "SourceId": [
+      "50036:1"
+    ]
+  },
+  "130": {
+    "RecountName": {
+      "zh-CN": "格挡回复",
+      "en-US": "Block Recovery",
+      "ja-JP": "レジスト回復",
+      "ko-KR": "막기 회복"
+    },
+    "SourceId": [
+      "2201080:3"
+    ]
+  },
+  "131": {
+    "RecountName": {
+      "zh-CN": "格挡反击",
+      "en-US": "Countercrush",
+      "ja-JP": "レジスト反撃",
+      "ko-KR": "막기 반격"
+    },
+    "SourceId": [
+      "50037:3",
+      "50067:3",
+      "50067:4",
+      "50068:3",
+      "50068:4",
+      "50068:5"
+    ]
+  },
+  "132": {
+    "RecountName": {
+      "zh-CN": "护盾回声",
+      "en-US": "Shield Echo",
+      "ja-JP": "盾残響",
+      "ko-KR": "실드 에코"
+    },
+    "SourceId": [
+      "2201240:3",
+      "2201240:5"
+    ]
+  },
+  "133": {
+    "RecountName": {
+      "zh-CN": "砂石复苏",
+      "en-US": "Sandstone Revival",
+      "ja-JP": "砂晶回復",
+      "ko-KR": "모래 소생"
+    },
+    "SourceId": [
+      "2201410:5"
+    ]
+  },
+  "134": {
+    "RecountName": {
+      "zh-CN": "回复",
+      "en-US": "Recovery",
+      "ja-JP": "回復",
+      "ko-KR": "회복"
+    },
+    "SourceId": [
+      "2201491:3"
+    ]
+  },
+  "135": {
+    "RecountName": {
+      "zh-CN": "岩拳回复",
+      "en-US": "Rock Heal",
+      "ja-JP": "岩拳回復",
+      "ko-KR": "바위 주먹 회복"
+    },
+    "SourceId": [
+      "2201641:3",
+      "2201641:4"
+    ]
+  },
+  "136": {
+    "RecountName": {
+      "zh-CN": "砂晶石震荡",
+      "en-US": "Sand Crystal Shock",
+      "ja-JP": "晶義激震",
+      "ko-KR": "모래 결정 진동"
+    },
+    "SourceId": [
+      "2201362:3"
+    ]
+  },
+  "137": {
+    "RecountName": {
+      "zh-CN": "岩弹",
+      "en-US": "Granite",
+      "ja-JP": "岩石弾",
+      "ko-KR": "암석탄"
+    },
+    "SourceId": [
+      "1901:0",
+      "1902:0"
+    ]
+  },
+  "138": {
+    "RecountName": {
+      "zh-CN": "坚毅之息",
+      "en-US": "Resolute Breath",
+      "ja-JP": "堅忍不抜",
+      "ko-KR": "불굴의 숨결"
+    },
+    "SourceId": [
+      "1909:2",
+      "2201172:3"
+    ]
+  },
+  "139": {
+    "RecountName": {
+      "zh-CN": "猛击追击",
+      "en-US": "Bash Pursuit",
+      "ja-JP": "猛撃追撃",
+      "ko-KR": "맹격 추격"
+    },
+    "SourceId": [
+      "2201540:5"
+    ]
+  },
+  "140": {
+    "RecountName": {
+      "zh-CN": "岩怒追击",
+      "en-US": "Granite Fury Pursuit",
+      "ja-JP": "岩塊追撃",
+      "ko-KR": "분노의 추격"
+    },
+    "SourceId": [
+      "2201640:5"
+    ]
+  },
+  "141": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "2424:2"
+    ]
+  },
+  "142": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031110:3",
+      "2031110:4"
+    ]
+  },
+  "143": {
+    "RecountName": {
+      "zh-CN": "公正之剑",
+      "en-US": "Blade of Justice",
+      "ja-JP": "ジャスティス",
+      "ko-KR": "정의의 검"
+    },
+    "SourceId": [
+      "2401:2",
+      "2402:2",
+      "2403:2",
+      "2404:2"
+    ]
+  },
+  "144": {
+    "RecountName": {
+      "zh-CN": "英勇盾击",
+      "en-US": "Valor Bash",
+      "ja-JP": "ブレイヴバッシュ",
+      "ko-KR": "용맹의 방패"
+    },
+    "SourceId": [
+      "2405:4",
+      "2405:7",
+      "2405:8"
+    ]
+  },
+  "145": {
+    "RecountName": {
+      "zh-CN": "先锋打击",
+      "en-US": "Vanguard Strike",
+      "ja-JP": "グローイングガード",
+      "ko-KR": "선봉 타격"
+    },
+    "SourceId": [
+      "2406:1"
+    ]
+  },
+  "146": {
+    "RecountName": {
+      "zh-CN": "先锋追击",
+      "en-US": "Vanguard Hunt",
+      "ja-JP": "ヴァンガードラッシュ",
+      "ko-KR": "선봉 추격"
+    },
+    "SourceId": [
+      "2406:4",
+      "2406:5",
+      "2406:8",
+      "2206541:3",
+      "2206561:3"
+    ]
+  },
+  "147": {
+    "RecountName": {
+      "zh-CN": "凛威·圣光灌注",
+      "en-US": "Radiant Infusion",
+      "ja-JP": "光凛・レイディアントフォース",
+      "ko-KR": "빛의 권위・라이트 인퓨전"
+    },
+    "SourceId": [
+      "2407:3"
+    ]
+  },
+  "148": {
+    "RecountName": {
+      "zh-CN": "裁决",
+      "en-US": "Judgment",
+      "ja-JP": "ジャッジメント",
+      "ko-KR": "심판"
+    },
+    "SourceId": [
+      "2410:1",
+      "2410:4",
+      "55421:3"
+    ]
+  },
+  "149": {
+    "RecountName": {
+      "zh-CN": "自动裁决",
+      "en-US": "Auto Judgment",
+      "ja-JP": "オートジャッジメント",
+      "ko-KR": "자동 심판"
+    },
+    "SourceId": [
+      "2451:1"
+    ]
+  },
+  "150": {
+    "RecountName": {
+      "zh-CN": "清算",
+      "en-US": "Reckoning",
+      "ja-JP": "レコニング",
+      "ko-KR": "숙청"
+    },
+    "SourceId": [
+      "2412:2",
+      "2412:3",
+      "2412:4"
+    ]
+  },
+  "151": {
+    "RecountName": {
+      "zh-CN": "投掷盾牌",
+      "en-US": "Shield Toss",
+      "ja-JP": "シールドスロー",
+      "ko-KR": "방패 투척"
+    },
+    "SourceId": [
+      "240101:0"
+    ]
+  },
+  "152": {
+    "RecountName": {
+      "zh-CN": "圣剑",
+      "en-US": "Sacred Blade",
+      "ja-JP": "ホーリーソード",
+      "ko-KR": "성스러운 검"
+    },
+    "SourceId": [
+      "2421:1"
+    ]
+  },
+  "153": {
+    "RecountName": {
+      "zh-CN": "光明决心",
+      "en-US": "Radiance",
+      "ja-JP": "セイクリッドオース",
+      "ko-KR": "결의의 빛"
+    },
+    "SourceId": [
+      "240102:0"
+    ]
+  },
+  "154": {
+    "RecountName": {
+      "zh-CN": "圣光守卫",
+      "en-US": "Aegis Ward",
+      "ja-JP": "ホーリーガード",
+      "ko-KR": "라이트 프로텍션"
+    },
+    "SourceId": [
+      "55405:2",
+      "55405:4"
+    ]
+  },
+  "155": {
+    "RecountName": {
+      "zh-CN": "冷酷征伐",
+      "en-US": "Zeal Crusade",
+      "ja-JP": "コンクエスト",
+      "ko-KR": "냉혹한 정벌"
+    },
+    "SourceId": [
+      "55412:3",
+      "55412:5",
+      "55412:9",
+      "55417:3",
+      "55417:5",
+      "55417:9",
+      "55431:1",
+      "55432:1"
+    ]
+  },
+  "156": {
+    "RecountName": {
+      "zh-CN": "圣环",
+      "en-US": "Divine Circle",
+      "ja-JP": "ホーリーリング",
+      "ko-KR": "디바인 서클"
+    },
+    "SourceId": [
+      "55404:3",
+      "55404:4"
+    ]
+  },
+  "157": {
+    "RecountName": {
+      "zh-CN": "炽热清算",
+      "en-US": "Inferno Reckon",
+      "ja-JP": "ブレイズレコニング",
+      "ko-KR": "열화의 숙청"
+    },
+    "SourceId": [
+      "2413:2",
+      "2413:3",
+      "2413:4",
+      "2413:5"
+    ]
+  },
+  "158": {
+    "RecountName": {
+      "zh-CN": "灼热裁决",
+      "en-US": "Scorching Judgment",
+      "ja-JP": "ブレイズジャッジメント",
+      "ko-KR": "작열의 심판"
+    },
+    "SourceId": [
+      "2452:1",
+      "2452:2",
+      "2452:3"
+    ]
+  },
+  "159": {
+    "RecountName": {
+      "zh-CN": "断罪",
+      "en-US": "Condemn",
+      "ja-JP": "パニッシュメント",
+      "ko-KR": "단죄"
+    },
+    "SourceId": [
+      "2416:2"
+    ]
+  },
+  "160": {
+    "RecountName": {
+      "zh-CN": "强化断罪",
+      "en-US": "Enhanced Condemn",
+      "ja-JP": "強化パニッシュメント",
+      "ko-KR": "강화 단죄"
+    },
+    "SourceId": [
+      "2417:2"
+    ]
+  },
+  "161": {
+    "RecountName": {
+      "zh-CN": "光明冲击",
+      "en-US": "Radiant Impact",
+      "ja-JP": "光明の衝撃",
+      "ko-KR": "라이트 임팩트"
+    },
+    "SourceId": [
+      "2450:1"
+    ]
+  },
+  "162": {
+    "RecountName": {
+      "zh-CN": "神圣印记",
+      "en-US": "Holy Mark",
+      "ja-JP": "聖印",
+      "ko-KR": "신성 인장"
+    },
+    "SourceId": [
+      "2206241:3",
+      "2206241:5",
+      "2206243:1",
+      "2206250:6"
+    ]
+  },
+  "163": {
+    "RecountName": {
+      "zh-CN": "神圣之击",
+      "en-US": "Divine Strike",
+      "ja-JP": "神聖攻撃",
+      "ko-KR": "신성한 일격"
+    },
+    "SourceId": [
+      "2206401:3"
+    ]
+  },
+  "164": {
+    "RecountName": {
+      "zh-CN": "光芒核心",
+      "en-US": "Radiant Core",
+      "ja-JP": "光核",
+      "ko-KR": "라이트 코어"
+    },
+    "SourceId": [
+      "2206552:3",
+      "2206552:4"
+    ]
+  },
+  "165": {
+    "RecountName": {
+      "zh-CN": "盾击守护",
+      "en-US": "Shield Guard",
+      "ja-JP": "盾撃守護",
+      "ko-KR": "방패 수호"
+    },
+    "SourceId": [
+      "2206460:3"
+    ]
+  },
+  "166": {
+    "RecountName": {
+      "zh-CN": "回复",
+      "en-US": "Recovery",
+      "ja-JP": "回復",
+      "ko-KR": "회복"
+    },
+    "SourceId": [
+      "2201493:3"
+    ]
+  },
+  "167": {
+    "RecountName": {
+      "zh-CN": "神圣光辉",
+      "en-US": "Holy Radiance",
+      "ja-JP": "神聖光輝",
+      "ko-KR": "신성한 빛"
+    },
+    "SourceId": [
+      "2206240:4"
+    ]
+  },
+  "168": {
+    "RecountName": {
+      "zh-CN": "裁决追击",
+      "en-US": "Judgment Pursuit",
+      "ja-JP": "裁決追撃",
+      "ko-KR": "심판 추격"
+    },
+    "SourceId": [
+      "2206290:5"
+    ]
+  },
+  "169": {
+    "RecountName": {
+      "zh-CN": "裁决追击",
+      "en-US": "Judgment Pursuit",
+      "ja-JP": "裁決追撃",
+      "ko-KR": "심판 추격"
+    },
+    "SourceId": [
+      "2206680:5"
+    ]
+  },
+  "170": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "1517:2"
+    ]
+  },
+  "171": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031105:3",
+      "2031105:4"
+    ]
+  },
+  "172": {
+    "RecountName": {
+      "zh-CN": "掌控藤蔓",
+      "en-US": "Vines' Embrace",
+      "ja-JP": "ヴァインラッシュ",
+      "ko-KR": "덩굴 조종"
+    },
+    "SourceId": [
+      "1501:2",
+      "1502:2",
+      "1502:3",
+      "1503:2",
+      "1503:3",
+      "1503:4",
+      "1504:2",
+      "1504:4"
+    ]
+  },
+  "173": {
+    "RecountName": {
+      "zh-CN": "狂野绽放",
+      "en-US": "Wild Bloom",
+      "ja-JP": "ワイルドブルーム",
+      "ko-KR": "야생의 꽃"
+    },
+    "SourceId": [
+      "1518:2",
+      "1530:2",
+      "1541:2",
+      "21402:1",
+      "21402:3"
+    ]
+  },
+  "174": {
+    "RecountName": {
+      "zh-CN": "生命绽放",
+      "en-US": "Life Bloom",
+      "ja-JP": "バイタルブルーム",
+      "ko-KR": "생명의 꽃"
+    },
+    "SourceId": [
+      "20301:4",
+      "21101:1"
+    ]
+  },
+  "175": {
+    "RecountName": {
+      "zh-CN": "繁盛·希望结界",
+      "en-US": "Divine Circle Bloom",
+      "ja-JP": "深葉・ブルームサークル",
+      "ko-KR": "만개・희망의 결계"
+    },
+    "SourceId": [
+      "1509:1",
+      "21414:4",
+      "21414:5"
+    ]
+  },
+  "176": {
+    "RecountName": {
+      "zh-CN": "花语回升",
+      "en-US": "Bloomheal",
+      "ja-JP": "ブルームヒール",
+      "ko-KR": "치유의 꽃말"
+    },
+    "SourceId": [
+      "1527:6",
+      "1527:8",
+      "1556:1"
+    ]
+  },
+  "178": {
+    "RecountName": {
+      "zh-CN": "不羁之种",
+      "en-US": "Feral Seed",
+      "ja-JP": "フェラルシード",
+      "ko-KR": "자유의 씨앗"
+    },
+    "SourceId": [
+      "1550:1",
+      "150103:0",
+      "150104:0"
+    ]
+  },
+  "179": {
+    "RecountName": {
+      "zh-CN": "滋养",
+      "en-US": "Nourish",
+      "ja-JP": "リジェネレーション",
+      "ko-KR": "양분 주기"
+    },
+    "SourceId": [
+      "21404:3"
+    ]
+  },
+  "180": {
+    "RecountName": {
+      "zh-CN": "再生脉冲",
+      "en-US": "Regen Pulse",
+      "ja-JP": "リジェネイトパルス",
+      "ko-KR": "재생의 파동"
+    },
+    "SourceId": [
+      "1560:1",
+      "1560:2",
+      "1560:3",
+      "1561:1",
+      "1561:2",
+      "1561:3",
+      "1561:5",
+      "1561:6",
+      "1561:7",
+      "1561:8",
+      "1561:9",
+      "1561:10",
+      "1561:11",
+      "1561:12",
+      "1561:13",
+      "21425:1",
+      "150112:0"
+    ]
+  },
+  "181": {
+    "RecountName": {
+      "zh-CN": "灌注",
+      "en-US": "Infusion",
+      "ja-JP": "インフュージョン",
+      "ko-KR": "인퓨전"
+    },
+    "SourceId": [
+      "150105:0",
+      "150106:0",
+      "150107:0",
+      "150110:0"
+    ]
+  },
+  "182": {
+    "RecountName": {
+      "zh-CN": "森之祈愿",
+      "en-US": "Grove Wish",
+      "ja-JP": "グローヴウィッシュ",
+      "ko-KR": "숲의 기도"
+    },
+    "SourceId": [
+      "21406:1"
+    ]
+  },
+  "183": {
+    "RecountName": {
+      "zh-CN": "森语G10-森之祈愿",
+      "en-US": "Verdant Oracle G10 - Grove Wish",
+      "ja-JP": "ヴァーダントオラクルG10-グローヴウィッシュ",
+      "ko-KR": "실반 오라클 G10 - 숲의 기도"
+    },
+    "SourceId": [
+      "21406:4"
+    ]
+  },
+  "185": {
+    "RecountName": {
+      "zh-CN": "盛放注能",
+      "en-US": "Blossom Charge",
+      "ja-JP": "ブルームチャージ",
+      "ko-KR": "에너지 주입"
+    },
+    "SourceId": [
+      "1529:1",
+      "1529:2",
+      "2202581:3",
+      "2202581:4",
+      "2202582:3",
+      "2202582:4"
+    ]
+  },
+  "187": {
+    "RecountName": {
+      "zh-CN": "鹿之奔袭",
+      "en-US": "Stag Charge",
+      "ja-JP": "スタッグチャージ",
+      "ko-KR": "사슴의 돌진"
+    },
+    "SourceId": [
+      "21418:4",
+      "150101:0"
+    ]
+  },
+  "188": {
+    "RecountName": {
+      "zh-CN": "治疗脉冲",
+      "en-US": "Healing Pulse",
+      "ja-JP": "治癒波動",
+      "ko-KR": "치료 파동"
+    },
+    "SourceId": [
+      "1562:1",
+      "1562:2",
+      "1562:3",
+      "150102:0",
+      "150102:1"
+    ]
+  },
+  "189": {
+    "RecountName": {
+      "zh-CN": "狂野之种",
+      "en-US": "Wild Seed",
+      "ja-JP": "荒野の種",
+      "ko-KR": "야생의 씨앗"
+    },
+    "SourceId": [
+      "1551:1"
+    ]
+  },
+  "190": {
+    "RecountName": {
+      "zh-CN": "滋养之种",
+      "en-US": "Nourishing Seed",
+      "ja-JP": "滋養の種",
+      "ko-KR": "양분의 씨앗"
+    },
+    "SourceId": [
+      "2202311:3",
+      "2202311:4"
+    ]
+  },
+  "191": {
+    "RecountName": {
+      "zh-CN": "治疗链接",
+      "en-US": "Healing Chain",
+      "ja-JP": "治癒連結",
+      "ko-KR": "치료 연쇄"
+    },
+    "SourceId": [
+      "2202091:1"
+    ]
+  },
+  "192": {
+    "RecountName": {
+      "zh-CN": "荆棘",
+      "en-US": "Thorn",
+      "ja-JP": "継続の茨",
+      "ko-KR": "가시"
+    },
+    "SourceId": [
+      "21424:3"
+    ]
+  },
+  "193": {
+    "RecountName": {
+      "zh-CN": "治疗球",
+      "en-US": "Healing Orb",
+      "ja-JP": "治癒球",
+      "ko-KR": "치료 구체"
+    },
+    "SourceId": [
+      "2202291:1"
+    ]
+  },
+  "194": {
+    "RecountName": {
+      "zh-CN": "自然护盾",
+      "en-US": "Nature Shield",
+      "ja-JP": "自然防壁",
+      "ko-KR": "자연 실드"
+    },
+    "SourceId": [
+      "2202120:4"
+    ]
+  },
+  "195": {
+    "RecountName": {
+      "zh-CN": "复苏",
+      "en-US": "Resurrect",
+      "ja-JP": "復活",
+      "ko-KR": "소생"
+    },
+    "SourceId": [
+      "2202262:3"
+    ]
+  },
+  "196": {
+    "RecountName": {
+      "zh-CN": "自然绽放",
+      "en-US": "Natural Bloom",
+      "ja-JP": "自然開花",
+      "ko-KR": "자연 개화"
+    },
+    "SourceId": [
+      "2202271:1"
+    ]
+  },
+  "197": {
+    "RecountName": {
+      "zh-CN": "共生印记",
+      "en-US": "Symbiotic Mark",
+      "ja-JP": "共生の印",
+      "ko-KR": "공생의 인장"
+    },
+    "SourceId": [
+      "21423:3"
+    ]
+  },
+  "198": {
+    "RecountName": {
+      "zh-CN": "休止的治愈",
+      "en-US": "Healing of Stillness",
+      "ja-JP": "小休止の癒し",
+      "ko-KR": "멈춰버린 치유"
+    },
+    "SourceId": [
+      "55355:1",
+      "55356:1",
+      "55357:1"
+    ]
+  },
+  "199": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "2337:1"
+    ]
+  },
+  "200": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031111:3",
+      "2031111:4"
+    ]
+  },
+  "201": {
+    "RecountName": {
+      "zh-CN": "琴弦叩击",
+      "en-US": "String Strike",
+      "ja-JP": "ストロークビート",
+      "ko-KR": "스트링 슬랩"
+    },
+    "SourceId": [
+      "2321:2",
+      "2321:3",
+      "2322:2",
+      "2322:3",
+      "2323:2",
+      "2323:3",
+      "2324:2",
+      "2324:3"
+    ]
+  },
+  "202": {
+    "RecountName": {
+      "zh-CN": "琴弦撩拨",
+      "en-US": "Resonant Strings",
+      "ja-JP": "スラップビート",
+      "ko-KR": "스트로크"
+    },
+    "SourceId": [
+      "2301:2",
+      "2302:2",
+      "2303:2",
+      "2304:2"
+    ]
+  },
+  "203": {
+    "RecountName": {
+      "zh-CN": "增幅节拍",
+      "en-US": "Amplified Beat",
+      "ja-JP": "ハードディストーション",
+      "ko-KR": "증폭하는 비트"
+    },
+    "SourceId": [
+      "2306:1",
+      "2306:3",
+      "2306:4"
+    ]
+  },
+  "204": {
+    "RecountName": {
+      "zh-CN": "愈合节拍",
+      "en-US": "Healing Beat",
+      "ja-JP": "コーラスヒーリング",
+      "ko-KR": "치유의 비트"
+    },
+    "SourceId": [
+      "55302:1",
+      "55302:4"
+    ]
+  },
+  "205": {
+    "RecountName": {
+      "zh-CN": "升格·劲爆全场/升格·无限狂想",
+      "en-US": "Rock the Stage/Infinite Rhapsody",
+      "ja-JP": "響演・バッドネスステージ/ブレイブフェローチェ",
+      "ko-KR": "승격・열광의 스테이지/승격・인피니트 랩소디"
+    },
+    "SourceId": [
+      "2314:6",
+      "2314:7",
+      "2314:8",
+      "2335:2",
+      "2364:4",
+      "2364:5",
+      "2364:6",
+      "2365:2",
+      "55344:1",
+      "55346:1"
+    ]
+  },
+  "206": {
+    "RecountName": {
+      "zh-CN": "升格·巡演曲",
+      "en-US": "Concert Circuit",
+      "ja-JP": "アレグロヴィヴァーチェ",
+      "ko-KR": "승격・객석 순회"
+    },
+    "SourceId": [
+      "2336:1",
+      "2366:2",
+      "55339:1"
+    ]
+  },
+  "207": {
+    "RecountName": {
+      "zh-CN": "聚合乐章",
+      "en-US": "Harmonic Anthem",
+      "ja-JP": "ハーモニックアンセム",
+      "ko-KR": "결집의 악장"
+    },
+    "SourceId": [
+      "230101:0",
+      "230101:1",
+      "230102:1",
+      "230102:2",
+      "230103:1",
+      "230103:2",
+      "230103:3",
+      "230104:1",
+      "230104:2",
+      "230104:3",
+      "230104:4"
+    ]
+  },
+  "208": {
+    "RecountName": {
+      "zh-CN": "烈焰狂想",
+      "en-US": "Rhapsody of Flame",
+      "ja-JP": "フレイムラプソディー",
+      "ko-KR": "불꽃의 랩소디"
+    },
+    "SourceId": [
+      "55301:1",
+      "55301:3",
+      "230801:0",
+      "230901:0",
+      "231001:0"
+    ]
+  },
+  "209": {
+    "RecountName": {
+      "zh-CN": "鸣奏·英勇乐章",
+      "en-US": "Heroic Melody",
+      "ja-JP": "ブレイブメロディー",
+      "ko-KR": "울림・용맹의 악장"
+    },
+    "SourceId": [
+      "55341:1"
+    ]
+  },
+  "210": {
+    "RecountName": {
+      "zh-CN": "鸣奏·愈合乐章",
+      "en-US": "Healing Melody",
+      "ja-JP": "ヒーリングメロディー",
+      "ko-KR": "울림・치유의 악장"
+    },
+    "SourceId": [
+      "55342:1"
+    ]
+  },
+  "211": {
+    "RecountName": {
+      "zh-CN": "激涌五重奏",
+      "en-US": "Fivefold Crescendo",
+      "ja-JP": "サージクインテット",
+      "ko-KR": "격렬한 오중주"
+    },
+    "SourceId": [
+      "2312:23",
+      "2312:24",
+      "2312:25",
+      "2312:26",
+      "2312:27",
+      "2362:11",
+      "2362:12",
+      "2362:13",
+      "2362:14",
+      "2362:15",
+      "55304:1",
+      "55304:3"
+    ]
+  },
+  "212": {
+    "RecountName": {
+      "zh-CN": "热情挥洒",
+      "en-US": "Passion Burst",
+      "ja-JP": "パッショネート",
+      "ko-KR": "열정 발산"
+    },
+    "SourceId": [
+      "2313:6",
+      "2313:7",
+      "2313:8"
+    ]
+  },
+  "213": {
+    "RecountName": {
+      "zh-CN": "安可",
+      "en-US": "Encore",
+      "ja-JP": "アンコール",
+      "ko-KR": "앵콜"
+    },
+    "SourceId": [
+      "55314:1",
+      "55314:3",
+      "230401:0",
+      "230501:0"
+    ]
+  },
+  "214": {
+    "RecountName": {
+      "zh-CN": "烈焰音符",
+      "en-US": "Flame Note",
+      "ja-JP": "烈炎音符",
+      "ko-KR": "화염 음표"
+    },
+    "SourceId": [
+      "230106:1"
+    ]
+  },
+  "215": {
+    "RecountName": {
+      "zh-CN": "炎律狂踏",
+      "en-US": "Flame's Rampage",
+      "ja-JP": "炎律の狂踏",
+      "ko-KR": "염률의 짓밟기"
+    },
+    "SourceId": [
+      "230105:1",
+      "2207431:3"
+    ]
+  },
+  "216": {
+    "RecountName": {
+      "zh-CN": "猛烈挥击",
+      "en-US": "Fierce Strike",
+      "ja-JP": "バイオレントスイング",
+      "ko-KR": "맹렬한 휘두르기"
+    },
+    "SourceId": [
+      "2317:4"
+    ]
+  },
+  "217": {
+    "RecountName": {
+      "zh-CN": "激昂·热情挥洒",
+      "en-US": "Passion Fury",
+      "ja-JP": "レイジパッショネート",
+      "ko-KR": "격앙・열정 발산"
+    },
+    "SourceId": [
+      "2332:2",
+      "2332:3"
+    ]
+  },
+  "218": {
+    "RecountName": {
+      "zh-CN": "音符热浪",
+      "en-US": "Sonic Surge",
+      "ja-JP": "音響熱波",
+      "ko-KR": "소닉 서지"
+    },
+    "SourceId": [
+      "2207681:3"
+    ]
+  },
+  "219": {
+    "RecountName": {
+      "zh-CN": "活力解放",
+      "en-US": "Vitality Unleash",
+      "ja-JP": "活力解放",
+      "ko-KR": "활력 해방"
+    },
+    "SourceId": [
+      "2207620:7",
+      "2207620:8"
+    ]
+  },
+  "220": {
+    "RecountName": {
+      "zh-CN": "音符",
+      "en-US": "Note",
+      "ja-JP": "音符",
+      "ko-KR": "음표"
+    },
+    "SourceId": [
+      "2207141:2",
+      "2207141:3",
+      "2207411:1"
+    ]
+  },
+  "221": {
+    "RecountName": {
+      "zh-CN": "火焰震击",
+      "en-US": "Flame Shock",
+      "ja-JP": "フレイムショック",
+      "ko-KR": "플레임 쇼크"
+    },
+    "SourceId": [
+      "2320:1"
+    ]
+  },
+  "222": {
+    "RecountName": {
+      "zh-CN": "火柱冲击",
+      "en-US": "Flame Pillar Blash",
+      "ja-JP": "火柱衝撃",
+      "ko-KR": "불기둥 임팩트"
+    },
+    "SourceId": [
+      "2329:1",
+      "2330:1",
+      "2330:2"
+    ]
+  },
+  "224": {
+    "RecountName": {
+      "zh-CN": "安和曲",
+      "en-US": "Peaceful Tune",
+      "ja-JP": "ピースフルロンド",
+      "ko-KR": "평온한 선율"
+    },
+    "SourceId": [
+      "55311:5"
+    ]
+  },
+  "225": {
+    "RecountName": {
+      "zh-CN": "炽焰治愈",
+      "en-US": "Blazing Heal",
+      "ja-JP": "炎癒",
+      "ko-KR": "작염 치유"
+    },
+    "SourceId": [
+      "2207151:3"
+    ]
+  },
+  "226": {
+    "RecountName": {
+      "zh-CN": "烈火冲击",
+      "en-US": "Scorching Impact",
+      "ja-JP": "烈火衝撃",
+      "ko-KR": "화염 임팩트"
+    },
+    "SourceId": [
+      "2331:2"
+    ]
+  },
+  "227": {
+    "RecountName": {
+      "zh-CN": "休止的治愈",
+      "en-US": "Healing of Stillness",
+      "ja-JP": "小休止の癒し",
+      "ko-KR": "멈춰버린 치유"
+    },
+    "SourceId": [
+      "21427:1",
+      "21428:1",
+      "21429:1",
+      "21430:1"
+    ]
+  },
+  "228": {
+    "RecountName": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "SourceId": [
+      "1624:1"
+    ]
+  },
+  "229": {
+    "RecountName": {
+      "zh-CN": "幸运一击",
+      "en-US": "Lucky Strike",
+      "ja-JP": "幸運の一撃",
+      "ko-KR": "행운의 일격"
+    },
+    "SourceId": [
+      "2031103:3",
+      "2031103:4"
+    ]
+  },
+  "230": {
+    "RecountName": {
+      "zh-CN": "炽热挥击",
+      "en-US": "Blazing Swing",
+      "ja-JP": "ブレイズスイング",
+      "ko-KR": "화염의 휘두르기"
+    },
+    "SourceId": [
+      "1601:1",
+      "1602:1",
+      "1602:2",
+      "1603:1",
+      "1603:2",
+      "1604:1"
+    ]
+  },
+  "231": {
+    "RecountName": {
+      "zh-CN": "炽烈升腾",
+      "en-US": "Blazing Ascension",
+      "ja-JP": "スパイラルブロウ",
+      "ko-KR": "작열 승천"
+    },
+    "SourceId": [
+      "1605:2",
+      "1605:3",
+      "1619:2",
+      "1619:3"
+    ]
+  },
+  "232": {
+    "RecountName": {
+      "zh-CN": "狂热斩击",
+      "en-US": "Frenzied Slash",
+      "ja-JP": "ブレイズアクス",
+      "ko-KR": "광열의 참격"
+    },
+    "SourceId": [
+      "1606:2",
+      "35104:1"
+    ]
+  },
+  "233": {
+    "RecountName": {
+      "zh-CN": "烬灭！狱炎不知火",
+      "en-US": "Cinderfall! Hellfire Shiranui",
+      "ja-JP": "ヴォルテクスインパクト",
+      "ko-KR": "진멸! 옥염부지화"
+    },
+    "SourceId": [
+      "1618:4",
+      "1618:5",
+      "1618:6",
+      "1618:7"
+    ]
+  },
+  "234": {
+    "RecountName": {
+      "zh-CN": "炽焰突袭",
+      "en-US": "Blazing Assault",
+      "ja-JP": "ツインラッシュ",
+      "ko-KR": "열화의 습격"
+    },
+    "SourceId": [
+      "1607:2",
+      "1607:3",
+      "1607:5",
+      "1607:6"
+    ]
+  },
+  "235": {
+    "RecountName": {
+      "zh-CN": "暴怒劈斩",
+      "en-US": "Rage Cleave",
+      "ja-JP": "ラースアクス",
+      "ko-KR": "격노 강타"
+    },
+    "SourceId": [
+      "1608:1",
+      "1608:2",
+      "1609:1",
+      "1609:2",
+      "1610:1",
+      "1611:1"
+    ]
+  },
+  "236": {
+    "RecountName": {
+      "zh-CN": "斧风",
+      "en-US": "Axe Wind",
+      "ja-JP": "アクススパイラル",
+      "ko-KR": "도끼 폭풍"
+    },
+    "SourceId": [
+      "1612:1",
+      "1612:2"
+    ]
+  },
+  "237": {
+    "RecountName": {
+      "zh-CN": "迷狂炎舞",
+      "en-US": "Wildfire Dance",
+      "ja-JP": "バーニングラッシュ",
+      "ko-KR": "광염난무"
+    },
+    "SourceId": [
+      "1613:1",
+      "1613:3"
+    ]
+  },
+  "238": {
+    "RecountName": {
+      "zh-CN": "无羁坠星",
+      "en-US": "Unbound Meteor",
+      "ja-JP": "ラーヴァインパクト",
+      "ko-KR": "해방된 유성"
+    },
+    "SourceId": [
+      "1614:3",
+      "160101:1"
+    ]
+  },
+  "240": {
+    "RecountName": {
+      "zh-CN": "如川流华斩",
+      "en-US": "Flowing Splendor Slash",
+      "ja-JP": "バーニングクロス",
+      "ko-KR": "유수화참"
+    },
+    "SourceId": [
+      "1616:2",
+      "35105:3"
+    ]
+  },
+  "242": {
+    "RecountName": {
+      "zh-CN": "无相火斩",
+      "en-US": "Formless Flame Slash.",
+      "ja-JP": "イラプション",
+      "ko-KR": "무상화참"
+    },
+    "SourceId": [
+      "35107:3",
+      "35108:3",
+      "35109:3"
+    ]
+  },
+  "243": {
+    "RecountName": {
+      "zh-CN": "地火流星",
+      "en-US": "Hellfire Meteor",
+      "ja-JP": "流星火",
+      "ko-KR": "지옥불 유성"
+    },
+    "SourceId": [
+      "160102:1"
+    ]
+  },
+  "244": {
+    "RecountName": {
+      "zh-CN": "燃烧",
+      "en-US": "Burn",
+      "ja-JP": "鬼火",
+      "ko-KR": "연소"
+    },
+    "SourceId": [
+      "2208172:3",
+      "2208172:4"
+    ]
+  },
+  "245": {
+    "RecountName": {
+      "zh-CN": "炎爆",
+      "en-US": "Explosion.",
+      "ja-JP": "フレアバースト",
+      "ko-KR": "염폭"
+    },
+    "SourceId": [
+      "2208181:3"
+    ]
+  },
+  "246": {
+    "RecountName": {
+      "zh-CN": "迷狂炎舞·最后一斩",
+      "en-US": "Wildfire Dance - Final Slash",
+      "ja-JP": "バーニングラッシュ・終式",
+      "ko-KR": "광염난무・종식"
+    },
+    "SourceId": [
+      "1622:1"
+    ]
+  },
+  "247": {
+    "RecountName": {
+      "zh-CN": "飞腾炎华",
+      "en-US": "Soaring Flame",
+      "ja-JP": "クリムゾンブロウ",
+      "ko-KR": "비상하는 화염"
+    },
+    "SourceId": [
+      "1620:3"
+    ]
+  },
+  "248": {
+    "RecountName": {
+      "zh-CN": "大红莲丸",
+      "en-US": "Great Crimson Lotus",
+      "ja-JP": "フレイムスピン",
+      "ko-KR": "대홍련환"
+    },
+    "SourceId": [
+      "1623:1"
+    ]
+  },
+  "249": {
+    "RecountName": {
+      "zh-CN": "炎魔天落杀",
+      "en-US": "Falling Hellfire.",
+      "ja-JP": "クリムゾンインパクト",
+      "ko-KR": "염마천락살"
+    },
+    "SourceId": [
+      "1621:3",
+      "1621:5",
+      "1621:6",
+      "1621:7",
+      "160103:1",
+      "160103:2",
+      "160103:3"
+    ]
+  },
+  "250": {
+    "RecountName": {
+      "zh-CN": "绝技！怒吼指令",
+      "en-US": "Stunt! Roar Command",
+      "ja-JP": "絶技！ロアコマンド",
+      "ko-KR": "비기! 포효 명령"
+    },
+    "SourceId": [
+      "2110062:3"
+    ]
+  },
+  "251": {
+    "RecountName": {
+      "zh-CN": "绝技！碎星陨落",
+      "en-US": "Stunt! Falling Star",
+      "ja-JP": "絶技！スターフォール",
+      "ko-KR": "비기! 떨어지는 별"
+    },
+    "SourceId": [
+      "2002853:1"
+    ]
+  },
+  "252": {
+    "RecountName": {
+      "zh-CN": "绝技！瞬步奇袭",
+      "en-US": "Stunt! Blink Ambush",
+      "ja-JP": "絶技！フラッシュレイド",
+      "ko-KR": "비기! 재빠른 기습"
+    },
+    "SourceId": [
+      "2001740:3",
+      "2001740:4",
+      "2001740:5"
+    ]
+  },
+  "253": {
+    "RecountName": {
+      "zh-CN": "绝技！追猎猛斩",
+      "en-US": "Stunt! Predator Slash",
+      "ja-JP": "絶技！ハントスラッシュ",
+      "ko-KR": "비기! 추격의 참격"
+    },
+    "SourceId": [
+      "1005240:1",
+      "1005240:2",
+      "1005240:5",
+      "1005240:6"
+    ]
+  },
+  "254": {
+    "RecountName": {
+      "zh-CN": "奥义！炽炎战斧",
+      "en-US": "Arcane! Blazing Axe",
+      "ja-JP": "奥義！炎のバトルアクス",
+      "ko-KR": "오의! 작열의 전투도끼"
+    },
+    "SourceId": [
+      "3210051:2"
+    ]
+  },
+  "255": {
+    "RecountName": {
+      "zh-CN": "奥义！毒爆",
+      "en-US": "Arcane! Poison Explosion",
+      "ja-JP": "奥義！ヴェノムバースト",
+      "ko-KR": "오의! 독폭"
+    },
+    "SourceId": [
+      "1007741:1",
+      "2110099:3"
+    ]
+  },
+  "256": {
+    "RecountName": {
+      "zh-CN": "绝技！超会心",
+      "en-US": "Stunt! Super Critical",
+      "ja-JP": "絶技！超会心",
+      "ko-KR": "비기! 초회심"
+    },
+    "SourceId": [
+      "1002440:3",
+      "3210061:1"
+    ]
+  },
+  "257": {
+    "RecountName": {
+      "zh-CN": "绝技！乱射",
+      "en-US": "Stunt! Frenzied Shot",
+      "ja-JP": "絶技！乱射",
+      "ko-KR": "비기! 난사"
+    },
+    "SourceId": [
+      "100730:2",
+      "100730:4",
+      "391007:0",
+      "10070801:0"
+    ]
+  },
+  "258": {
+    "RecountName": {
+      "zh-CN": "绝技！强压之雷",
+      "en-US": "Stunt! Thunder Suppress",
+      "ja-JP": "絶技！サンダープレッシャー",
+      "ko-KR": "비기! 강압의 번개"
+    },
+    "SourceId": [
+      "1010440:1",
+      "1010440:2",
+      "3210081:1"
+    ]
+  },
+  "259": {
+    "RecountName": {
+      "zh-CN": "奥义！重锤狂袭",
+      "en-US": "Arcane! Furious Hammer",
+      "ja-JP": "奥義！マッドハンマー",
+      "ko-KR": "오의! 광란의 해머"
+    },
+    "SourceId": [
+      "1700440:3",
+      "1700440:5"
+    ]
+  },
+  "260": {
+    "RecountName": {
+      "zh-CN": "奥义！流星陨落",
+      "en-US": "Arcane! Meteor Shower",
+      "ja-JP": "奥義！メテオフォール",
+      "ko-KR": "오의! 유성의 몰락"
+    },
+    "SourceId": [
+      "3698:1",
+      "3699:1",
+      "3210021:3",
+      "3210022:3"
+    ]
+  },
+  "261": {
+    "RecountName": {
+      "zh-CN": "奥义！沧澜风啸",
+      "en-US": "Arcane! Azure Gale",
+      "ja-JP": "奥義！ハウリングウェーブ",
+      "ko-KR": "오의! 창랑을 부르는 바람"
+    },
+    "SourceId": [
+      "1008440:1"
+    ]
+  },
+  "262": {
+    "RecountName": {
+      "zh-CN": "奥义！茧房术",
+      "en-US": "Arcane! Cocoon Tech",
+      "ja-JP": "奥義！コクーンスペル",
+      "ko-KR": "오의! 고치술"
+    },
+    "SourceId": [
+      "1006940:1"
+    ]
+  },
+  "263": {
+    "RecountName": {
+      "zh-CN": "绝技！静默之水",
+      "en-US": "Stunt! Water of Silence",
+      "ja-JP": "絶技！チルウォーター",
+      "ko-KR": "비기! 고요한 물"
+    },
+    "SourceId": [
+      "3936001:1"
+    ]
+  },
+  "264": {
+    "RecountName": {
+      "zh-CN": "绝技！雷光球",
+      "en-US": "Stunt! Lightning Orb",
+      "ja-JP": "絶技！ライトニングボール",
+      "ko-KR": "비기! 번개 구슬"
+    },
+    "SourceId": [
+      "10002:0",
+      "10002:1"
+    ]
+  },
+  "265": {
+    "RecountName": {
+      "zh-CN": "绝技！旋风打击",
+      "en-US": "Stunt! Whirlwind Strike",
+      "ja-JP": "絶技！スピンストライク",
+      "ko-KR": "비기! 바람의 타격"
+    },
+    "SourceId": [
+      "1008641:3"
+    ]
+  },
+  "266": {
+    "RecountName": {
+      "zh-CN": "绝技！螺旋断界",
+      "en-US": "Stunt! Spiral Severance",
+      "ja-JP": "絶技！スパイラルブレイク",
+      "ko-KR": "비기! 나선단계"
+    },
+    "SourceId": [
+      "1005940:1"
+    ]
+  },
+  "267": {
+    "RecountName": {
+      "zh-CN": "绝技！猪突猛进",
+      "en-US": "Stunt! Boarrier Rush",
+      "ja-JP": "絶技！猪突猛進",
+      "ko-KR": "비기! 돼지의 돌진"
+    },
+    "SourceId": [
+      "102640:1",
+      "102640:8"
+    ]
+  },
+  "268": {
+    "RecountName": {
+      "zh-CN": "绝技！电磁爆弹",
+      "en-US": "Stunt! Electro Bomb",
+      "ja-JP": "絶技！マグネボム",
+      "ko-KR": "비기! 마그네틱 폭탄"
+    },
+    "SourceId": [
+      "391301:0",
+      "3913001:1"
+    ]
+  },
+  "269": {
+    "RecountName": {
+      "zh-CN": "绝技！缭乱飞弹",
+      "en-US": "Stunt! Chaotic Barrage",
+      "ja-JP": "絶技！カオスミサイル",
+      "ko-KR": "비기! 화려한 탄환"
+    },
+    "SourceId": [
+      "391001:0",
+      "391002:0",
+      "391003:0",
+      "391004:0",
+      "391005:0",
+      "391006:0",
+      "2110090:3",
+      "2110091:3"
+    ]
+  },
+  "270": {
+    "RecountName": {
+      "zh-CN": "绝技！剑刃横扫",
+      "en-US": "Stunt! Blade Sweep",
+      "ja-JP": "絶技！ブレードスイープ",
+      "ko-KR": "비기! 검날 난무"
+    },
+    "SourceId": [
+      "3914:2",
+      "3914:3",
+      "10040102:0"
+    ]
+  },
+  "272": {
+    "RecountName": {
+      "zh-CN": "绝技！大地之盾",
+      "en-US": "Stunt! Earth Shield",
+      "ja-JP": "絶技！アースバリア",
+      "ko-KR": "비기! 대지의 방패"
+    },
+    "SourceId": [
+      "2110066:3"
+    ]
+  },
+  "273": {
+    "RecountName": {
+      "zh-CN": "奥义！雷霆咆哮",
+      "en-US": "Arcane! Thunder Roar",
+      "ja-JP": "奥義！サンダーロア",
+      "ko-KR": "오의! 번개의 포효"
+    },
+    "SourceId": [
+      "2110096:1",
+      "2110096:4"
+    ]
+  },
+  "274": {
+    "RecountName": {
+      "zh-CN": "奥义！脉冲祝祷",
+      "en-US": "Arcane! Pulse Benediction",
+      "ja-JP": "奥義！パルスの祈り",
+      "ko-KR": "오의! 축복의 파동"
+    },
+    "SourceId": [
+      "2110012:3",
+      "3210101:2"
+    ]
+  },
+  "275": {
+    "RecountName": {
+      "zh-CN": "奥义！雷霆天引",
+      "en-US": "Arcane! Thunderfall Grasp",
+      "ja-JP": "奥義！サンダーコール",
+      "ko-KR": "오의! 하늘을 울리는 번개"
+    },
+    "SourceId": [
+      "2002440:2",
+      "3210031:1"
+    ]
+  },
+  "276": {
+    "RecountName": {
+      "zh-CN": "奥义！地狱突刺",
+      "en-US": "Arcane! Infernal Thrust",
+      "ja-JP": "奥義！ヘルスラスト",
+      "ko-KR": "오의! 지옥의 찌르기"
+    },
+    "SourceId": [
+      "1008140:1"
+    ]
+  },
+  "277": {
+    "RecountName": {
+      "zh-CN": "奥义！琉火咆哮",
+      "en-US": "Arcane! Flame Roar",
+      "ja-JP": "奥義！炎の咆哮",
+      "ko-KR": "오의! 화염의 포효"
+    },
+    "SourceId": [
+      "3901:1",
+      "2110083:4"
+    ]
+  },
+  "278": {
+    "RecountName": {
+      "zh-CN": "绝技！超重斩",
+      "en-US": "Stunt! Heavy Slash",
+      "ja-JP": "絶技！ヘビースラッシュ",
+      "ko-KR": "비기! 초중참"
+    },
+    "SourceId": [
+      "3081023:1",
+      "3081023:2",
+      "3081023:3"
+    ]
+  },
+  "279": {
+    "RecountName": {
+      "zh-CN": "绝技！无形冲击",
+      "en-US": "Stunt! Invisible Impact",
+      "ja-JP": "絶技！エアインパクト",
+      "ko-KR": "비기! 형태 없는 공격"
+    },
+    "SourceId": [
+      "3925:2"
+    ]
+  },
+  "280": {
+    "RecountName": {
+      "zh-CN": "绝技！变身蜜蜂",
+      "en-US": "Stunt! Transform into Bee",
+      "ja-JP": "絶技！ミーンに変身",
+      "ko-KR": "비기! 민 변신"
+    },
+    "SourceId": [
+      "141104:1",
+      "391008:0",
+      "1007601:0",
+      "1007602:1"
+    ]
+  },
+  "281": {
+    "RecountName": {
+      "zh-CN": "奥义！静默潮汐",
+      "en-US": "Arcane! Silent Tide",
+      "ja-JP": "奥義！サイレントサージ",
+      "ko-KR": "오의! 고요한 조수"
+    },
+    "SourceId": [
+      "1008540:1",
+      "3210092:1"
+    ]
+  },
+  "282": {
+    "RecountName": {
+      "zh-CN": "奥义！冰霜震荡",
+      "en-US": "Arcane! Frostquake",
+      "ja-JP": "奥義！フロストショック",
+      "ko-KR": "오의! 서리의 진동"
+    },
+    "SourceId": [
+      "1002830:3",
+      "1002830:4"
+    ]
+  },
+  "283": {
+    "RecountName": {
+      "zh-CN": "奥义！瞬即斩",
+      "en-US": "Arcane! Flash Execution",
+      "ja-JP": "奥義！ゼロスラッシュ",
+      "ko-KR": "오의! 순즉참"
+    },
+    "SourceId": [
+      "2110085:3",
+      "2900540:1",
+      "2900540:3",
+      "2900540:4",
+      "2900540:5",
+      "2900540:6"
+    ]
+  },
+  "288": {
+    "RecountName": {
+      "zh-CN": "奥义！神灵依凭",
+      "en-US": "Arcane! Divine Reliance",
+      "ja-JP": "奥義！神霊憑依",
+      "ko-KR": "오의! 신령 의탁"
+    },
+    "SourceId": [
+      "2110111:4",
+      "2900840:3",
+      "2900840:5",
+      "2900840:7",
+      "2900840:8",
+      "2900840:9"
+    ]
+  },
+  "289": {
+    "RecountName": {
+      "zh-CN": "奥义！万象升华",
+      "en-US": "Arcane! Allscape Sublimation",
+      "ja-JP": "奥義！万象昇華",
+      "ko-KR": "오의! 만물 승화"
+    },
+    "SourceId": [
+      "2900740:1"
+    ]
+  },
+  "290": {
+    "RecountName": {
+      "zh-CN": "奥义！佑世边界",
+      "en-US": "Arcane! Guardian's Boundary",
+      "ja-JP": "奥義！加護結界",
+      "ko-KR": "오의! 수호의 결계"
+    },
+    "SourceId": [
+      "2110118:3"
+    ]
+  },
+  "291": {
+    "RecountName": {
+      "zh-CN": "奥义！幻象共鸣",
+      "en-US": "Arcane! Illusion Resonance",
+      "ja-JP": "奥義！幻影共鳴",
+      "ko-KR": "오의! 환상 공명"
+    },
+    "SourceId": [
+      "1850:1",
+      "1851:1",
+      "45300:1",
+      "45300:5",
+      "180101:0",
+      "180301:0",
+      "180501:0",
+      "180601:0",
+      "391009:0",
+      "391010:0",
+      "2900441:9",
+      "2900441:10",
+      "2900441:11"
+    ]
+  },
+  "292": {
+    "RecountName": {
+      "zh-CN": "奥义！熊熊烈焰",
+      "en-US": "Arcane! Blazing Flames",
+      "ja-JP": "奥義！爆炎奔流",
+      "ko-KR": "오의! 타오르는 화염"
+    },
+    "SourceId": [
+      "1011906:2"
+    ]
+  },
+  "293": {
+    "RecountName": {
+      "zh-CN": "奥义！无双突刺",
+      "en-US": "Arcane! Peerless Thrust",
+      "ja-JP": "奥義！無双突撃",
+      "ko-KR": "오의! 무쌍 찌르기"
+    },
+    "SourceId": [
+      "1101440:1"
+    ]
+  },
+  "294": {
+    "RecountName": {
+      "zh-CN": "奥义！魅影奇袭",
+      "en-US": "Arcane! Phantom Ambush",
+      "ja-JP": "奥義！ファントムレイド",
+      "ko-KR": "오의! 팬텀 기습"
+    },
+    "SourceId": [
+      "1700829:2"
+    ]
+  },
+  "295": {
+    "RecountName": {
+      "zh-CN": "奥义！卷心菜重锤",
+      "en-US": "Arcane! Cabbage Hammer",
+      "ja-JP": "奥義！甘藍ヘビーハンマー",
+      "ko-KR": "오의! 양배추 무거운 망치"
+    },
+    "SourceId": [
+      "1011806:1"
+    ]
+  },
+  "296": {
+    "RecountName": {
+      "zh-CN": "奥义！炎灵之幸",
+      "en-US": "Arcane! Flame Spirit's Fortune",
+      "ja-JP": "奥義！ラッキーフレイム",
+      "ko-KR": "오의! 염령의 행운"
+    },
+    "SourceId": [
+      "1102306:1",
+      "1102306:2",
+      "1102306:3",
+      "2110133:1"
+    ]
+  },
+  "297": {
+    "RecountName": {
+      "zh-CN": "奥义！绝命螺旋",
+      "en-US": "Arcane! Fatal Spiral",
+      "ja-JP": "奥義！デススパイラル",
+      "ko-KR": "오의! 죽음의 나선"
+    },
+    "SourceId": [
+      "1100740:8"
+    ]
+  },
+  "298": {
+    "RecountName": {
+      "zh-CN": "绝技！寒霜喷吐",
+      "en-US": "Stunt! Frost Breath",
+      "ja-JP": "絶技！フロストスプレー",
+      "ko-KR": "비기! 서리 분출"
+    },
+    "SourceId": [
+      "1100504:1"
+    ]
+  },
+  "299": {
+    "RecountName": {
+      "zh-CN": "绝技！落雷惩戒",
+      "en-US": "Stunt! Lightning Smite",
+      "ja-JP": "絶技！サンダーパニッシュ",
+      "ko-KR": "비기! 낙뢰 징벌"
+    },
+    "SourceId": [
+      "1011011:1",
+      "2110130:3"
+    ]
+  },
+  "300": {
+    "RecountName": {
+      "zh-CN": "绝技！剑刃风暴",
+      "en-US": "Stunt! Blade Storm",
+      "ja-JP": "絶技！剣刃の嵐",
+      "ko-KR": "비기! 검날 폭풍"
+    },
+    "SourceId": [
+      "3960:1"
+    ]
+  },
+  "301": {
+    "RecountName": {
+      "zh-CN": "绝技！治疗爆弹",
+      "en-US": "Stunt! Healing Bomb",
+      "ja-JP": "絶技！ヒールボム",
+      "ko-KR": "비기! 치료 폭탄"
+    },
+    "SourceId": [
+      "1101304:1",
+      "1101304:2",
+      "2110131:3",
+      "3200034:3"
+    ]
+  },
+  "302": {
+    "RecountName": {
+      "zh-CN": "绝技！全场轰炸",
+      "en-US": "Stunt! Carpet Bombing",
+      "ja-JP": "絶技！全域爆撃",
+      "ko-KR": "비기! 필드 폭격"
+    },
+    "SourceId": [
+      "1101204:1",
+      "1101204:2",
+      "3210161:1"
+    ]
+  },
+  "303": {
+    "RecountName": {
+      "zh-CN": "绝技！灵动出击",
+      "en-US": "Stunt! Kinetic Strike",
+      "ja-JP": "絶技！ラッシュアタック",
+      "ko-KR": "비기! 민첩 출격"
+    },
+    "SourceId": [
+      "1700718:1",
+      "1700718:2"
+    ]
+  },
+  "304": {
+    "RecountName": {
+      "zh-CN": "绝技！卷心菜回旋刃",
+      "en-US": "Stunt! Cabbage Boomerang",
+      "ja-JP": "絶技！甘藍スウィングブレード",
+      "ko-KR": "비기! 양배추 회전날"
+    },
+    "SourceId": [
+      "1011312:3"
+    ]
+  },
+  "305": {
+    "RecountName": {
+      "zh-CN": "绝技！卷心菜霹雳闪",
+      "en-US": "Stunt! Cabbage Blitz",
+      "ja-JP": "絶技！甘藍稲妻落とし",
+      "ko-KR": "비기! 양배추 벽력 섬광"
+    },
+    "SourceId": [
+      "1011215:1",
+      "1011215:2",
+      "1011215:3",
+      "1011216:1",
+      "1011216:2",
+      "1011217:2",
+      "3210171:3"
+    ]
+  },
+  "306": {
+    "RecountName": {
+      "zh-CN": "绝技！双重牙",
+      "en-US": "Stunt! Twin Fangs",
+      "ja-JP": "絶技！ダブルファング",
+      "ko-KR": "비기! 이중 송곳니"
+    },
+    "SourceId": [
+      "1102205:2"
+    ]
+  },
+  "307": {
+    "RecountName": {
+      "zh-CN": "奥义！虚蚀劫刄",
+      "en-US": "Arcane! Void Corruption Blade",
+      "ja-JP": "奥義！虚蝕劫刃",
+      "ko-KR": "오의! 허식의 칼날"
+    },
+    "SourceId": [
+      "170112:4"
+    ]
+  },
+  "308": {
+    "RecountName": {
+      "zh-CN": "奥义！裂空反冲",
+      "en-US": "Arcane! Rift Recoil",
+      "ja-JP": "奥義！裂空の反動",
+      "ko-KR": "오의! 열공 충격파"
+    },
+    "SourceId": [
+      "140145:2"
+    ]
+  },
+  "309": {
+    "RecountName": {
+      "zh-CN": "奥义！指令象限",
+      "en-US": "Arcane! Command Quadrant",
+      "ja-JP": "奥義！指令の象限",
+      "ko-KR": "오의! 지령 사분면"
+    },
+    "SourceId": [
+      "3210:0",
+      "3340115:1",
+      "3340115:2",
+      "3340115:3",
+      "3340115:6",
+      "3340116:1",
+      "3340116:2",
+      "3340116:3",
+      "3340190:1",
+      "3340190:2"
+    ]
+  },
+  "310": {
+    "RecountName": {
+      "zh-CN": "奥义！超导波动",
+      "en-US": "Arcane! Superconductor Surge",
+      "ja-JP": "奥義！超伝導波動",
+      "ko-KR": "오의! 초전도 파동"
+    },
+    "SourceId": [
+      "111069:1"
+    ]
+  },
+  "311": {
+    "RecountName": {
+      "zh-CN": "奥义！梭行毒牙",
+      "en-US": "Arcane! Shuttle Fang",
+      "ja-JP": "奥義！飛び交う毒牙",
+      "ko-KR": "오의! 날아드는 독니"
+    },
+    "SourceId": [
+      "1120310:1",
+      "1120310:3"
+    ]
+  },
+  "312": {
+    "RecountName": {
+      "zh-CN": "奥义！瞬空践踏",
+      "en-US": "Arcane! Flash Stomp",
+      "ja-JP": "奥義！瞬踏撃",
+      "ko-KR": "오의! 순간 짓밟기"
+    },
+    "SourceId": [
+      "1701040:2"
+    ]
+  },
+  "313": {
+    "RecountName": {
+      "zh-CN": "奥义！精准点射",
+      "en-US": "Arcane! Precision Burst",
+      "ja-JP": "奥義！精密点射",
+      "ko-KR": "오의! 정밀 점사"
+    },
+    "SourceId": [
+      "1009702:2",
+      "1009703:0",
+      "3210210:3"
+    ]
+  },
+  "314": {
+    "RecountName": {
+      "zh-CN": "奥义！穿透怒吼",
+      "en-US": "Arcane! Piercing Roar",
+      "ja-JP": "奥義！轟く怒号",
+      "ko-KR": "오의! 관통의 포효"
+    },
+    "SourceId": [
+      "1121105:2"
+    ]
+  },
+  "315": {
+    "RecountName": {
+      "zh-CN": "奥义！疾风连喰",
+      "en-US": "Arcane! Swift Devour",
+      "ja-JP": "奥義！暴食の嵐",
+      "ko-KR": "오의! 질풍의 포식"
+    },
+    "SourceId": [
+      "1121508:7",
+      "1121508:8",
+      "1121508:9",
+      "1121508:10",
+      "3210231:1"
+    ]
+  },
+  "316": {
+    "RecountName": {
+      "zh-CN": "绝技！隐匿藏击",
+      "en-US": "Stunt! Hidden Strike",
+      "ja-JP": "絶技！ステルスアタック",
+      "ko-KR": "비기! 은신 기습"
+    },
+    "SourceId": [
+      "1120220:3"
+    ]
+  },
+  "317": {
+    "RecountName": {
+      "zh-CN": "绝技！绝对零度",
+      "en-US": "Stunt! Absolute Zero",
+      "ja-JP": "絶技！絶対零度",
+      "ko-KR": "비기! 절대영도"
+    },
+    "SourceId": [
+      "102664:1"
+    ]
+  },
+  "318": {
+    "RecountName": {
+      "zh-CN": "绝技！深渊吐息",
+      "en-US": "Stunt! Abyssal Breath",
+      "ja-JP": "絶技！深淵の吐息",
+      "ko-KR": "비기! 심연의 숨결"
+    },
+    "SourceId": [
+      "1121406:2",
+      "1121406:3",
+      "1121406:4"
+    ]
+  },
+  "319": {
+    "RecountName": {
+      "zh-CN": "绝技！捶地猛击",
+      "en-US": "Stunt! Ground Smash",
+      "ja-JP": "絶技！ラッシュスラム",
+      "ko-KR": "비기! 대지 강타"
+    },
+    "SourceId": [
+      "1120610:1",
+      "1120610:2",
+      "1120610:3"
+    ]
+  },
+  "320": {
+    "RecountName": {
+      "zh-CN": "绝技！锁定射击",
+      "en-US": "Stunt! Lock-On Shot",
+      "ja-JP": "絶技！ロックオンショット",
+      "ko-KR": "비기! 고정 사격"
+    },
+    "SourceId": [
+      "1121810:1",
+      "1121810:2"
+    ]
+  },
+  "321": {
+    "RecountName": {
+      "zh-CN": "极·急救措施",
+      "en-US": "First Aid",
+      "ja-JP": "極・ファーストエイド",
+      "ko-KR": "극・응급 처치"
+    },
+    "SourceId": [
+      "2302321:3"
+    ]
+  },
+  "322": {
+    "RecountName": {
+      "zh-CN": "极·生命吸取",
+      "en-US": "Life Steal",
+      "ja-JP": "極・HP吸収",
+      "ko-KR": "극・생명 흡수"
+    },
+    "SourceId": [
+      "2300080:3"
+    ]
+  },
+  "323": {
+    "RecountName": {
+      "zh-CN": "虚蚀爆裂",
+      "en-US": "Void Corruption Arcane",
+      "ja-JP": "虚蝕の爆発",
+      "ko-KR": "허무의 침식 파열"
+    },
+    "SourceId": [
+      "701001:1"
+    ]
+  },
+  "324": {
+    "RecountName": {
+      "zh-CN": "虚蚀脉冲（原虚蚀凝神）",
+      "en-US": "Void Corruption Frenzy Pulse (formerly Void Corruption Frenzy Focus)",
+      "ja-JP": "虚蝕パルス（もと虚蝕フォーカス）",
+      "ko-KR": "허무의 침식 파동(이전: 침식의 집중)"
+    },
+    "SourceId": [
+      "391401:0"
+    ]
+  },
+  "325": {
+    "RecountName": {
+      "zh-CN": "虚蚀波动",
+      "en-US": "Void Corruption Fluctuation",
+      "ja-JP": "虚蝕の波動",
+      "ko-KR": "침식의 파동"
+    },
+    "SourceId": [
+      "701002:1",
+      "3001170:6"
+    ]
+  },
+  "326": {
+    "RecountName": {
+      "zh-CN": "虚蚀光环",
+      "en-US": "Void Aura",
+      "ja-JP": "虚蝕オーラ",
+      "ko-KR": "허무의 침식 오라"
+    },
+    "SourceId": [
+      "3001031:3",
+      "3001031:4"
+    ]
+  },
+  "327": {
+    "RecountName": {
+      "zh-CN": "幻梦处决",
+      "en-US": "Phantom Execution",
+      "ja-JP": "幻夢の断罪",
+      "ko-KR": "환상꿈 처형"
+    },
+    "SourceId": [
+      "3002215:1",
+      "3002215:3"
+    ]
+  },
+  "328": {
+    "RecountName": {
+      "zh-CN": "迷幻梦境-不灭战姿",
+      "en-US": "Mirage Dream - Immortal Stance",
+      "ja-JP": "夢幻迷界-不屈の構え",
+      "ko-KR": "몽롱한 꿈속-불멸의 전투 태세"
+    },
+    "SourceId": [
+      "3002671:3"
+    ]
+  },
+  "329": {
+    "RecountName": {
+      "zh-CN": "寂灭之梦-血限冲域",
+      "en-US": "Oblivion Dream - Bloodbound Surge",
+      "ja-JP": "寂滅の夢-HP限界突破",
+      "ko-KR": "적멸의 꿈-혈계 돌파 영역"
+    },
+    "SourceId": [
+      "3003023:1",
+      "3003025:1"
+    ]
+  },
+  "330": {
+    "RecountName": {
+      "zh-CN": "虚妄裁定",
+      "en-US": "Shattered Illusion",
+      "ja-JP": "虚妄断罪",
+      "ko-KR": "허상의 판결"
+    },
+    "SourceId": [
+      "3003250:3"
+    ]
+  },
+  "331": {
+    "RecountName": {
+      "zh-CN": "虚妄裁定-裁定·愈",
+      "en-US": "Shattered Illusion - Judgment - Heal",
+      "ja-JP": "虚妄断罪-断罪・癒",
+      "ko-KR": "허상의 판결-판결・치유"
+    },
+    "SourceId": [
+      "3003260:3"
+    ]
+  },
+  "332": {
+    "RecountName": {
+      "zh-CN": "稳态G8",
+      "en-US": "Stasis G8",
+      "ja-JP": "恒常性G8",
+      "ko-KR": "안정 G8"
+    },
+    "SourceId": [
+      "3059080:3"
+    ]
+  },
+  "333": {
+    "RecountName": {
+      "zh-CN": "雷影稳态G1",
+      "en-US": "Stormblade Stasis G1",
+      "ja-JP": "ストームブレイド・恒常性G1",
+      "ko-KR": "스톰 블레이드 안정 G1"
+    },
+    "SourceId": [
+      "3059101:3"
+    ]
+  },
+  "334": {
+    "RecountName": {
+      "zh-CN": "巨刃稳态G2",
+      "en-US": "Heavy Guardian Stasis G2",
+      "ja-JP": "ヘヴィガーディアン・恒常性G2",
+      "ko-KR": "헤비 가디언 안정 G2"
+    },
+    "SourceId": [
+      "3059210:3"
+    ]
+  },
+  "335": {
+    "RecountName": {
+      "zh-CN": "幻灭冲击",
+      "en-US": "Disillusion Impact",
+      "ja-JP": "イマジンインパクト",
+      "ko-KR": "환상 충격"
+    },
+    "SourceId": [
+      "7998:1"
+    ]
+  },
+  "336": {
+    "RecountName": {
+      "zh-CN": "战意激荡",
+      "en-US": "Battle Surge",
+      "ja-JP": "戦意激動",
+      "ko-KR": "끓어오르는 전의"
+    },
+    "SourceId": [
+      "3005504:1",
+      "3005590:3"
+    ]
+  },
+  "337": {
+    "RecountName": {
+      "zh-CN": "梦幻之箭",
+      "en-US": "Phantom Arrow",
+      "ja-JP": "夢幻の矢",
+      "ko-KR": "몽환의 화살"
+    },
+    "SourceId": [
+      "7997:1",
+      "7997:2",
+      "7997:3",
+      "7997:4",
+      "7997:5",
+      "7997:6",
+      "7997:7",
+      "7997:8",
+      "7997:9",
+      "7997:10"
+    ]
+  },
+  "338": {
+    "RecountName": {
+      "zh-CN": "普通攻击-奥义！星灵魔导士",
+      "en-US": "Normal attack - Arcane! Celestial Spirit Mage",
+      "ja-JP": "通常攻撃・奥義！星霊魔導士",
+      "ko-KR": "일반 공격 - 오의! 성령 마도사"
+    },
+    "SourceId": [
+      "2501:1",
+      "2502:1",
+      "2503:1"
+    ]
+  },
+  "339": {
+    "RecountName": {
+      "zh-CN": "星之大河-奥义！星灵魔导士",
+      "en-US": "Fleuve d'étoiles - Arcane! Celestial Spirit Mage",
+      "ja-JP": "星の大河・奥義！星霊魔導士",
+      "ko-KR": "에투알 플루브 - 오의! 성령 마도사"
+    },
+    "SourceId": [
+      "2504:2",
+      "2504:3",
+      "2504:4"
+    ]
+  },
+  "340": {
+    "RecountName": {
+      "zh-CN": "水文史话-奥义！星灵魔导士",
+      "en-US": "Aqua Metria - Arcane! Celestial Spirit Mage",
+      "ja-JP": "アクアメトリア・奥義！星霊魔導士",
+      "ko-KR": "아쿠아 메트리아 - 오의! 성령 마도사"
+    },
+    "SourceId": [
+      "250101:0"
+    ]
+  },
+  "341": {
+    "RecountName": {
+      "zh-CN": "普通攻击-奥义！灭龙魔导士",
+      "en-US": "Normal Attack - Arcane! Dragon Slayer",
+      "ja-JP": "通常攻撃・奥義！滅竜魔導士",
+      "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
+    },
+    "SourceId": [
+      "2601:2",
+      "2602:2",
+      "2603:2"
+    ]
+  },
+  "342": {
+    "RecountName": {
+      "zh-CN": "火龙的铁拳-奥义！灭龙魔导士",
+      "en-US": "Fire Dragon's Iron Fist - Arcane! Dragon Slayer",
+      "ja-JP": "火竜の鉄拳・奥義！滅竜魔導士",
+      "ko-KR": "화룡의 철권 - 오의! 멸룡 마도사"
+    },
+    "SourceId": [
+      "2604:1"
+    ]
+  },
+  "343": {
+    "RecountName": {
+      "zh-CN": "火龙的翼击-奥义！灭龙魔导士",
+      "en-US": "Fire Dragon's Wing Attack - Arcane! Dragon Slayer",
+      "ja-JP": "火竜の翼撃・奥義！滅竜魔導士",
+      "ko-KR": "화룡의 익격 - 오의! 멸룡 마도사"
+    },
+    "SourceId": [
+      "2605:2"
+    ]
+  },
+  "344": {
+    "RecountName": {
+      "zh-CN": "火龙的咆哮-奥义！灭龙魔导士",
+      "en-US": "Fire Dragon's Roar - Arcane! Dragon Slayer",
+      "ja-JP": "火竜の咆哮・奥義！滅竜魔導士",
+      "ko-KR": "화룡의 포효 - 오의! 멸룡 마도사"
+    },
+    "SourceId": [
+      "2606:2"
+    ]
+  },
+  "345": {
+    "RecountName": {
+      "zh-CN": "雷霆天引",
+      "en-US": "Thunderfall Grasp",
+      "ja-JP": "サンダーコール",
+      "ko-KR": "하늘을 울리는 번개"
+    },
+    "SourceId": [
+      "2002441:2"
+    ]
+  },
+  "346": {
+    "RecountName": {
+      "zh-CN": "琉火咆哮",
+      "en-US": "Flame Roar",
+      "ja-JP": "炎の咆哮",
+      "ko-KR": "화염의 포효"
+    },
+    "SourceId": [
+      "101227:1",
+      "2110302:3"
+    ]
+  },
+  "347": {
+    "RecountName": {
+      "zh-CN": "脉冲祝祷",
+      "en-US": "Pulse Benediction",
+      "ja-JP": "パルスの祈り",
+      "ko-KR": "축복의 파동"
+    },
+    "SourceId": [
+      "2110304:3"
+    ]
+  },
+  "348": {
+    "RecountName": {
+      "zh-CN": "地狱突刺",
+      "en-US": "Infernal Thrust",
+      "ja-JP": "ヘルスラスト",
+      "ko-KR": "지옥의 찌르기"
+    },
+    "SourceId": [
+      "1008141:1"
+    ]
+  },
+  "349": {
+    "RecountName": {
+      "zh-CN": "静默潮汐",
+      "en-US": "Silent Tide",
+      "ja-JP": "サイレントサージ",
+      "ko-KR": "고요한 조수"
+    },
+    "SourceId": [
+      "1008541:1"
+    ]
+  },
+  "350": {
+    "RecountName": {
+      "zh-CN": "奥义！圣焰龙息",
+      "en-US": "Arcane! Sacred Flame Breath",
+      "ja-JP": "奥義！聖炎の竜息",
+      "ko-KR": "오의! 성염룡의 숨결"
+    },
+    "SourceId": [
+      "10270141:1",
+      "10270141:2",
+      "10270141:3"
+    ]
+  },
+  "351": {
+    "RecountName": {
+      "zh-CN": "奥义！双星角斗",
+      "en-US": "Arcane! Twin Star Duel",
+      "ja-JP": "奥義！双星の決闘",
+      "ko-KR": "오의! 쌍성의 결투"
+    },
+    "SourceId": [
+      "3210262:1",
+      "10280041:1"
+    ]
+  },
+  "352": {
+    "RecountName": {
+      "zh-CN": "奥义！裂石风暴",
+      "en-US": "Arcane! Shatterstone Storm",
+      "ja-JP": "奥義！つぶての嵐",
+      "ko-KR": "오의! 바위 파편 폭풍"
+    },
+    "SourceId": [
+      "10290141:1",
+      "10290141:2"
+    ]
+  },
+  "353": {
+    "RecountName": {
+      "zh-CN": "奥义！终焉化身",
+      "en-US": "Arcane! Avatar of the End",
+      "ja-JP": "奥義！終焉の化身",
+      "ko-KR": "오의! 종언의 화신"
+    },
+    "SourceId": [
+      "10300141:1",
+      "10300141:2",
+      "10300141:3"
+    ]
+  },
+  "354": {
+    "RecountName": {
+      "zh-CN": "奥义！堕落一击",
+      "en-US": "Arcane! Corrupted Strike",
+      "ja-JP": "奥義！堕落の一撃",
+      "ko-KR": "오의! 타락의 일격"
+    },
+    "SourceId": [
+      "1123141:1",
+      "1123141:2"
+    ]
+  },
+  "355": {
+    "RecountName": {
+      "zh-CN": "奥义！逆刃极冻斩",
+      "en-US": "Arcane! Glacial Reverse Blade",
+      "ja-JP": "奥義！氷刃返し",
+      "ko-KR": "오의! 역날 극빙참"
+    },
+    "SourceId": [
+      "1122741:1",
+      "1122741:2",
+      "3210290:4"
+    ]
+  },
+  "356": {
+    "RecountName": {
+      "zh-CN": "奥义！斩铁式",
+      "en-US": "Arcane! Ironcleave Stance",
+      "ja-JP": "奥義！斬鉄式",
+      "ko-KR": "오의! 참철식"
+    },
+    "SourceId": [
+      "1123541:1"
+    ]
+  },
+  "357": {
+    "RecountName": {
+      "zh-CN": "奥义！鲛旋湍流",
+      "en-US": "Arcane! Sharkspin Torrent",
+      "ja-JP": "奥義！シャークトルネード",
+      "ko-KR": "오의! 상어 회오리 급류"
+    },
+    "SourceId": [
+      "2110181:3"
+    ]
+  },
+  "358": {
+    "RecountName": {
+      "zh-CN": "奥义！泡影之息",
+      "en-US": "Arcane! Breath of Illusions",
+      "ja-JP": "奥義！バブルブレス",
+      "ko-KR": "오의! 거품 그림자의 숨결"
+    },
+    "SourceId": [
+      "1122341:1",
+      "3210300:3"
+    ]
+  },
+  "359": {
+    "RecountName": {
+      "zh-CN": "绝技！连挟潮柱",
+      "en-US": "Stunt! Cascading Tidal Pillars",
+      "ja-JP": "絶技！タイドピンサー",
+      "ko-KR": "비기! 파도 기둥"
+    },
+    "SourceId": [
+      "1122241:1",
+      "1122241:2",
+      "1122241:3"
+    ]
+  },
+  "360": {
+    "RecountName": {
+      "zh-CN": "绝技！鳍锤重击",
+      "en-US": "Stunt! Fin Hammer Slam",
+      "ja-JP": "絶技！フィンハンマー",
+      "ko-KR": "비기! 지느러미 강타"
+    },
+    "SourceId": [
+      "1123841:1"
+    ]
+  },
+  "361": {
+    "RecountName": {
+      "zh-CN": "绝技！爆裂水弹",
+      "en-US": "Stunt! Bursting Water Shell",
+      "ja-JP": "絶技！アクアバースト",
+      "ko-KR": "비기! 아쿠아 익스플로전"
+    },
+    "SourceId": [
+      "1123441:0"
+    ]
+  },
+  "362": {
+    "RecountName": {
+      "zh-CN": "绝技！寒风旋涡",
+      "en-US": "Stunt! Frostwind Vortex",
+      "ja-JP": "絶技！フロストサイクロン",
+      "ko-KR": "비기! 냉기의 소용돌이"
+    },
+    "SourceId": [
+      "1002241:1",
+      "1002241:4"
+    ]
+  },
+  "363": {
+    "RecountName": {
+      "zh-CN": "绝技！烈焰驱散",
+      "en-US": "Stunt! Blaze Purge",
+      "ja-JP": "絶技！烈火一掃",
+      "ko-KR": "비기! 화염 흩날리기"
+    },
+    "SourceId": [
+      "1123041:1"
+    ]
+  }
+}

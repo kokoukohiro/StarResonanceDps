@@ -1,7 +1,7 @@
 """
 バフ名テーブルを生成する。
 
-  Data/Localization/buffs.{言語}.json
+  Data/Localization/BuffNames.json
 
 **`BuffTable` の全行を収録する。** 使い道を決めて絞らない。
 バフ/デバフウィジェットに加えて、バフ由来の被ダメなどバフ欄に出ないバフも名前を引ける。
@@ -29,7 +29,7 @@ def main():
 
     values = {lang: {i: name_of(t.get(i)) for i in keys} for lang, t in tables.items()}
     print("")
-    write_localized("buffs", values, keys)
+    write_localized("BuffNames", values, keys)
 
 
 if __name__ == "__main__":

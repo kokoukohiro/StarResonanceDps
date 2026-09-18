@@ -26,7 +26,7 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
-    /// <summary>技ID → ボス大技の予告(<c>DbmTable</c>)の名前。<c>Data/Localization/dbms.*.json</c>。</summary>
+    /// <summary>技ID → ボス大技の予告(<c>DbmTable</c>)の名前。<c>Data/Localization/DbmNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _dbmNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -42,17 +42,38 @@ public static class CombatDataCatalog
     /// <c>DataTools/gen_skill_warnings.py</c> が生成する。
     /// </summary>
     private static FrozenSet<int> _warningSkillLevelIds = FrozenSet<int>.Empty;
-    /// <summary>行代表キー → ゲーム内メーターの行名。<c>Data/Localization/recounts.*.json</c>。</summary>
+    /// <summary><see cref="_warningSkillLevelIds"/> のどれかのレベルを持つ技ID。</summary>
+    private static FrozenSet<int> _warningSkillIds = FrozenSet<int>.Empty;
+    /// <summary>行代表キー → ゲーム内メーターの行名。<c>Data/Localization/RecountRows.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<long, string>> _recountNames =
         new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>発生源キー → 行代表キー。<c>recounts.*.json</c> の行構成に手修正を重ねたもの。</summary>
+    /// <summary>発生源キー → 行代表キー。<c>RecountRows.json</c> の行構成に手修正を重ねたもの。</summary>
     private static FrozenDictionary<long, long> _recountRows = FrozenDictionary<long, long>.Empty;
+
+    /// <summary>特性のバフID → 特性名。<c>Data/Localization/RogueEntryNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _rogueEntryNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary><see cref="_rogueEntryNames"/> の鍵(特性のバフID)全部。</summary>
+    private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// ダンジョン名に付ける難易度名。<c>Data/Localization/DungeonTypeNames.json</c>。
+    /// 鍵は <see cref="MakeDungeonTypeKey"/>(ファイルでは <c>番号</c> と <c>番号:段階</c>)。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<long, string>> _dungeonTypeNames =
+        new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>ダンジョン名と難易度名の区切り。ゲームの表示と同じで、全言語で同じ文字。</summary>
+    private const string DungeonTypeNameSeparator = "-";
     private static string _cultureName = "en-US";
 
     /// <summary>
@@ -137,14 +158,18 @@ public static class CombatDataCatalog
             _skills = LoadNumericCatalog(HelperMethods.DataTables.Skills.Data);
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
             _skillCooldownsByLevel = LoadSkillCooldowns();
-            _skillNames = LoadLocalizedText("skills");
-            _buffNames = LoadLocalizedText("buffs");
-            _monsterNames = LoadLocalizedText("monsters");
-            _dbmNames = LoadLocalizedText("dbms");
+            _skillNames = LoadLocalizedText("SkillNames", out _);
+            _buffNames = LoadLocalizedText("BuffNames", out _);
+            _monsterNames = LoadLocalizedText("MonsterNames", out _);
+            _dbmNames = LoadLocalizedText("DbmNames", out _);
+            _rogueEntryNames = LoadLocalizedText("RogueEntryNames", out var rogueEntryBuffIds);
+            _rogueEntryBuffIds = rogueEntryBuffIds;
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
-            _sceneNames = LoadLocalizedText("scenes");
+            _warningSkillIds = _warningSkillLevelIds.Select(skillLevelId => skillLevelId / 100).ToFrozenSet();
+            _sceneNames = LoadLocalizedText("SceneNames", out _);
+            _dungeonTypeNames = LoadDungeonTypeNames();
             LoadRecounts();
         }
     }
@@ -206,11 +231,12 @@ public static class CombatDataCatalog
         => ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey);
 
     /// <summary>
-    /// メーターの行に出す名前。<b>ゲーム内メーターの見出し表だけが決める。</b>
+    /// メーターの行に出す名前。<b>ゲーム内メーターの見出し表(手修正込み)が先に決める。</b>
     ///
     /// <para>
-    /// <c>skills</c> / <c>buffs</c> の4言語テーブルは引かない。あちらは装備中スキル枠や
-    /// バフ/デバフウィジェットのためのもので、メーターの行とは対象も粒度も違う。
+    /// 見出し表で名前が空の行だけ、記録時に付与元をたどって着いた先(<paramref name="landing"/>)の名前を出す。
+    /// 特性のバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら <c>SkillNames</c>。
+    /// 着いていなければ空のまま(内部ID注記だけ)。見出し表の名前を着地先で上書きすることはない。
     /// </para>
     ///
     /// <para>
@@ -218,16 +244,37 @@ public static class CombatDataCatalog
     /// 「どの行か」と「注記のID」が必ず一致する。
     /// </para>
     /// </summary>
-    public static string GetSourceDisplayName(long rowKey, bool isBuffSource)
+    public static string GetSourceDisplayName(long rowKey, bool isBuffSource, SourceLanding landing)
     {
+        var name = ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey);
+        if (string.IsNullOrEmpty(name))
+        {
+            name = GetLandingName(landing);
+        }
+
         return AppendSourceInternalId(
-            ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey),
+            name,
             isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
             rowKey);
     }
 
+    /// <summary>着地先の名前。着いていないか名前が無ければ空。</summary>
+    public static string GetLandingName(SourceLanding landing)
+    {
+        var cultureName = Volatile.Read(ref _cultureName);
+        return landing.Kind switch
+        {
+            SourceLandingKind.RogueEntry => ResolveText(_rogueEntryNames, cultureName, landing.Id),
+            SourceLandingKind.Skill => ResolveText(_skillNames, cultureName, landing.Id),
+            _ => string.Empty
+        };
+    }
+
+    /// <summary>特性表(<c>RogueEntryTable.BuffId</c>)にあるバフか。</summary>
+    public static bool IsRogueEntryBuff(int buffId) => _rogueEntryBuffIds.Contains(buffId);
+
     /// <summary>
-    /// 発生源キー → 行代表キー。<c>recounts.*.json</c> の行構成に手修正を重ねたもの。
+    /// 発生源キー → 行代表キー。<c>RecountRows.json</c> の行構成に手修正を重ねたもの。
     ///
     /// <para>
     /// ゲーム内メーターは <c>RecountTable</c> の1行に複数の <c>DamageId</c> をまとめる。
@@ -260,7 +307,7 @@ public static class CombatDataCatalog
     /// 行構成・行名・手修正をまとめて読む。
     ///
     /// <list type="number">
-    ///   <item>生成物 <c>recounts.*.json</c> の行から、行の集まりを作る</item>
+    ///   <item>生成物 <c>RecountRows.json</c> の行から、行の集まりを作る</item>
     ///   <item>手修正の <c>Row</c> を当てる。<b>外すほうを先に</b>当てないと、外した鍵へ寄せられない</item>
     ///   <item>行代表を取り直す。外した鍵が代表だった行は代表が変わる</item>
     ///   <item>生成物の名前を行代表へ配り、手修正の <c>Name</c> を重ねる</item>
@@ -268,28 +315,27 @@ public static class CombatDataCatalog
     /// </summary>
     private static void LoadRecounts()
     {
-        // 生成物は生の見出し表と同じ形。行ごとに RecountName と、その行に属する発生源キーの一覧。
+        // 生成物は生の見出し表と同じ形。行ごとに RecountName(4言語)と、その行に属する発生源キーの一覧。
         // 項目名は SourceId。中身は TypeEnum:枝番 で、生の DamageId とは別の値。
-        var byCulture = new Dictionary<string, Dictionary<string, RecountRow>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var cultureName in SupportedCultures)
+        var layout = new Dictionary<string, RecountRow>();
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Localization", "RecountRows.json");
+        if (File.Exists(path))
         {
-            var path = Path.Combine(
-                Utils.DATA_DIR_NAME, "Localization", $"recounts.{cultureName}.json");
-            if (!File.Exists(path))
+            layout = JsonConvert.DeserializeObject<Dictionary<string, RecountRow>>(File.ReadAllText(path))
+                ?? throw new InvalidDataException($"{path} is empty.");
+            var missingNames = 0;
+            foreach (var row in layout)
             {
-                Log.Warning("Missing recounts localization for {CultureName}", cultureName);
-                byCulture[cultureName] = [];
-                continue;
+                row.Value.RecountName = CheckLocalizedNames("RecountRows", row.Key, row.Value.RecountName, ref missingNames);
             }
 
-            byCulture[cultureName] =
-                JsonConvert.DeserializeObject<Dictionary<string, RecountRow>>(File.ReadAllText(path)) ?? [];
+            LogMissingLocalizedNames("RecountRows", missingNames);
+            Log.Information("Loaded localization {FileName}", "RecountRows");
         }
-
-        // 行の構成はどの言語でも同じ。名前の受け皿でもある zh-CN を土台にする。
-        var layout = byCulture.TryGetValue("zh-CN", out var chinese) && chinese.Count > 0
-            ? chinese
-            : byCulture.Values.FirstOrDefault(rows => rows.Count > 0) ?? [];
+        else
+        {
+            Log.Error("Missing localization {FileName}", "RecountRows");
+        }
 
         var groups = new Dictionary<long, HashSet<long>>();
         var groupOf = new Dictionary<long, long>();
@@ -323,7 +369,7 @@ public static class CombatDataCatalog
 
         var overrides = LoadRecountOverrides();
 
-        // 外すほうを先に。寄せ先が「外したばかりの鍵」であることがある(パッシブ2件がこの形)。
+        // 外すほうを先に。寄せ先が「外したばかりの鍵」であることがある。
         foreach (var entry in overrides)
         {
             if (entry.Value.RowSpecified && entry.Value.Row is null)
@@ -364,7 +410,7 @@ public static class CombatDataCatalog
         }
 
         _recountRows = repOf.ToFrozenDictionary();
-        _recountNames = BuildRecountNames(membersOfRep, originRow, byCulture, repOf, overrides);
+        _recountNames = BuildRecountNames(membersOfRep, originRow, layout, repOf, overrides);
         Log.Information("Loaded {Keys} recount keys / {Rows} rows / {Overrides} overrides",
             repOf.Count, groups.Count, overrides.Count);
     }
@@ -376,7 +422,8 @@ public static class CombatDataCatalog
     /// </param>
     private sealed class RecountRow
     {
-        public string? RecountName { get; set; }
+        /// <summary>言語 → 行名。</summary>
+        public Dictionary<string, string>? RecountName { get; set; }
 
         public List<string>? SourceId { get; set; }
     }
@@ -433,8 +480,7 @@ public static class CombatDataCatalog
         }
 
         // 行の識別子はメンバーの鍵そのもの。その鍵を抜いたら残りのメンバーで付け直す。
-        // 付け直さないと、抜いた鍵で行を作り直したときに残りのメンバーごと消える
-        // (幻影共鳴の行から先頭の 1850:1 を外して、残り4件が名無しになった)。
+        // 付け直さないと、抜いた鍵で行を作り直したときに残りのメンバーごと消える。
         if (groupId == key)
         {
             groups.Remove(groupId);
@@ -453,6 +499,7 @@ public static class CombatDataCatalog
         var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "RecountOverrides.json");
         if (!File.Exists(path))
         {
+            Log.Error("Failed to load {OverridePath}", "Overrides/RecountOverrides.json");
             return result;
         }
 
@@ -513,7 +560,7 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<long, string>> BuildRecountNames(
         Dictionary<long, List<long>> membersOfRep,
         Dictionary<long, string> originRow,
-        Dictionary<string, Dictionary<string, RecountRow>> byCulture,
+        Dictionary<string, RecountRow> rows,
         Dictionary<long, long> repOf,
         Dictionary<long, RecountOverrideEntry> overrides)
     {
@@ -521,7 +568,6 @@ public static class CombatDataCatalog
 
         foreach (var cultureName in SupportedCultures)
         {
-            var rows = byCulture.TryGetValue(cultureName, out var forCulture) ? forCulture : [];
             var names = new Dictionary<long, string>();
 
             foreach (var group in membersOfRep)
@@ -530,9 +576,11 @@ public static class CombatDataCatalog
                 {
                     if (originRow.TryGetValue(member, out var rowId)
                         && rows.TryGetValue(rowId, out var row)
-                        && !string.IsNullOrWhiteSpace(row.RecountName))
+                        && row.RecountName is not null
+                        && row.RecountName.TryGetValue(cultureName, out var rowName)
+                        && !string.IsNullOrWhiteSpace(rowName))
                     {
-                        names[group.Key] = row.RecountName.Trim();
+                        names[group.Key] = rowName.Trim();
                         break;
                     }
                 }
@@ -621,6 +669,23 @@ public static class CombatDataCatalog
         return false;
     }
 
+    /// <summary>
+    /// 被ダメ1件が当たった技。<b>記録時(レベルを引く対象)と表示時(ギミック技の判定)で同じ決め方にするため、ここだけで決める。</b>
+    /// 技由来はその技、弾由来は親の技(<see cref="TryResolveBulletParentSkillId"/>)、バフ由来は付与元の技(<paramref name="buffSourceSkillId"/>)。
+    /// それ以外(落下など)と、辿れないものは 0。
+    /// </summary>
+    public static int ResolveHitSkillId(Zproto.EDamageSource damageSource, int ownerId, int buffSourceSkillId)
+    {
+        return damageSource switch
+        {
+            Zproto.EDamageSource.Skill => ownerId,
+            Zproto.EDamageSource.Bullet or Zproto.EDamageSource.FakeBullet =>
+                TryResolveBulletParentSkillId(ownerId, out var parentSkillId) ? parentSkillId : 0,
+            Zproto.EDamageSource.Buff => buffSourceSkillId,
+            _ => 0
+        };
+    }
+
     /// <summary>呼び出し側で決めた名前(空のときの代わりの名前など)に、技の内部ID注記を添える。</summary>
     public static string AppendSkillInternalId(string name, int skillId)
     {
@@ -637,7 +702,7 @@ public static class CombatDataCatalog
     /// 詠唱(または誘導)のバーを持つ技か。<c>SkillTable.SingOrGuideTime</c> の先頭要素の全体秒数が 0 より大きい。
     ///
     /// <para>
-    /// サーバは「詠唱中」を送らない。ゲームは技の開始とこの設定から詠唱バーを出す(2026-09-14 実測)。
+    /// サーバは「詠唱中」を送らない。ゲームは技の開始とこの設定から詠唱バーを出す。
     /// </para>
     /// </summary>
     public static bool HasSingOrGuideTime(int skillId)
@@ -654,6 +719,12 @@ public static class CombatDataCatalog
     {
         var skillLevelId = (long)skillId * 100 + skillLevel;
         return skillLevelId <= int.MaxValue && _warningSkillLevelIds.Contains((int)skillLevelId);
+    }
+
+    /// <summary>どれかのレベルで戦闘画面の警告バーを出す技か。レベルが分からないときの判定に使う。</summary>
+    public static bool IsWarningSkillId(int skillId)
+    {
+        return _warningSkillIds.Contains(skillId);
     }
 
     /// <summary>
@@ -707,6 +778,13 @@ public static class CombatDataCatalog
     /// 名前は起動時に英語で焼き付くので、言語切替に追従させるにはここを通す。
     /// </para>
     /// </summary>
+    /// <summary>表示名が空でないか。内部ID注記は数えない(注記は表示設定で付くので、名前の有無の判定に使えない)。</summary>
+    public static bool HasMonsterName(long monsterId)
+    {
+        return monsterId is > 0 and <= int.MaxValue
+            && !string.IsNullOrEmpty(ResolveText(_monsterNames, Volatile.Read(ref _cultureName), (int)monsterId));
+    }
+
     public static string GetMonsterName(long monsterId)
     {
         return monsterId is > 0 and <= int.MaxValue
@@ -721,18 +799,44 @@ public static class CombatDataCatalog
     /// シーン/ダンジョン名。<b>表示中の言語で引く。</b>
     ///
     /// <para>
-    /// 引数は <c>LevelMapId</c>。履歴は名前ではなくIDを保持し、表示時にここで引き直す。
+    /// 引数は <c>LevelMapId</c> と、ダンジョン同期で届いた難易度(<c>EncounterExData.DungeonDifficulty</c>)。
+    /// 履歴は名前ではなくIDと難易度を保持し、表示時にここで引き直す。
+    /// </para>
+    ///
+    /// <para>
+    /// 難易度名があれば <c>ダンジョン名-難易度名</c> にする。マスターの段階の名前(<c>番号:段階</c>)を先に引き、
+    /// 無ければダンジョンごとの名前(<c>番号</c>)。マスターのダンジョンは後者を持たないので、
+    /// 段階が分からなければ難易度名を付けない。
     /// </para>
     /// </summary>
-    public static string GetSceneName(long levelMapId)
+    public static string GetSceneName(long levelMapId, int dungeonDifficulty)
     {
-        return levelMapId is > 0 and <= int.MaxValue
-            ? AppendInternalId(
-                ResolveText(_sceneNames, Volatile.Read(ref _cultureName), (int)levelMapId),
-                InternalIdDisplayMode.MapOnly,
-                levelMapId)
+        if (levelMapId is not (> 0 and <= int.MaxValue))
+        {
+            return string.Empty;
+        }
+
+        var cultureName = Volatile.Read(ref _cultureName);
+        var name = ResolveText(_sceneNames, cultureName, (int)levelMapId);
+        var typeName = dungeonDifficulty > 0
+            ? ResolveText(_dungeonTypeNames, cultureName, MakeDungeonTypeKey((int)levelMapId, dungeonDifficulty))
             : string.Empty;
+        if (string.IsNullOrEmpty(typeName))
+        {
+            typeName = ResolveText(_dungeonTypeNames, cultureName, MakeDungeonTypeKey((int)levelMapId, 0));
+        }
+
+        if (!string.IsNullOrEmpty(typeName))
+        {
+            name = $"{name}{DungeonTypeNameSeparator}{typeName}";
+        }
+
+        return AppendInternalId(name, InternalIdDisplayMode.MapOnly, levelMapId);
     }
+
+    /// <summary>難易度名の鍵。段階 0 がダンジョンごとの名前、正の段階がマスターの段階の名前。</summary>
+    private static long MakeDungeonTypeKey(int dungeonId, int difficulty)
+        => ((long)dungeonId << 32) | (uint)difficulty;
 
     public static string GetSkillIconName(int skillId, string? fallbackIcon = null)
     {
@@ -772,8 +876,8 @@ public static class CombatDataCatalog
     /// <para>
     /// アイコンだけだと別系統が混ざる(<c>buff_food_up</c> には 美食的加护 と 丰收宴 が、
     /// <c>buff_agentia_up</c> には 禁药 と 沉梦抗性 が入る)。タグ100 を併せると
-    /// 料理は <c>2032011</c>〜<c>2032284</c> の136件、薬剤は <c>2033011</c>〜<c>2033189</c> の
-    /// 162件ちょうどになる。ゲーム側の表示名もそれぞれ1語に丸められている。
+    /// 料理は <c>2032011</c>〜<c>2032284</c>、薬剤は <c>2033011</c>〜<c>2033189</c> に
+    /// ちょうど収まる。ゲーム側の表示名もそれぞれ1語に丸められている。
     /// </para>
     /// </summary>
     public static BuffGroup GetBuffGroup(int buffId)
@@ -1014,67 +1118,164 @@ public static class CombatDataCatalog
         return result.ToFrozenDictionary(pair => pair.Key, pair => pair.Value.ToFrozenSet());
     }
 
-    /// <summary>形は技レベルIDの配列。同梱の生成物なので、無ければ読み込みごと失敗させる。</summary>
+    /// <summary>形は技レベルIDの配列。ファイルが無ければ空(警告の技は0件)。</summary>
     private static FrozenSet<int> LoadWarningSkillLevels()
     {
         var path = Path.Combine(Utils.DATA_DIR_NAME, "Generated", "SkillWarnings.json");
+        if (!File.Exists(path))
+        {
+            return FrozenSet<int>.Empty;
+        }
+
         var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"{path} is empty.");
         return skillLevelIds.ToFrozenSet();
     }
 
     /// <summary>
-    /// 生成物の名前テーブルに手修正を重ねる表。<c>Data/Overrides/{name}.json</c>。
+    /// 4言語をまとめた名前テーブル <c>Data/Localization/{fileName}.json</c> を読む。
+    /// 形は <c>{ "鍵": { "zh-CN": "名前", "en-US": "名前", "ja-JP": "名前", "ko-KR": "名前" } }</c>。
     ///
     /// <para>
-    /// 形は <c>{ "発生源ID": { "言語": "名前" } }</c>。
-    /// 書いた言語だけ差し替え、書かない言語は生成値のまま。
-    /// <b>空文字は「生成値を消す」</b>で、以後は通常どおり zh-CN へ落ちる。
-    /// </para>
-    ///
-    /// <para>
-    /// <b>言語名の打ち間違いを黙って無視しない。</b> 未知のキーはログにエラーを出して飛ばす。
-    /// 静かに効かないのが一番困る失敗なので、必ずログに出す。
+    /// ファイルが無ければエラーログを出して <c>null</c>(呼び出し側は全言語を空で続ける)。
+    /// 言語名は <see cref="CheckLocalizedNames"/> で検める。
     /// </para>
     /// </summary>
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(
-        string dataName)
+    private static Dictionary<string, Dictionary<string, string>>? ReadLocalizedFile(string fileName)
     {
-        var result = new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var cultureName in SupportedCultures)
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Localization", $"{fileName}.json");
+        if (!File.Exists(path))
         {
-            var path = Path.Combine(
-                Utils.DATA_DIR_NAME,
-                "Localization",
-                $"{dataName}.{cultureName}.json");
-            var names = new Dictionary<int, string>();
-
-            if (File.Exists(path))
-            {
-                var rawNames = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(path));
-                if (rawNames is not null)
-                {
-                    foreach (var pair in rawNames)
-                    {
-                        if (int.TryParse(pair.Key, out var id) && !string.IsNullOrWhiteSpace(pair.Value))
-                        {
-                            names[id] = pair.Value.Trim();
-                        }
-                    }
-                }
-
-                Log.Information("Loaded {DataName} localization for {CultureName}", dataName, cultureName);
-            }
-            else
-            {
-                Log.Warning("Missing {DataName} localization for {CultureName}", dataName, cultureName);
-            }
-
-            result[cultureName] = names.ToFrozenDictionary();
+            Log.Error("Missing localization {FileName}", fileName);
+            return null;
         }
 
-        return result.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+        var entries = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>?>>(File.ReadAllText(path))
+            ?? throw new InvalidDataException($"{path} is empty.");
+        var result = new Dictionary<string, Dictionary<string, string>>(entries.Count);
+        var missingNames = 0;
+        foreach (var entry in entries)
+        {
+            result[entry.Key] = CheckLocalizedNames(fileName, entry.Key, entry.Value, ref missingNames);
+        }
+
+        LogMissingLocalizedNames(fileName, missingNames);
+        Log.Information("Loaded localization {FileName}", fileName);
+        return result;
+    }
+
+    /// <summary>
+    /// 1つの鍵の「言語 → 名前」を検める。<b>知らない言語名はエラーログを出して外す。</b>
+    /// 欠けた言語は空欄と同じ扱い(zh-CN へ落ちる)にし、数を <paramref name="missingNames"/> に足す。
+    /// </summary>
+    private static Dictionary<string, string> CheckLocalizedNames(
+        string fileName,
+        string key,
+        Dictionary<string, string>? names,
+        ref int missingNames)
+    {
+        var checkedNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var name in names ?? [])
+        {
+            if (!SupportedCultures.Contains(name.Key, StringComparer.OrdinalIgnoreCase))
+            {
+                Log.Error("{FileName}: 鍵 {Key} に未知の言語 \"{Culture}\"。使えるのは {Cultures}",
+                    fileName, key, name.Key, string.Join(" / ", SupportedCultures));
+                continue;
+            }
+
+            checkedNames[name.Key] = name.Value ?? string.Empty;
+        }
+
+        missingNames += SupportedCultures.Count(cultureName => !checkedNames.ContainsKey(cultureName));
+        return checkedNames;
+    }
+
+    /// <summary>4言語のどれかが欠けていた数を、ファイルごとに1回だけエラーログに出す。</summary>
+    private static void LogMissingLocalizedNames(string fileName, int missingNames)
+    {
+        if (missingNames > 0)
+        {
+            Log.Error("{FileName}: 言語が欠けた名前が {Count} 件ある(空欄として扱う)", fileName, missingNames);
+        }
+    }
+
+    /// <summary>
+    /// 鍵が番号の名前テーブルを、言語ごとの「番号 → 名前」にして返す。
+    /// <paramref name="keys"/> は名前の有無を問わない全部の鍵。番号でない鍵はエラーログを出して飛ばす。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(
+        string fileName,
+        out FrozenSet<int> keys)
+    {
+        var namesByCulture = SupportedCultures.ToDictionary(
+            cultureName => cultureName,
+            _ => new Dictionary<int, string>(),
+            StringComparer.OrdinalIgnoreCase);
+        var allKeys = new HashSet<int>();
+
+        foreach (var entry in ReadLocalizedFile(fileName) ?? [])
+        {
+            if (!int.TryParse(entry.Key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id))
+            {
+                Log.Error("{FileName}: 鍵が番号の形でないので飛ばす \"{Key}\"", fileName, entry.Key);
+                continue;
+            }
+
+            allKeys.Add(id);
+            foreach (var name in entry.Value)
+            {
+                if (!string.IsNullOrWhiteSpace(name.Value))
+                {
+                    namesByCulture[name.Key][id] = name.Value.Trim();
+                }
+            }
+        }
+
+        keys = allKeys.ToFrozenSet();
+        return namesByCulture.ToFrozenDictionary(
+            pair => pair.Key,
+            pair => pair.Value.ToFrozenDictionary(),
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// <c>DungeonTypeNames.json</c> を、言語ごとの「<see cref="MakeDungeonTypeKey"/> → 名前」にして返す。
+    /// 鍵は <c>番号</c> か <c>番号:段階</c>。形の合わない鍵はエラーログを出して飛ばす。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<long, string>> LoadDungeonTypeNames()
+    {
+        var namesByCulture = SupportedCultures.ToDictionary(
+            cultureName => cultureName,
+            _ => new Dictionary<long, string>(),
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var entry in ReadLocalizedFile("DungeonTypeNames") ?? [])
+        {
+            var separator = entry.Key.IndexOf(':');
+            var idText = separator < 0 ? entry.Key.AsSpan() : entry.Key.AsSpan(0, separator);
+            var difficulty = 0;
+            if (!int.TryParse(idText, out var dungeonId)
+                || dungeonId <= 0
+                || (separator >= 0 && (!int.TryParse(entry.Key.AsSpan(separator + 1), out difficulty) || difficulty <= 0)))
+            {
+                Log.Error("DungeonTypeNames: 鍵が 番号 か 番号:段階 の形でないので飛ばす \"{Key}\"", entry.Key);
+                continue;
+            }
+
+            foreach (var name in entry.Value)
+            {
+                if (!string.IsNullOrWhiteSpace(name.Value))
+                {
+                    namesByCulture[name.Key][MakeDungeonTypeKey(dungeonId, difficulty)] = name.Value.Trim();
+                }
+            }
+        }
+
+        return namesByCulture.ToFrozenDictionary(
+            pair => pair.Key,
+            pair => pair.Value.ToFrozenDictionary(),
+            StringComparer.OrdinalIgnoreCase);
     }
 
     private static string ResolveText<TKey>(

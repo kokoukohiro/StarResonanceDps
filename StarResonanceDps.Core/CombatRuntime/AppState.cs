@@ -45,12 +45,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static Encounter? OpenedHistoricalEncounter = null;
 
         /// <summary>
-        /// アンパックした ZTable をそのまま置くフォルダ。<c>Data/</c> 直下は設定と実行時の
+        /// 言語別の生テーブルをそのまま置くフォルダ。<c>Data/</c> 直下は設定と実行時の
         /// 生成物(<c>Settings.json</c> / <c>AppSettings.json</c> / <c>WidgetSettings.json</c> /
         /// 戦闘履歴DB / ログ)が並ぶので、生データはここへ分けてある。
         ///
         /// <para>
-        /// <b>中身は加工しないこと。</b> 間引きや書き換えをすると、アンパックを取り直したときに
+        /// <b>中身は加工しないこと。</b> 間引きや書き換えをすると、テーブルを取り直したときに
         /// 何が自前の変更だったのか分からなくなる。絞り込みは読む側で行う。
         /// </para>
         /// </summary>
@@ -101,6 +101,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             LoadBuffOverridesTable();
+            LoadSkillOverridesTable();
             CombatDataCatalog.Load();
 
             string sceneEventDungeonConfigTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SceneEventDuneonConfigTable.json");
@@ -156,6 +157,60 @@ namespace StarResonanceDps.Core.CombatRuntime
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
 
             loadTime.Stop();
+        }
+
+        /// <summary>
+        /// 生の <c>SkillTable</c> が持たない <c>SkillLevelGroup</c> を補う。スキル枠のバッジの帰属が、
+        /// 付与元の技から装備中のイマジン・ロールスキルへ辿るのに使う。
+        ///
+        /// <para>
+        /// 書くのは <c>SkillLevelGroup</c> だけ。表に無いキーは、<c>BuffOverrides</c> と同じく行を作ってから当てる。
+        /// 作る行は ID と <c>SkillLevelGroup</c> だけを持ち、文字列の項目は空にする。
+        /// ファイルが無ければエラーログを出して上書き無しのまま続け、<c>SkillLevelGroup</c> が書かれていない項目は当てない。
+        /// </para>
+        /// </summary>
+        public static void LoadSkillOverridesTable()
+        {
+            const string relativePath = "Overrides/SkillOverrides.json";
+            var overridePath = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "SkillOverrides.json");
+            if (!File.Exists(overridePath))
+            {
+                Log.Error("Failed to load {OverridePath}", relativePath);
+                return;
+            }
+
+            var overrides = JsonConvert.DeserializeObject<Dictionary<string, SkillLevelGroupOverride>>(File.ReadAllText(overridePath))
+                ?? throw new InvalidDataException($"{relativePath} が空です。");
+
+            foreach (var (key, value) in overrides)
+            {
+                if (value.SkillLevelGroup is not > 0)
+                {
+                    continue;
+                }
+
+                if (!HelperMethods.DataTables.Skills.Data.TryGetValue(key, out var skill))
+                {
+                    skill = new Skill
+                    {
+                        Id = int.Parse(key, System.Globalization.CultureInfo.InvariantCulture),
+                        Icon = string.Empty,
+                        Name = string.Empty,
+                        Desc = string.Empty,
+                        NameDesign = string.Empty,
+                    };
+                    HelperMethods.DataTables.Skills.Data.Add(key, skill);
+                }
+
+                skill.SkillLevelGroup = value.SkillLevelGroup.Value;
+            }
+
+            Log.Information("Loaded {OverridePath}", relativePath);
+        }
+
+        private sealed class SkillLevelGroupOverride
+        {
+            public int? SkillLevelGroup { get; set; }
         }
 
         public static void LoadBuffOverridesTable()

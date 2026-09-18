@@ -10,9 +10,10 @@ python gen_recounts.py    # メーターの行名
 python gen_buffs.py       # バフ名(BuffTable の全行)
 python gen_skills.py      # スキル名(SkillTable の全行)
 python gen_dbms.py        # ボス大技の予告(DbmTable)の技名
-python gen_scenes.py      # シーン名
-python gen_monsters.py    # モンスター・NPCの名前
+python gen_scenes.py      # シーン名(ダンジョンではダンジョン名)と難易度名
+python gen_monsters.py    # モンスターの名前
 python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
+python gen_rogue_entries.py   # 特性(ローグ系モードの祈願)の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -26,15 +27,16 @@ python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
 言語別の Ztable を取り出せる。
 
 期待する構成は「出所 → `Ztable` → 言語フォルダ → `ZTable` → `*.json`」。
-`gen_skill_warnings.py` は同じツールの出力の `Unk`(出所ごと)と `Bundles`(共通)も読む。
+`gen_skill_warnings.py` は同じツールの出力の `Unk` と `Bundles` も読む(どちらも出所ごと)。
 
 ```
 JSONS/
   StarASIA/Ztable/{cn,en,jp,kr}/ZTable/*.json
   StarASIA/Unk/*.bin
+  StarASIA/Bundles/*.ab
   Star/Ztable/{cn,en,jp,kr}/ZTable/*.json
   Star/Unk/*.bin
-  Bundles/*.ab
+  Star/Bundles/*.ab
 ```
 
 既定ではリポジトリの隣の `JSONS` を見る。別の場所に置くなら環境変数で指す。
@@ -51,15 +53,14 @@ export BPSR_TABLES=<置き場所>     # bash
 
 **見出し表(`gen_recounts.py`)の行構成は `Ztable（Star）` だけで組む。** 行名は下の言語別の土台に従う。
 
-`Ztable（Star）` のほうが行構成が新しく、被覆も広い。実測で名前が出るイベントが
-94.73% → 96.80% に上がり、`StarASIA` にしか無い鍵は1件だけだった。
+`Ztable（Star）` のほうが行構成が新しく、被覆も広い。
 一方で `Ztable（Star）` は jp/kr の行名の列が壊れているので、jp/kr の行名は `StarASIA` から取る
 (壊れた列は総括行の検算で弾かれる)。
 
 ### 土台は言語で分ける — cn / en は `Ztable（Star）`、jp / kr は `Ztable（StarASIA）`
 
-`Ztable（Star）` は中国サーバー、`Ztable（StarASIA）` はアジアサーバーのビルドで、版が違う。
-**それぞれのサーバーの言語は、そのサーバーの表を土台にする**(`_common.sources_for`)。
+`Ztable（Star）` と `Ztable（StarASIA）` は別のビルドで、版が違う。
+**言語フォルダごとに、その言語が入っているビルドの表を土台にする**(`_common.sources_for`)。
 
 | 言語フォルダ | 土台 | 補う側 |
 |---|---|---|
@@ -69,14 +70,10 @@ export BPSR_TABLES=<置き場所>     # bash
 **行は土台が勝ち、補う側は無い行を足すだけ。** そのうえで、採った行の**空欄の文字列項目**だけを
 補う側で埋める(`_common.table`)。版によって同じIDの値が食い違うときも土台を採る。
 
-cn / en を `StarASIA` 土台から切り替えたとき(2026-09-14)に変わった名前は、zh-CN / en-US だけで
-buffs 5 / 3件(空 → 名前あり)、dbms 2 / 1件、monsters 10 / 12件、recounts の行名 5 / 7件。
-ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべて不変。
-
 ### 行番号で引くテーブルは合併しない
 
-`RecountTable` の鍵は**行番号**で、版が違えば同じ番号が別の行を指す
-(実測で `DamageId` の一致は349件中106件)。`Id` は単なる連番なので同一性の根拠にならない。
+`RecountTable` の鍵は**行番号**で、版が違えば同じ番号が別の行を指す。
+`Id` は単なる連番なので同一性の根拠にならない。
 
 このテーブルは `_common.table_of_source` で出所を名指しして取る。
 **行を跨いで重ねるのは、行の対応を鍵の重なりで取ってからだけ。**
@@ -90,20 +87,31 @@ ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべ�
 
 | ツール | 出力 |
 |---|---|
-| `gen_recounts.py` | `Data/Localization/recounts.{cn,en,jp,kr}.json` |
-| `gen_buffs.py` | `Data/Localization/buffs.{cn,en,jp,kr}.json` |
-| `gen_skills.py` | `Data/Localization/skills.{cn,en,jp,kr}.json` |
-| `gen_dbms.py` | `Data/Localization/dbms.{cn,en,jp,kr}.json` |
-| `gen_scenes.py` | `Data/Localization/scenes.{cn,en,jp,kr}.json` |
-| `gen_monsters.py` | `Data/Localization/monsters.{cn,en,jp,kr}.json` |
+| `gen_recounts.py` | `Data/Localization/RecountRows.json` |
+| `gen_buffs.py` | `Data/Localization/BuffNames.json` |
+| `gen_skills.py` | `Data/Localization/SkillNames.json` |
+| `gen_dbms.py` | `Data/Localization/DbmNames.json` |
+| `gen_scenes.py` | `Data/Localization/SceneNames.json`<br>`Data/Localization/DungeonTypeNames.json` |
+| `gen_monsters.py` | `Data/Localization/MonsterNames.json` |
 | `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
+| `gen_rogue_entries.py` | `Data/Localization/RogueEntryNames.json` |
 
 ## 全ツール共通の仕様
 
-### 鍵は4言語で同じにする
+### 4言語を1つのファイルに書く
+
+`Data/Localization` の名前テーブルは、鍵ごとに4言語の名前を持つ。言語の並びは zh-CN → en-US → ja-JP → ko-KR。
+
+```json
+{ "<鍵>": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } }
+```
+
+`RecountRows.json` だけは行の構成も持つので、`RecountName` がこの4言語の形になる(→ gen_recounts.py)。
+
+### 鍵ごとに4言語すべてを書く
 
 **鍵集合は4言語で同じにする。** 版差で収録IDが違っても、言語で変えない。
-足りない側は空文字で埋める。
+どの鍵も4言語すべてを持ち、名前の無い言語は空文字で入る。
 
 **鍵集合が言語で変わると、表示言語によって畳み込みの停止条件が変わってしまう。**
 名前が無い側は実行時に zh-CN へ落ちる（`ResolveText` はキー欠落でも空欄でも zh-CN へ落ちる）。
@@ -132,6 +140,19 @@ ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべ�
 |---|---|
 | `Data/Overrides/RecountOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
+| `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
+
+### SkillOverrides.json
+
+同梱の `SkillTable` を読んだ後に重ねる。**書くのは `SkillLevelGroup` だけ。**
+スキル枠のバッジが、付与元の技から装備中のイマジン・ロールスキルへ辿るのに使う。
+
+```json
+{ "<技ID>": { "SkillLevelGroup": <寄せ先の技ID> } }
+```
+
+キーが `SkillTable` に無いときは、`BuffOverrides` と同じく**技の行を作ってから当てる**(ID と `SkillLevelGroup` だけを持つ行)。
+`SkillLevelGroup` が書かれていない項目は当てない。ファイルが無ければエラーログを出し、上書き無しのまま続ける。
 
 ### BuffOverrides.json
 
@@ -167,8 +188,8 @@ ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべ�
 | `Name` | **その行**の名前。書いた言語だけ差し替わる |
 | `Name` に空文字 | **生成値を消す。** 以後は通常どおり zh-CN へ落ちる |
 
-**行代表ではなくメンバーのキーで書く。** 行代表は版で動く（実測で333行中4行が出所間で
-食い違う）ので、代表で書くと再生成のたびに静かに効かなくなる。
+**行代表ではなくメンバーのキーで書く。** 行代表は版で動くので、
+代表で書くと再生成のたびに静かに効かなくなる。
 
 **解決は2巡。** 先に `"Row": null` を全部当ててから `"Row": "<キー>"` を当てるので、
 「本体行から外したキーへ、別のキーを寄せる」が1ファイルで書ける。
@@ -180,8 +201,11 @@ ja-JP / ko-KR は全ファイルで0件、鍵と recounts の行構成もすべ�
 逆に、**生成物の行に載っているキーに `Name` だけ書くと、その行全体の名前が変わる。**
 そのキーだけ別の名前で出したいなら `"Row": null` が要る。
 
-**静かに効かない失敗はログに出す。** キーが `ownerId:枝番` の形でない、`Row` の指す先が
-無い、言語名の打ち間違い — いずれもエラーが出て飛ばされる。入れたらログを確認する。
+**静かに効かない失敗はログに出す。** キーや `Row` の値が `ownerId:枝番` の形でない、言語名の打ち間違い
+— いずれもエラーが出て飛ばされる。入れたらログを確認する。
+
+**`Row` の指す先が生成物にも手修正にも無いときは、エラーにならない。** 指す先のキーで行を新しく作り、そこへ入れる
+(キーを足す仕様と同じ扱い)。打ち間違えると、名前の無い行が黙って増える。
 
 ---
 
@@ -218,19 +242,18 @@ DamageId の下2桁                    = 枝番(HitEventId)
 落とすと表に無い鍵と同じ扱いになり、実行時は名前が空のまま内部ID注記だけが出る。
 
 **検算が落ちたら、その出所×言語の名前列は使わない。** 行の中身は正しくても
-名前列だけが詰まっていることがあり(実測で366行に294件ぶんが入っていた)、
-そのまま採るとIDと名前の対応が丸ごとずれる。落ちたことは実行時に `★` 付きで出る。
+名前列だけが詰まっていることがあり、そのまま採るとIDと名前の対応が丸ごとずれる。落ちたことは実行時に `★` 付きで出る。
 
 ### 生の見出し表と同じ形で書く
 
-行ごとに `RecountName` と、その行に属する発生源キーの一覧を持つ。行の構成はそのまま写す。
+行ごとに `RecountName`(4言語)と、その行に属する発生源キーの一覧を持つ。行の構成はそのまま写す。
 
 **項目名は `SourceId`。`DamageId` にはしない。** 中身は `DamageId` そのものではなく
 `TypeEnum:枝番` で、生の `DamageId`（`117010101` など）とは別の値だから。
 同じ名前にすると、生の表と見比べたときに値が食い違って見える。
 
 ```json
-{ "3": { "RecountName": "翔舞", "SourceId": ["1401:1", "1401:4", "1402:1"] } }
+{ "<行>": { "RecountName": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" }, "SourceId": ["<ownerId:枝番>", "..."] } }
 ```
 
 **名前を鍵ごとに繰り返さず、畳み込みの対応表も別に持たない。**
@@ -302,9 +325,40 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ## gen_scenes.py
 
-`SceneTable.Name` が本体。`SceneTable` に無いシーンIDだけ `DungeonsTable` で補う。
+アプリはマップの番号でこのテーブルを引く。ダンジョンではその番号がダンジョンの番号になる。
+
+鍵は **`SceneTable` と `DungeonsTable` の番号の和**。番号ごとに次の表で名前を選ぶ。
+
+| その番号の行 | 名前 |
+|---|---|
+| 両方の表にある | `SceneTable.SceneSubType` がダンジョン(`5`)なら `DungeonsTable.Name`、それ以外は `SceneTable.Name` |
+| `SceneTable` だけ | `SceneTable.Name` |
+| `DungeonsTable` だけ | `DungeonsTable.Name` |
+
+**両方にある番号は、どちらの表にあるかでは決めない。** ダンジョンの番号はシーン表にも行があり、
+ダンジョン表に行があってもシーンの種類がダンジョンでない番号(ギルドの施設など)はシーン名を出す。
 
 言語によって収録数に差がある。無い行は空文字で入り、表示時に zh-CN へ落ちる。
+
+### 難易度名 `DungeonTypeNames.json`
+
+アプリはダンジョン名に難易度名を `ダンジョン名-難易度名` の形で付ける。
+このテーブルは、上の表でダンジョン名を選んだ番号にだけ難易度名を持つ。鍵は2つの形。
+
+| 鍵 | 名前 |
+|---|---|
+| `番号` | `DungeonsTable.DungeonTypeName`。マスターのダンジョン(`PlayType` が MasterMode)は持たない |
+| `番号:段階` | マスターのダンジョンの段階ごとの `MasterChallengeDungeonTable.DungeonTypeName`。鍵は `DungeonId` と `Difficulty` から作る |
+
+アプリはダンジョン同期で届いた段階で `番号:段階` を先に引き、無ければ `番号` を引く。
+マスターのダンジョンは `番号` を持たないので、段階が分からなければ難易度名を付けない。
+
+どの言語にも名前が無い鍵は書かない。次のときは出力を書かずに止まる。
+
+- `MasterChallengeDungeonTable` の行のダンジョンが、ダンジョン名を選んだ番号にない
+- そのダンジョンがマスターのダンジョンでない
+- `Difficulty` が正の整数でない
+- 同じ `番号:段階` が2行ある
 
 ---
 
@@ -320,16 +374,21 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ### 入力の探し方
 
-1. 出所ごとの `Unk/*.bin` から、中身に `->>>> bundleHash:` を含むアドレス一覧を探す。1本に決まらなければ止まる
+出所ごとに次を行う。
+
+1. `Unk/*.bin` から、中身に `->>>> bundleHash:` を含むアドレス一覧を探す。1本に決まらなければ止まる
 2. アドレス一覧を読む
    - アドレス行 `address:<アドレス> ->>>> hash:<数字> ->>>> bundleHash:<数字>`(アドレスは空白を含むことがある)。行数が見出し `AddressCount` と違えば止まる
    - バンドルの一覧(見出し `DepsDictCount` のあとの `bundleHash:<数字>` の行)。行数か異なる番号の数が見出しと違えば止まる
-3. **バンドルの一覧が `Bundles` に全部そろうアドレス一覧を使う。** `Bundles` は出所共通なので、どの出所の一覧と対応しているかをファイルの有無で決める
-   - そろう一覧が無ければ止まる
-   - そろう一覧が複数あり、`bin/datas/show_data` の番号が違えば止まる(どちらを使うか決められない)
-4. その一覧の `bin/datas/show_data` の番号で `Bundles/<番号>.ab`(UnityFS)を開き、TextAsset `show_data` を取り出す。無ければ止まる
+3. バンドルの一覧が**同じ出所の** `Bundles` に全部そろわなければ止まる(一覧と `Bundles` が別の版)
+4. `bin/datas/show_data` の番号で `Bundles/<番号>.ab`(UnityFS)を開き、TextAsset `show_data` を取り出す。無ければ止まる
 
 バンドルの番号は版で変わるので直書きしない。**止まったときは出力を書かない**(前の出力が残る)。
+
+### 出力は `Star` で作る
+
+**`Star` に無い技レベルが `StarASIA` に1件でもあれば止まる。** 版の並びが逆転したときに、黙って取りこぼさないため。
+止まったら、どちらを土台にするかを決め直す。
 
 ### `show_data` の形
 
@@ -349,13 +408,25 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ---
 
+## gen_rogue_entries.py
+
+特性(ローグ系モードの祈願)の名前を、**特性のバフIDを鍵に**書く。値は `RogueEntryTable.EntryName`。
+
+メーターの行が見出し表で名前を持たないとき、アプリは記録時に付与元をたどり、特性のバフに着いたらこの名前を出す。
+`EntryId` は鍵にしない。同じバフを複数の特性の行が指す。
+
+**出所の土台はバフIDの単位で決める**(cn / en は `Star`、jp / kr は `StarASIA`)。土台にそのバフIDの名前があれば土台だけを使う。
+
+同じバフIDで名前が食い違う言語は、**`EntryId` が一番若い行の名前**を採り、一覧を出す。空にも除外にもしない。
+
+---
+
 ## gen_monsters.py
 
-エンティティリストやメーターで `AttrId` から表示名を引くのに使う。
+エンティティリストや被ダメログで、モンスターの実体の `AttrId` から表示名を引くのに使う。
 
-鍵は **`MonsterTable` ∪ `DummyTable` ∪ `NpcTable`** の和集合（4言語ぶんの和）。
-名前は**この順**で「本物の名前」を持つ最初の表から取る。
-同じIDが複数の表にあって名前が食い違うことがあるので順序が要る。
+鍵は **`MonsterTable`** の行（4言語ぶんの和）。
+**`DummyTable` と `NpcTable` は混ぜない。** 同じ番号が別の表で別のものを指すことがあり、
+どの表の名前かは実体の種類でしか決まらない。アプリはモンスターの実体のときだけこのテーブルを引く。
 
 `MonsterTable` は行があっても `Name` が空のことがあり、その数は言語で大きく違う。
-埋まらないIDは入力側に名前が無いだけで、他の表にも代わりは無い。

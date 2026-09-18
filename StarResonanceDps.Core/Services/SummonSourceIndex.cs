@@ -20,7 +20,7 @@ public sealed class SummonSourceIndex
     private static readonly Lazy<SummonSourceIndex> LazyInstance = new(() => new SummonSourceIndex());
 
     private readonly object _sync = new();
-    private readonly Dictionary<long, int> _sourceSkillByUuid = [];
+    private readonly Dictionary<long, SummonSource> _sourceByUuid = [];
 
     private SummonSourceIndex()
     {
@@ -28,11 +28,15 @@ public sealed class SummonSourceIndex
 
     public static SummonSourceIndex Instance => LazyInstance.Value;
 
-    public void Set(long uuid, int skillId)
+    /// <param name="SkillId">実体を出した技ID。</param>
+    /// <param name="SummonerUuid">出した元が届いた時点の召喚者。無ければ 0。</param>
+    public readonly record struct SummonSource(int SkillId, long SummonerUuid);
+
+    public void Set(long uuid, int skillId, long summonerUuid)
     {
         lock (_sync)
         {
-            _sourceSkillByUuid[uuid] = skillId;
+            _sourceByUuid[uuid] = new SummonSource(skillId, summonerUuid);
         }
     }
 
@@ -40,7 +44,7 @@ public sealed class SummonSourceIndex
     {
         lock (_sync)
         {
-            _sourceSkillByUuid.Remove(uuid);
+            _sourceByUuid.Remove(uuid);
         }
     }
 
@@ -48,15 +52,15 @@ public sealed class SummonSourceIndex
     {
         lock (_sync)
         {
-            _sourceSkillByUuid.Clear();
+            _sourceByUuid.Clear();
         }
     }
 
-    public bool TryGet(long uuid, out int skillId)
+    public bool TryGet(long uuid, out SummonSource source)
     {
         lock (_sync)
         {
-            return _sourceSkillByUuid.TryGetValue(uuid, out skillId);
+            return _sourceByUuid.TryGetValue(uuid, out source);
         }
     }
 }

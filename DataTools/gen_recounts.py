@@ -1,9 +1,9 @@
 """
 メーターの行の見出し表を、発生源キーで引ける形に写す。
 
-  Data/Localization/recounts.{言語}.json
+  Data/Localization/RecountRows.json
 
-**生の見出し表と同じ形にする。** 行ごとに `RecountName` と、その行に属する発生源キーの一覧。
+**生の見出し表と同じ形にする。** 行ごとに `RecountName`(4言語)と、その行に属する発生源キーの一覧。
 行の構成はそのまま写す。
 
 **項目名は `SourceId`。`DamageId` にはしない。** 中身は `DamageId` そのものではなく
@@ -11,7 +11,7 @@
 同じ名前にすると、生の表と見比べたときに値が食い違って見える。
 
 ```json
-{ "3": { "RecountName": "翔舞", "SourceId": ["1401:1", "1401:4", "1402:1"] } }
+{ "3": { "RecountName": { "zh-CN": "…", "en-US": "…", "ja-JP": "…", "ko-KR": "…" }, "SourceId": ["1401:1", "1401:4", "1402:1"] } }
 ```
 
 こうすると名前を鍵ごとに繰り返さずに済み、畳み込みの対応表を別に持つ必要もない。
@@ -39,7 +39,7 @@
 import collections
 import os
 
-from _common import DATA, LANGS, SOURCES, dump, name_of, sources_for, table_of_source
+from _common import LANGS, LOCALIZATION, SOURCES, dump, name_of, per_lang, sources_for, table_of_source
 
 # 行構成を決める出所。収録IDが多く、行の統合もこちらが新しい。
 STRUCTURE = "Star"
@@ -82,8 +82,7 @@ def name_column(source, lang, lang_dir):
     """
     1つの出所×言語の行名を返す。総括行の名前で検算し、落ちたら None。
 
-    **落ちた列は使わない。** 行の中身は正しくても名前列だけが詰まっていることがあり
-    (実測: `Star` の jp/kr は366行に294件ぶんが入り、総括行の名前が空)、
+    **落ちた列は使わない。** 行の中身は正しくても名前列だけが詰まっていることがあり、
     そのまま採るとIDと名前の対応が丸ごとずれる。
     """
     built = build_rows(source, lang_dir)
@@ -159,12 +158,11 @@ def main():
         names[lang] = per_row
         print("  %-6s 名前あり %3d / %d 行" % (lang, sum(1 for v in per_row.values() if v), len(per_row)))
 
-    # 生の見出し表と同じ形で書く。行ごとに名前と、その行に属する発生源キーの一覧。
+    # 生の見出し表と同じ形で書く。行ごとに4言語の名前と、その行に属する発生源キーの一覧。
     keys_of_row = {r: sorted(ks, key=as_pair) for r, ks in by_row.items()}
-    for lang in LANGS:
-        dump(os.path.join(DATA, "Localization", "recounts.%s.json" % lang),
-             {r: {"RecountName": names[lang][r], "SourceId": keys_of_row[r]}
-              for r in sorted(by_row, key=int)})
+    dump(os.path.join(LOCALIZATION, "RecountRows.json"),
+         {r: {"RecountName": per_lang(names, r), "SourceId": keys_of_row[r]}
+          for r in sorted(by_row, key=int)})
 
     print("\nrecounts 鍵 %d / 行 %d" % (len(row_of), len(by_row)))
 

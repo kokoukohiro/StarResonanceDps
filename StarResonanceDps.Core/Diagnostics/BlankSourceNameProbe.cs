@@ -1,15 +1,22 @@
 using System.Globalization;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.Core.Diagnostics;
 
 /// <summary>
-/// スキル詳細ウィジェットの行に<b>名前が入っていない</b>鍵を残す常設の計測。
+/// スキル詳細ウィジェットの行(プレイヤーの与ダメ・ヒール)に<b>名前が入っていない</b>鍵を残す常設の計測。
 ///
 /// <para>
-/// メーターの行名は <c>Data/Localization/recounts.*.json</c>(ゲーム内メーターの見出し表の写し)
-/// だけが決める。総括行(其他)は行ごと落としてあるので、そこに居た鍵と、
-/// 見出し表にそもそも無い鍵は<b>名前が空のまま内部ID注記だけ</b>で出る。
-/// どの鍵がそうなったかは実戦で撃ってみないと分からないので、常設で拾う。
+/// <b>呼ぶのは記録の直後</b>(<c>Encounter.ResolveSourceLanding</c>)。ウィジェットを開いていなくても、
+/// 全プレイヤーの与ダメ・ヒールの両方で拾う。行を作る側に置くと、開いている1人・1種別しか見えない。
+/// </para>
+///
+/// <para>
+/// メーターの行名は <c>Data/Localization/RecountRows.json</c>(ゲーム内メーターの見出し表の写し)が先に決める。
+/// 総括行(其他)は行ごと落としてあるので、そこに居た鍵と見出し表にそもそも無い鍵は、
+/// 記録時に付与元をたどった着地先(特性か技、<c>Services.SourceLandingResolver</c>)の名前で出る。
+/// ここに残すのは、どこにも着かず<b>名前が空のまま内部ID注記だけ</b>で出る鍵と、技に着いた鍵(特性より確かさが一段低い)、
+/// 着地先が食い違った鍵。どれも<b>たどった鎖</b>を書く。
 /// </para>
 ///
 /// <para>
@@ -25,10 +32,10 @@ namespace StarResonanceDps.Core.Diagnostics;
 /// </para>
 ///
 /// <para>
-/// <b>同じ鍵は1起動につき1行だけ。</b> <see cref="SpecConflictProbe"/> が同一IDで3件まで残すのは、
-/// 術者や <c>sourceConfigId</c> が違う別々の事象を見るため。こちらはスナップショットが
-/// 毎秒作り直されるので、複数残しても同じ内容が並ぶだけで新しい情報が無い。
-/// 1鍵1行にすると、ファイルがそのまま「名前を入れるべき鍵の一覧」になる。
+/// <b>同じ鍵は結果の種類ごとに1起動1行。</b> <see cref="SpecConflictProbe"/> が同一IDで3件まで残すのは、
+/// 術者や <c>sourceConfigId</c> が違う別々の事象を見るため。こちらは同じ鍵がヒットのたびに
+/// 届くので、複数残しても同じ内容が並ぶだけで新しい情報が無い。
+/// 着かなかった行だけを拾えば、ファイルがそのまま「名前を入れるべき鍵の一覧」になる。
 /// </para>
 ///
 /// <para>
@@ -46,20 +53,24 @@ public static class BlankSourceNameProbe
     private const string LogNamePrefix = "BlankSourceNameProbe";
 
     private static readonly object Sync = new();
-    private static readonly HashSet<long> SeenRowKeys = [];
+    private static readonly HashSet<(long RowKey, SourceLandingKind Kind)> SeenRowKeys = [];
+    private static readonly HashSet<(long RowKey, SourceLanding Decided, SourceLanding Other)> SeenConflicts = [];
 
     /// <summary>
-    /// 名前が空のままスキル詳細ウィジェットに載った行を1件残す。
+    /// 見出し表で名前が空の行を1件残す。着かなかったもの(<paramref name="landing"/> が無し)と、技に着いたものを書く。
+    /// 同じ鍵は結果の種類ごとに1起動1行(着かなかった行のあとで技に着けば、それも1行書く)。
     /// </summary>
     /// <param name="rowKey">畳んだあとの行代表キー。<c>ownerId:枝番</c> で書き出す。</param>
     /// <param name="rowKeyText">その鍵の表示形。手修正ファイルへそのまま写せる形で残す。</param>
     /// <param name="isBuffSource">届いたときの種別。名前には効かないが、正体を追う手掛かりになる。</param>
-    /// <param name="isHealing">与ダメ側とヒール側のどちらのウィジェットで出たか。</param>
+    /// <param name="isHealing">与ダメとヒールのどちらの記録で出たか。</param>
     /// <param name="totalValue">
-    /// <b>検知した時点の</b>累計値。スナップショットは毎秒作り直されるので最終値ではない。
+    /// <b>検知した時点の</b>累計値。記録の途中で拾うので最終値ではない(たいてい最初のヒットの値)。
     /// </param>
     /// <param name="hitCount">同じく検知した時点のヒット数。</param>
     /// <param name="characterId">出した人。職の当たりを付ける手掛かり。</param>
+    /// <param name="landing">付与元をたどって着いた先。着かなければ無し。</param>
+    /// <param name="trace">たどった鎖(段ごとの種類とID、止まった理由)。</param>
     public static void Capture(
         long rowKey,
         string rowKeyText,
@@ -67,11 +78,13 @@ public static class BlankSourceNameProbe
         bool isHealing,
         ulong totalValue,
         ulong hitCount,
-        long characterId)
+        long characterId,
+        SourceLanding landing,
+        string trace)
     {
         lock (Sync)
         {
-            if (!SeenRowKeys.Add(rowKey))
+            if (!SeenRowKeys.Add((rowKey, landing.Kind)))
             {
                 return;
             }
@@ -80,7 +93,33 @@ public static class BlankSourceNameProbe
         Write(string.Create(
             CultureInfo.InvariantCulture,
             $"行={rowKeyText} 種別={(isBuffSource ? "バフ" : "スキル")} 表={(isHealing ? "ヒール" : "与ダメ")} "
-            + $"検知時点 累計={totalValue} ヒット={hitCount} charId={characterId}"));
+            + $"検知時点 累計={totalValue} ヒット={hitCount} charId={characterId} 着地={landing} 鎖={trace}"));
+    }
+
+    /// <summary>
+    /// 着地先が決まった鍵で、別の先に着いた回を残す。同じ(鍵, 決まった先, 別の先)は1起動1行。
+    /// </summary>
+    public static void CaptureConflict(
+        long rowKey,
+        string rowKeyText,
+        bool isHealing,
+        long characterId,
+        SourceLanding decided,
+        SourceLanding other,
+        string trace)
+    {
+        lock (Sync)
+        {
+            if (!SeenConflicts.Add((rowKey, decided, other)))
+            {
+                return;
+            }
+        }
+
+        Write(string.Create(
+            CultureInfo.InvariantCulture,
+            $"着地先が食い違う 行={rowKeyText} 表={(isHealing ? "ヒール" : "与ダメ")} charId={characterId} "
+            + $"決まった先={decided} 今回={other} 鎖={trace}"));
     }
 
     private static void Write(string message)

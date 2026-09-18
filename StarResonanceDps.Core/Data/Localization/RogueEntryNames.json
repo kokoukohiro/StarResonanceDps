@@ -1,0 +1,2090 @@
+{
+  "997401": {
+    "zh-CN": "超载暴击",
+    "en-US": "Overload Crit",
+    "ja-JP": "過負荷会心",
+    "ko-KR": "치명타 과부하"
+  },
+  "997402": {
+    "zh-CN": "致命翻倍",
+    "en-US": "Lethal Doubled",
+    "ja-JP": "致命2倍",
+    "ko-KR": "치명 2배"
+  },
+  "997403": {
+    "zh-CN": "暴击风暴",
+    "en-US": "Crit Storm",
+    "ja-JP": "会心の嵐",
+    "ko-KR": "치명타 폭풍"
+  },
+  "997405": {
+    "zh-CN": "暴击冷却",
+    "en-US": "Crit Cooldown",
+    "ja-JP": "会心リキャスト",
+    "ko-KR": "치명타 쿨타임"
+  },
+  "997406": {
+    "zh-CN": "暴击印记",
+    "en-US": "Crit Mark",
+    "ja-JP": "会心マーク",
+    "ko-KR": "치명타 인장"
+  },
+  "997408": {
+    "zh-CN": "专精暴击",
+    "en-US": "Specialization Crit",
+    "ja-JP": "マスタリー会心",
+    "ko-KR": "마스터리 치명타"
+  },
+  "997409": {
+    "zh-CN": "特殊暴击",
+    "en-US": "Special Crit",
+    "ja-JP": "特殊会心",
+    "ko-KR": "특수 치명타"
+  },
+  "997410": {
+    "zh-CN": "暴击回血",
+    "en-US": "Crit Regen",
+    "ja-JP": "会心HP回復",
+    "ko-KR": "치명타 체력 회복"
+  },
+  "997411": {
+    "zh-CN": "复仇暴击",
+    "en-US": "Revenge Crit",
+    "ja-JP": "リベンジ会心",
+    "ko-KR": "복수 치명타"
+  },
+  "997412": {
+    "zh-CN": "终极暴击",
+    "en-US": "Ultimate Crit",
+    "ja-JP": "終極会心",
+    "ko-KR": "궁극 치명타"
+  },
+  "997414": {
+    "zh-CN": "治愈暴击",
+    "en-US": "Healing Crit",
+    "ja-JP": "治癒会心",
+    "ko-KR": "치유 치명타"
+  },
+  "997416": {
+    "zh-CN": "击杀暴击",
+    "en-US": "Crit on Kill",
+    "ja-JP": "撃破会心",
+    "ko-KR": "처치 치명타"
+  },
+  "997417": {
+    "zh-CN": "终结暴击",
+    "en-US": "Finisher Crit",
+    "ja-JP": "終結会心",
+    "ko-KR": "종결 치명타"
+  },
+  "997418": {
+    "zh-CN": "幸运暴击",
+    "en-US": "Lucky Crit",
+    "ja-JP": "幸運会心",
+    "ko-KR": "행운 치명타"
+  },
+  "997419": {
+    "zh-CN": "幸运暴击",
+    "en-US": "Lucky Crit",
+    "ja-JP": "幸運会心",
+    "ko-KR": "행운 치명타"
+  },
+  "997420": {
+    "zh-CN": "元素暴击",
+    "en-US": "Element Crit",
+    "ja-JP": "属性会心",
+    "ko-KR": "원소 치명타"
+  },
+  "997422": {
+    "zh-CN": "急速暴击",
+    "en-US": "Haste Crit",
+    "ja-JP": "ファスト会心",
+    "ko-KR": "속공 치명타"
+  },
+  "997424": {
+    "zh-CN": "首击暴击",
+    "en-US": "First Strike Crit",
+    "ja-JP": "初撃会心",
+    "ko-KR": "첫 공격 치명타"
+  },
+  "997425": {
+    "zh-CN": "连环暴击",
+    "en-US": "Chain Crit",
+    "ja-JP": "連環会心",
+    "ko-KR": "연쇄 치명타"
+  },
+  "997426": {
+    "zh-CN": "暴伤强化",
+    "en-US": "Crit DMG Boost",
+    "ja-JP": "会心ダメージ強化",
+    "ko-KR": "치명타 대미지 강화"
+  },
+  "997427": {
+    "zh-CN": "暴率强化",
+    "en-US": "Crit Rate Boost",
+    "ja-JP": "会心率強化",
+    "ko-KR": "치명타 확률 강화"
+  },
+  "997428": {
+    "zh-CN": "暴击召唤",
+    "en-US": "Summon on Crit",
+    "ja-JP": "会心召喚",
+    "ko-KR": "치명타 소환"
+  },
+  "997440": {
+    "zh-CN": "命运洪流",
+    "en-US": "Torrent of Fate",
+    "ja-JP": "運命の激流",
+    "ko-KR": "운명의 흐름"
+  },
+  "997442": {
+    "zh-CN": "因果倍增",
+    "en-US": "Causality Multiplier",
+    "ja-JP": "因果倍増",
+    "ko-KR": "인과 배증"
+  },
+  "997443": {
+    "zh-CN": "天命积累",
+    "en-US": "Fate Accumulation",
+    "ja-JP": "天命累積",
+    "ko-KR": "천명 축적"
+  },
+  "997445": {
+    "zh-CN": "幸运护符",
+    "en-US": "Lucky Charm",
+    "ja-JP": "幸運の護符",
+    "ko-KR": "행운 탈리스만"
+  },
+  "997447": {
+    "zh-CN": "时光眷顾",
+    "en-US": "Time's Favor",
+    "ja-JP": "時の配慮",
+    "ko-KR": "시간의 가호"
+  },
+  "997449": {
+    "zh-CN": "天命一击",
+    "en-US": "Fateful Strike",
+    "ja-JP": "天命の一撃",
+    "ko-KR": "천명의 일격"
+  },
+  "997451": {
+    "zh-CN": "命运连携",
+    "en-US": "Fate Linkage",
+    "ja-JP": "運命の連鎖",
+    "ko-KR": "운명의 연계"
+  },
+  "997452": {
+    "zh-CN": "天命暴击",
+    "en-US": "Fateful Crit",
+    "ja-JP": "天命会心",
+    "ko-KR": "천명의 치명타"
+  },
+  "997453": {
+    "zh-CN": "元素增幅",
+    "en-US": "Element Amp",
+    "ja-JP": "属性ブースト",
+    "ko-KR": "원소 증폭"
+  },
+  "997455": {
+    "zh-CN": "幸运加速",
+    "en-US": "Luck Acceleration",
+    "ja-JP": "幸運加速",
+    "ko-KR": "행운 가속"
+  },
+  "997457": {
+    "zh-CN": "命运收割",
+    "en-US": "Fate's Harvest",
+    "ja-JP": "運命の刈り取り",
+    "ko-KR": "운명 수확"
+  },
+  "997458": {
+    "zh-CN": "幸运涌动",
+    "en-US": "Luck - Tempest Flow",
+    "ja-JP": "湧き上がる幸運",
+    "ko-KR": "용솟는 행운"
+  },
+  "997460": {
+    "zh-CN": "命运增幅",
+    "en-US": "Fate Boost",
+    "ja-JP": "運命ブースト",
+    "ko-KR": "운명 증폭"
+  },
+  "997461": {
+    "zh-CN": "幸运加持",
+    "en-US": "Fortune's Blessing",
+    "ja-JP": "幸運の加護",
+    "ko-KR": "행운 부여"
+  },
+  "997462": {
+    "zh-CN": "风王契约",
+    "en-US": "Wind King's Pact",
+    "ja-JP": "風王の契約",
+    "ko-KR": "바람 왕의 계약"
+  },
+  "997463": {
+    "zh-CN": "终焉召唤",
+    "en-US": "Final Summon",
+    "ja-JP": "終焉の呼び声",
+    "ko-KR": "종언 소환"
+  },
+  "997470": {
+    "zh-CN": "幻想加速",
+    "en-US": "Imagine Acceleration",
+    "ja-JP": "イマジン加速",
+    "ko-KR": "이매진 가속"
+  },
+  "997471": {
+    "zh-CN": "幻象实体化",
+    "en-US": "Imagine Manifestation",
+    "ja-JP": "幻影実体化",
+    "ko-KR": "환상 실체화"
+  },
+  "997472": {
+    "zh-CN": "幻界审判",
+    "en-US": "Illusionary Judgment",
+    "ja-JP": "幻影界の審判",
+    "ko-KR": "환상 세계 심판"
+  },
+  "997473": {
+    "zh-CN": "元素幻灵",
+    "en-US": "Elemental Phantom",
+    "ja-JP": "属性の幻霊",
+    "ko-KR": "원소 환령"
+  },
+  "997474": {
+    "zh-CN": "幻象暴击",
+    "en-US": "Illusionary Crit",
+    "ja-JP": "幻影会心",
+    "ko-KR": "환상 치명타"
+  },
+  "997475": {
+    "zh-CN": "幻想共鸣",
+    "en-US": "Imagine Resonance",
+    "ja-JP": "イマジン共鳴",
+    "ko-KR": "이매진 공명"
+  },
+  "997476": {
+    "zh-CN": "梦境转移",
+    "en-US": "Dreamscape Transfer",
+    "ja-JP": "移りゆく夢",
+    "ko-KR": "꿈 전이"
+  },
+  "997477": {
+    "zh-CN": "幻想汲取",
+    "en-US": "Imagine Absorption",
+    "ja-JP": "イマジン吸収",
+    "ko-KR": "이매진 흡수"
+  },
+  "997478": {
+    "zh-CN": "幻象精准",
+    "en-US": "Illusionary Precision",
+    "ja-JP": "幻影精度",
+    "ko-KR": "환상 정밀"
+  },
+  "997479": {
+    "zh-CN": "哥布林冲锋",
+    "en-US": "Goblin Charge",
+    "ja-JP": "ゴブリンアタック",
+    "ko-KR": "고블린 돌격"
+  },
+  "997480": {
+    "zh-CN": "自然盟友",
+    "en-US": "Nature's Ally",
+    "ja-JP": "自然の友",
+    "ko-KR": "자연 맹우"
+  },
+  "997481": {
+    "zh-CN": "双重召唤",
+    "en-US": "Dual Summon",
+    "ja-JP": "ダブル召喚",
+    "ko-KR": "이중 소환"
+  },
+  "997482": {
+    "zh-CN": "英灵降临",
+    "en-US": "Heroic Descent",
+    "ja-JP": "英霊降臨",
+    "ko-KR": "영웅 강림"
+  },
+  "997483": {
+    "zh-CN": "幻界庇护",
+    "en-US": "Illusionary Sanctuary",
+    "ja-JP": "幻影界の庇護",
+    "ko-KR": "환상 세계 가호"
+  },
+  "997484": {
+    "zh-CN": "兵长召唤",
+    "en-US": "Captain's Summon",
+    "ja-JP": "ウォーリアー召喚",
+    "ko-KR": "병장 소환"
+  },
+  "997485": {
+    "zh-CN": "王者的援军",
+    "en-US": "King's Reinforcements",
+    "ja-JP": "王者からの援軍",
+    "ko-KR": "왕의 원군"
+  },
+  "997486": {
+    "zh-CN": "蒂娜的守护",
+    "en-US": "Tina's Blessing",
+    "ja-JP": "ティナの守護",
+    "ko-KR": "티나의 수호"
+  },
+  "997487": {
+    "zh-CN": "雷霆先锋",
+    "en-US": "Thunder Vanguard",
+    "ja-JP": "先駆ける霹靂",
+    "ko-KR": "천둥 선봉"
+  },
+  "997488": {
+    "zh-CN": "幸运幻影",
+    "en-US": "Lucky Phantom",
+    "ja-JP": "幸運幻影",
+    "ko-KR": "행운 환영"
+  },
+  "997489": {
+    "zh-CN": "幸运幻象",
+    "en-US": "Lucky Illusion",
+    "ja-JP": "幸運幻像",
+    "ko-KR": "행운 환상"
+  },
+  "997510": {
+    "zh-CN": "协同打击",
+    "en-US": "Coordinated Strike",
+    "ja-JP": "シナジー攻撃",
+    "ko-KR": "협동 타격"
+  },
+  "997512": {
+    "zh-CN": "元素共享",
+    "en-US": "Element Sharing",
+    "ja-JP": "属性享受",
+    "ko-KR": "원소 공유"
+  },
+  "997514": {
+    "zh-CN": "属性传导",
+    "en-US": "Attribute Transfer",
+    "ja-JP": "属性拡散",
+    "ko-KR": "능력치 전달"
+  },
+  "997516": {
+    "zh-CN": "并肩作战",
+    "en-US": "Join Forces",
+    "ja-JP": "協同戦線",
+    "ko-KR": "협동 전투"
+  },
+  "997517": {
+    "zh-CN": "增效协同",
+    "en-US": "Enhanced Synergy",
+    "ja-JP": "連携強化",
+    "ko-KR": "협동 버프"
+  },
+  "997519": {
+    "zh-CN": "能量协同领域",
+    "en-US": "Energy Synergy Domain",
+    "ja-JP": "エネルギー協力領域",
+    "ko-KR": "에너지 협동 영역"
+  },
+  "997521": {
+    "zh-CN": "减伤协同",
+    "en-US": "DMG Reduction Synergy",
+    "ja-JP": "ダメージ軽減シナジー",
+    "ko-KR": "협동 대미지 경감"
+  },
+  "997523": {
+    "zh-CN": "协同压制",
+    "en-US": "Coordinated Suppress",
+    "ja-JP": "協同抑圧",
+    "ko-KR": "협동 제압"
+  },
+  "997525": {
+    "zh-CN": "护盾协同",
+    "en-US": "Shield Synergy",
+    "ja-JP": "バリア連携",
+    "ko-KR": "실드 협동"
+  },
+  "997528": {
+    "zh-CN": "协同治疗",
+    "en-US": "Coordinated Healing",
+    "ja-JP": "連携回復",
+    "ko-KR": "협동 치료"
+  },
+  "997529": {
+    "zh-CN": "协同护盾",
+    "en-US": "Coordinated Shield",
+    "ja-JP": "バリア強化",
+    "ko-KR": "협동 실드"
+  },
+  "997530": {
+    "zh-CN": "协同转化",
+    "en-US": "Coordinated Conversion",
+    "ja-JP": "連携転化",
+    "ko-KR": "협동 전환"
+  },
+  "997531": {
+    "zh-CN": "协同治愈波",
+    "en-US": "Synergy Healing Wave",
+    "ja-JP": "連携ヒールウェーブ",
+    "ko-KR": "협동 치유 파동"
+  },
+  "997533": {
+    "zh-CN": "协同幸运场",
+    "en-US": "Synergy Luck Field",
+    "ja-JP": "連携幸運オーラ",
+    "ko-KR": "협동 행운 필드"
+  },
+  "997536": {
+    "zh-CN": "协同暴击场",
+    "en-US": "Synergy Crit Field",
+    "ja-JP": "連携会心オーラ",
+    "ko-KR": "협동 치명타 필드"
+  },
+  "997539": {
+    "zh-CN": "蓄力协同",
+    "en-US": "Charged Synergy",
+    "ja-JP": "チャージ協力",
+    "ko-KR": "협동 차징"
+  },
+  "997541": {
+    "zh-CN": "治疗反馈",
+    "en-US": "Healing Feedback",
+    "ja-JP": "回復フィードバック",
+    "ko-KR": "치료 피드백"
+  },
+  "997542": {
+    "zh-CN": "协同召唤：石化巨兽",
+    "en-US": "Synergy Summon—Petrified Behemoth",
+    "ja-JP": "連携召喚：石化巨獣",
+    "ko-KR": "협동 소환: 석화 거수"
+  },
+  "997543": {
+    "zh-CN": "协同召唤：山贼之王",
+    "en-US": "Synergy Summon—Brigand King",
+    "ja-JP": "連携召喚：山賊王",
+    "ko-KR": "협동 소환: 산적의 왕"
+  },
+  "997544": {
+    "zh-CN": "守护协同：蜂群",
+    "en-US": "Guardian Synergy—Swarm",
+    "ja-JP": "防御連携：ミーンの群れ",
+    "ko-KR": "협동 수호: 벌떼"
+  },
+  "997550": {
+    "zh-CN": "高能脉冲光束",
+    "en-US": "High-Energy Pulse Beam",
+    "ja-JP": "高エネルギーパルスビーム",
+    "ko-KR": "고에너지 파동 광선"
+  },
+  "997551": {
+    "zh-CN": "谐振波",
+    "en-US": "Resonance Wave",
+    "ja-JP": "共振波",
+    "ko-KR": "공진파"
+  },
+  "997552": {
+    "zh-CN": "过载协议",
+    "en-US": "Overdrive Protocol",
+    "ja-JP": "オーバーロードプロトコル",
+    "ko-KR": "과부하 프로토콜"
+  },
+  "997553": {
+    "zh-CN": "十字校准",
+    "en-US": "Cross Calibration",
+    "ja-JP": "十字キャリブレーション",
+    "ko-KR": "십자 보정"
+  },
+  "997554": {
+    "zh-CN": "冷却压缩",
+    "en-US": "CD Compression",
+    "ja-JP": "リキャスト圧縮",
+    "ko-KR": "쿨타임 압축"
+  },
+  "997555": {
+    "zh-CN": "连击加速",
+    "en-US": "Combo Acceleration",
+    "ja-JP": "コンボ加速",
+    "ko-KR": "콤보 가속"
+  },
+  "997556": {
+    "zh-CN": "生命共鸣",
+    "en-US": "HP Resonance",
+    "ja-JP": "生命の共鳴",
+    "ko-KR": "체력 공명"
+  },
+  "997557": {
+    "zh-CN": "战术祝福",
+    "en-US": "Tactical Blessing",
+    "ja-JP": "戦術の祝福",
+    "ko-KR": "전술 축복"
+  },
+  "997558": {
+    "zh-CN": "幸运触发",
+    "en-US": "Luck Trigger",
+    "ja-JP": "幸運のトリガー",
+    "ko-KR": "행운 발동"
+  },
+  "997559": {
+    "zh-CN": "装甲共鸣",
+    "en-US": "Armor Resonance",
+    "ja-JP": "装甲の共鳴",
+    "ko-KR": "장갑 공명"
+  },
+  "997560": {
+    "zh-CN": "能量虹吸",
+    "en-US": "Energy Siphon",
+    "ja-JP": "エネルギーサイフォン",
+    "ko-KR": "에너지 흡수"
+  },
+  "997561": {
+    "zh-CN": "医疗脉冲",
+    "en-US": "Medical Pulse",
+    "ja-JP": "医療パルス",
+    "ko-KR": "의료 파동"
+  },
+  "997562": {
+    "zh-CN": "暴伤增幅",
+    "en-US": "Crit DMG Amplification",
+    "ja-JP": "会心ダメージ増幅",
+    "ko-KR": "치명타 대미지 증폭"
+  },
+  "997563": {
+    "zh-CN": "暴击增幅",
+    "en-US": "Crit Amplification",
+    "ja-JP": "会心増幅",
+    "ko-KR": "치명타 증폭"
+  },
+  "997564": {
+    "zh-CN": "脉冲强化",
+    "en-US": "Pulse Enhancement",
+    "ja-JP": "パルス強化",
+    "ko-KR": "파동 강화"
+  },
+  "997565": {
+    "zh-CN": "专精联动",
+    "en-US": "Expertise Synergy",
+    "ja-JP": "マスタリー連動",
+    "ko-KR": "마스터리 연동"
+  },
+  "997566": {
+    "zh-CN": "终极过载",
+    "en-US": "Ultimate Overdrive",
+    "ja-JP": "アルティメットオーバーロード",
+    "ko-KR": "궁극 과부하"
+  },
+  "997567": {
+    "zh-CN": "寒霜召唤",
+    "en-US": "Frost Summon",
+    "ja-JP": "霜寒召喚",
+    "ko-KR": "서리 소환"
+  },
+  "997568": {
+    "zh-CN": "弱点分析",
+    "en-US": "Weakness Analysis",
+    "ja-JP": "弱点分析",
+    "ko-KR": "약점 분석"
+  },
+  "997569": {
+    "zh-CN": "精通转化",
+    "en-US": "Mastery Conversion",
+    "ja-JP": "器用さ変換",
+    "ko-KR": "숙련 전환"
+  },
+  "997580": {
+    "zh-CN": "精通增效",
+    "en-US": "Mastery Boost",
+    "ja-JP": "器用さ強化",
+    "ko-KR": "숙련 증폭"
+  },
+  "997581": {
+    "zh-CN": "猎手本能",
+    "en-US": "Hunter Instinct",
+    "ja-JP": "ハンターの本能",
+    "ko-KR": "사냥꾼의 본능"
+  },
+  "997582": {
+    "zh-CN": "精通专精",
+    "en-US": "Mastery Specialization",
+    "ja-JP": "器用さマスタリー",
+    "ko-KR": "숙련 마스터리"
+  },
+  "997583": {
+    "zh-CN": "蟹蛛召唤",
+    "en-US": "Arachnocrab Summon",
+    "ja-JP": "カニクモ召喚",
+    "ko-KR": "거미게 소환"
+  },
+  "997584": {
+    "zh-CN": "冷却共鸣",
+    "en-US": "CD Resonance",
+    "ja-JP": "リキャスト共鳴",
+    "ko-KR": "쿨타임 공명"
+  },
+  "997585": {
+    "zh-CN": "攻速爆发",
+    "en-US": "Attack SPD Burst",
+    "ja-JP": "攻撃速度バースト",
+    "ko-KR": "공속 폭발"
+  },
+  "997586": {
+    "zh-CN": "精通爆发",
+    "en-US": "Mastery Burst",
+    "ja-JP": "器用さバースト",
+    "ko-KR": "숙련 폭발"
+  },
+  "997587": {
+    "zh-CN": "地狐召唤",
+    "en-US": "Foxen Summon",
+    "ja-JP": "ランドフォックス召喚",
+    "ko-KR": "땅여우 소환"
+  },
+  "997588": {
+    "zh-CN": "暴伤倍率",
+    "en-US": "Crit DMG Multiplier",
+    "ja-JP": "会心ダメージ倍率",
+    "ko-KR": "치명타 대미지 배율"
+  },
+  "997589": {
+    "zh-CN": "精通超载",
+    "en-US": "Mastery Overdrive",
+    "ja-JP": "器用さオーバーロード",
+    "ko-KR": "숙련 과부하"
+  },
+  "997590": {
+    "zh-CN": "绝对暴击",
+    "en-US": "Absolute Crit",
+    "ja-JP": "絶対会心",
+    "ko-KR": "절대 치명타"
+  },
+  "997591": {
+    "zh-CN": "血怒精通",
+    "en-US": "Bloodwrath Mastery",
+    "ja-JP": "血怒精通",
+    "ko-KR": "피의 분노 숙련"
+  },
+  "997592": {
+    "zh-CN": "生命回响",
+    "en-US": "HP Echo",
+    "ja-JP": "生命の残響",
+    "ko-KR": "체력 메아리"
+  },
+  "997593": {
+    "zh-CN": "坚韧护甲",
+    "en-US": "Tenacity Armor",
+    "ja-JP": "強靱たる鎧",
+    "ko-KR": "강인 아머"
+  },
+  "997594": {
+    "zh-CN": "幸运倍率",
+    "en-US": "Luck Multiplier",
+    "ja-JP": "幸運倍率",
+    "ko-KR": "행운 배율"
+  },
+  "997595": {
+    "zh-CN": "精通加持",
+    "en-US": "Mastery Blessing",
+    "ja-JP": "器用さの加護",
+    "ko-KR": "숙련 강화"
+  },
+  "997596": {
+    "zh-CN": "精通冲击",
+    "en-US": "Mastery Impact",
+    "ja-JP": "器用さの衝撃",
+    "ko-KR": "숙련 충격"
+  },
+  "997597": {
+    "zh-CN": "精通附加",
+    "en-US": "Mastery Bonus",
+    "ja-JP": "器用さ付与",
+    "ko-KR": "숙련 추가"
+  },
+  "997598": {
+    "zh-CN": "蜘蛛召唤",
+    "en-US": "Spider Summon",
+    "ja-JP": "スパイダー召喚",
+    "ko-KR": "거미 소환"
+  },
+  "997599": {
+    "zh-CN": "治疗精通",
+    "en-US": "Healing Mastery",
+    "ja-JP": "回復精通",
+    "ko-KR": "치료 숙련"
+  },
+  "997610": {
+    "zh-CN": "生命打击",
+    "en-US": "HP Strike",
+    "ja-JP": "生命の打撃",
+    "ko-KR": "체력 타격"
+  },
+  "997611": {
+    "zh-CN": "不灭之躯",
+    "en-US": "Undying Body",
+    "ja-JP": "不滅の肉体",
+    "ko-KR": "불멸의 육신"
+  },
+  "997612": {
+    "zh-CN": "移动堡垒",
+    "en-US": "Mobile Fortress",
+    "ja-JP": "移動要塞",
+    "ko-KR": "이동 요새"
+  },
+  "997613": {
+    "zh-CN": "吸血打击",
+    "en-US": "Lifesteal Strike",
+    "ja-JP": "吸血の打撃",
+    "ko-KR": "흡혈 타격"
+  },
+  "997614": {
+    "zh-CN": "咒印暴击",
+    "en-US": "Curseseal Crit",
+    "ja-JP": "呪印の会心",
+    "ko-KR": "문양 치명타"
+  },
+  "997615": {
+    "zh-CN": "坚毅壁垒",
+    "en-US": "Resolute Barrier",
+    "ja-JP": "不屈の防壁",
+    "ko-KR": "불굴의 방벽"
+  },
+  "997616": {
+    "zh-CN": "生命律动",
+    "en-US": "HP Rhythm",
+    "ja-JP": "生命の律動",
+    "ko-KR": "생명의 율동"
+  },
+  "997617": {
+    "zh-CN": "体魄运势",
+    "en-US": "Physique Fortune",
+    "ja-JP": "体力の運勢",
+    "ko-KR": "체력의 운세"
+  },
+  "997618": {
+    "zh-CN": "丹佛召唤",
+    "en-US": "Denvel Summon",
+    "ja-JP": "デンヴェル召喚",
+    "ko-KR": "덴벨 소환"
+  },
+  "997619": {
+    "zh-CN": "生命增幅",
+    "en-US": "HP Amplification",
+    "ja-JP": "HP増幅",
+    "ko-KR": "체력 증폭"
+  },
+  "997620": {
+    "zh-CN": "荆棘反噬",
+    "en-US": "Thorn Backlash",
+    "ja-JP": "茨の反逆",
+    "ko-KR": "가시 반사"
+  },
+  "997621": {
+    "zh-CN": "生命强化",
+    "en-US": "Life Enhancement",
+    "ja-JP": "HP強化",
+    "ko-KR": "체력 강화"
+  },
+  "997622": {
+    "zh-CN": "防御强化",
+    "en-US": "Defense Enhancement",
+    "ja-JP": "防御力強化",
+    "ko-KR": "방어 강화"
+  },
+  "997623": {
+    "zh-CN": "全能强化",
+    "en-US": "Versatility Enhancement",
+    "ja-JP": "万能強化",
+    "ko-KR": "만능 강화"
+  },
+  "997624": {
+    "zh-CN": "幸运重击",
+    "en-US": "Lucky Heavy Strike",
+    "ja-JP": "幸運の重撃",
+    "ko-KR": "행운 강타"
+  },
+  "997625": {
+    "zh-CN": "破韧强化",
+    "en-US": "Resilience Break Enhancement",
+    "ja-JP": "ブレイク強化",
+    "ko-KR": "내성 파괴 강화"
+  },
+  "997626": {
+    "zh-CN": "狂战之躯",
+    "en-US": "Berserker Body",
+    "ja-JP": "狂戦の肉体",
+    "ko-KR": "광전의 육신"
+  },
+  "997627": {
+    "zh-CN": "沸血加速",
+    "en-US": "Blood-boiling Acceleration",
+    "ja-JP": "沸血の加速",
+    "ko-KR": "혈류 가속"
+  },
+  "997628": {
+    "zh-CN": "绝境元素",
+    "en-US": "Element of Desperation",
+    "ja-JP": "絶体絶命のエレメント",
+    "ko-KR": "절망 원소"
+  },
+  "997629": {
+    "zh-CN": "绝境之力",
+    "en-US": "Power of Desperation",
+    "ja-JP": "絶体絶命の力",
+    "ko-KR": "절망의 힘"
+  },
+  "997630": {
+    "zh-CN": "战意涌动",
+    "en-US": "Bloodthirst Surge",
+    "ja-JP": "戦意湧出",
+    "ko-KR": "솟구치는 전의"
+  },
+  "997631": {
+    "zh-CN": "火线冲锋",
+    "en-US": "Firing Line Charge",
+    "ja-JP": "最前線への突撃",
+    "ko-KR": "화선 돌진"
+  },
+  "997632": {
+    "zh-CN": "战吼爆发",
+    "en-US": "Battlecry Burst",
+    "ja-JP": "ウォークライバースト",
+    "ko-KR": "포효의 폭발"
+  },
+  "997633": {
+    "zh-CN": "血契召唤",
+    "en-US": "Blood Pact Summon",
+    "ja-JP": "血の契約召喚",
+    "ko-KR": "혈계 소환"
+  },
+  "997634": {
+    "zh-CN": "狂热攻速",
+    "en-US": "Frenzied Attack SPD",
+    "ja-JP": "狂熱の攻撃速度",
+    "ko-KR": "광열의 공속"
+  },
+  "997635": {
+    "zh-CN": "残血召唤",
+    "en-US": "Low HP Summon",
+    "ja-JP": "瀕死の召喚",
+    "ko-KR": "저체력 소환"
+  },
+  "997636": {
+    "zh-CN": "背水减伤",
+    "en-US": "Last Stand DMG Reduction",
+    "ja-JP": "背水のダメージ軽減",
+    "ko-KR": "배수의 대미지 경감"
+  },
+  "997637": {
+    "zh-CN": "绝境暴伤",
+    "en-US": "Desperation Crit",
+    "ja-JP": "絶体絶命の会心ダメージ",
+    "ko-KR": "절망의 치명타 대미지"
+  },
+  "997638": {
+    "zh-CN": "残血铁壁",
+    "en-US": "Low HP Iron Wall",
+    "ja-JP": "瀕死の鉄壁",
+    "ko-KR": "저체력 철벽"
+  },
+  "997639": {
+    "zh-CN": "残血幸运",
+    "en-US": "Low HP Luck",
+    "ja-JP": "瀕死の幸運",
+    "ko-KR": "저체력 행운"
+  },
+  "997640": {
+    "zh-CN": "燃血强攻",
+    "en-US": "Bloodburn Strong Attack",
+    "ja-JP": "燃血の強攻",
+    "ko-KR": "선혈의 공세"
+  },
+  "997641": {
+    "zh-CN": "燃血回响",
+    "en-US": "Bloodburn Echo",
+    "ja-JP": "燃血の残響",
+    "ko-KR": "선혈의 메아리"
+  },
+  "998010": {
+    "zh-CN": "引擎过载（诅咒）",
+    "en-US": "Engine Overload (Curse)",
+    "ja-JP": "オーバーヒート（呪い）",
+    "ko-KR": "엔진 과부하(저주)"
+  },
+  "998020": {
+    "zh-CN": "奥义充能",
+    "en-US": "Ultimate Charge",
+    "ja-JP": "奥義チャージ",
+    "ko-KR": "오의 충전"
+  },
+  "998030": {
+    "zh-CN": "循环加速",
+    "en-US": "Cycle Acceleration",
+    "ja-JP": "サイクル加速",
+    "ko-KR": "순환 가속"
+  },
+  "998040": {
+    "zh-CN": "时光沙漏",
+    "en-US": "Hourglass of Time",
+    "ja-JP": "時の砂時計",
+    "ko-KR": "시간의 모래시계"
+  },
+  "998060": {
+    "zh-CN": "无限火力",
+    "en-US": "Unlimited Power",
+    "ja-JP": "無限火力",
+    "ko-KR": "무한 화력"
+  },
+  "998070": {
+    "zh-CN": "雷神之怒",
+    "en-US": "Wrath of the Thunder God",
+    "ja-JP": "雷神の怒り",
+    "ko-KR": "뇌신의 분노"
+  },
+  "998140": {
+    "zh-CN": "雷云密布",
+    "en-US": "Stormclouds Gather",
+    "ja-JP": "立ち込める雷雲",
+    "ko-KR": "뇌운 밀집"
+  },
+  "998150": {
+    "zh-CN": "剑刃风暴",
+    "en-US": "Blade Storm",
+    "ja-JP": "剣刃の嵐",
+    "ko-KR": "검날 폭풍"
+  },
+  "998160": {
+    "zh-CN": "燃爆一击",
+    "en-US": "Fireball Explosion",
+    "ja-JP": "爆燃の一撃",
+    "ko-KR": "연폭 일격"
+  },
+  "998170": {
+    "zh-CN": "连锁闪电",
+    "en-US": "Chain Lightning",
+    "ja-JP": "連鎖稲妻",
+    "ko-KR": "연쇄 번개"
+  },
+  "998201": {
+    "zh-CN": "狂血契约（诅咒）",
+    "en-US": "Blood Pact (Curse)",
+    "ja-JP": "狂血の契約（呪い）",
+    "ko-KR": "광혈의 계약(저주)"
+  },
+  "998210": {
+    "zh-CN": "血怒转化",
+    "en-US": "Bloodwrath Conversion",
+    "ja-JP": "血怒の転換",
+    "ko-KR": "피의 분노 전환"
+  },
+  "998220": {
+    "zh-CN": "血气爆发",
+    "en-US": "Blood Surge",
+    "ja-JP": "血気の爆発",
+    "ko-KR": "혈기 폭발"
+  },
+  "998230": {
+    "zh-CN": "力挽狂澜",
+    "en-US": "Tide-Turner's Resolve",
+    "ja-JP": "起死回生",
+    "ko-KR": "위기 역전"
+  },
+  "998240": {
+    "zh-CN": "绝境神行",
+    "en-US": "Divine Escape",
+    "ja-JP": "絶体絶命の神速",
+    "ko-KR": "필사의 질주"
+  },
+  "998312": {
+    "zh-CN": "圣焰冲击",
+    "en-US": "Sacred Flame Strike",
+    "ja-JP": "聖炎インパクト",
+    "ko-KR": "성염 강타"
+  },
+  "998341": {
+    "zh-CN": "庇护光环",
+    "en-US": "Sanctuary Aura",
+    "ja-JP": "加護のオーラ",
+    "ko-KR": "가호 오라"
+  },
+  "998351": {
+    "zh-CN": "削弱光环",
+    "en-US": "Enfeeblement Aura",
+    "ja-JP": "弱体化オーラ",
+    "ko-KR": "약화 오라"
+  },
+  "998381": {
+    "zh-CN": "撼地重击",
+    "en-US": "Seismic Strike",
+    "ja-JP": "大地を揺るがす一撃",
+    "ko-KR": "지면 강타"
+  },
+  "998390": {
+    "zh-CN": "巨人之握",
+    "en-US": "Giant's Grasp",
+    "ja-JP": "巨人の握力",
+    "ko-KR": "거인의 손아귀"
+  },
+  "998400": {
+    "zh-CN": "巨人铠甲",
+    "en-US": "Giant's Armor",
+    "ja-JP": "巨人の鎧",
+    "ko-KR": "거인의 갑옷"
+  },
+  "998410": {
+    "zh-CN": "荆棘反伤",
+    "en-US": "Brambleblood Armor",
+    "ja-JP": "継続の茨反射",
+    "ko-KR": "가시 대미지 반사"
+  },
+  "998420": {
+    "zh-CN": "时空超载",
+    "en-US": "Spacetime Overload",
+    "ja-JP": "時空オーバーロード",
+    "ko-KR": "시공간 과부하"
+  },
+  "998421": {
+    "zh-CN": "时空超载",
+    "en-US": "Spacetime Overload",
+    "ja-JP": "時空オーバーロード",
+    "ko-KR": "시공간 과부하"
+  },
+  "998452": {
+    "zh-CN": "血怒血战",
+    "en-US": "Bloodwrath Bloodwar",
+    "ja-JP": "血怒血戦",
+    "ko-KR": "피의 분노 혈전"
+  },
+  "998461": {
+    "zh-CN": "战意流星（诅咒）",
+    "en-US": "Battle Starfall (Curse)",
+    "ja-JP": "流星（呪い）",
+    "ko-KR": "전의 유성(저주)"
+  },
+  "998500": {
+    "zh-CN": "动感节拍",
+    "en-US": "Dynamic Rhythm",
+    "ja-JP": "ダイナミックビート",
+    "ko-KR": "다이나믹 비트"
+  },
+  "998511": {
+    "zh-CN": "天体衰变(诅咒)",
+    "en-US": "Celestial Decay (Curse)",
+    "ja-JP": "アストロクラッシュ(呪い)",
+    "ko-KR": "천체 붕괴(저주)"
+  },
+  "998520": {
+    "zh-CN": "泰坦重拳",
+    "en-US": "Titan's Fist",
+    "ja-JP": "タイタンパンチ",
+    "ko-KR": "타이탄 펀치"
+  },
+  "998542": {
+    "zh-CN": "全职光环",
+    "en-US": "All-Class Aura",
+    "ja-JP": "全クラスオーラ",
+    "ko-KR": "만능 오라"
+  },
+  "998551": {
+    "zh-CN": "震荡光环",
+    "en-US": "Shockwave Aura",
+    "ja-JP": "ショックオーラ",
+    "ko-KR": "진동 오라"
+  },
+  "998601": {
+    "zh-CN": "赐福之矛",
+    "en-US": "Spear of Benediction",
+    "ja-JP": "祝福の槍",
+    "ko-KR": "축복의 창"
+  },
+  "998620": {
+    "zh-CN": "水晶契约（诅咒）",
+    "en-US": "Crystal Pact (Curse)",
+    "ja-JP": "水晶契約（呪い）",
+    "ko-KR": "수정 계약(저주)"
+  },
+  "998630": {
+    "zh-CN": "巨人装甲",
+    "en-US": "Titan Armor",
+    "ja-JP": "巨人の装甲",
+    "ko-KR": "거인의 방어구"
+  },
+  "998640": {
+    "zh-CN": "水晶反伤",
+    "en-US": "Crystal Thorns",
+    "ja-JP": "ダメージ反射",
+    "ko-KR": "수정 대미지 반사"
+  },
+  "998800": {
+    "zh-CN": "物理圣剑",
+    "en-US": "​Physical Sacred Blade​",
+    "ja-JP": "物理聖剣",
+    "ko-KR": "물리 성검"
+  },
+  "998810": {
+    "zh-CN": "魔法圣剑",
+    "en-US": "Magical Sacred Blade",
+    "ja-JP": "魔法聖剣",
+    "ko-KR": "마법 성검"
+  },
+  "998821": {
+    "zh-CN": "专精百炼",
+    "en-US": "Tempered Expertise",
+    "ja-JP": "マスタリー強化",
+    "ko-KR": "마스터리 단련"
+  },
+  "998831": {
+    "zh-CN": "特攻百炼",
+    "en-US": "Tempered Strike",
+    "ja-JP": "特攻強化",
+    "ko-KR": "특수 공격 단련"
+  },
+  "998960": {
+    "zh-CN": "源初-全能",
+    "en-US": "Origin - Versatility",
+    "ja-JP": "原初-万能",
+    "ko-KR": "원초 - 만능"
+  },
+  "998970": {
+    "zh-CN": "源初-急速",
+    "en-US": "Initial - Haste",
+    "ja-JP": "原初-ファスト",
+    "ko-KR": "원초 - 속공"
+  },
+  "998980": {
+    "zh-CN": "源初-幸运",
+    "en-US": "Initial - Luck",
+    "ja-JP": "原初-幸運",
+    "ko-KR": "원초 - 행운"
+  },
+  "998990": {
+    "zh-CN": "源初-暴击",
+    "en-US": "Initial - Crit",
+    "ja-JP": "原初-会心",
+    "ko-KR": "원초 - 치명타"
+  },
+  "999010": {
+    "zh-CN": "环绕火球",
+    "en-US": "Orbiting Fireball",
+    "ja-JP": "旋回火球",
+    "ko-KR": "회전 화염구"
+  },
+  "999020": {
+    "zh-CN": "牵引雷球",
+    "en-US": "Thunder Sphere Tethering",
+    "ja-JP": "雷球召喚",
+    "ko-KR": "견인 전기 구체"
+  },
+  "999030": {
+    "zh-CN": "灭世陨石",
+    "en-US": "Doom Meteor",
+    "ja-JP": "滅びの隕石",
+    "ko-KR": "멸세 운석"
+  },
+  "999040": {
+    "zh-CN": "弹跳炎弹",
+    "en-US": "Bouncing Fireball",
+    "ja-JP": "バウンド炎弾",
+    "ko-KR": "도약 화염탄"
+  },
+  "999050": {
+    "zh-CN": "洞察弱点",
+    "en-US": "Exploit Weakness",
+    "ja-JP": "弱点看破",
+    "ko-KR": "약점 통찰"
+  },
+  "999060": {
+    "zh-CN": "我是传奇",
+    "en-US": "I Am Legend",
+    "ja-JP": "我こそ伝説",
+    "ko-KR": "나는 전설이다"
+  },
+  "999070": {
+    "zh-CN": "引力黑洞",
+    "en-US": "Gravitational Black Hole",
+    "ja-JP": "グラトニー",
+    "ko-KR": "중력 블랙홀"
+  },
+  "999080": {
+    "zh-CN": "回旋利刃",
+    "en-US": "Spinning Blade",
+    "ja-JP": "回転する刃",
+    "ko-KR": "회전 칼날"
+  },
+  "999090": {
+    "zh-CN": "无人机兵",
+    "en-US": "Drone Gunner",
+    "ja-JP": "ドローン兵",
+    "ko-KR": "무인 기계병"
+  },
+  "999100": {
+    "zh-CN": "三分光轮",
+    "en-US": "Trichroma Halo",
+    "ja-JP": "三分光輪",
+    "ko-KR": "삼분 광륜"
+  },
+  "999110": {
+    "zh-CN": "无敌斩",
+    "en-US": "Invincible Slash",
+    "ja-JP": "無敵斬り",
+    "ko-KR": "무적 베기"
+  },
+  "999120": {
+    "zh-CN": "卡尼曼助战",
+    "en-US": "Kanamia Assistance",
+    "ja-JP": "カナミアのアシスト",
+    "ko-KR": "카나미아 지원군"
+  },
+  "3050160": {
+    "zh-CN": "雷影剑士·刃风绝影",
+    "en-US": "Stormblade - Phantom Edgewind",
+    "ja-JP": "ストームブレイド・刃風残影",
+    "ko-KR": "스톰 블레이드・검풍 절영"
+  },
+  "3050170": {
+    "zh-CN": "雷影剑士·雷印翻涌",
+    "en-US": "Stormblade - Surging Thunderseal",
+    "ja-JP": "ストームブレイド・雷印奔流",
+    "ko-KR": "스톰 블레이드・번개 인장의 격류"
+  },
+  "3050180": {
+    "zh-CN": "雷影剑士·居合迅闪",
+    "en-US": "Stormblade - Iai Flash",
+    "ja-JP": "ストームブレイド・居合迅閃",
+    "ko-KR": "스톰 블레이드・발도 신속 베기"
+  },
+  "3050190": {
+    "zh-CN": "雷影剑士·终极暴斩",
+    "en-US": "Stormblade - Ultimate Violent Slash",
+    "ja-JP": "ストームブレイド・究極暴斬",
+    "ko-KR": "스톰 블레이드・궁극 폭참"
+  },
+  "3050200": {
+    "zh-CN": "雷影剑士·坠龙延雷",
+    "en-US": "Stormblade - Dragonfall Echo",
+    "ja-JP": "ストームブレイド・墜竜雷撃",
+    "ko-KR": "스톰 블레이드・낙룡 연뢰"
+  },
+  "3050210": {
+    "zh-CN": "雷影剑士·雷霆刷新",
+    "en-US": "Stormblade - Thunderclap Reset",
+    "ja-JP": "ストームブレイド・雷霆更新",
+    "ko-KR": "스톰 블레이드・천둥 초기화"
+  },
+  "3050220": {
+    "zh-CN": "雷影剑士·雷切滞影",
+    "en-US": "Stormblade - Lingering Thunder Cut",
+    "ja-JP": "ストームブレイド・雷閃残影",
+    "ko-KR": "스톰 블레이드・뇌절 잔영"
+  },
+  "3050230": {
+    "zh-CN": "雷影剑士·雷压倍增",
+    "en-US": "Stormblade - Overwhelming Current",
+    "ja-JP": "ストームブレイド・雷圧倍増",
+    "ko-KR": "스톰 블레이드・뇌압 배증"
+  },
+  "3050240": {
+    "zh-CN": "雷影剑士·月影镰舞",
+    "en-US": "Stormblade - Moonstrike Scythe Dance",
+    "ja-JP": "ストームブレイド・月影殺乱舞",
+    "ko-KR": "스톰 블레이드・월영 낫무"
+  },
+  "3050250": {
+    "zh-CN": "雷影剑士·神罚叠层",
+    "en-US": "Stormblade - Stacking Divine Retribution",
+    "ja-JP": "ストームブレイド・神罰累積",
+    "ko-KR": "스톰 블레이드・신벌 중첩"
+  },
+  "3050260": {
+    "zh-CN": "雷影剑士·月刃同步",
+    "en-US": "Stormblade - Moonstrike Sync",
+    "ja-JP": "ストームブレイド・月刃連動",
+    "ko-KR": "스톰 블레이드・월광의 낫 동기화"
+  },
+  "3050270": {
+    "zh-CN": "雷影剑士·月刃扩容",
+    "en-US": "Stormblade - Expanded Moonstrike",
+    "ja-JP": "ストームブレイド・月刃拡張",
+    "ko-KR": "스톰 블레이드・월광의 낫 확장"
+  },
+  "3050280": {
+    "zh-CN": "雷影剑士·五重雷暴",
+    "en-US": "Stormblade - Quintuple Thunderstorm",
+    "ja-JP": "ストームブレイド・五連サンダーフォール",
+    "ko-KR": "스톰 블레이드・오중 뇌우"
+  },
+  "3050290": {
+    "zh-CN": "雷影剑士·神罚自启",
+    "en-US": "Stormblade - Instinctive Divine Retribution",
+    "ja-JP": "ストームブレイド・神罰誘発",
+    "ko-KR": "스톰 블레이드・자동 신벌"
+  },
+  "3050300": {
+    "zh-CN": "雷影剑士·雷击幸运",
+    "en-US": "Stormblade - Lucky Thunderstrike",
+    "ja-JP": "ストームブレイド・雷撃幸運",
+    "ko-KR": "스톰 블레이드・뇌격 행운"
+  },
+  "3050310": {
+    "zh-CN": "雷影剑士·幸运倍增",
+    "en-US": "Stormblade - Luck Multiplier",
+    "ja-JP": "ストームブレイド・幸運倍増",
+    "ko-KR": "스톰 블레이드・행운 배증"
+  },
+  "3051160": {
+    "zh-CN": "青岚骑士·风环增伤",
+    "en-US": "Wind Knight - Wind Gate Damage Buff",
+    "ja-JP": "ゲイルランサー・ウィンドリング増幅",
+    "ko-KR": "윈드 나이트・윈드 오라 대미지 증가"
+  },
+  "3051170": {
+    "zh-CN": "青岚骑士·龙炮风环",
+    "en-US": "Wind Knight - Drake Cannon Wind Gate",
+    "ja-JP": "ゲイルランサー・竜砲ウィンドリング",
+    "ko-KR": "윈드 나이트・용포 윈드 오라"
+  },
+  "3051180": {
+    "zh-CN": "青岚骑士·风环二连",
+    "en-US": "Wind Knight - Double Wind Gate",
+    "ja-JP": "ゲイルランサー・二連ウィンドリング",
+    "ko-KR": "윈드 나이트・2단 윈드 오라"
+  },
+  "3051190": {
+    "zh-CN": "青岚骑士·风姿极速",
+    "en-US": "Wind Knight - Extreme Galeform",
+    "ja-JP": "ゲイルランサー・風姿疾走",
+    "ko-KR": "윈드 나이트・초고속 풍모"
+  },
+  "3051200": {
+    "zh-CN": "青岚骑士·螺旋破追",
+    "en-US": "Wind Knight - Spiral Breach Pursuit",
+    "ja-JP": "ゲイルランサー・螺旋破追",
+    "ko-KR": "윈드 나이트・나선 체이싱"
+  },
+  "3051210": {
+    "zh-CN": "青岚骑士·勇气爆伤",
+    "en-US": "Wind Knight - Courage Crit Damage",
+    "ja-JP": "ゲイルランサー・勇気爆傷",
+    "ko-KR": "윈드 나이트・용기 폭발 대미지"
+  },
+  "3051220": {
+    "zh-CN": "青岚骑士·螺旋缩冷",
+    "en-US": "Wind Knight - Spiral CD Reduction",
+    "ja-JP": "ゲイルランサー・螺旋リキャスト短縮",
+    "ko-KR": "윈드 나이트・나선 냉기"
+  },
+  "3051230": {
+    "zh-CN": "青岚骑士·风意汲取",
+    "en-US": "Wind Knight - Wind Essence Siphon",
+    "ja-JP": "ゲイルランサー・風意吸収",
+    "ko-KR": "윈드 나이트・바람의 의지 흡수"
+  },
+  "3051240": {
+    "zh-CN": "青岚骑士·岚切召风",
+    "en-US": "Wind Knight - Sever Wind Summoning",
+    "ja-JP": "ゲイルランサー・嵐斬招風",
+    "ko-KR": "윈드 나이트・폭풍 가르기 토네이도"
+  },
+  "3051250": {
+    "zh-CN": "青岚骑士·七重龙卷",
+    "en-US": "Wind Knight - Sevenfold Tornado",
+    "ja-JP": "ゲイルランサー・七連トルネード",
+    "ko-KR": "윈드 나이트・칠중 회오리"
+  },
+  "3051260": {
+    "zh-CN": "青岚骑士·刹那极锐",
+    "en-US": "Wind Knight - Extreme Instant Edge",
+    "ja-JP": "ゲイルランサー・刹那鋭閃",
+    "ko-KR": "윈드 나이트・찰나 극한 예리"
+  },
+  "3051270": {
+    "zh-CN": "青岚骑士·风怒极速",
+    "en-US": "Wind Knight - Wind Fury Celerity",
+    "ja-JP": "ゲイルランサー・風怒迅撃",
+    "ko-KR": "윈드 나이트・바람의 분노 가속"
+  },
+  "3051280": {
+    "zh-CN": "青岚骑士·翔返充能",
+    "en-US": "Wind Knight - Skyfall Recharge",
+    "ja-JP": "ゲイルランサー・飛燕乱チャージ",
+    "ko-KR": "윈드 나이트・공중 반격 충전"
+  },
+  "3051290": {
+    "zh-CN": "青岚骑士·锐利自生",
+    "en-US": "Wind Knight - Self-Generating Sharpness",
+    "ja-JP": "ゲイルランサー・鋭利再生",
+    "ko-KR": "윈드 나이트・예리 자생"
+  },
+  "3051300": {
+    "zh-CN": "青岚骑士·刹那锐伤",
+    "en-US": "Wind Knight - Instant Edge Sharp Damage",
+    "ja-JP": "ゲイルランサー・瞬鋭裂傷",
+    "ko-KR": "윈드 나이트・찰나 예리한 일격"
+  },
+  "3051310": {
+    "zh-CN": "青岚骑士·风怒三叠",
+    "en-US": "Wind Knight - Wind Fury Triple Stack",
+    "ja-JP": "ゲイルランサー・風怒三撃",
+    "ko-KR": "윈드 나이트・바람의 분노 삼중첩"
+  },
+  "3052160": {
+    "zh-CN": "冰魔导师·绕珠风暴",
+    "en-US": "Frost Mage - Orbital Tempest",
+    "ja-JP": "フロストメイジ・連珠氷嵐",
+    "ko-KR": "프로스트 메이지・구슬 폭풍"
+  },
+  "3052170": {
+    "zh-CN": "冰魔导师·三重风暴",
+    "en-US": "Frost Mage - Triple Storm",
+    "ja-JP": "フロストメイジ・三連氷嵐",
+    "ko-KR": "프로스트 메이지・삼중 폭풍"
+  },
+  "3052180": {
+    "zh-CN": "冰魔导师·陨星终召",
+    "en-US": "Frost Mage - Final Meteor",
+    "ja-JP": "フロストメイジ・隕星終臨",
+    "ko-KR": "프로스트 메이지・메테오 궁극 소환"
+  },
+  "3052190": {
+    "zh-CN": "冰魔导师·苦寒永驻",
+    "en-US": "Frost Mage - Eternal Winter",
+    "ja-JP": "フロストメイジ・苦寒永続",
+    "ko-KR": "프로스트 메이지・영원한 혹한"
+  },
+  "3052200": {
+    "zh-CN": "冰魔导师·绕珠冰矛",
+    "en-US": "Frost Mage - Orbital Lance",
+    "ja-JP": "フロストメイジ・アイススピア連珠",
+    "ko-KR": "프로스트 메이지・워터 볼 스피어"
+  },
+  "3052210": {
+    "zh-CN": "冰魔导师·冰矛计数",
+    "en-US": "Frost Mage - Lance Count",
+    "ja-JP": "フロストメイジ・アイススピア加算",
+    "ko-KR": "프로스트 메이지・얼음 창 계수"
+  },
+  "3052220": {
+    "zh-CN": "冰魔导师·玄冰双矛",
+    "en-US": "Frost Mage - Dual Frost Crystal Lance",
+    "ja-JP": "フロストメイジ・氷矛双発",
+    "ko-KR": "프로스트 메이지・미스틱 아이스 더블 스피어"
+  },
+  "3052230": {
+    "zh-CN": "冰魔导师·冰矛减冷",
+    "en-US": "Frost Mage - Lance Reduction",
+    "ja-JP": "フロストメイジ・氷矛リキャスト短縮",
+    "ko-KR": "프로스트 메이지・쿨감 얼음 창"
+  },
+  "3052240": {
+    "zh-CN": "冰魔导师·极寒灌注",
+    "en-US": "Frost Mage - Frigid Infusion",
+    "ja-JP": "フロストメイジ・極寒注入",
+    "ko-KR": "프로스트 메이지・극한 주입"
+  },
+  "3052250": {
+    "zh-CN": "冰魔导师·十重冰漩",
+    "en-US": "Frost Mage - Deca-Vortex",
+    "ja-JP": "フロストメイジ・十連氷渦",
+    "ko-KR": "프로스트 메이지・십중 아이스 토네이도"
+  },
+  "3052260": {
+    "zh-CN": "冰魔导师·清滝留涡",
+    "en-US": "Frost Mage - Cascading Gyre",
+    "ja-JP": "フロストメイジ・落氷残渦",
+    "ko-KR": "프로스트 메이지・워터 스파이럴"
+  },
+  "3052270": {
+    "zh-CN": "冰魔导师·冰涡分裂",
+    "en-US": "Frost Mage - Shatter Vortex",
+    "ja-JP": "フロストメイジ・氷渦分裂",
+    "ko-KR": "프로스트 메이지・토네이도 분열"
+  },
+  "3052280": {
+    "zh-CN": "冰魔导师·冰脉脉冲",
+    "en-US": "Frost Mage - Iceflow Pulse",
+    "ja-JP": "フロストメイジ・氷脈パルス",
+    "ko-KR": "프로스트 메이지・얼음 줄기 파동"
+  },
+  "3052290": {
+    "zh-CN": "冰魔导师·脉冲减冷",
+    "en-US": "Frost Mage - Pulse Reduction",
+    "ja-JP": "フロストメイジ・パルスリキャスト短縮",
+    "ko-KR": "프로스트 메이지・쿨감 파동"
+  },
+  "3052300": {
+    "zh-CN": "冰魔导师·冰攻永升",
+    "en-US": "Frost Mage - Permafrost Might",
+    "ja-JP": "フロストメイジ・氷攻永昇",
+    "ko-KR": "프로스트 메이지・얼음 공격 영구 강화"
+  },
+  "3052310": {
+    "zh-CN": "冰魔导师·冰箭叠伤",
+    "en-US": "Frost Mage - Stacking Frostbolts",
+    "ja-JP": "フロストメイジ・氷矢累傷",
+    "ko-KR": "프로스트 메이지・아이스 애로우 대미지 중첩"
+  },
+  "3053160": {
+    "zh-CN": "神射手·群兽光召",
+    "en-US": "Marksman - Call of the Wild",
+    "ja-JP": "ディバインアーチャー・群獣召光",
+    "ko-KR": "디바인 아처・야수 무리 소환"
+  },
+  "3053170": {
+    "zh-CN": "神射手·传奇同临",
+    "en-US": "Marksman - Legendary Companion",
+    "ja-JP": "ディバインアーチャー・伝説同臨",
+    "ko-KR": "디바인 아처・전설 동행"
+  },
+  "3053180": {
+    "zh-CN": "神射手·狼唤凝神",
+    "en-US": "Marksman - Wolf's Focus",
+    "ja-JP": "ディバインアーチャー・召狼専心",
+    "ko-KR": "디바인 아처・늑대 집중 소환"
+  },
+  "3053190": {
+    "zh-CN": "神射手·兽攻强化",
+    "en-US": "Marksman - Primal Power",
+    "ja-JP": "ディバインアーチャー・獣攻強化",
+    "ko-KR": "디바인 아처・야수 공격 강화"
+  },
+  "3053200": {
+    "zh-CN": "神射手·箭雨倍增",
+    "en-US": "Marksman - Multiplying Arrow Rain",
+    "ja-JP": "ディバインアーチャー・アローレイン倍増",
+    "ko-KR": "디바인 아처・화살비 배증"
+  },
+  "3053210": {
+    "zh-CN": "神射手·怒涛必暴",
+    "en-US": "Marksman - Tidal Fury",
+    "ja-JP": "ディバインアーチャー・怒涛会心",
+    "ko-KR": "디바인 아처・치명적 격류"
+  },
+  "3053220": {
+    "zh-CN": "神射手·魔狼归兽",
+    "en-US": "Marksman - Demon Wolf Beast",
+    "ja-JP": "ディバインアーチャー・魔狼獣化",
+    "ko-KR": "디바인 아처・마랑 야수화"
+  },
+  "3053230": {
+    "zh-CN": "神射手·暴风驯兽",
+    "en-US": "Marksman - Storm Tamer",
+    "ja-JP": "ディバインアーチャー・暴風制獣",
+    "ko-KR": "디바인 아처・폭풍 조련"
+  },
+  "3053240": {
+    "zh-CN": "神射手·猎鹰回能",
+    "en-US": "Marksman - Falcon's Gift",
+    "ja-JP": "ディバインアーチャー・臣鷹回復",
+    "ko-KR": "디바인 아처・팔콘 에너지 회복"
+  },
+  "3053250": {
+    "zh-CN": "神射手·爆箭无界",
+    "en-US": "Marksman - Boundless Volley",
+    "ja-JP": "ディバインアーチャー・爆矢無限",
+    "ko-KR": "디바인 아처・폭발 화살 무한"
+  },
+  "3053260": {
+    "zh-CN": "神射手·鹰击延凝",
+    "en-US": "Marksman - Eagle-Eyed Focus",
+    "ja-JP": "ディバインアーチャー・鷹撃延長",
+    "ko-KR": "디바인 아처・팔콘 공격 응결"
+  },
+  "3053270": {
+    "zh-CN": "神射手·双鹰齐唤",
+    "en-US": "Marksman - Twin Talon Strike",
+    "ja-JP": "ディバインアーチャー・双鷹同召",
+    "ko-KR": "디바인 아처・더블 팔콘 소환"
+  },
+  "3053280": {
+    "zh-CN": "神射手·聚能三向",
+    "en-US": "Marksman - Charged Triple Shot",
+    "ja-JP": "ディバインアーチャー・三向チャージ",
+    "ko-KR": "디바인 아처・삼방향 집중"
+  },
+  "3053290": {
+    "zh-CN": "神射手·聚能斩血",
+    "en-US": "Marksman - Charged Execution",
+    "ja-JP": "ディバインアーチャー・チャージ削命",
+    "ko-KR": "디바인 아처・집중 참혈"
+  },
+  "3053300": {
+    "zh-CN": "神射手·暴击缩冷",
+    "en-US": "Marksman - Crit CD Reduction",
+    "ja-JP": "ディバインアーチャー・会心リキャスト短縮",
+    "ko-KR": "디바인 아처・치명적 냉기"
+  },
+  "3053310": {
+    "zh-CN": "神射手·轰炸暴伤",
+    "en-US": "Marksman - Devastating Bombardment",
+    "ja-JP": "ディバインアーチャー・爆撃増傷",
+    "ko-KR": "디바인 아처・폭격 강타"
+  },
+  "3054200": {
+    "zh-CN": "神盾骑士·十重旋盾",
+    "en-US": "Shield Knight - Tenfold Spinning Shield",
+    "ja-JP": "シールドファイター・十層回転シールド",
+    "ko-KR": "실드 나이트・십중 회전 방패"
+  },
+  "3054210": {
+    "zh-CN": "神盾骑士·裁决灼伤",
+    "en-US": "Shield Knight - Burning Judgment",
+    "ja-JP": "シールドファイター・ジャッジメント焔傷",
+    "ko-KR": "실드 나이트・작열의 심판"
+  },
+  "3054220": {
+    "zh-CN": "神盾骑士·裁决极意",
+    "en-US": "Shield Knight - Ultimate Judgment",
+    "ja-JP": "シールドファイター・ジャッジメント極意",
+    "ko-KR": "실드 나이트・심판 극의"
+  },
+  "3054230": {
+    "zh-CN": "神盾骑士·盾击叠攻",
+    "en-US": "Shield Knight - Shield Attack Stack",
+    "ja-JP": "シールドファイター・シールドアタック連撃",
+    "ko-KR": "실드 나이트・방패 공격 중첩"
+  },
+  "3054240": {
+    "zh-CN": "神盾骑士·清算暴伤",
+    "en-US": "Shield Knight - Reckoning Crit",
+    "ja-JP": "シールドファイター・レコニング増傷",
+    "ko-KR": "실드 나이트・숙청 치명타 대미지"
+  },
+  "3054250": {
+    "zh-CN": "神盾骑士·守卫连清算",
+    "en-US": "Shield Knight - Guard Reckoning",
+    "ja-JP": "シールドファイター・ガード連続レコニング",
+    "ko-KR": "실드 나이트・프로텍션 연속 숙청"
+  },
+  "3054260": {
+    "zh-CN": "神盾骑士·清算神圣",
+    "en-US": "Shield Knight - Holy Reckoning",
+    "ja-JP": "シールドファイター・神聖レコニング",
+    "ko-KR": "실드 나이트・신성한 숙청"
+  },
+  "3054270": {
+    "zh-CN": "神盾骑士·神圣打击",
+    "en-US": "Shield Knight - Holy Strike",
+    "ja-JP": "シールドファイター・聖裁打撃",
+    "ko-KR": "실드 나이트・신성한 타격"
+  },
+  "3054280": {
+    "zh-CN": "神盾骑士·决心极速",
+    "en-US": "Shield Knight - Swift Resolve",
+    "ja-JP": "シールドファイター・決意迅速",
+    "ko-KR": "실드 나이트・초고속 결심"
+  },
+  "3054290": {
+    "zh-CN": "神盾骑士·圣剑血刃",
+    "en-US": "Shield Knight - Blood Sacred Blade",
+    "ja-JP": "シールドファイター・ホーリーソード血刃",
+    "ko-KR": "실드 나이트・성스러운 혈검"
+  },
+  "3054300": {
+    "zh-CN": "神盾骑士·圣剑噬印",
+    "en-US": "Shield Knight - Sacred Blade Seal",
+    "ja-JP": "シールドファイター・ホーリーソード呑印",
+    "ko-KR": "실드 나이트・인장 포식의 성검"
+  },
+  "3054310": {
+    "zh-CN": "神盾骑士·光铸倍增",
+    "en-US": "Shield Knight - Lightforged Multiplier",
+    "ja-JP": "シールドファイター・光強化倍増",
+    "ko-KR": "실드 나이트・더블 라이트포지드"
+  },
+  "3054320": {
+    "zh-CN": "神盾骑士·追击血刃",
+    "en-US": "Shield Knight - Blood Blade Pursuit",
+    "ja-JP": "シールドファイター・追撃血刃",
+    "ko-KR": "실드 나이트・추격 혈검"
+  },
+  "3054340": {
+    "zh-CN": "神盾骑士·征伐极速",
+    "en-US": "Shield Knight - Swift Crusade",
+    "ja-JP": "シールドファイター・聖討迅撃",
+    "ko-KR": "실드 나이트・초고속 정벌"
+  },
+  "3054350": {
+    "zh-CN": "神盾骑士·裁决圣令",
+    "en-US": "Shield Knight - Holy Sigil Judgment",
+    "ja-JP": "シールドファイター・ジャッジメント光力",
+    "ko-KR": "실드 나이트・심판 칙령"
+  },
+  "3055200": {
+    "zh-CN": "巨刃守护者·砂石反转",
+    "en-US": "Heavy Guardian - Sandstone Reversal",
+    "ja-JP": "ヘヴィガーディアン・サンドストーンリバース",
+    "ko-KR": "헤비 가디언・모래 결정 반전"
+  },
+  "3055210": {
+    "zh-CN": "巨刃守护者·崩山噬砂",
+    "en-US": "Heavy Guardian - Mountain Shatter",
+    "ja-JP": "ヘヴィガーディアン・砕山呑砂",
+    "ko-KR": "헤비 가디언・붕괴한 산과 모래"
+  },
+  "3055220": {
+    "zh-CN": "巨刃守护者·岩稳增益",
+    "en-US": "Heavy Guardian - Rock Solid Buff",
+    "ja-JP": "ヘヴィガーディアン・岩壁増強",
+    "ko-KR": "헤비 가디언・바위 안정 버프"
+  },
+  "3055230": {
+    "zh-CN": "巨刃守护者·巨岩超载",
+    "en-US": "Heavy Guardian - Boulder Overload",
+    "ja-JP": "ヘヴィガーディアン・巨岩オーバーロード",
+    "ko-KR": "헤비 가디언・거암 과부하"
+  },
+  "3055240": {
+    "zh-CN": "巨刃守护者·护盾碎星",
+    "en-US": "Heavy Guardian - Starshatter Shield",
+    "ja-JP": "ヘヴィガーディアン・砕星バリア",
+    "ko-KR": "헤비 가디언・실드 별 파괴"
+  },
+  "3055250": {
+    "zh-CN": "巨刃守护者·弱点破盾",
+    "en-US": "Heavy Guardian - Weak Spot Shield Break",
+    "ja-JP": "ヘヴィガーディアン・弱点破盾",
+    "ko-KR": "헤비 가디언・약점 실드 파괴"
+  },
+  "3055260": {
+    "zh-CN": "巨刃守护者·弱点缩冷",
+    "en-US": "Heavy Guardian - Weak Spot CD Reduction",
+    "ja-JP": "ヘヴィガーディアン・弱点リキャスト短縮",
+    "ko-KR": "헤비 가디언・약점 냉기"
+  },
+  "3055270": {
+    "zh-CN": "巨刃守护者·护盾成长",
+    "en-US": "Heavy Guardian - Shield Growth",
+    "ja-JP": "ヘヴィガーディアン・バリア成長",
+    "ko-KR": "헤비 가디언・실드 성장"
+  },
+  "3055280": {
+    "zh-CN": "巨刃守护者·怒击极意",
+    "en-US": "Heavy Guardian - Ultimate Rageblow",
+    "ja-JP": "ヘヴィガーディアン・怒撃極意",
+    "ko-KR": "헤비 가디언・노격 극의"
+  },
+  "3055290": {
+    "zh-CN": "巨刃守护者·二十岩陨",
+    "en-US": "Heavy Guardian - Twentyfold Rockfall",
+    "ja-JP": "ヘヴィガーディアン・20ロックフォール",
+    "ko-KR": "헤비 가디언・20개의 낙석"
+  },
+  "3055300": {
+    "zh-CN": "巨刃守护者·格挡岩加",
+    "en-US": "Heavy Guardian - Granite Block",
+    "ja-JP": "ヘヴィガーディアン・ロックレジスト",
+    "ko-KR": "헤비 가디언・막기 바위 부가"
+  },
+  "3055310": {
+    "zh-CN": "巨刃守护者·岩弹永升",
+    "en-US": "Heavy Guardian - Granite Ascension",
+    "ja-JP": "ヘヴィガーディアン・岩石弾永昇",
+    "ko-KR": "헤비 가디언・암석탄 영구 강화"
+  },
+  "3055320": {
+    "zh-CN": "巨刃守护者·怒击延防",
+    "en-US": "Heavy Guardian - Rageblow Defense",
+    "ja-JP": "ヘヴィガーディアン・怒撃ガード延長",
+    "ko-KR": "헤비 가디언・노격 방어 연장"
+  },
+  "3055330": {
+    "zh-CN": "巨刃守护者·反击灼伤",
+    "en-US": "Heavy Guardian - Burning Counter",
+    "ja-JP": "ヘヴィガーディアン・反撃焔傷",
+    "ko-KR": "헤비 가디언・반격 작열"
+  },
+  "3055340": {
+    "zh-CN": "巨刃守护者·反击强化",
+    "en-US": "Heavy Guardian - Enhanced Counter",
+    "ja-JP": "ヘヴィガーディアン・反撃強化",
+    "ko-KR": "헤비 가디언・반격 강화"
+  },
+  "3055350": {
+    "zh-CN": "巨刃守护者·格挡岩强",
+    "en-US": "Heavy Guardian - Enhanced Rock Block",
+    "ja-JP": "ヘヴィガーディアン・ロックレジスト強化",
+    "ko-KR": "헤비 가디언・막기 바위 강화"
+  },
+  "3056220": {
+    "zh-CN": "森语者·脉冲荆棘",
+    "en-US": "Verdant Oracle - Pulsing Thorns",
+    "ja-JP": "ヴァーダントオラクル・継続の茨パルス",
+    "ko-KR": "실반 오라클・가시 파동"
+  },
+  "3056230": {
+    "zh-CN": "森语者·狂种速生",
+    "en-US": "Verdant Oracle - Wild Growth",
+    "ja-JP": "ヴァーダントオラクル・狂種速成",
+    "ko-KR": "실반 오라클・광란의 씨앗"
+  },
+  "3056240": {
+    "zh-CN": "森语者·脉冲必暴",
+    "en-US": "Verdant Oracle - Critical Pulse",
+    "ja-JP": "ヴァーダントオラクル・パルス会心",
+    "ko-KR": "실반 오라클・치명적 파동"
+  },
+  "3056250": {
+    "zh-CN": "森语者·鹿袭自启",
+    "en-US": "Verdant Oracle - Instinctive Assault",
+    "ja-JP": "ヴァーダントオラクル・鹿襲誘発",
+    "ko-KR": "실반 오라클・사슴 습격 개시"
+  },
+  "3056260": {
+    "zh-CN": "森语者·灌注散射",
+    "en-US": "Verdant Oracle - Scattering Infusion",
+    "ja-JP": "ヴァーダントオラクル・インフュージョン散射",
+    "ko-KR": "실반 오라클・인퓨전 산탄"
+  },
+  "3056270": {
+    "zh-CN": "森语者·鹿袭增益",
+    "en-US": "Verdant Oracle - Stag Assault Buff",
+    "ja-JP": "ヴァーダントオラクル・鹿襲強化",
+    "ko-KR": "실반 오라클・사슴 돌진 버프"
+  },
+  "3056280": {
+    "zh-CN": "森语者·十重注能",
+    "en-US": "Verdant Oracle - Tenfold Charge",
+    "ja-JP": "ヴァーダントオラクル・十連チャージ",
+    "ko-KR": "실반 오라클・십중 에너지 주입"
+  },
+  "3056290": {
+    "zh-CN": "森语者·幸运叠伤",
+    "en-US": "Verdant Oracle - Luck Stacks",
+    "ja-JP": "ヴァーダントオラクル・幸運累傷",
+    "ko-KR": "실반 오라클・행운 대미지 중첩"
+  },
+  "3056300": {
+    "zh-CN": "森语者·滋养爆域",
+    "en-US": "Verdant Oracle - Nourish Burst",
+    "ja-JP": "ヴァーダントオラクル・リジェネ爆域",
+    "ko-KR": "실반 오라클・양분 주기 폭발 영역"
+  },
+  "3056310": {
+    "zh-CN": "森语者·祈愿蓓蕾",
+    "en-US": "Verdant Oracle - Wishing Bud",
+    "ja-JP": "ヴァーダントオラクル・祈願の蕾",
+    "ko-KR": "실반 오라클・기원의 꽃망울"
+  },
+  "3056320": {
+    "zh-CN": "森语者·盛放缩冷",
+    "en-US": "Verdant Oracle - Full Bloom CD Reduction",
+    "ja-JP": "ヴァーダントオラクル・満開リキャスト短縮",
+    "ko-KR": "실반 오라클・만개 쿨다운"
+  },
+  "3056330": {
+    "zh-CN": "森语者·滋养倍增",
+    "en-US": "Verdant Oracle - Nourish Multiplier",
+    "ja-JP": "ヴァーダントオラクル・リジュネ倍増",
+    "ko-KR": "실반 오라클・양분 주기 배증"
+  },
+  "3056340": {
+    "zh-CN": "森语者·特攻极耗",
+    "en-US": "Verdant Oracle - High-Cost Special",
+    "ja-JP": "ヴァーダントオラクル・特攻消尽",
+    "ko-KR": "실반 오라클・특수 공격 극한 소모"
+  },
+  "3056350": {
+    "zh-CN": "森语者·生机永涌",
+    "en-US": "Verdant Oracle - Perpetual Vitality",
+    "ja-JP": "ヴァーダントオラクル・活気永続",
+    "ko-KR": "실반 오라클・용솟는 생기"
+  },
+  "3056360": {
+    "zh-CN": "森语者·魔法禁终",
+    "en-US": "Verdant Oracle - Unending Magic",
+    "ja-JP": "ヴァーダントオラクル・魔法永続",
+    "ko-KR": "실반 오라클・마법 궁극 봉인"
+  },
+  "3056370": {
+    "zh-CN": "森语者·汲取缩冷",
+    "en-US": "Verdant Oracle - Siphon CD Reduction",
+    "ja-JP": "ヴァーダントオラクル・吸収リキャスト短縮",
+    "ko-KR": "실반 오라클・냉기 착취"
+  },
+  "3057160": {
+    "zh-CN": "灵魂乐手·瞩目极章",
+    "en-US": "Beat Performer - Spotlight Finale",
+    "ja-JP": "ビートパフォーマー・クライマックス",
+    "ko-KR": "비트 퍼포머・주목 극장"
+  },
+  "3057170": {
+    "zh-CN": "灵魂乐手·幸运缩冷",
+    "en-US": "Beat Performer - Luck CD Reduction",
+    "ja-JP": "ビートパフォーマー・幸運リキャスト短縮",
+    "ko-KR": "비트 퍼포머・행운 냉기"
+  },
+  "3057180": {
+    "zh-CN": "灵魂乐手·狂想永升",
+    "en-US": "Beat Performer - Endless Rhapsody",
+    "ja-JP": "ビートパフォーマー・ラプソディ永昇",
+    "ko-KR": "비트 퍼포머・광상 영구 강화"
+  },
+  "3057190": {
+    "zh-CN": "灵魂乐手·狂想速奏",
+    "en-US": "Beat Performer - Rhapsody Presto",
+    "ja-JP": "ビートパフォーマー・ラプソディ速奏",
+    "ko-KR": "비트 퍼포머・광상 속주"
+  },
+  "3057200": {
+    "zh-CN": "灵魂乐手·英勇狂想",
+    "en-US": "Beat Performer - Heroic Rhapsody",
+    "ja-JP": "ビートパフォーマー・ブレイヴラプソディ",
+    "ko-KR": "비트 퍼포머・용맹 광상"
+  },
+  "3057210": {
+    "zh-CN": "灵魂乐手·幸运安可",
+    "en-US": "Beat Performer - Luck Encore",
+    "ja-JP": "ビートパフォーマー・幸運アンコール",
+    "ko-KR": "비트 퍼포머・행운 앵콜"
+  },
+  "3057220": {
+    "zh-CN": "灵魂乐手·终技回热",
+    "en-US": "Beat Performer - Ultimate Rebound",
+    "ja-JP": "ビートパフォーマー・フィナーレリチャージ",
+    "ko-KR": "비트 퍼포머・궁극 열정 회복"
+  },
+  "3057230": {
+    "zh-CN": "灵魂乐手·幸运终极",
+    "en-US": "Beat Performer - Lucky Ultimate",
+    "ja-JP": "ビートパフォーマー・究極幸運",
+    "ko-KR": "비트 퍼포머・행운 궁극"
+  },
+  "3057240": {
+    "zh-CN": "灵魂乐手·热情激昂",
+    "en-US": "Beat Performer - Passionate Exaltation",
+    "ja-JP": "ビートパフォーマー・パッションブースト",
+    "ko-KR": "비트 퍼포머・열정 격앙"
+  },
+  "3057250": {
+    "zh-CN": "灵魂乐手·激昂爆裂",
+    "en-US": "Beat Performer - Exaltation Burst",
+    "ja-JP": "ビートパフォーマー・激情バースト",
+    "ko-KR": "비트 퍼포머・격앙 폭발"
+  },
+  "3057260": {
+    "zh-CN": "灵魂乐手·安可音响",
+    "en-US": "Beat Performer - Resounding Encore",
+    "ja-JP": "ビートパフォーマー・アンコールサウンド",
+    "ko-KR": "비트 퍼포머・앵콜 스피커"
+  },
+  "3057270": {
+    "zh-CN": "灵魂乐手·喷火琴弦",
+    "en-US": "Beat Performer - Flaming Strings",
+    "ja-JP": "ビートパフォーマー・ブレイズストリング",
+    "ko-KR": "비트 퍼포머・화염 현"
+  },
+  "3057280": {
+    "zh-CN": "灵魂乐手·特攻极疗",
+    "en-US": "Beat Performer - Enhanced Special Heal",
+    "ja-JP": "ビートパフォーマー・特攻ヒール",
+    "ko-KR": "비트 퍼포머・특수 공격 고속 치료"
+  },
+  "3057290": {
+    "zh-CN": "灵魂乐手·巡演爆域",
+    "en-US": "Beat Performer - Tour Burst",
+    "ja-JP": "ビートパフォーマー・ツアーバースト",
+    "ko-KR": "비트 퍼포머・순회 공연 폭발 영역"
+  },
+  "3057300": {
+    "zh-CN": "灵魂乐手·五重无耗",
+    "en-US": "Beat Performer - Fivefold Freecast",
+    "ja-JP": "ビートパフォーマー・5連ノーコスト",
+    "ko-KR": "비트 퍼포머・무소모 오중주"
+  },
+  "3057310": {
+    "zh-CN": "灵魂乐手·乐章智升",
+    "en-US": "Beat Performer - Movement of Wisdom",
+    "ja-JP": "ビートパフォーマー・知力アップメロディ",
+    "ko-KR": "비트 퍼포머・악장 지능 강화"
+  },
+  "3060160": {
+    "zh-CN": "赤炎狂战士·幸运火斩",
+    "en-US": "Twin Striker - Lucky Flame Slash",
+    "ja-JP": "ツインストライカー・幸運の火斬",
+    "ko-KR": "트윈 스트라이커・행운 화참"
+  },
+  "3060170": {
+    "zh-CN": "赤炎狂战士·地火斧风",
+    "en-US": "Twin Striker - Hellfire Axe Wind",
+    "ja-JP": "ツインストライカー・地火のアクススパイラル",
+    "ko-KR": "트윈 스트라이커・지옥의 도끼 폭풍"
+  },
+  "3060180": {
+    "zh-CN": "赤炎狂战士·斧风强化",
+    "en-US": "Twin Striker - Axe Wind Enhancement",
+    "ja-JP": "ツインストライカー・アクススパイラル強化",
+    "ko-KR": "트윈 스트라이커・도끼 폭풍 강화"
+  },
+  "3060190": {
+    "zh-CN": "赤炎狂战士·突袭爆裂",
+    "en-US": "Twin Striker - Assault Burst",
+    "ja-JP": "ツインストライカー・突撃バースト",
+    "ko-KR": "트윈 스트라이커・습격 폭발"
+  },
+  "3060200": {
+    "zh-CN": "赤炎狂战士·燃烧火斩",
+    "en-US": "Twin Striker - Burning Flame Slash",
+    "ja-JP": "ツインストライカー・燃焼の火斬",
+    "ko-KR": "트윈 스트라이커・연소 화참"
+  },
+  "3060210": {
+    "zh-CN": "赤炎狂战士·斧风增伤",
+    "en-US": "Twin Striker - Axe Wind DMG Boost",
+    "ja-JP": "ツインストライカー・アクススパイラルダメージ強化",
+    "ko-KR": "트윈 스트라이커・도끼 폭풍 대미지 증가"
+  },
+  "3060220": {
+    "zh-CN": "赤炎狂战士·无相增益",
+    "en-US": "Twin Striker - Formless Buff",
+    "ja-JP": "ツインストライカー・双炎バフ",
+    "ko-KR": "트윈 스트라이커・무상 버프"
+  },
+  "3060230": {
+    "zh-CN": "赤炎狂战士·火斩强幸",
+    "en-US": "Twin Striker - Fortunate Flame Slash",
+    "ja-JP": "ツインストライカー・火斬の強運",
+    "ko-KR": "트윈 스트라이커・화참 강운"
+  },
+  "3060240": {
+    "zh-CN": "赤炎狂战士·元素增益",
+    "en-US": "Twin Striker - Element Buff",
+    "ja-JP": "ツインストライカー・属性バフ",
+    "ko-KR": "트윈 스트라이커・원소 버프"
+  },
+  "3060250": {
+    "zh-CN": "赤炎狂战士·生命流失",
+    "en-US": "Twin Striker - Bleed",
+    "ja-JP": "ツインストライカー・HP流失",
+    "ko-KR": "트윈 스트라이커・출혈"
+  },
+  "3060260": {
+    "zh-CN": "赤炎狂战士·专精暴击",
+    "en-US": "Twin Striker - Expertise Crit",
+    "ja-JP": "ツインストライカー・マスタリー会心",
+    "ko-KR": "트윈 스트라이커・마스터리 치명타"
+  },
+  "3060270": {
+    "zh-CN": "赤炎狂战士·专精增伤",
+    "en-US": "Twin Striker - Expertise DMG Boost",
+    "ja-JP": "ツインストライカー・マスタリーダメージ強化",
+    "ko-KR": "트윈 스트라이커・마스터리 대미지 증가"
+  },
+  "3060280": {
+    "zh-CN": "赤炎狂战士·炎魔爆裂",
+    "en-US": "Twin Striker - Hellfire Burst",
+    "ja-JP": "ツインストライカー・炎魔バースト",
+    "ko-KR": "트윈 스트라이커・염마 폭발"
+  },
+  "3060290": {
+    "zh-CN": "赤炎狂战士·炎魔缩冷",
+    "en-US": "Twin Striker - Hellfire CD Reduction",
+    "ja-JP": "ツインストライカー・炎魔リキャスト短縮",
+    "ko-KR": "트윈 스트라이커・염마 쿨타임 감소"
+  },
+  "3060300": {
+    "zh-CN": "赤炎狂战士·强力一击",
+    "en-US": "Twin Striker - Powerful Strike",
+    "ja-JP": "ツインストライカー・ヘヴィブロー",
+    "ko-KR": "트윈 스트라이커・강력한 일격"
+  },
+  "3060310": {
+    "zh-CN": "赤炎狂战士·如川充能",
+    "en-US": "Twin Striker - Flowing Splendor Charge",
+    "ja-JP": "ツインストライカー・川流のごとき斬撃チャージ",
+    "ko-KR": "트윈 스트라이커・유수 에너지 충전"
+  }
+}

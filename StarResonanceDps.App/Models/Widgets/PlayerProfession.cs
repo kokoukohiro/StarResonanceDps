@@ -1,9 +1,20 @@
+using StarResonanceDps.Core.Models;
+
 namespace StarResonanceDps.App.Models.Widgets;
 
 public static class PlayerProfession
 {
-    public static string GetKey(int professionId)
+    /// <param name="spec">
+    /// 変身している間の特化なら、職業IDに関係なく変身のキーにする。
+    /// ミーンの変身は職業IDが 0 で届くので、職業IDだけでは変身と分からない。
+    /// </param>
+    public static string GetKey(int professionId, PlayerClassSpec spec = PlayerClassSpec.Unknown)
     {
+        if (PlayerClassSpecResolver.IsTransformation(spec))
+        {
+            return "Transformation";
+        }
+
         return professionId switch
         {
             1 => "Stormblade",

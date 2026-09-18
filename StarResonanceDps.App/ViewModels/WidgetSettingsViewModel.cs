@@ -76,6 +76,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffCardSettings.PreviewChanged += BuffCardSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsTakenDamageLogSettings(kind))
+        {
+            TakenDamageLogSettings = new TakenDamageLogWidgetSettingsViewModel(config.TakenDamageLog);
+            TakenDamageLogSettings.PropertyChanged += TakenDamageLogSettings_PropertyChanged;
+            TakenDamageLogSettings.PreviewChanged += TakenDamageLogSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -86,6 +93,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<MetricTimelineWidgetSettingsConfig>? MetricTimelinePreviewChanged;
 
     public event Action<BuffCardWidgetSettingsConfig>? BuffCardPreviewChanged;
+
+    public event Action<TakenDamageLogWidgetSettingsConfig>? TakenDamageLogPreviewChanged;
 
     public void Dispose()
     {
@@ -111,6 +120,25 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffCardSettings.PreviewChanged -= BuffCardSettings_PreviewChanged;
             BuffCardSettings.Dispose();
         }
+
+        if (TakenDamageLogSettings is not null)
+        {
+            TakenDamageLogSettings.PropertyChanged -= TakenDamageLogSettings_PropertyChanged;
+            TakenDamageLogSettings.PreviewChanged -= TakenDamageLogSettings_PreviewChanged;
+        }
+    }
+
+    private void TakenDamageLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(TakenDamageLogWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void TakenDamageLogSettings_PreviewChanged(TakenDamageLogWidgetSettingsConfig config)
+    {
+        TakenDamageLogPreviewChanged?.Invoke(config);
     }
 
     private void BuffCardSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -168,6 +196,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public BuffCardWidgetSettingsViewModel? BuffCardSettings { get; }
 
+    public TakenDamageLogWidgetSettingsViewModel? TakenDamageLogSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     public bool HasMeterDisplaySettings => HasMeterSettings;
@@ -176,14 +206,18 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasBuffCardDisplaySettings => BuffCardSettings is not null;
 
+    public bool HasTakenDamageLogDisplaySettings => TakenDamageLogSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasMetricTimelineDisplaySettings
-        || HasBuffCardDisplaySettings;
+        || HasBuffCardDisplaySettings
+        || HasTakenDamageLogDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
         || (MetricTimelineSettings?.HasUnsavedChanges ?? false)
-        || (BuffCardSettings?.HasUnsavedChanges ?? false);
+        || (BuffCardSettings?.HasUnsavedChanges ?? false)
+        || (TakenDamageLogSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -217,12 +251,18 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.BuffCard = BuffCardSettings.CreateConfig();
         }
 
+        if (TakenDamageLogSettings is not null)
+        {
+            config.TakenDamageLog = TakenDamageLogSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
         MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
         BuffCardSettings?.MarkSaved(config.BuffCard);
+        TakenDamageLogSettings?.MarkSaved(config.TakenDamageLog);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -233,6 +273,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MeterSettings?.ResetToDefaults();
         MetricTimelineSettings?.ResetToDefaults();
         BuffCardSettings?.ResetToDefaults();
+        TakenDamageLogSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -242,6 +283,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MeterSettings?.RestoreSavedPreview();
         MetricTimelineSettings?.RestoreSavedPreview();
         BuffCardSettings?.RestoreSavedPreview();
+        TakenDamageLogSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

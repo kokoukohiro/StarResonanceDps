@@ -86,6 +86,15 @@
     <Resource Include="Assets\Images\com_icon_tab_146.png" />
     <Resource Include="Assets\Images\com_icon_tab_147.png" />
     <Resource Include="Assets\Images\com_icon_tab_148.png" />
+    <Resource Include="Assets\Images\hazard_sign_dark_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_fire_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_ice_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_light_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_no_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_rock_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_sen_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_thunder_high.png" />
+    <Resource Include="Assets\Images\hazard_sign_wind_high.png" />
     <Resource Include="Assets\Images\head_photo_000.png" />
     <Resource Include="Assets\Images\idcard_common_01.png" />
   </ItemGroup>

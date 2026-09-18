@@ -1,7 +1,7 @@
 """
 ボス大技の予告(DBM)の名前テーブルを生成する。
 
-  Data/Localization/dbms.{言語}.json
+  Data/Localization/DbmNames.json
 
 ゲームが予告に出す正式な技名。`SkillTable.Name` が埋め草の技にも名前がある。
 
@@ -66,7 +66,7 @@ def main():
 
     print("→ 和集合 %d" % len(keys))
     print("")
-    write_localized("dbms", values, keys)
+    write_localized("DbmNames", values, keys)
 
 
 if __name__ == "__main__":
