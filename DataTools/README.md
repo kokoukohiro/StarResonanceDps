@@ -13,7 +13,7 @@ python gen_dbms.py        # ボス大技の予告(DbmTable)の技名
 python gen_scenes.py      # シーン名(ダンジョンではダンジョン名)と難易度名
 python gen_monsters.py    # モンスターの名前
 python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
-python gen_rogue_entries.py   # 特性(ローグ系モードの祈願)の名前
+python gen_rogue_entries.py   # オプション(ローグ系モード)の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -410,10 +410,10 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ## gen_rogue_entries.py
 
-特性(ローグ系モードの祈願)の名前を、**特性のバフIDを鍵に**書く。値は `RogueEntryTable.EntryName`。
+オプション(ローグ系モード)の名前を、**オプションのバフIDを鍵に**書く。値は `RogueEntryTable.EntryName`。
 
-メーターの行が見出し表で名前を持たないとき、アプリは記録時に付与元をたどり、特性のバフに着いたらこの名前を出す。
-`EntryId` は鍵にしない。同じバフを複数の特性の行が指す。
+メーターの行が見出し表で名前を持たないとき、アプリは記録時に付与元をたどり、オプションのバフに着いたらこの名前を出す。
+`EntryId` は鍵にしない。同じバフを複数のオプションの行が指す。
 
 **出所の土台はバフIDの単位で決める**(cn / en は `Star`、jp / kr は `StarASIA`)。土台にそのバフIDの名前があれば土台だけを使う。
 
