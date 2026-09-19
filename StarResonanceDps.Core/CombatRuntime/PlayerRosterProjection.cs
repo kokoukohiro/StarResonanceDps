@@ -45,6 +45,28 @@ internal static class PlayerRosterProjection
         RosterStore.UpdateMapName(EncounterManager.SceneName, EncounterManager.ChannelLineId);
     }
 
+    /// <summary>
+    /// 起動時の値に戻す(ログアウト)。<see cref="BeginMap"/> と違い、パーティの補完へ書き戻さず、自分の行も残さない。
+    /// マップ名とチャンネルはシーン(起動時の値に戻した後)に合わせる。一覧の世代は進める。
+    /// <b>エンカウンターの保存(表示値の焼き付け)より後に呼ぶこと。</b>
+    /// </summary>
+    public static void ResetToStartup()
+    {
+        lock (NearbyPlayerSync)
+        {
+            NearbyPlayerUuids.Clear();
+        }
+
+        lock (PlayerEntitySync)
+        {
+            PlayerEntityUuidsByCharacterId.Clear();
+        }
+
+        MeterPlayerSpecCache.Instance.Clear();
+        RosterStore.Clear();
+        UpdateMapName();
+    }
+
     public static void UpsertSelf(long playerUuid)
     {
         UpsertPlayer(playerUuid, isSelfHint: true);

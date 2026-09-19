@@ -56,6 +56,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private int _selfDisplayModeIndex = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
     [ObservableProperty]
+    private int _listSortModeIndex = WidgetConfigDefaults.FirstSeenListSortModeIndex;
+
+    [ObservableProperty]
     private double _classColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
 
     [ObservableProperty]
@@ -164,8 +167,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public bool ShowsSelfDisplaySettings =>
         _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
+    /// <summary>「並び替え」(発見順 / 名前順)を出すのはプレイヤーリストとエンティティリスト。</summary>
+    public bool ShowsListSortSettings => WidgetConfigDefaults.UsesListSort(_kind);
+
     public bool HasAdditionalDisplaySettings =>
-        ShowsHealthValueSettings || ShowsPartyDisplaySettings || ShowsEntityDisplaySettings || ShowsSelfDisplaySettings;
+        ShowsHealthValueSettings || ShowsPartyDisplaySettings || ShowsEntityDisplaySettings
+        || ShowsSelfDisplaySettings || ShowsListSortSettings;
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -190,6 +197,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
+            ListSortModeIndex = ListSortModeIndex,
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -290,6 +298,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
             EntityDisplayModeIndex = normalized.EntityDisplayModeIndex;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
+            ListSortModeIndex = normalized.ListSortModeIndex;
             ClassColorOpacity = normalized.ClassColorOpacity;
             ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
             ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
@@ -317,6 +326,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
             || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
+            || left.ListSortModeIndex != right.ListSortModeIndex
             || left.ClassColorOpacity != right.ClassColorOpacity
             || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
             || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
@@ -465,6 +475,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     }
 
     partial void OnSelfDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnListSortModeIndexChanged(int value)
     {
         NotifyChanged();
     }

@@ -8,6 +8,12 @@ public static class AppConfigDefaults
     public const int MaxPaletteColorCount = 5;
     public const int MaxRecentColorCount = 10;
 
+    /// <summary>ウィジェットの窓を常に最前面に出す(既定)。</summary>
+    public const int AlwaysWidgetWindowTopmostModeIndex = 0;
+
+    /// <summary>ウィジェットの窓をピン留め中だけ最前面に出す。</summary>
+    public const int PinnedOnlyWidgetWindowTopmostModeIndex = 1;
+
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#1F1F1F",
@@ -39,6 +45,7 @@ public static class AppConfigDefaults
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
+            WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors()
         };
@@ -85,6 +92,10 @@ public static class AppConfigDefaults
         settings.NumberDisplayFormatIndex = Clamp(settings.NumberDisplayFormatIndex, 0, 1);
         settings.PlayerNameDisplayModeIndex = Clamp(settings.PlayerNameDisplayModeIndex, 0, 2);
         settings.InternalIdDisplayModeIndex = Clamp(settings.InternalIdDisplayModeIndex, 0, 5);
+        settings.WidgetWindowTopmostModeIndex = Clamp(
+            settings.WidgetWindowTopmostModeIndex,
+            AlwaysWidgetWindowTopmostModeIndex,
+            PinnedOnlyWidgetWindowTopmostModeIndex);
         settings.WindowColors = NormalizeColorList(settings.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         settings.WindowColorIndex = Clamp(settings.WindowColorIndex, 0, settings.WindowColors.Count - 1);
 

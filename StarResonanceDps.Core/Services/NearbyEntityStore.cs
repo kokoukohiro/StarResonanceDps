@@ -231,7 +231,11 @@ public sealed class NearbyEntityStore
         }
     }
 
-    private static int GetSortRank(NearbyEntityEntry entry)
+    /// <summary>
+    /// 群の順。<b>ボス → 精鋭 → 普通 → その他。</b>並び替えの設定(発見順 / 名前順)はこの中だけを決めるので、
+    /// 表示側もこの関数を使う(同じ規則を2か所に書かない)。
+    /// </summary>
+    public static int GetSortRank(NearbyEntityEntry entry)
     {
         return entry.MonsterType switch
         {

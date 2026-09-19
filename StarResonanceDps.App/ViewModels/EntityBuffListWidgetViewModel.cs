@@ -88,6 +88,11 @@ public sealed partial class EntityBuffListWidgetViewModel
         return _target.TryApply(entity);
     }
 
+    public void ReleaseEntity()
+    {
+        _target.Release();
+    }
+
     public void RefreshPresentation()
     {
         HeaderText = string.IsNullOrWhiteSpace(_target.DisplayName)

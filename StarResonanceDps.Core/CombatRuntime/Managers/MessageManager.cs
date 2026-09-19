@@ -93,6 +93,15 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterNotifyHandler((ulong)EServiceId.SocialNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.SocialNtf.NotifySocialData, ProcessNotifySocialData);
 
+            // ログイン画面へ戻ると、サーバーから GrpcCharactor(通知の service も GrpcCharactor)の ExitGame が通知で届く。
+            netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcCharactor, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.ExitGame, ProcessExitGame);
+
+            // 入り直し(キャラクター選択)。ログイン画面の門を開ける合図。
+            netCap.RegisterProxyHandler((uint)EServiceId.GrpcCharactor, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.SelectChar, ProcessSelectChar);
+
+            netCap.NotifyGate = ShouldDispatchNotify;
+            netCap.ProxyGate = ShouldDispatchProxy;
+
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
 
             netCap.Start();
@@ -323,6 +332,169 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static int ToInt32Saturating(long value)
         {
             return value > int.MaxValue ? int.MaxValue : (int)value;
+        }
+
+        /// <summary>
+        /// ログイン画面にいる間は <c>true</c>。<c>ExitGame</c> で立て、入り直し(<c>SelectChar</c>)かフルコンテナで下ろす。
+        ///
+        /// <para>
+        /// <b>この門が要る理由。</b> ログアウトの時点で受信の待ち行列に残っている AOI の差分が、
+        /// 起動直後の状態へ戻した直後に処理されて、消したはずのプレイヤーリスト・実体を作り直してしまう
+        /// (実測: 戻した4ミリ秒後に <c>SyncNearDeltaInfo</c> がプレイヤー51人・実体92体を作り直した)。
+        /// </para>
+        /// </summary>
+        private static volatile bool _isLoggedOut;
+
+        /// <summary>
+        /// 通知を処理してよいか。ログイン画面にいる間は、ゲームの状態を変える通知を通さない。
+        /// フルコンテナだけは通し、そこで門を開ける(入り直しの合図を取りこぼしたときの保険)。
+        /// </summary>
+        internal static bool ShouldDispatchNotify(ulong serviceUuid, uint methodId)
+        {
+            if (!_isLoggedOut)
+            {
+                return true;
+            }
+
+            if (serviceUuid == (ulong)EServiceId.WorldNtf
+                && methodId == (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncContainerData)
+            {
+                OpenGateAfterLogin("フルコンテナ");
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 要求・応答を処理してよいか。ログイン画面にいる間は、入り直し(<c>SelectChar</c>)だけ通す。
+        /// </summary>
+        internal static bool ShouldDispatchProxy(uint serviceId, uint methodId)
+        {
+            return !_isLoggedOut
+                || (serviceId == (uint)EServiceId.GrpcCharactor
+                    && methodId == (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.SelectChar);
+        }
+
+        /// <summary>入り直し(キャラクター選択)。ここから先は新しいセッションなので門を開ける。</summary>
+        public static void ProcessSelectChar(ReadOnlySpan<byte> payloadBuffer, uint returnUid, ExtraPacketData extraData)
+        {
+            OpenGateAfterLogin("SelectChar");
+        }
+
+        private static void OpenGateAfterLogin(string reason)
+        {
+            if (!_isLoggedOut)
+            {
+                return;
+            }
+
+            _isLoggedOut = false;
+            Log.Information("ログイン画面の門を開けた({Reason})", reason);
+        }
+
+        /// <summary>
+        /// ログアウトで起動直後の状態へ戻し終えた。パケット処理のスレッドで上がる。
+        /// App の実体の窓はこれを受けて、捕まえている個体を放し、起動時と同じく種類と種別IDで捕まえ直す。
+        /// </summary>
+        public static event Action? ResetToStartupCompleted;
+
+        /// <summary>
+        /// ゲームがログイン画面へ戻った(サーバーから <c>GrpcCharactor</c> の <c>ExitGame</c> が通知で届く)。
+        /// ログイン画面ではキャラクターを替えうるので、自分の素性も含めて<b>アプリ起動直後の状態へ戻す</b>。
+        /// ログイン画面のシーン(シーン表の login)はサーバーから届かないので、この通知を合図にする。
+        ///
+        /// <para>
+        /// 順序:
+        /// 1. 3分計測中なら止める(計測したエンカウンターはいつもどおり保存される)
+        /// 2. ダンジョンの状態とシーンを起動時の値に戻す(開いている記録には押さない)
+        /// 3. battle 行を閉じて開き直し、エンカウンターをマップ移動と同じ手順で保存して、持ち越しなし(reason=None、起動時と同じ)で作り直す。
+        ///    <b>プレイヤーリストはまだ残っている</b>ので、保存の直前の表示値の焼き付けが効く
+        /// 4. 自分の素性と、接続中に積もった状態を起動時の値に戻す。キャプチャ(接続とデバイス)・設定・データ表・DB・計測は戻さない
+        /// 5. 空のプレイヤーリストを作り直し、開いている履歴をライブに戻して、App に知らせる
+        /// </para>
+        /// </summary>
+        public static void ProcessExitGame(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            Log.Information("ExitGame: ログイン画面へ戻った。起動直後の状態へ戻す");
+
+            // 戻すより先に門を閉じる。待ち行列に残っている AOI の差分が、戻した直後に一覧を作り直すため。
+            _isLoggedOut = true;
+
+            try
+            {
+                ResetToStartupState();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "ExitGame: 起動直後の状態へ戻す途中で例外");
+                throw;
+            }
+        }
+
+        private static void ResetToStartupState()
+        {
+            if (AppState.IsBenchmarkMode)
+            {
+                MeterSnapshotProvider.TryStopBenchmark();
+            }
+
+            BattleStateMachine.ResetDungeonStateToStartup();
+            EncounterManager.ResetSceneToStartup();
+
+            EncounterManager.StartNewMap();
+
+            EncounterManager.EnterDungeon(true, EncounterStartReason.None);
+
+            BattleStateMachine.ClearEncounterEndFinalData();
+
+            currentUserUuid = 0;
+            AppState.PlayerUUID = 0;
+            AppState.PlayerUID = 0;
+            AppState.AccountId = null!;
+            AppState.PlayerName = null!;
+            AppState.ProfessionId = 0;
+            AppState.PlayerMeterPlacement = 0;
+            AppState.PlayerTotalMeterValue = 0;
+            AppState.PlayerMeterValuePerSecond = 0;
+            AppState.BenchmarkTime = 0;
+            AppState.BenchmarkSingleTargetUUID = 0;
+
+            // どれもパケット処理のスレッドだけが触る。
+            ShapeshiftedEntities.Clear();
+            PlayerDeathStates.Clear();
+            LastPassiveHealTicks.Clear();
+            PlayerStateHistory.Clear();
+            IsWipeCheckQueued = false;
+
+            // キャプチャの停止(StopCapturing)で消しているもの。停止はしない。
+            SkillCooldownStateStore.Reset();
+
+            GrpcTeamManager.ResetMemberState();
+
+            ActiveBuffStore.Instance.Clear();
+            BuffInstanceIndex.Instance.Clear();
+            SummonSourceIndex.Instance.Clear();
+            SourceLandingResolver.Instance.Clear();
+            NearbyMonsterIndex.Instance.Clear();
+
+            PartyMemberCache.Instance.Clear();
+
+            // マップ移動では残していたもの(自分の陣営・自分のスキル・プレイヤーリストの行など)。
+            PlayerSkillLevelStateStore.ResetSelfToStartup();
+
+            PlayerRosterProjection.ResetToStartup();
+
+            NearbyEntityProjection.ResetToStartup();
+
+            PlayerRosterProjection.RebuildRoster();
+
+            if (AppState.OpenedHistoricalEncounter is not null)
+            {
+                EncounterHistoryProvider.SelectLive();
+            }
+
+            ResetToStartupCompleted?.Invoke();
         }
 
         public static void ProcessNotifySocialData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -1078,7 +1250,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 本人が原因の被弾(<see cref="IsSelfCausedDamage"/>)を被ダメログにだけ残す。
         /// バフ由来なら、本人が付けたそのバフの付与元の技を控える(技の行の名前になる)。
         /// </summary>
-        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, bool isLastLoggedInSync, ExtraPacketData extraData)
+        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, bool carriesHp, ExtraPacketData extraData)
         {
             var skillId = SkillSourceResolver.Resolve(damageInfo.DamageSource, damageInfo.OwnerId, damageInfo.HitEventId).Key;
             var damage = ResolveDamageValue(damageInfo);
@@ -1117,7 +1289,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 (damageInfo.TypeFlag & 0B100) == 0B100,
                 damageInfo.IsMiss,
                 damageInfo.IsDead,
-                isLastLoggedInSync,
+                carriesHp,
                 extraData);
         }
 
@@ -2053,12 +2225,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 被ダメログの加害者を先に決めて、この同期で被ダメログに載る最後の被弾を求める。
+            // 被ダメログの加害者を先に決めて、この同期で被ダメログに載る被弾のうち、技の行ごとの最後の被弾を求める。
+            // HP はその被弾に載せる(同期で届く HP は全部当てた後の1つだけなので、同じ同期の技の行には同じ HP が並ぶ)。
+            // 技の行の鍵は被ダメログの表示(TakenDamageLogLayout)と同じ: 加害者・バフ由来か・発生源の番号(到着時刻は同期の中で同じ)。
             // 加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
             // 自分が原因の被弾(加害者の無いバフのダメージと落下)は被弾した本人。
             var damages = skillEffect.Damages;
             var takenDamageLogActors = new long[damages.Count];
-            var lastLoggedTakenDamageIndex = -1;
+            var lastLoggedTakenDamageIndexByGroup = new Dictionary<(long Actor, bool IsBuffSource, int OwnerId), int>();
             for (var index = 0; index < damages.Count; index++)
             {
                 var damageInfo = damages[index];
@@ -2082,8 +2256,14 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (Encounter.IsTakenDamageLogged(targetUuid, ResolveDamageValue(damageInfo)))
                 {
-                    lastLoggedTakenDamageIndex = index;
+                    lastLoggedTakenDamageIndexByGroup[(takenDamageLogActors[index], damageInfo.DamageSource == EDamageSource.Buff, damageInfo.OwnerId)] = index;
                 }
+            }
+
+            var carriesTakenDamageHp = new bool[damages.Count];
+            foreach (var lastIndex in lastLoggedTakenDamageIndexByGroup.Values)
+            {
+                carriesTakenDamageHp[lastIndex] = true;
             }
 
             HashSet<long> rosterPlayersToUpsert = [];
@@ -2098,7 +2278,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     if (syncDamageInfo.Type != EDamageType.Heal
                         && !(AppState.IsBenchmarkMode && targetUuid != AppState.PlayerUUID))
                     {
-                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, damageIndex == lastLoggedTakenDamageIndex, extraData);
+                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, carriesTakenDamageHp[damageIndex], extraData);
                         if (isTargetPlayer)
                         {
                             rosterPlayersToUpsert.Add(targetUuid);
@@ -2248,7 +2428,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
                 else
                 {
-                    if (attackerUuid != targetUuid)
+                    // 記録するのはプレイヤーの攻撃だけ。敵の攻撃は被ダメログ(AddTakenDamage)にだけ残す。
+                    if (isAttackerPlayer && attackerUuid != targetUuid)
                     {
                         EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
@@ -2278,7 +2459,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
                     }
 
-                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, damageIndex == lastLoggedTakenDamageIndex, extraData);
+                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, carriesTakenDamageHp[damageIndex], extraData);
                 }
 
                 // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。

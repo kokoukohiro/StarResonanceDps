@@ -8,6 +8,7 @@
              SnapsToDevicePixels="True">
     <UserControl.Resources>
         <converters:HealthRatioToWidthConverter x:Key="EntityList.RatioToWidthConverter" />
+        <converters:CenteredOffsetConverter x:Key="EntityList.CenteredOffsetConverter" />
 
         <CornerRadius x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
         <CornerRadius x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
@@ -377,13 +378,19 @@
                                                         VerticalAlignment="Center"
                                                         ClipToBounds="False"
                                                         IsHitTestVisible="False">
+                                                    <!-- 幅は数字の長さのまま、ゲージの中心にそろえる。ゲージより長ければ左右に同じだけはみ出す(切らない)。 -->
                                                     <TextBlock Canvas.Top="-3"
-                                                               Width="122"
                                                                Style="{StaticResource Text.WidgetWindow}"
                                                                FontSize="11"
                                                                FontWeight="SemiBold"
-                                                               Text="{Binding HealthText}"
-                                                               TextAlignment="Center" />
+                                                               Text="{Binding HealthText}">
+                                                        <Canvas.Left>
+                                                            <MultiBinding Converter="{StaticResource EntityList.CenteredOffsetConverter}">
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Canvas}}" />
+                                                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}" />
+                                                            </MultiBinding>
+                                                        </Canvas.Left>
+                                                    </TextBlock>
                                                 </Canvas>
                                             </Grid>
                                         </DataTemplate>

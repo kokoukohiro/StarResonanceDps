@@ -363,9 +363,6 @@
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
     <value>{0}死亡({1}/{2})</value>
   </data>
-  <data name="TakenDamageLog_DeathFormatNoHp" xml:space="preserve">
-    <value>{0}死亡</value>
-  </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>无属性</value>
   </data>
@@ -894,6 +891,21 @@
   <data name="EntityList_UnnamedAlly" xml:space="preserve">
     <value>友方</value>
   </data>
+  <data name="EntityList_UnknownEnemy" xml:space="preserve">
+    <value>未知敌人</value>
+  </data>
+  <data name="Settings_Display_ListSort" xml:space="preserve">
+    <value>排序方式</value>
+  </data>
+  <data name="ListSort_FirstSeen" xml:space="preserve">
+    <value>发现顺序</value>
+  </data>
+  <data name="ListSort_Name" xml:space="preserve">
+    <value>名称顺序</value>
+  </data>
+  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+    <value>隐藏自伤与友军伤害</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>增益减益卡片</value>
   </data>
@@ -959,6 +971,15 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>仅显示地图ID</value>
+  </data>
+  <data name="Settings_Display_WidgetWindow" xml:space="preserve">
+    <value>小组件窗口</value>
+  </data>
+  <data name="WidgetWindowTopmost_Always" xml:space="preserve">
+    <value>始终置顶</value>
+  </data>
+  <data name="WidgetWindowTopmost_PinnedOnly" xml:space="preserve">
+    <value>仅固定时置顶</value>
   </data>
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>统计设置</value>

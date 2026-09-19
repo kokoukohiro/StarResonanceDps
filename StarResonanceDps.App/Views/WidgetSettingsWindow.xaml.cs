@@ -189,6 +189,11 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(ClassColorsHost);
     }
 
+    private void TakenDamageLogClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(TakenDamageLogClassColorsHost);
+    }
+
     private void ResetButton_Click(object sender, RoutedEventArgs e)
     {
         var confirmed = ConfirmWindow.Show(

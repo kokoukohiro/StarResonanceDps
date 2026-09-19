@@ -14,6 +14,17 @@ internal static class NearbyEntityProjection
         EntityStore.BeginMap();
     }
 
+    /// <summary>
+    /// 起動時の値に戻す(ログアウト)。陣営は自分の分も消し、一覧を空にしてマップ名とチャンネルをシーン(起動時の値に戻した後)に合わせる。
+    /// 一覧の世代は進める(0 に戻すと App の控えと同じ番号になり、作り直しが起きないことがある)。
+    /// </summary>
+    public static void ResetToStartup()
+    {
+        NearbyEntityCampState.ResetToStartup();
+        EntityStore.Clear();
+        UpdateMapName();
+    }
+
     public static void SetSelfEntity(long entityUuid)
     {
         if (NearbyEntityCampState.SetSelfEntity(entityUuid))

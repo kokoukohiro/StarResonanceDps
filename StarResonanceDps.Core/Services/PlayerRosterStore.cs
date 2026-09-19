@@ -217,7 +217,11 @@ public sealed class PlayerRosterStore
             .ToArray());
     }
 
-    private static int GetGroupRank(PlayerRosterEntry entry)
+    /// <summary>
+    /// 群の順。<b>自分 → パーティ → PT外の灰色 → PT外のライブ。</b>並び替えの設定(発見順 / 名前順)は
+    /// この中だけを決めるので、表示側もこの関数を使う(同じ規則を2か所に書かない)。
+    /// </summary>
+    public static int GetGroupRank(PlayerRosterEntry entry)
     {
         if (entry.IsSelf)
         {

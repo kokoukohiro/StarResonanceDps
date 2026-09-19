@@ -198,7 +198,7 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                <Border Style="{StaticResource Panel.SettingField}"
                         Visibility="{Binding ShowsEntityDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -217,6 +217,39 @@
                                   Style="{StaticResource Input.SettingsComboBox}">
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityDisplay_All]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityDisplay_HideObjects]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- フィルターの次。プレイヤーリストは下に「自分の表示」が続くので線を引き、エンティティリストは最後の行なので引かない。 -->
+                <Border Visibility="{Binding ShowsListSortSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingField}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsSelfDisplaySettings}" Value="False">
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_ListSort]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding ListSortModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[ListSort_FirstSeen]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[ListSort_Name]}" />
                         </ComboBox>
                     </Grid>
                 </Border>

@@ -54,6 +54,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _internalIdDisplayModeIndex;
 
+    [ObservableProperty]
+    private int _widgetWindowTopmostModeIndex = AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
+
     // --- 集計設定 ---
 
     [ObservableProperty]
@@ -170,6 +173,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
+            WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()],
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
@@ -200,6 +204,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
             InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
+            WidgetWindowTopmostModeIndex = settings.WidgetWindowTopmostModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
@@ -445,6 +450,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.NumberDisplayFormatIndex == right.NumberDisplayFormatIndex
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
             && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
+            && left.WidgetWindowTopmostModeIndex == right.WidgetWindowTopmostModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
@@ -588,6 +594,16 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     partial void OnInternalIdDisplayModeIndexChanged(int value)
+    {
+        if (!_isLoadingSettings)
+        {
+            ApplySettingsPreview();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnWidgetWindowTopmostModeIndexChanged(int value)
     {
         if (!_isLoadingSettings)
         {

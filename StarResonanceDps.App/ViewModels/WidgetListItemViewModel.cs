@@ -589,7 +589,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
             .ToArray();
         if (mode == PartyDisplayMode.NonPartyMembersOnly)
         {
-            return visibleRoster;
+            return SortNonPartyByName(visibleRoster);
         }
 
         var entriesByCharacterId = visibleRoster
@@ -600,9 +600,43 @@ public partial class WidgetListItemViewModel : ViewModelBase
             .Select(characterId => entriesByCharacterId[characterId])
             .ToArray();
         var partyCharacterIds = party.OrderedCharacterIds.ToHashSet();
-        return orderedPartyEntries
+        return SortNonPartyByName(orderedPartyEntries
             .Concat(visibleRoster.Where(entry => !partyCharacterIds.Contains(entry.CharacterId)))
-            .ToArray();
+            .ToArray());
+    }
+
+    /// <summary>
+    /// 並び替えが名前順のときに、<b>自分とパーティ以外</b>を名前順にする。
+    /// 自分とパーティ(PT番号順)の並びと、PT外の 灰色 → ライブ の群は守る。
+    /// 名前は画面に出しているものと同じ(伏せ字・NPC の職業名込み)。同じ名前どうしは元の並び(発見順)のまま。
+    /// </summary>
+    private IReadOnlyList<PlayerRosterEntry> SortNonPartyByName(IReadOnlyList<PlayerRosterEntry> roster)
+    {
+        if (!SortsListByName)
+        {
+            return roster;
+        }
+
+        var nameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance
+            .GetSettingsSnapshot()
+            .PlayerNameDisplayModeIndex;
+
+        return
+        [
+            .. roster.Where(entry => entry.IsSelf || entry.IsPartyMember),
+            .. roster
+                .Where(entry => !entry.IsSelf && !entry.IsPartyMember)
+                .OrderBy(PlayerRosterStore.GetGroupRank)
+                .ThenBy(
+                    entry => PlayerInfoFormatFormatter.GetDisplayName(
+                        entry.Name,
+                        entry.CharacterId,
+                        entry.IsSelf,
+                        entry.IsNpc,
+                        entry.ProfessionId,
+                        nameDisplayMode),
+                    StringComparer.CurrentCulture)
+        ];
     }
 
     private int FindPlayerListEntryIndex(long characterId, int startIndex)
@@ -690,16 +724,39 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private IReadOnlyList<NearbyEntityEntry> GetVisibleNearbyEntities()
     {
         var hidesObjects = (EntityDisplayMode)_meter.EntityDisplayModeIndex == EntityDisplayMode.HideObjects;
-        return _nearbyEntities
+        var visibleEntities = _nearbyEntities
             .Where(entry => IsListed(entry) && (!hidesObjects || entry.HasHpBar))
             .ToArray();
+
+        if (!SortsListByName)
+        {
+            return visibleEntities;
+        }
+
+        // ボス → 精鋭 → 普通 の群は守り、その中だけを名前順にする。
+        // 並べ替えは安定なので、同じ名前どうしは元の並び(発見順)のまま。
+        return [.. visibleEntities
+            .OrderBy(NearbyEntityStore.GetSortRank)
+            .ThenBy(EntityListEntry.ResolveName, StringComparer.CurrentCulture)];
     }
+
+    /// <summary>
+    /// 並び替えの設定が名前順か。名前は画面に出しているものを使うので、並べ替えは App 側で行う
+    /// (Core で並べると表示言語の切り替えに追従しない)。
+    /// </summary>
+    private bool SortsListByName =>
+        _meter.ListSortModeIndex == WidgetConfigDefaults.NameListSortModeIndex;
 
     /// <summary>
     /// 一覧に載せるか。
     ///
     /// <para>
-    /// <c>AttrId</c> が未着(種別IDが 0)の間は載せない。種別が分からないと HP バーも名前も決まらない。
+    /// <c>AttrId</c> が未着(種別IDが 0)の実体は載せる(名前は「未知の敵」。<see cref="EntityListEntry"/>)。
+    /// <c>AttrId</c> は出現の通知でしか届かないので、アプリの起動前から居た実体はずっと種別が分からない。
+    /// 種別IDを UUID の通し番号で代えない(個体の番号なので、表を引くと別のモンスターの名前・判定になる)。
+    /// </para>
+    ///
+    /// <para>
     /// プレイヤーに見える HP バーを持つ実体は、名前が無くても載せる(名前は「敵」「味方」。<see cref="EntityListEntry"/>)。
     /// HP バーを持たない実体は、名前があるときだけ載せる。名前は表示と同じ引き方(表示言語、空なら zh-CN)で見る。
     /// </para>
@@ -711,10 +768,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
     /// </summary>
     private static bool IsListed(NearbyEntityEntry entry)
     {
-        return entry.EntityId > 0
-            && (entry.HasHpBar
-                || !CombatDataCatalog.HasEntityRow(entry.EntityType, entry.EntityId)
-                || CombatDataCatalog.HasEntityName(entry.EntityType, entry.EntityId));
+        return entry.EntityId == 0
+            || entry.HasHpBar
+            || !CombatDataCatalog.HasEntityRow(entry.EntityType, entry.EntityId)
+            || CombatDataCatalog.HasEntityName(entry.EntityType, entry.EntityId);
     }
 
     private int FindEntityListEntryIndex(long entityUuid, int startIndex)

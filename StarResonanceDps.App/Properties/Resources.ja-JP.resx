@@ -363,9 +363,6 @@
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
     <value>{0}が死亡({1}/{2})</value>
   </data>
-  <data name="TakenDamageLog_DeathFormatNoHp" xml:space="preserve">
-    <value>{0}が死亡</value>
-  </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>無属性</value>
   </data>
@@ -894,6 +891,21 @@
   <data name="EntityList_UnnamedAlly" xml:space="preserve">
     <value>味方</value>
   </data>
+  <data name="EntityList_UnknownEnemy" xml:space="preserve">
+    <value>未知の敵</value>
+  </data>
+  <data name="Settings_Display_ListSort" xml:space="preserve">
+    <value>並び替え</value>
+  </data>
+  <data name="ListSort_FirstSeen" xml:space="preserve">
+    <value>発見順</value>
+  </data>
+  <data name="ListSort_Name" xml:space="preserve">
+    <value>名前順</value>
+  </data>
+  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+    <value>自傷・フレンドリーファイア以外</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>バフ・デバフカード</value>
   </data>
@@ -959,6 +971,15 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>マップIDのみ表示</value>
+  </data>
+  <data name="Settings_Display_WidgetWindow" xml:space="preserve">
+    <value>ウィジェットウィンドウ</value>
+  </data>
+  <data name="WidgetWindowTopmost_Always" xml:space="preserve">
+    <value>常に最前面</value>
+  </data>
+  <data name="WidgetWindowTopmost_PinnedOnly" xml:space="preserve">
+    <value>ピン留め時のみ最前面</value>
   </data>
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>集計設定</value>

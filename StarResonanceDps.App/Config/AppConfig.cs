@@ -58,6 +58,12 @@ public sealed class SettingsConfig
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }
+
+    /// <summary>
+    /// ウィジェットの窓を最前面に出す条件。0=常に最前面 / 1=ピン留め時のみ最前面。
+    /// 反映は <c>WidgetWindow.ApplyTopmost</c>。
+    /// </summary>
+    public int WidgetWindowTopmostModeIndex { get; set; } = AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
     public int WindowColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
 
@@ -79,6 +85,7 @@ public sealed class SettingsConfig
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
+            WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             ExtensionData = CloneExtensionData(ExtensionData)

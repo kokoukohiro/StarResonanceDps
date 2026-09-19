@@ -55,6 +55,35 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         }
 
+        /// <summary>
+        /// ダンジョンの履歴・予約・前回の値を起動時の値に戻す(<see cref="StartNewMap"/> の前半と同じ消去)。ログアウト(ExitGame)で使う。
+        /// エンカウンターと battle 行には触らない。
+        /// </summary>
+        internal static void ResetDungeonStateToStartup()
+        {
+            PreviousDungeonTargetData = null;
+            DeferredEncounterStartTime = null;
+            DeferredEncounterStartReason = EncounterStartReason.None;
+            DeferredEncounterEndFinalTime = null;
+
+            DungeonVarHistory.Clear();
+            DungeonTargetDataHistory.Clear();
+            DungeonStateHistory.Clear();
+
+            PreviousDungeonVar = null;
+            NewEncounterOnNextEncounterEnd = false;
+        }
+
+        /// <summary>
+        /// 終わりの控え(前のエンカウンター)を起動時の値(null)に戻す。
+        /// <b>エンカウンターを作り直した後に呼ぶこと。</b> 作り直しの中で前のエンカウンター用に入れ直され、その場で消化される。
+        /// </summary>
+        internal static void ClearEncounterEndFinalData()
+        {
+            DeferredEncounterEndFinalTime = null;
+            DeferredEncounterEndFinalData = null;
+        }
+
         public static void DungeonStateHistoryAdd(EDungeonState dungeonState)
         {
             DungeonStateHistory.Enqueue(new KeyValuePair<EDungeonState, DateTime>(dungeonState, DateTime.Now));

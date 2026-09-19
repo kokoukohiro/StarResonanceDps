@@ -34,5 +34,8 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
     /// <summary>個体を採用する。未捕獲なら種別一致で捕まえる。</summary>
     bool TryApplyEntity(EntityListEntry entity);
 
+    /// <summary>捕まえている個体を放し、未捕獲に戻す(ログアウトで起動時の状態へ戻したとき)。</summary>
+    void ReleaseEntity();
+
     void RefreshPresentation();
 }

@@ -115,6 +115,7 @@ public partial class WidgetWindow : Window
         WidgetHeaderActionsHost.Content = headerActions;
         SetFooterContent(footerContent);
         _widget.PropertyChanged += Widget_PropertyChanged;
+        ConfigManager.Instance.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         MouseMove += WidgetWindow_ManualDragMouseMove;
         MouseLeftButtonUp += WidgetWindow_ManualDragMouseUp;
 
@@ -183,21 +184,38 @@ public partial class WidgetWindow : Window
 
     /// <summary>
     /// ピン留めは「配置を終えて以後は触らない」状態。
-    /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効き、
-    /// <b>最前面表示もここに含める。</b>
-    ///
-    /// <para>
-    /// <b>最前面は猶予(<see cref="IsPinBehaviorActive"/>)ではなくピン留めそのものに従わせる。</b>
-    /// 猶予中は窓を配置している最中なので、そこで最前面を外すとゲームの裏へ落ちる。
-    /// </para>
+    /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効く。
+    /// 最前面も、全体設定が「ピン留め時のみ最前面」ならピン留めに従う(<see cref="ApplyTopmost"/>)。
     /// </summary>
     public void ApplyPinState(bool isPinned)
     {
         _isPinned = isPinned;
-        Topmost = isPinned;
+        ApplyTopmost();
         ApplyNoActivateState();
         ApplyInactiveChromeVisibility();
         QueueContentScrollBarUpdate();
+    }
+
+    /// <summary>
+    /// 最前面にするか。全体設定「ウィジェットウィンドウ」が常に最前面なら常に、ピン留め時のみ最前面ならピン留め中だけ。
+    /// <b><c>Topmost</c> を書く場所はここ1つだけ。</b>
+    ///
+    /// <para>
+    /// <b>ピン留めは猶予(<see cref="IsPinBehaviorActive"/>)ではなくピン留めそのものを見る。</b>
+    /// 猶予中は窓を配置している最中なので、そこで最前面を外すとゲームの裏へ落ちる。
+    /// </para>
+    /// </summary>
+    private void ApplyTopmost()
+    {
+        Topmost = _isPinned
+            || ConfigManager.Instance.GetSettingsSnapshot().WidgetWindowTopmostModeIndex
+                == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
+    }
+
+    /// <summary>全体設定(プレビューか保存)が変わった。最前面の条件を当て直す。</summary>
+    private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
+    {
+        ApplyTopmost();
     }
 
     /// <summary>
@@ -315,6 +333,7 @@ public partial class WidgetWindow : Window
         _saveBoundsTimer.Stop();
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
         _widget.PropertyChanged -= Widget_PropertyChanged;
+        ConfigManager.Instance.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         MouseMove -= WidgetWindow_ManualDragMouseMove;
         MouseLeftButtonUp -= WidgetWindow_ManualDragMouseUp;
         EndManualDrag();

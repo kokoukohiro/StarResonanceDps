@@ -113,6 +113,21 @@ public sealed class EntityWindowTarget
         return true;
     }
 
+    /// <summary>
+    /// 捕まえている個体を放し、設定からの復元直後と同じ未捕獲に戻す(ログアウトで起動時の状態へ戻したとき)。
+    /// 以後は種類と種別IDが一致する個体を捕まえ直す。
+    /// </summary>
+    public void Release()
+    {
+        if (_entity is null)
+        {
+            return;
+        }
+
+        Detach();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
     public void Dispose()
     {
         Detach();

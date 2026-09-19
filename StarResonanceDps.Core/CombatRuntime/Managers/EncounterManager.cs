@@ -47,6 +47,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             ChannelLineId = lineId;
         }
+
+        /// <summary>
+        /// シーンを起動時の値(マップ 0・シーン名 null・チャンネル 0)に戻す。ログアウト(<c>ExitGame</c>)で使う。
+        /// <b>開いている記録(<see cref="Current"/> と battle 行)には押さない。</b> 直後の保存がログアウト前のマップのまま残るように。
+        /// マップ 0 は「まだシーン通知を一度も受け取っていない」状態で、入り直したときの最初のシーン通知は移動ではなく初回確定になる。
+        /// </summary>
+        internal static void ResetSceneToStartup()
+        {
+            LevelMapId = 0;
+            SceneName = null!;
+            ChannelLineId = 0;
+        }
         public delegate void BattleStartEventHandler(EventArgs e);
         public static event BattleStartEventHandler? BattleStart;
         public delegate void EncounterStartEventHandler(EncounterStartEventArgs e);
@@ -172,8 +184,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             Current = new Encounter(CurrentBattleId);
             Current.EncounterId = DB.GetNextEncounterId() + nextEncounterIdModifier;
             System.Diagnostics.Debug.WriteLine($"Created new encounter for EncounterId {Current.EncounterId} + ({nextEncounterIdModifier})");
-            // **Force も引き継ぐ。** 素性を捨ててよい区切りは無い。
-            // 区切りの強制は reason ではなく別引数の force が担う。
+            // **Force も引き継ぐ。** 素性を捨ててよい区切りは、ログアウト(ExitGame)だけ。
+            // 区切りの強制は reason ではなく別引数の force が担う。ログアウトは reason=None で呼んで持ち越さない(起動時と同じ)。
             if (priorEncounter != null && reason != EncounterStartReason.None)
             {
 
@@ -282,6 +294,10 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             AllowSceneUpdate = true;
 
+            // 統計が0になった人(AOI外でメーターにだけ居た灰色の行)をプレイヤーリストからも外す。
+            // 前のエンカウンターの保存(ApplyDisplayedIdentitiesForRecord がリストの表示値を焼き付ける)より後に置く。
+            PlayerRosterProjection.RebuildRoster();
+
             // エンカウンターの作り直しも「次のイベント」。3分計測・リセット・マップ移動・
             // フェーズ分割は全部ここを通るので、ボタン側に専用の解除を書かない。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -344,11 +360,39 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             UpdateTruePerValuesCTS.Cancel();
 
-            if (Current != null && Current.HasStatsBeenRecorded())
+            if (Current != null)
             {
+                SaveCurrentForRecordAndCloseBattle();
+            }
+
+        }
+
+        /// <summary>
+        /// 今のエンカウンターを記録として締める。<b>終了時刻は呼ぶ側で入れておくこと。</b>
+        ///
+        /// <para>
+        /// マップ移動の保存(<see cref="EnterDungeon"/> → <see cref="StartEncounter"/>、battle 行は <see cref="StartNewMap"/>)と同じ結果にそろえる:
+        /// 秒間値を終了時点で計算し直し、画面に出している素性を焼き付けてから保存し、battle 行を閉じる。
+        /// マップ移動の側は流れの途中に保存が組み込まれているので、この関数を通らない。手順を変えるときは両方を直す。
+        /// </para>
+        /// </summary>
+        internal static void SaveCurrentForRecordAndCloseBattle()
+        {
+            if (Current.TotalDamage > 0 || Current.TotalHealing > 0)
+            {
+                RecalculateEncounterPerValues(Current.EndTime.ToUniversalTime());
+            }
+
+            if (Current.HasStatsBeenRecorded())
+            {
+                ApplyDisplayedIdentitiesForRecord(Current);
                 DB.InsertEncounter(Current);
             }
 
+            if (CurrentBattleId != 0)
+            {
+                DB.UpdateBattleEnd(CurrentBattleId);
+            }
         }
 
         public static void SignalEncounterEndFinal(EncounterEndFinalData data)
@@ -707,13 +751,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ConcurrentDictionary<long, Entity> Entities { get; set; } = [];
 
         public ulong TotalDamage { get; set; } = 0;
-        public ulong TotalNpcDamage { get; set; } = 0;
         public ulong TotalShieldBreak { get; set; } = 0;
-        public ulong TotalNpcShieldBreak { get; set; } = 0;
         public ulong TotalHealing { get; set; } = 0;
-        public ulong TotalNpcHealing { get; set; } = 0;
         public ulong TotalOverhealing { get; set; } = 0;
-        public ulong TotalNpcOverhealing { get; set; } = 0;
+
+        /// <summary>
+        /// プレイヤーの被弾(被ダメログに載るもの)があったか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
+        /// 判定は実行中のエンカウンターでしか行わないので、DB には持たない。
+        /// </summary>
+        public bool HasPlayerTakenDamage { get; private set; }
         public ulong TotalDeaths { get; set; } = 0;
         public ulong TotalNpcDeaths { get; set; } = 0;
         public bool IsWipe { get; set; } = false;
@@ -1228,18 +1274,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// このエンカウンターに記録すべき戦闘があったか。**ダメージか回復が1でもあれば真。**
+        /// このエンカウンターに記録すべき戦闘があったか。**プレイヤーのダメージか回復か、プレイヤーの被弾が1でもあれば真。**
         ///
         /// <para>
         /// <b>ダメージだけで判定しない</b> — 回復のみの戦闘が落ちる。
-        /// <b>被ダメも数えない</b> — 被ダメメーターを作らない方針なので、表示しない値で真になる。
-        /// 見るのは <c>TotalDamage</c> / <c>TotalNpcDamage</c> / <c>TotalHealing</c> /
-        /// <c>TotalNpcHealing</c> の4本。
+        /// <b>プレイヤーの被弾も数える</b> — 殴られただけの戦闘も被ダメログとして残す。敵の攻撃そのもの(敵同士の戦闘を含む)は数えない。
+        /// 見るのは <c>TotalDamage</c> / <c>TotalHealing</c> / <see cref="HasPlayerTakenDamage"/> の3つ。
         /// </para>
         /// </summary>
         public bool HasStatsBeenRecorded()
         {
-            return TotalDamage > 0 || TotalNpcDamage > 0 || TotalHealing > 0 || TotalNpcHealing > 0;
+            return TotalDamage > 0 || TotalHealing > 0 || HasPlayerTakenDamage;
         }
 
         public void RegisterSkillActivation(long uuid, int skillId)
@@ -1360,29 +1405,14 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             ExData.FirstDamageTimeStamp ??= LastUpdate;
 
-            var attackerType = (EEntityType)Utils.UuidToEntityType(attackerUuid);
             var targetType = (EEntityType)Utils.UuidToEntityType(targetUuid);
 
-            if (attackerType == EEntityType.EntMonster)
+            if (damageType != EDamageType.Immune)
             {
-                if (damageType != EDamageType.Immune)
+                TotalDamage += (ulong)damage;
+                if (damageType == EDamageType.Absorbed)
                 {
-                    TotalNpcDamage += (ulong)damage;
-                    if (damageType == EDamageType.Absorbed)
-                    {
-                        TotalNpcShieldBreak += (ulong)shieldBreak;
-                    }
-                }
-            }
-            else
-            {
-                if (damageType != EDamageType.Immune)
-                {
-                    TotalDamage += (ulong)damage;
-                    if (damageType == EDamageType.Absorbed)
-                    {
-                        TotalShieldBreak += (ulong)shieldBreak;
-                    }
+                    TotalShieldBreak += (ulong)shieldBreak;
                 }
             }
 
@@ -1415,16 +1445,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             ExData.FirstDamageTimeStamp ??= LastUpdate;
 
-            var attackerType = (EEntityType)Utils.UuidToEntityType(attackerUuid);
-
-            if (attackerType == EEntityType.EntMonster)
-            {
-                TotalNpcHealing += (ulong)damage;
-            }
-            else
-            {
-                TotalHealing += (ulong)damage;
-            }
+            TotalHealing += (ulong)damage;
 
             var entity = GetOrCreateEntity(attackerUuid);
             var targetEntity = GetOrCreateEntity(targetUuid);
@@ -1444,14 +1465,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            if (attackerType == EEntityType.EntMonster)
-            {
-                TotalNpcOverhealing += (ulong)overhealing;
-            }
-            else
-            {
-                TotalOverhealing += (ulong)overhealing;
-            }
+            TotalOverhealing += (ulong)overhealing;
 
             entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, effectiveHealing, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
 
@@ -1471,15 +1485,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <param name="summonSourceSkillId">
         /// ダメージを出した実体(仮想体など)を出した技(<see cref="Services.SummonSourceIndex"/>)。決まらなければ 0。
         /// </param>
-        /// <param name="isLastLoggedInSync">
-        /// 同じ同期の中で被ダメログに載る最後の被弾か。同期で届く HP は被弾・回復を全部当てた後の1つだけなので、
-        /// HP・最大HP・バリアはこの被弾にだけ載せる。
+        /// <param name="carriesHp">
+        /// 同じ同期の中で、被ダメログの技の行(加害者・バフ由来か・発生源の番号)ごとの最後の被弾か。HP・最大HP・バリアはこの被弾にだけ載せる。
+        /// 同期で届く HP は被弾・回復を全部当てた後の1つだけなので、同じ同期の技の行には同じ値が載る。
         /// </param>
         public void AddTakenDamage(
             long attackerUuid, long targetUuid, long skillId, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
-            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, bool isLastLoggedInSync, ExtraPacketData extraPacketData)
+            bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, bool carriesHp, ExtraPacketData extraPacketData)
         {
+            // 被弾も「次のイベント」。自傷(加害者の無いバフ・落下・自分の技が自分に当たった被弾)は AddDamage を通らないので、ここで解除する。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
             LastUpdate = extraPacketData.ArrivalTime;
 
             var targetEntity = GetOrCreateEntity(targetUuid);
@@ -1491,12 +1508,24 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 敵の攻撃は AddDamage を通らないので、プレイヤーの被弾をここで戦闘の開始と記録すべき戦闘かの判定に数える
+            // (殴られて始まった戦闘・殴られただけの戦闘)。
+            ExData.FirstDamageTimeStamp ??= LastUpdate;
+            HasPlayerTakenDamage = true;
+
+            // 加害者の実体を作っておく。被ダメログの加害者名はこの実体(AttrId)から引くので、
+            // エンカウンターを作り直した直後に殴ってきた相手でも名前が引けるようにする。
+            if (attackerUuid != 0)
+            {
+                GetOrCreateEntity(attackerUuid);
+            }
+
             var snapshot = targetEntity.AddTakenDamage(attackerUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData,
                 new SkillSnapshotStamp(
                     NextTakenDamageLogSequence(),
-                    isLastLoggedInSync ? targetEntity.GetAttrKV("AttrHp") as long? : null,
-                    isLastLoggedInSync ? targetEntity.GetAttrKV("AttrMaxHp") as long? : null,
-                    isLastLoggedInSync ? Utils.GetCurrentShield(targetEntity) : null,
+                    carriesHp ? targetEntity.GetAttrKV("AttrHp") as long? : null,
+                    carriesHp ? targetEntity.GetAttrKV("AttrMaxHp") as long? : null,
+                    carriesHp ? Utils.GetCurrentShield(targetEntity) : null,
                     ownerId,
                     damageSource,
                     buffSourceSkillId,
@@ -1647,6 +1676,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void AddPlayerDeathWithoutDamage(long playerUuid, ExtraPacketData extraPacketData)
         {
+            // ダメージの無い死亡も「次のイベント」。AddDamage を通らないので、ここで解除する。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
             var death = new PlayerDeathRecord
             {
                 PlayerUuid = playerUuid,

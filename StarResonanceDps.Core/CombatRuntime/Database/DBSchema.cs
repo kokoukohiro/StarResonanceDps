@@ -18,13 +18,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             public const string Insert = @"
                 INSERT INTO Encounters (
                     BattleId, SceneId, SceneName, SceneSubName, BossUUID, BossAttrId, BossName, BossHpPct, Note, StartTime, EndTime, LastUpdate,
-                    TotalDamage, TotalNpcDamage, TotalShieldBreak, TotalNpcShieldBreak,
-                    TotalHealing, TotalNpcHealing, TotalOverhealing, TotalNpcOverhealing,
+                    TotalDamage, TotalShieldBreak,
+                    TotalHealing, TotalOverhealing,
                     TotalDeaths, TotalNpcDeaths, IsWipe, ExDataBlob
                 ) VALUES (
                     @BattleId, @SceneId, @SceneName, @SceneSubName, @BossUUID, @BossAttrId, @BossName, @BossHpPct, @Note, @StartTime, @EndTime, @LastUpdate,
-                    @TotalDamage, @TotalNpcDamage, @TotalShieldBreak, @TotalNpcShieldBreak,
-                    @TotalHealing, @TotalNpcHealing, @TotalOverhealing, @TotalNpcOverhealing,
+                    @TotalDamage, @TotalShieldBreak,
+                    @TotalHealing, @TotalOverhealing,
                     @TotalDeaths, @TotalNpcDeaths, @IsWipe, @ExDataBlob
                 );
                 SELECT last_insert_rowid();";
@@ -61,13 +61,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EndTime TEXT,
                     LastUpdate TEXT,
                     TotalDamage INTEGER DEFAULT 0,
-                    TotalNpcDamage INTEGER DEFAULT 0,
                     TotalShieldBreak INTEGER DEFAULT 0,
-                    TotalNpcShieldBreak INTEGER DEFAULT 0,
                     TotalHealing INTEGER DEFAULT 0,
-                    TotalNpcHealing INTEGER DEFAULT 0,
                     TotalOverhealing INTEGER DEFAULT 0,
-                    TotalNpcOverhealing INTEGER DEFAULT 0,
                     TotalDeaths INTEGER DEFAULT 0,
                     TotalNpcDeaths INTEGER DEFAULT 0,
                     IsWipe INTEGER DEFAULT 0,

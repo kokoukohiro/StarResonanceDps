@@ -149,7 +149,11 @@ public sealed record MeterPlayerIdentity(string Name, long UserId);
 /// <param name="IsUnnamedEnemy">
 /// 名前の無いモンスターで、ゲーム内で HP バーが見えるもの。表示側が「敵」と出す(名前は内部ID注記だけか空)。
 /// </param>
-public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false);
+/// <param name="IsUnknownEnemy">
+/// プレイヤーでも仮想体でもなく、実体か種別ID(AttrId)が無くて何者か分からない加害者。表示側が「未知の敵」と出す(名前は空)。
+/// AttrId は実体が現れたときの通知でしか届かないので、アプリの起動前から居た敵がこうなる。
+/// </param>
+public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false);
 
 /// <summary>
 /// 被ダメログの1件(予告か詠唱か被弾か、ダメージの無い死亡)。
@@ -484,7 +488,8 @@ public static class MeterSnapshotProvider
         TakenDamageLogParty party;
         if (!encounter.Entities.TryGetValue(uuid, out var entity))
         {
-            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid), false, 0, PlayerClassSpec.Unknown);
+            var isUnknownEnemy = !isPlayer && (EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntDummy;
+            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid), false, 0, PlayerClassSpec.Unknown, IsUnknownEnemy: isUnknownEnemy);
         }
         else if (isPlayer)
         {
@@ -513,9 +518,11 @@ public static class MeterSnapshotProvider
             // 仕掛けそのものを指す名前を出す。
             // 名前の無いモンスターでも、ゲーム内で HP バーが見えるものは「敵」と出す(エンティティリストと同じ条件)。
             // 表に行が無い番号には付けない(表が古いことを、名前の無い雑魚と見分けるため)。
+            // AttrId が届いていない加害者は何者か分からないので「未知の敵」と出す。
             var attrId = entity.GetAttrKV("AttrId");
             var entityType = (EEntityType)Utils.UuidToEntityType(uuid);
             var isSystem = entityType == EEntityType.EntDummy;
+            var isUnknownEnemy = !isSystem && attrId is null;
             var monsterId = attrId is null || entityType != EEntityType.EntMonster ? 0 : Convert.ToInt64(attrId);
             var name = monsterId == 0
                 ? string.Empty
@@ -524,7 +531,7 @@ public static class MeterSnapshotProvider
                 && CombatDataCatalog.HasEntityRow(EEntityType.EntMonster, monsterId)
                 && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)
                 && CombatDataCatalog.HasMonsterHpBar(monsterId);
-            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy);
+            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy);
         }
 
         cache[uuid] = party;

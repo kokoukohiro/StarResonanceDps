@@ -55,7 +55,6 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
-        _widgetWindowManager.RegisterPlayerListWidget(playerListWidget);
         var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         _entityListWidget = entityListWidget;
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");

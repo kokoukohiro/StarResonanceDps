@@ -363,9 +363,6 @@
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
     <value>{0} died ({1}/{2})</value>
   </data>
-  <data name="TakenDamageLog_DeathFormatNoHp" xml:space="preserve">
-    <value>{0} died</value>
-  </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>Non-elemental</value>
   </data>
@@ -894,6 +891,21 @@
   <data name="EntityList_UnnamedAlly" xml:space="preserve">
     <value>Ally</value>
   </data>
+  <data name="EntityList_UnknownEnemy" xml:space="preserve">
+    <value>Unknown enemy</value>
+  </data>
+  <data name="Settings_Display_ListSort" xml:space="preserve">
+    <value>Sort Order</value>
+  </data>
+  <data name="ListSort_FirstSeen" xml:space="preserve">
+    <value>Discovery Order</value>
+  </data>
+  <data name="ListSort_Name" xml:space="preserve">
+    <value>Name Order</value>
+  </data>
+  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+    <value>Hide self-damage &amp; friendly fire</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>Buff &amp; Debuff Card</value>
   </data>
@@ -959,6 +971,15 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>Map IDs only</value>
+  </data>
+  <data name="Settings_Display_WidgetWindow" xml:space="preserve">
+    <value>Widget Windows</value>
+  </data>
+  <data name="WidgetWindowTopmost_Always" xml:space="preserve">
+    <value>Always on Top</value>
+  </data>
+  <data name="WidgetWindowTopmost_PinnedOnly" xml:space="preserve">
+    <value>On Top Only While Pinned</value>
   </data>
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>Aggregation</value>

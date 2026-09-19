@@ -36,6 +36,10 @@ public class NetCap
     public ulong NumGameMessagesSeen = 0;
     public ulong NumGameMessagesDequeued = 0;
 
+    private static readonly TimeSpan FailureLogInterval = TimeSpan.FromMinutes(1);
+    private readonly object FailureLogSync = new();
+    private readonly Dictionary<string, (DateTime LastLogged, int Suppressed)> FailureLogState = new(StringComparer.Ordinal);
+
     private bool IsDebugCaptureFileMode = false;
     private string DebugCaptureFile = "";
     private DateTime LastDebugCapturePacketTime = DateTime.MinValue;
@@ -76,6 +80,15 @@ public class NetCap
     {
         NotifyHandlers.Add(new NotifyId(serviceId, methodId), handler);
     }
+
+    /// <summary>
+    /// 通知を処理してよいかの関門。<c>null</c> なら全部通す。
+    /// ログイン画面にいる間、ゲームの状態を変える通知を落とすために使う(<c>MessageManager.ShouldDispatchNotify</c>)。
+    /// </summary>
+    public Func<ulong, uint, bool>? NotifyGate { get; set; }
+
+    /// <summary>要求・応答を処理してよいかの関門。<c>null</c> なら全部通す。</summary>
+    public Func<uint, uint, bool>? ProxyGate { get; set; }
 
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {
@@ -163,29 +176,38 @@ public class NetCap
         var task = Task.Factory.StartNew(async () =>
         {
             NumConnectionReaders++;
-            while (conn.IsAlive && !CancelTokenSrc.IsCancellationRequested && !conn.CancelTokenSrc.IsCancellationRequested) {
-                var buff = await conn.Pipe.Reader.ReadAtLeastAsync(6);
-                if (buff.IsCompleted || buff.IsCanceled)
-                    break;
+            try
+            {
+                while (conn.IsAlive && !CancelTokenSrc.IsCancellationRequested && !conn.CancelTokenSrc.IsCancellationRequested)
+                {
+                    var buff = await conn.Pipe.Reader.ReadAtLeastAsync(6);
+                    if (buff.IsCompleted || buff.IsCanceled)
+                        break;
 
-                Span<byte> header = new byte[6];
-                buff.Buffer.Slice(0, 6).CopyTo(header);
-                var len = BinaryPrimitives.ReadUInt32BigEndian(header);
-                var rawMsgType = BinaryPrimitives.ReadInt16BigEndian(header[4..]);
-                var msgType = (rawMsgType & 0x7FFF);
-                conn.Pipe.Reader.AdvanceTo(buff.Buffer.Start);
+                    Span<byte> header = new byte[6];
+                    buff.Buffer.Slice(0, 6).CopyTo(header);
+                    var len = BinaryPrimitives.ReadUInt32BigEndian(header);
+                    var rawMsgType = BinaryPrimitives.ReadInt16BigEndian(header[4..]);
+                    var msgType = (rawMsgType & 0x7FFF);
+                    conn.Pipe.Reader.AdvanceTo(buff.Buffer.Start);
 
-                var msgBuff = await conn.Pipe.Reader.ReadAtLeastAsync((int)len);
-                if (msgBuff.IsCompleted || msgBuff.IsCanceled)
-                    break;
+                    var msgBuff = await conn.Pipe.Reader.ReadAtLeastAsync((int)len);
+                    if (msgBuff.IsCompleted || msgBuff.IsCanceled)
+                        break;
 
-                var rawPacket = RawPacketPool.Get();
-                rawPacket.Set((int)len);
-                rawPacket.LastPacketTime = conn.LastPacketTime;
-                msgBuff.Buffer.Slice(0, len).CopyTo(rawPacket.Data.AsSpan()[..(int)len]);
-                RawPacketQueue.Enqueue(rawPacket);
-                conn.Pipe.Reader.AdvanceTo(msgBuff.Buffer.GetPosition(len));
-                NumGameMessagesSeen++;
+                    var rawPacket = RawPacketPool.Get();
+                    rawPacket.Set((int)len);
+                    rawPacket.LastPacketTime = conn.LastPacketTime;
+                    msgBuff.Buffer.Slice(0, len).CopyTo(rawPacket.Data.AsSpan()[..(int)len]);
+                    RawPacketQueue.Enqueue(rawPacket);
+                    conn.Pipe.Reader.AdvanceTo(msgBuff.Buffer.GetPosition(len));
+                    NumGameMessagesSeen++;
+                }
+            }
+            catch (Exception ex)
+            {
+                // この接続の読み取りはここで終わる。黙って終わらせない。
+                LogFailureAndContinue($"接続の読み取り {conn.EndPoint}", ex);
             }
 
             NumConnectionReaders--;
@@ -199,11 +221,22 @@ public class NetCap
         {
             if (RawPacketQueue.TryDequeue(out var rawPacket))
             {
-                ParsePacket(rawPacket.Data[..rawPacket.Len], rawPacket.LastPacketTime);
-
-                rawPacket.Return();
-                RawPacketPool.Return(rawPacket);
-                NumGameMessagesDequeued++;
+                try
+                {
+                    ParsePacket(rawPacket.Data[..rawPacket.Len], rawPacket.LastPacketTime);
+                }
+                catch (Exception ex)
+                {
+                    // 最後の砦。処理の中で拾えなかった例外(解析そのものの失敗など)。
+                    // ここで投げ直すとこのループごと終わり、以後のパケットが一切処理されなくなる。
+                    LogFailureAndContinue("パケットの解析", ex);
+                }
+                finally
+                {
+                    rawPacket.Return();
+                    RawPacketPool.Return(rawPacket);
+                    NumGameMessagesDequeued++;
+                }
             }
             else
             {
@@ -301,10 +334,19 @@ public class NetCap
         }
 
         var id = new NotifyId(serviceUuid, methodId);
-        if (NotifyHandlers.TryGetValue(id, out var handler))
+        var hasNotifyHandler = NotifyHandlers.TryGetValue(id, out var handler);
+        var isNotifyAllowed = NotifyGate is null || NotifyGate(serviceUuid, methodId);
+        if (hasNotifyHandler && isNotifyAllowed)
         {
             var extraData = new ExtraPacketData(lastPacketTime);
-            handler(msgData, extraData);
+            try
+            {
+                handler!(msgData, extraData);
+            }
+            catch (Exception ex)
+            {
+                LogFailureAndContinue($"通知 service={serviceUuid} method={methodId}", ex);
+            }
         }
 
     }
@@ -436,11 +478,20 @@ public class NetCap
             return;
         }
 
+        var hasReturnHandler = ProxyReturnHandlers.TryGetValue(id, out var handler);
+        var isReturnAllowed = ProxyGate is null || ProxyGate(id.ServiceId, id.MethodId);
         var finalData = msgData[protoStart..];
         var extraData = new ExtraPacketData(lastPacketTime);
-        if (ProxyReturnHandlers.TryGetValue(id, out var handler))
+        if (hasReturnHandler && isReturnAllowed)
         {
-            handler(finalData, returnUid, extraData);
+            try
+            {
+                handler!(finalData, returnUid, extraData);
+            }
+            catch (Exception ex)
+            {
+                LogFailureAndContinue($"応答 service={id.ServiceId} method={id.MethodId}", ex);
+            }
         }
     }
 
@@ -451,9 +502,67 @@ public class NetCap
         DateTime lastPacketTime)
     {
         var extraData = new ExtraPacketData(lastPacketTime);
-        if (ProxyHandlers.TryGetValue(id, out var handler))
+        var hasProxyHandler = ProxyHandlers.TryGetValue(id, out var handler);
+        var isProxyAllowed = ProxyGate is null || ProxyGate(id.ServiceId, id.MethodId);
+        if (hasProxyHandler && isProxyAllowed)
         {
-            handler(data, returnUid, extraData);
+            try
+            {
+                handler!(data, returnUid, extraData);
+            }
+            catch (Exception ex)
+            {
+                LogFailureAndContinue($"要求 service={id.ServiceId} method={id.MethodId}", ex);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 処理の途中で出た例外を、見える形で書く。<b>その1件だけ捨てて、処理は続ける。</b>
+    ///
+    /// <para>
+    /// 投げ直すとパケット処理のタスクがそこで終わり、以後の通知が一切処理されなくなる。
+    /// 表示が更新されなくなるのに、ログには何も残らない(実際にそうなっていた)。
+    /// </para>
+    ///
+    /// <para>
+    /// 握り潰しにはしない。<c>Log.Error</c> はアプリのログ画面(<c>ManagerLogSink</c>)に出る。
+    /// ログが埋まらないよう、同じ場所・同じ種類の例外は最初の1件の後は <see cref="FailureLogInterval"/> に1件だけ書き、
+    /// その間の件数を添える。
+    /// </para>
+    /// </summary>
+    private void LogFailureAndContinue(string where, Exception exception)
+    {
+        var key = where + "|" + exception.GetType().FullName;
+        int suppressed;
+        lock (FailureLogSync)
+        {
+            var now = DateTime.Now;
+            if (FailureLogState.TryGetValue(key, out var state))
+            {
+                if (now - state.LastLogged < FailureLogInterval)
+                {
+                    FailureLogState[key] = (state.LastLogged, state.Suppressed + 1);
+                    return;
+                }
+
+                suppressed = state.Suppressed;
+            }
+            else
+            {
+                suppressed = 0;
+            }
+
+            FailureLogState[key] = (now, 0);
+        }
+
+        if (suppressed > 0)
+        {
+            Log.Error(exception, "{Where} で例外。この1件を捨てて続ける(前回の記録からの間に同じ例外が {Suppressed} 件)", where, suppressed);
+        }
+        else
+        {
+            Log.Error(exception, "{Where} で例外。この1件を捨てて続ける", where);
         }
     }
 

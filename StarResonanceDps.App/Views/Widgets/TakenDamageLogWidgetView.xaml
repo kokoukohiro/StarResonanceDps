@@ -93,7 +93,10 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
             <DataTemplate>
-                <!-- 時刻の列は行をまたいで幅を揃える。被弾行は時刻が空で、本文が技の行と同じ位置から始まる。 -->
+                <!--
+                    時刻の列は行をまたいで幅を揃える。揃うのは画面に作られている行だけなので、時刻を見せない行(被弾行など)も
+                    自分の時刻を Hidden で置いて場所を取る。本文が技の行と同じ位置から始まる。
+                -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" SharedSizeGroup="TakenDamageLogTime" />
@@ -101,9 +104,18 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0"
-                               Style="{StaticResource TakenDamageLog.LineText}"
                                Margin="0,1,8,1"
-                               Text="{Binding TimeText}" />
+                               Text="{Binding TimeText}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource TakenDamageLog.LineText}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsTimeShown}" Value="False">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
 
                     <TextBlock Grid.Column="1"
                                Style="{StaticResource TakenDamageLog.LineText}"

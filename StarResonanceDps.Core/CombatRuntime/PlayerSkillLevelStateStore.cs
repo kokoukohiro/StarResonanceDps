@@ -228,6 +228,17 @@ public static class PlayerSkillLevelStateStore
     }
 
     /// <summary>
+    /// 自分のスキルの控えを起動時の値に戻す(ログアウトでキャラが替わりうるため)。
+    /// アクションバーも「一度も受信していない」に戻す。
+    /// </summary>
+    public static void ResetSelfToStartup()
+    {
+        ReplaceSelfSkillLevels(null, null);
+        Volatile.Write(ref _selfActionBarSlots, new Dictionary<int, int>().ToFrozenDictionary());
+        Volatile.Write(ref _hasSelfActionBarSlots, false);
+    }
+
+    /// <summary>
     /// 自分のアクションバーを丸ごと差し替える。<c>AttrSlot</c> は毎回全枠を運ぶので、
     /// 差分を持たず置き換えるだけでよい。
     /// </summary>

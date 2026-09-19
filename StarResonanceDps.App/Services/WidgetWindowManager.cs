@@ -21,12 +21,35 @@ public sealed class WidgetWindowManager
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
     private readonly List<EntityBuffListWindowSession> _openEntityBuffWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
-    private WidgetListItemViewModel? _playerListWidget;
     private Window? _managerWindow;
     private bool _isManagerClosing;
 
     private WidgetWindowManager()
     {
+        MessageManager.ResetToStartupCompleted += MessageManager_ResetToStartupCompleted;
+    }
+
+    /// <summary>
+    /// ログアウトで Core を起動時の状態へ戻した。実体の窓を未捕獲に戻し、起動時の復元と同じく種類と種別IDで捕まえ直させる。
+    /// 未知の敵(種別ID 0)の窓は捕まえ直せないのでそのままにする。通知はパケット処理のスレッドで来るので、UI のスレッドへ渡す。
+    /// </summary>
+    private void MessageManager_ResetToStartupCompleted()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(ReleaseEntityWindows);
+    }
+
+    private void ReleaseEntityWindows()
+    {
+        foreach (var session in _openEntityBuffWindows)
+        {
+            if (!session.ViewModel.IsEntityAcquired || session.ViewModel.EntityId == 0)
+            {
+                continue;
+            }
+
+            session.ViewModel.ReleaseEntity();
+            session.Window.SetHeaderText(session.ViewModel.HeaderText);
+        }
     }
 
     public static WidgetWindowManager Instance { get; } = new();
@@ -37,12 +60,6 @@ public sealed class WidgetWindowManager
         {
             TrackPlayerWidget(widget);
         }
-    }
-
-    /// <summary>プレイヤーリストのウィジェット。被ダメログのクラスアイコンがこの設定のクラスカラーを使う。</summary>
-    public void RegisterPlayerListWidget(WidgetListItemViewModel widget)
-    {
-        _playerListWidget = widget;
     }
 
     public void OpenPlayerWindow(WidgetKind kind, long characterId)
@@ -365,6 +382,13 @@ public sealed class WidgetWindowManager
         foreach (var session in _openEntityBuffWindows)
         {
             if (!ReferenceEquals(session.Widget, widget))
+            {
+                continue;
+            }
+
+            // 種別ID 0(未知の敵)の窓は保存しない。復元は種類と種別IDで個体を捕まえるので、
+            // 0 のまま戻すと次の起動で別の未知の個体を捕まえる。
+            if (session.ViewModel.EntityId == 0)
             {
                 continue;
             }
@@ -795,9 +819,7 @@ public sealed class WidgetWindowManager
             WidgetKind.TakenDamageLog => new WidgetWindowComposition(
                 new TakenDamageLogWidgetView
                 {
-                    DataContext = new TakenDamageLogWidgetViewModel(
-                        widget,
-                        _playerListWidget ?? throw new InvalidOperationException("Player list widget is not registered."))
+                    DataContext = new TakenDamageLogWidgetViewModel(widget)
                 },
                 null,
                 null,

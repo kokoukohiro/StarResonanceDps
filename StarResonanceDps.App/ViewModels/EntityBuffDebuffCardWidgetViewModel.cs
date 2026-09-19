@@ -153,6 +153,11 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         return _target.TryApply(entity);
     }
 
+    public void ReleaseEntity()
+    {
+        _target.Release();
+    }
+
     public void RefreshPresentation()
     {
         Refresh();

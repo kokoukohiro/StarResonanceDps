@@ -29,7 +29,10 @@ public sealed partial class EntityListEntry : ObservableObject
     /// <summary>実体の種類。<see cref="EntityId"/> がどの表の番号かを決める。</summary>
     public EEntityType EntityType { get; private set; }
 
-    /// <summary>書式を通していない素の名前。表に名前が無く HP バーが見える実体は「敵」「味方」。</summary>
+    /// <summary>
+    /// 書式を通していない素の名前。表に名前が無く HP バーが見える実体は「敵」「味方」。
+    /// 種別ID(<c>AttrId</c>)が分からない実体は「未知の敵」(陣営が味方と分かっていれば「味方」)。
+    /// </summary>
     public string Name { get; private set; } = string.Empty;
 
     public int Level { get; private set; }
@@ -104,7 +107,7 @@ public sealed partial class EntityListEntry : ObservableObject
         // 投影した時点の言語で焼き付いて言語切替に追従しなくなる。
         // 言語を切り替えると WidgetListItemViewModel が全エントリに Update を掛け直すので、
         // ここを通していれば自動で入れ替わる。
-        Name = CombatDataCatalog.GetEntityName(entity.EntityType, entity.EntityId, GetUnnamedLabel(entity));
+        Name = ResolveName(entity);
         Level = entity.Level;
         ClassificationKey = GetClassificationKey(entity);
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
@@ -131,6 +134,19 @@ public sealed partial class EntityListEntry : ObservableObject
     }
 
     /// <summary>
+    /// 行に出す名前。<b>並び替え(名前順)もこれを使う</b>ので、行を作る前にも引けるように分けてある。
+    /// 名前は表示言語で決まるので、ここで引く(Core の投影で解決すると言語切替に追従しない)。
+    /// </summary>
+    public static string ResolveName(NearbyEntityEntry entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+        return entity.EntityId == 0
+            ? GetUnknownLabel(entity)
+            : CombatDataCatalog.GetEntityName(entity.EntityType, entity.EntityId, GetUnnamedLabel(entity));
+    }
+
+    /// <summary>
     /// 名前の無い実体に出す名前。HP バーが見える実体だけで、HP バーの色と同じ判定で決める
     /// (緑=自分と同じ陣営なら「味方」、赤なら「敵」。陣営がまだ分からない間も赤なので「敵」)。
     /// HP バーが見えない実体は名前が無ければ一覧に載らないので、付けない。
@@ -146,6 +162,18 @@ public sealed partial class EntityListEntry : ObservableObject
             entity.CampRelation == EntityCampRelation.Friendly
                 ? "EntityList_UnnamedAlly"
                 : "EntityList_UnnamedEnemy");
+    }
+
+    /// <summary>
+    /// 種別ID(<c>AttrId</c>)が分からない実体の名前。<c>AttrId</c> は出現の通知でしか届かないので、
+    /// アプリの起動前から居た実体がこうなる。HP バーの色と同じ判定で、味方と分かっていれば「味方」、それ以外は「未知の敵」。
+    /// </summary>
+    private static string GetUnknownLabel(NearbyEntityEntry entity)
+    {
+        return LocalizationManager.Instance.GetString(
+            entity.CampRelation == EntityCampRelation.Friendly
+                ? "EntityList_UnnamedAlly"
+                : "EntityList_UnknownEnemy");
     }
 
     partial void OnCampRelationChanged(EntityCampRelation value)

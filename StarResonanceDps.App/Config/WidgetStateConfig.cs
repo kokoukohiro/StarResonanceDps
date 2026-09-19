@@ -132,11 +132,35 @@ public sealed class TakenDamageLogWidgetSettingsConfig
     /// </summary>
     public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
+    /// <summary>
+    /// フィルター。0=すべて表示 / 1=自傷・フレンドリーファイア以外(加害者がプレイヤーの被弾を出さない)。
+    /// 以前のフィルター(撤去済み)の <c>FilterIndex</c> とは別の名前にしてある。古い保存の値を拾わないため。
+    /// </summary>
+    public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogAttackerFilterIndex;
+
+    /// <summary>
+    /// クラスアイコンの色(クラスカラー)。形はプレイヤーリストのクラスカラーと同じで、被ダメログ専用に持つ。
+    /// 既定の色はプレイヤーリストと同じ。フィルターと不透明度は持たない。
+    /// </summary>
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);
+
     public TakenDamageLogWidgetSettingsConfig Clone()
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
-            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex
+            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            AttackerFilterIndex = AttackerFilterIndex,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -281,6 +305,13 @@ public sealed class MeterWidgetSettingsConfig
     /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示。</summary>
     public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
+    /// <summary>
+    /// 一覧の並び替え。0=発見順 / 1=名前順。既定はプレイヤーリストが発見順、エンティティリストが名前順。
+    /// <b>群(プレイヤーリストの 自分→パーティ→灰色→ライブ、エンティティリストの ボス→精鋭→普通)の順は変えない。</b>
+    /// この設定が決めるのは、その群の中の並びだけ。使うのはプレイヤーリストとエンティティリストだけ。
+    /// </summary>
+    public int ListSortModeIndex { get; set; } = WidgetConfigDefaults.FirstSeenListSortModeIndex;
+
     public int ClassColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes();
@@ -323,6 +354,7 @@ public sealed class MeterWidgetSettingsConfig
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
+            ListSortModeIndex = ListSortModeIndex,
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes()
@@ -364,6 +396,14 @@ public static class WidgetConfigDefaults
     public const int DefaultEntityDisplayModeIndex = (int)EntityDisplayMode.HideObjects;
     public const int DefaultSelfDisplayModeIndex = 0;
     public const int MaxSelfDisplayModeIndex = 1;
+
+    /// <summary>一覧の並び替え: 発見順(群の中は初めて現れた順のまま)。</summary>
+    public const int FirstSeenListSortModeIndex = 0;
+
+    /// <summary>一覧の並び替え: 名前順(群の中を画面に出している名前で並べる)。</summary>
+    public const int NameListSortModeIndex = 1;
+    public const int DefaultTakenDamageLogAttackerFilterIndex = 0;
+    public const int NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex = 1;
     public const int MinClassColorFilterStrength = 0;
     public const int MaxClassColorFilterStrength = 100;
     public const int DefaultClassColorFilterStrength = 50;
@@ -725,7 +765,10 @@ public static class WidgetConfigDefaults
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
-            HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex
+            HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
+            AttackerFilterIndex = DefaultTakenDamageLogAttackerFilterIndex,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog)
         };
     }
 
@@ -737,6 +780,7 @@ public static class WidgetConfigDefaults
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
             PartyDisplayModeIndex = DefaultPartyDisplayModeIndex,
             EntityDisplayModeIndex = DefaultEntityDisplayModeIndex,
+            ListSortModeIndex = GetDefaultListSortModeIndex(kind),
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(kind),
             ClassColorFilterColors = CreateDefaultClassColorFilterColors(kind),
@@ -759,6 +803,22 @@ public static class WidgetConfigDefaults
             WidgetKind.PlayerList => DefaultPlayerListPlayerInfoFormatString,
             _ => DefaultMeterPlayerInfoFormatString
         };
+    }
+
+    /// <summary>
+    /// 一覧の並び替えの既定。エンティティリストは名前順、それ以外(プレイヤーリスト)は発見順。
+    /// </summary>
+    public static int GetDefaultListSortModeIndex(WidgetKind kind)
+    {
+        return kind == WidgetKind.EntityList
+            ? NameListSortModeIndex
+            : FirstSeenListSortModeIndex;
+    }
+
+    /// <summary>並び替えの設定を出すウィジェット。</summary>
+    public static bool UsesListSort(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerList or WidgetKind.EntityList;
     }
 
     public static IReadOnlyList<string> GetClassColorKeys(WidgetKind kind)
@@ -833,7 +893,8 @@ public static class WidgetConfigDefaults
     {
         var source = kind switch
         {
-            WidgetKind.PlayerList => PlayerListDefaultClassColorHexes,
+            // 被ダメログのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.PlayerList or WidgetKind.TakenDamageLog => PlayerListDefaultClassColorHexes,
             WidgetKind.EntityList => EntityListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
@@ -1025,6 +1086,17 @@ public static class WidgetConfigDefaults
             takenDamageLog.HealthValueDisplayModeIndex,
             DefaultHealthValueDisplayModeIndex,
             SeparateShieldHealthValueDisplayModeIndex);
+        takenDamageLog.AttackerFilterIndex = Math.Clamp(
+            takenDamageLog.AttackerFilterIndex,
+            DefaultTakenDamageLogAttackerFilterIndex,
+            NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex);
+
+        takenDamageLog.ClassColorIndexes ??= CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
+        takenDamageLog.ClassColorPalettes ??= CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);
+        (takenDamageLog.ClassColorIndexes, takenDamageLog.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.TakenDamageLog,
+            takenDamageLog.ClassColorIndexes,
+            takenDamageLog.ClassColorPalettes);
     }
 
     public static int ClampBuffCardScale(int scale)
@@ -1055,6 +1127,10 @@ public static class WidgetConfigDefaults
             meter.SelfDisplayModeIndex,
             DefaultSelfDisplayModeIndex,
             MaxSelfDisplayModeIndex);
+        meter.ListSortModeIndex = Math.Clamp(
+            meter.ListSortModeIndex,
+            FirstSeenListSortModeIndex,
+            NameListSortModeIndex);
 
         // クラスカラーのフィルター。持たないウィジェットでは常に無効に倒す。
         var filterDefaults = CreateDefaultClassColorFilterColors(kind);
@@ -1092,26 +1168,40 @@ public static class WidgetConfigDefaults
 
         meter.OtherRoleSkillVisibility = normalizedRoleSkills;
 
+        (meter.ClassColorIndexes, meter.ClassColorPalettes) = NormalizeClassColors(
+            kind,
+            meter.ClassColorIndexes,
+            meter.ClassColorPalettes);
+    }
+
+    /// <summary>
+    /// クラスカラーの色の一覧と選んでいる枠を、<paramref name="kind"/> の職の並びと既定値で揃える。
+    /// メーター系の設定と被ダメログが使う。
+    /// </summary>
+    private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeClassColors(
+        WidgetKind kind,
+        Dictionary<string, int> indexes,
+        Dictionary<string, List<string>> palettes)
+    {
         var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var key in GetClassColorKeys(kind))
         {
             var defaultColors = CreateDefaultClassColors(kind, key);
-            var sourceColors = meter.ClassColorPalettes.TryGetValue(key, out var colors)
+            var sourceColors = palettes.TryGetValue(key, out var colors)
                 ? colors
                 : defaultColors;
             var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
             normalizedPalettes[key] = palette;
 
-            var selectedIndex = meter.ClassColorIndexes.TryGetValue(key, out var index)
+            var selectedIndex = indexes.TryGetValue(key, out var index)
                 ? index
                 : GetDefaultClassColorIndex(kind, key);
             normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
         }
 
-        meter.ClassColorIndexes = normalizedIndexes;
-        meter.ClassColorPalettes = normalizedPalettes;
+        return (normalizedIndexes, normalizedPalettes);
     }
 
     public static string GetKey(WidgetKind kind)

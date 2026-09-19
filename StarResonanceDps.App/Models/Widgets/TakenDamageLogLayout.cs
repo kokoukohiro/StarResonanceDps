@@ -18,7 +18,7 @@ public enum TakenDamageLogRowKind
 /// <para>
 /// <see cref="Line"/> は、予告行・詠唱行・技の行ならその記録、被弾行なら畳んだ被弾のうち最後のもの。
 /// 被弾行の <see cref="Value"/> は畳んだ被弾の値の合計で、HP・最大HP・バリアは畳んだ被弾のうち HP を持つもの
-/// (同期の中で最後の被弾)の値。どれも HP を持たなければ <c>null</c>。
+/// (同期の中で、その技の行の最後の被弾)の値。どれも HP を持たなければ <c>null</c>。
 /// </para>
 /// </summary>
 public sealed record TakenDamageLogRow(

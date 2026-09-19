@@ -125,6 +125,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         {
             TakenDamageLogSettings.PropertyChanged -= TakenDamageLogSettings_PropertyChanged;
             TakenDamageLogSettings.PreviewChanged -= TakenDamageLogSettings_PreviewChanged;
+            TakenDamageLogSettings.Dispose();
         }
     }
 

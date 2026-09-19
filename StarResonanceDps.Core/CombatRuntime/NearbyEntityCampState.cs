@@ -24,6 +24,18 @@ internal static class NearbyEntityCampState
         }
     }
 
+    /// <summary>
+    /// 起動時の値に戻す。<see cref="BeginMap"/> と違い、自分の実体と陣営も消す(ログアウトでキャラが替わりうるため)。
+    /// </summary>
+    public static void ResetToStartup()
+    {
+        lock (Sync)
+        {
+            Camps.Clear();
+            _selfEntityUuid = 0;
+        }
+    }
+
     public static bool SetSelfEntity(long entityUuid)
     {
         if (entityUuid == 0)
