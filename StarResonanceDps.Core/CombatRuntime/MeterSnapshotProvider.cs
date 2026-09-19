@@ -146,7 +146,10 @@ internal sealed record PlayerBuffCandidate(
 public sealed record MeterPlayerIdentity(string Name, long UserId);
 
 /// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
-public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false);
+/// <param name="IsUnnamedEnemy">
+/// 名前の無いモンスターで、ゲーム内で HP バーが見えるもの。表示側が「敵」と出す(名前は内部ID注記だけか空)。
+/// </param>
+public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false);
 
 /// <summary>
 /// 被ダメログの1件(予告か詠唱か被弾か、ダメージの無い死亡)。
@@ -508,13 +511,20 @@ public static class MeterSnapshotProvider
             // 同じ番号が仮想体や NPC では別のものを指すので、モンスター以外と属性が無いものは名前を空のままにする。
             // 仮想体が加害者として残るのは親(召喚者)を特定できなかったときだけなので(Encounter.ResolveTakenDamageLogActor)、
             // 仕掛けそのものを指す名前を出す。
+            // 名前の無いモンスターでも、ゲーム内で HP バーが見えるものは「敵」と出す(エンティティリストと同じ条件)。
+            // 表に行が無い番号には付けない(表が古いことを、名前の無い雑魚と見分けるため)。
             var attrId = entity.GetAttrKV("AttrId");
             var entityType = (EEntityType)Utils.UuidToEntityType(uuid);
             var isSystem = entityType == EEntityType.EntDummy;
-            var name = attrId is null || entityType != EEntityType.EntMonster
+            var monsterId = attrId is null || entityType != EEntityType.EntMonster ? 0 : Convert.ToInt64(attrId);
+            var name = monsterId == 0
                 ? string.Empty
-                : CombatDataCatalog.GetMonsterName(Convert.ToInt64(attrId));
-            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem);
+                : CombatDataCatalog.GetMonsterName(monsterId);
+            var isUnnamedEnemy = monsterId > 0
+                && CombatDataCatalog.HasEntityRow(EEntityType.EntMonster, monsterId)
+                && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)
+                && CombatDataCatalog.HasMonsterHpBar(monsterId);
+            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy);
         }
 
         cache[uuid] = party;

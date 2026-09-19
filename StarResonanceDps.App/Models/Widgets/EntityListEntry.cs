@@ -20,12 +20,16 @@ public sealed partial class EntityListEntry : ObservableObject
     public long EntityUuid { get; }
 
     /// <summary>
-    /// モンスターの種別ID(<c>MonsterTable</c> のキー)。<c>AttrId</c> 由来なので
+    /// 種別ID(<c>AttrId</c>。モンスターなら <c>MonsterTable</c> のキー)。
     /// <b>再起動をまたいでも同じ値</b>。<c>EntityUuid</c> は実体ごとの値で別物。
+    /// どの表の番号かは <see cref="EntityType"/> で決まるので、比べるときは種類と組で比べる。
     /// </summary>
     public long EntityId { get; private set; }
 
-    /// <summary>書式を通していない素の名前。</summary>
+    /// <summary>実体の種類。<see cref="EntityId"/> がどの表の番号かを決める。</summary>
+    public EEntityType EntityType { get; private set; }
+
+    /// <summary>書式を通していない素の名前。表に名前が無く HP バーが見える実体は「敵」「味方」。</summary>
     public string Name { get; private set; } = string.Empty;
 
     public int Level { get; private set; }
@@ -94,12 +98,13 @@ public sealed partial class EntityListEntry : ObservableObject
         MeterWidgetSettingsConfig settings)
     {
         EntityId = entity.EntityId;
+        EntityType = entity.EntityType;
 
         // 名前は<b>ここで</b>言語別に引く。Core の投影側で解決すると、
         // 投影した時点の言語で焼き付いて言語切替に追従しなくなる。
         // 言語を切り替えると WidgetListItemViewModel が全エントリに Update を掛け直すので、
         // ここを通していれば自動で入れ替わる。
-        Name = CombatDataCatalog.GetMonsterName(entity.EntityId);
+        Name = CombatDataCatalog.GetEntityName(entity.EntityType, entity.EntityId, GetUnnamedLabel(entity));
         Level = entity.Level;
         ClassificationKey = GetClassificationKey(entity);
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
@@ -123,6 +128,24 @@ public sealed partial class EntityListEntry : ObservableObject
         {
             ClassBrush = CreateBrush(classColor);
         }
+    }
+
+    /// <summary>
+    /// 名前の無い実体に出す名前。HP バーが見える実体だけで、HP バーの色と同じ判定で決める
+    /// (緑=自分と同じ陣営なら「味方」、赤なら「敵」。陣営がまだ分からない間も赤なので「敵」)。
+    /// HP バーが見えない実体は名前が無ければ一覧に載らないので、付けない。
+    /// </summary>
+    private static string? GetUnnamedLabel(NearbyEntityEntry entity)
+    {
+        if (!entity.HasHpBar)
+        {
+            return null;
+        }
+
+        return LocalizationManager.Instance.GetString(
+            entity.CampRelation == EntityCampRelation.Friendly
+                ? "EntityList_UnnamedAlly"
+                : "EntityList_UnnamedEnemy");
     }
 
     partial void OnCampRelationChanged(EntityCampRelation value)

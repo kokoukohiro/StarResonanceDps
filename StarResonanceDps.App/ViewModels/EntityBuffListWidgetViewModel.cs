@@ -57,6 +57,8 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     public long EntityId => _target.EntityId;
 
+    public Zproto.EEntityType? EntityType => _target.EntityType;
+
     public long EntityUuid => _target.EntityUuid;
 
     public bool IsEntityAcquired => _target.IsAcquired;

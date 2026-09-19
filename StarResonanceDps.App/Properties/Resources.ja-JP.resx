@@ -882,6 +882,18 @@
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>自分のみ</value>
   </data>
+  <data name="EntityDisplay_All" xml:space="preserve">
+    <value>すべて表示</value>
+  </data>
+  <data name="EntityDisplay_HideObjects" xml:space="preserve">
+    <value>オブジェクト以外</value>
+  </data>
+  <data name="EntityList_UnnamedEnemy" xml:space="preserve">
+    <value>敵</value>
+  </data>
+  <data name="EntityList_UnnamedAlly" xml:space="preserve">
+    <value>味方</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>バフ・デバフカード</value>
   </data>

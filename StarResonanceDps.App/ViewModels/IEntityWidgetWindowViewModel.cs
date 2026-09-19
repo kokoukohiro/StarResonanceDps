@@ -16,6 +16,9 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
     /// <summary>種別ID。復元時に対象を捕まえ直すのに使う。</summary>
     long EntityId { get; }
 
+    /// <summary>実体の種類。<see cref="EntityId"/> がどの表の番号かを決めるので、捕まえ直すときは組で比べる。</summary>
+    Zproto.EEntityType? EntityType { get; }
+
     /// <summary>捕まえている実体のID。<b>0 は未捕獲</b>(復元直後)。</summary>
     long EntityUuid { get; }
 

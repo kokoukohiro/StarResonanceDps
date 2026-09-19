@@ -120,6 +120,9 @@
                                 <DataTrigger Binding="{Binding ShowsPartyDisplaySettings}" Value="True">
                                     <Setter Property="BorderThickness" Value="0,0,0,1" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding ShowsEntityDisplaySettings}" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
@@ -191,6 +194,29 @@
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_MembersOnly]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_NonMembersOnly]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_SelfOnly]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsEntityDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding EntityDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityDisplay_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityDisplay_HideObjects]}" />
                         </ComboBox>
                     </Grid>
                 </Border>

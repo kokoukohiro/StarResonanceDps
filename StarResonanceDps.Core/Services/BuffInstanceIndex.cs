@@ -7,6 +7,12 @@ namespace StarResonanceDps.Core.Services;
 /// 被ダメログが、バフ由来の被ダメを受けた瞬間にそのバフの付与元(技)を引くのに使う。
 ///
 /// <para>
+/// <b>除去した実体は、除去の到着から <see cref="RemovedGrace"/> の間は引ける。</b>
+/// 付与と除去が同じ差分で届く一瞬のバフがあり、そのダメージは同じ差分(バフ効果はダメージより先に処理する)や、
+/// 周りの別の実体の差分・少し後のパケットで届く。すぐ消すとそのダメージの時点で引けない。
+/// </para>
+///
+/// <para>
 /// 実体の鍵は <c>(保持者, BuffUuid)</c>。<c>BuffUuid</c> は種別をまたいで使い回されるので単体では鍵にならない。
 /// </para>
 ///
@@ -27,17 +33,26 @@ public sealed class BuffInstanceIndex
     private static readonly TimeSpan ExpiryGrace = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan SweepInterval = TimeSpan.FromSeconds(10);
 
+    /// <summary>除去した実体を引ける間。</summary>
+    private static readonly TimeSpan RemovedGrace = TimeSpan.FromSeconds(1);
+
     private readonly object _sync = new();
     private readonly Dictionary<(long Holder, int BuffUuid), BuffInstance> _instances = [];
     private readonly Dictionary<int, HashSet<(long Holder, int BuffUuid)>> _keysByBaseId = [];
     private DateTime _lastSweep = DateTime.MinValue;
 
+    /// <param name="RemovedAt">除去が届いた時刻。除去されていなければ <c>null</c>。</param>
     private readonly record struct BuffInstance(
         int BaseId,
         long FireUuid,
         int FightSourceType,
         int SourceConfigId,
-        DateTime? ExpiresAt);
+        DateTime? ExpiresAt,
+        DateTime? RemovedAt)
+    {
+        /// <summary><paramref name="time"/> の時点で引けるか。持続が切れて猶予を過ぎたもの、除去から <see cref="RemovedGrace"/> を過ぎたものは引けない。</summary>
+        public bool IsAlive(DateTime time) => !(ExpiresAt < time) && !(RemovedAt + RemovedGrace < time);
+    }
 
     private BuffInstanceIndex()
     {
@@ -73,7 +88,8 @@ public sealed class BuffInstanceIndex
                 RemoveBaseIdKeyNoLock(previous.BaseId, key);
             }
 
-            _instances[key] = new BuffInstance(baseId, fireUuid, fightSourceType, sourceConfigId, expiresAt);
+            // 除去した実体と同じ鍵で付与が来たら、新しい実体に置き換わる(除去の時刻は持ち越さない)。
+            _instances[key] = new BuffInstance(baseId, fireUuid, fightSourceType, sourceConfigId, expiresAt, RemovedAt: null);
             if (!_keysByBaseId.TryGetValue(baseId, out var keys))
             {
                 keys = [];
@@ -90,15 +106,18 @@ public sealed class BuffInstanceIndex
         }
     }
 
-    /// <summary>除去(<c>BuffEventRemove</c>)。除去イベントは <c>BuffUuid</c> しか運ばない。</summary>
-    public void Remove(long holderUuid, int buffUuid)
+    /// <summary>
+    /// 除去(<c>BuffEventRemove</c>)。除去イベントは <c>BuffUuid</c> しか運ばない。
+    /// 除去の時刻を控えるだけで、実体は <see cref="RemovedGrace"/> の間は引ける。消すのは掃除。
+    /// </summary>
+    public void Remove(long holderUuid, int buffUuid, DateTime arrivalTime)
     {
         var key = (holderUuid, buffUuid);
         lock (_sync)
         {
-            if (_instances.Remove(key, out var removed))
+            if (_instances.TryGetValue(key, out var instance) && instance.RemovedAt is null)
             {
-                RemoveBaseIdKeyNoLock(removed.BaseId, key);
+                _instances[key] = instance with { RemovedAt = arrivalTime };
             }
         }
     }
@@ -183,7 +202,7 @@ public sealed class BuffInstanceIndex
             foreach (var key in keys)
             {
                 var instance = _instances[key];
-                if (instance.ExpiresAt < arrivalTime
+                if (!instance.IsAlive(arrivalTime)
                     || (instance.FireUuid != attackerRawUuid && instance.FireUuid != attackerUuid))
                 {
                     continue;
@@ -218,7 +237,7 @@ public sealed class BuffInstanceIndex
         List<(long Holder, int BuffUuid)>? expired = null;
         foreach (var (key, instance) in _instances)
         {
-            if (instance.ExpiresAt < arrivalTime)
+            if (!instance.IsAlive(arrivalTime))
             {
                 (expired ??= []).Add(key);
             }

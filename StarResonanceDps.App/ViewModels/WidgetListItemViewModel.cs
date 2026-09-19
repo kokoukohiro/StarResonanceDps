@@ -7,6 +7,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 
@@ -624,6 +625,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
+        var visibleEntities = GetVisibleNearbyEntities();
+
         if (resetEntries)
         {
             foreach (var entry in _entityListEntries)
@@ -636,7 +639,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         }
         else
         {
-            var activeEntityUuids = _nearbyEntities
+            var activeEntityUuids = visibleEntities
                 .Select(entry => entry.EntityUuid)
                 .ToHashSet();
 
@@ -654,9 +657,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
             }
         }
 
-        for (var targetIndex = 0; targetIndex < _nearbyEntities.Count; targetIndex++)
+        for (var targetIndex = 0; targetIndex < visibleEntities.Count; targetIndex++)
         {
-            var entity = _nearbyEntities[targetIndex];
+            var entity = visibleEntities[targetIndex];
             if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
             {
                 entry = EntityListEntry.Create(entity, _meter);
@@ -678,6 +681,40 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 _entityListEntries.Move(currentIndex, targetIndex);
             }
         }
+    }
+
+    /// <summary>
+    /// 一覧に載せる実体。フィルター「オブジェクト以外」は、さらにプレイヤーに見える HP バーを持つ実体だけを残す
+    /// (名前はあっても HP バーの見えない実体がいる)。
+    /// </summary>
+    private IReadOnlyList<NearbyEntityEntry> GetVisibleNearbyEntities()
+    {
+        var hidesObjects = (EntityDisplayMode)_meter.EntityDisplayModeIndex == EntityDisplayMode.HideObjects;
+        return _nearbyEntities
+            .Where(entry => IsListed(entry) && (!hidesObjects || entry.HasHpBar))
+            .ToArray();
+    }
+
+    /// <summary>
+    /// 一覧に載せるか。
+    ///
+    /// <para>
+    /// <c>AttrId</c> が未着(種別IDが 0)の間は載せない。種別が分からないと HP バーも名前も決まらない。
+    /// プレイヤーに見える HP バーを持つ実体は、名前が無くても載せる(名前は「敵」「味方」。<see cref="EntityListEntry"/>)。
+    /// HP バーを持たない実体は、名前があるときだけ載せる。名前は表示と同じ引き方(表示言語、空なら zh-CN)で見る。
+    /// </para>
+    ///
+    /// <para>
+    /// <b>表に行が無い実体は載せる</b>(名前は空欄で、内部ID注記だけ)。行が無いのはアプリの表が古いということで、
+    /// 消すと表の欠けに気付けない。
+    /// </para>
+    /// </summary>
+    private static bool IsListed(NearbyEntityEntry entry)
+    {
+        return entry.EntityId > 0
+            && (entry.HasHpBar
+                || !CombatDataCatalog.HasEntityRow(entry.EntityType, entry.EntityId)
+                || CombatDataCatalog.HasEntityName(entry.EntityType, entry.EntityId));
     }
 
     private int FindEntityListEntryIndex(long entityUuid, int startIndex)

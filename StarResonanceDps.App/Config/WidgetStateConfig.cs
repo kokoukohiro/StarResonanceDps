@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Config;
 
@@ -144,8 +145,8 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 /// 開いていたウィンドウ1枚ぶんの対象。
 ///
 /// <para>
-/// プレイヤーとモンスターの両方を1つの型で表す。<see cref="EntityId"/> が 0 以外なら
-/// モンスター、そうでなければプレイヤー。
+/// プレイヤーとエンティティリストの実体(モンスター)の両方を1つの型で表す。
+/// <see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー。
 /// </para>
 /// </summary>
 public sealed class WidgetOpenTargetConfig
@@ -158,10 +159,16 @@ public sealed class WidgetOpenTargetConfig
     public long? CharacterId { get; set; }
 
     /// <summary>
-    /// モンスターの種別ID(<c>MonsterTable</c> のキー)。0 ならプレイヤーの窓。
+    /// 実体の種別ID(<c>AttrId</c>)。0 ならプレイヤーの窓。
     /// 実体IDは再起動で消えるので、種別で捕まえ直す。
     /// </summary>
     public long EntityId { get; set; }
+
+    /// <summary>
+    /// 実体の種類(<c>EEntityType</c> の値)。<see cref="EntityId"/> がどの表の番号かを決めるので、
+    /// 捕まえ直すときは種類と番号の両方が一致する個体だけを捕まえる。無い保存は捕まえない。
+    /// </summary>
+    public int? EntityType { get; set; }
 
     /// <summary>
     /// 最後に分かっていた対象の名前。<b>復元直後にタイトルを正しく出すために持つ。</b>
@@ -221,6 +228,7 @@ public sealed class WidgetOpenTargetConfig
         {
             CharacterId = CharacterId,
             EntityId = EntityId,
+            EntityType = EntityType,
             Name = Name,
             ResolvedCharacterId = ResolvedCharacterId,
             BuffListKind = BuffListKind,
@@ -267,6 +275,9 @@ public sealed class MeterWidgetSettingsConfig
 
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
+    /// <summary>エンティティリストのフィルター。0=すべて表示 / 1=オブジェクト以外(<c>EntityDisplayMode</c>)。</summary>
+    public int EntityDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultEntityDisplayModeIndex;
+
     /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示。</summary>
     public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
@@ -310,6 +321,7 @@ public sealed class MeterWidgetSettingsConfig
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
+            EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
             ClassColorOpacity = ClassColorOpacity,
             ClassColorIndexes = ClassColorIndexes is null
@@ -347,6 +359,9 @@ public static class WidgetConfigDefaults
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
     public const int MaxPartyDisplayModeIndex = 3;
+    public const int MinEntityDisplayModeIndex = (int)EntityDisplayMode.All;
+    public const int MaxEntityDisplayModeIndex = (int)EntityDisplayMode.HideObjects;
+    public const int DefaultEntityDisplayModeIndex = (int)EntityDisplayMode.HideObjects;
     public const int DefaultSelfDisplayModeIndex = 0;
     public const int MaxSelfDisplayModeIndex = 1;
     public const int MinClassColorFilterStrength = 0;
@@ -721,6 +736,7 @@ public static class WidgetConfigDefaults
             PlayerInfoFormatString = GetDefaultPlayerInfoFormatString(kind),
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
             PartyDisplayModeIndex = DefaultPartyDisplayModeIndex,
+            EntityDisplayModeIndex = DefaultEntityDisplayModeIndex,
             ClassColorOpacity = MaxClassColorOpacity,
             ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(kind),
             ClassColorFilterColors = CreateDefaultClassColorFilterColors(kind),
@@ -1031,6 +1047,10 @@ public static class WidgetConfigDefaults
             meter.PartyDisplayModeIndex,
             DefaultPartyDisplayModeIndex,
             MaxPartyDisplayModeIndex);
+        meter.EntityDisplayModeIndex = Math.Clamp(
+            meter.EntityDisplayModeIndex,
+            MinEntityDisplayModeIndex,
+            MaxEntityDisplayModeIndex);
         meter.SelfDisplayModeIndex = Math.Clamp(
             meter.SelfDisplayModeIndex,
             DefaultSelfDisplayModeIndex,

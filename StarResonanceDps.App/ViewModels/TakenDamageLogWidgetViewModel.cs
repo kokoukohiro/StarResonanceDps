@@ -426,6 +426,12 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
             return LocalizationManager.Instance["TakenDamageLog_SystemActor"];
         }
 
+        // 名前の無い、HP バーの見える敵。文言はエンティティリストと同じ。名前には内部ID注記だけが入っていることがある。
+        if (person.IsUnnamedEnemy)
+        {
+            return LocalizationManager.Instance["EntityList_UnnamedEnemy"] + person.Name;
+        }
+
         return person.IsPlayer
             ? PlayerInfoFormatFormatter.GetDisplayName(
                 person.Name,

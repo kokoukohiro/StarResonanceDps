@@ -68,7 +68,8 @@ public sealed class WidgetWindowManager
                 ReferenceEquals(session.Widget, widget)
                 && (session.ViewModel.RepresentsEntity(entity.EntityUuid)
                     || (!session.ViewModel.IsEntityAcquired
-                        && session.ViewModel.EntityId == entity.EntityId)));
+                        && session.ViewModel.EntityId == entity.EntityId
+                        && session.ViewModel.EntityType == entity.EntityType)));
 
         if (existingWindow is not null)
         {
@@ -244,7 +245,9 @@ public sealed class WidgetWindowManager
                 && session.ViewModel is EntityBuffDebuffCardWidgetViewModel card
                 && card.RepresentsBuff(kind, buffKey, group)
                 && (card.RepresentsEntity(entity.EntityUuid)
-                    || (!card.IsEntityAcquired && card.EntityId == entity.EntityId)));
+                    || (!card.IsEntityAcquired
+                        && card.EntityId == entity.EntityId
+                        && card.EntityType == entity.EntityType)));
 
         if (existingWindow is not null)
         {
@@ -261,8 +264,8 @@ public sealed class WidgetWindowManager
     /// 保存しておいた対象で窓を1枚開き直す。
     ///
     /// <para>
-    /// モンスターの窓は<b>未捕獲の状態</b>で開く。実体IDは再起動で消えるため、
-    /// 種別が一致する個体がAOIに現れた時点で
+    /// 実体の窓は<b>未捕獲の状態</b>で開く。実体IDは再起動で消えるため、
+    /// 種類と種別が一致する個体がAOIに現れた時点で
     /// <see cref="UpdateEntityWindowPresentations"/> が捕まえる。
     /// </para>
     /// </summary>
@@ -293,7 +296,10 @@ public sealed class WidgetWindowManager
             return;
         }
 
-        var entityTarget = new EntityWindowTarget(target.EntityId, target.Name);
+        var entityType = target.EntityType is { } typeValue && Enum.IsDefined(typeof(Zproto.EEntityType), typeValue)
+            ? (Zproto.EEntityType)typeValue
+            : (Zproto.EEntityType?)null;
+        var entityTarget = new EntityWindowTarget(target.EntityId, entityType, target.Name);
 
         if (widget.Kind != WidgetKind.BuffDebuffCard)
         {
@@ -367,6 +373,7 @@ public sealed class WidgetWindowManager
             targets.Add(new WidgetOpenTargetConfig
             {
                 EntityId = session.ViewModel.EntityId,
+                EntityType = session.ViewModel.EntityType is { } entityType ? (int)entityType : null,
                 Name = session.ViewModel.TargetName,
                 BuffListKind = card is null ? null : (int)card.BuffListKind,
                 BuffKey = card?.RequestedBuffKey,
@@ -898,9 +905,10 @@ public sealed class WidgetWindowManager
             }
             else
             {
-                // 設定から復元した直後の窓。種別が一致する個体を1体だけ捕まえる。
+                // 設定から復元した直後の窓。種類と種別が一致する個体を1体だけ捕まえる。
                 entity = entities.FirstOrDefault(
-                    candidate => candidate.EntityId == viewModel.EntityId);
+                    candidate => candidate.EntityId == viewModel.EntityId
+                        && candidate.EntityType == viewModel.EntityType);
             }
 
             if (entity is null)

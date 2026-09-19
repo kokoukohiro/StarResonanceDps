@@ -37,15 +37,9 @@ internal static class NearbyEntityProjection
 
     public static void AddOrUpdateAppearedEntity(long entityUuid)
     {
-        var entity = GetMonsterEntity(entityUuid);
+        var entity = GetListedEntity(entityUuid);
         if (entity is null)
         {
-            return;
-        }
-
-        if (IsHiddenEntity(entityUuid))
-        {
-            EntityStore.Remove(entityUuid);
             return;
         }
 
@@ -56,15 +50,9 @@ internal static class NearbyEntityProjection
     {
         ArgumentNullException.ThrowIfNull(changedAttributes);
 
-        var entity = GetMonsterEntity(entityUuid);
+        var entity = GetListedEntity(entityUuid);
         if (entity is null)
         {
-            return;
-        }
-
-        if (changedAttributes.Contains(EAttrType.AttrId) && IsHiddenEntity(entityUuid))
-        {
-            EntityStore.Remove(entityUuid);
             return;
         }
 
@@ -79,12 +67,6 @@ internal static class NearbyEntityProjection
             return;
         }
 
-        if (IsHiddenEntity(entityUuid))
-        {
-            EntityStore.Remove(entityUuid);
-            return;
-        }
-
         EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity));
     }
 
@@ -94,7 +76,7 @@ internal static class NearbyEntityProjection
         EntityStore.Remove(entityUuid);
     }
 
-    private static Entity? GetMonsterEntity(long entityUuid)
+    private static Entity? GetListedEntity(long entityUuid)
     {
         var encounter = EncounterManager.Current;
         if (entityUuid == 0 || encounter is null)
@@ -107,8 +89,7 @@ internal static class NearbyEntityProjection
             return null;
         }
 
-        var entityType = ResolveEntityType(entityUuid, entity);
-        if (entityType != EEntityType.EntMonster)
+        if (!IsListedType(ResolveEntityType(entityUuid, entity)))
         {
             EntityStore.Remove(entityUuid);
             return null;
@@ -120,11 +101,12 @@ internal static class NearbyEntityProjection
     private static NearbyEntityEntry CreateEntry(long entityUuid, Entity entity)
     {
         var entityId = ResolveEntityId(entityUuid, entity);
+        var entityType = ResolveEntityType(entityUuid, entity);
         return new NearbyEntityEntry(
             entityUuid,
             entityId,
             ResolveName(entity, entityId, entityUuid),
-            ResolveEntityType(entityUuid, entity),
+            entityType,
             entity.MonsterType,
             ResolveLevel(entity),
             entity.Hp,
@@ -134,7 +116,8 @@ internal static class NearbyEntityProjection
             GetInt(entity, "AttrCanLessenHp") > 0,
             GetInt(entity, "AttrIsLockStunned") > 0,
             NearbyEntityCampState.GetRelation(entityUuid),
-            Utils.GetCurrentShield(entity));
+            Utils.GetCurrentShield(entity),
+            ResolveHasHpBar(entityType, entity));
     }
 
     private static NearbyEntityEntry MergeChangedFields(
@@ -152,7 +135,8 @@ internal static class NearbyEntityProjection
             {
                 EntityId = entityId,
                 Name = ResolveName(entity, entityId, existing.EntityUuid),
-                MonsterType = entity.MonsterType
+                MonsterType = entity.MonsterType,
+                HasHpBar = ResolveHasHpBar(existing.EntityType, entity)
             };
         }
 
@@ -227,26 +211,33 @@ internal static class NearbyEntityProjection
     }
 
     /// <summary>
-    /// 一覧に出さないエンティティか。<b>召喚体を除く。</b>
+    /// 一覧に入れる種類。名前の表を持つモンスターだけ(名前は <c>CombatDataCatalog.GetEntityName</c>)。
+    /// 名前で絞るのは表示側(名前は表示言語で決まる)。
     ///
     /// <para>
-    /// 判定は <b>UUIDのビット15</b>(<see cref="Utils.IsSummonByUuid"/>)。ワイヤ側の情報なので、
-    /// <c>MonsterTable</c> に載っていない相手でも判定できる。
-    /// </para>
-    ///
-    /// <para>
-    /// <b><c>MonsterTable.HudShowParam[0] == 0</c> で除外してはいけない。</b>
-    /// ボスがこれに当たって一覧から消える。<c>HudShowParam</c> の意味は追えていない。
-    /// </para>
-    ///
-    /// <para>
-    /// 召喚ビットが立つのは他プレイヤーのイマジン召喚と効果の実体(燃烧地面・时空立场・奶环 等)。
-    /// ボス・取り巻き・クリスタル・訓練ダミー・設置物とプレイヤーには立たない。
+    /// <b>召喚ビット(UUID のビット15)では外さない。</b> 敵が召喚した敵にも立つ。
     /// </para>
     /// </summary>
-    private static bool IsHiddenEntity(long entityUuid)
+    private static bool IsListedType(EEntityType entityType)
     {
-        return Utils.IsSummonByUuid(entityUuid);
+        return entityType is EEntityType.EntMonster;
+    }
+
+    /// <summary>
+    /// ゲーム内でプレイヤーに見える HP バーを持つ実体か。持つ実体は名前が無くても一覧に載せる。
+    /// 判定は被ダメログと同じ <see cref="CombatDataCatalog.HasMonsterHpBar"/>。
+    /// <c>AttrId</c> が未着のときは判定できないので、持つ側に倒す。
+    /// </summary>
+    private static bool ResolveHasHpBar(EEntityType entityType, Entity entity)
+    {
+        if (entityType != EEntityType.EntMonster)
+        {
+            return false;
+        }
+
+        return entity.GetAttrKV("AttrId") is not int attrId
+            || attrId <= 0
+            || CombatDataCatalog.HasMonsterHpBar(attrId);
     }
 
     private static EEntityType ResolveEntityType(long entityUuid, Entity entity)
@@ -256,9 +247,13 @@ internal static class NearbyEntityProjection
             : entity.EntityType;
     }
 
+    /// <summary>
+    /// 種別ID(<c>AttrId</c>)。未着なら 0。
+    /// UUID の通し番号で代えない。通し番号を種別IDとして名前を引くと、別の実体の名前になる。
+    /// </summary>
     private static long ResolveEntityId(long entityUuid, Entity entity)
     {
-        return entity.UID != 0 ? entity.UID : Utils.UuidToEntityId(entityUuid);
+        return entity.GetAttrKV("AttrId") is int attrId && attrId > 0 ? attrId : 0;
     }
 
     private static int ResolveLevel(Entity entity)

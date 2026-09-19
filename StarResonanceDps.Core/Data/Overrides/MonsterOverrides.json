@@ -1,0 +1,5322 @@
+{
+  "101": {
+    "Name": {
+      "zh-CN": "木桩(火焰兽人)",
+      "en-US": "Dummy (Flame Orc)",
+      "ja-JP": "訓練用ダミー(フレイムオーク)",
+      "ko-KR": "더미(화염 오크)"
+    }
+  },
+  "102": {
+    "Name": {
+      "zh-CN": "测试木桩(敌方)",
+      "en-US": "Test Dummy (Enemy)",
+      "ja-JP": "訓練用ダミー(敵)",
+      "ko-KR": "더미 테스트(적군)"
+    }
+  },
+  "104": {
+    "Name": {
+      "zh-CN": "伊格尼索尔",
+      "en-US": "Ignisor",
+      "ja-JP": "イグニソル",
+      "ko-KR": "이그니솔"
+    }
+  },
+  "105": {
+    "Name": {
+      "zh-CN": "测试木桩(友方)",
+      "en-US": "Test Dummy (Ally)",
+      "ja-JP": "訓練用ダミー(味方)",
+      "ko-KR": "더미 테스트(아군)"
+    }
+  },
+  "106": {
+    "Name": {
+      "zh-CN": "测试木桩(中立)",
+      "en-US": "Test Dummy (Neutral)",
+      "ja-JP": "訓練用ダミー(中立)",
+      "ko-KR": "더미 테스트(중립)"
+    }
+  },
+  "107": {
+    "Name": {
+      "zh-CN": "姆克兵长(1E血)",
+      "en-US": "Muku Warrior (1E HP)",
+      "ja-JP": "ムークウォーリアー(HP1憶)",
+      "ko-KR": "무크 병장(체력 1억)"
+    }
+  },
+  "109": {
+    "Name": {
+      "zh-CN": "姆克兵长(6KW血)",
+      "en-US": "Muku Warrior (6KW HP)",
+      "ja-JP": "ムークウォーリアー(HP6千万)",
+      "ko-KR": "무크 병장(체력 6천만)"
+    }
+  },
+  "110": {
+    "Name": {
+      "zh-CN": "棒槌哥布林",
+      "en-US": "Goblin Cudgel",
+      "ja-JP": "ゴブリングロウ",
+      "ko-KR": "몽둥이 고블린"
+    }
+  },
+  "111": {
+    "Name": {
+      "zh-CN": "棒槌哥布林",
+      "en-US": "Goblin Cudgel",
+      "ja-JP": "ゴブリングロウ",
+      "ko-KR": "몽둥이 고블린"
+    }
+  },
+  "113": {
+    "Name": {
+      "zh-CN": "塔塔",
+      "en-US": "Tatta",
+      "ja-JP": "タータ",
+      "ko-KR": "타타"
+    }
+  },
+  "200": {
+    "Name": {
+      "zh-CN": "变身专用-虚蚀蒂娜",
+      "en-US": "Transformation Exclusive - Void Tina",
+      "ja-JP": "変身専用-虚蝕ティナ",
+      "ko-KR": "변신 전용 - 침식된 티나"
+    }
+  },
+  "1108": {
+    "Name": {
+      "zh-CN": "主战机残躯",
+      "en-US": "Battle Mech Remains",
+      "ja-JP": "メイン機の残骸",
+      "ko-KR": "전장 골렘 잔해"
+    }
+  },
+  "1109": {
+    "Name": {
+      "zh-CN": "主战机残躯",
+      "en-US": "Battle Mech Remains",
+      "ja-JP": "メイン機の残骸",
+      "ko-KR": "전장 골렘 잔해"
+    }
+  },
+  "1111": {
+    "Name": {
+      "zh-CN": "黯影军团剑士",
+      "en-US": "Dark Mist Swordsman",
+      "ja-JP": "暗霧分隊の剣士",
+      "ko-KR": "검은 안개 군단 검병"
+    }
+  },
+  "1112": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "1113": {
+    "Name": {
+      "zh-CN": "杰克",
+      "en-US": "Jayden",
+      "ja-JP": "エリアス",
+      "ko-KR": "잭"
+    }
+  },
+  "1114": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "1123": {
+    "Name": {
+      "zh-CN": "超级主战机像99型",
+      "en-US": "Super Battle Mech 99",
+      "ja-JP": "スーパーメインゴーレム99型",
+      "ko-KR": "슈퍼 전장 골렘 99형"
+    }
+  },
+  "1124": {
+    "Name": {
+      "zh-CN": "激光炮",
+      "en-US": "Laser Cannon",
+      "ja-JP": "レーザー砲",
+      "ko-KR": "레이저포"
+    }
+  },
+  "1146": {
+    "Name": {
+      "zh-CN": "战斗机像03型",
+      "en-US": "Battle Mech 03",
+      "ja-JP": "バトルゴーレム03型",
+      "ko-KR": "전투 골렘 03형"
+    }
+  },
+  "1153": {
+    "Name": {
+      "zh-CN": "幻幻花",
+      "en-US": "Illusory Bloom",
+      "ja-JP": "幻花晶",
+      "ko-KR": "환상꽃"
+    }
+  },
+  "1154": {
+    "Name": {
+      "zh-CN": "幻幻花·幻",
+      "en-US": "Phantom Illusory Bloom",
+      "ja-JP": "幻花晶・幻",
+      "ko-KR": "환상꽃・환"
+    }
+  },
+  "1175": {
+    "Name": {
+      "zh-CN": "甬道激光特效",
+      "en-US": "Corridor Laser Special Effect",
+      "ja-JP": "通路のレーザーエフェクト",
+      "ko-KR": "통로 레이저 특수 효과"
+    }
+  },
+  "1308": {
+    "Name": {
+      "zh-CN": "主战机残躯",
+      "en-US": "Battle Mech Remains",
+      "ja-JP": "メイン機の残骸",
+      "ko-KR": "전장 골렘 잔해"
+    }
+  },
+  "1338": {
+    "Name": {
+      "zh-CN": "自爆机器人08型",
+      "en-US": "Self-destruct Robot 08",
+      "ja-JP": "ブラストポッド08型",
+      "ko-KR": "자폭 로봇 08형"
+    }
+  },
+  "1363": {
+    "Name": {
+      "zh-CN": "自爆机器人08型（大范围）",
+      "en-US": "Self-destruct Robot 08 (wide range)",
+      "ja-JP": "自爆ゴーレム08型（広範囲）",
+      "ko-KR": "자폭 로봇 08형(광범위)"
+    }
+  },
+  "1365": {
+    "Name": {
+      "zh-CN": "连线空模型",
+      "en-US": "Link Test Model",
+      "ja-JP": "接続用の空モデル",
+      "ko-KR": "빈 모델 연결"
+    }
+  },
+  "1402": {
+    "Name": {
+      "zh-CN": "风龙落石",
+      "en-US": "Wind Dragon Falling Rock",
+      "ja-JP": "ロックフォール",
+      "ko-KR": "풍룡 낙석"
+    }
+  },
+  "1438": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "1439": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "1440": {
+    "Name": {
+      "zh-CN": "罗罗拉",
+      "en-US": "Rorola",
+      "ja-JP": "ロローラ",
+      "ko-KR": "로로라"
+    }
+  },
+  "1450": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "1451": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "1452": {
+    "Name": {
+      "zh-CN": "罗罗拉",
+      "en-US": "Rorola",
+      "ja-JP": "ロローラ",
+      "ko-KR": "로로라"
+    }
+  },
+  "1454": {
+    "Name": {
+      "zh-CN": "卡尼曼战士",
+      "en-US": "Kanamia Warrior",
+      "ja-JP": "カナミア戦士",
+      "ko-KR": "카나미아족 전사"
+    }
+  },
+  "1455": {
+    "Name": {
+      "zh-CN": "卡尼曼猎人",
+      "en-US": "Kanamia Hunter",
+      "ja-JP": "カナミア狩人",
+      "ko-KR": "카나미아족 사냥꾼"
+    }
+  },
+  "1456": {
+    "Name": {
+      "zh-CN": "卡尼曼射手",
+      "en-US": "Kanamia Archer",
+      "ja-JP": "カナミア弓兵",
+      "ko-KR": "카나미아족 사격꾼"
+    }
+  },
+  "1481": {
+    "Name": {
+      "zh-CN": "滚石机关1",
+      "en-US": "Rolling Stone Mechanism 1",
+      "ja-JP": "転石トラップ1",
+      "ko-KR": "구르는 바위 장치1"
+    }
+  },
+  "1518": {
+    "Name": {
+      "zh-CN": "蛇蛋1个（普通）",
+      "en-US": "Serpent Egg x1 (Normal)",
+      "ja-JP": "スネークの卵1個（通常）",
+      "ko-KR": "뱀 알 1개(일반)"
+    }
+  },
+  "1519": {
+    "Name": {
+      "zh-CN": "蛇蛋1个（岩石）",
+      "en-US": "Serpent Egg ×1 (Rock)",
+      "ja-JP": "スネークの卵1個（ロック）",
+      "ko-KR": "뱀 알 1개(바위)"
+    }
+  },
+  "1521": {
+    "Name": {
+      "zh-CN": "蛇蛋1个（生命）",
+      "en-US": "Serpent Egg x1 (Life)",
+      "ja-JP": "スネークの卵1個（生命）",
+      "ko-KR": "뱀 알 1개(체력)"
+    }
+  },
+  "1704": {
+    "Name": {
+      "zh-CN": "金色鬼",
+      "en-US": "Golden Ghost",
+      "ja-JP": "ゴルドエビル",
+      "ko-KR": "금색 귀신"
+    }
+  },
+  "1905": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "1909": {
+    "Name": {
+      "zh-CN": "拉法尔",
+      "en-US": "Lafael",
+      "ja-JP": "ラファエル",
+      "ko-KR": "라파엘"
+    }
+  },
+  "1910": {
+    "Name": {
+      "zh-CN": "伊格",
+      "en-US": "Ygg",
+      "ja-JP": "イグ",
+      "ko-KR": "이그"
+    }
+  },
+  "1911": {
+    "Name": {
+      "zh-CN": "苏蒂",
+      "en-US": "Suti",
+      "ja-JP": "スージー",
+      "ko-KR": "수티"
+    }
+  },
+  "1912": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "1913": {
+    "Name": {
+      "zh-CN": "普通的脚印显示",
+      "en-US": "Normal Footprint Display",
+      "ja-JP": "通常の足跡表示",
+      "ko-KR": "일반 발자국 표시"
+    }
+  },
+  "1914": {
+    "Name": {
+      "zh-CN": "隐藏的脚印显示",
+      "en-US": "Hidden Footprint Display",
+      "ja-JP": "隠された足跡表示",
+      "ko-KR": "숨겨진 발자국 표시"
+    }
+  },
+  "1915": {
+    "Name": {
+      "zh-CN": "在空中的脚印显示",
+      "en-US": "Airborne Footprint Display",
+      "ja-JP": "空中の足跡表示",
+      "ko-KR": "공중 발자국 표시"
+    }
+  },
+  "3004": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "3005": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "3006": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "3020": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "3023": {
+    "Name": {
+      "zh-CN": "阿斯特里斯护卫",
+      "en-US": "Asterleeds Guard",
+      "ja-JP": "アステルリーズ衛士",
+      "ko-KR": "아스텔리즈 호위병"
+    }
+  },
+  "3024": {
+    "Name": {
+      "zh-CN": "阿斯特里斯护卫",
+      "en-US": "Asterleeds Guard",
+      "ja-JP": "アステルリーズ衛士",
+      "ko-KR": "아스텔리즈 호위병"
+    }
+  },
+  "3025": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "3060": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "3061": {
+    "Name": {
+      "zh-CN": "迷失的蒂娜",
+      "en-US": "Lost Tina",
+      "ja-JP": "迷えるティナ",
+      "ko-KR": "방황하는 티나"
+    }
+  },
+  "3062": {
+    "Name": {
+      "zh-CN": "迷失的蒂娜",
+      "en-US": "Lost Tina",
+      "ja-JP": "迷えるティナ",
+      "ko-KR": "방황하는 티나"
+    }
+  },
+  "3063": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "3991": {
+    "Name": {
+      "zh-CN": "奥尔维拉黑影",
+      "en-US": "Olvera's Shadow",
+      "ja-JP": "オルヴェラの黒い影",
+      "ko-KR": "올베라의 그림자"
+    }
+  },
+  "3992": {
+    "Name": {
+      "zh-CN": "卡尼曼青年",
+      "en-US": "Kanamia Youth",
+      "ja-JP": "カナミア族の青年",
+      "ko-KR": "카나미아 청년"
+    }
+  },
+  "4000": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4001": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4004": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "4005": {
+    "Name": {
+      "zh-CN": "蒂娜（调查副本用）",
+      "en-US": "Tina (Investigation Copy)",
+      "ja-JP": "ティナ（調査ダンジョン用）",
+      "ko-KR": "티나(던전 조사용)"
+    }
+  },
+  "4006": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "4007": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "4008": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4009": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4010": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "4011": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林",
+      "en-US": "Void - Goblin Cudgel",
+      "ja-JP": "虚蝕・ゴブリングロウ",
+      "ko-KR": "허무의 침식・몽둥이 고블린"
+    }
+  },
+  "4012": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "4020": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林",
+      "en-US": "Void - Goblin Cudgel",
+      "ja-JP": "虚蝕・ゴブリングロウ",
+      "ko-KR": "허무의 침식・몽둥이 고블린"
+    }
+  },
+  "4021": {
+    "Name": {
+      "zh-CN": "虚蚀·小刀哥布林",
+      "en-US": "Void - Goblin Dagger",
+      "ja-JP": "虚蝕・ナイフゴブリン",
+      "ko-KR": "허무의 침식・나이프 고블린"
+    }
+  },
+  "4022": {
+    "Name": {
+      "zh-CN": "虚蚀·弩箭哥布林",
+      "en-US": "Void - Goblin Crossbow",
+      "ja-JP": "虚蝕・ボウガンゴブリン",
+      "ko-KR": "허무의 침식・석궁 고블린"
+    }
+  },
+  "4023": {
+    "Name": {
+      "zh-CN": "虚蚀·巫妖哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・ゴブリンリッチ",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "4024": {
+    "Name": {
+      "zh-CN": "虚蚀·剑盾哥布林",
+      "en-US": "Void - Goblin Sword",
+      "ja-JP": "虚蝕・ゴブリンナイト",
+      "ko-KR": "허무의 침식・검방패 고블린"
+    }
+  },
+  "4025": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "4026": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "4027": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void - Goblin Mage",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "4034": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4035": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4036": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4037": {
+    "Name": {
+      "zh-CN": "黑衣人分身",
+      "en-US": "Man in Black Clone",
+      "ja-JP": "黒の者の分身",
+      "ko-KR": "검은 옷을 입은 자의 분신"
+    }
+  },
+  "4106": {
+    "Name": {
+      "zh-CN": "泡泡使者",
+      "en-US": "Bubble Messenger",
+      "ja-JP": "バブルの使者",
+      "ko-KR": "비눗방울 전령"
+    }
+  },
+  "4202": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "4204": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "4205": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "4301": {
+    "Name": {
+      "zh-CN": "海风节·雷电食人魔Q版立牌",
+      "en-US": "Seabreeze Festival - Chibi Tempest Ogre Standee",
+      "ja-JP": "海風祭・サンダーオーガちびダミー",
+      "ko-KR": "해풍절・번개 오우거 Q버전 스탠드"
+    }
+  },
+  "4408": {
+    "Name": {
+      "zh-CN": "切磋范围",
+      "en-US": "Spar Zone",
+      "ja-JP": "対戦範囲",
+      "ko-KR": "대결 범위"
+    }
+  },
+  "4503": {
+    "Name": {
+      "zh-CN": "心魔",
+      "en-US": "Inner Demon",
+      "ja-JP": "心の闇",
+      "ko-KR": "심마"
+    }
+  },
+  "4504": {
+    "Name": {
+      "zh-CN": "心魔",
+      "en-US": "Inner Demon",
+      "ja-JP": "心の闇",
+      "ko-KR": "심마"
+    }
+  },
+  "4525": {
+    "Name": {
+      "zh-CN": "幻花晶簇",
+      "en-US": "Illusory Bloom Crystal Cluster",
+      "ja-JP": "幻花晶クラスター",
+      "ko-KR": "환상꽃 결정군"
+    }
+  },
+  "4531": {
+    "Name": {
+      "zh-CN": "心魔·幻象",
+      "en-US": "Illusion Inner Demon",
+      "ja-JP": "心の闇・幻影",
+      "ko-KR": "심마・환상"
+    }
+  },
+  "4602": {
+    "Name": {
+      "zh-CN": "深海音响",
+      "en-US": "Abyssal Sound System",
+      "ja-JP": "深海スピーカー",
+      "ko-KR": "심해 음향"
+    }
+  },
+  "4603": {
+    "Name": {
+      "zh-CN": "隐形音响",
+      "en-US": "Invisible Sound System",
+      "ja-JP": "ステルススピーカー",
+      "ko-KR": "투명 음향"
+    }
+  },
+  "4604": {
+    "Name": {
+      "zh-CN": "冰球",
+      "en-US": "Ice Sphere",
+      "ja-JP": "アイスホッケー",
+      "ko-KR": "얼음 구체"
+    }
+  },
+  "4605": {
+    "Name": {
+      "zh-CN": "水泡",
+      "en-US": "Bubble",
+      "ja-JP": "バブル",
+      "ko-KR": "물방울"
+    }
+  },
+  "4606": {
+    "Name": {
+      "zh-CN": "深海音响",
+      "en-US": "Abyssal Sound System",
+      "ja-JP": "深海スピーカー",
+      "ko-KR": "심해 음향"
+    }
+  },
+  "4607": {
+    "Name": {
+      "zh-CN": "深海娜宝",
+      "en-US": "Abyssal Nappo",
+      "ja-JP": "深海ナッポ",
+      "ko-KR": "심해 나뽀"
+    }
+  },
+  "4610": {
+    "Name": {
+      "zh-CN": "冰球",
+      "en-US": "Ice Sphere",
+      "ja-JP": "アイスホッケー",
+      "ko-KR": "얼음 구체"
+    }
+  },
+  "4611": {
+    "Name": {
+      "zh-CN": "水泡",
+      "en-US": "Bubble",
+      "ja-JP": "バブル",
+      "ko-KR": "물방울"
+    }
+  },
+  "4612": {
+    "Name": {
+      "zh-CN": "深海娜宝",
+      "en-US": "Abyssal Nappo",
+      "ja-JP": "深海ナッポ",
+      "ko-KR": "심해 나뽀"
+    }
+  },
+  "4613": {
+    "Name": {
+      "zh-CN": "深海娜宝",
+      "en-US": "Abyssal Nappo",
+      "ja-JP": "深海ナッポ",
+      "ko-KR": "심해 나뽀"
+    }
+  },
+  "4614": {
+    "Name": {
+      "zh-CN": "深海娜宝",
+      "en-US": "Abyssal Nappo",
+      "ja-JP": "深海ナッポ",
+      "ko-KR": "심해 나뽀"
+    }
+  },
+  "4615": {
+    "Name": {
+      "zh-CN": "深海娜宝",
+      "en-US": "Abyssal Nappo",
+      "ja-JP": "深海ナッポ",
+      "ko-KR": "심해 나뽀"
+    }
+  },
+  "4640": {
+    "Name": {
+      "zh-CN": "潮汐之核",
+      "en-US": "Tidal Core",
+      "ja-JP": "潮汐のコア",
+      "ko-KR": "파도의 코어"
+    }
+  },
+  "4691": {
+    "Name": {
+      "zh-CN": "音响",
+      "en-US": "Sound System",
+      "ja-JP": "スピーカー",
+      "ko-KR": "음향"
+    }
+  },
+  "4692": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "4693": {
+    "Name": {
+      "zh-CN": "音响",
+      "en-US": "Sound System",
+      "ja-JP": "スピーカー",
+      "ko-KR": "음향"
+    }
+  },
+  "7003": {
+    "Name": {
+      "zh-CN": "少女",
+      "en-US": "Young Girl",
+      "ja-JP": "少女",
+      "ko-KR": "소녀"
+    }
+  },
+  "7004": {
+    "Name": {
+      "zh-CN": "哥布林",
+      "en-US": "Goblin",
+      "ja-JP": "ゴブリン",
+      "ko-KR": "고블린"
+    }
+  },
+  "7005": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "8022": {
+    "Name": {
+      "zh-CN": "阿尔林",
+      "en-US": "Arlin",
+      "ja-JP": "アーリン",
+      "ko-KR": "알린"
+    }
+  },
+  "8049": {
+    "Name": {
+      "zh-CN": "角羊攻击空模型",
+      "en-US": "Caprahorn Attacking Air Model",
+      "ja-JP": "ホーンゴート攻撃ダミー",
+      "ko-KR": "뿔염소 공격 공중 모델"
+    }
+  },
+  "8310": {
+    "Name": {
+      "zh-CN": "博伊斯",
+      "en-US": "Boyce",
+      "ja-JP": "ボイス",
+      "ko-KR": "보이스"
+    }
+  },
+  "8311": {
+    "Name": {
+      "zh-CN": "战斗的博伊斯",
+      "en-US": "Fighting Boyce",
+      "ja-JP": "戦うボイス",
+      "ko-KR": "전투하는 보이스"
+    }
+  },
+  "8312": {
+    "Name": {
+      "zh-CN": "防御的博伊斯",
+      "en-US": "Defending Boyce",
+      "ja-JP": "防御するボイス",
+      "ko-KR": "방어하는 보이스"
+    }
+  },
+  "8313": {
+    "Name": {
+      "zh-CN": "沉思的博伊斯",
+      "en-US": "Contemplative Boyce",
+      "ja-JP": "考え込むボイス",
+      "ko-KR": "생각하는 보이스"
+    }
+  },
+  "8314": {
+    "Name": {
+      "zh-CN": "施法的博伊斯",
+      "en-US": "Casting Boyce",
+      "ja-JP": "術を使うボイス",
+      "ko-KR": "마법을 사용하는 보이스"
+    }
+  },
+  "8316": {
+    "Name": {
+      "zh-CN": "被击败的博伊斯",
+      "en-US": "Defeated Boyce",
+      "ja-JP": "倒されたボイス",
+      "ko-KR": "패배한 보이스"
+    }
+  },
+  "8501": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8502": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8503": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "8504": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "8505": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "8506": {
+    "Name": {
+      "zh-CN": "黯影军团男剑士",
+      "en-US": "Dark Mist Legion Swordsman",
+      "ja-JP": "暗霧分隊の剣士(男)",
+      "ko-KR": "검은 안개 군단 남자 검병"
+    }
+  },
+  "8507": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵A",
+      "en-US": "Asterleeds Trooper A",
+      "ja-JP": "アステルリーズの兵士A",
+      "ko-KR": "아스텔리즈 병사A"
+    }
+  },
+  "8508": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8509": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8510": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "8511": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8512": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "8513": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "8515": {
+    "Name": {
+      "zh-CN": "虚蚀哥布林",
+      "en-US": "Void Goblin",
+      "ja-JP": "虚蝕ゴブリン",
+      "ko-KR": "허무의 침식 고블린"
+    }
+  },
+  "8519": {
+    "Name": {
+      "zh-CN": "黯影军团盾牌兵",
+      "en-US": "Dark Mist Legion Shield Bearer",
+      "ja-JP": "暗霧分隊盾兵",
+      "ko-KR": "검은 안개 군단 방패병"
+    }
+  },
+  "8520": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵B",
+      "en-US": "Asterleeds Trooper B",
+      "ja-JP": "アステルリーズの兵士B",
+      "ko-KR": "아스텔리즈 병사B"
+    }
+  },
+  "8521": {
+    "Name": {
+      "zh-CN": "黯影军团双剑兵",
+      "en-US": "Dark Mist Legion Dual Swordsman",
+      "ja-JP": "暗霧分隊の双剣兵",
+      "ko-KR": "검은 안개 군단 쌍검병"
+    }
+  },
+  "8522": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵C",
+      "en-US": "Asterleeds Trooper C",
+      "ja-JP": "アステルリーズの兵士C",
+      "ko-KR": "아스텔리즈 병사C"
+    }
+  },
+  "8888": {
+    "Name": {
+      "zh-CN": "随机怪物配置",
+      "en-US": "Random Monster Configuration",
+      "ja-JP": "ランダムモンスター配置",
+      "ko-KR": "몬스터 설정 랜덤"
+    }
+  },
+  "10314": {
+    "Name": {
+      "zh-CN": "隐身怪（机械守卫180度转身用）",
+      "en-US": "Invisible Monster (for Mech Sentinel 180-degree turn)",
+      "ja-JP": "ハイドモンスター（機械の衛兵180度ターン用）",
+      "ko-KR": "은신 몬스터(기계 경비병 180도 회전용)"
+    }
+  },
+  "12003": {
+    "Name": {
+      "zh-CN": "蟹蛛",
+      "en-US": "Arachnocrab",
+      "ja-JP": "カニクモ",
+      "ko-KR": "거미게"
+    }
+  },
+  "20014": {
+    "Name": {
+      "zh-CN": "生存机制龙卷风",
+      "en-US": "Survival Mechanism Tornado",
+      "ja-JP": "生存メカニズム竜巻",
+      "ko-KR": "생존 메커니즘 토네이도"
+    }
+  },
+  "20015": {
+    "Name": {
+      "zh-CN": "山贼",
+      "en-US": "Brigand",
+      "ja-JP": "山賊",
+      "ko-KR": "산적"
+    }
+  },
+  "20016": {
+    "Name": {
+      "zh-CN": "山贼射手",
+      "en-US": "Brigand Archer",
+      "ja-JP": "山賊弓使い",
+      "ko-KR": "산적 사격꾼"
+    }
+  },
+  "20017": {
+    "Name": {
+      "zh-CN": "山贼斥候",
+      "en-US": "Brigand Scout",
+      "ja-JP": "山賊の斥候",
+      "ko-KR": "산적 정찰꾼"
+    }
+  },
+  "30101": {
+    "Name": {
+      "zh-CN": "喽啰",
+      "en-US": "Minion",
+      "ja-JP": "手下",
+      "ko-KR": "졸개"
+    }
+  },
+  "30102": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "30301": {
+    "Name": {
+      "zh-CN": "造景卫兵",
+      "en-US": "Scenery Guard",
+      "ja-JP": "景観衛兵",
+      "ko-KR": "연출 호위병"
+    }
+  },
+  "30303": {
+    "Name": {
+      "zh-CN": "护送单位-平民1",
+      "en-US": "Escort Unit - Civilian 1",
+      "ja-JP": "護送ユニット-平民1",
+      "ko-KR": "호위 유닛 - 평민1"
+    }
+  },
+  "30304": {
+    "Name": {
+      "zh-CN": "护送单位-平民2",
+      "en-US": "Escort Unit - Civilian 2",
+      "ja-JP": "護送ユニット-平民2",
+      "ko-KR": "호위 유닛 - 평민2"
+    }
+  },
+  "30305": {
+    "Name": {
+      "zh-CN": "护送单位-平民3小孩",
+      "en-US": "Escort Unit - Civilian 3 Children",
+      "ja-JP": "護送ユニット-平民3子供",
+      "ko-KR": "호위 유닛 - 평민3 아이"
+    }
+  },
+  "30306": {
+    "Name": {
+      "zh-CN": "护送单位-平民4中心",
+      "en-US": "Escort Unit - Civilian 4 Center",
+      "ja-JP": "護送ユニット-平民4中央",
+      "ko-KR": "호위 유닛 - 평민4 중심"
+    }
+  },
+  "30312": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎1-青年男",
+      "en-US": "Diorama - Void Human - Struggle 1 - Young Male",
+      "ja-JP": "景観-被虚蝕者-もがく1-青年男子",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥1 - 청년 남성"
+    }
+  },
+  "30313": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-对抗",
+      "en-US": "Diorama - Void Human - Confrontation",
+      "ja-JP": "景観-被虚蝕者-敵対",
+      "ko-KR": "연출 - 허무의 침식 인간 - 저항"
+    }
+  },
+  "30314": {
+    "Name": {
+      "zh-CN": "造景-兵团士兵对抗",
+      "en-US": "Diorama - Legion Soldier Confrontation",
+      "ja-JP": "景観-兵団兵士敵対",
+      "ko-KR": "연출 - 병단 병사 저항"
+    }
+  },
+  "30315": {
+    "Name": {
+      "zh-CN": "造景-兵团士兵警戒",
+      "en-US": "Diorama - Legion Soldier Vigilance",
+      "ja-JP": "景観-兵団兵士警戒",
+      "ko-KR": "연출 - 병단 병사 경계"
+    }
+  },
+  "30316": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎2-青年男",
+      "en-US": "Diorama - Void Human - Struggle 2 - Young Male",
+      "ja-JP": "景観-被虚蝕者-もがく2-青年男子",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥2 - 청년 남성"
+    }
+  },
+  "30320": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎1-中年男",
+      "en-US": "Diorama - Void Human - Struggle 1 - Middle-aged Male",
+      "ja-JP": "景観-被虚蝕者-もがく1-中年男性",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥1 - 중년 남성"
+    }
+  },
+  "30321": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎2-中年男",
+      "en-US": "Diorama - Void Human - Struggle 2 - Middle-aged Male",
+      "ja-JP": "景観-被虚蝕者-もがく2-中年男性",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥2 - 중년 남성"
+    }
+  },
+  "30322": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎1-中年女",
+      "en-US": "Diorama - Void Human - Struggle 1 - Middle-aged Female",
+      "ja-JP": "景観-被虚蝕者-もがく1-中年女",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥1 - 중년 여성"
+    }
+  },
+  "30323": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎2-中年女",
+      "en-US": "Diorama - Void Human - Struggle 2 - Middle-aged Female",
+      "ja-JP": "景観-被虚蝕者-もがく2-中年女",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥2 - 중년 여성"
+    }
+  },
+  "30324": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎1-老年男",
+      "en-US": "Diorama - Void Human - Struggle 1 - Elderly Male",
+      "ja-JP": "景観-被虚蝕者-もがく1-老年男",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥1 - 노년 남성"
+    }
+  },
+  "30325": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎2-老年男",
+      "en-US": "Diorama - Void Human - Struggle 2 - Elderly Male",
+      "ja-JP": "景観-被虚蝕者-もがく2-老年男",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥2 - 노년 남성"
+    }
+  },
+  "30326": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎1-老年女",
+      "en-US": "Diorama - Void Human - Struggle 1 - Elderly Female",
+      "ja-JP": "景観-被虚蝕者-もがく1-老女",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥1 - 노년 여성"
+    }
+  },
+  "30327": {
+    "Name": {
+      "zh-CN": "造景-虚蚀人类-挣扎2-老年女",
+      "en-US": "Scene - Void- Human - Struggle 2 - Elderly Woman",
+      "ja-JP": "景観-被虚蝕者-もがく2-老女",
+      "ko-KR": "연출 - 허무의 침식 인간 - 발버둥2 - 노년 여성"
+    }
+  },
+  "30344": {
+    "Name": {
+      "zh-CN": "战斗-虚蚀人类-士兵",
+      "en-US": "Combat - Void Human - Soldier",
+      "ja-JP": "戦闘-被虚蝕者-兵士",
+      "ko-KR": "전투 - 허무의 침식 인간 - 병사"
+    }
+  },
+  "30350": {
+    "Name": {
+      "zh-CN": "战斗-近战青年男",
+      "en-US": "Battle - Melee Young Man",
+      "ja-JP": "戦闘-近接青年男子",
+      "ko-KR": "전투 - 근접 공격 청년 남성"
+    }
+  },
+  "30351": {
+    "Name": {
+      "zh-CN": "战斗-近战老年女",
+      "en-US": "Battle - Melee Elderly Woman",
+      "ja-JP": "戦闘-近接老女",
+      "ko-KR": "전투 - 근접 공격 노년 여성"
+    }
+  },
+  "30352": {
+    "Name": {
+      "zh-CN": "战斗-远程士兵",
+      "en-US": "Battle - Ranged Soldier",
+      "ja-JP": "戦闘-遠距離兵士",
+      "ko-KR": "전투 - 원거리 병사"
+    }
+  },
+  "30353": {
+    "Name": {
+      "zh-CN": "战斗-爆发中年男",
+      "en-US": "Battle - Explosive Middle-aged Man",
+      "ja-JP": "戦闘-爆発中年男性",
+      "ko-KR": "전투 - 폭발 중년 남성"
+    }
+  },
+  "30360": {
+    "Name": {
+      "zh-CN": "战斗第三波-近战青年男",
+      "en-US": "Battle Third Wave - Melee Young Man",
+      "ja-JP": "戦闘第3ウェーブ-近接青年男子",
+      "ko-KR": "전투 3차 - 근접 공격 청년 남성"
+    }
+  },
+  "30361": {
+    "Name": {
+      "zh-CN": "战斗第三波-近战老年女",
+      "en-US": "Battle Third Wave - Melee Elderly Woman",
+      "ja-JP": "戦闘第3ウェーブ-近接老女",
+      "ko-KR": "전투 3차 - 근접 공격 노년 여성"
+    }
+  },
+  "30362": {
+    "Name": {
+      "zh-CN": "战斗第三波-远程士兵",
+      "en-US": "Battle Third Wave - Ranged Soldier",
+      "ja-JP": "戦闘第3ウェーブ-遠距離兵士",
+      "ko-KR": "전투 3차 - 원거리 병사"
+    }
+  },
+  "30363": {
+    "Name": {
+      "zh-CN": "战斗第三波-爆发中年男",
+      "en-US": "Battle Third Wave - Explosive Middle-aged Man",
+      "ja-JP": "戦闘第3ウェーブ-爆発中年男性",
+      "ko-KR": "전투 3차 - 폭발 중년 남성"
+    }
+  },
+  "30401": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30402": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30403": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30405": {
+    "Name": {
+      "zh-CN": "维尔古城瑞恩",
+      "en-US": "Ancient City of Vill - Ryan",
+      "ja-JP": "古代都市ヴィル・ライアン",
+      "ko-KR": "고대도시 빌 라이언"
+    }
+  },
+  "30407": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "30408": {
+    "Name": {
+      "zh-CN": "丹佛",
+      "en-US": "Denvel",
+      "ja-JP": "デンヴェル",
+      "ko-KR": "덴벨"
+    }
+  },
+  "30409": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "30410": {
+    "Name": {
+      "zh-CN": "神秘人",
+      "en-US": "Mysterious Person",
+      "ja-JP": "謎の人物",
+      "ko-KR": "정체불명의 인물"
+    }
+  },
+  "30411": {
+    "Name": {
+      "zh-CN": "初探黯影军团士兵",
+      "en-US": "Initial Exploration of Dark Mist Trooper",
+      "ja-JP": "暗霧分隊の兵士初歩捜査",
+      "ko-KR": "검은 안개 군단 병사 첫 조사"
+    }
+  },
+  "30420": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30422": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30423": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30424": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30425": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30426": {
+    "Name": {
+      "zh-CN": "黯影军团士兵",
+      "en-US": "Soldier",
+      "ja-JP": "暗霧分隊の兵士",
+      "ko-KR": "검은 안개 군단 병사"
+    }
+  },
+  "30601": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30602": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30603": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30604": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30605": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30606": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30607": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30608": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30609": {
+    "Name": {
+      "zh-CN": "工匠",
+      "en-US": "Artisan",
+      "ja-JP": "職人",
+      "ko-KR": "대장장이"
+    }
+  },
+  "30610": {
+    "Name": {
+      "zh-CN": "女工匠",
+      "en-US": "Female Artisan",
+      "ja-JP": "女職人",
+      "ko-KR": "여자 대장장이"
+    }
+  },
+  "30701": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "30702": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "30703": {
+    "Name": {
+      "zh-CN": "杰拉德躺",
+      "en-US": "Jerrad Lying Down",
+      "ja-JP": "横たわるジェラード",
+      "ko-KR": "제라드 눕기"
+    }
+  },
+  "30803": {
+    "Name": {
+      "zh-CN": "暴躁的女平民",
+      "en-US": "Irritable Female Civilian",
+      "ja-JP": "短気な女平民",
+      "ko-KR": "화난 여자 평민"
+    }
+  },
+  "30804": {
+    "Name": {
+      "zh-CN": "暴躁的女平民",
+      "en-US": "Irritable Female Civilian",
+      "ja-JP": "短気な女平民",
+      "ko-KR": "화난 여자 평민"
+    }
+  },
+  "30805": {
+    "Name": {
+      "zh-CN": "暴躁的女平民",
+      "en-US": "Irritable Female Civilian",
+      "ja-JP": "短気な女平民",
+      "ko-KR": "화난 여자 평민"
+    }
+  },
+  "30806": {
+    "Name": {
+      "zh-CN": "暴躁的女平民",
+      "en-US": "Irritable Female Civilian",
+      "ja-JP": "短気な女平民",
+      "ko-KR": "화난 여자 평민"
+    }
+  },
+  "30811": {
+    "Name": {
+      "zh-CN": "黯影军士",
+      "en-US": "Dark Mist Sergeant",
+      "ja-JP": "暗霧分隊軍士",
+      "ko-KR": "검은 안개 군단 부사관"
+    }
+  },
+  "30812": {
+    "Name": {
+      "zh-CN": "黯影军士",
+      "en-US": "Dark Mist Sergeant",
+      "ja-JP": "暗霧分隊軍士",
+      "ko-KR": "검은 안개 군단 부사관"
+    }
+  },
+  "30814": {
+    "Name": {
+      "zh-CN": "黯影军士",
+      "en-US": "Dark Mist Sergeant",
+      "ja-JP": "暗霧分隊軍士",
+      "ko-KR": "검은 안개 군단 부사관"
+    }
+  },
+  "30852": {
+    "Name": {
+      "zh-CN": "遥控炸弹",
+      "en-US": "Remote Bomb",
+      "ja-JP": "リモート爆弾",
+      "ko-KR": "원격 폭탄"
+    }
+  },
+  "30853": {
+    "Name": {
+      "zh-CN": "蛇蛋1个",
+      "en-US": "Serpent Egg x1",
+      "ja-JP": "スネークの卵1個",
+      "ko-KR": "뱀 알 1개"
+    }
+  },
+  "30854": {
+    "Name": {
+      "zh-CN": "蛇蛋3个",
+      "en-US": "Serpent Egg x3",
+      "ja-JP": "スネークの卵3個",
+      "ko-KR": "뱀 알 3개"
+    }
+  },
+  "30855": {
+    "Name": {
+      "zh-CN": "蛇蛋4个",
+      "en-US": "Serpent Egg x4",
+      "ja-JP": "スネークの卵4個",
+      "ko-KR": "뱀 알 4개"
+    }
+  },
+  "30859": {
+    "Name": {
+      "zh-CN": "蛇怪",
+      "en-US": "Basilisk",
+      "ja-JP": "スネークモンスター",
+      "ko-KR": "뱀 괴물"
+    }
+  },
+  "30860": {
+    "Name": {
+      "zh-CN": "蛇怪",
+      "en-US": "Basilisk",
+      "ja-JP": "スネークモンスター",
+      "ko-KR": "뱀 괴물"
+    }
+  },
+  "30863": {
+    "Name": {
+      "zh-CN": "爆桶",
+      "en-US": "Explosive Barrel",
+      "ja-JP": "爆薬",
+      "ko-KR": "폭발통"
+    }
+  },
+  "30864": {
+    "Name": {
+      "zh-CN": "蛇",
+      "en-US": "Serpent",
+      "ja-JP": "スネーク",
+      "ko-KR": "뱀"
+    }
+  },
+  "30865": {
+    "Name": {
+      "zh-CN": "蛇",
+      "en-US": "Serpent",
+      "ja-JP": "スネーク",
+      "ko-KR": "뱀"
+    }
+  },
+  "31004": {
+    "Name": {
+      "zh-CN": "里昂",
+      "en-US": "Lyon",
+      "ja-JP": "リアン",
+      "ko-KR": "리안"
+    }
+  },
+  "31902": {
+    "Name": {
+      "zh-CN": "瑞恩箱子",
+      "en-US": "Ryan's Box",
+      "ja-JP": "ライアンボックス",
+      "ko-KR": "라이언 상자"
+    }
+  },
+  "33208": {
+    "Name": {
+      "zh-CN": "腐蚀水晶_坐标",
+      "en-US": "Corrupted Crystal_Coordinates",
+      "ja-JP": "腐食水晶_座標",
+      "ko-KR": "침식된 수정_좌표"
+    }
+  },
+  "33209": {
+    "Name": {
+      "zh-CN": "生命水晶_坐标",
+      "en-US": "Life Crystal_Coordinates",
+      "ja-JP": "生命水晶_座標",
+      "ko-KR": "생명 수정_좌표"
+    }
+  },
+  "33210": {
+    "Name": {
+      "zh-CN": "元素水晶_坐标",
+      "en-US": "Elemental Crystal_Coordinates",
+      "ja-JP": "元素水晶_座標",
+      "ko-KR": "원소 수정_좌표"
+    }
+  },
+  "33211": {
+    "Name": {
+      "zh-CN": "腐蚀水晶",
+      "en-US": "Corrupted Crystal",
+      "ja-JP": "腐食水晶",
+      "ko-KR": "침식된 수정"
+    }
+  },
+  "33212": {
+    "Name": {
+      "zh-CN": "生命水晶",
+      "en-US": "Life Crystal",
+      "ja-JP": "生命水晶",
+      "ko-KR": "생명 수정"
+    }
+  },
+  "33213": {
+    "Name": {
+      "zh-CN": "元素水晶",
+      "en-US": "Elemental Crystal",
+      "ja-JP": "元素水晶",
+      "ko-KR": "원소 수정"
+    }
+  },
+  "33302": {
+    "Name": {
+      "zh-CN": "边缘之刃",
+      "en-US": "Edgeblade",
+      "ja-JP": "エッジブレード",
+      "ko-KR": "끝자락의 검"
+    }
+  },
+  "33303": {
+    "Name": {
+      "zh-CN": "边缘之刃",
+      "en-US": "Edgeblade",
+      "ja-JP": "エッジブレード",
+      "ko-KR": "끝자락의 검"
+    }
+  },
+  "33306": {
+    "Name": {
+      "zh-CN": "边缘之刃造假1",
+      "en-US": "Edgeblade Fake 1",
+      "ja-JP": "エッジブレード偽造1",
+      "ko-KR": "끝자락의 검 위조1"
+    }
+  },
+  "33307": {
+    "Name": {
+      "zh-CN": "边缘之刃造假2",
+      "en-US": "Edgeblade Fake 2",
+      "ja-JP": "エッジブレード偽造2",
+      "ko-KR": "끝자락의 검 위조2"
+    }
+  },
+  "33404": {
+    "Name": {
+      "zh-CN": "BOSS出生点_坐标",
+      "en-US": "Boss Spawn Point_Coordinates",
+      "ja-JP": "ボススポーン地点_座標",
+      "ko-KR": "보스 탄생 지점_좌표"
+    }
+  },
+  "33501": {
+    "Name": {
+      "zh-CN": "蒸汽口",
+      "en-US": "Steam Vent",
+      "ja-JP": "蒸気口",
+      "ko-KR": "증기 분출구"
+    }
+  },
+  "33502": {
+    "Name": {
+      "zh-CN": "火龙卷",
+      "en-US": "Fire Tornado",
+      "ja-JP": "炎の竜巻",
+      "ko-KR": "화염 회오리"
+    }
+  },
+  "33503": {
+    "Name": {
+      "zh-CN": "远离点",
+      "en-US": "Evasion Point",
+      "ja-JP": "退避ポイント",
+      "ko-KR": "이탈 지점"
+    }
+  },
+  "33504": {
+    "Name": {
+      "zh-CN": "跳跃点",
+      "en-US": "Jump Point",
+      "ja-JP": "ジャンプポイント",
+      "ko-KR": "점프 지점"
+    }
+  },
+  "33505": {
+    "Name": {
+      "zh-CN": "场中标记",
+      "en-US": "Arena Marker",
+      "ja-JP": "フィールドマーカー",
+      "ko-KR": "필드 내 표식"
+    }
+  },
+  "33506": {
+    "Name": {
+      "zh-CN": "矿车",
+      "en-US": "Minecart",
+      "ja-JP": "トロッコ",
+      "ko-KR": "광차"
+    }
+  },
+  "33507": {
+    "Name": {
+      "zh-CN": "场中标记偏移点",
+      "en-US": "Arena Marker Offset",
+      "ja-JP": "フィールドマーカーのオフセットポイント",
+      "ko-KR": "필드 내 표식 오프셋 지점"
+    }
+  },
+  "33514": {
+    "Name": {
+      "zh-CN": "组装点",
+      "en-US": "Assembly Point",
+      "ja-JP": "組み立てポイント",
+      "ko-KR": "조립 지점"
+    }
+  },
+  "33515": {
+    "Name": {
+      "zh-CN": "电能",
+      "en-US": "Electrical Energy",
+      "ja-JP": "電気エネルギー",
+      "ko-KR": "전기 에너지"
+    }
+  },
+  "33516": {
+    "Name": {
+      "zh-CN": "2号零件",
+      "en-US": "Part 2",
+      "ja-JP": "2号パーツ",
+      "ko-KR": "2번 부품"
+    }
+  },
+  "33517": {
+    "Name": {
+      "zh-CN": "3号零件",
+      "en-US": "Part 3",
+      "ja-JP": "3号パーツ",
+      "ko-KR": "3번 부품"
+    }
+  },
+  "33518": {
+    "Name": {
+      "zh-CN": "炮台",
+      "en-US": "Turret",
+      "ja-JP": "砲台",
+      "ko-KR": "포탑"
+    }
+  },
+  "33519": {
+    "Name": {
+      "zh-CN": "转阶段火龙卷",
+      "en-US": "Phase Transition Fire Tornado",
+      "ja-JP": "フェイズ移行・炎の竜巻",
+      "ko-KR": "단계 전환 화염 회오리"
+    }
+  },
+  "33520": {
+    "Name": {
+      "zh-CN": "转阶段吸收子弹点",
+      "en-US": "Phase Transition Bullet Absorption Point",
+      "ja-JP": "フェイズ移行・弾丸吸収ポイント",
+      "ko-KR": "단계 전환 탄환 흡수 지점"
+    }
+  },
+  "33533": {
+    "Name": {
+      "zh-CN": "炮台底座",
+      "en-US": "Turret Base",
+      "ja-JP": "砲台の台座",
+      "ko-KR": "포탑 받침대"
+    }
+  },
+  "33534": {
+    "Name": {
+      "zh-CN": "红水晶",
+      "en-US": "Ruby",
+      "ja-JP": "赤水晶",
+      "ko-KR": "홍수정"
+    }
+  },
+  "33535": {
+    "Name": {
+      "zh-CN": "原爆点",
+      "en-US": "Explosion Point",
+      "ja-JP": "爆心地",
+      "ko-KR": "폭심 지점"
+    }
+  },
+  "33536": {
+    "Name": {
+      "zh-CN": "堵口蒸汽",
+      "en-US": "Blocked Steam",
+      "ja-JP": "蒸気口を塞ぐ",
+      "ko-KR": "막힌 분출구의 증기"
+    }
+  },
+  "33537": {
+    "Name": {
+      "zh-CN": "炮台",
+      "en-US": "Turret",
+      "ja-JP": "砲台",
+      "ko-KR": "포탑"
+    }
+  },
+  "33538": {
+    "Name": {
+      "zh-CN": "爆炸",
+      "en-US": "Explosion",
+      "ja-JP": "爆発",
+      "ko-KR": "폭발"
+    }
+  },
+  "33539": {
+    "Name": {
+      "zh-CN": "道中扩散蒸汽",
+      "en-US": "Mid-Path Diffusing Steam",
+      "ja-JP": "道中の拡散蒸気",
+      "ko-KR": "구간 확산 증기"
+    }
+  },
+  "33540": {
+    "Name": {
+      "zh-CN": "道中矩形蒸汽陷阱",
+      "en-US": "Mid-Path Rectangular Steam Trap",
+      "ja-JP": "道中の長方形蒸気トラップ",
+      "ko-KR": "구간 직사각형 증기 트랩"
+    }
+  },
+  "33543": {
+    "Name": {
+      "zh-CN": "红水晶",
+      "en-US": "Ruby",
+      "ja-JP": "赤水晶",
+      "ko-KR": "홍수정"
+    }
+  },
+  "33544": {
+    "Name": {
+      "zh-CN": "火龙卷假子弹",
+      "en-US": "Fire Tornado Fake Bullet",
+      "ja-JP": "炎の竜巻の偽弾丸",
+      "ko-KR": "화염 회오리 가짜 탄환"
+    }
+  },
+  "33545": {
+    "Name": {
+      "zh-CN": "副本路线指引",
+      "en-US": "Dungeon Route Guide",
+      "ja-JP": "ダンジョンルートガイド",
+      "ko-KR": "던전 경로 안내"
+    }
+  },
+  "33546": {
+    "Name": {
+      "zh-CN": "普通难度以下炸团高伤害",
+      "en-US": "Team Wipe Damage Below Normal Difficulty",
+      "ja-JP": "ノーマル難易度以下の全滅高ダメージ",
+      "ko-KR": "노멀 난이도 이하 전멸급 고 대미지"
+    }
+  },
+  "33547": {
+    "Name": {
+      "zh-CN": "工厂废墟",
+      "en-US": "Factory Ruins",
+      "ja-JP": "工場の廃墟",
+      "ko-KR": "공장 폐허"
+    }
+  },
+  "33548": {
+    "Name": {
+      "zh-CN": "工厂废墟",
+      "en-US": "Factory Ruins",
+      "ja-JP": "工場の廃墟",
+      "ko-KR": "공장 폐허"
+    }
+  },
+  "33549": {
+    "Name": {
+      "zh-CN": "虹视爆炸",
+      "en-US": "Prismatic Explosion",
+      "ja-JP": "虹視の爆発",
+      "ko-KR": "무지개 폭발"
+    }
+  },
+  "33702": {
+    "Name": {
+      "zh-CN": "蒂娜·虚蚀心像(分身)",
+      "en-US": "Tina - Void Reverie (Clone)",
+      "ja-JP": "ティナ・虚蝕心像（分身）",
+      "ko-KR": "티나・허식의 심상(분신)"
+    }
+  },
+  "33799": {
+    "Name": {
+      "zh-CN": "蒂娜站坑位",
+      "en-US": "Tina Standing Position",
+      "ja-JP": "ティナの立ち位置",
+      "ko-KR": "티나 위치 고정 자리"
+    }
+  },
+  "33802": {
+    "Name": {
+      "zh-CN": "切割风球",
+      "en-US": "Rending Gale Orb",
+      "ja-JP": "切断の風のオーブ",
+      "ko-KR": "바람 구체 절단"
+    }
+  },
+  "33904": {
+    "Name": {
+      "zh-CN": "元能塔",
+      "en-US": "Engram Tower",
+      "ja-JP": "マトリックスタワー",
+      "ko-KR": "원소 에너지 탑"
+    }
+  },
+  "33905": {
+    "Name": {
+      "zh-CN": "元能塔",
+      "en-US": "Engram Tower",
+      "ja-JP": "マトリックスタワー",
+      "ko-KR": "원소 에너지 탑"
+    }
+  },
+  "33906": {
+    "Name": {
+      "zh-CN": "浮游炮",
+      "en-US": "Hovering Cannon",
+      "ja-JP": "浮遊砲",
+      "ko-KR": "부유형 포대"
+    }
+  },
+  "33907": {
+    "Name": {
+      "zh-CN": "浮游炮",
+      "en-US": "Hovering Cannon",
+      "ja-JP": "浮遊砲",
+      "ko-KR": "부유형 포대"
+    }
+  },
+  "33908": {
+    "Name": {
+      "zh-CN": "冲锋分身(左侧光剑）",
+      "en-US": "Charging Clone (Left Light Sword)",
+      "ja-JP": "突進分身（左側光剣）",
+      "ko-KR": "돌진 분신(좌측 광검)"
+    }
+  },
+  "33909": {
+    "Name": {
+      "zh-CN": "冲锋分身（右侧光剑）",
+      "en-US": "Charging Clone (Right Light Sword)",
+      "ja-JP": "突進分身（右側光剣）",
+      "ko-KR": "돌진 분신(우측 광검)"
+    }
+  },
+  "33920": {
+    "Name": {
+      "zh-CN": "浮游炮",
+      "en-US": "Hovering Cannon",
+      "ja-JP": "浮遊砲",
+      "ko-KR": "부유형 포대"
+    }
+  },
+  "33921": {
+    "Name": {
+      "zh-CN": "冲锋分身(瞬间左侧光剑）",
+      "en-US": "Charging Clone (Instant Left Light Sword)",
+      "ja-JP": "突進分身（瞬間左側光剣）",
+      "ko-KR": "돌진 분신(즉시 좌측 광검)"
+    }
+  },
+  "33922": {
+    "Name": {
+      "zh-CN": "冲锋分身(瞬间右侧光剑）",
+      "en-US": "Charging Clone (Instant Right Light Sword)",
+      "ja-JP": "突進分身（瞬間右側光剣）",
+      "ko-KR": "돌진 분신(즉시 우측 광검)"
+    }
+  },
+  "35004": {
+    "Name": {
+      "zh-CN": "主战机像99型",
+      "en-US": "Main Battle Mech 99",
+      "ja-JP": "メインゴーレム99型",
+      "ko-KR": "전장 골렘 99형"
+    }
+  },
+  "35006": {
+    "Name": {
+      "zh-CN": "副战机像03型",
+      "en-US": "Sub Fighter Type 03",
+      "ja-JP": "サブゴーレム03型",
+      "ko-KR": "서브 전투 골렘 03형"
+    }
+  },
+  "35007": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "35011": {
+    "Name": {
+      "zh-CN": "主战机像99型",
+      "en-US": "Main Battle Mech 99",
+      "ja-JP": "メインゴーレム99型",
+      "ko-KR": "전장 골렘 99형"
+    }
+  },
+  "35012": {
+    "Name": {
+      "zh-CN": "副战机像03型",
+      "en-US": "Sub Fighter Type 03",
+      "ja-JP": "サブゴーレム03型",
+      "ko-KR": "서브 전투 골렘 03형"
+    }
+  },
+  "35013": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "35014": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "35055": {
+    "Name": {
+      "zh-CN": "主战机像99型",
+      "en-US": "Main Battle Mech 99",
+      "ja-JP": "メインゴーレム99型",
+      "ko-KR": "전장 골렘 99형"
+    }
+  },
+  "35056": {
+    "Name": {
+      "zh-CN": "副战机像03型",
+      "en-US": "Sub Fighter Type 03",
+      "ja-JP": "サブゴーレム03型",
+      "ko-KR": "서브 전투 골렘 03형"
+    }
+  },
+  "35057": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "35105": {
+    "Name": {
+      "zh-CN": "会议范围",
+      "en-US": "Meeting Scope",
+      "ja-JP": "会議範囲",
+      "ko-KR": "회의 범위"
+    }
+  },
+  "35106": {
+    "Name": {
+      "zh-CN": "聚光灯",
+      "en-US": "Spotlight",
+      "ja-JP": "スポットライト",
+      "ko-KR": "스포트라이트"
+    }
+  },
+  "35108": {
+    "Name": {
+      "zh-CN": "沙丘顽石目的地",
+      "en-US": "Dune Rock Destination",
+      "ja-JP": "砂丘の岩の目的地",
+      "ko-KR": "사구 완석 목적지"
+    }
+  },
+  "35200": {
+    "Name": {
+      "zh-CN": "游戏范围",
+      "en-US": "Game Scope",
+      "ja-JP": "ゲーム範囲",
+      "ko-KR": "게임 범위"
+    }
+  },
+  "35201": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "35202": {
+    "Name": {
+      "zh-CN": "排球少年艾露娜",
+      "en-US": "Airona the Volleyball Ace",
+      "ja-JP": "バレーボール少年アルーナ",
+      "ko-KR": "배구 소년 아이로나"
+    }
+  },
+  "35203": {
+    "Name": {
+      "zh-CN": "顺时针旋转3圈眼球",
+      "en-US": "Clockwise 3-Rotation Eyeball",
+      "ja-JP": "時計回りに3周する目玉",
+      "ko-KR": "안구를 시계 방향으로 3바퀴 회전"
+    }
+  },
+  "35204": {
+    "Name": {
+      "zh-CN": "逆时针旋转3圈眼球",
+      "en-US": "Counter-Clockwise 3-Rotation Eyeball",
+      "ja-JP": "反時計回りに3周する目玉",
+      "ko-KR": "안구를 반시계 방향으로 3바퀴 회전"
+    }
+  },
+  "35205": {
+    "Name": {
+      "zh-CN": "平移5米速度眼球",
+      "en-US": "5m/s Panning Eyeball",
+      "ja-JP": "平行移動5メートルの速度の目玉",
+      "ko-KR": "안구를 5m/s로 평행 이동"
+    }
+  },
+  "35206": {
+    "Name": {
+      "zh-CN": "平移10米速度眼球",
+      "en-US": "10m/s Panning Eyeball",
+      "ja-JP": "平行移動10メートルの速度の目玉",
+      "ko-KR": "안구를 10m/s로 평행 이동"
+    }
+  },
+  "35211": {
+    "Name": {
+      "zh-CN": "大伊",
+      "en-US": "Dai",
+      "ja-JP": "ビッグ・イー",
+      "ko-KR": "큰 이짱"
+    }
+  },
+  "35212": {
+    "Name": {
+      "zh-CN": "矩形20米空气墙",
+      "en-US": "Rectangular 20m Invisible Wall",
+      "ja-JP": "長方形20メートルの見えない壁",
+      "ko-KR": "직사각형 20m 공기 벽"
+    }
+  },
+  "35213": {
+    "Name": {
+      "zh-CN": "环形15米空气墙",
+      "en-US": "Ring 15m Invisible Wall",
+      "ja-JP": "円形15メートルの見えない壁",
+      "ko-KR": "원형 15m 공기 벽"
+    }
+  },
+  "35214": {
+    "Name": {
+      "zh-CN": "环形30米空气墙",
+      "en-US": "Ring 30m Invisible Wall",
+      "ja-JP": "円形30メートルの見えない壁",
+      "ko-KR": "원형 15m 공기 벽"
+    }
+  },
+  "35215": {
+    "Name": {
+      "zh-CN": "大风车眼球",
+      "en-US": "Wheel Eye",
+      "ja-JP": "暴風の目",
+      "ko-KR": "큰 풍차의 눈"
+    }
+  },
+  "35216": {
+    "Name": {
+      "zh-CN": "大风车眼球（静止）",
+      "en-US": "Wheel Eye (Stationary)",
+      "ja-JP": "暴風の目（静止）",
+      "ko-KR": "큰 풍차의 눈(정지)"
+    }
+  },
+  "40021": {
+    "Name": {
+      "zh-CN": "弩箭哥布林队长",
+      "en-US": "Goblin Crossbow Captain",
+      "ja-JP": "ボウガンゴブリン隊長",
+      "ko-KR": "석궁 고블린 대장"
+    }
+  },
+  "40024": {
+    "Name": {
+      "zh-CN": "弩箭哥布林",
+      "en-US": "Goblin Crossbow",
+      "ja-JP": "ボウガンゴブリン",
+      "ko-KR": "석궁 고블린"
+    }
+  },
+  "40060": {
+    "Name": {
+      "zh-CN": "小号蟹蛛宝宝",
+      "en-US": "Small Arachnocrab Baby",
+      "ja-JP": "カニクモＳベビー",
+      "ko-KR": "작은 거미게 아기"
+    }
+  },
+  "40074": {
+    "Name": {
+      "zh-CN": "风哥布林巫师",
+      "en-US": "Wind Goblin Mage",
+      "ja-JP": "風のエルダーゴブリン",
+      "ko-KR": "바람 고블린 샤먼"
+    }
+  },
+  "40075": {
+    "Name": {
+      "zh-CN": "森哥布林巫师",
+      "en-US": "Forest Goblin Mage",
+      "ja-JP": "森のエルダーゴブリン",
+      "ko-KR": "숲 고블린 샤먼"
+    }
+  },
+  "40076": {
+    "Name": {
+      "zh-CN": "火哥布林巫师",
+      "en-US": "Fire Goblin Mage",
+      "ja-JP": "炎のエルダーゴブリン",
+      "ko-KR": "불 고블린 샤먼"
+    }
+  },
+  "40077": {
+    "Name": {
+      "zh-CN": "弩箭哥布林",
+      "en-US": "Goblin Crossbow",
+      "ja-JP": "ボウガンゴブリン",
+      "ko-KR": "석궁 고블린"
+    }
+  },
+  "40078": {
+    "Name": {
+      "zh-CN": "棒槌哥布林",
+      "en-US": "Goblin Cudgel",
+      "ja-JP": "ゴブリングロウ",
+      "ko-KR": "몽둥이 고블린"
+    }
+  },
+  "40084": {
+    "Name": {
+      "zh-CN": "大号蟹蛛宝宝",
+      "en-US": "Large Arachnocrab Baby",
+      "ja-JP": "カニクモＬベビー",
+      "ko-KR": "큰 거미게 아기"
+    }
+  },
+  "40085": {
+    "Name": {
+      "zh-CN": "普通蟹蛛宝宝",
+      "en-US": "Ordinary Arachnocrab Baby",
+      "ja-JP": "普通カニクモベビー",
+      "ko-KR": "일반 거미게 아기"
+    }
+  },
+  "40086": {
+    "Name": {
+      "zh-CN": "硬壳蟹蛛宝宝",
+      "en-US": "Hard Shell Arachnocrab Baby",
+      "ja-JP": "硬殻カニクモベビー",
+      "ko-KR": "단단한 껍질 거미게 아기"
+    }
+  },
+  "40087": {
+    "Name": {
+      "zh-CN": "毒液蟹蛛宝宝",
+      "en-US": "Venom Arachnocrab Baby",
+      "ja-JP": "毒液カニクモベビー",
+      "ko-KR": "독 거미게 아기"
+    }
+  },
+  "40088": {
+    "Name": {
+      "zh-CN": "多汁蟹蛛宝宝",
+      "en-US": "Juicy Arachnocrab Baby",
+      "ja-JP": "ジューシーカニクモベビー",
+      "ko-KR": "다즙 거미게 아기"
+    }
+  },
+  "40089": {
+    "Name": {
+      "zh-CN": "快脚蟹蛛宝宝",
+      "en-US": "Fast-footed Arachnocrab Baby",
+      "ja-JP": "俊足カニクモベビー",
+      "ko-KR": "발 빠른 거미게 아기"
+    }
+  },
+  "40090": {
+    "Name": {
+      "zh-CN": "火哥布林巫师-灵体",
+      "en-US": "Fire Goblin Mage - Spirit",
+      "ja-JP": "炎のエルダーゴブリン-霊体",
+      "ko-KR": "불 고블린 샤먼 - 영체"
+    }
+  },
+  "40091": {
+    "Name": {
+      "zh-CN": "风哥布林巫师-灵体",
+      "en-US": "Wind Goblin Mage - Spirit",
+      "ja-JP": "エルダーゴブリン-霊体",
+      "ko-KR": "바람 고블린 샤먼 - 영체"
+    }
+  },
+  "40092": {
+    "Name": {
+      "zh-CN": "森哥布林巫师-灵体",
+      "en-US": "Forest Goblin Mage - Spirit",
+      "ja-JP": "森のエルダーゴブリン-霊体",
+      "ko-KR": "숲 고블린 샤먼 - 영체"
+    }
+  },
+  "40094": {
+    "Name": {
+      "zh-CN": "普通蟹蛛宝宝-生态",
+      "en-US": "Common Arachnocrab Baby - Ecology",
+      "ja-JP": "普通カニクモベビー-生態",
+      "ko-KR": "일반 거미게 아기 - 생태"
+    }
+  },
+  "40095": {
+    "Name": {
+      "zh-CN": "硬壳蟹蛛宝宝-生态",
+      "en-US": "Hard Shell Arachnocrab Baby - Ecology",
+      "ja-JP": "硬殻カニクモベビー-生態",
+      "ko-KR": "단단한 껍질 거미게 아기 - 생태"
+    }
+  },
+  "40096": {
+    "Name": {
+      "zh-CN": "毒液蟹蛛宝宝-生态",
+      "en-US": "Venom Arachnocrab Baby - Ecology",
+      "ja-JP": "毒液カニクモベビー-生態",
+      "ko-KR": "독 거미게 아기 - 생태"
+    }
+  },
+  "40311": {
+    "Name": {
+      "zh-CN": "内卡利",
+      "en-US": "Necalli",
+      "ja-JP": "ネイカリ",
+      "ko-KR": "네칼리"
+    }
+  },
+  "40325": {
+    "Name": {
+      "zh-CN": "隐身怪",
+      "en-US": "Invisible Monster",
+      "ja-JP": "ハイドモンスター",
+      "ko-KR": "은신 몬스터"
+    }
+  },
+  "40327": {
+    "Name": {
+      "zh-CN": "奎宁分身",
+      "en-US": "Quinine Doppelganger",
+      "ja-JP": "キニーンの分身",
+      "ko-KR": "퀴닌 분신"
+    }
+  },
+  "40335": {
+    "Name": {
+      "zh-CN": "嫌疑人",
+      "en-US": "Suspect",
+      "ja-JP": "容疑者",
+      "ko-KR": "용의자"
+    }
+  },
+  "40336": {
+    "Name": {
+      "zh-CN": "中年女人",
+      "en-US": "Middle-aged Woman",
+      "ja-JP": "中年女性",
+      "ko-KR": "중년 여성"
+    }
+  },
+  "40337": {
+    "Name": {
+      "zh-CN": "嫌疑人",
+      "en-US": "Suspect",
+      "ja-JP": "容疑者",
+      "ko-KR": "용의자"
+    }
+  },
+  "40339": {
+    "Name": {
+      "zh-CN": "嫌疑人",
+      "en-US": "Suspect",
+      "ja-JP": "容疑者",
+      "ko-KR": "용의자"
+    }
+  },
+  "40396": {
+    "Name": {
+      "zh-CN": "魂池",
+      "en-US": "Soul Pool",
+      "ja-JP": "魂の泉",
+      "ko-KR": "비운의 못"
+    }
+  },
+  "40397": {
+    "Name": {
+      "zh-CN": "灵魂分裂",
+      "en-US": "Soul Split",
+      "ja-JP": "魂分裂",
+      "ko-KR": "영혼 분열"
+    }
+  },
+  "40398": {
+    "Name": {
+      "zh-CN": "卡尼曼缚魂者",
+      "en-US": "Kanamia Tribe Soul Binder",
+      "ja-JP": "カナミアソウルバインダー",
+      "ko-KR": "카나미아 영혼 속박자"
+    }
+  },
+  "40399": {
+    "Name": {
+      "zh-CN": "卡尼曼猎魂者",
+      "en-US": "Kanamia Tribe Soul Hunter",
+      "ja-JP": "カナミアソウルハンター",
+      "ko-KR": "카나미아 영혼 사냥자"
+    }
+  },
+  "40401": {
+    "Name": {
+      "zh-CN": "魂池<灵魂分裂>",
+      "en-US": "Soul Pool <Soul Split>",
+      "ja-JP": "魂の泉<魂分裂>",
+      "ko-KR": "비운의 못<영혼 분열>"
+    }
+  },
+  "40402": {
+    "Name": {
+      "zh-CN": "场景灵魂收割",
+      "en-US": "Scene Soul Reaper",
+      "ja-JP": "マップソウルリープ",
+      "ko-KR": "필드 영혼 수확"
+    }
+  },
+  "40405": {
+    "Name": {
+      "zh-CN": "魂池",
+      "en-US": "Soul Pool",
+      "ja-JP": "魂の泉",
+      "ko-KR": "비운의 못"
+    }
+  },
+  "40406": {
+    "Name": {
+      "zh-CN": "卡尼曼缚魂者",
+      "en-US": "Kanamia Tribe Soul Binder",
+      "ja-JP": "カナミアソウルバインダー",
+      "ko-KR": "카나미아 영혼 속박자"
+    }
+  },
+  "40407": {
+    "Name": {
+      "zh-CN": "卡尼曼猎魂者",
+      "en-US": "Kanamia Tribe Soul Hunter",
+      "ja-JP": "カナミアソウルハンター",
+      "ko-KR": "카나미아 영혼 사냥자"
+    }
+  },
+  "40511": {
+    "Name": {
+      "zh-CN": "图腾",
+      "en-US": "Totem",
+      "ja-JP": "トーテム",
+      "ko-KR": "토템"
+    }
+  },
+  "40512": {
+    "Name": {
+      "zh-CN": "图腾",
+      "en-US": "Totem",
+      "ja-JP": "トーテム",
+      "ko-KR": "토템"
+    }
+  },
+  "60900": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "60901": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "60902": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "60903": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "60904": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "60905": {
+    "Name": {
+      "zh-CN": "减速蜘蛛雷",
+      "en-US": "Slow Spider Mine",
+      "ja-JP": "スロウサンダースパイダー",
+      "ko-KR": "둔화 거미 지뢰"
+    }
+  },
+  "60906": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "60907": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "61200": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷（折返）",
+      "en-US": "Self-Destructing Spider Mine (Return)",
+      "ja-JP": "自爆サンダースパイダー（折返し）",
+      "ko-KR": "자폭 거미 지뢰(리턴)"
+    }
+  },
+  "61201": {
+    "Name": {
+      "zh-CN": "滚石",
+      "en-US": "Rolling Stone",
+      "ja-JP": "転石",
+      "ko-KR": "구르는 바위"
+    }
+  },
+  "61203": {
+    "Name": {
+      "zh-CN": "红绿灯木头人",
+      "en-US": "Traffic Light Wooden Dummy",
+      "ja-JP": "だるまさんが転んだ",
+      "ko-KR": "신호등 목각인형"
+    }
+  },
+  "61204": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷（三角）",
+      "en-US": "Self-Destructing Spider Mine (Triangle)",
+      "ja-JP": "自爆サンダースパイダー（3角）",
+      "ko-KR": "자폭 거미 지뢰(삼각형)"
+    }
+  },
+  "61205": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷（正方形）",
+      "en-US": "Self-Destructing Spider Mine (Square)",
+      "ja-JP": "自爆サンダースパイダー（正方形）",
+      "ko-KR": "자폭 거미 지뢰(정사각형)"
+    }
+  },
+  "61206": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷（20度）",
+      "en-US": "Self-Destructing Spider Mine (20 Degrees)",
+      "ja-JP": "自爆サンダースパイダー（20度）",
+      "ko-KR": "자폭 거미 지뢰(20도)"
+    }
+  },
+  "61900": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "61901": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "61902": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "61903": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "61904": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "61905": {
+    "Name": {
+      "zh-CN": "减速蜘蛛雷",
+      "en-US": "Slow Spider Mine",
+      "ja-JP": "スロウサンダースパイダー",
+      "ko-KR": "둔화 거미 지뢰"
+    }
+  },
+  "61906": {
+    "Name": {
+      "zh-CN": "自爆蜘蛛雷",
+      "en-US": "Self-Destruct Spider Mine",
+      "ja-JP": "自爆サンダースパイダー",
+      "ko-KR": "자폭 거미 지뢰"
+    }
+  },
+  "61907": {
+    "Name": {
+      "zh-CN": "冷冻蜘蛛雷",
+      "en-US": "Frozen Spider Mine",
+      "ja-JP": "凍結サンダースパイダー",
+      "ko-KR": "냉동 거미 지뢰"
+    }
+  },
+  "61908": {
+    "Name": {
+      "zh-CN": "追踪蜘蛛雷",
+      "en-US": "Homing Spider Mine",
+      "ja-JP": "追跡サンダースパイダー",
+      "ko-KR": "추적 거미 지뢰"
+    }
+  },
+  "62000": {
+    "Name": {
+      "zh-CN": "滚石机关",
+      "en-US": "Rolling Boulder Trap",
+      "ja-JP": "転石トラップ",
+      "ko-KR": "구르는 바위 장치"
+    }
+  },
+  "62100": {
+    "Name": {
+      "zh-CN": "浮空炸弹",
+      "en-US": "Floating Bombs",
+      "ja-JP": "浮遊爆弾",
+      "ko-KR": "부유 폭탄"
+    }
+  },
+  "69001": {
+    "Name": {
+      "zh-CN": "弩箭哥布林-跑酷弩箭陷阱",
+      "en-US": "Goblin Crossbow - Parkour Crossbow Trap",
+      "ja-JP": "ボウガンゴブリン-パルクールボウガントラップ",
+      "ko-KR": "석궁 고블린 - 파쿠르 석궁 트랩"
+    }
+  },
+  "69002": {
+    "Name": {
+      "zh-CN": "哥布林巫师-跑酷水球陷阱",
+      "en-US": "Goblin Mage - Parkour Water Balloon Trap",
+      "ja-JP": "エルダーゴブリン-パルクールウォーターボールトラップ",
+      "ko-KR": "고블린 샤먼 - 파쿠르 물풍선 트랩"
+    }
+  },
+  "69003": {
+    "Name": {
+      "zh-CN": "弩箭哥布林-跑酷疯狂弩箭陷阱",
+      "en-US": "Goblin Crossbow - Parkour Crazy Crossbow Trap",
+      "ja-JP": "ボウガンゴブリン-パルクールマッドボウガントラップ",
+      "ko-KR": "석궁 고블린 - 파쿠르 광란의 석궁 트랩"
+    }
+  },
+  "69004": {
+    "Name": {
+      "zh-CN": "弩箭哥布林-跑酷箭雨陷阱",
+      "en-US": "Goblin Crossbow - Parkour Arrow Rain Trap",
+      "ja-JP": "ボウガンゴブリン-パルクールアローレイントラップ",
+      "ko-KR": "석궁 고블린 - 파쿠르 화살비 트랩"
+    }
+  },
+  "69005": {
+    "Name": {
+      "zh-CN": "弩箭哥布林-跑酷箭雨陷阱2",
+      "en-US": "Goblin Crossbow - Parkour Arrow Rain Trap 2",
+      "ja-JP": "ボウガンゴブリン-パルクールアローレイントラップ2",
+      "ko-KR": "석궁 고블린 - 파쿠르 화살비 트랩2"
+    }
+  },
+  "69006": {
+    "Name": {
+      "zh-CN": "追踪蜘蛛雷",
+      "en-US": "Homing Spider Mine",
+      "ja-JP": "追跡サンダースパイダー",
+      "ko-KR": "추적 거미 지뢰"
+    }
+  },
+  "69010": {
+    "Name": {
+      "zh-CN": "折返蜘蛛雷(友方-测试用)",
+      "en-US": "Rebound Spider Mine (Allied - Test)",
+      "ja-JP": "サンダースパイダー折り返し(味方-テスト用)",
+      "ko-KR": "왕복 거미 지뢰(아군 - 테스트용)"
+    }
+  },
+  "69011": {
+    "Name": {
+      "zh-CN": "折返蜘蛛雷(中立-测试用)",
+      "en-US": "Rebound Spider Mine (Neutral - Test)",
+      "ja-JP": "サンダースパイダー折り返し(中立-テスト用)",
+      "ko-KR": "왕복 거미 지뢰(중립 - 테스트용)"
+    }
+  },
+  "69012": {
+    "Name": {
+      "zh-CN": "折返蜘蛛雷(敌人-测试用)",
+      "en-US": "Rebound Spider Mine (Enemy - Test)",
+      "ja-JP": "サンダースパイダー折り返し(エネミー-テスト用)",
+      "ko-KR": "왕복 거미 지뢰(적군 - 테스트용)"
+    }
+  },
+  "69101": {
+    "Name": {
+      "zh-CN": "雪人",
+      "en-US": "Snowman",
+      "ja-JP": "雪だるま",
+      "ko-KR": "눈사람"
+    }
+  },
+  "69104": {
+    "Name": {
+      "zh-CN": "仪仗队娜宝-测试",
+      "en-US": "Ritual Team Nappo (Test)",
+      "ja-JP": "儀仗隊ナッポ-テスト",
+      "ko-KR": "의장대 나뽀 - 테스트"
+    }
+  },
+  "69214": {
+    "Name": {
+      "zh-CN": "恶疫之种-1阶段大",
+      "en-US": "Seed of Malice - Phase 1 (Large)",
+      "ja-JP": "汚染源-フェイズ1大",
+      "ko-KR": "역병의 씨앗 - 1단계 큼"
+    }
+  },
+  "69215": {
+    "Name": {
+      "zh-CN": "恶疫之种-2阶段大",
+      "en-US": "Seed of Malice - Phase 2 (Large)",
+      "ja-JP": "汚染源-フェイズ2大",
+      "ko-KR": "역병의 씨앗 - 2단계 큼"
+    }
+  },
+  "69216": {
+    "Name": {
+      "zh-CN": "恶疫之种-2阶段小",
+      "en-US": "Seed of Malice - Phase 2 (Small)",
+      "ja-JP": "汚染源-フェイズ2小",
+      "ko-KR": "역병의 씨앗 - 2단계 작음"
+    }
+  },
+  "69217": {
+    "Name": {
+      "zh-CN": "毒雾",
+      "en-US": "Toxic mist",
+      "ja-JP": "毒霧",
+      "ko-KR": "독안개"
+    }
+  },
+  "69220": {
+    "Name": {
+      "zh-CN": "毒池空气墙",
+      "en-US": "Poison Pool Barrier",
+      "ja-JP": "毒沼エアウォール",
+      "ko-KR": "독늪 공기벽"
+    }
+  },
+  "69230": {
+    "Name": {
+      "zh-CN": "毒雾",
+      "en-US": "Toxic mist",
+      "ja-JP": "毒霧",
+      "ko-KR": "독안개"
+    }
+  },
+  "69231": {
+    "Name": {
+      "zh-CN": "毒珠",
+      "en-US": "Poison Orb",
+      "ja-JP": "ベノムボール",
+      "ko-KR": "독구슬"
+    }
+  },
+  "69232": {
+    "Name": {
+      "zh-CN": "坠石",
+      "en-US": "Falling Rocks",
+      "ja-JP": "落石",
+      "ko-KR": "낙석"
+    }
+  },
+  "69233": {
+    "Name": {
+      "zh-CN": "毒刃",
+      "en-US": "Poison Blade",
+      "ja-JP": "ベノムブレード",
+      "ko-KR": "독 칼날"
+    }
+  },
+  "70502": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "70503": {
+    "Name": {
+      "zh-CN": "监视者",
+      "en-US": "Watcher",
+      "ja-JP": "監視者",
+      "ko-KR": "감시자"
+    }
+  },
+  "81004": {
+    "Name": {
+      "zh-CN": "虚蚀偷袭者",
+      "en-US": "Void Ambusher",
+      "ja-JP": "虚蝕レイダー",
+      "ko-KR": "허무의 침식 습격자"
+    }
+  },
+  "81005": {
+    "Name": {
+      "zh-CN": "光域指针",
+      "en-US": "Illuminator",
+      "ja-JP": "光域",
+      "ko-KR": "빛 영역 시곗바늘"
+    }
+  },
+  "81006": {
+    "Name": {
+      "zh-CN": "开场光域指针",
+      "en-US": "Opening Illuminator",
+      "ja-JP": "オープニング光域",
+      "ko-KR": "시작 필드 빛 영역 시곗바늘"
+    }
+  },
+  "81014": {
+    "Name": {
+      "zh-CN": "虚蚀偷袭者",
+      "en-US": "Void Ambusher",
+      "ja-JP": "虚蝕レイダー",
+      "ko-KR": "허무의 침식 습격자"
+    }
+  },
+  "81020": {
+    "Name": {
+      "zh-CN": "虚蚀·普通哥布林",
+      "en-US": "Void Corruption: Goblin",
+      "ja-JP": "虚蝕・ゴブリン",
+      "ko-KR": "허무의 침식・일반 고블린"
+    }
+  },
+  "81021": {
+    "Name": {
+      "zh-CN": "光域指针",
+      "en-US": "Illuminator",
+      "ja-JP": "光域",
+      "ko-KR": "빛 영역 시곗바늘"
+    }
+  },
+  "81022": {
+    "Name": {
+      "zh-CN": "虚蚀·普通哥布林",
+      "en-US": "Void Corruption: Goblin",
+      "ja-JP": "虚蝕・ゴブリン",
+      "ko-KR": "허무의 침식・일반 고블린"
+    }
+  },
+  "81023": {
+    "Name": {
+      "zh-CN": "虚蚀·弩箭哥布林",
+      "en-US": "Void Corruption: Goblin Crossbow",
+      "ja-JP": "虚蝕・ボウガンゴブリン",
+      "ko-KR": "허무의 침식・석궁 고블린"
+    }
+  },
+  "81024": {
+    "Name": {
+      "zh-CN": "虚蚀·剑盾哥布林",
+      "en-US": "Void Corruption: Goblin Swords",
+      "ja-JP": "虚蝕・ゴブリンナイト",
+      "ko-KR": "허무의 침식・검방패 고블린"
+    }
+  },
+  "81025": {
+    "Name": {
+      "zh-CN": "虚蚀·巫妖哥布林",
+      "en-US": "Void Goblin Lich",
+      "ja-JP": "虚蝕・ゴブリンリッチ",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "81026": {
+    "Name": {
+      "zh-CN": "虚蚀·巫师哥布林",
+      "en-US": "Void Corruption: Goblin Wizard",
+      "ja-JP": "虚蝕・エルダーゴブリン",
+      "ko-KR": "허무의 침식・샤먼 고블린"
+    }
+  },
+  "81028": {
+    "Name": {
+      "zh-CN": "光芒水晶",
+      "en-US": "Crystal of Light",
+      "ja-JP": "光域",
+      "ko-KR": "빛살 수정"
+    }
+  },
+  "81030": {
+    "Name": {
+      "zh-CN": "虚影哥布林",
+      "en-US": "Phantom Goblin",
+      "ja-JP": "虚影ゴブリン",
+      "ko-KR": "허상 고블린"
+    }
+  },
+  "81031": {
+    "Name": {
+      "zh-CN": "裂隙",
+      "en-US": "Rift",
+      "ja-JP": "裂け目",
+      "ko-KR": "균열"
+    }
+  },
+  "81033": {
+    "Name": {
+      "zh-CN": "暗耀水晶",
+      "en-US": "Dark Crystal",
+      "ja-JP": "闇の水晶",
+      "ko-KR": "어둠의 수정"
+    }
+  },
+  "81034": {
+    "Name": {
+      "zh-CN": "虚蚀偷袭者",
+      "en-US": "Void Ambusher",
+      "ja-JP": "虚蝕レイダー",
+      "ko-KR": "허무의 침식 습격자"
+    }
+  },
+  "81102": {
+    "Name": {
+      "zh-CN": "小伊（随机撞人）",
+      "en-US": "Ee-chan (Random Collision)",
+      "ja-JP": "イー（ランダムで体当たり）",
+      "ko-KR": "이짱(랜덤 충돌)"
+    }
+  },
+  "81103": {
+    "Name": {
+      "zh-CN": "小伊（列队撞人）",
+      "en-US": "Ee-chan (Formation Collision)",
+      "ja-JP": "イー（整列して体当たり）",
+      "ko-KR": "이짱(대열 충돌)"
+    }
+  },
+  "81105": {
+    "Name": {
+      "zh-CN": "小伊（连线）",
+      "en-US": "Ee-chan (Line Connection)",
+      "ja-JP": "イー（接続）",
+      "ko-KR": "이짱(연결)"
+    }
+  },
+  "81106": {
+    "Name": {
+      "zh-CN": "地面泡泡",
+      "en-US": "Ground Bubble",
+      "ja-JP": "地面の泡",
+      "ko-KR": "지면 버블"
+    }
+  },
+  "81107": {
+    "Name": {
+      "zh-CN": "吃豆人",
+      "en-US": "Pac-Man",
+      "ja-JP": "パクパクマン",
+      "ko-KR": "팩맨"
+    }
+  },
+  "81108": {
+    "Name": {
+      "zh-CN": "豆豆",
+      "en-US": "Bean",
+      "ja-JP": "豆",
+      "ko-KR": "도트"
+    }
+  },
+  "90001": {
+    "Name": {
+      "zh-CN": "金币本体",
+      "en-US": "Living Hoard",
+      "ja-JP": "コイン本体",
+      "ko-KR": "코인 본체"
+    }
+  },
+  "101111": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "102102": {
+    "Name": {
+      "zh-CN": "凝冰幻影",
+      "en-US": "Ice Mirage",
+      "ja-JP": "氷の幻影",
+      "ko-KR": "응빙 환영"
+    }
+  },
+  "102111": {
+    "Name": {
+      "zh-CN": "小飞龙1号",
+      "en-US": "Little Dragon 1",
+      "ja-JP": "小さな竜1",
+      "ko-KR": "작은 비룡 1호"
+    }
+  },
+  "102112": {
+    "Name": {
+      "zh-CN": "小飞龙2号",
+      "en-US": "Little Dragon 2",
+      "ja-JP": "小さな竜2",
+      "ko-KR": "작은 비룡 2호"
+    }
+  },
+  "102113": {
+    "Name": {
+      "zh-CN": "小火龙1号",
+      "en-US": "Little Fire Dragon 1",
+      "ja-JP": "小さな火竜1",
+      "ko-KR": "작은 화룡 1호"
+    }
+  },
+  "102114": {
+    "Name": {
+      "zh-CN": "小火龙2号",
+      "en-US": "Little Fire Dragon 2",
+      "ja-JP": "小さな火竜2",
+      "ko-KR": "작은 화룡 2호"
+    }
+  },
+  "102131": {
+    "Name": {
+      "zh-CN": "挡风冰墙1",
+      "en-US": "Windbreaking Ice Wall 1",
+      "ja-JP": "風よけの氷壁1",
+      "ko-KR": "방풍 얼음벽1"
+    }
+  },
+  "102141": {
+    "Name": {
+      "zh-CN": "火药桶1",
+      "en-US": "Gunpowder Bucket 1",
+      "ja-JP": "火薬樽1",
+      "ko-KR": "화약통1"
+    }
+  },
+  "102151": {
+    "Name": {
+      "zh-CN": "人体冰块",
+      "en-US": "Human Ice Block",
+      "ja-JP": "人間の氷塊",
+      "ko-KR": "인체 얼음"
+    }
+  },
+  "102152": {
+    "Name": {
+      "zh-CN": "火炮冰块",
+      "en-US": "Cannon Ice Block",
+      "ja-JP": "砲撃の氷塊",
+      "ko-KR": "포탄 얼음"
+    }
+  },
+  "102153": {
+    "Name": {
+      "zh-CN": "寒冰之柱（大号）",
+      "en-US": "Ice Pillar (L)",
+      "ja-JP": "氷の柱（大）",
+      "ko-KR": "얼음 기둥(대형)"
+    }
+  },
+  "102154": {
+    "Name": {
+      "zh-CN": "寒冰之柱（小号）",
+      "en-US": "Ice Pillar (S)",
+      "ja-JP": "氷の柱（小）",
+      "ko-KR": "얼음 기둥(소형)"
+    }
+  },
+  "102402": {
+    "Name": {
+      "zh-CN": "神族防御塔",
+      "en-US": "Divine Defense Tower",
+      "ja-JP": "神族防衛タワー",
+      "ko-KR": "신족 방어탑"
+    }
+  },
+  "102802": {
+    "Name": {
+      "zh-CN": "炎光领域_1",
+      "en-US": "Solarshine Domain 1",
+      "ja-JP": "炎光領域_1",
+      "ko-KR": "화염의 빛 영역_1"
+    }
+  },
+  "102803": {
+    "Name": {
+      "zh-CN": "炎光领域_2",
+      "en-US": "Solarshine Domain 2",
+      "ja-JP": "炎光領域_2",
+      "ko-KR": "화염의 빛 영역_2"
+    }
+  },
+  "102804": {
+    "Name": {
+      "zh-CN": "炎光领域_3",
+      "en-US": "Solarshine Domain 3",
+      "ja-JP": "炎光領域_3",
+      "ko-KR": "화염의 빛 영역_3"
+    }
+  },
+  "102805": {
+    "Name": {
+      "zh-CN": "炎光领域_4",
+      "en-US": "Solarshine Domain 4",
+      "ja-JP": "炎光領域_4",
+      "ko-KR": "화염의 빛 영역_4"
+    }
+  },
+  "102806": {
+    "Name": {
+      "zh-CN": "幻华领域_1",
+      "en-US": "Lunalusion Domain 1",
+      "ja-JP": "幻華領域_1",
+      "ko-KR": "환상의 빛 영역_1"
+    }
+  },
+  "102807": {
+    "Name": {
+      "zh-CN": "幻华领域_2",
+      "en-US": "Lunalusion Domain 2",
+      "ja-JP": "幻華領域_2",
+      "ko-KR": "환상의 빛 영역_2"
+    }
+  },
+  "102808": {
+    "Name": {
+      "zh-CN": "幻华领域_3",
+      "en-US": "Lunalusion Domain 3",
+      "ja-JP": "幻華領域_3",
+      "ko-KR": "환상의 빛 영역_3"
+    }
+  },
+  "102809": {
+    "Name": {
+      "zh-CN": "幻华领域_4",
+      "en-US": "Lunalusion Domain 4",
+      "ja-JP": "幻華領域_4",
+      "ko-KR": "환상의 빛 영역_4"
+    }
+  },
+  "102810": {
+    "Name": {
+      "zh-CN": "炎光果实",
+      "en-US": "Solarshine Fruit",
+      "ja-JP": "炎光果実",
+      "ko-KR": "화염의 빛 과일"
+    }
+  },
+  "102811": {
+    "Name": {
+      "zh-CN": "幻华果实",
+      "en-US": "Lunalusion Fruit",
+      "ja-JP": "幻華果実",
+      "ko-KR": "환상의 빛 과일"
+    }
+  },
+  "102812": {
+    "Name": {
+      "zh-CN": "蜻蜓队长",
+      "en-US": "Dragonfly Captain",
+      "ja-JP": "ドラゴンフライ隊長",
+      "ko-KR": "잠자리 대장"
+    }
+  },
+  "102813": {
+    "Name": {
+      "zh-CN": "炎光果实",
+      "en-US": "Solarshine Fruit",
+      "ja-JP": "炎光果実",
+      "ko-KR": "화염의 빛 과일"
+    }
+  },
+  "102814": {
+    "Name": {
+      "zh-CN": "幻华果实",
+      "en-US": "Lunalusion Fruit",
+      "ja-JP": "幻華果実",
+      "ko-KR": "환상의 빛 과일"
+    }
+  },
+  "102823": {
+    "Name": {
+      "zh-CN": "蜻蜓队长",
+      "en-US": "Dragonfly Captain",
+      "ja-JP": "ドラゴンフライ隊長",
+      "ko-KR": "잠자리 대장"
+    }
+  },
+  "102833": {
+    "Name": {
+      "zh-CN": "蜻蜓队长",
+      "en-US": "Dragonfly Captain",
+      "ja-JP": "ドラゴンフライ隊長",
+      "ko-KR": "잠자리 대장"
+    }
+  },
+  "102834": {
+    "Name": {
+      "zh-CN": "光暗纠缠体",
+      "en-US": "Light–Dark Entwined Entity",
+      "ja-JP": "光闇もつれ",
+      "ko-KR": "빛 어둠 구속체"
+    }
+  },
+  "102902": {
+    "Name": {
+      "zh-CN": "遗迹防御装置",
+      "en-US": "Defense Device of the Ruin",
+      "ja-JP": "遺跡防御装置",
+      "ko-KR": "유적 방어 장치"
+    }
+  },
+  "102903": {
+    "Name": {
+      "zh-CN": "遗迹防御装置",
+      "en-US": "Defense Device of the Ruin",
+      "ja-JP": "遺跡防御装置",
+      "ko-KR": "유적 방어 장치"
+    }
+  },
+  "102904": {
+    "Name": {
+      "zh-CN": "嵌入绯红水晶的岩石墙",
+      "en-US": "Rock Wall Embedded with Crimson Crystal",
+      "ja-JP": "緋色鉱髄が埋め込まれた岩壁",
+      "ko-KR": "진홍 수정 장착한 돌벽"
+    }
+  },
+  "102905": {
+    "Name": {
+      "zh-CN": "遗迹岩石墙",
+      "en-US": "Rock Wall of the Ruin",
+      "ja-JP": "遺跡の岩壁",
+      "ko-KR": "유적 돌벽"
+    }
+  },
+  "102906": {
+    "Name": {
+      "zh-CN": "幻幻花",
+      "en-US": "Illusory Bloom",
+      "ja-JP": "幻花晶",
+      "ko-KR": "환상꽃"
+    }
+  },
+  "102907": {
+    "Name": {
+      "zh-CN": "大型幻幻花",
+      "en-US": "Large Illusory Bloom",
+      "ja-JP": "大型幻花晶",
+      "ko-KR": "대형 환상꽃"
+    }
+  },
+  "103004": {
+    "Name": {
+      "zh-CN": "殷红断狱-P1残影",
+      "en-US": "Scarlet Abyss - P1 Afterimage",
+      "ja-JP": "裁きの剣-P1残影",
+      "ko-KR": "선홍 단옥 - P1 잔상"
+    }
+  },
+  "103005": {
+    "Name": {
+      "zh-CN": "殷红断狱-P2残影",
+      "en-US": "Scarlet Abyss - P2 Afterimage",
+      "ja-JP": "裁きの剣-P2残影",
+      "ko-KR": "선홍 단옥 - P2 잔상"
+    }
+  },
+  "103006": {
+    "Name": {
+      "zh-CN": "蚀花的残影巨大",
+      "en-US": "Erosion Bloom Afterimage (Huge)",
+      "ja-JP": "蝕花の残影・巨大",
+      "ko-KR": "잠식된 꽃의 잔상 거대"
+    }
+  },
+  "103008": {
+    "Name": {
+      "zh-CN": "幻觉晶簇",
+      "en-US": "Hallucination Crystal Cluster",
+      "ja-JP": "幻覚クラスター",
+      "ko-KR": "환각 결정군"
+    }
+  },
+  "103009": {
+    "Name": {
+      "zh-CN": "幻觉晶簇虚拟体",
+      "en-US": "Virtual Hallucination Crystal Cluster",
+      "ja-JP": "幻覚クラスター仮想体",
+      "ko-KR": "환각 결정군 가상체"
+    }
+  },
+  "103201": {
+    "Name": {
+      "zh-CN": "隐身怪（闪现的目标点 长边）",
+      "en-US": "Invisible Monster (Blink Target Point - Long Edge)",
+      "ja-JP": "ハイドモンスター（フラッシュ先の目標点 長辺）",
+      "ko-KR": "은신 몬스터(순간이동 목표 지점・긴 쪽)"
+    }
+  },
+  "103202": {
+    "Name": {
+      "zh-CN": "隐身怪（场景中心点）",
+      "en-US": "Invisible Monster (Arena Center Point)",
+      "ja-JP": "ハイドモンスター（フィールド中心点）",
+      "ko-KR": "은신 몬스터(필드 중심 지점)"
+    }
+  },
+  "103204": {
+    "Name": {
+      "zh-CN": "隐身怪（闪现的目标点 宽边）",
+      "en-US": "Invisible Monster (Blink Target Point - Short Edge)",
+      "ja-JP": "ハイドモンスター（フラッシュ先の目標点 短辺）",
+      "ko-KR": "은신 몬스터(순간이동 목표 지점・짧은 쪽)"
+    }
+  },
+  "103209": {
+    "Name": {
+      "zh-CN": "隐身怪（结局表演冲锋用）",
+      "en-US": "Invisible Monster (End-Cinematic Charge)",
+      "ja-JP": "ハイドモンスター（エンディング演出の突進用）",
+      "ko-KR": "은신 몬스터(엔딩 연출 돌격용)"
+    }
+  },
+  "103303": {
+    "Name": {
+      "zh-CN": "地块A标记",
+      "en-US": "Zone A Marker",
+      "ja-JP": "ブロックAマーク",
+      "ko-KR": "구역 A 표식"
+    }
+  },
+  "103304": {
+    "Name": {
+      "zh-CN": "地块A标记",
+      "en-US": "Zone A Marker",
+      "ja-JP": "ブロックAマーク",
+      "ko-KR": "구역 A 표식"
+    }
+  },
+  "103305": {
+    "Name": {
+      "zh-CN": "地块A标记",
+      "en-US": "Zone A Marker",
+      "ja-JP": "ブロックAマーク",
+      "ko-KR": "구역 A 표식"
+    }
+  },
+  "103306": {
+    "Name": {
+      "zh-CN": "地块A标记",
+      "en-US": "Zone A Marker",
+      "ja-JP": "ブロックAマーク",
+      "ko-KR": "구역 A 표식"
+    }
+  },
+  "210101": {
+    "Name": {
+      "zh-CN": "楔柱",
+      "en-US": "Wedge Pillar",
+      "ja-JP": "楔柱",
+      "ko-KR": "쐐기 기둥"
+    }
+  },
+  "210102": {
+    "Name": {
+      "zh-CN": "流派技能-假人",
+      "en-US": "Style Skill - Dummy",
+      "ja-JP": "型スキル-ダミー",
+      "ko-KR": "계열 스킬 - 허수아비"
+    }
+  },
+  "210105": {
+    "Name": {
+      "zh-CN": "大招音效左",
+      "en-US": "Ultimate Sound Effect Left",
+      "ja-JP": "絶技サウンドエフェクト左",
+      "ko-KR": "궁극기 음향 효과(왼쪽)"
+    }
+  },
+  "210106": {
+    "Name": {
+      "zh-CN": "大招音效右",
+      "en-US": "Ultimate Sound Effect Right",
+      "ja-JP": "絶技サウンドエフェクト右",
+      "ko-KR": "궁극기 음향 효과(오른쪽)"
+    }
+  },
+  "210107": {
+    "Name": {
+      "zh-CN": "基础音响",
+      "en-US": "Basic Sound System",
+      "ja-JP": "基本サウンド",
+      "ko-KR": "기본 음향"
+    }
+  },
+  "530105": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "530106": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "530391": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的棒槌哥布林",
+      "en-US": "Void Goblin Cudgel",
+      "ja-JP": "雷虚蝕されたゴブリングロウ",
+      "ko-KR": "번개 침식된 몽둥이 고블린"
+    }
+  },
+  "530392": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的小刀哥布林",
+      "en-US": "Void Goblin Dagger",
+      "ja-JP": "雷虚蝕されたナイフゴブリン",
+      "ko-KR": "번개 침식된 나이프 고블린"
+    }
+  },
+  "530393": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的弩箭哥布林",
+      "en-US": "Void Goblin Crossbow",
+      "ja-JP": "雷虚蝕されたボウガンゴブリン",
+      "ko-KR": "번개 침식된 석궁 고블린"
+    }
+  },
+  "530394": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的剑盾哥布林",
+      "en-US": "Void Goblin Sword",
+      "ja-JP": "雷虚蝕されたゴブリンナイト",
+      "ko-KR": "번개 침식된 검방패 고블린"
+    }
+  },
+  "530395": {
+    "Name": {
+      "zh-CN": "雷电虚蚀的巨斧哥布林",
+      "en-US": "Void Goblin Axe",
+      "ja-JP": "雷虚蝕された大斧ゴブリン",
+      "ko-KR": "번개 침식된 거대 도끼 고블린"
+    }
+  },
+  "530396": {
+    "Name": {
+      "zh-CN": "虚蚀巫妖哥布林",
+      "en-US": "Void Goblin Mage",
+      "ja-JP": "虚蝕ゴブリンリッチ",
+      "ko-KR": "허무의 침식 샤먼 고블린"
+    }
+  },
+  "530397": {
+    "Name": {
+      "zh-CN": "虚蚀火巫师哥布林",
+      "en-US": "Void Goblin Fire Mage",
+      "ja-JP": "虚蝕炎のエルダーゴブリン",
+      "ko-KR": "허무의 침식 불 샤먼 고블린"
+    }
+  },
+  "530398": {
+    "Name": {
+      "zh-CN": "虚蚀森巫师哥布林",
+      "en-US": "Void Goblin Forest Mage",
+      "ja-JP": "虚蝕森のエルダーゴブリン",
+      "ko-KR": "허무의 침식 숲 샤먼 고블린"
+    }
+  },
+  "530399": {
+    "Name": {
+      "zh-CN": "虚蚀风巫师哥布林",
+      "en-US": "Void Goblin Wind Mage",
+      "ja-JP": "虚蝕風のエルダーゴブリン",
+      "ko-KR": "허무의 침식 바람 샤먼 고블린"
+    }
+  },
+  "540101": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540102": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540103": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540104": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540105": {
+    "Name": {
+      "zh-CN": "亡灵·班哈尔特剑士",
+      "en-US": "Undead Byrnhald Swordsman",
+      "ja-JP": "死霊・バーンハルト剣士",
+      "ko-KR": "망령・번하르트 검사"
+    }
+  },
+  "540106": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540107": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯长官",
+      "en-US": "Undead Asterleeds Officer",
+      "ja-JP": "死霊・アステルリーズ長官",
+      "ko-KR": "망령・아스텔리즈 장관"
+    }
+  },
+  "540108": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540109": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540112": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540113": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540114": {
+    "Name": {
+      "zh-CN": "亡灵·班哈尔特剑士",
+      "en-US": "Undead Byrnhald Swordsman",
+      "ja-JP": "死霊・バーンハルト剣士",
+      "ko-KR": "망령・번하르트 검사"
+    }
+  },
+  "540115": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540116": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540117": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540118": {
+    "Name": {
+      "zh-CN": "亡灵·班哈尔特剑士",
+      "en-US": "Undead Byrnhald Swordsman",
+      "ja-JP": "死霊・バーンハルト剣士",
+      "ko-KR": "망령・번하르트 검사"
+    }
+  },
+  "540119": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540120": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540121": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540122": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540123": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540124": {
+    "Name": {
+      "zh-CN": "亡灵·班哈尔特剑士",
+      "en-US": "Undead Byrnhald Swordsman",
+      "ja-JP": "死霊・バーンハルト剣士",
+      "ko-KR": "망령・번하르트 검사"
+    }
+  },
+  "540125": {
+    "Name": {
+      "zh-CN": "亡灵·阿斯特里斯士兵",
+      "en-US": "Undead Asterleeds Soldier",
+      "ja-JP": "死霊・アステルリーズ兵士",
+      "ko-KR": "망령・아스텔리즈 병사"
+    }
+  },
+  "540129": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼战士",
+      "en-US": "Undead Kanamia Warrior",
+      "ja-JP": "死霊・カナミア戦士",
+      "ko-KR": "망령・카나미아족 전사"
+    }
+  },
+  "540130": {
+    "Name": {
+      "zh-CN": "亡灵·卡尼曼射手",
+      "en-US": "Undead Kanamia Archer",
+      "ja-JP": "死霊・カナミア弓兵",
+      "ko-KR": "망령・카나미아족 사격꾼"
+    }
+  },
+  "540131": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "540304": {
+    "Name": {
+      "zh-CN": "奎宁",
+      "en-US": "Quinin",
+      "ja-JP": "キニーン",
+      "ko-KR": "퀴닌"
+    }
+  },
+  "540603": {
+    "Name": {
+      "zh-CN": "卡尼曼守卫",
+      "en-US": "Kanamia Guard",
+      "ja-JP": "カナミア衛士",
+      "ko-KR": "카나미아족 경비병"
+    }
+  },
+  "540604": {
+    "Name": {
+      "zh-CN": "卡尼曼守卫-吸引",
+      "en-US": "Kanamia Guard - Attract",
+      "ja-JP": "カナミア衛士-引き寄せ",
+      "ko-KR": "카나미아족 경비병 - 유인"
+    }
+  },
+  "552005": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林1-防御玩法用",
+      "en-US": "Void - Goblin Cudgel 1 - For Defense Gameplay",
+      "ja-JP": "虚蝕・ゴブリングロウ1-防衛モード用",
+      "ko-KR": "허무의 침식・몽둥이 고블린1 - 방어 콘텐츠용"
+    }
+  },
+  "552006": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵1-防御玩法用",
+      "en-US": "Void - Dark Mist Trooper 1 - For Defense Gameplay",
+      "ja-JP": "虚蝕・暗霧分隊の兵士1-防衛モード用",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사1 - 방어 콘텐츠용"
+    }
+  },
+  "552007": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-青年男",
+      "en-US": "Five-Stage Escape Target - Young Man",
+      "ja-JP": "5段階逃走目標-青年男子",
+      "ko-KR": "5단계 도망 목표 - 청년 남성"
+    }
+  },
+  "552008": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-青年女",
+      "en-US": "Five-Stage Escape Target - Young Woman",
+      "ja-JP": "5段階逃走目標-青年女子",
+      "ko-KR": "5단계 도망 목표 - 청년 여자"
+    }
+  },
+  "552009": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-老年男",
+      "en-US": "Five-Stage Escape Target - Elderly Man",
+      "ja-JP": "5段階逃走目標-老年男",
+      "ko-KR": "5단계 도망 목표 - 노년 남성"
+    }
+  },
+  "552010": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-中年女",
+      "en-US": "Five-Stage Escape Target - Middle-Aged Woman",
+      "ja-JP": "5段階逃走目標-中年女",
+      "ko-KR": "5단계 도망 목표 - 중년 여성"
+    }
+  },
+  "552011": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-幼年男",
+      "en-US": "Five-Stage Escape Target - Young Boy",
+      "ja-JP": "5段階逃走目標-少年",
+      "ko-KR": "5단계 도망 목표 - 어린 남자아이"
+    }
+  },
+  "552012": {
+    "Name": {
+      "zh-CN": "五阶段逃跑目标-幼年女",
+      "en-US": "Five-Stage Escape Target - Young Girl",
+      "ja-JP": "5段階逃走目標-少女",
+      "ko-KR": "5단계 도망 목표 - 어린 여자아이"
+    }
+  },
+  "552013": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林2-防御玩法用",
+      "en-US": "Void - Goblin Cudgel 2 - For Defense Gameplay",
+      "ja-JP": "虚蝕・ゴブリングロウ2-防衛モード用",
+      "ko-KR": "허무의 침식・몽둥이 고블린2 - 방어 콘텐츠용"
+    }
+  },
+  "552014": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵2-防御玩法用",
+      "en-US": "Void - Dark Mist Trooper 2 - For Defense Gameplay",
+      "ja-JP": "虚蝕・暗霧分隊の兵士2-防衛モード用",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사2 - 방어 콘텐츠용"
+    }
+  },
+  "552015": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林3-防御玩法用",
+      "en-US": "Void - Goblin Cudgel 3 - For Defense Gameplay",
+      "ja-JP": "虚蝕・ゴブリングロウ3-防衛モード用",
+      "ko-KR": "허무의 침식・몽둥이 고블린3 - 방어 콘텐츠용"
+    }
+  },
+  "552016": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵3-防御玩法用",
+      "en-US": "Void - Dark Mist Trooper 3 - For Defense Gameplay",
+      "ja-JP": "虚蝕・暗霧分隊の兵士3-防衛モード用",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사3 - 방어 콘텐츠용"
+    }
+  },
+  "552017": {
+    "Name": {
+      "zh-CN": "虚蚀火巫师哥布林",
+      "en-US": "​Void Goblin Fire Mage",
+      "ja-JP": "虚蝕炎のエルダーゴブリン",
+      "ko-KR": "허무의 침식 불 샤먼 고블린"
+    }
+  },
+  "552018": {
+    "Name": {
+      "zh-CN": "虚蚀森巫师哥布林",
+      "en-US": "Void Goblin Forest Mage",
+      "ja-JP": "虚蝕森のエルダーゴブリン",
+      "ko-KR": "허무의 침식 숲 샤먼 고블린"
+    }
+  },
+  "552019": {
+    "Name": {
+      "zh-CN": "虚蚀风巫师哥布林",
+      "en-US": "Void Goblin Wind Mage",
+      "ja-JP": "虚蝕風のエルダーゴブリン",
+      "ko-KR": "허무의 침식 바람 샤먼 고블린"
+    }
+  },
+  "552021": {
+    "Name": {
+      "zh-CN": "虚蚀·棒槌哥布林",
+      "en-US": "Void - Goblin Cudgel",
+      "ja-JP": "虚蝕・ゴブリングロウ",
+      "ko-KR": "허무의 침식・몽둥이 고블린"
+    }
+  },
+  "552022": {
+    "Name": {
+      "zh-CN": "虚蚀·黯影军团士兵",
+      "en-US": "Void - Legion Soldier",
+      "ja-JP": "虚蝕・暗霧分隊の兵士",
+      "ko-KR": "허무의 침식・검은 안개 군단 병사"
+    }
+  },
+  "560303": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "570305": {
+    "Name": {
+      "zh-CN": "黑石军团士兵",
+      "en-US": "Blackstone Legion Soldier",
+      "ja-JP": "黒磊兵団の兵士",
+      "ko-KR": "검은 돌 군단 병사"
+    }
+  },
+  "570404": {
+    "Name": {
+      "zh-CN": "矿工-死亡",
+      "en-US": "Miner - Dead",
+      "ja-JP": "鉱員-死亡",
+      "ko-KR": "광부 - 사망"
+    }
+  },
+  "581101": {
+    "Name": {
+      "zh-CN": "娜宝",
+      "en-US": "Nappo",
+      "ja-JP": "ナッポ",
+      "ko-KR": "나뽀"
+    }
+  },
+  "581102": {
+    "Name": {
+      "zh-CN": "蟹蛛",
+      "en-US": "Arachnocrab",
+      "ja-JP": "カニクモ",
+      "ko-KR": "거미게"
+    }
+  },
+  "581103": {
+    "Name": {
+      "zh-CN": "蟹蛛",
+      "en-US": "Arachnocrab",
+      "ja-JP": "カニクモ",
+      "ko-KR": "거미게"
+    }
+  },
+  "581104": {
+    "Name": {
+      "zh-CN": "极速蟹蛛",
+      "en-US": "Swift Arachnocrab",
+      "ja-JP": "爆速カニクモ",
+      "ko-KR": "초고속 거미게"
+    }
+  },
+  "581105": {
+    "Name": {
+      "zh-CN": "极速蟹蛛",
+      "en-US": "Swift Arachnocrab",
+      "ja-JP": "爆速カニクモ",
+      "ko-KR": "초고속 거미게"
+    }
+  },
+  "604005": {
+    "Name": {
+      "zh-CN": "卷心菜巡逻1",
+      "en-US": "Cabbage Patrol 1",
+      "ja-JP": "甘藍巡回1",
+      "ko-KR": "양배추 순찰1"
+    }
+  },
+  "604006": {
+    "Name": {
+      "zh-CN": "卷心菜巡逻2",
+      "en-US": "Cabbage Patrol 2",
+      "ja-JP": "甘藍巡回2",
+      "ko-KR": "양배추 순찰2"
+    }
+  },
+  "604007": {
+    "Name": {
+      "zh-CN": "卷心菜巡逻3",
+      "en-US": "Cabbage Patrol 3",
+      "ja-JP": "甘藍巡回3",
+      "ko-KR": "양배추 순찰3"
+    }
+  },
+  "604008": {
+    "Name": {
+      "zh-CN": "卷心菜巡逻4",
+      "en-US": "Cabbage Patrol 4",
+      "ja-JP": "甘藍巡回4",
+      "ko-KR": "양배추 순찰4"
+    }
+  },
+  "612101": {
+    "Name": {
+      "zh-CN": "钩锁1",
+      "en-US": "Grappling Hook 1",
+      "ja-JP": "フックチェーン1",
+      "ko-KR": "그래플링훅1"
+    }
+  },
+  "660304": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "660305": {
+    "Name": {
+      "zh-CN": "斯莱特",
+      "en-US": "Sleht",
+      "ja-JP": "スレト",
+      "ko-KR": "슬레이트"
+    }
+  },
+  "660306": {
+    "Name": {
+      "zh-CN": "崔班",
+      "en-US": "Triban",
+      "ja-JP": "トライバン",
+      "ko-KR": "트리반"
+    }
+  },
+  "660307": {
+    "Name": {
+      "zh-CN": "莱拉亚",
+      "en-US": "Lerahha",
+      "ja-JP": "レラハ",
+      "ko-KR": "레일라야"
+    }
+  },
+  "660308": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "660312": {
+    "Name": {
+      "zh-CN": "幻幻花",
+      "en-US": "Illusory Bloom",
+      "ja-JP": "幻花晶",
+      "ko-KR": "환상꽃"
+    }
+  },
+  "700071": {
+    "Name": {
+      "zh-CN": "音响1号",
+      "en-US": "Acoustic No.1",
+      "ja-JP": "サウンド1号",
+      "ko-KR": "음향 1호"
+    }
+  },
+  "700072": {
+    "Name": {
+      "zh-CN": "音响2号",
+      "en-US": "Acoustic No.2",
+      "ja-JP": "サウンド2号",
+      "ko-KR": "음향 2호"
+    }
+  },
+  "700073": {
+    "Name": {
+      "zh-CN": "音响3号",
+      "en-US": "Acoustic No.3",
+      "ja-JP": "サウンド3号",
+      "ko-KR": "음향 3호"
+    }
+  },
+  "700074": {
+    "Name": {
+      "zh-CN": "音响4号",
+      "en-US": "Acoustic No.4",
+      "ja-JP": "サウンド4号",
+      "ko-KR": "음향 4호"
+    }
+  },
+  "700075": {
+    "Name": {
+      "zh-CN": "音响5号",
+      "en-US": "Acoustic No.5",
+      "ja-JP": "サウンド5号",
+      "ko-KR": "음향 5호"
+    }
+  },
+  "700076": {
+    "Name": {
+      "zh-CN": "音响6号",
+      "en-US": "Acoustic No.6",
+      "ja-JP": "サウンド6号",
+      "ko-KR": "음향 6호"
+    }
+  },
+  "700077": {
+    "Name": {
+      "zh-CN": "音响7号",
+      "en-US": "Acoustic No.7",
+      "ja-JP": "サウンド7号",
+      "ko-KR": "음향 7호"
+    }
+  },
+  "700078": {
+    "Name": {
+      "zh-CN": "音响8号",
+      "en-US": "Acoustic No.8",
+      "ja-JP": "サウンド8号",
+      "ko-KR": "음향 8호"
+    }
+  },
+  "700079": {
+    "Name": {
+      "zh-CN": "音响9号",
+      "en-US": "Acoustic No.9",
+      "ja-JP": "サウンド9号",
+      "ko-KR": "음향 9호"
+    }
+  },
+  "700080": {
+    "Name": {
+      "zh-CN": "音响10号",
+      "en-US": "Acoustic No.10",
+      "ja-JP": "サウンド10号",
+      "ko-KR": "음향 10호"
+    }
+  },
+  "700081": {
+    "Name": {
+      "zh-CN": "音响11号",
+      "en-US": "Acoustic No.11",
+      "ja-JP": "サウンド11号",
+      "ko-KR": "음향 11호"
+    }
+  },
+  "700082": {
+    "Name": {
+      "zh-CN": "音响12号",
+      "en-US": "Acoustic No.12",
+      "ja-JP": "サウンド12号",
+      "ko-KR": "음향 12호"
+    }
+  },
+  "700090": {
+    "Name": {
+      "zh-CN": "神秘娜宝",
+      "en-US": "Mysterious Nappo",
+      "ja-JP": "神秘のナッポ",
+      "ko-KR": "신비한 나뽀"
+    }
+  },
+  "920021": {
+    "Name": {
+      "zh-CN": "无人机兵",
+      "en-US": "Drone Gunner",
+      "ja-JP": "ドローン兵",
+      "ko-KR": "무인 기계병"
+    }
+  },
+  "920022": {
+    "Name": {
+      "zh-CN": "无人机兵",
+      "en-US": "Drone Gunner",
+      "ja-JP": "ドローン兵",
+      "ko-KR": "무인 기계병"
+    }
+  },
+  "920023": {
+    "Name": {
+      "zh-CN": "无人机兵",
+      "en-US": "Drone Gunner",
+      "ja-JP": "ドローン兵",
+      "ko-KR": "무인 기계병"
+    }
+  },
+  "920024": {
+    "Name": {
+      "zh-CN": "无人机兵",
+      "en-US": "Drone Gunner",
+      "ja-JP": "ドローン兵",
+      "ko-KR": "무인 기계병"
+    }
+  },
+  "920025": {
+    "Name": {
+      "zh-CN": "无人机兵",
+      "en-US": "Drone Gunner",
+      "ja-JP": "ドローン兵",
+      "ko-KR": "무인 기계병"
+    }
+  },
+  "920115": {
+    "Name": {
+      "zh-CN": "角羊",
+      "en-US": "Caprahorn",
+      "ja-JP": "ホーンゴート",
+      "ko-KR": "뿔염소"
+    }
+  },
+  "920116": {
+    "Name": {
+      "zh-CN": "地狐",
+      "en-US": "Foxen",
+      "ja-JP": "ランドフォックス",
+      "ko-KR": "땅여우"
+    }
+  },
+  "920241": {
+    "Name": {
+      "zh-CN": "蓝球隐形",
+      "en-US": "Cloaked Blue Orb",
+      "ja-JP": "ブルーオーブ不可視",
+      "ko-KR": "블루볼 숨김"
+    }
+  },
+  "920242": {
+    "Name": {
+      "zh-CN": "蓝球显形",
+      "en-US": "Revealed Blue Orb",
+      "ja-JP": "ブルーオーブ可視",
+      "ko-KR": "블루볼 표시"
+    }
+  },
+  "920243": {
+    "Name": {
+      "zh-CN": "蓝球节点",
+      "en-US": "Blue Orb Node",
+      "ja-JP": "ブルーオーブノード",
+      "ko-KR": "블루볼 노드"
+    }
+  },
+  "920554": {
+    "Name": {
+      "zh-CN": "幻幻花",
+      "en-US": "Illusory Bloom",
+      "ja-JP": "幻花晶",
+      "ko-KR": "환상꽃"
+    }
+  },
+  "1100158": {
+    "Name": {
+      "zh-CN": "圣域飞鱼",
+      "en-US": "Celestial Flier",
+      "ja-JP": "ヘヴンスカイ",
+      "ko-KR": "성스러운 날치"
+    }
+  },
+  "1205014": {
+    "Name": {
+      "zh-CN": "阿卡多的雷电球",
+      "en-US": "Arcado's Thunder Orb",
+      "ja-JP": "アッカードのライトニングオーブ",
+      "ko-KR": "아카도의 천둥 번개 오브"
+    }
+  },
+  "1205015": {
+    "Name": {
+      "zh-CN": "阿卡多的雷电球",
+      "en-US": "Arcado's Thunder Orb",
+      "ja-JP": "アッカードのライトニングオーブ",
+      "ko-KR": "아카도의 천둥 번개 오브"
+    }
+  },
+  "1205017": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "1205018": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "1205019": {
+    "Name": {
+      "zh-CN": "阿斯特里斯士兵",
+      "en-US": "Asterleeds Trooper",
+      "ja-JP": "アステルリーズの兵士",
+      "ko-KR": "아스텔리즈 병사"
+    }
+  },
+  "1205020": {
+    "Name": {
+      "zh-CN": "枪兵",
+      "en-US": "Gunner",
+      "ja-JP": "槍兵",
+      "ko-KR": "창병"
+    }
+  },
+  "3000000": {
+    "Name": {
+      "zh-CN": "火焰兽人-共鸣",
+      "en-US": "Flame Orc - Resonance",
+      "ja-JP": "フレイムオーク-共鳴",
+      "ko-KR": "화염 오크 - 공명"
+    }
+  },
+  "3000001": {
+    "Name": {
+      "zh-CN": "雷电食人魔-共鸣",
+      "en-US": "Tempest Ogre - Resonance",
+      "ja-JP": "サンダーオーガ-共鳴",
+      "ko-KR": "번개 오우거 - 공명"
+    }
+  },
+  "3000002": {
+    "Name": {
+      "zh-CN": "山贼首领-共鸣",
+      "en-US": "Brigand Chief - Resonance",
+      "ja-JP": "異国の山賊長ヒグマ-共鳴",
+      "ko-KR": "산적 대장 - 공명"
+    }
+  },
+  "3000003": {
+    "Name": {
+      "zh-CN": "共鸣姆克",
+      "en-US": "Resonance Muku",
+      "ja-JP": "共鳴ムーク",
+      "ko-KR": "공명 무크"
+    }
+  },
+  "3000004": {
+    "Name": {
+      "zh-CN": "共鸣野猪王",
+      "en-US": "Resonating Boarrier King",
+      "ja-JP": "共鳴キングボア",
+      "ko-KR": "공명 멧돼지 왕"
+    }
+  },
+  "3000006": {
+    "Name": {
+      "zh-CN": "寒霜食人魔-共鸣",
+      "en-US": "Frost Ogre - Resonance",
+      "ja-JP": "フロストオーガ-共鳴",
+      "ko-KR": "서리 오우거 - 공명"
+    }
+  },
+  "3000007": {
+    "Name": {
+      "zh-CN": "哥布林酋王-共鸣",
+      "en-US": "Goblin Chieftain - Resonance",
+      "ja-JP": "ゴブリン酋王-共鳴",
+      "ko-KR": "고블린 추장 왕 - 공명"
+    }
+  },
+  "3000008": {
+    "Name": {
+      "zh-CN": "姆克王-共鸣",
+      "en-US": "Muku King - Resonance",
+      "ja-JP": "キングムーク-共鳴",
+      "ko-KR": "무크왕 - 공명"
+    }
+  },
+  "3000009": {
+    "Name": {
+      "zh-CN": "山贼头目战斧-共鸣",
+      "en-US": "Brigand Leader - Battle Axe - Resonance",
+      "ja-JP": "異国の山賊長ヒグマ戦斧-共鳴",
+      "ko-KR": "산적 두목 전투 도끼 - 공명"
+    }
+  },
+  "3000010": {
+    "Name": {
+      "zh-CN": "剑盾哥布林-共鸣",
+      "en-US": "Goblin Sword - Resonance",
+      "ja-JP": "ゴブリンナイト-共鳴",
+      "ko-KR": "검방패 고블린 - 공명"
+    }
+  },
+  "3000011": {
+    "Name": {
+      "zh-CN": "弩箭哥布林-共鸣",
+      "en-US": "Goblin Crossbow - Resonance",
+      "ja-JP": "ボウガンゴブリン-共鳴",
+      "ko-KR": "석궁 고블린 - 공명"
+    }
+  },
+  "3000012": {
+    "Name": {
+      "zh-CN": "山贼射手-共鸣",
+      "en-US": "Brigand Archer - Resonance",
+      "ja-JP": "山賊弓使い-共鳴",
+      "ko-KR": "산적 사격꾼 - 공명"
+    }
+  },
+  "3000013": {
+    "Name": {
+      "zh-CN": "激进黯影剑士-共鸣",
+      "en-US": "Shadow Blade - Resonance",
+      "ja-JP": "昂る暗霧剣士-共鳴",
+      "ko-KR": "급진파 검은 안개 검병 - 공명"
+    }
+  },
+  "3000014": {
+    "Name": {
+      "zh-CN": "巨斧哥布林-共鸣",
+      "en-US": "Goblin Axe - Resonance",
+      "ja-JP": "大斧ゴブリン-共鳴",
+      "ko-KR": "거대 도끼 고블린 - 공명"
+    }
+  },
+  "3000015": {
+    "Name": {
+      "zh-CN": "大斧姆克-共鸣",
+      "en-US": "Great Muku Axe - Resonance",
+      "ja-JP": "大斧ムーク-共鳴",
+      "ko-KR": "큰 도끼 무크 - 공명"
+    }
+  },
+  "3000016": {
+    "Name": {
+      "zh-CN": "眼球王-共鸣",
+      "en-US": "Eye King - Resonating",
+      "ja-JP": "キングアイボール-共鳴",
+      "ko-KR": "스피어 왕 - 공명"
+    }
+  },
+  "3000017": {
+    "Name": {
+      "zh-CN": "首领·姆克头目",
+      "en-US": "Boss: Muku Chief",
+      "ja-JP": "ボス・ムークボス",
+      "ko-KR": "보스・무크 두목"
+    }
+  },
+  "3000018": {
+    "Name": {
+      "zh-CN": "首领·多戈尔曼",
+      "en-US": "Boss: Dogorman",
+      "ja-JP": "ボス・ドゴルマン",
+      "ko-KR": "보스・도골만"
+    }
+  },
+  "3000019": {
+    "Name": {
+      "zh-CN": "寒霜食人魔-共鸣",
+      "en-US": "Frost Ogre - Resonance",
+      "ja-JP": "フロストオーガ-共鳴",
+      "ko-KR": "서리 오우거 - 공명"
+    }
+  },
+  "3000020": {
+    "Name": {
+      "zh-CN": "雷电食人魔-共鸣",
+      "en-US": "Tempest Ogre - Resonance",
+      "ja-JP": "サンダーオーガ-共鳴",
+      "ko-KR": "번개 오우거 - 공명"
+    }
+  },
+  "3000021": {
+    "Name": {
+      "zh-CN": "风哥布林王-共鸣",
+      "en-US": "Wind Goblin King - Resonance",
+      "ja-JP": "風のキングゴブリン-共鳴",
+      "ko-KR": "바람 고블린 왕 - 공명"
+    }
+  },
+  "3000022": {
+    "Name": {
+      "zh-CN": "姆克头目-共鸣",
+      "en-US": "Muku Chief - Resonance",
+      "ja-JP": "ムークボス-共鳴",
+      "ko-KR": "무크 두목 - 공명"
+    }
+  },
+  "3000023": {
+    "Name": {
+      "zh-CN": "蟹蛛王-共鸣",
+      "en-US": "Arachnocrab King - Resonance",
+      "ja-JP": "プレデター-共鳴",
+      "ko-KR": "거미게 왕 - 공명"
+    }
+  },
+  "3000024": {
+    "Name": {
+      "zh-CN": "铁牙-共鸣",
+      "en-US": "Iron Fang - Resonance",
+      "ja-JP": "鉄牙-共鳴",
+      "ko-KR": "무쇠 이빨 - 공명"
+    }
+  },
+  "3000025": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-共鸣",
+      "en-US": "Venobzzar Incubator - Resonance",
+      "ja-JP": "ヴェノミーンの巣-共鳴",
+      "ko-KR": "맹독 민의 둥지 - 공명"
+    }
+  },
+  "3000026": {
+    "Name": {
+      "zh-CN": "雷光野猪-共鸣",
+      "en-US": "Great Warhog - Resonance",
+      "ja-JP": "グレートファング-共鳴",
+      "ko-KR": "전격 멧돼지 - 공명"
+    }
+  },
+  "3000027": {
+    "Name": {
+      "zh-CN": "威猛野猪-共鸣",
+      "en-US": "Boarrier Tyrant - Resonance",
+      "ja-JP": "マイティボア-共鳴",
+      "ko-KR": "맹렬한 멧돼지 - 공명"
+    }
+  },
+  "3000028": {
+    "Name": {
+      "zh-CN": "姆克兵长-共鸣",
+      "en-US": "Muku Warrior - Resonance",
+      "ja-JP": "ムークウォーリアー-共鳴",
+      "ko-KR": "무크 병장 - 공명"
+    }
+  },
+  "3000029": {
+    "Name": {
+      "zh-CN": "蜥蜴人猎手-共鸣",
+      "en-US": "Lizardman Hunter - Resonance",
+      "ja-JP": "ギルミーハンター-共鳴",
+      "ko-KR": "리자드맨 사냥꾼 - 공명"
+    }
+  },
+  "3000030": {
+    "Name": {
+      "zh-CN": "姆克尖兵-共鸣",
+      "en-US": "Muku Scout - Resonance",
+      "ja-JP": "ムークスカウト-共鳴",
+      "ko-KR": "무크 선봉병 - 공명"
+    }
+  },
+  "3000031": {
+    "Name": {
+      "zh-CN": "山贼斥候-共鸣",
+      "en-US": "Brigand Scout - Resonance",
+      "ja-JP": "山賊の斥候-共鳴",
+      "ko-KR": "산적 정찰꾼 - 공명"
+    }
+  },
+  "3000032": {
+    "Name": {
+      "zh-CN": "奥尔维拉-共鸣",
+      "en-US": "Olvera - Resonance",
+      "ja-JP": "オルヴェラ-共鳴",
+      "ko-KR": "올베라 - 공명"
+    }
+  },
+  "3000033": {
+    "Name": {
+      "zh-CN": "蒂娜-共鸣",
+      "en-US": "Tina - Resonance",
+      "ja-JP": "ティナ-共鳴",
+      "ko-KR": "티나 - 공명"
+    }
+  },
+  "3000034": {
+    "Name": {
+      "zh-CN": "艾露娜-共鸣",
+      "en-US": "Airona - Resonance",
+      "ja-JP": "アルーナ-共鳴",
+      "ko-KR": "아이로나 - 공명"
+    }
+  },
+  "3000035": {
+    "Name": {
+      "zh-CN": "虚蚀兽人-共鸣",
+      "en-US": "Void Orc - Resonance",
+      "ja-JP": "虚蝕オーク-共鳴",
+      "ko-KR": "허무의 침식 오크 - 공명"
+    }
+  },
+  "3000036": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-共鸣",
+      "en-US": "Lizardman King - Resonance",
+      "ja-JP": "キングギルミー-共鳴",
+      "ko-KR": "리자드맨 킹 - 공명"
+    }
+  },
+  "3000037": {
+    "Name": {
+      "zh-CN": "姆克狂战士-共鸣",
+      "en-US": "Muku Vanguard - Resonance",
+      "ja-JP": "ムークスマッシャー-共鳴",
+      "ko-KR": "무크 광전사 - 공명"
+    }
+  },
+  "3000038": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-共鸣",
+      "en-US": "Celestial Flier - Resonance",
+      "ja-JP": "ヘヴンスカイ-共鳴",
+      "ko-KR": "성스러운 날치 - 공명"
+    }
+  },
+  "3000039": {
+    "Name": {
+      "zh-CN": "火巫师哥布林-共鸣",
+      "en-US": "Goblin Fire Mage - Resonance",
+      "ja-JP": "炎のエルダーゴブリン-共鳴",
+      "ko-KR": "불 샤먼 고블린 - 공명"
+    }
+  },
+  "3000040": {
+    "Name": {
+      "zh-CN": "风巨斧哥布林-共鸣",
+      "en-US": "storm Goblin Axe - Resonance",
+      "ja-JP": "風の大斧ゴブリン-共鳴",
+      "ko-KR": "바람 거대 도끼 고블린 - 공명"
+    }
+  },
+  "3000041": {
+    "Name": {
+      "zh-CN": "塔塔-共鸣",
+      "en-US": "Tatta-Resonance",
+      "ja-JP": "タータ-共鳴",
+      "ko-KR": "타타 - 공명"
+    }
+  },
+  "3000042": {
+    "Name": {
+      "zh-CN": "蜥蜴人法师-共鸣",
+      "en-US": "Lizardman Mage - Resonance",
+      "ja-JP": "ギルミーメイジ-共鳴",
+      "ko-KR": "리자드맨 마법사 - 공명"
+    }
+  },
+  "3000043": {
+    "Name": {
+      "zh-CN": "罗罗拉-共鸣",
+      "en-US": "Rorola - Resonance",
+      "ja-JP": "ロローラ-共鳴",
+      "ko-KR": "로로라 - 공명"
+    }
+  },
+  "3000044": {
+    "Name": {
+      "zh-CN": "陶洛斯-共鸣",
+      "en-US": "Dorothy - Resonance",
+      "ja-JP": "ドロシー-共鳴",
+      "ko-KR": "도로시 - 공명"
+    }
+  },
+  "3000045": {
+    "Name": {
+      "zh-CN": "博伊斯-共鸣",
+      "en-US": "Boyce - Resonance",
+      "ja-JP": "ボイス-共鳴",
+      "ko-KR": "보이스 - 공명"
+    }
+  },
+  "3000046": {
+    "Name": {
+      "zh-CN": "法法菈-共鸣",
+      "en-US": "Fafala - Resonance",
+      "ja-JP": "ファルファラ-共鳴",
+      "ko-KR": "파파라 - 공명"
+    }
+  },
+  "3000047": {
+    "Name": {
+      "zh-CN": "黑石军团中士-共鸣",
+      "en-US": "Blackstone Sergeant - Resonance",
+      "ja-JP": "黒磊兵団中尉-共鳴",
+      "ko-KR": "검은 돌 군단 중사 - 공명"
+    }
+  },
+  "3000048": {
+    "Name": {
+      "zh-CN": "哥布林首领-共鸣",
+      "en-US": "Goblin Chief - Resonance",
+      "ja-JP": "ゴブリンウォーロード-共鳴",
+      "ko-KR": "고블린 족장 - 공명"
+    }
+  },
+  "3000049": {
+    "Name": {
+      "zh-CN": "赤玉地狐-共鸣",
+      "en-US": "Crimson Foxen - Resonance",
+      "ja-JP": "猛る獣-共鳴",
+      "ko-KR": "루비 땅여우 - 공명"
+    }
+  },
+  "3000050": {
+    "Name": {
+      "zh-CN": "黑石军团中士-共鸣",
+      "en-US": "Blackstone Sergeant - Resonance",
+      "ja-JP": "黒磊兵団中尉-共鳴",
+      "ko-KR": "검은 돌 군단 중사 - 공명"
+    }
+  },
+  "3000051": {
+    "Name": {
+      "zh-CN": "卷心菜调查团首领-共鸣",
+      "en-US": "Cabbage Mission Leader - Resonance",
+      "ja-JP": "甘藍調査団のボス-共鳴",
+      "ko-KR": "양배추 조사단 보스 - 공명"
+    }
+  },
+  "3000052": {
+    "Name": {
+      "zh-CN": "炎角-共鸣",
+      "en-US": "Flamehorn - Resonance",
+      "ja-JP": "炎角-共鳴",
+      "ko-KR": "화염뿔 - 공명"
+    }
+  },
+  "3000053": {
+    "Name": {
+      "zh-CN": "巴西利斯克-共鸣",
+      "en-US": "Basilisk - Resonance",
+      "ja-JP": "バジリスク-共鳴",
+      "ko-KR": "바실리스크 - 공명"
+    }
+  },
+  "3000054": {
+    "Name": {
+      "zh-CN": "蓝脊巨蜥-共鸣",
+      "en-US": "Bluespine Lizard - Resonance",
+      "ja-JP": "ブルースパインリザード-共鳴",
+      "ko-KR": "푸른 돌기 리자드 - 공명"
+    }
+  },
+  "3000055": {
+    "Name": {
+      "zh-CN": "黑石法师队长-共鸣",
+      "en-US": "Blackstone Mage Captain - Resonance",
+      "ja-JP": "黒磊メイジリーダー-共鳴",
+      "ko-KR": "검은 돌 마법사 대장 - 공명"
+    }
+  },
+  "3000056": {
+    "Name": {
+      "zh-CN": "黑石战士队长-共鸣",
+      "en-US": "Blackstone Warrior Captain - Resonance",
+      "ja-JP": "黒磊戦士リーダー-共鳴",
+      "ko-KR": "검은 돌 전사 대장 - 공명"
+    }
+  },
+  "3000057": {
+    "Name": {
+      "zh-CN": "哥布林巫医-共鸣",
+      "en-US": "Goblin Shaman - Resonance",
+      "ja-JP": "悪しき癒し手-共鳴",
+      "ko-KR": "고블린 의술사 - 공명"
+    }
+  },
+  "3000058": {
+    "Name": {
+      "zh-CN": "哥布林欺诈师-共鸣",
+      "en-US": "Goblin Trickster - Resonance",
+      "ja-JP": "トリックエルダー-共鳴",
+      "ko-KR": "고블린 기만술사 - 공명"
+    }
+  },
+  "3000059": {
+    "Name": {
+      "zh-CN": "变异地狐-共鸣",
+      "en-US": "Mutant Foxen - Resonance",
+      "ja-JP": "変異ランドフォックス-共鳴",
+      "ko-KR": "돌연변이 땅여우 - 공명"
+    }
+  },
+  "3000060": {
+    "Name": {
+      "zh-CN": "卷心菜调查团剑士-共鸣",
+      "en-US": "Cabbage Mission Swordsman - Resonance",
+      "ja-JP": "甘藍調査団の剣士-共鳴",
+      "ko-KR": "양배추 조사단 검사 - 공명"
+    }
+  },
+  "3000061": {
+    "Name": {
+      "zh-CN": "卷心菜调查团学者-共鸣",
+      "en-US": "Cabbage Mission Scholar - Resonance",
+      "ja-JP": "甘藍調査団の学者-共鳴",
+      "ko-KR": "양배추 조사단 학자 - 공명"
+    }
+  },
+  "3000062": {
+    "Name": {
+      "zh-CN": "翡翠角羊",
+      "en-US": "Emerald Caprahorn",
+      "ja-JP": "エメラルドホーン",
+      "ko-KR": "비취 뿔염소"
+    }
+  },
+  "3000063": {
+    "Name": {
+      "zh-CN": "丹佛",
+      "en-US": "Denvel",
+      "ja-JP": "デンヴェル",
+      "ko-KR": "덴벨"
+    }
+  },
+  "3000064": {
+    "Name": {
+      "zh-CN": "风龙",
+      "en-US": "Wind Dragon",
+      "ja-JP": "風竜",
+      "ko-KR": "풍룡"
+    }
+  },
+  "3000065": {
+    "Name": {
+      "zh-CN": "幻祸娜宝太刀",
+      "en-US": "Katana Plague Nappo",
+      "ja-JP": "幻災ナッポ・太刀",
+      "ko-KR": "환상 재해 나뽀 태도"
+    }
+  },
+  "3000066": {
+    "Name": {
+      "zh-CN": "幻祸娜宝弓箭",
+      "en-US": "Bow Plague Nappo",
+      "ja-JP": "幻災ナッポ・ディバインアーク",
+      "ko-KR": "환상 재해 나뽀 활"
+    }
+  },
+  "3000067": {
+    "Name": {
+      "zh-CN": "幻祸娜宝长枪",
+      "en-US": "Lance Plague Nappo",
+      "ja-JP": "幻災ナッポ・穿雲槍",
+      "ko-KR": "환상 재해 나뽀 장창"
+    }
+  },
+  "3000068": {
+    "Name": {
+      "zh-CN": "幻祸娜宝吉他",
+      "en-US": "Guitar Plague Nappo",
+      "ja-JP": "幻災ナッポ・ギター",
+      "ko-KR": "환상 재해 나뽀 기타"
+    }
+  },
+  "3000069": {
+    "Name": {
+      "zh-CN": "巨塔boss",
+      "en-US": "Great Tower Boss",
+      "ja-JP": "巨塔ボス",
+      "ko-KR": "거탑 보스"
+    }
+  },
+  "3000070": {
+    "Name": {
+      "zh-CN": "掠食蟹蛛",
+      "en-US": "Predator Arachnocrab",
+      "ja-JP": "プレデター",
+      "ko-KR": "포식 거미게"
+    }
+  },
+  "3000071": {
+    "Name": {
+      "zh-CN": "狂悖之王",
+      "en-US": "Rebel King",
+      "ja-JP": "狂悖の覇者",
+      "ko-KR": "광패한 왕"
+    }
+  },
+  "3000072": {
+    "Name": {
+      "zh-CN": "空洞监察者",
+      "en-US": "Void Watcher",
+      "ja-JP": "クロックゲイザー",
+      "ko-KR": "공허 감시자"
+    }
+  },
+  "3000073": {
+    "Name": {
+      "zh-CN": "山脊之牙",
+      "en-US": "Ridge Fang",
+      "ja-JP": "峠の牙",
+      "ko-KR": "산등엄니"
+    }
+  },
+  "3000074": {
+    "Name": {
+      "zh-CN": "嗜血毛球",
+      "en-US": "Bloodthirsty Furball",
+      "ja-JP": "ブラッドバウル",
+      "ko-KR": "흡혈 모구"
+    }
+  },
+  "3000075": {
+    "Name": {
+      "zh-CN": "杀手蟹蛛",
+      "en-US": "Killer Arachnocrab",
+      "ja-JP": "キラーカニクモ",
+      "ko-KR": "킬러 거미게"
+    }
+  },
+  "3000076": {
+    "Name": {
+      "zh-CN": "深绿之牙",
+      "en-US": "Verdant Fang",
+      "ja-JP": "深緑の牙",
+      "ko-KR": "짙푸른 엄니"
+    }
+  },
+  "3000077": {
+    "Name": {
+      "zh-CN": "食人毛球",
+      "en-US": "Man-Eating Furball",
+      "ja-JP": "カニバルバウル",
+      "ko-KR": "식인 모구"
+    }
+  },
+  "3000078": {
+    "Name": {
+      "zh-CN": "多格尔曼",
+      "en-US": "Dogorman",
+      "ja-JP": "ドゴルマン",
+      "ko-KR": "도골만"
+    }
+  },
+  "3000079": {
+    "Name": {
+      "zh-CN": "圣堂之眼",
+      "en-US": "Sanctuary Eye",
+      "ja-JP": "ヘヴンアイ",
+      "ko-KR": "성역의 눈"
+    }
+  },
+  "3000080": {
+    "Name": {
+      "zh-CN": "露西-共鸣",
+      "en-US": "Lucy - Resonance",
+      "ja-JP": "ルーシィ・共鳴",
+      "ko-KR": "루시 - 공명"
+    }
+  },
+  "3000081": {
+    "Name": {
+      "zh-CN": "纳兹-共鸣",
+      "en-US": "Natsu - Resonance",
+      "ja-JP": "ナツ・共鳴",
+      "ko-KR": "나츠 - 공명"
+    }
+  },
+  "3100000": {
+    "Name": {
+      "zh-CN": "宠物-弓-传奇野猪",
+      "en-US": "Companion-Bow-Legendary Boar",
+      "ja-JP": "臣獣-弓-伝説のボア",
+      "ko-KR": "야수 - 활 - 전설 멧돼지"
+    }
+  },
+  "3100001": {
+    "Name": {
+      "zh-CN": "宠物-弓-传奇雄鹰",
+      "en-US": "Companion-Bow-Legendary Eagle",
+      "ja-JP": "臣獣-弓-伝説の臣鷹",
+      "ko-KR": "야수 - 활 - 전설 독수리"
+    }
+  },
+  "3100002": {
+    "Name": {
+      "zh-CN": "宠物-弓-天界雄鹰",
+      "en-US": "Companion-Bow-Celestial Eagle",
+      "ja-JP": "臣獣-弓-天界の臣鷹",
+      "ko-KR": "야수 - 활 - 하늘 독수리"
+    }
+  },
+  "3110001": {
+    "Name": {
+      "zh-CN": "雷电食人魔-职责",
+      "en-US": "Tempest Ogre - Role",
+      "ja-JP": "サンダーオーガ・ロール",
+      "ko-KR": "번개 오우거-포지션"
+    }
+  },
+  "3110002": {
+    "Name": {
+      "zh-CN": "火焰兽人-职责",
+      "en-US": "Flame Orc - Role",
+      "ja-JP": "フレイムオーク・ロール",
+      "ko-KR": "화염 오크-포지션"
+    }
+  },
+  "3110003": {
+    "Name": {
+      "zh-CN": "姆克王-职责",
+      "en-US": "Muku King - Role",
+      "ja-JP": "キングムーク・ロール",
+      "ko-KR": "무크왕-포지션"
+    }
+  },
+  "3110004": {
+    "Name": {
+      "zh-CN": "铁牙-职责",
+      "en-US": "Iron Fang - Role",
+      "ja-JP": "鉄牙・ロール",
+      "ko-KR": "무쇠 이빨-포지션"
+    }
+  },
+  "3110005": {
+    "Name": {
+      "zh-CN": "金牙-职责",
+      "en-US": "Golden Juggernaut - Role",
+      "ja-JP": "猛る金色・ロール",
+      "ko-KR": "황금 이빨-포지션"
+    }
+  },
+  "3110006": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-职责",
+      "en-US": "Lizardman King - Role",
+      "ja-JP": "キングギルミー・ロール",
+      "ko-KR": "리자드맨 킹-포지션"
+    }
+  },
+  "3110007": {
+    "Name": {
+      "zh-CN": "艾露娜-职责",
+      "en-US": "Airona - Role",
+      "ja-JP": "アルーナ・ロール",
+      "ko-KR": "아이로나-포지션"
+    }
+  },
+  "3110008": {
+    "Name": {
+      "zh-CN": "法法菈-职责",
+      "en-US": "Fafala - Role",
+      "ja-JP": "ファルファラ・ロール",
+      "ko-KR": "파파라-포지션"
+    }
+  },
+  "5100301": {
+    "Name": {
+      "zh-CN": "法法菈",
+      "en-US": "Fafala",
+      "ja-JP": "ファルファラ",
+      "ko-KR": "파파라"
+    }
+  },
+  "5100304": {
+    "Name": {
+      "zh-CN": "法法菈",
+      "en-US": "Fafala",
+      "ja-JP": "ファルファラ",
+      "ko-KR": "파파라"
+    }
+  },
+  "6000901": {
+    "Name": {
+      "zh-CN": "自爆兵02型",
+      "en-US": "Suicidal Soldier 02",
+      "ja-JP": "自爆兵02型",
+      "ko-KR": "자폭병 02형"
+    }
+  },
+  "6000902": {
+    "Name": {
+      "zh-CN": "毒雾",
+      "en-US": "Toxic mist",
+      "ja-JP": "毒霧",
+      "ko-KR": "독안개"
+    }
+  }
+}

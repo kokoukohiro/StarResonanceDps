@@ -143,6 +143,24 @@ export BPSR_TABLES=<置き場所>     # bash
 | `Data/Overrides/RecountOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
 | `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
+| `Data/Overrides/MonsterOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
+
+### MonsterOverrides.json
+
+`MonsterNames.json` を読んだ後に重ねる。入力の表で名前が空になっているモンスターの名前を補う。
+
+```json
+{ "<モンスターの種別ID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
+```
+
+| | |
+|---|---|
+| `Name` | 書いた言語だけ差し替わる。生成物に名前があっても、こちらが勝つ |
+| `Name` に空文字 | **生成値を消す。** 以後は通常どおり zh-CN へ落ちる |
+| 生成物に無いキー | 書ける。名前の表に行がある扱いになる |
+
+**`Name` の無い項目は置かない。** 行を作らずに飛ばし、エラーログを出す。
+キーが番号の形でない、言語名の打ち間違いも、エラーログを出して飛ばす。ファイルが無ければエラーログを出し、上書き無しのまま続ける。
 
 ### SkillOverrides.json
 
@@ -474,3 +492,6 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 同じ番号が別の表で別のものを指すことがあり、どの表の名前かは実体の種類でしか決まらない。アプリはモンスターの実体のときだけこのテーブルを引く。
 
 `MonsterTable` は行があっても `Name` が空のことがあり、その数は言語で大きく違う。
+
+**名前が空の行も鍵を持つ。** エンティティリストは「表に行があって名前が空」と「表に行が無い(アプリの表が古い)」を
+鍵の有無で見分ける(前者は HP バーが見えなければ出さず、見えれば「敵」「味方」と出す。後者は空欄のまま出す)。

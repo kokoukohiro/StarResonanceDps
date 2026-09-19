@@ -26,6 +26,8 @@ public static class CombatDataCatalog
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _monsterNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary><see cref="_monsterNames"/> の鍵(<c>MonsterTable</c> の行)全部。名前が空の行も含む。</summary>
+    private static FrozenSet<int> _monsterIds = FrozenSet<int>.Empty;
     /// <summary>技ID → ボス大技の予告(<c>DbmTable</c>)の名前。<c>Data/Localization/DbmNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _dbmNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -175,7 +177,8 @@ public static class CombatDataCatalog
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillNames = LoadLocalizedText("SkillNames", out _);
             _buffNames = LoadLocalizedText("BuffNames", out _);
-            _monsterNames = LoadLocalizedText("MonsterNames", out _);
+            var monsterNames = LoadLocalizedText("MonsterNames", out var monsterIds);
+            (_monsterNames, _monsterIds) = ApplyMonsterOverrides(monsterNames, monsterIds);
             _dbmNames = LoadLocalizedText("DbmNames", out _);
             _rogueEntryNames = LoadLocalizedText("RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
@@ -531,6 +534,87 @@ public static class CombatDataCatalog
         }
     }
 
+    /// <summary>
+    /// <c>Data/Overrides/MonsterOverrides.json</c> をモンスターの名前に重ねる。形は <c>RecountOverrides</c> の名前と同じで、
+    /// 書いた言語だけ差し替わる(空文字はその言語の名前を消し、以後は zh-CN へ落ちる)。
+    ///
+    /// <para>
+    /// 生成物に無い番号も書け、名前の表に行がある扱いになる。<c>Name</c> の無い項目は行を作らずに飛ばす。
+    /// 鍵が番号でない・言語名の打ち間違いはエラーログを出して飛ばす(静かに効かないので)。
+    /// </para>
+    /// </summary>
+    private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids) ApplyMonsterOverrides(
+        FrozenDictionary<string, FrozenDictionary<int, string>> names,
+        FrozenSet<int> ids)
+    {
+        const string relativePath = "Overrides/MonsterOverrides.json";
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "MonsterOverrides.json");
+        if (!File.Exists(path))
+        {
+            Log.Error("Failed to load {OverridePath}", relativePath);
+            return (names, ids);
+        }
+
+        var overrides = JsonConvert.DeserializeObject<Dictionary<string, MonsterOverrideEntry?>>(File.ReadAllText(path))
+            ?? throw new InvalidDataException($"{relativePath} が空です。");
+        var merged = names.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value.ToDictionary(),
+            StringComparer.OrdinalIgnoreCase);
+        var mergedIds = ids.ToHashSet();
+
+        foreach (var (key, entry) in overrides)
+        {
+            if (!int.TryParse(key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id)
+                || id <= 0)
+            {
+                Log.Error("MonsterOverrides: 鍵が番号の形でないので飛ばす \"{Key}\"", key);
+                continue;
+            }
+
+            if (entry?.Name is null)
+            {
+                Log.Error("MonsterOverrides: {Key} に Name が無いので飛ばす", key);
+                continue;
+            }
+
+            mergedIds.Add(id);
+            foreach (var (culture, value) in entry.Name)
+            {
+                if (!merged.TryGetValue(culture, out var namesById))
+                {
+                    Log.Error(
+                        "MonsterOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                        key, culture, string.Join(" / ", SupportedCultures));
+                    continue;
+                }
+
+                var text = value?.Trim() ?? string.Empty;
+                if (text.Length == 0)
+                {
+                    namesById.Remove(id);
+                }
+                else
+                {
+                    namesById[id] = text;
+                }
+            }
+        }
+
+        Log.Information("Loaded {OverridePath}", relativePath);
+        return (
+            merged.ToFrozenDictionary(
+                pair => pair.Key,
+                pair => pair.Value.ToFrozenDictionary(),
+                StringComparer.OrdinalIgnoreCase),
+            mergedIds.ToFrozenSet());
+    }
+
+    private sealed class MonsterOverrideEntry
+    {
+        public Dictionary<string, string?>? Name { get; set; }
+    }
+
     private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides()
     {
         var result = new Dictionary<long, RecountOverrideEntry>();
@@ -845,6 +929,97 @@ public static class CombatDataCatalog
                 InternalIdDisplayMode.EntityOnly,
                 monsterId)
             : string.Empty;
+    }
+
+    /// <summary>
+    /// エンティティリストの実体の名前。<b>表示中の言語で引く。</b>
+    ///
+    /// <para>
+    /// 引数は実体の種類と <c>AttrId</c>(種別ID)。引く表は種類で決まる(いまはモンスターだけ)。
+    /// 同じ番号が別の表で別のものを指すので、種類を取り違えると別の実体の名前になる。
+    /// 表を持たない種類は空。
+    /// </para>
+    ///
+    /// <para>
+    /// <paramref name="unnamedLabel"/> は、表に行があって名前が空のときに代わりに出す文字列(「敵」「味方」)。
+    /// <b>表に行が無い番号には当てない。</b> 表が古いことを、名前の無い雑魚と見分けられるように空欄のまま(内部ID注記だけ)にする。
+    /// </para>
+    /// </summary>
+    public static string GetEntityName(Zproto.EEntityType entityType, long entityId, string? unnamedLabel = null)
+    {
+        if (GetEntityNameTable(entityType) is not { } table || entityId is not (> 0 and <= int.MaxValue))
+        {
+            return string.Empty;
+        }
+
+        var name = ResolveText(table.Names, Volatile.Read(ref _cultureName), (int)entityId);
+        if (string.IsNullOrEmpty(name) && unnamedLabel is not null && table.Ids.Contains((int)entityId))
+        {
+            name = unnamedLabel;
+        }
+
+        return AppendInternalId(name, InternalIdDisplayMode.EntityOnly, entityId);
+    }
+
+    /// <summary><see cref="GetEntityName"/> の名前(内部ID注記を除く)が空でないか。</summary>
+    public static bool HasEntityName(Zproto.EEntityType entityType, long entityId)
+    {
+        return GetEntityNameTable(entityType) is { } table
+            && entityId is > 0 and <= int.MaxValue
+            && !string.IsNullOrEmpty(ResolveText(table.Names, Volatile.Read(ref _cultureName), (int)entityId));
+    }
+
+    /// <summary>
+    /// 種類の表にその番号の行があるか。名前が空の行もある扱い。
+    /// 「行があって名前が空」と「表に行が無い(表が古い)」を見分けるのに使う。
+    /// </summary>
+    public static bool HasEntityRow(Zproto.EEntityType entityType, long entityId)
+    {
+        return GetEntityNameTable(entityType) is { } table
+            && entityId is > 0 and <= int.MaxValue
+            && table.Ids.Contains((int)entityId);
+    }
+
+    /// <summary>
+    /// そのモンスターがゲーム内でプレイヤーに見える HP バーを持つか。エンティティリストと被ダメログが同じ判定を使う。
+    ///
+    /// <para>
+    /// <c>MonsterTable.HudShowParam</c> の3番目が HP バーを出すか。値が1つの形は全部の位置がその値。
+    /// 先頭は HP バーではない(名前はあって HP バーの無い実体、画面に名前が無くて HP バーのある実体がいる)。
+    /// 先頭は画面に名前を出すかと見ているが推定(表に名前があっても画面に出ない実体がいる)。
+    /// </para>
+    ///
+    /// <para>
+    /// 表に無い番号・<c>HudShowParam</c> が空か2つのときは判定できないので、持つ側に倒す。
+    /// </para>
+    /// </summary>
+    public static bool HasMonsterHpBar(long monsterId)
+    {
+        if (monsterId is not (> 0 and <= int.MaxValue)
+            || !HelperMethods.DataTables.Monsters.Data.TryGetValue(
+                monsterId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var monster)
+            || monster.HudShowParam is not { } hudShowParam)
+        {
+            return true;
+        }
+
+        return hudShowParam.Count switch
+        {
+            1 => hudShowParam[0] != 0,
+            >= 3 => hudShowParam[2] != 0,
+            _ => true
+        };
+    }
+
+    private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids)? GetEntityNameTable(
+        Zproto.EEntityType entityType)
+    {
+        return entityType switch
+        {
+            Zproto.EEntityType.EntMonster => (_monsterNames, _monsterIds),
+            _ => null
+        };
     }
 
     /// <summary>

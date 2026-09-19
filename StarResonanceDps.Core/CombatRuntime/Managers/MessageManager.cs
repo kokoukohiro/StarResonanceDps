@@ -1983,7 +1983,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (buffEffect.Type == EBuffEventType.BuffEventRemove)
                     {
-                        BuffInstanceIndex.Instance.Remove(targetUuid, buffEffect.BuffUuid);
+                        BuffInstanceIndex.Instance.Remove(targetUuid, buffEffect.BuffUuid, extraData.ArrivalTime);
                         if (EncounterManager.Current.Entities.TryGetValue(targetUuid, out var targetEntity))
                         {
                             List<ShieldInfo>? attrShieldList = targetEntity.GetAttrKV("AttrShieldList") as List<ShieldInfo>;

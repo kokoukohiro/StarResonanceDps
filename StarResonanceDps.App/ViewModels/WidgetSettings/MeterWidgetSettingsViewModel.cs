@@ -50,6 +50,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     private int _partyDisplayModeIndex = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
     [ObservableProperty]
+    private int _entityDisplayModeIndex = WidgetConfigDefaults.DefaultEntityDisplayModeIndex;
+
+    [ObservableProperty]
     private int _selfDisplayModeIndex = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
     [ObservableProperty]
@@ -154,12 +157,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     /// </summary>
     public bool ShowsPartyDisplayHistoryNote => _kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
+    /// <summary>エンティティリストのフィルター(すべて表示 / オブジェクト以外)を出すか。</summary>
+    public bool ShowsEntityDisplaySettings => _kind == WidgetKind.EntityList;
+
     /// <summary>「自分の表示」を出すのはプレイヤーリストとメーター2種。</summary>
     public bool ShowsSelfDisplaySettings =>
         _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
     public bool HasAdditionalDisplaySettings =>
-        ShowsHealthValueSettings || ShowsPartyDisplaySettings || ShowsSelfDisplaySettings;
+        ShowsHealthValueSettings || ShowsPartyDisplaySettings || ShowsEntityDisplaySettings || ShowsSelfDisplaySettings;
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -182,6 +188,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
+            EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
             ClassColorOpacity = Math.Clamp(
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
@@ -281,6 +288,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
+            EntityDisplayModeIndex = normalized.EntityDisplayModeIndex;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
             ClassColorOpacity = normalized.ClassColorOpacity;
             ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
@@ -307,6 +315,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
+            || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
             || left.ClassColorOpacity != right.ClassColorOpacity
             || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
@@ -446,6 +455,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     }
 
     partial void OnPartyDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnEntityDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
     }

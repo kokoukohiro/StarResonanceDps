@@ -882,6 +882,18 @@
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>본인만</value>
   </data>
+  <data name="EntityDisplay_All" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="EntityDisplay_HideObjects" xml:space="preserve">
+    <value>오브젝트 제외</value>
+  </data>
+  <data name="EntityList_UnnamedEnemy" xml:space="preserve">
+    <value>적</value>
+  </data>
+  <data name="EntityList_UnnamedAlly" xml:space="preserve">
+    <value>아군</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>버프·디버프 카드</value>
   </data>

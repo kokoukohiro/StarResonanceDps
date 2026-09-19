@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using Zproto;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
-/// エンティティ(モンスター)用ウィンドウが追う対象。
+/// エンティティ(エンティティリストの実体)用ウィンドウが追う対象。
 ///
 /// <para>
 /// 通常は<b>実体1つ</b>に固定される。エンティティリストから選んで開いた窓は、
@@ -12,8 +13,8 @@ namespace StarResonanceDps.App.Models.Widgets;
 ///
 /// <para>
 /// 例外は<b>設定からの復元直後</b>。実体ID(<c>EntityUuid</c>)は再起動で消えるため、
-/// 保存できるのは種別ID(<see cref="EntityId"/>)だけ。復元した窓は未捕獲の状態で開き、
-/// その種別の個体が現れた時点で1体だけ捕まえる。捕まえた後は通常と同じで、その個体に固定される。
+/// 保存できるのは種類と種別ID(<see cref="EntityType"/>・<see cref="EntityId"/>)だけ。復元した窓は未捕獲の状態で開き、
+/// 種類と種別が一致する個体が現れた時点で1体だけ捕まえる。捕まえた後は通常と同じで、その個体に固定される。
 /// </para>
 /// </summary>
 public sealed class EntityWindowTarget
@@ -27,14 +28,19 @@ public sealed class EntityWindowTarget
         ArgumentNullException.ThrowIfNull(entity);
 
         EntityId = entity.EntityId;
+        EntityType = entity.EntityType;
         _savedName = entity.Name;
         Attach(entity);
     }
 
-    /// <summary>種別だけ分かっている状態で作る。設定からの復元経路。</summary>
-    public EntityWindowTarget(long entityId, string? savedName)
+    /// <summary>
+    /// 種別だけ分かっている状態で作る。設定からの復元経路。
+    /// <paramref name="entityType"/> が <c>null</c>(種類を持たない保存)なら、どの個体も捕まえない。
+    /// </summary>
+    public EntityWindowTarget(long entityId, EEntityType? entityType, string? savedName)
     {
         EntityId = entityId;
+        EntityType = entityType;
         _savedName = savedName ?? string.Empty;
     }
 
@@ -42,6 +48,9 @@ public sealed class EntityWindowTarget
     public event EventHandler? Changed;
 
     public long EntityId { get; }
+
+    /// <summary>実体の種類。<see cref="EntityId"/> がどの表の番号かを決める。</summary>
+    public EEntityType? EntityType { get; }
 
     /// <summary>捕まえている実体のID。<b>0 は未捕獲</b>。</summary>
     public long EntityUuid => _entity?.EntityUuid ?? 0;
@@ -64,8 +73,16 @@ public sealed class EntityWindowTarget
         return IsAcquired && EntityUuid == entityUuid;
     }
 
+    /// <summary>未捕獲のときに捕まえてよい個体か。種類と種別IDの両方が一致するもの。</summary>
+    public bool Matches(EntityListEntry entity)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+
+        return entity.EntityId == EntityId && entity.EntityType == EntityType;
+    }
+
     /// <summary>
-    /// 与えられた個体を採用する。未捕獲なら種別が一致するものを捕まえ、
+    /// 与えられた個体を採用する。未捕獲なら種類と種別が一致するものを捕まえ、
     /// 捕獲済みなら同じ実体の新しいエントリにだけ差し替える。
     /// </summary>
     /// <returns>採用したら <c>true</c>。</returns>
@@ -75,7 +92,7 @@ public sealed class EntityWindowTarget
 
         if (_entity is null)
         {
-            if (entity.EntityId != EntityId)
+            if (!Matches(entity))
             {
                 return false;
             }

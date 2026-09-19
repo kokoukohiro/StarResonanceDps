@@ -882,6 +882,18 @@
   <data name="PartyDisplay_SelfOnly" xml:space="preserve">
     <value>仅自己</value>
   </data>
+  <data name="EntityDisplay_All" xml:space="preserve">
+    <value>全部显示</value>
+  </data>
+  <data name="EntityDisplay_HideObjects" xml:space="preserve">
+    <value>隐藏物件</value>
+  </data>
+  <data name="EntityList_UnnamedEnemy" xml:space="preserve">
+    <value>敌方</value>
+  </data>
+  <data name="EntityList_UnnamedAlly" xml:space="preserve">
+    <value>友方</value>
+  </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>增益减益卡片</value>
   </data>
