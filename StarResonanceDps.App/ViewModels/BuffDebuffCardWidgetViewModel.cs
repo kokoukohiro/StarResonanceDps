@@ -240,7 +240,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         // それを保存すると ID 表示を切ったあともタイトルに残る。
         var rememberedName = snapshot is null
             ? string.Empty
-            : CombatDataCatalog.GetBuffNameWithoutInternalId(snapshot.BaseId);
+            : BuffDebuffCardContent.GetCardBuffName(snapshot.BaseId);
         if (!string.IsNullOrWhiteSpace(rememberedName))
         {
             var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownBuffName);

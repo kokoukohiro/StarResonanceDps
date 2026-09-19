@@ -44,6 +44,21 @@ public static class CombatDataCatalog
     private static FrozenSet<int> _warningSkillLevelIds = FrozenSet<int>.Empty;
     /// <summary><see cref="_warningSkillLevelIds"/> のどれかのレベルを持つ技ID。</summary>
     private static FrozenSet<int> _warningSkillIds = FrozenSet<int>.Empty;
+    /// <summary>
+    /// 料理のバフ → 名前(そのバフを付けるアイテムの名前)。<c>Data/Localization/CuisineBuffs.json</c>。
+    /// <c>DataTools/gen_buff_groups.py</c> が生成する。バフ自身の名前は「料理」の1語に丸められているので、こちらを先に引く。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _cuisineBuffNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary><see cref="_cuisineBuffNames"/> の鍵(料理のバフ)全部。</summary>
+    private static FrozenSet<int> _cuisineBuffIds = FrozenSet<int>.Empty;
+    /// <summary>薬剤のバフ → 名前。<c>Data/Localization/PotionBuffs.json</c>。形と引き方は料理と同じ。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _potionBuffNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary><see cref="_potionBuffNames"/> の鍵(薬剤のバフ)全部。</summary>
+    private static FrozenSet<int> _potionBuffIds = FrozenSet<int>.Empty;
     /// <summary>行代表キー → ゲーム内メーターの行名。<c>Data/Localization/RecountRows.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<long, string>> _recountNames =
         new Dictionary<string, FrozenDictionary<long, string>>(StringComparer.OrdinalIgnoreCase)
@@ -52,12 +67,12 @@ public static class CombatDataCatalog
     /// <summary>発生源キー → 行代表キー。<c>RecountRows.json</c> の行構成に手修正を重ねたもの。</summary>
     private static FrozenDictionary<long, long> _recountRows = FrozenDictionary<long, long>.Empty;
 
-    /// <summary>特性のバフID → 特性名。<c>Data/Localization/RogueEntryNames.json</c>。</summary>
+    /// <summary>オプションのバフID → オプション名。<c>Data/Localization/RogueEntryNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _rogueEntryNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary><see cref="_rogueEntryNames"/> の鍵(特性のバフID)全部。</summary>
+    /// <summary><see cref="_rogueEntryNames"/> の鍵(オプションのバフID)全部。</summary>
     private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
@@ -168,6 +183,7 @@ public static class CombatDataCatalog
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
             _warningSkillIds = _warningSkillLevelIds.Select(skillLevelId => skillLevelId / 100).ToFrozenSet();
+            LoadBuffGroups();
             _sceneNames = LoadLocalizedText("SceneNames", out _);
             _dungeonTypeNames = LoadDungeonTypeNames();
             LoadRecounts();
@@ -234,9 +250,10 @@ public static class CombatDataCatalog
     /// メーターの行に出す名前。<b>ゲーム内メーターの見出し表(手修正込み)が先に決める。</b>
     ///
     /// <para>
-    /// 見出し表で名前が空の行だけ、記録時に付与元をたどって着いた先(<paramref name="landing"/>)の名前を出す。
-    /// 特性のバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら <c>SkillNames</c>。
-    /// 着いていなければ空のまま(内部ID注記だけ)。見出し表の名前を着地先で上書きすることはない。
+    /// 見出し表で名前が空の行は、バフから来た行で鍵のバフが料理なら料理の名前(<c>CuisineBuffs.json</c>)。
+    /// それも無ければ、記録時に付与元をたどって着いた先(<paramref name="landing"/>)の名前を出す。
+    /// オプションのバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら <c>SkillNames</c>。
+    /// 着いていなければ空のまま(内部ID注記だけ)。見出し表の名前をこれらで上書きすることはない。
     /// </para>
     ///
     /// <para>
@@ -246,7 +263,7 @@ public static class CombatDataCatalog
     /// </summary>
     public static string GetSourceDisplayName(long rowKey, bool isBuffSource, SourceLanding landing)
     {
-        var name = ResolveText(_recountNames, Volatile.Read(ref _cultureName), rowKey);
+        var name = GetSourceNameBeforeLanding(rowKey, isBuffSource);
         if (string.IsNullOrEmpty(name))
         {
             name = GetLandingName(landing);
@@ -256,6 +273,27 @@ public static class CombatDataCatalog
             name,
             isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
             rowKey);
+    }
+
+    /// <summary>
+    /// 着地先より前に決まるメーターの行名(内部ID注記なし)。見出し表(手修正込み)、空ならバフから来た行で鍵のバフが料理なら料理の名前。
+    /// どちらも無ければ空。
+    ///
+    /// <para>
+    /// 表示(<see cref="GetSourceDisplayName"/>)と空欄の検知(着地先を決めるかどうか)の両方がこれで判定する。
+    /// 片方だけ変えると、名前が出る行を空欄として報告するか、空欄の行を報告しなくなる。
+    /// </para>
+    /// </summary>
+    public static string GetSourceNameBeforeLanding(long rowKey, bool isBuffSource)
+    {
+        var cultureName = Volatile.Read(ref _cultureName);
+        var name = ResolveText(_recountNames, cultureName, rowKey);
+        if (string.IsNullOrEmpty(name) && isBuffSource && _cuisineBuffIds.Contains(SourceKeyOwnerId(rowKey)))
+        {
+            name = ResolveText(_cuisineBuffNames, cultureName, SourceKeyOwnerId(rowKey));
+        }
+
+        return name;
     }
 
     /// <summary>着地先の名前。着いていないか名前が無ければ空。</summary>
@@ -270,7 +308,7 @@ public static class CombatDataCatalog
         };
     }
 
-    /// <summary>特性表(<c>RogueEntryTable.BuffId</c>)にあるバフか。</summary>
+    /// <summary>オプションの表(<c>RogueEntryTable.BuffId</c>)にあるバフか。</summary>
     public static bool IsRogueEntryBuff(int buffId) => _rogueEntryBuffIds.Contains(buffId);
 
     /// <summary>
@@ -759,15 +797,29 @@ public static class CombatDataCatalog
     /// </summary>
     public static string GetBuffNameWithoutInternalId(int buffId)
     {
-        return ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId);
+        return ResolveBuffName(Volatile.Read(ref _cultureName), buffId);
     }
 
     public static string GetBuffName(int buffId)
     {
         return AppendInternalId(
-            ResolveText(_buffNames, Volatile.Read(ref _cultureName), buffId),
+            ResolveBuffName(Volatile.Read(ref _cultureName), buffId),
             InternalIdDisplayMode.BuffOnly,
             buffId);
+    }
+
+    /// <summary>
+    /// バフの名前。料理・薬剤のバフはその表の名前(付けるアイテムの名前)、それ以外は <c>BuffNames</c>。
+    /// 料理・薬剤のバフでも、その表の名前が全言語で空なら <c>BuffNames</c> へ落とさず空を返す。
+    /// </summary>
+    private static string ResolveBuffName(string cultureName, int buffId)
+    {
+        return GetBuffGroup(buffId) switch
+        {
+            BuffGroup.Cuisine => ResolveText(_cuisineBuffNames, cultureName, buffId),
+            BuffGroup.Potion => ResolveText(_potionBuffNames, cultureName, buffId),
+            _ => ResolveText(_buffNames, cultureName, buffId)
+        };
     }
 
     /// <summary>
@@ -858,45 +910,18 @@ public static class CombatDataCatalog
         return string.Empty;
     }
 
-    /// <summary>料理バフのアイコン。</summary>
-    private const string CuisineBuffIconName = "buff_food_up";
-
-    /// <summary>薬剤バフのアイコン。</summary>
-    private const string PotionBuffIconName = "buff_agentia_up";
-
     /// <summary>
-    /// 消費アイテム系バフのタグ。
-    /// <c>美食的加护</c>・虚蚀战利品・丰收宴・禁药・沉梦抗性 などはこれを持たない。
-    /// </summary>
-    private const int ConsumableBuffTag = 100;
-
-    /// <summary>
-    /// 個別に扱わず1つのまとまりとして見るバフか。<b>アイコンとタグの両方</b>で判定する。
-    ///
-    /// <para>
-    /// アイコンだけだと別系統が混ざる(<c>buff_food_up</c> には 美食的加护 と 丰收宴 が、
-    /// <c>buff_agentia_up</c> には 禁药 と 沉梦抗性 が入る)。タグ100 を併せると
-    /// 料理は <c>2032011</c>〜<c>2032284</c>、薬剤は <c>2033011</c>〜<c>2033189</c> に
-    /// ちょうど収まる。ゲーム側の表示名もそれぞれ1語に丸められている。
-    /// </para>
+    /// 個別に扱わず1つのまとまりとして見るバフか。<c>Data/Localization/CuisineBuffs.json</c> にあれば料理、
+    /// <c>Data/Localization/PotionBuffs.json</c> にあれば薬剤。選ぶ条件は <c>DataTools/gen_buff_groups.py</c> が持つ。
     /// </summary>
     public static BuffGroup GetBuffGroup(int buffId)
     {
-        if (!_buffs.TryGetValue(buffId, out var buff)
-            || buff.Tags is null
-            || !buff.Tags.Contains(ConsumableBuffTag))
-        {
-            return BuffGroup.None;
-        }
-
-        var icon = FirstNonEmpty(buff.ShowHUDIcon, buff.Icon);
-
-        if (icon.Contains(CuisineBuffIconName, StringComparison.OrdinalIgnoreCase))
+        if (_cuisineBuffIds.Contains(buffId))
         {
             return BuffGroup.Cuisine;
         }
 
-        return icon.Contains(PotionBuffIconName, StringComparison.OrdinalIgnoreCase)
+        return _potionBuffIds.Contains(buffId)
             ? BuffGroup.Potion
             : BuffGroup.None;
     }
@@ -1130,6 +1155,28 @@ public static class CombatDataCatalog
         var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"{path} is empty.");
         return skillLevelIds.ToFrozenSet();
+    }
+
+    /// <summary>
+    /// 料理・薬剤の名前テーブル(<c>Data/Localization/CuisineBuffs.json</c> / <c>PotionBuffs.json</c>)を読む。
+    /// 形はほかの名前テーブルと同じで、表にある鍵がそのまとまりのバフ。ファイルが無ければエラーログを出して空(そのまとまりが無い)。
+    /// 同じバフが両方にあれば止まる。
+    /// </summary>
+    private static void LoadBuffGroups()
+    {
+        var cuisineBuffNames = LoadLocalizedText("CuisineBuffs", out var cuisineBuffIds);
+        var potionBuffNames = LoadLocalizedText("PotionBuffs", out var potionBuffIds);
+
+        var both = cuisineBuffIds.Intersect(potionBuffIds).ToArray();
+        if (both.Length > 0)
+        {
+            throw new InvalidDataException($"CuisineBuffs and PotionBuffs share buffs: {string.Join(", ", both)}");
+        }
+
+        _cuisineBuffNames = cuisineBuffNames;
+        _cuisineBuffIds = cuisineBuffIds;
+        _potionBuffNames = potionBuffNames;
+        _potionBuffIds = potionBuffIds;
     }
 
     /// <summary>

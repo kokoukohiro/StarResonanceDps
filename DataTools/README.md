@@ -14,6 +14,7 @@ python gen_scenes.py      # シーン名(ダンジョンではダンジョン名
 python gen_monsters.py    # モンスターの名前
 python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
 python gen_rogue_entries.py   # オプション(ローグ系モード)の名前
+python gen_buff_groups.py     # 料理・薬剤のバフの名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -95,6 +96,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_monsters.py` | `Data/Localization/MonsterNames.json` |
 | `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
 | `gen_rogue_entries.py` | `Data/Localization/RogueEntryNames.json` |
+| `gen_buff_groups.py` | `Data/Localization/CuisineBuffs.json`<br>`Data/Localization/PotionBuffs.json` |
 
 ## 全ツール共通の仕様
 
@@ -418,6 +420,49 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 **出所の土台はバフIDの単位で決める**(cn / en は `Star`、jp / kr は `StarASIA`)。土台にそのバフIDの名前があれば土台だけを使う。
 
 同じバフIDで名前が食い違う言語は、**`EntryId` が一番若い行の名前**を採り、一覧を出す。空にも除外にもしない。
+
+---
+
+## gen_buff_groups.py
+
+料理・薬剤のバフを、まとまりごとの名前テーブルに書く。形はほかの名前テーブルと同じ。
+
+料理・薬剤は食べ直すたびに別のIDへ入れ替わるので、バフバーの行から開くバフカードは、
+この一覧にあるバフを個別のIDではなくまとまりとして追う。
+アプリはこの一覧にあるバフの名前を、`BuffNames.json` ではなくこの一覧から引く。
+
+### 選ぶ条件
+
+`BuffTable` の2つの項目だけで選ぶ。**名前は見ない。**
+
+| 項目 | 条件 |
+|---|---|
+| `Tags` | 消耗品のタグ(`CONSUMABLE_TAG`)を持つ |
+| アイコン | `ShowHUDIcon`、空なら `Icon`。料理のアイコンなら料理、薬剤のアイコンなら薬剤(`GROUP_ICONS`) |
+
+アイコンだけでは、料理・薬剤でないバフも同じアイコンを使っていて混ざる。
+
+### 名前
+
+**そのバフを付けるアイテムの名前。** バフ自身の名前は料理・薬剤の1語に丸められている。
+料理の表(`CookCuisineTable`)・薬剤の表(`ChemistryCuisineTable`)の行の `Id` がアイテムの `Id` で、
+`BuffPar` の先頭がそのアイテムが付けるバフ。アイテムの名前は `ItemTable` から引く。
+
+| そのバフを付けるアイテム | 名前 |
+|---|---|
+| 1つ | そのアイテムの名前 |
+| 複数 | アイテムの `Id` の順に ` / ` でつなぐ(どのアイテムで付いたかはバフからは決まらない) |
+| 無い | バフ自身の名前 |
+
+言語ごとの出所は上の「土台は言語で分ける」と同じ。**つなぐ名前が1つでも空の言語は、その言語ごと空にする**(一部だけの並びを作らない)。
+
+### 出力は `Star` で作る
+
+`StarASIA` も読み、次のときは**書かずに止まる**(前の出力が残る)。
+
+- `StarASIA` にだけある料理・薬剤のバフがある。料理と薬剤が入れ替わっている
+- 料理・薬剤の表に、`StarASIA` にだけある行か、付けるバフが `Star` と違う行がある
+- 料理・薬剤の表の行が、`ItemTable` に無い
 
 ---
 

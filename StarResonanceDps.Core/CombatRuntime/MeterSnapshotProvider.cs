@@ -149,7 +149,7 @@ public sealed record MeterPlayerIdentity(string Name, long UserId);
 public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false);
 
 /// <summary>
-/// 被ダメログの1件(予告か詠唱か被弾)。
+/// 被ダメログの1件(予告か詠唱か被弾か、ダメージの無い死亡)。
 ///
 /// <para>
 /// <see cref="Elapsed"/> はメーターのタイマーと同じ起点(<c>Encounter.StartTime</c>)からの経過、
@@ -167,6 +167,11 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// <para>
 /// <see cref="DamageElement"/> は被弾の属性。予告・詠唱と、属性を保存していなかった頃の被弾は <c>null</c>。
 /// </para>
+///
+/// <para>
+/// ダメージの無い死亡は <see cref="Attacker"/> がシステム、<see cref="Target"/> が死亡したプレイヤー、HP は 0 と死亡時の最大HP。
+/// <see cref="IsFall"/> は落下の被弾(技名は画面側の文言)。
+/// </para>
 /// </summary>
 public sealed record TakenDamageLogLine(
     TakenDamageLogRecordKind Kind,
@@ -182,7 +187,8 @@ public sealed record TakenDamageLogLine(
     long? TargetHp,
     long? TargetMaxHp,
     long? TargetShield,
-    EDamageProperty? DamageElement);
+    EDamageProperty? DamageElement,
+    bool IsFall = false);
 
 /// <summary>
 /// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
@@ -344,23 +350,46 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
+            if (record.Kind == TakenDamageLogRecordKind.Death)
+            {
+                var death = record.Death!;
+                lines[index] = new TakenDamageLogLine(
+                    record.Kind,
+                    death.Sequence,
+                    death.Timestamp - encounterStart,
+                    death.Timestamp,
+                    new TakenDamageLogParty(0, 0, string.Empty, false, false, false, 0, PlayerClassSpec.Unknown, IsSystem: true),
+                    ResolveTakenDamageLogParty(encounter, death.PlayerUuid, parties),
+                    0,
+                    false,
+                    string.Empty,
+                    0,
+                    0,
+                    death.MaxHp,
+                    null,
+                    null);
+                continue;
+            }
+
             var snapshot = record.Hit!;
             var isBuffSource = snapshot.DamageSource == Zproto.EDamageSource.Buff;
+            var attacker = ResolveTakenDamageLogParty(encounter, snapshot.OtherUUID, parties);
             lines[index] = new TakenDamageLogLine(
                 record.Kind,
                 snapshot.Sequence,
                 snapshot.Timestamp!.Value - encounterStart,
                 snapshot.Timestamp.Value,
-                ResolveTakenDamageLogParty(encounter, snapshot.OtherUUID, parties),
+                attacker,
                 ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
                 snapshot.OwnerId,
                 isBuffSource,
-                ResolveTakenDamageSourceName(snapshot.DamageSource, snapshot.OwnerId, snapshot.BuffSourceSkillId, snapshot.SummonSourceSkillId),
+                ResolveTakenDamageSourceName(attacker.IsPlayer, snapshot.Id, snapshot.DamageSource, snapshot.OwnerId, snapshot.BuffSourceSkillId, snapshot.SummonSourceSkillId),
                 snapshot.Value,
                 snapshot.TargetHp,
                 snapshot.TargetMaxHp,
                 snapshot.TargetShield,
-                snapshot.DamageElement);
+                snapshot.DamageElement,
+                snapshot.DamageSource == Zproto.EDamageSource.Fall);
         }
 
         return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines);
@@ -368,6 +397,12 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// 被ダメの発生源の名前。<c>OwnerId</c> の中身は <c>DamageSource</c> で変わる。
+    ///
+    /// <para>
+    /// <b>加害者がプレイヤーなら、先にメーターの見出し表(手修正込み)を <paramref name="meterKey"/> で引く。</b>
+    /// プレイヤーの技の派生(イマジンのパッシブ・幸運の一撃など)はバフ名が空で、名前は見出し表にしか無い。
+    /// 見出し表が空か、鍵を保存していなかった頃の記録(0)なら下の引き方に戻る。
+    /// </para>
     ///
     /// <list type="bullet">
     ///   <item>バフ — バフID。記録時に付与元の技(<paramref name="buffSourceSkillId"/>)が決まっていれば技として引き、
@@ -386,8 +421,17 @@ public static class MeterSnapshotProvider
     /// (<c>3920</c> は弾 普攻假子弹 / 技 奥義！ライフブレス)。
     /// </para>
     /// </summary>
-    private static string ResolveTakenDamageSourceName(Zproto.EDamageSource damageSource, int ownerId, int buffSourceSkillId, int summonSourceSkillId)
+    private static string ResolveTakenDamageSourceName(bool isPlayerAttacker, long meterKey, Zproto.EDamageSource damageSource, int ownerId, int buffSourceSkillId, int summonSourceSkillId)
     {
+        if (isPlayerAttacker && meterKey != 0)
+        {
+            var meterName = CombatDataCatalog.GetSourceName(meterKey);
+            if (!string.IsNullOrEmpty(meterName))
+            {
+                return meterName;
+            }
+        }
+
         var name = damageSource switch
         {
             Zproto.EDamageSource.Buff => ResolveTakenDamageBuffName(ownerId, buffSourceSkillId),

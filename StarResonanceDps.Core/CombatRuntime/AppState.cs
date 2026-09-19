@@ -150,6 +150,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Log.Information("Loaded TempAttrTable.json");
             }
 
+            LoadCookCuisineTable();
+
 
 
 
@@ -157,6 +159,58 @@ namespace StarResonanceDps.Core.CombatRuntime
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
 
             loadTime.Stop();
+        }
+
+        /// <summary>
+        /// 料理の表を読み、回復の料理が付けるバフと1回の回復量を引けるようにする。
+        /// 表が無いと料理の回復を HPS に数えられないので、黙って空にせずエラーを出す。
+        /// </summary>
+        private static void LoadCookCuisineTable()
+        {
+            string cookCuisineTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "CookCuisineTable.json");
+            if (!File.Exists(cookCuisineTableFile))
+            {
+                Log.Error("CookCuisineTable.json が無い。料理の回復を HPS に数えられない path={Path}", cookCuisineTableFile);
+                return;
+            }
+
+            var cookCuisines = JsonConvert.DeserializeObject<Dictionary<string, CookCuisine>>(File.ReadAllText(cookCuisineTableFile))!;
+            HelperMethods.DataTables.CookCuisines.Data = cookCuisines;
+
+            var amounts = new Dictionary<int, int>();
+            var conflicts = new HashSet<int>();
+            foreach (var cuisine in cookCuisines.Values)
+            {
+                if (cuisine.Description != CookCuisineTable.HealthRegenDescriptionId)
+                {
+                    continue;
+                }
+
+                foreach (var buffPar in cuisine.BuffPar)
+                {
+                    if (buffPar.Count < 2)
+                    {
+                        Log.Error("CookCuisineTable.json の回復の料理 {Id} の BuffPar が短い({Count} 個)", cuisine.Id, buffPar.Count);
+                        continue;
+                    }
+
+                    if (amounts.TryGetValue(buffPar[0], out var existing) && existing != buffPar[1])
+                    {
+                        conflicts.Add(buffPar[0]);
+                    }
+
+                    amounts[buffPar[0]] = buffPar[1];
+                }
+            }
+
+            foreach (var buffId in conflicts)
+            {
+                Log.Error("CookCuisineTable.json で回復の料理のバフ {BuffId} に違う回復量の行がある。このバフは数えない", buffId);
+                amounts.Remove(buffId);
+            }
+
+            HelperMethods.DataTables.CookCuisines.RegenAmountsByBuffId = amounts.ToFrozenDictionary();
+            Log.Information("Loaded CookCuisineTable.json(回復の料理のバフ {Count} 種)", amounts.Count);
         }
 
         /// <summary>

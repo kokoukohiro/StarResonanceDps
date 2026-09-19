@@ -78,15 +78,39 @@ public sealed class SkillAnnouncementRecord
     public long Sequence { get; set; }
 }
 
+/// <summary>
+/// ダメージの無い死亡(ダンジョンの仕掛けの即死など)1件。死亡の印つきの被弾がある死亡は被弾の行で分かるので残さない。
+/// 画面では「システムの攻撃」の技の行と、その下の死亡の行になる。
+/// </summary>
+[ProtoContract]
+public sealed class PlayerDeathRecord
+{
+    [ProtoMember(1)]
+    public long PlayerUuid { get; set; }
+
+    /// <summary>死亡を見た時点の最大HP。属性が届いていなければ null。</summary>
+    [ProtoMember(2)]
+    public long? MaxHp { get; set; }
+
+    /// <summary>死亡が届いたパケットの到着時刻(UTC)。</summary>
+    [ProtoMember(3)]
+    public DateTime Timestamp { get; set; }
+
+    /// <summary>被ダメと同じ通し番号。並べ直しに使う。</summary>
+    [ProtoMember(4)]
+    public long Sequence { get; set; }
+}
+
 public enum TakenDamageLogRecordKind
 {
     Cast,
     Hit,
-    Announcement
+    Announcement,
+    Death
 }
 
 /// <summary>
-/// 被ダメログの1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、被弾なら被弾したプレイヤー。
+/// 被ダメログの1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、被弾と死亡ならそのプレイヤー。
 /// 予告は実体を持たないので 0。
 /// </summary>
 public readonly record struct TakenDamageLogRecord(
@@ -94,27 +118,34 @@ public readonly record struct TakenDamageLogRecord(
     long EntityUuid,
     SkillSnapshot? Hit,
     SkillCastRecord? Cast,
-    SkillAnnouncementRecord? Announcement)
+    SkillAnnouncementRecord? Announcement,
+    PlayerDeathRecord? Death)
 {
     public long Sequence => Kind switch
     {
         TakenDamageLogRecordKind.Hit => Hit!.Sequence,
         TakenDamageLogRecordKind.Cast => Cast!.Sequence,
+        TakenDamageLogRecordKind.Death => Death!.Sequence,
         _ => Announcement!.Sequence
     };
 
     public static TakenDamageLogRecord ForHit(long targetUuid, SkillSnapshot snapshot)
     {
-        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Hit, targetUuid, snapshot, null, null);
+        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Hit, targetUuid, snapshot, null, null, null);
     }
 
     public static TakenDamageLogRecord ForCast(long casterUuid, SkillCastRecord cast)
     {
-        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Cast, casterUuid, null, cast, null);
+        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Cast, casterUuid, null, cast, null, null);
     }
 
     public static TakenDamageLogRecord ForAnnouncement(SkillAnnouncementRecord announcement)
     {
-        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Announcement, 0, null, null, announcement);
+        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Announcement, 0, null, null, announcement, null);
+    }
+
+    public static TakenDamageLogRecord ForDeath(PlayerDeathRecord death)
+    {
+        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Death, death.PlayerUuid, null, null, null, death);
     }
 }

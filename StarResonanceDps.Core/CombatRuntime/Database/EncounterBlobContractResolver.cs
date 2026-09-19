@@ -84,6 +84,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
         ],
         [typeof(SkillSnapshot)] =
         [
+            nameof(SkillSnapshot.Id),
             nameof(SkillSnapshot.OtherUUID),
             nameof(SkillSnapshot.Value),
             nameof(SkillSnapshot.DamageElement),

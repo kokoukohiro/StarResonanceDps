@@ -1,0 +1,968 @@
+{
+  "2010024": {
+    "zh-CN": "月露莓蜜糕",
+    "en-US": "Moonberry Honey Cake",
+    "ja-JP": "ムーンベリーの蜜菓子",
+    "ko-KR": "문베리 꿀과자"
+  },
+  "2032011": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032012": {
+    "zh-CN": "罐罐鱼·等级1",
+    "en-US": "Canned Fish Lv.1",
+    "ja-JP": "カンカン魚G1",
+    "ko-KR": "통조림 생선・Lv.1"
+  },
+  "2032013": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032014": {
+    "zh-CN": "罐罐鱼·等级2 / 鱼鲜熔岩·等级1 / 鱼菇双鲜锅·等级1 / 朴素阿斯特锅·等级1 / 满足双响串·等级1 / 痛痛飞·等级1 / 黄油飞鱼·等级1",
+    "en-US": "Canned Fish Lv.2 / Lavafish Stew Lv.1 / Astelpot Duo Lv.1 / Simple Asterleeds Pot Lv.1 / Meatfish Skewer Lv.1 / Painfly Lv.1 / Buttery Flyfish Lv.1",
+    "ja-JP": "カンカン魚G2 / 魚介の溶岩焼きG1 / 魚とキノコのミックス鍋G1 / シンプルアステルリーズ鍋G1 / 満足ダブル串焼きG1 / イタイタフライG1 / バタースカイフィッシュG1",
+    "ko-KR": "통조림 생선・Lv.2 / 진한 생선 수프・Lv.1 / 생선 버섯전골・Lv.1 / 소박한 아스테 전골・Lv.1 / 누구나 좋아하는 꼬치・Lv.1 / 아플 때 먹는 요리・Lv.1 / 버터 날치・Lv.1"
+  },
+  "2032015": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032016": {
+    "zh-CN": "鱼鲜熔岩·等级2 / 鱼菇双鲜锅·等级2 / 朴素阿斯特锅·等级2 / 满足双响串·等级2 / 黄油飞鱼·等级2",
+    "en-US": "Lavafish Stew Lv.2 / Astelpot Duo Lv.2 / Simple Asterleeds Pot Lv.2 / Meatfish Skewer Lv.2 / Buttery Flyfish Lv.2",
+    "ja-JP": "魚介の溶岩焼きG2 / 魚とキノコのミックス鍋G2 / シンプルアステルリーズ鍋G2 / 満足ダブル串焼きG2 / バタースカイフィッシュG2",
+    "ko-KR": "진한 생선 수프・Lv.2 / 생선 버섯전골・Lv.2 / 소박한 아스테 전골・Lv.2 / 누구나 좋아하는 꼬치・Lv.2 / 버터 날치・Lv.2"
+  },
+  "2032017": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032018": {
+    "zh-CN": "满足双响串·等级3 / 黄油飞鱼·等级3",
+    "en-US": "Meatfish Skewer Lv.3 / Buttery Flyfish Lv.3",
+    "ja-JP": "満足ダブル串焼きG3 / バタースカイフィッシュG3",
+    "ko-KR": "누구나 좋아하는 꼬치・Lv.3 / 버터 날치・Lv.3"
+  },
+  "2032021": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032022": {
+    "zh-CN": "坛坛肉·等级1",
+    "en-US": "Jarred Meat Lv.1",
+    "ja-JP": "つぼ漬け肉G1",
+    "ko-KR": "고기조림・Lv.1"
+  },
+  "2032023": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032024": {
+    "zh-CN": "坛坛肉·等级2 / 鱼酱蜜汁肉排·等级1 / 肉馅蒸胖菇菇·等级1 / 九味腌肉·等级1 / 真味双宝炖·等级1 / 海风节精选·等级1 / 小熊蜂蜜肉排·等级1",
+    "en-US": "Jarred Meat Lv.2 / Glazefin Chop Lv.1 / Stuffshroom Puff Lv.1 / Nine-Flavor Meat Lv.1 / Hearty Stewmix Lv.1 / Seabreeze Special Lv.1 / Bearcut Patty Lv.1",
+    "ja-JP": "つぼ漬け肉G2 / ナンプラーのハニーステーキG1 / キノコの肉詰め蒸しG1 / ディップミートG1 / ダブルシチューG1 / 海風祭スペシャルG1 / クマのハニーステーキG1",
+    "ko-KR": "고기조림・Lv.2 / 피쉬 소스 허니 스테이크・Lv.1 / 고기소 버섯찜・Lv.1 / 아홉 가지 향신료 고기절임・Lv.1 / 진미쌍보탕・Lv.1 / 해풍절 특선 요리・Lv.1 / 곰돌이 허니 스테이크・Lv.1"
+  },
+  "2032025": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032026": {
+    "zh-CN": "鱼酱蜜汁肉排·等级2 / 肉馅蒸胖菇菇·等级2 / 九味腌肉·等级2 / 真味双宝炖·等级2 / 小熊蜂蜜肉排·等级2",
+    "en-US": "Glazefin Chop Lv.2 / Stuffshroom Puff Lv.2 / Nine-Flavor Meat Lv.2 / Hearty Stewmix Lv.2 / Bearcut Patty Lv.2",
+    "ja-JP": "ナンプラーのハニーステーキG2 / キノコの肉詰め蒸しG2 / ディップミートG2 / ダブルシチューG2 / クマのハニーステーキG2",
+    "ko-KR": "피쉬 소스 허니 스테이크・Lv.2 / 고기소 버섯찜・Lv.2 / 아홉 가지 향신료 고기절임・Lv.2 / 진미쌍보탕・Lv.2 / 곰돌이 허니 스테이크・Lv.2"
+  },
+  "2032027": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032028": {
+    "zh-CN": "真味双宝炖·等级3 / 小熊蜂蜜肉排·等级3",
+    "en-US": "Hearty Stewmix Lv.3 / Bearcut Patty Lv.3",
+    "ja-JP": "ダブルシチューG3 / クマのハニーステーキG3",
+    "ko-KR": "진미쌍보탕・Lv.3 / 곰돌이 허니 스테이크・Lv.3"
+  },
+  "2032031": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032032": {
+    "zh-CN": "蜜菇汤·等级1",
+    "en-US": "Honeyshroom Soup Lv.1",
+    "ja-JP": "ハニーキノコスープG1",
+    "ko-KR": "꿀 버섯 수프・Lv.1"
+  },
+  "2032033": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032034": {
+    "zh-CN": "蜜菇汤·等级2 / 菇菇阿斯特锅·等级1 / 黄油肉块·等级1 / 菇噜酱·等级1 / 山菌高汤鱼鲜烩·等级1 / 妙香绵绵烧肉·等级1 / 藏香菇菇汤·等级1",
+    "en-US": "Honeyshroom Soup Lv.2 / Astelshroom Pot Lv.1 / Buttery Chunks Lv.1 / Mushroom Sauce Lv.1 / Shroomfish Stew Lv.1 / Buttermelt Roast Lv.1 / Spiceshroom Soup Lv.1",
+    "ja-JP": "ハニーキノコスープG2 / キノコアステルリーズ鍋G1 / ブロック肉のバター炒めG1 / キノコソースG1 / キノコブイヨン魚介煮込みG1 / 絶品フワフワ焼肉G1 / 高原キノコのスープG1",
+    "ko-KR": "꿀 버섯 수프・Lv.2 / 아스테 버섯전골・Lv.1 / 버터 미트로프・Lv.1 / 버섯 소스・Lv.1 / 산채 버섯 육수 생선 스튜・Lv.1 / 냄새 좋은 고기구이・Lv.1 / 은은한 버섯 수프・Lv.1"
+  },
+  "2032035": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032036": {
+    "zh-CN": "菇菇阿斯特锅·等级2 / 黄油肉块·等级2 / 菇噜酱·等级2 / 藏香菇菇汤·等级2",
+    "en-US": "Astelshroom Pot Lv.2 / Buttery Chunks Lv.2 / Mushroom Sauce Lv.2 / Spiceshroom Soup Lv.2",
+    "ja-JP": "キノコアステルリーズ鍋G2 / ブロック肉のバター炒めG2 / キノコソースG2 / 高原キノコのスープG2",
+    "ko-KR": "아스테 버섯전골・Lv.2 / 버터 미트로프・Lv.2 / 버섯 소스・Lv.2 / 은은한 버섯 수프・Lv.2"
+  },
+  "2032037": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032038": {
+    "zh-CN": "藏香菇菇汤·等级3",
+    "en-US": "Spiceshroom Soup Lv.3",
+    "ja-JP": "高原キノコのスープG3",
+    "ko-KR": "은은한 버섯 수프・Lv.3"
+  },
+  "2032041": {
+    "zh-CN": "炭火鱼排·等级1 / 香蕈乳冻·等级1",
+    "en-US": "Grilled Fish Lv.1 / Shroom Jelly Lv.1",
+    "ja-JP": "炭火焼き魚ステーキG1 / カオリダケのプリンG1",
+    "ko-KR": "숯불 생선구이・Lv.1 / 버섯 푸딩・Lv.1"
+  },
+  "2032042": {
+    "zh-CN": "郁郁鲜果茶·等级1",
+    "en-US": "Yoyo Fruit Tea Lv.1",
+    "ja-JP": "濃厚フルーツティーG1",
+    "ko-KR": "상큼한 과일차・Lv.1"
+  },
+  "2032043": {
+    "zh-CN": "炭火鱼排·等级2 / 香蕈乳冻·等级2",
+    "en-US": "Grilled Fish Lv.2 / Shroom Jelly Lv.2",
+    "ja-JP": "炭火焼き魚ステーキG2 / カオリダケのプリンG2",
+    "ko-KR": "숯불 생선구이・Lv.2 / 버섯 푸딩・Lv.2"
+  },
+  "2032044": {
+    "zh-CN": "郁郁鲜果茶·等级2 / 绉纱鱼果鲜滚羮·等级1 / 炭火香果烤肉·等级1 / 奶香乌姆·等级1 / 海风节阿斯特锅·等级1 / 透花琉璃蜜肉酱·等级1 / 寻觅鲜果汁·等级1",
+    "en-US": "Yoyo Fruit Tea Lv.2 / Veilfruit Stew Lv.1 / Charfruit Roast Lv.1 / Milky Umm - Lv.1 / Astelpot Feast Lv.1 / Glazemeat Sauce Lv.1 / Wanderfruit Juice Lv.1",
+    "ja-JP": "濃厚フルーツティーG2 / シルク魚介フルーツスープG1 / 炭火スパイシー焼肉G1 / ミルクウムG1 / 海風祭アステルリーズ鍋G1 / ラピスラズリの蜜肉ソースG1 / サーチフルーツジュースG1",
+    "ko-KR": "상큼한 과일차・Lv.2 / 부드러운 생선 과일 수프・Lv.1 / 숯불 과일 고기구이・Lv.1 / 우유 움・Lv.1 / 해풍절 아스테 전골・Lv.1 / 특제 고기 꿀 절임・Lv.1 / 신선한 과일주스・Lv.1"
+  },
+  "2032045": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032046": {
+    "zh-CN": "绉纱鱼果鲜滚羮·等级2 / 炭火香果烤肉·等级2 / 奶香乌姆·等级2 / 海风节阿斯特锅·等级2 / 透花琉璃蜜肉酱·等级2 / 寻觅鲜果汁·等级2",
+    "en-US": "Veilfruit Stew Lv.2 / Charfruit Roast Lv.2 / Milky Umm - Lv.2 / Astelpot Feast Lv.2 / Glazemeat Sauce Lv.2 / Wanderfruit Juice Lv.2",
+    "ja-JP": "シルク魚介フルーツスープG2 / 炭火スパイシー焼肉G2 / ミルクウムG2 / 海風祭アステルリーズ鍋G2 / ラピスラズリの蜜肉ソースG2 / サーチフルーツジュースG2",
+    "ko-KR": "부드러운 생선 과일 수프・Lv.2 / 숯불 과일 고기구이・Lv.2 / 우유 움・Lv.2 / 해풍절 아스테 전골・Lv.2 / 특제 고기 꿀 절임・Lv.2 / 신선한 과일주스・Lv.2"
+  },
+  "2032047": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032048": {
+    "zh-CN": "海风节阿斯特锅·等级3 / 透花琉璃蜜肉酱·等级3 / 寻觅鲜果汁·等级3",
+    "en-US": "Astelpot Feast Lv.3 / Glazemeat Sauce Lv.3 / Wanderfruit Juice Lv.3",
+    "ja-JP": "海風祭アステルリーズ鍋G3 / ラピスラズリの蜜肉ソースG3 / サーチフルーツジュースG3",
+    "ko-KR": "해풍절 아스테 전골・Lv.3 / 특제 고기 꿀 절임・Lv.3 / 신선한 과일주스・Lv.3"
+  },
+  "2032051": {
+    "zh-CN": "裹花蒸丸子·等级1 / 糖露莓果·等级1 / 糖露莓果·试吃装",
+    "en-US": "Blossom Dumpling Lv.1 / Sweet Dew Berry - Lv.1 / Sweet Dew Berry - Sample Pack",
+    "ja-JP": "花蒸し団子G1 / シュガーベリーG1 / シュガーベリー・試食パック",
+    "ko-KR": "꽃완자찜・Lv.1 / 사탕이슬열매・Lv.1 / 사탕이슬열매・시식용"
+  },
+  "2032052": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032053": {
+    "zh-CN": "裹花蒸丸子·等级2 / 糖露莓果·等级2",
+    "en-US": "Blossom Dumpling Lv.2 / Sweet Dew Berry - Level 2",
+    "ja-JP": "花蒸し団子G2 / シュガーベリーG2",
+    "ko-KR": "꽃완자찜・Lv.2 / 사탕이슬열매・Lv.2"
+  },
+  "2032054": {
+    "zh-CN": "香薰鱼·等级1 / 清炖肉汤·等级1 / 果味海洋冰激凌·等级1 / 卡尼曼果肉碎·等级1",
+    "en-US": "Aromafish Can Lv.1 / Plainmeat Soup Lv.1 / Fruitocean Gelato Lv.1 / Kanamia Morsel Lv.1",
+    "ja-JP": "魚の香り焼きG1 / 肉のスープG1 / 果物風味のオーシャンアイスG1 / カナミアの果肉クラッシュG1",
+    "ko-KR": "훈제 생선구이・Lv.1 / 콩소메 수프・Lv.1 / 과일 맛 바다 아이스크림・Lv.1 / 카나미아 다진 과일・Lv.1"
+  },
+  "2032055": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032056": {
+    "zh-CN": "香薰鱼·等级2 / 清炖肉汤·等级2 / 果味海洋冰激凌·等级2 / 卡尼曼果肉碎·等级2",
+    "en-US": "Aromafish Can Lv.2 / Plainmeat Soup Lv.2 / Fruitocean Gelato Lv.2 / Kanamia Morsel Lv.2",
+    "ja-JP": "魚の香り焼きG2 / 肉のスープG2 / 果物風味のオーシャンアイスG2 / カナミアの果肉クラッシュG2",
+    "ko-KR": "훈제 생선구이・Lv.2 / 콩소메 수프・Lv.2 / 과일 맛 바다 아이스크림・Lv.2 / 카나미아 다진 과일・Lv.2"
+  },
+  "2032057": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032058": {
+    "zh-CN": "果味海洋冰激凌·等级3 / 卡尼曼果肉碎·等级3",
+    "en-US": "Fruitocean Gelato Lv.3 / Kanamia Morsel Lv.3",
+    "ja-JP": "果物風味のオーシャンアイスG3 / カナミアの果肉クラッシュG3",
+    "ko-KR": "과일 맛 바다 아이스크림・Lv.3 / 카나미아 다진 과일・Lv.3"
+  },
+  "2032065": {
+    "zh-CN": "痛痛飞·等级2",
+    "en-US": "Painfly Lv.2",
+    "ja-JP": "イタイタフライG2",
+    "ko-KR": "아플 때 먹는 요리・Lv.2"
+  },
+  "2032067": {
+    "zh-CN": "痛痛飞·等级3",
+    "en-US": "Painfly Lv.3",
+    "ja-JP": "イタイタフライG3",
+    "ko-KR": "아플 때 먹는 요리・Lv.3"
+  },
+  "2032075": {
+    "zh-CN": "海风节精选·等级2",
+    "en-US": "Seabreeze Special Lv.2",
+    "ja-JP": "海風祭スペシャルG2",
+    "ko-KR": "해풍절 특선 요리・Lv.2"
+  },
+  "2032077": {
+    "zh-CN": "海风节精选·等级3",
+    "en-US": "Seabreeze Special Lv.3",
+    "ja-JP": "海風祭スペシャルG3",
+    "ko-KR": "해풍절 특선 요리・Lv.3"
+  },
+  "2032086": {
+    "zh-CN": "山菌高汤鱼鲜烩·等级2 / 妙香绵绵烧肉·等级2",
+    "en-US": "Shroomfish Stew Lv.2 / Buttermelt Roast Lv.2",
+    "ja-JP": "キノコブイヨン魚介煮込みG2 / 絶品フワフワ焼肉G2",
+    "ko-KR": "산채 버섯 육수 생선 스튜・Lv.2 / 냄새 좋은 고기구이・Lv.2"
+  },
+  "2032088": {
+    "zh-CN": "山菌高汤鱼鲜烩·等级3 / 妙香绵绵烧肉·等级3",
+    "en-US": "Shroomfish Stew Lv.3 / Buttermelt Roast Lv.3",
+    "ja-JP": "キノコブイヨン魚介煮込みG3 / 絶品フワフワ焼肉G3",
+    "ko-KR": "산채 버섯 육수 생선 스튜・Lv.3 / 냄새 좋은 고기구이・Lv.3"
+  },
+  "2032111": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032112": {
+    "zh-CN": "黄油煎香烤肉卷·等级1 / 酥脆小鱼干·等级1",
+    "en-US": "Pan-Seared Meat Roll with Butter Lv.1 / Crispy Dried Fish Lv.1",
+    "ja-JP": "こんがり肉巻きG1 / 干し魚のパリッと焼きG1",
+    "ko-KR": "버터에 구운 고기 롤・Lv.1 / 바삭한 어포・Lv.1"
+  },
+  "2032113": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032114": {
+    "zh-CN": "黄油煎香烤肉卷·等级2 / 酥脆小鱼干·等级2 / 黄金双拼肉堡·等级1 / 滋滋冒油烤咸鱼·等级1",
+    "en-US": "Pan-Seared Meat Roll with Butter Lv.2 / Crispy Dried Fish Lv.2 / Golden Double-Meat Burger Lv.1 / Sizzling Salted Fish Lv.1",
+    "ja-JP": "こんがり肉巻きG2 / 干し魚のパリッと焼きG2 / ゴールデンバーガーG1 / 塩魚のジュージュー焼きG1",
+    "ko-KR": "버터에 구운 고기 롤・Lv.2 / 바삭한 어포・Lv.2 / 황금 더블 미트 버거・Lv.1 / 지글지글 염장 생선구이・Lv.1"
+  },
+  "2032115": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032116": {
+    "zh-CN": "黄金双拼肉堡·等级2 / 滋滋冒油烤咸鱼·等级2",
+    "en-US": "Golden Double-Meat Burger Lv.2 / Sizzling Salted Fish Lv.2",
+    "ja-JP": "ゴールデンバーガーG2 / 塩魚のジュージュー焼きG2",
+    "ko-KR": "황금 더블 미트 버거・Lv.2 / 지글지글 염장 생선구이・Lv.2"
+  },
+  "2032121": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032122": {
+    "zh-CN": "好滋味炖肉·等级1 / 咸香烤羊排·等级1",
+    "en-US": "Hearty Stewed Meat Lv.1 / Savory Roast Lamb Ribs Lv.1",
+    "ja-JP": "滋味たっぷりシチューG1 / 羊のローストチョップG1",
+    "ko-KR": "풍미 고기찜・Lv.1 / 짭짤한 양갈비・Lv.1"
+  },
+  "2032123": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032124": {
+    "zh-CN": "好滋味炖肉·等级2 / 咸香烤羊排·等级2 / 双鲜豪炖·等级1 / 滋滋冒油烤肋排·等级1",
+    "en-US": "Hearty Stewed Meat Lv.2 / Savory Roast Lamb Ribs Lv.2 / Twin-Fresh Grand Stew Lv.1 / Sizzling Grilled Ribs Lv.1",
+    "ja-JP": "滋味たっぷりシチューG2 / 羊のローストチョップG2 / 魚と肉のシチューG1 / じゅーじゅースペアリブG1",
+    "ko-KR": "풍미 고기찜・Lv.2 / 짭짤한 양갈비・Lv.2 / 더블 호화 스튜・Lv.1 / 지글지글 갈비구이・Lv.1"
+  },
+  "2032125": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032126": {
+    "zh-CN": "双鲜豪炖·等级2 / 滋滋冒油烤肋排·等级2",
+    "en-US": "Twin-Fresh Grand Stew Lv.2 / Sizzling Grilled Ribs Lv.2",
+    "ja-JP": "魚と肉のシチューG2 / じゅーじゅースペアリブG2",
+    "ko-KR": "더블 호화 스튜・Lv.2 / 지글지글 갈비구이・Lv.2"
+  },
+  "2032131": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032132": {
+    "zh-CN": "甜蜜蜜沙拉·等级1",
+    "en-US": "Honey-Fresh Salad Lv.1",
+    "ja-JP": "スウィートサラダG1",
+    "ko-KR": "달콤한 샐러드・Lv.1"
+  },
+  "2032133": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032134": {
+    "zh-CN": "甜蜜蜜沙拉·等级2 / 风味醇香酱·等级1",
+    "en-US": "Honey-Fresh Salad Lv.2 / Rich Flavor Condiment Lv.1",
+    "ja-JP": "スウィートサラダG2 / コク旨ペッパーソースG1",
+    "ko-KR": "달콤한 샐러드・Lv.2 / 순한 풍미 소스・Lv.1"
+  },
+  "2032135": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032136": {
+    "zh-CN": "风味醇香酱·等级2",
+    "en-US": "Rich Flavor Condiment Lv.2",
+    "ja-JP": "コク旨ペッパーソースG2",
+    "ko-KR": "순한 풍미 소스・Lv.2"
+  },
+  "2032141": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032142": {
+    "zh-CN": "橙香小鱼饼·等级1 / 溜溜果味羊排·等级1 / 苦橙汁·等级1",
+    "en-US": "Citrus Fish Cake Lv.1 / Citrus-Glazed Lamb Ribs Lv.1 / Citrus Juice Lv.1",
+    "ja-JP": "橙と魚のお焼きG1 / 艶やかフルーティーリブG1 / 橙ジュースG1",
+    "ko-KR": "오렌지향 어묵・Lv.1 / 미끌한 과일향 양갈비・Lv.1 / 쌉싸름한 오렌지주스・Lv.1"
+  },
+  "2032143": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032144": {
+    "zh-CN": "橙香小鱼饼·等级2 / 溜溜果味羊排·等级2 / 苦橙汁·等级2 / 素味咸鱼串·等级1 / 拉尔帕尔田园煲·等级1 / 雪酪流心蜜豆卷·等级1",
+    "en-US": "Citrus Fish Cake Lv.2 / Citrus-Glazed Lamb Ribs Lv.2 / Citrus Juice Lv.2 / Simple Salted Fish Skewers Lv.1 / Lallipar Homestead Stew Lv.1 / Honey Bean Roll Lv.1",
+    "ja-JP": "橙と魚のお焼きG2 / 艶やかフルーティーリブG2 / 橙ジュースG2 / 魚と豆の串焼きG1 / ラルパルの田舎煮込みG1 / 餡シャーベットロールG1",
+    "ko-KR": "오렌지향 어묵・Lv.2 / 미끌한 과일향 양갈비・Lv.2 / 쌉싸름한 오렌지주스・Lv.2 / 담백 염장 생선꼬치・Lv.1 / 라팔 마을 전원 솥요리・Lv.1 / 눈꽃 치즈 꿀콩 롤・Lv.1"
+  },
+  "2032145": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032146": {
+    "zh-CN": "素味咸鱼串·等级2 / 拉尔帕尔田园煲·等级2 / 雪酪流心蜜豆卷·等级2",
+    "en-US": "Simple Salted Fish Skewers Lv.2 / Lallipar Homestead Stew Lv.2 / Honey Bean Roll Lv.2",
+    "ja-JP": "魚と豆の串焼きG2 / ラルパルの田舎煮込みG2 / 餡シャーベットロールG2",
+    "ko-KR": "담백 염장 생선꼬치・Lv.2 / 라팔 마을 전원 솥요리・Lv.2 / 눈꽃 치즈 꿀콩 롤・Lv.2"
+  },
+  "2032151": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032152": {
+    "zh-CN": "极味鱼丝面·等级1 / 橙汁羊肉烩饭·等级1",
+    "en-US": "Fish-Shred Noodles Lv.1 / Citrus-Infused Lamb Pilaf Lv.1",
+    "ja-JP": "極上フィッシュヌードルG1 / 橙と羊肉のピラフG1",
+    "ko-KR": "극미 생선채 국수・Lv.1 / 오렌지향 양고기 리소토・Lv.1"
+  },
+  "2032153": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032154": {
+    "zh-CN": "极味鱼丝面·等级2 / 橙汁羊肉烩饭·等级2 / 怪味雨豆泥·等级1 / 高原特色合蒸·等级1",
+    "en-US": "Fish-Shred Noodles Lv.2 / Citrus-Infused Lamb Pilaf Lv.2 / Mysterious Rainbean Paste Lv.1 / Highland Steamed Mix Lv.1",
+    "ja-JP": "極上フィッシュヌードルG2 / 橙と羊肉のピラフG2 / 変てこ雨季豆ペーストG1 / 高原の蒸しスペアリブG1",
+    "ko-KR": "극미 생선채 국수・Lv.2 / 오렌지향 양고기 리소토・Lv.2 / 괴상한 빗방울콩 퓌레・Lv.1 / 고원 특선 모듬찜・Lv.1"
+  },
+  "2032155": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032156": {
+    "zh-CN": "怪味雨豆泥·等级2 / 高原特色合蒸·等级2",
+    "en-US": "Mysterious Rainbean Paste Lv.2 / Highland Steamed Mix Lv.2",
+    "ja-JP": "変てこ雨季豆ペーストG2 / 高原の蒸しスペアリブG2",
+    "ko-KR": "괴상한 빗방울콩 퓌레・Lv.2 / 고원 특선 모듬찜・Lv.2"
+  },
+  "2032161": {
+    "zh-CN": "清鲜汤·等级1",
+    "en-US": "Fresh Soup Lv.1",
+    "ja-JP": "新鮮さっぱりスープG1",
+    "ko-KR": "담백한 생선 수프・Lv.1"
+  },
+  "2032162": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032163": {
+    "zh-CN": "火辣香煎鱼·等级1",
+    "en-US": "Fiery Pan-Seared Fish Lv.1",
+    "ja-JP": "魚のスパイシーソテーG1",
+    "ko-KR": "매콤 향신 생선구이・Lv.1"
+  },
+  "2032164": {
+    "zh-CN": "清鲜汤·等级2",
+    "en-US": "Fresh Soup Lv.2",
+    "ja-JP": "新鮮さっぱりスープG2",
+    "ko-KR": "담백한 생선 수프・Lv.2"
+  },
+  "2032165": {
+    "zh-CN": "火辣香煎鱼·等级2",
+    "en-US": "Fiery Pan-Seared Fish Lv.2",
+    "ja-JP": "魚のスパイシーソテーG2",
+    "ko-KR": "매콤 향신 생선구이・Lv.2"
+  },
+  "2032166": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032171": {
+    "zh-CN": "辛香羊骨鲜·等级1",
+    "en-US": "Spiced Lamb Rib Delight Lv.1",
+    "ja-JP": "羊のピリ辛スペアリブG1",
+    "ko-KR": "매콤한 양뼈 수프・Lv.1"
+  },
+  "2032172": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032173": {
+    "zh-CN": "烈焰椒香肋条·等级1",
+    "en-US": "Pepper Rib Strips Lv.1",
+    "ja-JP": "炎のペッパーリブG1",
+    "ko-KR": "화염 고추향 갈비・Lv.1"
+  },
+  "2032174": {
+    "zh-CN": "辛香羊骨鲜·等级2",
+    "en-US": "Spiced Lamb Rib Delight Lv.2",
+    "ja-JP": "羊のピリ辛スペアリブG2",
+    "ko-KR": "매콤한 양뼈 수프・Lv.2"
+  },
+  "2032175": {
+    "zh-CN": "烈焰椒香肋条·等级2",
+    "en-US": "Pepper Rib Strips Lv.2",
+    "ja-JP": "炎のペッパーリブG2",
+    "ko-KR": "화염 고추향 갈비・Lv.2"
+  },
+  "2032176": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032181": {
+    "zh-CN": "山野蜜鱼宝·等级1 / 盐焗鲜蔬羊肋排·等级1",
+    "en-US": "Honey Fish Delight Lv.1 / Salt-Baked Lamb Ribs Lv.1",
+    "ja-JP": "旨々甘辛フィッシュG1 / 野菜とスペアリブの蒸し焼きG1",
+    "ko-KR": "산야꿀생선・Lv.1 / 소금구이 야채 양갈비・Lv.1"
+  },
+  "2032182": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032183": {
+    "zh-CN": "暖风海鲜羹·等级1 / 炽辣肋排·等级1",
+    "en-US": "Windy Seafood Chowder Lv.1 / Scorching Spicy Ribs Lv.1",
+    "ja-JP": "魚介のHOTスープG1 / 激辛スペアリブG1",
+    "ko-KR": "따뜻한 바람 해물 수프・Lv.1 / 작열 매운 갈비・Lv.1"
+  },
+  "2032184": {
+    "zh-CN": "山野蜜鱼宝·等级2 / 盐焗鲜蔬羊肋排·等级2",
+    "en-US": "Honey Fish Delight Lv.2 / Salt-Baked Lamb Ribs Lv.2",
+    "ja-JP": "旨々甘辛フィッシュG2 / 野菜とスペアリブの蒸し焼きG2",
+    "ko-KR": "산야꿀생선・Lv.2 / 소금구이 야채 양갈비・Lv.2"
+  },
+  "2032185": {
+    "zh-CN": "暖风海鲜羹·等级2 / 炽辣肋排·等级2",
+    "en-US": "Windy Seafood Chowder Lv.2 / Scorching Spicy Ribs Lv.2",
+    "ja-JP": "魚介のHOTスープG2 / 激辛スペアリブG2",
+    "ko-KR": "따뜻한 바람 해물 수프・Lv.2 / 작열 매운 갈비・Lv.2"
+  },
+  "2032186": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032211": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032212": {
+    "zh-CN": "香炸鱼丸·等级1",
+    "en-US": "Crispy Fried Fish Balls Lv.1",
+    "ja-JP": "揚げつみれG1",
+    "ko-KR": "바삭 튀김 어묵볼・Lv.1"
+  },
+  "2032213": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032214": {
+    "zh-CN": "香炸鱼丸·等级2 / 蘸蘸鱼排·等级1",
+    "en-US": "Crispy Fried Fish Balls Lv.2 / Dipped Fish Fillet Lv.1",
+    "ja-JP": "揚げつみれG2 / 魚の漬けフライG1",
+    "ko-KR": "바삭 튀김 어묵볼・Lv.2 / 찍어 먹는 생선 스테이크・Lv.1"
+  },
+  "2032215": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032216": {
+    "zh-CN": "蘸蘸鱼排·等级2",
+    "en-US": "Dipped Fish Fillet Lv.2",
+    "ja-JP": "魚の漬けフライG2",
+    "ko-KR": "찍어 먹는 생선 스테이크・Lv.2"
+  },
+  "2032221": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032222": {
+    "zh-CN": "鲜滋羊肉丸·等级1",
+    "en-US": "Savory Mutton Balls Lv.1",
+    "ja-JP": "旨うま羊肉団子G1",
+    "ko-KR": "신선 풍미 양고기 완자・Lv.1"
+  },
+  "2032223": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032224": {
+    "zh-CN": "鲜滋羊肉丸·等级2 / 蘸蘸羊排·等级1",
+    "en-US": "Savory Mutton Balls Lv.2 / Dipped Mutton Chop Lv.1",
+    "ja-JP": "旨うま羊肉団子G2 / 漬け羊肉のローストG1",
+    "ko-KR": "신선 풍미 양고기 완자・Lv.2 / 찍어 먹는 양갈비・Lv.1"
+  },
+  "2032225": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032226": {
+    "zh-CN": "蘸蘸羊排·等级2",
+    "en-US": "Dipped Mutton Chop Lv.2",
+    "ja-JP": "漬け羊肉のローストG2",
+    "ko-KR": "찍어 먹는 양갈비・Lv.2"
+  },
+  "2032231": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032232": {
+    "zh-CN": "好健康罐罐·等级1",
+    "en-US": "Healthy Canned Food Lv.1",
+    "ja-JP": "健康カンカンG1",
+    "ko-KR": "건강 통조림・Lv.1"
+  },
+  "2032233": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032234": {
+    "zh-CN": "好健康罐罐·等级2 / 酸辣面糊·等级1",
+    "en-US": "Healthy Canned Food Lv.2 / Hot and Sour Batter Lv.1",
+    "ja-JP": "健康カンカンG2 / 酸辣ペーストG1",
+    "ko-KR": "건강 통조림・Lv.2 / 새콤 매운 반죽・Lv.1"
+  },
+  "2032235": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032236": {
+    "zh-CN": "酸辣面糊·等级2",
+    "en-US": "Hot and Sour Batter Lv.2",
+    "ja-JP": "酸辣ペーストG2",
+    "ko-KR": "새콤 매운 반죽・Lv.2"
+  },
+  "2032241": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032242": {
+    "zh-CN": "清醒酸汤鱼·等级1 / 苦口大补羊肉浓汤·等级1 / 琥珀蜜橙·等级1",
+    "en-US": "Zesty Sour Fish Soup Lv.1 / Bitter Mutton Tonic Soup Lv.1 / Amber Honey Coated Orange Lv.1",
+    "ja-JP": "酸っぱフィッシュスープG1 / 滋養の羊肉にがポタージュG1 / 琥珀蜜オレンジG1",
+    "ko-KR": "상쾌 시큼 생선 요리・Lv.1 / 쓴맛 보양 양고기 수프・Lv.1 / 호박 꿀 오렌지・Lv.1"
+  },
+  "2032243": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032244": {
+    "zh-CN": "清醒酸汤鱼·等级2 / 苦口大补羊肉浓汤·等级2 / 琥珀蜜橙·等级2 / 极致持久·鱼排罐头·等级1 / 极致持久·羊排罐头·等级1 / 云朵乳酪豆奶糕·等级1",
+    "en-US": "Zesty Sour Fish Soup Lv.2 / Bitter Mutton Tonic Soup Lv.2 / Amber Honey Coated Orange Lv.2 / Ultra-Durable Canned Fish Fillet Lv.1 / Ultra-Durable Canned Mutton Chop Lv.1 / Soy Milk Cloud Cake Lv.1",
+    "ja-JP": "酸っぱフィッシュスープG2 / 滋養の羊肉にがポタージュG2 / 琥珀蜜オレンジG2 / 魚のスーパー長持ち缶詰G1 / ラムチョップのスーパー長持ち缶詰G1 / ふわふわ豆乳チーズスフレG1",
+    "ko-KR": "상쾌 시큼 생선 요리・Lv.2 / 쓴맛 보양 양고기 수프・Lv.2 / 호박 꿀 오렌지・Lv.2 / 극한 보존・생선 스테이크 통조림・Lv.1 / 극한 보존・양갈비 통조림・Lv.1 / 구름 치즈 두유 케이크・Lv.1"
+  },
+  "2032245": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032246": {
+    "zh-CN": "极致持久·鱼排罐头·等级2 / 极致持久·羊排罐头·等级2 / 云朵乳酪豆奶糕·等级2",
+    "en-US": "Ultra-Durable Canned Fish Fillet Lv.2 / Ultra-Durable Canned Mutton Chop Lv.2 / Soy Milk Cloud Cake Lv.2",
+    "ja-JP": "魚のスーパー長持ち缶詰G2 / ラムチョップのスーパー長持ち缶詰G2 / ふわふわ豆乳チーズスフレG2",
+    "ko-KR": "극한 보존・생선 스테이크 통조림・Lv.2 / 극한 보존・양갈비 통조림・Lv.2 / 구름 치즈 두유 케이크・Lv.2"
+  },
+  "2032251": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032252": {
+    "zh-CN": "橙皮蒸鱼·等级1 / 缤纷羊肉饼·等级1",
+    "en-US": "Steamed Fish with Orange Peel Lv.1 / Colorful Mutton Pie Lv.1",
+    "ja-JP": "魚のオレンジ蒸しG1 / カラフル羊肉パイG1",
+    "ko-KR": "귤껍질 찜 생선・Lv.1 / 다채로운 양고기 패티・Lv.1"
+  },
+  "2032253": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032254": {
+    "zh-CN": "橙皮蒸鱼·等级2 / 缤纷羊肉饼·等级2 / 风味缠绵的卷饼·等级1 / 让人流泪的卷饼·等级1",
+    "en-US": "Steamed Fish with Orange Peel Lv.2 / Colorful Mutton Pie Lv.2 / Savory Wrap Lv.1 / Tear-Inducing Wrap Lv.1",
+    "ja-JP": "魚のオレンジ蒸しG2 / カラフル羊肉パイG2 / 風味長持ちブリトーG1 / 泣けるブリトーG1",
+    "ko-KR": "귤껍질 찜 생선・Lv.2 / 다채로운 양고기 패티・Lv.2 / 깊은 풍미 랩・Lv.1 / 눈물 나는 랩・Lv.1"
+  },
+  "2032255": {
+    "zh-CN": "料理",
+    "en-US": "Cuisine",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "2032256": {
+    "zh-CN": "风味缠绵的卷饼·等级2 / 让人流泪的卷饼·等级2",
+    "en-US": "Savory Wrap Lv.2 / Tear-Inducing Wrap Lv.2",
+    "ja-JP": "風味長持ちブリトーG2 / 泣けるブリトーG2",
+    "ko-KR": "깊은 풍미 랩・Lv.2 / 눈물 나는 랩・Lv.2"
+  },
+  "2032261": {
+    "zh-CN": "酸香鱼·等级1",
+    "en-US": "Tangy Fish Lv.1",
+    "ja-JP": "酸菜魚G1",
+    "ko-KR": "새콤 생선구이・Lv.1"
+  },
+  "2032262": {
+    "zh-CN": "酸香鱼·等级2",
+    "en-US": "Tangy Fish Lv.2",
+    "ja-JP": "酸菜魚G2",
+    "ko-KR": "새콤 생선구이・Lv.2"
+  },
+  "2032263": {
+    "zh-CN": "劲爆鱼汤面·等级1",
+    "en-US": "Spicy Fish Noodle Soup Lv.1",
+    "ja-JP": "極うま魚タンメンG1",
+    "ko-KR": "폭발 매운 생선탕면・Lv.1"
+  },
+  "2032264": {
+    "zh-CN": "劲爆鱼汤面·等级2",
+    "en-US": "Spicy Fish Noodle Soup Lv.2",
+    "ja-JP": "極うま魚タンメンG2",
+    "ko-KR": "폭발 매운 생선탕면・Lv.2"
+  },
+  "2032271": {
+    "zh-CN": "酸香羊肉锅·等级1",
+    "en-US": "Tangy Mutton Pot Lv.1",
+    "ja-JP": "サワーラム鍋G1",
+    "ko-KR": "새콤 양고기 전골・Lv.1"
+  },
+  "2032272": {
+    "zh-CN": "酸香羊肉锅·等级2",
+    "en-US": "Tangy Mutton Pot Lv.2",
+    "ja-JP": "サワーラム鍋G2",
+    "ko-KR": "새콤 양고기 전골・Lv.2"
+  },
+  "2032273": {
+    "zh-CN": "火爆羊汤·等级1",
+    "en-US": "Fiery Mutton Soup Lv.1",
+    "ja-JP": "羊の熱々スープG1",
+    "ko-KR": "매운 양고기 탕・Lv.1"
+  },
+  "2032274": {
+    "zh-CN": "火爆羊汤·等级2",
+    "en-US": "Fiery Mutton Soup Lv.2",
+    "ja-JP": "羊の熱々スープG2",
+    "ko-KR": "매운 양고기 탕・Lv.2"
+  },
+  "2032281": {
+    "zh-CN": "蜜汁鱼·等级1 / 有嚼劲羊排堡·等级1",
+    "en-US": "Honey Glazed Fish Lv.1 / Chewy Mutton Chop Burger Lv.1",
+    "ja-JP": "ハニーフィッシュG1 / 歯ごたえ羊バーガーG1",
+    "ko-KR": "꿀소스 생선・Lv.1 / 쫄깃한 양갈비 버거・Lv.1"
+  },
+  "2032282": {
+    "zh-CN": "蜜汁鱼·等级2 / 有嚼劲羊排堡·等级2",
+    "en-US": "Honey Glazed Fish Lv.2 / Chewy Mutton Chop Burger Lv.2",
+    "ja-JP": "ハニーフィッシュG2 / 歯ごたえ羊バーガーG2",
+    "ko-KR": "꿀소스 생선・Lv.2 / 쫄깃한 양갈비 버거・Lv.2"
+  },
+  "2032283": {
+    "zh-CN": "海味甜辣拌面·等级1 / 火爆羊排面·等级1",
+    "en-US": "Sweet and Spicy Seafood Noodles Lv.1 / Fiery Mutton Chop Noodles Lv.1",
+    "ja-JP": "海鮮甘辛混ぜ麺G1 / 羊のカツのせ熱々麺G1",
+    "ko-KR": "해풍 매콤달콤 비빔면・Lv.1 / 매운 양갈비 면・Lv.1"
+  },
+  "2032284": {
+    "zh-CN": "海味甜辣拌面·等级2 / 火爆羊排面·等级2",
+    "en-US": "Sweet and Spicy Seafood Noodles Lv.2 / Fiery Mutton Chop Noodles Lv.2",
+    "ja-JP": "海鮮甘辛混ぜ麺G2 / 羊のカツのせ熱々麺G2",
+    "ko-KR": "해풍 매콤달콤 비빔면・Lv.2 / 매운 양갈비 면・Lv.2"
+  },
+  "2032311": {
+    "zh-CN": "蕨菜虾饼·等级1",
+    "en-US": "Fern Shrimp Cake Lv.1",
+    "ja-JP": "エビとワラビのお焼きG1",
+    "ko-KR": "고사리 새우전・Lv.1"
+  },
+  "2032312": {
+    "zh-CN": "蕨菜虾饼·等级2",
+    "en-US": "Fern Shrimp Cake Lv.2",
+    "ja-JP": "エビとワラビのお焼きG2",
+    "ko-KR": "고사리 새우전・Lv.2"
+  },
+  "2032313": {
+    "zh-CN": "蕨菜虾饼·等级3",
+    "en-US": "Fern Shrimp Cake Lv.3",
+    "ja-JP": "エビとワラビのお焼きG3",
+    "ko-KR": "고사리 새우전・Lv.3"
+  },
+  "2032321": {
+    "zh-CN": "虾丸果子烤串·等级1",
+    "en-US": "Shrimp Ball and Fruit Skewers Lv.1",
+    "ja-JP": "エビボールの串焼きG1",
+    "ko-KR": "새우완자 과일 꼬치・Lv.1"
+  },
+  "2032322": {
+    "zh-CN": "虾丸果子烤串·等级2",
+    "en-US": "Shrimp Ball and Fruit Skewers Lv.2",
+    "ja-JP": "エビボールの串焼きG2",
+    "ko-KR": "새우완자 과일 꼬치・Lv.2"
+  },
+  "2032323": {
+    "zh-CN": "虾丸果子烤串·等级3",
+    "en-US": "Shrimp Ball and Fruit Skewers Lv.3",
+    "ja-JP": "エビボールの串焼きG3",
+    "ko-KR": "새우완자 과일 꼬치・Lv.3"
+  },
+  "2032331": {
+    "zh-CN": "酸甜冷拌蕨·等级1",
+    "en-US": "Sweet-and-Tart Chilled Fern Salad Lv.1",
+    "ja-JP": "わらびの甘酸っぱ和えG1",
+    "ko-KR": "새콤달콤 고사리 냉채・Lv.1"
+  },
+  "2032332": {
+    "zh-CN": "酸甜冷拌蕨·等级2",
+    "en-US": "Sweet-and-Tart Chilled Fern Salad Lv.2",
+    "ja-JP": "わらびの甘酸っぱ和えG2",
+    "ko-KR": "새콤달콤 고사리 냉채・Lv.2"
+  },
+  "2032333": {
+    "zh-CN": "酸甜冷拌蕨·等级3",
+    "en-US": "Sweet-and-Tart Chilled Fern Salad Lv.3",
+    "ja-JP": "わらびの甘酸っぱ和えG3",
+    "ko-KR": "새콤달콤 고사리 냉채・Lv.3"
+  },
+  "2032341": {
+    "zh-CN": "博尔豆泥与缘果酱烤饼·等级1",
+    "en-US": "Bor Bean Paste and Fated Jam Scones Lv.1",
+    "ja-JP": "ボル豆のペーストとベリージャムのスコーンG1",
+    "ko-KR": "볼콩 퓌레와 과일잼 구운 빵・Lv.1"
+  },
+  "2032342": {
+    "zh-CN": "博尔豆泥与缘果酱烤饼·等级2",
+    "en-US": "Bor Bean Paste and Fated Jam Scones Lv.2",
+    "ja-JP": "ボル豆のペーストとベリージャムのスコーンG2",
+    "ko-KR": "볼콩 퓌레와 과일잼 구운 빵・Lv.2"
+  },
+  "2032343": {
+    "zh-CN": "博尔豆泥与缘果酱烤饼·等级3",
+    "en-US": "Bor Bean Paste and Fated Jam Scones Lv.3",
+    "ja-JP": "ボル豆のペーストとベリージャムのスコーンG3",
+    "ko-KR": "볼콩 퓌레와 과일잼 구운 빵・Lv.3"
+  },
+  "2032351": {
+    "zh-CN": "垂瀑温石茶·等级1",
+    "en-US": "Waterfall Warm Stone Tea Lv.1",
+    "ja-JP": "滝シダ温石茶G1",
+    "ko-KR": "폭포바위 차・Lv.1"
+  },
+  "2032352": {
+    "zh-CN": "垂瀑温石茶·等级2",
+    "en-US": "Waterfall Warm Stone Tea Lv.2",
+    "ja-JP": "滝シダ温石茶G2",
+    "ko-KR": "폭포바위 차・Lv.2"
+  },
+  "2032353": {
+    "zh-CN": "垂瀑温石茶·等级3",
+    "en-US": "Waterfall Warm Stone Tea Lv.3",
+    "ja-JP": "滝シダ温石茶G3",
+    "ko-KR": "폭포바위 차・Lv.3"
+  },
+  "2032361": {
+    "zh-CN": "拟态烤虾·等级1",
+    "en-US": "Mimetic Grilled Shrimp Lv.1",
+    "ja-JP": "焼きエビもどきG1",
+    "ko-KR": "가짜 새우구이・Lv.1"
+  },
+  "2032362": {
+    "zh-CN": "拟态烤虾·等级2",
+    "en-US": "Mimetic Grilled Shrimp Lv.2",
+    "ja-JP": "焼きエビもどきG2",
+    "ko-KR": "가짜 새우구이・Lv.2"
+  },
+  "2032363": {
+    "zh-CN": "拟态烤虾·等级3",
+    "en-US": "Mimetic Grilled Shrimp Lv.3",
+    "ja-JP": "焼きエビもどきG3",
+    "ko-KR": "가짜 새우구이・Lv.3"
+  },
+  "2032371": {
+    "zh-CN": "红豆泥虾酱·等级1",
+    "en-US": "Red Bean Shrimp Paste Lv.1",
+    "ja-JP": "エビと小豆のペーストG1",
+    "ko-KR": "팥 새우장・Lv.1"
+  },
+  "2032372": {
+    "zh-CN": "红豆泥虾酱·等级2",
+    "en-US": "Red Bean Shrimp Paste Lv.2",
+    "ja-JP": "エビと小豆のペーストG2",
+    "ko-KR": "팥 새우장・Lv.2"
+  },
+  "2032373": {
+    "zh-CN": "红豆泥虾酱·等级3",
+    "en-US": "Red Bean Shrimp Paste Lv.3",
+    "ja-JP": "エビと小豆のペーストG3",
+    "ko-KR": "팥 새우장・Lv.3"
+  },
+  "2032381": {
+    "zh-CN": "冷拌蕨·等级1",
+    "en-US": "Chilled Fern Salad Lv.1",
+    "ja-JP": "わらびの和え物G1",
+    "ko-KR": "고사리 냉채・Lv.1"
+  },
+  "2032382": {
+    "zh-CN": "冷拌蕨·等级2",
+    "en-US": "Chilled Fern Salad Lv.2",
+    "ja-JP": "わらびの和え物G2",
+    "ko-KR": "고사리 냉채・Lv.2"
+  },
+  "2032383": {
+    "zh-CN": "冷拌蕨·等级3",
+    "en-US": "Chilled Fern Salad Lv.3",
+    "ja-JP": "わらびの和え物G3",
+    "ko-KR": "고사리 냉채・Lv.3"
+  }
+}

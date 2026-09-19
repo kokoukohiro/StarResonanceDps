@@ -1,0 +1,1262 @@
+{
+  "2033011": {
+    "zh-CN": "烈火糖浆·等级1",
+    "en-US": "Fire Serum Lv.1",
+    "ja-JP": "烈火のシロップG1",
+    "ko-KR": "불꽃 시럽・Lv.1"
+  },
+  "2033012": {
+    "zh-CN": "烈火糖浆·等级2",
+    "en-US": "Fire Serum Lv.2",
+    "ja-JP": "烈火のシロップG2",
+    "ko-KR": "불꽃 시럽・Lv.2"
+  },
+  "2033013": {
+    "zh-CN": "烈火糖浆·等级3",
+    "en-US": "Fire Serum Lv.3",
+    "ja-JP": "烈火のシロップG3",
+    "ko-KR": "불꽃 시럽・Lv.3"
+  },
+  "2033014": {
+    "zh-CN": "烈焰蜥脊试剂·等级1",
+    "en-US": "Blazing Lizard Spine Serum Lv.1",
+    "ja-JP": "烈炎リザードの脊椎試薬G1",
+    "ko-KR": "열염 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033015": {
+    "zh-CN": "烈焰蜥脊试剂·等级2",
+    "en-US": "Blazing Lizard Spine Serum Lv.2",
+    "ja-JP": "烈炎リザードの脊椎試薬G2",
+    "ko-KR": "열염 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033016": {
+    "zh-CN": "烈焰蜥脊试剂·等级3",
+    "en-US": "Blazing Lizard Spine Serum Lv.3",
+    "ja-JP": "烈炎リザードの脊椎試薬G3",
+    "ko-KR": "열염 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033017": {
+    "zh-CN": "烈焰蜥脊喷剂·等级1",
+    "en-US": "Blazing Lizard Spine Spray Lv.1",
+    "ja-JP": "烈炎リザード脊椎のスプレー薬G1",
+    "ko-KR": "열염 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033018": {
+    "zh-CN": "烈焰蜥脊喷剂·等级2",
+    "en-US": "Blazing Lizard Spine Spray Lv.2",
+    "ja-JP": "烈炎リザード脊椎のスプレー薬G2",
+    "ko-KR": "열염 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033019": {
+    "zh-CN": "烈焰蜥脊喷剂·等级3",
+    "en-US": "Blazing Lizard Spine Spray Lv.3",
+    "ja-JP": "烈炎リザード脊椎のスプレー薬G3",
+    "ko-KR": "열염 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033021": {
+    "zh-CN": "冰冻糖浆·等级1",
+    "en-US": "Ice Serum Lv.1",
+    "ja-JP": "氷結のシロップG1",
+    "ko-KR": "서리 시럽・Lv.1"
+  },
+  "2033022": {
+    "zh-CN": "冰冻糖浆·等级2",
+    "en-US": "Ice Serum Lv.2",
+    "ja-JP": "氷結のシロップG2",
+    "ko-KR": "서리 시럽・Lv.2"
+  },
+  "2033023": {
+    "zh-CN": "冰冻糖浆·等级3",
+    "en-US": "Ice Serum Lv.3",
+    "ja-JP": "氷結のシロップG3",
+    "ko-KR": "서리 시럽・Lv.3"
+  },
+  "2033024": {
+    "zh-CN": "极寒蜥脊试剂·等级1",
+    "en-US": "Frost Lizard Spine Serum Lv.1",
+    "ja-JP": "極寒リザードの脊椎試薬G1",
+    "ko-KR": "극한 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033025": {
+    "zh-CN": "极寒蜥脊试剂·等级2",
+    "en-US": "Frost Lizard Spine Serum Lv.2",
+    "ja-JP": "極寒リザードの脊椎試薬G2",
+    "ko-KR": "극한 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033026": {
+    "zh-CN": "极寒蜥脊试剂·等级3",
+    "en-US": "Frost Lizard Spine Serum Lv.3",
+    "ja-JP": "極寒リザードの脊椎試薬G3",
+    "ko-KR": "극한 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033027": {
+    "zh-CN": "极寒蜥脊喷剂·等级1",
+    "en-US": "Frost Lizard Spine Spray Lv.1",
+    "ja-JP": "極寒リザード脊椎のスプレー薬G1",
+    "ko-KR": "극한 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033028": {
+    "zh-CN": "极寒蜥脊喷剂·等级2",
+    "en-US": "Frost Lizard Spine Spray Lv.2",
+    "ja-JP": "極寒リザード脊椎のスプレー薬G2",
+    "ko-KR": "극한 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033029": {
+    "zh-CN": "极寒蜥脊喷剂·等级3",
+    "en-US": "Frost Lizard Spine Spray Lv.3",
+    "ja-JP": "極寒リザード脊椎のスプレー薬G3",
+    "ko-KR": "극한 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033031": {
+    "zh-CN": "青蔓糖浆·等级1",
+    "en-US": "Forest Serum Lv.1",
+    "ja-JP": "青ツタのシロップG1",
+    "ko-KR": "덩굴 시럽・Lv.1"
+  },
+  "2033032": {
+    "zh-CN": "青蔓糖浆·等级2",
+    "en-US": "Forest Serum Lv.2",
+    "ja-JP": "青ツタのシロップG2",
+    "ko-KR": "덩굴 시럽・Lv.2"
+  },
+  "2033033": {
+    "zh-CN": "青蔓糖浆·等级3",
+    "en-US": "Forest Serum Lv.3",
+    "ja-JP": "青ツタのシロップG3",
+    "ko-KR": "덩굴 시럽・Lv.3"
+  },
+  "2033034": {
+    "zh-CN": "叶脉蜥脊试剂·等级1",
+    "en-US": "Verdant Lizard Spine Serum Lv.1",
+    "ja-JP": "葉脈リザードの脊椎試薬G1",
+    "ko-KR": "엽맥 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033035": {
+    "zh-CN": "叶脉蜥脊试剂·等级2",
+    "en-US": "Verdant Lizard Spine Serum Lv.2",
+    "ja-JP": "葉脈リザードの脊椎試薬G2",
+    "ko-KR": "엽맥 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033036": {
+    "zh-CN": "叶脉蜥脊试剂·等级3",
+    "en-US": "Verdant Lizard Spine Serum Lv.3",
+    "ja-JP": "葉脈リザードの脊椎試薬G3",
+    "ko-KR": "엽맥 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033037": {
+    "zh-CN": "叶脉蜥脊喷剂·等级1",
+    "en-US": "Verdant Lizard Spine Spray Lv.1",
+    "ja-JP": "葉脈リザード脊椎のスプレー薬G1",
+    "ko-KR": "엽맥 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033038": {
+    "zh-CN": "叶脉蜥脊喷剂·等级2",
+    "en-US": "Verdant Lizard Spine Spray Lv.2",
+    "ja-JP": "葉脈リザード脊椎のスプレー薬G2",
+    "ko-KR": "엽맥 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033039": {
+    "zh-CN": "叶脉蜥脊喷剂·等级3",
+    "en-US": "Verdant Lizard Spine Spray Lv.3",
+    "ja-JP": "葉脈リザード脊椎のスプレー薬G3",
+    "ko-KR": "엽맥 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033041": {
+    "zh-CN": "震土糖浆·等级1",
+    "en-US": "Rock Serum Lv.1",
+    "ja-JP": "震土のシロップG1",
+    "ko-KR": "토양 시럽・Lv.1"
+  },
+  "2033042": {
+    "zh-CN": "震土糖浆·等级2",
+    "en-US": "Rock Serum Lv.2",
+    "ja-JP": "震土のシロップG2",
+    "ko-KR": "토양 시럽・Lv.2"
+  },
+  "2033043": {
+    "zh-CN": "震土糖浆·等级3",
+    "en-US": "Rock Serum Lv.3",
+    "ja-JP": "震土のシロップG3",
+    "ko-KR": "토양 시럽・Lv.3"
+  },
+  "2033044": {
+    "zh-CN": "砂岩蜥脊试剂·等级1",
+    "en-US": "Sandstone Lizard Spine Serum Lv.1",
+    "ja-JP": "砂岩リザードの脊椎試薬G1",
+    "ko-KR": "사암 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033045": {
+    "zh-CN": "砂岩蜥脊试剂·等级2",
+    "en-US": "Sandstone Lizard Spine Serum Lv.2",
+    "ja-JP": "砂岩リザードの脊椎試薬G2",
+    "ko-KR": "사암 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033046": {
+    "zh-CN": "砂岩蜥脊试剂·等级3",
+    "en-US": "Sandstone Lizard Spine Serum Lv.3",
+    "ja-JP": "砂岩リザードの脊椎試薬G3",
+    "ko-KR": "사암 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033047": {
+    "zh-CN": "砂岩蜥脊喷剂·等级1",
+    "en-US": "Sandstone Lizard Spine Spray Lv.1",
+    "ja-JP": "砂岩リザード脊椎のスプレー薬G1",
+    "ko-KR": "사암 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033048": {
+    "zh-CN": "砂岩蜥脊喷剂·等级2",
+    "en-US": "Sandstone Lizard Spine Spray Lv.2",
+    "ja-JP": "砂岩リザード脊椎のスプレー薬G2",
+    "ko-KR": "사암 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033049": {
+    "zh-CN": "砂岩蜥脊喷剂·等级3",
+    "en-US": "Sandstone Lizard Spine Spray Lv.3",
+    "ja-JP": "砂岩リザード脊椎のスプレー薬G3",
+    "ko-KR": "사암 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033051": {
+    "zh-CN": "旋风糖浆·等级1",
+    "en-US": "Wind Serum Lv.1",
+    "ja-JP": "旋風のシロップG1",
+    "ko-KR": "회오리 시럽・Lv.1"
+  },
+  "2033052": {
+    "zh-CN": "旋风糖浆·等级2",
+    "en-US": "Wind Serum Lv.2",
+    "ja-JP": "旋風のシロップG2",
+    "ko-KR": "회오리 시럽・Lv.2"
+  },
+  "2033053": {
+    "zh-CN": "旋风糖浆·等级3",
+    "en-US": "Wind Serum Lv.3",
+    "ja-JP": "旋風のシロップG3",
+    "ko-KR": "회오리 시럽・Lv.3"
+  },
+  "2033054": {
+    "zh-CN": "风鸣蜥脊试剂·等级1",
+    "en-US": "Windchime Lizard Spine Serum Lv.1",
+    "ja-JP": "風鳴リザードの脊椎試薬G1",
+    "ko-KR": "바람 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033055": {
+    "zh-CN": "风鸣蜥脊试剂·等级2",
+    "en-US": "Windchime Lizard Spine Serum Lv.2",
+    "ja-JP": "風鳴リザードの脊椎試薬G2",
+    "ko-KR": "바람 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033056": {
+    "zh-CN": "风鸣蜥脊试剂·等级3",
+    "en-US": "Windchime Lizard Spine Serum Lv.3",
+    "ja-JP": "風鳴リザードの脊椎試薬G3",
+    "ko-KR": "바람 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033057": {
+    "zh-CN": "风鸣蜥脊喷剂·等级1",
+    "en-US": "Windchime Lizard Spine Spray Lv.1",
+    "ja-JP": "風鳴リザード脊椎のスプレー薬G1",
+    "ko-KR": "바람 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033058": {
+    "zh-CN": "风鸣蜥脊喷剂·等级2",
+    "en-US": "Windchime Lizard Spine Spray Lv.2",
+    "ja-JP": "風鳴リザード脊椎のスプレー薬G2",
+    "ko-KR": "바람 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033059": {
+    "zh-CN": "风鸣蜥脊喷剂·等级3",
+    "en-US": "Windchime Lizard Spine Spray Lv.3",
+    "ja-JP": "風鳴リザード脊椎のスプレー薬G3",
+    "ko-KR": "바람 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033061": {
+    "zh-CN": "雷鸣糖浆·等级1",
+    "en-US": "Thunder Serum Lv.1",
+    "ja-JP": "雷鳴のシロップG1",
+    "ko-KR": "천둥 시럽・Lv.1"
+  },
+  "2033062": {
+    "zh-CN": "雷鸣糖浆·等级2",
+    "en-US": "Thunder Serum Lv.2",
+    "ja-JP": "雷鳴のシロップG2",
+    "ko-KR": "천둥 시럽・Lv.2"
+  },
+  "2033063": {
+    "zh-CN": "雷鸣糖浆·等级3",
+    "en-US": "Thunder Serum Lv.3",
+    "ja-JP": "雷鳴のシロップG3",
+    "ko-KR": "천둥 시럽・Lv.3"
+  },
+  "2033064": {
+    "zh-CN": "电解蜥脊试剂·等级1",
+    "en-US": "Electrolytic Lizard Spine Serum Lv.1",
+    "ja-JP": "電解リザードの脊椎試薬G1",
+    "ko-KR": "번개 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033065": {
+    "zh-CN": "电解蜥脊试剂·等级2",
+    "en-US": "Electrolytic Lizard Spine Serum Lv.2",
+    "ja-JP": "電解リザードの脊椎試薬G2",
+    "ko-KR": "번개 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033066": {
+    "zh-CN": "电解蜥脊试剂·等级3",
+    "en-US": "Electrolytic Lizard Spine Serum Lv.3",
+    "ja-JP": "電解リザードの脊椎試薬G3",
+    "ko-KR": "번개 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033067": {
+    "zh-CN": "电解蜥脊喷剂·等级1",
+    "en-US": "Electrolytic Lizard Spine Spray Lv.1",
+    "ja-JP": "電解リザード脊椎のスプレー薬G1",
+    "ko-KR": "번개 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033068": {
+    "zh-CN": "电解蜥脊喷剂·等级2",
+    "en-US": "Electrolytic Lizard Spine Spray Lv.2",
+    "ja-JP": "電解リザード脊椎のスプレー薬G2",
+    "ko-KR": "번개 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033069": {
+    "zh-CN": "电解蜥脊喷剂·等级3",
+    "en-US": "Electrolytic Lizard Spine Spray Lv.3",
+    "ja-JP": "電解リザード脊椎のスプレー薬G3",
+    "ko-KR": "번개 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033071": {
+    "zh-CN": "光彩糖浆·等级1",
+    "en-US": "Light Serum Lv.1",
+    "ja-JP": "光彩のシロップG1",
+    "ko-KR": "광채 시럽・Lv.1"
+  },
+  "2033072": {
+    "zh-CN": "光彩糖浆·等级2",
+    "en-US": "Light Serum Lv.2",
+    "ja-JP": "光彩のシロップG2",
+    "ko-KR": "광채 시럽・Lv.2"
+  },
+  "2033073": {
+    "zh-CN": "光彩糖浆·等级3",
+    "en-US": "Light Serum Lv.3",
+    "ja-JP": "光彩のシロップG3",
+    "ko-KR": "광채 시럽・Lv.3"
+  },
+  "2033074": {
+    "zh-CN": "辉白蜥脊试剂·等级1",
+    "en-US": "Radiant Lizard Spine Serum Lv.1",
+    "ja-JP": "輝白リザードの脊椎試薬G1",
+    "ko-KR": "휘백 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033075": {
+    "zh-CN": "辉白蜥脊试剂·等级2",
+    "en-US": "Radiant Lizard Spine Serum Lv.2",
+    "ja-JP": "輝白リザードの脊椎試薬G2",
+    "ko-KR": "휘백 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033076": {
+    "zh-CN": "辉白蜥脊试剂·等级3",
+    "en-US": "Radiant Lizard Spine Serum Lv.3",
+    "ja-JP": "輝白リザードの脊椎試薬G3",
+    "ko-KR": "휘백 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033077": {
+    "zh-CN": "辉白蜥脊喷剂·等级1",
+    "en-US": "Radiant Lizard Spine Spray Lv.1",
+    "ja-JP": "輝白リザード脊椎のスプレー薬G1",
+    "ko-KR": "휘백 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033078": {
+    "zh-CN": "辉白蜥脊喷剂·等级2",
+    "en-US": "Radiant Lizard Spine Spray Lv.2",
+    "ja-JP": "輝白リザード脊椎のスプレー薬G2",
+    "ko-KR": "휘백 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033079": {
+    "zh-CN": "辉白蜥脊喷剂·等级3",
+    "en-US": "Radiant Lizard Spine Spray Lv.3",
+    "ja-JP": "輝白リザード脊椎のスプレー薬G3",
+    "ko-KR": "휘백 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033081": {
+    "zh-CN": "暗夜糖浆·等级1",
+    "en-US": "Dark Serum Lv.1",
+    "ja-JP": "常闇のシロップG1",
+    "ko-KR": "어둠 시럽・Lv.1"
+  },
+  "2033082": {
+    "zh-CN": "暗夜糖浆·等级2",
+    "en-US": "Dark Serum Lv.2",
+    "ja-JP": "常闇のシロップG2",
+    "ko-KR": "어둠 시럽・Lv.2"
+  },
+  "2033083": {
+    "zh-CN": "暗夜糖浆·等级3",
+    "en-US": "Dark Serum Lv.3",
+    "ja-JP": "常闇のシロップG3",
+    "ko-KR": "어둠 시럽・Lv.3"
+  },
+  "2033084": {
+    "zh-CN": "黯淡蜥脊试剂·等级1",
+    "en-US": "Dusk Lizard Spine Serum Lv.1",
+    "ja-JP": "暗淡リザードの脊椎試薬G1",
+    "ko-KR": "어둠 도마뱀 등뼈 시약・Lv.1"
+  },
+  "2033085": {
+    "zh-CN": "黯淡蜥脊试剂·等级2",
+    "en-US": "Dusk Lizard Spine Serum Lv.2",
+    "ja-JP": "暗淡リザードの脊椎試薬G2",
+    "ko-KR": "어둠 도마뱀 등뼈 시약・Lv.2"
+  },
+  "2033086": {
+    "zh-CN": "黯淡蜥脊试剂·等级3",
+    "en-US": "Dusk Lizard Spine Serum Lv.3",
+    "ja-JP": "暗淡リザードの脊椎試薬G3",
+    "ko-KR": "어둠 도마뱀 등뼈 시약・Lv.3"
+  },
+  "2033087": {
+    "zh-CN": "黯淡蜥脊喷剂·等级1",
+    "en-US": "Dusk Lizard Spine Spray Lv.1",
+    "ja-JP": "暗淡リザード脊椎のスプレー薬G1",
+    "ko-KR": "어둠 도마뱀 등뼈 스프레이・Lv.1"
+  },
+  "2033088": {
+    "zh-CN": "黯淡蜥脊喷剂·等级2",
+    "en-US": "Dusk Lizard Spine Spray Lv.2",
+    "ja-JP": "暗淡リザード脊椎のスプレー薬G2",
+    "ko-KR": "어둠 도마뱀 등뼈 스프레이・Lv.2"
+  },
+  "2033089": {
+    "zh-CN": "黯淡蜥脊喷剂·等级3",
+    "en-US": "Dusk Lizard Spine Spray Lv.3",
+    "ja-JP": "暗淡リザード脊椎のスプレー薬G3",
+    "ko-KR": "어둠 도마뱀 등뼈 스프레이・Lv.3"
+  },
+  "2033091": {
+    "zh-CN": "抗火含片·等级1",
+    "en-US": "Fire Drop Lv.1",
+    "ja-JP": "耐火のトローチG1",
+    "ko-KR": "불 저항 캔디・Lv.1"
+  },
+  "2033092": {
+    "zh-CN": "抗火含片·等级2",
+    "en-US": "Fire Drop Lv.2",
+    "ja-JP": "耐火のトローチG2",
+    "ko-KR": "불 저항 캔디・Lv.2"
+  },
+  "2033093": {
+    "zh-CN": "抗火含片·等级3",
+    "en-US": "Fire Drop Lv.3",
+    "ja-JP": "耐火のトローチG3",
+    "ko-KR": "불 저항 캔디・Lv.3"
+  },
+  "2033094": {
+    "zh-CN": "避火型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Fire Drop Lv.1",
+    "ja-JP": "避火型リザード脊椎のトローチG1",
+    "ko-KR": "화염 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033095": {
+    "zh-CN": "避火型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Fire Drop Lv.2",
+    "ja-JP": "避火型リザード脊椎のトローチG2",
+    "ko-KR": "화염 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033096": {
+    "zh-CN": "避火型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Fire Drop Lv.3",
+    "ja-JP": "避火型リザード脊椎のトローチG3",
+    "ko-KR": "화염 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033097": {
+    "zh-CN": "避火型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Fire Pill Lv.1",
+    "ja-JP": "避火型リザード脊椎の丸薬G1",
+    "ko-KR": "화염 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033098": {
+    "zh-CN": "避火型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Fire Pill Lv.2",
+    "ja-JP": "避火型リザード脊椎の丸薬G2",
+    "ko-KR": "화염 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033099": {
+    "zh-CN": "避火型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Fire Pill Lv.3",
+    "ja-JP": "避火型リザード脊椎の丸薬G3",
+    "ko-KR": "화염 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033101": {
+    "zh-CN": "抗冰含片·等级1",
+    "en-US": "Ice Drop Lv.1",
+    "ja-JP": "耐氷のトローチG1",
+    "ko-KR": "얼음 저항 캔디・Lv.1"
+  },
+  "2033102": {
+    "zh-CN": "抗冰含片·等级2",
+    "en-US": "Ice Drop Lv.2",
+    "ja-JP": "耐氷のトローチG2",
+    "ko-KR": "얼음 저항 캔디・Lv.2"
+  },
+  "2033103": {
+    "zh-CN": "抗冰含片·等级3",
+    "en-US": "Ice Drop Lv.3",
+    "ja-JP": "耐氷のトローチG3",
+    "ko-KR": "얼음 저항 캔디・Lv.3"
+  },
+  "2033104": {
+    "zh-CN": "避寒型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Ice Drop Lv.1",
+    "ja-JP": "避寒型リザード脊椎のトローチG1",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033105": {
+    "zh-CN": "避寒型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Ice Drop Lv.2",
+    "ja-JP": "避寒型リザード脊椎のトローチG2",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033106": {
+    "zh-CN": "避寒型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Ice Drop Lv.3",
+    "ja-JP": "避寒型リザード脊椎のトローチG3",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033107": {
+    "zh-CN": "避寒型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Ice Pill Lv.1",
+    "ja-JP": "避寒型リザード脊椎の丸薬G1",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033108": {
+    "zh-CN": "避寒型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Ice Pill Lv.2",
+    "ja-JP": "避寒型リザード脊椎の丸薬G2",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033109": {
+    "zh-CN": "避寒型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Ice Pill Lv.3",
+    "ja-JP": "避寒型リザード脊椎の丸薬G3",
+    "ko-KR": "얼음 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033111": {
+    "zh-CN": "抗森含片·等级1",
+    "en-US": "Forest Drop Lv.1",
+    "ja-JP": "耐森のトローチG1",
+    "ko-KR": "나무 저항 캔디・Lv.1"
+  },
+  "2033112": {
+    "zh-CN": "抗森含片·等级2",
+    "en-US": "Forest Drop Lv.2",
+    "ja-JP": "耐森のトローチG2",
+    "ko-KR": "나무 저항 캔디・Lv.2"
+  },
+  "2033113": {
+    "zh-CN": "抗森含片·等级3",
+    "en-US": "Forest Drop Lv.3",
+    "ja-JP": "耐森のトローチG3",
+    "ko-KR": "나무 저항 캔디・Lv.3"
+  },
+  "2033114": {
+    "zh-CN": "避茵型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Frost Drop Lv.1",
+    "ja-JP": "避草型リザード脊椎のトローチG1",
+    "ko-KR": "초원 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033115": {
+    "zh-CN": "避茵型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Frost Drop Lv.2",
+    "ja-JP": "避草型リザード脊椎のトローチG2",
+    "ko-KR": "초원 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033116": {
+    "zh-CN": "避茵型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Frost Drop Lv.3",
+    "ja-JP": "避草型リザード脊椎のトローチG3",
+    "ko-KR": "초원 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033117": {
+    "zh-CN": "避茵型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Frost Pill Lv.1",
+    "ja-JP": "避草型リザード脊椎の丸薬G1",
+    "ko-KR": "초원 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033118": {
+    "zh-CN": "避茵型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Frost Pill Lv.2",
+    "ja-JP": "避草型リザード脊椎の丸薬G2",
+    "ko-KR": "초원 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033119": {
+    "zh-CN": "避茵型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Frost Pill Lv.3",
+    "ja-JP": "避草型リザード脊椎の丸薬G3",
+    "ko-KR": "초원 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033121": {
+    "zh-CN": "抗岩含片·等级1",
+    "en-US": "Rock Drop Lv.1",
+    "ja-JP": "耐岩のトローチG1",
+    "ko-KR": "바위 저항 캔디・Lv.1"
+  },
+  "2033122": {
+    "zh-CN": "抗岩含片·等级2",
+    "en-US": "Rock Drop Lv.2",
+    "ja-JP": "耐岩のトローチG2",
+    "ko-KR": "바위 저항 캔디・Lv.2"
+  },
+  "2033123": {
+    "zh-CN": "抗岩含片·等级3",
+    "en-US": "Rock Drop Lv.3",
+    "ja-JP": "耐岩のトローチG3",
+    "ko-KR": "바위 저항 캔디・Lv.3"
+  },
+  "2033124": {
+    "zh-CN": "避砂型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Rock Drop Lv.1",
+    "ja-JP": "避砂型リザード脊椎のトローチG1",
+    "ko-KR": "모래 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033125": {
+    "zh-CN": "避砂型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Rock Drop Lv.2",
+    "ja-JP": "避砂型リザード脊椎のトローチG2",
+    "ko-KR": "모래 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033126": {
+    "zh-CN": "避砂型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Rock Drop Lv.3",
+    "ja-JP": "避砂型リザード脊椎のトローチG3",
+    "ko-KR": "모래 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033127": {
+    "zh-CN": "避砂型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Rock Pill Lv.1",
+    "ja-JP": "避砂型リザード脊椎の丸薬G1",
+    "ko-KR": "모래 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033128": {
+    "zh-CN": "避砂型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Rock Pill Lv.2",
+    "ja-JP": "避砂型リザード脊椎の丸薬G2",
+    "ko-KR": "모래 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033129": {
+    "zh-CN": "避砂型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Rock Pill Lv.3",
+    "ja-JP": "避砂型リザード脊椎の丸薬G3",
+    "ko-KR": "모래 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033131": {
+    "zh-CN": "抗风含片·等级1",
+    "en-US": "Wind Drop Lv.1",
+    "ja-JP": "耐風のトローチG1",
+    "ko-KR": "바람 저항 캔디・Lv.1"
+  },
+  "2033132": {
+    "zh-CN": "抗风含片·等级2",
+    "en-US": "Wind Drop Lv.2",
+    "ja-JP": "耐風のトローチG2",
+    "ko-KR": "바람 저항 캔디・Lv.2"
+  },
+  "2033133": {
+    "zh-CN": "抗风含片·等级3",
+    "en-US": "Wind Drop Lv.3",
+    "ja-JP": "耐風のトローチG3",
+    "ko-KR": "바람 저항 캔디・Lv.3"
+  },
+  "2033134": {
+    "zh-CN": "避风型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Wind Drop Lv.1",
+    "ja-JP": "避風型リザード脊椎のトローチG1",
+    "ko-KR": "바람 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033135": {
+    "zh-CN": "避风型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Wind Drop Lv.2",
+    "ja-JP": "避風型リザード脊椎のトローチG2",
+    "ko-KR": "바람 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033136": {
+    "zh-CN": "避风型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Wind Drop Lv.3",
+    "ja-JP": "避風型リザード脊椎のトローチG3",
+    "ko-KR": "바람 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033137": {
+    "zh-CN": "避风型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Wind Pill Lv.1",
+    "ja-JP": "避風型リザード脊椎の丸薬G1",
+    "ko-KR": "바람 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033138": {
+    "zh-CN": "避风型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Wind Pill Lv.2",
+    "ja-JP": "避風型リザード脊椎の丸薬G2",
+    "ko-KR": "바람 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033139": {
+    "zh-CN": "避风型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Wind Pill Lv.3",
+    "ja-JP": "避風型リザード脊椎の丸薬G3",
+    "ko-KR": "바람 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033141": {
+    "zh-CN": "抗雷含片·等级1",
+    "en-US": "Thunder Drop Lv.1",
+    "ja-JP": "耐雷のトローチG1",
+    "ko-KR": "번개 저항 캔디・Lv.1"
+  },
+  "2033142": {
+    "zh-CN": "抗雷含片·等级2",
+    "en-US": "Thunder Drop Lv.2",
+    "ja-JP": "耐雷のトローチG2",
+    "ko-KR": "번개 저항 캔디・Lv.2"
+  },
+  "2033143": {
+    "zh-CN": "抗雷含片·等级3",
+    "en-US": "Thunder Drop Lv.3",
+    "ja-JP": "耐雷のトローチG3",
+    "ko-KR": "번개 저항 캔디・Lv.3"
+  },
+  "2033144": {
+    "zh-CN": "避雷型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Thunder Drop Lv.1",
+    "ja-JP": "避雷型リザード脊椎のトローチG1",
+    "ko-KR": "번개 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033145": {
+    "zh-CN": "避雷型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Thunder Drop Lv.2",
+    "ja-JP": "避雷型リザード脊椎のトローチG2",
+    "ko-KR": "번개 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033146": {
+    "zh-CN": "避雷型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Thunder Drop Lv.3",
+    "ja-JP": "避雷型リザード脊椎のトローチG3",
+    "ko-KR": "번개 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033147": {
+    "zh-CN": "避雷型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Thunder Pill Lv.1",
+    "ja-JP": "避雷型リザード脊椎の丸薬G1",
+    "ko-KR": "번개 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033148": {
+    "zh-CN": "避雷型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Thunder Pill Lv.2",
+    "ja-JP": "避雷型リザード脊椎の丸薬G2",
+    "ko-KR": "번개 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033149": {
+    "zh-CN": "避雷型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Thunder Pill Lv.3",
+    "ja-JP": "避雷型リザード脊椎の丸薬G3",
+    "ko-KR": "번개 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033151": {
+    "zh-CN": "抗光含片·等级1",
+    "en-US": "Light Drop Lv.1",
+    "ja-JP": "耐光のトローチG1",
+    "ko-KR": "빛 저항 캔디・Lv.1"
+  },
+  "2033152": {
+    "zh-CN": "抗光含片·等级2",
+    "en-US": "Light Drop Lv.2",
+    "ja-JP": "耐光のトローチG2",
+    "ko-KR": "빛 저항 캔디・Lv.2"
+  },
+  "2033153": {
+    "zh-CN": "抗光含片·等级3",
+    "en-US": "Light Drop Lv.3",
+    "ja-JP": "耐光のトローチG3",
+    "ko-KR": "빛 저항 캔디・Lv.3"
+  },
+  "2033154": {
+    "zh-CN": "避光型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Light Drop Lv.1",
+    "ja-JP": "避光型リザード脊椎のトローチG1",
+    "ko-KR": "빛 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033155": {
+    "zh-CN": "避光型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Light Drop Lv.2",
+    "ja-JP": "避光型リザード脊椎のトローチG2",
+    "ko-KR": "빛 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033156": {
+    "zh-CN": "避光型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Light Drop Lv.3",
+    "ja-JP": "避光型リザード脊椎のトローチG3",
+    "ko-KR": "빛 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033157": {
+    "zh-CN": "避光型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Light Pill Lv.1",
+    "ja-JP": "避光型リザード脊椎の丸薬G1",
+    "ko-KR": "빛 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033158": {
+    "zh-CN": "避光型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Light Pill Lv.2",
+    "ja-JP": "避光型リザード脊椎の丸薬G2",
+    "ko-KR": "빛 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033159": {
+    "zh-CN": "避光型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Light Pill Lv.3",
+    "ja-JP": "避光型リザード脊椎の丸薬G3",
+    "ko-KR": "빛 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033161": {
+    "zh-CN": "抗暗含片·等级1",
+    "en-US": "Dark Drop Lv.1",
+    "ja-JP": "耐闇のトローチG1",
+    "ko-KR": "어둠 저항 캔디・Lv.1"
+  },
+  "2033162": {
+    "zh-CN": "抗暗含片·等级2",
+    "en-US": "Dark Drop Lv.2",
+    "ja-JP": "耐闇のトローチG2",
+    "ko-KR": "어둠 저항 캔디・Lv.2"
+  },
+  "2033163": {
+    "zh-CN": "抗暗含片·等级3",
+    "en-US": "Dark Drop Lv.3",
+    "ja-JP": "耐闇のトローチG3",
+    "ko-KR": "어둠 저항 캔디・Lv.3"
+  },
+  "2033164": {
+    "zh-CN": "避夜型蜥脊含片·等级1",
+    "en-US": "Lizard Spine Dark Drop Lv.1",
+    "ja-JP": "避夜型リザード脊椎のトローチG1",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 캔디・Lv.1"
+  },
+  "2033165": {
+    "zh-CN": "避夜型蜥脊含片·等级2",
+    "en-US": "Lizard Spine Dark Drop Lv.2",
+    "ja-JP": "避夜型リザード脊椎のトローチG2",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 캔디・Lv.2"
+  },
+  "2033166": {
+    "zh-CN": "避夜型蜥脊含片·等级3",
+    "en-US": "Lizard Spine Dark Drop Lv.3",
+    "ja-JP": "避夜型リザード脊椎のトローチG3",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 캔디・Lv.3"
+  },
+  "2033167": {
+    "zh-CN": "避夜型蜥脊药丸·等级1",
+    "en-US": "Lizard Spine Dark Pill Lv.1",
+    "ja-JP": "避夜型リザード脊椎の丸薬G1",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 알약・Lv.1"
+  },
+  "2033168": {
+    "zh-CN": "避夜型蜥脊药丸·等级2",
+    "en-US": "Lizard Spine Dark Pill Lv.2",
+    "ja-JP": "避夜型リザード脊椎の丸薬G2",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 알약・Lv.2"
+  },
+  "2033169": {
+    "zh-CN": "避夜型蜥脊药丸·等级3",
+    "en-US": "Lizard Spine Dark Pill Lv.3",
+    "ja-JP": "避夜型リザード脊椎の丸薬G3",
+    "ko-KR": "어둠 저항 도마뱀 등뼈 알약・Lv.3"
+  },
+  "2033174": {
+    "zh-CN": "辉芒星油·等级1",
+    "en-US": "Starshine Oil Lv.1",
+    "ja-JP": "煌光スターオイルG1",
+    "ko-KR": "빛의 엔그램 오일・Lv.1"
+  },
+  "2033175": {
+    "zh-CN": "辉芒星油·等级2",
+    "en-US": "Starshine Oil Lv.2",
+    "ja-JP": "煌光スターオイルG2",
+    "ko-KR": "빛의 엔그램 오일・Lv.2"
+  },
+  "2033176": {
+    "zh-CN": "辉芒星油·等级3",
+    "en-US": "Starshine Oil Lv.3",
+    "ja-JP": "煌光スターオイルG3",
+    "ko-KR": "빛의 엔그램 오일・Lv.3"
+  },
+  "2033177": {
+    "zh-CN": "辉芒月髓·等级1",
+    "en-US": "Starshine Moonmarrow Lv.1",
+    "ja-JP": "煌光ムーンエッセンスG1",
+    "ko-KR": "빛나는 달의 골수・Lv.1"
+  },
+  "2033178": {
+    "zh-CN": "辉芒月髓·等级2",
+    "en-US": "Starshine Moonmarrow Lv.2",
+    "ja-JP": "煌光ムーンエッセンスG2",
+    "ko-KR": "빛나는 달의 골수・Lv.2"
+  },
+  "2033179": {
+    "zh-CN": "辉芒月髓·等级3",
+    "en-US": "Starshine Moonmarrow Lv.3",
+    "ja-JP": "煌光ムーンエッセンスG3",
+    "ko-KR": "빛나는 달의 골수・Lv.3"
+  },
+  "2033184": {
+    "zh-CN": "灵息星油·等级1",
+    "en-US": "Spiritbreath Oil Lv.1",
+    "ja-JP": "霊息スターオイルG1",
+    "ko-KR": "영혼 숨결 엔그램 오일・Lv.1"
+  },
+  "2033185": {
+    "zh-CN": "灵息星油·等级2",
+    "en-US": "Spiritbreath Oil Lv.2",
+    "ja-JP": "霊息スターオイルG2",
+    "ko-KR": "영혼 숨결 엔그램 오일・Lv.2"
+  },
+  "2033186": {
+    "zh-CN": "灵息星油·等级3",
+    "en-US": "Spiritbreath Oil Lv.3",
+    "ja-JP": "霊息スターオイルG3",
+    "ko-KR": "영혼 숨결 엔그램 오일・Lv.3"
+  },
+  "2033187": {
+    "zh-CN": "灵息月髓·等级1",
+    "en-US": "Spiritbreath Moonmarrow Lv.1",
+    "ja-JP": "霊息ムーンエッセンスG1",
+    "ko-KR": "영혼 숨결 달의 골수・Lv.1"
+  },
+  "2033188": {
+    "zh-CN": "灵息月髓·等级2",
+    "en-US": "Spiritbreath Moonmarrow Lv.2",
+    "ja-JP": "霊息ムーンエッセンスG2",
+    "ko-KR": "영혼 숨결 달의 골수・Lv.2"
+  },
+  "2033189": {
+    "zh-CN": "灵息月髓·等级3",
+    "en-US": "Spiritbreath Moonmarrow Lv.3",
+    "ja-JP": "霊息ムーンエッセンスG3",
+    "ko-KR": "영혼 숨결 달의 골수・Lv.3"
+  },
+  "2033211": {
+    "zh-CN": "烈焰之烛·等级1",
+    "en-US": "Flame Candle Lv.1",
+    "ja-JP": "烈炎のキャンドルG1",
+    "ko-KR": "열화의 촛불・Lv.1"
+  },
+  "2033212": {
+    "zh-CN": "烈焰之烛·等级2",
+    "en-US": "Flame Candle Lv.2",
+    "ja-JP": "烈炎のキャンドルG2",
+    "ko-KR": "열화의 촛불・Lv.2"
+  },
+  "2033213": {
+    "zh-CN": "烈焰之烛·等级3",
+    "en-US": "Flame Candle Lv.3",
+    "ja-JP": "烈炎のキャンドルG3",
+    "ko-KR": "열화의 촛불・Lv.3"
+  },
+  "2033221": {
+    "zh-CN": "极寒之烛·等级1",
+    "en-US": "Frost Candle Lv.1",
+    "ja-JP": "極寒のキャンドルG1",
+    "ko-KR": "극한의 촛불・Lv.1"
+  },
+  "2033222": {
+    "zh-CN": "极寒之烛·等级2",
+    "en-US": "Frost Candle Lv.2",
+    "ja-JP": "極寒のキャンドルG2",
+    "ko-KR": "극한의 촛불・Lv.2"
+  },
+  "2033223": {
+    "zh-CN": "极寒之烛·等级3",
+    "en-US": "Frost Candle Lv.3",
+    "ja-JP": "極寒のキャンドルG3",
+    "ko-KR": "극한의 촛불・Lv.3"
+  },
+  "2033231": {
+    "zh-CN": "叶脉之烛·等级1",
+    "en-US": "Leafvein Candle Lv.1",
+    "ja-JP": "葉脈のキャンドルG1",
+    "ko-KR": "잎맥의 촛불・Lv.1"
+  },
+  "2033232": {
+    "zh-CN": "叶脉之烛·等级2",
+    "en-US": "Leafvein Candle Lv.2",
+    "ja-JP": "葉脈のキャンドルG2",
+    "ko-KR": "잎맥의 촛불・Lv.2"
+  },
+  "2033233": {
+    "zh-CN": "叶脉之烛·等级3",
+    "en-US": "Leafvein Candle Lv.3",
+    "ja-JP": "葉脈のキャンドルG3",
+    "ko-KR": "잎맥의 촛불・Lv.3"
+  },
+  "2033241": {
+    "zh-CN": "砂岩之烛·等级1",
+    "en-US": "Sandstone Candle Lv.1",
+    "ja-JP": "砂岩のキャンドルG1",
+    "ko-KR": "사암의 촛불・Lv.1"
+  },
+  "2033242": {
+    "zh-CN": "砂岩之烛·等级2",
+    "en-US": "Sandstone Candle Lv.2",
+    "ja-JP": "砂岩のキャンドルG2",
+    "ko-KR": "사암의 촛불・Lv.2"
+  },
+  "2033243": {
+    "zh-CN": "砂岩之烛·等级3",
+    "en-US": "Sandstone Candle Lv.3",
+    "ja-JP": "砂岩のキャンドルG3",
+    "ko-KR": "사암의 촛불・Lv.3"
+  },
+  "2033251": {
+    "zh-CN": "风鸣之烛·等级1",
+    "en-US": "Windwhisper Candle Lv.1",
+    "ja-JP": "風鳴のキャンドルG1",
+    "ko-KR": "풍명의 촛불・Lv.1"
+  },
+  "2033252": {
+    "zh-CN": "风鸣之烛·等级2",
+    "en-US": "Windwhisper Candle Lv.2",
+    "ja-JP": "風鳴のキャンドルG2",
+    "ko-KR": "풍명의 촛불・Lv.2"
+  },
+  "2033253": {
+    "zh-CN": "风鸣之烛·等级3",
+    "en-US": "Windwhisper Candle Lv.3",
+    "ja-JP": "風鳴のキャンドルG3",
+    "ko-KR": "풍명의 촛불・Lv.3"
+  },
+  "2033261": {
+    "zh-CN": "电解之烛·等级1",
+    "en-US": "Electrolytic Candle Lv.1",
+    "ja-JP": "電解のキャンドルG1",
+    "ko-KR": "전해의 촛불・Lv.1"
+  },
+  "2033262": {
+    "zh-CN": "电解之烛·等级2",
+    "en-US": "Electrolytic Candle Lv.2",
+    "ja-JP": "電解のキャンドルG2",
+    "ko-KR": "전해의 촛불・Lv.2"
+  },
+  "2033263": {
+    "zh-CN": "电解之烛·等级3",
+    "en-US": "Electrolytic Candle Lv.3",
+    "ja-JP": "電解のキャンドルG3",
+    "ko-KR": "전해의 촛불・Lv.3"
+  },
+  "2033271": {
+    "zh-CN": "辉白之烛·等级1",
+    "en-US": "Radiant White Candle Lv.1",
+    "ja-JP": "輝白のキャンドルG1",
+    "ko-KR": "광휘의 촛불・Lv.1"
+  },
+  "2033272": {
+    "zh-CN": "辉白之烛·等级2",
+    "en-US": "Radiant White Candle Lv.2",
+    "ja-JP": "輝白のキャンドルG2",
+    "ko-KR": "광휘의 촛불・Lv.2"
+  },
+  "2033273": {
+    "zh-CN": "辉白之烛·等级3",
+    "en-US": "Radiant White Candle Lv.3",
+    "ja-JP": "輝白のキャンドルG3",
+    "ko-KR": "광휘의 촛불・Lv.3"
+  },
+  "2033281": {
+    "zh-CN": "黯淡之烛·等级1",
+    "en-US": "Dim Candle Lv.1",
+    "ja-JP": "暗淡のキャンドルG1",
+    "ko-KR": "암담의 촛불・Lv.1"
+  },
+  "2033282": {
+    "zh-CN": "黯淡之烛·等级2",
+    "en-US": "Dim Candle Lv.2",
+    "ja-JP": "暗淡のキャンドルG2",
+    "ko-KR": "암담의 촛불・Lv.2"
+  },
+  "2033283": {
+    "zh-CN": "黯淡之烛·等级3",
+    "en-US": "Dim Candle Lv.3",
+    "ja-JP": "暗淡のキャンドルG3",
+    "ko-KR": "암담의 촛불・Lv.3"
+  },
+  "2033291": {
+    "zh-CN": "避火之凝脂·等级1",
+    "en-US": "Fireward Balm Lv.1",
+    "ja-JP": "避火のクリームG1",
+    "ko-KR": "화염 저항 연고・Lv.1"
+  },
+  "2033292": {
+    "zh-CN": "避火之凝脂·等级2",
+    "en-US": "Fireward Balm Lv.2",
+    "ja-JP": "避火のクリームG2",
+    "ko-KR": "화염 저항 연고・Lv.2"
+  },
+  "2033293": {
+    "zh-CN": "避火之凝脂·等级3",
+    "en-US": "Fireward Balm Lv.3",
+    "ja-JP": "避火のクリームG3",
+    "ko-KR": "화염 저항 연고・Lv.3"
+  },
+  "2033301": {
+    "zh-CN": "避寒之凝脂·等级1",
+    "en-US": "Frostward Balm Lv.1",
+    "ja-JP": "避寒のクリームG1",
+    "ko-KR": "얼음 저항 연고・Lv.1"
+  },
+  "2033302": {
+    "zh-CN": "避寒之凝脂·等级2",
+    "en-US": "Frostward Balm Lv.2",
+    "ja-JP": "避寒のクリームG2",
+    "ko-KR": "얼음 저항 연고・Lv.2"
+  },
+  "2033303": {
+    "zh-CN": "避寒之凝脂·等级3",
+    "en-US": "Frostward Balm Lv.3",
+    "ja-JP": "避寒のクリームG3",
+    "ko-KR": "얼음 저항 연고・Lv.3"
+  },
+  "2033311": {
+    "zh-CN": "避茵之凝脂·等级1",
+    "en-US": "Moldward Balm Lv.1",
+    "ja-JP": "避草のクリームG1",
+    "ko-KR": "초원 저항 연고・Lv.1"
+  },
+  "2033312": {
+    "zh-CN": "避茵之凝脂·等级2",
+    "en-US": "Moldward Balm Lv.2",
+    "ja-JP": "避草のクリームG2",
+    "ko-KR": "초원 저항 연고・Lv.2"
+  },
+  "2033313": {
+    "zh-CN": "避茵之凝脂·等级3",
+    "en-US": "Moldward Balm Lv.3",
+    "ja-JP": "避草のクリームG3",
+    "ko-KR": "초원 저항 연고・Lv.3"
+  },
+  "2033321": {
+    "zh-CN": "避砂之凝脂·等级1",
+    "en-US": "Sandward Balm Lv.1",
+    "ja-JP": "避砂のクリームG1",
+    "ko-KR": "모래 저항 연고・Lv.1"
+  },
+  "2033322": {
+    "zh-CN": "避砂之凝脂·等级2",
+    "en-US": "Sandward Balm Lv.2",
+    "ja-JP": "避砂のクリームG2",
+    "ko-KR": "모래 저항 연고・Lv.2"
+  },
+  "2033323": {
+    "zh-CN": "避砂之凝脂·等级3",
+    "en-US": "Sandward Balm Lv.3",
+    "ja-JP": "避砂のクリームG3",
+    "ko-KR": "모래 저항 연고・Lv.3"
+  },
+  "2033331": {
+    "zh-CN": "避风之凝脂·等级1",
+    "en-US": "Galeward Balm Lv.1",
+    "ja-JP": "避風のクリームG1",
+    "ko-KR": "바람 저항 연고・Lv.1"
+  },
+  "2033332": {
+    "zh-CN": "避风之凝脂·等级2",
+    "en-US": "Galeward Balm Lv.2",
+    "ja-JP": "避風のクリームG2",
+    "ko-KR": "바람 저항 연고・Lv.2"
+  },
+  "2033333": {
+    "zh-CN": "避风之凝脂·等级3",
+    "en-US": "Galeward Balm Lv.3",
+    "ja-JP": "避風のクリームG3",
+    "ko-KR": "바람 저항 연고・Lv.3"
+  },
+  "2033341": {
+    "zh-CN": "避雷之凝脂·等级1",
+    "en-US": "Thunderward Balm Lv.1",
+    "ja-JP": "避雷のクリームG1",
+    "ko-KR": "번개 저항 연고・Lv.1"
+  },
+  "2033342": {
+    "zh-CN": "避雷之凝脂·等级2",
+    "en-US": "Thunderward Balm Lv.2",
+    "ja-JP": "避雷のクリームG2",
+    "ko-KR": "번개 저항 연고・Lv.2"
+  },
+  "2033343": {
+    "zh-CN": "避雷之凝脂·等级3",
+    "en-US": "Thunderward Balm Lv.3",
+    "ja-JP": "避雷のクリームG3",
+    "ko-KR": "번개 저항 연고・Lv.3"
+  },
+  "2033351": {
+    "zh-CN": "避光之凝脂·等级1",
+    "en-US": "Lightward Balm Lv.1",
+    "ja-JP": "避光のクリームG1",
+    "ko-KR": "빛 저항 연고・Lv.1"
+  },
+  "2033352": {
+    "zh-CN": "避光之凝脂·等级2",
+    "en-US": "Lightward Balm Lv.2",
+    "ja-JP": "避光のクリームG2",
+    "ko-KR": "빛 저항 연고・Lv.2"
+  },
+  "2033353": {
+    "zh-CN": "避光之凝脂·等级3",
+    "en-US": "Lightward Balm Lv.3",
+    "ja-JP": "避光のクリームG3",
+    "ko-KR": "빛 저항 연고・Lv.3"
+  },
+  "2033361": {
+    "zh-CN": "避夜之凝脂·等级1",
+    "en-US": "Nightward Balm Lv.1",
+    "ja-JP": "避夜のクリームG1",
+    "ko-KR": "어둠 저항 연고・Lv.1"
+  },
+  "2033362": {
+    "zh-CN": "避夜之凝脂·等级2",
+    "en-US": "Nightward Balm Lv.2",
+    "ja-JP": "避夜のクリームG2",
+    "ko-KR": "어둠 저항 연고・Lv.2"
+  },
+  "2033363": {
+    "zh-CN": "避夜之凝脂·等级3",
+    "en-US": "Nightward Balm Lv.3",
+    "ja-JP": "避夜のクリームG3",
+    "ko-KR": "어둠 저항 연고・Lv.3"
+  },
+  "2033371": {
+    "zh-CN": "物攻敷贴药泥·等级1",
+    "en-US": "ATK Poultice Lv.1",
+    "ja-JP": "物攻泥灸G1",
+    "ko-KR": "물리 공격 연고・Lv.1"
+  },
+  "2033372": {
+    "zh-CN": "物攻敷贴药泥·等级2",
+    "en-US": "ATK Poultice Lv.2",
+    "ja-JP": "物攻泥灸G2",
+    "ko-KR": "물리 공격 연고・Lv.2"
+  },
+  "2033373": {
+    "zh-CN": "物攻敷贴药泥·等级3",
+    "en-US": "ATK Poultice Lv.3",
+    "ja-JP": "物攻泥灸G3",
+    "ko-KR": "물리 공격 연고・Lv.3"
+  },
+  "2033381": {
+    "zh-CN": "魔攻敷贴药泥·等级1",
+    "en-US": "MATK Poultice Lv.1",
+    "ja-JP": "魔攻泥灸G1",
+    "ko-KR": "마법 공격 연고・Lv.1"
+  },
+  "2033382": {
+    "zh-CN": "魔攻敷贴药泥·等级2",
+    "en-US": "MATK Poultice Lv.2",
+    "ja-JP": "魔攻泥灸G2",
+    "ko-KR": "마법 공격 연고・Lv.2"
+  },
+  "2033383": {
+    "zh-CN": "魔攻敷贴药泥·等级3",
+    "en-US": "MATK Poultice Lv.3",
+    "ja-JP": "魔攻泥灸G3",
+    "ko-KR": "마법 공격 연고・Lv.3"
+  }
+}

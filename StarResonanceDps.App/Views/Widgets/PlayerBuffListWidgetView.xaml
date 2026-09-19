@@ -19,7 +19,7 @@
         </Style>
 
         <!--
-            残り時間。列は固定幅・左寄りのまま、その中でテキストだけ右端に揃える。
+            残り時間。行の右端の列に右寄せで置く。
             単位は DurationWithUnitText に含まれているので、ここでは並べない
             (単位なしの DurationText はプレイヤーリストのバッジ用)。
         -->
@@ -94,13 +94,12 @@
 
                             <Grid VerticalAlignment="Center">
                                 <!--
-                                    全列固定幅。名前の160は最長の名前に合わせてある
-                                    (この書体・FontSize=12・SemiBold で最長 "Imagine - Return To Caster" が145.1px)。
+                                    メーターの行と同じ組み方。名前は残りの幅いっぱい、残り時間は右端。
                                 -->
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="34" />
-                                    <ColumnDefinition Width="160" />
-                                    <ColumnDefinition Width="58" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid Grid.Column="0"

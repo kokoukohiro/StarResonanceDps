@@ -32,13 +32,33 @@ public readonly record struct BuffDebuffCardContent(
         string? formatString)
     {
         var entry = new PlayerBuffEntry(snapshot);
+        var group = CombatDataCatalog.GetBuffGroup(snapshot.BaseId);
+        var name = group != BuffGroup.None
+            ? CombatDataCatalog.AppendBuffInternalId(GetGroupName(group), snapshot.BaseId)
+            : entry.Name;
 
         return new BuffDebuffCardContent(
-            BuffInfoFormatFormatter.Format(entry.Name, targetName, level, formatString),
+            BuffInfoFormatFormatter.Format(name, targetName, level, formatString),
             entry.DurationWithUnitText,
             entry.LayerText,
             entry.IconPath);
     }
+
+    /// <summary>
+    /// カードに出すバフ名(内部ID注記なし)。<b>料理・薬剤のバフは、まとまりの名前(料理・薬剤)の1語にする。</b>
+    /// 表の名前はそのバフを付けるアイテムの名前で、複数つながると長い。
+    /// </summary>
+    public static string GetCardBuffName(int baseId)
+    {
+        var group = CombatDataCatalog.GetBuffGroup(baseId);
+        return group != BuffGroup.None
+            ? GetGroupName(group)
+            : CombatDataCatalog.GetBuffNameWithoutInternalId(baseId);
+    }
+
+    /// <summary>まとまりの名前。タイトルの「バフ(料理)」と同じ文言。</summary>
+    private static string GetGroupName(BuffGroup group)
+        => LocalizationManager.Instance.GetString($"Widget_BuffDebuffCard_Group_{group}");
 
     /// <summary>
     /// 失効したあとに残す表示値。<b>名前の行だけを組み、アイコン・残り時間・重ね数は出さない。</b>
@@ -144,7 +164,7 @@ public readonly record struct BuffDebuffCardContent(
         string lastKnownBuffName)
     {
         var name = group != BuffGroup.None
-            ? LocalizationManager.Instance.GetString($"Widget_BuffDebuffCard_Group_{group}")
+            ? GetGroupName(group)
             : lastKnownBuffName;
 
         if (string.IsNullOrWhiteSpace(name))

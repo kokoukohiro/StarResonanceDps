@@ -936,15 +936,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (key == "AttrState")
             {
+                // プレイヤーの死亡は RecordPlayerDeath で数える。状態の「死亡」は、死亡の印つきの被弾と同じ差分で
+                // いきなり復活(27)になる回に届かず、同じ人への再送も届く。
                 if (!IsBenchmarkMetricCaptureStopped()
-                    && (EActorState)value == EActorState.ActorStateDead)
+                    && (EActorState)value == EActorState.ActorStateDead
+                    && entity.EntityType != EEntityType.EntChar)
                 {
                     entity.IncrementDeaths();
-                    if (entity.EntityType == EEntityType.EntChar)
-                    {
-                        IncrementDeaths();
-                    }
-                    else if (entity.EntityType == EEntityType.EntMonster)
+                    if (entity.EntityType == EEntityType.EntMonster)
                     {
                         IncrementNpcDeaths();
                     }
@@ -1187,6 +1186,21 @@ namespace StarResonanceDps.Core.CombatRuntime
             TotalDeaths++;
         }
 
+        /// <summary>
+        /// プレイヤーの死亡を1回数える。呼ぶのは差分で <c>AttrDeadTime</c> が新しい値になったとき(<c>MessageManager</c>)。
+        /// 3分計測の記録停止中は数えない。
+        /// </summary>
+        public void RecordPlayerDeath(long playerUuid)
+        {
+            if (IsBenchmarkMetricCaptureStopped())
+            {
+                return;
+            }
+
+            GetOrCreateEntity(playerUuid).IncrementDeaths();
+            IncrementDeaths();
+        }
+
         public void IncrementNpcDeaths()
         {
             TotalNpcDeaths++;
@@ -1253,14 +1267,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 見出し表で名前を持たない行の出どころ(着地先)を決めて控える。
+        /// 着地先より前に名前が決まらない行(見出し表にも料理の表にも名前が無い行)の出どころ(着地先)を決めて控える。
         /// 着かなかったもの・技に着いたもの・着地先が食い違ったものは常設の検知ログ(<c>BlankSourceNameProbe</c>)へ送る。
         /// 記録(<c>AddDamage</c> 等)と <see cref="MarkBuffSourcedSkill"/> の後に、プレイヤーの記録にだけ呼ぶこと。
         ///
         /// <para>
         /// 対象はスキル詳細ウィジェットに行が出る条件(その種別の累計が 0 より大きい)の行だけ。
-        /// 名前の有無は注記を付ける前の生名で見る。表示名は空欄でも内部ID注記が付いて空文字にならず、
-        /// 注記は表示設定で消えるので、表示名で見ると設定次第で結果が変わる。
+        /// 名前の有無は表示と同じ <see cref="CombatDataCatalog.GetSourceNameBeforeLanding"/>(注記を付ける前の名前)で見る。
+        /// 表示名は空欄でも内部ID注記が付いて空文字にならず、注記は表示設定で消えるので、表示名で見ると設定次第で結果が変わる。
         /// </para>
         ///
         /// <para>
@@ -1284,7 +1298,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             var stats = isHealing ? container.Healing : container.Damage;
             if (stats.ValueTotal == 0UL
-                || !string.IsNullOrEmpty(CombatDataCatalog.GetSourceName(skillId)))
+                || !string.IsNullOrEmpty(CombatDataCatalog.GetSourceNameBeforeLanding(skillId, container.IsBuffSource)))
             {
                 return;
             }
@@ -1471,7 +1485,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var targetEntity = GetOrCreateEntity(targetUuid);
 
             // 戦闘中かどうかの判定だけは全員に効かせる。
-            if (!IsTakenDamageLogged(attackerUuid, targetUuid))
+            if (!IsTakenDamageLogged(targetUuid, damage))
             {
                 targetEntity.RecalculateInactiveTime(extraPacketData.ArrivalTime);
                 return;
@@ -1492,14 +1506,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 被ダメログに載る被弾か。対象がプレイヤーで、被ダメログの加害者(<see cref="ResolveTakenDamageLogActor"/>)が
-        /// 0(加害者なし)でもプレイヤーでもないもの。モンスターの被ダメとプレイヤー同士のぶんは読み手が無い。
+        /// 被ダメログに載る被弾か。対象がプレイヤーで、値が 0 でないもの。加害者は問わない
+        /// (自傷・落下・フレンドリーファイアも載せる)。値 0 は HP もバリアも減っていない被弾。
         /// </summary>
-        internal static bool IsTakenDamageLogged(long attackerUuid, long targetUuid)
+        internal static bool IsTakenDamageLogged(long targetUuid, long damage)
         {
-            return attackerUuid != 0
-                && (EEntityType)Utils.UuidToEntityType(targetUuid) == EEntityType.EntChar
-                && (EEntityType)Utils.UuidToEntityType(attackerUuid) != EEntityType.EntChar;
+            return damage != 0
+                && (EEntityType)Utils.UuidToEntityType(targetUuid) == EEntityType.EntChar;
         }
 
         /// <summary>
@@ -1512,7 +1525,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </para>
         ///
         /// <para>
-        /// 大元の召喚者がプレイヤーなら、召喚体の名前に関係なくプレイヤーを返す(被ダメログの対象外にするため)。
+        /// 大元の召喚者がプレイヤーなら、召喚体の名前に関係なくプレイヤーを返す(フレンドリーファイアは打ったプレイヤーとして出す)。
         /// </para>
         /// </summary>
         internal long ResolveTakenDamageLogActor(long rawUuid, long topSummonerUuid)
@@ -1628,6 +1641,27 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// ダメージの無い死亡(死亡の印つきの被弾が無いまま死亡したもの)を被ダメログに残す。
+        /// 死亡かどうか・印つきの被弾があったかは <c>MessageManager</c> が差分全体を見て決める。
+        /// </summary>
+        public void AddPlayerDeathWithoutDamage(long playerUuid, ExtraPacketData extraPacketData)
+        {
+            var death = new PlayerDeathRecord
+            {
+                PlayerUuid = playerUuid,
+                MaxHp = GetOrCreateEntity(playerUuid).GetAttrKV("AttrMaxHp") as long?,
+                Timestamp = extraPacketData.ArrivalTime,
+                Sequence = NextTakenDamageLogSequence(),
+            };
+
+            lock (_takenDamageLogGate)
+            {
+                ExData.PlayerDeaths.Add(death);
+                _takenDamageLog.Add(TakenDamageLogRecord.ForDeath(death));
+            }
+        }
+
         private long NextTakenDamageLogSequence()
         {
             return Interlocked.Increment(ref _takenDamageLogSequence);
@@ -1653,7 +1687,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>
         /// <b>DB から読んだエンカウンターは並びを持たない</b>ので、実行中のエンカウンター以外で空なら
-        /// 1回だけ、予告とプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
+        /// 1回だけ、予告とダメージの無い死亡とプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
         /// </para>
         /// </summary>
         public TakenDamageLogRecord[] GetTakenDamageLogRecords(int startIndex)
@@ -1683,6 +1717,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             foreach (var announcement in ExData.SkillAnnouncements)
             {
                 records.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+            }
+
+            foreach (var death in ExData.PlayerDeaths)
+            {
+                records.Add(TakenDamageLogRecord.ForDeath(death));
             }
 
             foreach (var (uuid, entity) in Entities)
@@ -1981,6 +2020,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>被ダメログの予告行(<see cref="Encounter.AddSkillAnnouncement"/>)。実体に属さないのでここに持つ。</summary>
         [ProtoMember(8)]
         public List<SkillAnnouncementRecord> SkillAnnouncements { get; set; } = [];
+        /// <summary>被ダメログのダメージの無い死亡(<see cref="Encounter.AddPlayerDeathWithoutDamage"/>)。予告と同じくここに持つ。</summary>
+        [ProtoMember(9)]
+        public List<PlayerDeathRecord> PlayerDeaths { get; set; } = [];
 
         public EncounterExData() { }
     }
@@ -3247,7 +3289,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public SourceLandingKind LandingKind { get; set; }
 
-        /// <summary>着地先のID。<see cref="LandingKind"/> が特性ならバフID、技なら技ID。</summary>
+        /// <summary>着地先のID。<see cref="LandingKind"/> がオプションならバフID、技なら技ID。</summary>
         public int LandingId { get; set; }
 
         [Newtonsoft.Json.JsonIgnore]

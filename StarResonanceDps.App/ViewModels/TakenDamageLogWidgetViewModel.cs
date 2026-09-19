@@ -236,6 +236,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
                     [localization.Format("TakenDamageLog_SkillFormat", GetDisplayName(line.Attacker), FormatSourceName(line, "TakenDamageLog_UnnamedSkill"))]);
             case TakenDamageLogRowKind.Hit:
                 return new TakenDamageLogEntry(string.Empty, CreateHitSegments(row));
+            case TakenDamageLogRowKind.Death:
+                return new TakenDamageLogEntry(string.Empty, CreateDeathSegments(row));
             default:
                 throw new ArgumentOutOfRangeException(nameof(row), row.Kind, null);
         }
@@ -244,9 +246,15 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     /// <summary>
     /// 技(またはバフ)の名前。名前が無ければこのウィジェットだけ <paramref name="unnamedKey"/> の文言を出す。
     /// 技の行は「攻撃」、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
+    /// 落下は技を持たないので「落下」の文言。
     /// </summary>
     private static string FormatSourceName(TakenDamageLogLine line, string unnamedKey)
     {
+        if (line.IsFall)
+        {
+            return LocalizationManager.Instance.GetString("TakenDamageLog_FallSkill");
+        }
+
         var name = string.IsNullOrEmpty(line.SourceName)
             ? LocalizationManager.Instance.GetString(unnamedKey)
             : line.SourceName;
@@ -317,6 +325,48 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         if (start < text.Length)
         {
             segments.Add(text[start..]);
+        }
+
+        return segments;
+    }
+
+    /// <summary>
+    /// ダメージの無い死亡の行。書式の対象名({0})の前にクラスアイコンを差し込む。
+    /// 死亡時の最大HPが分からなければ HP を出さない書式にする。
+    /// </summary>
+    private IReadOnlyList<object> CreateDeathSegments(TakenDamageLogRow row)
+    {
+        var localization = LocalizationManager.Instance;
+        var target = row.Line.Target!;
+
+        var text = row.TargetMaxHp is { } maxHp
+            ? localization.Format(
+                "TakenDamageLog_DeathFormat",
+                TargetNameMarker,
+                FormatHealthValue(row.TargetHp ?? 0L, 0L),
+                maxHp.ToString(CultureInfo.InvariantCulture))
+            : localization.Format("TakenDamageLog_DeathFormatNoHp", TargetNameMarker);
+
+        var markerIndex = text.IndexOf(TargetNameMarker, StringComparison.Ordinal);
+        if (markerIndex < 0)
+        {
+            throw new InvalidOperationException(
+                "TakenDamageLog_DeathFormat / TakenDamageLog_DeathFormatNoHp must contain {0} (target).");
+        }
+
+        var segments = new List<object>();
+        if (markerIndex > 0)
+        {
+            segments.Add(text[..markerIndex]);
+        }
+
+        segments.Add(CreateClassIconSegment(target));
+        segments.Add(GetDisplayName(target));
+
+        var rest = markerIndex + TargetNameMarker.Length;
+        if (rest < text.Length)
+        {
+            segments.Add(text[rest..]);
         }
 
         return segments;

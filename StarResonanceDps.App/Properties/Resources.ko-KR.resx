@@ -357,6 +357,15 @@
   <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
     <value>무언가</value>
   </data>
+  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+    <value>추락</value>
+  </data>
+  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
+    <value>{0} 사망({1}/{2})</value>
+  </data>
+  <data name="TakenDamageLog_DeathFormatNoHp" xml:space="preserve">
+    <value>{0} 사망</value>
+  </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>무속성</value>
   </data>

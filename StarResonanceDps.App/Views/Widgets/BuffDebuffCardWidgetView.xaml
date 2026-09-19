@@ -30,6 +30,7 @@
                        FontWeight="SemiBold"
                        Text="{Binding DisplayText}"
                        TextAlignment="Center"
+                       TextTrimming="CharacterEllipsis"
                        Visibility="{Binding HasDisplayText, Converter={StaticResource BooleanToVisibilityHiddenConverter}}" />
 
             <Grid Width="32"

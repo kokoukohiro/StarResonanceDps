@@ -357,6 +357,15 @@
   <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
     <value>某个技能</value>
   </data>
+  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+    <value>坠落</value>
+  </data>
+  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
+    <value>{0}死亡({1}/{2})</value>
+  </data>
+  <data name="TakenDamageLog_DeathFormatNoHp" xml:space="preserve">
+    <value>{0}死亡</value>
+  </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>无属性</value>
   </data>

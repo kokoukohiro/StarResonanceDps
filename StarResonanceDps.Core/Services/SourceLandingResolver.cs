@@ -7,7 +7,7 @@ namespace StarResonanceDps.Core.Services;
 /// 見出し表で名前を持たないメーターの行について、付与元をたどって出どころ(着地先)を決める。
 ///
 /// <para>
-/// 着地は2種類。特性のバフ(<c>RogueEntryTable.BuffId</c>)に着けば特性、着かずにプレイヤーが使った技に着けば技。
+/// 着地は2種類。オプションのバフ(<c>RogueEntryTable.BuffId</c>)に着けばオプション、着かずにプレイヤーが使った技に着けば技。
 /// 技は <c>SkillNames</c> に名前があるときだけで、空なら着かない。どちらにも着かなければ <see cref="SourceLanding.None"/>。
 /// 名前の引き先は <see cref="CombatDataCatalog.GetSourceDisplayName"/>。
 /// </para>

@@ -8,7 +8,8 @@ public enum TakenDamageLogRowKind
     Announcement,
     Cast,
     Skill,
-    Hit
+    Hit,
+    Death
 }
 
 /// <summary>
@@ -33,6 +34,7 @@ public sealed record TakenDamageLogRow(
 ///
 /// <list type="bullet">
 ///   <item>被弾は、届いた瞬間ごとに技の行を出し、その下に同じ加害者・同じ発生源・同じ到着時刻の被弾を並べる</item>
+///   <item>ダメージの無い死亡は、「システムの攻撃」の技の行とその下の死亡の行の2行。ほかの行と畳まない</item>
 ///   <item>技の行の下で、同じ対象・同じ属性の被弾は1行に畳んで値を足す。畳んだ行は、その中で最後の被弾の位置に出す</item>
 ///   <item>属性を持たない被弾(属性を保存していなかった頃の記録)は、同じ属性か分からないので畳まない</item>
 /// </list>
@@ -85,6 +87,27 @@ public sealed class TakenDamageLogLayout
             _rows.Add(row);
             _openStart = _rows.Count;
             return _rows.Count - 1;
+        }
+
+        if (line.Kind == TakenDamageLogRecordKind.Death)
+        {
+            var skillRow = new TakenDamageLogRow(TakenDamageLogRowKind.Skill, line, 0, null, null, null);
+            var deathRow = new TakenDamageLogRow(TakenDamageLogRowKind.Death, line, 0, line.TargetHp, line.TargetMaxHp, null);
+
+            // 予告・詠唱と同じく、開いている到着時刻と同じならその時刻の並びに入れる。
+            if (_openTimestamp == line.Timestamp)
+            {
+                var block = OpenBlock.ForSingle(skillRow);
+                block.Folds.Add(new Fold(null, deathRow));
+                _openBlocks.Add(block);
+                return RebuildOpenRows();
+            }
+
+            Close();
+            _rows.Add(skillRow);
+            _rows.Add(deathRow);
+            _openStart = _rows.Count;
+            return _rows.Count - 2;
         }
 
         if (_openTimestamp != line.Timestamp)
