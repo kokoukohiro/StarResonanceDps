@@ -20,7 +20,7 @@ namespace StarResonanceDps.Core.Diagnostics;
 /// </para>
 ///
 /// <para>
-/// 出た鍵は <c>Data/Overrides/RecountOverrides.json</c> に手当てする候補になる。
+/// 出た鍵は <c>Data/Overrides/RecountRowOverrides.json</c> に手当てする候補になる。
 /// 行に寄せるなら <c>Row</c>、独立した行として名前を付けるなら <c>Name</c>。
 /// <b>値は実物を確認してから入れること。</b> 根拠のない名前は、空欄のままより悪い。
 /// </para>

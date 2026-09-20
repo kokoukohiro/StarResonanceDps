@@ -138,14 +138,29 @@ export BPSR_TABLES=<置き場所>     # bash
 
 **ツールが読みも書きもしないファイル。** 生成物とは独立していて、再生成しても消えない。
 
+**名前の表に重ねるものはファイル名を `～NameOverrides.json` にする。** 残りは同梱の生の表に重ねる。
+
 | ファイル | 中身 |
 |---|---|
-| `Data/Overrides/RecountOverrides.json` | メーターの行の出入りと名前 |
+| `Data/Overrides/RecountRowOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
 | `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
-| `Data/Overrides/MonsterOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
+| `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
+| `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
+| `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
 
-### MonsterOverrides.json
+### 名前の上書き3つの中身は「入力から消された名前」
+
+`MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` に入っているのは、
+**入力の表の更新で名前が落とされた行**の名前。以前の版の入力にはあり、今の版では空になっている。
+
+行そのものは今の入力にも残っていて、消えたのは名前だけ。
+ゲーム側が名前を引き下げた結果なので、取り込みの失敗ではない。
+生成物は入力だけで決まるため、ここに置かないと流すたびに空へ戻る。
+
+**逆に、ゲーム側が名前を入れ直しても上書きのほうが勝つ。** 名前が復活した鍵は手で外す。
+
+### MonsterNameOverrides.json
 
 `MonsterNames.json` を読んだ後に重ねる。入力の表で名前が空になっているモンスターの名前を補う。
 
@@ -161,6 +176,28 @@ export BPSR_TABLES=<置き場所>     # bash
 
 **`Name` の無い項目は置かない。** 行を作らずに飛ばし、エラーログを出す。
 キーが番号の形でない、言語名の打ち間違いも、エラーログを出して飛ばす。ファイルが無ければエラーログを出し、上書き無しのまま続ける。
+
+### SkillNameOverrides.json
+
+`SkillNames.json` を読んだ後に重ねる。入力の表で名前が空になっている技の名前を補う。
+**形も振る舞いも `MonsterNameOverrides.json` と同じ**(重ねる先と鍵だけが違う)。
+
+```json
+{ "<技ID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
+```
+
+**鍵は技ID。** 技レベルID(技ID×100＋レベル)ではない。
+
+### BuffNameOverrides.json
+
+`BuffNames.json` を読んだ後に重ねる。入力の表で名前が空になっているバフの名前を補う。
+**形も振る舞いも `MonsterNameOverrides.json` と同じ**(重ねる先と鍵だけが違う)。
+
+```json
+{ "<バフID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
+```
+
+同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `Icon`)で、名前には触らない。
 
 ### SkillOverrides.json
 
@@ -187,7 +224,7 @@ export BPSR_TABLES=<置き場所>     # bash
 
 **IDだけの項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
 
-### RecountOverrides.json
+### RecountRowOverrides.json
 
 生成物は流すたびに書き直されるので、手修正はこちらへ置く。**行の出入りと名前の2つを持つ。**
 

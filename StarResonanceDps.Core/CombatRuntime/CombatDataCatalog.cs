@@ -175,10 +175,12 @@ public static class CombatDataCatalog
             _skills = LoadNumericCatalog(HelperMethods.DataTables.Skills.Data);
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
             _skillCooldownsByLevel = LoadSkillCooldowns();
-            _skillNames = LoadLocalizedText("SkillNames", out _);
-            _buffNames = LoadLocalizedText("BuffNames", out _);
+            var skillNames = LoadLocalizedText("SkillNames", out var skillNameIds);
+            (_skillNames, _) = ApplyNameOverrides(skillNames, skillNameIds, "SkillNameOverrides.json");
+            var buffNames = LoadLocalizedText("BuffNames", out var buffNameIds);
+            (_buffNames, _) = ApplyNameOverrides(buffNames, buffNameIds, "BuffNameOverrides.json");
             var monsterNames = LoadLocalizedText("MonsterNames", out var monsterIds);
-            (_monsterNames, _monsterIds) = ApplyMonsterOverrides(monsterNames, monsterIds);
+            (_monsterNames, _monsterIds) = ApplyNameOverrides(monsterNames, monsterIds, "MonsterNameOverrides.json");
             _dbmNames = LoadLocalizedText("DbmNames", out _);
             _rogueEntryNames = LoadLocalizedText("RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
@@ -320,7 +322,7 @@ public static class CombatDataCatalog
     /// <para>
     /// ゲーム内メーターは <c>RecountTable</c> の1行に複数の <c>DamageId</c> をまとめる。
     /// 生成物はその所属をそのまま写したもので、<b>手書きの判断は入っていない</b>。
-    /// 判断が要るぶんは <c>Data/Overrides/RecountOverrides.json</c> にある。
+    /// 判断が要るぶんは <c>Data/Overrides/RecountRowOverrides.json</c> にある。
     /// </para>
     /// </summary>
     public static bool TryResolveRecountRow(long key, out long rowKey)
@@ -428,7 +430,7 @@ public static class CombatDataCatalog
 
             if (!TryParseSourceKey(entry.Value.Row, out var target))
             {
-                Log.Error("RecountOverrides: {Key} の Row \"{Row}\" が ownerId:枝番 の形でない",
+                Log.Error("RecountRowOverrides: {Key} の Row \"{Row}\" が ownerId:枝番 の形でない",
                     FormatSourceKey(entry.Key), entry.Value.Row);
                 continue;
             }
@@ -535,27 +537,28 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// <c>Data/Overrides/MonsterOverrides.json</c> をモンスターの名前に重ねる。形は <c>RecountOverrides</c> の名前と同じで、
-    /// 書いた言語だけ差し替わる(空文字はその言語の名前を消し、以後は zh-CN へ落ちる)。
+    /// <c>Data/Overrides/</c> の名前の上書きを、<c>Data/Localization/</c> の名前の表に重ねる。形は
+    /// <c>RecountRowOverrides</c> の名前と同じで、書いた言語だけ差し替わる(空文字はその言語の名前を消し、以後は zh-CN へ落ちる)。
     ///
     /// <para>
     /// 生成物に無い番号も書け、名前の表に行がある扱いになる。<c>Name</c> の無い項目は行を作らずに飛ばす。
     /// 鍵が番号でない・言語名の打ち間違いはエラーログを出して飛ばす(静かに効かないので)。
     /// </para>
     /// </summary>
-    private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids) ApplyMonsterOverrides(
+    private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids) ApplyNameOverrides(
         FrozenDictionary<string, FrozenDictionary<int, string>> names,
-        FrozenSet<int> ids)
+        FrozenSet<int> ids,
+        string fileName)
     {
-        const string relativePath = "Overrides/MonsterOverrides.json";
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "MonsterOverrides.json");
+        var relativePath = $"Overrides/{fileName}";
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", fileName);
         if (!File.Exists(path))
         {
             Log.Error("Failed to load {OverridePath}", relativePath);
             return (names, ids);
         }
 
-        var overrides = JsonConvert.DeserializeObject<Dictionary<string, MonsterOverrideEntry?>>(File.ReadAllText(path))
+        var overrides = JsonConvert.DeserializeObject<Dictionary<string, NameOverrideEntry?>>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"{relativePath} が空です。");
         var merged = names.ToDictionary(
             pair => pair.Key,
@@ -568,13 +571,13 @@ public static class CombatDataCatalog
             if (!int.TryParse(key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id)
                 || id <= 0)
             {
-                Log.Error("MonsterOverrides: 鍵が番号の形でないので飛ばす \"{Key}\"", key);
+                Log.Error("{OverridePath}: 鍵が番号の形でないので飛ばす \"{Key}\"", relativePath, key);
                 continue;
             }
 
             if (entry?.Name is null)
             {
-                Log.Error("MonsterOverrides: {Key} に Name が無いので飛ばす", key);
+                Log.Error("{OverridePath}: {Key} に Name が無いので飛ばす", relativePath, key);
                 continue;
             }
 
@@ -584,8 +587,8 @@ public static class CombatDataCatalog
                 if (!merged.TryGetValue(culture, out var namesById))
                 {
                     Log.Error(
-                        "MonsterOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
-                        key, culture, string.Join(" / ", SupportedCultures));
+                        "{OverridePath}: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                        relativePath, key, culture, string.Join(" / ", SupportedCultures));
                     continue;
                 }
 
@@ -610,7 +613,7 @@ public static class CombatDataCatalog
             mergedIds.ToFrozenSet());
     }
 
-    private sealed class MonsterOverrideEntry
+    private sealed class NameOverrideEntry
     {
         public Dictionary<string, string?>? Name { get; set; }
     }
@@ -618,10 +621,10 @@ public static class CombatDataCatalog
     private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides()
     {
         var result = new Dictionary<long, RecountOverrideEntry>();
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "RecountOverrides.json");
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "RecountRowOverrides.json");
         if (!File.Exists(path))
         {
-            Log.Error("Failed to load {OverridePath}", "Overrides/RecountOverrides.json");
+            Log.Error("Failed to load {OverridePath}", "Overrides/RecountRowOverrides.json");
             return result;
         }
 
@@ -633,7 +636,7 @@ public static class CombatDataCatalog
         {
             if (!TryParseSourceKey(pair.Key, out var key))
             {
-                Log.Error("RecountOverrides: 鍵が ownerId:枝番 の形でないので飛ばす \"{Key}\"", pair.Key);
+                Log.Error("RecountRowOverrides: 鍵が ownerId:枝番 の形でないので飛ばす \"{Key}\"", pair.Key);
                 continue;
             }
 
@@ -655,7 +658,7 @@ public static class CombatDataCatalog
                     if (!SupportedCultures.Contains(name.Key, StringComparer.OrdinalIgnoreCase))
                     {
                         Log.Error(
-                            "RecountOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
+                            "RecountRowOverrides: {Key} に未知の言語 \"{Culture}\"。言語は {Cultures}",
                             pair.Key, name.Key, string.Join(" / ", SupportedCultures));
                         continue;
                     }

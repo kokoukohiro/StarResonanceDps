@@ -1,0 +1,3114 @@
+{
+  "1238": {
+    "Name": {
+      "zh-CN": "水龙卷-被动版",
+      "en-US": "Tidal Vortex - Passive Skill",
+      "ja-JP": "ウォータートルネード-パッシブ版",
+      "ko-KR": "물 회오리-패시브 버전"
+    }
+  },
+  "1260": {
+    "Name": {
+      "zh-CN": "冰陨石虚拟体",
+      "en-US": "Ice Meteor Hologram",
+      "ja-JP": "アイスメテオダミー",
+      "ko-KR": "얼음 운석 가상체"
+    }
+  },
+  "1262": {
+    "Name": {
+      "zh-CN": "冰陨石虚拟体",
+      "en-US": "Ice Meteor Hologram",
+      "ja-JP": "アイスメテオダミー",
+      "ko-KR": "얼음 운석 가상체"
+    }
+  },
+  "1263": {
+    "Name": {
+      "zh-CN": "法杖大招强力冰陨石",
+      "en-US": "Staff Ultimate: Powerful Ice Meteor",
+      "ja-JP": "法杖絶技強力アイスメテオ",
+      "ko-KR": "지팡이 궁극기 강력 얼음 운석"
+    }
+  },
+  "2302": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_01",
+      "en-US": "Beat Performer ATK_01",
+      "ja-JP": "ビートパフォーマーATK_01",
+      "ko-KR": "비트 퍼포머ATK_01"
+    }
+  },
+  "2303": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_03",
+      "en-US": "Beat Performer ATK_03",
+      "ja-JP": "ビートパフォーマーATK_03",
+      "ko-KR": "비트 퍼포머ATK_03"
+    }
+  },
+  "2304": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_04",
+      "en-US": "Beat Performer ATK_04",
+      "ja-JP": "ビートパフォーマーATK_04",
+      "ko-KR": "비트 퍼포머ATK_04"
+    }
+  },
+  "2322": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_02a",
+      "en-US": "Beat Performer ATK_02a",
+      "ja-JP": "ビートパフォーマーATK_02a",
+      "ko-KR": "비트 퍼포머ATK_02a"
+    }
+  },
+  "2323": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_03a",
+      "en-US": "Beat Performer ATK_03a",
+      "ja-JP": "ビートパフォーマーATK_03a",
+      "ko-KR": "비트 퍼포머ATK_03a"
+    }
+  },
+  "2324": {
+    "Name": {
+      "zh-CN": "灵魂乐手ATK_04a",
+      "en-US": "Beat Performer ATK_04a",
+      "ja-JP": "ビートパフォーマーATK_04a",
+      "ko-KR": "비트 퍼포머ATK_04a"
+    }
+  },
+  "2422": {
+    "Name": {
+      "zh-CN": "剑盾Dodge_f",
+      "en-US": "AegisDodge_f",
+      "ja-JP": "ソード＆バリアDodge_f",
+      "ko-KR": "검방패Dodge_f"
+    }
+  },
+  "2423": {
+    "Name": {
+      "zh-CN": "剑盾Dodge_b",
+      "en-US": "AegisDodge_b",
+      "ja-JP": "ソード＆バリアDodge_b",
+      "ko-KR": "검방패Dodge_b"
+    }
+  },
+  "2424": {
+    "Name": {
+      "zh-CN": "剑盾FRACTURE_ATK",
+      "en-US": "AegisFRACTURE_ATK",
+      "ja-JP": "ソード＆バリアFRACTURE_ATK",
+      "ko-KR": "검방패FRACTURE_ATK"
+    }
+  },
+  "8000": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8001": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8002": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8003": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8004": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8005": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8006": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8007": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8008": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8009": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "8010": {
+    "Name": {
+      "zh-CN": "我TM给你一拳",
+      "en-US": "I'm Gonna Punch You So Hard",
+      "ja-JP": "一発ぶん殴る",
+      "ko-KR": "주먹 한 방 먹어라"
+    }
+  },
+  "50101": {
+    "Name": {
+      "zh-CN": "五阶段共鸣",
+      "en-US": "Five-Stage Resonance",
+      "ja-JP": "5段階共鳴",
+      "ko-KR": "5단계 공명"
+    }
+  },
+  "50201": {
+    "Name": {
+      "zh-CN": "五阶段共鸣",
+      "en-US": "Five-Stage Resonance",
+      "ja-JP": "5段階共鳴",
+      "ko-KR": "5단계 공명"
+    }
+  },
+  "100527": {
+    "Name": {
+      "zh-CN": "巫师哥布林危险火圈-无硬直-职业试炼",
+      "en-US": "Goblin Mage Dangerous Fire Circle - No Stiffness - Class Trial",
+      "ja-JP": "エルダーゴブリン危険ファイアサークル-硬直なし-クラス試練",
+      "ko-KR": "샤먼 고블린 위험한 화염 고리-경직 없음-클래스 시련"
+    }
+  },
+  "100808": {
+    "Name": {
+      "zh-CN": "烈风重劈",
+      "en-US": "Gale Cleave",
+      "ja-JP": "烈風の重撃",
+      "ko-KR": "질풍 강한 베기"
+    }
+  },
+  "100819": {
+    "Name": {
+      "zh-CN": "共鸣-怒吼指令",
+      "en-US": "Resonance - Roar Command",
+      "ja-JP": "共鳴-ロアコマンド",
+      "ko-KR": "공명 - 포효 명령"
+    }
+  },
+  "100863": {
+    "Name": {
+      "zh-CN": "飓风回旋斩",
+      "en-US": "Hurricane Slash",
+      "ja-JP": "テンペストスラッシュ",
+      "ko-KR": "태풍 회전 참격"
+    }
+  },
+  "100871": {
+    "Name": {
+      "zh-CN": "飓风哥布林战士-回旋斩",
+      "en-US": "Storm Goblin Warrior - Whirling Slash",
+      "ja-JP": "嵐のゴブリンウォーリアー-スピニングスラッシュ",
+      "ko-KR": "태풍 고블린 전사-회전 참격"
+    }
+  },
+  "101112": {
+    "Name": {
+      "zh-CN": "宠物雄鹰快速回旋",
+      "en-US": "Companion Eagle Quick Spin",
+      "ja-JP": "臣鷹クイックスピン",
+      "ko-KR": "야수 팔콘 고속 회전"
+    }
+  },
+  "101240": {
+    "Name": {
+      "zh-CN": "狂暴",
+      "en-US": "Berserk",
+      "ja-JP": "バーサーク",
+      "ko-KR": "광폭"
+    }
+  },
+  "101338": {
+    "Name": {
+      "zh-CN": "龙光核蓄力",
+      "en-US": "Dragon Light Core Charging",
+      "ja-JP": "竜光のコアチャージ",
+      "ko-KR": "드래곤 라이트 코어 차징"
+    }
+  },
+  "101354": {
+    "Name": {
+      "zh-CN": "巨龙分摊",
+      "en-US": "Dragon Share",
+      "ja-JP": "巨竜分担",
+      "ko-KR": "거룡 분담"
+    }
+  },
+  "110503": {
+    "Name": {
+      "zh-CN": "自爆",
+      "en-US": "Self-Destruct",
+      "ja-JP": "自爆",
+      "ko-KR": "자폭"
+    }
+  },
+  "110505": {
+    "Name": {
+      "zh-CN": "自爆",
+      "en-US": "Self-Destruct",
+      "ja-JP": "自爆",
+      "ko-KR": "자폭"
+    }
+  },
+  "110850": {
+    "Name": {
+      "zh-CN": "巨塔点名小导弹",
+      "en-US": "Giant Tower Targeting Small Missile",
+      "ja-JP": "巨塔指定小型ミサイル",
+      "ko-KR": "거탑 지정 소형 미사일"
+    }
+  },
+  "114801": {
+    "Name": {
+      "zh-CN": "机像核心-召唤导弹",
+      "en-US": "Machine Core - Summon Missile",
+      "ja-JP": "ゴーレムコア-ミサイル召喚",
+      "ko-KR": "골렘 코어-미사일 소환"
+    }
+  },
+  "114802": {
+    "Name": {
+      "zh-CN": "机像核心-召唤自爆机械",
+      "en-US": "Machine Core - Summon Self-Destructing Machine",
+      "ja-JP": "ゴーレムコア-自爆装置召喚",
+      "ko-KR": "골렘 코어-자폭 기계 소환"
+    }
+  },
+  "140182": {
+    "Name": {
+      "zh-CN": "投掷火种",
+      "en-US": "Fireseed Toss",
+      "ja-JP": "火種投擲",
+      "ko-KR": "불씨 투척"
+    }
+  },
+  "170212": {
+    "Name": {
+      "zh-CN": "虚蚀衰减",
+      "en-US": "Void Corruption Waning",
+      "ja-JP": "虚蝕減衰",
+      "ko-KR": "허무의 침식 약화"
+    }
+  },
+  "170252": {
+    "Name": {
+      "zh-CN": "虚蚀残留",
+      "en-US": "Void Residue",
+      "ja-JP": "虚蝕残留",
+      "ko-KR": "침식의 잔해"
+    }
+  },
+  "170253": {
+    "Name": {
+      "zh-CN": "虚蚀地板",
+      "en-US": "Void Corruption Floor",
+      "ja-JP": "虚蝕床",
+      "ko-KR": "허무의 침식 바닥"
+    }
+  },
+  "170254": {
+    "Name": {
+      "zh-CN": "虚蚀aoe",
+      "en-US": "Void Corruption AOE",
+      "ja-JP": "虚蝕AOE",
+      "ko-KR": "허무의 침식 광역 공격"
+    }
+  },
+  "170255": {
+    "Name": {
+      "zh-CN": "虚蚀贯穿",
+      "en-US": "Void Corruption Pierce",
+      "ja-JP": "虚蝕の貫通",
+      "ko-KR": "허무의 침식 관통"
+    }
+  },
+  "170256": {
+    "Name": {
+      "zh-CN": "虚蚀地板",
+      "en-US": "Void Corruption Floor",
+      "ja-JP": "虚蝕床",
+      "ko-KR": "허무의 침식 바닥"
+    }
+  },
+  "170257": {
+    "Name": {
+      "zh-CN": "虚蚀地板",
+      "en-US": "Void Corruption Floor",
+      "ja-JP": "虚蝕床",
+      "ko-KR": "허무의 침식 바닥"
+    }
+  },
+  "170258": {
+    "Name": {
+      "zh-CN": "虚蚀地板",
+      "en-US": "Void Corruption Floor",
+      "ja-JP": "虚蝕床",
+      "ko-KR": "허무의 침식 바닥"
+    }
+  },
+  "170259": {
+    "Name": {
+      "zh-CN": "虚蚀衰减伤害虚拟体",
+      "en-US": "Void Corruption Decay DMG (Virtual Entity)",
+      "ja-JP": "虚蝕のダメージ減衰ダミー",
+      "ko-KR": "허무의 침식 대미지 약화 가상체"
+    }
+  },
+  "170260": {
+    "Name": {
+      "zh-CN": "虚蚀衰减伤害虚拟体",
+      "en-US": "Void Corruption Decay DMG (Virtual Entity)",
+      "ja-JP": "虚蝕のダメージ減衰ダミー",
+      "ko-KR": "허무의 침식 대미지 약화 가상체"
+    }
+  },
+  "170401": {
+    "Name": {
+      "zh-CN": "扑击",
+      "en-US": "Pounce",
+      "ja-JP": "飛びかかる",
+      "ko-KR": "덮치기"
+    }
+  },
+  "170410": {
+    "Name": {
+      "zh-CN": "虚蚀扑击",
+      "en-US": "Void Corruption Pounce",
+      "ja-JP": "虚蝕が飛びかかる",
+      "ko-KR": "허무의 침식 덮치기"
+    }
+  },
+  "170450": {
+    "Name": {
+      "zh-CN": "爬行怪震荡波-英雄本",
+      "en-US": "Crawling Monster - Shockwave (Hero Dungeon)",
+      "ja-JP": "爬行モンスターのショックウェーブ-ヒロイックダンジョン",
+      "ko-KR": "기어다니는 몬스터 진동파 - 영웅 던전"
+    }
+  },
+  "300081": {
+    "Name": {
+      "zh-CN": "蓄力扫枪虚拟体",
+      "en-US": "Charged Sweep Gun Virtual Body",
+      "ja-JP": "チャージスイープダミー",
+      "ko-KR": "차징 사격 가상체"
+    }
+  },
+  "300433": {
+    "Name": {
+      "zh-CN": "剑士-攻击光环",
+      "en-US": "Swordsman - Attack Aura",
+      "ja-JP": "剣士-攻撃オーラ",
+      "ko-KR": "검사 - 공격 오라"
+    }
+  },
+  "300434": {
+    "Name": {
+      "zh-CN": "单手剑&长矛-减速刺击",
+      "en-US": "One-handed Sword & Spear - Slowing Stab",
+      "ja-JP": "片手剣&スピア-スロウスタブ",
+      "ko-KR": "한손검&장창 - 둔화 찌르기"
+    }
+  },
+  "300435": {
+    "Name": {
+      "zh-CN": "流血戳刺·英雄本",
+      "en-US": "Bleeding Thrust - Hero Dungeon",
+      "ja-JP": "ブリードスタブ・ヒロイックダンジョン",
+      "ko-KR": "출혈 찌르기・영웅 던전"
+    }
+  },
+  "300436": {
+    "Name": {
+      "zh-CN": "长矛-冲锋连斩",
+      "en-US": "Spear - Charge Slash Combo",
+      "ja-JP": "スピア-チャージスラッシュコンボ",
+      "ko-KR": "장창 - 돌격 연참"
+    }
+  },
+  "300437": {
+    "Name": {
+      "zh-CN": "子弹发射",
+      "en-US": "Bullet Launch",
+      "ja-JP": "銃弾発射",
+      "ko-KR": "탄환 발사"
+    }
+  },
+  "300442": {
+    "Name": {
+      "zh-CN": "步枪-贯穿射击（安德拉讨伐战专用）",
+      "en-US": "Rifle - Piercing Shot (Andra Extermination Battle Exclusive)",
+      "ja-JP": "ライフル-貫通射撃（アンドラ討伐戦専用）",
+      "ko-KR": "소총-관통 사격(안드라 토벌전 전용)"
+    }
+  },
+  "300448": {
+    "Name": {
+      "zh-CN": "步枪-后跳隐身回中召唤地火（安德拉讨伐战专用）",
+      "en-US": "Rifle - Backflip Stealth Reset Summon Ground Fire (Andra Slaying Only)",
+      "ja-JP": "ライフル-後ろ飛びステルスリセットアースファイア召喚（アンドラ討伐戦専用）",
+      "ko-KR": "소총-뒷점프 은신, 땅불 소환(안드라 토벌전 전용)"
+    }
+  },
+  "300451": {
+    "Name": {
+      "zh-CN": "阿卡多的引雷弹（安德拉）",
+      "en-US": "Arcado's Bomb (Andra)",
+      "ja-JP": "アッカードのサンダーボルト（アンドラ）",
+      "ko-KR": "아카도의 유도 뇌탄(안드라)"
+    }
+  },
+  "300452": {
+    "Name": {
+      "zh-CN": "阿卡多的分摊雷",
+      "en-US": "Arcado's Shared Lightning",
+      "ja-JP": "アッカードの雷分担",
+      "ko-KR": "아카도의 분담 번개"
+    }
+  },
+  "300453": {
+    "Name": {
+      "zh-CN": "阿卡多的枪兵队圆地板（安德拉）",
+      "en-US": "Arcado's Spearman (Andra)",
+      "ja-JP": "アッカードの銃兵円形床（アンドラ）",
+      "ko-KR": "아카도의 창병 부대 원형 바닥(안드라)"
+    }
+  },
+  "300462": {
+    "Name": {
+      "zh-CN": "阿贝库技能01",
+      "en-US": "Abeku Skill 01",
+      "ja-JP": "アベイクスキル01",
+      "ko-KR": "아베쿠 스킬01"
+    }
+  },
+  "300463": {
+    "Name": {
+      "zh-CN": "阿贝库技能02",
+      "en-US": "Abeku Skill 02",
+      "ja-JP": "アベイクスキル02",
+      "ko-KR": "아베쿠 스킬02"
+    }
+  },
+  "300465": {
+    "Name": {
+      "zh-CN": "阿贝库普攻2",
+      "en-US": "Abeku Normal Attack 2",
+      "ja-JP": "アベイク通常攻撃2",
+      "ko-KR": "아베쿠 일반 공격2"
+    }
+  },
+  "300480": {
+    "Name": {
+      "zh-CN": "普攻子弹三连射-英雄本",
+      "en-US": "Basic Attack: Triple Shot (Hero Dungeon)",
+      "ja-JP": "通常攻撃弾の三連射-ヒロイックダンジョン",
+      "ko-KR": "일반 공격 총알 3연사 - 영웅 던전"
+    }
+  },
+  "301520": {
+    "Name": {
+      "zh-CN": "双子机像卡基-火焰护盾",
+      "en-US": "Twin Kaki - Flame Shield",
+      "ja-JP": "ツインゴーレム・カーキ-フレイムバリア",
+      "ko-KR": "쌍둥이 골렘 카지-화염 실드"
+    }
+  },
+  "301521": {
+    "Name": {
+      "zh-CN": "双子机像-联动-火焰扩散",
+      "en-US": "Twin Mechanoid - Flame",
+      "ja-JP": "ツインゴーレム-コラボ-火炎拡散",
+      "ko-KR": "쌍둥이 골렘-연동-화염 확산"
+    }
+  },
+  "301522": {
+    "Name": {
+      "zh-CN": "双子机像-火焰扩散虚拟体",
+      "en-US": "Twin Machine - Flame Spread Virtual Body",
+      "ja-JP": "ツインゴーレム-火炎拡散ダミー",
+      "ko-KR": "쌍둥이 골렘-화염 확산 가상체"
+    }
+  },
+  "301523": {
+    "Name": {
+      "zh-CN": "双子机像卡基-突袭重槌",
+      "en-US": "Twin Machine Kaki - Assault Heavy Hammer",
+      "ja-JP": "ツインゴーレム・カーキ-ヘビーハンマーアサルト",
+      "ko-KR": "쌍둥이 골렘 카지-망치 기습"
+    }
+  },
+  "301524": {
+    "Name": {
+      "zh-CN": "双子机像卡基-追踪地火",
+      "en-US": "Twin Mechanoid Kaki - Homing Ground Fire",
+      "ja-JP": "ツインゴーレム・カーキ-アースファイア追跡",
+      "ko-KR": "쌍둥이 골렘 카지-땅불 추적"
+    }
+  },
+  "301525": {
+    "Name": {
+      "zh-CN": "双子机像-联动-锁定喷火",
+      "en-US": "Twin Mechanoid - Linkage - Lock-on Flamethrower",
+      "ja-JP": "ツインゴーレム-連動-ロックオン火炎放射",
+      "ko-KR": "쌍둥이 골렘-연동-화염 뿜기 잠금"
+    }
+  },
+  "301526": {
+    "Name": {
+      "zh-CN": "双子机像预警地火",
+      "en-US": "Twin Mechanoid Warning",
+      "ja-JP": "ツインゴーレムアラートアースファイア",
+      "ko-KR": "쌍둥이 골렘 땅불 경고"
+    }
+  },
+  "301528": {
+    "Name": {
+      "zh-CN": "载人机兵-定点天火落地爆炸虚拟体",
+      "en-US": "Manned Mech - Targeted Hellfire Landing Explosion (Virtual Object)",
+      "ja-JP": "有人メカ-定点業火着弾爆発ダミー",
+      "ko-KR": "탑승형 기계병 - 지정 위치 천화 폭발 가상체"
+    }
+  },
+  "301624": {
+    "Name": {
+      "zh-CN": "双子机像预警导弹",
+      "en-US": "Twin Machine Warning Missile",
+      "ja-JP": "ツインゴーレムアラートミサイル",
+      "ko-KR": "쌍둥이 골렘 미사일 경고"
+    }
+  },
+  "301626": {
+    "Name": {
+      "zh-CN": "双子机像导弹",
+      "en-US": "Twin Mechanoid Missile",
+      "ja-JP": "ツインゴーレムミサイル",
+      "ko-KR": "쌍둥이 골렘 미사일"
+    }
+  },
+  "301627": {
+    "Name": {
+      "zh-CN": "安德拉讨伐战陨星",
+      "en-US": "Andra Slaying Raid Meteor",
+      "ja-JP": "アンドラ討伐戦メテオ",
+      "ko-KR": "안드라 토벌전 운석"
+    }
+  },
+  "301630": {
+    "Name": {
+      "zh-CN": "双子机像凯莉-分摊",
+      "en-US": "Twin Machine Kelly - Share Damage",
+      "ja-JP": "ツインゴーレム・カイリ-分担",
+      "ko-KR": "쌍둥이 골렘 켈리-분담"
+    }
+  },
+  "301631": {
+    "Name": {
+      "zh-CN": "双子机像凯莉-连续开炮",
+      "en-US": "Twin Mechanoid Kelly - Continuous Cannon Fire",
+      "ja-JP": "ツインゴーレム・カイリ-連射",
+      "ko-KR": "쌍둥이 골렘 켈리-연속 포격"
+    }
+  },
+  "301632": {
+    "Name": {
+      "zh-CN": "双子机像凯莉-炮击",
+      "en-US": "Twin Mechanoid Kelly - Cannon Barrage",
+      "ja-JP": "ツインゴーレム・カイリ-砲撃",
+      "ko-KR": "쌍둥이 골렘 켈리-포격"
+    }
+  },
+  "301633": {
+    "Name": {
+      "zh-CN": "双子机像凯莉-干扰炮火",
+      "en-US": "Twin Mechanoid Kelly - Disruptive Cannon Fire",
+      "ja-JP": "ツインゴーレム・カイリ-砲撃妨害",
+      "ko-KR": "쌍둥이 골렘 켈리-포격 방해"
+    }
+  },
+  "301635": {
+    "Name": {
+      "zh-CN": "双子机像凯莉-点名地火",
+      "en-US": "Twin Golem Kelly - Targeting Cannon Fire",
+      "ja-JP": "ツインゴーレム・カイリ-指定アースファイア",
+      "ko-KR": "쌍둥이 골렘 켈리-지정 땅불"
+    }
+  },
+  "301732": {
+    "Name": {
+      "zh-CN": "大机器人导弹（安德拉讨伐战专用）",
+      "en-US": "Large Robot Missile (Andra Slaying Only)",
+      "ja-JP": "ゴーレムLミサイル（アンドラ討伐戦専用）",
+      "ko-KR": "대형 로봇 미사일(안드라 토벌전 전용)"
+    }
+  },
+  "301733": {
+    "Name": {
+      "zh-CN": "大机器人右手捶地（安德拉讨伐战）",
+      "en-US": "Large Robot Right-Hand Slam (Andra Crusade)",
+      "ja-JP": "大型ゴーレム右手スラム（アンドラ討伐戦）",
+      "ko-KR": "대형 로봇 오른손 바닥 내리치기(안드라 토벌전 전용)"
+    }
+  },
+  "301734": {
+    "Name": {
+      "zh-CN": "大机器人左手捶地（安德拉讨伐战）",
+      "en-US": "Large Robot Left-Hand Slam (Andra Crusade)",
+      "ja-JP": "大型ゴーレム左手スラム（アンドラ討伐戦）",
+      "ko-KR": "대형 로봇 왼손 바닥 내리치기(안드라 토벌전 전용)"
+    }
+  },
+  "301735": {
+    "Name": {
+      "zh-CN": "大机器人双手捶地（安德拉讨伐战）",
+      "en-US": "Large Robot Double-Hand Slam (Andra Crusade)",
+      "ja-JP": "大型ゴーレム両手スラム（アンドラ討伐戦）",
+      "ko-KR": "대형 로봇 양손 바닥 내리치기(안드라 토벌전 전용)"
+    }
+  },
+  "302520": {
+    "Name": {
+      "zh-CN": "蒂娜化为光球",
+      "en-US": "Tina Transforms into a Light Ball",
+      "ja-JP": "ティナが光の玉と化す",
+      "ko-KR": "티나가 빛 구슬로 변신"
+    }
+  },
+  "304206": {
+    "Name": {
+      "zh-CN": "卡尼曼亡魂深渊凝视（减速）",
+      "en-US": "Kanamia Tribe Abyssal Gaze (Slow)",
+      "ja-JP": "カナミア族亡霊アビサルゲイズ（スロウ）",
+      "ko-KR": "카나미아 혼령 심연 주시(둔화)"
+    }
+  },
+  "304211": {
+    "Name": {
+      "zh-CN": "英雄本亡灵远程普攻",
+      "en-US": "(Hero Dungeon) Undead Ranged Basic Attack",
+      "ja-JP": "ヒロイックダンジョン-死霊の遠距離通常攻撃",
+      "ko-KR": "영웅 던전 망령 원거리 일반 공격"
+    }
+  },
+  "304212": {
+    "Name": {
+      "zh-CN": "亡灵连线强化",
+      "en-US": "Undead Link - Empower",
+      "ja-JP": "死霊の接続強化",
+      "ko-KR": "망령 링크 강화"
+    }
+  },
+  "400410": {
+    "Name": {
+      "zh-CN": "狂化周围怪物-黯影堡垒",
+      "en-US": "Enrages Nearby Monsters (Dark Mist Fortress)",
+      "ja-JP": "周囲のモンスターを狂暴化-暗霧要塞",
+      "ko-KR": "주위 몬스터 광폭화 - 검은 안개 요새"
+    }
+  },
+  "400411": {
+    "Name": {
+      "zh-CN": "吟唱表演",
+      "en-US": "Chanting Performance",
+      "ja-JP": "詠唱デモ",
+      "ko-KR": "캐스팅 연출"
+    }
+  },
+  "400413": {
+    "Name": {
+      "zh-CN": "黯影法师进战术-英雄本",
+      "en-US": "Dark Mist Mage - Tactical Advance (Hero Dungeon)",
+      "ja-JP": "暗霧魔術師の進攻戦術-ヒロイックダンジョン",
+      "ko-KR": "검은 안개 마법사 진입 전술 - 영웅 던전"
+    }
+  },
+  "400414": {
+    "Name": {
+      "zh-CN": "黯影法师爆炸术-英雄本",
+      "en-US": "Dark Mist Mage - Explosion Spell (Hero Dungeon)",
+      "ja-JP": "暗霧魔術師の爆発術-ヒロイックダンジョン",
+      "ko-KR": "검은 안개 마법사 폭발술 - 영웅 던전"
+    }
+  },
+  "400415": {
+    "Name": {
+      "zh-CN": "暗影法师吞噬之术-英雄本",
+      "en-US": "Dark Mist Mage - Devour Spell (Hero Dungeon)",
+      "ja-JP": "暗霧魔術師の吞食の術-ヒロイックダンジョン",
+      "ko-KR": "검은 안개 마법사 탐식술 - 영웅 던전"
+    }
+  },
+  "400416": {
+    "Name": {
+      "zh-CN": "黯影法师落石术-英雄本",
+      "en-US": "Dark Mist Mage - Rockfall Spell (Hero Dungeon)",
+      "ja-JP": "暗霧魔術師の落石術-ヒロイックダンジョン",
+      "ko-KR": "검은 안개 마법사 낙석술 - 영웅 던전"
+    }
+  },
+  "400417": {
+    "Name": {
+      "zh-CN": "黯影法师复生术-英雄本",
+      "en-US": "Dark Mist Mage - Resurrection Spell (Hero Dungeon)",
+      "ja-JP": "暗霧魔術師の復活術-ヒロイックダンジョン",
+      "ko-KR": "검은 안개 마법사 소생술 - 영웅 던전"
+    }
+  },
+  "400450": {
+    "Name": {
+      "zh-CN": "吞噬之术爆炸虚拟体",
+      "en-US": "Devour Spell Explosion (Virtual Object)",
+      "ja-JP": "吞食の術爆発ダミー",
+      "ko-KR": "탐식술 폭발 가상체"
+    }
+  },
+  "430101": {
+    "Name": {
+      "zh-CN": "雷魔立牌测试用",
+      "en-US": "Thunder Demon Test",
+      "ja-JP": "雷魔ダミーテスト用",
+      "ko-KR": "번개 오우거 스탠드 테스트용"
+    }
+  },
+  "706009": {
+    "Name": {
+      "zh-CN": "扫射型机甲-直线超级激光",
+      "en-US": "Sweeping Mech - Linear Super Laser",
+      "ja-JP": "掃射型メカ-直線スーパーレーザー",
+      "ko-KR": "난사형 메카 - 직선 슈퍼 레이저"
+    }
+  },
+  "706011": {
+    "Name": {
+      "zh-CN": "扫射型机甲-超负荷",
+      "en-US": "Sweeping Mech - Overload",
+      "ja-JP": "掃射型メカ-過負荷",
+      "ko-KR": "난사형 메카 - 과부하"
+    }
+  },
+  "706099": {
+    "Name": {
+      "zh-CN": "扫射型机甲-奥义小导弹",
+      "en-US": "Sweeping Mech - Ultimate Small Missiles",
+      "ja-JP": "掃射型メカ-奥義小型ミサイル",
+      "ko-KR": "난사형 메카 - 오의 소형 미사일"
+    }
+  },
+  "866432": {
+    "Name": {
+      "zh-CN": "虚拟体火种（高原矿洞）",
+      "en-US": "Virtual Object Spark (Highland Mine)",
+      "ja-JP": "ダミー火種（高原鉱洞）",
+      "ko-KR": "가상체 불씨(고원 갱도)"
+    }
+  },
+  "900052": {
+    "Name": {
+      "zh-CN": "黯影堡垒-虚蚀层",
+      "en-US": "Dark Mist Fortress - Void Corruption",
+      "ja-JP": "暗霧要塞-虚蝕階",
+      "ko-KR": "검은 안개 요새 - 허무의 침식층"
+    }
+  },
+  "900055": {
+    "Name": {
+      "zh-CN": "黯影堡垒-落石",
+      "en-US": "Dark Mist Fortress - Falling Rocks",
+      "ja-JP": "暗霧要塞-落石",
+      "ko-KR": "검은 안개 요새-낙석"
+    }
+  },
+  "900056": {
+    "Name": {
+      "zh-CN": "黯影堡垒-塔楼虚蚀地板",
+      "en-US": "Dark Mist Fortress - Tower Void Corruption Floor",
+      "ja-JP": "暗霧要塞-タワー虚蝕床",
+      "ko-KR": "검은 안개 요새-탑 건물 허무의 침식 바닥"
+    }
+  },
+  "900057": {
+    "Name": {
+      "zh-CN": "黯影堡垒-虚蚀层-事件用",
+      "en-US": "Dark Mist Fortress - Void Corruption Floor - Event Use",
+      "ja-JP": "暗霧要塞-虚蝕階-イベント用",
+      "ko-KR": "검은 안개 요새 - 허무의 침식층 - 이벤트용"
+    }
+  },
+  "900071": {
+    "Name": {
+      "zh-CN": "爬塔-净化波",
+      "en-US": "Tower Climb: Purifying Wave",
+      "ja-JP": "タワーチャレンジ-浄化の波",
+      "ko-KR": "탑 등반 - 정화파"
+    }
+  },
+  "900072": {
+    "Name": {
+      "zh-CN": "爬塔-净化波1",
+      "en-US": "Tower Climb: Purifying Wave 1",
+      "ja-JP": "タワーチャレンジ-浄化の波1",
+      "ko-KR": "탑 등반 - 정화파1"
+    }
+  },
+  "900073": {
+    "Name": {
+      "zh-CN": "爬塔-净化波2",
+      "en-US": "Tower Climb: Purifying Wave 2",
+      "ja-JP": "タワーチャレンジ-浄化の波2",
+      "ko-KR": "탑 등반 - 정화파2"
+    }
+  },
+  "1005303": {
+    "Name": {
+      "zh-CN": "下砸",
+      "en-US": "Slam Down",
+      "ja-JP": "スマッシュダウン",
+      "ko-KR": "내려찍기"
+    }
+  },
+  "1005304": {
+    "Name": {
+      "zh-CN": "挥击",
+      "en-US": "Strike",
+      "ja-JP": "スイングカット",
+      "ko-KR": "휘두르기"
+    }
+  },
+  "1005310": {
+    "Name": {
+      "zh-CN": "金沫哥布林-普攻",
+      "en-US": "Gold Dust Goblin - Normal Attack",
+      "ja-JP": "金色の飛沫-通常攻撃",
+      "ko-KR": "황금 고블린-일반 공격"
+    }
+  },
+  "1005311": {
+    "Name": {
+      "zh-CN": "金沫哥布林-狂吼",
+      "en-US": "Gold Dust Goblin - Roar",
+      "ja-JP": "金色の飛沫-マッドロア",
+      "ko-KR": "황금 고블린-격렬한 포효"
+    }
+  },
+  "1005398": {
+    "Name": {
+      "zh-CN": "金沫哥布林-聚气炸弹",
+      "en-US": "Gold Dust Goblin - Charge Bomb",
+      "ja-JP": "金色の飛沫-ガス爆弾",
+      "ko-KR": "황금 고블린-차징 폭발"
+    }
+  },
+  "1005399": {
+    "Name": {
+      "zh-CN": "金沫哥布林-扇形虚拟体",
+      "en-US": "Gold Dust Goblin - Virtual Body",
+      "ja-JP": "金色の飛沫-扇形ダミー",
+      "ko-KR": "황금 고블린-부채꼴 가상체"
+    }
+  },
+  "1005803": {
+    "Name": {
+      "zh-CN": "红光技-虚蚀重劈",
+      "en-US": "Red Light Skill - Void Corruption Slash",
+      "ja-JP": "レッドライトスキル-虚蝕ヘヴィハック",
+      "ko-KR": "붉은 빛 스킬 - 허무의 침식 강타"
+    }
+  },
+  "1005810": {
+    "Name": {
+      "zh-CN": "疯狂挥砍-职业试炼",
+      "en-US": "Frenzied Slash - Class Trial",
+      "ja-JP": "マッドスラッシュ-クラス試練",
+      "ko-KR": "광란의 베기 - 클래스 시련"
+    }
+  },
+  "1005811": {
+    "Name": {
+      "zh-CN": "挥砍二连-职业试炼",
+      "en-US": "Double Slash - Class Trial",
+      "ja-JP": "ダブルスラッシュ-クラス試練",
+      "ko-KR": "2단 베기 - 클래스 시련"
+    }
+  },
+  "1005901": {
+    "Name": {
+      "zh-CN": "姆克狂战士普攻",
+      "en-US": "Muku Vanguard Basic Attack",
+      "ja-JP": "ムークスマッシャー通常攻撃",
+      "ko-KR": "무크 광전사 일반 공격"
+    }
+  },
+  "1005902": {
+    "Name": {
+      "zh-CN": "姆克狂战士-跳砸",
+      "en-US": "Muku Vanguard - Jump Smash",
+      "ja-JP": "ムークスマッシャー-ジャンプスマッシュ",
+      "ko-KR": "무크 광전사-점프 내려찍기"
+    }
+  },
+  "1005903": {
+    "Name": {
+      "zh-CN": "姆克狂战士-跑步乱砍",
+      "en-US": "Muku Vanguard - Running Rampage",
+      "ja-JP": "ムークスマッシャー-ランペイジ",
+      "ko-KR": "무크 광전사-폭주 참격"
+    }
+  },
+  "1005904": {
+    "Name": {
+      "zh-CN": "姆克狂战士-旋风冲锋",
+      "en-US": "Muku Vanguard - Whirlwind Charge",
+      "ja-JP": "ムークスマッシャー-サイクロンアサルト",
+      "ko-KR": "무크 광전사-회오리 대시"
+    }
+  },
+  "1005905": {
+    "Name": {
+      "zh-CN": "姆克狂战士-绝地反击",
+      "en-US": "Muku Vanguard - Counterattack",
+      "ja-JP": "ムークスマッシャー-カウンターアタック",
+      "ko-KR": "무크 광전사-필사 반격"
+    }
+  },
+  "1005920": {
+    "Name": {
+      "zh-CN": "疯狂双刀姆克-前砍",
+      "en-US": "Muku Duelblade - Forward Slash",
+      "ja-JP": "マッドツインムーク--フォワードスラッシュ",
+      "ko-KR": "광분한 이도류 무크-전방 참격"
+    }
+  },
+  "1005940": {
+    "Name": {
+      "zh-CN": "姆克狂战士-旋风冲锋",
+      "en-US": "Muku Vanguard - Whirlwind Charge",
+      "ja-JP": "ムークスマッシャー-サイクロンアサルト",
+      "ko-KR": "무크 광전사-회오리 대시"
+    }
+  },
+  "1006401": {
+    "Name": {
+      "zh-CN": "丢手雷",
+      "en-US": "Throw Grenade",
+      "ja-JP": "手榴弾",
+      "ko-KR": "수류탄 던지기"
+    }
+  },
+  "1006402": {
+    "Name": {
+      "zh-CN": "精英暗影军团步枪-电陷阱",
+      "en-US": "Elite Dark Mist Legion Rifle - Electric Trap",
+      "ja-JP": "精鋭暗霧分隊ライフル-電気トラップ",
+      "ko-KR": "엘리트 검은 안개 군단 소총 - 전기 트랩"
+    }
+  },
+  "1006403": {
+    "Name": {
+      "zh-CN": "后跳红光技",
+      "en-US": "Backward Jump Red Light Skill",
+      "ja-JP": "後ろ飛びレッドライトスキル",
+      "ko-KR": "뒷점프 붉은 빛 스킬"
+    }
+  },
+  "1006404": {
+    "Name": {
+      "zh-CN": "单发",
+      "en-US": "Single Shot",
+      "ja-JP": "単発",
+      "ko-KR": "단발"
+    }
+  },
+  "1006405": {
+    "Name": {
+      "zh-CN": "后跳三连击",
+      "en-US": "Backward Jump Triple Strike",
+      "ja-JP": "後ろ飛び3連撃",
+      "ko-KR": "뒷점프 3콤보"
+    }
+  },
+  "1006411": {
+    "Name": {
+      "zh-CN": "虚蚀弹三连",
+      "en-US": "Void Corruption Bullet Triple Shot",
+      "ja-JP": "3連虚蝕弾",
+      "ko-KR": "허무의 침식 탄환 3콤보"
+    }
+  },
+  "1006412": {
+    "Name": {
+      "zh-CN": "电磁爆弹-英雄本",
+      "en-US": "Electro Bomb (Hero Dungeon)",
+      "ja-JP": "マグネボム-ヒロイックダンジョン",
+      "ko-KR": "마그네틱 폭탄 - 영웅 던전"
+    }
+  },
+  "1006413": {
+    "Name": {
+      "zh-CN": "点远程子弹-英雄本",
+      "en-US": "Point Ranged Bullet (Hero Dungeon)",
+      "ja-JP": "マークドショット-ヒロイックダンジョン",
+      "ko-KR": "지정 원거리 탄환 - 영웅 던전"
+    }
+  },
+  "1006414": {
+    "Name": {
+      "zh-CN": "单发",
+      "en-US": "Single Shot",
+      "ja-JP": "単発",
+      "ko-KR": "단발"
+    }
+  },
+  "1006450": {
+    "Name": {
+      "zh-CN": "子弹雨虚拟体",
+      "en-US": "Bullet Rain Virtual Body",
+      "ja-JP": "ブレットレインダミー",
+      "ko-KR": "총알비 가상체"
+    }
+  },
+  "1006452": {
+    "Name": {
+      "zh-CN": "点名雷弹虚拟体",
+      "en-US": "Named Thunder Projectile (Virtual Object)",
+      "ja-JP": "ターゲット雷弾ダミー",
+      "ko-KR": "지정 뇌탄 가상체"
+    }
+  },
+  "1006501": {
+    "Name": {
+      "zh-CN": "强化虚蚀振波",
+      "en-US": "Enhanced Void Corruption Shockwave",
+      "ja-JP": "強化虚蝕ショックウェーブ",
+      "ko-KR": "강화 허무의 침식 진동파"
+    }
+  },
+  "1006502": {
+    "Name": {
+      "zh-CN": "上撩火焰弹3道-黯影堡垒剧情",
+      "en-US": "3 Upward Fire Projectiles - Dark Mist Fortress Story",
+      "ja-JP": "火炎弾3発上方投射-暗霧要塞ストーリー",
+      "ko-KR": "상향 화염탄 3발-검은 안개 요새 스토리"
+    }
+  },
+  "1006503": {
+    "Name": {
+      "zh-CN": "虚蚀·裂地-英雄本",
+      "en-US": "Void Corruption: Earth Split - Hero Dungeon",
+      "ja-JP": "虚蝕・クエイク-ヒロイックダンジョン",
+      "ko-KR": "허무의 침식・지면 격파-영웅 던전"
+    }
+  },
+  "1006504": {
+    "Name": {
+      "zh-CN": "前砍",
+      "en-US": "Forward Slash",
+      "ja-JP": "フォワードスラッシュ",
+      "ko-KR": "전방 참격"
+    }
+  },
+  "1006505": {
+    "Name": {
+      "zh-CN": "回旋斩",
+      "en-US": "Whirlwind Slash",
+      "ja-JP": "スピニングスラッシュ",
+      "ko-KR": "회전 참격"
+    }
+  },
+  "1006506": {
+    "Name": {
+      "zh-CN": "挥砍二连",
+      "en-US": "Double Slash",
+      "ja-JP": "ダブルスラッシュ",
+      "ko-KR": "2단 베기"
+    }
+  },
+  "1006507": {
+    "Name": {
+      "zh-CN": "吸引怪物-黯影堡垒专用",
+      "en-US": "Attract Monsters - Dark Mist Fortress Exclusive",
+      "ja-JP": "モンスター引き寄せ-暗霧要塞専用",
+      "ko-KR": "몬스터 끌기-검은 안개 요새 전용"
+    }
+  },
+  "1006508": {
+    "Name": {
+      "zh-CN": "引爆遗迹能量-剧情表演技能",
+      "en-US": "Detonate Ruins Energy",
+      "ja-JP": "遺跡エネルギー起爆-ストーリーデモスキル",
+      "ko-KR": "유적 에너지 폭발-스토리 연출 스킬"
+    }
+  },
+  "1006509": {
+    "Name": {
+      "zh-CN": "一挥接一砍红光",
+      "en-US": "One Swing Followed by a Red Light Slash",
+      "ja-JP": "レッドライトを次々斬る",
+      "ko-KR": "휘두르며 붉은 빛을 베기"
+    }
+  },
+  "1006510": {
+    "Name": {
+      "zh-CN": "烈剑波-英雄本",
+      "en-US": "Blazing Blade Wave - Heroic Mode",
+      "ja-JP": "ヘヴィソードウェーブ-ヒロイックダンジョン",
+      "ko-KR": "열검파-영웅 던전"
+    }
+  },
+  "1006511": {
+    "Name": {
+      "zh-CN": "虚蚀·震荡-黯影多人",
+      "en-US": "Void Corruption - Tremor - Dark Mist Multiplayer",
+      "ja-JP": "虚蝕・ショック-暗霧マルチ",
+      "ko-KR": "허무의 침식・진동-검은 안개 멀티"
+    }
+  },
+  "1006512": {
+    "Name": {
+      "zh-CN": "虚蚀·剑气-黯影堡垒多人",
+      "en-US": "Void Corruption: Sword Energy (Dark Mist Fortress Multiplayer)",
+      "ja-JP": "虚蝕·剣気-暗霧要塞マルチ",
+      "ko-KR": "허무의 침식・검기 - 검은 안개 요새 멀티"
+    }
+  },
+  "1006513": {
+    "Name": {
+      "zh-CN": "虚蚀·震荡-披萨-黯影多人",
+      "en-US": "Void Corruption: Tremor - Pizza (Dark Mist Multiplayer)",
+      "ja-JP": "虚蝕・ショック-扇型-暗霧マルチ",
+      "ko-KR": "허무의 침식・진동 - 피자 - 검은 안개 멀티"
+    }
+  },
+  "1006514": {
+    "Name": {
+      "zh-CN": "重坠-英雄本",
+      "en-US": "Heavy Slam (Hero Dungeon)",
+      "ja-JP": "ヘビーフォール-ヒロイックダンジョン",
+      "ko-KR": "강력 낙하 - 영웅 던전"
+    }
+  },
+  "1006515": {
+    "Name": {
+      "zh-CN": "虚蚀·迸发-对角披萨-黯影多人",
+      "en-US": "Void Corruption: Burst - Diagonal Pizza (Dark Mist Multiplayer)",
+      "ja-JP": "虚蝕・バースト-対角扇型-暗霧マルチ",
+      "ko-KR": "허무의 침식・분출 - 대각 피자 - 검은 안개 멀티"
+    }
+  },
+  "1006551": {
+    "Name": {
+      "zh-CN": "虚蚀震荡披萨虚拟体",
+      "en-US": "Void Corruption Tremor Pizza (Virtual Object)",
+      "ja-JP": "虚蝕ショック-扇型-ダミー",
+      "ko-KR": "허무의 침식 진동 피자 가상체"
+    }
+  },
+  "1006552": {
+    "Name": {
+      "zh-CN": "虚蚀迸发披萨虚拟体",
+      "en-US": "Void Corruption Burst Pizza (Virtual Object)",
+      "ja-JP": "虚蝕バースト-扇型-ダミー",
+      "ko-KR": "허무의 침식 분출 피자 가상체"
+    }
+  },
+  "1006601": {
+    "Name": {
+      "zh-CN": "吸引怪物-黯影堡垒专用",
+      "en-US": "Attract Monsters - Dark Mist Fortress Exclusive",
+      "ja-JP": "モンスター引き寄せ-暗霧要塞専用",
+      "ko-KR": "몬스터 끌기-검은 안개 요새 전용"
+    }
+  },
+  "1006901": {
+    "Name": {
+      "zh-CN": "蟹蛛王普攻",
+      "en-US": "Arachnocrab King Normal Attack",
+      "ja-JP": "キングカニクモ通常攻撃",
+      "ko-KR": "거미게 왕 일반 공격"
+    }
+  },
+  "1006902": {
+    "Name": {
+      "zh-CN": "蟹蛛王结茧",
+      "en-US": "Arachnocrab King Cocooning",
+      "ja-JP": "キングカニクモ繭化",
+      "ko-KR": "거미게 왕 고치 짓기"
+    }
+  },
+  "1006903": {
+    "Name": {
+      "zh-CN": "蟹蛛王正面吐子弹",
+      "en-US": "Arachnocrab King Front Bullet Spit",
+      "ja-JP": "キングカニクモ正面銃弾発射",
+      "ko-KR": "거미게 왕 정면 탄환 발사"
+    }
+  },
+  "1006904": {
+    "Name": {
+      "zh-CN": "蟹蛛蛛丝弹道散射",
+      "en-US": "Arachnocrab Silk Ballistic Scatter",
+      "ja-JP": "カニクモクモ糸ミサイル拡散射撃",
+      "ko-KR": "거미게 거미줄 난사"
+    }
+  },
+  "1006905": {
+    "Name": {
+      "zh-CN": "蟹蛛王狂乱蛛丝",
+      "en-US": "Arachnocrab King Frenzied Silk",
+      "ja-JP": "キングカニクモマッドストリング",
+      "ko-KR": "거미게 왕 광란의 거미줄"
+    }
+  },
+  "1006906": {
+    "Name": {
+      "zh-CN": "蟹蛛王遁地",
+      "en-US": "Arachnocrab King Burrow",
+      "ja-JP": "キングカニクモ巣隠れ",
+      "ko-KR": "거미게 왕 지하 은신"
+    }
+  },
+  "1006907": {
+    "Name": {
+      "zh-CN": "蟹蛛王跳砸",
+      "en-US": "Arachnocrab King Jump Smash",
+      "ja-JP": "キングカニクモジャンプスマッシュ",
+      "ko-KR": "거미게 왕 점프 내려찍기"
+    }
+  },
+  "1006999": {
+    "Name": {
+      "zh-CN": "蟹蛛王地刺虚拟体",
+      "en-US": "Arachnocrab King Ground Spike Virtual Body",
+      "ja-JP": "キングカニクモランドスパイクダミー",
+      "ko-KR": "거미게 왕 가상체 지하 찌르기"
+    }
+  },
+  "1007601": {
+    "Name": {
+      "zh-CN": "变异蜂普攻",
+      "en-US": "Void Bzzar Basic Attack",
+      "ja-JP": "変異ミーン通常攻撃",
+      "ko-KR": "돌연변이 민 일반 공격"
+    }
+  },
+  "1007602": {
+    "Name": {
+      "zh-CN": "变异蜂-大自爆",
+      "en-US": "Void Bzzar - Big Explosion",
+      "ja-JP": "変異ミーン-大自爆",
+      "ko-KR": "돌연변이 민-자폭 공격"
+    }
+  },
+  "1007603": {
+    "Name": {
+      "zh-CN": "变异蜂-把玩家变身",
+      "en-US": "Void Bzzar - Transform Player",
+      "ja-JP": "変異ミーン-プレイヤー変身",
+      "ko-KR": "돌연변이 민-플레이어 변신시키기"
+    }
+  },
+  "1007604": {
+    "Name": {
+      "zh-CN": "变异蜂-连续弹道",
+      "en-US": "Void Bzzar - Continuous Projectiles",
+      "ja-JP": "変異ミーン-連続ミサイル",
+      "ko-KR": "돌연변이 민-연속 탄도"
+    }
+  },
+  "1007701": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-炸人",
+      "en-US": "Venobzzar Incubator - Bombing",
+      "ja-JP": "ヴェノミーンの巣-爆撃",
+      "ko-KR": "맹독 민의 둥지-폭발 공격"
+    }
+  },
+  "1007702": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-召唤毒蜂",
+      "en-US": "Venobzzar Incubator - Summon Poison Bees",
+      "ja-JP": "ヴェノミーンの巣-ヴェノミーン召喚",
+      "ko-KR": "맹독 민의 둥지-맹독 민 소환"
+    }
+  },
+  "1007703": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-腐蚀毒爆",
+      "en-US": "Venobzzar Incubator - Corrosive Poison Explosion",
+      "ja-JP": "ヴェノミーンの巣-腐食ヴェノムバースト",
+      "ko-KR": "맹독 민의 둥지-침식된 독폭"
+    }
+  },
+  "1007704": {
+    "Name": {
+      "zh-CN": "猛毒爆裂",
+      "en-US": "Poison Explosion",
+      "ja-JP": "ハイヴェノムバースト",
+      "ko-KR": "극독 폭열"
+    }
+  },
+  "1007741": {
+    "Name": {
+      "zh-CN": "奥义! 毒爆虚拟体",
+      "en-US": "Arcane! Poison Explosion Avatar",
+      "ja-JP": "奥義！ ヴェノムバーストダミー",
+      "ko-KR": "오의! 독폭 가상체"
+    }
+  },
+  "1007798": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-毒池",
+      "en-US": "Venobzzar Incubator - Poison Pool",
+      "ja-JP": "ヴェノミーンの巣-毒沼",
+      "ko-KR": "맹독 민의 둥지-독 테러터리"
+    }
+  },
+  "1007799": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢-延迟爆炸",
+      "en-US": "Venobzzar Incubator - Delayed Explosion",
+      "ja-JP": "ヴェノミーンの巣-遅延爆発",
+      "ko-KR": "맹독 민의 둥지-지연 폭발"
+    }
+  },
+  "1007801": {
+    "Name": {
+      "zh-CN": "风-短剑哥布林-普攻",
+      "en-US": "Wind - Dagger Goblin - Normal Attack",
+      "ja-JP": "風-短剣ゴブリン-通常攻撃",
+      "ko-KR": "바람-단검 고블린-일반 공격"
+    }
+  },
+  "1007802": {
+    "Name": {
+      "zh-CN": "风-短剑哥布林-强力旋转",
+      "en-US": "Wind - Dagger Goblin - Powerful Spin",
+      "ja-JP": "風-短剣ゴブリン-強力回転",
+      "ko-KR": "바람-단검 고블린-강력 회전"
+    }
+  },
+  "1008001": {
+    "Name": {
+      "zh-CN": "雷光野猪-普攻",
+      "en-US": "Great Warhog - Normal Attack",
+      "ja-JP": "グレートファング-通常攻撃",
+      "ko-KR": "전격 멧돼지-일반 공격"
+    }
+  },
+  "1008002": {
+    "Name": {
+      "zh-CN": "雷光野猪-直线咆哮",
+      "en-US": "Great Warhog - Linear Roar",
+      "ja-JP": "グレートファング-直線咆哮",
+      "ko-KR": "전격 멧돼지-직선 포효"
+    }
+  },
+  "1008003": {
+    "Name": {
+      "zh-CN": "雷光野猪-雷光球",
+      "en-US": "Great Warhog - Thunder Ball",
+      "ja-JP": "グレートファング-ライトニングボール",
+      "ko-KR": "전격 멧돼지-번개 구슬"
+    }
+  },
+  "1008020": {
+    "Name": {
+      "zh-CN": "烈风野猪-普攻",
+      "en-US": "Boarrier Storm - Normal Attack",
+      "ja-JP": "ゲイルボア-通常攻撃",
+      "ko-KR": "질풍 멧돼지-일반 공격"
+    }
+  },
+  "1008021": {
+    "Name": {
+      "zh-CN": "烈风野猪-风阵",
+      "en-US": "Boarrier Storm - Wind Formation",
+      "ja-JP": "ゲイルボア-風陣",
+      "ko-KR": "질풍 멧돼지-바람의 진"
+    }
+  },
+  "1008099": {
+    "Name": {
+      "zh-CN": "雷光野猪-普攻虚拟体",
+      "en-US": "Great Warhog - Normal Attack Virtual Body",
+      "ja-JP": "グレートファング-通常攻撃ダミー",
+      "ko-KR": "전격 멧돼지-일반 공격 가상체"
+    }
+  },
+  "1008101": {
+    "Name": {
+      "zh-CN": "铁牙普攻",
+      "en-US": "Iron Fang Normal Attack",
+      "ja-JP": "鉄牙-通常攻撃",
+      "ko-KR": "무쇠 이빨 일반 공격"
+    }
+  },
+  "1008102": {
+    "Name": {
+      "zh-CN": "铁牙_地裂",
+      "en-US": "Iron Fang - Earth Splitter",
+      "ja-JP": "鉄牙-アースリフト",
+      "ko-KR": "무쇠 이빨_대지 파열"
+    }
+  },
+  "1008103": {
+    "Name": {
+      "zh-CN": "铁牙-狂吼霸体",
+      "en-US": "Iron Fang - Berserk Roar",
+      "ja-JP": "鉄牙-マッドロア剛体",
+      "ko-KR": "무쇠 이빨-격렬한 포효 슈퍼 아머"
+    }
+  },
+  "1008104": {
+    "Name": {
+      "zh-CN": "地狱突刺",
+      "en-US": "Infernal Thrust",
+      "ja-JP": "ヘルスラスト",
+      "ko-KR": "지옥의 찌르기"
+    }
+  },
+  "1008140": {
+    "Name": {
+      "zh-CN": "奥义-地狱突刺",
+      "en-US": "Ultimate - Hell Stab",
+      "ja-JP": "奥義-ヘルスラスト",
+      "ko-KR": "오의 - 지옥의 찌르기"
+    }
+  },
+  "1008201": {
+    "Name": {
+      "zh-CN": "普攻甩尾",
+      "en-US": "Normal Attack Tail Whip",
+      "ja-JP": "通常攻撃テイルウィップ",
+      "ko-KR": "일반 공격 꼬리 흔들기"
+    }
+  },
+  "1008202": {
+    "Name": {
+      "zh-CN": "甩尾",
+      "en-US": "Tail Whip",
+      "ja-JP": "テイルウィップ",
+      "ko-KR": "꼬리 흔들기"
+    }
+  },
+  "1008210": {
+    "Name": {
+      "zh-CN": "飞鱼-远程子弹",
+      "en-US": "Skyfish - Long Range Bullet",
+      "ja-JP": "スカイフィッシュ-遠距離弾",
+      "ko-KR": "날치-원거리 총알"
+    }
+  },
+  "1008211": {
+    "Name": {
+      "zh-CN": "飞鱼-后退刀光",
+      "en-US": "Skyfish - Backward Blade Light",
+      "ja-JP": "スカイフィッシュ-バックブレード",
+      "ko-KR": "날치-후퇴 참광"
+    }
+  },
+  "1008401": {
+    "Name": {
+      "zh-CN": "普攻甩尾",
+      "en-US": "Normal Attack Tail Whip",
+      "ja-JP": "通常攻撃テイルウィップ",
+      "ko-KR": "일반 공격 꼬리 흔들기"
+    }
+  },
+  "1008402": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-召唤冰晶",
+      "en-US": "Celestial Flier - Summon Ice Crystal",
+      "ja-JP": "ヘヴンスカイ-氷晶召喚",
+      "ko-KR": "성스러운 날치-아이스 소환"
+    }
+  },
+  "1008403": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-远程投掷子弹",
+      "en-US": "Celestial Flier - Long Range Throwing Bullet",
+      "ja-JP": "ヘヴンスカイ-ブレットスロー",
+      "ko-KR": "성스러운 날치-원거리 총알 투척"
+    }
+  },
+  "1008404": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-冲锋",
+      "en-US": "Celestial Flier - Charge",
+      "ja-JP": "ヘヴンスカイ-アサルト",
+      "ko-KR": "성스러운 날치-돌진"
+    }
+  },
+  "1008405": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-扫尾",
+      "en-US": "Celestial Flier - Tail Sweep",
+      "ja-JP": "ヘヴンスカイ-掃撃",
+      "ko-KR": "성스러운 날치-꼬리 휩쓸기"
+    }
+  },
+  "1008406": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-环形飞弹",
+      "en-US": "Celestial Flier - Circular Missile",
+      "ja-JP": "ヘヴンスカイ-サーキュラーミサイル",
+      "ko-KR": "성스러운 날치-고리형 탄환"
+    }
+  },
+  "1008498": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-子弹爆炸",
+      "en-US": "Celestial Flier - Bullet Explosion",
+      "ja-JP": "ヘヴンスカイ-銃弾爆発",
+      "ko-KR": "성스러운 날치-총알 폭발"
+    }
+  },
+  "1008499": {
+    "Name": {
+      "zh-CN": "圣域飞鱼-巡逻子弹",
+      "en-US": "Celestial Flier - Patrolling Bullet",
+      "ja-JP": "ヘヴンスカイ-哨戒弾",
+      "ko-KR": "성스러운 날치-순찰 총알"
+    }
+  },
+  "1008501": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-普攻二连",
+      "en-US": "Lizardman King - Double Normal Attack",
+      "ja-JP": "キングギルミー-通常攻撃2連",
+      "ko-KR": "리자드맨 킹-일반 공격 2콤보"
+    }
+  },
+  "1008502": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-头悬冰刺",
+      "en-US": "Lizardman King - Head Suspended Ice Spike",
+      "ja-JP": "キングギルミー-ハンギングアイススパイク",
+      "ko-KR": "리자드맨 킹-위태로운 얼음 가시"
+    }
+  },
+  "1008503": {
+    "Name": {
+      "zh-CN": "冰刺雨",
+      "en-US": "Icicle Rain",
+      "ja-JP": "アイシクルレイン",
+      "ko-KR": "얼음 가시 비"
+    }
+  },
+  "1008504": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-坐地念经",
+      "en-US": "Lizardman King - Ground Meditation",
+      "ja-JP": "キングギルミー-メディテーション",
+      "ko-KR": "리자드맨 킹-앉아서 경읽기"
+    }
+  },
+  "1008505": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-大水爆",
+      "en-US": "Lizardman King - Great Water Explosion",
+      "ja-JP": "キングギルミー-EXウォーターエクスプロード",
+      "ko-KR": "리자드맨 킹-거대 물폭탄"
+    }
+  },
+  "1008506": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-红光技",
+      "en-US": "Lizardman King - Red Light Technique",
+      "ja-JP": "キングギルミー-レッドライトスキル",
+      "ko-KR": "리자드맨 킹-붉은 빛 스킬"
+    }
+  },
+  "1008598": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-冰锥爆炸",
+      "en-US": "Lizardman King - Ice Spike Explosion",
+      "ja-JP": "キングギルミー-アイススパイクボム",
+      "ko-KR": "리자드맨 킹-얼음 송곳 폭발"
+    }
+  },
+  "1008599": {
+    "Name": {
+      "zh-CN": "蜥蜴人王-水爆",
+      "en-US": "Lizardman King - Water Explosion",
+      "ja-JP": "キングギルミー-ウォーターエクスプロード",
+      "ko-KR": "리자드맨 킹-물폭탄"
+    }
+  },
+  "1008601": {
+    "Name": {
+      "zh-CN": "新哥布林王-普攻",
+      "en-US": "New Goblin King - Normal Attack",
+      "ja-JP": "新キングゴブリン-通常攻撃",
+      "ko-KR": "신 고블린 왕-일반 공격"
+    }
+  },
+  "1008602": {
+    "Name": {
+      "zh-CN": "新哥布林王-变身",
+      "en-US": "New Goblin King - Transformation",
+      "ja-JP": "新キングゴブリン-変身",
+      "ko-KR": "신 고블린 왕-변신"
+    }
+  },
+  "1008603": {
+    "Name": {
+      "zh-CN": "新哥布林王-红光",
+      "en-US": "New Goblin King - Red Light",
+      "ja-JP": "新キングゴブリン-レッドライト",
+      "ko-KR": "신 고블린 왕-붉은 빛"
+    }
+  },
+  "1008694": {
+    "Name": {
+      "zh-CN": "新哥布林王-残留虚拟体-森",
+      "en-US": "New Goblin King - Residual Virtual Body - Forest",
+      "ja-JP": "新キングゴブリン-残留ダミー-森",
+      "ko-KR": "신 고블린 왕-가상체 잔해-나무"
+    }
+  },
+  "1008695": {
+    "Name": {
+      "zh-CN": "新哥布林王-虚拟体-岩",
+      "en-US": "New Goblin King - Virtual Body - Rock",
+      "ja-JP": "新キングゴブリン-ダミー-岩",
+      "ko-KR": "신 고블린 왕-가상체-바위"
+    }
+  },
+  "1008696": {
+    "Name": {
+      "zh-CN": "新哥布林王-红光虚拟体-森",
+      "en-US": "New Goblin King - Red Light Virtual Body - Forest",
+      "ja-JP": "新キングゴブリン-レッドライトダミー-森",
+      "ko-KR": "신 고블린 왕-붉은 빛 가상체-나무"
+    }
+  },
+  "1008697": {
+    "Name": {
+      "zh-CN": "变身-虚拟体光",
+      "en-US": "Transformation - Virtual Body Light",
+      "ja-JP": "変身-ダミー光",
+      "ko-KR": "변신-가상체 빛"
+    }
+  },
+  "1008698": {
+    "Name": {
+      "zh-CN": "变身-虚拟体森",
+      "en-US": "Transformation - Virtual Body Forest",
+      "ja-JP": "変身-ダミー森",
+      "ko-KR": "변신-가상체 나무"
+    }
+  },
+  "1008699": {
+    "Name": {
+      "zh-CN": "变身-虚拟体岩",
+      "en-US": "Transformation - Virtual Body Rock",
+      "ja-JP": "変身-ダミー岩",
+      "ko-KR": "변신-가상체 바위"
+    }
+  },
+  "1009701": {
+    "Name": {
+      "zh-CN": "普攻",
+      "en-US": "Normal Attack",
+      "ja-JP": "通常攻撃",
+      "ko-KR": "일반 공격"
+    }
+  },
+  "1009702": {
+    "Name": {
+      "zh-CN": "瞄准射击-共鸣",
+      "en-US": "Aimed Shot - Resonance",
+      "ja-JP": "エイムショット-共鳴",
+      "ko-KR": "조준 사격 - 공명"
+    }
+  },
+  "1009706": {
+    "Name": {
+      "zh-CN": "那一天，开拓者想起来被眼球王支配的恐惧。。。",
+      "en-US": "That day, the Pioneer remembered the fear of being dominated by the Eye King...",
+      "ja-JP": "あの日、冒険者はキングアイボールに支配された恐怖を思い出した…",
+      "ko-KR": "그날, 개척자는 떠올렸다. 스피어 왕에게 지배당하던 공포를..."
+    }
+  },
+  "1010401": {
+    "Name": {
+      "zh-CN": "鱼人战士普攻",
+      "en-US": "Murloc Warrior Normal Attack",
+      "ja-JP": "マーマン戦士通常攻撃",
+      "ko-KR": "리자드맨 전사 일반 공격"
+    }
+  },
+  "1010402": {
+    "Name": {
+      "zh-CN": "鱼人战士大招",
+      "en-US": "Murloc Warrior Ultimate",
+      "ja-JP": "マーマン戦士絶技",
+      "ko-KR": "리자드맨 전사 궁극기"
+    }
+  },
+  "1010403": {
+    "Name": {
+      "zh-CN": "鱼人战士-调整位置",
+      "en-US": "Murloc Warrior - Adjust Position",
+      "ja-JP": "マーマン戦士-位置調整",
+      "ko-KR": "리자드맨 전사 - 위치 조정"
+    }
+  },
+  "1010404": {
+    "Name": {
+      "zh-CN": "鱼人战士扇形攻击",
+      "en-US": "Murloc Warrior Fan-shaped Attack",
+      "ja-JP": "マーマン戦士扇形攻撃",
+      "ko-KR": "리자드맨 전사 부채꼴 공격"
+    }
+  },
+  "1010405": {
+    "Name": {
+      "zh-CN": "鱼人战士等待复活",
+      "en-US": "Murloc Warrior Waiting for Resurrection",
+      "ja-JP": "マーマン戦士復活待機",
+      "ko-KR": "리자드맨 전사 부활 대기"
+    }
+  },
+  "1010406": {
+    "Name": {
+      "zh-CN": "鱼人战士小冲锋",
+      "en-US": "Murloc Warrior Small Charge",
+      "ja-JP": "マーマン戦士短距離チャージ",
+      "ko-KR": "리자드맨 전사 짧은 돌진"
+    }
+  },
+  "1010407": {
+    "Name": {
+      "zh-CN": "鱼人组合技-鱼人战士",
+      "en-US": "Murloc Combo Skill - Murloc Warrior",
+      "ja-JP": "マーマンコンボ-マーマン戦士",
+      "ko-KR": "리자드맨 세트 스킬 - 리자드맨 전사"
+    }
+  },
+  "1010498": {
+    "Name": {
+      "zh-CN": "鱼人精英组合技虚拟体",
+      "en-US": "Murloc Elite Combo Skill Virtual Body",
+      "ja-JP": "マーマン精鋭コンボダミー",
+      "ko-KR": "리자드맨 엘리트 세트 스킬 가상체"
+    }
+  },
+  "1010499": {
+    "Name": {
+      "zh-CN": "鱼人战士-落雷",
+      "en-US": "Murloc Warrior - Thunder Strike",
+      "ja-JP": "マーマン戦士-落雷",
+      "ko-KR": "리자드맨 전사 - 낙뢰"
+    }
+  },
+  "1010501": {
+    "Name": {
+      "zh-CN": "鱼人法师瞬移",
+      "en-US": "Murloc Mage Teleport",
+      "ja-JP": "マーマンメイジ瞬間移動",
+      "ko-KR": "리자드맨 마법사 순간이동"
+    }
+  },
+  "1010502": {
+    "Name": {
+      "zh-CN": "鱼人法师小水球散射",
+      "en-US": "Murloc Mage Small Water Ball Scatter",
+      "ja-JP": "マーマンメイジミニウォーターボール拡散射撃",
+      "ko-KR": "리자드맨 마법사 작은 물풍선 산탄 발사"
+    }
+  },
+  "1010503": {
+    "Name": {
+      "zh-CN": "鱼人法师治愈波动",
+      "en-US": "Murloc Mage Healing Wave",
+      "ja-JP": "マーマンメイジヒールウェーブ",
+      "ko-KR": "리자드맨 마법사 치유 파동"
+    }
+  },
+  "1010504": {
+    "Name": {
+      "zh-CN": "鱼人法师普攻",
+      "en-US": "Murloc Mage Normal Attack",
+      "ja-JP": "マーマンメイジ通常攻撃",
+      "ko-KR": "리자드맨 마법사 일반 공격"
+    }
+  },
+  "1010505": {
+    "Name": {
+      "zh-CN": "鱼人法师召唤沉默水池",
+      "en-US": "Murloc Mage Summon Silence Pool",
+      "ja-JP": "マーマンメイジ沈黙の沼召喚",
+      "ko-KR": "리자드맨 마법사 침묵의 물구덩이 소환"
+    }
+  },
+  "1010506": {
+    "Name": {
+      "zh-CN": "鱼人法师召唤天空水池",
+      "en-US": "Murloc Mage Summon Sky Pool",
+      "ja-JP": "マーマンメイジ浮遊沼召喚",
+      "ko-KR": "리자드맨 마법사 하늘의 물구덩이 소환"
+    }
+  },
+  "1010510": {
+    "Name": {
+      "zh-CN": "鱼人组合技预备",
+      "en-US": "Murloc Combo Skill Preparation",
+      "ja-JP": "マーマンコンボ準備",
+      "ko-KR": "리자드맨 세트 스킬 준비"
+    }
+  },
+  "1010598": {
+    "Name": {
+      "zh-CN": "鱼人法师沉默水池",
+      "en-US": "Murloc Mage Silence Pool",
+      "ja-JP": "マーマンメイジ沈黙の沼",
+      "ko-KR": "리자드맨 마법사 침묵의 물구덩이"
+    }
+  },
+  "1010599": {
+    "Name": {
+      "zh-CN": "鱼人法师天空水池",
+      "en-US": "Murloc Mage Sky Pool",
+      "ja-JP": "マーマンメイジ浮遊沼",
+      "ko-KR": "리자드맨 마법사 하늘의 물구덩이"
+    }
+  },
+  "1010600": {
+    "Name": {
+      "zh-CN": "大世界鱼人法师沉默水池",
+      "en-US": "Great World Murloc Mage Silence Pool",
+      "ja-JP": "ワールドマーマンメイジ沈黙の沼",
+      "ko-KR": "월드 리자드맨 마법사 침묵의 물구덩이"
+    }
+  },
+  "1010601": {
+    "Name": {
+      "zh-CN": "黑石剑刃风暴",
+      "en-US": "Blackstone Blade Storm",
+      "ja-JP": "黒磊-剣刃の嵐",
+      "ko-KR": "검은 돌 검날 폭풍"
+    }
+  },
+  "1011001": {
+    "Name": {
+      "zh-CN": "枪兵近战踢人",
+      "en-US": "Lancer Melee Kick",
+      "ja-JP": "槍兵近接キック",
+      "ko-KR": "창병 근접 발차기"
+    }
+  },
+  "1011206": {
+    "Name": {
+      "zh-CN": "卷心菜法师普攻",
+      "en-US": "Cabbage Mage Basic Attack",
+      "ja-JP": "甘藍魔術師-通常攻撃",
+      "ko-KR": "양배추 마법사 일반 공격"
+    }
+  },
+  "1102401": {
+    "Name": {
+      "zh-CN": "梦魇角羊-究极梦魇",
+      "en-US": "Nightmare Ram - Ultimate Nightmare",
+      "ja-JP": "悪夢ホーンゴート-究極ナイトメア",
+      "ko-KR": "악몽 뿔염소-궁극 악몽"
+    }
+  },
+  "1102402": {
+    "Name": {
+      "zh-CN": "梦魇角羊-普攻1",
+      "en-US": "Nightmare Ram - Basic Attack 1",
+      "ja-JP": "悪夢ホーンゴート-通常攻撃1",
+      "ko-KR": "악몽 뿔염소-일반 공격1"
+    }
+  },
+  "1102403": {
+    "Name": {
+      "zh-CN": "梦魇角羊-普攻2",
+      "en-US": "Nightmare Ram - Basic Attack 2",
+      "ja-JP": "悪夢ホーンゴート-通常攻撃2",
+      "ko-KR": "악몽 뿔염소-일반 공격2"
+    }
+  },
+  "1102404": {
+    "Name": {
+      "zh-CN": "梦魇角羊-冲锋",
+      "en-US": "Nightmare Ram - Charge",
+      "ja-JP": "悪夢ホーンゴート-アサルト",
+      "ko-KR": "악몽 뿔염소-돌진"
+    }
+  },
+  "1102405": {
+    "Name": {
+      "zh-CN": "梦魇角羊-压团血",
+      "en-US": "Nightmare Ram - Group Blood Pressure",
+      "ja-JP": "悪夢ホーンゴート-パーティHPプレッシャー",
+      "ko-KR": "악몽 뿔염소-파티 체력 압박"
+    }
+  },
+  "1102430": {
+    "Name": {
+      "zh-CN": "梦魇陨石",
+      "en-US": "Nightmare Meteor",
+      "ja-JP": "ナイトメアメテオ",
+      "ko-KR": "악몽 운석"
+    }
+  },
+  "1205004": {
+    "Name": {
+      "zh-CN": "巨型机像的追击",
+      "en-US": "Pursuit of the Golem",
+      "ja-JP": "巨大ゴーレム追撃",
+      "ko-KR": "초대형 골렘의 추격"
+    }
+  },
+  "1205005": {
+    "Name": {
+      "zh-CN": "阿卡多的引雷弹",
+      "en-US": "Arcado's Raijin Dash",
+      "ja-JP": "アッカードのサンダーボルト",
+      "ko-KR": "아카도의 유도 뇌탄"
+    }
+  },
+  "1205006": {
+    "Name": {
+      "zh-CN": "阿卡多的追踪弹",
+      "en-US": "Arcado's Tracking Missile",
+      "ja-JP": "アッカードの追尾弾",
+      "ko-KR": "아카도의 추적탄"
+    }
+  },
+  "1205007": {
+    "Name": {
+      "zh-CN": "火焰之地",
+      "en-US": "Land of Flames",
+      "ja-JP": "フレイムゾーン",
+      "ko-KR": "화염 지역"
+    }
+  },
+  "1205008": {
+    "Name": {
+      "zh-CN": "阿卡多的续爆雷",
+      "en-US": "Arcado's Continuous Thunder Explosion",
+      "ja-JP": "アッカードのサンダーブラスト続行",
+      "ko-KR": "아카도의 연속 폭발 지뢰"
+    }
+  },
+  "1205009": {
+    "Name": {
+      "zh-CN": "大机器人召唤导弹",
+      "en-US": "Large Robot Summon Missile",
+      "ja-JP": "ゴーレムLミサイル召喚",
+      "ko-KR": "대형 로봇 미사일 소환"
+    }
+  },
+  "1205011": {
+    "Name": {
+      "zh-CN": "巨型机像的追击-随机范围",
+      "en-US": "Golem's Pursuit - Random Area",
+      "ja-JP": "巨大ゴーレム追撃-ランダム範囲",
+      "ko-KR": "초대형 골렘의 추격-랜덤 범위"
+    }
+  },
+  "1205012": {
+    "Name": {
+      "zh-CN": "巨型机像的右手锤击",
+      "en-US": "Giant Golem's Right-Hand Slam",
+      "ja-JP": "巨大ゴーレムの右手攻撃",
+      "ko-KR": "초대형 골렘 오른손 해머 공격"
+    }
+  },
+  "1205013": {
+    "Name": {
+      "zh-CN": "巨型机像的左手锤击",
+      "en-US": "Giant Golem's Left-Hand Slam",
+      "ja-JP": "巨大ゴーレムの左手攻撃",
+      "ko-KR": "초대형 골렘 왼손 해머 공격"
+    }
+  },
+  "1205014": {
+    "Name": {
+      "zh-CN": "巨型机像的双手锤击",
+      "en-US": "Giant Golem's Double-Hand Slam",
+      "ja-JP": "巨大ゴーレムの両手攻撃",
+      "ko-KR": "초대형 골렘 양손 해머 공격"
+    }
+  },
+  "1301101": {
+    "Name": {
+      "zh-CN": "普攻四连",
+      "en-US": "Normal Attack Quadruple Hit",
+      "ja-JP": "4連通常攻撃",
+      "ko-KR": "일반 공격 4콤보"
+    }
+  },
+  "1301102": {
+    "Name": {
+      "zh-CN": "丹佛释放虚蚀-表演",
+      "en-US": "Denvel Releases Void Corruption - Performance",
+      "ja-JP": "デンヴェル虚蝕発動-デモ",
+      "ko-KR": "덴벨 허무의 침식 시전-연출"
+    }
+  },
+  "1301103": {
+    "Name": {
+      "zh-CN": "半血跪地表演",
+      "en-US": "Half-Health Kneeling Performance",
+      "ja-JP": "HP50％跪きデモ",
+      "ko-KR": "체력 50% 무릎 꿇기 연출"
+    }
+  },
+  "1301104": {
+    "Name": {
+      "zh-CN": "丹佛大劈加虚蚀-表演",
+      "en-US": "Denvel Great Slash with Void Corruption - Performance",
+      "ja-JP": "デンヴェルパワフルハック虚蝕追加-デモ",
+      "ko-KR": "덴벨 대참격 허무의 침식-연출"
+    }
+  },
+  "1301105": {
+    "Name": {
+      "zh-CN": "小丹佛下劈",
+      "en-US": "Small Denvel's Downward Slash",
+      "ja-JP": "ちびデンヴェル・ハックダウン",
+      "ko-KR": "작은 덴벨 수직 강타"
+    }
+  },
+  "1301106": {
+    "Name": {
+      "zh-CN": "打断用假技能",
+      "en-US": "Fake Skill for Interrupt",
+      "ja-JP": "中断用の偽スキル",
+      "ko-KR": "방해용 가짜 스킬"
+    }
+  },
+  "1700103": {
+    "Name": {
+      "zh-CN": "野猪王-踩地板",
+      "en-US": "Boarrier King - Stomp",
+      "ja-JP": "キングボア-地団太",
+      "ko-KR": "멧돼지 왕 - 바닥 밟기"
+    }
+  },
+  "1700110": {
+    "Name": {
+      "zh-CN": "野猪王-压团血",
+      "en-US": "Boarrier King - Group Blood Pressure",
+      "ja-JP": "キングボア-パーティHPプレッシャー",
+      "ko-KR": "멧돼지 왕-파티 체력 압박"
+    }
+  },
+  "1700321": {
+    "Name": {
+      "zh-CN": "哥布林本-落石",
+      "en-US": "Goblin Book - Falling Rocks",
+      "ja-JP": "ゴブリンダンジョン-落石",
+      "ko-KR": "고블린 던전-낙석"
+    }
+  },
+  "1700322": {
+    "Name": {
+      "zh-CN": "育母蜘蛛普攻-英雄本",
+      "en-US": "Broodmother Spider Normal Attack - Hero Book",
+      "ja-JP": "マザースパイダー通常攻撃-ヒロイックダンジョン",
+      "ko-KR": "어미 거미 일반 공격-영웅 던전"
+    }
+  },
+  "1700331": {
+    "Name": {
+      "zh-CN": "蟹蛛水中跳出（高原矿洞战斗）",
+      "en-US": "Arachnocrab Jumps from Water (Highland Mine Battle)",
+      "ja-JP": "カニクモ-水中ジャンプ（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 수중 점프(고원 갱도 전투)"
+    }
+  },
+  "1700332": {
+    "Name": {
+      "zh-CN": "蟹蛛高处跳下（高原矿洞战斗）",
+      "en-US": "Arachnocrab Jumps from Height (Highland Mine Battle)",
+      "ja-JP": "カニクモ-高所ジャンプダウン（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 높은 곳에서 점프(고원 갱도 전투)"
+    }
+  },
+  "1700340": {
+    "Name": {
+      "zh-CN": "矿洞蟹蛛-落石",
+      "en-US": "Mine Arachnocrab - Rockfall",
+      "ja-JP": "鉱洞カニクモ-落石",
+      "ko-KR": "갱도 거미게 - 낙석"
+    }
+  },
+  "1700341": {
+    "Name": {
+      "zh-CN": "蟹蛛颤地攻击（高原矿洞战斗）",
+      "en-US": "Arachnocrab Tremor Attack (Highland Mine Battle)",
+      "ja-JP": "カニクモ-クエイク（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 진동 공격(고원 갱도 전투)"
+    }
+  },
+  "1700342": {
+    "Name": {
+      "zh-CN": "蟹蛛二连击（高原矿洞战斗）",
+      "en-US": "Arachnocrab Double Strike (Highland Mine Battle)",
+      "ja-JP": "カニクモ-二連撃（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 2콤보(고원 갱도 전투)"
+    }
+  },
+  "1700343": {
+    "Name": {
+      "zh-CN": "左爪击（高原矿洞战斗）",
+      "en-US": "Left Claw Strike (Highland Mine Battle)",
+      "ja-JP": "レフトクローストライク（高原鉱洞・戦闘）",
+      "ko-KR": "왼쪽 발톱 공격(고원 갱도 전투)"
+    }
+  },
+  "1700344": {
+    "Name": {
+      "zh-CN": "蟹蛛后跳顺劈（高原矿洞战斗）",
+      "en-US": "Arachnocrab Backstep Sweep (Highland Mine Battle)",
+      "ja-JP": "カニクモ-バックスラッシュ（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 후방 점프 후 베기(고원 갱도 전투)"
+    }
+  },
+  "1700345": {
+    "Name": {
+      "zh-CN": "蟹蛛滚滚球（高原矿洞战斗）",
+      "en-US": "Arachnocrab Rolling Ball (Highland Mine Battle)",
+      "ja-JP": "カニクモ-ローリングボール（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 구르기(고원 갱도 전투)"
+    }
+  },
+  "1700346": {
+    "Name": {
+      "zh-CN": "蟹蛛钻地（高原矿洞战斗）",
+      "en-US": "Arachnocrab Burrow (Highland Mine Battle)",
+      "ja-JP": "カニクモ-ドリルダイブ（高原鉱洞・戦闘）",
+      "ko-KR": "거미게 잠복(고원 갱도 전투)"
+    }
+  },
+  "1700825": {
+    "Name": {
+      "zh-CN": "宠物-地狐飞扑",
+      "en-US": "Companion - Foxen Pounce",
+      "ja-JP": "臣獣-ランドフォックス飛び掛かり",
+      "ko-KR": "펫 - 땅여우 돌진"
+    }
+  },
+  "1700826": {
+    "Name": {
+      "zh-CN": "宠物-强力飞扑",
+      "en-US": "Companion - Powerful Pounce",
+      "ja-JP": "臣獣-強力飛び掛かり",
+      "ko-KR": "펫 - 강력한 돌진"
+    }
+  },
+  "1700827": {
+    "Name": {
+      "zh-CN": "宠物-普攻",
+      "en-US": "Companion - Basic Attack",
+      "ja-JP": "臣獣-通常攻撃",
+      "ko-KR": "펫 - 일반 공격"
+    }
+  },
+  "1700828": {
+    "Name": {
+      "zh-CN": "宠物-共鸣赤玉地狐强击",
+      "en-US": "Companion - Resonance Crimson Foxen Strong Strike",
+      "ja-JP": "臣獣-共鳴レッドランドフォックス強撃",
+      "ko-KR": "펫 - 루비 땅여우 공명 강타"
+    }
+  },
+  "1701101": {
+    "Name": {
+      "zh-CN": "普攻01",
+      "en-US": "Basic Attack 01",
+      "ja-JP": "通常攻撃01",
+      "ko-KR": "일반 공격01"
+    }
+  },
+  "2001627": {
+    "Name": {
+      "zh-CN": "对远程射箭-英雄本-大精英",
+      "en-US": "Ranged Archery - Hero Dungeon - Major Elite",
+      "ja-JP": "遠距離への射撃-ヒロイックダンジョン-大精鋭",
+      "ko-KR": "원거리에게 화살 발사 - 영웅 던전 - 대형 엘리트"
+    }
+  },
+  "2001632": {
+    "Name": {
+      "zh-CN": "对远程射箭-英雄本-小精英",
+      "en-US": "Ranged Archery - Hero Dungeon - Minor Elite",
+      "ja-JP": "遠距離への射撃-ヒロイックダンジョン-小精鋭",
+      "ko-KR": "원거리에게 화살 발사 - 영웅 던전 - 소형 엘리트"
+    }
+  },
+  "2001634": {
+    "Name": {
+      "zh-CN": "对远程射箭-英雄本-小精英新",
+      "en-US": "Ranged Archery - Hero Dungeon - Minor Elite (New)",
+      "ja-JP": "遠距離への射撃-ヒロイックダンジョン-小精鋭・新",
+      "ko-KR": "원거리에게 화살 발사 - 영웅 던전 - 소형 엘리트 신규"
+    }
+  },
+  "2001706": {
+    "Name": {
+      "zh-CN": "投掷匕首（预警）",
+      "en-US": "Throwing Dagger (Warning)",
+      "ja-JP": "ナイフスロー（アラート）",
+      "ko-KR": "단검 투척(경고)"
+    }
+  },
+  "2001708": {
+    "Name": {
+      "zh-CN": "刀扇",
+      "en-US": "Fan of Knives",
+      "ja-JP": "刀扇",
+      "ko-KR": "부채칼"
+    }
+  },
+  "2001710": {
+    "Name": {
+      "zh-CN": "刀扇",
+      "en-US": "Fan of Knives",
+      "ja-JP": "刀扇",
+      "ko-KR": "부채칼"
+    }
+  },
+  "2001712": {
+    "Name": {
+      "zh-CN": "瞬步奇袭-共鸣",
+      "en-US": "Instant Step Surprise Attack - Resonance",
+      "ja-JP": "フラッシュレイド-共鳴",
+      "ko-KR": "재빠른 기습 - 공명"
+    }
+  },
+  "2001723": {
+    "Name": {
+      "zh-CN": "吸收遗迹能量-剧情表演技能",
+      "en-US": "Absorb Relic Energy - Story Performance Skill",
+      "ja-JP": "遺跡エネルギー吸収-ストーリーデモスキル",
+      "ko-KR": "유적 에너지 흡수-스토리 연출 스킬"
+    }
+  },
+  "2001724": {
+    "Name": {
+      "zh-CN": "雷系瞬步旋身踢-剧情战斗技能",
+      "en-US": "Thunder Flash Spin Kick - Story Combat Skill",
+      "ja-JP": "雷系フラッシュスピンキック-ストーリー戦闘スキル",
+      "ko-KR": "번개 계열 재빠른 돌려차기-스토리 전투 스킬"
+    }
+  },
+  "2001725": {
+    "Name": {
+      "zh-CN": "后空翻虚蚀匕首五连发-英雄本",
+      "en-US": "Backflip Void Corruption Dagger Five-Shot (Hero Dungeon)",
+      "ja-JP": "後ろ宙返り-虚蝕ナイフ五連発-ヒロイックダンジョン",
+      "ko-KR": "백플립 허무의 침식 단검 5연발 - 영웅 던전"
+    }
+  },
+  "2001726": {
+    "Name": {
+      "zh-CN": "二段普攻-英雄本",
+      "en-US": "Two-Stage Basic Attack (Hero Dungeon)",
+      "ja-JP": "二段通常攻撃-ヒロイックダンジョン",
+      "ko-KR": "2단 일반 공격 - 영웅 던전"
+    }
+  },
+  "2001750": {
+    "Name": {
+      "zh-CN": "双刀虚蚀池虚拟体",
+      "en-US": "Dual Blade Void Corruption Pool (Virtual Object)",
+      "ja-JP": "双剣虚蝕プールタミー",
+      "ko-KR": "쌍검 허무의 침식 풀 가상체"
+    }
+  },
+  "2002241": {
+    "Name": {
+      "zh-CN": "巨塔事件内场地板电爆炸",
+      "en-US": "Giant Tower Event Inner Area Floor Electric Explosion",
+      "ja-JP": "巨塔イベントフィールド床電気爆発",
+      "ko-KR": "거탑 이벤트 필드 내부 바닥 전기 폭발"
+    }
+  },
+  "2002411": {
+    "Name": {
+      "zh-CN": "精准打击",
+      "en-US": "Precision Strike",
+      "ja-JP": "プリサイスストライク",
+      "ko-KR": "정밀 타격"
+    }
+  },
+  "2002412": {
+    "Name": {
+      "zh-CN": "共鸣核心",
+      "en-US": "Engram Core",
+      "ja-JP": "共鳴コア",
+      "ko-KR": "코어 공명"
+    }
+  },
+  "2002413": {
+    "Name": {
+      "zh-CN": "雷电食人魔虚弱表演-雷暴本",
+      "en-US": "Tempest Ogre Weakening Performance - lightning storm Edition",
+      "ja-JP": "サンダーオーガ虚弱デモ-嵐ダンジョン",
+      "ko-KR": "번개 오우거 허약 퍼포먼스 - 뇌우 던전"
+    }
+  },
+  "2002414": {
+    "Name": {
+      "zh-CN": "蓄力雷暴",
+      "en-US": "Charged lightning storm",
+      "ja-JP": "チャージストーム",
+      "ko-KR": "뇌우 차징"
+    }
+  },
+  "2002740": {
+    "Name": {
+      "zh-CN": "无敌乱砍",
+      "en-US": "Invincible Slash",
+      "ja-JP": "無敵スラッシュ",
+      "ko-KR": "무적 폭주 베기"
+    }
+  },
+  "2002804": {
+    "Name": {
+      "zh-CN": "旋转打击",
+      "en-US": "Spinning Strike",
+      "ja-JP": "スピニングストライク",
+      "ko-KR": "회전 타격"
+    }
+  },
+  "2002872": {
+    "Name": {
+      "zh-CN": "哥布林王三连击-职业试炼",
+      "en-US": "Goblin King Triple Strike - Class Trial",
+      "ja-JP": "キングゴブリン3連撃-クラス試練",
+      "ko-KR": "고블린 왕 3콤보 - 클래스 시련"
+    }
+  },
+  "2002873": {
+    "Name": {
+      "zh-CN": "哥布林王前方挥击-职业试炼",
+      "en-US": "Goblin King Forward Swing - Class Trial",
+      "ja-JP": "キングゴブリン前方スイング-クラス試練",
+      "ko-KR": "고블린 왕 전방 휘두르기 - 클래스 시련"
+    }
+  },
+  "2009602": {
+    "Name": {
+      "zh-CN": "木桩小技能-职业试炼",
+      "en-US": "Wooden Dummy - Class Trial",
+      "ja-JP": "訓練用ダミーミニスキル-クラス試練",
+      "ko-KR": "더미 작은 스킬 - 클래스 시련"
+    }
+  },
+  "2009603": {
+    "Name": {
+      "zh-CN": "木桩大技能-职业试炼",
+      "en-US": "Wooden Dummy - Class Trial",
+      "ja-JP": "訓練用ダミーラージスキル-クラス試練",
+      "ko-KR": "더미 큰 스킬 - 클래스 시련"
+    }
+  },
+  "2900904": {
+    "Name": {
+      "zh-CN": "法法菈大招虚拟体",
+      "en-US": "Fafala's Ultimate (Virtual Object)",
+      "ja-JP": "ファルファラ究極スキルダミー",
+      "ko-KR": "파파라 궁극기 가상체"
+    }
+  },
+  "3010020": {
+    "Name": {
+      "zh-CN": "愤怒加攻击力-强尼",
+      "en-US": "Rage Increases ATK - Johnny",
+      "ja-JP": "憤怒で攻撃力アップ-ジョニー",
+      "ko-KR": "분노로 공격력 증가 - 조니"
+    }
+  },
+  "3010021": {
+    "Name": {
+      "zh-CN": "怀疑加防御力-强尼",
+      "en-US": "Suspicion Increases Defense Power - Johnny",
+      "ja-JP": "疑いで防御力アップ-ジョニー",
+      "ko-KR": "의심으로 방어력 증가 - 조니"
+    }
+  },
+  "3030908": {
+    "Name": {
+      "zh-CN": "虚蚀人类爪击二连接自爆",
+      "en-US": "Void Human Claw Strike followed by Self-Destruction",
+      "ja-JP": "被虚蝕者クローストライク2連続自爆",
+      "ko-KR": "허무의 침식 인간 발톱 공격 2콤보 후 자폭"
+    }
+  },
+  "3030909": {
+    "Name": {
+      "zh-CN": "虚蚀人类爪击二连-英雄本",
+      "en-US": "Void Human Claw Combo (Hero Dungeon)",
+      "ja-JP": "被虚蝕者2連クローストライク-ヒロイックダンジョン",
+      "ko-KR": "허무의 침식 인간 발톱 공격 2콤보 - 영웅 던전"
+    }
+  },
+  "3030910": {
+    "Name": {
+      "zh-CN": "虚蚀自爆-英雄本",
+      "en-US": "Void Corruption Self-Destruct (Hero Dungeon)",
+      "ja-JP": "虚蝕・自爆-ヒロイックダンジョン",
+      "ko-KR": "허무의 침식 자폭 - 영웅 던전"
+    }
+  },
+  "3030911": {
+    "Name": {
+      "zh-CN": "虚蚀人类-连线假技能",
+      "en-US": "Void Human - Link Fake Skill",
+      "ja-JP": "被虚蝕者-ダミースキル接続",
+      "ko-KR": "허무의 침식 인간 - 링크 가짜 스킬"
+    }
+  },
+  "3030912": {
+    "Name": {
+      "zh-CN": "虚蚀人类-复生表演",
+      "en-US": "Void Human - Resurrection Performance",
+      "ja-JP": "被虚蝕者-復活デモ",
+      "ko-KR": "허무의 침식 인간 - 소생 연출"
+    }
+  },
+  "3040110": {
+    "Name": {
+      "zh-CN": "黯影军团庆祝-表演",
+      "en-US": "Dark Mist Legion Celebration - Performance",
+      "ja-JP": "暗霧分隊祝賀-デモ",
+      "ko-KR": "검은 안개 군단 세리머니-연출"
+    }
+  },
+  "3040111": {
+    "Name": {
+      "zh-CN": "黯影军团咆哮-表演",
+      "en-US": "Dark Mist Legion Roar - Performance",
+      "ja-JP": "暗霧分隊咆哮-デモ",
+      "ko-KR": "검은 안개 군단 포효-연출"
+    }
+  },
+  "3040310": {
+    "Name": {
+      "zh-CN": "黯影军团盾牌格挡反击—英雄本",
+      "en-US": "Dark Mist Legion Shield Countercrush (Hero Dungeon)",
+      "ja-JP": "暗霧分隊盾牌ガードカウンター—ヒーローブック",
+      "ko-KR": "검은 안개 군단 방패 막기 반격 - 영웅 던전"
+    }
+  },
+  "3040311": {
+    "Name": {
+      "zh-CN": "暴怒觉醒-黯影多人",
+      "en-US": "Rage Awakening - Dark Mist Multiplayer",
+      "ja-JP": "レイジ覚醒-暗霧マルチ",
+      "ko-KR": "광분 각성 - 검은 안개 멀티"
+    }
+  },
+  "3040312": {
+    "Name": {
+      "zh-CN": "盾兵劈砍-黯影多人",
+      "en-US": "Shield Soldier Slash - Dark Mist Multiplayer",
+      "ja-JP": "盾兵斬撃-暗霧マルチ",
+      "ko-KR": "방패병 베기 - 검은 안개 멀티"
+    }
+  },
+  "3040313": {
+    "Name": {
+      "zh-CN": "盾兵-无属性劈砍-多人本",
+      "en-US": "Shield Soldier - Non-Elemental Slash - Multiplayer",
+      "ja-JP": "盾兵-無属性斬撃-マルチダンジョン",
+      "ko-KR": "방패병 - 무속성 베기 - 멀티 던전"
+    }
+  },
+  "3320101": {
+    "Name": {
+      "zh-CN": "扫尾",
+      "en-US": "Tail Sweep",
+      "ja-JP": "掃撃",
+      "ko-KR": "꼬리 휩쓸기"
+    }
+  },
+  "3320110": {
+    "Name": {
+      "zh-CN": "转阶段遁地",
+      "en-US": "Phase Transition Burrow",
+      "ja-JP": "フェーズ移行巣隠れ",
+      "ko-KR": "단계 전환 지하 은신"
+    }
+  },
+  "3320111": {
+    "Name": {
+      "zh-CN": "死亡尖啸",
+      "en-US": "Death Scream",
+      "ja-JP": "死の叫び",
+      "ko-KR": "죽음의 비명"
+    }
+  },
+  "3320120": {
+    "Name": {
+      "zh-CN": "协同技-能量吸收",
+      "en-US": "Synergy Skill - Energy Absorption",
+      "ja-JP": "協力スキル-エネルギー吸収",
+      "ko-KR": "협동 스킬-에너지 흡수"
+    }
+  },
+  "3320121": {
+    "Name": {
+      "zh-CN": "小岩蛇-能量吸收",
+      "en-US": "Small Rock Snake - Energy Absorption",
+      "ja-JP": "Sロックスネーク-エネルギー吸収",
+      "ko-KR": "어린 바위뱀-에너지 흡수"
+    }
+  },
+  "3320122": {
+    "Name": {
+      "zh-CN": "协同技-岩蛇喷吐",
+      "en-US": "Synergy Skill - Rock Snake Spit",
+      "ja-JP": "協力スキル-ロックスネーク噴射",
+      "ko-KR": "협동 스킬-바위뱀 뿜기"
+    }
+  },
+  "3320123": {
+    "Name": {
+      "zh-CN": "小岩蛇-岩蛇喷吐",
+      "en-US": "Small Rock Snake - Rock Snake Spit",
+      "ja-JP": "Sロックスネーク-ロックスネーク噴射",
+      "ko-KR": "어린 바위뱀-바위뱀 뿜기"
+    }
+  },
+  "3320124": {
+    "Name": {
+      "zh-CN": "地震",
+      "en-US": "Terra Sunder",
+      "ja-JP": "地震",
+      "ko-KR": "지진"
+    }
+  },
+  "3320125": {
+    "Name": {
+      "zh-CN": "腐蚀毒弹",
+      "en-US": "Corrosive Poison Bomb",
+      "ja-JP": "腐食ベノムボム",
+      "ko-KR": "침식 독탄"
+    }
+  },
+  "3320130": {
+    "Name": {
+      "zh-CN": "岩蛇蛋-孵蛋",
+      "en-US": "Rock Snake Egg - Hatching",
+      "ja-JP": "ロックスネークの卵-卵孵化",
+      "ko-KR": "바위뱀 알-부화"
+    }
+  },
+  "3320199": {
+    "Name": {
+      "zh-CN": "腐蚀毒弹虚拟体",
+      "en-US": "Corrosive Poison Bomb Virtual Form",
+      "ja-JP": "腐食ベノムボムダミー",
+      "ko-KR": "침식 독탄 가상체"
+    }
+  },
+  "3330101": {
+    "Name": {
+      "zh-CN": "挥砍",
+      "en-US": "Slash",
+      "ja-JP": "スラッシュ",
+      "ko-KR": "베기"
+    }
+  },
+  "3340101": {
+    "Name": {
+      "zh-CN": "幻祸娜宝-太刀乱砍",
+      "en-US": "Plague Nappo - Katana Frenzy",
+      "ja-JP": "幻災ナッポ-刀振り回し",
+      "ko-KR": "환상의 소용돌이 나뽀-태도 베기"
+    }
+  },
+  "3340102": {
+    "Name": {
+      "zh-CN": "幻祸娜宝-弓箭直射",
+      "en-US": "Plague Nappo - Bow Shot",
+      "ja-JP": "幻災ナッポ-ディバインアーク直射",
+      "ko-KR": "환상의 소용돌이 나뽀-활 직사"
+    }
+  },
+  "3340110": {
+    "Name": {
+      "zh-CN": "幻祸娜宝-娜宝炸弹术",
+      "en-US": "Plague Nappo - Nappo Bomb Technique",
+      "ja-JP": "幻災ナッポ-ナッポ爆弾投下術",
+      "ko-KR": "환상의 소용돌이 나뽀-나뽀 폭탄술"
+    }
+  },
+  "3340169": {
+    "Name": {
+      "zh-CN": "冰雪娜宝-冰雪区域",
+      "en-US": "Snow Nappo - Frost Zone",
+      "ja-JP": "氷雪ナッポ-氷雪エリア",
+      "ko-KR": "얼음 나뽀 - 얼음 구역"
+    }
+  },
+  "3340199": {
+    "Name": {
+      "zh-CN": "太刀裂痕虚拟体",
+      "en-US": "Blade Rift Virtual Body",
+      "ja-JP": "刀痕ダミー",
+      "ko-KR": "태도 균열 가상체"
+    }
+  },
+  "3926001": {
+    "Name": {
+      "zh-CN": "共鸣-迅捷涡流虚拟体",
+      "en-US": "Resonance - Swift Vortex Virtual Body",
+      "ja-JP": "共鳴-スウィフトスワールダミー",
+      "ko-KR": "공명 - 신속 볼텍스 가상체"
+    }
+  },
+  "3926002": {
+    "Name": {
+      "zh-CN": "共鸣-迅捷涡流虚拟体",
+      "en-US": "Resonance - Swift Vortex Virtual Body",
+      "ja-JP": "共鳴-スウィフトスワールダミー",
+      "ko-KR": "공명 - 신속 볼텍스 가상체"
+    }
+  },
+  "3936001": {
+    "Name": {
+      "zh-CN": "鱼人法师沉默水池",
+      "en-US": "Murloc Mage Silence Pool",
+      "ja-JP": "マーマンメイジ沈黙の沼",
+      "ko-KR": "리자드맨 마법사 침묵의 물구덩이"
+    }
+  },
+  "4010005": {
+    "Name": {
+      "zh-CN": "艾露娜npc丢属性球",
+      "en-US": "Airona NPC throws attribute balls",
+      "ja-JP": "アルーナNPC属性ボール投擲",
+      "ko-KR": "아이로나 NPC 능력치 구슬 투척"
+    }
+  },
+  "4010006": {
+    "Name": {
+      "zh-CN": "艾露娜npc丢大量属性球",
+      "en-US": "Airona NPC throws a large number of attribute balls",
+      "ja-JP": "アルーナNPC大量属性ボール",
+      "ko-KR": "아이로나 NPC 대량 능력치 구슬 투척"
+    }
+  },
+  "4040006": {
+    "Name": {
+      "zh-CN": "红光技-英勇粉碎",
+      "en-US": "Red Light Technique - Heroic Smash",
+      "ja-JP": "レッドライトスキル-ブレイブスマッシュ",
+      "ko-KR": "붉은 빛 스킬 - 용맹 분쇄"
+    }
+  },
+  "7050301": {
+    "Name": {
+      "zh-CN": "监视者扫描",
+      "en-US": "Watcher's Scan",
+      "ja-JP": "監視者スキャン",
+      "ko-KR": "감시자 스캔"
+    }
+  },
+  "7050302": {
+    "Name": {
+      "zh-CN": "监视者扫描",
+      "en-US": "Watcher's Scan",
+      "ja-JP": "監視者スキャン",
+      "ko-KR": "감시자 스캔"
+    }
+  },
+  "7050304": {
+    "Name": {
+      "zh-CN": "监视者扫描",
+      "en-US": "Watcher's Scan",
+      "ja-JP": "監視者スキャン",
+      "ko-KR": "감시자 스캔"
+    }
+  },
+  "8110001": {
+    "Name": {
+      "zh-CN": "转身1",
+      "en-US": "Turn Around 1",
+      "ja-JP": "ターン1",
+      "ko-KR": "뒤돌기1"
+    }
+  },
+  "8110002": {
+    "Name": {
+      "zh-CN": "虚晃1",
+      "en-US": "Feint 1",
+      "ja-JP": "フェイント1",
+      "ko-KR": "페이크1"
+    }
+  },
+  "8110003": {
+    "Name": {
+      "zh-CN": "虚晃2",
+      "en-US": "Feint 2",
+      "ja-JP": "フェイント2",
+      "ko-KR": "페이크2"
+    }
+  },
+  "8110004": {
+    "Name": {
+      "zh-CN": "登场",
+      "en-US": "Entrance",
+      "ja-JP": "登場",
+      "ko-KR": "등장"
+    }
+  },
+  "8110007": {
+    "Name": {
+      "zh-CN": "中场休息",
+      "en-US": "Intermission",
+      "ja-JP": "ハーフタイム",
+      "ko-KR": "중간 휴식"
+    }
+  },
+  "8110008": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110009": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110010": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110011": {
+    "Name": {
+      "zh-CN": "登场2",
+      "en-US": "Entrance 2",
+      "ja-JP": "登場2",
+      "ko-KR": "등장2"
+    }
+  },
+  "8110012": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110013": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110014": {
+    "Name": {
+      "zh-CN": "转身2",
+      "en-US": "Turn Around 2",
+      "ja-JP": "ターン2",
+      "ko-KR": "뒤돌기2"
+    }
+  },
+  "8110015": {
+    "Name": {
+      "zh-CN": "拉绳子绊人",
+      "en-US": "Pull Rope to Trip",
+      "ja-JP": "ロープトラップ",
+      "ko-KR": "줄 당겨 사람 걸기"
+    }
+  },
+  "8110016": {
+    "Name": {
+      "zh-CN": "滚球移动",
+      "en-US": "Rolling Ball Movement",
+      "ja-JP": "転がり移動",
+      "ko-KR": "구르기 이동"
+    }
+  },
+  "10240104": {
+    "Name": {
+      "zh-CN": "虚蚀龙-分摊",
+      "en-US": "Void Dragon: DMG Sharing",
+      "ja-JP": "虚蝕竜-分担",
+      "ko-KR": "침식 드래곤 - 분담"
+    }
+  },
+  "10240111": {
+    "Name": {
+      "zh-CN": "虚蚀龙-旋转子弹",
+      "en-US": "Void Dragon: Spinning Bullets",
+      "ja-JP": "虚蝕竜-回転弾",
+      "ko-KR": "침식 드래곤 - 회전 탄환"
+    }
+  },
+  "10240112": {
+    "Name": {
+      "zh-CN": "虚蚀龙-尾巴扫尾",
+      "en-US": "Void Dragon: Tail Sweep",
+      "ja-JP": "虚蝕ドラゴン - 尻尾の一掃",
+      "ko-KR": "침식 드래곤 - 꼬리 휩쓸기"
+    }
+  },
+  "10240113": {
+    "Name": {
+      "zh-CN": "虚蚀龙-爪子拍地",
+      "en-US": "Void Dragon: Claw Slam",
+      "ja-JP": "虚蝕竜-クローインパクト",
+      "ko-KR": "침식 드래곤 - 바닥 내려치기"
+    }
+  },
+  "10240114": {
+    "Name": {
+      "zh-CN": "虚蚀龙-头部吐息",
+      "en-US": "Void Dragon: Head Breath",
+      "ja-JP": "虚蝕竜-ヘッドブレス",
+      "ko-KR": "침식 드래곤 - 머리 브레스"
+    }
+  },
+  "10240115": {
+    "Name": {
+      "zh-CN": "虚蚀龙-召唤虚蚀残影",
+      "en-US": "Void Dragon: Summon Void Corruption Afterimage",
+      "ja-JP": "虚蝕竜-虚蝕の残影召喚",
+      "ko-KR": "침식 드래곤 - 침식의 잔상 소환"
+    }
+  },
+  "10240116": {
+    "Name": {
+      "zh-CN": "虚蚀龙-回旋刀",
+      "en-US": "Void Dragon: Spinning Blade",
+      "ja-JP": "虚蝕竜-回転ブレード",
+      "ko-KR": "침식 드래곤 - 회전 칼"
+    }
+  },
+  "10240117": {
+    "Name": {
+      "zh-CN": "虚蚀龙-虚雾喷洒",
+      "en-US": "Void Dragon: Void Mist Spray",
+      "ja-JP": "虚蝕竜-虚蝕エングラムスプレー",
+      "ko-KR": "침식 드래곤 - 침식의 안개 분사"
+    }
+  },
+  "10240118": {
+    "Name": {
+      "zh-CN": "虚蚀龙-传染虚雾",
+      "en-US": "Void Dragon: Void Mist Infection",
+      "ja-JP": "虚蝕竜-伝染虚蝕エングラム",
+      "ko-KR": "침식 드래곤 - 침식의 안개 전염"
+    }
+  },
+  "10240130": {
+    "Name": {
+      "zh-CN": "虚蚀龙-虚蚀毁灭",
+      "en-US": "Void Dragon: Erosive Annihilation",
+      "ja-JP": "虚蝕竜-虚蝕壊滅",
+      "ko-KR": "침식 드래곤 - 허무의 침식 섬멸"
+    }
+  },
+  "10240131": {
+    "Name": {
+      "zh-CN": "虚蚀龙-虚蚀放逐",
+      "en-US": "Void Dragon: Void Corruption Banishment",
+      "ja-JP": "虚蝕竜-虚蝕追放",
+      "ko-KR": "침식 드래곤 - 허무의 침식 방출"
+    }
+  },
+  "10240132": {
+    "Name": {
+      "zh-CN": "虚蚀龙-挣扎",
+      "en-US": "Void Dragon: Struggle",
+      "ja-JP": "虚蝕竜-もがき",
+      "ko-KR": "침식 드래곤 - 몸부림"
+    }
+  },
+  "10240195": {
+    "Name": {
+      "zh-CN": "虚蚀龙-虚雾爆破虚拟体",
+      "en-US": "Void Dragon: Void Mist Explosion (Virtual Object)",
+      "ja-JP": "虚蝕竜-虚蝕エングラム爆破ダミー",
+      "ko-KR": "침식 드래곤 - 침식의 안개 가상체 폭파"
+    }
+  },
+  "10240196": {
+    "Name": {
+      "zh-CN": "虚雾喷洒-虚拟体",
+      "en-US": "Void Mist Spray - Virtual Object",
+      "ja-JP": "虚蝕エングラムスプレー-ダミー",
+      "ko-KR": "침식의 안개 분사 - 가상체"
+    }
+  },
+  "10240197": {
+    "Name": {
+      "zh-CN": "虚蚀龙-虚蚀残影",
+      "en-US": "Void Dragon: Void Corruption Afterimage",
+      "ja-JP": "虚蝕竜-虚蝕の残影",
+      "ko-KR": "침식 드래곤 - 침식의 잔상"
+    }
+  },
+  "10240198": {
+    "Name": {
+      "zh-CN": "虚蚀龙-旋转虚拟体",
+      "en-US": "Void Dragon: Spinning (Virtual Object)",
+      "ja-JP": "虚蝕竜-回転ダミー",
+      "ko-KR": "침식 드래곤 - 회전 가상체"
+    }
+  },
+  "10240199": {
+    "Name": {
+      "zh-CN": "旋转龙息-虚拟体",
+      "en-US": "Spinning Dragon Breath - Virtual Object",
+      "ja-JP": "ドラゴン回転ブレス-ダミー",
+      "ko-KR": "회전 브레스 - 가상체"
+    }
+  },
+  "10240201": {
+    "Name": {
+      "zh-CN": "神族防御塔-场地清理波",
+      "en-US": "Divine Defense Tower - Field Cleanse Wave",
+      "ja-JP": "神族防衛タワー-クリアウェーブ",
+      "ko-KR": "신족 방어탑 - 필드 정리파"
+    }
+  },
+  "10240202": {
+    "Name": {
+      "zh-CN": "神族之塔-散射",
+      "en-US": "Divine Tower - Scattershot",
+      "ja-JP": "神族タワー-拡散射撃",
+      "ko-KR": "신족의 탑 - 산탄 발사"
+    }
+  },
+  "10270101": {
+    "Name": {
+      "zh-CN": "光龙右爪击",
+      "en-US": "Light Dragon's Right Claw Strike",
+      "ja-JP": "光竜ライトクローストライク",
+      "ko-KR": "빛의 용 오른쪽 발톱 공격"
+    }
+  },
+  "10270102": {
+    "Name": {
+      "zh-CN": "光龙左爪击",
+      "en-US": "Light Dragon's Left Claw Strike",
+      "ja-JP": "光竜レフトクローストライク",
+      "ko-KR": "빛의 용 왼쪽 발톱 공격"
+    }
+  },
+  "10270103": {
+    "Name": {
+      "zh-CN": "光龙双连击",
+      "en-US": "Light Dragon's Double Strike",
+      "ja-JP": "光竜ツインストライク",
+      "ko-KR": "빛의 용 2콤보"
+    }
+  },
+  "10270104": {
+    "Name": {
+      "zh-CN": "光龙左顺劈",
+      "en-US": "Light Dragon's Left Sweep",
+      "ja-JP": "光竜レフトスラッシュ",
+      "ko-KR": "빛의 용 왼쪽 베기"
+    }
+  },
+  "10270105": {
+    "Name": {
+      "zh-CN": "光龙右顺劈",
+      "en-US": "Light Dragon's Right Sweep",
+      "ja-JP": "光竜ライトスラッシュ",
+      "ko-KR": "빛의 용 오른쪽 베기"
+    }
+  },
+  "10270106": {
+    "Name": {
+      "zh-CN": "光龙吐息",
+      "en-US": "Light Dragon's Breath",
+      "ja-JP": "光竜ブレス",
+      "ko-KR": "빛의 용 브레스"
+    }
+  },
+  "12010103": {
+    "Name": {
+      "zh-CN": "小刀姆克跳砸",
+      "en-US": "Dagger Muku's Jump Slam",
+      "ja-JP": "ナイフムークジャンプクラッシュ",
+      "ko-KR": "나이프 무크 점프 내려찍기"
+    }
+  },
+  "13312101": {
+    "Name": {
+      "zh-CN": "溃界迁跃",
+      "en-US": "Rift Leap",
+      "ja-JP": "崩壊ワープ",
+      "ko-KR": "붕괴 세계 도약"
+    }
+  },
+  "13312102": {
+    "Name": {
+      "zh-CN": "湮灭脉冲",
+      "en-US": "Annihilation Pulse",
+      "ja-JP": "ルインパルス",
+      "ko-KR": "소멸 펄스"
+    }
+  }
+}

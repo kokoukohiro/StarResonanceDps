@@ -33,7 +33,7 @@
 **総括行(其他)は落とす。** 鍵の大半を占め、個別の名前を持たない。落とせば表に無い鍵と
 同じ扱いになり、実行時は名前が空のまま内部ID注記だけが出る。
 
-畳み込みの手修正(`Data/Overrides/RecountOverrides.json`)は**手動編集のファイル**で、
+畳み込みの手修正(`Data/Overrides/RecountRowOverrides.json`)は**手動編集のファイル**で、
 このツールは読みも書きもしない。
 """
 import collections
