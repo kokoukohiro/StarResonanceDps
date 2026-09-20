@@ -170,7 +170,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             string cookCuisineTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "CookCuisineTable.json");
             if (!File.Exists(cookCuisineTableFile))
             {
-                Log.Error("CookCuisineTable.json が無い。料理の回復を HPS に数えられない path={Path}", cookCuisineTableFile);
+                Log.Error("CookCuisineTable.json is missing. Cuisine healing cannot be counted in HPS path={Path}", cookCuisineTableFile);
                 return;
             }
 
@@ -190,7 +190,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     if (buffPar.Count < 2)
                     {
-                        Log.Error("CookCuisineTable.json の回復の料理 {Id} の BuffPar が短い({Count} 個)", cuisine.Id, buffPar.Count);
+                        Log.Error("CookCuisineTable.json: healing cuisine {Id} has too few BuffPar entries ({Count})", cuisine.Id, buffPar.Count);
                         continue;
                     }
 
@@ -205,12 +205,12 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var buffId in conflicts)
             {
-                Log.Error("CookCuisineTable.json で回復の料理のバフ {BuffId} に違う回復量の行がある。このバフは数えない", buffId);
+                Log.Error("CookCuisineTable.json: healing buff {BuffId} has rows with different amounts. This buff is not counted", buffId);
                 amounts.Remove(buffId);
             }
 
             HelperMethods.DataTables.CookCuisines.RegenAmountsByBuffId = amounts.ToFrozenDictionary();
-            Log.Information("Loaded CookCuisineTable.json(回復の料理のバフ {Count} 種)", amounts.Count);
+            Log.Information("Loaded CookCuisineTable.json");
         }
 
         /// <summary>

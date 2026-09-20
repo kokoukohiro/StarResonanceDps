@@ -390,7 +390,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             _isLoggedOut = false;
-            Log.Information("ログイン画面の門を開けた({Reason})", reason);
+            Log.Information("Login screen gate opened ({Reason})", reason);
         }
 
         /// <summary>
@@ -416,7 +416,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public static void ProcessExitGame(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
-            Log.Information("ExitGame: ログイン画面へ戻った。起動直後の状態へ戻す");
+            Log.Information("ExitGame: returned to the login screen. Resetting to the startup state");
 
             // 戻すより先に門を閉じる。待ち行列に残っている AOI の差分が、戻した直後に一覧を作り直すため。
             _isLoggedOut = true;
@@ -427,7 +427,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "ExitGame: 起動直後の状態へ戻す途中で例外");
+                Log.Error(ex, "ExitGame: exception while resetting to the startup state");
                 throw;
             }
         }
@@ -1072,13 +1072,13 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (hpBefore is null)
             {
-                Serilog.Log.Warning("薬の回復: 差分の前の HP が無いので回復量を決められない uuid={Uuid}", uuid);
+                Serilog.Log.Warning("Potion healing: cannot determine the amount because the HP before the delta is unknown uuid={Uuid}", uuid);
                 return;
             }
 
             if (delta.SkillEffects?.Damages.Count > 0)
             {
-                Serilog.Log.Warning("薬の回復: 同じ差分にダメージ・回復の通知 {Count} 件があり、薬のぶんを取り出せない uuid={Uuid}",
+                Serilog.Log.Warning("Potion healing: cannot isolate the potion amount because the same delta carries {Count} damage/healing notifications uuid={Uuid}",
                     delta.SkillEffects.Damages.Count, uuid);
                 return;
             }

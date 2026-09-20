@@ -392,7 +392,7 @@ public static class CombatDataCatalog
             {
                 if (!TryParseSourceKey(text, out var key))
                 {
-                    Log.Error("recounts: 行 {Row} の \"{Key}\" が ownerId:枝番 の形でない", row.Key, text);
+                    Log.Error("recounts: row {Row} has \"{Key}\" which is not in ownerId:branch form", row.Key, text);
                     continue;
                 }
 
@@ -430,7 +430,7 @@ public static class CombatDataCatalog
 
             if (!TryParseSourceKey(entry.Value.Row, out var target))
             {
-                Log.Error("RecountRowOverrides: {Key} の Row \"{Row}\" が ownerId:枝番 の形でない",
+                Log.Error("RecountRowOverrides: {Key} has Row \"{Row}\" which is not in ownerId:branch form",
                     FormatSourceKey(entry.Key), entry.Value.Row);
                 continue;
             }
@@ -571,13 +571,13 @@ public static class CombatDataCatalog
             if (!int.TryParse(key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id)
                 || id <= 0)
             {
-                Log.Error("{OverridePath}: 鍵が番号の形でないので飛ばす \"{Key}\"", relativePath, key);
+                Log.Error("{OverridePath}: skipping \"{Key}\" because the key is not numeric", relativePath, key);
                 continue;
             }
 
             if (entry?.Name is null)
             {
-                Log.Error("{OverridePath}: {Key} に Name が無いので飛ばす", relativePath, key);
+                Log.Error("{OverridePath}: skipping {Key} because it has no Name", relativePath, key);
                 continue;
             }
 
@@ -636,7 +636,7 @@ public static class CombatDataCatalog
         {
             if (!TryParseSourceKey(pair.Key, out var key))
             {
-                Log.Error("RecountRowOverrides: 鍵が ownerId:枝番 の形でないので飛ばす \"{Key}\"", pair.Key);
+                Log.Error("RecountRowOverrides: skipping \"{Key}\" because the key is not in ownerId:branch form", pair.Key);
                 continue;
             }
 
@@ -1404,7 +1404,7 @@ public static class CombatDataCatalog
         {
             if (!SupportedCultures.Contains(name.Key, StringComparer.OrdinalIgnoreCase))
             {
-                Log.Error("{FileName}: 鍵 {Key} に未知の言語 \"{Culture}\"。使えるのは {Cultures}",
+                Log.Error("{FileName}: key {Key} has unknown culture \"{Culture}\". Available cultures are {Cultures}",
                     fileName, key, name.Key, string.Join(" / ", SupportedCultures));
                 continue;
             }
@@ -1421,7 +1421,7 @@ public static class CombatDataCatalog
     {
         if (missingNames > 0)
         {
-            Log.Error("{FileName}: 言語が欠けた名前が {Count} 件ある(空欄として扱う)", fileName, missingNames);
+            Log.Error("{FileName}: {Count} names are missing one or more cultures (treated as blank)", fileName, missingNames);
         }
     }
 
@@ -1443,7 +1443,7 @@ public static class CombatDataCatalog
         {
             if (!int.TryParse(entry.Key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id))
             {
-                Log.Error("{FileName}: 鍵が番号の形でないので飛ばす \"{Key}\"", fileName, entry.Key);
+                Log.Error("{FileName}: skipping \"{Key}\" because the key is not numeric", fileName, entry.Key);
                 continue;
             }
 
@@ -1484,7 +1484,7 @@ public static class CombatDataCatalog
                 || dungeonId <= 0
                 || (separator >= 0 && (!int.TryParse(entry.Key.AsSpan(separator + 1), out difficulty) || difficulty <= 0)))
             {
-                Log.Error("DungeonTypeNames: 鍵が 番号 か 番号:段階 の形でないので飛ばす \"{Key}\"", entry.Key);
+                Log.Error("DungeonTypeNames: skipping \"{Key}\" because the key is not in id or id:difficulty form", entry.Key);
                 continue;
             }
 

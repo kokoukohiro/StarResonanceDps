@@ -1590,7 +1590,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (!Services.NearbyMonsterIndex.Instance.TryGetMonsterId(rawUuid, out monsterId))
             {
-                Serilog.Log.Warning("召喚体の AttrId が届いていない uuid={SummonUuid}。名前があるか分からないので大元の召喚者 {TopSummonerUuid} に寄せる",
+                Serilog.Log.Warning("Summon has no AttrId uuid={SummonUuid}. Cannot tell whether it has a name, so folding it into the root summoner {TopSummonerUuid}",
                     rawUuid, topSummonerUuid);
                 return topSummonerUuid;
             }
@@ -1615,7 +1615,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // 警告の技かは技レベルで決まるので、レベルが無ければ判定できない。
                 if (skillLevel <= 0)
                 {
-                    Serilog.Log.Warning("AttrSkillLevel が届いていない技の開始 uuid={EntityUuid} skillId={SkillId}。警告の技かを判定できないので記録しない",
+                    Serilog.Log.Warning("Skill start without AttrSkillLevel uuid={EntityUuid} skillId={SkillId}. Cannot tell whether it is a warned skill, so not recording it",
                         entityUuid, skillId);
                     return;
                 }

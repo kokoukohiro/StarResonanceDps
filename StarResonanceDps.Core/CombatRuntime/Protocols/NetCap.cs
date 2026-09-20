@@ -558,11 +558,11 @@ public class NetCap
 
         if (suppressed > 0)
         {
-            Log.Error(exception, "{Where} で例外。この1件を捨てて続ける(前回の記録からの間に同じ例外が {Suppressed} 件)", where, suppressed);
+            Log.Error(exception, "Exception in {Where}. Dropping this one and continuing ({Suppressed} identical exceptions since the last log)", where, suppressed);
         }
         else
         {
-            Log.Error(exception, "{Where} で例外。この1件を捨てて続ける", where);
+            Log.Error(exception, "Exception in {Where}. Dropping this one and continuing", where);
         }
     }
 
