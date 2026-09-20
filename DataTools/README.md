@@ -149,8 +149,6 @@ export BPSR_TABLES=<置き場所>     # bash
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
 
-### 名前の上書き3つの中身は「入力から消された名前」
-
 `MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` に入っているのは、
 **入力の表の更新で名前が落とされた行**の名前。以前の版の入力にはあり、今の版では空になっている。
 
