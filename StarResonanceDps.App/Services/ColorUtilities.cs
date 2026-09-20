@@ -39,6 +39,52 @@ public static class ColorUtilities
             BlendChannel(from.B, to.B, weight));
     }
 
+    /// <summary>
+    /// 重みを付けて複数の色を混ぜる(重みの合計で割った加重平均)。
+    ///
+    /// <para>
+    /// <b>重みが1つも無ければ混ぜられないので false を返す。</b>
+    /// 呼び出し側は、そのとき色を作ったことにせず、出すのをやめる。
+    /// </para>
+    /// </summary>
+    public static bool TryBlendWeighted(IReadOnlyList<(Color Color, double Weight)> parts, out Color color)
+    {
+        color = Colors.White;
+
+        var totalWeight = 0d;
+        foreach (var part in parts)
+        {
+            if (part.Weight > 0d)
+            {
+                totalWeight += part.Weight;
+            }
+        }
+
+        if (totalWeight <= 0d)
+        {
+            return false;
+        }
+
+        var red = 0d;
+        var green = 0d;
+        var blue = 0d;
+        foreach (var part in parts)
+        {
+            if (part.Weight <= 0d)
+            {
+                continue;
+            }
+
+            var weight = part.Weight / totalWeight;
+            red += part.Color.R * weight;
+            green += part.Color.G * weight;
+            blue += part.Color.B * weight;
+        }
+
+        color = Color.FromRgb(ToChannel(red), ToChannel(green), ToChannel(blue));
+        return true;
+    }
+
     public static string ToHex(Color color)
     {
         return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
@@ -86,6 +132,11 @@ public static class ColorUtilities
     private static byte BlendChannel(byte from, byte to, double toWeight)
     {
         var value = from + ((to - from) * toWeight);
+        return ToChannel(value);
+    }
+
+    private static byte ToChannel(double value)
+    {
         return (byte)Math.Clamp((int)Math.Round(value, MidpointRounding.AwayFromZero), byte.MinValue, byte.MaxValue);
     }
 

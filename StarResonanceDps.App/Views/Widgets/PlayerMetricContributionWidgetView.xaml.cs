@@ -23,7 +23,8 @@ public partial class PlayerMetricContributionWidgetView : UserControl, IWidgetVe
             viewport,
             Math.Min(ContributionScrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9d, 1d),
-            32d);
+            // 行1つぶん。行の高さ(31)と合わせる。
+            31d);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)

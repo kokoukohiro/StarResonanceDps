@@ -73,6 +73,8 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(CombatStats.SkillSnapshots),
             nameof(CombatStats.PerSecondTotals),
             nameof(CombatStats.LastPerSecondTimestamp),
+            nameof(CombatStats.ValueTotalByElement),
+            nameof(CombatStats.ValueTotalByMode),
         ],
         [typeof(MetricsContainer)] =
         [
@@ -88,6 +90,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(SkillSnapshot.OtherUUID),
             nameof(SkillSnapshot.Value),
             nameof(SkillSnapshot.DamageElement),
+            nameof(SkillSnapshot.DamageMode),
             nameof(SkillSnapshot.Timestamp),
             nameof(SkillSnapshot.Sequence),
             nameof(SkillSnapshot.TargetHp),
@@ -98,6 +101,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(SkillSnapshot.DamageSource),
             nameof(SkillSnapshot.BuffSourceSkillId),
             nameof(SkillSnapshot.SummonSourceSkillId),
+            nameof(SkillSnapshot.IsKill),
         ],
         [typeof(SkillCastRecord)] =
         [

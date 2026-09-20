@@ -384,6 +384,7 @@ internal static class PlayerRosterProjection
                 Intelligence: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrIntelligence"),
                 Endurance: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrVitality"),
                 Armor: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrDefense"),
+                Resistance: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrMdefense"),
                 Critical: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCri"),
                 CriticalPercent: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCrit"),
                 Haste: PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrHaste"),

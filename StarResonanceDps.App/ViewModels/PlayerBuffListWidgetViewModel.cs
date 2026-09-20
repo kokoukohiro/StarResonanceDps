@@ -1,9 +1,12 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
@@ -18,7 +21,12 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
 
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
     private readonly DispatcherTimer _refreshTimer;
+    private BuffListWidgetSettingsConfig _settings;
     private bool _isDisposed;
+
+    /// <summary>行のゲージの塗り。設定が変わったら作り直す。</summary>
+    [ObservableProperty]
+    private Brush _gaugeBrush = Brushes.Transparent;
 
     [ObservableProperty]
     private string _noDataText = string.Empty;
@@ -36,12 +44,15 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     {
         _kind = kind;
         _openCard = openCard;
+        _settings = playerWidget.GetBuffListSettingsSnapshot();
+        GaugeBrush = CreateGaugeBrush(_settings);
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
         };
         _refreshTimer.Tick += RefreshTimer_Tick;
+        playerWidget.BuffListSettingsChanged += Widget_BuffListSettingsChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         InitializePlayer(initialPlayer);
         Refresh();
@@ -60,7 +71,21 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _isDisposed = true;
         _refreshTimer.Stop();
         _refreshTimer.Tick -= RefreshTimer_Tick;
+        PlayerWidget.BuffListSettingsChanged -= Widget_BuffListSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+    }
+
+    /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直し、ゲージの長さも当て直す。</summary>
+    private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
+    {
+        _settings = PlayerWidget.GetBuffListSettingsSnapshot();
+        GaugeBrush = CreateGaugeBrush(_settings);
+
+        var gaugeLengthSeconds = WidgetConfigDefaults.BuffListGaugeLengthSeconds[_settings.GaugeLengthIndex];
+        foreach (var entry in _entries)
+        {
+            entry.UpdateBar(gaugeLengthSeconds);
+        }
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -145,6 +170,64 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             }
         }
 
+        // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
+        var gaugeLengthSeconds = WidgetConfigDefaults.BuffListGaugeLengthSeconds[_settings.GaugeLengthIndex];
+        foreach (var entry in _entries)
+        {
+            entry.UpdateBar(gaugeLengthSeconds);
+        }
+    }
+
+    /// <summary>
+    /// 行のゲージの塗り。設定の2色で左から右へのグラデーションにする
+    /// (停止位置はエンティティリストの HP バーと同じ)。
+    /// </summary>
+    private static LinearGradientBrush CreateGaugeBrush(BuffListWidgetSettingsConfig settings)
+    {
+        var brush = new LinearGradientBrush
+        {
+            StartPoint = new System.Windows.Point(0, 0.5),
+            EndPoint = new System.Windows.Point(1, 0.5)
+        };
+
+        var start = ResolveGaugeColor(settings, "GaugeStart");
+        var end = ResolveGaugeColor(settings, "GaugeEnd");
+        brush.GradientStops.Add(new GradientStop(start, 0d));
+        brush.GradientStops.Add(new GradientStop(start, 0.05d));
+        brush.GradientStops.Add(new GradientStop(end, 0.95d));
+        brush.GradientStops.Add(new GradientStop(end, 1d));
+        brush.Freeze();
+        return brush;
+    }
+
+    private static Color ResolveGaugeColor(BuffListWidgetSettingsConfig settings, string key)
+    {
+        var palette = settings.GaugeColorPalettes.TryGetValue(key, out var colors)
+            ? colors
+            : WidgetConfigDefaults.CreateDefaultGaugeColors(key);
+        var selectedIndex = settings.GaugeColorIndexes.TryGetValue(key, out var index)
+            ? index
+            : WidgetConfigDefaults.MinClassColorIndex;
+        var selectedColor = palette.Count == 0
+            ? WidgetConfigDefaults.CreateDefaultGaugeColors(key)[0]
+            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
+
+        var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
+            ? parsed
+            : Colors.Gray;
+
+        // 不透明度はメーターのクラスカラーと同じ作りで、表示に使う色のアルファへ掛ける。
+        // 設定画面の色見本は素のままにしたいので、ここだけで掛ける。
+        var opacity = Math.Clamp(
+            settings.GaugeColorOpacity,
+            WidgetConfigDefaults.MinClassColorOpacity,
+            WidgetConfigDefaults.MaxClassColorOpacity);
+
+        return Color.FromArgb(
+            (byte)Math.Round(opacity / 100d * byte.MaxValue, MidpointRounding.AwayFromZero),
+            color.R,
+            color.G,
+            color.B);
     }
 
     private int FindEntryIndex(string key)

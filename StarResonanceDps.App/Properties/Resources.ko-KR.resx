@@ -343,10 +343,25 @@
     <value>{0}의 {1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}에게 {1}{2} 피해({3}/{4})</value>
+    <value>{0}에게 {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}에게 {1}{2} 피해</value>
+    <value>{0}에게 {1}</value>
+  </data>
+  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
+    <value>{0}{1} 피해</value>
+  </data>
+  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
+    <value>{0}{1} 물리 피해</value>
+  </data>
+  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
+    <value>{0}{1} 마법 피해</value>
+  </data>
+  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
+    <value>HP({0}/{1})</value>
+  </data>
+  <data name="TakenDamageLog_DeathText" xml:space="preserve">
+    <value>사망({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
@@ -361,7 +376,58 @@
     <value>추락</value>
   </data>
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0} 사망({1}/{2})</value>
+    <value>{0} {1}</value>
+  </data>
+  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+    <value>텍스트 색상</value>
+  </data>
+  <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
+    <value>버프 색상</value>
+  </data>
+  <data name="Settings_Section_DebuffListColors_Title" xml:space="preserve">
+    <value>디버프 색상</value>
+  </data>
+  <data name="Settings_BuffListColors_Opacity" xml:space="preserve">
+    <value>버프 색상 불투명도</value>
+  </data>
+  <data name="Settings_DebuffListColors_Opacity" xml:space="preserve">
+    <value>디버프 색상 불투명도</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeStart" xml:space="preserve">
+    <value>게이지 왼쪽</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeEnd" xml:space="preserve">
+    <value>게이지 오른쪽</value>
+  </data>
+  <data name="Settings_Display_GaugeLength" xml:space="preserve">
+    <value>게이지 길이</value>
+  </data>
+  <data name="GaugeLength_10" xml:space="preserve">
+    <value>10초</value>
+  </data>
+  <data name="GaugeLength_20" xml:space="preserve">
+    <value>20초</value>
+  </data>
+  <data name="GaugeLength_30" xml:space="preserve">
+    <value>30초</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+    <value>엔티티 이름</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+    <value>스킬 이름</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+    <value>플레이어 이름</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+    <value>HP 수치</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
+    <value>실드 수치</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
+    <value>사망</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>무속성</value>
@@ -543,6 +609,9 @@
   <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
     <value>물리 공격</value>
   </data>
+  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
+    <value>마법 공격</value>
+  </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>힘</value>
   </data>
@@ -550,13 +619,16 @@
     <value>민첩</value>
   </data>
   <data name="PlayerStatus_Intellect" xml:space="preserve">
-    <value>지능</value>
+    <value>지력</value>
   </data>
   <data name="PlayerStatus_Endurance" xml:space="preserve">
     <value>내구력</value>
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
     <value>물리 방어</value>
+  </data>
+  <data name="PlayerStatus_Resistance" xml:space="preserve">
+    <value>마법 방어</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>치명타</value>
@@ -611,6 +683,18 @@
   </data>
   <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
     <value>필터 강도</value>
+  </data>
+  <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
+    <value>속성 색상</value>
+  </data>
+  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
+    <value>{0} 100%</value>
+  </data>
+  <data name="Settings_ElementColors_Opacity" xml:space="preserve">
+    <value>속성 색상 불투명도</value>
+  </data>
+  <data name="Settings_ElementColors_Filter" xml:space="preserve">
+    <value>속성 색상 필터</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
@@ -681,6 +765,21 @@
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>플레이어 UID</value>
   </data>
+  <data name="Metric_No" xml:space="preserve">
+    <value>번호</value>
+  </data>
+  <data name="Metric_Element" xml:space="preserve">
+    <value>속성</value>
+  </data>
+  <data name="Metric_DamageMode" xml:space="preserve">
+    <value>유형</value>
+  </data>
+  <data name="Metric_DamageMode_Physical" xml:space="preserve">
+    <value>물리</value>
+  </data>
+  <data name="Metric_DamageMode_Magical" xml:space="preserve">
+    <value>마법</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>스킬 이름</value>
   </data>
@@ -694,13 +793,13 @@
     <value>aDPS</value>
   </data>
   <data name="Metric_EncounterDps" xml:space="preserve">
-    <value>eDPS</value>
+    <value>DPS</value>
   </data>
   <data name="Metric_ActiveHps" xml:space="preserve">
     <value>aHPS</value>
   </data>
   <data name="Metric_EncounterHps" xml:space="preserve">
-    <value>eHPS</value>
+    <value>HPS</value>
   </data>
   <data name="Metric_HitCount" xml:space="preserve">
     <value>타격 수</value>
@@ -712,10 +811,10 @@
     <value>평균 타격</value>
   </data>
   <data name="Metric_DamageShare" xml:space="preserve">
-    <value>피해 %</value>
+    <value>피해%</value>
   </data>
   <data name="Metric_HealingShare" xml:space="preserve">
-    <value>치유 %</value>
+    <value>치유%</value>
   </data>
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap 업데이트</value>

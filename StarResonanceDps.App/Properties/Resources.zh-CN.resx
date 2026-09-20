@@ -331,7 +331,7 @@
     <value>DTPS计量器</value>
   </data>
   <data name="Widget_TakenDamageLog" xml:space="preserve">
-    <value>承受伤害日志</value>
+    <value>承伤日志</value>
   </data>
   <data name="TakenDamageLog_CastFormat" xml:space="preserve">
     <value>{0}正在咏唱{1}</value>
@@ -343,10 +343,25 @@
     <value>{0}的{1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}受到{1}{2}伤害({3}/{4})</value>
+    <value>{0}受到{1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}受到{1}{2}伤害</value>
+    <value>{0}受到{1}</value>
+  </data>
+  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
+    <value>{0}{1}伤害</value>
+  </data>
+  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
+    <value>{0}{1}物理伤害</value>
+  </data>
+  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
+    <value>{0}{1}魔法伤害</value>
+  </data>
+  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
+    <value>HP({0}/{1})</value>
+  </data>
+  <data name="TakenDamageLog_DeathText" xml:space="preserve">
+    <value>死亡({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻击</value>
@@ -361,7 +376,58 @@
     <value>坠落</value>
   </data>
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0}死亡({1}/{2})</value>
+    <value>{0}{1}</value>
+  </data>
+  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
+  <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
+    <value>增益颜色</value>
+  </data>
+  <data name="Settings_Section_DebuffListColors_Title" xml:space="preserve">
+    <value>减益颜色</value>
+  </data>
+  <data name="Settings_BuffListColors_Opacity" xml:space="preserve">
+    <value>增益颜色不透明度</value>
+  </data>
+  <data name="Settings_DebuffListColors_Opacity" xml:space="preserve">
+    <value>减益颜色不透明度</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeStart" xml:space="preserve">
+    <value>进度条左侧</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeEnd" xml:space="preserve">
+    <value>进度条右侧</value>
+  </data>
+  <data name="Settings_Display_GaugeLength" xml:space="preserve">
+    <value>进度条长度</value>
+  </data>
+  <data name="GaugeLength_10" xml:space="preserve">
+    <value>10秒</value>
+  </data>
+  <data name="GaugeLength_20" xml:space="preserve">
+    <value>20秒</value>
+  </data>
+  <data name="GaugeLength_30" xml:space="preserve">
+    <value>30秒</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+    <value>实体名称</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+    <value>技能名称</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+    <value>玩家名称</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+    <value>HP数值</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
+    <value>护盾量数值</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
+    <value>死亡</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>无属性</value>
@@ -543,6 +609,9 @@
   <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
     <value>物理攻击</value>
   </data>
+  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
+    <value>魔法攻击</value>
+  </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>力量</value>
   </data>
@@ -557,6 +626,9 @@
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
     <value>物理防御</value>
+  </data>
+  <data name="PlayerStatus_Resistance" xml:space="preserve">
+    <value>魔法防御</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>暴击</value>
@@ -611,6 +683,18 @@
   </data>
   <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
     <value>滤镜强度</value>
+  </data>
+  <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
+    <value>属性颜色</value>
+  </data>
+  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
+    <value>{0}100%</value>
+  </data>
+  <data name="Settings_ElementColors_Opacity" xml:space="preserve">
+    <value>属性颜色不透明度</value>
+  </data>
+  <data name="Settings_ElementColors_Filter" xml:space="preserve">
+    <value>属性颜色滤镜</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
@@ -681,6 +765,21 @@
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>玩家UID</value>
   </data>
+  <data name="Metric_No" xml:space="preserve">
+    <value>序号</value>
+  </data>
+  <data name="Metric_Element" xml:space="preserve">
+    <value>属性</value>
+  </data>
+  <data name="Metric_DamageMode" xml:space="preserve">
+    <value>类型</value>
+  </data>
+  <data name="Metric_DamageMode_Physical" xml:space="preserve">
+    <value>物理</value>
+  </data>
+  <data name="Metric_DamageMode_Magical" xml:space="preserve">
+    <value>魔法</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>技能名称</value>
   </data>
@@ -694,13 +793,13 @@
     <value>aDPS</value>
   </data>
   <data name="Metric_EncounterDps" xml:space="preserve">
-    <value>eDPS</value>
+    <value>DPS</value>
   </data>
   <data name="Metric_ActiveHps" xml:space="preserve">
     <value>aHPS</value>
   </data>
   <data name="Metric_EncounterHps" xml:space="preserve">
-    <value>eHPS</value>
+    <value>HPS</value>
   </data>
   <data name="Metric_HitCount" xml:space="preserve">
     <value>命中次数</value>
@@ -712,10 +811,10 @@
     <value>平均单次</value>
   </data>
   <data name="Metric_DamageShare" xml:space="preserve">
-    <value>伤害 %</value>
+    <value>伤害%</value>
   </data>
   <data name="Metric_HealingShare" xml:space="preserve">
-    <value>治疗 %</value>
+    <value>治疗%</value>
   </data>
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap更新</value>

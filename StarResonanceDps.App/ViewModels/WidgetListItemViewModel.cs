@@ -24,6 +24,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
     private TakenDamageLogWidgetSettingsConfig _takenDamageLog = WidgetConfigDefaults.CreateTakenDamageLogSettings();
+    private BuffListWidgetSettingsConfig _buffList = WidgetConfigDefaults.CreateBuffListSettings(WidgetKind.BuffList);
+    private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -128,6 +130,16 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(_takenDamageLog);
     }
 
+    public BuffListWidgetSettingsConfig GetBuffListSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedBuffList(Kind, _buffList);
+    }
+
+    public ElementColorWidgetSettingsConfig GetElementColorSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedElementColor(Kind, _elementColor);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -171,6 +183,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event EventHandler? MeterSettingsChanged;
 
     public event EventHandler? TakenDamageLogSettingsChanged;
+
+    public event EventHandler? BuffListSettingsChanged;
+
+    public event EventHandler? ElementColorSettingsChanged;
 
     public WidgetListItemViewModel()
     {
@@ -225,6 +241,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             TakenDamageLog = WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind)
                 ? _takenDamageLog.Clone()
+                : null,
+            BuffList = WidgetConfigDefaults.SupportsBuffListSettings(Kind)
+                ? _buffList.Clone()
+                : null,
+            ElementColor = WidgetConfigDefaults.SupportsElementColorSettings(Kind)
+                ? _elementColor.Clone()
                 : null
         };
     }
@@ -263,6 +285,18 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config.TakenDamageLog);
             TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsBuffListSettings(Kind))
+        {
+            _buffList = WidgetConfigDefaults.CloneNormalizedBuffList(Kind, config.BuffList);
+            BuffListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsElementColorSettings(Kind))
+        {
+            _elementColor = WidgetConfigDefaults.CloneNormalizedElementColor(Kind, config.ElementColor);
+            ElementColorSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -314,6 +348,28 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(takenDamageLog);
         TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyBuffListSettingsPreview(BuffListWidgetSettingsConfig buffList)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffListSettings(Kind))
+        {
+            return;
+        }
+
+        _buffList = WidgetConfigDefaults.CloneNormalizedBuffList(Kind, buffList);
+        BuffListSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyElementColorSettingsPreview(ElementColorWidgetSettingsConfig elementColor)
+    {
+        if (!WidgetConfigDefaults.SupportsElementColorSettings(Kind))
+        {
+            return;
+        }
+
+        _elementColor = WidgetConfigDefaults.CloneNormalizedElementColor(Kind, elementColor);
+        ElementColorSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

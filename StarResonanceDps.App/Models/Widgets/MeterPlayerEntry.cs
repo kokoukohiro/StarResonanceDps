@@ -75,7 +75,7 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         PlayerId = player.UserId != 0 ? player.UserId : player.CharacterId;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
         DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
-        ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F0}%";
+        ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F2}%";
         BarRatio = player.BarRatio;
 
         var classColor = GetClassColor(settings, widgetKind, ProfessionKey);

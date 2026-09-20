@@ -75,6 +75,24 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="ElementColorsNavButton"
+                                Click="ElementColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasElementColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ElementColorSettings.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BuffListColorsNavButton"
+                                Click="BuffListColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.GaugeColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ClassColorsNavButton"
                                 Click="ClassColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -91,6 +109,15 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TakenDamageLogSettings.ClassColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="TakenDamageLogTextColorsNavButton"
+                                Click="TakenDamageLogTextColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.TextColor}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TakenDamageLogSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -149,6 +176,15 @@
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
                                                 <widgetSettingsViews:TakenDamageLogWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+
+                                    <ContentControl Content="{Binding BuffListSettings}"
+                                                    Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:BuffListWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -335,6 +371,26 @@
                                     </StackPanel>
                                 </ContentControl>
 
+                                <ContentControl x:Name="ElementColorsHost"
+                                                Content="{Binding ElementColorSettings}"
+                                                Visibility="{Binding HasElementColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:MetricElementColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffListColorsHost"
+                                                Content="{Binding BuffListSettings}"
+                                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffListGaugeColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
                                 <ContentControl x:Name="ClassColorsHost"
                                                 Content="{Binding MeterSettings}"
                                                 Visibility="{Binding HasMeterSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -351,6 +407,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:TakenDamageLogClassColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="TakenDamageLogTextColorsHost"
+                                                Content="{Binding TakenDamageLogSettings}"
+                                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:TakenDamageLogTextColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

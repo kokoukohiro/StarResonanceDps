@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerBuffListWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              Loaded="PlayerBuffListWidgetView_Loaded"
@@ -29,8 +30,10 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="8,4,8,4">
+    <Grid>
+        <!-- 余白はメーター・プレイヤーリストと同じ(左5・右0)。ホバーの枠が同じ位置で始まる。 -->
         <ScrollViewer x:Name="BuffListScrollViewer"
+                      Margin="5,5,0,5"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Hidden"
                       CanContentScroll="False"
@@ -43,7 +46,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Button Height="34"
+                        <Button Height="31"
                                 Padding="0"
                                 Background="Transparent"
                                 BorderThickness="0"
@@ -97,7 +100,7 @@
                                     メーターの行と同じ組み方。名前は残りの幅いっぱい、残り時間は右端。
                                 -->
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="34" />
+                                    <ColumnDefinition Width="30" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
@@ -122,12 +125,47 @@
                                                TextAlignment="Center" />
                                 </Grid>
 
+                                <!--
+                                    ゲージはアイコンの外(右)だけに伸びる。色は設定の固定グラデーション。
+                                -->
+                                <Grid x:Name="GaugeArea"
+                                      Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      Margin="0,0,2,0"
+                                      ClipToBounds="True">
+                                    <!--
+                                        2層にする。外は幅が動く窓で、中は常に満タンの幅で塗る
+                                        (エンティティリストの HP バーと同じ作り)。
+                                        1枚で幅を動かすと、グラデーションがバーと一緒に縮んでしまう。
+
+                                        幅はアニメーションで動かす(behaviors:BarWidthAnimationBehavior)。
+                                        1秒ごとに値を差し替えるだけだと、その間隔ぶん跳んで見える。
+                                    -->
+                                    <Grid Height="26"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          ClipToBounds="True"
+                                          behaviors:BarWidthAnimationBehavior.AreaWidth="{Binding ActualWidth, ElementName=GaugeArea}"
+                                          behaviors:BarWidthAnimationBehavior.DecaySeconds="{Binding BarDecaySeconds}"
+                                          behaviors:BarWidthAnimationBehavior.Ratio="{Binding BarRatio}"
+                                          behaviors:BarWidthAnimationBehavior.SnapsToTarget="True">
+                                        <!--
+                                            右端の角丸は窓に切られるので、短いうちは直角、満タンでだけ丸く見える。
+                                        -->
+                                        <Border Width="{Binding ActualWidth, ElementName=GaugeArea}"
+                                                HorizontalAlignment="Left"
+                                                CornerRadius="4"
+                                                Background="{Binding DataContext.GaugeBrush, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                                    </Grid>
+                                </Grid>
+
                                 <TextBlock Grid.Column="1"
                                            Margin="6,0,6,0"
                                            Style="{StaticResource BuffList.RowText}"
                                            Text="{Binding Name}" />
 
                                 <TextBlock Grid.Column="2"
+                                           Margin="0,0,8,0"
                                            Style="{StaticResource BuffList.Duration}"
                                            Text="{Binding DurationWithUnitText}" />
                             </Grid>

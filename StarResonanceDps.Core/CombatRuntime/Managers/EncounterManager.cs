@@ -756,10 +756,23 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ulong TotalOverhealing { get; set; } = 0;
 
         /// <summary>
-        /// プレイヤーの被弾(被ダメログに載るもの)があったか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
-        /// 判定は実行中のエンカウンターでしか行わないので、DB には持たない。
+        /// 被ダメログに行があるか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
+        ///
+        /// <para>
+        /// <b>行数をそのまま見る。</b> 載る経路は予告・詠唱・被弾・ダメージの無い死亡の4つで、
+        /// 印を別に持つと経路が増えたときに立て忘れる。判定は実行中のエンカウンターでしか行わないので DB には持たない。
+        /// </para>
         /// </summary>
-        public bool HasPlayerTakenDamage { get; private set; }
+        public bool HasTakenDamageLogRecords
+        {
+            get
+            {
+                lock (_takenDamageLogGate)
+                {
+                    return _takenDamageLog.Count > 0;
+                }
+            }
+        }
         public ulong TotalDeaths { get; set; } = 0;
         public ulong TotalNpcDeaths { get; set; } = 0;
         public bool IsWipe { get; set; } = false;
@@ -1274,17 +1287,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// このエンカウンターに記録すべき戦闘があったか。**プレイヤーのダメージか回復か、プレイヤーの被弾が1でもあれば真。**
+        /// このエンカウンターに記録すべき戦闘があったか。**プレイヤーのダメージか回復か、被ダメログの行が1でもあれば真。**
         ///
         /// <para>
         /// <b>ダメージだけで判定しない</b> — 回復のみの戦闘が落ちる。
-        /// <b>プレイヤーの被弾も数える</b> — 殴られただけの戦闘も被ダメログとして残す。敵の攻撃そのもの(敵同士の戦闘を含む)は数えない。
-        /// 見るのは <c>TotalDamage</c> / <c>TotalHealing</c> / <see cref="HasPlayerTakenDamage"/> の3つ。
+        /// <b>被ダメログの行も数える</b> — 殴られただけの戦闘に加えて、ギミックの即死・詠唱・構えだけの回も残す
+        /// (被弾を印にすると、ダメージの無い死亡や予告だけの回が履歴に残らない)。敵の攻撃そのもの(敵同士の戦闘を含む)は数えない。
+        /// 見るのは <c>TotalDamage</c> / <c>TotalHealing</c> / <see cref="HasTakenDamageLogRecords"/> の3つ。
         /// </para>
         /// </summary>
         public bool HasStatsBeenRecorded()
         {
-            return TotalDamage > 0 || TotalHealing > 0 || HasPlayerTakenDamage;
+            return TotalDamage > 0 || TotalHealing > 0 || HasTakenDamageLogRecords;
         }
 
         public void RegisterSkillActivation(long uuid, int skillId)
@@ -1508,10 +1522,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 敵の攻撃は AddDamage を通らないので、プレイヤーの被弾をここで戦闘の開始と記録すべき戦闘かの判定に数える
-            // (殴られて始まった戦闘・殴られただけの戦闘)。
+            // 敵の攻撃は AddDamage を通らないので、プレイヤーの被弾をここで戦闘の開始に数える
+            // (殴られて始まった戦闘・殴られただけの戦闘)。記録すべき戦闘かは被ダメログの行数で決まる。
             ExData.FirstDamageTimeStamp ??= LastUpdate;
-            HasPlayerTakenDamage = true;
 
             // 加害者の実体を作っておく。被ダメログの加害者名はこの実体(AttrId)から引くので、
             // エンカウンターを作り直した直後に殴ってきた相手でも名前が引けるようにする。
@@ -3342,9 +3355,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int TierLevel { get; private set; }
         public long SummonUUID { get; private set; }
 
-        public EDamageProperty DamageElement { get; private set; }
-        public EDamageMode DamageMode { get; private set; }
-
         public ulong ValueTotal { get; private set; }
         public ulong ValueNormalTotal { get; private set; }
         public ulong ValueCritTotal { get; private set; }
@@ -3461,6 +3471,77 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 属性ごとの累計。スキル詳細の属性列(割合)の材料。
+        ///
+        /// <para>
+        /// 足す条件は <see cref="ValueTotal"/> と同じで、<c>Immune</c> と <c>Miss</c> は足さない。
+        /// したがって全部の合計は <see cref="ValueTotal"/> に一致し、行の中で割合を足すと 100% になる。
+        /// </para>
+        /// </summary>
+        public Dictionary<EDamageProperty, ulong> ValueTotalByElement { get; private set; } = new();
+
+        /// <summary>
+        /// 物理・魔法ごとの累計。足す条件は <see cref="ValueTotalByElement"/> と同じ。
+        /// <c>DamageNormal</c> は「物理でも魔法でもない」で、表示では「――」に当たる。
+        /// </summary>
+        public Dictionary<EDamageMode, ulong> ValueTotalByMode { get; private set; } = new();
+
+        private readonly object _valueBreakdownGate = new();
+
+        public bool ShouldSerializeValueTotalByElement() => ValueTotalByElement.Count > 0;
+
+        public bool ShouldSerializeValueTotalByMode() => ValueTotalByMode.Count > 0;
+
+        public void AddValueBreakdown(EDamageProperty damageElement, EDamageMode damageMode, long value)
+        {
+            lock (_valueBreakdownGate)
+            {
+                ValueTotalByElement[damageElement] =
+                    ValueTotalByElement.GetValueOrDefault(damageElement) + (ulong)value;
+                ValueTotalByMode[damageMode] =
+                    ValueTotalByMode.GetValueOrDefault(damageMode) + (ulong)value;
+            }
+        }
+
+        /// <summary>区切りをまたいだ合算。ここに足さないとマップ移動で内訳だけ消える。</summary>
+        public void MergeValueBreakdown(CombatStats other)
+        {
+            var elements = other.GetValueTotalByElementCopy();
+            var modes = other.GetValueTotalByModeCopy();
+
+            lock (_valueBreakdownGate)
+            {
+                foreach (var pair in elements)
+                {
+                    ValueTotalByElement[pair.Key] =
+                        ValueTotalByElement.GetValueOrDefault(pair.Key) + pair.Value;
+                }
+
+                foreach (var pair in modes)
+                {
+                    ValueTotalByMode[pair.Key] =
+                        ValueTotalByMode.GetValueOrDefault(pair.Key) + pair.Value;
+                }
+            }
+        }
+
+        public KeyValuePair<EDamageProperty, ulong>[] GetValueTotalByElementCopy()
+        {
+            lock (_valueBreakdownGate)
+            {
+                return ValueTotalByElement.ToArray();
+            }
+        }
+
+        public KeyValuePair<EDamageMode, ulong>[] GetValueTotalByModeCopy()
+        {
+            lock (_valueBreakdownGate)
+            {
+                return ValueTotalByMode.ToArray();
+            }
+        }
+
         public object Clone()
         {
             return this.MemberwiseClone();
@@ -3564,9 +3645,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             Id = skillId;
             Level = level;
 
-            DamageElement = damageElement;
-            DamageMode = damageMode;
-
             if (damageType == EDamageType.Immune)
             {
                 ImmuneCount++;
@@ -3587,6 +3665,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             else
             {
                 AddValue(value);
+
+                // 内訳は ValueTotal と同じ門の内側で足す。合計すると ValueTotal に一致する。
+                AddValueBreakdown(damageElement, damageMode, value);
 
                 HpLessenTotal += (ulong)hpLessenValue;
                 ShieldBreakTotal += (ulong)shieldBreak;
@@ -3627,8 +3708,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             ValueAverage = HitsCount > 0 ? Math.Round(((double)ValueTotal / (double)HitsCount), 0) : 0.0;
-            CritRate = HitsCount > 0 ? Math.Round(((double)CritCount / (double)HitsCount) * 100.0, 0) : 0.0;
-            LuckyRate = HitsCount > 0 && HitsCount >= LuckyHitCount ? Math.Round(((double)LuckyHitCount / Math.Clamp((double)(HitsCount - LuckyHitCount), 1, double.MaxValue)) * 100.0, 0) : 0.0;
+            // 率は小数点以下2位まで持つ。表示側は F2 で固定2桁にする。
+            CritRate = HitsCount > 0 ? Math.Round(((double)CritCount / (double)HitsCount) * 100.0, 2) : 0.0;
+            LuckyRate = HitsCount > 0 && HitsCount >= LuckyHitCount ? Math.Round(((double)LuckyHitCount / Math.Clamp((double)(HitsCount - LuckyHitCount), 1, double.MaxValue)) * 100.0, 2) : 0.0;
 
             if (StartTime != null && EndTime != null && StartTime <= EndTime)
             {
@@ -3740,6 +3822,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             ValueMax = newCombatStats.ValueMax > ValueMax ? newCombatStats.ValueMax : ValueMax;
             ValueMin = newCombatStats.ValueMin < ValueMin ? newCombatStats.ValueMin : ValueMin;
 
+            MergeValueBreakdown(newCombatStats);
+
             HpLessenTotal += newCombatStats.HpLessenTotal;
             ShieldBreakTotal += newCombatStats.ShieldBreakTotal;
 
@@ -3755,8 +3839,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             ImmuneCount += newCombatStats.ImmuneCount;
 
             ValueAverage = HitsCount > 0 ? Math.Round(((double)ValueTotal / (double)HitsCount), 0) : 0.0;
-            CritRate = HitsCount > 0 ? Math.Round(((double)CritCount / (double)HitsCount) * 100.0, 0) : 0.0;
-            LuckyRate = HitsCount > 0 && HitsCount >= LuckyHitCount ? Math.Round(((double)LuckyHitCount / Math.Clamp((double)(HitsCount - LuckyHitCount), 1, double.MaxValue)) * 100.0, 0) : 0.0;
+            // 率は小数点以下2位まで持つ(AddData と同じ)。
+            CritRate = HitsCount > 0 ? Math.Round(((double)CritCount / (double)HitsCount) * 100.0, 2) : 0.0;
+            LuckyRate = HitsCount > 0 && HitsCount >= LuckyHitCount ? Math.Round(((double)LuckyHitCount / Math.Clamp((double)(HitsCount - LuckyHitCount), 1, double.MaxValue)) * 100.0, 2) : 0.0;
 
             if (MissCount > 0 && HitsCount == 0)
             {

@@ -17,6 +17,11 @@
             <Setter Property="Margin" Value="0,1,0,1" />
         </Style>
 
+        <!-- 文字に付ける TIPS。アイコンの TIPS(下の DataTemplate)と同じ見た目にそろえる。 -->
+        <Style x:Key="TakenDamageLog.ToolTipText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
         <!--
             行の中のアイコン。大きさの違う画像を同じ見た目にそろえるため、正方形の枠の中に中央寄せで置く。
             影はプレイヤーリストのクラスアイコンと同じ。TIPS の色は Tag(ウィジェット)の窓のパレットから取る。
@@ -58,10 +63,10 @@
                 </Grid.ToolTip>
                 <Image Source="{Binding Icon}"
                        Stretch="Uniform"
-                       Effect="{StaticResource Effect.ProfessionIconShadow}"
                        RenderOptions.BitmapScalingMode="HighQuality" />
             </Grid>
         </DataTemplate>
+
     </UserControl.Resources>
 
     <!--
@@ -117,8 +122,15 @@
                         </TextBlock.Style>
                     </TextBlock>
 
+                    <!--
+                        Tag は文字の TIPS の見た目が引く窓のパレット。Run は PlacementTarget になれないので、
+                        WPF はホストするこの TextBlock を PlacementTarget にする(実測で確認)。
+                    -->
                     <TextBlock Grid.Column="1"
                                Style="{StaticResource TakenDamageLog.LineText}"
+                               Tag="{Binding Widget}"
+                               behaviors:TextSegmentsBehavior.RunToolTipStyle="{StaticResource ToolTip.WidgetWindowInfo}"
+                               behaviors:TextSegmentsBehavior.RunToolTipTextStyle="{StaticResource TakenDamageLog.ToolTipText}"
                                behaviors:TextSegmentsBehavior.Segments="{Binding Segments}" />
                 </Grid>
             </DataTemplate>

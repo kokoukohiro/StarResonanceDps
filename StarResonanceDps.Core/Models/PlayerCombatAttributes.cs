@@ -8,6 +8,7 @@ public readonly record struct PlayerCombatAttributes(
     int Intelligence = 0,
     int Endurance = 0,
     int Armor = 0,
+    int Resistance = 0,
     int Critical = 0,
     int CriticalPercent = 0,
     int Haste = 0,

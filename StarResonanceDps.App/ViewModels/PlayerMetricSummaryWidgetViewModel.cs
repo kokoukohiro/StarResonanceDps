@@ -212,11 +212,11 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
 
     private static string FormatPercent(double value)
     {
-        return value.ToString("0.##", CultureInfo.CurrentCulture) + "%";
+        return value.ToString("F2", CultureInfo.CurrentCulture) + "%";
     }
 
     private static string FormatDecimal(double value)
     {
-        return value.ToString("0.##", CultureInfo.CurrentCulture);
+        return value.ToString("F2", CultureInfo.CurrentCulture);
     }
 }

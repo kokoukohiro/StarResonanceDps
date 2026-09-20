@@ -1552,10 +1552,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                     case EAttrType.AttrStunned:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
+                    // 攻撃力・防御力は物理も魔法も同じ形で届く。魔法側を default(int32)へ落とさず、まとめて int64 で読む。
                     case EAttrType.AttrAttack:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
-                        break;
+                    case EAttrType.AttrMattack:
                     case EAttrType.AttrDefense:
+                    case EAttrType.AttrMdefense:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0L : reader.ReadInt64());
                         break;
                     case EAttrType.AttrPos:

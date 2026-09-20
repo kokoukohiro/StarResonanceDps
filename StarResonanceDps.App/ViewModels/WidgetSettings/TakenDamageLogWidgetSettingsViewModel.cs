@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
@@ -14,6 +15,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableObject, IDisposable
 {
     private readonly Dictionary<string, MeterClassColorItemViewModel> _classColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, TakenDamageLogTextColorItemViewModel> _textColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private TakenDamageLogWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
 
@@ -41,6 +43,23 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         }
 
         ClassColorItems = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
+
+        var textItems = new ObservableCollection<TakenDamageLogTextColorItemViewModel>();
+        var textColorKeys = WidgetConfigDefaults.TakenDamageLogTextColorKeys;
+        for (var index = 0; index < textColorKeys.Length; index++)
+        {
+            var key = textColorKeys[index];
+            var colors = new ColorPaletteViewModel(
+                WidgetConfigDefaults.CreateDefaultTextColors(key),
+                WidgetConfigDefaults.MaxPaletteColorCount);
+            colors.PaletteChanged += TextColors_PaletteChanged;
+
+            var item = new TakenDamageLogTextColorItemViewModel(key, colors, index == textColorKeys.Length - 1);
+            _textColorItemsByKey.Add(key, item);
+            textItems.Add(item);
+        }
+
+        TextColorItems = new ReadOnlyObservableCollection<TakenDamageLogTextColorItemViewModel>(textItems);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         _lastSaved = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config);
@@ -52,7 +71,12 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     /// <summary>クラスカラーの行。職ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
 
+    /// <summary>テキストカラーの行。行ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
+    public ReadOnlyObservableCollection<TakenDamageLogTextColorItemViewModel> TextColorItems { get; }
+
     public string ClassColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_ClassColors_Title");
+
+    public string TextColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_TakenDamageLogTextColors_Title");
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -64,6 +88,11 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         {
             item.Colors.PaletteChanged -= ClassColors_PaletteChanged;
         }
+
+        foreach (var item in TextColorItems)
+        {
+            item.Colors.PaletteChanged -= TextColors_PaletteChanged;
+        }
     }
 
     public TakenDamageLogWidgetSettingsConfig CreateConfig()
@@ -73,13 +102,21 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
-            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
+            TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
 
         foreach (var item in ClassColorItems)
         {
             config.ClassColorIndexes[item.Key] = item.Colors.SelectedIndex;
             config.ClassColorPalettes[item.Key] = [.. item.Colors.GetHexColors()];
+        }
+
+        foreach (var item in TextColorItems)
+        {
+            config.TextColorIndexes[item.Key] = item.Colors.SelectedIndex;
+            config.TextColorPalettes[item.Key] = [.. item.Colors.GetHexColors()];
         }
 
         return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config);
@@ -93,6 +130,16 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     public void ApplyClassColor(string key, Color color)
     {
         _classColorItemsByKey[key].Colors.AddOrSelect(color);
+    }
+
+    public Color GetSelectedTextColor(string key)
+    {
+        return _textColorItemsByKey[key].Colors.SelectedColor;
+    }
+
+    public void ApplyTextColor(string key, Color color)
+    {
+        _textColorItemsByKey[key].Colors.AddOrSelect(color);
     }
 
     public void ResetToDefaults()
@@ -124,6 +171,11 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
             foreach (var item in ClassColorItems)
             {
                 item.Colors.Load(normalized.ClassColorPalettes[item.Key], normalized.ClassColorIndexes[item.Key]);
+            }
+
+            foreach (var item in TextColorItems)
+            {
+                item.Colors.Load(normalized.TextColorPalettes[item.Key], normalized.TextColorIndexes[item.Key]);
             }
 
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
@@ -159,10 +211,24 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
             }
         }
 
+        foreach (var key in WidgetConfigDefaults.TakenDamageLogTextColorKeys)
+        {
+            if (left.TextColorIndexes[key] != right.TextColorIndexes[key]
+                || !left.TextColorPalettes[key].SequenceEqual(right.TextColorPalettes[key], StringComparer.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+        }
+
         return true;
     }
 
     private void ClassColors_PaletteChanged(object? sender, EventArgs e)
+    {
+        NotifyChanged();
+    }
+
+    private void TextColors_PaletteChanged(object? sender, EventArgs e)
     {
         NotifyChanged();
     }
@@ -174,7 +240,13 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
             item.RefreshDisplayName();
         }
 
+        foreach (var item in TextColorItems)
+        {
+            item.RefreshDisplayName();
+        }
+
         OnPropertyChanged(nameof(ClassColorSectionTitle));
+        OnPropertyChanged(nameof(TextColorSectionTitle));
     }
 
     partial void OnHealthValueDisplayModeIndexChanged(int value)
@@ -196,5 +268,44 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
         OnPropertyChanged(nameof(HasUnsavedChanges));
         RaisePreviewChanged();
+    }
+}
+
+/// <summary>
+/// テキストカラーの1行。行の作りはクラスカラー(<see cref="MeterClassColorItemViewModel"/>)と同じで、
+/// ダメージの属性の行だけ左にアイコンを出す。
+/// </summary>
+public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
+{
+    public TakenDamageLogTextColorItemViewModel(string key, ColorPaletteViewModel colors, bool isLast)
+    {
+        Key = key;
+        Colors = colors;
+        IsLast = isLast;
+        IsDamageProperty = WidgetConfigDefaults.IsDamagePropertyKey(key);
+        Icon = IsDamageProperty
+            ? (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}")
+            : null;
+    }
+
+    public string Key { get; }
+
+    public ColorPaletteViewModel Colors { get; }
+
+    public bool IsLast { get; }
+
+    /// <summary>ダメージの属性の行。左にアイコンを出す。</summary>
+    public bool IsDamageProperty { get; }
+
+    public ImageSource? Icon { get; }
+
+    /// <summary>属性の行は属性名、それ以外は被ダメログ専用の項目名。</summary>
+    public string DisplayName => IsDamageProperty
+        ? LocalizationManager.Instance.GetString($"DamageProperty_{Key}")
+        : LocalizationManager.Instance.GetString($"Settings_TakenDamageLogTextColor_{Key}");
+
+    public void RefreshDisplayName()
+    {
+        OnPropertyChanged(nameof(DisplayName));
     }
 }

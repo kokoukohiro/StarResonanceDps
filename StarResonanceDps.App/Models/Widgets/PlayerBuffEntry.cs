@@ -47,6 +47,26 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>行のゲージの長さ(0〜1)。満タンになる残り時間は表示設定で決まる。</summary>
+    [ObservableProperty]
+    private double _barRatio = 1d;
+
+    /// <summary>ゲージが満タンか。満タンのときだけ右端も角丸にする。</summary>
+    [ObservableProperty]
+    private bool _isBarFull = true;
+
+    /// <summary>
+    /// ゲージが 0 になるまでの秒数。表示側はこのぶんかけて線形に縮める。
+    /// <b>0 は「今は減らない」</b>(満タンで頭打ちの間と、減らないバフ)。
+    /// </summary>
+    [ObservableProperty]
+    private double _barDecaySeconds;
+
+    /// <summary>残り時間をそのまま持つ。ゲージの長さの設定が変わったら比率を計算し直すのに要る。</summary>
+    private double? _remainingSeconds;
+
+    private bool _isRemainingUnknown;
+
     public void Update(PlayerBuffSnapshot snapshot)
     {
         Key = snapshot.Key;
@@ -58,6 +78,39 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
+
+        _remainingSeconds = snapshot.RemainingSeconds;
+        _isRemainingUnknown = snapshot.IsRemainingUnknown;
+    }
+
+    /// <summary>
+    /// ゲージの長さを計算し直す。
+    ///
+    /// <para>
+    /// <b>残り時間が分からないバフと持続時間の無いバフは、ずっと満タン</b>(ユーザー決定)。
+    /// 減っていかないものを短いゲージで出すと、消えかけに見えるため。
+    /// </para>
+    /// </summary>
+    public void UpdateBar(int gaugeLengthSeconds)
+    {
+        double ratio;
+        double decaySeconds;
+        if (_isRemainingUnknown || _remainingSeconds is not { } seconds || gaugeLengthSeconds <= 0)
+        {
+            ratio = 1d;
+            decaySeconds = 0d;
+        }
+        else
+        {
+            ratio = Math.Clamp(seconds / gaugeLengthSeconds, 0d, 1d);
+
+            // 満タンで頭打ちの間はまだ縮まない。縮み始めるのは残りがゲージの長さを切ってから。
+            decaySeconds = seconds <= gaugeLengthSeconds ? Math.Max(seconds, 0d) : 0d;
+        }
+
+        BarRatio = ratio;
+        IsBarFull = ratio >= 1d;
+        BarDecaySeconds = decaySeconds;
     }
 
     /// <summary>

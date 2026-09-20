@@ -56,6 +56,20 @@ public sealed record MetricTimelineSnapshot(
     ulong TotalValue,
     IReadOnlyList<MetricTimelinePoint> Points);
 
+/// <summary>
+/// スキル詳細の1行。
+///
+/// <para>
+/// <see cref="ValueByElement"/> と <see cref="ValueByMode"/> は、この行の累計の内訳。
+/// 足す条件は <see cref="TotalValue"/> と同じ(<c>Immune</c> と <c>Miss</c> は入らない)ので、
+/// それぞれの合計は <see cref="TotalValue"/> に一致する。<b>並びは enum の値の順</b>で、
+/// 表示の都合で並べ替えるのは読む側。<b>値が入った種類だけ</b>が載る。
+/// </para>
+///
+/// <para>
+/// 内訳を溜め始める前に保存した履歴では、どちらも空になる。
+/// </para>
+/// </summary>
 public sealed record MetricSkillTableRowSnapshot(
     long SkillId,
     string SkillIdText,
@@ -66,7 +80,9 @@ public sealed record MetricSkillTableRowSnapshot(
     ulong HitCount,
     double CritRate,
     double AverageValue,
-    double Percentage);
+    double Percentage,
+    IReadOnlyList<KeyValuePair<EDamageProperty, ulong>> ValueByElement,
+    IReadOnlyList<KeyValuePair<EDamageMode, ulong>> ValueByMode);
 
 public sealed record MetricSkillTableSnapshot(
     ulong TotalValue,
@@ -176,8 +192,17 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// </para>
 ///
 /// <para>
-/// ダメージの無い死亡は <see cref="Attacker"/> がシステム、<see cref="Target"/> が死亡したプレイヤー、HP は 0 と死亡時の最大HP。
+/// 死亡は <see cref="Attacker"/> がシステム、<see cref="Target"/> が死亡したプレイヤー、HP は 0 と死亡時の最大HP。
 /// <see cref="IsFall"/> は落下の被弾(技名は画面側の文言)。
+/// </para>
+///
+/// <para>
+/// <see cref="IsLethal"/> は「この被弾で死んだ」。表示は HP の代わりに死亡の文言を出す。
+/// </para>
+///
+/// <para>
+/// <see cref="DamageMode"/> は物理と魔法の別。属性(<see cref="DamageElement"/>)とは独立していて、
+/// <c>DamageNormal</c> はどちらでもない。予告・詠唱・死亡は <c>DamageNormal</c>。
 /// </para>
 /// </summary>
 public sealed record TakenDamageLogLine(
@@ -195,7 +220,9 @@ public sealed record TakenDamageLogLine(
     long? TargetMaxHp,
     long? TargetShield,
     EDamageProperty? DamageElement,
-    bool IsFall = false);
+    bool IsFall = false,
+    bool IsLethal = false,
+    EDamageMode DamageMode = EDamageMode.DamageNormal);
 
 /// <summary>
 /// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
@@ -396,7 +423,9 @@ public static class MeterSnapshotProvider
                 snapshot.TargetMaxHp,
                 snapshot.TargetShield,
                 snapshot.DamageElement,
-                snapshot.DamageSource == Zproto.EDamageSource.Fall);
+                snapshot.DamageSource == Zproto.EDamageSource.Fall,
+                snapshot.IsKill,
+                snapshot.DamageMode);
         }
 
         return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines);
@@ -1780,8 +1809,9 @@ public static class MeterSnapshotProvider
         {
             var stat = skillStats[index];
             var value = stat.Value;
+            // 小数点以下2位まで持つ。表示側は F2 で固定2桁にする。
             var percentage = value.ValueTotal > 0UL
-                ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 0)
+                ? Math.Round(((double)value.ValueTotal / entityTotalValue) * 100d, 2)
                 : 0d;
 
             // バフとして届いたかどうか。名前には影響しない(見出し表は種別を区別しない)。
@@ -1803,7 +1833,10 @@ public static class MeterSnapshotProvider
                 value.HitsCount,
                 value.CritRate,
                 value.ValueAverage,
-                percentage);
+                percentage,
+                // 並びは enum の値の順で安定させる。表示の並びは読む側が決める。
+                [.. value.GetValueTotalByElementCopy().OrderBy(pair => pair.Key)],
+                [.. value.GetValueTotalByModeCopy().OrderBy(pair => pair.Key)]);
         }
 
         return new MetricSkillTableSnapshot(entityTotalValue, rows);

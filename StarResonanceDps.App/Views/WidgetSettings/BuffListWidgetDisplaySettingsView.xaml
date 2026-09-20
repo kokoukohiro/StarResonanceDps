@@ -1,0 +1,40 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffListWidgetDisplaySettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <StackPanel>
+        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}"
+                        Margin="0,0,0,12">
+            <Border Style="{StaticResource Panel.SettingFieldLast}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
+                               Foreground="{DynamicResource Brush.TextPrimary}"
+                               FontSize="14"
+                               FontWeight="SemiBold" />
+
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource Input.SettingsComboBox}">
+                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
+                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
+                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
+                    </ComboBox>
+                </Grid>
+            </Border>
+        </ContentControl>
+    </StackPanel>
+</UserControl>

@@ -83,6 +83,20 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             TakenDamageLogSettings.PreviewChanged += TakenDamageLogSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsBuffListSettings(kind))
+        {
+            BuffListSettings = new BuffListWidgetSettingsViewModel(kind, config.BuffList);
+            BuffListSettings.PropertyChanged += BuffListSettings_PropertyChanged;
+            BuffListSettings.PreviewChanged += BuffListSettings_PreviewChanged;
+        }
+
+        if (WidgetConfigDefaults.SupportsElementColorSettings(kind))
+        {
+            ElementColorSettings = new ElementColorWidgetSettingsViewModel(kind, config.ElementColor);
+            ElementColorSettings.PropertyChanged += ElementColorSettings_PropertyChanged;
+            ElementColorSettings.PreviewChanged += ElementColorSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -95,6 +109,10 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<BuffCardWidgetSettingsConfig>? BuffCardPreviewChanged;
 
     public event Action<TakenDamageLogWidgetSettingsConfig>? TakenDamageLogPreviewChanged;
+
+    public event Action<BuffListWidgetSettingsConfig>? BuffListPreviewChanged;
+
+    public event Action<ElementColorWidgetSettingsConfig>? ElementColorPreviewChanged;
 
     public void Dispose()
     {
@@ -127,6 +145,20 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             TakenDamageLogSettings.PreviewChanged -= TakenDamageLogSettings_PreviewChanged;
             TakenDamageLogSettings.Dispose();
         }
+
+        if (BuffListSettings is not null)
+        {
+            BuffListSettings.PropertyChanged -= BuffListSettings_PropertyChanged;
+            BuffListSettings.PreviewChanged -= BuffListSettings_PreviewChanged;
+            BuffListSettings.Dispose();
+        }
+
+        if (ElementColorSettings is not null)
+        {
+            ElementColorSettings.PropertyChanged -= ElementColorSettings_PropertyChanged;
+            ElementColorSettings.PreviewChanged -= ElementColorSettings_PreviewChanged;
+            ElementColorSettings.Dispose();
+        }
     }
 
     private void TakenDamageLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -140,6 +172,32 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void TakenDamageLogSettings_PreviewChanged(TakenDamageLogWidgetSettingsConfig config)
     {
         TakenDamageLogPreviewChanged?.Invoke(config);
+    }
+
+    private void BuffListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BuffListWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void BuffListSettings_PreviewChanged(BuffListWidgetSettingsConfig config)
+    {
+        BuffListPreviewChanged?.Invoke(config);
+    }
+
+    private void ElementColorSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ElementColorWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void ElementColorSettings_PreviewChanged(ElementColorWidgetSettingsConfig config)
+    {
+        ElementColorPreviewChanged?.Invoke(config);
     }
 
     private void BuffCardSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -199,7 +257,14 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public TakenDamageLogWidgetSettingsViewModel? TakenDamageLogSettings { get; }
 
+    public BuffListWidgetSettingsViewModel? BuffListSettings { get; }
+
+    public ElementColorWidgetSettingsViewModel? ElementColorSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
+
+    /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
+    public bool HasElementColorSettings => ElementColorSettings is not null;
 
     public bool HasMeterDisplaySettings => HasMeterSettings;
 
@@ -209,16 +274,21 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasTakenDamageLogDisplaySettings => TakenDamageLogSettings is not null;
 
+    public bool HasBuffListDisplaySettings => BuffListSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
-        || HasTakenDamageLogDisplaySettings;
+        || HasTakenDamageLogDisplaySettings
+        || HasBuffListDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
         || (MetricTimelineSettings?.HasUnsavedChanges ?? false)
         || (BuffCardSettings?.HasUnsavedChanges ?? false)
-        || (TakenDamageLogSettings?.HasUnsavedChanges ?? false);
+        || (TakenDamageLogSettings?.HasUnsavedChanges ?? false)
+        || (BuffListSettings?.HasUnsavedChanges ?? false)
+        || (ElementColorSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -257,6 +327,16 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.TakenDamageLog = TakenDamageLogSettings.CreateConfig();
         }
 
+        if (BuffListSettings is not null)
+        {
+            config.BuffList = BuffListSettings.CreateConfig();
+        }
+
+        if (ElementColorSettings is not null)
+        {
+            config.ElementColor = ElementColorSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -264,6 +344,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
         BuffCardSettings?.MarkSaved(config.BuffCard);
         TakenDamageLogSettings?.MarkSaved(config.TakenDamageLog);
+        BuffListSettings?.MarkSaved(config.BuffList);
+        ElementColorSettings?.MarkSaved(config.ElementColor);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -275,6 +357,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.ResetToDefaults();
         BuffCardSettings?.ResetToDefaults();
         TakenDamageLogSettings?.ResetToDefaults();
+        BuffListSettings?.ResetToDefaults();
+        ElementColorSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -285,6 +369,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.RestoreSavedPreview();
         BuffCardSettings?.RestoreSavedPreview();
         TakenDamageLogSettings?.RestoreSavedPreview();
+        BuffListSettings?.RestoreSavedPreview();
+        ElementColorSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

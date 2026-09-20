@@ -44,6 +44,8 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
         _viewModel.TakenDamageLogPreviewChanged += _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.BuffListPreviewChanged += _widget.ApplyBuffListSettingsPreview;
+        _viewModel.ElementColorPreviewChanged += _widget.ApplyElementColorSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -70,6 +72,8 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
         _viewModel.TakenDamageLogPreviewChanged -= _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.BuffListPreviewChanged -= _widget.ApplyBuffListSettingsPreview;
+        _viewModel.ElementColorPreviewChanged -= _widget.ApplyElementColorSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -192,6 +196,21 @@ public partial class WidgetSettingsWindow : Window
     private void TakenDamageLogClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(TakenDamageLogClassColorsHost);
+    }
+
+    private void TakenDamageLogTextColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(TakenDamageLogTextColorsHost);
+    }
+
+    private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffListColorsHost);
+    }
+
+    private void ElementColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ElementColorsHost);
     }
 
     private void ResetButton_Click(object sender, RoutedEventArgs e)

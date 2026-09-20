@@ -16,6 +16,7 @@
             <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding PrimaryStatText}" />
             <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding EnduranceText}" />
             <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding ArmorText}" />
+            <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding ResistanceText}" />
         </StackPanel>
 
         <StackPanel Grid.Column="1" Margin="16,0,0,0">

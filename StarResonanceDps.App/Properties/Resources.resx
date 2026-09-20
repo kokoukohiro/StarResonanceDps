@@ -343,10 +343,25 @@
     <value>{0}'s {1}</value>
   </data>
   <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0} took {1}{2} damage ({3}/{4})</value>
+    <value>{0} took {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0} took {1}{2} damage</value>
+    <value>{0} took {1}</value>
+  </data>
+  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
+    <value>{0}{1} damage</value>
+  </data>
+  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
+    <value>{0}{1} Physical damage</value>
+  </data>
+  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
+    <value>{0}{1} Magic damage</value>
+  </data>
+  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
+    <value>HP({0}/{1})</value>
+  </data>
+  <data name="TakenDamageLog_DeathText" xml:space="preserve">
+    <value>died ({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
@@ -361,7 +376,58 @@
     <value>Fall</value>
   </data>
   <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0} died ({1}/{2})</value>
+    <value>{0} {1}</value>
+  </data>
+  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+    <value>Text Colors</value>
+  </data>
+  <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
+    <value>Buff Colors</value>
+  </data>
+  <data name="Settings_Section_DebuffListColors_Title" xml:space="preserve">
+    <value>Debuff Colors</value>
+  </data>
+  <data name="Settings_BuffListColors_Opacity" xml:space="preserve">
+    <value>Buff Colors Opacity</value>
+  </data>
+  <data name="Settings_DebuffListColors_Opacity" xml:space="preserve">
+    <value>Debuff Colors Opacity</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeStart" xml:space="preserve">
+    <value>Gauge left</value>
+  </data>
+  <data name="Settings_BuffListGauge_GaugeEnd" xml:space="preserve">
+    <value>Gauge right</value>
+  </data>
+  <data name="Settings_Display_GaugeLength" xml:space="preserve">
+    <value>Gauge length</value>
+  </data>
+  <data name="GaugeLength_10" xml:space="preserve">
+    <value>10 s</value>
+  </data>
+  <data name="GaugeLength_20" xml:space="preserve">
+    <value>20 s</value>
+  </data>
+  <data name="GaugeLength_30" xml:space="preserve">
+    <value>30 s</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+    <value>Entity name</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+    <value>Skill name</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+    <value>Player name</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+    <value>HP value</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
+    <value>Shield value</value>
+  </data>
+  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
+    <value>Death</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>Non-elemental</value>
@@ -543,6 +609,9 @@
   <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
     <value>ATK</value>
   </data>
+  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
+    <value>MATK</value>
+  </data>
   <data name="PlayerStatus_Strength" xml:space="preserve">
     <value>Strength</value>
   </data>
@@ -557,6 +626,9 @@
   </data>
   <data name="PlayerStatus_Armor" xml:space="preserve">
     <value>Armor</value>
+  </data>
+  <data name="PlayerStatus_Resistance" xml:space="preserve">
+    <value>Resistance</value>
   </data>
   <data name="PlayerStatus_Crit" xml:space="preserve">
     <value>Crit</value>
@@ -611,6 +683,18 @@
   </data>
   <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
     <value>Filter Strength</value>
+  </data>
+  <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
+    <value>Element Colors</value>
+  </data>
+  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
+    <value>{0} 100%</value>
+  </data>
+  <data name="Settings_ElementColors_Opacity" xml:space="preserve">
+    <value>Element Colors Opacity</value>
+  </data>
+  <data name="Settings_ElementColors_Filter" xml:space="preserve">
+    <value>Element Colors Filter</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
@@ -681,6 +765,21 @@
   <data name="Settings_PlayerInfo_Field_PlayerUid" xml:space="preserve">
     <value>Player UID</value>
   </data>
+  <data name="Metric_No" xml:space="preserve">
+    <value>No.</value>
+  </data>
+  <data name="Metric_Element" xml:space="preserve">
+    <value>Element</value>
+  </data>
+  <data name="Metric_DamageMode" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Metric_DamageMode_Physical" xml:space="preserve">
+    <value>Physical</value>
+  </data>
+  <data name="Metric_DamageMode_Magical" xml:space="preserve">
+    <value>Magic</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>Skill Name</value>
   </data>
@@ -694,13 +793,13 @@
     <value>aDPS</value>
   </data>
   <data name="Metric_EncounterDps" xml:space="preserve">
-    <value>eDPS</value>
+    <value>DPS</value>
   </data>
   <data name="Metric_ActiveHps" xml:space="preserve">
     <value>aHPS</value>
   </data>
   <data name="Metric_EncounterHps" xml:space="preserve">
-    <value>eHPS</value>
+    <value>HPS</value>
   </data>
   <data name="Metric_HitCount" xml:space="preserve">
     <value>Hit Count</value>

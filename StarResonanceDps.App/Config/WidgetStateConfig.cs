@@ -23,6 +23,8 @@ public sealed class WidgetConfig
     public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
     public BuffCardWidgetSettingsConfig? BuffCard { get; set; }
     public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
+    public BuffListWidgetSettingsConfig? BuffList { get; set; }
+    public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
 
     /// <summary>
     /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
@@ -50,6 +52,8 @@ public sealed class WidgetConfig
             MetricTimeline = MetricTimeline?.Clone(),
             BuffCard = BuffCard?.Clone(),
             TakenDamageLog = TakenDamageLog?.Clone(),
+            BuffList = BuffList?.Clone(),
+            ElementColor = ElementColor?.Clone(),
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
@@ -146,6 +150,13 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);
 
+    /// <summary>
+    /// 行の文字の色(テキストカラー)。形はクラスカラーと同じで、鍵は <see cref="WidgetConfigDefaults.TakenDamageLogTextColorKeys"/>。
+    /// </summary>
+    public Dictionary<string, int> TextColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorIndexes();
+
+    public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorPalettes();
+
     public TakenDamageLogWidgetSettingsConfig Clone()
     {
         return new TakenDamageLogWidgetSettingsConfig
@@ -158,6 +169,62 @@ public sealed class TakenDamageLogWidgetSettingsConfig
             ClassColorPalettes = ClassColorPalettes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog)
                 : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase),
+            TextColorIndexes = TextColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultTextColorIndexes()
+                : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = TextColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultTextColorPalettes()
+                : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// バフ・デバフ一覧の設定。行に出すゲージの色と長さ。
+///
+/// <para>
+/// 色は左端と右端の2つで、間はグラデーションになる(形はクラスカラーと同じ「色見本＋選んでいる枠」)。
+/// 既定の長さは種別で違う(バフは短く、デバフは長い)ので、作るときに <see cref="WidgetKind"/> を渡す。
+/// </para>
+/// </summary>
+public sealed class BuffListWidgetSettingsConfig
+{
+    /// <summary>
+    /// 選んでいる枠。<b>既定が種別で違う</b>(バフは1枠目、デバフは2枠目)ので、
+    /// <see cref="WidgetKind"/> を知らないここでは入れない。空のまま
+    /// <see cref="WidgetConfigDefaults.CloneNormalizedBuffList"/> を通ると、そこで種別に応じて埋まる。
+    /// </summary>
+    public Dictionary<string, int> GaugeColorIndexes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, List<string>> GaugeColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultGaugeColorPalettes();
+
+    /// <summary>
+    /// ゲージの色の不透明度(0〜100)。作りはメーターのクラスカラーと同じで、
+    /// 表示に使う色のアルファへ掛ける(設定画面の色見本には掛けない)。
+    /// </summary>
+    public int GaugeColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
+
+    /// <summary>ゲージが満タンになる残り時間。0=10秒 / 1=20秒 / 2=30秒。これ以上は満タンで頭打ち。</summary>
+    public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultBuffListGaugeLengthIndex;
+
+    public BuffListWidgetSettingsConfig Clone()
+    {
+        return new BuffListWidgetSettingsConfig
+        {
+            GaugeLengthIndex = GaugeLengthIndex,
+            GaugeColorOpacity = GaugeColorOpacity,
+            GaugeColorIndexes = GaugeColorIndexes is null
+                ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, int>(GaugeColorIndexes, StringComparer.OrdinalIgnoreCase),
+            GaugeColorPalettes = GaugeColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultGaugeColorPalettes()
+                : GaugeColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
                     StringComparer.OrdinalIgnoreCase)
@@ -376,6 +443,58 @@ public sealed class MeterWidgetSettingsConfig
     }
 }
 
+/// <summary>
+/// スキル詳細の属性カラー。作りはメーターのクラスカラーと同じで、行が9属性になる。
+///
+/// <para>
+/// ウィジェットが実際に使う色は<b>その行に出た属性の割合で混ぜたもの</b>で、そこへフィルターと
+/// 不透明度が掛かる。<b>設定画面の色見本にはどちらも掛けない</b>(クラスカラーと同じ)。
+/// </para>
+/// </summary>
+public sealed class ElementColorWidgetSettingsConfig
+{
+    public int ColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
+
+    public Dictionary<string, int> ColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultElementColorIndexes();
+
+    public Dictionary<string, List<string>> ColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultElementColorPalettes();
+
+    /// <remarks>
+    /// <c>null</c> は「設定されていない」。ウィジェット種別ごとの既定は
+    /// <see cref="WidgetConfigDefaults.NormalizeElementColor"/> で埋める。
+    /// </remarks>
+    public bool? FilterEnabled { get; set; }
+
+    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
+    public List<string>? FilterColors { get; set; }
+
+    public int FilterColorIndex { get; set; }
+
+    /// <summary>フィルター色をどれだけ反映するか(0〜100)。レンズの濃さ。</summary>
+    public int FilterStrength { get; set; } = WidgetConfigDefaults.DefaultClassColorFilterStrength;
+
+    public ElementColorWidgetSettingsConfig Clone()
+    {
+        return new ElementColorWidgetSettingsConfig
+        {
+            ColorOpacity = ColorOpacity,
+            ColorIndexes = ColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultElementColorIndexes()
+                : new Dictionary<string, int>(ColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ColorPalettes = ColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultElementColorPalettes()
+                : ColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase),
+            FilterEnabled = FilterEnabled,
+            FilterColors = FilterColors is null ? null : [.. FilterColors],
+            FilterColorIndex = FilterColorIndex,
+            FilterStrength = FilterStrength
+        };
+    }
+}
+
 public static class WidgetConfigDefaults
 {
     public const int CurrentSchemaVersion = 1;
@@ -516,6 +635,59 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
+    /// <summary>ゲージの色の鍵。左端と右端の2つで、間はグラデーションになる。</summary>
+    public static readonly string[] BuffListGaugeColorKeys =
+    [
+        "GaugeStart",
+        "GaugeEnd"
+    ];
+
+    public const int MinBuffListGaugeLengthIndex = 0;
+
+    /// <summary>ゲージが満タンになる残り時間。添字は 0=10秒 / 1=20秒 / 2=30秒。</summary>
+    public static readonly int[] BuffListGaugeLengthSeconds = [10, 20, 30];
+
+    /// <summary>バフ一覧の既定。短いバフを見るので10秒。</summary>
+    public const int DefaultBuffListGaugeLengthIndex = 0;
+
+    /// <summary>デバフ一覧の既定。長いデバフを見るので30秒。</summary>
+    public const int DefaultDebuffListGaugeLengthIndex = 2;
+
+    /// <summary>
+    /// ダメージの属性の鍵。<c>EDamageProperty</c> の並び(属性ID 0〜8)。
+    /// 表示名は <c>DamageProperty_*</c>、アイコンは <c>Icon.DamageProperty.*</c> で引く。
+    /// </summary>
+    public static readonly string[] DamagePropertyKeys =
+    [
+        "General",
+        "Fire",
+        "Water",
+        "Electricity",
+        "Wood",
+        "Wind",
+        "Rock",
+        "Light",
+        "Dark"
+    ];
+
+    /// <summary>被ダメログのテキストカラーの鍵。属性の9行はこの並びのまま真ん中に入る。</summary>
+    public static readonly string[] TakenDamageLogTextColorKeys =
+    [
+        "EntityName",
+        "SkillName",
+        "PlayerName",
+        .. DamagePropertyKeys,
+        "HpValue",
+        "ShieldValue",
+        "Death"
+    ];
+
+    /// <summary>テキストカラーの鍵のうち、ダメージの属性のもの。行の左にアイコンを出す。</summary>
+    public static bool IsDamagePropertyKey(string key)
+    {
+        return DamagePropertyKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
+    }
+
     private static readonly Dictionary<string, string[]> PlayerListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["ShieldKnight"] = ["#68A6CD", "#0F68B3"],
@@ -529,6 +701,60 @@ public static class WidgetConfigDefaults
         ["Marksman"] = ["#DB8787", "#D4D116"],
         ["Transformation"] = ["#FFFFFF", "#B06BE8"],
         ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
+    };
+
+    /// <summary>
+    /// ゲージの既定色。左から右へこの2色でグラデーションになる。
+    ///
+    /// <para>
+    /// 見本は2枠で、<b>1枠目がバフの青緑、2枠目がデバフの紫</b>。2枠目は1枠目の R と G を入れ替えたもので、
+    /// 彩度と明度はそのままに色相だけ反対側へ回る。どちらを選んだ状態で始めるかは
+    /// <see cref="GetDefaultGaugeColorIndex"/> が種別で決める。
+    /// </para>
+    /// </summary>
+    private static readonly Dictionary<string, string[]> BuffListDefaultGaugeColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["GaugeStart"] = ["#5688A4", "#8856A4"],
+        ["GaugeEnd"] = ["#56C8C1", "#C856C1"]
+    };
+
+    /// <summary>
+    /// 被ダメログのテキストカラーの既定色。属性は属性らしい色、それ以外は白と差し色の2枠。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> TakenDamageLogDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["EntityName"] = ["#FFFFFF", "#FFD98A"],
+        ["SkillName"] = ["#FFFFFF", "#D9866C"],
+        ["PlayerName"] = ["#FFFFFF", "#9FD1FF"],
+        ["General"] = ["#FFFFFF", "#D0E1E9"],
+        ["Fire"] = ["#FFFFFF", "#FF8100"],
+        ["Water"] = ["#FFFFFF", "#9DFFEF"],
+        ["Electricity"] = ["#FFFFFF", "#AE86FF"],
+        ["Wood"] = ["#FFFFFF", "#CEF700"],
+        ["Wind"] = ["#FFFFFF", "#00EFFF"],
+        ["Rock"] = ["#FFFFFF", "#F7C600"],
+        ["Light"] = ["#FFFFFF", "#F5EFB3"],
+        ["Dark"] = ["#FFFFFF", "#734FE1"],
+        ["HpValue"] = ["#FFFFFF", "#81E5C6"],
+        ["ShieldValue"] = ["#FFFFFF", "#DCDCDC"],
+        ["Death"] = ["#FFFFFF", "#FF8080"]
+    };
+
+    /// <summary>
+    /// スキル詳細の属性カラーの既定色。<b>被ダメログの属性テキストカラーと同じ2枠</b>で、
+    /// 既定で選ばれるのも同じく2枠目の差し色。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> ElementDefaultColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["General"] = ["#FFFFFF", "#D0E1E9"],
+        ["Fire"] = ["#FFFFFF", "#FF8100"],
+        ["Water"] = ["#FFFFFF", "#9DFFEF"],
+        ["Electricity"] = ["#FFFFFF", "#AE86FF"],
+        ["Wood"] = ["#FFFFFF", "#CEF700"],
+        ["Wind"] = ["#FFFFFF", "#00EFFF"],
+        ["Rock"] = ["#FFFFFF", "#F7C600"],
+        ["Light"] = ["#FFFFFF", "#F5EFB3"],
+        ["Dark"] = ["#FFFFFF", "#734FE1"]
     };
 
     private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
@@ -672,7 +898,9 @@ public static class WidgetConfigDefaults
             Window = CreateDefaultWindowConfig(kind),
             Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
             MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null,
-            TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null
+            TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
+            BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
+            ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null
         };
     }
 
@@ -768,8 +996,74 @@ public static class WidgetConfigDefaults
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
             AttackerFilterIndex = DefaultTakenDamageLogAttackerFilterIndex,
             ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog),
-            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog)
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog),
+            TextColorIndexes = CreateDefaultTextColorIndexes(),
+            TextColorPalettes = CreateDefaultTextColorPalettes()
         };
+    }
+
+    /// <summary>ゲージの長さの既定は種別で違う。バフは10秒、デバフは30秒。</summary>
+    public static BuffListWidgetSettingsConfig CreateBuffListSettings(WidgetKind kind)
+    {
+        return new BuffListWidgetSettingsConfig
+        {
+            GaugeLengthIndex = kind == WidgetKind.DebuffList
+                ? DefaultDebuffListGaugeLengthIndex
+                : DefaultBuffListGaugeLengthIndex,
+            GaugeColorIndexes = CreateDefaultGaugeColorIndexes(kind),
+            GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
+            GaugeColorOpacity = MaxClassColorOpacity
+        };
+    }
+
+    public static bool SupportsBuffListSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.BuffList or WidgetKind.DebuffList;
+    }
+
+    public static BuffListWidgetSettingsConfig CloneNormalizedBuffList(WidgetKind kind, BuffListWidgetSettingsConfig? buffList)
+    {
+        var normalized = (buffList ?? CreateBuffListSettings(kind)).Clone();
+        NormalizeBuffList(kind, normalized);
+        return normalized;
+    }
+
+    /// <summary>
+    /// 保存値を表示できる形に直す。<b>選んでいる枠が入っていないときの既定は種別で違う</b>ので
+    /// <see cref="WidgetKind"/> を受け取る(<see cref="GetDefaultGaugeColorIndex"/>)。
+    /// </summary>
+    public static void NormalizeBuffList(WidgetKind kind, BuffListWidgetSettingsConfig buffList)
+    {
+        buffList.GaugeLengthIndex = Math.Clamp(
+            buffList.GaugeLengthIndex,
+            MinBuffListGaugeLengthIndex,
+            BuffListGaugeLengthSeconds.Length - 1);
+
+        buffList.GaugeColorOpacity = Math.Clamp(
+            buffList.GaugeColorOpacity,
+            MinClassColorOpacity,
+            MaxClassColorOpacity);
+
+        buffList.GaugeColorIndexes ??= CreateDefaultGaugeColorIndexes(kind);
+        buffList.GaugeColorPalettes ??= CreateDefaultGaugeColorPalettes();
+
+        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in BuffListGaugeColorKeys)
+        {
+            var defaultColors = CreateDefaultGaugeColors(key);
+            var sourceColors = buffList.GaugeColorPalettes.TryGetValue(key, out var colors) ? colors : defaultColors;
+            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+            normalizedPalettes[key] = palette;
+
+            var selectedIndex = buffList.GaugeColorIndexes.TryGetValue(key, out var index)
+                ? index
+                : GetDefaultGaugeColorIndex(kind);
+            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+        }
+
+        buffList.GaugeColorIndexes = normalizedIndexes;
+        buffList.GaugeColorPalettes = normalizedPalettes;
     }
 
     public static MeterWidgetSettingsConfig CreateMeterSettings(WidgetKind kind)
@@ -854,6 +1148,71 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
+    /// テキストカラーで最初に選ばれている枠。エンティティ名とプレイヤー名だけ1枠目(白)で、
+    /// 残りは2枠目の差し色から始める。
+    /// </summary>
+    public static int GetDefaultTextColorIndex(string key)
+    {
+        return string.Equals(key, "EntityName", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(key, "PlayerName", StringComparison.OrdinalIgnoreCase)
+            ? MinClassColorIndex
+            : MinClassColorIndex + 1;
+    }
+
+    /// <summary>
+    /// ゲージの色で最初に選ばれている枠。<b>デバフ一覧だけ2枠目(紫)</b>で、残りは1枠目(青緑)から始める。
+    /// 見本そのものは両方で同じ(<see cref="BuffListDefaultGaugeColorHexes"/>)。
+    /// </summary>
+    public static int GetDefaultGaugeColorIndex(WidgetKind kind)
+    {
+        return kind == WidgetKind.DebuffList
+            ? MinClassColorIndex + 1
+            : MinClassColorIndex;
+    }
+
+    public static Dictionary<string, int> CreateDefaultGaugeColorIndexes(WidgetKind kind)
+    {
+        return BuffListGaugeColorKeys
+            .ToDictionary(key => key, _ => GetDefaultGaugeColorIndex(kind), StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultGaugeColorPalettes()
+    {
+        return BuffListGaugeColorKeys.ToDictionary(
+            key => key,
+            CreateDefaultGaugeColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static List<string> CreateDefaultGaugeColors(string key)
+    {
+        return BuffListDefaultGaugeColorHexes.TryGetValue(key, out var colors)
+            ? [.. colors]
+            : ["#5688A4"];
+    }
+
+    public static Dictionary<string, int> CreateDefaultTextColorIndexes()
+    {
+        return TakenDamageLogTextColorKeys
+            .ToDictionary(key => key, GetDefaultTextColorIndex, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultTextColorPalettes()
+    {
+        return TakenDamageLogTextColorKeys.ToDictionary(
+            key => key,
+            CreateDefaultTextColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static List<string> CreateDefaultTextColors(string key)
+    {
+        return TakenDamageLogDefaultTextColorHexes.TryGetValue(key, out var colors)
+            ? [.. colors]
+            : ["#FFFFFF", "#A8A8A8"];
+    }
+
+    /// <summary>
     /// フッターを持つウィジェット。持たないウィジェットでは「ピン留め中フッターを隠す」を出さない。
     ///
     /// <para>
@@ -887,6 +1246,121 @@ public static class WidgetConfigDefaults
         return kind == WidgetKind.HpsMeter
             ? ["#43D978", "#227A20"]
             : ["#B33000", "#6F1F00"];
+    }
+
+    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種だけ。</summary>
+    public static bool SupportsElementColorSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
+    }
+
+    /// <summary>
+    /// 属性カラーの既定を引くときの読み替え先(ユーザー決定)。
+    /// スキル詳細(与ダメ)は DPS メーター、スキル詳細(ヒール)は HPS メーターに合わせる。
+    /// </summary>
+    private static WidgetKind GetElementColorDefaultSource(WidgetKind kind)
+    {
+        return kind == WidgetKind.HealingContribution
+            ? WidgetKind.HpsMeter
+            : WidgetKind.DpsMeter;
+    }
+
+    /// <summary>属性カラーのフィルター色の既定パレット。読み替え先のメーターと同じ色。</summary>
+    public static List<string> CreateDefaultElementFilterColors(WidgetKind kind)
+    {
+        return CreateDefaultClassColorFilterColors(GetElementColorDefaultSource(kind));
+    }
+
+    public static ElementColorWidgetSettingsConfig CreateElementColorSettings(WidgetKind kind)
+    {
+        var source = GetElementColorDefaultSource(kind);
+
+        return new ElementColorWidgetSettingsConfig
+        {
+            ColorOpacity = MaxClassColorOpacity,
+            ColorIndexes = CreateDefaultElementColorIndexes(),
+            ColorPalettes = CreateDefaultElementColorPalettes(),
+            FilterEnabled = IsClassColorFilterEnabledByDefault(source),
+            FilterColors = CreateDefaultClassColorFilterColors(source),
+            FilterStrength = DefaultClassColorFilterStrength
+        };
+    }
+
+    /// <summary>属性カラーで最初に選ばれている枠。被ダメログのテキストカラーと同じく全部2枠目の差し色。</summary>
+    public static Dictionary<string, int> CreateDefaultElementColorIndexes()
+    {
+        return DamagePropertyKeys
+            .ToDictionary(key => key, _ => MinClassColorIndex + 1, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultElementColorPalettes()
+    {
+        return DamagePropertyKeys.ToDictionary(
+            key => key,
+            CreateDefaultElementColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static List<string> CreateDefaultElementColors(string key)
+    {
+        return ElementDefaultColorHexes.TryGetValue(key, out var colors)
+            ? [.. colors]
+            : [.. ElementDefaultColorHexes["General"]];
+    }
+
+    public static ElementColorWidgetSettingsConfig CloneNormalizedElementColor(
+        WidgetKind kind,
+        ElementColorWidgetSettingsConfig? elementColor)
+    {
+        var normalized = (elementColor ?? CreateElementColorSettings(kind)).Clone();
+        NormalizeElementColor(kind, normalized);
+        return normalized;
+    }
+
+    public static void NormalizeElementColor(WidgetKind kind, ElementColorWidgetSettingsConfig elementColor)
+    {
+        var source = GetElementColorDefaultSource(kind);
+
+        elementColor.ColorOpacity = Math.Clamp(
+            elementColor.ColorOpacity,
+            MinClassColorOpacity,
+            MaxClassColorOpacity);
+        elementColor.FilterStrength = Math.Clamp(
+            elementColor.FilterStrength,
+            MinClassColorFilterStrength,
+            MaxClassColorFilterStrength);
+        elementColor.FilterEnabled ??= IsClassColorFilterEnabledByDefault(source);
+
+        elementColor.ColorIndexes ??= CreateDefaultElementColorIndexes();
+        elementColor.ColorPalettes ??= CreateDefaultElementColorPalettes();
+
+        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in DamagePropertyKeys)
+        {
+            var defaultColors = CreateDefaultElementColors(key);
+            var sourceColors = elementColor.ColorPalettes.TryGetValue(key, out var colors) ? colors : defaultColors;
+            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+            normalizedPalettes[key] = palette;
+
+            var selectedIndex = elementColor.ColorIndexes.TryGetValue(key, out var index)
+                ? index
+                : MinClassColorIndex + 1;
+            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+        }
+
+        elementColor.ColorIndexes = normalizedIndexes;
+        elementColor.ColorPalettes = normalizedPalettes;
+
+        var filterDefaults = CreateDefaultClassColorFilterColors(source);
+        elementColor.FilterColors = NormalizeColorList(
+            elementColor.FilterColors ?? filterDefaults,
+            filterDefaults,
+            MaxPaletteColorCount);
+        elementColor.FilterColorIndex = Math.Clamp(
+            elementColor.FilterColorIndex,
+            MinClassColorIndex,
+            elementColor.FilterColors.Count - 1);
     }
 
     public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
@@ -976,6 +1450,12 @@ public static class WidgetConfigDefaults
             : null;
         config.TakenDamageLog = SupportsTakenDamageLogSettings(kind)
             ? CloneNormalizedTakenDamageLog(config.TakenDamageLog)
+            : null;
+        config.BuffList = SupportsBuffListSettings(kind)
+            ? CloneNormalizedBuffList(kind, config.BuffList)
+            : null;
+        config.ElementColor = SupportsElementColorSettings(kind)
+            ? CloneNormalizedElementColor(kind, config.ElementColor)
             : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
@@ -1097,6 +1577,12 @@ public static class WidgetConfigDefaults
             WidgetKind.TakenDamageLog,
             takenDamageLog.ClassColorIndexes,
             takenDamageLog.ClassColorPalettes);
+
+        takenDamageLog.TextColorIndexes ??= CreateDefaultTextColorIndexes();
+        takenDamageLog.TextColorPalettes ??= CreateDefaultTextColorPalettes();
+        (takenDamageLog.TextColorIndexes, takenDamageLog.TextColorPalettes) = NormalizeTextColors(
+            takenDamageLog.TextColorIndexes,
+            takenDamageLog.TextColorPalettes);
     }
 
     public static int ClampBuffCardScale(int scale)
@@ -1198,6 +1684,34 @@ public static class WidgetConfigDefaults
             var selectedIndex = indexes.TryGetValue(key, out var index)
                 ? index
                 : GetDefaultClassColorIndex(kind, key);
+            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+        }
+
+        return (normalizedIndexes, normalizedPalettes);
+    }
+
+    /// <summary>
+    /// 被ダメログのテキストカラーを、鍵の並びと既定値で揃える。クラスカラーと同じ規則。
+    /// </summary>
+    private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeTextColors(
+        Dictionary<string, int> indexes,
+        Dictionary<string, List<string>> palettes)
+    {
+        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var key in TakenDamageLogTextColorKeys)
+        {
+            var defaultColors = CreateDefaultTextColors(key);
+            var sourceColors = palettes.TryGetValue(key, out var colors)
+                ? colors
+                : defaultColors;
+            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+            normalizedPalettes[key] = palette;
+
+            var selectedIndex = indexes.TryGetValue(key, out var index)
+                ? index
+                : GetDefaultTextColorIndex(key);
             normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
         }
 

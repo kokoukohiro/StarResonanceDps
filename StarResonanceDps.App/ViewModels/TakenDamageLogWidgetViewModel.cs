@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
@@ -20,7 +21,12 @@ namespace StarResonanceDps.App.ViewModels;
 /// どの行も自分の経過時刻を持つ。時刻を見せない行は場所だけ取って描かない。時刻の列の幅は画面に作られている行だけで揃うので、
 /// 空にすると、時刻を見せる行が画面に無いとき列が縮んで本文が左へずれる。
 /// </param>
-public sealed record TakenDamageLogEntry(string TimeText, bool IsTimeShown, IReadOnlyList<object> Segments);
+/// <param name="Widget">文字の TIPS の見た目が引く窓のパレットの持ち主。行の TextBlock の Tag に載る。</param>
+public sealed record TakenDamageLogEntry(
+    string TimeText,
+    bool IsTimeShown,
+    IReadOnlyList<object> Segments,
+    WidgetListItemViewModel Widget);
 
 /// <summary>被弾行の対象の前に出すクラスアイコン。色はプレイヤーリストのクラスカラー、TIPS は特化名。</summary>
 /// <param name="IconMask">職業アイコンの形。クラス色の塗りをこの形で抜く。</param>
@@ -69,6 +75,11 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     // 書式の中の対象名({0})と属性アイコン({2})の位置の印。整形した文字列をここで区切ってアイコンを差し込む。
     private const string TargetNameMarker = "\x01";
     private const string AttributeIconMarker = "\x02";
+    private const string AttackerNameMarker = "\x03";
+    private const string SourceNameMarker = "\x04";
+    private const string DamagePartMarker = "\x05";
+    private const string HealthPartMarker = "\x06";
+    private const string MaxHealthMarker = "\x07";
 
     private readonly WidgetListItemViewModel _widget;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
@@ -81,6 +92,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     private readonly List<TakenDamageLogRow> _entryRows = [];
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
 
     private Encounter? _encounter;
     private int _nextIndex;
@@ -131,6 +143,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         var previous = _settings;
         _settings = _widget.GetTakenDamageLogSettingsSnapshot();
         _classBrushes.Clear();
+        _textBrushes.Clear();
 
         if (_settings.AttackerFilterIndex != previous.AttackerFilterIndex)
         {
@@ -227,7 +240,6 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
     private TakenDamageLogEntry CreateEntry(TakenDamageLogRow row)
     {
-        var localization = LocalizationManager.Instance;
         var line = row.Line;
 
         switch (row.Kind)
@@ -240,16 +252,20 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
                 return new TakenDamageLogEntry(
                     MeterWidgetViewModel.FormatDuration(line.Elapsed),
                     true,
-                    [localization.Format(format, GetDisplayName(line.Attacker), FormatSourceName(line, "TakenDamageLog_UnnamedCastSkill"))]);
+                    CreateSourceSegments(format, line, "TakenDamageLog_UnnamedCastSkill"),
+                    _widget);
             case TakenDamageLogRowKind.Skill:
                 return new TakenDamageLogEntry(
                     MeterWidgetViewModel.FormatDuration(line.Elapsed),
                     true,
-                    [localization.Format("TakenDamageLog_SkillFormat", GetDisplayName(line.Attacker), FormatSourceName(line, "TakenDamageLog_UnnamedSkill"))]);
+                    CreateSourceSegments("TakenDamageLog_SkillFormat", line, "TakenDamageLog_UnnamedSkill"),
+                    _widget);
             case TakenDamageLogRowKind.Hit:
-                return new TakenDamageLogEntry(MeterWidgetViewModel.FormatDuration(line.Elapsed), false, CreateHitSegments(row));
+                return new TakenDamageLogEntry(
+                    MeterWidgetViewModel.FormatDuration(line.Elapsed), false, CreateHitSegments(row), _widget);
             case TakenDamageLogRowKind.Death:
-                return new TakenDamageLogEntry(MeterWidgetViewModel.FormatDuration(line.Elapsed), false, CreateDeathSegments(row));
+                return new TakenDamageLogEntry(
+                    MeterWidgetViewModel.FormatDuration(line.Elapsed), false, CreateDeathSegments(row), _widget);
             default:
                 throw new ArgumentOutOfRangeException(nameof(row), row.Kind, null);
         }
@@ -276,7 +292,22 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// 被弾行。書式の対象名({0})の前にクラスアイコン、属性アイコンの位置({2})に属性アイコンを差し込む。
+    /// 予告行・詠唱行・技の行。加害者の名前(エンティティ名)と技の名前(スキル名)に、それぞれのテキストカラーを当てる。
+    /// </summary>
+    private IReadOnlyList<object> CreateSourceSegments(string formatKey, TakenDamageLogLine line, string unnamedKey)
+    {
+        var text = LocalizationManager.Instance.Format(formatKey, AttackerNameMarker, SourceNameMarker);
+        EnsureMarkers(text, formatKey, AttackerNameMarker, SourceNameMarker);
+
+        return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
+        {
+            [AttackerNameMarker[0]] = [ColoredText(GetDisplayName(line.Attacker), "EntityName")],
+            [SourceNameMarker[0]] = [ColoredText(FormatSourceName(line, unnamedKey), "SkillName")]
+        });
+    }
+
+    /// <summary>
+    /// 被弾行。書式の対象名({0})の前にクラスアイコン、ダメージ部({1})とHP部({2})をそれぞれの色で差し込む。
     /// 属性を持たない被弾(属性を保存していなかった頃の記録)は属性アイコンを出さない。
     /// </summary>
     private IReadOnlyList<object> CreateHitSegments(TakenDamageLogRow row)
@@ -284,102 +315,241 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         var localization = LocalizationManager.Instance;
         var line = row.Line;
         var target = line.Target!;
-        var value = row.Value.ToString(CultureInfo.InvariantCulture);
 
-        var text = row.TargetHp is { } hp
-            ? localization.Format(
-                "TakenDamageLog_HitFormat",
-                TargetNameMarker,
-                value,
-                AttributeIconMarker,
-                FormatHealthValue(hp, row.TargetShield ?? 0L),
-                (row.TargetMaxHp ?? 0L).ToString(CultureInfo.InvariantCulture))
-            : localization.Format("TakenDamageLog_HitFormatNoHp", TargetNameMarker, value, AttributeIconMarker);
-
-        if (!text.Contains(TargetNameMarker, StringComparison.Ordinal)
-            || !text.Contains(AttributeIconMarker, StringComparison.Ordinal))
+        var replacements = new Dictionary<char, IReadOnlyList<object>>
         {
-            throw new InvalidOperationException(
-                "TakenDamageLog_HitFormat / TakenDamageLog_HitFormatNoHp must contain {0} (target) and {2} (damage property icon).");
+            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(GetDisplayName(target), "PlayerName")],
+            [DamagePartMarker[0]] = CreateDamageSegments(row)
+        };
+
+        string text;
+        if (row.TargetHp is { } hp)
+        {
+            text = localization.Format("TakenDamageLog_HitFormat", TargetNameMarker, DamagePartMarker, HealthPartMarker);
+            EnsureMarkers(text, "TakenDamageLog_HitFormat", TargetNameMarker, DamagePartMarker, HealthPartMarker);
+
+            // 結果部。この被弾で死んだなら HP の代わりに死亡の文言を出す(ダメージの無い死亡の行と同じ書式)。
+            IReadOnlyList<object> result = line.IsLethal
+                ? [ColoredText(
+                    localization.Format(
+                        "TakenDamageLog_DeathText",
+                        FormatHealthValue(hp, 0L),
+                        (row.TargetMaxHp ?? 0L).ToString(CultureInfo.InvariantCulture)),
+                    "Death")]
+                : CreateHealthSegments(hp, row.TargetShield ?? 0L, row.TargetMaxHp ?? 0L);
+            replacements[HealthPartMarker[0]] = result;
+        }
+        else
+        {
+            text = localization.Format("TakenDamageLog_HitFormatNoHp", TargetNameMarker, DamagePartMarker);
+            EnsureMarkers(text, "TakenDamageLog_HitFormatNoHp", TargetNameMarker, DamagePartMarker);
         }
 
-        var segments = new List<object>();
-        var start = 0;
-        for (var index = 0; index < text.Length; index++)
+        return SplitByMarkers(text, replacements);
+    }
+
+    /// <summary>
+    /// ダメージ部(値＋属性アイコン＋「物理ダメージ」などの語)。ひとまとまりで属性の色にし、
+    /// <b>どの要素にも同じ TIPS</b>(属性名)を出す。
+    /// 属性を持たない被弾(属性を保存していなかった頃の記録)はアイコンを出さず、色は無属性のもので TIPS も付けない。
+    ///
+    /// <para>
+    /// 物理か魔法かは語を差し込まず<b>書式ごと分ける</b>。差し込みだと、種類の無い被弾のときに
+    /// 言語によっては空白が二重に残る。
+    /// </para>
+    /// </summary>
+    private IReadOnlyList<object> CreateDamageSegments(TakenDamageLogRow row)
+    {
+        var localization = LocalizationManager.Instance;
+        var element = row.Line.DamageElement;
+        var colorKey = element?.ToString() ?? "General";
+
+        var formatKey = row.Line.DamageMode switch
         {
-            var marker = text[index];
-            if (marker != TargetNameMarker[0] && marker != AttributeIconMarker[0])
-            {
-                continue;
-            }
+            Zproto.EDamageMode.DamagePhysical => "TakenDamageLog_HitDamagePhysical",
+            Zproto.EDamageMode.DamageMagical => "TakenDamageLog_HitDamageMagical",
+            _ => "TakenDamageLog_HitDamage"
+        };
 
-            if (index > start)
-            {
-                segments.Add(text[start..index]);
-            }
+        var text = localization.Format(
+            formatKey,
+            row.Value.ToString(CultureInfo.InvariantCulture),
+            AttributeIconMarker);
+        EnsureMarkers(text, formatKey, AttributeIconMarker);
 
-            if (marker == TargetNameMarker[0])
-            {
-                segments.Add(CreateClassIconSegment(target));
-                segments.Add(GetDisplayName(target));
-            }
-            else if (line.DamageElement is { } element)
-            {
-                segments.Add(new TakenDamageLogAttributeIconSegment(
-                    (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{element}"),
-                    localization.GetString($"DamageProperty_{element}"),
-                    _widget));
-            }
-
-            start = index + 1;
+        IReadOnlyList<object> icon = [];
+        string? attributeName = null;
+        if (element is { } value)
+        {
+            attributeName = localization.GetString($"DamageProperty_{value}");
+            icon =
+            [
+                new TakenDamageLogAttributeIconSegment(
+                    (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{value}"),
+                    attributeName,
+                    _widget)
+            ];
         }
 
-        if (start < text.Length)
+        return SplitByMarkers(
+            text,
+            new Dictionary<char, IReadOnlyList<object>> { [AttributeIconMarker[0]] = icon },
+            GetTextBrush(colorKey),
+            attributeName);
+    }
+
+    /// <summary>
+    /// HP部。外側の括弧まで HP 数値の色にし、バリア量の括弧だけバリア量の色にする。
+    /// </summary>
+    private IReadOnlyList<object> CreateHealthSegments(long hp, long shield, long maxHp)
+    {
+        var text = LocalizationManager.Instance.Format("TakenDamageLog_HitHealth", TargetNameMarker, MaxHealthMarker);
+        EnsureMarkers(text, "TakenDamageLog_HitHealth", TargetNameMarker, MaxHealthMarker);
+
+        return SplitByMarkers(
+            text,
+            new Dictionary<char, IReadOnlyList<object>>
+            {
+                [TargetNameMarker[0]] = CreateCurrentHealthSegments(hp, shield),
+                [MaxHealthMarker[0]] = [ColoredText(maxHp.ToString(CultureInfo.InvariantCulture), "HpValue")]
+            },
+            GetTextBrush("HpValue"));
+    }
+
+    /// <summary>
+    /// 現在HP。バリア量を分けて出す設定のときだけ、括弧ごとバリア量の色にする
+    /// (足して出す設定と、バリアが無いときは HP 数値だけ)。
+    /// </summary>
+    private IReadOnlyList<object> CreateCurrentHealthSegments(long hp, long shield)
+    {
+        var currentShield = Math.Max(shield, 0L);
+        if (_settings.HealthValueDisplayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
+            && currentShield > 0)
         {
-            segments.Add(text[start..]);
+            return
+            [
+                ColoredText(hp.ToString(CultureInfo.InvariantCulture), "HpValue"),
+                ColoredText(string.Create(CultureInfo.InvariantCulture, $"({currentShield})"), "ShieldValue")
+            ];
         }
 
-        return segments;
+        return [ColoredText(FormatHealthValue(hp, shield), "HpValue")];
     }
 
     /// <summary>
     /// ダメージの無い死亡の行。書式の対象名({0})の前にクラスアイコンを差し込む。
-    /// 死亡時の最大HPが分からなければ 0 と出す(被弾の行・プレイヤーリストと同じ)。
+    /// 「死亡」の語とHPは、まとめて死亡の色にする。死亡時の最大HPが分からなければ 0 と出す
+    /// (被弾の行・プレイヤーリストと同じ)。
     /// </summary>
     private IReadOnlyList<object> CreateDeathSegments(TakenDamageLogRow row)
     {
         var localization = LocalizationManager.Instance;
         var target = row.Line.Target!;
 
-        var text = localization.Format(
-            "TakenDamageLog_DeathFormat",
-            TargetNameMarker,
+        var text = localization.Format("TakenDamageLog_DeathFormat", TargetNameMarker, DamagePartMarker);
+        EnsureMarkers(text, "TakenDamageLog_DeathFormat", TargetNameMarker, DamagePartMarker);
+
+        var deathText = localization.Format(
+            "TakenDamageLog_DeathText",
             FormatHealthValue(row.TargetHp ?? 0L, 0L),
             (row.TargetMaxHp ?? 0L).ToString(CultureInfo.InvariantCulture));
 
-        var markerIndex = text.IndexOf(TargetNameMarker, StringComparison.Ordinal);
-        if (markerIndex < 0)
+        return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            throw new InvalidOperationException(
-                "TakenDamageLog_DeathFormat must contain {0} (target).");
-        }
+            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(GetDisplayName(target), "PlayerName")],
+            [DamagePartMarker[0]] = [ColoredText(deathText, "Death")]
+        });
+    }
 
+    /// <summary>
+    /// マーカーを埋めた文字列を、マーカーの位置で切って segment の並びにする。
+    /// <paramref name="textBrush"/> を渡すと、マーカー以外の文字もその色になる(渡さなければ行の既定の色)。
+    /// <paramref name="toolTipText"/> を渡すと、その文字にも TIPS が出る。
+    /// </summary>
+    private static IReadOnlyList<object> SplitByMarkers(
+        string text,
+        IReadOnlyDictionary<char, IReadOnlyList<object>> replacements,
+        Brush? textBrush = null,
+        string? toolTipText = null)
+    {
         var segments = new List<object>();
-        if (markerIndex > 0)
+        var start = 0;
+
+        void AddText(int end)
         {
-            segments.Add(text[..markerIndex]);
+            if (end <= start)
+            {
+                return;
+            }
+
+            var part = text[start..end];
+            segments.Add(textBrush is null ? part : new TextRunSegment(part, textBrush, toolTipText));
         }
 
-        segments.Add(CreateClassIconSegment(target));
-        segments.Add(GetDisplayName(target));
-
-        var rest = markerIndex + TargetNameMarker.Length;
-        if (rest < text.Length)
+        for (var index = 0; index < text.Length; index++)
         {
-            segments.Add(text[rest..]);
+            if (!replacements.TryGetValue(text[index], out var replacement))
+            {
+                continue;
+            }
+
+            AddText(index);
+            segments.AddRange(replacement);
+            start = index + 1;
         }
 
+        AddText(text.Length);
         return segments;
+    }
+
+    /// <summary>
+    /// 書式にプレースホルダが残っているかを見る。訳を差し替えたときに静かに消えるのを防ぐ。
+    /// </summary>
+    private static void EnsureMarkers(string text, string formatKey, params string[] markers)
+    {
+        foreach (var marker in markers)
+        {
+            if (!text.Contains(marker, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException($"{formatKey} must contain every placeholder.");
+            }
+        }
+    }
+
+    private TextRunSegment ColoredText(string text, string colorKey)
+    {
+        return new TextRunSegment(text, GetTextBrush(colorKey));
+    }
+
+    /// <summary>テキストカラーの1色。設定が変われば <see cref="_textBrushes"/> ごと捨てて引き直す。</summary>
+    private Brush GetTextBrush(string colorKey)
+    {
+        if (!_textBrushes.TryGetValue(colorKey, out var brush))
+        {
+            brush = new SolidColorBrush(GetTextColor(colorKey));
+            brush.Freeze();
+            _textBrushes[colorKey] = brush;
+        }
+
+        return brush;
+    }
+
+    /// <summary>テキストカラーの設定で選んでいる色(引き方はクラスカラーと同じ)。</summary>
+    private Color GetTextColor(string colorKey)
+    {
+        var palette = _settings.TextColorPalettes.TryGetValue(colorKey, out var colors)
+            ? colors
+            : WidgetConfigDefaults.CreateDefaultTextColors(colorKey);
+        var selectedIndex = _settings.TextColorIndexes.TryGetValue(colorKey, out var index)
+            ? index
+            : WidgetConfigDefaults.GetDefaultTextColorIndex(colorKey);
+        var selectedColor = palette.Count == 0
+            ? "#FFFFFF"
+            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
+
+        return ColorUtilities.TryParseHex(selectedColor, out var color)
+            ? color
+            : Colors.White;
     }
 
     private TakenDamageLogClassIconSegment CreateClassIconSegment(TakenDamageLogParty target)

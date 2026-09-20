@@ -83,6 +83,20 @@
 
   <ItemGroup>
     <Resource Include="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
+    <Resource Include="Assets\Images\common_attrattack.png" />
+    <Resource Include="Assets\Images\common_attrblock.png" />
+    <Resource Include="Assets\Images\common_attrdefense.png" />
+    <Resource Include="Assets\Images\common_attrdexterity.png" />
+    <Resource Include="Assets\Images\common_attrhaste.png" />
+    <Resource Include="Assets\Images\common_attrluck.png" />
+    <Resource Include="Assets\Images\common_attrmastery.png" />
+    <Resource Include="Assets\Images\common_attrmattack.png" />
+    <Resource Include="Assets\Images\common_attrmdefense.png" />
+    <Resource Include="Assets\Images\common_attrversatility.png" />
+    <Resource Include="Assets\Images\common_icon05.png" />
+    <Resource Include="Assets\Images\common_icon06.png" />
+    <Resource Include="Assets\Images\common_icon08.png" />
+    <Resource Include="Assets\Images\common_icon12.png" />
     <Resource Include="Assets\Images\com_icon_tab_146.png" />
     <Resource Include="Assets\Images\com_icon_tab_147.png" />
     <Resource Include="Assets\Images\com_icon_tab_148.png" />

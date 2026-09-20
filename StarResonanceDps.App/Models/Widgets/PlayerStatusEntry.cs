@@ -12,6 +12,7 @@ public sealed class PlayerStatusEntry
         string primaryStatText,
         string enduranceText,
         string armorText,
+        string resistanceText,
         string criticalText,
         string hasteText,
         string luckText,
@@ -24,6 +25,7 @@ public sealed class PlayerStatusEntry
         PrimaryStatText = primaryStatText;
         EnduranceText = enduranceText;
         ArmorText = armorText;
+        ResistanceText = resistanceText;
         CriticalText = criticalText;
         HasteText = hasteText;
         LuckText = luckText;
@@ -41,6 +43,8 @@ public sealed class PlayerStatusEntry
     public string EnduranceText { get; }
 
     public string ArmorText { get; }
+
+    public string ResistanceText { get; }
 
     public string CriticalText { get; }
 
@@ -63,10 +67,11 @@ public sealed class PlayerStatusEntry
 
         return new PlayerStatusEntry(
             $"{localization.GetString("PlayerStatus_MaxHp")}: {FormatInteger(player.MaxHp)}",
-            $"{(isMagicalProfession ? "MATK" : localization.GetString("PlayerStatus_PhysicalAttack"))}: {FormatInteger(isMagicalProfession ? attributes.MagicalAttack : attributes.PhysicalAttack)}",
+            $"{localization.GetString(isMagicalProfession ? "PlayerStatus_MagicAttack" : "PlayerStatus_PhysicalAttack")}: {FormatInteger(isMagicalProfession ? attributes.MagicalAttack : attributes.PhysicalAttack)}",
             $"{localization.GetString(primaryStatKey)}: {FormatInteger(primaryStatValue)}",
             $"{localization.GetString("PlayerStatus_Endurance")}: {FormatInteger(attributes.Endurance)}",
             $"{localization.GetString("PlayerStatus_Armor")}: {FormatInteger(attributes.Armor)}",
+            $"{localization.GetString("PlayerStatus_Resistance")}: {FormatInteger(attributes.Resistance)}",
             $"{localization.GetString("PlayerStatus_Crit")}: {FormatPercent(attributes.CriticalPercent / 100d)}% ({FormatInteger(attributes.Critical)})",
             $"{localization.GetString("PlayerStatus_Haste")}: {FormatPercent(attributes.HastePercent / 100d)}% ({FormatInteger(attributes.Haste)})",
             $"{localization.GetString("PlayerStatus_Luck")}: {FormatPercent(attributes.LuckPercent / 100d)}% ({FormatInteger(attributes.Luck)})",

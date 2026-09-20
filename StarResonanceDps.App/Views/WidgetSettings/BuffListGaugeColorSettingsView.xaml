@@ -1,0 +1,118 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffListGaugeColorSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        バフ・デバフ一覧のゲージの色。行の作りはクラスカラー(TakenDamageLogClassColorSettingsView)と同じで、
+        左のアイコンを持たない。
+    -->
+    <UserControl.Resources>
+        <!-- 最後の行は下の線を引かない(節の枠が閉じる)。 -->
+        <Style x:Key="BuffListGaugeColorSettings.Field"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource Panel.SettingField}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="{Binding GaugeColorSectionTitle}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding GaugeColorItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource BuffListGaugeColorSettings.Field}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                               Text="{Binding DisplayName}"
+                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ItemsControl ItemsSource="{Binding Colors.Colors}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <RadioButton GroupName="{Binding DataContext.Key, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                                 Background="{Binding Brush}"
+                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                                 IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                                 Click="ColorOptionRadioButton_Click" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
+                                                Style="{StaticResource Button.Text}"
+                                                Tag="{Binding Key}"
+                                                Click="ColorPickerButton_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!--
+                    不透明度。作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じ。
+                    節の最後の行なので下の線は引かない。
+                -->
+                <Border Style="{StaticResource Panel.SettingField}" BorderThickness="0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="260" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding GaugeColorOpacityLabel}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <Grid Grid.Column="2" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="35" />
+                            </Grid.ColumnDefinitions>
+                            <Slider Grid.Column="0"
+                                    IsSnapToTickEnabled="True"
+                                    TickFrequency="1"
+                                    Style="{StaticResource Input.ValueSlider}"
+                                    Value="{Binding GaugeColorOpacity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding GaugeColorOpacity, StringFormat={}{0:0}%}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ContentControl>
+    </StackPanel>
+</UserControl>
