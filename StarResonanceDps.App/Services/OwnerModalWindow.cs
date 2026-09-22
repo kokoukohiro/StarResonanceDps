@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Threading;
 
 namespace StarResonanceDps.App.Services;
 
@@ -53,6 +54,22 @@ public static class OwnerModalWindow
         }
 
         window.Show();
+    }
+
+    /// <summary>
+    /// <see cref="Show"/> と同じくオーナーだけを止めて表示し、閉じるまで呼び出しを待つ。
+    ///
+    /// <para>
+    /// 結果をその場で使う呼び出し(<c>Window.OnClosing</c> の中で閉じるかを決める確認など)用。
+    /// 待つ間は <see cref="Dispatcher.PushFrame"/> でメッセージを回すので、<see cref="Window.ShowDialog"/> と違って
+    /// オーナー以外のウィンドウ(ウィジェット)は動き続ける。
+    /// </para>
+    /// </summary>
+    public static void ShowAndWait(Window window, Window? owner)
+    {
+        var frame = new DispatcherFrame();
+        Show(window, owner, () => frame.Continue = false);
+        Dispatcher.PushFrame(frame);
     }
 
     [DllImport("user32.dll")]

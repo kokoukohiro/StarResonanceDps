@@ -1,10 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows.Media;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -21,7 +24,12 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
     private readonly DispatcherTimer _refreshTimer;
+    private BuffListWidgetSettingsConfig _settings;
     private bool _isDisposed;
+
+    /// <summary>行のゲージの塗り。設定はプレイヤーから開いた一覧と同じウィジェットのものを使う。</summary>
+    [ObservableProperty]
+    private Brush _gaugeBrush = Brushes.Transparent;
 
     [ObservableProperty]
     private string _headerText = string.Empty;
@@ -42,6 +50,8 @@ public sealed partial class EntityBuffListWidgetViewModel
         _target = target;
         _kind = kind;
         _openCard = openCard;
+        _settings = widget.GetBuffListSettingsSnapshot();
+        GaugeBrush = BuffListGaugeBrush.Create(_settings);
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -49,6 +59,7 @@ public sealed partial class EntityBuffListWidgetViewModel
         };
         _refreshTimer.Tick += RefreshTimer_Tick;
         _target.Changed += Target_Changed;
+        _widget.BuffListSettingsChanged += Widget_BuffListSettingsChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         RefreshPresentation();
         Refresh();
@@ -112,7 +123,21 @@ public sealed partial class EntityBuffListWidgetViewModel
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _target.Changed -= Target_Changed;
         _target.Dispose();
+        _widget.BuffListSettingsChanged -= Widget_BuffListSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+    }
+
+    /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直し、ゲージの長さも当て直す。</summary>
+    private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
+    {
+        _settings = _widget.GetBuffListSettingsSnapshot();
+        GaugeBrush = BuffListGaugeBrush.Create(_settings);
+
+        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
+        foreach (var entry in _entries)
+        {
+            entry.UpdateBar(gaugeLengthSeconds);
+        }
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -176,6 +201,12 @@ public sealed partial class EntityBuffListWidgetViewModel
             }
         }
 
+        // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
+        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
+        foreach (var entry in _entries)
+        {
+            entry.UpdateBar(gaugeLengthSeconds);
+        }
     }
 
     private int FindEntryIndex(string key)

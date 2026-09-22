@@ -13,38 +13,20 @@ namespace StarResonanceDps.Core.CombatRuntime
     public static class BattleStateMachine
     {
         public static ConcurrentQueue<KeyValuePair<EDungeonState, DateTime>> DungeonStateHistory { get; private set; } = new();
-        public static ConcurrentQueue<KeyValuePair<DungeonTargetData, DateTime>> DungeonTargetDataHistory { get; private set; } = new();
-        public static ConcurrentQueue<KeyValuePair<DungeonVar, DateTime>> DungeonVarHistory { get; private set; } = new();
-        public static DateTime? DeferredEncounterStartTime { get; private set; } = null;
-        public static EncounterStartReason DeferredEncounterStartReason { get; private set; } = EncounterStartReason.None;
         public static DateTime? DeferredEncounterEndFinalTime { get; private set; } = null;
         public static EncounterEndFinalData? DeferredEncounterEndFinalData { get; private set; } = null;
-        static KeyValuePair<DungeonTargetData, DateTime>? PreviousDungeonTargetData = null;
-        static KeyValuePair<DungeonVar, DateTime>? PreviousDungeonVar = null;
-        static bool NewEncounterOnNextEncounterEnd = false;
         static readonly object BenchmarkCompletionSync = new();
         static System.Threading.Timer? BenchmarkCompletionTimer;
 
         public static void StartNewMap()
         {
             Log.Information($"{DateTime.Now} - BattleStateMachine.StartNewMap");
-            PreviousDungeonTargetData = null;
-            DeferredEncounterStartTime = null;
-            DeferredEncounterStartReason = EncounterStartReason.None;
             DeferredEncounterEndFinalTime = null;
 
-            DungeonVarHistory.Clear();
-            DungeonTargetDataHistory.Clear();
             DungeonStateHistory.Clear();
-
-            PreviousDungeonVar = null;
-            NewEncounterOnNextEncounterEnd = false;
 
             EncounterManager.StartNewMap();
             EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
-
-            // マップが変わるとゲーム側のクールダウンはリセットされる。
-            SkillCooldownStateStore.NotifyCooldownsResetByGame();
 
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
             Services.ActiveBuffStore.Instance.Clear();
@@ -61,17 +43,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         internal static void ResetDungeonStateToStartup()
         {
-            PreviousDungeonTargetData = null;
-            DeferredEncounterStartTime = null;
-            DeferredEncounterStartReason = EncounterStartReason.None;
             DeferredEncounterEndFinalTime = null;
 
-            DungeonVarHistory.Clear();
-            DungeonTargetDataHistory.Clear();
             DungeonStateHistory.Clear();
-
-            PreviousDungeonVar = null;
-            NewEncounterOnNextEncounterEnd = false;
         }
 
         /// <summary>
@@ -99,18 +73,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
-                // ダンジョン開始でゲーム側のクールダウンはリセットされる。
-                // 自分の残CDはサーバ真値なので勝手に戻るが、他プレイヤーの推測値は明示的に捨てる。
-                SkillCooldownStateStore.NotifyCooldownsResetByGame();
-
-                if (EncounterManager.Current.HasStatsBeenRecorded())
-                {
-
-                    EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
-                }
-                else
+                // 開始までの待ち時間の記録を別の戦闘に分けるのはフェーズ分割の一部なので、無効なら区切らずに続ける。
+                // 記録が無ければ区切りではなく開始時刻の付け直し(EnterDungeon の中)なので、設定によらず行う。
+                if (!EncounterManager.Current.HasStatsBeenRecorded())
                 {
                     EncounterManager.EnterDungeon();
+                }
+                else if (CombatRuntimeSettings.SplitEncountersOnNewPhases)
+                {
+                    EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
                 }
             }
             else if (dungeonState == EDungeonState.DungeonStateEnd)
@@ -122,126 +93,13 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         }
 
-        public static void DungeonTargetDataHistoryAdd(DungeonTargetData dungeonTargetData)
+        /// <summary>
+        /// ダンジョンの目標が届いたことをログに残すだけ。区切りの判定には使わない
+        /// (ボス部屋の入場はリセット系バフで見る。<see cref="Managers.MessageManager"/> の差分の処理)。
+        /// </summary>
+        public static void LogDungeonTarget(DungeonTargetData dungeonTargetData)
         {
-
-            if (DungeonTargetDataHistory.Count > 300)
-            {
-                DungeonTargetDataHistory.TryDequeue(out _);
-            }
-
-            var newDungeonTargetData = new KeyValuePair<DungeonTargetData, DateTime>(dungeonTargetData, DateTime.Now);
-
-            DungeonTargetDataHistory.Enqueue(newDungeonTargetData);
-            Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonTargetDataHistoryAdd: TargetId={dungeonTargetData.TargetId}, Complete={dungeonTargetData.Complete}, Nums={dungeonTargetData.Nums}");
-
-            if (DungeonTargetDataHistory.Count > 2 && dungeonTargetData.Complete == 0 && dungeonTargetData.Nums == 0)
-            {
-
-                var firstObjective = DungeonTargetDataHistory.First();
-                if (firstObjective.Key != null && PreviousDungeonTargetData != null)
-                {
-                    if (firstObjective.Key.TargetId != 0 && PreviousDungeonTargetData.Value.Key.TargetId != 0 && PreviousDungeonTargetData.Value.Key.TargetId != firstObjective.Key.TargetId && firstObjective.Key.TargetId == dungeonTargetData.TargetId)
-                    {
-                        PreviousDungeonTargetData = newDungeonTargetData;
-
-                        // 最初の目標がボス選択のダンジョンでは、次のフェーズの目標が届いた直後にボス選択がもう一度届く。
-                        // そこでリスタートとして作り直すと、敵を運ばないエンカウンターを挟むことになり、
-                        // 予約中の目標切替がそこからボスを運んで、出現時にしか届かない AttrId を失う。
-                        // 目標切替が予約中なら、区切りはその予約に任せる。
-                        if (DeferredEncounterStartTime.HasValue && DeferredEncounterStartReason == EncounterStartReason.NewObjective)
-                        {
-                            Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonTargetDataHistoryAdd: RestartCheckHit skipped (NewObjective is deferred)");
-                            return;
-                        }
-
-                        Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonTargetDataHistoryAdd: RestartCheckHit!");
-
-                        EncounterManager.StopEncounter();
-                        EncounterManager.EnterDungeon(false, EncounterStartReason.Restart);
-                        return;
-                    }
-                }
-            }
-
-            if (PreviousDungeonTargetData != null)
-            {
-                if (PreviousDungeonTargetData.Value.Key.Complete == 0 && dungeonTargetData.Complete == 0 && PreviousDungeonTargetData.Value.Key.TargetId == dungeonTargetData.TargetId)
-                {
-
-                    PreviousDungeonTargetData = newDungeonTargetData;
-                    return;
-                }
-            }
-
-            PreviousDungeonTargetData = newDungeonTargetData;
-
-            if (CombatRuntimeSettings.SplitEncountersOnNewPhases)
-            {
-                if (dungeonTargetData.Complete == 0 && dungeonTargetData.Nums == 0)
-                {
-
-                    Log.Debug("DungeonTargetDataHistoryAdd - Deferring a New Objective EncounterStart");
-                    DeferredEncounterStartReason = EncounterStartReason.NewObjective;
-                    DeferredEncounterStartTime = DateTime.Now.AddSeconds(1);
-                }
-                else if (dungeonTargetData.Complete == 1 && dungeonTargetData.Nums > 0)
-                {
-
-                    EncounterManager.StopEncounter();
-
-                    if (NewEncounterOnNextEncounterEnd)
-                    {
-                        NewEncounterOnNextEncounterEnd = false;
-
-                        Log.Debug("DungeonTargetDataHistoryAdd - Objective Complete is requesting an EncounterStart as New Objective");
-
-                        DeferredEncounterStartReason = EncounterStartReason.NewObjective;
-                        DeferredEncounterStartTime = DateTime.Now.AddSeconds(1);
-                    }
-                }
-            }
-        }
-
-        public static void DungeonVarHistoryAdd(DungeonVar dungeonVar)
-        {
-
-            if (DungeonVarHistory.Count > 300)
-            {
-                DungeonVarHistory.TryDequeue(out _);
-            }
-
-            var newDungeonVar = new KeyValuePair<DungeonVar, DateTime>(dungeonVar, DateTime.Now);
-
-            DungeonVarHistory.Enqueue(newDungeonVar);
-
-            foreach (var dungeonVarData in dungeonVar.DungeonVarData)
-            {
-
-                if (dungeonVarData.Name == "IsFinishTarget" && dungeonVarData.Value == 1)
-                {
-                    bool previousWasFinish = false;
-                    if (PreviousDungeonVar != null)
-                    {
-                        foreach (var item in PreviousDungeonVar.Value.Key.DungeonVarData)
-                        {
-                            if (item.Name == "IsFinishTarget" && item.Value == 1)
-                            {
-                                previousWasFinish = true;
-                            }
-                        }
-                    }
-
-                    if (!previousWasFinish)
-                    {
-                        Log.Debug($"{DateTime.Now} - BattleStateMachine.DungeonVarHistoryAdd: IsFinishTarget == 1 for the first time. Next EncounterEnd will request EncounterStart");
-
-                        NewEncounterOnNextEncounterEnd = true;
-                    }
-                }
-            }
-
-            PreviousDungeonVar = newDungeonVar;
+            Log.Information($"{DateTime.Now} - BattleStateMachine.LogDungeonTarget: TargetId={dungeonTargetData.TargetId}, Complete={dungeonTargetData.Complete}, Nums={dungeonTargetData.Nums}");
         }
 
         public static void SetDeferredEncounterEndFinalData(DateTime dateTime, EncounterEndFinalData data)
@@ -361,15 +219,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             CompleteBenchmarkIfElapsed(DateTime.Now);
 
-            if (DeferredEncounterStartTime.HasValue && DateTime.Now.CompareTo(DeferredEncounterStartTime) >= 0)
-            {
-                DeferredEncounterStartTime = null;
-
-                EncounterManager.EnterDungeon(false, DeferredEncounterStartReason);
-
-                DeferredEncounterStartReason = EncounterStartReason.None;
-            }
-
             if (DeferredEncounterEndFinalTime.HasValue && DateTime.Now.CompareTo(DeferredEncounterEndFinalTime) >= 0)
             {
                 DeferredEncounterEndFinalTime = null;
@@ -377,6 +226,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 EncounterManager.SignalEncounterEndFinal(DeferredEncounterEndFinalData!);
 
             }
+        }
+
+        /// <summary>
+        /// ダンジョンが進行中(Playing)か。ボス部屋の入場の判定で使う。
+        /// エンカウンターが持つ状態は区切りで消えるので、履歴の最後で見る。
+        /// </summary>
+        public static bool IsDungeonPlaying()
+        {
+            return !DungeonStateHistory.IsEmpty && DungeonStateHistory.Last().Key == EDungeonState.DungeonStatePlaying;
         }
 
         public static bool IsInOpenWorld()

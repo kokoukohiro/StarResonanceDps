@@ -38,7 +38,7 @@ public static class AppConfigDefaults
             NetCaptureDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName,
             GameCapturePreference = EGameCapturePreference.Auto,
             GameCaptureCustomExeName = string.Empty,
-            SplitEncountersOnNewPhases = false,
+            SplitEncountersOnNewPhases = true,
             KeepPastEncounterInMeterUntilNextDamage = false,
             ClearHistorySelectionOnNextEvent = true,
             DatabaseRetentionPolicyDays = 30,

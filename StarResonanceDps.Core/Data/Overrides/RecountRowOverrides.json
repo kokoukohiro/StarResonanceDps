@@ -234,6 +234,22 @@
   "920093:2": {
     "Row": "920006:0"
   },
+  "997820:3": {
+    "Name": {
+      "zh-CN": "栖林的神秘力量",
+      "en-US": "The mysterious power in the woods",
+      "ja-JP": "森の神秘的な力",
+      "ko-KR": "숲의 신비한 힘"
+    }
+  },
+  "997820:5": {
+    "Name": {
+      "zh-CN": "栖林的神秘力量",
+      "en-US": "The mysterious power in the woods",
+      "ja-JP": "森の神秘的な力",
+      "ko-KR": "숲의 신비한 힘"
+    }
+  },
   "999031:1": {
     "Row": "920011:0"
   },
@@ -366,6 +382,14 @@
       "ko-KR": "프로스트 메이지X11 - 블리자드"
     }
   },
+  "3054412:1": {
+    "Name": {
+      "zh-CN": "神盾真实因子X2",
+      "en-US": "Shield Knight Reality Factor X2",
+      "ja-JP": "シールドファイター・実像因子X2",
+      "ko-KR": "실드 나이트 진실 인자X2"
+    }
+  },
   "3054440:6": {
     "Row": "2421:1"
   },
@@ -383,6 +407,14 @@
       "en-US": "Beat Performer X11",
       "ja-JP": "ビートパフォーマーX11",
       "ko-KR": "비트 퍼포머X11"
+    }
+  },
+  "3057431:1": {
+    "Name": {
+      "zh-CN": "灵魂真实因子X4",
+      "en-US": "Beat Performer Reality Factor X4",
+      "ja-JP": "ビートパフォーマー・実像因子X4",
+      "ko-KR": "비트 퍼포머 진실 인자X4"
     }
   },
   "3059080:3": {

@@ -293,15 +293,20 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
     /// <summary>
     /// 予告行・詠唱行・技の行。加害者の名前(エンティティ名)と技の名前(スキル名)に、それぞれのテキストカラーを当てる。
+    /// 加害者がプレイヤー(自傷・フレンドリーファイア)なら、被弾行と同じクラスアイコンを名前の前に置く。
     /// </summary>
     private IReadOnlyList<object> CreateSourceSegments(string formatKey, TakenDamageLogLine line, string unnamedKey)
     {
         var text = LocalizationManager.Instance.Format(formatKey, AttackerNameMarker, SourceNameMarker);
         EnsureMarkers(text, formatKey, AttackerNameMarker, SourceNameMarker);
 
+        IReadOnlyList<object> attacker = line.Attacker.IsPlayer
+            ? [CreateClassIconSegment(line.Attacker), ColoredText(GetDisplayName(line.Attacker), "EntityName")]
+            : [ColoredText(GetDisplayName(line.Attacker), "EntityName")];
+
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [AttackerNameMarker[0]] = [ColoredText(GetDisplayName(line.Attacker), "EntityName")],
+            [AttackerNameMarker[0]] = attacker,
             [SourceNameMarker[0]] = [ColoredText(FormatSourceName(line, unnamedKey), "SkillName")]
         });
     }

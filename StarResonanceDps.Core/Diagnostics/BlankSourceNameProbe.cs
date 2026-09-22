@@ -17,6 +17,8 @@ namespace StarResonanceDps.Core.Diagnostics;
 /// 記録時に付与元をたどった着地先(オプションか技、<c>Services.SourceLandingResolver</c>)の名前で出る。
 /// ここに残すのは、どこにも着かず<b>名前が空のまま内部ID注記だけ</b>で出る鍵と、技に着いた鍵(オプションより確かさが一段低い)、
 /// 着地先が食い違った鍵。どれも<b>たどった鎖</b>を書く。
+/// 着かなかった鍵は、後の記録で着けば DB に空欄が残らないので、記録の時点では書かずにエンカウンターに控え、
+/// DB へ保存した直後にまだ着いていないものだけを書く(<c>Encounter.ReportUnresolvedBlankSources</c>)。
 /// </para>
 ///
 /// <para>
@@ -57,8 +59,8 @@ public static class BlankSourceNameProbe
     private static readonly HashSet<(long RowKey, SourceLanding Decided, SourceLanding Other)> SeenConflicts = [];
 
     /// <summary>
-    /// 見出し表で名前が空の行を1件残す。着かなかったもの(<paramref name="landing"/> が無し)と、技に着いたものを書く。
-    /// 同じ鍵は結果の種類ごとに1起動1行(着かなかった行のあとで技に着けば、それも1行書く)。
+    /// 見出し表で名前が空の行を1件残す。保存の時点で着いていなかったもの(<paramref name="landing"/> が無し)と、技に着いたものを書く。
+    /// 同じ鍵は結果の種類ごとに1起動1行(ある戦闘で着かなかった鍵が別の戦闘で技に着けば、それも1行書く)。
     /// </summary>
     /// <param name="rowKey">畳んだあとの行代表キー。<c>ownerId:枝番</c> で書き出す。</param>
     /// <param name="rowKeyText">その鍵の表示形。手修正ファイルへそのまま写せる形で残す。</param>
@@ -71,6 +73,9 @@ public static class BlankSourceNameProbe
     /// <param name="characterId">出した人。職の当たりを付ける手掛かり。</param>
     /// <param name="landing">付与元をたどって着いた先。着かなければ無し。</param>
     /// <param name="trace">たどった鎖(段ごとの種類とID、止まった理由)。</param>
+    /// <param name="firstBlankAt">
+    /// 着かなかった鍵の、最初に着かなかった記録の到着時刻。行の先頭の時刻は書いた時刻(保存の直後)なので別に残す。技に着いた鍵では無し。
+    /// </param>
     public static void Capture(
         long rowKey,
         string rowKeyText,
@@ -80,7 +85,8 @@ public static class BlankSourceNameProbe
         ulong hitCount,
         long characterId,
         SourceLanding landing,
-        string trace)
+        string trace,
+        DateTime? firstBlankAt = null)
     {
         lock (Sync)
         {
@@ -90,10 +96,13 @@ public static class BlankSourceNameProbe
             }
         }
 
+        var firstBlankText = firstBlankAt is { } blankAt
+            ? string.Create(CultureInfo.InvariantCulture, $"初回={blankAt.ToLocalTime():HH:mm:ss.fff} ")
+            : string.Empty;
         Write(string.Create(
             CultureInfo.InvariantCulture,
             $"行={rowKeyText} 種別={(isBuffSource ? "バフ" : "スキル")} 表={(isHealing ? "ヒール" : "与ダメ")} "
-            + $"検知時点 累計={totalValue} ヒット={hitCount} charId={characterId} 着地={landing} 鎖={trace}"));
+            + $"検知時点 累計={totalValue} ヒット={hitCount} charId={characterId} 着地={landing} {firstBlankText}鎖={trace}"));
     }
 
     /// <summary>

@@ -45,7 +45,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _kind = kind;
         _openCard = openCard;
         _settings = playerWidget.GetBuffListSettingsSnapshot();
-        GaugeBrush = CreateGaugeBrush(_settings);
+        GaugeBrush = BuffListGaugeBrush.Create(_settings);
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -79,9 +79,9 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
         _settings = PlayerWidget.GetBuffListSettingsSnapshot();
-        GaugeBrush = CreateGaugeBrush(_settings);
+        GaugeBrush = BuffListGaugeBrush.Create(_settings);
 
-        var gaugeLengthSeconds = WidgetConfigDefaults.BuffListGaugeLengthSeconds[_settings.GaugeLengthIndex];
+        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
         foreach (var entry in _entries)
         {
             entry.UpdateBar(gaugeLengthSeconds);
@@ -171,63 +171,11 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         }
 
         // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
-        var gaugeLengthSeconds = WidgetConfigDefaults.BuffListGaugeLengthSeconds[_settings.GaugeLengthIndex];
+        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
         foreach (var entry in _entries)
         {
             entry.UpdateBar(gaugeLengthSeconds);
         }
-    }
-
-    /// <summary>
-    /// 行のゲージの塗り。設定の2色で左から右へのグラデーションにする
-    /// (停止位置はエンティティリストの HP バーと同じ)。
-    /// </summary>
-    private static LinearGradientBrush CreateGaugeBrush(BuffListWidgetSettingsConfig settings)
-    {
-        var brush = new LinearGradientBrush
-        {
-            StartPoint = new System.Windows.Point(0, 0.5),
-            EndPoint = new System.Windows.Point(1, 0.5)
-        };
-
-        var start = ResolveGaugeColor(settings, "GaugeStart");
-        var end = ResolveGaugeColor(settings, "GaugeEnd");
-        brush.GradientStops.Add(new GradientStop(start, 0d));
-        brush.GradientStops.Add(new GradientStop(start, 0.05d));
-        brush.GradientStops.Add(new GradientStop(end, 0.95d));
-        brush.GradientStops.Add(new GradientStop(end, 1d));
-        brush.Freeze();
-        return brush;
-    }
-
-    private static Color ResolveGaugeColor(BuffListWidgetSettingsConfig settings, string key)
-    {
-        var palette = settings.GaugeColorPalettes.TryGetValue(key, out var colors)
-            ? colors
-            : WidgetConfigDefaults.CreateDefaultGaugeColors(key);
-        var selectedIndex = settings.GaugeColorIndexes.TryGetValue(key, out var index)
-            ? index
-            : WidgetConfigDefaults.MinClassColorIndex;
-        var selectedColor = palette.Count == 0
-            ? WidgetConfigDefaults.CreateDefaultGaugeColors(key)[0]
-            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
-
-        var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
-            ? parsed
-            : Colors.Gray;
-
-        // 不透明度はメーターのクラスカラーと同じ作りで、表示に使う色のアルファへ掛ける。
-        // 設定画面の色見本は素のままにしたいので、ここだけで掛ける。
-        var opacity = Math.Clamp(
-            settings.GaugeColorOpacity,
-            WidgetConfigDefaults.MinClassColorOpacity,
-            WidgetConfigDefaults.MaxClassColorOpacity);
-
-        return Color.FromArgb(
-            (byte)Math.Round(opacity / 100d * byte.MaxValue, MidpointRounding.AwayFromZero),
-            color.R,
-            color.G,
-            color.B);
     }
 
     private int FindEntryIndex(string key)

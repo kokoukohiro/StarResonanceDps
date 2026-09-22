@@ -413,7 +413,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         private static void ApplyTeamMemberSocialData(TeamMemData member, string source)
         {
-
             if (member.CharId <= 0 || member.SocialData == null)
             {
                 return;

@@ -34,7 +34,7 @@ public sealed record TakenDamageLogRow(
 ///
 /// <list type="bullet">
 ///   <item>被弾は、届いた瞬間ごとに技の行を出し、その下に同じ加害者・同じ発生源・同じ到着時刻の被弾を並べる</item>
-///   <item>ダメージの無い死亡は、「システムの攻撃」の技の行とその下の死亡の行の2行。ほかの行と畳まない</item>
+///   <item>ダメージの無い死亡は、同じ到着時刻のものを1つの「システムの攻撃」の技の行の下に並べる(死亡の行は1人1行)</item>
 ///   <item>技の行の下で、同じ対象・同じ属性の被弾は1行に畳んで値を足す。畳んだ行は、その中で最後の被弾の位置に出す</item>
 ///   <item>属性を持たない被弾(属性を保存していなかった頃の記録)は、同じ属性か分からないので畳まない</item>
 /// </list>
@@ -42,7 +42,7 @@ public sealed record TakenDamageLogRow(
 /// <para>
 /// 被弾は1件ずつ記録に足されるので、同じ到着時刻の被弾が取得の区切りをまたいで分かれて届くことがある。
 /// 到着時刻が同じ間はその時刻の行を開いたままにして、後から届いた被弾も同じ技の行・同じ畳みへ入れる。
-/// 違う到着時刻の被弾か、違う到着時刻の予告・詠唱が来たら閉じる。
+/// 違う到着時刻の被弾・死亡か、違う到着時刻の予告・詠唱が来たら閉じる。
 /// </para>
 /// </summary>
 public sealed class TakenDamageLogLayout
@@ -91,23 +91,25 @@ public sealed class TakenDamageLogLayout
 
         if (line.Kind == TakenDamageLogRecordKind.Death)
         {
-            var skillRow = new TakenDamageLogRow(TakenDamageLogRowKind.Skill, line, 0, null, null, null);
-            var deathRow = new TakenDamageLogRow(TakenDamageLogRowKind.Death, line, 0, line.TargetHp, line.TargetMaxHp, null);
-
-            // 予告・詠唱と同じく、開いている到着時刻と同じならその時刻の並びに入れる。
-            if (_openTimestamp == line.Timestamp)
+            // 被弾と同じく到着時刻を開く。同じ時刻に続けて届いた死亡を同じまとまりへ入れるため。
+            if (_openTimestamp != line.Timestamp)
             {
-                var block = OpenBlock.ForSingle(skillRow);
-                block.Folds.Add(new Fold(null, deathRow));
-                _openBlocks.Add(block);
-                return RebuildOpenRows();
+                Close();
+                _openTimestamp = line.Timestamp;
             }
 
-            Close();
-            _rows.Add(skillRow);
-            _rows.Add(deathRow);
-            _openStart = _rows.Count;
-            return _rows.Count - 2;
+            // 同じ到着時刻のダメージの無い死亡は、1つの「システムの攻撃」の技の行の下に並べる。
+            var deathGroup = _openBlocks.Find(block => block.IsDeathGroup);
+            if (deathGroup is null)
+            {
+                deathGroup = OpenBlock.ForDeathGroup(new TakenDamageLogRow(TakenDamageLogRowKind.Skill, line, 0, null, null, null));
+                _openBlocks.Add(deathGroup);
+            }
+
+            deathGroup.Folds.Add(new Fold(
+                null,
+                new TakenDamageLogRow(TakenDamageLogRowKind.Death, line, 0, line.TargetHp, line.TargetMaxHp, null)));
+            return RebuildOpenRows();
         }
 
         if (_openTimestamp != line.Timestamp)
@@ -209,29 +211,41 @@ public sealed class TakenDamageLogLayout
 
     private sealed record Fold(FoldKey? Key, TakenDamageLogRow Row);
 
-    /// <summary>開いている到着時刻の行のまとまり。予告・詠唱の1行か、技の行とその下の被弾。</summary>
+    /// <summary>
+    /// 開いている到着時刻の行のまとまり。予告・詠唱の1行か、技の行とその下の被弾か、
+    /// 「システムの攻撃」の技の行とその下のダメージの無い死亡。
+    /// </summary>
     private sealed class OpenBlock
     {
-        private OpenBlock(TakenDamageLogRow head, HitGroupKey? groupKey)
+        private OpenBlock(TakenDamageLogRow head, HitGroupKey? groupKey, bool isDeathGroup)
         {
             Head = head;
             GroupKey = groupKey;
+            IsDeathGroup = isDeathGroup;
         }
 
         public TakenDamageLogRow Head { get; }
 
         public HitGroupKey? GroupKey { get; }
 
+        /// <summary>ダメージの無い死亡のまとまりか。同じ到着時刻に1つだけ作る。</summary>
+        public bool IsDeathGroup { get; }
+
         public List<Fold> Folds { get; } = [];
 
         public static OpenBlock ForSingle(TakenDamageLogRow row)
         {
-            return new OpenBlock(row, null);
+            return new OpenBlock(row, null, isDeathGroup: false);
         }
 
         public static OpenBlock ForGroup(HitGroupKey key, TakenDamageLogRow skillRow)
         {
-            return new OpenBlock(skillRow, key);
+            return new OpenBlock(skillRow, key, isDeathGroup: false);
+        }
+
+        public static OpenBlock ForDeathGroup(TakenDamageLogRow skillRow)
+        {
+            return new OpenBlock(skillRow, null, isDeathGroup: true);
         }
 
         public IEnumerable<TakenDamageLogRow> EnumerateRows()

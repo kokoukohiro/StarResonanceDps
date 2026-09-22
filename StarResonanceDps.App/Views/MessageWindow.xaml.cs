@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views;
 
@@ -34,7 +35,9 @@ public partial class MessageWindow : Window
         window.DetailText.Visibility = string.IsNullOrWhiteSpace(detail)
             ? Visibility.Collapsed
             : Visibility.Visible;
-        window.ShowDialog();
+
+        // ShowDialog はアプリのウィンドウを全部止めるので、ウィジェットも操作できなくなる。止めるのはオーナーだけにする。
+        OwnerModalWindow.ShowAndWait(window, owner);
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -45,13 +48,14 @@ public partial class MessageWindow : Window
         }
     }
 
+    // DialogResult は ShowDialog で表示した窓にしか設定できないので、閉じるだけにする(結果は使わない)。
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        DialogResult = false;
+        Close();
     }
 
     private void OkButton_Click(object sender, RoutedEventArgs e)
     {
-        DialogResult = true;
+        Close();
     }
 }

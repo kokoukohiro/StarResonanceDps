@@ -115,9 +115,22 @@ namespace StarResonanceDps.Core.CombatRuntime
                 netCap.Stop();
             }
 
+            NearbyEntityStore.Instance.Clear();
+            ClearReceivedStateStores();
+        }
+
+        /// <summary>
+        /// 受信した通知から作った状態を消す。キャプチャの停止とログアウト(起動直後の状態へ戻す)の両方から呼ぶ。
+        ///
+        /// <para>
+        /// 周囲の実体の一覧(<see cref="NearbyEntityStore"/>)はここに入れない。ログアウトでは
+        /// 陣営・マップ名と一緒に <see cref="NearbyEntityProjection.ResetToStartup"/> が消すため。
+        /// </para>
+        /// </summary>
+        private static void ClearReceivedStateStores()
+        {
             SkillCooldownStateStore.Reset();
             GrpcTeamManager.ResetMemberState();
-            NearbyEntityStore.Instance.Clear();
             ActiveBuffStore.Instance.Clear();
             BuffInstanceIndex.Instance.Clear();
             SummonSourceIndex.Instance.Clear();
@@ -126,18 +139,56 @@ namespace StarResonanceDps.Core.CombatRuntime
             PartyMemberCache.Instance.Clear();
         }
 
+        /// <summary>
+        /// 自動のときにキャプチャするアダプタ。
+        ///
+        /// <para>
+        /// 候補は <b>Windows の状態が Up</b> で、アドレス・ゲートウェイ・MAC を持つもの。
+        /// 切れた Wi-Fi にも自動割り当てのアドレスと、前に接続したときのゲートウェイが残って見えるので、
+        /// Up かどうかで外さないと候補に残ってしまう。
+        /// </para>
+        ///
+        /// <para>
+        /// 候補が複数あるときは、<b>Windows が外向きの通信に使っているアダプタ</b>を選ぶ。
+        /// Npcap の並び順は優先度ではない。有線を決め打ちで優先しないのは、通信が実際に Wi-Fi を
+        /// 通っているときに有線を掴むと何も取れないため。
+        /// <b>経路を引けない・経路の先が候補に無いときは、候補(どれも Up)の先頭で動かし続け、警告を残す。</b>
+        /// 何も選ばないとキャプチャが止まり、何も取れなくなる。
+        /// </para>
+        /// </summary>
         public static SharpPcap.LibPcap.LibPcapLiveDevice? TryFindBestNetworkDevice()
         {
-            var devices = SharpPcap.LibPcap.LibPcapLiveDeviceList.Instance;
-
-            foreach (var device in devices)
+            var upInterfaces = new Dictionary<string, System.Net.NetworkInformation.NetworkInterface>(StringComparer.Ordinal);
+            foreach (var networkInterface in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
             {
+                if (networkInterface.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)
+                {
+                    continue;
+                }
+
+                var guid = ExtractAdapterGuid(networkInterface.Id);
+                if (guid.Length > 0)
+                {
+                    upInterfaces.TryAdd(guid, networkInterface);
+                }
+            }
+
+            var candidates = new List<(SharpPcap.LibPcap.LibPcapLiveDevice Device, System.Net.NetworkInformation.NetworkInterface Interface)>();
+            foreach (var device in SharpPcap.LibPcap.LibPcapLiveDeviceList.Instance)
+            {
+                // pcap の名前(\Device\NPF_{GUID})の GUID で Windows のアダプタと突き合わせる。
+                // Up でないものと、Windows 側に対応が無いもの(ループバック)はここで外れる。
+                if (!upInterfaces.TryGetValue(ExtractAdapterGuid(device.Name), out var networkInterface))
+                {
+                    continue;
+                }
+
                 if (device.Addresses.Count == 0)
                 {
                     continue;
                 }
 
-                if (device.Interface?.GatewayAddresses.Count == 0)
+                if (device.Interface is null || device.Interface.GatewayAddresses.Count == 0)
                 {
                     continue;
                 }
@@ -147,12 +198,77 @@ namespace StarResonanceDps.Core.CombatRuntime
                     continue;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Best Network Device = {device.Description} -- {device.Name}");
-                return device;
+                candidates.Add((device, networkInterface));
             }
 
-            return null;
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+
+            if (candidates.Count == 1)
+            {
+                return candidates[0].Device;
+            }
+
+            if (!TryGetOutboundInterfaceIndex(out var outboundIndex))
+            {
+                Log.Warning(
+                    "Could not resolve the outbound route; using the first of {Count} capture adapter candidates: {Adapter}",
+                    candidates.Count,
+                    candidates[0].Device.Description);
+                return candidates[0].Device;
+            }
+
+            foreach (var candidate in candidates)
+            {
+                if (candidate.Interface.Supports(System.Net.NetworkInformation.NetworkInterfaceComponent.IPv4)
+                    && candidate.Interface.GetIPProperties().GetIPv4Properties()?.Index == outboundIndex)
+                {
+                    return candidate.Device;
+                }
+            }
+
+            Log.Warning(
+                "Outbound interface {Index} is not among the {Count} capture adapter candidates; using the first: {Adapter}",
+                outboundIndex,
+                candidates.Count,
+                candidates[0].Device.Description);
+            return candidates[0].Device;
         }
+
+        /// <summary>
+        /// Windows のアダプタID(<c>{GUID}</c>)と pcap のデバイス名(<c>\Device\NPF_{GUID}</c>)から、GUID の部分だけを取り出す。
+        /// 括弧が無ければ空。
+        /// </summary>
+        private static string ExtractAdapterGuid(string name)
+        {
+            var start = name.IndexOf('{');
+            if (start < 0)
+            {
+                return string.Empty;
+            }
+
+            var end = name.IndexOf('}', start + 1);
+            return end > start
+                ? name[(start + 1)..end].ToUpperInvariant()
+                : string.Empty;
+        }
+
+        /// <summary>
+        /// Windows が外向きの通信に使うアダプタの番号(IPv4 のインターフェース番号)。
+        /// 宛先は既定の経路に乗る公開アドレスなら何でもよく、パケットは送らない。
+        /// </summary>
+        private static bool TryGetOutboundInterfaceIndex(out int index)
+        {
+            var destination = BitConverter.ToUInt32(System.Net.IPAddress.Parse("8.8.8.8").GetAddressBytes(), 0);
+            var result = GetBestInterface(destination, out var bestInterfaceIndex);
+            index = (int)bestInterfaceIndex;
+            return result == 0;
+        }
+
+        [System.Runtime.InteropServices.DllImport("iphlpapi.dll")]
+        private static extern int GetBestInterface(uint destinationAddress, out uint bestInterfaceIndex);
 
         public static void ProcessEnterScene(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
@@ -464,21 +580,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             ShapeshiftedEntities.Clear();
             PlayerDeathStates.Clear();
             LastPassiveHealTicks.Clear();
-            PlayerStateHistory.Clear();
-            IsWipeCheckQueued = false;
-
-            // キャプチャの停止(StopCapturing)で消しているもの。停止はしない。
-            SkillCooldownStateStore.Reset();
-
-            GrpcTeamManager.ResetMemberState();
-
-            ActiveBuffStore.Instance.Clear();
-            BuffInstanceIndex.Instance.Clear();
-            SummonSourceIndex.Instance.Clear();
-            SourceLandingResolver.Instance.Clear();
-            NearbyMonsterIndex.Instance.Clear();
-
-            PartyMemberCache.Instance.Clear();
+            // キャプチャの停止(StopCapturing)と共通のもの。停止はしない。
+            ClearReceivedStateStores();
 
             // マップ移動では残していたもの(自分の陣営・自分のスキル・プレイヤーリストの行など)。
             PlayerSkillLevelStateStore.ResetSelfToStartup();
@@ -867,7 +970,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             System.Diagnostics.Debug.WriteLine($"ProcessSyncHitInfo");
         }
-        public static bool IsWipeCheckQueued = false;
         private static readonly HashSet<EAttrType> ShieldListChangedAttributes = [EAttrType.AttrShieldList];
 
         internal static bool IsSelfPlayer(long uuid)
@@ -937,6 +1039,26 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 回復の薬はどれもこのバフを付けるので、どの薬かは分からない。
         /// </summary>
         private const int PotionHealBuffId = 2033000;
+
+        /// <summary>全滅でゲームがリセットしたとき、戦っていた全員に付くバフ(<c>NameDesign</c> 英雄本通用团灭恢复血量清理CD)。ダンジョン開始・ボス部屋の初回の入場にも付く。</summary>
+        private const int WipeResetBuffId = 510072;
+
+        /// <summary>復活の前に付くバフ(<c>ReviveTable.BeforeBuffId</c>)。1人の復活にも付く。</summary>
+        private const int ReviveStartBuffId = 500111;
+
+        /// <summary>
+        /// 付いた人のスキルのクールダウンをゲームが一括で消すバフと、付与から消えるまでの時間。
+        /// 510072(<c>NameDesign</c> 英雄本通用团灭恢复血量清理CD)は付与の約3.5秒後、
+        /// 900122(清cd和回满生命)と 999962(肉鸽本-进休息室重置)は付与と同じ差分で消える。
+        /// 510072 の 3.6秒は、付与から消えるまでの時間の最大(3.57秒)の直後。
+        /// この3種が付く瞬間は、ゲームが戦いを仕切り直した瞬間でもある(ダンジョン開始・ボス部屋の初回の入場・全滅)。
+        /// </summary>
+        private static readonly Dictionary<int, TimeSpan> CooldownResetBuffDelays = new()
+        {
+            [510072] = TimeSpan.FromSeconds(3.6),
+            [900122] = TimeSpan.Zero,
+            [999962] = TimeSpan.Zero,
+        };
 
         /// <summary>
         /// 自然回復のバフ。683104(主城自动回血、シーン入場で付く)と 683105(坐木桩自动回血、切り株に座っている間)。
@@ -1216,7 +1338,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static void AddBuffHealing(long uuid, int buffId, long healing, ExtraPacketData extraData)
         {
             var source = SkillSourceResolver.Resolve(EDamageSource.Buff, buffId, 0);
-            EncounterManager.Current.AddHealing(uuid, uuid, source.Key, 0, healing, healing, 0, default, EDamageType.Heal, default, false, false, false, false, false, extraData);
+            // HP の増えはそのまま実際に増えた値なので、名目にも同じ値を渡す(過剰回復は 0)。
+            EncounterManager.Current.AddHealing(uuid, uuid, source.Key, 0, healing, healing, healing, 0, default, EDamageType.Heal, default, false, false, false, false, false, extraData);
             EncounterManager.Current.MarkBuffSourcedSkill(uuid, source.Key);
             PlayerRosterProjection.UpsertPlayer(uuid);
         }
@@ -1585,12 +1708,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         break;
                     case EAttrType.AttrState:
                         EncounterManager.Current.SetAttrKV(uuid, "AttrState", isNoValue ? (EActorState)0 : (EActorState)reader.ReadInt32());
-
-                        if (uuid == currentUserUuid)
-                        {
-                            IsWipeCheckQueued = true;
-                        }
-
                         break;
                     case EAttrType.AttrShieldList:
                         {
@@ -1846,12 +1963,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
 
-            if (IsWipeCheckQueued)
-            {
-                IsWipeCheckQueued = false;
-                CheckForWipe();
-            }
-
             BattleStateMachine.CheckDeferredCalls();
         }
 
@@ -1984,12 +2095,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ProcessAoiSyncDelta(aoiSyncDelta, extraData);
             }
 
-            if (IsWipeCheckQueued)
-            {
-                IsWipeCheckQueued = false;
-                CheckForWipe();
-            }
-
             BattleStateMachine.CheckDeferredCalls();
         }
 
@@ -2009,7 +2114,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             BattleStateMachine.CompleteBenchmarkIfElapsed(DateTime.Now);
 
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
-            long targetUid = Utils.UuidToEntityId(targetUuid);
             var attrCollection = delta.Attrs;
             HashSet<EAttrType> changedAttributes = [];
 
@@ -2113,6 +2217,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     sawPotionHealBuff = true;
                                 }
 
+                                if (CooldownResetBuffDelays.TryGetValue(buffInfo.BaseId, out var cooldownResetDelay))
+                                {
+                                    SkillCooldownStateStore.NotifyCooldownsResetForPlayer(targetUuid, DateTime.Now + cooldownResetDelay);
+                                }
+
                                 BuffInstanceIndex.Instance.Add(
                                     targetUuid,
                                     buffEffect.BuffUuid,
@@ -2198,6 +2307,37 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             extraData.ArrivalTime = originalArrivalTime;
+
+            // 全滅とボス部屋の入場は、どちらもゲームが仕切り直した合図(CooldownResetBuffDelays の3種)から見分ける。
+            // 全滅は、戦っていた全員の差分にリセットのバフと 500111 の付与、状態の復活(27)が一緒に来る。
+            // ボス部屋の入場は復活の印を伴わず、進行中(Playing)に来る
+            // (ダンジョンや層の開始にも来るが、そこは開始の区切りと同じ瞬間なので記録が無く、何も起きない)。
+            //
+            // **見るのは自分の付与だけ。** バフは戦っていた全員に付くが、PT では到着が分かれることがあり
+            // (実測で 0.47秒差)、間に記録が入ると人数分だけ区切ってしまう。1つの出来事につき自分への付与は1回なので、
+            // 自分だけを見れば区切りも1回になる。
+            if (isTargetPlayer
+                && addedBuffIds.Exists(CooldownResetBuffDelays.ContainsKey)
+                && IsSelfPlayer(targetUuid)
+                && CombatRuntimeSettings.SplitEncountersOnNewPhases
+                && EncounterManager.Current.HasStatsBeenRecorded())
+            {
+                if (addedBuffIds.Contains(WipeResetBuffId)
+                    && addedBuffIds.Contains(ReviveStartBuffId)
+                    && changedAttributes.Contains(EAttrType.AttrState)
+                    && EncounterManager.Current.GetAttrKV(targetUuid, "AttrState") is EActorState.ActorStateResurrection)
+                {
+                    Log.Information("Wipe detected: {Uuid} received the wipe reset buffs and was resurrected", targetUuid);
+                    EncounterManager.Current.SetWipeState(true);
+                    EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
+                }
+                else if (!addedBuffIds.Contains(ReviveStartBuffId)
+                    && BattleStateMachine.IsDungeonPlaying())
+                {
+                    Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
+                    EncounterManager.EnterDungeon(false, EncounterStartReason.NewObjective);
+                }
+            }
 
             if (AppState.IsBenchmarkMode
                 && (AppState.IsBenchmarkCompleting || AppState.IsBenchmarkCompleted))
@@ -2425,12 +2565,13 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (isHeal)
                 {
-                    EncounterManager.Current.AddHealing((isAttackerPlayer ? attackerUuid : 0), targetUuid, skillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
+                    // 足すのは実際に増えた HP(ActualValue)。ゲーム内メーターと同じ。名目(damage)との差は過剰回復。
+                    EncounterManager.Current.AddHealing((isAttackerPlayer ? attackerUuid : 0), targetUuid, skillId, syncDamageInfo.OwnerLevel, syncDamageInfo.ActualValue, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                 }
                 else
                 {
-                    // 記録するのはプレイヤーの攻撃だけ。敵の攻撃は被ダメログ(AddTakenDamage)にだけ残す。
-                    if (isAttackerPlayer && attackerUuid != targetUuid)
+                    // 記録するのはプレイヤーから敵への攻撃だけ。敵の攻撃・自傷・フレンドリーファイアは被ダメログ(AddTakenDamage)にだけ残す。
+                    if (isAttackerPlayer && !isTargetPlayer)
                     {
                         EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
@@ -2545,12 +2686,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
             ProcessAoiSyncDelta(aoiSyncDelta, extraData);
-
-            if (IsWipeCheckQueued)
-            {
-                IsWipeCheckQueued = false;
-                CheckForWipe();
-            }
 
             BattleStateMachine.CheckDeferredCalls();
         }
@@ -2908,7 +3043,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var targetData in vData.Target.TargetData)
             {
-                BattleStateMachine.DungeonTargetDataHistoryAdd(targetData.Value);
+                BattleStateMachine.LogDungeonTarget(targetData.Value);
                 System.Diagnostics.Debug.WriteLine($"Target.TargetData[{targetData.Key}]: TargetId={targetData.Value.TargetId},Nums={targetData.Value.Nums},Complete={targetData.Value.Complete}");
             }
 
@@ -2923,87 +3058,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             System.Diagnostics.Debug.WriteLine($"syncDungeonData.vData State={vData.FlowInfo.State},TotalScore={vData.DungeonScore.TotalScore},CurRatio={vData.DungeonScore.CurRatio}");
-        }
-
-        public static ConcurrentQueue<EActorState> PlayerStateHistory = new();
-        public static void CheckForWipe()
-        {
-
-
-            if (currentUserUuid != 0)
-            {
-                if (!EncounterManager.Current.HasStatsBeenRecorded())
-                {
-                    return;
-                }
-
-                if (EncounterManager.Current.IsWipe)
-                {
-                    if (EncounterManager.Current.GetDuration().TotalSeconds < 2)
-                    {
-                        System.Diagnostics.Debug.WriteLine("EncounterManager.Current Duration was under 2 seconds, correcting the Wipe State to false");
-                        EncounterManager.Current.SetWipeState(false);
-                    }
-
-                    if (!EncounterManager.Current.HasStatsBeenRecorded())
-                    {
-                        EncounterManager.Current.SetWipeState(false);
-                    }
-
-                    System.Diagnostics.Debug.WriteLine("EncounterManager.Current.IsWipe already true");
-                }
-
-                var playerEntity = EncounterManager.Current.GetOrCreateEntity(currentUserUuid);
-                var attrState = playerEntity.GetAttrKV("AttrState");
-                if (attrState != null)
-                {
-
-                    if (PlayerStateHistory == null)
-                    {
-                        PlayerStateHistory = new();
-                    }
-
-                    if (PlayerStateHistory.Count >= 5)
-                    {
-                        PlayerStateHistory.TryDequeue(out _);
-                    }
-
-                    {
-                        PlayerStateHistory.Enqueue((EActorState)attrState);
-                    }
-                }
-                else
-                {
-                    return;
-                }
-
-                // 全滅の印は復活不可デバフ 510072。付与から1秒経っていれば新しい戦闘へ切り替える。
-                // 状態遷移(Dead→Resurrection→TelePort)からは推測しない。
-                var currentEncounterDuration = EncounterManager.Current.GetDuration();
-                var characterList = EncounterManager.Current.Entities.AsValueEnumerable().Where(x => x.Value.EntityType == EEntityType.EntChar);
-                foreach (var character in characterList)
-                {
-                    if (character.Value.RecentBuffEventHistory.Count > 0)
-                    {
-                        foreach (var recentBuff in character.Value.RecentBuffEventHistory)
-                        {
-                            if (recentBuff.Value.BaseId == 510072)
-                            {
-
-                                EncounterManager.Current.SetWipeState(true);
-
-                                if (recentBuff.Value.EventAddTime.Add(TimeSpan.FromSeconds(1.0)).TotalSeconds <= currentEncounterDuration.TotalSeconds)
-                                {
-                                    Log.Debug($"Encounter Wipe Reset buff was found and duration was hit, creating a new Encounter now");
-                                    EncounterManager.Current.SetWipeState(true);
-                                    EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         public static void ProcessSyncDungeonDirtyData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -3056,22 +3110,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                         System.Diagnostics.Debug.WriteLine($"[{item.Key}]CompletedTargetList[{CompletedTargetListIdx}] = {completedTargetList.Key}, {completedTargetList.Value}");
                         CompletedTargetListIdx++;
                     }
-                }
-            }
-
-            if (dun?.DungeonVar?.Data != null)
-            {
-                BattleStateMachine.DungeonVarHistoryAdd(dun.DungeonVar);
-
-                if (dun?.DungeonVar?.Data.Count > 1)
-                {
-                }
-
-                int dungeonVarDataIdx = 0;
-                foreach (var dungeonVarData in dun.DungeonVar.Data!)
-                {
-
-                    dungeonVarDataIdx++;
                 }
             }
 
@@ -3131,7 +3169,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     System.Diagnostics.Debug.WriteLine($"dun.Target.TargetData.Target = {target.Key}, [TargetId:{target.Value.TargetId}, Complete:{target.Value.Complete}, Nums:{target.Value.Nums}]");
 
-                    BattleStateMachine.DungeonTargetDataHistoryAdd(target.Value);
+                    BattleStateMachine.LogDungeonTarget(target.Value);
                 }
             }
         }

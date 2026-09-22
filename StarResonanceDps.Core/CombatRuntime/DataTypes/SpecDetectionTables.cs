@@ -447,7 +447,16 @@ public static class SpecDetectionTables
         2207090  => (SubProfessionId.SubProfession_Dissonance,         0), // 狂音  根から0 node=1308006  近战流
         2207100  => (SubProfessionId.SubProfession_Dissonance,         5), // 狂音  根から5 node=1313006  幸运闪光
         2207110  => (SubProfessionId.SubProfession_Dissonance,         2), // 狂音  根から2 node=6558  全域展开
-        2207120  => (SubProfessionId.SubProfession_Dissonance,         2), // 狂音  根から2 node=6557  断章
+        // 2207120 断章(node=6557) は除外。丸めで同じ扱いになる 2207121 断章_BK効率 が、
+        // パーティメンバーに配られる効果バフだから(AttrDescription 2207120:
+        // 「自身と30m以内にいるパーティメンバーのブレイク効率+10%」)。
+        // 受け手のクラスは狂音とは限らず、術者として届く UUID も受け手側のことがある
+        // (2202540 共生之息 と同じ形)。
+        //
+        // 親優先(TryResolveSpecByParentBuff)では解けない。2207121 の親は 2207120 そのもの、
+        // つまりこの表のキーなので、同じ狂音へ着地する(2208650 と同じ形)。
+        //
+        // 再生成しても復活させないこと。
         2207130  => (SubProfessionId.SubProfession_Dissonance,         2), // 狂音  根から2 node=2401  音浪烈焰
         2207140  => (SubProfessionId.SubProfession_Dissonance,         5), // 狂音  根から5 node=1312006  双重旋律
         2207150  => (SubProfessionId.SubProfession_Dissonance,         6), // 狂音  根から6 node=1328012  炽焰治愈

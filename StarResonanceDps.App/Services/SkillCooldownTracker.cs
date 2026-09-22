@@ -15,6 +15,7 @@ public sealed class SkillCooldownTracker
     private static readonly Lazy<SkillCooldownTracker> LazyInstance = new(() => new SkillCooldownTracker());
 
     private readonly ConcurrentDictionary<SkillActivationKey, SkillActivationHistory> _activationHistories = new();
+    private readonly ConcurrentDictionary<long, CooldownResetSchedule> _resetSchedules = new();
     private readonly object _subscriptionSync = new();
 
     private Encounter? _subscribedEncounter;
@@ -38,6 +39,7 @@ public sealed class SkillCooldownTracker
             _isInitialized = true;
             EncounterManager.EncounterStart += EncounterManager_EncounterStart;
             SkillCooldownStateStore.CooldownsResetByGame += SkillCooldownStateStore_CooldownsResetByGame;
+            SkillCooldownStateStore.CooldownsResetForPlayer += SkillCooldownStateStore_CooldownsResetForPlayer;
             AttachToCurrentEncounter();
         }
     }
@@ -53,6 +55,7 @@ public sealed class SkillCooldownTracker
 
             EncounterManager.EncounterStart -= EncounterManager_EncounterStart;
             SkillCooldownStateStore.CooldownsResetByGame -= SkillCooldownStateStore_CooldownsResetByGame;
+            SkillCooldownStateStore.CooldownsResetForPlayer -= SkillCooldownStateStore_CooldownsResetForPlayer;
             if (_subscribedEncounter is not null)
             {
                 _subscribedEncounter.SkillActivated -= Encounter_SkillActivated;
@@ -61,6 +64,7 @@ public sealed class SkillCooldownTracker
 
             _isInitialized = false;
             _activationHistories.Clear();
+            _resetSchedules.Clear();
         }
     }
 
@@ -80,7 +84,7 @@ public sealed class SkillCooldownTracker
                 ? GetSelfChargeState(entityUuid, skillId, maxCharges)
                 : GetEstimatedChargeState(
                     entityUuid,
-                    chargeHistory?.GetSnapshot() ?? [],
+                    ExcludeBeforeReset(entityUuid, chargeHistory?.GetSnapshot() ?? []),
                     maxCharges,
                     chargeCooldownSeconds,
                     isImagine);
@@ -112,7 +116,8 @@ public sealed class SkillCooldownTracker
     {
         if (estimatedCooldownSeconds <= 0
             || !_activationHistories.TryGetValue(key, out var history)
-            || history.GetLatest() is not { } activation)
+            || history.GetLatest() is not { } activation
+            || GetResetCutoff(entityUuid) is { } cutoff && activation.ActivationDateTime < cutoff)
         {
             return null;
         }
@@ -137,12 +142,30 @@ public sealed class SkillCooldownTracker
     }
 
     /// <summary>
-    /// ゲーム側がクールダウンを一括リセットしたときに、他プレイヤーの推測値の元になる
-    /// 発動履歴を破棄する。自分の残CDはサーバ真値なのでここでは何もしない。
+    /// 起動直後の状態へ戻したときに、他プレイヤーの推測値の元になる発動履歴を全員分破棄する。
+    /// 自分の残CDはサーバ真値なのでここでは何もしない。
     /// </summary>
     private void SkillCooldownStateStore_CooldownsResetByGame()
     {
         _activationHistories.Clear();
+        _resetSchedules.Clear();
+    }
+
+    /// <summary>
+    /// ゲームがその人のクールダウンをリセットする時刻を控える。消えるのが付与より後のバフがあるので、履歴はここでは消さず、
+    /// 読むときに「過ぎたリセットのうち最後の時刻」より前の発動を無視する(<see cref="GetResetCutoff"/>)。
+    /// </summary>
+    private void SkillCooldownStateStore_CooldownsResetForPlayer(long entityUuid, DateTime resetAt)
+    {
+        _resetSchedules.GetOrAdd(entityUuid, static _ => new CooldownResetSchedule()).Add(resetAt);
+    }
+
+    /// <summary>その人のクールダウンが最後にリセットされた時刻(いまより前のもの)。無ければ null。</summary>
+    private DateTime? GetResetCutoff(long entityUuid)
+    {
+        return _resetSchedules.TryGetValue(entityUuid, out var schedule)
+            ? schedule.GetLatestPassed(DateTime.Now)
+            : null;
     }
 
     private void EncounterManager_EncounterStart(EncounterStartEventArgs e)
@@ -185,6 +208,14 @@ public sealed class SkillCooldownTracker
             new SkillActivationKey(e.CasterUuid, e.SkillId),
             static _ => new SkillActivationHistory());
         history.Record(activation, maxCharges, rawChargeCooldownSeconds);
+    }
+
+    /// <summary>最後に過ぎたリセットより前の発動を除く。</summary>
+    private IReadOnlyList<SkillActivationState> ExcludeBeforeReset(long entityUuid, IReadOnlyList<SkillActivationState> activations)
+    {
+        return GetResetCutoff(entityUuid) is { } cutoff
+            ? activations.Where(activation => activation.ActivationDateTime >= cutoff).ToArray()
+            : activations;
     }
 
     private static bool IsSelf(long entityUuid)
@@ -424,6 +455,49 @@ public sealed class SkillCooldownTracker
         TimeSpan EncounterTime);
 
     private readonly record struct LowerCdInterval(TimeSpan Start, TimeSpan End);
+
+    /// <summary>
+    /// 1人ぶんのクールダウンのリセットの時刻。まだ来ていない時刻(付与より後に消えるバフ)も持つ。
+    /// </summary>
+    private sealed class CooldownResetSchedule
+    {
+        private readonly object _sync = new();
+        private readonly List<DateTime> _times = [];
+
+        public void Add(DateTime resetAt)
+        {
+            lock (_sync)
+            {
+                _times.Add(resetAt);
+            }
+        }
+
+        /// <summary>
+        /// <paramref name="now"/> までに過ぎたリセットのうち最後の時刻。無ければ null。
+        /// それより前の時刻はもう使わないので捨て、まだ来ていない時刻は残す。
+        /// </summary>
+        public DateTime? GetLatestPassed(DateTime now)
+        {
+            lock (_sync)
+            {
+                DateTime? latest = null;
+                foreach (var time in _times)
+                {
+                    if (time <= now && (latest is null || time > latest))
+                    {
+                        latest = time;
+                    }
+                }
+
+                if (latest is { } kept)
+                {
+                    _times.RemoveAll(time => time < kept);
+                }
+
+                return latest;
+            }
+        }
+    }
 
     private readonly record struct ChargeCooldownState(
         int AvailableCharges,

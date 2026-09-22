@@ -288,6 +288,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     ApplyDisplayedIdentitiesForRecord(priorEncounter);
                     DB.InsertEncounter(priorEncounter);
+                    priorEncounter.ReportUnresolvedBlankSources();
                     GC.Collect();
                 }
             }
@@ -387,6 +388,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 ApplyDisplayedIdentitiesForRecord(Current);
                 DB.InsertEncounter(Current);
+                Current.ReportUnresolvedBlankSources();
             }
 
             if (CurrentBattleId != 0)
@@ -719,7 +721,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         NewObjective = 1,
         Wipe = 2,
         Force = 3,
-        Restart = 4,
         TimedOut = 5,
         BenchmarkStart = 6,
         BenchmarkEnd = 7,
@@ -805,6 +806,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         private readonly List<TakenDamageLogRecord> _takenDamageLog = [];
         private bool _takenDamageLogRebuiltFromSnapshots;
         private long _takenDamageLogSequence;
+
+        // 着地先が決まらなかった行の控え。鍵は(記録先の UUID, 行代表キー)、値は最初に着かなかった記録。
+        // 後の記録で着けば消え、保存の直後に残りを検知ログへ送る(ReportUnresolvedBlankSources)。DB には入れない。
+        private readonly object _unresolvedBlankSourcesGate = new();
+        private readonly Dictionary<(long EntityUuid, long RowKey), UnresolvedBlankSource> _unresolvedBlankSources = [];
+
+        private sealed record UnresolvedBlankSource(
+            string KeyText,
+            bool IsBuffSource,
+            bool IsHealing,
+            ulong ValueTotal,
+            ulong HitsCount,
+            long CharacterId,
+            string Trace,
+            DateTime FirstBlankAt);
 
         public Encounter()
         {
@@ -1327,7 +1343,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 着地先より前に名前が決まらない行(見出し表にも料理の表にも名前が無い行)の出どころ(着地先)を決めて控える。
-        /// 着かなかったもの・技に着いたもの・着地先が食い違ったものは常設の検知ログ(<c>BlankSourceNameProbe</c>)へ送る。
+        /// 技に着いたもの・着地先が食い違ったものは常設の検知ログ(<c>BlankSourceNameProbe</c>)へすぐ送る。オプションに着いたものは送らない。
+        /// 着かなかったものは送らずにこのエンカウンターに控え、後の記録で着けば控えを消す。後で着けば DB に空欄は残らないので、
+        /// 残ったものだけを保存の直後に <see cref="ReportUnresolvedBlankSources"/> が送る。
         /// 記録(<c>AddDamage</c> 等)と <see cref="MarkBuffSourcedSkill"/> の後に、プレイヤーの記録にだけ呼ぶこと。
         ///
         /// <para>
@@ -1377,10 +1395,31 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            if (landing.Kind != SourceLandingKind.None)
+            if (landing.Kind == SourceLandingKind.None)
             {
-                container.LandingKind = landing.Kind;
-                container.LandingId = landing.Id;
+                lock (_unresolvedBlankSourcesGate)
+                {
+                    _unresolvedBlankSources.TryAdd(
+                        (entityUuid, skillId),
+                        new UnresolvedBlankSource(
+                            keyText,
+                            container.IsBuffSource,
+                            isHealing,
+                            stats.ValueTotal,
+                            stats.HitsCount,
+                            entity.UID,
+                            trace,
+                            arrivalTime));
+                }
+
+                return;
+            }
+
+            container.LandingKind = landing.Kind;
+            container.LandingId = landing.Id;
+            lock (_unresolvedBlankSourcesGate)
+            {
+                _unresolvedBlankSources.Remove((entityUuid, skillId));
             }
 
             if (landing.Kind != SourceLandingKind.RogueEntry)
@@ -1395,6 +1434,35 @@ namespace StarResonanceDps.Core.CombatRuntime
                     entity.UID,
                     landing,
                     trace);
+            }
+        }
+
+        /// <summary>
+        /// 着地先が決まらないまま残った行(<see cref="ResolveSourceLanding"/> の控え)を常設の検知ログ(<c>BlankSourceNameProbe</c>)へ送り、控えを空にする。
+        /// <b>DB へ保存した直後に呼ぶ。</b> 保存しないエンカウンターでは呼ばない(DB に空欄が残らない)。
+        /// </summary>
+        public void ReportUnresolvedBlankSources()
+        {
+            List<(long RowKey, UnresolvedBlankSource Blank)> unresolved;
+            lock (_unresolvedBlankSourcesGate)
+            {
+                unresolved = _unresolvedBlankSources.Select(pair => (pair.Key.RowKey, pair.Value)).ToList();
+                _unresolvedBlankSources.Clear();
+            }
+
+            foreach (var (rowKey, blank) in unresolved)
+            {
+                Diagnostics.BlankSourceNameProbe.Capture(
+                    rowKey,
+                    blank.KeyText,
+                    blank.IsBuffSource,
+                    blank.IsHealing,
+                    blank.ValueTotal,
+                    blank.HitsCount,
+                    blank.CharacterId,
+                    SourceLanding.None,
+                    blank.Trace,
+                    blank.FirstBlankAt);
             }
         }
 
@@ -1444,8 +1512,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <param name="damage">
+        /// 足す回復量。回復の通知なら実際に増えた HP(<c>ActualValue</c>、ゲーム内メーターと同じ)、通知の無い回復(薬・料理・自然回復)なら HP の増え。
+        /// </param>
+        /// <param name="nominalHealing">
+        /// 名目の回復量(通知の <c>Value</c>、0 なら <c>LuckyValue</c>)。<paramref name="damage"/> との差を過剰回復として数える。
+        /// 通知の無い回復は <paramref name="damage"/> と同じ値を渡す(過剰回復は 0)。
+        /// </param>
         public void AddHealing(
-            long attackerUuid, long targetUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
+            long attackerUuid, long targetUuid, long skillId, int skillLevel, long damage, long nominalHealing, long hpLessen, long shieldBreak,
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
             bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
@@ -1459,29 +1534,23 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             ExData.FirstDamageTimeStamp ??= LastUpdate;
 
-            TotalHealing += (ulong)damage;
-
-            var entity = GetOrCreateEntity(attackerUuid);
-            var targetEntity = GetOrCreateEntity(targetUuid);
-
-            long? currentHp = targetEntity.GetAttrKV("AttrHp") as long?;
-            long? maxHp = targetEntity.GetAttrKV("AttrMaxHp") as long?;
-
-            long overhealing = 0;
-            long effectiveHealing = 0;
-
-            if ((currentHp != null && maxHp != null && maxHp > 0 && currentHp >= 0 && currentHp <= maxHp) && (currentHp + damage > maxHp))
-            {
-                effectiveHealing = (long)(maxHp - currentHp);
-                if (damage >= effectiveHealing)
-                {
-                    overhealing = damage - effectiveHealing;
-                }
-            }
-
+            var overhealing = Math.Max(0L, nominalHealing - damage);
             TotalOverhealing += (ulong)overhealing;
 
-            entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, effectiveHealing, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
+            var entity = GetOrCreateEntity(attackerUuid);
+            GetOrCreateEntity(targetUuid);
+
+            // 実際に増えた HP が 0 の回復(満タンの人への回復)は、ゲーム内メーターと同じく回復として数えない。
+            // 名目の全額を過剰回復に足すだけで、回数・会心・幸運・秒ごとの値・行動時間には入れない。
+            if (damage <= 0)
+            {
+                entity.TotalOverhealing += (ulong)overhealing;
+                return;
+            }
+
+            TotalHealing += (ulong)damage;
+
+            entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
 
             if (damage > 0)
             {
@@ -1899,7 +1968,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // 除去を突き合わせられるのはマーカー本体(ツリーの根)だけ。距離1以上の派生バフは
             // procで付いたり消えたりするので、それが消えても未装着の根拠にならない。
-            var isMarker = distanceFromRoot == 0;
+            //
+            // 根の +1〜+9 の変種も、10刻みに丸めると根と同じ距離0になる。変種は死亡や時間切れで
+            // 消えるので、控えるとその除去で特化を落としてしまう。控えるのは観測IDが根そのものの時だけ。
+            // 変種は下の書き込みで特化の判定には使う(丸めは外さない)。
+            var isMarker = distanceFromRoot == 0 && observedBuffId == grantedBuffId;
             var target = GetOrCreateEntity(fireUuid);
 
             // 常設の食い違い検知。枝タレント(距離1以上)が、控えてあるマーカーと違う特化を

@@ -115,6 +115,16 @@ public static class BarWidthAnimationBehavior
             return;
         }
 
+        // まだ幅を一度も持っていない(Width が NaN)。長さの最初の値が既定値の 0 と同じだと変更通知が来ず、
+        // 上の「置き場所の幅が決まる前」の分岐を通らないままここへ来る。
+        // From の無いアニメーションは今の値から始めるので NaN から始められずに落ちる。最初の1回は即座に合わせる。
+        if (double.IsNaN(element.Width))
+        {
+            element.BeginAnimation(FrameworkElement.WidthProperty, null);
+            element.Width = targetWidth;
+            return;
+        }
+
         element.BeginAnimation(
             FrameworkElement.WidthProperty,
             new DoubleAnimation(targetWidth, TransitionDuration)

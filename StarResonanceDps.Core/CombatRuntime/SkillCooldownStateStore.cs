@@ -19,11 +19,16 @@ public static class SkillCooldownStateStore
     private static bool _hasClientServerTimeDelta;
 
     /// <summary>
-    /// ゲーム側がクールダウンを一括リセットしたとき(ダンジョン開始・マップ移動)に発火する。
-    /// 自分の残CDはサーバから真値が再送されるので購読不要だが、
-    /// 他プレイヤーの残CDはアプリ側の推測値なので、購読側で破棄しないと残り続ける。
+    /// 起動直後の状態へ戻したとき(<see cref="Reset"/>)に発火する。
+    /// 他プレイヤーの残CDはアプリ側の推測値なので、購読側で全員の分を捨てる。
     /// </summary>
     public static event Action? CooldownsResetByGame;
+
+    /// <summary>
+    /// ゲームがその人のクールダウンをリセットするとき(クールダウンのリセットのバフが付いたとき)に、その人の実体の UUID と、消える時刻で発火する。
+    /// 他プレイヤーの残CDはアプリ側の推測値なので、購読側でその時刻より前の発動を捨てる。
+    /// </summary>
+    public static event Action<long, DateTime>? CooldownsResetForPlayer;
 
     public static void Reset()
     {
@@ -40,17 +45,15 @@ public static class SkillCooldownStateStore
     }
 
     /// <summary>
-    /// ゲーム側のクールダウン一括リセットを通知する。
-    /// 自分の状態(サーバ時刻差・自UUID)は保持したまま、推測値の購読者にだけ破棄を促す。
+    /// ゲームがその人のクールダウンをリセットすることを通知する。推測値の購読者に、その人の分の破棄を促す。
     /// </summary>
-    public static void NotifyCooldownsResetByGame()
+    /// <param name="resetAt">
+    /// クールダウンが消える時刻。時計は発動の時刻(<see cref="SkillActivatedEventArgs.ActivationDateTime"/>)と同じ <see cref="DateTime.Now"/>。
+    /// バフによっては付与より後になる。
+    /// </param>
+    public static void NotifyCooldownsResetForPlayer(long uuid, DateTime resetAt)
     {
-        lock (Sync)
-        {
-            SelfCooldowns.Clear();
-        }
-
-        CooldownsResetByGame?.Invoke();
+        CooldownsResetForPlayer?.Invoke(uuid, resetAt);
     }
 
     public static void SetSelfPlayer(long uuid)
