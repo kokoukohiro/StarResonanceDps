@@ -687,9 +687,6 @@
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>属性カラー</value>
   </data>
-  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
-    <value>{0}100%</value>
-  </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>属性カラーの不透明度</value>
   </data>
@@ -856,10 +853,10 @@
     <value>{0}秒</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
-    <value>スキル詳細（与ダメ）</value>
+    <value>スキル詳細(与ダメ)</value>
   </data>
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
-    <value>スキル詳細（ヒール）</value>
+    <value>スキル詳細(ヒール)</value>
   </data>
   <data name="Metric_LabelValueFormat" xml:space="preserve">
     <value>{0}: {1}</value>

@@ -188,6 +188,9 @@ public sealed partial class EncounterHistoryItem : ObservableObject
     [ObservableProperty]
     private bool _isSelected;
 
+    /// <summary>シーンIDが無いなどで名前を出せない行の表記。バフリストの「??」と同じく記号なのでリソースを持たない。</summary>
+    private const string UnknownSceneText = "？？？";
+
     public EncounterHistoryItem(EncounterHistoryEntry entry)
     {
         _entry = entry;
@@ -219,7 +222,7 @@ public sealed partial class EncounterHistoryItem : ObservableObject
                 resolved = _entry.SceneName;
             }
 
-            var text = resolved;
+            var text = string.IsNullOrWhiteSpace(resolved) ? UnknownSceneText : resolved;
 
             if (_entry.BenchmarkSeconds > 0)
             {

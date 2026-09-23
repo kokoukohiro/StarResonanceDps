@@ -430,7 +430,7 @@
     <value>Death</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
-    <value>Non-elemental</value>
+    <value>No element</value>
   </data>
   <data name="DamageProperty_Fire" xml:space="preserve">
     <value>Fire</value>
@@ -686,9 +686,6 @@
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>Element Colors</value>
-  </data>
-  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
-    <value>{0} 100%</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>Element Colors Opacity</value>

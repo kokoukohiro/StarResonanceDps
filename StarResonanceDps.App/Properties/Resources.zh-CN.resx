@@ -430,7 +430,7 @@
     <value>死亡</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
-    <value>无属性</value>
+    <value>无元素</value>
   </data>
   <data name="DamageProperty_Fire" xml:space="preserve">
     <value>火元素</value>
@@ -685,16 +685,13 @@
     <value>滤镜强度</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>属性颜色</value>
-  </data>
-  <data name="Settings_ElementColors_RowFormat" xml:space="preserve">
-    <value>{0}100%</value>
+    <value>元素颜色</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>属性颜色不透明度</value>
+    <value>元素颜色不透明度</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>属性颜色滤镜</value>
+    <value>元素颜色滤镜</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
@@ -769,7 +766,7 @@
     <value>序号</value>
   </data>
   <data name="Metric_Element" xml:space="preserve">
-    <value>属性</value>
+    <value>元素</value>
   </data>
   <data name="Metric_DamageMode" xml:space="preserve">
     <value>类型</value>
@@ -856,10 +853,10 @@
     <value>{0}秒</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
-    <value>技能详情（伤害）</value>
+    <value>技能详情(伤害)</value>
   </data>
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
-    <value>技能详情（治疗）</value>
+    <value>技能详情(治疗)</value>
   </data>
   <data name="Metric_LabelValueFormat" xml:space="preserve">
     <value>{0}: {1}</value>

@@ -37,16 +37,23 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
     private string _noText = string.Empty;
 
     /// <summary>
-    /// 属性の内訳。アイコンと割合が交互に並ぶ。
+    /// 属性の内訳。アイコンを「/」で並べる。
     /// 組み立ては <c>TextSegmentsBehavior</c> で、被ダメログの行と同じ仕組み。
-    /// 内訳を溜める前に保存した履歴では空になる。
     /// </summary>
     [ObservableProperty]
     private IReadOnlyList<object> _elementSegments = [];
 
+    /// <summary>属性の欄の TIPS。「無属性33.33%/火属性33.33%」。</summary>
+    [ObservableProperty]
+    private string _elementToolTipText = string.Empty;
+
     /// <summary>物理・魔法の内訳。並びは 物理 → 魔法 → ――(どちらでもない)。</summary>
     [ObservableProperty]
     private string _damageModeText = string.Empty;
+
+    /// <summary>種類の欄の TIPS。「物理33.33%/魔法33.33%」。</summary>
+    [ObservableProperty]
+    private string _damageModeToolTipText = string.Empty;
 
     [ObservableProperty]
     private string _skillName = string.Empty;
@@ -69,7 +76,9 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
     public void Update(
         string noText,
         IReadOnlyList<object> elementSegments,
+        string elementToolTipText,
         string damageModeText,
+        string damageModeToolTipText,
         string skillName,
         string totalValueText,
         string encounterPerSecondText,
@@ -81,7 +90,9 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
     {
         NoText = noText;
         ElementSegments = elementSegments;
+        ElementToolTipText = elementToolTipText;
         DamageModeText = damageModeText;
+        DamageModeToolTipText = damageModeToolTipText;
         SkillName = skillName;
         TotalValueText = totalValueText;
         EncounterPerSecondText = encounterPerSecondText;

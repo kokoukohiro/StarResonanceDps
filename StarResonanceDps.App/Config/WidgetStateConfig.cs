@@ -537,8 +537,12 @@ public static class WidgetConfigDefaults
     public const int BuffCardScaleStep = 25;
 
 
-    private const double PlayerListInitialWindowWidth = 360d;
-    private const double PlayerListInitialWindowHeight = 400d;
+    private const double PlayerListInitialWindowWidth = 400d;
+    private const double PlayerListInitialWindowHeight = 440d;
+    private const double MeterInitialWindowWidth = 400d;
+    private const double MeterInitialWindowHeight = 440d;
+    private const double TakenDamageLogInitialWindowWidth = 400d;
+    private const double TakenDamageLogInitialWindowHeight = 440d;
     private const double PlayerInfoInitialWindowWidth = 360d;
     private const double PlayerInfoInitialWindowHeight = 200d;
     private const double PlayerStatusInitialWindowWidth = 400d;
@@ -550,8 +554,8 @@ public static class WidgetConfigDefaults
     private const double PlayerBuffListInitialWindowHeight = 240d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
-    private const double MetricContributionInitialWindowWidth = 980d;
-    private const double MetricContributionInitialWindowHeight = 360d;
+    private const double MetricContributionInitialWindowWidth = 580d;
+    private const double MetricContributionInitialWindowHeight = 440d;
     private const double MetricSummaryInitialWindowWidth = 720d;
     private const double MetricSummaryInitialWindowHeight = 180d;
     private const double MetricTimelineInitialWindowWidth = 980d;
@@ -915,8 +919,8 @@ public static class WidgetConfigDefaults
             },
             WidgetKind.DpsMeter or WidgetKind.HpsMeter => new WidgetWindowConfig
             {
-                Width = PlayerListInitialWindowWidth,
-                Height = PlayerListInitialWindowHeight
+                Width = MeterInitialWindowWidth,
+                Height = MeterInitialWindowHeight
             },
             WidgetKind.PlayerInfo => new WidgetWindowConfig
             {
@@ -943,10 +947,15 @@ public static class WidgetConfigDefaults
                 Width = BuffDebuffCardInitialWindowWidth,
                 Height = BuffDebuffCardInitialWindowHeight
             },
-            WidgetKind.DamageContribution or WidgetKind.HealingContribution or WidgetKind.TakenDamageLog => new WidgetWindowConfig
+            WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
             {
                 Width = MetricContributionInitialWindowWidth,
                 Height = MetricContributionInitialWindowHeight
+            },
+            WidgetKind.TakenDamageLog => new WidgetWindowConfig
+            {
+                Width = TakenDamageLogInitialWindowWidth,
+                Height = TakenDamageLogInitialWindowHeight
             },
             WidgetKind.DamageSummary or WidgetKind.HealingSummary => new WidgetWindowConfig
             {
@@ -1471,8 +1480,8 @@ public static class WidgetConfigDefaults
 
             case WidgetKind.DpsMeter:
             case WidgetKind.HpsMeter:
-                config.Window.Width ??= PlayerListInitialWindowWidth;
-                config.Window.Height ??= PlayerListInitialWindowHeight;
+                config.Window.Width ??= MeterInitialWindowWidth;
+                config.Window.Height ??= MeterInitialWindowHeight;
                 break;
 
             case WidgetKind.PlayerInfo:
@@ -1500,9 +1509,12 @@ public static class WidgetConfigDefaults
                 break;
             case WidgetKind.DamageContribution:
             case WidgetKind.HealingContribution:
-            case WidgetKind.TakenDamageLog:
                 config.Window.Width ??= MetricContributionInitialWindowWidth;
                 config.Window.Height ??= MetricContributionInitialWindowHeight;
+                break;
+            case WidgetKind.TakenDamageLog:
+                config.Window.Width ??= TakenDamageLogInitialWindowWidth;
+                config.Window.Height ??= TakenDamageLogInitialWindowHeight;
                 break;
             case WidgetKind.DamageSummary:
             case WidgetKind.HealingSummary:

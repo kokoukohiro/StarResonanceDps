@@ -19,11 +19,10 @@ public enum PlayerMetricDisplayMode
 }
 
 /// <summary>
-/// スキル詳細の属性列に出すアイコン。TIPS は属性名。
-/// 被ダメログの属性アイコンと同じで、<b>影は付けない</b>。
+/// スキル詳細の属性列に出すアイコン。被ダメログの属性アイコンと同じで、<b>影は付けない</b>。
+/// TIPS は欄そのものに1つ付けるので、アイコンは持たない。
 /// </summary>
-/// <param name="Widget">TIPS の色を取る窓のパレットの持ち主。</param>
-public sealed record MetricElementIconSegment(ImageSource Icon, string Name, WidgetListItemViewModel Widget);
+public sealed record MetricElementIconSegment(ImageSource Icon);
 
 public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
@@ -37,6 +36,9 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>物理でも魔法でもないときの表記。記号なので4言語とも同じで、リソースは持たない。</summary>
     private const string NoDamageModeText = "――";
+
+    /// <summary>属性・種類の欄と、その TIPS の区切り。記号なので4言語とも同じ。</summary>
+    private const string ShareSeparator = "/";
 
     private readonly MeterSnapshotKind _kind;
     private readonly PlayerMetricDisplayMode _displayMode;
@@ -270,6 +272,9 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             .Select(entry => entry.SkillId)
             .ToHashSet();
 
+        // バーの長さは1位の値で割る(メーターと同じ)。並びは総量の降順なので先頭が1位。
+        var topValue = entries.Count == 0 ? 0UL : entries[0].TotalValue;
+
         for (var index = _skillEntries.Count - 1; index >= 0; index--)
         {
             var skillId = _skillEntries[index].SkillId;
@@ -288,13 +293,13 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             if (!_skillEntriesBySkillId.TryGetValue(entry.SkillId, out var item))
             {
                 item = new MetricSkillTableEntry(entry.SkillId);
-                ApplySkillEntry(item, entry, index, numberDisplayFormatIndex);
+                ApplySkillEntry(item, entry, index, numberDisplayFormatIndex, topValue);
                 _skillEntriesBySkillId.Add(entry.SkillId, item);
                 _skillEntries.Insert(index, item);
                 continue;
             }
 
-            ApplySkillEntry(item, entry, index, numberDisplayFormatIndex);
+            ApplySkillEntry(item, entry, index, numberDisplayFormatIndex, topValue);
             if (_skillEntries[index].SkillId == entry.SkillId)
             {
                 continue;
@@ -308,17 +313,21 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         }
     }
 
+    /// <param name="topValue">一覧の1位の総量。バーの長さはこれに対する比(メーターと同じ)。</param>
     private void ApplySkillEntry(
         MetricSkillTableEntry item,
         MetricSkillTableRowSnapshot entry,
         int index,
-        int numberDisplayFormatIndex)
+        int numberDisplayFormatIndex,
+        ulong topValue)
     {
         item.Update(
             // 並びは総量の降順なので、そのまま振るとメーターの順位と同じ形になる。
             (index + 1).ToString(CultureInfo.CurrentCulture),
             CreateElementSegments(entry),
+            CreateElementToolTipText(entry),
             CreateDamageModeText(entry),
+            CreateDamageModeToolTipText(entry),
             entry.Name,
             MeterNumberFormatter.Format(entry.TotalValue, numberDisplayFormatIndex),
             MeterNumberFormatter.Format(entry.ValuePerSecond, numberDisplayFormatIndex),
@@ -326,7 +335,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             entry.CritRate.ToString("F2", CultureInfo.CurrentCulture) + "%",
             entry.Percentage.ToString("F2", CultureInfo.CurrentCulture) + "%",
             CreateBarBrush(entry),
-            Math.Clamp(entry.Percentage / 100d, 0d, 1d));
+            topValue == 0UL ? 0d : Math.Clamp(entry.TotalValue / (double)topValue, 0d, 1d));
     }
 
     private int FindSkillEntryIndex(long skillId)
@@ -344,20 +353,10 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>
     /// 行のバーの塗り。属性ごとの色を<b>その行の割合で混ぜ</b>、フィルターと不透明度を掛ける。
-    ///
-    /// <para>
-    /// <b>内訳が1件も無い行は <c>null</c></b> を返す(バーを出さない)。
-    /// 内訳を溜める前に保存した履歴がこれに当たる。色を決める材料が無いので、
-    /// それらしい色で埋めると内訳が無いことが見えなくなる。
-    /// </para>
+    /// 材料(属性の内訳)が無ければ色を作れないので <c>null</c> を返す(バーを出さない)。
     /// </summary>
     private Brush? CreateBarBrush(MetricSkillTableRowSnapshot entry)
     {
-        if (entry.TotalValue == 0UL || entry.ValueByElement.Count == 0)
-        {
-            return null;
-        }
-
         var parts = new List<(Color Color, double Weight)>();
         foreach (var pair in entry.ValueByElement)
         {
@@ -407,17 +406,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     /// <summary>
-    /// 属性の内訳。アイコンと割合を属性ID順に並べる。
-    /// <b>割合が 0 の属性は出さない</b>ので、混ざっていない行はアイコン1つと 100.00% になる。
+    /// 属性の内訳。アイコンだけを属性ID順に並べる。<b>割合が 0 の属性は出さない</b>ので、
+    /// 混ざっていない行はアイコン1つになる。割合は欄の TIPS(<see cref="CreateElementToolTipText"/>)に出す。
     /// </summary>
     private IReadOnlyList<object> CreateElementSegments(MetricSkillTableRowSnapshot entry)
     {
-        if (entry.TotalValue == 0UL || entry.ValueByElement.Count == 0)
-        {
-            return [];
-        }
-
-        var localization = LocalizationManager.Instance;
         var segments = new List<object>();
         foreach (var pair in entry.ValueByElement)
         {
@@ -426,34 +419,54 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 continue;
             }
 
-            if (segments.Count > 0)
-            {
-                segments.Add(" ");
-            }
-
             segments.Add(new MetricElementIconSegment(
-                (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{pair.Key}"),
-                localization.GetString($"DamageProperty_{pair.Key}"),
-                PlayerWidget));
-            segments.Add(FormatShare(pair.Value, entry.TotalValue));
+                (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{pair.Key}")));
         }
 
         return segments;
     }
 
+    /// <summary>属性の欄の TIPS。「無属性33.33%/火属性33.33%」の形で、割合が 0 の属性は出さない。</summary>
+    private static string CreateElementToolTipText(MetricSkillTableRowSnapshot entry)
+    {
+        var localization = LocalizationManager.Instance;
+        var parts = new List<string>();
+        foreach (var pair in entry.ValueByElement)
+        {
+            if (pair.Value == 0UL)
+            {
+                continue;
+            }
+
+            parts.Add(localization.GetString($"DamageProperty_{pair.Key}") + FormatShare(pair.Value, entry.TotalValue));
+        }
+
+        return string.Join(ShareSeparator, parts);
+    }
+
     /// <summary>
-    /// 物理・魔法の内訳。<b>並びは 物理 → 魔法 → ――</b> で、割合が 0 のものは出さない。
+    /// 物理・魔法の内訳。ラベルだけを「/」で並べる。<b>並びは 物理 → 魔法 → ――</b> で、割合が 0 のものは出さない。
     /// 「――」は <c>DamageNormal</c>(物理でも魔法でもない)で、記号なのでリソースを持たない。
+    /// 割合は欄の TIPS(<see cref="CreateDamageModeToolTipText"/>)に出す。
     /// </summary>
     private static string CreateDamageModeText(MetricSkillTableRowSnapshot entry)
     {
-        if (entry.TotalValue == 0UL || entry.ValueByMode.Count == 0)
-        {
-            return string.Empty;
-        }
+        return string.Join(ShareSeparator, EnumerateDamageModeParts(entry).Select(part => part.Label));
+    }
 
+    /// <summary>種類の欄の TIPS。「物理33.33%/魔法33.33%」の形で、割合が 0 のものは出さない。</summary>
+    private static string CreateDamageModeToolTipText(MetricSkillTableRowSnapshot entry)
+    {
+        return string.Join(
+            ShareSeparator,
+            EnumerateDamageModeParts(entry).Select(part => part.Label + FormatShare(part.Value, entry.TotalValue)));
+    }
+
+    /// <summary>種類の欄に出す分だけを、決めた並びで返す。</summary>
+    private static IEnumerable<(string Label, ulong Value)> EnumerateDamageModeParts(MetricSkillTableRowSnapshot entry)
+    {
         var localization = LocalizationManager.Instance;
-        var parts = new List<string>();
+        var parts = new List<(string Label, ulong Value)>();
         foreach (var mode in DamageModeDisplayOrder)
         {
             var value = 0UL;
@@ -478,10 +491,10 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 _ => NoDamageModeText
             };
 
-            parts.Add(label + FormatShare(value, entry.TotalValue));
+            parts.Add((label, value));
         }
 
-        return string.Join(" ", parts);
+        return parts;
     }
 
     private static string FormatShare(ulong value, ulong total)

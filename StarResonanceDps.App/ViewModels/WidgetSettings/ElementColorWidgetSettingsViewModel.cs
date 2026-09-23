@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -282,11 +281,8 @@ public sealed class ElementColorItemViewModel : ObservableObject
 
     public ImageSource Icon { get; }
 
-    /// <summary>行名は「無属性100%」の形。その属性だけで出来た行の色、という意味。</summary>
-    public string DisplayName => string.Format(
-        CultureInfo.CurrentCulture,
-        LocalizationManager.Instance.GetString("Settings_ElementColors_RowFormat"),
-        LocalizationManager.Instance.GetString($"DamageProperty_{Key}"));
+    /// <summary>行名は属性名。その属性だけで出来た行の色、という意味。</summary>
+    public string DisplayName => LocalizationManager.Instance.GetString($"DamageProperty_{Key}");
 
     public void RefreshDisplayName()
     {
