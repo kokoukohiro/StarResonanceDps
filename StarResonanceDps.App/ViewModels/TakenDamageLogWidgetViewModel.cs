@@ -34,8 +34,10 @@ public sealed record TakenDamageLogEntry(
 public sealed record TakenDamageLogClassIconSegment(Brush IconMask, Brush ClassBrush, string SpecName, WidgetListItemViewModel Widget);
 
 /// <summary>被弾行の値の後ろに出す属性アイコン。TIPS は属性名。</summary>
+/// <param name="IconMask">属性アイコンの形。テキストカラーの塗りをこの形で抜く(クラスアイコンと同じ染め方)。</param>
+/// <param name="ElementBrush">その属性のテキストカラー。設定を変えるとアイコンの色も変わる。</param>
 /// <param name="Widget">TIPS の色を取る窓のパレットの持ち主。</param>
-public sealed record TakenDamageLogAttributeIconSegment(ImageSource Icon, string Name, WidgetListItemViewModel Widget);
+public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush ElementBrush, string Name, WidgetListItemViewModel Widget);
 
 /// <summary>
 /// 被ダメログ。表示中のエンカウンターで、ボス大技の予告、プレイヤー以外の詠唱と、プレイヤーがプレイヤー以外から受けたダメージを出す。
@@ -92,6 +94,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     private readonly List<TakenDamageLogRow> _entryRows = [];
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
 
     private Encounter? _encounter;
@@ -390,7 +393,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
             icon =
             [
                 new TakenDamageLogAttributeIconSegment(
-                    (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{value}"),
+                    GetElementIconMask(colorKey),
+                    GetTextBrush(colorKey),
                     attributeName,
                     _widget)
             ];
@@ -555,6 +559,22 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         return ColorUtilities.TryParseHex(selectedColor, out var color)
             ? color
             : Colors.White;
+    }
+
+    /// <summary>属性アイコンの形。塗りをこの形で抜く(クラスアイコンと同じ染め方)。</summary>
+    private ImageBrush GetElementIconMask(string elementKey)
+    {
+        if (!_elementIconMasks.TryGetValue(elementKey, out var mask))
+        {
+            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{elementKey}"))
+            {
+                Stretch = Stretch.Uniform
+            };
+            mask.Freeze();
+            _elementIconMasks[elementKey] = mask;
+        }
+
+        return mask;
     }
 
     private TakenDamageLogClassIconSegment CreateClassIconSegment(TakenDamageLogParty target)

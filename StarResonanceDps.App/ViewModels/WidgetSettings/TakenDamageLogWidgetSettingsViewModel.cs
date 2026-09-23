@@ -283,9 +283,15 @@ public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
         Colors = colors;
         IsLast = isLast;
         IsDamageProperty = WidgetConfigDefaults.IsDamagePropertyKey(key);
-        Icon = IsDamageProperty
-            ? (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}")
-            : null;
+        if (IsDamageProperty)
+        {
+            var mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}"))
+            {
+                Stretch = Stretch.Uniform
+            };
+            mask.Freeze();
+            IconMask = mask;
+        }
     }
 
     public string Key { get; }
@@ -297,7 +303,8 @@ public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
     /// <summary>ダメージの属性の行。左にアイコンを出す。</summary>
     public bool IsDamageProperty { get; }
 
-    public ImageSource? Icon { get; }
+    /// <summary>属性アイコンの形。その行の選択色をこの形で抜く(クラスアイコンと同じ染め方)。</summary>
+    public Brush? IconMask { get; }
 
     /// <summary>属性の行は属性名、それ以外は被ダメログ専用の項目名。</summary>
     public string DisplayName => IsDamageProperty

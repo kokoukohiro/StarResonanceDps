@@ -181,6 +181,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 priorEncounter?.Entities.TryGetValue(MessageManager.currentUserUuid, out priorSelf);
             }
 
+            // 画面に出している素性を焼き付ける。<b>作り直しで運ぶより前に行うこと</b> —
+            // 後ろに置くと次のエンカウンターへ運ばれるのは焼き付ける前の値になり、
+            // 保存した回と次の回で同じ人の素性が食い違う。とくに NPC の印は実体に残らないと、
+            // 社交データが切れた回(ダンジョン退出・途中からの起動)で失われる。
+            if (priorEncounter != null && nextEncounterIdModifier != 0)
+            {
+                ApplyDisplayedIdentitiesForRecord(priorEncounter);
+            }
+
             Current = new Encounter(CurrentBattleId);
             Current.EncounterId = DB.GetNextEncounterId() + nextEncounterIdModifier;
             System.Diagnostics.Debug.WriteLine($"Created new encounter for EncounterId {Current.EncounterId} + ({nextEncounterIdModifier})");
@@ -286,7 +295,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (nextEncounterIdModifier != 0)
                 {
-                    ApplyDisplayedIdentitiesForRecord(priorEncounter);
+                    // 素性の焼き付けは作り直しの前に済ませてある(持ち越しへ載せるため)。
                     DB.InsertEncounter(priorEncounter);
                     priorEncounter.ReportUnresolvedBlankSources();
                     GC.Collect();
@@ -296,7 +305,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             AllowSceneUpdate = true;
 
             // 統計が0になった人(AOI外でメーターにだけ居た灰色の行)をプレイヤーリストからも外す。
-            // 前のエンカウンターの保存(ApplyDisplayedIdentitiesForRecord がリストの表示値を焼き付ける)より後に置く。
+            // 素性の焼き付け(ApplyDisplayedIdentitiesForRecord がリストの表示値を読む)より後に置く。
             PlayerRosterProjection.RebuildRoster();
 
             // エンカウンターの作り直しも「次のイベント」。3分計測・リセット・マップ移動・
@@ -418,7 +427,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 保存の直前に、<b>いま画面に出している素性をエンティティへ焼き付ける。</b>
+        /// 記録する回に、<b>いま画面に出している素性をエンティティへ焼き付ける。</b>
+        /// <b>エンカウンターの作り直しより前に呼ぶこと</b> — 焼いた値をそのまま次の回へ持ち越すため。
         ///
         /// <para>
         /// エンティティの生の値は表示値と一致しない。AOI退出で特化は消され
@@ -2223,7 +2233,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// NPC(助っ人)か。判定はパーティの社交データ(<c>BotAiId</c>)だけが持っていて実体には届かないので、
-        /// 保存の直前に表示している値を焼き付ける(<see cref="Entity.ApplyDisplayedIdentityForRecord"/>)。
+        /// 作り直しの前に表示している値を焼き付ける(<see cref="Entity.ApplyDisplayedIdentityForRecord"/>)。
         /// 履歴では社交データが無く、これが唯一の根拠になる。
         /// </summary>
         public bool IsNpc { get; set; }
@@ -2259,7 +2269,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int SpecMarkerBuffUuid { get => _identity.SpecMarkerBuffUuid; private set => _identity.SpecMarkerBuffUuid = value; }
         public bool HasBuffSnapshot { get => _identity.HasBuffSnapshot; private set => _identity.HasBuffSnapshot = value; }
 
-        /// <summary>NPC(助っ人)か。保存の直前に焼き付ける。履歴ではここだけが根拠。</summary>
+        /// <summary>
+        /// NPC(助っ人)か。判定の出所はパーティの社交データだけで、実体には届かない。
+        /// 作り直しの前に焼き付けて次の回へ持ち越す。社交データが切れた回と履歴ではここだけが根拠。
+        /// </summary>
         public bool IsNpc { get => _identity.IsNpc; private set => _identity.IsNpc = value; }
 
         /// <summary>
@@ -2540,7 +2553,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// <b>保存の直前にだけ呼ぶ。いま画面に出している素性をそのまま記録へ焼き付ける。</b>
+        /// <b>記録する回に対して、作り直しの前にだけ呼ぶ。いま画面に出している素性をそのまま記録へ焼き付ける。</b>
         ///
         /// <para>
         /// エンティティが持つ生の値は、AOI退出で <see cref="SetSubProfessionUnknown"/> に消される
@@ -3556,7 +3569,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 物理・魔法ごとの累計。足す条件は <see cref="ValueTotalByElement"/> と同じ。
-        /// <c>DamageNormal</c> は「物理でも魔法でもない」で、表示では「――」に当たる。
+        /// <c>DamageNormal</c> は「物理でも魔法でもない」で、表示では「無分類」に当たる。
         /// </summary>
         public Dictionary<EDamageMode, ulong> ValueTotalByMode { get; private set; } = new();
 

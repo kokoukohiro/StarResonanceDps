@@ -19,86 +19,54 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
-        <Style x:Key="MetricSkillStatisticHeaderText"
-               TargetType="TextBlock"
-               BasedOn="{StaticResource MetricSkillStatisticText}">
-            <Setter Property="Opacity" Value="0.8" />
-        </Style>
-
         <!--
             属性列のアイコン。大きさの違う画像を正方形の枠に中央寄せで入れる。
-            被ダメログの属性アイコンと同じで、影は付けない。
+            クラスアイコンと同じ染め方で、塗りは白(行の色は下のバーが持つ)。影はクラスアイコンと同じ。
             TIPS は欄そのものに1つ付けるので、アイコンには持たせない。
+
+            2種類以上の属性を含む行は、中央の縦線で枠を2等分し、
+            1位を左、2位を右に切り抜いて重ねる。1種類だけの行は切り抜かない。
         -->
         <DataTemplate DataType="{x:Type viewModels:MetricElementIconSegment}">
-            <Grid Width="16"
-                  Height="16"
+            <Grid Width="25"
+                  Height="25"
                   Margin="0,0,1,0"
                   Background="Transparent">
-                <Image Source="{Binding Icon}"
-                       Stretch="Uniform"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <Rectangle Fill="White"
+                           OpacityMask="{Binding PrimaryMask}"
+                           Effect="{StaticResource Effect.ProfessionIconShadow}"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSecondary}" Value="True">
+                                    <Setter Property="Clip" Value="M0,0 L12.5,0 L12.5,25 L0,25 Z" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+                <Rectangle Fill="White"
+                           OpacityMask="{Binding SecondaryMask}"
+                           Clip="M12.5,0 L25,0 L25,25 L12.5,25 Z"
+                           Effect="{StaticResource Effect.ProfessionIconShadow}"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasSecondary}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid Margin="0,5,0,0">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="16" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-
-        <!-- 左の余白は下の ScrollViewer(メーターと同じ 5)に合わせる。合わないと列が縦にずれる。 -->
-        <Grid Grid.Row="0"
-              Margin="5,0,5,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="40" />
-                <!-- 属性は2つぶんの幅。3つ以上混ざる行は省略記号で切れる -->
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="*" MinWidth="30" />
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="52" />
-                <ColumnDefinition Width="52" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_No]}" />
-            <TextBlock Grid.Column="1"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_Element]}" />
-            <TextBlock Grid.Column="2"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_DamageMode]}" />
-            <TextBlock Grid.Column="3"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_SkillName]}" />
-            <TextBlock Grid.Column="4"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding TotalValueHeader}" />
-            <TextBlock Grid.Column="5"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding EncounterPerSecondHeader}" />
-            <TextBlock Grid.Column="6"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_HitCount]}" />
-            <TextBlock Grid.Column="7"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_CritRate]}" />
-            <TextBlock Grid.Column="8"
-                       HorizontalAlignment="Right"
-                       Style="{StaticResource MetricSkillStatisticHeaderText}"
-                       Text="{Binding ShareHeader}" />
-        </Grid>
-
-        <Grid Grid.Row="1">
+    <Grid>
+        <Grid>
             <ScrollViewer x:Name="ContributionScrollViewer"
                           Margin="5,2,0,5"
                           HorizontalScrollBarVisibility="Disabled"
@@ -110,8 +78,8 @@
                         <DataTemplate>
                             <!--
                                 行の高さとホバーの作りはメーターの行に合わせてある。
-                                押しても何も起きないが、Button の ControlTemplate でないと
-                                ホバーの背景を同じ形で出せない。
+                                Button の ControlTemplate でないとホバーの背景を同じ形で出せない。
+                                押したときは TIPS を開き直す(WPF は押すと閉じ、カーソルを外へ出すまで出し直さない)。
                             -->
                             <Button Height="31"
                                     Padding="0"
@@ -121,7 +89,19 @@
                                     IsTabStop="False"
                                     IsHitTestVisible="True"
                                     HorizontalContentAlignment="Stretch"
-                                    VerticalContentAlignment="Stretch">
+                                    VerticalContentAlignment="Stretch"
+                                    Click="SkillRow_Click"
+                                    MouseLeave="SkillRow_MouseLeave"
+                                    Tag="{Binding DataContext.PlayerWidget, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
+                                <!-- TIPS は行(ホバーの範囲)に1つ。属性の内訳とタイプの内訳を出す。 -->
+                                <Button.ToolTip>
+                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="12"
+                                                   Text="{Binding RowToolTipText}" />
+                                    </ToolTip>
+                                </Button.ToolTip>
                                 <Button.Style>
                                     <Style TargetType="Button">
                                         <Setter Property="Template">
@@ -177,80 +157,33 @@
                                 </Grid>
 
                                 <Grid ClipToBounds="True">
+                                    <!-- 番号・アイコン・名前の幅と余白はメーターの行と同じ。右の3つはメーターに無いので同じ書式で並べる。 -->
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="40" />
-                                        <ColumnDefinition Width="52" />
-                                        <ColumnDefinition Width="52" />
+                                        <ColumnDefinition Width="10" />
+                                        <ColumnDefinition Width="18" />
+                                        <ColumnDefinition Width="25" />
                                         <ColumnDefinition Width="*" MinWidth="30" />
-                                        <ColumnDefinition Width="52" />
-                                        <ColumnDefinition Width="52" />
-                                        <ColumnDefinition Width="52" />
-                                        <ColumnDefinition Width="52" />
-                                        <ColumnDefinition Width="52" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock Grid.Column="0"
-                                               Margin="10,0,4,0"
+                                    <TextBlock Grid.Column="1"
+                                               VerticalAlignment="Center"
                                                Style="{StaticResource MetricSkillStatisticText}"
                                                Text="{Binding NoText}" />
-                                    <!-- アイコンが「/」で並ぶ。中身は ViewModel が組む。割合は欄の TIPS に出す。 -->
-                                    <TextBlock Grid.Column="1"
-                                               Margin="2,0,6,0"
-                                               Style="{StaticResource MetricSkillStatisticText}"
-                                               Tag="{Binding DataContext.PlayerWidget, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                                               behaviors:TextSegmentsBehavior.Segments="{Binding ElementSegments}">
-                                        <TextBlock.ToolTip>
-                                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                                     Style="{StaticResource ToolTip.WidgetWindowInfo}">
-                                                <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                                                           FontSize="12"
-                                                           Text="{Binding ElementToolTipText}" />
-                                            </ToolTip>
-                                        </TextBlock.ToolTip>
-                                    </TextBlock>
+                                    <!-- 属性アイコン。1属性なら1枚、2種類以上なら上位2つを左右に切り抜いて重ねる。 -->
                                     <TextBlock Grid.Column="2"
-                                               Margin="2,0,6,0"
                                                Style="{StaticResource MetricSkillStatisticText}"
-                                               Tag="{Binding DataContext.PlayerWidget, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
-                                               Text="{Binding DamageModeText}">
-                                        <TextBlock.ToolTip>
-                                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                                                     Style="{StaticResource ToolTip.WidgetWindowInfo}">
-                                                <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                                                           FontSize="12"
-                                                           Text="{Binding DamageModeToolTipText}" />
-                                            </ToolTip>
-                                        </TextBlock.ToolTip>
-                                    </TextBlock>
+                                               behaviors:TextSegmentsBehavior.Segments="{Binding ElementSegments}" />
                                     <TextBlock Grid.Column="3"
-                                               Margin="2,0,6,0"
+                                               Margin="5,0,6,0"
                                                Style="{StaticResource MetricSkillStatisticText}"
                                                Text="{Binding SkillName}" />
+                                    <!-- 値はメーターと同じ1つの欄「総量 (秒間値) 割合%」。 -->
                                     <TextBlock Grid.Column="4"
-                                               Margin="4,0"
-                                               HorizontalAlignment="Right"
+                                               Margin="4,0,5,0"
                                                Style="{StaticResource MetricSkillStatisticText}"
-                                               Text="{Binding TotalValueText}" />
-                                    <TextBlock Grid.Column="5"
-                                               Margin="4,0"
-                                               HorizontalAlignment="Right"
-                                               Style="{StaticResource MetricSkillStatisticText}"
-                                               Text="{Binding EncounterPerSecondText}" />
-                                    <TextBlock Grid.Column="6"
-                                               Margin="4,0"
-                                               HorizontalAlignment="Right"
-                                               Style="{StaticResource MetricSkillStatisticText}"
-                                               Text="{Binding HitCountText}" />
-                                    <TextBlock Grid.Column="7"
-                                               Margin="4,0"
-                                               HorizontalAlignment="Right"
-                                               Style="{StaticResource MetricSkillStatisticText}"
-                                               Text="{Binding CritRateText}" />
-                                    <TextBlock Grid.Column="8"
-                                               Margin="4,0"
-                                               HorizontalAlignment="Right"
-                                               Style="{StaticResource MetricSkillStatisticText}"
-                                               Text="{Binding ShareText}" />
+                                               Text="{Binding ValueText}"
+                                               TextAlignment="Right" />
                                 </Grid>
                                 </Grid>
                             </Button>
@@ -259,22 +192,6 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Opacity="0.7"
-                       Text="{Binding NoDataText}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock"
-                           BasedOn="{StaticResource Text.WidgetWindow}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding HasMetricData}" Value="False">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
         </Grid>
     </Grid>
 </UserControl>

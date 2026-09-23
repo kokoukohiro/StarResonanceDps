@@ -723,6 +723,12 @@
   <data name="Common_Add" xml:space="preserve">
     <value>추가</value>
   </data>
+  <data name="Settings_SkillInfo_Customization" xml:space="preserve">
+    <value>스킬 이름</value>
+  </data>
+  <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
+    <value>Skill1</value>
+  </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>플레이어 이름</value>
   </data>
@@ -776,6 +782,9 @@
   </data>
   <data name="Metric_DamageMode_Magical" xml:space="preserve">
     <value>마법</value>
+  </data>
+  <data name="Metric_DamageMode_Normal" xml:space="preserve">
+    <value>미분류</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>스킬 이름</value>

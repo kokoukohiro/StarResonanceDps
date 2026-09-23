@@ -8,8 +8,8 @@
              SnapsToDevicePixels="True">
     <!--
         スキル詳細の属性カラー。作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じで、
-        行が9属性になる。左のアイコンはバーカラーの背景に載せるが、
-        クラスカラーと違って画像そのままで、影は付けない(被ダメログのテキストカラーと同じ)。
+        行が9属性になる。左のアイコンはバーカラーの背景に載せ、
+        アイコンは白で染めて影を付ける(アイコンの実体は純粋な白ではないので、塗りで白にする)。
     -->
     <UserControl.Resources>
         <converters:ClassColorFilterBrushConverter x:Key="ClassColorFilterBrushConverter" />
@@ -57,11 +57,12 @@
                                                 <Binding Path="DataContext.FilterStrength" RelativeSource="{RelativeSource AncestorType={x:Type local:MetricElementColorSettingsView}}" />
                                             </MultiBinding>
                                         </Border.Background>
-                                        <Image Width="25"
-                                               Height="25"
-                                               Source="{Binding Icon}"
-                                               Stretch="Uniform"
-                                               RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <Rectangle Width="25"
+                                                   Height="25"
+                                                   Fill="White"
+                                                   OpacityMask="{Binding IconMask}"
+                                                   Effect="{StaticResource Effect.ProfessionIconShadow}"
+                                                   RenderOptions.BitmapScalingMode="HighQuality" />
                                     </Border>
 
                                     <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center"

@@ -188,6 +188,15 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
+
+                                    <ContentControl Content="{Binding SkillDetailSettings}"
+                                                    Visibility="{Binding HasSkillDetailDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:SkillDetailWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </StackPanel>
 
                                 <StackPanel x:Name="OtherRoleSkillsSection"

@@ -723,6 +723,12 @@
   <data name="Common_Add" xml:space="preserve">
     <value>Add</value>
   </data>
+  <data name="Settings_SkillInfo_Customization" xml:space="preserve">
+    <value>Skill Name</value>
+  </data>
+  <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
+    <value>Skill1</value>
+  </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>Player Name</value>
   </data>
@@ -776,6 +782,9 @@
   </data>
   <data name="Metric_DamageMode_Magical" xml:space="preserve">
     <value>Magic</value>
+  </data>
+  <data name="Metric_DamageMode_Normal" xml:space="preserve">
+    <value>Unclassified</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>Skill Name</value>

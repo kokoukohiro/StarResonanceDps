@@ -97,6 +97,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ElementColorSettings.PreviewChanged += ElementColorSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsSkillDetailSettings(kind))
+        {
+            SkillDetailSettings = new SkillDetailWidgetSettingsViewModel(config.SkillDetail);
+            SkillDetailSettings.PropertyChanged += SkillDetailSettings_PropertyChanged;
+            SkillDetailSettings.PreviewChanged += SkillDetailSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -113,6 +120,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<BuffListWidgetSettingsConfig>? BuffListPreviewChanged;
 
     public event Action<ElementColorWidgetSettingsConfig>? ElementColorPreviewChanged;
+
+    public event Action<SkillDetailWidgetSettingsConfig>? SkillDetailPreviewChanged;
 
     public void Dispose()
     {
@@ -159,6 +168,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ElementColorSettings.PreviewChanged -= ElementColorSettings_PreviewChanged;
             ElementColorSettings.Dispose();
         }
+
+        if (SkillDetailSettings is not null)
+        {
+            SkillDetailSettings.PropertyChanged -= SkillDetailSettings_PropertyChanged;
+            SkillDetailSettings.PreviewChanged -= SkillDetailSettings_PreviewChanged;
+            SkillDetailSettings.Dispose();
+        }
+    }
+
+    private void SkillDetailSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SkillDetailWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void SkillDetailSettings_PreviewChanged(SkillDetailWidgetSettingsConfig config)
+    {
+        SkillDetailPreviewChanged?.Invoke(config);
     }
 
     private void TakenDamageLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -261,6 +290,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public ElementColorWidgetSettingsViewModel? ElementColorSettings { get; }
 
+    public SkillDetailWidgetSettingsViewModel? SkillDetailSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -276,11 +307,14 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasBuffListDisplaySettings => BuffListSettings is not null;
 
+    public bool HasSkillDetailDisplaySettings => SkillDetailSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
         || HasTakenDamageLogDisplaySettings
-        || HasBuffListDisplaySettings;
+        || HasBuffListDisplaySettings
+        || HasSkillDetailDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
@@ -288,7 +322,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (BuffCardSettings?.HasUnsavedChanges ?? false)
         || (TakenDamageLogSettings?.HasUnsavedChanges ?? false)
         || (BuffListSettings?.HasUnsavedChanges ?? false)
-        || (ElementColorSettings?.HasUnsavedChanges ?? false);
+        || (ElementColorSettings?.HasUnsavedChanges ?? false)
+        || (SkillDetailSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -337,6 +372,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.ElementColor = ElementColorSettings.CreateConfig();
         }
 
+        if (SkillDetailSettings is not null)
+        {
+            config.SkillDetail = SkillDetailSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -346,6 +386,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         TakenDamageLogSettings?.MarkSaved(config.TakenDamageLog);
         BuffListSettings?.MarkSaved(config.BuffList);
         ElementColorSettings?.MarkSaved(config.ElementColor);
+        SkillDetailSettings?.MarkSaved(config.SkillDetail);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -359,6 +400,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         TakenDamageLogSettings?.ResetToDefaults();
         BuffListSettings?.ResetToDefaults();
         ElementColorSettings?.ResetToDefaults();
+        SkillDetailSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -371,6 +413,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         TakenDamageLogSettings?.RestoreSavedPreview();
         BuffListSettings?.RestoreSavedPreview();
         ElementColorSettings?.RestoreSavedPreview();
+        SkillDetailSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

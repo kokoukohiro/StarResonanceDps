@@ -25,6 +25,7 @@ public sealed class WidgetConfig
     public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
     public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
+    public SkillDetailWidgetSettingsConfig? SkillDetail { get; set; }
 
     /// <summary>
     /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
@@ -54,6 +55,7 @@ public sealed class WidgetConfig
             TakenDamageLog = TakenDamageLog?.Clone(),
             BuffList = BuffList?.Clone(),
             ElementColor = ElementColor?.Clone(),
+            SkillDetail = SkillDetail?.Clone(),
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
@@ -451,6 +453,21 @@ public sealed class MeterWidgetSettingsConfig
 /// 不透明度が掛かる。<b>設定画面の色見本にはどちらも掛けない</b>(クラスカラーと同じ)。
 /// </para>
 /// </summary>
+/// <summary>スキル詳細の表示設定。いまは行名の書式だけ。</summary>
+public sealed class SkillDetailWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultSkillInfoFormatString"/>。</remarks>
+    public string? SkillInfoFormatString { get; set; }
+
+    public SkillDetailWidgetSettingsConfig Clone()
+    {
+        return new SkillDetailWidgetSettingsConfig
+        {
+            SkillInfoFormatString = SkillInfoFormatString
+        };
+    }
+}
+
 public sealed class ElementColorWidgetSettingsConfig
 {
     public int ColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
@@ -528,6 +545,7 @@ public static class WidgetConfigDefaults
     public const int DefaultClassColorFilterStrength = 50;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
     public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
 
@@ -537,12 +555,12 @@ public static class WidgetConfigDefaults
     public const int BuffCardScaleStep = 25;
 
 
-    private const double PlayerListInitialWindowWidth = 400d;
-    private const double PlayerListInitialWindowHeight = 440d;
-    private const double MeterInitialWindowWidth = 400d;
-    private const double MeterInitialWindowHeight = 440d;
-    private const double TakenDamageLogInitialWindowWidth = 400d;
-    private const double TakenDamageLogInitialWindowHeight = 440d;
+    private const double PlayerListInitialWindowWidth = 440d;
+    private const double PlayerListInitialWindowHeight = 460d;
+    private const double MeterInitialWindowWidth = 440d;
+    private const double MeterInitialWindowHeight = 460d;
+    private const double TakenDamageLogInitialWindowWidth = 440d;
+    private const double TakenDamageLogInitialWindowHeight = 460d;
     private const double PlayerInfoInitialWindowWidth = 360d;
     private const double PlayerInfoInitialWindowHeight = 200d;
     private const double PlayerStatusInitialWindowWidth = 400d;
@@ -554,8 +572,8 @@ public static class WidgetConfigDefaults
     private const double PlayerBuffListInitialWindowHeight = 240d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
-    private const double MetricContributionInitialWindowWidth = 580d;
-    private const double MetricContributionInitialWindowHeight = 440d;
+    private const double MetricContributionInitialWindowWidth = 520d;
+    private const double MetricContributionInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 720d;
     private const double MetricSummaryInitialWindowHeight = 180d;
     private const double MetricTimelineInitialWindowWidth = 980d;
@@ -732,13 +750,13 @@ public static class WidgetConfigDefaults
         ["PlayerName"] = ["#FFFFFF", "#9FD1FF"],
         ["General"] = ["#FFFFFF", "#D0E1E9"],
         ["Fire"] = ["#FFFFFF", "#FF8100"],
-        ["Water"] = ["#FFFFFF", "#9DFFEF"],
-        ["Electricity"] = ["#FFFFFF", "#AE86FF"],
+        ["Water"] = ["#FFFFFF", "#9EECFF"],
+        ["Electricity"] = ["#FFFFFF", "#8787FF"],
         ["Wood"] = ["#FFFFFF", "#CEF700"],
-        ["Wind"] = ["#FFFFFF", "#00EFFF"],
+        ["Wind"] = ["#FFFFFF", "#80FFCE"],
         ["Rock"] = ["#FFFFFF", "#F7C600"],
         ["Light"] = ["#FFFFFF", "#F5EFB3"],
-        ["Dark"] = ["#FFFFFF", "#734FE1"],
+        ["Dark"] = ["#FFFFFF", "#8C70E0"],
         ["HpValue"] = ["#FFFFFF", "#81E5C6"],
         ["ShieldValue"] = ["#FFFFFF", "#DCDCDC"],
         ["Death"] = ["#FFFFFF", "#FF8080"]
@@ -750,15 +768,15 @@ public static class WidgetConfigDefaults
     /// </summary>
     private static readonly Dictionary<string, string[]> ElementDefaultColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["General"] = ["#FFFFFF", "#D0E1E9"],
-        ["Fire"] = ["#FFFFFF", "#FF8100"],
-        ["Water"] = ["#FFFFFF", "#9DFFEF"],
-        ["Electricity"] = ["#FFFFFF", "#AE86FF"],
-        ["Wood"] = ["#FFFFFF", "#CEF700"],
-        ["Wind"] = ["#FFFFFF", "#00EFFF"],
-        ["Rock"] = ["#FFFFFF", "#F7C600"],
-        ["Light"] = ["#FFFFFF", "#F5EFB3"],
-        ["Dark"] = ["#FFFFFF", "#734FE1"]
+        ["General"] = ["#A4C2D0", "#A8A8A8"],
+        ["Fire"] = ["#F4501B", "#CC6333"],
+        ["Water"] = ["#66CDE7", "#4494A9"],
+        ["Electricity"] = ["#6B6BEB", "#826DD5"],
+        ["Wood"] = ["#94E727", "#519F44"],
+        ["Wind"] = ["#70DAB2", "#4A997A"],
+        ["Rock"] = ["#997951", "#9C714F"],
+        ["Light"] = ["#F9ED73", "#F5CF64"],
+        ["Dark"] = ["#B36AF4", "#9D66AA"]
     };
 
     private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
@@ -823,6 +841,12 @@ public static class WidgetConfigDefaults
     public static bool SupportsTakenDamageLogSettings(WidgetKind kind)
     {
         return kind is WidgetKind.TakenDamageLog;
+    }
+
+    /// <summary>スキル詳細の表示設定(行名の書式)を持つ種別か。</summary>
+    public static bool SupportsSkillDetailSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
     }
 
     /// <summary>
@@ -904,8 +928,26 @@ public static class WidgetConfigDefaults
             MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null,
             TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
-            ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null
+            ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
+            SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null
         };
+    }
+
+    /// <summary>スキル詳細の表示設定の既定。</summary>
+    public static SkillDetailWidgetSettingsConfig CreateSkillDetailSettings()
+    {
+        return new SkillDetailWidgetSettingsConfig
+        {
+            SkillInfoFormatString = DefaultSkillInfoFormatString
+        };
+    }
+
+    /// <summary>保存値を正規化して写す。書式が無ければ既定を入れる。</summary>
+    public static SkillDetailWidgetSettingsConfig CloneNormalizedSkillDetail(SkillDetailWidgetSettingsConfig? skillDetail)
+    {
+        var normalized = (skillDetail ?? CreateSkillDetailSettings()).Clone();
+        normalized.SkillInfoFormatString ??= DefaultSkillInfoFormatString;
+        return normalized;
     }
 
     private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
@@ -1295,11 +1337,11 @@ public static class WidgetConfigDefaults
         };
     }
 
-    /// <summary>属性カラーで最初に選ばれている枠。被ダメログのテキストカラーと同じく全部2枠目の差し色。</summary>
+    /// <summary>属性カラーで最初に選ばれている枠。9属性とも1枠目(白)。</summary>
     public static Dictionary<string, int> CreateDefaultElementColorIndexes()
     {
         return DamagePropertyKeys
-            .ToDictionary(key => key, _ => MinClassColorIndex + 1, StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(key => key, _ => MinClassColorIndex, StringComparer.OrdinalIgnoreCase);
     }
 
     public static Dictionary<string, List<string>> CreateDefaultElementColorPalettes()
@@ -1465,6 +1507,9 @@ public static class WidgetConfigDefaults
             : null;
         config.ElementColor = SupportsElementColorSettings(kind)
             ? CloneNormalizedElementColor(kind, config.ElementColor)
+            : null;
+        config.SkillDetail = SupportsSkillDetailSettings(kind)
+            ? CloneNormalizedSkillDetail(config.SkillDetail)
             : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets

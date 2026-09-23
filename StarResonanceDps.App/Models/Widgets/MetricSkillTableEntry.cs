@@ -1,4 +1,4 @@
-using System.Windows.Media;
+﻿using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace StarResonanceDps.App.Models.Widgets;
@@ -43,62 +43,32 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
     [ObservableProperty]
     private IReadOnlyList<object> _elementSegments = [];
 
-    /// <summary>属性の欄の TIPS。「無属性33.33%/火属性33.33%」。</summary>
+    /// <summary>行の TIPS。「火属性33.33%/光属性66.67%, 物理60.00%/無分類40.00%」(属性の内訳、タイプの内訳)。</summary>
     [ObservableProperty]
-    private string _elementToolTipText = string.Empty;
+    private string _rowToolTipText = string.Empty;
 
-    /// <summary>物理・魔法の内訳。並びは 物理 → 魔法 → ――(どちらでもない)。</summary>
-    [ObservableProperty]
-    private string _damageModeText = string.Empty;
-
-    /// <summary>種類の欄の TIPS。「物理33.33%/魔法33.33%」。</summary>
-    [ObservableProperty]
-    private string _damageModeToolTipText = string.Empty;
-
+    /// <summary>行名。設定の書式(スキル名・属性・タイプ・ヒット数・会心率)で組み立てたもの。</summary>
     [ObservableProperty]
     private string _skillName = string.Empty;
 
+    /// <summary>値の欄。メーターの行と同じ「総量 (秒間値) 割合%」。</summary>
     [ObservableProperty]
-    private string _totalValueText = string.Empty;
-
-    [ObservableProperty]
-    private string _encounterPerSecondText = string.Empty;
-
-    [ObservableProperty]
-    private string _hitCountText = string.Empty;
-
-    [ObservableProperty]
-    private string _critRateText = string.Empty;
-
-    [ObservableProperty]
-    private string _shareText = string.Empty;
+    private string _valueText = string.Empty;
 
     public void Update(
         string noText,
         IReadOnlyList<object> elementSegments,
-        string elementToolTipText,
-        string damageModeText,
-        string damageModeToolTipText,
+        string rowToolTipText,
         string skillName,
-        string totalValueText,
-        string encounterPerSecondText,
-        string hitCountText,
-        string critRateText,
-        string shareText,
+        string valueText,
         Brush? barBrush,
         double barRatio)
     {
         NoText = noText;
         ElementSegments = elementSegments;
-        ElementToolTipText = elementToolTipText;
-        DamageModeText = damageModeText;
-        DamageModeToolTipText = damageModeToolTipText;
+        RowToolTipText = rowToolTipText;
         SkillName = skillName;
-        TotalValueText = totalValueText;
-        EncounterPerSecondText = encounterPerSecondText;
-        HitCountText = hitCountText;
-        CritRateText = critRateText;
-        ShareText = shareText;
+        ValueText = valueText;
         BarBrush = barBrush;
         BarRatio = barRatio;
         HasBar = barBrush is not null;

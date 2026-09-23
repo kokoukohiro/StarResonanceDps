@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
@@ -19,10 +19,21 @@ public enum PlayerMetricDisplayMode
 }
 
 /// <summary>
-/// スキル詳細の属性列に出すアイコン。被ダメログの属性アイコンと同じで、<b>影は付けない</b>。
+/// スキル詳細の属性列に出すアイコン。クラスアイコンと同じ染め方で、塗りは白(行の色は下のバーが持つ)。
 /// TIPS は欄そのものに1つ付けるので、アイコンは持たない。
+///
+/// <para>
+/// 2種類以上の属性を含む行は、枠を中央の縦線で2等分し、
+/// <b>ダメージの多い1位を左、2位を右</b>に切り抜いて重ねる。3つ目以降は出さない(TIPS には出る)。
+/// </para>
 /// </summary>
-public sealed record MetricElementIconSegment(ImageSource Icon);
+/// <param name="PrimaryMask">1位の属性アイコンの形。2位があるときは左半分に切り抜く。</param>
+/// <param name="SecondaryMask">2位の属性アイコンの形。無ければ <c>null</c>。</param>
+public sealed record MetricElementIconSegment(Brush PrimaryMask, Brush? SecondaryMask)
+{
+    /// <summary>2位があるか。切り抜きと2枚目の出し分けに使う。</summary>
+    public bool HasSecondary => SecondaryMask is not null;
+}
 
 public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
@@ -34,19 +45,21 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         Zproto.EDamageMode.DamageNormal
     ];
 
-    /// <summary>物理でも魔法でもないときの表記。記号なので4言語とも同じで、リソースは持たない。</summary>
-    private const string NoDamageModeText = "――";
-
-    /// <summary>属性・種類の欄と、その TIPS の区切り。記号なので4言語とも同じ。</summary>
+    /// <summary>属性・種類の並びと、その TIPS の区切り。記号なので4言語とも同じ。</summary>
     private const string ShareSeparator = "/";
+
+    /// <summary>行の TIPS で、属性の内訳とタイプの内訳を分ける区切り。</summary>
+    private const string ToolTipPartSeparator = ", ";
 
     private readonly MeterSnapshotKind _kind;
     private readonly PlayerMetricDisplayMode _displayMode;
     private ElementColorWidgetSettingsConfig _elementColorSettings;
+    private SkillDetailWidgetSettingsConfig _skillDetailSettings;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<MetricSkillTableEntry> _skillEntries = [];
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
+    private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private IReadOnlyList<MetricTimelinePoint> _timelinePoints = Array.Empty<MetricTimelinePoint>();
     private string _metricLabel = string.Empty;
     private string _totalLabel = string.Empty;
@@ -68,6 +81,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         _kind = kind;
         _displayMode = displayMode;
         _elementColorSettings = playerWidget.GetElementColorSettingsSnapshot();
+        _skillDetailSettings = playerWidget.GetSkillDetailSettingsSnapshot();
         SkillEntries = new ReadOnlyObservableCollection<MetricSkillTableEntry>(_skillEntries);
         _refreshTimer = new DispatcherTimer
         {
@@ -76,6 +90,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         _refreshTimer.Tick += RefreshTimer_Tick;
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         playerWidget.ElementColorSettingsChanged += Widget_ElementColorSettingsChanged;
+        playerWidget.SkillDetailSettingsChanged += Widget_SkillDetailSettingsChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         InitializePlayer(initialPlayer);
         Refresh();
@@ -157,6 +172,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         PlayerWidget.ElementColorSettingsChanged -= Widget_ElementColorSettingsChanged;
+        PlayerWidget.SkillDetailSettingsChanged -= Widget_SkillDetailSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
@@ -179,6 +195,12 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private void Widget_ElementColorSettingsChanged(object? sender, EventArgs e)
     {
         _elementColorSettings = PlayerWidget.GetElementColorSettingsSnapshot();
+        Refresh();
+    }
+
+    private void Widget_SkillDetailSettingsChanged(object? sender, EventArgs e)
+    {
+        _skillDetailSettings = PlayerWidget.GetSkillDetailSettingsSnapshot();
         Refresh();
     }
 
@@ -325,15 +347,18 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             // 並びは総量の降順なので、そのまま振るとメーターの順位と同じ形になる。
             (index + 1).ToString(CultureInfo.CurrentCulture),
             CreateElementSegments(entry),
-            CreateElementToolTipText(entry),
-            CreateDamageModeText(entry),
-            CreateDamageModeToolTipText(entry),
-            entry.Name,
-            MeterNumberFormatter.Format(entry.TotalValue, numberDisplayFormatIndex),
-            MeterNumberFormatter.Format(entry.ValuePerSecond, numberDisplayFormatIndex),
-            entry.HitCount.ToString(CultureInfo.CurrentCulture),
-            entry.CritRate.ToString("F2", CultureInfo.CurrentCulture) + "%",
-            entry.Percentage.ToString("F2", CultureInfo.CurrentCulture) + "%",
+            CreateRowToolTipText(entry),
+            SkillInfoFormatFormatter.Format(
+                entry.Name,
+                CreateElementText(entry),
+                CreateDamageModeText(entry),
+                entry.HitCount,
+                entry.CritRate,
+                _skillDetailSettings.SkillInfoFormatString),
+            // 値の書式はメーターの行と同じ(MeterPlayerEntry.ValueText)。
+            $"{MeterNumberFormatter.Format(entry.TotalValue, numberDisplayFormatIndex)}"
+                + $" ({MeterNumberFormatter.Format(entry.ValuePerSecond, numberDisplayFormatIndex)})"
+                + $" {entry.Percentage.ToString("F2", CultureInfo.CurrentCulture)}%",
             CreateBarBrush(entry),
             topValue == 0UL ? 0d : Math.Clamp(entry.TotalValue / (double)topValue, 0d, 1d));
     }
@@ -407,27 +432,67 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>
     /// 属性の内訳。アイコンだけを属性ID順に並べる。<b>割合が 0 の属性は出さない</b>ので、
-    /// 混ざっていない行はアイコン1つになる。割合は欄の TIPS(<see cref="CreateElementToolTipText"/>)に出す。
+    /// 混ざっていない行はアイコン1つになる。割合は行の TIPS(<see cref="CreateRowToolTipText"/>)に出す。
     /// </summary>
     private IReadOnlyList<object> CreateElementSegments(MetricSkillTableRowSnapshot entry)
     {
-        var segments = new List<object>();
-        foreach (var pair in entry.ValueByElement)
+        // ダメージの多い順に上位2つ。3つ目以降は枠に入らないので出さない(TIPS には全部出る)。
+        var masks = new List<Brush>();
+        foreach (var pair in entry.ValueByElement.OrderByDescending(pair => pair.Value))
         {
-            if (pair.Value == 0UL)
+            if (pair.Value == 0UL || masks.Count >= 2)
             {
-                continue;
+                break;
             }
 
-            segments.Add(new MetricElementIconSegment(
-                (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{pair.Key}")));
+            masks.Add(GetElementIconMask(pair.Key.ToString()));
         }
 
-        return segments;
+        return masks.Count switch
+        {
+            0 => [],
+            1 => [new MetricElementIconSegment(masks[0], null)],
+            _ => [new MetricElementIconSegment(masks[0], masks[1])]
+        };
     }
 
-    /// <summary>属性の欄の TIPS。「無属性33.33%/火属性33.33%」の形で、割合が 0 の属性は出さない。</summary>
-    private static string CreateElementToolTipText(MetricSkillTableRowSnapshot entry)
+    /// <summary>属性アイコンの形。白い塗りをこの形で抜く(クラスアイコンと同じ染め方)。</summary>
+    private ImageBrush GetElementIconMask(string elementKey)
+    {
+        if (!_elementIconMasks.TryGetValue(elementKey, out var mask))
+        {
+            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{elementKey}"))
+            {
+                Stretch = Stretch.Uniform
+            };
+            mask.Freeze();
+            _elementIconMasks[elementKey] = mask;
+        }
+
+        return mask;
+    }
+
+    /// <summary>
+    /// 行の TIPS。「火属性33.33%/光属性66.67%, 物理60.00%/無分類40.00%」の形で、
+    /// 属性の内訳とタイプの内訳を「, 」でつなぐ。割合が 0 のものは出さない。
+    /// </summary>
+    private static string CreateRowToolTipText(MetricSkillTableRowSnapshot entry)
+    {
+        var elements = CreateElementShareText(entry);
+        var modes = string.Join(
+            ShareSeparator,
+            EnumerateDamageModeParts(entry).Select(part => part.Label + FormatShare(part.Value, entry.TotalValue)));
+
+        if (elements.Length == 0)
+        {
+            return modes;
+        }
+
+        return modes.Length == 0 ? elements : elements + ToolTipPartSeparator + modes;
+    }
+
+    /// <summary>属性の内訳(割合つき)。「火属性33.33%/光属性66.67%」。</summary>
+    private static string CreateElementShareText(MetricSkillTableRowSnapshot entry)
     {
         var localization = LocalizationManager.Instance;
         var parts = new List<string>();
@@ -444,22 +509,32 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         return string.Join(ShareSeparator, parts);
     }
 
+    /// <summary>書式の {Element} に入れる属性名。2種類以上あれば「/」でつなぐ(割合は付けない)。</summary>
+    private static string CreateElementText(MetricSkillTableRowSnapshot entry)
+    {
+        var localization = LocalizationManager.Instance;
+        var parts = new List<string>();
+        foreach (var pair in entry.ValueByElement)
+        {
+            if (pair.Value == 0UL)
+            {
+                continue;
+            }
+
+            parts.Add(localization.GetString($"DamageProperty_{pair.Key}"));
+        }
+
+        return string.Join(ShareSeparator, parts);
+    }
+
     /// <summary>
-    /// 物理・魔法の内訳。ラベルだけを「/」で並べる。<b>並びは 物理 → 魔法 → ――</b> で、割合が 0 のものは出さない。
-    /// 「――」は <c>DamageNormal</c>(物理でも魔法でもない)で、記号なのでリソースを持たない。
-    /// 割合は欄の TIPS(<see cref="CreateDamageModeToolTipText"/>)に出す。
+    /// 物理・魔法の内訳。ラベルだけを「/」で並べる。<b>並びは 物理 → 魔法 → 無分類</b> で、割合が 0 のものは出さない。
+    /// 「無分類」は <c>DamageNormal</c>(物理でも魔法でもない)。
+    /// 割合は行の TIPS(<see cref="CreateRowToolTipText"/>)に出す。
     /// </summary>
     private static string CreateDamageModeText(MetricSkillTableRowSnapshot entry)
     {
         return string.Join(ShareSeparator, EnumerateDamageModeParts(entry).Select(part => part.Label));
-    }
-
-    /// <summary>種類の欄の TIPS。「物理33.33%/魔法33.33%」の形で、割合が 0 のものは出さない。</summary>
-    private static string CreateDamageModeToolTipText(MetricSkillTableRowSnapshot entry)
-    {
-        return string.Join(
-            ShareSeparator,
-            EnumerateDamageModeParts(entry).Select(part => part.Label + FormatShare(part.Value, entry.TotalValue)));
     }
 
     /// <summary>種類の欄に出す分だけを、決めた並びで返す。</summary>
@@ -488,7 +563,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             {
                 Zproto.EDamageMode.DamagePhysical => localization.GetString("Metric_DamageMode_Physical"),
                 Zproto.EDamageMode.DamageMagical => localization.GetString("Metric_DamageMode_Magical"),
-                _ => NoDamageModeText
+                _ => localization.GetString("Metric_DamageMode_Normal")
             };
 
             parts.Add((label, value));

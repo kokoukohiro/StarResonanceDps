@@ -46,6 +46,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.TakenDamageLogPreviewChanged += _widget.ApplyTakenDamageLogSettingsPreview;
         _viewModel.BuffListPreviewChanged += _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged += _widget.ApplyElementColorSettingsPreview;
+        _viewModel.SkillDetailPreviewChanged += _widget.ApplySkillDetailSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -74,6 +75,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.TakenDamageLogPreviewChanged -= _widget.ApplyTakenDamageLogSettingsPreview;
         _viewModel.BuffListPreviewChanged -= _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged -= _widget.ApplyElementColorSettingsPreview;
+        _viewModel.SkillDetailPreviewChanged -= _widget.ApplySkillDetailSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }

@@ -47,6 +47,7 @@
             </Grid>
         </DataTemplate>
 
+        <!-- 属性アイコン。クラスアイコンと同じ染め方で、塗りはその属性のテキストカラー。 -->
         <DataTemplate DataType="{x:Type viewModels:TakenDamageLogAttributeIconSegment}">
             <Grid Width="16"
                   Height="16"
@@ -61,9 +62,10 @@
                                    Text="{Binding Name}" />
                     </ToolTip>
                 </Grid.ToolTip>
-                <Image Source="{Binding Icon}"
-                       Stretch="Uniform"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <Rectangle Fill="{Binding ElementBrush}"
+                           OpacityMask="{Binding IconMask}"
+                           Effect="{StaticResource Effect.ProfessionIconShadow}"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
             </Grid>
         </DataTemplate>
 

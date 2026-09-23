@@ -723,6 +723,12 @@
   <data name="Common_Add" xml:space="preserve">
     <value>添加</value>
   </data>
+  <data name="Settings_SkillInfo_Customization" xml:space="preserve">
+    <value>技能名称</value>
+  </data>
+  <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
+    <value>Skill1</value>
+  </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>玩家名称</value>
   </data>
@@ -776,6 +782,9 @@
   </data>
   <data name="Metric_DamageMode_Magical" xml:space="preserve">
     <value>魔法</value>
+  </data>
+  <data name="Metric_DamageMode_Normal" xml:space="preserve">
+    <value>无分类</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>技能名称</value>

@@ -265,21 +265,28 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
     }
 }
 
-/// <summary>属性カラーの1行。作りはクラスカラーの行と同じで、アイコンは影を付けない。</summary>
+/// <summary>属性カラーの1行。作りはメーターのクラスカラーの行と同じで、アイコンは白で染めて影を付ける。</summary>
 public sealed class ElementColorItemViewModel : ObservableObject
 {
     public ElementColorItemViewModel(string key, ColorPaletteViewModel colors)
     {
         Key = key;
         Colors = colors;
-        Icon = (ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}");
+
+        var mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}"))
+        {
+            Stretch = Stretch.Uniform
+        };
+        mask.Freeze();
+        IconMask = mask;
     }
 
     public string Key { get; }
 
     public ColorPaletteViewModel Colors { get; }
 
-    public ImageSource Icon { get; }
+    /// <summary>属性アイコンの形。塗りをこの形で抜く。</summary>
+    public Brush IconMask { get; }
 
     /// <summary>行名は属性名。その属性だけで出来た行の色、という意味。</summary>
     public string DisplayName => LocalizationManager.Instance.GetString($"DamageProperty_{Key}");
