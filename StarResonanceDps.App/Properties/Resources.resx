@@ -543,6 +543,9 @@
   <data name="ClassSpec_TransformMean" xml:space="preserve">
     <value>Bee</value>
   </data>
+  <data name="ClassSpec_TransformGolem" xml:space="preserve">
+    <value>Golem</value>
+  </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>

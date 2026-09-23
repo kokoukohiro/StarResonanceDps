@@ -537,7 +537,8 @@ public static class MeterSnapshotProvider
                     source.ProfessionId,
                     source.SubProfessionId,
                     source.IsSpecAbilityUnequipped,
-                    PlayerClassSpecResolver.HasMeanTransformBuff(uuid)));
+                    PlayerClassSpecResolver.HasMeanTransformBuff(uuid),
+                    PlayerClassSpecResolver.HasGolemTransformBuff(uuid)));
         }
         else
         {
@@ -2358,7 +2359,8 @@ public static class MeterSnapshotProvider
                 source.ProfessionId,
                 source.SubProfessionId,
                 source.IsSpecAbilityUnequipped,
-                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID)),
+                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID),
+                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)),
             source.CombatPower,
             source.SeasonStrength,
             source.Level,

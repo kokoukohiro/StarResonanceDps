@@ -161,6 +161,55 @@
   "683105:0": {
     "Row": "683104:0"
   },
+  "706201:1": {
+    "Name": {
+      "zh-CN": "拳击-机像变身",
+      "en-US": "Punch - Golem Transformation",
+      "ja-JP": "パンチ・ゴーレム変身",
+      "ko-KR": "펀치 - 골렘 변신"
+    }
+  },
+  "706202:1": {
+    "Name": {
+      "zh-CN": "三连击-机像变身",
+      "en-US": "Triple Strike - Golem Transformation",
+      "ja-JP": "三連撃・ゴーレム変身",
+      "ko-KR": "삼연격 - 골렘 변신"
+    }
+  },
+  "706202:2": {
+    "Row": "706202:1"
+  },
+  "706202:3": {
+    "Row": "706202:1"
+  },
+  "706204:1": {
+    "Name": {
+      "zh-CN": "旋风斩-机像变身",
+      "en-US": "Whirlwind Slash - Golem Transformation",
+      "ja-JP": "旋風斬り・ゴーレム変身",
+      "ko-KR": "회오리 베기 - 골렘 변신"
+    }
+  },
+  "706206:1": {
+    "Name": {
+      "zh-CN": "蓄势解放-机像变身",
+      "en-US": "Charged Release - Golem Transformation",
+      "ja-JP": "力溜め解放・ゴーレム変身",
+      "ko-KR": "기세 해방 - 골렘 변신"
+    }
+  },
+  "706207:1": {
+    "Name": {
+      "zh-CN": "连续下砸-机像变身",
+      "en-US": "Repeated Slam - Golem Transformation",
+      "ja-JP": "連続叩きつけ・ゴーレム変身",
+      "ko-KR": "연속 내려찍기 - 골렘 변신"
+    }
+  },
+  "706207:2": {
+    "Row": "706207:1"
+  },
   "920002:0": {
     "Name": {
       "zh-CN": "魂火环绕",

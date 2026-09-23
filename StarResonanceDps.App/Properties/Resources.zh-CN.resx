@@ -543,6 +543,9 @@
   <data name="ClassSpec_TransformMean" xml:space="preserve">
     <value>蜜蜂</value>
   </data>
+  <data name="ClassSpec_TransformGolem" xml:space="preserve">
+    <value>机像</value>
+  </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>未知</value>
   </data>

@@ -543,6 +543,9 @@
   <data name="ClassSpec_TransformMean" xml:space="preserve">
     <value>ミーン</value>
   </data>
+  <data name="ClassSpec_TransformGolem" xml:space="preserve">
+    <value>ゴーレム</value>
+  </data>
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>不明</value>
   </data>

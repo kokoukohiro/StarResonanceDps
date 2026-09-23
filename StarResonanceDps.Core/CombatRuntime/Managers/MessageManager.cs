@@ -287,7 +287,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
-                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, isFullSnapshot: true);
+                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                     }
 
                     if (vData.EnterSceneInfo.PlayerEnt.TempAttrs != null)
@@ -577,7 +577,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             AppState.BenchmarkSingleTargetUUID = 0;
 
             // どれもパケット処理のスレッドだけが触る。
-            ShapeshiftedEntities.Clear();
             PlayerDeathStates.Clear();
             LastPassiveHealTicks.Clear();
             // キャプチャの停止(StopCapturing)と共通のもの。停止はしない。
@@ -983,55 +982,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// 変身中か。変身中は職業IDの属性(AttrProfessionId)だけが職業を決める。
         /// ソーシャル・コンテナ・ダメージの技の経路は変身前のクラスを運んでくるので、変身中は書かない。
-        /// ミーンは変身のバフ、ドロシー・ルーシィ・ナツは変身クラスの職業IDで判断する。
+        /// ミーンとゴーレムは変身のバフ、ドロシー・ルーシィ・ナツは変身クラスの職業IDで判断する。
         /// </summary>
         private static bool IsTransformed(long uuid)
         {
-            if (Models.PlayerClassSpecResolver.HasMeanTransformBuff(uuid))
+            if (Models.PlayerClassSpecResolver.HasMeanTransformBuff(uuid)
+                || Models.PlayerClassSpecResolver.HasGolemTransformBuff(uuid))
             {
                 return true;
             }
 
             return EncounterManager.Current.Entities.TryGetValue(uuid, out var entity)
                 && Models.PlayerClassSpecResolver.TryResolveTransformation(entity.ProfessionId, out _);
-        }
-
-        /// <summary>変身の属性(AttrShapeshiftType)が値ありで最後に届いた実体。</summary>
-        private static readonly HashSet<long> ShapeshiftedEntities = [];
-
-        /// <summary>
-        /// この取り込みの時点で変身中か。1回の取り込みの中で、差し替えの値が変身の属性より先に並ぶことがあるので、
-        /// 先に全体から変身の属性を探して決める。差分に変身の属性が無ければ前の状態のまま。
-        /// </summary>
-        private static bool ResolveShapeshifted(long uuid, RepeatedField<Attr> attrs, bool isFullSnapshot)
-        {
-            foreach (var attr in attrs)
-            {
-                if (attr.Id != (int)EAttrType.AttrShapeshiftType)
-                {
-                    continue;
-                }
-
-                var type = attr.RawData is { Length: > 0 }
-                    ? new Google.Protobuf.CodedInputStream(attr.RawData.ToByteArray()).ReadInt32()
-                    : 0;
-                if (type != 0)
-                {
-                    ShapeshiftedEntities.Add(uuid);
-                    return true;
-                }
-
-                ShapeshiftedEntities.Remove(uuid);
-                return false;
-            }
-
-            if (isFullSnapshot)
-            {
-                ShapeshiftedEntities.Remove(uuid);
-                return false;
-            }
-
-            return ShapeshiftedEntities.Contains(uuid);
         }
 
         /// <summary>
@@ -1569,12 +1531,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        /// <param name="isFullSnapshot">出現・EnterScene の全属性の写しか(変身の属性が無ければ変身していない)。</param>
-        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs, bool isFullSnapshot = false)
+        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
         {
-            // 変身中はサーバーが能力スコア・シーズン強度・レベル・シーズンレベルを変身体の値に差し替えてくるので、変身前の値のまま持つ。
-            var isShapeshifted = ResolveShapeshifted(uuid, attrs, isFullSnapshot);
-
             foreach (var attr in attrs)
             {
                 if (attr.Id == 0 || attr.RawData == null)
@@ -1625,16 +1583,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrFightPoint:
-                        if (!isShapeshifted)
-                        {
-                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
-                        }
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrLevel:
-                        if (!isShapeshifted)
-                        {
-                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
-                        }
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrRankLevel:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
@@ -1805,16 +1757,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                             break;
                         }
                     case EAttrType.AttrSeasonLevel:
-                        if (!isShapeshifted)
-                        {
-                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
-                        }
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrSeasonStrength:
-                        if (!isShapeshifted)
-                        {
-                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
-                        }
+                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
                         break;
                     case EAttrType.AttrSeasonStrengthAdd:
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
@@ -1925,7 +1871,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyEntityProjection.RemoveEntity(disappearedEntity.Uuid);
                 SummonSourceIndex.Instance.Remove(disappearedEntity.Uuid);
                 NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
-                ShapeshiftedEntities.Remove(disappearedEntity.Uuid);
                 PlayerDeathStates.Remove(disappearedEntity.Uuid);
                 LastPassiveHealTicks.Remove(disappearedEntity.Uuid);
             }
@@ -1949,7 +1894,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var attrCollection = entity.Attrs;
                 if (attrCollection?.Attrs != null)
                 {
-                    ProcessAttrs(entity.Uuid, attrCollection.Attrs, isFullSnapshot: true);
+                    ProcessAttrs(entity.Uuid, attrCollection.Attrs);
                     RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
                 }

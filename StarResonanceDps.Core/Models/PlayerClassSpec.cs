@@ -54,7 +54,17 @@ public enum PlayerClassSpec
     /// 変身のバフ <see cref="PlayerClassSpecResolver.MeanTransformBuffId"/> が乗っている間だけこれになる。
     /// </para>
     /// </summary>
-    TransformMean
+    TransformMean,
+
+    /// <summary>
+    /// クエスト「ゴーレム鋼拳戦」(ダンジョン 8002)でゴーレムに変身している間。
+    ///
+    /// <para>
+    /// ミーンと同じく職業IDが値なし(0)で届く。変身のバフ
+    /// <see cref="PlayerClassSpecResolver.GolemTransformBuffId"/> が乗っている間だけこれになる。
+    /// </para>
+    /// </summary>
+    TransformGolem
 }
 
 public static class PlayerClassSpecResolver
@@ -62,8 +72,26 @@ public static class PlayerClassSpecResolver
     /// <summary>ミーンに変身している間だけ乗るバフ(变异蜂-变身)。</summary>
     public const int MeanTransformBuffId = 2110101;
 
+    /// <summary>
+    /// ゴーレムに変身している間だけ乗るバフ(狩猎怪物首领-变身近战机甲)。
+    ///
+    /// <para>
+    /// 同時に付く 960207(机甲本-已驾驶机甲标记)は搭乗中の印で、変身そのものはこちら。
+    /// <b>持続なしで除去も届かない</b>が、クエストはこのバフが乗ったまま進み、
+    /// 終わると強制のマップ移動が入って <c>ActiveBuffStore</c> ごと消える。
+    /// </para>
+    /// </summary>
+    public const int GolemTransformBuffId = 960200;
+
     /// <summary>その実体にミーンの変身のバフが今乗っているか。外れるか時間切れになれば false。</summary>
     public static bool HasMeanTransformBuff(long entityUuid)
+        => HasBuff(entityUuid, MeanTransformBuffId);
+
+    /// <summary>その実体にゴーレムの変身のバフが今乗っているか。マップ移動で消えれば false。</summary>
+    public static bool HasGolemTransformBuff(long entityUuid)
+        => HasBuff(entityUuid, GolemTransformBuffId);
+
+    private static bool HasBuff(long entityUuid, int buffId)
     {
         if (entityUuid == 0)
         {
@@ -72,7 +100,7 @@ public static class PlayerClassSpecResolver
 
         foreach (var buff in Services.ActiveBuffStore.Instance.GetActive(entityUuid))
         {
-            if (buff.BaseId == MeanTransformBuffId)
+            if (buff.BaseId == buffId)
             {
                 return true;
             }
@@ -87,7 +115,8 @@ public static class PlayerClassSpecResolver
         return spec is PlayerClassSpec.TransformDorothy
             or PlayerClassSpec.TransformLucy
             or PlayerClassSpec.TransformNatsu
-            or PlayerClassSpec.TransformMean;
+            or PlayerClassSpec.TransformMean
+            or PlayerClassSpec.TransformGolem;
     }
 
     /// <summary>
@@ -100,16 +129,24 @@ public static class PlayerClassSpecResolver
     /// </para>
     /// </summary>
     /// <param name="hasMeanTransformBuff">ミーンの変身のバフが乗っているか(<see cref="HasMeanTransformBuff"/>)。</param>
+    /// <param name="hasGolemTransformBuff">ゴーレムの変身のバフが乗っているか(<see cref="HasGolemTransformBuff"/>)。</param>
     public static PlayerClassSpec Resolve(
         int professionId,
         int subProfessionId,
         bool isSpecAbilityUnequipped,
-        bool hasMeanTransformBuff)
+        bool hasMeanTransformBuff,
+        bool hasGolemTransformBuff)
     {
         // ミーンの変身は職業IDを持たないので、バフで決める。
         if (hasMeanTransformBuff)
         {
             return PlayerClassSpec.TransformMean;
+        }
+
+        // ゴーレムも職業IDを持たないので、ミーンと同じくバフで決める。
+        if (hasGolemTransformBuff)
+        {
+            return PlayerClassSpec.TransformGolem;
         }
 
         // 変身クラスは特化を持たない。職業IDだけで決まり、SubProfessionId は見ない。
