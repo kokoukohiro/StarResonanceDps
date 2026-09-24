@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.TakenDamageLogTextColorSettingsView"
+﻿<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.TakenDamageLogTextColorSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
@@ -62,8 +62,15 @@
                                                VerticalAlignment="Center"
                                                Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
                                                OpacityMask="{Binding IconMask}"
-                                               Effect="{StaticResource Effect.ProfessionIconShadow}"
-                                               RenderOptions.BitmapScalingMode="HighQuality" />
+                                               RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Rectangle.Effect>
+                                            <DropShadowEffect
+                                                Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                Opacity="0.5"
+                                                ShadowDepth="0"
+                                                BlurRadius="5" />
+                                        </Rectangle.Effect>
+                                    </Rectangle>
                                 </Grid>
 
                                 <TextBlock Grid.Column="1" VerticalAlignment="Center"

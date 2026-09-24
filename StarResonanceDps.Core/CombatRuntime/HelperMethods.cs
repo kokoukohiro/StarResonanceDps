@@ -15,6 +15,7 @@ public class HelperMethods
         public static EquipTable Equips = new EquipTable();
         public static EquipBreakThroughTable EquipBreakThroughs = new EquipBreakThroughTable();
         public static TempAttrTable TempAttrs = new TempAttrTable();
+        public static ProfessionSystemTable ProfessionSystems = new ProfessionSystemTable();
         public static CookCuisineTable CookCuisines = new CookCuisineTable();
     }
 }

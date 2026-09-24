@@ -421,8 +421,40 @@ internal static class PlayerRosterProjection
             nearbyEntity is null ? 0 : Utils.GetCurrentShield(nearbyEntity),
             party.GetMembership(characterId) == PartyMembershipState.Member,
             party.GetPartyNumber(characterId),
-            source.IsLive);
+            source.IsLive,
+            CreateAttributeEntries(isSelf, nearbyEntity));
         return true;
+    }
+
+    /// <summary>
+    /// 自分の実体に届いている属性を番号順に全部並べる。ステータス詳細が使う。
+    ///
+    /// <para>
+    /// <b>自分だけ</b>。他人には能力値が届かない(notes/109)。
+    /// 属性の鍵は列挙名の文字列だが、列挙に無い番号はその数字が鍵になっている。
+    /// <c>Enum.TryParse</c> はどちらも受けるので、そのまま番号へ戻せる。
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<PlayerAttributeEntry>? CreateAttributeEntries(bool isSelf, Entity? nearbyEntity)
+    {
+        if (!isSelf || nearbyEntity is null)
+        {
+            return null;
+        }
+
+        var entries = new List<PlayerAttributeEntry>(nearbyEntity.Attributes.Count);
+        foreach (var (key, value) in nearbyEntity.Attributes)
+        {
+            if (!Enum.TryParse<Zproto.EAttrType>(key, out var attrType))
+            {
+                continue;
+            }
+
+            entries.Add(new PlayerAttributeEntry((int)attrType, key, value?.ToString() ?? string.Empty));
+        }
+
+        entries.Sort((left, right) => left.AttrId.CompareTo(right.AttrId));
+        return entries;
     }
 
     private static void RefreshPartyMemberSupplementFromNearby(

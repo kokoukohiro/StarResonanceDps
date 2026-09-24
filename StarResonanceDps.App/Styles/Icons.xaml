@@ -40,21 +40,35 @@
     <BitmapImage x:Key="Icon.DamageProperty.Light" UriSource="/Assets/Images/main_progress_icon_light.png" />
     <BitmapImage x:Key="Icon.DamageProperty.Dark" UriSource="/Assets/Images/main_progress_icon_dark.png" />
 
-    <!-- ステータスの項目のアイコン。名前は表示名のリソース(Properties/Resources の PlayerStatus_*)と同じ。 -->
-    <BitmapImage x:Key="Icon.PlayerStatus.PhysicalAttack" UriSource="/Assets/Images/common_attrattack.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.MagicAttack" UriSource="/Assets/Images/common_attrmattack.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Armor" UriSource="/Assets/Images/common_attrdefense.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Resistance" UriSource="/Assets/Images/common_attrmdefense.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Strength" UriSource="/Assets/Images/common_icon05.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Agility" UriSource="/Assets/Images/common_attrdexterity.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Intellect" UriSource="/Assets/Images/common_icon06.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Endurance" UriSource="/Assets/Images/common_icon08.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Crit" UriSource="/Assets/Images/common_icon12.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Haste" UriSource="/Assets/Images/common_attrhaste.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Luck" UriSource="/Assets/Images/common_attrluck.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Mastery" UriSource="/Assets/Images/common_attrmastery.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Versatility" UriSource="/Assets/Images/common_attrversatility.png" />
-    <BitmapImage x:Key="Icon.PlayerStatus.Block" UriSource="/Assets/Images/common_attrblock.png" />
+    <!--
+        ステータス詳細の項目のアイコン。鍵の末尾は同梱のファイル名。
+        どの項目がどれを使うかは PlayerStatusEntry の表が持つ。
+    -->
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrattack" UriSource="/Assets/Images/common_attrattack.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrblock" UriSource="/Assets/Images/common_attrblock.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrdefense" UriSource="/Assets/Images/common_attrdefense.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrdexterity" UriSource="/Assets/Images/common_attrdexterity.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrhaste" UriSource="/Assets/Images/common_attrhaste.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrhit" UriSource="/Assets/Images/common_attrhit.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrluck" UriSource="/Assets/Images/common_attrluck.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrmastery" UriSource="/Assets/Images/common_attrmastery.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrmattack" UriSource="/Assets/Images/common_attrmattack.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrmaxhp" UriSource="/Assets/Images/common_attrmaxhp.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrmdefense" UriSource="/Assets/Images/common_attrmdefense.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_attrversatility" UriSource="/Assets/Images/common_attrversatility.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon01" UriSource="/Assets/Images/common_icon01.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon03" UriSource="/Assets/Images/common_icon03.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon05" UriSource="/Assets/Images/common_icon05.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon06" UriSource="/Assets/Images/common_icon06.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon07" UriSource="/Assets/Images/common_icon07.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon08" UriSource="/Assets/Images/common_icon08.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon11" UriSource="/Assets/Images/common_icon11.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon12" UriSource="/Assets/Images/common_icon12.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon13" UriSource="/Assets/Images/common_icon13.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon14" UriSource="/Assets/Images/common_icon14.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon19" UriSource="/Assets/Images/common_icon19.png" />
+    <BitmapImage x:Key="Icon.PlayerStatus.common_icon21" UriSource="/Assets/Images/common_icon21.png" />
+
     <BitmapImage x:Key="Icon.PartyNumberFrame" UriSource="/Assets/Images/team_num_frame.png" />
     <BitmapImage x:Key="Icon.RoleSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_01.png" />
     <BitmapImage x:Key="Icon.ImagineSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_02.png" />

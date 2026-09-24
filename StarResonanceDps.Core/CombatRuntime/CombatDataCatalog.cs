@@ -81,6 +81,7 @@ public static class CombatDataCatalog
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
+
     /// <summary>
     /// ダンジョン名に付ける難易度名。<c>Data/Localization/DungeonTypeNames.json</c>。
     /// 鍵は <see cref="MakeDungeonTypeKey"/>(ファイルでは <c>番号</c> と <c>番号:段階</c>)。
@@ -1039,6 +1040,51 @@ public static class CombatDataCatalog
     /// 段階が分からなければ難易度名を付けない。
     /// </para>
     /// </summary>
+    /// <summary>
+    /// その職業が出す攻撃力の属性番号(物理 11330 か魔法 11340)。
+    /// 表に行が無ければ 0。<b>直書きの分岐で持たない</b> — ゲームの表とずれる。
+    /// </summary>
+    public static int GetProfessionAttackAttrId(int professionId)
+        => GetProfessionShownAttrId(professionId, static row => row.AttackShow);
+
+    /// <summary>
+    /// その職業が出す主ステータスの属性番号(筋力 11010 / 知力 11020 / 敏捷 11030)。
+    /// 表に行が無ければ 0。
+    /// </summary>
+    public static int GetProfessionPrimaryStatAttrId(int professionId)
+        => GetProfessionShownAttrId(professionId, static row => row.StrOrIntOrDexShow);
+
+    /// <summary>
+    /// 表の <c>[[種別, 番号], …]</c> から番号を1つ取る。形が想定と違えば 0。
+    /// </summary>
+    private static int GetProfessionShownAttrId(
+        int professionId,
+        Func<DataTypes.ProfessionSystem, List<List<int>>?> select)
+    {
+        if (professionId <= 0
+            || !HelperMethods.DataTables.ProfessionSystems.Data.TryGetValue(
+                professionId.ToString(), out var row))
+        {
+            return 0;
+        }
+
+        var pairs = select(row);
+        if (pairs is null)
+        {
+            return 0;
+        }
+
+        foreach (var pair in pairs)
+        {
+            if (pair is { Count: >= 2 } && pair[1] > 0)
+            {
+                return pair[1];
+            }
+        }
+
+        return 0;
+    }
+
     public static string GetSceneName(long levelMapId, int dungeonDifficulty)
     {
         if (levelMapId is not (> 0 and <= int.MaxValue))

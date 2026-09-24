@@ -536,7 +536,11 @@ public sealed class WidgetWindowManager
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
         window.Closed += WidgetWindow_Closed;
-        window.SaveWindowBoundsOverride = () => SaveOpenTargets(playerWidget);
+        // 開き先を持たない種別(常に自分1枚のステータス詳細)は、種別ごとの保存に落とす。
+        // ここで Override を付けると SaveOpenTargets が何もせず返り、位置も大きさも捨てられる。
+        window.SaveWindowBoundsOverride = WidgetConfigDefaults.SupportsOpenTargets(playerWidget.Kind)
+            ? () => SaveOpenTargets(playerWidget)
+            : null;
 
         // 復元した位置があるならカスケードで動かさない。
         if (savedWindowBounds is null)

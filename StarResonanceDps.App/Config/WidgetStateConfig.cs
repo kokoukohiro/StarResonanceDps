@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.Models;
 
@@ -26,6 +27,8 @@ public sealed class WidgetConfig
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
     public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
     public SkillDetailWidgetSettingsConfig? SkillDetail { get; set; }
+
+    public PlayerStatusWidgetSettingsConfig? PlayerStatus { get; set; }
 
     /// <summary>
     /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
@@ -56,6 +59,7 @@ public sealed class WidgetConfig
             BuffList = BuffList?.Clone(),
             ElementColor = ElementColor?.Clone(),
             SkillDetail = SkillDetail?.Clone(),
+            PlayerStatus = PlayerStatus?.Clone(),
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
@@ -468,6 +472,27 @@ public sealed class SkillDetailWidgetSettingsConfig
     }
 }
 
+public sealed class PlayerStatusWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultHideInactiveStatusEffects"/>。</remarks>
+    public bool? HideInactiveStatusEffects { get; set; }
+
+    /// <summary>行ごとに出すか。鍵は属性の番号。</summary>
+    public Dictionary<string, bool> RowVisibility { get; set; } =
+        WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility();
+
+    public PlayerStatusWidgetSettingsConfig Clone()
+    {
+        return new PlayerStatusWidgetSettingsConfig
+        {
+            HideInactiveStatusEffects = HideInactiveStatusEffects,
+            RowVisibility = RowVisibility is null
+                ? WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility()
+                : new Dictionary<string, bool>(RowVisibility, StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 public sealed class ElementColorWidgetSettingsConfig
 {
     public int ColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
@@ -546,6 +571,9 @@ public static class WidgetConfigDefaults
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
+
+    /// <summary>ステータス詳細で、値が 0 の属性効果の行を隠すか。</summary>
+    public const bool DefaultHideInactiveStatusEffects = true;
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
     public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
 
@@ -562,14 +590,13 @@ public static class WidgetConfigDefaults
     private const double TakenDamageLogInitialWindowWidth = 440d;
     private const double TakenDamageLogInitialWindowHeight = 460d;
     private const double PlayerInfoInitialWindowWidth = 360d;
-    private const double PlayerInfoInitialWindowHeight = 200d;
-    private const double PlayerStatusInitialWindowWidth = 400d;
-    private const double PlayerStatusInitialWindowHeight = 230d;
+    private const double PlayerInfoInitialWindowHeight = 400d;
+    private const double PlayerStatusInitialWindowWidth = 360d;
+    private const double PlayerStatusInitialWindowHeight = 400d;
     private const double PlayerEquipmentInitialWindowWidth = 400d;
     private const double PlayerEquipmentInitialWindowHeight = 230d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
-    // 1行1件になったので、初回に開いた時点で数行ぶんが見える高さにする(1行34px)。
-    private const double PlayerBuffListInitialWindowHeight = 240d;
+    private const double PlayerBuffListInitialWindowHeight = 400d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
     private const double MetricContributionInitialWindowWidth = 520d;
@@ -849,6 +876,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
     }
 
+    /// <summary>ステータス詳細の表示設定を持つ種別か。</summary>
+    public static bool SupportsPlayerStatusSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerStatus;
+    }
+
     /// <summary>
     /// 開いていた窓の対象を保存する種別か。プレイヤー用ウィンドウだけが持つ。
     /// <see cref="WidgetKind.PlayerStatus"/> は常に自分1枚なので対象外。
@@ -929,8 +962,58 @@ public static class WidgetConfigDefaults
             TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
-            SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null
+            SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
+            PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null
         };
+    }
+
+    /// <summary>ステータス詳細の表示設定の既定。</summary>
+    public static PlayerStatusWidgetSettingsConfig CreatePlayerStatusSettings()
+    {
+        return new PlayerStatusWidgetSettingsConfig
+        {
+            HideInactiveStatusEffects = DefaultHideInactiveStatusEffects,
+            RowVisibility = CreateDefaultPlayerStatusRowVisibility()
+        };
+    }
+
+    /// <summary>行ごとのオン/オフの既定。一覧の全件を埋める。</summary>
+    public static Dictionary<string, bool> CreateDefaultPlayerStatusRowVisibility()
+    {
+        var visibility = new Dictionary<string, bool>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        {
+            visibility[attrId.ToString(CultureInfo.InvariantCulture)] =
+                PlayerStatusEntry.IsRowVisibleByDefault(attrId);
+        }
+
+        return visibility;
+    }
+
+    /// <summary>保存値を正規化して写す。設定が無ければ既定を入れる。</summary>
+    public static PlayerStatusWidgetSettingsConfig CloneNormalizedPlayerStatus(
+        PlayerStatusWidgetSettingsConfig? playerStatus)
+    {
+        var normalized = (playerStatus ?? CreatePlayerStatusSettings()).Clone();
+        normalized.HideInactiveStatusEffects ??= DefaultHideInactiveStatusEffects;
+
+        // 一覧に無い鍵は捨て、足りない鍵は既定で埋める。表が変わっても保存値が取り残されない。
+        var rowVisibility = new Dictionary<string, bool>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        {
+            var key = attrId.ToString(CultureInfo.InvariantCulture);
+            rowVisibility[key] = normalized.RowVisibility is not null
+                && normalized.RowVisibility.TryGetValue(key, out var visible)
+                    ? visible
+                    : PlayerStatusEntry.IsRowVisibleByDefault(attrId);
+        }
+
+        normalized.RowVisibility = rowVisibility;
+        return normalized;
     }
 
     /// <summary>スキル詳細の表示設定の既定。</summary>
@@ -1507,6 +1590,9 @@ public static class WidgetConfigDefaults
             : null;
         config.ElementColor = SupportsElementColorSettings(kind)
             ? CloneNormalizedElementColor(kind, config.ElementColor)
+            : null;
+        config.PlayerStatus = SupportsPlayerStatusSettings(kind)
+            ? CloneNormalizedPlayerStatus(config.PlayerStatus)
             : null;
         config.SkillDetail = SupportsSkillDetailSettings(kind)
             ? CloneNormalizedSkillDetail(config.SkillDetail)

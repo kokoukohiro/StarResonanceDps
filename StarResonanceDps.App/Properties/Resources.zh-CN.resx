@@ -216,6 +216,9 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>主题</value>
   </data>
+  <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
+    <value>属性</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>职责技能</value>
   </data>
@@ -606,51 +609,6 @@
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>属性详情</value>
   </data>
-  <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>生命上限</value>
-  </data>
-  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
-    <value>物理攻击</value>
-  </data>
-  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
-    <value>魔法攻击</value>
-  </data>
-  <data name="PlayerStatus_Strength" xml:space="preserve">
-    <value>力量</value>
-  </data>
-  <data name="PlayerStatus_Agility" xml:space="preserve">
-    <value>敏捷</value>
-  </data>
-  <data name="PlayerStatus_Intellect" xml:space="preserve">
-    <value>智力</value>
-  </data>
-  <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>耐力</value>
-  </data>
-  <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>物理防御</value>
-  </data>
-  <data name="PlayerStatus_Resistance" xml:space="preserve">
-    <value>魔法防御</value>
-  </data>
-  <data name="PlayerStatus_Crit" xml:space="preserve">
-    <value>暴击</value>
-  </data>
-  <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>急速</value>
-  </data>
-  <data name="PlayerStatus_Luck" xml:space="preserve">
-    <value>幸运</value>
-  </data>
-  <data name="PlayerStatus_Mastery" xml:space="preserve">
-    <value>精通</value>
-  </data>
-  <data name="PlayerStatus_Versatility" xml:space="preserve">
-    <value>全能</value>
-  </data>
-  <data name="PlayerStatus_Block" xml:space="preserve">
-    <value>格挡</value>
-  </data>
   <data name="Widget_PlayerInfo" xml:space="preserve">
     <value>玩家信息</value>
   </data>
@@ -725,6 +683,9 @@
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>添加</value>
+  </data>
+  <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
+    <value>隐藏无效的属性效果</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>技能名称</value>
@@ -1130,5 +1091,347 @@
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※例如在副本中进入BOSS房间等</value>
+  </data>
+  <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
+    <value>移动速度</value>
+  </data>
+  <data name="PlayerStatus_10200" xml:space="preserve">
+    <value>移动速度(走)</value>
+  </data>
+  <data name="PlayerStatus_10210" xml:space="preserve">
+    <value>移动速度(跑)</value>
+  </data>
+  <data name="PlayerStatus_10220" xml:space="preserve">
+    <value>移动速度(冲刺)</value>
+  </data>
+  <data name="PlayerStatus_11010" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="PlayerStatus_11020" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="PlayerStatus_11030" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="PlayerStatus_11040" xml:space="preserve">
+    <value>耐力</value>
+  </data>
+  <data name="PlayerStatus_11110" xml:space="preserve">
+    <value>暴击</value>
+  </data>
+  <data name="PlayerStatus_11120" xml:space="preserve">
+    <value>急速</value>
+  </data>
+  <data name="PlayerStatus_11130" xml:space="preserve">
+    <value>幸运</value>
+  </data>
+  <data name="PlayerStatus_11140" xml:space="preserve">
+    <value>精通</value>
+  </data>
+  <data name="PlayerStatus_11150" xml:space="preserve">
+    <value>全能</value>
+  </data>
+  <data name="PlayerStatus_11170" xml:space="preserve">
+    <value>格挡</value>
+  </data>
+  <data name="PlayerStatus_11320" xml:space="preserve">
+    <value>生命上限</value>
+  </data>
+  <data name="PlayerStatus_11330" xml:space="preserve">
+    <value>物理攻击</value>
+  </data>
+  <data name="PlayerStatus_11340" xml:space="preserve">
+    <value>魔法攻击</value>
+  </data>
+  <data name="PlayerStatus_11350" xml:space="preserve">
+    <value>物理防御</value>
+  </data>
+  <data name="PlayerStatus_11360" xml:space="preserve">
+    <value>魔法防御</value>
+  </data>
+  <data name="PlayerStatus_11370" xml:space="preserve">
+    <value>忽视物理防御</value>
+  </data>
+  <data name="PlayerStatus_11380" xml:space="preserve">
+    <value>忽视魔法防御</value>
+  </data>
+  <data name="PlayerStatus_11390" xml:space="preserve">
+    <value>忽视物理防御</value>
+  </data>
+  <data name="PlayerStatus_11400" xml:space="preserve">
+    <value>忽视魔法防御</value>
+  </data>
+  <data name="PlayerStatus_11410" xml:space="preserve">
+    <value>精炼物攻</value>
+  </data>
+  <data name="PlayerStatus_11420" xml:space="preserve">
+    <value>精炼防御</value>
+  </data>
+  <data name="PlayerStatus_11430" xml:space="preserve">
+    <value>精炼魔攻</value>
+  </data>
+  <data name="PlayerStatus_11440" xml:space="preserve">
+    <value>赛季强度</value>
+  </data>
+  <data name="PlayerStatus_11460" xml:space="preserve">
+    <value>赛季防御</value>
+  </data>
+  <data name="PlayerStatus_11470" xml:space="preserve">
+    <value>忽视赛季防御</value>
+  </data>
+  <data name="PlayerStatus_11480" xml:space="preserve">
+    <value>忽视赛季防御</value>
+  </data>
+  <data name="PlayerStatus_11500" xml:space="preserve">
+    <value>全元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11510" xml:space="preserve">
+    <value>火元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11520" xml:space="preserve">
+    <value>冰元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11530" xml:space="preserve">
+    <value>森元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11540" xml:space="preserve">
+    <value>雷元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11550" xml:space="preserve">
+    <value>风元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11560" xml:space="preserve">
+    <value>岩元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11570" xml:space="preserve">
+    <value>光元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11580" xml:space="preserve">
+    <value>暗元素攻击</value>
+  </data>
+  <data name="PlayerStatus_11710" xml:space="preserve">
+    <value>暴击</value>
+  </data>
+  <data name="PlayerStatus_11720" xml:space="preserve">
+    <value>攻击速度</value>
+  </data>
+  <data name="PlayerStatus_11730" xml:space="preserve">
+    <value>施法速度</value>
+  </data>
+  <data name="PlayerStatus_11780" xml:space="preserve">
+    <value>幸运</value>
+  </data>
+  <data name="PlayerStatus_11790" xml:space="preserve">
+    <value>治疗强度</value>
+  </data>
+  <data name="PlayerStatus_11800" xml:space="preserve">
+    <value>受治疗强度</value>
+  </data>
+  <data name="PlayerStatus_11810" xml:space="preserve">
+    <value>护盾强度</value>
+  </data>
+  <data name="PlayerStatus_11820" xml:space="preserve">
+    <value>受护盾强度</value>
+  </data>
+  <data name="PlayerStatus_11830" xml:space="preserve">
+    <value>破韧效率</value>
+  </data>
+  <data name="PlayerStatus_11840" xml:space="preserve">
+    <value>全能增效</value>
+  </data>
+  <data name="PlayerStatus_11850" xml:space="preserve">
+    <value>全能减免</value>
+  </data>
+  <data name="PlayerStatus_11880" xml:space="preserve">
+    <value>压制伤害</value>
+  </data>
+  <data name="PlayerStatus_11890" xml:space="preserve">
+    <value>压制减伤</value>
+  </data>
+  <data name="PlayerStatus_11930" xml:space="preserve">
+    <value>急速</value>
+  </data>
+  <data name="PlayerStatus_11940" xml:space="preserve">
+    <value>精通</value>
+  </data>
+  <data name="PlayerStatus_11950" xml:space="preserve">
+    <value>全能</value>
+  </data>
+  <data name="PlayerStatus_11960" xml:space="preserve">
+    <value>冷却加速</value>
+  </data>
+  <data name="PlayerStatus_11970" xml:space="preserve">
+    <value>格挡</value>
+  </data>
+  <data name="PlayerStatus_12510" xml:space="preserve">
+    <value>暴击伤害</value>
+  </data>
+  <data name="PlayerStatus_12530" xml:space="preserve">
+    <value>幸运一击伤害倍率</value>
+  </data>
+  <data name="PlayerStatus_12540" xml:space="preserve">
+    <value>格挡伤害减免</value>
+  </data>
+  <data name="PlayerStatus_12550" xml:space="preserve">
+    <value>物理增效</value>
+  </data>
+  <data name="PlayerStatus_12560" xml:space="preserve">
+    <value>物理削减</value>
+  </data>
+  <data name="PlayerStatus_12570" xml:space="preserve">
+    <value>魔法增效</value>
+  </data>
+  <data name="PlayerStatus_12580" xml:space="preserve">
+    <value>魔法削减</value>
+  </data>
+  <data name="PlayerStatus_12590" xml:space="preserve">
+    <value>近距离伤害加成</value>
+  </data>
+  <data name="PlayerStatus_12610" xml:space="preserve">
+    <value>远距离伤害加成</value>
+  </data>
+  <data name="PlayerStatus_12630" xml:space="preserve">
+    <value>对首领伤害加成</value>
+  </data>
+  <data name="PlayerStatus_12670" xml:space="preserve">
+    <value>伤害加成</value>
+  </data>
+  <data name="PlayerStatus_12680" xml:space="preserve">
+    <value>伤害减免</value>
+  </data>
+  <data name="PlayerStatus_12690" xml:space="preserve">
+    <value>赛季伤害</value>
+  </data>
+  <data name="PlayerStatus_12700" xml:space="preserve">
+    <value>赛季伤害减免</value>
+  </data>
+  <data name="PlayerStatus_12720" xml:space="preserve">
+    <value>幸运一击治疗倍率</value>
+  </data>
+  <data name="PlayerStatus_12730" xml:space="preserve">
+    <value>宠物伤害</value>
+  </data>
+  <data name="PlayerStatus_12740" xml:space="preserve">
+    <value>暴击治疗</value>
+  </data>
+  <data name="PlayerStatus_12790" xml:space="preserve">
+    <value>物理增效强度</value>
+  </data>
+  <data name="PlayerStatus_12800" xml:space="preserve">
+    <value>魔法增效强度</value>
+  </data>
+  <data name="PlayerStatus_13000" xml:space="preserve">
+    <value>全元素强度</value>
+  </data>
+  <data name="PlayerStatus_13010" xml:space="preserve">
+    <value>火元素强度</value>
+  </data>
+  <data name="PlayerStatus_13020" xml:space="preserve">
+    <value>冰元素强度</value>
+  </data>
+  <data name="PlayerStatus_13030" xml:space="preserve">
+    <value>森元素强度</value>
+  </data>
+  <data name="PlayerStatus_13040" xml:space="preserve">
+    <value>雷元素强度</value>
+  </data>
+  <data name="PlayerStatus_13050" xml:space="preserve">
+    <value>风元素强度</value>
+  </data>
+  <data name="PlayerStatus_13060" xml:space="preserve">
+    <value>岩元素强度</value>
+  </data>
+  <data name="PlayerStatus_13070" xml:space="preserve">
+    <value>光元素强度</value>
+  </data>
+  <data name="PlayerStatus_13080" xml:space="preserve">
+    <value>暗元素强度</value>
+  </data>
+  <data name="PlayerStatus_13100" xml:space="preserve">
+    <value>全元素加成</value>
+  </data>
+  <data name="PlayerStatus_13110" xml:space="preserve">
+    <value>火元素加成</value>
+  </data>
+  <data name="PlayerStatus_13120" xml:space="preserve">
+    <value>冰元素加成</value>
+  </data>
+  <data name="PlayerStatus_13130" xml:space="preserve">
+    <value>森元素加成</value>
+  </data>
+  <data name="PlayerStatus_13140" xml:space="preserve">
+    <value>雷元素加成</value>
+  </data>
+  <data name="PlayerStatus_13150" xml:space="preserve">
+    <value>风元素加成</value>
+  </data>
+  <data name="PlayerStatus_13160" xml:space="preserve">
+    <value>岩元素加成</value>
+  </data>
+  <data name="PlayerStatus_13170" xml:space="preserve">
+    <value>光元素加成</value>
+  </data>
+  <data name="PlayerStatus_13180" xml:space="preserve">
+    <value>暗元素加成</value>
+  </data>
+  <data name="PlayerStatus_13200" xml:space="preserve">
+    <value>全元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13210" xml:space="preserve">
+    <value>火元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13220" xml:space="preserve">
+    <value>冰元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13230" xml:space="preserve">
+    <value>森元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13240" xml:space="preserve">
+    <value>雷元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13250" xml:space="preserve">
+    <value>风元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13260" xml:space="preserve">
+    <value>岩元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13270" xml:space="preserve">
+    <value>光元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13280" xml:space="preserve">
+    <value>暗元素抗性</value>
+  </data>
+  <data name="PlayerStatus_13310" xml:space="preserve">
+    <value>全元素减免</value>
+  </data>
+  <data name="PlayerStatus_13320" xml:space="preserve">
+    <value>火元素减免</value>
+  </data>
+  <data name="PlayerStatus_13330" xml:space="preserve">
+    <value>冰元素减免</value>
+  </data>
+  <data name="PlayerStatus_13340" xml:space="preserve">
+    <value>森元素减免</value>
+  </data>
+  <data name="PlayerStatus_13350" xml:space="preserve">
+    <value>雷元素减免</value>
+  </data>
+  <data name="PlayerStatus_13360" xml:space="preserve">
+    <value>风元素减免</value>
+  </data>
+  <data name="PlayerStatus_13370" xml:space="preserve">
+    <value>岩元素减免</value>
+  </data>
+  <data name="PlayerStatus_13380" xml:space="preserve">
+    <value>光元素减免</value>
+  </data>
+  <data name="PlayerStatus_13390" xml:space="preserve">
+    <value>暗元素减免</value>
+  </data>
+  <data name="PlayerStatus_20020" xml:space="preserve">
+    <value>体力值上限</value>
+  </data>
+  <data name="PlayerStatus_20120" xml:space="preserve">
+    <value>战斗状态下体力恢复速率</value>
   </data>
 </root>

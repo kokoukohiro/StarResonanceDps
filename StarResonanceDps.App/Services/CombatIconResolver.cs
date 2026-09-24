@@ -20,6 +20,7 @@ public static class CombatIconResolver
             : Resolve(iconName, "Skills", "Skills_Imagines", "Buffs");
     }
 
+
     private static string? Resolve(string? iconName, params string[] categories)
     {
         if (string.IsNullOrWhiteSpace(iconName))

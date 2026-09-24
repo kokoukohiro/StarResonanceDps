@@ -216,6 +216,9 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>Theme</value>
   </data>
+  <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
+    <value>Status</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>Role skills</value>
   </data>
@@ -606,51 +609,6 @@
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>Status</value>
   </data>
-  <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>Max HP</value>
-  </data>
-  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
-    <value>ATK</value>
-  </data>
-  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
-    <value>MATK</value>
-  </data>
-  <data name="PlayerStatus_Strength" xml:space="preserve">
-    <value>Strength</value>
-  </data>
-  <data name="PlayerStatus_Agility" xml:space="preserve">
-    <value>Agility</value>
-  </data>
-  <data name="PlayerStatus_Intellect" xml:space="preserve">
-    <value>Intellect</value>
-  </data>
-  <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>Endurance</value>
-  </data>
-  <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>Armor</value>
-  </data>
-  <data name="PlayerStatus_Resistance" xml:space="preserve">
-    <value>Resistance</value>
-  </data>
-  <data name="PlayerStatus_Crit" xml:space="preserve">
-    <value>Crit</value>
-  </data>
-  <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>Haste</value>
-  </data>
-  <data name="PlayerStatus_Luck" xml:space="preserve">
-    <value>Luck</value>
-  </data>
-  <data name="PlayerStatus_Mastery" xml:space="preserve">
-    <value>Mastery</value>
-  </data>
-  <data name="PlayerStatus_Versatility" xml:space="preserve">
-    <value>Versatility</value>
-  </data>
-  <data name="PlayerStatus_Block" xml:space="preserve">
-    <value>Block</value>
-  </data>
   <data name="Widget_PlayerInfo" xml:space="preserve">
     <value>Player Info</value>
   </data>
@@ -725,6 +683,9 @@
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>Add</value>
+  </data>
+  <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
+    <value>Hide Inactive Status Effects</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>Skill Name</value>
@@ -1130,5 +1091,348 @@
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>Note: e.g. entering a boss room in a dungeon.</value>
+  </data>
+  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
+  <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
+    <value>Move Speed</value>
+  </data>
+  <data name="PlayerStatus_10200" xml:space="preserve">
+    <value>Move Speed (Walk)</value>
+  </data>
+  <data name="PlayerStatus_10210" xml:space="preserve">
+    <value>Move Speed (Run)</value>
+  </data>
+  <data name="PlayerStatus_10220" xml:space="preserve">
+    <value>Move Speed (Sprint)</value>
+  </data>
+  <data name="PlayerStatus_11010" xml:space="preserve">
+    <value>Strength</value>
+  </data>
+  <data name="PlayerStatus_11020" xml:space="preserve">
+    <value>Intellect</value>
+  </data>
+  <data name="PlayerStatus_11030" xml:space="preserve">
+    <value>Agility</value>
+  </data>
+  <data name="PlayerStatus_11040" xml:space="preserve">
+    <value>Endurance</value>
+  </data>
+  <data name="PlayerStatus_11110" xml:space="preserve">
+    <value>Crit</value>
+  </data>
+  <data name="PlayerStatus_11120" xml:space="preserve">
+    <value>Haste</value>
+  </data>
+  <data name="PlayerStatus_11130" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="PlayerStatus_11140" xml:space="preserve">
+    <value>Mastery</value>
+  </data>
+  <data name="PlayerStatus_11150" xml:space="preserve">
+    <value>Versatility</value>
+  </data>
+  <data name="PlayerStatus_11170" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="PlayerStatus_11320" xml:space="preserve">
+    <value>Max HP</value>
+  </data>
+  <data name="PlayerStatus_11330" xml:space="preserve">
+    <value>ATK</value>
+  </data>
+  <data name="PlayerStatus_11340" xml:space="preserve">
+    <value>MATK</value>
+  </data>
+  <data name="PlayerStatus_11350" xml:space="preserve">
+    <value>Armor</value>
+  </data>
+  <data name="PlayerStatus_11360" xml:space="preserve">
+    <value>Resistance</value>
+  </data>
+  <data name="PlayerStatus_11370" xml:space="preserve">
+    <value>Armor Penetration</value>
+  </data>
+  <data name="PlayerStatus_11380" xml:space="preserve">
+    <value>Magic Penetration</value>
+  </data>
+  <data name="PlayerStatus_11390" xml:space="preserve">
+    <value>Armor Penetration</value>
+  </data>
+  <data name="PlayerStatus_11400" xml:space="preserve">
+    <value>Magic Penetration</value>
+  </data>
+  <data name="PlayerStatus_11410" xml:space="preserve">
+    <value>Refined ATK</value>
+  </data>
+  <data name="PlayerStatus_11420" xml:space="preserve">
+    <value>Refined Armor</value>
+  </data>
+  <data name="PlayerStatus_11430" xml:space="preserve">
+    <value>Refined MATK</value>
+  </data>
+  <data name="PlayerStatus_11440" xml:space="preserve">
+    <value>Season Strength</value>
+  </data>
+  <data name="PlayerStatus_11460" xml:space="preserve">
+    <value>Season Armor</value>
+  </data>
+  <data name="PlayerStatus_11470" xml:space="preserve">
+    <value>Season Penetration</value>
+  </data>
+  <data name="PlayerStatus_11480" xml:space="preserve">
+    <value>Season Penetration</value>
+  </data>
+  <data name="PlayerStatus_11500" xml:space="preserve">
+    <value>All Element Attack</value>
+  </data>
+  <data name="PlayerStatus_11510" xml:space="preserve">
+    <value>Fire Attack</value>
+  </data>
+  <data name="PlayerStatus_11520" xml:space="preserve">
+    <value>Ice Attack</value>
+  </data>
+  <data name="PlayerStatus_11530" xml:space="preserve">
+    <value>Forest Attack</value>
+  </data>
+  <data name="PlayerStatus_11540" xml:space="preserve">
+    <value>Thunder Attack</value>
+  </data>
+  <data name="PlayerStatus_11550" xml:space="preserve">
+    <value>Wind Attack</value>
+  </data>
+  <data name="PlayerStatus_11560" xml:space="preserve">
+    <value>Rock Attack</value>
+  </data>
+  <data name="PlayerStatus_11570" xml:space="preserve">
+    <value>Light Attack</value>
+  </data>
+  <data name="PlayerStatus_11580" xml:space="preserve">
+    <value>Dark Attack</value>
+  </data>
+  <data name="PlayerStatus_11710" xml:space="preserve">
+    <value>Crit</value>
+  </data>
+  <data name="PlayerStatus_11720" xml:space="preserve">
+    <value>Attack SPD</value>
+  </data>
+  <data name="PlayerStatus_11730" xml:space="preserve">
+    <value>Cast Speed</value>
+  </data>
+  <data name="PlayerStatus_11780" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="PlayerStatus_11790" xml:space="preserve">
+    <value>Healing Strength</value>
+  </data>
+  <data name="PlayerStatus_11800" xml:space="preserve">
+    <value>Received Healing Strength</value>
+  </data>
+  <data name="PlayerStatus_11810" xml:space="preserve">
+    <value>Shield</value>
+  </data>
+  <data name="PlayerStatus_11820" xml:space="preserve">
+    <value>Shield Receive</value>
+  </data>
+  <data name="PlayerStatus_11830" xml:space="preserve">
+    <value>Resilience Break Efficiency</value>
+  </data>
+  <data name="PlayerStatus_11840" xml:space="preserve">
+    <value>Versatility Enhancement</value>
+  </data>
+  <data name="PlayerStatus_11850" xml:space="preserve">
+    <value>Versatility Resistance</value>
+  </data>
+  <data name="PlayerStatus_11880" xml:space="preserve">
+    <value>Suppress Damage</value>
+  </data>
+  <data name="PlayerStatus_11890" xml:space="preserve">
+    <value>Suppress DMG Reduction</value>
+  </data>
+  <data name="PlayerStatus_11930" xml:space="preserve">
+    <value>Haste</value>
+  </data>
+  <data name="PlayerStatus_11940" xml:space="preserve">
+    <value>Mastery</value>
+  </data>
+  <data name="PlayerStatus_11950" xml:space="preserve">
+    <value>Versatility</value>
+  </data>
+  <data name="PlayerStatus_11960" xml:space="preserve">
+    <value>CD Boost</value>
+  </data>
+  <data name="PlayerStatus_11970" xml:space="preserve">
+    <value>Block</value>
+  </data>
+  <data name="PlayerStatus_12510" xml:space="preserve">
+    <value>Crit DMG</value>
+  </data>
+  <data name="PlayerStatus_12530" xml:space="preserve">
+    <value>Lucky Strike DMG Multiplier</value>
+  </data>
+  <data name="PlayerStatus_12540" xml:space="preserve">
+    <value>Block DMG Reduction</value>
+  </data>
+  <data name="PlayerStatus_12550" xml:space="preserve">
+    <value>PHY Boost</value>
+  </data>
+  <data name="PlayerStatus_12560" xml:space="preserve">
+    <value>ATK Reduction</value>
+  </data>
+  <data name="PlayerStatus_12570" xml:space="preserve">
+    <value>MAG Boost</value>
+  </data>
+  <data name="PlayerStatus_12580" xml:space="preserve">
+    <value>MATK Reduction</value>
+  </data>
+  <data name="PlayerStatus_12590" xml:space="preserve">
+    <value>Melee Damage Bonus</value>
+  </data>
+  <data name="PlayerStatus_12610" xml:space="preserve">
+    <value>Ranged Damage Bonus</value>
+  </data>
+  <data name="PlayerStatus_12630" xml:space="preserve">
+    <value>DMG Bonus vs. Bosses</value>
+  </data>
+  <data name="PlayerStatus_12670" xml:space="preserve">
+    <value>Damage bonus</value>
+  </data>
+  <data name="PlayerStatus_12680" xml:space="preserve">
+    <value>DMG Reduction</value>
+  </data>
+  <data name="PlayerStatus_12690" xml:space="preserve">
+    <value>Season DMG</value>
+  </data>
+  <data name="PlayerStatus_12700" xml:space="preserve">
+    <value>Season DMG Reduction</value>
+  </data>
+  <data name="PlayerStatus_12720" xml:space="preserve">
+    <value>Lucky Strike Healing</value>
+  </data>
+  <data name="PlayerStatus_12730" xml:space="preserve">
+    <value>Companion's Damage</value>
+  </data>
+  <data name="PlayerStatus_12740" xml:space="preserve">
+    <value>Crit Healing</value>
+  </data>
+  <data name="PlayerStatus_12790" xml:space="preserve">
+    <value>PHY Boost</value>
+  </data>
+  <data name="PlayerStatus_12800" xml:space="preserve">
+    <value>MAG Boost</value>
+  </data>
+  <data name="PlayerStatus_13000" xml:space="preserve">
+    <value>All Element Strength</value>
+  </data>
+  <data name="PlayerStatus_13010" xml:space="preserve">
+    <value>Fire Strength</value>
+  </data>
+  <data name="PlayerStatus_13020" xml:space="preserve">
+    <value>Ice Strength</value>
+  </data>
+  <data name="PlayerStatus_13030" xml:space="preserve">
+    <value>Forest Strength</value>
+  </data>
+  <data name="PlayerStatus_13040" xml:space="preserve">
+    <value>Thunder Strength</value>
+  </data>
+  <data name="PlayerStatus_13050" xml:space="preserve">
+    <value>Wind Strength</value>
+  </data>
+  <data name="PlayerStatus_13060" xml:space="preserve">
+    <value>Rock Strength</value>
+  </data>
+  <data name="PlayerStatus_13070" xml:space="preserve">
+    <value>Light Strength</value>
+  </data>
+  <data name="PlayerStatus_13080" xml:space="preserve">
+    <value>Dark Strength</value>
+  </data>
+  <data name="PlayerStatus_13100" xml:space="preserve">
+    <value>All-Element Bonus</value>
+  </data>
+  <data name="PlayerStatus_13110" xml:space="preserve">
+    <value>Fire Bonus</value>
+  </data>
+  <data name="PlayerStatus_13120" xml:space="preserve">
+    <value>Ice Bonus</value>
+  </data>
+  <data name="PlayerStatus_13130" xml:space="preserve">
+    <value>Forest Bonus</value>
+  </data>
+  <data name="PlayerStatus_13140" xml:space="preserve">
+    <value>Thunder Bonus</value>
+  </data>
+  <data name="PlayerStatus_13150" xml:space="preserve">
+    <value>Wind Bonus</value>
+  </data>
+  <data name="PlayerStatus_13160" xml:space="preserve">
+    <value>Rock Bonus</value>
+  </data>
+  <data name="PlayerStatus_13170" xml:space="preserve">
+    <value>Light Bonus</value>
+  </data>
+  <data name="PlayerStatus_13180" xml:space="preserve">
+    <value>Dark Bonus</value>
+  </data>
+  <data name="PlayerStatus_13200" xml:space="preserve">
+    <value>All Element Resistance</value>
+  </data>
+  <data name="PlayerStatus_13210" xml:space="preserve">
+    <value>Fire Resistance</value>
+  </data>
+  <data name="PlayerStatus_13220" xml:space="preserve">
+    <value>Ice Resistance</value>
+  </data>
+  <data name="PlayerStatus_13230" xml:space="preserve">
+    <value>Forest Resistance</value>
+  </data>
+  <data name="PlayerStatus_13240" xml:space="preserve">
+    <value>Thunder Resistance</value>
+  </data>
+  <data name="PlayerStatus_13250" xml:space="preserve">
+    <value>Wind Resistance</value>
+  </data>
+  <data name="PlayerStatus_13260" xml:space="preserve">
+    <value>Rock Resistance</value>
+  </data>
+  <data name="PlayerStatus_13270" xml:space="preserve">
+    <value>Light Resistance</value>
+  </data>
+  <data name="PlayerStatus_13280" xml:space="preserve">
+    <value>Dark Resistance</value>
+  </data>
+  <data name="PlayerStatus_13310" xml:space="preserve">
+    <value>All Element Resistance</value>
+  </data>
+  <data name="PlayerStatus_13320" xml:space="preserve">
+    <value>Fire Resistance</value>
+  </data>
+  <data name="PlayerStatus_13330" xml:space="preserve">
+    <value>Ice Resistance</value>
+  </data>
+  <data name="PlayerStatus_13340" xml:space="preserve">
+    <value>Forest Resistance</value>
+  </data>
+  <data name="PlayerStatus_13350" xml:space="preserve">
+    <value>Thunder Resistance</value>
+  </data>
+  <data name="PlayerStatus_13360" xml:space="preserve">
+    <value>Wind Resistance</value>
+  </data>
+  <data name="PlayerStatus_13370" xml:space="preserve">
+    <value>Rock Resistance</value>
+  </data>
+  <data name="PlayerStatus_13380" xml:space="preserve">
+    <value>Light Resistance</value>
+  </data>
+  <data name="PlayerStatus_13390" xml:space="preserve">
+    <value>Dark Resistance</value>
+  </data>
+  <data name="PlayerStatus_20020" xml:space="preserve">
+    <value>Stamina Limit</value>
+  </data>
+  <data name="PlayerStatus_20120" xml:space="preserve">
+    <value>Stamina Recovery</value>
   </data>
 </root>

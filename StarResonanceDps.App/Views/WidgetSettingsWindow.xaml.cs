@@ -47,6 +47,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.BuffListPreviewChanged += _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged += _widget.ApplyElementColorSettingsPreview;
         _viewModel.SkillDetailPreviewChanged += _widget.ApplySkillDetailSettingsPreview;
+        _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -76,6 +77,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.BuffListPreviewChanged -= _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged -= _widget.ApplyElementColorSettingsPreview;
         _viewModel.SkillDetailPreviewChanged -= _widget.ApplySkillDetailSettingsPreview;
+        _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -180,9 +182,14 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(DisplaySettingsHost);
     }
 
+    private void PlayerStatusRowsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(PlayerStatusRowsHost);
+    }
+
     private void OtherRoleSkillsNavButton_Click(object sender, RoutedEventArgs e)
     {
-        ScrollToSection(OtherRoleSkillsSection);
+        ScrollToSection(OtherRoleSkillsHost);
     }
 
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)

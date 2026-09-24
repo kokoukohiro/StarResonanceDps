@@ -27,6 +27,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private BuffListWidgetSettingsConfig _buffList = WidgetConfigDefaults.CreateBuffListSettings(WidgetKind.BuffList);
     private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
     private SkillDetailWidgetSettingsConfig _skillDetail = WidgetConfigDefaults.CreateSkillDetailSettings();
+    private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -146,6 +147,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedSkillDetail(_skillDetail);
     }
 
+    public PlayerStatusWidgetSettingsConfig GetPlayerStatusSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedPlayerStatus(_playerStatus);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -195,6 +201,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event EventHandler? ElementColorSettingsChanged;
 
     public event EventHandler? SkillDetailSettingsChanged;
+
+    public event EventHandler? PlayerStatusSettingsChanged;
 
     public WidgetListItemViewModel()
     {
@@ -258,6 +266,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             SkillDetail = WidgetConfigDefaults.SupportsSkillDetailSettings(Kind)
                 ? _skillDetail.Clone()
+                : null,
+            PlayerStatus = WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind)
+                ? _playerStatus.Clone()
                 : null
         };
     }
@@ -314,6 +325,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _skillDetail = WidgetConfigDefaults.CloneNormalizedSkillDetail(config.SkillDetail);
             SkillDetailSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind))
+        {
+            _playerStatus = WidgetConfigDefaults.CloneNormalizedPlayerStatus(config.PlayerStatus);
+            PlayerStatusSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -398,6 +415,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _skillDetail = WidgetConfigDefaults.CloneNormalizedSkillDetail(skillDetail);
         SkillDetailSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyPlayerStatusSettingsPreview(PlayerStatusWidgetSettingsConfig playerStatus)
+    {
+        if (!WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind))
+        {
+            return;
+        }
+
+        _playerStatus = WidgetConfigDefaults.CloneNormalizedPlayerStatus(playerStatus);
+        PlayerStatusSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

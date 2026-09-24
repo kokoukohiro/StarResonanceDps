@@ -58,6 +58,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="PlayerStatusRowsNavButton"
+                                Click="PlayerStatusRowsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.RoleSkills}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding PlayerStatusSettings.RowSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="OtherRoleSkillsNavButton"
                                 Click="OtherRoleSkillsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -197,102 +206,36 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
-                                </StackPanel>
 
-                                <StackPanel x:Name="OtherRoleSkillsSection"
-                                            Visibility="{Binding MeterSettings.ShowsOtherRoleSkillSettings, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
-                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Title]}"
-                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="0,0,0,4" />
-                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Description]}"
-                                               Foreground="{DynamicResource Brush.TextSecondary}"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               TextWrapping="Wrap"
-                                               Margin="0,0,0,10" />
-                                    <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
-                                        <ItemsControl ItemsSource="{Binding MeterSettings.OtherRoleSkills}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border>
-                                                        <Border.Style>
-                                                            <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsLast}" Value="True">
-                                                                        <Setter Property="BorderThickness" Value="0" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto" />
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-
-                                                            <Grid Grid.Column="0">
-                                                                <Image Width="31"
-                                                                       Style="{StaticResource Icon.PlayerListSkillFrame}"
-                                                                       Stretch="Uniform"
-                                                                       RenderOptions.BitmapScalingMode="HighQuality" />
-                                                                <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                                                                       Stretch="Uniform"
-                                                                       RenderOptions.BitmapScalingMode="HighQuality">
-                                                                    <Image.Style>
-                                                                        <Style TargetType="Image">
-                                                                            <Setter Property="Width" Value="27" />
-                                                                            <Setter Property="RenderTransform">
-                                                                                <Setter.Value>
-                                                                                    <TranslateTransform X="-0.2" Y="2.1" />
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding UsesImagineAsset}" Value="True">
-                                                                                    <Setter Property="Width" Value="25" />
-                                                                                    <Setter Property="RenderTransform">
-                                                                                        <Setter.Value>
-                                                                                            <TranslateTransform X="-0.4" Y="2.1" />
-                                                                                        </Setter.Value>
-                                                                                    </Setter>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </Image.Style>
-                                                                </Image>
-                                                            </Grid>
-
-                                                            <TextBlock Grid.Column="1"
-                                                                       Margin="12,0,12,0"
-                                                                       VerticalAlignment="Center"
-                                                                       TextTrimming="CharacterEllipsis"
-                                                                       Text="{Binding DisplayName}"
-                                                                       Foreground="{DynamicResource Brush.TextPrimary}"
-                                                                       FontSize="14"
-                                                                       FontWeight="SemiBold" />
-
-                                                            <StackPanel Grid.Column="2"
-                                                                        Orientation="Horizontal"
-                                                                        VerticalAlignment="Center">
-                                                                <ToggleButton Style="{StaticResource Input.Switch}"
-                                                                              IsChecked="{Binding IsVisible, Mode=TwoWay}" />
-                                                                <TextBlock Margin="8,0,0,0"
-                                                                           VerticalAlignment="Center"
-                                                                           MinWidth="28"
-                                                                           Text="{Binding StateText}"
-                                                                           Foreground="{DynamicResource Brush.TextPrimary}"
-                                                                           FontSize="14"
-                                                                           FontWeight="SemiBold" />
-                                                            </StackPanel>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                    <ContentControl Content="{Binding PlayerStatusSettings}"
+                                                    Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:PlayerStatusWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
                                     </ContentControl>
                                 </StackPanel>
+
+                                <ContentControl x:Name="PlayerStatusRowsHost"
+                                                Content="{Binding PlayerStatusSettings}"
+                                                Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:PlayerStatusRowSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="OtherRoleSkillsHost"
+                                                Content="{Binding MeterSettings}"
+                                                Visibility="{Binding MeterSettings.ShowsOtherRoleSkillSettings, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:MeterWidgetOtherRoleSkillSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
 
                                 <TextBlock x:Name="ThemeSection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}"

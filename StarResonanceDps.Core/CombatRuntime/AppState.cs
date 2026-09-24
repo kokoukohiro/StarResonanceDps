@@ -150,6 +150,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Log.Information("Loaded TempAttrTable.json");
             }
 
+            string professionSystemTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "ProfessionSystemTable.json");
+            if (File.Exists(professionSystemTableFile))
+            {
+                var professionSystems = JsonConvert.DeserializeObject<Dictionary<string, ProfessionSystem>>(File.ReadAllText(professionSystemTableFile))!;
+                HelperMethods.DataTables.ProfessionSystems.Data = professionSystems;
+                Log.Information("Loaded ProfessionSystemTable.json");
+            }
+
             LoadCookCuisineTable();
 
 

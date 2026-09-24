@@ -279,7 +279,8 @@ public sealed class PlayerRosterStore
             entry.CurrentShield,
             entry.IsPartyMember,
             entry.PartyNumber,
-            entry.IsLive);
+            entry.IsLive,
+            entry.Attributes);
     }
 }
 

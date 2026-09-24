@@ -216,6 +216,9 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>テーマ</value>
   </data>
+  <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
+    <value>ステータス</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>ロールスキル</value>
   </data>
@@ -606,51 +609,6 @@
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>ステータス詳細</value>
   </data>
-  <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>最大HP</value>
-  </data>
-  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
-    <value>物理攻撃力</value>
-  </data>
-  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
-    <value>魔法攻撃力</value>
-  </data>
-  <data name="PlayerStatus_Strength" xml:space="preserve">
-    <value>筋力</value>
-  </data>
-  <data name="PlayerStatus_Agility" xml:space="preserve">
-    <value>敏捷</value>
-  </data>
-  <data name="PlayerStatus_Intellect" xml:space="preserve">
-    <value>知力</value>
-  </data>
-  <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>耐久力</value>
-  </data>
-  <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>物理防御力</value>
-  </data>
-  <data name="PlayerStatus_Resistance" xml:space="preserve">
-    <value>魔法防御力</value>
-  </data>
-  <data name="PlayerStatus_Crit" xml:space="preserve">
-    <value>会心</value>
-  </data>
-  <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>ファスト</value>
-  </data>
-  <data name="PlayerStatus_Luck" xml:space="preserve">
-    <value>幸運</value>
-  </data>
-  <data name="PlayerStatus_Mastery" xml:space="preserve">
-    <value>器用さ</value>
-  </data>
-  <data name="PlayerStatus_Versatility" xml:space="preserve">
-    <value>万能</value>
-  </data>
-  <data name="PlayerStatus_Block" xml:space="preserve">
-    <value>レジスト</value>
-  </data>
   <data name="Widget_PlayerInfo" xml:space="preserve">
     <value>プレイヤー情報</value>
   </data>
@@ -725,6 +683,9 @@
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>追加</value>
+  </data>
+  <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
+    <value>無効なステータス効果を隠す</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>スキル名</value>
@@ -1130,5 +1091,348 @@
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※ダンジョンでボス部屋進入など</value>
+  </data>
+  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
+  <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
+    <value>移動速度</value>
+  </data>
+  <data name="PlayerStatus_10200" xml:space="preserve">
+    <value>移動速度(歩く)</value>
+  </data>
+  <data name="PlayerStatus_10210" xml:space="preserve">
+    <value>移動速度(走る)</value>
+  </data>
+  <data name="PlayerStatus_10220" xml:space="preserve">
+    <value>移動速度(ダッシュ)</value>
+  </data>
+  <data name="PlayerStatus_11010" xml:space="preserve">
+    <value>筋力</value>
+  </data>
+  <data name="PlayerStatus_11020" xml:space="preserve">
+    <value>知力</value>
+  </data>
+  <data name="PlayerStatus_11030" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="PlayerStatus_11040" xml:space="preserve">
+    <value>耐久力</value>
+  </data>
+  <data name="PlayerStatus_11110" xml:space="preserve">
+    <value>会心</value>
+  </data>
+  <data name="PlayerStatus_11120" xml:space="preserve">
+    <value>ファスト</value>
+  </data>
+  <data name="PlayerStatus_11130" xml:space="preserve">
+    <value>幸運</value>
+  </data>
+  <data name="PlayerStatus_11140" xml:space="preserve">
+    <value>器用さ</value>
+  </data>
+  <data name="PlayerStatus_11150" xml:space="preserve">
+    <value>万能</value>
+  </data>
+  <data name="PlayerStatus_11170" xml:space="preserve">
+    <value>レジスト</value>
+  </data>
+  <data name="PlayerStatus_11320" xml:space="preserve">
+    <value>最大HP</value>
+  </data>
+  <data name="PlayerStatus_11330" xml:space="preserve">
+    <value>物理攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11340" xml:space="preserve">
+    <value>魔法攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11350" xml:space="preserve">
+    <value>物理防御力</value>
+  </data>
+  <data name="PlayerStatus_11360" xml:space="preserve">
+    <value>魔法防御力</value>
+  </data>
+  <data name="PlayerStatus_11370" xml:space="preserve">
+    <value>物理防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11380" xml:space="preserve">
+    <value>魔法防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11390" xml:space="preserve">
+    <value>物理防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11400" xml:space="preserve">
+    <value>魔法防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11410" xml:space="preserve">
+    <value>精錬物攻</value>
+  </data>
+  <data name="PlayerStatus_11420" xml:space="preserve">
+    <value>精錬防御力</value>
+  </data>
+  <data name="PlayerStatus_11430" xml:space="preserve">
+    <value>精錬魔攻</value>
+  </data>
+  <data name="PlayerStatus_11440" xml:space="preserve">
+    <value>シーズン強度</value>
+  </data>
+  <data name="PlayerStatus_11460" xml:space="preserve">
+    <value>シーズン防御力</value>
+  </data>
+  <data name="PlayerStatus_11470" xml:space="preserve">
+    <value>シーズン防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11480" xml:space="preserve">
+    <value>シーズン防御力無視</value>
+  </data>
+  <data name="PlayerStatus_11500" xml:space="preserve">
+    <value>全属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11510" xml:space="preserve">
+    <value>火属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11520" xml:space="preserve">
+    <value>氷属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11530" xml:space="preserve">
+    <value>森属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11540" xml:space="preserve">
+    <value>雷属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11550" xml:space="preserve">
+    <value>風属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11560" xml:space="preserve">
+    <value>岩属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11570" xml:space="preserve">
+    <value>光属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11580" xml:space="preserve">
+    <value>闇属性攻撃力</value>
+  </data>
+  <data name="PlayerStatus_11710" xml:space="preserve">
+    <value>会心</value>
+  </data>
+  <data name="PlayerStatus_11720" xml:space="preserve">
+    <value>攻撃速度</value>
+  </data>
+  <data name="PlayerStatus_11730" xml:space="preserve">
+    <value>詠唱速度</value>
+  </data>
+  <data name="PlayerStatus_11780" xml:space="preserve">
+    <value>幸運</value>
+  </data>
+  <data name="PlayerStatus_11790" xml:space="preserve">
+    <value>回復力</value>
+  </data>
+  <data name="PlayerStatus_11800" xml:space="preserve">
+    <value>被回復力</value>
+  </data>
+  <data name="PlayerStatus_11810" xml:space="preserve">
+    <value>バリア強度</value>
+  </data>
+  <data name="PlayerStatus_11820" xml:space="preserve">
+    <value>被バリア強度</value>
+  </data>
+  <data name="PlayerStatus_11830" xml:space="preserve">
+    <value>ブレイク効率</value>
+  </data>
+  <data name="PlayerStatus_11840" xml:space="preserve">
+    <value>万能増強</value>
+  </data>
+  <data name="PlayerStatus_11850" xml:space="preserve">
+    <value>万能軽減</value>
+  </data>
+  <data name="PlayerStatus_11880" xml:space="preserve">
+    <value>抑圧ダメージ</value>
+  </data>
+  <data name="PlayerStatus_11890" xml:space="preserve">
+    <value>抑圧ダメージ軽減</value>
+  </data>
+  <data name="PlayerStatus_11930" xml:space="preserve">
+    <value>ファスト</value>
+  </data>
+  <data name="PlayerStatus_11940" xml:space="preserve">
+    <value>器用さ</value>
+  </data>
+  <data name="PlayerStatus_11950" xml:space="preserve">
+    <value>万能</value>
+  </data>
+  <data name="PlayerStatus_11960" xml:space="preserve">
+    <value>リキャスト加速</value>
+  </data>
+  <data name="PlayerStatus_11970" xml:space="preserve">
+    <value>レジスト</value>
+  </data>
+  <data name="PlayerStatus_12510" xml:space="preserve">
+    <value>会心ダメージ</value>
+  </data>
+  <data name="PlayerStatus_12530" xml:space="preserve">
+    <value>幸運の一撃のダメージ倍率</value>
+  </data>
+  <data name="PlayerStatus_12540" xml:space="preserve">
+    <value>レジストダメージ軽減</value>
+  </data>
+  <data name="PlayerStatus_12550" xml:space="preserve">
+    <value>物理増強</value>
+  </data>
+  <data name="PlayerStatus_12560" xml:space="preserve">
+    <value>物理軽減</value>
+  </data>
+  <data name="PlayerStatus_12570" xml:space="preserve">
+    <value>魔法増強</value>
+  </data>
+  <data name="PlayerStatus_12580" xml:space="preserve">
+    <value>魔法軽減</value>
+  </data>
+  <data name="PlayerStatus_12590" xml:space="preserve">
+    <value>近距離ダメージボーナス</value>
+  </data>
+  <data name="PlayerStatus_12610" xml:space="preserve">
+    <value>遠距離ダメージボーナス</value>
+  </data>
+  <data name="PlayerStatus_12630" xml:space="preserve">
+    <value>対ボスダメージボーナス</value>
+  </data>
+  <data name="PlayerStatus_12670" xml:space="preserve">
+    <value>ダメージボーナス</value>
+  </data>
+  <data name="PlayerStatus_12680" xml:space="preserve">
+    <value>ダメージ軽減</value>
+  </data>
+  <data name="PlayerStatus_12690" xml:space="preserve">
+    <value>シーズンダメージボーナス</value>
+  </data>
+  <data name="PlayerStatus_12700" xml:space="preserve">
+    <value>シーズンダメージ軽減</value>
+  </data>
+  <data name="PlayerStatus_12720" xml:space="preserve">
+    <value>幸運の一撃回復の倍率</value>
+  </data>
+  <data name="PlayerStatus_12730" xml:space="preserve">
+    <value>臣獣ダメージ</value>
+  </data>
+  <data name="PlayerStatus_12740" xml:space="preserve">
+    <value>会心回復</value>
+  </data>
+  <data name="PlayerStatus_12790" xml:space="preserve">
+    <value>物理ダメージ強化度</value>
+  </data>
+  <data name="PlayerStatus_12800" xml:space="preserve">
+    <value>魔法ダメージ強化度</value>
+  </data>
+  <data name="PlayerStatus_13000" xml:space="preserve">
+    <value>全属性強度</value>
+  </data>
+  <data name="PlayerStatus_13010" xml:space="preserve">
+    <value>火属性強度</value>
+  </data>
+  <data name="PlayerStatus_13020" xml:space="preserve">
+    <value>氷属性強度</value>
+  </data>
+  <data name="PlayerStatus_13030" xml:space="preserve">
+    <value>森属性強度</value>
+  </data>
+  <data name="PlayerStatus_13040" xml:space="preserve">
+    <value>雷属性強度</value>
+  </data>
+  <data name="PlayerStatus_13050" xml:space="preserve">
+    <value>風属性強度</value>
+  </data>
+  <data name="PlayerStatus_13060" xml:space="preserve">
+    <value>岩属性強度</value>
+  </data>
+  <data name="PlayerStatus_13070" xml:space="preserve">
+    <value>光属性強度</value>
+  </data>
+  <data name="PlayerStatus_13080" xml:space="preserve">
+    <value>闇属性強度</value>
+  </data>
+  <data name="PlayerStatus_13100" xml:space="preserve">
+    <value>全属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13110" xml:space="preserve">
+    <value>火属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13120" xml:space="preserve">
+    <value>氷属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13130" xml:space="preserve">
+    <value>森属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13140" xml:space="preserve">
+    <value>雷属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13150" xml:space="preserve">
+    <value>風属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13160" xml:space="preserve">
+    <value>岩属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13170" xml:space="preserve">
+    <value>光属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13180" xml:space="preserve">
+    <value>闇属性ボーナス</value>
+  </data>
+  <data name="PlayerStatus_13200" xml:space="preserve">
+    <value>全属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13210" xml:space="preserve">
+    <value>火属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13220" xml:space="preserve">
+    <value>氷属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13230" xml:space="preserve">
+    <value>森属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13240" xml:space="preserve">
+    <value>雷属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13250" xml:space="preserve">
+    <value>風属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13260" xml:space="preserve">
+    <value>岩属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13270" xml:space="preserve">
+    <value>光属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13280" xml:space="preserve">
+    <value>闇属性耐性</value>
+  </data>
+  <data name="PlayerStatus_13310" xml:space="preserve">
+    <value>全属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13320" xml:space="preserve">
+    <value>火属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13330" xml:space="preserve">
+    <value>氷属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13340" xml:space="preserve">
+    <value>森属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13350" xml:space="preserve">
+    <value>雷属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13360" xml:space="preserve">
+    <value>風属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13370" xml:space="preserve">
+    <value>岩属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13380" xml:space="preserve">
+    <value>光属性軽減</value>
+  </data>
+  <data name="PlayerStatus_13390" xml:space="preserve">
+    <value>闇属性軽減</value>
+  </data>
+  <data name="PlayerStatus_20020" xml:space="preserve">
+    <value>最大スタミナ</value>
+  </data>
+  <data name="PlayerStatus_20120" xml:space="preserve">
+    <value>戦闘時のスタミナ回復率</value>
   </data>
 </root>

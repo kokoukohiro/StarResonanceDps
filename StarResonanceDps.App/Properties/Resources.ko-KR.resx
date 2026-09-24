@@ -216,6 +216,9 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>테마</value>
   </data>
+  <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
+    <value>능력치</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>역할 스킬</value>
   </data>
@@ -606,51 +609,6 @@
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>능력치 상세 정보</value>
   </data>
-  <data name="PlayerStatus_MaxHp" xml:space="preserve">
-    <value>최대 체력</value>
-  </data>
-  <data name="PlayerStatus_PhysicalAttack" xml:space="preserve">
-    <value>물리 공격</value>
-  </data>
-  <data name="PlayerStatus_MagicAttack" xml:space="preserve">
-    <value>마법 공격</value>
-  </data>
-  <data name="PlayerStatus_Strength" xml:space="preserve">
-    <value>힘</value>
-  </data>
-  <data name="PlayerStatus_Agility" xml:space="preserve">
-    <value>민첩</value>
-  </data>
-  <data name="PlayerStatus_Intellect" xml:space="preserve">
-    <value>지력</value>
-  </data>
-  <data name="PlayerStatus_Endurance" xml:space="preserve">
-    <value>내구력</value>
-  </data>
-  <data name="PlayerStatus_Armor" xml:space="preserve">
-    <value>물리 방어</value>
-  </data>
-  <data name="PlayerStatus_Resistance" xml:space="preserve">
-    <value>마법 방어</value>
-  </data>
-  <data name="PlayerStatus_Crit" xml:space="preserve">
-    <value>치명타</value>
-  </data>
-  <data name="PlayerStatus_Haste" xml:space="preserve">
-    <value>속공</value>
-  </data>
-  <data name="PlayerStatus_Luck" xml:space="preserve">
-    <value>행운</value>
-  </data>
-  <data name="PlayerStatus_Mastery" xml:space="preserve">
-    <value>숙련</value>
-  </data>
-  <data name="PlayerStatus_Versatility" xml:space="preserve">
-    <value>만능</value>
-  </data>
-  <data name="PlayerStatus_Block" xml:space="preserve">
-    <value>막기</value>
-  </data>
   <data name="Widget_PlayerInfo" xml:space="preserve">
     <value>플레이어 정보</value>
   </data>
@@ -725,6 +683,9 @@
   </data>
   <data name="Common_Add" xml:space="preserve">
     <value>추가</value>
+  </data>
+  <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
+    <value>비활성 능력치 효과 숨기기</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>스킬 이름</value>
@@ -1130,5 +1091,348 @@
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※던전에서 보스 방 진입 등</value>
+  </data>
+  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
+  <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
+    <value>이동 속도</value>
+  </data>
+  <data name="PlayerStatus_10200" xml:space="preserve">
+    <value>이동 속도(걷기)</value>
+  </data>
+  <data name="PlayerStatus_10210" xml:space="preserve">
+    <value>이동 속도(달리기)</value>
+  </data>
+  <data name="PlayerStatus_10220" xml:space="preserve">
+    <value>이동 속도(대시)</value>
+  </data>
+  <data name="PlayerStatus_11010" xml:space="preserve">
+    <value>힘</value>
+  </data>
+  <data name="PlayerStatus_11020" xml:space="preserve">
+    <value>지력</value>
+  </data>
+  <data name="PlayerStatus_11030" xml:space="preserve">
+    <value>민첩</value>
+  </data>
+  <data name="PlayerStatus_11040" xml:space="preserve">
+    <value>내구력</value>
+  </data>
+  <data name="PlayerStatus_11110" xml:space="preserve">
+    <value>치명타</value>
+  </data>
+  <data name="PlayerStatus_11120" xml:space="preserve">
+    <value>속공</value>
+  </data>
+  <data name="PlayerStatus_11130" xml:space="preserve">
+    <value>행운</value>
+  </data>
+  <data name="PlayerStatus_11140" xml:space="preserve">
+    <value>숙련</value>
+  </data>
+  <data name="PlayerStatus_11150" xml:space="preserve">
+    <value>만능</value>
+  </data>
+  <data name="PlayerStatus_11170" xml:space="preserve">
+    <value>막기</value>
+  </data>
+  <data name="PlayerStatus_11320" xml:space="preserve">
+    <value>최대 체력</value>
+  </data>
+  <data name="PlayerStatus_11330" xml:space="preserve">
+    <value>물리 공격</value>
+  </data>
+  <data name="PlayerStatus_11340" xml:space="preserve">
+    <value>마법 공격</value>
+  </data>
+  <data name="PlayerStatus_11350" xml:space="preserve">
+    <value>물리 방어</value>
+  </data>
+  <data name="PlayerStatus_11360" xml:space="preserve">
+    <value>마법 방어</value>
+  </data>
+  <data name="PlayerStatus_11370" xml:space="preserve">
+    <value>물리 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11380" xml:space="preserve">
+    <value>마법 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11390" xml:space="preserve">
+    <value>물리 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11400" xml:space="preserve">
+    <value>마법 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11410" xml:space="preserve">
+    <value>정제 물리 공격</value>
+  </data>
+  <data name="PlayerStatus_11420" xml:space="preserve">
+    <value>정제 방어</value>
+  </data>
+  <data name="PlayerStatus_11430" xml:space="preserve">
+    <value>정제 마법 공격</value>
+  </data>
+  <data name="PlayerStatus_11440" xml:space="preserve">
+    <value>시즌 강도</value>
+  </data>
+  <data name="PlayerStatus_11460" xml:space="preserve">
+    <value>시즌 방어</value>
+  </data>
+  <data name="PlayerStatus_11470" xml:space="preserve">
+    <value>시즌 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11480" xml:space="preserve">
+    <value>시즌 방어 무시</value>
+  </data>
+  <data name="PlayerStatus_11500" xml:space="preserve">
+    <value>모든 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11510" xml:space="preserve">
+    <value>불 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11520" xml:space="preserve">
+    <value>얼음 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11530" xml:space="preserve">
+    <value>나무 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11540" xml:space="preserve">
+    <value>번개 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11550" xml:space="preserve">
+    <value>바람 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11560" xml:space="preserve">
+    <value>바위 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11570" xml:space="preserve">
+    <value>빛 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11580" xml:space="preserve">
+    <value>어둠 원소 공격</value>
+  </data>
+  <data name="PlayerStatus_11710" xml:space="preserve">
+    <value>치명타</value>
+  </data>
+  <data name="PlayerStatus_11720" xml:space="preserve">
+    <value>공격 속도</value>
+  </data>
+  <data name="PlayerStatus_11730" xml:space="preserve">
+    <value>스킬 시전 속도</value>
+  </data>
+  <data name="PlayerStatus_11780" xml:space="preserve">
+    <value>행운</value>
+  </data>
+  <data name="PlayerStatus_11790" xml:space="preserve">
+    <value>치료 강도</value>
+  </data>
+  <data name="PlayerStatus_11800" xml:space="preserve">
+    <value>받는 치료 강도</value>
+  </data>
+  <data name="PlayerStatus_11810" xml:space="preserve">
+    <value>실드 강도</value>
+  </data>
+  <data name="PlayerStatus_11820" xml:space="preserve">
+    <value>받는 실드 강도</value>
+  </data>
+  <data name="PlayerStatus_11830" xml:space="preserve">
+    <value>내성 파괴 효율</value>
+  </data>
+  <data name="PlayerStatus_11840" xml:space="preserve">
+    <value>만능 버프</value>
+  </data>
+  <data name="PlayerStatus_11850" xml:space="preserve">
+    <value>만능 감면</value>
+  </data>
+  <data name="PlayerStatus_11880" xml:space="preserve">
+    <value>제압 대미지</value>
+  </data>
+  <data name="PlayerStatus_11890" xml:space="preserve">
+    <value>제압 대미지 경감</value>
+  </data>
+  <data name="PlayerStatus_11930" xml:space="preserve">
+    <value>속공</value>
+  </data>
+  <data name="PlayerStatus_11940" xml:space="preserve">
+    <value>숙련</value>
+  </data>
+  <data name="PlayerStatus_11950" xml:space="preserve">
+    <value>만능</value>
+  </data>
+  <data name="PlayerStatus_11960" xml:space="preserve">
+    <value>쿨타임 가속</value>
+  </data>
+  <data name="PlayerStatus_11970" xml:space="preserve">
+    <value>막기</value>
+  </data>
+  <data name="PlayerStatus_12510" xml:space="preserve">
+    <value>치명타 대미지</value>
+  </data>
+  <data name="PlayerStatus_12530" xml:space="preserve">
+    <value>행운의 일격 대미지 배율</value>
+  </data>
+  <data name="PlayerStatus_12540" xml:space="preserve">
+    <value>막기 대미지 감면</value>
+  </data>
+  <data name="PlayerStatus_12550" xml:space="preserve">
+    <value>물리 버프</value>
+  </data>
+  <data name="PlayerStatus_12560" xml:space="preserve">
+    <value>물리 경감</value>
+  </data>
+  <data name="PlayerStatus_12570" xml:space="preserve">
+    <value>마법 버프</value>
+  </data>
+  <data name="PlayerStatus_12580" xml:space="preserve">
+    <value>마법 경감</value>
+  </data>
+  <data name="PlayerStatus_12590" xml:space="preserve">
+    <value>근거리 대미지 보너스</value>
+  </data>
+  <data name="PlayerStatus_12610" xml:space="preserve">
+    <value>원거리 대미지 보너스</value>
+  </data>
+  <data name="PlayerStatus_12630" xml:space="preserve">
+    <value>보스에게 주는 대미지 보너스</value>
+  </data>
+  <data name="PlayerStatus_12670" xml:space="preserve">
+    <value>대미지 보너스</value>
+  </data>
+  <data name="PlayerStatus_12680" xml:space="preserve">
+    <value>대미지 감면</value>
+  </data>
+  <data name="PlayerStatus_12690" xml:space="preserve">
+    <value>시즌 대미지</value>
+  </data>
+  <data name="PlayerStatus_12700" xml:space="preserve">
+    <value>시즌 대미지 감면</value>
+  </data>
+  <data name="PlayerStatus_12720" xml:space="preserve">
+    <value>행운의 일격 치료 배율</value>
+  </data>
+  <data name="PlayerStatus_12730" xml:space="preserve">
+    <value>야수 대미지</value>
+  </data>
+  <data name="PlayerStatus_12740" xml:space="preserve">
+    <value>치명타 치료</value>
+  </data>
+  <data name="PlayerStatus_12790" xml:space="preserve">
+    <value>물리 버프 강도</value>
+  </data>
+  <data name="PlayerStatus_12800" xml:space="preserve">
+    <value>마법 버프 강도</value>
+  </data>
+  <data name="PlayerStatus_13000" xml:space="preserve">
+    <value>모든 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13010" xml:space="preserve">
+    <value>불 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13020" xml:space="preserve">
+    <value>얼음 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13030" xml:space="preserve">
+    <value>나무 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13040" xml:space="preserve">
+    <value>번개 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13050" xml:space="preserve">
+    <value>바람 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13060" xml:space="preserve">
+    <value>바위 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13070" xml:space="preserve">
+    <value>빛 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13080" xml:space="preserve">
+    <value>어둠 원소 강도</value>
+  </data>
+  <data name="PlayerStatus_13100" xml:space="preserve">
+    <value>모든 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13110" xml:space="preserve">
+    <value>불 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13120" xml:space="preserve">
+    <value>얼음 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13130" xml:space="preserve">
+    <value>나무 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13140" xml:space="preserve">
+    <value>번개 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13150" xml:space="preserve">
+    <value>바람 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13160" xml:space="preserve">
+    <value>바위 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13170" xml:space="preserve">
+    <value>빛 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13180" xml:space="preserve">
+    <value>어둠 원소 보너스</value>
+  </data>
+  <data name="PlayerStatus_13200" xml:space="preserve">
+    <value>모든 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13210" xml:space="preserve">
+    <value>불 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13220" xml:space="preserve">
+    <value>얼음 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13230" xml:space="preserve">
+    <value>나무 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13240" xml:space="preserve">
+    <value>번개 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13250" xml:space="preserve">
+    <value>바람 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13260" xml:space="preserve">
+    <value>바위 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13270" xml:space="preserve">
+    <value>빛 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13280" xml:space="preserve">
+    <value>어둠 원소 저항</value>
+  </data>
+  <data name="PlayerStatus_13310" xml:space="preserve">
+    <value>모든 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13320" xml:space="preserve">
+    <value>불 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13330" xml:space="preserve">
+    <value>얼음 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13340" xml:space="preserve">
+    <value>나무 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13350" xml:space="preserve">
+    <value>번개 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13360" xml:space="preserve">
+    <value>바람 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13370" xml:space="preserve">
+    <value>바위 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13380" xml:space="preserve">
+    <value>빛 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_13390" xml:space="preserve">
+    <value>어둠 원소 감면</value>
+  </data>
+  <data name="PlayerStatus_20020" xml:space="preserve">
+    <value>최대 스태미나</value>
+  </data>
+  <data name="PlayerStatus_20120" xml:space="preserve">
+    <value>전투 상태에서 스태미나 회복 속도</value>
   </data>
 </root>

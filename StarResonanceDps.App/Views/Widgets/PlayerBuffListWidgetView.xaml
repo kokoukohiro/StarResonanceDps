@@ -112,8 +112,7 @@
                                       VerticalAlignment="Center">
                                     <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
                                            Stretch="Uniform"
-                                           RenderOptions.BitmapScalingMode="HighQuality"
-                                           Opacity="0.82" />
+                                           RenderOptions.BitmapScalingMode="HighQuality" />
 
                                     <!-- スタック数はアイコンに重ねたまま。 -->
                                     <TextBlock HorizontalAlignment="Center"

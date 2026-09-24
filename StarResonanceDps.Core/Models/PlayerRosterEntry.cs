@@ -19,4 +19,6 @@ public sealed record PlayerRosterEntry(
     long CurrentShield = 0,
     bool IsPartyMember = false,
     int? PartyNumber = null,
-    bool IsLive = true);
+    bool IsLive = true,
+    // 自分の実体に届いている属性の全部(番号順)。他人には能力値が届かないので自分だけ入る。
+    IReadOnlyList<PlayerAttributeEntry>? Attributes = null);
