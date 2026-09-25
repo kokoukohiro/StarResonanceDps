@@ -41,7 +41,7 @@ public static class AppConfigDefaults
             SplitEncountersOnNewPhases = true,
             KeepPastEncounterInMeterUntilNextDamage = false,
             ClearHistorySelectionOnNextEvent = true,
-            DatabaseRetentionPolicyDays = 30,
+            DatabaseMaxEncounterCount = 99,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
@@ -104,8 +104,8 @@ public static class AppConfigDefaults
             : settings.NetCaptureDeviceName.Trim();
         settings.GameCaptureCustomExeName = settings.GameCaptureCustomExeName?.Trim() ?? string.Empty;
 
-        // 0 は無期限。ZDPS のスライダーに合わせて上限は30日。
-        settings.DatabaseRetentionPolicyDays = Clamp(settings.DatabaseRetentionPolicyDays, 0, 30);
+        // 0 は無限。選べる最大は 99 件。
+        settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);
     }
 
     public static void NormalizeColorPicker(ColorPickerConfig colorPicker)

@@ -1,0 +1,97 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.PlayerStatusTextColorSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        ステータス詳細の行ごとのテキストカラー。色の選び方は被ダメログのテキストカラー
+        (TakenDamageLogTextColorSettingsView)と同じで、アイコンは持たない。
+        最後の行は色ではなく、行を足す/消すボタンを出す。
+    -->
+    <StackPanel>
+        <TextBlock Text="{Binding TextColorSectionTitle}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+            <StackPanel>
+                <ItemsControl ItemsSource="{Binding TextColors}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Panel.SettingField}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Grid.Column="0"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding DisplayName}"
+                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ItemsControl ItemsSource="{Binding Colors.Colors}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <RadioButton GroupName="{Binding DataContext.Key, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                                 Background="{Binding Brush}"
+                                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                                 IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                                 Click="ColorOptionRadioButton_Click" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
+                                                Style="{StaticResource Button.Text}"
+                                                Tag="{Binding Key}"
+                                                Click="ColorPickerButton_Click" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerStatus_TextColorRow_New]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <!-- 下限・上限に達した側は消す。間隔はウィンドウ下の「初期化 / 保存」と同じ 12。 -->
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Delete]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}"
+                                    Command="{Binding RemoveTextColorRowCommand}"
+                                    Visibility="{Binding CanRemoveTextColorRow, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    Margin="12,0,0,0"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}"
+                                    Command="{Binding AddTextColorRowCommand}"
+                                    Visibility="{Binding CanAddTextColorRow, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ContentControl>
+    </StackPanel>
+</UserControl>

@@ -28,6 +28,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
     private SkillDetailWidgetSettingsConfig _skillDetail = WidgetConfigDefaults.CreateSkillDetailSettings();
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
+    private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -152,6 +153,26 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedPlayerStatus(_playerStatus);
     }
 
+    public IReadOnlyList<int> GetPlayerStatusRowOrderSnapshot()
+    {
+        return [.. _playerStatusRowOrder];
+    }
+
+    /// <summary>
+    /// 行の並びを1項目だけ書き戻す。<b>設定一式は触らない</b>ので、
+    /// 開いている設定ウィンドウが持つ値とぶつからない。
+    /// </summary>
+    public void SavePlayerStatusRowOrder(IReadOnlyList<int> order)
+    {
+        if (Kind != WidgetKind.PlayerStatus)
+        {
+            return;
+        }
+
+        _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(order);
+        WidgetStateManager.Instance.SavePlayerStatusRowOrder(Kind, _playerStatusRowOrder);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -269,6 +290,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             PlayerStatus = WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind)
                 ? _playerStatus.Clone()
+                : null,
+            PlayerStatusRowOrder = Kind == WidgetKind.PlayerStatus
+                ? [.. _playerStatusRowOrder]
                 : null
         };
     }
@@ -331,6 +355,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _playerStatus = WidgetConfigDefaults.CloneNormalizedPlayerStatus(config.PlayerStatus);
             PlayerStatusSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (Kind == WidgetKind.PlayerStatus)
+        {
+            _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(config.PlayerStatusRowOrder);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);

@@ -698,6 +698,12 @@ public partial class WidgetWindow : Window
     /// 次の起動で全員が同じ場所に出る。1枚ずつ持つ窓はこちらへ流す。
     /// </para>
     /// </summary>
+    /// <summary>
+    /// 枠のレイヤーに重ねる飾りの置き場。<b>中身のレイヤーに置くと背景の上にベタで乗る</b>ので、
+    /// 分割線や閉じる印と同じ不透明度で合成したいものはここへ入れる。
+    /// </summary>
+    public ContentControl FrameOverlayHost => WidgetFrameOverlayHost;
+
     public Action? SaveWindowBoundsOverride { get; set; }
 
     private void SaveBounds()

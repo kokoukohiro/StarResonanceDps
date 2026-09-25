@@ -71,6 +71,17 @@
                     </StackPanel>
                 </Grid>
 
+                <!--
+                    枠のレイヤーに重ねる飾りの置き場。ここに入れたものは背景・分割線・
+                    閉じる印と同じ不透明度で合成される。
+                -->
+                <ContentControl x:Name="WidgetFrameOverlayHost"
+                                Grid.Row="1"
+                                Grid.ColumnSpan="2"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                IsHitTestVisible="False" />
+
                 <ScrollBar x:Name="WidgetContentScrollBar"
                            Grid.Row="1"
                            Grid.Column="1"

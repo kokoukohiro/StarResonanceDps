@@ -53,8 +53,8 @@ public sealed class SettingsConfig
     public bool KeepPastEncounterInMeterUntilNextDamage { get; set; }
     public bool ClearHistorySelectionOnNextEvent { get; set; } = true;
 
-    /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
-    public int DatabaseRetentionPolicyDays { get; set; } = 30;
+    /// <summary>戦闘履歴を残す最大の件数。<b>0 は無限。</b></summary>
+    public int DatabaseMaxEncounterCount { get; set; } = 99;
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }
@@ -81,7 +81,7 @@ public sealed class SettingsConfig
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
-            DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
+            DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,

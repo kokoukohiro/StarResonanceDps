@@ -187,6 +187,11 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(PlayerStatusRowsHost);
     }
 
+    private void PlayerStatusTextColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(PlayerStatusTextColorsHost);
+    }
+
     private void OtherRoleSkillsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(OtherRoleSkillsHost);

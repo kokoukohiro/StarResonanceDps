@@ -216,6 +216,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>Theme</value>
   </data>
+  <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
+    <value>Text Colors</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
+    <value>Row {0}</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
+    <value>New Row</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>Status</value>
   </data>
@@ -1062,14 +1074,14 @@
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
     <value>Auto-exit History View</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
-    <value>History Retention</value>
+  <data name="Settings_Aggregation_MaxEncounterCount" xml:space="preserve">
+    <value>Max History Entries</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
-    <value>Forever</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Unlimited" xml:space="preserve">
+    <value>Unlimited</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
-    <value>{0} days</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
+    <value>{0} entries</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>Aggregation</value>
@@ -1264,7 +1276,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>Block</value>
   </data>
-  <data name="PlayerStatus_12510" xml:space="preserve">
+    <data name="PlayerStatus_11990" xml:space="preserve">
+    <value>Companion's Attack Speed</value>
+  </data>
+<data name="PlayerStatus_12510" xml:space="preserve">
     <value>Crit DMG</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">

@@ -1,4 +1,4 @@
-using Serilog;
+﻿using Serilog;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 using StarResonanceDps.Core.CombatRuntime.Database;
 using StarResonanceDps.Core.Logging;
@@ -92,10 +92,10 @@ public sealed class CombatRuntimeHost
 
             DB.CloseAndSave();
 
-            // 0 は無期限。掃除を回さない。
-            if (CombatRuntimeSettings.DatabaseRetentionPolicyDays > 0)
+            // 0 は無限。掃除を回さない。
+            if (CombatRuntimeSettings.DatabaseMaxEncounterCount > 0)
             {
-                DB.ClearOldEncounters(CombatRuntimeSettings.DatabaseRetentionPolicyDays);
+                DB.TrimEncountersToLimit(CombatRuntimeSettings.DatabaseMaxEncounterCount, vacuum: true);
             }
 
             _isInitialized = false;

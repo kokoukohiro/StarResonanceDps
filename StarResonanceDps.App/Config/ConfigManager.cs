@@ -149,7 +149,7 @@ public sealed class ConfigManager
             settings.SplitEncountersOnNewPhases,
             settings.KeepPastEncounterInMeterUntilNextDamage,
             settings.ClearHistorySelectionOnNextEvent,
-            settings.DatabaseRetentionPolicyDays);
+            settings.DatabaseMaxEncounterCount);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using StarResonanceDps.Core.CombatRuntime.DataTypes;
+﻿using StarResonanceDps.Core.CombatRuntime.DataTypes;
 
 namespace StarResonanceDps.Core.CombatRuntime;
 
@@ -57,10 +57,10 @@ public static class CombatRuntimeSettings
 
 
     /// <summary>
-    /// 戦闘履歴を残す日数。<b>0 は無期限</b>で、そのときは掃除を行わない。
-    /// アプリ終了時に <c>DB.ClearOldEncounters</c> を通す。
+    /// 戦闘履歴を残す最大の件数。<b>0 は無限</b>で、そのときは掃除を行わない。
+    /// 保存のたびとアプリ終了時に <c>DB.TrimEncountersToLimit</c> を通す。
     /// </summary>
-    public static int DatabaseRetentionPolicyDays { get; private set; } = 30;
+    public static int DatabaseMaxEncounterCount { get; private set; } = 99;
 
     /// <summary>
     /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。
@@ -72,14 +72,14 @@ public static class CombatRuntimeSettings
         bool splitEncountersOnNewPhases,
         bool keepPastEncounterInMeterUntilNextDamage,
         bool clearHistorySelectionOnNextEvent,
-        int databaseRetentionPolicyDays)
+        int databaseMaxEncounterCount)
     {
         ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
 
         SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
         KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
         ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;
-        DatabaseRetentionPolicyDays = databaseRetentionPolicyDays;
+        DatabaseMaxEncounterCount = databaseMaxEncounterCount;
         HasBeenApplied = true;
     }
 

@@ -216,6 +216,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>テーマ</value>
   </data>
+  <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
+    <value>テキストカラー</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
+    <value>{0}行目</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
+    <value>新規行</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>削除</value>
+  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>ステータス</value>
   </data>
@@ -1062,14 +1074,14 @@
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
     <value>履歴表示を自動解除</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
-    <value>履歴の保持期間</value>
+  <data name="Settings_Aggregation_MaxEncounterCount" xml:space="preserve">
+    <value>履歴の最大保持数</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
-    <value>無期限</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Unlimited" xml:space="preserve">
+    <value>無制限</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
-    <value>{0}日</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
+    <value>{0}件</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>集計</value>
@@ -1092,7 +1104,6 @@
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※ダンジョンでボス部屋進入など</value>
   </data>
-  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>移動速度</value>
   </data>
@@ -1264,7 +1275,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>レジスト</value>
   </data>
-  <data name="PlayerStatus_12510" xml:space="preserve">
+    <data name="PlayerStatus_11990" xml:space="preserve">
+    <value>臣獣の攻撃速度</value>
+  </data>
+<data name="PlayerStatus_12510" xml:space="preserve">
     <value>会心ダメージ</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">

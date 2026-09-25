@@ -37,7 +37,6 @@ public static class OwnerModalWindow
 
         if (ownerHandle != IntPtr.Zero)
         {
-            EnableWindow(ownerHandle, false);
             window.Closed += (_, _) =>
             {
                 EnableWindow(ownerHandle, true);
@@ -54,6 +53,14 @@ public static class OwnerModalWindow
         }
 
         window.Show();
+
+        // <b>止めるのは表示の後。</b>アクティブなまま無効化すると、無効なウィンドウは
+        // アクティブでいられないので、Windows がアクティブ化を次のウィンドウ(下にある
+        // 別アプリ)へ渡してしまい、オーナーがその後ろへ回る。
+        if (ownerHandle != IntPtr.Zero)
+        {
+            EnableWindow(ownerHandle, false);
+        }
     }
 
     /// <summary>

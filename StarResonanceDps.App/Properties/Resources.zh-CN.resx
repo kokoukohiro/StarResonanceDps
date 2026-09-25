@@ -216,6 +216,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>主题</value>
   </data>
+  <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
+    <value>第{0}行</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
+    <value>新增行</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>属性</value>
   </data>
@@ -1062,14 +1074,14 @@
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
     <value>自动退出历史显示</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
-    <value>历史保留期限</value>
+  <data name="Settings_Aggregation_MaxEncounterCount" xml:space="preserve">
+    <value>历史最大保留数</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
+  <data name="Settings_Aggregation_MaxEncounterCount_Unlimited" xml:space="preserve">
     <value>不限</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
-    <value>{0}天</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
+    <value>{0}条</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>统计</value>
@@ -1263,7 +1275,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>格挡</value>
   </data>
-  <data name="PlayerStatus_12510" xml:space="preserve">
+    <data name="PlayerStatus_11990" xml:space="preserve">
+    <value>宠物攻击速度</value>
+  </data>
+<data name="PlayerStatus_12510" xml:space="preserve">
     <value>暴击伤害</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">

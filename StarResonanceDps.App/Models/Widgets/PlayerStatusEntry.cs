@@ -13,7 +13,19 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// <param name="Name">表示名。リソース <c>PlayerStatus_(番号)</c>。</param>
 /// <param name="IconMask">行のアイコンの形。塗りをこの形で抜く。</param>
 /// <param name="ValueText">表示する値。</param>
-public sealed record PlayerStatusRow(string Name, Brush? IconMask, string ValueText);
+/// <param name="OrderUnitAttrId">
+/// 並べ替えの単位(組は代表1つ)。行を掴んで動かすときの宛先。
+/// </param>
+/// <param name="TextBrush">
+/// 行の色。アイコンの塗り・名前・値の3つに使う。設定の行数より表示の行数が多いときは、
+/// <c>Create</c> が色の並びを繰り返して割り当てる。
+/// </param>
+public sealed record PlayerStatusRow(
+    string Name,
+    Brush? IconMask,
+    string ValueText,
+    int OrderUnitAttrId,
+    Brush? TextBrush = null);
 
 /// <summary>
 /// ステータス詳細の行を作る。
@@ -203,6 +215,7 @@ public static class PlayerStatusEntry
         new(11880, true, "common_icon03"),
         new(11890, true, "common_icon14"),
         new(12730, true, "common_icon03"),
+        new(11990, true, "common_icon13"),
         new(10200, false, "common_icon21"),
         new(10210, false, "common_icon21"),
         new(10220, false, "common_icon21"),
@@ -263,6 +276,46 @@ public static class PlayerStatusEntry
     /// </summary>
     public static IReadOnlyList<int> SettingRowAttrIds { get; } = BuildSettingRowAttrIds();
 
+    /// <summary>職業で1つに絞る組。<b>並べ替えでは組ごと動く</b>ので、代表は各組の先頭。</summary>
+    private static readonly int[][] OrderGroupAttrIds =
+    [
+        PrimaryStatAttrIds,
+        AttackAttrIds,
+        DefensePenetrationAttrIds,
+        RefinedAttackAttrIds,
+        AttackSpeedAttrIds,
+    ];
+
+    /// <summary>
+    /// 並べ替えの単位。<b>組は代表1つにまとめた76件</b>で、並びが既定の表示順。
+    /// 設定の一覧(<see cref="SettingRowAttrIds"/>)と違い、職業で片方だけ出る組も1件にする。
+    /// </summary>
+    public static IReadOnlyList<int> OrderUnitAttrIds { get; } = BuildOrderUnitAttrIds();
+
+    /// <summary>その番号が属する並べ替えの単位。割合の行と組の2件目以降は代表へ寄せる。</summary>
+    public static int GetOrderUnitAttrId(int attrId)
+    {
+        if (TryGetPairedRow(attrId, out var paired))
+        {
+            attrId = paired.ValueAttrId;
+        }
+
+        if (TryGetMergedGroup(attrId, out var merged))
+        {
+            return merged.AttrIds[0];
+        }
+
+        foreach (var group in OrderGroupAttrIds)
+        {
+            if (Array.IndexOf(group, attrId) >= 0)
+            {
+                return group[0];
+            }
+        }
+
+        return attrId;
+    }
+
     /// <summary>既定でオンにする行。残りはオフで、ユーザーが設定で出す。</summary>
     private static readonly int[] DefaultVisibleAttrIds =
     [
@@ -314,10 +367,20 @@ public static class PlayerStatusEntry
     /// 行ごとのオン/オフ(鍵は番号)。<b>オフの行は無条件で出さない。</b>
     /// 一覧に無い番号(割合の行など)は代表の位置で判定されるので見ない。
     /// </param>
+    /// <param name="textBrushes">
+    /// 行の色。並びが設定の行順で、<b>表示の行数がこれより多ければ先頭へ戻って繰り返す</b>。
+    /// 空なら色を割り当てない(表示側の既定色になる)。
+    /// </param>
+    /// <param name="rowOrder">
+    /// 並べ替えの単位の並び(<see cref="OrderUnitAttrIds"/> の番号)。
+    /// <b>隠れている行も含めた全体の順</b>で、空なら表の既定順。
+    /// </param>
     public static IReadOnlyList<PlayerStatusRow> Create(
         PlayerRosterEntry player,
         bool hideInactiveStatusEffects,
-        IReadOnlyDictionary<string, bool> rowVisibility)
+        IReadOnlyDictionary<string, bool> rowVisibility,
+        IReadOnlyList<Brush> textBrushes,
+        IReadOnlyList<int> rowOrder)
     {
         var attributes = player.Attributes;
         if (attributes is null || attributes.Count == 0)
@@ -347,7 +410,7 @@ public static class PlayerStatusEntry
 
         var localization = LocalizationManager.Instance;
         var rows = new List<PlayerStatusRow>(Rows.Length);
-        foreach (var spec in Rows)
+        foreach (var spec in OrderRows(rowOrder))
         {
             if (IsHidden(spec.AttrId, PrimaryStatAttrIds, shownPrimaryStat)
                 || IsHidden(spec.AttrId, AttackAttrIds, shownAttack)
@@ -394,6 +457,15 @@ public static class PlayerStatusEntry
             rows.Add(CreateRow(spec, spec.AttrId, arrived, localization));
         }
 
+        // 色は行の並びに沿って配り、足りなくなったら先頭へ戻る。
+        if (textBrushes.Count > 0)
+        {
+            for (var index = 0; index < rows.Count; index++)
+            {
+                rows[index] = rows[index] with { TextBrush = textBrushes[index % textBrushes.Count] };
+            }
+        }
+
         return rows;
     }
 
@@ -436,6 +508,68 @@ public static class PlayerStatusEntry
         return string.IsNullOrEmpty(arrivedText)
             || (long.TryParse(arrivedText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)
                 && value == 0);
+    }
+
+    /// <summary>並べ替えの単位を、既定の表示順のまま拾う。</summary>
+    private static int[] BuildOrderUnitAttrIds()
+    {
+        var units = new List<int>(SettingRowAttrIds.Count);
+        var seen = new HashSet<int>();
+        foreach (var attrId in SettingRowAttrIds)
+        {
+            var unit = GetOrderUnitAttrId(attrId);
+            if (seen.Add(unit))
+            {
+                units.Add(unit);
+            }
+        }
+
+        return [.. units];
+    }
+
+    /// <summary>
+    /// 保存された並びのとおりに <see cref="Rows"/> を並べ替える。
+    /// 並びに無い単位(表が増えたとき)は既定の順で後ろへ回し、<b>落とさない</b>。
+    /// </summary>
+    private static IReadOnlyList<StatusRowSpec> OrderRows(IReadOnlyList<int> rowOrder)
+    {
+        if (rowOrder.Count == 0)
+        {
+            return Rows;
+        }
+
+        var byUnit = new Dictionary<int, List<StatusRowSpec>>(OrderUnitAttrIds.Count);
+        foreach (var spec in Rows)
+        {
+            var unit = GetOrderUnitAttrId(spec.AttrId);
+            if (!byUnit.TryGetValue(unit, out var list))
+            {
+                list = [];
+                byUnit[unit] = list;
+            }
+
+            list.Add(spec);
+        }
+
+        var ordered = new List<StatusRowSpec>(Rows.Length);
+        var used = new HashSet<int>();
+        foreach (var unit in rowOrder)
+        {
+            if (used.Add(unit) && byUnit.TryGetValue(unit, out var list))
+            {
+                ordered.AddRange(list);
+            }
+        }
+
+        foreach (var unit in OrderUnitAttrIds)
+        {
+            if (used.Add(unit) && byUnit.TryGetValue(unit, out var list))
+            {
+                ordered.AddRange(list);
+            }
+        }
+
+        return ordered;
     }
 
     /// <summary>設定の一覧に出す番号を、表示の順のまま拾う。</summary>
@@ -507,7 +641,8 @@ public static class PlayerStatusEntry
         return new PlayerStatusRow(
             localization.GetString($"PlayerStatus_{paired.PercentAttrId}"),
             ResolveIconMask(percentSpec.IconKey),
-            $"{percentText}({valueText})");
+            $"{percentText}({valueText})",
+            GetOrderUnitAttrId(paired.ValueAttrId));
     }
 
     /// <summary>その番号が、値の一致で畳む組に入っているか。</summary>
@@ -553,7 +688,8 @@ public static class PlayerStatusEntry
             rows.Add(new PlayerStatusRow(
                 localization.GetString(group.MergedNameKey),
                 ResolveIconMask(spec.IconKey),
-                FormatValue(spec, first)));
+                FormatValue(spec, first),
+                GetOrderUnitAttrId(group.AttrIds[0])));
             return;
         }
 
@@ -573,7 +709,8 @@ public static class PlayerStatusEntry
         return new PlayerStatusRow(
             localization.GetString($"PlayerStatus_{attrId}"),
             ResolveIconMask(spec.IconKey),
-            FormatValue(spec, arrived.GetValueOrDefault(attrId)));
+            FormatValue(spec, arrived.GetValueOrDefault(attrId)),
+            GetOrderUnitAttrId(attrId));
     }
 
     /// <summary>

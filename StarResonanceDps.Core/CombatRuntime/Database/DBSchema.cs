@@ -39,8 +39,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             public const string SelectOneByBattleId =
                 @"SELECT * FROM Encounters WHERE BattleId = @BattleId ORDER BY StartTime LIMIT 1";
 
-            public const string RemoveEncountersOlderThan =
-                @"DELETE FROM Encounters WHERE EndTime IS NOT NULL AND datetime(EndTime) < @Date;";
+            // 残すのは新しい順に @Keep 件。並びは SelectAll(履歴の一覧)と同じ基準。
+            public const string RemoveEncountersOverLimit =
+                @"DELETE FROM Encounters WHERE EncounterId NOT IN (
+                      SELECT EncounterId FROM Encounters ORDER BY StartTime DESC LIMIT @Keep);";
 
             public const string RemoveEncounter =
                 @"DELETE FROM Encounters WHERE EncounterId = @EncounterId;";

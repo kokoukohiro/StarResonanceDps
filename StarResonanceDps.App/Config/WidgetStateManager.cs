@@ -138,6 +138,30 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
+    /// ステータス詳細の行の並びだけを保存する。
+    ///
+    /// <para>
+    /// 設定一式を書き戻す形にすると、開いている設定ウィンドウが持っている古い値とぶつかる。
+    /// ウィンドウの位置と同じく、この項目だけを書く。
+    /// </para>
+    /// </summary>
+    public void SavePlayerStatusRowOrder(WidgetKind kind, IReadOnlyList<int> order)
+    {
+        if (kind != WidgetKind.PlayerStatus)
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.PlayerStatusRowOrder = [.. order];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
     /// バフ・デバフカードの倍率を1件だけ保存する。
     ///
     /// <para>

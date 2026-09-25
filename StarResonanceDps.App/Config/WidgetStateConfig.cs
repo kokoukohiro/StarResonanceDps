@@ -31,6 +31,17 @@ public sealed class WidgetConfig
     public PlayerStatusWidgetSettingsConfig? PlayerStatus { get; set; }
 
     /// <summary>
+    /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
+    ///
+    /// <para>
+    /// <b>設定ウィンドウは触らない。</b>あちらは開いた時点の設定を丸ごと書き戻すので、
+    /// ウィジェット側で動かした並びを巻き戻してしまう。ウィンドウの位置と同じく、
+    /// 掴んで動かした瞬間にウィジェットから直接保存する。
+    /// </para>
+    /// </summary>
+    public List<int>? PlayerStatusRowOrder { get; set; }
+
+    /// <summary>
     /// 前回開いていたウィンドウの対象一覧。プレイヤー用ウィンドウのみ持つ。
     ///
     /// <para>
@@ -60,6 +71,7 @@ public sealed class WidgetConfig
             ElementColor = ElementColor?.Clone(),
             SkillDetail = SkillDetail?.Clone(),
             PlayerStatus = PlayerStatus?.Clone(),
+            PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
             ExtensionData = ExtensionData is null
                 ? null
@@ -481,6 +493,13 @@ public sealed class PlayerStatusWidgetSettingsConfig
     public Dictionary<string, bool> RowVisibility { get; set; } =
         WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility();
 
+    /// <summary>
+    /// 行の文字とアイコンの色。<b>並びが表示の行順で、件数が設定の行数。</b>
+    /// 他の色設定は鍵が固定なので辞書だが、ここは行数が可変なので並びで持つ。
+    /// </summary>
+    public List<PlayerStatusTextColorConfig> TextColors { get; set; } =
+        WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors();
+
     public PlayerStatusWidgetSettingsConfig Clone()
     {
         return new PlayerStatusWidgetSettingsConfig
@@ -488,7 +507,27 @@ public sealed class PlayerStatusWidgetSettingsConfig
             HideInactiveStatusEffects = HideInactiveStatusEffects,
             RowVisibility = RowVisibility is null
                 ? WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility()
-                : new Dictionary<string, bool>(RowVisibility, StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, bool>(RowVisibility, StringComparer.OrdinalIgnoreCase),
+            TextColors = TextColors is null
+                ? WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors()
+                : [.. TextColors.Select(row => row.Clone())]
+        };
+    }
+}
+
+/// <summary>ステータス詳細のテキストカラー1行ぶん。形はクラスカラーの1項目と同じ。</summary>
+public sealed class PlayerStatusTextColorConfig
+{
+    public int SelectedIndex { get; set; }
+
+    public List<string> Palette { get; set; } = [];
+
+    public PlayerStatusTextColorConfig Clone()
+    {
+        return new PlayerStatusTextColorConfig
+        {
+            SelectedIndex = SelectedIndex,
+            Palette = Palette is null ? [] : new List<string>(Palette)
         };
     }
 }
@@ -973,8 +1012,92 @@ public static class WidgetConfigDefaults
         return new PlayerStatusWidgetSettingsConfig
         {
             HideInactiveStatusEffects = DefaultHideInactiveStatusEffects,
-            RowVisibility = CreateDefaultPlayerStatusRowVisibility()
+            RowVisibility = CreateDefaultPlayerStatusRowVisibility(),
+            TextColors = CreateDefaultPlayerStatusTextColors()
         };
+    }
+
+    /// <summary>テキストカラーの行数の下限と上限。色は表示側がループさせるので、上限は控えめ。</summary>
+    public const int MinPlayerStatusTextColorRows = 1;
+    public const int MaxPlayerStatusTextColorRows = 20;
+
+    /// <summary>
+    /// テキストカラーの既定(13行)。
+    /// </summary>
+    private static readonly string[][] DefaultPlayerStatusTextColorHexes =
+    [
+        ["#FFFFFF", "#FF8A7A"],
+        ["#FFFFFF", "#FFB37A"],
+        ["#FFFFFF", "#FFD77A"],
+        ["#FFFFFF", "#F4F08A"],
+        ["#FFFFFF", "#BFF58A"],
+        ["#FFFFFF", "#7EF0A2"],
+        ["#FFFFFF", "#7EF5D8"],
+        ["#FFFFFF", "#7EEBFF"],
+        ["#FFFFFF", "#8BCBFF"],
+        ["#FFFFFF", "#A7B6FF"],
+        ["#FFFFFF", "#C3A7FF"],
+        ["#FFFFFF", "#E0A7FF"],
+        ["#FFFFFF", "#FF9FD8"],
+    ];
+
+    /// <summary>テキストカラーの既定。各行は「白」と固有色の2択で、固有色を選んだ状態。</summary>
+    public static List<PlayerStatusTextColorConfig> CreateDefaultPlayerStatusTextColors()
+    {
+        var rows = new List<PlayerStatusTextColorConfig>(DefaultPlayerStatusTextColorHexes.Length);
+        foreach (var palette in DefaultPlayerStatusTextColorHexes)
+        {
+            rows.Add(new PlayerStatusTextColorConfig
+            {
+                SelectedIndex = 1,
+                Palette = [.. palette]
+            });
+        }
+
+        return rows;
+    }
+
+    /// <summary>行を1つ足すときの色。<b>純白1色だけ</b>で、あとはユーザーが選び直す。</summary>
+    public static PlayerStatusTextColorConfig CreatePlayerStatusTextColorRow()
+    {
+        return new PlayerStatusTextColorConfig
+        {
+            SelectedIndex = 0,
+            Palette = ["#FFFFFF"]
+        };
+    }
+
+    /// <summary>
+    /// 行の並びを正規化する。<b>表に無い番号は捨て、足りない番号は既定の位置へ補う</b>ので、
+    /// 表が増減しても保存値が取り残されない。
+    /// </summary>
+    public static List<int> NormalizePlayerStatusRowOrder(IReadOnlyList<int>? order)
+    {
+        var units = PlayerStatusEntry.OrderUnitAttrIds;
+        var known = new HashSet<int>(units);
+        var result = new List<int>(units.Count);
+        var seen = new HashSet<int>();
+
+        if (order is not null)
+        {
+            foreach (var unit in order)
+            {
+                if (known.Contains(unit) && seen.Add(unit))
+                {
+                    result.Add(unit);
+                }
+            }
+        }
+
+        foreach (var unit in units)
+        {
+            if (seen.Add(unit))
+            {
+                result.Add(unit);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>行ごとのオン/オフの既定。一覧の全件を埋める。</summary>
@@ -1013,6 +1136,27 @@ public static class WidgetConfigDefaults
         }
 
         normalized.RowVisibility = rowVisibility;
+
+        // 行数は 1〜20。空なら既定へ戻し、各行の選択はパレットの範囲に収める。
+        var textColors = normalized.TextColors is null || normalized.TextColors.Count == 0
+            ? CreateDefaultPlayerStatusTextColors()
+            : normalized.TextColors;
+        if (textColors.Count > MaxPlayerStatusTextColorRows)
+        {
+            textColors = textColors.GetRange(0, MaxPlayerStatusTextColorRows);
+        }
+
+        foreach (var row in textColors)
+        {
+            if (row.Palette is null || row.Palette.Count == 0)
+            {
+                row.Palette = ["#FFFFFF"];
+            }
+
+            row.SelectedIndex = Math.Clamp(row.SelectedIndex, 0, row.Palette.Count - 1);
+        }
+
+        normalized.TextColors = textColors;
         return normalized;
     }
 
@@ -1591,6 +1735,10 @@ public static class WidgetConfigDefaults
         config.ElementColor = SupportsElementColorSettings(kind)
             ? CloneNormalizedElementColor(kind, config.ElementColor)
             : null;
+        config.PlayerStatusRowOrder = kind == WidgetKind.PlayerStatus
+            ? NormalizePlayerStatusRowOrder(config.PlayerStatusRowOrder)
+            : null;
+
         config.PlayerStatus = SupportsPlayerStatusSettings(kind)
             ? CloneNormalizedPlayerStatus(config.PlayerStatus)
             : null;

@@ -457,19 +457,19 @@
 
                                                 <TextBlock Grid.Column="0"
                                                            VerticalAlignment="Center"
-                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_RetentionDays]}"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_MaxEncounterCount]}"
                                                            Foreground="{DynamicResource Brush.TextPrimary}"
                                                            FontSize="14"
                                                            FontWeight="SemiBold" />
 
-                                                <!-- 選択肢はビューモデルが持つ。値は日数そのもので 0 が無期限。 -->
+                                                <!-- 選択肢はビューモデルが持つ。値は件数そのもので 0 が無限。 -->
                                                 <!-- DisplayMemberPath は Input.SettingsComboBox では効かない。ItemTemplate を使うこと。 -->
                                                 <ComboBox Grid.Column="1"
                                                           Width="220"
                                                           Style="{StaticResource Input.SettingsComboBox}"
                                                           ItemsSource="{Binding RetentionPolicyOptions}"
-                                                          SelectedValuePath="Days"
-                                                          SelectedValue="{Binding DatabaseRetentionPolicyDays, Mode=TwoWay}">
+                                                          SelectedValuePath="Count"
+                                                          SelectedValue="{Binding DatabaseMaxEncounterCount, Mode=TwoWay}">
                                                     <ComboBox.ItemTemplate>
                                                         <DataTemplate>
                                                             <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />

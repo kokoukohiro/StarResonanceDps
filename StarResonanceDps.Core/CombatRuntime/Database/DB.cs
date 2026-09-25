@@ -73,6 +73,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             var result = InsertEncounter(encounter, transaction);
             transaction.Commit();
 
+            // 上限を超えたぶんはその場で落とす。終了時だけの掃除だと、稼働中は上限を超えて溜まる。
+            if (CombatRuntimeSettings.DatabaseMaxEncounterCount > 0)
+            {
+                TrimEncountersToLimit(CombatRuntimeSettings.DatabaseMaxEncounterCount, vacuum: false);
+            }
+
             return result;
         }
 
@@ -268,17 +274,21 @@ namespace StarResonanceDps.Core.CombatRuntime
             return null;
         }
 
-        public static DBCleanUpResults ClearOldEncounters(int olderThanDays)
+        /// <param name="maxCount">残す最大の件数。<b>0 は無限</b>で、呼び出し側が呼ばない。</param>
+        /// <param name="vacuum">DB を詰め直すか。保存のたびに回すには重いので、終了時だけ真にする。</param>
+        public static DBCleanUpResults TrimEncountersToLimit(int maxCount, bool vacuum)
         {
             lock (DBLock)
             {
-                var date = DateTime.Now.AddDays(olderThanDays * -1);
                 var results = new DBCleanUpResults();
-                results.EncountersDeleted = DbConn.Execute(DBSchema.Encounter.RemoveEncountersOlderThan, new { Date = date });
+                results.EncountersDeleted = DbConn.Execute(DBSchema.Encounter.RemoveEncountersOverLimit, new { Keep = maxCount });
                 results.EntitiesCachesDeleted = DbConn.Execute(DBSchema.Entities.DeleteEntitiesCachesWithNoEncounters);
                 results.BattlesDeleted = DbConn.Execute(DBSchema.Battles.DeleteBattlesWithNoEncounters);
 
-                DbConn.Execute("VACUUM");
+                if (vacuum)
+                {
+                    DbConn.Execute("VACUUM");
+                }
 
                 Log.Information("Cleaned up {EncountersDeleted} encounters and {BattlesDeleted} battles, with {EntitesCachesDeleted} cachedEntities",
                         results.EncountersDeleted, results.BattlesDeleted, results.EntitiesCachesDeleted);

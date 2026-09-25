@@ -4,6 +4,7 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              Loaded="PlayerStatusWidgetView_Loaded"
+             Unloaded="PlayerStatusWidgetView_Unloaded"
              SizeChanged="PlayerStatusWidgetView_SizeChanged"
              DataContextChanged="PlayerStatusWidgetView_DataContextChanged">
     <UserControl.Resources>
@@ -21,6 +22,17 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="TextAlignment" Value="Right" />
         </Style>
+        <!--
+            掴んだ行の落とし先を示す線。<b>枠のレイヤー(WidgetWindow.FrameOverlayHost)へ差し込む</b>。
+            中身のレイヤーに置くと、半透明の背景の上にベタで乗って暗く濁る。
+        -->
+        <Rectangle x:Key="DropIndicator"
+                   Height="1"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Fill="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                   Visibility="Collapsed" />
+
     </UserControl.Resources>
 
     <Grid>
@@ -42,15 +54,17 @@
                         <!--
                             行の高さとホバーの作りはバフ一覧の行と同じ。押しても何も起きないが、
                             Button の ControlTemplate でないとホバーの背景を同じ形で出せない。
+                            掴んで動かすと並べ替えになる(閾値を超えるまでは何も起きない)。
                         -->
-                        <Button Height="31"
+                        <Button Height="25"
                                 Padding="0"
                                 Background="Transparent"
                                 BorderThickness="0"
                                 Focusable="False"
                                 IsTabStop="False"
                                 HorizontalContentAlignment="Stretch"
-                                VerticalContentAlignment="Stretch">
+                                VerticalContentAlignment="Stretch"
+                                PreviewMouseLeftButtonDown="StatusRow_PreviewMouseLeftButtonDown">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="Template">
@@ -101,7 +115,7 @@
                                            Height="30"
                                            HorizontalAlignment="Left"
                                            VerticalAlignment="Center"
-                                           Fill="White"
+                                           Fill="{Binding TextBrush}"
                                            OpacityMask="{Binding IconMask}"
                                            RenderOptions.BitmapScalingMode="HighQuality"
                                            Effect="{StaticResource Effect.ProfessionIconShadow}" />
@@ -109,11 +123,13 @@
                                 <TextBlock Grid.Column="1"
                                            Margin="6,0,6,0"
                                            Style="{StaticResource StatusList.RowText}"
+                                           Foreground="{Binding TextBrush}"
                                            Text="{Binding Name}" />
 
                                 <TextBlock Grid.Column="2"
                                            Margin="0,0,8,0"
                                            Style="{StaticResource StatusList.Value}"
+                                           Foreground="{Binding TextBrush}"
                                            Text="{Binding ValueText}" />
                             </Grid>
                         </Button>

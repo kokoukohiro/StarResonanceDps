@@ -67,6 +67,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding PlayerStatusSettings.RowSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="PlayerStatusTextColorsNavButton"
+                                Click="PlayerStatusTextColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.TextColor}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding PlayerStatusSettings.TextColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="OtherRoleSkillsNavButton"
                                 Click="OtherRoleSkillsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -223,6 +232,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:PlayerStatusRowSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="PlayerStatusTextColorsHost"
+                                                Content="{Binding PlayerStatusSettings}"
+                                                Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:PlayerStatusTextColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

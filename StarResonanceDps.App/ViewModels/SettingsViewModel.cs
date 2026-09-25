@@ -68,16 +68,16 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _clearHistorySelectionOnNextEvent = true;
 
-    /// <summary>戦闘履歴を残す日数。<b>0 は無期限。</b></summary>
+    /// <summary>戦闘履歴を残す最大の件数。<b>0 は無限。</b></summary>
     [ObservableProperty]
-    private int _databaseRetentionPolicyDays;
+    private int _databaseMaxEncounterCount;
 
     /// <summary>
     /// 保持期間の選択肢。**値は日数そのもので、0 が無期限。**
     /// 選べる値をここだけで決めているので、増やすならこの配列に足す
     /// (<c>AppConfigDefaults.Normalize</c> の上限とずれないようにすること)。
     /// </summary>
-    private static readonly int[] RetentionPolicyDayChoices = [1, 3, 7, 30, 0];
+    private static readonly int[] MaxEncounterCountChoices = [20, 50, 99, 0];
 
     private readonly ObservableCollection<RetentionPolicyOption> _retentionPolicyOptions = [];
 
@@ -179,7 +179,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
-            DatabaseRetentionPolicyDays = DatabaseRetentionPolicyDays,
+            DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
 
             // キャプチャ3項目はこの画面では SettingsConfig 経由で編集しない
             // (NetworkAdapterSession が持ち、保存も別経路)。ただしここで落とすと
@@ -209,7 +209,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
             ClearHistorySelectionOnNextEvent = settings.ClearHistorySelectionOnNextEvent;
-            DatabaseRetentionPolicyDays = settings.DatabaseRetentionPolicyDays;
+            DatabaseMaxEncounterCount = settings.DatabaseMaxEncounterCount;
         }
         finally
         {
@@ -455,7 +455,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
             && left.ClearHistorySelectionOnNextEvent == right.ClearHistorySelectionOnNextEvent
-            && left.DatabaseRetentionPolicyDays == right.DatabaseRetentionPolicyDays
+            && left.DatabaseMaxEncounterCount == right.DatabaseMaxEncounterCount
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
     }
 
@@ -536,7 +536,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         return LocalizationManager.Instance.GetString(isOn ? "Settings_Switch_On" : "Settings_Switch_Off");
     }
 
-    partial void OnDatabaseRetentionPolicyDaysChanged(int value)
+    partial void OnDatabaseMaxEncounterCountChanged(int value)
     {
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
@@ -551,26 +551,26 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     {
         // 作り直すと SelectedValue の参照先が消えるので、選択を戻せるよう控えておく。
         // 通知を出さない ＝ 空欄のままになる。控えた値を押し直して選び直させる。
-        var selected = DatabaseRetentionPolicyDays;
+        var selected = DatabaseMaxEncounterCount;
 
         _retentionPolicyOptions.Clear();
-        foreach (var days in RetentionPolicyDayChoices)
+        foreach (var count in MaxEncounterCountChoices)
         {
-            _retentionPolicyOptions.Add(new RetentionPolicyOption(days, FormatRetentionPolicy(days)));
+            _retentionPolicyOptions.Add(new RetentionPolicyOption(count, FormatRetentionPolicy(count)));
         }
 
-        DatabaseRetentionPolicyDays = selected;
-        OnPropertyChanged(nameof(DatabaseRetentionPolicyDays));
+        DatabaseMaxEncounterCount = selected;
+        OnPropertyChanged(nameof(DatabaseMaxEncounterCount));
     }
 
-    /// <summary><b>0 は日数ではなく「無期限」</b>なので数字を出さない。</summary>
-    private static string FormatRetentionPolicy(int days)
+    /// <summary><b>0 は件数ではなく「無限」</b>なので数字を出さない。</summary>
+    private static string FormatRetentionPolicy(int count)
     {
-        return days <= 0
-            ? LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Forever")
+        return count <= 0
+            ? LocalizationManager.Instance.GetString("Settings_Aggregation_MaxEncounterCount_Unlimited")
             : string.Format(
-                LocalizationManager.Instance.GetString("Settings_Aggregation_RetentionDays_Value"),
-                days);
+                LocalizationManager.Instance.GetString("Settings_Aggregation_MaxEncounterCount_Value"),
+                count);
     }
 
     partial void OnNumberDisplayFormatIndexChanged(int value)

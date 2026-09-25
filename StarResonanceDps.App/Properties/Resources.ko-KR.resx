@@ -216,6 +216,18 @@
   <data name="Settings_Section_Theme_Title" xml:space="preserve">
     <value>테마</value>
   </data>
+  <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
+    <value>텍스트 색상</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
+    <value>{0}번째 행</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
+    <value>새 행</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>삭제</value>
+  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>능력치</value>
   </data>
@@ -1062,14 +1074,14 @@
   <data name="Settings_Aggregation_ClearHistoryOnNextEvent" xml:space="preserve">
     <value>기록 표시 자동 해제</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays" xml:space="preserve">
-    <value>기록 보관 기간</value>
+  <data name="Settings_Aggregation_MaxEncounterCount" xml:space="preserve">
+    <value>기록 최대 보관 수</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Forever" xml:space="preserve">
-    <value>무기한</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Unlimited" xml:space="preserve">
+    <value>무제한</value>
   </data>
-  <data name="Settings_Aggregation_RetentionDays_Value" xml:space="preserve">
-    <value>{0}일</value>
+  <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
+    <value>{0}개</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>집계</value>
@@ -1264,7 +1276,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>막기</value>
   </data>
-  <data name="PlayerStatus_12510" xml:space="preserve">
+    <data name="PlayerStatus_11990" xml:space="preserve">
+    <value>야수 공격 속도</value>
+  </data>
+<data name="PlayerStatus_12510" xml:space="preserve">
     <value>치명타 대미지</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">
