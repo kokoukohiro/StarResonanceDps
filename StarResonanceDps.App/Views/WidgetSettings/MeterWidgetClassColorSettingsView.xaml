@@ -170,20 +170,61 @@
                                         <Grid Width="27"
                                               Height="27"
                                               Visibility="{Binding DataContext.ShowsPlayerListProfessionIcons, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetClassColorSettingsView}}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Rectangle Width="25"
-                                                       Height="25"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       Style="{StaticResource MeterWidgetClassColorSettings.ProfessionIconMask}"
-                                                       Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}">
-                                                <Rectangle.Effect>
-                                                    <DropShadowEffect
-                                                        Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
-                                                        Opacity="0.5"
-                                                        ShadowDepth="0"
-                                                        BlurRadius="5" />
-                                                </Rectangle.Effect>
-                                            </Rectangle>
+                                            <!-- クラスの行。シーズン心相晶の行では出さない。 -->
+                                            <Grid>
+                                                <Grid.Style>
+                                                    <Style TargetType="Grid">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsSeasonTalent}" Value="True">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Grid.Style>
+                                                <Rectangle Width="25"
+                                                           Height="25"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           Style="{StaticResource MeterWidgetClassColorSettings.ProfessionIconMask}"
+                                                           Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}">
+                                                    <Rectangle.Effect>
+                                                        <DropShadowEffect
+                                                            Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                            Opacity="0.5"
+                                                            ShadowDepth="0"
+                                                            BlurRadius="5" />
+                                                    </Rectangle.Effect>
+                                                </Rectangle>
+                                            </Grid>
+                                            <!-- シーズン心相晶の行。 -->
+                                            <Grid Visibility="{Binding IsSeasonTalent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <Rectangle HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                           Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
+                                                           OpacityMask="{Binding SeasonTalentIconMask}">
+                                                    <!-- 型の絵は欄いっぱい、不明の行だけクラスアイコンと同じ大きさ。 -->
+                                                    <Rectangle.Style>
+                                                        <Style TargetType="Rectangle">
+                                                            <Setter Property="Width" Value="27" />
+                                                            <Setter Property="Height" Value="27" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Key}" Value="SeasonTalent.Unknown">
+                                                                    <Setter Property="Width" Value="25" />
+                                                                    <Setter Property="Height" Value="25" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Rectangle.Style>
+                                                    <Rectangle.Effect>
+                                                        <DropShadowEffect
+                                                            Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                            Opacity="0.5"
+                                                            ShadowDepth="0"
+                                                            BlurRadius="5" />
+                                                    </Rectangle.Effect>
+                                                </Rectangle>
+                                            </Grid>
                                         </Grid>
                                         <Border Style="{StaticResource MeterWidgetClassColorSettings.MeterProfessionIconBackground}"
                                                 Visibility="{Binding DataContext.UsesMeterClassColorIconBackground, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetClassColorSettingsView}}, Converter={StaticResource BooleanToVisibilityConverter}}">

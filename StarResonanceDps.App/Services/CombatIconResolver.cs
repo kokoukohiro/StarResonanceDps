@@ -8,16 +8,16 @@ public static class CombatIconResolver
     private static readonly ConcurrentDictionary<string, string> ResolvedPaths =
         new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>バフのアイコン。バフのフォルダだけを探す。</summary>
     public static string? ResolveBuffIcon(string? iconName)
     {
-        return Resolve(iconName, "Buffs", "Skills", "Skills_Imagines");
+        return Resolve(iconName, "Buffs");
     }
 
-    public static string? ResolveSkillIcon(string? iconName, bool isImagine)
+    /// <summary>技のアイコン。スキルのフォルダだけを探す(イマジンの技もここ)。</summary>
+    public static string? ResolveSkillIcon(string? iconName)
     {
-        return isImagine
-            ? Resolve(iconName, "Skills_Imagines", "Skills", "Buffs")
-            : Resolve(iconName, "Skills", "Skills_Imagines", "Buffs");
+        return Resolve(iconName, "Skills");
     }
 
 

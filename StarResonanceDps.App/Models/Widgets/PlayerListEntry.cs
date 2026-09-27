@@ -69,6 +69,37 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private string _classSpecDisplayName = string.Empty;
 
+    /// <summary>有効化しているシーズンタレントの型の根ノードのバフID。0 は不明か無効(<see cref="IsSeasonTalentInactive"/> で分ける)。</summary>
+    [ObservableProperty]
+    private int _seasonTalentBuffId;
+
+    /// <summary>シーズンタレントの型が無効(どの型も有効化していない)と確定しているか。</summary>
+    [ObservableProperty]
+    private bool _isSeasonTalentInactive;
+
+    /// <summary>有効化しているシーズンタレントの型の名前(根ノードの名前)。不明か無効なら空。</summary>
+    [ObservableProperty]
+    private string _seasonTalentName = string.Empty;
+
+    /// <summary>シーズン心相晶の絵のツールチップの文字。書式の <c>{Psych}</c> と同じ(型の名前 / 無効 / 不明)。</summary>
+    [ObservableProperty]
+    private string _seasonTalentDisplayText = string.Empty;
+
+    /// <summary>
+    /// シーズン心相晶の枠の中の絵の形。型が分かれば型の絵、不明ならクラスの不明と同じ絵、無効なら無し(枠だけ)。
+    /// どの型がどの絵かは <see cref="SeasonTalentIcons"/> の表が持つ。
+    /// </summary>
+    [ObservableProperty]
+    private Brush? _seasonTalentIconMask;
+
+    /// <summary>シーズン心相晶の枠と絵の色。アイコンカラーの設定の、型の絵の行の色(不明と無効は不明の行の色)。</summary>
+    [ObservableProperty]
+    private SolidColorBrush _seasonTalentBrush = CreateBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
+
+    /// <summary>シーズン心相晶の絵を出すか。設定「シーズン心相晶の表示」。オフなら絵も、絵のために空けた幅も無くす。</summary>
+    [ObservableProperty]
+    private bool _showsSeasonTalent = true;
+
     [ObservableProperty]
     private string _displayName = string.Empty;
 
@@ -119,6 +150,9 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     public bool IsHealthFull => HealthRatio >= 1d;
 
+    /// <summary>シーズン心相晶の枠の中に絵があるか。無ければ枠だけを出す。</summary>
+    public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
+
     public static PlayerListEntry Create(
         PlayerRosterEntry player,
         MeterWidgetSettingsConfig settings,
@@ -140,7 +174,15 @@ public sealed partial class PlayerListEntry : ObservableObject
             && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
         _otherRoleSkillVisibility = settings.OtherRoleSkillVisibility;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
-        ClassSpecDisplayName = LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}");
+        ClassSpecDisplayName = PlayerInfoFormatFormatter.GetClassSpecText(player.ClassSpec);
+        SeasonTalentBuffId = player.SeasonTalentBuffId;
+        IsSeasonTalentInactive = player.IsSeasonTalentInactive;
+        SeasonTalentName = player.SeasonTalentBuffId > 0
+            ? CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
+            : string.Empty;
+        SeasonTalentDisplayText = PlayerInfoFormatFormatter.GetSeasonTalentText(
+            player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
+        SeasonTalentIconMask = SeasonTalentIcons.GetIconMask(player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
         IsNpc = player.IsNpc;
         IsLive = player.IsLive;
         IsPartyMember = player.IsPartyMember;
@@ -159,12 +201,19 @@ public sealed partial class PlayerListEntry : ObservableObject
         _maxHp = player.MaxHp;
         _currentShield = player.CurrentShield;
         _healthValueDisplayModeIndex = settings.HealthValueDisplayModeIndex;
+        ShowsSeasonTalent = settings.ShowSeasonTalent;
         UpdateHealthText();
 
         var classColor = GetClassColor(settings, ProfessionKey);
         if (ClassBrush.Color != classColor)
         {
             ClassBrush = CreateBrush(classColor);
+        }
+
+        var seasonTalentColor = GetClassColor(settings, SeasonTalentIcons.GetColorKey(player.SeasonTalentBuffId));
+        if (SeasonTalentBrush.Color != seasonTalentColor)
+        {
+            SeasonTalentBrush = CreateBrush(seasonTalentColor);
         }
     }
 
@@ -413,6 +462,11 @@ public sealed partial class PlayerListEntry : ObservableObject
     partial void OnHealthRatioChanged(double value)
     {
         OnPropertyChanged(nameof(IsHealthFull));
+    }
+
+    partial void OnSeasonTalentIconMaskChanged(Brush? value)
+    {
+        OnPropertyChanged(nameof(HasSeasonTalentIcon));
     }
 
     private void UpdateShieldGeometry(long currentHp, long maxHp, long currentShield)

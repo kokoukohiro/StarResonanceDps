@@ -99,7 +99,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
             : snapshot.ShowLevel
                 ? $"{snapshot.Name} G{snapshot.CurrentLevel}"
                 : snapshot.Name;
-        IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName, snapshot.IsImagine);
+        IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName);
         HasChargeCount = snapshot.MaxCharges > 1;
     }
 

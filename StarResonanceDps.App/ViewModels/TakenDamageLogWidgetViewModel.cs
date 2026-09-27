@@ -600,7 +600,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         return new TakenDamageLogClassIconSegment(
             mask,
             brush,
-            LocalizationManager.Instance.GetString($"ClassSpec_{target.ClassSpec}"),
+            PlayerInfoFormatFormatter.GetClassSpecText(target.ClassSpec),
             _widget);
     }
 

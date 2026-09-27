@@ -254,8 +254,18 @@
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
-                        Visibility="{Binding ShowsSelfDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <!-- プレイヤーリストは下に「シーズン心相晶の表示」が続くので線を引き、メーター2種は最後の行なので引かない。 -->
+                <Border Visibility="{Binding ShowsSelfDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldLast}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsSeasonTalentSettings}" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -268,12 +278,51 @@
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding SelfDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SelfDisplay_Highlight]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SelfDisplay_Normal]}" />
-                        </ComboBox>
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding SelfHighlightEnabled, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding SelfHighlightStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- プレイヤーリストだけ。最後の行なので線を引かない。 -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsSeasonTalentSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SeasonTalent]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding ShowSeasonTalent, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding ShowSeasonTalentStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </StackPanel>

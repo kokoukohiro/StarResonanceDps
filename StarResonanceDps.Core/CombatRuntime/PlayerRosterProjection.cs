@@ -422,7 +422,9 @@ internal static class PlayerRosterProjection
             party.GetMembership(characterId) == PartyMembershipState.Member,
             party.GetPartyNumber(characterId),
             source.IsLive,
-            CreateAttributeEntries(isSelf, nearbyEntity));
+            CreateAttributeEntries(isSelf, nearbyEntity),
+            source.SeasonTalentBuffId,
+            source.IsSeasonTalentInactive);
         return true;
     }
 
@@ -588,6 +590,7 @@ internal static class PlayerRosterProjection
         {
             CaptureMeterPlayerSpec(entity);
             entity.SetSubProfessionUnknown();
+            entity.SetSeasonTalentUnknown();
             return;
         }
 
@@ -625,6 +628,20 @@ internal static class PlayerRosterProjection
         else
         {
             cache.Remove(characterId);
+        }
+
+        // シーズンタレントの型も同じ規則で控える。
+        if (entity.SeasonTalentBuffId > 0)
+        {
+            cache.SetSeasonTalent(characterId, entity.SeasonTalentBuffId);
+        }
+        else if (entity.IsSeasonTalentInactive)
+        {
+            cache.SetSeasonTalentInactive(characterId);
+        }
+        else
+        {
+            cache.RemoveSeasonTalent(characterId);
         }
     }
 

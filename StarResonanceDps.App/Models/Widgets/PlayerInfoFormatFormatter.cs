@@ -9,6 +9,9 @@ public static partial class PlayerInfoFormatFormatter
 {
     private const string HiddenPlayerName = "*****";
 
+    /// <summary>設定画面の見本に出すシーズンタレントの型(根ノードのバフ 3002810、4言語とも名前が短い型)。</summary>
+    private const int PreviewSeasonTalentBuffId = 3002810;
+
     public static string Format(
         MeterPlayerSnapshot player,
         string? formatString,
@@ -26,7 +29,9 @@ public static partial class PlayerInfoFormatFormatter
                 player.SeasonStrength,
                 player.SeasonLevel,
                 player.IsSelf,
-                player.IsNpc),
+                player.IsNpc,
+                player.SeasonTalentBuffId,
+                player.IsSeasonTalentInactive),
             formatString,
             nameDisplayMode);
     }
@@ -46,7 +51,9 @@ public static partial class PlayerInfoFormatFormatter
                 player.SeasonStrength,
                 player.SeasonLevel,
                 player.IsSelf,
-                player.IsNpc),
+                player.IsNpc,
+                player.SeasonTalentBuffId,
+                player.IsSeasonTalentInactive),
             formatString,
             nameDisplayMode);
     }
@@ -63,6 +70,8 @@ public static partial class PlayerInfoFormatFormatter
                 8,
                 50,
                 true,
+                false,
+                PreviewSeasonTalentBuffId,
                 false),
             formatString,
             PlayerNameDisplayMode.Show);
@@ -81,7 +90,8 @@ public static partial class PlayerInfoFormatFormatter
         var result = formatString;
 
         result = GetNameRegex().Replace(result, GetName(player, nameDisplayMode));
-        result = GetSpecRegex().Replace(result, LocalizationManager.Instance.GetString($"ClassSpec_{player.ClassSpec}"));
+        result = GetSpecRegex().Replace(result, GetClassSpecText(player.ClassSpec));
+        result = GetPsychRegex().Replace(result, GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive));
         result = GetPowerLevelRegex().Replace(result, player.AbilityScore.ToString());
         result = GetSeasonStrengthRegex().Replace(result, player.SeasonStrength.ToString());
         result = GetSeasonLevelRegex().Replace(result, player.SeasonLevel.ToString());
@@ -158,6 +168,34 @@ public static partial class PlayerInfoFormatFormatter
             nameDisplayMode);
     }
 
+    /// <summary>
+    /// シーズンタレントの型の表示値。型が分かれば型の名前、無効なら「無効」、どちらでもなければ「不明」。
+    /// 特化の <c>{Spec}</c> と同じく、不明も空にせず文字で出す。書式の <c>{Psych}</c> とプレイヤーリストのツールチップが使う。
+    /// </summary>
+    public static string GetSeasonTalentText(int seasonTalentBuffId, bool isSeasonTalentInactive)
+    {
+        if (seasonTalentBuffId > 0)
+        {
+            return CombatDataCatalog.GetSeasonTalentName(seasonTalentBuffId);
+        }
+
+        return LocalizationManager.Instance.GetString(
+            isSeasonTalentInactive ? "SeasonTalent_Inactive" : "SeasonTalent_Unknown");
+    }
+
+    /// <summary>
+    /// 特化の表示値。特化(クラスR2)なら名前の表 <c>ClassSpecNames.json</c> の名前、
+    /// それ以外(クラスR1・変身・不明)はリソース <c>ClassSpec_&lt;特化&gt;</c> の文字。
+    /// 書式の <c>{Spec}</c>、プレイヤーリスト、被ダメログ、プレイヤー情報が使う。
+    /// </summary>
+    public static string GetClassSpecText(PlayerClassSpec classSpec)
+    {
+        var subProfessionId = PlayerClassSpecResolver.ToSubProfessionId(classSpec);
+        return subProfessionId > 0
+            ? CombatDataCatalog.GetClassSpecName(subProfessionId)
+            : LocalizationManager.Instance.GetString($"ClassSpec_{classSpec}");
+    }
+
     private static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)
     {
         return nameDisplayMode switch
@@ -173,6 +211,9 @@ public static partial class PlayerInfoFormatFormatter
 
     [GeneratedRegex(@"\{Spec\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetSpecRegex();
+
+    [GeneratedRegex(@"\{Psych\}", RegexOptions.IgnoreCase)]
+    private static partial Regex GetPsychRegex();
 
     [GeneratedRegex(@"\{PowerLevel\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetPowerLevelRegex();
@@ -210,5 +251,7 @@ public static partial class PlayerInfoFormatFormatter
         int SeasonStrength,
         int SeasonLevel,
         bool IsSelf,
-        bool IsNpc);
+        bool IsNpc,
+        int SeasonTalentBuffId,
+        bool IsSeasonTalentInactive);
 }

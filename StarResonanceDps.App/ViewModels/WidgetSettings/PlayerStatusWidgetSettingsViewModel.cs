@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
@@ -18,6 +17,7 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
 {
     private readonly ObservableCollection<PlayerStatusRowItemViewModel> _rows = [];
     private readonly ObservableCollection<PlayerStatusTextColorItemViewModel> _textColors = [];
+    private readonly Dictionary<string, PlayerStatusTextColorItemViewModel> _textColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private PlayerStatusWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
 
@@ -36,6 +36,20 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         }
 
         Rows = new ReadOnlyObservableCollection<PlayerStatusRowItemViewModel>(_rows);
+
+        for (var index = 0; index < attrIds.Count; index++)
+        {
+            var attrId = attrIds[index];
+            var colors = new ColorPaletteViewModel(
+                WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors(attrId),
+                WidgetConfigDefaults.MaxPaletteColorCount);
+            colors.PaletteChanged += TextColors_PaletteChanged;
+
+            var item = new PlayerStatusTextColorItemViewModel(attrId, colors, index == attrIds.Count - 1);
+            _textColorItemsByKey.Add(item.Key, item);
+            _textColors.Add(item);
+        }
+
         TextColors = new ReadOnlyObservableCollection<PlayerStatusTextColorItemViewModel>(_textColors);
 
         Load(WidgetConfigDefaults.CloneNormalizedPlayerStatus(config));
@@ -62,12 +76,6 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
-    /// <summary>行を足せるか。上限に達していたら押せない。</summary>
-    public bool CanAddTextColorRow => _textColors.Count < WidgetConfigDefaults.MaxPlayerStatusTextColorRows;
-
-    /// <summary>最後の行を消せるか。下限に達していたら押せない。</summary>
-    public bool CanRemoveTextColorRow => _textColors.Count > WidgetConfigDefaults.MinPlayerStatusTextColorRows;
-
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
@@ -84,7 +92,8 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         {
             HideInactiveStatusEffects = HideInactiveStatusEffects,
             RowVisibility = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase),
-            TextColors = []
+            TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
 
         foreach (var row in _rows)
@@ -94,11 +103,8 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
 
         foreach (var item in _textColors)
         {
-            config.TextColors.Add(new PlayerStatusTextColorConfig
-            {
-                SelectedIndex = item.Colors.SelectedIndex,
-                Palette = [.. item.Colors.GetHexColors()]
-            });
+            config.TextColorIndexes[item.Key] = item.Colors.SelectedIndex;
+            config.TextColorPalettes[item.Key] = [.. item.Colors.GetHexColors()];
         }
 
         return config;
@@ -125,44 +131,20 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     /// <summary>色選択ウィンドウの初期値。宛先は行番号。</summary>
     public Color GetSelectedTextColor(string key)
     {
-        return FindTextColorItem(key)?.Colors.SelectedColor ?? Colors.White;
+        return _textColorItemsByKey.TryGetValue(key, out var item)
+            ? item.Colors.SelectedColor
+            : Colors.White;
     }
 
     public void ApplyTextColor(string key, Color color)
     {
-        FindTextColorItem(key)?.Colors.AddOrSelect(color);
-    }
-
-    /// <summary>次の行を足す。色は純白1色から始める。</summary>
-    [RelayCommand]
-    private void AddTextColorRow()
-    {
-        if (!CanAddTextColorRow)
+        if (_textColorItemsByKey.TryGetValue(key, out var item))
         {
-            return;
+            item.Colors.AddOrSelect(color);
         }
-
-        AppendTextColorRow(WidgetConfigDefaults.CreatePlayerStatusTextColorRow());
-        RaiseTextColorRowCountChanged();
-        NotifyChanged();
     }
 
-    /// <summary>最後の行を消す。</summary>
-    [RelayCommand]
-    private void RemoveTextColorRow()
-    {
-        if (!CanRemoveTextColorRow)
-        {
-            return;
-        }
 
-        var item = _textColors[^1];
-        item.Colors.PaletteChanged -= TextColors_PaletteChanged;
-        _textColors.RemoveAt(_textColors.Count - 1);
-
-        RaiseTextColorRowCountChanged();
-        NotifyChanged();
-    }
 
     partial void OnHideInactiveStatusEffectsChanged(bool value)
     {
@@ -187,54 +169,29 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
                         : PlayerStatusEntry.IsRowVisibleByDefault(row.AttrId));
             }
 
-            // 行数が変わるので、作り直して入れ直す。
             foreach (var item in _textColors)
             {
-                item.Colors.PaletteChanged -= TextColors_PaletteChanged;
-            }
+                var palette = config.TextColorPalettes is not null
+                    && config.TextColorPalettes.TryGetValue(item.Key, out var saved)
+                    && saved is { Count: > 0 }
+                        ? saved
+                        : WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors(item.AttrId);
+                var index = config.TextColorIndexes is not null
+                    && config.TextColorIndexes.TryGetValue(item.Key, out var savedIndex)
+                        ? savedIndex
+                        : WidgetConfigDefaults.DefaultPlayerStatusTextColorIndex;
 
-            _textColors.Clear();
-            foreach (var row in config.TextColors ?? WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors())
-            {
-                AppendTextColorRow(row);
+                item.Colors.Load(palette, index);
             }
         }
         finally
         {
             _isLoading = false;
         }
-
-        RaiseTextColorRowCountChanged();
     }
 
-    private void AppendTextColorRow(PlayerStatusTextColorConfig row)
-    {
-        var colors = new ColorPaletteViewModel(row.Palette, WidgetConfigDefaults.MaxPaletteColorCount);
-        colors.Load(row.Palette, row.SelectedIndex);
-        colors.PaletteChanged += TextColors_PaletteChanged;
-        _textColors.Add(new PlayerStatusTextColorItemViewModel(_textColors.Count + 1, colors));
-    }
 
-    private PlayerStatusTextColorItemViewModel? FindTextColorItem(string key)
-    {
-        foreach (var item in _textColors)
-        {
-            if (string.Equals(item.Key, key, StringComparison.Ordinal))
-            {
-                return item;
-            }
-        }
 
-        return null;
-    }
-
-    private void RaiseTextColorRowCountChanged()
-    {
-        OnPropertyChanged(nameof(CanAddTextColorRow));
-        OnPropertyChanged(nameof(CanRemoveTextColorRow));
-        AddTextColorRowCommand.NotifyCanExecuteChanged();
-        RemoveTextColorRowCommand.NotifyCanExecuteChanged();
-    }
 
     private void TextColors_PaletteChanged(object? sender, EventArgs e)
     {
@@ -303,17 +260,19 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
             }
         }
 
-        var leftColors = left.TextColors;
-        var rightColors = right.TextColors;
-        if (leftColors is null || rightColors is null || leftColors.Count != rightColors.Count)
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
         {
-            return false;
-        }
-
-        for (var index = 0; index < leftColors.Count; index++)
-        {
-            if (leftColors[index].SelectedIndex != rightColors[index].SelectedIndex
-                || !leftColors[index].Palette.SequenceEqual(rightColors[index].Palette, StringComparer.OrdinalIgnoreCase))
+            var key = attrId.ToString(CultureInfo.InvariantCulture);
+            if (left.TextColorIndexes is null
+                || right.TextColorIndexes is null
+                || left.TextColorPalettes is null
+                || right.TextColorPalettes is null
+                || !left.TextColorIndexes.TryGetValue(key, out var leftIndex)
+                || !right.TextColorIndexes.TryGetValue(key, out var rightIndex)
+                || leftIndex != rightIndex
+                || !left.TextColorPalettes.TryGetValue(key, out var leftPalette)
+                || !right.TextColorPalettes.TryGetValue(key, out var rightPalette)
+                || !leftPalette.SequenceEqual(rightPalette, StringComparer.OrdinalIgnoreCase))
             {
                 return false;
             }

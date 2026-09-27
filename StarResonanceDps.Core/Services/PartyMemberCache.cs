@@ -14,7 +14,7 @@ namespace StarResonanceDps.Core.Services;
 /// 追い越して更新を握り潰す事故になる(旧 EntityCache がまさにそれだった)。
 /// </para>
 ///
-/// <para>保持するのは次の2種類だけ。どちらもAOI同期でしか届かず、相手がAOI外に出ると取れなくなる:</para>
+/// <para>保持するのは次の3種類だけ。どれもAOI同期でしか届かず、相手がAOI外に出ると取れなくなる:</para>
 /// <list type="bullet">
 ///   <item>
 ///     <b>習得スキル一覧(AttrSkillLevelIdList)</b> — イマジン/ロールスキルの表示元。
@@ -22,6 +22,10 @@ namespace StarResonanceDps.Core.Services;
 ///   <item>
 ///     <b>職業特化</b> — 特化マーカーバフの観測結果。「特化が確定した」と
 ///     「アビリティ未装着が確定した」の両方を持つ。
+///   </item>
+///   <item>
+///     <b>シーズンタレントの型</b> — 根ノードのバフの観測結果。「型が確定した」と「無効が確定した」の両方を持つ。
+///     特化と同じ扱い。
 ///   </item>
 /// </list>
 ///
@@ -155,6 +159,80 @@ public sealed class PartyMemberCache
         }
     }
 
+    /// <summary>
+    /// 根ノードのバフで確定した、有効化しているシーズンタレントの型を記録する(鍵は根ノードのバフID)。
+    /// </summary>
+    public void SetSeasonTalent(long characterId, int rootBuffId)
+    {
+        if (rootBuffId <= 0 || !IsCacheableMember(characterId))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            var entry = GetOrCreateNoLock(characterId);
+            entry.SeasonTalentBuffId = rootBuffId;
+            entry.SeasonTalentInactive = false;
+            entry.SeasonTalentObservedAt = DateTime.Now;
+        }
+    }
+
+    /// <summary>
+    /// シーズンタレントの型が無効(どの型も有効化していない)と確定したことを記録する。
+    /// 全バフスナップショットに根ノードのバフが無かった場合と、その除去を見届けた場合だけ呼ぶ。
+    /// </summary>
+    public void SetSeasonTalentInactive(long characterId)
+    {
+        if (!IsCacheableMember(characterId))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            var entry = GetOrCreateNoLock(characterId);
+            entry.SeasonTalentBuffId = 0;
+            entry.SeasonTalentInactive = true;
+            entry.SeasonTalentObservedAt = DateTime.Now;
+        }
+    }
+
+    public bool TryGetSeasonTalent(long characterId, out int rootBuffId)
+    {
+        rootBuffId = 0;
+        if (!IsCacheableMember(characterId))
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            if (!_entriesByCharacterId.TryGetValue(characterId, out var entry)
+                || entry.SeasonTalentBuffId <= 0)
+            {
+                return false;
+            }
+
+            rootBuffId = entry.SeasonTalentBuffId;
+            return true;
+        }
+    }
+
+    public bool IsSeasonTalentInactive(long characterId)
+    {
+        if (!IsCacheableMember(characterId))
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            return _entriesByCharacterId.TryGetValue(characterId, out var entry)
+                && entry.SeasonTalentInactive;
+        }
+    }
+
     public void SetSkillLevels(long characterId, IReadOnlyList<SkillLevelInfo> skillLevels)
     {
         if (skillLevels is null || skillLevels.Count == 0 || !IsCacheableMember(characterId))
@@ -264,6 +342,12 @@ public sealed class PartyMemberCache
         public bool SpecAbilityUnequipped { get; set; }
 
         public DateTime SubProfessionObservedAt { get; set; }
+
+        public int SeasonTalentBuffId { get; set; }
+
+        public bool SeasonTalentInactive { get; set; }
+
+        public DateTime SeasonTalentObservedAt { get; set; }
 
         public IReadOnlyList<SkillLevelInfo> SkillLevels { get; set; } = Array.Empty<SkillLevelInfo>();
 

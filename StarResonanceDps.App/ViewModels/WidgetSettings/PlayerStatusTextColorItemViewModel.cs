@@ -1,47 +1,43 @@
 using System.Globalization;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Widgets;
 
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// ステータス詳細のテキストカラーの1行。作りは被ダメログのテキストカラー
-/// (<see cref="TakenDamageLogTextColorItemViewModel"/>)と同じで、<b>アイコンは持たない</b>。
-///
-/// <para>
-/// 行数が可変なので、鍵は固定の名前ではなく行番号。<see cref="RowNumber"/> は 1 始まりで、
-/// 行を足したり消したりすると <c>PlayerStatusWidgetSettingsViewModel</c> が振り直す。
-/// </para>
+/// ステータス詳細のテキストカラーの1行。作りはプレイヤーリストのクラスカラー
+/// (<see cref="MeterClassColorItemViewModel"/>)と同じで、左のアイコンを<b>選んだ色で塗る</b>。
+/// 項目と並びは「ステータス」の一覧(<c>PlayerStatusEntry.SettingRowAttrIds</c>)と同じ。
 /// </summary>
-public sealed partial class PlayerStatusTextColorItemViewModel : ObservableObject
+public sealed class PlayerStatusTextColorItemViewModel : ObservableObject
 {
-    public PlayerStatusTextColorItemViewModel(int rowNumber, ColorPaletteViewModel colors)
+    public PlayerStatusTextColorItemViewModel(int attrId, ColorPaletteViewModel colors, bool isLast)
     {
-        RowNumber = rowNumber;
+        AttrId = attrId;
         Colors = colors;
+        IsLast = isLast;
+        Key = attrId.ToString(CultureInfo.InvariantCulture);
+        IconMask = PlayerStatusEntry.GetRowIconMask(attrId);
     }
+
+    public int AttrId { get; }
 
     public ColorPaletteViewModel Colors { get; }
 
-    /// <summary>1 始まりの行番号。色の選択肢のグループ名と、色選択ウィンドウの宛先を兼ねる。</summary>
-    [ObservableProperty]
-    private int _rowNumber;
+    /// <summary>最終行。区切り線を消して二重にならないようにする。</summary>
+    public bool IsLast { get; }
 
-    public string Key => RowNumber.ToString(CultureInfo.InvariantCulture);
+    public string Key { get; }
 
-    public string DisplayName => string.Format(
-        CultureInfo.CurrentCulture,
-        LocalizationManager.Instance.GetString("Settings_PlayerStatus_TextColorRow_Value"),
-        RowNumber);
+    /// <summary>行のアイコンの形。選んだ色をこの形で抜く(クラスアイコンと同じ染め方)。</summary>
+    public Brush? IconMask { get; }
+
+    public string DisplayName => LocalizationManager.Instance.GetString(PlayerStatusEntry.GetRowNameKey(AttrId));
 
     public void RefreshDisplayName()
     {
-        OnPropertyChanged(nameof(DisplayName));
-    }
-
-    partial void OnRowNumberChanged(int value)
-    {
-        OnPropertyChanged(nameof(Key));
         OnPropertyChanged(nameof(DisplayName));
     }
 }

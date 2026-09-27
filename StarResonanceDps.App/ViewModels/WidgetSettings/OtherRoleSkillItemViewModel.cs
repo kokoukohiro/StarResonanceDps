@@ -61,8 +61,8 @@ public sealed partial class OtherRoleSkillItemViewModel : ObservableObject
         Key = SkillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var iconName = CombatDataCatalog.GetSkillIconName(SkillId, string.Empty);
         DisplayName = CombatDataCatalog.GetSkillName(SkillId);
-        IconPath = CombatIconResolver.ResolveSkillIcon(iconName, isImagine: false);
         UsesImagineAsset = CombatDataCatalog.HasLevelDependentCooldown(SkillId);
+        IconPath = CombatIconResolver.ResolveSkillIcon(iconName);
         OnPropertyChanged(nameof(StateText));
     }
 

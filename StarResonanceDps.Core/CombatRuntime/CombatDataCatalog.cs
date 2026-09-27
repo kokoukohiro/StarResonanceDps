@@ -77,6 +77,22 @@ public static class CombatDataCatalog
     /// <summary><see cref="_rogueEntryNames"/> の鍵(オプションのバフID)全部。</summary>
     private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
+    /// <summary>シーズンタレントの型の根ノードのバフID → 根ノードの名前。<c>Data/Localization/SeasonTalentNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonTalentNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// <see cref="_seasonTalentNames"/> の鍵(根ノードのバフID)全部。型の判定に使う。
+    /// 名前の辞書は空の値を落とすので、判定は名前ではなくこの鍵で行う。
+    /// </summary>
+    private static FrozenSet<int> _seasonTalentRootBuffIds = FrozenSet<int>.Empty;
+
+    /// <summary>特化の番号(<c>SubProfessionId</c>)→ 特化の名前。<c>Data/Localization/ClassSpecNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _classSpecNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -185,6 +201,9 @@ public static class CombatDataCatalog
             _dbmNames = LoadLocalizedText("DbmNames", out _);
             _rogueEntryNames = LoadLocalizedText("RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
+            _seasonTalentNames = LoadLocalizedText("SeasonTalentNames", out var seasonTalentRootBuffIds);
+            _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
+            _classSpecNames = LoadLocalizedText("ClassSpecNames", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
@@ -316,6 +335,27 @@ public static class CombatDataCatalog
 
     /// <summary>オプションの表(<c>RogueEntryTable.BuffId</c>)にあるバフか。</summary>
     public static bool IsRogueEntryBuff(int buffId) => _rogueEntryBuffIds.Contains(buffId);
+
+    /// <summary>シーズンタレントの型の根ノードのバフか(<c>SeasonTalentNames.json</c> の鍵にあるか)。</summary>
+    public static bool IsSeasonTalentRootBuff(int buffId) => _seasonTalentRootBuffIds.Contains(buffId);
+
+    /// <summary>
+    /// シーズンタレントの型の根ノードの名前。鍵は根ノードのバフID。表示中の言語で引き、無ければ空。
+    /// 内部IDの注記はバフと同じ設定で付く。
+    /// </summary>
+    public static string GetSeasonTalentName(int rootBuffId)
+    {
+        return AppendInternalId(
+            ResolveText(_seasonTalentNames, Volatile.Read(ref _cultureName), rootBuffId),
+            InternalIdDisplayMode.BuffOnly,
+            rootBuffId);
+    }
+
+    /// <summary>特化の名前。鍵は特化の番号(<c>SubProfessionId</c>)。表示中の言語で引き、無ければ空。</summary>
+    public static string GetClassSpecName(int subProfessionId)
+    {
+        return ResolveText(_classSpecNames, Volatile.Read(ref _cultureName), subProfessionId);
+    }
 
     /// <summary>
     /// 発生源キー → 行代表キー。<c>RecountRows.json</c> の行構成に手修正を重ねたもの。

@@ -368,8 +368,8 @@ public static class PlayerStatusEntry
     /// 一覧に無い番号(割合の行など)は代表の位置で判定されるので見ない。
     /// </param>
     /// <param name="textBrushes">
-    /// 行の色。並びが設定の行順で、<b>表示の行数がこれより多ければ先頭へ戻って繰り返す</b>。
-    /// 空なら色を割り当てない(表示側の既定色になる)。
+    /// 行の色。鍵は設定の一覧の番号(<see cref="SettingRowAttrIds"/>)。
+    /// 鍵の無い行は色を割り当てない(表示側の既定色になる)。
     /// </param>
     /// <param name="rowOrder">
     /// 並べ替えの単位の並び(<see cref="OrderUnitAttrIds"/> の番号)。
@@ -379,7 +379,7 @@ public static class PlayerStatusEntry
         PlayerRosterEntry player,
         bool hideInactiveStatusEffects,
         IReadOnlyDictionary<string, bool> rowVisibility,
-        IReadOnlyList<Brush> textBrushes,
+        IReadOnlyDictionary<int, Brush> textBrushes,
         IReadOnlyList<int> rowOrder)
     {
         var attributes = player.Attributes;
@@ -410,6 +410,7 @@ public static class PlayerStatusEntry
 
         var localization = LocalizationManager.Instance;
         var rows = new List<PlayerStatusRow>(Rows.Length);
+        var rowKeys = new List<int>(Rows.Length);
         foreach (var spec in OrderRows(rowOrder))
         {
             if (IsHidden(spec.AttrId, PrimaryStatAttrIds, shownPrimaryStat)
@@ -438,6 +439,7 @@ public static class PlayerStatusEntry
                 if (spec.AttrId == paired.ValueAttrId)
                 {
                     rows.Add(CreatePairedRow(paired, arrived, localization));
+                    rowKeys.Add(paired.ValueAttrId);
                 }
 
                 continue;
@@ -448,21 +450,22 @@ public static class PlayerStatusEntry
                 // 組は先頭の位置でまとめて出す。残りの番号はここでは何もしない。
                 if (spec.AttrId == group.AttrIds[0])
                 {
-                    AppendMergedGroup(rows, group, spec, arrived, localization);
+                    AppendMergedGroup(rows, rowKeys, group, spec, arrived, localization);
                 }
 
                 continue;
             }
 
             rows.Add(CreateRow(spec, spec.AttrId, arrived, localization));
+            rowKeys.Add(spec.AttrId);
         }
 
-        // 色は行の並びに沿って配り、足りなくなったら先頭へ戻る。
-        if (textBrushes.Count > 0)
+        // 色は行ごとに決まっている。鍵の無い行はそのまま(表示側の既定色)。
+        for (var index = 0; index < rows.Count; index++)
         {
-            for (var index = 0; index < rows.Count; index++)
+            if (textBrushes.TryGetValue(rowKeys[index], out var brush))
             {
-                rows[index] = rows[index] with { TextBrush = textBrushes[index % textBrushes.Count] };
+                rows[index] = rows[index] with { TextBrush = brush };
             }
         }
 
@@ -667,6 +670,7 @@ public static class PlayerStatusEntry
     /// </summary>
     private static void AppendMergedGroup(
         List<PlayerStatusRow> rows,
+        List<int> rowKeys,
         MergedGroupSpec group,
         StatusRowSpec spec,
         Dictionary<int, string> arrived,
@@ -690,12 +694,16 @@ public static class PlayerStatusEntry
                 ResolveIconMask(spec.IconKey),
                 FormatValue(spec, first),
                 GetOrderUnitAttrId(group.AttrIds[0])));
+            rowKeys.Add(group.AttrIds[0]);
             return;
         }
 
         foreach (var attrId in group.AttrIds)
         {
             rows.Add(CreateRow(spec, attrId, arrived, localization));
+
+            // 畳めずに開いた行も、色は組の代表のものを使う(一覧には代表しか無い)。
+            rowKeys.Add(group.AttrIds[0]);
         }
     }
 

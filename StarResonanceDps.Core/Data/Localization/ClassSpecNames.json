@@ -1,0 +1,110 @@
+{
+  "10001": {
+    "zh-CN": "居合斩",
+    "en-US": "Iaido Slash",
+    "ja-JP": "雷刃",
+    "ko-KR": "발도"
+  },
+  "10002": {
+    "zh-CN": "月刃召唤",
+    "en-US": "Moonstrike",
+    "ja-JP": "月影",
+    "ko-KR": "월광의 낫"
+  },
+  "20001": {
+    "zh-CN": "冰矛",
+    "en-US": "Icicle",
+    "ja-JP": "氷牙",
+    "ko-KR": "스피어"
+  },
+  "20002": {
+    "zh-CN": "射线",
+    "en-US": "Frostbeam",
+    "ja-JP": "霜天",
+    "ko-KR": "레이"
+  },
+  "30001": {
+    "zh-CN": "无相",
+    "en-US": "Formless",
+    "ja-JP": "双炎",
+    "ko-KR": "무상"
+  },
+  "30002": {
+    "zh-CN": "赤红",
+    "en-US": "Crimson",
+    "ja-JP": "炎舞",
+    "ko-KR": "적홍"
+  },
+  "40001": {
+    "zh-CN": "重装",
+    "en-US": "Vanguard",
+    "ja-JP": "烈風",
+    "ko-KR": "질풍"
+  },
+  "40002": {
+    "zh-CN": "空战",
+    "en-US": "Skyward",
+    "ja-JP": "乱風",
+    "ko-KR": "난무"
+  },
+  "50001": {
+    "zh-CN": "惩击",
+    "en-US": "Smite",
+    "ja-JP": "威咲",
+    "ko-KR": "숲의 심판"
+  },
+  "50002": {
+    "zh-CN": "愈合",
+    "en-US": "Lifebind",
+    "ja-JP": "森癒",
+    "ko-KR": "숲의 치유"
+  },
+  "90001": {
+    "zh-CN": "岩盾",
+    "en-US": "Earthfort",
+    "ja-JP": "剛身",
+    "ko-KR": "암석 방패"
+  },
+  "90002": {
+    "zh-CN": "格挡",
+    "en-US": "Block",
+    "ja-JP": "剛守",
+    "ko-KR": "가드"
+  },
+  "110001": {
+    "zh-CN": "驭兽",
+    "en-US": "Wildpack",
+    "ja-JP": "狼弓",
+    "ko-KR": "야수 조련사"
+  },
+  "110002": {
+    "zh-CN": "驯鹰",
+    "en-US": "Falconry",
+    "ja-JP": "鷹弓",
+    "ko-KR": "맹금 조련사"
+  },
+  "120001": {
+    "zh-CN": "防护回复",
+    "en-US": "Recovery",
+    "ja-JP": "光砕",
+    "ko-KR": "신성한 방패"
+  },
+  "120002": {
+    "zh-CN": "光盾回复",
+    "en-US": "Shield",
+    "ja-JP": "光盾",
+    "ko-KR": "광휘의 축복"
+  },
+  "130001": {
+    "zh-CN": "狂音",
+    "en-US": "Dissonance",
+    "ja-JP": "狂音",
+    "ko-KR": "음파"
+  },
+  "130002": {
+    "zh-CN": "协奏",
+    "en-US": "Concerto",
+    "ja-JP": "響奏",
+    "ko-KR": "협주"
+  }
+}

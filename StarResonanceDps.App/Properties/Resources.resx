@@ -219,12 +219,6 @@
   <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
     <value>Text Colors</value>
   </data>
-  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
-    <value>Row {0}</value>
-  </data>
-  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
-    <value>New Row</value>
-  </data>
   <data name="Common_Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
@@ -481,7 +475,7 @@
     <value>Entity List</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
-    <value>Class Colors</value>
+    <value>Icon Colors</value>
   </data>
   <data name="Settings_Section_IconColors_Title" xml:space="preserve">
     <value>Icon Colors</value>
@@ -564,59 +558,11 @@
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
-  <data name="ClassSpec_ShieldKnightRecovery" xml:space="preserve">
-    <value>Recovery</value>
+  <data name="SeasonTalent_Inactive" xml:space="preserve">
+    <value>Not Enabled</value>
   </data>
-  <data name="ClassSpec_ShieldKnightShield" xml:space="preserve">
-    <value>Shield</value>
-  </data>
-  <data name="ClassSpec_HeavyGuardianEarthfort" xml:space="preserve">
-    <value>Earthfort</value>
-  </data>
-  <data name="ClassSpec_HeavyGuardianBlock" xml:space="preserve">
-    <value>Block</value>
-  </data>
-  <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
-    <value>Iaido</value>
-  </data>
-  <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
-    <value>Moonstrike</value>
-  </data>
-  <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
-    <value>Vanguard</value>
-  </data>
-  <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
-    <value>Skyward</value>
-  </data>
-  <data name="ClassSpec_FrostMageIcicle" xml:space="preserve">
-    <value>Icicle</value>
-  </data>
-  <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
-    <value>Frostbeam</value>
-  </data>
-  <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
-    <value>Wildpack</value>
-  </data>
-  <data name="ClassSpec_MarksmanFalconry" xml:space="preserve">
-    <value>Falconry</value>
-  </data>
-  <data name="ClassSpec_VerdantOracleSmite" xml:space="preserve">
-    <value>Smite</value>
-  </data>
-  <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
-    <value>Lifebind</value>
-  </data>
-  <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
-    <value>Dissonance</value>
-  </data>
-  <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
-    <value>Concerto</value>
-  </data>
-  <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
-    <value>Formless</value>
-  </data>
-  <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
-    <value>Crimson</value>
+  <data name="SeasonTalent_Unknown" xml:space="preserve">
+    <value>Unknown</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>Status</value>
@@ -643,13 +589,13 @@
     <value>ProfessionSpec</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>Class Colors Opacity</value>
+    <value>Icon Colors Opacity</value>
   </data>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>No Revive ({0})</value>
   </data>
   <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>Class Color Filter</value>
+    <value>Icon Color Filter</value>
   </data>
   <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
     <value>Filter Color</value>
@@ -658,13 +604,13 @@
     <value>Filter Strength</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>Element Colors</value>
+    <value>Icon Colors</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>Element Colors Opacity</value>
+    <value>Icon Colors Opacity</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>Element Colors Filter</value>
+    <value>Icon Color Filter</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
@@ -731,6 +677,9 @@
   </data>
   <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
     <value>Class Spec</value>
+  </data>
+  <data name="Settings_PlayerInfo_Field_SeasonTalent" xml:space="preserve">
+    <value>Season Psychoscope</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
     <value>Power</value>
@@ -930,6 +879,9 @@
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP value</value>
   </data>
+  <data name="Settings_Display_SeasonTalent" xml:space="preserve">
+    <value>Show Season Psychoscope</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>Add shield amount</value>
   </data>
@@ -940,13 +892,7 @@
     <value>Filter settings</value>
   </data>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
-    <value>Self display</value>
-  </data>
-  <data name="SelfDisplay_Highlight" xml:space="preserve">
-    <value>Highlight</value>
-  </data>
-  <data name="SelfDisplay_Normal" xml:space="preserve">
-    <value>Normal</value>
+    <value>Self highlight</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>Show all</value>
@@ -1104,7 +1050,6 @@
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>Note: e.g. entering a boss room in a dungeon.</value>
   </data>
-  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>Move Speed</value>
   </data>
@@ -1276,10 +1221,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>Block</value>
   </data>
-    <data name="PlayerStatus_11990" xml:space="preserve">
+  <data name="PlayerStatus_11990" xml:space="preserve">
     <value>Companion's Attack Speed</value>
   </data>
-<data name="PlayerStatus_12510" xml:space="preserve">
+  <data name="PlayerStatus_12510" xml:space="preserve">
     <value>Crit DMG</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">

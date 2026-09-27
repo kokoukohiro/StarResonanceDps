@@ -36,7 +36,10 @@ public sealed record MeterPlayerSnapshot(
     ulong TotalValue,
     double ValuePerSecond,
     double Contribution,
-    double BarRatio);
+    double BarRatio,
+    // 有効化しているシーズンタレントの型の根ノードのバフID(0 = 不明か無効)と、無効が確定しているか。
+    int SeasonTalentBuffId = 0,
+    bool IsSeasonTalentInactive = false);
 
 public sealed record MeterSnapshot(
     MeterSnapshotKind Kind,
@@ -2370,7 +2373,9 @@ public static class MeterSnapshotProvider
             totalValue,
             valuePerSecond,
             0d,
-            0d);
+            0d,
+            source.SeasonTalentBuffId,
+            source.IsSeasonTalentInactive);
     }
 
     private static bool IsSelf(Entity entity)

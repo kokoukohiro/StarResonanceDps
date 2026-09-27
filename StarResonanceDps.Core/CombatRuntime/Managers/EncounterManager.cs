@@ -483,6 +483,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     displayed.ProfessionId,
                     displayed.SubProfessionId,
                     displayed.ClassSpec == Models.PlayerClassSpec.Rank1,
+                    displayed.SeasonTalentBuffId,
+                    displayed.IsSeasonTalentInactive,
                     displayed.CombatPower,
                     displayed.Level,
                     displayed.SeasonLevel,
@@ -1926,11 +1928,57 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (buffEventType == EBuffEventType.BuffEventRemove)
             {
                 ApplySpecMarkerRemoval(entityUuid, buffUuid);
+                ApplySeasonTalentRemoval(entityUuid, buffUuid);
             }
             else if (baseId > 0)
             {
                 ApplySpecFromTalentBuff(baseId, buffUuid, fireUuid, fightSourceType ?? -1, entityUuid, sourceConfigId);
+                ApplySeasonTalentFromRootBuff(baseId, buffUuid, fireUuid);
             }
+        }
+
+        /// <summary>
+        /// シーズンタレントの型の根ノードのバフから、<b>そのバフを張った本人</b>の有効化している型を確定する。
+        /// 根以外のノードや因子のバフからは推さない(シーズンごとに木が違うことがあるため)。
+        /// 帰属先は特化と同じく術者(<c>FireUuid</c>)。根ノードのバフは本人が本人に付ける。
+        /// </summary>
+        public void ApplySeasonTalentFromRootBuff(int baseId, int buffUuid, long fireUuid)
+        {
+            if (!CombatDataCatalog.IsSeasonTalentRootBuff(baseId))
+            {
+                return;
+            }
+
+            if (fireUuid == 0 || (EEntityType)Utils.UuidToEntityType(fireUuid) != EEntityType.EntChar)
+            {
+                return;
+            }
+
+            GetOrCreateEntity(fireUuid).UpdateSeasonTalentFromRootBuff(baseId, buffUuid);
+        }
+
+        /// <summary>
+        /// シーズンタレントの型の根ノードのバフの除去を受けて、型を無効へ戻す。
+        /// 除去イベントは <c>BaseId</c> を運ばないので、付与時に控えた実体UUIDとの一致で判定する。
+        /// 保持者で突き合わせる(根ノードのバフは術者と保持者が同じ人)。
+        /// </summary>
+        private void ApplySeasonTalentRemoval(long entityUuid, int buffUuid)
+        {
+            if (entityUuid == 0 || buffUuid == 0)
+            {
+                return;
+            }
+
+            if (!Entities.TryGetValue(entityUuid, out var entity)
+                || !entity.ClearSeasonTalentFromRootRemoval(buffUuid))
+            {
+                return;
+            }
+
+            var characterId = Utils.UuidToEntityId(entityUuid);
+            Services.PartyMemberCache.Instance.SetSeasonTalentInactive(characterId);
+            Services.MeterPlayerSpecCache.Instance.SetSeasonTalentInactive(characterId);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(entityUuid);
         }
 
         /// <summary>
@@ -2232,6 +2280,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool HasBuffSnapshot { get; set; }
 
         /// <summary>
+        /// 有効化しているシーズンタレントの型の、根ノードのバフID。0 なら未観測か無効。
+        /// 型の判定は根ノードのバフだけで行う(根以外のノードや因子からは推さない)。
+        /// </summary>
+        public int SeasonTalentBuffId { get; set; }
+
+        /// <summary>上の根ノードのバフの実体UUID。除去イベントは BaseId を運ばないため、これで突き合わせる。</summary>
+        public int SeasonTalentBuffUuid { get; set; }
+
+        /// <summary>
+        /// シーズンタレントについて、全バフスナップショットを受信済みか。立て方と落とし方は
+        /// <see cref="HasBuffSnapshot"/> と同じだが、記録では特化の未装着(Rank1)とは別に焼き付くので分けて持つ。
+        /// </summary>
+        public bool HasSeasonTalentSnapshot { get; set; }
+
+        /// <summary>
         /// NPC(助っ人)か。判定はパーティの社交データ(<c>BotAiId</c>)だけが持っていて実体には届かないので、
         /// 作り直しの前に表示している値を焼き付ける(<see cref="Entity.ApplyDisplayedIdentityForRecord"/>)。
         /// 履歴では社交データが無く、これが唯一の根拠になる。
@@ -2268,6 +2331,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int SpecMarkerBuffId { get => _identity.SpecMarkerBuffId; private set => _identity.SpecMarkerBuffId = value; }
         public int SpecMarkerBuffUuid { get => _identity.SpecMarkerBuffUuid; private set => _identity.SpecMarkerBuffUuid = value; }
         public bool HasBuffSnapshot { get => _identity.HasBuffSnapshot; private set => _identity.HasBuffSnapshot = value; }
+
+        public int SeasonTalentBuffId { get => _identity.SeasonTalentBuffId; private set => _identity.SeasonTalentBuffId = value; }
+        public int SeasonTalentBuffUuid { get => _identity.SeasonTalentBuffUuid; private set => _identity.SeasonTalentBuffUuid = value; }
+        public bool HasSeasonTalentSnapshot { get => _identity.HasSeasonTalentSnapshot; private set => _identity.HasSeasonTalentSnapshot = value; }
+
+        /// <summary>
+        /// シーズンタレントの型が無効(どの型も有効化していない)と確定できる状態か。
+        /// 全バフスナップショットを受け取った上で、そこに根ノードのバフが無かったときだけ true。
+        /// 特化の <see cref="IsSpecAbilityUnequipped"/> と同じ作り。
+        /// </summary>
+        public bool IsSeasonTalentInactive =>
+            ProfessionId > 0 && HasSeasonTalentSnapshot && SeasonTalentBuffId == 0;
 
         /// <summary>
         /// NPC(助っ人)か。判定の出所はパーティの社交データだけで、実体には届かない。
@@ -2572,6 +2647,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 特化と「未装着」は同じ1行から揃えて渡すこと。<see cref="IsSpecAbilityUnequipped"/> は
         /// <c>ProfessionId &gt; 0 &amp;&amp; HasBuffSnapshot &amp;&amp; SubProfessionId == 0</c> で導出されるので、
         /// 未装着を記録するには <paramref name="hasBuffSnapshot"/> を立てて特化を0にする。
+        /// シーズンタレントも同じで、無効を記録するには <paramref name="seasonTalentInactive"/> を立てて根ノードのバフを0にする。
         /// </para>
         /// </summary>
         public void ApplyDisplayedIdentityForRecord(
@@ -2579,6 +2655,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             int professionId,
             int subProfessionId,
             bool hasBuffSnapshot,
+            int seasonTalentBuffId,
+            bool seasonTalentInactive,
             int abilityScore,
             int level,
             long seasonLevel,
@@ -2602,6 +2680,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             SubProfessionId = subProfessionId;
             HasBuffSnapshot = hasBuffSnapshot;
+            SeasonTalentBuffId = seasonTalentBuffId;
+            HasSeasonTalentSnapshot = seasonTalentInactive;
 
             if (abilityScore > 0)
             {
@@ -2640,6 +2720,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             SpecMarkerBuffId = 0;
             SpecMarkerBuffUuid = 0;
             HasBuffSnapshot = false;
+        }
+
+        /// <summary>
+        /// シーズンタレントの型を「観測できていない」に戻す。根ノードのバフとスナップショット受信済みの印も落とす
+        /// (<see cref="SetSubProfessionUnknown"/> と同じ理由)。
+        /// </summary>
+        public void SetSeasonTalentUnknown()
+        {
+            SeasonTalentBuffId = 0;
+            SeasonTalentBuffUuid = 0;
+            HasSeasonTalentSnapshot = false;
         }
 
         public void SetLevel(int level)
@@ -3044,6 +3135,49 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// シーズンタレントの型の根ノードのバフから、有効化している型を確定する。
+        /// <b>このエンティティが術者であること</b>は呼び出し側(<see cref="EncounterManager.ApplySeasonTalentFromRootBuff"/>)が保証する。
+        /// 同じ型の再付与でも実体UUIDを控え直すので、シーン切替の再付与にも追従する。
+        /// </summary>
+        public void UpdateSeasonTalentFromRootBuff(int rootBuffId, int rootBuffUuid)
+        {
+            if (rootBuffId <= 0)
+            {
+                return;
+            }
+
+            if (rootBuffUuid != 0)
+            {
+                SeasonTalentBuffUuid = rootBuffUuid;
+            }
+
+            if (SeasonTalentBuffId == rootBuffId)
+            {
+                return;
+            }
+
+            SeasonTalentBuffId = rootBuffId;
+            Services.PartyMemberCache.Instance.SetSeasonTalent(Utils.UuidToEntityId(UUID), rootBuffId);
+            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+        }
+
+        /// <summary>
+        /// 控えてある根ノードのバフが除去されたら、型を無効へ戻す。一致しなければ何もしないで <c>false</c>。
+        /// <see cref="SetSeasonTalentUnknown"/> は使えない(受信済みの印まで落とし、無効ではなく「観測できていない」になる)。
+        /// </summary>
+        public bool ClearSeasonTalentFromRootRemoval(int buffUuid)
+        {
+            if (buffUuid == 0 || SeasonTalentBuffUuid != buffUuid)
+            {
+                return false;
+            }
+
+            SeasonTalentBuffId = 0;
+            SeasonTalentBuffUuid = 0;
+            return true;
+        }
+
+        /// <summary>
         /// AOI出現時に届く全バフスナップショットを特化判定に通す。
         ///
         /// <para>
@@ -3062,18 +3196,28 @@ namespace StarResonanceDps.Core.CombatRuntime
             IReadOnlyList<(int BaseId, int BuffUuid, long FireUuid, int FightSourceType, int SourceConfigId)> buffs)
         {
             HasBuffSnapshot = true;
+            // シーズンタレントの型も同じスナップショットで決める(無効が言えるのもこの経路だけ)。
+            HasSeasonTalentSnapshot = true;
             var manager = EncounterManager.Current;
             for (var index = 0; index < buffs.Count; index++)
             {
                 manager?.ApplySpecFromTalentBuff(
                     buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid, buffs[index].FightSourceType,
                     UUID, buffs[index].SourceConfigId);
+                manager?.ApplySeasonTalentFromRootBuff(buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid);
             }
 
             // 自分が術者のタレントバフが1件も無かった＝未装着。PTメンバーぶんはキャッシュにも残す。
             if (SubProfessionId == 0 && ProfessionId > 0)
             {
                 Services.PartyMemberCache.Instance.SetSpecAbilityUnequipped(Utils.UuidToEntityId(UUID));
+                PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+            }
+
+            // 根ノードのバフが1件も無かった＝シーズンタレントの型が無効。
+            if (SeasonTalentBuffId == 0 && ProfessionId > 0)
+            {
+                Services.PartyMemberCache.Instance.SetSeasonTalentInactive(Utils.UuidToEntityId(UUID));
                 PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
             }
         }
@@ -3089,6 +3233,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void MarkSelfBuffStreamReceived()
         {
+            // シーズンタレントの印も同じ時点で立てる(特化と同じ扱い)。
+            HasSeasonTalentSnapshot = true;
+
             if (HasBuffSnapshot)
             {
                 return;
@@ -3259,6 +3406,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (newEntity.SubProfessionId > 0)
             {
                 SetSubProfessionId(newEntity.SubProfessionId);
+            }
+            if (newEntity.SeasonTalentBuffId > 0)
+            {
+                UpdateSeasonTalentFromRootBuff(newEntity.SeasonTalentBuffId, newEntity.SeasonTalentBuffUuid);
             }
 
             TotalDamage += newEntity.TotalDamage;

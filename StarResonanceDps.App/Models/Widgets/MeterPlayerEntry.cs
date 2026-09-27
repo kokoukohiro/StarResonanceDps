@@ -32,6 +32,18 @@ public sealed partial class MeterPlayerEntry : ObservableObject
     [ObservableProperty]
     private string _professionKey = "Unknown";
 
+    /// <summary>有効化しているシーズンタレントの型の根ノードのバフID。0 は不明か無効(<see cref="IsSeasonTalentInactive"/> で分ける)。</summary>
+    [ObservableProperty]
+    private int _seasonTalentBuffId;
+
+    /// <summary>シーズンタレントの型が無効(どの型も有効化していない)と確定しているか。</summary>
+    [ObservableProperty]
+    private bool _isSeasonTalentInactive;
+
+    /// <summary>有効化しているシーズンタレントの型の名前(根ノードの名前)。不明か無効なら空。</summary>
+    [ObservableProperty]
+    private string _seasonTalentName = string.Empty;
+
     [ObservableProperty]
     private string _displayName = string.Empty;
 
@@ -74,6 +86,11 @@ public sealed partial class MeterPlayerEntry : ObservableObject
             && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
         PlayerId = player.UserId != 0 ? player.UserId : player.CharacterId;
         ProfessionKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
+        SeasonTalentBuffId = player.SeasonTalentBuffId;
+        IsSeasonTalentInactive = player.IsSeasonTalentInactive;
+        SeasonTalentName = player.SeasonTalentBuffId > 0
+            ? CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
+            : string.Empty;
         DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
         ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F2}%";
         BarRatio = player.BarRatio;

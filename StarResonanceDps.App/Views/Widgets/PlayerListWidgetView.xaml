@@ -355,10 +355,65 @@
 
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="33" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="128" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
+
+                                <!-- 型の絵のために空ける幅。設定「シーズン心相晶の表示」がオフなら消し、列の幅を0に戻す。 -->
+                                <Border Grid.Column="1"
+                                        Width="15"
+                                        Visibility="{Binding ShowsSeasonTalent, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <!--
+                                    シーズン心相晶。枠はいつも出し、中は型の絵・不明の絵・無し(無効)のどれか。
+                                    クラスアイコンに少し重ねるため、特化テキストと同じく Canvas に置く。
+                                    クラスアイコンより前に置き、クラスアイコンと特化テキストが上に描かれるようにする。
+                                -->
+                                <Canvas Grid.Column="1"
+                                        Visibility="{Binding ShowsSeasonTalent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <!-- ツールチップはスキル枠と同じ作り。文字は書式の {Psych} と同じ(型の名前 / 無効 / 不明)。 -->
+                                    <Grid Canvas.Left="-18.5"
+                                          Canvas.Top="2.5"
+                                          Width="35"
+                                          Height="35"
+                                          Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}">
+                                        <Grid.ToolTip>
+                                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                                     Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                                <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                           FontSize="12"
+                                                           Text="{Binding SeasonTalentDisplayText}" />
+                                            </ToolTip>
+                                        </Grid.ToolTip>
+                                        <!-- 枠と型の絵は、アイコンカラーの設定の色で塗る。枠は影なし、型の絵はクラスアイコンと同じ影。 -->
+                                        <Rectangle Fill="{Binding SeasonTalentBrush}"
+                                                   RenderOptions.BitmapScalingMode="HighQuality">
+                                            <Rectangle.OpacityMask>
+                                                <ImageBrush ImageSource="{StaticResource Icon.SeasonTalentFrame}" Stretch="Uniform" />
+                                            </Rectangle.OpacityMask>
+                                        </Rectangle>
+                                        <Rectangle Width="23"
+                                                   Height="23"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Fill="{Binding SeasonTalentBrush}"
+                                                   OpacityMask="{Binding SeasonTalentIconMask}"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                            <Rectangle.Style>
+                                                <Style TargetType="Rectangle">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding HasSeasonTalentIcon}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Rectangle.Style>
+                                        </Rectangle>
+                                    </Grid>
+                                </Canvas>
 
                                 <Grid Grid.Column="0">
                                     <Rectangle Width="25"
@@ -454,7 +509,7 @@
                                 </Grid>
 
                                 <!-- HP の数字はゲージより長いと左右にはみ出す。右のスキル枠より上に描くため前に出す。 -->
-                                <Grid Grid.Column="1"
+                                <Grid Grid.Column="2"
                                       Panel.ZIndex="1"
                                       Height="34"
                                       Margin="6,0,0,0"
@@ -602,7 +657,7 @@
                                         </TextBlock>
                                     </Canvas>
                                 </Grid>
-                                <StackPanel Grid.Column="2"
+                                <StackPanel Grid.Column="3"
                                             Margin="10,0,0,0"
                                             HorizontalAlignment="Left"
                                             VerticalAlignment="Center"

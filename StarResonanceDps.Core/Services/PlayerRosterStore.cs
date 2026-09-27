@@ -280,7 +280,9 @@ public sealed class PlayerRosterStore
             entry.IsPartyMember,
             entry.PartyNumber,
             entry.IsLive,
-            entry.Attributes);
+            entry.Attributes,
+            entry.SeasonTalentBuffId,
+            entry.IsSeasonTalentInactive);
     }
 }
 

@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
@@ -15,6 +16,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [
         ("Name", "Settings_PlayerInfo_Field_Name", "{Name}"),
         ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
+        ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", "{Psych}"),
         ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
         ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", "{SeasonStrength}"),
         ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", "{SeasonLevel}"),
@@ -45,6 +47,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     [ObservableProperty]
     private int _healthValueDisplayModeIndex = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
+
+    /// <summary>「シーズン心相晶の表示」のスイッチ。</summary>
+    [ObservableProperty]
+    private bool _showSeasonTalent = true;
 
     [ObservableProperty]
     private int _partyDisplayModeIndex = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
@@ -152,6 +158,13 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
 
+    /// <summary>「シーズン心相晶の表示」を出すか。プレイヤーリストだけ。</summary>
+    public bool ShowsSeasonTalentSettings => _kind == WidgetKind.PlayerList;
+
+    /// <summary>「シーズン心相晶の表示」のスイッチの右に出す ON / OFF。</summary>
+    public string ShowSeasonTalentStateText => LocalizationManager.Instance.GetString(
+        ShowSeasonTalent ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     public bool ShowsPartyDisplaySettings => _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
     /// <summary>
@@ -163,9 +176,25 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     /// <summary>エンティティリストのフィルター(すべて表示 / オブジェクト以外)を出すか。</summary>
     public bool ShowsEntityDisplaySettings => _kind == WidgetKind.EntityList;
 
-    /// <summary>「自分の表示」を出すのはプレイヤーリストとメーター2種。</summary>
+    /// <summary>「自分の強調表示」を出すのはプレイヤーリストとメーター2種。</summary>
     public bool ShowsSelfDisplaySettings =>
         _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
+
+    /// <summary>
+    /// 「自分の強調表示」のスイッチ。保存する値は <see cref="SelfDisplayModeIndex"/> のままで、
+    /// オンが強調表示、オフが通常表示に当たる。
+    /// </summary>
+    public bool SelfHighlightEnabled
+    {
+        get => SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+        set => SelfDisplayModeIndex = value
+            ? WidgetConfigDefaults.DefaultSelfDisplayModeIndex
+            : WidgetConfigDefaults.MaxSelfDisplayModeIndex;
+    }
+
+    /// <summary>「自分の強調表示」のスイッチの右に出す ON / OFF。</summary>
+    public string SelfHighlightStateText => LocalizationManager.Instance.GetString(
+        SelfHighlightEnabled ? "Settings_Switch_On" : "Settings_Switch_Off");
 
     /// <summary>「並び替え」(発見順 / 名前順)を出すのはプレイヤーリストとエンティティリスト。</summary>
     public bool ShowsListSortSettings => WidgetConfigDefaults.UsesListSort(_kind);
@@ -194,6 +223,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         {
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            ShowSeasonTalent = ShowSeasonTalent,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -295,6 +325,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
+            ShowSeasonTalent = normalized.ShowSeasonTalent;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
             EntityDisplayModeIndex = normalized.EntityDisplayModeIndex;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
@@ -323,6 +354,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     {
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
+            || left.ShowSeasonTalent != right.ShowSeasonTalent
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
             || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
@@ -426,6 +458,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
         OnPropertyChanged(nameof(ClassColorSectionTitle));
         OnPropertyChanged(nameof(ClassColorFilterStateText));
+        OnPropertyChanged(nameof(ShowSeasonTalentStateText));
+        OnPropertyChanged(nameof(SelfHighlightStateText));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
     }
@@ -464,6 +498,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         NotifyChanged();
     }
 
+    partial void OnShowSeasonTalentChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowSeasonTalentStateText));
+        NotifyChanged();
+    }
+
     partial void OnPartyDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
@@ -476,6 +516,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     partial void OnSelfDisplayModeIndexChanged(int value)
     {
+        OnPropertyChanged(nameof(SelfHighlightEnabled));
+        OnPropertyChanged(nameof(SelfHighlightStateText));
         NotifyChanged();
     }
 
@@ -547,7 +589,15 @@ public sealed class MeterClassColorItemViewModel : ObservableObject
 
     public bool IsLast { get; }
 
-    public string DisplayName => LocalizationManager.Instance.GetString($"Classes_{Key}");
+    /// <summary>シーズン心相晶の行か。クラスアイコンの代わりに枠と型の絵を出す。</summary>
+    public bool IsSeasonTalent => SeasonTalentIcons.IsColorKey(Key);
+
+    /// <summary>シーズン心相晶の行の型の絵の形。不明の行はクラスの不明と同じ絵。</summary>
+    public Brush? SeasonTalentIconMask => IsSeasonTalent ? SeasonTalentIcons.GetIconMask(Key) : null;
+
+    public string DisplayName => IsSeasonTalent
+        ? SeasonTalentIcons.GetDisplayName(Key)
+        : LocalizationManager.Instance.GetString($"Classes_{Key}");
 
     public void RefreshDisplayName()
     {

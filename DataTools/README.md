@@ -15,6 +15,8 @@ python gen_monsters.py    # モンスターの名前
 python gen_skill_warnings.py  # 戦闘画面の警告バーを出す技
 python gen_rogue_entries.py   # オプション(ローグ系モード)の名前
 python gen_buff_groups.py     # 料理・薬剤のバフの名前
+python gen_season_talents.py  # シーズンタレントの型の根ノードの名前
+python gen_class_specs.py     # 職業の特化の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -97,6 +99,8 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
 | `gen_rogue_entries.py` | `Data/Localization/RogueEntryNames.json` |
 | `gen_buff_groups.py` | `Data/Localization/CuisineBuffs.json`<br>`Data/Localization/PotionBuffs.json` |
+| `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json` |
+| `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
 
 ## 全ツール共通の仕様
 
@@ -530,3 +534,44 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 **名前が空の行も鍵を持つ。** エンティティリストは「表に行があって名前が空」と「表に行が無い(アプリの表が古い)」を
 鍵の有無で見分ける(前者は HP バーが見えなければ出さず、見えれば「敵」「味方」と出す。後者は空欄のまま出す)。
+
+---
+
+## gen_season_talents.py
+
+シーズンタレントの型の根ノードの名前を、**根ノードのバフIDを鍵に**書く。値は根ノードの名前。
+
+型を付けると、その型の根ノードの効果のバフが乗る。このバフから、その人が付けている型の根ノードを引くのに使う。
+
+根ノードは `SeasonTalentTemplateTable.NoteRootId`。`SeasonTalentEffectOrdinaryTable` のうち `GroupId` がそれに一致する行が根ノードの効果で、
+`Effect` の `[3, バフID, 1]` がそのバフ、`Name` が根ノードの名前。根以外のノードは入れない。
+
+入れるのは主の型だけ。効く遊びの種類(`EffectiveGameplayType`)が決まっている型は、その遊びの中だけで主の型の上に足されるので入れない。
+
+**同じ出所の中で1つのバフIDに複数の根ノードが当たったら、型の `BelongSeasonId` が一番大きい行の名前を採り、一覧を出す。**
+シーズンをまたいで同じバフを根に使う型がある。行やノードの番号の大小はシーズンの新旧と一致しないので使わない。
+
+次のときは止まる。
+
+- 一番新しいシーズンの中で、同じバフIDの名前が食い違う
+- 型の根ノードに当たる行が無い
+- 根ノードの行のバフIDが1つでない
+- 出所に型の表が無い
+
+## gen_class_specs.py
+
+職業の特化の名前を、**アプリの特化の番号を鍵に**書く。番号は 職業ID × 10000 ＋ 特化の並び(1始まり)。
+
+職業ごとの特化は `ProfessionSystemTable.ShowTalentStage` が並びつきで持つ。その段階の行 `TalentStageTable` の `Name` は
+[段階の名前, 特化の名前] で、2番目を使う。
+
+**名前から、その言語の全特化の名前に共通する語尾を落とす。** 語尾は言語ごとに生成器の `COMMON_SUFFIX` で決めている。
+
+出所の土台は鍵の単位で決める(`gen_season_talents.py` と同じ)。土台にその鍵の名前があれば土台だけを使い、無いときだけもう一方を使う。
+
+次のときは止まる。
+
+- 職業の段階の行が段階の表に無い
+- 段階の行の名前が2要素でない
+- 使う名前が、その言語の共通の語尾で終わっていない
+- 出所に段階の表が無い

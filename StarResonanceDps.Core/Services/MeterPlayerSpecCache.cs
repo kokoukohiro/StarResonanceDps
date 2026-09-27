@@ -35,6 +35,9 @@ public sealed class MeterPlayerSpecCache
     private readonly object _sync = new();
     private readonly Dictionary<long, CacheEntry> _entriesByCharacterId = [];
 
+    /// <summary>シーズンタレントの型。特化と同じ扱いで、寿命も同じ(マップ/チャンネル切替まで)。</summary>
+    private readonly Dictionary<long, SeasonTalentEntry> _seasonTalentsByCharacterId = [];
+
     private MeterPlayerSpecCache()
     {
     }
@@ -124,12 +127,95 @@ public sealed class MeterPlayerSpecCache
         }
     }
 
+    /// <summary>
+    /// 確定したシーズンタレントの型(根ノードのバフID)を記録する。特化と同じ扱いで、特化の記録とは別に持つ
+    /// (特化の書き込みは記録を丸ごと置き換えるため)。
+    /// </summary>
+    public void SetSeasonTalent(long characterId, int rootBuffId)
+    {
+        if (rootBuffId <= 0 || !IsCacheable(characterId))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            _seasonTalentsByCharacterId[characterId] = new SeasonTalentEntry(rootBuffId, false);
+        }
+    }
+
+    /// <summary>
+    /// シーズンタレントの型が無効と確定したことを記録する。「観測できていない」ではなく「無いことを確認した」ときだけ呼ぶこと。
+    /// </summary>
+    public void SetSeasonTalentInactive(long characterId)
+    {
+        if (!IsCacheable(characterId))
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            _seasonTalentsByCharacterId[characterId] = new SeasonTalentEntry(0, true);
+        }
+    }
+
+    /// <summary>シーズンタレントの記録を捨てる。型も無効も確定していない状態を控えるときに使う。</summary>
+    public void RemoveSeasonTalent(long characterId)
+    {
+        if (characterId <= 0)
+        {
+            return;
+        }
+
+        lock (_sync)
+        {
+            _seasonTalentsByCharacterId.Remove(characterId);
+        }
+    }
+
+    public bool TryGetSeasonTalent(long characterId, out int rootBuffId)
+    {
+        rootBuffId = 0;
+        if (!IsCacheable(characterId))
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            if (!_seasonTalentsByCharacterId.TryGetValue(characterId, out var entry)
+                || entry.RootBuffId <= 0)
+            {
+                return false;
+            }
+
+            rootBuffId = entry.RootBuffId;
+            return true;
+        }
+    }
+
+    public bool IsSeasonTalentInactive(long characterId)
+    {
+        if (!IsCacheable(characterId))
+        {
+            return false;
+        }
+
+        lock (_sync)
+        {
+            return _seasonTalentsByCharacterId.TryGetValue(characterId, out var entry)
+                && entry.Inactive;
+        }
+    }
+
     /// <summary>マップ/チャンネル切替で全部捨てる。</summary>
     public void Clear()
     {
         lock (_sync)
         {
             _entriesByCharacterId.Clear();
+            _seasonTalentsByCharacterId.Clear();
         }
     }
 
@@ -143,4 +229,6 @@ public sealed class MeterPlayerSpecCache
     }
 
     private readonly record struct CacheEntry(int SubProfessionId, bool SpecAbilityUnequipped);
+
+    private readonly record struct SeasonTalentEntry(int RootBuffId, bool Inactive);
 }

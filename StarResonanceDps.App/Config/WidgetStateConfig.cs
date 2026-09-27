@@ -382,6 +382,9 @@ public sealed class MeterWidgetSettingsConfig
 
     public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
+    /// <summary>プレイヤーリストにシーズン心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
+    public bool ShowSeasonTalent { get; set; } = true;
+
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
     /// <summary>エンティティリストのフィルター。0=すべて表示 / 1=オブジェクト以外(<c>EntityDisplayMode</c>)。</summary>
@@ -436,6 +439,7 @@ public sealed class MeterWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            ShowSeasonTalent = ShowSeasonTalent,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -494,11 +498,14 @@ public sealed class PlayerStatusWidgetSettingsConfig
         WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility();
 
     /// <summary>
-    /// 行の文字とアイコンの色。<b>並びが表示の行順で、件数が設定の行数。</b>
-    /// 他の色設定は鍵が固定なので辞書だが、ここは行数が可変なので並びで持つ。
+    /// 行の文字とアイコンの色。形はクラスカラーと同じで、<b>鍵は属性の番号</b>
+    /// (<c>PlayerStatusEntry.SettingRowAttrIds</c>)。
     /// </summary>
-    public List<PlayerStatusTextColorConfig> TextColors { get; set; } =
-        WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors();
+    public Dictionary<string, int> TextColorIndexes { get; set; } =
+        WidgetConfigDefaults.CreateDefaultPlayerStatusTextColorIndexes();
+
+    public Dictionary<string, List<string>> TextColorPalettes { get; set; } =
+        WidgetConfigDefaults.CreateDefaultPlayerStatusTextColorPalettes();
 
     public PlayerStatusWidgetSettingsConfig Clone()
     {
@@ -508,29 +515,19 @@ public sealed class PlayerStatusWidgetSettingsConfig
             RowVisibility = RowVisibility is null
                 ? WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility()
                 : new Dictionary<string, bool>(RowVisibility, StringComparer.OrdinalIgnoreCase),
-            TextColors = TextColors is null
-                ? WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors()
-                : [.. TextColors.Select(row => row.Clone())]
+            TextColorIndexes = TextColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultPlayerStatusTextColorIndexes()
+                : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = TextColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultPlayerStatusTextColorPalettes()
+                : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
         };
     }
 }
 
-/// <summary>ステータス詳細のテキストカラー1行ぶん。形はクラスカラーの1項目と同じ。</summary>
-public sealed class PlayerStatusTextColorConfig
-{
-    public int SelectedIndex { get; set; }
-
-    public List<string> Palette { get; set; } = [];
-
-    public PlayerStatusTextColorConfig Clone()
-    {
-        return new PlayerStatusTextColorConfig
-        {
-            SelectedIndex = SelectedIndex,
-            Palette = Palette is null ? [] : new List<string>(Palette)
-        };
-    }
-}
 
 public sealed class ElementColorWidgetSettingsConfig
 {
@@ -608,7 +605,7 @@ public static class WidgetConfigDefaults
     public const int MaxClassColorFilterStrength = 100;
     public const int DefaultClassColorFilterStrength = 50;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
-    public const string DefaultMeterPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultMeterPlayerInfoFormatString = "{Name}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
 
     /// <summary>ステータス詳細で、値が 0 の属性効果の行を隠すか。</summary>
@@ -622,7 +619,7 @@ public static class WidgetConfigDefaults
     public const int BuffCardScaleStep = 25;
 
 
-    private const double PlayerListInitialWindowWidth = 440d;
+    private const double PlayerListInitialWindowWidth = 457d;
     private const double PlayerListInitialWindowHeight = 460d;
     private const double MeterInitialWindowWidth = 440d;
     private const double MeterInitialWindowHeight = 460d;
@@ -715,6 +712,10 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
+    /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、シーズン心相晶の絵の10件と不明。</summary>
+    public static readonly string[] PlayerListClassColorKeys =
+        [.. ClassColorKeys, .. StarResonanceDps.App.Services.SeasonTalentIcons.ColorKeys];
+
     public static readonly string[] EntityClassColorKeys =
     [
         "Monster",
@@ -789,6 +790,22 @@ public static class WidgetConfigDefaults
         ["Marksman"] = ["#DB8787", "#D4D116"],
         ["Transformation"] = ["#FFFFFF", "#B06BE8"],
         ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
+    };
+
+    /// <summary>プレイヤーリストのシーズン心相晶の既定色。鍵は SeasonTalent.(絵の名前)。</summary>
+    private static readonly Dictionary<string, string[]> PlayerListDefaultSeasonTalentColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["SeasonTalent.s2talent01_01"] = ["#FFFFFF", "#F5EABF"],
+        ["SeasonTalent.s2talent02_01"] = ["#FFFFFF", "#F5C1A8"],
+        ["SeasonTalent.s2talent03_01"] = ["#FFFFFF", "#F5CECE"],
+        ["SeasonTalent.s2talent04_01"] = ["#FFFFFF", "#F5CEEA"],
+        ["SeasonTalent.s2talent05_01"] = ["#FFFFFF", "#C2E9F5"],
+        ["SeasonTalent.s2talent06_01"] = ["#FFFFFF", "#DFD2F5"],
+        ["SeasonTalent.s2talent07_01"] = ["#FFFFFF", "#C8F5EB"],
+        ["SeasonTalent.s2talent08_01"] = ["#FFFFFF", "#CCF5DD"],
+        ["SeasonTalent.s2talent051_01"] = ["#FFFFFF", "#C2F5F1"],
+        ["SeasonTalent.s2talent054_01"] = ["#FFFFFF", "#F5D8F2"],
+        ["SeasonTalent.Unknown"] = ["#FFFFFF", "#EEE9F2"]
     };
 
     /// <summary>
@@ -869,6 +886,107 @@ public static class WidgetConfigDefaults
     };
 
     private static readonly Dictionary<string, string[]> HpsMeterDefaultClassColorHexes = MeterDefaultClassColorHexes;
+
+    /// <summary>
+    /// テキストカラーの見本。<b>一覧の全項目ぶんを1件ずつ並べる</b>(並びは「ステータス」の一覧と同じ)。
+    /// </summary>
+    private static readonly Dictionary<int, string[]> PlayerStatusDefaultTextColorHexes = new()
+    {
+        [11440] = ["#FFFFFF", "#C3A7FF"],    // シーズン強度
+        [11320] = ["#FFFFFF", "#FFB3B3"],    // 最大HP
+        [12790] = ["#FFFFFF", "#FBE8C3"],    // 物理増強
+        [12800] = ["#FFFFFF", "#DFC8FA"],    // 魔法増強
+        [13000] = ["#FFFFFF", "#D6E8F0"],    // 全属性ボーナス
+        [13010] = ["#FFFFFF", "#FFB38A"],    // 火属性ボーナス
+        [13020] = ["#FFFFFF", "#B5ECFA"],    // 氷属性ボーナス
+        [13030] = ["#FFFFFF", "#C8F49A"],    // 森属性ボーナス
+        [13040] = ["#FFFFFF", "#B5B0FF"],    // 雷属性ボーナス
+        [13050] = ["#FFFFFF", "#A8F2D7"],    // 風属性ボーナス
+        [13060] = ["#FFFFFF", "#F7D98A"],    // 岩属性ボーナス
+        [13070] = ["#FFFFFF", "#F7F0C9"],    // 光属性ボーナス
+        [13080] = ["#FFFFFF", "#C8B4F2"],    // 闇属性ボーナス
+        [13200] = ["#FFFFFF", "#D6E8F0"],    // 全属性軽減
+        [13210] = ["#FFFFFF", "#FFB38A"],    // 火属性軽減
+        [13220] = ["#FFFFFF", "#B5ECFA"],    // 氷属性軽減
+        [13230] = ["#FFFFFF", "#C8F49A"],    // 森属性軽減
+        [13240] = ["#FFFFFF", "#B5B0FF"],    // 雷属性軽減
+        [13250] = ["#FFFFFF", "#A8F2D7"],    // 風属性軽減
+        [13260] = ["#FFFFFF", "#F7D98A"],    // 岩属性軽減
+        [13270] = ["#FFFFFF", "#F7F0C9"],    // 光属性軽減
+        [13280] = ["#FFFFFF", "#C8B4F2"],    // 闇属性軽減
+
+        [11330] = ["#FFFFFF", "#FBE8C3"],    // 物理攻撃力
+        [11340] = ["#FFFFFF", "#DFC8FA"],    // 魔法攻撃力
+        [11010] = ["#FFFFFF", "#F6D3A8"],    // 筋力
+        [11020] = ["#FFFFFF", "#DCC1FA"],    // 知力
+        [11030] = ["#FFFFFF", "#A2E3F5"],    // 敏捷
+        [11040] = ["#FFFFFF", "#B3F4C6"],    // 耐久力
+
+        [11110] = ["#FFFFFF", "#FABFCB"],    // 会心
+        [12510] = ["#FFFFFF", "#F8B6C7"],    // 会心ダメージ
+        [11120] = ["#FFFFFF", "#A2E3F5"],    // ファスト
+        [11130] = ["#FFFFFF", "#B3F4C6"],    // 幸運
+        [12530] = ["#FFFFFF", "#C1F8D2"],    // 幸運の一撃のダメージ倍率
+        [11140] = ["#FFFFFF", "#DFC8FA"],    // 器用さ
+        [11150] = ["#FFFFFF", "#FBF2B9"],    // 万能
+        [11840] = ["#FFFFFF", "#F7EFBE"],    // 万能増強
+        [11850] = ["#FFFFFF", "#F3EDC2"],    // 万能軽減
+        [11170] = ["#FFFFFF", "#CDC6FA"],    // レジスト
+        [12540] = ["#FFFFFF", "#DCC1FA"],    // レジストダメージ軽減
+
+        [11720] = ["#FFFFFF", "#7EEBFF"],    // 攻撃速度
+        [11730] = ["#FFFFFF", "#8BCBFF"],    // 詠唱速度
+        [11960] = ["#FFFFFF", "#A7B6FF"],    // リキャスト加速
+        [11830] = ["#FFFFFF", "#FFD77A"],    // ブレイク効率
+
+        [11350] = ["#FFFFFF", "#AEDAFA"],    // 物理防御力
+        [11360] = ["#FFFFFF", "#CDC6FA"],    // 魔法防御力
+        [11370] = ["#FFFFFF", "#F4E8B9"],    // 物理防御力無視
+        [11380] = ["#FFFFFF", "#D9C7FA"],    // 魔法防御力無視
+        [12560] = ["#FFFFFF", "#BFE9FB"],    // 物理軽減
+        [12580] = ["#FFFFFF", "#DCC1FA"],    // 魔法軽減
+
+        [11410] = ["#FFFFFF", "#FFE0A8"],    // 精錬物攻
+        [11430] = ["#FFFFFF", "#D8C0FA"],    // 精錬魔攻
+        [11420] = ["#FFFFFF", "#BBDFF5"],    // 精錬防御力
+
+        [12670] = ["#FFFFFF", "#FFB9AD"],    // ダメージボーナス
+        [12680] = ["#FFFFFF", "#B8DFF5"],    // ダメージ軽減
+        [12590] = ["#FFFFFF", "#FFC7A8"],    // 近距離ダメージボーナス
+        [12610] = ["#FFFFFF", "#A9E7F5"],    // 遠距離ダメージボーナス
+        [12630] = ["#FFFFFF", "#FFD69A"],    // 対ボスダメージボーナス
+
+        [11460] = ["#FFFFFF", "#C3A7FF"],    // シーズン防御力
+        [11470] = ["#FFFFFF", "#D0B6FA"],    // シーズン防御力無視
+        [12690] = ["#FFFFFF", "#FFB3D0"],    // シーズンダメージボーナス
+        [12700] = ["#FFFFFF", "#C6C4FA"],    // シーズンダメージ軽減
+
+        [11500] = ["#FFFFFF", "#D6E8F0"],    // 全属性攻撃力
+        [11510] = ["#FFFFFF", "#FFB38A"],    // 火属性攻撃力
+        [11520] = ["#FFFFFF", "#B5ECFA"],    // 氷属性攻撃力
+        [11530] = ["#FFFFFF", "#C8F49A"],    // 森属性攻撃力
+        [11540] = ["#FFFFFF", "#B5B0FF"],    // 雷属性攻撃力
+        [11550] = ["#FFFFFF", "#A8F2D7"],    // 風属性攻撃力
+        [11560] = ["#FFFFFF", "#F7D98A"],    // 岩属性攻撃力
+        [11570] = ["#FFFFFF", "#F7F0C9"],    // 光属性攻撃力
+        [11580] = ["#FFFFFF", "#C8B4F2"],    // 闇属性攻撃力
+
+        [11790] = ["#FFFFFF", "#9EF0C1"],    // 回復力
+        [11800] = ["#FFFFFF", "#B8F2D0"],    // 被回復力
+        [12740] = ["#FFFFFF", "#C1F8D2"],    // 会心回復
+        [12720] = ["#FFFFFF", "#C1F8D2"],    // 幸運の一撃回復の倍率
+        [11810] = ["#FFFFFF", "#A9E8F5"],    // バリア強度
+        [11820] = ["#FFFFFF", "#C3DFF5"],    // 被バリア強度
+
+        [11880] = ["#FFFFFF", "#F3B8D5"],    // 抑圧ダメージ
+        [11890] = ["#FFFFFF", "#CDBEFA"],    // 抑圧ダメージ軽減
+        [12730] = ["#FFFFFF", "#FFCAA8"],    // 臣獣ダメージ
+        [11990] = ["#FFFFFF", "#A5ECF3"],    // 臣獣の攻撃速度
+
+        [10200] = ["#FFFFFF", "#A2E3F5"],    // 移動速度
+        [20020] = ["#FFFFFF", "#F5D6A8"],    // 最大スタミナ
+        [20120] = ["#FFFFFF", "#B3F4C6"],    // 戦闘時のスタミナ回復率
+    };
 
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -1013,58 +1131,47 @@ public static class WidgetConfigDefaults
         {
             HideInactiveStatusEffects = DefaultHideInactiveStatusEffects,
             RowVisibility = CreateDefaultPlayerStatusRowVisibility(),
-            TextColors = CreateDefaultPlayerStatusTextColors()
+            TextColorIndexes = CreateDefaultPlayerStatusTextColorIndexes(),
+            TextColorPalettes = CreateDefaultPlayerStatusTextColorPalettes()
         };
     }
-
-    /// <summary>テキストカラーの行数の下限と上限。色は表示側がループさせるので、上限は控えめ。</summary>
-    public const int MinPlayerStatusTextColorRows = 1;
-    public const int MaxPlayerStatusTextColorRows = 20;
 
     /// <summary>
-    /// テキストカラーの既定(13行)。
+    /// テキストカラーの見本。1枠目は白で、2枠目に色を置く(クラスカラーと同じ2色)。
+    /// <b>表は一覧の全項目を持つ</b>ので、引けない番号は表の書き忘れ。埋めずに落とす。
     /// </summary>
-    private static readonly string[][] DefaultPlayerStatusTextColorHexes =
-    [
-        ["#FFFFFF", "#FF8A7A"],
-        ["#FFFFFF", "#FFB37A"],
-        ["#FFFFFF", "#FFD77A"],
-        ["#FFFFFF", "#F4F08A"],
-        ["#FFFFFF", "#BFF58A"],
-        ["#FFFFFF", "#7EF0A2"],
-        ["#FFFFFF", "#7EF5D8"],
-        ["#FFFFFF", "#7EEBFF"],
-        ["#FFFFFF", "#8BCBFF"],
-        ["#FFFFFF", "#A7B6FF"],
-        ["#FFFFFF", "#C3A7FF"],
-        ["#FFFFFF", "#E0A7FF"],
-        ["#FFFFFF", "#FF9FD8"],
-    ];
-
-    /// <summary>テキストカラーの既定。各行は「白」と固有色の2択で、固有色を選んだ状態。</summary>
-    public static List<PlayerStatusTextColorConfig> CreateDefaultPlayerStatusTextColors()
+    public static List<string> CreateDefaultPlayerStatusTextColors(int attrId)
     {
-        var rows = new List<PlayerStatusTextColorConfig>(DefaultPlayerStatusTextColorHexes.Length);
-        foreach (var palette in DefaultPlayerStatusTextColorHexes)
-        {
-            rows.Add(new PlayerStatusTextColorConfig
-            {
-                SelectedIndex = 1,
-                Palette = [.. palette]
-            });
-        }
-
-        return rows;
+        return [.. PlayerStatusDefaultTextColorHexes[attrId]];
     }
 
-    /// <summary>行を1つ足すときの色。<b>純白1色だけ</b>で、あとはユーザーが選び直す。</summary>
-    public static PlayerStatusTextColorConfig CreatePlayerStatusTextColorRow()
+    /// <summary>テキストカラーで最初に選ばれている枠。</summary>
+    public const int DefaultPlayerStatusTextColorIndex = 1;
+
+    public static Dictionary<string, int> CreateDefaultPlayerStatusTextColorIndexes()
     {
-        return new PlayerStatusTextColorConfig
+        var indexes = new Dictionary<string, int>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
         {
-            SelectedIndex = 0,
-            Palette = ["#FFFFFF"]
-        };
+            indexes[attrId.ToString(CultureInfo.InvariantCulture)] = DefaultPlayerStatusTextColorIndex;
+        }
+
+        return indexes;
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultPlayerStatusTextColorPalettes()
+    {
+        var palettes = new Dictionary<string, List<string>>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        {
+            palettes[attrId.ToString(CultureInfo.InvariantCulture)] = CreateDefaultPlayerStatusTextColors(attrId);
+        }
+
+        return palettes;
     }
 
     /// <summary>
@@ -1137,26 +1244,33 @@ public static class WidgetConfigDefaults
 
         normalized.RowVisibility = rowVisibility;
 
-        // 行数は 1〜20。空なら既定へ戻し、各行の選択はパレットの範囲に収める。
-        var textColors = normalized.TextColors is null || normalized.TextColors.Count == 0
-            ? CreateDefaultPlayerStatusTextColors()
-            : normalized.TextColors;
-        if (textColors.Count > MaxPlayerStatusTextColorRows)
+        // 一覧に無い鍵は捨て、足りない鍵は既定で埋める。選択はパレットの範囲に収める。
+        var textIndexes = new Dictionary<string, int>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        var textPalettes = new Dictionary<string, List<string>>(
+            PlayerStatusEntry.SettingRowAttrIds.Count,
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
         {
-            textColors = textColors.GetRange(0, MaxPlayerStatusTextColorRows);
+            var key = attrId.ToString(CultureInfo.InvariantCulture);
+            var palette = normalized.TextColorPalettes is not null
+                && normalized.TextColorPalettes.TryGetValue(key, out var saved)
+                && saved is { Count: > 0 }
+                    ? new List<string>(saved)
+                    : CreateDefaultPlayerStatusTextColors(attrId);
+
+            var index = normalized.TextColorIndexes is not null
+                && normalized.TextColorIndexes.TryGetValue(key, out var savedIndex)
+                    ? savedIndex
+                    : DefaultPlayerStatusTextColorIndex;
+
+            textPalettes[key] = palette;
+            textIndexes[key] = Math.Clamp(index, 0, palette.Count - 1);
         }
 
-        foreach (var row in textColors)
-        {
-            if (row.Palette is null || row.Palette.Count == 0)
-            {
-                row.Palette = ["#FFFFFF"];
-            }
-
-            row.SelectedIndex = Math.Clamp(row.SelectedIndex, 0, row.Palette.Count - 1);
-        }
-
-        normalized.TextColors = textColors;
+        normalized.TextColorIndexes = textIndexes;
+        normalized.TextColorPalettes = textPalettes;
         return normalized;
     }
 
@@ -1395,18 +1509,23 @@ public static class WidgetConfigDefaults
 
     public static IReadOnlyList<string> GetClassColorKeys(WidgetKind kind)
     {
-        return kind == WidgetKind.EntityList
-            ? EntityClassColorKeys
-            : ClassColorKeys;
+        return kind switch
+        {
+            WidgetKind.EntityList => EntityClassColorKeys,
+            WidgetKind.PlayerList => PlayerListClassColorKeys,
+            _ => ClassColorKeys
+        };
     }
 
     /// <summary>
-    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーだけ2枠目。
+    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストのシーズン心相晶(不明を含む)だけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
-        return kind == WidgetKind.HpsMeter
-            && string.Equals(key, "SoulMusician", StringComparison.OrdinalIgnoreCase)
+        return (kind == WidgetKind.HpsMeter
+                && string.Equals(key, "SoulMusician", StringComparison.OrdinalIgnoreCase))
+            || (kind == WidgetKind.PlayerList
+                && PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key))
             ? MinClassColorIndex + 1
             : MinClassColorIndex;
     }
@@ -1643,6 +1762,12 @@ public static class WidgetConfigDefaults
 
     public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
     {
+        if (kind == WidgetKind.PlayerList
+            && PlayerListDefaultSeasonTalentColorHexes.TryGetValue(key, out var seasonTalentColors))
+        {
+            return [.. seasonTalentColors];
+        }
+
         var source = kind switch
         {
             // 被ダメログのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。

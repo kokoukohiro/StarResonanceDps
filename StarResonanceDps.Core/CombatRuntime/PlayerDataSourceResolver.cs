@@ -19,7 +19,9 @@ internal sealed record PlayerDataSourceSnapshot(
     bool IsNpc,
     bool IsSpecAbilityUnequipped,
     PlayerEquipmentData? EquipmentData,
-    bool IsLive);
+    bool IsLive,
+    int SeasonTalentBuffId,
+    bool IsSeasonTalentInactive);
 
 internal static class PlayerDataSourceResolver
 {
@@ -185,7 +187,99 @@ internal static class PlayerDataSourceResolver
             //
             // <b>自分だけは常にライブ。</b> 作り直した直後のエンカウンターには自分の
             // エンティティがまだ無く、導出だと一瞬だけ灰に落ちる。
-            isSelf || nearbyEntity is not null || partySupplement is not null);
+            isSelf || nearbyEntity is not null || partySupplement is not null,
+            ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf),
+            ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf));
+    }
+
+    /// <summary>
+    /// 有効化しているシーズンタレントの型(根ノードのバフID)を解決する。特化(<see cref="ResolveSubProfessionId"/>)と同じ順で、
+    /// 実体 → 控え(パーティ → メーター)。自分は控えを見ない。変身中でも型は変わらないので、変身の関門は置かない。
+    /// </summary>
+    private static int ResolveSeasonTalentBuffId(
+        long characterId,
+        Entity? nearbyEntity,
+        Entity? metadataEntity,
+        bool isSelf)
+    {
+        if (nearbyEntity is { SeasonTalentBuffId: > 0 })
+        {
+            return nearbyEntity.SeasonTalentBuffId;
+        }
+
+        if (metadataEntity is { SeasonTalentBuffId: > 0 })
+        {
+            return metadataEntity.SeasonTalentBuffId;
+        }
+
+        if (isSelf)
+        {
+            return 0;
+        }
+
+        return TryResolveCachedSeasonTalent(characterId, out var cached, out _) ? cached : 0;
+    }
+
+    /// <summary>
+    /// 控えからシーズンタレントの型を補完する。<b>型と無効の印を必ず同じ出所から返す</b>(特化の <see cref="TryResolveCachedSpec"/> と同じ理由)。
+    /// </summary>
+    private static bool TryResolveCachedSeasonTalent(
+        long characterId,
+        out int rootBuffId,
+        out bool isInactive)
+    {
+        var partyCache = PartyMemberCache.Instance;
+        if (partyCache.TryGetSeasonTalent(characterId, out rootBuffId))
+        {
+            isInactive = false;
+            return true;
+        }
+
+        if (partyCache.IsSeasonTalentInactive(characterId))
+        {
+            rootBuffId = 0;
+            isInactive = true;
+            return true;
+        }
+
+        var meterCache = MeterPlayerSpecCache.Instance;
+        if (meterCache.TryGetSeasonTalent(characterId, out rootBuffId))
+        {
+            isInactive = false;
+            return true;
+        }
+
+        if (meterCache.IsSeasonTalentInactive(characterId))
+        {
+            rootBuffId = 0;
+            isInactive = true;
+            return true;
+        }
+
+        rootBuffId = 0;
+        isInactive = false;
+        return false;
+    }
+
+    /// <summary>
+    /// シーズンタレントの型が無効と確定しているか。全バフスナップショットを受け取った上で根ノードのバフが無かったときだけ true
+    /// (<see cref="Entity.IsSeasonTalentInactive"/>)。
+    /// </summary>
+    private static bool ResolveSeasonTalentInactive(
+        long characterId,
+        Entity? nearbyEntity,
+        Entity? metadataEntity,
+        bool isSelf)
+    {
+        if (nearbyEntity?.IsSeasonTalentInactive == true
+            || metadataEntity?.IsSeasonTalentInactive == true)
+        {
+            return true;
+        }
+
+        return !isSelf
+            && TryResolveCachedSeasonTalent(characterId, out _, out var cachedInactive)
+            && cachedInactive;
     }
 
     /// <summary>

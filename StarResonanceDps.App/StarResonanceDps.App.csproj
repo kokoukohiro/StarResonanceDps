@@ -44,6 +44,7 @@
     <None Remove="Assets\Images\common_icon06.png" />
     <None Remove="Assets\Images\head_photo_000.png" />
     <None Remove="Assets\Images\idcard_common_01.png" />
+    <None Remove="Assets\Images\img_seasontalent_main_btn_bg1.png" />
     <None Remove="Assets\Images\main_progress_icon_dark.png" />
     <None Remove="Assets\Images\main_progress_icon_electricity.png" />
     <None Remove="Assets\Images\main_progress_icon_fire.png" />
@@ -63,6 +64,16 @@
     <None Remove="Assets\Images\profession_horizontal_08.png" />
     <None Remove="Assets\Images\profession_horizontal_09.png" />
     <None Remove="Assets\Images\profession_horizontal_hud00.png" />
+    <None Remove="Assets\Images\s2talent01_01.png" />
+    <None Remove="Assets\Images\s2talent02_01.png" />
+    <None Remove="Assets\Images\s2talent03_01.png" />
+    <None Remove="Assets\Images\s2talent04_01.png" />
+    <None Remove="Assets\Images\s2talent051_01.png" />
+    <None Remove="Assets\Images\s2talent054_01.png" />
+    <None Remove="Assets\Images\s2talent05_01.png" />
+    <None Remove="Assets\Images\s2talent06_01.png" />
+    <None Remove="Assets\Images\s2talent07_01.png" />
+    <None Remove="Assets\Images\s2talent08_01.png" />
     <None Remove="Assets\Images\team_num_frame.png" />
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
@@ -158,6 +169,7 @@
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
+    <Resource Include="Assets\Images\img_seasontalent_main_btn_bg1.png" />
     <Resource Include="Assets\Images\main_progress_icon_dark.png" />
     <Resource Include="Assets\Images\main_progress_icon_electricity.png" />
     <Resource Include="Assets\Images\main_progress_icon_fire.png" />
@@ -177,6 +189,16 @@
     <Resource Include="Assets\Images\profession_horizontal_08.png" />
     <Resource Include="Assets\Images\profession_horizontal_09.png" />
     <Resource Include="Assets\Images\profession_horizontal_hud00.png" />
+    <Resource Include="Assets\Images\s2talent01_01.png" />
+    <Resource Include="Assets\Images\s2talent02_01.png" />
+    <Resource Include="Assets\Images\s2talent03_01.png" />
+    <Resource Include="Assets\Images\s2talent04_01.png" />
+    <Resource Include="Assets\Images\s2talent051_01.png" />
+    <Resource Include="Assets\Images\s2talent054_01.png" />
+    <Resource Include="Assets\Images\s2talent05_01.png" />
+    <Resource Include="Assets\Images\s2talent06_01.png" />
+    <Resource Include="Assets\Images\s2talent07_01.png" />
+    <Resource Include="Assets\Images\s2talent08_01.png" />
     <Resource Include="Assets\Images\team_num_frame.png" />
   </ItemGroup>
 

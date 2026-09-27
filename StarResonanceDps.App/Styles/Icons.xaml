@@ -73,6 +73,22 @@
     <BitmapImage x:Key="Icon.RoleSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_01.png" />
     <BitmapImage x:Key="Icon.ImagineSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_02.png" />
 
+    <!--
+        シーズン心相晶。型の絵の鍵の末尾は同梱のファイル名。
+        どの型がどれを使うかは Services/SeasonTalentIcons の表が持つ。
+    -->
+    <BitmapImage x:Key="Icon.SeasonTalentFrame" UriSource="/Assets/Images/img_seasontalent_main_btn_bg1.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent01_01" UriSource="/Assets/Images/s2talent01_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent02_01" UriSource="/Assets/Images/s2talent02_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent03_01" UriSource="/Assets/Images/s2talent03_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent04_01" UriSource="/Assets/Images/s2talent04_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent05_01" UriSource="/Assets/Images/s2talent05_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent06_01" UriSource="/Assets/Images/s2talent06_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent07_01" UriSource="/Assets/Images/s2talent07_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent08_01" UriSource="/Assets/Images/s2talent08_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent051_01" UriSource="/Assets/Images/s2talent051_01.png" />
+    <BitmapImage x:Key="Icon.SeasonTalent.s2talent054_01" UriSource="/Assets/Images/s2talent054_01.png" />
+
     <Style x:Key="Icon.PlayerListSkillFrame" TargetType="{x:Type Image}">
         <Setter Property="Source" Value="{StaticResource Icon.RoleSkillFrame}" />
         <Setter Property="Stretch" Value="Fill" />

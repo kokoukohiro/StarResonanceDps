@@ -33,6 +33,8 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.ProfessionId),
             nameof(Entity.SubProfessionId),
             nameof(Entity.HasBuffSnapshot),
+            nameof(Entity.SeasonTalentBuffId),
+            nameof(Entity.HasSeasonTalentSnapshot),
             nameof(Entity.IsNpc),
             nameof(Entity.SeasonLevel),
             nameof(Entity.SeasonStrength),

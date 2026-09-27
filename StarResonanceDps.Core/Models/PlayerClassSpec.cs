@@ -211,4 +211,17 @@ public static class PlayerClassSpecResolver
             _ => PlayerClassSpec.Unknown
         };
     }
+
+    /// <summary><see cref="ToSubProfessionId"/> の表。特化の番号の列挙を全部 <see cref="FromSubProfessionId"/> に通して作る。</summary>
+    private static readonly Dictionary<PlayerClassSpec, int> SubProfessionIdBySpec =
+        Enum.GetValues<CombatRuntime.DataTypes.Enums.Professions.SubProfessionId>()
+            .Select(subProfessionId => (int)subProfessionId)
+            .Where(subProfessionId => FromSubProfessionId(subProfessionId) != PlayerClassSpec.Unknown)
+            .ToDictionary(FromSubProfessionId, subProfessionId => subProfessionId);
+
+    /// <summary>特化の番号(<c>SubProfessionId</c>)。特化(クラスR2)でなければ 0。</summary>
+    public static int ToSubProfessionId(PlayerClassSpec spec)
+    {
+        return SubProfessionIdBySpec.TryGetValue(spec, out var subProfessionId) ? subProfessionId : 0;
+    }
 }

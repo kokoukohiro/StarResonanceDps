@@ -219,12 +219,6 @@
   <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
   </data>
-  <data name="Settings_PlayerStatus_TextColorRow_Value" xml:space="preserve">
-    <value>第{0}行</value>
-  </data>
-  <data name="Settings_PlayerStatus_TextColorRow_New" xml:space="preserve">
-    <value>新增行</value>
-  </data>
   <data name="Common_Delete" xml:space="preserve">
     <value>删除</value>
   </data>
@@ -481,7 +475,7 @@
     <value>实体列表</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
-    <value>职业颜色</value>
+    <value>图标颜色</value>
   </data>
   <data name="Settings_Section_IconColors_Title" xml:space="preserve">
     <value>图标颜色</value>
@@ -564,59 +558,11 @@
   <data name="ClassSpec_Unknown" xml:space="preserve">
     <value>未知</value>
   </data>
-  <data name="ClassSpec_ShieldKnightRecovery" xml:space="preserve">
-    <value>防盾</value>
+  <data name="SeasonTalent_Inactive" xml:space="preserve">
+    <value>未启用</value>
   </data>
-  <data name="ClassSpec_ShieldKnightShield" xml:space="preserve">
-    <value>光盾</value>
-  </data>
-  <data name="ClassSpec_HeavyGuardianEarthfort" xml:space="preserve">
-    <value>岩盾</value>
-  </data>
-  <data name="ClassSpec_HeavyGuardianBlock" xml:space="preserve">
-    <value>格挡</value>
-  </data>
-  <data name="ClassSpec_StormbladeIaidoSlash" xml:space="preserve">
-    <value>居合</value>
-  </data>
-  <data name="ClassSpec_StormbladeMoonStrike" xml:space="preserve">
-    <value>月刃</value>
-  </data>
-  <data name="ClassSpec_WindKnightVanGuard" xml:space="preserve">
-    <value>重装</value>
-  </data>
-  <data name="ClassSpec_WindKnightSkyward" xml:space="preserve">
-    <value>空枪</value>
-  </data>
-  <data name="ClassSpec_FrostMageIcicle" xml:space="preserve">
-    <value>冰矛</value>
-  </data>
-  <data name="ClassSpec_FrostMageFrostBeam" xml:space="preserve">
-    <value>射线</value>
-  </data>
-  <data name="ClassSpec_MarksmanWildpack" xml:space="preserve">
-    <value>狼弓</value>
-  </data>
-  <data name="ClassSpec_MarksmanFalconry" xml:space="preserve">
-    <value>鹰弓</value>
-  </data>
-  <data name="ClassSpec_VerdantOracleSmite" xml:space="preserve">
-    <value>惩戒</value>
-  </data>
-  <data name="ClassSpec_VerdantOracleLifeBind" xml:space="preserve">
-    <value>愈合</value>
-  </data>
-  <data name="ClassSpec_SoulMusicianDissonance" xml:space="preserve">
-    <value>狂音</value>
-  </data>
-  <data name="ClassSpec_SoulMusicianConcerto" xml:space="preserve">
-    <value>协奏</value>
-  </data>
-  <data name="ClassSpec_FlameBerserkerFormless" xml:space="preserve">
-    <value>无相</value>
-  </data>
-  <data name="ClassSpec_FlameBerserkerCrimson" xml:space="preserve">
-    <value>赤红</value>
+  <data name="SeasonTalent_Unknown" xml:space="preserve">
+    <value>未知</value>
   </data>
   <data name="Widget_PlayerStatus" xml:space="preserve">
     <value>属性详情</value>
@@ -643,13 +589,13 @@
     <value>职业专精</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>职业颜色不透明度</value>
+    <value>图标颜色不透明度</value>
   </data>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>无法复活({0})</value>
   </data>
   <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>职业颜色滤镜</value>
+    <value>图标颜色滤镜</value>
   </data>
   <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
     <value>滤镜颜色</value>
@@ -658,13 +604,13 @@
     <value>滤镜强度</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>元素颜色</value>
+    <value>图标颜色</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>元素颜色不透明度</value>
+    <value>图标颜色不透明度</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>元素颜色滤镜</value>
+    <value>图标颜色滤镜</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
@@ -731,6 +677,9 @@
   </data>
   <data name="Settings_PlayerInfo_Field_Class" xml:space="preserve">
     <value>职业流派</value>
+  </data>
+  <data name="Settings_PlayerInfo_Field_SeasonTalent" xml:space="preserve">
+    <value>赛季心相仪</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
     <value>战力</value>
@@ -930,6 +879,9 @@
   <data name="Settings_Display_HealthValue" xml:space="preserve">
     <value>HP数值</value>
   </data>
+  <data name="Settings_Display_SeasonTalent" xml:space="preserve">
+    <value>显示赛季心相仪</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>护盾量合并显示</value>
   </data>
@@ -940,13 +892,7 @@
     <value>筛选设置</value>
   </data>
   <data name="Settings_Display_SelfDisplay" xml:space="preserve">
-    <value>自己显示</value>
-  </data>
-  <data name="SelfDisplay_Highlight" xml:space="preserve">
-    <value>高亮显示</value>
-  </data>
-  <data name="SelfDisplay_Normal" xml:space="preserve">
-    <value>普通显示</value>
+    <value>自己高亮显示</value>
   </data>
   <data name="PartyDisplay_All" xml:space="preserve">
     <value>全部显示</value>
@@ -1275,10 +1221,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>格挡</value>
   </data>
-    <data name="PlayerStatus_11990" xml:space="preserve">
+  <data name="PlayerStatus_11990" xml:space="preserve">
     <value>宠物攻击速度</value>
   </data>
-<data name="PlayerStatus_12510" xml:space="preserve">
+  <data name="PlayerStatus_12510" xml:space="preserve">
     <value>暴击伤害</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">

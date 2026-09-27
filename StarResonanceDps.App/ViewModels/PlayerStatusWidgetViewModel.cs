@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Globalization;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
@@ -72,7 +73,7 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
                 _settings.HideInactiveStatusEffects
                     ?? WidgetConfigDefaults.DefaultHideInactiveStatusEffects,
                 _settings.RowVisibility,
-                CreateTextBrushes(_settings.TextColors),
+                CreateTextBrushes(_settings),
                 _rowOrder);
     }
 
@@ -139,32 +140,37 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
         RefreshRows();
     }
 
-    /// <summary>設定の各行の選択色を刷にする。<see cref="PlayerStatusEntry.Create"/> が並びを繰り返して配る。</summary>
-    private static IReadOnlyList<Brush> CreateTextBrushes(IReadOnlyList<PlayerStatusTextColorConfig>? textColors)
+    /// <summary>設定の各行の選択色を、行の鍵ごとの刷にする。</summary>
+    private static IReadOnlyDictionary<int, Brush> CreateTextBrushes(PlayerStatusWidgetSettingsConfig settings)
     {
-        if (textColors is null || textColors.Count == 0)
+        var brushes = new Dictionary<int, Brush>(PlayerStatusEntry.SettingRowAttrIds.Count);
+        var palettes = settings.TextColorPalettes;
+        var indexes = settings.TextColorIndexes;
+        if (palettes is null)
         {
-            return [];
+            return brushes;
         }
 
-        var brushes = new List<Brush>(textColors.Count);
-        foreach (var row in textColors)
+        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
         {
-            var palette = row.Palette;
-            if (palette is null || palette.Count == 0)
+            var key = attrId.ToString(CultureInfo.InvariantCulture);
+            if (!palettes.TryGetValue(key, out var palette) || palette is not { Count: > 0 })
             {
                 continue;
             }
 
-            var hex = palette[Math.Clamp(row.SelectedIndex, 0, palette.Count - 1)];
-            if (!ColorUtilities.TryParseHex(hex, out var color))
+            var index = indexes is not null && indexes.TryGetValue(key, out var saved)
+                ? saved
+                : WidgetConfigDefaults.DefaultPlayerStatusTextColorIndex;
+
+            if (!ColorUtilities.TryParseHex(palette[Math.Clamp(index, 0, palette.Count - 1)], out var color))
             {
                 continue;
             }
 
             var brush = new SolidColorBrush(color);
             brush.Freeze();
-            brushes.Add(brush);
+            brushes[attrId] = brush;
         }
 
         return brushes;
