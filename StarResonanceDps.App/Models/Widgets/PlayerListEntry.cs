@@ -417,6 +417,8 @@ public sealed partial class PlayerListEntry : ObservableObject
         for (var index = 0; index < entries.Count; index++)
         {
             entries[index].UpdateSkill(index < snapshots.Count ? snapshots[index] : null);
+            // 空枠は null で届くので、一覧の長さより後ろの枠だけが不明。
+            entries[index].IsSlotKnown = index < snapshots.Count;
         }
     }
 

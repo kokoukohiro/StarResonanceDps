@@ -615,9 +615,6 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
   </data>
-  <data name="Widget_NoMetricData" xml:space="preserve">
-    <value>데이터 없음</value>
-  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>순간 HPS 그래프</value>
   </data>

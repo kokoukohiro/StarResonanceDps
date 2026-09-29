@@ -44,6 +44,13 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
     [ObservableProperty]
     private bool _hasSkill;
 
+    /// <summary>
+    /// 枠の中身が分かっているか。何も装備していない枠(自分のアクションバーの空枠、一覧が届いた他人の足りない枠)は、分かっている(空)に入る。
+    /// 一覧が届くまでは分からない。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSlotKnown;
+
     [ObservableProperty]
     private string _nameDisplayText = string.Empty;
 

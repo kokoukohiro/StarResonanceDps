@@ -34,12 +34,6 @@ public sealed partial class EntityBuffListWidgetViewModel
     [ObservableProperty]
     private string _headerText = string.Empty;
 
-    [ObservableProperty]
-    private string _noDataText = string.Empty;
-
-    [ObservableProperty]
-    private bool _hasEntries;
-
     public EntityBuffListWidgetViewModel(
         WidgetListItemViewModel widget,
         EntityWindowTarget target,

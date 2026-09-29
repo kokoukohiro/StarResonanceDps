@@ -615,9 +615,6 @@
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
   </data>
-  <data name="Widget_NoMetricData" xml:space="preserve">
-    <value>暂无数据</value>
-  </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>瞬时HPS图表</value>
   </data>

@@ -82,7 +82,6 @@ public static class SpecDetectionTables
         2200150  => (SubProfessionId.SubProfession_Iaido,             11), // 雷刃  根から11 node=113018  刃风界域
         2200160  => (SubProfessionId.SubProfession_Moonstrike,         3), // 月影  根から3 node=157001  雷魂之触
         2200170  => (SubProfessionId.SubProfession_Moonstrike,        11), // 月影  根から11 node=121011  幸运雷印
-        2200180  => (SubProfessionId.SubProfession_Moonstrike,         6), // 月影  根から6 node=5608  镰刀分裂
         2200200  => (SubProfessionId.SubProfession_Moonstrike,         7), // 月影  根から7 node=118011  幻镰之境
         2200210  => (SubProfessionId.SubProfession_Moonstrike,        12), // 月影  根から12 node=119011  月刃疾袭
         2200220  => (SubProfessionId.SubProfession_Moonstrike,         8), // 月影  根から8 node=160001  雷电之力
@@ -297,14 +296,6 @@ public static class SpecDetectionTables
         2204190  => (SubProfessionId.SubProfession_Icicle,            10), // 氷牙  根から10 node=221011  冰川怒潮
         2204200  => (SubProfessionId.SubProfession_Icicle,            10), // 氷牙  根から10 node=215011  极寒之矛
         2204230  => (SubProfessionId.SubProfession_Frostbeam,          6), // 霜天  根から6 node=234001  玄冰无界
-        // 2204240 氷霜衝撃(Frost Shock, node=226026) は除外。丸めで同じ扱いになる 2204241 が
-        // 霜天からも出るため。その出所は 2204250 急速冷凍 で、TalentTreeTable に
-        // 氷牙(node=227027 wt=2/bd=0)と霜天(node=256001 wt=2/bd=1)の2ノードが実在する共有タレント。
-        // どちらの特化とも言えないので判定表のキーにできず、親優先でも解けない。
-        //
-        // 「親が 2204250 なら帰属しない」関門を足して戻す形は採らない。キーを外しておけば
-        // 2204241 はそもそも解決段階に入らないので、関門は死にコードになる。
-        // 再生成しても復活させないこと。
         2204260  => (SubProfessionId.SubProfession_Frostbeam,          7), // 霜天  根から7 node=228026  冰息宁静
         2204290  => (SubProfessionId.SubProfession_Frostbeam,          5), // 霜天  根から5 node=231003  冰光共鸣
         2204300  => (SubProfessionId.SubProfession_Icicle,             0), // 氷牙  根から0 node=233002  冰矛流
@@ -447,16 +438,6 @@ public static class SpecDetectionTables
         2207090  => (SubProfessionId.SubProfession_Dissonance,         0), // 狂音  根から0 node=1308006  近战流
         2207100  => (SubProfessionId.SubProfession_Dissonance,         5), // 狂音  根から5 node=1313006  幸运闪光
         2207110  => (SubProfessionId.SubProfession_Dissonance,         2), // 狂音  根から2 node=6558  全域展开
-        // 2207120 断章(node=6557) は除外。丸めで同じ扱いになる 2207121 断章_BK効率 が、
-        // パーティメンバーに配られる効果バフだから(AttrDescription 2207120:
-        // 「自身と30m以内にいるパーティメンバーのブレイク効率+10%」)。
-        // 受け手のクラスは狂音とは限らず、術者として届く UUID も受け手側のことがある
-        // (2202540 共生之息 と同じ形)。
-        //
-        // 親優先(TryResolveSpecByParentBuff)では解けない。2207121 の親は 2207120 そのもの、
-        // つまりこの表のキーなので、同じ狂音へ着地する(2208650 と同じ形)。
-        //
-        // 再生成しても復活させないこと。
         2207130  => (SubProfessionId.SubProfession_Dissonance,         2), // 狂音  根から2 node=2401  音浪烈焰
         2207140  => (SubProfessionId.SubProfession_Dissonance,         5), // 狂音  根から5 node=1312006  双重旋律
         2207150  => (SubProfessionId.SubProfession_Dissonance,         6), // 狂音  根から6 node=1328012  炽焰治愈
@@ -548,16 +529,6 @@ public static class SpecDetectionTables
         2208620  => (SubProfessionId.SubProfession_CrimsonExpertise,   8), // 炎舞  根から8 node=361005  迷狂炎舞派生
         2208630  => (SubProfessionId.SubProfession_CrimsonExpertise,  12), // 炎舞  根から12 node=362005  迷狂炎舞三刀流判定
         2208640  => (SubProfessionId.SubProfession_CrimsonExpertise,  10), // 炎舞  根から10 node=363005  迷狂炎舞段数判定
-        // 2208650 大红莲丸触发逻辑(node=364005) は除外。丸めで同じ扱いになる 2208652 大红莲丸派生 が
-        // 因子(シーズンタレント) 3060430「真实因子-触发大红莲丸，增伤buff」からも出るため。
-        // 因子はID帯 3050000〜3060999 で、系列 3060 = 赤焰。ワイヤでは fightSourceType=13 SeasonTalent。
-        // タレントではないので判定表のキーにできず、親優先(TryResolveSpecByParentBuff)でも解けない。
-        // キーに残すと、因子だけ着けた双炎の人が炎舞にされる。
-        //
-        // 本物の炎舞では 2208650(ftype=6) → 2208651 大红莲丸计数 → 2208652 と繋がり、
-        // 同じ人には兄弟キー 2208640 も当たる。
-        //
-        // 再生成しても復活させないこと。
         2208660  => (SubProfessionId.SubProfession_CrimsonExpertise,   9), // 炎舞  根から9 node=365005  炎舞的急速奥义
         2208670  => (SubProfessionId.SubProfession_CrimsonExpertise,   6), // 炎舞  根から6 node=366005  怒焰奥义
         _ => (SubProfessionId.SubProfession_Unknown, -1)

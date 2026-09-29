@@ -20,12 +20,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     [ObservableProperty]
     private PlayerMetricSummaryEntry? _summary;
 
-    [ObservableProperty]
-    private string _noDataText = string.Empty;
-
-    [ObservableProperty]
-    private bool _hasMetricData;
-
     public PlayerMetricSummaryWidgetViewModel(
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,
@@ -95,12 +89,9 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
 
         _isBenchmarkUiFrozen = benchmarkState.IsCompleted;
 
-        NoDataText = LocalizationManager.Instance.GetString("Widget_NoMetricData");
-
         if (SelectedCharacterId is not { } characterId)
         {
             Summary = CreateEntry(MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0), _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
-            HasMetricData = false;
             return;
         }
 
@@ -113,10 +104,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
         var snapshot = MeterSnapshotProvider.GetPlayerMetricSummary(_kind, characterId);
         Summary = CreateEntry(snapshot, numberDisplayFormatIndex);
-        HasMetricData = snapshot.TotalValue > 0UL
-            || snapshot.ExtraTotalValue > 0UL
-            || snapshot.HitsCount > 0UL
-            || snapshot.CastsCount > 0UL;
     }
 
     private PlayerMetricSummaryEntry CreateEntry(

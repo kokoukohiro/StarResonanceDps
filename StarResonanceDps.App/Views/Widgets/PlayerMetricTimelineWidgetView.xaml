@@ -37,21 +37,6 @@
                                           LineBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowCloseBrush}"
                                           GridBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowDividerBrush}"
                                           TextBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowCloseBrush}" />
-            <TextBlock HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Opacity="0.7"
-                       Text="{Binding NoDataText}">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding HasMetricData}" Value="False">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
         </Grid>
 
         <StackPanel Grid.Row="2"

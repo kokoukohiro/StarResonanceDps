@@ -142,6 +142,16 @@
                   ClipToBounds="False"
                   ToolTipService.IsEnabled="{Binding HasSkill}"
                   Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}">
+                <!-- 枠の中身が不明なら出さない。場所は残す(ロールスキルが横へ動かないように)。 -->
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSlotKnown}" Value="False">
+                                <Setter Property="Visibility" Value="Hidden" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
                 <Grid.ToolTip>
                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                              Style="{StaticResource ToolTip.WidgetWindowInfo}">

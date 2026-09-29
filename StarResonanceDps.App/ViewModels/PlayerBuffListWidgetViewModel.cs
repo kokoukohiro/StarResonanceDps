@@ -28,12 +28,6 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     [ObservableProperty]
     private Brush _gaugeBrush = Brushes.Transparent;
 
-    [ObservableProperty]
-    private string _noDataText = string.Empty;
-
-    [ObservableProperty]
-    private bool _hasEntries;
-
     public PlayerBuffListWidgetViewModel(
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,

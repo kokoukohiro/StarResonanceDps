@@ -829,7 +829,7 @@ public static class MeterSnapshotProvider
         // 他人は習得済みの集合しか届かず装備を判別できないので、上限を設けず取れた数だけ返す。
         const int SelfRoleSlotCount = 4;
 
-        var imagineSkills = new List<PlayerCooldownSkillSnapshot>(2);
+        var imagineSkills = new List<PlayerCooldownSkillSnapshot?>(2);
         var roleSkills = new List<PlayerCooldownSkillSnapshot>();
         var includedSkillIds = new HashSet<int>();
 
@@ -895,6 +895,16 @@ public static class MeterSnapshotProvider
             }
 
             // 他人はロールスキルに上限が無いので打ち切らない。
+        }
+
+        // 一覧に入るイマジンは装備中のものだけなので、一覧が届いていれば見つからない枠は未装着。
+        // null で埋めて2枠にし、一覧が届いていない(不明)の0枠と分ける。自分のアクションバーの空枠と同じ形。
+        if (skillLevels.Count > 0)
+        {
+            while (imagineSkills.Count < 2)
+            {
+                imagineSkills.Add(null);
+            }
         }
 
         return new PlayerImagineRoleSkillLoadoutSnapshot(

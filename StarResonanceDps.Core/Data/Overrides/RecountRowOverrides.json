@@ -628,5 +628,29 @@
   },
   "3913001:3": {
     "Row": "391301:0"
+  },
+  "6015501:1": {
+    "Name": {
+      "zh-CN": "召唤火焰炮台",
+      "en-US": "Summon Flame Turret",
+      "ja-JP": "火炎砲台召喚",
+      "ko-KR": "화염 포탑 소환"
+    }
+  },
+  "6015601:1": {
+    "Name": {
+      "zh-CN": "召唤弹幕炮台",
+      "en-US": "Summon Barrage Turret",
+      "ja-JP": "弾幕砲台召喚",
+      "ko-KR": "탄막 포탑 소환"
+    }
+  },
+  "6015702:1": {
+    "Name": {
+      "zh-CN": "召唤天火炮台",
+      "en-US": "Summon Skyfire Turret",
+      "ja-JP": "烈火砲台召喚",
+      "ko-KR": "하늘 불길 포탑 소환"
+    }
   }
 }

@@ -65,8 +65,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private string _totalLabel = string.Empty;
     private string _totalValueText = string.Empty;
     private string _latestValueText = string.Empty;
-    private string _noDataText = string.Empty;
-    private bool _hasMetricData;
     private bool _isBenchmarkUiFrozen;
     private bool _isDisposed;
 
@@ -131,18 +129,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     {
         get => _latestValueText;
         private set => SetProperty(ref _latestValueText, value);
-    }
-
-    public string NoDataText
-    {
-        get => _noDataText;
-        private set => SetProperty(ref _noDataText, value);
-    }
-
-    public bool HasMetricData
-    {
-        get => _hasMetricData;
-        private set => SetProperty(ref _hasMetricData, value);
     }
 
     public string TotalValueHeader => LocalizationManager.Instance.GetString(
@@ -232,7 +218,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             ? LocalizationManager.Instance.GetString(_kind == MeterSnapshotKind.Damage ? "Metric_InstantDps" : "Metric_InstantHps")
             : (_kind == MeterSnapshotKind.Damage ? "DPS" : "HPS");
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
-        NoDataText = LocalizationManager.Instance.GetString("Widget_NoMetricData");
 
         if (SelectedCharacterId is not { } characterId)
         {
@@ -261,7 +246,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             LatestValueText = timeline.Points.Count == 0
                 ? string.Empty
                 : MeterNumberFormatter.Format(timeline.Points[^1].ValuePerSecond, numberDisplayFormatIndex);
-            HasMetricData = timeline.Points.Count > 0;
             return;
         }
 
@@ -270,7 +254,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         TotalValueText = MeterNumberFormatter.Format(table.TotalValue, numberDisplayFormatIndex);
         LatestValueText = string.Empty;
         SynchronizeSkillEntries(table.Entries, numberDisplayFormatIndex);
-        HasMetricData = table.Entries.Count > 0;
     }
 
     private void ApplyEmptyData(int numberDisplayFormatIndex)
@@ -279,7 +262,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         ClearSkillEntries();
         TotalValueText = MeterNumberFormatter.Format(0UL, numberDisplayFormatIndex);
         LatestValueText = string.Empty;
-        HasMetricData = false;
     }
 
     /// <summary>
