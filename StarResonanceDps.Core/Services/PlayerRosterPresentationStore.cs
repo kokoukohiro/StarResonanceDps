@@ -16,6 +16,7 @@ public sealed class PlayerRosterPresentationStore
     private string _mapName = string.Empty;
     private uint _mapChannel;
     private long _mapGeneration;
+    private int _seasonId;
     private PlayerNameDisplayMode _nameDisplayMode = PlayerNameDisplayMode.Show;
 
     private PlayerRosterPresentationStore()
@@ -27,6 +28,7 @@ public sealed class PlayerRosterPresentationStore
         _mapName = current.MapName;
         _mapChannel = current.MapChannel;
         _mapGeneration = current.MapGeneration;
+        _seasonId = current.SeasonId;
     }
 
     public static PlayerRosterPresentationStore Instance => LazyInstance.Value;
@@ -39,7 +41,7 @@ public sealed class PlayerRosterPresentationStore
         {
             lock (_sync)
             {
-                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
+                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration, _seasonId);
             }
         }
     }
@@ -82,7 +84,8 @@ public sealed class PlayerRosterPresentationStore
             _mapName = current.MapName;
             _mapChannel = current.MapChannel;
             _mapGeneration = current.MapGeneration;
-            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
+            _seasonId = current.SeasonId;
+            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration, _seasonId);
         }
 
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot));
@@ -97,7 +100,8 @@ public sealed class PlayerRosterPresentationStore
             _mapName = e.MapName;
             _mapChannel = e.MapChannel;
             _mapGeneration = e.MapGeneration;
-            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
+            _seasonId = e.SeasonId;
+            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration, _seasonId);
         }
 
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot));

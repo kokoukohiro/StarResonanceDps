@@ -573,20 +573,20 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>장비 정보</value>
   </data>
-  <data name="PlayerInfo_Name" xml:space="preserve">
-    <value>이름</value>
+  <data name="PlayerInfo_Uid" xml:space="preserve">
+    <value>UID</value>
   </data>
   <data name="PlayerInfo_Level" xml:space="preserve">
-    <value>레벨</value>
+    <value>생체 엔그램 레벨</value>
   </data>
   <data name="PlayerInfo_AbilityScore" xml:space="preserve">
-    <value>전투력</value>
+    <value>능력 점수</value>
   </data>
-  <data name="PlayerInfo_Profession" xml:space="preserve">
-    <value>직업</value>
+  <data name="PlayerInfo_Location" xml:space="preserve">
+    <value>현재 위치</value>
   </data>
-  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
-    <value>직업 특성</value>
+  <data name="PlayerInfo_Unknown" xml:space="preserve">
+    <value>알 수 없음</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>아이콘 색상 불투명도</value>
@@ -1050,7 +1050,6 @@
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
     <value>※던전에서 보스 방 진입 등</value>
   </data>
-  <!-- ステータス詳細の項目名。鍵は属性の番号。 -->
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>이동 속도</value>
   </data>
@@ -1222,10 +1221,10 @@
   <data name="PlayerStatus_11970" xml:space="preserve">
     <value>막기</value>
   </data>
-    <data name="PlayerStatus_11990" xml:space="preserve">
+  <data name="PlayerStatus_11990" xml:space="preserve">
     <value>야수 공격 속도</value>
   </data>
-<data name="PlayerStatus_12510" xml:space="preserve">
+  <data name="PlayerStatus_12510" xml:space="preserve">
     <value>치명타 대미지</value>
   </data>
   <data name="PlayerStatus_12530" xml:space="preserve">
@@ -1395,5 +1394,47 @@
   </data>
   <data name="PlayerStatus_20120" xml:space="preserve">
     <value>전투 상태에서 스태미나 회복 속도</value>
+  </data>
+  <data name="Settings_IconColors_UnknownClass" xml:space="preserve">
+    <value>알 수 없음(클래스)</value>
+  </data>
+  <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
+    <value>알 수 없음(시즌 심상의)</value>
+  </data>
+  <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
+    <value>심상의 미적용</value>
+  </data>
+  <data name="ClassSpec_NameSuffix" xml:space="preserve">
+    <value> 계열</value>
+  </data>
+  <data name="PlayerInfo_SeasonTalentInactive" xml:space="preserve">
+    <value>심상의 미적용</value>
+  </data>
+  <data name="PlayerInfo_SeasonRank" xml:space="preserve">
+    <value>시즌 타이틀</value>
+  </data>
+  <data name="PlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>시즌 강도</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAs" xml:space="preserve">
+    <value>다른 이름으로 이미지 저장…</value>
+  </data>
+  <data name="PlayerInfo_CopyImage" xml:space="preserve">
+    <value>이미지 복사</value>
+  </data>
+  <data name="PlayerInfo_SaveImageDialogTitle" xml:space="preserve">
+    <value>다른 이름으로 저장</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
+    <value>{0} 파일</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
+    <value>모든 파일</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
+    <value>이미지를 저장하지 못했습니다</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
+    <value>이미지를 복사하지 못했습니다</value>
   </data>
 </root>

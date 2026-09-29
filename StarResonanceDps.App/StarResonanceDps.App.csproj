@@ -12,9 +12,14 @@
 
   <ItemGroup>
     <None Remove="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
+    <None Remove="Assets\Images\achievement_simclass_new_huanhuanhua.png" />
+    <None Remove="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
+    <None Remove="Assets\Images\achievement_simclass_new_s4.png" />
+    <None Remove="Assets\Images\achievement_simclass_new_xushirongguang.png" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
     <None Remove="Assets\Images\ApplicationIcon.ico" />
     <None Remove="Assets\Images\com_icon_question.png" />
+    <None Remove="Assets\Images\com_icon_tab_113.png" />
     <None Remove="Assets\Images\com_icon_tab_146.png" />
     <None Remove="Assets\Images\com_icon_tab_147.png" />
     <None Remove="Assets\Images\com_icon_tab_148.png" />
@@ -84,6 +89,7 @@
 
   <ItemGroup>
     <Resource Include="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
+    <Resource Include="Assets\Images\com_icon_tab_113.png" />
     <Resource Include="Assets\Images\com_icon_tab_146.png" />
     <Resource Include="Assets\Images\com_icon_tab_147.png" />
     <Resource Include="Assets\Images\com_icon_tab_148.png" />
@@ -166,6 +172,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\Images\achievement_simclass_new_huanhuanhua.png" />
+    <Resource Include="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
+    <Resource Include="Assets\Images\achievement_simclass_new_s4.png" />
+    <Resource Include="Assets\Images\achievement_simclass_new_xushirongguang.png" />
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />

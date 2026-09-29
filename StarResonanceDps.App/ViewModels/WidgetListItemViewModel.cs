@@ -24,6 +24,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
     private TakenDamageLogWidgetSettingsConfig _takenDamageLog = WidgetConfigDefaults.CreateTakenDamageLogSettings();
+    private PlayerInfoWidgetSettingsConfig _playerInfo = WidgetConfigDefaults.CreatePlayerInfoSettings();
     private BuffListWidgetSettingsConfig _buffList = WidgetConfigDefaults.CreateBuffListSettings(WidgetKind.BuffList);
     private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
     private SkillDetailWidgetSettingsConfig _skillDetail = WidgetConfigDefaults.CreateSkillDetailSettings();
@@ -133,6 +134,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(_takenDamageLog);
     }
 
+    public PlayerInfoWidgetSettingsConfig GetPlayerInfoSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedPlayerInfo(_playerInfo);
+    }
+
     public BuffListWidgetSettingsConfig GetBuffListSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedBuffList(Kind, _buffList);
@@ -217,6 +223,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public event EventHandler? TakenDamageLogSettingsChanged;
 
+    public event EventHandler? PlayerInfoSettingsChanged;
+
     public event EventHandler? BuffListSettingsChanged;
 
     public event EventHandler? ElementColorSettingsChanged;
@@ -244,9 +252,15 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     private void RenderMapName()
     {
-        MapName = _mapChannel > 0 && !string.IsNullOrEmpty(_mapSceneName)
-            ? $"{_mapSceneName} {LocalizationManager.Instance.Format("Map_ChannelFormat", _mapChannel)}"
-            : _mapSceneName;
+        MapName = FormatMapName(_mapSceneName, _mapChannel);
+    }
+
+    /// <summary>マップ名とチャンネルの表示。プレイヤーリストの左下とプレイヤー情報の現在地が使う。</summary>
+    public static string FormatMapName(string mapName, uint mapChannel)
+    {
+        return mapChannel > 0 && !string.IsNullOrEmpty(mapName)
+            ? $"{mapName} {LocalizationManager.Instance.Format("Map_ChannelFormat", mapChannel)}"
+            : mapName;
     }
 
     public void RefreshLocalizedText()
@@ -278,6 +292,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             TakenDamageLog = WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind)
                 ? _takenDamageLog.Clone()
+                : null,
+            PlayerInfo = WidgetConfigDefaults.SupportsPlayerInfoSettings(Kind)
+                ? _playerInfo.Clone()
                 : null,
             BuffList = WidgetConfigDefaults.SupportsBuffListSettings(Kind)
                 ? _buffList.Clone()
@@ -331,6 +348,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config.TakenDamageLog);
             TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsPlayerInfoSettings(Kind))
+        {
+            _playerInfo = WidgetConfigDefaults.CloneNormalizedPlayerInfo(config.PlayerInfo);
+            PlayerInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (WidgetConfigDefaults.SupportsBuffListSettings(Kind))
@@ -411,6 +434,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(takenDamageLog);
         TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyPlayerInfoSettingsPreview(PlayerInfoWidgetSettingsConfig playerInfo)
+    {
+        if (!WidgetConfigDefaults.SupportsPlayerInfoSettings(Kind))
+        {
+            return;
+        }
+
+        _playerInfo = WidgetConfigDefaults.CloneNormalizedPlayerInfo(playerInfo);
+        PlayerInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyBuffListSettingsPreview(BuffListWidgetSettingsConfig buffList)

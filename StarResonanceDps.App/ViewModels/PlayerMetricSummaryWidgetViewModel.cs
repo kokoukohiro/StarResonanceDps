@@ -107,7 +107,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         var playerIdentity = MeterSnapshotProvider.GetPlayerIdentity(characterId);
         if (playerIdentity is not null)
         {
-            SetHeaderText(playerIdentity.Name, playerIdentity.UserId);
+            SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
         var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;

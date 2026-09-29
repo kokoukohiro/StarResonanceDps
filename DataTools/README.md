@@ -17,6 +17,7 @@ python gen_rogue_entries.py   # オプション(ローグ系モード)の名前
 python gen_buff_groups.py     # 料理・薬剤のバフの名前
 python gen_season_talents.py  # シーズンタレントの型の根ノードの名前
 python gen_class_specs.py     # 職業の特化の名前
+python gen_seasons.py         # シーズンの名前とシーズンランクの名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -101,6 +102,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_buff_groups.py` | `Data/Localization/CuisineBuffs.json`<br>`Data/Localization/PotionBuffs.json` |
 | `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json` |
 | `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
+| `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
 
 ## 全ツール共通の仕様
 
@@ -566,6 +568,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 [段階の名前, 特化の名前] で、2番目を使う。
 
 **名前から、その言語の全特化の名前に共通する語尾を落とす。** 語尾は言語ごとに生成器の `COMMON_SUFFIX` で決めている。
+同じ語尾はアプリのリソース `ClassSpec_NameSuffix` にもあり、語尾を付け直して出す表示がそれを使う。変えるときは両方を直す。
 
 出所の土台は鍵の単位で決める(`gen_season_talents.py` と同じ)。土台にその鍵の名前があれば土台だけを使い、無いときだけもう一方を使う。
 
@@ -575,3 +578,20 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 - 段階の行の名前が2要素でない
 - 使う名前が、その言語の共通の語尾で終わっていない
 - 出所に段階の表が無い
+
+## gen_seasons.py
+
+シーズンの名前と、シーズンランクの名前を書く。
+
+- `SeasonNames.json`: **鍵はシーズン番号。** 値は `AchievementSeasonClassTable` のうち `Type` がそのシーズン番号の行で、
+  `SortID` が一番小さい行の `ClassName`。`Type` 0 はシーズンに属さない分類なので入れない
+- `SeasonRankNames.json`: **鍵は シーズン番号 × 100 ＋ 段階(`SeasonRankTable.RankToLevel`)。** 値は、その段階の行のうち
+  `StarLevel` が一番小さい行の `Name`。同じ段階の中で名前が分かれていれば一覧を出し、★が一番小さい行を採る
+
+出所の土台は鍵の単位で決める(`gen_season_talents.py` と同じ)。土台にその鍵の名前があれば土台だけを使い、無いときだけもう一方を使う。
+
+次のときは止まる。
+
+- シーズンの分類で、`SortID` が一番小さい行が2行以上ある
+- 段階の行で、`StarLevel` が一番小さい行が2行以上ある
+- 段階が鍵の桁に収まらない(0 未満か 100 以上)、シーズン番号が 1 未満

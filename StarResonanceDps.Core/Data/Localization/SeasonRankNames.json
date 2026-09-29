@@ -1,0 +1,530 @@
+{
+  "100": {
+    "zh-CN": "见习侦查员一",
+    "en-US": "Novice Ranger I",
+    "ja-JP": "見習い調査員I",
+    "ko-KR": "견습 정찰원1"
+  },
+  "101": {
+    "zh-CN": "见习侦查员二",
+    "en-US": "Novice Ranger II",
+    "ja-JP": "見習い調査員II",
+    "ko-KR": "견습 정찰원2"
+  },
+  "102": {
+    "zh-CN": "见习侦查员三",
+    "en-US": "Novice Ranger III",
+    "ja-JP": "見習い調査員III",
+    "ko-KR": "견습 정찰원3"
+  },
+  "103": {
+    "zh-CN": "初阶追踪者一",
+    "en-US": "Rookie Tracker I",
+    "ja-JP": "初級追跡者I",
+    "ko-KR": "초급 추적자1"
+  },
+  "104": {
+    "zh-CN": "初阶追踪者二",
+    "en-US": "Rookie Tracker II",
+    "ja-JP": "初級追跡者II",
+    "ko-KR": "초급 추적자2"
+  },
+  "105": {
+    "zh-CN": "初阶追踪者三",
+    "en-US": "Rookie Tracker III",
+    "ja-JP": "初級追跡者III",
+    "ko-KR": "초급 추적자3"
+  },
+  "106": {
+    "zh-CN": "高阶捕手一",
+    "en-US": "Advanced Snatcher I",
+    "ja-JP": "上級保安官I",
+    "ko-KR": "고급 포수1"
+  },
+  "107": {
+    "zh-CN": "高阶捕手二",
+    "en-US": "Advanced Snatcher II",
+    "ja-JP": "上級保安官II",
+    "ko-KR": "고급 포수2"
+  },
+  "108": {
+    "zh-CN": "高阶捕手三",
+    "en-US": "Advanced Snatcher III",
+    "ja-JP": "上級保安官III",
+    "ko-KR": "고급 포수3"
+  },
+  "109": {
+    "zh-CN": "高阶捕手四",
+    "en-US": "Advanced Snatcher IV",
+    "ja-JP": "上級保安官IV",
+    "ko-KR": "고급 포수4"
+  },
+  "110": {
+    "zh-CN": "高阶捕手五",
+    "en-US": "Advanced Snatcher V",
+    "ja-JP": "上級保安官V",
+    "ko-KR": "고급 포수5"
+  },
+  "111": {
+    "zh-CN": "精英怪猎人一",
+    "en-US": "Elite Vanquisher I",
+    "ja-JP": "精鋭ハンターI",
+    "ko-KR": "엘리트 몬스터 사냥꾼1"
+  },
+  "112": {
+    "zh-CN": "精英怪猎人二",
+    "en-US": "Elite Vanquisher II",
+    "ja-JP": "精鋭ハンターII",
+    "ko-KR": "엘리트 몬스터 사냥꾼2"
+  },
+  "113": {
+    "zh-CN": "精英怪猎人三",
+    "en-US": "Elite Vanquisher III",
+    "ja-JP": "精鋭ハンターIII",
+    "ko-KR": "엘리트 몬스터 사냥꾼3"
+  },
+  "114": {
+    "zh-CN": "精英怪猎人四",
+    "en-US": "Elite Vanquisher IV",
+    "ja-JP": "精鋭ハンターIV",
+    "ko-KR": "엘리트 몬스터 사냥꾼4"
+  },
+  "115": {
+    "zh-CN": "精英怪猎人五",
+    "en-US": "Elite Vanquisher V",
+    "ja-JP": "精鋭ハンターV",
+    "ko-KR": "엘리트 몬스터 사냥꾼5"
+  },
+  "116": {
+    "zh-CN": "卓越讨伐者一",
+    "en-US": "Paragon Slayer I",
+    "ja-JP": "異彩の討伐者I",
+    "ko-KR": "탁월한 토벌자1"
+  },
+  "117": {
+    "zh-CN": "卓越讨伐者二",
+    "en-US": "Paragon Slayer II",
+    "ja-JP": "異彩の討伐者II",
+    "ko-KR": "탁월한 토벌자2"
+  },
+  "118": {
+    "zh-CN": "卓越讨伐者三",
+    "en-US": "Paragon Slayer III",
+    "ja-JP": "異彩の討伐者III",
+    "ko-KR": "탁월한 토벌자3"
+  },
+  "119": {
+    "zh-CN": "卓越讨伐者四",
+    "en-US": "Paragon Slayer IV",
+    "ja-JP": "異彩の討伐者IV",
+    "ko-KR": "탁월한 토벌자4"
+  },
+  "120": {
+    "zh-CN": "卓越讨伐者五",
+    "en-US": "Paragon Slayer V",
+    "ja-JP": "異彩の討伐者V",
+    "ko-KR": "탁월한 토벌자5"
+  },
+  "121": {
+    "zh-CN": "至高赏金猎手",
+    "en-US": "Eclipse Bounty Ace",
+    "ja-JP": "至高の賞金ハンター",
+    "ko-KR": "최고의 바운티 헌터"
+  },
+  "200": {
+    "zh-CN": "入梦者一",
+    "en-US": "Dreamer I",
+    "ja-JP": "ドリーマーI",
+    "ko-KR": "꿈을 꾸는 자1"
+  },
+  "201": {
+    "zh-CN": "入梦者二",
+    "en-US": "Dreamer II",
+    "ja-JP": "ドリーマーII",
+    "ko-KR": "꿈을 꾸는 자2"
+  },
+  "202": {
+    "zh-CN": "入梦者三",
+    "en-US": "Dreamer III",
+    "ja-JP": "ドリーマーIII",
+    "ko-KR": "꿈을 꾸는 자3"
+  },
+  "203": {
+    "zh-CN": "梦旅人一",
+    "en-US": "Dream Traveler I",
+    "ja-JP": "夢の旅人I",
+    "ko-KR": "꿈속 방랑자1"
+  },
+  "204": {
+    "zh-CN": "梦旅人二",
+    "en-US": "Dream Traveler II",
+    "ja-JP": "夢の旅人II",
+    "ko-KR": "꿈속 방랑자2"
+  },
+  "205": {
+    "zh-CN": "梦旅人三",
+    "en-US": "Dream Traveler III",
+    "ja-JP": "夢の旅人III",
+    "ko-KR": "꿈속 방랑자3"
+  },
+  "206": {
+    "zh-CN": "觅影之眼一",
+    "en-US": "Umbral Seeker I",
+    "ja-JP": "シャドウシーカーI",
+    "ko-KR": "그림자를 찾는 눈 1"
+  },
+  "207": {
+    "zh-CN": "觅影之眼二",
+    "en-US": "Umbral Seeker II",
+    "ja-JP": "シャドウシーカーII",
+    "ko-KR": "그림자를 찾는 눈 2"
+  },
+  "208": {
+    "zh-CN": "觅影之眼三",
+    "en-US": "Umbral Seeker III",
+    "ja-JP": "シャドウシーカーIII",
+    "ko-KR": "그림자를 찾는 눈 3"
+  },
+  "209": {
+    "zh-CN": "觅影之眼四",
+    "en-US": "Umbral Seeker IV",
+    "ja-JP": "シャドウシーカーIV",
+    "ko-KR": "그림자를 찾는 눈 4"
+  },
+  "210": {
+    "zh-CN": "觅影之眼五",
+    "en-US": "Umbral Seeker V",
+    "ja-JP": "シャドウシーカーV",
+    "ko-KR": "그림자를 찾는 눈 5"
+  },
+  "211": {
+    "zh-CN": "幻境来客一",
+    "en-US": "Visionary Guest I",
+    "ja-JP": "夢世界の訪問者I",
+    "ko-KR": "환상 세계 방문자1"
+  },
+  "212": {
+    "zh-CN": "幻境来客二",
+    "en-US": "Visionary Guest II",
+    "ja-JP": "夢世界の訪問者II",
+    "ko-KR": "환상 세계 방문자2"
+  },
+  "213": {
+    "zh-CN": "幻境来客三",
+    "en-US": "Visionary Guest III",
+    "ja-JP": "夢世界の訪問者III",
+    "ko-KR": "환상 세계 방문자3"
+  },
+  "214": {
+    "zh-CN": "幻境来客四",
+    "en-US": "Visionary Guest IV",
+    "ja-JP": "夢世界の訪問者IV",
+    "ko-KR": "환상 세계 방문자4"
+  },
+  "215": {
+    "zh-CN": "幻境来客五",
+    "en-US": "Visionary Guest V",
+    "ja-JP": "夢世界の訪問者V",
+    "ko-KR": "환상 세계 방문자5"
+  },
+  "216": {
+    "zh-CN": "执梦猎手一",
+    "en-US": "Dream Hunter I",
+    "ja-JP": "ドリームハンターI",
+    "ko-KR": "드림 헌터1"
+  },
+  "217": {
+    "zh-CN": "执梦猎手二",
+    "en-US": "Dream Hunter II",
+    "ja-JP": "ドリームハンターII",
+    "ko-KR": "드림 헌터2"
+  },
+  "218": {
+    "zh-CN": "执梦猎手三",
+    "en-US": "Dream Hunter III",
+    "ja-JP": "ドリームハンターIII",
+    "ko-KR": "드림 헌터3"
+  },
+  "219": {
+    "zh-CN": "执梦猎手四",
+    "en-US": "Dream Hunter IV",
+    "ja-JP": "ドリームハンターIV",
+    "ko-KR": "드림 헌터4"
+  },
+  "220": {
+    "zh-CN": "执梦猎手五",
+    "en-US": "Dream Hunter V",
+    "ja-JP": "ドリームハンターV",
+    "ko-KR": "드림 헌터5"
+  },
+  "221": {
+    "zh-CN": "逐幻的勇者",
+    "en-US": "Chaser of Illusions",
+    "ja-JP": "幻を追う勇者",
+    "ko-KR": "환상을 쫓는 용사"
+  },
+  "300": {
+    "zh-CN": "余烬的序曲一",
+    "en-US": "Overture of Embers I",
+    "ja-JP": "余燼の序曲・1",
+    "ko-KR": "잔불의 서곡1"
+  },
+  "301": {
+    "zh-CN": "余烬的序曲二",
+    "en-US": "Overture of Embers II",
+    "ja-JP": "余燼の序曲・2",
+    "ko-KR": "잔불의 서곡2"
+  },
+  "302": {
+    "zh-CN": "余烬的序曲三",
+    "en-US": "Overture of Embers III",
+    "ja-JP": "余燼の序曲・3",
+    "ko-KR": "잔불의 서곡3"
+  },
+  "303": {
+    "zh-CN": "虚妄的单音一",
+    "en-US": "Illusory Monotone I",
+    "ja-JP": "虚妄の単音・1",
+    "ko-KR": "허망의 단음1"
+  },
+  "304": {
+    "zh-CN": "虚妄的单音二",
+    "en-US": "Illusory Monotone II",
+    "ja-JP": "虚妄の単音・2",
+    "ko-KR": "허망의 단음2"
+  },
+  "305": {
+    "zh-CN": "虚妄的单音三",
+    "en-US": "Illusory Monotone III",
+    "ja-JP": "虚妄の単音・3",
+    "ko-KR": "허망의 단음3"
+  },
+  "306": {
+    "zh-CN": "裂痕的低语一",
+    "en-US": "The Rift Whispers I",
+    "ja-JP": "亀裂の囁き・1",
+    "ko-KR": "균열의 속삭임1"
+  },
+  "307": {
+    "zh-CN": "裂痕的低语二",
+    "en-US": "The Rift Whispers II",
+    "ja-JP": "亀裂の囁き・2",
+    "ko-KR": "균열의 속삭임2"
+  },
+  "308": {
+    "zh-CN": "裂痕的低语三",
+    "en-US": "The Rift Whispers III",
+    "ja-JP": "亀裂の囁き・3",
+    "ko-KR": "균열의 속삭임3"
+  },
+  "309": {
+    "zh-CN": "裂痕的低语四",
+    "en-US": "The Rift Whispers IV",
+    "ja-JP": "亀裂の囁き・4",
+    "ko-KR": "균열의 속삭임4"
+  },
+  "310": {
+    "zh-CN": "裂痕的低语五",
+    "en-US": "The Rift Whispers V",
+    "ja-JP": "亀裂の囁き・5",
+    "ko-KR": "균열의 속삭임5"
+  },
+  "311": {
+    "zh-CN": "执念的变奏一",
+    "en-US": "Chaotic Variations I",
+    "ja-JP": "執念の変奏・1",
+    "ko-KR": "집념의 변주1"
+  },
+  "312": {
+    "zh-CN": "执念的变奏二",
+    "en-US": "Chaotic Variations II",
+    "ja-JP": "執念の変奏・2",
+    "ko-KR": "집념의 변주2"
+  },
+  "313": {
+    "zh-CN": "执念的变奏三",
+    "en-US": "Chaotic Variations III",
+    "ja-JP": "執念の変奏・3",
+    "ko-KR": "집념의 변주3"
+  },
+  "314": {
+    "zh-CN": "执念的变奏四",
+    "en-US": "Chaotic Variations IV",
+    "ja-JP": "執念の変奏・4",
+    "ko-KR": "집념의 변주4"
+  },
+  "315": {
+    "zh-CN": "执念的变奏五",
+    "en-US": "Chaotic Variations V",
+    "ja-JP": "執念の変奏・5",
+    "ko-KR": "집념의 변주5"
+  },
+  "316": {
+    "zh-CN": "破晓的重奏一",
+    "en-US": "Dawn Ensemble I",
+    "ja-JP": "破暁の変奏・一",
+    "ko-KR": "동틀 녘의 중주1"
+  },
+  "317": {
+    "zh-CN": "破晓的重奏二",
+    "en-US": "Dawn Ensemble II",
+    "ja-JP": "破暁の変奏・二",
+    "ko-KR": "동틀 녘의 중주2"
+  },
+  "318": {
+    "zh-CN": "破晓的重奏三",
+    "en-US": "Dawn Ensemble III",
+    "ja-JP": "破暁の変奏・三",
+    "ko-KR": "동틀 녘의 중주3"
+  },
+  "319": {
+    "zh-CN": "破晓的重奏四",
+    "en-US": "Dawn Ensemble IV",
+    "ja-JP": "破暁の変奏・四",
+    "ko-KR": "동틀 녘의 중주4"
+  },
+  "320": {
+    "zh-CN": "破晓的重奏五",
+    "en-US": "Dawn Ensemble V",
+    "ja-JP": "破暁の変奏・五",
+    "ko-KR": "동틀 녘의 중주5"
+  },
+  "321": {
+    "zh-CN": "空境的指挥家",
+    "en-US": "Void Conductor",
+    "ja-JP": "空境の指揮者",
+    "ko-KR": "허공의 지휘자"
+  },
+  "400": {
+    "zh-CN": "初念的星痕一",
+    "en-US": "Nascent Star Trace I",
+    "ja-JP": "始まりの星痕Ⅰ",
+    "ko-KR": "초념의 별의 궤적1"
+  },
+  "401": {
+    "zh-CN": "初念的星痕二",
+    "en-US": "Nascent Star Trace II",
+    "ja-JP": "始まりの星痕Ⅱ",
+    "ko-KR": "초념의 별의 궤적2"
+  },
+  "402": {
+    "zh-CN": "初念的星痕三",
+    "en-US": "Nascent Star Trace III",
+    "ja-JP": "始まりの星痕Ⅲ",
+    "ko-KR": "초념의 별의 궤적3"
+  },
+  "403": {
+    "zh-CN": "心意的星辉一",
+    "en-US": "Heartfelt Starshine I",
+    "ja-JP": "想い星の輝きⅠ",
+    "ko-KR": "마음의 별빛1"
+  },
+  "404": {
+    "zh-CN": "心意的星辉二",
+    "en-US": "Heartfelt Starshine II",
+    "ja-JP": "想い星の輝きⅡ",
+    "ko-KR": "마음의 별빛2"
+  },
+  "405": {
+    "zh-CN": "心意的星辉三",
+    "en-US": "Heartfelt Starshine III",
+    "ja-JP": "想い星の輝きⅢ",
+    "ko-KR": "마음의 별빛3"
+  },
+  "406": {
+    "zh-CN": "约定的星辰一",
+    "en-US": "Promised Constellation I",
+    "ja-JP": "約束の星Ⅰ",
+    "ko-KR": "약속의 별1"
+  },
+  "407": {
+    "zh-CN": "约定的星辰二",
+    "en-US": "Promised Constellation II",
+    "ja-JP": "約束の星Ⅱ",
+    "ko-KR": "약속의 별2"
+  },
+  "408": {
+    "zh-CN": "约定的星辰三",
+    "en-US": "Promised Constellation III",
+    "ja-JP": "約束の星Ⅲ",
+    "ko-KR": "약속의 별3"
+  },
+  "409": {
+    "zh-CN": "约定的星辰四",
+    "en-US": "Promised Constellation IV",
+    "ja-JP": "約束の星Ⅳ",
+    "ko-KR": "약속의 별4"
+  },
+  "410": {
+    "zh-CN": "约定的星辰五",
+    "en-US": "Promised Constellation V",
+    "ja-JP": "約束の星Ⅴ",
+    "ko-KR": "약속의 별5"
+  },
+  "411": {
+    "zh-CN": "羁绊的流星一",
+    "en-US": "Bound Shooting Star I",
+    "ja-JP": "絆の流星Ⅰ",
+    "ko-KR": "인연의 유성1"
+  },
+  "412": {
+    "zh-CN": "羁绊的流星二",
+    "en-US": "Bound Shooting Star II",
+    "ja-JP": "絆の流星Ⅱ",
+    "ko-KR": "인연의 유성2"
+  },
+  "413": {
+    "zh-CN": "羁绊的流星三",
+    "en-US": "Bound Shooting Star III",
+    "ja-JP": "絆の流星Ⅲ",
+    "ko-KR": "인연의 유성3"
+  },
+  "414": {
+    "zh-CN": "羁绊的流星四",
+    "en-US": "Bound Shooting Star IV",
+    "ja-JP": "絆の流星Ⅳ",
+    "ko-KR": "인연의 유성4"
+  },
+  "415": {
+    "zh-CN": "羁绊的流星五",
+    "en-US": "Bound Shooting Star V",
+    "ja-JP": "絆の流星Ⅴ",
+    "ko-KR": "인연의 유성5"
+  },
+  "416": {
+    "zh-CN": "归依的繁星一",
+    "en-US": "Devoted Firmament I",
+    "ja-JP": "寄る辺の星々Ⅰ",
+    "ko-KR": "별무리의 안식1"
+  },
+  "417": {
+    "zh-CN": "归依的繁星二",
+    "en-US": "Devoted Firmament II",
+    "ja-JP": "寄る辺の星々Ⅱ",
+    "ko-KR": "별무리의 안식2"
+  },
+  "418": {
+    "zh-CN": "归依的繁星三",
+    "en-US": "Devoted Firmament III",
+    "ja-JP": "寄る辺の星々Ⅲ",
+    "ko-KR": "별무리의 안식3"
+  },
+  "419": {
+    "zh-CN": "归依的繁星四",
+    "en-US": "Devoted Firmament IV",
+    "ja-JP": "寄る辺の星々Ⅳ",
+    "ko-KR": "별무리의 안식4"
+  },
+  "420": {
+    "zh-CN": "归依的繁星五",
+    "en-US": "Devoted Firmament V",
+    "ja-JP": "寄る辺の星々Ⅴ",
+    "ko-KR": "별무리의 안식5"
+  },
+  "421": {
+    "zh-CN": "溯光的引路人",
+    "en-US": "Lightchase Guide",
+    "ja-JP": "巡光の導き手",
+    "ko-KR": "빛을 거스르는 인도자"
+  }
+}

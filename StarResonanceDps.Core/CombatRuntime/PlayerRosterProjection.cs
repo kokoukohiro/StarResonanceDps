@@ -45,6 +45,12 @@ internal static class PlayerRosterProjection
         RosterStore.UpdateMapName(EncounterManager.SceneName, EncounterManager.ChannelLineId);
     }
 
+    /// <summary>今のシーズンを一覧へ渡す。プレイヤー情報のシーズンとシーズンランクの表示に使う。</summary>
+    public static void UpdateSeason()
+    {
+        RosterStore.UpdateSeason(SeasonStateStore.CurrentSeasonId);
+    }
+
     /// <summary>
     /// 起動時の値に戻す(ログアウト)。<see cref="BeginMap"/> と違い、パーティの補完へ書き戻さず、自分の行も残さない。
     /// マップ名とチャンネルはシーン(起動時の値に戻した後)に合わせる。一覧の世代は進める。
@@ -65,6 +71,7 @@ internal static class PlayerRosterProjection
         MeterPlayerSpecCache.Instance.Clear();
         RosterStore.Clear();
         UpdateMapName();
+        UpdateSeason();
     }
 
     public static void UpsertSelf(long playerUuid)
@@ -374,6 +381,9 @@ internal static class PlayerRosterProjection
 
         var source = PlayerDataSourceResolver.Resolve(characterId, nearbyEntity, metadataEntity, isSelf);
         var party = PartyStateStore.Instance.Current;
+        var (partySceneId, partyLineId) = party.TryGetSupplement(characterId, out var partySupplement)
+            ? (partySupplement.SceneId, partySupplement.LineId)
+            : (0, 0);
         var combatAttributes = nearbyEntity is null
             ? default
             : new PlayerCombatAttributes(
@@ -424,7 +434,11 @@ internal static class PlayerRosterProjection
             source.IsLive,
             CreateAttributeEntries(isSelf, nearbyEntity),
             source.SeasonTalentBuffId,
-            source.IsSeasonTalentInactive);
+            source.IsSeasonTalentInactive,
+            source.SeasonRankLevel,
+            nearbyEntity is not null,
+            partySceneId,
+            partyLineId);
         return true;
     }
 

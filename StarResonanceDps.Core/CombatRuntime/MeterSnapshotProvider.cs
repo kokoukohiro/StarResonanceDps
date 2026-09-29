@@ -162,7 +162,8 @@ internal sealed record PlayerBuffCandidate(
     PlayerBuffSnapshot Snapshot,
     TimeSpan EffectiveRemoveTime);
 
-public sealed record MeterPlayerIdentity(string Name, long UserId);
+/// <summary>ロスターを通らない表示(ウィンドウのタイトルなど)が使う相手の素性。名前の規則(NPC は職業名)を当てるので NPC の印と職業も持つ。</summary>
+public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId);
 
 /// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
 /// <param name="IsUnnamedEnemy">
@@ -581,7 +582,7 @@ public static class MeterSnapshotProvider
         }
 
         var source = PlayerDataSourceResolver.Resolve(entity, IsSelf(entity));
-        return new MeterPlayerIdentity(source.Name, source.CharacterId);
+        return new MeterPlayerIdentity(source.Name, source.CharacterId, source.IsNpc, source.ProfessionId);
     }
 
 

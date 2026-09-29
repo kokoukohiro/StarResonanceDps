@@ -24,6 +24,7 @@ STAGE_TABLE = "TalentStageTable"
 # 特化の番号は 職業ID × これ ＋ 特化の並び(1始まり)。アプリの特化の番号と同じ決め方。
 PROFESSION_DIGIT = 10000
 # 言語フォルダごとの、全特化の名前に共通する語尾。名前から落とす。
+# アプリのリソース ClassSpec_NameSuffix と同じ値(アプリが語尾を付け直す表示がある)。変えるときは両方を直す。
 COMMON_SUFFIX = {"cn": "流", "en": " Spec", "jp": "型", "kr": " 계열"}
 
 

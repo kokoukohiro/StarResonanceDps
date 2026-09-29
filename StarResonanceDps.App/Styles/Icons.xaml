@@ -78,6 +78,8 @@
         どの型がどれを使うかは Services/SeasonTalentIcons の表が持つ。
     -->
     <BitmapImage x:Key="Icon.SeasonTalentFrame" UriSource="/Assets/Images/img_seasontalent_main_btn_bg1.png" />
+    <!-- 心相晶が無効の人の絵。プレイヤー情報だけが使う(プレイヤーリストは枠だけ)。 -->
+    <BitmapImage x:Key="Icon.SeasonTalentInactive" UriSource="/Assets/Images/com_icon_tab_113.png" />
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent01_01" UriSource="/Assets/Images/s2talent01_01.png" />
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent02_01" UriSource="/Assets/Images/s2talent02_01.png" />
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent03_01" UriSource="/Assets/Images/s2talent03_01.png" />
@@ -88,6 +90,16 @@
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent08_01" UriSource="/Assets/Images/s2talent08_01.png" />
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent051_01" UriSource="/Assets/Images/s2talent051_01.png" />
     <BitmapImage x:Key="Icon.SeasonTalent.s2talent054_01" UriSource="/Assets/Images/s2talent054_01.png" />
+
+    <!-- シーズンの絵(シーズン実績の1枠目の分類の絵)。どのシーズンがどれを使うかは Services/SeasonIcons の表が持つ。 -->
+    <BitmapImage x:Key="Icon.Season.achievement_simclass_new_xushirongguang" UriSource="/Assets/Images/achievement_simclass_new_xushirongguang.png" />
+    <BitmapImage x:Key="Icon.Season.achievement_simclass_new_huanhuanhua" UriSource="/Assets/Images/achievement_simclass_new_huanhuanhua.png" />
+    <BitmapImage x:Key="Icon.Season.achievement_simclass_new_jinkonghuixiang" UriSource="/Assets/Images/achievement_simclass_new_jinkonghuixiang.png" />
+    <BitmapImage x:Key="Icon.Season.achievement_simclass_new_s4" UriSource="/Assets/Images/achievement_simclass_new_s4.png" />
+
+    <!-- プレイヤー情報の顔と名刺の既定の絵(写真を設定していない人)。プレイヤーの基本モデルはどれもこの2枚。 -->
+    <BitmapImage x:Key="Icon.Avatar.head_photo_000" UriSource="/Assets/Images/head_photo_000.png" />
+    <BitmapImage x:Key="Icon.IdCard.idcard_common_01" UriSource="/Assets/Images/idcard_common_01.png" />
 
     <Style x:Key="Icon.PlayerListSkillFrame" TargetType="{x:Type Image}">
         <Setter Property="Source" Value="{StaticResource Icon.RoleSkillFrame}" />

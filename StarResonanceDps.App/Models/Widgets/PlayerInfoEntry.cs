@@ -1,87 +1,281 @@
 using System.Globalization;
+using System.Windows;
+using System.Windows.Media;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
+using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
+/// <summary>
+/// プレイヤー情報の表示値。名前・UID・5つの文字の行(冒険者レベル / シーズン階級 / 現在地 / 能力スコア / シーズン強度)と、
+/// 下に並べる3つのバッジ(シーズン / クラスと特化 / シーズン心相晶)。
+/// バッジの絵の色はプレイヤー情報の設定のアイコンカラー。
+/// </summary>
 public sealed class PlayerInfoEntry
 {
-    private PlayerInfoEntry(
-        string nameText,
-        string levelText,
-        string abilityScoreText,
-        string professionText,
-        string professionSpecText,
-        int seasonTalentBuffId,
-        bool isSeasonTalentInactive,
-        string seasonTalentName)
+    /// <summary>アイコンカラーの不明の鍵。バッジ3つのはてなを1色で塗る。</summary>
+    private const string UnknownColorKey = "Unknown";
+
+    private PlayerInfoEntry()
     {
-        NameText = nameText;
-        LevelText = levelText;
-        AbilityScoreText = abilityScoreText;
-        ProfessionText = professionText;
-        ProfessionSpecText = professionSpecText;
-        SeasonTalentBuffId = seasonTalentBuffId;
-        IsSeasonTalentInactive = isSeasonTalentInactive;
-        SeasonTalentName = seasonTalentName;
     }
 
-    public string NameText { get; }
+    public string NameText { get; private init; } = string.Empty;
 
-    public string LevelText { get; }
+    public string UidText { get; private init; } = string.Empty;
 
-    public string AbilityScoreText { get; }
+    /// <summary>冒険者レベル(+シーズンレベル)。</summary>
+    public string LevelText { get; private init; } = string.Empty;
 
-    public string ProfessionText { get; }
+    /// <summary>シーズン階級(シーズンランクの名前)。段階か今のシーズンが分からなければ不明(名前はシーズンごとに違う)。</summary>
+    public string SeasonRankText { get; private init; } = string.Empty;
 
-    public string ProfessionSpecText { get; }
+    public string AbilityScoreText { get; private init; } = string.Empty;
 
-    /// <summary>有効化しているシーズンタレントの型の根ノードのバフID。0 は不明か無効(<see cref="IsSeasonTalentInactive"/> で分ける)。</summary>
-    public int SeasonTalentBuffId { get; }
+    public string SeasonStrengthText { get; private init; } = string.Empty;
 
-    /// <summary>シーズンタレントの型が無効(どの型も有効化していない)と確定しているか。</summary>
-    public bool IsSeasonTalentInactive { get; }
+    /// <summary>現在地。自分と、いま周りに見えている人(自分と同じ場所)と、パーティのメンバー(パーティ情報のいる場所)だけ分かる。</summary>
+    public string LocationText { get; private init; } = string.Empty;
 
-    /// <summary>有効化しているシーズンタレントの型の名前(根ノードの名前)。不明か無効なら空。</summary>
-    public string SeasonTalentName { get; }
+    /// <summary>クラスアイコンの形。プレイヤーリストと同じ絵。</summary>
+    public Brush? ClassIconMask { get; private init; }
 
-    public static PlayerInfoEntry Create(PlayerRosterEntry player)
+    public bool HasClassIcon => ClassIconMask is not null;
+
+    /// <summary>クラスアイコンの色。職が分からなければ不明の色。</summary>
+    public Brush? ClassIconBrush { get; private init; }
+
+    /// <summary>クラスアイコンの下の特化名。クラスR2は共通の語尾つき。</summary>
+    public string ClassSpecText { get; private init; } = string.Empty;
+
+    /// <summary>シーズン心相晶の絵。型の絵、無効なら無効の絵、不明ならはてな。表に無い型は無し。</summary>
+    public Brush? SeasonTalentIconMask { get; private init; }
+
+    public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
+
+    /// <summary>シーズン心相晶の絵の色。型・無効・不明の色。</summary>
+    public Brush? SeasonTalentIconBrush { get; private init; }
+
+    /// <summary>シーズン心相晶の名前(型の名前 / シーズン心相晶無効 / 不明)。無効の文字だけ書式の <c>{Psych}</c>(無効)と違う。</summary>
+    public string SeasonTalentText { get; private init; } = string.Empty;
+
+    /// <summary>今のシーズンの絵の形。表に無いシーズンか、リソースが見つからなければ無し。</summary>
+    public Brush? SeasonIconMask { get; private init; }
+
+    public bool HasSeasonIcon => SeasonIconMask is not null;
+
+    /// <summary>今のシーズンの絵の色。</summary>
+    public Brush? SeasonIconBrush { get; private init; }
+
+    /// <summary>シーズンのはてなの色(不明の色)。</summary>
+    public Brush? UnknownIconBrush { get; private init; }
+
+    /// <summary>今のシーズンがまだ届いていない(はてなを出す)。</summary>
+    public bool IsSeasonUnknown { get; private init; }
+
+    public string SeasonText { get; private init; } = string.Empty;
+
+    /// <param name="mapName">一覧の通知のマップ名(自分のいる場所)。</param>
+    /// <param name="mapChannel">一覧の通知のチャンネル番号。</param>
+    /// <param name="seasonId">今のシーズン番号。まだ分からなければ 0。</param>
+    /// <param name="settings">プレイヤー情報の設定(アイコンカラー)。</param>
+    public static PlayerInfoEntry Create(
+        PlayerRosterEntry player,
+        string mapName,
+        uint mapChannel,
+        int seasonId,
+        PlayerInfoWidgetSettingsConfig settings)
     {
         var localization = LocalizationManager.Instance;
+        var unknownText = localization.GetString("PlayerInfo_Unknown");
+        var nameDisplayMode = PlayerRosterPresentationStore.Instance.NameDisplayMode;
 
-        return new PlayerInfoEntry(
-            $"{localization.GetString("PlayerInfo_Name")}: {player.Name}",
-            $"{localization.GetString("PlayerInfo_Level")}: {FormatInteger(player.Level)} (+{FormatInteger(player.SeasonLevel)})",
-            $"{localization.GetString("PlayerInfo_AbilityScore")}: {FormatInteger(player.CombatPower)} (+{FormatInteger(player.SeasonStrength)})",
-            $"{localization.GetString("PlayerInfo_Profession")}: {GetProfessionDisplayName(player.ProfessionId, player.ClassSpec, localization)}",
-            $"{localization.GetString("PlayerInfo_ProfessionSpec")}: {GetProfessionSpecDisplayName(player.ClassSpec, localization)}",
-            player.SeasonTalentBuffId,
-            player.IsSeasonTalentInactive,
-            player.SeasonTalentBuffId > 0
-                ? StarResonanceDps.Core.CombatRuntime.CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
-                : string.Empty);
+        // 名前を伏せる設定ならUIDも伏せる(名簿の伏せ方と同じ)。
+        var uid = PlayerInfoFormatFormatter.ShouldHideName(player.IsSelf, nameDisplayMode)
+            ? PlayerRosterPresentationStore.HiddenPlayerName
+            : player.CharacterId.ToString(CultureInfo.InvariantCulture);
+
+        // 周りに見えている人(自分を含む)は自分と同じ場所。周りにいないパーティのメンバーはパーティ情報のいる場所
+        // (ダンジョンの難易度は届かないので難易度なしで引く)。どちらでもなければ分からない。
+        var location = player.IsNearby
+            ? WidgetListItemViewModel.FormatMapName(mapName, mapChannel)
+            : player.PartySceneId > 0
+                ? WidgetListItemViewModel.FormatMapName(
+                    CombatDataCatalog.GetSceneName(player.PartySceneId, 0),
+                    (uint)Math.Max(player.PartyLineId, 0))
+                : string.Empty;
+
+        var season = CreateSeasonBadge(seasonId, unknownText, settings);
+        // シーズン階級の名前はシーズンごとに違うので、段階か今のシーズンのどちらかが分からなければ不明。
+        var seasonRankName = season.IsUnknown || player.SeasonRankLevel is null
+            ? unknownText
+            : CombatDataCatalog.GetSeasonRankName(seasonId, player.SeasonRankLevel.Value);
+        var classKey = PlayerProfession.GetKey(player.ProfessionId, player.ClassSpec);
+        var seasonTalent = ResolveSeasonTalentIcon(player.SeasonTalentBuffId, player.IsSeasonTalentInactive);
+
+        return new PlayerInfoEntry
+        {
+            NameText = PlayerInfoFormatFormatter.GetDisplayName(
+                player.Name,
+                player.CharacterId,
+                player.IsSelf,
+                player.IsNpc,
+                player.ProfessionId,
+                nameDisplayMode),
+            UidText = $"{localization.GetString("PlayerInfo_Uid")}: {uid}",
+            LevelText = $"{localization.GetString("PlayerInfo_Level")}: {FormatInteger(player.Level)}(+{FormatInteger(player.SeasonLevel)})",
+            SeasonRankText = $"{localization.GetString("PlayerInfo_SeasonRank")}: {seasonRankName}",
+            AbilityScoreText = $"{localization.GetString("PlayerInfo_AbilityScore")}: {FormatInteger(player.CombatPower)}",
+            SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {FormatInteger(player.SeasonStrength)}",
+            LocationText = $"{localization.GetString("PlayerInfo_Location")}: {(string.IsNullOrEmpty(location) ? unknownText : location)}",
+            ClassIconMask = ResolveMask($"Icon.Profession.{classKey}"),
+            ClassIconBrush = CreateIconBrush(settings, classKey),
+            ClassSpecText = GetProfessionSpecDisplayName(player.ClassSpec, localization),
+            SeasonTalentIconMask = seasonTalent.Mask,
+            SeasonTalentIconBrush = CreateIconBrush(settings, seasonTalent.ColorKey),
+            // 無効はプレイヤー情報だけ「シーズン心相晶無効」と出す(書式の {Psych} とプレイヤーリストは「無効」)。
+            SeasonTalentText = player.SeasonTalentBuffId <= 0 && player.IsSeasonTalentInactive
+                ? localization.GetString("PlayerInfo_SeasonTalentInactive")
+                : PlayerInfoFormatFormatter.GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive),
+            SeasonIconMask = season.Mask,
+            SeasonIconBrush = season.Brush,
+            IsSeasonUnknown = season.IsUnknown,
+            SeasonText = season.Text,
+            UnknownIconBrush = CreateIconBrush(settings, UnknownColorKey)
+        };
     }
 
-    private static string GetProfessionDisplayName(int professionId, PlayerClassSpec classSpec, LocalizationManager localization)
+    /// <summary>
+    /// 相手がまだ一覧に載っていないときの表示値。窓が覚えている素性(保存から戻した名前と UID を含む)だけを出し、
+    /// ほかの値は「不明」。今のシーズンは相手に依らないので、分かれば出す。
+    /// </summary>
+    /// <param name="name">覚えている名前。無ければ空。</param>
+    /// <param name="uid">覚えている UID。無ければ 0。</param>
+    /// <param name="seasonId">今のシーズン番号。まだ分からなければ 0。</param>
+    /// <param name="settings">プレイヤー情報の設定(アイコンカラー)。</param>
+    public static PlayerInfoEntry CreateUnknown(
+        string? name,
+        long uid,
+        bool isSelf,
+        bool isNpc,
+        int professionId,
+        int seasonId,
+        PlayerInfoWidgetSettingsConfig settings)
     {
-        var professionKey = PlayerProfession.GetKey(professionId, classSpec);
-        if (professionId != 0 && string.Equals(professionKey, "Unknown", StringComparison.Ordinal))
+        var localization = LocalizationManager.Instance;
+        var unknownText = localization.GetString("PlayerInfo_Unknown");
+        var nameDisplayMode = PlayerRosterPresentationStore.Instance.NameDisplayMode;
+        var isIdentityUnknown = string.IsNullOrWhiteSpace(name) && uid == 0;
+
+        // 名前を伏せる設定ならUIDも伏せる(名簿の伏せ方と同じ)。
+        var uidText = PlayerInfoFormatFormatter.ShouldHideName(isSelf, nameDisplayMode)
+            ? PlayerRosterPresentationStore.HiddenPlayerName
+            : uid != 0
+                ? uid.ToString(CultureInfo.InvariantCulture)
+                : unknownText;
+
+        var season = CreateSeasonBadge(seasonId, unknownText, settings);
+        var classKey = PlayerProfession.GetKey(professionId);
+        var seasonTalent = ResolveSeasonTalentIcon(0, isInactive: false);
+
+        return new PlayerInfoEntry
         {
-            return FormatInteger(professionId);
+            NameText = isIdentityUnknown
+                ? unknownText
+                : PlayerInfoFormatFormatter.GetDisplayName(name, uid, isSelf, isNpc, professionId, nameDisplayMode),
+            UidText = $"{localization.GetString("PlayerInfo_Uid")}: {uidText}",
+            LevelText = $"{localization.GetString("PlayerInfo_Level")}: {unknownText}",
+            SeasonRankText = $"{localization.GetString("PlayerInfo_SeasonRank")}: {unknownText}",
+            AbilityScoreText = $"{localization.GetString("PlayerInfo_AbilityScore")}: {unknownText}",
+            SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {unknownText}",
+            LocationText = $"{localization.GetString("PlayerInfo_Location")}: {unknownText}",
+            ClassIconMask = ResolveMask($"Icon.Profession.{classKey}"),
+            ClassIconBrush = CreateIconBrush(settings, classKey),
+            ClassSpecText = localization.GetString("ClassSpec_Unknown"),
+            SeasonTalentIconMask = seasonTalent.Mask,
+            SeasonTalentIconBrush = CreateIconBrush(settings, seasonTalent.ColorKey),
+            SeasonTalentText = PlayerInfoFormatFormatter.GetSeasonTalentText(0, isSeasonTalentInactive: false),
+            SeasonIconMask = season.Mask,
+            SeasonIconBrush = season.Brush,
+            IsSeasonUnknown = season.IsUnknown,
+            SeasonText = season.Text,
+            UnknownIconBrush = CreateIconBrush(settings, UnknownColorKey)
+        };
+    }
+
+    /// <summary>シーズンのバッジ。今のシーズンで決まり、相手には依らない。まだ届いていなければはてなと「不明」。</summary>
+    private static (Brush? Mask, Brush? Brush, bool IsUnknown, string Text) CreateSeasonBadge(
+        int seasonId,
+        string unknownText,
+        PlayerInfoWidgetSettingsConfig settings)
+    {
+        var isUnknown = seasonId <= 0;
+        return (
+            isUnknown ? null : SeasonIcons.GetSeasonIconMask(seasonId),
+            isUnknown ? null : CreateIconBrush(settings, SeasonIcons.GetColorKey(seasonId)),
+            isUnknown,
+            isUnknown ? unknownText : CombatDataCatalog.GetSeasonName(seasonId));
+    }
+
+    /// <summary>
+    /// シーズン心相晶の絵と色の鍵。型が分かれば型の絵と型の色、無効なら無効の絵と無効の色、どちらでもなければはてなと不明の色。
+    /// 表に無い型は絵が無い(色は不明の色)。
+    /// </summary>
+    private static (Brush? Mask, string ColorKey) ResolveSeasonTalentIcon(int rootBuffId, bool isInactive)
+    {
+        if (rootBuffId > 0)
+        {
+            var typeColorKey = SeasonTalentIcons.GetColorKey(rootBuffId);
+            return (
+                SeasonTalentIcons.GetIconMask(rootBuffId, isInactive: false),
+                string.Equals(typeColorKey, SeasonTalentIcons.UnknownColorKey, StringComparison.OrdinalIgnoreCase)
+                    ? UnknownColorKey
+                    : typeColorKey);
         }
 
-        var key = $"Classes_{professionKey}";
-        var value = localization.GetString(key);
-        return string.Equals(value, key, StringComparison.Ordinal)
-            ? FormatInteger(professionId)
-            : value;
+        return isInactive
+            ? (SeasonTalentIcons.GetInactiveIconMask(), SeasonTalentIcons.InactiveColorKey)
+            : (SeasonTalentIcons.GetIconMask(0, isInactive: false), UnknownColorKey);
     }
 
+    /// <summary>アイコンカラーで選んでいる色の塗り。引き方はプレイヤーリスト・被ダメログのクラスカラーと同じ。</summary>
+    private static Brush CreateIconBrush(PlayerInfoWidgetSettingsConfig settings, string colorKey)
+    {
+        var palette = settings.ClassColorPalettes.TryGetValue(colorKey, out var colors)
+            ? colors
+            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerInfo, colorKey);
+        var selectedIndex = settings.ClassColorIndexes.TryGetValue(colorKey, out var index)
+            ? index
+            : WidgetConfigDefaults.MinClassColorIndex;
+        var selectedColor = palette.Count == 0
+            ? "#A8A8A8"
+            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
+        var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
+            ? parsed
+            : Color.FromRgb(0xA8, 0xA8, 0xA8);
+
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        return brush;
+    }
+
+    /// <summary>
+    /// 特化名。クラスR2の特化名は、名前の表が落としている共通の語尾(<c>ClassSpec_NameSuffix</c>)を後ろに付け直す(プレイヤー情報だけ)。
+    /// 名前が引けないときは語尾だけにならないよう付けない。
+    /// </summary>
     private static string GetProfessionSpecDisplayName(PlayerClassSpec classSpec, LocalizationManager localization)
     {
         if (PlayerClassSpecResolver.ToSubProfessionId(classSpec) > 0)
         {
-            return PlayerInfoFormatFormatter.GetClassSpecText(classSpec);
+            var specName = PlayerInfoFormatFormatter.GetClassSpecText(classSpec);
+            return string.IsNullOrEmpty(specName)
+                ? specName
+                : specName + localization.GetString("ClassSpec_NameSuffix");
         }
 
         var key = $"ClassSpec_{classSpec}";
@@ -89,6 +283,19 @@ public sealed class PlayerInfoEntry
         return string.Equals(value, key, StringComparison.Ordinal)
             ? localization.GetString("ClassSpec_Unknown")
             : value;
+    }
+
+    /// <summary>Icons.xaml の絵から、塗りを抜く形を作る。リソースが無ければ無し。</summary>
+    private static Brush? ResolveMask(string resourceKey)
+    {
+        if (Application.Current?.TryFindResource(resourceKey) is not ImageSource source)
+        {
+            return null;
+        }
+
+        var mask = new ImageBrush(source) { Stretch = Stretch.Uniform };
+        mask.Freeze();
+        return mask;
     }
 
     private static string FormatInteger(int value)

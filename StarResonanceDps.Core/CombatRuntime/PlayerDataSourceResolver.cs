@@ -21,7 +21,8 @@ internal sealed record PlayerDataSourceSnapshot(
     PlayerEquipmentData? EquipmentData,
     bool IsLive,
     int SeasonTalentBuffId,
-    bool IsSeasonTalentInactive);
+    bool IsSeasonTalentInactive,
+    int? SeasonRankLevel);
 
 internal static class PlayerDataSourceResolver
 {
@@ -189,7 +190,18 @@ internal static class PlayerDataSourceResolver
             // エンティティがまだ無く、導出だと一瞬だけ灰に落ちる。
             isSelf || nearbyEntity is not null || partySupplement is not null,
             ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf),
-            ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf));
+            ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf),
+            ResolveSeasonRankLevel(nearbyEntity, metadataEntity));
+    }
+
+    /// <summary>
+    /// シーズンランクの段階(属性 <c>AttrRankLevel</c> = <c>SeasonRankTable.RankToLevel</c>)。
+    /// シーズンレベルと同じ順で、周りの実体 → エンカウンターの実体。段階 0 があるので、属性が届いていなければ null。
+    /// </summary>
+    private static int? ResolveSeasonRankLevel(Entity? nearbyEntity, Entity? metadataEntity)
+    {
+        var value = nearbyEntity?.GetAttrKV("AttrRankLevel") ?? metadataEntity?.GetAttrKV("AttrRankLevel");
+        return value is null ? null : ToInt32(value);
     }
 
     /// <summary>

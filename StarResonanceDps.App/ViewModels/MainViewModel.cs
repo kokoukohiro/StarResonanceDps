@@ -93,6 +93,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
         _partyStateStore.Changed += PartyStateStore_Changed;
+        SocialDataStore.Changed += SocialDataStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
 
         var roster = _playerRosterStore.Current;
@@ -171,7 +172,21 @@ public sealed partial class MainViewModel : ViewModelBase
             e.Snapshot,
             e.MapName,
             e.MapChannel,
-            e.MapGeneration));
+            e.MapGeneration,
+            e.SeasonId));
+    }
+
+    /// <summary>名刺の値(顔写真・名刺)が変わった相手。受信のスレッドから来るので UI のスレッドへ移して窓へ渡す。</summary>
+    private void SocialDataStore_Changed(long characterId)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _widgetWindowManager.UpdatePlayerWindowSocialData(characterId);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSocialData(characterId));
     }
 
     private void PartyStateStore_Changed(object? sender, EventArgs e)
@@ -226,7 +241,7 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapName,
             roster.MapChannel,
             roster.MapGeneration);
-        _widgetWindowManager.UpdatePlayerWindowPresentations(roster.Entries);
+        _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
     }
 
     private void NearbyEntityStore_EntitiesChanged(object? sender, NearbyEntitiesChangedEventArgs e)

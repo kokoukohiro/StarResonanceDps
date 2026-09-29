@@ -83,6 +83,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             TakenDamageLogSettings.PreviewChanged += TakenDamageLogSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsPlayerInfoSettings(kind))
+        {
+            PlayerInfoSettings = new PlayerInfoWidgetSettingsViewModel(config.PlayerInfo);
+            PlayerInfoSettings.PropertyChanged += PlayerInfoSettings_PropertyChanged;
+            PlayerInfoSettings.PreviewChanged += PlayerInfoSettings_PreviewChanged;
+        }
+
         if (WidgetConfigDefaults.SupportsBuffListSettings(kind))
         {
             BuffListSettings = new BuffListWidgetSettingsViewModel(kind, config.BuffList);
@@ -124,6 +131,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public event Action<TakenDamageLogWidgetSettingsConfig>? TakenDamageLogPreviewChanged;
 
+    public event Action<PlayerInfoWidgetSettingsConfig>? PlayerInfoPreviewChanged;
+
     public event Action<BuffListWidgetSettingsConfig>? BuffListPreviewChanged;
 
     public event Action<ElementColorWidgetSettingsConfig>? ElementColorPreviewChanged;
@@ -162,6 +171,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             TakenDamageLogSettings.PropertyChanged -= TakenDamageLogSettings_PropertyChanged;
             TakenDamageLogSettings.PreviewChanged -= TakenDamageLogSettings_PreviewChanged;
             TakenDamageLogSettings.Dispose();
+        }
+
+        if (PlayerInfoSettings is not null)
+        {
+            PlayerInfoSettings.PropertyChanged -= PlayerInfoSettings_PropertyChanged;
+            PlayerInfoSettings.PreviewChanged -= PlayerInfoSettings_PreviewChanged;
+            PlayerInfoSettings.Dispose();
         }
 
         if (BuffListSettings is not null)
@@ -230,6 +246,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void TakenDamageLogSettings_PreviewChanged(TakenDamageLogWidgetSettingsConfig config)
     {
         TakenDamageLogPreviewChanged?.Invoke(config);
+    }
+
+    private void PlayerInfoSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PlayerInfoWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void PlayerInfoSettings_PreviewChanged(PlayerInfoWidgetSettingsConfig config)
+    {
+        PlayerInfoPreviewChanged?.Invoke(config);
     }
 
     private void BuffListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -315,6 +344,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public TakenDamageLogWidgetSettingsViewModel? TakenDamageLogSettings { get; }
 
+    public PlayerInfoWidgetSettingsViewModel? PlayerInfoSettings { get; }
+
     public BuffListWidgetSettingsViewModel? BuffListSettings { get; }
 
     public ElementColorWidgetSettingsViewModel? ElementColorSettings { get; }
@@ -336,6 +367,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasTakenDamageLogDisplaySettings => TakenDamageLogSettings is not null;
 
+    /// <summary>プレイヤー情報のアイコンカラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
+    public bool HasPlayerInfoSettings => PlayerInfoSettings is not null;
+
     public bool HasBuffListDisplaySettings => BuffListSettings is not null;
 
     public bool HasSkillDetailDisplaySettings => SkillDetailSettings is not null;
@@ -355,6 +389,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (MetricTimelineSettings?.HasUnsavedChanges ?? false)
         || (BuffCardSettings?.HasUnsavedChanges ?? false)
         || (TakenDamageLogSettings?.HasUnsavedChanges ?? false)
+        || (PlayerInfoSettings?.HasUnsavedChanges ?? false)
         || (BuffListSettings?.HasUnsavedChanges ?? false)
         || (ElementColorSettings?.HasUnsavedChanges ?? false)
         || (SkillDetailSettings?.HasUnsavedChanges ?? false)
@@ -397,6 +432,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.TakenDamageLog = TakenDamageLogSettings.CreateConfig();
         }
 
+        if (PlayerInfoSettings is not null)
+        {
+            config.PlayerInfo = PlayerInfoSettings.CreateConfig();
+        }
+
         if (BuffListSettings is not null)
         {
             config.BuffList = BuffListSettings.CreateConfig();
@@ -424,6 +464,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
         BuffCardSettings?.MarkSaved(config.BuffCard);
         TakenDamageLogSettings?.MarkSaved(config.TakenDamageLog);
+        PlayerInfoSettings?.MarkSaved(config.PlayerInfo);
         BuffListSettings?.MarkSaved(config.BuffList);
         ElementColorSettings?.MarkSaved(config.ElementColor);
         SkillDetailSettings?.MarkSaved(config.SkillDetail);
@@ -439,6 +480,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.ResetToDefaults();
         BuffCardSettings?.ResetToDefaults();
         TakenDamageLogSettings?.ResetToDefaults();
+        PlayerInfoSettings?.ResetToDefaults();
         BuffListSettings?.ResetToDefaults();
         ElementColorSettings?.ResetToDefaults();
         SkillDetailSettings?.ResetToDefaults();
@@ -453,6 +495,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MetricTimelineSettings?.RestoreSavedPreview();
         BuffCardSettings?.RestoreSavedPreview();
         TakenDamageLogSettings?.RestoreSavedPreview();
+        PlayerInfoSettings?.RestoreSavedPreview();
         BuffListSettings?.RestoreSavedPreview();
         ElementColorSettings?.RestoreSavedPreview();
         SkillDetailSettings?.RestoreSavedPreview();

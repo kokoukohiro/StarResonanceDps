@@ -254,7 +254,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
         if (playerIdentity is not null)
         {
-            SetHeaderText(playerIdentity.Name, playerIdentity.UserId);
+            SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
         else
         {
@@ -262,11 +262,13 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         }
 
         // 名前の出し方はプレイヤー一覧・メーターと同じ規則へ通す。
-        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字。
+        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字、NPC なら職業名。
         var targetName = PlayerInfoFormatFormatter.GetDisplayName(
             _player?.Name ?? playerIdentity?.Name,
             playerIdentity?.UserId ?? characterId,
             _player?.IsSelf ?? (AppState.PlayerUID != 0 && characterId == AppState.PlayerUID),
+            _player?.IsNpc ?? playerIdentity?.IsNpc ?? false,
+            _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
             PlayerRosterPresentationStore.Instance.NameDisplayMode);
 
         if (snapshot is null)

@@ -20,7 +20,10 @@ public sealed record PartyMemberSupplement(
     bool IsNpc = false,
     long CurrentHp = 0,
     long MaxHp = 0,
-    bool HasTrustedSocialData = false);
+    bool HasTrustedSocialData = false,
+    // いる場所(userSceneInfo)。マップ番号とチャンネル番号、0 は分からない。古い値を送る NotifySocialData からは入れない。
+    int SceneId = 0,
+    int LineId = 0);
 
 public sealed record PartyMemberPosition(int GroupId, int? GroupSlot);
 

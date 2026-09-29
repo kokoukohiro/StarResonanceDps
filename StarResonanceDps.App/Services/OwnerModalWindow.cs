@@ -37,14 +37,28 @@ public static class OwnerModalWindow
 
         if (ownerHandle != IntPtr.Zero)
         {
-            window.Closed += (_, _) =>
+            // <b>閉じると決まった瞬間(窓が消える前)にオーナーを戻す。</b>ShowDialog が閉じるときと同じ順番。
+            // 消えた後に戻すと、消える瞬間はオーナーが止まったままで選ばれず、Windows が別のアプリを前面にする。
+            // 前面を移すのは閉じる窓が前面だったときだけ(別のアプリへ切り替えてから閉じたときは奪わない)。
+            // Closing が届くのは閉じると決まったときだけという前提(各窓は取り消すとき base.OnClosing を呼ばずに戻る)。
+            window.Closing += (_, e) =>
             {
-                EnableWindow(ownerHandle, true);
+                if (e.Cancel)
+                {
+                    return;
+                }
 
-                // 破棄の後に戻すので、そのままだと別のアプリへフォーカスが飛ぶことがある。
-                // オーナーへ明示的に返す。
-                owner!.Activate();
+                var wasActive = window.IsActive;
+                EnableWindow(ownerHandle, true);
+                if (wasActive)
+                {
+                    owner!.Activate();
+                }
             };
+
+            // 閉じ始めを通らずに閉じたとき(オーナーが閉じる・アプリの終了で、取り消しを無視して閉じられた)の戻し。
+            // 止めたオーナーは、実際に閉じるたびに必ず戻す。
+            window.Closed += (_, _) => EnableWindow(ownerHandle, true);
         }
 
         if (onClosed is not null)

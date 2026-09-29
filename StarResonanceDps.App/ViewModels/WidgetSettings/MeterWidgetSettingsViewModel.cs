@@ -86,7 +86,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 WidgetConfigDefaults.MaxPaletteColorCount);
             colors.PaletteChanged += Colors_PaletteChanged;
 
-            var item = new MeterClassColorItemViewModel(key, colors, index == classColorKeys.Count - 1);
+            // プレイヤーリストは不明が2行(クラスとシーズン心相晶)あるので、クラスの不明を「不明(クラス)」と名乗る。
+            var item = new MeterClassColorItemViewModel(
+                key,
+                colors,
+                index == classColorKeys.Count - 1,
+                _kind == WidgetKind.PlayerList ? "Settings_IconColors_UnknownClass" : null);
             _itemsByKey.Add(key, item);
             items.Add(item);
         }
@@ -576,11 +581,24 @@ public sealed class MeterPlayerInfoFormatField
 
 public sealed class MeterClassColorItemViewModel : ObservableObject
 {
-    public MeterClassColorItemViewModel(string key, ColorPaletteViewModel colors, bool isLast)
+    private const string UnknownKey = "Unknown";
+
+    private readonly string? _unknownDisplayNameResourceKey;
+
+    /// <param name="unknownDisplayNameResourceKey">
+    /// 不明の行の名前のリソース。null ならクラスの不明と同じ名前。
+    /// 不明が2行あるプレイヤーリストは「不明(クラス)」、不明を1行にまとめたプレイヤー情報は「不明」。
+    /// </param>
+    public MeterClassColorItemViewModel(
+        string key,
+        ColorPaletteViewModel colors,
+        bool isLast,
+        string? unknownDisplayNameResourceKey = null)
     {
         Key = key;
         Colors = colors;
         IsLast = isLast;
+        _unknownDisplayNameResourceKey = unknownDisplayNameResourceKey;
     }
 
     public string Key { get; }
@@ -589,15 +607,25 @@ public sealed class MeterClassColorItemViewModel : ObservableObject
 
     public bool IsLast { get; }
 
-    /// <summary>シーズン心相晶の行か。クラスアイコンの代わりに枠と型の絵を出す。</summary>
+    /// <summary>シーズン心相晶の行か。クラスアイコンの代わりに型の絵(無効・不明の行はその絵)を出す。</summary>
     public bool IsSeasonTalent => SeasonTalentIcons.IsColorKey(Key);
 
-    /// <summary>シーズン心相晶の行の型の絵の形。不明の行はクラスの不明と同じ絵。</summary>
+    /// <summary>シーズン心相晶の行の型の絵の形。不明の行はクラスの不明と同じ絵、無効の行は無効の絵。</summary>
     public Brush? SeasonTalentIconMask => IsSeasonTalent ? SeasonTalentIcons.GetIconMask(Key) : null;
+
+    /// <summary>シーズンの行か(プレイヤー情報だけ)。クラスアイコンの代わりにシーズンの絵を出す。</summary>
+    public bool IsSeason => SeasonIcons.IsColorKey(Key);
+
+    /// <summary>シーズンの行の絵の形。</summary>
+    public Brush? SeasonIconMask => IsSeason ? SeasonIcons.GetIconMask(Key) : null;
 
     public string DisplayName => IsSeasonTalent
         ? SeasonTalentIcons.GetDisplayName(Key)
-        : LocalizationManager.Instance.GetString($"Classes_{Key}");
+        : IsSeason
+            ? SeasonIcons.GetDisplayName(Key)
+            : string.Equals(Key, UnknownKey, StringComparison.OrdinalIgnoreCase) && _unknownDisplayNameResourceKey is not null
+                ? LocalizationManager.Instance.GetString(_unknownDisplayNameResourceKey)
+                : LocalizationManager.Instance.GetString($"Classes_{Key}");
 
     public void RefreshDisplayName()
     {

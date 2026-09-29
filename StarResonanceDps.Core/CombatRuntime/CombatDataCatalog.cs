@@ -93,6 +93,16 @@ public static class CombatDataCatalog
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>シーズン番号 → シーズンの名前(シーズン実績の1枠目の分類名)。<c>Data/Localization/SeasonNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>シーズン番号 × 100 ＋ 段階 → シーズンランクの名前。<c>Data/Localization/SeasonRankNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonRankNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -204,6 +214,8 @@ public static class CombatDataCatalog
             _seasonTalentNames = LoadLocalizedText("SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
             _classSpecNames = LoadLocalizedText("ClassSpecNames", out _);
+            _seasonNames = LoadLocalizedText("SeasonNames", out _);
+            _seasonRankNames = LoadLocalizedText("SeasonRankNames", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
@@ -355,6 +367,21 @@ public static class CombatDataCatalog
     public static string GetClassSpecName(int subProfessionId)
     {
         return ResolveText(_classSpecNames, Volatile.Read(ref _cultureName), subProfessionId);
+    }
+
+    /// <summary>シーズンの名前(シーズン実績の1枠目の分類名)。表示中の言語で引き、無ければ空。</summary>
+    public static string GetSeasonName(int seasonId)
+    {
+        return ResolveText(_seasonNames, Volatile.Read(ref _cultureName), seasonId);
+    }
+
+    /// <summary>
+    /// シーズンランクの名前。段階(<c>SeasonRankTable.RankToLevel</c>)の中で★が一番小さい行の名前。
+    /// 表示中の言語で引き、無ければ空。
+    /// </summary>
+    public static string GetSeasonRankName(int seasonId, int rankLevel)
+    {
+        return ResolveText(_seasonRankNames, Volatile.Read(ref _cultureName), seasonId * 100 + rankLevel);
     }
 
     /// <summary>

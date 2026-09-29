@@ -536,8 +536,8 @@ public sealed class WidgetWindowManager
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
         window.Closed += WidgetWindow_Closed;
-        // 開き先を持たない種別(常に自分1枚のステータス詳細)は、種別ごとの保存に落とす。
-        // ここで Override を付けると SaveOpenTargets が何もせず返り、位置も大きさも捨てられる。
+        // 開き先を持たない種別(常に自分1枚のステータス詳細)は、種別ごとの保存だけを使う
+        // (SaveOpenTargets はその種別では何もせず返る)。
         window.SaveWindowBoundsOverride = WidgetConfigDefaults.SupportsOpenTargets(playerWidget.Kind)
             ? () => SaveOpenTargets(playerWidget)
             : null;
@@ -902,15 +902,25 @@ public sealed class WidgetWindowManager
         playerWidget.PlayerWindowPresentationChanged += PlayerWidget_PresentationChanged;
     }
 
-    public void UpdatePlayerWindowPresentations(IReadOnlyList<PlayerRosterEntry> roster)
+    /// <summary>その相手の名刺の値(顔写真・名刺)が変わった。開いているプレイヤーの窓へ渡す。</summary>
+    public void UpdatePlayerWindowSocialData(long characterId)
     {
-        var playersByCharacterId = roster
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            playerWindow.ViewModel.NotifySocialDataChanged(characterId);
+        }
+    }
+
+    public void UpdatePlayerWindowPresentations(PlayerRosterSnapshot roster)
+    {
+        var playersByCharacterId = roster.Entries
             .Where(player => player.CharacterId != 0)
             .ToDictionary(player => player.CharacterId);
-        var selfPlayer = roster.FirstOrDefault(player => player.IsSelf);
+        var selfPlayer = roster.Entries.FirstOrDefault(player => player.IsSelf);
 
         foreach (var playerWindow in _openPlayerWindows.ToArray())
         {
+            playerWindow.ViewModel.UpdateRosterContext(roster.MapName, roster.MapChannel, roster.SeasonId);
             playerWindow.ViewModel.UpdatePlayerFromRoster(playersByCharacterId, selfPlayer);
             playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
         }

@@ -25,6 +25,12 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     private long _lastKnownPlayerUid;
 
+    /// <summary>最後に確定した相手の NPC の印。タイトルに名前の規則(NPC は職業名)を当てるために持つ。</summary>
+    private bool _lastKnownIsNpc;
+
+    /// <summary>最後に確定した相手の職業。NPC のタイトルに出す職業名の元。</summary>
+    private int _lastKnownProfessionId;
+
     protected PlayerWidgetWindowViewModel(
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,
@@ -33,7 +39,58 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         PlayerWidget = playerWidget;
         _requestedCharacterId = requestedCharacterId;
         _showPlayerIdentityInHeader = showPlayerIdentityInHeader;
+
+        // 一覧の通知は中身が変わるまで来ないので、開いた時点の値から始める。
+        var roster = PlayerRosterPresentationStore.Instance.Current;
+        RosterMapName = roster.MapName;
+        RosterMapChannel = roster.MapChannel;
+        RosterSeasonId = roster.SeasonId;
+
         RefreshHeaderText();
+    }
+
+    /// <summary>一覧の通知のマップ名(自分のいる場所)。</summary>
+    protected string RosterMapName { get; private set; }
+
+    /// <summary>一覧の通知のチャンネル番号。チャンネルの無い場所では 0。</summary>
+    protected uint RosterMapChannel { get; private set; }
+
+    /// <summary>一覧の通知の今のシーズン番号。まだ分からなければ 0。</summary>
+    protected int RosterSeasonId { get; private set; }
+
+    /// <summary>一覧の通知の場所とシーズンを受け取る。変わったら <see cref="OnRosterContextChanged"/> を呼ぶ。</summary>
+    public void UpdateRosterContext(string mapName, uint mapChannel, int seasonId)
+    {
+        if (string.Equals(RosterMapName, mapName, StringComparison.Ordinal)
+            && RosterMapChannel == mapChannel
+            && RosterSeasonId == seasonId)
+        {
+            return;
+        }
+
+        RosterMapName = mapName;
+        RosterMapChannel = mapChannel;
+        RosterSeasonId = seasonId;
+        OnRosterContextChanged();
+    }
+
+    /// <summary>場所か今のシーズンが変わったとき。それを表示に使う窓だけが上書きする。</summary>
+    protected virtual void OnRosterContextChanged()
+    {
+    }
+
+    /// <summary>名刺の値(顔写真・名刺)が変わった相手。その相手を映している窓だけ <see cref="OnSocialDataChanged"/> を呼ぶ。</summary>
+    public void NotifySocialDataChanged(long characterId)
+    {
+        if (_selectedPlayer?.CharacterId == characterId)
+        {
+            OnSocialDataChanged();
+        }
+    }
+
+    /// <summary>映している相手の名刺の値が変わったとき。それを表示に使う窓だけが上書きする。</summary>
+    protected virtual void OnSocialDataChanged()
+    {
     }
 
     public WidgetListItemViewModel PlayerWidget { get; }
@@ -50,6 +107,16 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     /// <summary>最後に確定した相手のUID。名前と対にして保存する。</summary>
     public long LastKnownPlayerUid => _lastKnownPlayerUid;
+
+    /// <summary>最後に確定した相手の NPC の印。</summary>
+    protected bool LastKnownIsNpc => _lastKnownIsNpc;
+
+    /// <summary>最後に確定した相手の職業。</summary>
+    protected int LastKnownProfessionId => _lastKnownProfessionId;
+
+    /// <summary>自分を映す窓か。「自分」の指定で開いた窓と、覚えている UID が自分のものの窓。</summary>
+    protected bool IsSelfTarget => _requestedCharacterId is null
+        || (AppState.PlayerUID != 0 && _lastKnownPlayerUid == AppState.PlayerUID);
 
     /// <summary>
     /// 保存しておきたい素性が空から確定に変わったときに上がる。
@@ -85,6 +152,15 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
         _lastKnownPlayerUid = playerUid;
         RefreshHeaderText();
+        OnLastKnownPlayerChanged();
+    }
+
+    /// <summary>
+    /// 覚えている相手の素性(名前・UID・NPC の印・職業)を書いたとき。
+    /// 相手が一覧に載る前から素性を表示に使う窓だけが上書きする。
+    /// </summary>
+    protected virtual void OnLastKnownPlayerChanged()
+    {
     }
 
     protected long? SelectedCharacterId => _requestedCharacterId ?? _representedCharacterId;
@@ -111,9 +187,9 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     /// そのまま書き込むと<b>復元済みのタイトルが消える</b>。
     /// </para>
     /// </summary>
-    protected void SetHeaderText(string playerName, long playerUid)
+    protected void SetHeaderText(string playerName, long playerUid, bool isNpc, int professionId)
     {
-        RememberPlayer(playerName, playerUid);
+        RememberPlayer(playerName, playerUid, isNpc, professionId);
         RenderHeaderText();
     }
 
@@ -170,7 +246,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
                 _representedCharacterId = player.CharacterId;
             }
 
-            RememberPlayer(player.Name, player.CharacterId);
+            RememberPlayer(player.Name, player.CharacterId, player.IsNpc, player.ProfessionId);
         }
 
         if (EqualityComparer<PlayerRosterEntry?>.Default.Equals(_selectedPlayer, player))
@@ -197,7 +273,11 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         }
         else
         {
-            RememberPlayer(_selectedPlayer.Name, _selectedPlayer.CharacterId);
+            RememberPlayer(
+                _selectedPlayer.Name,
+                _selectedPlayer.CharacterId,
+                _selectedPlayer.IsNpc,
+                _selectedPlayer.ProfessionId);
         }
 
         RenderHeaderText();
@@ -222,16 +302,17 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
             return;
         }
 
-        var isSelf = _requestedCharacterId is null
-            || (AppState.PlayerUID != 0 && _lastKnownPlayerUid == AppState.PlayerUID);
+        var isSelf = IsSelfTarget;
 
         // 名前の出し方はプレイヤー一覧・メーターと同じ規則へ通す。
-        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字になるので、
+        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字、NPC なら職業名になるので、
         // タイトル専用の分岐は要らない。
         HeaderText = $"{HeaderPrefix} - {PlayerInfoFormatFormatter.GetDisplayName(
             _lastKnownPlayerName,
             _lastKnownPlayerUid,
             isSelf,
+            _lastKnownIsNpc,
+            _lastKnownProfessionId,
             PlayerRosterPresentationStore.Instance.NameDisplayMode)}";
     }
 
@@ -260,7 +341,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
             _representedCharacterId = identity.UserId;
         }
 
-        RememberPlayer(identity.Name, identity.UserId);
+        RememberPlayer(identity.Name, identity.UserId, identity.IsNpc, identity.ProfessionId);
     }
 
     /// <summary>
@@ -276,8 +357,14 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     /// <c>Name</c> を伏せ字に差し替えて渡すので、そのまま覚えると
     /// 表示を戻したあとも伏せ字が残る。
     /// </para>
+    ///
+    /// <para>
+    /// <b>NPC の印と職業は相手ごとの値。</b>相手(UID)が変わったら入れ替える。
+    /// 同じ相手なら名前と同じく分かった値を消さない(NPC の印は true から戻さない、職業は 0 で上書きしない)。
+    /// パーティを離れると NPC の印を運ぶ社交データが切れ、ロスターを通らない素性では false になるため。
+    /// </para>
     /// </summary>
-    private void RememberPlayer(string? playerName, long playerUid)
+    private void RememberPlayer(string? playerName, long playerUid, bool isNpc, int professionId)
     {
         var name = string.Equals(
             playerName,
@@ -288,6 +375,20 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
         var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownPlayerName)
             && _lastKnownPlayerUid == 0;
+
+        if (playerUid != 0 && playerUid != _lastKnownPlayerUid)
+        {
+            _lastKnownIsNpc = isNpc;
+            _lastKnownProfessionId = professionId;
+        }
+        else
+        {
+            _lastKnownIsNpc |= isNpc;
+            if (professionId > 0)
+            {
+                _lastKnownProfessionId = professionId;
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -304,5 +405,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         {
             SavedTargetInfoResolved?.Invoke(this, EventArgs.Empty);
         }
+
+        OnLastKnownPlayerChanged();
     }
 }

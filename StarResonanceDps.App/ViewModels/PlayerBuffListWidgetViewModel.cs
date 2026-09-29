@@ -130,7 +130,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         var playerIdentity = MeterSnapshotProvider.GetPlayerIdentity(characterId);
         if (playerIdentity is not null)
         {
-            SetHeaderText(playerIdentity.Name, playerIdentity.UserId);
+            SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
         SynchronizeEntries(MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind));

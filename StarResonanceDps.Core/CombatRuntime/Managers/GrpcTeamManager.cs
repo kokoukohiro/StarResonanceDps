@@ -427,12 +427,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var socialData = member.SocialData;
+            SocialDataStore.Apply(member.CharId, socialData.AvatarInfo);
+
             var receivedEquipment = socialData.EquipData != null
                 && socialData.EquipData.EquipInfos.Count > 0
                     ? PlayerEquipmentData.Create(
                         socialData.EquipData.EquipInfos.Select(
                             item => new PlayerEquipmentItem(item.Slot, item.EquipID)))
                     : null;
+
+            // いる場所は NotifySocialData だけ古い値を送り続ける(移動しても変わらない)ので、そこからは入れない。
+            var sceneInfo = isTrustedSource ? socialData.UserSceneInfo : null;
 
             PartyState.UpdateSupplement(
                 AppState.PartyTeamId,
@@ -461,7 +466,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     IsNpc = socialData.BasicData != null
                         ? socialData.BasicData.BotAiId > 0
                         : current.IsNpc,
-                    HasTrustedSocialData = current.HasTrustedSocialData || isTrustedSource
+                    HasTrustedSocialData = current.HasTrustedSocialData || isTrustedSource,
+                    SceneId = sceneInfo?.SceneId ?? current.SceneId,
+                    LineId = sceneInfo?.LineId ?? current.LineId
                 });
         }
 

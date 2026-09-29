@@ -573,20 +573,20 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>装備情報</value>
   </data>
-  <data name="PlayerInfo_Name" xml:space="preserve">
-    <value>名前</value>
+  <data name="PlayerInfo_Uid" xml:space="preserve">
+    <value>UID</value>
   </data>
   <data name="PlayerInfo_Level" xml:space="preserve">
-    <value>レベル</value>
+    <value>冒険者レベル</value>
   </data>
   <data name="PlayerInfo_AbilityScore" xml:space="preserve">
-    <value>戦力</value>
+    <value>能力スコア</value>
   </data>
-  <data name="PlayerInfo_Profession" xml:space="preserve">
-    <value>職業</value>
+  <data name="PlayerInfo_Location" xml:space="preserve">
+    <value>現在地</value>
   </data>
-  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
-    <value>職業特化</value>
+  <data name="PlayerInfo_Unknown" xml:space="preserve">
+    <value>不明</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>アイコンカラーの不透明度</value>
@@ -1394,5 +1394,47 @@
   </data>
   <data name="PlayerStatus_20120" xml:space="preserve">
     <value>戦闘時のスタミナ回復率</value>
+  </data>
+  <data name="Settings_IconColors_UnknownClass" xml:space="preserve">
+    <value>不明(クラス)</value>
+  </data>
+  <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
+    <value>不明(シーズン心相晶)</value>
+  </data>
+  <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
+    <value>心相晶無効</value>
+  </data>
+  <data name="ClassSpec_NameSuffix" xml:space="preserve">
+    <value>型</value>
+  </data>
+  <data name="PlayerInfo_SeasonTalentInactive" xml:space="preserve">
+    <value>心相晶無効</value>
+  </data>
+  <data name="PlayerInfo_SeasonRank" xml:space="preserve">
+    <value>シーズン階級</value>
+  </data>
+  <data name="PlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>シーズン強度</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAs" xml:space="preserve">
+    <value>名前を付けて画像を保存…</value>
+  </data>
+  <data name="PlayerInfo_CopyImage" xml:space="preserve">
+    <value>画像をコピー</value>
+  </data>
+  <data name="PlayerInfo_SaveImageDialogTitle" xml:space="preserve">
+    <value>名前を付けて保存</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
+    <value>{0} ファイル</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
+    <value>すべてのファイル</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
+    <value>画像を保存できませんでした</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
+    <value>画像をコピーできませんでした</value>
   </data>
 </root>

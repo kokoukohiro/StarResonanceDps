@@ -27,6 +27,7 @@ public sealed class PlayerRosterStore
     private string _mapName = string.Empty;
     private uint _mapChannel;
     private long _mapGeneration;
+    private int _seasonId;
 
     private PlayerRosterStore()
     {
@@ -53,7 +54,7 @@ public sealed class PlayerRosterStore
         {
             lock (_sync)
             {
-                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
+                return new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration, _seasonId);
             }
         }
     }
@@ -83,6 +84,14 @@ public sealed class PlayerRosterStore
                 _mapName = normalizedMapName;
                 _mapChannel = mapChannel;
             },
+            forcePublish: false);
+    }
+
+    /// <summary>今のシーズン番号。まだ分からなければ 0。</summary>
+    public void UpdateSeason(int seasonId)
+    {
+        PublishIfChanged(
+            () => _seasonId = seasonId,
             forcePublish: false);
     }
 
@@ -176,6 +185,7 @@ public sealed class PlayerRosterStore
             var previousMapName = _mapName;
             var previousMapChannel = _mapChannel;
             var previousMapGeneration = _mapGeneration;
+            var previousSeasonId = _seasonId;
 
             update();
 
@@ -184,13 +194,14 @@ public sealed class PlayerRosterStore
                 && previousEntries.SequenceEqual(nextSnapshot)
                 && string.Equals(previousMapName, _mapName, StringComparison.Ordinal)
                 && previousMapChannel == _mapChannel
-                && previousMapGeneration == _mapGeneration)
+                && previousMapGeneration == _mapGeneration
+                && previousSeasonId == _seasonId)
             {
                 return;
             }
 
             _snapshot = nextSnapshot;
-            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration);
+            changedSnapshot = new PlayerRosterSnapshot(_snapshot, _mapName, _mapChannel, _mapGeneration, _seasonId);
         }
 
         RosterChanged?.Invoke(this, new PlayerRosterChangedEventArgs(changedSnapshot!));
@@ -282,15 +293,21 @@ public sealed class PlayerRosterStore
             entry.IsLive,
             entry.Attributes,
             entry.SeasonTalentBuffId,
-            entry.IsSeasonTalentInactive);
+            entry.IsSeasonTalentInactive,
+            entry.SeasonRankLevel,
+            entry.IsNearby,
+            entry.PartySceneId,
+            entry.PartyLineId);
     }
 }
 
+/// <param name="SeasonId">今のシーズン番号。まだ分からなければ 0。</param>
 public sealed record PlayerRosterSnapshot(
     IReadOnlyList<PlayerRosterEntry> Entries,
     string MapName,
     uint MapChannel,
-    long MapGeneration);
+    long MapGeneration,
+    int SeasonId);
 
 public sealed class PlayerRosterChangedEventArgs(PlayerRosterSnapshot roster) : EventArgs
 {
@@ -302,4 +319,7 @@ public sealed class PlayerRosterChangedEventArgs(PlayerRosterSnapshot roster) : 
     public string MapName { get; } = roster.MapName;
 
     public long MapGeneration { get; } = roster.MapGeneration;
+
+    /// <summary>今のシーズン番号。まだ分からなければ 0。</summary>
+    public int SeasonId { get; } = roster.SeasonId;
 }

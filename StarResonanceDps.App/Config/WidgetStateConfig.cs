@@ -24,6 +24,7 @@ public sealed class WidgetConfig
     public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
     public BuffCardWidgetSettingsConfig? BuffCard { get; set; }
     public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
+    public PlayerInfoWidgetSettingsConfig? PlayerInfo { get; set; }
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
     public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
     public SkillDetailWidgetSettingsConfig? SkillDetail { get; set; }
@@ -67,6 +68,7 @@ public sealed class WidgetConfig
             MetricTimeline = MetricTimeline?.Clone(),
             BuffCard = BuffCard?.Clone(),
             TakenDamageLog = TakenDamageLog?.Clone(),
+            PlayerInfo = PlayerInfo?.Clone(),
             BuffList = BuffList?.Clone(),
             ElementColor = ElementColor?.Clone(),
             SkillDetail = SkillDetail?.Clone(),
@@ -196,6 +198,34 @@ public sealed class TakenDamageLogWidgetSettingsConfig
             TextColorPalettes = TextColorPalettes is null
                 ? WidgetConfigDefaults.CreateDefaultTextColorPalettes()
                 : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// プレイヤー情報の設定。バッジの絵の色(アイコンカラー)。
+/// 鍵は <see cref="WidgetConfigDefaults.PlayerInfoClassColorKeys"/>(クラス・シーズン心相晶・シーズン・不明)。
+/// フィルターと不透明度は持たない。
+/// </summary>
+public sealed class PlayerInfoWidgetSettingsConfig
+{
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.PlayerInfo);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfo);
+
+    public PlayerInfoWidgetSettingsConfig Clone()
+    {
+        return new PlayerInfoWidgetSettingsConfig
+        {
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.PlayerInfo)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.PlayerInfo)
+                : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
                     StringComparer.OrdinalIgnoreCase)
@@ -625,8 +655,8 @@ public static class WidgetConfigDefaults
     private const double MeterInitialWindowHeight = 460d;
     private const double TakenDamageLogInitialWindowWidth = 440d;
     private const double TakenDamageLogInitialWindowHeight = 460d;
-    private const double PlayerInfoInitialWindowWidth = 360d;
-    private const double PlayerInfoInitialWindowHeight = 400d;
+    private const double PlayerInfoInitialWindowWidth = 406d;
+    private const double PlayerInfoInitialWindowHeight = 265d;
     private const double PlayerStatusInitialWindowWidth = 360d;
     private const double PlayerStatusInitialWindowHeight = 400d;
     private const double PlayerEquipmentInitialWindowWidth = 400d;
@@ -715,6 +745,19 @@ public static class WidgetConfigDefaults
     /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、シーズン心相晶の絵の10件と不明。</summary>
     public static readonly string[] PlayerListClassColorKeys =
         [.. ClassColorKeys, .. StarResonanceDps.App.Services.SeasonTalentIcons.ColorKeys];
+
+    /// <summary>
+    /// プレイヤー情報のアイコンカラーの鍵。クラス(不明を除く)、シーズン心相晶の絵の10件と無効、シーズン、最後に不明。
+    /// 不明はバッジ3つ(シーズン・クラス・シーズン心相晶)のはてなを1色で塗る。絵が同じなので分けない。
+    /// </summary>
+    public static readonly string[] PlayerInfoClassColorKeys =
+    [
+        .. ClassColorKeys.Where(key => key != "Unknown"),
+        .. StarResonanceDps.App.Services.SeasonTalentIcons.TypeColorKeys,
+        StarResonanceDps.App.Services.SeasonTalentIcons.InactiveColorKey,
+        .. StarResonanceDps.App.Services.SeasonIcons.ColorKeys,
+        "Unknown"
+    ];
 
     public static readonly string[] EntityClassColorKeys =
     [
@@ -806,6 +849,19 @@ public static class WidgetConfigDefaults
         ["SeasonTalent.s2talent051_01"] = ["#FFFFFF", "#C2F5F1"],
         ["SeasonTalent.s2talent054_01"] = ["#FFFFFF", "#F5D8F2"],
         ["SeasonTalent.Unknown"] = ["#FFFFFF", "#EEE9F2"]
+    };
+
+    /// <summary>
+    /// プレイヤー情報だけにある行の既定色。心相晶の無効は不明と同じ色、シーズンは白と灰色の2枠で、2枠目から始める。
+    /// ほかの行はプレイヤーリストと同じ既定色。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> PlayerInfoDefaultExtraColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["SeasonTalent.Inactive"] = ["#FFFFFF", "#EEE9F2"],
+        ["Season.1"] = ["#FFFFFF", "#8C52F7"],
+        ["Season.2"] = ["#FFFFFF", "#EF66B1"],
+        ["Season.3"] = ["#FFFFFF", "#EFAE65"],
+        ["Season.4"] = ["#FFFFFF", "#7F8ECF"]
     };
 
     /// <summary>
@@ -1027,6 +1083,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.TakenDamageLog;
     }
 
+    /// <summary>プレイヤー情報の設定(アイコンカラー)を持つ種別か。</summary>
+    public static bool SupportsPlayerInfoSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerInfo;
+    }
+
     /// <summary>スキル詳細の表示設定(行名の書式)を持つ種別か。</summary>
     public static bool SupportsSkillDetailSettings(WidgetKind kind)
     {
@@ -1117,6 +1179,7 @@ public static class WidgetConfigDefaults
             Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
             MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null,
             TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
+            PlayerInfo = SupportsPlayerInfoSettings(kind) ? CreatePlayerInfoSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
             SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
@@ -1381,6 +1444,15 @@ public static class WidgetConfigDefaults
         };
     }
 
+    public static PlayerInfoWidgetSettingsConfig CreatePlayerInfoSettings()
+    {
+        return new PlayerInfoWidgetSettingsConfig
+        {
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.PlayerInfo),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.PlayerInfo)
+        };
+    }
+
     public static TakenDamageLogWidgetSettingsConfig CreateTakenDamageLogSettings()
     {
         return new TakenDamageLogWidgetSettingsConfig
@@ -1513,12 +1585,14 @@ public static class WidgetConfigDefaults
         {
             WidgetKind.EntityList => EntityClassColorKeys,
             WidgetKind.PlayerList => PlayerListClassColorKeys,
+            WidgetKind.PlayerInfo => PlayerInfoClassColorKeys,
             _ => ClassColorKeys
         };
     }
 
     /// <summary>
-    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストのシーズン心相晶(不明を含む)だけ2枠目。
+    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストのシーズン心相晶(不明を含む)と、
+    /// プレイヤー情報のシーズン心相晶(無効を含む)とシーズンだけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
@@ -1526,6 +1600,10 @@ public static class WidgetConfigDefaults
                 && string.Equals(key, "SoulMusician", StringComparison.OrdinalIgnoreCase))
             || (kind == WidgetKind.PlayerList
                 && PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key))
+            || (kind == WidgetKind.PlayerInfo
+                && (PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key)
+                    || string.Equals(key, StarResonanceDps.App.Services.SeasonTalentIcons.InactiveColorKey, StringComparison.OrdinalIgnoreCase)
+                    || StarResonanceDps.App.Services.SeasonIcons.IsColorKey(key)))
             ? MinClassColorIndex + 1
             : MinClassColorIndex;
     }
@@ -1762,7 +1840,13 @@ public static class WidgetConfigDefaults
 
     public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
     {
-        if (kind == WidgetKind.PlayerList
+        if (kind == WidgetKind.PlayerInfo
+            && PlayerInfoDefaultExtraColorHexes.TryGetValue(key, out var playerInfoColors))
+        {
+            return [.. playerInfoColors];
+        }
+
+        if ((kind is WidgetKind.PlayerList or WidgetKind.PlayerInfo)
             && PlayerListDefaultSeasonTalentColorHexes.TryGetValue(key, out var seasonTalentColors))
         {
             return [.. seasonTalentColors];
@@ -1770,8 +1854,8 @@ public static class WidgetConfigDefaults
 
         var source = kind switch
         {
-            // 被ダメログのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.PlayerList or WidgetKind.TakenDamageLog => PlayerListDefaultClassColorHexes,
+            // 被ダメログとプレイヤー情報のクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo => PlayerListDefaultClassColorHexes,
             WidgetKind.EntityList => EntityListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
@@ -1824,6 +1908,13 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    public static PlayerInfoWidgetSettingsConfig CloneNormalizedPlayerInfo(PlayerInfoWidgetSettingsConfig? playerInfo)
+    {
+        var normalized = (playerInfo ?? CreatePlayerInfoSettings()).Clone();
+        NormalizePlayerInfo(normalized);
+        return normalized;
+    }
+
     public static void Normalize(WidgetConfig config)
     {
         config.Theme ??= CreateTheme();
@@ -1853,6 +1944,9 @@ public static class WidgetConfigDefaults
             : null;
         config.TakenDamageLog = SupportsTakenDamageLogSettings(kind)
             ? CloneNormalizedTakenDamageLog(config.TakenDamageLog)
+            : null;
+        config.PlayerInfo = SupportsPlayerInfoSettings(kind)
+            ? CloneNormalizedPlayerInfo(config.PlayerInfo)
             : null;
         config.BuffList = SupportsBuffListSettings(kind)
             ? CloneNormalizedBuffList(kind, config.BuffList)
@@ -2001,6 +2095,16 @@ public static class WidgetConfigDefaults
             takenDamageLog.TextColorPalettes);
     }
 
+    public static void NormalizePlayerInfo(PlayerInfoWidgetSettingsConfig playerInfo)
+    {
+        playerInfo.ClassColorIndexes ??= CreateDefaultClassColorIndexes(WidgetKind.PlayerInfo);
+        playerInfo.ClassColorPalettes ??= CreateDefaultClassColorPalettes(WidgetKind.PlayerInfo);
+        (playerInfo.ClassColorIndexes, playerInfo.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.PlayerInfo,
+            playerInfo.ClassColorIndexes,
+            playerInfo.ClassColorPalettes);
+    }
+
     public static int ClampBuffCardScale(int scale)
     {
         var stepped = (int)Math.Round(
@@ -2078,7 +2182,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーの色の一覧と選んでいる枠を、<paramref name="kind"/> の職の並びと既定値で揃える。
-    /// メーター系の設定と被ダメログが使う。
+    /// メーター系の設定と被ダメログとプレイヤー情報が使う。
     /// </summary>
     private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeClassColors(
         WidgetKind kind,

@@ -25,4 +25,11 @@ public sealed record PlayerRosterEntry(
     // 有効化しているシーズンタレントの型の根ノードのバフID(0 = 不明か無効)。名前は表示時に CombatDataCatalog.GetSeasonTalentName で引く。
     int SeasonTalentBuffId = 0,
     // シーズンタレントの型が無効(どの型も有効化していない)と確定しているか。
-    bool IsSeasonTalentInactive = false);
+    bool IsSeasonTalentInactive = false,
+    // シーズンランクの段階(SeasonRankTable.RankToLevel、属性 AttrRankLevel)。段階 0 があるので、属性が届いていなければ null。
+    int? SeasonRankLevel = null,
+    // いま周りの実体から値が届いているか(自分を含む)。周りに見えている人は自分と同じ場所にいる。
+    bool IsNearby = false,
+    // パーティ情報のいる場所。マップ番号とチャンネル番号、0 は分からない(パーティ外も 0)。
+    int PartySceneId = 0,
+    int PartyLineId = 0);

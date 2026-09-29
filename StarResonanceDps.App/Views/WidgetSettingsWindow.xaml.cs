@@ -44,6 +44,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
         _viewModel.TakenDamageLogPreviewChanged += _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.PlayerInfoPreviewChanged += _widget.ApplyPlayerInfoSettingsPreview;
         _viewModel.BuffListPreviewChanged += _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged += _widget.ApplyElementColorSettingsPreview;
         _viewModel.SkillDetailPreviewChanged += _widget.ApplySkillDetailSettingsPreview;
@@ -74,6 +75,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
         _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
         _viewModel.TakenDamageLogPreviewChanged -= _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.PlayerInfoPreviewChanged -= _widget.ApplyPlayerInfoSettingsPreview;
         _viewModel.BuffListPreviewChanged -= _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged -= _widget.ApplyElementColorSettingsPreview;
         _viewModel.SkillDetailPreviewChanged -= _widget.ApplySkillDetailSettingsPreview;
@@ -215,6 +217,11 @@ public partial class WidgetSettingsWindow : Window
     private void TakenDamageLogTextColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(TakenDamageLogTextColorsHost);
+    }
+
+    private void PlayerInfoClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(PlayerInfoClassColorsHost);
     }
 
     private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)

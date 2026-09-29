@@ -329,7 +329,8 @@ public partial class WidgetWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
-        SaveBounds();
+        // 動かしてから保存待ちの間に閉じた窓は、その移動も種別ごとの位置へ書く。
+        SaveBounds(isMoveOrResize: _saveBoundsTimer.IsEnabled);
         _saveBoundsTimer.Stop();
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
         _widget.PropertyChanged -= Widget_PropertyChanged;
@@ -687,8 +688,14 @@ public partial class WidgetWindow : Window
     private void SaveBoundsTimer_Tick(object? sender, EventArgs e)
     {
         _saveBoundsTimer.Stop();
-        SaveBounds();
+        SaveBounds(isMoveOrResize: true);
     }
+
+    /// <summary>
+    /// 枠のレイヤーに重ねる飾りの置き場。<b>中身のレイヤーに置くと背景の上にベタで乗る</b>ので、
+    /// 分割線や閉じる印と同じ不透明度で合成したいものはここへ入れる。
+    /// </summary>
+    public ContentControl FrameOverlayHost => WidgetFrameOverlayHost;
 
     /// <summary>
     /// この窓ぶんの位置を保存する経路。<c>null</c> なら種別ごとの位置へ保存する。
@@ -697,16 +704,18 @@ public partial class WidgetWindow : Window
     /// 同じウィジェットを複数開くと、種別ごとの位置では最後に動かした窓が全部を上書きし、
     /// 次の起動で全員が同じ場所に出る。1枚ずつ持つ窓はこちらへ流す。
     /// </para>
+    ///
+    /// <para>
+    /// こちらへ流す窓も、動かしたときと大きさを変えたときは種別ごとの位置にも書く(次に新しく開く窓の位置と大きさになる)。
+    /// <b>閉じたときは書かない。</b>閉じる順に上書きされ、最後に動かした窓の位置ではなくなる。
+    /// </para>
     /// </summary>
-    /// <summary>
-    /// 枠のレイヤーに重ねる飾りの置き場。<b>中身のレイヤーに置くと背景の上にベタで乗る</b>ので、
-    /// 分割線や閉じる印と同じ不透明度で合成したいものはここへ入れる。
-    /// </summary>
-    public ContentControl FrameOverlayHost => WidgetFrameOverlayHost;
-
     public Action? SaveWindowBoundsOverride { get; set; }
 
-    private void SaveBounds()
+    /// <param name="isMoveOrResize">
+    /// 動かした・大きさを変えたことによる保存か。閉じたときの保存は、その保存待ちが残っているときだけ真。
+    /// </param>
+    private void SaveBounds(bool isMoveOrResize)
     {
         if (_isRestoringBounds
             || !IsLoaded
@@ -722,7 +731,10 @@ public partial class WidgetWindow : Window
         if (SaveWindowBoundsOverride is not null)
         {
             SaveWindowBoundsOverride();
-            return;
+            if (!isMoveOrResize)
+            {
+                return;
+            }
         }
 
         WidgetStateManager.Instance.SaveWidgetWindowBounds(

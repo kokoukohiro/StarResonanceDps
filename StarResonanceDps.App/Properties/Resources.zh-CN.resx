@@ -573,20 +573,20 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>装备信息</value>
   </data>
-  <data name="PlayerInfo_Name" xml:space="preserve">
-    <value>名称</value>
+  <data name="PlayerInfo_Uid" xml:space="preserve">
+    <value>玩家编号</value>
   </data>
   <data name="PlayerInfo_Level" xml:space="preserve">
-    <value>等级</value>
+    <value>生体元等级</value>
   </data>
   <data name="PlayerInfo_AbilityScore" xml:space="preserve">
-    <value>战力</value>
+    <value>能力评分</value>
   </data>
-  <data name="PlayerInfo_Profession" xml:space="preserve">
-    <value>职业</value>
+  <data name="PlayerInfo_Location" xml:space="preserve">
+    <value>当前位置</value>
   </data>
-  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
-    <value>职业专精</value>
+  <data name="PlayerInfo_Unknown" xml:space="preserve">
+    <value>未知</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>图标颜色不透明度</value>
@@ -1394,5 +1394,47 @@
   </data>
   <data name="PlayerStatus_20120" xml:space="preserve">
     <value>战斗状态下体力恢复速率</value>
+  </data>
+  <data name="Settings_IconColors_UnknownClass" xml:space="preserve">
+    <value>未知(职业)</value>
+  </data>
+  <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
+    <value>未知(赛季心相仪)</value>
+  </data>
+  <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
+    <value>心相仪未启用</value>
+  </data>
+  <data name="ClassSpec_NameSuffix" xml:space="preserve">
+    <value>流</value>
+  </data>
+  <data name="PlayerInfo_SeasonTalentInactive" xml:space="preserve">
+    <value>心相仪未启用</value>
+  </data>
+  <data name="PlayerInfo_SeasonRank" xml:space="preserve">
+    <value>赛季头衔</value>
+  </data>
+  <data name="PlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>赛季强度</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAs" xml:space="preserve">
+    <value>图片另存为…</value>
+  </data>
+  <data name="PlayerInfo_CopyImage" xml:space="preserve">
+    <value>复制图片</value>
+  </data>
+  <data name="PlayerInfo_SaveImageDialogTitle" xml:space="preserve">
+    <value>另存为</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
+    <value>{0} 文件</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
+    <value>所有文件</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
+    <value>无法保存图片</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
+    <value>无法复制图片</value>
   </data>
 </root>

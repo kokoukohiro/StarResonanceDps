@@ -107,15 +107,15 @@ public static partial class PlayerInfoFormatFormatter
     }
 
     /// <summary>
-    /// 相手の名前の表示値。<b>書式を通さない表示からも使う</b>
-    /// (ウィンドウのタイトル、バフ・デバフカードの本文)。
+    /// NPC の規則を当てる前の名前の表示値。伏せる設定なら伏せ字、
+    /// <b>名前がまだ取れていなければUID</b>、それ以外は名前そのもの。
     ///
     /// <para>
-    /// 規則はプレイヤー一覧・メーターと同じ。伏せる設定なら伏せ字、
-    /// <b>名前がまだ取れていなければUID</b>、それ以外は名前そのもの。
+    /// <b>外へ出さない。</b>表示はどこも NPC の印を渡す版を通す。
+    /// NPC の印を渡さずに名前を出せる入口があると、そこだけ NPC の規則が抜ける。
     /// </para>
     /// </summary>
-    public static string GetDisplayName(
+    private static string GetDisplayName(
         string? name,
         long userId,
         bool isSelf,
@@ -133,6 +133,7 @@ public static partial class PlayerInfoFormatFormatter
 
     /// <summary>
     /// 相手の名前の表示値。<b>NPC は名前ではなく職業名を出す</b>(プレイヤー一覧と同じ規則)。
+    /// 書式を通さない表示(ウィンドウのタイトル、バフ・デバフカードの本文)もこれを通す。
     /// </summary>
     public static string GetDisplayName(
         string? name,
@@ -196,7 +197,7 @@ public static partial class PlayerInfoFormatFormatter
             : LocalizationManager.Instance.GetString($"ClassSpec_{classSpec}");
     }
 
-    private static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)
+    internal static bool ShouldHideName(bool isSelf, PlayerNameDisplayMode nameDisplayMode)
     {
         return nameDisplayMode switch
         {

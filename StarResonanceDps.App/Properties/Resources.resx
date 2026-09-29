@@ -573,20 +573,20 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>Equipment Info</value>
   </data>
-  <data name="PlayerInfo_Name" xml:space="preserve">
-    <value>Name</value>
+  <data name="PlayerInfo_Uid" xml:space="preserve">
+    <value>UID</value>
   </data>
   <data name="PlayerInfo_Level" xml:space="preserve">
-    <value>Level</value>
+    <value>Adventurer Level</value>
   </data>
   <data name="PlayerInfo_AbilityScore" xml:space="preserve">
     <value>Ability Score</value>
   </data>
-  <data name="PlayerInfo_Profession" xml:space="preserve">
-    <value>Profession</value>
+  <data name="PlayerInfo_Location" xml:space="preserve">
+    <value>Location</value>
   </data>
-  <data name="PlayerInfo_ProfessionSpec" xml:space="preserve">
-    <value>ProfessionSpec</value>
+  <data name="PlayerInfo_Unknown" xml:space="preserve">
+    <value>Unknown</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
     <value>Icon Colors Opacity</value>
@@ -1394,5 +1394,47 @@
   </data>
   <data name="PlayerStatus_20120" xml:space="preserve">
     <value>Stamina Recovery</value>
+  </data>
+  <data name="Settings_IconColors_UnknownClass" xml:space="preserve">
+    <value>Unknown (Class)</value>
+  </data>
+  <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
+    <value>Unknown (Season Psychoscope)</value>
+  </data>
+  <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
+    <value>Psychoscope Not Enabled</value>
+  </data>
+  <data name="ClassSpec_NameSuffix" xml:space="preserve">
+    <value> Spec</value>
+  </data>
+  <data name="PlayerInfo_SeasonTalentInactive" xml:space="preserve">
+    <value>Psychoscope Not Enabled</value>
+  </data>
+  <data name="PlayerInfo_SeasonRank" xml:space="preserve">
+    <value>Season Title</value>
+  </data>
+  <data name="PlayerInfo_SeasonStrength" xml:space="preserve">
+    <value>Season Strength</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAs" xml:space="preserve">
+    <value>Save Image As…</value>
+  </data>
+  <data name="PlayerInfo_CopyImage" xml:space="preserve">
+    <value>Copy Image</value>
+  </data>
+  <data name="PlayerInfo_SaveImageDialogTitle" xml:space="preserve">
+    <value>Save As</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
+    <value>{0} Files</value>
+  </data>
+  <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
+    <value>All Files</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
+    <value>Could not save the image</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
+    <value>Could not copy the image</value>
   </data>
 </root>

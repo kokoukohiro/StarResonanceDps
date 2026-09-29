@@ -24,6 +24,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const string MaxStaminaSnapshotAttribute = "MaxStaminaSnapshot";
         private const uint WorldProxyServiceId = 103198054;
         private const uint GetTeamInfoMethodId = 0x4C01F;
+        private const uint GetSocialDataMethodId = 0x47065;
 
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
@@ -50,6 +51,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncContainerData, ProcessSyncContainerData);
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncContainerDirtyData, ProcessSyncContainerDirtyData);
+            netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncSeason, ProcessSyncSeason);
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncNearDeltaInfo, ProcessSyncNearDeltaInfo);
 
@@ -103,6 +105,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.ProxyGate = ShouldDispatchProxy;
 
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
 
             netCap.Start();
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
@@ -137,6 +140,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SourceLandingResolver.Instance.Clear();
             NearbyMonsterIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
+            SocialDataStore.ResetToStartup();
         }
 
         /// <summary>
@@ -389,6 +393,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            SocialDataStore.Apply(socialData.CharId, socialData.AvatarInfo);
+
             var selfUuid = currentUserUuid != 0
                 ? currentUserUuid
                 : AppState.PlayerUUID != 0
@@ -584,6 +590,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // マップ移動では残していたもの(自分の陣営・自分のスキル・プレイヤーリストの行など)。
             PlayerSkillLevelStateStore.ResetSelfToStartup();
+            SeasonStateStore.ResetToStartup();
 
             PlayerRosterProjection.ResetToStartup();
 
@@ -1425,6 +1432,46 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 Log.Debug(ex, "Failed to parse team information response");
             }
+        }
+
+        /// <summary>
+        /// 名刺照会の応答。顔写真と名刺を控える(プレイヤー情報が出す)。
+        /// 照会はゲームが送ったものだけで、照会の種類によって入っている部分が違う。
+        /// </summary>
+        private static void ProcessGetSocialDataReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var data = ParseGetSocialDataReply(payloadBuffer)?.Data;
+            if (data is not null)
+            {
+                SocialDataStore.Apply(data.CharId, data.AvatarInfo);
+            }
+        }
+
+        /// <summary>
+        /// 名刺照会の応答は <c>GetSocialData_Ret { ret }</c> で1段包まれている(先頭は 0x0A、ret の長さ、ret)。
+        ///
+        /// <para>
+        /// 応答が 1280〜1407 バイトだと包みの長さの2バイト目が 0x0A になり、NetCap が中身の始まりと見てそこから渡してくる
+        /// (先頭の 0x0A は長さの一部で、その後ろが中身の <c>GetSocialDataReply</c>)。
+        /// 包みの長さが残りとちょうど合えば包みとして、合わなければ先頭1バイトを除いて中身として読む。
+        /// </para>
+        /// </summary>
+        private static GetSocialDataReply? ParseGetSocialDataReply(ReadOnlySpan<byte> payload)
+        {
+            if (payload.IsEmpty || payload[0] != 0x0A)
+            {
+                throw new InvalidDataException("Unexpected framing of social data reply");
+            }
+
+            var rest = payload[1..].ToArray();
+            var input = new Google.Protobuf.CodedInputStream(rest);
+            var length = input.ReadLength();
+            return length == rest.Length - input.Position
+                ? Zproto.World.Types.GetSocialData_Ret.Parser.ParseFrom(payload).Ret
+                : GetSocialDataReply.Parser.ParseFrom(rest);
         }
 
         /// <summary>
@@ -2711,6 +2758,32 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 今のシーズンの通知。マップ移動のたびにフルコンテナの直後に届く。
+        /// 自分のシーズンレベルを今のシーズンで引き直し、プレイヤーの一覧へ今のシーズンを渡す。
+        /// </summary>
+        public static void ProcessSyncSeason(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            var vData = SyncSeason.Parser.ParseFrom(payloadBuffer);
+            SeasonStateStore.SetCurrentSeasonId(vData.VSeason);
+
+            if (AppState.PlayerUID != 0)
+            {
+                ApplySelfSeasonLevel(Utils.EntityIdToUuid(AppState.PlayerUID, (long)EEntityType.EntChar, false, false));
+            }
+
+            PlayerRosterProjection.UpdateSeason();
+        }
+
+        /// <summary>今のシーズンの自分のシーズンレベルを入れる。今のシーズンが分からないか、表に無ければ書かない。</summary>
+        private static void ApplySelfSeasonLevel(long playerUuid)
+        {
+            if (SeasonStateStore.TryGetSelfCurrentSeasonLevel(out var level))
+            {
+                EncounterManager.Current.SetAttrKV(playerUuid, "AttrSeasonLevel", level);
+            }
+        }
+
         public static void ProcessSyncContainerData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             BattleStateMachine.CheckDeferredCalls();
@@ -2813,14 +2886,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                     resetForSceneChange: false);
             }
 
+            // シーズンごとのレベルの表は並びが届くたびに入れ替わるので、控えて今のシーズンで引く。
+            // ログインのときは今のシーズン(SyncSeason)がこの直後に届き、そこで入る。
             var seasonRoleLevelData = vData.SeasonRoleLevelData;
             if (seasonRoleLevelData != null)
             {
-                var lastSeason = seasonRoleLevelData.SeasonRoleLevelMap.LastOrDefault();
-                if (lastSeason.Value != null)
-                {
-                    EncounterManager.Current.SetAttrKV(playerUuid, "AttrSeasonLevel", lastSeason.Value.Level);
-                }
+                SeasonStateStore.ReplaceSelfSeasonLevels(seasonRoleLevelData.SeasonRoleLevelMap
+                    .Where(pair => pair.Value != null)
+                    .Select(pair => KeyValuePair.Create(pair.Key, pair.Value.Level)));
+                ApplySelfSeasonLevel(playerUuid);
             }
 
             if (vData.Equip != null)
