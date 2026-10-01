@@ -236,7 +236,7 @@ public sealed class PlayerInfoWidgetSettingsConfig
 }
 
 /// <summary>
-/// バフ・デバフ一覧の設定。行に出すゲージの色と長さ。
+/// バフ・デバフ一覧の設定。行に出すゲージの色と長さ、一覧に出さないバフ。
 ///
 /// <para>
 /// 色は左端と右端の2つで、間はグラデーションになる(形はクラスカラーと同じ「色見本＋選んでいる枠」)。
@@ -263,12 +263,19 @@ public sealed class BuffListWidgetSettingsConfig
     /// <summary>ゲージが満タンになる残り時間。0=10秒 / 1=20秒 / 2=30秒。これ以上は満タンで頭打ち。</summary>
     public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultBuffListGaugeLengthIndex;
 
+    /// <summary>
+    /// 一覧に出さないバフのID(<c>BaseId</c>)。並びは非表示にした順。
+    /// 窓の右クリックで足し、設定画面の削除で外す。
+    /// </summary>
+    public List<int> HiddenBuffIds { get; set; } = [];
+
     public BuffListWidgetSettingsConfig Clone()
     {
         return new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
             GaugeColorOpacity = GaugeColorOpacity,
+            HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
             GaugeColorIndexes = GaugeColorIndexes is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, int>(GaugeColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -1604,7 +1611,8 @@ public static class WidgetConfigDefaults
                 : DefaultBuffListGaugeLengthIndex,
             GaugeColorIndexes = CreateDefaultGaugeColorIndexes(kind),
             GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
-            GaugeColorOpacity = MaxClassColorOpacity
+            GaugeColorOpacity = MaxClassColorOpacity,
+            HiddenBuffIds = []
         };
     }
 
@@ -1656,6 +1664,11 @@ public static class WidgetConfigDefaults
 
         buffList.GaugeColorIndexes = normalizedIndexes;
         buffList.GaugeColorPalettes = normalizedPalettes;
+
+        // 0 以下はバフのIDではない。重なりは先に足したほうを残し、非表示にした順を保つ。
+        buffList.HiddenBuffIds = buffList.HiddenBuffIds is null
+            ? []
+            : [.. buffList.HiddenBuffIds.Where(baseId => baseId > 0).Distinct()];
     }
 
     public static MeterWidgetSettingsConfig CreateMeterSettings(WidgetKind kind)

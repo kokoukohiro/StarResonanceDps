@@ -153,9 +153,25 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
+        widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widgetItems.Add(widget);
         _widgetWindowManager.RegisterPlayerWindowWidget(widget);
         return widget;
+    }
+
+    /// <summary>
+    /// 窓の右クリックでバフを非表示にした。<b>保存済みの一覧に足して</b>その項目だけ書く。
+    /// ウィジェットが持つ一覧は設定ウィンドウのプレビューを含むので、そのまま書くと未保存の削除まで保存してしまう。
+    /// </summary>
+    private void Widget_BuffListHiddenBuffsChanged(WidgetKind kind, int baseId)
+    {
+        var hiddenBuffIds = _widgetStateManager.GetWidgetSnapshot(kind).BuffList?.HiddenBuffIds ?? [];
+        if (hiddenBuffIds.Contains(baseId))
+        {
+            return;
+        }
+
+        _widgetStateManager.SaveBuffListHiddenBuffs(kind, [.. hiddenBuffIds, baseId]);
     }
 
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)

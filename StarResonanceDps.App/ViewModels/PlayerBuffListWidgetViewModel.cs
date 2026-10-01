@@ -12,7 +12,7 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowViewModel, IBuffListWindowViewModel, IDisposable
 {
     private readonly PlayerBuffListKind _kind;
 
@@ -55,6 +55,18 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
 
     public ReadOnlyObservableCollection<PlayerBuffEntry> Entries { get; }
 
+    public WidgetListItemViewModel Widget => PlayerWidget;
+
+    public string CardMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_DebuffCard"
+            : "BuffList_Menu_BuffCard");
+
+    public string HideMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_HideDebuff"
+            : "BuffList_Menu_HideBuff");
+
     public void Dispose()
     {
         if (_isDisposed)
@@ -69,17 +81,15 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
-    /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直し、ゲージの長さも当て直す。</summary>
+    /// <summary>
+    /// 表示設定(保存かプレビュー)が変わった。色を作り直し、行も作り直す
+    /// (非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
+    /// </summary>
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
         _settings = PlayerWidget.GetBuffListSettingsSnapshot();
         GaugeBrush = BuffListGaugeBrush.Create(_settings);
-
-        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
-        foreach (var entry in _entries)
-        {
-            entry.UpdateBar(gaugeLengthSeconds);
-        }
+        Refresh();
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -98,6 +108,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _openCard?.Invoke(characterId, _kind, entry.Key, entry.BaseId);
     }
 
+    [RelayCommand]
+    private void HideBuff(PlayerBuffEntry? entry)
+    {
+        if (entry is null)
+        {
+            return;
+        }
+
+        PlayerWidget.HideBuffInList(entry.BaseId);
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -105,6 +126,8 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
+        OnPropertyChanged(nameof(CardMenuText));
+        OnPropertyChanged(nameof(HideMenuText));
         Refresh();
     }
 
@@ -127,7 +150,18 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
-        SynchronizeEntries(MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind));
+        SynchronizeEntries(ExcludeHiddenBuffs(MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind)));
+    }
+
+    /// <summary>設定の非表示の一覧にあるバフを除く。</summary>
+    private IReadOnlyList<PlayerBuffSnapshot> ExcludeHiddenBuffs(IReadOnlyList<PlayerBuffSnapshot> snapshots)
+    {
+        if (_settings.HiddenBuffIds.Count == 0)
+        {
+            return snapshots;
+        }
+
+        return [.. snapshots.Where(snapshot => !_settings.HiddenBuffIds.Contains(snapshot.BaseId))];
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
@@ -143,6 +177,8 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
                 continue;
             }
 
+            // 行が消えるならメニューも閉じる(消えた行に開いたまま残らないように)。
+            _entries[index].IsMenuOpen = false;
             _entries.RemoveAt(index);
         }
 

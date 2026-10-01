@@ -231,6 +231,30 @@
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>※显示其他玩家已习得的职责技能（显示的技能不一定处于装备状态）</value>
   </data>
+  <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
+    <value>隐藏列表</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Title" xml:space="preserve">
+    <value>隐藏列表</value>
+  </data>
+  <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
+    <value>※右键点击增益即可隐藏</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
+    <value>※右键点击减益即可隐藏</value>
+  </data>
+  <data name="BuffList_Menu_BuffCard" xml:space="preserve">
+    <value>增益卡片</value>
+  </data>
+  <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
+    <value>减益卡片</value>
+  </data>
+  <data name="BuffList_Menu_HideBuff" xml:space="preserve">
+    <value>隐藏此增益</value>
+  </data>
+  <data name="BuffList_Menu_HideDebuff" xml:space="preserve">
+    <value>隐藏此减益</value>
+  </data>
   <data name="Settings_Switch_On" xml:space="preserve">
     <value>开</value>
   </data>

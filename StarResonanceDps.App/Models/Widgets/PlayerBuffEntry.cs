@@ -62,6 +62,10 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private double _barDecaySeconds;
 
+    /// <summary>この行の右クリックのメニューを開いている間。行を強調する。</summary>
+    [ObservableProperty]
+    private bool _isMenuOpen;
+
     /// <summary>残り時間をそのまま持つ。ゲージの長さの設定が変わったら比率を計算し直すのに要る。</summary>
     private double? _remainingSeconds;
 

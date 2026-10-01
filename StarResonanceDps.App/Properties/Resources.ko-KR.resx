@@ -231,6 +231,30 @@
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>※다른 플레이어가 습득한 역할 스킬을 표시합니다(표시되어 있어도 장착 중이라고는 할 수 없습니다)</value>
   </data>
+  <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
+    <value>숨김 목록</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Title" xml:space="preserve">
+    <value>숨김 목록</value>
+  </data>
+  <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
+    <value>※버프를 우클릭하면 숨길 수 있습니다</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
+    <value>※디버프를 우클릭하면 숨길 수 있습니다</value>
+  </data>
+  <data name="BuffList_Menu_BuffCard" xml:space="preserve">
+    <value>버프 카드</value>
+  </data>
+  <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
+    <value>디버프 카드</value>
+  </data>
+  <data name="BuffList_Menu_HideBuff" xml:space="preserve">
+    <value>이 버프 숨기기</value>
+  </data>
+  <data name="BuffList_Menu_HideDebuff" xml:space="preserve">
+    <value>이 디버프 숨기기</value>
+  </data>
   <data name="Settings_Switch_On" xml:space="preserve">
     <value>켜기</value>
   </data>

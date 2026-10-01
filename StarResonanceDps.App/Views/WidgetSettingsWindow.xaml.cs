@@ -7,6 +7,7 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Services;
 
@@ -50,6 +51,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.SkillDetailPreviewChanged += _widget.ApplySkillDetailSettingsPreview;
         _viewModel.EquipmentPreviewChanged += _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
+        _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -82,8 +84,15 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.SkillDetailPreviewChanged -= _widget.ApplySkillDetailSettingsPreview;
         _viewModel.EquipmentPreviewChanged -= _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
+        _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _viewModel.Dispose();
         base.OnClosed(e);
+    }
+
+    /// <summary>開いている間に一覧の窓の右クリックでバフが非表示になった。設定の行にも足す。</summary>
+    private void Widget_BuffListHiddenBuffsChanged(WidgetKind kind, int baseId)
+    {
+        _viewModel.BuffListSettings?.AddHiddenBuffFromWidget(baseId);
     }
 
     protected override void OnClosing(CancelEventArgs e)
@@ -204,6 +213,11 @@ public partial class WidgetSettingsWindow : Window
     private void OtherRoleSkillsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(OtherRoleSkillsHost);
+    }
+
+    private void BuffListHiddenBuffsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffListHiddenBuffsHost);
     }
 
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)

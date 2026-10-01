@@ -8,12 +8,13 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間。
+/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、一覧に出さないバフ。
 /// 色の行の作りはクラスカラーと同じ。
 /// </summary>
 public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, IDisposable
 {
     private readonly Dictionary<string, BuffListGaugeColorItemViewModel> _gaugeColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ObservableCollection<HiddenBuffItemViewModel> _hiddenBuffItems = [];
     private readonly WidgetKind _kind;
     private BuffListWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
@@ -46,6 +47,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         }
 
         GaugeColorItems = new ReadOnlyObservableCollection<BuffListGaugeColorItemViewModel>(items);
+        HiddenBuffItems = new ReadOnlyObservableCollection<HiddenBuffItemViewModel>(_hiddenBuffItems);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         _lastSaved = WidgetConfigDefaults.CloneNormalizedBuffList(kind, config);
@@ -69,6 +71,24 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             ? "Settings_DebuffListColors_Opacity"
             : "Settings_BuffListColors_Opacity");
 
+    /// <summary>非表示のバフの行。並びは非表示にした順。</summary>
+    public ReadOnlyObservableCollection<HiddenBuffItemViewModel> HiddenBuffItems { get; }
+
+    /// <summary>非表示のバフが1つでもあるか。無いときは枠ごと出さない。</summary>
+    public bool HasHiddenBuffs => _hiddenBuffItems.Count > 0;
+
+    /// <summary>節の見出し(「非表示リスト」)。今は種別で同じ文言だが、鍵はバフ一覧とデバフ一覧で分けてある。</summary>
+    public string HiddenBuffSectionTitle => LocalizationManager.Instance.GetString(
+        _kind == WidgetKind.DebuffList
+            ? "Settings_Section_HiddenDebuffs_Title"
+            : "Settings_Section_HiddenBuffs_Title");
+
+    /// <summary>見出しの下の説明。右クリックで非表示にできることを書く。</summary>
+    public string HiddenBuffSectionDescription => LocalizationManager.Instance.GetString(
+        _kind == WidgetKind.DebuffList
+            ? "Settings_Section_HiddenDebuffs_Description"
+            : "Settings_Section_HiddenBuffs_Description");
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -91,7 +111,8 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
                 WidgetConfigDefaults.MinClassColorOpacity,
                 WidgetConfigDefaults.MaxClassColorOpacity),
             GaugeColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
-            GaugeColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            GaugeColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
+            HiddenBuffIds = [.. _hiddenBuffItems.Select(item => item.BaseId)]
         };
 
         foreach (var item in GaugeColorItems)
@@ -132,6 +153,32 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    /// <summary>
+    /// 開いている間に、一覧の窓の右クリックでバフが非表示になった。その分は既に保存されているので、
+    /// 行と保存済みの値の両方に足す(「保存」で消えず、未保存の印も付かない)。プレビューは鳴らさない
+    /// (ウィジェット側は既に非表示にしている)。
+    /// </summary>
+    public void AddHiddenBuffFromWidget(int baseId)
+    {
+        if (baseId <= 0)
+        {
+            return;
+        }
+
+        if (!_lastSaved.HiddenBuffIds.Contains(baseId))
+        {
+            _lastSaved.HiddenBuffIds.Add(baseId);
+        }
+
+        if (_hiddenBuffItems.All(item => item.BaseId != baseId))
+        {
+            _hiddenBuffItems.Add(new HiddenBuffItemViewModel(baseId, RemoveHiddenBuff));
+            OnHiddenBuffItemsChanged();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
     private void Load(BuffListWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedBuffList(_kind, config);
@@ -146,11 +193,41 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
             GaugeLengthIndex = normalized.GaugeLengthIndex;
             GaugeColorOpacity = normalized.GaugeColorOpacity;
+
+            _hiddenBuffItems.Clear();
+            foreach (var baseId in normalized.HiddenBuffIds)
+            {
+                _hiddenBuffItems.Add(new HiddenBuffItemViewModel(baseId, RemoveHiddenBuff));
+            }
+
+            OnHiddenBuffItemsChanged();
         }
         finally
         {
             _isLoading = false;
         }
+    }
+
+    private void RemoveHiddenBuff(HiddenBuffItemViewModel item)
+    {
+        if (!_hiddenBuffItems.Remove(item))
+        {
+            return;
+        }
+
+        OnHiddenBuffItemsChanged();
+        NotifyChanged();
+    }
+
+    /// <summary>行が増減したら、最終行の印と枠の有無を当て直す。</summary>
+    private void OnHiddenBuffItemsChanged()
+    {
+        for (var index = 0; index < _hiddenBuffItems.Count; index++)
+        {
+            _hiddenBuffItems[index].IsLast = index == _hiddenBuffItems.Count - 1;
+        }
+
+        OnPropertyChanged(nameof(HasHiddenBuffs));
     }
 
     private void RaisePreviewChanged()
@@ -161,7 +238,8 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     private static bool SettingsEqual(BuffListWidgetSettingsConfig left, BuffListWidgetSettingsConfig right)
     {
         if (left.GaugeLengthIndex != right.GaugeLengthIndex
-            || left.GaugeColorOpacity != right.GaugeColorOpacity)
+            || left.GaugeColorOpacity != right.GaugeColorOpacity
+            || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
             return false;
         }
@@ -190,8 +268,15 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             item.RefreshDisplayName();
         }
 
+        foreach (var item in _hiddenBuffItems)
+        {
+            item.RefreshMetadata();
+        }
+
         OnPropertyChanged(nameof(GaugeColorSectionTitle));
         OnPropertyChanged(nameof(GaugeColorOpacityLabel));
+        OnPropertyChanged(nameof(HiddenBuffSectionTitle));
+        OnPropertyChanged(nameof(HiddenBuffSectionDescription));
     }
 
     partial void OnGaugeLengthIndexChanged(int value)

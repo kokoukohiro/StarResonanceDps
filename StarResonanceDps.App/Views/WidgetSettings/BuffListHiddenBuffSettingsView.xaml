@@ -1,0 +1,77 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffListHiddenBuffSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        一覧に出さないバフ。見出しと説明はいつも出し、枠は非表示のバフがあるときだけ出す。
+        行は左にアイコンと名前、右に削除ボタン。
+    -->
+    <StackPanel>
+        <TextBlock Text="{Binding HiddenBuffSectionTitle}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,4" />
+        <TextBlock Text="{Binding HiddenBuffSectionDescription}"
+                   Foreground="{DynamicResource Brush.TextSecondary}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding HasHiddenBuffs, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ItemsControl ItemsSource="{Binding HiddenBuffItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border>
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Image Grid.Column="0"
+                                       Width="30"
+                                       Height="30"
+                                       Margin="-1,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="HighQuality" />
+
+                                <TextBlock Grid.Column="1"
+                                           Margin="10,0,12,0"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           Text="{Binding DisplayName}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold" />
+
+                                <Button Grid.Column="2"
+                                        VerticalAlignment="Center"
+                                        Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Delete]}"
+                                        Style="{StaticResource Button.Text}"
+                                        Command="{Binding RemoveCommand}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ContentControl>
+    </StackPanel>
+</UserControl>

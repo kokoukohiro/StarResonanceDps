@@ -76,6 +76,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Title]}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="BuffListHiddenBuffsNavButton"
+                                Click="BuffListHiddenBuffsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.EyeOff}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.HiddenBuffSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -269,6 +278,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:MeterWidgetOtherRoleSkillSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffListHiddenBuffsHost"
+                                                Content="{Binding BuffListSettings}"
+                                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffListHiddenBuffSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

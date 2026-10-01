@@ -186,6 +186,31 @@ public sealed class WidgetStateManager
         }
     }
 
+    /// <summary>
+    /// バフ・デバフ一覧の非表示のバフだけを保存する。窓の右クリックで非表示にしたときに呼ぶ。
+    ///
+    /// <para>
+    /// 設定一式を書き戻す形にすると、開いている設定ウィンドウが持っている未保存の値とぶつかる。
+    /// ステータス詳細の行の並びと同じく、この項目だけを書く。
+    /// </para>
+    /// </summary>
+    public void SaveBuffListHiddenBuffs(WidgetKind kind, IReadOnlyList<int> hiddenBuffIds)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffListSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffList ??= WidgetConfigDefaults.CreateBuffListSettings(kind);
+            config.BuffList.HiddenBuffIds = [.. hiddenBuffIds];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
     private WidgetConfig GetOrCreateWidgetConfig(WidgetKind kind)
     {
         var key = WidgetConfigDefaults.GetKey(kind);

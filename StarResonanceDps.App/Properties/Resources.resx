@@ -231,6 +231,30 @@
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>Note: Shows role skills other players have learned (a skill shown here is not necessarily equipped).</value>
   </data>
+  <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
+    <value>Hide List</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Title" xml:space="preserve">
+    <value>Hide List</value>
+  </data>
+  <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a buff to hide it.</value>
+  </data>
+  <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a debuff to hide it.</value>
+  </data>
+  <data name="BuffList_Menu_BuffCard" xml:space="preserve">
+    <value>Buff Card</value>
+  </data>
+  <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
+    <value>Debuff Card</value>
+  </data>
+  <data name="BuffList_Menu_HideBuff" xml:space="preserve">
+    <value>Hide This Buff</value>
+  </data>
+  <data name="BuffList_Menu_HideDebuff" xml:space="preserve">
+    <value>Hide This Debuff</value>
+  </data>
   <data name="Settings_Switch_On" xml:space="preserve">
     <value>On</value>
   </data>

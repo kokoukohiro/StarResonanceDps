@@ -185,6 +185,25 @@ public partial class WidgetListItemViewModel : ViewModelBase
         WidgetStateManager.Instance.SavePlayerStatusRowOrder(Kind, _playerStatusRowOrder);
     }
 
+    /// <summary>
+    /// バフ・デバフ一覧の窓の右クリックで、そのバフを非表示にする。
+    /// 開いている一覧の窓へ <see cref="BuffListSettingsChanged"/> で、保存と設定ウィンドウへ
+    /// <see cref="BuffListHiddenBuffsChanged"/> で知らせる。既に非表示なら何もしない。
+    /// </summary>
+    public void HideBuffInList(int baseId)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffListSettings(Kind)
+            || baseId <= 0
+            || _buffList.HiddenBuffIds.Contains(baseId))
+        {
+            return;
+        }
+
+        _buffList.HiddenBuffIds.Add(baseId);
+        BuffListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffListHiddenBuffsChanged?.Invoke(Kind, baseId);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -232,6 +251,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event EventHandler? PlayerInfoSettingsChanged;
 
     public event EventHandler? BuffListSettingsChanged;
+
+    /// <summary>窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面の削除では上げない。</summary>
+    public event Action<WidgetKind, int>? BuffListHiddenBuffsChanged;
 
     public event EventHandler? ElementColorSettingsChanged;
 

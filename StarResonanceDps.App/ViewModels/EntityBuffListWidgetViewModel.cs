@@ -13,7 +13,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class EntityBuffListWidgetViewModel
-    : ViewModelBase, IEntityWidgetWindowViewModel, IDisposable
+    : ViewModelBase, IEntityWidgetWindowViewModel, IBuffListWindowViewModel, IDisposable
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly EntityWindowTarget _target;
@@ -72,6 +72,18 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     public ReadOnlyObservableCollection<PlayerBuffEntry> Entries { get; }
 
+    public WidgetListItemViewModel Widget => _widget;
+
+    public string CardMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_DebuffCard"
+            : "BuffList_Menu_BuffCard");
+
+    public string HideMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_HideDebuff"
+            : "BuffList_Menu_HideBuff");
+
     public bool RepresentsEntity(long entityUuid)
     {
         return _target.Represents(entityUuid);
@@ -86,6 +98,17 @@ public sealed partial class EntityBuffListWidgetViewModel
         }
 
         _openCard?.Invoke(_target, _kind, entry.Key, entry.BaseId);
+    }
+
+    [RelayCommand]
+    private void HideBuff(PlayerBuffEntry? entry)
+    {
+        if (entry is null)
+        {
+            return;
+        }
+
+        _widget.HideBuffInList(entry.BaseId);
     }
 
     public bool TryApplyEntity(EntityListEntry entity)
@@ -121,17 +144,15 @@ public sealed partial class EntityBuffListWidgetViewModel
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
-    /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直し、ゲージの長さも当て直す。</summary>
+    /// <summary>
+    /// 表示設定(保存かプレビュー)が変わった。色を作り直し、行も作り直す
+    /// (非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
+    /// </summary>
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
         _settings = _widget.GetBuffListSettingsSnapshot();
         GaugeBrush = BuffListGaugeBrush.Create(_settings);
-
-        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
-        foreach (var entry in _entries)
-        {
-            entry.UpdateBar(gaugeLengthSeconds);
-        }
+        Refresh();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -147,6 +168,8 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
+        OnPropertyChanged(nameof(CardMenuText));
+        OnPropertyChanged(nameof(HideMenuText));
         RefreshPresentation();
         Refresh();
     }
@@ -158,7 +181,18 @@ public sealed partial class EntityBuffListWidgetViewModel
             return;
         }
 
-        SynchronizeEntries(MeterSnapshotProvider.GetEntityBuffs(EntityUuid, _kind));
+        SynchronizeEntries(ExcludeHiddenBuffs(MeterSnapshotProvider.GetEntityBuffs(EntityUuid, _kind)));
+    }
+
+    /// <summary>設定の非表示の一覧にあるバフを除く。</summary>
+    private IReadOnlyList<PlayerBuffSnapshot> ExcludeHiddenBuffs(IReadOnlyList<PlayerBuffSnapshot> snapshots)
+    {
+        if (_settings.HiddenBuffIds.Count == 0)
+        {
+            return snapshots;
+        }
+
+        return [.. snapshots.Where(snapshot => !_settings.HiddenBuffIds.Contains(snapshot.BaseId))];
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
@@ -174,6 +208,8 @@ public sealed partial class EntityBuffListWidgetViewModel
                 continue;
             }
 
+            // 行が消えるならメニューも閉じる(消えた行に開いたまま残らないように)。
+            _entries[index].IsMenuOpen = false;
             _entries.RemoveAt(index);
         }
 
