@@ -111,6 +111,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             SkillDetailSettings.PreviewChanged += SkillDetailSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsEquipmentSettings(kind))
+        {
+            EquipmentSettings = new EquipmentWidgetSettingsViewModel(config.Equipment);
+            EquipmentSettings.PropertyChanged += EquipmentSettings_PropertyChanged;
+            EquipmentSettings.PreviewChanged += EquipmentSettings_PreviewChanged;
+        }
+
         if (WidgetConfigDefaults.SupportsPlayerStatusSettings(kind))
         {
             PlayerStatusSettings = new PlayerStatusWidgetSettingsViewModel(config.PlayerStatus);
@@ -138,6 +145,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<ElementColorWidgetSettingsConfig>? ElementColorPreviewChanged;
 
     public event Action<SkillDetailWidgetSettingsConfig>? SkillDetailPreviewChanged;
+
+    public event Action<EquipmentWidgetSettingsConfig>? EquipmentPreviewChanged;
 
     public event Action<PlayerStatusWidgetSettingsConfig>? PlayerStatusPreviewChanged;
 
@@ -201,6 +210,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             SkillDetailSettings.Dispose();
         }
 
+        if (EquipmentSettings is not null)
+        {
+            EquipmentSettings.PropertyChanged -= EquipmentSettings_PropertyChanged;
+            EquipmentSettings.PreviewChanged -= EquipmentSettings_PreviewChanged;
+            EquipmentSettings.Dispose();
+        }
+
         if (PlayerStatusSettings is not null)
         {
             PlayerStatusSettings.PropertyChanged -= PlayerStatusSettings_PropertyChanged;
@@ -220,6 +236,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void SkillDetailSettings_PreviewChanged(SkillDetailWidgetSettingsConfig config)
     {
         SkillDetailPreviewChanged?.Invoke(config);
+    }
+
+    private void EquipmentSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(EquipmentWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void EquipmentSettings_PreviewChanged(EquipmentWidgetSettingsConfig config)
+    {
+        EquipmentPreviewChanged?.Invoke(config);
     }
 
     private void PlayerStatusSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -352,6 +381,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public SkillDetailWidgetSettingsViewModel? SkillDetailSettings { get; }
 
+    public EquipmentWidgetSettingsViewModel? EquipmentSettings { get; }
+
     public PlayerStatusWidgetSettingsViewModel? PlayerStatusSettings { get; }
 
     public bool HasMeterSettings => MeterSettings is not null;
@@ -374,6 +405,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasSkillDetailDisplaySettings => SkillDetailSettings is not null;
 
+    public bool HasEquipmentDisplaySettings => EquipmentSettings is not null;
+
     public bool HasPlayerStatusDisplaySettings => PlayerStatusSettings is not null;
 
     public bool HasDisplaySettings => HasMeterDisplaySettings
@@ -382,6 +415,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || HasTakenDamageLogDisplaySettings
         || HasBuffListDisplaySettings
         || HasSkillDetailDisplaySettings
+        || HasEquipmentDisplaySettings
         || HasPlayerStatusDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
@@ -393,6 +427,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (BuffListSettings?.HasUnsavedChanges ?? false)
         || (ElementColorSettings?.HasUnsavedChanges ?? false)
         || (SkillDetailSettings?.HasUnsavedChanges ?? false)
+        || (EquipmentSettings?.HasUnsavedChanges ?? false)
         || (PlayerStatusSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
@@ -457,6 +492,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.SkillDetail = SkillDetailSettings.CreateConfig();
         }
 
+        if (EquipmentSettings is not null)
+        {
+            config.Equipment = EquipmentSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -468,6 +508,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffListSettings?.MarkSaved(config.BuffList);
         ElementColorSettings?.MarkSaved(config.ElementColor);
         SkillDetailSettings?.MarkSaved(config.SkillDetail);
+        EquipmentSettings?.MarkSaved(config.Equipment);
         PlayerStatusSettings?.MarkSaved(config.PlayerStatus);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
@@ -484,6 +525,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffListSettings?.ResetToDefaults();
         ElementColorSettings?.ResetToDefaults();
         SkillDetailSettings?.ResetToDefaults();
+        EquipmentSettings?.ResetToDefaults();
         PlayerStatusSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
@@ -499,6 +541,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffListSettings?.RestoreSavedPreview();
         ElementColorSettings?.RestoreSavedPreview();
         SkillDetailSettings?.RestoreSavedPreview();
+        EquipmentSettings?.RestoreSavedPreview();
         PlayerStatusSettings?.RestoreSavedPreview();
     }
 

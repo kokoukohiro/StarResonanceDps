@@ -390,6 +390,9 @@
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
   </data>
+  <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
   <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
     <value>增益颜色</value>
   </data>
@@ -647,6 +650,18 @@
   </data>
   <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
     <value>Skill1</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Customization" xml:space="preserve">
+    <value>装备名称</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipName" xml:space="preserve">
+    <value>装备名称</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipLevel" xml:space="preserve">
+    <value>装备等级</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_MainStat" xml:space="preserve">
+    <value>主要属性</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>玩家名称</value>
@@ -1433,5 +1448,20 @@
   </data>
   <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
     <value>无法复制图片</value>
+  </data>
+  <data name="PlayerEquipment_Level" xml:space="preserve">
+    <value>{0}装等</value>
+  </data>
+  <data name="PlayerEquipment_ExpiredSeasonStrength" xml:space="preserve">
+    <value>{0}（已失效）{1}</value>
+  </data>
+  <data name="PlayerEquipment_NoEquipment" xml:space="preserve">
+    <value>无装备</value>
+  </data>
+  <data name="PlayerEquipment_Unknown" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="PlayerEquipment_Quality" xml:space="preserve">
+    <value>稀有度{0}</value>
   </data>
 </root>

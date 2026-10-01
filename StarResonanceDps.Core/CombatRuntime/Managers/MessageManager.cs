@@ -141,6 +141,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             NearbyMonsterIndex.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
+            SelfEquipmentStore.ResetSelfToStartup();
+            PlayerSkillLevelStateStore.ResetSelfToStartup();
+
+            // 死亡と自然回復の刻みの控え。止めている間の復活を取りこぼすと、次の死亡を扱わなくなる。
+            PlayerDeathStates = [];
+            LastPassiveHealTicks = [];
+        }
+
+        /// <summary>
+        /// キャプチャを止めて再開する前に呼ぶ。止めている間の出入りは届かないので、周りのプレイヤーを見失った扱いにする
+        /// (周りから外れたときと同じく、特化とシーズン心相晶はメーター用の控えへ写してから不明にし、名簿を作り直す)。
+        /// <see cref="StopCapturing"/> の中に置かないのは、アプリの終了では停止の後に最後の記録を保存し、
+        /// その保存が名簿の表示値を焼き付けるため。
+        /// </summary>
+        public static void ForgetNearbyPlayersAfterCaptureStop()
+        {
+            PlayerRosterProjection.ResetNearbyPlayers();
         }
 
         /// <summary>
@@ -518,6 +535,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// ログアウトで起動直後の状態へ戻し終えた。パケット処理のスレッドで上がる。
         /// App の実体の窓はこれを受けて、捕まえている個体を放し、起動時と同じく種類と種別IDで捕まえ直す。
+        /// プレイヤー情報の窓は、一覧から外れても残していた最後の値を捨てて、起動時の表示に戻す。
         /// </summary>
         public static event Action? ResetToStartupCompleted;
 
@@ -582,14 +600,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             AppState.BenchmarkTime = 0;
             AppState.BenchmarkSingleTargetUUID = 0;
 
-            // どれもパケット処理のスレッドだけが触る。
-            PlayerDeathStates.Clear();
-            LastPassiveHealTicks.Clear();
             // キャプチャの停止(StopCapturing)と共通のもの。停止はしない。
             ClearReceivedStateStores();
 
-            // マップ移動では残していたもの(自分の陣営・自分のスキル・プレイヤーリストの行など)。
-            PlayerSkillLevelStateStore.ResetSelfToStartup();
+            // マップ移動では残していたもの(自分の陣営・シーズン・プレイヤーリストの行など)。
             SeasonStateStore.ResetToStartup();
 
             PlayerRosterProjection.ResetToStartup();
@@ -1048,7 +1062,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             public bool IsDeathHandled;
         }
 
-        private static readonly Dictionary<long, PlayerDeathState> PlayerDeathStates = [];
+        /// <summary>
+        /// パケット処理のスレッドだけが触る。消すときは中身を消さず新しい辞書に差し替える
+        /// (キャプチャの停止は別のスレッドから消すため。<see cref="ClearReceivedStateStores"/>)。
+        /// </summary>
+        private static Dictionary<long, PlayerDeathState> PlayerDeathStates = [];
 
         /// <summary>料理・自然回復の刻みの種類。<see cref="LastPassiveHealTicks"/> に覚える。</summary>
         private enum PassiveHealTick
@@ -1061,8 +1079,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// プレイヤーごとの直前の料理・自然回復の刻み。両方乗っているときの満タンの端数を、どちらの番か決めるのに使う。
         /// 端数を振り分けたときも、振り分けた種類で覚え直す。
+        /// 消すときは <see cref="PlayerDeathStates"/> と同じく新しい辞書に差し替える。
         /// </summary>
-        private static readonly Dictionary<long, PassiveHealTick> LastPassiveHealTicks = [];
+        private static Dictionary<long, PassiveHealTick> LastPassiveHealTicks = [];
 
         private static PlayerVitals CapturePlayerVitals(long uuid)
         {
@@ -2897,6 +2916,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ApplySelfSeasonLevel(playerUuid);
             }
 
+            SelfEquipmentStore.ReplaceSelf(vData.Equip, vData.ItemPackage);
+
             if (vData.Equip != null)
             {
                 List<Zproto.EquipNine> playerEquips = new();
@@ -2939,6 +2960,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 bool isStreamSafe = dirty.VData.StreamType == EStreamType.StreamTypeDeltaDirtySafe;
                 var ser = new StarResonanceDps.Core.Protocols.Game.Binary.CharSerialize(
                     new StarResonanceDps.Core.Protocols.Game.Binary.BlobReader(buf, isStreamSafe));
+
+                if (ser.EquipList is not null || ser.ItemPackage is not null)
+                {
+                    SelfEquipmentStore.ApplySelfChanges(ser.EquipList, ser.ItemPackage);
+                }
 
                 if (ser.CharBaseInfo != null)
                 {

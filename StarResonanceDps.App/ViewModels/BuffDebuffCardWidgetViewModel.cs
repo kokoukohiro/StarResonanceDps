@@ -314,12 +314,12 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         HasBuff = hasBuff;
         HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);
 
-        SynchronizeScaleKey(BuffDebuffCardContent.CreateScaleKey(characterId, _group, buffKey));
+        SynchronizeScaleKey(BuffDebuffCardContent.CreateScaleKey(characterId, _group, _requestedBuffKey));
     }
 
     /// <summary>
     /// 倍率の保存キーが変わったら、その組み合わせの保存値を読み直す。
-    /// バフを見失っている間はキーが空になるので、そのときは今の倍率を保つ。
+    /// 対象が分からない間はキーが空になるので、そのときは今の倍率を保つ。
     /// </summary>
     private void SynchronizeScaleKey(string scaleKey)
     {

@@ -21,6 +21,11 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
     public DutyList? DutyList;
     public FightPoint? FightPoint;
     public SeasonRoleLevelData? SeasonRoleLevelData;
+    public ItemPackage? ItemPackage;
+    public EquipList? EquipList;
+
+    /// <summary>読み損ねを一度だけログに出した項目。</summary>
+    private static readonly HashSet<int> ReportedReadFailures = [];
 
     public override bool ParseField(int index, ref BlobReader blob)
     {
@@ -59,9 +64,58 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
             case Zproto.CharSerialize.SeasonRoleLevelDataFieldNumber:
                 SeasonRoleLevelData = new(blob);
                 return true;
+            case Zproto.CharSerialize.ItemPackageFieldNumber:
+                return TryReadWithoutDisturbingStream(blob, index, reader => ItemPackage = new(reader));
+            case Zproto.CharSerialize.EquipFieldNumber:
+                return TryReadWithoutDisturbingStream(blob, index, reader => EquipList = new(reader));
             default:
                 return false;
         }
+    }
+
+    /// <summary>
+    /// 入れ子の項目を読む。<b>外側のストリーム位置は、読み飛ばして確定させた終端で必ず終える</b>
+    /// (<see cref="ReadBuffInfoWithoutDisturbingStream"/> と同じ考え方。解釈がずれても後続の項目を失わない)。
+    /// 読み飛ばせない形なら <c>false</c> を返して、ほかの未対応の項目と同じ扱いにする。
+    /// 中で例外が出たら、その項目は無いものとして続け、項目ごとに一度だけ警告を出す。
+    /// </summary>
+    private static bool TryReadWithoutDisturbingStream(BlobReader blob, int index, Action<BlobReader> read)
+    {
+        var start = blob.Offset;
+        if (!blob.TrySkipNestedBlob())
+        {
+            blob.Offset = start;
+            return false;
+        }
+
+        var end = blob.Offset;
+        try
+        {
+            blob.Offset = start;
+            read(blob);
+        }
+        catch (Exception ex)
+        {
+            bool isFirst;
+            lock (ReportedReadFailures)
+            {
+                isFirst = ReportedReadFailures.Add(index);
+            }
+
+            if (isFirst)
+            {
+                Serilog.Log.Warning(
+                    ex,
+                    "Could not read field {FieldIndex} of the container delta; the change is skipped until the next full container",
+                    index);
+            }
+        }
+        finally
+        {
+            blob.Offset = end;
+        }
+
+        return true;
     }
 
     /// <summary>

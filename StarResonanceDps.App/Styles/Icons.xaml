@@ -101,6 +101,19 @@
     <BitmapImage x:Key="Icon.Avatar.head_photo_000" UriSource="/Assets/Images/head_photo_000.png" />
     <BitmapImage x:Key="Icon.IdCard.idcard_common_01" UriSource="/Assets/Images/idcard_common_01.png" />
 
+    <!-- 装備の部位のアイコン(白の形)。鍵の末尾は部位の番号。部位と絵の対応はゲームの部位の表のとおりで、208 と 209 は番号と逆。 -->
+    <BitmapImage x:Key="Icon.EquipSlot.200" UriSource="/Assets/Images/site_icon_1.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.201" UriSource="/Assets/Images/site_icon_2.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.202" UriSource="/Assets/Images/site_icon_3.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.203" UriSource="/Assets/Images/site_icon_4.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.204" UriSource="/Assets/Images/site_icon_5.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.205" UriSource="/Assets/Images/site_icon_6.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.206" UriSource="/Assets/Images/site_icon_7.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.207" UriSource="/Assets/Images/site_icon_8.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.208" UriSource="/Assets/Images/site_icon_10.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.209" UriSource="/Assets/Images/site_icon_9.png" />
+    <BitmapImage x:Key="Icon.EquipSlot.210" UriSource="/Assets/Images/site_icon_11.png" />
+
     <Style x:Key="Icon.PlayerListSkillFrame" TargetType="{x:Type Image}">
         <Setter Property="Source" Value="{StaticResource Icon.RoleSkillFrame}" />
         <Setter Property="Stretch" Value="Fill" />

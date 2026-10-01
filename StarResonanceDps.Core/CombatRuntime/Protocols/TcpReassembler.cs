@@ -22,6 +22,25 @@ public class TcpReassembler
         try
         {
             var ep = new IPEndPoint(ipPacket.SourceAddress, tcpPacket.SourcePort);
+
+            // 接続の始まり。SYN の次のバイトから読むので、読み始めの判定を待たない。
+            // 同じ端点に古い接続が残っていれば別の接続なので、消して作り直す。
+            if (tcpPacket.Synchronize && !tcpPacket.Reset && !tcpPacket.Finished)
+            {
+                if (Connections.TryGetValue(ep, out var oldConn))
+                {
+                    RemoveConnection(oldConn);
+                }
+
+                var synDestEp = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
+                var synConn = new TcpConnection(ep, synDestEp, this);
+                synConn.AddPacket(tcpPacket, timeval);
+                Connections[ep] = synConn;
+                OnNewConnection?.Invoke(synConn);
+                Log.Information("Got a new connection {ep} at the SYN", ep);
+                return;
+            }
+
             if (!Connections.ContainsKey(ep))
             {
                 var destEp = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
@@ -124,7 +143,9 @@ public class TcpReassembler
         {
             if (tcpPacket.Synchronize)
             {
+                // SYN の次のバイトはストリームの先頭で、メッセージの先頭。
                 NextExpectedSeq = tcpPacket.SequenceNumber + 1;
+                IsSynced = true;
                 Log.Information("Got a Sync Tcp Packet.");
                 Console.WriteLine("Got a Sync Tcp Packet.");
                 return;

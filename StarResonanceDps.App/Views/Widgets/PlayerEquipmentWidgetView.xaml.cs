@@ -1,15 +1,15 @@
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
+/// <summary>
+/// 装備詳細。作りはバフ一覧と同じで、縦スクロールはウィンドウ枠側の細いスクロールバーに繋ぐ。
+/// 行の TIPS の開き方はスキル詳細と同じ。
+/// </summary>
 public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScrollContent
 {
-    private PlayerEquipmentWidgetViewModel? _viewModel;
-
     public PlayerEquipmentWidgetView()
     {
         InitializeComponent();
@@ -27,7 +27,7 @@ public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScr
             viewport,
             Math.Min(EquipmentScrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9, 1),
-            24);
+            34);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)
@@ -45,11 +45,6 @@ public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScr
         NotifyVerticalScrollMetricsChanged();
     }
 
-    private void PlayerEquipmentWidgetView_Unloaded(object sender, RoutedEventArgs e)
-    {
-        DetachViewModel();
-    }
-
     private void PlayerEquipmentWidgetView_SizeChanged(object sender, SizeChangedEventArgs e)
     {
         NotifyVerticalScrollMetricsChanged();
@@ -59,14 +54,6 @@ public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScr
         object sender,
         DependencyPropertyChangedEventArgs e)
     {
-        DetachViewModel();
-
-        if (e.NewValue is PlayerEquipmentWidgetViewModel viewModel)
-        {
-            _viewModel = viewModel;
-            _viewModel.PropertyChanged += ViewModel_PropertyChanged;
-        }
-
         NotifyVerticalScrollMetricsChanged();
     }
 
@@ -75,28 +62,36 @@ public partial class PlayerEquipmentWidgetView : UserControl, IWidgetVerticalScr
         NotifyVerticalScrollMetricsChanged();
     }
 
-    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void NotifyVerticalScrollMetricsChanged()
     {
-        if (e.PropertyName is nameof(PlayerEquipmentWidgetViewModel.ShowUnknownAttributes)
-            or nameof(PlayerEquipmentWidgetViewModel.EquipmentDataState))
-        {
-            Dispatcher.BeginInvoke(NotifyVerticalScrollMetricsChanged);
-        }
+        VerticalScrollMetricsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private void DetachViewModel()
+    /// <summary>
+    /// 押すと WPF が TIPS を閉じ、カーソルを一度外へ出すまで出し直さない。
+    /// 押した行の TIPS を手で開き直す。<b>置き場所(<c>PlacementTarget</c>)を入れてから開く</b> —
+    /// 中身の結び付けが置き場所のデータを見ているので、入れないと空の TIPS になる。
+    /// TIPS を止めている行(中身が無い)は手でも開かない。
+    /// </summary>
+    private void EquipmentRow_Click(object sender, RoutedEventArgs e)
     {
-        if (_viewModel is null)
+        if (sender is not FrameworkElement row
+            || row.ToolTip is not ToolTip toolTip
+            || !ToolTipService.GetIsEnabled(row))
         {
             return;
         }
 
-        _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
-        _viewModel = null;
+        toolTip.PlacementTarget = row;
+        toolTip.IsOpen = true;
     }
 
-    private void NotifyVerticalScrollMetricsChanged()
+    /// <summary>手で開いた TIPS は自動で閉じないので、行から離れたら閉じる。</summary>
+    private void EquipmentRow_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
     {
-        VerticalScrollMetricsChanged?.Invoke(this, EventArgs.Empty);
+        if (sender is FrameworkElement row && row.ToolTip is ToolTip toolTip)
+        {
+            toolTip.IsOpen = false;
+        }
     }
 }

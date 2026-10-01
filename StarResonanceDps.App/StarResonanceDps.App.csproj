@@ -20,6 +20,17 @@
     <None Remove="Assets\Images\ApplicationIcon.ico" />
     <None Remove="Assets\Images\com_icon_question.png" />
     <None Remove="Assets\Images\com_icon_tab_113.png" />
+    <None Remove="Assets\Images\site_icon_1.png" />
+    <None Remove="Assets\Images\site_icon_2.png" />
+    <None Remove="Assets\Images\site_icon_3.png" />
+    <None Remove="Assets\Images\site_icon_4.png" />
+    <None Remove="Assets\Images\site_icon_5.png" />
+    <None Remove="Assets\Images\site_icon_6.png" />
+    <None Remove="Assets\Images\site_icon_7.png" />
+    <None Remove="Assets\Images\site_icon_8.png" />
+    <None Remove="Assets\Images\site_icon_9.png" />
+    <None Remove="Assets\Images\site_icon_10.png" />
+    <None Remove="Assets\Images\site_icon_11.png" />
     <None Remove="Assets\Images\com_icon_tab_146.png" />
     <None Remove="Assets\Images\com_icon_tab_147.png" />
     <None Remove="Assets\Images\com_icon_tab_148.png" />
@@ -90,6 +101,17 @@
   <ItemGroup>
     <Resource Include="Assets\Fonts\NotoSansJP-VariableFont_wght.ttf" />
     <Resource Include="Assets\Images\com_icon_tab_113.png" />
+    <Resource Include="Assets\Images\site_icon_1.png" />
+    <Resource Include="Assets\Images\site_icon_2.png" />
+    <Resource Include="Assets\Images\site_icon_3.png" />
+    <Resource Include="Assets\Images\site_icon_4.png" />
+    <Resource Include="Assets\Images\site_icon_5.png" />
+    <Resource Include="Assets\Images\site_icon_6.png" />
+    <Resource Include="Assets\Images\site_icon_7.png" />
+    <Resource Include="Assets\Images\site_icon_8.png" />
+    <Resource Include="Assets\Images\site_icon_9.png" />
+    <Resource Include="Assets\Images\site_icon_10.png" />
+    <Resource Include="Assets\Images\site_icon_11.png" />
     <Resource Include="Assets\Images\com_icon_tab_146.png" />
     <Resource Include="Assets\Images\com_icon_tab_147.png" />
     <Resource Include="Assets\Images\com_icon_tab_148.png" />

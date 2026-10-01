@@ -35,7 +35,23 @@ public sealed class WidgetWindowManager
     /// </summary>
     private void MessageManager_ResetToStartupCompleted()
     {
-        Application.Current?.Dispatcher.InvokeAsync(ReleaseEntityWindows);
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            ReleaseEntityWindows();
+            ResetPlayerWindowsToStartup();
+        });
+    }
+
+    /// <summary>
+    /// プレイヤーの窓を起動直後の状態へ戻す。空の一覧の通知が先に UI のスレッドへ積まれているので、
+    /// 窓が一覧の外れで残した最後の値を、その後で捨てる。
+    /// </summary>
+    private void ResetPlayerWindowsToStartup()
+    {
+        foreach (var session in _openPlayerWindows.ToArray())
+        {
+            session.ViewModel.ResetToStartup();
+        }
     }
 
     private void ReleaseEntityWindows()
@@ -908,6 +924,27 @@ public sealed class WidgetWindowManager
         foreach (var playerWindow in _openPlayerWindows.ToArray())
         {
             playerWindow.ViewModel.NotifySocialDataChanged(characterId);
+        }
+    }
+
+    /// <summary>名刺の値の控えが全部消えた。開いているプレイヤーの窓すべてへ渡す(一覧から外れて値を残している窓も含む)。</summary>
+    public void ClearPlayerWindowSocialData()
+    {
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            playerWindow.ViewModel.NotifySocialDataCleared();
+        }
+    }
+
+    /// <summary>自分の装備の値が変わった。装備詳細の窓に知らせる(自分を出している窓だけが作り直す)。</summary>
+    public void UpdatePlayerWindowSelfEquipment()
+    {
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            if (playerWindow.ViewModel is PlayerEquipmentWidgetViewModel equipment)
+            {
+                equipment.NotifySelfEquipmentChanged();
+            }
         }
     }
 

@@ -1,0 +1,170 @@
+{
+  "92000": {
+    "zh-CN": "移动速度+{1}",
+    "en-US": "Movement Speed+{1}",
+    "ja-JP": "移動速度+{0}",
+    "ko-KR": "이동속도 +{0}"
+  },
+  "99005": {
+    "zh-CN": "自适应力量/智力/敏捷+{0}",
+    "en-US": "Adaptive Strength/Intellect/Agility +{0}",
+    "ja-JP": "適応筋力/知力/敏捷+{0}",
+    "ko-KR": "적응형 힘/지력/민첩 +{0}"
+  },
+  "99006": {
+    "zh-CN": "自适应物攻/魔攻+{0}",
+    "en-US": "Adaptive ATK/MATK +{0}",
+    "ja-JP": "適応物理/魔法攻撃力+{0}",
+    "ko-KR": "적응형 물리 공격/마법 공격 +{0}"
+  },
+  "2400001": {
+    "zh-CN": "近距离伤害+{0}",
+    "en-US": "Melee DMG +{0}",
+    "ja-JP": "近距離ダメージ+{0}",
+    "ko-KR": "근거리 대미지 +{0}"
+  },
+  "2400002": {
+    "zh-CN": "远距离伤害+{0}",
+    "en-US": "Ranged DMG +{0}",
+    "ja-JP": "遠距離ダメージ+{0}",
+    "ko-KR": "원거리 대미지 +{0}"
+  },
+  "2401250": {
+    "zh-CN": "消耗雷之印的技能提升{0}物理增效",
+    "en-US": "Skills that consume Thunder Sigil gain {0} PHY Boost",
+    "ja-JP": "雷印を消費するスキルによって物理増強+{0}",
+    "ko-KR": "번개의 인장을 소모하는 스킬의 물리 버프 {0} 증가"
+  },
+  "2402240": {
+    "zh-CN": "远距离伤害+{0}",
+    "en-US": "Ranged DMG +{0}",
+    "ja-JP": "遠距離ダメージ+{0}",
+    "ko-KR": "원거리 대미지 +{0}"
+  },
+  "2402250": {
+    "zh-CN": "魔法伤害+{0}",
+    "en-US": "Magic DMG +{0}",
+    "ja-JP": "魔法ダメージ+{0}",
+    "ko-KR": "마법 대미지 +{0}."
+  },
+  "2402280": {
+    "zh-CN": "冰之灌注期间提升{0}魔法增效",
+    "en-US": "While Permafrost is active, grants {0} MAG Boost",
+    "ja-JP": "パーマフロストの持続中、魔法ダメージ強化+{0}。",
+    "ko-KR": "퍼마프로스트를 연주하는 동안 마법 버프 {0} 증가"
+  },
+  "2403160": {
+    "zh-CN": "物理伤害+{0}",
+    "en-US": "Attack DMG +{0}",
+    "ja-JP": "物理ダメージ+{0}",
+    "ko-KR": "물리 대미지 +{0}."
+  },
+  "2403240": {
+    "zh-CN": "近距离伤害+{0}",
+    "en-US": "Melee DMG +{0}",
+    "ja-JP": "近距離ダメージ+{0}",
+    "ko-KR": "근거리 대미지 +{0}"
+  },
+  "2403250": {
+    "zh-CN": "风姿卓绝期间提升{0}物理增效",
+    "en-US": "{0} PHY Boost while in Galeform",
+    "ja-JP": "風姿卓絶の持続中、物理増強+{0}",
+    "ko-KR": "비범한 풍모 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2403260": {
+    "zh-CN": "风姿卓绝期间提升{0}物理增效",
+    "en-US": "{0} PHY Boost while in Galeform",
+    "ja-JP": "風姿卓絶の持続中、物理増強+{0}",
+    "ko-KR": "비범한 풍모 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2404170": {
+    "zh-CN": "幸运一击伤害+{0}",
+    "en-US": "Lucky Strike DMG +{0}",
+    "ja-JP": "幸運の一撃のダメージ+{0}。",
+    "ko-KR": "행운의 일격 대미지 +{0}"
+  },
+  "2404230": {
+    "zh-CN": "远距离伤害+{0}",
+    "en-US": "Ranged DMG +{0}",
+    "ja-JP": "遠距離ダメージ+{0}",
+    "ko-KR": "원거리 대미지 +{0}"
+  },
+  "2404240": {
+    "zh-CN": "伤害型专精技能提升{0}魔法增效",
+    "en-US": "Attack Expertise Skill enhances MAG Boost by {0}",
+    "ja-JP": "ダメージ系のマスタリースキルが魔法増強を{0}上昇させる",
+    "ko-KR": "대미지형 마스터리 스킬 마법 버프 {0} 증가"
+  },
+  "2404250": {
+    "zh-CN": "治疗型专精技能提升{0}魔法增效",
+    "en-US": "Healing Expertise Skill enhances MAG Boost by {0}",
+    "ja-JP": "回復系のマスタリースキルが魔法増強を{0}上昇させる",
+    "ko-KR": "치료형 마스터리 스킬 마법 버프 {0} 증가"
+  },
+  "2404280": {
+    "zh-CN": "鼓舞效果提升{0}",
+    "en-US": "Grants {0} Inspiration bonus",
+    "ja-JP": "鼓舞効果+{0}。",
+    "ko-KR": "고무 효과 {0} 증가"
+  },
+  "2405240": {
+    "zh-CN": "远距离伤害+{0}",
+    "en-US": "Ranged DMG +{0}",
+    "ja-JP": "遠距離ダメージ+{0}",
+    "ko-KR": "원거리 대미지 +{0}"
+  },
+  "2406250": {
+    "zh-CN": "激怒状态下提升{0}物理增效",
+    "en-US": "When Enraged is active, {0} PHY Boost will be gained",
+    "ja-JP": "憤怒状態の持続中、物理増強+{0}",
+    "ko-KR": "격노 상태일 때 물리 버프 {0} 증가"
+  },
+  "2406260": {
+    "zh-CN": "格挡冲击状态下提升{0}物理增效",
+    "en-US": "When Countercrush is active, {0} PHY Boost will be gained",
+    "ja-JP": "護刃の衝撃の持続中、物理増強+{0}",
+    "ko-KR": "블로킹 스트라이크 상태일 때 물리 버프 {0} 증가"
+  },
+  "2407250": {
+    "zh-CN": "近距离伤害+{0}",
+    "en-US": "Melee DMG +{0}",
+    "ja-JP": "近距離ダメージ+{0}",
+    "ko-KR": "근거리 대미지 +{0}"
+  },
+  "2407260": {
+    "zh-CN": "英勇盾击状态下提升{0}物理增效",
+    "en-US": "When Valor Bash is active, {0} PHY Boost will be gained",
+    "ja-JP": "ブレイヴバッシュの持続中、物理増強+{0}",
+    "ko-KR": "용맹의 방패 상태일 때 물리 버프 {0} 증가"
+  },
+  "2407270": {
+    "zh-CN": "拥有光铸屏障时提升{0}物理增效",
+    "en-US": "When Lightforged Barrier is active, {0} PHY Boost will be gained",
+    "ja-JP": "光盾障壁があるとき、物理増強+{0}",
+    "ko-KR": "라이트포지드 배리어 보유 시 물리 버프 {0} 증가"
+  },
+  "2407300": {
+    "zh-CN": "物理伤害+{0}",
+    "en-US": "Attack DMG +{0}",
+    "ja-JP": "物理ダメージ+{0}",
+    "ko-KR": "물리 대미지 +{0}."
+  },
+  "2408230": {
+    "zh-CN": "你所拥有的幸运效果伤害提升{0}",
+    "en-US": "Luck effect DMG is boosted by {0}",
+    "ja-JP": "幸運効果のダメージ+{0}",
+    "ko-KR": "자신이 보유한 행운 효과 대미지 {0} 증가"
+  },
+  "2408240": {
+    "zh-CN": "开启鸣奏·愈合乐章期间提升{0}智力",
+    "en-US": "While Healing Melody is active, grants {0} Intellect bonus",
+    "ja-JP": "ヒーリングメロディー持続中、知力+{0}。",
+    "ko-KR": "울림・치유의 악장을 연주하는 동안 지력 {0} 증가"
+  },
+  "2408250": {
+    "zh-CN": "开启鸣奏·愈合乐章期间提升{0}魔法增效",
+    "en-US": "While Healing Melody is active, {0} MAG Boost will be gained",
+    "ja-JP": "ヒーリングメロディー持続中、魔法増強+{0}",
+    "ko-KR": "울림・치유의 악장을 연주하는 동안 마법 버프 {0} 증가"
+  }
+}

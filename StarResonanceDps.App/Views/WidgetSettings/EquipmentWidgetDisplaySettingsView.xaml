@@ -1,0 +1,116 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.EquipmentWidgetDisplaySettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        装備詳細の表示設定。中身は行の書式だけで、作りはスキル詳細の行名
+        (SkillDetailWidgetDisplaySettingsView)と同じ。
+    -->
+    <StackPanel>
+        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}"
+                        Margin="0,0,0,12">
+            <StackPanel>
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Padding" Value="20,11,20,11" />
+                            <Setter Property="BorderThickness" Value="0" />
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="134" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_EquipmentInfo_Customization]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <TextBox x:Name="EquipmentInfoFormatTextBox"
+                                 Grid.Row="0"
+                                 Grid.Column="2"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 Text="{Binding InfoFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Loaded="EquipmentInfoFormatTextBox_Loaded"
+                                 TextChanged="EquipmentInfoFormatTextBox_TextChanged" />
+
+                        <Grid Grid.Row="1"
+                              Grid.ColumnSpan="4"
+                              Margin="0,4,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Preview]}" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding FormatPreview}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="4"
+                              Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="1" x:Name="EquipmentInfoFormatFieldHost">
+                                <ComboBox Width="{Binding ActualWidth, ElementName=EquipmentInfoFormatFieldHost}"
+                                          MaxWidth="220"
+                                          HorizontalAlignment="Right"
+                                          ItemsSource="{Binding AvailableEquipmentInfoFormatFields}"
+                                          SelectedItem="{Binding SelectedEquipmentInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource Input.SettingsComboBox}" />
+                            </Grid>
+
+                            <Button Grid.Column="3"
+                                    Click="AddEquipmentInfoFormatField_Click"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ContentControl>
+    </StackPanel>
+</UserControl>

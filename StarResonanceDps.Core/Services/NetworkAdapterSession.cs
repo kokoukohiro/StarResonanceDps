@@ -285,6 +285,7 @@ public sealed class NetworkAdapterSession
     private void RestartCapture()
     {
         MessageManager.StopCapturing();
+        MessageManager.ForgetNearbyPlayersAfterCaptureStop();
         ApplyRuntimeCaptureSettings();
 
         if (!string.IsNullOrWhiteSpace(MessageManager.NetCaptureDeviceName))

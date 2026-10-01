@@ -94,6 +94,8 @@ public sealed partial class MainViewModel : ViewModelBase
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
         _partyStateStore.Changed += PartyStateStore_Changed;
         SocialDataStore.Changed += SocialDataStore_Changed;
+        SocialDataStore.Cleared += SocialDataStore_Cleared;
+        SelfEquipmentStore.Changed += SelfEquipmentStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
 
         var roster = _playerRosterStore.Current;
@@ -187,6 +189,31 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSocialData(characterId));
+    }
+
+    /// <summary>名刺の値の控えが全部消えた(キャプチャの停止とログアウト)。UI のスレッドへ移して全部の窓へ渡す。</summary>
+    private void SocialDataStore_Cleared()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _widgetWindowManager.ClearPlayerWindowSocialData();
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _widgetWindowManager.ClearPlayerWindowSocialData());
+    }
+
+    private void SelfEquipmentStore_Changed()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _widgetWindowManager.UpdatePlayerWindowSelfEquipment();
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfEquipment());
     }
 
     private void PartyStateStore_Changed(object? sender, EventArgs e)

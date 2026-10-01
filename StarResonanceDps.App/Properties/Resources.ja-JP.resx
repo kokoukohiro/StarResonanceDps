@@ -390,6 +390,9 @@
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>テキストカラー</value>
   </data>
+  <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
+    <value>テキストカラー</value>
+  </data>
   <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
     <value>バフカラー</value>
   </data>
@@ -647,6 +650,18 @@
   </data>
   <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
     <value>Skill1</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Customization" xml:space="preserve">
+    <value>装備名</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipName" xml:space="preserve">
+    <value>装備名</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipLevel" xml:space="preserve">
+    <value>装備レベル</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_MainStat" xml:space="preserve">
+    <value>メインステータス</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>プレイヤー名</value>
@@ -1433,5 +1448,20 @@
   </data>
   <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
     <value>画像をコピーできませんでした</value>
+  </data>
+  <data name="PlayerEquipment_Level" xml:space="preserve">
+    <value>装備Lv.{0}</value>
+  </data>
+  <data name="PlayerEquipment_ExpiredSeasonStrength" xml:space="preserve">
+    <value>{0}（無効）{1}</value>
+  </data>
+  <data name="PlayerEquipment_NoEquipment" xml:space="preserve">
+    <value>装備なし</value>
+  </data>
+  <data name="PlayerEquipment_Unknown" xml:space="preserve">
+    <value>不明</value>
+  </data>
+  <data name="PlayerEquipment_Quality" xml:space="preserve">
+    <value>レアリティ{0}</value>
   </data>
 </root>

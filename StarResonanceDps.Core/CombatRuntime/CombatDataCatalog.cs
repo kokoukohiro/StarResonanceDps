@@ -103,6 +103,49 @@ public static class CombatDataCatalog
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>装備ID → 装備名(<c>ItemTable.Name</c>)。<c>Data/Localization/EquipNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _equipNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 進化・改鋳・レアの効果の番号(一時属性・バフ)→ 説明文。値の差し込みは <c>{0}</c>(そのまま)と <c>{1}</c>(%)。
+    /// <c>Data/Localization/EquipEffectTexts.json</c>。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _equipEffectTexts =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>装備ID → 装備の定義。<c>Data/Generated/Equips.json</c> の <c>Equips</c>。</summary>
+    private static FrozenDictionary<int, EquipmentDefinition> _equipments =
+        FrozenDictionary<int, EquipmentDefinition>.Empty;
+
+    /// <summary>
+    /// <see cref="MakeEquipmentKey"/>(属性庫の型, 庫ID)→ 庫の行(表の並び順)。<c>Equips.json</c> の <c>AttrLibs</c>。
+    /// 型は 1 = <c>EquipAttrLibTable</c>、2 = <c>EquipAttrSchoolLibTable</c>。
+    /// </summary>
+    private static FrozenDictionary<long, IReadOnlyList<EquipmentAttrLibRow>> _equipmentAttrLibs =
+        FrozenDictionary<long, IReadOnlyList<EquipmentAttrLibRow>>.Empty;
+
+    /// <summary><see cref="MakeEquipmentKey"/>(属性庫の型, 行ID)→ 行。<c>AttrLibs</c> の全行の索引。</summary>
+    private static FrozenDictionary<long, EquipmentAttrLibRow> _equipmentAttrRows =
+        FrozenDictionary<long, EquipmentAttrLibRow>.Empty;
+
+    /// <summary>
+    /// <see cref="MakeEquipmentKey"/>(効果の種類, 番号)→ シーズン強度の項目のシーズン。
+    /// <c>Equips.json</c> の <c>StrengthSeasons</c>。
+    /// </summary>
+    private static FrozenDictionary<long, int> _equipmentStrengthSeasons = FrozenDictionary<long, int>.Empty;
+
+    /// <summary>
+    /// 特化の番号(<c>SubProfessionId</c>)→ 型2 の属性庫の特化(<c>TalentSchoolTable.Id</c>)。
+    /// <c>Equips.json</c> の <c>SpecSchools</c>。
+    /// </summary>
+    private static FrozenDictionary<int, int> _equipmentSpecSchools = FrozenDictionary<int, int>.Empty;
+
+    /// <summary>職業ID → クラスR1 の人の型2 の属性庫の特化。<c>Equips.json</c> の <c>Rank1Schools</c>。</summary>
+    private static FrozenDictionary<int, int> _equipmentRank1Schools = FrozenDictionary<int, int>.Empty;
+
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -216,10 +259,13 @@ public static class CombatDataCatalog
             _classSpecNames = LoadLocalizedText("ClassSpecNames", out _);
             _seasonNames = LoadLocalizedText("SeasonNames", out _);
             _seasonRankNames = LoadLocalizedText("SeasonRankNames", out _);
+            _equipNames = LoadLocalizedText("EquipNames", out _);
+            _equipEffectTexts = LoadLocalizedText("EquipEffectTexts", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
             _warningSkillIds = _warningSkillLevelIds.Select(skillLevelId => skillLevelId / 100).ToFrozenSet();
+            LoadEquipments();
             LoadBuffGroups();
             _sceneNames = LoadLocalizedText("SceneNames", out _);
             _dungeonTypeNames = LoadDungeonTypeNames();
@@ -382,6 +428,67 @@ public static class CombatDataCatalog
     public static string GetSeasonRankName(int seasonId, int rankLevel)
     {
         return ResolveText(_seasonRankNames, Volatile.Read(ref _cultureName), seasonId * 100 + rankLevel);
+    }
+
+    /// <summary>装備名(<c>ItemTable.Name</c>)。鍵は装備ID。表示中の言語で引き、無ければ空。</summary>
+    public static string GetEquipName(int equipId)
+    {
+        return ResolveText(_equipNames, Volatile.Read(ref _cultureName), equipId);
+    }
+
+    /// <summary>
+    /// 進化・改鋳・レアの効果(一時属性・バフ)の説明文。値の差し込みは <c>{0}</c>(そのままの値)と
+    /// <c>{1}</c>(% の値。値 ÷ 100)。言語でどちらが入るかが違うことがある。
+    /// 鍵は効果の番号。表示中の言語で引き、無ければ空。
+    /// </summary>
+    public static string GetEquipEffectText(int effectId)
+    {
+        return ResolveText(_equipEffectTexts, Volatile.Read(ref _cultureName), effectId);
+    }
+
+    /// <summary>装備の定義。表に無い装備IDなら <c>null</c>。</summary>
+    public static EquipmentDefinition? GetEquipment(int equipId)
+    {
+        return _equipments.TryGetValue(equipId, out var equipment) ? equipment : null;
+    }
+
+    /// <summary>
+    /// 属性庫の行を表の並び順で。<paramref name="libType"/> は 1 = <c>EquipAttrLibTable</c>、
+    /// 2 = <c>EquipAttrSchoolLibTable</c>。表に無い庫なら空。
+    /// </summary>
+    public static IReadOnlyList<EquipmentAttrLibRow> GetEquipmentAttrLibRows(int libType, int libId)
+    {
+        return _equipmentAttrLibs.TryGetValue(MakeEquipmentKey(libType, libId), out var rows) ? rows : [];
+    }
+
+    /// <summary>
+    /// 属性庫の行を行ID で。<paramref name="libType"/> は <see cref="GetEquipmentAttrLibRows"/> と同じ。
+    /// 行ID は型ごとの番号なので、型を取り違えると別の行になる。表に無ければ <c>null</c>。
+    /// </summary>
+    public static EquipmentAttrLibRow? GetEquipmentAttrRow(int libType, int rowId)
+    {
+        return _equipmentAttrRows.TryGetValue(MakeEquipmentKey(libType, rowId), out var row) ? row : null;
+    }
+
+    /// <summary>
+    /// 効果(種類と番号)がシーズン強度の項目ならそのシーズン、でなければ 0。
+    /// 項目のシーズンは、その効果を基礎に持つ装備の <c>EquipTable.SeasonId</c> の積集合で決めてある。
+    /// </summary>
+    public static int GetEquipmentStrengthSeason(int kind, int effectId)
+    {
+        return _equipmentStrengthSeasons.TryGetValue(MakeEquipmentKey(kind, effectId), out var season) ? season : 0;
+    }
+
+    /// <summary>特化の番号(<c>SubProfessionId</c>)に対応する型2 の属性庫の特化。無ければ 0。</summary>
+    public static int GetEquipmentSpecSchool(int subProfessionId)
+    {
+        return _equipmentSpecSchools.TryGetValue(subProfessionId, out var school) ? school : 0;
+    }
+
+    /// <summary>クラスR1 の人(職業ID)に対応する型2 の属性庫の特化。無ければ 0。</summary>
+    public static int GetEquipmentRank1School(int professionId)
+    {
+        return _equipmentRank1Schools.TryGetValue(professionId, out var school) ? school : 0;
     }
 
     /// <summary>
@@ -1202,6 +1309,26 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
+    /// バフの表の絵(<c>Icon</c>)。HUD 用の絵は見ない(装備の TIPS の効果の行はこの絵を使う)。無ければ空。
+    /// </summary>
+    public static string GetBuffTableIconName(int buffId)
+    {
+        return _buffs.TryGetValue(buffId, out var buff)
+            ? buff.Icon?.Trim() ?? string.Empty
+            : string.Empty;
+    }
+
+    /// <summary>一時属性の表の絵(<c>AttrIcon</c>)。無ければ空。</summary>
+    public static string GetTempAttrIconName(int tempAttrId)
+    {
+        return HelperMethods.DataTables.TempAttrs.Data.TryGetValue(
+                tempAttrId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var tempAttr)
+            ? tempAttr.AttrIcon?.Trim() ?? string.Empty
+            : string.Empty;
+    }
+
+    /// <summary>
     /// 個別に扱わず1つのまとまりとして見るバフか。<c>Data/Localization/CuisineBuffs.json</c> にあれば料理、
     /// <c>Data/Localization/PotionBuffs.json</c> にあれば薬剤。選ぶ条件は <c>DataTools/gen_buff_groups.py</c> が持つ。
     /// </summary>
@@ -1446,6 +1573,262 @@ public static class CombatDataCatalog
         var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"{path} is empty.");
         return skillLevelIds.ToFrozenSet();
+    }
+
+    /// <summary>装備の表の2つ組の鍵(属性庫の型と庫ID、効果の種類と番号)。詰め方は <see cref="MakeSourceKey"/> と同じ。</summary>
+    private static long MakeEquipmentKey(int first, int second)
+        => ((long)first << 32) | (uint)second;
+
+    /// <summary>
+    /// 装備の定義 <c>Data/Generated/Equips.json</c> を読む。<c>DataTools/gen_equips.py</c> が生成する。
+    ///
+    /// <para>
+    /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(装備詳細は定義を出せない)。
+    /// 読めたところまでで続けることはしない。
+    /// </para>
+    /// </summary>
+    private static void LoadEquipments()
+    {
+        const string relativePath = "Generated/Equips.json";
+        var path = Path.Combine(Utils.DATA_DIR_NAME, "Generated", "Equips.json");
+        if (!File.Exists(path))
+        {
+            Log.Error("{FileName} is missing. Equipment details cannot be shown path={Path}", relativePath, path);
+            return;
+        }
+
+        FrozenDictionary<int, EquipmentDefinition> equipments;
+        FrozenDictionary<long, IReadOnlyList<EquipmentAttrLibRow>> attrLibs;
+        FrozenDictionary<long, EquipmentAttrLibRow> attrRows;
+        FrozenDictionary<long, int> strengthSeasons;
+        FrozenDictionary<int, int> specSchools;
+        FrozenDictionary<int, int> rank1Schools;
+        try
+        {
+            var file = JsonConvert.DeserializeObject<EquipmentFile>(File.ReadAllText(path))
+                ?? throw new InvalidDataException("the file is empty");
+            equipments = ReadEquipmentDefinitions(file.Equips);
+            attrLibs = ReadEquipmentAttrLibs(file.AttrLibs, out attrRows);
+            strengthSeasons = ReadEquipmentStrengthSeasons(file.StrengthSeasons);
+            specSchools = ReadEquipmentSchools(file.SpecSchools, "SpecSchools");
+            rank1Schools = ReadEquipmentSchools(file.Rank1Schools, "Rank1Schools");
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            Log.Error(ex, "{FileName} could not be read. Equipment details cannot be shown path={Path}", relativePath, path);
+            return;
+        }
+
+        _equipments = equipments;
+        _equipmentAttrLibs = attrLibs;
+        _equipmentAttrRows = attrRows;
+        _equipmentStrengthSeasons = strengthSeasons;
+        _equipmentSpecSchools = specSchools;
+        _equipmentRank1Schools = rank1Schools;
+        Log.Information(
+            "Loaded {FileName}: {Equips} equips / {AttrLibs} attribute libraries / {StrengthSeasons} strength seasons / {SpecSchools} spec schools / {Rank1Schools} rank-1 schools",
+            relativePath, equipments.Count, attrLibs.Count, strengthSeasons.Count, specSchools.Count, rank1Schools.Count);
+    }
+
+    private static FrozenDictionary<int, EquipmentDefinition> ReadEquipmentDefinitions(
+        Dictionary<string, EquipmentEntry?> entries)
+    {
+        var result = new Dictionary<int, EquipmentDefinition>(entries.Count);
+        foreach (var (key, entry) in entries)
+        {
+            var equipId = ParseEquipmentKey(key, "Equips");
+            var equip = RequireEquipmentItem(entry, $"Equips.{key}");
+            if (equip.Stages.Count == 0)
+            {
+                throw new InvalidDataException($"Equips.{key} has no stages");
+            }
+
+            var stages = new EquipmentStage[equip.Stages.Count];
+            for (var index = 0; index < stages.Length; index++)
+            {
+                var stage = RequireEquipmentItem(equip.Stages[index], $"Equips.{key}.Stages[{index}]");
+                stages[index] = new EquipmentStage(stage.Gs, stage.Basic.ToArray(), stage.Advanced.ToArray());
+            }
+
+            result[equipId] = new EquipmentDefinition(
+                equipId,
+                equip.Part,
+                equip.Quality,
+                equip.PerfectUpperLimit,
+                equip.MainStat,
+                stages,
+                equip.Recast.ToArray(),
+                equip.Rare.ToArray());
+        }
+
+        return result.ToFrozenDictionary();
+    }
+
+    /// <param name="rowsById">
+    /// 読んだ行を <see cref="MakeEquipmentKey"/>(型, 行ID)で引く索引。同じ型に同じ行ID が2回出たら形の誤り。
+    /// </param>
+    private static FrozenDictionary<long, IReadOnlyList<EquipmentAttrLibRow>> ReadEquipmentAttrLibs(
+        Dictionary<string, Dictionary<string, List<EquipmentAttrLibRowEntry?>?>?> entries,
+        out FrozenDictionary<long, EquipmentAttrLibRow> rowsById)
+    {
+        var result = new Dictionary<long, IReadOnlyList<EquipmentAttrLibRow>>();
+        var byId = new Dictionary<long, EquipmentAttrLibRow>();
+        foreach (var (typeKey, libs) in entries)
+        {
+            var libType = ParseEquipmentKey(typeKey, "AttrLibs");
+            foreach (var (libKey, rows) in RequireEquipmentItem(libs, $"AttrLibs.{typeKey}"))
+            {
+                var libId = ParseEquipmentKey(libKey, $"AttrLibs.{typeKey}");
+                var libPath = $"AttrLibs.{typeKey}.{libKey}";
+                var rowEntries = RequireEquipmentItem(rows, libPath);
+                var libRows = new EquipmentAttrLibRow[rowEntries.Count];
+                for (var rowIndex = 0; rowIndex < libRows.Length; rowIndex++)
+                {
+                    var rowPath = $"{libPath}[{rowIndex}]";
+                    var row = RequireEquipmentItem(rowEntries[rowIndex], rowPath);
+                    var effects = new EquipmentAttrEffect[row.Effects.Count];
+                    for (var effectIndex = 0; effectIndex < effects.Length; effectIndex++)
+                    {
+                        var effect = RequireEquipmentItem(row.Effects[effectIndex], $"{rowPath}.Effects[{effectIndex}]");
+                        effects[effectIndex] = new EquipmentAttrEffect(effect.Kind, effect.Id, effect.Min, effect.Max, effect.Format);
+                    }
+
+                    libRows[rowIndex] = new EquipmentAttrLibRow(row.Id, row.Parts.ToArray(), row.Specs.ToArray(), effects);
+                    if (!byId.TryAdd(MakeEquipmentKey(libType, row.Id), libRows[rowIndex]))
+                    {
+                        throw new InvalidDataException($"AttrLibs.{typeKey} has row {row.Id} more than once");
+                    }
+                }
+
+                result[MakeEquipmentKey(libType, libId)] = libRows;
+            }
+        }
+
+        rowsById = byId.ToFrozenDictionary();
+        return result.ToFrozenDictionary();
+    }
+
+    private static FrozenDictionary<long, int> ReadEquipmentStrengthSeasons(List<EquipmentStrengthSeasonEntry?> entries)
+    {
+        var result = new Dictionary<long, int>(entries.Count);
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entry = RequireEquipmentItem(entries[index], $"StrengthSeasons[{index}]");
+            if (!result.TryAdd(MakeEquipmentKey(entry.Kind, entry.Id), entry.Season))
+            {
+                throw new InvalidDataException($"StrengthSeasons has kind {entry.Kind} id {entry.Id} more than once");
+            }
+        }
+
+        return result.ToFrozenDictionary();
+    }
+
+    private static FrozenDictionary<int, int> ReadEquipmentSchools(Dictionary<string, int> entries, string section)
+    {
+        var result = new Dictionary<int, int>(entries.Count);
+        foreach (var (key, school) in entries)
+        {
+            result[ParseEquipmentKey(key, section)] = school;
+        }
+
+        return result.ToFrozenDictionary();
+    }
+
+    private static int ParseEquipmentKey(string key, string section)
+    {
+        return int.TryParse(key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id)
+            ? id
+            : throw new InvalidDataException($"{section} has \"{key}\" which is not numeric");
+    }
+
+    /// <summary><c>Equips.json</c> の中の <c>null</c> を形の誤りにする。</summary>
+    private static T RequireEquipmentItem<T>(T? item, string itemPath)
+        where T : class
+    {
+        return item ?? throw new InvalidDataException($"{itemPath} is null");
+    }
+
+    /// <summary><c>Equips.json</c> の形。項目の意味は <see cref="EquipmentDefinition"/> ほか公開の型と同じ。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentFile
+    {
+        public Dictionary<string, EquipmentEntry?> Equips { get; set; } = null!;
+
+        /// <summary>属性庫の型 → 庫ID → 庫の行。</summary>
+        public Dictionary<string, Dictionary<string, List<EquipmentAttrLibRowEntry?>?>?> AttrLibs { get; set; } = null!;
+
+        public List<EquipmentStrengthSeasonEntry?> StrengthSeasons { get; set; } = null!;
+
+        /// <summary>特化の番号(<c>SubProfessionId</c>)→ 型2 の属性庫の特化。</summary>
+        public Dictionary<string, int> SpecSchools { get; set; } = null!;
+
+        /// <summary>職業ID → クラスR1 の人の型2 の属性庫の特化。</summary>
+        public Dictionary<string, int> Rank1Schools { get; set; } = null!;
+    }
+
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentEntry
+    {
+        public int Part { get; set; }
+
+        public int Quality { get; set; }
+
+        public int PerfectUpperLimit { get; set; }
+
+        public int MainStat { get; set; }
+
+        public List<EquipmentStageEntry?> Stages { get; set; } = null!;
+
+        public List<int> Recast { get; set; } = null!;
+
+        public List<int> Rare { get; set; } = null!;
+    }
+
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentStageEntry
+    {
+        public int Gs { get; set; }
+
+        public List<int> Basic { get; set; } = null!;
+
+        public List<int> Advanced { get; set; } = null!;
+    }
+
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentAttrLibRowEntry
+    {
+        public int Id { get; set; }
+
+        public List<int> Parts { get; set; } = null!;
+
+        public List<int> Specs { get; set; } = null!;
+
+        public List<EquipmentAttrEffectEntry?> Effects { get; set; } = null!;
+    }
+
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentAttrEffectEntry
+    {
+        public int Kind { get; set; }
+
+        public int Id { get; set; }
+
+        public long Min { get; set; }
+
+        public long Max { get; set; }
+
+        public int Format { get; set; }
+    }
+
+    /// <summary>シーズン強度の項目(効果の種類と番号)とそのシーズン。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class EquipmentStrengthSeasonEntry
+    {
+        public int Kind { get; set; }
+
+        public int Id { get; set; }
+
+        public int Season { get; set; }
     }
 
     /// <summary>

@@ -1,0 +1,75 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.EquipmentTextColorSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        装備詳細の品質ごとのテキストカラー。行の作りは被ダメログのテキストカラー
+        (TakenDamageLogTextColorSettingsView)のアイコンの無い行と同じ。
+    -->
+    <UserControl.Resources>
+        <!-- 最後の行は下の線を引かない(節の枠が閉じる)。 -->
+        <Style x:Key="EquipmentTextColorSettings.Field"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource Panel.SettingField}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <TextBlock Text="{Binding TextColorSectionTitle}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+            <ItemsControl ItemsSource="{Binding TextColorItems}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource EquipmentTextColorSettings.Field}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                                           Text="{Binding DisplayName}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="14"
+                                           FontWeight="SemiBold" />
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ItemsControl ItemsSource="{Binding Colors.Colors}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <RadioButton GroupName="{Binding DataContext.Key, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                             Background="{Binding Brush}"
+                                                             Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                             IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                             Click="ColorOptionRadioButton_Click" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
+                                            Style="{StaticResource Button.Text}"
+                                            Tag="{Binding Key}"
+                                            Click="ColorPickerButton_Click" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ContentControl>
+    </StackPanel>
+</UserControl>

@@ -138,8 +138,13 @@
         </Style>
     </UserControl.Resources>
 
-    <!-- 左に顔・名前・文字の行・バッジ、右に名刺。顔と名刺は窓の VM の写真、それ以外は PlayerInfo。 -->
-    <Grid Margin="12,8,12,12" HorizontalAlignment="Left">
+    <!--
+        左に顔・名前・文字の行・バッジ、右に名刺。顔と名刺は窓の VM の写真、それ以外は PlayerInfo。
+        相手も覚えている素性も無い間(PlayerInfo が null)は、ほかのウィンドウと同じく何も出さない。
+    -->
+    <Grid Margin="12,8,12,12"
+          HorizontalAlignment="Left"
+          Visibility="{Binding HasPlayerInfo, Converter={StaticResource BooleanToVisibilityConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />

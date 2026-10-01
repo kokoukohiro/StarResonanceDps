@@ -113,35 +113,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
 
-            string itemTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "ItemTable.json");
-            if (File.Exists(itemTableFile))
-            {
-                var items = JsonConvert.DeserializeObject<Dictionary<string, Item>>(File.ReadAllText(itemTableFile))!;
-                HelperMethods.DataTables.Items.Data = items;
-                Log.Information("Loaded ItemTable.json");
-            }
-
-            string equipTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "EquipTable.json");
-            if (File.Exists(equipTableFile))
-            {
-                var equips = JsonConvert.DeserializeObject<Dictionary<string, Equip>>(File.ReadAllText(equipTableFile))!;
-                HelperMethods.DataTables.Equips.Data = equips;
-                Log.Information("Loaded EquipTable.json");
-            }
-
-
-
-
-
-            string equipBreakThroughTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "EquipBreakThroughTable.json");
-            if (File.Exists(equipBreakThroughTableFile))
-            {
-                var equipBreakThroughs = JsonConvert.DeserializeObject<Dictionary<string, EquipBreakThrough>>(File.ReadAllText(equipBreakThroughTableFile))!;
-                HelperMethods.DataTables.EquipBreakThroughs.Data = equipBreakThroughs;
-                Log.Information("Loaded EquipBreakThroughTable.json");
-            }
-
-
             string tempAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "TempAttrTable.json");
             if (File.Exists(tempAttrTableFile))
             {

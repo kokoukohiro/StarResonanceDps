@@ -778,7 +778,8 @@ public static class MeterSnapshotProvider
             && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(
                 out var currentSkillLevels))
         {
-            skillSourceToken = currentSkillLevels;
+            // 自分の枠はアクションバーから組むので、アクションバーの差し替えでも組み直す。
+            skillSourceToken = PlayerSkillLevelStateStore.SelfActionBarToken;
             roleFilterToken = currentSkillLevels;
             return true;
         }

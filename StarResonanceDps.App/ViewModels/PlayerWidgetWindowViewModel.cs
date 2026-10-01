@@ -79,17 +79,43 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     {
     }
 
-    /// <summary>名刺の値(顔写真・名刺)が変わった相手。その相手を映している窓だけ <see cref="OnSocialDataChanged"/> を呼ぶ。</summary>
+    /// <summary>
+    /// 名刺の値(顔写真・名刺)が変わった相手。その相手を映している窓(一覧から外れて最後の値を残している窓も含む)だけ
+    /// <see cref="OnSocialDataChanged"/> を呼ぶ。
+    /// </summary>
     public void NotifySocialDataChanged(long characterId)
     {
-        if (_selectedPlayer?.CharacterId == characterId)
+        if (RepresentsPlayer(characterId))
         {
             OnSocialDataChanged();
         }
     }
 
+    /// <summary>名刺の値の控えが全部消えた(キャプチャの停止とログアウト)。相手を問わず <see cref="OnSocialDataChanged"/> を呼ぶ。</summary>
+    public void NotifySocialDataCleared()
+    {
+        OnSocialDataChanged();
+    }
+
     /// <summary>映している相手の名刺の値が変わったとき。それを表示に使う窓だけが上書きする。</summary>
     protected virtual void OnSocialDataChanged()
+    {
+    }
+
+    /// <summary>
+    /// ログアウトで起動直後の状態へ戻したとき。覚えている素性のうち、保存して次の起動へ持ち越す名前と UID だけを残し、
+    /// NPC の印と職業は捨てる(起動時の復元と同じ)。
+    /// </summary>
+    public void ResetToStartup()
+    {
+        _lastKnownIsNpc = false;
+        _lastKnownProfessionId = 0;
+        RenderHeaderText();
+        OnResetToStartup();
+    }
+
+    /// <summary>ログアウトで起動直後の状態へ戻したとき。一覧の行の写しを残している窓だけが上書きする。</summary>
+    protected virtual void OnResetToStartup()
     {
     }
 

@@ -42,10 +42,10 @@ public static class PlayerSkillLevelStateStore
     /// </para>
     ///
     /// <para><b>空枠は 0 のまま残す。</b> 落とすと枠の位置が失われる。</para>
+    ///
+    /// <para><c>null</c> は未受信。</para>
     /// </summary>
-    private static FrozenDictionary<int, int> _selfActionBarSlots =
-        new Dictionary<int, int>().ToFrozenDictionary();
-    private static bool _hasSelfActionBarSlots;
+    private static FrozenDictionary<int, int>? _selfActionBarSlots;
 
     public static void ReplaceSelfSkillLevels(
         Zproto.ProfessionList? professionList,
@@ -228,14 +228,13 @@ public static class PlayerSkillLevelStateStore
     }
 
     /// <summary>
-    /// 自分のスキルの控えを起動時の値に戻す(ログアウトでキャラが替わりうるため)。
-    /// アクションバーも「一度も受信していない」に戻す。
+    /// 自分のスキルの控えを起動時の値に戻す。キャプチャを止めたとき(止めている間の差分が届かず古くなる)と
+    /// ログアウト(キャラが替わりうる)に呼ぶ。アクションバーも「一度も受信していない」に戻す。
     /// </summary>
     public static void ResetSelfToStartup()
     {
         ReplaceSelfSkillLevels(null, null);
-        Volatile.Write(ref _selfActionBarSlots, new Dictionary<int, int>().ToFrozenDictionary());
-        Volatile.Write(ref _hasSelfActionBarSlots, false);
+        Volatile.Write(ref _selfActionBarSlots, null);
     }
 
     /// <summary>
@@ -247,7 +246,6 @@ public static class PlayerSkillLevelStateStore
         ArgumentNullException.ThrowIfNull(slots);
 
         Volatile.Write(ref _selfActionBarSlots, slots.ToFrozenDictionary());
-        Volatile.Write(ref _hasSelfActionBarSlots, true);
     }
 
     /// <summary>
@@ -258,7 +256,13 @@ public static class PlayerSkillLevelStateStore
     /// 受信できていないことが空欄と同じ見た目になって気付けない。
     /// </para>
     /// </summary>
-    public static bool HasSelfActionBarSlots => Volatile.Read(ref _hasSelfActionBarSlots);
+    public static bool HasSelfActionBarSlots => Volatile.Read(ref _selfActionBarSlots) is not null;
+
+    /// <summary>
+    /// アクションバーの控えの版。差し替えるたびに別の参照になる。未受信は <c>null</c>。
+    /// 行の組み直しの合図に使う。
+    /// </summary>
+    public static object? SelfActionBarToken => Volatile.Read(ref _selfActionBarSlots);
 
     /// <summary>
     /// 枠番号のスキルID。枠が無い場合も 0 を返すので、
@@ -266,7 +270,8 @@ public static class PlayerSkillLevelStateStore
     /// </summary>
     public static int GetSelfActionBarSkillId(int slotId)
     {
-        return Volatile.Read(ref _selfActionBarSlots).TryGetValue(slotId, out var skillId)
+        return Volatile.Read(ref _selfActionBarSlots) is { } slots
+            && slots.TryGetValue(slotId, out var skillId)
             ? skillId
             : 0;
     }

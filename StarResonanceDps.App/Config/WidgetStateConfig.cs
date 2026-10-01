@@ -28,6 +28,7 @@ public sealed class WidgetConfig
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
     public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
     public SkillDetailWidgetSettingsConfig? SkillDetail { get; set; }
+    public EquipmentWidgetSettingsConfig? Equipment { get; set; }
 
     public PlayerStatusWidgetSettingsConfig? PlayerStatus { get; set; }
 
@@ -72,6 +73,7 @@ public sealed class WidgetConfig
             BuffList = BuffList?.Clone(),
             ElementColor = ElementColor?.Clone(),
             SkillDetail = SkillDetail?.Clone(),
+            Equipment = Equipment?.Clone(),
             PlayerStatus = PlayerStatus?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
@@ -518,6 +520,40 @@ public sealed class SkillDetailWidgetSettingsConfig
     }
 }
 
+/// <summary>装備詳細の表示設定。行の書式と、品質ごとのテキストカラー。</summary>
+public sealed class EquipmentWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultEquipmentInfoFormatString"/>。</remarks>
+    public string? InfoFormat { get; set; }
+
+    /// <summary>
+    /// 装備名の文字の色。形はクラスカラーと同じで、<b>鍵はアイテムの品質の番号</b>
+    /// (<see cref="WidgetConfigDefaults.EquipmentTextColorKeys"/>)。
+    /// </summary>
+    public Dictionary<string, int> TextColorIndexes { get; set; } =
+        WidgetConfigDefaults.CreateDefaultEquipmentTextColorIndexes();
+
+    public Dictionary<string, List<string>> TextColorPalettes { get; set; } =
+        WidgetConfigDefaults.CreateDefaultEquipmentTextColorPalettes();
+
+    public EquipmentWidgetSettingsConfig Clone()
+    {
+        return new EquipmentWidgetSettingsConfig
+        {
+            InfoFormat = InfoFormat,
+            TextColorIndexes = TextColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultEquipmentTextColorIndexes()
+                : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = TextColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultEquipmentTextColorPalettes()
+                : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 public sealed class PlayerStatusWidgetSettingsConfig
 {
     /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultHideInactiveStatusEffects"/>。</remarks>
@@ -637,6 +673,7 @@ public static class WidgetConfigDefaults
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
     public const string DefaultMeterPlayerInfoFormatString = "{Name}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
+    public const string DefaultEquipmentInfoFormatString = "{EquipName}({MainStat})";
 
     /// <summary>ステータス詳細で、値が 0 の属性効果の行を隠すか。</summary>
     public const bool DefaultHideInactiveStatusEffects = true;
@@ -659,8 +696,8 @@ public static class WidgetConfigDefaults
     private const double PlayerInfoInitialWindowHeight = 265d;
     private const double PlayerStatusInitialWindowWidth = 360d;
     private const double PlayerStatusInitialWindowHeight = 400d;
-    private const double PlayerEquipmentInitialWindowWidth = 400d;
-    private const double PlayerEquipmentInitialWindowHeight = 230d;
+    private const double PlayerEquipmentInitialWindowWidth = 360d;
+    private const double PlayerEquipmentInitialWindowHeight = 381d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
     private const double PlayerBuffListInitialWindowHeight = 400d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
@@ -1044,6 +1081,26 @@ public static class WidgetConfigDefaults
         [20120] = ["#FFFFFF", "#B3F4C6"],    // 戦闘時のスタミナ回復率
     };
 
+    /// <summary>
+    /// 装備のテキストカラーの鍵。アイテムの品質の番号(0〜5)で、低い順。
+    /// レアリティはアイテム共通なので、装備に無い品質0も持つ。
+    /// </summary>
+    public static readonly string[] EquipmentTextColorKeys = ["0", "1", "2", "3", "4", "5"];
+
+    /// <summary>
+    /// 装備のテキストカラーの見本。1枠目は白で、2枠目にゲームのアイテムの品質の色を置く。
+    /// <b>表は鍵の全項目を持つ</b>ので、引けない鍵は表の書き忘れ。埋めずに落とす。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> EquipmentDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["0"] = ["#A4AAB2", "#C4C9CF"],
+        ["1"] = ["#89BD92", "#ACD3B3"],
+        ["2"] = ["#ADCAFF", "#C2D7FD"],
+        ["3"] = ["#AB85F6", "#C4ABF6"],
+        ["4"] = ["#EED335", "#F2DE75"],
+        ["5"] = ["#EF8E60", "#F2AE8E"]
+    };
+
     private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         "#2297F4",
@@ -1093,6 +1150,12 @@ public static class WidgetConfigDefaults
     public static bool SupportsSkillDetailSettings(WidgetKind kind)
     {
         return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
+    }
+
+    /// <summary>装備詳細の表示設定(行の書式)を持つ種別か。</summary>
+    public static bool SupportsEquipmentSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerEquipment;
     }
 
     /// <summary>ステータス詳細の表示設定を持つ種別か。</summary>
@@ -1183,6 +1246,7 @@ public static class WidgetConfigDefaults
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
             SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
+            Equipment = SupportsEquipmentSettings(kind) ? CreateEquipmentSettings() : null,
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null
         };
     }
@@ -1351,6 +1415,70 @@ public static class WidgetConfigDefaults
     {
         var normalized = (skillDetail ?? CreateSkillDetailSettings()).Clone();
         normalized.SkillInfoFormatString ??= DefaultSkillInfoFormatString;
+        return normalized;
+    }
+
+    /// <summary>装備詳細の表示設定の既定。</summary>
+    public static EquipmentWidgetSettingsConfig CreateEquipmentSettings()
+    {
+        return new EquipmentWidgetSettingsConfig
+        {
+            InfoFormat = DefaultEquipmentInfoFormatString,
+            TextColorIndexes = CreateDefaultEquipmentTextColorIndexes(),
+            TextColorPalettes = CreateDefaultEquipmentTextColorPalettes()
+        };
+    }
+
+    /// <summary>装備のテキストカラーで最初に選ばれている枠(品質の色)。</summary>
+    public const int DefaultEquipmentTextColorIndex = 1;
+
+    public static List<string> CreateDefaultEquipmentTextColors(string key)
+    {
+        return [.. EquipmentDefaultTextColorHexes[key]];
+    }
+
+    public static Dictionary<string, int> CreateDefaultEquipmentTextColorIndexes()
+    {
+        return EquipmentTextColorKeys.ToDictionary(
+            key => key,
+            _ => DefaultEquipmentTextColorIndex,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultEquipmentTextColorPalettes()
+    {
+        return EquipmentTextColorKeys.ToDictionary(
+            key => key,
+            CreateDefaultEquipmentTextColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>保存値を正規化して写す。書式が無ければ既定を入れる。</summary>
+    public static EquipmentWidgetSettingsConfig CloneNormalizedEquipment(EquipmentWidgetSettingsConfig? equipment)
+    {
+        var normalized = (equipment ?? CreateEquipmentSettings()).Clone();
+        normalized.InfoFormat ??= DefaultEquipmentInfoFormatString;
+
+        // 一覧に無い鍵は捨て、足りない鍵は既定で埋める。選択はパレットの範囲に収める。
+        var textIndexes = new Dictionary<string, int>(EquipmentTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        var textPalettes = new Dictionary<string, List<string>>(EquipmentTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        foreach (var key in EquipmentTextColorKeys)
+        {
+            var palette = normalized.TextColorPalettes.TryGetValue(key, out var saved)
+                && saved is { Count: > 0 }
+                    ? new List<string>(saved)
+                    : CreateDefaultEquipmentTextColors(key);
+
+            var index = normalized.TextColorIndexes.TryGetValue(key, out var savedIndex)
+                ? savedIndex
+                : DefaultEquipmentTextColorIndex;
+
+            textPalettes[key] = palette;
+            textIndexes[key] = Math.Clamp(index, 0, palette.Count - 1);
+        }
+
+        normalized.TextColorIndexes = textIndexes;
+        normalized.TextColorPalettes = textPalettes;
         return normalized;
     }
 
@@ -1963,6 +2091,9 @@ public static class WidgetConfigDefaults
             : null;
         config.SkillDetail = SupportsSkillDetailSettings(kind)
             ? CloneNormalizedSkillDetail(config.SkillDetail)
+            : null;
+        config.Equipment = SupportsEquipmentSettings(kind)
+            ? CloneNormalizedEquipment(config.Equipment)
             : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets

@@ -93,6 +93,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding PlayerStatusSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="EquipmentTextColorsNavButton"
+                                Click="EquipmentTextColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasEquipmentDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.TextColor}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EquipmentSettings.TextColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ElementColorsNavButton"
                                 Click="ElementColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -225,6 +234,15 @@
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
 
+                                    <ContentControl Content="{Binding EquipmentSettings}"
+                                                    Visibility="{Binding HasEquipmentDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:EquipmentWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+
                                     <ContentControl Content="{Binding PlayerStatusSettings}"
                                                     Visibility="{Binding HasPlayerStatusDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <ContentControl.ContentTemplate>
@@ -347,6 +365,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:PlayerStatusTextColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="EquipmentTextColorsHost"
+                                                Content="{Binding EquipmentSettings}"
+                                                Visibility="{Binding HasEquipmentDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:EquipmentTextColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

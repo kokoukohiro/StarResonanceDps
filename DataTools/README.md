@@ -18,6 +18,7 @@ python gen_buff_groups.py     # 料理・薬剤のバフの名前
 python gen_season_talents.py  # シーズンタレントの型の根ノードの名前
 python gen_class_specs.py     # 職業の特化の名前
 python gen_seasons.py         # シーズンの名前とシーズンランクの名前
+python gen_equips.py          # 装備の名前・数値・効果の文言
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -103,6 +104,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json` |
 | `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
+| `gen_equips.py` | `Data/Localization/EquipNames.json`<br>`Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
 
 ## 全ツール共通の仕様
 
@@ -595,3 +597,119 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 - シーズンの分類で、`SortID` が一番小さい行が2行以上ある
 - 段階の行で、`StarLevel` が一番小さい行が2行以上ある
 - 段階が鍵の桁に収まらない(0 未満か 100 以上)、シーズン番号が 1 未満
+
+## gen_equips.py
+
+装備の名前・数値・効果の文言を書く。
+
+- `EquipNames.json`: **鍵は装備ID**(`EquipTable` の全行)。値は `ItemTable.Name`。名前の空の鍵も残す
+- `Equips.json`: 装備ごとの数値と、装備が参照する属性庫の行
+- `EquipEffectTexts.json`: **鍵は効果の番号。** 進化・改鋳・レアの側に出る一時属性とバフの文言
+
+名前と文言の出所は上の「土台は言語で分ける」と同じ。
+
+### 数値は `Star` で作る
+
+`Equips.json` は `Star` の表だけで作る(数値の表は言語で変わらないので `cn` フォルダを読む)。
+
+シーズン強度の項目は、表の版によって同じ行が属性か一時属性かで違う(その版の今のシーズンは属性、過去のシーズンは一時属性)。
+アプリは有効・無効を表の違いではなく、今のシーズンと項目のシーズンで決める。生成物が持つのは項目のシーズンだけ。
+
+### 形
+
+```json
+{
+  "Equips": {
+    "<装備ID>": {
+      "Part": <部位>, "Quality": <品質>, "PerfectUpperLimit": <完成度の上限>, "MainStat": <主能力値の系統>,
+      "Stages": [ { "Gs": <装備Lv>, "Basic": [<型>, <庫ID>, ...], "Advanced": [<型>, <庫ID>, ...] } ],
+      "Recast": [<型>, <庫ID>, ...], "Rare": [<型>, <庫ID>, ...]
+    }
+  },
+  "AttrLibs": {
+    "<型>": { "<庫ID>": [ { "Id": <行ID>, "Parts": [<部位>], "Specs": [<特化>], "Effects": [ { "Kind": <種類>, "Id": <番号>, "Min": <下限>, "Max": <上限>, "Format": <書式> } ] } ] }
+  },
+  "StrengthSeasons": [ { "Kind": <種類>, "Id": <番号>, "Season": <シーズン> } ],
+  "SpecSchools": { "<特化の番号>": <特化> },
+  "Rank1Schools": { "<職業ID>": <特化> }
+}
+```
+
+| 項目 | 中身 |
+|---|---|
+| `Part` | `EquipTable.EquipPart` |
+| `Quality` | `ItemTable.Quality` |
+| `PerfectUpperLimit` | `EquipTable.PerfectUpperLimit` の2要素目 |
+| `MainStat` | 段階0 の基礎の庫の行(部位で絞る)に出る属性の系統(番号 − 番号%10)のうち、筋力・知力・敏捷の系統。無ければ 0 |
+| `Stages` | 添字が突破の段階。段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を `BreakThroughTime` の順に。`Basic` / `Advanced` は表の庫の配列 `[型, 庫ID…]` のまま |
+| `Recast` / `Rare` | `EquipTable.RecastingAttrLibId` / `QualityChildAttrLibId`(改鋳 / レアの庫の配列)のまま |
+| `AttrLibs` | 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ `AttrLibId` → その庫の全行を表の順に。装備の全段階の基礎・進化、改鋳、装備と突破の行のレアから参照される庫だけ |
+| `Id` | 行の `Id`。通信で届く自分の装備の値は、この行ID で行を指す |
+| `Parts` / `Specs` | 行の `AllowPart` / `TalentSchoolId`(型1 は空) |
+
+「部位で絞る」は、`AllowPart` に装備の部位か 0 を含む行を採ること。
+
+### 効果
+
+`Effects` は行の `AttrEffect` の要素 `[種類, 番号, …]` を順に歩いて作る。`AttrEffectConfig` の添字を種類ごとに次の数だけ進め、
+`Min` / `Max` はその効果の最初の設定の `[min, max]`。
+
+| 種類 | 中身 | 設定を進める数 | `Format` |
+|---|---|---|---|
+| 1 | 属性 | 1 | `FightAttrTable[番号 − 番号%10].AttrNumType` が 1 か、0 で末尾(番号%10)が 4 なら 1。0 で末尾が 2・3 なら 0 |
+| 3 | バフ | 要素の3要素目(無ければ 1) | 1 |
+| 5 | 一時属性 | 1 | 0 |
+
+`Format` は 0 がそのままの数、1 が %(値 ÷ 100)。
+
+### シーズン強度の項目 `StrengthSeasons`
+
+基礎の庫(全装備・全段階、部位で絞った行)に出る**一時属性の全部**と、**系統 11440 の属性**をシーズン強度の項目とする。
+
+**項目のシーズンは、それを基礎に持つ装備の `EquipTable.SeasonId` の積集合。** ちょうど1つに決まらなければ止まる。
+庫の行ごとには取らない。複数のシーズンに属する装備だけが使う行は、行ごとではシーズンが決まらない。
+
+進化にだけ出る一時属性はシーズン強度ではないので入らない。基礎に出る一時属性が進化にも出たら止まる。
+
+### 特化 `SpecSchools` / `Rank1Schools`
+
+型2 の庫の行は特化(`TalentSchoolTable.Id`)で選ぶ。アプリの特化から特化を引く表を2つ持つ。
+どちらも、特化の段階を `TalentStage` に含む `TalentSchoolTable` の行を引く。
+
+- `SpecSchools`: 鍵はアプリの特化の番号(職業ID × 10000 ＋ `ShowTalentStage` の並び。`gen_class_specs.py` と同じ)。段階は `ShowTalentStage` のその並びの要素
+- `Rank1Schools`: 鍵は職業ID。段階はクラスR1 の段階(`TalentStageTable` のうち `WeaponType` がその職業で、`TalentStage` と `BdType` が 0 の行)
+
+特化に当たらない段階は出さない。
+
+**段階の欄(`TalentStage`)が空の特化は、ほかの特化と同じ形として扱う。** ほかの特化の段階の欄は
+[同じ職業のクラスR1 の段階, 自分の段階] なので、空の特化の段階も、その特化の番号を段階に持つ職業の
+クラスR1 の段階と自分の番号とする。型2 の庫で特化の欄(`TalentSchoolId`)が空の行は、この特化の行とする
+(`Specs` にその特化を入れる)。
+
+### 効果の文言 `EquipEffectTexts.json`
+
+`AttrLibs` の効果のうち、進化・改鋳・レアの側(`Advanced` / `Recast` / `Rare` と突破の行のレアから参照される庫)に出る一時属性とバフの文言。
+
+| 種類 | 文言 |
+|---|---|
+| 一時属性 | `TempAttrTable.AttrDesc` |
+| バフ | `AttrDescription[BuffTable.TipsDescription].Description` |
+
+値の差し込み `{*tempAttr.un*}` と `{*Decision.unmarkpercent(1)*}` は `{0}`(そのままの値)、
+`{*tempAttr.up*}` は `{1}`(% の値。値 ÷ 100 の末尾の 0 を落として %)に置き換える。
+同じ効果でも言語で差し込みが違うことがあるので、`{0}` と `{1}` のどちらが入るかは言語ごとに決まる。
+基礎に出るシーズン強度の一時属性は入れない(アプリはシーズン強度の文言で出す)。
+
+### 止まる条件
+
+次のときは**書かずに止まる**(前の出力が残る)。
+
+- 装備の行がアイテムの表に無い、`PerfectUpperLimit` に2要素目が無い
+- 突破の段階が 1 からの連番でない
+- 参照される庫が表に無い、庫の配列の型が 1・2 以外
+- 効果の種類が 1・3・5 以外、設定の数が効果と合わない、設定が `[min, max]` でない、属性の書式が上の表で決まらない
+- 主能力値の系統が2つ出る
+- シーズン強度の項目のシーズンが1つに決まらない、基礎に出る一時属性が進化にも出る
+- 1つの段階に特化が2つ当たる、職業のクラスR1 の段階が2行ある
+- 段階の欄が空の特化が2つ以上ある、それがどの職業の BdType0 の段階でもない、特化の欄が空の行があるのに段階の欄が空の特化が無い
+- 文言に上の3つ以外の差し込みか `{0}` / `{1}` 以外の波括弧がある、一時属性とバフで番号が重なる

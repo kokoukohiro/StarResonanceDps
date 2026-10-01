@@ -17,7 +17,9 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     /// <summary>名刺の既定の絵。写真を取れたとき以外はこれを出す。</summary>
     private const string DefaultCardResourceKey = "Icon.IdCard.idcard_common_01";
 
+    /// <summary>表示値。相手も覚えている素性も無い間は null(画面ごと隠す)。</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPlayerInfo))]
     private PlayerInfoEntry? _playerInfo;
 
     /// <summary>顔の絵。写真を取れたら写真、それ以外(照会がまだ届いていない・写真が無い・取得中・取得に失敗)は既定の絵。</summary>
@@ -47,14 +49,17 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         infoWidget.PlayerInfoSettingsChanged += InfoWidget_PlayerInfoSettingsChanged;
         _avatarSlot = new PhotoSlot(DefaultAvatarResourceKey, image => AvatarImage = image);
         _cardSlot = new PhotoSlot(DefaultCardResourceKey, image => CardImage = image);
-        // 相手が決まる前から既定の絵を出す。
+        // 相手が決まる前から既定の絵を用意する(何も分からない間は画面ごと隠れる)。
         RefreshPhotos(force: true);
         InitializePlayer(initialPlayer);
-        // 相手がまだ一覧に載っていなくても、見出しと「不明」を出す。
+        // 相手がまだ一覧に載っていなくても、覚えている素性があれば見出しと「不明」を出す。
         RenderPlayerInfo();
     }
 
     public WidgetListItemViewModel InfoWidget => PlayerWidget;
+
+    /// <summary>何か出すものがあるか。無ければ画面ごと隠して、ほかのウィンドウと同じく何も出さない。</summary>
+    public bool HasPlayerInfo => PlayerInfo is not null;
 
     /// <summary>自分の顔の写真を出しているときだけ、その写真。右クリックのメニュー(保存・コピー)はこれがあるときだけ出す。</summary>
     public PlayerPhoto? SavableAvatarPhoto => _player?.IsSelf == true ? _avatarSlot.Photo : null;
@@ -108,6 +113,17 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         RefreshPhotos(force: false);
     }
 
+    /// <summary>
+    /// ログアウト。キャラが替わり得るので、一覧から消えても残していた最後の値を捨て、
+    /// 覚えている素性だけの表示(起動時の復元と同じ)と既定の絵に戻す。
+    /// </summary>
+    protected override void OnResetToStartup()
+    {
+        _player = null;
+        RenderPlayerInfo();
+        RefreshPhotos(force: true);
+    }
+
     /// <summary>相手がまだ一覧に載っていない間は、覚えている素性(保存から戻した名前と UID)が入ったら出し直す。</summary>
     protected override void OnLastKnownPlayerChanged()
     {
@@ -119,6 +135,15 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
 
     private void RenderPlayerInfo()
     {
+        // 相手も覚えている素性も無い(タイトルに名前が出ない)間は何も出さない。
+        if (_player is null
+            && string.IsNullOrWhiteSpace(LastKnownPlayerName)
+            && LastKnownPlayerUid == 0)
+        {
+            PlayerInfo = null;
+            return;
+        }
+
         PlayerInfo = _player is null
             ? PlayerInfoEntry.CreateUnknown(
                 LastKnownPlayerName,

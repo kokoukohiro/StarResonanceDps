@@ -58,6 +58,12 @@ public static class SocialDataStore
         }
     }
 
+    /// <summary>
+    /// 控えを全部消した(キャプチャの停止とログアウト)。表示側はこれを受けて、相手を問わず写真を引き直す。
+    /// 停止かログアウトのスレッドから上がる。
+    /// </summary>
+    public static event Action? Cleared;
+
     /// <summary>起動時の値に戻す(キャプチャの停止とログアウト)。</summary>
     public static void ResetToStartup()
     {
@@ -65,6 +71,8 @@ public static class SocialDataStore
         {
             Avatars.Clear();
         }
+
+        Cleared?.Invoke();
     }
 
     private static SocialAvatarState ToAvatarState(AvatarInfo avatarInfo)

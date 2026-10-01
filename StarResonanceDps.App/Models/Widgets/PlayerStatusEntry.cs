@@ -359,6 +359,32 @@ public static class PlayerStatusEntry
         return ResolveIconMask(RowsByAttrId[ResolveNameAttrId(attrId)].IconKey);
     }
 
+    /// <summary>
+    /// 属性のアイコンの形。ステータス詳細の外(装備の TIPS)から引く。
+    /// <b>表に無い番号は <c>null</c></b>(アイコン無し)。
+    /// </summary>
+    public static Brush? FindRowIconMask(int attrId)
+    {
+        return RowsByAttrId.TryGetValue(ResolveNameAttrId(attrId), out var spec)
+            ? ResolveIconMask(spec.IconKey)
+            : null;
+    }
+
+    /// <summary>
+    /// 表の絵のパス(<c>ui/atlas/…/common_icon01</c> など)の最後の名前で、ステータスのアイコンの形を引く。
+    /// パスが空か、同じ名前の絵が無ければ <c>null</c>。
+    /// </summary>
+    public static Brush? FindIconMaskByName(string iconPath)
+    {
+        if (string.IsNullOrWhiteSpace(iconPath))
+        {
+            return null;
+        }
+
+        var slash = iconPath.LastIndexOf('/');
+        return ResolveIconMask(slash >= 0 ? iconPath[(slash + 1)..] : iconPath);
+    }
+
     /// <param name="player">行を作る相手。</param>
     /// <param name="hideInactiveStatusEffects">
     /// <see cref="HideWhenZeroAttrIds"/> の行のうち、値が 0 のものを出さないか。

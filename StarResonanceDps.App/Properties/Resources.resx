@@ -390,6 +390,9 @@
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>Text Colors</value>
   </data>
+  <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
+    <value>Text Colors</value>
+  </data>
   <data name="Settings_Section_BuffListColors_Title" xml:space="preserve">
     <value>Buff Colors</value>
   </data>
@@ -647,6 +650,18 @@
   </data>
   <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
     <value>Skill1</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Customization" xml:space="preserve">
+    <value>Equipment Name</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipName" xml:space="preserve">
+    <value>Equipment Name</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_EquipLevel" xml:space="preserve">
+    <value>Equipment Level</value>
+  </data>
+  <data name="Settings_EquipmentInfo_Field_MainStat" xml:space="preserve">
+    <value>Main Stat</value>
   </data>
   <data name="Settings_PlayerInfo_Customization" xml:space="preserve">
     <value>Player Name</value>
@@ -1433,5 +1448,20 @@
   </data>
   <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
     <value>Could not copy the image</value>
+  </data>
+  <data name="PlayerEquipment_Level" xml:space="preserve">
+    <value>Lv.{0}</value>
+  </data>
+  <data name="PlayerEquipment_ExpiredSeasonStrength" xml:space="preserve">
+    <value>{0} (Expired) {1}</value>
+  </data>
+  <data name="PlayerEquipment_NoEquipment" xml:space="preserve">
+    <value>No Equipment</value>
+  </data>
+  <data name="PlayerEquipment_Unknown" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
+  <data name="PlayerEquipment_Quality" xml:space="preserve">
+    <value>Rarity {0}</value>
   </data>
 </root>

@@ -158,6 +158,7 @@ public class NetCap
         {
             if (IsFromGame(ipv4, tcpPacket)) {
                 ConnectionFilters.TryAdd(connId, true);
+                allowed = true;
             }
             else {
                 ConnectionFilters.TryAdd(connId, false);

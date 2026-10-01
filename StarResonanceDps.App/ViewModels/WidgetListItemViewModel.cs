@@ -28,6 +28,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private BuffListWidgetSettingsConfig _buffList = WidgetConfigDefaults.CreateBuffListSettings(WidgetKind.BuffList);
     private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
     private SkillDetailWidgetSettingsConfig _skillDetail = WidgetConfigDefaults.CreateSkillDetailSettings();
+    private EquipmentWidgetSettingsConfig _equipment = WidgetConfigDefaults.CreateEquipmentSettings();
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
@@ -154,6 +155,11 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedSkillDetail(_skillDetail);
     }
 
+    public EquipmentWidgetSettingsConfig GetEquipmentSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedEquipment(_equipment);
+    }
+
     public PlayerStatusWidgetSettingsConfig GetPlayerStatusSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedPlayerStatus(_playerStatus);
@@ -231,6 +237,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public event EventHandler? SkillDetailSettingsChanged;
 
+    public event EventHandler? EquipmentSettingsChanged;
+
     public event EventHandler? PlayerStatusSettingsChanged;
 
     public WidgetListItemViewModel()
@@ -305,6 +313,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
             SkillDetail = WidgetConfigDefaults.SupportsSkillDetailSettings(Kind)
                 ? _skillDetail.Clone()
                 : null,
+            Equipment = WidgetConfigDefaults.SupportsEquipmentSettings(Kind)
+                ? _equipment.Clone()
+                : null,
             PlayerStatus = WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind)
                 ? _playerStatus.Clone()
                 : null,
@@ -372,6 +383,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _skillDetail = WidgetConfigDefaults.CloneNormalizedSkillDetail(config.SkillDetail);
             SkillDetailSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsEquipmentSettings(Kind))
+        {
+            _equipment = WidgetConfigDefaults.CloneNormalizedEquipment(config.Equipment);
+            EquipmentSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (WidgetConfigDefaults.SupportsPlayerStatusSettings(Kind))
@@ -478,6 +495,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _skillDetail = WidgetConfigDefaults.CloneNormalizedSkillDetail(skillDetail);
         SkillDetailSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyEquipmentSettingsPreview(EquipmentWidgetSettingsConfig equipment)
+    {
+        if (!WidgetConfigDefaults.SupportsEquipmentSettings(Kind))
+        {
+            return;
+        }
+
+        _equipment = WidgetConfigDefaults.CloneNormalizedEquipment(equipment);
+        EquipmentSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyPlayerStatusSettingsPreview(PlayerStatusWidgetSettingsConfig playerStatus)
