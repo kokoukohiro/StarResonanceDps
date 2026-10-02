@@ -14,6 +14,7 @@
             行内テキストの共通スタイル。全部左寄せで、収まらないぶんは省略記号で切る。
         -->
         <Style x:Key="BuffList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="12" />
@@ -27,6 +28,7 @@
             (単位なしの DurationText はプレイヤーリストのバッジ用)。
         -->
         <Style x:Key="BuffList.Duration" TargetType="TextBlock" BasedOn="{StaticResource BuffList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="TextAlignment" Value="Right" />
         </Style>
@@ -41,6 +43,7 @@
 
         <Style x:Key="Menu.WidgetWindowBuffListContextMenu"
                TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -75,6 +78,7 @@
 
         <Style x:Key="Menu.WidgetWindowBuffListContextMenuItem"
                TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
             <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
@@ -121,18 +125,21 @@
         <Style x:Key="Menu.WidgetWindowBuffListContextMenuItem.First"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowBuffListContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffListContextMenuItem.FirstCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowBuffListContextMenuItem.Middle"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowBuffListContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffListContextMenuItem.MiddleCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowBuffListContextMenuItem.Last"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowBuffListContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffListContextMenuItem.LastCornerRadius}" />
         </Style>
     </UserControl.Resources>
@@ -182,6 +189,7 @@
                             </Button.ContextMenu>
                             <Button.Style>
                                 <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
@@ -191,6 +199,7 @@
                                                             Visibility="Collapsed">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">

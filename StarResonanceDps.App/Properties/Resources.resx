@@ -181,16 +181,37 @@
     <value>Pinned</value>
   </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
-    <value>Start all favorites</value>
+    <value>Start favorites</value>
   </data>
   <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
     <value>Stop all</value>
   </data>
   <data name="Manager_WidgetAction_PinAllRunning" xml:space="preserve">
-    <value>Pin all running</value>
+    <value>Pin running</value>
   </data>
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
     <value>Unpin all</value>
+  </data>
+  <data name="Manager_WidgetAction_ClickThroughAllPinned" xml:space="preserve">
+    <value>Make pinned click-through</value>
+  </data>
+  <data name="Manager_WidgetAction_ClearAllClickThrough" xml:space="preserve">
+    <value>Disable all click-through</value>
+  </data>
+  <data name="Settings_Section_Hotkeys_Title" xml:space="preserve">
+    <value>Hotkeys</value>
+  </data>
+  <data name="Settings_Hotkey_Listening" xml:space="preserve">
+    <value>Press a key</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
+    <value>Could not set hotkey</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
+    <value>"{0}" is in use by another app</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
+    <value>Could not set "{0}" (error {1})</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>

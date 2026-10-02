@@ -30,6 +30,7 @@
                            IsHitTestVisible="False">
                     <TextBlock.Style>
                         <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Setter Property="Visibility" Value="Collapsed" />
                             <Style.Triggers>
                                 <MultiDataTrigger>

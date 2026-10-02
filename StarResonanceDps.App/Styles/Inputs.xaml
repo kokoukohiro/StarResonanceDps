@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style x:Key="Input.CopyableTextBox" TargetType="{x:Type TextBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="4,0,8,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
@@ -74,6 +75,7 @@
     </Style>
 
     <Style x:Key="Input.SearchBox" TargetType="TextBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="16,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
@@ -102,12 +104,14 @@
     <Style x:Key="Input.SearchFrame"
            TargetType="{x:Type ContentControl}"
            BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
     </Style>
 
     <Style x:Key="Input.SearchInnerTextBox" TargetType="TextBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -127,6 +131,7 @@
     <Style x:Key="Input.PathBox"
        TargetType="{x:Type TextBox}"
        BasedOn="{StaticResource Input.SearchBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
         <Setter Property="Padding" Value="8,0" />
@@ -146,6 +151,7 @@
     </Style>
 
     <Style x:Key="Input.SelectComboBoxItem" TargetType="ComboBoxItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
@@ -181,6 +187,7 @@
     </Style>
 
     <Style x:Key="Input.ActionComboBoxItem" TargetType="ComboBoxItem">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
@@ -221,10 +228,12 @@
     <Style x:Key="Input.SettingsComboBoxItem"
         TargetType="{x:Type ComboBoxItem}"
         BasedOn="{StaticResource Input.SelectComboBoxItem}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="30" />
     </Style>
 
     <Style x:Key="Input.SelectBox" TargetType="ComboBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="12,0" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
@@ -318,6 +327,7 @@
     </Style>
 
     <Style x:Key="Input.IconOnlySelectBox" TargetType="ComboBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Width" Value="40" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Padding" Value="0" />
@@ -389,6 +399,7 @@
 
 
     <Style x:Key="Input.SettingsComboBox" TargetType="ComboBox" BasedOn="{StaticResource Input.SelectBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="220" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource Input.SettingsComboBoxItem}" />
@@ -474,6 +485,7 @@
         溝 = Brush.BorderSoft、バー/つまみ = Brush.TextSecondary。
     -->
     <Style x:Key="Input.Switch" TargetType="{x:Type ToggleButton}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Width" Value="36" />
         <Setter Property="Height" Value="18" />
         <Setter Property="Cursor" Value="Hand" />
@@ -517,6 +529,7 @@
     </Style>
 
     <Style x:Key="Input.ValueSlider" TargetType="{x:Type Slider}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Minimum" Value="0" />
         <Setter Property="Maximum" Value="100" />
         <Setter Property="Height" Value="24" />

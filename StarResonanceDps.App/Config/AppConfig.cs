@@ -67,6 +67,14 @@ public sealed class SettingsConfig
     public int WindowColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
 
+    // --- ホットキー ---
+
+    /// <summary>
+    /// ホットキーの割り当て。登録は <c>GlobalHotkeyService</c> が起動時と保存時に行い、
+    /// 全体設定で変えている間はその割り当てでプレビューする(保存せずに閉じたら戻す)。
+    /// </summary>
+    public HotkeySettingsConfig Hotkeys { get; set; } = AppConfigDefaults.CreateDefaultHotkeys();
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; set; }
 
@@ -88,6 +96,7 @@ public sealed class SettingsConfig
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
+            Hotkeys = Hotkeys?.Clone() ?? AppConfigDefaults.CreateDefaultHotkeys(),
             ExtensionData = CloneExtensionData(ExtensionData)
         };
     }

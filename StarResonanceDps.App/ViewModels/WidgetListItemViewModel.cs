@@ -56,6 +56,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isPinned;
 
+    /// <summary>クリック透過。窓側(<c>WidgetWindow</c>)がこの値を見て、マウス入力を裏の窓へ通す。</summary>
+    [ObservableProperty]
+    private bool _isClickThrough;
+
     [ObservableProperty]
     private ThemeColorPalette _themePalette = ThemeColorPalette.Create(Color.FromRgb(0x0B, 0x16, 0x24));
 
@@ -309,6 +313,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
+            IsClickThrough = IsClickThrough,
             State = State,
             Theme = _theme.Clone(),
             Meter = WidgetConfigDefaults.SupportsMeterSettings(Kind)
@@ -353,6 +358,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         IsFavorite = config.IsFavorite;
         IsPinned = config.IsPinned;
+        IsClickThrough = config.IsClickThrough;
 
         if (config.State is { } state)
         {
@@ -654,6 +660,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private void TogglePin()
     {
         IsPinned = !IsPinned;
+    }
+
+    [RelayCommand]
+    private void ToggleClickThrough()
+    {
+        IsClickThrough = !IsClickThrough;
     }
 
     [RelayCommand]

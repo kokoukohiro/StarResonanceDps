@@ -12,6 +12,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerInfoImageContextMenu"
                TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="BorderBrush" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -46,6 +47,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerInfoImageContextMenuItem"
                TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
             <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
@@ -92,26 +94,31 @@
         <Style x:Key="Menu.WidgetWindowPlayerInfoImageContextMenuItem.First"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem.FirstCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerInfoImageContextMenuItem.Middle"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem.MiddleCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerInfoImageContextMenuItem.Last"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerInfoImageContextMenuItem.LastCornerRadius}" />
         </Style>
 
         <!-- バッジ1つの幅と、絵の大きさ。 -->
         <Style x:Key="PlayerInfo.Badge" TargetType="StackPanel">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Width" Value="80" />
         </Style>
         <Style x:Key="PlayerInfo.BadgeIcon" TargetType="Grid">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Width" Value="44" />
             <Setter Property="Height" Value="44" />
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -120,17 +127,20 @@
         <Style x:Key="PlayerInfo.RowText"
                TargetType="TextBlock"
                BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
         <!-- 顔の下の文字の行の枠。行の高さはステータス詳細の行と同じ。文字は枠の中で上下の真ん中に置く。 -->
         <Style x:Key="PlayerInfo.Line" TargetType="Grid">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="19" />
         </Style>
         <!-- バッジの下の名前。幅に収まらない名前は折り返す。 -->
         <Style x:Key="PlayerInfo.BadgeText"
                TargetType="TextBlock"
                BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="FontSize" Value="11" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextAlignment" Value="Center" />

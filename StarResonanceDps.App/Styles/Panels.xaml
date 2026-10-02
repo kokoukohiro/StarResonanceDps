@@ -6,6 +6,7 @@
         project to resolve a same-assembly custom control from this ResourceDictionary.
     -->
     <Style x:Key="Surface.RoundedOutline" TargetType="{x:Type ContentControl}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
@@ -42,6 +43,7 @@
     </Style>
 
     <Style x:Key="Surface.RoundedButtonOutline" TargetType="{x:Type ContentControl}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="1" />
@@ -115,6 +117,7 @@
 
     <Style x:Key="Panel.WindowFrame"
            TargetType="{x:Type ContentControl}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -129,6 +132,7 @@
     <Style x:Key="Panel.Root"
            TargetType="{x:Type ContentControl}"
            BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Brush.PanelBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
     </Style>
@@ -138,6 +142,7 @@
         background/divider/body layer, preventing the divider from compositing twice over the surface.
     -->
     <Style x:Key="Panel.WidgetWindowFrame" TargetType="{x:Type Border}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
         <Setter Property="Opacity" Value="{Binding WidgetWindowPalette.NonTextOpacity}" />
         <Setter Property="CornerRadius" Value="{StaticResource Radius.Default}" />
@@ -170,6 +175,7 @@
     <Style x:Key="Panel.ManagerItemCard"
            TargetType="{x:Type ContentControl}"
            BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Margin" Value="0,0,0,10" />
         <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
@@ -178,6 +184,7 @@
 
     <Style x:Key="Panel.WidgetCard"
            TargetType="{x:Type ContentControl}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Margin" Value="0,0,0,10" />
         <Setter Property="Background" Value="{Binding ThemePalette.WindowSurfaceBrush}" />
         <Setter Property="BorderBrush" Value="{Binding ThemePalette.BorderSoftBrush}" />
@@ -201,7 +208,7 @@
                                 SnapsToDevicePixels="True">
                             <Grid ClipToBounds="True">
                                 <Border x:Name="WidgetBackgroundImageLayer"
-                                        Width="220"
+                                        Width="262"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Stretch"
                                         CornerRadius="0,5,5,0"
@@ -215,7 +222,7 @@
                                 </Border>
 
                                 <Border x:Name="WidgetBackgroundFadeLayer"
-                                        Width="220"
+                                        Width="262"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Stretch"
                                         CornerRadius="0,5,5,0"
@@ -273,11 +280,13 @@
     <Style x:Key="Panel.SettingSection"
            TargetType="{x:Type ContentControl}"
            BasedOn="{StaticResource Surface.RoundedOutline}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Background" Value="{DynamicResource Brush.WindowSurface}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.BorderSoft}" />
     </Style>
 
     <Style x:Key="Panel.SettingFieldBase" TargetType="Border">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="54" />
         <Setter Property="Padding" Value="20,0" />
         <Setter Property="Background" Value="Transparent" />
@@ -292,8 +301,11 @@
     </Style>
 
     <Style x:Key="Panel.SettingField" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
-    <Style x:Key="Panel.SettingFieldLast" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}" />
+    <Style x:Key="Panel.SettingFieldLast" TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldBase}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    </Style>
 </ResourceDictionary>

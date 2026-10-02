@@ -13,6 +13,7 @@
         <Style x:Key="MetricSkillStatisticText"
                TargetType="TextBlock"
                BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -38,6 +39,7 @@
                            RenderOptions.BitmapScalingMode="HighQuality">
                     <Rectangle.Style>
                         <Style TargetType="Rectangle">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding HasSecondary}" Value="True">
                                     <Setter Property="Clip" Value="M0,0 L12.5,0 L12.5,25 L0,25 Z" />
@@ -53,6 +55,7 @@
                            RenderOptions.BitmapScalingMode="HighQuality">
                     <Rectangle.Style>
                         <Style TargetType="Rectangle">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding HasSecondary}" Value="False">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -104,6 +107,7 @@
                                 </Button.ToolTip>
                                 <Button.Style>
                                     <Style TargetType="Button">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate TargetType="Button">
@@ -113,6 +117,7 @@
                                                                 Visibility="Collapsed">
                                                             <Border.Style>
                                                                 <Style TargetType="Border">
+                                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                     <Setter Property="Opacity" Value="{Binding DataContext.PlayerWidget.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                                                                     <Style.Triggers>
                                                                         <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.Views;
 
 namespace StarResonanceDps.App;
 
@@ -43,6 +44,9 @@ public partial class MainWindow : Window
         if (DataContext is MainViewModel viewModel)
         {
             viewModel.RestoreRunningWidgetWindows();
+
+            // 登録できなかったホットキーはここで知らせる(メッセージの親にこの窓が要るので、開いた後に登録する)。
+            HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
         }
     }
 

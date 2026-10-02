@@ -18,6 +18,7 @@
             ここだけ高さの半分を直接入れて完全な丸にする。
         -->
         <Style x:Key="Aggregation.ViewingPill" TargetType="{x:Type Border}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="26" />
             <Setter Property="CornerRadius" Value="13" />
             <Setter Property="Padding" Value="14,0" />
@@ -81,6 +82,7 @@
                    Text="{Binding EmptyText}">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
+                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                     <Setter Property="Visibility" Value="Collapsed" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding HasEntries}" Value="False">

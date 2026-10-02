@@ -15,7 +15,11 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class MainViewModel : ViewModelBase
 {
+    /// <summary>ホットキーの3分計測の長さ。集計タブ・メーターのヘッダーのボタンと同じ。</summary>
+    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
+
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
+    private readonly GlobalHotkeyService _hotkeyService = GlobalHotkeyService.Instance;
     private readonly ObservableCollection<PluginListItemViewModel> _pluginItems = new();
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly WidgetStateManager _widgetStateManager = WidgetStateManager.Instance;
@@ -50,6 +54,21 @@ public sealed partial class MainViewModel : ViewModelBase
     public ICollectionView Widgets { get; }
 
     public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
+
+    // 三点メニューの項目。登録できているホットキーを右に半角括弧で添える。
+    // 1つのキーで切り替える2項目(起動/停止など)には同じキーが付く。
+
+    public string StartFavoritesActionText => FormatWidgetActionText("Manager_WidgetAction_StartAllFavorites", HotkeyAction.StartFavoritesOrStopAll);
+
+    public string StopAllActionText => FormatWidgetActionText("Manager_WidgetAction_StopAll", HotkeyAction.StartFavoritesOrStopAll);
+
+    public string PinRunningActionText => FormatWidgetActionText("Manager_WidgetAction_PinAllRunning", HotkeyAction.PinRunningOrUnpinAll);
+
+    public string UnpinAllActionText => FormatWidgetActionText("Manager_WidgetAction_UnpinAll", HotkeyAction.PinRunningOrUnpinAll);
+
+    public string ClickThroughPinnedActionText => FormatWidgetActionText("Manager_WidgetAction_ClickThroughAllPinned", HotkeyAction.ClickThroughPinnedOrClearAll);
+
+    public string ClearClickThroughActionText => FormatWidgetActionText("Manager_WidgetAction_ClearAllClickThrough", HotkeyAction.ClickThroughPinnedOrClearAll);
 
     public MainViewModel()
     {
@@ -88,6 +107,8 @@ public sealed partial class MainViewModel : ViewModelBase
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        _hotkeyService.Pressed += HotkeyService_Pressed;
+        _hotkeyService.RegistrationChanged += HotkeyService_RegistrationChanged;
         _configManager.SettingsChanged += ConfigManager_SettingsChanged;
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
 
@@ -407,6 +428,7 @@ public sealed partial class MainViewModel : ViewModelBase
             plugin.RefreshLocalizedText();
         }
 
+        RaiseWidgetActionTextsChanged();
         Widgets.Refresh();
     }
 
@@ -417,9 +439,11 @@ public sealed partial class MainViewModel : ViewModelBase
             return;
         }
 
-        if (e.PropertyName is nameof(WidgetListItemViewModel.IsFavorite) or nameof(WidgetListItemViewModel.IsPinned))
+        if (e.PropertyName is nameof(WidgetListItemViewModel.IsFavorite)
+            or nameof(WidgetListItemViewModel.IsPinned)
+            or nameof(WidgetListItemViewModel.IsClickThrough))
         {
-            _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned);
+            _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned, widget.IsClickThrough);
 
             if (e.PropertyName == nameof(WidgetListItemViewModel.IsPinned))
             {
@@ -453,19 +477,100 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public void RestoreRunningWidgetWindows()
     {
-        _widgetWindowManager.BeginStartupRestore();
+        foreach (var widget in _widgetItems.Where(widget => widget.State == WidgetState.Running))
+        {
+            _widgetWindowManager.ApplyWidgetState(widget);
+        }
+    }
 
-        try
+    /// <summary>
+    /// 保存してあるホットキーを登録する(起動時)。登録できなかったものを返す。
+    /// 全体設定での登録(プレビュー・リセット・保存・保存せずに閉じる)は全体設定の画面が行う。
+    /// </summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> ApplyHotkeys()
+    {
+        return _hotkeyService.Apply(_configManager.GetSettingsSnapshot().Hotkeys);
+    }
+
+    private void HotkeyService_Pressed(HotkeyAction action)
+    {
+        switch (action)
         {
-            foreach (var widget in _widgetItems.Where(widget => widget.State == WidgetState.Running))
-            {
-                _widgetWindowManager.ApplyWidgetState(widget);
-            }
+            case HotkeyAction.StartFavoritesOrStopAll:
+                if (_widgetItems.Any(widget => widget.State == WidgetState.Running))
+                {
+                    StopAllWidgets();
+                }
+                else
+                {
+                    StartFavoriteWidgets();
+                }
+
+                break;
+
+            case HotkeyAction.PinRunningOrUnpinAll:
+                if (_widgetItems.Any(widget => widget.IsPinned))
+                {
+                    UnpinAllWidgets();
+                }
+                else
+                {
+                    PinAllRunningWidgets();
+                }
+
+                break;
+
+            case HotkeyAction.ClickThroughPinnedOrClearAll:
+                if (_widgetItems.Any(widget => widget.IsClickThrough))
+                {
+                    ClearAllWidgetClickThrough();
+                }
+                else
+                {
+                    ClickThroughAllPinnedWidgets();
+                }
+
+                break;
+
+            case HotkeyAction.ThreeMinuteBenchmark:
+                if (MeterSnapshotProvider.GetBenchmarkState().IsActive)
+                {
+                    MeterSnapshotProvider.TryStopBenchmark();
+                }
+                else
+                {
+                    MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
+                }
+
+                break;
+
+            case HotkeyAction.ResetEncounter:
+                MeterSnapshotProvider.ResetCurrentEncounter();
+                break;
         }
-        finally
-        {
-            _widgetWindowManager.EndStartupRestore();
-        }
+    }
+
+    private void HotkeyService_RegistrationChanged(object? sender, EventArgs e)
+    {
+        RaiseWidgetActionTextsChanged();
+    }
+
+    private string FormatWidgetActionText(string resourceKey, HotkeyAction action)
+    {
+        var text = LocalizationManager.Instance.GetString(resourceKey);
+        return _hotkeyService.IsRegistered(action)
+            ? $"{text} ({HotkeyText.Format(_hotkeyService.GetBinding(action))})"
+            : text;
+    }
+
+    private void RaiseWidgetActionTextsChanged()
+    {
+        OnPropertyChanged(nameof(StartFavoritesActionText));
+        OnPropertyChanged(nameof(StopAllActionText));
+        OnPropertyChanged(nameof(PinRunningActionText));
+        OnPropertyChanged(nameof(UnpinAllActionText));
+        OnPropertyChanged(nameof(ClickThroughPinnedActionText));
+        OnPropertyChanged(nameof(ClearClickThroughActionText));
     }
 
     private bool FilterWidget(object item)
@@ -541,6 +646,28 @@ public sealed partial class MainViewModel : ViewModelBase
         UpdateWidgetPinStates(_widgetItems, isPinned: false);
     }
 
+    /// <summary>ピン留め中のウィジェットを全部クリック透過にする。起動中かどうかは問わない(閉じているものは開いたときに効く)。</summary>
+    private void ClickThroughAllPinnedWidgets()
+    {
+        UpdateWidgetClickThroughStates(
+            _widgetItems.Where(widget => widget.IsPinned),
+            isClickThrough: true);
+    }
+
+    private void ClearAllWidgetClickThrough()
+    {
+        UpdateWidgetClickThroughStates(_widgetItems, isClickThrough: false);
+    }
+
+    /// <summary>並び替えにも絞り込みにも関わらないので、ピン留めの一括と違って一覧は並べ直さない。</summary>
+    private static void UpdateWidgetClickThroughStates(IEnumerable<WidgetListItemViewModel> widgets, bool isClickThrough)
+    {
+        foreach (var widget in widgets)
+        {
+            widget.IsClickThrough = isClickThrough;
+        }
+    }
+
     private void UpdateWidgetStates(IEnumerable<WidgetListItemViewModel> widgets, WidgetState state)
     {
         _isBulkUpdatingWidgets = true;
@@ -607,6 +734,14 @@ public sealed partial class MainViewModel : ViewModelBase
 
             case 3:
                 UnpinAllWidgets();
+                break;
+
+            case 4:
+                ClickThroughAllPinnedWidgets();
+                break;
+
+            case 5:
+                ClearAllWidgetClickThrough();
                 break;
 
             default:

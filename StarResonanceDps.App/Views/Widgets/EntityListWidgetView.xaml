@@ -16,6 +16,7 @@
 
         <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="{Binding WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{Binding WidgetWindowPalette.WidgetWindowDividerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -50,6 +51,7 @@
 
         <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem"
                TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
             <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
@@ -96,18 +98,21 @@
         <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.First"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.FirstCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.Middle"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.MiddleCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowEntitySelectionContextMenuItem.Last"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.LastCornerRadius}" />
         </Style>
     </UserControl.Resources>
@@ -162,6 +167,7 @@
                             </Button.ContextMenu>
                             <Button.Style>
                                 <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
@@ -171,6 +177,7 @@
                                                             Visibility="Collapsed">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
@@ -220,6 +227,7 @@
                                                Effect="{StaticResource Effect.ProfessionIconShadow}">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                 <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
                                                 <Setter Property="OpacityMask">
                                                     <Setter.Value>
@@ -298,6 +306,7 @@
                                                                         HorizontalAlignment="Left">
                                                                     <Border.Style>
                                                                         <Style TargetType="{x:Type Border}">
+                                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                             <Setter Property="Background">
                                                                                 <Setter.Value>
                                                                                     <LinearGradientBrush StartPoint="0,0.5"
@@ -400,6 +409,7 @@
                                     <Grid>
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                 <Setter Property="Visibility"
                                                         Value="Visible" />
                                                 <Style.Triggers>
@@ -435,6 +445,7 @@
                                     <Grid Margin="0,-4,0,0">
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                 <Setter Property="Visibility"
                                                         Value="Collapsed" />
                                                 <Style.Triggers>
@@ -488,6 +499,7 @@
                                                         VerticalAlignment="Center">
                                                     <Border.Style>
                                                         <Style TargetType="{x:Type Border}">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                             <Setter Property="Background"
                                                                     Value="#FFF7E8D3" />
                                                             <Style.Triggers>

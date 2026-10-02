@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -81,9 +82,19 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     private readonly ObservableCollection<RetentionPolicyOption> _retentionPolicyOptions = [];
 
+    // --- ホットキー ---
+
+    private readonly GlobalHotkeyService _hotkeyService = GlobalHotkeyService.Instance;
+
+    /// <summary>キーを受け付けている行。受付中はホットキーを全部外している(<see cref="GlobalHotkeyService.Suspend"/>)。</summary>
+    private HotkeyItemViewModel? _capturingHotkeyItem;
+
     public SettingsViewModel()
     {
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        var hotkeyActions = System.Enum.GetValues<HotkeyAction>();
+        HotkeyItems = new ReadOnlyObservableCollection<HotkeyItemViewModel>(new ObservableCollection<HotkeyItemViewModel>(
+            hotkeyActions.Select((action, index) => new HotkeyItemViewModel(action, isLast: index == hotkeyActions.Length - 1))));
         RetentionPolicyOptions = new ReadOnlyObservableCollection<RetentionPolicyOption>(_retentionPolicyOptions);
         RebuildRetentionPolicyOptions();
         GameCapturePreferences = new ReadOnlyObservableCollection<GameCapturePreferenceOption>(
@@ -105,8 +116,15 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasUnsavedChanges => !SettingsEquals(CreateSettings(), _lastSavedSettings) || !CaptureSettingsEqualsSaved();
 
+    /// <summary>ホットキーの行。並びは <see cref="HotkeyAction"/> の並び。</summary>
+    public ReadOnlyObservableCollection<HotkeyItemViewModel> HotkeyItems { get; }
+
+    public bool IsCapturingHotkey => _capturingHotkeyItem is not null;
+
     public void Dispose()
     {
+        // 受付中に閉じたら取り消して、外していたホットキーを戻す(戻せなかったものはサービスがログに書く)。
+        EndHotkeyCapture();
         _configManager.ClearSettingsPreview();
         WindowColors.PaletteChanged -= WindowColors_PaletteChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
@@ -124,7 +142,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         ResetToDefaults();
     }
 
-    public void SaveSettings()
+    /// <summary>保存してホットキーを登録し直す。登録できなかったホットキーを返す(画面がメッセージで知らせる)。</summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> SaveSettings()
     {
         var settings = CreateSettings();
         _configManager.SaveSettings(settings);
@@ -132,18 +151,114 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         SaveCaptureSettings();
         ApplyCurrentGlobalTheme();
         OnPropertyChanged(nameof(HasUnsavedChanges));
+        return _hotkeyService.Apply(settings.Hotkeys);
     }
 
-    public void ResetToDefaults()
+    /// <summary>
+    /// その行でキーの受付を始める。ほかの行が受付中ならそちらは取り消す。
+    /// 受付の間はホットキーを全部外す(外さないと押したキーがホットキーとして動いて欄に届かない)。
+    /// </summary>
+    public void BeginHotkeyCapture(HotkeyItemViewModel item)
+    {
+        if (ReferenceEquals(_capturingHotkeyItem, item))
+        {
+            return;
+        }
+
+        if (_capturingHotkeyItem is not null)
+        {
+            _capturingHotkeyItem.IsCapturing = false;
+        }
+        else
+        {
+            _hotkeyService.Suspend();
+        }
+
+        _capturingHotkeyItem = item;
+        item.IsCapturing = true;
+        OnPropertyChanged(nameof(IsCapturingHotkey));
+    }
+
+    /// <summary>
+    /// 受付中の行に、押されたキーを割り当てる。
+    ///
+    /// <para>
+    /// その場で試しに登録し、できなければ割り当てずに元のキーのまま受付を終える。
+    /// できたら、同じキーを持つほかの行は空欄にする。受付を終えると、画面で編集中の割り当てで登録し直す
+    /// (プレビュー。保存せずに閉じたら <see cref="RestoreSavedSettingsPreview"/> が保存してある割り当てへ戻す)。
+    /// 返すのは登録できなかったもの(試しの登録と、登録し直したときの両方)。
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> CompleteHotkeyCapture(Key key, ModifierKeys modifiers)
+    {
+        if (_capturingHotkeyItem is not { } item)
+        {
+            return [];
+        }
+
+        var failures = new List<HotkeyRegistrationFailure>();
+        var binding = HotkeyBindingConfig.Create(key, modifiers);
+
+        if (!binding.SameAs(item.Binding))
+        {
+            if (_hotkeyService.TestRegistration(binding) is { } error)
+            {
+                failures.Add(new HotkeyRegistrationFailure(item.Action, binding, error));
+            }
+            else
+            {
+                foreach (var other in HotkeyItems)
+                {
+                    if (!ReferenceEquals(other, item) && other.Binding.SameAs(binding))
+                    {
+                        other.Binding = new HotkeyBindingConfig();
+                    }
+                }
+
+                item.Binding = binding;
+
+                // 受付中(一時停止中)なので控えるだけ。下の受付の終了で登録される。
+                _hotkeyService.Apply(CreateHotkeySettings());
+            }
+        }
+
+        failures.AddRange(EndHotkeyCapture());
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+        return failures;
+    }
+
+    /// <summary>受付を取り消す(欄の外をクリックした)。受付の前の割り当てで登録し直し、登録できなかったものを返す。</summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> CancelHotkeyCapture()
+    {
+        return EndHotkeyCapture();
+    }
+
+    private IReadOnlyList<HotkeyRegistrationFailure> EndHotkeyCapture()
+    {
+        if (_capturingHotkeyItem is null)
+        {
+            return [];
+        }
+
+        _capturingHotkeyItem.IsCapturing = false;
+        _capturingHotkeyItem = null;
+        OnPropertyChanged(nameof(IsCapturingHotkey));
+        return _hotkeyService.Resume();
+    }
+
+    /// <summary>既定に戻してプレビューする。ホットキーも既定のキーで登録し直し、登録できなかったものを返す。</summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> ResetToDefaults()
     {
         LoadFromSettings(AppConfigDefaults.CreateSettings(), applyLanguage: true, applyPreview: true);
         LoadCaptureSettingsFromValues(string.Empty, EGameCapturePreference.Auto, string.Empty);
         ApplyCaptureSettingsPreview();
         ApplyCurrentGlobalTheme();
         OnPropertyChanged(nameof(HasUnsavedChanges));
+        return _hotkeyService.Apply(CreateHotkeySettings());
     }
 
-    public void RestoreSavedSettingsPreview()
+    /// <summary>保存せずに閉じる。プレビューを保存してある値へ戻し、ホットキーも登録し直して、登録できなかったものを返す。</summary>
+    public IReadOnlyList<HotkeyRegistrationFailure> RestoreSavedSettingsPreview()
     {
         LocalizationManager.Instance.ApplyLanguageIndex(_lastSavedSettings.LanguageIndex);
         _configManager.ClearSettingsPreview();
@@ -153,6 +268,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             _lastSavedGameCapturePreference,
             _lastSavedGameCaptureCustomExeName);
         ApplyCaptureSettingsPreview();
+        return _hotkeyService.Apply(_lastSavedSettings.Hotkeys);
     }
 
     public Color GetSelectedWindowColor()
@@ -180,6 +296,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
             DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
+            Hotkeys = CreateHotkeySettings(),
 
             // キャプチャ3項目はこの画面では SettingsConfig 経由で編集しない
             // (NetworkAdapterSession が持ち、保存も別経路)。ただしここで落とすと
@@ -191,6 +308,17 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
         AppConfigDefaults.NormalizeSettings(settings);
         return settings;
+    }
+
+    private HotkeySettingsConfig CreateHotkeySettings()
+    {
+        var hotkeys = new HotkeySettingsConfig();
+        foreach (var item in HotkeyItems)
+        {
+            hotkeys.Set(item.Action, item.Binding.Clone());
+        }
+
+        return hotkeys;
     }
 
     private void LoadFromSettings(SettingsConfig settings, bool applyLanguage, bool applyPreview)
@@ -210,6 +338,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
             ClearHistorySelectionOnNextEvent = settings.ClearHistorySelectionOnNextEvent;
             DatabaseMaxEncounterCount = settings.DatabaseMaxEncounterCount;
+
+            foreach (var item in HotkeyItems)
+            {
+                item.Binding = settings.Hotkeys.Get(item.Action).Clone();
+            }
         }
         finally
         {
@@ -351,6 +484,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
 
         RebuildRetentionPolicyOptions();
+
+        foreach (var item in HotkeyItems)
+        {
+            item.RefreshText();
+        }
     }
 
     private void ApplySettingsPreview()
@@ -456,7 +594,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
             && left.ClearHistorySelectionOnNextEvent == right.ClearHistorySelectionOnNextEvent
             && left.DatabaseMaxEncounterCount == right.DatabaseMaxEncounterCount
-            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase);
+            && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase)
+            && left.Hotkeys.HasSameBindings(right.Hotkeys);
     }
 
     partial void OnSelectedNetworkAdapterChanged(NetworkAdapterOption? value)

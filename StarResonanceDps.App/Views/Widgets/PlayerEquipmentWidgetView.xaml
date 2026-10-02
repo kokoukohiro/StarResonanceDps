@@ -12,6 +12,7 @@
             行内テキストの共通スタイル。作りはバフ一覧の行と同じで、左寄せ・収まらないぶんは省略記号で切る。
         -->
         <Style x:Key="EquipmentList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="12" />
@@ -21,12 +22,14 @@
 
         <!-- 装備レベル。作りはバフ一覧の残り時間と同じで、行の右端の列に右寄せで置く。 -->
         <Style x:Key="EquipmentList.LevelText" TargetType="TextBlock" BasedOn="{StaticResource EquipmentList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="TextAlignment" Value="Right" />
         </Style>
 
         <!-- 装備の文字。品質の色がある行だけ色を替え、無い行(表に無い装備・装備なし・不明)はふつうの色のまま。 -->
         <Style x:Key="EquipmentList.NameText" TargetType="TextBlock" BasedOn="{StaticResource EquipmentList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasTextBrush}" Value="True">
                     <Setter Property="Foreground" Value="{Binding TextBrush}" />
@@ -90,6 +93,7 @@
                                                                Effect="{StaticResource Effect.ProfessionIconShadow}">
                                                         <Rectangle.Style>
                                                             <Style TargetType="Rectangle">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding HasIcon}" Value="False">
                                                                         <Setter Property="Visibility" Value="Hidden" />
@@ -105,6 +109,7 @@
                                                         <TextBlock.Style>
                                                             <!-- 色がある行(無効のシーズン強度)だけ色を替える。 -->
                                                             <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="FontSize" Value="12" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding HasTextBrush}" Value="True">
@@ -122,6 +127,7 @@
                             </Button.ToolTip>
                             <Button.Style>
                                 <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
@@ -131,6 +137,7 @@
                                                             Visibility="Collapsed">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">

@@ -181,16 +181,37 @@
     <value>ピン留め</value>
   </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
-    <value>すべてのお気に入りを起動</value>
+    <value>お気に入りを起動</value>
   </data>
   <data name="Manager_WidgetAction_StopAll" xml:space="preserve">
     <value>すべてを停止</value>
   </data>
   <data name="Manager_WidgetAction_PinAllRunning" xml:space="preserve">
-    <value>すべての起動中をピン留め</value>
+    <value>起動中をピン留め</value>
   </data>
   <data name="Manager_WidgetAction_UnpinAll" xml:space="preserve">
-    <value>すべてのピン留めを解除</value>
+    <value>ピン留めをすべて解除</value>
+  </data>
+  <data name="Manager_WidgetAction_ClickThroughAllPinned" xml:space="preserve">
+    <value>ピン留めをクリック透過</value>
+  </data>
+  <data name="Manager_WidgetAction_ClearAllClickThrough" xml:space="preserve">
+    <value>クリック透過をすべて解除</value>
+  </data>
+  <data name="Settings_Section_Hotkeys_Title" xml:space="preserve">
+    <value>ホットキー</value>
+  </data>
+  <data name="Settings_Hotkey_Listening" xml:space="preserve">
+    <value>キーを入力</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
+    <value>ホットキーを設定できません</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
+    <value>「{0}」はほかのアプリが使用中です</value>
+  </data>
+  <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
+    <value>「{0}」を設定できませんでした(エラー {1})</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>

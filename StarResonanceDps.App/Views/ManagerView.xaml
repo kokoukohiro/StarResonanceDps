@@ -142,10 +142,12 @@
                             Tag="{DynamicResource Icon.MoreVertical}"
                             SelectedIndex="{Binding WidgetActionIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             DropDownClosed="WidgetActionComboBox_DropDownClosed">
-                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_StartAllFavorites]}" />
-                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_StopAll]}" />
-                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_PinAllRunning]}" />
-                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetAction_UnpinAll]}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding StartFavoritesActionText}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding StopAllActionText}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding PinRunningActionText}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding UnpinAllActionText}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding ClickThroughPinnedActionText}" />
+                            <ComboBoxItem Style="{StaticResource Input.ActionComboBoxItem}" Content="{Binding ClearClickThroughActionText}" />
                         </ComboBox>
                     </Grid>
 

@@ -1,4 +1,5 @@
-﻿using StarResonanceDps.Core.CombatRuntime;
+﻿using System.Windows.Input;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 
 namespace StarResonanceDps.App.Config;
@@ -47,7 +48,21 @@ public static class AppConfigDefaults
             InternalIdDisplayModeIndex = 0,
             WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
             WindowColorIndex = 1,
-            WindowColors = CreateDefaultWindowColors()
+            WindowColors = CreateDefaultWindowColors(),
+            Hotkeys = CreateDefaultHotkeys()
+        };
+    }
+
+    /// <summary>ホットキーの既定。お気に入り F8 / ピン留め F7 / クリック透過 F6 / 3分計測 F10 / リセット F9。</summary>
+    public static HotkeySettingsConfig CreateDefaultHotkeys()
+    {
+        return new HotkeySettingsConfig
+        {
+            StartFavoritesOrStopAll = HotkeyBindingConfig.Create(Key.F8),
+            PinRunningOrUnpinAll = HotkeyBindingConfig.Create(Key.F7),
+            ClickThroughPinnedOrClearAll = HotkeyBindingConfig.Create(Key.F6),
+            ThreeMinuteBenchmark = HotkeyBindingConfig.Create(Key.F10),
+            ResetEncounter = HotkeyBindingConfig.Create(Key.F9)
         };
     }
 
@@ -106,6 +121,37 @@ public static class AppConfigDefaults
 
         // 0 は無限。選べる最大は 99 件。
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);
+
+        NormalizeHotkeys(settings);
+    }
+
+    /// <summary>
+    /// 項目そのものが無ければ既定にする。読めないキー・修飾キーだけのキーは割り当てなし(空欄)にし、
+    /// 修飾キーは Ctrl・Alt・Shift だけ残す。
+    /// </summary>
+    private static void NormalizeHotkeys(SettingsConfig settings)
+    {
+        var defaults = CreateDefaultHotkeys();
+        settings.Hotkeys ??= defaults.Clone();
+
+        foreach (var action in System.Enum.GetValues<HotkeyAction>())
+        {
+            var binding = settings.Hotkeys.Get(action);
+            if (binding is null)
+            {
+                settings.Hotkeys.Set(action, defaults.Get(action).Clone());
+                continue;
+            }
+
+            if (!System.Enum.IsDefined(binding.Key) || HotkeyBindingConfig.IsModifierKey(binding.Key))
+            {
+                binding.Key = Key.None;
+            }
+
+            binding.Modifiers = binding.IsAssigned
+                ? binding.Modifiers & HotkeyBindingConfig.SupportedModifiers
+                : ModifierKeys.None;
+        }
     }
 
     public static void NormalizeColorPicker(ColorPickerConfig colorPicker)

@@ -115,18 +115,6 @@ public sealed class WidgetWindowManager
         CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
     }
 
-    /// <summary>
-    /// アプリ起動時の復元をこの区間で囲む。<b>この間に作った窓には置き直しの猶予を与えない</b>
-    /// (<see cref="WidgetWindow.SuppressInitialGrace"/>)。
-    /// 復元は連続して窓を開くので、猶予を与えても直後に隣の窓へアクティブを奪われて終わる。
-    /// </summary>
-    private bool _isRestoringStartupWindows;
-
-    public void BeginStartupRestore() => _isRestoringStartupWindows = true;
-
-    /// <summary><see cref="BeginStartupRestore"/> の区間を閉じる。</summary>
-    public void EndStartupRestore() => _isRestoringStartupWindows = false;
-
     public void ApplyWidgetState(WidgetListItemViewModel widget)
     {
         if (IsPlayerWindowWidget(widget.Kind))
@@ -500,7 +488,7 @@ public sealed class WidgetWindowManager
         window.Closed += WidgetWindow_Closed;
 
         _openSingleWindows.Add(widget.Kind, window);
-        ShowWidgetWindow(window);
+        window.Show();
     }
 
     private void CreatePlayerWindow(
@@ -568,7 +556,7 @@ public sealed class WidgetWindowManager
         UpdatePlayerWindowCount(playerWidget);
         SaveOpenTargets(playerWidget);
 
-        ShowWidgetWindow(window);
+        window.Show();
 
         if (playerWidget.State != WidgetState.Running)
         {
@@ -663,7 +651,7 @@ public sealed class WidgetWindowManager
         UpdatePlayerWindowCount(widget);
         SaveOpenTargets(widget);
 
-        ShowWidgetWindow(window);
+        window.Show();
 
         if (widget.State != WidgetState.Running)
         {
@@ -1115,16 +1103,6 @@ public sealed class WidgetWindowManager
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph;
-    }
-
-    private void ShowWidgetWindow(WidgetWindow window)
-    {
-        if (_isRestoringStartupWindows)
-        {
-            window.SuppressInitialGrace();
-        }
-
-        window.Show();
     }
 
     private static void RestoreAndActivate(WidgetWindow window)

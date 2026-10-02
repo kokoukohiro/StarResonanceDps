@@ -12,6 +12,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -46,6 +47,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
                TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
             <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
@@ -92,24 +94,28 @@
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
         </Style>
 
         <Style x:Key="MeterWidget.ProfessionIconMask"
                TargetType="{x:Type Rectangle}"
                BasedOn="{StaticResource Icon.ProfessionMask}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Width" Value="25" />
             <Setter Property="Height" Value="25" />
             <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
@@ -242,6 +248,7 @@
                             </Button.ContextMenu>
                             <Button.Style>
                                 <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
@@ -251,6 +258,7 @@
                                                             Visibility="Collapsed">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="Opacity" Value="{Binding DataContext.Widget.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetView}}}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
@@ -334,6 +342,7 @@
                                     <TextBlock.Style>
                                         <!-- 自分の行だけ色を変える。影は Text.WidgetWindow のまま。 -->
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
                                                         <Setter Property="Foreground" Value="#F9CD04" />

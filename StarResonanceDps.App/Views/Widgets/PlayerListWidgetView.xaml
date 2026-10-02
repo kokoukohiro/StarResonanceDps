@@ -16,6 +16,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Background" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="BorderBrush" Value="{Binding PlacementTarget.Tag.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource Self}}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -50,6 +51,7 @@
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
                TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Height" Value="24" />
             <Setter Property="Padding" Value="6,0" />
             <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
@@ -96,18 +98,21 @@
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
         </Style>
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
                TargetType="{x:Type MenuItem}"
                BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
         </Style>
 
@@ -145,6 +150,7 @@
                 <!-- 枠の中身が不明なら出さない。場所は残す(ロールスキルが横へ動かないように)。 -->
                 <Grid.Style>
                     <Style TargetType="Grid">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsSlotKnown}" Value="False">
                                 <Setter Property="Visibility" Value="Hidden" />
@@ -172,6 +178,7 @@
                            RenderOptions.BitmapScalingMode="HighQuality">
                         <Image.Style>
                             <Style TargetType="Image">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                 <Setter Property="Width" Value="27" />
                                 <Setter Property="RenderTransform">
                                     <Setter.Value>
@@ -216,6 +223,7 @@
                                TextAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
                                     <MultiDataTrigger>
@@ -241,6 +249,7 @@
                                TextAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                 <Setter Property="Visibility" Value="Collapsed" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasCooldown}" Value="True">
@@ -319,6 +328,7 @@
                             </Button.ContextMenu>
                             <Button.Style>
                                 <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="Button">
@@ -328,6 +338,7 @@
                                                             Visibility="Collapsed">
                                                         <Border.Style>
                                                             <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                                 <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}" />
                                                                 <Style.Triggers>
                                                                     <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
@@ -414,6 +425,7 @@
                                                    Effect="{StaticResource Effect.ProfessionIconShadow}">
                                             <Rectangle.Style>
                                                 <Style TargetType="Rectangle">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding HasSeasonTalentIcon}" Value="False">
                                                             <Setter Property="Visibility" Value="Collapsed" />
@@ -434,6 +446,7 @@
                                                Effect="{StaticResource Effect.ProfessionIconShadow}">
                                         <Rectangle.Style>
                                             <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                 <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
                                                 <Setter Property="OpacityMask">
                                                     <Setter.Value>
@@ -550,6 +563,7 @@
                                             <TextBlock.Style>
                                                 <!-- 自分の行だけ色を変える。影は Text.WidgetWindow のまま。 -->
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
                                                             <Setter Property="Foreground" Value="#F9CD04" />
@@ -583,6 +597,7 @@
                                                         Height="8">
                                                     <Border.Style>
                                                         <Style TargetType="{x:Type Border}">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                             <Setter Property="Background" Value="#FF1CE6A7" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding IsNpc}" Value="True">

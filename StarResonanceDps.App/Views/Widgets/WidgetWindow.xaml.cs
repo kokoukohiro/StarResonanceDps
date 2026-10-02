@@ -29,6 +29,7 @@ public partial class WidgetWindow : Window
 
     private const int GwlExStyle = -20;
     private const int WsExNoActivate = 0x08000000;
+    private const int WsExTransparent = 0x00000020;
     private const int WmMouseActivate = 0x0021;
 
     /// <summary>ヘッダー/フッター1つ分の高さ。XAML の行定義と合わせること。</summary>
@@ -52,42 +53,6 @@ public partial class WidgetWindow : Window
     private bool _hasFooterContent;
 
     private bool _isPinned;
-
-    /// <summary>
-    /// 開いた直後の猶予。<b>まだ一度も非アクティブになっていない間だけ真。</b>
-    ///
-    /// <para>
-    /// この間はピン留めの制約(アクティブにしない・ヘッダー/フッターを隠す)を一切掛けない。
-    /// 掛けたままだとドラッグ領域が無く、開いた窓を置き直せないため。
-    /// <b>一度でも非アクティブになったら二度と戻らない。</b>
-    /// </para>
-    ///
-    /// <para>
-    /// アプリ起動時の復元では与えない(<see cref="SuppressInitialGrace"/>)。
-    /// 置き直しの猶予は、その場で開いた窓にだけ要る。
-    /// </para>
-    /// </summary>
-    private bool _isInitialGrace = true;
-
-    /// <summary>
-    /// 猶予の終了判定を始めてよいか。<b>開いた直後の一括生成が終わるまでは偽。</b>
-    ///
-    /// <para>
-    /// 窓を続けて開くと、後から開いた窓が前の窓のアクティブを奪う。
-    /// その非アクティブ化まで数えると、最後に開いた1枚以外は開いた瞬間に猶予が終わり、
-    /// 触ってもいないのに動かせなくなる。生成が一段落する
-    /// (ディスパッチャが <see cref="DispatcherPriority.Background"/> まで降りる)まで数えない。
-    /// </para>
-    /// </summary>
-    private bool _isGraceArmed;
-
-    /// <summary>手動ドラッグ中か。<see cref="DragMove"/> が使えないときだけ使う。</summary>
-    private bool _isManualDragging;
-
-    /// <summary>手動ドラッグ開始時の、ウィンドウ内でのカーソル位置(DIP)。</summary>
-    private Point _manualDragOrigin;
-
-    private IInputElement? _manualDragCaptureTarget;
 
     /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
     private readonly WidgetWindowConfig _restoredBounds;
@@ -116,8 +81,6 @@ public partial class WidgetWindow : Window
         SetFooterContent(footerContent);
         _widget.PropertyChanged += Widget_PropertyChanged;
         ConfigManager.Instance.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
-        MouseMove += WidgetWindow_ManualDragMouseMove;
-        MouseLeftButtonUp += WidgetWindow_ManualDragMouseUp;
 
         _verticalScrollContent = widgetContent as IWidgetVerticalScrollContent;
         if (_verticalScrollContent is not null)
@@ -150,25 +113,6 @@ public partial class WidgetWindow : Window
 
     public WidgetListItemViewModel Widget => _widget;
 
-    /// <summary>ピン留めの制約をいま掛けているか。開いた直後の猶予中は掛けない。</summary>
-    private bool IsPinBehaviorActive => _isPinned && !_isInitialGrace;
-
-    /// <summary>
-    /// 開いた直後の猶予を与えない。アプリ起動時の復元で開く窓に使う。
-    /// <b><see cref="Window.Show"/> の前に呼ぶこと。</b>
-    /// </summary>
-    public void SuppressInitialGrace()
-    {
-        if (!_isInitialGrace)
-        {
-            return;
-        }
-
-        _isInitialGrace = false;
-        ApplyNoActivateState();
-        ApplyInactiveChromeVisibility();
-    }
-
     public string HeaderText
     {
         get => (string)GetValue(HeaderTextProperty);
@@ -183,9 +127,11 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// ピン留めは「配置を終えて以後は触らない」状態。
+    /// ピン留めは「配置を終えて、以後は動かさずに使う」状態。
+    /// 位置と大きさを固定し(ヘッダーのドラッグと縁での大きさの変更を止める)、クリックの操作は残す。
     /// フォーカスを奪わなくなり、ヘッダー/フッターを隠す設定もここでだけ効く。
     /// 最前面も、全体設定が「ピン留め時のみ最前面」ならピン留めに従う(<see cref="ApplyTopmost"/>)。
+    /// 開いた直後から掛かる(置き直すときはピン留めを外す)。
     /// </summary>
     public void ApplyPinState(bool isPinned)
     {
@@ -199,11 +145,6 @@ public partial class WidgetWindow : Window
     /// <summary>
     /// 最前面にするか。全体設定「ウィジェットウィンドウ」が常に最前面なら常に、ピン留め時のみ最前面ならピン留め中だけ。
     /// <b><c>Topmost</c> を書く場所はここ1つだけ。</b>
-    ///
-    /// <para>
-    /// <b>ピン留めは猶予(<see cref="IsPinBehaviorActive"/>)ではなくピン留めそのものを見る。</b>
-    /// 猶予中は窓を配置している最中なので、そこで最前面を外すとゲームの裏へ落ちる。
-    /// </para>
     /// </summary>
     private void ApplyTopmost()
     {
@@ -232,7 +173,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var noActivate = IsPinBehaviorActive;
+        var noActivate = _isPinned;
         var exStyle = GetWindowLong(handle, GwlExStyle);
         var updated = noActivate
             ? exStyle | WsExNoActivate
@@ -245,14 +186,33 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// ピン留め中にヘッダー/フッターを隠す設定を反映する。
-    ///
-    /// <para>
-    /// ヘッダーは枠側(<c>FrameHeaderRow</c>)と中身側(<c>ContentHeaderRow</c>)の2層に分かれているので
-    /// 両方の行高を畳む。<b>隠している間はドラッグ領域も消える</b>ので、
-    /// 動かすにはいったんクリックしてアクティブにする必要がある。
-    /// </para>
+    /// クリック透過(ウィジェットごとのスイッチ、ピン留めとは別)を当てる。
+    /// 透過中は窓へのマウス入力を受けず、裏の窓へそのまま通す(<c>WS_EX_TRANSPARENT</c>)。
+    /// WPF 側の当たり判定も合わせて止める。
     /// </summary>
+    private void ApplyClickThroughState()
+    {
+        var clickThrough = _widget.IsClickThrough;
+        IsHitTestVisible = !clickThrough;
+
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero)
+        {
+            // まだ HWND が無い。SourceInitialized で貼り直す。
+            return;
+        }
+
+        var exStyle = GetWindowLong(handle, GwlExStyle);
+        var updated = clickThrough
+            ? exStyle | WsExTransparent
+            : exStyle & ~WsExTransparent;
+
+        if (updated != exStyle)
+        {
+            SetWindowLong(handle, GwlExStyle, updated);
+        }
+    }
+
     /// <summary>
     /// ピン留め中にヘッダー/フッターを隠す設定を反映する。
     ///
@@ -272,7 +232,7 @@ public partial class WidgetWindow : Window
     /// </summary>
     private void ApplyInactiveChromeVisibility()
     {
-        var pinned = IsPinBehaviorActive;
+        var pinned = _isPinned;
         var hideHeader = _widget.HideHeaderWhenInactive && pinned;
         var hideFooter = _hasFooterContent && _widget.HideFooterWhenInactive && pinned;
 
@@ -315,7 +275,7 @@ public partial class WidgetWindow : Window
             return;
         }
 
-        var hidden = _widget.HideFooterWhenInactive && IsPinBehaviorActive;
+        var hidden = _widget.HideFooterWhenInactive && _isPinned;
         WidgetFooterFrame.Visibility = hidden ? Visibility.Collapsed : Visibility.Visible;
         WidgetFooterHost.Visibility = hidden ? Visibility.Hidden : Visibility.Visible;
     }
@@ -335,9 +295,6 @@ public partial class WidgetWindow : Window
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
         _widget.PropertyChanged -= Widget_PropertyChanged;
         ConfigManager.Instance.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
-        MouseMove -= WidgetWindow_ManualDragMouseMove;
-        MouseLeftButtonUp -= WidgetWindow_ManualDragMouseUp;
-        EndManualDrag();
 
         if (_verticalScrollContent is not null)
         {
@@ -356,12 +313,6 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_Loaded(object sender, RoutedEventArgs e)
     {
         _isRestoringBounds = false;
-
-        // 続けて開かれる窓が出そろってから、猶予の終了判定を始める。
-        Dispatcher.BeginInvoke(
-            DispatcherPriority.Background,
-            new Action(() => _isGraceArmed = true));
-
         UpdateWindowRootClip();
         QueueContentScrollBarUpdate();
     }
@@ -374,6 +325,7 @@ public partial class WidgetWindow : Window
         }
 
         ApplyNoActivateState();
+        ApplyClickThroughState();
         ApplyInactiveChromeVisibility();
     }
 
@@ -388,13 +340,14 @@ public partial class WidgetWindow : Window
         // WS_EX_NOACTIVATE だけでは足りない。クリックすると WM_MOUSEACTIVATE が来て、
         // 既定では MA_ACTIVATE が返るのでフォーカスを奪ってしまう。
         // ここで MA_NOACTIVATE を返して、入力だけ受け取り活性化はしない状態にする。
-        if (msg == WmMouseActivate && IsPinBehaviorActive)
+        if (msg == WmMouseActivate && _isPinned)
         {
             handled = true;
             return new IntPtr(MaNoActivate);
         }
 
-        if (msg != WmNcHitTest || WindowState == WindowState.Maximized)
+        // ピン留め中は大きさを固定するので、縁を返さない(全体がクライアント領域になる)。
+        if (msg != WmNcHitTest || WindowState == WindowState.Maximized || _isPinned)
         {
             return IntPtr.Zero;
         }
@@ -454,75 +407,14 @@ public partial class WidgetWindow : Window
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.LeftButton != MouseButtonState.Pressed)
+        // ピン留め中は位置を固定するので動かさない。
+        // DragMove() は OS の移動ループの中で必ずアクティブ化されるので、ピン留め中に使うとフォーカスも奪う。
+        if (e.LeftButton != MouseButtonState.Pressed || _isPinned)
         {
-            return;
-        }
-
-        // DragMove() は WM_SYSCOMMAND(SC_MOVE) を送って OS の移動ループに入るため、
-        // その中で必ずアクティブ化される。WM_MOUSEACTIVATE を潰しても別経路なので通る。
-        // 「ピン留め中アクティブにしない」が効いている間だけ、自前でドラッグする。
-        if (IsPinBehaviorActive)
-        {
-            BeginManualDrag(sender as IInputElement, e);
             return;
         }
 
         DragMove();
-    }
-
-    private void BeginManualDrag(IInputElement? captureTarget, MouseButtonEventArgs e)
-    {
-        if (captureTarget is null || !captureTarget.CaptureMouse())
-        {
-            return;
-        }
-
-        _manualDragCaptureTarget = captureTarget;
-        _manualDragOrigin = e.GetPosition(this);
-        _isManualDragging = true;
-        e.Handled = true;
-    }
-
-    private void EndManualDrag()
-    {
-        if (!_isManualDragging)
-        {
-            return;
-        }
-
-        _isManualDragging = false;
-        _manualDragCaptureTarget?.ReleaseMouseCapture();
-        _manualDragCaptureTarget = null;
-        ScheduleBoundsSave();
-    }
-
-    /// <summary>
-    /// 手動ドラッグの移動。ウィンドウを (dx, dy) 動かすと、ウィンドウ内でのカーソル位置は
-    /// 開始時の値へ戻る。だから差分をそのまま Left / Top に足せばよい。
-    /// すべて DIP で完結するので DPI が 100% 以外でもずれない。
-    /// </summary>
-    private void WidgetWindow_ManualDragMouseMove(object sender, MouseEventArgs e)
-    {
-        if (!_isManualDragging)
-        {
-            return;
-        }
-
-        if (e.LeftButton != MouseButtonState.Pressed)
-        {
-            EndManualDrag();
-            return;
-        }
-
-        var cursor = e.GetPosition(this);
-        Left += cursor.X - _manualDragOrigin.X;
-        Top += cursor.Y - _manualDragOrigin.Y;
-    }
-
-    private void WidgetWindow_ManualDragMouseUp(object sender, MouseButtonEventArgs e)
-    {
-        EndManualDrag();
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -543,6 +435,11 @@ public partial class WidgetWindow : Window
         {
             ApplyInactiveChromeVisibility();
         }
+
+        if (e.PropertyName == nameof(WidgetListItemViewModel.IsClickThrough))
+        {
+            ApplyClickThroughState();
+        }
     }
 
     protected override void OnActivated(EventArgs e)
@@ -554,15 +451,6 @@ public partial class WidgetWindow : Window
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
-
-        if (_isInitialGrace && _isGraceArmed)
-        {
-            // 開いた直後の猶予はここで終わる。以後はピン留めの制約が通常どおり掛かる。
-            // 一度も触られていない窓(隣の窓が開いて奪われただけ)はここへ来ない。
-            _isInitialGrace = false;
-            ApplyNoActivateState();
-        }
-
         ApplyInactiveChromeVisibility();
     }
 

@@ -16,6 +16,7 @@
     <None Remove="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
     <None Remove="Assets\Images\achievement_simclass_new_s4.png" />
     <None Remove="Assets\Images\achievement_simclass_new_xushirongguang.png" />
+    <None Remove="Assets\Images\ApplicationIcon_22x22.png" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
     <None Remove="Assets\Images\ApplicationIcon.ico" />
     <None Remove="Assets\Images\com_icon_question.png" />
@@ -198,6 +199,7 @@
     <Resource Include="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_s4.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_xushirongguang.png" />
+    <Resource Include="Assets\Images\ApplicationIcon_22x22.png" />
     <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />

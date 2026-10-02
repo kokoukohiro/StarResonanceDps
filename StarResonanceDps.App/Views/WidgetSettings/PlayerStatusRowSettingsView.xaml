@@ -21,6 +21,7 @@
                         <Border>
                             <Border.Style>
                                 <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsLast}" Value="True">
                                             <Setter Property="BorderThickness" Value="0" />

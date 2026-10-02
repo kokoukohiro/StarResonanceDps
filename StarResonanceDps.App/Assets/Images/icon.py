@@ -12,6 +12,11 @@ SOURCE_FILES = {
 
 OUTPUT_FILE = Path("ApplicationIcon.ico")
 
+# ウィンドウ左上のヘッダーに表示の大きさ(22)そのままで出す画像。実行時に縮めさせない
+HEADER_ICON_FILE = Path("ApplicationIcon_22x22.png")
+HEADER_ICON_SIZE = 22
+HEADER_ICON_SOURCE_SIZE = 48
+
 TARGET_SIZES = (16, 20, 24, 32, 40, 48, 64, 256)
 
 SOURCE_SIZE_FOR_TARGET = {
@@ -103,6 +108,13 @@ def main() -> None:
     print("収録サイズ:")
     for width, height in actual_sizes:
         print(f"  {width}x{height}")
+
+    header_icon = resize_rgba(
+        source_images[HEADER_ICON_SOURCE_SIZE],
+        HEADER_ICON_SIZE,
+    )
+    header_icon.save(HEADER_ICON_FILE, format="PNG")
+    print(f"生成完了: {HEADER_ICON_FILE.resolve()}")
 
 
 if __name__ == "__main__":

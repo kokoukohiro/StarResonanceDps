@@ -17,6 +17,9 @@ public sealed class WidgetConfig
     public bool IsFavorite { get; set; }
     public bool IsPinned { get; set; }
 
+    /// <summary>クリック透過。そのウィジェットの窓すべてがマウス入力を裏の窓へ通す。ピン留めとは別のスイッチ。</summary>
+    public bool IsClickThrough { get; set; }
+
     public WidgetState? State { get; set; }
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
@@ -62,6 +65,7 @@ public sealed class WidgetConfig
         {
             IsFavorite = IsFavorite,
             IsPinned = IsPinned,
+            IsClickThrough = IsClickThrough,
             State = State,
             Theme = Theme?.Clone() ?? WidgetConfigDefaults.CreateTheme(),
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
@@ -1243,6 +1247,7 @@ public static class WidgetConfigDefaults
         {
             IsFavorite = false,
             IsPinned = false,
+            IsClickThrough = false,
             State = WidgetState.Stopped,
             Theme = CreateTheme(),
             Window = CreateDefaultWindowConfig(kind),

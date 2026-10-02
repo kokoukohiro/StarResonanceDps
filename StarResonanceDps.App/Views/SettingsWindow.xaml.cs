@@ -6,7 +6,9 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
@@ -37,6 +39,8 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         Loaded += SettingsWindow_Loaded;
         SourceInitialized += SettingsWindow_SourceInitialized;
+        PreviewMouseDown += SettingsWindow_PreviewMouseDown;
+        Deactivated += SettingsWindow_Deactivated;
     }
 
     private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
@@ -130,7 +134,7 @@ public partial class SettingsWindow : Window
                 return;
             }
 
-            ViewModel.RestoreSavedSettingsPreview();
+            HotkeyRegistrationFailureMessage.Show(this, ViewModel.RestoreSavedSettingsPreview());
         }
 
         base.OnClosing(e);
@@ -219,6 +223,104 @@ public partial class SettingsWindow : Window
         ScrollToSection(AggregationSection);
     }
 
+    private void HotkeyNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(HotkeySection);
+    }
+
+    /// <summary>ホットキーの欄をクリックした。その行でキーの受付を始める。</summary>
+    private void HotkeyBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: HotkeyItemViewModel item } box)
+        {
+            return;
+        }
+
+        // 読み取り専用の欄の文字を選択させない。
+        e.Handled = true;
+        box.Focus();
+        ViewModel.BeginHotkeyCapture(item);
+    }
+
+    /// <summary>
+    /// 受付中に押されたキーを割り当てる。どのキーも割り当ての対象(Esc・Delete も)。
+    /// 修飾キーだけを押したときは、組み合わせの途中なので待つ。
+    /// </summary>
+    private void HotkeyBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (sender is not TextBox { DataContext: HotkeyItemViewModel { IsCapturing: true } })
+        {
+            return;
+        }
+
+        e.Handled = true;
+
+        // Alt との組み合わせと F10 は System、IME を通ったキーは ImeProcessed として届く。
+        var key = e.Key switch
+        {
+            Key.System => e.SystemKey,
+            Key.ImeProcessed => e.ImeProcessedKey,
+            Key.DeadCharProcessed => e.DeadCharProcessedKey,
+            _ => e.Key
+        };
+
+        if (key == Key.None || HotkeyBindingConfig.IsModifierKey(key))
+        {
+            return;
+        }
+
+        var failures = ViewModel.CompleteHotkeyCapture(key, Keyboard.Modifiers);
+        Keyboard.ClearFocus();
+        HotkeyRegistrationFailureMessage.Show(this, failures);
+    }
+
+    private void HotkeyBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        if (sender is TextBox { DataContext: HotkeyItemViewModel { IsCapturing: true } })
+        {
+            HotkeyRegistrationFailureMessage.Show(this, ViewModel.CancelHotkeyCapture());
+        }
+    }
+
+    /// <summary>受付中に欄の外をクリックしたら取り消す。ほかの行の欄なら、その行の受付に移る(欄の処理に任せる)。</summary>
+    private void SettingsWindow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (!ViewModel.IsCapturingHotkey || IsWithinHotkeyBox(e.OriginalSource as DependencyObject))
+        {
+            return;
+        }
+
+        Keyboard.ClearFocus();
+        HotkeyRegistrationFailureMessage.Show(this, ViewModel.CancelHotkeyCapture());
+    }
+
+    /// <summary>ほかのアプリをクリックしたときも欄の外として取り消す(受付の間はホットキーを外しているため)。</summary>
+    private void SettingsWindow_Deactivated(object? sender, EventArgs e)
+    {
+        if (ViewModel.IsCapturingHotkey)
+        {
+            Keyboard.ClearFocus();
+            HotkeyRegistrationFailureMessage.Show(this, ViewModel.CancelHotkeyCapture());
+        }
+    }
+
+    private static bool IsWithinHotkeyBox(DependencyObject? element)
+    {
+        while (element is not null)
+        {
+            if (element is TextBox { DataContext: HotkeyItemViewModel })
+            {
+                return true;
+            }
+
+            element = element is Visual or System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(element)
+                : LogicalTreeHelper.GetParent(element);
+        }
+
+        return false;
+    }
+
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);
@@ -243,7 +345,7 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        ViewModel.ResetToDefaults();
+        HotkeyRegistrationFailureMessage.Show(this, ViewModel.ResetToDefaults());
     }
 
 
@@ -277,7 +379,8 @@ public partial class SettingsWindow : Window
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         CommitGameCaptureCustomExeNameEdit();
-        ViewModel.SaveSettings();
+        var hotkeyFailures = ViewModel.SaveSettings();
+        HotkeyRegistrationFailureMessage.Show(this, hotkeyFailures);
         Close();
     }
 

@@ -13,6 +13,7 @@
         <Style x:Key="MeterWidgetClassColorSettings.ProfessionIconMask"
                TargetType="{x:Type Rectangle}"
                BasedOn="{StaticResource Icon.ProfessionMask}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Width" Value="25" />
             <Setter Property="Height" Value="25" />
 
@@ -121,6 +122,7 @@
         <Style x:Key="MeterWidgetClassColorSettings.FinalField"
                TargetType="{x:Type Border}"
                BasedOn="{StaticResource Panel.SettingField}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Style.Triggers>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -136,6 +138,7 @@
 
         <Style x:Key="MeterWidgetClassColorSettings.MeterProfessionIconBackground"
                TargetType="{x:Type Border}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Width" Value="29" />
             <Setter Property="Height" Value="29" />
             <Setter Property="CornerRadius" Value="{DynamicResource Radius.ButtonInner}" />
@@ -174,6 +177,7 @@
                                             <Grid>
                                                 <Grid.Style>
                                                     <Style TargetType="Grid">
+                                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsSeasonTalent}" Value="True">
                                                                 <Setter Property="Visibility" Value="Collapsed" />
@@ -206,6 +210,7 @@
                                                     <!-- 型の絵は欄いっぱい、不明の行だけクラスアイコンと同じ大きさ。 -->
                                                     <Rectangle.Style>
                                                         <Style TargetType="Rectangle">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                             <Setter Property="Width" Value="27" />
                                                             <Setter Property="Height" Value="27" />
                                                             <Style.Triggers>
@@ -322,6 +327,7 @@
                 <Border Visibility="{Binding ShowsClassColorFilterSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.Style>
                         <Style TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.SettingField}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ShowsClassColorFilterOptions}" Value="False">
                                     <Setter Property="BorderThickness" Value="0" />

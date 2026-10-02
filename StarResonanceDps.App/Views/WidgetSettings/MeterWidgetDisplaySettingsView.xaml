@@ -18,6 +18,7 @@
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
                                BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Setter Property="Height" Value="Auto" />
                             <Setter Property="Padding" Value="20,11,20,11" />
                             <Setter Property="BorderThickness" Value="0,0,0,1" />
@@ -116,6 +117,7 @@
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
                                BasedOn="{StaticResource Panel.SettingFieldLast}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ShowsPartyDisplaySettings}" Value="True">
                                     <Setter Property="BorderThickness" Value="0,0,0,1" />
@@ -151,6 +153,7 @@
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
                                BasedOn="{StaticResource Panel.SettingField}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <!-- 注記を出すときだけ2行分の高さにする。 -->
                                 <DataTrigger Binding="{Binding ShowsPartyDisplayHistoryNote}" Value="True">
@@ -226,6 +229,7 @@
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
                                BasedOn="{StaticResource Panel.SettingField}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ShowsSelfDisplaySettings}" Value="False">
                                     <Setter Property="BorderThickness" Value="0" />
@@ -259,6 +263,7 @@
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
                                BasedOn="{StaticResource Panel.SettingFieldLast}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ShowsSeasonTalentSettings}" Value="True">
                                     <Setter Property="BorderThickness" Value="0,0,0,1" />

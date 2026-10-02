@@ -65,13 +65,14 @@ public sealed class WidgetStateManager
         }
     }
 
-    public void SaveWidgetFlags(WidgetKind kind, bool isFavorite, bool isPinned)
+    public void SaveWidgetFlags(WidgetKind kind, bool isFavorite, bool isPinned, bool isClickThrough)
     {
         lock (_syncRoot)
         {
             var config = GetOrCreateWidgetConfig(kind);
             config.IsFavorite = isFavorite;
             config.IsPinned = isPinned;
+            config.IsClickThrough = isClickThrough;
             WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }

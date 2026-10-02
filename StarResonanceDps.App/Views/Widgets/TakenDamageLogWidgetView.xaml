@@ -9,6 +9,7 @@
              SizeChanged="TakenDamageLogWidgetView_SizeChanged">
     <UserControl.Resources>
         <Style x:Key="TakenDamageLog.LineText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="FontSize" Value="12" />
@@ -19,6 +20,7 @@
 
         <!-- 文字に付ける TIPS。アイコンの TIPS(下の DataTemplate)と同じ見た目にそろえる。 -->
         <Style x:Key="TakenDamageLog.ToolTipText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="FontSize" Value="12" />
         </Style>
 
@@ -115,6 +117,7 @@
                                Text="{Binding TimeText}">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock" BasedOn="{StaticResource TakenDamageLog.LineText}">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsTimeShown}" Value="False">
                                         <Setter Property="Visibility" Value="Hidden" />

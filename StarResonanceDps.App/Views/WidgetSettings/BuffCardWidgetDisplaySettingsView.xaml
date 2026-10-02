@@ -17,6 +17,7 @@
                 <Border.Style>
                     <Style TargetType="{x:Type Border}"
                            BasedOn="{StaticResource Panel.SettingFieldBase}">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                         <Setter Property="Height" Value="Auto" />
                         <Setter Property="Padding" Value="20,11,20,11" />
                         <Setter Property="BorderThickness" Value="0" />

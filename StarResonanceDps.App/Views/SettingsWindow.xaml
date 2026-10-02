@@ -72,6 +72,15 @@
                             </StackPanel>
                         </Button>
 
+                        <Button x:Name="HotkeyNavButton"
+                                Click="HotkeyNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Hotkey}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Hotkeys_Title]}" />
+                            </StackPanel>
+                        </Button>
+
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -140,6 +149,7 @@
                                         <Border>
                                             <Border.Style>
                                                 <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldLast}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsCustomGameCapturePreference}" Value="True">
                                                             <Setter Property="Height" Value="96" />
@@ -480,6 +490,64 @@
                                         </Border>
 
                                     </StackPanel>
+                                </ContentControl>
+
+                                <TextBlock x:Name="HotkeySection"
+                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Hotkeys_Title]}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,10" />
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                    <ItemsControl ItemsSource="{Binding HotkeyItems}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                                                                    <Setter Property="BorderThickness" Value="0" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+
+                                                        <TextBlock Grid.Column="0"
+                                                                   VerticalAlignment="Center"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Text="{Binding Label}"
+                                                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                                                   FontSize="14"
+                                                                   FontWeight="SemiBold" />
+
+                                                        <!--
+                                                            クリックでキーの受付を始め、押したキーを割り当てる(SettingsWindow.xaml.cs)。
+                                                            見た目は背景画像の欄と同じ Input.PathBox、幅は Button.Text と同じ 88。
+                                                        -->
+                                                        <TextBox Grid.Column="1"
+                                                                 Width="88"
+                                                                 Height="32"
+                                                                 Style="{StaticResource Input.PathBox}"
+                                                                 IsReadOnly="True"
+                                                                 Cursor="Hand"
+                                                                 InputMethod.IsInputMethodEnabled="False"
+                                                                 VerticalContentAlignment="Center"
+                                                                 Text="{Binding DisplayText, Mode=OneWay}"
+                                                                 PreviewMouseLeftButtonDown="HotkeyBox_PreviewMouseLeftButtonDown"
+                                                                 PreviewKeyDown="HotkeyBox_PreviewKeyDown"
+                                                                 LostKeyboardFocus="HotkeyBox_LostKeyboardFocus" />
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </ContentControl>
 
                                 <TextBlock x:Name="ThemeSection"
