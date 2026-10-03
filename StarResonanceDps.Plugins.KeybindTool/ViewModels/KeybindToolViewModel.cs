@@ -1072,10 +1072,11 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception exception)
         {
+            _context.Logger.Error($"Failed to open the location of '{filePath}'.", exception);
             ShowMessageWithDetail(
                 "Keybind.Message.Title.OpenLocationError",
                 "Keybind.Message.OpenDirectoryFailed",
-                exception.Message);
+                Texts["Keybind.Message.OpenDirectoryFailedDetail"]);
         }
     }
 
@@ -1380,7 +1381,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
             ShowMessageWithDetail(
                 "Keybind.Message.Title.LayoutLoadError",
                 "Keybind.Message.LayoutLoadFailedBody",
-                exception.Message);
+                Texts["Keybind.Message.LayoutLoadFailedDetail"]);
         }
     }
 

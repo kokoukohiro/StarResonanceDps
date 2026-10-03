@@ -50,7 +50,7 @@ internal sealed class PluginSettingsStore : IPluginSettingsStore
         {
             _logger.Warning($"Failed to read plugin settings file '{Path.GetFileName(settingsPath)}'. {exception.Message}");
             throw new InvalidDataException(
-                $"プラグイン設定ファイルを読み込めません。{Path.GetFileName(settingsPath)}",
+                $"Could not read the plugin settings file '{Path.GetFileName(settingsPath)}'.",
                 exception);
         }
     }

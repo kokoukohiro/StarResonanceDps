@@ -623,6 +623,10 @@
   <data name="Keybind.Message.LayoutLoadFailedBody" xml:space="preserve">
     <value>Failed to load the key settings preset.</value>
   </data>
+  <data name="Keybind.Message.LayoutLoadFailedDetail" xml:space="preserve">
+    <value>The key settings preset file is damaged or could not be read.
+Check read permissions for the file and whether sync or security software is using it.</value>
+  </data>
   <data name="Keybind.Message.LayoutLoadedBody" xml:space="preserve">
     <value>Key settings were loaded.</value>
   </data>
@@ -643,6 +647,9 @@
   </data>
   <data name="Keybind.Message.OpenDirectoryFailed" xml:space="preserve">
     <value>Could not open the folder.</value>
+  </data>
+  <data name="Keybind.Message.OpenDirectoryFailedDetail" xml:space="preserve">
+    <value>Check access permissions for the folder and whether security software is blocking it.</value>
   </data>
   <data name="Keybind.Message.SaveCompletedBody" xml:space="preserve">
     <value>Created the key settings preset.</value>

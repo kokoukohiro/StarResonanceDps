@@ -158,6 +158,12 @@
     <Compile Include="..\StarResonanceDps.HotkeyHost\KeyboardHotkeyHook.cs" Link="Services\KeyboardHotkeyHook.cs" />
   </ItemGroup>
 
+  <!-- デバッグ用の道具(DebugTools)は Debug の構成のときだけビルドに入れる。 -->
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Compile Remove="DebugTools\**" />
+    <Page Remove="DebugTools\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <Folder Include="Config\" />
     <Folder Include="Controls\" />

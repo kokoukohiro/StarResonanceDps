@@ -8,9 +8,7 @@ using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
 #if DEBUG
-using System.IO;
-using System.Reflection;
-using Serilog;
+using StarResonanceDps.App.DebugTools;
 #endif
 
 namespace StarResonanceDps.App;
@@ -74,11 +72,7 @@ public partial class MainWindow : Window
     }
 
 #if DEBUG
-    private const string DebugToolsFileName = "StarResonanceDps.Debug.dll";
-    private const string MessagePreviewWindowTypeName = "StarResonanceDps.Debug.MessagePreviewWindow";
-
-    // Ctrl+Shift+D でデバッグ用の確認画面(StarResonanceDps.Debug)を開く。
-    // App はそのプロジェクトを参照しない(向こうが App を参照するので輪になる)ため、実行フォルダの dll を読み込む。
+    // Ctrl+Shift+D でデバッグ用の確認画面(DebugTools、Debug の構成でだけビルドされる)を開く。
     private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.D || Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
@@ -87,17 +81,7 @@ public partial class MainWindow : Window
         }
 
         e.Handled = true;
-        var path = Path.Combine(AppContext.BaseDirectory, DebugToolsFileName);
-        if (!File.Exists(path))
-        {
-            Log.Warning("Debug tools were not found: {Path}", path);
-            return;
-        }
-
-        var type = Assembly.LoadFrom(path).GetType(MessagePreviewWindowTypeName, throwOnError: true)!;
-        var window = (Window)Activator.CreateInstance(type)!;
-        window.Owner = this;
-        window.Show();
+        new MessagePreviewWindow { Owner = this }.Show();
     }
 #endif
 

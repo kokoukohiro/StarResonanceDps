@@ -681,6 +681,10 @@
   <data name="Keybind.Message.LayoutLoadFailedBody" xml:space="preserve">
     <value>キー設定プリセットの読み込みに失敗しました。</value>
   </data>
+  <data name="Keybind.Message.LayoutLoadFailedDetail" xml:space="preserve">
+    <value>キー設定プリセットのファイルが壊れているか、読み取れませんでした。
+ファイルの読み取り権限と、同期ソフトやセキュリティソフトによるファイル使用を確認してください。</value>
+  </data>
   <data name="Keybind.Message.LayoutLoadedBody" xml:space="preserve">
     <value>キー設定を読み込みました。</value>
   </data>
@@ -701,6 +705,9 @@
   </data>
   <data name="Keybind.Message.OpenDirectoryFailed" xml:space="preserve">
     <value>フォルダを開けませんでした。</value>
+  </data>
+  <data name="Keybind.Message.OpenDirectoryFailedDetail" xml:space="preserve">
+    <value>フォルダへのアクセス権限と、セキュリティソフトによる制限を確認してください。</value>
   </data>
   <data name="Keybind.Message.SaveCompletedBody" xml:space="preserve">
     <value>キー設定プリセットを作成しました。</value>

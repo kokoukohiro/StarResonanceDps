@@ -623,6 +623,10 @@
   <data name="Keybind.Message.LayoutLoadFailedBody" xml:space="preserve">
     <value>读取键位设置预设失败。</value>
   </data>
+  <data name="Keybind.Message.LayoutLoadFailedDetail" xml:space="preserve">
+    <value>键位设置预设文件已损坏或无法读取。
+请检查文件的读取权限，以及同步软件或安全软件是否正在占用文件。</value>
+  </data>
   <data name="Keybind.Message.LayoutLoadedBody" xml:space="preserve">
     <value>已读取键位设置。</value>
   </data>
@@ -643,6 +647,9 @@
   </data>
   <data name="Keybind.Message.OpenDirectoryFailed" xml:space="preserve">
     <value>无法打开文件夹。</value>
+  </data>
+  <data name="Keybind.Message.OpenDirectoryFailedDetail" xml:space="preserve">
+    <value>请检查文件夹的访问权限，以及安全软件是否进行了限制。</value>
   </data>
   <data name="Keybind.Message.SaveCompletedBody" xml:space="preserve">
     <value>已创建键位设置预设。</value>
