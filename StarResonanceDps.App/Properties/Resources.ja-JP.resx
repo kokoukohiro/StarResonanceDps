@@ -204,14 +204,21 @@
   <data name="Settings_Hotkey_Listening" xml:space="preserve">
     <value>キーを入力</value>
   </data>
-  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
-    <value>ホットキーを設定できません</value>
+  <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
+    <value>次のホットキーを設定できませんでした。</value>
   </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
-    <value>「{0}」はほかのアプリが使用中です</value>
+    <value>「{0}」はほかのアプリが使用中です。</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>「{0}」を設定できませんでした(エラー {1})</value>
+    <value>「{0}」を設定できませんでした(エラー {1})。</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
+    <value>ゲームの操作中はホットキーが効きません。</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
+    <value>ホットキー用の補助プログラムを起動できなかったか、途中で停止しました。
+アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ゲームの操作中も効くようになります。</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>
@@ -346,10 +353,10 @@
     <value>未保存変更の破棄</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
-    <value>保存されていない変更があります。</value>
+    <value>設定を保存せずに閉じますか？</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
-    <value>設定を保存せずに閉じますか？</value>
+    <value>保存されていない変更があります。</value>
   </data>
   <data name="Confirm_ResetSettings_Title" xml:space="preserve">
     <value>設定の初期化</value>
@@ -811,13 +818,15 @@
     <value>Npcapをインストールしますか？</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>Npcapがインストールされていないか、バージョンを検出できませんでした。ネットワークパケットをキャプチャするにはNpcapをインストールしてください。</value>
+    <value>Npcapがインストールされていないか、バージョンを検出できませんでした。
+ネットワークパケットをキャプチャするにはNpcapをインストールしてください。</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>Npcapを更新しますか？</value>
   </data>
   <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
-    <value>Npcapのバージョン（{0}）は1.86未満です。問題を避けるため、1.86以上へ更新することを強くおすすめします。</value>
+    <value>Npcapのバージョン({0})は1.86未満です。
+問題を避けるため、1.86以上へ更新することを強くおすすめします。</value>
   </data>
   <data name="Metric_InstantDps" xml:space="preserve">
     <value>瞬間DPS</value>
@@ -1488,12 +1497,6 @@
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>すべてのファイル</value>
   </data>
-  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
-    <value>画像を保存できませんでした</value>
-  </data>
-  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
-    <value>画像をコピーできませんでした</value>
-  </data>
   <data name="PlayerEquipment_Level" xml:space="preserve">
     <value>装備Lv.{0}</value>
   </data>
@@ -1508,5 +1511,28 @@
   </data>
   <data name="PlayerEquipment_Quality" xml:space="preserve">
     <value>レアリティ{0}</value>
+  </data>
+  <data name="Hotkey_Error_Title" xml:space="preserve">
+    <value>ホットキーエラー</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Title" xml:space="preserve">
+    <value>画像保存エラー</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Message" xml:space="preserve">
+    <value>画像を保存できませんでした。</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Detail" xml:space="preserve">
+    <value>選んだ場所に書き込めませんでした。
+別の場所を選んで、もう一度保存してください。</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Title" xml:space="preserve">
+    <value>画像コピーエラー</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Message" xml:space="preserve">
+    <value>画像をコピーできませんでした。</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使っている可能性があります。
+少し待ってから、もう一度コピーしてください。</value>
   </data>
 </root>

@@ -204,14 +204,21 @@
   <data name="Settings_Hotkey_Listening" xml:space="preserve">
     <value>请按键</value>
   </data>
-  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
-    <value>无法设置快捷键</value>
+  <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
+    <value>无法设置以下快捷键。</value>
   </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
-    <value>“{0}”已被其他程序占用</value>
+    <value>“{0}”已被其他程序占用。</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>无法设置“{0}”(错误 {1})</value>
+    <value>无法设置“{0}”(错误 {1})。</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
+    <value>游戏操作期间快捷键无效。</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
+    <value>快捷键辅助程序未能启动或已中途停止。
+重新启动应用并在用户帐户控制中选择“是”后，游戏操作期间也能使用快捷键。</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
@@ -346,10 +353,10 @@
     <value>放弃未保存的更改</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
-    <value>存在未保存的更改。</value>
+    <value>不保存设置并关闭吗？</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
-    <value>不保存设置并关闭吗？</value>
+    <value>存在未保存的更改。</value>
   </data>
   <data name="Confirm_ResetSettings_Title" xml:space="preserve">
     <value>初始化设置</value>
@@ -811,13 +818,15 @@
     <value>是否安装 Npcap？</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>未安装 Npcap，或无法检测到 Npcap 版本。要捕获网络数据包，请安装 Npcap。</value>
+    <value>未安装 Npcap，或无法检测到 Npcap 版本。
+要捕获网络数据包，请安装 Npcap。</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>是否更新 Npcap？</value>
   </data>
   <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
-    <value>Npcap 版本（{0}）低于 1.86。为避免问题，强烈建议更新到 1.86 或更高版本。</value>
+    <value>Npcap 版本({0})低于 1.86。
+为避免问题，强烈建议更新到 1.86 或更高版本。</value>
   </data>
   <data name="Metric_InstantDps" xml:space="preserve">
     <value>瞬时DPS</value>
@@ -1488,12 +1497,6 @@
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>所有文件</value>
   </data>
-  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
-    <value>无法保存图片</value>
-  </data>
-  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
-    <value>无法复制图片</value>
-  </data>
   <data name="PlayerEquipment_Level" xml:space="preserve">
     <value>{0}装等</value>
   </data>
@@ -1508,5 +1511,28 @@
   </data>
   <data name="PlayerEquipment_Quality" xml:space="preserve">
     <value>稀有度{0}</value>
+  </data>
+  <data name="Hotkey_Error_Title" xml:space="preserve">
+    <value>快捷键错误</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Title" xml:space="preserve">
+    <value>图片保存错误</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Message" xml:space="preserve">
+    <value>无法保存图片。</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Detail" xml:space="preserve">
+    <value>无法写入所选位置。
+请选择其他位置后重新保存。</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Title" xml:space="preserve">
+    <value>图片复制错误</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Message" xml:space="preserve">
+    <value>无法复制图片。</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
+    <value>剪贴板可能正被其他程序占用。
+请稍后再复制一次。</value>
   </data>
 </root>

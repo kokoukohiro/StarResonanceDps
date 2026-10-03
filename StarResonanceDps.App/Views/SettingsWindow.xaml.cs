@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -89,17 +88,7 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://npcap.com/",
-                UseShellExecute = true
-            });
-        }
-        catch
-        {
-        }
+        ExternalLinkOpener.Open("https://npcap.com/");
     }
 
     private void SettingsWindow_SourceInitialized(object? sender, EventArgs e)

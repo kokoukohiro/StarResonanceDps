@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" name="MyApplication.app"/>
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <!--
+          ゲームのランチャーと同じ「可能なら管理者権限」。ゲームが管理者権限で動くとき、
+          通常権限で登録したホットキーはゲームが前面の間届かないので、登録するこの補助だけをゲームと同じ権限で動かす。
+          本体は通常権限で動く。
+        -->
+        <requestedExecutionLevel level="highestAvailable" uiAccess="false"/>
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+</assembly>

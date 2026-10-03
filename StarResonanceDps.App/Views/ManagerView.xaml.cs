@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -52,10 +51,7 @@ public partial class ManagerView : UserControl
 
     private void HelpButton_Click(object sender, RoutedEventArgs e)
     {
-        Process.Start(new ProcessStartInfo(HelpUrl)
-        {
-            UseShellExecute = true
-        });
+        ExternalLinkOpener.Open(HelpUrl);
     }
 
     private void ShowNavigationContent(ManagerContent content)

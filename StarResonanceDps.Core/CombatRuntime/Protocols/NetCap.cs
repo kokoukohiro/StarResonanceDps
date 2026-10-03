@@ -6,7 +6,6 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net;
 using ZstdSharp;
 
@@ -583,7 +582,6 @@ public class NetCap
 
     private bool IsFromGame(IPv4Packet ip, TcpPacket tcp)
     {
-        var sw = Stopwatch.StartNew();
         var conns = Utils.GetTCPConnectionsForExe(Config.ExeNames);
         var isGameConnection = conns.Any((x =>
             (x.LocalAddress == ip.SourceAddress.ToString() && x.LocalPort == tcp.SourcePort) ||
@@ -591,8 +589,7 @@ public class NetCap
             (x.LocalAddress == ip.DestinationAddress.ToString() && x.LocalPort == tcp.DestinationPort) ||
             (x.RemoteAddress == ip.DestinationAddress.ToString() && x.RemotePort == tcp.DestinationPort)));
 
-        sw.Stop();
-        Log.Logger.Debug($"Checking {ip.SourceAddress}:{tcp.SourcePort} > {ip.DestinationAddress}:{tcp.DestinationPort} is game connection: {isGameConnection}, took {sw.ElapsedMilliseconds}ms");
+        Log.Logger.Debug($"Checking {ip.SourceAddress}:{tcp.SourcePort} > {ip.DestinationAddress}:{tcp.DestinationPort} is game connection: {isGameConnection}");
 
         return isGameConnection;
     }

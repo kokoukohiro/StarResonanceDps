@@ -150,6 +150,12 @@
 
     <ProjectReference Include="..\StarResonanceDps.Plugins.KeybindTool\StarResonanceDps.Plugins.KeybindTool.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\StarResonanceDps.Plugins.ModuleTool\StarResonanceDps.Plugins.ModuleTool.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\StarResonanceDps.HotkeyHost\StarResonanceDps.HotkeyHost.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\StarResonanceDps.HotkeyHost\HotkeyHostProtocol.cs" Link="Services\HotkeyHostProtocol.cs" />
+    <Compile Include="..\StarResonanceDps.HotkeyHost\KeyboardHotkeyHook.cs" Link="Services\KeyboardHotkeyHook.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -273,6 +279,26 @@
     <MakeDir Directories="$(PublishDir)Plugins" />
     <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(PublishDir)Plugins\KeybindTool.dll" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(PublishDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- ホットキーの補助(管理者権限で動く別の実行ファイル)は実行フォルダの直下に置く。 -->
+  <PropertyGroup>
+    <HotkeyHostOutputDirectory>$(MSBuildProjectDirectory)\..\StarResonanceDps.HotkeyHost\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\</HotkeyHostOutputDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <HotkeyHostFiles Include="$(HotkeyHostOutputDirectory)StarResonanceDps.HotkeyHost.exe" />
+    <HotkeyHostFiles Include="$(HotkeyHostOutputDirectory)StarResonanceDps.HotkeyHost.dll" />
+    <HotkeyHostFiles Include="$(HotkeyHostOutputDirectory)StarResonanceDps.HotkeyHost.runtimeconfig.json" />
+    <HotkeyHostFiles Include="$(HotkeyHostOutputDirectory)StarResonanceDps.HotkeyHost.deps.json" />
+  </ItemGroup>
+
+  <Target Name="CopyHotkeyHost" AfterTargets="Build">
+    <Copy SourceFiles="@(HotkeyHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyHotkeyHostToPublish" AfterTargets="Publish">
+    <Copy SourceFiles="@(HotkeyHostFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
   </Target>
 
   <ItemGroup>

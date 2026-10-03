@@ -204,14 +204,21 @@
   <data name="Settings_Hotkey_Listening" xml:space="preserve">
     <value>키를 입력</value>
   </data>
-  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
-    <value>단축키를 설정할 수 없습니다</value>
+  <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
+    <value>다음 단축키를 설정할 수 없습니다.</value>
   </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
-    <value>'{0}'은(는) 다른 앱이 사용 중입니다</value>
+    <value>'{0}'은(는) 다른 앱이 사용 중입니다.</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>'{0}'을(를) 설정할 수 없습니다 (오류 {1})</value>
+    <value>'{0}'을(를) 설정할 수 없습니다 (오류 {1}).</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
+    <value>게임 조작 중에는 단축키가 작동하지 않습니다.</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
+    <value>단축키용 보조 프로그램을 시작하지 못했거나 도중에 중지되었습니다.
+앱을 다시 시작하고 사용자 계정 컨트롤에서 '예'를 선택하면 게임 조작 중에도 작동합니다.</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>기본 설정</value>
@@ -346,10 +353,10 @@
     <value>저장하지 않은 변경 내용 삭제</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
-    <value>저장하지 않은 변경 내용이 있습니다.</value>
+    <value>설정을 저장하지 않고 닫을까요?</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
-    <value>설정을 저장하지 않고 닫을까요?</value>
+    <value>저장하지 않은 변경 내용이 있습니다.</value>
   </data>
   <data name="Confirm_ResetSettings_Title" xml:space="preserve">
     <value>설정 초기화</value>
@@ -811,13 +818,15 @@
     <value>Npcap을 설치하시겠습니까?</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>Npcap이 설치되어 있지 않거나 버전을 감지할 수 없습니다. 네트워크 패킷을 캡처하려면 Npcap을 설치하세요.</value>
+    <value>Npcap이 설치되어 있지 않거나 버전을 감지할 수 없습니다.
+네트워크 패킷을 캡처하려면 Npcap을 설치하세요.</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>Npcap을 업데이트하시겠습니까?</value>
   </data>
   <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
-    <value>Npcap 버전({0})이 1.86보다 낮습니다. 문제를 방지하려면 1.86 이상으로 업데이트하는 것을 강력히 권장합니다.</value>
+    <value>Npcap 버전({0})이 1.86보다 낮습니다.
+문제를 방지하려면 1.86 이상으로 업데이트하는 것을 강력히 권장합니다.</value>
   </data>
   <data name="Metric_InstantDps" xml:space="preserve">
     <value>순간 DPS</value>
@@ -1488,12 +1497,6 @@
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>모든 파일</value>
   </data>
-  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
-    <value>이미지를 저장하지 못했습니다</value>
-  </data>
-  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
-    <value>이미지를 복사하지 못했습니다</value>
-  </data>
   <data name="PlayerEquipment_Level" xml:space="preserve">
     <value>장비 레벨 Lv.{0}</value>
   </data>
@@ -1508,5 +1511,28 @@
   </data>
   <data name="PlayerEquipment_Quality" xml:space="preserve">
     <value>레어도 {0}</value>
+  </data>
+  <data name="Hotkey_Error_Title" xml:space="preserve">
+    <value>단축키 오류</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Title" xml:space="preserve">
+    <value>이미지 저장 오류</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Message" xml:space="preserve">
+    <value>이미지를 저장하지 못했습니다.</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Detail" xml:space="preserve">
+    <value>선택한 위치에 쓸 수 없습니다.
+다른 위치를 선택하여 다시 저장하세요.</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Title" xml:space="preserve">
+    <value>이미지 복사 오류</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Message" xml:space="preserve">
+    <value>이미지를 복사하지 못했습니다.</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
+    <value>다른 앱이 클립보드를 사용 중일 수 있습니다.
+잠시 후 다시 복사하세요.</value>
   </data>
 </root>

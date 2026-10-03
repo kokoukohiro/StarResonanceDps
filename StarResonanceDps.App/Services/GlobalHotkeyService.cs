@@ -1,8 +1,8 @@
-using System.Runtime.InteropServices;
 using System.Windows.Input;
-using System.Windows.Interop;
+using System.Windows.Threading;
 using Serilog;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Services;
 
@@ -16,11 +16,21 @@ public sealed record HotkeyRegistrationFailure(HotkeyAction Action, HotkeyBindin
 }
 
 /// <summary>
-/// アプリ全体のホットキー。<c>RegisterHotKey</c> で登録し、見えないメッセージ専用の窓で受ける。
+/// アプリ全体のホットキー。割り当てを決め、キーを受けるのは補助(<see cref="HelperHotkeyRegistrar"/>)に任せる。
 ///
 /// <para>
-/// 登録したキーはこのアプリが受け取り、ほかのアプリ(ゲームを含む)には届かない。
-/// 押しっぱなしの連打は数えない(<c>MOD_NOREPEAT</c>)。
+/// 割り当てたキーは、ゲームかこのアプリが前面のときだけ受け取り、ゲームには渡さない。
+/// それ以外のアプリが前面なら何もせず、キーはそのアプリに届く(受け方は <see cref="StarResonanceDps.HotkeyHost.KeyboardHotkeyHook"/>)。
+/// ゲームとして扱うのは、今の「ゲームの種類」の設定から決まるプロセス名(キャプチャと同じ)。
+/// ほかのアプリが同じキーを登録していれば割り当てない(失敗として返す)。押しっぱなしの繰り返しは数えない。
+/// </para>
+///
+/// <para>
+/// アプリは通常権限で動き、管理者権限で動くのはキーを受ける補助だけ。
+/// ゲームが管理者権限で動くと、通常権限ではゲームが前面の間キーを受けられないため。
+/// 補助は割り当てのあるキーを初めて足すときに起動する(割り当てが無ければ起動しない)。
+/// 起動できない・途中で使えなくなったときは、このプロセスの中で受けるようにし(<see cref="LocalHotkeyRegistrar"/>)、
+/// <see cref="HelperUnavailable"/> で知らせる。その回の実行中は補助に戻らない。
 /// </para>
 ///
 /// <para>
@@ -36,7 +46,6 @@ public sealed class GlobalHotkeyService : IDisposable
 {
     private static readonly Lazy<GlobalHotkeyService> LazyInstance = new(() => new GlobalHotkeyService());
 
-    private const int WmHotkey = 0x0312;
     private const uint ModAlt = 0x0001;
     private const uint ModControl = 0x0002;
     private const uint ModShift = 0x0004;
@@ -45,12 +54,11 @@ public sealed class GlobalHotkeyService : IDisposable
     /// <summary>試しの登録に使う番号。アプリが使える番号の上限(0xBFFF)。操作の番号(1〜)とぶつからない。</summary>
     private const int TestHotkeyId = 0xBFFF;
 
-    /// <summary>メッセージ専用の窓を作るときの親(HWND_MESSAGE)。</summary>
-    private static readonly IntPtr MessageOnlyParent = new(-3);
-
     private readonly HashSet<HotkeyAction> _registeredActions = [];
     private HotkeySettingsConfig _bindings = new();
-    private HwndSource? _source;
+    private IReadOnlyList<string> _gameProcessNames = [];
+    private IHotkeyRegistrar? _registrar;
+    private bool _isHelperUnavailable;
     private bool _isSuspended;
 
     private GlobalHotkeyService()
@@ -65,6 +73,12 @@ public sealed class GlobalHotkeyService : IDisposable
     /// <summary>登録の状態が変わった(登録・解除・一時停止・再開)。</summary>
     public event EventHandler? RegistrationChanged;
 
+    /// <summary>
+    /// 補助が使えず、このプロセスの中で登録するようにした。一覧はそのとき登録し直せなかったキー
+    /// (呼び出しの戻り値で返す場面では空)。UI スレッドで後から上がる。
+    /// </summary>
+    public event Action<IReadOnlyList<HotkeyRegistrationFailure>>? HelperUnavailable;
+
     public bool IsRegistered(HotkeyAction action)
     {
         return _registeredActions.Contains(action);
@@ -75,14 +89,15 @@ public sealed class GlobalHotkeyService : IDisposable
         return _bindings.Get(action);
     }
 
-    /// <summary>割り当てを入れ替えて登録し直す。一時停止中なら控えるだけで、再開したときに登録する。</summary>
+    /// <summary>
+    /// 割り当てを入れ替えて登録し直す。一時停止中なら控えるだけで、再開したときに登録する。
+    /// ゲームのプロセス名もここで今の設定から取り直す(全体設定の保存では、ゲームの種類がこれより先に反映される)。
+    /// </summary>
     public IReadOnlyList<HotkeyRegistrationFailure> Apply(HotkeySettingsConfig bindings)
     {
         _bindings = bindings.Clone();
-        UnregisterAll();
-        IReadOnlyList<HotkeyRegistrationFailure> failures = _isSuspended
-            ? Array.Empty<HotkeyRegistrationFailure>()
-            : RegisterAll();
+        _gameProcessNames = Utils.GameCapturePreferenceToExeNames(CombatRuntimeSettings.GameCapturePreference);
+        var failures = RegisterAgain();
         RegistrationChanged?.Invoke(this, EventArgs.Empty);
         return failures;
     }
@@ -95,7 +110,15 @@ public sealed class GlobalHotkeyService : IDisposable
         }
 
         _isSuspended = true;
-        UnregisterAll();
+        try
+        {
+            UnregisterAll();
+        }
+        catch (HotkeyHelperException exception)
+        {
+            NotifyHelperUnavailable(FallBackToLocal(exception));
+        }
+
         RegistrationChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -107,41 +130,62 @@ public sealed class GlobalHotkeyService : IDisposable
         }
 
         _isSuspended = false;
-        var failures = RegisterAll();
+        var failures = RegisterAgain();
         RegistrationChanged?.Invoke(this, EventArgs.Empty);
         return failures;
     }
 
     /// <summary>
-    /// そのキーを登録できるか試す。できたらすぐ外す。できなければ Windows のエラー番号を返す。
-    /// 自分の登録とぶつからないよう、一時停止中に呼ぶこと。
+    /// そのキーを割り当てられるか(ほかのアプリが同じキーを登録していないか)試す。できたらすぐ外す。
+    /// できなければ Windows のエラー番号を返す。
     /// </summary>
     public int? TestRegistration(HotkeyBindingConfig binding)
     {
-        var handle = EnsureHandle();
-        if (!RegisterHotKey(handle, TestHotkeyId, ToNativeModifiers(binding.Modifiers), ToVirtualKey(binding.Key)))
+        try
         {
-            var error = Marshal.GetLastWin32Error();
-            Log.Warning("Hotkey {Hotkey} cannot be registered: Win32 error {Error}", HotkeyText.Format(binding), error);
-            return error;
+            return Test(binding);
         }
-
-        UnregisterHotKey(handle, TestHotkeyId);
-        return null;
+        catch (HotkeyHelperException exception)
+        {
+            var failures = FallBackToLocal(exception);
+            RegistrationChanged?.Invoke(this, EventArgs.Empty);
+            NotifyHelperUnavailable(failures);
+            return Test(binding);
+        }
     }
 
+    /// <summary>登録を全部外す。補助は接続を閉じると終わり、補助が登録したキーもそれで外れる。</summary>
     public void Dispose()
     {
-        UnregisterAll();
-        _source?.RemoveHook(WndProc);
-        _source?.Dispose();
-        _source = null;
+        _registeredActions.Clear();
+        DisposeRegistrar();
+    }
+
+    // 全部外して、止めていなければ全部登録し直す。補助が途中で使えなくなったら、このプロセスの中で登録し直す。
+    private IReadOnlyList<HotkeyRegistrationFailure> RegisterAgain()
+    {
+        try
+        {
+            UnregisterAll();
+            _registrar?.SetGameProcessNames(_gameProcessNames);
+            if (_isSuspended)
+            {
+                return Array.Empty<HotkeyRegistrationFailure>();
+            }
+
+            return RegisterAll();
+        }
+        catch (HotkeyHelperException exception)
+        {
+            var failures = FallBackToLocal(exception);
+            NotifyHelperUnavailable(Array.Empty<HotkeyRegistrationFailure>());
+            return failures;
+        }
     }
 
     private List<HotkeyRegistrationFailure> RegisterAll()
     {
         var failures = new List<HotkeyRegistrationFailure>();
-        var handle = EnsureHandle();
 
         foreach (var action in Enum.GetValues<HotkeyAction>())
         {
@@ -151,13 +195,16 @@ public sealed class GlobalHotkeyService : IDisposable
                 continue;
             }
 
-            if (RegisterHotKey(handle, ToHotkeyId(action), ToNativeModifiers(binding.Modifiers), ToVirtualKey(binding.Key)))
+            var error = EnsureRegistrar().Register(
+                ToHotkeyId(action),
+                ToNativeModifiers(binding.Modifiers),
+                ToVirtualKey(binding.Key));
+            if (error == 0)
             {
                 _registeredActions.Add(action);
                 continue;
             }
 
-            var error = Marshal.GetLastWin32Error();
             Log.Warning(
                 "Failed to register hotkey {Action} ({Hotkey}): Win32 error {Error}",
                 action,
@@ -171,43 +218,118 @@ public sealed class GlobalHotkeyService : IDisposable
 
     private void UnregisterAll()
     {
-        if (_source is null)
+        if (_registrar is not null)
         {
-            _registeredActions.Clear();
-            return;
-        }
-
-        foreach (var action in _registeredActions)
-        {
-            UnregisterHotKey(_source.Handle, ToHotkeyId(action));
+            foreach (var action in _registeredActions)
+            {
+                _registrar.Unregister(ToHotkeyId(action));
+            }
         }
 
         _registeredActions.Clear();
     }
 
-    private IntPtr EnsureHandle()
+    private int? Test(HotkeyBindingConfig binding)
     {
-        if (_source is null)
+        var registrar = EnsureRegistrar();
+        var error = registrar.Register(TestHotkeyId, ToNativeModifiers(binding.Modifiers), ToVirtualKey(binding.Key));
+        if (error != 0)
         {
-            _source = new HwndSource(new HwndSourceParameters("StarResonanceDpsHotkeys")
-            {
-                ParentWindow = MessageOnlyParent,
-                WindowStyle = 0
-            });
-            _source.AddHook(WndProc);
+            Log.Warning("Hotkey {Hotkey} cannot be registered: Win32 error {Error}", HotkeyText.Format(binding), error);
+            return error;
         }
 
-        return _source.Handle;
+        registrar.Unregister(TestHotkeyId);
+        return null;
     }
 
-    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    // 登録の役を用意する。最初は補助を起動し、起動できなければ(その回の実行中はずっと)このプロセスの中で登録する。
+    private IHotkeyRegistrar EnsureRegistrar()
     {
-        if (msg != WmHotkey)
+        if (_registrar is not null)
         {
-            return IntPtr.Zero;
+            return _registrar;
         }
 
-        var id = wParam.ToInt32();
+        if (!_isHelperUnavailable)
+        {
+            HelperHotkeyRegistrar? helper = null;
+            try
+            {
+                helper = HelperHotkeyRegistrar.Start();
+            }
+            catch (HotkeyHelperException exception)
+            {
+                if (exception.WasDeclined)
+                {
+                    Log.Warning(exception, "Hotkey helper was not started (elevation was declined); registering hotkeys in this process");
+                }
+                else
+                {
+                    Log.Error(exception, "Could not start the hotkey helper; registering hotkeys in this process");
+                }
+
+                _isHelperUnavailable = true;
+                NotifyHelperUnavailable(Array.Empty<HotkeyRegistrationFailure>());
+            }
+
+            if (helper is not null)
+            {
+                helper.Pressed += Registrar_Pressed;
+                helper.Lost += Helper_Lost;
+                _registrar = helper;
+                // ここで補助が切れたら、呼び出し元がこのプロセスの中へ切り替える(_registrar に入れてから渡すため)。
+                helper.SetGameProcessNames(_gameProcessNames);
+                return helper;
+            }
+        }
+
+        var local = new LocalHotkeyRegistrar();
+        local.Pressed += Registrar_Pressed;
+        _registrar = local;
+        local.SetGameProcessNames(_gameProcessNames);
+        return local;
+    }
+
+    // 補助が使えなくなった。このプロセスの中へ切り替え、止めていなければ今の割り当てを全部登録し直す。
+    private List<HotkeyRegistrationFailure> FallBackToLocal(HotkeyHelperException exception)
+    {
+        int? exitCode = null;
+        if (_registrar is HelperHotkeyRegistrar helper)
+        {
+            helper.Pressed -= Registrar_Pressed;
+            helper.Lost -= Helper_Lost;
+            exitCode = helper.DisposeAndGetExitCode();
+            _registrar = null;
+        }
+
+        Log.Error(exception, "Lost the hotkey helper (exit code {ExitCode}); registering hotkeys in this process", exitCode);
+        _registeredActions.Clear();
+        _isHelperUnavailable = true;
+
+        if (_isSuspended)
+        {
+            return [];
+        }
+
+        return RegisterAll();
+    }
+
+    // 命令の合間に補助が切れた(補助が落ちたなど)。
+    private void Helper_Lost(object? sender, EventArgs e)
+    {
+        if (!ReferenceEquals(sender, _registrar) || sender is not HelperHotkeyRegistrar helper)
+        {
+            return;
+        }
+
+        var failures = FallBackToLocal(new HotkeyHelperException("The hotkey helper closed the connection", helper.ReadFailure));
+        RegistrationChanged?.Invoke(this, EventArgs.Empty);
+        NotifyHelperUnavailable(failures);
+    }
+
+    private void Registrar_Pressed(int id)
+    {
         foreach (var action in _registeredActions)
         {
             if (ToHotkeyId(action) != id)
@@ -215,12 +337,32 @@ public sealed class GlobalHotkeyService : IDisposable
                 continue;
             }
 
-            handled = true;
             Pressed?.Invoke(action);
             break;
         }
+    }
 
-        return IntPtr.Zero;
+    // 登録の途中で知らせの窓を出さないよう、後から上げる。
+    private void NotifyHelperUnavailable(IReadOnlyList<HotkeyRegistrationFailure> failures)
+    {
+        Dispatcher.CurrentDispatcher.InvokeAsync(() => HelperUnavailable?.Invoke(failures));
+    }
+
+    private void DisposeRegistrar()
+    {
+        if (_registrar is null)
+        {
+            return;
+        }
+
+        _registrar.Pressed -= Registrar_Pressed;
+        if (_registrar is HelperHotkeyRegistrar helper)
+        {
+            helper.Lost -= Helper_Lost;
+        }
+
+        _registrar.Dispose();
+        _registrar = null;
     }
 
     private static int ToHotkeyId(HotkeyAction action)
@@ -254,12 +396,4 @@ public sealed class GlobalHotkeyService : IDisposable
 
         return native;
     }
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
-
-    [DllImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 }

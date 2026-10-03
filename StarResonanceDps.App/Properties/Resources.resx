@@ -204,14 +204,21 @@
   <data name="Settings_Hotkey_Listening" xml:space="preserve">
     <value>Press a key</value>
   </data>
-  <data name="Hotkey_RegisterFailed_Title" xml:space="preserve">
-    <value>Could not set hotkey</value>
+  <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
+    <value>The following hotkeys could not be set.</value>
   </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
-    <value>"{0}" is in use by another app</value>
+    <value>"{0}" is in use by another app.</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>Could not set "{0}" (error {1})</value>
+    <value>Could not set "{0}" (error {1}).</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
+    <value>Hotkeys do not work while you are playing the game.</value>
+  </data>
+  <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
+    <value>The hotkey helper program could not start or stopped unexpectedly.
+Restart the app and select "Yes" in User Account Control to use hotkeys while playing.</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
@@ -346,10 +353,10 @@
     <value>Discard unsaved changes</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Message" xml:space="preserve">
-    <value>There are unsaved changes.</value>
+    <value>Close without saving the settings?</value>
   </data>
   <data name="Confirm_DiscardUnsaved_Detail" xml:space="preserve">
-    <value>Close without saving the settings?</value>
+    <value>There are unsaved changes.</value>
   </data>
   <data name="Confirm_ResetSettings_Title" xml:space="preserve">
     <value>Reset settings</value>
@@ -811,13 +818,15 @@
     <value>Install Npcap?</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>Npcap is not installed, or its version could not be detected. Please install Npcap to capture network packets.</value>
+    <value>Npcap is not installed, or its version could not be detected.
+Please install Npcap to capture network packets.</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>Update Npcap?</value>
   </data>
   <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
-    <value>Npcap version ({0}) is below 1.86. It is strongly recommended to update to this version, or higher, to avoid problems.</value>
+    <value>Npcap version ({0}) is below 1.86.
+It is strongly recommended to update to this version, or higher, to avoid problems.</value>
   </data>
   <data name="Metric_InstantDps" xml:space="preserve">
     <value>Instant DPS</value>
@@ -1488,12 +1497,6 @@
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>All Files</value>
   </data>
-  <data name="PlayerInfo_SaveImageFailed" xml:space="preserve">
-    <value>Could not save the image</value>
-  </data>
-  <data name="PlayerInfo_CopyImageFailed" xml:space="preserve">
-    <value>Could not copy the image</value>
-  </data>
   <data name="PlayerEquipment_Level" xml:space="preserve">
     <value>Lv.{0}</value>
   </data>
@@ -1508,5 +1511,28 @@
   </data>
   <data name="PlayerEquipment_Quality" xml:space="preserve">
     <value>Rarity {0}</value>
+  </data>
+  <data name="Hotkey_Error_Title" xml:space="preserve">
+    <value>Hotkey error</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Title" xml:space="preserve">
+    <value>Image save error</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Message" xml:space="preserve">
+    <value>Could not save the image.</value>
+  </data>
+  <data name="PlayerInfo_SaveImageFailed_Detail" xml:space="preserve">
+    <value>Could not write to the selected location.
+Choose another location and save again.</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Title" xml:space="preserve">
+    <value>Image copy error</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Message" xml:space="preserve">
+    <value>Could not copy the image.</value>
+  </data>
+  <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
+    <value>Another app may be using the clipboard.
+Wait a moment and copy again.</value>
   </data>
 </root>

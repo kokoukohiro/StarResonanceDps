@@ -3,8 +3,15 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
+#if DEBUG
+using System.IO;
+using System.Reflection;
+using Serilog;
+#endif
 
 namespace StarResonanceDps.App;
 
@@ -37,6 +44,9 @@ public partial class MainWindow : Window
 
         Loaded += MainWindow_Loaded;
         SourceInitialized += MainWindow_SourceInitialized;
+#if DEBUG
+        PreviewKeyDown += MainWindow_PreviewKeyDown;
+#endif
     }
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -45,10 +55,51 @@ public partial class MainWindow : Window
         {
             viewModel.RestoreRunningWidgetWindows();
 
-            // 登録できなかったホットキーはここで知らせる(メッセージの親にこの窓が要るので、開いた後に登録する)。
+            // ホットキーの補助が使えなかったこと・登録できなかったホットキーはここで知らせる
+            // (メッセージの親にこの窓が要るので、開いた後に登録する)。
+            GlobalHotkeyService.Instance.HelperUnavailable += HotkeyService_HelperUnavailable;
             HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
         }
     }
+
+    private void HotkeyService_HelperUnavailable(IReadOnlyList<HotkeyRegistrationFailure> failures)
+    {
+        var localization = LocalizationManager.Instance;
+        MessageWindow.Show(
+            this,
+            localization.GetString("Hotkey_Error_Title"),
+            localization.GetString("Hotkey_HelperUnavailable_Message"),
+            localization.GetString("Hotkey_HelperUnavailable_Detail"));
+        HotkeyRegistrationFailureMessage.Show(this, failures);
+    }
+
+#if DEBUG
+    private const string DebugToolsFileName = "StarResonanceDps.Debug.dll";
+    private const string MessagePreviewWindowTypeName = "StarResonanceDps.Debug.MessagePreviewWindow";
+
+    // Ctrl+Shift+D でデバッグ用の確認画面(StarResonanceDps.Debug)を開く。
+    // App はそのプロジェクトを参照しない(向こうが App を参照するので輪になる)ため、実行フォルダの dll を読み込む。
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.D || Keyboard.Modifiers != (ModifierKeys.Control | ModifierKeys.Shift))
+        {
+            return;
+        }
+
+        e.Handled = true;
+        var path = Path.Combine(AppContext.BaseDirectory, DebugToolsFileName);
+        if (!File.Exists(path))
+        {
+            Log.Warning("Debug tools were not found: {Path}", path);
+            return;
+        }
+
+        var type = Assembly.LoadFrom(path).GetType(MessagePreviewWindowTypeName, throwOnError: true)!;
+        var window = (Window)Activator.CreateInstance(type)!;
+        window.Owner = this;
+        window.Show();
+    }
+#endif
 
     private void MainWindow_SourceInitialized(object? sender, EventArgs e)
     {

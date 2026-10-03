@@ -116,7 +116,11 @@ public partial class PlayerInfoWidgetView : UserControl
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Log.Warning(ex, "Failed to save player photo");
-            MessageWindow.Show(owner, localization.GetString("PlayerInfo_SaveImageFailed"), ex.Message);
+            MessageWindow.Show(
+                owner,
+                localization.GetString("PlayerInfo_SaveImageFailed_Title"),
+                localization.GetString("PlayerInfo_SaveImageFailed_Message"),
+                localization.GetString("PlayerInfo_SaveImageFailed_Detail"));
         }
     }
 
@@ -134,10 +138,12 @@ public partial class PlayerInfoWidgetView : UserControl
         catch (ExternalException ex)
         {
             Log.Warning(ex, "Failed to copy player photo to clipboard");
+            var localization = LocalizationManager.Instance;
             MessageWindow.Show(
                 Window.GetWindow(this),
-                LocalizationManager.Instance.GetString("PlayerInfo_CopyImageFailed"),
-                ex.Message);
+                localization.GetString("PlayerInfo_CopyImageFailed_Title"),
+                localization.GetString("PlayerInfo_CopyImageFailed_Message"),
+                localization.GetString("PlayerInfo_CopyImageFailed_Detail"));
         }
     }
 
