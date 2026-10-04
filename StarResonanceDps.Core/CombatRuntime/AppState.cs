@@ -130,6 +130,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             LoadCookCuisineTable();
+            LoadFightAttrTable();
 
 
 
@@ -190,6 +191,52 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             HelperMethods.DataTables.CookCuisines.RegenAmountsByBuffId = amounts.ToFrozenDictionary();
             Log.Information("Loaded CookCuisineTable.json");
+        }
+
+        /// <summary>
+        /// 能力値の表を読み、能力値の属性番号を引けるようにする。
+        /// 表が無いと入場のときに残った能力値を 0 に戻せないので、黙って空にせずエラーを出す。
+        /// </summary>
+        private static void LoadFightAttrTable()
+        {
+            string fightAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "FightAttrTable.json");
+            if (!File.Exists(fightAttrTableFile))
+            {
+                Log.Error("FightAttrTable.json is missing. Stats left over from the previous scene are not reset on EnterScene path={Path}", fightAttrTableFile);
+                return;
+            }
+
+            var fightAttrs = JsonConvert.DeserializeObject<Dictionary<string, FightAttr>>(File.ReadAllText(fightAttrTableFile))!;
+            HelperMethods.DataTables.FightAttrs.Data = fightAttrs;
+
+            var statAttrIds = new HashSet<int>();
+            foreach (var fightAttr in fightAttrs.Values)
+            {
+                if (!fightAttr.IsClass)
+                {
+                    continue;
+                }
+
+                foreach (var attrId in new[]
+                {
+                    fightAttr.Id,
+                    fightAttr.AttrFinal,
+                    fightAttr.AttrTotal,
+                    fightAttr.AttrAdd,
+                    fightAttr.AttrExAdd,
+                    fightAttr.AttrPer,
+                    fightAttr.AttrExPer,
+                })
+                {
+                    if (attrId != 0)
+                    {
+                        statAttrIds.Add(attrId);
+                    }
+                }
+            }
+
+            HelperMethods.DataTables.FightAttrs.StatAttrIds = statAttrIds.ToFrozenSet();
+            Log.Information("Loaded FightAttrTable.json");
         }
 
         /// <summary>

@@ -291,6 +291,49 @@ namespace StarResonanceDps.Core.CombatRuntime
         [System.Runtime.InteropServices.DllImport("iphlpapi.dll")]
         private static extern int GetBestInterface(uint destinationAddress, out uint bestInterfaceIndex);
 
+        /// <summary>
+        /// 入場時の自分の全属性に含まれない能力値を 0 にする。
+        /// 全属性は値が 0 の属性を含まず、コンテンツを出て消えた能力値も値なしでは届かないので、
+        /// 重ねるだけだと前のマップから写した値が残る。HP などの状態の値は能力値の表に入らないので触らない。
+        /// </summary>
+        private static void ResetSelfStatsMissingFromEnterScene(long uuid, RepeatedField<Attr> attrs)
+        {
+            if (!EncounterManager.Current.Entities.TryGetValue(uuid, out var entity))
+            {
+                return;
+            }
+
+            var statAttrIds = HelperMethods.DataTables.FightAttrs.StatAttrIds;
+            var arrivedAttrIds = new HashSet<int>();
+            foreach (var attr in attrs)
+            {
+                if (attr.Id != 0 && attr.RawData != null)
+                {
+                    arrivedAttrIds.Add(attr.Id);
+                }
+            }
+
+            foreach (var (key, value) in entity.Attributes.ToArray())
+            {
+                if (!System.Enum.TryParse<EAttrType>(key, ignoreCase: false, out var attrType)
+                    || !statAttrIds.Contains((int)attrType)
+                    || arrivedAttrIds.Contains((int)attrType))
+                {
+                    continue;
+                }
+
+                // 値なしで届いたときと同じ値にする。ProcessAttrs は能力値を int か long で控える。
+                if (value is int intValue && intValue != 0)
+                {
+                    EncounterManager.Current.SetAttrKV(uuid, key, 0);
+                }
+                else if (value is long longValue && longValue != 0)
+                {
+                    EncounterManager.Current.SetAttrKV(uuid, key, 0L);
+                }
+            }
+        }
+
         public static void ProcessEnterScene(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             if (payloadBuffer.Length == 0)
@@ -308,6 +351,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
+                        ResetSelfStatsMissingFromEnterScene(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                         ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                     }
 

@@ -14,5 +14,6 @@ public class HelperMethods
         public static TempAttrTable TempAttrs = new TempAttrTable();
         public static ProfessionSystemTable ProfessionSystems = new ProfessionSystemTable();
         public static CookCuisineTable CookCuisines = new CookCuisineTable();
+        public static FightAttrTable FightAttrs = new FightAttrTable();
     }
 }
