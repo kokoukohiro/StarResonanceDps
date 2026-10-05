@@ -154,6 +154,36 @@ public sealed class GlobalHotkeyService : IDisposable
         }
     }
 
+    /// <summary>
+    /// このプロセスの窓を補助(管理者権限)に前面の窓のすぐ後ろへ置いてもらう。Windows のエラー番号(0 は成功)を返す。補助を使っていなければ null。
+    /// 前面がゲーム(管理者権限)のとき、本体(通常権限)はその窓を基準に置けない。
+    /// </summary>
+    public int? TryPlaceBehindForegroundThroughHelper(IntPtr window)
+    {
+        return RequestThroughHelper(helper => helper.PlaceBehindForeground(window));
+    }
+
+    // 補助に頼む。補助を使っていなければ null。補助が切れたら、このプロセスの中へ切り替えて知らせ、null を返す。
+    private int? RequestThroughHelper(Func<HelperHotkeyRegistrar, int> request)
+    {
+        if (_registrar is not HelperHotkeyRegistrar helper)
+        {
+            return null;
+        }
+
+        try
+        {
+            return request(helper);
+        }
+        catch (HotkeyHelperException exception)
+        {
+            var failures = FallBackToLocal(exception);
+            RegistrationChanged?.Invoke(this, EventArgs.Empty);
+            NotifyHelperUnavailable(failures);
+            return null;
+        }
+    }
+
     /// <summary>登録を全部外す。補助は接続を閉じると終わり、補助が登録したキーもそれで外れる。</summary>
     public void Dispose()
     {

@@ -11,6 +11,8 @@ namespace StarResonanceDps.HotkeyHost;
 /// <summary>
 /// ホットキーを受ける補助。管理者権限で動き、本体(通常権限)が開いた名前付きパイプにつなぐ。
 /// 割り当ての判断は本体がし、ここは言われた割り当てをキーボードのフック(<see cref="KeyboardHotkeyHook"/>)で受けて、押されたら知らせる。
+/// 本体の窓を前面の窓のすぐ後ろへ置くのも頼まれたら行う
+/// (本体は通常権限なので、管理者権限のゲームの窓を基準に置けない)。
 /// パイプが閉じたら(本体が終わったら)終わる。
 /// ログは書かない。失敗は終了コード(<see cref="HotkeyHostProtocol"/>)とエラー番号の返事で本体に渡る。
 /// </summary>
@@ -62,17 +64,24 @@ internal static class Program
 /// </summary>
 internal sealed class HotkeyHostSession
 {
+    private const int ErrorAccessDenied = 5;
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoActivate = 0x0010;
+
     private readonly NamedPipeClientStream _pipe;
     private readonly StreamWriter _writer;
     private readonly object _writeLock = new();
     private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private readonly KeyboardHotkeyHook _hook;
     private readonly List<string> _gameProcessNames = [];
+    private readonly int _ownerProcessId;
     private int _exitCode;
 
     public HotkeyHostSession(NamedPipeClientStream pipe, int ownerProcessId)
     {
         _pipe = pipe;
+        _ownerProcessId = ownerProcessId;
         _writer = new StreamWriter(pipe, new UTF8Encoding(false), leaveOpen: true)
         {
             AutoFlush = true,
@@ -158,7 +167,42 @@ internal sealed class HotkeyHostSession
             return 0;
         }
 
+        if (parts[0] == HotkeyHostProtocol.PlaceBehindForeground
+            && parts.Length == 2
+            && long.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out var windowHandle))
+        {
+            return PlaceBehindForeground(new IntPtr(windowHandle));
+        }
+
         return null;
+    }
+
+    /// <summary>
+    /// 本体の窓を前面の窓のすぐ後ろへ置く(アクティブにはしない)。前面の窓が無いかその窓自身なら何もしない。
+    /// 本体のプロセスの窓でなければ断る。
+    /// </summary>
+    private int PlaceBehindForeground(IntPtr window)
+    {
+        if (!IsOwnerWindow(window))
+        {
+            return ErrorAccessDenied;
+        }
+
+        var foreground = GetForegroundWindow();
+        if (foreground == IntPtr.Zero || foreground == window)
+        {
+            return 0;
+        }
+
+        return SetWindowPos(window, foreground, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoActivate)
+            ? 0
+            : Marshal.GetLastWin32Error();
+    }
+
+    private bool IsOwnerWindow(IntPtr window)
+    {
+        GetWindowThreadProcessId(window, out var processId);
+        return processId == (uint)_ownerProcessId;
     }
 
     // フックの中から呼ばれる。書き込みはフックを抜けてから行う。
@@ -187,4 +231,14 @@ internal sealed class HotkeyHostSession
     {
         return uint.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out value);
     }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr window, out uint processId);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 }

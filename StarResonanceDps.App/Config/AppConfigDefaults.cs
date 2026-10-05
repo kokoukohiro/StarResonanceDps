@@ -53,16 +53,17 @@ public static class AppConfigDefaults
         };
     }
 
-    /// <summary>ホットキーの既定。お気に入り F8 / ピン留め F7 / クリック透過 F6 / 3分計測 F10 / リセット F9。</summary>
+    /// <summary>ホットキーの既定。お気に入り Ctrl+F8 / ピン留め Ctrl+F7 / クリック透過 Ctrl+F6 / 3分計測 Ctrl+F10 / リセット Ctrl+F9。</summary>
     public static HotkeySettingsConfig CreateDefaultHotkeys()
     {
         return new HotkeySettingsConfig
         {
-            StartFavoritesOrStopAll = HotkeyBindingConfig.Create(Key.F8),
-            PinRunningOrUnpinAll = HotkeyBindingConfig.Create(Key.F7),
-            ClickThroughPinnedOrClearAll = HotkeyBindingConfig.Create(Key.F6),
-            ThreeMinuteBenchmark = HotkeyBindingConfig.Create(Key.F10),
-            ResetEncounter = HotkeyBindingConfig.Create(Key.F9)
+            StartFavoritesOrStopAll = HotkeyBindingConfig.Create(Key.F8, ModifierKeys.Control),
+            PinRunningOrUnpinAll = HotkeyBindingConfig.Create(Key.F7, ModifierKeys.Control),
+            ClickThroughPinnedOrClearAll = HotkeyBindingConfig.Create(Key.F6, ModifierKeys.Control),
+            WidgetWindowTopmostAlwaysOrPinnedOnly = HotkeyBindingConfig.Create(Key.F5, ModifierKeys.Control),
+            ThreeMinuteBenchmark = HotkeyBindingConfig.Create(Key.F10, ModifierKeys.Control),
+            ResetEncounter = HotkeyBindingConfig.Create(Key.F9, ModifierKeys.Control)
         };
     }
 

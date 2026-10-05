@@ -167,6 +167,12 @@ internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
         }
     }
 
+    /// <summary>このプロセスの窓を補助に前面の窓のすぐ後ろへ置いてもらう。Windows のエラー番号(0 は成功)を返す。</summary>
+    public int PlaceBehindForeground(IntPtr window)
+    {
+        return Request($"{HotkeyHostProtocol.PlaceBehindForeground} {window.ToInt64().ToString(CultureInfo.InvariantCulture)}");
+    }
+
     /// <summary>補助との接続を閉じ、補助が終わるのを少し待って終了コードを返す。終わらなければ null。</summary>
     public int? DisposeAndGetExitCode()
     {

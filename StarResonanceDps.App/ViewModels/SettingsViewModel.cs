@@ -106,6 +106,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         _lastSavedSettings = settings.Clone();
         LoadFromSettings(settings, applyLanguage: false, applyPreview: false);
         LoadCaptureSettings();
+        _configManager.WidgetWindowTopmostModeSaved += ConfigManager_WidgetWindowTopmostModeSaved;
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -125,6 +126,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     {
         // 受付中に閉じたら取り消して、外していたホットキーを戻す(戻せなかったものはサービスがログに書く)。
         EndHotkeyCapture();
+        _configManager.WidgetWindowTopmostModeSaved -= ConfigManager_WidgetWindowTopmostModeSaved;
         _configManager.ClearSettingsPreview();
         WindowColors.PaletteChanged -= WindowColors_PaletteChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
@@ -737,6 +739,28 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         if (!_isLoadingSettings)
         {
             ApplySettingsPreview();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>
+    /// ホットキーが表示設定「ウィジェットウィンドウ」を切り替えて保存した。表示と保存済みの控えの両方を保存した値に合わせる
+    /// (未保存の扱いにしない)。プレビューは保存の側で合わせてあるので出し直さない。
+    /// </summary>
+    private void ConfigManager_WidgetWindowTopmostModeSaved(object? sender, EventArgs e)
+    {
+        var savedIndex = _configManager.AppConfig.Settings.WidgetWindowTopmostModeIndex;
+        _lastSavedSettings.WidgetWindowTopmostModeIndex = savedIndex;
+
+        _isLoadingSettings = true;
+        try
+        {
+            WidgetWindowTopmostModeIndex = savedIndex;
+        }
+        finally
+        {
+            _isLoadingSettings = false;
         }
 
         OnPropertyChanged(nameof(HasUnsavedChanges));

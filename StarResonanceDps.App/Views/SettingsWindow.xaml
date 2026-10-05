@@ -228,6 +228,29 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_WidgetWindow]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <ComboBox Grid.Column="1"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          SelectedIndex="{Binding WidgetWindowTopmostModeIndex, Mode=TwoWay}">
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[WidgetWindowTopmost_Always]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[WidgetWindowTopmost_PinnedOnly]}" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Language_Title]}"
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
@@ -293,7 +316,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingField}">
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -316,29 +339,6 @@
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_BuffOnly]}" />
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_EntityOnly]}" />
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_MapOnly]}" />
-                                                </ComboBox>
-                                            </Grid>
-                                        </Border>
-
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_WidgetWindow]}"
-                                                               Foreground="{DynamicResource Brush.TextPrimary}"
-                                                               FontSize="14"
-                                                               FontWeight="SemiBold" />
-                                                </StackPanel>
-
-                                                <ComboBox Grid.Column="1"
-                                                          Style="{StaticResource Input.SettingsComboBox}"
-                                                          SelectedIndex="{Binding WidgetWindowTopmostModeIndex, Mode=TwoWay}">
-                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[WidgetWindowTopmost_Always]}" />
-                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[WidgetWindowTopmost_PinnedOnly]}" />
                                                 </ComboBox>
                                             </Grid>
                                         </Border>

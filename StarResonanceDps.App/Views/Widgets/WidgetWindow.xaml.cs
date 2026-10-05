@@ -7,7 +7,9 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Serilog;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views.Widgets;
@@ -30,7 +32,13 @@ public partial class WidgetWindow : Window
     private const int GwlExStyle = -20;
     private const int WsExNoActivate = 0x08000000;
     private const int WsExTransparent = 0x00000020;
+    private const int WsExTopmost = 0x00000008;
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoActivate = 0x0010;
+    private const uint SwpNoOwnerZOrder = 0x0200;
     private const int WmMouseActivate = 0x0021;
+    private static readonly IntPtr HwndTopmost = new(-1);
 
     /// <summary>ヘッダー/フッター1つ分の高さ。XAML の行定義と合わせること。</summary>
     private const double ChromeRowHeight = 30d;
@@ -151,12 +159,84 @@ public partial class WidgetWindow : Window
         Topmost = _isPinned
             || ConfigManager.Instance.GetSettingsSnapshot().WidgetWindowTopmostModeIndex
                 == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
+
+        if (Topmost)
+        {
+            BringToTopmostIfRefused();
+        }
     }
 
-    /// <summary>全体設定(プレビューか保存)が変わった。最前面の条件を当て直す。</summary>
+    /// <summary>
+    /// 最前面の指定が実際に付いたかを確かめ、付いていなければ属する窓を動かさずに上げ直す。
+    /// WPF の <c>Topmost</c> は属する窓も一緒に動かす。この窓が IME の窓(Default IME。最後にアクティブにした窓が持ち主になる)の持ち主のとき、
+    /// IME の窓は最前面にならず、この窓もその後ろに留まる。
+    /// それでも付かなければ警告を出す。
+    /// </summary>
+    private void BringToTopmostIfRefused()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        if (handle == IntPtr.Zero || HasTopmostStyle(handle))
+        {
+            return;
+        }
+
+        if (!SetWindowPos(handle, HwndTopmost, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoActivate | SwpNoOwnerZOrder))
+        {
+            Log.Warning("Could not raise widget window {Title} to the top: Win32 error {Error}", Title, Marshal.GetLastWin32Error());
+        }
+        else if (!HasTopmostStyle(handle))
+        {
+            Log.Warning("Widget window {Title} is still not topmost after raising it without moving owned windows", Title);
+        }
+    }
+
+    /// <summary>
+    /// 全体設定(プレビューか保存)が変わった。最前面の条件を当て直す。
+    /// ピン留め時のみ最前面に切り替わって最前面から外れた窓は、前面の窓のすぐ後ろへ置く
+    /// (普通の窓がほかの窓をアクティブにされたときと同じ位置。アクティブな窓は OS が前に置くので動かさない)。
+    /// </summary>
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {
+        var wasTopmost = Topmost;
         ApplyTopmost();
+        if (wasTopmost && !Topmost && !IsActive)
+        {
+            PlaceBehindForeground();
+        }
+    }
+
+    /// <summary>
+    /// 前面の窓のすぐ後ろへ置く(アクティブにはしない)。前面の窓が無いか、この窓自身なら動かさない。
+    /// 前面がゲーム(管理者権限)だと本体(通常権限)はその窓を基準に置けないので、断られたら補助(管理者権限)に置いてもらう。
+    /// </summary>
+    private void PlaceBehindForeground()
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        var foreground = GetForegroundWindow();
+        if (handle == IntPtr.Zero || foreground == IntPtr.Zero || foreground == handle)
+        {
+            return;
+        }
+
+        if (SetWindowPos(handle, foreground, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoActivate))
+        {
+            return;
+        }
+
+        var error = GlobalHotkeyService.Instance.TryPlaceBehindForegroundThroughHelper(handle);
+        if (error is null)
+        {
+            Log.Warning("Could not place widget window {Title} behind the foreground window, and the hotkey helper is not running", Title);
+        }
+        else if (error != 0)
+        {
+            Log.Warning("The hotkey helper could not place widget window {Title} behind the foreground window: Win32 error {Error}", Title, error);
+        }
+    }
+
+    private static bool HasTopmostStyle(IntPtr handle)
+    {
+        return (GetWindowLong(handle, GwlExStyle) & WsExTopmost) != 0;
     }
 
     /// <summary>
@@ -334,6 +414,13 @@ public partial class WidgetWindow : Window
 
     [DllImport("user32.dll", EntryPoint = "SetWindowLongW")]
     private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {

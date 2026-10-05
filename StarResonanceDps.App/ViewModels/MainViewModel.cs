@@ -532,6 +532,13 @@ public sealed partial class MainViewModel : ViewModelBase
 
                 break;
 
+            case HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly:
+                _configManager.SaveWidgetWindowTopmostModeIndex(
+                    _configManager.GetSettingsSnapshot().WidgetWindowTopmostModeIndex == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex
+                        ? AppConfigDefaults.PinnedOnlyWidgetWindowTopmostModeIndex
+                        : AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex);
+                break;
+
             case HotkeyAction.ThreeMinuteBenchmark:
                 if (MeterSnapshotProvider.GetBenchmarkState().IsActive)
                 {
