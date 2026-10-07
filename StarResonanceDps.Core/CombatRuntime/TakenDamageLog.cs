@@ -52,6 +52,7 @@ public sealed class SkillCastRecord
 
 /// <summary>
 /// ボス大技の予告1件。予告の通知(<c>BossDbm</c>)が届いたら、持続が 0 のものも含めて全部残す。
+/// 予告のバーが終わった時刻にも1件残す(<see cref="IsBarEnd"/>)。
 ///
 /// <para>
 /// 通知は誰が構えたかを運ばないので、<see cref="OwnerMonsterId"/> は通知が届いた時点で
@@ -69,13 +70,17 @@ public sealed class SkillAnnouncementRecord
     [ProtoMember(2)]
     public int OwnerMonsterId { get; set; }
 
-    /// <summary>通知が届いたパケットの到着時刻(UTC)。</summary>
+    /// <summary>通知が届いたパケットの到着時刻(UTC)。<see cref="IsBarEnd"/> ならバーが終わった時刻(UTC)。</summary>
     [ProtoMember(3)]
     public DateTime Timestamp { get; set; }
 
     /// <summary>被ダメと同じ通し番号。並べ直しに使う。</summary>
     [ProtoMember(4)]
     public long Sequence { get; set; }
+
+    /// <summary>予告のバーが終わった時刻の行か(<c>BossDbmBarStore</c> のバーの終わり)。偽なら予告の通知が届いた時刻の行。</summary>
+    [ProtoMember(5)]
+    public bool IsBarEnd { get; set; }
 }
 
 /// <summary>
@@ -106,7 +111,10 @@ public enum TakenDamageLogRecordKind
     Cast,
     Hit,
     Announcement,
-    Death
+    Death,
+
+    /// <summary>予告のバーが終わった時刻の行(<see cref="SkillAnnouncementRecord.IsBarEnd"/>)。</summary>
+    AnnouncementEnd
 }
 
 /// <summary>
@@ -141,7 +149,8 @@ public readonly record struct TakenDamageLogRecord(
 
     public static TakenDamageLogRecord ForAnnouncement(SkillAnnouncementRecord announcement)
     {
-        return new TakenDamageLogRecord(TakenDamageLogRecordKind.Announcement, 0, null, null, announcement, null);
+        var kind = announcement.IsBarEnd ? TakenDamageLogRecordKind.AnnouncementEnd : TakenDamageLogRecordKind.Announcement;
+        return new TakenDamageLogRecord(kind, 0, null, null, announcement, null);
     }
 
     public static TakenDamageLogRecord ForDeath(PlayerDeathRecord death)

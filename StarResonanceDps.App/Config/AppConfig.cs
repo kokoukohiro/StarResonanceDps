@@ -75,6 +75,30 @@ public sealed class SettingsConfig
     /// </summary>
     public HotkeySettingsConfig Hotkeys { get; set; } = AppConfigDefaults.CreateDefaultHotkeys();
 
+    // --- 通知 ---
+    // 何を通知・読み上げるかは各ウィジェットの設定で決める。ここは出し方と音量と声だけ。
+
+    /// <summary>通知方式。0=通知しない / 1=Windows の通知 / 2=読み上げ(<see cref="AppConfigDefaults"/> の定数)。</summary>
+    public int NotificationMethodIndex { get; set; } = AppConfigDefaults.NotificationMethodNoneIndex;
+
+    /// <summary>
+    /// 通知音量 0〜100(%)。Windows の通知の音と読み上げの両方に掛ける(掛け方は <c>SpeechQueue</c>)。
+    /// 100 は Windows の通知の音と Windows の音声では元の大きさ、VOICEVOX では元の大きさを上げた大きさ(50 が元の大きさ)。
+    /// </summary>
+    public int NotificationVolume { get; set; } = AppConfigDefaults.NotificationVolumeDefault;
+
+    /// <summary>読み上げ方式(通知方式が読み上げのときの声)。0=Windows の音声 / 1=VOICEVOX(<see cref="AppConfigDefaults"/> の定数)。</summary>
+    public int SpeechVoiceIndex { get; set; } = AppConfigDefaults.SpeechVoiceWindowsIndex;
+
+    // VOICEVOX の話者。名前も持つのは、エンジンが起動していないときにも選んだ話者と利用規約のリンクを出すため。
+    public string VoicevoxSpeakerUuid { get; set; } = string.Empty;
+    public string VoicevoxSpeakerName { get; set; } = string.Empty;
+
+    /// <summary>VOICEVOX のスタイルの番号。0 も使われる番号なので、未選択は null。</summary>
+    public int? VoicevoxStyleId { get; set; }
+
+    public string VoicevoxStyleName { get; set; } = string.Empty;
+
     [JsonExtensionData]
     public Dictionary<string, JsonElement>? ExtensionData { get; set; }
 
@@ -97,6 +121,13 @@ public sealed class SettingsConfig
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             Hotkeys = Hotkeys?.Clone() ?? AppConfigDefaults.CreateDefaultHotkeys(),
+            NotificationMethodIndex = NotificationMethodIndex,
+            NotificationVolume = NotificationVolume,
+            SpeechVoiceIndex = SpeechVoiceIndex,
+            VoicevoxSpeakerUuid = VoicevoxSpeakerUuid,
+            VoicevoxSpeakerName = VoicevoxSpeakerName,
+            VoicevoxStyleId = VoicevoxStyleId,
+            VoicevoxStyleName = VoicevoxStyleName,
             ExtensionData = CloneExtensionData(ExtensionData)
         };
     }

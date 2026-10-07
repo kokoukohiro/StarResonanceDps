@@ -124,7 +124,7 @@
     <value>设置</value>
   </data>
   <data name="Window_WidgetSettings_Title" xml:space="preserve">
-    <value>{0} 设置</value>
+    <value>{0}设置</value>
   </data>
   <data name="Window_ColorPicker_Title" xml:space="preserve">
     <value>颜色选择器</value>
@@ -211,7 +211,7 @@
     <value>“{0}”已被其他程序占用。</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>无法设置“{0}”(错误 {1})。</value>
+    <value>无法设置“{0}”(错误{1})。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
     <value>游戏操作期间快捷键无效。</value>
@@ -219,6 +219,121 @@
   <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
     <value>快捷键辅助程序未能启动或已中途停止。
 重新启动应用并在用户帐户控制中选择“是”后，游戏操作期间也能使用快捷键。</value>
+  </data>
+  <data name="Settings_Section_Notification_Title" xml:space="preserve">
+    <value>通知设置</value>
+  </data>
+  <data name="Settings_Notification_Method" xml:space="preserve">
+    <value>通知方式</value>
+  </data>
+  <data name="NotificationMethod_None" xml:space="preserve">
+    <value>不通知</value>
+  </data>
+  <data name="NotificationMethod_Windows" xml:space="preserve">
+    <value>Windows通知</value>
+  </data>
+  <data name="NotificationMethod_Speech" xml:space="preserve">
+    <value>朗读</value>
+  </data>
+  <data name="Settings_Notification_Volume" xml:space="preserve">
+    <value>通知音量</value>
+  </data>
+  <data name="Settings_Notification_WindowsNote" xml:space="preserve">
+    <value>※游戏中可能会因Windows的“自动打开请勿打扰”而不显示横幅</value>
+  </data>
+  <data name="Settings_Notification_Speech" xml:space="preserve">
+    <value>朗读方式</value>
+  </data>
+  <data name="SpeechVoice_WindowsVoice" xml:space="preserve">
+    <value>Windows语音</value>
+  </data>
+  <data name="SpeechVoice_Voicevox" xml:space="preserve">
+    <value>VOICEVOX</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeaker" xml:space="preserve">
+    <value>说话人</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxStyle" xml:space="preserve">
+    <value>风格</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxNote" xml:space="preserve">
+    <value>※仅支持日语</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxDownload" xml:space="preserve">
+    <value>下载VOICEVOX</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeakerMissing" xml:space="preserve">
+    <value>{0}(未找到)</value>
+  </data>
+  <data name="Voicevox_Error_Title" xml:space="preserve">
+    <value>VOICEVOX连接错误</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Message" xml:space="preserve">
+    <value>无法连接到VOICEVOX。</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Detail" xml:space="preserve">
+    <value>请启动VOICEVOX。
+如果尚未安装，可以从下方链接下载。</value>
+  </data>
+  <data name="Voicevox_BadResponse_Message" xml:space="preserve">
+    <value>无法读取VOICEVOX的响应。</value>
+  </data>
+  <data name="Voicevox_Policy_Title" xml:space="preserve">
+    <value>{0}的使用条款</value>
+  </data>
+  <data name="WindowsVoice_Missing_Title" xml:space="preserve">
+    <value>Windows语音</value>
+  </data>
+  <data name="WindowsVoice_Missing_Message" xml:space="preserve">
+    <value>Windows中未安装{0}语音。</value>
+  </data>
+  <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
+    <value>在Windows设置中添加{0}语音后即可朗读。</value>
+  </data>
+  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
+    <value>通知文本</value>
+  </data>
+  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
+    <value>※仅运行中的小组件会通知</value>
+  </data>
+  <data name="Settings_Notification_BlankNote" xml:space="preserve">
+    <value>※留空则不通知</value>
+  </data>
+  <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
+    <value>效果时间结束</value>
+  </data>
+  <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
+    <value>药剂·料理增益2分钟以下</value>
+  </data>
+  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+    <value>预兆技能</value>
+  </data>
+  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
+    <value>匹配成功</value>
+  </data>
+  <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
+    <value>HP降低</value>
+  </data>
+  <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
+    <value>玩法</value>
+  </data>
+  <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
+    <value>玩法1</value>
+  </data>
+  <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
+    <value>{Name}的{BuffName}效果已结束</value>
+  </data>
+  <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
+    <value>{Name}的{BuffName}效果不足2分钟</value>
+  </data>
+  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+    <value>{SkillName}来袭</value>
+  </data>
+  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
+    <value>已匹配到{Content}</value>
+  </data>
+  <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
+    <value>{Name}的HP降低了</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
@@ -530,7 +645,7 @@
     <value>实体列表</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
-    <value>图标颜色</value>
+    <value>职业颜色</value>
   </data>
   <data name="Settings_Section_IconColors_Title" xml:space="preserve">
     <value>图标颜色</value>
@@ -644,13 +759,13 @@
     <value>未知</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>图标颜色不透明度</value>
+    <value>职业颜色不透明度</value>
   </data>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>无法复活({0})</value>
   </data>
   <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>图标颜色滤镜</value>
+    <value>职业颜色滤镜</value>
   </data>
   <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
     <value>滤镜颜色</value>
@@ -659,13 +774,13 @@
     <value>滤镜强度</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>图标颜色</value>
+    <value>元素颜色</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>图标颜色不透明度</value>
+    <value>元素颜色不透明度</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>图标颜色滤镜</value>
+    <value>元素颜色滤镜</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
@@ -701,7 +816,7 @@
     <value>技能名称</value>
   </data>
   <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
-    <value>Skill1</value>
+    <value>技能1</value>
   </data>
   <data name="Settings_EquipmentInfo_Customization" xml:space="preserve">
     <value>装备名称</value>
@@ -725,10 +840,10 @@
     <value>预览：</value>
   </data>
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
-    <value>Player1</value>
+    <value>玩家1</value>
   </data>
   <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
-    <value>Entity1</value>
+    <value>实体1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>玩家名</value>
@@ -815,18 +930,18 @@
     <value>Npcap更新</value>
   </data>
   <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
-    <value>是否安装 Npcap？</value>
+    <value>是否安装Npcap？</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>未安装 Npcap，或无法检测到 Npcap 版本。
-要捕获网络数据包，请安装 Npcap。</value>
+    <value>未安装Npcap，或无法检测到Npcap版本。
+要捕获网络数据包，请安装Npcap。</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
-    <value>是否更新 Npcap？</value>
+    <value>是否更新Npcap？</value>
   </data>
   <data name="Confirm_NpcapOutdated_Detail" xml:space="preserve">
-    <value>Npcap 版本({0})低于 1.86。
-为避免问题，强烈建议更新到 1.86 或更高版本。</value>
+    <value>Npcap版本({0})低于1.86。
+为避免问题，强烈建议更新到1.86或更高版本。</value>
   </data>
   <data name="Metric_InstantDps" xml:space="preserve">
     <value>瞬时DPS</value>
@@ -1492,7 +1607,7 @@
     <value>另存为</value>
   </data>
   <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
-    <value>{0} 文件</value>
+    <value>{0}文件</value>
   </data>
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>所有文件</value>

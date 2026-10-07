@@ -15,6 +15,28 @@ public static class AppConfigDefaults
     /// <summary>ウィジェットの窓をピン留め中だけ最前面に出す。</summary>
     public const int PinnedOnlyWidgetWindowTopmostModeIndex = 1;
 
+    /// <summary>通知しない(既定)。</summary>
+    public const int NotificationMethodNoneIndex = 0;
+
+    /// <summary>Windows の通知(トースト)で知らせる。</summary>
+    public const int NotificationMethodWindowsIndex = 1;
+
+    /// <summary>読み上げで知らせる。声は <see cref="SettingsConfig.SpeechVoiceIndex"/>。</summary>
+    public const int NotificationMethodSpeechIndex = 2;
+
+    /// <summary>Windows に入っている声で読み上げる(既定)。</summary>
+    public const int SpeechVoiceWindowsIndex = 0;
+
+    /// <summary>利用者が入れた VOICEVOX で読み上げる。</summary>
+    public const int SpeechVoiceVoicevoxIndex = 1;
+
+    // 通知音量(Windows の通知の音と読み上げ、%)。0 は鳴らさない。
+    // 100 は Windows の通知の音と Windows の音声では元の大きさ、VOICEVOX では値を2倍して掛ける(SpeechQueue.VoicevoxVolumeScale)ので 50 が元の大きさ。
+    public const int NotificationVolumeMin = 0;
+    public const int NotificationVolumeOriginal = 100;
+    public const int NotificationVolumeMax = 100;
+    public const int NotificationVolumeDefault = 100;
+
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#1F1F1F",
@@ -49,7 +71,14 @@ public static class AppConfigDefaults
             WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors(),
-            Hotkeys = CreateDefaultHotkeys()
+            Hotkeys = CreateDefaultHotkeys(),
+            NotificationMethodIndex = NotificationMethodNoneIndex,
+            NotificationVolume = NotificationVolumeDefault,
+            SpeechVoiceIndex = SpeechVoiceWindowsIndex,
+            VoicevoxSpeakerUuid = string.Empty,
+            VoicevoxSpeakerName = string.Empty,
+            VoicevoxStyleId = null,
+            VoicevoxStyleName = string.Empty
         };
     }
 
@@ -119,6 +148,13 @@ public static class AppConfigDefaults
             ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
             : settings.NetCaptureDeviceName.Trim();
         settings.GameCaptureCustomExeName = settings.GameCaptureCustomExeName?.Trim() ?? string.Empty;
+
+        settings.NotificationMethodIndex = Clamp(settings.NotificationMethodIndex, NotificationMethodNoneIndex, NotificationMethodSpeechIndex);
+        settings.NotificationVolume = Clamp(settings.NotificationVolume, NotificationVolumeMin, NotificationVolumeMax);
+        settings.SpeechVoiceIndex = Clamp(settings.SpeechVoiceIndex, SpeechVoiceWindowsIndex, SpeechVoiceVoicevoxIndex);
+        settings.VoicevoxSpeakerUuid = settings.VoicevoxSpeakerUuid?.Trim() ?? string.Empty;
+        settings.VoicevoxSpeakerName = settings.VoicevoxSpeakerName?.Trim() ?? string.Empty;
+        settings.VoicevoxStyleName = settings.VoicevoxStyleName?.Trim() ?? string.Empty;
 
         // 0 は無限。選べる最大は 99 件。
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);

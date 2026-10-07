@@ -9,11 +9,18 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// 被ダメログの表示設定。HP数値の出し方、フィルター、クラスアイコンの色(クラスカラー)。
+/// 被ダメログの表示設定。HP数値の出し方、フィルター、クラスアイコンの色(クラスカラー)、通知の文章(予兆技)。
 /// クラスカラーの形はプレイヤーリストと同じで、フィルターと不透明度は持たない。
 /// </summary>
 public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableObject, IDisposable
 {
+    /// <summary>予兆技の通知の文章に差し込める項目。名前はログの行と同じ名前、スキル名は予告の名前があればそれ。</summary>
+    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] TelegraphedSkillFormatFieldDefinitions =
+    [
+        ("Name", "Settings_EntityInfo_Field_Name", "{Name}"),
+        ("SkillName", "Metric_SkillName", "{SkillName}")
+    ];
+
     private readonly Dictionary<string, MeterClassColorItemViewModel> _classColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, TakenDamageLogTextColorItemViewModel> _textColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private TakenDamageLogWidgetSettingsConfig _lastSaved;
@@ -62,11 +69,21 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         TextColorItems = new ReadOnlyObservableCollection<TakenDamageLogTextColorItemViewModel>(textItems);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
+        TelegraphedSkillNotification = new WidgetNotificationTextItemViewModel(
+            "Settings_TakenDamageLogNotification_TelegraphedSkill",
+            WidgetNotificationTextFormatter.TelegraphedSkillDefaultKey,
+            TelegraphedSkillFormatFieldDefinitions,
+            WidgetNotificationTextFormatter.FormatTelegraphedSkillPreview);
+        TelegraphedSkillNotification.Changed += NotificationText_Changed;
+
         _lastSaved = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config);
         Load(_lastSaved);
     }
 
     public event Action<TakenDamageLogWidgetSettingsConfig>? PreviewChanged;
+
+    /// <summary>通知の文章「予兆技」。</summary>
+    public WidgetNotificationTextItemViewModel TelegraphedSkillNotification { get; }
 
     /// <summary>クラスカラーの行。職ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
@@ -74,7 +91,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     /// <summary>テキストカラーの行。行ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<TakenDamageLogTextColorItemViewModel> TextColorItems { get; }
 
-    public string ClassColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_ClassColors_Title");
+    public string ClassColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_IconColors_Title");
 
     public string TextColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_TakenDamageLogTextColors_Title");
 
@@ -83,6 +100,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        TelegraphedSkillNotification.Changed -= NotificationText_Changed;
 
         foreach (var item in ClassColorItems)
         {
@@ -101,6 +119,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         {
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
+            TelegraphedSkillNotificationFormatString = TelegraphedSkillNotification.CreateSavedValue(),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
             TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
@@ -180,6 +199,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             AttackerFilterIndex = normalized.AttackerFilterIndex;
+            TelegraphedSkillNotification.Load(normalized.TelegraphedSkillNotificationFormatString);
         }
         finally
         {
@@ -197,7 +217,8 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         TakenDamageLogWidgetSettingsConfig right)
     {
         if (left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
-            || left.AttackerFilterIndex != right.AttackerFilterIndex)
+            || left.AttackerFilterIndex != right.AttackerFilterIndex
+            || !string.Equals(left.TelegraphedSkillNotificationFormatString, right.TelegraphedSkillNotificationFormatString, StringComparison.Ordinal))
         {
             return false;
         }
@@ -247,6 +268,12 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
         OnPropertyChanged(nameof(ClassColorSectionTitle));
         OnPropertyChanged(nameof(TextColorSectionTitle));
+        TelegraphedSkillNotification.RefreshLocalizedText();
+    }
+
+    private void NotificationText_Changed(object? sender, EventArgs e)
+    {
+        NotifyChanged();
     }
 
     partial void OnHealthValueDisplayModeIndexChanged(int value)

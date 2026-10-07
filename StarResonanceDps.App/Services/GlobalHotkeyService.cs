@@ -57,6 +57,9 @@ public sealed class GlobalHotkeyService : IDisposable
     private readonly HashSet<HotkeyAction> _registeredActions = [];
     private HotkeySettingsConfig _bindings = new();
     private IReadOnlyList<string> _gameProcessNames = [];
+
+    // 全体設定でゲームの種類をプレビューしている間のプロセス名。null なら保存してある設定から取る。
+    private IReadOnlyList<string>? _previewGameProcessNames;
     private IHotkeyRegistrar? _registrar;
     private bool _isHelperUnavailable;
     private bool _isSuspended;
@@ -91,15 +94,46 @@ public sealed class GlobalHotkeyService : IDisposable
 
     /// <summary>
     /// 割り当てを入れ替えて登録し直す。一時停止中なら控えるだけで、再開したときに登録する。
-    /// ゲームのプロセス名もここで今の設定から取り直す(全体設定の保存では、ゲームの種類がこれより先に反映される)。
+    /// ゲームのプロセス名もここで今の設定から取り直す(全体設定の保存では、ゲームの種類がこれより先に反映される。
+    /// 全体設定でゲームの種類をプレビューしている間はプレビューの値)。
     /// </summary>
     public IReadOnlyList<HotkeyRegistrationFailure> Apply(HotkeySettingsConfig bindings)
     {
         _bindings = bindings.Clone();
-        _gameProcessNames = Utils.GameCapturePreferenceToExeNames(CombatRuntimeSettings.GameCapturePreference);
+        _gameProcessNames = ResolveGameProcessNames();
         var failures = RegisterAgain();
         RegistrationChanged?.Invoke(this, EventArgs.Empty);
         return failures;
+    }
+
+    /// <summary>
+    /// 全体設定でゲームの種類をプレビューしている間、ゲームが前面かの判定に使うプロセス名を差し替える(キーの登録はそのまま)。
+    /// null で保存してある設定へ戻す。
+    /// </summary>
+    public void PreviewGameProcessNames(IReadOnlyList<string>? names)
+    {
+        _previewGameProcessNames = names;
+        _gameProcessNames = ResolveGameProcessNames();
+        if (_registrar is null)
+        {
+            return;
+        }
+
+        try
+        {
+            _registrar.SetGameProcessNames(_gameProcessNames);
+        }
+        catch (HotkeyHelperException exception)
+        {
+            var failures = FallBackToLocal(exception);
+            RegistrationChanged?.Invoke(this, EventArgs.Empty);
+            NotifyHelperUnavailable(failures);
+        }
+    }
+
+    private IReadOnlyList<string> ResolveGameProcessNames()
+    {
+        return _previewGameProcessNames ?? Utils.GameCapturePreferenceToExeNames(CombatRuntimeSettings.GameCapturePreference);
     }
 
     public void Suspend()

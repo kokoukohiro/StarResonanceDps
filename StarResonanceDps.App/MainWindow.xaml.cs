@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
@@ -47,7 +48,7 @@ public partial class MainWindow : Window
 #endif
     }
 
-    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         if (DataContext is MainViewModel viewModel)
         {
@@ -57,6 +58,13 @@ public partial class MainWindow : Window
             // (メッセージの親にこの窓が要るので、開いた後に登録する)。
             GlobalHotkeyService.Instance.HelperUnavailable += HotkeyService_HelperUnavailable;
             HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
+
+            // 読み上げに使う VOICEVOX のスタイルを、最初の通知より前に初期化しておく(返事は待たない)。
+            VoicevoxStyleInitializer.Start();
+
+            // 読み上げの声が使えなければ知らせる(通知方式が読み上げでなければ何もしない)。
+            var settings = ConfigManager.Instance.AppConfig.Settings;
+            await NotificationCheckMessage.CheckSpeechVoiceAsync(this, settings.NotificationMethodIndex, settings.SpeechVoiceIndex);
         }
     }
 

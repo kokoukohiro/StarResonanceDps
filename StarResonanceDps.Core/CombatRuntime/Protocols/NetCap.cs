@@ -89,6 +89,12 @@ public class NetCap
     /// <summary>要求・応答を処理してよいかの関門。<c>null</c> なら全部通す。</summary>
     public Func<uint, uint, bool>? ProxyGate { get; set; }
 
+    /// <summary>
+    /// パケットを1つ処理する直前に、その到着時刻で呼ぶ。到着時刻までに起きた出来事を、パケットの中身より先に記録するのに使う
+    /// (<c>EncounterManager.RecordEndedAnnouncementBars</c>)。
+    /// </summary>
+    public Action<DateTime>? BeforeParsePacket { get; set; }
+
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {
         ProxyHandlers.Add(new ProxyId(serviceId, methodId), handler);
@@ -221,6 +227,16 @@ public class NetCap
         {
             if (RawPacketQueue.TryDequeue(out var rawPacket))
             {
+                // 失敗してもこのパケットの処理は続ける(別の try にする)。
+                try
+                {
+                    BeforeParsePacket?.Invoke(rawPacket.LastPacketTime);
+                }
+                catch (Exception ex)
+                {
+                    LogFailureAndContinue("Before parsing a packet", ex);
+                }
+
                 try
                 {
                     ParsePacket(rawPacket.Data[..rawPacket.Len], rawPacket.LastPacketTime);

@@ -47,6 +47,11 @@ public static class CombatDataCatalog
     /// <summary><see cref="_warningSkillLevelIds"/> のどれかのレベルを持つ技ID。</summary>
     private static FrozenSet<int> _warningSkillIds = FrozenSet<int>.Empty;
     /// <summary>
+    /// ボス大技の予告の番号(<c>DbmTable.Id</c>) → 予告のバーの既定の秒数(<c>CountCDTime</c>)。<c>Data/Raw/DbmTable.json</c>。
+    /// 予告の通知の持続が 0 のとき、ゲームはこの秒数でバーを出す。
+    /// </summary>
+    private static FrozenDictionary<int, int> _dbmCountCdTimes = FrozenDictionary<int, int>.Empty;
+    /// <summary>
     /// 料理のバフ → 名前(そのバフを付けるアイテムの名前)。<c>Data/Localization/CuisineBuffs.json</c>。
     /// <c>DataTools/gen_buff_groups.py</c> が生成する。バフ自身の名前は「料理」の1語に丸められているので、こちらを先に引く。
     /// </summary>
@@ -90,6 +95,16 @@ public static class CombatDataCatalog
 
     /// <summary>特化の番号(<c>SubProfessionId</c>)→ 特化の名前。<c>Data/Localization/ClassSpecNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _classSpecNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>パーティの目的(<c>TeamTargetTable</c> の行)→ 名前。パーティのマッチングのマッチング先。<c>Data/Localization/TeamTargetNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _teamTargetNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>活動(<c>SeasonActTable</c> の行)→ 名前。活動のマッチングのマッチング先。<c>Data/Localization/SeasonActNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _seasonActNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
@@ -259,12 +274,15 @@ public static class CombatDataCatalog
             _classSpecNames = LoadLocalizedText("ClassSpecNames", out _);
             _seasonNames = LoadLocalizedText("SeasonNames", out _);
             _seasonRankNames = LoadLocalizedText("SeasonRankNames", out _);
+            _teamTargetNames = LoadLocalizedText("TeamTargetNames", out _);
+            _seasonActNames = LoadLocalizedText("SeasonActNames", out _);
             _equipNames = LoadLocalizedText("EquipNames", out _);
             _equipEffectTexts = LoadLocalizedText("EquipEffectTexts", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
             _warningSkillLevelIds = LoadWarningSkillLevels();
             _warningSkillIds = _warningSkillLevelIds.Select(skillLevelId => skillLevelId / 100).ToFrozenSet();
+            _dbmCountCdTimes = LoadDbmCountCdTimes();
             LoadEquipments();
             LoadBuffGroups();
             _sceneNames = LoadLocalizedText("SceneNames", out _);
@@ -419,6 +437,26 @@ public static class CombatDataCatalog
     public static string GetSeasonName(int seasonId)
     {
         return ResolveText(_seasonNames, Volatile.Read(ref _cultureName), seasonId);
+    }
+
+    /// <summary>
+    /// マッチング先の名前(マッチング成立の通知の <c>MatchKeyInfo</c>)。番号の意味は種類で決まる:
+    /// パーティのマッチングは <c>TeamTargetTable</c>、活動のマッチングは <c>SeasonActTable</c> の行。表示中の言語で引き、無ければ空。
+    /// </summary>
+    public static string GetMatchTargetName(Zproto.EMatchType matchType, long matchTypeUuid)
+    {
+        if (matchTypeUuid is <= 0 or > int.MaxValue)
+        {
+            return string.Empty;
+        }
+
+        var names = matchType switch
+        {
+            Zproto.EMatchType.Team => _teamTargetNames,
+            Zproto.EMatchType.Activity => _seasonActNames,
+            _ => null
+        };
+        return names is null ? string.Empty : ResolveText(names, Volatile.Read(ref _cultureName), (int)matchTypeUuid);
     }
 
     /// <summary>
@@ -1027,6 +1065,12 @@ public static class CombatDataCatalog
         return _warningSkillIds.Contains(skillId);
     }
 
+    /// <summary>予告の番号が予告の表にあれば、バーの既定の秒数(<c>CountCDTime</c>)を返す。表に無い番号のバーはゲームも出さない。</summary>
+    public static bool TryGetDbmCountCdTime(int dbmId, out int seconds)
+    {
+        return _dbmCountCdTimes.TryGetValue(dbmId, out seconds);
+    }
+
     /// <summary>
     /// ボス大技の予告の通知(<c>DbmTable.Id</c>)から技IDを引く。
     /// <c>SkillTable</c> にその番号があればその技、無ければその番号を <c>EffectIDs</c> に持つ技。
@@ -1573,6 +1617,30 @@ public static class CombatDataCatalog
         var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
             ?? throw new InvalidDataException($"{path} is empty.");
         return skillLevelIds.ToFrozenSet();
+    }
+
+    /// <summary>
+    /// 予告の表の番号と既定の秒数。ファイルが無ければエラーを出して空(予告のバーの終わりが決まらないので、予兆技の予告は通知されない)。
+    /// </summary>
+    private static FrozenDictionary<int, int> LoadDbmCountCdTimes()
+    {
+        var path = Path.Combine(Utils.DATA_DIR_NAME, AppState.RawTableDirectoryName, "DbmTable.json");
+        if (!File.Exists(path))
+        {
+            Log.Error("DbmTable.json is missing. Boss announcement bars cannot be timed path={Path}", path);
+            return FrozenDictionary<int, int>.Empty;
+        }
+
+        var rows = JsonConvert.DeserializeObject<Dictionary<string, DbmTableRow>>(File.ReadAllText(path))
+            ?? throw new InvalidDataException($"{path} is empty.");
+        return rows.Values.ToFrozenDictionary(row => row.Id, row => row.CountCDTime);
+    }
+
+    private sealed class DbmTableRow
+    {
+        public int Id { get; set; }
+
+        public int CountCDTime { get; set; }
     }
 
     /// <summary>装備の表の2つ組の鍵(属性庫の型と庫ID、効果の種類と番号)。詰め方は <see cref="MakeSourceKey"/> と同じ。</summary>

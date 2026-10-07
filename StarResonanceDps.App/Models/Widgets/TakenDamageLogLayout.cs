@@ -9,14 +9,17 @@ public enum TakenDamageLogRowKind
     Cast,
     Skill,
     Hit,
-    Death
+    Death,
+
+    /// <summary>予告のバーが終わった時刻の行。技の行と同じ書式で、下に被弾は並べない。</summary>
+    AnnouncementEnd
 }
 
 /// <summary>
 /// 被ダメログの画面の1行ぶんの中身。
 ///
 /// <para>
-/// <see cref="Line"/> は、予告行・詠唱行・技の行ならその記録、被弾行なら畳んだ被弾のうち最後のもの。
+/// <see cref="Line"/> は、予告行・予告のバーの終わりの行・詠唱行・技の行ならその記録、被弾行なら畳んだ被弾のうち最後のもの。
 /// 被弾行の <see cref="Value"/> は畳んだ被弾の値の合計で、HP・最大HP・バリアは畳んだ被弾のうち HP を持つもの
 /// (同期の中で、その技の行の最後の被弾)の値。どれも HP を持たなければ <c>null</c>。
 /// </para>
@@ -66,10 +69,15 @@ public sealed class TakenDamageLogLayout
     /// <returns>中身が変わった行の先頭の位置。呼び出し側はそこから後ろを出し直す。変わった行が無ければ <see cref="Rows"/> の件数。</returns>
     public int Append(TakenDamageLogLine line)
     {
-        if (line.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.Cast)
+        if (line.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.AnnouncementEnd or TakenDamageLogRecordKind.Cast)
         {
             var row = new TakenDamageLogRow(
-                line.Kind == TakenDamageLogRecordKind.Announcement ? TakenDamageLogRowKind.Announcement : TakenDamageLogRowKind.Cast,
+                line.Kind switch
+                {
+                    TakenDamageLogRecordKind.Announcement => TakenDamageLogRowKind.Announcement,
+                    TakenDamageLogRecordKind.AnnouncementEnd => TakenDamageLogRowKind.AnnouncementEnd,
+                    _ => TakenDamageLogRowKind.Cast
+                },
                 line,
                 0,
                 null,
@@ -212,7 +220,7 @@ public sealed class TakenDamageLogLayout
     private sealed record Fold(FoldKey? Key, TakenDamageLogRow Row);
 
     /// <summary>
-    /// 開いている到着時刻の行のまとまり。予告・詠唱の1行か、技の行とその下の被弾か、
+    /// 開いている到着時刻の行のまとまり。予告・予告のバーの終わり・詠唱の1行か、技の行とその下の被弾か、
     /// 「システムの攻撃」の技の行とその下のダメージの無い死亡。
     /// </summary>
     private sealed class OpenBlock

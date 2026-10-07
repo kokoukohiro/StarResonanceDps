@@ -211,7 +211,7 @@
     <value>「{0}」はほかのアプリが使用中です。</value>
   </data>
   <data name="Hotkey_RegisterFailed_Error" xml:space="preserve">
-    <value>「{0}」を設定できませんでした(エラー {1})。</value>
+    <value>「{0}」を設定できませんでした(エラー{1})。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
     <value>ゲームの操作中はホットキーが効きません。</value>
@@ -219,6 +219,58 @@
   <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
     <value>ホットキー用の補助プログラムを起動できなかったか、途中で停止しました。
 アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ゲームの操作中も効くようになります。</value>
+  </data>
+  <data name="Settings_Section_Notification_Title" xml:space="preserve">
+    <value>通知設定</value>
+  </data>
+  <data name="Settings_Notification_Speech" xml:space="preserve">
+    <value>読み上げ方法</value>
+  </data>
+  <data name="SpeechVoice_WindowsVoice" xml:space="preserve">
+    <value>Windowsの音声</value>
+  </data>
+  <data name="SpeechVoice_Voicevox" xml:space="preserve">
+    <value>VOICEVOX</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeaker" xml:space="preserve">
+    <value>話者</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxStyle" xml:space="preserve">
+    <value>スタイル</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxNote" xml:space="preserve">
+    <value>※日本語のみ対応</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxDownload" xml:space="preserve">
+    <value>VOICEVOXをダウンロード</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeakerMissing" xml:space="preserve">
+    <value>{0}(見つかりません)</value>
+  </data>
+  <data name="Voicevox_Error_Title" xml:space="preserve">
+    <value>VOICEVOX接続エラー</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Message" xml:space="preserve">
+    <value>VOICEVOXに接続できません。</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Detail" xml:space="preserve">
+    <value>VOICEVOXを起動してください。
+インストールしていない場合は、下記のリンクからダウンロードできます。</value>
+  </data>
+  <data name="Voicevox_BadResponse_Message" xml:space="preserve">
+    <value>VOICEVOXの応答を読み取れませんでした。</value>
+  </data>
+  <data name="Voicevox_Policy_Title" xml:space="preserve">
+    <value>{0}の利用規約</value>
+  </data>
+  <data name="WindowsVoice_Missing_Title" xml:space="preserve">
+    <value>Windowsの音声</value>
+  </data>
+  <data name="WindowsVoice_Missing_Message" xml:space="preserve">
+    <value>Windowsに{0}の音声が入っていません。</value>
+  </data>
+  <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
+    <value>Windowsの設定で{0}の音声を追加すると、読み上げられるようになります。</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>
@@ -530,7 +582,7 @@
     <value>エンティティリスト</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
-    <value>アイコンカラー</value>
+    <value>クラスカラー</value>
   </data>
   <data name="Settings_Section_IconColors_Title" xml:space="preserve">
     <value>アイコンカラー</value>
@@ -644,13 +696,13 @@
     <value>不明</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>アイコンカラーの不透明度</value>
+    <value>クラスカラーの不透明度</value>
   </data>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>蘇生不可({0})</value>
   </data>
   <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>アイコンカラーのフィルター</value>
+    <value>クラスカラーのフィルター</value>
   </data>
   <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
     <value>フィルターカラー</value>
@@ -659,13 +711,13 @@
     <value>フィルターの強さ</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>アイコンカラー</value>
+    <value>属性カラー</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>アイコンカラーの不透明度</value>
+    <value>属性カラーの不透明度</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>アイコンカラーのフィルター</value>
+    <value>属性カラーのフィルター</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
@@ -701,7 +753,7 @@
     <value>スキル名</value>
   </data>
   <data name="Settings_SkillInfo_PreviewName" xml:space="preserve">
-    <value>Skill1</value>
+    <value>スキル1</value>
   </data>
   <data name="Settings_EquipmentInfo_Customization" xml:space="preserve">
     <value>装備名</value>
@@ -725,10 +777,10 @@
     <value>プレビュー：</value>
   </data>
   <data name="Settings_PlayerInfo_PreviewName" xml:space="preserve">
-    <value>Player1</value>
+    <value>プレイヤー1</value>
   </data>
   <data name="Settings_EntityInfo_PreviewName" xml:space="preserve">
-    <value>Entity1</value>
+    <value>エンティティ1</value>
   </data>
   <data name="Settings_PlayerInfo_Field_Name" xml:space="preserve">
     <value>プレイヤー名</value>
@@ -1492,7 +1544,7 @@
     <value>名前を付けて保存</value>
   </data>
   <data name="PlayerInfo_SaveImageFilterFormat" xml:space="preserve">
-    <value>{0} ファイル</value>
+    <value>{0}ファイル</value>
   </data>
   <data name="PlayerInfo_SaveImageAllFilesFilter" xml:space="preserve">
     <value>すべてのファイル</value>
@@ -1534,5 +1586,68 @@
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
     <value>ほかのアプリがクリップボードを使っている可能性があります。
 少し待ってから、もう一度コピーしてください。</value>
+  </data>
+  <data name="Settings_Notification_Method" xml:space="preserve">
+    <value>通知方法</value>
+  </data>
+  <data name="NotificationMethod_None" xml:space="preserve">
+    <value>通知しない</value>
+  </data>
+  <data name="NotificationMethod_Windows" xml:space="preserve">
+    <value>Windows通知</value>
+  </data>
+  <data name="NotificationMethod_Speech" xml:space="preserve">
+    <value>読み上げ</value>
+  </data>
+  <data name="Settings_Notification_Volume" xml:space="preserve">
+    <value>通知音量</value>
+  </data>
+  <data name="Settings_Notification_WindowsNote" xml:space="preserve">
+    <value>※ゲーム中は、Windowsの「応答不可を自動的にオンにする」によりバナーが表示されないことがあります</value>
+  </data>
+  <data name="Settings_Notification_BlankNote" xml:space="preserve">
+    <value>※空欄にすると通知しません</value>
+  </data>
+  <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
+    <value>効果時間切れ</value>
+  </data>
+  <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
+    <value>薬剤・料理バフ2分以下</value>
+  </data>
+  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+    <value>予兆技</value>
+  </data>
+  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
+    <value>マッチング成立</value>
+  </data>
+  <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
+    <value>HP低下</value>
+  </data>
+  <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
+    <value>コンテンツ</value>
+  </data>
+  <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
+    <value>コンテンツ1</value>
+  </data>
+  <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
+    <value>{Name}の{BuffName}の効果が切れました</value>
+  </data>
+  <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
+    <value>{Name}の{BuffName}効果が2分以下です</value>
+  </data>
+  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+    <value>{SkillName}が来ます</value>
+  </data>
+  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
+    <value>{Content}にマッチングしました</value>
+  </data>
+  <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
+    <value>{Name}のHPが低下しました</value>
+  </data>
+  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
+    <value>通知テキスト</value>
+  </data>
+  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
+    <value>※起動中のウィジェットのみが通知します</value>
   </data>
 </root>

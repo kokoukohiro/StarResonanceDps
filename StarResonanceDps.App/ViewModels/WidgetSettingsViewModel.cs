@@ -730,6 +730,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     partial void OnBackgroundImagePathChanged(string? value)
     {
+        // 背景画像を選んでいる間は、ウィンドウの色の枠をどれも選んでいない表示にする。
+        // 選んでいる色は保存し、画像が見つからないときの塗りに使う。
+        WindowColors.IsSelectionHidden = !string.IsNullOrWhiteSpace(value);
         NotifyBackgroundImageChanged();
     }
 

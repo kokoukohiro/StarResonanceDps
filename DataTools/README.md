@@ -19,6 +19,7 @@ python gen_season_talents.py  # シーズンタレントの型の根ノードの
 python gen_class_specs.py     # 職業の特化の名前
 python gen_seasons.py         # シーズンの名前とシーズンランクの名前
 python gen_equips.py          # 装備の名前・数値・効果の文言
+python gen_match_targets.py   # マッチング先(パーティ・活動)の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -105,6 +106,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
 | `gen_equips.py` | `Data/Localization/EquipNames.json`<br>`Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
+| `gen_match_targets.py` | `Data/Localization/TeamTargetNames.json`<br>`Data/Localization/SeasonActNames.json` |
 
 ## 全ツール共通の仕様
 
@@ -713,3 +715,13 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 - 1つの段階に特化が2つ当たる、職業のクラスR1 の段階が2行ある
 - 段階の欄が空の特化が2つ以上ある、それがどの職業の BdType0 の段階でもない、特化の欄が空の行があるのに段階の欄が空の特化が無い
 - 文言に上の3つ以外の差し込みか `{0}` / `{1}` 以外の波括弧がある、一時属性とバフで番号が重なる
+
+## gen_match_targets.py
+
+プレイヤーリストの通知「マッチング成立」で、マッチング先の名前を引くのに使う。
+マッチング成立の通知はマッチング先を種類と番号で持ち、番号がどの表の行かは種類で決まる。
+
+- `TeamTargetNames.json`: **鍵は `TeamTargetTable` の行**(パーティのマッチング)。値は `Name` で、難易度まで含む
+- `SeasonActNames.json`: **鍵は `SeasonActTable` の行**(活動のマッチング)。値は `Name`
+
+鍵はそれぞれの表の行(4言語ぶんの和)。2つの表は同じ番号が別のものを指すので、ファイルを分ける。

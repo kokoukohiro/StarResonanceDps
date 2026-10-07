@@ -62,12 +62,12 @@ public static partial class PlayerInfoFormatFormatter
     {
         return Format(
             new PlayerInfoFormatData(
-                123456789,
+                39733357,
                 LocalizationManager.Instance.GetString("Settings_PlayerInfo_PreviewName"),
                 2,
                 PlayerClassSpec.FrostMageIcicle,
                 25000,
-                8,
+                1800,
                 50,
                 true,
                 false,

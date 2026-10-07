@@ -59,6 +59,29 @@ namespace StarResonanceDps.Core.CombatRuntime
             SceneName = null!;
             ChannelLineId = 0;
         }
+
+        // 予告のバーの終わりの行を、どの到着時刻まで残したか。到着時刻とともに進むだけなので消さない。
+        private static DateTime _announcementBarsRecordedUntil = DateTime.MinValue;
+
+        /// <summary>
+        /// パケットを1つ処理する直前に呼ぶ(<c>NetCap.BeforeParsePacket</c>)。そのパケットの到着時刻までに終わった予告のバーを、
+        /// 今のエンカウンターの被ダメログへ終わりの行として残す。パケットの出来事より前に入るので、並びはバーの終わりの時刻どおりになる。
+        /// 途中で消えたバー・上書きされたバーは控え(<see cref="Services.BossDbmBarStore"/>)に無いので残らない。
+        /// </summary>
+        public static void RecordEndedAnnouncementBars(DateTime arrivalTime)
+        {
+            if (arrivalTime <= _announcementBarsRecordedUntil)
+            {
+                return;
+            }
+
+            var ended = Services.BossDbmBarStore.Instance.GetEndedBetween(_announcementBarsRecordedUntil, arrivalTime);
+            _announcementBarsRecordedUntil = arrivalTime;
+            foreach (var bar in ended)
+            {
+                Current.AddSkillAnnouncementBarEnd(bar);
+            }
+        }
         public delegate void BattleStartEventHandler(EventArgs e);
         public static event BattleStartEventHandler? BattleStart;
         public delegate void EncounterStartEventHandler(EncounterStartEventArgs e);
@@ -1158,6 +1181,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
+                RecordBossDbmBar(sceneEvent.IntParams?.Count ?? 0, skillId, duration, insertion, extraPacketData);
                 AddSkillAnnouncement(skillId, extraPacketData);
                 OnSceneEvent(this, new SceneEventBossDbmEventArgs() { EventType = WorldEventType.BossDbm, SkillId = skillId, Duration = duration, Insertion = insertion, Timestamp = timestamp });
             }
@@ -1741,13 +1765,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            var ownerMonsterId = 0;
-            if (CombatDataCatalog.TryResolveDbmSkillId(dbmId, out var skillId))
-            {
-                Services.NearbyMonsterIndex.Instance.TryFindMonsterId(
-                    monsterId => CombatDataCatalog.MonsterHasSkill(monsterId, skillId),
-                    out ownerMonsterId);
-            }
+            var (skillId, ownerMonsterId) = ResolveAnnouncementSource(dbmId);
 
             var announcement = new SkillAnnouncementRecord
             {
@@ -1762,6 +1780,84 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ExData.SkillAnnouncements.Add(announcement);
                 _takenDamageLog.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
             }
+        }
+
+        /// <summary>
+        /// 予告のバーが終わった時刻に、被ダメログへ「主の予告技」の行を残す。技と主はバーに控えた値(予告の行と同じ決め方)。
+        /// 呼ぶのは <see cref="EncounterManager.RecordEndedAnnouncementBars"/> だけ。
+        /// </summary>
+        public void AddSkillAnnouncementBarEnd(Services.BossDbmBarStore.BossDbmBar bar)
+        {
+            var announcement = new SkillAnnouncementRecord
+            {
+                SkillId = bar.SkillId,
+                OwnerMonsterId = bar.OwnerMonsterId,
+                Timestamp = bar.EndTimeUtc,
+                Sequence = NextTakenDamageLogSequence(),
+                IsBarEnd = true,
+            };
+
+            lock (_takenDamageLogGate)
+            {
+                ExData.SkillAnnouncements.Add(announcement);
+                _takenDamageLog.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+            }
+        }
+
+        /// <summary>
+        /// 予告の番号から技を引き、周囲にいるモンスターからその技を持つものの種別IDを引く。引けなければどちらも 0。
+        /// 被ダメログの予告の行と予告のバーの控えが同じ決め方を使う。
+        /// </summary>
+        private static (int SkillId, int OwnerMonsterId) ResolveAnnouncementSource(int dbmId)
+        {
+            var ownerMonsterId = 0;
+            if (CombatDataCatalog.TryResolveDbmSkillId(dbmId, out var skillId))
+            {
+                Services.NearbyMonsterIndex.Instance.TryFindMonsterId(
+                    monsterId => CombatDataCatalog.MonsterHasSkill(monsterId, skillId),
+                    out ownerMonsterId);
+            }
+
+            return (skillId, ownerMonsterId);
+        }
+
+        /// <summary>
+        /// ボス大技の予告のバーを控える(<see cref="Services.BossDbmBarStore"/>)。決め方はゲームと同じ:
+        /// 番号が無い通知は何もしない、番号・持続・insertion が全部 0 なら全部消す、
+        /// バーの長さは持続の秒数(0 なら予告の表の <c>CountCDTime</c>)、表に無い番号と長さ 0 のバーは作らない。
+        /// </summary>
+        private static void RecordBossDbmBar(int intParamCount, int dbmId, int duration, int insertion, ExtraPacketData extraPacketData)
+        {
+            if (intParamCount == 0)
+            {
+                return;
+            }
+
+            if (intParamCount >= 3 && dbmId == 0 && duration == 0 && insertion == 0)
+            {
+                Services.BossDbmBarStore.Instance.Clear();
+                return;
+            }
+
+            if (!CombatDataCatalog.TryGetDbmCountCdTime(dbmId, out var countCdTime))
+            {
+                Serilog.Log.Warning("Boss announcement {DbmId} is not in DbmTable. No announcement bar is timed for it", dbmId);
+                return;
+            }
+
+            var seconds = duration != 0 ? duration : countCdTime;
+            if (seconds <= 0)
+            {
+                Serilog.Log.Warning("Boss announcement {DbmId} has no duration. No announcement bar is timed for it", dbmId);
+                return;
+            }
+
+            var (skillId, ownerMonsterId) = ResolveAnnouncementSource(dbmId);
+            Services.BossDbmBarStore.Instance.Set(new Services.BossDbmBarStore.BossDbmBar(
+                dbmId,
+                skillId,
+                ownerMonsterId,
+                extraPacketData.ArrivalTime.AddSeconds(seconds)));
         }
 
         /// <summary>

@@ -622,7 +622,7 @@
     <value>クイックホイールのアクションを単独で設定する</value>
   </data>
   <data name="Keybind.Dialog.SelectSaveFile.Filter" xml:space="preserve">
-    <value>Bytes ファイル (*.bytes)|*.bytes</value>
+    <value>Bytesファイル (*.bytes)|*.bytes</value>
   </data>
   <data name="Keybind.Dialog.SelectSaveFile.Title" xml:space="preserve">
     <value>設定ファイルを選択</value>
@@ -832,13 +832,13 @@ localsave\Env1\[数字のフォルダ]\[キャラクターUIDのフォルダ]\lo
     <value>補助キー設定が見つかりません。</value>
   </data>
   <data name="Keybind.Error.InvalidActionHelper" xml:space="preserve">
-    <value>{0} の補助キー設定が不正です。</value>
+    <value>{0}の補助キー設定が不正です。</value>
   </data>
   <data name="Keybind.Error.InvalidActionKey" xml:space="preserve">
-    <value>{0} のキーが不正です。</value>
+    <value>{0}のキーが不正です。</value>
   </data>
   <data name="Keybind.Error.InvalidActionValue" xml:space="preserve">
-    <value>{0} の値が不正です。</value>
+    <value>{0}の値が不正です。</value>
   </data>
   <data name="Keybind.Error.InvalidControllerType" xml:space="preserve">
     <value>ゲームパッド種類の値が不正です。</value>

@@ -56,6 +56,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         GlobalHotkeyService.Instance.Dispose();
+        NotificationService.Shutdown();
         SkillCooldownTracker.Instance.Shutdown();
         CombatRuntimeHost.Instance.Shutdown();
         PluginManager.Instance.ShutdownAll();

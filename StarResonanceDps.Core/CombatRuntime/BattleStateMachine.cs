@@ -34,6 +34,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.SummonSourceIndex.Instance.Clear();
             Services.SourceLandingResolver.Instance.Clear();
             Services.NearbyMonsterIndex.Instance.Clear();
+            Services.BossDbmBarStore.Instance.Clear();
 
         }
 

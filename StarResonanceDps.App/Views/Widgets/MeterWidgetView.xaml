@@ -13,7 +13,7 @@
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowSurfaceBrush}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
             <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Padding" Value="4" />

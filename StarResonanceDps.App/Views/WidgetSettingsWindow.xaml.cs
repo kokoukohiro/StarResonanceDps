@@ -220,6 +220,21 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(BuffListHiddenBuffsHost);
     }
 
+    private void BuffCardNotificationNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffCardNotificationHost);
+    }
+
+    private void TakenDamageLogNotificationNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(TakenDamageLogNotificationHost);
+    }
+
+    private void PlayerListNotificationNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(PlayerListNotificationHost);
+    }
+
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);

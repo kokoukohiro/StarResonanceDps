@@ -220,6 +220,121 @@
     <value>The hotkey helper program could not start or stopped unexpectedly.
 Restart the app and select "Yes" in User Account Control to use hotkeys while playing.</value>
   </data>
+  <data name="Settings_Section_Notification_Title" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Settings_Notification_Method" xml:space="preserve">
+    <value>Notification method</value>
+  </data>
+  <data name="NotificationMethod_None" xml:space="preserve">
+    <value>Don't notify</value>
+  </data>
+  <data name="NotificationMethod_Windows" xml:space="preserve">
+    <value>Windows notification</value>
+  </data>
+  <data name="NotificationMethod_Speech" xml:space="preserve">
+    <value>Read aloud</value>
+  </data>
+  <data name="Settings_Notification_Volume" xml:space="preserve">
+    <value>Notification volume</value>
+  </data>
+  <data name="Settings_Notification_WindowsNote" xml:space="preserve">
+    <value>Note: Banners may not appear during games because of the Windows setting "Turn on do not disturb automatically".</value>
+  </data>
+  <data name="Settings_Notification_Speech" xml:space="preserve">
+    <value>Read-aloud method</value>
+  </data>
+  <data name="SpeechVoice_WindowsVoice" xml:space="preserve">
+    <value>Windows voice</value>
+  </data>
+  <data name="SpeechVoice_Voicevox" xml:space="preserve">
+    <value>VOICEVOX</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeaker" xml:space="preserve">
+    <value>Speaker</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxStyle" xml:space="preserve">
+    <value>Style</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxNote" xml:space="preserve">
+    <value>Note: Japanese only</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxDownload" xml:space="preserve">
+    <value>Download VOICEVOX</value>
+  </data>
+  <data name="Settings_Notification_VoicevoxSpeakerMissing" xml:space="preserve">
+    <value>{0} (not found)</value>
+  </data>
+  <data name="Voicevox_Error_Title" xml:space="preserve">
+    <value>VOICEVOX connection error</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Message" xml:space="preserve">
+    <value>Cannot connect to VOICEVOX.</value>
+  </data>
+  <data name="Voicevox_ConnectFailed_Detail" xml:space="preserve">
+    <value>Please start VOICEVOX.
+If it is not installed, you can download it from the link below.</value>
+  </data>
+  <data name="Voicevox_BadResponse_Message" xml:space="preserve">
+    <value>Could not read the response from VOICEVOX.</value>
+  </data>
+  <data name="Voicevox_Policy_Title" xml:space="preserve">
+    <value>{0} terms of use</value>
+  </data>
+  <data name="WindowsVoice_Missing_Title" xml:space="preserve">
+    <value>Windows voice</value>
+  </data>
+  <data name="WindowsVoice_Missing_Message" xml:space="preserve">
+    <value>No {0} voice is installed in Windows.</value>
+  </data>
+  <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
+    <value>Add a {0} voice in the Windows settings to enable reading aloud.</value>
+  </data>
+  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
+    <value>Notification Text</value>
+  </data>
+  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
+    <value>Note: Only running widgets send notifications.</value>
+  </data>
+  <data name="Settings_Notification_BlankNote" xml:space="preserve">
+    <value>Note: Leave a field blank to turn off that notification.</value>
+  </data>
+  <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
+    <value>Effect expired</value>
+  </data>
+  <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
+    <value>Potion/cuisine buff 2 min or less</value>
+  </data>
+  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+    <value>Telegraphed skill</value>
+  </data>
+  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
+    <value>Match found</value>
+  </data>
+  <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
+    <value>Low HP</value>
+  </data>
+  <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
+    <value>Content1</value>
+  </data>
+  <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
+    <value>{BuffName} on {Name} has expired</value>
+  </data>
+  <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
+    <value>{Name}'s {BuffName} effect has 2 minutes or less left</value>
+  </data>
+  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+    <value>{SkillName} incoming</value>
+  </data>
+  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
+    <value>Match found: {Content}</value>
+  </data>
+  <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
+    <value>{Name}'s HP is low</value>
+  </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
   </data>
@@ -530,7 +645,7 @@ Restart the app and select "Yes" in User Account Control to use hotkeys while pl
     <value>Entity List</value>
   </data>
   <data name="Settings_Section_ClassColors_Title" xml:space="preserve">
-    <value>Icon Colors</value>
+    <value>Class Colors</value>
   </data>
   <data name="Settings_Section_IconColors_Title" xml:space="preserve">
     <value>Icon Colors</value>
@@ -644,13 +759,13 @@ Restart the app and select "Yes" in User Account Control to use hotkeys while pl
     <value>Unknown</value>
   </data>
   <data name="Settings_ClassColors_Opacity" xml:space="preserve">
-    <value>Icon Colors Opacity</value>
+    <value>Class Colors Opacity</value>
   </data>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>No Revive ({0})</value>
   </data>
   <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>Icon Color Filter</value>
+    <value>Class Color Filter</value>
   </data>
   <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
     <value>Filter Color</value>
@@ -659,13 +774,13 @@ Restart the app and select "Yes" in User Account Control to use hotkeys while pl
     <value>Filter Strength</value>
   </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
-    <value>Icon Colors</value>
+    <value>Element Colors</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
-    <value>Icon Colors Opacity</value>
+    <value>Element Colors Opacity</value>
   </data>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>Icon Color Filter</value>
+    <value>Element Colors Filter</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>

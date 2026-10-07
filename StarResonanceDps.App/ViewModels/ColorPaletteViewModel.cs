@@ -24,6 +24,13 @@ public sealed partial class ColorPaletteViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedIndex;
 
+    /// <summary>
+    /// 選んでいる枠を見せないか。立っている間はどの枠も選んでいない表示にする(選んでいる番号と色は保つ)。
+    /// ウィジェット設定のウィンドウの色で、背景画像を選んでいる間に立てる。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSelectionHidden;
+
     public Color SelectedColor => Colors.Count == 0
         ? System.Windows.Media.Colors.White
         : Colors[Math.Clamp(SelectedIndex, 0, Colors.Count - 1)].Color;
@@ -142,20 +149,29 @@ public sealed partial class ColorPaletteViewModel : ObservableObject
         SelectIndex(index, true);
     }
 
+    partial void OnIsSelectionHiddenChanged(bool value)
+    {
+        UpdateSelectionMarks();
+    }
+
     private void SelectIndex(int index, bool raiseChanged)
     {
         SelectedIndex = index;
-
-        for (var i = 0; i < Colors.Count; i++)
-        {
-            Colors[i].IsSelected = i == index;
-        }
+        UpdateSelectionMarks();
 
         OnPropertyChanged(nameof(SelectedColor));
 
         if (raiseChanged)
         {
             RaisePaletteChanged();
+        }
+    }
+
+    private void UpdateSelectionMarks()
+    {
+        for (var i = 0; i < Colors.Count; i++)
+        {
+            Colors[i].IsSelected = !IsSelectionHidden && i == SelectedIndex;
         }
     }
 

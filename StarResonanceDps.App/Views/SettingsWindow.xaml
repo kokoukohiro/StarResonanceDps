@@ -81,6 +81,15 @@
                             </StackPanel>
                         </Button>
 
+                        <Button x:Name="NotificationNavButton"
+                                Click="NotificationNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Notification}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Notification_Title]}" />
+                            </StackPanel>
+                        </Button>
+
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -146,68 +155,69 @@
                                             </Grid>
                                         </Border>
 
+                                        <!-- カスタムのときは下に実行ファイル名の行が続くので下線を引く。 -->
                                         <Border>
                                             <Border.Style>
-                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingFieldLast}">
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
                                                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsCustomGameCapturePreference}" Value="True">
-                                                            <Setter Property="Height" Value="96" />
+                                                        <DataTrigger Binding="{Binding IsCustomGameCapturePreference}" Value="False">
+                                                            <Setter Property="BorderThickness" Value="0" />
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <StackPanel VerticalAlignment="Center">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
 
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_GameCapturePreference_Label]}"
-                                                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                                                   FontSize="14"
-                                                                   FontWeight="SemiBold" />
-                                                    </StackPanel>
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_GameCapturePreference_Label]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
 
-                                                    <ComboBox Grid.Column="1"
-                                                              Width="220"
-                                                              Style="{StaticResource Input.SettingsComboBox}"
-                                                              ItemsSource="{Binding GameCapturePreferences}"
-                                                              SelectedItem="{Binding SelectedGameCapturePreference, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                        <ComboBox.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <TextBlock Text="{Binding DisplayName}" />
-                                                            </DataTemplate>
-                                                        </ComboBox.ItemTemplate>
-                                                    </ComboBox>
-                                                </Grid>
+                                                <ComboBox Grid.Column="1"
+                                                          Width="220"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          ItemsSource="{Binding GameCapturePreferences}"
+                                                          SelectedItem="{Binding SelectedGameCapturePreference, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
 
-                                                <Grid Margin="0,10,0,0"
-                                                      Visibility="{Binding IsCustomGameCapturePreference, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*" />
-                                                        <ColumnDefinition Width="Auto" />
-                                                    </Grid.ColumnDefinitions>
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}"
+                                                Visibility="{Binding IsCustomGameCapturePreference, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
 
-                                                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_GameCaptureCustomExeName_Label]}"
-                                                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                                                   FontSize="14"
-                                                                   FontWeight="SemiBold" />
-                                                    </StackPanel>
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_GameCaptureCustomExeName_Label]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
 
-                                                    <TextBox x:Name="GameCaptureCustomExeNameTextBox"
-                                                             Grid.Column="1"
-                                                             Width="220"
-                                                             Height="32"
-                                                             Style="{StaticResource Input.PathBox}"
-                                                             Text="{Binding GameCaptureCustomExeName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
-                                                             KeyDown="GameCaptureCustomExeNameTextBox_KeyDown"
-                                                             VerticalContentAlignment="Center" />
-                                                </Grid>
-                                            </StackPanel>
+                                                <TextBox x:Name="GameCaptureCustomExeNameTextBox"
+                                                         Grid.Column="1"
+                                                         Width="220"
+                                                         Height="32"
+                                                         Style="{StaticResource Input.PathBox}"
+                                                         Text="{Binding GameCaptureCustomExeName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                         KeyDown="GameCaptureCustomExeNameTextBox_KeyDown"
+                                                         VerticalContentAlignment="Center" />
+                                            </Grid>
                                         </Border>
                                     </StackPanel>
                                 </ContentControl>
@@ -548,6 +558,308 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
+                                </ContentControl>
+
+                                <TextBlock x:Name="NotificationSection"
+                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Notification_Title]}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,4" />
+                                <!-- 注記の体裁はウィジェット設定「ロールスキル」の見出しの注記に合わせてある。 -->
+                                <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_WidgetNote]}"
+                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                           FontSize="13"
+                                           FontWeight="SemiBold"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,10" />
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <!--
+                                            下に通知音量の行が続くので常に下線を引く。
+                                            Windows の通知のときは2行目に応答不可の注意書きを出す。折り返すことがあるので高さは中身に合わせる。
+                                        -->
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsWindowsNotificationSelected}" Value="True">
+                                                            <Setter Property="Height" Value="Auto" />
+                                                            <Setter Property="Padding" Value="20,11,20,11" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Method]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!-- 並びは AppConfigDefaults.NotificationMethod*Index の番号と同じ。 -->
+                                                <ComboBox Grid.Row="0"
+                                                          Grid.Column="1"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          SelectedIndex="{Binding NotificationMethodIndex, Mode=TwoWay}">
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NotificationMethod_None]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NotificationMethod_Windows]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NotificationMethod_Speech]}" />
+                                                </ComboBox>
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="0,4,0,0"
+                                                           Visibility="{Binding IsWindowsNotificationSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_WindowsNote]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- 通知方式に関係なく出す。読み上げのときは下に読み上げ方式の行が続くので下線を引く。行の作りはウィジェット設定の不透明度のスライダーと同じ。 -->
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSpeechSelected}" Value="False">
+                                                            <Setter Property="BorderThickness" Value="0" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Volume]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <Grid Grid.Column="1" Width="260" VerticalAlignment="Center">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="10" />
+                                                        <ColumnDefinition Width="35" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- 範囲は AppConfigDefaults.NotificationVolumeMin / Max と同じ(スタイルの既定は 0〜100)。 -->
+                                                    <Slider Grid.Column="0"
+                                                            Maximum="100"
+                                                            IsSnapToTickEnabled="True"
+                                                            TickFrequency="1"
+                                                            Style="{StaticResource Input.ValueSlider}"
+                                                            Value="{Binding NotificationVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                                    <TextBlock Grid.Column="2"
+                                                               VerticalAlignment="Center"
+                                                               HorizontalAlignment="Right"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding NotificationVolume, StringFormat={}{0:0}%}" />
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- 通知方式が読み上げのときだけ出す。VOICEVOX のときは下に行が続くので下線を引く。 -->
+                                        <Border Visibility="{Binding IsSpeechSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsVoicevoxSelected}" Value="False">
+                                                            <Setter Property="BorderThickness" Value="0" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Speech]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!-- 並びは AppConfigDefaults.SpeechVoice*Index の番号と同じ。 -->
+                                                <ComboBox Grid.Column="1"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          SelectedIndex="{Binding SpeechVoiceIndex, Mode=TwoWay}">
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SpeechVoice_WindowsVoice]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SpeechVoice_Voicevox]}" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <!--
+                                            VOICEVOX を選んだときだけ出す行(話者・スタイル)。注意書きの行は最後の行の2行目に置く。
+                                            最後の行の高さは、既定54 + 注記の行(13px)と間隔4 で 75。
+                                        -->
+                                        <Border Visibility="{Binding IsVoicevoxSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ShowsVoicevoxStyle}" Value="False">
+                                                            <Setter Property="BorderThickness" Value="0" />
+                                                            <Setter Property="Height" Value="75" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxSpeaker]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!-- 開くたびにエンジンへ問い合わせて選択肢を作り直す(SettingsWindow.xaml.cs)。DisplayMemberPath は効かないので ItemTemplate。 -->
+                                                <ComboBox Grid.Row="0"
+                                                          Grid.Column="1"
+                                                          Width="220"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          ItemsSource="{Binding VoicevoxSpeakerOptions}"
+                                                          SelectedItem="{Binding SelectedVoicevoxSpeaker, Mode=TwoWay}"
+                                                          DropDownOpened="VoicevoxComboBox_DropDownOpened">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+
+                                                <!-- 注意書きの行。スタイルの行があるときはそちらに出す(スタイルの行と同じ中身)。 -->
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ShowsVoicevoxStyle}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                    <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxNote], Mode=OneWay}" />
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                                        <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxPolicyLink_Click">
+                                                        <Run Text="{Binding VoicevoxPolicyLinkText, Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}"
+                                                Height="75"
+                                                Visibility="{Binding ShowsVoicevoxStyle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxStyle]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!-- 開いたときの作り直しは話者と同じ。 -->
+                                                <ComboBox Grid.Row="0"
+                                                          Grid.Column="1"
+                                                          Width="220"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          ItemsSource="{Binding VoicevoxStyleOptions}"
+                                                          SelectedItem="{Binding SelectedVoicevoxStyle, Mode=TwoWay}"
+                                                          DropDownOpened="VoicevoxComboBox_DropDownOpened">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+
+                                                <!-- 注意書きの行(話者の行と同じ中身)。 -->
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap">
+                                                    <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxNote], Mode=OneWay}" />
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                                        <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxPolicyLink_Click">
+                                                        <Run Text="{Binding VoicevoxPolicyLinkText, Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
                                 </ContentControl>
 
                                 <TextBlock x:Name="ThemeSection"

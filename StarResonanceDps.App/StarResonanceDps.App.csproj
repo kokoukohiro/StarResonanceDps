@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- Windows SDK の版は WinRT の API(Windows の音声・Windows の通知)をコードから呼ぶためだけに付ける。
+         対応する Windows の範囲は SupportedOSPlatformVersion で版を付けないときと同じ値に保ち、WinRT は実行時に版を確かめて呼ぶ。 -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>StarResonanceDps</AssemblyName>
@@ -262,9 +265,10 @@
     <RemoveDir Directories="$(OutDir)zh-CN" Condition="'@(_OtherChineseCultureFiles)' == ''" />
   </Target>
 
+  <!-- 同梱プラグインと補助は版を付けない net10.0-windows のまま(WinRT を引き込まない)。App の TargetFramework から組まない。 -->
   <PropertyGroup>
-    <BundledPluginOutputSubdirectory>$(TargetFramework)</BundledPluginOutputSubdirectory>
-    <BundledPluginOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">$(TargetFramework)\$(RuntimeIdentifier)</BundledPluginOutputSubdirectory>
+    <BundledPluginOutputSubdirectory>net10.0-windows</BundledPluginOutputSubdirectory>
+    <BundledPluginOutputSubdirectory Condition="'$(RuntimeIdentifier)' != ''">net10.0-windows\$(RuntimeIdentifier)</BundledPluginOutputSubdirectory>
     <KeybindPluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.KeybindTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\KeybindTool.dll</KeybindPluginAssembly>
     <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\ModuleTool.dll</ModulePluginAssembly>
   </PropertyGroup>
@@ -319,6 +323,15 @@
   <ItemGroup>
     <Resource Include="Assets\Images\weap_role_skill_bg_01.png" />
     <Resource Include="Assets\Images\weap_role_skill_bg_02.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Windows の通知のアイコン。通知のためのアプリの名前の登録(IconUri)が、実行フォルダのこのファイルを指す。 -->
+    <Content Include="Assets\Images\ApplicationIcon_32x32.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -29,6 +29,18 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         ("Level", "Settings_EntityInfo_Field_Level", "{Level}")
     ];
 
+    /// <summary>通知テキスト「マッチング成立」に差し込める項目。マッチング先のコンテンツ名だけ。</summary>
+    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] MatchFoundNotificationFieldDefinitions =
+    [
+        ("Content", "Settings_PlayerListNotification_Field_Content", "{Content}")
+    ];
+
+    /// <summary>通知テキスト「HP低下」に差し込める項目。プレイヤー名だけ。</summary>
+    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] HealthLowNotificationFieldDefinitions =
+    [
+        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}")
+    ];
+
     private readonly WidgetKind _kind;
     private readonly Dictionary<string, MeterClassColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly ObservableCollection<MeterPlayerInfoFormatField> _availablePlayerInfoFormatFields = [];
@@ -116,6 +128,19 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         AvailablePlayerInfoFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availablePlayerInfoFormatFields);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
+        MatchFoundNotification = new WidgetNotificationTextItemViewModel(
+            "Settings_PlayerListNotification_MatchFound",
+            WidgetNotificationTextFormatter.MatchFoundDefaultKey,
+            MatchFoundNotificationFieldDefinitions,
+            WidgetNotificationTextFormatter.FormatMatchFoundPreview);
+        HealthLowNotification = new WidgetNotificationTextItemViewModel(
+            "Settings_PlayerListNotification_HealthLow",
+            WidgetNotificationTextFormatter.HealthLowDefaultKey,
+            HealthLowNotificationFieldDefinitions,
+            WidgetNotificationTextFormatter.FormatHealthLowPreview);
+        MatchFoundNotification.Changed += NotificationText_Changed;
+        HealthLowNotification.Changed += NotificationText_Changed;
+
         RebuildPlayerInfoFormatFields();
         _lastSaved = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
         Load(_lastSaved);
@@ -125,6 +150,15 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     /// <summary>「他人のロールスキル」設定を出すのはプレイヤーリストだけ。</summary>
     public bool ShowsOtherRoleSkillSettings => _kind == WidgetKind.PlayerList;
+
+    /// <summary>通知テキスト(マッチング成立・HP低下)を出すのはプレイヤーリストだけ。</summary>
+    public bool ShowsPlayerListNotificationSettings => _kind == WidgetKind.PlayerList;
+
+    /// <summary>通知テキスト「マッチング成立」。</summary>
+    public WidgetNotificationTextItemViewModel MatchFoundNotification { get; }
+
+    /// <summary>通知テキスト「HP低下」。</summary>
+    public WidgetNotificationTextItemViewModel HealthLowNotification { get; }
 
     public event Action<MeterWidgetSettingsConfig>? PreviewChanged;
 
@@ -137,10 +171,14 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             ? "Settings_EntityInfo_Customization"
             : "Settings_PlayerInfo_Customization");
 
+    /// <summary>
+    /// 色の節の見出し。DPS・HPS メーターはアイコンの背景を塗るので「クラスカラー」、
+    /// プレイヤーリスト・エンティティリストはアイコン自体を塗るので「アイコンカラー」。
+    /// </summary>
     public string ClassColorSectionTitle => LocalizationManager.Instance.GetString(
-        _kind == WidgetKind.EntityList
-            ? "Settings_Section_IconColors_Title"
-            : "Settings_Section_ClassColors_Title");
+        UsesMeterClassColorIconBackground
+            ? "Settings_Section_ClassColors_Title"
+            : "Settings_Section_IconColors_Title");
 
     public bool UsesMeterClassColorIconBackground => WidgetConfigDefaults.UsesMeterClassColorOpacity(_kind);
 
@@ -213,6 +251,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        MatchFoundNotification.Changed -= NotificationText_Changed;
+        HealthLowNotification.Changed -= NotificationText_Changed;
 
         foreach (var item in Items)
         {
@@ -245,7 +285,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 WidgetConfigDefaults.MinClassColorFilterStrength,
                 WidgetConfigDefaults.MaxClassColorFilterStrength),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
-            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
+            MatchFoundNotificationFormatString = MatchFoundNotification.CreateSavedValue(),
+            HealthLowNotificationFormatString = HealthLowNotification.CreateSavedValue()
         };
 
         foreach (var item in Items)
@@ -339,6 +381,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
             ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
             ClassColorFilterStrength = normalized.ClassColorFilterStrength;
+            MatchFoundNotification.Load(normalized.MatchFoundNotificationFormatString);
+            HealthLowNotification.Load(normalized.HealthLowNotificationFormatString);
         }
         finally
         {
@@ -368,6 +412,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
             || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
             || left.ClassColorFilterStrength != right.ClassColorFilterStrength
+            || !string.Equals(left.MatchFoundNotificationFormatString, right.MatchFoundNotificationFormatString, StringComparison.Ordinal)
+            || !string.Equals(left.HealthLowNotificationFormatString, right.HealthLowNotificationFormatString, StringComparison.Ordinal)
             || !(left.ClassColorFilterColors ?? []).SequenceEqual(
                 right.ClassColorFilterColors ?? [],
                 StringComparer.OrdinalIgnoreCase))
@@ -439,6 +485,11 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         NotifyChanged();
     }
 
+    private void NotificationText_Changed(object? sender, EventArgs e)
+    {
+        NotifyChanged();
+    }
+
     /// <summary>
     /// スイッチを触った瞬間に呼ぶ。既存の色設定と同じ経路で、
     /// プレビュー反映と「未保存あり」の判定を更新する。
@@ -467,6 +518,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         OnPropertyChanged(nameof(SelfHighlightStateText));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
+        MatchFoundNotification.RefreshLocalizedText();
+        HealthLowNotification.RefreshLocalizedText();
     }
 
     private void NotifyChanged()

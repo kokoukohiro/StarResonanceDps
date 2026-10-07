@@ -7,7 +7,7 @@ namespace StarResonanceDps.App.Views.WidgetSettings;
 ///
 /// <para>
 /// カーソル位置はViewModelから見えないので、挿入はビュー側でやる。
-/// プレイヤー名・エンティティ名・バフ名の3か所が同じ振る舞いをする。
+/// 書式の欄(プレイヤー名・エンティティ名・バフ名・装備名・スキル名・通知の文章)はどれも同じ振る舞いをする。
 /// </para>
 /// </summary>
 internal static class FormatFieldInsertion

@@ -1,0 +1,1448 @@
+{
+  "1": {
+    "zh-CN": "剧情回溯",
+    "en-US": "Time Machine",
+    "ja-JP": "物語回想",
+    "ko-KR": "스토리 회상"
+  },
+  "2": {
+    "zh-CN": "蒂娜·精神之界",
+    "en-US": "Tina's Mindrealm",
+    "ja-JP": "ティナ・精神領域",
+    "ko-KR": "티나・정신 세계"
+  },
+  "3": {
+    "zh-CN": "巨塔遗迹",
+    "en-US": "Towering Ruin",
+    "ja-JP": "巨塔の遺跡",
+    "ko-KR": "거탑 유적"
+  },
+  "4": {
+    "zh-CN": "不稳定空间",
+    "en-US": "Unstable Space",
+    "ja-JP": "不安定な空間",
+    "ko-KR": "불안정 공간"
+  },
+  "5": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "6": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "7": {
+    "zh-CN": "镜中的审判",
+    "en-US": "Mirror Judgment",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "8": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "9": {
+    "zh-CN": "日活跃目标",
+    "en-US": "Daily Mission",
+    "ja-JP": "毎日活躍度目標",
+    "ko-KR": "일일 활약 목표"
+  },
+  "10": {
+    "zh-CN": "开拓局委托",
+    "en-US": "Bureau Commissions",
+    "ja-JP": "開拓局の依頼",
+    "ko-KR": "개척국 의뢰"
+  },
+  "11": {
+    "zh-CN": "讨伐精英",
+    "en-US": "Elite Hunt",
+    "ja-JP": "精鋭討伐",
+    "ko-KR": "엘리트 토벌"
+  },
+  "12": {
+    "zh-CN": "讨伐首领",
+    "en-US": "Boss Hunt",
+    "ja-JP": "ボス討伐",
+    "ko-KR": "보스 토벌"
+  },
+  "13": {
+    "zh-CN": "极限空间",
+    "en-US": "Chaotic Realm",
+    "ja-JP": "極限空間",
+    "ko-KR": "극한 공간"
+  },
+  "14": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "15": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "16": {
+    "zh-CN": "镜中的审判",
+    "en-US": "Mirror Judgment",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "17": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "18": {
+    "zh-CN": "讨伐领主",
+    "en-US": "World Boss Crusade",
+    "ja-JP": "ワールドレイド",
+    "ko-KR": "월드 보스 토벌"
+  },
+  "19": {
+    "zh-CN": "钓鱼",
+    "en-US": "Fishing",
+    "ja-JP": "釣り",
+    "ko-KR": "낚시"
+  },
+  "20": {
+    "zh-CN": "协会货运",
+    "en-US": "Guild Cargo",
+    "ja-JP": "ギルド輸送",
+    "ko-KR": "길드 납품"
+  },
+  "21": {
+    "zh-CN": "试炼之路",
+    "en-US": "Trial Path",
+    "ja-JP": "試練の道",
+    "ko-KR": "시련의 길"
+  },
+  "23": {
+    "zh-CN": "烹饪",
+    "en-US": "Culinary",
+    "ja-JP": "料理",
+    "ko-KR": "요리"
+  },
+  "26": {
+    "zh-CN": "世界探索",
+    "en-US": "Exploration",
+    "ja-JP": "ワールド探索",
+    "ko-KR": "월드 탐색"
+  },
+  "27": {
+    "zh-CN": "烟火大会",
+    "en-US": "Fireworks Festival",
+    "ja-JP": "花火大会",
+    "ko-KR": "불꽃놀이 축제"
+  },
+  "28": {
+    "zh-CN": "司第门遗迹",
+    "en-US": "Stimen Vaults",
+    "ja-JP": "レグディニス遺跡",
+    "ko-KR": "시디문 유적"
+  },
+  "29": {
+    "zh-CN": "协会狩猎",
+    "en-US": "Guild Hunt",
+    "ja-JP": "ギルドハント",
+    "ko-KR": "길드 사냥"
+  },
+  "30": {
+    "zh-CN": "协会战舞",
+    "en-US": "Guild Dance",
+    "ja-JP": "ギルドダンス",
+    "ko-KR": "길드 무도회"
+  },
+  "31": {
+    "zh-CN": "协会周目标",
+    "en-US": "Guild Activity",
+    "ja-JP": "ギルド週間目標",
+    "ko-KR": "길드 주간 목표"
+  },
+  "32": {
+    "zh-CN": "神奇生物",
+    "en-US": "Magical Creatures",
+    "ja-JP": "不思議な生き物",
+    "ko-KR": "신비한 생물"
+  },
+  "33": {
+    "zh-CN": "协会打卡",
+    "en-US": "Check-in",
+    "ja-JP": "ギルド出席",
+    "ko-KR": "길드 출석 체크"
+  },
+  "34": {
+    "zh-CN": "生活职业",
+    "en-US": "Life Skill",
+    "ja-JP": "クラフトクラス",
+    "ko-KR": "생활 클래스"
+  },
+  "35": {
+    "zh-CN": "植生学",
+    "en-US": "Botany",
+    "ja-JP": "植生学",
+    "ko-KR": "식물학"
+  },
+  "36": {
+    "zh-CN": "矿物学",
+    "en-US": "Mineralogy",
+    "ja-JP": "鉱物学",
+    "ko-KR": "광물학"
+  },
+  "37": {
+    "zh-CN": "晶石学",
+    "en-US": "Gemology",
+    "ja-JP": "結晶学",
+    "ko-KR": "결정학"
+  },
+  "38": {
+    "zh-CN": "炼金",
+    "en-US": "Alchemy",
+    "ja-JP": "錬金",
+    "ko-KR": "연금술"
+  },
+  "39": {
+    "zh-CN": "铸造",
+    "en-US": "Smelting",
+    "ja-JP": "鍛造",
+    "ko-KR": "주조"
+  },
+  "40": {
+    "zh-CN": "工艺",
+    "en-US": "Gemcrafting",
+    "ja-JP": "工芸",
+    "ko-KR": "공예"
+  },
+  "41": {
+    "zh-CN": "木作",
+    "en-US": "Artisanry",
+    "ja-JP": "木工",
+    "ko-KR": "목공"
+  },
+  "42": {
+    "zh-CN": "织造",
+    "en-US": "Weaving",
+    "ja-JP": "織物",
+    "ko-KR": "직조"
+  },
+  "45": {
+    "zh-CN": "沉梦林谷",
+    "en-US": "Slumberdream Valley",
+    "ja-JP": "夢沈みの森谷",
+    "ko-KR": "침몽의 숲 골짜기"
+  },
+  "46": {
+    "zh-CN": "弥妄栖林",
+    "en-US": "Illusion-Shroud Woods",
+    "ja-JP": "迷妄の森",
+    "ko-KR": "미망의 숲"
+  },
+  "50": {
+    "zh-CN": "虚空浮岛·神龙枷所",
+    "en-US": "Floating Island - Dragon Shackles",
+    "ja-JP": "虚空の浮島・神竜の枷",
+    "ko-KR": "허공의 부유섬・드래곤 프리즌"
+  },
+  "51": {
+    "zh-CN": "幻花沉眠之地",
+    "en-US": "Dreambloom Ruins",
+    "ja-JP": "幻花沈む地",
+    "ko-KR": "환상꽃이 잠든 땅"
+  },
+  "52": {
+    "zh-CN": "遗忘幻梦之野",
+    "en-US": "Field of Forgotten Illusions",
+    "ja-JP": "忘られし幻夢の野",
+    "ko-KR": "잊혀진 환상꿈의 들판"
+  },
+  "53": {
+    "zh-CN": "苍穹之上·昼夜尽头",
+    "en-US": "Twilight's Edge",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "101": {
+    "zh-CN": "弥妄·黯影堡垒",
+    "en-US": "Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "102": {
+    "zh-CN": "弥妄·黯影堡垒",
+    "en-US": "Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "103": {
+    "zh-CN": "巨龙爪痕",
+    "en-US": "Dragon Claw Valley",
+    "ja-JP": "巨竜の爪痕",
+    "ko-KR": "거룡의 발톱"
+  },
+  "104": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "105": {
+    "zh-CN": "黯影堡垒",
+    "en-US": "Dark Mist Fortress",
+    "ja-JP": "暗霧要塞",
+    "ko-KR": "검은 안개 요새"
+  },
+  "106": {
+    "zh-CN": "噬光牢笼",
+    "en-US": "Devourer Cage",
+    "ja-JP": "光亡き牢",
+    "ko-KR": "빛을 삼키는 감옥"
+  },
+  "107": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "200": {
+    "zh-CN": "主题活动",
+    "en-US": "Events",
+    "ja-JP": "テーマイベント",
+    "ko-KR": "테마 이벤트"
+  },
+  "201": {
+    "zh-CN": "环城载具赛",
+    "en-US": "City Rally",
+    "ja-JP": "マウントレース",
+    "ko-KR": "도시 일주 라이드 레이스"
+  },
+  "202": {
+    "zh-CN": "废都障碍赛",
+    "en-US": "Wasteland Race",
+    "ja-JP": "廃都障害レース",
+    "ko-KR": "폐허 도시 장애물 레이스"
+  },
+  "203": {
+    "zh-CN": "气球捕获大作战",
+    "en-US": "Balloon Capture",
+    "ja-JP": "バルーン大作戦",
+    "ko-KR": "풍선 포획 대작전"
+  },
+  "204": {
+    "zh-CN": "维尔古城巡逻",
+    "en-US": "Ancient City Patrol",
+    "ja-JP": "古代都市ヴィルの巡回",
+    "ko-KR": "고대도시 빌 순찰"
+  },
+  "205": {
+    "zh-CN": "山贼营地巡逻",
+    "en-US": "Brigand Camp Patrol",
+    "ja-JP": "山賊野営地の巡回",
+    "ko-KR": "산적 영지 순찰"
+  },
+  "206": {
+    "zh-CN": "姆克营地巡逻",
+    "en-US": "Muku Camp Patrol",
+    "ja-JP": "ムークキャンプの巡回",
+    "ko-KR": "무크 영지 순찰"
+  },
+  "207": {
+    "zh-CN": "舞蹈练习生",
+    "en-US": "Dance Novice",
+    "ja-JP": "ダンス練習生",
+    "ko-KR": "댄스 연습생"
+  },
+  "208": {
+    "zh-CN": "路演小剧场",
+    "en-US": "Street Theater",
+    "ja-JP": "路上ミニシアター",
+    "ko-KR": "로드쇼 소극장"
+  },
+  "209": {
+    "zh-CN": "巡游！魅力鱼获",
+    "en-US": "Parade! Charming Fish",
+    "ja-JP": "釣りパレード",
+    "ko-KR": "퍼레이드! 물고기 자랑"
+  },
+  "210": {
+    "zh-CN": "巡游！小猪骑士",
+    "en-US": "Parade! Boarlet Knight",
+    "ja-JP": "ウリボパレード",
+    "ko-KR": "퍼레이드! 우리보 기사"
+  },
+  "211": {
+    "zh-CN": "小伊别盯我！",
+    "en-US": "Ee-chan, Don't Stare at Me!",
+    "ja-JP": "見ないでイー！",
+    "ko-KR": "이짱, 쳐다보지 마!"
+  },
+  "301": {
+    "zh-CN": "喵露万事屋",
+    "en-US": "Meowlux Yorozuya",
+    "ja-JP": "ニャルクス万事屋",
+    "ko-KR": "냐루 만물상"
+  },
+  "302": {
+    "zh-CN": "星光花火夜",
+    "en-US": "Starlight Fireworks",
+    "ja-JP": "星明かりと花火の夜",
+    "ko-KR": "별과 불꽃의 밤"
+  },
+  "303": {
+    "zh-CN": "浪花补给站",
+    "en-US": "Spindrift Supply",
+    "ja-JP": "波の補給ステーション",
+    "ko-KR": "파도 휴게소"
+  },
+  "304": {
+    "zh-CN": "银星游园会",
+    "en-US": "Silverstar Carnival",
+    "ja-JP": "シルバースターフェス",
+    "ko-KR": "실버스타 카니발"
+  },
+  "305": {
+    "zh-CN": "海风赠礼",
+    "en-US": "Seabreeze Gifts",
+    "ja-JP": "海風の賜物",
+    "ko-KR": "해풍의 선물"
+  },
+  "306": {
+    "zh-CN": "纾风巡行",
+    "en-US": "Windsoothe Parade",
+    "ja-JP": "そよ風パレード",
+    "ko-KR": "바람 순행"
+  },
+  "307": {
+    "zh-CN": "神龙枷所:适格者特训",
+    "en-US": "Dragon Shackles - Adept's Trial",
+    "ja-JP": "神竜の枷：適格者試練",
+    "ko-KR": "드래곤 프리즌: 적격자 특훈"
+  },
+  "308": {
+    "zh-CN": "大师试炼！热砂共战",
+    "en-US": "Master's Trial: Scorching Warfare",
+    "ja-JP": "マスター試練！熱い共闘",
+    "ko-KR": "마스터의 시련! 열사 협동전"
+  },
+  "309": {
+    "zh-CN": "海风节商店",
+    "en-US": "Seabreeze Store",
+    "ja-JP": "海風祭ストア",
+    "ko-KR": "해풍절 상점"
+  },
+  "310": {
+    "zh-CN": "暮夏的纪念",
+    "en-US": "Memento of the Journey",
+    "ja-JP": "晩夏の記念",
+    "ko-KR": "늦여름의 추억"
+  },
+  "311": {
+    "zh-CN": "秋收的馈赠",
+    "en-US": "Gift of Time",
+    "ja-JP": "時の贈り物",
+    "ko-KR": "시간의 선물"
+  },
+  "312": {
+    "zh-CN": "祖灵灰契",
+    "en-US": "Ancestral Ash Pact​",
+    "ja-JP": "祖霊の灰契",
+    "ko-KR": "재의 계약"
+  },
+  "313": {
+    "zh-CN": "先祖之路",
+    "en-US": "Trail of Legacy",
+    "ja-JP": "祖霊の道",
+    "ko-KR": "선조의 길"
+  },
+  "314": {
+    "zh-CN": "灵舞",
+    "en-US": "Spirit Dance​",
+    "ja-JP": "霊舞",
+    "ko-KR": "영혼의 춤"
+  },
+  "315": {
+    "zh-CN": "丰收宴",
+    "en-US": "Harvest Feast​",
+    "ja-JP": "豊穣の宴",
+    "ko-KR": "추수 연회"
+  },
+  "316": {
+    "zh-CN": "千梦织灵之夜",
+    "en-US": "Loom of Dreams​",
+    "ja-JP": "千夢織霊の夜",
+    "ko-KR": "꿈을 엮는 밤"
+  },
+  "317": {
+    "zh-CN": "秋祭司的算筹",
+    "en-US": "Priest's Tally​",
+    "ja-JP": "祭司の備蓄計画",
+    "ko-KR": "가을 사제의 준비"
+  },
+  "318": {
+    "zh-CN": "丰收市集",
+    "en-US": "Harvest Store",
+    "ja-JP": "豊年市場",
+    "ko-KR": "풍수 시장"
+  },
+  "319": {
+    "zh-CN": "绯色与幻梦的序章",
+    "en-US": "Prelude of Crimson",
+    "ja-JP": "緋色と幻夢の序章",
+    "ko-KR": "주홍빛과 꿈의 서장"
+  },
+  "320": {
+    "zh-CN": "幻梦商店",
+    "en-US": "Loom Store",
+    "ja-JP": "幻夢ストア",
+    "ko-KR": "환상꿈 상점"
+  },
+  "321": {
+    "zh-CN": "怪奇夜的衣橱",
+    "en-US": "Nocturne Wardrobe",
+    "ja-JP": "奇妙な夜の衣装部屋",
+    "ko-KR": "기이한 밤의 옷장"
+  },
+  "322": {
+    "zh-CN": "捣蛋者的糖罐",
+    "en-US": "Trickster's Candy Jar",
+    "ja-JP": "いたずら者のキャンディポット",
+    "ko-KR": "장난꾸러기의 사탕단지"
+  },
+  "323": {
+    "zh-CN": "幻光掠影",
+    "en-US": "Glimmering Moments",
+    "ja-JP": "幻光の掠影",
+    "ko-KR": "환상이 스치는 순간"
+  },
+  "324": {
+    "zh-CN": "大师试炼！幻梦共战",
+    "en-US": "Master's Trial: Dream Resonance",
+    "ja-JP": "マスター試練！幻夢の共闘",
+    "ko-KR": "마스터의 시련! 몽환 협동전"
+  },
+  "325": {
+    "zh-CN": "冰雪节献礼",
+    "en-US": "Winterfest Gift",
+    "ja-JP": "氷雪の贈り物",
+    "ko-KR": "눈꽃 축제 선물"
+  },
+  "326": {
+    "zh-CN": "雪人出击！娜宝讨伐战",
+    "en-US": "Snowman Strike! Nappo Hunt",
+    "ja-JP": "雪だるまの奇跡！ナッポ討伐戦",
+    "ko-KR": "눈사람 출격! 나뽀 토벌전"
+  },
+  "327": {
+    "zh-CN": "幻形派对",
+    "en-US": "Morph Party",
+    "ja-JP": "メリーイリュージョン",
+    "ko-KR": "일루전 파티"
+  },
+  "328": {
+    "zh-CN": "绮想冰雪节",
+    "en-US": "Whimsical Winterfest",
+    "ja-JP": "ふしぎな氷雪祭",
+    "ko-KR": "신비한 눈꽃 축제"
+  },
+  "329": {
+    "zh-CN": "冬日礼遇",
+    "en-US": "Winterfest Store",
+    "ja-JP": "ウィンターギフト",
+    "ko-KR": "겨울맞이 스페셜"
+  },
+  "330": {
+    "zh-CN": "雀运千结，岭上开花",
+    "en-US": "Fortune's Perfect Bloom",
+    "ja-JP": "幸運の結び、嶺上開花",
+    "ko-KR": "작운대통, 영상개화"
+  },
+  "331": {
+    "zh-CN": "逐风的恋语传递",
+    "en-US": "Windborne Whispers",
+    "ja-JP": "そよ風に舞う恋の便り",
+    "ko-KR": "바람에 실려 온 러브레터"
+  },
+  "332": {
+    "zh-CN": "祈岁之光",
+    "en-US": "Renewal Light",
+    "ja-JP": "祈歳の光",
+    "ko-KR": "새해의 빛"
+  },
+  "333": {
+    "zh-CN": "岁光更新之礼",
+    "en-US": "Gifts of Renewal",
+    "ja-JP": "祈歳の贈り物",
+    "ko-KR": "새해 소원 선물"
+  },
+  "334": {
+    "zh-CN": "岁魔、袭来",
+    "en-US": "Year Demon Strikes",
+    "ja-JP": "歳魔、襲来",
+    "ko-KR": "새해 오우거의 습격!"
+  },
+  "335": {
+    "zh-CN": "焰彩试放",
+    "en-US": "Colorflare Trial",
+    "ja-JP": "弾ける願い",
+    "ko-KR": "불꽃놀이 시연"
+  },
+  "336": {
+    "zh-CN": "岁光流动之时",
+    "en-US": "Renewal Unfolds",
+    "ja-JP": "光の流れ往く時",
+    "ko-KR": "빛이 흐르는 때"
+  },
+  "337": {
+    "zh-CN": "喧春灯会",
+    "en-US": "Spring Lantern Fair",
+    "ja-JP": "灯祭り",
+    "ko-KR": "등불 축제"
+  },
+  "338": {
+    "zh-CN": "祈岁集市",
+    "en-US": "Renewal Store",
+    "ja-JP": "祈歳市場",
+    "ko-KR": "새해 장터"
+  },
+  "340": {
+    "zh-CN": "星花相逢",
+    "en-US": "Starlit Bloom",
+    "ja-JP": "星花の邂逅",
+    "ko-KR": "별과 꽃의 만남"
+  },
+  "341": {
+    "zh-CN": "星花商店",
+    "en-US": "",
+    "ja-JP": "星と花のショップ",
+    "ko-KR": "별과 꽃 상점"
+  },
+  "342": {
+    "zh-CN": "大师试炼！烬空共战",
+    "en-US": "Master's Trial: Ember Resonance",
+    "ja-JP": "マスター試練！燼空共闘",
+    "ko-KR": "마스터의 시련! 잔불 협동전"
+  },
+  "343": {
+    "zh-CN": "夏日海岛物语",
+    "en-US": "Summer Island Story",
+    "ja-JP": "海風の夏物語",
+    "ko-KR": "여름날의 섬 이야기"
+  },
+  "344": {
+    "zh-CN": "大鱼·小鱼·可疑的鱼",
+    "en-US": "Big Fish, Little Fish, Suspicious Fish",
+    "ja-JP": "大きな魚・小さな魚・怪しい魚",
+    "ko-KR": "큰 물고기・작은 물고기・이상한 물고기"
+  },
+  "345": {
+    "zh-CN": "传说鱼影追踪战",
+    "en-US": "Legendary Fish Chase",
+    "ja-JP": "伝説の魚影を追え！",
+    "ko-KR": "전설의 물고기 그림자 추격전"
+  },
+  "346": {
+    "zh-CN": "青葱一夏",
+    "en-US": "Lush Summer",
+    "ja-JP": "煌めく青い夏",
+    "ko-KR": "한여름의 청춘"
+  },
+  "347": {
+    "zh-CN": "深海行动·星脉调谐",
+    "en-US": "Deep Sea Mission: Engram Line Tuning",
+    "ja-JP": "深海作戦・星脈同調",
+    "ko-KR": "심해 작전・엔그램 라인 조율"
+  },
+  "352": {
+    "zh-CN": "旅行信标",
+    "en-US": "Travel Beacons",
+    "ja-JP": "旅の道しるべ",
+    "ko-KR": "여행의 이정표"
+  },
+  "355": {
+    "zh-CN": "溯梦拾光",
+    "en-US": "Tracing Dreams and Lights",
+    "ja-JP": "夢を遡る光",
+    "ko-KR": "꿈을 되짚어 모은 빛"
+  },
+  "356": {
+    "zh-CN": "海风之宴",
+    "en-US": "Sea Breeze Feast",
+    "ja-JP": "海風の宴",
+    "ko-KR": "해풍의 연회"
+  },
+  "358": {
+    "zh-CN": "烬夜映迹",
+    "en-US": "Ember Night Echoes",
+    "ja-JP": "余燼の残影",
+    "ko-KR": "밤의 잔불의 잔상"
+  },
+  "359": {
+    "zh-CN": "朝夕祈愿",
+    "en-US": "Dawn to Dusk Wishes",
+    "ja-JP": "朝夕の祈り",
+    "ko-KR": "낮밤의 기원"
+  },
+  "360": {
+    "zh-CN": "海风节庆典<br>～星之行迹～",
+    "en-US": "Seabreeze Festival Celebration<br>~Stellar Paths~",
+    "ja-JP": "海風祭記念<br>～星の軌跡～",
+    "ko-KR": "해풍절 축제<br>~별의 발자취~"
+  },
+  "361": {
+    "zh-CN": "星光花火夜",
+    "en-US": "Starlight Fireworks",
+    "ja-JP": "星明かりと花火の夜",
+    "ko-KR": "별과 불꽃의 밤"
+  },
+  "362": {
+    "zh-CN": "花火问答会",
+    "en-US": "Fireworks Trivia",
+    "ja-JP": "夜空に閃く花火",
+    "ko-KR": "불꽃 퀴즈쇼"
+  },
+  "363": {
+    "zh-CN": "弦月升起之时",
+    "en-US": "Moonrise",
+    "ja-JP": "弦月の昇る時",
+    "ko-KR": "초승달이 떠오를 무렵"
+  },
+  "364": {
+    "zh-CN": "卡尼曼丰收祭<br>～共栖之祭～",
+    "en-US": "Kanamia Harvest Festival<br>~Festival of Coexistence~",
+    "ja-JP": "カナミア豊年祭<br>～共生の祭～",
+    "ko-KR": "카나미아 풍수제<br>~공생의 축제~"
+  },
+  "365": {
+    "zh-CN": "祖灵灰契",
+    "en-US": "Ancestral Ash Pact​",
+    "ja-JP": "祖霊の灰契",
+    "ko-KR": "재의 계약"
+  },
+  "366": {
+    "zh-CN": "千梦织灵·异梦净除",
+    "en-US": "Loom of Dreams​: Nightmare Purge",
+    "ja-JP": "千夢織霊・悪夢浄化",
+    "ko-KR": "꿈 엮기 의식・변이된 꿈 정화"
+  },
+  "367": {
+    "zh-CN": "激斗！息壤争夺",
+    "en-US": "Clash! Battle for the Renewal",
+    "ja-JP": "激闘！盟約の地争奪",
+    "ko-KR": "격돌! 식양 쟁탈전"
+  },
+  "368": {
+    "zh-CN": "祖息孢培育计划",
+    "en-US": "Ancestral Spore Cultivation Plan",
+    "ja-JP": "盟約の胞子育成計画",
+    "ko-KR": "선조의 숨결 포자 배양 계획"
+  },
+  "369": {
+    "zh-CN": "灵舞",
+    "en-US": "Spirit Dance​",
+    "ja-JP": "霊舞",
+    "ko-KR": "영혼의 춤"
+  },
+  "370": {
+    "zh-CN": "大地、天空、祖灵与族人",
+    "en-US": "Earth, Sky, Ancestral Spirits, and the Kanamians",
+    "ja-JP": "大地、大空、祖霊と族人",
+    "ko-KR": "대지, 하늘, 선조령 그리고 부족민"
+  },
+  "401": {
+    "zh-CN": "星光花火夜",
+    "en-US": "Starlight Fireworks",
+    "ja-JP": "星明かりと花火の夜",
+    "ko-KR": "별과 불꽃의 밤"
+  },
+  "402": {
+    "zh-CN": "星光花火夜",
+    "en-US": "Starlight Fireworks",
+    "ja-JP": "星明かりと花火の夜",
+    "ko-KR": "별과 불꽃의 밤"
+  },
+  "403": {
+    "zh-CN": "灵舞",
+    "en-US": "Spirit Dance​",
+    "ja-JP": "霊舞",
+    "ko-KR": "영혼의 춤"
+  },
+  "404": {
+    "zh-CN": "丰收宴",
+    "en-US": "Harvest Feast​",
+    "ja-JP": "豊穣の宴",
+    "ko-KR": "추수 연회"
+  },
+  "405": {
+    "zh-CN": "幻形派对",
+    "en-US": "Morph Party",
+    "ja-JP": "メリーイリュージョン",
+    "ko-KR": "일루전 파티"
+  },
+  "406": {
+    "zh-CN": "雪人出击！娜宝讨伐战",
+    "en-US": "Snowman Strike! Nappo Hunt",
+    "ja-JP": "雪だるまの奇跡！ナッポ討伐戦",
+    "ko-KR": "눈사람 출격! 나뽀 토벌전"
+  },
+  "407": {
+    "zh-CN": "岁魔、袭来",
+    "en-US": "Year Demon Strikes",
+    "ja-JP": "歳魔、襲来",
+    "ko-KR": "새해 오우거의 습격!"
+  },
+  "408": {
+    "zh-CN": "焰彩试放",
+    "en-US": "Colorflare Trial",
+    "ja-JP": "弾ける願い",
+    "ko-KR": "불꽃놀이 시연"
+  },
+  "409": {
+    "zh-CN": "喧春灯会",
+    "en-US": "Spring Lantern Fair",
+    "ja-JP": "灯祭り",
+    "ko-KR": "등불 축제"
+  },
+  "410": {
+    "zh-CN": "流光律动",
+    "en-US": "Glimmering Rhythm",
+    "ja-JP": "流光のリズム",
+    "ko-KR": "빛나는 리듬"
+  },
+  "411": {
+    "zh-CN": "异世界商店",
+    "en-US": "Astral Store",
+    "ja-JP": "異世界ショップ",
+    "ko-KR": "이세계 상점"
+  },
+  "412": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "413": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "414": {
+    "zh-CN": "花火庆典",
+    "en-US": "Fireworks Celebration",
+    "ja-JP": "花火の祭典",
+    "ko-KR": "불꽃 축제"
+  },
+  "416": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "417": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "418": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "419": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "420": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "421": {
+    "zh-CN": "活动目标",
+    "en-US": "Event Objectives",
+    "ja-JP": "イベント目標",
+    "ko-KR": "이벤트 목표"
+  },
+  "501": {
+    "zh-CN": "环城载具赛",
+    "en-US": "City Rally",
+    "ja-JP": "マウントレース",
+    "ko-KR": "도시 일주 라이드 레이스"
+  },
+  "502": {
+    "zh-CN": "追逃游戏",
+    "en-US": "Tag",
+    "ja-JP": "チェイスゲーム",
+    "ko-KR": "술래잡기"
+  },
+  "503": {
+    "zh-CN": "雀牌游戏",
+    "en-US": "Mahjong",
+    "ja-JP": "麻雀",
+    "ko-KR": "마작패 게임"
+  },
+  "511": {
+    "zh-CN": "小伊别盯我！",
+    "en-US": "Ee-chan, Don't Stare at Me!",
+    "ja-JP": "見ないでイー！",
+    "ko-KR": "이짱, 쳐다보지 마!"
+  },
+  "512": {
+    "zh-CN": "小伊鼓乐队",
+    "en-US": "Ee-chan Drum Band",
+    "ja-JP": "イーの鼓笛隊",
+    "ko-KR": "이짱 고적대"
+  },
+  "513": {
+    "zh-CN": "巡游！小猪骑士",
+    "en-US": "Parade! Boarlet Knight",
+    "ja-JP": "ウリボパレード",
+    "ko-KR": "퍼레이드! 우리보 기사"
+  },
+  "514": {
+    "zh-CN": "今夜，随星而歌",
+    "en-US": "Tonight, Sing with the Stars",
+    "ja-JP": "今宵、星と共に歌おう",
+    "ko-KR": "오늘 밤, 별과 함께 노래하다"
+  },
+  "515": {
+    "zh-CN": "今夜，随星而歌",
+    "en-US": "Tonight, Sing with the Stars",
+    "ja-JP": "今宵、星と共に歌おう",
+    "ko-KR": "오늘 밤, 별과 함께 노래하다"
+  },
+  "901": {
+    "zh-CN": "喵特赏·异世巡礼",
+    "en-US": "Meowlux Special - Astral Pilgrimage",
+    "ja-JP": "異世界巡礼",
+    "ko-KR": "냥추첨・이세계 순례"
+  },
+  "902": {
+    "zh-CN": "扭蛋·异世奇遇",
+    "en-US": "Wish - Astral Encounter",
+    "ja-JP": "ガシャ・異世界奇遇",
+    "ko-KR": "뽑기・이세계 만남"
+  },
+  "903": {
+    "zh-CN": "露西的祝福",
+    "en-US": "Lucy's Blessing",
+    "ja-JP": "ルーシィの祝福",
+    "ko-KR": "루시의 축복"
+  },
+  "904": {
+    "zh-CN": "纳兹的试炼",
+    "en-US": "Natsu's Trial",
+    "ja-JP": "ナツの試練",
+    "ko-KR": "나츠의 시련"
+  },
+  "905": {
+    "zh-CN": "哈比的援助",
+    "en-US": "Happy's Assist",
+    "ja-JP": "ハッピーの援助",
+    "ko-KR": "해피의 지원"
+  },
+  "906": {
+    "zh-CN": "恶疫之涌现",
+    "en-US": "Emergence of Malice Scales",
+    "ja-JP": "パンデミック",
+    "ko-KR": "역병의 출현"
+  },
+  "907": {
+    "zh-CN": "恶疫之鳞剿灭·普通",
+    "en-US": "Malice Scales Subjugation - Normal",
+    "ja-JP": "毒竜殲滅戦・ノーマル",
+    "ko-KR": "역병 비늘 토벌전・노멀"
+  },
+  "908": {
+    "zh-CN": "恶疫之鳞剿灭·挑战",
+    "en-US": "Malice Scales Subjugation - Challenge",
+    "ja-JP": "毒竜殲滅戦・チャレンジ",
+    "ko-KR": "역병 비늘 토벌전・도전"
+  },
+  "909": {
+    "zh-CN": "公会委托板",
+    "en-US": "Guild Request Board",
+    "ja-JP": "ギルド依頼掲示板",
+    "ko-KR": "길드 의뢰 게시판"
+  },
+  "1002": {
+    "zh-CN": "镭射回旋",
+    "en-US": "Laser Cyclone",
+    "ja-JP": "回転レーザー",
+    "ko-KR": "레이저 회전"
+  },
+  "1003": {
+    "zh-CN": "游鱼暴走",
+    "en-US": "Fish Frenzy",
+    "ja-JP": "魚の群れ大暴走",
+    "ko-KR": "물고기 폭주"
+  },
+  "1004": {
+    "zh-CN": "一拳大作战",
+    "en-US": "One-Punch Brawl",
+    "ja-JP": "一撃大作戦",
+    "ko-KR": "원펀치 대작전"
+  },
+  "1005": {
+    "zh-CN": "极限落潮",
+    "en-US": "Extreme Low Tide",
+    "ja-JP": "極限の引き潮",
+    "ko-KR": "익스트림 타이드"
+  },
+  "1006": {
+    "zh-CN": "浪花躲避球",
+    "en-US": "Wave Dodgeball",
+    "ja-JP": "ウォータードッジボール",
+    "ko-KR": "물보라 피구"
+  },
+  "1007": {
+    "zh-CN": "异次元惩戒",
+    "en-US": "Interdimensional Punishment",
+    "ja-JP": "異次元の制裁",
+    "ko-KR": "이차원 응징"
+  },
+  "3011": {
+    "zh-CN": "时装礼盒",
+    "en-US": "Fashion Box",
+    "ja-JP": "衣装ボックス",
+    "ko-KR": "코스튬 선물 상자"
+  },
+  "3012": {
+    "zh-CN": "直购礼包",
+    "en-US": "Themed Bundle",
+    "ja-JP": "直接購入パック",
+    "ko-KR": "패키지 구매"
+  },
+  "3013": {
+    "zh-CN": "一折外观",
+    "en-US": "Style Vault: 90% Off",
+    "ja-JP": "90%オフ外観",
+    "ko-KR": "90% 할인 외형"
+  },
+  "3021": {
+    "zh-CN": "庆典彩蛋",
+    "en-US": "Festival Surprise Egg",
+    "ja-JP": "祝典サプライズ",
+    "ko-KR": "축제 이스터에그"
+  },
+  "3022": {
+    "zh-CN": "庆典宝箱",
+    "en-US": "Festival Treasure Chest",
+    "ja-JP": "祝典宝箱",
+    "ko-KR": "축제 보물 상자"
+  },
+  "3023": {
+    "zh-CN": "幻梦事件",
+    "en-US": "Illusion Events",
+    "ja-JP": "幻夢イベント",
+    "ko-KR": "환상꿈 이벤트"
+  },
+  "3024": {
+    "zh-CN": "规则介绍",
+    "en-US": "Rules",
+    "ja-JP": "ルール",
+    "ko-KR": "규칙 소개"
+  },
+  "3026": {
+    "zh-CN": "活动任务",
+    "en-US": "Event Quests",
+    "ja-JP": "イベントクエスト",
+    "ko-KR": "이벤트 퀘스트"
+  },
+  "3031": {
+    "zh-CN": "浪花探路预告",
+    "en-US": "Wavefront Supply Preview",
+    "ja-JP": "波間の冒険予告",
+    "ko-KR": "파도 길 찾기 미리보기"
+  },
+  "3041": {
+    "zh-CN": "银星游园会延期",
+    "en-US": "Silverstar Carnival",
+    "ja-JP": "シルバースターフェス延期",
+    "ko-KR": "실버스타 카니발 연기"
+  },
+  "3051": {
+    "zh-CN": "海风赠礼预告",
+    "en-US": "Seabreeze Gifts Preview",
+    "ja-JP": "海風の賜物予告",
+    "ko-KR": "해풍의 선물 미리보기"
+  },
+  "3061": {
+    "zh-CN": "纾风巡行预告",
+    "en-US": "Windsoothe Parade Preview",
+    "ja-JP": "そよ風パレード予告",
+    "ko-KR": "바람 순행 미리보기"
+  },
+  "3071": {
+    "zh-CN": "浮空岛预告",
+    "en-US": "Floating Island Preview",
+    "ja-JP": "浮遊島予告",
+    "ko-KR": "허공의 부유섬 미리보기"
+  },
+  "3081": {
+    "zh-CN": "闪耀预告",
+    "en-US": "Radiance Preview",
+    "ja-JP": "輝きの予告",
+    "ko-KR": "반짝 예고"
+  },
+  "3111": {
+    "zh-CN": "秋收的馈赠预告",
+    "en-US": "Time's Boon",
+    "ja-JP": "時の贈り物予告",
+    "ko-KR": "시간의 선물 미리보기"
+  },
+  "3121": {
+    "zh-CN": "祖灵灰契预告",
+    "en-US": "Ancestral Ash Pact​",
+    "ja-JP": "祖霊の灰契予告",
+    "ko-KR": "재의 계약 미리보기"
+  },
+  "3131": {
+    "zh-CN": "先祖之路预告",
+    "en-US": "Trail of Legacy",
+    "ja-JP": "祖霊の道予告",
+    "ko-KR": "선조의 길 미리보기"
+  },
+  "3141": {
+    "zh-CN": "灵舞预告",
+    "en-US": "Spirit Dance​",
+    "ja-JP": "霊舞予告",
+    "ko-KR": "영혼의 춤 미리보기"
+  },
+  "3151": {
+    "zh-CN": "丰收宴预告",
+    "en-US": "Harvest Feast​",
+    "ja-JP": "豊穣の宴予告",
+    "ko-KR": "추수 연회 미리보기"
+  },
+  "3161": {
+    "zh-CN": "千梦织灵之夜预告",
+    "en-US": "Loom of Dreams​",
+    "ja-JP": "千夢織霊の夜予告",
+    "ko-KR": "꿈을 엮는 밤 미리보기"
+  },
+  "3171": {
+    "zh-CN": "秋祭司的算筹预告",
+    "en-US": "Priest's Tally​",
+    "ja-JP": "祭司の備蓄計画予告",
+    "ko-KR": "가을 사제의 준비 미리보기"
+  },
+  "3191": {
+    "zh-CN": "绯色与幻梦的序章",
+    "en-US": "Prelude of Crimson",
+    "ja-JP": "緋色と幻夢の序章",
+    "ko-KR": "주홍빛과 꿈의 서장"
+  },
+  "3200": {
+    "zh-CN": "大师试炼！幻梦共战",
+    "en-US": "Master's Trial: Dream Resonance",
+    "ja-JP": "マスター試練！幻夢の共闘",
+    "ko-KR": "마스터의 시련! 몽환 협동전"
+  },
+  "3251": {
+    "zh-CN": "冰雪节献礼延长",
+    "en-US": "Winterfest Gift Extended",
+    "ja-JP": "氷雪の贈り物延長",
+    "ko-KR": "눈꽃 축제 선물 연장"
+  },
+  "3261": {
+    "zh-CN": "雪人出击！娜宝讨伐战预告",
+    "en-US": "Snowman Strike! Nappo Hunt",
+    "ja-JP": "「雪だるまの奇跡！ナッポ討伐戦」予告",
+    "ko-KR": "눈사람 출격! 나뽀 토벌전 미리보기"
+  },
+  "3262": {
+    "zh-CN": "26年岁光流动之时预告",
+    "en-US": "2026 Renewal Unfolds Preview",
+    "ja-JP": "26年光の流れ往く時 予告",
+    "ko-KR": "26년 빛이 흐르는 때 예고"
+  },
+  "3263": {
+    "zh-CN": "26年喧春灯会预告",
+    "en-US": "2026 Spring Lantern Fair Preview",
+    "ja-JP": "26年灯祭り予告",
+    "ko-KR": "26년 등불 축제 예고"
+  },
+  "3264": {
+    "zh-CN": "26年春节延长",
+    "en-US": "2026 Springfest Extension",
+    "ja-JP": "26年祈歳 期間延長",
+    "ko-KR": "26년 새해 연장"
+  },
+  "3265": {
+    "zh-CN": "深海行动·星脉调谐预告",
+    "en-US": "Deep Sea Mission: Engram Line Tuning Preview",
+    "ja-JP": "深海作戦・星脈同調予告",
+    "ko-KR": "심해 작전・엔그램 라인 조율 예고"
+  },
+  "3266": {
+    "zh-CN": "烟花大会",
+    "en-US": "Fireworks Show",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3267": {
+    "zh-CN": "祖息孢培育计划预告",
+    "en-US": "Ancestral Spore Cultivation Plan Preview",
+    "ja-JP": "盟約の胞子育成計画予告",
+    "ko-KR": "선조의 숨결 포자 배양 계획 예고"
+  },
+  "3268": {
+    "zh-CN": "第一勇士预告",
+    "en-US": "Kanamia Brave Preview",
+    "ja-JP": "ナダニの予告",
+    "ko-KR": "제1용사 예고"
+  },
+  "10000": {
+    "zh-CN": "适格者特训",
+    "en-US": "Adept's Trial",
+    "ja-JP": "適格者試練",
+    "ko-KR": "적격자 특훈"
+  },
+  "10001": {
+    "zh-CN": "千梦织灵之夜",
+    "en-US": "Loom of Dreams​",
+    "ja-JP": "千夢織霊の夜",
+    "ko-KR": "꿈을 엮는 밤"
+  },
+  "10002": {
+    "zh-CN": "沉梦的裂隙",
+    "en-US": "Rift of Slumberdream",
+    "ja-JP": "夢沈みの亀裂",
+    "ko-KR": "침몽의 균열"
+  },
+  "10003": {
+    "zh-CN": "不思议的追逃游戏",
+    "en-US": "Wondrous Tag",
+    "ja-JP": "チェイスゲーム",
+    "ko-KR": "신비한 술래잡기"
+  },
+  "10005": {
+    "zh-CN": "双端互通",
+    "en-US": "Cross-Platform Connection",
+    "ja-JP": "PC・スマホ対応",
+    "ko-KR": "멀티 플랫폼 연동"
+  },
+  "10006": {
+    "zh-CN": "传说鱼影追踪战·一",
+    "en-US": "Legendary Fish Chase I",
+    "ja-JP": "伝説の魚影を追え！・一",
+    "ko-KR": "전설의 물고기 그림자 추격전・1"
+  },
+  "10007": {
+    "zh-CN": "传说鱼影追踪战·二",
+    "en-US": "Legendary Fish Chase II",
+    "ja-JP": "伝説の魚影を追え！・二",
+    "ko-KR": "전설의 물고기 그림자 추격전・2"
+  },
+  "10008": {
+    "zh-CN": "传说鱼影追踪战·三",
+    "en-US": "Legendary Fish Chase III",
+    "ja-JP": "伝説の魚影を追え！・三",
+    "ko-KR": "전설의 물고기 그림자 추격전・3"
+  },
+  "10009": {
+    "zh-CN": "传说鱼影追踪战·四",
+    "en-US": "Legendary Fish Chase IV",
+    "ja-JP": "伝説の魚影を追え！・四",
+    "ko-KR": "전설의 물고기 그림자 추격전・4"
+  },
+  "11000": {
+    "zh-CN": "大师阶位赛",
+    "en-US": "Master Rank Match",
+    "ja-JP": "マスターランキング戦",
+    "ko-KR": "마스터 랭킹전"
+  },
+  "11001": {
+    "zh-CN": "诅咒的煌墓",
+    "en-US": "Cursed Radiant Tomb",
+    "ja-JP": "呪われし煌墓",
+    "ko-KR": "저주받은 무덤"
+  },
+  "11002": {
+    "zh-CN": "机化处理所",
+    "en-US": "Mech Facility",
+    "ja-JP": "機械化工場",
+    "ko-KR": "기계화 처리소"
+  },
+  "11003": {
+    "zh-CN": "蚀·蒂娜精神之界",
+    "en-US": "Void - Tina's Mindrealm",
+    "ja-JP": "蝕・ティナの精神領域",
+    "ko-KR": "침식・티나의 정신 세계"
+  },
+  "11004": {
+    "zh-CN": "隐雾猎场",
+    "en-US": "Mistveil Hunting Ground",
+    "ja-JP": "霧海の猟場",
+    "ko-KR": "안개 속 사냥터"
+  },
+  "11005": {
+    "zh-CN": "蚀·巨塔遗迹",
+    "en-US": "Void - Towering Ruin",
+    "ja-JP": "蝕・巨塔の遺跡",
+    "ko-KR": "침식・거탑 유적"
+  },
+  "11006": {
+    "zh-CN": "环海石礁",
+    "en-US": "Sea-Ringed Reef",
+    "ja-JP": "珊瑚岩の谷",
+    "ko-KR": "환해 암초 지대"
+  },
+  "11007": {
+    "zh-CN": "勇者试炼",
+    "en-US": "Hero Trials",
+    "ja-JP": "勇者の試練",
+    "ko-KR": "용사의 시련"
+  },
+  "11008": {
+    "zh-CN": "大师试炼！祈愿共战",
+    "en-US": "Master's Trial: Oath Resonance",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "20001": {
+    "zh-CN": "香格里拉边境",
+    "en-US": "Shangri-La Frontier",
+    "ja-JP": "シャングリラ・フロンティア",
+    "ko-KR": "샹그릴라 프론티어"
+  },
+  "20002": {
+    "zh-CN": "物语系列",
+    "en-US": "Monogatari Series",
+    "ja-JP": "〈物語〉シリーズ",
+    "ko-KR": "<이야기> 시리즈"
+  },
+  "20003": {
+    "zh-CN": "一番赏活动一跳转按钮",
+    "en-US": "Raffle Event I Jump Button",
+    "ja-JP": "一番くじ・ボタン",
+    "ko-KR": "제비뽑기 이벤트1 전환 버튼"
+  },
+  "20004": {
+    "zh-CN": "冒险纪念册",
+    "en-US": "Adventure Memory Album",
+    "ja-JP": "冒険アルバム",
+    "ko-KR": "모험 기념 앨범"
+  },
+  "20005": {
+    "zh-CN": "公会委托板",
+    "en-US": "Guild Request Board",
+    "ja-JP": "ギルド依頼掲示板",
+    "ko-KR": "길드 의뢰 게시판"
+  },
+  "20006": {
+    "zh-CN": "夏日海岛物语",
+    "en-US": "Summer Island Story",
+    "ja-JP": "海風の夏物語",
+    "ko-KR": "여름날의 섬 이야기"
+  },
+  "20007": {
+    "zh-CN": "青葱一夏",
+    "en-US": "Lush Summer",
+    "ja-JP": "煌めく青い夏",
+    "ko-KR": "한여름의 청춘"
+  },
+  "20008": {
+    "zh-CN": "星脉调谐",
+    "en-US": "Engram Line Tuning",
+    "ja-JP": "星脈同調",
+    "ko-KR": "엔그램 라인 조율"
+  },
+  "20009": {
+    "zh-CN": "大鱼·小鱼·可疑的鱼",
+    "en-US": "Big Fish, Little Fish, Suspicious Fish",
+    "ja-JP": "大きな魚・小さな魚・怪しい魚",
+    "ko-KR": "큰 물고기・작은 물고기・이상한 물고기"
+  },
+  "20010": {
+    "zh-CN": "传说鱼影追踪战",
+    "en-US": "Legendary Fish Chase",
+    "ja-JP": "伝説の魚影を追え！",
+    "ko-KR": "전설의 물고기 그림자 추격전"
+  },
+  "20011": {
+    "zh-CN": "追逃游戏",
+    "en-US": "Tag",
+    "ja-JP": "チェイスゲーム",
+    "ko-KR": "술래잡기"
+  },
+  "20012": {
+    "zh-CN": "海风节庆典",
+    "en-US": "Seabreeze Festival Celebration",
+    "ja-JP": "海風祭記念",
+    "ko-KR": "해풍절 축제"
+  },
+  "20013": {
+    "zh-CN": "花火庆典",
+    "en-US": "Fireworks Celebration",
+    "ja-JP": "花火の祭典",
+    "ko-KR": "불꽃 축제"
+  },
+  "20014": {
+    "zh-CN": "冒险见闻",
+    "en-US": "Adventure Tales",
+    "ja-JP": "冒険の見聞",
+    "ko-KR": "모험 견문록"
+  },
+  "20015": {
+    "zh-CN": "卡尼曼丰收祭<br>～共栖之祭～",
+    "en-US": "Kanamia Harvest Festival<br>~Festival of Coexistence~",
+    "ja-JP": "カナミア豊年祭<br>～共生の祭～",
+    "ko-KR": "카나미아 풍수제<br>~공생의 축제~"
+  },
+  "20016": {
+    "zh-CN": "弦月升起之时",
+    "en-US": "Moonrise",
+    "ja-JP": "弦月の昇る時",
+    "ko-KR": "초승달이 떠오를 무렵"
+  },
+  "20017": {
+    "zh-CN": "千梦织灵·异梦净除",
+    "en-US": "Loom of Dreams​: Nightmare Purge",
+    "ja-JP": "千夢織霊・悪夢浄化",
+    "ko-KR": "꿈 엮기 의식・변이된 꿈 정화"
+  },
+  "20018": {
+    "zh-CN": "激斗！息壤争夺",
+    "en-US": "Clash! Battle for the Renewal",
+    "ja-JP": "激闘！盟約の地争奪",
+    "ko-KR": "격돌! 식양 쟁탈전"
+  },
+  "20019": {
+    "zh-CN": "祖息孢培育计划",
+    "en-US": "Ancestral Spore Cultivation Plan",
+    "ja-JP": "盟約の胞子育成計画",
+    "ko-KR": "선조의 숨결 포자 배양 계획"
+  },
+  "20020": {
+    "zh-CN": "丰收祭的意趣",
+    "en-US": "Delights of the Harvest Festival",
+    "ja-JP": "豊年祭の趣き",
+    "ko-KR": "풍수제의 정취"
+  },
+  "20021": {
+    "zh-CN": "勇士的远行日常",
+    "en-US": "Warrior's Journey Dailies",
+    "ja-JP": "勇士の長旅の日常",
+    "ko-KR": "용사의 원정 일상"
+  },
+  "30001": {
+    "zh-CN": "游星手册",
+    "en-US": "Starland Manual",
+    "ja-JP": "スターリーブック",
+    "ko-KR": "유성 매뉴얼"
+  }
+}

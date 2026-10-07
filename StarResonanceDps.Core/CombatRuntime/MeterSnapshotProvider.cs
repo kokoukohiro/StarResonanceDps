@@ -325,7 +325,33 @@ public static class MeterSnapshotProvider
     /// </summary>
     public static TakenDamageLogSnapshot GetTakenDamageLog(Encounter? knownEncounter, int startIndex)
     {
-        var encounter = ResolveActiveEncounter();
+        return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);
+    }
+
+    /// <summary>
+    /// ライブのエンカウンター(<see cref="EncounterManager.Current"/>)の被ダメログを <paramref name="startIndex"/> 件目から返す。
+    /// <b>履歴表示に追従しない。</b> 被ダメログの通知(予兆技)が、履歴を見ている間もライブの戦闘で通知するのに使う。
+    /// 返し方は <see cref="GetTakenDamageLog"/> と同じ。
+    /// </summary>
+    public static TakenDamageLogSnapshot GetLiveTakenDamageLog(Encounter? knownEncounter, int startIndex)
+    {
+        return BuildTakenDamageLog(EncounterManager.Current, knownEncounter, startIndex);
+    }
+
+    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。被ダメログの予告の行・詠唱の行と同じ。</summary>
+    public static string GetTakenDamageLogSkillName(int skillId)
+    {
+        return ResolveTakenDamageSkillName(skillId);
+    }
+
+    /// <summary>予告の主(予告が届いた時点で周囲にいる、その技を持つモンスターの種別ID。0 なら名前なし)。被ダメログの予告の行の加害者。</summary>
+    public static TakenDamageLogParty CreateTakenDamageLogAnnouncementParty(int ownerMonsterId)
+    {
+        return new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(ownerMonsterId), false, false, false, 0, PlayerClassSpec.Unknown);
+    }
+
+    private static TakenDamageLogSnapshot BuildTakenDamageLog(Encounter? encounter, Encounter? knownEncounter, int startIndex)
+    {
         if (encounter is null)
         {
             return new TakenDamageLogSnapshot(null, 0, Array.Empty<TakenDamageLogLine>());
@@ -346,7 +372,7 @@ public static class MeterSnapshotProvider
         for (var index = 0; index < records.Length; index++)
         {
             var record = records[index];
-            if (record.Kind == TakenDamageLogRecordKind.Announcement)
+            if (record.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.AnnouncementEnd)
             {
                 var announcement = record.Announcement!;
                 lines[index] = new TakenDamageLogLine(
@@ -354,7 +380,7 @@ public static class MeterSnapshotProvider
                     announcement.Sequence,
                     announcement.Timestamp - encounterStart,
                     announcement.Timestamp,
-                    new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(announcement.OwnerMonsterId), false, false, false, 0, PlayerClassSpec.Unknown),
+                    CreateTakenDamageLogAnnouncementParty(announcement.OwnerMonsterId),
                     null,
                     announcement.SkillId,
                     false,

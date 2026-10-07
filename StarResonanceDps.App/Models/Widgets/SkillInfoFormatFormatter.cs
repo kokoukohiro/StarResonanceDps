@@ -49,8 +49,8 @@ public static partial class SkillInfoFormatFormatter
             localization.GetString("Settings_SkillInfo_PreviewName"),
             localization.GetString("DamageProperty_Fire"),
             localization.GetString("Metric_DamageMode_Physical"),
-            123UL,
-            45.67d,
+            484UL,
+            16.42d,
             formatString);
     }
 

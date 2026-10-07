@@ -183,12 +183,19 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 
     public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorPalettes();
 
+    /// <summary>
+    /// 通知の文章(予兆技 = 予告と警告の技の開始)。読み上げの内容・Windows の通知の本文になる。
+    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
+    /// </summary>
+    public string? TelegraphedSkillNotificationFormatString { get; set; }
+
     public TakenDamageLogWidgetSettingsConfig Clone()
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
+            TelegraphedSkillNotificationFormatString = TelegraphedSkillNotificationFormatString,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -397,6 +404,15 @@ public sealed class BuffCardWidgetSettingsConfig
     public string? BuffInfoFormatString { get; set; }
 
     /// <summary>
+    /// 通知の文章(効果時間切れ)。読み上げの内容・Windows の通知の本文になる。
+    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
+    /// </summary>
+    public string? ExpiredNotificationFormatString { get; set; }
+
+    /// <summary>通知の文章(薬剤・料理バフ2分以下)。null と空の意味は <see cref="ExpiredNotificationFormatString"/> と同じ。</summary>
+    public string? CuisinePotionLowNotificationFormatString { get; set; }
+
+    /// <summary>
     /// 倍率(%)。キーは <c>{対象ID}:{バフキー}</c>。
     ///
     /// <para>
@@ -412,6 +428,8 @@ public sealed class BuffCardWidgetSettingsConfig
         return new BuffCardWidgetSettingsConfig
         {
             BuffInfoFormatString = BuffInfoFormatString,
+            ExpiredNotificationFormatString = ExpiredNotificationFormatString,
+            CuisinePotionLowNotificationFormatString = CuisinePotionLowNotificationFormatString,
             Scales = Scales is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase)
@@ -476,6 +494,15 @@ public sealed class MeterWidgetSettingsConfig
     public int ClassColorFilterStrength { get; set; } =
         WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
+    /// <summary>
+    /// 通知の文章(マッチング成立)。使うのはプレイヤーリストだけ。読み上げの内容・Windows の通知の本文になる。
+    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
+    /// </summary>
+    public string? MatchFoundNotificationFormatString { get; set; }
+
+    /// <summary>通知の文章(HP低下)。使うのはプレイヤーリストだけ。null と空の意味は <see cref="MatchFoundNotificationFormatString"/> と同じ。</summary>
+    public string? HealthLowNotificationFormatString { get; set; }
+
     public MeterWidgetSettingsConfig Clone()
     {
         return new MeterWidgetSettingsConfig
@@ -503,7 +530,9 @@ public sealed class MeterWidgetSettingsConfig
             ClassColorFilterEnabled = ClassColorFilterEnabled,
             ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
             ClassColorFilterColorIndex = ClassColorFilterColorIndex,
-            ClassColorFilterStrength = ClassColorFilterStrength
+            ClassColorFilterStrength = ClassColorFilterStrength,
+            MatchFoundNotificationFormatString = MatchFoundNotificationFormatString,
+            HealthLowNotificationFormatString = HealthLowNotificationFormatString
         };
     }
 }
@@ -887,7 +916,7 @@ public static class WidgetConfigDefaults
     private static readonly Dictionary<string, string[]> PlayerListDefaultSeasonTalentColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["SeasonTalent.s2talent01_01"] = ["#FFFFFF", "#F5EABF"],
-        ["SeasonTalent.s2talent02_01"] = ["#FFFFFF", "#F5C1A8"],
+        ["SeasonTalent.s2talent02_01"] = ["#FFFFFF", "#F6D3A8"],
         ["SeasonTalent.s2talent03_01"] = ["#FFFFFF", "#F5CECE"],
         ["SeasonTalent.s2talent04_01"] = ["#FFFFFF", "#F5CEEA"],
         ["SeasonTalent.s2talent05_01"] = ["#FFFFFF", "#C2E9F5"],

@@ -27,6 +27,10 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     /// <summary>追うまとまり。<see cref="BuffGroup.None"/> なら個別のバフを追う。</summary>
     private readonly BuffGroup _group;
     private readonly DispatcherTimer _refreshTimer;
+
+    /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
+    private readonly BuffCardNotificationTracker _notificationTracker;
+
     private string _scaleKey = string.Empty;
 
     /// <summary>最後に分かったバフ名。失効してもタイトルは維持する。</summary>
@@ -74,6 +78,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _kind = kind;
         _group = group;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
+        _notificationTracker = new BuffCardNotificationTracker(widget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -268,6 +273,8 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
                 SavedTargetInfoResolved?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        _notificationTracker.Observe(_target.EntityUuid, snapshot, _target.Name);
 
         if (snapshot is null)
         {

@@ -51,7 +51,7 @@ public sealed class PlayerInfoWidgetSettingsViewModel : ObservableObject, IDispo
     /// <summary>アイコンカラーの行。行ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
 
-    public string ClassColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_ClassColors_Title");
+    public string ClassColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_IconColors_Title");
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 

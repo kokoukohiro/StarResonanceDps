@@ -101,8 +101,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 入り直し(キャラクター選択)。ログイン画面の門を開ける合図。
             netCap.RegisterProxyHandler((uint)EServiceId.GrpcCharactor, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.SelectChar, ProcessSelectChar);
 
+            // マッチング成立(承諾待ち)。プレイヤーリストの通知に使う。
+            netCap.RegisterMatchNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.MatchNtf.EnterMatchResult, ProcessEnterMatchResult);
+
             netCap.NotifyGate = ShouldDispatchNotify;
             netCap.ProxyGate = ShouldDispatchProxy;
+
+            // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先に被ダメログへ残す。
+            netCap.BeforeParsePacket = EncounterManager.RecordEndedAnnouncementBars;
 
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
@@ -139,6 +145,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SummonSourceIndex.Instance.Clear();
             SourceLandingResolver.Instance.Clear();
             NearbyMonsterIndex.Instance.Clear();
+            BossDbmBarStore.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
@@ -582,6 +589,25 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// プレイヤー情報の窓は、一覧から外れても残していた最後の値を捨てて、起動時の表示に戻す。
         /// </summary>
         public static event Action? ResetToStartupCompleted;
+
+        /// <summary>
+        /// マッチングが成立して承諾待ちになった(<c>MatchNtf.EnterMatchResult</c> の状態が <c>WaitReady</c>。ゲームの「マッチング成功、確認待ち」)。
+        /// 値はマッチング先の種類と番号(名前は <see cref="CombatDataCatalog.GetMatchTargetName"/>)。パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<EMatchType, long>? MatchFound;
+
+        public static void ProcessEnterMatchResult(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            var vData = MatchNtf.Types.EnterMatchResultNtf.Parser.ParseFrom(payloadBuffer);
+            var matchInfo = vData.VRequest?.MatchInfo;
+            if (matchInfo is null || matchInfo.MatchStatus != EMatchStatus.WaitReady)
+            {
+                return;
+            }
+
+            var key = matchInfo.MatchKeyInfo;
+            MatchFound?.Invoke(key?.MatchType ?? EMatchType.Null, key?.MatchTypeUuid ?? 0);
+        }
 
         /// <summary>
         /// ゲームがログイン画面へ戻った(サーバーから <c>GrpcCharactor</c> の <c>ExitGame</c> が通知で届く)。

@@ -118,6 +118,7 @@ public sealed partial class MainViewModel : ViewModelBase
         SocialDataStore.Cleared += SocialDataStore_Cleared;
         SelfEquipmentStore.Changed += SelfEquipmentStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
+        MessageManager.MatchFound += MessageManager_MatchFound;
 
         var roster = _playerRosterStore.Current;
         ApplyPlayerRosterSnapshot(roster);
@@ -251,6 +252,19 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfEquipment());
+    }
+
+    /// <summary>マッチングが成立した。受信のスレッドから来るので UI のスレッドへ移してプレイヤーリストへ渡す。</summary>
+    private void MessageManager_MatchFound(Zproto.EMatchType matchType, long matchTypeUuid)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _playerListWidget?.NotifyMatchFound(matchType, matchTypeUuid);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _playerListWidget?.NotifyMatchFound(matchType, matchTypeUuid));
     }
 
     private void PartyStateStore_Changed(object? sender, EventArgs e)

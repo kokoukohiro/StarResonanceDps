@@ -34,6 +34,10 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     private readonly BuffGroup _group;
 
     private readonly DispatcherTimer _refreshTimer;
+
+    /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
+    private readonly BuffCardNotificationTracker _notificationTracker;
+
     private PlayerRosterEntry? _player;
     private string _scaleKey = string.Empty;
 
@@ -82,6 +86,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         _kind = kind;
         _group = group;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
+        _notificationTracker = new BuffCardNotificationTracker(playerWidget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -220,6 +225,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
         if (SelectedCharacterId is not { } characterId)
         {
+            _notificationTracker.Reset();
             ApplyContent(BuffDebuffCardContent.Empty, string.Empty, characterId: 0, hasBuff: false);
 
             // 対象が分からなくても、まとまり(料理・薬剤)の名前は出せる。
@@ -270,6 +276,8 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             _player?.IsNpc ?? playerIdentity?.IsNpc ?? false,
             _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
             PlayerRosterPresentationStore.Instance.NameDisplayMode);
+
+        _notificationTracker.Observe(characterId, snapshot, targetName);
 
         if (snapshot is null)
         {

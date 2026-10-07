@@ -97,6 +97,9 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>通知(予兆技)の判定。窓の表示(履歴を含む)とは別に、ライブの戦闘を読む。窓を開いている間だけ動く。</summary>
+    private readonly TelegraphedSkillNotificationTracker _notificationTracker;
+
     private Encounter? _encounter;
     private int _nextIndex;
     private TakenDamageLogWidgetSettingsConfig _settings;
@@ -105,6 +108,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     {
         _widget = widget;
         _settings = widget.GetTakenDamageLogSettingsSnapshot();
+        _notificationTracker = new TelegraphedSkillNotificationTracker(widget.GetTakenDamageLogSettingsSnapshot, GetDisplayName);
         Entries = new ReadOnlyObservableCollection<TakenDamageLogEntry>(_entries);
 
         _refreshTimer = new DispatcherTimer
@@ -117,6 +121,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         Refresh();
+        _notificationTracker.Poll();
         _refreshTimer.Start();
     }
 
@@ -134,6 +139,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
+        _notificationTracker.Poll();
     }
 
     /// <summary>
@@ -258,6 +264,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
                     CreateSourceSegments(format, line, "TakenDamageLog_UnnamedCastSkill"),
                     _widget);
             case TakenDamageLogRowKind.Skill:
+            case TakenDamageLogRowKind.AnnouncementEnd:
                 return new TakenDamageLogEntry(
                     MeterWidgetViewModel.FormatDuration(line.Elapsed),
                     true,
@@ -276,7 +283,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
     /// <summary>
     /// 技(またはバフ)の名前。名前が無ければこのウィジェットだけ <paramref name="unnamedKey"/> の文言を出す。
-    /// 技の行は「攻撃」、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
+    /// 技の行と予告のバーの終わりの行は「攻撃」、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
     /// 落下は技を持たないので「落下」の文言。
     /// </summary>
     private static string FormatSourceName(TakenDamageLogLine line, string unnamedKey)
@@ -295,7 +302,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// 予告行・詠唱行・技の行。加害者の名前(エンティティ名)と技の名前(スキル名)に、それぞれのテキストカラーを当てる。
+    /// 予告行・予告のバーの終わりの行・詠唱行・技の行。加害者の名前(エンティティ名)と技の名前(スキル名)に、それぞれのテキストカラーを当てる。
     /// 加害者がプレイヤー(自傷・フレンドリーファイア)なら、被弾行と同じクラスアイコンを名前の前に置く。
     /// </summary>
     private IReadOnlyList<object> CreateSourceSegments(string formatKey, TakenDamageLogLine line, string unnamedKey)
