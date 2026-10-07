@@ -79,9 +79,9 @@
   "45300:1": {
     "Row": null,
     "Name": {
-      "zh-CN": "连锁闪电-奥义！幻象共鸣",
+      "zh-CN": "闪电链-奥义！幻象共鸣",
       "en-US": "Chain Lightning - Arcane! Illusion Resonance",
-      "ja-JP": "チェインサンダー・奥義！幻影共鳴",
+      "ja-JP": "稲妻チェーン・奥義！幻影共鳴",
       "ko-KR": "연쇄 번개 - 오의! 환상 공명"
     }
   },
@@ -139,6 +139,15 @@
   },
   "304301:0": {
     "Row": "301531:2"
+  },
+  "391007:0": {
+    "Row": null,
+    "Name": {
+      "zh-CN": "绝技！乱射(被动)",
+      "en-US": "Stunt! Frenzied Shot - Passive",
+      "ja-JP": "絶技！乱射(パッシブ)",
+      "ko-KR": "비기! 난사(패시브)"
+    }
   },
   "391008:0": {
     "Row": null,
@@ -385,6 +394,14 @@
   "2110035:3": {
     "Row": "1101304:1"
   },
+  "2110161:5": {
+    "Name": {
+      "zh-CN": "奥义！星灵魔导士",
+      "en-US": "Arcane! Celestial Spirit Mage",
+      "ja-JP": "奥義！星霊魔導士",
+      "ko-KR": "오의! 성령 마도사"
+    }
+  },
   "2201493:3": {
     "Row": "2201491:3"
   },
@@ -595,6 +612,9 @@
       "ko-KR": "오의! 고요한 조수(패시브)"
     }
   },
+  "3210092:2": {
+    "Row": "3210092:1"
+  },
   "3210101:2": {
     "Row": null,
     "Name": {
@@ -631,6 +651,14 @@
       "ko-KR": "오의! 정밀 점사(패시브)"
     }
   },
+  "3210222:3": {
+    "Name": {
+      "zh-CN": "奥义！穿透怒吼(被动)",
+      "en-US": "Arcane! Piercing Roar - Passive",
+      "ja-JP": "奥義！轟く怒号(パッシブ)",
+      "ko-KR": "오의! 관통의 포효(패시브)"
+    }
+  },
   "3210231:1": {
     "Row": null,
     "Name": {
@@ -652,21 +680,30 @@
     "Row": null,
     "Name": {
       "zh-CN": "奥义！双星角斗(被动)",
-      "en-US": "Arcane! Twin Star Duel - Passive"
+      "en-US": "Arcane! Twin Star Duel - Passive",
+      "ja-JP": "奥義！双星の決闘(パッシブ)",
+      "ko-KR": "오의! 쌍성의 결투(패시브)"
     }
   },
   "3210290:4": {
     "Row": null,
     "Name": {
       "zh-CN": "奥义！逆刃极冻斩(被动)",
-      "en-US": "Arcane! Glacial Reverse Blade - Passive"
+      "en-US": "Arcane! Glacial Reverse Blade - Passive",
+      "ja-JP": "奥義！氷刃返し(パッシブ)",
+      "ko-KR": "오의! 역날 극빙참(패시브)"
     }
+  },
+  "3210300:2": {
+    "Row": "3210300:3"
   },
   "3210300:3": {
     "Row": null,
     "Name": {
       "zh-CN": "奥义！泡影之息(被动)",
-      "en-US": "Arcane! Breath of Illusions - Passive"
+      "en-US": "Arcane! Breath of Illusions - Passive",
+      "ja-JP": "奥義！バブルブレス(パッシブ)",
+      "ko-KR": "오의! 거품 그림자의 숨결(패시브)"
     }
   },
   "3913001:3": {

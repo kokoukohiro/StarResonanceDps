@@ -222,8 +222,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         _configManager.ClearSettingsPreview();
         _hotkeyService.PreviewGameProcessNames(null);
 
-        // プレビューで Windows の通知を出していると、アプリの名前の登録が書かれている。
-        // 保存してある通知方法が Windows の通知でなければ消す(取り消し・値を戻して閉じた場合も)。
+        // プレビューで Windows の通知を出していると、アプリの名前とアイコンの登録が書かれている。
+        // 保存してある通知方法が Windows の通知でなければ、通知センターのこのアプリの通知と一緒に消す(取り消し・値を戻して閉じた場合も)。
         if (_lastSavedSettings.NotificationMethodIndex != AppConfigDefaults.NotificationMethodWindowsIndex)
         {
             NotificationService.RemoveWindowsNotificationRegistration();
@@ -251,7 +251,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         _configManager.SaveSettings(settings);
         _lastSavedSettings = settings.Clone();
 
-        // Windows の通知のためのアプリの名前の登録は、Windows の通知を使わなくなったら消す(使うときに通知の処理が書く)。
+        // Windows の通知のためのアプリの名前とアイコンの登録は、Windows の通知を使わなくなったら通知センターのこのアプリの通知と一緒に消す
+        // (使うときに通知の処理が書く)。
         if (settings.NotificationMethodIndex != AppConfigDefaults.NotificationMethodWindowsIndex)
         {
             NotificationService.RemoveWindowsNotificationRegistration();

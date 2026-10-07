@@ -215,7 +215,7 @@
     <Resource Include="Assets\Images\achievement_simclass_new_s4.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_xushirongguang.png" />
     <Resource Include="Assets\Images\ApplicationIcon_22x22.png" />
-    <Resource Include="Assets\Images\ApplicationIcon_32x32.png" />
+    <EmbeddedResource Include="Assets\Images\ApplicationIcon_32x32.png" LogicalName="WindowsNotificationIcon.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
     <Resource Include="Assets\Images\img_seasontalent_main_btn_bg1.png" />
@@ -323,15 +323,6 @@
   <ItemGroup>
     <Resource Include="Assets\Images\weap_role_skill_bg_01.png" />
     <Resource Include="Assets\Images\weap_role_skill_bg_02.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Windows の通知のアイコン。通知のためのアプリの名前の登録(IconUri)が、実行フォルダのこのファイルを指す。 -->
-    <Content Include="Assets\Images\ApplicationIcon_32x32.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -2,6 +2,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Win32;
 using Serilog;
 using StarResonanceDps.App.Config;
@@ -19,8 +21,12 @@ namespace StarResonanceDps.App.Services;
 /// </para>
 ///
 /// <para>
-/// Windows の通知は、パッケージ化していないアプリなので、出す前にアプリの名前を
-/// <c>HKCU\Software\Classes\AppUserModelId\StarResonanceDps</c> に書く。通知方法をほかに変えて保存したら消す
+/// Windows の通知は、パッケージ化していないアプリなので、出す前にアプリの名前とアイコンを
+/// <c>HKCU\Software\Classes\AppUserModelId\{登録名}</c> に書く。アイコンは埋め込みの png を
+/// <see cref="AppDataPaths.WindowsNotificationIconPath"/> へ書き出したもの。
+/// 登録名は <c>StarResonanceDps.</c> ＋ その png のパスの SHA-256。Windows は登録名ごとに最初に読んだアイコンの場所を覚えて
+/// 読み直さないので、png の場所が変われば(フォルダの移動を含む)登録名も変わる形にしてある。
+/// 通知方法をほかに変えて保存したら、通知センターのこのアプリの通知・登録・png を消す
 /// (<see cref="RemoveWindowsNotificationRegistration"/>)。
 /// </para>
 ///
@@ -32,8 +38,18 @@ namespace StarResonanceDps.App.Services;
 /// </summary>
 public sealed class NotificationService : IDisposable
 {
-    private const string AppUserModelId = "StarResonanceDps";
-    private const string AppUserModelIdKeyPath = @"Software\Classes\AppUserModelId\" + AppUserModelId;
+    private const string AppUserModelIdPrefix = "StarResonanceDps.";
+    private const string AppUserModelIdRootKeyPath = @"Software\Classes\AppUserModelId";
+    private const string IconResourceName = "WindowsNotificationIcon.png";
+
+    private static readonly string IconPath = AppDataPaths.WindowsNotificationIconPath;
+    private static readonly string AppUserModelId = CreateAppUserModelId(IconPath);
+    private static readonly string AppUserModelIdKeyPath = AppUserModelIdRootKeyPath + @"\" + AppUserModelId;
+    private static readonly Lazy<byte[]> EmbeddedIcon = new(ReadEmbeddedIcon);
+
+    // 登録・古い登録の掃除・削除を1つずつ通す。
+    private static readonly object RegistrationSync = new();
+    private static bool _hasRemovedStaleRegistrations;
 
     private static readonly Lazy<NotificationService> LazyInstance = new(() => new NotificationService());
 
@@ -93,16 +109,43 @@ public sealed class NotificationService : IDisposable
         _speechQueue.Dispose();
     }
 
-    /// <summary>通知方法を Windows の通知以外にして保存したときに呼ぶ。アプリの名前の登録を消す(無ければ何もしない)。</summary>
+    /// <summary>
+    /// 通知方法を Windows の通知以外にして保存したときに呼ぶ。通知センターのこのアプリの通知、アプリの名前とアイコンの登録、
+    /// 書き出した png を消す(無ければ何もしない)。
+    /// </summary>
     public static void RemoveWindowsNotificationRegistration()
     {
-        try
+        lock (RegistrationSync)
         {
-            Registry.CurrentUser.DeleteSubKeyTree(AppUserModelIdKeyPath, throwOnMissingSubKey: false);
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException or IOException)
-        {
-            Log.Warning(ex, "Could not remove the Windows notification registration key={Key}", AppUserModelIdKeyPath);
+            try
+            {
+                bool isRegistered;
+                using (var key = Registry.CurrentUser.OpenSubKey(AppUserModelIdKeyPath))
+                {
+                    isRegistered = key is not null;
+                }
+
+                if (isRegistered)
+                {
+                    RemoveRegistration(AppUserModelId);
+                }
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException or IOException)
+            {
+                Log.Warning(ex, "Could not remove the Windows notification registration key={Key}", AppUserModelIdKeyPath);
+            }
+
+            try
+            {
+                if (File.Exists(IconPath))
+                {
+                    File.Delete(IconPath);
+                }
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException or IOException)
+            {
+                Log.Warning(ex, "Could not remove the Windows notification icon path={Path}", IconPath);
+            }
         }
     }
 
@@ -130,33 +173,156 @@ public sealed class NotificationService : IDisposable
 
     /// <summary>
     /// アプリの名前(管理画面のタイトル)とアイコンを登録する。値が今と同じなら書かない。
-    /// アイコンのファイルが無ければアイコン無しで登録し、そのことをログに残す。
+    /// 起動してから最初の1回だけ、ほかの場所の古い登録を消す(<see cref="RemoveStaleRegistrations"/>)。
+    /// png が書けなかった回もアイコンの場所は登録し、通知はアイコン無しで出る(失敗はログ)。後で書けたときに読まれる見込みのため。
     /// </summary>
     private static void EnsureWindowsNotificationRegistration()
     {
-        var displayName = LocalizationManager.Instance.GetString("Window_Manager_Title");
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Images", "ApplicationIcon_32x32.png");
-
-        using var key = Registry.CurrentUser.CreateSubKey(AppUserModelIdKeyPath, writable: true);
-        if (!string.Equals(key.GetValue("DisplayName") as string, displayName, StringComparison.Ordinal))
+        lock (RegistrationSync)
         {
-            key.SetValue("DisplayName", displayName);
-        }
+            if (!_hasRemovedStaleRegistrations)
+            {
+                _hasRemovedStaleRegistrations = true;
+                RemoveStaleRegistrations();
+            }
 
-        if (!File.Exists(iconPath))
+            WriteIconFile();
+
+            var displayName = LocalizationManager.Instance.GetString("Window_Manager_Title");
+            using var key = Registry.CurrentUser.CreateSubKey(AppUserModelIdKeyPath, writable: true);
+            if (!string.Equals(key.GetValue("DisplayName") as string, displayName, StringComparison.Ordinal))
+            {
+                key.SetValue("DisplayName", displayName);
+            }
+
+            if (!string.Equals(key.GetValue("IconUri") as string, IconPath, StringComparison.OrdinalIgnoreCase))
+            {
+                key.SetValue("IconUri", IconPath);
+            }
+        }
+    }
+
+    /// <summary>埋め込みのアイコンを png に書き出す。無いか中身が違うときだけ書く。書けなければログに残す。</summary>
+    private static void WriteIconFile()
+    {
+        try
+        {
+            var icon = EmbeddedIcon.Value;
+            if (File.Exists(IconPath) && File.ReadAllBytes(IconPath).AsSpan().SequenceEqual(icon))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(IconPath)!);
+            File.WriteAllBytes(IconPath, icon);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException or InvalidOperationException)
         {
             NotificationFailureLog.Warning(
                 "windows-notification-icon",
-                null,
-                "The Windows notification icon is missing path={Path}",
-                iconPath);
+                ex,
+                "Could not write the Windows notification icon. The notification is shown without the icon path={Path}",
+                IconPath);
+        }
+    }
+
+    /// <summary>
+    /// フォルダを動かした・消した後に残った、このアプリのほかの登録を消す。
+    /// 対象はアイコンのファイルが無いものだけで、そのドライブが今無いもの(外したドライブにあるコピー)は残す。
+    /// </summary>
+    private static void RemoveStaleRegistrations()
+    {
+        string[] names;
+        try
+        {
+            using var root = Registry.CurrentUser.OpenSubKey(AppUserModelIdRootKeyPath);
+            if (root is null)
+            {
+                return;
+            }
+
+            names = root.GetSubKeyNames();
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException or IOException)
+        {
+            Log.Warning(ex, "Could not list the Windows notification registrations key={Key}", AppUserModelIdRootKeyPath);
             return;
         }
 
-        if (!string.Equals(key.GetValue("IconUri") as string, iconPath, StringComparison.OrdinalIgnoreCase))
+        foreach (var name in names)
         {
-            key.SetValue("IconUri", iconPath);
+            if (!name.StartsWith(AppUserModelIdPrefix, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(name, AppUserModelId, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            try
+            {
+                string? iconUri;
+                using (var key = Registry.CurrentUser.OpenSubKey(AppUserModelIdRootKeyPath + @"\" + name))
+                {
+                    iconUri = key?.GetValue("IconUri") as string;
+                }
+
+                if (!IsStaleIcon(iconUri))
+                {
+                    continue;
+                }
+
+                RemoveRegistration(name);
+                Log.Information("Removed a stale Windows notification registration name={Name} icon={Icon}", name, iconUri);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException or IOException)
+            {
+                Log.Warning(ex, "Could not remove a stale Windows notification registration name={Name}", name);
+            }
         }
+    }
+
+    private static bool IsStaleIcon(string? iconUri)
+    {
+        if (string.IsNullOrEmpty(iconUri))
+        {
+            return false;
+        }
+
+        var root = Path.GetPathRoot(iconUri);
+        return !string.IsNullOrEmpty(root) && Directory.Exists(root) && !File.Exists(iconUri);
+    }
+
+    /// <summary>登録名の通知を通知センターから消してから、登録の鍵を消す。通知センターから消せなくても鍵は消す(ログに残す)。</summary>
+    private static void RemoveRegistration(string appUserModelId)
+    {
+        if (OperatingSystem.IsWindowsVersionAtLeast(10, 0, 10240))
+        {
+            try
+            {
+                ToastNotificationManager.History.Clear(appUserModelId);
+            }
+            catch (COMException ex)
+            {
+                Log.Warning(ex, "Could not clear the Windows notifications name={Name}", appUserModelId);
+            }
+        }
+
+        Registry.CurrentUser.DeleteSubKeyTree(AppUserModelIdRootKeyPath + @"\" + appUserModelId, throwOnMissingSubKey: false);
+    }
+
+    /// <summary>登録名。<c>StarResonanceDps.</c> ＋ アイコンの png のパス(大文字にそろえる)の SHA-256 の16進。</summary>
+    private static string CreateAppUserModelId(string iconPath)
+    {
+        var normalizedPath = Path.GetFullPath(iconPath).ToUpperInvariant();
+        return AppUserModelIdPrefix + Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(normalizedPath)));
+    }
+
+    private static byte[] ReadEmbeddedIcon()
+    {
+        using var stream = typeof(NotificationService).Assembly.GetManifestResourceStream(IconResourceName)
+            ?? throw new InvalidOperationException($"The embedded resource {IconResourceName} is missing");
+        using var memory = new MemoryStream();
+        stream.CopyTo(memory);
+        return memory.ToArray();
     }
 
     [SupportedOSPlatform("windows10.0.10240")]

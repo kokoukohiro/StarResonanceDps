@@ -239,7 +239,7 @@ export BPSR_TABLES=<置き場所>     # bash
 ```json
 {
   "55355:1":   { "Row": "21427:1" },
-  "3210021:3": { "Row": null, "Name": { "ja-JP": "奥義！メテオフォール(パッシブ)" } },
+  "3210022:3": { "Row": null, "Name": { "ja-JP": "奥義！メテオフォール(パッシブ)" } },
   "50037:3":   { "Name": { "en-US": "Countercrush (Counter Storm)" } }
 }
 ```
