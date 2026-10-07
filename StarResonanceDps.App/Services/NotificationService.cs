@@ -40,7 +40,7 @@ public sealed class NotificationService : IDisposable
 {
     private const string AppUserModelIdPrefix = "StarResonanceDps.";
     private const string AppUserModelIdRootKeyPath = @"Software\Classes\AppUserModelId";
-    private const string IconResourceName = "WindowsNotificationIcon.png";
+    private const string IconResourceName = "Icon.png";
 
     private static readonly string IconPath = AppDataPaths.WindowsNotificationIconPath;
     private static readonly string AppUserModelId = CreateAppUserModelId(IconPath);

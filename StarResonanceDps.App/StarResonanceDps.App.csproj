@@ -215,7 +215,7 @@
     <Resource Include="Assets\Images\achievement_simclass_new_s4.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_xushirongguang.png" />
     <Resource Include="Assets\Images\ApplicationIcon_22x22.png" />
-    <EmbeddedResource Include="Assets\Images\ApplicationIcon_32x32.png" LogicalName="WindowsNotificationIcon.png" />
+    <EmbeddedResource Include="Assets\Images\ApplicationIcon_32x32.png" LogicalName="Icon.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
     <Resource Include="Assets\Images\com_icon_question.png" />
     <Resource Include="Assets\Images\img_seasontalent_main_btn_bg1.png" />

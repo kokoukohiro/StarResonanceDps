@@ -22,7 +22,7 @@ public static class AppDataPaths
 
     // Windows の通知のアイコン。通知の処理が埋め込みから書き出す。Windows の通知の登録名はこのパスから作る
     // (Windows は登録名ごとに最初に読んだアイコンの場所を覚えて読み直さないため、場所を変えたら登録名も変わる形にしてある)。
-    public static string WindowsNotificationIconPath => Path.Combine(DataDirectory, "Images", "WindowsNotificationIcon.png");
+    public static string WindowsNotificationIconPath => Path.Combine(DataDirectory, "Images", "Icon.png");
 
     // Plugin DLLs and every plugin-owned generated file share this one runtime directory.
     public static string PluginsDirectory => Path.Combine(BaseDirectory, "Plugins");
