@@ -64,8 +64,8 @@
                         Orientation="Horizontal"
                         VerticalAlignment="Center">
                 <Button Style="{StaticResource Button.AggregationAction}"
-                        Command="{Binding ToggleThreeMinuteBenchmarkCommand}"
-                        Content="{Binding ThreeMinuteBenchmarkText}" />
+                        Command="{Binding ToggleBenchmarkCommand}"
+                        Content="{Binding BenchmarkText}" />
                 <Button Style="{StaticResource Button.AggregationAction}"
                         Margin="8,0,0,0"
                         Command="{Binding ResetEncounterCommand}"

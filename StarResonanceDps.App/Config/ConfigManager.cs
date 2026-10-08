@@ -16,13 +16,11 @@ public sealed class ConfigManager
     };
 
     private readonly string _configPath;
-    private readonly string _legacyConfigPath;
     private SettingsConfig? _settingsPreview;
 
     private ConfigManager()
     {
         _configPath = AppDataPaths.AppSettingsPath;
-        _legacyConfigPath = AppDataPaths.GetLegacyAppSettingsPath();
         AppConfig = LoadAppConfig();
         ApplyDisplaySettings(AppConfig.Settings);
         ApplyRuntimeSettings(AppConfig.Settings);
@@ -31,6 +29,9 @@ public sealed class ConfigManager
     public static ConfigManager Instance => LazyInstance.Value;
 
     public AppConfig AppConfig { get; }
+
+    /// <summary>起動時に、ファイルはあるのに読めなかった(壊れている・設定が入っていない)か。既定値で動いている。</summary>
+    public bool HasLoadFailed { get; private set; }
 
     public event EventHandler? SettingsChanged;
 
@@ -68,39 +69,6 @@ public sealed class ConfigManager
     {
         AppConfigDefaults.Normalize(AppConfig);
         return AppConfig.ColorPicker.Clone();
-    }
-
-    public MeterWidgetSettingsConfig? TakeLegacyClassColorSettings()
-    {
-        var extensionData = AppConfig.Settings.ExtensionData;
-        var classColorsKey = extensionData?
-            .Keys
-            .FirstOrDefault(key => string.Equals(key, "ClassColors", StringComparison.OrdinalIgnoreCase));
-        if (extensionData is null
-            || classColorsKey is null
-            || !extensionData.TryGetValue(classColorsKey, out var value)
-            || value.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null)
-        {
-            return null;
-        }
-
-        MeterWidgetSettingsConfig? settings = null;
-        try
-        {
-            settings = JsonSerializer.Deserialize<MeterWidgetSettingsConfig>(value.GetRawText(), JsonOptions);
-        }
-        catch (JsonException)
-        {
-        }
-
-        extensionData.Remove(classColorsKey);
-        if (extensionData.Count == 0)
-        {
-            AppConfig.Settings.ExtensionData = null;
-        }
-
-        Save();
-        return settings;
     }
 
     public void SaveSettings(SettingsConfig settings)
@@ -170,7 +138,9 @@ public sealed class ConfigManager
             settings.SplitEncountersOnNewPhases,
             settings.KeepPastEncounterInMeterUntilNextDamage,
             settings.ClearHistorySelectionOnNextEvent,
-            settings.DatabaseMaxEncounterCount);
+            settings.DatabaseMaxEncounterCount,
+            settings.BenchmarkDurationSeconds,
+            settings.BenchmarkFirstTargetOnly);
     }
 
     /// <summary>
@@ -205,36 +175,30 @@ public sealed class ConfigManager
 
     private AppConfig LoadAppConfig()
     {
-        var loadPath = GetReadableConfigPath();
-        if (loadPath is null)
+        if (!File.Exists(_configPath))
         {
             return AppConfigDefaults.Create();
         }
 
         try
         {
-            var json = File.ReadAllText(loadPath);
+            var json = File.ReadAllText(_configPath);
             var root = JsonSerializer.Deserialize<AppSettingsRoot>(json, JsonOptions);
-            var config = root?.Config ?? AppConfigDefaults.Create();
+            if (root?.Config is not { } config)
+            {
+                HasLoadFailed = true;
+                return AppConfigDefaults.Create();
+            }
+
             AppConfigDefaults.Normalize(config);
             return config;
         }
         catch
         {
+            // 読めないファイルは丸ごと既定値で動く。メイン窓が出たところで知らせ(SettingsLoadFailureMessage)、次の保存で上書きする。
+            HasLoadFailed = true;
             return AppConfigDefaults.Create();
         }
-    }
-
-    private string? GetReadableConfigPath()
-    {
-        if (File.Exists(_configPath))
-        {
-            return _configPath;
-        }
-
-        return File.Exists(_legacyConfigPath)
-            ? _legacyConfigPath
-            : null;
     }
 
     private sealed class AppSettingsRoot

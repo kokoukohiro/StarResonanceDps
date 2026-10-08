@@ -9,11 +9,11 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// 表示には使わない。<paramref name="SceneId"/> から引き直せなかったときの受け皿。
 /// </param>
 /// <param name="BenchmarkSeconds">
-/// 3分計測の記録なら計測秒数、そうでなければ 0。
+/// 計測の記録なら計測時間(秒、計測を始めたときの設定)、そうでなければ 0。
 /// 出所は <c>EncounterExData.BenchmarkTime</c> で、書き込みは <c>EnterDungeon</c> の
-/// <c>if (AppState.IsBenchmarkMode)</c> の中だけ。<c>TryStopBenchmark</c> は
-/// <c>IsBenchmarkMode = false</c> を先に立ててから次のエンカウンターを作るので、
-/// <b>計測本体の1件にしか付かない。</b>
+/// <c>if (IsBenchmarkActive)</c> の中だけ。計測を終える側(停止・ログアウト・マップ移動)は
+/// 印を先に下ろしてから次のエンカウンターを作るので、<b>計測の回にしか付かない。</b>
+/// 待機中の回は記録が無く保存されないので、残るのは計測が始まった回だけ。
 /// </param>
 /// <param name="DungeonDifficulty">
 /// ダンジョン同期で届いた難易度(マスターの段階)。出所は <c>EncounterExData.DungeonDifficulty</c>。
@@ -57,7 +57,7 @@ public static class EncounterHistoryProvider
     /// <para>
     /// 呼ぶのは <c>Encounter.AddDamage</c> / <c>AddHealing</c>(戦闘)と
     /// <c>EncounterManager.EnterDungeon</c> の末尾(エンカウンターの作り直し)。
-    /// 3分計測・リセット・マップ移動・フェーズ分割は全部 <c>EnterDungeon</c> を通るので、
+    /// 計測・リセット・マップ移動・フェーズ分割は全部 <c>EnterDungeon</c> を通るので、
     /// <b>ボタン側に専用の解除を書かない。</b>
     /// </para>
     ///

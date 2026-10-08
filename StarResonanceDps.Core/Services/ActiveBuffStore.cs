@@ -16,8 +16,7 @@ namespace StarResonanceDps.Core.Services;
 /// 残り時間の基準には<b>このストアが書き込みを受けたローカル時刻</b>を使う。
 /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の <c>creationTime</c> が入る経路があり
 /// ローカル時計と基準がずれるため、期限判定には使えない。
-/// <see cref="BuffEvent.EventAddTime"/> はエンカウンター相対なので境界を跨げない。
-/// 自前で観測時刻を持つのが、どちらの問題にも影響されない唯一の方法。
+/// 自前で観測時刻を持つのが、この問題に影響されない唯一の方法。
 /// </para>
 ///
 /// <para>

@@ -21,8 +21,8 @@ public enum HotkeyAction
     /// </summary>
     WidgetWindowTopmostAlwaysOrPinnedOnly,
 
-    /// <summary>3分計測(計測中なら止める)。集計タブのボタンと同じ。</summary>
-    ThreeMinuteBenchmark,
+    /// <summary>計測(計測中なら止める)。集計タブのボタンと同じ。</summary>
+    Benchmark,
 
     /// <summary>リセット。集計タブのボタンと同じ。</summary>
     ResetEncounter
@@ -30,20 +30,26 @@ public enum HotkeyAction
 
 /// <summary>
 /// ホットキーの割り当て。操作ごとに1つ。保存は名前で書く(<c>"F8"</c>、<c>"Control, Shift"</c>)。
+///
+/// <para>
+/// 各項目の初期値は null。保存ファイルに鍵が無い操作(足した操作・改名した操作)は null のまま読まれ、
+/// 正規化(<c>AppConfigDefaults.NormalizeHotkeys</c>)が既定の割り当てを入れる。
+/// 初期値を空の割り当てにすると、鍵が無い操作が「割り当てなし」になってしまう。
+/// </para>
 /// </summary>
 public sealed class HotkeySettingsConfig
 {
-    public HotkeyBindingConfig StartFavoritesOrStopAll { get; set; } = new();
+    public HotkeyBindingConfig StartFavoritesOrStopAll { get; set; } = null!;
 
-    public HotkeyBindingConfig PinRunningOrUnpinAll { get; set; } = new();
+    public HotkeyBindingConfig PinRunningOrUnpinAll { get; set; } = null!;
 
-    public HotkeyBindingConfig ClickThroughPinnedOrClearAll { get; set; } = new();
+    public HotkeyBindingConfig ClickThroughPinnedOrClearAll { get; set; } = null!;
 
-    public HotkeyBindingConfig WidgetWindowTopmostAlwaysOrPinnedOnly { get; set; } = new();
+    public HotkeyBindingConfig WidgetWindowTopmostAlwaysOrPinnedOnly { get; set; } = null!;
 
-    public HotkeyBindingConfig ThreeMinuteBenchmark { get; set; } = new();
+    public HotkeyBindingConfig Benchmark { get; set; } = null!;
 
-    public HotkeyBindingConfig ResetEncounter { get; set; } = new();
+    public HotkeyBindingConfig ResetEncounter { get; set; } = null!;
 
     public HotkeyBindingConfig Get(HotkeyAction action)
     {
@@ -53,7 +59,7 @@ public sealed class HotkeySettingsConfig
             HotkeyAction.PinRunningOrUnpinAll => PinRunningOrUnpinAll,
             HotkeyAction.ClickThroughPinnedOrClearAll => ClickThroughPinnedOrClearAll,
             HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly => WidgetWindowTopmostAlwaysOrPinnedOnly,
-            HotkeyAction.ThreeMinuteBenchmark => ThreeMinuteBenchmark,
+            HotkeyAction.Benchmark => Benchmark,
             HotkeyAction.ResetEncounter => ResetEncounter,
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
         };
@@ -75,8 +81,8 @@ public sealed class HotkeySettingsConfig
             case HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly:
                 WidgetWindowTopmostAlwaysOrPinnedOnly = binding;
                 break;
-            case HotkeyAction.ThreeMinuteBenchmark:
-                ThreeMinuteBenchmark = binding;
+            case HotkeyAction.Benchmark:
+                Benchmark = binding;
                 break;
             case HotkeyAction.ResetEncounter:
                 ResetEncounter = binding;
@@ -99,7 +105,7 @@ public sealed class HotkeySettingsConfig
             PinRunningOrUnpinAll = PinRunningOrUnpinAll?.Clone() ?? new(),
             ClickThroughPinnedOrClearAll = ClickThroughPinnedOrClearAll?.Clone() ?? new(),
             WidgetWindowTopmostAlwaysOrPinnedOnly = WidgetWindowTopmostAlwaysOrPinnedOnly?.Clone() ?? new(),
-            ThreeMinuteBenchmark = ThreeMinuteBenchmark?.Clone() ?? new(),
+            Benchmark = Benchmark?.Clone() ?? new(),
             ResetEncounter = ResetEncounter?.Clone() ?? new()
         };
     }

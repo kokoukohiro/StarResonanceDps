@@ -21,17 +21,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static int PlayerMeterPlacement { get; set; }
 
         public static ulong PlayerTotalMeterValue { get; set; }
-        public static double PlayerMeterValuePerSecond { get; set; }
-
-        public static bool IsBenchmarkMode { get; set; }
-        public static int BenchmarkTime { get; set; }
-        public static bool HasBenchmarkBegun { get; set; }
-        internal static bool IsBenchmarkCompleting { get; set; }
-        public static bool IsBenchmarkCompleted { get; set; }
-        public static DateTime? BenchmarkCompletionTime { get; set; }
-        public static bool BenchmarkSingleTarget { get; set; }
-        public static long BenchmarkSingleTargetUUID { get; set; }
-
 
         public static bool MousePassthrough { get; set; } = false;
 
@@ -44,96 +33,26 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static Encounter? ActiveEncounter = null;
         public static Encounter? OpenedHistoricalEncounter = null;
 
-        /// <summary>
-        /// 言語別の生テーブルをそのまま置くフォルダ。<c>Data/</c> 直下は設定と実行時の
-        /// 生成物(<c>Settings.json</c> / <c>AppSettings.json</c> / <c>WidgetSettings.json</c> /
-        /// 戦闘履歴DB / ログ)が並ぶので、生データはここへ分けてある。
-        ///
-        /// <para>
-        /// <b>中身は加工しないこと。</b> 間引きや書き換えをすると、テーブルを取り直したときに
-        /// 何が自前の変更だったのか分からなくなる。絞り込みは読む側で行う。
-        /// </para>
-        /// </summary>
-        public const string RawTableDirectoryName = "Raw";
-
         public static void LoadDataTables()
         {
             System.Diagnostics.Stopwatch loadTime = new();
             loadTime.Start();
 
-            string monsterTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "MonsterTable.json");
-            if (File.Exists(monsterTableFile))
-            {
-                var monsters = JsonConvert.DeserializeObject<Dictionary<string, Monster>>(File.ReadAllText(monsterTableFile))!;
-                HelperMethods.DataTables.Monsters.Data = monsters;
-                Log.Information("Loaded MonsterTable.json");
-            }
-
-            string skillTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SkillTable.json");
-            if (File.Exists(skillTableFile))
-            {
-                var skills = JsonConvert.DeserializeObject<Dictionary<string, Skill>>(File.ReadAllText(skillTableFile))!;
-                HelperMethods.DataTables.Skills.Data = skills;
-                Log.Information("Loaded SkillTable.json");
-            }
-
-
-
-
-
-            string skillFightLevelTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SkillFightLevelTable.json");
-            if (File.Exists(skillTableFile))
-            {
-                var skillFightLevels = JsonConvert.DeserializeObject<Dictionary<string, SkillFightLevel>>(File.ReadAllText(skillFightLevelTableFile))!;
-                HelperMethods.DataTables.SkillFightLevels.Data = skillFightLevels;
-                Log.Information("Loaded SkillFightLevelTable.json");
-            }
-
-
-
-
-            string buffTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "BuffTable.json");
-            if (File.Exists(buffTableFile))
-            {
-                var buffs = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(buffTableFile))!;
-                HelperMethods.DataTables.Buffs.Data = buffs;
-                Log.Information("Loaded BuffTable.json");
-            }
+            LoadRawTable<Monster>("MonsterTable.json", table => HelperMethods.DataTables.Monsters.Data = table);
+            LoadRawTable<Skill>("SkillTable.json", table => HelperMethods.DataTables.Skills.Data = table);
+            LoadRawTable<SkillFightLevel>("SkillFightLevelTable.json", table => HelperMethods.DataTables.SkillFightLevels.Data = table);
+            LoadRawTable<Buff>("BuffTable.json", table => HelperMethods.DataTables.Buffs.Data = table);
 
             LoadBuffOverridesTable();
             LoadSkillOverridesTable();
             CombatDataCatalog.Load();
 
-            string sceneEventDungeonConfigTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "SceneEventDuneonConfigTable.json");
-            if (File.Exists(sceneEventDungeonConfigTableFile))
-            {
-                var sceneEventDungeonConfigs = JsonConvert.DeserializeObject<Dictionary<string, SceneEventDungeonConfig>>(File.ReadAllText(sceneEventDungeonConfigTableFile))!;
-                HelperMethods.DataTables.SceneEventDungeonConfigs.Data = sceneEventDungeonConfigs;
-                Log.Information("Loaded SceneEventDuneonConfigTable.json");
-            }
-
-
-            string tempAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "TempAttrTable.json");
-            if (File.Exists(tempAttrTableFile))
-            {
-                var tempAttrs = JsonConvert.DeserializeObject<Dictionary<string, TempAttr>>(File.ReadAllText(tempAttrTableFile))!;
-                HelperMethods.DataTables.TempAttrs.Data = tempAttrs;
-                Log.Information("Loaded TempAttrTable.json");
-            }
-
-            string professionSystemTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "ProfessionSystemTable.json");
-            if (File.Exists(professionSystemTableFile))
-            {
-                var professionSystems = JsonConvert.DeserializeObject<Dictionary<string, ProfessionSystem>>(File.ReadAllText(professionSystemTableFile))!;
-                HelperMethods.DataTables.ProfessionSystems.Data = professionSystems;
-                Log.Information("Loaded ProfessionSystemTable.json");
-            }
+            LoadRawTable<SceneEventDungeonConfig>("SceneEventDuneonConfigTable.json", table => HelperMethods.DataTables.SceneEventDungeonConfigs.Data = table);
+            LoadRawTable<TempAttr>("TempAttrTable.json", table => HelperMethods.DataTables.TempAttrs.Data = table);
+            LoadRawTable<ProfessionSystem>("ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
 
             LoadCookCuisineTable();
             LoadFightAttrTable();
-
-
-
 
             var startupTime = loadTime.Elapsed.TotalSeconds;
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
@@ -142,12 +61,29 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// <c>Data/Raw</c> の生テーブルを1つ読み、<paramref name="assign"/> で置き場へ入れる。
+        /// 無ければ、その表を引く機能が空のまま動くので、黙って飛ばさずエラーを出す。
+        /// </summary>
+        private static void LoadRawTable<T>(string fileName, Action<Dictionary<string, T>> assign)
+        {
+            string path = Path.Combine(CombatRuntimePaths.RawTableDirectory, fileName);
+            if (!File.Exists(path))
+            {
+                Log.Error("{FileName} is missing. Lookups that use this table will be empty path={Path}", fileName, path);
+                return;
+            }
+
+            assign(JsonConvert.DeserializeObject<Dictionary<string, T>>(File.ReadAllText(path))!);
+            Log.Information("Loaded {FileName}", fileName);
+        }
+
+        /// <summary>
         /// 料理の表を読み、回復の料理が付けるバフと1回の回復量を引けるようにする。
         /// 表が無いと料理の回復を HPS に数えられないので、黙って空にせずエラーを出す。
         /// </summary>
         private static void LoadCookCuisineTable()
         {
-            string cookCuisineTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "CookCuisineTable.json");
+            string cookCuisineTableFile = Path.Combine(CombatRuntimePaths.RawTableDirectory, "CookCuisineTable.json");
             if (!File.Exists(cookCuisineTableFile))
             {
                 Log.Error("CookCuisineTable.json is missing. Cuisine healing cannot be counted in HPS path={Path}", cookCuisineTableFile);
@@ -199,7 +135,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static void LoadFightAttrTable()
         {
-            string fightAttrTableFile = Path.Combine(Utils.DATA_DIR_NAME, RawTableDirectoryName, "FightAttrTable.json");
+            string fightAttrTableFile = Path.Combine(CombatRuntimePaths.RawTableDirectory, "FightAttrTable.json");
             if (!File.Exists(fightAttrTableFile))
             {
                 Log.Error("FightAttrTable.json is missing. Stats left over from the previous scene are not reset on EnterScene path={Path}", fightAttrTableFile);
@@ -252,7 +188,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static void LoadSkillOverridesTable()
         {
             const string relativePath = "Overrides/SkillOverrides.json";
-            var overridePath = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "SkillOverrides.json");
+            var overridePath = Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillOverrides.json");
             if (!File.Exists(overridePath))
             {
                 Log.Error("Failed to load {OverridePath}", relativePath);
@@ -300,7 +236,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         private static void LoadBuffOverrideFile(string relativePath)
         {
-            var overridePath = Path.Combine(Utils.DATA_DIR_NAME, relativePath);
+            var overridePath = Path.Combine(CombatRuntimePaths.DataDirectory, relativePath);
             if (!File.Exists(overridePath))
             {
                 Log.Error("Failed to load {OverridePath}", relativePath);

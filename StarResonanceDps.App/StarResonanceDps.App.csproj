@@ -185,12 +185,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <WithCulture>false</WithCulture>
       <LogicalName>StarResonanceDps.App.Properties.Resources.resources</LogicalName>

@@ -51,7 +51,7 @@ public static class CombatRuntimeSettings
     /// <summary>
     /// 履歴を開いている間にライブ側でイベント(戦闘・エンカウンターの作り直し)が起きたら、
     /// ライブへ戻すか。<c>EncounterHistoryProvider.NotifyLiveEncounterEvent</c> が見る。
-    /// <b>3分計測とリセットもこの設定に従う</b>(どちらもエンカウンターの作り直しとして届く)。
+    /// <b>計測とリセットもこの設定に従う</b>(どちらもエンカウンターの作り直しとして届く)。
     /// </summary>
     public static bool ClearHistorySelectionOnNextEvent { get; private set; } = true;
 
@@ -63,6 +63,18 @@ public static class CombatRuntimeSettings
     public static int DatabaseMaxEncounterCount { get; private set; } = 99;
 
     /// <summary>
+    /// 計測の長さ(秒)。<c>EncounterManager.ToggleBenchmark</c> が計測を始めるときに控え、
+    /// その計測の間は保存で変わっても控えた値で測る。
+    /// </summary>
+    public static int BenchmarkDurationSeconds { get; private set; } = 180;
+
+    /// <summary>
+    /// 計測で、自分が最初にダメージを与えた敵へのダメージだけを数えるか。
+    /// <see cref="BenchmarkDurationSeconds"/> と同じく計測を始めるときに控える。
+    /// </summary>
+    public static bool BenchmarkFirstTargetOnly { get; private set; }
+
+    /// <summary>
     /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。
     /// </summary>
     public static void Apply(
@@ -72,14 +84,23 @@ public static class CombatRuntimeSettings
         bool splitEncountersOnNewPhases,
         bool keepPastEncounterInMeterUntilNextDamage,
         bool clearHistorySelectionOnNextEvent,
-        int databaseMaxEncounterCount)
+        int databaseMaxEncounterCount,
+        int benchmarkDurationSeconds,
+        bool benchmarkFirstTargetOnly)
     {
+        if (benchmarkDurationSeconds <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(benchmarkDurationSeconds), benchmarkDurationSeconds, "Benchmark duration must be positive.");
+        }
+
         ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
 
         SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
         KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
         ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;
         DatabaseMaxEncounterCount = databaseMaxEncounterCount;
+        BenchmarkDurationSeconds = benchmarkDurationSeconds;
+        BenchmarkFirstTargetOnly = benchmarkFirstTargetOnly;
         HasBeenApplied = true;
     }
 

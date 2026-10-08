@@ -12,8 +12,12 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </param>
 /// <param name="TargetHp">
 /// 対象の HP。同期で届く HP は、その同期の被弾・回復を全部当てた後の1つだけなので、
-/// 同期の中で被ダメログに載る最後の被弾にだけ入れ、それ以外の被弾は null。
+/// 同期の中で、被ダメログの技の行(加害者・バフ由来か・発生源)ごとの最後の被弾にだけ入れ、それ以外の被弾は null。
 /// <c>TargetMaxHp</c> と <c>TargetShield</c> も同じ。
+/// </param>
+/// <param name="TargetHpBefore">
+/// 対象の、その同期を当てる前の HP(アプリが直前まで持っていた値)。被ダメログのまとめの行の矢印の前に出す。
+/// <c>TargetHp</c> と同じ被弾にだけ入れる。前の値を持っていなければ null。<c>TargetMaxHpBefore</c> と <c>TargetShieldBefore</c> も同じ。
 /// </param>
 /// <param name="OwnerId">
 /// <c>SyncDamageInfo.OwnerId</c> の生の値。<c>DamageSource</c> によってスキルIDかバフIDになる。
@@ -30,10 +34,19 @@ public readonly record struct SkillSnapshotStamp(
     long? TargetHp,
     long? TargetMaxHp,
     long? TargetShield,
+    long? TargetHpBefore,
+    long? TargetMaxHpBefore,
+    long? TargetShieldBefore,
     int OwnerId,
     EDamageSource DamageSource,
     int BuffSourceSkillId,
     int SummonSourceSkillId);
+
+/// <summary>
+/// 対象の HP・最大HP・バリア量の組。被ダメログに、同期を当てる前の値として渡す。
+/// 値を持っていない項目は null(バリア量は控えが無ければ 0)。
+/// </summary>
+public readonly record struct TargetHealth(long? Hp, long? MaxHp, long? Shield);
 
 /// <summary>
 /// 詠唱の開始1件。<b>詠唱バーを持つ技</b>(<see cref="CombatDataCatalog.HasSingOrGuideTime"/>)と
@@ -85,7 +98,7 @@ public sealed class SkillAnnouncementRecord
 
 /// <summary>
 /// ダメージの無い死亡(ダンジョンの仕掛けの即死など)1件。死亡の印つきの被弾がある死亡は被弾の行で分かるので残さない。
-/// 画面では「システムの攻撃」の技の行と、その下の死亡の行になる。
+/// 画面では「システムの攻撃」の技の行の下の戦闘不能の行と、その時刻のまとめの行の戦闘不能になる。
 /// </summary>
 [ProtoContract]
 public sealed class PlayerDeathRecord
@@ -104,6 +117,18 @@ public sealed class PlayerDeathRecord
     /// <summary>被ダメと同じ通し番号。並べ直しに使う。</summary>
     [ProtoMember(4)]
     public long Sequence { get; set; }
+
+    /// <summary>死亡を伝えた同期を当てる前の HP(被ダメログのまとめの行の矢印の前)。持っていなければ null。</summary>
+    [ProtoMember(5)]
+    public long? HpBefore { get; set; }
+
+    /// <summary>死亡を伝えた同期を当てる前の最大HP。持っていなければ null。</summary>
+    [ProtoMember(6)]
+    public long? MaxHpBefore { get; set; }
+
+    /// <summary>死亡を伝えた同期を当てる前のバリア量。持っていなければ null。</summary>
+    [ProtoMember(7)]
+    public long? ShieldBefore { get; set; }
 }
 
 public enum TakenDamageLogRecordKind

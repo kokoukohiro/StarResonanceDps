@@ -60,9 +60,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncNearEntities, ProcessSyncNearEntities);
 
-            // 計測専用。これまでハンドラが無く中身を一度も見ていない通知。
-            netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.NotifyBuffChange, ProcessNotifyBuffChange);
-
             netCap.RegisterWorldNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldNtf.SyncSceneEvents, ProcessSyncSceneEvents);
 
             netCap.RegisterNotifyHandler(936649811, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.WorldActivityNtf.SyncHitInfo, ProcessSyncHitInfo);
@@ -117,6 +114,21 @@ namespace StarResonanceDps.Core.CombatRuntime
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
         }
 
+        /// <summary>
+        /// エンカウンターを触る操作(計測の開始・停止、リセット)を、パケットを処理するスレッドで実行する
+        /// (メッセージと同じ待ち行列に積むので、前に届いたメッセージを処理した後に走る)。
+        /// キャプチャが動いていなければ、呼んだスレッドでそのまま実行する。
+        /// </summary>
+        public static void RunOnPacketThread(Action action)
+        {
+            if (netCap?.TryEnqueueCommand(action) == true)
+            {
+                return;
+            }
+
+            action();
+        }
+
         public static void StopCapturing()
         {
             if (netCap != null)
@@ -146,6 +158,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SourceLandingResolver.Instance.Clear();
             NearbyMonsterIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
+            WarningSkillCastStore.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
@@ -359,7 +372,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
                         ResetSelfStatsMissingFromEnterScene(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
-                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
+                        ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, extraData.ArrivalTime);
                     }
 
                     if (vData.EnterSceneInfo.PlayerEnt.TempAttrs != null)
@@ -616,9 +629,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>
         /// 順序:
-        /// 1. 3分計測中なら止める(計測したエンカウンターはいつもどおり保存される)
+        /// 1. 計測中なら(待機中でも)終える(計測したエンカウンターは次の作り直しで計測の注記つきで保存される)
         /// 2. ダンジョンの状態とシーンを起動時の値に戻す(開いている記録には押さない)
-        /// 3. battle 行を閉じて開き直し、エンカウンターをマップ移動と同じ手順で保存して、持ち越しなし(reason=None、起動時と同じ)で作り直す。
+        /// 3. battle 行を閉じて開き直し、エンカウンターをマップ移動と同じ手順で保存して、持ち越しなし(reason=ExitGame、起動時と同じ)で作り直す。
         ///    <b>プレイヤーリストはまだ残っている</b>ので、保存の直前の表示値の焼き付けが効く
         /// 4. 自分の素性と、接続中に積もった状態を起動時の値に戻す。キャプチャ(接続とデバイス)・設定・データ表・DB・計測は戻さない
         /// 5. 空のプレイヤーリストを作り直し、開いている履歴をライブに戻して、App に知らせる
@@ -644,17 +657,15 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         private static void ResetToStartupState()
         {
-            if (AppState.IsBenchmarkMode)
-            {
-                MeterSnapshotProvider.TryStopBenchmark();
-            }
+            // 計測は待機中でも終える。下の作り直しが、記録があれば計測の注記つきで保存する。
+            EncounterManager.EndBenchmarkBeforeSplit("logout", onlyIfBegun: false);
 
             BattleStateMachine.ResetDungeonStateToStartup();
             EncounterManager.ResetSceneToStartup();
 
             EncounterManager.StartNewMap();
 
-            EncounterManager.EnterDungeon(true, EncounterStartReason.None);
+            EncounterManager.EnterDungeon(true, EncounterStartReason.ExitGame);
 
             BattleStateMachine.ClearEncounterEndFinalData();
 
@@ -666,9 +677,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             AppState.ProfessionId = 0;
             AppState.PlayerMeterPlacement = 0;
             AppState.PlayerTotalMeterValue = 0;
-            AppState.PlayerMeterValuePerSecond = 0;
-            AppState.BenchmarkTime = 0;
-            AppState.BenchmarkSingleTargetUUID = 0;
 
             // キャプチャの停止(StopCapturing)と共通のもの。停止はしない。
             ClearReceivedStateStores();
@@ -1119,8 +1127,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static readonly int[] RegenBuffIds = [683104, 683105];
 
-        /// <summary>差分を当てる前のプレイヤーの状態・死亡時刻・HP・最大HP。</summary>
-        private readonly record struct PlayerVitals(EActorState? State, long DeadTime, long? Hp, long? MaxHp);
+        /// <summary>差分を当てる前のプレイヤーの状態・死亡時刻・HP・最大HP・バリア量。</summary>
+        private readonly record struct PlayerVitals(EActorState? State, long DeadTime, long? Hp, long? MaxHp, long? Shield)
+        {
+            /// <summary>被ダメログに渡す「同期を当てる前の HP」。</summary>
+            public TargetHealth Health => new(Hp, MaxHp, Shield);
+        }
 
         /// <summary>プレイヤーごとの、いまの死亡の扱い。復活で消す。</summary>
         private sealed class PlayerDeathState
@@ -1157,14 +1169,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             if (!EncounterManager.Current.Entities.TryGetValue(uuid, out var entity))
             {
-                return new PlayerVitals(null, 0, null, null);
+                return new PlayerVitals(null, 0, null, null, null);
             }
 
             return new PlayerVitals(
                 entity.GetAttrKV("AttrState") as EActorState?,
                 entity.GetAttrKV("AttrDeadTime") is long deadTime ? deadTime : 0,
                 entity.GetAttrKV("AttrHp") as long?,
-                entity.GetAttrKV("AttrMaxHp") as long?);
+                entity.GetAttrKV("AttrMaxHp") as long?,
+                Utils.GetCurrentShield(entity));
         }
 
         private static PlayerDeathState GetPlayerDeathState(long uuid)
@@ -1210,14 +1223,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                     death.IsDeathHandled = true;
                     if (!death.HasLethalHit)
                     {
-                        EncounterManager.Current.AddPlayerDeathWithoutDamage(uuid, extraData);
+                        EncounterManager.Current.AddPlayerDeathWithoutDamage(uuid, before.Health, extraData);
                     }
                 }
             }
 
             if (hasNewDeadTime)
             {
-                EncounterManager.Current.RecordPlayerDeath(uuid);
+                EncounterManager.Current.RecordPlayerDeath(uuid, extraData.ArrivalTime);
             }
 
             var revived = stateChanged
@@ -1241,11 +1254,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             // HP が変わっていなければ(満タンで飲んだなど)回復量は 0。
             if (!changedAttributes.Contains(EAttrType.AttrHp))
-            {
-                return;
-            }
-
-            if (AppState.IsBenchmarkMode && uuid != AppState.PlayerUUID)
             {
                 return;
             }
@@ -1301,8 +1309,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 || delta.SkillEffects?.Damages.Count > 0
                 || before.Hp is not { } hpBefore
                 || before.MaxHp is not { } maxHpBefore
-                || before.State == EActorState.ActorStateDead
-                || (AppState.IsBenchmarkMode && uuid != AppState.PlayerUUID))
+                || before.State == EActorState.ActorStateDead)
             {
                 return;
             }
@@ -1428,10 +1435,57 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// 戦闘の時計の起点を立てる通知か。与ダメ・被弾の判定はここ1か所(<see cref="ProcessAoiSyncDelta"/> が差分ごとに当てる)。
+        /// プレイヤーかどうかは UUID の種類で見る(助っ人の NPC もプレイヤーに入る)。
+        ///
+        /// <list type="bullet">
+        ///   <item>普通の回: プレイヤー → プレイヤー以外の与ダメ(値 0・Immune・Miss も)か、プレイヤー以外 → プレイヤーの値が 0 でない被弾</item>
+        ///   <item>計測の回: 自分 → プレイヤー以外の与ダメ(同上)か、自分が出した回復の通知</item>
+        /// </list>
+        ///
+        /// <para>
+        /// 回復はここでは立てない(実際に HP が増えた回復は <c>Encounter.AddHealing</c> が立てる。計測の回の自分の回復だけはここで立てる)。
+        /// 自傷・落下・フレンドリーファイアでは立てない。
+        /// 加害者と <c>OwnerId</c> の扱いはダメージ・回復の振り分けと同じ(<c>OwnerId</c> 0・加害者 0 は捨てる)。
+        /// </para>
+        /// </summary>
+        private static bool IsCombatClockStartEvent(SyncDamageInfo damageInfo, long targetUuid, bool isBenchmarkEncounter)
+        {
+            if (IsSelfCausedDamage(damageInfo) || damageInfo.OwnerId == 0)
+            {
+                return false;
+            }
+
+            var attackerUuid = damageInfo.TopSummonerId != 0 ? damageInfo.TopSummonerId : damageInfo.AttackerUuid;
+            if (attackerUuid == 0)
+            {
+                return false;
+            }
+
+            var isAttackerPlayer = Utils.UuidToEntityType(attackerUuid) == (long)EEntityType.EntChar;
+            var isTargetPlayer = Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar;
+            var isHeal = damageInfo.Type == EDamageType.Heal;
+
+            if (isBenchmarkEncounter)
+            {
+                var isSelfAttacker = attackerUuid == AppState.PlayerUUID;
+                return isSelfAttacker && (isHeal || !isTargetPlayer);
+            }
+
+            if (isHeal)
+            {
+                return false;
+            }
+
+            return (isAttackerPlayer && !isTargetPlayer)
+                || (!isAttackerPlayer && isTargetPlayer && ResolveDamageValue(damageInfo) != 0);
+        }
+
+        /// <summary>
         /// 本人が原因の被弾(<see cref="IsSelfCausedDamage"/>)を被ダメログにだけ残す。
         /// バフ由来なら、本人が付けたそのバフの付与元の技を控える(技の行の名前になる)。
         /// </summary>
-        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, bool carriesHp, ExtraPacketData extraData)
+        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, bool carriesHp, TargetHealth healthBefore, ExtraPacketData extraData)
         {
             var skillId = SkillSourceResolver.Resolve(damageInfo.DamageSource, damageInfo.OwnerId, damageInfo.HitEventId).Key;
             var damage = ResolveDamageValue(damageInfo);
@@ -1471,6 +1525,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 damageInfo.IsMiss,
                 damageInfo.IsDead,
                 carriesHp,
+                healthBefore,
                 extraData);
         }
 
@@ -1667,7 +1722,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs)
+        /// <param name="arrivalUtc">属性が届いたメッセージの到着時刻。技の発動(CD の推定・発動の数)と死亡数に使う。</param>
+        public static void ProcessAttrs(long uuid, RepeatedField<Attr> attrs, DateTime arrivalUtc)
         {
             foreach (var attr in attrs)
             {
@@ -1689,8 +1745,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? "" : reader.ReadString().TrimEnd());
                         break;
                     case EAttrType.AttrSkillId:
-                        EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? 0 : reader.ReadInt32());
-                        break;
+                        {
+                            // 詠唱が終わると「値なし」で届くので 0 にする。0 は「撃った」ではなく「詠唱が終わった」の合図で、発動には数えない
+                            // (数えると SkillMetrics[0] が作られ、発動の数も水増しされる)。
+                            var skillId = isNoValue ? 0 : reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, attrIdName, skillId);
+                            if (skillId > 0)
+                            {
+                                EncounterManager.Current.RegisterSkillActivation(uuid, skillId, arrivalUtc);
+                            }
+
+                            break;
+                        }
                     case EAttrType.AttrCdAcceleratePct:
                         {
                             var accelerationPct = isNoValue ? 0 : reader.ReadInt32();
@@ -1795,8 +1861,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.SetAttrKV(uuid, attrIdName, isNoValue ? new Vec3() : Vec3.Parser.ParseFrom(reader));
                         break;
                     case EAttrType.AttrState:
-                        EncounterManager.Current.SetAttrKV(uuid, "AttrState", isNoValue ? (EActorState)0 : (EActorState)reader.ReadInt32());
-                        break;
+                        {
+                            var state = isNoValue ? (EActorState)0 : (EActorState)reader.ReadInt32();
+                            EncounterManager.Current.SetAttrKV(uuid, "AttrState", state);
+                            if (state == EActorState.ActorStateDead)
+                            {
+                                EncounterManager.Current.RecordNonPlayerDeath(uuid, arrivalUtc);
+                            }
+
+                            break;
+                        }
                     case EAttrType.AttrShieldList:
                         {
                             if (isNoValue)
@@ -2030,7 +2104,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var attrCollection = entity.Attrs;
                 if (attrCollection?.Attrs != null)
                 {
-                    ProcessAttrs(entity.Uuid, attrCollection.Attrs);
+                    ProcessAttrs(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
                 }
@@ -2192,8 +2266,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            BattleStateMachine.CompleteBenchmarkIfElapsed(DateTime.Now);
-
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
             var attrCollection = delta.Attrs;
             HashSet<EAttrType> changedAttributes = [];
@@ -2208,6 +2280,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     GetPlayerDeathState(targetUuid).HasLethalHit = true;
                 }
 
+                // 属性を当てる前の値。死亡の判定・料理と自然回復の刻みと、被ダメログの「同期を当てる前の HP」に使う。
                 playerVitalsBefore = CapturePlayerVitals(targetUuid);
             }
 
@@ -2221,7 +2294,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                ProcessAttrs(targetUuid, attrCollection.Attrs);
+                ProcessAttrs(targetUuid, attrCollection.Attrs, extraData.ArrivalTime);
                 if (isTargetPlayer)
                 {
                     TrackPlayerDeath(targetUuid, playerVitalsBefore, changedAttributes, extraData);
@@ -2300,7 +2373,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                                 if (CooldownResetBuffDelays.TryGetValue(buffInfo.BaseId, out var cooldownResetDelay))
                                 {
-                                    SkillCooldownStateStore.NotifyCooldownsResetForPlayer(targetUuid, DateTime.Now + cooldownResetDelay);
+                                    SkillCooldownStateStore.NotifyCooldownsResetForPlayer(targetUuid, extraData.ArrivalTime + cooldownResetDelay);
                                 }
 
                                 BuffInstanceIndex.Instance.Add(
@@ -2409,7 +2482,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     && EncounterManager.Current.GetAttrKV(targetUuid, "AttrState") is EActorState.ActorStateResurrection)
                 {
                     Log.Information("Wipe detected: {Uuid} received the wipe reset buffs and was resurrected", targetUuid);
-                    EncounterManager.Current.SetWipeState(true);
                     EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
                 }
                 else if (!addedBuffIds.Contains(ReviveStartBuffId)
@@ -2420,11 +2492,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            if (AppState.IsBenchmarkMode
-                && (AppState.IsBenchmarkCompleting || AppState.IsBenchmarkCompleted))
+            // 戦闘の時計の起点。全滅・ボス部屋の作り直しの後(立てるのは今の回)、回復・薬・料理・自然回復の記録より前に立てる
+            // (起点より前の回復は数えないので、同じ差分の起点で落とさないように)。メッセージの途中の作り直しにも追従するよう差分ごとに見る。
+            if (delta.SkillEffects?.Damages is { Count: > 0 } clockDamages
+                && EncounterManager.Current.ExData.FirstDamageTimeStamp is null)
             {
-                BattleStateMachine.CheckDeferredCalls();
-                return;
+                var isBenchmarkEncounter = EncounterManager.Current.IsBenchmark;
+                foreach (var clockDamage in clockDamages)
+                {
+                    if (IsCombatClockStartEvent(clockDamage, targetUuid, isBenchmarkEncounter))
+                    {
+                        EncounterManager.Current.StartCombatClock(extraData.ArrivalTime);
+                        break;
+                    }
+                }
             }
 
             // 薬を飲んだ差分は薬の回復だけ。料理・自然回復としては見ない。
@@ -2448,7 +2529,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 被ダメログの加害者を先に決めて、この同期で被ダメログに載る被弾のうち、技の行ごとの最後の被弾を求める。
-            // HP はその被弾に載せる(同期で届く HP は全部当てた後の1つだけなので、同じ同期の技の行には同じ HP が並ぶ)。
+            // HP はその被弾に載せる(同期で届く HP は全部当てた後の1つだけなので、同じ同期の技の行には同じ HP が載る。
+            // 被ダメログはこれを、その時刻の最後のまとめの行に1人1行で出す)。
             // 技の行の鍵は被ダメログの表示(TakenDamageLogLayout)と同じ: 加害者・バフ由来か・発生源の番号(到着時刻は同期の中で同じ)。
             // 加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
             // 自分が原因の被弾(加害者の無いバフのダメージと落下)は被弾した本人。
@@ -2497,10 +2579,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 if (IsSelfCausedDamage(syncDamageInfo))
                 {
-                    if (syncDamageInfo.Type != EDamageType.Heal
-                        && !(AppState.IsBenchmarkMode && targetUuid != AppState.PlayerUUID))
+                    if (syncDamageInfo.Type != EDamageType.Heal)
                     {
-                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, carriesTakenDamageHp[damageIndex], extraData);
+                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, carriesTakenDamageHp[damageIndex], playerVitalsBefore.Health, extraData);
                         if (isTargetPlayer)
                         {
                             rosterPlayersToUpsert.Add(targetUuid);
@@ -2612,38 +2693,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                     buffBasedShieldBreakValue = 0;
                 }
 
-                if (AppState.IsBenchmarkMode)
-                {
-                    if (isAttackerPlayer && attackerUuid != AppState.PlayerUUID)
-                    {
-
-                        continue;
-                    }
-                    else if (isAttackerPlayer && attackerUuid == AppState.PlayerUUID)
-                    {
-                        if (!AppState.HasBenchmarkBegun)
-                        {
-                            AppState.HasBenchmarkBegun = true;
-
-                            EncounterManager.EnterDungeon(false, EncounterStartReason.BenchmarkStart);
-                            BattleStateMachine.StartBenchmarkCompletionTimer();
-                        }
-
-                        if (AppState.BenchmarkSingleTarget && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntMonster && !isHeal)
-                        {
-                            if (AppState.BenchmarkSingleTargetUUID == 0)
-                            {
-                                AppState.BenchmarkSingleTargetUUID = targetUuid;
-                            }
-
-                            if (targetUuid != AppState.BenchmarkSingleTargetUUID)
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                }
-
                 if (isHeal)
                 {
                     // 足すのは実際に増えた HP(ActualValue)。ゲーム内メーターと同じ。名目(damage)との差は過剰回復。
@@ -2682,7 +2731,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
                     }
 
-                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, carriesTakenDamageHp[damageIndex], extraData);
+                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, carriesTakenDamageHp[damageIndex], playerVitalsBefore.Health, extraData);
                 }
 
                 // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。
@@ -2827,24 +2876,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             EncounterManager.Current.SetChannelLineNumber(lineId);
             PlayerRosterProjection.UpdateMapName();
             NearbyEntityProjection.UpdateMapName();
-        }
-
-        /// <summary>
-        /// 計測専用のハンドラ。<c>NotifyBuffChange</c> の中身を記録するだけで、状態は一切変えない。
-        /// </summary>
-        private static void ProcessNotifyBuffChange(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
-        {
-            try
-            {
-                var notify = NotifyBuffChange.Parser.ParseFrom(payloadBuffer);
-                if (notify != null)
-                {
-                }
-            }
-            catch
-            {
-                // 診断のみ。本来の処理へは伝播させない。
-            }
         }
 
         /// <summary>

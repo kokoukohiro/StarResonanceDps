@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 集計タブ。**エンカウンターという1つの対象への操作をまとめた場所。**
 ///
 /// <para>
-/// メーターのヘッダーにある 3分計測 / リセット と同じものをここにも置く。
+/// メーターのヘッダーにある 計測 / リセット と同じものをここにも置く。
 /// どちらから押しても対象は1つ(<c>EncounterManager.Current</c>)で、
 /// ウィジェットごとに分かれてはいない。
 /// </para>
@@ -25,8 +25,6 @@ namespace StarResonanceDps.App.ViewModels;
 /// </summary>
 public sealed partial class AggregationViewModel : ObservableObject
 {
-    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
-
     [ObservableProperty]
     private ObservableCollection<EncounterHistoryItem> _entries = [];
 
@@ -36,16 +34,16 @@ public sealed partial class AggregationViewModel : ObservableObject
     private bool _isLiveSelected = true;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ThreeMinuteBenchmarkText))]
+    [NotifyPropertyChangedFor(nameof(BenchmarkText))]
     [NotifyPropertyChangedFor(nameof(StatusText))]
     private bool _isBenchmarkActive;
 
     /// <summary>
-    /// 見出しに出す状態。**優先順位は 履歴 &gt; 3分計測 &gt; 集計。**
+    /// 見出しに出す状態。**優先順位は 履歴 &gt; 計測 &gt; 集計。**
     ///
     /// <para>
-    /// 3分計測中に履歴を開いても計測は止まらない(<c>TrySelect</c> は計測に触らない)ので、
-    /// そのときは「履歴表示中」が正しい。逆に 3分計測 / リセット は押した時点で
+    /// 計測中に履歴を開いても計測は止まらない(<c>TrySelect</c> は計測に触らない)ので、
+    /// そのときは「履歴表示中」が正しい。逆に 計測 / リセット は押した時点で
     /// <see cref="SelectLive"/> を通るので、見出しが履歴から切り替わって解除が見える。
     /// </para>
     /// </summary>
@@ -54,8 +52,8 @@ public sealed partial class AggregationViewModel : ObservableObject
         : IsBenchmarkActive ? "Aggregation_StatusBenchmark"
         : "Aggregation_StatusLive");
 
-    public string ThreeMinuteBenchmarkText => LocalizationManager.Instance.GetString(
-        IsBenchmarkActive ? "Meter_StopBenchmark" : "Meter_ThreeMinuteBenchmark");
+    public string BenchmarkText => LocalizationManager.Instance.GetString(
+        IsBenchmarkActive ? "Meter_StopBenchmark" : "Meter_Benchmark");
 
     public string ResetText => LocalizationManager.Instance.GetString("Meter_Reset");
 
@@ -79,7 +77,7 @@ public sealed partial class AggregationViewModel : ObservableObject
     }
 
     /// <summary>
-    /// ベンチマークの状態を取り直す。3分計測は <c>AppState</c> の静的値で通知が無いので、
+    /// ベンチマークの状態を取り直す。計測の状態は Core が通知を出さないので、
     /// ビュー側が定期的に呼ぶ。値が変わらなければ <c>ObservableProperty</c> が何も通知しない。
     /// </summary>
     public void RefreshBenchmarkState()
@@ -123,17 +121,9 @@ public sealed partial class AggregationViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ToggleThreeMinuteBenchmark()
+    private void ToggleBenchmark()
     {
-        if (MeterSnapshotProvider.GetBenchmarkState().IsActive)
-        {
-            MeterSnapshotProvider.TryStopBenchmark();
-        }
-        else
-        {
-            MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
-        }
-
+        MeterSnapshotProvider.ToggleBenchmark();
         RefreshBenchmarkState();
     }
 
@@ -170,7 +160,7 @@ public sealed partial class AggregationViewModel : ObservableObject
     public void RefreshTexts()
     {
         OnPropertyChanged(nameof(StatusText));
-        OnPropertyChanged(nameof(ThreeMinuteBenchmarkText));
+        OnPropertyChanged(nameof(BenchmarkText));
         OnPropertyChanged(nameof(ResetText));
         OnPropertyChanged(nameof(EmptyText));
         foreach (var entry in Entries)
@@ -207,7 +197,7 @@ public sealed partial class EncounterHistoryItem : ObservableObject
     ///
     /// <para>
     /// 注記は<b>半角括弧で詰めて末尾に足す</b>(スペースを入れない)。
-    /// 3分計測はボタンと同じ <c>Meter_ThreeMinuteBenchmark</c>で、
+    /// 計測はボタンと同じ <c>Meter_Benchmark</c>で、
     /// 言語を切り替えると一緒に変わる(<see cref="RefreshTexts"/> が再通知する)。
     /// フェーズで分けた記録も注記を付けず、同じ名前で出す。
     /// </para>
@@ -226,7 +216,7 @@ public sealed partial class EncounterHistoryItem : ObservableObject
 
             if (_entry.BenchmarkSeconds > 0)
             {
-                text += $"({LocalizationManager.Instance.GetString("Meter_ThreeMinuteBenchmark")})";
+                text += $"({LocalizationManager.Instance.GetString("Meter_Benchmark")})";
             }
 
             return text;

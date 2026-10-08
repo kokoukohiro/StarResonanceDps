@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Threading;
 using Microsoft.Win32.SafeHandles;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.HotkeyHost;
 
 namespace StarResonanceDps.App.Services;
@@ -95,7 +96,7 @@ internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
                 PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
 
             process = Process.Start(new ProcessStartInfo(
-                Path.Combine(AppContext.BaseDirectory, HotkeyHostProtocol.ExecutableFileName),
+                AppDataPaths.HotkeyHostPath,
                 $"{pipeName} {Environment.ProcessId.ToString(CultureInfo.InvariantCulture)}")
             {
                 UseShellExecute = true

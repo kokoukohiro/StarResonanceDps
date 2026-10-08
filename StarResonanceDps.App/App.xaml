@@ -1,8 +1,7 @@
 <Application x:Class="StarResonanceDps.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
-             StartupUri="MainWindow.xaml">
+             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

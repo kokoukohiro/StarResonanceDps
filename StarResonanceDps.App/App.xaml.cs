@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.App.Views;
 using StarResonanceDps.Core.Logging;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Services;
@@ -28,10 +30,10 @@ public partial class App : Application
 
         ManagerTraceOutput.Configure();
 
-        // 設定ファイルの改名(appsettings→AppSettings / widgetstate→WidgetSettings)は
-        // ConfigManager と WidgetStateManager のどちらに触れるより前に済ませる。
-        // どちらも遅延生成の singleton で、最初の参照で旧名のまま読み込んでしまう。
-        AppDataPaths.MigrateLegacyFileNames();
+        if (!TryEnsureWritableDataDirectory())
+        {
+            return;
+        }
 
         var configManager = ConfigManager.Instance;
 
@@ -39,11 +41,6 @@ public partial class App : Application
         // 合図だけ受け取って、こちらで AppSettings.json へ書く。
         NetworkAdapterSession.Instance.CaptureSettingsPersistRequested +=
             (_, _) => configManager.PersistCaptureSettingsFromRuntime();
-        var legacyClassColors = configManager.TakeLegacyClassColorSettings();
-        if (legacyClassColors is not null)
-        {
-            WidgetStateManager.Instance.MigrateLegacyPlayerListClassColors(legacyClassColors);
-        }
 
         var settings = configManager.GetSettingsSnapshot();
         LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
@@ -51,6 +48,36 @@ public partial class App : Application
         base.OnStartup(e);
         CombatRuntimeHost.Instance.Initialize();
         SkillCooldownTracker.Instance.Initialize();
+
+        // メイン窓はここで作る(App.xaml に StartupUri を置かない)。StartupUri だと、上の枝で終わるときも
+        // OnStartup の後にメイン窓が作られて表示される。
+        var mainWindow = new MainWindow();
+        MainWindow = mainWindow;
+        mainWindow.Show();
+    }
+
+    /// <summary>
+    /// 設定・履歴・ログは実行フォルダの Data に書く。書けなければ動かせないので、知らせて終わる
+    /// (ログもそのフォルダの中なので書けない)。窓の言語とテーマは、設定を読むだけ読んで当てる。
+    /// </summary>
+    private bool TryEnsureWritableDataDirectory()
+    {
+        try
+        {
+            CombatRuntimePaths.EnsureWritableDataDirectory();
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            // 窓を閉じたときに WPF が終了コード0で終わらせないよう、終わりは自分で決める。
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            var settings = ConfigManager.Instance.GetSettingsSnapshot();
+            LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
+            ThemeManager.Instance.ApplyGlobalTheme(settings);
+            DataFolderNotWritableMessage.Show(null, CombatRuntimePaths.DataDirectory);
+            Shutdown(1);
+            return false;
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)

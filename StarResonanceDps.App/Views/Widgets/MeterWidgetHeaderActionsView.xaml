@@ -8,13 +8,13 @@
         <Button Width="Auto"
                 Height="30"
                 Style="{StaticResource Button.WidgetWindowHeaderIcon}"
-                Command="{Binding ToggleThreeMinuteBenchmarkCommand}">
+                Command="{Binding ToggleBenchmarkCommand}">
             <Border Margin="8,0">
                 <TextBlock Opacity="0"
                            IsHitTestVisible="False"
                            FontSize="13"
                            FontWeight="SemiBold"
-                           Text="{Binding ThreeMinuteBenchmarkActionText}" />
+                           Text="{Binding BenchmarkActionText}" />
             </Border>
         </Button>
 

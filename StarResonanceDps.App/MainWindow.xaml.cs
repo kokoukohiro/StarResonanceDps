@@ -52,6 +52,9 @@ public partial class MainWindow : Window
     {
         if (DataContext is MainViewModel viewModel)
         {
+            // 起動時に読めなかった設定ファイルを知らせる。ウィジェットを開く前に出す(開くとウィジェットの設定が保存され、壊れたファイルが上書きされる)。
+            SettingsLoadFailureMessage.Show(this);
+
             viewModel.RestoreRunningWidgetWindows();
 
             // ホットキーの補助が使えなかったこと・登録できなかったホットキーはここで知らせる

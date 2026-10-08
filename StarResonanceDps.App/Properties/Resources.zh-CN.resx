@@ -518,8 +518,17 @@
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}的{1}</value>
   </data>
-  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}受到{1} → {2}</value>
+  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
+    <value>{0}受到{1}{2}</value>
+  </data>
+  <data name="TakenDamageLog_LethalText" xml:space="preserve">
+    <value>被击败</value>
+  </data>
+  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
+    <value>{0}的{1}</value>
+  </data>
+  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
+    <value>{0}的{1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
     <value>{0}受到{1}</value>
@@ -537,7 +546,7 @@
     <value>HP({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>死亡({0}/{1})</value>
+    <value>被击败({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻击</value>
@@ -606,7 +615,7 @@
     <value>护盾量数值</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>死亡</value>
+    <value>被击败</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>无元素</value>
@@ -786,13 +795,13 @@
     <value>合计</value>
   </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
-    <value>瞬时HPS图表</value>
+    <value>HPS趋势图表</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
     <value>治疗详情</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
-    <value>瞬时DPS图表</value>
+    <value>DPS趋势图表</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
     <value>伤害详情</value>
@@ -962,7 +971,7 @@
     <value>自定义执行文件名</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
-    <value>实时聚合间隔</value>
+    <value>绘制间隔</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0}秒</value>
@@ -1042,8 +1051,8 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>每分钟施放</value>
   </data>
-  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
-    <value>3分测量</value>
+  <data name="Meter_Benchmark" xml:space="preserve">
+    <value>测量</value>
   </data>
   <data name="Meter_Reset" xml:space="preserve">
     <value>重置</value>
@@ -1210,6 +1219,18 @@
   <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
     <value>{0}条</value>
   </data>
+  <data name="Settings_Aggregation_BenchmarkDuration" xml:space="preserve">
+    <value>测量时间</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkDuration_Unit" xml:space="preserve">
+    <value>秒</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly" xml:space="preserve">
+    <value>仅测量最先攻击的敌人</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
+    <value>※即使同时攻击多个敌人，也只统计最先攻击的1个敌人</value>
+  </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>统计</value>
   </data>
@@ -1217,7 +1238,7 @@
     <value>统计中</value>
   </data>
   <data name="Aggregation_StatusBenchmark" xml:space="preserve">
-    <value>3分测量中</value>
+    <value>测量中</value>
   </data>
   <data name="Aggregation_StatusHistory" xml:space="preserve">
     <value>历史显示中</value>
@@ -1649,5 +1670,28 @@
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
     <value>剪贴板可能正被其他程序占用。
 请稍后再复制一次。</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+    <value>启动错误</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
+    <value>无法启动应用。</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Detail" xml:space="preserve">
+    <value>无法写入以下文件夹。
+{0}
+请检查文件夹的写入权限和安全软件的设置，或将整个应用文件夹移到可写入的位置后重新启动。</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
+    <value>设置读取错误</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Message" xml:space="preserve">
+    <value>无法读取设置，已使用初始值启动。</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Detail" xml:space="preserve">
+    <value>以下设置文件已损坏或无法读取。
+{0}
+应用下次保存设置时，此文件将被覆盖。
+如有需要，请重新进行设置。</value>
   </data>
 </root>

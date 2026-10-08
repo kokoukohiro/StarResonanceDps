@@ -13,8 +13,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 {
     public class DB
     {
-        public const string DbFileName = "CombatHistory.db";
-        public static string DbFilePath = Path.Combine(Utils.DATA_DIR_NAME, DbFileName);
+        public static string DbFilePath => CombatRuntimePaths.DatabasePath;
         public static MigrationStatus MigrationStatus = new MigrationStatus();
 
         private static SqliteConnection DbConn = null!;
@@ -38,7 +37,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 DbConn.Dispose();
             }
 
-            DbConn = new SqliteConnection($"Data Source={DbFilePath}");
+            DbConn = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = DbFilePath }.ToString());
             DbConn.Open();
 
             DBSchema.CreateTables(DbConn);

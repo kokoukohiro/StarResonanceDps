@@ -13,21 +13,20 @@ public sealed class WidgetStateManager
         PropertyNameCaseInsensitive = true
     };
 
-    private const string LegacyPlayerListWidgetKey = "PlayerInfoDebug";
-
     private readonly string _statePath;
-    private readonly string _legacyStatePath;
     private readonly object _syncRoot = new();
     private WidgetStateDocument _document;
 
     private WidgetStateManager()
     {
         _statePath = AppDataPaths.WidgetStatePath;
-        _legacyStatePath = AppDataPaths.GetLegacyWidgetStatePath();
         _document = Load();
     }
 
     public static WidgetStateManager Instance => LazyInstance.Value;
+
+    /// <summary>起動時に、ファイルはあるのに読めなかった(壊れている・ウィジェットの設定が入っていない)か。既定値で動いている。</summary>
+    public bool HasLoadFailed { get; private set; }
 
     public WidgetConfig GetWidgetSnapshot(WidgetKind kind)
     {
@@ -50,17 +49,6 @@ public sealed class WidgetStateManager
         {
             var key = WidgetConfigDefaults.GetKey(kind);
             _document.Widgets[key] = WidgetConfigDefaults.CloneNormalized(kind, config);
-            SaveCore();
-        }
-    }
-
-    public void MigrateLegacyPlayerListClassColors(MeterWidgetSettingsConfig meter)
-    {
-        lock (_syncRoot)
-        {
-            var config = GetOrCreateWidgetConfig(WidgetKind.PlayerList);
-            config.Meter = WidgetConfigDefaults.CloneNormalizedMeter(WidgetKind.PlayerList, meter);
-            WidgetConfigDefaults.Normalize(WidgetKind.PlayerList, config);
             SaveCore();
         }
     }
@@ -227,21 +215,28 @@ public sealed class WidgetStateManager
 
     private WidgetStateDocument Load()
     {
-        var loadPath = GetReadableStatePath();
-        if (loadPath is null)
+        if (!File.Exists(_statePath))
         {
             return CreateDefaultDocument();
         }
 
         try
         {
-            var json = File.ReadAllText(loadPath);
-            var document = JsonSerializer.Deserialize<WidgetStateDocument>(json, JsonOptions) ?? CreateDefaultDocument();
+            var json = File.ReadAllText(_statePath);
+            var document = JsonSerializer.Deserialize<WidgetStateDocument>(json, JsonOptions);
+            if (document?.Widgets is null)
+            {
+                HasLoadFailed = true;
+                return CreateDefaultDocument();
+            }
+
             Normalize(document);
             return document;
         }
         catch
         {
+            // 読めないファイルは丸ごと既定値で動く。メイン窓が出たところで知らせ(SettingsLoadFailureMessage)、次の保存で上書きする。
+            HasLoadFailed = true;
             return CreateDefaultDocument();
         }
     }
@@ -255,10 +250,7 @@ public sealed class WidgetStateManager
 
     private static void Normalize(WidgetStateDocument document)
     {
-        var sourceSchemaVersion = document.SchemaVersion <= 0 ? 1 : document.SchemaVersion;
         document.Widgets ??= new Dictionary<string, WidgetConfig>(StringComparer.OrdinalIgnoreCase);
-        MigratePlayerStatusWidgetConfig(document.Widgets);
-        MigrateLegacyPlayerListWidgetConfig(document.Widgets);
 
         foreach (WidgetKind kind in Enum.GetValues<WidgetKind>())
         {
@@ -269,59 +261,8 @@ public sealed class WidgetStateManager
                 continue;
             }
 
-            if (sourceSchemaVersion < 3)
-            {
-                WidgetConfigDefaults.MigrateVersion1Defaults(config);
-            }
-
-            if (sourceSchemaVersion < 7 && kind == WidgetKind.PlayerList)
-            {
-                WidgetConfigDefaults.MigratePlayerListFormatDefault(config);
-            }
-
             WidgetConfigDefaults.Normalize(kind, config);
         }
-
-        document.SchemaVersion = WidgetConfigDefaults.CurrentSchemaVersion;
-    }
-
-    private static void MigratePlayerStatusWidgetConfig(Dictionary<string, WidgetConfig> widgets)
-    {
-        const string legacyKey = "PlayerDetail";
-        var statusKey = WidgetConfigDefaults.GetKey(WidgetKind.PlayerStatus);
-
-        if (widgets.TryGetValue(legacyKey, out var legacyConfig)
-            && !widgets.ContainsKey(statusKey))
-        {
-            widgets[statusKey] = legacyConfig;
-        }
-
-        widgets.Remove(legacyKey);
-    }
-
-    private static void MigrateLegacyPlayerListWidgetConfig(Dictionary<string, WidgetConfig> widgets)
-    {
-        var playerListKey = WidgetConfigDefaults.GetKey(WidgetKind.PlayerList);
-
-        if (widgets.TryGetValue(LegacyPlayerListWidgetKey, out var legacyConfig)
-            && !widgets.ContainsKey(playerListKey))
-        {
-            widgets[playerListKey] = legacyConfig;
-        }
-
-        widgets.Remove(LegacyPlayerListWidgetKey);
-    }
-
-    private string? GetReadableStatePath()
-    {
-        if (File.Exists(_statePath))
-        {
-            return _statePath;
-        }
-
-        return File.Exists(_legacyStatePath)
-            ? _legacyStatePath
-            : null;
     }
 
     private void SaveCore()

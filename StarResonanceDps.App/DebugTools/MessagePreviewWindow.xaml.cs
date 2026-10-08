@@ -7,6 +7,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Views;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.DebugTools;
@@ -51,6 +52,18 @@ public partial class MessagePreviewWindow : Window
     // キーバインドツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
     private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindLayoutFileName);
 
+    // 本物: 起動時(実行フォルダの Data に書けないとき)。場所は実際の Data のフォルダ。
+    private void DataFolderNotWritable_Click(object sender, RoutedEventArgs e)
+    {
+        DataFolderNotWritableMessage.Show(this, CombatRuntimePaths.DataDirectory);
+    }
+
+    // 本物: 起動時のメイン窓(設定ファイルを読めなかったとき)。場所は実際の AppSettings.json。
+    private void SettingsLoadFailed_Click(object sender, RoutedEventArgs e)
+    {
+        SettingsLoadFailureMessage.Show(this, AppDataPaths.AppSettingsPath);
+    }
+
     // 本物: MainWindow(ホットキーの補助が使えなかったとき)
     private void HotkeyHelperUnavailable_Click(object sender, RoutedEventArgs e)
     {
@@ -61,7 +74,7 @@ public partial class MessagePreviewWindow : Window
             Localization.GetString("Hotkey_HelperUnavailable_Detail"));
     }
 
-    // 本物: 起動時・全体設定(ホットキーを設定できなかったとき)。5つの操作を既定の割り当てで並べる。
+    // 本物: 起動時・全体設定(ホットキーを設定できなかったとき)。全部の操作を既定の割り当てで並べる。
     private void HotkeyRegisterFailed_Click(object sender, RoutedEventArgs e)
     {
         var bindings = AppConfigDefaults.CreateDefaultHotkeys();
@@ -237,7 +250,7 @@ public partial class MessagePreviewWindow : Window
             KeybindTexts["Keybind.Message.LayoutLoadedDetail"]);
     }
 
-    // 本物: キーバインドツール(キー設定プリセットを読み込めなかった)
+    // 本物: キーバインドツール(キー設定プリセットを読み込めなかった。読み込みのボタンと起動時)
     private void KeybindLayoutLoadFailed_Click(object sender, RoutedEventArgs e)
     {
         ShowKeybindMessage(

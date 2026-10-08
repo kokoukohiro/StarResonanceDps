@@ -14,7 +14,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     private readonly MeterSnapshotKind _kind;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly DispatcherTimer _refreshTimer;
-    private bool _isBenchmarkUiFrozen;
     private bool _isDisposed;
 
     [ObservableProperty]
@@ -80,14 +79,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         {
             return;
         }
-
-        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
-        if (benchmarkState.IsCompleted && _isBenchmarkUiFrozen)
-        {
-            return;
-        }
-
-        _isBenchmarkUiFrozen = benchmarkState.IsCompleted;
 
         if (SelectedCharacterId is not { } characterId)
         {

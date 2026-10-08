@@ -7,6 +7,15 @@ public readonly record struct SkillCooldownDisplayState(
     int? AvailableCharges,
     double? CooldownRemainingSeconds);
 
+/// <summary>
+/// 他プレイヤーのクールダウンの推定(自分はサーバーの値)。
+///
+/// <para>
+/// 時計はメッセージの到着時刻(UTC)で、推定の「今」は <see cref="DateTime.UtcNow"/>。発動・リセット・CD を早めるバフの区間はどれもこの時計で控え、
+/// エンカウンターには依らない(CD はゲームの側の状態で、エンカウンターの作り直し・マップ移動・死亡では消えない)。
+/// 控えを消すのはゲームのリセット(リセット系のバフ。それより前の発動を読むときに外す)と、ログアウト・キャプチャの停止だけ。
+/// </para>
+/// </summary>
 public sealed class SkillCooldownTracker
 {
     private const int LowerCdBuffBaseId = 2110034;
@@ -16,6 +25,7 @@ public sealed class SkillCooldownTracker
 
     private readonly ConcurrentDictionary<SkillActivationKey, SkillActivationHistory> _activationHistories = new();
     private readonly ConcurrentDictionary<long, CooldownResetSchedule> _resetSchedules = new();
+    private readonly ConcurrentDictionary<long, LowerCdIntervalLog> _lowerCdIntervals = new();
     private readonly object _subscriptionSync = new();
 
     private Encounter? _subscribedEncounter;
@@ -59,12 +69,14 @@ public sealed class SkillCooldownTracker
             if (_subscribedEncounter is not null)
             {
                 _subscribedEncounter.SkillActivated -= Encounter_SkillActivated;
+                _subscribedEncounter.BuffUpdated -= Encounter_BuffUpdated;
                 _subscribedEncounter = null;
             }
 
             _isInitialized = false;
             _activationHistories.Clear();
             _resetSchedules.Clear();
+            _lowerCdIntervals.Clear();
         }
     }
 
@@ -117,21 +129,18 @@ public sealed class SkillCooldownTracker
         if (estimatedCooldownSeconds <= 0
             || !_activationHistories.TryGetValue(key, out var history)
             || history.GetLatest() is not { } activation
-            || GetResetCutoff(entityUuid) is { } cutoff && activation.ActivationDateTime < cutoff)
+            || GetResetCutoff(entityUuid) is { } cutoff && activation.ActivationUtc < cutoff)
         {
             return null;
         }
 
+        var nowUtc = DateTime.UtcNow;
         var elapsedSeconds = Math.Max(
-            DateTime.Now.Subtract(activation.ActivationDateTime).TotalSeconds,
+            nowUtc.Subtract(activation.ActivationUtc).TotalSeconds,
             0d);
         if (isImagine)
         {
-            elapsedSeconds += GetLowerCdOverlapSeconds(
-                    entityUuid,
-                    activation.Encounter,
-                    activation.EncounterTime,
-                    activation.Encounter?.GetDuration() ?? activation.EncounterTime)
+            elapsedSeconds += GetLowerCdOverlapSeconds(entityUuid, activation.ActivationUtc, nowUtc)
                 * LowerCdAdditionalProgressRate;
         }
 
@@ -149,6 +158,7 @@ public sealed class SkillCooldownTracker
     {
         _activationHistories.Clear();
         _resetSchedules.Clear();
+        _lowerCdIntervals.Clear();
     }
 
     /// <summary>
@@ -164,7 +174,7 @@ public sealed class SkillCooldownTracker
     private DateTime? GetResetCutoff(long entityUuid)
     {
         return _resetSchedules.TryGetValue(entityUuid, out var schedule)
-            ? schedule.GetLatestPassed(DateTime.Now)
+            ? schedule.GetLatestPassed(DateTime.UtcNow)
             : null;
     }
 
@@ -187,19 +197,17 @@ public sealed class SkillCooldownTracker
         if (_subscribedEncounter is not null)
         {
             _subscribedEncounter.SkillActivated -= Encounter_SkillActivated;
+            _subscribedEncounter.BuffUpdated -= Encounter_BuffUpdated;
         }
 
         _subscribedEncounter = currentEncounter;
         _subscribedEncounter.SkillActivated += Encounter_SkillActivated;
+        _subscribedEncounter.BuffUpdated += Encounter_BuffUpdated;
     }
 
     private void Encounter_SkillActivated(object sender, SkillActivatedEventArgs e)
     {
-        var encounter = sender as Encounter;
-        var activation = new SkillActivationState(
-            e.ActivationDateTime,
-            encounter,
-            encounter?.GetDuration() ?? TimeSpan.Zero);
+        var activation = new SkillActivationState(e.ActivationDateTime);
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(e.SkillId);
         var rawChargeCooldownSeconds = maxCharges > 1
             ? CombatDataCatalog.GetSkillChargeCooldownSeconds(e.SkillId, 0)
@@ -210,11 +218,68 @@ public sealed class SkillCooldownTracker
         history.Record(activation, maxCharges, rawChargeCooldownSeconds);
     }
 
+    /// <summary>
+    /// CD を早めるバフ(<see cref="LowerCdBuffBaseId"/>)の区間を、通知の到着時刻で控える。
+    /// 付与は区間を開き、層・持続の変化はその時刻から新しい持続で開き直し、除去は閉じる(除去は BaseId を運ばないので実体の UUID で突き合わせる)。
+    /// 中身の無い通知(<see cref="BuffEventPayload.None"/>)の 0 はバフの状態ではないので見ない。
+    /// </summary>
+    private void Encounter_BuffUpdated(object sender, BuffUpdatedEventArgs e)
+    {
+        if (e.BuffEventType == Zproto.EBuffEventType.BuffEventRemove)
+        {
+            if (_lowerCdIntervals.TryGetValue(e.EntityUuid, out var removedLog))
+            {
+                removedLog.Close(e.BuffUuid, e.UpdateDateTime);
+            }
+
+            return;
+        }
+
+        if (e.Payload == BuffEventPayload.BuffInfo && e.BaseId == LowerCdBuffBaseId && e.Duration > 0)
+        {
+            _lowerCdIntervals
+                .GetOrAdd(e.EntityUuid, static _ => new LowerCdIntervalLog())
+                .Open(e.BuffUuid, e.UpdateDateTime, e.Duration, e.CreationDateTime);
+            PruneLowerCdIntervals(e.EntityUuid, e.UpdateDateTime);
+            return;
+        }
+
+        if (e.Payload == BuffEventPayload.BuffChange
+            && e.Duration > 0
+            && _lowerCdIntervals.TryGetValue(e.EntityUuid, out var changedLog))
+        {
+            changedLog.Change(e.BuffUuid, e.UpdateDateTime, e.Duration);
+        }
+    }
+
+    /// <summary>
+    /// その人の区間のうち、もう重なり得ないもの(控えている発動のうち一番古いものより前に終わった区間)を捨てる。
+    /// 発動の控えが無ければ、今より前に終わった区間を捨てる(この後の発動は今より後)。
+    /// </summary>
+    private void PruneLowerCdIntervals(long entityUuid, DateTime nowUtc)
+    {
+        if (!_lowerCdIntervals.TryGetValue(entityUuid, out var log))
+        {
+            return;
+        }
+
+        var cutoff = nowUtc;
+        foreach (var (key, history) in _activationHistories)
+        {
+            if (key.EntityUuid == entityUuid && history.GetEarliest() is { } earliest && earliest.ActivationUtc < cutoff)
+            {
+                cutoff = earliest.ActivationUtc;
+            }
+        }
+
+        log.PruneEndedBefore(cutoff);
+    }
+
     /// <summary>最後に過ぎたリセットより前の発動を除く。</summary>
     private IReadOnlyList<SkillActivationState> ExcludeBeforeReset(long entityUuid, IReadOnlyList<SkillActivationState> activations)
     {
         return GetResetCutoff(entityUuid) is { } cutoff
-            ? activations.Where(activation => activation.ActivationDateTime >= cutoff).ToArray()
+            ? activations.Where(activation => activation.ActivationUtc >= cutoff).ToArray()
             : activations;
     }
 
@@ -239,7 +304,7 @@ public sealed class SkillCooldownTracker
             state.FullRecoveryRemainingSeconds);
     }
 
-    private static ChargeCooldownState GetEstimatedChargeState(
+    private ChargeCooldownState GetEstimatedChargeState(
         long entityUuid,
         IReadOnlyList<SkillActivationState> activationHistory,
         int maxCharges,
@@ -251,31 +316,21 @@ public sealed class SkillCooldownTracker
             return ChargeCooldownState.FullyRecovered(maxCharges);
         }
 
-        var latestEncounter = activationHistory[^1].Encounter;
         var activations = activationHistory
-            .Where(activation => ReferenceEquals(activation.Encounter, latestEncounter))
-            .OrderBy(activation => activation.ActivationDateTime)
+            .OrderBy(activation => activation.ActivationUtc)
             .ToArray();
-        if (activations.Length == 0)
-        {
-            return ChargeCooldownState.FullyRecovered(maxCharges);
-        }
-
         var origin = activations[0];
         var activationProgressTimes = activations
             .Select(activation => GetEffectiveElapsedSeconds(
                 entityUuid,
                 origin,
-                activation.ActivationDateTime,
-                activation.EncounterTime,
+                activation.ActivationUtc,
                 isImagine))
             .ToArray();
-        var currentEncounterTime = latestEncounter?.GetDuration() ?? origin.EncounterTime;
         var currentProgressTime = GetEffectiveElapsedSeconds(
             entityUuid,
             origin,
-            DateTime.Now,
-            currentEncounterTime,
+            DateTime.UtcNow,
             isImagine);
 
         return CalculateChargeState(
@@ -350,15 +405,14 @@ public sealed class SkillCooldownTracker
             fullRecoveryRemainingSeconds);
     }
 
-    private static double GetEffectiveElapsedSeconds(
+    private double GetEffectiveElapsedSeconds(
         long entityUuid,
         SkillActivationState origin,
-        DateTime targetDateTime,
-        TimeSpan targetEncounterTime,
+        DateTime targetUtc,
         bool isImagine)
     {
         var elapsedSeconds = Math.Max(
-            targetDateTime.Subtract(origin.ActivationDateTime).TotalSeconds,
+            targetUtc.Subtract(origin.ActivationUtc).TotalSeconds,
             0d);
         if (!isImagine)
         {
@@ -366,95 +420,152 @@ public sealed class SkillCooldownTracker
         }
 
         return elapsedSeconds
-            + GetLowerCdOverlapSeconds(
-                entityUuid,
-                origin.Encounter,
-                origin.EncounterTime,
-                targetEncounterTime)
+            + GetLowerCdOverlapSeconds(entityUuid, origin.ActivationUtc, targetUtc)
             * LowerCdAdditionalProgressRate;
     }
 
-    private static double GetLowerCdOverlapSeconds(
-        long entityUuid,
-        Encounter? encounter,
-        TimeSpan rangeStart,
-        TimeSpan rangeEnd)
+    /// <summary>[<paramref name="rangeStartUtc"/>, <paramref name="rangeEndUtc"/>] のうち、その人に CD を早めるバフが乗っていた秒数。</summary>
+    private double GetLowerCdOverlapSeconds(long entityUuid, DateTime rangeStartUtc, DateTime rangeEndUtc)
     {
-        if (encounter is null
-            || rangeEnd <= rangeStart
-            || !encounter.Entities.TryGetValue(entityUuid, out var entity))
-        {
-            return 0d;
-        }
-
-        var intervals = new List<LowerCdInterval>();
-        foreach (var buffEvent in entity.BuffEvents.Values)
-        {
-            if (buffEvent.BaseId != LowerCdBuffBaseId
-                || buffEvent.Duration <= 0)
-            {
-                continue;
-            }
-
-            var intervalStart = buffEvent.EventAddTime;
-            var scheduledEnd = intervalStart + TimeSpan.FromMilliseconds(buffEvent.Duration);
-            var intervalEnd = buffEvent.EventRemoveTime > TimeSpan.Zero
-                && buffEvent.EventRemoveTime < scheduledEnd
-                    ? buffEvent.EventRemoveTime
-                    : scheduledEnd;
-            var clippedStart = intervalStart > rangeStart
-                ? intervalStart
-                : rangeStart;
-            var clippedEnd = intervalEnd < rangeEnd
-                ? intervalEnd
-                : rangeEnd;
-
-            if (clippedEnd > clippedStart)
-            {
-                intervals.Add(new LowerCdInterval(clippedStart, clippedEnd));
-            }
-        }
-
-        if (intervals.Count == 0)
-        {
-            return 0d;
-        }
-
-        intervals.Sort(static (left, right) => left.Start.CompareTo(right.Start));
-
-        var total = TimeSpan.Zero;
-        var mergedStart = intervals[0].Start;
-        var mergedEnd = intervals[0].End;
-        for (var index = 1; index < intervals.Count; index++)
-        {
-            var interval = intervals[index];
-            if (interval.Start <= mergedEnd)
-            {
-                if (interval.End > mergedEnd)
-                {
-                    mergedEnd = interval.End;
-                }
-
-                continue;
-            }
-
-            total += mergedEnd - mergedStart;
-            mergedStart = interval.Start;
-            mergedEnd = interval.End;
-        }
-
-        total += mergedEnd - mergedStart;
-        return total.TotalSeconds;
+        return rangeEndUtc > rangeStartUtc && _lowerCdIntervals.TryGetValue(entityUuid, out var log)
+            ? log.GetOverlapSeconds(rangeStartUtc, rangeEndUtc)
+            : 0d;
     }
 
     private readonly record struct SkillActivationKey(long EntityUuid, int SkillId);
 
-    private readonly record struct SkillActivationState(
-        DateTime ActivationDateTime,
-        Encounter? Encounter,
-        TimeSpan EncounterTime);
+    /// <param name="ActivationUtc">発動が届いたメッセージの到着時刻。</param>
+    private readonly record struct SkillActivationState(DateTime ActivationUtc);
 
-    private readonly record struct LowerCdInterval(TimeSpan Start, TimeSpan End);
+    private readonly record struct LowerCdInterval(DateTime Start, DateTime End);
+
+    /// <summary>
+    /// 1人ぶんの CD を早めるバフの区間(到着時刻、UTC)。開いている区間は実体の UUID ごとに持ち、持続の分だけ続くものとして数える。
+    /// </summary>
+    private sealed class LowerCdIntervalLog
+    {
+        private readonly object _sync = new();
+        private readonly Dictionary<int, OpenInterval> _openByBuffUuid = [];
+        private readonly List<LowerCdInterval> _closed = [];
+
+        private readonly record struct OpenInterval(DateTime Start, DateTime ScheduledEnd, int DurationMilliseconds, DateTime? CreationUtc);
+
+        /// <summary>
+        /// 付与で区間を開く。同じ実体の付与が届き直したとき(出現のたびの一覧など)は区間を伸ばさない。
+        /// 同じ実体かは、付与時刻と持続が一致するかで見る(ライブのバフの控えと同じ決め方)。
+        /// </summary>
+        public void Open(int buffUuid, DateTime startUtc, int durationMilliseconds, DateTime? creationUtc)
+        {
+            lock (_sync)
+            {
+                if (_openByBuffUuid.TryGetValue(buffUuid, out var open))
+                {
+                    if (open.DurationMilliseconds == durationMilliseconds && open.CreationUtc == creationUtc)
+                    {
+                        return;
+                    }
+
+                    CloseNoLock(buffUuid, open, startUtc);
+                }
+
+                _openByBuffUuid[buffUuid] = new OpenInterval(startUtc, startUtc.AddMilliseconds(durationMilliseconds), durationMilliseconds, creationUtc);
+            }
+        }
+
+        /// <summary>層・持続の変化。その時刻で区間を閉じ、新しい持続で開き直す。</summary>
+        public void Change(int buffUuid, DateTime changeUtc, int durationMilliseconds)
+        {
+            lock (_sync)
+            {
+                if (!_openByBuffUuid.TryGetValue(buffUuid, out var open))
+                {
+                    return;
+                }
+
+                CloseNoLock(buffUuid, open, changeUtc);
+                _openByBuffUuid[buffUuid] = new OpenInterval(changeUtc, changeUtc.AddMilliseconds(durationMilliseconds), durationMilliseconds, open.CreationUtc);
+            }
+        }
+
+        public void Close(int buffUuid, DateTime removeUtc)
+        {
+            lock (_sync)
+            {
+                if (_openByBuffUuid.TryGetValue(buffUuid, out var open))
+                {
+                    CloseNoLock(buffUuid, open, removeUtc);
+                }
+            }
+        }
+
+        /// <summary><paramref name="cutoffUtc"/> より前に終わった区間を捨てる(持続の終わりを過ぎた開いている区間も)。</summary>
+        public void PruneEndedBefore(DateTime cutoffUtc)
+        {
+            lock (_sync)
+            {
+                _closed.RemoveAll(interval => interval.End <= cutoffUtc);
+                foreach (var (buffUuid, open) in _openByBuffUuid.Where(pair => pair.Value.ScheduledEnd <= cutoffUtc).ToArray())
+                {
+                    _openByBuffUuid.Remove(buffUuid);
+                }
+            }
+        }
+
+        public double GetOverlapSeconds(DateTime rangeStartUtc, DateTime rangeEndUtc)
+        {
+            List<LowerCdInterval> intervals;
+            lock (_sync)
+            {
+                intervals = [.. _closed, .. _openByBuffUuid.Values.Select(open => new LowerCdInterval(open.Start, open.ScheduledEnd))];
+            }
+
+            var clipped = intervals
+                .Select(interval => new LowerCdInterval(
+                    interval.Start > rangeStartUtc ? interval.Start : rangeStartUtc,
+                    interval.End < rangeEndUtc ? interval.End : rangeEndUtc))
+                .Where(interval => interval.End > interval.Start)
+                .OrderBy(interval => interval.Start)
+                .ToList();
+            if (clipped.Count == 0)
+            {
+                return 0d;
+            }
+
+            var total = TimeSpan.Zero;
+            var mergedStart = clipped[0].Start;
+            var mergedEnd = clipped[0].End;
+            for (var index = 1; index < clipped.Count; index++)
+            {
+                var interval = clipped[index];
+                if (interval.Start <= mergedEnd)
+                {
+                    if (interval.End > mergedEnd)
+                    {
+                        mergedEnd = interval.End;
+                    }
+
+                    continue;
+                }
+
+                total += mergedEnd - mergedStart;
+                mergedStart = interval.Start;
+                mergedEnd = interval.End;
+            }
+
+            total += mergedEnd - mergedStart;
+            return total.TotalSeconds;
+        }
+
+        private void CloseNoLock(int buffUuid, OpenInterval open, DateTime endUtc)
+        {
+            _openByBuffUuid.Remove(buffUuid);
+            var end = endUtc < open.ScheduledEnd ? endUtc : open.ScheduledEnd;
+            if (end > open.Start)
+            {
+                _closed.Add(new LowerCdInterval(open.Start, end));
+            }
+        }
+    }
 
     /// <summary>
     /// 1人ぶんのクールダウンのリセットの時刻。まだ来ていない時刻(付与より後に消えるバフ)も持つ。
@@ -529,13 +640,8 @@ public sealed class SkillCooldownTracker
                     return;
                 }
 
-                if (_activations.Count > 0
-                    && !ReferenceEquals(_activations[^1].Encounter, activation.Encounter))
-                {
-                    _activations.Clear();
-                }
-                else if (AreAllChargesRecovered(
-                    activation.ActivationDateTime,
+                if (AreAllChargesRecovered(
+                    activation.ActivationUtc,
                     maxCharges,
                     rawChargeCooldownSeconds))
                 {
@@ -557,12 +663,12 @@ public sealed class SkillCooldownTracker
             }
 
             var activations = _activations
-                .OrderBy(activation => activation.ActivationDateTime)
+                .OrderBy(activation => activation.ActivationUtc)
                 .ToArray();
-            var originDateTime = activations[0].ActivationDateTime;
+            var originDateTime = activations[0].ActivationUtc;
             var activationProgressTimes = activations
                 .Select(activation => Math.Max(
-                    activation.ActivationDateTime.Subtract(originDateTime).TotalSeconds,
+                    activation.ActivationUtc.Subtract(originDateTime).TotalSeconds,
                     0d))
                 .ToArray();
             var currentProgressTime = Math.Max(
@@ -588,13 +694,23 @@ public sealed class SkillCooldownTracker
                 var latest = _activations[0];
                 for (var index = 1; index < _activations.Count; index++)
                 {
-                    if (_activations[index].ActivationDateTime > latest.ActivationDateTime)
+                    if (_activations[index].ActivationUtc > latest.ActivationUtc)
                     {
                         latest = _activations[index];
                     }
                 }
 
                 return latest;
+            }
+        }
+
+        public SkillActivationState? GetEarliest()
+        {
+            lock (_sync)
+            {
+                return _activations.Count == 0
+                    ? null
+                    : _activations.MinBy(activation => activation.ActivationUtc);
             }
         }
 

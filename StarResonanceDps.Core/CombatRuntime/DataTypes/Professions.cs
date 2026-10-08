@@ -9,33 +9,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 {
     public static class Professions
     {
-        public static string GetProfessionIconPathFromId(int professionId)
-        {
-            switch ((EProfessionId)professionId)
-            {
-                case EProfessionId.Profession_Stormblade:
-                    return Path.Combine("Professions", "Profession_1");
-                case EProfessionId.Profession_FrostMage:
-                    return Path.Combine("Professions", "Profession_2");
-                case EProfessionId.Profession_TwinStriker:
-                    return Path.Combine("Professions", "Profession_3");
-                case EProfessionId.Profession_WindKnight:
-                    return Path.Combine("Professions", "Profession_4");
-                case EProfessionId.Profession_VerdantOracle:
-                    return Path.Combine("Professions", "Profession_5");
-                case EProfessionId.Profession_HeavyGuardian:
-                    return Path.Combine("Professions", "Profession_9");
-                case EProfessionId.Profession_Marksman:
-                    return Path.Combine("Professions", "Profession_11");
-                case EProfessionId.Profession_ShieldKnight:
-                    return Path.Combine("Professions", "Profession_12");
-                case EProfessionId.Profession_BeatPerformer:
-                    return Path.Combine("Professions", "Profession_13");
-                default:
-                    return "";
-            }
-        }
-
         public static int GetProfessionIdFromSubProfessionId(int subProfessionId) => subProfessionId switch
         {
             (int)SubProfessionId.SubProfession_Unknown => (int)EProfessionId.Profession_Unknown,

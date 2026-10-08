@@ -47,7 +47,7 @@ public sealed class CombatRuntimeHost
                     "CombatRuntimeSettings.Apply を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
             }
 
-            Utils.EnsureDataDirectory();
+            Directory.CreateDirectory(CombatRuntimePaths.DataDirectory);
             ConfigureLogging();
             DB.Init();
             AppState.LoadDataTables();
@@ -108,7 +108,7 @@ public sealed class CombatRuntimeHost
             .MinimumLevel.Verbose()
             .Enrich.FromLogContext()
             .WriteTo.Sink(new ManagerLogSink(PacketDiagnosticLogStore.Instance))
-            .WriteTo.File(Path.Combine(Utils.DATA_DIR_NAME, "CombatRuntime.log"));
+            .WriteTo.File(CombatRuntimePaths.LogFilePath);
 
         Log.Logger = loggerConfiguration.CreateLogger();
     }

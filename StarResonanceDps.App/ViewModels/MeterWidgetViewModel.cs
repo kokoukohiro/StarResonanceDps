@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,8 +13,6 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 {
-    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
-
     private readonly WidgetListItemViewModel _widget;
     private readonly MeterSnapshotKind _kind;
     private readonly ObservableCollection<MeterPlayerEntry> _entries = [];
@@ -21,7 +20,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private readonly DispatcherTimer _refreshTimer;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly Action<WidgetKind, long> _requestPlayerWindow;
-    private bool _isBenchmarkUiFrozen;
 
     [ObservableProperty]
     private string _elapsedText = "00:00:00";
@@ -46,7 +44,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     /// <summary>ヘッダーのボタンに出す文言。計測中は「計測停止」に変わる。</summary>
     [ObservableProperty]
-    private string _threeMinuteBenchmarkActionText = string.Empty;
+    private string _benchmarkActionText = string.Empty;
 
     public MeterWidgetViewModel(
         WidgetListItemViewModel widget,
@@ -122,14 +120,8 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     private void Refresh()
     {
+        // 計測の完了後も描き直してよい。時計が窓の終わりで止まり、窓の後は記録されない(Core)。
         var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
-        if (benchmarkState.IsCompleted && _isBenchmarkUiFrozen)
-        {
-            return;
-        }
-
-        _isBenchmarkUiFrozen = benchmarkState.IsCompleted;
-
         var settings = _widget.GetMeterSettingsSnapshot();
         var globalSettings = _configManager.GetSettingsSnapshot();
         var numberDisplayFormatIndex = globalSettings.NumberDisplayFormatIndex;
@@ -138,18 +130,16 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
             _kind,
             (PartyDisplayMode)settings.PartyDisplayModeIndex);
 
-        ElapsedText = benchmarkState.IsActive && !benchmarkState.HasBegun
-            ? "00:00:00"
-            : FormatDuration(snapshot.Duration);
+        ElapsedText = FormatDuration(snapshot.Duration);
         IsBenchmarkActive = benchmarkState.IsActive;
         BenchmarkStatusText = LocalizationManager.Instance.GetString(
             benchmarkState.IsCompleted
                 ? "Meter_BenchmarkCompleted"
                 : "Meter_BenchmarkInProgress");
-        ThreeMinuteBenchmarkActionText = LocalizationManager.Instance.GetString(
+        BenchmarkActionText = LocalizationManager.Instance.GetString(
             benchmarkState.IsActive
                 ? "Meter_StopBenchmark"
-                : "Meter_ThreeMinuteBenchmark");
+                : "Meter_Benchmark");
         PartyMetricLabel = _kind == MeterSnapshotKind.Damage ? "DPS:" : "HPS:";
         PartyMetricValueText = MeterNumberFormatter.Format(snapshot.ValuePerSecond, numberDisplayFormatIndex);
         TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
@@ -198,18 +188,9 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     }
 
     [RelayCommand]
-    private void ToggleThreeMinuteBenchmark()
+    private void ToggleBenchmark()
     {
-        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
-        if (benchmarkState.IsActive)
-        {
-            MeterSnapshotProvider.TryStopBenchmark();
-        }
-        else
-        {
-            MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
-        }
-
+        MeterSnapshotProvider.ToggleBenchmark();
         Refresh();
     }
 
@@ -270,16 +251,21 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         return -1;
     }
 
-    /// <summary>メーターのタイマーの書式。被ダメログの時刻も同じ書式で出す。</summary>
+    /// <summary>
+    /// メーターのタイマーの書式。被ダメログの時刻も同じ書式で出す。
+    /// 秒は床関数で丸め、負は符号を付けて出す(起点より前の被ダメログの行。-0.4 秒は -00:00:01)。
+    /// </summary>
     internal static string FormatDuration(TimeSpan duration)
     {
-        if (duration < TimeSpan.Zero)
-        {
-            duration = TimeSpan.Zero;
-        }
+        var totalSeconds = (long)Math.Floor(duration.TotalSeconds);
+        var sign = totalSeconds < 0 ? "-" : string.Empty;
+        var magnitude = Math.Abs(totalSeconds);
+        var hours = magnitude / 3600;
+        var minutes = magnitude / 60 % 60;
+        var seconds = magnitude % 60;
 
-        return duration.TotalHours >= 100d
-            ? $"{(int)duration.TotalHours:000}:{duration.Minutes:00}:{duration.Seconds:00}"
-            : duration.ToString(@"hh\:mm\:ss");
+        return hours >= 100
+            ? string.Create(CultureInfo.InvariantCulture, $"{sign}{hours:000}:{minutes:00}:{seconds:00}")
+            : string.Create(CultureInfo.InvariantCulture, $"{sign}{hours:00}:{minutes:00}:{seconds:00}");
     }
 }

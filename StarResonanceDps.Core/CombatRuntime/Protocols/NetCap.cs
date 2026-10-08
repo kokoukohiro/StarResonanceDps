@@ -1,4 +1,3 @@
-using System.Buffers;
 using Microsoft.Extensions.ObjectPool;
 using PacketDotNet;
 using Serilog;
@@ -6,42 +5,46 @@ using SharpPcap;
 using SharpPcap.LibPcap;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
-using System.Net;
 using ZstdSharp;
 
 namespace StarResonanceDps.Core.CombatRuntime.Protocols;
 
+/// <summary>
+/// キャプチャ → TCP の組み立てと切り出し(キャプチャのスレッド)→ 待ち行列 → 処理(1本のスレッド)。
+/// メッセージはキャプチャの順に処理し、時刻はそのメッセージが揃ったパケットのキャプチャ時刻(UTC)。
+/// 待ち行列には、処理のスレッドで実行する命令(<see cref="TryEnqueueCommand"/>)も同じ順で並ぶ。
+/// </summary>
 public class NetCap
 {
     private NetCapConfig Config = null!;
     public ICaptureDevice CaptureDevice = null!;
-    public TcpReassembler TcpReassempler = null!;
+    private TcpReassembler _tcpReassembler = null!;
 
-    private CancellationTokenSource CancelTokenSrc = new();
     public ObjectPool<RawPacket> RawPacketPool = ObjectPool.Create(new DefaultPooledObjectPolicy<RawPacket>());
-    public ConcurrentQueue<RawPacket> RawPacketQueue = new();
+    private readonly BlockingCollection<QueuedWork> _workQueue = new();
     private Task PacketParseTask = null!;
-    private byte[] DecompressionScratchBuffer = new byte[1024 * 1024];
+
+    // 命令を積めるか(_isStarted)と、待ち行列を閉じる順番を守る。閉じた後に積むと例外になる。
+    private readonly object _queueGate = new();
+    private bool _isStarted;
+
+    /// <summary>待ち行列の1件。メッセージか、処理のスレッドで実行する命令のどちらか。</summary>
+    private readonly record struct QueuedWork(RawPacket? Packet, Action? Command);
+
+    /// <summary>展開後の大きさの上限。切り出しの長さの上限(<see cref="MessageFramer.MaxMessageLength"/>)とは別。</summary>
+    private const int DecompressionBufferLength = 1024 * 1024;
+
+    private byte[] DecompressionScratchBuffer = new byte[DecompressionBufferLength];
     private Decompressor _decompressor = new();
     private Dictionary<NotifyId, Action<ReadOnlySpan<byte>, ExtraPacketData>> NotifyHandlers = new();
     private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyHandlers = new();
     private Dictionary<ProxyId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData>> ProxyReturnHandlers = new();
     private ConcurrentDictionary<uint, ProxyId> ProxyReturnsDictionary = new();
-    public ulong NumSeenPackets = 0;
-    public DateTime LastPacketSeenAt = DateTime.MinValue;
-    public int NumConnectionReaders = 0;
-    public ConcurrentDictionary<ConnectionId, bool> ConnectionFilters = new();
-    public ConcurrentBag<string> ImportantLogMsgs = [];
-    public ulong NumGameMessagesSeen = 0;
-    public ulong NumGameMessagesDequeued = 0;
+    public ConcurrentDictionary<TcpConnectionKey, bool> ConnectionFilters = new();
 
     private static readonly TimeSpan FailureLogInterval = TimeSpan.FromMinutes(1);
     private readonly object FailureLogSync = new();
     private readonly Dictionary<string, (DateTime LastLogged, int Suppressed)> FailureLogState = new(StringComparer.Ordinal);
-
-    private bool IsDebugCaptureFileMode = false;
-    private string DebugCaptureFile = "";
-    private DateTime LastDebugCapturePacketTime = DateTime.MinValue;
 
     public void Init(NetCapConfig config)
     {
@@ -52,27 +55,48 @@ public class NetCap
     {
         ProxyReturnsDictionary.Clear();
 
-        if (!string.IsNullOrEmpty(DebugCaptureFile) && IsDebugCaptureFileMode)
-        {
-            CaptureDevice = new CaptureFileReaderDevice(DebugCaptureFile);
-            CaptureDevice.Open();
-        }
-        else
-        {
-            CaptureDevice = GetCaptureDevice();
-            CaptureDevice.Open(DeviceModes.Promiscuous, 100);
-        }
-
-        PacketParseTask = Task.Factory.StartNew(ParsePacketsLoop, CancelTokenSrc.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
-        TcpReassempler = new TcpReassembler();
-        TcpReassempler.OnNewConnection += OnNewConnection;
-
+        CaptureDevice = GetCaptureDevice();
+        CaptureDevice.Open(DeviceModes.Promiscuous, 100);
         CaptureDevice.Filter = "tcp and not portrange 0-1000";
         CaptureDevice.OnPacketArrival += DeviceOnOnPacketArrival;
-        CaptureDevice.StartCapture();
+
+        // デバイスを開けた後に作る。開けずに例外で抜けたとき、処理のスレッドが待ち行列を待ったまま残らないように。
+        _tcpReassembler = new TcpReassembler(EnqueueMessage, DescribeCaptureStatistics);
+        PacketParseTask = Task.Factory.StartNew(ParsePacketsLoop, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        try
+        {
+            CaptureDevice.StartCapture();
+        }
+        catch
+        {
+            _workQueue.CompleteAdding();
+            throw;
+        }
+
+        lock (_queueGate)
+        {
+            _isStarted = true;
+        }
 
         Log.Information("Capture device started");
+    }
+
+    /// <summary>
+    /// 処理のスレッドで <paramref name="command"/> を実行するよう待ち行列に積む(前に積まれたメッセージの処理の後に走る)。
+    /// キャプチャが動いていなければ積まずに false を返す。呼び手は自分のスレッドで実行する。
+    /// </summary>
+    public bool TryEnqueueCommand(Action command)
+    {
+        lock (_queueGate)
+        {
+            if (!_isStarted)
+            {
+                return false;
+            }
+
+            _workQueue.Add(new QueuedWork(null, command));
+            return true;
+        }
     }
 
     public void RegisterNotifyHandler(ulong serviceId, uint methodId, Action<ReadOnlySpan<byte>, ExtraPacketData> handler)
@@ -117,146 +141,96 @@ public class NetCap
 
     private void DeviceOnOnPacketArrival(object sender, PacketCapture e)
     {
-        var rawPacket = e.GetPacket();
-
-        if (IsDebugCaptureFileMode)
+        try
         {
-            if (LastDebugCapturePacketTime == DateTime.MinValue)
-            {
-                LastDebugCapturePacketTime = rawPacket.Timeval.Date;
-            }
-            else
-            {
-                TimeSpan timeDiff = rawPacket.Timeval.Date.Subtract(LastDebugCapturePacketTime);
-                if (timeDiff > TimeSpan.Zero)
-                {
-                    System.Threading.Thread.Sleep(timeDiff);
-                }
+            var rawPacket = e.GetPacket();
+            var packet = Packet.ParsePacket(rawPacket.LinkLayerType, rawPacket.Data);
 
-                LastDebugCapturePacketTime = rawPacket.Timeval.Date;
-            }
-        }
-
-        var packet = Packet.ParsePacket(rawPacket.LinkLayerType, rawPacket.Data);
-
-        var ipv4 = packet?.Extract<IPv4Packet>();
-        if (ipv4 == null)
-            return;
-
-        var tcpPacket = packet?.Extract<TcpPacket>();
-        if (tcpPacket == null)
-            return;
-
-        NumSeenPackets++;
-        LastPacketSeenAt = DateTime.Now;
-
-        if (tcpPacket.DestinationPort <= 1000 || tcpPacket.SourcePort <= 1000)
-            return;
-
-        if (IsDebugCaptureFileMode) {
-            TcpReassempler.AddPacket(ipv4, tcpPacket, rawPacket.Timeval);
-            return;
-        }
-
-        var connId = new ConnectionId(ipv4.SourceAddress.ToString(), tcpPacket.SourcePort, ipv4.DestinationAddress.ToString(), tcpPacket.DestinationPort);
-        if (!ConnectionFilters.TryGetValue(connId, out var allowed))
-        {
-            if (IsFromGame(ipv4, tcpPacket)) {
-                ConnectionFilters.TryAdd(connId, true);
-                allowed = true;
-            }
-            else {
-                ConnectionFilters.TryAdd(connId, false);
+            var ipv4 = packet?.Extract<IPv4Packet>();
+            if (ipv4 == null)
                 return;
+
+            var tcpPacket = packet?.Extract<TcpPacket>();
+            if (tcpPacket == null)
+                return;
+
+            if (tcpPacket.DestinationPort <= 1000 || tcpPacket.SourcePort <= 1000)
+                return;
+
+            var connectionKey = TcpConnectionKey.From(
+                TcpEndpoint.From(ipv4.SourceAddress, tcpPacket.SourcePort),
+                TcpEndpoint.From(ipv4.DestinationAddress, tcpPacket.DestinationPort));
+            if (!ConnectionFilters.TryGetValue(connectionKey, out var allowed))
+            {
+                allowed = IsFromGame(ipv4, tcpPacket);
+                ConnectionFilters.TryAdd(connectionKey, allowed);
             }
+
+            if (!allowed)
+                return;
+
+            _tcpReassembler.AddPacket(ipv4, tcpPacket, rawPacket.Timeval.Date);
         }
-
-        if (!allowed)
-            return;
-
-        TcpReassempler.AddPacket(ipv4, tcpPacket, rawPacket.Timeval);
+        catch (Exception ex)
+        {
+            // キャプチャのスレッドで投げるとキャプチャごと止まる。その1件だけ捨てて続ける。
+            LogFailureAndContinue("capture callback", ex);
+        }
     }
 
-    private void OnNewConnection(TcpReassembler.TcpConnection conn)
+    /// <summary>組み立ての受け手。キャプチャのスレッドで、組み立ての lock の中で呼ばれる。</summary>
+    private void EnqueueMessage(byte[] rentedBuffer, int length, DateTime arrivalUtc)
     {
-        var task = Task.Factory.StartNew(async () =>
-        {
-            NumConnectionReaders++;
-            try
-            {
-                while (conn.IsAlive && !CancelTokenSrc.IsCancellationRequested && !conn.CancelTokenSrc.IsCancellationRequested)
-                {
-                    var buff = await conn.Pipe.Reader.ReadAtLeastAsync(6);
-                    if (buff.IsCompleted || buff.IsCanceled)
-                        break;
-
-                    Span<byte> header = new byte[6];
-                    buff.Buffer.Slice(0, 6).CopyTo(header);
-                    var len = BinaryPrimitives.ReadUInt32BigEndian(header);
-                    var rawMsgType = BinaryPrimitives.ReadInt16BigEndian(header[4..]);
-                    var msgType = (rawMsgType & 0x7FFF);
-                    conn.Pipe.Reader.AdvanceTo(buff.Buffer.Start);
-
-                    var msgBuff = await conn.Pipe.Reader.ReadAtLeastAsync((int)len);
-                    if (msgBuff.IsCompleted || msgBuff.IsCanceled)
-                        break;
-
-                    var rawPacket = RawPacketPool.Get();
-                    rawPacket.Set((int)len);
-                    rawPacket.LastPacketTime = conn.LastPacketTime;
-                    msgBuff.Buffer.Slice(0, len).CopyTo(rawPacket.Data.AsSpan()[..(int)len]);
-                    RawPacketQueue.Enqueue(rawPacket);
-                    conn.Pipe.Reader.AdvanceTo(msgBuff.Buffer.GetPosition(len));
-                    NumGameMessagesSeen++;
-                }
-            }
-            catch (Exception ex)
-            {
-                // この接続の読み取りはここで終わる。黙って終わらせない。
-                LogFailureAndContinue($"接続の読み取り {conn.EndPoint}", ex);
-            }
-
-            NumConnectionReaders--;
-            Log.Logger.Information($"{conn.EndPoint} finished reading");
-        }, CancelTokenSrc.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        var rawPacket = RawPacketPool.Get();
+        rawPacket.Adopt(rentedBuffer, length, arrivalUtc);
+        _workQueue.Add(new QueuedWork(rawPacket, null));
     }
 
     private void ParsePacketsLoop()
     {
-        while (!CancelTokenSrc.IsCancellationRequested)
+        foreach (var work in _workQueue.GetConsumingEnumerable())
         {
-            if (RawPacketQueue.TryDequeue(out var rawPacket))
+            if (work.Command is { } command)
             {
-                // 失敗してもこのパケットの処理は続ける(別の try にする)。
                 try
                 {
-                    BeforeParsePacket?.Invoke(rawPacket.LastPacketTime);
+                    command();
                 }
                 catch (Exception ex)
                 {
-                    LogFailureAndContinue("Before parsing a packet", ex);
+                    // ここで投げ直すとこのループごと終わり、以後のパケットが一切処理されなくなる。
+                    LogFailureAndContinue("queued command", ex);
                 }
 
-                try
-                {
-                    ParsePacket(rawPacket.Data[..rawPacket.Len], rawPacket.LastPacketTime);
-                }
-                catch (Exception ex)
-                {
-                    // 最後の砦。処理の中で拾えなかった例外(解析そのものの失敗など)。
-                    // ここで投げ直すとこのループごと終わり、以後のパケットが一切処理されなくなる。
-                    LogFailureAndContinue("パケットの解析", ex);
-                }
-                finally
-                {
-                    rawPacket.Return();
-                    RawPacketPool.Return(rawPacket);
-                    NumGameMessagesDequeued++;
-                }
+                continue;
             }
-            else
+
+            var rawPacket = work.Packet!;
+
+            // 失敗してもこのパケットの処理は続ける(別の try にする)。
+            try
             {
-                Task.Delay(10).Wait();
+                BeforeParsePacket?.Invoke(rawPacket.ArrivalTime);
+            }
+            catch (Exception ex)
+            {
+                LogFailureAndContinue("Before parsing a packet", ex);
+            }
+
+            try
+            {
+                ParsePacket(rawPacket.Data.AsSpan(0, rawPacket.Len), rawPacket.ArrivalTime);
+            }
+            catch (Exception ex)
+            {
+                // 最後の砦。処理の中で拾えなかった例外(解析そのものの失敗など)。
+                // ここで投げ直すとこのループごと終わり、以後のパケットが一切処理されなくなる。
+                LogFailureAndContinue("packet parsing", ex);
+            }
+            finally
+            {
+                rawPacket.Return();
+                RawPacketPool.Return(rawPacket);
             }
         }
     }
@@ -267,12 +241,27 @@ public class NetCap
         while (offset < data.Length)
         {
             var msgData = data[offset..];
-            if (data.Length < 6)
+            if (msgData.Length < MessageFramer.HeaderLength)
             {
+                Log.Error(
+                    "Invalid message bundle: {Remaining} trailing bytes at offset {Offset} of {Total} are shorter than a message header; dropping them",
+                    msgData.Length,
+                    offset,
+                    data.Length);
                 return;
             }
 
             var len = BinaryPrimitives.ReadUInt32BigEndian(msgData);
+            if (len < MessageFramer.HeaderLength || len > msgData.Length)
+            {
+                Log.Error(
+                    "Invalid message bundle: message length {Length} at offset {Offset} of {Total} does not fit the remaining {Remaining} bytes; dropping the rest of the bundle",
+                    len,
+                    offset,
+                    data.Length,
+                    msgData.Length);
+                return;
+            }
             var rawMsgType = BinaryPrimitives.ReadInt16BigEndian(msgData[4..]);
             var isCompressed = (rawMsgType & 0x8000) != 0;
             var msgType = (MsgTypeId)(rawMsgType & 0x7FFF);
@@ -361,7 +350,7 @@ public class NetCap
             }
             catch (Exception ex)
             {
-                LogFailureAndContinue($"通知 service={serviceUuid} method={methodId}", ex);
+                LogFailureAndContinue($"notify service={serviceUuid} method={methodId}", ex);
             }
         }
 
@@ -506,7 +495,7 @@ public class NetCap
             }
             catch (Exception ex)
             {
-                LogFailureAndContinue($"応答 service={id.ServiceId} method={id.MethodId}", ex);
+                LogFailureAndContinue($"return service={id.ServiceId} method={id.MethodId}", ex);
             }
         }
     }
@@ -528,7 +517,7 @@ public class NetCap
             }
             catch (Exception ex)
             {
-                LogFailureAndContinue($"要求 service={id.ServiceId} method={id.MethodId}", ex);
+                LogFailureAndContinue($"call service={id.ServiceId} method={id.MethodId}", ex);
             }
         }
     }
@@ -610,28 +599,54 @@ public class NetCap
         return isGameConnection;
     }
 
+    /// <summary>
+    /// 止める。キャプチャを止め、組み立ての接続を全部閉じ、待ち行列の残りを処理し終えてから戻る。
+    ///
+    /// <para>
+    /// 停止は UI スレッドから呼ばれる(アプリの終了・アダプターの替え)。処理の経路で UI スレッドへ同期で戻すと、ここで止まる。
+    /// SharpPcap の <c>StopCapture</c> はキャプチャのスレッドの終わりを長く待たないので、戻った後に届くパケットは組み立てが無視する。
+    /// 統計は閉じた後には読めないので、閉じる前に控える。
+    /// </para>
+    /// </summary>
     public void Stop()
     {
-        CancelTokenSrc.Cancel();
-
-        if (CaptureDevice != null)
+        // 先に印を下ろして、これ以後の命令は呼び手のスレッドで実行させる(閉じた待ち行列に積まない)。
+        lock (_queueGate)
         {
-            CaptureDevice.StopCapture();
-            CaptureDevice.Close();
-            ConnectionFilters.Clear();
+            if (!_isStarted)
+            {
+                return;
+            }
 
-            Log.Information("Capture device stopped");
+            _isStarted = false;
         }
+
+        CaptureDevice.StopCapture();
+        var statistics = DescribeCaptureStatistics();
+        var summary = _tcpReassembler.Stop(DateTime.UtcNow);
+        _workQueue.CompleteAdding();
+        var pending = _workQueue.Count;
+        Log.Information("Capture stopped; processing {Pending} queued messages and commands before closing the device", pending);
+        PacketParseTask.Wait();
+        Log.Information(
+            "Capture stopped: closed {Connections} TCP connections, processed {Pending} queued messages and commands, ignored {LatePure} empty and {LatePayload} data packets for closed connections and {WithoutConnection} packets without a connection; {Capture}",
+            summary.ClosedConnections,
+            pending,
+            summary.LatePureAfterClose,
+            summary.LatePayloadAfterClose,
+            summary.IgnoredWithoutConnection,
+            statistics);
+
+        CaptureDevice.Close();
+        ConnectionFilters.Clear();
     }
 
-    public void PrintCaptureDevices()
+    private string DescribeCaptureStatistics()
     {
-        var devices = CaptureDeviceList.Instance;
-        foreach (var liveDevice in devices)
-        {
-            var dev = (LibPcapLiveDevice)liveDevice;
-            Log.Information("Device: {DeviceName}, {FriendlyName}", dev.Name, dev.Interface?.FriendlyName);
-        }
+        var statistics = CaptureDevice.Statistics;
+        return statistics is null
+            ? "capture statistics unavailable"
+            : $"capture received {statistics.ReceivedPackets}, dropped {statistics.DroppedPackets}, interface dropped {statistics.InterfaceDroppedPackets}";
     }
 
     private ICaptureDevice GetCaptureDevice()
@@ -668,18 +683,4 @@ public class NetCap
         Log.Information("No matched capture device, using first found: {DeviceName}, {FriendlyName}", device.Name, ((LibPcapLiveDevice)device).Interface?.FriendlyName);
         return device;
     }
-
-    public string GetFilterString(IEnumerable<TcpHelper.TcpRow> conns)
-    {
-        var connLines = conns.DistinctBy(x => x.RemoteAddress).Select(x => $"(tcp and src host {x.RemoteAddress} or dst host {x.RemoteAddress})");
-        var filterStr = string.Join(" or ", connLines);
-        return filterStr;
-    }
-}
-
-public class PendingConnState(IPAddress addr)
-{
-    public IPAddress IPAddress { get; set; } = addr;
-    public DateTime FirstSeenAt { get; set; } = DateTime.Now;
-    public bool? IsGameConnection = null;
 }

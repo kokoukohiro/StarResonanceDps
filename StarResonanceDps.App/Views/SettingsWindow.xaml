@@ -468,7 +468,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                        <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -496,6 +496,97 @@
                                                         </DataTemplate>
                                                     </ComboBox.ItemTemplate>
                                                 </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_BenchmarkDuration]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <!--
+                                                    数字だけを受け付け、Enter・フォーカスが外れたとき・保存と閉じるときに確定する(SettingsWindow.xaml.cs)。
+                                                    文字はバインドせずビューが書く(確定のたびに今の値で書き直す)。
+                                                    見た目はゲーム実行ファイルの欄と同じ Input.PathBox、幅はホットキーの欄と同じ 88。
+                                                -->
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <TextBox x:Name="BenchmarkDurationTextBox"
+                                                             Width="88"
+                                                             Height="32"
+                                                             Style="{StaticResource Input.PathBox}"
+                                                             InputMethod.IsInputMethodEnabled="False"
+                                                             VerticalContentAlignment="Center"
+                                                             PreviewTextInput="BenchmarkDurationTextBox_PreviewTextInput"
+                                                             PreviewKeyDown="BenchmarkDurationTextBox_PreviewKeyDown"
+                                                             LostKeyboardFocus="BenchmarkDurationTextBox_LostKeyboardFocus" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_BenchmarkDuration_Unit]}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!--
+                                            行の名前と注記の2行。形はフェーズ分割の行と同じ。
+                                            注記は折り返すので高さは中身に合わせ、上下の余白はフェーズ分割の行(高さ75)と同じ見た目にする。
+                                        -->
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}" Height="Auto" Padding="20,17,20,17">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_BenchmarkFirstTargetOnly]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_BenchmarkFirstTargetOnly_Description]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <StackPanel Grid.Row="0"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding BenchmarkFirstTargetOnly, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding BenchmarkFirstTargetOnlyStateText}" />
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
 
@@ -665,13 +756,21 @@
                                                         <ColumnDefinition Width="35" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <!-- 範囲は AppConfigDefaults.NotificationVolumeMin / Max と同じ(スタイルの既定は 0〜100)。 -->
-                                                    <Slider Grid.Column="0"
+                                                    <!--
+                                                        範囲は AppConfigDefaults.NotificationVolumeMin / Max と同じ(スタイルの既定は 0〜100)。
+                                                        値を設定へ渡すのは、つまみを手放したときと、ドラッグ以外の操作(クリック・キー・ホイール)のときだけ(SettingsWindow.xaml.cs)。
+                                                        右の数字はスライドバーの値を出すので、ドラッグ中もつまみに合わせて動く。
+                                                    -->
+                                                    <Slider x:Name="NotificationVolumeSlider"
+                                                            Grid.Column="0"
                                                             Maximum="100"
                                                             IsSnapToTickEnabled="True"
                                                             TickFrequency="1"
                                                             Style="{StaticResource Input.ValueSlider}"
-                                                            Value="{Binding NotificationVolume, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                            Value="{Binding NotificationVolume, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                            Thumb.DragStarted="NotificationVolumeSlider_DragStarted"
+                                                            Thumb.DragCompleted="NotificationVolumeSlider_DragCompleted"
+                                                            ValueChanged="NotificationVolumeSlider_ValueChanged" />
 
                                                     <TextBlock Grid.Column="2"
                                                                VerticalAlignment="Center"
@@ -679,7 +778,7 @@
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold"
-                                                               Text="{Binding NotificationVolume, StringFormat={}{0:0}%}" />
+                                                               Text="{Binding Value, ElementName=NotificationVolumeSlider, StringFormat={}{0:0}%}" />
                                                 </Grid>
                                             </Grid>
                                         </Border>

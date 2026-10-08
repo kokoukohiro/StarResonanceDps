@@ -9,16 +9,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 
 public static class Utils
 {
-    public const string DATA_DIR_NAME = "Data";
     public static Version AppVersion { get; set; } = typeof(Utils).Assembly.GetName().Version ?? new Version(0, 0);
-
-    /// <summary>
-    /// <c>Data/</c> が無ければ作る。<c>DB</c> もログもここへ書くので、最初に触る側が用意する。
-    /// </summary>
-    public static void EnsureDataDirectory()
-    {
-        Directory.CreateDirectory(DATA_DIR_NAME);
-    }
 
     public static string BytesToString<T>(T number)
     {
@@ -57,33 +48,6 @@ public static class Utils
         var hashUlong = hash.GetCurrentHashAsUInt64();
 
         return hashUlong;
-    }
-
-    public static string DamagePropertyToIconPath(EDamageProperty damageElement)
-    {
-        switch (damageElement)
-        {
-            case EDamageProperty.General:
-                return Path.Combine("Elements", "General_v1");
-            case EDamageProperty.Fire:
-                return Path.Combine("Elements", "Fire_v1");
-            case EDamageProperty.Water:
-                return Path.Combine("Elements", "Ice_v1");
-            case EDamageProperty.Electricity:
-                return Path.Combine("Elements", "Thunder_v1");
-            case EDamageProperty.Wood:
-                return Path.Combine("Elements", "Forest_v1");
-            case EDamageProperty.Wind:
-                return Path.Combine("Elements", "Wind_v1");
-            case EDamageProperty.Rock:
-                return Path.Combine("Elements", "Rock_v1");
-            case EDamageProperty.Light:
-                return Path.Combine("Elements", "Light_v1");
-            case EDamageProperty.Dark:
-                return Path.Combine("Elements", "Dark_v1");
-            default:
-                return "";
-        }
     }
 
     public static string DamagePropertyToString(EDamageProperty damageElement)

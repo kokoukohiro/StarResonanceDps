@@ -53,7 +53,11 @@ public sealed record BenchmarkStateSnapshot(
     bool HasBegun,
     bool IsCompleted);
 
-public sealed record MetricTimelinePoint(double Seconds, double ValuePerSecond);
+/// <summary>
+/// 推移の区切り1つ。<see cref="StartSeconds"/>〜<see cref="EndSeconds"/> は <c>FirstDamageTimeStamp</c> からの秒(右閉じ)、
+/// <see cref="ValuePerSecond"/> はその区切りの合計 ÷ 区切りの長さ。
+/// </summary>
+public sealed record MetricTimelinePoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
 
 public sealed record MetricTimelineSnapshot(
     ulong TotalValue,
@@ -179,8 +183,8 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// 被ダメログの1件(予告か詠唱か被弾か、ダメージの無い死亡)。
 ///
 /// <para>
-/// <see cref="Elapsed"/> はメーターのタイマーと同じ起点(<c>Encounter.StartTime</c>)からの経過、
-/// <see cref="Timestamp"/> はパケットの到着時刻(UTC)。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
+/// <see cref="Timestamp"/> はパケットの到着時刻(UTC。予告のバーの終わりはバーが消える時刻)。経過は持たず、表示側が
+/// 戦闘の時計の起点(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)から引く。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
 /// </para>
 ///
 /// <para>
@@ -201,18 +205,22 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// </para>
 ///
 /// <para>
-/// <see cref="IsLethal"/> は「この被弾で死んだ」。表示は HP の代わりに死亡の文言を出す。
+/// <see cref="IsLethal"/> は「この被弾で死んだ」。表示は被弾の行に戦闘不能の語を付け、その時刻のまとめの行を戦闘不能にする。
 /// </para>
 ///
 /// <para>
 /// <see cref="DamageMode"/> は物理と魔法の別。属性(<see cref="DamageElement"/>)とは独立していて、
 /// <c>DamageNormal</c> はどちらでもない。予告・詠唱・死亡は <c>DamageNormal</c>。
 /// </para>
+///
+/// <para>
+/// <see cref="TargetHpBefore"/> / <see cref="TargetMaxHpBefore"/> / <see cref="TargetShieldBefore"/> は、その同期を当てる前の対象の値
+/// (被弾は <see cref="TargetHp"/> を持つものだけ、死亡は死亡を伝えた同期の前)。持っていない記録(この項目を足す前の記録も)は null。
+/// </para>
 /// </summary>
 public sealed record TakenDamageLogLine(
     TakenDamageLogRecordKind Kind,
     long Sequence,
-    TimeSpan Elapsed,
     DateTime Timestamp,
     TakenDamageLogParty Attacker,
     TakenDamageLogParty? Target,
@@ -226,16 +234,24 @@ public sealed record TakenDamageLogLine(
     EDamageProperty? DamageElement,
     bool IsFall = false,
     bool IsLethal = false,
-    EDamageMode DamageMode = EDamageMode.DamageNormal);
+    EDamageMode DamageMode = EDamageMode.DamageNormal,
+    long? TargetHpBefore = null,
+    long? TargetMaxHpBefore = null,
+    long? TargetShieldBefore = null);
 
 /// <summary>
 /// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
 /// <see cref="Encounter"/> が前回と違えば、呼び出し側は持っている行を捨てて読み直す。
 /// </summary>
+/// <param name="CombatStartUtc">
+/// 読んだ時点の戦闘の時計の起点(メーターの経過と同じ)。まだ無ければ null。起点の前の行は負の経過になる。
+/// 同じエンカウンターでも後から立つので、呼び出し側は変わったら持っている行の時刻を作り直す。
+/// </param>
 public sealed record TakenDamageLogSnapshot(
     Encounter? Encounter,
     int NextIndex,
-    IReadOnlyList<TakenDamageLogLine> Lines);
+    IReadOnlyList<TakenDamageLogLine> Lines,
+    DateTime? CombatStartUtc);
 
 public static class MeterSnapshotProvider
 {
@@ -256,6 +272,9 @@ public static class MeterSnapshotProvider
     /// </summary>
     private const int ReviveBlockDebuffBaseId = 2110057;
 
+    // 推移グラフの記録が時計の終点より後ろにあったのを、どの回について残したか(回ごとに1回だけ)。
+    private static Encounter? _timelineEndErrorEncounter;
+
     public static MeterSnapshot GetSnapshot(
         MeterSnapshotKind kind,
         PartyDisplayMode partyDisplayMode = PartyDisplayMode.All)
@@ -266,9 +285,11 @@ public static class MeterSnapshotProvider
             return new MeterSnapshot(kind, TimeSpan.Zero, 0, 0, Array.Empty<MeterPlayerSnapshot>());
         }
 
+        // 経過・行の秒間値・フッターの合計を同じ終点で出すため、時計は1回だけ読む。
+        var clock = encounter.ReadCombatClock();
         var source = encounter.Entities
             .Where(pair => pair.Value.EntityType == EEntityType.EntChar)
-            .Select(pair => CreatePlayerValue(pair.Key, pair.Value, kind))
+            .Select(pair => CreatePlayerValue(pair.Key, pair.Value, kind, clock))
             .Where(player => player.TotalValue > 0UL)
             .OrderByDescending(player => player.TotalValue)
             .ThenBy(player => player.Name, StringComparer.Ordinal)
@@ -308,7 +329,7 @@ public static class MeterSnapshotProvider
 
         return new MeterSnapshot(
             kind,
-            ResolveMetricDuration(encounter),
+            clock.Elapsed,
             totalValue,
             players.Sum(player => player.ValuePerSecond),
             players);
@@ -328,16 +349,6 @@ public static class MeterSnapshotProvider
         return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);
     }
 
-    /// <summary>
-    /// ライブのエンカウンター(<see cref="EncounterManager.Current"/>)の被ダメログを <paramref name="startIndex"/> 件目から返す。
-    /// <b>履歴表示に追従しない。</b> 被ダメログの通知(予兆技)が、履歴を見ている間もライブの戦闘で通知するのに使う。
-    /// 返し方は <see cref="GetTakenDamageLog"/> と同じ。
-    /// </summary>
-    public static TakenDamageLogSnapshot GetLiveTakenDamageLog(Encounter? knownEncounter, int startIndex)
-    {
-        return BuildTakenDamageLog(EncounterManager.Current, knownEncounter, startIndex);
-    }
-
     /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。被ダメログの予告の行・詠唱の行と同じ。</summary>
     public static string GetTakenDamageLogSkillName(int skillId)
     {
@@ -354,7 +365,7 @@ public static class MeterSnapshotProvider
     {
         if (encounter is null)
         {
-            return new TakenDamageLogSnapshot(null, 0, Array.Empty<TakenDamageLogLine>());
+            return new TakenDamageLogSnapshot(null, 0, Array.Empty<TakenDamageLogLine>(), null);
         }
 
         if (!ReferenceEquals(encounter, knownEncounter))
@@ -362,12 +373,10 @@ public static class MeterSnapshotProvider
             startIndex = 0;
         }
 
+        var combatStartUtc = encounter.ExData.FirstDamageTimeStamp;
         var records = encounter.GetTakenDamageLogRecords(startIndex);
         var parties = new Dictionary<long, TakenDamageLogParty>();
         var lines = new TakenDamageLogLine[records.Length];
-
-        // メーターのタイマーと同じ起点。StartTime はローカル、Timestamp はパケットの到着時刻(UTC)なので揃えてから引く。
-        var encounterStart = encounter.StartTime.ToUniversalTime();
 
         for (var index = 0; index < records.Length; index++)
         {
@@ -378,7 +387,6 @@ public static class MeterSnapshotProvider
                 lines[index] = new TakenDamageLogLine(
                     record.Kind,
                     announcement.Sequence,
-                    announcement.Timestamp - encounterStart,
                     announcement.Timestamp,
                     CreateTakenDamageLogAnnouncementParty(announcement.OwnerMonsterId),
                     null,
@@ -399,7 +407,6 @@ public static class MeterSnapshotProvider
                 lines[index] = new TakenDamageLogLine(
                     record.Kind,
                     cast.Sequence,
-                    cast.Timestamp - encounterStart,
                     cast.Timestamp,
                     ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
                     null,
@@ -420,7 +427,6 @@ public static class MeterSnapshotProvider
                 lines[index] = new TakenDamageLogLine(
                     record.Kind,
                     death.Sequence,
-                    death.Timestamp - encounterStart,
                     death.Timestamp,
                     new TakenDamageLogParty(0, 0, string.Empty, false, false, false, 0, PlayerClassSpec.Unknown, IsSystem: true),
                     ResolveTakenDamageLogParty(encounter, death.PlayerUuid, parties),
@@ -431,7 +437,10 @@ public static class MeterSnapshotProvider
                     0,
                     death.MaxHp,
                     null,
-                    null);
+                    null,
+                    TargetHpBefore: death.HpBefore,
+                    TargetMaxHpBefore: death.MaxHpBefore,
+                    TargetShieldBefore: death.ShieldBefore);
                 continue;
             }
 
@@ -441,8 +450,7 @@ public static class MeterSnapshotProvider
             lines[index] = new TakenDamageLogLine(
                 record.Kind,
                 snapshot.Sequence,
-                snapshot.Timestamp!.Value - encounterStart,
-                snapshot.Timestamp.Value,
+                snapshot.Timestamp!.Value,
                 attacker,
                 ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
                 snapshot.OwnerId,
@@ -455,10 +463,13 @@ public static class MeterSnapshotProvider
                 snapshot.DamageElement,
                 snapshot.DamageSource == Zproto.EDamageSource.Fall,
                 snapshot.IsKill,
-                snapshot.DamageMode);
+                snapshot.DamageMode,
+                snapshot.TargetHpBefore,
+                snapshot.TargetMaxHpBefore,
+                snapshot.TargetShieldBefore);
         }
 
-        return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines);
+        return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines, combatStartUtc);
     }
 
     /// <summary>
@@ -531,6 +542,12 @@ public static class MeterSnapshotProvider
         return string.IsNullOrEmpty(dbmName)
             ? CombatDataCatalog.GetSkillNameWithoutInternalId(skillId)
             : dbmName;
+    }
+
+    /// <summary>被ダメログの登場人物1人を、<paramref name="encounter"/> の実体から決める(被ダメログの行と同じ決め方)。</summary>
+    internal static TakenDamageLogParty CreateTakenDamageLogParty(Encounter encounter, long uuid)
+    {
+        return ResolveTakenDamageLogParty(encounter, uuid, []);
     }
 
     private static TakenDamageLogParty ResolveTakenDamageLogParty(
@@ -1665,12 +1682,22 @@ public static class MeterSnapshotProvider
             : normalized;
     }
 
+    /// <summary>
+    /// 推移を <paramref name="aggregationIntervalSeconds"/> 秒ごとの重ならない区切りで返す。
+    ///
+    /// <para>
+    /// 区切り j は (jN, (j+1)N] 秒で、値は中の1秒の合計の和 ÷ N。1件のダメージは1つの区切りにだけ入る。
+    /// ライブでは満ちていない最後の区切りを出さない。戦闘が閉じているときだけ、最後の半端な区切りを
+    /// 実際の長さ(1秒未満の端数を含む)で割って出す。選べる N は App の一覧が決め、ここは1秒以上なら受ける。
+    /// </para>
+    /// </summary>
     public static MetricTimelineSnapshot GetPlayerTimeline(
         MeterSnapshotKind kind,
         long characterId,
         int aggregationIntervalSeconds)
     {
-        var intervalSeconds = NormalizeTimelineAggregationIntervalSeconds(aggregationIntervalSeconds);
+        ArgumentOutOfRangeException.ThrowIfLessThan(aggregationIntervalSeconds, 1);
+        var intervalSeconds = aggregationIntervalSeconds;
         var encounter = ResolveActiveEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
@@ -1689,55 +1716,60 @@ public static class MeterSnapshotProvider
             return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
         }
 
-        // 秒の区切りは記録時に FirstDamageTimeStamp から切ってある。起点が無いのに合計があるなら記録側が壊れている。
-        var startTime = encounter.ExData.FirstDamageTimeStamp
+        // 秒の区切りは記録時に戦闘の時計の起点から切ってある。起点が無いのに合計があるなら記録側が壊れている。
+        var clock = encounter.ReadCombatClock();
+        var endTime = clock.EndUtc
             ?? throw new InvalidOperationException(
                 $"Per-second totals exist without FirstDamageTimeStamp (encounter={encounter.EncounterId}).");
-        var endTime = ResolveMetricEndTime(encounter);
 
-        if (endTime < lastValueTime)
+        // 記録は時計の終点より前にしか入らないはず(ライブは今、閉じた回は閉じた時刻、計測は窓の終わり)。
+        // 後ろにあれば時刻の出所が食い違っているので、伸ばさずに終点まで描き、回ごとに1回だけ残す。
+        if (lastValueTime > endTime && !ReferenceEquals(_timelineEndErrorEncounter, encounter))
         {
-            endTime = lastValueTime;
+            _timelineEndErrorEncounter = encounter;
+            Log.Error("Timeline value at {LastValue:o} is after the combat clock end {End:o} (encounter={EncounterId}); values after the end are not drawn",
+                lastValueTime, endTime, encounter.EncounterId);
         }
 
-        var elapsedSeconds = Math.Max((endTime - startTime).TotalSeconds, 0d);
-        var sampleCount = (int)Math.Floor(elapsedSeconds);
-        if (sampleCount == 0)
+        var elapsedSeconds = clock.Elapsed.TotalSeconds;
+        var fullBucketCount = (int)Math.Floor(elapsedSeconds / intervalSeconds);
+        var partialBucketSeconds = elapsedSeconds - fullBucketCount * (double)intervalSeconds;
+        var hasPartialBucket = clock.IsClosed && partialBucketSeconds > 0d;
+        var bucketCount = fullBucketCount + (hasPartialBucket ? 1 : 0);
+        if (bucketCount == 0)
         {
             return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
         }
 
-        var perSecondValues = new double[sampleCount];
+        // 1秒の鍵 k は (k, k+1] 秒なので、区切り j に入るのは k / N == j の鍵。
+        var bucketTotals = new double[bucketCount];
         foreach (var (second, value) in totals)
         {
-            if (second < sampleCount)
+            var bucket = second / intervalSeconds;
+            if (bucket < bucketCount)
             {
-                perSecondValues[second] += value;
+                bucketTotals[bucket] += value;
             }
         }
 
-        var points = new MetricTimelinePoint[sampleCount];
-        var rollingValue = 0d;
-        for (var index = 0; index < sampleCount; index++)
+        var points = new MetricTimelinePoint[bucketCount];
+        for (var bucket = 0; bucket < fullBucketCount; bucket++)
         {
-            rollingValue += perSecondValues[index];
-            if (index >= intervalSeconds)
-            {
-                rollingValue -= perSecondValues[index - intervalSeconds];
-            }
+            points[bucket] = new MetricTimelinePoint(
+                bucket * (double)intervalSeconds,
+                (bucket + 1) * (double)intervalSeconds,
+                bucketTotals[bucket] / intervalSeconds);
+        }
 
-            var windowSeconds = Math.Min(index + 1, intervalSeconds);
-            points[index] = new MetricTimelinePoint(index + 1, rollingValue / windowSeconds);
+        if (hasPartialBucket)
+        {
+            points[fullBucketCount] = new MetricTimelinePoint(
+                fullBucketCount * (double)intervalSeconds,
+                elapsedSeconds,
+                bucketTotals[fullBucketCount] / partialBucketSeconds);
         }
 
         return new MetricTimelineSnapshot(totalValue, points);
-    }
-
-    private static int NormalizeTimelineAggregationIntervalSeconds(int aggregationIntervalSeconds)
-    {
-        return aggregationIntervalSeconds is 5 or 3 or 2 or 1
-            ? aggregationIntervalSeconds
-            : 10;
     }
 
     public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)
@@ -1770,10 +1802,11 @@ public static class MeterSnapshotProvider
             }
         }
 
+        var clock = encounter.ReadCombatClock();
         return new PlayerMetricSummarySnapshot(
             stats.ValueTotal,
-            stats.ValuePerSecondActive,
-            stats.ValuePerSecond,
+            CombatClockReading.PerSecond(stats.ValueTotal, entity.GetActiveSeconds(clock)),
+            CombatClockReading.PerSecond(stats.ValueTotal, clock.Elapsed.TotalSeconds),
             extraTotal,
             stats.HitsCount,
             stats.CritRate,
@@ -1846,6 +1879,10 @@ public static class MeterSnapshotProvider
             return new MetricSkillTableSnapshot(entityTotalValue, Array.Empty<MetricSkillTableRowSnapshot>());
         }
 
+        // 有効は、その人の有効な秒数で割る(行ごとに変わらない)。
+        var clock = encounter.ReadCombatClock();
+        var elapsedSeconds = clock.Elapsed.TotalSeconds;
+        var activeSeconds = entity.GetActiveSeconds(clock);
         var rows = new MetricSkillTableRowSnapshot[skillStats.Count];
         for (var index = 0; index < skillStats.Count; index++)
         {
@@ -1870,8 +1907,8 @@ public static class MeterSnapshotProvider
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
                 CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource, landing),
                 value.ValueTotal,
-                value.ValuePerSecondActive,
-                value.ValuePerSecond,
+                CombatClockReading.PerSecond(value.ValueTotal, activeSeconds),
+                CombatClockReading.PerSecond(value.ValueTotal, elapsedSeconds),
                 value.HitsCount,
                 value.CritRate,
                 value.ValueAverage,
@@ -1884,138 +1921,34 @@ public static class MeterSnapshotProvider
         return new MetricSkillTableSnapshot(entityTotalValue, rows);
     }
 
+    /// <summary>
+    /// 計測の状態。通知は出さないので、表示側が定期的に読み直す。
+    /// 完了は「計測の回で起点があり、今が窓の終わり以降」から毎回計算する(完了の瞬間にすることは無い)。
+    /// </summary>
     public static BenchmarkStateSnapshot GetBenchmarkState()
     {
+        var current = EncounterManager.Current;
+        var isActive = EncounterManager.IsBenchmarkActive;
+        var hasBegun = isActive && current?.ExData.FirstDamageTimeStamp != null;
         return new BenchmarkStateSnapshot(
-            AppState.IsBenchmarkMode,
-            AppState.HasBenchmarkBegun,
-            AppState.IsBenchmarkCompleted);
-    }
-
-    public static bool TryStartBenchmark(int durationSeconds)
-    {
-        if (durationSeconds < 5
-            || AppState.IsBenchmarkMode)
-        {
-            return false;
-        }
-
-        BattleStateMachine.CancelBenchmarkCompletionTimer();
-        AppState.BenchmarkTime = durationSeconds;
-        AppState.BenchmarkSingleTargetUUID = 0;
-        AppState.IsBenchmarkCompleting = false;
-        AppState.IsBenchmarkCompleted = false;
-        AppState.BenchmarkCompletionTime = null;
-        AppState.IsBenchmarkMode = true;
-        ResetCurrentEncounter();
-        return true;
-    }
-
-    public static bool TryStopBenchmark()
-    {
-        if (!AppState.IsBenchmarkMode)
-        {
-            return false;
-        }
-
-        var wasCompleted = AppState.IsBenchmarkCompleted;
-        var completionTime = AppState.BenchmarkCompletionTime;
-        BattleStateMachine.CancelBenchmarkCompletionTimer();
-
-        if (wasCompleted && completionTime is { } completedAt)
-        {
-            EncounterManager.SetCurrentBenchmarkEndTime(completedAt);
-        }
-
-        AppState.HasBenchmarkBegun = false;
-        AppState.IsBenchmarkMode = false;
-
-        try
-        {
-            EncounterManager.EnterDungeon(wasCompleted, EncounterStartReason.BenchmarkEnd);
-        }
-        finally
-        {
-            AppState.IsBenchmarkCompleting = false;
-            AppState.IsBenchmarkCompleted = false;
-            AppState.BenchmarkCompletionTime = null;
-        }
-
-        return true;
-    }
-
-    public static void ResetCurrentEncounter()
-    {
-        if (AppState.IsBenchmarkMode && AppState.HasBenchmarkBegun)
-        {
-            Log.Information($"Manual early ending of Benchmark at {DateTime.Now}");
-            TryStopBenchmark();
-            return;
-        }
-
-
-        var isOpenWorld = BattleStateMachine.IsInOpenWorld();
-        Task.Factory.StartNew(() =>
-        {
-            if (AppState.IsBenchmarkMode)
-            {
-                Log.Information($"Starting new Benchmark encounter at {DateTime.Now}");
-                EncounterManager.EnterDungeon(true, EncounterStartReason.BenchmarkStart);
-            }
-            else if (isOpenWorld)
-            {
-                EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
-            }
-            else
-            {
-                EncounterManager.EnterDungeon(true, EncounterStartReason.NewObjective);
-            }
-        });
-    }
-
-
-    private static TimeSpan ResolveMetricDuration(Encounter encounter)
-    {
-        if (ReferenceEquals(encounter, EncounterManager.Current)
-            && AppState.IsBenchmarkMode
-            && AppState.IsBenchmarkCompleted
-            && AppState.BenchmarkCompletionTime is { } completionTime)
-        {
-            return completionTime.Subtract(encounter.StartTime).Duration();
-        }
-
-        return encounter.GetDuration();
+            isActive,
+            hasBegun,
+            hasBegun && current!.IsBenchmarkWindowElapsed(DateTime.UtcNow));
     }
 
     /// <summary>
-    /// タイムラインの終端。<b>必ず UTC で返す。</b>
-    ///
-    /// <para>
-    /// <see cref="Encounter"/> は<b>基準の違う時刻を同居させている</b>。
-    /// <c>StartTime</c> / <c>EndTime</c> は <c>DateTime.Now</c>(ローカル)、
-    /// <c>ExData.FirstDamageTimeStamp</c> と <c>CombatStats.LastPerSecondTimestamp</c> は
-    /// パケットの到着時刻(UTC)。<see cref="GetPlayerTimeline"/> は後者を起点にするので、
-    /// 終端をローカルのまま渡すと<b>差が時差ぶん膨らむ</b>。
-    /// </para>
-    ///
-    /// <para>
-    /// ライブと3分計測の完了時は元から UTC なので、<b>崩れるのは履歴を開いたときだけ。</b>
-    /// <c>Encounter.GetDuration()</c> も同じ引き算を <c>EndTime.ToUniversalTime()</c> で揃えている。
-    /// </para>
+    /// 計測の開始と停止を切り替える。入口(メーターのヘッダー・集計タブ・ホットキー)はここだけを呼ぶ。
+    /// 実行はパケットを処理するスレッド(キャプチャが止まっていれば呼んだスレッド)。表示が変わるのは実行の後。
     /// </summary>
-    private static DateTime ResolveMetricEndTime(Encounter encounter)
+    public static void ToggleBenchmark()
     {
-        if (ReferenceEquals(encounter, EncounterManager.Current)
-            && AppState.IsBenchmarkMode
-            && AppState.IsBenchmarkCompleted
-            && AppState.BenchmarkCompletionTime is { } completionTime)
-        {
-            return completionTime.ToUniversalTime();
-        }
+        MessageManager.RunOnPacketThread(EncounterManager.ToggleBenchmark);
+    }
 
-        return encounter.EndTime == DateTime.MinValue
-            ? DateTime.UtcNow
-            : encounter.EndTime.ToUniversalTime();
+    /// <summary>今の回を区切り直す。実行するスレッドは <see cref="ToggleBenchmark"/> と同じ。</summary>
+    public static void ResetCurrentEncounter()
+    {
+        MessageManager.RunOnPacketThread(EncounterManager.ResetCurrentEncounter);
     }
 
 
@@ -2086,8 +2019,7 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// ライブ表示用の残り時間。基準は <see cref="Services.ActiveBuffStore"/> が持つ観測時刻。
-    /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の時刻が入る経路があってローカル時計とずれ、
-    /// <see cref="BuffEvent.EventAddTime"/> はエンカウンター相対で境界を跨げないため、どちらも使えない。
+    /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の時刻が入る経路があってローカル時計とずれるので使えない。
     /// </summary>
     private static bool TryResolveLiveBuffTiming(
         long entityUuid,
@@ -2133,7 +2065,6 @@ public static class MeterSnapshotProvider
 
             AppState.PlayerMeterPlacement = index + 1;
             AppState.PlayerTotalMeterValue = player.TotalValue;
-            AppState.PlayerMeterValuePerSecond = player.ValuePerSecond;
             return;
         }
     }
@@ -2361,8 +2292,7 @@ public static class MeterSnapshotProvider
             {
                 AppState.ActiveEncounter = currentEncounter;
             }
-            else if (AppState.ActiveEncounter?.EncounterId != currentEncounter?.EncounterId
-                || AppState.ActiveEncounter?.StartTime != currentEncounter?.StartTime)
+            else if (!ReferenceEquals(AppState.ActiveEncounter, currentEncounter))
             {
                 if (currentEncounter is not null && currentEncounter.HasStatsBeenRecorded())
                 {
@@ -2370,24 +2300,24 @@ public static class MeterSnapshotProvider
                 }
             }
         }
-        else if (AppState.ActiveEncounter?.EncounterId != currentEncounter?.EncounterId
-            || AppState.ActiveEncounter?.BattleId != currentEncounter?.BattleId
-            || AppState.ActiveEncounter?.StartTime != currentEncounter?.StartTime)
+        else if (!ReferenceEquals(AppState.ActiveEncounter, currentEncounter))
         {
+            // 記録の無い回の後に作り直すと EncounterId が同じ番号になるので、実体の同一性で見る。
             AppState.ActiveEncounter = currentEncounter;
         }
 
         return activeEncounter ?? AppState.ActiveEncounter;
     }
 
-    private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind)
+    private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind, CombatClockReading clock)
     {
         var totalValue = kind == MeterSnapshotKind.Damage
             ? entity.TotalDamage
             : entity.TotalHealing;
-        var valuePerSecond = kind == MeterSnapshotKind.Damage
-            ? entity.DamageStats.ValuePerSecond
-            : entity.HealingStats.ValuePerSecond;
+        var stats = kind == MeterSnapshotKind.Damage
+            ? entity.DamageStats
+            : entity.HealingStats;
+        var valuePerSecond = CombatClockReading.PerSecond(stats.ValueTotal, clock.Elapsed.TotalSeconds);
         var isSelf = IsSelf(entity);
         var source = PlayerDataSourceResolver.Resolve(entity, isSelf);
         return new MeterPlayerSnapshot(

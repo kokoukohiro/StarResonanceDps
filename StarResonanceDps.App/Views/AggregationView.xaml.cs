@@ -9,7 +9,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.Views;
 
 /// <summary>
-/// 集計タブ。保存済みエンカウンターの一覧と、現在の戦闘への操作(3分計測・リセット)。
+/// 集計タブ。保存済みエンカウンターの一覧と、現在の戦闘への操作(計測・リセット)。
 /// </summary>
 public partial class AggregationView : UserControl
 {
@@ -26,7 +26,7 @@ public partial class AggregationView : UserControl
         InitializeComponent();
         DataContext = _viewModel;
 
-        // 3分計測の状態は AppState の静的値なので、通知が来ない。メーターウィジェットと
+        // 計測の状態は Core が通知を出さない。メーターウィジェットと
         // 同じく定期的に読み直す。動かすのはこのタブが見えている間だけ。
         _benchmarkTimer = new DispatcherTimer
         {

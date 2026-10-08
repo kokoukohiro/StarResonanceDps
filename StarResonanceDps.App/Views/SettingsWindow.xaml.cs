@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
+using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -39,6 +41,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        DataObject.AddPastingHandler(BenchmarkDurationTextBox, BenchmarkDurationTextBox_Pasting);
         Loaded += SettingsWindow_Loaded;
         SourceInitialized += SettingsWindow_SourceInitialized;
         PreviewMouseDown += SettingsWindow_PreviewMouseDown;
@@ -48,6 +51,8 @@ public partial class SettingsWindow : Window
     private async void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ViewModel.SpeechVoiceCheckRequested += ViewModel_SpeechVoiceCheckRequested;
+        ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+        ShowBenchmarkDuration();
         QueueUpdateExternalScrollBar();
         QueueNpcapWarning();
 
@@ -173,6 +178,7 @@ public partial class SettingsWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         ViewModel.SpeechVoiceCheckRequested -= ViewModel_SpeechVoiceCheckRequested;
+        ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         ViewModel.Dispose();
         base.OnClosed(e);
     }
@@ -180,6 +186,7 @@ public partial class SettingsWindow : Window
     protected override void OnClosing(CancelEventArgs e)
     {
         CommitGameCaptureCustomExeNameEdit();
+        CommitBenchmarkDurationEdit();
 
         if (ViewModel.HasUnsavedChanges)
         {
@@ -445,6 +452,7 @@ public partial class SettingsWindow : Window
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         CommitGameCaptureCustomExeNameEdit();
+        CommitBenchmarkDurationEdit();
         var hotkeyFailures = ViewModel.SaveSettings();
         HotkeyRegistrationFailureMessage.Show(this, hotkeyFailures);
         Close();
@@ -465,6 +473,115 @@ public partial class SettingsWindow : Window
     private void CommitGameCaptureCustomExeNameEdit()
     {
         GameCaptureCustomExeNameTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
+    }
+
+    // --- 通知音量のスライドバー ---
+    // 値を設定へ渡す(保存前プレビュー・未保存の印・通知の音量に効く)のは、つまみを手放したときと、
+    // ドラッグ以外の操作(クリック・キー・ホイール)で値が変わったときだけ。ドラッグ中は打つ前の値のまま。
+
+    private bool _isDraggingNotificationVolume;
+
+    private void NotificationVolumeSlider_DragStarted(object sender, DragStartedEventArgs e)
+    {
+        _isDraggingNotificationVolume = true;
+    }
+
+    private void NotificationVolumeSlider_DragCompleted(object sender, DragCompletedEventArgs e)
+    {
+        _isDraggingNotificationVolume = false;
+        CommitNotificationVolume((Slider)sender);
+    }
+
+    private void NotificationVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (!_isDraggingNotificationVolume)
+        {
+            CommitNotificationVolume((Slider)sender);
+        }
+    }
+
+    private static void CommitNotificationVolume(Slider slider)
+    {
+        slider.GetBindingExpression(RangeBase.ValueProperty)?.UpdateSource();
+    }
+
+    // --- 計測時間の入力欄 ---
+    // 文字はバインドせずここで書く。確定(Enter・フォーカスが外れたとき・保存と閉じるとき)のたびに今の値で書き直す
+    // (範囲の外を端の値にしたとき、値が変わらなくても欄を直すため)。
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // 初期化など、欄の外から値が変わったとき。
+        if (e.PropertyName == nameof(SettingsViewModel.BenchmarkDurationSeconds))
+        {
+            ShowBenchmarkDuration();
+        }
+    }
+
+    private void ShowBenchmarkDuration()
+    {
+        BenchmarkDurationTextBox.Text = ViewModel.BenchmarkDurationSeconds.ToString(CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>欄の文字を確定する。空なら打つ前の値に戻して警告音を鳴らす。</summary>
+    private void CommitBenchmarkDurationEdit()
+    {
+        if (!ViewModel.TryCommitBenchmarkDurationText(BenchmarkDurationTextBox.Text))
+        {
+            PlayInvalidInputSound();
+        }
+
+        ShowBenchmarkDuration();
+    }
+
+    /// <summary>数字以外の文字は入れない。文字を伴わない入力(Ctrl との組み合わせなど)は止めない。</summary>
+    private void BenchmarkDurationTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        if (e.Text.Length > 0 && !e.Text.All(char.IsAsciiDigit))
+        {
+            e.Handled = true;
+            PlayInvalidInputSound();
+        }
+    }
+
+    private void BenchmarkDurationTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
+    {
+        if (!e.DataObject.GetDataPresent(DataFormats.Text)
+            || e.DataObject.GetData(DataFormats.Text) is not string pastedText
+            || pastedText.Length == 0
+            || !pastedText.All(char.IsAsciiDigit))
+        {
+            e.CancelCommand();
+            PlayInvalidInputSound();
+        }
+    }
+
+    private void BenchmarkDurationTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        // スペースは文字の入力(PreviewTextInput)を通らないので、ここで止める。
+        if (e.Key == Key.Space)
+        {
+            e.Handled = true;
+            PlayInvalidInputSound();
+            return;
+        }
+
+        if (e.Key == Key.Enter)
+        {
+            CommitBenchmarkDurationEdit();
+            Keyboard.ClearFocus();
+            e.Handled = true;
+        }
+    }
+
+    private void BenchmarkDurationTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        CommitBenchmarkDurationEdit();
+    }
+
+    private static void PlayInvalidInputSound()
+    {
+        SystemSounds.Beep.Play();
     }
 
     private void ScrollToSection(FrameworkElement target)

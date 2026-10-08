@@ -28,7 +28,7 @@ public static class DiagnosticSession
     /// </para>
     /// </summary>
     public static string ResidentLogDirectory { get; } =
-        Path.Combine(AppContext.BaseDirectory, "Logs", "Resident");
+        Path.Combine(CombatRuntimePaths.LogsDirectory, "Resident");
 
     private static readonly HashSet<string> HeaderWritten = [];
     private static readonly Dictionary<string, (long Uuid, long CharId)> LastIdentity = [];

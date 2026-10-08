@@ -65,7 +65,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private string _totalLabel = string.Empty;
     private string _totalValueText = string.Empty;
     private string _latestValueText = string.Empty;
-    private bool _isBenchmarkUiFrozen;
     private bool _isDisposed;
 
     public PlayerMetricWidgetViewModel(
@@ -204,14 +203,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         {
             return;
         }
-
-        var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
-        if (benchmarkState.IsCompleted && _isBenchmarkUiFrozen)
-        {
-            return;
-        }
-
-        _isBenchmarkUiFrozen = benchmarkState.IsCompleted;
 
         var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
         MetricLabel = _displayMode == PlayerMetricDisplayMode.Timeline

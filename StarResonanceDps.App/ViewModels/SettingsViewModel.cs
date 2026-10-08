@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -73,8 +74,15 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _databaseMaxEncounterCount;
 
+    /// <summary>計測時間(秒)。入力欄の文字は <see cref="TryCommitBenchmarkDurationText"/> で確定したときだけここへ入る。</summary>
+    [ObservableProperty]
+    private int _benchmarkDurationSeconds = AppConfigDefaults.BenchmarkDurationDefaultSeconds;
+
+    [ObservableProperty]
+    private bool _benchmarkFirstTargetOnly;
+
     /// <summary>
-    /// 保持期間の選択肢。**値は日数そのもので、0 が無期限。**
+    /// 最大保持数の選択肢。**値は件数そのもので、0 が無制限。**
     /// 選べる値をここだけで決めているので、増やすならこの配列に足す
     /// (<c>AppConfigDefaults.Normalize</c> の上限とずれないようにすること)。
     /// </summary>
@@ -406,6 +414,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
             DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
+            BenchmarkDurationSeconds = BenchmarkDurationSeconds,
+            BenchmarkFirstTargetOnly = BenchmarkFirstTargetOnly,
             Hotkeys = CreateHotkeySettings(),
             NotificationMethodIndex = NotificationMethodIndex,
             NotificationVolume = (int)Math.Round(NotificationVolume, MidpointRounding.AwayFromZero),
@@ -455,6 +465,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
             ClearHistorySelectionOnNextEvent = settings.ClearHistorySelectionOnNextEvent;
             DatabaseMaxEncounterCount = settings.DatabaseMaxEncounterCount;
+            BenchmarkDurationSeconds = settings.BenchmarkDurationSeconds;
+            BenchmarkFirstTargetOnly = settings.BenchmarkFirstTargetOnly;
 
             foreach (var item in HotkeyItems)
             {
@@ -615,6 +627,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(SplitEncountersOnNewPhasesStateText));
         OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
         OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
+        OnPropertyChanged(nameof(BenchmarkFirstTargetOnlyStateText));
 
         RebuildRetentionPolicyOptions();
         RebuildVoicevoxOptions();
@@ -729,6 +742,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
             && left.ClearHistorySelectionOnNextEvent == right.ClearHistorySelectionOnNextEvent
             && left.DatabaseMaxEncounterCount == right.DatabaseMaxEncounterCount
+            && left.BenchmarkDurationSeconds == right.BenchmarkDurationSeconds
+            && left.BenchmarkFirstTargetOnly == right.BenchmarkFirstTargetOnly
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase)
             && left.Hotkeys.HasSameBindings(right.Hotkeys)
             && left.NotificationMethodIndex == right.NotificationMethodIndex
@@ -1022,6 +1037,38 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public string ClearHistorySelectionOnNextEventStateText =>
         GetSwitchStateText(ClearHistorySelectionOnNextEvent);
+
+    partial void OnBenchmarkDurationSecondsChanged(int value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>
+    /// 計測時間の入力欄の文字を確定する。30 より小さければ 30、1200 より大きければ 1200 にする。
+    /// 空など数字として読めないときは値を変えずに false を返す。欄の書き直しはビューが行う(確定のたびに今の値で)。
+    /// </summary>
+    public bool TryCommitBenchmarkDurationText(string text)
+    {
+        if (text.Length == 0 || !text.All(char.IsAsciiDigit))
+        {
+            return false;
+        }
+
+        // 桁が多すぎて int に入らない値も 1200 より大きいので、上の端にする。
+        var seconds = int.TryParse(text, NumberStyles.None, CultureInfo.InvariantCulture, out var parsed)
+            ? parsed
+            : int.MaxValue;
+        BenchmarkDurationSeconds = AppConfigDefaults.ClampBenchmarkDurationSeconds(seconds);
+        return true;
+    }
+
+    partial void OnBenchmarkFirstTargetOnlyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(BenchmarkFirstTargetOnlyStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    public string BenchmarkFirstTargetOnlyStateText => GetSwitchStateText(BenchmarkFirstTargetOnly);
 
     private static string GetSwitchStateText(bool isOn)
     {

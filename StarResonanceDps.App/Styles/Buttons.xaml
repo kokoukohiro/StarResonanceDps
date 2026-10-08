@@ -264,7 +264,7 @@
         角丸が 外6・内5 なので、当てるのは ButtonOutline ではなく RoundedOutline のほう。
     -->
 
-    <!-- 3分計測 / リセット。高さは検索欄(Input.SearchFrame)に合わせてある。 -->
+    <!-- 計測 / リセット。高さは検索欄(Input.SearchFrame)に合わせてある。 -->
     <Style x:Key="Button.AggregationAction" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Height" Value="38" />

@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
 using Microsoft.Win32;
 using StarResonanceDps.PluginSdk;
 using StarResonanceDps.Plugins.KeybindTool.Models;
@@ -11,18 +10,10 @@ namespace StarResonanceDps.Plugins.KeybindTool.ViewModels;
 
 internal sealed class KeybindToolViewModel : ObservableObject
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNameCaseInsensitive = true
-    };
-
     private readonly IPluginContext _context;
     private readonly PluginLocalizer _texts;
     private readonly KeybindSaveService _saveService;
     private readonly string _layoutFilePath;
-    private readonly IReadOnlyList<string> _legacyLayoutFilePaths;
-    private readonly IReadOnlyList<string> _legacyLayoutSearchDirectories;
     private readonly Dictionary<string, ControllerActionRowViewModel> _controllerRowsById;
     private readonly Dictionary<string, KeyMouseActionRowViewModel> _keyMouseRowsById;
     private readonly Dictionary<string, KeyMouseInputOption> _customKeyMouseOptionsByStorageKey = new(StringComparer.Ordinal);
@@ -52,6 +43,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
     private bool _isSynchronizing;
     private bool _isUpdatingDetectedSelection;
     private bool _pendingInitialPresetUnavailableMessage;
+    private bool _pendingLayoutLoadFailedMessage;
 
     public KeybindToolViewModel(IPluginContext context)
     {
@@ -64,27 +56,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
         _saveService = new KeybindSaveService(_texts);
 
         _layoutFilePath = _context.Settings.GetFilePath(KeybindCatalog.ButtonLayoutFileName);
-        _legacyLayoutFilePaths = new[]
-        {
-
-            Path.Combine(AppContext.BaseDirectory, KeybindCatalog.ButtonLayoutFileName),
-
-            Path.Combine(
-                AppContext.BaseDirectory,
-                "Data",
-                "PluginData",
-                _context.PluginId,
-                KeybindCatalog.ButtonLayoutFileName)
-        };
-        _legacyLayoutSearchDirectories = new[]
-        {
-            Path.GetDirectoryName(_layoutFilePath) ?? string.Empty,
-            AppContext.BaseDirectory,
-            Path.Combine(AppContext.BaseDirectory, "Data", "PluginData", _context.PluginId)
-        }
-        .Where(Directory.Exists)
-        .Distinct(StringComparer.OrdinalIgnoreCase)
-        .ToArray();
 
         ControllerMainActions = CreateControllerRows(KeybindModeGroup.Main);
         ControllerQuickWheelActions = CreateControllerRows(KeybindModeGroup.QuickWheel);
@@ -451,15 +422,14 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void RestoreLayoutSettingsFromLayoutFile()
     {
-        var layoutFilePath = GetExistingLayoutFilePath();
-        if (layoutFilePath is null)
+        if (!File.Exists(_layoutFilePath))
         {
             return;
         }
 
         try
         {
-            var layout = ReadLayoutFile(layoutFilePath);
+            var layout = ReadLayoutFile();
 
             if (layout.ControllerProfile is not null)
             {
@@ -489,7 +459,8 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
         catch (Exception)
         {
-
+            // 読めないプリセットは使わずに続け、画面が出たところで知らせる(KeybindToolView の Loaded)。
+            _pendingLayoutLoadFailedMessage = true;
         }
     }
 
@@ -1120,6 +1091,21 @@ internal sealed class KeybindToolViewModel : ObservableObject
             Texts["Keybind.Message.PresetUnavailableDetail"]);
     }
 
+    /// <summary>起動時に読めなかったキー設定プリセットを、画面が出たところで知らせる。</summary>
+    internal void ShowPendingLayoutLoadFailedMessage()
+    {
+        if (!_pendingLayoutLoadFailedMessage)
+        {
+            return;
+        }
+
+        _pendingLayoutLoadFailedMessage = false;
+        ShowMessageWithDetail(
+            "Keybind.Message.Title.LayoutLoadError",
+            "Keybind.Message.LayoutLoadFailedBody",
+            Texts["Keybind.Message.LayoutLoadFailedDetail"]);
+    }
+
     private void LoadSaveFile(
         string filePath,
         bool showErrors,
@@ -1333,8 +1319,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
     private void LoadLayout()
     {
-        var layoutFilePath = GetExistingLayoutFilePath();
-        if (layoutFilePath is null)
+        if (!File.Exists(_layoutFilePath))
         {
             ShowMessageWithDetail(
                 "Keybind.Message.Title.LayoutLoadError",
@@ -1345,7 +1330,7 @@ internal sealed class KeybindToolViewModel : ObservableObject
 
         try
         {
-            var layout = ReadLayoutFile(layoutFilePath);
+            var layout = ReadLayoutFile();
 
             RunSynchronizing(() =>
             {
@@ -1356,13 +1341,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 SynchronizeModeLinks();
             });
             CacheCurrentActiveLayoutProfile();
-
-            if (!PathsEqual(layoutFilePath, _layoutFilePath))
-            {
-                SaveLayoutFile(
-                    NormalizeControllerLayoutProfile(_controllerProfileCache),
-                    NormalizeKeyMouseLayoutProfile(_keyMouseProfileCache));
-            }
 
             SetStatus("Keybind.Status.LayoutLoaded", Path.GetFileName(_layoutFilePath));
             UpdateCommandState();
@@ -1385,92 +1363,9 @@ internal sealed class KeybindToolViewModel : ObservableObject
         }
     }
 
-    private string? GetExistingLayoutFilePath()
+    private KeybindLayoutConfig ReadLayoutFile()
     {
-        if (File.Exists(_layoutFilePath))
-        {
-            return _layoutFilePath;
-        }
-
-        var knownLegacyPath = _legacyLayoutFilePaths.FirstOrDefault(File.Exists);
-        return knownLegacyPath ?? FindMatchingStoredLayoutFile();
-    }
-
-    private string? FindMatchingStoredLayoutFile()
-    {
-        var candidates = _legacyLayoutSearchDirectories
-            .SelectMany(directory => Directory.EnumerateFiles(directory, "*.json", SearchOption.TopDirectoryOnly))
-            .Where(path => !PathsEqual(path, _layoutFilePath))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Where(IsStoredLayoutFile)
-            .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        return candidates.Length == 1 ? candidates[0] : null;
-    }
-
-    private static bool IsStoredLayoutFile(string filePath)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(File.ReadAllText(filePath));
-            if (document.RootElement.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            return document.RootElement.TryGetProperty("controller_profile", out _)
-                && document.RootElement.TryGetProperty("keymouse_profile", out _);
-        }
-        catch (JsonException)
-        {
-            return false;
-        }
-        catch (IOException)
-        {
-            return false;
-        }
-        catch (UnauthorizedAccessException)
-        {
-            return false;
-        }
-    }
-
-    private KeybindLayoutConfig ReadLayoutFile(string filePath)
-    {
-        if (PathsEqual(filePath, _layoutFilePath))
-        {
-            return _context.Settings.Load<KeybindLayoutConfig>(KeybindCatalog.ButtonLayoutFileName);
-        }
-
-        var json = File.ReadAllText(filePath);
-        return JsonSerializer.Deserialize<KeybindLayoutConfig>(json, JsonOptions)
-            ?? throw new InvalidDataException(Texts["Keybind.Error.InvalidLayoutFile"]);
-    }
-
-    private void RemoveLegacyLayoutFiles()
-    {
-        var legacyPaths = _legacyLayoutFilePaths
-            .Append(FindMatchingStoredLayoutFile())
-            .Where(path => !string.IsNullOrWhiteSpace(path))
-            .Where(path => !PathsEqual(path!, _layoutFilePath))
-            .Select(path => path!)
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var legacyPath in legacyPaths)
-        {
-            try
-            {
-                if (File.Exists(legacyPath))
-                {
-                    File.Delete(legacyPath);
-                }
-            }
-            catch (Exception exception)
-            {
-                _context.Logger.Warning($"Failed to remove a prior key settings preset. {exception.Message}");
-            }
-        }
+        return _context.Settings.Load<KeybindLayoutConfig>(KeybindCatalog.ButtonLayoutFileName);
     }
 
     private void InitializeLayoutProfileCacheFromUi()
@@ -2132,7 +2027,6 @@ internal sealed class KeybindToolViewModel : ObservableObject
         };
 
         _context.Settings.Save(KeybindCatalog.ButtonLayoutFileName, layout);
-        RemoveLegacyLayoutFiles();
     }
 
     private string BuildPartialSaveDetail(IReadOnlyList<KeybindInvalidWriteTarget> invalidTargets)

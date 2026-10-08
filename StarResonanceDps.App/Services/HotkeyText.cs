@@ -9,7 +9,7 @@ public static class HotkeyText
 {
     /// <summary>
     /// 操作の名前。切り替えは2つの名前を「/」でつなぐ。起動・ピン留め・クリック透過は三点メニューの2項目(「お気に入りを起動/すべてを停止」)、
-    /// 最前面は全体設定の表示設定「ウィジェットウィンドウ」の2つの選択肢。3分計測とリセットは集計タブのボタンと同じ文言。
+    /// 最前面は全体設定の表示設定「ウィジェットウィンドウ」の2つの選択肢。計測とリセットは集計タブのボタンと同じ文言。
     /// </summary>
     public static string GetLabel(HotkeyAction action)
     {
@@ -20,7 +20,7 @@ public static class HotkeyText
             HotkeyAction.PinRunningOrUnpinAll => JoinMenuTexts("Manager_WidgetAction_PinAllRunning", "Manager_WidgetAction_UnpinAll"),
             HotkeyAction.ClickThroughPinnedOrClearAll => JoinMenuTexts("Manager_WidgetAction_ClickThroughAllPinned", "Manager_WidgetAction_ClearAllClickThrough"),
             HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly => JoinMenuTexts("WidgetWindowTopmost_Always", "WidgetWindowTopmost_PinnedOnly"),
-            HotkeyAction.ThreeMinuteBenchmark => localization.GetString("Meter_ThreeMinuteBenchmark"),
+            HotkeyAction.Benchmark => localization.GetString("Meter_Benchmark"),
             HotkeyAction.ResetEncounter => localization.GetString("Meter_Reset"),
             _ => throw new ArgumentOutOfRangeException(nameof(action), action, null)
         };

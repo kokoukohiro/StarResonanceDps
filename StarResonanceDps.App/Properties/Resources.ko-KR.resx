@@ -518,8 +518,17 @@
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}의 {1}</value>
   </data>
-  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0}에게 {1} → {2}</value>
+  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
+    <value>{0}에게 {1}로 {2}</value>
+  </data>
+  <data name="TakenDamageLog_LethalText" xml:space="preserve">
+    <value>쓰러짐</value>
+  </data>
+  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
+    <value>{0}의 {1}</value>
+  </data>
+  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
+    <value>{0}의 {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
     <value>{0}에게 {1}</value>
@@ -537,7 +546,7 @@
     <value>HP({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>사망({0}/{1})</value>
+    <value>쓰러짐({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
@@ -606,7 +615,7 @@
     <value>실드 수치</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>사망</value>
+    <value>쓰러짐</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>무 원소</value>
@@ -786,13 +795,13 @@
     <value>합계</value>
   </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
-    <value>순간 HPS 그래프</value>
+    <value>HPS 추이 그래프</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
     <value>치유 상세</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
-    <value>순간 DPS 그래프</value>
+    <value>DPS 추이 그래프</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
     <value>피해 상세</value>
@@ -962,7 +971,7 @@
     <value>사용자 지정 실행 파일 이름</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
-    <value>실시간 집계 간격</value>
+    <value>그리기 간격</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0}초</value>
@@ -1042,8 +1051,8 @@
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>분당 시전</value>
   </data>
-  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
-    <value>3분 측정</value>
+  <data name="Meter_Benchmark" xml:space="preserve">
+    <value>측정</value>
   </data>
   <data name="Meter_Reset" xml:space="preserve">
     <value>리셋</value>
@@ -1210,6 +1219,18 @@
   <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
     <value>{0}개</value>
   </data>
+  <data name="Settings_Aggregation_BenchmarkDuration" xml:space="preserve">
+    <value>측정 시간</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkDuration_Unit" xml:space="preserve">
+    <value>초</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly" xml:space="preserve">
+    <value>처음 공격한 적만 측정</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
+    <value>※여러 적을 동시에 공격해도 처음 공격한 1체만 집계합니다</value>
+  </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>집계</value>
   </data>
@@ -1217,7 +1238,7 @@
     <value>집계 중</value>
   </data>
   <data name="Aggregation_StatusBenchmark" xml:space="preserve">
-    <value>3분 측정 중</value>
+    <value>측정 중</value>
   </data>
   <data name="Aggregation_StatusHistory" xml:space="preserve">
     <value>기록 표시 중</value>
@@ -1649,5 +1670,28 @@
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
     <value>다른 앱이 클립보드를 사용 중일 수 있습니다.
 잠시 후 다시 복사하세요.</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+    <value>시작 오류</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
+    <value>앱을 시작하지 못했습니다.</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Detail" xml:space="preserve">
+    <value>다음 폴더에 쓸 수 없습니다.
+{0}
+폴더의 쓰기 권한과 보안 소프트웨어 설정을 확인하거나, 앱 폴더 전체를 쓸 수 있는 위치로 옮긴 후 다시 시작하세요.</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
+    <value>설정 불러오기 오류</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Message" xml:space="preserve">
+    <value>설정을 불러오지 못해 기본값으로 시작했습니다.</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Detail" xml:space="preserve">
+    <value>다음 설정 파일이 손상되었거나 읽을 수 없습니다.
+{0}
+이 파일은 앱이 다음에 설정을 저장할 때 덮어씁니다.
+필요하면 설정을 다시 하세요.</value>
   </data>
 </root>

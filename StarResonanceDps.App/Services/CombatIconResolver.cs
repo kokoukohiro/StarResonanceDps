@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.IO;
+using StarResonanceDps.App.Config;
 
 namespace StarResonanceDps.App.Services;
 
@@ -37,12 +38,11 @@ public static class CombatIconResolver
 
     private static string? ResolveUncached(string iconName, IReadOnlyList<string> categories)
     {
-        var baseDirectory = AppContext.BaseDirectory;
         var candidateNames = GetCandidateNames(iconName).ToArray();
 
         foreach (var category in categories)
         {
-            var categoryDirectory = Path.Combine(baseDirectory, "Data", "Images", category);
+            var categoryDirectory = Path.Combine(AppDataPaths.ImagesDirectory, category);
             foreach (var candidateName in candidateNames)
             {
                 var candidatePath = Path.Combine(categoryDirectory, candidateName);

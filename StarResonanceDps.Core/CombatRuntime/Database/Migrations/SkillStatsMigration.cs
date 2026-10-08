@@ -95,8 +95,6 @@ namespace StarResonanceDps.Core.CombatRuntime.Database.Migrations
                                         snapshot.DamageMode,
                                         snapshot.IsKill,
                                         new StarResonanceDps.Core.CombatRuntime.Protocols.ExtraPacketData(snapshot.Timestamp!.Value),
-                                        0.0,
-                                        snapshot.Timestamp!.Value,
                                         default);
 
                                     entity.SkillMetrics[skillStat.Key] = metrics;

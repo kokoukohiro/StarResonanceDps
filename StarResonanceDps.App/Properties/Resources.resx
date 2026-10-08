@@ -518,8 +518,17 @@ If it is not installed, you can download it from the link below.</value>
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}'s {1}</value>
   </data>
-  <data name="TakenDamageLog_HitFormat" xml:space="preserve">
-    <value>{0} took {1} → {2}</value>
+  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
+    <value>{0} took {1} and {2}</value>
+  </data>
+  <data name="TakenDamageLog_LethalText" xml:space="preserve">
+    <value>was defeated</value>
+  </data>
+  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
+    <value>{0}'s {1}</value>
+  </data>
+  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
+    <value>{0}'s {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
     <value>{0} took {1}</value>
@@ -537,7 +546,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>HP({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>died ({0}/{1})</value>
+    <value>was defeated ({0}/{1})</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
@@ -606,7 +615,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>Shield value</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>Death</value>
+    <value>Defeated</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>No element</value>
@@ -636,7 +645,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>Dark</value>
   </data>
   <data name="Settings_Display_Filter_HistoryNote" xml:space="preserve">
-    <value>Note: No effect while viewing history.</value>
+    <value>Note: No effect while viewing history</value>
   </data>
   <data name="Widget_PlayerList" xml:space="preserve">
     <value>Player List</value>
@@ -786,13 +795,13 @@ If it is not installed, you can download it from the link below.</value>
     <value>Total</value>
   </data>
   <data name="Widget_HpsGraph" xml:space="preserve">
-    <value>Instant HPS Graph</value>
+    <value>HPS Trend Graph</value>
   </data>
   <data name="Widget_HealingContribution" xml:space="preserve">
     <value>Healing Details</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
-    <value>Instant DPS Graph</value>
+    <value>DPS Trend Graph</value>
   </data>
   <data name="Widget_DamageContribution" xml:space="preserve">
     <value>Damage Details</value>
@@ -962,7 +971,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Custom Executable Name</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
-    <value>Real-time aggregation interval</value>
+    <value>Drawing interval</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
     <value>{0} seconds</value>
@@ -1042,8 +1051,8 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Metric_CastsPerMinute" xml:space="preserve">
     <value>Casts Per Min</value>
   </data>
-  <data name="Meter_ThreeMinuteBenchmark" xml:space="preserve">
-    <value>3-Minute Benchmark</value>
+  <data name="Meter_Benchmark" xml:space="preserve">
+    <value>Benchmark</value>
   </data>
   <data name="Meter_Reset" xml:space="preserve">
     <value>Reset</value>
@@ -1210,6 +1219,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Aggregation_MaxEncounterCount_Value" xml:space="preserve">
     <value>{0} entries</value>
   </data>
+  <data name="Settings_Aggregation_BenchmarkDuration" xml:space="preserve">
+    <value>Benchmark Duration</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkDuration_Unit" xml:space="preserve">
+    <value>sec</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly" xml:space="preserve">
+    <value>Measure Only the First Enemy Attacked</value>
+  </data>
+  <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
+    <value>Note: Even when attacking several enemies at once, only the first enemy attacked is counted.</value>
+  </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>Aggregation</value>
   </data>
@@ -1229,7 +1250,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>No history</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
-    <value>Note: e.g. entering a boss room in a dungeon.</value>
+    <value>Note: e.g. entering a boss room in a dungeon</value>
   </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>Move Speed</value>
@@ -1649,5 +1670,28 @@ Choose another location and save again.</value>
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
     <value>Another app may be using the clipboard.
 Wait a moment and copy again.</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+    <value>Startup error</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
+    <value>Could not start the app.</value>
+  </data>
+  <data name="Startup_DataFolderNotWritable_Detail" xml:space="preserve">
+    <value>Could not write to the following folder.
+{0}
+Check the folder's write permissions and your security software settings, or move the whole app folder to a location you can write to, then start the app again.</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
+    <value>Settings load error</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Message" xml:space="preserve">
+    <value>Could not load the settings, so the app started with the defaults.</value>
+  </data>
+  <data name="SettingsFile_LoadFailed_Detail" xml:space="preserve">
+    <value>The following settings file is damaged or could not be read.
+{0}
+This file will be overwritten the next time the app saves the settings.
+Change the settings again if needed.</value>
   </data>
 </root>

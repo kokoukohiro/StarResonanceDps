@@ -10,9 +10,10 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// 被ダメログの通知(予兆技)の判定。被ダメログの窓の更新ごとに <see cref="Poll"/> を呼ぶ(起動中のウィジェットだけが通知する)。
 ///
 /// <para>
-/// <b>予告</b>はゲームの予告のバーが消える時刻(<see cref="BossDbmBarStore"/>)に、<b>警告</b>は警告の技の開始が届いたときに出す。
-/// 同じ技に予告と警告の両方があっても、それぞれの時機に別々に出す。
-/// どちらもライブの戦闘で決め、被ダメログが履歴を表示していても止まらない。窓を開いた時点で既に過ぎたものは出さない。
+/// <b>予告</b>はゲームの予告のバーが消える時刻(<see cref="BossDbmBarStore"/>)に、<b>警告</b>は警告の技の開始が届いたとき
+/// (<see cref="WarningSkillCastStore"/>)に出す。同じ技に予告と警告の両方があっても、それぞれの時機に別々に出す。
+/// どちらもライブの戦闘で決め、被ダメログが履歴を表示していても、計測の窓の外で記録が止まっていても止まらない。
+/// 窓を開いた時点で既に過ぎたものは出さない。
 /// </para>
 ///
 /// <para>
@@ -25,9 +26,9 @@ public sealed class TelegraphedSkillNotificationTracker
     private readonly Func<TakenDamageLogParty, string> _getDisplayName;
 
     private DateTime _lastBarCheckUtc = DateTime.UtcNow;
-    private Encounter? _liveEncounter;
-    private int _liveNextIndex;
-    private bool _hasReadLiveLog;
+
+    // 窓を開いた時点までに控えた警告は出さない。
+    private long _lastWarningSequence = WarningSkillCastStore.Instance.LastSequence;
 
     /// <param name="getSettings">被ダメログの設定(保存前プレビューを含む)。</param>
     /// <param name="getDisplayName">ログの行の名前の出し方(被ダメログの窓と同じ)。</param>
@@ -51,24 +52,10 @@ public sealed class TelegraphedSkillNotificationTracker
 
         _lastBarCheckUtc = now;
 
-        var snapshot = MeterSnapshotProvider.GetLiveTakenDamageLog(_liveEncounter, _liveNextIndex);
-        var isFirstRead = !_hasReadLiveLog;
-        _hasReadLiveLog = true;
-        _liveEncounter = snapshot.Encounter;
-        _liveNextIndex = snapshot.NextIndex;
-
-        // 窓を開いた時点で既にある行は出さない。
-        if (isFirstRead)
+        foreach (var cast in WarningSkillCastStore.Instance.GetAfter(_lastWarningSequence))
         {
-            return;
-        }
-
-        foreach (var line in snapshot.Lines)
-        {
-            if (line.Kind == TakenDamageLogRecordKind.Cast && CombatDataCatalog.IsWarningSkillId(line.SourceId))
-            {
-                Notify(_getDisplayName(line.Attacker), line.SourceName);
-            }
+            _lastWarningSequence = cast.Sequence;
+            Notify(_getDisplayName(cast.Caster), MeterSnapshotProvider.GetTakenDamageLogSkillName(cast.SkillId));
         }
     }
 

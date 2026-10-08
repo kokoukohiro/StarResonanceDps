@@ -48,7 +48,7 @@ public static class SkillCooldownStateStore
     /// ゲームがその人のクールダウンをリセットすることを通知する。推測値の購読者に、その人の分の破棄を促す。
     /// </summary>
     /// <param name="resetAt">
-    /// クールダウンが消える時刻。時計は発動の時刻(<see cref="SkillActivatedEventArgs.ActivationDateTime"/>)と同じ <see cref="DateTime.Now"/>。
+    /// クールダウンが消える時刻。時計は発動の時刻(<see cref="SkillActivatedEventArgs.ActivationDateTime"/>)と同じ、メッセージの到着時刻(UTC)。
     /// バフによっては付与より後になる。
     /// </param>
     public static void NotifyCooldownsResetForPlayer(long uuid, DateTime resetAt)

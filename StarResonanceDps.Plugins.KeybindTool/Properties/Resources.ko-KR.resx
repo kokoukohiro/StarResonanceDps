@@ -569,9 +569,6 @@
   <data name="Keybind.Dialog.SelectSaveFile.Title" xml:space="preserve">
     <value>설정 파일 선택</value>
   </data>
-  <data name="Keybind.Error.InvalidLayoutFile" xml:space="preserve">
-    <value>키 설정 파일 형식이 잘못되었습니다.</value>
-  </data>
   <data name="Keybind.Input.Axis.ForwardBack" xml:space="preserve">
     <value>앞/뒤</value>
   </data>

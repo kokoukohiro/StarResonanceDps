@@ -1,305 +1,164 @@
-using System.Buffers.Binary;
-using System.Collections.Concurrent;
-using System.IO.Pipelines;
-using System.Net;
 using PacketDotNet;
 using Serilog;
-using SharpPcap;
 
 namespace StarResonanceDps.Core.CombatRuntime.Protocols;
 
-public class TcpReassembler
+/// <summary>
+/// キャプチャのパケットを TCP 接続へ振り分け、揃ったメッセージを受け手へ渡す。
+///
+/// <para>
+/// <b>時間で決める値は持たない。</b>接続を閉じるのは、両方向の FIN・RST・同じ4つ組の別の SYN・キャプチャの停止だけ。
+/// 閉じた接続は中身を捨てて表に残し(同じ4つ組の SYN か停止まで)、後から来るパケットで接続を作らない。
+/// 時計はキャプチャの時刻(UTC)だけを使う。
+/// </para>
+///
+/// <para>
+/// キャプチャのスレッドと停止の呼び手(UI スレッド)の両方が触るので、表は <see cref="_sync"/> で守る。
+/// 受け手(<see cref="_onMessage"/>)はこの lock の中で呼ばれる。
+/// </para>
+/// </summary>
+public sealed class TcpReassembler
 {
-    public static ILogger Log = Serilog.Log.ForContext<TcpReassembler>();
+    private static readonly ILogger Log = Serilog.Log.ForContext<TcpReassembler>();
 
-    public static TimeSpan ConnectionCleanUpInterval = TimeSpan.FromSeconds(60);
-    public Action<TcpConnection>? OnNewConnection;
-    public ConcurrentDictionary<IPEndPoint, TcpConnection> Connections = new();
-    public DateTime LastConnectionCleanUpTime = DateTime.Now;
+    private readonly object _sync = new();
+    private readonly Dictionary<TcpConnectionKey, TcpConnection> _connections = new();
+    private readonly Action<byte[], int, DateTime> _onMessage;
+    private readonly Func<string> _describeCaptureStatistics;
+    private bool _isStopped;
+    private bool _hasLoggedPacketAfterStop;
+    private long _ignoredWithoutConnection;
+    private long _replacedLatePureAfterClose;
+    private long _replacedLatePayloadAfterClose;
 
-    public void AddPacket(IPv4Packet ipPacket, TcpPacket tcpPacket, PosixTimeval timeval)
+    /// <param name="onMessage">揃ったメッセージ(<see cref="System.Buffers.ArrayPool{T}.Shared"/> から借りたバッファ、長さ、揃ったパケットのキャプチャ時刻)。バッファを返すのは受け手。</param>
+    /// <param name="describeCaptureStatistics">ログに添えるキャプチャの統計(英語)。</param>
+    public TcpReassembler(Action<byte[], int, DateTime> onMessage, Func<string> describeCaptureStatistics)
     {
-        try
-        {
-            var ep = new IPEndPoint(ipPacket.SourceAddress, tcpPacket.SourcePort);
+        _onMessage = onMessage;
+        _describeCaptureStatistics = describeCaptureStatistics;
+    }
 
-            // 接続の始まり。SYN の次のバイトから読むので、読み始めの判定を待たない。
-            // 同じ端点に古い接続が残っていれば別の接続なので、消して作り直す。
-            if (tcpPacket.Synchronize && !tcpPacket.Reset && !tcpPacket.Finished)
+    public void AddPacket(IPv4Packet ip, TcpPacket tcp, DateTime captureTimeUtc)
+    {
+        var source = TcpEndpoint.From(ip.SourceAddress, tcp.SourcePort);
+        var destination = TcpEndpoint.From(ip.DestinationAddress, tcp.DestinationPort);
+        var key = TcpConnectionKey.From(source, destination);
+        var fromLow = source == key.Low;
+        ReadOnlySpan<byte> payload = tcp.PayloadData ?? [];
+
+        lock (_sync)
+        {
+            if (_isStopped)
             {
-                if (Connections.TryGetValue(ep, out var oldConn))
+                if (!_hasLoggedPacketAfterStop)
                 {
-                    RemoveConnection(oldConn);
+                    _hasLoggedPacketAfterStop = true;
+                    Log.Information("Ignoring TCP packets that arrive after the capture stopped");
                 }
 
-                var synDestEp = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
-                var synConn = new TcpConnection(ep, synDestEp, this);
-                synConn.AddPacket(tcpPacket, timeval);
-                Connections[ep] = synConn;
-                OnNewConnection?.Invoke(synConn);
-                Log.Information("Got a new connection {ep} at the SYN", ep);
                 return;
             }
 
-            if (!Connections.ContainsKey(ep))
+            _connections.TryGetValue(key, out var connection);
+
+            if (tcp.Synchronize && !tcp.Reset)
             {
-                var destEp = new IPEndPoint(ipPacket.DestinationAddress, tcpPacket.DestinationPort);
-                var newConn = new TcpConnection(ep, destEp, this);
-                Connections.TryAdd(ep, newConn);
-                OnNewConnection?.Invoke(newConn);
-                Log.Information("Got a new connection {ep}", ep);
-            }
-
-            var conn = Connections[ep];
-            if (tcpPacket.Reset || tcpPacket.Finished || tcpPacket.Synchronize)
-            {
-                RemoveConnection(conn);
-                Log.Information($"Removed connection {ep}, Reset: {tcpPacket.Reset}, Finished: {tcpPacket.Finished}, Synchronize: {tcpPacket.Synchronize}");
-                return;
-            }
-
-            conn.AddPacket(tcpPacket, timeval);
-            RemoveTimedOutConnections();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error adding packet.");
-        }
-    }
-
-    public void RemoveConnection(ConnectionId connId)
-    {
-        if (Connections.TryGetValue(connId.SrcEp, out var srcConn))
-        {
-            RemoveConnection(srcConn);
-        }
-
-        if (Connections.TryGetValue(connId.DestEp, out var destConn))
-        {
-            RemoveConnection(destConn);
-        }
-    }
-
-    private void RemoveTimedOutConnections()
-    {
-        if (DateTime.Now - LastConnectionCleanUpTime >= ConnectionCleanUpInterval)
-        {
-            var toRemove = new List<TcpConnection>();
-            foreach (var connection in Connections)
-            {
-                if ((DateTime.Now - connection.Value.LastPacketAt).TotalSeconds >= 60)
+                if (connection is { IsClosed: false } && connection.IsDifferentStreamStart(fromLow, tcp.SequenceNumber))
                 {
-                    toRemove.Add(connection.Value);
+                    connection.Close(TcpCloseReason.ReplacedBySyn, captureTimeUtc);
+                }
+
+                if (connection is null || connection.IsClosed)
+                {
+                    connection = Open(key, tcp.Acknowledgment ? "SYN-ACK" : "SYN", captureTimeUtc);
                 }
             }
-
-            foreach (var connection in toRemove)
+            else if (connection is null)
             {
-                RemoveConnection(connection);
-            }
-
-            LastConnectionCleanUpTime = DateTime.Now;
-            if (toRemove.Count > 0)
-            {
-                Log.Information($"Removed {toRemove.Count} connections");
-            }
-        }
-    }
-
-    public void RemoveConnection(TcpConnection conn)
-    {
-        conn.IsAlive = false;
-        conn.CancelTokenSrc.Cancel();
-        Connections.TryRemove(conn.EndPoint, out var _);
-        conn.Pipe.Reader.CancelPendingRead();
-        conn.Pipe.Writer.Complete();
-    }
-
-    public class TcpConnection(IPEndPoint endPoint, IPEndPoint destEndPoint, TcpReassembler owner)
-    {
-        public const int NUM_PACKETS_BEFORE_CLEAN_UP = 200;
-        public const int MAX_DUPE_PACKET_SEQ_DIFF = 1700;
-
-        public IPEndPoint EndPoint = endPoint;
-        public IPEndPoint DestEndPoint = destEndPoint;
-        public SortedDictionary<uint, PacketFragment> Packets = new();
-        public uint? NextExpectedSeq = null;
-        public uint LastSeq = 0;
-        public Pipe Pipe = new Pipe();
-        public bool IsAlive = true;
-        public DateTime LastPacketAt = DateTime.MinValue;
-        public ulong NumBytesSent;
-        public ulong NumPacketsSeen;
-        public CancellationTokenSource CancelTokenSrc = new();
-        public bool IsSynced = false;
-        public TcpReassembler Owner = owner;
-        public DateTime LastPacketTime;
-
-        static bool SeqLt(uint a, uint b) => unchecked((int)(a - b)) < 0;
-        static bool SeqGt(uint a, uint b) => unchecked((int)(a - b)) > 0;
-        static bool SeqLe(uint a, uint b) => unchecked((int)(a - b)) <= 0;
-
-        public void AddPacket(TcpPacket tcpPacket, PosixTimeval timeVal)
-        {
-            if (tcpPacket.Synchronize)
-            {
-                // SYN の次のバイトはストリームの先頭で、メッセージの先頭。
-                NextExpectedSeq = tcpPacket.SequenceNumber + 1;
-                IsSynced = true;
-                Log.Information("Got a Sync Tcp Packet.");
-                Console.WriteLine("Got a Sync Tcp Packet.");
-                return;
-            }
-
-            var payload = tcpPacket.PayloadData.ToArray();
-            if (payload.Length <= 0)
-            {
-                return;
-            }
-
-            if (!IsSynced)
-            {
-                if (payload.Length >= 6 && BinaryPrimitives.ReadInt32BigEndian(payload) == payload.Length &&
-                    (BinaryPrimitives.ReadInt16BigEndian(payload.AsSpan()[4..]) & 0x7FFF) <= 9)
+                // 中身の無いパケット(閉じた後の最後の ACK など)と、FIN・RST の付いた途中のパケットからは接続を作らない。
+                if (payload.IsEmpty || tcp.Reset || tcp.Finished)
                 {
-                    IsSynced = true;
-                    Log.Information($"Connection {EndPoint} is synced");
-                }
-                else {
+                    _ignoredWithoutConnection++;
                     return;
                 }
+
+                connection = Open(key, "mid-stream data", captureTimeUtc);
             }
-
-            if (Packets.ContainsKey(tcpPacket.SequenceNumber))
+            else if (connection.IsClosed)
             {
-                Log.Warning("{SrcEp} -> {DestEp} has duplicate packet {SequenceNumber}, LastSeq: {LastSeq}, Packets.Len: {numPackets}",
-                    EndPoint, DestEndPoint, tcpPacket.SequenceNumber, LastSeq, Packets.Count);
-
-                if (unchecked(tcpPacket.SequenceNumber - LastSeq) >= MAX_DUPE_PACKET_SEQ_DIFF)
+                if (payload.IsEmpty)
                 {
-                    Log.Error("{SrcEp} -> {DestEp} dupe exceeded {MAX_DUPE_PACKET_SEQ_DIFF}, removing stream to reset :<, SequenceNumber: {SequenceNumber}, LastSeq: {LastSeq}, Diff {Diff}",
-                        EndPoint, DestEndPoint, MAX_DUPE_PACKET_SEQ_DIFF, tcpPacket.SequenceNumber, LastSeq, (tcpPacket.SequenceNumber - LastSeq));
-
-                    Owner.RemoveConnection(this);
+                    connection.NoteLatePureAfterClose();
+                    return;
                 }
+
+                // SYN を取りこぼしたまま同じ4つ組が使い回されたときは、FIN より先のデータが来る。
+                if (!connection.IsBeyondFin(fromLow, tcp.SequenceNumber))
+                {
+                    connection.NoteLatePayloadAfterClose(fromLow, payload.Length);
+                    return;
+                }
+
+                Log.Warning(
+                    "TCP {Connection} received data beyond the FIN of a closed connection; treating it as a new connection found mid-stream",
+                    key);
+                connection = Open(key, "mid-stream data after close", captureTimeUtc);
             }
 
-            if (tcpPacket.SequenceNumber < LastSeq)
-            {
-                Log.Warning("{SrcEp} -> {DestEp} tcpPacket.SequenceNumber < LastSeq, {SequenceNumber} < {LastSeq}",
-                    EndPoint, DestEndPoint, tcpPacket.SequenceNumber, LastSeq);
-            }
-
-            if (SeqLt(tcpPacket.SequenceNumber, NextExpectedSeq ?? 0) &&
-                (tcpPacket.SequenceNumber + payload.Length) > NextExpectedSeq)
-            {
-                Log.Warning("{SrcEp} -> {DestEp} had overlap! NextExpectedSeq: {NextExpectedSeq}, SeqNumber: {SequenceNumber} to {PacketEndPos}",
-                    EndPoint, DestEndPoint, NextExpectedSeq, tcpPacket.SequenceNumber, (tcpPacket.SequenceNumber + payload.Length));
-            }
-
-            if (NextExpectedSeq == null)
-                NextExpectedSeq = tcpPacket.SequenceNumber;
-
-            var fragment = new PacketFragment(tcpPacket.SequenceNumber, payload, timeVal.Date);
-            Packets.TryAdd(tcpPacket.SequenceNumber, fragment);
-            NumPacketsSeen++;
-            LastPacketAt = DateTime.Now;
-            CheckAndPushContinuesData();
+            connection.Process(fromLow, tcp, payload, captureTimeUtc);
         }
+    }
 
-        private void CheckAndPushContinuesData()
+    /// <summary>
+    /// 停止する。開いている接続を全部閉じて要約を書き、以後のパケットは無視する。
+    /// 戻った後に受け手が呼ばれることは無い。
+    /// </summary>
+    public TcpReassemblerStopSummary Stop(DateTime stoppedAtUtc)
+    {
+        lock (_sync)
         {
-            bool consumedSomething = false;
-
-            do
+            _isStopped = true;
+            var closed = 0;
+            var latePure = _replacedLatePureAfterClose;
+            var latePayload = _replacedLatePayloadAfterClose;
+            foreach (var connection in _connections.Values)
             {
-                consumedSomething = false;
-
-                var packetsToRemove = new List<uint>();
-                var expectedSeq = NextExpectedSeq!.Value;
-
-                if (Packets.TryGetValue(expectedSeq, out var exactFrag))
+                if (!connection.IsClosed)
                 {
-                    Packets.Remove(expectedSeq);
-                    PushPacketSegment(exactFrag);
-                    consumedSomething = true;
-                    continue;
+                    connection.Close(TcpCloseReason.CaptureStopped, stoppedAtUtc);
+                    closed++;
                 }
 
-                foreach (var packet in Packets)
-                {
-                    if (SeqLt(packet.Value.SequenceNumber, expectedSeq) &&
-                        SeqGt(packet.Value.SequenceNumber + (uint)packet.Value.PayloadData.Length, expectedSeq))
-                    {
-                        uint skip = expectedSeq - packet.Value.SequenceNumber;
-
-                        var data = packet.Value.PayloadData[(int)skip..];
-                        LastPacketTime = packet.Value.ArriveTime;
-                        var mem = Pipe.Writer.GetMemory(data.Length);
-                        data.CopyTo(mem);
-                        Pipe.Writer.Advance(data.Length);
-                        Pipe.Writer.FlushAsync();
-                        NumBytesSent += (ulong)data.Length;
-
-                        NextExpectedSeq = unchecked(packet.Value.SequenceNumber + (uint)packet.Value.PayloadData.Length);
-                        LastSeq = unchecked(packet.Value.SequenceNumber + (uint)data.Length);
-
-                        packetsToRemove.Add(packet.Value.SequenceNumber);
-
-                        consumedSomething = true;
-
-                        Log.Information("Had overlapping packet");
-                        Console.WriteLine("Had overlapping packet");
-
-                        break;
-                    }
-                }
-
-                foreach (var packet in packetsToRemove)
-                {
-                    Packets.Remove(packet);
-                }
-            } while (consumedSomething);
-
-            if (Packets.Count >= NUM_PACKETS_BEFORE_CLEAN_UP)
-            {
-                RemoveOldCachedPackets();
+                latePure += connection.LatePureAfterClose;
+                latePayload += connection.LatePayloadAfterClose;
             }
-        }
 
-        private void PushPacketSegment(PacketFragment segment)
+            return new TcpReassemblerStopSummary(closed, latePure, latePayload, _ignoredWithoutConnection);
+        }
+    }
+
+    private TcpConnection Open(TcpConnectionKey key, string openedBy, DateTime captureTimeUtc)
+    {
+        if (_connections.TryGetValue(key, out var replaced))
         {
-            LastPacketTime = segment.ArriveTime;
-            var mem = Pipe.Writer.GetMemory(segment.PayloadData.Length);
-            segment.PayloadData.CopyTo(mem);
-            Pipe.Writer.Advance(segment.PayloadData.Length);
-            Pipe.Writer.FlushAsync();
-            NumBytesSent += (ulong)segment.PayloadData.Length;
-
-            NextExpectedSeq = segment.SequenceNumber + (uint)segment.PayloadData.Length;
-            LastSeq = segment.SequenceNumber;
+            _replacedLatePureAfterClose += replaced.LatePureAfterClose;
+            _replacedLatePayloadAfterClose += replaced.LatePayloadAfterClose;
         }
 
-        public void RemoveOldCachedPackets()
-        {
-            var toRemove = Packets.Where(x => x.Value.SequenceNumber < LastSeq ||
-                                x.Value.PayloadData.Length == 0 ||
-                                (DateTime.Now - x.Value.ArriveTime).TotalSeconds >= 10).ToList();
-
-            if (toRemove.Count() > 0)
-                Log.Information($"{EndPoint} -> {DestEndPoint}, Cleaned up {toRemove.Count()} packets");
-
-            foreach (var item in toRemove)
-            {
-                Packets.Remove(item.Key);
-            }
-        }
+        var connection = new TcpConnection(key, captureTimeUtc, _onMessage, _describeCaptureStatistics);
+        _connections[key] = connection;
+        Log.Information("TCP connection opened {Connection} by {OpenedBy}", key, openedBy);
+        return connection;
     }
 }
 
-public class PacketFragment(uint seqNum, byte[] data, DateTime arrivalTime)
-{
-    public uint SequenceNumber = seqNum;
-    public byte[] PayloadData = data;
-    public DateTime ArriveTime = arrivalTime;
-}
+/// <param name="ClosedConnections">停止で閉じた接続の数。</param>
+/// <param name="LatePureAfterClose">閉じた接続へ届いた中身の無いパケットの数。</param>
+/// <param name="LatePayloadAfterClose">閉じた接続へ届いた中身のあるパケットの数。</param>
+/// <param name="IgnoredWithoutConnection">接続が無く、接続を作らなかったパケットの数。</param>
+public sealed record TcpReassemblerStopSummary(
+    int ClosedConnections,
+    long LatePureAfterClose,
+    long LatePayloadAfterClose,
+    long IgnoredWithoutConnection);

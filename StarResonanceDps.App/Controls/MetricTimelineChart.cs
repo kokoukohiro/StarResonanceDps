@@ -111,9 +111,10 @@ public sealed class MetricTimelineChart : FrameworkElement
             axisPen.Freeze();
         }
 
+        // 点は区切りの中央に置き、軸の右端は最後の区切りの終わりにする。
         var maxX = points.Count == 0
             ? 1d
-            : Math.Max(points.Max(static point => point.Seconds), 1d);
+            : Math.Max(points.Max(static point => point.EndSeconds), 1d);
         var maxY = points.Count == 0
             ? 1d
             : Math.Max(points.Max(static point => point.ValuePerSecond), 1d);
@@ -129,7 +130,7 @@ public sealed class MetricTimelineChart : FrameworkElement
         var markerBrush = TextBrush;
         var geometry = new StreamGeometry();
         var orderedPoints = points
-            .OrderBy(static point => point.Seconds)
+            .OrderBy(static point => point.StartSeconds)
             .ToArray();
 
         using (var context = geometry.Open())
@@ -138,7 +139,7 @@ public sealed class MetricTimelineChart : FrameworkElement
             for (var index = 0; index < orderedPoints.Length; index++)
             {
                 var point = orderedPoints[index];
-                var normalizedX = maxX <= 0d ? 0d : point.Seconds / maxX;
+                var normalizedX = maxX <= 0d ? 0d : GetCenterSeconds(point) / maxX;
                 var normalizedY = maxY <= 0d ? 0d : point.ValuePerSecond / maxY;
                 var x = plotBounds.Left + normalizedX * plotBounds.Width;
                 var y = plotBounds.Bottom - normalizedY * plotBounds.Height;
@@ -146,10 +147,10 @@ public sealed class MetricTimelineChart : FrameworkElement
 
                 var previousX = index == 0
                     ? plotBounds.Left
-                    : plotBounds.Left + (Math.Max(orderedPoints[index - 1].Seconds, 0d) / maxX) * plotBounds.Width;
+                    : plotBounds.Left + (Math.Max(GetCenterSeconds(orderedPoints[index - 1]), 0d) / maxX) * plotBounds.Width;
                 var nextX = index == orderedPoints.Length - 1
                     ? plotBounds.Right
-                    : plotBounds.Left + (Math.Max(orderedPoints[index + 1].Seconds, 0d) / maxX) * plotBounds.Width;
+                    : plotBounds.Left + (Math.Max(GetCenterSeconds(orderedPoints[index + 1]), 0d) / maxX) * plotBounds.Width;
                 var availableWidth = Math.Max(Math.Min(x - previousX, nextX - x), 0d);
                 var barWidth = Math.Clamp(availableWidth * 0.6d, 2d, 12d);
                 var barRect = new Rect(
@@ -179,6 +180,11 @@ public sealed class MetricTimelineChart : FrameworkElement
         }
 
         drawingContext.DrawGeometry(null, linePen, geometry);
+    }
+
+    private static double GetCenterSeconds(MetricTimelinePoint point)
+    {
+        return (point.StartSeconds + point.EndSeconds) * 0.5d;
     }
 
     private static Brush CreateBarBrush(Brush source)

@@ -15,12 +15,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static ConcurrentQueue<KeyValuePair<EDungeonState, DateTime>> DungeonStateHistory { get; private set; } = new();
         public static DateTime? DeferredEncounterEndFinalTime { get; private set; } = null;
         public static EncounterEndFinalData? DeferredEncounterEndFinalData { get; private set; } = null;
-        static readonly object BenchmarkCompletionSync = new();
-        static System.Threading.Timer? BenchmarkCompletionTimer;
 
         public static void StartNewMap()
         {
             Log.Information($"{DateTime.Now} - BattleStateMachine.StartNewMap");
+
+            // 始まった計測はマップ移動で終える(下の作り直しが計測の注記つきで保存する)。待機中はそのまま待つ。
+            EncounterManager.EndBenchmarkBeforeSplit("map move", onlyIfBegun: true);
+
             DeferredEncounterEndFinalTime = null;
 
             DungeonStateHistory.Clear();
@@ -35,6 +37,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.SourceLandingResolver.Instance.Clear();
             Services.NearbyMonsterIndex.Instance.Clear();
             Services.BossDbmBarStore.Instance.Clear();
+            Services.WarningSkillCastStore.Instance.Clear();
 
         }
 
@@ -75,7 +78,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
                 // 開始までの待ち時間の記録を別の戦闘に分けるのはフェーズ分割の一部なので、無効なら区切らずに続ける。
-                // 記録が無ければ区切りではなく開始時刻の付け直し(EnterDungeon の中)なので、設定によらず行う。
+                // 記録が無ければ、作り直しても何も保存されない(回を作った時刻がダンジョンの開始になり、制限時間はそこから測る)ので、設定によらず行う。
                 if (!EncounterManager.Current.HasStatsBeenRecorded())
                 {
                     EncounterManager.EnterDungeon();
@@ -87,9 +90,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStateEnd)
             {
+                // 計測中は回を閉じない(窓の途中で時計が止まらないように。待機中の回は記録が無く、次の区切りで作り直す)。
+                if (EncounterManager.IsBenchmarkActive)
+                {
+                    Log.Information("Dungeon end did not close the encounter during benchmark");
+                    return;
+                }
 
                 EncounterManager.StopEncounter(true, EncounterStartReason.DungeonStateEnd);
-
             }
 
         }
@@ -126,100 +134,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalData = data;
         }
 
-        public static void StartBenchmarkCompletionTimer()
-        {
-            lock (BenchmarkCompletionSync)
-            {
-                BenchmarkCompletionTimer?.Dispose();
-                BenchmarkCompletionTimer = null;
-
-                if (!AppState.IsBenchmarkMode
-                    || !AppState.HasBenchmarkBegun
-                    || AppState.IsBenchmarkCompleting
-                    || AppState.IsBenchmarkCompleted)
-                {
-                    return;
-                }
-
-                var completionTime = EncounterManager.Current.StartTime.AddSeconds(AppState.BenchmarkTime);
-                var dueTime = completionTime - DateTime.Now;
-                if (dueTime < TimeSpan.Zero)
-                {
-                    dueTime = TimeSpan.Zero;
-                }
-
-                BenchmarkCompletionTimer = new System.Threading.Timer(
-                    static _ => CompleteBenchmarkIfElapsed(DateTime.Now),
-                    null,
-                    dueTime,
-                    System.Threading.Timeout.InfiniteTimeSpan);
-            }
-        }
-
-        public static void CancelBenchmarkCompletionTimer()
-        {
-            lock (BenchmarkCompletionSync)
-            {
-                BenchmarkCompletionTimer?.Dispose();
-                BenchmarkCompletionTimer = null;
-                AppState.IsBenchmarkCompleting = false;
-            }
-        }
-
-        public static void CompleteBenchmarkIfElapsed(DateTime currentTime)
-        {
-            if (!AppState.IsBenchmarkMode
-                || !AppState.HasBenchmarkBegun
-                || AppState.IsBenchmarkCompleting
-                || AppState.IsBenchmarkCompleted)
-            {
-                return;
-            }
-
-            lock (BenchmarkCompletionSync)
-            {
-                if (!AppState.IsBenchmarkMode
-                    || !AppState.HasBenchmarkBegun
-                    || AppState.IsBenchmarkCompleting
-                    || AppState.IsBenchmarkCompleted)
-                {
-                    return;
-                }
-
-                var completionTime = EncounterManager.Current.StartTime.AddSeconds(AppState.BenchmarkTime);
-                if (currentTime < completionTime)
-                {
-                    BenchmarkCompletionTimer?.Change(
-                        completionTime - currentTime,
-                        System.Threading.Timeout.InfiniteTimeSpan);
-                    return;
-                }
-
-                AppState.IsBenchmarkCompleting = true;
-                BenchmarkCompletionTimer?.Dispose();
-                BenchmarkCompletionTimer = null;
-
-                try
-                {
-                    EncounterManager.FreezeCurrentBenchmarkMetrics(completionTime);
-                    AppState.BenchmarkCompletionTime = completionTime;
-                    AppState.IsBenchmarkCompleted = true;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Failed to complete benchmark");
-                }
-                finally
-                {
-                    AppState.IsBenchmarkCompleting = false;
-                }
-            }
-        }
-
         public static void CheckDeferredCalls()
         {
-            CompleteBenchmarkIfElapsed(DateTime.Now);
-
             if (DeferredEncounterEndFinalTime.HasValue && DateTime.Now.CompareTo(DeferredEncounterEndFinalTime) >= 0)
             {
                 DeferredEncounterEndFinalTime = null;

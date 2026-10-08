@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using StarResonanceDps.Core.CombatRuntime;
+﻿using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
 
 namespace StarResonanceDps.App.Config;
@@ -55,6 +53,12 @@ public sealed class SettingsConfig
 
     /// <summary>戦闘履歴を残す最大の件数。<b>0 は無限。</b></summary>
     public int DatabaseMaxEncounterCount { get; set; } = 99;
+
+    /// <summary>計測の長さ(秒)。範囲は <see cref="AppConfigDefaults"/> の定数。計測を始めた時点の値で測る。</summary>
+    public int BenchmarkDurationSeconds { get; set; } = AppConfigDefaults.BenchmarkDurationDefaultSeconds;
+
+    /// <summary>計測で、自分が最初にダメージを与えた敵へのダメージだけを数える。計測を始めた時点の値で測る。</summary>
+    public bool BenchmarkFirstTargetOnly { get; set; }
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }
@@ -99,9 +103,6 @@ public sealed class SettingsConfig
 
     public string VoicevoxStyleName { get; set; } = string.Empty;
 
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement>? ExtensionData { get; set; }
-
     public SettingsConfig Clone()
     {
         return new SettingsConfig
@@ -114,6 +115,8 @@ public sealed class SettingsConfig
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
             DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
+            BenchmarkDurationSeconds = BenchmarkDurationSeconds,
+            BenchmarkFirstTargetOnly = BenchmarkFirstTargetOnly,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
@@ -127,21 +130,7 @@ public sealed class SettingsConfig
             VoicevoxSpeakerUuid = VoicevoxSpeakerUuid,
             VoicevoxSpeakerName = VoicevoxSpeakerName,
             VoicevoxStyleId = VoicevoxStyleId,
-            VoicevoxStyleName = VoicevoxStyleName,
-            ExtensionData = CloneExtensionData(ExtensionData)
+            VoicevoxStyleName = VoicevoxStyleName
         };
-    }
-
-    private static Dictionary<string, JsonElement>? CloneExtensionData(Dictionary<string, JsonElement>? source)
-    {
-        if (source is null || source.Count == 0)
-        {
-            return null;
-        }
-
-        return source.ToDictionary(
-            pair => pair.Key,
-            pair => pair.Value.Clone(),
-            StringComparer.OrdinalIgnoreCase);
     }
 }

@@ -15,9 +15,6 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class MainViewModel : ViewModelBase
 {
-    /// <summary>ホットキーの3分計測の長さ。集計タブ・メーターのヘッダーのボタンと同じ。</summary>
-    private const int ThreeMinuteBenchmarkDurationSeconds = 180;
-
     private readonly ObservableCollection<WidgetListItemViewModel> _widgetItems = new();
     private readonly GlobalHotkeyService _hotkeyService = GlobalHotkeyService.Instance;
     private readonly ObservableCollection<PluginListItemViewModel> _pluginItems = new();
@@ -553,16 +550,8 @@ public sealed partial class MainViewModel : ViewModelBase
                         : AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex);
                 break;
 
-            case HotkeyAction.ThreeMinuteBenchmark:
-                if (MeterSnapshotProvider.GetBenchmarkState().IsActive)
-                {
-                    MeterSnapshotProvider.TryStopBenchmark();
-                }
-                else
-                {
-                    MeterSnapshotProvider.TryStartBenchmark(ThreeMinuteBenchmarkDurationSeconds);
-                }
-
+            case HotkeyAction.Benchmark:
+                MeterSnapshotProvider.ToggleBenchmark();
                 break;
 
             case HotkeyAction.ResetEncounter:

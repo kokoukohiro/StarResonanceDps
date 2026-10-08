@@ -29,6 +29,9 @@ public partial class KeybindToolView : UserControl
             Dispatcher.BeginInvoke(
                 viewModel.ShowPendingInitialPresetUnavailableMessage,
                 DispatcherPriority.ContextIdle);
+            Dispatcher.BeginInvoke(
+                viewModel.ShowPendingLayoutLoadFailedMessage,
+                DispatcherPriority.ContextIdle);
         }
     }
 

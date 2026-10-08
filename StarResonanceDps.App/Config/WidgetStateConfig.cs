@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Text.Json.Serialization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.Models;
 
@@ -7,8 +6,6 @@ namespace StarResonanceDps.App.Config;
 
 public sealed class WidgetStateDocument
 {
-    public int SchemaVersion { get; set; } = WidgetConfigDefaults.CurrentSchemaVersion;
-
     public Dictionary<string, WidgetConfig> Widgets { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
@@ -56,9 +53,6 @@ public sealed class WidgetConfig
     /// </summary>
     public List<WidgetOpenTargetConfig>? OpenTargets { get; set; }
 
-    [JsonExtensionData]
-    public Dictionary<string, object>? ExtensionData { get; set; }
-
     public WidgetConfig Clone()
     {
         return new WidgetConfig
@@ -80,10 +74,7 @@ public sealed class WidgetConfig
             Equipment = Equipment?.Clone(),
             PlayerStatus = PlayerStatus?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
-            OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList(),
-            ExtensionData = ExtensionData is null
-                ? null
-                : new Dictionary<string, object>(ExtensionData, StringComparer.OrdinalIgnoreCase)
+            OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
     }
 }
@@ -681,7 +672,6 @@ public sealed class ElementColorWidgetSettingsConfig
 
 public static class WidgetConfigDefaults
 {
-    public const int CurrentSchemaVersion = 1;
     public const int MaxPaletteColorCount = 5;
     public const int MinColorIndex = 0;
     public const int MinWindowOpacity = 0;
@@ -689,7 +679,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
-    public const int DefaultMetricTimelineAggregationIntervalSeconds = 10;
+    public const int DefaultMetricTimelineAggregationIntervalSeconds = 2;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
@@ -749,7 +739,7 @@ public static class WidgetConfigDefaults
     private const double MetricTimelineInitialWindowWidth = 980d;
     private const double MetricTimelineInitialWindowHeight = 420d;
 
-    public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [10, 5, 3, 2, 1];
+    public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [5, 3, 2, 1];
 
     /// <summary>
     /// 設定に並べるロールスキル。全20種。
@@ -1141,17 +1131,6 @@ public static class WidgetConfigDefaults
         ["5"] = ["#EF8E60", "#F2AE8E"]
     };
 
-    private static readonly HashSet<string> LegacyWidgetWindowColorHexes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "#2297F4",
-        "#7C5CFF",
-        "#9FD14A",
-        "#FF9F2E",
-        "#F05284",
-        "#000000",
-        "#FFFFFF"
-    };
-
     public static bool SupportsMeterSettings(WidgetKind kind)
     {
         return kind is WidgetKind.PlayerList
@@ -1221,53 +1200,6 @@ public static class WidgetConfigDefaults
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph;
-    }
-
-    public static void MigrateVersion1Defaults(WidgetConfig config)
-    {
-        config.Theme ??= CreateTheme();
-
-        if (UsesLegacyWindowColorPalette(config.Theme.WindowColors))
-        {
-            config.Theme.WindowColors = CreateDefaultWindowColors();
-            config.Theme.WindowColorIndex = MinColorIndex;
-        }
-    }
-
-    public static void MigratePlayerListFormatDefault(WidgetConfig config)
-    {
-        if (config.Meter is not { } meter
-            || !string.Equals(
-                meter.PlayerInfoFormatString,
-                DefaultMeterPlayerInfoFormatString,
-                StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        meter.PlayerInfoFormatString = DefaultPlayerListPlayerInfoFormatString;
-    }
-
-    private static bool UsesLegacyWindowColorPalette(IEnumerable<string>? colors)
-    {
-        if (colors is null)
-        {
-            return false;
-        }
-
-        var normalized = new List<string>();
-        foreach (var color in colors)
-        {
-            if (!TryNormalizeHexColor(color, out var value))
-            {
-                return false;
-            }
-
-            normalized.Add(value);
-        }
-
-        return normalized.Count == MaxPaletteColorCount
-            && normalized.All(LegacyWidgetWindowColorHexes.Contains);
     }
 
     public static WidgetConfig Create(WidgetKind kind)

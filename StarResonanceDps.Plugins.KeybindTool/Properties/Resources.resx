@@ -569,9 +569,6 @@
   <data name="Keybind.Dialog.SelectSaveFile.Title" xml:space="preserve">
     <value>Select Settings File</value>
   </data>
-  <data name="Keybind.Error.InvalidLayoutFile" xml:space="preserve">
-    <value>The key settings file format is invalid.</value>
-  </data>
   <data name="Keybind.Input.Axis.ForwardBack" xml:space="preserve">
     <value>Fwd/Back</value>
   </data>

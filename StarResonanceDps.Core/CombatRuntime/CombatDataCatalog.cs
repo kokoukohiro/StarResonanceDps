@@ -574,7 +574,7 @@ public static class CombatDataCatalog
         // 生成物は生の見出し表と同じ形。行ごとに RecountName(4言語)と、その行に属する発生源キーの一覧。
         // 項目名は SourceId。中身は TypeEnum:枝番 で、生の DamageId とは別の値。
         var layout = new Dictionary<string, RecountRow>();
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Localization", "RecountRows.json");
+        var path = Path.Combine(CombatRuntimePaths.LocalizationDirectory, "RecountRows.json");
         if (File.Exists(path))
         {
             layout = JsonConvert.DeserializeObject<Dictionary<string, RecountRow>>(File.ReadAllText(path))
@@ -764,7 +764,7 @@ public static class CombatDataCatalog
         string fileName)
     {
         var relativePath = $"Overrides/{fileName}";
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", fileName);
+        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, fileName);
         if (!File.Exists(path))
         {
             Log.Error("Failed to load {OverridePath}", relativePath);
@@ -834,7 +834,7 @@ public static class CombatDataCatalog
     private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides()
     {
         var result = new Dictionary<long, RecountOverrideEntry>();
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Overrides", "RecountRowOverrides.json");
+        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, "RecountRowOverrides.json");
         if (!File.Exists(path))
         {
             Log.Error("Failed to load {OverridePath}", "Overrides/RecountRowOverrides.json");
@@ -1608,7 +1608,7 @@ public static class CombatDataCatalog
     /// <summary>形は技レベルIDの配列。ファイルが無ければ空(警告の技は0件)。</summary>
     private static FrozenSet<int> LoadWarningSkillLevels()
     {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Generated", "SkillWarnings.json");
+        var path = Path.Combine(CombatRuntimePaths.GeneratedDirectory, "SkillWarnings.json");
         if (!File.Exists(path))
         {
             return FrozenSet<int>.Empty;
@@ -1624,7 +1624,7 @@ public static class CombatDataCatalog
     /// </summary>
     private static FrozenDictionary<int, int> LoadDbmCountCdTimes()
     {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, AppState.RawTableDirectoryName, "DbmTable.json");
+        var path = Path.Combine(CombatRuntimePaths.RawTableDirectory, "DbmTable.json");
         if (!File.Exists(path))
         {
             Log.Error("DbmTable.json is missing. Boss announcement bars cannot be timed path={Path}", path);
@@ -1658,7 +1658,7 @@ public static class CombatDataCatalog
     private static void LoadEquipments()
     {
         const string relativePath = "Generated/Equips.json";
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Generated", "Equips.json");
+        var path = Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Equips.json");
         if (!File.Exists(path))
         {
             Log.Error("{FileName} is missing. Equipment details cannot be shown path={Path}", relativePath, path);
@@ -1932,7 +1932,7 @@ public static class CombatDataCatalog
     /// </summary>
     private static Dictionary<string, Dictionary<string, string>>? ReadLocalizedFile(string fileName)
     {
-        var path = Path.Combine(Utils.DATA_DIR_NAME, "Localization", $"{fileName}.json");
+        var path = Path.Combine(CombatRuntimePaths.LocalizationDirectory, $"{fileName}.json");
         if (!File.Exists(path))
         {
             Log.Error("Missing localization {FileName}", fileName);

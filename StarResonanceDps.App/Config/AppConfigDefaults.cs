@@ -37,6 +37,11 @@ public static class AppConfigDefaults
     public const int NotificationVolumeMax = 100;
     public const int NotificationVolumeDefault = 100;
 
+    // 計測時間(秒)。全体設定の入力欄で受け付ける範囲。範囲の外は近いほうの端にする(ClampBenchmarkDurationSeconds)。
+    public const int BenchmarkDurationMinSeconds = 30;
+    public const int BenchmarkDurationMaxSeconds = 1200;
+    public const int BenchmarkDurationDefaultSeconds = 180;
+
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#1F1F1F",
@@ -65,6 +70,8 @@ public static class AppConfigDefaults
             KeepPastEncounterInMeterUntilNextDamage = false,
             ClearHistorySelectionOnNextEvent = true,
             DatabaseMaxEncounterCount = 99,
+            BenchmarkDurationSeconds = BenchmarkDurationDefaultSeconds,
+            BenchmarkFirstTargetOnly = false,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
@@ -82,7 +89,7 @@ public static class AppConfigDefaults
         };
     }
 
-    /// <summary>ホットキーの既定。お気に入り Ctrl+F8 / ピン留め Ctrl+F7 / クリック透過 Ctrl+F6 / 3分計測 Ctrl+F10 / リセット Ctrl+F9。</summary>
+    /// <summary>ホットキーの既定。お気に入り Ctrl+F8 / ピン留め Ctrl+F7 / クリック透過 Ctrl+F6 / 計測 Ctrl+F10 / リセット Ctrl+F9。</summary>
     public static HotkeySettingsConfig CreateDefaultHotkeys()
     {
         return new HotkeySettingsConfig
@@ -91,7 +98,7 @@ public static class AppConfigDefaults
             PinRunningOrUnpinAll = HotkeyBindingConfig.Create(Key.F7, ModifierKeys.Control),
             ClickThroughPinnedOrClearAll = HotkeyBindingConfig.Create(Key.F6, ModifierKeys.Control),
             WidgetWindowTopmostAlwaysOrPinnedOnly = HotkeyBindingConfig.Create(Key.F5, ModifierKeys.Control),
-            ThreeMinuteBenchmark = HotkeyBindingConfig.Create(Key.F10, ModifierKeys.Control),
+            Benchmark = HotkeyBindingConfig.Create(Key.F10, ModifierKeys.Control),
             ResetEncounter = HotkeyBindingConfig.Create(Key.F9, ModifierKeys.Control)
         };
     }
@@ -159,7 +166,15 @@ public static class AppConfigDefaults
         // 0 は無限。選べる最大は 99 件。
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);
 
+        settings.BenchmarkDurationSeconds = ClampBenchmarkDurationSeconds(settings.BenchmarkDurationSeconds);
+
         NormalizeHotkeys(settings);
+    }
+
+    /// <summary>計測時間を範囲に収める。30 より小さければ 30、1200 より大きければ 1200。全体設定の入力欄と保存した値の両方に使う。</summary>
+    public static int ClampBenchmarkDurationSeconds(int seconds)
+    {
+        return Clamp(seconds, BenchmarkDurationMinSeconds, BenchmarkDurationMaxSeconds);
     }
 
     /// <summary>
