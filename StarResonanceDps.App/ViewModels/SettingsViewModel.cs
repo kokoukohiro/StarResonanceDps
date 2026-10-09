@@ -78,6 +78,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _benchmarkDurationSeconds = AppConfigDefaults.BenchmarkDurationDefaultSeconds;
 
+    /// <summary>自動一時停止の秒数。値は <see cref="AppConfigDefaults.CombatExitChoicesSeconds"/> のどれかで、<b>0 は一時停止しない。</b></summary>
+    [ObservableProperty]
+    private int _combatExitSeconds = AppConfigDefaults.CombatExitDefaultSeconds;
+
     [ObservableProperty]
     private bool _benchmarkFirstTargetOnly;
 
@@ -89,6 +93,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     private static readonly int[] MaxEncounterCountChoices = [20, 50, 99, 0];
 
     private readonly ObservableCollection<RetentionPolicyOption> _retentionPolicyOptions = [];
+
+    private readonly ObservableCollection<CombatExitOption> _combatExitOptions = [];
 
     // --- ホットキー ---
 
@@ -147,6 +153,8 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             hotkeyActions.Select((action, index) => new HotkeyItemViewModel(action, isLast: index == hotkeyActions.Length - 1))));
         RetentionPolicyOptions = new ReadOnlyObservableCollection<RetentionPolicyOption>(_retentionPolicyOptions);
         RebuildRetentionPolicyOptions();
+        CombatExitOptions = new ReadOnlyObservableCollection<CombatExitOption>(_combatExitOptions);
+        RebuildCombatExitOptions();
         VoicevoxSpeakerOptions = new ReadOnlyObservableCollection<VoicevoxSpeakerOption>(_voicevoxSpeakerOptions);
         VoicevoxStyleOptions = new ReadOnlyObservableCollection<VoicevoxStyleOption>(_voicevoxStyleOptions);
         GameCapturePreferences = new ReadOnlyObservableCollection<GameCapturePreferenceOption>(
@@ -416,6 +424,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
             BenchmarkDurationSeconds = BenchmarkDurationSeconds,
             BenchmarkFirstTargetOnly = BenchmarkFirstTargetOnly,
+            CombatExitSeconds = CombatExitSeconds,
             Hotkeys = CreateHotkeySettings(),
             NotificationMethodIndex = NotificationMethodIndex,
             NotificationVolume = (int)Math.Round(NotificationVolume, MidpointRounding.AwayFromZero),
@@ -467,6 +476,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             DatabaseMaxEncounterCount = settings.DatabaseMaxEncounterCount;
             BenchmarkDurationSeconds = settings.BenchmarkDurationSeconds;
             BenchmarkFirstTargetOnly = settings.BenchmarkFirstTargetOnly;
+            CombatExitSeconds = settings.CombatExitSeconds;
 
             foreach (var item in HotkeyItems)
             {
@@ -630,6 +640,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         OnPropertyChanged(nameof(BenchmarkFirstTargetOnlyStateText));
 
         RebuildRetentionPolicyOptions();
+        RebuildCombatExitOptions();
         RebuildVoicevoxOptions();
         OnPropertyChanged(nameof(VoicevoxPolicyLinkText));
 
@@ -744,6 +755,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.DatabaseMaxEncounterCount == right.DatabaseMaxEncounterCount
             && left.BenchmarkDurationSeconds == right.BenchmarkDurationSeconds
             && left.BenchmarkFirstTargetOnly == right.BenchmarkFirstTargetOnly
+            && left.CombatExitSeconds == right.CombatExitSeconds
             && left.WindowColors.SequenceEqual(right.WindowColors, StringComparer.OrdinalIgnoreCase)
             && left.Hotkeys.HasSameBindings(right.Hotkeys)
             && left.NotificationMethodIndex == right.NotificationMethodIndex
@@ -1100,6 +1112,40 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
         DatabaseMaxEncounterCount = selected;
         OnPropertyChanged(nameof(DatabaseMaxEncounterCount));
+    }
+
+    partial void OnCombatExitSecondsChanged(int value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    public ReadOnlyObservableCollection<CombatExitOption> CombatExitOptions { get; }
+
+    /// <summary>
+    /// 自動一時停止の選択肢を作り直す。<see cref="RebuildRetentionPolicyOptions"/> と同じく言語切替のたびに呼び、選択を戻す。
+    /// </summary>
+    private void RebuildCombatExitOptions()
+    {
+        var selected = CombatExitSeconds;
+
+        _combatExitOptions.Clear();
+        foreach (var seconds in AppConfigDefaults.CombatExitChoicesSeconds)
+        {
+            _combatExitOptions.Add(new CombatExitOption(seconds, FormatCombatExit(seconds)));
+        }
+
+        CombatExitSeconds = selected;
+        OnPropertyChanged(nameof(CombatExitSeconds));
+    }
+
+    /// <summary><b>0 は秒数ではなく「一時停止しない」</b>なので数字を出さない。</summary>
+    private static string FormatCombatExit(int seconds)
+    {
+        return seconds <= 0
+            ? LocalizationManager.Instance.GetString("Settings_Aggregation_CombatExit_None")
+            : string.Format(
+                LocalizationManager.Instance.GetString("Settings_Aggregation_CombatExit_Value"),
+                seconds);
     }
 
     /// <summary><b>0 は件数ではなく「無限」</b>なので数字を出さない。</summary>

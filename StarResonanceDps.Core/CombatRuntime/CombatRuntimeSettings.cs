@@ -37,14 +37,15 @@ public static class CombatRuntimeSettings
     public static string GameCaptureCustomExeName { get; private set; } = string.Empty;
 
     /// <summary>
-    /// ダンジョンの目標が切り替わったらエンカウンターを分けるか。
-    /// <c>BattleStateMachine</c> がフェーズの境目で <c>StopEncounter</c> / 新規開始を行う。
+    /// 設定「進行で集計を分割」。ダンジョンの開始・ボス部屋の入場・全滅でエンカウンターを分けるか。
+    /// 開始は <c>BattleStateMachine</c>、ボス部屋の入場と全滅は <c>MessageManager.ProcessAoiSyncDelta</c> が見て、<c>EnterDungeon</c> で作り直す。
     /// </summary>
     public static bool SplitEncountersOnNewPhases { get; private set; }
 
     /// <summary>
-    /// 新しいエンカウンターが始まっても、次のダメージが入るまで前の結果を見せ続けるか。
-    /// <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が見る。
+    /// 設定「次のイベントまで結果を保持」。新しいエンカウンターに記録(与ダメ・回復・被ダメログの行)が入るまで、前の結果をメーターに出し続けるか。
+    /// 保持するのは「進行で集計を分割」の区切りとマップ移動で、手動のリセット・計測の開始と停止・ログアウトはすぐ新しい回を出す。
+    /// 回を作るとき(<c>EncounterManager.EnterDungeon</c>)と、メーターが映す回を決めるとき(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)に見る。
     /// </summary>
     public static bool KeepPastEncounterInMeterUntilNextDamage { get; private set; }
 
@@ -75,6 +76,12 @@ public static class CombatRuntimeSettings
     public static bool BenchmarkFirstTargetOnly { get; private set; }
 
     /// <summary>
+    /// 自動一時停止の秒数。最後の戦闘の出来事からこの秒数で戦闘の時計を止め、次の出来事で続きから数える。<b>0 は止めない</b>。
+    /// <c>EncounterManager</c> が回を作るときに回へ写すので、保存で変えても効くのは次の回から。
+    /// </summary>
+    public static int CombatExitSeconds { get; private set; }
+
+    /// <summary>
     /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。
     /// </summary>
     public static void Apply(
@@ -86,11 +93,17 @@ public static class CombatRuntimeSettings
         bool clearHistorySelectionOnNextEvent,
         int databaseMaxEncounterCount,
         int benchmarkDurationSeconds,
-        bool benchmarkFirstTargetOnly)
+        bool benchmarkFirstTargetOnly,
+        int combatExitSeconds)
     {
         if (benchmarkDurationSeconds <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(benchmarkDurationSeconds), benchmarkDurationSeconds, "Benchmark duration must be positive.");
+        }
+
+        if (combatExitSeconds < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(combatExitSeconds), combatExitSeconds, "Combat exit seconds must not be negative.");
         }
 
         ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
@@ -101,6 +114,7 @@ public static class CombatRuntimeSettings
         DatabaseMaxEncounterCount = databaseMaxEncounterCount;
         BenchmarkDurationSeconds = benchmarkDurationSeconds;
         BenchmarkFirstTargetOnly = benchmarkFirstTargetOnly;
+        CombatExitSeconds = combatExitSeconds;
         HasBeenApplied = true;
     }
 

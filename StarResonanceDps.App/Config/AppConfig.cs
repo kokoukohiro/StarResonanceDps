@@ -47,8 +47,8 @@ public sealed class SettingsConfig
 
     // --- 集計設定 ---
 
-    public bool SplitEncountersOnNewPhases { get; set; }
-    public bool KeepPastEncounterInMeterUntilNextDamage { get; set; }
+    public bool SplitEncountersOnNewPhases { get; set; } = true;
+    public bool KeepPastEncounterInMeterUntilNextDamage { get; set; } = true;
     public bool ClearHistorySelectionOnNextEvent { get; set; } = true;
 
     /// <summary>戦闘履歴を残す最大の件数。<b>0 は無限。</b></summary>
@@ -58,7 +58,10 @@ public sealed class SettingsConfig
     public int BenchmarkDurationSeconds { get; set; } = AppConfigDefaults.BenchmarkDurationDefaultSeconds;
 
     /// <summary>計測で、自分が最初にダメージを与えた敵へのダメージだけを数える。計測を始めた時点の値で測る。</summary>
-    public bool BenchmarkFirstTargetOnly { get; set; }
+    public bool BenchmarkFirstTargetOnly { get; set; } = true;
+
+    /// <summary>自動一時停止の秒数。選択肢は <see cref="AppConfigDefaults.CombatExitChoicesSeconds"/>、<b>0 は一時停止しない。</b></summary>
+    public int CombatExitSeconds { get; set; } = AppConfigDefaults.CombatExitDefaultSeconds;
     public int NumberDisplayFormatIndex { get; set; }
     public int PlayerNameDisplayModeIndex { get; set; }
     public int InternalIdDisplayModeIndex { get; set; }
@@ -117,6 +120,7 @@ public sealed class SettingsConfig
             DatabaseMaxEncounterCount = DatabaseMaxEncounterCount,
             BenchmarkDurationSeconds = BenchmarkDurationSeconds,
             BenchmarkFirstTargetOnly = BenchmarkFirstTargetOnly,
+            CombatExitSeconds = CombatExitSeconds,
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,

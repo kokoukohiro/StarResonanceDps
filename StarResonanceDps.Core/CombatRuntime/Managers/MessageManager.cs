@@ -665,7 +665,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             EncounterManager.StartNewMap();
 
-            EncounterManager.EnterDungeon(true, EncounterStartReason.ExitGame);
+            // ログアウトは前の結果を保持せず、すぐ新しい回を出す(キャラ交代があるので持ち越さない)。
+            EncounterManager.EnterDungeon(keepPastEncounterInMeter: false, force: true, reason: EncounterStartReason.ExitGame);
 
             BattleStateMachine.ClearEncounterEndFinalData();
 
@@ -1399,9 +1400,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        /// <summary>回復の通知の無い回復を、飲んだ・食べた・受けた本人から本人への回復として、そのバフの鍵で HPS に足す。行の名前は見出し表に無いので空欄になる。</summary>
+        /// <summary>
+        /// 回復の通知の無い回復を、飲んだ・食べた・受けた本人から本人への回復として、そのバフの鍵で HPS に足す。行の名前は見出し表に無いので空欄になる。
+        /// 実際に HP が増えたなら、記録の前に戦闘の出来事にする(最初なら戦闘の時計の起点になる)。計測の回は出来事にしない(計測は自分の与ダメか回復の通知で始まる)。
+        /// </summary>
         private static void AddBuffHealing(long uuid, int buffId, long healing, ExtraPacketData extraData)
         {
+            if (healing > 0 && !EncounterManager.Current.IsBenchmark)
+            {
+                EncounterManager.Current.RecordCombatEvent(extraData.ArrivalTime);
+            }
+
             var source = SkillSourceResolver.Resolve(EDamageSource.Buff, buffId, 0);
             // HP の増えはそのまま実際に増えた値なので、名目にも同じ値を渡す(過剰回復は 0)。
             EncounterManager.Current.AddHealing(uuid, uuid, source.Key, 0, healing, healing, healing, 0, default, EDamageType.Heal, default, false, false, false, false, false, extraData);
@@ -1435,21 +1444,23 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 戦闘の時計の起点を立てる通知か。与ダメ・被弾の判定はここ1か所(<see cref="ProcessAoiSyncDelta"/> が差分ごとに当てる)。
+        /// 戦闘の出来事の通知か。通知の判定はここ1か所(<see cref="ProcessAoiSyncDelta"/> が差分ごとに当てる)。
+        /// 最初の出来事が戦闘の時計の起点になり、その後の出来事は自動一時停止の時計を続ける(<c>Encounter.RecordCombatEvent</c>)。
+        /// 通知の無い薬・料理・自然回復は <see cref="AddBuffHealing"/> が出来事にする。
         /// プレイヤーかどうかは UUID の種類で見る(助っ人の NPC もプレイヤーに入る)。
         ///
         /// <list type="bullet">
-        ///   <item>普通の回: プレイヤー → プレイヤー以外の与ダメ(値 0・Immune・Miss も)か、プレイヤー以外 → プレイヤーの値が 0 でない被弾</item>
-        ///   <item>計測の回: 自分 → プレイヤー以外の与ダメ(同上)か、自分が出した回復の通知</item>
+        ///   <item>普通の回: プレイヤー → プレイヤー以外の与ダメ(値 0・Immune・Miss も)、プレイヤー以外 → プレイヤーの値が 0 でない被弾、
+        ///   実際に HP が増えた回復の通知(出し手・相手は問わない)</item>
+        ///   <item>計測の回: 自分 → プレイヤー以外の与ダメ(同上)、自分が出した回復の通知で実際に HP が増えたもの</item>
         /// </list>
         ///
         /// <para>
-        /// 回復はここでは立てない(実際に HP が増えた回復は <c>Encounter.AddHealing</c> が立てる。計測の回の自分の回復だけはここで立てる)。
-        /// 自傷・落下・フレンドリーファイアでは立てない。
+        /// 過剰回復だけの回復(実際に増えた HP の <c>ActualValue</c> が 0)・自傷・落下・フレンドリーファイアは出来事にしない。
         /// 加害者と <c>OwnerId</c> の扱いはダメージ・回復の振り分けと同じ(<c>OwnerId</c> 0・加害者 0 は捨てる)。
         /// </para>
         /// </summary>
-        private static bool IsCombatClockStartEvent(SyncDamageInfo damageInfo, long targetUuid, bool isBenchmarkEncounter)
+        private static bool IsCombatEvent(SyncDamageInfo damageInfo, long targetUuid, bool isBenchmarkEncounter)
         {
             if (IsSelfCausedDamage(damageInfo) || damageInfo.OwnerId == 0)
             {
@@ -1465,16 +1476,16 @@ namespace StarResonanceDps.Core.CombatRuntime
             var isAttackerPlayer = Utils.UuidToEntityType(attackerUuid) == (long)EEntityType.EntChar;
             var isTargetPlayer = Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar;
             var isHeal = damageInfo.Type == EDamageType.Heal;
-
-            if (isBenchmarkEncounter)
-            {
-                var isSelfAttacker = attackerUuid == AppState.PlayerUUID;
-                return isSelfAttacker && (isHeal || !isTargetPlayer);
-            }
+            var isSelfAttacker = attackerUuid == AppState.PlayerUUID;
 
             if (isHeal)
             {
-                return false;
+                return damageInfo.ActualValue > 0 && (!isBenchmarkEncounter || isSelfAttacker);
+            }
+
+            if (isBenchmarkEncounter)
+            {
+                return isSelfAttacker && !isTargetPlayer;
             }
 
             return (isAttackerPlayer && !isTargetPlayer)
@@ -2482,27 +2493,27 @@ namespace StarResonanceDps.Core.CombatRuntime
                     && EncounterManager.Current.GetAttrKV(targetUuid, "AttrState") is EActorState.ActorStateResurrection)
                 {
                     Log.Information("Wipe detected: {Uuid} received the wipe reset buffs and was resurrected", targetUuid);
-                    EncounterManager.EnterDungeon(false, EncounterStartReason.Wipe);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
                 }
                 else if (!addedBuffIds.Contains(ReviveStartBuffId)
                     && BattleStateMachine.IsDungeonPlaying())
                 {
                     Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
-                    EncounterManager.EnterDungeon(false, EncounterStartReason.NewObjective);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
                 }
             }
 
-            // 戦闘の時計の起点。全滅・ボス部屋の作り直しの後(立てるのは今の回)、回復・薬・料理・自然回復の記録より前に立てる
-            // (起点より前の回復は数えないので、同じ差分の起点で落とさないように)。メッセージの途中の作り直しにも追従するよう差分ごとに見る。
-            if (delta.SkillEffects?.Damages is { Count: > 0 } clockDamages
-                && EncounterManager.Current.ExData.FirstDamageTimeStamp is null)
+            // 戦闘の時計の起点と、戦闘の出来事(自動一時停止の時計を続ける)。全滅・ボス部屋の作り直しの後(今の回に当てる)、
+            // 回復・薬・料理・自然回復とダメージの記録より前に当てる(起点より前は数えず、止まっていた区間はその記録より前に閉じておく)。
+            // メッセージの途中の作り直しにも追従するよう差分ごとに見る。
+            if (delta.SkillEffects?.Damages is { Count: > 0 } clockDamages)
             {
                 var isBenchmarkEncounter = EncounterManager.Current.IsBenchmark;
                 foreach (var clockDamage in clockDamages)
                 {
-                    if (IsCombatClockStartEvent(clockDamage, targetUuid, isBenchmarkEncounter))
+                    if (IsCombatEvent(clockDamage, targetUuid, isBenchmarkEncounter))
                     {
-                        EncounterManager.Current.StartCombatClock(extraData.ArrivalTime);
+                        EncounterManager.Current.RecordCombatEvent(extraData.ArrivalTime);
                         break;
                     }
                 }

@@ -140,7 +140,8 @@ public sealed class ConfigManager
             settings.ClearHistorySelectionOnNextEvent,
             settings.DatabaseMaxEncounterCount,
             settings.BenchmarkDurationSeconds,
-            settings.BenchmarkFirstTargetOnly);
+            settings.BenchmarkFirstTargetOnly,
+            settings.CombatExitSeconds);
     }
 
     /// <summary>

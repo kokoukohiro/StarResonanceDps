@@ -363,6 +363,58 @@
                                            Margin="0,0,0,10" />
                                 <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
+                                        <!--
+                                            自動一時停止。行の名前と注記の2行で、右に選択リスト(選択肢はビューモデルが持つ。値は秒数そのもので 0 は一時停止しない)。
+                                            高さは「進行で集計を分割」の行と同じ 75。注記は選択リストの下まで広げる(右の列は選択リストの幅 220 なので、左の列だけだと折り返す)。
+                                        -->
+                                        <Border Style="{StaticResource Panel.SettingField}" Height="75">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_CombatExit]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Grid.ColumnSpan="2"
+                                                           Margin="0,4,0,0"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_CombatExit_Description]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <!-- DisplayMemberPath は Input.SettingsComboBox では効かない。ItemTemplate を使うこと。 -->
+                                                <ComboBox Grid.Row="0"
+                                                          Grid.Column="1"
+                                                          Width="220"
+                                                          VerticalAlignment="Center"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          ItemsSource="{Binding CombatExitOptions}"
+                                                          SelectedValuePath="Seconds"
+                                                          SelectedValue="{Binding CombatExitSeconds, Mode=TwoWay}">
+                                                    <ComboBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                                        </DataTemplate>
+                                                    </ComboBox.ItemTemplate>
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
                                         <!-- 2行ぶんの高さ。既定54 + 注記の行(13px)と間隔4 で 75。 -->
                                         <Border Style="{StaticResource Panel.SettingField}" Height="75">
                                             <Grid VerticalAlignment="Center">
@@ -541,8 +593,8 @@
                                         </Border>
 
                                         <!--
-                                            行の名前と注記の2行。形はフェーズ分割の行と同じ。
-                                            注記は折り返すので高さは中身に合わせ、上下の余白はフェーズ分割の行(高さ75)と同じ見た目にする。
+                                            行の名前と注記の2行。形は「進行で集計を分割」の行と同じ。
+                                            注記は折り返すので高さは中身に合わせ、上下の余白は「進行で集計を分割」の行(高さ75)と同じ見た目にする。
                                         -->
                                         <Border Style="{StaticResource Panel.SettingFieldLast}" Height="Auto" Padding="20,17,20,17">
                                             <Grid VerticalAlignment="Center">

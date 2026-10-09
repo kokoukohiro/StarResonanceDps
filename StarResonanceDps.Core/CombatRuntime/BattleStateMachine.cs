@@ -28,7 +28,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             DungeonStateHistory.Clear();
 
             EncounterManager.StartNewMap();
-            EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
+            // マップ移動は前の結果を保持してよい区切り(ここで終えた計測の結果も、次の記録まで出す)。
+            EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: true, reason: EncounterStartReason.Force);
 
             // バフはエンカウンター境界では消さないが、マップ移動では持ち越さない。
             Services.ActiveBuffStore.Instance.Clear();
@@ -71,21 +72,22 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (dungeonState == EDungeonState.DungeonStateNull)
             {
 
-                EncounterManager.EnterDungeon();
+                // 届くのはマップ移動の直後で、保持はマップ移動の作り直しから引き継ぐ。
+                EncounterManager.EnterDungeon(keepPastEncounterInMeter: true);
                 PlayerRosterProjection.ResetNearbyPlayers();
 
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
-                // 開始までの待ち時間の記録を別の戦闘に分けるのはフェーズ分割の一部なので、無効なら区切らずに続ける。
+                // 開始までの待ち時間の記録を別の戦闘に分けるのは設定「進行で集計を分割」の一部なので、無効なら区切らずに続ける。
                 // 記録が無ければ、作り直しても何も保存されない(回を作った時刻がダンジョンの開始になり、制限時間はそこから測る)ので、設定によらず行う。
                 if (!EncounterManager.Current.HasStatsBeenRecorded())
                 {
-                    EncounterManager.EnterDungeon();
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true);
                 }
                 else if (CombatRuntimeSettings.SplitEncountersOnNewPhases)
                 {
-                    EncounterManager.EnterDungeon(true, EncounterStartReason.Force);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: true, reason: EncounterStartReason.Force);
                 }
             }
             else if (dungeonState == EDungeonState.DungeonStateEnd)

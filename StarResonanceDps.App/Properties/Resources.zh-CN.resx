@@ -1202,7 +1202,7 @@
     <value>统计设置</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>按阶段分割统计</value>
+    <value>按进度分割统计</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>保留结果至下次事件</value>
@@ -1230,6 +1230,18 @@
   </data>
   <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
     <value>※即使同时攻击多个敌人，也只统计最先攻击的1个敌人</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit" xml:space="preserve">
+    <value>自动暂停</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Description" xml:space="preserve">
+    <value>※战斗停止后的秒数</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Value" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_None" xml:space="preserve">
+    <value>不暂停</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>统计</value>

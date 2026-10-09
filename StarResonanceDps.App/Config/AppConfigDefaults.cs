@@ -42,6 +42,10 @@ public static class AppConfigDefaults
     public const int BenchmarkDurationMaxSeconds = 1200;
     public const int BenchmarkDurationDefaultSeconds = 180;
 
+    // 自動一時停止(秒)。全体設定の選択リストの選択肢で、0 は一時停止しない。選択肢に無い値は既定にする。
+    public static readonly int[] CombatExitChoicesSeconds = [5, 8, 10, 0];
+    public const int CombatExitDefaultSeconds = 10;
+
     private static readonly string[] DefaultWindowColorHexes =
     [
         "#1F1F1F",
@@ -67,11 +71,12 @@ public static class AppConfigDefaults
             GameCapturePreference = EGameCapturePreference.Auto,
             GameCaptureCustomExeName = string.Empty,
             SplitEncountersOnNewPhases = true,
-            KeepPastEncounterInMeterUntilNextDamage = false,
+            KeepPastEncounterInMeterUntilNextDamage = true,
             ClearHistorySelectionOnNextEvent = true,
             DatabaseMaxEncounterCount = 99,
             BenchmarkDurationSeconds = BenchmarkDurationDefaultSeconds,
-            BenchmarkFirstTargetOnly = false,
+            BenchmarkFirstTargetOnly = true,
+            CombatExitSeconds = CombatExitDefaultSeconds,
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
@@ -167,6 +172,11 @@ public static class AppConfigDefaults
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);
 
         settings.BenchmarkDurationSeconds = ClampBenchmarkDurationSeconds(settings.BenchmarkDurationSeconds);
+
+        if (Array.IndexOf(CombatExitChoicesSeconds, settings.CombatExitSeconds) < 0)
+        {
+            settings.CombatExitSeconds = CombatExitDefaultSeconds;
+        }
 
         NormalizeHotkeys(settings);
     }

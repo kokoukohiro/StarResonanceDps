@@ -302,12 +302,13 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// 行の時刻。戦闘の時計の起点(メーターの経過と同じ)からの経過で、起点の前は負。起点がまだ無い間は空欄。
+    /// 行の時刻。戦闘の経過(<see cref="Encounter.ToCombatOffset"/>、メーターの経過と同じで自動一時停止で止まっていた区間を除く)で、
+    /// 起点の前は負。起点がまだ無い間は空欄。
     /// </summary>
     private string FormatTime(TakenDamageLogLine line)
     {
-        return _combatStartUtc is { } start
-            ? MeterWidgetViewModel.FormatDuration(line.Timestamp - start)
+        return _combatStartUtc is not null && _encounter?.ToCombatOffset(line.Timestamp) is { } offset
+            ? MeterWidgetViewModel.FormatDuration(offset)
             : string.Empty;
     }
 

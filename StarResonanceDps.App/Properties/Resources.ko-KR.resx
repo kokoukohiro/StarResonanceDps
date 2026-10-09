@@ -1202,7 +1202,7 @@
     <value>집계 설정</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>페이즈별로 집계 분할</value>
+    <value>진행별로 집계 분할</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>다음 이벤트까지 결과 유지</value>
@@ -1230,6 +1230,18 @@
   </data>
   <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
     <value>※여러 적을 동시에 공격해도 처음 공격한 1체만 집계합니다</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit" xml:space="preserve">
+    <value>자동 일시정지</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Description" xml:space="preserve">
+    <value>※전투가 멈춘 뒤의 초 수</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Value" xml:space="preserve">
+    <value>{0}초</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_None" xml:space="preserve">
+    <value>일시정지하지 않음</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>집계</value>

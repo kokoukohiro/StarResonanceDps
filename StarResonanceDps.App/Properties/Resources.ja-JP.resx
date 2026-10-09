@@ -1139,7 +1139,7 @@
     <value>集計設定</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>フェーズで集計を分割</value>
+    <value>進行で集計を分割</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>次のイベントまで結果を保持</value>
@@ -1167,6 +1167,18 @@
   </data>
   <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
     <value>※複数の敵に同時攻撃しても、最初に攻撃した1体のみを集計します</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit" xml:space="preserve">
+    <value>自動一時停止</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Description" xml:space="preserve">
+    <value>※戦闘が止まってからの秒数</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Value" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_None" xml:space="preserve">
+    <value>一時停止しない</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>集計</value>

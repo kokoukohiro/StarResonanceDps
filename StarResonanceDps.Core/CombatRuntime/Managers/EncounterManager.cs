@@ -110,10 +110,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
 
             StartNewMap();
-            EnterDungeon();
+            EnterDungeon(keepPastEncounterInMeter: false);
         }
 
+        /// <param name="keepPastEncounterInMeter">
+        /// 設定「次のイベントまで結果を保持」で、新しい回に記録が入るまで前の回をメーターに出してよいか。
+        /// 「進行で集計を分割」の区切りとマップ移動(直後のダンジョン状態の作り直しも)は true、
+        /// 手動のリセット・計測の開始と停止・ログアウトは false(すぐ新しい回を出す)。
+        /// 手動のリセットも <c>Force</c> / <c>NewObjective</c> を使うので <paramref name="reason"/> では分けられず、呼び手が渡す。
+        /// </param>
         public static void EnterDungeon(
+            bool keepPastEncounterInMeter,
             bool force = false,
             EncounterStartReason reason = EncounterStartReason.None,
             [System.Runtime.CompilerServices.CallerMemberName] string enterDungeonCaller = "")
@@ -212,7 +219,26 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ApplyDisplayedIdentitiesForRecord(priorEncounter);
             }
 
-            Current = new Encounter(CurrentBattleId);
+            // 記録が入るまでメーターに出す前の回。記録の無い前の回は飛ばし、それが持っていた回を引き継ぐ
+            // (マップ移動の直後のダンジョン状態の作り直しで切れないように)。新しい回と一緒に入れて、空の回が一瞬出ないようにする。
+            Encounter? pastEncounterForMeter = null;
+            if (keepPastEncounterInMeter
+                && CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage
+                && priorEncounter != null)
+            {
+                pastEncounterForMeter = priorEncounter.HasStatsBeenRecorded()
+                    ? priorEncounter
+                    : priorEncounter.PastEncounterForMeter;
+            }
+
+            Current = new Encounter(CurrentBattleId) { PastEncounterForMeter = pastEncounterForMeter };
+
+            // 持つのは1つ前の回まで。前の回が持っていた回を手放す(新しい回を出した後に外す)。
+            if (priorEncounter != null)
+            {
+                priorEncounter.PastEncounterForMeter = null;
+            }
+
             Current.EncounterId = DB.GetNextEncounterId() + nextEncounterIdModifier;
             System.Diagnostics.Debug.WriteLine($"Created new encounter for EncounterId {Current.EncounterId} + ({nextEncounterIdModifier})");
             // 素性を捨ててよい区切りは、ログアウト(ExitGame)だけ。それ以外の理由(ダンジョン状態 Null・Playing の None を含む)は運ぶ。
@@ -300,10 +326,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 計測中に作った回は計測の回(待機中の作り直しも)。計測時間を写しておくと、履歴でも同じ窓で読める。
+            // 自動一時停止の秒数も写す(履歴でも同じ時計で読める)。計測の回は窓で止まるので止めない。
             if (IsBenchmarkActive)
             {
                 Current.ExData.BenchmarkTime = _benchmarkDurationSeconds;
                 Current.BenchmarkFirstTargetOnly = _benchmarkFirstTargetOnly;
+            }
+            else
+            {
+                Current.ExData.CombatExitSeconds = CombatRuntimeSettings.CombatExitSeconds;
             }
 
             if (priorEncounter != null)
@@ -324,7 +355,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerRosterProjection.RebuildRoster();
 
             // エンカウンターの作り直しも「次のイベント」。計測・リセット・マップ移動・
-            // フェーズ分割は全部ここを通るので、ボタン側に専用の解除を書かない。
+            // 「進行で集計を分割」の区切りは全部ここを通るので、ボタン側に専用の解除を書かない。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
 
             Serilog.Log.Debug("EncounterManager sending OnEncounterStart event");
@@ -623,8 +654,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 計測の開始と停止を切り替える。<b>パケットを処理するスレッドで呼ぶ</b>(<c>MeterSnapshotProvider.ToggleBenchmark</c>)。
         ///
         /// <para>
-        /// 開始は計測の回を作って待つだけ。始まるのは自分の与ダメか自分が出した回復の通知が来て起点が立ったとき
-        /// (<c>MessageManager</c> の起点の判定)。停止は、始まる前でも後でも印を下ろしてから回を区切る
+        /// 開始は計測の回を作って待つだけ。始まるのは自分の与ダメか、自分が出した回復の通知で実際に HP が増えたものが来て起点が立ったとき
+        /// (<c>MessageManager</c> の戦闘の出来事の判定)。停止は、始まる前でも後でも印を下ろしてから回を区切る
         /// (記録があれば計測の注記つきで保存される)。
         /// </para>
         /// </summary>
@@ -634,7 +665,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 Serilog.Log.Information("Benchmark stopped by the user (begun={HasBegun})", HasBenchmarkBegun);
                 IsBenchmarkActive = false;
-                EnterDungeon(true, EncounterStartReason.BenchmarkEnd);
+                EnterDungeon(keepPastEncounterInMeter: false, force: true, reason: EncounterStartReason.BenchmarkEnd);
                 return;
             }
 
@@ -645,7 +676,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 _benchmarkDurationSeconds,
                 _benchmarkFirstTargetOnly);
             IsBenchmarkActive = true;
-            EnterDungeon(true, EncounterStartReason.BenchmarkStart);
+            EnterDungeon(keepPastEncounterInMeter: false, force: true, reason: EncounterStartReason.BenchmarkStart);
         }
 
         /// <summary>
@@ -660,17 +691,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     Serilog.Log.Information("Benchmark ended by a manual reset");
                     IsBenchmarkActive = false;
-                    EnterDungeon(true, EncounterStartReason.BenchmarkEnd);
+                    EnterDungeon(keepPastEncounterInMeter: false, force: true, reason: EncounterStartReason.BenchmarkEnd);
                 }
                 else
                 {
-                    EnterDungeon(true, EncounterStartReason.BenchmarkStart);
+                    EnterDungeon(keepPastEncounterInMeter: false, force: true, reason: EncounterStartReason.BenchmarkStart);
                 }
 
                 return;
             }
 
-            EnterDungeon(true, BattleStateMachine.IsInOpenWorld() ? EncounterStartReason.Force : EncounterStartReason.NewObjective);
+            EnterDungeon(
+                keepPastEncounterInMeter: false,
+                force: true,
+                reason: BattleStateMachine.IsInOpenWorld() ? EncounterStartReason.Force : EncounterStartReason.NewObjective);
         }
 
         /// <summary>
@@ -795,6 +829,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ulong TotalNpcDeaths { get; set; } = 0;
         public bool IsWipe { get; set; } = false;
 
+        /// <summary>
+        /// 設定「次のイベントまで結果を保持」で、この回に記録が入るまでメーターに代わりに出す前の回。実行中だけで保存しない。
+        ///
+        /// <para>
+        /// 入れるのは <see cref="EncounterManager.EnterDungeon"/> だけで、保持してよい区切り(「進行で集計を分割」の区切りとマップ移動)のとき。
+        /// 手動のリセット・計測の開始と停止・ログアウトでは入れない。持つのは1つ前の回までで、
+        /// この回に記録が入ったら <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が外す(記録は減らないので戻らない)。
+        /// </para>
+        /// </summary>
+        internal Encounter? PastEncounterForMeter { get; set; }
+
         public delegate void SkillActivatedEventHandler(object sender, SkillActivatedEventArgs e);
         public event SkillActivatedEventHandler? SkillActivated;
         public delegate void HpUpdatedEventHandler(object sender, HpUpdatedEventArgs e);
@@ -905,6 +950,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 終点はライブなら <paramref name="utcNow"/>、閉じた回なら <see cref="EndTime"/>(UTC へ直すのはここだけ)。
         /// 計測の回は窓の終わりを上限にし、窓が終われば閉じた扱い。どれも DB に載る値から決まるので、履歴でも同じ式。
         /// </para>
+        ///
+        /// <para>
+        /// 自動一時停止: 終点が止まっている区間の中なら、終点は止まった時刻(<see cref="GetPauseStart"/>)。
+        /// 経過は <see cref="ToCombatOffset"/> で、止まっていた区間を除いた長さ。
+        /// </para>
         /// </summary>
         internal CombatClockReading ReadCombatClock(DateTime utcNow)
         {
@@ -934,18 +984,109 @@ namespace StarResonanceDps.Core.CombatRuntime
                 end = start;
             }
 
-            return new CombatClockReading(start, end, end - start, isClosed);
+            if (GetOpenPauseStart() is { } pausedAt && end > pausedAt)
+            {
+                end = pausedAt;
+            }
+
+            return new CombatClockReading(start, end, ToCombatOffset(end)!.Value, isClosed);
         }
 
         private bool _combatClockOrderWarned;
 
+        private readonly object _combatPauseGate = new();
+
         /// <summary>
-        /// 与ダメ・被弾で戦闘の時計の起点を立てる(<c>MessageManager</c> の起点の判定)。回復は <see cref="AddHealing"/> が自分で立てる。
-        /// 一度立てたら動かさない。
+        /// 戦闘の出来事を1回受ける。判定は <c>MessageManager</c> だけ(通知は <c>IsCombatEvent</c>、薬・料理・自然回復は <c>AddBuffHealing</c>)。
+        /// 最初の出来事で戦闘の時計の起点を立て、一度立てたら動かさない。前の出来事から自動一時停止の秒数を超えて空いていたら、
+        /// 止まり始めた時刻(<see cref="GetPauseStart"/>)からこの出来事までを止まっていた区間として残す。
         /// </summary>
-        internal void StartCombatClock(DateTime arrivalUtc)
+        internal void RecordCombatEvent(DateTime arrivalUtc)
         {
             ExData.FirstDamageTimeStamp ??= arrivalUtc;
+
+            lock (_combatPauseGate)
+            {
+                if (ExData.LastCombatEventTimeStamp is { } last)
+                {
+                    // 接続をまたいで到着順が前後した出来事。最後の出来事は戻さない。
+                    if (arrivalUtc <= last)
+                    {
+                        return;
+                    }
+
+                    if (ExData.CombatExitSeconds > 0)
+                    {
+                        var pauseStart = GetPauseStart(last);
+                        if (arrivalUtc > pauseStart)
+                        {
+                            ExData.CombatPauses.Add(new CombatPause { Start = pauseStart, End = arrivalUtc });
+                        }
+                    }
+                }
+
+                ExData.LastCombatEventTimeStamp = arrivalUtc;
+            }
+        }
+
+        /// <summary>
+        /// 到着時刻(UTC)を戦闘の経過に直す。起点からの時間から、それより前に止まっていた区間を除いたもの。止まっている区間の中の時刻は、止まった時点の経過になる。
+        /// 経過・推移グラフの1秒の区切り・被ダメログの時刻・有効DPS と毎分キャストはどれもこれを通す。起点が無ければ null、起点より前は負。
+        /// </summary>
+        public TimeSpan? ToCombatOffset(DateTime utc)
+        {
+            if (ExData.FirstDamageTimeStamp is not { } start)
+            {
+                return null;
+            }
+
+            var offset = utc - start;
+            if (offset <= TimeSpan.Zero)
+            {
+                return offset;
+            }
+
+            lock (_combatPauseGate)
+            {
+                foreach (var pause in ExData.CombatPauses)
+                {
+                    if (utc <= pause.Start)
+                    {
+                        break;
+                    }
+
+                    offset -= (utc < pause.End ? utc : pause.End) - pause.Start;
+                }
+
+                if (GetOpenPauseStartLocked() is { } pausedAt && utc > pausedAt)
+                {
+                    offset -= utc - pausedAt;
+                }
+            }
+
+            return offset;
+        }
+
+        /// <summary>今止まっている区間の始まり(<see cref="GetPauseStart"/>)。止めない回と、出来事がまだ無い回は null。</summary>
+        private DateTime? GetOpenPauseStart()
+        {
+            lock (_combatPauseGate)
+            {
+                return GetOpenPauseStartLocked();
+            }
+        }
+
+        private DateTime? GetOpenPauseStartLocked()
+        {
+            return ExData.CombatExitSeconds > 0 && ExData.LastCombatEventTimeStamp is { } last
+                ? GetPauseStart(last)
+                : null;
+        }
+
+        /// <summary>最後の戦闘の出来事 <paramref name="lastEvent"/> の後に止まり始める時刻(最後の出来事 + 自動一時停止の秒数)。</summary>
+        private DateTime GetPauseStart(DateTime lastEvent)
+        {
+            return lastEvent.AddSeconds(ExData.CombatExitSeconds);
         }
 
         /// <summary>
@@ -1594,9 +1735,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // プレイヤーからプレイヤー以外への与ダメは、起点の判定(MessageManager)が同じ差分で先に時計を立てている。
+            // プレイヤーからプレイヤー以外への与ダメは、戦闘の出来事の判定(MessageManager)が同じ差分で先に時計を立てている。
             // 無いなら判定と振り分けの条件が食い違っている。
-            var timelineStart = ExData.FirstDamageTimeStamp
+            var combatOffset = ToCombatOffset(extraPacketData.ArrivalTime)
                 ?? throw new InvalidOperationException(
                     $"Damage recorded before the combat clock started (encounter={EncounterId}, attacker={attackerUuid}, target={targetUuid}).");
 
@@ -1614,12 +1755,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            attacker.RecordCombatAction(extraPacketData.ArrivalTime);
+            attacker.RecordCombatAction(extraPacketData.ArrivalTime, ToCombatOffset);
             attacker.AddDamage(targetUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
 
             if (damage > 0 && damageType != EDamageType.Immune)
             {
-                attacker.DamageStats.AddPerSecondValue(timelineStart, extraPacketData.ArrivalTime, damage);
+                attacker.DamageStats.AddPerSecondValue(combatOffset, extraPacketData.ArrivalTime, damage);
             }
         }
 
@@ -1635,13 +1776,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             EDamageProperty damageElement, EDamageType damageType, EDamageMode damageMode,
             bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
-            // ダメージの有無で回復を捨てる門を置かない。回復だけの戦闘でも HPS メーターが起動するよう、回復で起点を立てる。
-            // 過剰回復だけの回復(実際に増えた HP が 0)では立てない。計測の回の起点は MessageManager の判定だけ。
-            if (damage > 0 && !IsBenchmark)
-            {
-                ExData.FirstDamageTimeStamp ??= extraPacketData.ArrivalTime;
-            }
-
+            // 実際に HP が増えた回復は戦闘の出来事で、MessageManager が記録の前に当てている(最初なら起点を立てる。回復だけの戦闘でも HPS メーターが動く)。
             // 起点より前の回復は、何も記録しない(過剰回復・行動時刻・履歴表示の解除も)。計測の回は窓の中の自分の回復だけ(出し手がプレイヤー以外の回復は attackerUuid が 0)。
             if (!IsAfterCombatClockStart(extraPacketData.ArrivalTime)
                 || !IsRecordedInBenchmark(extraPacketData.ArrivalTime, attackerUuid))
@@ -1649,7 +1784,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            var timelineStart = ExData.FirstDamageTimeStamp!.Value;
+            var combatOffset = ToCombatOffset(extraPacketData.ArrivalTime)!.Value;
 
             // 戦闘は「次のイベント」なので履歴表示を解除する。開いていなければ即戻る。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -1672,12 +1807,12 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             TotalHealing += (ulong)damage;
 
-            entity.RecordCombatAction(extraPacketData.ArrivalTime);
+            entity.RecordCombatAction(extraPacketData.ArrivalTime, ToCombatOffset);
             entity.AddHealing(targetUuid, skillId, skillLevel, damage, overhealing, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData);
 
             if (damage > 0)
             {
-                entity.HealingStats.AddPerSecondValue(timelineStart, extraPacketData.ArrivalTime, damage);
+                entity.HealingStats.AddPerSecondValue(combatOffset, extraPacketData.ArrivalTime, damage);
             }
         }
 
@@ -1718,7 +1853,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 行動時刻は被ダメログに載らない被弾でも対象に効かせる。起点より前は動かさない。
             if (IsAfterCombatClockStart(arrivalUtc))
             {
-                targetEntity.RecordCombatAction(arrivalUtc);
+                targetEntity.RecordCombatAction(arrivalUtc, ToCombatOffset);
             }
 
             if (!IsTakenDamageLogged(targetUuid, damage))
@@ -1726,7 +1861,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 被弾で時計を立てるのは起点の判定(MessageManager)だけ。起点より前の被弾(自傷・フレンドリーファイア・落下など)も
+            // 被弾で時計を立てるのは戦闘の出来事の判定(MessageManager)だけ。起点より前の被弾(自傷・フレンドリーファイア・落下など)も
             // 被ダメログには載り、時刻は起点からの負の経過になる。記録すべき戦闘かは被ダメログの行数で決まる。
 
             // 加害者の実体を作っておく。被ダメログの加害者名はこの実体(AttrId)から引くので、
@@ -2426,8 +2561,33 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>被ダメログのダメージの無い死亡(<see cref="Encounter.AddPlayerDeathWithoutDamage"/>)。予告と同じくここに持つ。</summary>
         [ProtoMember(9)]
         public List<PlayerDeathRecord> PlayerDeaths { get; set; } = [];
+        /// <summary>この回の自動一時停止の秒数(回を作ったときの <see cref="CombatRuntimeSettings.CombatExitSeconds"/>)。0 は止めない。計測の回は 0。</summary>
+        [ProtoMember(10)]
+        public int CombatExitSeconds { get; set; } = 0;
+        /// <summary>最後の戦闘の出来事の到着時刻(UTC)。書くのは <see cref="Encounter.RecordCombatEvent"/> だけ。</summary>
+        [ProtoMember(11)]
+        public DateTime? LastCombatEventTimeStamp { get; set; } = null;
+        /// <summary>
+        /// 戦闘の時計が止まっていた区間(古い順)。読み書きは <see cref="Encounter"/> の中でだけ行う(ロックがそこにある)。
+        /// 今止まっている区間は入れない(最後の戦闘の出来事から決まる)。
+        /// </summary>
+        [ProtoMember(12)]
+        public List<CombatPause> CombatPauses { get; set; } = [];
 
         public EncounterExData() { }
+    }
+
+    /// <summary>
+    /// 戦闘の時計が止まっていた区間。始まりは最後の戦闘の出来事 + 自動一時停止の秒数、終わりは続きを始めた出来事の到着時刻(どちらも UTC)。
+    /// </summary>
+    [ProtoContract]
+    public sealed class CombatPause
+    {
+        [ProtoMember(1)]
+        public DateTime Start { get; set; }
+
+        [ProtoMember(2)]
+        public DateTime End { get; set; }
     }
 
     public class EncounterBossDataCache
@@ -2469,7 +2629,7 @@ namespace StarResonanceDps.Core.CombatRuntime
     /// エンカウンターをまたいでも変わらない素性。
     ///
     /// <para>
-    /// <see cref="Entity"/> は戦闘統計の入れ物でもあり、フェーズ区切り(NewObjective)などで
+    /// <see cref="Entity"/> は戦闘統計の入れ物でもあり、「進行で集計を分割」の区切りなどで
     /// まるごと作り直される。そのとき統計は捨ててよいが素性は残す必要がある。
     /// 素性をこの型に集約し、引き継ぎは <see cref="Entity.CopyIdentityFrom"/> の1呼び出しで済ませる。
     /// </para>
@@ -3214,12 +3374,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// 行動(与ダメ・回復・被弾)を1回受けて行動時刻を進める。前の行動から <see cref="InactiveGapSeconds"/> を超えた分を非行動に積む。
         /// 呼ぶのは <see cref="Encounter"/> の記録の入口だけで、起点の後の出来事に限る。
+        /// 間は戦闘の経過(<paramref name="toCombatOffset"/> = <see cref="Encounter.ToCombatOffset"/>、自動一時停止で止まっていた区間を除く)で測る。
         /// </summary>
-        internal void RecordCombatAction(DateTime arrivalUtc)
+        internal void RecordCombatAction(DateTime arrivalUtc, Func<DateTime, TimeSpan?> toCombatOffset)
         {
-            if (LastCombatActionTime is { } last)
+            if (LastCombatActionTime is { } last
+                && toCombatOffset(arrivalUtc) is { } current
+                && toCombatOffset(last) is { } previous)
             {
-                var idleSeconds = (arrivalUtc - last).TotalSeconds;
+                var idleSeconds = (current - previous).TotalSeconds;
                 if (idleSeconds > InactiveGapSeconds)
                 {
                     TotalInactiveTime += idleSeconds - InactiveGapSeconds;
@@ -3233,20 +3396,24 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// 有効な秒数(有効DPS の分母)。この人の最初の行動から時計の終点までのうち、行動の間が <see cref="InactiveGapSeconds"/> を
         /// 超えた分(最後の行動から終点までを含む)を除いた長さ。終点は戦闘の時計にそろえる(ライブは今、閉じた回は終了時刻、計測は窓の終わり)。
+        /// 時刻は戦闘の経過(<paramref name="toCombatOffset"/> = <see cref="Encounter.ToCombatOffset"/>)で測る。
+        /// 止まっていた区間を除かないと、自動一時停止の秒数が <see cref="InactiveGapSeconds"/> より短いときに有効DPS が DPS を下回る。
         /// </summary>
-        public double GetActiveSeconds(CombatClockReading clock)
+        public double GetActiveSeconds(CombatClockReading clock, Func<DateTime, TimeSpan?> toCombatOffset)
         {
-            if (clock.EndUtc is not { } end
+            if (clock.EndUtc is null
                 || FirstCombatActionTime is not { } first
-                || end <= first)
+                || toCombatOffset(first) is not { } firstOffset
+                || clock.Elapsed <= firstOffset)
             {
                 return 0d;
             }
 
-            var openIdleSeconds = LastCombatActionTime is { } last
-                ? Math.Max((end - last).TotalSeconds - InactiveGapSeconds, 0d)
+            var end = clock.Elapsed;
+            var openIdleSeconds = LastCombatActionTime is { } last && toCombatOffset(last) is { } lastOffset
+                ? Math.Max((end - lastOffset).TotalSeconds - InactiveGapSeconds, 0d)
                 : 0d;
-            return Math.Max((end - first).TotalSeconds - TotalInactiveTime - openIdleSeconds, 0d);
+            return Math.Max((end - firstOffset).TotalSeconds - TotalInactiveTime - openIdleSeconds, 0d);
         }
 
         public void AddDamage(long targetUuid, long skillId, int skillLevel, long damage, long hpLessen, long shieldBreak,
@@ -3806,8 +3973,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// DPS/HPS推移グラフの材料。キーは <see cref="EncounterExData.FirstDamageTimeStamp"/> からの
-        /// 1秒の区切り(<c>max(ceil(経過秒) - 1, 0)</c>)、値はその1秒に入った合計。
+        /// DPS/HPS推移グラフの材料。キーは戦闘の経過(<see cref="Encounter.ToCombatOffset"/>、自動一時停止で止まっていた区間を除く)の
+        /// 1秒の区切り(<c>max(ceil(経過秒) - 1, 0)</c>)、値はその1秒に入った合計。止まっていた間は区切りが進まない。
         ///
         /// <para>
         /// グラフは1秒ごとの合計しか使わないので、1件ずつは持たない。
@@ -3829,9 +3996,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public bool ShouldSerializeLastPerSecondTimestamp() => LastPerSecondTimestamp.HasValue;
 
-        public void AddPerSecondValue(DateTime timelineStart, DateTime timestamp, long value)
+        /// <param name="combatOffset">出来事の戦闘の経過(<see cref="Encounter.ToCombatOffset"/>)。</param>
+        /// <param name="timestamp">出来事の到着時刻(UTC)。<see cref="LastPerSecondTimestamp"/> に使う。</param>
+        public void AddPerSecondValue(TimeSpan combatOffset, DateTime timestamp, long value)
         {
-            var seconds = Math.Max((timestamp - timelineStart).TotalSeconds, 0d);
+            var seconds = Math.Max(combatOffset.TotalSeconds, 0d);
             var second = Math.Max((int)Math.Ceiling(seconds) - 1, 0);
 
             lock (_perSecondTotalsGate)

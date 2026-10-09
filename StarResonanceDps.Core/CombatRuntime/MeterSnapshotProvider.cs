@@ -184,7 +184,8 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 ///
 /// <para>
 /// <see cref="Timestamp"/> はパケットの到着時刻(UTC。予告のバーの終わりはバーが消える時刻)。経過は持たず、表示側が
-/// 戦闘の時計の起点(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)から引く。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
+/// <see cref="Encounter.ToCombatOffset"/> で戦闘の経過(メーターの経過と同じ。自動一時停止で止まっていた区間を除く)に直す。
+/// 起点が立つまでは直せない(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
 /// </para>
 ///
 /// <para>
@@ -1790,10 +1791,13 @@ public static class MeterSnapshotProvider
         var castsPerMinute = default(double?);
         var castsPerSecond = default(double?);
 
+        // 行動の間は戦闘の経過で測る(自動一時停止で止まっていた区間を除く)。
         if (entity.FirstCombatActionTime is { } firstAction
-            && entity.LastCombatActionTime is { } lastAction)
+            && entity.LastCombatActionTime is { } lastAction
+            && encounter.ToCombatOffset(firstAction) is { } firstOffset
+            && encounter.ToCombatOffset(lastAction) is { } lastOffset)
         {
-            var activeDuration = lastAction - firstAction;
+            var activeDuration = lastOffset - firstOffset;
             if (activeDuration.TotalSeconds > 0d)
             {
                 var totalCasts = (double)entity.TotalCasts;
@@ -1805,7 +1809,7 @@ public static class MeterSnapshotProvider
         var clock = encounter.ReadCombatClock();
         return new PlayerMetricSummarySnapshot(
             stats.ValueTotal,
-            CombatClockReading.PerSecond(stats.ValueTotal, entity.GetActiveSeconds(clock)),
+            CombatClockReading.PerSecond(stats.ValueTotal, entity.GetActiveSeconds(clock, encounter.ToCombatOffset)),
             CombatClockReading.PerSecond(stats.ValueTotal, clock.Elapsed.TotalSeconds),
             extraTotal,
             stats.HitsCount,
@@ -1882,7 +1886,7 @@ public static class MeterSnapshotProvider
         // 有効は、その人の有効な秒数で割る(行ごとに変わらない)。
         var clock = encounter.ReadCombatClock();
         var elapsedSeconds = clock.Elapsed.TotalSeconds;
-        var activeSeconds = entity.GetActiveSeconds(clock);
+        var activeSeconds = entity.GetActiveSeconds(clock, encounter.ToCombatOffset);
         var rows = new MetricSkillTableRowSnapshot[skillStats.Count];
         for (var index = 0; index < skillStats.Count; index++)
         {
@@ -2276,37 +2280,35 @@ public static class MeterSnapshotProvider
         return false;
     }
 
+    /// <summary>
+    /// メーターが映すエンカウンター。履歴を開いていればその回、無ければ今の回。
+    ///
+    /// <para>
+    /// 設定「次のイベントまで結果を保持」がオンで、今の回が前の回(<see cref="Encounter.PastEncounterForMeter"/>)を持ち、
+    /// まだ記録が無いうちは前の回を出す。保持してよい区切りかは回を作るときに決まっている(<see cref="EncounterManager.EnterDungeon"/>)。
+    /// 記録が入ったら前の回を手放す(記録は減らないので、外した後に前の回へ戻ることは無い)。
+    /// </para>
+    /// </summary>
     private static Encounter? ResolveActiveEncounter()
     {
-        Encounter? activeEncounter = AppState.OpenedHistoricalEncounter;
+        if (AppState.OpenedHistoricalEncounter is { } openedHistoricalEncounter)
+        {
+            return openedHistoricalEncounter;
+        }
+
         var currentEncounter = EncounterManager.Current;
+        if (CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage
+            && currentEncounter?.PastEncounterForMeter is { } pastEncounter)
+        {
+            if (!currentEncounter.HasStatsBeenRecorded())
+            {
+                return pastEncounter;
+            }
 
-        if (CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage)
-        {
-            if ((AppState.ActiveEncounter is null && currentEncounter is not null)
-                || (AppState.ActiveEncounter is not null && AppState.ActiveEncounter.Entities.IsEmpty))
-            {
-                AppState.ActiveEncounter = currentEncounter;
-            }
-            else if (AppState.ActiveEncounter?.BattleId != currentEncounter?.BattleId)
-            {
-                AppState.ActiveEncounter = currentEncounter;
-            }
-            else if (!ReferenceEquals(AppState.ActiveEncounter, currentEncounter))
-            {
-                if (currentEncounter is not null && currentEncounter.HasStatsBeenRecorded())
-                {
-                    AppState.ActiveEncounter = currentEncounter;
-                }
-            }
-        }
-        else if (!ReferenceEquals(AppState.ActiveEncounter, currentEncounter))
-        {
-            // 記録の無い回の後に作り直すと EncounterId が同じ番号になるので、実体の同一性で見る。
-            AppState.ActiveEncounter = currentEncounter;
+            currentEncounter.PastEncounterForMeter = null;
         }
 
-        return activeEncounter ?? AppState.ActiveEncounter;
+        return currentEncounter;
     }
 
     private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind, CombatClockReading clock)

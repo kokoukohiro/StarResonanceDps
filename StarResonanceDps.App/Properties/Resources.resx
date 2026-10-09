@@ -1202,7 +1202,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Aggregation</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>Split Aggregation by Phase</value>
+    <value>Split Aggregation by Progress</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>Hold Results Until Next Event</value>
@@ -1230,6 +1230,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Aggregation_BenchmarkFirstTargetOnly_Description" xml:space="preserve">
     <value>Note: Even when attacking several enemies at once, only the first enemy attacked is counted.</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit" xml:space="preserve">
+    <value>Auto Pause</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Description" xml:space="preserve">
+    <value>Note: Seconds after combat stops</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_Value" xml:space="preserve">
+    <value>{0} sec</value>
+  </data>
+  <data name="Settings_Aggregation_CombatExit_None" xml:space="preserve">
+    <value>Don't pause</value>
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>Aggregation</value>
