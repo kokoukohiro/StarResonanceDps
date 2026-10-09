@@ -12,6 +12,12 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </para>
 ///
 /// <para>
+/// <b>集計の設定は、パケットを処理するスレッドで、メッセージとメッセージのあいだに書き換える</b>
+/// (<c>MessageManager.RunOnPacketThread</c>。キャプチャが動いていなければ呼んだスレッドでその場で書く)。
+/// メッセージの処理の途中で値が変わらないようにするため。キャプチャの3項目はメッセージの処理が読まないので、呼んだスレッドで書く。
+/// </para>
+///
+/// <para>
 /// <b>ここに項目を足すときは、UIも一緒に作ること。</b> 値を変える手段が無い設定は、
 /// 既定値を直書きするのと変わらない。
 /// </para>
@@ -22,7 +28,8 @@ public static class CombatRuntimeSettings
     public const string AutomaticNetCaptureDeviceName = "Auto";
 
     /// <summary>
-    /// <see cref="Apply"/> が一度でも呼ばれたか。<c>CombatRuntimeHost.Initialize</c> の関門に使う。
+    /// <see cref="Apply"/> の値が一度でも書かれたか。<c>CombatRuntimeHost.Initialize</c> の関門に使う
+    /// (起動時はキャプチャが動いていないので、<see cref="Apply"/> の中で立つ)。
     /// 呼ばずに動かすと、既定値で動いているのか設定どおりなのかが区別できない。
     /// </summary>
     public static bool HasBeenApplied { get; private set; }
@@ -37,14 +44,20 @@ public static class CombatRuntimeSettings
     public static string GameCaptureCustomExeName { get; private set; } = string.Empty;
 
     /// <summary>
-    /// 設定「進行で集計を分割」。ダンジョンの開始・ボス部屋の入場・全滅でエンカウンターを分けるか。
+    /// 設定「アステルリーズでの集計を停止」。回のシーンがアステルリーズなら、戦闘の時計を立てず、回へ何も記録しないか。
+    /// 時計の判定と記録の門のたびに見る(<c>Encounter.IsAggregationStopped</c>)ので、保存すれば次のメッセージから効く。
+    /// </summary>
+    public static bool StopAggregationInAsterleeds { get; private set; }
+
+    /// <summary>
+    /// 設定「進行で自動リセット」。ダンジョンの開始・ボス部屋の入場・全滅でエンカウンターを分けるか。
     /// 開始は <c>BattleStateMachine</c>、ボス部屋の入場と全滅は <c>MessageManager.ProcessAoiSyncDelta</c> が見て、<c>EnterDungeon</c> で作り直す。
     /// </summary>
     public static bool SplitEncountersOnNewPhases { get; private set; }
 
     /// <summary>
     /// 設定「次のイベントまで結果を保持」。新しいエンカウンターに記録(与ダメ・回復・被ダメログの行)が入るまで、前の結果をメーターに出し続けるか。
-    /// 保持するのは「進行で集計を分割」の区切りとマップ移動で、手動のリセット・計測の開始と停止・ログアウトはすぐ新しい回を出す。
+    /// 保持するのは「進行で自動リセット」の区切りとマップ移動で、手動のリセット・計測の開始と停止・ログアウトはすぐ新しい回を出す。
     /// 回を作るとき(<c>EncounterManager.EnterDungeon</c>)と、メーターが映す回を決めるとき(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)に見る。
     /// </summary>
     public static bool KeepPastEncounterInMeterUntilNextDamage { get; private set; }
@@ -83,11 +96,13 @@ public static class CombatRuntimeSettings
 
     /// <summary>
     /// App が持っている値を Core へ流し込む。起動時と、設定を保存したときに呼ぶ。
+    /// 値の範囲の検査とキャプチャの3項目は呼んだスレッドで行い、集計の設定は処理のスレッドで書く(クラスの説明)。
     /// </summary>
     public static void Apply(
         string? netCaptureDeviceName,
         EGameCapturePreference gameCapturePreference,
         string? gameCaptureCustomExeName,
+        bool stopAggregationInAsterleeds,
         bool splitEncountersOnNewPhases,
         bool keepPastEncounterInMeterUntilNextDamage,
         bool clearHistorySelectionOnNextEvent,
@@ -108,14 +123,20 @@ public static class CombatRuntimeSettings
 
         ApplyCaptureSettings(netCaptureDeviceName, gameCapturePreference, gameCaptureCustomExeName);
 
-        SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
-        KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
-        ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;
-        DatabaseMaxEncounterCount = databaseMaxEncounterCount;
-        BenchmarkDurationSeconds = benchmarkDurationSeconds;
-        BenchmarkFirstTargetOnly = benchmarkFirstTargetOnly;
-        CombatExitSeconds = combatExitSeconds;
-        HasBeenApplied = true;
+        // 集計の設定はメッセージの処理が読むので、メッセージとメッセージのあいだでだけ書き換える。
+        // 1つのメッセージの中で読み直しても同じ値になり、時計の判定と記録の門が食い違わない。
+        MessageManager.RunOnPacketThread(() =>
+        {
+            StopAggregationInAsterleeds = stopAggregationInAsterleeds;
+            SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
+            KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
+            ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;
+            DatabaseMaxEncounterCount = databaseMaxEncounterCount;
+            BenchmarkDurationSeconds = benchmarkDurationSeconds;
+            BenchmarkFirstTargetOnly = benchmarkFirstTargetOnly;
+            CombatExitSeconds = combatExitSeconds;
+            HasBeenApplied = true;
+        });
     }
 
     /// <summary>

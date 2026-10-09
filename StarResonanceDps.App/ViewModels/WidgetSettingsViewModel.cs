@@ -64,7 +64,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
         if (WidgetConfigDefaults.SupportsMetricTimelineSettings(kind))
         {
-            MetricTimelineSettings = new MetricTimelineWidgetSettingsViewModel(config.MetricTimeline);
+            MetricTimelineSettings = new MetricTimelineWidgetSettingsViewModel(kind, config.MetricTimeline);
             MetricTimelineSettings.PropertyChanged += MetricTimelineSettings_PropertyChanged;
             MetricTimelineSettings.PreviewChanged += MetricTimelineSettings_PreviewChanged;
         }

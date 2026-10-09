@@ -791,6 +791,12 @@
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
     <value>원소 색상 필터</value>
   </data>
+  <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
+    <value>그래프 색상</value>
+  </data>
+  <data name="Settings_GraphColors_Filter" xml:space="preserve">
+    <value>그래프 색상 필터</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
   </data>
@@ -952,12 +958,6 @@
     <value>Npcap 버전({0})이 1.86보다 낮습니다.
 문제를 방지하려면 1.86 이상으로 업데이트하는 것을 강력히 권장합니다.</value>
   </data>
-  <data name="Metric_InstantDps" xml:space="preserve">
-    <value>순간 DPS</value>
-  </data>
-  <data name="Metric_InstantHps" xml:space="preserve">
-    <value>순간 HPS</value>
-  </data>
   <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
     <value>게임 실행 파일</value>
   </data>
@@ -974,6 +974,12 @@
     <value>그리기 간격</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}초</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+    <value>가로축 길이</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}초</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
@@ -1201,8 +1207,11 @@
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>집계 설정</value>
   </data>
+  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
+    <value>아스텔리즈에서 집계 중지</value>
+  </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>진행별로 집계 분할</value>
+    <value>진행에 따라 자동 리셋</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>다음 이벤트까지 결과 유지</value>
@@ -1262,7 +1271,7 @@
     <value>기록이 없습니다</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
-    <value>※던전에서 보스 방 진입 등</value>
+    <value>※던전에서 보스 방 진입이나 전멸 등</value>
   </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>이동 속도</value>

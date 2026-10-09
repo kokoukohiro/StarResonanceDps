@@ -199,7 +199,7 @@ public sealed partial class EncounterHistoryItem : ObservableObject
     /// 注記は<b>半角括弧で詰めて末尾に足す</b>(スペースを入れない)。
     /// 計測はボタンと同じ <c>Meter_Benchmark</c>で、
     /// 言語を切り替えると一緒に変わる(<see cref="RefreshTexts"/> が再通知する)。
-    /// 「進行で集計を分割」で分けた記録も注記を付けず、同じ名前で出す。
+    /// 「進行で自動リセット」で分けた記録も注記を付けず、同じ名前で出す。
     /// </para>
     /// </summary>
     public string SceneText

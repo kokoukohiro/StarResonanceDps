@@ -79,7 +79,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStatePlaying)
             {
-                // 開始までの待ち時間の記録を別の戦闘に分けるのは設定「進行で集計を分割」の一部なので、無効なら区切らずに続ける。
+                // 開始までの待ち時間の記録を別の戦闘に分けるのは設定「進行で自動リセット」の一部なので、無効なら区切らずに続ける。
                 // 記録が無ければ、作り直しても何も保存されない(回を作った時刻がダンジョンの開始になり、制限時間はそこから測る)ので、設定によらず行う。
                 if (!EncounterManager.Current.HasStatsBeenRecorded())
                 {

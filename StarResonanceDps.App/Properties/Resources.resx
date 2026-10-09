@@ -791,6 +791,12 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
     <value>Element Colors Filter</value>
   </data>
+  <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
+    <value>Graph Colors</value>
+  </data>
+  <data name="Settings_GraphColors_Filter" xml:space="preserve">
+    <value>Graph Colors Filter</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
   </data>
@@ -952,12 +958,6 @@ Please install Npcap to capture network packets.</value>
     <value>Npcap version ({0}) is below 1.86.
 It is strongly recommended to update to this version, or higher, to avoid problems.</value>
   </data>
-  <data name="Metric_InstantDps" xml:space="preserve">
-    <value>Instant DPS</value>
-  </data>
-  <data name="Metric_InstantHps" xml:space="preserve">
-    <value>Instant HPS</value>
-  </data>
   <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
     <value>Game Executable</value>
   </data>
@@ -974,6 +974,12 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Drawing interval</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0} seconds</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+    <value>X-axis length</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0} seconds</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
@@ -1201,8 +1207,11 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>Aggregation</value>
   </data>
+  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
+    <value>Stop Aggregation in Asterleeds</value>
+  </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>Split Aggregation by Progress</value>
+    <value>Auto Reset by Progress</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>Hold Results Until Next Event</value>
@@ -1262,7 +1271,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>No history</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
-    <value>Note: e.g. entering a boss room in a dungeon</value>
+    <value>Note: e.g. entering a boss room or a wipe in a dungeon</value>
   </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>Move Speed</value>

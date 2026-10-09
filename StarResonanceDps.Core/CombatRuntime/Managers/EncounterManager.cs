@@ -115,7 +115,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <param name="keepPastEncounterInMeter">
         /// 設定「次のイベントまで結果を保持」で、新しい回に記録が入るまで前の回をメーターに出してよいか。
-        /// 「進行で集計を分割」の区切りとマップ移動(直後のダンジョン状態の作り直しも)は true、
+        /// 「進行で自動リセット」の区切りとマップ移動(直後のダンジョン状態の作り直しも)は true、
         /// 手動のリセット・計測の開始と停止・ログアウトは false(すぐ新しい回を出す)。
         /// 手動のリセットも <c>Force</c> / <c>NewObjective</c> を使うので <paramref name="reason"/> では分けられず、呼び手が渡す。
         /// </param>
@@ -355,7 +355,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerRosterProjection.RebuildRoster();
 
             // エンカウンターの作り直しも「次のイベント」。計測・リセット・マップ移動・
-            // 「進行で集計を分割」の区切りは全部ここを通るので、ボタン側に専用の解除を書かない。
+            // 「進行で自動リセット」の区切りは全部ここを通るので、ボタン側に専用の解除を書かない。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
 
             Serilog.Log.Debug("EncounterManager sending OnEncounterStart event");
@@ -833,7 +833,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 設定「次のイベントまで結果を保持」で、この回に記録が入るまでメーターに代わりに出す前の回。実行中だけで保存しない。
         ///
         /// <para>
-        /// 入れるのは <see cref="EncounterManager.EnterDungeon"/> だけで、保持してよい区切り(「進行で集計を分割」の区切りとマップ移動)のとき。
+        /// 入れるのは <see cref="EncounterManager.EnterDungeon"/> だけで、保持してよい区切り(「進行で自動リセット」の区切りとマップ移動)のとき。
         /// 手動のリセット・計測の開始と停止・ログアウトでは入れない。持つのは1つ前の回までで、
         /// この回に記録が入ったら <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が外す(記録は減らないので戻らない)。
         /// </para>
@@ -900,6 +900,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             EndTime = end;
         }
+
+        /// <summary>アステルリーズ(街)のシーンの番号。同じ名前を持つダンジョンのシーンは別の番号で、対象に入れない。</summary>
+        private const uint AsterleedsSceneId = 8;
+
+        /// <summary>
+        /// 集計を止めている回か。設定「アステルリーズでの集計を停止」がオンで、回のシーンがアステルリーズのとき。
+        /// 設定もシーンもメッセージとメッセージのあいだでしか変わらない(設定は <see cref="CombatRuntimeSettings"/> の説明)ので、
+        /// 1つのメッセージの中で時計の判定(<see cref="RecordCombatEvent"/>)と記録の門(<see cref="IsRecorded"/>)は必ずそろう。
+        /// </summary>
+        internal bool IsAggregationStopped =>
+            CombatRuntimeSettings.StopAggregationInAsterleeds && SceneId == AsterleedsSceneId;
 
         /// <summary>計測の回か(計測時間を持つ)。履歴でも同じ値(DB に載る)。</summary>
         public bool IsBenchmark => ExData.BenchmarkTime > 0;
@@ -1000,9 +1011,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 戦闘の出来事を1回受ける。判定は <c>MessageManager</c> だけ(通知は <c>IsCombatEvent</c>、薬・料理・自然回復は <c>AddBuffHealing</c>)。
         /// 最初の出来事で戦闘の時計の起点を立て、一度立てたら動かさない。前の出来事から自動一時停止の秒数を超えて空いていたら、
         /// 止まり始めた時刻(<see cref="GetPauseStart"/>)からこの出来事までを止まっていた区間として残す。
+        /// 集計を止めている回(<see cref="IsAggregationStopped"/>)では受けない(時計を立てず、進めない)。
         /// </summary>
         internal void RecordCombatEvent(DateTime arrivalUtc)
         {
+            if (IsAggregationStopped)
+            {
+                return;
+            }
+
             ExData.FirstDamageTimeStamp ??= arrivalUtc;
 
             lock (_combatPauseGate)
@@ -1099,7 +1116,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 記録してよい出来事か(計測の回の門)。計測の回でなければ常に真。
+        /// 記録してよい出来事か(記録の入口の門)。集計を止めている回(<see cref="IsAggregationStopped"/>)では常に偽、
+        /// それ以外で計測の回でなければ常に真。
         ///
         /// <para>
         /// 計測の回は、窓 [起点, 起点 + 計測時間) の中で、かつ自分の出来事のときだけ真。待機中(起点の前)も窓の後も記録しない。
@@ -1112,8 +1130,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 止めるのは記録だけ。特化・職業の判定、CD の推定、バフ、予告のバーの控えは止めない。
         /// </para>
         /// </summary>
-        private bool IsRecordedInBenchmark(DateTime arrivalUtc, long? playerUuid)
+        private bool IsRecorded(DateTime arrivalUtc, long? playerUuid)
         {
+            if (IsAggregationStopped)
+            {
+                return false;
+            }
+
             if (!IsBenchmark)
             {
                 return true;
@@ -1480,11 +1503,11 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// プレイヤーの死亡を1回数える。呼ぶのは差分で <c>AttrDeadTime</c> が新しい値になったとき(<c>MessageManager</c>)。
-        /// 計測の回では窓の中の自分の死亡だけ数える(<see cref="IsRecordedInBenchmark"/>)。
+        /// 計測の回では窓の中の自分の死亡だけ数える(<see cref="IsRecorded"/>)。
         /// </summary>
         public void RecordPlayerDeath(long playerUuid, DateTime arrivalUtc)
         {
-            if (!IsRecordedInBenchmark(arrivalUtc, playerUuid))
+            if (!IsRecorded(arrivalUtc, playerUuid))
             {
                 return;
             }
@@ -1501,7 +1524,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void RecordNonPlayerDeath(long uuid, DateTime arrivalUtc)
         {
             var entity = GetOrCreateEntity(uuid);
-            if (entity.EntityType == EEntityType.EntChar || !IsRecordedInBenchmark(arrivalUtc, null))
+            if (entity.EntityType == EEntityType.EntChar || !IsRecorded(arrivalUtc, null))
             {
                 return;
             }
@@ -1562,7 +1585,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             entity.RegisterSkillActivation(
                 skillId,
                 activationUtc,
-                IsAfterCombatClockStart(activationUtc) && IsRecordedInBenchmark(activationUtc, playerUuid));
+                IsAfterCombatClockStart(activationUtc) && IsRecorded(activationUtc, playerUuid));
         }
 
         /// <summary>
@@ -1725,11 +1748,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             var attacker = GetOrCreateEntity(attackerUuid);
 
             // ダメージは RegisterSkillActivation を通らない別経路なので、ここでも引く。
-            // 詠唱の属性を取りこぼした場合の受け皿。同じ特化なら中で何もしない。判定は止めないので、計測の門より前に置く。
+            // 詠唱の属性を取りこぼした場合の受け皿。同じ特化なら中で何もしない。判定は止めないので、記録の門より前に置く。
             // 渡すのは畳む前の生のスキルID。理由は identitySkillId の説明を見ること。
             attacker.UpdateSubProfessionFromReplacedSkill(identitySkillId);
 
-            if (!IsRecordedInBenchmark(extraPacketData.ArrivalTime, attackerUuid)
+            if (!IsRecorded(extraPacketData.ArrivalTime, attackerUuid)
                 || !IsBenchmarkFirstTarget(targetUuid))
             {
                 return;
@@ -1779,7 +1802,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 実際に HP が増えた回復は戦闘の出来事で、MessageManager が記録の前に当てている(最初なら起点を立てる。回復だけの戦闘でも HPS メーターが動く)。
             // 起点より前の回復は、何も記録しない(過剰回復・行動時刻・履歴表示の解除も)。計測の回は窓の中の自分の回復だけ(出し手がプレイヤー以外の回復は attackerUuid が 0)。
             if (!IsAfterCombatClockStart(extraPacketData.ArrivalTime)
-                || !IsRecordedInBenchmark(extraPacketData.ArrivalTime, attackerUuid))
+                || !IsRecorded(extraPacketData.ArrivalTime, attackerUuid))
             {
                 return;
             }
@@ -1838,7 +1861,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             var arrivalUtc = extraPacketData.ArrivalTime;
             var isTargetPlayer = (EEntityType)Utils.UuidToEntityType(targetUuid) == EEntityType.EntChar;
-            if (!IsRecordedInBenchmark(arrivalUtc, isTargetPlayer ? targetUuid : null))
+            if (!IsRecorded(arrivalUtc, isTargetPlayer ? targetUuid : null))
             {
                 return;
             }
@@ -1986,7 +2009,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     extraPacketData.ArrivalTime);
             }
 
-            if (!IsRecordedInBenchmark(extraPacketData.ArrivalTime, null))
+            if (!IsRecorded(extraPacketData.ArrivalTime, null))
             {
                 return;
             }
@@ -2011,7 +2034,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void AddSkillAnnouncement(int dbmId, ExtraPacketData extraPacketData)
         {
-            if (dbmId <= 0 || !IsRecordedInBenchmark(extraPacketData.ArrivalTime, null))
+            if (dbmId <= 0 || !IsRecorded(extraPacketData.ArrivalTime, null))
             {
                 return;
             }
@@ -2039,7 +2062,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public void AddSkillAnnouncementBarEnd(Services.BossDbmBarStore.BossDbmBar bar)
         {
-            if (!IsRecordedInBenchmark(bar.EndTimeUtc, null))
+            if (!IsRecorded(bar.EndTimeUtc, null))
             {
                 return;
             }
@@ -2123,7 +2146,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <param name="healthBefore">死亡を伝えた同期を当てる前の HP・最大HP・バリア量。</param>
         public void AddPlayerDeathWithoutDamage(long playerUuid, TargetHealth healthBefore, ExtraPacketData extraPacketData)
         {
-            if (!IsRecordedInBenchmark(extraPacketData.ArrivalTime, playerUuid))
+            if (!IsRecorded(extraPacketData.ArrivalTime, playerUuid))
             {
                 return;
             }
@@ -2629,7 +2652,7 @@ namespace StarResonanceDps.Core.CombatRuntime
     /// エンカウンターをまたいでも変わらない素性。
     ///
     /// <para>
-    /// <see cref="Entity"/> は戦闘統計の入れ物でもあり、「進行で集計を分割」の区切りなどで
+    /// <see cref="Entity"/> は戦闘統計の入れ物でもあり、「進行で自動リセット」の区切りなどで
     /// まるごと作り直される。そのとき統計は捨ててよいが素性は残す必要がある。
     /// 素性をこの型に集約し、引き継ぎは <see cref="Entity.CopyIdentityFrom"/> の1呼び出しで済ませる。
     /// </para>

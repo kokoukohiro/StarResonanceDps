@@ -728,6 +728,12 @@
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
     <value>属性カラーのフィルター</value>
   </data>
+  <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
+    <value>グラフカラー</value>
+  </data>
+  <data name="Settings_GraphColors_Filter" xml:space="preserve">
+    <value>グラフカラーのフィルター</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
   </data>
@@ -889,12 +895,6 @@
     <value>Npcapのバージョン({0})は1.86未満です。
 問題を避けるため、1.86以上へ更新することを強くおすすめします。</value>
   </data>
-  <data name="Metric_InstantDps" xml:space="preserve">
-    <value>瞬間DPS</value>
-  </data>
-  <data name="Metric_InstantHps" xml:space="preserve">
-    <value>瞬間HPS</value>
-  </data>
   <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
     <value>ゲーム実行ファイル</value>
   </data>
@@ -911,6 +911,12 @@
     <value>描画間隔</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+    <value>横軸の長さ</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
@@ -1138,8 +1144,11 @@
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>集計設定</value>
   </data>
+  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
+    <value>アステルリーズでの集計を停止</value>
+  </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>進行で集計を分割</value>
+    <value>進行で自動リセット</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>次のイベントまで結果を保持</value>
@@ -1199,7 +1208,7 @@
     <value>履歴がありません</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
-    <value>※ダンジョンでボス部屋進入など</value>
+    <value>※ダンジョンでボス部屋進入や全滅など</value>
   </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>移動速度</value>

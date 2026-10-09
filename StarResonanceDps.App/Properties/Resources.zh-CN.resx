@@ -791,6 +791,12 @@
   <data name="Settings_ElementColors_Filter" xml:space="preserve">
     <value>元素颜色滤镜</value>
   </data>
+  <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
+    <value>图表颜色</value>
+  </data>
+  <data name="Settings_GraphColors_Filter" xml:space="preserve">
+    <value>图表颜色滤镜</value>
+  </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
   </data>
@@ -952,12 +958,6 @@
     <value>Npcap版本({0})低于1.86。
 为避免问题，强烈建议更新到1.86或更高版本。</value>
   </data>
-  <data name="Metric_InstantDps" xml:space="preserve">
-    <value>瞬时DPS</value>
-  </data>
-  <data name="Metric_InstantHps" xml:space="preserve">
-    <value>瞬时HPS</value>
-  </data>
   <data name="Settings_GameCapturePreference_Label" xml:space="preserve">
     <value>游戏执行文件</value>
   </data>
@@ -974,6 +974,12 @@
     <value>绘制间隔</value>
   </data>
   <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+    <value>{0}秒</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+    <value>横轴长度</value>
+  </data>
+  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
@@ -1201,8 +1207,11 @@
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>统计设置</value>
   </data>
+  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
+    <value>在阿斯特里斯停止统计</value>
+  </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
-    <value>按进度分割统计</value>
+    <value>按进度自动重置</value>
   </data>
   <data name="Settings_Aggregation_KeepPastResult" xml:space="preserve">
     <value>保留结果至下次事件</value>
@@ -1262,7 +1271,7 @@
     <value>无历史记录</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases_Description" xml:space="preserve">
-    <value>※例如在副本中进入BOSS房间等</value>
+    <value>※例如在副本中进入BOSS房间或团灭等</value>
   </data>
   <data name="PlayerStatus_MoveSpeed" xml:space="preserve">
     <value>移动速度</value>

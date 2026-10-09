@@ -120,6 +120,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="GraphColorsNavButton"
+                                Click="GraphColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MetricTimelineSettings.GraphColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="PlayerStatusTextColorsNavButton"
                                 Click="PlayerStatusTextColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -433,6 +442,16 @@
                                         </Border>
 
                                     </StackPanel>
+                                </ContentControl>
+
+                                <ContentControl x:Name="GraphColorsHost"
+                                                Content="{Binding MetricTimelineSettings}"
+                                                Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:MetricTimelineGraphColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
                                 </ContentControl>
 
                                 <ContentControl x:Name="PlayerStatusTextColorsHost"

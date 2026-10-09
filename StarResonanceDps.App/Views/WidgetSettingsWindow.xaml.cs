@@ -240,6 +240,11 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(ThemeSection);
     }
 
+    private void GraphColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(GraphColorsHost);
+    }
+
     private void ClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ClassColorsHost);

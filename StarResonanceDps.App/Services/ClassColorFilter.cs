@@ -31,6 +31,29 @@ public static class ClassColorFilter
         return Apply(color, filterColor, settings.ClassColorFilterStrength);
     }
 
+    /// <summary>推移グラフのグラフカラー用。掛け方はクラスカラーとまったく同じ。</summary>
+    public static Color Apply(Color color, MetricTimelineWidgetSettingsConfig settings)
+    {
+        if (settings.ClassColorFilterEnabled != true)
+        {
+            return color;
+        }
+
+        var palette = settings.ClassColorFilterColors;
+        if (palette is null || palette.Count == 0)
+        {
+            return color;
+        }
+
+        var index = Math.Clamp(settings.ClassColorFilterColorIndex, 0, palette.Count - 1);
+        if (!ColorUtilities.TryParseHex(palette[index], out var filterColor))
+        {
+            return color;
+        }
+
+        return Apply(color, filterColor, settings.ClassColorFilterStrength);
+    }
+
     /// <summary>スキル詳細の属性カラー用。掛け方はクラスカラーとまったく同じ。</summary>
     public static Color Apply(Color color, ElementColorWidgetSettingsConfig settings)
     {

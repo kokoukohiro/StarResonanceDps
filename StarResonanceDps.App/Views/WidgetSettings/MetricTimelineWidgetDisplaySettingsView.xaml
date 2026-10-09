@@ -13,32 +13,61 @@
 
         <ContentControl Style="{StaticResource Panel.SettingSection}"
                         Margin="0,0,0,12">
-            <Border Style="{StaticResource Panel.SettingFieldLast}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Timeline_AggregationInterval]}"
-                               Foreground="{DynamicResource Brush.TextPrimary}"
-                               FontSize="14"
-                               FontWeight="SemiBold" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Timeline_AggregationInterval]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
 
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding AvailableAggregationIntervals}"
-                              SelectedValuePath="Seconds"
-                              SelectedValue="{Binding AggregationIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Style="{StaticResource Input.SettingsComboBox}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding DisplayName}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </Grid>
-            </Border>
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding AvailableAggregationIntervals}"
+                                  SelectedValuePath="Seconds"
+                                  SelectedValue="{Binding AggregationIntervalSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Timeline_VisibleSeconds]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding AvailableVisibleSeconds}"
+                                  SelectedValuePath="Seconds"
+                                  SelectedValue="{Binding VisibleSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+            </StackPanel>
         </ContentControl>
     </StackPanel>
 </UserControl>

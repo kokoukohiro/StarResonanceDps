@@ -42,6 +42,10 @@ public partial class WidgetWindow : Window
 
     /// <summary>ヘッダー/フッター1つ分の高さ。XAML の行定義と合わせること。</summary>
     private const double ChromeRowHeight = 30d;
+
+    /// <summary>横のスクロールバーの行の高さ。バーがあれば16、無ければ5(縦のバーの列の幅と同じ)。</summary>
+    private const double HorizontalScrollBarRowVisibleHeight = 16d;
+    private const double HorizontalScrollBarRowHiddenHeight = 5d;
     private const int MaNoActivate = 3;
 
     public static readonly DependencyProperty HeaderTextProperty = DependencyProperty.Register(
@@ -52,10 +56,12 @@ public partial class WidgetWindow : Window
 
     private readonly WidgetListItemViewModel _widget;
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
+    private readonly IWidgetHorizontalScrollContent? _horizontalScrollContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
     private bool _isRestoringBounds = true;
     private bool _isSynchronizingContentScrollBar;
+    private bool _isSynchronizingContentHorizontalScrollBar;
 
     /// <summary>フッターに中身があるか。ピン留め中に隠す判定と合わせて可視状態を決める。</summary>
     private bool _hasFooterContent;
@@ -96,6 +102,21 @@ public partial class WidgetWindow : Window
             Grid.SetColumnSpan(WidgetContentHost, 1);
             _verticalScrollContent.VerticalScrollMetricsChanged += VerticalScrollContent_VerticalScrollMetricsChanged;
             WidgetContentScrollBar.ValueChanged += WidgetContentScrollBar_ValueChanged;
+        }
+
+        _horizontalScrollContent = widgetContent as IWidgetHorizontalScrollContent;
+        if (_horizontalScrollContent is not null)
+        {
+            // 行は両方の層に同じ高さで置く(バーを出すときに広げる、UpdateContentHorizontalScrollBar)。本体の層の行は空なので、クリックは枠の層のバーへ通る。
+            SetHorizontalScrollBarRowHeight(HorizontalScrollBarRowHiddenHeight);
+
+            // 縦のバーが無い中身では、縦のバーの列まで伸ばす(中身も右端まで使っている)。
+            if (_verticalScrollContent is null)
+            {
+                Grid.SetColumnSpan(WidgetContentHorizontalScrollBar, 2);
+            }
+            _horizontalScrollContent.HorizontalScrollMetricsChanged += HorizontalScrollContent_HorizontalScrollMetricsChanged;
+            WidgetContentHorizontalScrollBar.ValueChanged += WidgetContentHorizontalScrollBar_ValueChanged;
         }
 
         // まだ測れていないときに返す値。窓を出す前に保存を要求されることがある
@@ -382,6 +403,12 @@ public partial class WidgetWindow : Window
             WidgetContentScrollBar.ValueChanged -= WidgetContentScrollBar_ValueChanged;
         }
 
+        if (_horizontalScrollContent is not null)
+        {
+            _horizontalScrollContent.HorizontalScrollMetricsChanged -= HorizontalScrollContent_HorizontalScrollMetricsChanged;
+            WidgetContentHorizontalScrollBar.ValueChanged -= WidgetContentHorizontalScrollBar_ValueChanged;
+        }
+
         if (WidgetContentHost.Content is FrameworkElement { DataContext: IDisposable disposable })
         {
             disposable.Dispose();
@@ -588,6 +615,13 @@ public partial class WidgetWindow : Window
 
     private void QueueContentScrollBarUpdate()
     {
+        if (_horizontalScrollContent is not null)
+        {
+            Dispatcher.BeginInvoke(
+                UpdateContentHorizontalScrollBar,
+                DispatcherPriority.Loaded);
+        }
+
         if (_verticalScrollContent is null)
         {
             WidgetContentScrollBar.Visibility = Visibility.Collapsed;
@@ -647,6 +681,73 @@ public partial class WidgetWindow : Window
         {
             _isSynchronizingContentScrollBar = false;
         }
+    }
+
+    private void HorizontalScrollContent_HorizontalScrollMetricsChanged(object? sender, EventArgs e)
+    {
+        UpdateContentHorizontalScrollBar();
+    }
+
+    private void WidgetContentHorizontalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isSynchronizingContentHorizontalScrollBar || _horizontalScrollContent is null)
+        {
+            return;
+        }
+
+        _horizontalScrollContent.SetHorizontalScrollOffset(e.NewValue);
+    }
+
+    /// <summary>
+    /// 横のバーを中身の値へ合わせる。ずらせるときだけバーを出し、行をバーの分(16)に広げる。出さないときの行は5
+    /// (縦のバーの列と同じ。中身は下の余白を持たず、この行が下の隙間になる)。
+    /// </summary>
+    private void UpdateContentHorizontalScrollBar()
+    {
+        if (_horizontalScrollContent is null || !IsLoaded)
+        {
+            WidgetContentHorizontalScrollBar.Visibility = Visibility.Collapsed;
+            if (_horizontalScrollContent is not null)
+            {
+                SetHorizontalScrollBarRowHeight(HorizontalScrollBarRowHiddenHeight);
+            }
+
+            return;
+        }
+
+        var metrics = _horizontalScrollContent.GetHorizontalScrollMetrics();
+        var maximum = Math.Max(metrics.Maximum, 0);
+        var viewport = Math.Max(metrics.ViewportSize, 0);
+
+        _isSynchronizingContentHorizontalScrollBar = true;
+        try
+        {
+            WidgetContentHorizontalScrollBar.Minimum = 0;
+            WidgetContentHorizontalScrollBar.Maximum = maximum;
+            WidgetContentHorizontalScrollBar.ViewportSize = viewport;
+            WidgetContentHorizontalScrollBar.LargeChange = Math.Max(metrics.LargeChange, 1);
+            WidgetContentHorizontalScrollBar.SmallChange = Math.Max(metrics.SmallChange, 1);
+            WidgetContentHorizontalScrollBar.Value = Math.Clamp(metrics.Value, 0, maximum);
+
+            var isScrollBarVisible = maximum > 0;
+            WidgetContentHorizontalScrollBar.Visibility = isScrollBarVisible
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+            SetHorizontalScrollBarRowHeight(isScrollBarVisible
+                ? HorizontalScrollBarRowVisibleHeight
+                : HorizontalScrollBarRowHiddenHeight);
+        }
+        finally
+        {
+            _isSynchronizingContentHorizontalScrollBar = false;
+        }
+    }
+
+    /// <summary>横のバーの行の高さを枠の層と本体の層で同じにそろえる(ずれるとクリックがバーへ届かない)。</summary>
+    private void SetHorizontalScrollBarRowHeight(double height)
+    {
+        FrameHorizontalScrollBarRow.Height = new GridLength(height);
+        WidgetContentHorizontalScrollBarRow.Height = new GridLength(height);
     }
 
     private void ScheduleBoundsSave()

@@ -60,7 +60,6 @@ public sealed record BenchmarkStateSnapshot(
 public sealed record MetricTimelinePoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
 
 public sealed record MetricTimelineSnapshot(
-    ulong TotalValue,
     IReadOnlyList<MetricTimelinePoint> Points);
 
 /// <summary>
@@ -92,7 +91,6 @@ public sealed record MetricSkillTableRowSnapshot(
     IReadOnlyList<KeyValuePair<EDamageMode, ulong>> ValueByMode);
 
 public sealed record MetricSkillTableSnapshot(
-    ulong TotalValue,
     IReadOnlyList<MetricSkillTableRowSnapshot> Entries);
 
 public sealed record PlayerMetricSummarySnapshot(
@@ -166,8 +164,11 @@ internal sealed record PlayerBuffCandidate(
     PlayerBuffSnapshot Snapshot,
     TimeSpan EffectiveRemoveTime);
 
-/// <summary>ロスターを通らない表示(ウィンドウのタイトルなど)が使う相手の素性。名前の規則(NPC は職業名)を当てるので NPC の印と職業も持つ。</summary>
-public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId);
+/// <summary>
+/// ロスターを通らない表示(ウィンドウのタイトルなど)が使う相手の素性。名前の規則(NPC は職業名)を当てるので NPC の印と職業も持つ。
+/// <see cref="ClassSpec"/> はクラスカラーの鍵を決めるため(変身中か。求め方はメーターの行と同じ)。
+/// </summary>
+public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec);
 
 /// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
 /// <param name="IsUnnamedEnemy">
@@ -626,7 +627,17 @@ public static class MeterSnapshotProvider
         }
 
         var source = PlayerDataSourceResolver.Resolve(entity, IsSelf(entity));
-        return new MeterPlayerIdentity(source.Name, source.CharacterId, source.IsNpc, source.ProfessionId);
+        return new MeterPlayerIdentity(
+            source.Name,
+            source.CharacterId,
+            source.IsNpc,
+            source.ProfessionId,
+            PlayerClassSpecResolver.Resolve(
+                source.ProfessionId,
+                source.SubProfessionId,
+                source.IsSpecAbilityUnequipped,
+                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID),
+                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)));
     }
 
 
@@ -1703,7 +1714,7 @@ public static class MeterSnapshotProvider
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return new MetricTimelineSnapshot(0UL, Array.Empty<MetricTimelinePoint>());
+            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
         }
 
         var stats = kind == MeterSnapshotKind.Damage
@@ -1711,10 +1722,9 @@ public static class MeterSnapshotProvider
             : entity.HealingStats;
         var totals = stats.GetPerSecondTotalsCopy(out var lastTimestamp);
 
-        var totalValue = GetPlayerTotalValue(entity, kind);
         if (totals.Length == 0 || lastTimestamp is not { } lastValueTime)
         {
-            return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
+            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
         }
 
         // 秒の区切りは記録時に戦闘の時計の起点から切ってある。起点が無いのに合計があるなら記録側が壊れている。
@@ -1739,7 +1749,7 @@ public static class MeterSnapshotProvider
         var bucketCount = fullBucketCount + (hasPartialBucket ? 1 : 0);
         if (bucketCount == 0)
         {
-            return new MetricTimelineSnapshot(totalValue, Array.Empty<MetricTimelinePoint>());
+            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
         }
 
         // 1秒の鍵 k は (k, k+1] 秒なので、区切り j に入るのは k / N == j の鍵。
@@ -1770,7 +1780,7 @@ public static class MeterSnapshotProvider
                 bucketTotals[fullBucketCount] / partialBucketSeconds);
         }
 
-        return new MetricTimelineSnapshot(totalValue, points);
+        return new MetricTimelineSnapshot(points);
     }
 
     public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)
@@ -1857,7 +1867,7 @@ public static class MeterSnapshotProvider
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return new MetricSkillTableSnapshot(0UL, Array.Empty<MetricSkillTableRowSnapshot>());
+            return new MetricSkillTableSnapshot(Array.Empty<MetricSkillTableRowSnapshot>());
         }
 
         IReadOnlyList<KeyValuePair<long, CombatStats>> skillStats = kind switch
@@ -1880,7 +1890,7 @@ public static class MeterSnapshotProvider
         var entityTotalValue = GetPlayerTotalValue(entity, kind);
         if (skillStats.Count == 0 || entityTotalValue == 0UL)
         {
-            return new MetricSkillTableSnapshot(entityTotalValue, Array.Empty<MetricSkillTableRowSnapshot>());
+            return new MetricSkillTableSnapshot(Array.Empty<MetricSkillTableRowSnapshot>());
         }
 
         // 有効は、その人の有効な秒数で割る(行ごとに変わらない)。
@@ -1922,7 +1932,7 @@ public static class MeterSnapshotProvider
                 [.. value.GetValueTotalByModeCopy().OrderBy(pair => pair.Key)]);
         }
 
-        return new MetricSkillTableSnapshot(entityTotalValue, rows);
+        return new MetricSkillTableSnapshot(rows);
     }
 
     /// <summary>

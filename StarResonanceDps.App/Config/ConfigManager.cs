@@ -135,6 +135,7 @@ public sealed class ConfigManager
             settings.NetCaptureDeviceName,
             settings.GameCapturePreference,
             settings.GameCaptureCustomExeName,
+            settings.StopAggregationInAsterleeds,
             settings.SplitEncountersOnNewPhases,
             settings.KeepPastEncounterInMeterUntilNextDamage,
             settings.ClearHistorySelectionOnNextEvent,

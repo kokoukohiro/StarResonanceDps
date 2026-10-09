@@ -61,10 +61,8 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
     private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private IReadOnlyList<MetricTimelinePoint> _timelinePoints = Array.Empty<MetricTimelinePoint>();
-    private string _metricLabel = string.Empty;
-    private string _totalLabel = string.Empty;
-    private string _totalValueText = string.Empty;
-    private string _latestValueText = string.Empty;
+    private int _timelineVisibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+    private Brush? _timelineLineBrush;
     private bool _isDisposed;
 
     public PlayerMetricWidgetViewModel(
@@ -104,31 +102,21 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         private set => SetProperty(ref _timelinePoints, value);
     }
 
+    /// <summary>推移グラフの横軸の長さ(秒)。設定「横軸の長さ」。</summary>
+    public int TimelineVisibleSeconds
+    {
+        get => _timelineVisibleSeconds;
+        private set => SetProperty(ref _timelineVisibleSeconds, value);
+    }
+
+    /// <summary>推移グラフの線の色。その人のクラスのグラフカラー(フィルターを掛けた色)。相手が分かるまでは null。</summary>
+    public Brush? TimelineLineBrush
+    {
+        get => _timelineLineBrush;
+        private set => SetProperty(ref _timelineLineBrush, value);
+    }
+
     public ReadOnlyObservableCollection<MetricSkillTableEntry> SkillEntries { get; }
-
-    public string MetricLabel
-    {
-        get => _metricLabel;
-        private set => SetProperty(ref _metricLabel, value);
-    }
-
-    public string TotalLabel
-    {
-        get => _totalLabel;
-        private set => SetProperty(ref _totalLabel, value);
-    }
-
-    public string TotalValueText
-    {
-        get => _totalValueText;
-        private set => SetProperty(ref _totalValueText, value);
-    }
-
-    public string LatestValueText
-    {
-        get => _latestValueText;
-        private set => SetProperty(ref _latestValueText, value);
-    }
 
     public string TotalValueHeader => LocalizationManager.Instance.GetString(
         _kind == MeterSnapshotKind.Damage
@@ -204,15 +192,15 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             return;
         }
 
-        var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
-        MetricLabel = _displayMode == PlayerMetricDisplayMode.Timeline
-            ? LocalizationManager.Instance.GetString(_kind == MeterSnapshotKind.Damage ? "Metric_InstantDps" : "Metric_InstantHps")
-            : (_kind == MeterSnapshotKind.Damage ? "DPS" : "HPS");
-        TotalLabel = $"{LocalizationManager.Instance.GetString("Meter_Total")}:";
+        var timelineSettings = IsTimeline ? PlayerWidget.GetMetricTimelineSettingsSnapshot() : null;
+        if (timelineSettings is not null)
+        {
+            TimelineVisibleSeconds = timelineSettings.VisibleSeconds;
+        }
 
         if (SelectedCharacterId is not { } characterId)
         {
-            ApplyEmptyData(numberDisplayFormatIndex);
+            ApplyEmptyData();
             return;
         }
 
@@ -222,37 +210,59 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
-        if (IsTimeline)
+        if (timelineSettings is not null)
         {
-            var aggregationIntervalSeconds = PlayerWidget
-                .GetMetricTimelineSettingsSnapshot()
-                .AggregationIntervalSeconds;
             var timeline = MeterSnapshotProvider.GetPlayerTimeline(
                 _kind,
                 characterId,
-                aggregationIntervalSeconds);
+                timelineSettings.AggregationIntervalSeconds);
             TimelinePoints = timeline.Points;
+            if (playerIdentity is not null)
+            {
+                ApplyTimelineLineColor(
+                    timelineSettings,
+                    PlayerProfession.GetKey(playerIdentity.ProfessionId, playerIdentity.ClassSpec));
+            }
+
             ClearSkillEntries();
-            TotalValueText = MeterNumberFormatter.Format(timeline.TotalValue, numberDisplayFormatIndex);
-            LatestValueText = timeline.Points.Count == 0
-                ? string.Empty
-                : MeterNumberFormatter.Format(timeline.Points[^1].ValuePerSecond, numberDisplayFormatIndex);
             return;
         }
 
         var table = MeterSnapshotProvider.GetPlayerSkillTable(_kind, characterId);
         TimelinePoints = Array.Empty<MetricTimelinePoint>();
-        TotalValueText = MeterNumberFormatter.Format(table.TotalValue, numberDisplayFormatIndex);
-        LatestValueText = string.Empty;
-        SynchronizeSkillEntries(table.Entries, numberDisplayFormatIndex);
+        SynchronizeSkillEntries(table.Entries, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
     }
 
-    private void ApplyEmptyData(int numberDisplayFormatIndex)
+    private void ApplyEmptyData()
     {
         TimelinePoints = Array.Empty<MetricTimelinePoint>();
         ClearSkillEntries();
-        TotalValueText = MeterNumberFormatter.Format(0UL, numberDisplayFormatIndex);
-        LatestValueText = string.Empty;
+    }
+
+    /// <summary>
+    /// 線の色。クラスの鍵の選んでいる色にフィルターを掛ける(メーターの行のクラスカラーと同じ掛け方)。グラフカラーは不透明度を持たないので不透明で描く。
+    /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
+    /// </summary>
+    private void ApplyTimelineLineColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
+    {
+        var palette = settings.ClassColorPalettes[classKey];
+        var hex = palette[Math.Clamp(settings.ClassColorIndexes[classKey], 0, palette.Count - 1)];
+        if (!ColorUtilities.TryParseHex(hex, out var color))
+        {
+            throw new InvalidOperationException($"Graph color is not a valid color (class={classKey}, value={hex}).");
+        }
+
+        var filtered = ClassColorFilter.Apply(color, settings);
+        var lineColor = Color.FromRgb(filtered.R, filtered.G, filtered.B);
+
+        if (TimelineLineBrush is SolidColorBrush current && current.Color == lineColor)
+        {
+            return;
+        }
+
+        var brush = new SolidColorBrush(lineColor);
+        brush.Freeze();
+        TimelineLineBrush = brush;
     }
 
     /// <summary>

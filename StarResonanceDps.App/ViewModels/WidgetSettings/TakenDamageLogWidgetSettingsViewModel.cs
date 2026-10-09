@@ -300,7 +300,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
 /// <summary>
 /// テキストカラーの1行。行の作りはクラスカラー(<see cref="MeterClassColorItemViewModel"/>)と同じで、
-/// ダメージの属性の行だけ左にアイコンを出す。
+/// 左の欄はダメージの属性の行が属性アイコン、それ以外の行が「Aa」の見本。
 /// </summary>
 public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
 {

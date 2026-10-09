@@ -23,7 +23,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private readonly MatchFoundNotifier _matchFoundNotifier;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
-    private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings();
+    private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings(WidgetKind.DpsGraph);
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
     private TakenDamageLogWidgetSettingsConfig _takenDamageLog = WidgetConfigDefaults.CreateTakenDamageLogSettings();
     private PlayerInfoWidgetSettingsConfig _playerInfo = WidgetConfigDefaults.CreatePlayerInfoSettings();
@@ -128,7 +128,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public MetricTimelineWidgetSettingsConfig GetMetricTimelineSettingsSnapshot()
     {
-        return WidgetConfigDefaults.CloneNormalizedMetricTimeline(_metricTimeline);
+        return WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, _metricTimeline);
     }
 
     public BuffCardWidgetSettingsConfig GetBuffCardSettingsSnapshot()
@@ -377,7 +377,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         if (WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
         {
-            _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(config.MetricTimeline);
+            _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, config.MetricTimeline);
             RaisePlayerWindowPresentationChanged();
         }
 
@@ -459,7 +459,7 @@ public partial class WidgetListItemViewModel : ViewModelBase
             return;
         }
 
-        _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(metricTimeline);
+        _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, metricTimeline);
         RaisePlayerWindowPresentationChanged();
     }
 

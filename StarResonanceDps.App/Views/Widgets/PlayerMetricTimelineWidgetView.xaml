@@ -4,51 +4,24 @@
              xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <UserControl.Resources>
+        <!--
+            格子と軸の線。<b>枠のレイヤー(WidgetWindow.FrameOverlayHost)へ差し込む</b>(分割線と同じく窓の不透明度で合成する)。
+            色は分割線と同じ。
+        -->
+        <controls:MetricTimelineGridLayer x:Key="GridLayer"
+                                          Brush="{Binding DataContext.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+    </UserControl.Resources>
 
-        <Grid>
-            <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                       FontSize="14"
-                       FontWeight="SemiBold"
-                       Text="{Binding MetricLabel}" />
-            <StackPanel HorizontalAlignment="Right"
-                        Orientation="Horizontal">
-                <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                           Opacity="0.7"
-                           Text="{Binding TotalLabel}" />
-                <TextBlock Margin="5,0,0,0"
-                           Style="{StaticResource Text.WidgetWindow}"
-                           FontWeight="SemiBold"
-                           Text="{Binding TotalValueText}" />
-            </StackPanel>
-        </Grid>
-
-        <Grid Grid.Row="1" Margin="0,10,0,8">
-            <controls:MetricTimelineChart MinWidth="1"
-                                          MinHeight="1"
-                                          HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch"
-                                          Points="{Binding TimelinePoints}"
-                                          LineBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowCloseBrush}"
-                                          GridBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowDividerBrush}"
-                                          TextBrush="{Binding PlayerWidget.WidgetWindowPalette.WidgetWindowCloseBrush}" />
-        </Grid>
-
-        <StackPanel Grid.Row="2"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-            <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                       Opacity="0.7"
-                       Text="{Binding MetricLabel}" />
-            <TextBlock Margin="5,0,0,0"
-                       Style="{StaticResource Text.WidgetWindow}"
-                       FontWeight="SemiBold"
-                       Text="{Binding LatestValueText}" />
-        </StackPanel>
+    <!-- 下の隙間は窓の横のスクロールバーの行が受け持つ(バーがあれば16、無ければ5。ほかのウィジェットの右と縦のバーの列と同じ)。 -->
+    <Grid Margin="5,5,5,0">
+        <controls:MetricTimelineChart x:Name="TimelineChart"
+                                      MinWidth="1"
+                                      MinHeight="1"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      Points="{Binding TimelinePoints}"
+                                      VisibleSeconds="{Binding TimelineVisibleSeconds}"
+                                      LineBrush="{Binding TimelineLineBrush}" />
     </Grid>
 </UserControl>

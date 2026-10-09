@@ -57,7 +57,7 @@ public static class EncounterHistoryProvider
     /// <para>
     /// 呼ぶのは <c>Encounter.AddDamage</c> / <c>AddHealing</c>(戦闘)と
     /// <c>EncounterManager.EnterDungeon</c> の末尾(エンカウンターの作り直し)。
-    /// 計測・リセット・マップ移動・「進行で集計を分割」の区切りは全部 <c>EnterDungeon</c> を通るので、
+    /// 計測・リセット・マップ移動・「進行で自動リセット」の区切りは全部 <c>EnterDungeon</c> を通るので、
     /// <b>ボタン側に専用の解除を書かない。</b>
     /// </para>
     ///

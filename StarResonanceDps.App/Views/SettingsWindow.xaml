@@ -363,9 +363,37 @@
                                            Margin="0,0,0,10" />
                                 <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_StopInAsterleeds]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding StopAggregationInAsterleeds, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding StopAggregationInAsterleedsStateText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
                                         <!--
                                             自動一時停止。行の名前と注記の2行で、右に選択リスト(選択肢はビューモデルが持つ。値は秒数そのもので 0 は一時停止しない)。
-                                            高さは「進行で集計を分割」の行と同じ 75。注記は選択リストの下まで広げる(右の列は選択リストの幅 220 なので、左の列だけだと折り返す)。
+                                            高さは「進行で自動リセット」の行と同じ 75。注記は選択リストの下まで広げる(右の列は選択リストの幅 220 なので、左の列だけだと折り返す)。
                                         -->
                                         <Border Style="{StaticResource Panel.SettingField}" Height="75">
                                             <Grid VerticalAlignment="Center">
@@ -593,8 +621,8 @@
                                         </Border>
 
                                         <!--
-                                            行の名前と注記の2行。形は「進行で集計を分割」の行と同じ。
-                                            注記は折り返すので高さは中身に合わせ、上下の余白は「進行で集計を分割」の行(高さ75)と同じ見た目にする。
+                                            行の名前と注記の2行。形は「進行で自動リセット」の行と同じ。
+                                            注記は折り返すので高さは中身に合わせ、上下の余白は「進行で自動リセット」の行(高さ75)と同じ見た目にする。
                                         -->
                                         <Border Style="{StaticResource Panel.SettingFieldLast}" Height="Auto" Padding="20,17,20,17">
                                             <Grid VerticalAlignment="Center">

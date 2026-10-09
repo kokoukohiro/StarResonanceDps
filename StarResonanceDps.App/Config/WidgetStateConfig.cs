@@ -132,15 +132,56 @@ public sealed class WidgetWindowConfig
     }
 }
 
+/// <summary>
+/// 推移グラフ(DPS / HPS)の設定。描画間隔、横軸の長さ、線の色(グラフカラー)。
+/// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色・フィルター。不透明度は持たない)で、既定は読み替え先のメーターと同じ
+/// (<see cref="WidgetConfigDefaults.GetMetricTimelineColorDefaultSource"/>)。ここの初期値は種類が分からないので DPS の既定で、
+/// 種類に合わせるのは <see cref="WidgetConfigDefaults.NormalizeMetricTimeline"/>。
+/// </summary>
 public sealed class MetricTimelineWidgetSettingsConfig
 {
     public int AggregationIntervalSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineAggregationIntervalSeconds;
+
+    /// <summary>横軸に入れる秒数。選択肢は <see cref="WidgetConfigDefaults.MetricTimelineVisibleSecondsChoices"/>。</summary>
+    public int VisibleSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter);
+
+    /// <summary>
+    /// 線の色にフィルター(レンズ)を掛けるか。<c>null</c> は「設定されていない」で、種類ごとの既定は
+    /// <see cref="WidgetConfigDefaults.NormalizeMetricTimeline"/> で埋める(メーターと同じ)。
+    /// </summary>
+    public bool? ClassColorFilterEnabled { get; set; }
+
+    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
+    public List<string>? ClassColorFilterColors { get; set; }
+
+    public int ClassColorFilterColorIndex { get; set; }
+
+    /// <summary>フィルター色をどれだけ反映するか(0〜100)。</summary>
+    public int ClassColorFilterStrength { get; set; } = WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
     public MetricTimelineWidgetSettingsConfig Clone()
     {
         return new MetricTimelineWidgetSettingsConfig
         {
-            AggregationIntervalSeconds = AggregationIntervalSeconds
+            AggregationIntervalSeconds = AggregationIntervalSeconds,
+            VisibleSeconds = VisibleSeconds,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase),
+            ClassColorFilterEnabled = ClassColorFilterEnabled,
+            ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
+            ClassColorFilterColorIndex = ClassColorFilterColorIndex,
+            ClassColorFilterStrength = ClassColorFilterStrength
         };
     }
 }
@@ -680,6 +721,7 @@ public static class WidgetConfigDefaults
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
     public const int DefaultMetricTimelineAggregationIntervalSeconds = 2;
+    public const int DefaultMetricTimelineVisibleSeconds = 60;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
@@ -740,6 +782,9 @@ public static class WidgetConfigDefaults
     private const double MetricTimelineInitialWindowHeight = 420d;
 
     public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [5, 3, 2, 1];
+
+    /// <summary>推移グラフの横軸の長さ(秒)の選択肢。軸の数字の間隔は <c>MetricTimelineChart</c> が長さから決める。</summary>
+    public static IReadOnlyList<int> MetricTimelineVisibleSecondsChoices { get; } = [30, 60, 120];
 
     /// <summary>
     /// 設定に並べるロールスキル。全20種。
@@ -1213,7 +1258,7 @@ public static class WidgetConfigDefaults
             Theme = CreateTheme(),
             Window = CreateDefaultWindowConfig(kind),
             Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
-            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings() : null,
+            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings(kind) : null,
             TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
             PlayerInfo = SupportsPlayerInfoSettings(kind) ? CreatePlayerInfoSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
@@ -1529,12 +1574,32 @@ public static class WidgetConfigDefaults
         };
     }
 
-    public static MetricTimelineWidgetSettingsConfig CreateMetricTimelineSettings()
+    /// <summary>推移グラフの既定。グラフカラーの既定は読み替え先のメーター(<see cref="GetMetricTimelineColorDefaultSource"/>)と同じ。</summary>
+    public static MetricTimelineWidgetSettingsConfig CreateMetricTimelineSettings(WidgetKind kind)
     {
+        var source = GetMetricTimelineColorDefaultSource(kind);
+
         return new MetricTimelineWidgetSettingsConfig
         {
-            AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds
+            AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds,
+            VisibleSeconds = DefaultMetricTimelineVisibleSeconds,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(source),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(source),
+            ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(source),
+            ClassColorFilterColors = CreateDefaultClassColorFilterColors(source),
+            ClassColorFilterStrength = DefaultClassColorFilterStrength
         };
+    }
+
+    /// <summary>
+    /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS推移グラフは DPS メーター、HPS推移グラフは HPS メーターに合わせる
+    /// (行の並び・色・最初に選ぶ枠・フィルター)。
+    /// </summary>
+    public static WidgetKind GetMetricTimelineColorDefaultSource(WidgetKind kind)
+    {
+        return kind == WidgetKind.HpsGraph
+            ? WidgetKind.HpsMeter
+            : WidgetKind.DpsMeter;
     }
 
     public static BuffCardWidgetSettingsConfig CreateBuffCardSettings()
@@ -1994,10 +2059,12 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
-    public static MetricTimelineWidgetSettingsConfig CloneNormalizedMetricTimeline(MetricTimelineWidgetSettingsConfig? metricTimeline)
+    public static MetricTimelineWidgetSettingsConfig CloneNormalizedMetricTimeline(
+        WidgetKind kind,
+        MetricTimelineWidgetSettingsConfig? metricTimeline)
     {
-        var normalized = (metricTimeline ?? CreateMetricTimelineSettings()).Clone();
-        NormalizeMetricTimeline(normalized);
+        var normalized = (metricTimeline ?? CreateMetricTimelineSettings(kind)).Clone();
+        NormalizeMetricTimeline(kind, normalized);
         return normalized;
     }
 
@@ -2044,7 +2111,7 @@ public static class WidgetConfigDefaults
             ? CloneNormalizedMeter(kind, config.Meter)
             : null;
         config.MetricTimeline = SupportsMetricTimelineSettings(kind)
-            ? CloneNormalizedMetricTimeline(config.MetricTimeline)
+            ? CloneNormalizedMetricTimeline(kind, config.MetricTimeline)
             : null;
         config.BuffCard = SupportsBuffCardSettings(kind)
             ? CloneNormalizedBuffCard(config.BuffCard)
@@ -2161,12 +2228,42 @@ public static class WidgetConfigDefaults
             : theme.BackgroundImageAverageColorSourcePath.Trim();
     }
 
-    public static void NormalizeMetricTimeline(MetricTimelineWidgetSettingsConfig metricTimeline)
+    public static void NormalizeMetricTimeline(WidgetKind kind, MetricTimelineWidgetSettingsConfig metricTimeline)
     {
         if (!MetricTimelineAggregationIntervals.Contains(metricTimeline.AggregationIntervalSeconds))
         {
             metricTimeline.AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds;
         }
+
+        if (!MetricTimelineVisibleSecondsChoices.Contains(metricTimeline.VisibleSeconds))
+        {
+            metricTimeline.VisibleSeconds = DefaultMetricTimelineVisibleSeconds;
+        }
+
+        // グラフカラー。行の並び・既定の色・フィルターの既定は読み替え先のメーターと同じ。
+        var source = GetMetricTimelineColorDefaultSource(kind);
+        metricTimeline.ClassColorFilterEnabled ??= IsClassColorFilterEnabledByDefault(source);
+
+        var filterDefaults = CreateDefaultClassColorFilterColors(source);
+        metricTimeline.ClassColorFilterColors = NormalizeColorList(
+            metricTimeline.ClassColorFilterColors ?? filterDefaults,
+            filterDefaults,
+            MaxPaletteColorCount);
+        metricTimeline.ClassColorFilterColorIndex = Math.Clamp(
+            metricTimeline.ClassColorFilterColorIndex,
+            MinClassColorIndex,
+            metricTimeline.ClassColorFilterColors.Count - 1);
+        metricTimeline.ClassColorFilterStrength = Math.Clamp(
+            metricTimeline.ClassColorFilterStrength,
+            MinClassColorFilterStrength,
+            MaxClassColorFilterStrength);
+
+        metricTimeline.ClassColorIndexes ??= CreateDefaultClassColorIndexes(source);
+        metricTimeline.ClassColorPalettes ??= CreateDefaultClassColorPalettes(source);
+        (metricTimeline.ClassColorIndexes, metricTimeline.ClassColorPalettes) = NormalizeClassColors(
+            source,
+            metricTimeline.ClassColorIndexes,
+            metricTimeline.ClassColorPalettes);
     }
 
     public static void NormalizeBuffCard(BuffCardWidgetSettingsConfig buffCard)
@@ -2292,7 +2389,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーの色の一覧と選んでいる枠を、<paramref name="kind"/> の職の並びと既定値で揃える。
-    /// メーター系の設定と被ダメログとプレイヤー情報が使う。
+    /// メーター系の設定と被ダメログとプレイヤー情報と推移グラフ(読み替え先のメーターの種類で呼ぶ)が使う。
     /// </summary>
     private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeClassColors(
         WidgetKind kind,

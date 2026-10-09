@@ -7,7 +7,7 @@
              SnapsToDevicePixels="True">
     <!--
         被ダメログのテキストカラー。行の作りはクラスカラー(TakenDamageLogClassColorSettingsView)と同じ。
-        左のアイコンはダメージの属性の行だけ。クラスアイコンと同じで、その行の選択色で染めて影を付ける。
+        左の欄はダメージの属性の行が属性アイコン、それ以外の行が「Aa」。どちらもクラスアイコンと同じで、その行の選択色で染めて影を付ける。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
@@ -43,25 +43,15 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <!-- 属性以外の行は枠ごと消す。項目名が他の設定の行と同じ左端から始まる。 -->
                                 <Grid Grid.Column="0"
                                       Width="27"
                                       Height="27"
                                       VerticalAlignment="Center">
-                                    <Grid.Style>
-                                        <Style TargetType="Grid">
-                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDamageProperty}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Grid.Style>
                                     <Rectangle Width="25"
                                                Height="25"
                                                HorizontalAlignment="Center"
                                                VerticalAlignment="Center"
+                                               Visibility="{Binding IsDamageProperty, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
                                                OpacityMask="{Binding IconMask}"
                                                RenderOptions.BitmapScalingMode="HighQuality">
@@ -73,25 +63,42 @@
                                                 BlurRadius="5" />
                                         </Rectangle.Effect>
                                     </Rectangle>
+
+                                    <!--
+                                        属性以外の行の見本。言語に依らないので文言の表に入れない。太さは行の名前と同じで、
+                                        大きさは字面の高さを名前(14)にそろえた 18(英字は同じ大きさの指定でも和文より字面が低い)。
+                                    -->
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Text="Aa"
+                                               Foreground="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
+                                               FontSize="18"
+                                               FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDamageProperty}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect
+                                                Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                Opacity="0.5"
+                                                ShadowDepth="0"
+                                                BlurRadius="5" />
+                                        </TextBlock.Effect>
+                                    </TextBlock>
                                 </Grid>
 
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center"
                                            Text="{Binding DisplayName}"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
                                            FontSize="14"
-                                           FontWeight="SemiBold">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                            <Setter Property="Margin" Value="0" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDamageProperty}" Value="True">
-                                                    <Setter Property="Margin" Value="10,0,0,0" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                           FontWeight="SemiBold" />
 
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                                     <ItemsControl ItemsSource="{Binding Colors.Colors}">
