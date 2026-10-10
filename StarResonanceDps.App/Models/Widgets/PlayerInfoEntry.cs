@@ -56,7 +56,7 @@ public sealed record PlayerInfoEntry
     /// <summary>クラスアイコンの下の特化名。クラスR2は共通の語尾つき。</summary>
     public string ClassSpecText { get; private init; } = string.Empty;
 
-    /// <summary>シーズン心相晶の絵。型の絵、無効なら無効の絵、不明ならはてな。表に無い型は無し。</summary>
+    /// <summary>シーズン心相晶の絵。型の絵、無効なら無効の絵、不明と表に無い型(絵が無い型)ははてな。</summary>
     public Brush? SeasonTalentIconMask { get; private init; }
 
     public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
@@ -227,7 +227,7 @@ public sealed record PlayerInfoEntry
 
     /// <summary>
     /// シーズン心相晶の絵と色の鍵。型が分かれば型の絵と型の色、無効なら無効の絵と無効の色、どちらでもなければはてなと不明の色。
-    /// 表に無い型は絵が無い(色は不明の色)。
+    /// 表に無い型(絵が無い型)も、はてなと不明の色。
     /// </summary>
     private static (Brush? Mask, string ColorKey) ResolveSeasonTalentIcon(int rootBuffId, bool isInactive)
     {

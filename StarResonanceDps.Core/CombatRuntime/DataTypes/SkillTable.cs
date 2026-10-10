@@ -163,5 +163,29 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
             return false;
         }
+
+        /// <summary>究極スキル(6)の枠の技か。</summary>
+        public bool IsUltimateSlot()
+        {
+            if (SlotPositionId == null)
+            {
+                return false;
+            }
+
+            return SlotPositionId.Contains(6);
+        }
+
+        /// <summary>
+        /// 枠の番号を持つ技か(0 以外の値がある)。通常攻撃の2段目以降や特化で置き換わった技は持たない(0 だけ)。
+        /// </summary>
+        public bool HasSlotPosition()
+        {
+            if (SlotPositionId == null)
+            {
+                return false;
+            }
+
+            return SlotPositionId.Exists(slotPositionId => slotPositionId != 0);
+        }
     }
 }

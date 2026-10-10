@@ -64,7 +64,7 @@ public static class SeasonTalentIcons
 
     /// <summary>
     /// プレイヤーリストの枠の中の形。型が分かれば型の絵、無効なら無し(枠だけ)、不明ならクラスの不明と同じ絵。
-    /// 表に無い型は無し。
+    /// 表に無い型(絵が無い型)は、不明と同じクラスの不明の絵(色も不明の色、<see cref="GetColorKey"/>)。
     /// </summary>
     public static Brush? GetIconMask(int rootBuffId, bool isInactive)
     {
@@ -72,7 +72,7 @@ public static class SeasonTalentIcons
         {
             return IconNameByRootBuffId.TryGetValue(rootBuffId, out var iconName)
                 ? ResolveMask($"Icon.SeasonTalent.{iconName}")
-                : null;
+                : ResolveMask("Icon.Profession.Unknown");
         }
 
         return isInactive ? null : ResolveMask("Icon.Profession.Unknown");

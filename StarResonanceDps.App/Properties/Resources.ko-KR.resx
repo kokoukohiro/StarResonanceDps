@@ -519,7 +519,7 @@
     <value>{0}의 {1}</value>
   </data>
   <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0}에게 {1}로 {2}</value>
+    <value>{0}에게 {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_LethalText" xml:space="preserve">
     <value>쓰러짐</value>
@@ -984,6 +984,9 @@
   </data>
   <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}초</value>
+  </data>
+  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+    <value>스킬 로그 표시</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
     <value>스킬 상세(피해)</value>

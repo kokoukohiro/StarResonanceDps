@@ -210,6 +210,47 @@ public partial class WidgetListItemViewModel : ViewModelBase
         BuffListHiddenBuffsChanged?.Invoke(Kind, baseId);
     }
 
+    /// <summary>推移グラフの今の横軸の長さ(設定の窓のプレビューを含む)。</summary>
+    public int MetricTimelineVisibleSeconds => _metricTimeline.VisibleSeconds;
+
+    /// <summary>
+    /// 推移グラフの窓の上のホイールで横軸の長さを変える。同じ種類の開いている窓を全部描き直し、
+    /// 開いている設定の窓へ <see cref="MetricTimelineVisibleSecondsChangedFromWidget"/> で知らせる。
+    /// 保存はホイールが止まってから <see cref="SaveMetricTimelineVisibleSeconds"/> で行う。
+    /// </summary>
+    public void SetMetricTimelineVisibleSecondsFromWidget(int visibleSeconds)
+    {
+        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        {
+            return;
+        }
+
+        var normalized = WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(visibleSeconds);
+        if (_metricTimeline.VisibleSeconds == normalized)
+        {
+            return;
+        }
+
+        _metricTimeline.VisibleSeconds = normalized;
+        RaisePlayerWindowPresentationChanged();
+        MetricTimelineVisibleSecondsChangedFromWidget?.Invoke(normalized);
+    }
+
+    /// <summary>
+    /// 横軸の長さを1項目だけ書き戻す。<b>設定一式は触らない</b>ので、開いている設定の窓が持つ未保存の値とぶつからない。
+    /// </summary>
+    public void SaveMetricTimelineVisibleSeconds(int visibleSeconds)
+    {
+        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        {
+            return;
+        }
+
+        WidgetStateManager.Instance.SaveMetricTimelineVisibleSeconds(
+            Kind,
+            WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(visibleSeconds));
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -260,6 +301,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     /// <summary>窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面の削除では上げない。</summary>
     public event Action<WidgetKind, int>? BuffListHiddenBuffsChanged;
+
+    /// <summary>推移グラフの窓の上のホイールで横軸の長さが変わった(引数は新しい秒数)。設定の窓のスライダーでは上げない。</summary>
+    public event Action<int>? MetricTimelineVisibleSecondsChangedFromWidget;
 
     public event EventHandler? ElementColorSettingsChanged;
 

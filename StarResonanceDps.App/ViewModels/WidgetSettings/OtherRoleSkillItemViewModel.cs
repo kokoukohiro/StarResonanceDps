@@ -44,14 +44,8 @@ public sealed partial class OtherRoleSkillItemViewModel : ObservableObject
     public bool IsImagine => false;
 
     /// <summary>
-    /// アイコンの位置・サイズをイマジン側の調整値にするか。
-    ///
-    /// <para>
-    /// プレイヤーリスト側([PlayerImagineRoleSkillEntry])と同じ条件にする。
-    /// あちらは <c>IsImagine || ShowLevel</c> で、<c>ShowLevel</c> は
-    /// 「ロールスキルかつレベルでCDが変わる」= 3021〜3028 のこと。
-    /// この画面はロールスキルだけなので、レベル依存かどうかだけで決まる。
-    /// </para>
+    /// アイコンの位置・サイズをイマジン側の調整値にするか。アイコンがイマジンの絵か(<c>CombatDataCatalog.IsImagineArtIcon</c>)で決める。
+    /// プレイヤーリスト側(<c>PlayerImagineRoleSkillEntry</c>)と同じ判定。
     /// </summary>
     [ObservableProperty]
     private bool _usesImagineAsset;
@@ -61,7 +55,7 @@ public sealed partial class OtherRoleSkillItemViewModel : ObservableObject
         Key = SkillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
         var iconName = CombatDataCatalog.GetSkillIconName(SkillId, string.Empty);
         DisplayName = CombatDataCatalog.GetSkillName(SkillId);
-        UsesImagineAsset = CombatDataCatalog.HasLevelDependentCooldown(SkillId);
+        UsesImagineAsset = CombatDataCatalog.IsImagineArtIcon(iconName);
         IconPath = CombatIconResolver.ResolveSkillIcon(iconName);
         OnPropertyChanged(nameof(StateText));
     }

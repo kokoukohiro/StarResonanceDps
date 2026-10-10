@@ -70,8 +70,14 @@
     <BitmapImage x:Key="Icon.PlayerStatus.common_icon21" UriSource="/Assets/Images/common_icon21.png" />
 
     <BitmapImage x:Key="Icon.PartyNumberFrame" UriSource="/Assets/Images/team_num_frame.png" />
+
+    <!--
+        技のアイコンの背景の枠。ファイル名の番号: 01 究極スキル・イマジンスキル以外(プレイヤーリストではロールスキル) / 02 イマジンスキル / 03 究極スキル。
+        3枚とも幅が同じで、下寄せに並べると中の円の位置がそろう。
+    -->
     <BitmapImage x:Key="Icon.RoleSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_01.png" />
     <BitmapImage x:Key="Icon.ImagineSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_02.png" />
+    <BitmapImage x:Key="Icon.UltimateSkillFrame" UriSource="/Assets/Images/weap_role_skill_bg_03.png" />
 
     <!--
         シーズン心相晶。型の絵の鍵の末尾は同梱のファイル名。

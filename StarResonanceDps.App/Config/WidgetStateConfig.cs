@@ -142,8 +142,14 @@ public sealed class MetricTimelineWidgetSettingsConfig
 {
     public int AggregationIntervalSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineAggregationIntervalSeconds;
 
-    /// <summary>横軸に入れる秒数。選択肢は <see cref="WidgetConfigDefaults.MetricTimelineVisibleSecondsChoices"/>。</summary>
+    /// <summary>
+    /// 横軸に入れる秒数(<see cref="WidgetConfigDefaults.MinMetricTimelineVisibleSeconds"/>〜<see cref="WidgetConfigDefaults.MaxMetricTimelineVisibleSeconds"/>)。
+    /// 設定の窓のスライダーと、ウィジェットの窓の上のホイールで変える。
+    /// </summary>
     public int VisibleSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+
+    /// <summary>横軸の下に押した技のアイコンの行(スキルログ)を出すか。</summary>
+    public bool ShowSkillLog { get; set; } = true;
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter);
 
@@ -169,6 +175,7 @@ public sealed class MetricTimelineWidgetSettingsConfig
         {
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = VisibleSeconds,
+            ShowSkillLog = ShowSkillLog,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DpsMeter)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -721,7 +728,12 @@ public static class WidgetConfigDefaults
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
     public const int DefaultMetricTimelineAggregationIntervalSeconds = 2;
-    public const int DefaultMetricTimelineVisibleSeconds = 60;
+    public const int DefaultMetricTimelineVisibleSeconds = 12;
+    public const int MinMetricTimelineVisibleSeconds = 4;
+    public const int MaxMetricTimelineVisibleSeconds = 120;
+
+    /// <summary>推移グラフの窓の上でホイールを1回回したときに横軸の長さを変える秒数。</summary>
+    public const int MetricTimelineVisibleSecondsWheelStep = 2;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
@@ -778,13 +790,16 @@ public static class WidgetConfigDefaults
     private const double MetricContributionInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 720d;
     private const double MetricSummaryInitialWindowHeight = 180d;
-    private const double MetricTimelineInitialWindowWidth = 980d;
-    private const double MetricTimelineInitialWindowHeight = 420d;
+    private const double MetricTimelineInitialWindowWidth = 440d;
+    private const double MetricTimelineInitialWindowHeight = 260d;
 
     public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [5, 3, 2, 1];
 
-    /// <summary>推移グラフの横軸の長さ(秒)の選択肢。軸の数字の間隔は <c>MetricTimelineChart</c> が長さから決める。</summary>
-    public static IReadOnlyList<int> MetricTimelineVisibleSecondsChoices { get; } = [30, 60, 120];
+    /// <summary>推移グラフの横軸の長さ(秒)を範囲に収める。軸の数字の間隔は <c>MetricTimelineChart</c> が長さから決める。</summary>
+    public static int ClampMetricTimelineVisibleSeconds(int seconds)
+    {
+        return Math.Clamp(seconds, MinMetricTimelineVisibleSeconds, MaxMetricTimelineVisibleSeconds);
+    }
 
     /// <summary>
     /// 設定に並べるロールスキル。全20種。
@@ -1583,6 +1598,7 @@ public static class WidgetConfigDefaults
         {
             AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds,
             VisibleSeconds = DefaultMetricTimelineVisibleSeconds,
+            ShowSkillLog = true,
             ClassColorIndexes = CreateDefaultClassColorIndexes(source),
             ClassColorPalettes = CreateDefaultClassColorPalettes(source),
             ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(source),
@@ -2235,10 +2251,7 @@ public static class WidgetConfigDefaults
             metricTimeline.AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds;
         }
 
-        if (!MetricTimelineVisibleSecondsChoices.Contains(metricTimeline.VisibleSeconds))
-        {
-            metricTimeline.VisibleSeconds = DefaultMetricTimelineVisibleSeconds;
-        }
+        metricTimeline.VisibleSeconds = ClampMetricTimelineVisibleSeconds(metricTimeline.VisibleSeconds);
 
         // グラフカラー。行の並び・既定の色・フィルターの既定は読み替え先のメーターと同じ。
         var source = GetMetricTimelineColorDefaultSource(kind);

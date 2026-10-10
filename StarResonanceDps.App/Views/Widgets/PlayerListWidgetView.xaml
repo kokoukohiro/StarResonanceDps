@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerListWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
              xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
@@ -198,6 +199,33 @@
                             </Style>
                         </Image.Style>
                     </Image>
+                    <!-- 絵のファイルが無い技ははてな。大きさと位置は推移グラフの 01・02 の枠のはてなと同じ値(MetricTimelineChart の定数)。 -->
+                    <Rectangle Width="{x:Static controls:MetricTimelineChart.UnknownSkillIconSize}"
+                               Height="{x:Static controls:MetricTimelineChart.UnknownSkillIconSize}"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Fill="White"
+                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                        <Rectangle.RenderTransform>
+                            <TranslateTransform X="{x:Static controls:MetricTimelineChart.RoleImagineUnknownIconOffsetX}"
+                                                Y="{x:Static controls:MetricTimelineChart.RoleImagineUnknownIconOffsetY}" />
+                        </Rectangle.RenderTransform>
+                        <Rectangle.OpacityMask>
+                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                        </Rectangle.OpacityMask>
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
                 </Grid>
 
                 <ContentPresenter Content="{Binding DebuffEntry}"

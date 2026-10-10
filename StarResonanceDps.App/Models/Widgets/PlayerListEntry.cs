@@ -86,7 +86,7 @@ public sealed partial class PlayerListEntry : ObservableObject
     private string _seasonTalentDisplayText = string.Empty;
 
     /// <summary>
-    /// シーズン心相晶の枠の中の絵の形。型が分かれば型の絵、不明ならクラスの不明と同じ絵、無効なら無し(枠だけ)。
+    /// シーズン心相晶の枠の中の絵の形。型が分かれば型の絵、不明と表に無い型(絵が無い型)はクラスの不明と同じ絵、無効なら無し(枠だけ)。
     /// どの型がどの絵かは <see cref="SeasonTalentIcons"/> の表が持つ。
     /// </summary>
     [ObservableProperty]

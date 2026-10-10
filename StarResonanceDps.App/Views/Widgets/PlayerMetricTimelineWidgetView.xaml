@@ -24,7 +24,7 @@
                                       VisibleSeconds="{Binding TimelineVisibleSeconds}"
                                       LineBrush="{Binding TimelineLineBrush}"
                                       SkillMarkers="{Binding TimelineSkillMarkers}"
-                                      UnknownSkillIconBrush="{Binding TimelineUnknownSkillIconBrush}"
+                                      ShowSkillMarkers="{Binding TimelineShowsSkillLog}"
                                       SkillMarkerToolTipTag="{Binding PlayerWidget}" />
     </Grid>
 </UserControl>

@@ -45,19 +45,6 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes.Skills
             return Icon;
         }
 
-        public bool IsImagineSlot()
-        {
-            if (Icon != null && Icon.Length > 0)
-            {
-                if (Icon.Contains("skill_aoyi"))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static implicit operator Zproto.SkillLevelInfo(SkillLevelInfo skillLevelInfo)
         {
             var data = new Zproto.SkillLevelInfo()

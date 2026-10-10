@@ -8,16 +8,16 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// 推移グラフ(DPS / HPS)の設定。表示設定(描画間隔・横軸の長さ)と、線の色(グラフカラー)。
+/// 推移グラフ(DPS / HPS)の設定。表示設定(描画間隔・横軸の長さ・スキルログを表示)と、線の色(グラフカラー)。
 /// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色・フィルター。不透明度は持たない)で、アイコンの欄には折れ線の見本を出す。
 /// 行の並びと既定は読み替え先のメーター(<see cref="WidgetConfigDefaults.GetMetricTimelineColorDefaultSource"/>)と同じ。
+/// 横軸の長さはウィジェットの窓の上のホイールでも変わり、そのときは <see cref="SetVisibleSecondsFromWidget"/> で受ける。
 /// </summary>
 public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableObject, IDisposable
 {
     private readonly WidgetKind _kind;
     private readonly WidgetKind _colorDefaultSource;
     private readonly ObservableCollection<MetricTimelineSecondsOption> _availableAggregationIntervals = [];
-    private readonly ObservableCollection<MetricTimelineSecondsOption> _availableVisibleSeconds = [];
     private readonly Dictionary<string, MeterClassColorItemViewModel> _classColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private MetricTimelineWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
@@ -25,8 +25,12 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     [ObservableProperty]
     private int _aggregationIntervalSeconds = WidgetConfigDefaults.DefaultMetricTimelineAggregationIntervalSeconds;
 
+    /// <summary>横軸の長さのスライダーの値。保存する値は <see cref="CreateConfig"/> で整数に丸めて範囲に収める。</summary>
     [ObservableProperty]
-    private int _visibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+    private double _visibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+
+    [ObservableProperty]
+    private bool _showSkillLog = true;
 
     [ObservableProperty]
     private bool _classColorFilterEnabled;
@@ -39,7 +43,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         _kind = kind;
         _colorDefaultSource = WidgetConfigDefaults.GetMetricTimelineColorDefaultSource(kind);
         AvailableAggregationIntervals = new ReadOnlyObservableCollection<MetricTimelineSecondsOption>(_availableAggregationIntervals);
-        AvailableVisibleSeconds = new ReadOnlyObservableCollection<MetricTimelineSecondsOption>(_availableVisibleSeconds);
 
         var items = new ObservableCollection<MeterClassColorItemViewModel>();
         var classColorKeys = WidgetConfigDefaults.GetClassColorKeys(_colorDefaultSource);
@@ -74,8 +77,24 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
 
     public ReadOnlyObservableCollection<MetricTimelineSecondsOption> AvailableAggregationIntervals { get; }
 
-    /// <summary>横軸の長さの選択肢。</summary>
-    public ReadOnlyObservableCollection<MetricTimelineSecondsOption> AvailableVisibleSeconds { get; }
+    /// <summary>横軸の長さのスライダーの最小。値の束縛より先に決まるよう、画面からは <c>x:Static</c> で読む。</summary>
+    public const double VisibleSecondsSliderMinimum = WidgetConfigDefaults.MinMetricTimelineVisibleSeconds;
+
+    /// <summary>横軸の長さのスライダーの最大。値の束縛より先に決まるよう、画面からは <c>x:Static</c> で読む。</summary>
+    public const double VisibleSecondsSliderMaximum = WidgetConfigDefaults.MaxMetricTimelineVisibleSeconds;
+
+    /// <summary>スライダーの右に出す今の横軸の長さ。</summary>
+    public string VisibleSecondsText => FormatVisibleSeconds(RoundVisibleSeconds(VisibleSeconds));
+
+    /// <summary>
+    /// いちばん長い横軸の長さの文字。スライダーの右の欄に見えない文字として重ね、欄の幅をこの文字に合わせる
+    /// (値が変わっても溝の長さが変わらない)。
+    /// </summary>
+    public string VisibleSecondsMaxText => FormatVisibleSeconds(WidgetConfigDefaults.MaxMetricTimelineVisibleSeconds);
+
+    /// <summary>スキルログのスイッチの右に出す ON / OFF。</summary>
+    public string ShowSkillLogStateText => LocalizationManager.Instance.GetString(
+        ShowSkillLog ? "Settings_Switch_On" : "Settings_Switch_Off");
 
     /// <summary>グラフカラーの行。クラスごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
@@ -111,7 +130,8 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         var config = new MetricTimelineWidgetSettingsConfig
         {
             AggregationIntervalSeconds = AggregationIntervalSeconds,
-            VisibleSeconds = VisibleSeconds,
+            VisibleSeconds = RoundVisibleSeconds(VisibleSeconds),
+            ShowSkillLog = ShowSkillLog,
             ClassColorFilterEnabled = ClassColorFilterEnabled,
             ClassColorFilterColors = [.. ClassColorFilterColors.GetHexColors()],
             ClassColorFilterColorIndex = ClassColorFilterColors.SelectedIndex,
@@ -151,6 +171,28 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    /// <summary>
+    /// ウィジェットの窓の上のホイールで変わった横軸の長さを受ける。ウィジェットの側で保存するので、
+    /// 保存済みの控えと画面の値の両方を合わせる(この項目を未保存に数えず、取り消しで戻さず、保存で古い値を書き戻さない)。
+    /// ほかの項目の未保存の変更はそのまま残す。
+    /// </summary>
+    public void SetVisibleSecondsFromWidget(int visibleSeconds)
+    {
+        _lastSaved.VisibleSeconds = visibleSeconds;
+
+        _isLoading = true;
+        try
+        {
+            VisibleSeconds = visibleSeconds;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
     public Color GetSelectedClassColor(string key)
     {
         return _classColorItemsByKey[key].Colors.SelectedColor;
@@ -180,6 +222,7 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         {
             AggregationIntervalSeconds = normalized.AggregationIntervalSeconds;
             VisibleSeconds = normalized.VisibleSeconds;
+            ShowSkillLog = normalized.ShowSkillLog;
 
             foreach (var item in ClassColorItems)
             {
@@ -205,14 +248,17 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
                 seconds,
                 LocalizationManager.Instance.Format("Settings_Timeline_AggregationInterval_Option", seconds)));
         }
+    }
 
-        _availableVisibleSeconds.Clear();
-        foreach (var seconds in WidgetConfigDefaults.MetricTimelineVisibleSecondsChoices)
-        {
-            _availableVisibleSeconds.Add(new MetricTimelineSecondsOption(
-                seconds,
-                LocalizationManager.Instance.Format("Settings_Timeline_VisibleSeconds_Option", seconds)));
-        }
+    private static int RoundVisibleSeconds(double visibleSeconds)
+    {
+        return WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(
+            (int)Math.Round(visibleSeconds, MidpointRounding.AwayFromZero));
+    }
+
+    private static string FormatVisibleSeconds(int visibleSeconds)
+    {
+        return LocalizationManager.Instance.Format("Settings_Timeline_VisibleSeconds_Option", visibleSeconds);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -226,6 +272,9 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
 
         OnPropertyChanged(nameof(GraphColorSectionTitle));
         OnPropertyChanged(nameof(ClassColorFilterStateText));
+        OnPropertyChanged(nameof(ShowSkillLogStateText));
+        OnPropertyChanged(nameof(VisibleSecondsText));
+        OnPropertyChanged(nameof(VisibleSecondsMaxText));
     }
 
     private void RaisePreviewChanged()
@@ -239,6 +288,7 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     {
         if (left.AggregationIntervalSeconds != right.AggregationIntervalSeconds
             || left.VisibleSeconds != right.VisibleSeconds
+            || left.ShowSkillLog != right.ShowSkillLog
             || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
             || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
             || left.ClassColorFilterStrength != right.ClassColorFilterStrength
@@ -282,8 +332,15 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         NotifyChanged();
     }
 
-    partial void OnVisibleSecondsChanged(int value)
+    partial void OnVisibleSecondsChanged(double value)
     {
+        OnPropertyChanged(nameof(VisibleSecondsText));
+        NotifyChanged();
+    }
+
+    partial void OnShowSkillLogChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowSkillLogStateText));
         NotifyChanged();
     }
 
@@ -301,7 +358,7 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     }
 }
 
-/// <summary>秒数の選択肢(描画間隔・横軸の長さ)。</summary>
+/// <summary>秒数の選択肢(描画間隔)。</summary>
 public sealed class MetricTimelineSecondsOption
 {
     public MetricTimelineSecondsOption(int seconds, string displayName)

@@ -155,6 +155,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `Data/Overrides/RecountRowOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
 | `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
+| `Data/Overrides/SkillActivationOverrides.json` | 推移グラフの技のアイコンの名前とアイコン |
 | `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
@@ -211,6 +212,7 @@ export BPSR_TABLES=<置き場所>     # bash
 
 同梱の `SkillTable` を読んだ後に重ねる。**書くのは `SkillLevelGroup` だけ。**
 スキル枠のバッジが、付与元の技から装備中のイマジン・ロールスキルへ辿るのに使う。
+推移グラフの技のアイコンの枠もこの寄せ先で決まる(枠の番号を持たない技は、`SkillLevelGroup` の先の技の枠になる)。
 
 ```json
 { "<技ID>": { "SkillLevelGroup": <寄せ先の技ID> } }
@@ -218,6 +220,25 @@ export BPSR_TABLES=<置き場所>     # bash
 
 キーが `SkillTable` に無いときは、`BuffOverrides` と同じく**技の行を作ってから当てる**(ID と `SkillLevelGroup` だけを持つ行)。
 `SkillLevelGroup` が書かれていない項目は当てない。ファイルが無ければエラーログを出し、上書き無しのまま続ける。
+
+### SkillActivationOverrides.json
+
+推移グラフの横軸の下に出す、押した技のアイコンの名前とアイコンの手修正。表に名前もアイコンも無い技に使う。
+鍵は押した技の技ID。名前とアイコンを見出し表の行・技の名前の表・技の表で決めた後に、**書いてある言語の名前とアイコンだけ**を差し替える。
+
+```json
+{
+  "<技ID>": {
+    "Name": { "zh-CN": "…", "en-US": "…", "ja-JP": "…", "ko-KR": "…" },
+    "Icon": "<アイコンのパス>"
+  }
+}
+```
+
+- `Name` と `Icon` はどちらも省略できる。空の値は書かなかったのと同じ
+- `Icon` は `SkillTable` の `Icon` と同じパスの形で書く。アプリはパスの最後の部分をファイル名として技のアイコンのフォルダから探し、
+  イマジンの絵かどうかもパスで決める
+- 鍵が技IDの形でない行と知らない言語の名前はエラーログを出して読まない。ファイルが無ければエラーログを出し、上書き無しのまま続ける
 
 ### BuffOverrides.json
 

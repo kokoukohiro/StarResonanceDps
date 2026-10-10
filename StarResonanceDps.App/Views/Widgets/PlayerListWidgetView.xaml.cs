@@ -43,7 +43,6 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
         Loaded += PlayerListWidgetView_Loaded;
         Unloaded += PlayerListWidgetView_Unloaded;
         SizeChanged += PlayerListWidgetView_SizeChanged;
-        PreviewMouseWheel += PlayerListWidgetView_PreviewMouseWheel;
     }
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
@@ -76,13 +75,7 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("PlayerList");
         _scrollViewer.ScrollToVerticalOffset(offset);
-    }
-
-    private void PlayerListWidgetView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("PlayerList");
     }
 
     private void PlayerListWidgetView_Loaded(object sender, RoutedEventArgs e)
@@ -137,7 +130,6 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
         if (e.VerticalChange != 0)
         {
             ClosePlayerSelectionMenu();
-            StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollPositionChanged();
         }
 
         NotifyVerticalScrollMetricsChanged();

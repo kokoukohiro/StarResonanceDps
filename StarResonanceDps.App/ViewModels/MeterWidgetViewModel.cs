@@ -4,7 +4,6 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
-using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
@@ -64,7 +63,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         _widget.MeterSettingsChanged += Widget_MeterSettingsChanged;
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
-        HistorySwitchProbe.Register(this, _widget.Kind.ToString());
         Refresh();
         _refreshTimer.Start();
     }
@@ -80,7 +78,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         _widget.MeterSettingsChanged -= Widget_MeterSettingsChanged;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
-        HistorySwitchProbe.Unregister(this);
     }
 
     public string ContributionMenuText => LocalizationManager.Instance.GetString(
@@ -123,8 +120,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
 
     private void Refresh()
     {
-        var probe = HistorySwitchProbe.BeginRefresh(this);
-
         // 計測の完了後も描き直してよい。時計が窓の終わりで止まり、窓の後は記録されない(Core)。
         var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
         var settings = _widget.GetMeterSettingsSnapshot();
@@ -134,8 +129,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
         var snapshot = MeterSnapshotProvider.GetSnapshot(
             _kind,
             (PartyDisplayMode)settings.PartyDisplayModeIndex);
-        probe?.DataDone();
-        var rowsBefore = _entries.Count;
 
         ElapsedText = FormatDuration(snapshot.Duration);
         IsBenchmarkActive = benchmarkState.IsActive;
@@ -192,8 +185,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 _entries.Move(currentIndex, index);
             }
         }
-
-        probe?.End($"players={snapshot.Players.Count} rows={rowsBefore}->{_entries.Count}");
     }
 
     [RelayCommand]

@@ -66,8 +66,16 @@ public sealed record MetricTimelineSnapshot(
 /// 推移グラフの横軸の下に出す、プレイヤーの技の開始1件。<see cref="Seconds"/> は戦闘の時計の経過(<c>Encounter.ToCombatOffset</c>)で、
 /// 起点より前の開始は 0、自動一時停止の中の開始は止まった時点の経過。<see cref="IconName"/> と <see cref="Name"/> は
 /// メーターと同じ見出し表の行で畳んだもの(<c>CombatDataCatalog.GetSkillActivationDisplay</c>、内部IDの注記は設定どおり。名前が無ければ空)。
+/// <see cref="Frame"/>(アイコンの背景の枠)は押した技が属する、枠の番号を持つ技で決めたもの(<c>CombatDataCatalog.GetSkillIconFrame</c>)。
+/// <see cref="UsesImagineAsset"/>(イマジンの絵か)は出す絵で決めたもの(<c>CombatDataCatalog.IsImagineArtIcon</c>)。
 /// </summary>
-public sealed record MetricTimelineSkillActivation(double Seconds, int SkillId, string IconName, string Name);
+public sealed record MetricTimelineSkillActivation(
+    double Seconds,
+    int SkillId,
+    string IconName,
+    string Name,
+    SkillIconFrame Frame,
+    bool UsesImagineAsset);
 
 /// <summary>
 /// スキル詳細の1行。
@@ -1813,12 +1821,14 @@ public static class MeterSnapshotProvider
                 return Array.Empty<MetricTimelineSkillActivation>();
             }
 
-            var (name, iconName) = CombatDataCatalog.GetSkillActivationDisplay(record.SkillId);
+            var (name, iconName, frame, usesImagineAsset) = CombatDataCatalog.GetSkillActivationDisplay(record.SkillId);
             activations.Add(new MetricTimelineSkillActivation(
                 Math.Max(offset.TotalSeconds, 0d),
                 record.SkillId,
                 iconName,
-                name));
+                name,
+                frame,
+                usesImagineAsset));
         }
 
         return activations;

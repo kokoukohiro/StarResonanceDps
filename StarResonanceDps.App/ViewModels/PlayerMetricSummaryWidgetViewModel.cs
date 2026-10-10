@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
-using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
@@ -35,7 +34,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         InitializePlayer(initialPlayer);
-        HistorySwitchProbe.Register(this, playerWidget.Kind.ToString());
         Refresh();
         _refreshTimer.Start();
     }
@@ -52,7 +50,6 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
-        HistorySwitchProbe.Unregister(this);
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -82,13 +79,9 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
             return;
         }
 
-        var probe = HistorySwitchProbe.BeginRefresh(this);
         if (SelectedCharacterId is not { } characterId)
         {
-            var emptySnapshot = MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0);
-            probe?.DataDone();
-            ApplySnapshot(emptySnapshot, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
-            probe?.End("no player");
+            ApplySnapshot(MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0), _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
             return;
         }
 
@@ -100,9 +93,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
 
         var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
         var snapshot = MeterSnapshotProvider.GetPlayerMetricSummary(_kind, characterId);
-        probe?.DataDone();
         ApplySnapshot(snapshot, numberDisplayFormatIndex);
-        probe?.End(string.Empty);
     }
 
     /// <summary>行の文字を組み直して入れる。行の部品は作り直さない(同じ文字なら何も起きない)。</summary>

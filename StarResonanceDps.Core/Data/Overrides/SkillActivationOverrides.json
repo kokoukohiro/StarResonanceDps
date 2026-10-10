@@ -1,0 +1,173 @@
+{
+  "1224": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "1294": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+  },
+  "1413": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "1417": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+  },
+  "1511": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "1517": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+  },
+  "1624": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+  },
+  "1693": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "1792": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "1795": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+  },
+  "1912": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+  },
+  "1914": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2002": {
+    "Name": {
+      "zh-CN": "受身",
+      "en-US": "Recovery",
+      "ja-JP": "受身",
+      "ko-KR": "낙법"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2211": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+  },
+  "2212": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2327": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2337": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+  },
+  "2422": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2424": {
+    "Name": {
+      "zh-CN": "红光反制攻击",
+      "en-US": "Red Light Counter",
+      "ja-JP": "ジャスト反撃",
+      "ko-KR": "붉은빛 반격"
+    },
+    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+  }
+}

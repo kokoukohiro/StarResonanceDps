@@ -519,7 +519,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>{0}'s {1}</value>
   </data>
   <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0} took {1} and {2}</value>
+    <value>{0} took {1} → {2}</value>
   </data>
   <data name="TakenDamageLog_LethalText" xml:space="preserve">
     <value>was defeated</value>
@@ -984,6 +984,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0} seconds</value>
+  </data>
+  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+    <value>Show Skill Log</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
     <value>Skill Details (Damage)</value>

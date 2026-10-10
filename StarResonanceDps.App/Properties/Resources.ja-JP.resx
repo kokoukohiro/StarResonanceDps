@@ -456,7 +456,7 @@
     <value>{0}の{1}</value>
   </data>
   <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0}に{1}で{2}</value>
+    <value>{0}に{1} → {2}</value>
   </data>
   <data name="TakenDamageLog_LethalText" xml:space="preserve">
     <value>戦闘不能</value>
@@ -921,6 +921,9 @@
   </data>
   <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}秒</value>
+  </data>
+  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+    <value>スキルログを表示</value>
   </data>
   <data name="Widget_DamageSkillDetails" xml:space="preserve">
     <value>スキル詳細(与ダメ)</value>

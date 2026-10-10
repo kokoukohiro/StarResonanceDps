@@ -17,6 +17,8 @@ public static class CombatDataCatalog
         new Dictionary<int, Buff>().ToFrozenDictionary();
     private static FrozenDictionary<int, FrozenDictionary<int, float>> _skillCooldownsByLevel =
         new Dictionary<int, FrozenDictionary<int, float>>().ToFrozenDictionary();
+    /// <summary>技ID → 技のアイコンの背景の枠(<see cref="BuildSkillIconFrames"/>)。技の表の全部の技。</summary>
+    private static FrozenDictionary<int, SkillIconFrame> _skillIconFrames = FrozenDictionary<int, SkillIconFrame>.Empty;
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -80,6 +82,13 @@ public static class CombatDataCatalog
     /// </summary>
     private static FrozenDictionary<int, (int Branch, long RowKey)[]> _recountKeysByOwner =
         FrozenDictionary<int, (int Branch, long RowKey)[]>.Empty;
+
+    /// <summary>
+    /// 押した技の技ID → 推移グラフの技のアイコンの名前とアイコンの手修正。<c>Data/Overrides/SkillActivationOverrides.json</c>。
+    /// 表に名前もアイコンも無い技(回避・共通受身スキルなど)に使う(<see cref="GetSkillActivationDisplay"/>)。
+    /// </summary>
+    private static FrozenDictionary<int, SkillActivationOverride> _skillActivationOverrides =
+        FrozenDictionary<int, SkillActivationOverride>.Empty;
 
     /// <summary>オプションのバフID → オプション名。<c>Data/Localization/RogueEntryNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _rogueEntryNames =
@@ -267,6 +276,7 @@ public static class CombatDataCatalog
             _skills = LoadNumericCatalog(HelperMethods.DataTables.Skills.Data);
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
             _skillCooldownsByLevel = LoadSkillCooldowns();
+            _skillIconFrames = BuildSkillIconFrames();
             var skillNames = LoadLocalizedText("SkillNames", out var skillNameIds);
             (_skillNames, _) = ApplyNameOverrides(skillNames, skillNameIds, "SkillNameOverrides.json");
             var buffNames = LoadLocalizedText("BuffNames", out var buffNameIds);
@@ -295,6 +305,7 @@ public static class CombatDataCatalog
             _sceneNames = LoadLocalizedText("SceneNames", out _);
             _dungeonTypeNames = LoadDungeonTypeNames();
             LoadRecounts();
+            _skillActivationOverrides = LoadSkillActivationOverrides();
         }
     }
 
@@ -549,7 +560,7 @@ public static class CombatDataCatalog
         => _recountRows.TryGetValue(key, out rowKey);
 
     /// <summary>
-    /// 押した技(推移グラフの技のアイコン)の名前とアイコン名。<b>メーターと同じ見出し表の行で畳む</b>
+    /// 押した技(推移グラフの技のアイコン)の名前・アイコン名・背景の枠・イマジンの絵か。<b>名前とアイコンはメーターと同じ見出し表の行で畳む</b>
     /// (通常攻撃の2段目以降のように、技の表に名前もアイコンも無い技を根の技の行で出すため)。
     ///
     /// <para>
@@ -557,8 +568,18 @@ public static class CombatDataCatalog
     /// 行が無い、または行から決まらなければ技自身の名前・アイコン。どちらも無ければ空。
     /// 内部IDの注記は技の番号で付け、技名と同じ設定に従う。
     /// </para>
+    ///
+    /// <para>
+    /// 最後に手修正(<see cref="_skillActivationOverrides"/>、押した技の技ID)で、書いてある言語の名前とアイコンだけを差し替える。
+    /// 書いていない言語とアイコンは上の決め方のまま。
+    /// </para>
+    ///
+    /// <para>
+    /// 枠(<see cref="GetSkillIconFrame"/>)は押した技で決める(押した技が属する、枠の番号を持つ技の番号。畳んだ行では決めない)。
+    /// イマジンの絵か(<see cref="IsImagineArtIcon"/>)は出す絵(手修正の後)で決める。
+    /// </para>
     /// </summary>
-    public static (string Name, string IconName) GetSkillActivationDisplay(int skillId)
+    public static (string Name, string IconName, SkillIconFrame Frame, bool UsesImagineAsset) GetSkillActivationDisplay(int skillId)
     {
         var cultureName = Volatile.Read(ref _cultureName);
         var name = string.Empty;
@@ -579,7 +600,24 @@ public static class CombatDataCatalog
             iconName = GetSkillIconName(skillId);
         }
 
-        return (AppendInternalId(name, InternalIdDisplayMode.SkillOnly, skillId), iconName);
+        if (_skillActivationOverrides.TryGetValue(skillId, out var activationOverride))
+        {
+            if (activationOverride.Names.TryGetValue(cultureName, out var overrideName))
+            {
+                name = overrideName;
+            }
+
+            if (activationOverride.Icon is { } overrideIcon)
+            {
+                iconName = overrideIcon;
+            }
+        }
+
+        return (
+            AppendInternalId(name, InternalIdDisplayMode.SkillOnly, skillId),
+            iconName,
+            GetSkillIconFrame(skillId),
+            IsImagineArtIcon(iconName));
     }
 
     /// <summary>
@@ -959,6 +997,71 @@ public static class CombatDataCatalog
         }
 
         return result;
+    }
+
+    /// <summary>推移グラフの技のアイコンの手修正1件(<see cref="_skillActivationOverrides"/>)。</summary>
+    /// <param name="Names">言語 → 名前。書いてある言語だけ。</param>
+    /// <param name="Icon">アイコン(技の表の <c>Icon</c> と同じゲームのパスの形)。書いていなければ null。</param>
+    private sealed record SkillActivationOverride(FrozenDictionary<string, string> Names, string? Icon);
+
+    private sealed class SkillActivationOverrideEntry
+    {
+        public Dictionary<string, string?>? Name { get; set; }
+
+        public string? Icon { get; set; }
+    }
+
+    /// <summary>
+    /// <c>Data/Overrides/SkillActivationOverrides.json</c> を読む。鍵は押した技の技ID、中身は4言語の名前と、アイコン。
+    /// 空の値は書かなかったのと同じに扱う。鍵が技IDの形でない行と、知らない言語の名前は、記録して読まない。
+    /// </summary>
+    private static FrozenDictionary<int, SkillActivationOverride> LoadSkillActivationOverrides()
+    {
+        const string relativePath = "Overrides/SkillActivationOverrides.json";
+        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillActivationOverrides.json");
+        if (!File.Exists(path))
+        {
+            Log.Error("Failed to load {OverridePath}", relativePath);
+            return FrozenDictionary<int, SkillActivationOverride>.Empty;
+        }
+
+        var raw = JsonConvert.DeserializeObject<Dictionary<string, SkillActivationOverrideEntry>>(File.ReadAllText(path));
+        var result = new Dictionary<int, SkillActivationOverride>();
+        foreach (var pair in raw ?? [])
+        {
+            if (!int.TryParse(pair.Key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var skillId))
+            {
+                Log.Error("SkillActivationOverrides: skipping \"{Key}\" because the key is not a skill ID", pair.Key);
+                continue;
+            }
+
+            var names = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (cultureName, text) in pair.Value?.Name ?? [])
+            {
+                // 言語名の打ち間違いは静かに効かないので、必ず出す。
+                if (!SupportedCultures.Contains(cultureName, StringComparer.OrdinalIgnoreCase))
+                {
+                    Log.Error(
+                        "SkillActivationOverrides: {Key} has unknown culture \"{Culture}\"; cultures are {Cultures}",
+                        pair.Key, cultureName, string.Join(" / ", SupportedCultures));
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    names[cultureName] = text.Trim();
+                }
+            }
+
+            var iconText = pair.Value?.Icon;
+            var icon = string.IsNullOrWhiteSpace(iconText) ? null : iconText.Trim();
+            result[skillId] = new SkillActivationOverride(
+                names.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase),
+                icon);
+        }
+
+        Log.Information("Loaded {OverridePath}", relativePath);
+        return result.ToFrozenDictionary();
     }
 
     /// <summary>
@@ -1504,6 +1607,29 @@ public static class CombatDataCatalog
             && cooldownsByLevel.Values.Distinct().Skip(1).Any();
     }
 
+    /// <summary>
+    /// 技のアイコンの背景の枠(<see cref="BuildSkillIconFrames"/>)。表に無い技は <see cref="SkillIconFrame.Standard"/>。
+    /// </summary>
+    public static SkillIconFrame GetSkillIconFrame(int skillId)
+    {
+        return _skillIconFrames.TryGetValue(skillId, out var frame)
+            ? frame
+            : SkillIconFrame.Standard;
+    }
+
+    /// <summary>イマジンの絵の置き場所(技の表の <c>Icon</c> の全体のパスの先頭)。</summary>
+    private const string ImagineArtIconFolder = "ui/textures/skill_aoyi/";
+
+    /// <summary>
+    /// アイコンがイマジンの絵か(イマジンの絵は丸い絵で、ほかの技の絵と大きさと位置の調整が違う)。
+    /// 引数は技の表の <c>Icon</c> の全体のパス(<see cref="GetSkillIconName"/> の値)。ファイル名だけでは判定できない。
+    /// 見た目の調整のための判定で、イマジンの技か(<see cref="IsSkillImagine"/>)とは別。
+    /// </summary>
+    public static bool IsImagineArtIcon(string? iconName)
+    {
+        return iconName?.StartsWith(ImagineArtIconFolder, StringComparison.OrdinalIgnoreCase) == true;
+    }
+
     public static int GetSkillMaxCharges(int skillId)
     {
         return _skills.TryGetValue(skillId, out var skill)
@@ -1583,6 +1709,128 @@ public static class CombatDataCatalog
                 pair => pair.Key,
                 pair => pair.Value.ToFrozenDictionary())
             .ToFrozenDictionary();
+    }
+
+    /// <summary>
+    /// 技の表の全部の技のアイコンの背景の枠(<see cref="_skillIconFrames"/>)。<b>技が属する、枠の番号を持つ技の番号で決める。</b>
+    /// 判定はプレイヤーリストのイマジンの枠と同じ形(<c>Skill.IsImagineSlot</c>)にそろえる。
+    /// <list type="bullet">
+    ///   <item>
+    ///     番号は技の表の <c>SlotPositionId</c>(0 以外)。変身クラスの技は持たないので、職業の表の技の4列(通常攻撃・特殊攻撃・マスタリー・究極)を番号の代わりにする。
+    ///     通常攻撃・特殊攻撃・マスタリーの列は、たどるのを止める所として要る(止めないと、手修正で寄せた変身中の技がイマジンまでたどって <see cref="SkillIconFrame.Imagine"/> になる)
+    ///   </item>
+    ///   <item>
+    ///     番号を持たない技(通常攻撃の2段目以降・特化で置き換わった技など)は、番号を持つ技に着くまでたどる。
+    ///     <c>SkillLevelGroup</c> の根、それが無ければ自分を切り替え先(<c>SwitchSkillId</c>)か空中版(<c>SkySkillId</c>)に持つ技(番号の小さい順)。
+    ///     たどった技を控えて輪を止める。<c>SkillLevelGroup</c> は手修正(<c>SkillOverrides.json</c>)を重ねた値
+    ///   </item>
+    ///   <item>
+    ///     着いた技が 7・8 → <see cref="SkillIconFrame.Imagine"/>、6(職業の表の究極)→ <see cref="SkillIconFrame.Ultimate"/>。
+    ///     ほかの番号と、着かなかった技は <see cref="SkillIconFrame.Standard"/>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    private static FrozenDictionary<int, SkillIconFrame> BuildSkillIconFrames()
+    {
+        var professionClassSkillIds = new HashSet<int>();
+        var professionUltimateSkillIds = new HashSet<int>();
+        foreach (var profession in HelperMethods.DataTables.ProfessionSystems.Data.Values)
+        {
+            professionClassSkillIds.UnionWith(profession.NormalAttackSkill ?? []);
+            professionClassSkillIds.UnionWith(profession.SpecialSkill ?? []);
+            professionClassSkillIds.UnionWith(profession.NormalSkill ?? []);
+            professionUltimateSkillIds.UnionWith(profession.UltimateSkill ?? []);
+        }
+
+        // 技 → 自分を切り替え先・空中版に持つ技(番号の小さい順)。
+        var linkParents = new Dictionary<int, List<int>>();
+        foreach (var skill in _skills.Values)
+        {
+            AddLinkParent(skill.SwitchSkillId, skill.Id);
+            AddLinkParent(skill.SkySkillId, skill.Id);
+        }
+
+        foreach (var parents in linkParents.Values)
+        {
+            parents.Sort();
+        }
+
+        var frames = new Dictionary<int, SkillIconFrame>(_skills.Count);
+        foreach (var skillId in _skills.Keys)
+        {
+            frames[skillId] = ResolveFrame(skillId);
+        }
+
+        return frames.ToFrozenDictionary();
+
+        void AddLinkParent(int linkedSkillId, int parentSkillId)
+        {
+            if (linkedSkillId <= 0 || linkedSkillId == parentSkillId)
+            {
+                return;
+            }
+
+            if (!linkParents.TryGetValue(linkedSkillId, out var parents))
+            {
+                parents = [];
+                linkParents.Add(linkedSkillId, parents);
+            }
+
+            parents.Add(parentSkillId);
+        }
+
+        bool HasSlotNumber(Skill skill)
+        {
+            return skill.HasSlotPosition()
+                || professionClassSkillIds.Contains(skill.Id)
+                || professionUltimateSkillIds.Contains(skill.Id);
+        }
+
+        SkillIconFrame ResolveFrame(int skillId)
+        {
+            var visited = new HashSet<int>();
+            var currentId = skillId;
+            while (visited.Add(currentId) && _skills.TryGetValue(currentId, out var current))
+            {
+                if (HasSlotNumber(current))
+                {
+                    return ToFrame(current);
+                }
+
+                if (current.SkillLevelGroup > 0
+                    && current.SkillLevelGroup != currentId
+                    && _skills.ContainsKey(current.SkillLevelGroup))
+                {
+                    currentId = current.SkillLevelGroup;
+                    continue;
+                }
+
+                if (!linkParents.TryGetValue(currentId, out var parents))
+                {
+                    break;
+                }
+
+                currentId = parents[0];
+            }
+
+            return SkillIconFrame.Standard;
+        }
+
+        SkillIconFrame ToFrame(Skill skill)
+        {
+            if (skill.IsImagineSlot())
+            {
+                return SkillIconFrame.Imagine;
+            }
+
+            if (skill.IsUltimateSlot()
+                || professionUltimateSkillIds.Contains(skill.Id))
+            {
+                return SkillIconFrame.Ultimate;
+            }
+
+            return SkillIconFrame.Standard;
+        }
     }
 
     private static float ResolveSkillPveCooldownSeconds(Skill skill, int currentLevel)

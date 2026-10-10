@@ -200,6 +200,31 @@ public sealed class WidgetStateManager
         }
     }
 
+    /// <summary>
+    /// 推移グラフの横軸の長さだけを保存する。窓の上のホイールで変えて、ホイールが止まったときに呼ぶ。
+    ///
+    /// <para>
+    /// 設定一式を書き戻す形にすると、開いている設定ウィンドウが持っている未保存の値とぶつかる。
+    /// バフ・デバフ一覧の非表示のバフと同じく、この項目だけを書く。
+    /// </para>
+    /// </summary>
+    public void SaveMetricTimelineVisibleSeconds(WidgetKind kind, int visibleSeconds)
+    {
+        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.MetricTimeline ??= WidgetConfigDefaults.CreateMetricTimelineSettings(kind);
+            config.MetricTimeline.VisibleSeconds = visibleSeconds;
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
     private WidgetConfig GetOrCreateWidgetConfig(WidgetKind kind)
     {
         var key = WidgetConfigDefaults.GetKey(kind);

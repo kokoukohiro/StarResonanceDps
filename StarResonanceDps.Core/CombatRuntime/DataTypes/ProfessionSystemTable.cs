@@ -9,6 +9,11 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     /// ステータス詳細で、職業ごとに出す攻撃力と主ステータスを決めるのに使う。
     /// 直書きの分岐で持つとゲームの表とずれる。
     /// </para>
+    ///
+    /// <para>
+    /// 推移グラフの技のアイコンの枠(<c>CombatDataCatalog.GetSkillIconFrame</c>)にも使う。
+    /// 変身クラスの技は技の表の枠の番号を持たないので、職業の技の4列を番号の代わりにする。
+    /// </para>
     /// </summary>
     public class ProfessionSystemTable
     {
@@ -28,5 +33,17 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
         /// <summary>出す主ステータス(筋力・知力・敏捷)の属性番号。形は <see cref="AttackShow"/> と同じ。</summary>
         public List<List<int>> StrOrIntOrDexShow { get; set; } = null!;
+
+        /// <summary>通常攻撃の技ID。</summary>
+        public List<int> NormalAttackSkill { get; set; } = null!;
+
+        /// <summary>特殊攻撃の技ID。</summary>
+        public List<int> SpecialSkill { get; set; } = null!;
+
+        /// <summary>究極スキルの技ID。</summary>
+        public List<int> UltimateSkill { get; set; } = null!;
+
+        /// <summary>マスタリースキルの技ID。</summary>
+        public List<int> NormalSkill { get; set; } = null!;
     }
 }

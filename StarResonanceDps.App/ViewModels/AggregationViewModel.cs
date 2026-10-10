@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 
@@ -106,7 +105,6 @@ public sealed partial class AggregationViewModel : ObservableObject
     private void SelectLive()
     {
         _loadingEncounterId = null;
-        HistorySwitchProbe.LiveRequested();
         EncounterHistoryProvider.SelectLive();
         ApplySelection(null);
     }
@@ -135,10 +133,7 @@ public sealed partial class AggregationViewModel : ObservableObject
         _loadingEncounterId = encounterId;
         UpdateLoadingFlags();
 
-        HistorySwitchProbe.SelectionRequested(encounterId);
-        var loadWatch = System.Diagnostics.Stopwatch.StartNew();
         var result = await EncounterHistoryProvider.SelectAsync(encounterId);
-        HistorySwitchProbe.LoadCompleted(encounterId, loadWatch.Elapsed.TotalMilliseconds, result);
 
         // 後から別の行が押されたか、ライブへ戻したか、もう表示中になった。読み込み中の印はそちらが持つ(外した)。
         if (_loadingEncounterId != encounterId)

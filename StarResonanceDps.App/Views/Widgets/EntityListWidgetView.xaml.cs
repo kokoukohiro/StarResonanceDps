@@ -28,7 +28,6 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         Loaded += EntityListWidgetView_Loaded;
         Unloaded += EntityListWidgetView_Unloaded;
         SizeChanged += EntityListWidgetView_SizeChanged;
-        PreviewMouseWheel += EntityListWidgetView_PreviewMouseWheel;
     }
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
@@ -61,13 +60,7 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("EntityList");
         _scrollViewer.ScrollToVerticalOffset(offset);
-    }
-
-    private void EntityListWidgetView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-    {
-        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("EntityList");
     }
 
     private void EntityListWidgetView_Loaded(object sender, RoutedEventArgs e)
@@ -99,7 +92,6 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         if (e.VerticalChange != 0)
         {
             CloseEntitySelectionMenu();
-            StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollPositionChanged();
         }
 
         NotifyVerticalScrollMetricsChanged();

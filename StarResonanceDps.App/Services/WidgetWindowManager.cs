@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
-using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.Core.Models;
@@ -989,11 +988,9 @@ public sealed class WidgetWindowManager
             return;
         }
 
-        var probe = HistorySwitchProbe.BeginWindow(playerWindow.ViewModel, playerWindow.Widget.Kind.ToString());
         playerWindow.ViewModel.UpdateRosterContext(latest.Roster.MapName, latest.Roster.MapChannel, latest.Roster.SeasonId);
         playerWindow.ViewModel.UpdatePlayerFromRoster(latest.PlayersByCharacterId, latest.SelfPlayer);
         playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
-        probe?.End(string.Empty);
     }
 
     /// <summary>積んである顔ぶれを、待っている窓全部へその場で当てる。</summary>

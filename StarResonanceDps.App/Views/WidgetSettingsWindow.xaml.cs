@@ -52,6 +52,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.EquipmentPreviewChanged += _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
+        _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -85,6 +86,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.EquipmentPreviewChanged -= _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
+        _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -93,6 +95,12 @@ public partial class WidgetSettingsWindow : Window
     private void Widget_BuffListHiddenBuffsChanged(WidgetKind kind, int baseId)
     {
         _viewModel.BuffListSettings?.AddHiddenBuffFromWidget(baseId);
+    }
+
+    /// <summary>開いている間に推移グラフの窓の上のホイールで横軸の長さが変わった。設定の値にも入れる。</summary>
+    private void Widget_MetricTimelineVisibleSecondsChangedFromWidget(int visibleSeconds)
+    {
+        _viewModel.MetricTimelineSettings?.SetVisibleSecondsFromWidget(visibleSeconds);
     }
 
     protected override void OnClosing(CancelEventArgs e)

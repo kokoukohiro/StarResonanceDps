@@ -16,6 +16,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
 
     private bool _usesImagineAsset;
 
+    /// <summary>アイコンがイマジンの絵か(<c>CombatDataCatalog.IsImagineArtIcon</c>)。アイコンの大きさと位置の調整を変える。</summary>
     public bool UsesImagineAsset
     {
         get => _usesImagineAsset;
@@ -42,6 +43,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
     private int _skillId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsUnknownIcon))]
     private bool _hasSkill;
 
     /// <summary>
@@ -55,7 +57,11 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
     private string _nameDisplayText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsUnknownIcon))]
     private string? _iconPath;
+
+    /// <summary>技があるのに絵のファイルが無い。絵の代わりにクラス不明のアイコン(はてな)を出す。</summary>
+    public bool ShowsUnknownIcon => HasSkill && IconPath is null;
 
     [ObservableProperty]
     private string _chargeCountText = string.Empty;
@@ -98,7 +104,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
 
         SkillId = snapshot.SkillId;
         HasSkill = true;
-        UsesImagineAsset = snapshot.IsImagine || snapshot.ShowLevel;
+        UsesImagineAsset = CombatDataCatalog.IsImagineArtIcon(snapshot.IconName);
         // 表記は G で統一する。ただし<b>数字の出所は2つで違う</b> —
         // イマジンは改造段階(Tier)、イマジン式ロールスキルはレベル(CDがレベル依存のため)。
         NameDisplayText = snapshot.IsImagine

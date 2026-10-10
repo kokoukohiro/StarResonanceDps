@@ -57,6 +57,7 @@ public partial class WidgetWindow : Window
     private readonly WidgetListItemViewModel _widget;
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly IWidgetHorizontalScrollContent? _horizontalScrollContent;
+    private readonly IWidgetMouseWheelContent? _mouseWheelContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
     private bool _isRestoringBounds = true;
@@ -117,6 +118,13 @@ public partial class WidgetWindow : Window
             }
             _horizontalScrollContent.HorizontalScrollMetricsChanged += HorizontalScrollContent_HorizontalScrollMetricsChanged;
             WidgetContentHorizontalScrollBar.ValueChanged += WidgetContentHorizontalScrollBar_ValueChanged;
+        }
+
+        // 窓の上のホイールを受ける中身なら、窓まで上がってきたホイールを全部渡す(ヘッダー・余白・枠の層のバーの上も)。
+        _mouseWheelContent = widgetContent as IWidgetMouseWheelContent;
+        if (_mouseWheelContent is not null)
+        {
+            MouseWheel += WidgetWindow_MouseWheel;
         }
 
         // まだ測れていないときに返す値。窓を出す前に保存を要求されることがある
@@ -409,6 +417,11 @@ public partial class WidgetWindow : Window
             WidgetContentHorizontalScrollBar.ValueChanged -= WidgetContentHorizontalScrollBar_ValueChanged;
         }
 
+        if (_mouseWheelContent is not null)
+        {
+            MouseWheel -= WidgetWindow_MouseWheel;
+        }
+
         if (WidgetContentHost.Content is FrameworkElement { DataContext: IDisposable disposable })
         {
             disposable.Dispose();
@@ -428,6 +441,9 @@ public partial class WidgetWindow : Window
     {
         if (PresentationSource.FromVisual(this) is HwndSource source)
         {
+            // ウィジェットの窓はソフトウェアで描く。GPU で描くと、文字とアイコンの影の効果ごとに
+            // テクスチャを作り GPU の完了を待つので、窓が多いと描画のスレッドが詰まる。
+            source.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
             source.AddHook(WndProc);
         }
 
@@ -680,6 +696,14 @@ public partial class WidgetWindow : Window
         finally
         {
             _isSynchronizingContentScrollBar = false;
+        }
+    }
+
+    private void WidgetWindow_MouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (!e.Handled && _mouseWheelContent!.HandleWidgetMouseWheel(e.Delta))
+        {
+            e.Handled = true;
         }
     }
 

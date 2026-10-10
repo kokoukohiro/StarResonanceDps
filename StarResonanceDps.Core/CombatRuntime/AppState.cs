@@ -41,6 +41,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             LoadRawTable<Skill>("SkillTable.json", table => HelperMethods.DataTables.Skills.Data = table);
             LoadRawTable<SkillFightLevel>("SkillFightLevelTable.json", table => HelperMethods.DataTables.SkillFightLevels.Data = table);
             LoadRawTable<Buff>("BuffTable.json", table => HelperMethods.DataTables.Buffs.Data = table);
+            // CombatDataCatalog.Load が技のアイコンの枠を作るのに使う(変身クラスの技の番号)。
+            LoadRawTable<ProfessionSystem>("ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
 
             LoadBuffOverridesTable();
             LoadSkillOverridesTable();
@@ -48,7 +50,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             LoadRawTable<SceneEventDungeonConfig>("SceneEventDuneonConfigTable.json", table => HelperMethods.DataTables.SceneEventDungeonConfigs.Data = table);
             LoadRawTable<TempAttr>("TempAttrTable.json", table => HelperMethods.DataTables.TempAttrs.Data = table);
-            LoadRawTable<ProfessionSystem>("ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
 
             LoadCookCuisineTable();
             LoadFightAttrTable();
@@ -177,6 +178,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// 生の <c>SkillTable</c> が持たない <c>SkillLevelGroup</c> を補う。スキル枠のバッジの帰属が、
         /// 付与元の技から装備中のイマジン・ロールスキルへ辿るのに使う。
+        /// 推移グラフの技のアイコンの枠(<c>CombatDataCatalog.GetSkillIconFrame</c>)も、この寄せ先で決まる
+        /// (枠の番号を持たない技は <c>SkillLevelGroup</c> の先の技の枠になる)。
         ///
         /// <para>
         /// 書くのは <c>SkillLevelGroup</c> だけ。表に無いキーは、<c>BuffOverrides</c> と同じく行を作ってから当てる。
