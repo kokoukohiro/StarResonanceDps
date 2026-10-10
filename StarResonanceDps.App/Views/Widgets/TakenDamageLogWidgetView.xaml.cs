@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
@@ -20,6 +21,7 @@ public partial class TakenDamageLogWidgetView : UserControl, IWidgetVerticalScro
     public TakenDamageLogWidgetView()
     {
         InitializeComponent();
+        PreviewMouseWheel += TakenDamageLogWidgetView_PreviewMouseWheel;
     }
 
     public event EventHandler? VerticalScrollMetricsChanged;
@@ -54,7 +56,13 @@ public partial class TakenDamageLogWidgetView : UserControl, IWidgetVerticalScro
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("TakenDamageLog");
         _scrollViewer.ScrollToVerticalOffset(offset);
+    }
+
+    private void TakenDamageLogWidgetView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("TakenDamageLog");
     }
 
     private void TakenDamageLogWidgetView_Loaded(object sender, RoutedEventArgs e)
@@ -85,6 +93,11 @@ public partial class TakenDamageLogWidgetView : UserControl, IWidgetVerticalScro
         else if (_followsTail)
         {
             scrollViewer.ScrollToEnd();
+        }
+
+        if (e.VerticalChange != 0)
+        {
+            StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollPositionChanged();
         }
 
         NotifyVerticalScrollMetricsChanged();

@@ -28,6 +28,22 @@ public sealed record EncounterHistoryEntry(
     int BenchmarkSeconds,
     int DungeonDifficulty);
 
+/// <summary>履歴の1件を選んだ結果(<see cref="EncounterHistoryProvider.SelectAsync"/>)。</summary>
+public enum HistorySelectResult
+{
+    /// <summary>読めた。選択の反映はパケットのスレッドへ積んだ(反映されると <see cref="EncounterHistoryProvider.SelectionChanged"/> が上がる)。</summary>
+    Opened,
+
+    /// <summary>DB にその回が無い(保存数の上限で消えたなど)。選択は変えない。</summary>
+    NotFound,
+
+    /// <summary>読み込みの間に別の回かライブが選ばれた(またはアプリを閉じている)。読んだ結果は捨てた。</summary>
+    Superseded,
+
+    /// <summary>読み込みで例外が起きた(ログに書いた)。選択は変えない。</summary>
+    Failed
+}
+
 /// <summary>
 /// 集計タブが読む、保存済みエンカウンターの一覧と選択。
 ///
@@ -35,18 +51,35 @@ public sealed record EncounterHistoryEntry(
 /// 選択の実体は <see cref="AppState.OpenedHistoricalEncounter"/> ただ1つ。
 /// <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が先頭でこれを見るので、
 /// <b>ここへ入れるだけでメーター・スキル詳細・グラフ・集計のすべてが追従する</b>
-/// (入口6か所すべてが同じ関数を通る)。ウィジェットごとの切り替えは持たない。
+/// (入口はどれも同じ関数を通る)。ウィジェットごとの切り替えは持たない。
+/// </para>
+///
+/// <para>
+/// <b>選択を書くのはパケットのスレッドだけ。</b> 履歴の回は裏のスレッドで読み、反映(選択・顔ぶれの作り直し・合図)を
+/// <c>MessageManager.RunOnPacketThread</c> で積む。自動でライブへ戻す処理とログアウトもパケットのスレッドで走る。
+/// 選ぶたびに要求の番号を進め、反映するのは最新の要求だけ(読み込みは途中で止められないので、古い結果は捨てる)。
 /// </para>
 /// </summary>
 public static class EncounterHistoryProvider
 {
+    private static readonly object RequestGate = new();
+
+    /// <summary>最新の選択の要求の番号。集計タブの操作(回を選ぶ・ライブへ戻す)とログアウトで進める。</summary>
+    private static long _latestRequest;
+
+    /// <summary>アプリを閉じている(<see cref="ShutdownLoads"/> の後)。新しい読み込みを受けず、反映もしない。</summary>
+    private static bool _isShutDown;
+
+    /// <summary>走っている読み込み。閉じるときに終わりを待つ(閉じた接続に当てない)。</summary>
+    private static readonly List<Task> PendingLoads = [];
+
     /// <summary>いま履歴を開いているならその ID。ライブを見ているなら <c>null</c>。</summary>
     public static ulong? SelectedEncounterId => AppState.OpenedHistoricalEncounter?.EncounterId;
 
     /// <summary>
     /// 選択が変わったときに上がる。<b>自動でライブへ戻したときも上がる</b>ので、
     /// 一覧を出している側はこれを購読して「表示中」を出し直すこと。
-    /// パケット処理スレッドから来ることがあるので、UI へは渡し直す。
+    /// パケットのスレッドから来る(キャプチャが止まっていれば、選んだ操作のスレッドか読み込みのスレッド)ので、UI へは渡し直す。
     /// </summary>
     public static event Action? SelectionChanged;
 
@@ -75,7 +108,8 @@ public static class EncounterHistoryProvider
             return;
         }
 
-        SelectLive();
+        // 要求の番号は進めない。読み込み中の回があれば、それは読み終えてから開く(押した操作は残す)。
+        ApplyLive();
     }
 
     /// <summary>
@@ -109,28 +143,128 @@ public static class EncounterHistoryProvider
 
     /// <summary>
     /// 履歴の1件を開く。**開いている間、全ウィジェットが新しいデータを表示しなくなる。**
-    /// 読めなければ選択を変えずに false を返す(ライブのまま)。
+    /// DB は裏のスレッドで読み(画面を止めない)、読めたら反映をパケットのスレッドへ積む。
+    /// 読めなければ選択を変えない(結果で分かる)。返す Task は読み込みと反映の予約まで。
     /// </summary>
-    public static bool TrySelect(ulong encounterId)
+    public static Task<HistorySelectResult> SelectAsync(ulong encounterId)
     {
-        var encounter = DB.LoadEncounter(encounterId);
+        Task<HistorySelectResult> load;
+        lock (RequestGate)
+        {
+            if (_isShutDown)
+            {
+                return Task.FromResult(HistorySelectResult.Superseded);
+            }
+
+            var request = ++_latestRequest;
+            load = Task.Run(() => LoadAndApply(encounterId, request));
+            PendingLoads.Add(load);
+        }
+
+        load.ContinueWith(
+            finished =>
+            {
+                lock (RequestGate)
+                {
+                    PendingLoads.Remove(finished);
+                }
+            },
+            TaskScheduler.Default);
+        return load;
+    }
+
+    private static HistorySelectResult LoadAndApply(ulong encounterId, long request)
+    {
+        Encounter? encounter;
+        try
+        {
+            encounter = DB.LoadEncounter(encounterId);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Encounter {EncounterId} could not be loaded from history", encounterId);
+            return HistorySelectResult.Failed;
+        }
+
         if (encounter is null)
         {
             Log.Warning("Encounter {EncounterId} could not be opened from history", encounterId);
-            return false;
+            return HistorySelectResult.NotFound;
         }
 
-        AppState.OpenedHistoricalEncounter = encounter;
-        PlayerRosterProjection.RebuildRoster();
-        SelectionChanged?.Invoke();
-        return true;
+        if (!IsLatestRequest(request))
+        {
+            return HistorySelectResult.Superseded;
+        }
+
+        MessageManager.RunOnPacketThread(() =>
+        {
+            // 待ち行列に並んでいる間に別の回かライブが選ばれていたら反映しない。
+            if (!IsLatestRequest(request))
+            {
+                return;
+            }
+
+            AppState.OpenedHistoricalEncounter = encounter;
+            PlayerRosterProjection.RebuildRoster();
+            SelectionChanged?.Invoke();
+        });
+        return HistorySelectResult.Opened;
     }
 
-    /// <summary>現在の戦闘へ戻す。</summary>
+    private static bool IsLatestRequest(long request)
+    {
+        lock (RequestGate)
+        {
+            return !_isShutDown && request == _latestRequest;
+        }
+    }
+
+    /// <summary>現在の戦闘へ戻す(集計タブの操作)。読み込み中の選択は捨てる。反映はパケットのスレッドで。</summary>
     public static void SelectLive()
+    {
+        lock (RequestGate)
+        {
+            _latestRequest++;
+        }
+
+        MessageManager.RunOnPacketThread(ApplyLive);
+    }
+
+    /// <summary>ログアウト(起動直後へ戻す)。読み込み中の選択は捨て、開いていれば現在の戦闘へ戻す。パケットのスレッドから呼ぶ。</summary>
+    internal static void ResetSelectionForLogout()
+    {
+        lock (RequestGate)
+        {
+            _latestRequest++;
+        }
+
+        if (AppState.OpenedHistoricalEncounter is not null)
+        {
+            ApplyLive();
+        }
+    }
+
+    private static void ApplyLive()
     {
         AppState.OpenedHistoricalEncounter = null;
         PlayerRosterProjection.RebuildRoster();
         SelectionChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// アプリを閉じる。新しい読み込みを受けなくし、走っている読み込みの終わりを待つ(読み終えた結果は反映しない)。
+    /// DB を閉じる前に呼ぶ。
+    /// </summary>
+    public static void ShutdownLoads()
+    {
+        Task[] pending;
+        lock (RequestGate)
+        {
+            _isShutDown = true;
+            pending = PendingLoads.ToArray();
+        }
+
+        Task.WaitAll(pending);
     }
 }

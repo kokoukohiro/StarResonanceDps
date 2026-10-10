@@ -14,6 +14,9 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
     private const string EntitySelectionContextMenuMiddleItemStyleKey = "Menu.WidgetWindowEntitySelectionContextMenuItem.Middle";
     private const string EntitySelectionContextMenuLastItemStyleKey = "Menu.WidgetWindowEntitySelectionContextMenuItem.Last";
 
+    /// <summary>一覧のテンプレートの中の ScrollViewer(仮想化のため一覧の中に置く)。読み込むまでは null。</summary>
+    private ScrollViewer? _scrollViewer;
+
     private ContextMenu? _openEntitySelectionMenu;
     private EntityListEntry? _openEntitySelectionEntry;
 
@@ -25,33 +28,57 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         Loaded += EntityListWidgetView_Loaded;
         Unloaded += EntityListWidgetView_Unloaded;
         SizeChanged += EntityListWidgetView_SizeChanged;
+        PreviewMouseWheel += EntityListWidgetView_PreviewMouseWheel;
     }
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
     {
-        var maximum = Math.Max(EntityListScrollViewer.ScrollableHeight, 0);
-        var viewport = Math.Max(EntityListScrollViewer.ViewportHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return new WidgetVerticalScrollMetrics(0, 0, 0, 1, 1);
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
+        var viewport = Math.Max(_scrollViewer.ViewportHeight, 0);
 
         return new WidgetVerticalScrollMetrics(
             maximum,
             viewport,
-            Math.Min(EntityListScrollViewer.VerticalOffset, maximum),
+            Math.Min(_scrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9, 1),
             50);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)
     {
-        var maximum = Math.Max(EntityListScrollViewer.ScrollableHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return;
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
         var offset = double.IsFinite(verticalOffset)
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        EntityListScrollViewer.ScrollToVerticalOffset(offset);
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("EntityList");
+        _scrollViewer.ScrollToVerticalOffset(offset);
+    }
+
+    private void EntityListWidgetView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("EntityList");
     }
 
     private void EntityListWidgetView_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_scrollViewer is null)
+        {
+            EntityListItemsControl.ApplyTemplate();
+            _scrollViewer = (ScrollViewer)EntityListItemsControl.Template.FindName("EntityListScrollViewer", EntityListItemsControl);
+            _scrollViewer.ScrollChanged += EntityListScrollViewer_ScrollChanged;
+        }
+
         NotifyVerticalScrollMetricsChanged();
     }
 
@@ -67,7 +94,27 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void EntityListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
+        // 行の部品は別の敵の行に使い回されるので、位置が動いたら開いているメニューを閉じる
+        // (開いたままだと、メニューの相手が使い回した先の敵に替わる)。
+        if (e.VerticalChange != 0)
+        {
+            CloseEntitySelectionMenu();
+            StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollPositionChanged();
+        }
+
         NotifyVerticalScrollMetricsChanged();
+    }
+
+    /// <summary>
+    /// 行の部品が見えている範囲から外された(別の行に使い回される)。その行がメニューを開いている行なら閉じる。
+    /// 位置が動かずに行だけが外へ押し出される(敵の出入りで並びが動く)ときも、ここで拾う。
+    /// </summary>
+    private void EntityListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
+    {
+        if (_openEntitySelectionEntry is not null && ReferenceEquals(e.Value, _openEntitySelectionEntry))
+        {
+            CloseEntitySelectionMenu();
+        }
     }
 
     private void EntityListItem_Click(object sender, RoutedEventArgs e)

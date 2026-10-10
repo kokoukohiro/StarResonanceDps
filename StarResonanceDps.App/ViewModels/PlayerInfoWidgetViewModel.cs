@@ -17,7 +17,7 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     /// <summary>名刺の既定の絵。写真を取れたとき以外はこれを出す。</summary>
     private const string DefaultCardResourceKey = "Icon.IdCard.idcard_common_01";
 
-    /// <summary>表示値。相手も覚えている素性も無い間は null(画面ごと隠す)。</summary>
+    /// <summary>表示値。相手も覚えている素性も無い間は null(画面ごと隠す)。値で比べ、前回と同じなら差し替えない(画面を作り直さない)。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPlayerInfo))]
     private PlayerInfoEntry? _playerInfo;
@@ -34,8 +34,8 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     private readonly PhotoSlot _cardSlot;
     private PlayerRosterEntry? _player;
 
-    /// <summary>アイコンカラー。基底のコンストラクタから描き直しが呼ばれることがあるので、既定値で始める。</summary>
-    private PlayerInfoWidgetSettingsConfig _settings = WidgetConfigDefaults.CreatePlayerInfoSettings();
+    /// <summary>アイコンカラーの塗り。基底のコンストラクタから描き直しが呼ばれることがあるので、既定値で始める。</summary>
+    private PlayerInfoIconPalette _iconPalette = new(WidgetConfigDefaults.CreatePlayerInfoSettings());
 
     private bool _isDisposed;
 
@@ -45,7 +45,7 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         PlayerRosterEntry? initialPlayer)
         : base(infoWidget, requestedCharacterId)
     {
-        _settings = infoWidget.GetPlayerInfoSettingsSnapshot();
+        _iconPalette = new PlayerInfoIconPalette(infoWidget.GetPlayerInfoSettingsSnapshot());
         infoWidget.PlayerInfoSettingsChanged += InfoWidget_PlayerInfoSettingsChanged;
         _avatarSlot = new PhotoSlot(DefaultAvatarResourceKey, image => AvatarImage = image);
         _cardSlot = new PhotoSlot(DefaultCardResourceKey, image => CardImage = image);
@@ -78,10 +78,10 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         InfoWidget.PlayerInfoSettingsChanged -= InfoWidget_PlayerInfoSettingsChanged;
     }
 
-    /// <summary>アイコンカラーの設定(保存かプレビュー)が変わった。</summary>
+    /// <summary>アイコンカラーの設定(保存かプレビュー)が変わった。塗りを作り直す。</summary>
     private void InfoWidget_PlayerInfoSettingsChanged(object? sender, EventArgs e)
     {
-        _settings = InfoWidget.GetPlayerInfoSettingsSnapshot();
+        _iconPalette = new PlayerInfoIconPalette(InfoWidget.GetPlayerInfoSettingsSnapshot());
         RenderPlayerInfo();
     }
 
@@ -152,8 +152,8 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
                 LastKnownIsNpc,
                 LastKnownProfessionId,
                 RosterSeasonId,
-                _settings)
-            : PlayerInfoEntry.Create(_player, RosterMapName, RosterMapChannel, RosterSeasonId, _settings);
+                _iconPalette)
+            : PlayerInfoEntry.Create(_player, RosterMapName, RosterMapChannel, RosterSeasonId, _iconPalette);
     }
 
     private void RefreshPhotos(bool force)

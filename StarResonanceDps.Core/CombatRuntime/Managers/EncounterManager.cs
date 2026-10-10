@@ -1048,7 +1048,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 到着時刻(UTC)を戦闘の経過に直す。起点からの時間から、それより前に止まっていた区間を除いたもの。止まっている区間の中の時刻は、止まった時点の経過になる。
-        /// 経過・推移グラフの1秒の区切り・被ダメログの時刻・有効DPS と毎分キャストはどれもこれを通す。起点が無ければ null、起点より前は負。
+        /// 経過・推移グラフの1秒の区切りと技のアイコン・被ダメログの時刻・有効DPS と毎分キャストはどれもこれを通す。起点が無ければ null、起点より前は負。
         /// </summary>
         public TimeSpan? ToCombatOffset(DateTime utc)
         {
@@ -2028,6 +2028,41 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        private readonly object _skillActivationGate = new();
+
+        /// <summary>
+        /// プレイヤーの技の開始を残す(推移グラフのアイコン)。呼ぶのは周りの差分の経路だけ(出現・入場の全属性は呼ばない)。
+        /// 門は <see cref="IsRecorded"/> だけで、戦闘の時計の起点より前の開始も残す(最初の一撃の技の開始は最初のダメージより先に届く)。
+        /// </summary>
+        public void AddSkillActivation(long playerUuid, int skillId, DateTime arrivalUtc)
+        {
+            if (skillId <= 0 || !IsRecorded(arrivalUtc, playerUuid))
+            {
+                return;
+            }
+
+            lock (_skillActivationGate)
+            {
+                ExData.SkillActivations.Add(new SkillActivationRecord
+                {
+                    PlayerUuid = playerUuid,
+                    SkillId = skillId,
+                    Timestamp = arrivalUtc,
+                });
+            }
+        }
+
+        /// <summary><paramref name="playerUuid"/> の技の開始(届いた順)の写し。</summary>
+        public SkillActivationRecord[] GetSkillActivationsCopy(long playerUuid)
+        {
+            lock (_skillActivationGate)
+            {
+                return ExData.SkillActivations
+                    .Where(record => record.PlayerUuid == playerUuid)
+                    .ToArray();
+            }
+        }
+
         /// <summary>
         /// ボス大技の予告を被ダメログの予告行として残す。通知の番号(<c>DbmTable.Id</c>)から技を引き、
         /// 周囲にいるモンスターからその技を持つものを構えた側とする。
@@ -2596,6 +2631,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         [ProtoMember(12)]
         public List<CombatPause> CombatPauses { get; set; } = [];
+        /// <summary>プレイヤーの技の開始(<see cref="Encounter.AddSkillActivation"/>、届いた順)。読み書きは <see cref="Encounter"/> の中でだけ行う(ロックがそこにある)。</summary>
+        [ProtoMember(13)]
+        public List<SkillActivationRecord> SkillActivations { get; set; } = [];
 
         public EncounterExData() { }
     }

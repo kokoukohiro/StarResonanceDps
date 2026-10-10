@@ -20,6 +20,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static ILogger Log = null!;
         private static ZstdSharp.Compressor Compressor = new ZstdSharp.Compressor();
         private static ZstdSharp.Decompressor Decompressor = new ZstdSharp.Decompressor();
+
+        /// <summary>
+        /// 接続(<see cref="DbConn"/>)と共有の圧縮器・展開器を触る処理は全部この中で行う。
+        /// 保存はパケットのスレッド、履歴の読み込みは裏のスレッド、一覧は画面のスレッドから来るので、同じ接続を同時に使わせない。
+        /// </summary>
         private static object DBLock = new object();
         private static readonly RuntimeSerializationBinder SerializationBinder = new();
         private static readonly EncounterBlobContractResolver BlobContractResolver = new();
@@ -57,28 +62,38 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static ulong GetNextEncounterId()
         {
             const string sql = "SELECT COALESCE(MAX(EncounterId), 0) + 1 FROM Encounters";
-            return DbConn.QuerySingle<ulong>(sql);
+            lock (DBLock)
+            {
+                return DbConn.QuerySingle<ulong>(sql);
+            }
         }
 
         public static ulong GetNumEncounters()
         {
             const string sql = "SELECT COUNT(*) FROM Encounters";
-            return DbConn.QuerySingle<ulong>(sql);
+            lock (DBLock)
+            {
+                return DbConn.QuerySingle<ulong>(sql);
+            }
         }
 
         public static ulong InsertEncounter(Encounter encounter)
         {
-            using var transaction = DbConn.BeginTransaction();
-            var result = InsertEncounter(encounter, transaction);
-            transaction.Commit();
-
-            // 上限を超えたぶんはその場で落とす。終了時だけの掃除だと、稼働中は上限を超えて溜まる。
-            if (CombatRuntimeSettings.DatabaseMaxEncounterCount > 0)
+            // トランザクションの開始から確定までロックの中。外にあると、開いている間に別のスレッドの読み込みが同じ接続を使う。
+            lock (DBLock)
             {
-                TrimEncountersToLimit(CombatRuntimeSettings.DatabaseMaxEncounterCount, vacuum: false);
-            }
+                using var transaction = DbConn.BeginTransaction();
+                var result = InsertEncounter(encounter, transaction);
+                transaction.Commit();
 
-            return result;
+                // 上限を超えたぶんはその場で落とす。終了時だけの掃除だと、稼働中は上限を超えて溜まる。
+                if (CombatRuntimeSettings.DatabaseMaxEncounterCount > 0)
+                {
+                    TrimEncountersToLimit(CombatRuntimeSettings.DatabaseMaxEncounterCount, vacuum: false);
+                }
+
+                return result;
+            }
         }
 
         public static ulong InsertEncounter(Encounter encounter, SqliteTransaction tx)
@@ -185,22 +200,31 @@ namespace StarResonanceDps.Core.CombatRuntime
             Log.Information("Updated {encounterId} IsWipe to: {isWipe}", encounterId, isWipe);
         }
 
+        /// <summary>
+        /// 保存済みの回を1件読む。履歴の選択では裏のスレッドから呼ぶ(<c>EncounterHistoryProvider.SelectAsync</c>)。
+        /// 接続と共有の展開器を触る間(問い合わせ2つと ExData の展開)はロックの中、実体の JSON の復元は呼ぶたびに別のストリームなのでロックの外。
+        /// </summary>
         public static Encounter? LoadEncounter(ulong encounterId)
         {
             var sw = Stopwatch.StartNew();
-            var encounter = DbConn.QuerySingleOrDefault<Encounter>(DBSchema.Encounter.SelectById, new { EncounterId = encounterId });
-
-            if (encounter == null)
+            Encounter? encounter;
+            EntityBlobTable? entityBlob;
+            lock (DBLock)
             {
-                Log.Warning("Encounter {encounterId} not found in database", encounterId);
-                return null;
+                encounter = DbConn.QuerySingleOrDefault<Encounter>(DBSchema.Encounter.SelectById, new { EncounterId = encounterId });
+                if (encounter == null)
+                {
+                    Log.Warning("Encounter {encounterId} not found in database", encounterId);
+                    return null;
+                }
+
+                var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
+                ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
+                encounter.ExDataBlob = null!;
+
+                entityBlob = DbConn.QuerySingleOrDefault<EntityBlobTable>(DBSchema.Entities.SelectByEncounterId, new { EncounterId = encounterId });
             }
 
-            var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
-            ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-            encounter.ExDataBlob = null!;
-
-            var entityBlob = DbConn.QuerySingleOrDefault<EntityBlobTable>(DBSchema.Entities.SelectByEncounterId, new { EncounterId = encounterId });
             if (entityBlob?.Data != null)
             {
                 using (var memStream = new MemoryStream(entityBlob.Data))
@@ -226,8 +250,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                // GC.Collect(2) はここに置かない。**世代2のフル回収は呼び出し元を止める。**
-                // この経路は履歴を選んだUIスレッドから走るので、そのぶん丸ごと固まる。
+                // GC.Collect(2) はここに置かない。**世代2のフル回収は全部のスレッドを止める。**
+                // 履歴の選択は裏のスレッドから走るが、回収の間は画面のスレッドも止まる。
                 // blob が小さくても1秒以上持っていかれる。一時バッファの回収はランタイムに任せる。
             }
             else
@@ -244,26 +268,33 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static List<Encounter> LoadEncounterSummaries()
         {
-            var encounters = DbConn.Query<Encounter>(DBSchema.Encounter.SelectAll).ToList();
-            foreach (var encounter in encounters)
+            lock (DBLock)
             {
-                var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
-                ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-                encounter.ExDataBlob = null!;
+                var encounters = DbConn.Query<Encounter>(DBSchema.Encounter.SelectAll).ToList();
+                foreach (var encounter in encounters)
+                {
+                    var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
+                    ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
+                    encounter.ExDataBlob = null!;
+                }
+
+                return encounters;
             }
-            return encounters;
         }
 
         public static EncounterExData? GetEncounterExDataForBattle(int battleId)
         {
             try
             {
-                var encounter = DB.DbConn.QueryFirst<Encounter>(DBSchema.Encounter.SelectOneByBattleId, new { BattleId = battleId });
-                var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
-                ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
-                encounter.ExDataBlob = null!;
+                lock (DBLock)
+                {
+                    var encounter = DB.DbConn.QueryFirst<Encounter>(DBSchema.Encounter.SelectOneByBattleId, new { BattleId = battleId });
+                    var decompressedEncEx = Decompressor.Unwrap(encounter.ExDataBlob);
+                    ProtoBuf.Serializer.Deserialize<EncounterExData>(decompressedEncEx, encounter.ExData);
+                    encounter.ExDataBlob = null!;
 
-                return encounter.ExData;
+                    return encounter.ExData;
+                }
             }
             catch (Exception ex)
             {
@@ -312,7 +343,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static int GetNextBattleId()
         {
             const string sql = "SELECT COALESCE(MAX(BattleId), 0) + 1 FROM Battles";
-            return DbConn.QuerySingle<int>(sql);
+            lock (DBLock)
+            {
+                return DbConn.QuerySingle<int>(sql);
+            }
         }
 
         public static int StartBattle(uint sceneId, string sceneName)
@@ -363,15 +397,22 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static List<Battle> LoadBattles()
         {
-            var battles = DbConn.Query<Battle>(DBSchema.Battles.SelectAll).ToList();
-            return battles;
+            lock (DBLock)
+            {
+                var battles = DbConn.Query<Battle>(DBSchema.Battles.SelectAll).ToList();
+                return battles;
+            }
         }
 
         public static List<Encounter> LoadEncountersForBattleId(int battleId)
         {
-            var encountersSum = DbConn.Query<Encounter>(DBSchema.Encounter.SelectByBattleId, new { BattleId = battleId });
-            var encounters = new List<Encounter>(encountersSum.Count());
+            List<Encounter> encountersSum;
+            lock (DBLock)
+            {
+                encountersSum = DbConn.Query<Encounter>(DBSchema.Encounter.SelectByBattleId, new { BattleId = battleId }).ToList();
+            }
 
+            var encounters = new List<Encounter>(encountersSum.Count);
             foreach (var encounter in encountersSum)
             {
                 var encounterFull = LoadEncounter(encounter.EncounterId);
@@ -388,13 +429,25 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public static bool CheckIfMigrationsNeeded()
         {
-            var dbData = DbConn.Query<DbData>(DBSchema.DbData.Select).First();
-            var migrationsToRun = Migrations.Where(x => x.MinVersion >= dbData.Version).ToList();
+            lock (DBLock)
+            {
+                var dbData = DbConn.Query<DbData>(DBSchema.DbData.Select).First();
+                var migrationsToRun = Migrations.Where(x => x.MinVersion >= dbData.Version).ToList();
 
-            return migrationsToRun.Count > 0;
+                return migrationsToRun.Count > 0;
+            }
         }
 
         public static void CheckAndRunMigrations()
+        {
+            // 移行は中で読み込み・保存を呼ぶ(同じスレッドなのでロックは入れ子で取れる)。
+            lock (DBLock)
+            {
+                RunMigrations();
+            }
+        }
+
+        private static void RunMigrations()
         {
             var dbData = DbConn.Query<DbData>(DBSchema.DbData.Select).First();
             var migrationsToRun = Migrations.Where(x => x.MinVersion >= dbData.Version).ToList();

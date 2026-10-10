@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 
@@ -42,9 +43,9 @@ public sealed partial class AggregationViewModel : ObservableObject
     /// 見出しに出す状態。**優先順位は 履歴 &gt; 計測 &gt; 集計。**
     ///
     /// <para>
-    /// 計測中に履歴を開いても計測は止まらない(<c>TrySelect</c> は計測に触らない)ので、
-    /// そのときは「履歴表示中」が正しい。逆に 計測 / リセット は押した時点で
-    /// <see cref="SelectLive"/> を通るので、見出しが履歴から切り替わって解除が見える。
+    /// 計測中に履歴を開いても計測は止まらない(<c>SelectAsync</c> は計測に触らない)ので、
+    /// そのときは「履歴表示中」が正しい。計測 / リセット は回を作り直すので、
+    /// 設定「次のイベントで解除」がオンなら履歴の表示が解除され、見出しが切り替わる。
     /// </para>
     /// </summary>
     public string StatusText => LocalizationManager.Instance.GetString(
@@ -61,6 +62,15 @@ public sealed partial class AggregationViewModel : ObservableObject
 
     public bool HasEntries => Entries.Count > 0;
 
+    /// <summary>
+    /// 読み込み中の回(最後に押した行)。表示中になったとき、開けなかったとき、ライブへ戻したときに外す。
+    /// 先に押した行の読み込みは、後から押した行に置き換わる(反映されるのは最後に押した行だけ)。
+    /// </summary>
+    private ulong? _loadingEncounterId;
+
+    /// <summary>履歴を開けなかった(読み込みで例外)。エラーの窓はビューが出す(持ち主の窓を知っているのはビュー)。</summary>
+    public event EventHandler? LoadFailed;
+
     /// <summary>一覧を読み直す。タブを開いたときと、戦闘が保存されたときに呼ぶ。</summary>
     public void Reload()
     {
@@ -68,7 +78,11 @@ public sealed partial class AggregationViewModel : ObservableObject
         var items = new ObservableCollection<EncounterHistoryItem>();
         foreach (var entry in EncounterHistoryProvider.GetEntries())
         {
-            items.Add(new EncounterHistoryItem(entry) { IsSelected = entry.EncounterId == selected });
+            items.Add(new EncounterHistoryItem(entry)
+            {
+                IsSelected = entry.EncounterId == selected,
+                IsLoading = entry.EncounterId == _loadingEncounterId
+            });
         }
 
         Entries = items;
@@ -91,14 +105,20 @@ public sealed partial class AggregationViewModel : ObservableObject
     /// </summary>
     private void SelectLive()
     {
+        _loadingEncounterId = null;
+        HistorySwitchProbe.LiveRequested();
         EncounterHistoryProvider.SelectLive();
         ApplySelection(null);
     }
 
-    [RelayCommand]
-    private void SelectEntry(EncounterHistoryItem? item)
+    /// <summary>
+    /// 行を押した。DB は裏のスレッドで読む(画面を止めない)ので、読み終えるまで行に「読み込み中」を出す。
+    /// 続けて別の行を押してもよく、反映されるのは最後に押した行だけ。
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = true)]
+    private async Task SelectEntry(EncounterHistoryItem? item)
     {
-        if (item is null)
+        if (item is null || item.IsLoading)
         {
             return;
         }
@@ -111,13 +131,37 @@ public sealed partial class AggregationViewModel : ObservableObject
             return;
         }
 
-        // 開けなかったら選択を動かさない。読めないものを「表示中」にしない。
-        if (!EncounterHistoryProvider.TrySelect(item.EncounterId))
+        var encounterId = item.EncounterId;
+        _loadingEncounterId = encounterId;
+        UpdateLoadingFlags();
+
+        HistorySwitchProbe.SelectionRequested(encounterId);
+        var loadWatch = System.Diagnostics.Stopwatch.StartNew();
+        var result = await EncounterHistoryProvider.SelectAsync(encounterId);
+        HistorySwitchProbe.LoadCompleted(encounterId, loadWatch.Elapsed.TotalMilliseconds, result);
+
+        // 後から別の行が押されたか、ライブへ戻したか、もう表示中になった。読み込み中の印はそちらが持つ(外した)。
+        if (_loadingEncounterId != encounterId)
         {
             return;
         }
 
-        ApplySelection(item.EncounterId);
+        switch (result)
+        {
+            case HistorySelectResult.Opened:
+                // 反映の合図(SyncSelection)で表示中になるまで、読み込み中のまま。
+                return;
+            case HistorySelectResult.Failed:
+                // 開けなかったら選択を動かさない。読めないものを「表示中」にしない。
+                _loadingEncounterId = null;
+                UpdateLoadingFlags();
+                LoadFailed?.Invoke(this, EventArgs.Empty);
+                return;
+            default:
+                _loadingEncounterId = null;
+                UpdateLoadingFlags();
+                return;
+        }
     }
 
     [RelayCommand]
@@ -134,9 +178,9 @@ public sealed partial class AggregationViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 選択が外から変わったときに、一覧の「表示中」を合わせ直す。
-    /// 戦闘とエンカウンターの作り直しによる自動解除がここを通る。
-    /// **通らないと「表示中」が残ったままになる。**
+    /// 選択が変わったときに、一覧の「表示中」を合わせ直す。
+    /// 押した回の反映(読み込みの後にパケットのスレッドで行う)と、戦闘とエンカウンターの作り直しによる自動解除がここを通る。
+    /// **通らないと「表示中」が出ない・残ったままになる。**
     /// </summary>
     public void SyncSelection()
     {
@@ -150,7 +194,22 @@ public sealed partial class AggregationViewModel : ObservableObject
             entry.IsSelected = entry.EncounterId == encounterId;
         }
 
+        // 読み込んでいた行が表示中になった。
+        if (encounterId is not null && encounterId == _loadingEncounterId)
+        {
+            _loadingEncounterId = null;
+        }
+
+        UpdateLoadingFlags();
         IsLiveSelected = encounterId is null;
+    }
+
+    private void UpdateLoadingFlags()
+    {
+        foreach (var entry in Entries)
+        {
+            entry.IsLoading = entry.EncounterId == _loadingEncounterId;
+        }
     }
 
     /// <summary>
@@ -177,6 +236,10 @@ public sealed partial class EncounterHistoryItem : ObservableObject
 
     [ObservableProperty]
     private bool _isSelected;
+
+    /// <summary>押した回を DB から読んでいる間。「表示中」の場所に「読み込み中」を出す。</summary>
+    [ObservableProperty]
+    private bool _isLoading;
 
     /// <summary>シーンIDが無いなどで名前を出せない行の表記。バフリストの「??」と同じく記号なのでリソースを持たない。</summary>
     private const string UnknownSceneText = "？？？";

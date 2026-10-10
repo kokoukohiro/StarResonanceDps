@@ -65,12 +65,34 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
         double barRatio)
     {
         NoText = noText;
-        ElementSegments = elementSegments;
+
+        // 属性の欄とバーの塗りは、中身が同じなら入れ替えない。毎回新しい一覧・ブラシを入れると、
+        // 値が同じでも属性の欄の部品を作り直し、バーを描き直すことになる(一覧とブラシの比べは参照になるため)。
+        if (!ElementSegments.SequenceEqual(elementSegments))
+        {
+            ElementSegments = elementSegments;
+        }
+
         RowToolTipText = rowToolTipText;
         SkillName = skillName;
         ValueText = valueText;
-        BarBrush = barBrush;
+        if (!HasSameColor(BarBrush, barBrush))
+        {
+            BarBrush = barBrush;
+        }
+
         BarRatio = barRatio;
         HasBar = barBrush is not null;
+    }
+
+    private static bool HasSameColor(Brush? current, Brush? next)
+    {
+        return (current, next) switch
+        {
+            (null, null) => true,
+            (SolidColorBrush currentSolid, SolidColorBrush nextSolid) => currentSolid.Color == nextSolid.Color
+                && currentSolid.Opacity.Equals(nextSolid.Opacity),
+            _ => false
+        };
     }
 }

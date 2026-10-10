@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Threading;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.Core.Models;
@@ -21,6 +23,13 @@ public sealed class WidgetWindowManager
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
     private readonly List<EntityBuffListWindowSession> _openEntityBuffWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
+
+    /// <summary>顔ぶれを当てる処理を積んだまま、まだ当てていないプレイヤーの窓(<see cref="UpdatePlayerWindowPresentations"/>)。</summary>
+    private readonly HashSet<PlayerWidgetWindowSession> _playerWindowsAwaitingRoster = [];
+
+    /// <summary>窓へ当てる最新の顔ぶれ。</summary>
+    private PlayerWindowRoster? _latestPlayerWindowRoster;
+
     private Window? _managerWindow;
     private bool _isManagerClosing;
 
@@ -45,9 +54,11 @@ public sealed class WidgetWindowManager
     /// <summary>
     /// プレイヤーの窓を起動直後の状態へ戻す。空の一覧の通知が先に UI のスレッドへ積まれているので、
     /// 窓が一覧の外れで残した最後の値を、その後で捨てる。
+    /// 窓へ当てる処理はそれより低い優先度で積まれているので、先にここで当て切ってから戻す。
     /// </summary>
     private void ResetPlayerWindowsToStartup()
     {
+        ApplyAwaitingRosterToPlayerWindows();
         foreach (var session in _openPlayerWindows.ToArray())
         {
             session.ViewModel.ResetToStartup();
@@ -936,18 +947,61 @@ public sealed class WidgetWindowManager
         }
     }
 
+    /// <summary>
+    /// 顔ぶれをプレイヤーの窓へ当てる。<b>窓ごとに別の処理(Background)として積む。</b>
+    /// 相手が変わった窓はその場で中身を作り直すので、1つの処理で全部の窓に当てると、全部の窓の作り直しの間は入力も描画も止まる。
+    /// 積んだ窓に当たる前に次の顔ぶれが来たら、その窓は最新の顔ぶれで1回だけ当てる。閉じた窓は飛ばす。
+    /// </summary>
     public void UpdatePlayerWindowPresentations(PlayerRosterSnapshot roster)
     {
-        var playersByCharacterId = roster.Entries
-            .Where(player => player.CharacterId != 0)
-            .ToDictionary(player => player.CharacterId);
-        var selfPlayer = roster.Entries.FirstOrDefault(player => player.IsSelf);
+        _latestPlayerWindowRoster = new PlayerWindowRoster(
+            roster,
+            roster.Entries
+                .Where(player => player.CharacterId != 0)
+                .ToDictionary(player => player.CharacterId),
+            roster.Entries.FirstOrDefault(player => player.IsSelf));
 
+        var dispatcher = Application.Current?.Dispatcher;
         foreach (var playerWindow in _openPlayerWindows.ToArray())
         {
-            playerWindow.ViewModel.UpdateRosterContext(roster.MapName, roster.MapChannel, roster.SeasonId);
-            playerWindow.ViewModel.UpdatePlayerFromRoster(playersByCharacterId, selfPlayer);
-            playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
+            if (!_playerWindowsAwaitingRoster.Add(playerWindow))
+            {
+                continue;
+            }
+
+            if (dispatcher is null)
+            {
+                ApplyRosterToPlayerWindow(playerWindow);
+                continue;
+            }
+
+            dispatcher.BeginInvoke(DispatcherPriority.Background, () => ApplyRosterToPlayerWindow(playerWindow));
+        }
+    }
+
+    /// <summary>積んである顔ぶれを窓へ当てる。積んでいない窓・閉じた窓には何もしない。</summary>
+    private void ApplyRosterToPlayerWindow(PlayerWidgetWindowSession playerWindow)
+    {
+        if (!_playerWindowsAwaitingRoster.Remove(playerWindow)
+            || _latestPlayerWindowRoster is not { } latest
+            || !_openPlayerWindows.Contains(playerWindow))
+        {
+            return;
+        }
+
+        var probe = HistorySwitchProbe.BeginWindow(playerWindow.ViewModel, playerWindow.Widget.Kind.ToString());
+        playerWindow.ViewModel.UpdateRosterContext(latest.Roster.MapName, latest.Roster.MapChannel, latest.Roster.SeasonId);
+        playerWindow.ViewModel.UpdatePlayerFromRoster(latest.PlayersByCharacterId, latest.SelfPlayer);
+        playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
+        probe?.End(string.Empty);
+    }
+
+    /// <summary>積んである顔ぶれを、待っている窓全部へその場で当てる。</summary>
+    private void ApplyAwaitingRosterToPlayerWindows()
+    {
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            ApplyRosterToPlayerWindow(playerWindow);
         }
     }
 
@@ -1189,6 +1243,7 @@ public sealed class WidgetWindowManager
             }
 
             _openPlayerWindows.Remove(playerWindow);
+            _playerWindowsAwaitingRoster.Remove(playerWindow);
             UpdatePlayerWindowCount(playerWindow.Widget);
             SaveOpenTargets(playerWindow.Widget);
 
@@ -1235,6 +1290,11 @@ public sealed class WidgetWindowManager
             window.Widget.State = WidgetState.Stopped;
         }
     }
+
+    private sealed record PlayerWindowRoster(
+        PlayerRosterSnapshot Roster,
+        IReadOnlyDictionary<long, PlayerRosterEntry> PlayersByCharacterId,
+        PlayerRosterEntry? SelfPlayer);
 
     private sealed class PlayerWidgetWindowSession
     {

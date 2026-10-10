@@ -14,7 +14,9 @@
         <ItemsControl Grid.Column="0" ItemsSource="{Binding ValueLines}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding}" />
+                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}"
+                               Text="{Binding Text}"
+                               Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -22,7 +24,9 @@
         <ItemsControl Grid.Column="1" Margin="18,0,0,0" ItemsSource="{Binding RateLines}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding}" />
+                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}"
+                               Text="{Binding Text}"
+                               Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -30,7 +34,9 @@
         <ItemsControl Grid.Column="2" Margin="18,0,0,0" ItemsSource="{Binding DistributionLines}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding}" />
+                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}"
+                               Text="{Binding Text}"
+                               Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
@@ -38,7 +44,9 @@
         <ItemsControl Grid.Column="3" Margin="18,0,0,0" ItemsSource="{Binding CastLines}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}" Text="{Binding}" />
+                    <TextBlock Style="{StaticResource Text.WidgetWindowSubtitle}"
+                               Text="{Binding Text}"
+                               Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

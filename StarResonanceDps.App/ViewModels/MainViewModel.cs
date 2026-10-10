@@ -311,12 +311,14 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void ApplyPlayerRosterSnapshot(PlayerRosterSnapshot roster)
     {
+        var probe = StarResonanceDps.App.Diagnostics.HistorySwitchProbe.BeginRoster();
         _playerListWidget?.UpdatePlayerRoster(
             roster.Entries,
             roster.MapName,
             roster.MapChannel,
             roster.MapGeneration);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
+        probe?.End($"rows={roster.Entries.Count}");
     }
 
     private void NearbyEntityStore_EntitiesChanged(object? sender, NearbyEntitiesChangedEventArgs e)

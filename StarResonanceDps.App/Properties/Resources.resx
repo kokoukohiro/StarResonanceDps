@@ -905,6 +905,9 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>Unclassified</value>
   </data>
+  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>Skill Name</value>
   </data>
@@ -1266,6 +1269,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Aggregation_Viewing" xml:space="preserve">
     <value>Viewing</value>
+  </data>
+  <data name="Aggregation_Loading" xml:space="preserve">
+    <value>Loading</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Title" xml:space="preserve">
+    <value>History load error</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Message" xml:space="preserve">
+    <value>Could not open the history entry.</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
+    <value>The current display is unchanged.</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>No history</value>

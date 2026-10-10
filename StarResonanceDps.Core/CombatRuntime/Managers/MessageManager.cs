@@ -691,10 +691,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             PlayerRosterProjection.RebuildRoster();
 
-            if (AppState.OpenedHistoricalEncounter is not null)
-            {
-                EncounterHistoryProvider.SelectLive();
-            }
+            EncounterHistoryProvider.ResetSelectionForLogout();
 
             ResetToStartupCompleted?.Invoke();
         }
@@ -2322,6 +2319,10 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     var castSkillLevel = EncounterManager.Current.GetAttrKV(targetUuid, "AttrSkillLevel") is int level ? level : 0;
                     EncounterManager.Current.AddSkillCast(targetUuid, castSkillId, castSkillLevel, extraData);
+                    if (isTargetPlayer)
+                    {
+                        EncounterManager.Current.AddSkillActivation(targetUuid, castSkillId, extraData.ArrivalTime);
+                    }
                 }
             }
 

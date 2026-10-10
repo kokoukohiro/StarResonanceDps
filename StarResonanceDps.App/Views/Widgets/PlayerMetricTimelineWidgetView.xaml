@@ -22,6 +22,9 @@
                                       VerticalAlignment="Stretch"
                                       Points="{Binding TimelinePoints}"
                                       VisibleSeconds="{Binding TimelineVisibleSeconds}"
-                                      LineBrush="{Binding TimelineLineBrush}" />
+                                      LineBrush="{Binding TimelineLineBrush}"
+                                      SkillMarkers="{Binding TimelineSkillMarkers}"
+                                      UnknownSkillIconBrush="{Binding TimelineUnknownSkillIconBrush}"
+                                      SkillMarkerToolTipTag="{Binding PlayerWidget}" />
     </Grid>
 </UserControl>

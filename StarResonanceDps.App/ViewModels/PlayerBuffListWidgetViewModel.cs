@@ -22,6 +22,10 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
     private readonly DispatcherTimer _refreshTimer;
     private BuffListWidgetSettingsConfig _settings;
+
+    /// <summary>最後に行を当てた相手。名簿の行が変わっても相手が同じなら、行は1秒ごとの更新に任せる。</summary>
+    private long? _refreshedCharacterId;
+
     private bool _isDisposed;
 
     /// <summary>行のゲージの塗り。設定が変わったら作り直す。</summary>
@@ -92,8 +96,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         Refresh();
     }
 
+    /// <summary>
+    /// 名簿の行が変わった。相手が替わったときだけ行を当て直す。同じ相手なら、タイトルは基底が組み直しているので何もしない
+    /// (バフは名簿の行から作らないので、名簿の変化のたびに当て直す意味が無い)。
+    /// </summary>
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
+        if (SelectedCharacterId == _refreshedCharacterId)
+        {
+            return;
+        }
+
         Refresh();
     }
 
@@ -138,6 +151,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             return;
         }
 
+        _refreshedCharacterId = SelectedCharacterId;
         if (SelectedCharacterId is not { } characterId)
         {
             SynchronizeEntries(Array.Empty<PlayerBuffSnapshot>());

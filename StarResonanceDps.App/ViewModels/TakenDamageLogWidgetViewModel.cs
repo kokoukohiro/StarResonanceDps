@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
@@ -127,6 +128,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         _widget.TakenDamageLogSettingsChanged += Widget_TakenDamageLogSettingsChanged;
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        HistorySwitchProbe.Register(this, widget.Kind.ToString());
 
         Refresh();
         _notificationTracker.Poll();
@@ -142,6 +144,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         _widget.TakenDamageLogSettingsChanged -= Widget_TakenDamageLogSettingsChanged;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        HistorySwitchProbe.Unregister(this);
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -205,7 +208,10 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
     private void Refresh()
     {
+        var probe = HistorySwitchProbe.BeginRefresh(this);
         var snapshot = MeterSnapshotProvider.GetTakenDamageLog(_encounter, _nextIndex);
+        probe?.DataDone();
+        var encounterChanged = !ReferenceEquals(snapshot.Encounter, _encounter);
 
         if (!ReferenceEquals(snapshot.Encounter, _encounter))
         {
@@ -230,6 +236,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         {
             AppendEntries(line);
         }
+
+        probe?.End($"lines=+{snapshot.Lines.Count} entries={_entries.Count} encounterChanged={encounterChanged}");
     }
 
     private void ClearEntries()

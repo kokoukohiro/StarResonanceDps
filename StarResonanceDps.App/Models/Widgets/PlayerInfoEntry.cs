@@ -15,11 +15,14 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// プレイヤー情報の表示値。名前・UID・5つの文字の行(冒険者レベル / シーズン階級 / 現在地 / 能力スコア / シーズン強度)と、
 /// 下に並べる3つのバッジ(シーズン / クラスと特化 / シーズン心相晶)。
 /// バッジの絵の色はプレイヤー情報の設定のアイコンカラー。
+/// 値で比べる。前回と同じ値なら表示を差し替えないので、絵の形と塗りは使い回す(毎回作ると、値が同じでも差し替えになる)。
 /// </summary>
-public sealed class PlayerInfoEntry
+public sealed record PlayerInfoEntry
 {
     /// <summary>アイコンカラーの不明の鍵。バッジ3つのはてなを1色で塗る。</summary>
     private const string UnknownColorKey = "Unknown";
+
+    private static readonly Dictionary<string, Brush> IconMasks = new(StringComparer.Ordinal);
 
     private PlayerInfoEntry()
     {
@@ -83,13 +86,13 @@ public sealed class PlayerInfoEntry
     /// <param name="mapName">一覧の通知のマップ名(自分のいる場所)。</param>
     /// <param name="mapChannel">一覧の通知のチャンネル番号。</param>
     /// <param name="seasonId">今のシーズン番号。まだ分からなければ 0。</param>
-    /// <param name="settings">プレイヤー情報の設定(アイコンカラー)。</param>
+    /// <param name="iconPalette">アイコンカラーの塗り。</param>
     public static PlayerInfoEntry Create(
         PlayerRosterEntry player,
         string mapName,
         uint mapChannel,
         int seasonId,
-        PlayerInfoWidgetSettingsConfig settings)
+        PlayerInfoIconPalette iconPalette)
     {
         var localization = LocalizationManager.Instance;
         var unknownText = localization.GetString("PlayerInfo_Unknown");
@@ -110,7 +113,7 @@ public sealed class PlayerInfoEntry
                     (uint)Math.Max(player.PartyLineId, 0))
                 : string.Empty;
 
-        var season = CreateSeasonBadge(seasonId, unknownText, settings);
+        var season = CreateSeasonBadge(seasonId, unknownText, iconPalette);
         // シーズン階級の名前はシーズンごとに違うので、段階か今のシーズンのどちらかが分からなければ不明。
         var seasonRankName = season.IsUnknown || player.SeasonRankLevel is null
             ? unknownText
@@ -134,10 +137,10 @@ public sealed class PlayerInfoEntry
             SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {FormatInteger(player.SeasonStrength)}",
             LocationText = $"{localization.GetString("PlayerInfo_Location")}: {(string.IsNullOrEmpty(location) ? unknownText : location)}",
             ClassIconMask = ResolveMask($"Icon.Profession.{classKey}"),
-            ClassIconBrush = CreateIconBrush(settings, classKey),
+            ClassIconBrush = iconPalette.GetBrush(classKey),
             ClassSpecText = GetProfessionSpecDisplayName(player.ClassSpec, localization),
             SeasonTalentIconMask = seasonTalent.Mask,
-            SeasonTalentIconBrush = CreateIconBrush(settings, seasonTalent.ColorKey),
+            SeasonTalentIconBrush = iconPalette.GetBrush(seasonTalent.ColorKey),
             // 無効はプレイヤー情報だけ「シーズン心相晶無効」と出す(書式の {Psych} とプレイヤーリストは「無効」)。
             SeasonTalentText = player.SeasonTalentBuffId <= 0 && player.IsSeasonTalentInactive
                 ? localization.GetString("PlayerInfo_SeasonTalentInactive")
@@ -146,7 +149,7 @@ public sealed class PlayerInfoEntry
             SeasonIconBrush = season.Brush,
             IsSeasonUnknown = season.IsUnknown,
             SeasonText = season.Text,
-            UnknownIconBrush = CreateIconBrush(settings, UnknownColorKey)
+            UnknownIconBrush = iconPalette.GetBrush(UnknownColorKey)
         };
     }
 
@@ -157,7 +160,7 @@ public sealed class PlayerInfoEntry
     /// <param name="name">覚えている名前。無ければ空。</param>
     /// <param name="uid">覚えている UID。無ければ 0。</param>
     /// <param name="seasonId">今のシーズン番号。まだ分からなければ 0。</param>
-    /// <param name="settings">プレイヤー情報の設定(アイコンカラー)。</param>
+    /// <param name="iconPalette">アイコンカラーの塗り。</param>
     public static PlayerInfoEntry CreateUnknown(
         string? name,
         long uid,
@@ -165,7 +168,7 @@ public sealed class PlayerInfoEntry
         bool isNpc,
         int professionId,
         int seasonId,
-        PlayerInfoWidgetSettingsConfig settings)
+        PlayerInfoIconPalette iconPalette)
     {
         var localization = LocalizationManager.Instance;
         var unknownText = localization.GetString("PlayerInfo_Unknown");
@@ -179,7 +182,7 @@ public sealed class PlayerInfoEntry
                 ? uid.ToString(CultureInfo.InvariantCulture)
                 : unknownText;
 
-        var season = CreateSeasonBadge(seasonId, unknownText, settings);
+        var season = CreateSeasonBadge(seasonId, unknownText, iconPalette);
         var classKey = PlayerProfession.GetKey(professionId);
         var seasonTalent = ResolveSeasonTalentIcon(0, isInactive: false);
 
@@ -195,16 +198,16 @@ public sealed class PlayerInfoEntry
             SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {unknownText}",
             LocationText = $"{localization.GetString("PlayerInfo_Location")}: {unknownText}",
             ClassIconMask = ResolveMask($"Icon.Profession.{classKey}"),
-            ClassIconBrush = CreateIconBrush(settings, classKey),
+            ClassIconBrush = iconPalette.GetBrush(classKey),
             ClassSpecText = localization.GetString("ClassSpec_Unknown"),
             SeasonTalentIconMask = seasonTalent.Mask,
-            SeasonTalentIconBrush = CreateIconBrush(settings, seasonTalent.ColorKey),
+            SeasonTalentIconBrush = iconPalette.GetBrush(seasonTalent.ColorKey),
             SeasonTalentText = PlayerInfoFormatFormatter.GetSeasonTalentText(0, isSeasonTalentInactive: false),
             SeasonIconMask = season.Mask,
             SeasonIconBrush = season.Brush,
             IsSeasonUnknown = season.IsUnknown,
             SeasonText = season.Text,
-            UnknownIconBrush = CreateIconBrush(settings, UnknownColorKey)
+            UnknownIconBrush = iconPalette.GetBrush(UnknownColorKey)
         };
     }
 
@@ -212,12 +215,12 @@ public sealed class PlayerInfoEntry
     private static (Brush? Mask, Brush? Brush, bool IsUnknown, string Text) CreateSeasonBadge(
         int seasonId,
         string unknownText,
-        PlayerInfoWidgetSettingsConfig settings)
+        PlayerInfoIconPalette iconPalette)
     {
         var isUnknown = seasonId <= 0;
         return (
             isUnknown ? null : SeasonIcons.GetSeasonIconMask(seasonId),
-            isUnknown ? null : CreateIconBrush(settings, SeasonIcons.GetColorKey(seasonId)),
+            isUnknown ? null : iconPalette.GetBrush(SeasonIcons.GetColorKey(seasonId)),
             isUnknown,
             isUnknown ? unknownText : CombatDataCatalog.GetSeasonName(seasonId));
     }
@@ -243,27 +246,6 @@ public sealed class PlayerInfoEntry
             : (SeasonTalentIcons.GetIconMask(0, isInactive: false), UnknownColorKey);
     }
 
-    /// <summary>アイコンカラーで選んでいる色の塗り。引き方はプレイヤーリスト・被ダメログのクラスカラーと同じ。</summary>
-    private static Brush CreateIconBrush(PlayerInfoWidgetSettingsConfig settings, string colorKey)
-    {
-        var palette = settings.ClassColorPalettes.TryGetValue(colorKey, out var colors)
-            ? colors
-            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerInfo, colorKey);
-        var selectedIndex = settings.ClassColorIndexes.TryGetValue(colorKey, out var index)
-            ? index
-            : WidgetConfigDefaults.MinClassColorIndex;
-        var selectedColor = palette.Count == 0
-            ? "#A8A8A8"
-            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
-        var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
-            ? parsed
-            : Color.FromRgb(0xA8, 0xA8, 0xA8);
-
-        var brush = new SolidColorBrush(color);
-        brush.Freeze();
-        return brush;
-    }
-
     /// <summary>
     /// 特化名。クラスR2の特化名は、名前の表が落としている共通の語尾(<c>ClassSpec_NameSuffix</c>)を後ろに付け直す(プレイヤー情報だけ)。
     /// 名前が引けないときは語尾だけにならないよう付けない。
@@ -285,9 +267,14 @@ public sealed class PlayerInfoEntry
             : value;
     }
 
-    /// <summary>Icons.xaml の絵から、塗りを抜く形を作る。リソースが無ければ無し。</summary>
+    /// <summary>Icons.xaml の絵から、塗りを抜く形を作る。鍵ごとに使い回す。リソースが無ければ無し。</summary>
     private static Brush? ResolveMask(string resourceKey)
     {
+        if (IconMasks.TryGetValue(resourceKey, out var cached))
+        {
+            return cached;
+        }
+
         if (Application.Current?.TryFindResource(resourceKey) is not ImageSource source)
         {
             return null;
@@ -295,11 +282,48 @@ public sealed class PlayerInfoEntry
 
         var mask = new ImageBrush(source) { Stretch = Stretch.Uniform };
         mask.Freeze();
+        IconMasks[resourceKey] = mask;
         return mask;
     }
 
     private static string FormatInteger(int value)
     {
         return value.ToString(CultureInfo.CurrentCulture);
+    }
+}
+
+/// <summary>
+/// プレイヤー情報のアイコンカラーの塗り。色の鍵ごとに一度だけ作って使い回す(毎回作ると、色が同じでも表示値が変わった扱いになる)。
+/// 設定(保存かプレビュー)が変わったら新しく作り直す。
+/// </summary>
+public sealed class PlayerInfoIconPalette(PlayerInfoWidgetSettingsConfig settings)
+{
+    private readonly Dictionary<string, Brush> _brushes = new(StringComparer.Ordinal);
+
+    /// <summary>アイコンカラーで選んでいる色の塗り。引き方はプレイヤーリスト・被ダメログのクラスカラーと同じ。</summary>
+    public Brush GetBrush(string colorKey)
+    {
+        if (_brushes.TryGetValue(colorKey, out var cached))
+        {
+            return cached;
+        }
+
+        var palette = settings.ClassColorPalettes.TryGetValue(colorKey, out var colors)
+            ? colors
+            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.PlayerInfo, colorKey);
+        var selectedIndex = settings.ClassColorIndexes.TryGetValue(colorKey, out var index)
+            ? index
+            : WidgetConfigDefaults.MinClassColorIndex;
+        var selectedColor = palette.Count == 0
+            ? "#A8A8A8"
+            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
+        var color = ColorUtilities.TryParseHex(selectedColor, out var parsed)
+            ? parsed
+            : Color.FromRgb(0xA8, 0xA8, 0xA8);
+
+        var brush = new SolidColorBrush(color);
+        brush.Freeze();
+        _brushes[colorKey] = brush;
+        return brush;
     }
 }

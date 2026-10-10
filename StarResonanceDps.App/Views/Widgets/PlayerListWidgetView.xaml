@@ -273,17 +273,30 @@
             ここに 5px を残すとクリップ境界も 5px 内側に来る。特化テキストは列幅(33)より広く
             はみ出させるため、その 5px を左の余地として使いたい。描画位置は行の Margin で
             相殺しているので見た目は変わらない。
+
+            行は見えている分だけ作る(仮想化)。仮想化はリスト自身のテンプレートの中に ScrollViewer が無いと効かない
+            (外側に ScrollViewer を置くと全行が実体化する)。行の部品は別の人の行に使い回される。
         -->
-        <ScrollViewer x:Name="PlayerListScrollViewer"
-                      Margin="0,5,0,5"
-                      VerticalScrollBarVisibility="Hidden"
-                      HorizontalScrollBarVisibility="Disabled"
-                      CanContentScroll="False"
-                      ScrollChanged="PlayerListScrollViewer_ScrollChanged">
-            <ItemsControl ItemsSource="{Binding PlayerListEntries}">
+            <ItemsControl x:Name="PlayerListItemsControl"
+                          ItemsSource="{Binding PlayerListEntries}"
+                          VirtualizingPanel.IsVirtualizing="True"
+                          VirtualizingPanel.VirtualizationMode="Recycling"
+                          VirtualizingPanel.ScrollUnit="Pixel"
+                          VirtualizingStackPanel.CleanUpVirtualizedItem="PlayerListItemsControl_CleanUpVirtualizedItem">
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ScrollViewer x:Name="PlayerListScrollViewer"
+                                      Margin="0,5,0,5"
+                                      VerticalScrollBarVisibility="Hidden"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      CanContentScroll="True">
+                            <ItemsPresenter />
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel />
+                        <VirtualizingStackPanel />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -739,6 +752,5 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </ScrollViewer>
     </Grid>
 </UserControl>

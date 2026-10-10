@@ -905,6 +905,9 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>미분류</value>
   </data>
+  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+    <value>알 수 없음</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>스킬 이름</value>
   </data>
@@ -1266,6 +1269,18 @@
   </data>
   <data name="Aggregation_Viewing" xml:space="preserve">
     <value>표시 중</value>
+  </data>
+  <data name="Aggregation_Loading" xml:space="preserve">
+    <value>불러오는 중</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Title" xml:space="preserve">
+    <value>기록 불러오기 오류</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Message" xml:space="preserve">
+    <value>기록을 열 수 없습니다.</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
+    <value>표시는 그대로입니다.</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>기록이 없습니다</value>

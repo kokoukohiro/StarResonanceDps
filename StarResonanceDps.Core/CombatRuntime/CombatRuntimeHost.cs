@@ -84,6 +84,8 @@ public sealed class CombatRuntimeHost
                 return;
             }
 
+            // 履歴の読み込みが閉じた接続に当たらないよう、先に止めて待つ。
+            EncounterHistoryProvider.ShutdownLoads();
             MessageManager.StopCapturing();
             if (EncounterManager.Current is not null)
             {

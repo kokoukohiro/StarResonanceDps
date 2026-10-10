@@ -163,7 +163,7 @@ public partial class PlayerStatusWidgetView : UserControl, IWidgetVerticalScroll
             _dragRow.Opacity = 0.4d;
             CaptureMouse();
 
-            // 掴んでいる間は行の作り直しを止める。止めないと属性の更新でコンテナが差し替わる。
+            // 掴んでいる間は行の当て直しを止める。止めないと行の数が減ったときに掴んでいる行の部品が外れる。
             (DataContext as PlayerStatusWidgetViewModel)?.BeginRowDrag();
         }
 

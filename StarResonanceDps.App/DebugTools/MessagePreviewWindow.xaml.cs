@@ -196,6 +196,12 @@ public partial class MessagePreviewWindow : Window
         NotificationCheckMessage.ShowWindowsVoiceMissing(this);
     }
 
+    // 本物: 集計タブ(押した履歴の回を読み込めなかったとき)
+    private void HistoryLoadFailed_Click(object sender, RoutedEventArgs e)
+    {
+        HistoryLoadFailureMessage.Show(this);
+    }
+
     // 本物: キーバインドツール(ファイルの場所を開くとき、フォルダが無い)
     private void KeybindDirectoryNotFound_Click(object sender, RoutedEventArgs e)
     {

@@ -1,6 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Media;
-using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
@@ -8,17 +8,18 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
     private PlayerStatusWidgetSettingsConfig _settings;
+
+    /// <summary>行の色。設定が変わったときだけ作る(毎回作ると、色が同じでも行の色の差し替えになる)。</summary>
+    private IReadOnlyDictionary<int, Brush> _textBrushes;
+
     private IReadOnlyList<int> _rowOrder;
     private PlayerRosterEntry? _player;
     private bool _isRowDragging;
     private bool _needsRefreshAfterDrag;
     private bool _isDisposed;
-
-    [ObservableProperty]
-    private IReadOnlyList<PlayerStatusRow> _playerStatus = [];
 
     public PlayerStatusWidgetViewModel(
         WidgetListItemViewModel statusWidget,
@@ -27,12 +28,16 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
         : base(statusWidget, requestedCharacterId, showPlayerIdentityInHeader: false)
     {
         _settings = statusWidget.GetPlayerStatusSettingsSnapshot();
+        _textBrushes = CreateTextBrushes(_settings);
         _rowOrder = statusWidget.GetPlayerStatusRowOrderSnapshot();
         statusWidget.PlayerStatusSettingsChanged += Widget_PlayerStatusSettingsChanged;
         InitializePlayer(initialPlayer);
     }
 
     public WidgetListItemViewModel StatusWidget => PlayerWidget;
+
+    /// <summary>表示する行。行の部品は使い回し、更新では値だけを入れ替える(<see cref="SynchronizeRows"/>)。</summary>
+    public ObservableCollection<PlayerStatusRowItem> PlayerStatus { get; } = [];
 
     public void Dispose()
     {
@@ -51,10 +56,11 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
         RefreshRows();
     }
 
-    /// <summary>表示設定(保存かプレビュー)が変わった。行を作り直す。</summary>
+    /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直して行に当て直す。</summary>
     private void Widget_PlayerStatusSettingsChanged(object? sender, EventArgs e)
     {
         _settings = StatusWidget.GetPlayerStatusSettingsSnapshot();
+        _textBrushes = CreateTextBrushes(_settings);
         RefreshRows();
     }
 
@@ -66,19 +72,44 @@ public sealed partial class PlayerStatusWidgetViewModel : PlayerWidgetWindowView
             return;
         }
 
-        PlayerStatus = _player is null
+        SynchronizeRows(_player is null
             ? []
             : PlayerStatusEntry.Create(
                 _player,
                 _settings.HideInactiveStatusEffects
                     ?? WidgetConfigDefaults.DefaultHideInactiveStatusEffects,
                 _settings.RowVisibility,
-                CreateTextBrushes(_settings),
-                _rowOrder);
+                _textBrushes,
+                _rowOrder));
     }
 
     /// <summary>
-    /// 行を掴んでいる間は作り直しを止める。属性は届くたびに行を差し替えるので、
+    /// 行を位置ごとに当て直す。行の部品は作り直さず値だけを入れ替え、増えた分だけ足し、減った分だけ末尾から外す
+    /// (行が途中で出入りしても、後ろの行は値が1つずれて入るだけ)。
+    /// </summary>
+    private void SynchronizeRows(IReadOnlyList<PlayerStatusRow> rows)
+    {
+        for (var index = 0; index < rows.Count; index++)
+        {
+            if (index < PlayerStatus.Count)
+            {
+                PlayerStatus[index].Apply(rows[index]);
+                continue;
+            }
+
+            var item = new PlayerStatusRowItem();
+            item.Apply(rows[index]);
+            PlayerStatus.Add(item);
+        }
+
+        while (PlayerStatus.Count > rows.Count)
+        {
+            PlayerStatus.RemoveAt(PlayerStatus.Count - 1);
+        }
+    }
+
+    /// <summary>
+    /// 行を掴んでいる間は行の当て直しを止める。行の数が減ると末尾の行の部品が外れるので、
     /// そのままだと<b>掴んでいるコンテナが visual tree から外れて手が離れる</b>。
     /// </summary>
     public void BeginRowDrag()

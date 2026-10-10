@@ -25,6 +25,7 @@ public partial class AggregationView : UserControl
     {
         InitializeComponent();
         DataContext = _viewModel;
+        _viewModel.LoadFailed += ViewModel_LoadFailed;
 
         // 計測の状態は Core が通知を出さない。メーターウィジェットと
         // 同じく定期的に読み直す。動かすのはこのタブが見えている間だけ。
@@ -137,7 +138,7 @@ public partial class AggregationView : UserControl
     }
 
     /// <summary>
-    /// スナップショットを作るスレッドから上がることがあるので、UIスレッドへ渡し直す。
+    /// パケットのスレッドから上がる(キャプチャが止まっていれば読み込みのスレッドのこともある)ので、UIスレッドへ渡し直す。
     /// </summary>
     private void EncounterHistoryProvider_SelectionChanged()
     {
@@ -153,6 +154,11 @@ public partial class AggregationView : UserControl
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         _viewModel.RefreshTexts();
+    }
+
+    private void ViewModel_LoadFailed(object? sender, EventArgs e)
+    {
+        HistoryLoadFailureMessage.Show(Window.GetWindow(this));
     }
 
     /// <summary>

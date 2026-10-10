@@ -905,6 +905,9 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>无分类</value>
   </data>
+  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+    <value>未知</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>技能名称</value>
   </data>
@@ -1266,6 +1269,18 @@
   </data>
   <data name="Aggregation_Viewing" xml:space="preserve">
     <value>显示中</value>
+  </data>
+  <data name="Aggregation_Loading" xml:space="preserve">
+    <value>读取中</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Title" xml:space="preserve">
+    <value>历史读取错误</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Message" xml:space="preserve">
+    <value>无法打开历史记录。</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
+    <value>显示内容保持不变。</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>无历史记录</value>

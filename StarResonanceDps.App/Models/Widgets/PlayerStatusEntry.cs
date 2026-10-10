@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
@@ -26,6 +27,37 @@ public sealed record PlayerStatusRow(
     string ValueText,
     int OrderUnitAttrId,
     Brush? TextBrush = null);
+
+/// <summary>
+/// ステータス詳細の画面の1行。行の部品は使い回し、届くたびに <see cref="PlayerStatusRow"/> の値だけを入れ替える
+/// (同じ値なら通知しないので、値が変わらない間は画面の部品も描画も動かない)。
+/// </summary>
+public sealed partial class PlayerStatusRowItem : ObservableObject
+{
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    private Brush? _iconMask;
+
+    [ObservableProperty]
+    private string _valueText = string.Empty;
+
+    [ObservableProperty]
+    private Brush? _textBrush;
+
+    /// <summary>並べ替えの単位(<see cref="PlayerStatusRow.OrderUnitAttrId"/>)。</summary>
+    public int OrderUnitAttrId { get; private set; }
+
+    public void Apply(PlayerStatusRow row)
+    {
+        Name = row.Name;
+        IconMask = row.IconMask;
+        ValueText = row.ValueText;
+        TextBrush = row.TextBrush;
+        OrderUnitAttrId = row.OrderUnitAttrId;
+    }
+}
 
 /// <summary>
 /// ステータス詳細の行を作る。

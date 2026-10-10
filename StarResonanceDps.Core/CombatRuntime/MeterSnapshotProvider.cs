@@ -63,6 +63,13 @@ public sealed record MetricTimelineSnapshot(
     IReadOnlyList<MetricTimelinePoint> Points);
 
 /// <summary>
+/// 推移グラフの横軸の下に出す、プレイヤーの技の開始1件。<see cref="Seconds"/> は戦闘の時計の経過(<c>Encounter.ToCombatOffset</c>)で、
+/// 起点より前の開始は 0、自動一時停止の中の開始は止まった時点の経過。<see cref="IconName"/> と <see cref="Name"/> は
+/// メーターと同じ見出し表の行で畳んだもの(<c>CombatDataCatalog.GetSkillActivationDisplay</c>、内部IDの注記は設定どおり。名前が無ければ空)。
+/// </summary>
+public sealed record MetricTimelineSkillActivation(double Seconds, int SkillId, string IconName, string Name);
+
+/// <summary>
 /// スキル詳細の1行。
 ///
 /// <para>
@@ -1781,6 +1788,40 @@ public static class MeterSnapshotProvider
         }
 
         return new MetricTimelineSnapshot(points);
+    }
+
+    /// <summary>
+    /// 推移グラフに出すプレイヤーの技の開始(届いた順)。回は線と同じ(<see cref="ResolveActiveEncounter"/>)。
+    /// 戦闘の時計の起点がまだ無い回は空(線も無い)。起点より前の開始は 0 秒に置く
+    /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
+    /// </summary>
+    public static IReadOnlyList<MetricTimelineSkillActivation> GetPlayerSkillActivations(long characterId)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out _))
+        {
+            return Array.Empty<MetricTimelineSkillActivation>();
+        }
+
+        var records = encounter.GetSkillActivationsCopy(entityUuid);
+        var activations = new List<MetricTimelineSkillActivation>(records.Length);
+        foreach (var record in records)
+        {
+            if (encounter.ToCombatOffset(record.Timestamp) is not { } offset)
+            {
+                return Array.Empty<MetricTimelineSkillActivation>();
+            }
+
+            var (name, iconName) = CombatDataCatalog.GetSkillActivationDisplay(record.SkillId);
+            activations.Add(new MetricTimelineSkillActivation(
+                Math.Max(offset.TotalSeconds, 0d),
+                record.SkillId,
+                iconName,
+                name));
+        }
+
+        return activations;
     }
 
     public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)

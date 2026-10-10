@@ -18,6 +18,10 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private readonly DispatcherTimer _skillRefreshTimer;
     private readonly DispatcherTimer _skillEffectRefreshTimer;
+
+    /// <summary>一覧のテンプレートの中の ScrollViewer(仮想化のため一覧の中に置く)。読み込むまでは null。</summary>
+    private ScrollViewer? _scrollViewer;
+
     private ContextMenu? _openPlayerSelectionMenu;
     private PlayerListEntry? _openPlayerSelectionEntry;
 
@@ -39,33 +43,57 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
         Loaded += PlayerListWidgetView_Loaded;
         Unloaded += PlayerListWidgetView_Unloaded;
         SizeChanged += PlayerListWidgetView_SizeChanged;
+        PreviewMouseWheel += PlayerListWidgetView_PreviewMouseWheel;
     }
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
     {
-        var maximum = Math.Max(PlayerListScrollViewer.ScrollableHeight, 0);
-        var viewport = Math.Max(PlayerListScrollViewer.ViewportHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return new WidgetVerticalScrollMetrics(0, 0, 0, 1, 1);
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
+        var viewport = Math.Max(_scrollViewer.ViewportHeight, 0);
 
         return new WidgetVerticalScrollMetrics(
             maximum,
             viewport,
-            Math.Min(PlayerListScrollViewer.VerticalOffset, maximum),
+            Math.Min(_scrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9, 1),
             42);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)
     {
-        var maximum = Math.Max(PlayerListScrollViewer.ScrollableHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return;
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
         var offset = double.IsFinite(verticalOffset)
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        PlayerListScrollViewer.ScrollToVerticalOffset(offset);
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("PlayerList");
+        _scrollViewer.ScrollToVerticalOffset(offset);
+    }
+
+    private void PlayerListWidgetView_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("PlayerList");
     }
 
     private void PlayerListWidgetView_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_scrollViewer is null)
+        {
+            PlayerListItemsControl.ApplyTemplate();
+            _scrollViewer = (ScrollViewer)PlayerListItemsControl.Template.FindName("PlayerListScrollViewer", PlayerListItemsControl);
+            _scrollViewer.ScrollChanged += PlayerListScrollViewer_ScrollChanged;
+        }
+
         _skillRefreshTimer.Start();
         _skillEffectRefreshTimer.Start();
         RefreshSkillEntries(refreshEffects: true);
@@ -104,7 +132,27 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void PlayerListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
+        // 行の部品は別の人の行に使い回されるので、位置が動いたら開いているメニューを閉じる
+        // (開いたままだと、メニューの相手が使い回した先の人に替わる)。
+        if (e.VerticalChange != 0)
+        {
+            ClosePlayerSelectionMenu();
+            StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollPositionChanged();
+        }
+
         NotifyVerticalScrollMetricsChanged();
+    }
+
+    /// <summary>
+    /// 行の部品が見えている範囲から外された(別の行に使い回される)。その行がメニューを開いている行なら閉じる。
+    /// 位置が動かずに行だけが外へ押し出される(顔ぶれの更新で並びが動く)ときも、ここで拾う。
+    /// </summary>
+    private void PlayerListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
+    {
+        if (_openPlayerSelectionEntry is not null && ReferenceEquals(e.Value, _openPlayerSelectionEntry))
+        {
+            ClosePlayerSelectionMenu();
+        }
     }
 
     /// <summary>

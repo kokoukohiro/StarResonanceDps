@@ -11,9 +11,18 @@ internal static class PlayerRosterProjection
     private static readonly HashSet<long> NearbyPlayerUuids = [];
     private static readonly Dictionary<long, long> PlayerEntityUuidsByCharacterId = [];
     private static readonly PlayerRosterStore RosterStore = PlayerRosterStore.Instance;
+    private static readonly object SelfAttributesSync = new();
+
+    /// <summary>
+    /// 最後に作った自分の属性の一覧。中身が同じなら同じ一覧を返し、名簿の行が「変わった」扱いにならないようにする
+    /// (名簿の行の比べでは一覧は参照で比べるので、毎回新しい一覧だと値が同じでも名簿の通知が出て、
+    /// 自分を映す窓とプレイヤーリストが作り直す)。名簿と同じ所(マップ移動・キャプチャの停止・ログアウト)で消す。
+    /// </summary>
+    private static IReadOnlyList<PlayerAttributeEntry>? _lastSelfAttributes;
 
     public static void BeginMap()
     {
+        ForgetSelfAttributes();
         PreserveHumanPartySupplements();
 
         long[] previousNearbyPlayerUuids;
@@ -58,6 +67,7 @@ internal static class PlayerRosterProjection
     /// </summary>
     public static void ResetToStartup()
     {
+        ForgetSelfAttributes();
         lock (NearbyPlayerSync)
         {
             NearbyPlayerUuids.Clear();
@@ -133,6 +143,7 @@ internal static class PlayerRosterProjection
 
     public static void ResetNearbyPlayers()
     {
+        ForgetSelfAttributes();
         long[] previousNearbyPlayerUuids;
         lock (NearbyPlayerSync)
         {
@@ -470,7 +481,24 @@ internal static class PlayerRosterProjection
         }
 
         entries.Sort((left, right) => left.AttrId.CompareTo(right.AttrId));
-        return entries;
+        lock (SelfAttributesSync)
+        {
+            if (_lastSelfAttributes is not null && _lastSelfAttributes.SequenceEqual(entries))
+            {
+                return _lastSelfAttributes;
+            }
+
+            _lastSelfAttributes = entries;
+            return entries;
+        }
+    }
+
+    private static void ForgetSelfAttributes()
+    {
+        lock (SelfAttributesSync)
+        {
+            _lastSelfAttributes = null;
+        }
     }
 
     private static void RefreshPartyMemberSupplementFromNearby(

@@ -36,6 +36,7 @@ public partial class PlayerMetricTimelineWidgetView : UserControl, IWidgetHorizo
 
     public void SetHorizontalScrollOffset(double horizontalOffset)
     {
+        StarResonanceDps.App.Diagnostics.HistorySwitchProbe.ScrollInputReceived("Timeline");
         TimelineChart.HorizontalOffset = horizontalOffset;
     }
 
@@ -70,7 +71,6 @@ public partial class PlayerMetricTimelineWidgetView : UserControl, IWidgetHorizo
         _gridLayer = gridLayer;
         _frameOverlayOwner = owner;
         gridLayer.Chart = TimelineChart;
-        TimelineChart.GridLayer = gridLayer;
         owner.FrameOverlayHost.Content = gridLayer;
     }
 
@@ -87,7 +87,6 @@ public partial class PlayerMetricTimelineWidgetView : UserControl, IWidgetHorizo
             _gridLayer.Chart = null;
         }
 
-        TimelineChart.GridLayer = null;
         _gridLayer = null;
         _frameOverlayOwner = null;
     }

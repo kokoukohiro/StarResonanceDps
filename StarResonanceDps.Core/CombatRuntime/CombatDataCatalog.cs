@@ -74,6 +74,13 @@ public static class CombatDataCatalog
     /// <summary>発生源キー → 行代表キー。<c>RecountRows.json</c> の行構成に手修正を重ねたもの。</summary>
     private static FrozenDictionary<long, long> _recountRows = FrozenDictionary<long, long>.Empty;
 
+    /// <summary>
+    /// ownerId → その ownerId の鍵の枝番と行代表キー(枝番の昇順)。<see cref="_recountRows"/> を ownerId で引き直したもの。
+    /// 押した技の表示を見出し表の行で畳むのに使う(<see cref="GetSkillActivationDisplay"/>)。
+    /// </summary>
+    private static FrozenDictionary<int, (int Branch, long RowKey)[]> _recountKeysByOwner =
+        FrozenDictionary<int, (int Branch, long RowKey)[]>.Empty;
+
     /// <summary>オプションのバフID → オプション名。<c>Data/Localization/RogueEntryNames.json</c>。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _rogueEntryNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -541,6 +548,66 @@ public static class CombatDataCatalog
     public static bool TryResolveRecountRow(long key, out long rowKey)
         => _recountRows.TryGetValue(key, out rowKey);
 
+    /// <summary>
+    /// 押した技(推移グラフの技のアイコン)の名前とアイコン名。<b>メーターと同じ見出し表の行で畳む</b>
+    /// (通常攻撃の2段目以降のように、技の表に名前もアイコンも無い技を根の技の行で出すため)。
+    ///
+    /// <para>
+    /// 行は <see cref="TryResolveSkillActivationRow"/>。名前は行の名前、アイコンは行代表の技のアイコン。
+    /// 行が無い、または行から決まらなければ技自身の名前・アイコン。どちらも無ければ空。
+    /// 内部IDの注記は技の番号で付け、技名と同じ設定に従う。
+    /// </para>
+    /// </summary>
+    public static (string Name, string IconName) GetSkillActivationDisplay(int skillId)
+    {
+        var cultureName = Volatile.Read(ref _cultureName);
+        var name = string.Empty;
+        var iconName = string.Empty;
+        if (TryResolveSkillActivationRow(skillId, out var rowKey))
+        {
+            name = ResolveText(_recountNames, cultureName, rowKey);
+            iconName = GetSkillIconName(SourceKeyOwnerId(rowKey));
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            name = ResolveText(_skillNames, cultureName, skillId);
+        }
+
+        if (string.IsNullOrEmpty(iconName))
+        {
+            iconName = GetSkillIconName(skillId);
+        }
+
+        return (AppendInternalId(name, InternalIdDisplayMode.SkillOnly, skillId), iconName);
+    }
+
+    /// <summary>
+    /// 押した技を畳む見出し表の行。技の番号を ownerId とする鍵の行で、鍵が2つ以上の行に分かれていれば、
+    /// 枝番が 0 でない最小の枝番の鍵の行(枝番 0 しか無ければ枝番 0 の鍵の行)。
+    /// </summary>
+    private static bool TryResolveSkillActivationRow(int skillId, out long rowKey)
+    {
+        rowKey = 0;
+        if (!_recountKeysByOwner.TryGetValue(skillId, out var keys) || keys.Length == 0)
+        {
+            return false;
+        }
+
+        var chosen = keys[0];
+        foreach (var key in keys)
+        {
+            if (key.Branch != 0)
+            {
+                chosen = key;
+                break;
+            }
+        }
+
+        rowKey = chosen.RowKey;
+        return true;
+    }
+
     /// <param name="Row">
     /// 行の出入り。別の鍵ならその鍵の行へ入れる(追加)、<c>null</c> なら行から外して単独にする(削除)。
     /// 省略したら生成物のまま。
@@ -666,6 +733,14 @@ public static class CombatDataCatalog
         }
 
         _recountRows = repOf.ToFrozenDictionary();
+        _recountKeysByOwner = repOf
+            .GroupBy(pair => SourceKeyOwnerId(pair.Key))
+            .ToFrozenDictionary(
+                group => group.Key,
+                group => group
+                    .Select(pair => (Branch: SourceKeyBranch(pair.Key), RowKey: pair.Value))
+                    .OrderBy(entry => entry.Branch)
+                    .ToArray());
         _recountNames = BuildRecountNames(membersOfRep, originRow, layout, repOf, overrides);
         Log.Information("Loaded {Keys} recount keys / {Rows} rows / {Overrides} overrides",
             repOf.Count, groups.Count, overrides.Count);

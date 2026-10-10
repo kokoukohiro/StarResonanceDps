@@ -842,6 +842,9 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>無分類</value>
   </data>
+  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+    <value>不明</value>
+  </data>
   <data name="Metric_SkillName" xml:space="preserve">
     <value>スキル名</value>
   </data>
@@ -1203,6 +1206,18 @@
   </data>
   <data name="Aggregation_Viewing" xml:space="preserve">
     <value>表示中</value>
+  </data>
+  <data name="Aggregation_Loading" xml:space="preserve">
+    <value>読み込み中</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Title" xml:space="preserve">
+    <value>履歴読み込みエラー</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Message" xml:space="preserve">
+    <value>履歴を開けませんでした。</value>
+  </data>
+  <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
+    <value>表示はこれまでのままです。</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>履歴がありません</value>

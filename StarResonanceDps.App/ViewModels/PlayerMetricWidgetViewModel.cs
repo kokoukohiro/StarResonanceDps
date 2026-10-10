@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
@@ -61,8 +62,10 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
     private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private IReadOnlyList<MetricTimelinePoint> _timelinePoints = Array.Empty<MetricTimelinePoint>();
+    private IReadOnlyList<MetricTimelineSkillMarker> _timelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
     private int _timelineVisibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
     private Brush? _timelineLineBrush;
+    private Brush? _timelineUnknownSkillIconBrush;
     private bool _isDisposed;
 
     public PlayerMetricWidgetViewModel(
@@ -88,6 +91,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         playerWidget.SkillDetailSettingsChanged += Widget_SkillDetailSettingsChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         InitializePlayer(initialPlayer);
+        HistorySwitchProbe.Register(this, playerWidget.Kind.ToString());
         Refresh();
         _refreshTimer.Start();
     }
@@ -96,10 +100,19 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     public bool IsTimeline => _displayMode == PlayerMetricDisplayMode.Timeline;
 
+    /// <summary>
+    /// 推移グラフの点。値が前回と同じなら差し替えない(毎回新しい配列を入れると、値が同じでもグラフが線と配置を全部やり直す)。
+    /// </summary>
     public IReadOnlyList<MetricTimelinePoint> TimelinePoints
     {
         get => _timelinePoints;
-        private set => SetProperty(ref _timelinePoints, value);
+        private set
+        {
+            if (!_timelinePoints.SequenceEqual(value))
+            {
+                SetProperty(ref _timelinePoints, value);
+            }
+        }
     }
 
     /// <summary>推移グラフの横軸の長さ(秒)。設定「横軸の長さ」。</summary>
@@ -114,6 +127,20 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     {
         get => _timelineLineBrush;
         private set => SetProperty(ref _timelineLineBrush, value);
+    }
+
+    /// <summary>推移グラフの横軸の下に出す、その人の技の開始のアイコン(届いた順)。</summary>
+    public IReadOnlyList<MetricTimelineSkillMarker> TimelineSkillMarkers
+    {
+        get => _timelineSkillMarkers;
+        private set => SetProperty(ref _timelineSkillMarkers, value);
+    }
+
+    /// <summary>技のアイコンのファイルが無い技に出すクラス不明のアイコンの色。グラフカラーの「不明」(フィルターを掛けた色)。</summary>
+    public Brush? TimelineUnknownSkillIconBrush
+    {
+        get => _timelineUnknownSkillIconBrush;
+        private set => SetProperty(ref _timelineUnknownSkillIconBrush, value);
     }
 
     public ReadOnlyObservableCollection<MetricSkillTableEntry> SkillEntries { get; }
@@ -147,6 +174,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         PlayerWidget.ElementColorSettingsChanged -= Widget_ElementColorSettingsChanged;
         PlayerWidget.SkillDetailSettingsChanged -= Widget_SkillDetailSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        HistorySwitchProbe.Unregister(this);
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -192,6 +220,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             return;
         }
 
+        var probe = HistorySwitchProbe.BeginRefresh(this);
         var timelineSettings = IsTimeline ? PlayerWidget.GetMetricTimelineSettingsSnapshot() : null;
         if (timelineSettings is not null)
         {
@@ -200,7 +229,9 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
         if (SelectedCharacterId is not { } characterId)
         {
+            probe?.DataDone();
             ApplyEmptyData();
+            probe?.End("no player");
             return;
         }
 
@@ -216,7 +247,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 _kind,
                 characterId,
                 timelineSettings.AggregationIntervalSeconds);
+            var activations = MeterSnapshotProvider.GetPlayerSkillActivations(characterId);
+            probe?.DataDone();
             TimelinePoints = timeline.Points;
+            ApplyTimelineSkillMarkers(activations);
+            ApplyTimelineUnknownSkillIconColor(timelineSettings);
             if (playerIdentity is not null)
             {
                 ApplyTimelineLineColor(
@@ -225,25 +260,85 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             }
 
             ClearSkillEntries();
+            probe?.End($"points={timeline.Points.Count} activations={activations.Count}");
             return;
         }
 
         var table = MeterSnapshotProvider.GetPlayerSkillTable(_kind, characterId);
+        probe?.DataDone();
+        var rowsBefore = _skillEntries.Count;
         TimelinePoints = Array.Empty<MetricTimelinePoint>();
         SynchronizeSkillEntries(table.Entries, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
+        probe?.End($"rows={rowsBefore}->{_skillEntries.Count}");
     }
 
     private void ApplyEmptyData()
     {
         TimelinePoints = Array.Empty<MetricTimelinePoint>();
+        TimelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
         ClearSkillEntries();
     }
 
     /// <summary>
+    /// 技のアイコンの一覧。アイコンは技の表のアイコンの欄を Skills のフォルダで探し(無ければ null = クラス不明のアイコン)、
+    /// 名前が無い技の TIPS は「不明」。中身が前と同じなら差し替えない(グラフの並べ直しを毎回起こさない)。
+    /// </summary>
+    private void ApplyTimelineSkillMarkers(IReadOnlyList<MetricTimelineSkillActivation> activations)
+    {
+        var unknownName = LocalizationManager.Instance.GetString("MetricTimeline_UnknownSkill");
+        var markers = new MetricTimelineSkillMarker[activations.Count];
+        for (var index = 0; index < activations.Count; index++)
+        {
+            var activation = activations[index];
+            markers[index] = new MetricTimelineSkillMarker(
+                activation.Seconds,
+                CombatIconResolver.ResolveSkillIcon(activation.IconName),
+                string.IsNullOrWhiteSpace(activation.Name) ? unknownName : activation.Name);
+        }
+
+        if (markers.SequenceEqual(TimelineSkillMarkers))
+        {
+            return;
+        }
+
+        TimelineSkillMarkers = markers;
+    }
+
+    /// <summary>
     /// 線の色。クラスの鍵の選んでいる色にフィルターを掛ける(メーターの行のクラスカラーと同じ掛け方)。グラフカラーは不透明度を持たないので不透明で描く。
-    /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
     /// </summary>
     private void ApplyTimelineLineColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
+    {
+        var lineColor = ResolveGraphColor(settings, classKey);
+        if (TimelineLineBrush is SolidColorBrush current && current.Color == lineColor)
+        {
+            return;
+        }
+
+        var brush = new SolidColorBrush(lineColor);
+        brush.Freeze();
+        TimelineLineBrush = brush;
+    }
+
+    /// <summary>クラス不明のアイコンの色。グラフカラーの「不明」に線と同じ掛け方でフィルターを掛ける。</summary>
+    private void ApplyTimelineUnknownSkillIconColor(MetricTimelineWidgetSettingsConfig settings)
+    {
+        var iconColor = ResolveGraphColor(settings, "Unknown");
+        if (TimelineUnknownSkillIconBrush is SolidColorBrush current && current.Color == iconColor)
+        {
+            return;
+        }
+
+        var brush = new SolidColorBrush(iconColor);
+        brush.Freeze();
+        TimelineUnknownSkillIconBrush = brush;
+    }
+
+    /// <summary>
+    /// グラフカラーの <paramref name="classKey"/> の選んでいる色にフィルターを掛けた不透明の色。
+    /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
+    /// </summary>
+    private static Color ResolveGraphColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
     {
         var palette = settings.ClassColorPalettes[classKey];
         var hex = palette[Math.Clamp(settings.ClassColorIndexes[classKey], 0, palette.Count - 1)];
@@ -253,16 +348,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         }
 
         var filtered = ClassColorFilter.Apply(color, settings);
-        var lineColor = Color.FromRgb(filtered.R, filtered.G, filtered.B);
-
-        if (TimelineLineBrush is SolidColorBrush current && current.Color == lineColor)
-        {
-            return;
-        }
-
-        var brush = new SolidColorBrush(lineColor);
-        brush.Freeze();
-        TimelineLineBrush = brush;
+        return Color.FromRgb(filtered.R, filtered.G, filtered.B);
     }
 
     /// <summary>

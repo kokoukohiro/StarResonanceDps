@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Diagnostics;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
@@ -16,8 +16,8 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     private readonly DispatcherTimer _refreshTimer;
     private bool _isDisposed;
 
-    [ObservableProperty]
-    private PlayerMetricSummaryEntry? _summary;
+    /// <summary>表示する行。窓を開いたときに作り、更新では行の文字だけを入れ替える。</summary>
+    public PlayerMetricSummaryEntry Summary { get; } = new();
 
     public PlayerMetricSummaryWidgetViewModel(
         WidgetListItemViewModel playerWidget,
@@ -35,6 +35,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         _configManager.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         InitializePlayer(initialPlayer);
+        HistorySwitchProbe.Register(this, playerWidget.Kind.ToString());
         Refresh();
         _refreshTimer.Start();
     }
@@ -51,6 +52,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _configManager.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        HistorySwitchProbe.Unregister(this);
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -80,9 +82,13 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
             return;
         }
 
+        var probe = HistorySwitchProbe.BeginRefresh(this);
         if (SelectedCharacterId is not { } characterId)
         {
-            Summary = CreateEntry(MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0), _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
+            var emptySnapshot = MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0);
+            probe?.DataDone();
+            ApplySnapshot(emptySnapshot, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
+            probe?.End("no player");
             return;
         }
 
@@ -94,10 +100,13 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
 
         var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
         var snapshot = MeterSnapshotProvider.GetPlayerMetricSummary(_kind, characterId);
-        Summary = CreateEntry(snapshot, numberDisplayFormatIndex);
+        probe?.DataDone();
+        ApplySnapshot(snapshot, numberDisplayFormatIndex);
+        probe?.End(string.Empty);
     }
 
-    private PlayerMetricSummaryEntry CreateEntry(
+    /// <summary>行の文字を組み直して入れる。行の部品は作り直さない(同じ文字なら何も起きない)。</summary>
+    private void ApplySnapshot(
         PlayerMetricSummarySnapshot snapshot,
         int numberDisplayFormatIndex)
     {
@@ -111,58 +120,41 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
         var luckyValueKey = isDamage ? "Metric_TotalLuckyDamage" : "Metric_TotalLuckyHealing";
         var averageValueKey = isDamage ? "Metric_TotalAverageDamage" : "Metric_TotalAverageHealing";
 
-        var valueLines = new List<string>
-        {
-            FormatLine("Metric_TotalValue", localization.GetString(valueNameKey), FormatValue(snapshot.TotalValue, numberDisplayFormatIndex)),
-            FormatLine("Metric_TotalPerSecond", localization.GetString(perSecondKey),
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    "{0} ({1})",
-                    FormatValue(snapshot.ValuePerSecondActive, numberDisplayFormatIndex),
-                    FormatValue(snapshot.ValuePerSecond, numberDisplayFormatIndex))),
-            FormatLine(extraTotalKey, FormatValue(snapshot.ExtraTotalValue, numberDisplayFormatIndex)),
-            FormatLine("Metric_TotalHits", snapshot.HitsCount.ToString(CultureInfo.CurrentCulture))
-        };
+        var summary = Summary;
+        summary.ValueLines[0].Show(FormatLine("Metric_TotalValue", localization.GetString(valueNameKey), FormatValue(snapshot.TotalValue, numberDisplayFormatIndex)));
+        summary.ValueLines[1].Show(FormatLine("Metric_TotalPerSecond", localization.GetString(perSecondKey),
+            string.Format(
+                CultureInfo.CurrentCulture,
+                "{0} ({1})",
+                FormatValue(snapshot.ValuePerSecondActive, numberDisplayFormatIndex),
+                FormatValue(snapshot.ValuePerSecond, numberDisplayFormatIndex))));
+        summary.ValueLines[2].Show(FormatLine(extraTotalKey, FormatValue(snapshot.ExtraTotalValue, numberDisplayFormatIndex)));
+        summary.ValueLines[3].Show(FormatLine("Metric_TotalHits", snapshot.HitsCount.ToString(CultureInfo.CurrentCulture)));
 
-        var rateLines = new List<string>
-        {
-            FormatLine("Metric_TotalCritRate", FormatPercent(snapshot.CritRate)),
-            FormatLine("Metric_TotalLuckyRate", FormatPercent(snapshot.LuckyRate)),
-            FormatLine("Metric_TotalCrits", snapshot.CritCount.ToString(CultureInfo.CurrentCulture))
-        };
+        summary.RateLines[0].Show(FormatLine("Metric_TotalCritRate", FormatPercent(snapshot.CritRate)));
+        summary.RateLines[1].Show(FormatLine("Metric_TotalLuckyRate", FormatPercent(snapshot.LuckyRate)));
+        summary.RateLines[2].Show(FormatLine("Metric_TotalCrits", snapshot.CritCount.ToString(CultureInfo.CurrentCulture)));
+        summary.RateLines[PlayerMetricSummaryEntry.ImmuneLineIndex].Show(snapshot.ShowsImmuneCount
+            ? FormatLine("Metric_TotalImmunes", snapshot.ImmuneCount.ToString(CultureInfo.CurrentCulture))
+            : null);
 
-        if (snapshot.ShowsImmuneCount)
-        {
-            rateLines.Add(FormatLine("Metric_TotalImmunes", snapshot.ImmuneCount.ToString(CultureInfo.CurrentCulture)));
-        }
+        summary.DistributionLines[0].Show(FormatLine(normalValueKey, FormatValue(snapshot.NormalValue, numberDisplayFormatIndex)));
+        summary.DistributionLines[1].Show(FormatLine(critValueKey, FormatValue(snapshot.CritValue, numberDisplayFormatIndex)));
+        summary.DistributionLines[2].Show(FormatLine(luckyValueKey, FormatValue(snapshot.LuckyValue, numberDisplayFormatIndex)));
 
-        var distributionLines = new List<string>
-        {
-            FormatLine(normalValueKey, FormatValue(snapshot.NormalValue, numberDisplayFormatIndex)),
-            FormatLine(critValueKey, FormatValue(snapshot.CritValue, numberDisplayFormatIndex)),
-            FormatLine(luckyValueKey, FormatValue(snapshot.LuckyValue, numberDisplayFormatIndex))
-        };
-
-        var castLines = new List<string>
-        {
-            FormatLine("Metric_TotalLuckyStrikes", snapshot.LuckyCount.ToString(CultureInfo.CurrentCulture)),
-            FormatLine(averageValueKey, FormatValue(snapshot.AverageValue, numberDisplayFormatIndex)),
-            FormatLine("Metric_TotalCasts", snapshot.CastsCount.ToString(CultureInfo.CurrentCulture))
-        };
-
-        if (snapshot.CastsPerMinute is { } castsPerMinute
-            && snapshot.CastsPerSecond is { } castsPerSecond)
-        {
-            castLines.Add(FormatLine(
-                "Metric_CastsPerMinute",
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    "{0} ({1})",
-                    FormatDecimal(castsPerMinute),
-                    FormatDecimal(castsPerSecond))));
-        }
-
-        return new PlayerMetricSummaryEntry(valueLines, rateLines, distributionLines, castLines);
+        summary.CastLines[0].Show(FormatLine("Metric_TotalLuckyStrikes", snapshot.LuckyCount.ToString(CultureInfo.CurrentCulture)));
+        summary.CastLines[1].Show(FormatLine(averageValueKey, FormatValue(snapshot.AverageValue, numberDisplayFormatIndex)));
+        summary.CastLines[2].Show(FormatLine("Metric_TotalCasts", snapshot.CastsCount.ToString(CultureInfo.CurrentCulture)));
+        summary.CastLines[PlayerMetricSummaryEntry.CastsPerMinuteLineIndex].Show(
+            snapshot.CastsPerMinute is { } castsPerMinute && snapshot.CastsPerSecond is { } castsPerSecond
+                ? FormatLine(
+                    "Metric_CastsPerMinute",
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        "{0} ({1})",
+                        FormatDecimal(castsPerMinute),
+                        FormatDecimal(castsPerSecond)))
+                : null);
     }
 
     private static string FormatLine(string labelKey, string value)
