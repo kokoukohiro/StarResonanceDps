@@ -68,6 +68,8 @@ public sealed record MetricTimelineSnapshot(
 /// メーターと同じ見出し表の行で畳んだもの(<c>CombatDataCatalog.GetSkillActivationDisplay</c>、内部IDの注記は設定どおり。名前が無ければ空)。
 /// <see cref="Frame"/>(アイコンの背景の枠)は押した技が属する、枠の番号を持つ技で決めたもの(<c>CombatDataCatalog.GetSkillIconFrame</c>)。
 /// <see cref="UsesImagineAsset"/>(イマジンの絵か)は出す絵で決めたもの(<c>CombatDataCatalog.IsImagineArtIcon</c>)。
+/// <see cref="Grade"/>(G○ の数字)はプレイヤーリストの技の枠と同じ規則で、押した技がその人の技の一覧にあるときだけ持つ
+/// (イマジンは改造段階、CD がレベルで変わるロールスキルはレベル。今の、履歴なら保存した時点の値で、押した時点の値ではない)。
 /// </summary>
 public sealed record MetricTimelineSkillActivation(
     double Seconds,
@@ -75,7 +77,8 @@ public sealed record MetricTimelineSkillActivation(
     string IconName,
     string Name,
     SkillIconFrame Frame,
-    bool UsesImagineAsset);
+    bool UsesImagineAsset,
+    int? Grade);
 
 /// <summary>
 /// スキル詳細の1行。
@@ -1807,12 +1810,13 @@ public static class MeterSnapshotProvider
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out _))
+            || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
             return Array.Empty<MetricTimelineSkillActivation>();
         }
 
         var records = encounter.GetSkillActivationsCopy(entityUuid);
+        var grades = ResolveSkillGrades(entityUuid, entity, characterId);
         var activations = new List<MetricTimelineSkillActivation>(records.Length);
         foreach (var record in records)
         {
@@ -1828,10 +1832,40 @@ public static class MeterSnapshotProvider
                 iconName,
                 name,
                 frame,
-                usesImagineAsset));
+                usesImagineAsset,
+                grades.TryGetValue(record.SkillId, out var grade) ? grade : null));
         }
 
         return activations;
+    }
+
+    /// <summary>
+    /// 技ID → G○ の数字。プレイヤーリストの技の枠(<see cref="CreatePlayerImagineRoleSkillLoadout"/>)と同じ技の一覧と規則で決める:
+    /// イマジンは改造段階、CD がレベルで変わるロールスキルはレベル、それ以外は持たない。
+    /// </summary>
+    private static Dictionary<int, int> ResolveSkillGrades(long entityUuid, Entity? entity, long characterId)
+    {
+        var grades = new Dictionary<int, int>();
+        foreach (var skillLevel in ResolvePlayerSkillLevels(entityUuid, entity, characterId))
+        {
+            if (skillLevel.SkillId <= 0 || grades.ContainsKey(skillLevel.SkillId))
+            {
+                continue;
+            }
+
+            var iconName = CombatDataCatalog.GetSkillIconName(skillLevel.SkillId, skillLevel.Icon);
+            if (CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName))
+            {
+                grades.Add(skillLevel.SkillId, skillLevel.Tier);
+            }
+            else if (CombatDataCatalog.IsSkillRole(skillLevel.SkillId)
+                && CombatDataCatalog.HasLevelDependentCooldown(skillLevel.SkillId))
+            {
+                grades.Add(skillLevel.SkillId, ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel));
+            }
+        }
+
+        return grades;
     }
 
     public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)

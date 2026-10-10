@@ -340,7 +340,8 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>
     /// 技のアイコンの一覧。アイコンは技の表のアイコンの欄を Skills のフォルダで探し(無ければ null = クラス不明のアイコン)、
-    /// 名前が無い技の TIPS は「不明」。背景の枠とイマジンの絵かは Core が決めた値をそのまま渡す。
+    /// 名前が無い技の TIPS は「不明」。G○ の数字があれば、プレイヤーリストの技の枠の TIPS と同じく名前の後ろに「 G○」を付ける。
+    /// 背景の枠とイマジンの絵かは Core が決めた値をそのまま渡す。
     /// 中身が前と同じなら差し替えない(グラフの並べ直しを毎回起こさない)。
     /// </summary>
     private void ApplyTimelineSkillMarkers(IReadOnlyList<MetricTimelineSkillActivation> activations)
@@ -350,10 +351,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         for (var index = 0; index < activations.Count; index++)
         {
             var activation = activations[index];
+            var name = string.IsNullOrWhiteSpace(activation.Name) ? unknownName : activation.Name;
             markers[index] = new MetricTimelineSkillMarker(
                 activation.Seconds,
                 CombatIconResolver.ResolveSkillIcon(activation.IconName),
-                string.IsNullOrWhiteSpace(activation.Name) ? unknownName : activation.Name,
+                activation.Grade is { } grade ? $"{name} G{grade}" : name,
                 activation.Frame,
                 activation.UsesImagineAsset);
         }
