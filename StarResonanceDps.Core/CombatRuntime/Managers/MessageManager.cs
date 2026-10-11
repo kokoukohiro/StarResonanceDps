@@ -151,6 +151,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static void ClearReceivedStateStores()
         {
             SkillCooldownStateStore.Reset();
+            CooldownModifierStore.Clear();
             GrpcTeamManager.ResetMemberState();
             ActiveBuffStore.Instance.Clear();
             BuffInstanceIndex.Instance.Clear();
@@ -375,10 +376,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                         ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, extraData.ArrivalTime);
                     }
 
-                    if (vData.EnterSceneInfo.PlayerEnt.TempAttrs != null)
-                    {
-                        ProcessTempAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.TempAttrs.Attrs);
-                    }
+                    // 入場の一覧は自分の一時属性の全部(無ければ一時属性が無い)。前のマップの値を置き換える。
+                    var enterTempAttrs = vData.EnterSceneInfo.PlayerEnt.TempAttrs?.Attrs ?? (IEnumerable<Zproto.TempAttr>)[];
+                    ProcessTempAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, enterTempAttrs, extraData.ArrivalTime, isFullList: true);
 
                     PlayerRosterProjection.UpsertSelf(vData.EnterSceneInfo.PlayerEnt.Uuid);
                 }
@@ -2064,8 +2064,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        public static void ProcessTempAttrs(long uuid, RepeatedField<Zproto.TempAttr> tempAttrs)
+        /// <param name="isFullList">
+        /// 入場(自分)・出現(他人)の一覧なら true。その人の CD の短縮の控え(<see cref="CooldownModifierStore"/>)を丸ごと置き換える。
+        /// 周りの差分なら false で、控えに重ねる。
+        /// </param>
+        public static void ProcessTempAttrs(long uuid, IEnumerable<Zproto.TempAttr> tempAttrs, DateTime arrivalUtc, bool isFullList)
         {
+            // 自分なら、短縮が変わる前の速さでここまでの CD の進みを確定してから変える。
+            SkillCooldownStateStore.SettleSelfProgress(uuid);
+            if (isFullList)
+            {
+                CooldownModifierStore.Replace(uuid, tempAttrs, arrivalUtc);
+            }
+            else
+            {
+                CooldownModifierStore.Merge(uuid, tempAttrs, arrivalUtc);
+            }
+
             foreach (var tempAttr in tempAttrs)
             {
                 if (HelperMethods.DataTables.TempAttrs.Data.TryGetValue(tempAttr.Id.ToString(), out var matchedTempAttr))
@@ -2104,10 +2119,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 EncounterManager.Current.SetEntityType(entity.Uuid, entity.EntType);
 
-                if (entity.TempAttrs != null && entity.TempAttrs.Attrs.Any())
-                {
-                    ProcessTempAttrs(entity.Uuid, entity.TempAttrs.Attrs);
-                }
+                // 出現の一覧はその実体の一時属性の全部(無ければ一時属性が無い)。前に見たときの値を置き換える。
+                var appearTempAttrs = entity.TempAttrs?.Attrs ?? (IEnumerable<Zproto.TempAttr>)[];
+                ProcessTempAttrs(entity.Uuid, appearTempAttrs, extraData.ArrivalTime, isFullList: true);
 
                 var attrCollection = entity.Attrs;
                 if (attrCollection?.Attrs != null)
@@ -2328,7 +2342,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             if (delta.TempAttrs != null && delta.TempAttrs.Attrs.Any())
             {
-                ProcessTempAttrs(targetUuid, delta.TempAttrs.Attrs);
+                ProcessTempAttrs(targetUuid, delta.TempAttrs.Attrs, extraData.ArrivalTime, isFullList: false);
             }
 
             NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes);

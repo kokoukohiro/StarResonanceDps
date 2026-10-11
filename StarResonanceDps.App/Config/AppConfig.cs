@@ -47,8 +47,8 @@ public sealed class SettingsConfig
 
     // --- 集計設定 ---
 
-    /// <summary>アステルリーズ(街)では戦闘の時計を立てず、何も記録しない。</summary>
-    public bool StopAggregationInAsterleeds { get; set; } = true;
+    /// <summary>非戦闘エリア(アステルリーズ・ホームガーデン・ホームハウス)では戦闘の時計を立てず、何も記録しない。</summary>
+    public bool StopAggregationInNonCombatAreas { get; set; } = true;
     public bool SplitEncountersOnNewPhases { get; set; } = true;
     public bool KeepPastEncounterInMeterUntilNextDamage { get; set; } = true;
     public bool ClearHistorySelectionOnNextEvent { get; set; } = true;
@@ -116,7 +116,7 @@ public sealed class SettingsConfig
             NetCaptureDeviceName = NetCaptureDeviceName,
             GameCapturePreference = GameCapturePreference,
             GameCaptureCustomExeName = GameCaptureCustomExeName,
-            StopAggregationInAsterleeds = StopAggregationInAsterleeds,
+            StopAggregationInNonCombatAreas = StopAggregationInNonCombatAreas,
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,

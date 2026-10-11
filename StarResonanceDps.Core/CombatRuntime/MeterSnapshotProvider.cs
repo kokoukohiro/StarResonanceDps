@@ -146,17 +146,16 @@ public sealed record PlayerBuffSnapshot(
     /// </summary>
     bool IsRemainingUnknown = false);
 
+/// <param name="Grade">技の枠の TIPS に出す G○ の数字(<see cref="MeterSnapshotProvider.ResolveSkillGrade"/>)。出さないなら null。</param>
 public sealed record PlayerCooldownSkillSnapshot(
     int SkillId,
     string Name,
     string IconName,
-    int CurrentLevel,
-    int Tier,
     bool IsImagine,
-    bool ShowLevel,
     double CooldownSeconds,
     int MaxCharges,
-    double ChargeCooldownSeconds);
+    double ChargeCooldownSeconds,
+    int? Grade);
 
 public sealed record PlayerSkillEffectSnapshot(
     PlayerBuffSnapshot? Buff,
@@ -941,16 +940,14 @@ public static class MeterSnapshotProvider
                 skillLevel.SkillId,
                 CombatDataCatalog.GetSkillName(skillLevel.SkillId),
                 iconName,
-                currentLevel,
-                skillLevel.Tier,
                 isImagine,
-                showLevel,
                 CombatDataCatalog.GetSkillPveCooldownSeconds(
                     skillLevel.SkillId,
                     currentLevel,
                     skillLevel.Tier),
                 maxCharges,
-                chargeCooldownSeconds);
+                chargeCooldownSeconds,
+                ResolveSkillGrade(isImagine, showLevel, skillLevel.Tier, currentLevel));
 
             if (isImagine && imagineSkills.Count < 2)
             {
@@ -1057,21 +1054,43 @@ public static class MeterSnapshotProvider
         var iconName = CombatDataCatalog.GetSkillIconName(skillId, string.Empty);
         var isImagine = CombatDataCatalog.IsSkillImagine(skillId, iconName);
         var isRole = CombatDataCatalog.IsSkillRole(skillId);
+        var showLevel = isRole && CombatDataCatalog.HasLevelDependentCooldown(skillId);
         var currentLevel = ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel);
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillId);
         return new PlayerCooldownSkillSnapshot(
             skillId,
             CombatDataCatalog.GetSkillName(skillId),
             iconName,
-            currentLevel,
-            tier,
             isImagine,
-            isRole && CombatDataCatalog.HasLevelDependentCooldown(skillId),
             CombatDataCatalog.GetSkillPveCooldownSeconds(skillId, currentLevel, tier),
             maxCharges,
             maxCharges > 1
                 ? CombatDataCatalog.GetSkillChargeCooldownSeconds(skillId, tier)
-                : 0d);
+                : 0d,
+            ResolveSkillGrade(isImagine, showLevel, tier, currentLevel));
+    }
+
+    /// <summary>
+    /// 技の G○ の数字。プレイヤーリストの技の枠の TIPS と推移グラフの技のアイコンの TIPS が使う。
+    /// イマジンは改造段階、CD がレベルで変わるロールスキルはレベル、それ以外は無し。
+    /// 値が負なら無し(G を出さない)。負の値は通信でそのまま届いたもので、観測は NPC(助っ人)のイマジンの段階 -1 だけ。
+    /// </summary>
+    internal static int? ResolveSkillGrade(bool isImagine, bool showLevel, int tier, int currentLevel)
+    {
+        int? grade = isImagine
+            ? tier
+            : showLevel
+                ? currentLevel
+                : null;
+        return grade is >= 0 ? grade : null;
+    }
+
+    /// <summary>
+    /// 技の枠と推移グラフの技のアイコンの TIPS に出す名前。G○ の数字(<see cref="ResolveSkillGrade"/>)があれば「名前 G○」、無ければ名前だけ。
+    /// </summary>
+    public static string FormatSkillNameWithGrade(string name, int? grade)
+    {
+        return grade is { } value ? $"{name} G{value}" : name;
     }
 
     private static PlayerImagineRoleSkillLoadoutSnapshot EmptyPlayerImagineRoleSkillLoadout()
@@ -1840,8 +1859,8 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 技ID → G○ の数字。プレイヤーリストの技の枠(<see cref="CreatePlayerImagineRoleSkillLoadout"/>)と同じ技の一覧と規則で決める:
-    /// イマジンは改造段階、CD がレベルで変わるロールスキルはレベル、それ以外は持たない。
+    /// 技ID → G○ の数字。プレイヤーリストの技の枠(<see cref="CreatePlayerImagineRoleSkillLoadout"/>)と同じ技の一覧で、
+    /// 数字は同じ <see cref="ResolveSkillGrade"/> で決める。数字の無い技は入れない。
     /// </summary>
     private static Dictionary<int, int> ResolveSkillGrades(long entityUuid, Entity? entity, long characterId)
     {
@@ -1854,14 +1873,16 @@ public static class MeterSnapshotProvider
             }
 
             var iconName = CombatDataCatalog.GetSkillIconName(skillLevel.SkillId, skillLevel.Icon);
-            if (CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName))
+            var isImagine = CombatDataCatalog.IsSkillImagine(skillLevel.SkillId, iconName);
+            var showLevel = CombatDataCatalog.IsSkillRole(skillLevel.SkillId)
+                && CombatDataCatalog.HasLevelDependentCooldown(skillLevel.SkillId);
+            if (ResolveSkillGrade(
+                    isImagine,
+                    showLevel,
+                    skillLevel.Tier,
+                    ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel)) is { } grade)
             {
-                grades.Add(skillLevel.SkillId, skillLevel.Tier);
-            }
-            else if (CombatDataCatalog.IsSkillRole(skillLevel.SkillId)
-                && CombatDataCatalog.HasLevelDependentCooldown(skillLevel.SkillId))
-            {
-                grades.Add(skillLevel.SkillId, ResolvePlayerSkillCurrentLevel(entityUuid, skillLevel));
+                grades.Add(skillLevel.SkillId, grade);
             }
         }
 

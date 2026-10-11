@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using ProtoBuf;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -901,16 +902,20 @@ namespace StarResonanceDps.Core.CombatRuntime
             EndTime = end;
         }
 
-        /// <summary>アステルリーズ(街)のシーンの番号。同じ名前を持つダンジョンのシーンは別の番号で、対象に入れない。</summary>
-        private const uint AsterleedsSceneId = 8;
+        /// <summary>
+        /// 集計を止める非戦闘エリアのシーンの番号: アステルリーズ(街)・ホームガーデン・ホームハウス。
+        /// 表の種類では決めない(同じ種類に戦闘のできるシーンがある。街のスターリー島、ギルド活動所と同じ種類のギルドハント)。
+        /// アステルリーズと同じ名前を持つダンジョンのシーンは別の番号で、対象に入れない。
+        /// </summary>
+        private static readonly FrozenSet<uint> NonCombatSceneIds = FrozenSet.ToFrozenSet<uint>([8, 30001, 40001]);
 
         /// <summary>
-        /// 集計を止めている回か。設定「アステルリーズでの集計を停止」がオンで、回のシーンがアステルリーズのとき。
+        /// 集計を止めている回か。設定「非戦闘エリアでの集計を停止」がオンで、回のシーンが非戦闘エリア(<see cref="NonCombatSceneIds"/>)のとき。
         /// 設定もシーンもメッセージとメッセージのあいだでしか変わらない(設定は <see cref="CombatRuntimeSettings"/> の説明)ので、
         /// 1つのメッセージの中で時計の判定(<see cref="RecordCombatEvent"/>)と記録の門(<see cref="IsRecorded"/>)は必ずそろう。
         /// </summary>
         internal bool IsAggregationStopped =>
-            CombatRuntimeSettings.StopAggregationInAsterleeds && SceneId == AsterleedsSceneId;
+            CombatRuntimeSettings.StopAggregationInNonCombatAreas && NonCombatSceneIds.Contains(SceneId);
 
         /// <summary>計測の回か(計測時間を持つ)。履歴でも同じ値(DB に載る)。</summary>
         public bool IsBenchmark => ExData.BenchmarkTime > 0;

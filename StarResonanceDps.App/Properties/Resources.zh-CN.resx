@@ -1213,8 +1213,11 @@
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>统计设置</value>
   </data>
-  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
-    <value>在阿斯特里斯停止统计</value>
+  <data name="Settings_Aggregation_StopInNonCombatAreas" xml:space="preserve">
+    <value>在非战斗区域停止统计</value>
+  </data>
+  <data name="Settings_Aggregation_StopInNonCombatAreas_Description" xml:space="preserve">
+    <value>※阿斯特里斯、家园庭院、家园房屋</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
     <value>按进度自动重置</value>

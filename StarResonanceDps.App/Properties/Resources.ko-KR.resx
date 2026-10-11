@@ -1213,8 +1213,11 @@
   <data name="Settings_Section_Aggregation_Title" xml:space="preserve">
     <value>집계 설정</value>
   </data>
-  <data name="Settings_Aggregation_StopInAsterleeds" xml:space="preserve">
-    <value>아스텔리즈에서 집계 중지</value>
+  <data name="Settings_Aggregation_StopInNonCombatAreas" xml:space="preserve">
+    <value>비전투 지역에서 집계 중지</value>
+  </data>
+  <data name="Settings_Aggregation_StopInNonCombatAreas_Description" xml:space="preserve">
+    <value>※아스텔리즈, 가든 정원, 가든 주택</value>
   </data>
   <data name="Settings_Aggregation_SplitOnPhases" xml:space="preserve">
     <value>진행에 따라 자동 리셋</value>

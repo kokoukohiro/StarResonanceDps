@@ -363,30 +363,49 @@
                                            Margin="0,0,0,10" />
                                 <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
                                     <StackPanel>
-                                        <Border Style="{StaticResource Panel.SettingField}">
-                                            <Grid>
+                                        <!-- 行の名前と注記(対象の場所)の2行。形と高さは「進行で自動リセット」の行と同じ。 -->
+                                        <Border Style="{StaticResource Panel.SettingField}" Height="75">
+                                            <Grid VerticalAlignment="Center">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <TextBlock Grid.Column="0"
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
                                                            VerticalAlignment="Center"
-                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_StopInAsterleeds]}"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_StopInNonCombatAreas]}"
                                                            Foreground="{DynamicResource Brush.TextPrimary}"
                                                            FontSize="14"
                                                            FontWeight="SemiBold" />
 
-                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Aggregation_StopInNonCombatAreas_Description]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <StackPanel Grid.Row="0"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
                                                     <ToggleButton Style="{StaticResource Input.Switch}"
-                                                                  IsChecked="{Binding StopAggregationInAsterleeds, Mode=TwoWay}" />
+                                                                  IsChecked="{Binding StopAggregationInNonCombatAreas, Mode=TwoWay}" />
                                                     <TextBlock Margin="8,0,0,0"
                                                                VerticalAlignment="Center"
                                                                MinWidth="28"
                                                                Foreground="{DynamicResource Brush.TextPrimary}"
                                                                FontSize="14"
                                                                FontWeight="SemiBold"
-                                                               Text="{Binding StopAggregationInAsterleedsStateText}" />
+                                                               Text="{Binding StopAggregationInNonCombatAreasStateText}" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>

@@ -70,7 +70,7 @@ public static class AppConfigDefaults
             NetCaptureDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName,
             GameCapturePreference = EGameCapturePreference.Auto,
             GameCaptureCustomExeName = string.Empty,
-            StopAggregationInAsterleeds = true,
+            StopAggregationInNonCombatAreas = true,
             SplitEncountersOnNewPhases = true,
             KeepPastEncounterInMeterUntilNextDamage = true,
             ClearHistorySelectionOnNextEvent = true,

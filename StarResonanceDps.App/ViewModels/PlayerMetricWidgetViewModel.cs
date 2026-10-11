@@ -340,7 +340,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>
     /// 技のアイコンの一覧。アイコンは技の表のアイコンの欄を Skills のフォルダで探し(無ければ null = クラス不明のアイコン)、
-    /// 名前が無い技の TIPS は「不明」。G○ の数字があれば、プレイヤーリストの技の枠の TIPS と同じく名前の後ろに「 G○」を付ける。
+    /// 名前が無い技の TIPS は「不明」。G○ の数字があれば、プレイヤーリストの技の枠の TIPS と同じ組み立て(<c>MeterSnapshotProvider.FormatSkillNameWithGrade</c>)で「名前 G○」にする。
     /// 背景の枠とイマジンの絵かは Core が決めた値をそのまま渡す。
     /// 中身が前と同じなら差し替えない(グラフの並べ直しを毎回起こさない)。
     /// </summary>
@@ -355,7 +355,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             markers[index] = new MetricTimelineSkillMarker(
                 activation.Seconds,
                 CombatIconResolver.ResolveSkillIcon(activation.IconName),
-                activation.Grade is { } grade ? $"{name} G{grade}" : name,
+                MeterSnapshotProvider.FormatSkillNameWithGrade(name, activation.Grade),
                 activation.Frame,
                 activation.UsesImagineAsset);
         }

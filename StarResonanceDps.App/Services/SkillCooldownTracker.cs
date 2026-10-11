@@ -15,11 +15,23 @@ public readonly record struct SkillCooldownDisplayState(
 /// エンカウンターには依らない(CD はゲームの側の状態で、エンカウンターの作り直し・マップ移動・死亡では消えない)。
 /// 控えを消すのはゲームのリセット(リセット系のバフ。それより前の発動を読むときに外す)と、ログアウト・キャプチャの停止だけ。
 /// </para>
+///
+/// <para>
+/// CD の長さは短縮の率で縮めた長さ(<see cref="CooldownModifierStore.ToReducedLength"/>。80秒に率 80% なら 16秒)。CD は実時間で進み、
+/// 加速の間はその倍率で速く進む。進みは済んだ割合で数え、発動から今までを区間に分けて足す(短縮の率が変わっても済んだ割合のまま新しい長さに切り替わる)。
+/// 短縮の率はその人の一時属性の移り変わり(<see cref="CooldownModifierStore"/>)、加速は CD を早めるバフの区間で、加速はイマジンにだけ効かせる。
+/// </para>
 /// </summary>
 public sealed class SkillCooldownTracker
 {
     private const int LowerCdBuffBaseId = 2110034;
-    private const double LowerCdAdditionalProgressRate = 0.5d;
+
+    /// <summary>
+    /// CD を早めるバフ(<see cref="LowerCdBuffBaseId"/>)の間の加速。自分にはこのバフの間 <c>AttrCdAcceleratePct</c> = 10000(2倍の速さ)が届く。
+    /// 他人の <c>AttrCdAcceleratePct</c> は届かないので、バフの区間で代える。
+    /// 効くのはイマジンと、表示しない通常攻撃・特殊攻撃・マスタリースキル・究極スキルで、ロールスキルには効かない。
+    /// </summary>
+    private const double LowerCdAcceleration = 1d;
 
     private static readonly Lazy<SkillCooldownTracker> LazyInstance = new(() => new SkillCooldownTracker());
 
@@ -96,6 +108,7 @@ public sealed class SkillCooldownTracker
                 ? GetSelfChargeState(entityUuid, skillId, maxCharges)
                 : GetEstimatedChargeState(
                     entityUuid,
+                    skillId,
                     ExcludeBeforeReset(entityUuid, chargeHistory?.GetSnapshot() ?? []),
                     maxCharges,
                     chargeCooldownSeconds,
@@ -134,19 +147,17 @@ public sealed class SkillCooldownTracker
             return null;
         }
 
-        var nowUtc = DateTime.UtcNow;
-        var elapsedSeconds = Math.Max(
-            nowUtc.Subtract(activation.ActivationUtc).TotalSeconds,
-            0d);
-        if (isImagine)
-        {
-            elapsedSeconds += GetLowerCdOverlapSeconds(entityUuid, activation.ActivationUtc, nowUtc)
-                * LowerCdAdditionalProgressRate;
-        }
-
-        var remainingSeconds = estimatedCooldownSeconds - elapsedSeconds;
-        return remainingSeconds > 0
-            ? remainingSeconds
+        var doneFraction = GetDoneCooldowns(
+            entityUuid,
+            key.SkillId,
+            activation.ActivationUtc,
+            DateTime.UtcNow,
+            isImagine,
+            estimatedCooldownSeconds);
+        return doneFraction < 1d
+            ? (1d - doneFraction) * CooldownModifierStore.ToReducedLength(
+                estimatedCooldownSeconds,
+                CooldownModifierStore.GetReductionRatio(entityUuid, key.SkillId))
             : null;
     }
 
@@ -184,6 +195,28 @@ public sealed class SkillCooldownTracker
         {
             AttachToCurrentEncounter();
         }
+
+        PruneReductionHistories();
+    }
+
+    /// <summary>
+    /// 短縮の率の移り変わり(<see cref="CooldownModifierStore"/>)のうち、もう使わないものを捨てる。
+    /// 人ごとに、控えている発動のうち一番古いものより前に終わったもの(発動の控えが無い人は今より前に終わったもの)。
+    /// </summary>
+    private void PruneReductionHistories()
+    {
+        var nowUtc = DateTime.UtcNow;
+        var earliestByEntity = new Dictionary<long, DateTime>();
+        foreach (var (key, history) in _activationHistories)
+        {
+            if (history.GetEarliest() is { } earliest
+                && (!earliestByEntity.TryGetValue(key.EntityUuid, out var current) || earliest.ActivationUtc < current))
+            {
+                earliestByEntity[key.EntityUuid] = earliest.ActivationUtc;
+            }
+        }
+
+        CooldownModifierStore.Prune(uuid => earliestByEntity.TryGetValue(uuid, out var earliest) ? earliest : nowUtc);
     }
 
     private void AttachToCurrentEncounter()
@@ -306,6 +339,7 @@ public sealed class SkillCooldownTracker
 
     private ChargeCooldownState GetEstimatedChargeState(
         long entityUuid,
+        int skillId,
         IReadOnlyList<SkillActivationState> activationHistory,
         int maxCharges,
         double chargeCooldownSeconds,
@@ -319,25 +353,38 @@ public sealed class SkillCooldownTracker
         var activations = activationHistory
             .OrderBy(activation => activation.ActivationUtc)
             .ToArray();
+        // 進みはチャージ1回ぶんを 1 とした済んだ回数で数え、残りは今の縮めた長さを掛けて秒にする。
         var origin = activations[0];
-        var activationProgressTimes = activations
-            .Select(activation => GetEffectiveElapsedSeconds(
+        var activationDoneCharges = activations
+            .Select(activation => GetDoneCooldowns(
                 entityUuid,
-                origin,
+                skillId,
+                origin.ActivationUtc,
                 activation.ActivationUtc,
-                isImagine))
+                isImagine,
+                chargeCooldownSeconds))
             .ToArray();
-        var currentProgressTime = GetEffectiveElapsedSeconds(
+        var currentDoneCharges = GetDoneCooldowns(
             entityUuid,
-            origin,
+            skillId,
+            origin.ActivationUtc,
             DateTime.UtcNow,
-            isImagine);
-
-        return CalculateChargeState(
-            activationProgressTimes,
-            currentProgressTime,
-            maxCharges,
+            isImagine,
             chargeCooldownSeconds);
+
+        var state = CalculateChargeState(
+            activationDoneCharges,
+            currentDoneCharges,
+            maxCharges,
+            1d);
+        var chargeLengthSeconds = CooldownModifierStore.ToReducedLength(
+            chargeCooldownSeconds,
+            CooldownModifierStore.GetReductionRatio(entityUuid, skillId));
+        return state with
+        {
+            NextChargeRemainingSeconds = state.NextChargeRemainingSeconds * chargeLengthSeconds,
+            FullRecoveryRemainingSeconds = state.FullRecoveryRemainingSeconds * chargeLengthSeconds,
+        };
     }
 
     private static ChargeCooldownState CalculateChargeState(
@@ -405,31 +452,67 @@ public sealed class SkillCooldownTracker
             fullRecoveryRemainingSeconds);
     }
 
-    private double GetEffectiveElapsedSeconds(
+    /// <summary>
+    /// [<paramref name="startUtc"/>, <paramref name="endUtc"/>] に済んだ CD の回数(長さ <paramref name="lengthSeconds"/> の CD を 1 とする)。
+    /// 短縮の率が変わった時刻と、CD を早めるバフの区間の端で区切り、区間ごとに「実時間 ×(1 + 加速)÷ 縮めた長さ」を足す。
+    /// 加速はイマジンにだけ効かせる。縮めた長さが 0 の区間があれば正の無限大(すぐ終わる)。
+    /// </summary>
+    private double GetDoneCooldowns(
         long entityUuid,
-        SkillActivationState origin,
-        DateTime targetUtc,
-        bool isImagine)
+        int skillId,
+        DateTime startUtc,
+        DateTime endUtc,
+        bool isImagine,
+        double lengthSeconds)
     {
-        var elapsedSeconds = Math.Max(
-            targetUtc.Subtract(origin.ActivationUtc).TotalSeconds,
-            0d);
-        if (!isImagine)
+        if (endUtc <= startUtc)
         {
-            return elapsedSeconds;
+            return 0d;
         }
 
-        return elapsedSeconds
-            + GetLowerCdOverlapSeconds(entityUuid, origin.ActivationUtc, targetUtc)
-            * LowerCdAdditionalProgressRate;
-    }
+        var ratioChanges = CooldownModifierStore.GetReductionChanges(entityUuid, skillId, startUtc);
+        IReadOnlyList<LowerCdInterval> lowerCdIntervals = isImagine && _lowerCdIntervals.TryGetValue(entityUuid, out var log)
+            ? log.GetMergedIntervals(startUtc, endUtc)
+            : [];
 
-    /// <summary>[<paramref name="rangeStartUtc"/>, <paramref name="rangeEndUtc"/>] のうち、その人に CD を早めるバフが乗っていた秒数。</summary>
-    private double GetLowerCdOverlapSeconds(long entityUuid, DateTime rangeStartUtc, DateTime rangeEndUtc)
-    {
-        return rangeEndUtc > rangeStartUtc && _lowerCdIntervals.TryGetValue(entityUuid, out var log)
-            ? log.GetOverlapSeconds(rangeStartUtc, rangeEndUtc)
-            : 0d;
+        var boundaries = new SortedSet<DateTime> { startUtc, endUtc };
+        foreach (var (changeUtc, _) in ratioChanges)
+        {
+            if (changeUtc > startUtc && changeUtc < endUtc)
+            {
+                boundaries.Add(changeUtc);
+            }
+        }
+
+        foreach (var interval in lowerCdIntervals)
+        {
+            boundaries.Add(interval.Start);
+            boundaries.Add(interval.End);
+        }
+
+        var total = 0d;
+        DateTime? previous = null;
+        foreach (var boundary in boundaries)
+        {
+            if (previous is { } segmentStart)
+            {
+                var ratio = ratioChanges.Last(change => change.StartUtc <= segmentStart).Ratio;
+                var acceleration = lowerCdIntervals.Any(interval => interval.Start <= segmentStart && segmentStart < interval.End)
+                    ? LowerCdAcceleration
+                    : 0d;
+                var reducedLengthSeconds = CooldownModifierStore.ToReducedLength(lengthSeconds, ratio);
+                if (reducedLengthSeconds <= 0d)
+                {
+                    return double.PositiveInfinity;
+                }
+
+                total += boundary.Subtract(segmentStart).TotalSeconds * (1d + acceleration) / reducedLengthSeconds;
+            }
+
+            previous = boundary;
+        }
+
+        return total;
     }
 
     private readonly record struct SkillActivationKey(long EntityUuid, int SkillId);
@@ -511,7 +594,8 @@ public sealed class SkillCooldownTracker
             }
         }
 
-        public double GetOverlapSeconds(DateTime rangeStartUtc, DateTime rangeEndUtc)
+        /// <summary>[<paramref name="rangeStartUtc"/>, <paramref name="rangeEndUtc"/>] に切り詰め、重なる区間をまとめた区間(始まりの順)。</summary>
+        public IReadOnlyList<LowerCdInterval> GetMergedIntervals(DateTime rangeStartUtc, DateTime rangeEndUtc)
         {
             List<LowerCdInterval> intervals;
             lock (_sync)
@@ -526,34 +610,23 @@ public sealed class SkillCooldownTracker
                 .Where(interval => interval.End > interval.Start)
                 .OrderBy(interval => interval.Start)
                 .ToList();
-            if (clipped.Count == 0)
+            var merged = new List<LowerCdInterval>();
+            foreach (var interval in clipped)
             {
-                return 0d;
-            }
-
-            var total = TimeSpan.Zero;
-            var mergedStart = clipped[0].Start;
-            var mergedEnd = clipped[0].End;
-            for (var index = 1; index < clipped.Count; index++)
-            {
-                var interval = clipped[index];
-                if (interval.Start <= mergedEnd)
+                if (merged.Count > 0 && interval.Start <= merged[^1].End)
                 {
-                    if (interval.End > mergedEnd)
+                    if (interval.End > merged[^1].End)
                     {
-                        mergedEnd = interval.End;
+                        merged[^1] = merged[^1] with { End = interval.End };
                     }
 
                     continue;
                 }
 
-                total += mergedEnd - mergedStart;
-                mergedStart = interval.Start;
-                mergedEnd = interval.End;
+                merged.Add(interval);
             }
 
-            total += mergedEnd - mergedStart;
-            return total.TotalSeconds;
+            return merged;
         }
 
         private void CloseNoLock(int buffUuid, OpenInterval open, DateTime endUtc)

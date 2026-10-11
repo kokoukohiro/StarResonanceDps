@@ -269,7 +269,64 @@ public static class CombatDataCatalog
         return string.IsNullOrEmpty(name) ? $"({text})" : $"{name}({text})";
     }
 
-    public static void Load()
+    /// <summary><see cref="ReadLocalizedFile"/> で読む名前テーブル(<c>Data/Localization/{名前}.json</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
+    private static readonly string[] LocalizedFileNames =
+    [
+        "SkillNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
+        "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "EquipNames", "EquipEffectTexts",
+        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames",
+    ];
+
+    /// <summary><see cref="ApplyNameOverrides"/> で重ねる名前の上書き(<c>Data/Overrides/</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
+    private static readonly string[] NameOverrideFileNames =
+    [
+        "SkillNameOverrides.json", "BuffNameOverrides.json", "MonsterNameOverrides.json",
+    ];
+
+    private static string LocalizedFilePath(string fileName) => Path.Combine(CombatRuntimePaths.LocalizationDirectory, $"{fileName}.json");
+
+    private static string OverrideFilePath(string fileName) => Path.Combine(CombatRuntimePaths.OverridesDirectory, fileName);
+
+    private static string RecountRowsPath => LocalizedFilePath("RecountRows");
+
+    private static string RecountRowOverridesPath => OverrideFilePath("RecountRowOverrides.json");
+
+    private static string SkillActivationOverridesPath => OverrideFilePath("SkillActivationOverrides.json");
+
+    private static string SkillWarningsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "SkillWarnings.json");
+
+    private static string DbmTablePath => Path.Combine(CombatRuntimePaths.RawTableDirectory, "DbmTable.json");
+
+    private static string EquipmentsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Equips.json");
+
+    /// <summary>
+    /// <see cref="Load"/> が読むファイルを、先に解き始める。読む側と同じパスと型で始める
+    /// (食い違うと、受け取る側がエラーログを出してその場で読む)。
+    /// </summary>
+    internal static void StartReads(JsonDataFileReads reads)
+    {
+        foreach (var fileName in LocalizedFileNames)
+        {
+            reads.Start<Dictionary<string, Dictionary<string, string>?>>(LocalizedFilePath(fileName));
+        }
+
+        reads.Start<Dictionary<string, RecountRow>>(RecountRowsPath);
+        foreach (var fileName in NameOverrideFileNames)
+        {
+            reads.Start<Dictionary<string, NameOverrideEntry?>>(OverrideFilePath(fileName));
+        }
+
+        reads.Start<Dictionary<string, Newtonsoft.Json.Linq.JObject>>(RecountRowOverridesPath);
+        reads.Start<Dictionary<string, SkillActivationOverrideEntry>>(SkillActivationOverridesPath);
+        reads.Start<int[]>(SkillWarningsPath);
+        reads.Start<Dictionary<string, DbmTableRow>>(DbmTablePath);
+        reads.Start<EquipmentFile>(EquipmentsPath);
+    }
+
+    /// <summary>
+    /// 技・バフの表(<c>HelperMethods.DataTables</c>)が入った後に呼ぶ。ファイルは <see cref="StartReads"/> で始めたものを受け取る。
+    /// </summary>
+    internal static void Load(JsonDataFileReads reads)
     {
         lock (Sync)
         {
@@ -277,35 +334,35 @@ public static class CombatDataCatalog
             _buffs = LoadNumericCatalog(HelperMethods.DataTables.Buffs.Data);
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillIconFrames = BuildSkillIconFrames();
-            var skillNames = LoadLocalizedText("SkillNames", out var skillNameIds);
-            (_skillNames, _) = ApplyNameOverrides(skillNames, skillNameIds, "SkillNameOverrides.json");
-            var buffNames = LoadLocalizedText("BuffNames", out var buffNameIds);
-            (_buffNames, _) = ApplyNameOverrides(buffNames, buffNameIds, "BuffNameOverrides.json");
-            var monsterNames = LoadLocalizedText("MonsterNames", out var monsterIds);
-            (_monsterNames, _monsterIds) = ApplyNameOverrides(monsterNames, monsterIds, "MonsterNameOverrides.json");
-            _dbmNames = LoadLocalizedText("DbmNames", out _);
-            _rogueEntryNames = LoadLocalizedText("RogueEntryNames", out var rogueEntryBuffIds);
+            var skillNames = LoadLocalizedText(reads, "SkillNames", out var skillNameIds);
+            (_skillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
+            var buffNames = LoadLocalizedText(reads, "BuffNames", out var buffNameIds);
+            (_buffNames, _) = ApplyNameOverrides(reads, buffNames, buffNameIds, "BuffNameOverrides.json");
+            var monsterNames = LoadLocalizedText(reads, "MonsterNames", out var monsterIds);
+            (_monsterNames, _monsterIds) = ApplyNameOverrides(reads, monsterNames, monsterIds, "MonsterNameOverrides.json");
+            _dbmNames = LoadLocalizedText(reads, "DbmNames", out _);
+            _rogueEntryNames = LoadLocalizedText(reads, "RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
-            _seasonTalentNames = LoadLocalizedText("SeasonTalentNames", out var seasonTalentRootBuffIds);
+            _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
-            _classSpecNames = LoadLocalizedText("ClassSpecNames", out _);
-            _seasonNames = LoadLocalizedText("SeasonNames", out _);
-            _seasonRankNames = LoadLocalizedText("SeasonRankNames", out _);
-            _teamTargetNames = LoadLocalizedText("TeamTargetNames", out _);
-            _seasonActNames = LoadLocalizedText("SeasonActNames", out _);
-            _equipNames = LoadLocalizedText("EquipNames", out _);
-            _equipEffectTexts = LoadLocalizedText("EquipEffectTexts", out _);
+            _classSpecNames = LoadLocalizedText(reads, "ClassSpecNames", out _);
+            _seasonNames = LoadLocalizedText(reads, "SeasonNames", out _);
+            _seasonRankNames = LoadLocalizedText(reads, "SeasonRankNames", out _);
+            _teamTargetNames = LoadLocalizedText(reads, "TeamTargetNames", out _);
+            _seasonActNames = LoadLocalizedText(reads, "SeasonActNames", out _);
+            _equipNames = LoadLocalizedText(reads, "EquipNames", out _);
+            _equipEffectTexts = LoadLocalizedText(reads, "EquipEffectTexts", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
-            _warningSkillLevelIds = LoadWarningSkillLevels();
+            _warningSkillLevelIds = LoadWarningSkillLevels(reads);
             _warningSkillIds = _warningSkillLevelIds.Select(skillLevelId => skillLevelId / 100).ToFrozenSet();
-            _dbmCountCdTimes = LoadDbmCountCdTimes();
-            LoadEquipments();
-            LoadBuffGroups();
-            _sceneNames = LoadLocalizedText("SceneNames", out _);
-            _dungeonTypeNames = LoadDungeonTypeNames();
-            LoadRecounts();
-            _skillActivationOverrides = LoadSkillActivationOverrides();
+            _dbmCountCdTimes = LoadDbmCountCdTimes(reads);
+            LoadEquipments(reads);
+            LoadBuffGroups(reads);
+            _sceneNames = LoadLocalizedText(reads, "SceneNames", out _);
+            _dungeonTypeNames = LoadDungeonTypeNames(reads);
+            LoadRecounts(reads);
+            _skillActivationOverrides = LoadSkillActivationOverrides(reads);
         }
     }
 
@@ -670,19 +727,20 @@ public static class CombatDataCatalog
     /// <list type="number">
     ///   <item>生成物 <c>RecountRows.json</c> の行から、行の集まりを作る</item>
     ///   <item>手修正の <c>Row</c> を当てる。<b>外すほうを先に</b>当てないと、外した鍵へ寄せられない</item>
+    ///   <item>手修正に <c>Name</c> だけ書いた、どの行にも無い鍵を、その鍵だけの行にする</item>
     ///   <item>行代表を取り直す。外した鍵が代表だった行は代表が変わる</item>
     ///   <item>生成物の名前を行代表へ配り、手修正の <c>Name</c> を重ねる</item>
     /// </list>
     /// </summary>
-    private static void LoadRecounts()
+    private static void LoadRecounts(JsonDataFileReads reads)
     {
         // 生成物は生の見出し表と同じ形。行ごとに RecountName(4言語)と、その行に属する発生源キーの一覧。
         // 項目名は SourceId。中身は TypeEnum:枝番 で、生の DamageId とは別の値。
         var layout = new Dictionary<string, RecountRow>();
-        var path = Path.Combine(CombatRuntimePaths.LocalizationDirectory, "RecountRows.json");
-        if (File.Exists(path))
+        var path = RecountRowsPath;
+        if (reads.TryTake<Dictionary<string, RecountRow>>(path, out var loadedLayout))
         {
-            layout = JsonConvert.DeserializeObject<Dictionary<string, RecountRow>>(File.ReadAllText(path))
+            layout = loadedLayout
                 ?? throw new InvalidDataException($"{path} is empty.");
             var missingNames = 0;
             foreach (var row in layout)
@@ -728,7 +786,7 @@ public static class CombatDataCatalog
             }
         }
 
-        var overrides = LoadRecountOverrides();
+        var overrides = LoadRecountOverrides(reads);
 
         // 外すほうを先に。寄せ先が「外したばかりの鍵」であることがある。
         foreach (var entry in overrides)
@@ -754,6 +812,17 @@ public static class CombatDataCatalog
             }
 
             Join(groups, groupOf, entry.Key, target);
+        }
+
+        // 名前だけ書いた、どの行にも無い鍵は、その鍵だけの行にする(生成物に無い鍵を足す仕様)。
+        // 行に入れないと、押した技の名前(GetSkillActivationDisplay)がこの鍵の行を引けない。
+        foreach (var entry in overrides)
+        {
+            if (!entry.Value.RowSpecified && entry.Value.Name is not null && !groupOf.ContainsKey(entry.Key))
+            {
+                groups[entry.Key] = [entry.Key];
+                groupOf[entry.Key] = entry.Key;
+            }
         }
 
         // 行代表は行の最小キー。ownerId → 枝番 の順で比べる。
@@ -872,19 +941,20 @@ public static class CombatDataCatalog
     /// </para>
     /// </summary>
     private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids) ApplyNameOverrides(
+        JsonDataFileReads reads,
         FrozenDictionary<string, FrozenDictionary<int, string>> names,
         FrozenSet<int> ids,
         string fileName)
     {
         var relativePath = $"Overrides/{fileName}";
-        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, fileName);
-        if (!File.Exists(path))
+        var path = OverrideFilePath(fileName);
+        if (!reads.TryTake<Dictionary<string, NameOverrideEntry?>>(path, out var loadedOverrides))
         {
             Log.Error("Failed to load {OverridePath}", relativePath);
             return (names, ids);
         }
 
-        var overrides = JsonConvert.DeserializeObject<Dictionary<string, NameOverrideEntry?>>(File.ReadAllText(path))
+        var overrides = loadedOverrides
             ?? throw new InvalidDataException($"{relativePath} が空です。");
         var merged = names.ToDictionary(
             pair => pair.Key,
@@ -944,20 +1014,18 @@ public static class CombatDataCatalog
         public Dictionary<string, string?>? Name { get; set; }
     }
 
-    private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides()
+    private static Dictionary<long, RecountOverrideEntry> LoadRecountOverrides(JsonDataFileReads reads)
     {
         var result = new Dictionary<long, RecountOverrideEntry>();
-        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, "RecountRowOverrides.json");
-        if (!File.Exists(path))
+
+        // Row に null が書かれたのか、そもそも書かれなかったのかを見分けるため、
+        // 一度 JObject で受けてからキーの有無を見る。
+        if (!reads.TryTake<Dictionary<string, Newtonsoft.Json.Linq.JObject>>(RecountRowOverridesPath, out var raw))
         {
             Log.Error("Failed to load {OverridePath}", "Overrides/RecountRowOverrides.json");
             return result;
         }
 
-        // Row に null が書かれたのか、そもそも書かれなかったのかを見分けるため、
-        // 一度 JObject で受けてからキーの有無を見る。
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, Newtonsoft.Json.Linq.JObject>>(
-            File.ReadAllText(path));
         foreach (var pair in raw ?? [])
         {
             if (!TryParseSourceKey(pair.Key, out var key))
@@ -1015,17 +1083,15 @@ public static class CombatDataCatalog
     /// <c>Data/Overrides/SkillActivationOverrides.json</c> を読む。鍵は押した技の技ID、中身は4言語の名前と、アイコン。
     /// 空の値は書かなかったのと同じに扱う。鍵が技IDの形でない行と、知らない言語の名前は、記録して読まない。
     /// </summary>
-    private static FrozenDictionary<int, SkillActivationOverride> LoadSkillActivationOverrides()
+    private static FrozenDictionary<int, SkillActivationOverride> LoadSkillActivationOverrides(JsonDataFileReads reads)
     {
         const string relativePath = "Overrides/SkillActivationOverrides.json";
-        var path = Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillActivationOverrides.json");
-        if (!File.Exists(path))
+        if (!reads.TryTake<Dictionary<string, SkillActivationOverrideEntry>>(SkillActivationOverridesPath, out var raw))
         {
             Log.Error("Failed to load {OverridePath}", relativePath);
             return FrozenDictionary<int, SkillActivationOverride>.Empty;
         }
 
-        var raw = JsonConvert.DeserializeObject<Dictionary<string, SkillActivationOverrideEntry>>(File.ReadAllText(path));
         var result = new Dictionary<int, SkillActivationOverride>();
         foreach (var pair in raw ?? [])
         {
@@ -1929,15 +1995,15 @@ public static class CombatDataCatalog
     }
 
     /// <summary>形は技レベルIDの配列。ファイルが無ければ空(警告の技は0件)。</summary>
-    private static FrozenSet<int> LoadWarningSkillLevels()
+    private static FrozenSet<int> LoadWarningSkillLevels(JsonDataFileReads reads)
     {
-        var path = Path.Combine(CombatRuntimePaths.GeneratedDirectory, "SkillWarnings.json");
-        if (!File.Exists(path))
+        var path = SkillWarningsPath;
+        if (!reads.TryTake<int[]>(path, out var loadedSkillLevelIds))
         {
             return FrozenSet<int>.Empty;
         }
 
-        var skillLevelIds = JsonConvert.DeserializeObject<int[]>(File.ReadAllText(path))
+        var skillLevelIds = loadedSkillLevelIds
             ?? throw new InvalidDataException($"{path} is empty.");
         return skillLevelIds.ToFrozenSet();
     }
@@ -1945,16 +2011,16 @@ public static class CombatDataCatalog
     /// <summary>
     /// 予告の表の番号と既定の秒数。ファイルが無ければエラーを出して空(予告のバーの終わりが決まらないので、予兆技の予告は通知されない)。
     /// </summary>
-    private static FrozenDictionary<int, int> LoadDbmCountCdTimes()
+    private static FrozenDictionary<int, int> LoadDbmCountCdTimes(JsonDataFileReads reads)
     {
-        var path = Path.Combine(CombatRuntimePaths.RawTableDirectory, "DbmTable.json");
-        if (!File.Exists(path))
+        var path = DbmTablePath;
+        if (!reads.TryTake<Dictionary<string, DbmTableRow>>(path, out var loadedRows))
         {
             Log.Error("DbmTable.json is missing. Boss announcement bars cannot be timed path={Path}", path);
             return FrozenDictionary<int, int>.Empty;
         }
 
-        var rows = JsonConvert.DeserializeObject<Dictionary<string, DbmTableRow>>(File.ReadAllText(path))
+        var rows = loadedRows
             ?? throw new InvalidDataException($"{path} is empty.");
         return rows.Values.ToFrozenDictionary(row => row.Id, row => row.CountCDTime);
     }
@@ -1978,15 +2044,10 @@ public static class CombatDataCatalog
     /// 読めたところまでで続けることはしない。
     /// </para>
     /// </summary>
-    private static void LoadEquipments()
+    private static void LoadEquipments(JsonDataFileReads reads)
     {
         const string relativePath = "Generated/Equips.json";
-        var path = Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Equips.json");
-        if (!File.Exists(path))
-        {
-            Log.Error("{FileName} is missing. Equipment details cannot be shown path={Path}", relativePath, path);
-            return;
-        }
+        var path = EquipmentsPath;
 
         FrozenDictionary<int, EquipmentDefinition> equipments;
         FrozenDictionary<long, IReadOnlyList<EquipmentAttrLibRow>> attrLibs;
@@ -1996,7 +2057,14 @@ public static class CombatDataCatalog
         FrozenDictionary<int, int> rank1Schools;
         try
         {
-            var file = JsonConvert.DeserializeObject<EquipmentFile>(File.ReadAllText(path))
+            // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
+            if (!reads.TryTake<EquipmentFile>(path, out var loadedFile))
+            {
+                Log.Error("{FileName} is missing. Equipment details cannot be shown path={Path}", relativePath, path);
+                return;
+            }
+
+            var file = loadedFile
                 ?? throw new InvalidDataException("the file is empty");
             equipments = ReadEquipmentDefinitions(file.Equips);
             attrLibs = ReadEquipmentAttrLibs(file.AttrLibs, out attrRows);
@@ -2227,10 +2295,10 @@ public static class CombatDataCatalog
     /// 形はほかの名前テーブルと同じで、表にある鍵がそのまとまりのバフ。ファイルが無ければエラーログを出して空(そのまとまりが無い)。
     /// 同じバフが両方にあれば止まる。
     /// </summary>
-    private static void LoadBuffGroups()
+    private static void LoadBuffGroups(JsonDataFileReads reads)
     {
-        var cuisineBuffNames = LoadLocalizedText("CuisineBuffs", out var cuisineBuffIds);
-        var potionBuffNames = LoadLocalizedText("PotionBuffs", out var potionBuffIds);
+        var cuisineBuffNames = LoadLocalizedText(reads, "CuisineBuffs", out var cuisineBuffIds);
+        var potionBuffNames = LoadLocalizedText(reads, "PotionBuffs", out var potionBuffIds);
 
         var both = cuisineBuffIds.Intersect(potionBuffIds).ToArray();
         if (both.Length > 0)
@@ -2253,16 +2321,16 @@ public static class CombatDataCatalog
     /// 言語名は <see cref="CheckLocalizedNames"/> で検める。
     /// </para>
     /// </summary>
-    private static Dictionary<string, Dictionary<string, string>>? ReadLocalizedFile(string fileName)
+    private static Dictionary<string, Dictionary<string, string>>? ReadLocalizedFile(JsonDataFileReads reads, string fileName)
     {
-        var path = Path.Combine(CombatRuntimePaths.LocalizationDirectory, $"{fileName}.json");
-        if (!File.Exists(path))
+        var path = LocalizedFilePath(fileName);
+        if (!reads.TryTake<Dictionary<string, Dictionary<string, string>?>>(path, out var loadedEntries))
         {
             Log.Error("Missing localization {FileName}", fileName);
             return null;
         }
 
-        var entries = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>?>>(File.ReadAllText(path))
+        var entries = loadedEntries
             ?? throw new InvalidDataException($"{path} is empty.");
         var result = new Dictionary<string, Dictionary<string, string>>(entries.Count);
         var missingNames = 0;
@@ -2317,6 +2385,7 @@ public static class CombatDataCatalog
     /// <paramref name="keys"/> は名前の有無を問わない全部の鍵。番号でない鍵はエラーログを出して飛ばす。
     /// </summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> LoadLocalizedText(
+        JsonDataFileReads reads,
         string fileName,
         out FrozenSet<int> keys)
     {
@@ -2326,7 +2395,7 @@ public static class CombatDataCatalog
             StringComparer.OrdinalIgnoreCase);
         var allKeys = new HashSet<int>();
 
-        foreach (var entry in ReadLocalizedFile(fileName) ?? [])
+        foreach (var entry in ReadLocalizedFile(reads, fileName) ?? [])
         {
             if (!int.TryParse(entry.Key, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var id))
             {
@@ -2355,14 +2424,14 @@ public static class CombatDataCatalog
     /// <c>DungeonTypeNames.json</c> を、言語ごとの「<see cref="MakeDungeonTypeKey"/> → 名前」にして返す。
     /// 鍵は <c>番号</c> か <c>番号:段階</c>。形の合わない鍵はエラーログを出して飛ばす。
     /// </summary>
-    private static FrozenDictionary<string, FrozenDictionary<long, string>> LoadDungeonTypeNames()
+    private static FrozenDictionary<string, FrozenDictionary<long, string>> LoadDungeonTypeNames(JsonDataFileReads reads)
     {
         var namesByCulture = SupportedCultures.ToDictionary(
             cultureName => cultureName,
             _ => new Dictionary<long, string>(),
             StringComparer.OrdinalIgnoreCase);
 
-        foreach (var entry in ReadLocalizedFile("DungeonTypeNames") ?? [])
+        foreach (var entry in ReadLocalizedFile(reads, "DungeonTypeNames") ?? [])
         {
             var separator = entry.Key.IndexOf(':');
             var idText = separator < 0 ? entry.Key.AsSpan() : entry.Key.AsSpan(0, separator);

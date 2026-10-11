@@ -105,13 +105,7 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
         SkillId = snapshot.SkillId;
         HasSkill = true;
         UsesImagineAsset = CombatDataCatalog.IsImagineArtIcon(snapshot.IconName);
-        // 表記は G で統一する。ただし<b>数字の出所は2つで違う</b> —
-        // イマジンは改造段階(Tier)、イマジン式ロールスキルはレベル(CDがレベル依存のため)。
-        NameDisplayText = snapshot.IsImagine
-            ? $"{snapshot.Name} G{snapshot.Tier}"
-            : snapshot.ShowLevel
-                ? $"{snapshot.Name} G{snapshot.CurrentLevel}"
-                : snapshot.Name;
+        NameDisplayText = MeterSnapshotProvider.FormatSkillNameWithGrade(snapshot.Name, snapshot.Grade);
         IconPath = CombatIconResolver.ResolveSkillIcon(snapshot.IconName);
         HasChargeCount = snapshot.MaxCharges > 1;
     }

@@ -13,6 +13,12 @@ public static class SkillCooldownStateStore
     private static readonly object Sync = new();
     private static readonly Dictionary<int, CooldownState> SelfCooldowns = [];
 
+    /// <summary>
+    /// 控えの上で終わった普通の CD の開始時刻(技ごと)。サーバーの CD の差分は値を作った時刻より遅れて届くことがあるので、
+    /// 終わった後に同じ開始時刻の差分が届いても作り直さない。開始時刻が違えば次に使った CD として受ける。
+    /// </summary>
+    private static readonly Dictionary<int, long> FinishedBeginTimes = [];
+
     private static long _selfUuid;
     private static int _accelerationPct;
     private static long _clientServerTimeDeltaMilliseconds;
@@ -35,6 +41,7 @@ public static class SkillCooldownStateStore
         lock (Sync)
         {
             SelfCooldowns.Clear();
+            FinishedBeginTimes.Clear();
             _selfUuid = 0;
             _accelerationPct = 0;
             _clientServerTimeDeltaMilliseconds = 0;
@@ -95,7 +102,7 @@ public static class SkillCooldownStateStore
     /// <para>
     /// 差の出所は <c>SyncServerTime</c> の <c>ClientMilliseconds - ServerMilliseconds</c>。
     /// <c>ClientMilliseconds</c> がこの端末の Unix ミリ秒であることは、
-    /// <see cref="ResolveInitialProgressMilliseconds"/> が同じ式で本番のCD表示を出していることによる。
+    /// <see cref="ResolveInitialDoneFraction"/> が同じ式で本番のCD表示を出していることによる。
     /// </para>
     /// </summary>
     public static bool TryGetServerNowUnixMilliseconds(out long serverNowUnixMilliseconds)
@@ -143,7 +150,7 @@ public static class SkillCooldownStateStore
                         UpdateChargeCooldown(skillId, cooldown, nowTimestamp);
                         break;
                     default:
-                        SelfCooldowns.Remove(skillId);
+                        FinishCooldown(skillId);
                         break;
                 }
             }
@@ -162,14 +169,36 @@ public static class SkillCooldownStateStore
         lock (Sync)
         {
             EnsureSelfPlayer(uuid);
+            SettleProgressNoLock(nowTimestamp);
+            _accelerationPct = Math.Max(accelerationPct, 0);
+        }
+    }
 
-            foreach (var cooldown in SelfCooldowns.Values)
+    /// <summary>
+    /// 自分の CD の長さか進む速さが変わる直前に呼ぶ。今までの長さと速さでここまでに済んだ割合を確定し、ここから新しい長さと速さで進める。
+    /// CD を率で短縮する一時属性(<see cref="CooldownModifierStore"/>)を変える前に呼ぶ。自分でなければ何もしない。
+    /// </summary>
+    public static void SettleSelfProgress(long uuid)
+    {
+        var nowTimestamp = Stopwatch.GetTimestamp();
+
+        lock (Sync)
+        {
+            if (uuid == 0 || uuid != _selfUuid)
             {
-                cooldown.ProgressMilliseconds = GetProgressMilliseconds(cooldown, nowTimestamp);
-                cooldown.AnchorTimestamp = nowTimestamp;
+                return;
             }
 
-            _accelerationPct = Math.Max(accelerationPct, 0);
+            SettleProgressNoLock(nowTimestamp);
+        }
+    }
+
+    private static void SettleProgressNoLock(long nowTimestamp)
+    {
+        foreach (var cooldown in SelfCooldowns.Values)
+        {
+            cooldown.DoneFraction = GetDoneFraction(cooldown, nowTimestamp);
+            cooldown.AnchorTimestamp = nowTimestamp;
         }
     }
 
@@ -191,15 +220,14 @@ public static class SkillCooldownStateStore
                 return null;
             }
 
-            var remainingMilliseconds = cooldown.DurationMilliseconds
-                - GetProgressMilliseconds(cooldown, nowTimestamp);
-            if (remainingMilliseconds <= 0)
+            var doneFraction = GetDoneFraction(cooldown, nowTimestamp);
+            if (doneFraction >= 1d)
             {
-                SelfCooldowns.Remove(skillId);
+                FinishCooldown(skillId);
                 return null;
             }
 
-            return remainingMilliseconds / 1000d;
+            return (1d - doneFraction) * GetReducedLengthMilliseconds(cooldown) / 1000d;
         }
     }
 
@@ -230,15 +258,14 @@ public static class SkillCooldownStateStore
                     0d);
             }
 
+            // 済んだ割合はチャージの回数ぶんまで(1回ぶんで 1)。
             var maxCharges = cooldown.MaxCharges;
-            var durationMilliseconds = cooldown.DurationMilliseconds;
-            var totalDurationMilliseconds = (double)durationMilliseconds * maxCharges;
-            var progressMilliseconds = Math.Clamp(
-                GetProgressMilliseconds(cooldown, nowTimestamp),
+            var doneCharges = Math.Clamp(
+                GetDoneFraction(cooldown, nowTimestamp),
                 0d,
-                totalDurationMilliseconds);
+                maxCharges);
 
-            if (progressMilliseconds >= totalDurationMilliseconds)
+            if (doneCharges >= maxCharges)
             {
                 SelfCooldowns.Remove(skillId);
                 return new SelfChargeCooldownState(
@@ -247,18 +274,15 @@ public static class SkillCooldownStateStore
                     0d);
             }
 
+            var lengthMilliseconds = GetReducedLengthMilliseconds(cooldown);
             var availableCharges = Math.Clamp(
-                (int)Math.Floor(progressMilliseconds / durationMilliseconds),
+                (int)Math.Floor(doneCharges),
                 0,
                 maxCharges);
-            var partialProgressMilliseconds = progressMilliseconds
-                - availableCharges * durationMilliseconds;
             var nextChargeRemainingMilliseconds = availableCharges >= maxCharges
                 ? 0d
-                : Math.Max(durationMilliseconds - partialProgressMilliseconds, 0d);
-            var fullRecoveryRemainingMilliseconds = Math.Max(
-                totalDurationMilliseconds - progressMilliseconds,
-                0d);
+                : (1d - (doneCharges - availableCharges)) * lengthMilliseconds;
+            var fullRecoveryRemainingMilliseconds = (maxCharges - doneCharges) * lengthMilliseconds;
 
             return new SelfChargeCooldownState(
                 availableCharges,
@@ -276,36 +300,47 @@ public static class SkillCooldownStateStore
             || cooldown.Duration <= 0
             || cooldown.ValidCDTime >= cooldown.Duration)
         {
-            SelfCooldowns.Remove(skillId);
+            FinishCooldown(skillId);
             return;
         }
 
+        var packetDoneFraction = Math.Max(cooldown.ValidCDTime, 0) / (double)cooldown.Duration;
         if (SelfCooldowns.TryGetValue(skillId, out var existing)
             && existing.Type == ESkillCDType.EskillCdnormal
             && existing.BeginTimeMilliseconds == cooldown.BeginTime)
         {
+            // 差分は値を作った時刻より遅れて届くことがあるので、控えの進みより戻さない。
+            existing.DoneFraction = Math.Max(packetDoneFraction, GetDoneFraction(existing, nowTimestamp));
             existing.DurationMilliseconds = cooldown.Duration;
-            existing.ProgressMilliseconds = Math.Max(cooldown.ValidCDTime, 0);
             existing.AnchorTimestamp = nowTimestamp;
             return;
         }
 
-        var progressMilliseconds = ResolveInitialProgressMilliseconds(cooldown);
-        if (progressMilliseconds >= cooldown.Duration)
+        if (FinishedBeginTimes.TryGetValue(skillId, out var finishedBeginTime)
+            && finishedBeginTime == cooldown.BeginTime)
+        {
+            return;
+        }
+
+        var doneFraction = ResolveInitialDoneFraction(cooldown, skillId);
+        if (doneFraction >= 1d)
         {
             SelfCooldowns.Remove(skillId);
+            FinishedBeginTimes[skillId] = cooldown.BeginTime;
             return;
         }
 
         SelfCooldowns[skillId] = new CooldownState
         {
+            SkillId = skillId,
             Type = ESkillCDType.EskillCdnormal,
             BeginTimeMilliseconds = cooldown.BeginTime,
             DurationMilliseconds = cooldown.Duration,
             MaxCharges = 1,
-            ProgressMilliseconds = progressMilliseconds,
+            DoneFraction = doneFraction,
             AnchorTimestamp = nowTimestamp
         };
+        FinishedBeginTimes.Remove(skillId);
     }
 
     private static void UpdateChargeCooldown(
@@ -318,37 +353,35 @@ public static class SkillCooldownStateStore
             || cooldown.Duration <= 0
             || maxCharges <= 1)
         {
-            SelfCooldowns.Remove(skillId);
+            FinishCooldown(skillId);
             return;
         }
 
-        var totalDurationMilliseconds = (double)cooldown.Duration * maxCharges;
-        var packetProgressMilliseconds = Math.Clamp(
-            (double)Math.Max(cooldown.ValidCDTime, 0),
+        var packetDoneCharges = Math.Clamp(
+            Math.Max(cooldown.ValidCDTime, 0) / (double)cooldown.Duration,
             0d,
-            totalDurationMilliseconds);
+            maxCharges);
 
         if (SelfCooldowns.TryGetValue(skillId, out var existing)
             && existing.Type == ESkillCDType.EskillCdcharge
             && existing.BeginTimeMilliseconds == cooldown.BeginTime)
         {
+            existing.DoneFraction = Math.Max(
+                packetDoneCharges,
+                Math.Min(
+                    GetDoneFraction(existing, nowTimestamp),
+                    maxCharges));
             existing.DurationMilliseconds = cooldown.Duration;
             existing.MaxCharges = maxCharges;
-            existing.ProgressMilliseconds = Math.Max(
-                packetProgressMilliseconds,
-                Math.Min(
-                    GetProgressMilliseconds(existing, nowTimestamp),
-                    totalDurationMilliseconds));
             existing.AnchorTimestamp = nowTimestamp;
             return;
         }
 
-        var progressMilliseconds = ResolveInitialProgressMilliseconds(cooldown);
-        progressMilliseconds = Math.Clamp(
-            progressMilliseconds,
+        var doneCharges = Math.Clamp(
+            ResolveInitialDoneFraction(cooldown, skillId),
             0d,
-            totalDurationMilliseconds);
-        if (progressMilliseconds >= totalDurationMilliseconds)
+            maxCharges);
+        if (doneCharges >= maxCharges)
         {
             SelfCooldowns.Remove(skillId);
             return;
@@ -356,21 +389,27 @@ public static class SkillCooldownStateStore
 
         SelfCooldowns[skillId] = new CooldownState
         {
+            SkillId = skillId,
             Type = ESkillCDType.EskillCdcharge,
             BeginTimeMilliseconds = cooldown.BeginTime,
             DurationMilliseconds = cooldown.Duration,
             MaxCharges = maxCharges,
-            ProgressMilliseconds = progressMilliseconds,
+            DoneFraction = doneCharges,
             AnchorTimestamp = nowTimestamp
         };
     }
 
-    private static double ResolveInitialProgressMilliseconds(SkillCD cooldown)
+    /// <summary>
+    /// 新しく控える CD の、済んだ割合。差分の値(<c>ValidCDTime</c> ÷ <c>Duration</c>)を使い、使った直後の差分(値 0)なら
+    /// 開始から今までを今の長さと速さで進める。値があるときは、開始からの実時間を短縮の前の長さで割った割合を下限にする。
+    /// </summary>
+    private static double ResolveInitialDoneFraction(SkillCD cooldown, int skillId)
     {
-        double progressMilliseconds = Math.Max(cooldown.ValidCDTime, 0);
+        var durationMilliseconds = (double)cooldown.Duration;
+        var packetDoneFraction = Math.Max(cooldown.ValidCDTime, 0) / durationMilliseconds;
         if (!_hasClientServerTimeDelta)
         {
-            return progressMilliseconds;
+            return packetDoneFraction;
         }
 
         var serverNowMilliseconds = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
@@ -380,8 +419,8 @@ public static class SkillCooldownStateStore
             0);
 
         return cooldown.ValidCDTime == 0
-            ? elapsedSinceBeginMilliseconds * GetProgressRate()
-            : Math.Max(progressMilliseconds, elapsedSinceBeginMilliseconds);
+            ? ScaleDone(elapsedSinceBeginMilliseconds, GetDoneRate(skillId, cooldown.Duration))
+            : Math.Max(packetDoneFraction, elapsedSinceBeginMilliseconds / durationMilliseconds);
     }
 
     private static void EnsureSelfPlayer(long uuid)
@@ -392,21 +431,64 @@ public static class SkillCooldownStateStore
         }
 
         SelfCooldowns.Clear();
+        FinishedBeginTimes.Clear();
         _selfUuid = uuid;
         _accelerationPct = 0;
     }
 
-    private static double GetProgressMilliseconds(CooldownState cooldown, long nowTimestamp)
+    /// <summary>控えを消す。普通の CD なら、遅れて届く差分で作り直さないよう開始時刻を覚える(<see cref="FinishedBeginTimes"/>)。</summary>
+    private static void FinishCooldown(int skillId)
+    {
+        if (!SelfCooldowns.Remove(skillId, out var cooldown))
+        {
+            return;
+        }
+
+        if (cooldown.Type == ESkillCDType.EskillCdnormal)
+        {
+            FinishedBeginTimes[skillId] = cooldown.BeginTimeMilliseconds;
+        }
+    }
+
+    /// <summary>今の時点で済んだ割合(1 で終わり。チャージは回数ぶんまで)。</summary>
+    private static double GetDoneFraction(CooldownState cooldown, long nowTimestamp)
     {
         var elapsedMilliseconds = (nowTimestamp - cooldown.AnchorTimestamp)
             * 1000d
             / Stopwatch.Frequency;
-        return cooldown.ProgressMilliseconds + elapsedMilliseconds * GetProgressRate();
+        return cooldown.DoneFraction + ScaleDone(elapsedMilliseconds, GetDoneRate(cooldown.SkillId, cooldown.DurationMilliseconds));
     }
 
-    private static double GetProgressRate()
+    /// <summary>
+    /// 自分のその技の CD の長さ(ミリ秒)。CD の長さ(<c>Duration</c>)を、率の短縮の一時属性(<see cref="CooldownModifierStore"/>)で縮めた長さ。
+    /// </summary>
+    private static double GetReducedLengthMilliseconds(CooldownState cooldown)
     {
-        return 1d + _accelerationPct / 10000d;
+        return CooldownModifierStore.ToReducedLength(
+            cooldown.DurationMilliseconds,
+            CooldownModifierStore.GetReductionRatio(_selfUuid, cooldown.SkillId));
+    }
+
+    /// <summary>
+    /// 実時間 1ミリ秒あたりに済む割合。縮めた長さを実時間で進み、加速(<c>AttrCdAcceleratePct</c>、10000 で 2倍)の間はその倍率で速く進む。
+    /// 縮めた長さが 0 なら無限大(すぐ終わる)。
+    /// </summary>
+    private static double GetDoneRate(int skillId, int durationMilliseconds)
+    {
+        var lengthMilliseconds = CooldownModifierStore.ToReducedLength(
+            durationMilliseconds,
+            CooldownModifierStore.GetReductionRatio(_selfUuid, skillId));
+        return lengthMilliseconds <= 0d
+            ? double.PositiveInfinity
+            : (1d + _accelerationPct / 10000d) / lengthMilliseconds;
+    }
+
+    /// <summary>実時間の経過を済んだ割合にする。速さが無限大(すぐ終わる)なら、経過が 0 でも終わった扱い。</summary>
+    private static double ScaleDone(double elapsedMilliseconds, double rate)
+    {
+        return double.IsPositiveInfinity(rate)
+            ? double.PositiveInfinity
+            : elapsedMilliseconds * rate;
     }
 
     private static bool TryResolveSkillId(int skillLevelId, out int skillId)
@@ -427,6 +509,8 @@ public static class SkillCooldownStateStore
 
     private sealed class CooldownState
     {
+        public int SkillId { get; init; }
+
         public ESkillCDType Type { get; init; }
 
         public long BeginTimeMilliseconds { get; init; }
@@ -435,7 +519,11 @@ public static class SkillCooldownStateStore
 
         public int MaxCharges { get; set; }
 
-        public double ProgressMilliseconds { get; set; }
+        /// <summary>
+        /// <see cref="AnchorTimestamp"/> の時点で済んだ割合(1 で終わり。チャージは回数ぶんまで)。
+        /// 割合で持つので、CD の途中で短縮の率が変わっても済んだ割合のまま新しい長さに切り替わる。
+        /// </summary>
+        public double DoneFraction { get; set; }
 
         public long AnchorTimestamp { get; set; }
     }

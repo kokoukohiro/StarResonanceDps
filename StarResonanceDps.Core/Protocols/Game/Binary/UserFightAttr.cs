@@ -16,7 +16,6 @@ public class UserFightAttr : BlobType
     public int? IsDead;
     public long? DeadTime;
     public int? ReviveId;
-    public SkillCDInfo? CDInfo;
 
     public UserFightAttr()
     {
@@ -55,7 +54,8 @@ public class UserFightAttr : BlobType
                 ReviveId = blob.ReadInt();
                 return true;
             case Zproto.UserFightAttr.CdInfoFieldNumber:
-                CDInfo = new(blob);
+                // 使い先は無いが、一覧は読み飛ばせないので読んで捨てる(読まないと、この項目で読み取りを打ち切る)。
+                blob.ReadList<SkillCDInfo>();
                 return true;
             default:
                 return false;

@@ -125,9 +125,12 @@ public partial class SettingsWindow : Window
     }
 
 
+    /// <summary>確認の窓は閉じるまで待つので、後から流れるこの処理では、窓の移動・大きさの変更の最中なら終わってから出す。</summary>
     private void QueueNpcapWarning()
     {
-        Dispatcher.BeginInvoke((Action)ShowNpcapWarningIfNeeded, DispatcherPriority.ContextIdle);
+        Dispatcher.BeginInvoke(
+            (Action)(() => OwnerModalWindow.RunWhenNotMovingOrSizing(ShowNpcapWarningIfNeeded)),
+            DispatcherPriority.ContextIdle);
     }
 
     private void ShowNpcapWarningIfNeeded()

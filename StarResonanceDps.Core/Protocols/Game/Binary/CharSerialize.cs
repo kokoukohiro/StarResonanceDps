@@ -64,6 +64,11 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
             case Zproto.CharSerialize.SeasonRoleLevelDataFieldNumber:
                 SeasonRoleLevelData = new(blob);
                 return true;
+            case Zproto.CharSerialize.SaveSerialFieldNumber:
+                // 保存の通し番号。使い先は無いが、数値は長さが分からず読み飛ばせないので読んで捨てる
+                // (読まないと、この後ろの項目(106 今のプロジェクト・107 ロールスキルの一覧 など)をその差分で失う)。
+                blob.ReadLong();
+                return true;
             case Zproto.CharSerialize.ItemPackageFieldNumber:
                 return TryReadWithoutDisturbingStream(blob, index, reader => ItemPackage = new(reader));
             case Zproto.CharSerialize.EquipFieldNumber:

@@ -1,5 +1,4 @@
 ﻿using StarResonanceDps.Core.CombatRuntime.DataTypes;
-using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Frozen;
@@ -37,22 +36,38 @@ namespace StarResonanceDps.Core.CombatRuntime
             System.Diagnostics.Stopwatch loadTime = new();
             loadTime.Start();
 
-            LoadRawTable<Monster>("MonsterTable.json", table => HelperMethods.DataTables.Monsters.Data = table);
-            LoadRawTable<Skill>("SkillTable.json", table => HelperMethods.DataTables.Skills.Data = table);
-            LoadRawTable<SkillFightLevel>("SkillFightLevelTable.json", table => HelperMethods.DataTables.SkillFightLevels.Data = table);
-            LoadRawTable<Buff>("BuffTable.json", table => HelperMethods.DataTables.Buffs.Data = table);
+            // 先に全部のファイルを同時に解き始める。組み立ては下の今までの順番で、それぞれ解き終わるのを待って受け取る。
+            var reads = new JsonDataFileReads();
+            reads.Start<Dictionary<string, Monster>>(RawTablePath("MonsterTable.json"));
+            reads.Start<Dictionary<string, Skill>>(RawTablePath("SkillTable.json"));
+            reads.Start<Dictionary<string, SkillFightLevel>>(RawTablePath("SkillFightLevelTable.json"));
+            reads.Start<Dictionary<string, Buff>>(RawTablePath("BuffTable.json"));
+            reads.Start<Dictionary<string, ProfessionSystem>>(RawTablePath("ProfessionSystemTable.json"));
+            reads.Start<Dictionary<string, Buff>>(Path.Combine(CombatRuntimePaths.DataDirectory, BuffOverridesRelativePath));
+            reads.Start<Dictionary<string, SkillLevelGroupOverride>>(Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillOverrides.json"));
+            CombatDataCatalog.StartReads(reads);
+            reads.Start<Dictionary<string, SceneEventDungeonConfig>>(RawTablePath("SceneEventDuneonConfigTable.json"));
+            reads.Start<Dictionary<string, TempAttr>>(RawTablePath("TempAttrTable.json"));
+            reads.Start<Dictionary<string, CookCuisine>>(RawTablePath("CookCuisineTable.json"));
+            reads.Start<Dictionary<string, FightAttr>>(RawTablePath("FightAttrTable.json"));
+
+            LoadRawTable<Monster>(reads, "MonsterTable.json", table => HelperMethods.DataTables.Monsters.Data = table);
+            LoadRawTable<Skill>(reads, "SkillTable.json", table => HelperMethods.DataTables.Skills.Data = table);
+            LoadRawTable<SkillFightLevel>(reads, "SkillFightLevelTable.json", table => HelperMethods.DataTables.SkillFightLevels.Data = table);
+            LoadRawTable<Buff>(reads, "BuffTable.json", table => HelperMethods.DataTables.Buffs.Data = table);
             // CombatDataCatalog.Load が技のアイコンの枠を作るのに使う(変身クラスの技の番号)。
-            LoadRawTable<ProfessionSystem>("ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
+            LoadRawTable<ProfessionSystem>(reads, "ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
 
-            LoadBuffOverridesTable();
-            LoadSkillOverridesTable();
-            CombatDataCatalog.Load();
+            LoadBuffOverridesTable(reads);
+            LoadSkillOverridesTable(reads);
+            CombatDataCatalog.Load(reads);
 
-            LoadRawTable<SceneEventDungeonConfig>("SceneEventDuneonConfigTable.json", table => HelperMethods.DataTables.SceneEventDungeonConfigs.Data = table);
-            LoadRawTable<TempAttr>("TempAttrTable.json", table => HelperMethods.DataTables.TempAttrs.Data = table);
+            LoadRawTable<SceneEventDungeonConfig>(reads, "SceneEventDuneonConfigTable.json", table => HelperMethods.DataTables.SceneEventDungeonConfigs.Data = table);
+            LoadRawTable<TempAttr>(reads, "TempAttrTable.json", table => HelperMethods.DataTables.TempAttrs.Data = table);
 
-            LoadCookCuisineTable();
-            LoadFightAttrTable();
+            LoadCookCuisineTable(reads);
+            LoadFightAttrTable(reads);
+            reads.LogUntaken();
 
             var startupTime = loadTime.Elapsed.TotalSeconds;
             Serilog.Log.Debug($"Took {Math.Round(startupTime, 4)}s to load DataTables.");
@@ -60,20 +75,24 @@ namespace StarResonanceDps.Core.CombatRuntime
             loadTime.Stop();
         }
 
+        private const string BuffOverridesRelativePath = @"Overrides\BuffOverrides.json";
+
+        private static string RawTablePath(string fileName) => Path.Combine(CombatRuntimePaths.RawTableDirectory, fileName);
+
         /// <summary>
-        /// <c>Data/Raw</c> の生テーブルを1つ読み、<paramref name="assign"/> で置き場へ入れる。
+        /// <c>Data/Raw</c> の生テーブルを1つ受け取り、<paramref name="assign"/> で置き場へ入れる。
         /// 無ければ、その表を引く機能が空のまま動くので、黙って飛ばさずエラーを出す。
         /// </summary>
-        private static void LoadRawTable<T>(string fileName, Action<Dictionary<string, T>> assign)
+        private static void LoadRawTable<T>(JsonDataFileReads reads, string fileName, Action<Dictionary<string, T>> assign)
         {
-            string path = Path.Combine(CombatRuntimePaths.RawTableDirectory, fileName);
-            if (!File.Exists(path))
+            string path = RawTablePath(fileName);
+            if (!reads.TryTake<Dictionary<string, T>>(path, out var table))
             {
                 Log.Error("{FileName} is missing. Lookups that use this table will be empty path={Path}", fileName, path);
                 return;
             }
 
-            assign(JsonConvert.DeserializeObject<Dictionary<string, T>>(File.ReadAllText(path))!);
+            assign(table!);
             Log.Information("Loaded {FileName}", fileName);
         }
 
@@ -81,16 +100,16 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 料理の表を読み、回復の料理が付けるバフと1回の回復量を引けるようにする。
         /// 表が無いと料理の回復を HPS に数えられないので、黙って空にせずエラーを出す。
         /// </summary>
-        private static void LoadCookCuisineTable()
+        private static void LoadCookCuisineTable(JsonDataFileReads reads)
         {
-            string cookCuisineTableFile = Path.Combine(CombatRuntimePaths.RawTableDirectory, "CookCuisineTable.json");
-            if (!File.Exists(cookCuisineTableFile))
+            string cookCuisineTableFile = RawTablePath("CookCuisineTable.json");
+            if (!reads.TryTake<Dictionary<string, CookCuisine>>(cookCuisineTableFile, out var loadedCookCuisines))
             {
                 Log.Error("CookCuisineTable.json is missing. Cuisine healing cannot be counted in HPS path={Path}", cookCuisineTableFile);
                 return;
             }
 
-            var cookCuisines = JsonConvert.DeserializeObject<Dictionary<string, CookCuisine>>(File.ReadAllText(cookCuisineTableFile))!;
+            var cookCuisines = loadedCookCuisines!;
             HelperMethods.DataTables.CookCuisines.Data = cookCuisines;
 
             var amounts = new Dictionary<int, int>();
@@ -133,16 +152,16 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 能力値の表を読み、能力値の属性番号を引けるようにする。
         /// 表が無いと入場のときに残った能力値を 0 に戻せないので、黙って空にせずエラーを出す。
         /// </summary>
-        private static void LoadFightAttrTable()
+        private static void LoadFightAttrTable(JsonDataFileReads reads)
         {
-            string fightAttrTableFile = Path.Combine(CombatRuntimePaths.RawTableDirectory, "FightAttrTable.json");
-            if (!File.Exists(fightAttrTableFile))
+            string fightAttrTableFile = RawTablePath("FightAttrTable.json");
+            if (!reads.TryTake<Dictionary<string, FightAttr>>(fightAttrTableFile, out var loadedFightAttrs))
             {
                 Log.Error("FightAttrTable.json is missing. Stats left over from the previous scene are not reset on EnterScene path={Path}", fightAttrTableFile);
                 return;
             }
 
-            var fightAttrs = JsonConvert.DeserializeObject<Dictionary<string, FightAttr>>(File.ReadAllText(fightAttrTableFile))!;
+            var fightAttrs = loadedFightAttrs!;
             HelperMethods.DataTables.FightAttrs.Data = fightAttrs;
 
             var statAttrIds = new HashSet<int>();
@@ -187,17 +206,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// ファイルが無ければエラーログを出して上書き無しのまま続け、<c>SkillLevelGroup</c> が書かれていない項目は当てない。
         /// </para>
         /// </summary>
-        public static void LoadSkillOverridesTable()
+        private static void LoadSkillOverridesTable(JsonDataFileReads reads)
         {
             const string relativePath = "Overrides/SkillOverrides.json";
             var overridePath = Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillOverrides.json");
-            if (!File.Exists(overridePath))
+            if (!reads.TryTake<Dictionary<string, SkillLevelGroupOverride>>(overridePath, out var loadedOverrides))
             {
                 Log.Error("Failed to load {OverridePath}", relativePath);
                 return;
             }
 
-            var overrides = JsonConvert.DeserializeObject<Dictionary<string, SkillLevelGroupOverride>>(File.ReadAllText(overridePath))
+            var overrides = loadedOverrides
                 ?? throw new InvalidDataException($"{relativePath} が空です。");
 
             foreach (var (key, value) in overrides)
@@ -231,21 +250,21 @@ namespace StarResonanceDps.Core.CombatRuntime
             public int? SkillLevelGroup { get; set; }
         }
 
-        public static void LoadBuffOverridesTable()
+        private static void LoadBuffOverridesTable(JsonDataFileReads reads)
         {
-            LoadBuffOverrideFile(Path.Combine("Overrides", "BuffOverrides.json"));
+            LoadBuffOverrideFile(reads, BuffOverridesRelativePath);
         }
 
-        private static void LoadBuffOverrideFile(string relativePath)
+        private static void LoadBuffOverrideFile(JsonDataFileReads reads, string relativePath)
         {
             var overridePath = Path.Combine(CombatRuntimePaths.DataDirectory, relativePath);
-            if (!File.Exists(overridePath))
+            if (!reads.TryTake<Dictionary<string, Buff>>(overridePath, out var loadedOverrides))
             {
                 Log.Error("Failed to load {OverridePath}", relativePath);
                 return;
             }
 
-            var overrides = JsonConvert.DeserializeObject<Dictionary<string, Buff>>(File.ReadAllText(overridePath))
+            var overrides = loadedOverrides
                 ?? new Dictionary<string, Buff>();
             foreach (var item in overrides)
             {

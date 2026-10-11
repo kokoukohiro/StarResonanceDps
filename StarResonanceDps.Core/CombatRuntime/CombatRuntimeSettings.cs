@@ -44,10 +44,11 @@ public static class CombatRuntimeSettings
     public static string GameCaptureCustomExeName { get; private set; } = string.Empty;
 
     /// <summary>
-    /// 設定「アステルリーズでの集計を停止」。回のシーンがアステルリーズなら、戦闘の時計を立てず、回へ何も記録しないか。
+    /// 設定「非戦闘エリアでの集計を停止」。回のシーンが非戦闘エリア(アステルリーズ・ホームガーデン・ホームハウス)なら、
+    /// 戦闘の時計を立てず、回へ何も記録しないか。
     /// 時計の判定と記録の門のたびに見る(<c>Encounter.IsAggregationStopped</c>)ので、保存すれば次のメッセージから効く。
     /// </summary>
-    public static bool StopAggregationInAsterleeds { get; private set; }
+    public static bool StopAggregationInNonCombatAreas { get; private set; }
 
     /// <summary>
     /// 設定「進行で自動リセット」。ダンジョンの開始・ボス部屋の入場・全滅でエンカウンターを分けるか。
@@ -102,7 +103,7 @@ public static class CombatRuntimeSettings
         string? netCaptureDeviceName,
         EGameCapturePreference gameCapturePreference,
         string? gameCaptureCustomExeName,
-        bool stopAggregationInAsterleeds,
+        bool stopAggregationInNonCombatAreas,
         bool splitEncountersOnNewPhases,
         bool keepPastEncounterInMeterUntilNextDamage,
         bool clearHistorySelectionOnNextEvent,
@@ -127,7 +128,7 @@ public static class CombatRuntimeSettings
         // 1つのメッセージの中で読み直しても同じ値になり、時計の判定と記録の門が食い違わない。
         MessageManager.RunOnPacketThread(() =>
         {
-            StopAggregationInAsterleeds = stopAggregationInAsterleeds;
+            StopAggregationInNonCombatAreas = stopAggregationInNonCombatAreas;
             SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
             ClearHistorySelectionOnNextEvent = clearHistorySelectionOnNextEvent;

@@ -62,7 +62,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     // --- 集計設定 ---
 
     [ObservableProperty]
-    private bool _stopAggregationInAsterleeds = true;
+    private bool _stopAggregationInNonCombatAreas = true;
 
     [ObservableProperty]
     private bool _splitEncountersOnNewPhases = true;
@@ -421,7 +421,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()],
-            StopAggregationInAsterleeds = StopAggregationInAsterleeds,
+            StopAggregationInNonCombatAreas = StopAggregationInNonCombatAreas,
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
             ClearHistorySelectionOnNextEvent = ClearHistorySelectionOnNextEvent,
@@ -474,7 +474,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
             WidgetWindowTopmostModeIndex = settings.WidgetWindowTopmostModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
-            StopAggregationInAsterleeds = settings.StopAggregationInAsterleeds;
+            StopAggregationInNonCombatAreas = settings.StopAggregationInNonCombatAreas;
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
             ClearHistorySelectionOnNextEvent = settings.ClearHistorySelectionOnNextEvent;
@@ -639,7 +639,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
         // ON / OFF は言語で変わるので、開いたまま切り替えられても追従させる
         // (言語の選択肢はこの画面の中にあるので、開いたままの切り替えが普通に起きる)。
-        OnPropertyChanged(nameof(StopAggregationInAsterleedsStateText));
+        OnPropertyChanged(nameof(StopAggregationInNonCombatAreasStateText));
         OnPropertyChanged(nameof(SplitEncountersOnNewPhasesStateText));
         OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
         OnPropertyChanged(nameof(ClearHistorySelectionOnNextEventStateText));
@@ -755,7 +755,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
             && left.WidgetWindowTopmostModeIndex == right.WidgetWindowTopmostModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
-            && left.StopAggregationInAsterleeds == right.StopAggregationInAsterleeds
+            && left.StopAggregationInNonCombatAreas == right.StopAggregationInNonCombatAreas
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
             && left.ClearHistorySelectionOnNextEvent == right.ClearHistorySelectionOnNextEvent
@@ -1030,9 +1030,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     // 集計設定はプレビューを持たない。戦闘の区切り方やDBの掃除は「下見」できる類ではなく、
     // 保存したときにだけ効かせる。未保存の印だけ更新する。
-    partial void OnStopAggregationInAsterleedsChanged(bool value)
+    partial void OnStopAggregationInNonCombatAreasChanged(bool value)
     {
-        OnPropertyChanged(nameof(StopAggregationInAsterleedsStateText));
+        OnPropertyChanged(nameof(StopAggregationInNonCombatAreasStateText));
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -1055,7 +1055,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>スイッチの右に出す ON / OFF。ウィジェット設定と同じ形。</summary>
-    public string StopAggregationInAsterleedsStateText => GetSwitchStateText(StopAggregationInAsterleeds);
+    public string StopAggregationInNonCombatAreasStateText => GetSwitchStateText(StopAggregationInNonCombatAreas);
 
     public string SplitEncountersOnNewPhasesStateText => GetSwitchStateText(SplitEncountersOnNewPhases);
 
