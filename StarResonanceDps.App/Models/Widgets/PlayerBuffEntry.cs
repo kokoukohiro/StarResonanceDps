@@ -47,6 +47,10 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>絵がモジュール効果の絵か。モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵と別の大きさで出す。</summary>
+    [ObservableProperty]
+    private bool _isModuleEffectIcon;
+
     /// <summary>行のゲージの長さ(0〜1)。満タンになる残り時間は表示設定で決まる。</summary>
     [ObservableProperty]
     private double _barRatio = 1d;
@@ -82,6 +86,7 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
+        IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(snapshot.IconName);
 
         _remainingSeconds = snapshot.RemainingSeconds;
         _isRemainingUnknown = snapshot.IsRemainingUnknown;

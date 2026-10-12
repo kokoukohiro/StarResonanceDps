@@ -8,7 +8,7 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、一覧に出さないバフ。
+/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、モジュール効果の出し方、一覧に出さないバフ。
 /// 色の行の作りはクラスカラーと同じ。
 /// </summary>
 public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -21,6 +21,10 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
     [ObservableProperty]
     private int _gaugeLengthIndex;
+
+    /// <summary>設定「モジュール効果」の添字。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。</summary>
+    [ObservableProperty]
+    private int _moduleEffectDisplayModeIndex = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
 
     /// <summary>ゲージの色の不透明度(0〜100)。UI がスライダーなので double で持つ(メーターのクラスカラーと同じ)。</summary>
     [ObservableProperty]
@@ -106,6 +110,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         var config = new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
+            ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
             GaugeColorOpacity = Math.Clamp(
                 (int)Math.Round(GaugeColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -192,6 +197,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             }
 
             GaugeLengthIndex = normalized.GaugeLengthIndex;
+            ModuleEffectDisplayModeIndex = normalized.ModuleEffectDisplayModeIndex;
             GaugeColorOpacity = normalized.GaugeColorOpacity;
 
             _hiddenBuffItems.Clear();
@@ -238,6 +244,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     private static bool SettingsEqual(BuffListWidgetSettingsConfig left, BuffListWidgetSettingsConfig right)
     {
         if (left.GaugeLengthIndex != right.GaugeLengthIndex
+            || left.ModuleEffectDisplayModeIndex != right.ModuleEffectDisplayModeIndex
             || left.GaugeColorOpacity != right.GaugeColorOpacity
             || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
@@ -280,6 +287,11 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     }
 
     partial void OnGaugeLengthIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnModuleEffectDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
     }

@@ -43,6 +43,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             reads.Start<Dictionary<string, SkillFightLevel>>(RawTablePath("SkillFightLevelTable.json"));
             reads.Start<Dictionary<string, Buff>>(RawTablePath("BuffTable.json"));
             reads.Start<Dictionary<string, ProfessionSystem>>(RawTablePath("ProfessionSystemTable.json"));
+            reads.Start<Dictionary<string, ModEffect>>(RawTablePath("ModEffectTable.json"));
+            reads.Start<Dictionary<string, SkillAoyi>>(RawTablePath("SkillAoyiTable.json"));
+            reads.Start<Dictionary<string, SkillAoyiStar>>(RawTablePath("SkillAoyiStarTable.json"));
             reads.Start<Dictionary<string, Buff>>(Path.Combine(CombatRuntimePaths.DataDirectory, BuffOverridesRelativePath));
             reads.Start<Dictionary<string, SkillLevelGroupOverride>>(Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillOverrides.json"));
             CombatDataCatalog.StartReads(reads);
@@ -57,6 +60,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             LoadRawTable<Buff>(reads, "BuffTable.json", table => HelperMethods.DataTables.Buffs.Data = table);
             // CombatDataCatalog.Load が技のアイコンの枠を作るのに使う(変身クラスの技の番号)。
             LoadRawTable<ProfessionSystem>(reads, "ProfessionSystemTable.json", table => HelperMethods.DataTables.ProfessionSystems.Data = table);
+            // CombatDataCatalog.Load がモジュールとイマジンのパッシブの根のバフを引けるようにするのに使う(バフの由来の名前)。
+            LoadRawTable<ModEffect>(reads, "ModEffectTable.json", table => HelperMethods.DataTables.ModEffects.Data = table);
+            LoadRawTable<SkillAoyi>(reads, "SkillAoyiTable.json", table => HelperMethods.DataTables.SkillAoyis.Data = table);
+            LoadRawTable<SkillAoyiStar>(reads, "SkillAoyiStarTable.json", table => HelperMethods.DataTables.SkillAoyiStars.Data = table);
 
             LoadBuffOverridesTable(reads);
             LoadSkillOverridesTable(reads);

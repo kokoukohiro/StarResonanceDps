@@ -5,6 +5,25 @@ namespace StarResonanceDps.App.Services;
 
 public static partial class NpcapVersionProbe
 {
+    /// <summary>
+    /// これより古い版は、フィルターを掛けて捕捉している最中に OS ごと落ちる不具合(1.86 で修正)が残っている。
+    /// 無いときは起動しない、古いときは知らせて続ける。
+    /// </summary>
+    public static readonly Version MinimumVersion = new(1, 86);
+
+    public const string DownloadUrl = "https://npcap.com/";
+
+    /// <summary>Npcap が入っていない(版を検出できない)。<see cref="GetVersion"/> は検出できなければ空の版を返す。</summary>
+    public static bool IsMissing(Version version)
+    {
+        return version == new Version();
+    }
+
+    public static bool IsOutdated(Version version)
+    {
+        return !IsMissing(version) && version < MinimumVersion;
+    }
+
     public static string GetVersionString()
     {
         try

@@ -42,7 +42,9 @@ public partial class AggregationView : UserControl
 
     private void AggregationView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_isSubscribed)
+        // 起動できないときに見せるだけのメイン窓では Core が初期化されていない(DB も開いていない)。
+        // EncounterManager に触ると静的コンストラクタが DB に書きに行って落ちるので、購読もタイマーも始めない。
+        if (_isSubscribed || !CombatRuntimeHost.Instance.IsInitialized)
         {
             return;
         }
@@ -88,6 +90,11 @@ public partial class AggregationView : UserControl
 
     private void UpdateActiveState()
     {
+        if (!CombatRuntimeHost.Instance.IsInitialized)
+        {
+            return;
+        }
+
         if (!IsVisible)
         {
             _benchmarkTimer.Stop();

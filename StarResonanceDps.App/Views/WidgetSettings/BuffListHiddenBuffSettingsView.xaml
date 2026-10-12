@@ -45,14 +45,33 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Image Grid.Column="0"
-                                       Width="30"
-                                       Height="30"
-                                       Margin="-1,0,0,0"
-                                       VerticalAlignment="Center"
-                                       Source="{Binding IconPath, TargetNullValue={x:Null}}"
-                                       Stretch="Uniform"
-                                       RenderOptions.BitmapScalingMode="HighQuality" />
+                                <!-- 枠は一覧の行と同じ 30×30。モジュール効果の絵だけ枠の中で小さく出す(一覧の行と同じ値)。 -->
+                                <Grid Grid.Column="0"
+                                      Width="30"
+                                      Height="30"
+                                      Margin="-1,0,0,0"
+                                      VerticalAlignment="Center">
+                                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
+                                                        <Setter Property="Width" Value="26" />
+                                                        <Setter Property="Height" Value="26" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+                                </Grid>
 
                                 <TextBlock Grid.Column="1"
                                            Margin="10,0,12,0"

@@ -599,6 +599,18 @@
   <data name="GaugeLength_30" xml:space="preserve">
     <value>30초</value>
   </data>
+  <data name="Settings_Display_ModuleEffect" xml:space="preserve">
+    <value>모듈 효과</value>
+  </data>
+  <data name="ModuleEffectDisplay_All" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
+    <value>상시 효과만 숨기기</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>엔티티 이름</value>
   </data>
@@ -947,12 +959,15 @@
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap 업데이트</value>
   </data>
+  <data name="Confirm_NpcapInstall_Title" xml:space="preserve">
+    <value>Npcap 설치</value>
+  </data>
   <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
     <value>Npcap을 설치하시겠습니까?</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>Npcap이 설치되어 있지 않거나 버전을 감지할 수 없습니다.
-네트워크 패킷을 캡처하려면 Npcap을 설치하세요.</value>
+    <value>Npcap이 설치되어 있지 않거나 버전을 감지할 수 없어 시작하지 못했습니다.
+※게임을 실행한 채로 Npcap을 설치한 경우, 게임을 다시 시작해야 동작할 수 있습니다.</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>Npcap을 업데이트하시겠습니까?</value>
@@ -1713,7 +1728,7 @@
     <value>다른 앱이 클립보드를 사용 중일 수 있습니다.
 잠시 후 다시 복사하세요.</value>
   </data>
-  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+  <data name="Startup_Error_Title" xml:space="preserve">
     <value>시작 오류</value>
   </data>
   <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
@@ -1723,6 +1738,15 @@
     <value>다음 폴더에 쓸 수 없습니다.
 {0}
 폴더의 쓰기 권한과 보안 소프트웨어 설정을 확인하거나, 앱 폴더 전체를 쓸 수 있는 위치로 옮긴 후 다시 시작하세요.</value>
+  </data>
+  <data name="Startup_InitializationFailed_Message" xml:space="preserve">
+    <value>초기화에 실패했습니다.</value>
+  </data>
+  <data name="Error_Unhandled_Title" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="Error_Unhandled_Message" xml:space="preserve">
+    <value>예기치 않은 오류가 발생하여 종료합니다.</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>설정 불러오기 오류</value>

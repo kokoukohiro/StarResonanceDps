@@ -17,13 +17,15 @@ public readonly record struct BuffDebuffCardContent(
     string DisplayText,
     string DurationText,
     string LayerText,
-    string? IconPath)
+    string? IconPath,
+    bool IsModuleEffectIcon)
 {
     public static BuffDebuffCardContent Empty { get; } = new(
         string.Empty,
         string.Empty,
         string.Empty,
-        null);
+        null,
+        false);
 
     public static BuffDebuffCardContent Create(
         PlayerBuffSnapshot snapshot,
@@ -41,19 +43,21 @@ public readonly record struct BuffDebuffCardContent(
             BuffInfoFormatFormatter.Format(name, targetName, level, formatString),
             entry.DurationWithUnitText,
             entry.LayerText,
-            entry.IconPath);
+            entry.IconPath,
+            entry.IsModuleEffectIcon);
     }
 
     /// <summary>
     /// カードに出すバフ名(内部ID注記なし)。<b>料理・薬剤のバフは、まとまりの名前(料理・薬剤)の1語にする。</b>
     /// 表の名前はそのバフを付けるアイテムの名前で、複数つながると長い。
+    /// それ以外は一覧の行と同じ名前(表に名前が無ければ付与元をたどった由来の名前)。
     /// </summary>
-    public static string GetCardBuffName(int baseId)
+    public static string GetCardBuffName(PlayerBuffSnapshot snapshot)
     {
-        var group = CombatDataCatalog.GetBuffGroup(baseId);
+        var group = CombatDataCatalog.GetBuffGroup(snapshot.BaseId);
         return group != BuffGroup.None
             ? GetGroupName(group)
-            : CombatDataCatalog.GetBuffNameWithoutInternalId(baseId);
+            : snapshot.NameWithoutInternalId;
     }
 
     /// <summary>まとまりの名前。タイトルの「バフ(料理)」と同じ文言。</summary>
@@ -87,7 +91,8 @@ public readonly record struct BuffDebuffCardContent(
             BuffInfoFormatFormatter.Format(lastKnownBuffName, targetName, level, formatString),
             string.Empty,
             string.Empty,
-            null);
+            null,
+            false);
     }
 
     /// <summary>

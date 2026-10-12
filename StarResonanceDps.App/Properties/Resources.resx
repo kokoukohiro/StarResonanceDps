@@ -599,6 +599,18 @@ If it is not installed, you can download it from the link below.</value>
   <data name="GaugeLength_30" xml:space="preserve">
     <value>30 s</value>
   </data>
+  <data name="Settings_Display_ModuleEffect" xml:space="preserve">
+    <value>Module effect</value>
+  </data>
+  <data name="ModuleEffectDisplay_All" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
+    <value>Hide persistent effects</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>Entity name</value>
   </data>
@@ -947,12 +959,15 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap update</value>
   </data>
+  <data name="Confirm_NpcapInstall_Title" xml:space="preserve">
+    <value>Install Npcap</value>
+  </data>
   <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
     <value>Install Npcap?</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>Npcap is not installed, or its version could not be detected.
-Please install Npcap to capture network packets.</value>
+    <value>Could not start because Npcap is not installed or its version could not be detected.
+Note: If you installed Npcap while the game was running, it may not work until you restart the game.</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>Update Npcap?</value>
@@ -1713,7 +1728,7 @@ Choose another location and save again.</value>
     <value>Another app may be using the clipboard.
 Wait a moment and copy again.</value>
   </data>
-  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+  <data name="Startup_Error_Title" xml:space="preserve">
     <value>Startup error</value>
   </data>
   <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
@@ -1723,6 +1738,15 @@ Wait a moment and copy again.</value>
     <value>Could not write to the following folder.
 {0}
 Check the folder's write permissions and your security software settings, or move the whole app folder to a location you can write to, then start the app again.</value>
+  </data>
+  <data name="Startup_InitializationFailed_Message" xml:space="preserve">
+    <value>Initialization failed.</value>
+  </data>
+  <data name="Error_Unhandled_Title" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Error_Unhandled_Message" xml:space="preserve">
+    <value>An unexpected error occurred. The application will exit.</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>Settings load error</value>

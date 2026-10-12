@@ -14,7 +14,7 @@ public static class DataFolderNotWritableMessage
         var localization = LocalizationManager.Instance;
         MessageWindow.Show(
             owner,
-            localization.GetString("Startup_DataFolderNotWritable_Title"),
+            localization.GetString("Startup_Error_Title"),
             localization.GetString("Startup_DataFolderNotWritable_Message"),
             localization.Format("Startup_DataFolderNotWritable_Detail", directory));
     }

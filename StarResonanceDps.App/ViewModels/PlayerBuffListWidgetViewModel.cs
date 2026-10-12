@@ -164,18 +164,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
-        SynchronizeEntries(ExcludeHiddenBuffs(MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind)));
-    }
-
-    /// <summary>設定の非表示の一覧にあるバフを除く。</summary>
-    private IReadOnlyList<PlayerBuffSnapshot> ExcludeHiddenBuffs(IReadOnlyList<PlayerBuffSnapshot> snapshots)
-    {
-        if (_settings.HiddenBuffIds.Count == 0)
-        {
-            return snapshots;
-        }
-
-        return [.. snapshots.Where(snapshot => !_settings.HiddenBuffIds.Contains(snapshot.BaseId))];
+        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind)));
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)

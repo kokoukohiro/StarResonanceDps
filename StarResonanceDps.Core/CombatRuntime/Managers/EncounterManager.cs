@@ -3788,6 +3788,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // 差し引くのに使う(AOI出現で受け取る、見る前から乗っているバフのため)。
                 Services.ActiveBuffStore.Instance.AddOrUpdate(
                     UUID, (ulong)buffUuid, buffEvent, creationTime, createsInstance: payload == BuffEventPayload.BuffInfo);
+
+                // 表に名前の無いバフは、付与元をたどった由来の名前で出す。付与元が届くのは付与だけで、たどるのはこの通知の最後。
+                if (payload == BuffEventPayload.BuffInfo)
+                {
+                    Services.BuffOriginResolver.Instance.Enqueue(UUID, buffEvent, extraPacketData.ArrivalTime);
+                }
             }
         }
 
@@ -4469,9 +4475,22 @@ namespace StarResonanceDps.Core.CombatRuntime
         public DateTime AddDateTime { get; private set; }
         public DateTime RemoveDateTime { get; private set; }
 
+        /// <summary>
+        /// 表に名前の無いバフの由来(付与元をたどって着いた先とたどった鎖)。<c>null</c> はまだたどっていないか、表に名前がある。
+        /// 付与のたびに消し、その通知の最後にたどり直す(<see cref="Services.BuffOriginResolver"/>)。
+        /// 名前は <c>CombatDataCatalog.GetBuffDisplayName</c> がこの由来から引く。
+        /// </summary>
+        [JsonIgnore]
+        public Services.BuffOrigin? Origin { get; private set; }
+
         public BuffEvent(long uuid)
         {
             Uuid = uuid;
+        }
+
+        public void SetOrigin(Services.BuffOrigin? origin)
+        {
+            Origin = origin;
         }
 
         [JsonConstructor]

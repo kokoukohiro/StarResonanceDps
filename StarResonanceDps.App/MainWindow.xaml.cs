@@ -32,8 +32,37 @@ public partial class MainWindow : Window
     private static readonly bool IsInDesignMode =
         DesignerProperties.GetIsInDesignMode(new DependencyObject());
 
-    public MainWindow()
+    /// <summary>
+    /// 起動できないときに出す窓(持ち主はこの窓)。null なら起動を続ける。
+    /// 見せるだけの窓では Loaded の処理(ウィジェットの復元・ホットキー)を走らせない(Core の初期化が済んでいない)。
+    /// </summary>
+    private readonly Action<Window>? _showStartupFailure;
+
+    /// <summary>入っている Npcap の版。古ければ窓が描かれたところで知らせる。</summary>
+    private readonly Version _npcapVersion;
+
+    /// <summary>起動の処理(<see cref="MainWindow_ContentRendered"/>)を走らせたか。</summary>
+    private bool _hasStartedUp;
+
+    /// <summary>起動を続けるメイン窓。</summary>
+    public static MainWindow Create(Version npcapVersion)
     {
+        return new MainWindow(showStartupFailure: null, npcapVersion);
+    }
+
+    /// <summary>
+    /// 起動できないときに見せるだけのメイン窓(起動エラーの窓の持ち主。どのアプリの窓かが分かる)。
+    /// 描かれたところで <paramref name="showStartupFailure"/> の窓を出し、閉じたら終了コード 1 で終わる。
+    /// </summary>
+    public static MainWindow CreateForStartupFailure(Action<Window> showStartupFailure)
+    {
+        return new MainWindow(showStartupFailure, new Version());
+    }
+
+    private MainWindow(Action<Window>? showStartupFailure, Version npcapVersion)
+    {
+        _showStartupFailure = showStartupFailure;
+        _npcapVersion = npcapVersion;
         InitializeComponent();
 
         if (!IsInDesignMode)
@@ -41,34 +70,73 @@ public partial class MainWindow : Window
             DataContext = new MainViewModel();
         }
 
-        Loaded += MainWindow_Loaded;
+        ContentRendered += MainWindow_ContentRendered;
         SourceInitialized += MainWindow_SourceInitialized;
 #if DEBUG
         PreviewKeyDown += MainWindow_PreviewKeyDown;
 #endif
     }
 
-    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    /// <summary>
+    /// 起動の処理。この窓が表示されて最初の描画が終わった後(WPF の合図)に1回だけ走る。
+    ///
+    /// <para>
+    /// <c>Loaded</c> には置かない。<c>Loaded</c> は <c>Show()</c> の中で HWND を作ったときのレイアウトで呼ばれ、
+    /// <c>ShowWindow</c> より前なので、そこで開いたウィジェットや出した窓はこの窓より先に見え、
+    /// 処理の中でメッセージが回る(補助の起動のユーザーアカウント制御)と予約した処理も表示前に走る。
+    /// <c>ContentRendered</c> の予約は <c>Show()</c> の中でメッセージが回らなければ <c>OnStartup</c> が戻った後に処理される。
+    /// </para>
+    ///
+    /// <para>
+    /// 起動できないときはその窓を出して終わる。続けるときは、設定ファイルの知らせ → ウィジェットの復元 → ホットキー →
+    /// VOICEVOX の初期化 → 古い Npcap の確認 → 読み上げの声の確認、の順。1つの処理に直列なので、途中で
+    /// メッセージが回ってもこの順は崩れない。
+    /// </para>
+    /// </summary>
+    private async void MainWindow_ContentRendered(object? sender, EventArgs e)
     {
-        if (DataContext is MainViewModel viewModel)
+        // ContentRendered は中身を入れ替えると再び届く。起動の処理は1回だけ。
+        if (_hasStartedUp)
         {
-            // 起動時に読めなかった設定ファイルを知らせる。ウィジェットを開く前に出す(開くとウィジェットの設定が保存され、壊れたファイルが上書きされる)。
-            SettingsLoadFailureMessage.Show(this);
-
-            viewModel.RestoreRunningWidgetWindows();
-
-            // ホットキーの補助が使えなかったこと・登録できなかったホットキーはここで知らせる
-            // (メッセージの親にこの窓が要るので、開いた後に登録する)。
-            GlobalHotkeyService.Instance.HelperUnavailable += HotkeyService_HelperUnavailable;
-            HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
-
-            // 読み上げに使う VOICEVOX のスタイルを、最初の通知より前に初期化しておく(返事は待たない)。
-            VoicevoxStyleInitializer.Start();
-
-            // 読み上げの声が使えなければ知らせる(通知方式が読み上げでなければ何もしない)。
-            var settings = ConfigManager.Instance.AppConfig.Settings;
-            await NotificationCheckMessage.CheckSpeechVoiceAsync(this, settings.NotificationMethodIndex, settings.SpeechVoiceIndex);
+            return;
         }
+
+        _hasStartedUp = true;
+
+        if (_showStartupFailure is not null)
+        {
+            _showStartupFailure(this);
+            Application.Current.Shutdown(1);
+            return;
+        }
+
+        if (DataContext is not MainViewModel viewModel)
+        {
+            return;
+        }
+
+        // 起動時に読めなかった設定ファイルを知らせる。ウィジェットを開く前に出す(開くとウィジェットの設定が保存され、壊れたファイルが上書きされる)。
+        SettingsLoadFailureMessage.Show(this);
+
+        viewModel.RestoreRunningWidgetWindows();
+
+        // ホットキーの補助が使えなかったこと・登録できなかったホットキーはここで知らせる
+        // (メッセージの親にこの窓が要るので、開いた後に登録する)。
+        GlobalHotkeyService.Instance.HelperUnavailable += HotkeyService_HelperUnavailable;
+        HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
+
+        // 読み上げに使う VOICEVOX のスタイルを、最初の通知より前に初期化しておく(返事は待たない)。
+        VoicevoxStyleInitializer.Start();
+
+        // 古い Npcap は知らせて続ける(無いときは App が初期化の前に止めている)。読み上げの確認より先。
+        if (NpcapVersionProbe.IsOutdated(_npcapVersion))
+        {
+            OwnerModalWindow.RunWhenNotMovingOrSizing(() => NpcapOutdatedMessage.Show(this, _npcapVersion));
+        }
+
+        // 読み上げの声が使えなければ知らせる(通知方式が読み上げでなければ何もしない)。
+        var settings = ConfigManager.Instance.AppConfig.Settings;
+        await NotificationCheckMessage.CheckSpeechVoiceAsync(this, settings.NotificationMethodIndex, settings.SpeechVoiceIndex);
     }
 
     private void HotkeyService_HelperUnavailable(IReadOnlyList<HotkeyRegistrationFailure> failures)

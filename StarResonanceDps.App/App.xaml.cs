@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using Serilog;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -19,6 +20,9 @@ public partial class App : Application
 
     private static Mutex? _singleInstanceMutex;
 
+    /// <summary>受け手の無い例外の窓は最初の1件だけ出す(2件目からはログだけ)。</summary>
+    private static int _unhandledExceptionShown;
+
     protected override void OnStartup(StartupEventArgs e)
     {
         if (!TryAcquireSingleInstance())
@@ -28,12 +32,20 @@ public partial class App : Application
             return;
         }
 
+        RegisterUnhandledExceptionHandlers();
         ManagerTraceOutput.Configure();
 
+        // 設定・履歴・ログは実行フォルダの Data に書く。書けなければ動かせない(ログもそのフォルダの中なので書けない)。
+        // 窓の言語とテーマは、設定を読むだけ読んで当てる。
         if (!TryEnsureWritableDataDirectory())
         {
+            ApplyLanguageAndTheme(ConfigManager.Instance.GetSettingsSnapshot());
+            ShowStartupFailureAndExit(mainWindow => DataFolderNotWritableMessage.Show(mainWindow, CombatRuntimePaths.DataDirectory));
             return;
         }
+
+        // ログはここから。これより後の失敗(設定・言語・テーマ・Npcap・初期化・受け手の無い例外)は全部 Data\CombatRuntime.log に残る。
+        CombatRuntimeHost.ConfigureLogging();
 
         var configManager = ConfigManager.Instance;
 
@@ -42,25 +54,51 @@ public partial class App : Application
         NetworkAdapterSession.Instance.CaptureSettingsPersistRequested +=
             (_, _) => configManager.PersistCaptureSettingsFromRuntime();
 
-        var settings = configManager.GetSettingsSnapshot();
-        LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
-        ThemeManager.Instance.ApplyGlobalTheme(settings);
+        // 起動できないときの窓もこの言語で出す。
+        ApplyLanguageAndTheme(configManager.GetSettingsSnapshot());
         base.OnStartup(e);
-        CombatRuntimeHost.Instance.Initialize();
-        SkillCooldownTracker.Instance.Initialize();
+
+        // Npcap が無いとキャプチャ用のアダプタを引けない(初期化の中で SharpPcap が例外になる)ので、初期化の前に見る。
+        // 古いときは初期化の後、メイン窓が出たところで知らせて続ける(MainWindow)。
+        var npcapVersion = NpcapVersionProbe.GetVersion();
+        if (NpcapVersionProbe.IsMissing(npcapVersion))
+        {
+            ShowStartupFailureAndExit(NpcapInstallMessage.Show);
+            return;
+        }
+
+        try
+        {
+            CombatRuntimeHost.Instance.Initialize();
+            SkillCooldownTracker.Instance.Initialize();
+        }
+        catch (Exception exception)
+        {
+            Log.Fatal(exception, "Startup initialization failed");
+            ShowStartupFailureAndExit(mainWindow => StartupInitializationFailedMessage.Show(mainWindow, exception));
+            return;
+        }
+
+        if (NpcapVersionProbe.IsOutdated(npcapVersion))
+        {
+            Log.Warning("Npcap version {Version} is below {MinimumVersion}", npcapVersion, NpcapVersionProbe.MinimumVersion);
+        }
 
         // メイン窓はここで作る(App.xaml に StartupUri を置かない)。StartupUri だと、上の枝で終わるときも
         // OnStartup の後にメイン窓が作られて表示される。
-        var mainWindow = new MainWindow();
+        // MainWindow は Application のプロパティと同じ名前なので、型は名前空間から書く。
+        var mainWindow = StarResonanceDps.App.MainWindow.Create(npcapVersion);
         MainWindow = mainWindow;
         mainWindow.Show();
     }
 
-    /// <summary>
-    /// 設定・履歴・ログは実行フォルダの Data に書く。書けなければ動かせないので、知らせて終わる
-    /// (ログもそのフォルダの中なので書けない)。窓の言語とテーマは、設定を読むだけ読んで当てる。
-    /// </summary>
-    private bool TryEnsureWritableDataDirectory()
+    private static void ApplyLanguageAndTheme(SettingsConfig settings)
+    {
+        LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
+        ThemeManager.Instance.ApplyGlobalTheme(settings);
+    }
+
+    private static bool TryEnsureWritableDataDirectory()
     {
         try
         {
@@ -69,14 +107,65 @@ public partial class App : Application
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            // 窓を閉じたときに WPF が終了コード0で終わらせないよう、終わりは自分で決める。
-            ShutdownMode = ShutdownMode.OnExplicitShutdown;
-            var settings = ConfigManager.Instance.GetSettingsSnapshot();
-            LocalizationManager.Instance.ApplyLanguageIndex(settings.LanguageIndex);
-            ThemeManager.Instance.ApplyGlobalTheme(settings);
-            DataFolderNotWritableMessage.Show(null, CombatRuntimePaths.DataDirectory);
-            Shutdown(1);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// 起動できないことを知らせて終わる。メイン窓を見せるだけの形で出し(どのアプリの窓かが分かる。Loaded の処理は走らない)、
+    /// 描かれたところでメイン窓が <paramref name="showMessage"/> の窓を持ち主つきで出す。持ち主は止まるので、操作できるのは出した窓だけ。
+    /// 閉じたら終了コード 1 で終わる(MainWindow が行う)。
+    /// </summary>
+    private void ShowStartupFailureAndExit(Action<Window> showMessage)
+    {
+        // 窓を閉じたときに WPF が終了コード0で終わらせないよう、終わりは自分で決める。
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+        var mainWindow = StarResonanceDps.App.MainWindow.CreateForStartupFailure(showMessage);
+        MainWindow = mainWindow;
+        mainWindow.Show();
+    }
+
+    /// <summary>
+    /// 受け手の無い例外は、ログに全文を書き、「エラー」の窓を出してから終了コード 1 で終わる。
+    /// 画面のスレッドの例外は WPF に渡さず(渡すと窓を出さずに落ちる)、ほかのスレッドと Task の例外は画面のスレッドで窓を出す。
+    /// </summary>
+    private void RegisterUnhandledExceptionHandlers()
+    {
+        DispatcherUnhandledException += (_, args) =>
+        {
+            args.Handled = true;
+            HandleUnhandledException(args.Exception);
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+            HandleUnhandledException(args.ExceptionObject as Exception ?? new InvalidOperationException(args.ExceptionObject?.ToString()));
+        TaskScheduler.UnobservedTaskException += (_, args) =>
+        {
+            args.SetObserved();
+            HandleUnhandledException(args.Exception);
+        };
+    }
+
+    private void HandleUnhandledException(Exception exception)
+    {
+        Log.Fatal(exception, "Unhandled exception");
+        if (Interlocked.Exchange(ref _unhandledExceptionShown, 1) != 0)
+        {
+            return;
+        }
+
+        void ShowAndExit()
+        {
+            UnhandledExceptionMessage.Show(MainWindow is { IsVisible: true } mainWindow ? mainWindow : null, exception);
+            Shutdown(1);
+        }
+
+        if (Dispatcher.CheckAccess())
+        {
+            ShowAndExit();
+        }
+        else
+        {
+            Dispatcher.Invoke(ShowAndExit);
         }
     }
 

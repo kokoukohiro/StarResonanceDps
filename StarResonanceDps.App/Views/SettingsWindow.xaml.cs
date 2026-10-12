@@ -54,7 +54,6 @@ public partial class SettingsWindow : Window
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         ShowBenchmarkDuration();
         QueueUpdateExternalScrollBar();
-        QueueNpcapWarning();
 
         // スタイルの行を出すかは、エンジンの一覧で話者のスタイルの数を見ないと決まらない。
         // つながらなくても知らせない(知らせるのは読み上げで選んだときと起動時。失敗は VoicevoxClient がログに書く)。
@@ -124,51 +123,6 @@ public partial class SettingsWindow : Window
         await NotificationCheckMessage.ShowVoicevoxPolicyAsync(this, ViewModel.VoicevoxSpeakerUuid, ViewModel.VoicevoxSpeakerName);
     }
 
-
-    /// <summary>確認の窓は閉じるまで待つので、後から流れるこの処理では、窓の移動・大きさの変更の最中なら終わってから出す。</summary>
-    private void QueueNpcapWarning()
-    {
-        Dispatcher.BeginInvoke(
-            (Action)(() => OwnerModalWindow.RunWhenNotMovingOrSizing(ShowNpcapWarningIfNeeded)),
-            DispatcherPriority.ContextIdle);
-    }
-
-    private void ShowNpcapWarningIfNeeded()
-    {
-        var version = NpcapVersionProbe.GetVersion();
-        string? message = null;
-        string? detail = null;
-        var localization = LocalizationManager.Instance;
-
-        if (version == new Version())
-        {
-            message = localization.GetString("Confirm_NpcapMissing_Message");
-            detail = localization.GetString("Confirm_NpcapMissing_Detail");
-        }
-        else if (version < new Version(1, 86))
-        {
-            message = localization.GetString("Confirm_NpcapOutdated_Message");
-            detail = localization.Format("Confirm_NpcapOutdated_Detail", version);
-        }
-
-        if (string.IsNullOrWhiteSpace(message))
-        {
-            return;
-        }
-
-        var confirmed = ConfirmWindow.ShowText(
-            this,
-            localization.GetString("Confirm_NpcapUpdate_Title"),
-            message,
-            detail ?? string.Empty);
-
-        if (!confirmed)
-        {
-            return;
-        }
-
-        ExternalLinkOpener.Open("https://npcap.com/");
-    }
 
     private void SettingsWindow_SourceInitialized(object? sender, EventArgs e)
     {

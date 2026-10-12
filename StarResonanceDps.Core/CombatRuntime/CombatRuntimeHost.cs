@@ -8,6 +8,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 public sealed class CombatRuntimeHost
 {
     private static readonly Lazy<CombatRuntimeHost> LazyInstance = new(() => new CombatRuntimeHost());
+    private static bool _isLoggingConfigured;
     private readonly object _sync = new();
     private bool _isInitialized;
 
@@ -47,8 +48,14 @@ public sealed class CombatRuntimeHost
                     "CombatRuntimeSettings.Apply を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
             }
 
+            // ログの設定は起動の最初に App が行う(ConfigureLogging)。初期化の中で行うと、それより前の失敗が残らない。
+            if (!_isLoggingConfigured)
+            {
+                throw new InvalidOperationException(
+                    "CombatRuntimeHost.ConfigureLogging を呼んでから CombatRuntimeHost.Initialize を呼ぶこと。");
+            }
+
             Directory.CreateDirectory(CombatRuntimePaths.DataDirectory);
-            ConfigureLogging();
             DB.Init();
             AppState.LoadDataTables();
 
@@ -104,7 +111,11 @@ public sealed class CombatRuntimeHost
         }
     }
 
-    private static void ConfigureLogging()
+    /// <summary>
+    /// ログ(Data\CombatRuntime.log とログタブ)の設定。起動の最初、Data に書けると確かめた直後に App が呼ぶ。
+    /// それより前に出る例外はどこにも残らない。
+    /// </summary>
+    public static void ConfigureLogging()
     {
         var loggerConfiguration = new LoggerConfiguration()
             .MinimumLevel.Verbose()
@@ -113,5 +124,6 @@ public sealed class CombatRuntimeHost
             .WriteTo.File(CombatRuntimePaths.LogFilePath);
 
         Log.Logger = loggerConfiguration.CreateLogger();
+        _isLoggingConfigured = true;
     }
 }

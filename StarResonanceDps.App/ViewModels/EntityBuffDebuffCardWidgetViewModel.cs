@@ -53,6 +53,10 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>絵がモジュール効果の絵か(<see cref="BuffDebuffCardContent.IsModuleEffectIcon"/>)。絵の大きさを切り替える。</summary>
+    [ObservableProperty]
+    private bool _isModuleEffectIcon;
+
     [ObservableProperty]
     private bool _hasBuff;
 
@@ -261,7 +265,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         // それを保存すると ID 表示を切ったあともタイトルに残る。
         var rememberedName = snapshot is null
             ? string.Empty
-            : BuffDebuffCardContent.GetCardBuffName(snapshot.BaseId);
+            : BuffDebuffCardContent.GetCardBuffName(snapshot);
         if (!string.IsNullOrWhiteSpace(rememberedName))
         {
             var wasUnknown = string.IsNullOrWhiteSpace(_lastKnownBuffName);
@@ -307,6 +311,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         DurationText = content.DurationText;
         LayerText = content.LayerText;
         IconPath = content.IconPath;
+        IsModuleEffectIcon = content.IsModuleEffectIcon;
         HasBuff = hasBuff;
         HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);
 

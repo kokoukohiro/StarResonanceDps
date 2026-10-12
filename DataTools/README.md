@@ -20,6 +20,7 @@ python gen_class_specs.py     # 職業の特化の名前
 python gen_seasons.py         # シーズンの名前とシーズンランクの名前
 python gen_equips.py          # 装備の名前・数値・効果の文言
 python gen_match_targets.py   # マッチング先(パーティ・活動)の名前
+python gen_mod_effects.py     # モジュール効果の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -107,6 +108,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
 | `gen_equips.py` | `Data/Localization/EquipNames.json`<br>`Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
 | `gen_match_targets.py` | `Data/Localization/TeamTargetNames.json`<br>`Data/Localization/SeasonActNames.json` |
+| `gen_mod_effects.py` | `Data/Localization/ModEffectNames.json` |
 
 ## 全ツール共通の仕様
 
@@ -154,11 +156,13 @@ export BPSR_TABLES=<置き場所>     # bash
 |---|---|
 | `Data/Overrides/RecountRowOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
+| `Data/Overrides/ModuleBuffOverrides.json` | モジュール効果のバフのバフ/デバフリストでの出し方 |
 | `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
 | `Data/Overrides/SkillActivationOverrides.json` | 推移グラフの技のアイコンの名前とアイコン |
 | `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
+| `Data/Overrides/BuffNameManualOverrides.json` | 表にもともと名前の無いバフに付ける名前 |
 
 `MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` に入っているのは、
 **入力の表の更新で名前が落とされた行**の名前。以前の版の入力にはあり、今の版では空になっている。
@@ -208,6 +212,17 @@ export BPSR_TABLES=<置き場所>     # bash
 
 同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `Icon`)で、名前には触らない。
 
+### BuffNameManualOverrides.json
+
+`BuffNameOverrides.json` を重ねた後に重ねる。**表にもともと名前の無いバフ**に付ける名前を書く(`BuffNameOverrides.json` は表の更新で落ちた名前)。
+形も振る舞いも `MonsterNameOverrides.json` と同じ。こちらが最後に重なるので、同じ鍵ならこちらが勝つ。
+
+```json
+{ "<バフID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
+```
+
+バフ/デバフリストに名前の無いまま出るバフは、アプリの空欄の検知の記録に出る。名前はその記録を見て足す。
+
 ### SkillOverrides.json
 
 同梱の `SkillTable` を読んだ後に重ねる。**書くのは `SkillLevelGroup` だけ。**
@@ -252,6 +267,36 @@ export BPSR_TABLES=<置き場所>     # bash
 振り分けが実行時と食い違うため、**振り分けは実質このファイルが決めている。**
 
 **IDだけの項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
+
+### ModuleBuffOverrides.json
+
+モジュール効果のバフを、バフ/デバフリストにどう出すか。モジュール効果のバフは、ゲーム内のバフ表示の条件や持続ではなく、ここで決める。
+
+```json
+{
+  "<根のバフID>": { "Display": "Resident" },
+  "<子のバフID>": { "Effect": <モジュール効果の番号>, "Display": "Hidden" }
+}
+```
+
+| 項目 | |
+|---|---|
+| `Display` | 出し方。省くと `Shown` |
+| `Effect` | そのバフが属するモジュール効果の番号(`ModEffectTable.EffectID`)。**子のバフに書く**(根のバフは表で決まる) |
+
+| `Display` | |
+|---|---|
+| `Shown` | 出す。リストの設定「モジュール効果」が「非表示」のときだけ隠れる |
+| `Resident` | 付いている間ずっと変わらない(常駐)。設定が「すべて表示」のときだけ出る |
+| `Hidden` | どの設定でも出さない(ほかのバフと同じことを示すもの) |
+
+モジュール効果のバフとは、モジュールの根のバフ(`ModEffectTable` の `EffectConfig` の `[3, バフID, 1]`)と、ここに `Effect` を書いたバフ。
+子のバフは表からモジュール効果へつながらないので、`Effect` で結ぶ。結ぶと、バフの番号だけで名前と絵を引く場所(設定の非表示リストなど)でも、そのモジュール効果の名前と絵になる。
+ここに無い子のバフも、付与元をたどってモジュール効果に着けばモジュール効果のバフとして扱い(`Shown`)、その効果の名前と絵を出す。
+名前と絵は `gen_mod_effects.py` の節のもので、バフ自身の名前・絵(名前の表と手修正、`BuffOverrides.json` の `Icon`)があればそちらが勝つ。
+
+鍵がバフIDの形でない行、`Display` も `Effect` も無い行、`Display` がこの3つ以外の行は、エラーログを出して読まない。
+`Effect` が表に無い番号のとき、根のバフに表と違う番号が書かれたときは、エラーログを出してその `Effect` だけ読まない。ファイルが無ければエラーログを出し、手修正無しのまま続ける。
 
 ### RecountRowOverrides.json
 
@@ -360,7 +405,7 @@ DamageId の下2桁                    = 枝番(HitEventId)
 言語によって収録数に差があるので、鍵は和集合。
 
 > **表示条件はこのファイルで判定しない。**
-> 同梱 `Data/Raw/BuffTable.json` の `BuffPriority` で判定する（`MeterSnapshotProvider.IsHiddenFromBuffBar`）。
+> アプリが同梱 `Data/Raw/BuffTable.json` の `BuffPriority`・アイコン・持続などで判定する（`BuffDisplayRules`）。
 > 名前テーブルに載っていることは、バフバーに出ることを意味しない。
 
 **`201` も空にする。** 埋め草 `气刃突刺计数` は `BuffTable` の先頭行 `201` の名前だが、
@@ -746,3 +791,15 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 - `SeasonActNames.json`: **鍵は `SeasonActTable` の行**(活動のマッチング)。値は `Name`
 
 鍵はそれぞれの表の行(4言語ぶんの和)。2つの表は同じ番号が別のものを指すので、ファイルを分ける。
+
+## gen_mod_effects.py
+
+モジュール効果の名前を、**モジュール効果の番号(`ModEffectTable.EffectID`)を鍵に**書く。値は `EffectName`。
+`ModEffectTable` の行は効果の段階ごとに分かれるので、行ではなく `EffectID` を鍵にする。
+
+モジュール効果のバフ(モジュールの根のバフ = `EffectConfig` の `[3, バフID, 1]`、同梱 `Data/Raw/ModEffectTable.json` で引く。
+子のバフは `ModuleBuffOverrides.json` の `Effect` で結ぶ)は、名前の表に名前が無ければ、どこでもこの名前を出す。
+付与元をたどってモジュール効果に着いたバフも、この名前で出る。
+絵はバフ自身の絵が無ければ、同じ表の `EffectConfigIcon` の絵(アプリの `Data/Images/Modules` からファイル名で探す)。
+
+同じ `EffectID` で段階によって名前が食い違う言語は、段階の一番小さい、名前のある行の名前を採り、一覧を出す。空にも除外にもしない。

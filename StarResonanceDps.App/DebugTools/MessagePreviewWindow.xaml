@@ -50,10 +50,12 @@
                     <!-- 本体の窓 -->
                     <StackPanel Grid.Column="0">
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Startup_DataFolderNotWritable" Click="DataFolderNotWritable_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_NpcapInstall" Click="NpcapInstall_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Startup_InitializationFailed" Click="StartupInitializationFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Error_Unhandled" Click="UnhandledException_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="SettingsFile_LoadFailed" Click="SettingsLoadFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Hotkey_HelperUnavailable" Click="HotkeyHelperUnavailable_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Hotkey_RegisterFailed" Click="HotkeyRegisterFailed_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_NpcapMissing" Click="NpcapMissing_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_NpcapOutdated" Click="NpcapOutdated_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_DiscardUnsaved" Click="DiscardUnsaved_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_ResetSettings" Click="ResetSettings_Click" />

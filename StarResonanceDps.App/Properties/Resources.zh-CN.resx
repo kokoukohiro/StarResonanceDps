@@ -599,6 +599,18 @@
   <data name="GaugeLength_30" xml:space="preserve">
     <value>30秒</value>
   </data>
+  <data name="Settings_Display_ModuleEffect" xml:space="preserve">
+    <value>模组效果</value>
+  </data>
+  <data name="ModuleEffectDisplay_All" xml:space="preserve">
+    <value>全部显示</value>
+  </data>
+  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
+    <value>隐藏</value>
+  </data>
+  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
+    <value>仅隐藏常驻效果</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>实体名称</value>
   </data>
@@ -947,12 +959,15 @@
   <data name="Confirm_NpcapUpdate_Title" xml:space="preserve">
     <value>Npcap更新</value>
   </data>
+  <data name="Confirm_NpcapInstall_Title" xml:space="preserve">
+    <value>安装Npcap</value>
+  </data>
   <data name="Confirm_NpcapMissing_Message" xml:space="preserve">
     <value>是否安装Npcap？</value>
   </data>
   <data name="Confirm_NpcapMissing_Detail" xml:space="preserve">
-    <value>未安装Npcap，或无法检测到Npcap版本。
-要捕获网络数据包，请安装Npcap。</value>
+    <value>未安装Npcap或无法检测到Npcap版本，因此无法启动。
+※如果在游戏运行时安装了Npcap，可能需要重新启动游戏才能正常工作。</value>
   </data>
   <data name="Confirm_NpcapOutdated_Message" xml:space="preserve">
     <value>是否更新Npcap？</value>
@@ -1713,7 +1728,7 @@
     <value>剪贴板可能正被其他程序占用。
 请稍后再复制一次。</value>
   </data>
-  <data name="Startup_DataFolderNotWritable_Title" xml:space="preserve">
+  <data name="Startup_Error_Title" xml:space="preserve">
     <value>启动错误</value>
   </data>
   <data name="Startup_DataFolderNotWritable_Message" xml:space="preserve">
@@ -1723,6 +1738,15 @@
     <value>无法写入以下文件夹。
 {0}
 请检查文件夹的写入权限和安全软件的设置，或将整个应用文件夹移到可写入的位置后重新启动。</value>
+  </data>
+  <data name="Startup_InitializationFailed_Message" xml:space="preserve">
+    <value>初始化失败。</value>
+  </data>
+  <data name="Error_Unhandled_Title" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="Error_Unhandled_Message" xml:space="preserve">
+    <value>发生意外错误，程序将退出。</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>设置读取错误</value>

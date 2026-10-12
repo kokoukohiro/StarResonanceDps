@@ -137,6 +137,8 @@ public sealed record PlayerBuffSnapshot(
     int BaseId,
     string Key,
     string Name,
+    /// <summary>内部ID注記を付けない名前。記憶・保存する値(カードの見出しと通知)に使う。</summary>
+    string NameWithoutInternalId,
     string IconName,
     int Layer,
     double? RemainingSeconds,
@@ -144,7 +146,12 @@ public sealed record PlayerBuffSnapshot(
     /// 残り時間を名乗れない状態。<b><see cref="RemainingSeconds"/> の null(持続時間なし)とは別物。</b>
     /// 表示側は空欄ではなく「?」を出す。
     /// </summary>
-    bool IsRemainingUnknown = false);
+    bool IsRemainingUnknown = false,
+    /// <summary>
+    /// モジュール効果のバフの出し方(<see cref="BuffDisplayRules.GetModuleBuffDisplay"/>)。リストの設定「モジュール効果」で絞るのに使う。
+    /// <see cref="ModuleBuffDisplay.Hidden"/> の行は作らない。
+    /// </summary>
+    ModuleBuffDisplay ModuleDisplay = ModuleBuffDisplay.None);
 
 /// <param name="Grade">技の枠の TIPS に出す G○ の数字(<see cref="MeterSnapshotProvider.ResolveSkillGrade"/>)。出さないなら null。</param>
 public sealed record PlayerCooldownSkillSnapshot(
@@ -701,6 +708,12 @@ public static class MeterSnapshotProvider
         return CreateBuffSnapshots(entity, kind);
     }
 
+    /// <summary>
+    /// バフ/デバフリストの行。出す条件は <see cref="BuffDisplayRules.IsListed"/>(モジュール効果のバフはモジュール効果の出し方、
+    /// それ以外はゲーム内のバフバーと同じ条件のものと、足して出すもの)。
+    /// 表に名前が無ければ付与元をたどった由来の名前を出し(<see cref="CombatDataCatalog.GetBuffDisplayNameWithoutInternalId"/>)、
+    /// 絵はバフ自身の絵、無ければモジュール効果の絵(<see cref="ResolveBuffListIconName"/>)。どちらも無ければ空欄のまま渡す。
+    /// </summary>
     private static IReadOnlyList<PlayerBuffSnapshot> CreateBuffSnapshots(
         Entity entity,
         PlayerBuffListKind kind)
@@ -714,20 +727,18 @@ public static class MeterSnapshotProvider
         for (var index = 0; index < buffEvents.Length; index++)
         {
             var buffEvent = buffEvents[index];
-            if (buffEvent.Duration < 0
-                || !IsIncludedBuff(kind, buffEvent)
-                || IsHiddenFromBuffBar(buffEvent))
+            if (!IsIncludedBuff(kind, buffEvent) || !BuffDisplayRules.IsListed(buffEvent, entity))
             {
                 continue;
             }
 
-            var iconName = ResolveBuffOwnIconName(buffEvent);
-            if (string.IsNullOrWhiteSpace(iconName))
-            {
-                continue;
-            }
-
-            var name = ResolveBuffName(buffEvent);
+            var iconName = ResolveBuffListIconName(buffEvent);
+            var nameWithoutInternalId = buffEvent.BaseId > 0
+                ? CombatDataCatalog.GetBuffDisplayNameWithoutInternalId(buffEvent.BaseId, buffEvent.Origin?.Landing ?? SourceLanding.None)
+                : string.Empty;
+            var name = buffEvent.BaseId > 0
+                ? CombatDataCatalog.AppendBuffInternalId(nameWithoutInternalId, buffEvent.BaseId)
+                : string.Empty;
             if (string.IsNullOrWhiteSpace(name) && buffEvent.BaseId <= 0)
             {
                 continue;
@@ -749,10 +760,12 @@ public static class MeterSnapshotProvider
                 buffEvent.BaseId,
                 key,
                 name,
+                nameWithoutInternalId,
                 iconName,
                 buffEvent.Layer,
                 remainingSeconds,
-                remainingUnknown);
+                remainingUnknown,
+                BuffDisplayRules.GetModuleBuffDisplay(buffEvent));
             var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
 
             if (!entriesByKey.TryGetValue(key, out var existing))
@@ -1237,7 +1250,7 @@ public static class MeterSnapshotProvider
         {
             if (buffEvent.Duration < 0
                 || buffEvent.SourceConfigId <= 0
-                || IsHiddenFromBuffBar(buffEvent))
+                || BuffDisplayRules.IsHiddenFromGameBuffBar(buffEvent))
             {
                 continue;
             }
@@ -1311,6 +1324,7 @@ public static class MeterSnapshotProvider
                 buffEvent.BaseId,
                 key,
                 name,
+                CombatDataCatalog.GetBuffNameWithoutInternalId(buffEvent.BaseId),
                 iconName,
                 buffEvent.Layer,
                 remainingSeconds,
@@ -2072,22 +2086,6 @@ public static class MeterSnapshotProvider
     }
 
 
-    /// <summary>
-    /// ゲーム内のバフバーが出さないバフか。
-    ///
-    /// <para>
-    /// ゲーム内のバフ表示は <c>BuffPriority</c> が <c>NotShow</c> のバフを出さない。
-    /// 自分のバーもボスHPバーのバーも同じ条件で、対象エンティティが違うだけ。
-    /// </para>
-    ///
-    /// <para>
-    /// <b>アイコンの有無で判定しない。</b> 計数・マーカー・移動アクションの有効化など、
-    /// アイコンを持っていてもゲームが出さないバフが多数ある。
-    /// </para>
-    /// </summary>
-    private static bool IsHiddenFromBuffBar(BuffEvent buffEvent)
-        => buffEvent.BuffPriority == DataTypes.Enum.EBuffPriority.NotShow;
-
     private static bool IsIncludedBuff(PlayerBuffListKind kind, BuffEvent buffEvent)
     {
         return kind switch
@@ -2110,6 +2108,14 @@ public static class MeterSnapshotProvider
     {
         return buffEvent.BaseId > 0
             ? CombatDataCatalog.GetBuffOwnIconName(buffEvent.BaseId)
+            : string.Empty;
+    }
+
+    /// <summary>バフ/デバフリストの行の絵(<see cref="CombatDataCatalog.GetBuffDisplayIconName"/>)。</summary>
+    private static string ResolveBuffListIconName(BuffEvent buffEvent)
+    {
+        return buffEvent.BaseId > 0
+            ? CombatDataCatalog.GetBuffDisplayIconName(buffEvent.BaseId, buffEvent.Origin?.Landing ?? SourceLanding.None)
             : string.Empty;
     }
 

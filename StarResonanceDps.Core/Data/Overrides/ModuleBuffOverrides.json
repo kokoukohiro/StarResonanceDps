@@ -1,0 +1,22 @@
+{
+  "2300020": {"Display": "Resident"},
+  "2300070": {"Display": "Resident"},
+  "2300080": {"Display": "Resident"},
+  "2300120": {"Display": "Resident"},
+  "2300220": {"Display": "Resident"},
+  "2300310": {"Display": "Resident"},
+  "2300410": {"Display": "Resident"},
+  "2300420": {"Display": "Resident"},
+  "2300620": {"Display": "Resident"},
+  "2300820": {"Display": "Resident"},
+  "2302020": {"Display": "Hidden"},
+  "2302120": {"Display": "Hidden"},
+  "2302320": {"Display": "Hidden"},
+  "2302420": {"Display": "Hidden"},
+  "2300621": {"Effect": 2104},
+  "2302021": {"Effect": 2105},
+  "2302022": {"Effect": 2105, "Display": "Hidden"},
+  "2302121": {"Effect": 2406},
+  "2302321": {"Effect": 2205},
+  "2302421": {"Effect": 2404}
+}

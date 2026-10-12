@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.IO;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Services;
 
@@ -9,10 +10,13 @@ public static class CombatIconResolver
     private static readonly ConcurrentDictionary<string, string> ResolvedPaths =
         new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>バフのアイコン。バフのフォルダだけを探す。</summary>
+    /// <summary>
+    /// バフのアイコン。モジュール効果の絵(<see cref="CombatDataCatalog.IsModEffectIcon"/>)ならモジュールのフォルダだけ、
+    /// それ以外はバフのフォルダだけを探す。
+    /// </summary>
     public static string? ResolveBuffIcon(string? iconName)
     {
-        return Resolve(iconName, "Buffs");
+        return Resolve(iconName, CombatDataCatalog.IsModEffectIcon(iconName) ? "Modules" : "Buffs");
     }
 
     /// <summary>技のアイコン。スキルのフォルダだけを探す(イマジンの技もここ)。</summary>

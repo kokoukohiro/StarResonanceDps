@@ -72,7 +72,7 @@ public sealed class BuffCardNotificationTracker
         }
 
         var remainingSeconds = snapshot.IsRemainingUnknown ? null : snapshot.RemainingSeconds;
-        var buffName = BuffDebuffCardContent.GetCardBuffName(snapshot.BaseId);
+        var buffName = BuffDebuffCardContent.GetCardBuffName(snapshot);
 
         if (CombatDataCatalog.GetBuffGroup(snapshot.BaseId) is not (BuffGroup.Cuisine or BuffGroup.Potion))
         {

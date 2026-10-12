@@ -157,6 +157,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             BuffInstanceIndex.Instance.Clear();
             SummonSourceIndex.Instance.Clear();
             SourceLandingResolver.Instance.Clear();
+            BuffOriginResolver.Instance.Clear();
             NearbyMonsterIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
@@ -2140,6 +2141,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyEntityProjection.AddOrUpdateAppearedEntity(entity.Uuid);
             }
 
+            // 表に名前の無いバフの由来は、通知の全部の付与を索引に入れてからたどる。
+            BuffOriginResolver.Instance.ResolvePending();
+
             BattleStateMachine.CheckDeferredCalls();
         }
 
@@ -2271,6 +2275,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 ProcessAoiSyncDelta(aoiSyncDelta, extraData);
             }
+
+            // 表に名前の無いバフの由来は、通知の全部の差分を処理してからたどる(親のバフが別の実体の差分で後ろに届くことがある)。
+            BuffOriginResolver.Instance.ResolvePending();
 
             BattleStateMachine.CheckDeferredCalls();
         }
@@ -2842,6 +2849,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
             ProcessAoiSyncDelta(aoiSyncDelta, extraData);
+
+            // 表に名前の無いバフの由来は、差分を処理し終えてからたどる。
+            BuffOriginResolver.Instance.ResolvePending();
 
             BattleStateMachine.CheckDeferredCalls();
         }

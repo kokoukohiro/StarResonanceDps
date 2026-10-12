@@ -87,24 +87,28 @@ public partial class MessagePreviewWindow : Window
         HotkeyRegistrationFailureMessage.Show(this, failures);
     }
 
-    // 本物: 全体設定(Npcap が入っていないとき)
-    private void NpcapMissing_Click(object sender, RoutedEventArgs e)
+    // 本物: 起動時(Npcap が入っていないとき)。「はい」は本物と同じく Npcap のページを開く(終了はしない)。
+    private void NpcapInstall_Click(object sender, RoutedEventArgs e)
     {
-        _ = ConfirmWindow.ShowText(
-            this,
-            Localization.GetString("Confirm_NpcapUpdate_Title"),
-            Localization.GetString("Confirm_NpcapMissing_Message"),
-            Localization.GetString("Confirm_NpcapMissing_Detail"));
+        NpcapInstallMessage.Show(this);
     }
 
-    // 本物: 全体設定(Npcap が古いとき)。バージョンはこの PC に入っている Npcap のもの。
+    // 本物: 起動時(初期化で例外が出たとき)。例外は試しのもの。
+    private void StartupInitializationFailed_Click(object sender, RoutedEventArgs e)
+    {
+        StartupInitializationFailedMessage.Show(this, new InvalidOperationException("Sample exception"));
+    }
+
+    // 本物: 受け手の無い例外で終わるとき。例外は試しのもの(終了はしない)。
+    private void UnhandledException_Click(object sender, RoutedEventArgs e)
+    {
+        UnhandledExceptionMessage.Show(this, new InvalidOperationException("Sample exception"));
+    }
+
+    // 本物: 起動時のメイン窓(Npcap が古いとき)。バージョンはこの PC に入っている Npcap のもの。
     private void NpcapOutdated_Click(object sender, RoutedEventArgs e)
     {
-        _ = ConfirmWindow.ShowText(
-            this,
-            Localization.GetString("Confirm_NpcapUpdate_Title"),
-            Localization.GetString("Confirm_NpcapOutdated_Message"),
-            Localization.Format("Confirm_NpcapOutdated_Detail", NpcapVersionProbe.GetVersion()));
+        NpcapOutdatedMessage.Show(this, NpcapVersionProbe.GetVersion());
     }
 
     // 本物: 全体設定・ウィジェット設定(保存せずに閉じるとき)

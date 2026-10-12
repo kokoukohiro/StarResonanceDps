@@ -28,14 +28,22 @@ public sealed partial class HiddenBuffItemViewModel : ObservableObject
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>絵がモジュール効果の絵か。一覧の行と同じく、絵の大きさを切り替える。</summary>
+    [ObservableProperty]
+    private bool _isModuleEffectIcon;
+
     /// <summary>最終行。区切り線を消して二重にならないようにする。行が増減すると変わる。</summary>
     [ObservableProperty]
     private bool _isLast;
 
     public void RefreshMetadata()
     {
-        DisplayName = CombatDataCatalog.GetBuffName(BaseId);
-        IconPath = CombatIconResolver.ResolveBuffIcon(CombatDataCatalog.GetBuffOwnIconName(BaseId));
+        // 一覧と同じ名前と絵の引き方(付与元の由来は分からないので無し)。モジュール効果のバフは番号でその効果の名前と絵になる。
+        // 番号で名前の引けないバフは内部名が出る。
+        DisplayName = CombatDataCatalog.GetBuffDisplayName(BaseId, SourceLanding.None);
+        var iconName = CombatDataCatalog.GetBuffDisplayIconName(BaseId, SourceLanding.None);
+        IconPath = CombatIconResolver.ResolveBuffIcon(iconName);
+        IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(iconName);
     }
 
     [RelayCommand]

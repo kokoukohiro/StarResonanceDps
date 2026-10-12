@@ -29,6 +29,11 @@ namespace StarResonanceDps.Core.Services;
 /// そのプレイヤーが出した同じ番号の弾(弾の実体の <c>AttrId</c>)の着地先を使う。
 /// 同じプレイヤー・同じ番号で着地先が割れたら決めずに止まる。
 /// </para>
+///
+/// <para>
+/// バフ/デバフリストで表に名前の無いバフの由来も、同じたどり方で決める(<see cref="ResolveBuffOrigin"/>)。
+/// こちらだけはモジュールの根のバフとイマジンのパッシブの根のバフでも止まる。
+/// </para>
 /// </summary>
 public sealed class SourceLandingResolver
 {
@@ -176,7 +181,64 @@ public sealed class SourceLandingResolver
         return landing;
     }
 
-    private SourceLanding ResolveBuff(Walk walk, int buffId, long rawUuid, long attackerUuid, DateTime arrivalTime)
+    /// <summary>
+    /// バフ1つの由来を決める。バフ/デバフリストで、表に名前の無いバフに出す名前の出どころ(<c>CombatDataCatalog.GetBuffDisplayName</c>)。
+    ///
+    /// <para>
+    /// そのバフ自身がモジュールの根のバフならモジュール効果、イマジンのパッシブの根のバフならそのイマジンの技に着く。
+    /// そうでなければ、そのバフの付与元と付与者からたどる。たどり方はダメージの出どころと同じ
+    /// (親のバフ → その付与元、技 → 術者がプレイヤーならその技・召喚体なら実体の控え、弾 → プレイヤーの弾の控え)。
+    /// ダメージと違い、たどる途中のバフがモジュールの根のバフならモジュール効果、
+    /// イマジンのパッシブの根のバフならそのイマジンの技で止まる(メーターの行名はこの2つに着かない)。
+    /// </para>
+    /// </summary>
+    public SourceLanding ResolveBuffOrigin(int buffId, int fightSourceType, int sourceConfigId, long fireUuid, DateTime arrivalTime, out string trace)
+    {
+        var walk = new Walk();
+        SourceLanding landing;
+        if (TryLandBuffOriginRoot(walk, buffId, out var rootLanding))
+        {
+            landing = rootLanding;
+        }
+        else
+        {
+            landing = fightSourceType == (int)EFightSource.Buff && sourceConfigId > 0
+                ? ResolveBuff(walk, sourceConfigId, fireUuid, fireUuid, arrivalTime, stopAtBuffOriginRoots: true)
+                : LandNonBuffSource(walk, fightSourceType, sourceConfigId, fireUuid, arrivalTime);
+        }
+
+        trace = walk.ToString();
+        return landing;
+    }
+
+    /// <summary>
+    /// バフの由来の止まり先(モジュールの根のバフ → モジュール効果、イマジンのパッシブの根のバフ → そのイマジンの技)なら着く。
+    /// 止まり先でなければ <paramref name="walk"/> に何も足さずに false。
+    /// </summary>
+    private static bool TryLandBuffOriginRoot(Walk walk, int buffId, out SourceLanding landing)
+    {
+        if (CombatDataCatalog.TryGetModEffectIdByRootBuff(buffId, out var modEffectId))
+        {
+            walk.Add($"モジュールの根 {buffId}");
+            landing = walk.Land(new SourceLanding(SourceLandingKind.Module, modEffectId));
+            return true;
+        }
+
+        if (CombatDataCatalog.TryGetImagineSkillIdByPassiveRoot(buffId, out var imagineSkillId))
+        {
+            walk.Add($"イマジンのパッシブの根 {buffId} → 技 {imagineSkillId}");
+            landing = LandSkill(walk, imagineSkillId);
+            return true;
+        }
+
+        landing = SourceLanding.None;
+        return false;
+    }
+
+    /// <param name="stopAtBuffOriginRoots">
+    /// モジュールの根のバフとイマジンのパッシブの根のバフで止めるか。バフの由来(<see cref="ResolveBuffOrigin"/>)だけが立てる。
+    /// </param>
+    private SourceLanding ResolveBuff(Walk walk, int buffId, long rawUuid, long attackerUuid, DateTime arrivalTime, bool stopAtBuffOriginRoots = false)
     {
         var visited = new HashSet<int>();
         for (var step = 0; step < MaxBuffSteps; step++)
@@ -185,6 +247,11 @@ public sealed class SourceLandingResolver
             if (CombatDataCatalog.IsRogueEntryBuff(buffId))
             {
                 return walk.Land(new SourceLanding(SourceLandingKind.RogueEntry, buffId));
+            }
+
+            if (stopAtBuffOriginRoots && TryLandBuffOriginRoot(walk, buffId, out var rootLanding))
+            {
+                return rootLanding;
             }
 
             if (!visited.Add(buffId))
@@ -203,30 +270,36 @@ public sealed class SourceLandingResolver
                 continue;
             }
 
-            if (sourceType == (int)EFightSource.Skill)
-            {
-                walk.Add($"技 {sourceId}(術者 {fireUuid})");
-                return IsPlayer(fireUuid)
-                    ? LandSkill(walk, sourceId)
-                    : fireUuid != 0
-                        ? FromEntity(walk, fireUuid, arrivalTime)
-                        : walk.Stop("術者なし");
-            }
-
-            if (sourceType == (int)EFightSource.Bullet)
-            {
-                walk.Add($"弾 {sourceId}(術者 {fireUuid})");
-                return IsPlayer(fireUuid)
-                    ? FromBulletOfPlayer(walk, fireUuid, sourceId, arrivalTime)
-                    : fireUuid != 0
-                        ? FromEntity(walk, fireUuid, arrivalTime)
-                        : walk.Stop("術者なし");
-            }
-
-            return walk.Stop($"付与元 {SourceTypeName(sourceType)} {sourceId}");
+            return LandNonBuffSource(walk, sourceType, sourceId, fireUuid, arrivalTime);
         }
 
         return walk.Stop("段数の上限");
+    }
+
+    /// <summary>付与元が親のバフ以外の段。技 → 術者がプレイヤーならその技・召喚体なら実体の控え、弾 → プレイヤーの弾の控え、それ以外は止まる。</summary>
+    private SourceLanding LandNonBuffSource(Walk walk, int sourceType, int sourceId, long fireUuid, DateTime arrivalTime)
+    {
+        if (sourceType == (int)EFightSource.Skill && sourceId > 0)
+        {
+            walk.Add($"技 {sourceId}(術者 {fireUuid})");
+            return IsPlayer(fireUuid)
+                ? LandSkill(walk, sourceId)
+                : fireUuid != 0
+                    ? FromEntity(walk, fireUuid, arrivalTime)
+                    : walk.Stop("術者なし");
+        }
+
+        if (sourceType == (int)EFightSource.Bullet && sourceId > 0)
+        {
+            walk.Add($"弾 {sourceId}(術者 {fireUuid})");
+            return IsPlayer(fireUuid)
+                ? FromBulletOfPlayer(walk, fireUuid, sourceId, arrivalTime)
+                : fireUuid != 0
+                    ? FromEntity(walk, fireUuid, arrivalTime)
+                    : walk.Stop("術者なし");
+        }
+
+        return walk.Stop($"付与元 {SourceTypeName(sourceType)} {sourceId}");
     }
 
     private SourceLanding FromBulletOfPlayer(Walk walk, long playerUuid, int bulletId, DateTime arrivalTime)

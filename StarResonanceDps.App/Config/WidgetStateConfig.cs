@@ -319,12 +319,19 @@ public sealed class BuffListWidgetSettingsConfig
     /// </summary>
     public List<int> HiddenBuffIds { get; set; } = [];
 
+    /// <summary>
+    /// モジュール効果のバフの出し方。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。
+    /// 常駐かどうかは手修正 <c>ModuleBuffOverrides.json</c> が決める(<c>ModuleBuffDisplay</c>)。
+    /// </summary>
+    public int ModuleEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
+
     public BuffListWidgetSettingsConfig Clone()
     {
         return new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
             GaugeColorOpacity = GaugeColorOpacity,
+            ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
             HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
             GaugeColorIndexes = GaugeColorIndexes is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
@@ -911,6 +918,15 @@ public static class WidgetConfigDefaults
 
     /// <summary>デバフ一覧の既定。長いデバフを見るので30秒。</summary>
     public const int DefaultDebuffListGaugeLengthIndex = 2;
+
+    /// <summary>バフ・デバフ一覧の設定「モジュール効果」の添字。並びは選択リストと同じ。</summary>
+    public const int ShowAllModuleEffectDisplayModeIndex = 0;
+
+    public const int HideModuleEffectDisplayModeIndex = 1;
+
+    public const int HideResidentModuleEffectDisplayModeIndex = 2;
+
+    public const int DefaultModuleEffectDisplayModeIndex = HideResidentModuleEffectDisplayModeIndex;
 
     /// <summary>
     /// ダメージの属性の鍵。<c>EDamageProperty</c> の並び(属性ID 0〜8)。
@@ -1659,7 +1675,8 @@ public static class WidgetConfigDefaults
             GaugeColorIndexes = CreateDefaultGaugeColorIndexes(kind),
             GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
             GaugeColorOpacity = MaxClassColorOpacity,
-            HiddenBuffIds = []
+            HiddenBuffIds = [],
+            ModuleEffectDisplayModeIndex = DefaultModuleEffectDisplayModeIndex
         };
     }
 
@@ -1690,6 +1707,11 @@ public static class WidgetConfigDefaults
             buffList.GaugeColorOpacity,
             MinClassColorOpacity,
             MaxClassColorOpacity);
+
+        buffList.ModuleEffectDisplayModeIndex = Math.Clamp(
+            buffList.ModuleEffectDisplayModeIndex,
+            ShowAllModuleEffectDisplayModeIndex,
+            HideResidentModuleEffectDisplayModeIndex);
 
         buffList.GaugeColorIndexes ??= CreateDefaultGaugeColorIndexes(kind);
         buffList.GaugeColorPalettes ??= CreateDefaultGaugeColorPalettes();

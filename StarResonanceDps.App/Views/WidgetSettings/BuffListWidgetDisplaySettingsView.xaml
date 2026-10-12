@@ -13,28 +13,53 @@
 
         <ContentControl Style="{StaticResource Panel.SettingSection}"
                         Margin="0,0,0,12">
-            <Border Style="{StaticResource Panel.SettingFieldLast}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
 
-                    <TextBlock VerticalAlignment="Center"
-                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
-                               Foreground="{DynamicResource Brush.TextPrimary}"
-                               FontSize="14"
-                               FontWeight="SemiBold" />
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
 
-                    <ComboBox Grid.Column="1"
-                              SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Style="{StaticResource Input.SettingsComboBox}">
-                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
-                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
-                        <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
-                    </ComboBox>
-                </Grid>
-            </Border>
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_ModuleEffect]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding ModuleEffectDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[ModuleEffectDisplay_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[ModuleEffectDisplay_Hidden]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[ModuleEffectDisplay_HideResident]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+            </StackPanel>
         </ContentControl>
     </StackPanel>
 </UserControl>
