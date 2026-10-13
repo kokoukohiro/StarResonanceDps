@@ -1,4 +1,31 @@
 {
+  "1202": {
+    "Name": {
+      "zh-CN": "雨打潮生",
+      "en-US": "Raincall Surge",
+      "ja-JP": "レインフォール",
+      "ko-KR": "레인폴"
+    },
+    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+  },
+  "1203": {
+    "Name": {
+      "zh-CN": "雨打潮生",
+      "en-US": "Raincall Surge",
+      "ja-JP": "レインフォール",
+      "ko-KR": "레인폴"
+    },
+    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+  },
+  "1204": {
+    "Name": {
+      "zh-CN": "雨打潮生",
+      "en-US": "Raincall Surge",
+      "ja-JP": "レインフォール",
+      "ko-KR": "레인폴"
+    },
+    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+  },
   "1224": {
     "Name": {
       "zh-CN": "极限闪避",
@@ -16,6 +43,33 @@
       "ko-KR": "붉은빛 반격"
     },
     "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+  },
+  "1402": {
+    "Name": {
+      "zh-CN": "风华翔舞",
+      "en-US": "Windborne Grace",
+      "ja-JP": "翔舞",
+      "ko-KR": "바람의 춤"
+    },
+    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+  },
+  "1403": {
+    "Name": {
+      "zh-CN": "风华翔舞",
+      "en-US": "Windborne Grace",
+      "ja-JP": "翔舞",
+      "ko-KR": "바람의 춤"
+    },
+    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+  },
+  "1404": {
+    "Name": {
+      "zh-CN": "风华翔舞",
+      "en-US": "Windborne Grace",
+      "ja-JP": "翔舞",
+      "ko-KR": "바람의 춤"
+    },
+    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
   },
   "1413": {
     "Name": {
@@ -35,6 +89,33 @@
     },
     "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
   },
+  "1502": {
+    "Name": {
+      "zh-CN": "掌控藤蔓",
+      "en-US": "Vines' Embrace",
+      "ja-JP": "ヴァインラッシュ",
+      "ko-KR": "덩굴 조종"
+    },
+    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+  },
+  "1503": {
+    "Name": {
+      "zh-CN": "掌控藤蔓",
+      "en-US": "Vines' Embrace",
+      "ja-JP": "ヴァインラッシュ",
+      "ko-KR": "덩굴 조종"
+    },
+    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+  },
+  "1504": {
+    "Name": {
+      "zh-CN": "掌控藤蔓",
+      "en-US": "Vines' Embrace",
+      "ja-JP": "ヴァインラッシュ",
+      "ko-KR": "덩굴 조종"
+    },
+    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+  },
   "1511": {
     "Name": {
       "zh-CN": "极限闪避",
@@ -52,6 +133,33 @@
       "ko-KR": "붉은빛 반격"
     },
     "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+  },
+  "1602": {
+    "Name": {
+      "zh-CN": "炽热挥击",
+      "en-US": "Blazing Swing",
+      "ja-JP": "ブレイズスイング",
+      "ko-KR": "화염의 휘두르기"
+    },
+    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+  },
+  "1603": {
+    "Name": {
+      "zh-CN": "炽热挥击",
+      "en-US": "Blazing Swing",
+      "ja-JP": "ブレイズスイング",
+      "ko-KR": "화염의 휘두르기"
+    },
+    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+  },
+  "1604": {
+    "Name": {
+      "zh-CN": "炽热挥击",
+      "en-US": "Blazing Swing",
+      "ja-JP": "ブレイズスイング",
+      "ko-KR": "화염의 휘두르기"
+    },
+    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
   },
   "1624": {
     "Name": {
@@ -71,6 +179,33 @@
     },
     "Icon": "ui/atlas/proficiency/proficiency_skill_03"
   },
+  "1702": {
+    "Name": {
+      "zh-CN": "我流刀法·诛恶",
+      "en-US": "Judgment Cut",
+      "ja-JP": "刃影",
+      "ko-KR": "아류도법・멸악"
+    },
+    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+  },
+  "1703": {
+    "Name": {
+      "zh-CN": "我流刀法·诛恶",
+      "en-US": "Judgment Cut",
+      "ja-JP": "刃影",
+      "ko-KR": "아류도법・멸악"
+    },
+    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+  },
+  "1704": {
+    "Name": {
+      "zh-CN": "我流刀法·诛恶",
+      "en-US": "Judgment Cut",
+      "ja-JP": "刃影",
+      "ko-KR": "아류도법・멸악"
+    },
+    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+  },
   "1792": {
     "Name": {
       "zh-CN": "极限闪避",
@@ -88,6 +223,83 @@
       "ko-KR": "붉은빛 반격"
     },
     "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+  },
+  "1801": {
+    "Name": {
+      "zh-CN": "雷鸣电闪-奥义！幻象共鸣",
+      "en-US": "Thunderclap Arcane - Arcane! Illusion Resonance",
+      "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
+      "ko-KR": "천둥번개 - 오의! 환상 공명"
+    }
+  },
+  "1802": {
+    "Name": {
+      "zh-CN": "雷鸣电闪-奥义！幻象共鸣",
+      "en-US": "Thunderclap Arcane - Arcane! Illusion Resonance",
+      "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
+      "ko-KR": "천둥번개 - 오의! 환상 공명"
+    },
+    "Icon": "ui/textures/skill_weapon_cannongun/weapon_cannongun_skill_atk"
+  },
+  "1803": {
+    "Name": {
+      "zh-CN": "雷鸣电闪-奥义！幻象共鸣",
+      "en-US": "Thunderclap Arcane - Arcane! Illusion Resonance",
+      "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
+      "ko-KR": "천둥번개 - 오의! 환상 공명"
+    },
+    "Icon": "ui/textures/skill_weapon_cannongun/weapon_cannongun_skill_atk"
+  },
+  "1806": {
+    "Name": {
+      "zh-CN": "雷域-奥义！幻象共鸣",
+      "en-US": "Thunder Zone - Arcane! Illusion Resonance",
+      "ja-JP": "雷領域・奥義！幻影共鳴",
+      "ko-KR": "번개 영역 - 오의! 환상 공명"
+    }
+  },
+  "1807": {
+    "Name": {
+      "zh-CN": "雷弹穿行-奥义！幻象共鸣",
+      "en-US": "Thunder Traverse - Arcane! Illusion Resonance",
+      "ja-JP": "トラッキングサンダー・奥義！幻影共鳴",
+      "ko-KR": "뇌탄 관통 - 오의! 환상 공명"
+    }
+  },
+  "1808": {
+    "Name": {
+      "zh-CN": "雷爆溟灭-奥义！幻象共鸣",
+      "en-US": "Thunderburst Oblivion - Arcane! Illusion Resonance",
+      "ja-JP": "雷裂滅・奥義！幻影共鳴",
+      "ko-KR": "뇌폭명멸 - 오의! 환상 공명"
+    }
+  },
+  "1902": {
+    "Name": {
+      "zh-CN": "止战之锋",
+      "en-US": "Halberd's Edge",
+      "ja-JP": "止戦刃",
+      "ko-KR": "종전의 칼끝"
+    },
+    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+  },
+  "1903": {
+    "Name": {
+      "zh-CN": "止战之锋",
+      "en-US": "Halberd's Edge",
+      "ja-JP": "止戦刃",
+      "ko-KR": "종전의 칼끝"
+    },
+    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+  },
+  "1904": {
+    "Name": {
+      "zh-CN": "止战之锋",
+      "en-US": "Halberd's Edge",
+      "ja-JP": "止戦刃",
+      "ko-KR": "종전의 칼끝"
+    },
+    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
   },
   "1912": {
     "Name": {
@@ -116,6 +328,33 @@
     },
     "Icon": "ui/atlas/proficiency/proficiency_skill_03"
   },
+  "2202": {
+    "Name": {
+      "zh-CN": "弹无虚发",
+      "en-US": "Bullseye",
+      "ja-JP": "ブルズアイ",
+      "ko-KR": "백발백중"
+    },
+    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+  },
+  "2203": {
+    "Name": {
+      "zh-CN": "弹无虚发",
+      "en-US": "Bullseye",
+      "ja-JP": "ブルズアイ",
+      "ko-KR": "백발백중"
+    },
+    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+  },
+  "2204": {
+    "Name": {
+      "zh-CN": "弹无虚发",
+      "en-US": "Bullseye",
+      "ja-JP": "ブルズアイ",
+      "ko-KR": "백발백중"
+    },
+    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+  },
   "2211": {
     "Name": {
       "zh-CN": "红光反制攻击",
@@ -133,6 +372,33 @@
       "ko-KR": "극한 회피"
     },
     "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+  },
+  "2322": {
+    "Name": {
+      "zh-CN": "琴弦叩击",
+      "en-US": "String Strike",
+      "ja-JP": "ストロークビート",
+      "ko-KR": "스트링 슬랩"
+    },
+    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+  },
+  "2323": {
+    "Name": {
+      "zh-CN": "琴弦叩击",
+      "en-US": "String Strike",
+      "ja-JP": "ストロークビート",
+      "ko-KR": "스트링 슬랩"
+    },
+    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+  },
+  "2324": {
+    "Name": {
+      "zh-CN": "琴弦叩击",
+      "en-US": "String Strike",
+      "ja-JP": "ストロークビート",
+      "ko-KR": "스트링 슬랩"
+    },
+    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
   },
   "2327": {
     "Name": {
@@ -152,6 +418,33 @@
     },
     "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
   },
+  "2402": {
+    "Name": {
+      "zh-CN": "公正之剑",
+      "en-US": "Blade of Justice",
+      "ja-JP": "ジャスティス",
+      "ko-KR": "정의의 검"
+    },
+    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+  },
+  "2403": {
+    "Name": {
+      "zh-CN": "公正之剑",
+      "en-US": "Blade of Justice",
+      "ja-JP": "ジャスティス",
+      "ko-KR": "정의의 검"
+    },
+    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+  },
+  "2404": {
+    "Name": {
+      "zh-CN": "公正之剑",
+      "en-US": "Blade of Justice",
+      "ja-JP": "ジャスティス",
+      "ko-KR": "정의의 검"
+    },
+    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+  },
   "2422": {
     "Name": {
       "zh-CN": "极限闪避",
@@ -169,5 +462,65 @@
       "ko-KR": "붉은빛 반격"
     },
     "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+  },
+  "2502": {
+    "Name": {
+      "zh-CN": "普通攻击-奥义！星灵魔导士",
+      "en-US": "Normal attack - Arcane! Celestial Spirit Mage",
+      "ja-JP": "通常攻撃・奥義！星霊魔導士",
+      "ko-KR": "일반 공격 - 오의! 성령 마도사"
+    },
+    "Icon": "ui/textures/skill_ip004x02/ip004x02_skill_atk"
+  },
+  "2503": {
+    "Name": {
+      "zh-CN": "普通攻击-奥义！星灵魔导士",
+      "en-US": "Normal attack - Arcane! Celestial Spirit Mage",
+      "ja-JP": "通常攻撃・奥義！星霊魔導士",
+      "ko-KR": "일반 공격 - 오의! 성령 마도사"
+    },
+    "Icon": "ui/textures/skill_ip004x02/ip004x02_skill_atk"
+  },
+  "2602": {
+    "Name": {
+      "zh-CN": "普通攻击-奥义！灭龙魔导士",
+      "en-US": "Normal Attack - Arcane! Dragon Slayer",
+      "ja-JP": "通常攻撃・奥義！滅竜魔導士",
+      "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
+    },
+    "Icon": "ui/textures/skill_ip004x01/ip004x01_skill_atk"
+  },
+  "2603": {
+    "Name": {
+      "zh-CN": "普通攻击-奥义！灭龙魔导士",
+      "en-US": "Normal Attack - Arcane! Dragon Slayer",
+      "ja-JP": "通常攻撃・奥義！滅竜魔導士",
+      "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
+    },
+    "Icon": "ui/textures/skill_ip004x01/ip004x01_skill_atk"
+  },
+  "1007601": {
+    "Name": {
+      "zh-CN": "普通攻击-绝技！变身蜜蜂",
+      "en-US": "Normal Attack - Stunt! Transform into Bee",
+      "ja-JP": "通常攻撃・絶技！ミーンに変身",
+      "ko-KR": "일반 공격 - 비기! 민 변신"
+    }
+  },
+  "1007604": {
+    "Name": {
+      "zh-CN": "连续飞针-绝技！变身蜜蜂",
+      "en-US": "Continuous Needle Throw - Stunt! Transform into Bee",
+      "ja-JP": "連続針飛ばし・絶技！ミーンに変身",
+      "ko-KR": "연속 침 날리기 - 비기! 민 변신"
+    }
+  },
+  "2900442": {
+    "Name": {
+      "zh-CN": "雷域-奥义！幻象共鸣",
+      "en-US": "Thunder Zone - Arcane! Illusion Resonance",
+      "ja-JP": "雷領域・奥義！幻影共鳴",
+      "ko-KR": "번개 영역 - 오의! 환상 공명"
+    }
   }
 }

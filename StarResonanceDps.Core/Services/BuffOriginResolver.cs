@@ -19,7 +19,7 @@ public sealed record BuffOrigin(SourceLanding Landing, string Trace);
 /// <para>
 /// たどった後、バフ/デバフリストに出るものは常設の空欄検知(<see cref="BlankBuffNameProbe"/>)へ渡す
 /// (由来に着いたものも、着かずに空欄のまま出るものも。ここへ来るのは表に名前の無いバフだけ)。
-/// モジュール効果のバフは渡さない(名前と絵はモジュール効果から出し、出し方は手修正 <c>ModuleBuffOverrides.json</c> で決めている)。
+/// モジュール効果のバフは渡さない(名前・絵・出し方は番号ごとの手修正で決めている)。
 /// </para>
 ///
 /// <para>
@@ -86,7 +86,7 @@ public sealed class BuffOriginResolver
 
             if (EncounterManager.Current.Entities.TryGetValue(holderUuid, out var bearer)
                 && BuffDisplayRules.IsDisplayed(buffEvent, bearer)
-                && BuffDisplayRules.GetModuleBuffDisplay(buffEvent) == ModuleBuffDisplay.None)
+                && BuffDisplayRules.GetModuleEffectId(buffEvent) == 0)
             {
                 BlankBuffNameProbe.Capture(holderUuid, buffEvent, landing, trace);
             }

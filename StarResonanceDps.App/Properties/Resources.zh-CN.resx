@@ -507,7 +507,7 @@
     <value>DTPS计量器</value>
   </data>
   <data name="Widget_TakenDamageLog" xml:space="preserve">
-    <value>承伤日志</value>
+    <value>时间轴</value>
   </data>
   <data name="TakenDamageLog_CastFormat" xml:space="preserve">
     <value>{0}正在咏唱{1}</value>
@@ -829,6 +829,9 @@
   </data>
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}秒</value>
+  </data>
+  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
+    <value>{0}({1})</value>
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>

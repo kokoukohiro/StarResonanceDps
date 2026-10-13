@@ -85,7 +85,8 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// 押した技の技ID → 推移グラフの技のアイコンの名前とアイコンの手修正。<c>Data/Overrides/SkillActivationOverrides.json</c>。
-    /// 表に名前もアイコンも無い技(回避・共通受身スキルなど)に使う(<see cref="GetSkillActivationDisplay"/>)。
+    /// 表に名前もアイコンも無い技(回避・共通受身スキルなど)、通常攻撃の2段目以降、
+    /// 押した技の番号とダメージの発生源キーが違って見出し表の名前に届かない技に使う(<see cref="GetSkillActivationDisplay"/>)。
     /// </summary>
     private static FrozenDictionary<int, SkillActivationOverride> _skillActivationOverrides =
         FrozenDictionary<int, SkillActivationOverride>.Empty;
@@ -105,25 +106,10 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// モジュールの根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)→ モジュール効果の番号。
-    /// バフの由来をたどるときの止まり先(<see cref="Services.SourceLandingResolver.ResolveBuffOrigin"/>)。
+    /// バフの由来をたどるときの止まり先(<see cref="Services.SourceLandingResolver.ResolveBuffOrigin"/>)と、
+    /// モジュール効果のバフかの判定(<see cref="GetModEffectId"/>)に使う。
     /// </summary>
     private static FrozenDictionary<int, int> _modEffectIdByRootBuff = FrozenDictionary<int, int>.Empty;
-
-    /// <summary>モジュール効果の番号 → 絵の全体のパス(<c>ModEffectTable.EffectConfigIcon</c>)。</summary>
-    private static FrozenDictionary<int, string> _modEffectIcons = FrozenDictionary<int, string>.Empty;
-
-    /// <summary>
-    /// モジュール効果のバフID → バフ/デバフリストでの出し方。<c>Data/Overrides/ModuleBuffOverrides.json</c>。
-    /// 書かれていないモジュール効果のバフは <see cref="ModuleBuffDisplay.Shown"/>(<see cref="BuffDisplayRules.GetModuleBuffDisplay"/>)。
-    /// </summary>
-    private static FrozenDictionary<int, ModuleBuffDisplay> _moduleBuffDisplays = FrozenDictionary<int, ModuleBuffDisplay>.Empty;
-
-    /// <summary>
-    /// モジュール効果のバフID → モジュール効果の番号。根のバフ(<see cref="_modEffectIdByRootBuff"/>)と、
-    /// 手修正 <c>ModuleBuffOverrides.json</c> の <c>Effect</c>(子のバフ。表につながりが無い)を合わせたもの。
-    /// バフの番号だけで名前と絵を引く場所(非表示リストなど)もこれで引く。
-    /// </summary>
-    private static FrozenDictionary<int, int> _modEffectIdByBuff = FrozenDictionary<int, int>.Empty;
 
     /// <summary>
     /// イマジンのパッシブの根のバフ(<c>SkillAoyiTable</c> / <c>SkillAoyiStarTable</c> の <c>TransformationType</c> の <c>[3, バフID, 1]</c>)→ イマジンの技ID。
@@ -313,7 +299,7 @@ public static class CombatDataCatalog
     /// <summary><see cref="ApplyNameOverrides"/> で重ねる名前の上書き(<c>Data/Overrides/</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
     private static readonly string[] NameOverrideFileNames =
     [
-        "SkillNameOverrides.json", "BuffNameOverrides.json", "BuffNameManualOverrides.json", "MonsterNameOverrides.json",
+        "SkillNameOverrides.json", "BuffNameOverrides.json", "BuffNameAssignedOverrides.json", "MonsterNameOverrides.json",
     ];
 
     private static string LocalizedFilePath(string fileName) => Path.Combine(CombatRuntimePaths.LocalizationDirectory, $"{fileName}.json");
@@ -325,8 +311,6 @@ public static class CombatDataCatalog
     private static string RecountRowOverridesPath => OverrideFilePath("RecountRowOverrides.json");
 
     private static string SkillActivationOverridesPath => OverrideFilePath("SkillActivationOverrides.json");
-
-    private static string ModuleBuffOverridesPath => OverrideFilePath("ModuleBuffOverrides.json");
 
     private static string SkillWarningsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "SkillWarnings.json");
 
@@ -353,7 +337,6 @@ public static class CombatDataCatalog
 
         reads.Start<Dictionary<string, Newtonsoft.Json.Linq.JObject>>(RecountRowOverridesPath);
         reads.Start<Dictionary<string, SkillActivationOverrideEntry>>(SkillActivationOverridesPath);
-        reads.Start<Dictionary<string, ModuleBuffOverrideEntry?>>(ModuleBuffOverridesPath);
         reads.Start<int[]>(SkillWarningsPath);
         reads.Start<Dictionary<string, DbmTableRow>>(DbmTablePath);
         reads.Start<EquipmentFile>(EquipmentsPath);
@@ -374,8 +357,8 @@ public static class CombatDataCatalog
             (_skillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
             var buffNames = LoadLocalizedText(reads, "BuffNames", out var buffNameIds);
             var (restoredBuffNames, restoredBuffNameIds) = ApplyNameOverrides(reads, buffNames, buffNameIds, "BuffNameOverrides.json");
-            // 表にもともと名前の無いバフに手で付けた名前。表の更新で落ちた名前(BuffNameOverrides)の上に重ねる。
-            (_buffNames, _) = ApplyNameOverrides(reads, restoredBuffNames, restoredBuffNameIds, "BuffNameManualOverrides.json");
+            // どの版の表にも名前の無いバフに割り当てた名前。表の更新で落ちた名前を戻したもの(BuffNameOverrides)の上に重ねる。
+            (_buffNames, _) = ApplyNameOverrides(reads, restoredBuffNames, restoredBuffNameIds, "BuffNameAssignedOverrides.json");
             var monsterNames = LoadLocalizedText(reads, "MonsterNames", out var monsterIds);
             (_monsterNames, _monsterIds) = ApplyNameOverrides(reads, monsterNames, monsterIds, "MonsterNameOverrides.json");
             _dbmNames = LoadLocalizedText(reads, "DbmNames", out _);
@@ -383,8 +366,6 @@ public static class CombatDataCatalog
             _rogueEntryBuffIds = rogueEntryBuffIds;
             _modEffectNames = LoadLocalizedText(reads, "ModEffectNames", out _);
             _modEffectIdByRootBuff = BuildModEffectIdByRootBuff();
-            _modEffectIcons = BuildModEffectIcons();
-            (_moduleBuffDisplays, _modEffectIdByBuff) = LoadModuleBuffOverrides(reads, _modEffectIdByRootBuff);
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
             _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
@@ -535,8 +516,7 @@ public static class CombatDataCatalog
         => AppendInternalId(GetBuffDisplayNameWithoutInternalId(buffId, origin), InternalIdDisplayMode.BuffOnly, buffId);
 
     /// <summary>
-    /// バフ/デバフリストに出すバフの名前(注記なし)。バフの番号で引く名前(<c>BuffNames</c> と手修正、料理・薬剤はその表、
-    /// 番号で引けるモジュール効果のバフはその効果の名前)が空なら、
+    /// バフ/デバフリストに出すバフの名前(注記なし)。バフの番号で引く名前(<c>BuffNames</c> と手修正、料理・薬剤はその表)が空なら、
     /// そのバフの付与元をたどった由来(<paramref name="origin"/>)の名前。どちらも無ければ表の内部名(一時の表示)、
     /// それも無ければ空。カードの見出しと通知もこの名前を使う。
     /// </summary>
@@ -565,40 +545,37 @@ public static class CombatDataCatalog
         => _modEffectIdByRootBuff.TryGetValue(buffId, out effectId);
 
     /// <summary>
-    /// バフが属するモジュール効果の番号。番号で引ける(根のバフか、手修正 <c>ModuleBuffOverrides.json</c> の <c>Effect</c>)ならそれ、
-    /// 引けなければ付与元をたどった由来(<paramref name="origin"/>)がモジュール効果ならその効果。どちらでもなければ 0。
+    /// バフが属するモジュール効果の番号。根のバフ(<see cref="_modEffectIdByRootBuff"/>)ならその効果、
+    /// 直の付与元のバフ(<paramref name="sourceBuffId"/>、付与元がバフでなければ 0)が根のバフならその効果(子のバフ)、
+    /// どちらでもなく付与元をたどった由来(<paramref name="origin"/>)がモジュール効果ならその効果。どれでもなければ 0。
+    /// 名前のあるバフは由来をたどらないので、子のバフは直の付与元で決める。
     /// </summary>
-    public static int GetModEffectId(int buffId, SourceLanding origin)
+    public static int GetModEffectId(int buffId, int sourceBuffId, SourceLanding origin)
     {
-        if (buffId > 0 && _modEffectIdByBuff.TryGetValue(buffId, out var effectId))
+        if (buffId > 0 && _modEffectIdByRootBuff.TryGetValue(buffId, out var effectId))
         {
             return effectId;
+        }
+
+        if (sourceBuffId > 0 && _modEffectIdByRootBuff.TryGetValue(sourceBuffId, out var parentEffectId))
+        {
+            return parentEffectId;
         }
 
         return origin.Kind == SourceLandingKind.Module ? origin.Id : 0;
     }
 
-    /// <summary>モジュール効果の絵の全体のパス。無ければ空。</summary>
-    public static string GetModEffectIconName(int effectId)
-        => _modEffectIcons.TryGetValue(effectId, out var icon) ? icon : string.Empty;
+    /// <summary>
+    /// 手修正 <c>BuffOverrides.json</c> が優先度(<c>BuffPriority</c>)を書いたバフか。
+    /// 書いたバフはバフ/デバフリストの「足して出す」規則に当たらない(<see cref="BuffDisplayRules"/>)。
+    /// </summary>
+    public static bool HasBuffPriorityOverride(int buffId)
+        => _buffs.TryGetValue(buffId, out var buff) && buff.HasBuffPriorityOverride;
 
     /// <summary>
-    /// バフ/デバフリストと設定の非表示リストに出すバフの絵。バフ自身の絵(表と手修正 <c>BuffOverrides</c>)があればそれ、
-    /// 無ければモジュール効果のバフ(<see cref="GetModEffectId"/>)はその効果の絵。どちらも無ければ空。
+    /// モジュール効果の絵の置き場所(全体のパスの先頭)。モジュール効果のバフの絵は、手修正 <c>BuffOverrides.json</c> の <c>Icon</c> に
+    /// 表 <c>ModEffectTable</c> の <c>EffectConfigIcon</c> の値を書く。
     /// </summary>
-    public static string GetBuffDisplayIconName(int buffId, SourceLanding origin)
-    {
-        var ownIconName = GetBuffOwnIconName(buffId);
-        if (!string.IsNullOrWhiteSpace(ownIconName))
-        {
-            return ownIconName;
-        }
-
-        var effectId = GetModEffectId(buffId, origin);
-        return effectId > 0 ? GetModEffectIconName(effectId) : string.Empty;
-    }
-
-    /// <summary>モジュール効果の絵の置き場所(<c>ModEffectTable.EffectConfigIcon</c> の全体のパスの先頭)。</summary>
     private const string ModEffectIconFolder = "ui/atlas/mod_effect/";
 
     /// <summary>
@@ -606,10 +583,6 @@ public static class CombatDataCatalog
     /// </summary>
     public static bool IsModEffectIcon(string? iconName)
         => iconName?.StartsWith(ModEffectIconFolder, StringComparison.OrdinalIgnoreCase) == true;
-
-    /// <summary>手修正(<c>ModuleBuffOverrides.json</c>)に書かれたモジュール効果のバフなら、その出し方を返す。</summary>
-    public static bool TryGetModuleBuffDisplay(int buffId, out ModuleBuffDisplay display)
-        => _moduleBuffDisplays.TryGetValue(buffId, out display);
 
     /// <summary>イマジンのパッシブの根のバフなら、そのイマジンの技IDを返す。</summary>
     public static bool TryGetImagineSkillIdByPassiveRoot(int buffId, out int skillId)
@@ -1489,23 +1462,15 @@ public static class CombatDataCatalog
     /// <summary>
     /// バフの名前。料理・薬剤のバフはその表の名前(付けるアイテムの名前)、それ以外は <c>BuffNames</c>(手修正込み)。
     /// 料理・薬剤のバフでも、その表の名前が全言語で空なら <c>BuffNames</c> へ落とさず空を返す。
-    /// <c>BuffNames</c> にも名前の無いモジュール効果のバフ(番号で引けるもの)は、そのモジュール効果の名前(<c>ModEffectNames</c>)。
     /// </summary>
     private static string ResolveBuffName(string cultureName, int buffId)
     {
-        var name = GetBuffGroup(buffId) switch
+        return GetBuffGroup(buffId) switch
         {
             BuffGroup.Cuisine => ResolveText(_cuisineBuffNames, cultureName, buffId),
             BuffGroup.Potion => ResolveText(_potionBuffNames, cultureName, buffId),
             _ => ResolveText(_buffNames, cultureName, buffId)
         };
-
-        if (string.IsNullOrEmpty(name) && _modEffectIdByBuff.TryGetValue(buffId, out var effectId))
-        {
-            name = ResolveText(_modEffectNames, cultureName, effectId);
-        }
-
-        return name;
     }
 
     /// <summary>
@@ -1722,6 +1687,10 @@ public static class CombatDataCatalog
         return fallbackIcon?.Trim() ?? string.Empty;
     }
 
+    /// <summary>
+    /// バフの絵。表の <c>ShowHUDIcon</c>、空なら <c>Icon</c>(どちらも手修正 <c>BuffOverrides.json</c> を重ねた値)。
+    /// 無ければ空で、代わりの絵は出さない(バフ/デバフリストではゲームの条件で出なくなる)。
+    /// </summary>
     public static string GetBuffOwnIconName(int buffId)
     {
         if (_buffs.TryGetValue(buffId, out var buff))
@@ -2145,131 +2114,6 @@ public static class CombatDataCatalog
         }
 
         return ToUniqueTargets(targets, "ModEffectTable", "module effect");
-    }
-
-    /// <summary>モジュール効果の番号 → 絵の全体のパス。段階ごとの行で絵が割れた効果は入れず、エラーログを出す(その効果のバフは絵なし)。</summary>
-    private static FrozenDictionary<int, string> BuildModEffectIcons()
-    {
-        var icons = new Dictionary<int, HashSet<string>>();
-        foreach (var modEffect in HelperMethods.DataTables.ModEffects.Data.Values)
-        {
-            var icon = modEffect.EffectConfigIcon?.Trim();
-            if (modEffect.EffectID <= 0 || string.IsNullOrEmpty(icon))
-            {
-                continue;
-            }
-
-            if (!icons.TryGetValue(modEffect.EffectID, out var set))
-            {
-                set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                icons[modEffect.EffectID] = set;
-            }
-
-            set.Add(icon);
-        }
-
-        foreach (var (effectId, set) in icons.Where(pair => pair.Value.Count > 1))
-        {
-            Log.Error("ModEffectTable: module effect {EffectId} has more than one icon ({Icons}); its buffs are shown without an icon",
-                effectId, string.Join(", ", set.Order(StringComparer.OrdinalIgnoreCase)));
-        }
-
-        return icons
-            .Where(pair => pair.Value.Count == 1)
-            .ToFrozenDictionary(pair => pair.Key, pair => pair.Value.First());
-    }
-
-    private sealed class ModuleBuffOverrideEntry
-    {
-        public string? Display { get; set; }
-
-        public int? Effect { get; set; }
-    }
-
-    /// <summary>
-    /// <c>Data/Overrides/ModuleBuffOverrides.json</c> を読む。鍵はバフID、中身は出し方(<c>Display</c>: <c>Shown</c> / <c>Resident</c> / <c>Hidden</c>)と、
-    /// そのバフが属するモジュール効果の番号(<c>Effect</c>。子のバフに書く)。どちらも省ける。
-    /// 返すのは、書かれた出し方と、バフID → モジュール効果の番号(根のバフ <paramref name="effectIdByRootBuff"/> と <c>Effect</c> を合わせたもの)。
-    ///
-    /// <para>
-    /// 鍵がバフIDの形でない行、どちらも書かれていない行、出し方の値が3つ以外の行は、記録して読まない。
-    /// <c>Effect</c> が <c>ModEffectTable</c> に無い番号のとき、根のバフに表と違う番号が書かれたときは、記録してその <c>Effect</c> だけ読まない。
-    /// </para>
-    /// </summary>
-    private static (FrozenDictionary<int, ModuleBuffDisplay> Displays, FrozenDictionary<int, int> EffectIdByBuff) LoadModuleBuffOverrides(
-        JsonDataFileReads reads,
-        FrozenDictionary<int, int> effectIdByRootBuff)
-    {
-        const string relativePath = "Overrides/ModuleBuffOverrides.json";
-        var effectIdByBuff = effectIdByRootBuff.ToDictionary();
-        if (!reads.TryTake<Dictionary<string, ModuleBuffOverrideEntry?>>(ModuleBuffOverridesPath, out var raw))
-        {
-            Log.Error("Failed to load {OverridePath}", relativePath);
-            return (FrozenDictionary<int, ModuleBuffDisplay>.Empty, effectIdByBuff.ToFrozenDictionary());
-        }
-
-        var knownEffectIds = HelperMethods.DataTables.ModEffects.Data.Values
-            .Select(modEffect => modEffect.EffectID)
-            .ToHashSet();
-        var displays = new Dictionary<int, ModuleBuffDisplay>();
-        foreach (var pair in raw ?? [])
-        {
-            if (!int.TryParse(pair.Key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var buffId))
-            {
-                Log.Error("ModuleBuffOverrides: skipping \"{Key}\" because the key is not a buff ID", pair.Key);
-                continue;
-            }
-
-            var text = pair.Value?.Display;
-            var effectId = pair.Value?.Effect;
-            if (text is null && effectId is null)
-            {
-                Log.Error("ModuleBuffOverrides: skipping {Key} because it has neither Display nor Effect", pair.Key);
-                continue;
-            }
-
-            if (text is not null)
-            {
-                switch (text)
-                {
-                    case nameof(ModuleBuffDisplay.Shown):
-                        displays[buffId] = ModuleBuffDisplay.Shown;
-                        break;
-                    case nameof(ModuleBuffDisplay.Resident):
-                        displays[buffId] = ModuleBuffDisplay.Resident;
-                        break;
-                    case nameof(ModuleBuffDisplay.Hidden):
-                        displays[buffId] = ModuleBuffDisplay.Hidden;
-                        break;
-                    default:
-                        Log.Error("ModuleBuffOverrides: skipping {Key} because Display \"{Display}\" is not Shown / Resident / Hidden", pair.Key, text);
-                        continue;
-                }
-            }
-
-            if (effectId is not { } writtenEffectId)
-            {
-                continue;
-            }
-
-            if (!knownEffectIds.Contains(writtenEffectId))
-            {
-                Log.Error("ModuleBuffOverrides: ignoring Effect {EffectId} of {Key} because ModEffectTable has no such module effect", writtenEffectId, pair.Key);
-                continue;
-            }
-
-            if (effectIdByRootBuff.TryGetValue(buffId, out var tableEffectId) && tableEffectId != writtenEffectId)
-            {
-                Log.Error("ModuleBuffOverrides: ignoring Effect {EffectId} of {Key} because ModEffectTable makes it a root buff of module effect {TableEffectId}",
-                    writtenEffectId, pair.Key, tableEffectId);
-                continue;
-            }
-
-            effectIdByBuff[buffId] = writtenEffectId;
-        }
-
-        Log.Information("Loaded {OverridePath}", relativePath);
-        return (displays.ToFrozenDictionary(), effectIdByBuff.ToFrozenDictionary());
     }
 
     private static FrozenDictionary<int, int> BuildImagineSkillIdByPassiveRoot()

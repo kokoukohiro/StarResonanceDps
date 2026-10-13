@@ -97,7 +97,7 @@ public sealed partial class EntityBuffListWidgetViewModel
             return;
         }
 
-        _openCard?.Invoke(_target, _kind, entry.Key, entry.BaseId);
+        _openCard?.Invoke(_target, _kind, entry.CardKey, entry.BaseId);
     }
 
     [RelayCommand]

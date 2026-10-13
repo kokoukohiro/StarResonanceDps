@@ -57,6 +57,10 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     [ObservableProperty]
     private bool _isModuleEffectIcon;
 
+    /// <summary>絵のパスはあるのにファイルが見つからないか(<see cref="BuffDebuffCardContent.ShowsUnknownIcon"/>)。はてなを出す。</summary>
+    [ObservableProperty]
+    private bool _showsUnknownIcon;
+
     [ObservableProperty]
     private bool _hasBuff;
 
@@ -312,6 +316,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         LayerText = content.LayerText;
         IconPath = content.IconPath;
         IsModuleEffectIcon = content.IsModuleEffectIcon;
+        ShowsUnknownIcon = content.ShowsUnknownIcon;
         HasBuff = hasBuff;
         HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);
 

@@ -18,13 +18,15 @@ public readonly record struct BuffDebuffCardContent(
     string DurationText,
     string LayerText,
     string? IconPath,
-    bool IsModuleEffectIcon)
+    bool IsModuleEffectIcon,
+    bool ShowsUnknownIcon)
 {
     public static BuffDebuffCardContent Empty { get; } = new(
         string.Empty,
         string.Empty,
         string.Empty,
         null,
+        false,
         false);
 
     public static BuffDebuffCardContent Create(
@@ -35,16 +37,18 @@ public readonly record struct BuffDebuffCardContent(
     {
         var entry = new PlayerBuffEntry(snapshot);
         var group = CombatDataCatalog.GetBuffGroup(snapshot.BaseId);
+        // 付与者の名前は添えない。カードはバフの番号で追い、出す行(付与者)は残り時間で入れ替わる。見出しと通知の名前とも同じ。
         var name = group != BuffGroup.None
             ? CombatDataCatalog.AppendBuffInternalId(GetGroupName(group), snapshot.BaseId)
-            : entry.Name;
+            : snapshot.Name;
 
         return new BuffDebuffCardContent(
             BuffInfoFormatFormatter.Format(name, targetName, level, formatString),
             entry.DurationWithUnitText,
             entry.LayerText,
             entry.IconPath,
-            entry.IsModuleEffectIcon);
+            entry.IsModuleEffectIcon,
+            entry.ShowsUnknownIcon);
     }
 
     /// <summary>
@@ -92,6 +96,7 @@ public readonly record struct BuffDebuffCardContent(
             string.Empty,
             string.Empty,
             null,
+            false,
             false);
     }
 
@@ -128,6 +133,7 @@ public readonly record struct BuffDebuffCardContent(
     /// <summary>
     /// そのまとまりに属するバフを探す。入れ替わっても同じまとまりなら拾い直せる。
     /// 複数付いていることはゲーム仕様上ないが、あれば一覧順の先頭を採る。
+    /// 同じバフの行が複数(エンティティの付与したプレイヤーごと)あるときは、カードに出す行(<see cref="PlayerBuffSnapshot.IsCardRepresentative"/>)だけを見る。
     /// </summary>
     public static PlayerBuffSnapshot? FindByGroup(
         IReadOnlyList<PlayerBuffSnapshot> snapshots,
@@ -140,7 +146,8 @@ public readonly record struct BuffDebuffCardContent(
 
         foreach (var snapshot in snapshots)
         {
-            if (CombatDataCatalog.GetBuffGroup(snapshot.BaseId) == group)
+            if (snapshot.IsCardRepresentative
+                && CombatDataCatalog.GetBuffGroup(snapshot.BaseId) == group)
             {
                 return snapshot;
             }
@@ -184,13 +191,18 @@ public readonly record struct BuffDebuffCardContent(
             name);
     }
 
+    /// <summary>
+    /// カードの鍵(<see cref="PlayerBuffSnapshot.CardKey"/>、バフの番号ごと)で行を探す。
+    /// 同じ鍵の行が並ぶ(エンティティの付与したプレイヤーごと)ときは、カードに出す行(<see cref="PlayerBuffSnapshot.IsCardRepresentative"/>)。
+    /// </summary>
     public static PlayerBuffSnapshot? FindByKey(
         IReadOnlyList<PlayerBuffSnapshot> snapshots,
         string buffKey)
     {
         foreach (var snapshot in snapshots)
         {
-            if (string.Equals(snapshot.Key, buffKey, StringComparison.Ordinal))
+            if (snapshot.IsCardRepresentative
+                && string.Equals(snapshot.CardKey, buffKey, StringComparison.Ordinal))
             {
                 return snapshot;
             }

@@ -156,13 +156,12 @@ export BPSR_TABLES=<置き場所>     # bash
 |---|---|
 | `Data/Overrides/RecountRowOverrides.json` | メーターの行の出入りと名前 |
 | `Data/Overrides/BuffOverrides.json` | 同梱 `Data/BuffTable.json` の項目の差し替え |
-| `Data/Overrides/ModuleBuffOverrides.json` | モジュール効果のバフのバフ/デバフリストでの出し方 |
 | `Data/Overrides/SkillOverrides.json` | 同梱 `SkillTable` の `SkillLevelGroup` の補い |
 | `Data/Overrides/SkillActivationOverrides.json` | 推移グラフの技のアイコンの名前とアイコン |
 | `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
-| `Data/Overrides/BuffNameManualOverrides.json` | 表にもともと名前の無いバフに付ける名前 |
+| `Data/Overrides/BuffNameAssignedOverrides.json` | どの版の表にも名前の無いバフに割り当てる名前 |
 
 `MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` に入っているのは、
 **入力の表の更新で名前が落とされた行**の名前。以前の版の入力にはあり、今の版では空になっている。
@@ -210,11 +209,11 @@ export BPSR_TABLES=<置き場所>     # bash
 { "<バフID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
 ```
 
-同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `Icon`)で、名前には触らない。
+同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `BuffPriority` / `Icon` など)で、名前には触らない。
 
-### BuffNameManualOverrides.json
+### BuffNameAssignedOverrides.json
 
-`BuffNameOverrides.json` を重ねた後に重ねる。**表にもともと名前の無いバフ**に付ける名前を書く(`BuffNameOverrides.json` は表の更新で落ちた名前)。
+`BuffNameOverrides.json` を重ねた後に重ねる。**どの版の表にも名前の無いバフ**に割り当てる名前を書く(`BuffNameOverrides.json` は表の更新で落ちた名前を戻したもの)。
 形も振る舞いも `MonsterNameOverrides.json` と同じ。こちらが最後に重なるので、同じ鍵ならこちらが勝つ。
 
 ```json
@@ -230,7 +229,11 @@ export BPSR_TABLES=<置き場所>     # bash
 推移グラフの技のアイコンの枠もこの寄せ先で決まる(枠の番号を持たない技は、`SkillLevelGroup` の先の技の枠になる)。
 
 ```json
-{ "<技ID>": { "SkillLevelGroup": <寄せ先の技ID> } }
+{
+  "<技ID>": {
+    "SkillLevelGroup": <寄せ先の技ID>
+  }
+}
 ```
 
 キーが `SkillTable` に無いときは、`BuffOverrides` と同じく**技の行を作ってから当てる**(ID と `SkillLevelGroup` だけを持つ行)。
@@ -239,6 +242,11 @@ export BPSR_TABLES=<置き場所>     # bash
 ### SkillActivationOverrides.json
 
 推移グラフの横軸の下に出す、押した技のアイコンの名前とアイコンの手修正。表に名前もアイコンも無い技に使う。
+ほかに次の2つにも使う。
+
+- 通常攻撃の2段目以降。名前は1段目の見出し表の行名、アイコンは1段目のアイコン(段はコードで判定しない)
+- 押した技の番号とダメージの発生源キーが違い、見出し表の名前に届かない技。名前は見出し表(その手修正を含む)の名前を写す
+
 鍵は押した技の技ID。名前とアイコンを見出し表の行・技の名前の表・技の表で決めた後に、**書いてある言語の名前とアイコンだけ**を差し替える。
 
 ```json
@@ -260,43 +268,30 @@ export BPSR_TABLES=<置き場所>     # bash
 同梱の `Data/BuffTable.json` を読むときに重ねる。名前ではなく**項目**の差し替え。
 
 ```json
-{ "<バフID>": { "Id": "<バフID>", "BuffType": <値>, "Icon": "<アイコン名>" } }
-```
-
-`BuffType` と `Icon` を、必要なほうだけ書く。生の値をそのまま使うとバフとデバフの
-振り分けが実行時と食い違うため、**振り分けは実質このファイルが決めている。**
-
-**IDだけの項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
-
-### ModuleBuffOverrides.json
-
-モジュール効果のバフを、バフ/デバフリストにどう出すか。モジュール効果のバフは、ゲーム内のバフ表示の条件や持続ではなく、ここで決める。
-
-```json
 {
-  "<根のバフID>": { "Display": "Resident" },
-  "<子のバフID>": { "Effect": <モジュール効果の番号>, "Display": "Hidden" }
+  "<バフID>": {
+    "BuffType": <値>,
+    "BuffPriority": <値>,
+    "Icon": "<アイコン名>"
+  }
 }
 ```
 
+鍵がバフID。表に無いIDなら、そのIDの行を作ってから当てる。
+
 | 項目 | |
 |---|---|
-| `Display` | 出し方。省くと `Shown` |
-| `Effect` | そのバフが属するモジュール効果の番号(`ModEffectTable.EffectID`)。**子のバフに書く**(根のバフは表で決まる) |
+| `BuffType` | バフ側かデバフ側か。生の値をそのまま使うとバフとデバフの振り分けが実行時と食い違うため、**振り分けは実質このファイルが決めている** |
+| `BuffPriority` | ゲーム内のバフ表示に出すか(0 は出さない)。**書いたバフは、バフ/デバフリストでもこの値とアイコンだけで出すか決まる**(0 なら出さない、0 以外ならアイコンがあるときだけ出す) |
+| `Icon` / `ShowHUDIcon` | アイコンのパス。`"-"` は空にする。アプリはパスの最後の部分をファイル名として探すので、ファイル名だけでよい。**モジュール効果の絵だけは頭の `ui/atlas/mod_effect/` が要る**(探すフォルダと絵の大きさをパスの頭で決める) |
 
-| `Display` | |
-|---|---|
-| `Shown` | 出す。リストの設定「モジュール効果」が「非表示」のときだけ隠れる |
-| `Resident` | 付いている間ずっと変わらない(常駐)。設定が「すべて表示」のときだけ出る |
-| `Hidden` | どの設定でも出さない(ほかのバフと同じことを示すもの) |
+必要な項目だけ書く。**中身の無い項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
 
-モジュール効果のバフとは、モジュールの根のバフ(`ModEffectTable` の `EffectConfig` の `[3, バフID, 1]`)と、ここに `Effect` を書いたバフ。
-子のバフは表からモジュール効果へつながらないので、`Effect` で結ぶ。結ぶと、バフの番号だけで名前と絵を引く場所(設定の非表示リストなど)でも、そのモジュール効果の名前と絵になる。
-ここに無い子のバフも、付与元をたどってモジュール効果に着けばモジュール効果のバフとして扱い(`Shown`)、その効果の名前と絵を出す。
-名前と絵は `gen_mod_effects.py` の節のもので、バフ自身の名前・絵(名前の表と手修正、`BuffOverrides.json` の `Icon`)があればそちらが勝つ。
-
-鍵がバフIDの形でない行、`Display` も `Effect` も無い行、`Display` がこの3つ以外の行は、エラーログを出して読まない。
-`Effect` が表に無い番号のとき、根のバフに表と違う番号が書かれたときは、エラーログを出してその `Effect` だけ読まない。ファイルが無ければエラーログを出し、手修正無しのまま続ける。
+`BuffPriority` を書かないバフは、生の値が 0 でも、持続が1秒を超えればバフ/デバフリストに出る(アイコンが無ければ空欄)。
+表の優先度が 0 以外で、出したくないものは `BuffPriority` に 0 を書く。逆に、持続が無い・短いバフを出したいときは、0 以外の値を書く。
+`BuffPriority` を 0 以外にしてもアイコンが無いバフは出ない。出すなら `Icon` も書く。
+アイコンのパスはあるのにアプリの絵のフォルダにファイルが無いバフは、はてなの絵で出る。
+モジュール効果のバフの絵は、`Icon` にモジュール効果の絵のパス(`ModEffectTable` の `EffectConfigIcon`)を書く。名前は `BuffNameAssignedOverrides.json` に書く。
 
 ### RecountRowOverrides.json
 
@@ -400,7 +395,7 @@ DamageId の下2桁                    = 枝番(HitEventId)
 **`BuffTable` の全行**を収録する。`BuffPriority` で絞らない。
 
 バフ/デバフウィジェットに出るバフに加えて、ゲームがバフバーに出さないバフも名前を引ける。
-被ダメログは発生源がバフのダメージ(`OwnerId` がバフID)の名前をここから引く。
+タイムラインは発生源がバフのダメージ(`OwnerId` がバフID)の名前をここから引く。
 
 言語によって収録数に差があるので、鍵は和集合。
 
@@ -496,7 +491,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 ## gen_skill_warnings.py
 
 戦闘画面の警告バーを出す技を、**技レベルID(技ID×100＋レベル)の配列**で書く。名前は持たない。
-被ダメログは、この一覧にある技の開始を詠唱として出す。
+タイムラインは、この一覧にある技の開始を詠唱として出す。
 
 ### 判定
 
@@ -597,7 +592,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ## gen_monsters.py
 
-エンティティリストや被ダメログで、モンスターの実体の `AttrId` から表示名を引くのに使う。
+エンティティリストやタイムラインで、モンスターの実体の `AttrId` から表示名を引くのに使う。
 
 鍵は **`MonsterTable`** の行（4言語ぶんの和）。
 同じ番号が別の表で別のものを指すことがあり、どの表の名前かは実体の種類でしか決まらない。アプリはモンスターの実体のときだけこのテーブルを引く。
@@ -797,9 +792,9 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 モジュール効果の名前を、**モジュール効果の番号(`ModEffectTable.EffectID`)を鍵に**書く。値は `EffectName`。
 `ModEffectTable` の行は効果の段階ごとに分かれるので、行ではなく `EffectID` を鍵にする。
 
-モジュール効果のバフ(モジュールの根のバフ = `EffectConfig` の `[3, バフID, 1]`、同梱 `Data/Raw/ModEffectTable.json` で引く。
-子のバフは `ModuleBuffOverrides.json` の `Effect` で結ぶ)は、名前の表に名前が無ければ、どこでもこの名前を出す。
-付与元をたどってモジュール効果に着いたバフも、この名前で出る。
-絵はバフ自身の絵が無ければ、同じ表の `EffectConfigIcon` の絵(アプリの `Data/Images/Modules` からファイル名で探す)。
+名前の表と手修正に名前の無いバフで、付与元をたどってモジュール効果(モジュールの根のバフ = `EffectConfig` の `[3, バフID, 1]`、
+同梱 `Data/Raw/ModEffectTable.json` で引く)に着いたものは、この名前で出る。
+モジュール効果のバフの名前と絵を番号で出すときは、`BuffNameAssignedOverrides.json` と `BuffOverrides.json` の `Icon` に書く
+(絵のパスが `EffectConfigIcon` の形なら、アプリは `Data/Images/Modules` からファイル名で探す)。
 
 同じ `EffectID` で段階によって名前が食い違う言語は、段階の一番小さい、名前のある行の名前を採り、一覧を出す。空にも除外にもしない。

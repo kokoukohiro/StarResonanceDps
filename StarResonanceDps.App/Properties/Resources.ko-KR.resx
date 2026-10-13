@@ -507,7 +507,7 @@
     <value>DTPS 미터</value>
   </data>
   <data name="Widget_TakenDamageLog" xml:space="preserve">
-    <value>받은 피해 로그</value>
+    <value>타임라인</value>
   </data>
   <data name="TakenDamageLog_CastFormat" xml:space="preserve">
     <value>{0}이(가) {1} 영창 중</value>
@@ -829,6 +829,9 @@
   </data>
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}초</value>
+  </data>
+  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
+    <value>{0}({1})</value>
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>디버프 목록</value>

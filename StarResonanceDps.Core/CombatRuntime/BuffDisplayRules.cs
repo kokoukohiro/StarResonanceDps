@@ -7,14 +7,20 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// 常設の空欄検知(<c>Diagnostics.BlankBuffNameProbe</c>)が同じ判定を使う。
 ///
 /// <para>
-/// <b>モジュール効果のバフは、モジュール効果の出し方(<see cref="GetModuleBuffDisplay"/>)だけで決める</b>(ゲームの条件も持続も見ない)。
-/// それ以外は2種類。ゲーム内のバフバーと同じ条件で出るもの(<see cref="IsShownByGameRule"/>)と、
+/// 2種類。ゲーム内のバフバーと同じ条件で出るもの(<see cref="IsShownByGameRule"/>)と、
 /// それで落ちるもののうち足して出すもの(<see cref="IsAddedBuff"/>)。<b>足すほうは由来(付与元)で絞らない。</b>
 /// 持続なし(0)と永続(負)は、ゲーム内のバフバーと同じ条件で出るなら出し(残り時間は出さない)、足すほうでは出さない。
 /// </para>
 ///
 /// <para>
-/// リストの設定「モジュール効果」(すべて表示 / 非表示 / 常駐効果のみ非表示)はアプリの一覧が当てる。ここでは出し方を行に渡すだけ。
+/// <b>出すか出さないかを個別に決めるのは、手修正 <c>BuffOverrides.json</c> の優先度(<c>BuffPriority</c>)とアイコン。</b>
+/// 優先度を書いたバフは足すほうに当たらず、ゲームの条件だけで決まる(0 なら出さない、0 以外でアイコンがあれば出す)。
+/// モジュール効果のバフもこの規則で、名前と絵も番号ごとの手修正に書く。
+/// </para>
+///
+/// <para>
+/// リストの設定「モジュール効果」(すべて表示 / 非表示 / 常駐効果のみ非表示)はアプリの一覧が当てる。
+/// ここではモジュール効果のバフか(<see cref="GetModuleEffectId"/>)を行に渡すだけ。常駐は永続(持続が負)のもの。
 /// </para>
 ///
 /// <para>
@@ -45,59 +51,44 @@ public static class BuffDisplayRules
     public static bool IsHiddenFromGameBuffBar(BuffEvent buffEvent)
         => buffEvent.BuffPriority == DataTypes.Enum.EBuffPriority.NotShow;
 
-    /// <summary>ゲーム内のバフバーと同じ条件(出す優先度で、アイコンがある)で出すバフか。</summary>
+    /// <summary>
+    /// ゲーム内のバフバーと同じ条件(出す優先度で、アイコンがある)で出すバフか。
+    /// アイコンはバフの絵(<see cref="CombatDataCatalog.GetBuffOwnIconName"/>、手修正を重ねた値)で見る。
+    /// 手修正で優先度を0以外にしても、絵の無いバフは出ない。
+    /// </summary>
     public static bool IsShownByGameRule(BuffEvent buffEvent)
         => !IsHiddenFromGameBuffBar(buffEvent)
            && buffEvent.BaseId > 0
            && !string.IsNullOrWhiteSpace(CombatDataCatalog.GetBuffOwnIconName(buffEvent.BaseId));
 
     /// <summary>
-    /// リストに出すバフか(バフ側かデバフ側かは見ない)。モジュール効果のバフは出し方が <see cref="ModuleBuffDisplay.Hidden"/> 以外で、
-    /// 付く相手が <see cref="IsAddedBuffBearer"/> のもの。それ以外は、ゲーム内のバフバーと同じ条件で出るものか、足して出すもの。
+    /// リストに出すバフか(バフ側かデバフ側かは見ない)。ゲーム内のバフバーと同じ条件で出るものか、足して出すもの。
     /// </summary>
     public static bool IsListed(BuffEvent buffEvent, Entity bearer)
-    {
-        var moduleDisplay = GetModuleBuffDisplay(buffEvent);
-        if (moduleDisplay != ModuleBuffDisplay.None)
-        {
-            return moduleDisplay != ModuleBuffDisplay.Hidden && IsAddedBuffBearer(bearer);
-        }
-
-        return IsShownByGameRule(buffEvent) || IsAddedBuff(buffEvent, bearer);
-    }
+        => IsShownByGameRule(buffEvent) || IsAddedBuff(buffEvent, bearer);
 
     /// <summary>
-    /// <see cref="IsShownByGameRule"/> で落ちるバフ(モジュール効果のバフを除く)のうち、足して出すものか。
+    /// <see cref="IsShownByGameRule"/> で落ちるバフのうち、足して出すものか。
     /// 持続が <see cref="AddedBuffDurationThresholdMilliseconds"/> を超え、付く相手が <see cref="IsAddedBuffBearer"/> のもの。
     /// 持続なし・永続は出さない(時間の無い状態の印や数)。アイコンが無ければ空欄で出す。
+    /// 手修正 <c>BuffOverrides.json</c> が優先度を書いたバフ(<see cref="CombatDataCatalog.HasBuffPriorityOverride"/>)は足さない。
     /// </summary>
     private static bool IsAddedBuff(BuffEvent buffEvent, Entity bearer)
         => !IsShownByGameRule(buffEvent)
+           && !CombatDataCatalog.HasBuffPriorityOverride(buffEvent.BaseId)
            && buffEvent.Duration > AddedBuffDurationThresholdMilliseconds
            && IsAddedBuffBearer(bearer);
 
     /// <summary>
     /// モジュール効果のバフなら、そのモジュール効果の番号(<c>ModEffectTable.EffectID</c>)。違えば 0。
-    /// 番号で引ける(根のバフか、手修正 <c>ModuleBuffOverrides.json</c> の <c>Effect</c>)ならその効果、
-    /// 引けなければ付与元をたどった由来(<see cref="BuffEvent.Origin"/>)がモジュール効果ならその効果(手修正にまだ無い子のバフ)。
+    /// 根のバフか、直の付与元が根のバフ(子のバフ)か、付与元をたどった由来(<see cref="BuffEvent.Origin"/>)がモジュール効果か
+    /// (<see cref="CombatDataCatalog.GetModEffectId"/>)。
     /// </summary>
     public static int GetModuleEffectId(BuffEvent buffEvent)
-        => CombatDataCatalog.GetModEffectId(buffEvent.BaseId, buffEvent.Origin?.Landing ?? SourceLanding.None);
-
-    /// <summary>
-    /// モジュール効果のバフの出し方。手修正(<c>ModuleBuffOverrides.json</c>)に書かれたバフはその値、
-    /// 書かれていないモジュール効果のバフ(<see cref="GetModuleEffectId"/> が 0 でない)は <see cref="ModuleBuffDisplay.Shown"/>、
-    /// モジュール効果のバフでなければ <see cref="ModuleBuffDisplay.None"/>。
-    /// </summary>
-    public static ModuleBuffDisplay GetModuleBuffDisplay(BuffEvent buffEvent)
-    {
-        if (buffEvent.BaseId > 0 && CombatDataCatalog.TryGetModuleBuffDisplay(buffEvent.BaseId, out var display))
-        {
-            return display;
-        }
-
-        return GetModuleEffectId(buffEvent) > 0 ? ModuleBuffDisplay.Shown : ModuleBuffDisplay.None;
-    }
+        => CombatDataCatalog.GetModEffectId(
+            buffEvent.BaseId,
+            buffEvent.FightSourceType == (int)EFightSource.Buff ? buffEvent.SourceConfigId : 0,
+            buffEvent.Origin?.Landing ?? SourceLanding.None);
 
     /// <summary>どちらかのリスト(バフ・デバフ)に出るバフか。空欄検知が使う。</summary>
     public static bool IsDisplayed(BuffEvent buffEvent, Entity bearer)

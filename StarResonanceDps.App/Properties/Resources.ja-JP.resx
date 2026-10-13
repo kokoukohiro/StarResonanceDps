@@ -444,7 +444,7 @@
     <value>DTPSメーター</value>
   </data>
   <data name="Widget_TakenDamageLog" xml:space="preserve">
-    <value>被ダメログ</value>
+    <value>タイムライン</value>
   </data>
   <data name="TakenDamageLog_CastFormat" xml:space="preserve">
     <value>{0}が{1}を唱えている</value>
@@ -766,6 +766,9 @@
   </data>
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}秒</value>
+  </data>
+  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
+    <value>{0}({1})</value>
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>デバフリスト</value>

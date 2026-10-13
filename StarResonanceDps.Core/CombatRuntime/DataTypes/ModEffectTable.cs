@@ -17,8 +17,5 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
 
         /// <summary>段階の効果。<c>[3, バフID, 1]</c> はモジュールを付けている間ずっと付くバフ(モジュールの根のバフ)。</summary>
         public List<List<int>> EffectConfig { get; set; } = [];
-
-        /// <summary>モジュール効果の絵の全体のパス(<c>ui/atlas/mod_effect/…</c>)。同じ効果の段階ごとの行が同じ値を持つ。</summary>
-        public string EffectConfigIcon { get; set; } = string.Empty;
     }
 }

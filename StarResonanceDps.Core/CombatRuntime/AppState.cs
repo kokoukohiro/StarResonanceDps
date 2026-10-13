@@ -279,7 +279,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     buff = new Buff
                     {
-                        Id = string.IsNullOrWhiteSpace(item.Value.Id) ? item.Key : item.Value.Id,
+                        Id = item.Key,
                         Icon = string.Empty,
                         ShowHUDIcon = string.Empty,
                         Name = string.Empty,
@@ -307,6 +307,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (item.Value.BuffPriority.HasValue)
                 {
                     buff.BuffPriority = item.Value.BuffPriority.Value;
+                    buff.HasBuffPriorityOverride = true;
                 }
             }
 

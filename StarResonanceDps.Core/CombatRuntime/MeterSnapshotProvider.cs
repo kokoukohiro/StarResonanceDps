@@ -132,10 +132,24 @@ public sealed record PlayerMetricSummarySnapshot(
     double? CastsPerSecond);
 
 
+/// <param name="Key">
+/// 行の鍵。プレイヤーのバフ/デバフリストはバフの番号ごと(付与者に関係なく1行)。
+/// エンティティリストに載る実体のリストは、プレイヤーが付けたものは番号と付与したプレイヤーごと、それ以外は番号ごと。
+/// 同じ鍵の実体が複数あれば、残り時間の一番長い実体を出す。プレイヤーリストの枠のバッジは <paramref name="CardKey"/> と同じ。
+/// </param>
+/// <param name="CardKey">
+/// カードが追う鍵(<c>base:バフ番号</c>)。実体に関係なく同じで、保存して次の起動でも使える。
+/// 同じ鍵の行が複数(エンティティの付与したプレイヤーごと)あるときは <paramref name="IsCardRepresentative"/> の行をカードに出す。
+/// </param>
+/// <param name="Caster">
+/// エンティティリストに載る実体のリストで、プレイヤーが付けた行の付与者(行の名前に添える)。召喚物は大元の召喚者のプレイヤー。それ以外の行は null。
+/// </param>
+/// <param name="IsCardRepresentative">同じ <paramref name="CardKey"/> の行のうち、カードに出す行か(残り時間の一番長いもの)。</param>
 public sealed record PlayerBuffSnapshot(
     long Uuid,
     int BaseId,
     string Key,
+    string CardKey,
     string Name,
     /// <summary>内部ID注記を付けない名前。記憶・保存する値(カードの見出しと通知)に使う。</summary>
     string NameWithoutInternalId,
@@ -148,10 +162,13 @@ public sealed record PlayerBuffSnapshot(
     /// </summary>
     bool IsRemainingUnknown = false,
     /// <summary>
-    /// モジュール効果のバフの出し方(<see cref="BuffDisplayRules.GetModuleBuffDisplay"/>)。リストの設定「モジュール効果」で絞るのに使う。
-    /// <see cref="ModuleBuffDisplay.Hidden"/> の行は作らない。
+    /// モジュール効果のバフか(<see cref="BuffDisplayRules.GetModuleEffectId"/> が 0 でない)。リストの設定「モジュール効果」で絞るのに使う。
     /// </summary>
-    ModuleBuffDisplay ModuleDisplay = ModuleBuffDisplay.None);
+    bool IsModuleEffect = false,
+    /// <summary>永続(持続が負)のバフか。リストの設定「モジュール効果」の常駐効果はこれ。</summary>
+    bool IsPermanent = false,
+    TakenDamageLogParty? Caster = null,
+    bool IsCardRepresentative = true);
 
 /// <param name="Grade">技の枠の TIPS に出す G○ の数字(<see cref="MeterSnapshotProvider.ResolveSkillGrade"/>)。出さないなら null。</param>
 public sealed record PlayerCooldownSkillSnapshot(
@@ -693,9 +710,10 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(entity, kind);
+        return CreateBuffSnapshots(encounter, entity, kind, BuffRowGrouping.ByBuff);
     }
 
+    /// <summary>エンティティリストに載る実体のバフ/デバフリストとカードが読む。</summary>
     public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind)
     {
         var encounter = EncounterManager.Current;
@@ -705,22 +723,43 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(entity, kind);
+        return CreateBuffSnapshots(encounter, entity, kind, BuffRowGrouping.ByPlayerCaster);
+    }
+
+    /// <summary>バフ/デバフリストの行のまとめ方。</summary>
+    private enum BuffRowGrouping
+    {
+        /// <summary>バフの番号ごとに1行。付与者に関係なく上書きする(プレイヤーのリスト)。</summary>
+        ByBuff,
+
+        /// <summary>
+        /// プレイヤーが付けたものは番号と付与したプレイヤーごとに1行で、付与者の名前を添える。
+        /// それ以外(付与者なし・モンスター・召喚者の分からない召喚物)は名前を添えず番号ごとに1行(エンティティリストに載る実体のリスト)。
+        /// </summary>
+        ByPlayerCaster,
     }
 
     /// <summary>
-    /// バフ/デバフリストの行。出す条件は <see cref="BuffDisplayRules.IsListed"/>(モジュール効果のバフはモジュール効果の出し方、
-    /// それ以外はゲーム内のバフバーと同じ条件のものと、足して出すもの)。
+    /// バフ/デバフリストの行。出す条件は <see cref="BuffDisplayRules.IsListed"/>(ゲーム内のバフバーと同じ条件のものと、足して出すもの)。
     /// 表に名前が無ければ付与元をたどった由来の名前を出し(<see cref="CombatDataCatalog.GetBuffDisplayNameWithoutInternalId"/>)、
-    /// 絵はバフ自身の絵、無ければモジュール効果の絵(<see cref="ResolveBuffListIconName"/>)。どちらも無ければ空欄のまま渡す。
+    /// 絵はバフの絵(<see cref="CombatDataCatalog.GetBuffOwnIconName"/>)。無ければ空欄のまま渡す。
+    ///
+    /// <para>
+    /// 行のまとめ方は <paramref name="grouping"/>(<see cref="BuffRowGrouping"/>)。同じ行にまとまる実体が複数あれば、
+    /// 残り時間の一番長い実体(持続の無いもの・残りの分からないものが勝つ、同じなら先の実体)の層・残り時間を出し、足さない。
+    /// カードはバフの番号で追い、同じ番号の行のうち残り時間の一番長い行を出す。
+    /// </para>
     /// </summary>
     private static IReadOnlyList<PlayerBuffSnapshot> CreateBuffSnapshots(
+        Encounter encounter,
         Entity entity,
-        PlayerBuffListKind kind)
+        PlayerBuffListKind kind,
+        BuffRowGrouping grouping)
     {
         var buffEvents = ResolveDisplayBuffEvents(entity);
-        var entriesByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
-        var entryKeys = new List<string>(buffEvents.Length);
+        var rowsByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
+        var rowKeys = new List<string>(buffEvents.Length);
+        var partyCache = new Dictionary<long, TakenDamageLogParty>();
 
         // 初出順(古い順)で回す。ソートせず、新しいバフが末尾に付く並びにする。
         // ストアが初出順で返すので、ここで逆順にすると並びが反転する。
@@ -732,7 +771,7 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            var iconName = ResolveBuffListIconName(buffEvent);
+            var iconName = buffEvent.BaseId > 0 ? CombatDataCatalog.GetBuffOwnIconName(buffEvent.BaseId) : string.Empty;
             var nameWithoutInternalId = buffEvent.BaseId > 0
                 ? CombatDataCatalog.GetBuffDisplayNameWithoutInternalId(buffEvent.BaseId, buffEvent.Origin?.Landing ?? SourceLanding.None)
                 : string.Empty;
@@ -754,36 +793,85 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            var key = ResolveBuffSnapshotKey(buffEvent);
+            var cardKey = ResolveBuffCardKey(buffEvent);
+            var playerCasterUuid = grouping == BuffRowGrouping.ByPlayerCaster
+                ? ResolveBuffPlayerCasterUuid(encounter, buffEvent.FireUuid)
+                : 0;
+            var key = ResolveBuffRowKey(cardKey, playerCasterUuid);
+            var isNewRow = !rowsByKey.TryGetValue(key, out var currentRow);
+            if (!isNewRow && currentRow!.EffectiveRemoveTime >= effectiveRemoveTime)
+            {
+                continue;
+            }
+
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
                 buffEvent.BaseId,
                 key,
+                cardKey,
                 name,
                 nameWithoutInternalId,
                 iconName,
                 buffEvent.Layer,
                 remainingSeconds,
                 remainingUnknown,
-                BuffDisplayRules.GetModuleBuffDisplay(buffEvent));
-            var candidate = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
-
-            if (!entriesByKey.TryGetValue(key, out var existing))
+                BuffDisplayRules.GetModuleEffectId(buffEvent) > 0,
+                buffEvent.Duration < 0,
+                playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null);
+            rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
+            if (isNewRow)
             {
-                entriesByKey.Add(key, candidate);
-                entryKeys.Add(key);
-                continue;
-            }
-
-            if (candidate.EffectiveRemoveTime > existing.EffectiveRemoveTime)
-            {
-                entriesByKey[key] = candidate;
+                rowKeys.Add(key);
             }
         }
 
-        return entryKeys
-            .Select(key => entriesByKey[key].Snapshot)
-            .ToArray();
+        // カードの鍵(バフの番号)ごとに、カードに出す行(残り時間の一番長い行、同じなら先の行)を決める。
+        var representativeByCardKey = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var key in rowKeys)
+        {
+            var row = rowsByKey[key];
+            if (!representativeByCardKey.TryGetValue(row.Snapshot.CardKey, out var representativeKey)
+                || row.EffectiveRemoveTime > rowsByKey[representativeKey].EffectiveRemoveTime)
+            {
+                representativeByCardKey[row.Snapshot.CardKey] = key;
+            }
+        }
+
+        var snapshots = new PlayerBuffSnapshot[rowKeys.Count];
+        for (var index = 0; index < rowKeys.Count; index++)
+        {
+            var key = rowKeys[index];
+            var snapshot = rowsByKey[key].Snapshot;
+            snapshots[index] = string.Equals(representativeByCardKey[snapshot.CardKey], key, StringComparison.Ordinal)
+                ? snapshot
+                : snapshot with { IsCardRepresentative = false };
+        }
+
+        return snapshots;
+    }
+
+    /// <summary>
+    /// バフを付けたプレイヤーの実体。付与者の実体がプレイヤーならその人、召喚物で大元の召喚者(付与者の実体の <c>AttrTopSummonerId</c>)が
+    /// プレイヤーならその人(被ダメログの加害者の寄せ方 <see cref="Encounter.ResolveTakenDamageLogActor"/> と同じ結果)。
+    /// プレイヤーでなければ 0(付与者なし・モンスター・召喚者の分からない召喚物)。
+    /// </summary>
+    private static long ResolveBuffPlayerCasterUuid(Encounter encounter, long fireUuid)
+    {
+        if (fireUuid == 0)
+        {
+            return 0;
+        }
+
+        if ((EEntityType)Utils.UuidToEntityType(fireUuid) == EEntityType.EntChar)
+        {
+            return fireUuid;
+        }
+
+        return encounter.Entities.TryGetValue(fireUuid, out var fireEntity)
+            && fireEntity.GetAttrKV("AttrTopSummonerId") is long summonerUuid
+            && (EEntityType)Utils.UuidToEntityType(summonerUuid) == EEntityType.EntChar
+            ? summonerUuid
+            : 0;
     }
 
     public static PlayerImagineRoleSkillLoadoutSnapshot GetPlayerImagineRoleSkills(long characterId)
@@ -1318,10 +1406,11 @@ public static class MeterSnapshotProvider
 
             candidatesBySkill.TryGetValue(trackedSkillId, out var candidates);
 
-            var key = ResolveBuffSnapshotKey(buffEvent);
+            var key = ResolveBuffCardKey(buffEvent);
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
                 buffEvent.BaseId,
+                key,
                 key,
                 name,
                 CombatDataCatalog.GetBuffNameWithoutInternalId(buffEvent.BaseId),
@@ -2111,15 +2200,8 @@ public static class MeterSnapshotProvider
             : string.Empty;
     }
 
-    /// <summary>バフ/デバフリストの行の絵(<see cref="CombatDataCatalog.GetBuffDisplayIconName"/>)。</summary>
-    private static string ResolveBuffListIconName(BuffEvent buffEvent)
-    {
-        return buffEvent.BaseId > 0
-            ? CombatDataCatalog.GetBuffDisplayIconName(buffEvent.BaseId, buffEvent.Origin?.Landing ?? SourceLanding.None)
-            : string.Empty;
-    }
-
-    private static string ResolveBuffSnapshotKey(BuffEvent buffEvent)
+    /// <summary>カードとプレイヤーリストの枠のバッジの鍵。バフの番号ごと(番号の無い実体はその実体)。</summary>
+    private static string ResolveBuffCardKey(BuffEvent buffEvent)
     {
         if (buffEvent.BaseId > 0)
         {
@@ -2128,6 +2210,13 @@ public static class MeterSnapshotProvider
 
         return $"uuid:{buffEvent.Uuid}";
     }
+
+    /// <summary>
+    /// バフ/デバフリストの行の鍵。バフの番号ごと(<paramref name="cardKey"/>)、付与したプレイヤーで分ける行はその実体を足す
+    /// (<see cref="BuffRowGrouping"/>)。
+    /// </summary>
+    private static string ResolveBuffRowKey(string cardKey, long playerCasterUuid)
+        => playerCasterUuid == 0 ? cardKey : $"{cardKey}:player:{playerCasterUuid}";
 
     /// <summary>
     /// 表示用のバフ取得。<b>常に <see cref="Services.ActiveBuffStore"/> だけを見る。</b>

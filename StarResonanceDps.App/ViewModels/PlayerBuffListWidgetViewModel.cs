@@ -118,7 +118,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             return;
         }
 
-        _openCard?.Invoke(characterId, _kind, entry.Key, entry.BaseId);
+        _openCard?.Invoke(characterId, _kind, entry.CardKey, entry.BaseId);
     }
 
     [RelayCommand]

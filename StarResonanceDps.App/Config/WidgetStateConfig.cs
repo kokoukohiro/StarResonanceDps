@@ -321,7 +321,7 @@ public sealed class BuffListWidgetSettingsConfig
 
     /// <summary>
     /// モジュール効果のバフの出し方。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。
-    /// 常駐かどうかは手修正 <c>ModuleBuffOverrides.json</c> が決める(<c>ModuleBuffDisplay</c>)。
+    /// 常駐効果は永続(持続が負)のモジュール効果のバフ(<c>PlayerBuffSnapshot.IsPermanent</c>)。
     /// </summary>
     public int ModuleEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
 
@@ -756,7 +756,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>一覧の並び替え: 名前順(群の中を画面に出している名前で並べる)。</summary>
     public const int NameListSortModeIndex = 1;
-    public const int DefaultTakenDamageLogAttackerFilterIndex = 0;
+    public const int DefaultTakenDamageLogAttackerFilterIndex = 1;
     public const int NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex = 1;
     public const int MinClassColorFilterStrength = 0;
     public const int MaxClassColorFilterStrength = 100;

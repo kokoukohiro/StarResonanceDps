@@ -2,6 +2,7 @@
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
@@ -151,6 +152,41 @@ public static partial class PlayerInfoFormatFormatter
         return isNpc
             ? LocalizationManager.Instance.GetString($"Classes_{PlayerProfession.GetKey(professionId)}")
             : GetDisplayName(name, userId, isSelf, nameDisplayMode);
+    }
+
+    /// <summary>
+    /// 被ダメログの登場人物(加害者・対象)と、バフ/デバフリストの付与者(エンティティのリストでプレイヤーが付けた行)の表示値。
+    /// システム(召喚者へ寄せられなかった仮想体)は「システム」、名前の無い HP バーの見える敵は「敵」、何者か分からない敵は「未知の敵」、
+    /// プレイヤーはプレイヤー名の規則(<see cref="GetDisplayName(string?, long, bool, bool, int, PlayerNameDisplayMode)"/>)、
+    /// それ以外は名前のまま。
+    /// </summary>
+    public static string GetPartyDisplayName(TakenDamageLogParty person)
+    {
+        if (person.IsSystem)
+        {
+            return LocalizationManager.Instance["TakenDamageLog_SystemActor"];
+        }
+
+        // 名前の無い、HP バーの見える敵。文言はエンティティリストと同じ。名前には内部ID注記だけが入っていることがある。
+        if (person.IsUnnamedEnemy)
+        {
+            return LocalizationManager.Instance["EntityList_UnnamedEnemy"] + person.Name;
+        }
+
+        if (person.IsUnknownEnemy)
+        {
+            return LocalizationManager.Instance["EntityList_UnknownEnemy"];
+        }
+
+        return person.IsPlayer
+            ? GetDisplayName(
+                person.Name,
+                person.CharacterId,
+                person.IsSelf,
+                person.IsNpc,
+                person.ProfessionId,
+                PlayerRosterPresentationStore.Instance.NameDisplayMode)
+            : person.Name;
     }
 
     private static string GetName(PlayerInfoFormatData player, PlayerNameDisplayMode nameDisplayMode)

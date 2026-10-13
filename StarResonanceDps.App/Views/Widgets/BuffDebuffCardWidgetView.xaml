@@ -68,6 +68,34 @@
                     </Image.Style>
                 </Image>
 
+                <!--
+                    絵のパスはあるのにファイルが無いバフははてな(プレイヤーリストの技の枠と同じ作り)。大きさは絵の枠いっぱい。
+                    影は Effect.ProfessionIconShadow と同じ値で、ずれとぼかしに倍率を掛ける(文字の影と同じく、変形で拡大しない)。
+                -->
+                <Rectangle Fill="White">
+                    <Rectangle.Effect>
+                        <DropShadowEffect Color="#000000"
+                                          Opacity="0.5"
+                                          ShadowDepth="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=2}"
+                                          BlurRadius="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=5}" />
+                    </Rectangle.Effect>
+                    <Rectangle.OpacityMask>
+                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                    </Rectangle.OpacityMask>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Style="{StaticResource Text.WidgetWindow}"

@@ -12,12 +12,12 @@ namespace StarResonanceDps.Core.Diagnostics;
 /// リストに出る条件(<see cref="BuffDisplayRules.IsDisplayed"/>)を満たすもの。ウィジェットを開いていなくても、全部の実体のバフで拾う。
 /// スキル詳細の空欄検知(<see cref="BlankSourceNameProbe"/>)と同じく、どこにも着かず空欄のまま出るものだけでなく、
 /// 付与元をたどった由来(オプション・技)に着いてその名前で出るものも書く(由来の名前はバフ自身の名前より確かさが一段低い)。
-/// <b>モジュール効果のバフは書かない</b>(呼ぶ側で外す。名前と絵はモジュール効果から出し、出し方は手修正で決めている)。
+/// <b>モジュール効果のバフは書かない</b>(呼ぶ側で外す。名前・絵・出し方は番号ごとの手修正で決めている)。
 /// どれも<b>たどった鎖</b>を書く。同じバフが別の由来に着いた回は、食い違いとして書く。
 /// </para>
 ///
 /// <para>
-/// 出たバフは <c>Data/Overrides/BuffNameManualOverrides.json</c> に名前を足す候補になる。
+/// 出たバフは <c>Data/Overrides/BuffNameAssignedOverrides.json</c> に名前を足す候補になる。
 /// <b>値は実物を確認してから入れること。</b> 根拠のない名前は、空欄のままより悪い。
 /// </para>
 ///

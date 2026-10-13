@@ -507,7 +507,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>DTPS Meter</value>
   </data>
   <data name="Widget_TakenDamageLog" xml:space="preserve">
-    <value>Damage Taken Log</value>
+    <value>Timeline</value>
   </data>
   <data name="TakenDamageLog_CastFormat" xml:space="preserve">
     <value>{0} is casting {1}</value>
@@ -829,6 +829,9 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}s</value>
+  </data>
+  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
+    <value>{0} ({1})</value>
   </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>Debuff List</value>

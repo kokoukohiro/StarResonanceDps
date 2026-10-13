@@ -9,7 +9,6 @@ using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
-using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -116,7 +115,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     {
         _widget = widget;
         _settings = widget.GetTakenDamageLogSettingsSnapshot();
-        _notificationTracker = new TelegraphedSkillNotificationTracker(widget.GetTakenDamageLogSettingsSnapshot, GetDisplayName);
+        _notificationTracker = new TelegraphedSkillNotificationTracker(widget.GetTakenDamageLogSettingsSnapshot, PlayerInfoFormatFormatter.GetPartyDisplayName);
         Entries = new ReadOnlyObservableCollection<TakenDamageLogEntry>(_entries);
 
         _refreshTimer = new DispatcherTimer
@@ -342,8 +341,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         EnsureMarkers(text, formatKey, AttackerNameMarker, SourceNameMarker);
 
         IReadOnlyList<object> attacker = line.Attacker.IsPlayer
-            ? [CreateClassIconSegment(line.Attacker), ColoredText(GetDisplayName(line.Attacker), "EntityName")]
-            : [ColoredText(GetDisplayName(line.Attacker), "EntityName")];
+            ? [CreateClassIconSegment(line.Attacker), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(line.Attacker), "EntityName")]
+            : [ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(line.Attacker), "EntityName")];
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
@@ -364,7 +363,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
         var replacements = new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(GetDisplayName(target), "PlayerName")],
+            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
             [DamagePartMarker[0]] = CreateDamageSegments(row)
         };
 
@@ -522,7 +521,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(GetDisplayName(target), "PlayerName")],
+            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
             [HealthPartMarker[0]] = part
         });
     }
@@ -539,7 +538,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(GetDisplayName(target), "PlayerName")],
+            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
             [HealthPartMarker[0]] = CreateHealthSegments(row.TargetHpBefore!.Value, row.TargetShieldBefore ?? 0L, row.TargetMaxHpBefore ?? 0L),
             [AfterHealthMarker[0]] = after
         });
@@ -728,34 +727,5 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         return _settings.AttackerFilterIndex == WidgetConfigDefaults.NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex
             && line.Kind == TakenDamageLogRecordKind.Hit
             && line.Attacker.IsPlayer;
-    }
-
-    private static string GetDisplayName(TakenDamageLogParty person)
-    {
-        if (person.IsSystem)
-        {
-            return LocalizationManager.Instance["TakenDamageLog_SystemActor"];
-        }
-
-        // 名前の無い、HP バーの見える敵。文言はエンティティリストと同じ。名前には内部ID注記だけが入っていることがある。
-        if (person.IsUnnamedEnemy)
-        {
-            return LocalizationManager.Instance["EntityList_UnnamedEnemy"] + person.Name;
-        }
-
-        if (person.IsUnknownEnemy)
-        {
-            return LocalizationManager.Instance["EntityList_UnknownEnemy"];
-        }
-
-        return person.IsPlayer
-            ? PlayerInfoFormatFormatter.GetDisplayName(
-                person.Name,
-                person.CharacterId,
-                person.IsSelf,
-                person.IsNpc,
-                person.ProfessionId,
-                PlayerRosterPresentationStore.Instance.NameDisplayMode)
-            : person.Name;
     }
 }

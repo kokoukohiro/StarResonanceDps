@@ -21,11 +21,16 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     public PlayerBuffEntry(PlayerBuffSnapshot snapshot)
     {
         Key = snapshot.Key;
+        CardKey = snapshot.CardKey;
         Uuid = snapshot.Uuid;
         Update(snapshot);
     }
 
+    /// <summary>行の鍵(バフの番号ごと、エンティティのリストでプレイヤーが付けたものは番号と付与したプレイヤーごと)。</summary>
     public string Key { get; private set; }
+
+    /// <summary>この行から開くカードが追う鍵(バフの番号ごと)。</summary>
+    public string CardKey { get; private set; }
 
     public long Uuid { get; private set; }
 
@@ -50,6 +55,10 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     /// <summary>絵がモジュール効果の絵か。モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵と別の大きさで出す。</summary>
     [ObservableProperty]
     private bool _isModuleEffectIcon;
+
+    /// <summary>絵のパスはあるのにファイルが見つからないか。はてなを出す。パスが空なら何も出さない。</summary>
+    [ObservableProperty]
+    private bool _showsUnknownIcon;
 
     /// <summary>行のゲージの長さ(0〜1)。満タンになる残り時間は表示設定で決まる。</summary>
     [ObservableProperty]
@@ -78,15 +87,17 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     public void Update(PlayerBuffSnapshot snapshot)
     {
         Key = snapshot.Key;
+        CardKey = snapshot.CardKey;
         Uuid = snapshot.Uuid;
         BaseId = snapshot.BaseId;
-        Name = snapshot.Name ?? string.Empty;
+        Name = FormatName(snapshot);
         // 1スタックは数字を出さない。重なっているときだけ意味がある。
         LayerText = snapshot.Layer > 1 ? snapshot.Layer.ToString() : string.Empty;
         DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
         IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(snapshot.IconName);
+        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(snapshot.IconName) && IconPath is null;
 
         _remainingSeconds = snapshot.RemainingSeconds;
         _isRemainingUnknown = snapshot.IsRemainingUnknown;
@@ -120,6 +131,24 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         BarRatio = ratio;
         IsBarFull = ratio >= 1d;
         BarDecaySeconds = decaySeconds;
+    }
+
+    /// <summary>
+    /// 行の名前。エンティティのリストでプレイヤーが付けた行(<see cref="PlayerBuffSnapshot.Caster"/>)だけ
+    /// 「バフ名(付与者名)」にし、内部ID注記はその後に付ける。
+    /// </summary>
+    private static string FormatName(PlayerBuffSnapshot snapshot)
+    {
+        if (snapshot.Caster is not { } caster)
+        {
+            return snapshot.Name ?? string.Empty;
+        }
+
+        var nameWithCaster = LocalizationManager.Instance.Format(
+            "Widget_BuffNameWithCasterFormat",
+            snapshot.NameWithoutInternalId,
+            PlayerInfoFormatFormatter.GetPartyDisplayName(caster));
+        return CombatDataCatalog.AppendBuffInternalId(nameWithCaster, snapshot.BaseId);
     }
 
     /// <summary>

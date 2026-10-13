@@ -1,0 +1,146 @@
+{
+  "55430": {
+    "Name": {
+      "zh-CN": "嘲讽",
+      "en-US": "Taunt",
+      "ja-JP": "挑発",
+      "ko-KR": "도발"
+    }
+  },
+  "2110085": {
+    "Name": {
+      "zh-CN": "雷电之种",
+      "en-US": "Seed of Lightning",
+      "ja-JP": "サンダーシード",
+      "ko-KR": "뇌전의 씨앗"
+    }
+  },
+  "2110302": {
+    "Name": {
+      "zh-CN": "琉火庇护",
+      "en-US": "Blessing of Flowing Fire",
+      "ja-JP": "琉火の加護",
+      "ko-KR": "유화의 가호"
+    }
+  },
+  "2300020": {
+    "Name": {
+      "zh-CN": "精英打击",
+      "en-US": "Elite Strike",
+      "ja-JP": "精鋭打撃",
+      "ko-KR": "엘리트 타격"
+    }
+  },
+  "2300070": {
+    "Name": {
+      "zh-CN": "极·生命凝聚",
+      "en-US": "Life Condense",
+      "ja-JP": "極・HP凝縮",
+      "ko-KR": "극・체력 응집"
+    }
+  },
+  "2300080": {
+    "Name": {
+      "zh-CN": "极·生命吸取",
+      "en-US": "Life Steal",
+      "ja-JP": "極・HP吸収",
+      "ko-KR": "극・생명 흡수"
+    }
+  },
+  "2300120": {
+    "Name": {
+      "zh-CN": "特攻伤害加持",
+      "en-US": "Special Attack",
+      "ja-JP": "特攻ダメージ強化",
+      "ko-KR": "특수 공격 대미지 강화"
+    }
+  },
+  "2300220": {
+    "Name": {
+      "zh-CN": "敏捷加持",
+      "en-US": "Agility Boost",
+      "ja-JP": "敏捷強化",
+      "ko-KR": "민첩 강화"
+    }
+  },
+  "2300310": {
+    "Name": {
+      "zh-CN": "智力加持",
+      "en-US": "Intellect Boost",
+      "ja-JP": "知力強化",
+      "ko-KR": "지력 강화"
+    }
+  },
+  "2300410": {
+    "Name": {
+      "zh-CN": "特攻治疗加持",
+      "en-US": "Healing Boost",
+      "ja-JP": "特攻回復強化",
+      "ko-KR": "특수 공격 치료 강화"
+    }
+  },
+  "2300420": {
+    "Name": {
+      "zh-CN": "专精治疗加持",
+      "en-US": "Healing Enhance",
+      "ja-JP": "マスタリー回復強化",
+      "ko-KR": "마스터리 치료 강화"
+    }
+  },
+  "2300620": {
+    "Name": {
+      "zh-CN": "极·伤害叠加",
+      "en-US": "DMG Stack",
+      "ja-JP": "極・ダメージ増強",
+      "ko-KR": "극・대미지 중첩"
+    }
+  },
+  "2300621": {
+    "Name": {
+      "zh-CN": "极·伤害叠加",
+      "en-US": "DMG Stack",
+      "ja-JP": "極・ダメージ増強",
+      "ko-KR": "극・대미지 중첩"
+    }
+  },
+  "2300820": {
+    "Name": {
+      "zh-CN": "极·绝境守护",
+      "en-US": "Final Protection",
+      "ja-JP": "極・絶境守護",
+      "ko-KR": "극・절경 수호"
+    }
+  },
+  "2302021": {
+    "Name": {
+      "zh-CN": "极·灵活身法",
+      "en-US": "Agile",
+      "ja-JP": "極・適応力",
+      "ko-KR": "극・유연한 신법"
+    }
+  },
+  "2302121": {
+    "Name": {
+      "zh-CN": "极·全队幸暴",
+      "en-US": "Team Luck & Crit",
+      "ja-JP": "極・幸運会心",
+      "ko-KR": "극・팀 전체 행운 치명타"
+    }
+  },
+  "2302321": {
+    "Name": {
+      "zh-CN": "极·急救措施",
+      "en-US": "First Aid",
+      "ja-JP": "極・応急処置",
+      "ko-KR": "극・응급 처치"
+    }
+  },
+  "2302421": {
+    "Name": {
+      "zh-CN": "极·生命波动",
+      "en-US": "Life Wave",
+      "ja-JP": "極・HP変動",
+      "ko-KR": "극・생명 파동"
+    }
+  }
+}
