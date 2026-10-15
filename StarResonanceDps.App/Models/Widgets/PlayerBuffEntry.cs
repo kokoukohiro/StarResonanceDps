@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Windows.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.App.Localization;
@@ -52,6 +53,12 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>
+    /// 絵が Icons.xaml の絵(装備効果)なら、白く塗る面の型抜き(<see cref="CombatIconResolver.ResolveBuffIconMask"/>)。そうでなければ null。
+    /// </summary>
+    [ObservableProperty]
+    private ImageBrush? _iconMask;
+
     /// <summary>絵がモジュール効果の絵か。モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵と別の大きさで出す。</summary>
     [ObservableProperty]
     private bool _isModuleEffectIcon;
@@ -96,8 +103,9 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
+        IconMask = CombatIconResolver.ResolveBuffIconMask(snapshot.IconName);
         IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(snapshot.IconName);
-        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(snapshot.IconName) && IconPath is null;
+        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(snapshot.IconName) && IconPath is null && IconMask is null;
 
         _remainingSeconds = snapshot.RemainingSeconds;
         _isRemainingUnknown = snapshot.IsRemainingUnknown;

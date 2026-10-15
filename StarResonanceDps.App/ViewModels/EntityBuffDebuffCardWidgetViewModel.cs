@@ -1,4 +1,5 @@
 ﻿using System.Windows.Threading;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
@@ -52,6 +53,10 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
 
     [ObservableProperty]
     private string? _iconPath;
+
+    /// <summary>絵が Icons.xaml の絵(装備効果)なら型抜き(<see cref="BuffDebuffCardContent.IconMask"/>)。</summary>
+    [ObservableProperty]
+    private ImageBrush? _iconMask;
 
     /// <summary>絵がモジュール効果の絵か(<see cref="BuffDebuffCardContent.IsModuleEffectIcon"/>)。絵の大きさを切り替える。</summary>
     [ObservableProperty]
@@ -315,6 +320,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         DurationText = content.DurationText;
         LayerText = content.LayerText;
         IconPath = content.IconPath;
+        IconMask = content.IconMask;
         IsModuleEffectIcon = content.IsModuleEffectIcon;
         ShowsUnknownIcon = content.ShowsUnknownIcon;
         HasBuff = hasBuff;

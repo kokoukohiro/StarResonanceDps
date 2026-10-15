@@ -5,8 +5,9 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// バフ・デバフ一覧に出す行を、一覧の設定で絞る。プレイヤーから開いた一覧とエンティティリストから開いた一覧の両方が使う。
-/// 絞るのは、非表示リスト(右クリックで足したバフ)と、設定「モジュール効果」
-/// (行の <see cref="PlayerBuffSnapshot.IsModuleEffect"/>。常駐効果は永続 <see cref="PlayerBuffSnapshot.IsPermanent"/> のもの)。
+/// 絞るのは、非表示リスト(右クリックで足したバフ)と、設定「モジュール効果」(行の <see cref="PlayerBuffSnapshot.IsModuleEffect"/>)・
+/// 「装備効果」(行の <see cref="PlayerBuffSnapshot.IsEquipmentEffect"/>)。
+/// 常駐効果はどちらも永続 <see cref="PlayerBuffSnapshot.IsPermanent"/> のもの。
 /// </summary>
 public static class BuffListSnapshotFilter
 {
@@ -37,16 +38,26 @@ public static class BuffListSnapshotFilter
             return false;
         }
 
-        if (!snapshot.IsModuleEffect)
+        if (snapshot.IsModuleEffect)
         {
-            return true;
+            return settings.ModuleEffectDisplayModeIndex switch
+            {
+                WidgetConfigDefaults.HideModuleEffectDisplayModeIndex => false,
+                WidgetConfigDefaults.HideResidentModuleEffectDisplayModeIndex => !snapshot.IsPermanent,
+                _ => true
+            };
         }
 
-        return settings.ModuleEffectDisplayModeIndex switch
+        if (snapshot.IsEquipmentEffect)
         {
-            WidgetConfigDefaults.HideModuleEffectDisplayModeIndex => false,
-            WidgetConfigDefaults.HideResidentModuleEffectDisplayModeIndex => !snapshot.IsPermanent,
-            _ => true
-        };
+            return settings.EquipmentEffectDisplayModeIndex switch
+            {
+                WidgetConfigDefaults.HideEquipmentEffectDisplayModeIndex => false,
+                WidgetConfigDefaults.HideResidentEquipmentEffectDisplayModeIndex => !snapshot.IsPermanent,
+                _ => true
+            };
+        }
+
+        return true;
     }
 }

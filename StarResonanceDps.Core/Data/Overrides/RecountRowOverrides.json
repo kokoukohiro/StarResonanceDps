@@ -37,6 +37,12 @@
   "1904:0": {
     "Row": "1901:0"
   },
+  "2233:7": {
+    "Row": "2233:3"
+  },
+  "2233:8": {
+    "Row": "2233:3"
+  },
   "2426:2": {
     "Row": "2413:2"
   },
@@ -52,6 +58,17 @@
   "2453:1": {
     "Row": "2421:1"
   },
+  "2454:1": {
+    "Name": {
+      "zh-CN": "神盾灵感因子X7-先锋追击",
+      "en-US": "Shield Knight Inspiration Factor X7 - Vanguard Hunt",
+      "ja-JP": "シールドファイター・想像因子X7-ヴァンガードラッシュ",
+      "ko-KR": "실드 나이트 영감 인자 X7 - 선봉 추격"
+    }
+  },
+  "2454:2": {
+    "Row": "2454:1"
+  },
   "21406:4": {
     "Name": {
       "zh-CN": "森语X10-森之祈愿",
@@ -59,6 +76,9 @@
       "ja-JP": "ヴァーダントオラクルX10-グローヴウィッシュ",
       "ko-KR": "실반 오라클X10 - 숲의 기도"
     }
+  },
+  "21424:6": {
+    "Row": "21424:3"
   },
   "3614:2": {
     "Name": {
@@ -300,6 +320,22 @@
   "920093:2": {
     "Row": "920006:0"
   },
+  "920501:1": {
+    "Name": {
+      "zh-CN": "火球",
+      "en-US": "Fireball",
+      "ja-JP": "火の球",
+      "ko-KR": "화염구"
+    }
+  },
+  "920502:2": {
+    "Name": {
+      "zh-CN": "冰球",
+      "en-US": "Ice Ball",
+      "ja-JP": "氷の球",
+      "ko-KR": "얼음구"
+    }
+  },
   "997820:3": {
     "Name": {
       "zh-CN": "栖林的神秘力量",
@@ -424,10 +460,10 @@
   },
   "2406140:3": {
     "Name": {
-      "zh-CN": "护盾(套装效果)",
-      "en-US": "Shield - Set Effect",
-      "ja-JP": "バリア(セット効果)",
-      "ko-KR": "실드(세트 효과)"
+      "zh-CN": "护盾(虚蚀系列装备4件套效果)",
+      "en-US": "Shield - Void Corruption Series Equipment 4-Piece Set Effect",
+      "ja-JP": "バリア(虚蝕シリーズ装備4set効果)",
+      "ko-KR": "실드(허무의 침식 시리즈 장비 4세트 효과)"
     }
   },
   "2900441:9": {
@@ -477,45 +513,58 @@
   },
   "3052120:11": {
     "Name": {
-      "zh-CN": "冰魔狂想X1",
-      "en-US": "Frost Mage Rhapsody X1",
-      "ja-JP": "フロストメイジ・狂想X1",
-      "ko-KR": "프로스트 메이지 광상X1"
+      "zh-CN": "冰魔狂想X1-冰冷脉冲",
+      "en-US": "Frost Mage Rhapsody X1 - Cold Pulse",
+      "ja-JP": "フロストメイジ・狂想X1-コールドパルス",
+      "ko-KR": "프로스트 메이지 광상X1 - 콜드 펄스"
+    }
+  },
+  "3054151:3": {
+    "Name": {
+      "zh-CN": "神盾灵感因子X7-圣光环形斩",
+      "en-US": "Shield Knight Inspiration Factor X7 - Divine Arc Slash",
+      "ja-JP": "シールドファイター・想像因子X7-サーキュラースラッシュ",
+      "ko-KR": "실드 나이트 영감 인자 X7 - 신성한 빛 환형 참격"
     }
   },
   "3054412:1": {
     "Name": {
-      "zh-CN": "神盾真实因子X2",
-      "en-US": "Shield Knight Reality Factor X2",
-      "ja-JP": "シールドファイター・実像因子X2",
-      "ko-KR": "실드 나이트 진실 인자X2"
+      "zh-CN": "神盾真实因子X2-圣环",
+      "en-US": "Shield Knight Reality Factor X2 - Divine Circle",
+      "ja-JP": "シールドファイター・実像因子X2-ホーリーリング",
+      "ko-KR": "실드 나이트 진실 인자X2 - 디바인 서클"
     }
   },
   "3054440:6": {
-    "Row": "2421:1"
+    "Name": {
+      "zh-CN": "神盾真实因子X5-圣剑",
+      "en-US": "Shield Knight Reality Factor X5 - Sacred Blade",
+      "ja-JP": "シールドファイター・実像因子X5-ホーリーソード",
+      "ko-KR": "실드 나이트 진실 인자X5 - 성스러운 검"
+    }
   },
   "3056152:4": {
     "Name": {
-      "zh-CN": "森语狂想X4",
-      "en-US": "Verdant Oracle Rhapsody X4",
-      "ja-JP": "ヴァーダントオラクル・狂想X4",
-      "ko-KR": "실반 오라클 광사X4"
+      "zh-CN": "森语狂想X4-滋养",
+      "en-US": "Verdant Oracle Rhapsody X4 - Nourish",
+      "ja-JP": "ヴァーダントオラクル・狂想X4-リジェネレーション",
+      "ko-KR": "실반 오라클 광사X4 - 양분 주기"
     }
   },
   "3057111:4": {
     "Name": {
-      "zh-CN": "灵魂X11",
-      "en-US": "Beat Performer X11",
-      "ja-JP": "ビートパフォーマーX11",
-      "ko-KR": "비트 퍼포머X11"
+      "zh-CN": "灵魂X11-激涌五重奏",
+      "en-US": "Beat Performer X11 - Fivefold Crescendo",
+      "ja-JP": "ビートパフォーマーX11-サージクインテット",
+      "ko-KR": "비트 퍼포머X11 - 격렬한 오중주"
     }
   },
   "3057431:1": {
     "Name": {
-      "zh-CN": "灵魂真实因子X4",
-      "en-US": "Beat Performer Reality Factor X4",
-      "ja-JP": "ビートパフォーマー・実像因子X4",
-      "ko-KR": "비트 퍼포머 진실 인자X4"
+      "zh-CN": "灵魂真实因子X4-激涌治疗",
+      "en-US": "Beat Performer Reality Factor X4 - Surge Healing",
+      "ja-JP": "ビートパフォーマー・実像因子X4-サージヒール",
+      "ko-KR": "비트 퍼포머 진실 인자X4 - 격렬한 치료"
     }
   },
   "3059080:3": {

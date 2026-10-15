@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Services;
@@ -28,6 +29,10 @@ public sealed partial class HiddenBuffItemViewModel : ObservableObject
     [ObservableProperty]
     private string? _iconPath;
 
+    /// <summary>絵が Icons.xaml の絵(装備効果)なら型抜き。一覧の行と同じ引き方。</summary>
+    [ObservableProperty]
+    private ImageBrush? _iconMask;
+
     /// <summary>絵がモジュール効果の絵か。一覧の行と同じく、絵の大きさを切り替える。</summary>
     [ObservableProperty]
     private bool _isModuleEffectIcon;
@@ -47,8 +52,9 @@ public sealed partial class HiddenBuffItemViewModel : ObservableObject
         DisplayName = CombatDataCatalog.GetBuffDisplayName(BaseId, SourceLanding.None);
         var iconName = CombatDataCatalog.GetBuffOwnIconName(BaseId);
         IconPath = CombatIconResolver.ResolveBuffIcon(iconName);
+        IconMask = CombatIconResolver.ResolveBuffIconMask(iconName);
         IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(iconName);
-        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(iconName) && IconPath is null;
+        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(iconName) && IconPath is null && IconMask is null;
     }
 
     [RelayCommand]

@@ -17,6 +17,12 @@ namespace StarResonanceDps.Core.Diagnostics;
 /// </para>
 ///
 /// <para>
+/// <b>例外として、名前のある装備効果(セット効果・武器効果)のバフも書く</b>(<see cref="CaptureUnhandledEquipmentEffect"/>)。
+/// 出し方の手修正(<c>BuffOverrides.json</c> の優先度)が無いまま足す規則だけで出たもので、行の頭は「装備効果の手修正なし」。
+/// 名前のあるバフは空欄としては書かないので、手修正の漏れをここで拾う。
+/// </para>
+///
+/// <para>
 /// 出たバフは <c>Data/Overrides/BuffNameAssignedOverrides.json</c> に名前を足す候補になる。
 /// <b>値は実物を確認してから入れること。</b> 根拠のない名前は、空欄のままより悪い。
 /// </para>
@@ -45,6 +51,9 @@ public static class BlankBuffNameProbe
 
     /// <summary>バフの番号 → 最初に着いた由来(着かなかった回は入れない)。食い違いの判定に使う。</summary>
     private static readonly Dictionary<int, SourceLanding> DecidedLandings = [];
+
+    /// <summary>「装備効果の手修正なし」を書いたバフの番号。1起動1バフ1行。</summary>
+    private static readonly HashSet<int> SeenUnhandledEquipmentEffects = [];
 
     /// <summary>
     /// 表に名前の無いバフを1件残す。着地先の種類ごとに1起動1行。由来に着いた回は、前に別の由来に着いていれば食い違いも書く。
@@ -90,6 +99,28 @@ public static class BlankBuffNameProbe
                 $"着地先が食い違う バフ={buffId} 内部名={GetInternalName(buffId)} 先に着いた先={decidedLanding} 今回={landing} "
                 + $"{DescribeHolderAndSource(holderUuid, buffEvent)} 鎖={trace}"));
         }
+    }
+
+    /// <summary>
+    /// 名前のある装備効果のバフが、出し方の手修正の無いまま足す規則だけで出たのを1件残す。1起動1バフ1行。
+    /// </summary>
+    /// <param name="holderUuid">バフが付いた実体。</param>
+    /// <param name="buffEvent">そのバフ。番号・名前・種別・優先度・持続・付与者・付与元を書く。</param>
+    public static void CaptureUnhandledEquipmentEffect(long holderUuid, BuffEvent buffEvent)
+    {
+        var buffId = buffEvent.BaseId;
+        lock (Sync)
+        {
+            if (!SeenUnhandledEquipmentEffects.Add(buffId))
+            {
+                return;
+            }
+        }
+
+        Write(string.Create(
+            CultureInfo.InvariantCulture,
+            $"装備効果の手修正なし バフ={buffId} 内部名={GetInternalName(buffId)} 名前={CombatDataCatalog.GetBuffNameWithoutInternalId(buffId)} "
+            + $"種別={buffEvent.BuffType} 優先度={buffEvent.BuffPriority} 持続={buffEvent.Duration} {DescribeHolderAndSource(holderUuid, buffEvent)}"));
     }
 
     private static string GetInternalName(int buffId)

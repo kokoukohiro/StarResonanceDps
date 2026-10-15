@@ -25,7 +25,7 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
     private EquipmentWidgetSettingsConfig _settings;
     private PlayerRosterEntry? _player;
 
-    /// <summary>行を作ったときの今のシーズン。</summary>
+    /// <summary>行を作ったときのシーズン(<see cref="GetSeasonId"/>)。</summary>
     private int _builtSeasonId;
 
     private bool _isDisposed;
@@ -68,19 +68,28 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
         var isSameSource = HasSameEquipmentSource(_player, player);
         _player = player;
 
-        if (!isSameSource)
+        // 履歴の行とライブの行を行き来すると、装備が同じでもシーズンが変わる。
+        if (!isSameSource || GetSeasonId() != _builtSeasonId)
         {
             Rebuild();
         }
     }
 
-    /// <summary>今のシーズンでシーズン強度の有効・無効が変わるので、シーズンが変わったら作り直す。</summary>
+    /// <summary>シーズンでシーズン強度の有効・無効が変わるので、シーズンが変わったら作り直す。</summary>
     protected override void OnRosterContextChanged()
     {
-        if (RosterSeasonId != _builtSeasonId)
+        if (GetSeasonId() != _builtSeasonId)
         {
             Rebuild();
         }
+    }
+
+    /// <summary>
+    /// 行のシーズン。素性が履歴の回から来た行はその回のシーズン、ライブの行は一覧の今のシーズン。
+    /// </summary>
+    private int GetSeasonId()
+    {
+        return _player?.SeasonId ?? RosterSeasonId;
     }
 
     /// <summary>
@@ -116,7 +125,7 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
 
         var equipmentData = _player?.EquipmentData;
         EquipmentDataState = equipmentData?.State ?? PlayerEquipmentDataState.Missing;
-        _builtSeasonId = RosterSeasonId;
+        _builtSeasonId = GetSeasonId();
 
         _equipmentSlots.Clear();
         if (_player is null || equipmentData?.State != PlayerEquipmentDataState.Available)
@@ -127,7 +136,7 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
         foreach (var slot in PlayerEquipmentSlotEntry.CreateAll(
                      equipmentData,
                      _player,
-                     RosterSeasonId,
+                     _builtSeasonId,
                      _settings.InfoFormat,
                      CreateQualityBrushes(_settings)))
         {

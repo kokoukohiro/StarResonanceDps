@@ -101,7 +101,10 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         RefreshPhotos(force: isOtherPlayer);
     }
 
-    /// <summary>現在地とシーズン・シーズンランクは一覧の通知の場所とシーズンから決まるので、それが変わったら作り直す。</summary>
+    /// <summary>
+    /// 現在地と、ライブの行のシーズン・シーズン階級は一覧の通知の場所とシーズンから決まるので、それが変わったら作り直す
+    /// (履歴の回から来た行は、行が持つその回のシーズン)。
+    /// </summary>
     protected override void OnRosterContextChanged()
     {
         RenderPlayerInfo();
@@ -153,13 +156,16 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
                 LastKnownProfessionId,
                 RosterSeasonId,
                 _iconPalette)
-            : PlayerInfoEntry.Create(_player, RosterMapName, RosterMapChannel, RosterSeasonId, _iconPalette);
+            : PlayerInfoEntry.Create(_player, RosterMapName, RosterMapChannel, _player.SeasonId ?? RosterSeasonId, _iconPalette);
     }
 
+    /// <summary>
+    /// 写真のリンクは、履歴の回から来た行ならその回に保存した値、無ければ(ライブの行・保存の時点で届いていなかった人・前の回)名刺の店の今の値。
+    /// </summary>
     private void RefreshPhotos(bool force)
     {
         var characterId = _player?.CharacterId ?? 0;
-        var avatar = characterId == 0 ? null : SocialDataStore.GetAvatar(characterId);
+        var avatar = characterId == 0 ? null : _player?.RecordedAvatar ?? SocialDataStore.GetAvatar(characterId);
         _avatarSlot.Show(GetAvatarPhotoUrl(avatar), characterId, force);
         _cardSlot.Show(GetCardPhotoUrl(avatar), characterId, force);
     }

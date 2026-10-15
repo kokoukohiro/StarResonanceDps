@@ -548,6 +548,18 @@
   <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
     <value>常駐効果のみ非表示</value>
   </data>
+  <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
+    <value>装備効果</value>
+  </data>
+  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
+    <value>すべて表示</value>
+  </data>
+  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
+    <value>非表示</value>
+  </data>
+  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
+    <value>常駐効果のみ非表示</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>エンティティ名</value>
   </data>

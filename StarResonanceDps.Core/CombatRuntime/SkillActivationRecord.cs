@@ -3,7 +3,8 @@ using ProtoBuf;
 namespace StarResonanceDps.Core.CombatRuntime;
 
 /// <summary>
-/// プレイヤーの技の開始1件(周りの差分で <c>AttrSkillId</c> に技が入ったとき)。推移グラフの横軸の下にアイコンで出す。
+/// プレイヤーの技の開始1件。推移グラフの横軸の下にアイコンで出す。
+/// 自分以外は差分で <c>AttrSkillId</c> に技が入ったとき、自分は上りの要求 <c>UseSlot</c> に成功の応答が来たとき。
 /// 出現・入場の全属性に入っている技は、その時点で始めたものではないので残さない。
 /// </summary>
 [ProtoContract]
@@ -15,7 +16,7 @@ public sealed class SkillActivationRecord
     [ProtoMember(2)]
     public int SkillId { get; set; }
 
-    /// <summary>技の開始が届いたパケットの到着時刻(UTC)。</summary>
+    /// <summary>技の開始(自分は成功の応答)が届いたパケットの到着時刻(UTC)。</summary>
     [ProtoMember(3)]
     public DateTime Timestamp { get; set; }
 }

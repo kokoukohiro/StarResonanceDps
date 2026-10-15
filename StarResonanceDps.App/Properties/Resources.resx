@@ -611,6 +611,18 @@ If it is not installed, you can download it from the link below.</value>
   <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
     <value>Hide persistent effects</value>
   </data>
+  <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
+    <value>Equipment effect</value>
+  </data>
+  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
+    <value>Show all</value>
+  </data>
+  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
+    <value>Hide</value>
+  </data>
+  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
+    <value>Hide persistent effects</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>Entity name</value>
   </data>

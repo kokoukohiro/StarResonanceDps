@@ -325,6 +325,12 @@ public sealed class BuffListWidgetSettingsConfig
     /// </summary>
     public int ModuleEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
 
+    /// <summary>
+    /// 装備効果(セット効果・武器効果)のバフの出し方。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。
+    /// 常駐効果は永続(持続が負)の装備効果のバフ(効果そのものの根のバフ、<c>PlayerBuffSnapshot.IsPermanent</c>)。
+    /// </summary>
+    public int EquipmentEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultEquipmentEffectDisplayModeIndex;
+
     public BuffListWidgetSettingsConfig Clone()
     {
         return new BuffListWidgetSettingsConfig
@@ -332,6 +338,7 @@ public sealed class BuffListWidgetSettingsConfig
             GaugeLengthIndex = GaugeLengthIndex,
             GaugeColorOpacity = GaugeColorOpacity,
             ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
+            EquipmentEffectDisplayModeIndex = EquipmentEffectDisplayModeIndex,
             HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
             GaugeColorIndexes = GaugeColorIndexes is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
@@ -927,6 +934,15 @@ public static class WidgetConfigDefaults
     public const int HideResidentModuleEffectDisplayModeIndex = 2;
 
     public const int DefaultModuleEffectDisplayModeIndex = HideResidentModuleEffectDisplayModeIndex;
+
+    /// <summary>バフ・デバフ一覧の設定「装備効果」の添字。並びは選択リストと同じ。</summary>
+    public const int ShowAllEquipmentEffectDisplayModeIndex = 0;
+
+    public const int HideEquipmentEffectDisplayModeIndex = 1;
+
+    public const int HideResidentEquipmentEffectDisplayModeIndex = 2;
+
+    public const int DefaultEquipmentEffectDisplayModeIndex = HideResidentEquipmentEffectDisplayModeIndex;
 
     /// <summary>
     /// ダメージの属性の鍵。<c>EDamageProperty</c> の並び(属性ID 0〜8)。
@@ -1676,7 +1692,8 @@ public static class WidgetConfigDefaults
             GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
             GaugeColorOpacity = MaxClassColorOpacity,
             HiddenBuffIds = [],
-            ModuleEffectDisplayModeIndex = DefaultModuleEffectDisplayModeIndex
+            ModuleEffectDisplayModeIndex = DefaultModuleEffectDisplayModeIndex,
+            EquipmentEffectDisplayModeIndex = DefaultEquipmentEffectDisplayModeIndex
         };
     }
 
@@ -1712,6 +1729,11 @@ public static class WidgetConfigDefaults
             buffList.ModuleEffectDisplayModeIndex,
             ShowAllModuleEffectDisplayModeIndex,
             HideResidentModuleEffectDisplayModeIndex);
+
+        buffList.EquipmentEffectDisplayModeIndex = Math.Clamp(
+            buffList.EquipmentEffectDisplayModeIndex,
+            ShowAllEquipmentEffectDisplayModeIndex,
+            HideResidentEquipmentEffectDisplayModeIndex);
 
         buffList.GaugeColorIndexes ??= CreateDefaultGaugeColorIndexes(kind);
         buffList.GaugeColorPalettes ??= CreateDefaultGaugeColorPalettes();

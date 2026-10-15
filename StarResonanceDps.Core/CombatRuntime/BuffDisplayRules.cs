@@ -19,8 +19,9 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </para>
 ///
 /// <para>
-/// リストの設定「モジュール効果」(すべて表示 / 非表示 / 常駐効果のみ非表示)はアプリの一覧が当てる。
-/// ここではモジュール効果のバフか(<see cref="GetModuleEffectId"/>)を行に渡すだけ。常駐は永続(持続が負)のもの。
+/// リストの設定「モジュール効果」「装備効果」(どちらも すべて表示 / 非表示 / 常駐効果のみ非表示)はアプリの一覧が当てる。
+/// ここではモジュール効果のバフか(<see cref="GetModuleEffectId"/>)、装備効果(セット効果・武器効果)のバフか(<see cref="IsEquipmentEffect"/>)を
+/// 行に渡すだけ。どちらもバフの番号だけで決め、誰が付けたかでは変わらない。常駐は永続(持続が負)のもの。
 /// </para>
 ///
 /// <para>
@@ -81,14 +82,16 @@ public static class BuffDisplayRules
 
     /// <summary>
     /// モジュール効果のバフなら、そのモジュール効果の番号(<c>ModEffectTable.EffectID</c>)。違えば 0。
-    /// 根のバフか、直の付与元が根のバフ(子のバフ)か、付与元をたどった由来(<see cref="BuffEvent.Origin"/>)がモジュール効果か
-    /// (<see cref="CombatDataCatalog.GetModEffectId"/>)。
+    /// 根のバフか根の子のバフかを、バフの番号だけで決める(<see cref="CombatDataCatalog.GetModEffectId"/>)。
     /// </summary>
     public static int GetModuleEffectId(BuffEvent buffEvent)
-        => CombatDataCatalog.GetModEffectId(
-            buffEvent.BaseId,
-            buffEvent.FightSourceType == (int)EFightSource.Buff ? buffEvent.SourceConfigId : 0,
-            buffEvent.Origin?.Landing ?? SourceLanding.None);
+        => CombatDataCatalog.GetModEffectId(buffEvent.BaseId);
+
+    /// <summary>
+    /// 装備効果(セット効果・武器効果)のバフか。根のバフか根の子のバフかを、バフの番号だけで決める(<see cref="CombatDataCatalog.IsEquipmentEffectBuff"/>)。
+    /// </summary>
+    public static bool IsEquipmentEffect(BuffEvent buffEvent)
+        => CombatDataCatalog.IsEquipmentEffectBuff(buffEvent.BaseId);
 
     /// <summary>どちらかのリスト(バフ・デバフ)に出るバフか。空欄検知が使う。</summary>
     public static bool IsDisplayed(BuffEvent buffEvent, Entity bearer)

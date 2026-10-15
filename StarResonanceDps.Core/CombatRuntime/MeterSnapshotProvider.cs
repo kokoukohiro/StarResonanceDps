@@ -165,7 +165,11 @@ public sealed record PlayerBuffSnapshot(
     /// モジュール効果のバフか(<see cref="BuffDisplayRules.GetModuleEffectId"/> が 0 でない)。リストの設定「モジュール効果」で絞るのに使う。
     /// </summary>
     bool IsModuleEffect = false,
-    /// <summary>永続(持続が負)のバフか。リストの設定「モジュール効果」の常駐効果はこれ。</summary>
+    /// <summary>
+    /// 装備効果(セット効果・武器効果)のバフか(<see cref="BuffDisplayRules.IsEquipmentEffect"/>)。リストの設定「装備効果」で絞るのに使う。
+    /// </summary>
+    bool IsEquipmentEffect = false,
+    /// <summary>永続(持続が負)のバフか。リストの設定「モジュール効果」「装備効果」の常駐効果はこれ。</summary>
     bool IsPermanent = false,
     TakenDamageLogParty? Caster = null,
     bool IsCardRepresentative = true);
@@ -816,6 +820,7 @@ public static class MeterSnapshotProvider
                 remainingSeconds,
                 remainingUnknown,
                 BuffDisplayRules.GetModuleEffectId(buffEvent) > 0,
+                BuffDisplayRules.IsEquipmentEffect(buffEvent),
                 buffEvent.Duration < 0,
                 playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);

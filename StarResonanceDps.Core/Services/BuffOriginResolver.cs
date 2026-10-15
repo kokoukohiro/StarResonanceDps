@@ -20,6 +20,8 @@ public sealed record BuffOrigin(SourceLanding Landing, string Trace);
 /// たどった後、バフ/デバフリストに出るものは常設の空欄検知(<see cref="BlankBuffNameProbe"/>)へ渡す
 /// (由来に着いたものも、着かずに空欄のまま出るものも。ここへ来るのは表に名前の無いバフだけ)。
 /// モジュール効果のバフは渡さない(名前・絵・出し方は番号ごとの手修正で決めている)。
+/// 名前のあるバフは由来をたどらないが、装備効果(セット効果・武器効果)のバフで出し方の手修正(優先度)が無いものは別の一覧に入れ、
+/// 通知の最後に足す規則だけで出るなら空欄検知へ渡す(<see cref="BlankBuffNameProbe.CaptureUnhandledEquipmentEffect"/>)。
 /// </para>
 ///
 /// <para>
@@ -33,6 +35,9 @@ public sealed class BuffOriginResolver
     private readonly object _sync = new();
     private readonly List<(long HolderUuid, BuffEvent BuffEvent, DateTime ArrivalTime)> _pending = [];
 
+    /// <summary>名前のある装備効果のバフで、出し方の手修正が無いもの。通知の最後に、出るかを見て空欄検知へ渡す。</summary>
+    private readonly List<(long HolderUuid, BuffEvent BuffEvent)> _pendingEquipmentEffects = [];
+
     private BuffOriginResolver()
     {
     }
@@ -41,14 +46,28 @@ public sealed class BuffOriginResolver
 
     /// <summary>
     /// 付与を受けたバフを一覧に入れる。前の由来は消す(付与のたびに付与元が変わりうる)。
-    /// 表に名前のあるバフはたどらない(名前に由来を使わない)。
+    /// 表に名前のあるバフはたどらない(名前に由来を使わない)。そのうち装備効果のバフで出し方の手修正が無いものだけ、
+    /// 空欄検知のための別の一覧に入れる。
     /// </summary>
     public void Enqueue(long holderUuid, BuffEvent buffEvent, DateTime arrivalTime)
     {
         buffEvent.SetOrigin(null);
-        if (buffEvent.BaseId <= 0
-            || !string.IsNullOrEmpty(CombatDataCatalog.GetBuffNameWithoutInternalId(buffEvent.BaseId)))
+        if (buffEvent.BaseId <= 0)
         {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(CombatDataCatalog.GetBuffNameWithoutInternalId(buffEvent.BaseId)))
+        {
+            if (BuffDisplayRules.IsEquipmentEffect(buffEvent)
+                && !CombatDataCatalog.HasBuffPriorityOverride(buffEvent.BaseId))
+            {
+                lock (_sync)
+                {
+                    _pendingEquipmentEffects.Add((holderUuid, buffEvent));
+                }
+            }
+
             return;
         }
 
@@ -62,15 +81,18 @@ public sealed class BuffOriginResolver
     public void ResolvePending()
     {
         (long HolderUuid, BuffEvent BuffEvent, DateTime ArrivalTime)[] items;
+        (long HolderUuid, BuffEvent BuffEvent)[] equipmentEffects;
         lock (_sync)
         {
-            if (_pending.Count == 0)
+            if (_pending.Count == 0 && _pendingEquipmentEffects.Count == 0)
             {
                 return;
             }
 
             items = [.. _pending];
             _pending.Clear();
+            equipmentEffects = [.. _pendingEquipmentEffects];
+            _pendingEquipmentEffects.Clear();
         }
 
         foreach (var (holderUuid, buffEvent, arrivalTime) in items)
@@ -91,6 +113,17 @@ public sealed class BuffOriginResolver
                 BlankBuffNameProbe.Capture(holderUuid, buffEvent, landing, trace);
             }
         }
+
+        // 足す規則だけで出るもの(ゲームの条件で出ず、手修正の優先度も無い)。
+        foreach (var (holderUuid, buffEvent) in equipmentEffects)
+        {
+            if (EncounterManager.Current.Entities.TryGetValue(holderUuid, out var bearer)
+                && BuffDisplayRules.IsDisplayed(buffEvent, bearer)
+                && !BuffDisplayRules.IsShownByGameRule(buffEvent))
+            {
+                BlankBuffNameProbe.CaptureUnhandledEquipmentEffect(holderUuid, buffEvent);
+            }
+        }
     }
 
     public void Clear()
@@ -98,6 +131,7 @@ public sealed class BuffOriginResolver
         lock (_sync)
         {
             _pending.Clear();
+            _pendingEquipmentEffects.Clear();
         }
     }
 }

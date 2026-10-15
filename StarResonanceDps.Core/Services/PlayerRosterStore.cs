@@ -297,7 +297,9 @@ public sealed class PlayerRosterStore
             entry.SeasonRankLevel,
             entry.IsNearby,
             entry.PartySceneId,
-            entry.PartyLineId);
+            entry.PartyLineId,
+            entry.SeasonId,
+            entry.RecordedAvatar);
     }
 }
 

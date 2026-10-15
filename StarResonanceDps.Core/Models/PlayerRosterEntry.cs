@@ -1,3 +1,5 @@
+using StarResonanceDps.Core.CombatRuntime;
+
 namespace StarResonanceDps.Core.Models;
 
 public sealed record PlayerRosterEntry(
@@ -32,4 +34,10 @@ public sealed record PlayerRosterEntry(
     bool IsNearby = false,
     // パーティ情報のいる場所。マップ番号とチャンネル番号、0 は分からない(パーティ外も 0)。
     int PartySceneId = 0,
-    int PartyLineId = 0);
+    int PartyLineId = 0,
+    // この行のシーズン番号。素性が履歴の回から来た行だけその回のシーズン(0 は分からない)。
+    // ライブの行は null で、一覧の今のシーズン(PlayerRosterSnapshot.SeasonId)を使う。
+    int? SeasonId = null,
+    // この行の顔と名刺の写真のリンク。素性が履歴の回から来た行だけ、その回に保存した値(保存の時点で届いていなければ null)。
+    // ライブの行は null で、名刺の店(SocialDataStore)の今の値を使う。
+    SocialAvatarState? RecordedAvatar = null);

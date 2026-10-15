@@ -91,6 +91,26 @@
                                             </Style>
                                         </Rectangle.Style>
                                     </Rectangle>
+
+                                    <!-- 絵が Icons.xaml の絵(装備効果)なら、白く塗った面をその絵で型抜きする(一覧の行と同じ作り、左へ 1 ずらすのも同じ)。 -->
+                                    <Rectangle Fill="White"
+                                               OpacityMask="{Binding IconMask}"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                        <Rectangle.RenderTransform>
+                                            <TranslateTransform X="-1" />
+                                        </Rectangle.RenderTransform>
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IconMask}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
                                 </Grid>
 
                                 <TextBlock Grid.Column="1"

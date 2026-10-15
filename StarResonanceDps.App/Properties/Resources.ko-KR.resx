@@ -611,6 +611,18 @@
   <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
     <value>상시 효과만 숨기기</value>
   </data>
+  <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
+    <value>장비 효과</value>
+  </data>
+  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
+    <value>모두 표시</value>
+  </data>
+  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
+    <value>숨기기</value>
+  </data>
+  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
+    <value>상시 효과만 숨기기</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>엔티티 이름</value>
   </data>

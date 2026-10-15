@@ -26,6 +26,10 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     [ObservableProperty]
     private int _moduleEffectDisplayModeIndex = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
 
+    /// <summary>設定「装備効果」の添字。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。</summary>
+    [ObservableProperty]
+    private int _equipmentEffectDisplayModeIndex = WidgetConfigDefaults.DefaultEquipmentEffectDisplayModeIndex;
+
     /// <summary>ゲージの色の不透明度(0〜100)。UI がスライダーなので double で持つ(メーターのクラスカラーと同じ)。</summary>
     [ObservableProperty]
     private double _gaugeColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
@@ -111,6 +115,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         {
             GaugeLengthIndex = GaugeLengthIndex,
             ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
+            EquipmentEffectDisplayModeIndex = EquipmentEffectDisplayModeIndex,
             GaugeColorOpacity = Math.Clamp(
                 (int)Math.Round(GaugeColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -198,6 +203,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
             GaugeLengthIndex = normalized.GaugeLengthIndex;
             ModuleEffectDisplayModeIndex = normalized.ModuleEffectDisplayModeIndex;
+            EquipmentEffectDisplayModeIndex = normalized.EquipmentEffectDisplayModeIndex;
             GaugeColorOpacity = normalized.GaugeColorOpacity;
 
             _hiddenBuffItems.Clear();
@@ -245,6 +251,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     {
         if (left.GaugeLengthIndex != right.GaugeLengthIndex
             || left.ModuleEffectDisplayModeIndex != right.ModuleEffectDisplayModeIndex
+            || left.EquipmentEffectDisplayModeIndex != right.EquipmentEffectDisplayModeIndex
             || left.GaugeColorOpacity != right.GaugeColorOpacity
             || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
@@ -292,6 +299,11 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     }
 
     partial void OnModuleEffectDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnEquipmentEffectDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
     }

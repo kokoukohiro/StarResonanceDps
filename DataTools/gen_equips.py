@@ -13,6 +13,8 @@ Equips: **数値は `Star` の表で作る。** 形は次のとおり。
   段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を段階の順に
 - `AttrLibs`: 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ 庫ID → その庫の全行(行の `Id` つき)。
   装備から参照される庫だけ(全段階の基礎・進化、改鋳、装備と突破の行のレア)
+- `EquipmentEffectBuffs`: 装備効果の根のバフの番号(昇順)。セット効果(`EquipSuitTable` の庫)と、
+  武器(部位200)の進化と改造(`EquipTransformTable` の改鋳・レアの庫)の行に出るバフ
 - `StrengthSeasons`: シーズン強度の項目と、そのシーズン。基礎に出る一時属性と 11440 系の属性を項目にし、
   それを基礎に持つ装備の `SeasonId` の積集合で決める
 - `SpecSchools` / `Rank1Schools`: アプリの特化の番号 / 職業ID → 型2 の庫の行を選ぶ特化(`TalentSchoolTable.Id`)。
@@ -33,7 +35,7 @@ EquipEffectTexts: 鍵は効果の番号。進化・改鋳・レアの側に出�
 次のときは書かずに止まる。
 - 装備の行がアイテムの表に無い、`PerfectUpperLimit` に2要素目が無い
 - 突破の段階が飛んでいる・重なっている
-- 参照される庫が表に無い、庫の型が 1・2 以外
+- 参照される庫(装備効果の庫を含む)が表に無い、庫の型が 1・2 以外、武器の改造の行が表に無い
 - 効果の種類が 1・3・5 以外、設定の数が効果と合わない、属性の書式が決まらない
 - 主能力値が2系統出る
 - シーズン強度の項目のシーズンが1つに決まらない、基礎に出る一時属性が進化にも出る
@@ -54,6 +56,9 @@ VALUE_LANG_DIR = "cn"
 # 庫の配列の1要素目(型)→ 庫の表。
 LIB_TABLES = {1: "EquipAttrLibTable", 2: "EquipAttrSchoolLibTable"}
 SCHOOL_LIB_TYPE = 2
+
+# 武器の部位(`EquipTable.EquipPart`)。装備効果の武器の効果はこの部位の装備だけ。
+WEAPON_PART = 200
 
 # 効果の種類。
 KIND_ATTR = 1
@@ -323,6 +328,50 @@ def rank1_schools_of(professions, stages, stage_schools, problems):
     return result
 
 
+def equipment_effect_buffs_of(equips, breakthroughs, rows_of_type, problems):
+    """
+    装備効果の根のバフ(庫の行の効果の種類3)。番号の昇順。
+    セット効果(`EquipSuitTable.SuitAttrLibId`)と、武器(部位 `WEAPON_PART`)の効果
+    (装備と突破の行の進化 `AdvancedAttrLibId`、改造 `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)。
+    """
+    refs = []
+    for row_id, row in raw_table("EquipSuitTable").items():
+        label = "セット効果の行 %s" % row_id
+        refs += [(ref, label) for ref in lib_refs(row.get("SuitAttrLibId") or [], label, problems)]
+
+    transforms = raw_table("EquipTransformTable")
+    owners = [(row, "装備 %s" % equip_id, row["EquipPart"]) for equip_id, row in equips.items()]
+    owners += [(row, "突破の行 %s" % row_id, equips[str(row["EquipId"])]["EquipPart"])
+               for row_id, row in breakthroughs.items() if str(row["EquipId"]) in equips]
+    for row, owner, part in owners:
+        if part != WEAPON_PART:
+            continue
+        label = "%s AdvancedAttrLibId" % owner
+        refs += [(ref, label) for ref in lib_refs(row.get("AdvancedAttrLibId") or [], label, problems)]
+        transform_id = row.get("TransformId") or 0
+        if not transform_id:
+            continue
+        transform = transforms.get(str(transform_id))
+        if transform is None:
+            problems.append("%s の改造 %d が EquipTransformTable に無い" % (owner, transform_id))
+            continue
+        for column in ("RecastAttrLibId", "QualityAttrLibId"):
+            label = "%s 改造 %d %s" % (owner, transform_id, column)
+            refs += [(ref, label) for ref in lib_refs(transform.get(column) or [], label, problems)]
+
+    buffs = set()
+    for (lib_type, lib_id), label in refs:
+        rows = rows_of_type[lib_type].get(lib_id)
+        if not rows:
+            problems.append("%s の庫 %d が %s に無い" % (label, lib_id, LIB_TABLES[lib_type]))
+            continue
+        for row in rows:
+            for effect in row.get("AttrEffect") or []:
+                if effect[0] == KIND_BUFF:
+                    buffs.add(effect[1])
+    return sorted(buffs)
+
+
 def effect_text(text, label, problems):
     """文言の値の差し込みをアプリの差し込み({0} / {1})に置き換える。"""
     for injection, slot in INJECTIONS.items():
@@ -402,6 +451,7 @@ def main():
     stageless = stageless_school_of(schools, talent_stages, problems)
 
     rows_of_type = {lib_type: rows_by_lib(lib_type) for lib_type in LIB_TABLES}
+    effect_buffs = equipment_effect_buffs_of(equips, breakthroughs, rows_of_type, problems)
     attr_libs = {lib_type: {} for lib_type in LIB_TABLES}
     for (lib_type, lib_id), label in sorted(referenced.items()):
         rows = rows_of_type[lib_type].get(lib_id)
@@ -480,8 +530,8 @@ def main():
     print("         シーズン強度 %s"
           % " / ".join("%d:%d → %d" % (kind, effect_id, season)
                        for (kind, effect_id), season in sorted(strength_seasons.items())))
-    print("         特化 %d / クラスR1 %d / 改鋳・レアの庫 %d / 文言の一時属性 %d / 文言のバフ %d"
-          % (len(spec_schools), len(rank1_schools), len(side_refs), len(temp_ids), len(buff_ids)))
+    print("         特化 %d / クラスR1 %d / 改鋳・レアの庫 %d / 文言の一時属性 %d / 文言のバフ %d / 装備効果のバフ %d"
+          % (len(spec_schools), len(rank1_schools), len(side_refs), len(temp_ids), len(buff_ids), len(effect_buffs)))
     print()
 
     names = {}
@@ -499,6 +549,7 @@ def main():
                             for (kind, effect_id), season in sorted(strength_seasons.items())],
         "SpecSchools": {str(key): spec_schools[key] for key in sorted(spec_schools)},
         "Rank1Schools": {str(key): rank1_schools[key] for key in sorted(rank1_schools)},
+        "EquipmentEffectBuffs": effect_buffs,
     })
     print("  %s %d KB" % (os.path.relpath(path, GENERATED), os.path.getsize(path) // 1024))
 

@@ -452,7 +452,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 記録する回に、<b>いま画面に出している素性をエンティティへ焼き付ける。</b>
+        /// 記録する回に、<b>いま画面に出している素性をエンティティへ焼き付ける。</b>写真のリンクは名刺の店から書く(<see cref="Entity.RecordedAvatar"/>)。
+        /// あわせて今のシーズンを回に書く(<see cref="EncounterExData.SeasonId"/>)。
         /// <b>エンカウンターの作り直しより前に呼ぶこと</b> — 焼いた値をそのまま次の回へ持ち越すため。
         ///
         /// <para>
@@ -474,6 +475,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static void ApplyDisplayedIdentitiesForRecord(Encounter encounter)
         {
+            // シーズンは回に1つ。名簿が空でも書く。
+            encounter.ExData.SeasonId = SeasonStateStore.CurrentSeasonId;
+
             var roster = Services.PlayerRosterStore.Instance.Current.Entries;
             if (roster.Count == 0)
             {
@@ -515,7 +519,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     displayed.SeasonLevel,
                     displayed.SeasonStrength,
                     displayed.MaxHp,
-                    displayed.IsNpc);
+                    displayed.IsNpc,
+                    SocialDataStore.GetAvatar(characterId));
             }
         }
 
@@ -2036,7 +2041,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         private readonly object _skillActivationGate = new();
 
         /// <summary>
-        /// プレイヤーの技の開始を残す(推移グラフのアイコン)。呼ぶのは周りの差分の経路だけ(出現・入場の全属性は呼ばない)。
+        /// プレイヤーの技の開始を残す(推移グラフのアイコン)。自分以外のプレイヤーは差分の技の開始(<c>AttrSkillId</c>)から呼び(出現・入場の全属性は呼ばない)、
+        /// 自分は上りの要求 <c>UseSlot</c> の成功の応答から呼ぶ(<c>MessageManager.ProcessUseSlotReturn</c>)。
         /// 門は <see cref="IsRecorded"/> だけで、戦闘の時計の起点より前の開始も残す(最初の一撃の技の開始は最初のダメージより先に届く)。
         /// </summary>
         public void AddSkillActivation(long playerUuid, int skillId, DateTime arrivalUtc)
@@ -2209,6 +2215,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 ExData.PlayerDeaths.Add(death);
                 _takenDamageLog.Add(TakenDamageLogRecord.ForDeath(death));
+            }
+        }
+
+        /// <summary>この回に、そのプレイヤーのダメージの無い戦闘不能の記録(タイムラインの行)があるか。</summary>
+        public bool HasPlayerDeathRecord(long playerUuid)
+        {
+            lock (_takenDamageLogGate)
+            {
+                return ExData.PlayerDeaths.Any(death => death.PlayerUuid == playerUuid);
             }
         }
 
@@ -2639,6 +2654,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>プレイヤーの技の開始(<see cref="Encounter.AddSkillActivation"/>、届いた順)。読み書きは <see cref="Encounter"/> の中でだけ行う(ロックがそこにある)。</summary>
         [ProtoMember(13)]
         public List<SkillActivationRecord> SkillActivations { get; set; } = [];
+        /// <summary>
+        /// この回のシーズン番号(サーバー全体で1つ、<see cref="SeasonStateStore.CurrentSeasonId"/>)。保存の直前に書く(<c>ApplyDisplayedIdentitiesForRecord</c>)。
+        /// 履歴から来たプレイヤーの行は、今のシーズンではなくこの値で出す。分からなければ 0。
+        /// </summary>
+        [ProtoMember(14)]
+        public int SeasonId { get; set; } = 0;
 
         public EncounterExData() { }
     }
@@ -2802,6 +2823,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 作り直しの前に焼き付けて次の回へ持ち越す。社交データが切れた回と履歴ではここだけが根拠。
         /// </summary>
         public bool IsNpc { get => _identity.IsNpc; private set => _identity.IsNpc = value; }
+
+        /// <summary>
+        /// 保存した回の顔と名刺の写真のリンク(名刺の店 <see cref="SocialDataStore"/> の保存の時点の値、届いていなければ null)。
+        /// 書くのは保存の直前の焼き付け(<see cref="ApplyDisplayedIdentityForRecord"/>)だけで、回の作り直しでは運ばない。
+        /// 履歴から来たプレイヤーの行は、今の店の値ではなくこの値で写真を取る。画像そのものは持たない。
+        /// </summary>
+        public SocialAvatarState? RecordedAvatar { get; private set; }
 
         /// <summary>
         /// 特化が「アビリティ未装着」(ゲーム内呼称 クラスR1)と確定できる状態か。
@@ -3120,11 +3148,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             long seasonLevel,
             long seasonStrength,
             long maxHp,
-            bool isNpc)
+            bool isNpc,
+            SocialAvatarState? avatar)
         {
             // NPC かどうかはパーティの社交データ(BotAiId)だけが持っていて、実体には届かない。
             // 履歴では社交データが無くなるので、表示に出している値と一緒にここで焼き付ける。
             IsNpc = isNpc;
+
+            // 写真のリンクも同じく名刺の店にしか無い。届いていなければ null のまま書く。
+            RecordedAvatar = avatar;
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -4041,6 +4073,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             lock (_skillSnapshotsGate)
             {
                 return SkillSnapshots.ToArray();
+            }
+        }
+
+        /// <summary>1件以上の記録を持っているか。写しを作らずに見る。</summary>
+        public bool HasSkillSnapshots()
+        {
+            lock (_skillSnapshotsGate)
+            {
+                return SkillSnapshots.Count > 0;
             }
         }
 

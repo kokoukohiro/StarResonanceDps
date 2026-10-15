@@ -196,6 +196,12 @@ public static class CombatDataCatalog
     /// <summary>職業ID → クラスR1 の人の型2 の属性庫の特化。<c>Equips.json</c> の <c>Rank1Schools</c>。</summary>
     private static FrozenDictionary<int, int> _equipmentRank1Schools = FrozenDictionary<int, int>.Empty;
 
+    /// <summary>
+    /// 装備効果(セット効果・武器効果)の根のバフ。<c>Equips.json</c> の <c>EquipmentEffectBuffs</c>。
+    /// バフ/デバフリストの設定「装備効果」で絞るのに使う(<see cref="IsEquipmentEffectBuff"/>)。
+    /// </summary>
+    private static FrozenSet<int> _equipmentEffectRootBuffs = FrozenSet<int>.Empty;
+
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _sceneNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
@@ -546,24 +552,34 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// バフが属するモジュール効果の番号。根のバフ(<see cref="_modEffectIdByRootBuff"/>)ならその効果、
-    /// 直の付与元のバフ(<paramref name="sourceBuffId"/>、付与元がバフでなければ 0)が根のバフならその効果(子のバフ)、
-    /// どちらでもなく付与元をたどった由来(<paramref name="origin"/>)がモジュール効果ならその効果。どれでもなければ 0。
-    /// 名前のあるバフは由来をたどらないので、子のバフは直の付与元で決める。
+    /// 根の子のバフ(<see cref="GetEffectChildRootBuffId"/>)なら根の効果。どちらでもなければ 0。
+    /// バフの番号だけで決め、付与元は見ない(同じバフは誰が付けても同じ扱い)。
     /// </summary>
-    public static int GetModEffectId(int buffId, int sourceBuffId, SourceLanding origin)
+    public static int GetModEffectId(int buffId)
     {
         if (buffId > 0 && _modEffectIdByRootBuff.TryGetValue(buffId, out var effectId))
         {
             return effectId;
         }
 
-        if (sourceBuffId > 0 && _modEffectIdByRootBuff.TryGetValue(sourceBuffId, out var parentEffectId))
-        {
-            return parentEffectId;
-        }
-
-        return origin.Kind == SourceLandingKind.Module ? origin.Id : 0;
+        return _modEffectIdByRootBuff.TryGetValue(GetEffectChildRootBuffId(buffId), out var rootEffectId) ? rootEffectId : 0;
     }
+
+    /// <summary>
+    /// 装備効果のバフか。根のバフ(<see cref="_equipmentEffectRootBuffs"/>)か、根の子のバフ(<see cref="GetEffectChildRootBuffId"/>)なら真。
+    /// バフの番号だけで決め、付与元は見ない(セット効果がほかのしくみのバフ、たとえば光盾障壁を付けても装備効果にしない)。
+    /// </summary>
+    public static bool IsEquipmentEffectBuff(int buffId)
+        => buffId > 0
+           && (_equipmentEffectRootBuffs.Contains(buffId) || _equipmentEffectRootBuffs.Contains(GetEffectChildRootBuffId(buffId)));
+
+    /// <summary>
+    /// モジュール効果・装備効果の子のバフなら、その根の番号の候補。違えば 0。
+    /// 根の番号は 10 の倍数で、その効果だけが付ける子のバフは根の番号 +1〜+9 に置かれる。表に親子のつながりは無いので、この番号の決まりで決める。
+    /// 返した番号が根かどうかは呼ぶ側が根の表で確かめる。
+    /// </summary>
+    private static int GetEffectChildRootBuffId(int buffId)
+        => buffId > 0 && buffId % 10 != 0 ? buffId - buffId % 10 : 0;
 
     /// <summary>
     /// 手修正 <c>BuffOverrides.json</c> が優先度(<c>BuffPriority</c>)を書いたバフか。
@@ -2214,7 +2230,8 @@ public static class CombatDataCatalog
     /// 装備の定義 <c>Data/Generated/Equips.json</c> を読む。<c>DataTools/gen_equips.py</c> が生成する。
     ///
     /// <para>
-    /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(装備詳細は定義を出せない)。
+    /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(装備詳細は定義を出せず、
+    /// バフ/デバフリストの設定「装備効果」は装備効果のバフを見分けられない)。
     /// 読めたところまでで続けることはしない。
     /// </para>
     /// </summary>
@@ -2229,12 +2246,13 @@ public static class CombatDataCatalog
         FrozenDictionary<long, int> strengthSeasons;
         FrozenDictionary<int, int> specSchools;
         FrozenDictionary<int, int> rank1Schools;
+        FrozenSet<int> effectRootBuffs;
         try
         {
             // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
             if (!reads.TryTake<EquipmentFile>(path, out var loadedFile))
             {
-                Log.Error("{FileName} is missing. Equipment details cannot be shown path={Path}", relativePath, path);
+                Log.Error("{FileName} is missing. Equipment details cannot be shown and equipment effect buffs cannot be identified path={Path}", relativePath, path);
                 return;
             }
 
@@ -2245,10 +2263,11 @@ public static class CombatDataCatalog
             strengthSeasons = ReadEquipmentStrengthSeasons(file.StrengthSeasons);
             specSchools = ReadEquipmentSchools(file.SpecSchools, "SpecSchools");
             rank1Schools = ReadEquipmentSchools(file.Rank1Schools, "Rank1Schools");
+            effectRootBuffs = file.EquipmentEffectBuffs.ToFrozenSet();
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
         {
-            Log.Error(ex, "{FileName} could not be read. Equipment details cannot be shown path={Path}", relativePath, path);
+            Log.Error(ex, "{FileName} could not be read. Equipment details cannot be shown and equipment effect buffs cannot be identified path={Path}", relativePath, path);
             return;
         }
 
@@ -2258,9 +2277,10 @@ public static class CombatDataCatalog
         _equipmentStrengthSeasons = strengthSeasons;
         _equipmentSpecSchools = specSchools;
         _equipmentRank1Schools = rank1Schools;
+        _equipmentEffectRootBuffs = effectRootBuffs;
         Log.Information(
-            "Loaded {FileName}: {Equips} equips / {AttrLibs} attribute libraries / {StrengthSeasons} strength seasons / {SpecSchools} spec schools / {Rank1Schools} rank-1 schools",
-            relativePath, equipments.Count, attrLibs.Count, strengthSeasons.Count, specSchools.Count, rank1Schools.Count);
+            "Loaded {FileName}: {Equips} equips / {AttrLibs} attribute libraries / {StrengthSeasons} strength seasons / {SpecSchools} spec schools / {Rank1Schools} rank-1 schools / {EffectBuffs} equipment effect buffs",
+            relativePath, equipments.Count, attrLibs.Count, strengthSeasons.Count, specSchools.Count, rank1Schools.Count, effectRootBuffs.Count);
     }
 
     private static FrozenDictionary<int, EquipmentDefinition> ReadEquipmentDefinitions(
@@ -2397,6 +2417,9 @@ public static class CombatDataCatalog
 
         /// <summary>職業ID → クラスR1 の人の型2 の属性庫の特化。</summary>
         public Dictionary<string, int> Rank1Schools { get; set; } = null!;
+
+        /// <summary>装備効果(セット効果・武器効果)の根のバフの番号。</summary>
+        public List<int> EquipmentEffectBuffs { get; set; } = null!;
     }
 
     [JsonObject(ItemRequired = Required.Always)]

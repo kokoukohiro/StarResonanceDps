@@ -226,10 +226,10 @@ internal static class PlayerRosterProjection
             AddCharacterId(characterId);
         }
 
-        // AOI外でもメーターに残っている人。ここで候補に入れないと下の関門まで届かない。
+        // AOI外でもメーターかタイムラインに残っている人。ここで候補に入れないと下の関門まで届かない。
         foreach (var pair in metadataPlayersByCharacterId)
         {
-            if (HasMeterStats(pair.Value))
+            if (IsShownInMeterOrTimeline(meterEncounter, pair.Value))
             {
                 AddCharacterId(pair.Key);
             }
@@ -274,12 +274,12 @@ internal static class PlayerRosterProjection
             }
 
             var isPartyMember = party.GetMembership(characterId) == PartyMembershipState.Member;
-            // AOI外でもメーターに残る人はリストにも残す。エンカウンターが作り直されて
-            // 統計が0になれば、メーターと同時にここからも消える。
+            // AOI外でもメーターかタイムラインに残る人はリストにも残す。エンカウンターが作り直されて
+            // 統計と記録が無くなれば、メーター・タイムラインと同時にここからも消える。
             if (!isSelf
                 && !isPartyMember
                 && nearbyEntity is null
-                && !HasMeterStats(metadataEntity))
+                && !IsShownInMeterOrTimeline(meterEncounter, metadataEntity))
             {
                 continue;
             }
@@ -296,7 +296,9 @@ internal static class PlayerRosterProjection
                 metadataEntity,
                 isSelf,
                 out var entry,
-                useHistoryHealth: isMetadataFromHistory))
+                useHistoryHealth: isMetadataFromHistory,
+                seasonId: isMetadataFromHistory ? meterEncounter?.ExData.SeasonId ?? 0 : null,
+                recordedAvatar: isMetadataFromHistory ? metadataEntity?.RecordedAvatar : null))
             {
                 if (nearbyEntity is not null)
                 {
@@ -350,7 +352,7 @@ internal static class PlayerRosterProjection
         var isPartyMember = PartyStateStore.Instance.Current.GetMembership(characterId)
             == PartyMembershipState.Member;
         var isNearby = IsNearbyPlayer(playerUuid);
-        if (!isSelf && !isPartyMember && !isNearby && !HasMeterStats(entity))
+        if (!isSelf && !isPartyMember && !isNearby && !IsShownInMeterOrTimeline(EncounterManager.Current, entity))
         {
             return;
         }
@@ -376,13 +378,23 @@ internal static class PlayerRosterProjection
     /// 履歴に入っているのは「その戦闘が終わった時点の値」で、いまの状態ではない。
     /// AOIやパーティから供給が戻れば(=この行が緑になれば)実値に切り替わる。
     /// </param>
+    /// <param name="seasonId">
+    /// 素性の出所が履歴の記録のとき、その回のシーズン番号(<see cref="EncounterExData.SeasonId"/>、0 は分からない)。
+    /// ライブの行は null で、一覧の今のシーズンを使う。
+    /// </param>
+    /// <param name="recordedAvatar">
+    /// 素性の出所が履歴の記録のとき、その回に保存した顔と名刺の写真のリンク(<see cref="Entity.RecordedAvatar"/>)。
+    /// ライブの行は null で、名刺の店の今の値を使う。
+    /// </param>
     private static bool TryCreateEntry(
         long characterId,
         Entity? nearbyEntity,
         Entity? metadataEntity,
         bool isSelf,
         out PlayerRosterEntry entry,
-        bool useHistoryHealth = false)
+        bool useHistoryHealth = false,
+        int? seasonId = null,
+        SocialAvatarState? recordedAvatar = null)
     {
         if (characterId == 0)
         {
@@ -449,7 +461,9 @@ internal static class PlayerRosterProjection
             source.SeasonRankLevel,
             nearbyEntity is not null,
             partySceneId,
-            partyLineId);
+            partyLineId,
+            seasonId,
+            recordedAvatar);
         return true;
     }
 
@@ -641,7 +655,7 @@ internal static class PlayerRosterProjection
     }
 
     /// <summary>
-    /// AOI外へ出る直前の特化を控える。<b>メーターに残り続ける人だけ</b>が対象。
+    /// AOI外へ出る直前の特化を控える。<b>メーターかタイムラインに残り続ける人だけ</b>が対象。
     ///
     /// <para>
     /// 「分からない」も含めて必ず現在値で置き換える。何も書かずに素通りさせると、
@@ -650,7 +664,7 @@ internal static class PlayerRosterProjection
     /// </summary>
     private static void CaptureMeterPlayerSpec(Entity entity)
     {
-        if (!HasMeterStats(entity))
+        if (!IsShownInMeterOrTimeline(EncounterManager.Current, entity))
         {
             return;
         }
@@ -688,13 +702,22 @@ internal static class PlayerRosterProjection
     }
 
     /// <summary>
-    /// メーター(DPS/HPS)に出る条件。<see cref="MeterSnapshotProvider"/> の
-    /// <c>TotalValue &gt; 0</c> と同じ。どちらかの値を持っていれば片方のメーターには出る。
+    /// メーター(DPS/HPS)かタイムラインに出る人か。名簿に載せる条件。
+    ///
+    /// <para>
+    /// メーターは <see cref="MeterSnapshotProvider"/> の <c>TotalValue &gt; 0</c> と同じ(与ダメか回復のどちらかを持っていれば片方のメーターには出る)。
+    /// タイムラインはプレイヤーの行の材料と同じ(被弾の記録 <see cref="Entity.TakenStats"/> か、その回のダメージの無い戦闘不能の記録)。
+    /// タイムラインの絞り込みの設定は見ない。
+    /// </para>
     /// </summary>
-    private static bool HasMeterStats(Entity? entity)
+    /// <param name="encounter">その実体がいる回。戦闘不能の記録を引く。</param>
+    private static bool IsShownInMeterOrTimeline(Encounter? encounter, Entity? entity)
     {
         return entity is not null
-            && (entity.TotalDamage > 0 || entity.TotalHealing > 0);
+            && (entity.TotalDamage > 0
+                || entity.TotalHealing > 0
+                || entity.TakenStats.HasSkillSnapshots()
+                || encounter?.HasPlayerDeathRecord(entity.UUID) == true);
     }
 
     private static bool TryGetCharacterEntity(long playerUuid, out Entity entity)

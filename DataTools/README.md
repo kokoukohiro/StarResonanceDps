@@ -283,7 +283,7 @@ export BPSR_TABLES=<置き場所>     # bash
 |---|---|
 | `BuffType` | バフ側かデバフ側か。生の値をそのまま使うとバフとデバフの振り分けが実行時と食い違うため、**振り分けは実質このファイルが決めている** |
 | `BuffPriority` | ゲーム内のバフ表示に出すか(0 は出さない)。**書いたバフは、バフ/デバフリストでもこの値とアイコンだけで出すか決まる**(0 なら出さない、0 以外ならアイコンがあるときだけ出す) |
-| `Icon` / `ShowHUDIcon` | アイコンのパス。`"-"` は空にする。アプリはパスの最後の部分をファイル名として探すので、ファイル名だけでよい。**モジュール効果の絵だけは頭の `ui/atlas/mod_effect/` が要る**(探すフォルダと絵の大きさをパスの頭で決める) |
+| `Icon` / `ShowHUDIcon` | アイコンのパス。`"-"` は空にする。アプリはパスの最後の部分をファイル名として探すので、ファイル名だけでよい。**モジュール効果の絵だけは頭の `ui/atlas/mod_effect/` が要る**(探すフォルダと絵の大きさをパスの頭で決める)。**`Icon.` で始まる値はアプリの `Styles/Icons.xaml` の絵の鍵**で、白い形の絵として描く(装備効果の `Icon.EquipSlot.202` / `Icon.EquipSlot.200` など) |
 
 必要な項目だけ書く。**中身の無い項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
 
@@ -292,6 +292,7 @@ export BPSR_TABLES=<置き場所>     # bash
 `BuffPriority` を 0 以外にしてもアイコンが無いバフは出ない。出すなら `Icon` も書く。
 アイコンのパスはあるのにアプリの絵のフォルダにファイルが無いバフは、はてなの絵で出る。
 モジュール効果のバフの絵は、`Icon` にモジュール効果の絵のパス(`ModEffectTable` の `EffectConfigIcon`)を書く。名前は `BuffNameAssignedOverrides.json` に書く。
+装備効果(セット効果・武器効果)のバフの絵は、`Icon` に Icons.xaml の鍵を書く(セット効果 `Icon.EquipSlot.202`、武器効果 `Icon.EquipSlot.200`)。鍵が Icons.xaml に無ければ、はてなの絵で出る。
 
 ### RecountRowOverrides.json
 
@@ -694,7 +695,8 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
   },
   "StrengthSeasons": [ { "Kind": <種類>, "Id": <番号>, "Season": <シーズン> } ],
   "SpecSchools": { "<特化の番号>": <特化> },
-  "Rank1Schools": { "<職業ID>": <特化> }
+  "Rank1Schools": { "<職業ID>": <特化> },
+  "EquipmentEffectBuffs": [<バフID>, ...]
 }
 ```
 
@@ -707,6 +709,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 | `Stages` | 添字が突破の段階。段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を `BreakThroughTime` の順に。`Basic` / `Advanced` は表の庫の配列 `[型, 庫ID…]` のまま |
 | `Recast` / `Rare` | `EquipTable.RecastingAttrLibId` / `QualityChildAttrLibId`(改鋳 / レアの庫の配列)のまま |
 | `AttrLibs` | 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ `AttrLibId` → その庫の全行を表の順に。装備の全段階の基礎・進化、改鋳、装備と突破の行のレアから参照される庫だけ |
+| `EquipmentEffectBuffs` | 装備効果の根のバフの番号(昇順)。セット効果(`EquipSuitTable.SuitAttrLibId` の庫)と、武器(`EquipPart` 200)の装備と突破の行の進化(`AdvancedAttrLibId`)と改造(`TransformId` → `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)の庫の行に出るバフ(効果の種類 3)。庫か改造の行が表に無ければ止まる |
 | `Id` | 行の `Id`。通信で届く自分の装備の値は、この行ID で行を指す |
 | `Parts` / `Specs` | 行の `AllowPart` / `TalentSchoolId`(型1 は空) |
 

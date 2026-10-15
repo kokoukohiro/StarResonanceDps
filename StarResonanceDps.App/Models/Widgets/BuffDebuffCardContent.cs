@@ -1,4 +1,5 @@
-﻿using StarResonanceDps.App.Config;
+﻿using System.Windows.Media;
+using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
@@ -13,11 +14,13 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// 分けて書くと片方だけ直して見た目がずれる。
 /// </para>
 /// </summary>
+/// <param name="IconMask">絵が Icons.xaml の絵(装備効果)なら、白く塗る面の型抜き(<see cref="PlayerBuffEntry.IconMask"/>)。</param>
 public readonly record struct BuffDebuffCardContent(
     string DisplayText,
     string DurationText,
     string LayerText,
     string? IconPath,
+    ImageBrush? IconMask,
     bool IsModuleEffectIcon,
     bool ShowsUnknownIcon)
 {
@@ -25,6 +28,7 @@ public readonly record struct BuffDebuffCardContent(
         string.Empty,
         string.Empty,
         string.Empty,
+        null,
         null,
         false,
         false);
@@ -47,6 +51,7 @@ public readonly record struct BuffDebuffCardContent(
             entry.DurationWithUnitText,
             entry.LayerText,
             entry.IconPath,
+            entry.IconMask,
             entry.IsModuleEffectIcon,
             entry.ShowsUnknownIcon);
     }
@@ -95,6 +100,7 @@ public readonly record struct BuffDebuffCardContent(
             BuffInfoFormatFormatter.Format(lastKnownBuffName, targetName, level, formatString),
             string.Empty,
             string.Empty,
+            null,
             null,
             false,
             false);

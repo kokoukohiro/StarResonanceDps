@@ -25,6 +25,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const uint WorldProxyServiceId = 103198054;
         private const uint GetTeamInfoMethodId = 0x4C01F;
         private const uint GetSocialDataMethodId = 0x47065;
+        private const uint UseSlotMethodId = 0x3D002;
 
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
@@ -110,6 +111,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
 
+            // 自分が技を使うときの上りの要求とその応答。自分の推移グラフの技の記録はここから取る。
+            netCap.RegisterProxyHandler(WorldProxyServiceId, UseSlotMethodId, ProcessUseSlotCall);
+            netCap.RegisterProxyReturnHandler(WorldProxyServiceId, UseSlotMethodId, ProcessUseSlotReturn);
+
             netCap.Start();
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
         }
@@ -169,6 +174,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 死亡と自然回復の刻みの控え。止めている間の復活を取りこぼすと、次の死亡を扱わなくなる。
             PlayerDeathStates = [];
             LastPassiveHealTicks = [];
+
+            // 応答待ちの技の要求。止めている間の応答は届かない。
+            PendingUseSlotSkills = [];
         }
 
         /// <summary>
@@ -1588,6 +1596,71 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// 自分が技を使うときの上りの要求 <c>UseSlot</c> の技ID。応答の番号(returnUid)ごとに、応答が来るまで控える。
+        /// 消すときは <see cref="PlayerDeathStates"/> と同じく新しい辞書に差し替える(<see cref="ClearReceivedStateStores"/>)。
+        /// </summary>
+        private static Dictionary<uint, int> PendingUseSlotSkills = [];
+
+        /// <summary>
+        /// 自分が技を使うときの上りの要求 <c>UseSlot</c>。種類が技で、自動(<c>IsPassive</c>)でない要求の技IDを応答まで控える。
+        ///
+        /// <para>
+        /// <b>自分の推移グラフの技の記録は、差分の技の開始ではなくこの要求と成功の応答から取る</b>(<see cref="ProcessUseSlotReturn"/>)。
+        /// 短い技(エクストラスキルなど)はサーバーの1回の同期の中で開始と終わりが畳まれ、差分には <c>AttrSkillId</c> が値なしで届くだけで、
+        /// 何の技か分からないことがある。
+        /// </para>
+        /// </summary>
+        private static void ProcessUseSlotCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var request = Zproto.World.Types.UseSlot.Parser.ParseFrom(payloadBuffer).VRequest;
+            if (request is null
+                || request.UseType != Zproto.EUseSlotType.UseSlotTypeSkill
+                || request.ExtraData.IsEmpty)
+            {
+                return;
+            }
+
+            var skill = Zproto.UseSkillParam.Parser.ParseFrom(request.ExtraData);
+            if (skill.IsPassive || skill.Skillid <= 0)
+            {
+                return;
+            }
+
+            PendingUseSlotSkills[returnUid] = skill.Skillid;
+        }
+
+        /// <summary>
+        /// <c>UseSlot</c> の応答。成功なら、要求の技を自分の推移グラフの技の記録に残す(時刻は応答の到着時刻)。失敗なら捨てる。
+        /// </summary>
+        private static void ProcessUseSlotReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            if (!PendingUseSlotSkills.Remove(returnUid, out var skillId))
+            {
+                return;
+            }
+
+            if (Zproto.World.Types.UseSlot_Ret.Parser.ParseFrom(payloadBuffer).Ret != Zproto.EErrorCode.ErrSuccess)
+            {
+                return;
+            }
+
+            var selfUuid = AppState.PlayerUUID;
+            if (selfUuid == 0)
+            {
+                Log.Warning("UseSlot succeeded for skill {SkillId} before the player's own entity was known; not recording it in the skill timeline", skillId);
+                return;
+            }
+
+            EncounterManager.Current.AddSkillActivation(selfUuid, skillId, extraData.ArrivalTime);
+        }
+
+        /// <summary>
         /// 名刺照会の応答。顔写真と名刺を控える(プレイヤー情報が出す)。
         /// 照会はゲームが送ったものだけで、照会の種類によって入っている部分が違う。
         /// </summary>
@@ -2340,7 +2413,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     var castSkillLevel = EncounterManager.Current.GetAttrKV(targetUuid, "AttrSkillLevel") is int level ? level : 0;
                     EncounterManager.Current.AddSkillCast(targetUuid, castSkillId, castSkillLevel, extraData);
-                    if (isTargetPlayer)
+
+                    // 自分の推移グラフの技の記録は上りの UseSlot の成功の応答から取る(ProcessUseSlotReturn)。
+                    if (isTargetPlayer && !IsSelfPlayer(targetUuid))
                     {
                         EncounterManager.Current.AddSkillActivation(targetUuid, castSkillId, extraData.ArrivalTime);
                     }

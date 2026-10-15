@@ -96,6 +96,32 @@
                     </Rectangle.Style>
                 </Rectangle>
 
+                <!--
+                    絵が Icons.xaml の絵(装備効果)なら、白く塗った面をその絵で型抜きする(はてなと同じ作り、影の値も同じ)。
+                    位置はモジュール効果の絵と同じく余白で左へ 1 ずらす(左 -1・右 +1、要素ごとの値)。
+                -->
+                <Rectangle Fill="White"
+                           OpacityMask="{Binding IconMask}"
+                           Margin="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter='-0.5,0,0.5,0'}">
+                    <Rectangle.Effect>
+                        <DropShadowEffect Color="#000000"
+                                          Opacity="0.5"
+                                          ShadowDepth="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=2}"
+                                          BlurRadius="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=5}" />
+                    </Rectangle.Effect>
+                    <Rectangle.Style>
+                        <Style TargetType="Rectangle">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IconMask}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Rectangle.Style>
+                </Rectangle>
+
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Style="{StaticResource Text.WidgetWindow}"

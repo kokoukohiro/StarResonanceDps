@@ -54,6 +54,15 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.SkillMetrics),
             nameof(Entity.Attributes),
             nameof(Entity.SkillCasts),
+            nameof(Entity.RecordedAvatar),
+        ],
+        [typeof(SocialAvatarState)] =
+        [
+            nameof(SocialAvatarState.AvatarId),
+            nameof(SocialAvatarState.ProfileUrl),
+            nameof(SocialAvatarState.IsProfileReviewed),
+            nameof(SocialAvatarState.HalfBodyUrl),
+            nameof(SocialAvatarState.IsHalfBodyReviewed),
         ],
         [typeof(CombatStats)] =
         [
@@ -127,7 +136,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
     ];
 
     /// <summary>
-    /// <see cref="Entity.Attributes"/> のうち書くキー。装備(<c>AttrEquipData</c>)、HP、種別ID、習得スキル。
+    /// <see cref="Entity.Attributes"/> のうち書くキー。装備(<c>AttrEquipData</c>)、HP、種別ID、シーズン階級(<c>AttrRankLevel</c>)、習得スキル。
     /// </summary>
     private static readonly HashSet<string> PersistedAttributeKeys =
     [
@@ -135,6 +144,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
         "AttrHp",
         "AttrId",
         "AttrMaxHp",
+        "AttrRankLevel",
         "AttrSkillLevelIdList",
     ];
 
