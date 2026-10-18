@@ -446,6 +446,9 @@ If it is not installed, you can download it from the link below.</value>
   <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
     <value>Hide others</value>
   </data>
+  <data name="Hotkey_PlayerNameShowOrHide" xml:space="preserve">
+    <value>Show/Hide Player Names</value>
+  </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>Window Color</value>
   </data>
@@ -847,6 +850,12 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>Hide Inactive Status Effects</value>
+  </data>
+  <data name="Settings_PlayerStatus_ShowActualValues" xml:space="preserve">
+    <value>Show Actual Values</value>
+  </data>
+  <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
+    <value>Note: Drag items in the widget to reorder them.</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>Skill Name</value>

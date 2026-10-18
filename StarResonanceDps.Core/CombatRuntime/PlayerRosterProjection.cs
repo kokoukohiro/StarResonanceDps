@@ -181,9 +181,9 @@ internal static class PlayerRosterProjection
         var encounter = EncounterManager.Current;
 
         // <b>メーターUIに乗っている人は、履歴表示中かどうかに関わらずリストにも居なければならない。</b>
-        // だから「メーターの人」はメーターが映しているエンカウンターから取る。
+        // だから「メーターの人」はメーターが映しているエンカウンター(履歴、保持している前の回、今の回の順)から取る。
         // ライブ供給が無ければ行は灰色(IsLive=false)になるだけで、固まるわけではない。
-        var meterEncounter = AppState.OpenedHistoricalEncounter ?? encounter;
+        var meterEncounter = MeterSnapshotProvider.ResolveActiveEncounter();
         long[] nearbyPlayerUuids;
         lock (NearbyPlayerSync)
         {
@@ -264,7 +264,7 @@ internal static class PlayerRosterProjection
                 metadataEntity = nearbyEntity;
             }
 
-            // 素性が履歴の記録から来たか。履歴のHPは「その戦闘が終わった時点の値」で
+            // 素性が履歴の記録か保持している前の回から来たか。どちらもHPは「その戦闘が終わった時点の値」で
             // いまの状態ではないので、表示では最大値に置く(下の useHistoryHealth)。
             var isMetadataFromHistory = false;
             if (metadataEntity is null

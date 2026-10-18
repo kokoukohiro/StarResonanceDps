@@ -40,6 +40,9 @@ public sealed class ConfigManager
     /// <summary><see cref="SaveWidgetWindowTopmostModeIndex"/> が保存した。開いている全体設定の画面が表示と保存済みの控えを合わせる。</summary>
     public event EventHandler? WidgetWindowTopmostModeSaved;
 
+    /// <summary><see cref="SavePlayerNameDisplayModeIndex"/> が保存した。開いている全体設定の画面が表示と保存済みの控えを合わせる。</summary>
+    public event EventHandler? PlayerNameDisplayModeSaved;
+
     public SettingsConfig GetSettingsSnapshot()
     {
         AppConfigDefaults.Normalize(AppConfig);
@@ -97,6 +100,25 @@ public sealed class ConfigManager
 
         Save();
         WidgetWindowTopmostModeSaved?.Invoke(this, EventArgs.Empty);
+        SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 表示設定「プレイヤー名」だけを書き換えて保存し、名前の表示に当て直す。ホットキーの切り替えが使う。
+    /// 全体設定の画面で変更中の値(プレビュー)があれば、その中の同じ項目も合わせる。
+    /// ほかの項目のプレビューは保存しない(画面の未保存の変更を巻き込まない)。
+    /// </summary>
+    public void SavePlayerNameDisplayModeIndex(int index)
+    {
+        AppConfig.Settings.PlayerNameDisplayModeIndex = index;
+        if (_settingsPreview is not null)
+        {
+            _settingsPreview.PlayerNameDisplayModeIndex = index;
+        }
+
+        ApplyPlayerNameDisplayMode(_settingsPreview ?? AppConfig.Settings);
+        Save();
+        PlayerNameDisplayModeSaved?.Invoke(this, EventArgs.Empty);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
     }
 

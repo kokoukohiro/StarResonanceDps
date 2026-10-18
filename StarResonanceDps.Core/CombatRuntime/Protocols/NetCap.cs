@@ -119,6 +119,12 @@ public class NetCap
     /// </summary>
     public Action<DateTime>? BeforeParsePacket { get; set; }
 
+    /// <summary>
+    /// パケットを1つ処理した後に呼ぶ。パケットの出来事で変わった状態を、次のパケットより前に片付けるのに使う
+    /// (<c>EncounterManager.ReleaseHeldPastEncounter</c>)。
+    /// </summary>
+    public Action? AfterParsePacket { get; set; }
+
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {
         ProxyHandlers.Add(new ProxyId(serviceId, methodId), handler);
@@ -231,6 +237,16 @@ public class NetCap
             {
                 rawPacket.Return();
                 RawPacketPool.Return(rawPacket);
+            }
+
+            // 処理が途中で失敗したパケットの後でも呼ぶ(別の try にする)。
+            try
+            {
+                AfterParsePacket?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                LogFailureAndContinue("After parsing a packet", ex);
             }
         }
     }

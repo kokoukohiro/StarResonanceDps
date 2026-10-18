@@ -383,6 +383,9 @@
   <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
     <value>自分以外非表示</value>
   </data>
+  <data name="Hotkey_PlayerNameShowOrHide" xml:space="preserve">
+    <value>プレイヤー名表示/非表示</value>
+  </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>ウィンドウの色</value>
   </data>
@@ -784,6 +787,12 @@
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>無効なステータス効果を隠す</value>
+  </data>
+  <data name="Settings_PlayerStatus_ShowActualValues" xml:space="preserve">
+    <value>実数値を表示</value>
+  </data>
+  <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
+    <value>※ウィジェット上で項目をドラッグして並び替えできます</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>スキル名</value>

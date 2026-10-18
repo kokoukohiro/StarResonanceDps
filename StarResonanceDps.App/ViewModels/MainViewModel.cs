@@ -546,6 +546,13 @@ public sealed partial class MainViewModel : ViewModelBase
 
                 break;
 
+            case HotkeyAction.PlayerNameShowOrHide:
+                _configManager.SavePlayerNameDisplayModeIndex(
+                    _configManager.GetSettingsSnapshot().PlayerNameDisplayModeIndex == (int)PlayerNameDisplayMode.Show
+                        ? (int)PlayerNameDisplayMode.Hide
+                        : (int)PlayerNameDisplayMode.Show);
+                break;
+
             case HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly:
                 _configManager.SaveWidgetWindowTopmostModeIndex(
                     _configManager.GetSettingsSnapshot().WidgetWindowTopmostModeIndex == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex

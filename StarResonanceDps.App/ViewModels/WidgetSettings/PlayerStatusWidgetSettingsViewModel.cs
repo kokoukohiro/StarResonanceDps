@@ -24,6 +24,9 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     [ObservableProperty]
     private bool _hideInactiveStatusEffects = WidgetConfigDefaults.DefaultHideInactiveStatusEffects;
 
+    [ObservableProperty]
+    private bool _showActualValues = WidgetConfigDefaults.DefaultPlayerStatusShowActualValues;
+
     public PlayerStatusWidgetSettingsViewModel(PlayerStatusWidgetSettingsConfig? config)
     {
         var attrIds = PlayerStatusEntry.SettingRowAttrIds;
@@ -74,6 +77,9 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     public string HideInactiveStatusEffectsStateText => LocalizationManager.Instance.GetString(
         HideInactiveStatusEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
 
+    public string ShowActualValuesStateText => LocalizationManager.Instance.GetString(
+        ShowActualValues ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -91,6 +97,7 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         var config = new PlayerStatusWidgetSettingsConfig
         {
             HideInactiveStatusEffects = HideInactiveStatusEffects,
+            ShowActualValues = ShowActualValues,
             RowVisibility = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase),
             TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             TextColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
@@ -152,6 +159,12 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         NotifyChanged();
     }
 
+    partial void OnShowActualValuesChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowActualValuesStateText));
+        NotifyChanged();
+    }
+
     private void Load(PlayerStatusWidgetSettingsConfig config)
     {
         _isLoading = true;
@@ -159,6 +172,8 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         {
             HideInactiveStatusEffects = config.HideInactiveStatusEffects
                 ?? WidgetConfigDefaults.DefaultHideInactiveStatusEffects;
+            ShowActualValues = config.ShowActualValues
+                ?? WidgetConfigDefaults.DefaultPlayerStatusShowActualValues;
 
             foreach (var row in _rows)
             {
@@ -236,13 +251,15 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         OnPropertyChanged(nameof(RowSectionTitle));
         OnPropertyChanged(nameof(TextColorSectionTitle));
         OnPropertyChanged(nameof(HideInactiveStatusEffectsStateText));
+        OnPropertyChanged(nameof(ShowActualValuesStateText));
     }
 
     private static bool SettingsEqual(
         PlayerStatusWidgetSettingsConfig left,
         PlayerStatusWidgetSettingsConfig right)
     {
-        if (left.HideInactiveStatusEffects != right.HideInactiveStatusEffects)
+        if (left.HideInactiveStatusEffects != right.HideInactiveStatusEffects
+            || left.ShowActualValues != right.ShowActualValues)
         {
             return false;
         }

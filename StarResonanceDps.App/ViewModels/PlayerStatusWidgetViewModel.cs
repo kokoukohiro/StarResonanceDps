@@ -78,6 +78,8 @@ public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, I
                 _player,
                 _settings.HideInactiveStatusEffects
                     ?? WidgetConfigDefaults.DefaultHideInactiveStatusEffects,
+                _settings.ShowActualValues
+                    ?? WidgetConfigDefaults.DefaultPlayerStatusShowActualValues,
                 _settings.RowVisibility,
                 _textBrushes,
                 _rowOrder));

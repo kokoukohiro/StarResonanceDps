@@ -192,6 +192,8 @@ public static class PlayerStatusEntry
         new(12510, true, "common_icon12"),
         new(11120, false, "common_attrhaste"),
         new(11930, true, "common_attrhaste"),
+        new(11720, true, "common_icon13"),
+        new(11730, true, "common_icon13"),
         new(11130, false, "common_attrluck"),
         new(11780, true, "common_attrluck"),
         new(12530, true, "common_attrluck"),
@@ -204,8 +206,6 @@ public static class PlayerStatusEntry
         new(11170, false, "common_attrblock"),
         new(11970, true, "common_attrblock"),
         new(12540, true, "common_attrblock"),
-        new(11720, true, "common_icon13"),
-        new(11730, true, "common_icon13"),
         new(11960, true, "common_icon13"),
         new(11830, true, "common_attrhit"),
         new(11350, false, "common_attrdefense"),
@@ -354,6 +354,7 @@ public static class PlayerStatusEntry
         11010, 11020, 11030,
         11110, 11120, 11130, 11140, 11150, 11170,
         11330, 11340,
+        11720, 11730,
         11840, 11850,
         12510, 12530, 12540,
         12790, 12800,
@@ -421,6 +422,9 @@ public static class PlayerStatusEntry
     /// <param name="hideInactiveStatusEffects">
     /// <see cref="HideWhenZeroAttrIds"/> の行のうち、値が 0 のものを出さないか。
     /// </param>
+    /// <param name="showActualValues">
+    /// 割合と実数値を1行にまとめた行(<see cref="PairedRows"/>)で、括弧の実数値を出すか。偽なら割合だけ。
+    /// </param>
     /// <param name="rowVisibility">
     /// 行ごとのオン/オフ(鍵は番号)。<b>オフの行は無条件で出さない。</b>
     /// 一覧に無い番号(割合の行など)は代表の位置で判定されるので見ない。
@@ -436,6 +440,7 @@ public static class PlayerStatusEntry
     public static IReadOnlyList<PlayerStatusRow> Create(
         PlayerRosterEntry player,
         bool hideInactiveStatusEffects,
+        bool showActualValues,
         IReadOnlyDictionary<string, bool> rowVisibility,
         IReadOnlyDictionary<int, Brush> textBrushes,
         IReadOnlyList<int> rowOrder)
@@ -496,7 +501,7 @@ public static class PlayerStatusEntry
                 // 割合側は素の値の位置でまとめて出すので、ここでは行にしない。
                 if (spec.AttrId == paired.ValueAttrId)
                 {
-                    rows.Add(CreatePairedRow(paired, arrived, localization));
+                    rows.Add(CreatePairedRow(paired, arrived, showActualValues, localization));
                     rowKeys.Add(paired.ValueAttrId);
                 }
 
@@ -686,23 +691,26 @@ public static class PlayerStatusEntry
     }
 
     /// <summary>
-    /// 割合と素の値をまとめた1行。表示は <c>割合(素の値)</c> で、名前とアイコンは割合のほう。
+    /// 割合と素の値をまとめた1行。表示は <c>割合(素の値)</c>(設定「実数値を表示」がオフなら割合だけ)で、名前とアイコンは割合のほう。
     /// </summary>
     private static PlayerStatusRow CreatePairedRow(
         PairedRowSpec paired,
         Dictionary<int, string> arrived,
+        bool showActualValues,
         LocalizationManager localization)
     {
         var percentSpec = RowsByAttrId[paired.PercentAttrId];
         var valueSpec = RowsByAttrId[paired.ValueAttrId];
 
         var percentText = FormatValue(percentSpec, arrived.GetValueOrDefault(paired.PercentAttrId));
-        var valueText = FormatValue(valueSpec, arrived.GetValueOrDefault(paired.ValueAttrId));
+        var text = showActualValues
+            ? $"{percentText}({FormatValue(valueSpec, arrived.GetValueOrDefault(paired.ValueAttrId))})"
+            : percentText;
 
         return new PlayerStatusRow(
             localization.GetString($"PlayerStatus_{paired.PercentAttrId}"),
             ResolveIconMask(percentSpec.IconKey),
-            $"{percentText}({valueText})",
+            text,
             GetOrderUnitAttrId(paired.ValueAttrId));
     }
 

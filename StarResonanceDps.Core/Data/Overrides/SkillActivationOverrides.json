@@ -35,6 +35,15 @@
     },
     "Icon": "proficiency_skill_03"
   },
+  "1225": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
   "1294": {
     "Name": {
       "zh-CN": "红光反制攻击",
@@ -80,6 +89,15 @@
     },
     "Icon": "proficiency_skill_03"
   },
+  "1414": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
   "1417": {
     "Name": {
       "zh-CN": "红光反制攻击",
@@ -117,6 +135,15 @@
     "Icon": "weapon_fh_skill_atk"
   },
   "1511": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
+  "1512": {
     "Name": {
       "zh-CN": "极限闪避",
       "en-US": "Perfect Dodge",
@@ -179,6 +206,15 @@
     },
     "Icon": "proficiency_skill_03"
   },
+  "1694": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
   "1702": {
     "Name": {
       "zh-CN": "我流刀法·诛恶",
@@ -207,6 +243,15 @@
     "Icon": "weapon_tdl-01_skill_atk01"
   },
   "1792": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
+  "1793": {
     "Name": {
       "zh-CN": "极限闪避",
       "en-US": "Perfect Dodge",
@@ -319,6 +364,15 @@
     },
     "Icon": "proficiency_skill_03"
   },
+  "1915": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
   "2002": {
     "Name": {
       "zh-CN": "受身",
@@ -373,6 +427,15 @@
     },
     "Icon": "proficiency_skill_03"
   },
+  "2213": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
   "2322": {
     "Name": {
       "zh-CN": "琴弦叩击",
@@ -401,6 +464,15 @@
     "Icon": "weapon_jt-01_atk"
   },
   "2327": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
+  "2328": {
     "Name": {
       "zh-CN": "极限闪避",
       "en-US": "Perfect Dodge",
@@ -446,6 +518,15 @@
     "Icon": "weapon_jd-01_atk"
   },
   "2422": {
+    "Name": {
+      "zh-CN": "极限闪避",
+      "en-US": "Perfect Dodge",
+      "ja-JP": "ジャスト回避",
+      "ko-KR": "극한 회피"
+    },
+    "Icon": "proficiency_skill_03"
+  },
+  "2423": {
     "Name": {
       "zh-CN": "极限闪避",
       "en-US": "Perfect Dodge",

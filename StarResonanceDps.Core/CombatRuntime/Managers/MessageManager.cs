@@ -108,6 +108,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先に被ダメログへ残す。
             netCap.BeforeParsePacket = EncounterManager.RecordEndedAnnouncementBars;
 
+            // 保持していた前の回は、今の回に記録が入ったパケットの後で手放し、プレイヤーリストの名簿をメーターと同じ回へ作り直す。
+            netCap.AfterParsePacket = EncounterManager.ReleaseHeldPastEncounter;
+
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
 

@@ -650,6 +650,10 @@ public sealed class PlayerStatusWidgetSettingsConfig
     /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultHideInactiveStatusEffects"/>。</remarks>
     public bool? HideInactiveStatusEffects { get; set; }
 
+    /// <summary>割合と実数値を1行にまとめた行で、括弧の実数値を出すか(<c>12%(3456)</c> の括弧の部分)。</summary>
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultPlayerStatusShowActualValues"/>。</remarks>
+    public bool? ShowActualValues { get; set; }
+
     /// <summary>行ごとに出すか。鍵は属性の番号。</summary>
     public Dictionary<string, bool> RowVisibility { get; set; } =
         WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility();
@@ -669,6 +673,7 @@ public sealed class PlayerStatusWidgetSettingsConfig
         return new PlayerStatusWidgetSettingsConfig
         {
             HideInactiveStatusEffects = HideInactiveStatusEffects,
+            ShowActualValues = ShowActualValues,
             RowVisibility = RowVisibility is null
                 ? WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility()
                 : new Dictionary<string, bool>(RowVisibility, StringComparer.OrdinalIgnoreCase),
@@ -773,6 +778,9 @@ public static class WidgetConfigDefaults
 
     /// <summary>ステータス詳細で、値が 0 の属性効果の行を隠すか。</summary>
     public const bool DefaultHideInactiveStatusEffects = true;
+
+    /// <summary>ステータス詳細で、割合と実数値を1行にまとめた行の括弧の実数値を出すか。</summary>
+    public const bool DefaultPlayerStatusShowActualValues = true;
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
     public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
 
@@ -1314,6 +1322,7 @@ public static class WidgetConfigDefaults
         return new PlayerStatusWidgetSettingsConfig
         {
             HideInactiveStatusEffects = DefaultHideInactiveStatusEffects,
+            ShowActualValues = DefaultPlayerStatusShowActualValues,
             RowVisibility = CreateDefaultPlayerStatusRowVisibility(),
             TextColorIndexes = CreateDefaultPlayerStatusTextColorIndexes(),
             TextColorPalettes = CreateDefaultPlayerStatusTextColorPalettes()
@@ -1412,6 +1421,7 @@ public static class WidgetConfigDefaults
     {
         var normalized = (playerStatus ?? CreatePlayerStatusSettings()).Clone();
         normalized.HideInactiveStatusEffects ??= DefaultHideInactiveStatusEffects;
+        normalized.ShowActualValues ??= DefaultPlayerStatusShowActualValues;
 
         // 一覧に無い鍵は捨て、足りない鍵は既定で埋める。表が変わっても保存値が取り残されない。
         var rowVisibility = new Dictionary<string, bool>(

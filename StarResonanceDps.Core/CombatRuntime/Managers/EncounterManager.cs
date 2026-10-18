@@ -82,6 +82,26 @@ namespace StarResonanceDps.Core.CombatRuntime
                 Current.AddSkillAnnouncementBarEnd(bar);
             }
         }
+
+        /// <summary>
+        /// 保持していた前の回(<see cref="Encounter.PastEncounterForMeter"/>)を、終わっていれば手放してプレイヤーリストの名簿を作り直す。
+        /// 終わりは、今の回に記録が入ったか、設定「次のイベントまで結果を保持」がオフになったとき。
+        /// パケットを1つ処理した後(<c>NetCap.AfterParsePacket</c>)と、設定をオフにしたとき(<see cref="CombatRuntimeSettings.Apply"/>)に呼ぶ。
+        /// メーターと名簿は同じ回を映す(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)ので、手放したら名簿も作り直して、
+        /// 前の回にだけいた人の灰色の行を外す。
+        /// </summary>
+        public static void ReleaseHeldPastEncounter()
+        {
+            var current = Current;
+            if (current?.PastEncounterForMeter is null
+                || (CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage && !current.HasStatsBeenRecorded()))
+            {
+                return;
+            }
+
+            current.PastEncounterForMeter = null;
+            PlayerRosterProjection.RebuildRoster();
+        }
         public delegate void BattleStartEventHandler(EventArgs e);
         public static event BattleStartEventHandler? BattleStart;
         public delegate void EncounterStartEventHandler(EncounterStartEventArgs e);
@@ -836,12 +856,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool IsWipe { get; set; } = false;
 
         /// <summary>
-        /// 設定「次のイベントまで結果を保持」で、この回に記録が入るまでメーターに代わりに出す前の回。実行中だけで保存しない。
+        /// 設定「次のイベントまで結果を保持」で、この回に記録が入るまでメーターとプレイヤーリストに代わりに出す前の回。実行中だけで保存しない。
         ///
         /// <para>
         /// 入れるのは <see cref="EncounterManager.EnterDungeon"/> だけで、保持してよい区切り(「進行で自動リセット」の区切りとマップ移動)のとき。
         /// 手動のリセット・計測の開始と停止・ログアウトでは入れない。持つのは1つ前の回までで、
-        /// この回に記録が入ったら <c>MeterSnapshotProvider.ResolveActiveEncounter</c> が外す(記録は減らないので戻らない)。
+        /// この回に記録が入ったパケットの後か設定をオフにしたときに <see cref="EncounterManager.ReleaseHeldPastEncounter"/> が外す
+        /// (記録は減らないので戻らない)。画面の側は読むだけ(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)。
         /// </para>
         /// </summary>
         internal Encounter? PastEncounterForMeter { get; set; }

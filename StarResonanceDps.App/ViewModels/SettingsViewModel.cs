@@ -170,6 +170,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         LoadFromSettings(settings, applyLanguage: false, applyPreview: false);
         LoadCaptureSettings();
         _configManager.WidgetWindowTopmostModeSaved += ConfigManager_WidgetWindowTopmostModeSaved;
+        _configManager.PlayerNameDisplayModeSaved += ConfigManager_PlayerNameDisplayModeSaved;
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -238,6 +239,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         // 受付中に閉じたら取り消して、外していたホットキーを戻す(戻せなかったものはサービスがログに書く)。
         EndHotkeyCapture();
         _configManager.WidgetWindowTopmostModeSaved -= ConfigManager_WidgetWindowTopmostModeSaved;
+        _configManager.PlayerNameDisplayModeSaved -= ConfigManager_PlayerNameDisplayModeSaved;
         _configManager.ClearSettingsPreview();
         _hotkeyService.PreviewGameProcessNames(null);
 
@@ -1216,6 +1218,28 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         try
         {
             WidgetWindowTopmostModeIndex = savedIndex;
+        }
+        finally
+        {
+            _isLoadingSettings = false;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>
+    /// ホットキーが表示設定「プレイヤー名」を切り替えて保存した。表示と保存済みの控えの両方を保存した値に合わせる
+    /// (未保存の扱いにしない)。プレビューと名前の表示は保存の側で合わせてあるので出し直さない。
+    /// </summary>
+    private void ConfigManager_PlayerNameDisplayModeSaved(object? sender, EventArgs e)
+    {
+        var savedIndex = _configManager.AppConfig.Settings.PlayerNameDisplayModeIndex;
+        _lastSavedSettings.PlayerNameDisplayModeIndex = savedIndex;
+
+        _isLoadingSettings = true;
+        try
+        {
+            PlayerNameDisplayModeIndex = savedIndex;
         }
         finally
         {

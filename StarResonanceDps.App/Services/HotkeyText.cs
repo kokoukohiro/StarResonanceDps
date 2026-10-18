@@ -16,6 +16,7 @@ public static class HotkeyText
         var localization = LocalizationManager.Instance;
         return action switch
         {
+            HotkeyAction.PlayerNameShowOrHide => localization.GetString("Hotkey_PlayerNameShowOrHide"),
             HotkeyAction.StartFavoritesOrStopAll => JoinMenuTexts("Manager_WidgetAction_StartAllFavorites", "Manager_WidgetAction_StopAll"),
             HotkeyAction.PinRunningOrUnpinAll => JoinMenuTexts("Manager_WidgetAction_PinAllRunning", "Manager_WidgetAction_UnpinAll"),
             HotkeyAction.ClickThroughPinnedOrClearAll => JoinMenuTexts("Manager_WidgetAction_ClickThroughAllPinned", "Manager_WidgetAction_ClearAllClickThrough"),

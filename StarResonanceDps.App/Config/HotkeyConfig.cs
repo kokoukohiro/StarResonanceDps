@@ -6,6 +6,12 @@ namespace StarResonanceDps.App.Config;
 /// <summary>ホットキーで動かす操作。並びは全体設定の行の並び。</summary>
 public enum HotkeyAction
 {
+    /// <summary>
+    /// プレイヤー名が「表示」なら「非表示」、そうでなければ(非表示・自分以外非表示)「表示」に切り替える。
+    /// 全体設定の表示設定「プレイヤー名」と同じ値を書き換えて保存する。
+    /// </summary>
+    PlayerNameShowOrHide,
+
     /// <summary>1つでも起動中なら「すべてを停止」、無ければ「お気に入りを起動」。</summary>
     StartFavoritesOrStopAll,
 
@@ -39,6 +45,8 @@ public enum HotkeyAction
 /// </summary>
 public sealed class HotkeySettingsConfig
 {
+    public HotkeyBindingConfig PlayerNameShowOrHide { get; set; } = null!;
+
     public HotkeyBindingConfig StartFavoritesOrStopAll { get; set; } = null!;
 
     public HotkeyBindingConfig PinRunningOrUnpinAll { get; set; } = null!;
@@ -55,6 +63,7 @@ public sealed class HotkeySettingsConfig
     {
         return action switch
         {
+            HotkeyAction.PlayerNameShowOrHide => PlayerNameShowOrHide,
             HotkeyAction.StartFavoritesOrStopAll => StartFavoritesOrStopAll,
             HotkeyAction.PinRunningOrUnpinAll => PinRunningOrUnpinAll,
             HotkeyAction.ClickThroughPinnedOrClearAll => ClickThroughPinnedOrClearAll,
@@ -69,6 +78,9 @@ public sealed class HotkeySettingsConfig
     {
         switch (action)
         {
+            case HotkeyAction.PlayerNameShowOrHide:
+                PlayerNameShowOrHide = binding;
+                break;
             case HotkeyAction.StartFavoritesOrStopAll:
                 StartFavoritesOrStopAll = binding;
                 break;
@@ -101,6 +113,7 @@ public sealed class HotkeySettingsConfig
     {
         return new HotkeySettingsConfig
         {
+            PlayerNameShowOrHide = PlayerNameShowOrHide?.Clone() ?? new(),
             StartFavoritesOrStopAll = StartFavoritesOrStopAll?.Clone() ?? new(),
             PinRunningOrUnpinAll = PinRunningOrUnpinAll?.Clone() ?? new(),
             ClickThroughPinnedOrClearAll = ClickThroughPinnedOrClearAll?.Clone() ?? new(),

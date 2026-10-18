@@ -59,7 +59,8 @@ public static class CombatRuntimeSettings
     /// <summary>
     /// 設定「次のイベントまで結果を保持」。新しいエンカウンターに記録(与ダメ・回復・被ダメログの行)が入るまで、前の結果をメーターに出し続けるか。
     /// 保持するのは「進行で自動リセット」の区切りとマップ移動で、手動のリセット・計測の開始と停止・ログアウトはすぐ新しい回を出す。
-    /// 回を作るとき(<c>EncounterManager.EnterDungeon</c>)と、メーターが映す回を決めるとき(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)に見る。
+    /// 回を作るとき(<c>EncounterManager.EnterDungeon</c>)、メーターとプレイヤーリストが映す回を決めるとき(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)、
+    /// 前の回を手放すとき(<c>EncounterManager.ReleaseHeldPastEncounter</c>)に見る。
     /// </summary>
     public static bool KeepPastEncounterInMeterUntilNextDamage { get; private set; }
 
@@ -128,6 +129,7 @@ public static class CombatRuntimeSettings
         // 1つのメッセージの中で読み直しても同じ値になり、時計の判定と記録の門が食い違わない。
         MessageManager.RunOnPacketThread(() =>
         {
+            var wasApplied = HasBeenApplied;
             StopAggregationInNonCombatAreas = stopAggregationInNonCombatAreas;
             SplitEncountersOnNewPhases = splitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = keepPastEncounterInMeterUntilNextDamage;
@@ -137,6 +139,13 @@ public static class CombatRuntimeSettings
             BenchmarkFirstTargetOnly = benchmarkFirstTargetOnly;
             CombatExitSeconds = combatExitSeconds;
             HasBeenApplied = true;
+
+            // 保持をオフにしたら、保持していた前の回をその場で手放し、プレイヤーリストの名簿もメーターと同じ回へ作り直す。
+            // 起動時の最初の適用ではまだ回が無いので触らない(EncounterManager を起動の関門より前に動かさない)。
+            if (wasApplied && !keepPastEncounterInMeterUntilNextDamage)
+            {
+                EncounterManager.ReleaseHeldPastEncounter();
+            }
         });
     }
 

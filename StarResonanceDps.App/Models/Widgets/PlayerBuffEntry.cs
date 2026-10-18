@@ -147,8 +147,8 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     }
 
     /// <summary>
-    /// 行の名前。エンティティのリストでプレイヤーが付けた行(<see cref="PlayerBuffSnapshot.Caster"/>)だけ
-    /// 「バフ名(付与者名)」にし、内部ID注記はその後に付ける。
+    /// 行の名前。付与者のある行(<see cref="PlayerBuffSnapshot.Caster"/>。エンティティのリストはプレイヤーが付けた行、
+    /// プレイヤーのリストは本人以外のプレイヤーが付けた行)だけ「バフ名(付与者名)」にし、内部ID注記はその後に付ける。
     /// </summary>
     private static string FormatName(PlayerBuffSnapshot snapshot)
     {

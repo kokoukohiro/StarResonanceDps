@@ -146,7 +146,9 @@ public sealed record PlayerMetricSummarySnapshot(
 /// 同じ鍵の行が複数(エンティティの付与したプレイヤーごと)あるときは <paramref name="IsCardRepresentative"/> の行をカードに出す。
 /// </param>
 /// <param name="Caster">
-/// エンティティリストに載る実体のリストで、プレイヤーが付けた行の付与者(行の名前に添える)。召喚物は大元の召喚者のプレイヤー。それ以外の行は null。
+/// 行の名前に添える付与者。召喚物は大元の召喚者のプレイヤー。
+/// エンティティリストに載る実体のリストはプレイヤーが付けた行、プレイヤーのリストは本人以外のプレイヤーが付けた行(出している実体の付与者)。
+/// それ以外の行は null。
 /// </param>
 /// <param name="IsCardRepresentative">同じ <paramref name="CardKey"/> の行のうち、カードに出す行か(残り時間の一番長いもの)。</param>
 public sealed record PlayerBuffSnapshot(
@@ -737,7 +739,10 @@ public static class MeterSnapshotProvider
     /// <summary>バフ/デバフリストの行のまとめ方。</summary>
     private enum BuffRowGrouping
     {
-        /// <summary>バフの番号ごとに1行。付与者に関係なく上書きする(プレイヤーのリスト)。</summary>
+        /// <summary>
+        /// バフの番号ごとに1行。付与者に関係なく上書きする(プレイヤーのリスト)。
+        /// 出している実体を付けたのが本人以外のプレイヤーなら、付与者の名前を添える。
+        /// </summary>
         ByBuff,
 
         /// <summary>
@@ -754,7 +759,7 @@ public static class MeterSnapshotProvider
     ///
     /// <para>
     /// 行のまとめ方は <paramref name="grouping"/>(<see cref="BuffRowGrouping"/>)。同じ行にまとまる実体が複数あれば、
-    /// 残り時間の一番長い実体(持続の無いもの・残りの分からないものが勝つ、同じなら先の実体)の層・残り時間を出し、足さない。
+    /// 残り時間の一番長い実体(持続の無いもの・残りの分からないものが勝つ、同じなら先の実体)の層・残り時間・付与者を出し、足さない。
     /// カードはバフの番号で追い、同じ番号の行のうち残り時間の一番長い行を出す。
     /// </para>
     /// </summary>
@@ -802,10 +807,13 @@ public static class MeterSnapshotProvider
             }
 
             var cardKey = ResolveBuffCardKey(buffEvent);
-            var playerCasterUuid = grouping == BuffRowGrouping.ByPlayerCaster
-                ? ResolveBuffPlayerCasterUuid(encounter, buffEvent.FireUuid)
-                : 0;
-            var key = ResolveBuffRowKey(cardKey, playerCasterUuid);
+            var playerCasterUuid = ResolveBuffPlayerCasterUuid(encounter, buffEvent.FireUuid);
+            var key = ResolveBuffRowKey(cardKey, grouping == BuffRowGrouping.ByPlayerCaster ? playerCasterUuid : 0);
+
+            // プレイヤーのリストでは、本人(と本人の召喚物)が付けたものに名前を添えない。
+            var shownCasterUuid = grouping == BuffRowGrouping.ByBuff && playerCasterUuid == entity.UUID
+                ? 0
+                : playerCasterUuid;
             var isNewRow = !rowsByKey.TryGetValue(key, out var currentRow);
             if (!isNewRow && currentRow!.EffectiveRemoveTime >= effectiveRemoveTime)
             {
@@ -826,7 +834,7 @@ public static class MeterSnapshotProvider
                 BuffDisplayRules.GetModuleEffectId(buffEvent) > 0,
                 BuffDisplayRules.IsEquipmentEffect(buffEvent),
                 BuffDisplayRules.IsFactorEffect(buffEvent),
-                playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null);
+                shownCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, shownCasterUuid, partyCache) : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
             if (isNewRow)
             {
@@ -2510,15 +2518,16 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// メーターが映すエンカウンター。履歴を開いていればその回、無ければ今の回。
+    /// メーターが映すエンカウンター。履歴を開いていればその回、無ければ今の回。プレイヤーリストの名簿も同じ回の人を載せる
+    /// (<see cref="PlayerRosterProjection.RebuildRoster"/>)。
     ///
     /// <para>
-    /// 設定「次のイベントまで結果を保持」がオンで、今の回が前の回(<see cref="Encounter.PastEncounterForMeter"/>)を持ち、
-    /// まだ記録が無いうちは前の回を出す。保持してよい区切りかは回を作るときに決まっている(<see cref="EncounterManager.EnterDungeon"/>)。
-    /// 記録が入ったら前の回を手放す(記録は減らないので、外した後に前の回へ戻ることは無い)。
+    /// 設定「次のイベントまで結果を保持」がオンで、今の回が前の回(<see cref="Encounter.PastEncounterForMeter"/>)を持っていれば前の回を出す。
+    /// 保持してよい区切りかは回を作るときに決まっている(<see cref="EncounterManager.EnterDungeon"/>)。
+    /// 前の回を手放すのはパケットの処理の側(<see cref="EncounterManager.ReleaseHeldPastEncounter"/>)で、ここは読むだけ。
     /// </para>
     /// </summary>
-    private static Encounter? ResolveActiveEncounter()
+    internal static Encounter? ResolveActiveEncounter()
     {
         if (AppState.OpenedHistoricalEncounter is { } openedHistoricalEncounter)
         {
@@ -2526,18 +2535,10 @@ public static class MeterSnapshotProvider
         }
 
         var currentEncounter = EncounterManager.Current;
-        if (CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage
-            && currentEncounter?.PastEncounterForMeter is { } pastEncounter)
-        {
-            if (!currentEncounter.HasStatsBeenRecorded())
-            {
-                return pastEncounter;
-            }
-
-            currentEncounter.PastEncounterForMeter = null;
-        }
-
-        return currentEncounter;
+        return CombatRuntimeSettings.KeepPastEncounterInMeterUntilNextDamage
+            && currentEncounter?.PastEncounterForMeter is { } pastEncounter
+                ? pastEncounter
+                : currentEncounter;
     }
 
     private static MeterPlayerSnapshot CreatePlayerValue(long characterId, Entity entity, MeterSnapshotKind kind, CombatClockReading clock)

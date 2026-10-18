@@ -446,6 +446,9 @@
   <data name="PlayerNameDisplay_HideOthers" xml:space="preserve">
     <value>隐藏其他玩家</value>
   </data>
+  <data name="Hotkey_PlayerNameShowOrHide" xml:space="preserve">
+    <value>玩家名称显示/隐藏</value>
+  </data>
   <data name="Settings_Theme_WindowColor" xml:space="preserve">
     <value>窗体颜色</value>
   </data>
@@ -847,6 +850,12 @@
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>隐藏无效的属性效果</value>
+  </data>
+  <data name="Settings_PlayerStatus_ShowActualValues" xml:space="preserve">
+    <value>显示实际数值</value>
+  </data>
+  <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
+    <value>※可在小组件上拖动项目调整顺序</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>技能名称</value>

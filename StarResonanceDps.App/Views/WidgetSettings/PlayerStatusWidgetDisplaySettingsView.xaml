@@ -37,7 +37,7 @@
 
         <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
             <StackPanel>
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                <Border Style="{StaticResource Panel.SettingField}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -53,6 +53,26 @@
                                           IsChecked="{Binding HideInactiveStatusEffects, Mode=TwoWay}" />
                             <TextBlock Style="{StaticResource PlayerStatusSettings.StateText}"
                                        Text="{Binding HideInactiveStatusEffectsStateText}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Style="{StaticResource PlayerStatusSettings.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerStatus_ShowActualValues]}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding ShowActualValues, Mode=TwoWay}" />
+                            <TextBlock Style="{StaticResource PlayerStatusSettings.StateText}"
+                                       Text="{Binding ShowActualValuesStateText}" />
                         </StackPanel>
                     </Grid>
                 </Border>
