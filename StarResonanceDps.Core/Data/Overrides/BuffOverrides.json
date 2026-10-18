@@ -1,237 +1,307 @@
 {
+  "21408": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_sharpenergyre03"
+  },
+  "21411": {
+    "FoldInto": 21422
+  },
+  "21424": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_102"
+  },
+  "25401": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_abnormal_img_icon"
+  },
+  "27004": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
+  },
   "50049": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
+  },
+  "55326": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_icon200"
+  },
+  "55407": {
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_sharpenergyre03"
   },
   "55412": {
     "BuffType": 1
   },
+  "55418": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_icon202"
+  },
+  "55424": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_icon32"
+  },
   "55430": {
     "BuffPriority": 1,
-    "Icon": "ui/atlas/debuff/debuff_icon_100"
-  },
-  "680101": {
-    "BuffType": 1
-  },
-  "680201": {
-    "BuffType": 1
-  },
-  "680401": {
-    "BuffType": 1
-  },
-  "680501": {
-    "BuffType": 1
-  },
-  "680701": {
-    "BuffType": 1
-  },
-  "682501": {
-    "BuffType": 1
-  },
-  "682503": {
-    "BuffType": 1
-  },
-  "682505": {
-    "BuffType": 1
+    "Icon": "debuff_icon_100"
   },
   "683858": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "683859": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "683861": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "701018": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "827206": {
     "BuffType": 1
   },
   "829201": {
-    "Icon": "ui/atlas/hud/buff/buff_blue_cd"
+    "Icon": "buff_blue_cd"
   },
   "829210": {
-    "Icon": "ui/atlas/hud/buff/buff_blue_cd"
+    "Icon": "buff_blue_cd"
   },
   "833016": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom"
-  },
-  "833201": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral"
-  },
-  "833204": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral"
+    "Icon": "buff_talent_passive_icon_general_dps_arrtuprandom"
   },
   "835008": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird"
+    "Icon": "buff_talent_passive_icon_general_dps_thunderbird"
   },
   "881554": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
-  },
-  "881556": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
-  },
-  "883719": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "883721": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_sup_meleeconversion"
   },
   "883826": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral"
+    "Icon": "buff_talent_passive_icon_general_dps_windspiral"
   },
   "974301": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget"
+    "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
   },
   "974343": {
     "BuffType": 1,
-    "Icon": "ui/atlas/buff/buff_fairytail_icon001"
+    "Icon": "buff_fairytail_icon001"
   },
   "997047": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04"
+    "Icon": "buff_talent_passive_icon_dps_sacrifice04"
   },
   "997110": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "999995": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
+  },
+  "2010060": {
+    "BuffType": 1,
+    "BuffPriority": 1
   },
   "2100401": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
-  },
-  "2100410": {
-    "BuffType": 1,
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_sup_meleeconversion"
   },
   "2100411": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_sup_meleeconversion"
   },
   "2110061": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "2110066": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_sup_meleeconversion"
   },
   "2110085": {
     "BuffPriority": 1,
-    "Icon": "ui/atlas/debuff/buff_icon_ray"
+    "Icon": "buff_icon_ray"
   },
   "2110111": {
     "BuffType": 0
   },
   "2110115": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget"
+    "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
   },
   "2110116": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget"
+    "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
   },
   "2110123": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_arrtuprandom"
+    "Icon": "buff_talent_passive_icon_general_dps_arrtuprandom"
   },
   "2110302": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "ui/atlas/hud/base/buff/buff_blue_def"
-  },
-  "2200601": {
-    "BuffType": 1
-  },
-  "2200641": {
-    "BuffType": 1
+    "Icon": "buff_blue_def"
   },
   "2201201": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_sup_meleeconversion"
+    "Icon": "buff_talent_passive_icon_sup_meleeconversion"
   },
-  "2201501": {
-    "BuffType": 1
+  "2201343": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_sharpenergyre03"
   },
-  "2202201": {
-    "BuffType": 1
+  "2201344": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_sharpenergyre03"
+  },
+  "2201351": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_tank_ridicule02"
+  },
+  "2201451": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_27"
+  },
+  "2201452": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_talent_passive_icon_general_dps_sharpenergyre03"
+  },
+  "2201681": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_atk"
+  },
+  "2202041": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_passive_icon_sup_heal02"
+  },
+  "2202042": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_passive_icon_general_tank_unrelent"
+  },
+  "2202112": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_blue_heal"
+  },
+  "2202163": {
+    "BuffPriority": 1,
+    "Icon": "buff_icon201"
   },
   "2202241": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_dps_sacrifice04"
+    "Icon": "buff_talent_passive_icon_dps_sacrifice04"
   },
   "2202262": {
-    "BuffType": 1
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_icon50",
+    "ShowHUDIcon": "-"
+  },
+  "2202263": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_heal"
+  },
+  "2202541": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_passive_icon_sup_heal02"
+  },
+  "2202705": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_blue_def"
+  },
+  "2203091": {
+    "BuffPriority": 1,
+    "Icon": "buff_abnormal_red_icon_03"
+  },
+  "2203101": {
+    "FoldInto": 2203091
+  },
+  "2203102": {
+    "FoldInto": 2203091
+  },
+  "2203131": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_12"
+  },
+  "2203141": {
+    "FoldInto": 2203091
   },
   "2203161": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_thunderbird"
+    "Icon": "buff_talent_passive_icon_general_dps_thunderbird"
   },
-  "2203441": {
-    "BuffType": 1
+  "2203302": {
+    "FoldInto": 2203091
+  },
+  "2203571": {
+    "BuffPriority": 1
   },
   "2204101": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_iceenergyget"
+    "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
+  },
+  "2204471": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_icon_baoji"
+  },
+  "2204511": {
+    "BuffPriority": 1,
+    "Icon": "buff_icon_ice"
   },
   "2205131": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_dps_windspiral"
+    "Icon": "buff_talent_passive_icon_general_dps_windspiral"
   },
-  "2206171": {
-    "BuffType": 1
+  "2206241": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_46"
   },
   "2206331": {
-    "Icon": "ui/atlas/buff/buff_talent_passive_icon_general_sup_grassarea"
+    "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "2206461": {
     "BuffType": 1
   },
-  "2207241": {
-    "BuffType": 1
+  "2206591": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_46"
   },
-  "2300020": {
+  "2207121": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_038"
+    "Icon": "buff_passive_icon_general_dps_ruthless"
   },
-  "2300070": {
+  "2207122": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_012"
+    "Icon": "buff_passive_icon_general_dps_ruthless"
   },
-  "2300080": {
+  "2207252": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_035"
+    "Icon": "buff_icon20"
   },
-  "2300120": {
+  "2208051": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_def"
+  },
+  "2208172": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_1"
+  },
+  "2208182": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_2"
+  },
+  "2208482": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_002"
-  },
-  "2300220": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_039"
-  },
-  "2300310": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_034"
-  },
-  "2300410": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_023"
-  },
-  "2300420": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_042"
-  },
-  "2300620": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_016"
+    "Icon": "buff_icon200"
   },
   "2300621": {
     "BuffPriority": 1,
     "Icon": "ui/atlas/mod_effect/mod_effect_icon_016"
-  },
-  "2300820": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "ui/atlas/mod_effect/mod_effect_icon_045"
   },
   "2302021": {
     "BuffType": 1,
@@ -253,47 +323,7 @@
     "BuffPriority": 1,
     "Icon": "ui/atlas/mod_effect/mod_effect_icon_004"
   },
-  "2400003": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2400004": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2401020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2401030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2401040": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2401110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401120": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2401121": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401130": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -303,42 +333,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2401140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401160": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401230": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2401241": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2401260": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -348,50 +343,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2401270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401271": {
-    "BuffType": 1
-  },
-  "2401280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2401290": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2402111": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402130": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -401,37 +353,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2402140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402160": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2402171": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402210": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402220": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -441,177 +363,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2402240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2402290": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2402300": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403120": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403130": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403160": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403180": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403210": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2403211": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403220": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2403270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403290": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2403300": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404130": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404160": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404180": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -621,17 +373,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2404190": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2404191": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404210": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -639,37 +381,7 @@
   "2404211": {
     "Icon": "Icon.EquipSlot.202"
   },
-  "2404220": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404230": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2404261": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404270": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -679,47 +391,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2404280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2404290": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2404300": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2404301": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2405020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2405030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2405040": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2405130": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -729,22 +401,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2405140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2405141": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405160": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -754,72 +411,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2405170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405180": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405210": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405230": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2405250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2405271": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2405280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406160": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -828,72 +420,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2406170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2406171": {
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406180": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406210": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2406260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2406270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406290": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2406300": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407130": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407140": {
-    "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
@@ -902,61 +429,11 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2407150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407170": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2407171": {
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2407180": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407230": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2407231": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2407260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2407270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2407280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407290": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -966,105 +443,10 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2407300": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2407310": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2407320": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2408020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
   "2408021": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.200"
-  },
-  "2408030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2408110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408120": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408130": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408140": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408150": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408160": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408210": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408220": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408230": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2408240": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2408250": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2408260": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408270": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
   },
   "2408271": {
     "BuffType": 1,
@@ -1076,17 +458,7 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2408280": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2408281": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2408290": {
     "BuffType": 1,
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
@@ -1096,75 +468,10 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2409010": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2409020": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2409030": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2409040": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.200"
-  },
-  "2409050": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409060": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409070": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2409071": {
     "Icon": "Icon.EquipSlot.202"
   },
-  "2409080": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
   "2409081": {
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409090": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409100": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409110": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409120": {
-    "BuffType": 1,
-    "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
-  },
-  "2409130": {
-    "BuffType": 1,
-    "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
   "2409131": {
@@ -1172,22 +479,390 @@
     "BuffPriority": 1,
     "Icon": "Icon.EquipSlot.202"
   },
-  "2409140": {
+  "3002411": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
+    "Icon": "buff_passive_icon_general_dps_crithreetimes"
   },
-  "2409150": {
+  "3002812": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
+    "Icon": "buff_icon49"
   },
-  "2409160": {
+  "3003012": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_101"
+  },
+  "3003031": {
     "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "Icon.EquipSlot.202"
+    "Icon": "buff_passive_icon_general_dps_tyrannical"
   },
-  "3053401": {
-    "BuffType": 1
+  "3005001": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_def"
+  },
+  "3005502": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_atk"
+  },
+  "3005703": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_passive_icon_general_sup_inspire"
+  },
+  "3005721": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_def"
+  },
+  "3005781": {
+    "BuffPriority": 1,
+    "Icon": "buff_red_atk"
+  },
+  "3050081": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_01_008"
+  },
+  "3050111": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_01_011"
+  },
+  "3050401": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_01_001"
+  },
+  "3050421": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_01_003",
+    "ShowHUDIcon": "-"
+  },
+  "3050581": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_022"
+  },
+  "3051081": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_04_008"
+  },
+  "3051441": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_04_005"
+  },
+  "3051461": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_04_002"
+  },
+  "3051542": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_04_001"
+  },
+  "3051571": {
+    "FoldInto": 3051572
+  },
+  "3051572": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_04_005"
+  },
+  "3051591": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_024"
+  },
+  "3052401": {
+    "FoldInto": 3052402
+  },
+  "3052402": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_02_001"
+  },
+  "3052421": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_02_004"
+  },
+  "3052431": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_02_004",
+    "ShowHUDIcon": "-"
+  },
+  "3052441": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_02_005"
+  },
+  "3052451": {
+    "FoldInto": 3052452
+  },
+  "3052452": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s3_02_006"
+  },
+  "3052491": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_02_001"
+  },
+  "3052521": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_02_006"
+  },
+  "3052591": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_026"
+  },
+  "3053101": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_11_010"
+  },
+  "3053121": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/kuangxiangyinzi_s2_11_001"
+  },
+  "3053421": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_11_003"
+  },
+  "3053531": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_11_010"
+  },
+  "3054091": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_12_009"
+  },
+  "3054411": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_12_002"
+  },
+  "3054431": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_12_004"
+  },
+  "3054591": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_030"
+  },
+  "3055081": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_09_008"
+  },
+  "3055091": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_09_009"
+  },
+  "3055361": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_09_001"
+  },
+  "3055391": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_09_004"
+  },
+  "3055411": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_09_006"
+  },
+  "3055511": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_09_008"
+  },
+  "3056021": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_005"
+  },
+  "3056061": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_010"
+  },
+  "3056071": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_008"
+  },
+  "3056081": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_003"
+  },
+  "3056152": {
+    "BuffPriority": 1,
+    "Icon": "Factors/kuangxiangyinzi_s2_05_004"
+  },
+  "3056391": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_05_002",
+    "ShowHUDIcon": "-"
+  },
+  "3056401": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_05_003"
+  },
+  "3056481": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_001"
+  },
+  "3056521": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_05_008"
+  },
+  "3056551": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_05_001"
+  },
+  "3056561": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_05_004"
+  },
+  "3056591": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_033"
+  },
+  "3057101": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_13_010"
+  },
+  "3057111": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_13_011"
+  },
+  "3057451": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_13_006"
+  },
+  "3057571": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/xuwangyinzi_s2_13_001"
+  },
+  "3057572": {
+    "FoldInto": 3057571
+  },
+  "3057581": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_036"
+  },
+  "3057591": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_035"
+  },
+  "3058111": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_011"
+  },
+  "3059062": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_017"
+  },
+  "3059071": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_018"
+  },
+  "3059101": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_021"
+  },
+  "3059181": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_029"
+  },
+  "3059191": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_030"
+  },
+  "3059221": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_033"
+  },
+  "3059231": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_034"
+  },
+  "3059271": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_038"
+  },
+  "3059301": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_017"
+  },
+  "3059311": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_common_012"
+  },
+  "3060041": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_03_004"
+  },
+  "3060101": {
+    "FoldInto": 3060102
+  },
+  "3060102": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "Factors/yinzi_s2_03_010"
+  },
+  "3210051": {
+    "BuffPriority": 1,
+    "Icon": "debuff_icon_1"
+  },
+  "3210223": {
+    "BuffType": 1,
+    "BuffPriority": 1,
+    "Icon": "buff_passive_icon_general_dps_tyrannical"
   }
 }

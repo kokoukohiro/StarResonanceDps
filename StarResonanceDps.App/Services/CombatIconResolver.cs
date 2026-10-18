@@ -5,6 +5,7 @@ using System.Windows.Media;
 using Serilog;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Services;
 
@@ -16,6 +17,12 @@ public static class CombatIconResolver
     /// </summary>
     private const string AppIconPrefix = "Icon.";
 
+    /// <summary>
+    /// バフの絵の名前のうち、アプリの因子の絵のフォルダ(<c>Data/Images/Factors</c>)を指す値の頭(手修正 <c>BuffOverrides.json</c> の <c>Icon</c>)。
+    /// 因子のバフの絵(<c>Factors/yinzi_s2_common_011</c> など)。
+    /// </summary>
+    private const string FactorIconPrefix = "Factors/";
+
     private static readonly ConcurrentDictionary<string, string> ResolvedPaths =
         new(StringComparer.OrdinalIgnoreCase);
 
@@ -24,7 +31,8 @@ public static class CombatIconResolver
 
     /// <summary>
     /// バフのアイコン(ファイル)。モジュール効果の絵(<see cref="CombatDataCatalog.IsModEffectIcon"/>)ならモジュールのフォルダだけ、
-    /// それ以外はバフのフォルダだけを探す。Icons.xaml の絵の鍵(<see cref="ResolveBuffIconMask"/>)はファイルではないので null。
+    /// 因子の絵(頭が <see cref="FactorIconPrefix"/>)なら因子のフォルダだけ、それ以外はバフのフォルダだけを探す。
+    /// Icons.xaml の絵の鍵(<see cref="ResolveBuffIconMask"/>)はファイルではないので null。
     /// </summary>
     public static string? ResolveBuffIcon(string? iconName)
     {
@@ -33,7 +41,10 @@ public static class CombatIconResolver
             return null;
         }
 
-        return Resolve(iconName, CombatDataCatalog.IsModEffectIcon(iconName) ? "Modules" : "Buffs");
+        var category = CombatDataCatalog.IsModEffectIcon(iconName) ? "Modules"
+            : IsFactorIcon(iconName) ? "Factors"
+            : "Buffs";
+        return Resolve(iconName, category);
     }
 
     /// <summary>
@@ -69,6 +80,25 @@ public static class CombatIconResolver
 
     private static bool IsAppIcon(string? iconName)
         => iconName?.StartsWith(AppIconPrefix, StringComparison.Ordinal) == true;
+
+    /// <summary>バフの絵の名前が因子の絵(頭が <see cref="FactorIconPrefix"/>)か。リスト・カードは絵の位置をこれで切り替える。</summary>
+    public static bool IsFactorIcon(string? iconName)
+        => iconName?.StartsWith(FactorIconPrefix, StringComparison.Ordinal) == true;
+
+    /// <summary>
+    /// 根のバフの絵(ファイル)。種類ごとに1つのフォルダだけを探す: タレント・潜在心相晶のノードと上級は <c>Talents</c>
+    /// (同じ絵を共有するので1か所)、因子は <c>Factors</c>、モジュール効果は <c>Modules</c>。
+    /// </summary>
+    public static string? ResolveRootBuffIcon(RootBuffKind kind, string? iconName)
+    {
+        var category = kind switch
+        {
+            RootBuffKind.Factor => "Factors",
+            RootBuffKind.ModuleEffect => "Modules",
+            _ => "Talents"
+        };
+        return Resolve(iconName, category);
+    }
 
     /// <summary>技のアイコン。スキルのフォルダだけを探す(イマジンの技もここ)。</summary>
     public static string? ResolveSkillIcon(string? iconName)

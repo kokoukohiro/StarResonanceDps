@@ -258,7 +258,7 @@
                     </Grid>
                 </Border>
 
-                <!-- プレイヤーリストは下に「シーズン心相晶の表示」が続くので線を引き、メーター2種は最後の行なので引かない。 -->
+                <!-- プレイヤーリストは下に「潜在心相晶を表示」が続くので線を引き、メーター2種は最後の行なので引かない。 -->
                 <Border Visibility="{Binding ShowsSelfDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"

@@ -132,8 +132,12 @@ public sealed record PlayerMetricSummarySnapshot(
     double? CastsPerSecond);
 
 
+/// <param name="BaseId">
+/// バフの番号(非表示リストとカードが引く)。手修正 <c>BuffOverrides.json</c> の <c>FoldInto</c> で畳んだバフは畳み先の番号
+/// (<see cref="CombatDataCatalog.GetBuffDisplayId"/>)。
+/// </param>
 /// <param name="Key">
-/// 行の鍵。プレイヤーのバフ/デバフリストはバフの番号ごと(付与者に関係なく1行)。
+/// 行の鍵。プレイヤーのバフ/デバフリストはバフの番号ごと(付与者に関係なく1行)。畳んだバフは畳み先の番号の行にまとまる。
 /// エンティティリストに載る実体のリストは、プレイヤーが付けたものは番号と付与したプレイヤーごと、それ以外は番号ごと。
 /// 同じ鍵の実体が複数あれば、残り時間の一番長い実体を出す。プレイヤーリストの枠のバッジは <paramref name="CardKey"/> と同じ。
 /// </param>
@@ -169,8 +173,8 @@ public sealed record PlayerBuffSnapshot(
     /// 装備効果(セット効果・武器効果)のバフか(<see cref="BuffDisplayRules.IsEquipmentEffect"/>)。リストの設定「装備効果」で絞るのに使う。
     /// </summary>
     bool IsEquipmentEffect = false,
-    /// <summary>永続(持続が負)のバフか。リストの設定「モジュール効果」「装備効果」の常駐効果はこれ。</summary>
-    bool IsPermanent = false,
+    /// <summary>因子のバフか(<see cref="BuffDisplayRules.IsFactorEffect"/>)。リストの設定「因子効果」で絞るのに使う。</summary>
+    bool IsFactorEffect = false,
     TakenDamageLogParty? Caster = null,
     bool IsCardRepresentative = true);
 
@@ -744,9 +748,9 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// バフ/デバフリストの行。出す条件は <see cref="BuffDisplayRules.IsListed"/>(ゲーム内のバフバーと同じ条件のものと、足して出すもの)。
+    /// バフ/デバフリストの行。出す条件は <see cref="BuffDisplayRules.IsShownByGameRule"/>(ゲーム内のバフバーと同じ条件)。
     /// 表に名前が無ければ付与元をたどった由来の名前を出し(<see cref="CombatDataCatalog.GetBuffDisplayNameWithoutInternalId"/>)、
-    /// 絵はバフの絵(<see cref="CombatDataCatalog.GetBuffOwnIconName"/>)。無ければ空欄のまま渡す。
+    /// 絵はバフの絵(<see cref="CombatDataCatalog.GetBuffOwnIconName"/>)。
     ///
     /// <para>
     /// 行のまとめ方は <paramref name="grouping"/>(<see cref="BuffRowGrouping"/>)。同じ行にまとまる実体が複数あれば、
@@ -770,7 +774,7 @@ public static class MeterSnapshotProvider
         for (var index = 0; index < buffEvents.Length; index++)
         {
             var buffEvent = buffEvents[index];
-            if (!IsIncludedBuff(kind, buffEvent) || !BuffDisplayRules.IsListed(buffEvent, entity))
+            if (!IsIncludedBuff(kind, buffEvent) || !BuffDisplayRules.IsShownByGameRule(buffEvent))
             {
                 continue;
             }
@@ -810,7 +814,7 @@ public static class MeterSnapshotProvider
 
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
-                buffEvent.BaseId,
+                ResolveBuffDisplayId(buffEvent),
                 key,
                 cardKey,
                 name,
@@ -821,7 +825,7 @@ public static class MeterSnapshotProvider
                 remainingUnknown,
                 BuffDisplayRules.GetModuleEffectId(buffEvent) > 0,
                 BuffDisplayRules.IsEquipmentEffect(buffEvent),
-                buffEvent.Duration < 0,
+                BuffDisplayRules.IsFactorEffect(buffEvent),
                 playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
             if (isNewRow)
@@ -1414,7 +1418,7 @@ public static class MeterSnapshotProvider
             var key = ResolveBuffCardKey(buffEvent);
             var snapshot = new PlayerBuffSnapshot(
                 buffEvent.Uuid,
-                buffEvent.BaseId,
+                ResolveBuffDisplayId(buffEvent),
                 key,
                 key,
                 name,
@@ -2205,12 +2209,21 @@ public static class MeterSnapshotProvider
             : string.Empty;
     }
 
-    /// <summary>カードとプレイヤーリストの枠のバッジの鍵。バフの番号ごと(番号の無い実体はその実体)。</summary>
+    /// <summary>
+    /// 行が渡すバフの番号(非表示リストとカードが引く)。畳んだバフは畳み先の番号。番号の無い実体は 0 のまま。
+    /// </summary>
+    private static int ResolveBuffDisplayId(BuffEvent buffEvent)
+        => buffEvent.BaseId > 0 ? CombatDataCatalog.GetBuffDisplayId(buffEvent.BaseId) : buffEvent.BaseId;
+
+    /// <summary>
+    /// カードとプレイヤーリストの枠のバッジの鍵。バフの番号ごと(番号の無い実体はその実体)。
+    /// 畳んだバフは畳み先の番号(<see cref="CombatDataCatalog.GetBuffDisplayId"/>)。
+    /// </summary>
     private static string ResolveBuffCardKey(BuffEvent buffEvent)
     {
         if (buffEvent.BaseId > 0)
         {
-            return $"base:{buffEvent.BaseId}";
+            return $"base:{CombatDataCatalog.GetBuffDisplayId(buffEvent.BaseId)}";
         }
 
         return $"uuid:{buffEvent.Uuid}";

@@ -6,7 +6,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// シーズン心相晶の型の絵と型の対応。絵ごとに、その絵を使う型の根ノードのバフの番号を古いシーズンから並べる。
+/// 潜在心相晶の型の絵と型の対応。絵ごとに、その絵を使う型の根ノードのバフの番号を古いシーズンから並べる。
 /// 絵は Icons.xaml の <c>Icon.SeasonTalent.&lt;絵の名前&gt;</c>、アイコンカラーの設定の鍵は <c>SeasonTalent.&lt;絵の名前&gt;</c>。
 /// プレイヤーリストは、型が分からない人(不明)と無効の人を鍵 <see cref="UnknownColorKey"/> の色で塗る。
 /// プレイヤー情報は、無効の人を鍵 <see cref="InactiveColorKey"/> の色で塗り、不明はほかのバッジの不明と共通の1色で塗る。
@@ -104,7 +104,7 @@ public static class SeasonTalentIcons
 
     /// <summary>
     /// アイコンカラーの設定の行の名前。絵を使う型の名前を古い順に「 / 」でつなぐ。
-    /// 不明の鍵なら「不明(シーズン心相晶)」、無効の鍵なら「シーズン心相晶無効」。
+    /// 不明の鍵なら「不明(潜在心相晶)」、無効の鍵なら「心相晶無効」。
     /// </summary>
     public static string GetDisplayName(string colorKey)
     {

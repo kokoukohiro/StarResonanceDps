@@ -107,6 +107,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.PlayerEquipment
+        or WidgetKind.PlayerTalent
+        or WidgetKind.PlayerSeasonTalent
+        or WidgetKind.PlayerModule
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
         or WidgetKind.BuffDebuffCard
@@ -751,6 +754,24 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private void RequestPlayerEquipment(PlayerListEntry? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
+    }
+
+    [RelayCommand]
+    private void RequestPlayerTalent(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.PlayerTalent, player);
+    }
+
+    [RelayCommand]
+    private void RequestPlayerSeasonTalent(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.PlayerSeasonTalent, player);
+    }
+
+    [RelayCommand]
+    private void RequestPlayerModule(PlayerListEntry? player)
+    {
+        RequestPlayerWindow(WidgetKind.PlayerModule, player);
     }
 
     [RelayCommand]

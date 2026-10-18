@@ -13,7 +13,7 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
 /// プレイヤー情報の表示値。名前・UID・5つの文字の行(冒険者レベル / シーズン階級 / 現在地 / 能力スコア / シーズン強度)と、
-/// 下に並べる3つのバッジ(シーズン / クラスと特化 / シーズン心相晶)。
+/// 下に並べる3つのバッジ(シーズン / クラスと特化 / 潜在心相晶)。
 /// バッジの絵の色はプレイヤー情報の設定のアイコンカラー。
 /// 値で比べる。前回と同じ値なら表示を差し替えないので、絵の形と塗りは使い回す(毎回作ると、値が同じでも差し替えになる)。
 /// </summary>
@@ -56,15 +56,15 @@ public sealed record PlayerInfoEntry
     /// <summary>クラスアイコンの下の特化名。クラスR2は共通の語尾つき。</summary>
     public string ClassSpecText { get; private init; } = string.Empty;
 
-    /// <summary>シーズン心相晶の絵。型の絵、無効なら無効の絵、不明と表に無い型(絵が無い型)ははてな。</summary>
+    /// <summary>潜在心相晶の絵。型の絵、無効なら無効の絵、不明と表に無い型(絵が無い型)ははてな。</summary>
     public Brush? SeasonTalentIconMask { get; private init; }
 
     public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
 
-    /// <summary>シーズン心相晶の絵の色。型・無効・不明の色。</summary>
+    /// <summary>潜在心相晶の絵の色。型・無効・不明の色。</summary>
     public Brush? SeasonTalentIconBrush { get; private init; }
 
-    /// <summary>シーズン心相晶の名前(型の名前 / シーズン心相晶無効 / 不明)。無効の文字だけ書式の <c>{Psych}</c>(無効)と違う。</summary>
+    /// <summary>潜在心相晶の名前(型の名前 / 心相晶無効 / 不明)。無効の文字だけ書式の <c>{Psych}</c>(無効)と違う。</summary>
     public string SeasonTalentText { get; private init; } = string.Empty;
 
     /// <summary>今のシーズンの絵の形。表に無いシーズンか、リソースが見つからなければ無し。</summary>
@@ -141,7 +141,7 @@ public sealed record PlayerInfoEntry
             ClassSpecText = GetProfessionSpecDisplayName(player.ClassSpec, localization),
             SeasonTalentIconMask = seasonTalent.Mask,
             SeasonTalentIconBrush = iconPalette.GetBrush(seasonTalent.ColorKey),
-            // 無効はプレイヤー情報だけ「シーズン心相晶無効」と出す(書式の {Psych} とプレイヤーリストは「無効」)。
+            // 無効はプレイヤー情報だけ「心相晶無効」と出す(書式の {Psych} とプレイヤーリストは「無効」)。
             SeasonTalentText = player.SeasonTalentBuffId <= 0 && player.IsSeasonTalentInactive
                 ? localization.GetString("PlayerInfo_SeasonTalentInactive")
                 : PlayerInfoFormatFormatter.GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive),
@@ -226,7 +226,7 @@ public sealed record PlayerInfoEntry
     }
 
     /// <summary>
-    /// シーズン心相晶の絵と色の鍵。型が分かれば型の絵と型の色、無効なら無効の絵と無効の色、どちらでもなければはてなと不明の色。
+    /// 潜在心相晶の絵と色の鍵。型が分かれば型の絵と型の色、無効なら無効の絵と無効の色、どちらでもなければはてなと不明の色。
     /// 表に無い型(絵が無い型)も、はてなと不明の色。
     /// </summary>
     private static (Brush? Mask, string ColorKey) ResolveSeasonTalentIcon(int rootBuffId, bool isInactive)

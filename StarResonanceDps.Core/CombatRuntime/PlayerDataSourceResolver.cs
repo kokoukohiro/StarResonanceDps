@@ -22,7 +22,8 @@ internal sealed record PlayerDataSourceSnapshot(
     bool IsLive,
     int SeasonTalentBuffId,
     bool IsSeasonTalentInactive,
-    int? SeasonRankLevel);
+    int? SeasonRankLevel,
+    PlayerRootBuffData? RootBuffData);
 
 internal static class PlayerDataSourceResolver
 {
@@ -191,7 +192,19 @@ internal static class PlayerDataSourceResolver
             isSelf || nearbyEntity is not null || partySupplement is not null,
             ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf),
             ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf),
-            ResolveSeasonRankLevel(nearbyEntity, metadataEntity));
+            ResolveSeasonRankLevel(nearbyEntity, metadataEntity),
+            ResolveRootBuffData(nearbyEntity, metadataEntity));
+    }
+
+    /// <summary>
+    /// 根のバフの一覧(<see cref="Entity.RootBuffIds"/>)。周りの実体 → エンカウンターの実体の順。
+    /// 実体は周りから外れても一覧を消さないので、エンカウンターの実体には最後に受けた値が残る。履歴の行は保存した値。
+    /// 全部をまだ受けていなければ null。
+    /// </summary>
+    private static PlayerRootBuffData? ResolveRootBuffData(Entity? nearbyEntity, Entity? metadataEntity)
+    {
+        var buffIds = nearbyEntity?.RootBuffIds ?? metadataEntity?.RootBuffIds;
+        return buffIds is null ? null : PlayerRootBuffData.FromSorted(buffIds);
     }
 
     /// <summary>

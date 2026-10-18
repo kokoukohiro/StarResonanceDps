@@ -299,7 +299,8 @@ public sealed class PlayerRosterStore
             entry.PartySceneId,
             entry.PartyLineId,
             entry.SeasonId,
-            entry.RecordedAvatar);
+            entry.RecordedAvatar,
+            entry.RootBuffData);
     }
 }
 

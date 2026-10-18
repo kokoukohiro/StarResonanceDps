@@ -246,7 +246,10 @@
                                       Height="30"
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Center">
-                                    <!-- モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵の中身の高さにそろえて小さく出す。 -->
+                                    <!--
+                                        モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵の中身の高さにそろえて小さく出す。
+                                        因子の絵は大きさはそのままで、左へずらす(モジュール効果とは別の値)。
+                                    -->
                                     <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
                                            Stretch="Uniform"
                                            RenderOptions.BitmapScalingMode="HighQuality">
@@ -257,6 +260,13 @@
                                                     <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
                                                         <Setter Property="Width" Value="26" />
                                                         <Setter Property="Height" Value="26" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFactorIcon}" Value="True">
                                                         <Setter Property="RenderTransform">
                                                             <Setter.Value>
                                                                 <TranslateTransform X="-1" />

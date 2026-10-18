@@ -60,7 +60,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [ObservableProperty]
     private int _healthValueDisplayModeIndex = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
-    /// <summary>「シーズン心相晶の表示」のスイッチ。</summary>
+    /// <summary>「潜在心相晶を表示」のスイッチ。</summary>
     [ObservableProperty]
     private bool _showSeasonTalent = true;
 
@@ -98,7 +98,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 WidgetConfigDefaults.MaxPaletteColorCount);
             colors.PaletteChanged += Colors_PaletteChanged;
 
-            // プレイヤーリストは不明が2行(クラスとシーズン心相晶)あるので、クラスの不明を「不明(クラス)」と名乗る。
+            // プレイヤーリストは不明が2行(クラスと潜在心相晶)あるので、クラスの不明を「不明(クラス)」と名乗る。
             var item = new MeterClassColorItemViewModel(
                 key,
                 colors,
@@ -201,10 +201,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
 
-    /// <summary>「シーズン心相晶の表示」を出すか。プレイヤーリストだけ。</summary>
+    /// <summary>「潜在心相晶を表示」を出すか。プレイヤーリストだけ。</summary>
     public bool ShowsSeasonTalentSettings => _kind == WidgetKind.PlayerList;
 
-    /// <summary>「シーズン心相晶の表示」のスイッチの右に出す ON / OFF。</summary>
+    /// <summary>「潜在心相晶を表示」のスイッチの右に出す ON / OFF。</summary>
     public string ShowSeasonTalentStateText => LocalizationManager.Instance.GetString(
         ShowSeasonTalent ? "Settings_Switch_On" : "Settings_Switch_Off");
 
@@ -660,10 +660,10 @@ public sealed class MeterClassColorItemViewModel : ObservableObject
 
     public bool IsLast { get; }
 
-    /// <summary>シーズン心相晶の行か。クラスアイコンの代わりに型の絵(無効・不明の行はその絵)を出す。</summary>
+    /// <summary>潜在心相晶の行か。クラスアイコンの代わりに型の絵(無効・不明の行はその絵)を出す。</summary>
     public bool IsSeasonTalent => SeasonTalentIcons.IsColorKey(Key);
 
-    /// <summary>シーズン心相晶の行の型の絵の形。不明の行はクラスの不明と同じ絵、無効の行は無効の絵。</summary>
+    /// <summary>潜在心相晶の行の型の絵の形。不明の行はクラスの不明と同じ絵、無効の行は無効の絵。</summary>
     public Brush? SeasonTalentIconMask => IsSeasonTalent ? SeasonTalentIcons.GetIconMask(Key) : null;
 
     /// <summary>シーズンの行か(プレイヤー情報だけ)。クラスアイコンの代わりにシーズンの絵を出す。</summary>

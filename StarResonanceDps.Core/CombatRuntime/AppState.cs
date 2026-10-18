@@ -307,11 +307,63 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (item.Value.BuffPriority.HasValue)
                 {
                     buff.BuffPriority = item.Value.BuffPriority.Value;
-                    buff.HasBuffPriorityOverride = true;
+                }
+
+                if (item.Value.FoldInto.HasValue)
+                {
+                    buff.FoldInto = item.Value.FoldInto.Value;
                 }
             }
 
+            ApplyBuffFolds(relativePath);
             Log.Information("Loaded {OverridePath}", relativePath);
+        }
+
+        /// <summary>
+        /// 畳む手修正(<see cref="Buff.FoldInto"/>)を当てる。全部の手修正を重ねた後の畳み先の側・優先度・絵を、畳む側の行へ写す。
+        /// 名前は <see cref="CombatDataCatalog"/> が写す。
+        /// 畳み先が表に無い・自分自身・さらに畳まれている行は、エラーログを出して畳まない(静かに効かないので)。
+        /// </summary>
+        private static void ApplyBuffFolds(string relativePath)
+        {
+            var buffs = HelperMethods.DataTables.Buffs.Data;
+            var folds = new List<(string Key, Buff Buff, Buff Target)>();
+            foreach (var (key, buff) in buffs)
+            {
+                if (buff.FoldInto is not { } targetId)
+                {
+                    continue;
+                }
+
+                var targetKey = targetId.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                if (targetKey == key || !buffs.TryGetValue(targetKey, out var target) || target.FoldInto.HasValue)
+                {
+                    Log.Error(
+                        "{OverridePath}: skipping FoldInto of {Key} because the target {TargetId} is missing, itself, or folded",
+                        relativePath, key, targetId);
+                    continue;
+                }
+
+                folds.Add((key, buff, target));
+            }
+
+            foreach (var (key, buff, target) in folds)
+            {
+                buff.BuffType = target.BuffType;
+                buff.BuffPriority = target.BuffPriority;
+                buff.Icon = target.Icon;
+                buff.ShowHUDIcon = target.ShowHUDIcon;
+            }
+
+            // 畳めなかった行は畳まない(番号で引く側が畳み先へ行かないように、印を消す)。
+            var foldedKeys = folds.Select(fold => fold.Key).ToHashSet(StringComparer.Ordinal);
+            foreach (var (key, buff) in buffs)
+            {
+                if (buff.FoldInto.HasValue && !foldedKeys.Contains(key))
+                {
+                    buff.FoldInto = null;
+                }
+            }
         }
     }
 }

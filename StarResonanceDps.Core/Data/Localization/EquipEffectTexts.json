@@ -29,11 +29,59 @@
     "ja-JP": "遠距離ダメージ+{0}",
     "ko-KR": "원거리 대미지 +{0}"
   },
+  "2400003": {
+    "zh-CN": "物理伤害+{0}",
+    "en-US": "Attack DMG +{0}",
+    "ja-JP": "物理ダメージ+{0}",
+    "ko-KR": "물리 대미지 +{0}."
+  },
+  "2400004": {
+    "zh-CN": "魔法伤害+{0}",
+    "en-US": "Magic DMG +{0}",
+    "ja-JP": "魔法ダメージ+{0}",
+    "ko-KR": "마법 대미지 +{0}."
+  },
+  "2401020": {
+    "zh-CN": "无穷雷霆之力期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Volt Surge is active.",
+    "ja-JP": "無窮雷陣の有効中、物理ダメージ強化+{0}",
+    "ko-KR": "무궁뇌정의 힘 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2401030": {
+    "zh-CN": "伤害型专精技能提升{0}物理增效",
+    "en-US": "Attack Expertise Skills enhance PHY Boost by {0}.",
+    "ja-JP": "ダメージ系のマスタリースキルによる物理ダメージ強化+{0}",
+    "ko-KR": "대미지형 마스터리 스킬 물리 버프 {0} 증가"
+  },
+  "2401040": {
+    "zh-CN": "千雷闪影之意期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Stormflash is active.",
+    "ja-JP": "千雷の有効中、物理ダメージ強化+{0}",
+    "ko-KR": "천뢰섬영의 의지 지속 시간 동안 물리 버프 {0} 증가"
+  },
   "2401250": {
     "zh-CN": "消耗雷之印的技能提升{0}物理增效",
     "en-US": "Skills that consume Thunder Sigil gain {0} PHY Boost",
     "ja-JP": "雷印を消費するスキルによって物理増強+{0}",
     "ko-KR": "번개의 인장을 소모하는 스킬의 물리 버프 {0} 증가"
+  },
+  "2402010": {
+    "zh-CN": "冰之灌注期间提升{0}魔法增效",
+    "en-US": "While Permafrost is active, grants {0} MAG Boost",
+    "ja-JP": "パーマフロストの持続中、魔法ダメージ強化+{0}。",
+    "ko-KR": "퍼마프로스트를 연주하는 동안 마법 버프 {0} 증가"
+  },
+  "2402020": {
+    "zh-CN": "幸运一击提升{0}魔法增效",
+    "en-US": "Lucky Strike enhances MAG Boost by {0}.",
+    "ja-JP": "幸運の一撃による魔法ダメージ強化+{0}",
+    "ko-KR": "행운의 일격 마법 버프 {0} 증가"
+  },
+  "2402030": {
+    "zh-CN": "持续伤害提升{0}魔法增效",
+    "en-US": "DoT enhances MAG Boost by {0}.",
+    "ja-JP": "持続ダメージによる魔法ダメージ強化+{0}",
+    "ko-KR": "지속 대미지 마법 버프 {0} 증가"
   },
   "2402240": {
     "zh-CN": "远距离伤害+{0}",
@@ -52,6 +100,18 @@
     "en-US": "While Permafrost is active, grants {0} MAG Boost",
     "ja-JP": "パーマフロストの持続中、魔法ダメージ強化+{0}。",
     "ko-KR": "퍼마프로스트를 연주하는 동안 마법 버프 {0} 증가"
+  },
+  "2403010": {
+    "zh-CN": "伤害型专精技能提升{0}物理增效",
+    "en-US": "Attack Expertise Skills enhance PHY Boost by {0}.",
+    "ja-JP": "ダメージ系のマスタリースキルによる物理ダメージ強化+{0}",
+    "ko-KR": "대미지형 마스터리 스킬 물리 버프 {0} 증가"
+  },
+  "2403020": {
+    "zh-CN": "幸运一击提升{0}物理增效",
+    "en-US": "Lucky Strike enhances PHY Boost by {0}.",
+    "ja-JP": "幸運の一撃による物理ダメージ強化+{0}",
+    "ko-KR": "행운의 일격 물리 버프 {0} 증가"
   },
   "2403160": {
     "zh-CN": "物理伤害+{0}",
@@ -76,6 +136,24 @@
     "en-US": "{0} PHY Boost while in Galeform",
     "ja-JP": "風姿卓絶の持続中、物理増強+{0}",
     "ko-KR": "비범한 풍모 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2404010": {
+    "zh-CN": "灌注期间提升{0}魔法增效",
+    "en-US": "Grants {0} MAG Boost bonus while Infusion is active.",
+    "ja-JP": "インフュージョンの有効中、魔法ダメージ強化+{0}",
+    "ko-KR": "인퓨전 기간 동안 마법 버프 {0} 증가"
+  },
+  "2404020": {
+    "zh-CN": "幸运效果提升{0}魔法增效",
+    "en-US": "Luck effect enhances MAG Boost by {0}.",
+    "ja-JP": "幸運効果による魔法ダメージ強化+{0}",
+    "ko-KR": "행운 효과 마법 버프 {0} 증가"
+  },
+  "2404030": {
+    "zh-CN": "治疗型技能提升{0}魔法增效",
+    "en-US": "Healing Skills enhance MAG Boost by {0}.",
+    "ja-JP": "回復系スキルによる魔法ダメージ強化+{0}",
+    "ko-KR": "치료형 스킬 마법 버프 {0} 증가"
   },
   "2404170": {
     "zh-CN": "幸运一击伤害+{0}",
@@ -106,6 +184,30 @@
     "en-US": "Grants {0} Inspiration bonus",
     "ja-JP": "鼓舞効果+{0}。",
     "ko-KR": "고무 효과 {0} 증가"
+  },
+  "2405010": {
+    "zh-CN": "精神凝聚期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Focus is active.",
+    "ja-JP": "メンタルフォーカスの有効中、物理ダメージ強化+{0}",
+    "ko-KR": "정신 집중 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2405020": {
+    "zh-CN": "宠物造成的伤害提升{0}物理增效",
+    "en-US": "DMG dealt by Companions enhances PHY Boost by {0}.",
+    "ja-JP": "臣獣の与えるダメージによる物理ダメージ強化+{0}",
+    "ko-KR": "야수가 주는 대미지 물리 버프 {0} 증가"
+  },
+  "2405030": {
+    "zh-CN": "精神凝聚期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Focus is active.",
+    "ja-JP": "メンタルフォーカスの有効中、物理ダメージ強化+{0}",
+    "ko-KR": "정신 집중 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2405040": {
+    "zh-CN": "猎鹰出击物理增效提升{0}",
+    "en-US": "Falcon Strike increases PHY Boost by {0}.",
+    "ja-JP": "臣鷹出撃による物理ダメージ強化+{0}",
+    "ko-KR": "팔콘 출격 물리 버프 {0} 증가"
   },
   "2405240": {
     "zh-CN": "远距离伤害+{0}",
@@ -149,6 +251,24 @@
     "ja-JP": "物理ダメージ+{0}",
     "ko-KR": "물리 대미지 +{0}."
   },
+  "2408010": {
+    "zh-CN": "幸运效果提升{0}魔法增效",
+    "en-US": "Luck effect enhances MAG Boost by {0}.",
+    "ja-JP": "幸運効果による魔法ダメージ強化+{0}",
+    "ko-KR": "행운 효과 마법 버프 {0} 증가"
+  },
+  "2408020": {
+    "zh-CN": "主动施放安可后，20秒内提升{0}魔法增效",
+    "en-US": "After actively casting Encore, increases MAG Boost by {0} for 20s.",
+    "ja-JP": "アンコールのアクティブ発動後の20秒間、魔法ダメージ強化+{0}",
+    "ko-KR": "직접 앵콜 시전 후 20초 동안 마법 버프 {0} 증가"
+  },
+  "2408030": {
+    "zh-CN": "治疗型技能提升{0}魔法增效",
+    "en-US": "Healing Skills enhance MAG Boost by {0}.",
+    "ja-JP": "回復系スキルによる魔法ダメージ強化+{0}",
+    "ko-KR": "치료형 스킬 마법 버프 {0} 증가"
+  },
   "2408230": {
     "zh-CN": "你所拥有的幸运效果伤害提升{0}",
     "en-US": "Luck effect DMG is boosted by {0}",
@@ -166,5 +286,29 @@
     "en-US": "While Healing Melody is active, {0} MAG Boost will be gained",
     "ja-JP": "ヒーリングメロディー持続中、魔法増強+{0}",
     "ko-KR": "울림・치유의 악장을 연주하는 동안 마법 버프 {0} 증가"
+  },
+  "2409010": {
+    "zh-CN": "幸运一击提升{0}物理增效",
+    "en-US": "Lucky Strike enhances PHY Boost by {0}.",
+    "ja-JP": "幸運の一撃による物理ダメージ強化+{0}",
+    "ko-KR": "행운의 일격 물리 버프 {0} 증가"
+  },
+  "2409020": {
+    "zh-CN": "荒川之寂灭期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Wasteland's End is active.",
+    "ja-JP": "バーニングギアの有効中、物理ダメージ強化+{0}",
+    "ko-KR": "황천의 적멸 지속 시간 동안 물리 버프 {0} 증가"
+  },
+  "2409030": {
+    "zh-CN": "伤害型专精技能提升{0}物理增效",
+    "en-US": "Attack Expertise Skills enhance PHY Boost by {0}.",
+    "ja-JP": "ダメージ系のマスタリースキルによる物理ダメージ強化+{0}",
+    "ko-KR": "대미지형 마스터리 스킬 물리 버프 {0} 증가"
+  },
+  "2409040": {
+    "zh-CN": "无尽之炎魔期间提升{0}物理增效",
+    "en-US": "Grants {0} PHY Boost bonus while Endless Hellfire is active.",
+    "ja-JP": "イグニッションの有効中、物理ダメージ強化+{0}",
+    "ko-KR": "무한의 염마 지속 시간 동안 물리 버프 {0} 증가"
   }
 }

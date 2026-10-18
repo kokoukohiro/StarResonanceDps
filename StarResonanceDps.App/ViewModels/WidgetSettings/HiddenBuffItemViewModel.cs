@@ -37,6 +37,10 @@ public sealed partial class HiddenBuffItemViewModel : ObservableObject
     [ObservableProperty]
     private bool _isModuleEffectIcon;
 
+    /// <summary>絵が因子の絵か。一覧の行と同じく、絵の位置を切り替える。</summary>
+    [ObservableProperty]
+    private bool _isFactorIcon;
+
     /// <summary>絵のパスはあるのにファイルが見つからないか。一覧の行と同じく、はてなを出す。パスが空なら何も出さない。</summary>
     [ObservableProperty]
     private bool _showsUnknownIcon;
@@ -48,12 +52,13 @@ public sealed partial class HiddenBuffItemViewModel : ObservableObject
     public void RefreshMetadata()
     {
         // 一覧と同じ名前と絵の引き方(付与元の由来は分からないので無し)。名前と絵は番号ごと(表と手修正)。
-        // 番号で名前の引けないバフは内部名が出る。
+        // 番号で名前の引けないバフは名前が空になる。
         DisplayName = CombatDataCatalog.GetBuffDisplayName(BaseId, SourceLanding.None);
         var iconName = CombatDataCatalog.GetBuffOwnIconName(BaseId);
         IconPath = CombatIconResolver.ResolveBuffIcon(iconName);
         IconMask = CombatIconResolver.ResolveBuffIconMask(iconName);
         IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(iconName);
+        IsFactorIcon = CombatIconResolver.IsFactorIcon(iconName);
         ShowsUnknownIcon = !string.IsNullOrWhiteSpace(iconName) && IconPath is null && IconMask is null;
     }
 

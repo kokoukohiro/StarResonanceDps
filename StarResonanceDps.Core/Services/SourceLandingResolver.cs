@@ -192,23 +192,17 @@ public sealed class SourceLandingResolver
     /// イマジンのパッシブの根のバフならそのイマジンの技で止まる(メーターの行名はこの2つに着かない)。
     /// </para>
     /// </summary>
-    public SourceLanding ResolveBuffOrigin(int buffId, int fightSourceType, int sourceConfigId, long fireUuid, DateTime arrivalTime, out string trace)
+    public SourceLanding ResolveBuffOrigin(int buffId, int fightSourceType, int sourceConfigId, long fireUuid, DateTime arrivalTime)
     {
         var walk = new Walk();
-        SourceLanding landing;
         if (TryLandBuffOriginRoot(walk, buffId, out var rootLanding))
         {
-            landing = rootLanding;
-        }
-        else
-        {
-            landing = fightSourceType == (int)EFightSource.Buff && sourceConfigId > 0
-                ? ResolveBuff(walk, sourceConfigId, fireUuid, fireUuid, arrivalTime, stopAtBuffOriginRoots: true)
-                : LandNonBuffSource(walk, fightSourceType, sourceConfigId, fireUuid, arrivalTime);
+            return rootLanding;
         }
 
-        trace = walk.ToString();
-        return landing;
+        return fightSourceType == (int)EFightSource.Buff && sourceConfigId > 0
+            ? ResolveBuff(walk, sourceConfigId, fireUuid, fireUuid, arrivalTime, stopAtBuffOriginRoots: true)
+            : LandNonBuffSource(walk, fightSourceType, sourceConfigId, fireUuid, arrivalTime);
     }
 
     /// <summary>
@@ -217,10 +211,10 @@ public sealed class SourceLandingResolver
     /// </summary>
     private static bool TryLandBuffOriginRoot(Walk walk, int buffId, out SourceLanding landing)
     {
-        if (CombatDataCatalog.TryGetModEffectIdByRootBuff(buffId, out var modEffectId))
+        if (CombatDataCatalog.TryGetModEffectIdByRootBuff(buffId, out _))
         {
             walk.Add($"モジュールの根 {buffId}");
-            landing = walk.Land(new SourceLanding(SourceLandingKind.Module, modEffectId));
+            landing = walk.Land(new SourceLanding(SourceLandingKind.Module, buffId));
             return true;
         }
 

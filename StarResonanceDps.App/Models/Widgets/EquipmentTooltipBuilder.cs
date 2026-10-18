@@ -37,7 +37,8 @@ public sealed record EquipmentTooltipLine(string Text, Brush? TextBrush, Brush? 
 /// </summary>
 public static class EquipmentTooltipBuilder
 {
-    /// <summary>庫の型。2 は特化ごとに行が分かれる庫。</summary>
+    /// <summary>庫の型。1 は特化で分かれない庫、2 は特化ごとに行が分かれる庫。</summary>
+    private const int PlainAttrLibType = 1;
     private const int SchoolAttrLibType = 2;
 
     /// <summary>効果の種類。1 = 属性、3 = バフ、5 = 一時属性。</summary>
@@ -100,10 +101,13 @@ public static class EquipmentTooltipBuilder
         return lines;
     }
 
-    /// <summary>庫の配列の型。配列が空なら 0(どの表の型でもないので、その区分の行は表に無いものとして出る)。</summary>
+    /// <summary>
+    /// 素の項目で届いた行を引く庫の型。装備の表のその区分の庫の配列の型で、配列が空なら型1(ゲームと同じ)。
+    /// 改造でしか付かない区分は装備の表の配列が空になる。
+    /// </summary>
     private static int LibTypeOf(IReadOnlyList<int> libs)
     {
-        return libs.Count > 0 ? libs[0] : 0;
+        return libs.Count > 0 ? libs[0] : PlainAttrLibType;
     }
 
     /// <summary>

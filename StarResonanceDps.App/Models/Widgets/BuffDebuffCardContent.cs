@@ -22,6 +22,7 @@ public readonly record struct BuffDebuffCardContent(
     string? IconPath,
     ImageBrush? IconMask,
     bool IsModuleEffectIcon,
+    bool IsFactorIcon,
     bool ShowsUnknownIcon)
 {
     public static BuffDebuffCardContent Empty { get; } = new(
@@ -30,6 +31,7 @@ public readonly record struct BuffDebuffCardContent(
         string.Empty,
         null,
         null,
+        false,
         false,
         false);
 
@@ -53,6 +55,7 @@ public readonly record struct BuffDebuffCardContent(
             entry.IconPath,
             entry.IconMask,
             entry.IsModuleEffectIcon,
+            entry.IsFactorIcon,
             entry.ShowsUnknownIcon);
     }
 
@@ -102,6 +105,7 @@ public readonly record struct BuffDebuffCardContent(
             string.Empty,
             null,
             null,
+            false,
             false,
             false);
     }

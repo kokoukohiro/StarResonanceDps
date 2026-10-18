@@ -1,0 +1,200 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerRootBuffWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="PlayerRootBuffWidgetView_Loaded"
+             SizeChanged="PlayerRootBuffWidgetView_SizeChanged"
+             DataContextChanged="PlayerRootBuffWidgetView_DataContextChanged">
+    <UserControl.Resources>
+        <!-- 名前。作りはバフ一覧・装備情報の行と同じで、左寄せ・収まらないぶんは省略記号で切る。 -->
+        <Style x:Key="RootBuffList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!-- 余白はバフ一覧・装備情報と同じ(左5・右0)。 -->
+        <ScrollViewer x:Name="RootBuffScrollViewer"
+                      Margin="5,5,0,5"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden"
+                      CanContentScroll="False"
+                      ScrollChanged="RootBuffScrollViewer_ScrollChanged">
+            <ItemsControl ItemsSource="{Binding Entries}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!--
+                            行の高さとホバーの作りはバフ一覧の行と同じ。押しても何も起きないが、
+                            Button の ControlTemplate でないとホバーの背景を同じ形で出せない(ステータス詳細の行と同じ)。
+                        -->
+                        <Button Height="31"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                IsTabStop="False"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid SnapsToDevicePixels="True">
+                                                    <Border x:Name="InteractionBackground"
+                                                            Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                            Visibility="Collapsed">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                                <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                        <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+
+                            <Grid VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0"
+                                      Width="30"
+                                      Height="30"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center">
+                                    <!-- タレントの背景(役割の色)。枠いっぱいに置き、タレントの絵はその上に小さく置く。 -->
+                                    <Image Width="30"
+                                           Height="30"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsTankTalent}" Value="True">
+                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Tank}" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsHealerTalent}" Value="True">
+                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Healer}" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsDpsTalent}" Value="True">
+                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Dps}" />
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <!--
+                                        モジュール効果と因子の絵の大きさと位置はバフ一覧の行と同じ値。
+                                        タレントの絵の大きさは、ゲームのタレントの木の輪と絵の比を目安にした値(はてなも同じ値)。心相晶のノード・上級の絵は白いので影を付ける。
+                                    -->
+                                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsTalentIcon}" Value="True">
+                                                        <Setter Property="Width" Value="22" />
+                                                        <Setter Property="Height" Value="22" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsSeasonTalentIcon}" Value="True">
+                                                        <Setter Property="Effect" Value="{StaticResource Effect.ProfessionIconShadow}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
+                                                        <Setter Property="Width" Value="26" />
+                                                        <Setter Property="Height" Value="26" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFactorIcon}" Value="True">
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <!-- 絵が分からない(ファイルが無い・型が分からない上級)ときははてな。作りはバフ一覧の行と同じ。タレントは絵と同じ大きさで背景の上に置く。 -->
+                                    <Rectangle Fill="White"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                        </Rectangle.OpacityMask>
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsTalentIcon}" Value="True">
+                                                        <Setter Property="Width" Value="22" />
+                                                        <Setter Property="Height" Value="22" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+                                </Grid>
+
+                                <TextBlock Grid.Column="1"
+                                           Margin="6,0,8,0"
+                                           Style="{StaticResource RootBuffList.RowText}"
+                                           Text="{Binding Name}" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

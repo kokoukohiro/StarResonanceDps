@@ -20,7 +20,7 @@ python gen_class_specs.py     # 職業の特化の名前
 python gen_seasons.py         # シーズンの名前とシーズンランクの名前
 python gen_equips.py          # 装備の名前・数値・効果の文言
 python gen_match_targets.py   # マッチング先(パーティ・活動)の名前
-python gen_mod_effects.py     # モジュール効果の名前
+python gen_root_buffs.py      # 根のバフ(タレント・心相晶・因子・モジュール効果)の名前・種類・絵
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -108,7 +108,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
 | `gen_equips.py` | `Data/Localization/EquipNames.json`<br>`Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
 | `gen_match_targets.py` | `Data/Localization/TeamTargetNames.json`<br>`Data/Localization/SeasonActNames.json` |
-| `gen_mod_effects.py` | `Data/Localization/ModEffectNames.json` |
+| `gen_root_buffs.py` | `Data/Localization/RootBuffNames.json`<br>`Data/Generated/RootBuffs.json` |
 
 ## 全ツール共通の仕様
 
@@ -161,7 +161,7 @@ export BPSR_TABLES=<置き場所>     # bash
 | `Data/Overrides/MonsterNameOverrides.json` | モンスターの名前(`MonsterNames.json`)の差し替え |
 | `Data/Overrides/SkillNameOverrides.json` | 技の名前(`SkillNames.json`)の差し替え |
 | `Data/Overrides/BuffNameOverrides.json` | バフの名前(`BuffNames.json`)の差し替え |
-| `Data/Overrides/BuffNameAssignedOverrides.json` | どの版の表にも名前の無いバフに割り当てる名前 |
+| `Data/Overrides/BuffNameAssignedOverrides.json` | 名前の無いバフと、名前を変えるバフに割り当てる名前 |
 
 `MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` に入っているのは、
 **入力の表の更新で名前が落とされた行**の名前。以前の版の入力にはあり、今の版では空になっている。
@@ -209,18 +209,20 @@ export BPSR_TABLES=<置き場所>     # bash
 { "<バフID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
 ```
 
-同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `BuffPriority` / `Icon` など)で、名前には触らない。
+同じバフIDを `BuffOverrides.json` にも書ける。あちらは生の表の項目(`BuffType` / `BuffPriority` / `Icon` など)で、名前には触らない
+(`FoldInto` で畳んだバフだけは、畳み先の名前が写る)。
 
 ### BuffNameAssignedOverrides.json
 
-`BuffNameOverrides.json` を重ねた後に重ねる。**どの版の表にも名前の無いバフ**に割り当てる名前を書く(`BuffNameOverrides.json` は表の更新で落ちた名前を戻したもの)。
+`BuffNameOverrides.json` を重ねた後に重ねる。**どの版の表にも名前の無いバフ**と、**表や古い版の名前とは別の名前で出すバフ**に割り当てる名前を書く
+(`BuffNameOverrides.json` は表の更新で落ちた名前を戻したもの)。
 形も振る舞いも `MonsterNameOverrides.json` と同じ。こちらが最後に重なるので、同じ鍵ならこちらが勝つ。
+書いた言語だけ差し替わるので、ある言語を zh-CN の名前で出すときは、その言語を書かない。
+`BuffOverrides.json` の `FoldInto` で畳んだバフには書かない(畳み先の名前が写る)。
 
 ```json
 { "<バフID>": { "Name": { "zh-CN": "<名前>", "en-US": "<名前>", "ja-JP": "<名前>", "ko-KR": "<名前>" } } }
 ```
-
-バフ/デバフリストに名前の無いまま出るバフは、アプリの空欄の検知の記録に出る。名前はその記録を見て足す。
 
 ### SkillOverrides.json
 
@@ -259,8 +261,8 @@ export BPSR_TABLES=<置き場所>     # bash
 ```
 
 - `Name` と `Icon` はどちらも省略できる。空の値は書かなかったのと同じ
-- `Icon` は `SkillTable` の `Icon` と同じパスの形で書く。アプリはパスの最後の部分をファイル名として技のアイコンのフォルダから探し、
-  イマジンの絵かどうかもパスで決める
+- `Icon` はファイル名だけで書く。アプリは最後の部分をファイル名として技のアイコンのフォルダから探す。
+  **イマジンの絵だけは頭の `ui/textures/skill_aoyi/` を付ける**(イマジンの絵かどうかをこの頭で決める)。ほかの頭は使わないので書かない
 - 鍵が技IDの形でない行と知らない言語の名前はエラーログを出して読まない。ファイルが無ければエラーログを出し、上書き無しのまま続ける
 
 ### BuffOverrides.json
@@ -272,7 +274,8 @@ export BPSR_TABLES=<置き場所>     # bash
   "<バフID>": {
     "BuffType": <値>,
     "BuffPriority": <値>,
-    "Icon": "<アイコン名>"
+    "Icon": "<アイコン名>",
+    "FoldInto": <畳み先のバフID>
   }
 }
 ```
@@ -282,17 +285,18 @@ export BPSR_TABLES=<置き場所>     # bash
 | 項目 | |
 |---|---|
 | `BuffType` | バフ側かデバフ側か。生の値をそのまま使うとバフとデバフの振り分けが実行時と食い違うため、**振り分けは実質このファイルが決めている** |
-| `BuffPriority` | ゲーム内のバフ表示に出すか(0 は出さない)。**書いたバフは、バフ/デバフリストでもこの値とアイコンだけで出すか決まる**(0 なら出さない、0 以外ならアイコンがあるときだけ出す) |
-| `Icon` / `ShowHUDIcon` | アイコンのパス。`"-"` は空にする。アプリはパスの最後の部分をファイル名として探すので、ファイル名だけでよい。**モジュール効果の絵だけは頭の `ui/atlas/mod_effect/` が要る**(探すフォルダと絵の大きさをパスの頭で決める)。**`Icon.` で始まる値はアプリの `Styles/Icons.xaml` の絵の鍵**で、白い形の絵として描く(装備効果の `Icon.EquipSlot.202` / `Icon.EquipSlot.200` など) |
+| `BuffPriority` | ゲーム内のバフ表示に出すか(0 は出さない)。**バフ/デバフリストもこの値(手修正を重ねた値)とアイコンで出すか決まる**(0 なら出さない、0 以外ならアイコンがあるときだけ出す) |
+| `FoldInto` | 畳み先のバフID。畳んだバフはバフ/デバフリストで畳み先と同じものとして出る(名前・絵・側・優先度・行とカードの鍵・非表示リストの番号)。読み込みが、全部の手修正を重ねた後の畳み先の `BuffType` / `BuffPriority` / `Icon` / `ShowHUDIcon` と名前を写すので、畳む側にはほかの項目を書かない。同じ行には、同じ付与者(プレイヤーのリストは付与者に関係なく)の分が残り時間の一番長いものでまとまる。畳み先が表に無い・自分自身・さらに畳まれているときはエラーログを出して畳まない |
+| `Icon` / `ShowHUDIcon` | アイコンのファイル名。`"-"` は空にする。アプリは最後の部分をファイル名として探すので、**ファイル名だけで書き、頭は判定に使うものだけ付ける**(ほかの頭は使わないので書かない)。**モジュール効果の絵は頭の `ui/atlas/mod_effect/` を付ける**(探すフォルダと絵の大きさをパスの頭で決める)。**因子の絵は頭の `Factors/` を付ける**(アプリの `Data/Images/Factors` を探す)。**`Icon.` で始まる値はアプリの `Styles/Icons.xaml` の絵の鍵**で、白い形の絵として描く(装備効果の `Icon.EquipSlot.202` / `Icon.EquipSlot.200` など) |
 
 必要な項目だけ書く。**中身の無い項目を置かない。** 差し替える中身が無くても、そのIDが登録されている扱いになる。
 
-`BuffPriority` を書かないバフは、生の値が 0 でも、持続が1秒を超えればバフ/デバフリストに出る(アイコンが無ければ空欄)。
-表の優先度が 0 以外で、出したくないものは `BuffPriority` に 0 を書く。逆に、持続が無い・短いバフを出したいときは、0 以外の値を書く。
+表の優先度が 0 のバフは出ない。出すなら `BuffPriority` に 0 以外の値を書く。表の優先度が 0 以外で、出したくないものは `BuffPriority` に 0 を書く。
 `BuffPriority` を 0 以外にしてもアイコンが無いバフは出ない。出すなら `Icon` も書く。
-アイコンのパスはあるのにアプリの絵のフォルダにファイルが無いバフは、はてなの絵で出る。
+アイコンを書いたのにアプリの絵のフォルダにファイルが無いバフは、はてなの絵で出る。
 モジュール効果のバフの絵は、`Icon` にモジュール効果の絵のパス(`ModEffectTable` の `EffectConfigIcon`)を書く。名前は `BuffNameAssignedOverrides.json` に書く。
 装備効果(セット効果・武器効果)のバフの絵は、`Icon` に Icons.xaml の鍵を書く(セット効果 `Icon.EquipSlot.202`、武器効果 `Icon.EquipSlot.200`)。鍵が Icons.xaml に無ければ、はてなの絵で出る。
+因子のバフの絵は、`Icon` に `Factors/` と因子のアイテムの絵のファイル名を書く(`ItemTable` の `Icon`)。表に頭上の絵(`ShowHUDIcon`)があるバフは、アプリがそちらを先に使うので `ShowHUDIcon` に `"-"` も書く。
 
 ### RecountRowOverrides.json
 
@@ -707,8 +711,8 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 | `PerfectUpperLimit` | `EquipTable.PerfectUpperLimit` の2要素目 |
 | `MainStat` | 段階0 の基礎の庫の行(部位で絞る)に出る属性の系統(番号 − 番号%10)のうち、筋力・知力・敏捷の系統。無ければ 0 |
 | `Stages` | 添字が突破の段階。段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を `BreakThroughTime` の順に。`Basic` / `Advanced` は表の庫の配列 `[型, 庫ID…]` のまま |
-| `Recast` / `Rare` | `EquipTable.RecastingAttrLibId` / `QualityChildAttrLibId`(改鋳 / レアの庫の配列)のまま |
-| `AttrLibs` | 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ `AttrLibId` → その庫の全行を表の順に。装備の全段階の基礎・進化、改鋳、装備と突破の行のレアから参照される庫だけ |
+| `Recast` / `Rare` | `EquipTable.RecastingAttrLibId` / `QualityChildAttrLibId`(改鋳 / レアの庫の配列)のまま。アプリは素の項目で届いた行を引く型にだけ使い、空なら型1 で引く(ゲームと同じ。改造の行は見ない) |
+| `AttrLibs` | 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ `AttrLibId` → その庫の全行を表の順に。装備の全段階の基礎・進化、改鋳、装備と突破の行のレア、改造(`TransformId` → `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)から参照される庫だけ。改造の庫で付いた行も自分の装備の行ID として届く。改造の行が表に無ければ止まる |
 | `EquipmentEffectBuffs` | 装備効果の根のバフの番号(昇順)。セット効果(`EquipSuitTable.SuitAttrLibId` の庫)と、武器(`EquipPart` 200)の装備と突破の行の進化(`AdvancedAttrLibId`)と改造(`TransformId` → `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)の庫の行に出るバフ(効果の種類 3)。庫か改造の行が表に無ければ止まる |
 | `Id` | 行の `Id`。通信で届く自分の装備の値は、この行ID で行を指す |
 | `Parts` / `Specs` | 行の `AllowPart` / `TalentSchoolId`(型1 は空) |
@@ -754,7 +758,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ### 効果の文言 `EquipEffectTexts.json`
 
-`AttrLibs` の効果のうち、進化・改鋳・レアの側(`Advanced` / `Recast` / `Rare` と突破の行のレアから参照される庫)に出る一時属性とバフの文言。
+`AttrLibs` の効果のうち、進化・改鋳・レアの側(`Advanced` / `Recast` / `Rare`、突破の行のレア、改造の改鋳・レアから参照される庫)に出る一時属性とバフの文言。
 
 | 種類 | 文言 |
 |---|---|
@@ -790,14 +794,44 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 鍵はそれぞれの表の行(4言語ぶんの和)。2つの表は同じ番号が別のものを指すので、ファイルを分ける。
 
-## gen_mod_effects.py
+## gen_root_buffs.py
 
-モジュール効果の名前を、**モジュール効果の番号(`ModEffectTable.EffectID`)を鍵に**書く。値は `EffectName`。
-`ModEffectTable` の行は効果の段階ごとに分かれるので、行ではなく `EffectID` を鍵にする。
+根のバフの名前を `RootBuffNames.json` に、種類・並び・絵を `RootBuffs.json` に書く。鍵はどちらも根のバフのバフID。
 
-名前の表と手修正に名前の無いバフで、付与元をたどってモジュール効果(モジュールの根のバフ = `EffectConfig` の `[3, バフID, 1]`、
-同梱 `Data/Raw/ModEffectTable.json` で引く)に着いたものは、この名前で出る。
+根のバフは、タレント・心相晶のノード・心相晶の上級・因子・モジュール効果を付けている間、ずっと乗るバフ(それぞれの効果の `[3, バフID, 1]`)。
+アプリはプレイヤーに乗っている根のバフから、アビリティ情報(タレント)・潜在心相晶情報(ノード・上級・因子)・モジュール情報(モジュール効果)の一覧を出す。
+名前の表と手修正に名前の無いバフで、付与元をたどってモジュールの根のバフ(同梱 `Data/Raw/ModEffectTable.json` で引く)に着いたものも、この名前で出る。
 モジュール効果のバフの名前と絵を番号で出すときは、`BuffNameAssignedOverrides.json` と `BuffOverrides.json` の `Icon` に書く
 (絵のパスが `EffectConfigIcon` の形なら、アプリは `Data/Images/Modules` からファイル名で探す)。
 
-同じ `EffectID` で段階によって名前が食い違う言語は、段階の一番小さい、名前のある行の名前を採り、一覧を出す。空にも除外にもしない。
+| 種類(`RootBuffs.json` の項目) | 表 | 名前 | 絵 | 並び |
+|---|---|---|---|---|
+| `Talents` | `TalentTable.TalentEffect` | `TalentName` | `TalentIcon` | `Id` |
+| `SeasonTalentNodes` | `SeasonTalentEffectOrdinaryTable.Effect` | `Name` | `IconNormal` | `Id` |
+| `SeasonTalentAdvanced` | `SeasonTalentEffectAdvancedTable.Effect` | `Name` | `Icon`(型の上級の番号ごと) | `Id` |
+| `Factors` | `SeasonTalentFactorItemTable.FactorItemEffect` | `ItemTable.Name` から等級を外した名前 | `ItemTable.Icon` | バフID |
+| `ModuleEffects` | `ModEffectTable.EffectConfig` | `EffectName` | `EffectConfigIcon` | `EffectID` |
+
+- 各項目は `{ "Buff": <バフID>, "Icon": "<絵の全体のパス>" }` の配列で、配列の順が並び。上級だけ `Icon` の代わりに `Icons`(型の上級の番号 → 絵)を持つ
+- タレントは役割のタグ `TalentTag` も持つ。タレントの木の職業(`TalentTreeTable.WeaponType`)の `ProfessionSystemTable.Talent`(`TalentTagTable` の番号。1 攻撃 / 2 支援 / 3 防御)。アプリは絵の背景の色を選ぶのに使う
+- `SeasonTalentAdvancedEffects` は型の根のバフ → 型の上級の番号(`SeasonTalentTemplateTable.AdvancedEffectId`)。上級の絵はその人の型で選ぶ。番号が 0 の型(上級を持たない)は入れない
+- タレントは、段階の根のタレント(`TalentStageTable.RootId` → `TalentTreeTable.TalentId`)のバフを入れない。特化型のバフで、特化はプレイヤーリストが出す
+- 心相晶の上級は、1つの型の上級(`EffectId`)にしか出てこないバフ(型の専用効果)を入れない。入れるのは全部の型が使う共通の効果
+- 心相晶のノードは、型の根のノード(`NoteRootId`。型はプレイヤーリストが出す)と、効く遊びの種類(`EffectiveGameplayType`)が決まっている型の木(`SeasonTalentTreeTable.TemplateId`)のノードを入れない
+- 因子は、等級を外した名前が2つ以上になる根(シーズンが変わって効果を失った因子の共通の説明のバフ)を入れない。等級の書き方は言語で違う(jp / kr「・G1」、cn「·G1」、en「 - G1」)
+- アプリは絵をタレント・ノード・上級は `Data/Images/Talents`、因子は `Data/Images/Factors`、モジュール効果は `Data/Images/Modules` から、パスの最後の部分のファイル名で探す
+
+**名前の土台はバフIDの単位で決める**(cn / en は `Star`、jp / kr は `StarASIA`)。土台にそのバフIDの名前があれば土台だけを使い、無いときだけもう一方を使う。
+心相晶のノードで同じ出所の中の1つのバフIDに複数の行が当たったら、型の `BelongSeasonId` が一番大きい行の名前を採る。
+ほかの種類で1つのバフIDに名前の違う行が当たったら、並びの一番小さい行の名前を採り、一覧を出す。
+
+**種類・並び・絵は `StarASIA` を土台にし、無いバフだけ `Star` で補う。** 出所で絵が違うバフは一覧を出す。
+
+次のときは止まる。
+
+- 1つのバフIDが2つの種類に当たる
+- 段階の根が木の表に無い、上級の番号が1つしか無い(型の専用効果を見分けられない)
+- タレントの役割のタグが1つに決まらない(1つのバフで行や出所によって違う場合も)、1〜3 のどれでもない
+- 心相晶のノードの行がどの型の木にも無い、主の型とローグライクの型の両方の木に入る
+- 一番新しいシーズンの中で、同じノードのバフIDの名前が食い違う
+- 型の根のバフに上級の番号が2つ以上当たる、1つのモジュールの根のバフに効果が2つ以上当たる

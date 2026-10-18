@@ -600,28 +600,13 @@ If it is not installed, you can download it from the link below.</value>
     <value>30 s</value>
   </data>
   <data name="Settings_Display_ModuleEffect" xml:space="preserve">
-    <value>Module effect</value>
-  </data>
-  <data name="ModuleEffectDisplay_All" xml:space="preserve">
-    <value>Show all</value>
-  </data>
-  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
-    <value>Hide</value>
-  </data>
-  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
-    <value>Hide persistent effects</value>
+    <value>Module effect display</value>
   </data>
   <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
-    <value>Equipment effect</value>
+    <value>Equipment effect display</value>
   </data>
-  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
-    <value>Show all</value>
-  </data>
-  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
-    <value>Hide</value>
-  </data>
-  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
-    <value>Hide persistent effects</value>
+  <data name="Settings_Display_FactorEffect" xml:space="preserve">
+    <value>Factor effect display</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>Entity name</value>
@@ -776,6 +761,15 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>Equipment Info</value>
   </data>
+  <data name="Widget_PlayerTalent" xml:space="preserve">
+    <value>Talent Info</value>
+  </data>
+  <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
+    <value>Deep-Slumber Psychoscope Info</value>
+  </data>
+  <data name="Widget_PlayerModule" xml:space="preserve">
+    <value>Module Info</value>
+  </data>
   <data name="PlayerInfo_Uid" xml:space="preserve">
     <value>UID</value>
   </data>
@@ -900,7 +894,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>Class Spec</value>
   </data>
   <data name="Settings_PlayerInfo_Field_SeasonTalent" xml:space="preserve">
-    <value>Season Psychoscope</value>
+    <value>Deep-Slumber Psychoscope</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
     <value>Power</value>
@@ -1112,7 +1106,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>HP value</value>
   </data>
   <data name="Settings_Display_SeasonTalent" xml:space="preserve">
-    <value>Show Season Psychoscope</value>
+    <value>Show Deep-Slumber Psychoscope</value>
   </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>Add shield amount</value>
@@ -1673,7 +1667,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Unknown (Class)</value>
   </data>
   <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
-    <value>Unknown (Season Psychoscope)</value>
+    <value>Unknown (Deep-Slumber Psychoscope)</value>
   </data>
   <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
     <value>Psychoscope Not Enabled</value>

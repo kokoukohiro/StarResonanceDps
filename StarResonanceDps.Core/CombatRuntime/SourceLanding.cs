@@ -16,13 +16,13 @@ public enum SourceLandingKind
     Skill = 2,
 
     /// <summary>
-    /// モジュール効果(<c>ModEffectTable.EffectID</c>)。名前は <c>ModEffectNames</c>。
+    /// モジュール効果の根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)。名前は <c>RootBuffNames</c>。
     /// バフの由来(<c>SourceLandingResolver.ResolveBuffOrigin</c>)だけが着く。メーターの行は着かない。
     /// </summary>
     Module = 3,
 }
 
-/// <summary>着地先。<paramref name="Id"/> はオプションのバフID、技ID、モジュール効果の番号のどれか(<paramref name="Kind"/> で決まる)。</summary>
+/// <summary>着地先。<paramref name="Id"/> はオプションのバフID、技ID、モジュール効果の根のバフIDのどれか(<paramref name="Kind"/> で決まる)。</summary>
 public readonly record struct SourceLanding(SourceLandingKind Kind, int Id)
 {
     public static SourceLanding None => default;
@@ -31,7 +31,7 @@ public readonly record struct SourceLanding(SourceLandingKind Kind, int Id)
     {
         SourceLandingKind.RogueEntry => $"オプション {Id}",
         SourceLandingKind.Skill => $"技 {Id}",
-        SourceLandingKind.Module => $"モジュール効果 {Id}",
+        SourceLandingKind.Module => $"モジュールの根 {Id}",
         _ => "なし"
     };
 }

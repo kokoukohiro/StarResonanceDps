@@ -537,28 +537,13 @@
     <value>30秒</value>
   </data>
   <data name="Settings_Display_ModuleEffect" xml:space="preserve">
-    <value>モジュール効果</value>
-  </data>
-  <data name="ModuleEffectDisplay_All" xml:space="preserve">
-    <value>すべて表示</value>
-  </data>
-  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
-    <value>非表示</value>
-  </data>
-  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
-    <value>常駐効果のみ非表示</value>
+    <value>モジュール効果の表示</value>
   </data>
   <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
-    <value>装備効果</value>
+    <value>装備効果の表示</value>
   </data>
-  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
-    <value>すべて表示</value>
-  </data>
-  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
-    <value>非表示</value>
-  </data>
-  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
-    <value>常駐効果のみ非表示</value>
+  <data name="Settings_Display_FactorEffect" xml:space="preserve">
+    <value>因子効果の表示</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>エンティティ名</value>
@@ -713,6 +698,15 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>装備情報</value>
   </data>
+  <data name="Widget_PlayerTalent" xml:space="preserve">
+    <value>アビリティ情報</value>
+  </data>
+  <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
+    <value>潜在心相晶情報</value>
+  </data>
+  <data name="Widget_PlayerModule" xml:space="preserve">
+    <value>モジュール情報</value>
+  </data>
   <data name="PlayerInfo_Uid" xml:space="preserve">
     <value>UID</value>
   </data>
@@ -837,7 +831,7 @@
     <value>クラス</value>
   </data>
   <data name="Settings_PlayerInfo_Field_SeasonTalent" xml:space="preserve">
-    <value>シーズン心相晶</value>
+    <value>潜在心相晶</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
     <value>能力スコア</value>
@@ -1049,7 +1043,7 @@
     <value>HP数値</value>
   </data>
   <data name="Settings_Display_SeasonTalent" xml:space="preserve">
-    <value>シーズン心相晶を表示</value>
+    <value>潜在心相晶を表示</value>
   </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>バリア量加算表示</value>
@@ -1610,7 +1604,7 @@
     <value>不明(クラス)</value>
   </data>
   <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
-    <value>不明(シーズン心相晶)</value>
+    <value>不明(潜在心相晶)</value>
   </data>
   <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
     <value>心相晶無効</value>

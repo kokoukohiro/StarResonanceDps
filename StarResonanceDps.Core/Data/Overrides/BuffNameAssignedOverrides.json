@@ -1,4 +1,52 @@
 {
+  "21408": {
+    "Name": {
+      "zh-CN": "森之结界",
+      "en-US": "Forest Barrier",
+      "ja-JP": "森の結界",
+      "ko-KR": "숲의 결계"
+    }
+  },
+  "25401": {
+    "Name": {
+      "zh-CN": "极寒",
+      "en-US": "Ultra Cold",
+      "ja-JP": "極寒",
+      "ko-KR": "극한"
+    }
+  },
+  "27004": {
+    "Name": {
+      "zh-CN": "寒冰领域",
+      "en-US": "Ice Domain",
+      "ja-JP": "氷の領域",
+      "ko-KR": "얼음 영역"
+    }
+  },
+  "55326": {
+    "Name": {
+      "zh-CN": "涂鸦",
+      "en-US": "Graffiti",
+      "ja-JP": "グラフィティ",
+      "ko-KR": "그래피티"
+    }
+  },
+  "55407": {
+    "Name": {
+      "zh-CN": "神圣壁垒",
+      "en-US": "Holy Barrier",
+      "ja-JP": "聖壁",
+      "ko-KR": "신성 방벽"
+    }
+  },
+  "55418": {
+    "Name": {
+      "zh-CN": "圣环",
+      "en-US": "Divine Circle",
+      "ja-JP": "ホーリーリング",
+      "ko-KR": "디바인 서클"
+    }
+  },
   "55430": {
     "Name": {
       "zh-CN": "嘲讽",
@@ -23,76 +71,196 @@
       "ko-KR": "유화의 가호"
     }
   },
-  "2300020": {
+  "2201343": {
     "Name": {
-      "zh-CN": "精英打击",
-      "en-US": "Elite Strike",
-      "ja-JP": "精鋭打撃",
-      "ko-KR": "엘리트 타격"
+      "zh-CN": "沙石区域",
+      "en-US": "Sandfield",
+      "ja-JP": "砂石圏",
+      "ko-KR": "모래 영역"
     }
   },
-  "2300070": {
+  "2201344": {
     "Name": {
-      "zh-CN": "极·生命凝聚",
-      "en-US": "Life Condense",
-      "ja-JP": "極・HP凝縮",
-      "ko-KR": "극・체력 응집"
+      "zh-CN": "沙石区域",
+      "en-US": "Sandfield",
+      "ja-JP": "砂石圏",
+      "ko-KR": "모래 영역"
     }
   },
-  "2300080": {
+  "2201351": {
     "Name": {
-      "zh-CN": "极·生命吸取",
-      "en-US": "Life Steal",
-      "ja-JP": "極・HP吸収",
-      "ko-KR": "극・생명 흡수"
+      "zh-CN": "护盾",
+      "en-US": "Shield",
+      "ja-JP": "バリア",
+      "ko-KR": "실드"
     }
   },
-  "2300120": {
+  "2201451": {
     "Name": {
-      "zh-CN": "特攻伤害加持",
-      "en-US": "Special Attack",
-      "ja-JP": "特攻ダメージ強化",
-      "ko-KR": "특수 공격 대미지 강화"
+      "zh-CN": "石域",
+      "en-US": "Stone Domain",
+      "ja-JP": "砂塵域",
+      "ko-KR": "바위의 영역"
     }
   },
-  "2300220": {
+  "2201452": {
     "Name": {
-      "zh-CN": "敏捷加持",
-      "en-US": "Agility Boost",
-      "ja-JP": "敏捷強化",
-      "ko-KR": "민첩 강화"
+      "zh-CN": "石域",
+      "en-US": "Stone Domain",
+      "ja-JP": "砂塵域",
+      "ko-KR": "바위의 영역"
     }
   },
-  "2300310": {
+  "2201681": {
     "Name": {
-      "zh-CN": "智力加持",
-      "en-US": "Intellect Boost",
-      "ja-JP": "知力強化",
-      "ko-KR": "지력 강화"
+      "zh-CN": "威压",
+      "en-US": "Intimidation",
+      "ja-JP": "威圧",
+      "ko-KR": "위압"
     }
   },
-  "2300410": {
+  "2202041": {
     "Name": {
-      "zh-CN": "特攻治疗加持",
-      "en-US": "Healing Boost",
-      "ja-JP": "特攻回復強化",
-      "ko-KR": "특수 공격 치료 강화"
+      "zh-CN": "鼓舞",
+      "en-US": "Inspiration",
+      "ja-JP": "鼓舞",
+      "ko-KR": "고무"
     }
   },
-  "2300420": {
+  "2202042": {
     "Name": {
-      "zh-CN": "专精治疗加持",
-      "en-US": "Healing Enhance",
-      "ja-JP": "マスタリー回復強化",
-      "ko-KR": "마스터리 치료 강화"
+      "zh-CN": "绿意护佑",
+      "en-US": "Verdant Blessing",
+      "ja-JP": "緑の守り",
+      "ko-KR": "푸른 가호"
     }
   },
-  "2300620": {
+  "2202112": {
     "Name": {
-      "zh-CN": "极·伤害叠加",
-      "en-US": "DMG Stack",
-      "ja-JP": "極・ダメージ増強",
-      "ko-KR": "극・대미지 중첩"
+      "zh-CN": "溢出治疗恢复效果",
+      "en-US": "Overhealing Regeneration Effect",
+      "ja-JP": "オーバーヒール回復効果",
+      "ko-KR": "초과 치유 회복 효과"
+    }
+  },
+  "2202263": {
+    "Name": {
+      "zh-CN": "复苏之翼无法触发",
+      "en-US": "Wings of Revival Unavailable",
+      "ja-JP": "復活の翼発動不可",
+      "ko-KR": "소생의 날개 발동 불가"
+    }
+  },
+  "2202541": {
+    "Name": {
+      "zh-CN": "生机",
+      "en-US": "Vitality",
+      "ja-JP": "活気",
+      "ko-KR": "생기"
+    }
+  },
+  "2203091": {
+    "Name": {
+      "zh-CN": "生命流失",
+      "en-US": "Bleed",
+      "ja-JP": "HP流失",
+      "ko-KR": "출혈"
+    }
+  },
+  "2203131": {
+    "Name": {
+      "zh-CN": "双星之矢",
+      "en-US": "Twin Arrows",
+      "ja-JP": "双星の矢",
+      "ko-KR": "트윈 스타 애로우"
+    }
+  },
+  "2203571": {
+    "Name": {
+      "zh-CN": "光能凝滞",
+      "en-US": "Light Energy Stasis",
+      "ja-JP": "パラリシス",
+      "ko-KR": "정체된 빛"
+    }
+  },
+  "2204471": {
+    "Name": {
+      "zh-CN": "暴击之寒",
+      "en-US": "Critical Cold",
+      "ja-JP": "酷寒",
+      "ko-KR": "냉기 치명타"
+    }
+  },
+  "2204511": {
+    "Name": {
+      "zh-CN": "寒霜侵袭",
+      "en-US": "Frost Assault",
+      "ja-JP": "霜襲来",
+      "ko-KR": "서리 침습"
+    }
+  },
+  "2206591": {
+    "Name": {
+      "zh-CN": "圣印强化",
+      "en-US": "Holy Sigil Enhancement",
+      "ja-JP": "聖印強化",
+      "ko-KR": "신성 인장 강화"
+    }
+  },
+  "2207121": {
+    "Name": {
+      "zh-CN": "断章",
+      "en-US": "Severed Chapter",
+      "ja-JP": "断章",
+      "ko-KR": "악장 끊기"
+    }
+  },
+  "2207122": {
+    "Name": {
+      "zh-CN": "击破状态伤害强化",
+      "en-US": "Broken State DMG Boost",
+      "ja-JP": "ブレイク状態ダメージ強化",
+      "ko-KR": "격파 상태 대미지 강화"
+    }
+  },
+  "2207252": {
+    "Name": {
+      "zh-CN": "属性共鸣",
+      "en-US": "Stat Resonance",
+      "ja-JP": "能力共鳴",
+      "ko-KR": "능력치 공명"
+    }
+  },
+  "2208051": {
+    "Name": {
+      "zh-CN": "绯炎追命",
+      "en-US": "Crimson Flame Pursuit",
+      "ja-JP": "緋炎追撃",
+      "ko-KR": "적염 추격"
+    }
+  },
+  "2208172": {
+    "Name": {
+      "zh-CN": "燃烧",
+      "en-US": "Burn",
+      "ja-JP": "鬼火",
+      "ko-KR": "연소"
+    }
+  },
+  "2208182": {
+    "Name": {
+      "zh-CN": "狂焰",
+      "en-US": "Wildfire",
+      "ja-JP": "狂炎",
+      "ko-KR": "광염"
+    }
+  },
+  "2208482": {
+    "Name": {
+      "zh-CN": "赤红之地",
+      "en-US": "Crimson Earth",
+      "ja-JP": "炎舞エリア",
+      "ko-KR": "적홍의 땅"
     }
   },
   "2300621": {
@@ -101,14 +269,6 @@
       "en-US": "DMG Stack",
       "ja-JP": "極・ダメージ増強",
       "ko-KR": "극・대미지 중첩"
-    }
-  },
-  "2300820": {
-    "Name": {
-      "zh-CN": "极·绝境守护",
-      "en-US": "Final Protection",
-      "ja-JP": "極・絶境守護",
-      "ko-KR": "극・절경 수호"
     }
   },
   "2302021": {
@@ -143,76 +303,12 @@
       "ko-KR": "극・생명 파동"
     }
   },
-  "2400003": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2400004": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2401020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2401030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2401040": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2401110": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2401120": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
   "2401121": {
     "Name": {
       "zh-CN": "伤害+1%",
       "en-US": "DMG +1%",
       "ja-JP": "ダメージ+1%",
       "ko-KR": "대미지 +1%"
-    }
-  },
-  "2401130": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
     }
   },
   "2401131": {
@@ -223,68 +319,12 @@
       "ko-KR": "치명타 대미지 +2%"
     }
   },
-  "2401140": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2401150": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2401160": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2401230": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2401240": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
   "2401241": {
     "Name": {
       "zh-CN": "幸运效果伤害+10%",
       "en-US": "Luck Effect DMG +10%",
       "ja-JP": "幸運効果のダメージ+10%",
       "ko-KR": "행운 효과 대미지 +10%"
-    }
-  },
-  "2401250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2401260": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
     }
   },
   "2401261": {
@@ -295,76 +335,12 @@
       "ko-KR": "마스터리 스킬 번개 원소 대미지 +7%"
     }
   },
-  "2401270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2401280": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2401290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2402010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402110": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
   "2402111": {
     "Name": {
       "zh-CN": "冰矛伤害+15%",
       "en-US": "Frost Lance DMG +15%",
       "ja-JP": "アイススピアのダメージ+15%",
       "ko-KR": "프로스트 스피어 대미지 +15%"
-    }
-  },
-  "2402130": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
     }
   },
   "2402131": {
@@ -375,60 +351,12 @@
       "ko-KR": "블리자드 대미지 +5%"
     }
   },
-  "2402140": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2402150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2402160": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2402170": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
   "2402171": {
     "Name": {
       "zh-CN": "智力+2.5%",
       "en-US": "Intellect +2.5%",
       "ja-JP": "",
       "ko-KR": ""
-    }
-  },
-  "2402210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2402220": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
     }
   },
   "2402221": {
@@ -439,284 +367,12 @@
       "ko-KR": "숙련 +10%"
     }
   },
-  "2402240": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402260": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2402270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2402280": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2402290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2402300": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2403010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403120": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403130": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2403140": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2403160": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403170": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403180": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2403210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
   "2403211": {
     "Name": {
       "zh-CN": "伤害+1%",
       "en-US": "DMG +1%",
       "ja-JP": "ダメージ+1%",
       "ko-KR": "대미지 +1%"
-    }
-  },
-  "2403220": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403240": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403260": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2403270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403280": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2403290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2403300": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2404010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404130": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2404140": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2404150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2404160": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2404170": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404180": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
     }
   },
   "2404181": {
@@ -727,68 +383,12 @@
       "ko-KR": ""
     }
   },
-  "2404190": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
   "2404191": {
     "Name": {
       "zh-CN": "幸运一击伤害+20%",
       "en-US": "Lucky Strike DMG +20%",
       "ja-JP": "",
       "ko-KR": ""
-    }
-  },
-  "2404210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2404220": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2404230": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404240": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404260": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
     }
   },
   "2404261": {
@@ -799,44 +399,12 @@
       "ko-KR": "봄기운"
     }
   },
-  "2404270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
   "2404271": {
     "Name": {
       "zh-CN": "春意盎然",
       "en-US": "Full Bloom",
       "ja-JP": "春たけなわ",
       "ko-KR": "봄기운 만개"
-    }
-  },
-  "2404280": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2404290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2404300": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
     }
   },
   "2404301": {
@@ -847,60 +415,12 @@
       "ko-KR": ""
     }
   },
-  "2405010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2405020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2405030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2405040": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2405130": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
   "2405131": {
     "Name": {
       "zh-CN": "野狼攻击速度+30%",
       "en-US": "Wild Wolf Attack SPD +30%",
       "ja-JP": "臣狼の攻撃速度+30%",
       "ko-KR": "늑대 공격 속도 +30%"
-    }
-  },
-  "2405140": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
     }
   },
   "2405141": {
@@ -911,92 +431,12 @@
       "ko-KR": "빛 원소 보너스 +6%"
     }
   },
-  "2405150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2405160": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
   "2405161": {
     "Name": {
       "zh-CN": "敏捷+1.5%",
       "en-US": "Agility +1.5%",
       "ja-JP": "敏捷+1.5%",
       "ko-KR": "민첩 +1.5%"
-    }
-  },
-  "2405170": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2405180": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2405210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2405230": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2405240": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2405250": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2405260": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2405270": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
     }
   },
   "2405271": {
@@ -1007,60 +447,12 @@
       "ko-KR": ""
     }
   },
-  "2405280": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2406110": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2406140": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2406150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2406160": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
   "2406161": {
     "Name": {
       "zh-CN": "伤害-5%",
       "en-US": "DMG -5%",
       "ja-JP": "ダメージ-5%",
       "ko-KR": "대미지 -5%"
-    }
-  },
-  "2406170": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
     }
   },
   "2406171": {
@@ -1071,124 +463,12 @@
       "ko-KR": ""
     }
   },
-  "2406180": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2406210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2406240": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2406250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2406260": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2406270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2406280": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2406290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2406300": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2407110": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2407130": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2407140": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
   "2407141": {
     "Name": {
       "zh-CN": "幻光",
       "en-US": "Glimmering",
       "ja-JP": "幻光",
       "ko-KR": "환광"
-    }
-  },
-  "2407150": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2407170": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
     }
   },
   "2407171": {
@@ -1199,76 +479,12 @@
       "ko-KR": ""
     }
   },
-  "2407180": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2407230": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
   "2407231": {
     "Name": {
       "zh-CN": "额外伤害减免+1%",
       "en-US": "Additional DMG Reduction +1%",
       "ja-JP": "追加ダメージ軽減+1%",
       "ko-KR": "추가 대미지 감면 +1%"
-    }
-  },
-  "2407240": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2407250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2407260": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2407270": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2407280": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2407290": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
     }
   },
   "2407291": {
@@ -1279,164 +495,12 @@
       "ko-KR": "대미지 +10%, 속공 +6%"
     }
   },
-  "2407300": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2407310": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2407320": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2408010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2408020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
   "2408021": {
     "Name": {
       "zh-CN": "魔法增效+6%",
       "en-US": "MAG Boost +6%",
       "ja-JP": "魔法ダメージ強化+6%",
       "ko-KR": "마법 버프 +6%"
-    }
-  },
-  "2408030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2408110": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2408120": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2408130": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2408140": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2408150": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
-  "2408160": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
-    }
-  },
-  "2408210": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2408220": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2408230": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2408240": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2408250": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2408260": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2408270": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
     }
   },
   "2408271": {
@@ -1455,28 +519,12 @@
       "ko-KR": "치유의 악장 최종 치료 효과 +16%"
     }
   },
-  "2408280": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
-    }
-  },
   "2408281": {
     "Name": {
       "zh-CN": "暴击治疗+10%",
       "en-US": "Crit Healing +10%",
       "ja-JP": "",
       "ko-KR": ""
-    }
-  },
-  "2408290": {
-    "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
     }
   },
   "2408291": {
@@ -1487,116 +535,12 @@
       "ko-KR": ""
     }
   },
-  "2409010": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2409020": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2409030": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2409040": {
-    "Name": {
-      "zh-CN": "遥远之海系列武器效果",
-      "en-US": "Far Sea Series Weapon Effect",
-      "ja-JP": "蒼海シリーズ武器効果",
-      "ko-KR": "머나먼 바다 시리즈 무기 효과"
-    }
-  },
-  "2409050": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2409060": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2409070": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2409080": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
   "2409081": {
     "Name": {
       "zh-CN": "无相火斩伤害+13%",
       "en-US": "Formless Flame Slash DMG +13%",
       "ja-JP": "イラプションのダメージ+13%",
       "ko-KR": "무상화참 대미지 +13%"
-    }
-  },
-  "2409090": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备2件套效果",
-      "en-US": "Void Corruption Series Equipment 2-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備2set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 2세트 효과"
-    }
-  },
-  "2409100": {
-    "Name": {
-      "zh-CN": "虚蚀系列装备4件套效果",
-      "en-US": "Void Corruption Series Equipment 4-Piece Set Effect",
-      "ja-JP": "虚蝕シリーズ装備4set効果",
-      "ko-KR": "허무의 침식 시리즈 장비 4세트 효과"
-    }
-  },
-  "2409110": {
-    "Name": {
-      "zh-CN": "幻梦系列装备2件套效果",
-      "en-US": "Phantom Series Equipment 2-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備2set効果",
-      "ko-KR": "환상꿈 시리즈 장비 2세트 효과"
-    }
-  },
-  "2409120": {
-    "Name": {
-      "zh-CN": "幻梦系列装备4件套效果",
-      "en-US": "Phantom Series Equipment 4-Piece Set Effect",
-      "ja-JP": "幻夢シリーズ装備4set効果",
-      "ko-KR": "환상꿈 시리즈 장비 4세트 효과"
-    }
-  },
-  "2409130": {
-    "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
     }
   },
   "2409131": {
@@ -1607,28 +551,552 @@
       "ko-KR": ""
     }
   },
-  "2409140": {
+  "3002411": {
     "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
+      "zh-CN": "梦幻箭雨",
+      "en-US": "Dreamlike Arrow Rain",
+      "ja-JP": "夢幻の矢",
+      "ko-KR": "몽환의 화살"
     }
   },
-  "2409150": {
+  "3002812": {
     "Name": {
-      "zh-CN": "祈愿系列装备2件套效果",
-      "en-US": "Oath Series Equipment 2-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備2set効果",
-      "ko-KR": "기원 시리즈 장비 2세트 효과"
+      "zh-CN": "遗梦",
+      "en-US": "Vestige",
+      "ja-JP": "残夢",
+      "ko-KR": "남겨진 꿈"
     }
   },
-  "2409160": {
+  "3003012": {
     "Name": {
-      "zh-CN": "祈愿系列装备4件套效果",
-      "en-US": "Oath Series Equipment 4-Piece Set Effect",
-      "ja-JP": "祈りシリーズ装備4set効果",
-      "ko-KR": "기원 시리즈 장비 4세트 효과"
+      "zh-CN": "寂灭",
+      "en-US": "Oblivion",
+      "ja-JP": "寂滅",
+      "ko-KR": "적멸"
+    }
+  },
+  "3003031": {
+    "Name": {
+      "zh-CN": "激励·绝唱护魂",
+      "en-US": "Inspire: Soulguard Finale",
+      "ja-JP": "幻夢の執念",
+      "ko-KR": "환상꿈 집념"
+    }
+  },
+  "3005001": {
+    "Name": {
+      "zh-CN": "幻灭·削弱",
+      "en-US": "Disillusion: Weakening"
+    }
+  },
+  "3005502": {
+    "Name": {
+      "zh-CN": "战意削减",
+      "en-US": "Bloodthirst Reduction"
+    }
+  },
+  "3005703": {
+    "Name": {
+      "zh-CN": "激励",
+      "en-US": "Inspire"
+    }
+  },
+  "3005721": {
+    "Name": {
+      "zh-CN": "激励·破甲赞歌",
+      "en-US": "Inspire: Armorbreak Anthem"
+    }
+  },
+  "3005781": {
+    "Name": {
+      "zh-CN": "激励·圣盾咏调",
+      "en-US": "Inspire: Holy Shield Melody"
+    }
+  },
+  "3050081": {
+    "Name": {
+      "zh-CN": "雷影X8",
+      "en-US": "Stormblade X8",
+      "ja-JP": "ストームブレイドX8",
+      "ko-KR": "스톰 블레이드X8"
+    }
+  },
+  "3050111": {
+    "Name": {
+      "zh-CN": "雷影X11",
+      "en-US": "Stormblade X11",
+      "ja-JP": "ストームブレイドX11",
+      "ko-KR": "스톰 블레이드X11"
+    }
+  },
+  "3050401": {
+    "Name": {
+      "zh-CN": "雷影真实因子X1",
+      "en-US": "Stormblade Reality Factor X1",
+      "ja-JP": "ストームブレイド・実像因子X1",
+      "ko-KR": "스톰 블레이드 진실 인자X1"
+    }
+  },
+  "3050421": {
+    "Name": {
+      "zh-CN": "雷影真实因子X3",
+      "en-US": "Stormblade Reality Factor X3",
+      "ja-JP": "ストームブレイド・実像因子X3",
+      "ko-KR": "스톰 블레이드 진실 인자X3"
+    }
+  },
+  "3050581": {
+    "Name": {
+      "zh-CN": "雷影稳态因子X1",
+      "en-US": "Stormblade Stasis Factor X1"
+    }
+  },
+  "3051081": {
+    "Name": {
+      "zh-CN": "青岚X8",
+      "en-US": "Wind Knight X8",
+      "ja-JP": "ゲイルランサーX8",
+      "ko-KR": "윈드 나이트X8"
+    }
+  },
+  "3051441": {
+    "Name": {
+      "zh-CN": "青岚真实因子X5",
+      "en-US": "Wind Knight Reality Factor X5",
+      "ja-JP": "ゲイルランサー・実像因子X5",
+      "ko-KR": "윈드 나이트 진실 인자X5"
+    }
+  },
+  "3051461": {
+    "Name": {
+      "zh-CN": "青岚灵感因子X1",
+      "en-US": "Wind Knight Inspiration Factor X1"
+    }
+  },
+  "3051542": {
+    "Name": {
+      "zh-CN": "青岚奇点因子X1",
+      "en-US": "Wind Knight Singularity Factor X1"
+    }
+  },
+  "3051572": {
+    "Name": {
+      "zh-CN": "青岚奇点因子X4",
+      "en-US": "Wind Knight Singularity Factor X4"
+    }
+  },
+  "3051591": {
+    "Name": {
+      "zh-CN": "青岚稳态因子X2",
+      "en-US": "Wind Knight Stasis Factor X2"
+    }
+  },
+  "3052402": {
+    "Name": {
+      "zh-CN": "冰魔真实因子X1",
+      "en-US": "Frost Mage Reality Factor X1",
+      "ja-JP": "フロストメイジ・実像因子X1",
+      "ko-KR": "프로스트 메이지 진실 인자X1"
+    }
+  },
+  "3052421": {
+    "Name": {
+      "zh-CN": "冰魔灵感因子X3",
+      "en-US": "Frost Mage Inspiration Factor X3",
+      "ja-JP": "フロストメイジ・実像因子X3",
+      "ko-KR": "프로스트 메이지 진실 인자X3"
+    }
+  },
+  "3052431": {
+    "Name": {
+      "zh-CN": "冰魔真实因子X4",
+      "en-US": "Frost Mage Reality Factor X4",
+      "ja-JP": "フロストメイジ・実像因子X4",
+      "ko-KR": "프로스트 메이지 진실 인자X4"
+    }
+  },
+  "3052441": {
+    "Name": {
+      "zh-CN": "冰魔真实因子X5",
+      "en-US": "Frost Mage Reality Factor X5",
+      "ja-JP": "フロストメイジ・実像因子X5",
+      "ko-KR": "프로스트 메이지 진실 인자X5"
+    }
+  },
+  "3052452": {
+    "Name": {
+      "zh-CN": "冰魔真实因子X6",
+      "en-US": "Frost Mage Reality Factor X6",
+      "ja-JP": "フロストメイジ・実像因子X6",
+      "ko-KR": "프로스트 메이지 진실 인자X6"
+    }
+  },
+  "3052491": {
+    "Name": {
+      "zh-CN": "冰魔灵感因子X4",
+      "en-US": "Frost Mage Inspiration Factor X4"
+    }
+  },
+  "3052521": {
+    "Name": {
+      "zh-CN": "冰魔灵感因子X5",
+      "en-US": "Frost Mage Inspiration Factor X5"
+    }
+  },
+  "3052591": {
+    "Name": {
+      "zh-CN": "冰魔稳态因子X2",
+      "en-US": "Frost Mage Stasis Factor X2"
+    }
+  },
+  "3053101": {
+    "Name": {
+      "zh-CN": "神射X10",
+      "en-US": "Marksman X10",
+      "ja-JP": "ディバインアーチャーX10",
+      "ko-KR": "디바인 아처X10"
+    }
+  },
+  "3053121": {
+    "Name": {
+      "zh-CN": "神射狂想X1",
+      "en-US": "Marksman Rhapsody X1",
+      "ja-JP": "ディバインアーチャー・狂想X1",
+      "ko-KR": "디바인 아처 광상X1"
+    }
+  },
+  "3053421": {
+    "Name": {
+      "zh-CN": "神射真实因子X3",
+      "en-US": "Marksman Reality Factor X3",
+      "ja-JP": "ディバインアーチャー・実像因子X3",
+      "ko-KR": "디바인 아처 진실 인자X3"
+    }
+  },
+  "3053531": {
+    "Name": {
+      "zh-CN": "神射灵感因子X8",
+      "en-US": "Marksman Inspiration Factor X8"
+    }
+  },
+  "3054091": {
+    "Name": {
+      "zh-CN": "神盾X9",
+      "en-US": "Shield Knight X9",
+      "ja-JP": "シールドファイターX9",
+      "ko-KR": "실드 나이트X9"
+    }
+  },
+  "3054411": {
+    "Name": {
+      "zh-CN": "神盾真实因子X2",
+      "en-US": "Shield Knight Reality Factor X2",
+      "ja-JP": "シールドファイター・実像因子X2",
+      "ko-KR": "실드 나이트 진실 인자X2"
+    }
+  },
+  "3054431": {
+    "Name": {
+      "zh-CN": "神盾真实因子X4",
+      "en-US": "Shield Knight Reality Factor X4",
+      "ja-JP": "シールドファイター・実像因子X4",
+      "ko-KR": "실드 나이트 진실 인자X4"
+    }
+  },
+  "3054591": {
+    "Name": {
+      "zh-CN": "神盾稳态因子X2",
+      "en-US": "Shield Knight Stasis Factor X2"
+    }
+  },
+  "3055081": {
+    "Name": {
+      "zh-CN": "巨刃X8",
+      "en-US": "Heavy Guardian X8",
+      "ja-JP": "ヘヴィガーディアンX8",
+      "ko-KR": "헤비 가디언X8"
+    }
+  },
+  "3055091": {
+    "Name": {
+      "zh-CN": "巨刃X9",
+      "en-US": "Heavy Guardian X9",
+      "ja-JP": "ヘヴィガーディアンX9",
+      "ko-KR": "헤비 가디언X9"
+    }
+  },
+  "3055361": {
+    "Name": {
+      "zh-CN": "巨刃真实因子X1",
+      "en-US": "Heavy Guardian Reality Factor X1",
+      "ja-JP": "ヘヴィガーディアン・実像因子X1",
+      "ko-KR": "헤비 가디언 진실 인자X1"
+    }
+  },
+  "3055391": {
+    "Name": {
+      "zh-CN": "巨刃真实因子X4",
+      "en-US": "Heavy Guardian Reality Factor X4",
+      "ja-JP": "ヘヴィガーディアン・実像因子X4",
+      "ko-KR": "헤비 가디언 진실 인자X4"
+    }
+  },
+  "3055411": {
+    "Name": {
+      "zh-CN": "巨刃真实因子X6",
+      "en-US": "Heavy Guardian Reality Factor X6",
+      "ja-JP": "ヘヴィガーディアン・実像因子X6",
+      "ko-KR": "헤비 가디언 진실 인자X6"
+    }
+  },
+  "3055511": {
+    "Name": {
+      "zh-CN": "巨刃灵感因子X6",
+      "en-US": "Heavy Guardian Inspiration Factor X6"
+    }
+  },
+  "3056021": {
+    "Name": {
+      "zh-CN": "森语X2",
+      "en-US": "Verdant Oracle X2",
+      "ja-JP": "ヴァーダントオラクルX2",
+      "ko-KR": "실반 오라클X2"
+    }
+  },
+  "3056061": {
+    "Name": {
+      "zh-CN": "森语X6",
+      "en-US": "Verdant Oracle X6",
+      "ja-JP": "ヴァーダントオラクルX6",
+      "ko-KR": "실반 오라클X6"
+    }
+  },
+  "3056071": {
+    "Name": {
+      "zh-CN": "森语X7",
+      "en-US": "Verdant Oracle X7",
+      "ja-JP": "ヴァーダントオラクルX7",
+      "ko-KR": "실반 오라클X7"
+    }
+  },
+  "3056081": {
+    "Name": {
+      "zh-CN": "森语X8",
+      "en-US": "Verdant Oracle X8",
+      "ja-JP": "ヴァーダントオラクルX8",
+      "ko-KR": "실반 오라클X8"
+    }
+  },
+  "3056152": {
+    "Name": {
+      "zh-CN": "森语狂想X4",
+      "en-US": "Verdant Oracle Rhapsody X4",
+      "ja-JP": "ヴァーダントオラクル・狂想X4",
+      "ko-KR": "실반 오라클 광상X4"
+    }
+  },
+  "3056391": {
+    "Name": {
+      "zh-CN": "森语真实因子X2",
+      "en-US": "Verdant Oracle Reality Factor X2",
+      "ja-JP": "ヴァーダントオラクル・実像因子X2",
+      "ko-KR": "실반 오라클 진실 인자X2"
+    }
+  },
+  "3056401": {
+    "Name": {
+      "zh-CN": "森语真实因子X3",
+      "en-US": "Verdant Oracle Reality Factor X3",
+      "ja-JP": "ヴァーダントオラクル・実像因子X3",
+      "ko-KR": "실반 오라클 진실 인자X3"
+    }
+  },
+  "3056481": {
+    "Name": {
+      "zh-CN": "森语灵感因子X3",
+      "en-US": "Verdant Oracle Inspiration Factor X3"
+    }
+  },
+  "3056521": {
+    "Name": {
+      "zh-CN": "森语灵感因子X7",
+      "en-US": "Verdant Oracle Inspiration Factor X7"
+    }
+  },
+  "3056551": {
+    "Name": {
+      "zh-CN": "森语奇点因子X2",
+      "en-US": "Verdant Oracle Singularity Factor X2"
+    }
+  },
+  "3056561": {
+    "Name": {
+      "zh-CN": "森语奇点因子X3",
+      "en-US": "Verdant Oracle Singularity Factor X3"
+    }
+  },
+  "3056591": {
+    "Name": {
+      "zh-CN": "森语稳态因子X2",
+      "en-US": "Verdant Oracle Stasis Factor X2"
+    }
+  },
+  "3057101": {
+    "Name": {
+      "zh-CN": "灵魂X10",
+      "en-US": "Beat Performer X10",
+      "ja-JP": "ビートパフォーマーX10",
+      "ko-KR": "비트 퍼포머X10"
+    }
+  },
+  "3057111": {
+    "Name": {
+      "zh-CN": "灵魂X11",
+      "en-US": "Beat Performer X11",
+      "ja-JP": "ビートパフォーマーX11",
+      "ko-KR": "비트 퍼포머X11"
+    }
+  },
+  "3057451": {
+    "Name": {
+      "zh-CN": "灵魂真实因子X6",
+      "en-US": "Beat Performer Reality Factor X6",
+      "ja-JP": "ビートパフォーマー・実像因子X6",
+      "ko-KR": "비트 퍼포머 진실 인자X6"
+    }
+  },
+  "3057571": {
+    "Name": {
+      "zh-CN": "灵魂奇点因子X4",
+      "en-US": "Beat Performer Singularity Factor X4"
+    }
+  },
+  "3057581": {
+    "Name": {
+      "zh-CN": "灵魂稳态因子X1",
+      "en-US": "Beat Performer Stasis Factor X1"
+    }
+  },
+  "3057591": {
+    "Name": {
+      "zh-CN": "灵魂稳态因子X2",
+      "en-US": "Beat Performer Stasis Factor X2"
+    }
+  },
+  "3058111": {
+    "Name": {
+      "zh-CN": "极性X11",
+      "en-US": "Polarity X11",
+      "ja-JP": "極性X11",
+      "ko-KR": "극성X11"
+    }
+  },
+  "3059062": {
+    "Name": {
+      "zh-CN": "稳态X6",
+      "en-US": "Stasis X6",
+      "ja-JP": "恒常性X6",
+      "ko-KR": "안정X6"
+    }
+  },
+  "3059071": {
+    "Name": {
+      "zh-CN": "稳态X7",
+      "en-US": "Stasis X7",
+      "ja-JP": "恒常性X7",
+      "ko-KR": "안정X7"
+    }
+  },
+  "3059101": {
+    "Name": {
+      "zh-CN": "雷影稳态X1",
+      "en-US": "Stormblade Stasis X1",
+      "ja-JP": "ストームブレイド・恒常性X1",
+      "ko-KR": "스톰 블레이드 안정X1"
+    }
+  },
+  "3059181": {
+    "Name": {
+      "zh-CN": "神盾稳态X1",
+      "en-US": "Shield Knight Stasis X1",
+      "ja-JP": "シールドファイター・恒常性X1",
+      "ko-KR": "실드 나이트 안정X1"
+    }
+  },
+  "3059191": {
+    "Name": {
+      "zh-CN": "神盾稳态X2",
+      "en-US": "Shield Knight Stasis X2",
+      "ja-JP": "シールドファイター・恒常性X2",
+      "ko-KR": "실드 나이트 안정X2"
+    }
+  },
+  "3059221": {
+    "Name": {
+      "zh-CN": "森语稳态X1",
+      "en-US": "Verdant Oracle Stasis X1",
+      "ja-JP": "ヴァーダントオラクル・恒常性X1",
+      "ko-KR": "실반 오라클 안정X1"
+    }
+  },
+  "3059231": {
+    "Name": {
+      "zh-CN": "森语稳态X2",
+      "en-US": "Verdant Oracle Stasis X2",
+      "ja-JP": "ヴァーダントオラクル・恒常性X2",
+      "ko-KR": "실반 오라클 안정X2"
+    }
+  },
+  "3059271": {
+    "Name": {
+      "zh-CN": "赤炎稳态X2",
+      "en-US": "Flame Vanguard Stasis X2",
+      "ja-JP": "ツインストライカー・恒常性X2",
+      "ko-KR": "트윈 스트라이커 안정X2"
+    }
+  },
+  "3059301": {
+    "Name": {
+      "zh-CN": "稳态因子X3",
+      "en-US": "Stasis Factor X3"
+    }
+  },
+  "3059311": {
+    "Name": {
+      "zh-CN": "稳态因子X4",
+      "en-US": "Stasis Factor X4"
+    }
+  },
+  "3060041": {
+    "Name": {
+      "zh-CN": "赤炎X4",
+      "en-US": "Flame Vanguard X4",
+      "ja-JP": "ツインストライカーX4",
+      "ko-KR": "트윈 스트라이커X4"
+    }
+  },
+  "3060102": {
+    "Name": {
+      "zh-CN": "赤炎X10",
+      "en-US": "Flame Vanguard X10",
+      "ja-JP": "ツインストライカーX10",
+      "ko-KR": "트윈 스트라이커X10"
+    }
+  },
+  "3210051": {
+    "Name": {
+      "zh-CN": "灼烧",
+      "en-US": "Burn",
+      "ja-JP": "燃焼",
+      "ko-KR": "화상"
+    }
+  },
+  "3210223": {
+    "Name": {
+      "zh-CN": "绝境逢生",
+      "en-US": "Survival Instinct",
+      "ja-JP": "絶境逢生",
+      "ko-KR": "구사일생"
     }
   }
 }

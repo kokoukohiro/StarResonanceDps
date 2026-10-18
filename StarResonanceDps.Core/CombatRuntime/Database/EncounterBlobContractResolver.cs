@@ -55,6 +55,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.Attributes),
             nameof(Entity.SkillCasts),
             nameof(Entity.RecordedAvatar),
+            nameof(Entity.RootBuffIds),
         ],
         [typeof(SocialAvatarState)] =
         [

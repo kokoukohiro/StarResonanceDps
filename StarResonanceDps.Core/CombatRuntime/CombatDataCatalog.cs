@@ -99,10 +99,19 @@ public static class CombatDataCatalog
     /// <summary><see cref="_rogueEntryNames"/> の鍵(オプションのバフID)全部。</summary>
     private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
-    /// <summary>モジュール効果の番号(<c>ModEffectTable.EffectID</c>)→ 名前。<c>Data/Localization/ModEffectNames.json</c>。</summary>
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> _modEffectNames =
+    /// <summary>
+    /// 根のバフ(タレント・心相晶のノードと上級・因子・モジュール効果)→ 名前。<c>Data/Localization/RootBuffNames.json</c>。
+    /// アビリティ情報・潜在心相晶情報・モジュール情報の行と、付与元をたどってモジュールの根に着いたバフの名前に使う。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _rootBuffNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>根のバフ → 種類・並び・絵。<c>Data/Generated/RootBuffs.json</c>。</summary>
+    private static FrozenDictionary<int, RootBuffDefinition> _rootBuffs = FrozenDictionary<int, RootBuffDefinition>.Empty;
+
+    /// <summary>潜在心相晶の型の根のバフ → 型の上級の番号(上級の絵を選ぶのに使う)。<c>Data/Generated/RootBuffs.json</c>。</summary>
+    private static FrozenDictionary<int, int> _seasonTalentAdvancedEffectIds = FrozenDictionary<int, int>.Empty;
 
     /// <summary>
     /// モジュールの根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)→ モジュール効果の番号。
@@ -299,7 +308,7 @@ public static class CombatDataCatalog
     [
         "SkillNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
         "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "EquipNames", "EquipEffectTexts",
-        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "ModEffectNames",
+        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames",
     ];
 
     /// <summary><see cref="ApplyNameOverrides"/> で重ねる名前の上書き(<c>Data/Overrides/</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
@@ -324,6 +333,8 @@ public static class CombatDataCatalog
 
     private static string EquipmentsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "Equips.json");
 
+    private static string RootBuffsPath => Path.Combine(CombatRuntimePaths.GeneratedDirectory, "RootBuffs.json");
+
     /// <summary>
     /// <see cref="Load"/> が読むファイルを、先に解き始める。読む側と同じパスと型で始める
     /// (食い違うと、受け取る側がエラーログを出してその場で読む)。
@@ -346,6 +357,7 @@ public static class CombatDataCatalog
         reads.Start<int[]>(SkillWarningsPath);
         reads.Start<Dictionary<string, DbmTableRow>>(DbmTablePath);
         reads.Start<EquipmentFile>(EquipmentsPath);
+        reads.Start<RootBuffFile>(RootBuffsPath);
     }
 
     /// <summary>
@@ -363,14 +375,16 @@ public static class CombatDataCatalog
             (_skillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
             var buffNames = LoadLocalizedText(reads, "BuffNames", out var buffNameIds);
             var (restoredBuffNames, restoredBuffNameIds) = ApplyNameOverrides(reads, buffNames, buffNameIds, "BuffNameOverrides.json");
-            // どの版の表にも名前の無いバフに割り当てた名前。表の更新で落ちた名前を戻したもの(BuffNameOverrides)の上に重ねる。
-            (_buffNames, _) = ApplyNameOverrides(reads, restoredBuffNames, restoredBuffNameIds, "BuffNameAssignedOverrides.json");
+            // 名前の無いバフと名前を変えるバフに割り当てた名前。表の更新で落ちた名前を戻したもの(BuffNameOverrides)の上に重ねる。
+            var (assignedBuffNames, _) = ApplyNameOverrides(reads, restoredBuffNames, restoredBuffNameIds, "BuffNameAssignedOverrides.json");
+            _buffNames = ApplyBuffFoldNames(assignedBuffNames);
             var monsterNames = LoadLocalizedText(reads, "MonsterNames", out var monsterIds);
             (_monsterNames, _monsterIds) = ApplyNameOverrides(reads, monsterNames, monsterIds, "MonsterNameOverrides.json");
             _dbmNames = LoadLocalizedText(reads, "DbmNames", out _);
             _rogueEntryNames = LoadLocalizedText(reads, "RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
-            _modEffectNames = LoadLocalizedText(reads, "ModEffectNames", out _);
+            _rootBuffNames = LoadLocalizedText(reads, "RootBuffNames", out _);
+            LoadRootBuffs(reads);
             _modEffectIdByRootBuff = BuildModEffectIdByRootBuff();
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
             _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
@@ -510,7 +524,7 @@ public static class CombatDataCatalog
         {
             SourceLandingKind.RogueEntry => ResolveText(_rogueEntryNames, cultureName, landing.Id),
             SourceLandingKind.Skill => ResolveText(_skillNames, cultureName, landing.Id),
-            SourceLandingKind.Module => ResolveText(_modEffectNames, cultureName, landing.Id),
+            SourceLandingKind.Module => ResolveText(_rootBuffNames, cultureName, landing.Id),
             _ => string.Empty
         };
     }
@@ -523,24 +537,12 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// バフ/デバフリストに出すバフの名前(注記なし)。バフの番号で引く名前(<c>BuffNames</c> と手修正、料理・薬剤はその表)が空なら、
-    /// そのバフの付与元をたどった由来(<paramref name="origin"/>)の名前。どちらも無ければ表の内部名(一時の表示)、
-    /// それも無ければ空。カードの見出しと通知もこの名前を使う。
+    /// そのバフの付与元をたどった由来(<paramref name="origin"/>)の名前。どちらも無ければ空。カードの見出しと通知もこの名前を使う。
     /// </summary>
     public static string GetBuffDisplayNameWithoutInternalId(int buffId, SourceLanding origin)
     {
         var name = ResolveBuffName(Volatile.Read(ref _cultureName), buffId);
-        if (string.IsNullOrEmpty(name))
-        {
-            name = GetLandingName(origin);
-        }
-
-        // 一時の表示。表にも由来にも名前の無いバフを見分けるため、表の内部名(NameDesign、全言語で同じ文字)を出す。後で撤去する。
-        if (string.IsNullOrEmpty(name) && _buffs.TryGetValue(buffId, out var buff))
-        {
-            name = buff.NameDesign?.Trim() ?? string.Empty;
-        }
-
-        return name;
+        return string.IsNullOrEmpty(name) ? GetLandingName(origin) : name;
     }
 
     /// <summary>オプションの表(<c>RogueEntryTable.BuffId</c>)にあるバフか。</summary>
@@ -581,12 +583,82 @@ public static class CombatDataCatalog
     private static int GetEffectChildRootBuffId(int buffId)
         => buffId > 0 && buffId % 10 != 0 ? buffId - buffId % 10 : 0;
 
+    /// <summary>因子(シーズンタレントの因子)のバフの番号の帯の先頭。</summary>
+    private const int FactorBuffIdMin = 3050000;
+
+    /// <summary>因子のバフの番号の帯の末尾。</summary>
+    private const int FactorBuffIdMax = 3060999;
+
     /// <summary>
-    /// 手修正 <c>BuffOverrides.json</c> が優先度(<c>BuffPriority</c>)を書いたバフか。
-    /// 書いたバフはバフ/デバフリストの「足して出す」規則に当たらない(<see cref="BuffDisplayRules"/>)。
+    /// 因子のバフか。因子の根のバフも子のバフも番号の帯(<see cref="FactorBuffIdMin"/>〜<see cref="FactorBuffIdMax"/>)に置かれるので、番号だけで決める。
+    /// 付与元は見ない(因子の効果をほかのしくみのバフが付けても因子にしない)。
     /// </summary>
-    public static bool HasBuffPriorityOverride(int buffId)
-        => _buffs.TryGetValue(buffId, out var buff) && buff.HasBuffPriorityOverride;
+    public static bool IsFactorBuff(int buffId)
+        => buffId is >= FactorBuffIdMin and <= FactorBuffIdMax;
+
+    /// <summary>
+    /// 根のバフ(タレント・心相晶のノードと上級・因子・モジュール効果)か。表 <c>RootBuffs.json</c> にあるかで決める。
+    /// タレントの特化型、心相晶の型の根・上級の型の専用効果・ローグライク専用の型の木のノードは表に無いので、根のバフとして扱わない。
+    /// </summary>
+    public static bool IsRootBuff(int buffId) => _rootBuffs.ContainsKey(buffId);
+
+    /// <summary>根のバフの種類と、その種類の中の並び(表の順)。根のバフでなければ false。</summary>
+    public static bool TryGetRootBuffKind(int buffId, out RootBuffKind kind, out int order)
+    {
+        if (_rootBuffs.TryGetValue(buffId, out var definition))
+        {
+            kind = definition.Kind;
+            order = definition.Order;
+            return true;
+        }
+
+        kind = default;
+        order = 0;
+        return false;
+    }
+
+    /// <summary>根のバフの名前。内部ID注記はバフと同じ設定で付く。名前が無ければ空(注記だけ)。</summary>
+    public static string GetRootBuffName(int buffId)
+        => AppendInternalId(ResolveText(_rootBuffNames, Volatile.Read(ref _cultureName), buffId), InternalIdDisplayMode.BuffOnly, buffId);
+
+    /// <summary>
+    /// 根のバフの絵の全体のパス(表の値のまま)。心相晶の上級は型ごとに絵が違うので、その人の型の根のバフ
+    /// (<paramref name="seasonTalentRootBuffId"/>、0 は分からない)で選ぶ。型が分からない・型が上級を持たないときは空。
+    /// </summary>
+    public static string GetRootBuffIconName(int buffId, int seasonTalentRootBuffId)
+    {
+        if (!_rootBuffs.TryGetValue(buffId, out var definition))
+        {
+            return string.Empty;
+        }
+
+        if (definition.Kind != RootBuffKind.SeasonTalentAdvanced)
+        {
+            return definition.Icon;
+        }
+
+        return _seasonTalentAdvancedEffectIds.TryGetValue(seasonTalentRootBuffId, out var advancedEffectId)
+            && definition.AdvancedIcons.TryGetValue(advancedEffectId, out var icon)
+            ? icon
+            : string.Empty;
+    }
+
+    /// <summary>
+    /// タレントの根のバフの役割(タレントの木の職業の役割のタグ。絵の背景の色を選ぶのに使う)。
+    /// タレントでなければ <see cref="DataTypes.Enums.Professions.ERoleType.None"/>。
+    /// </summary>
+    public static DataTypes.Enums.Professions.ERoleType GetRootBuffTalentRole(int buffId)
+        => _rootBuffs.TryGetValue(buffId, out var definition)
+            ? definition.TalentRole
+            : DataTypes.Enums.Professions.ERoleType.None;
+
+    /// <summary>
+    /// バフ/デバフリストで使うバフの番号。手修正 <c>BuffOverrides.json</c> の <c>FoldInto</c> で畳んだバフは畳み先の番号、ほかは自分の番号。
+    /// 行とカードの鍵、行が渡す番号(非表示リスト・カードが引く)に使う。名前と絵は畳む側の番号でも畳み先のものが引ける
+    /// (読み込みが写す)。
+    /// </summary>
+    public static int GetBuffDisplayId(int buffId)
+        => _buffs.TryGetValue(buffId, out var buff) && buff.FoldInto is { } targetId ? targetId : buffId;
 
     /// <summary>
     /// モジュール効果の絵の置き場所(全体のパスの先頭)。モジュール効果のバフの絵は、手修正 <c>BuffOverrides.json</c> の <c>Icon</c> に
@@ -1124,6 +1196,44 @@ public static class CombatDataCatalog
                 pair => pair.Value.ToFrozenDictionary(),
                 StringComparer.OrdinalIgnoreCase),
             mergedIds.ToFrozenSet());
+    }
+
+    /// <summary>
+    /// 手修正 <c>BuffOverrides.json</c> の <c>FoldInto</c> で畳んだバフに、畳み先の名前を言語ごとに写す
+    /// (畳み先に名前の無い言語は畳む側の名前も消し、zh-CN へ落ちる)。畳めなかった行は読み込みが印を消している。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> ApplyBuffFoldNames(
+        FrozenDictionary<string, FrozenDictionary<int, string>> names)
+    {
+        var folds = _buffs
+            .Where(pair => pair.Value.FoldInto.HasValue)
+            .Select(pair => (BuffId: pair.Key, TargetId: pair.Value.FoldInto!.Value))
+            .ToList();
+        if (folds.Count == 0)
+        {
+            return names;
+        }
+
+        return names.ToFrozenDictionary(
+            pair => pair.Key,
+            pair =>
+            {
+                var namesById = pair.Value.ToDictionary();
+                foreach (var (buffId, targetId) in folds)
+                {
+                    if (namesById.TryGetValue(targetId, out var targetName))
+                    {
+                        namesById[buffId] = targetName;
+                    }
+                    else
+                    {
+                        namesById.Remove(buffId);
+                    }
+                }
+
+                return namesById.ToFrozenDictionary();
+            },
+            StringComparer.OrdinalIgnoreCase);
     }
 
     private sealed class NameOverrideEntry
@@ -2281,6 +2391,146 @@ public static class CombatDataCatalog
         Log.Information(
             "Loaded {FileName}: {Equips} equips / {AttrLibs} attribute libraries / {StrengthSeasons} strength seasons / {SpecSchools} spec schools / {Rank1Schools} rank-1 schools / {EffectBuffs} equipment effect buffs",
             relativePath, equipments.Count, attrLibs.Count, strengthSeasons.Count, specSchools.Count, rank1Schools.Count, effectRootBuffs.Count);
+    }
+
+    /// <summary>
+    /// 根のバフの表 <c>Data/Generated/RootBuffs.json</c> を読む。<c>DataTools/gen_root_buffs.py</c> が生成する。
+    ///
+    /// <para>
+    /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(アビリティ情報・潜在心相晶情報・モジュール情報は何も出さない)。
+    /// 読めたところまでで続けることはしない。
+    /// </para>
+    /// </summary>
+    private static void LoadRootBuffs(JsonDataFileReads reads)
+    {
+        const string relativePath = "Generated/RootBuffs.json";
+        var path = RootBuffsPath;
+
+        FrozenDictionary<int, RootBuffDefinition> rootBuffs;
+        FrozenDictionary<int, int> advancedEffectIds;
+        try
+        {
+            // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
+            if (!reads.TryTake<RootBuffFile>(path, out var loadedFile))
+            {
+                Log.Error("{FileName} is missing. Talent, psychoscope and module info cannot be shown path={Path}", relativePath, path);
+                return;
+            }
+
+            var file = loadedFile
+                ?? throw new InvalidDataException("the file is empty");
+            var definitions = new Dictionary<int, RootBuffDefinition>();
+            AddRootBuffs(definitions, RootBuffKind.Talent, file.Talents, nameof(RootBuffFile.Talents));
+            AddRootBuffs(definitions, RootBuffKind.SeasonTalentNode, file.SeasonTalentNodes, nameof(RootBuffFile.SeasonTalentNodes));
+            AddRootBuffs(definitions, RootBuffKind.SeasonTalentAdvanced, file.SeasonTalentAdvanced, nameof(RootBuffFile.SeasonTalentAdvanced));
+            AddRootBuffs(definitions, RootBuffKind.Factor, file.Factors, nameof(RootBuffFile.Factors));
+            AddRootBuffs(definitions, RootBuffKind.ModuleEffect, file.ModuleEffects, nameof(RootBuffFile.ModuleEffects));
+            rootBuffs = definitions.ToFrozenDictionary();
+            advancedEffectIds = file.SeasonTalentAdvancedEffects.ToFrozenDictionary(
+                pair => ParseRootBuffKey(pair.Key, nameof(RootBuffFile.SeasonTalentAdvancedEffects)),
+                pair => pair.Value);
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            Log.Error(ex, "{FileName} could not be read. Talent, psychoscope and module info cannot be shown path={Path}", relativePath, path);
+            return;
+        }
+
+        _rootBuffs = rootBuffs;
+        _seasonTalentAdvancedEffectIds = advancedEffectIds;
+        Log.Information(
+            "Loaded {FileName}: {RootBuffs} root buffs / {AdvancedEffects} psychoscope types with advanced effects",
+            relativePath, rootBuffs.Count, advancedEffectIds.Count);
+    }
+
+    /// <summary>種類の配列を、並び(配列の順)を付けて表へ足す。1つのバフが2つの種類に当たったら形の誤りとして止める。</summary>
+    private static void AddRootBuffs(
+        Dictionary<int, RootBuffDefinition> definitions,
+        RootBuffKind kind,
+        List<RootBuffEntry?> entries,
+        string itemPath)
+    {
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entry = entries[index] ?? throw new InvalidDataException($"{itemPath}[{index}] is null");
+            if (entry.Buff <= 0)
+            {
+                throw new InvalidDataException($"{itemPath}[{index}].Buff is not positive");
+            }
+
+            var advancedIcons = entry.Icons is null
+                ? FrozenDictionary<int, string>.Empty
+                : entry.Icons.ToFrozenDictionary(
+                    pair => ParseRootBuffKey(pair.Key, $"{itemPath}[{index}].Icons"),
+                    pair => pair.Value ?? string.Empty);
+            var talentRole = kind == RootBuffKind.Talent
+                ? ToTalentRole(entry.TalentTag, $"{itemPath}[{index}]")
+                : DataTypes.Enums.Professions.ERoleType.None;
+            if (!definitions.TryAdd(entry.Buff, new RootBuffDefinition(kind, index, entry.Icon ?? string.Empty, advancedIcons, talentRole)))
+            {
+                throw new InvalidDataException($"{itemPath}[{index}].Buff {entry.Buff} is listed in two kinds");
+            }
+        }
+    }
+
+    /// <summary>タレントの役割のタグ(<c>TalentTagTable</c> の番号。1 攻撃 / 2 支援 / 3 防御)→ 役割。</summary>
+    private static DataTypes.Enums.Professions.ERoleType ToTalentRole(int? talentTag, string itemPath)
+        => talentTag switch
+        {
+            1 => DataTypes.Enums.Professions.ERoleType.DPS,
+            2 => DataTypes.Enums.Professions.ERoleType.Healer,
+            3 => DataTypes.Enums.Professions.ERoleType.Tank,
+            _ => throw new InvalidDataException($"{itemPath}.TalentTag {talentTag?.ToString() ?? "null"} is not 1, 2 or 3")
+        };
+
+    private static int ParseRootBuffKey(string key, string itemPath)
+        => int.TryParse(key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
+            ? value
+            : throw new InvalidDataException($"{itemPath} has a key that is not a positive number: {key}");
+
+    /// <summary>
+    /// 根のバフ1つの種類・並び(種類の中の順)・絵。心相晶の上級だけ、型の上級の番号ごとの絵を持つ。
+    /// タレントだけ役割を持つ(ほかは None)。
+    /// </summary>
+    private sealed record RootBuffDefinition(
+        RootBuffKind Kind,
+        int Order,
+        string Icon,
+        FrozenDictionary<int, string> AdvancedIcons,
+        DataTypes.Enums.Professions.ERoleType TalentRole);
+
+    /// <summary><c>RootBuffs.json</c> の形。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class RootBuffFile
+    {
+        public List<RootBuffEntry?> Talents { get; set; } = null!;
+
+        public List<RootBuffEntry?> SeasonTalentNodes { get; set; } = null!;
+
+        public List<RootBuffEntry?> SeasonTalentAdvanced { get; set; } = null!;
+
+        public List<RootBuffEntry?> Factors { get; set; } = null!;
+
+        public List<RootBuffEntry?> ModuleEffects { get; set; } = null!;
+
+        /// <summary>型の根のバフ → 型の上級の番号。</summary>
+        public Dictionary<string, int> SeasonTalentAdvancedEffects { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// 根のバフ1つ。上級は <see cref="Icons"/>(型の上級の番号 → 絵)、ほかは <see cref="Icon"/> を持つ。
+    /// タレントは <see cref="TalentTag"/>(役割のタグ)も持つ。
+    /// </summary>
+    private sealed class RootBuffEntry
+    {
+        [JsonProperty(Required = Required.Always)]
+        public int Buff { get; set; }
+
+        public string? Icon { get; set; }
+
+        public Dictionary<string, string?>? Icons { get; set; }
+
+        public int? TalentTag { get; set; }
     }
 
     private static FrozenDictionary<int, EquipmentDefinition> ReadEquipmentDefinitions(

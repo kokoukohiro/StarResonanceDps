@@ -94,6 +94,9 @@
     <None Remove="Assets\Images\s2talent06_01.png" />
     <None Remove="Assets\Images\s2talent07_01.png" />
     <None Remove="Assets\Images\s2talent08_01.png" />
+    <None Remove="Assets\Images\talent_icon_blue.png" />
+    <None Remove="Assets\Images\talent_icon_green.png" />
+    <None Remove="Assets\Images\talent_icon_red.png" />
     <None Remove="Assets\Images\team_num_frame.png" />
     <None Remove="Assets\Images\trialroad_icon_assist.png" />
     <None Remove="Assets\Images\trialroad_icon_attack.png" />
@@ -243,6 +246,9 @@
     <Resource Include="Assets\Images\s2talent06_01.png" />
     <Resource Include="Assets\Images\s2talent07_01.png" />
     <Resource Include="Assets\Images\s2talent08_01.png" />
+    <Resource Include="Assets\Images\talent_icon_blue.png" />
+    <Resource Include="Assets\Images\talent_icon_green.png" />
+    <Resource Include="Assets\Images\talent_icon_red.png" />
     <Resource Include="Assets\Images\team_num_frame.png" />
   </ItemGroup>
 

@@ -7,7 +7,7 @@
              SnapsToDevicePixels="True">
     <!--
         プレイヤー情報のアイコンカラー。行の作りはプレイヤーリストのアイコンカラー(MeterWidgetClassColorSettingsView)と同じ。
-        行の絵はクラス・不明(クラスアイコンの形)、シーズン心相晶(型の絵と無効)、シーズンの3種類。フィルターと不透明度は持たない。
+        行の絵はクラス・不明(クラスアイコンの形)、潜在心相晶(型の絵と無効)、シーズンの3種類。フィルターと不透明度は持たない。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
@@ -136,7 +136,7 @@
                                       Width="27"
                                       Height="27"
                                       VerticalAlignment="Center">
-                                    <!-- クラスと不明の行。シーズン心相晶とシーズンの行では出さない。 -->
+                                    <!-- クラスと不明の行。潜在心相晶とシーズンの行では出さない。 -->
                                     <Grid>
                                         <Grid.Style>
                                             <Style TargetType="Grid">
@@ -166,7 +166,7 @@
                                             </Rectangle.Effect>
                                         </Rectangle>
                                     </Grid>
-                                    <!-- シーズン心相晶の行(型の絵と無効)。 -->
+                                    <!-- 潜在心相晶の行(型の絵と無効)。 -->
                                     <Rectangle Width="27"
                                                Height="27"
                                                HorizontalAlignment="Center"

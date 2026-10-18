@@ -40,4 +40,7 @@ public sealed record PlayerRosterEntry(
     int? SeasonId = null,
     // この行の顔と名刺の写真のリンク。素性が履歴の回から来た行だけ、その回に保存した値(保存の時点で届いていなければ null)。
     // ライブの行は null で、名刺の店(SocialDataStore)の今の値を使う。
-    SocialAvatarState? RecordedAvatar = null);
+    SocialAvatarState? RecordedAvatar = null,
+    // 乗っている根のバフ(タレント・潜在心相晶のノードと上級・因子・モジュール効果)。全部をまだ受けていなければ null。
+    // 履歴の行はその回に保存した値。
+    PlayerRootBuffData? RootBuffData = null);

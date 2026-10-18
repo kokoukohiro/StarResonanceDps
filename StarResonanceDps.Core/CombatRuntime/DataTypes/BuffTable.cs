@@ -45,10 +45,11 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
         public int SkillId { get; set; }
 
         /// <summary>
-        /// 手修正 <c>BuffOverrides.json</c> が <see cref="BuffPriority"/> を書いたか。表(JSON)には無い項目で、読み込みが立てる。
-        /// 立っているバフはバフ/デバフリストの「足して出す」規則に当たらず、ゲームの条件(優先度とアイコン)だけで出すか決まる。
+        /// 畳み先のバフ番号。手修正 <c>BuffOverrides.json</c> だけが書く項目で、表(JSON)には無い。
+        /// 畳んだバフはバフ/デバフリストで畳み先と同じものとして出る(名前・絵・側・優先度・行とカードの鍵・非表示リストの番号)。
+        /// 読み込みが畳み先の <see cref="BuffType"/>・<see cref="BuffPriority"/>・<see cref="Icon"/>・<see cref="ShowHUDIcon"/> を写す。
         /// </summary>
-        public bool HasBuffPriorityOverride { get; set; }
+        public int? FoldInto { get; set; }
 
         public string GetIconName()
         {

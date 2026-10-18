@@ -259,7 +259,7 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 
 /// <summary>
 /// プレイヤー情報の設定。バッジの絵の色(アイコンカラー)。
-/// 鍵は <see cref="WidgetConfigDefaults.PlayerInfoClassColorKeys"/>(クラス・シーズン心相晶・シーズン・不明)。
+/// 鍵は <see cref="WidgetConfigDefaults.PlayerInfoClassColorKeys"/>(クラス・潜在心相晶・シーズン・不明)。
 /// フィルターと不透明度は持たない。
 /// </summary>
 public sealed class PlayerInfoWidgetSettingsConfig
@@ -319,17 +319,14 @@ public sealed class BuffListWidgetSettingsConfig
     /// </summary>
     public List<int> HiddenBuffIds { get; set; } = [];
 
-    /// <summary>
-    /// モジュール効果のバフの出し方。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。
-    /// 常駐効果は永続(持続が負)のモジュール効果のバフ(<c>PlayerBuffSnapshot.IsPermanent</c>)。
-    /// </summary>
-    public int ModuleEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
+    /// <summary>モジュール効果のバフを出すか(<c>PlayerBuffSnapshot.IsModuleEffect</c>)。</summary>
+    public bool ShowModuleEffects { get; set; } = WidgetConfigDefaults.DefaultShowModuleEffects;
 
-    /// <summary>
-    /// 装備効果(セット効果・武器効果)のバフの出し方。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。
-    /// 常駐効果は永続(持続が負)の装備効果のバフ(効果そのものの根のバフ、<c>PlayerBuffSnapshot.IsPermanent</c>)。
-    /// </summary>
-    public int EquipmentEffectDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultEquipmentEffectDisplayModeIndex;
+    /// <summary>装備効果(セット効果・武器効果)のバフを出すか(<c>PlayerBuffSnapshot.IsEquipmentEffect</c>)。</summary>
+    public bool ShowEquipmentEffects { get; set; } = WidgetConfigDefaults.DefaultShowEquipmentEffects;
+
+    /// <summary>因子のバフを出すか(<c>PlayerBuffSnapshot.IsFactorEffect</c>)。</summary>
+    public bool ShowFactorEffects { get; set; } = WidgetConfigDefaults.DefaultShowFactorEffects;
 
     public BuffListWidgetSettingsConfig Clone()
     {
@@ -337,8 +334,9 @@ public sealed class BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
             GaugeColorOpacity = GaugeColorOpacity,
-            ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
-            EquipmentEffectDisplayModeIndex = EquipmentEffectDisplayModeIndex,
+            ShowModuleEffects = ShowModuleEffects,
+            ShowEquipmentEffects = ShowEquipmentEffects,
+            ShowFactorEffects = ShowFactorEffects,
             HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
             GaugeColorIndexes = GaugeColorIndexes is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
@@ -496,7 +494,7 @@ public sealed class MeterWidgetSettingsConfig
 
     public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
 
-    /// <summary>プレイヤーリストにシーズン心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
+    /// <summary>プレイヤーリストに潜在心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
     public bool ShowSeasonTalent { get; set; } = true;
 
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
@@ -883,13 +881,13 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
-    /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、シーズン心相晶の絵の10件と不明。</summary>
+    /// <summary>プレイヤーリストのアイコンカラーの鍵。クラスの鍵の後ろに、潜在心相晶の絵の10件と不明。</summary>
     public static readonly string[] PlayerListClassColorKeys =
         [.. ClassColorKeys, .. StarResonanceDps.App.Services.SeasonTalentIcons.ColorKeys];
 
     /// <summary>
-    /// プレイヤー情報のアイコンカラーの鍵。クラス(不明を除く)、シーズン心相晶の絵の10件と無効、シーズン、最後に不明。
-    /// 不明はバッジ3つ(シーズン・クラス・シーズン心相晶)のはてなを1色で塗る。絵が同じなので分けない。
+    /// プレイヤー情報のアイコンカラーの鍵。クラス(不明を除く)、潜在心相晶の絵の10件と無効、シーズン、最後に不明。
+    /// 不明はバッジ3つ(シーズン・クラス・潜在心相晶)のはてなを1色で塗る。絵が同じなので分けない。
     /// </summary>
     public static readonly string[] PlayerInfoClassColorKeys =
     [
@@ -926,23 +924,14 @@ public static class WidgetConfigDefaults
     /// <summary>デバフ一覧の既定。長いデバフを見るので30秒。</summary>
     public const int DefaultDebuffListGaugeLengthIndex = 2;
 
-    /// <summary>バフ・デバフ一覧の設定「モジュール効果」の添字。並びは選択リストと同じ。</summary>
-    public const int ShowAllModuleEffectDisplayModeIndex = 0;
+    /// <summary>バフ・デバフ一覧の設定「モジュール効果」の既定(出す)。</summary>
+    public const bool DefaultShowModuleEffects = true;
 
-    public const int HideModuleEffectDisplayModeIndex = 1;
+    /// <summary>バフ・デバフ一覧の設定「装備効果」の既定(出す)。</summary>
+    public const bool DefaultShowEquipmentEffects = true;
 
-    public const int HideResidentModuleEffectDisplayModeIndex = 2;
-
-    public const int DefaultModuleEffectDisplayModeIndex = HideResidentModuleEffectDisplayModeIndex;
-
-    /// <summary>バフ・デバフ一覧の設定「装備効果」の添字。並びは選択リストと同じ。</summary>
-    public const int ShowAllEquipmentEffectDisplayModeIndex = 0;
-
-    public const int HideEquipmentEffectDisplayModeIndex = 1;
-
-    public const int HideResidentEquipmentEffectDisplayModeIndex = 2;
-
-    public const int DefaultEquipmentEffectDisplayModeIndex = HideResidentEquipmentEffectDisplayModeIndex;
+    /// <summary>バフ・デバフ一覧の設定「因子効果」の既定(出す)。</summary>
+    public const bool DefaultShowFactorEffects = true;
 
     /// <summary>
     /// ダメージの属性の鍵。<c>EDamageProperty</c> の並び(属性ID 0〜8)。
@@ -994,7 +983,7 @@ public static class WidgetConfigDefaults
         ["Unknown"] = ["#FFFFFF", "#A8A8A8"]
     };
 
-    /// <summary>プレイヤーリストのシーズン心相晶の既定色。鍵は SeasonTalent.(絵の名前)。</summary>
+    /// <summary>プレイヤーリストの潜在心相晶の既定色。鍵は SeasonTalent.(絵の名前)。</summary>
     private static readonly Dictionary<string, string[]> PlayerListDefaultSeasonTalentColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["SeasonTalent.s2talent01_01"] = ["#FFFFFF", "#F5EABF"],
@@ -1283,6 +1272,9 @@ public static class WidgetConfigDefaults
     {
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerEquipment
+            or WidgetKind.PlayerTalent
+            or WidgetKind.PlayerSeasonTalent
+            or WidgetKind.PlayerModule
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
             or WidgetKind.BuffDebuffCard
@@ -1576,7 +1568,9 @@ public static class WidgetConfigDefaults
                 Width = PlayerEquipmentInitialWindowWidth,
                 Height = PlayerEquipmentInitialWindowHeight
             },
-            WidgetKind.BuffList or WidgetKind.DebuffList => new WidgetWindowConfig
+            // 根のバフの一覧(アビリティ・潜在心相晶・モジュール情報)は行がバフ一覧と同じ形なので、同じ大きさで開く。
+            WidgetKind.BuffList or WidgetKind.DebuffList
+                or WidgetKind.PlayerTalent or WidgetKind.PlayerSeasonTalent or WidgetKind.PlayerModule => new WidgetWindowConfig
             {
                 Width = PlayerBuffListInitialWindowWidth,
                 Height = PlayerBuffListInitialWindowHeight
@@ -1692,8 +1686,9 @@ public static class WidgetConfigDefaults
             GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
             GaugeColorOpacity = MaxClassColorOpacity,
             HiddenBuffIds = [],
-            ModuleEffectDisplayModeIndex = DefaultModuleEffectDisplayModeIndex,
-            EquipmentEffectDisplayModeIndex = DefaultEquipmentEffectDisplayModeIndex
+            ShowModuleEffects = DefaultShowModuleEffects,
+            ShowEquipmentEffects = DefaultShowEquipmentEffects,
+            ShowFactorEffects = DefaultShowFactorEffects
         };
     }
 
@@ -1724,16 +1719,6 @@ public static class WidgetConfigDefaults
             buffList.GaugeColorOpacity,
             MinClassColorOpacity,
             MaxClassColorOpacity);
-
-        buffList.ModuleEffectDisplayModeIndex = Math.Clamp(
-            buffList.ModuleEffectDisplayModeIndex,
-            ShowAllModuleEffectDisplayModeIndex,
-            HideResidentModuleEffectDisplayModeIndex);
-
-        buffList.EquipmentEffectDisplayModeIndex = Math.Clamp(
-            buffList.EquipmentEffectDisplayModeIndex,
-            ShowAllEquipmentEffectDisplayModeIndex,
-            HideResidentEquipmentEffectDisplayModeIndex);
 
         buffList.GaugeColorIndexes ??= CreateDefaultGaugeColorIndexes(kind);
         buffList.GaugeColorPalettes ??= CreateDefaultGaugeColorPalettes();
@@ -1823,8 +1808,8 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストのシーズン心相晶(不明を含む)と、
-    /// プレイヤー情報のシーズン心相晶(無効を含む)とシーズンだけ2枠目。
+    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストの潜在心相晶(不明を含む)と、
+    /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンだけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
@@ -2235,6 +2220,9 @@ public static class WidgetConfigDefaults
                 break;
             case WidgetKind.BuffList:
             case WidgetKind.DebuffList:
+            case WidgetKind.PlayerTalent:
+            case WidgetKind.PlayerSeasonTalent:
+            case WidgetKind.PlayerModule:
                 config.Window.Width ??= PlayerBuffListInitialWindowWidth;
                 config.Window.Height ??= PlayerBuffListInitialWindowHeight;
                 break;

@@ -81,22 +81,22 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private string _seasonTalentName = string.Empty;
 
-    /// <summary>シーズン心相晶の絵のツールチップの文字。書式の <c>{Psych}</c> と同じ(型の名前 / 無効 / 不明)。</summary>
+    /// <summary>潜在心相晶の絵のツールチップの文字。書式の <c>{Psych}</c> と同じ(型の名前 / 無効 / 不明)。</summary>
     [ObservableProperty]
     private string _seasonTalentDisplayText = string.Empty;
 
     /// <summary>
-    /// シーズン心相晶の枠の中の絵の形。型が分かれば型の絵、不明と表に無い型(絵が無い型)はクラスの不明と同じ絵、無効なら無し(枠だけ)。
+    /// 潜在心相晶の枠の中の絵の形。型が分かれば型の絵、不明と表に無い型(絵が無い型)はクラスの不明と同じ絵、無効なら無し(枠だけ)。
     /// どの型がどの絵かは <see cref="SeasonTalentIcons"/> の表が持つ。
     /// </summary>
     [ObservableProperty]
     private Brush? _seasonTalentIconMask;
 
-    /// <summary>シーズン心相晶の枠と絵の色。アイコンカラーの設定の、型の絵の行の色(不明と無効は不明の行の色)。</summary>
+    /// <summary>潜在心相晶の枠と絵の色。アイコンカラーの設定の、型の絵の行の色(不明と無効は不明の行の色)。</summary>
     [ObservableProperty]
     private SolidColorBrush _seasonTalentBrush = CreateBrush(Color.FromRgb(0xFF, 0xFF, 0xFF));
 
-    /// <summary>シーズン心相晶の絵を出すか。設定「シーズン心相晶の表示」。オフなら絵も、絵のために空けた幅も無くす。</summary>
+    /// <summary>潜在心相晶の絵を出すか。設定「潜在心相晶を表示」。オフなら絵も、絵のために空けた幅も無くす。</summary>
     [ObservableProperty]
     private bool _showsSeasonTalent = true;
 
@@ -150,7 +150,7 @@ public sealed partial class PlayerListEntry : ObservableObject
 
     public bool IsHealthFull => HealthRatio >= 1d;
 
-    /// <summary>シーズン心相晶の枠の中に絵があるか。無ければ枠だけを出す。</summary>
+    /// <summary>潜在心相晶の枠の中に絵があるか。無ければ枠だけを出す。</summary>
     public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
 
     public static PlayerListEntry Create(

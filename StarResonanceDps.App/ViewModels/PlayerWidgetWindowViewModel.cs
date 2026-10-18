@@ -104,20 +104,32 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     /// <summary>
     /// ログアウトで起動直後の状態へ戻したとき。覚えている素性のうち、保存して次の起動へ持ち越す名前と UID だけを残し、
-    /// NPC の印と職業は捨てる(起動時の復元と同じ)。
+    /// NPC の印と職業は捨てる(起動時の復元と同じ)。一覧から消えても残していた最後の行も、キャラが替わり得るので捨てる。
     /// </summary>
     public void ResetToStartup()
     {
         _lastKnownIsNpc = false;
         _lastKnownProfessionId = 0;
+        if (_selectedPlayer is not null)
+        {
+            _selectedPlayer = null;
+            OnSelectedPlayerChanged(null);
+        }
+
         RenderHeaderText();
         OnResetToStartup();
     }
 
-    /// <summary>ログアウトで起動直後の状態へ戻したとき。一覧の行の写しを残している窓だけが上書きする。</summary>
+    /// <summary>ログアウトで起動直後の状態へ戻したとき。行が無くても覚えている素性から表示を作る窓だけが上書きする。</summary>
     protected virtual void OnResetToStartup()
     {
     }
+
+    /// <summary>
+    /// 相手が一覧から消えても(パーティ外で周りから外れた)、最後に届いた行を残す窓か。既定は残さない。
+    /// 中身が今の状態を表す窓(バフ・グラフなど)は残さない。
+    /// </summary>
+    protected virtual bool KeepsLastPlayerWhenRemoved => false;
 
     public WidgetListItemViewModel PlayerWidget { get; }
 
@@ -265,6 +277,13 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
     private void UpdatePlayer(PlayerRosterEntry? player)
     {
+        // 相手が一覧から消えたら(パーティ外で周りから外れた)、残す窓は最後に届いた行のまま残す。
+        // 周りにいない形にする(現在地は分からない)。ログアウトで捨てる(ResetToStartup)。
+        if (player is null && KeepsLastPlayerWhenRemoved && _selectedPlayer is not null)
+        {
+            player = _selectedPlayer with { IsNearby = false, PartySceneId = 0, PartyLineId = 0 };
+        }
+
         if (player is not null)
         {
             if (_requestedCharacterId is null)

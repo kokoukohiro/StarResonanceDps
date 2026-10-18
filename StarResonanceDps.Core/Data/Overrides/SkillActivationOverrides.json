@@ -6,7 +6,7 @@
       "ja-JP": "レインフォール",
       "ko-KR": "레인폴"
     },
-    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+    "Icon": "weapon_mz-01_skill_atk"
   },
   "1203": {
     "Name": {
@@ -15,7 +15,7 @@
       "ja-JP": "レインフォール",
       "ko-KR": "레인폴"
     },
-    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+    "Icon": "weapon_mz-01_skill_atk"
   },
   "1204": {
     "Name": {
@@ -24,7 +24,7 @@
       "ja-JP": "レインフォール",
       "ko-KR": "레인폴"
     },
-    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+    "Icon": "weapon_mz-01_skill_atk"
   },
   "1224": {
     "Name": {
@@ -33,7 +33,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "1294": {
     "Name": {
@@ -42,7 +42,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_mz/weapon_mz-01_skill_atk"
+    "Icon": "weapon_mz-01_skill_atk"
   },
   "1402": {
     "Name": {
@@ -51,7 +51,7 @@
       "ja-JP": "翔舞",
       "ko-KR": "바람의 춤"
     },
-    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+    "Icon": "weapon_cq_skill_atk"
   },
   "1403": {
     "Name": {
@@ -60,7 +60,7 @@
       "ja-JP": "翔舞",
       "ko-KR": "바람의 춤"
     },
-    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+    "Icon": "weapon_cq_skill_atk"
   },
   "1404": {
     "Name": {
@@ -69,7 +69,7 @@
       "ja-JP": "翔舞",
       "ko-KR": "바람의 춤"
     },
-    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+    "Icon": "weapon_cq_skill_atk"
   },
   "1413": {
     "Name": {
@@ -78,7 +78,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "1417": {
     "Name": {
@@ -87,7 +87,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_cq/weapon_cq_skill_atk"
+    "Icon": "weapon_cq_skill_atk"
   },
   "1502": {
     "Name": {
@@ -96,7 +96,7 @@
       "ja-JP": "ヴァインラッシュ",
       "ko-KR": "덩굴 조종"
     },
-    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+    "Icon": "weapon_fh_skill_atk"
   },
   "1503": {
     "Name": {
@@ -105,7 +105,7 @@
       "ja-JP": "ヴァインラッシュ",
       "ko-KR": "덩굴 조종"
     },
-    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+    "Icon": "weapon_fh_skill_atk"
   },
   "1504": {
     "Name": {
@@ -114,7 +114,7 @@
       "ja-JP": "ヴァインラッシュ",
       "ko-KR": "덩굴 조종"
     },
-    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+    "Icon": "weapon_fh_skill_atk"
   },
   "1511": {
     "Name": {
@@ -123,7 +123,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "1517": {
     "Name": {
@@ -132,7 +132,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_fh/weapon_fh_skill_atk"
+    "Icon": "weapon_fh_skill_atk"
   },
   "1602": {
     "Name": {
@@ -141,7 +141,7 @@
       "ja-JP": "ブレイズスイング",
       "ko-KR": "화염의 휘두르기"
     },
-    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+    "Icon": "weapon_sf-01_atk"
   },
   "1603": {
     "Name": {
@@ -150,7 +150,7 @@
       "ja-JP": "ブレイズスイング",
       "ko-KR": "화염의 휘두르기"
     },
-    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+    "Icon": "weapon_sf-01_atk"
   },
   "1604": {
     "Name": {
@@ -159,7 +159,7 @@
       "ja-JP": "ブレイズスイング",
       "ko-KR": "화염의 휘두르기"
     },
-    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+    "Icon": "weapon_sf-01_atk"
   },
   "1624": {
     "Name": {
@@ -168,7 +168,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_sf/weapon_sf-01_atk"
+    "Icon": "weapon_sf-01_atk"
   },
   "1693": {
     "Name": {
@@ -177,7 +177,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "1702": {
     "Name": {
@@ -186,7 +186,7 @@
       "ja-JP": "刃影",
       "ko-KR": "아류도법・멸악"
     },
-    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+    "Icon": "weapon_tdl-01_skill_atk01"
   },
   "1703": {
     "Name": {
@@ -195,7 +195,7 @@
       "ja-JP": "刃影",
       "ko-KR": "아류도법・멸악"
     },
-    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+    "Icon": "weapon_tdl-01_skill_atk01"
   },
   "1704": {
     "Name": {
@@ -204,7 +204,7 @@
       "ja-JP": "刃影",
       "ko-KR": "아류도법・멸악"
     },
-    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+    "Icon": "weapon_tdl-01_skill_atk01"
   },
   "1792": {
     "Name": {
@@ -213,7 +213,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "1795": {
     "Name": {
@@ -222,7 +222,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_tdl/weapon_tdl-01_skill_atk01"
+    "Icon": "weapon_tdl-01_skill_atk01"
   },
   "1801": {
     "Name": {
@@ -239,7 +239,7 @@
       "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
       "ko-KR": "천둥번개 - 오의! 환상 공명"
     },
-    "Icon": "ui/textures/skill_weapon_cannongun/weapon_cannongun_skill_atk"
+    "Icon": "weapon_cannongun_skill_atk"
   },
   "1803": {
     "Name": {
@@ -248,7 +248,7 @@
       "ja-JP": "サンダースマッシュ・奥義！幻影共鳴",
       "ko-KR": "천둥번개 - 오의! 환상 공명"
     },
-    "Icon": "ui/textures/skill_weapon_cannongun/weapon_cannongun_skill_atk"
+    "Icon": "weapon_cannongun_skill_atk"
   },
   "1806": {
     "Name": {
@@ -281,7 +281,7 @@
       "ja-JP": "止戦刃",
       "ko-KR": "종전의 칼끝"
     },
-    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+    "Icon": "weapon_wr_skill_atk"
   },
   "1903": {
     "Name": {
@@ -290,7 +290,7 @@
       "ja-JP": "止戦刃",
       "ko-KR": "종전의 칼끝"
     },
-    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+    "Icon": "weapon_wr_skill_atk"
   },
   "1904": {
     "Name": {
@@ -299,7 +299,7 @@
       "ja-JP": "止戦刃",
       "ko-KR": "종전의 칼끝"
     },
-    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+    "Icon": "weapon_wr_skill_atk"
   },
   "1912": {
     "Name": {
@@ -308,7 +308,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_wr/weapon_wr_skill_atk"
+    "Icon": "weapon_wr_skill_atk"
   },
   "1914": {
     "Name": {
@@ -317,7 +317,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "2002": {
     "Name": {
@@ -326,7 +326,7 @@
       "ja-JP": "受身",
       "ko-KR": "낙법"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "2202": {
     "Name": {
@@ -335,7 +335,7 @@
       "ja-JP": "ブルズアイ",
       "ko-KR": "백발백중"
     },
-    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+    "Icon": "weapon_gj-01_atk"
   },
   "2203": {
     "Name": {
@@ -344,7 +344,7 @@
       "ja-JP": "ブルズアイ",
       "ko-KR": "백발백중"
     },
-    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+    "Icon": "weapon_gj-01_atk"
   },
   "2204": {
     "Name": {
@@ -353,7 +353,7 @@
       "ja-JP": "ブルズアイ",
       "ko-KR": "백발백중"
     },
-    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+    "Icon": "weapon_gj-01_atk"
   },
   "2211": {
     "Name": {
@@ -362,7 +362,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_gj/weapon_gj-01_atk"
+    "Icon": "weapon_gj-01_atk"
   },
   "2212": {
     "Name": {
@@ -371,7 +371,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "2322": {
     "Name": {
@@ -380,7 +380,7 @@
       "ja-JP": "ストロークビート",
       "ko-KR": "스트링 슬랩"
     },
-    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+    "Icon": "weapon_jt-01_atk"
   },
   "2323": {
     "Name": {
@@ -389,7 +389,7 @@
       "ja-JP": "ストロークビート",
       "ko-KR": "스트링 슬랩"
     },
-    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+    "Icon": "weapon_jt-01_atk"
   },
   "2324": {
     "Name": {
@@ -398,7 +398,7 @@
       "ja-JP": "ストロークビート",
       "ko-KR": "스트링 슬랩"
     },
-    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+    "Icon": "weapon_jt-01_atk"
   },
   "2327": {
     "Name": {
@@ -407,7 +407,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "2337": {
     "Name": {
@@ -416,7 +416,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_jt/weapon_jt-01_atk"
+    "Icon": "weapon_jt-01_atk"
   },
   "2402": {
     "Name": {
@@ -425,7 +425,7 @@
       "ja-JP": "ジャスティス",
       "ko-KR": "정의의 검"
     },
-    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+    "Icon": "weapon_jd-01_atk"
   },
   "2403": {
     "Name": {
@@ -434,7 +434,7 @@
       "ja-JP": "ジャスティス",
       "ko-KR": "정의의 검"
     },
-    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+    "Icon": "weapon_jd-01_atk"
   },
   "2404": {
     "Name": {
@@ -443,7 +443,7 @@
       "ja-JP": "ジャスティス",
       "ko-KR": "정의의 검"
     },
-    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+    "Icon": "weapon_jd-01_atk"
   },
   "2422": {
     "Name": {
@@ -452,7 +452,7 @@
       "ja-JP": "ジャスト回避",
       "ko-KR": "극한 회피"
     },
-    "Icon": "ui/atlas/proficiency/proficiency_skill_03"
+    "Icon": "proficiency_skill_03"
   },
   "2424": {
     "Name": {
@@ -461,7 +461,7 @@
       "ja-JP": "ジャスト反撃",
       "ko-KR": "붉은빛 반격"
     },
-    "Icon": "ui/textures/skill_weapon_jd/weapon_jd-01_atk"
+    "Icon": "weapon_jd-01_atk"
   },
   "2502": {
     "Name": {
@@ -470,7 +470,7 @@
       "ja-JP": "通常攻撃・奥義！星霊魔導士",
       "ko-KR": "일반 공격 - 오의! 성령 마도사"
     },
-    "Icon": "ui/textures/skill_ip004x02/ip004x02_skill_atk"
+    "Icon": "ip004x02_skill_atk"
   },
   "2503": {
     "Name": {
@@ -479,7 +479,7 @@
       "ja-JP": "通常攻撃・奥義！星霊魔導士",
       "ko-KR": "일반 공격 - 오의! 성령 마도사"
     },
-    "Icon": "ui/textures/skill_ip004x02/ip004x02_skill_atk"
+    "Icon": "ip004x02_skill_atk"
   },
   "2602": {
     "Name": {
@@ -488,7 +488,7 @@
       "ja-JP": "通常攻撃・奥義！滅竜魔導士",
       "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
     },
-    "Icon": "ui/textures/skill_ip004x01/ip004x01_skill_atk"
+    "Icon": "ip004x01_skill_atk"
   },
   "2603": {
     "Name": {
@@ -497,7 +497,7 @@
       "ja-JP": "通常攻撃・奥義！滅竜魔導士",
       "ko-KR": "일반 공격 - 오의! 멸룡 마도사"
     },
-    "Icon": "ui/textures/skill_ip004x01/ip004x01_skill_atk"
+    "Icon": "ip004x01_skill_atk"
   },
   "1007601": {
     "Name": {

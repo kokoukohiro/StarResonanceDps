@@ -17,6 +17,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 行は次のときにまとめて作り直す: 相手の装備・特化が変わった、今のシーズンが変わった、
 /// 表示設定(書式・テキストカラー)が変わった、表示の言語が変わった、自分を出していて自分の装備の値が変わった。
 /// 装備は時間では変わらないのでタイマーは持たない。
+/// 相手が一覧から消えても(パーティ外で周りから外れた)最後に届いた値のまま残し、ログアウトで捨てる(プレイヤー情報と同じ)。
 /// </para>
 /// </summary>
 public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
@@ -59,6 +60,9 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
         PlayerWidget.EquipmentSettingsChanged -= Widget_EquipmentSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
+
+    /// <summary>相手が一覧から消えても最後に届いた値のまま残す(プレイヤー情報と同じ)。</summary>
+    protected override bool KeepsLastPlayerWhenRemoved => true;
 
     /// <summary>
     /// ロスターの行は HP などで頻繁に入れ替わる。行に効く値(装備・特化)が変わったときだけ作り直す。

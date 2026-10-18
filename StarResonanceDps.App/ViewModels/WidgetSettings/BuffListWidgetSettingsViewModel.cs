@@ -8,7 +8,7 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、モジュール効果の出し方、一覧に出さないバフ。
+/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、モジュール効果・装備効果・因子効果を出すか、一覧に出さないバフ。
 /// 色の行の作りはクラスカラーと同じ。
 /// </summary>
 public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -22,13 +22,17 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     [ObservableProperty]
     private int _gaugeLengthIndex;
 
-    /// <summary>設定「モジュール効果」の添字。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。</summary>
+    /// <summary>設定「モジュール効果」のスイッチ。オンで出す。</summary>
     [ObservableProperty]
-    private int _moduleEffectDisplayModeIndex = WidgetConfigDefaults.DefaultModuleEffectDisplayModeIndex;
+    private bool _showModuleEffects = WidgetConfigDefaults.DefaultShowModuleEffects;
 
-    /// <summary>設定「装備効果」の添字。0=すべて表示 / 1=非表示 / 2=常駐効果のみ非表示。</summary>
+    /// <summary>設定「装備効果」のスイッチ。オンで出す。</summary>
     [ObservableProperty]
-    private int _equipmentEffectDisplayModeIndex = WidgetConfigDefaults.DefaultEquipmentEffectDisplayModeIndex;
+    private bool _showEquipmentEffects = WidgetConfigDefaults.DefaultShowEquipmentEffects;
+
+    /// <summary>設定「因子効果」のスイッチ。オンで出す。</summary>
+    [ObservableProperty]
+    private bool _showFactorEffects = WidgetConfigDefaults.DefaultShowFactorEffects;
 
     /// <summary>ゲージの色の不透明度(0〜100)。UI がスライダーなので double で持つ(メーターのクラスカラーと同じ)。</summary>
     [ObservableProperty]
@@ -79,6 +83,18 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             ? "Settings_DebuffListColors_Opacity"
             : "Settings_BuffListColors_Opacity");
 
+    /// <summary>モジュール効果のスイッチの右に出す ON / OFF。</summary>
+    public string ShowModuleEffectsStateText => LocalizationManager.Instance.GetString(
+        ShowModuleEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
+
+    /// <summary>装備効果のスイッチの右に出す ON / OFF。</summary>
+    public string ShowEquipmentEffectsStateText => LocalizationManager.Instance.GetString(
+        ShowEquipmentEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
+
+    /// <summary>因子効果のスイッチの右に出す ON / OFF。</summary>
+    public string ShowFactorEffectsStateText => LocalizationManager.Instance.GetString(
+        ShowFactorEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     /// <summary>非表示のバフの行。並びは非表示にした順。</summary>
     public ReadOnlyObservableCollection<HiddenBuffItemViewModel> HiddenBuffItems { get; }
 
@@ -114,8 +130,9 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         var config = new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
-            ModuleEffectDisplayModeIndex = ModuleEffectDisplayModeIndex,
-            EquipmentEffectDisplayModeIndex = EquipmentEffectDisplayModeIndex,
+            ShowModuleEffects = ShowModuleEffects,
+            ShowEquipmentEffects = ShowEquipmentEffects,
+            ShowFactorEffects = ShowFactorEffects,
             GaugeColorOpacity = Math.Clamp(
                 (int)Math.Round(GaugeColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
@@ -202,8 +219,9 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             }
 
             GaugeLengthIndex = normalized.GaugeLengthIndex;
-            ModuleEffectDisplayModeIndex = normalized.ModuleEffectDisplayModeIndex;
-            EquipmentEffectDisplayModeIndex = normalized.EquipmentEffectDisplayModeIndex;
+            ShowModuleEffects = normalized.ShowModuleEffects;
+            ShowEquipmentEffects = normalized.ShowEquipmentEffects;
+            ShowFactorEffects = normalized.ShowFactorEffects;
             GaugeColorOpacity = normalized.GaugeColorOpacity;
 
             _hiddenBuffItems.Clear();
@@ -250,8 +268,9 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     private static bool SettingsEqual(BuffListWidgetSettingsConfig left, BuffListWidgetSettingsConfig right)
     {
         if (left.GaugeLengthIndex != right.GaugeLengthIndex
-            || left.ModuleEffectDisplayModeIndex != right.ModuleEffectDisplayModeIndex
-            || left.EquipmentEffectDisplayModeIndex != right.EquipmentEffectDisplayModeIndex
+            || left.ShowModuleEffects != right.ShowModuleEffects
+            || left.ShowEquipmentEffects != right.ShowEquipmentEffects
+            || left.ShowFactorEffects != right.ShowFactorEffects
             || left.GaugeColorOpacity != right.GaugeColorOpacity
             || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
@@ -291,6 +310,9 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         OnPropertyChanged(nameof(GaugeColorOpacityLabel));
         OnPropertyChanged(nameof(HiddenBuffSectionTitle));
         OnPropertyChanged(nameof(HiddenBuffSectionDescription));
+        OnPropertyChanged(nameof(ShowModuleEffectsStateText));
+        OnPropertyChanged(nameof(ShowEquipmentEffectsStateText));
+        OnPropertyChanged(nameof(ShowFactorEffectsStateText));
     }
 
     partial void OnGaugeLengthIndexChanged(int value)
@@ -298,13 +320,21 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         NotifyChanged();
     }
 
-    partial void OnModuleEffectDisplayModeIndexChanged(int value)
+    partial void OnShowModuleEffectsChanged(bool value)
     {
+        OnPropertyChanged(nameof(ShowModuleEffectsStateText));
         NotifyChanged();
     }
 
-    partial void OnEquipmentEffectDisplayModeIndexChanged(int value)
+    partial void OnShowEquipmentEffectsChanged(bool value)
     {
+        OnPropertyChanged(nameof(ShowEquipmentEffectsStateText));
+        NotifyChanged();
+    }
+
+    partial void OnShowFactorEffectsChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowFactorEffectsStateText));
         NotifyChanged();
     }
 

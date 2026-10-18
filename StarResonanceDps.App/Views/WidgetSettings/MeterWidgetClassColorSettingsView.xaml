@@ -173,7 +173,7 @@
                                         <Grid Width="27"
                                               Height="27"
                                               Visibility="{Binding DataContext.ShowsPlayerListProfessionIcons, RelativeSource={RelativeSource AncestorType={x:Type local:MeterWidgetClassColorSettingsView}}, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <!-- クラスの行。シーズン心相晶の行では出さない。 -->
+                                            <!-- クラスの行。潜在心相晶の行では出さない。 -->
                                             <Grid>
                                                 <Grid.Style>
                                                     <Style TargetType="Grid">
@@ -200,7 +200,7 @@
                                                     </Rectangle.Effect>
                                                 </Rectangle>
                                             </Grid>
-                                            <!-- シーズン心相晶の行。 -->
+                                            <!-- 潜在心相晶の行。 -->
                                             <Grid Visibility="{Binding IsSeasonTalent, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                 <Rectangle HorizontalAlignment="Center"
                                                            VerticalAlignment="Center"

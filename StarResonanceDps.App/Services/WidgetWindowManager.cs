@@ -691,6 +691,22 @@ public sealed class WidgetWindowManager
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
+            WidgetKind.PlayerTalent => new PlayerRootBuffWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                [RootBuffKind.Talent]),
+            // 上にノード効果(ノード・上級)、下に因子効果。
+            WidgetKind.PlayerSeasonTalent => new PlayerRootBuffWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                [RootBuffKind.SeasonTalentNode, RootBuffKind.SeasonTalentAdvanced, RootBuffKind.Factor]),
+            WidgetKind.PlayerModule => new PlayerRootBuffWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                [RootBuffKind.ModuleEffect]),
             WidgetKind.BuffList => new PlayerBuffListWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -766,6 +782,10 @@ public sealed class WidgetWindowManager
             PlayerEquipmentWidgetViewModel equipmentViewModel => new PlayerEquipmentWidgetView
             {
                 DataContext = equipmentViewModel
+            },
+            PlayerRootBuffWidgetViewModel rootBuffViewModel => new PlayerRootBuffWidgetView
+            {
+                DataContext = rootBuffViewModel
             },
             PlayerBuffListWidgetViewModel buffListViewModel => new PlayerBuffListWidgetView
             {
@@ -1145,6 +1165,9 @@ public sealed class WidgetWindowManager
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerStatus
             or WidgetKind.PlayerEquipment
+            or WidgetKind.PlayerTalent
+            or WidgetKind.PlayerSeasonTalent
+            or WidgetKind.PlayerModule
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
             or WidgetKind.BuffDebuffCard

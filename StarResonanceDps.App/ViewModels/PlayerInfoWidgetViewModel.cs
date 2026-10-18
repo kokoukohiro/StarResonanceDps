@@ -85,15 +85,11 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         RenderPlayerInfo();
     }
 
+    /// <summary>相手が一覧から消えても最後に届いた値のまま残す。現在地は「不明」になる。顔と名刺は同じ相手なので取り直さない。</summary>
+    protected override bool KeepsLastPlayerWhenRemoved => true;
+
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
-        // 相手が一覧から消えたら(パーティ外で周りから外れた)、最後に届いた値のまま残す。
-        // 現在地だけは分からなくなるので「不明」にする。顔と名刺は同じ相手なので取り直さない。
-        if (player is null && _player is not null)
-        {
-            player = _player with { IsNearby = false, PartySceneId = 0, PartyLineId = 0 };
-        }
-
         // 窓を開いたとき(新しい窓は最初の相手が必ず「別の相手」になる)と相手が変わったときは、同じ URL でも取り直す。
         var isOtherPlayer = player?.CharacterId != _player?.CharacterId;
         _player = player;
@@ -117,14 +113,12 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     }
 
     /// <summary>
-    /// ログアウト。キャラが替わり得るので、一覧から消えても残していた最後の値を捨て、
-    /// 覚えている素性だけの表示(起動時の復元と同じ)と既定の絵に戻す。
+    /// ログアウト。残していた最後の行は基底が捨てる(相手が変わったときと同じく既定の絵に戻る)。
+    /// 行が無い表示は覚えている素性(捨てた NPC の印と職業を含む)から作るので出し直す。
     /// </summary>
     protected override void OnResetToStartup()
     {
-        _player = null;
         RenderPlayerInfo();
-        RefreshPhotos(force: true);
     }
 
     /// <summary>相手がまだ一覧に載っていない間は、覚えている素性(保存から戻した名前と UID)が入ったら出し直す。</summary>

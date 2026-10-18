@@ -49,6 +49,7 @@
                   Visibility="{Binding HasBuff, Converter={StaticResource BooleanToVisibilityHiddenConverter}}">
                 <!--
                     モジュール効果の絵は丸く画像いっぱいに描かれているので、バフの絵の中身の高さにそろえて小さく出す。
+                    因子の絵は大きさはそのままで、左へずらす(モジュール効果とは別の値)。
                     左へのずらしは余白で行う(変形だと絵の位置が画素の途中に来る)。左 -1・右 +1 で左へ 1 ずれる。
                 -->
                 <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
@@ -61,6 +62,9 @@
                                 <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
                                     <Setter Property="Width" Value="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=28}" />
                                     <Setter Property="Height" Value="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter=28}" />
+                                    <Setter Property="Margin" Value="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter='-1,0,1,0'}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsFactorIcon}" Value="True">
                                     <Setter Property="Margin" Value="{Binding Scale, Converter={StaticResource BuffDebuffCard.ScaleConverter}, ConverterParameter='-1,0,1,0'}" />
                                 </DataTrigger>
                             </Style.Triggers>

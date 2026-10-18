@@ -12,7 +12,8 @@ Equips: **数値は `Star` の表で作る。** 形は次のとおり。
   主能力値の系統・突破の段階ごとの装備Lv と庫の配列・改鋳の庫の配列・レアの庫の配列。
   段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を段階の順に
 - `AttrLibs`: 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ 庫ID → その庫の全行(行の `Id` つき)。
-  装備から参照される庫だけ(全段階の基礎・進化、改鋳、装備と突破の行のレア)
+  装備から参照される庫だけ(全段階の基礎・進化、改鋳、装備と突破の行のレア、改造 `EquipTransformTable` の改鋳・レア)。
+  `Recast` / `Rare` の配列は装備の行の欄のまま(素の項目で届いた行を引く型を決めるのに使う。ゲームと同じく改造の行は見ない)
 - `EquipmentEffectBuffs`: 装備効果の根のバフの番号(昇順)。セット効果(`EquipSuitTable` の庫)と、
   武器(部位200)の進化と改造(`EquipTransformTable` の改鋳・レアの庫)の行に出るバフ
 - `StrengthSeasons`: シーズン強度の項目と、そのシーズン。基礎に出る一時属性と 11440 系の属性を項目にし、
@@ -35,7 +36,7 @@ EquipEffectTexts: 鍵は効果の番号。進化・改鋳・レアの側に出�
 次のときは書かずに止まる。
 - 装備の行がアイテムの表に無い、`PerfectUpperLimit` に2要素目が無い
 - 突破の段階が飛んでいる・重なっている
-- 参照される庫(装備効果の庫を含む)が表に無い、庫の型が 1・2 以外、武器の改造の行が表に無い
+- 参照される庫(装備効果の庫を含む)が表に無い、庫の型が 1・2 以外、装備の改造の行が表に無い
 - 効果の種類が 1・3・5 以外、設定の数が効果と合わない、属性の書式が決まらない
 - 主能力値が2系統出る
 - シーズン強度の項目のシーズンが1つに決まらない、基礎に出る一時属性が進化にも出る
@@ -433,12 +434,23 @@ def main():
                     if side == "Advanced":
                         advanced_refs.add(ref)
 
-    # 改鋳とレアの庫。改鋳は装備の行、レアは装備の行と突破の行から。
+    # 改鋳とレアの庫。改鋳は装備の行と改造の行、レアは装備の行・突破の行・改造の行から。
+    # 改造の行の庫で付いた行も、自分の装備の行IDとして届く(品質5 の武器のレアは改造の行の型2 の庫にしか無い)。
     side_refs = set()
     side_columns = [(row, "装備 %s" % equip_id, ("RecastingAttrLibId", "QualityChildAttrLibId"))
                     for equip_id, row in equips.items()]
     side_columns += [(row, "突破の行 %s" % row_id, ("QualityChildAttrLibId",))
                      for row_id, row in breakthroughs.items()]
+    transforms = raw_table("EquipTransformTable")
+    for equip_id, row in equips.items():
+        transform_id = row.get("TransformId") or 0
+        if not transform_id:
+            continue
+        transform = transforms.get(str(transform_id))
+        if transform is None:
+            problems.append("装備 %s の改造 %d が EquipTransformTable に無い" % (equip_id, transform_id))
+            continue
+        side_columns.append((transform, "装備 %s の改造 %d" % (equip_id, transform_id), ("RecastAttrLibId", "QualityAttrLibId")))
     for row, owner, columns in side_columns:
         for column in columns:
             label = "%s %s" % (owner, column)

@@ -600,28 +600,13 @@
     <value>30秒</value>
   </data>
   <data name="Settings_Display_ModuleEffect" xml:space="preserve">
-    <value>模组效果</value>
-  </data>
-  <data name="ModuleEffectDisplay_All" xml:space="preserve">
-    <value>全部显示</value>
-  </data>
-  <data name="ModuleEffectDisplay_Hidden" xml:space="preserve">
-    <value>隐藏</value>
-  </data>
-  <data name="ModuleEffectDisplay_HideResident" xml:space="preserve">
-    <value>仅隐藏常驻效果</value>
+    <value>模组效果显示</value>
   </data>
   <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
-    <value>装备效果</value>
+    <value>装备效果显示</value>
   </data>
-  <data name="EquipmentEffectDisplay_All" xml:space="preserve">
-    <value>全部显示</value>
-  </data>
-  <data name="EquipmentEffectDisplay_Hidden" xml:space="preserve">
-    <value>隐藏</value>
-  </data>
-  <data name="EquipmentEffectDisplay_HideResident" xml:space="preserve">
-    <value>仅隐藏常驻效果</value>
+  <data name="Settings_Display_FactorEffect" xml:space="preserve">
+    <value>因子效果显示</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>实体名称</value>
@@ -776,6 +761,15 @@
   <data name="Widget_PlayerEquipment" xml:space="preserve">
     <value>装备信息</value>
   </data>
+  <data name="Widget_PlayerTalent" xml:space="preserve">
+    <value>天赋信息</value>
+  </data>
+  <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
+    <value>深眠心相仪信息</value>
+  </data>
+  <data name="Widget_PlayerModule" xml:space="preserve">
+    <value>模组信息</value>
+  </data>
   <data name="PlayerInfo_Uid" xml:space="preserve">
     <value>玩家编号</value>
   </data>
@@ -900,7 +894,7 @@
     <value>职业流派</value>
   </data>
   <data name="Settings_PlayerInfo_Field_SeasonTalent" xml:space="preserve">
-    <value>赛季心相仪</value>
+    <value>深眠心相仪</value>
   </data>
   <data name="Settings_PlayerInfo_Field_AbilityScore" xml:space="preserve">
     <value>战力</value>
@@ -1112,7 +1106,7 @@
     <value>HP数值</value>
   </data>
   <data name="Settings_Display_SeasonTalent" xml:space="preserve">
-    <value>显示赛季心相仪</value>
+    <value>显示深眠心相仪</value>
   </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>护盾量合并显示</value>
@@ -1673,7 +1667,7 @@
     <value>未知(职业)</value>
   </data>
   <data name="Settings_IconColors_UnknownSeasonTalent" xml:space="preserve">
-    <value>未知(赛季心相仪)</value>
+    <value>未知(深眠心相仪)</value>
   </data>
   <data name="Settings_IconColors_SeasonTalentInactive" xml:space="preserve">
     <value>心相仪未启用</value>

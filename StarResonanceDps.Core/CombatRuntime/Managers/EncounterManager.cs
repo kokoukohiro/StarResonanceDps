@@ -2775,6 +2775,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public bool IsNpc { get; set; }
 
+        /// <summary>
+        /// 乗っている根のバフ(<see cref="CombatDataCatalog.IsRootBuff"/>)の番号。昇順・重なりなし。null は全部をまだ受けていない。
+        /// <b>配列は書き換えず差し替える</b>(素性の写しが同じ配列を持つため)。
+        /// </summary>
+        public int[]? RootBuffIds { get; set; }
+
         public int Level { get; set; }
         public long SeasonLevel { get; set; }
         public long SeasonStrength { get; set; }
@@ -2823,6 +2829,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 作り直しの前に焼き付けて次の回へ持ち越す。社交データが切れた回と履歴ではここだけが根拠。
         /// </summary>
         public bool IsNpc { get => _identity.IsNpc; private set => _identity.IsNpc = value; }
+
+        /// <summary>
+        /// 乗っている根のバフの番号(昇順・重なりなし)。アビリティ情報・潜在心相晶情報・モジュール情報が出す。
+        ///
+        /// <para>
+        /// 全部を受けたときに作り直す(他人は出現時の全バフの一覧、自分は自分のバフの差分を受けるたび)。
+        /// その後は付与・除去の差分で増やしたり減らしたりする。null は全部をまだ受けていない(何も出さない)。
+        /// 周りから外れても消さない(最後に受けた値を出し、そのまま回に保存する)。
+        /// </para>
+        /// </summary>
+        public int[]? RootBuffIds { get => _identity.RootBuffIds; private set => _identity.RootBuffIds = value; }
 
         /// <summary>
         /// 保存した回の顔と名刺の写真のリンク(名刺の店 <see cref="SocialDataStore"/> の保存の時点の値、届いていなければ null)。
@@ -3708,6 +3725,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 manager?.ApplySeasonTalentFromRootBuff(buffs[index].BaseId, buffs[index].BuffUuid, buffs[index].FireUuid);
             }
 
+            ReplaceRootBuffIds(buffs.Select(buff => buff.BaseId));
+
             // 自分が術者のタレントバフが1件も無かった＝未装着。PTメンバーぶんはキャッシュにも残す。
             if (SubProfessionId == 0 && ProfessionId > 0)
             {
@@ -3724,18 +3743,22 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 自分のバフ集合を受信したとみなした瞬間を記録する。
+        /// 自分のバフ集合を受信したとみなした瞬間を記録する(自分のバフの付与を含む差分のたびに呼ばれる)。
         ///
         /// <para>
-        /// <b>いまは計測専用で、表示には効かない。</b>
-        /// <b>「全バフを受信した」の根拠に使ってはいけない</b> — 自分のバフ追加を含むデルタなら
-        /// 何でも立つので、スタックバフ1件でも真になる。
+        /// 特化の未装着・潜在心相晶の無効の判定と、根のバフの一覧(<see cref="RootBuffIds"/>)がこれを使う。
+        /// 自分のバフの付与を含む差分なら何でも立つので、途中で起動した回は、入場で付いたバフ(根のバフなど)が
+        /// 次のマップ移動まで欠けている。
         /// </para>
         /// </summary>
         public void MarkSelfBuffStreamReceived()
         {
             // シーズンタレントの印も同じ時点で立てる(特化と同じ扱い)。
             HasSeasonTalentSnapshot = true;
+
+            // 根のバフは今乗っているバフから作り直す(このデルタの付与は先に処理されている)。
+            // マップ移動では今乗っているバフが空になり、入場の差分で全部が付き直すので、受けるたびに作り直す。
+            ReplaceRootBuffIds(Services.ActiveBuffStore.Instance.GetActive(UUID).Select(buff => buff.BaseId));
 
             if (HasBuffSnapshot)
             {
@@ -3776,6 +3799,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                 // ライブ表示用の状態はエンカウンター境界を跨いで保持する。
                 Services.ActiveBuffStore.Instance.Remove(UUID, (ulong)buffUuid);
+
+                // 除去は BaseId を運ばないので、付与で控えたバフの番号で外す。
+                RemoveRootBuff(buffEvent.BaseId);
             }
             else
             {
@@ -3824,8 +3850,61 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // 表に名前の無いバフは、付与元をたどった由来の名前で出す。付与元が届くのは付与だけで、たどるのはこの通知の最後。
                 if (payload == BuffEventPayload.BuffInfo)
                 {
-                    Services.BuffOriginResolver.Instance.Enqueue(UUID, buffEvent, extraPacketData.ArrivalTime);
+                    Services.BuffOriginResolver.Instance.Enqueue(buffEvent, extraPacketData.ArrivalTime);
+                    AddRootBuff(baseId);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 全部を受けたバフの番号から、根のバフの一覧(<see cref="RootBuffIds"/>)を作り直す。中身が同じなら差し替えない。
+        /// </summary>
+        private void ReplaceRootBuffIds(IEnumerable<int> buffIds)
+        {
+            var rootBuffIds = buffIds.Where(CombatDataCatalog.IsRootBuff).Distinct().Order().ToArray();
+            if (RootBuffIds is { } current && current.AsSpan().SequenceEqual(rootBuffIds))
+            {
+                return;
+            }
+
+            RootBuffIds = rootBuffIds;
+            NotifyRootBuffsChanged();
+        }
+
+        /// <summary>付与された根のバフを一覧へ足す。全部をまだ受けていなければ何もしない(全部を受けたときに作る)。</summary>
+        private void AddRootBuff(int buffId)
+        {
+            if (RootBuffIds is not { } current
+                || !CombatDataCatalog.IsRootBuff(buffId)
+                || Array.BinarySearch(current, buffId) >= 0)
+            {
+                return;
+            }
+
+            RootBuffIds = [.. current.Append(buffId).Order()];
+            NotifyRootBuffsChanged();
+        }
+
+        /// <summary>外れた根のバフを一覧から外す。同じ番号の別の実体がまだ乗っていれば残す(付け直しで新しい実体が先に付く)。</summary>
+        private void RemoveRootBuff(int buffId)
+        {
+            if (RootBuffIds is not { } current
+                || Array.BinarySearch(current, buffId) < 0
+                || Services.ActiveBuffStore.Instance.GetActive(UUID).Any(buff => buff.BaseId == buffId))
+            {
+                return;
+            }
+
+            RootBuffIds = [.. current.Where(id => id != buffId)];
+            NotifyRootBuffsChanged();
+        }
+
+        /// <summary>根のバフの一覧が変わった。プレイヤーなら名簿の行を作り直す(バフの変化は名簿を作り直す合図に無い)。</summary>
+        private void NotifyRootBuffsChanged()
+        {
+            if (Utils.UuidToEntityType(UUID) == (long)EEntityType.EntChar)
+            {
+                PlayerRosterProjection.UpsertPlayer(UUID);
             }
         }
 
@@ -4517,7 +4596,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public DateTime RemoveDateTime { get; private set; }
 
         /// <summary>
-        /// 表に名前の無いバフの由来(付与元をたどって着いた先とたどった鎖)。<c>null</c> はまだたどっていないか、表に名前がある。
+        /// 表に名前の無いバフの由来(付与元をたどって着いた先)。<c>null</c> はまだたどっていないか、表に名前がある。
         /// 付与のたびに消し、その通知の最後にたどり直す(<see cref="Services.BuffOriginResolver"/>)。
         /// 名前は <c>CombatDataCatalog.GetBuffDisplayName</c> がこの由来から引く。
         /// </summary>

@@ -70,6 +70,10 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     [ObservableProperty]
     private bool _isModuleEffectIcon;
 
+    /// <summary>絵が因子の絵か(<see cref="BuffDebuffCardContent.IsFactorIcon"/>)。絵の位置を切り替える。</summary>
+    [ObservableProperty]
+    private bool _isFactorIcon;
+
     /// <summary>絵のパスはあるのにファイルが見つからないか(<see cref="BuffDebuffCardContent.ShowsUnknownIcon"/>)。はてなを出す。</summary>
     [ObservableProperty]
     private bool _showsUnknownIcon;
@@ -334,6 +338,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         IconPath = content.IconPath;
         IconMask = content.IconMask;
         IsModuleEffectIcon = content.IsModuleEffectIcon;
+        IsFactorIcon = content.IsFactorIcon;
         ShowsUnknownIcon = content.ShowsUnknownIcon;
         HasBuff = hasBuff;
         HasDisplayText = !string.IsNullOrEmpty(content.DisplayText);

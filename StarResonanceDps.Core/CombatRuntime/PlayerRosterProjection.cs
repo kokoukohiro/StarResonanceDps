@@ -463,7 +463,8 @@ internal static class PlayerRosterProjection
             partySceneId,
             partyLineId,
             seasonId,
-            recordedAvatar);
+            recordedAvatar,
+            source.RootBuffData);
         return true;
     }
 

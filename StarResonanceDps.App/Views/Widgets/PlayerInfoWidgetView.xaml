@@ -212,7 +212,7 @@
                 </Grid>
 
                 <!--
-                    バッジ: シーズン / クラスと特化 / シーズン心相晶。絵の色はプレイヤー情報の設定のアイコンカラー。
+                    バッジ: シーズン / クラスと特化 / 潜在心相晶。絵の色はプレイヤー情報の設定のアイコンカラー。
                     絵には、ほかのウィジェットのアイコンと同じ影(Effect.ProfessionIconShadow)を付ける。
                 -->
                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
@@ -248,7 +248,7 @@
                         <TextBlock Style="{StaticResource PlayerInfo.BadgeText}" Text="{Binding ClassSpecText}" />
                     </StackPanel>
 
-                    <!-- シーズン心相晶。型の絵・無効の絵・不明のはてなのどれか。 -->
+                    <!-- 潜在心相晶。型の絵・無効の絵・不明のはてなのどれか。 -->
                     <StackPanel Style="{StaticResource PlayerInfo.Badge}">
                         <Grid Style="{StaticResource PlayerInfo.BadgeIcon}">
                             <Rectangle Fill="{Binding SeasonTalentIconBrush}"

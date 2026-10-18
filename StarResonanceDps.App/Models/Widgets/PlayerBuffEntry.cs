@@ -63,6 +63,10 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private bool _isModuleEffectIcon;
 
+    /// <summary>絵が因子の絵か(<see cref="CombatIconResolver.IsFactorIcon"/>)。絵の位置を切り替える。</summary>
+    [ObservableProperty]
+    private bool _isFactorIcon;
+
     /// <summary>絵のパスはあるのにファイルが見つからないか。はてなを出す。パスが空なら何も出さない。</summary>
     [ObservableProperty]
     private bool _showsUnknownIcon;
@@ -105,6 +109,7 @@ public sealed partial class PlayerBuffEntry : ObservableObject
         IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
         IconMask = CombatIconResolver.ResolveBuffIconMask(snapshot.IconName);
         IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(snapshot.IconName);
+        IsFactorIcon = CombatIconResolver.IsFactorIcon(snapshot.IconName);
         ShowsUnknownIcon = !string.IsNullOrWhiteSpace(snapshot.IconName) && IconPath is null && IconMask is null;
 
         _remainingSeconds = snapshot.RemainingSeconds;

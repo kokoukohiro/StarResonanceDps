@@ -76,6 +76,9 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
+        AddWidget(WidgetKind.PlayerTalent, "Widget_PlayerTalent");
+        AddWidget(WidgetKind.PlayerSeasonTalent, "Widget_PlayerSeasonTalent");
+        AddWidget(WidgetKind.PlayerModule, "Widget_PlayerModule");
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
         AddWidget(WidgetKind.BuffDebuffCard, "Widget_BuffDebuffCard");
