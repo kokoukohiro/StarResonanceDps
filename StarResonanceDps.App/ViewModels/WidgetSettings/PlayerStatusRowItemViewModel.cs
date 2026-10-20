@@ -18,7 +18,8 @@ public sealed partial class PlayerStatusRowItemViewModel : ObservableObject
     public PlayerStatusRowItemViewModel(int attrId, bool isLast, Action onVisibilityChanged)
     {
         AttrId = attrId;
-        IsLast = isLast;
+        OrderUnitAttrId = PlayerStatusEntry.GetOrderUnitAttrId(attrId);
+        _isLast = isLast;
         Key = attrId.ToString(CultureInfo.InvariantCulture);
         _onVisibilityChanged = onVisibilityChanged;
         RefreshMetadata();
@@ -26,9 +27,12 @@ public sealed partial class PlayerStatusRowItemViewModel : ObservableObject
 
     public int AttrId { get; }
 
-    /// <summary>最終行。区切り線を消して二重にならないようにする。</summary>
-    public bool IsLast { get; }
+    /// <summary>並べ替えの単位(<see cref="PlayerStatusEntry.GetOrderUnitAttrId"/>)。同じ単位の行(組)は並んでいて、一緒に動く。</summary>
+    public int OrderUnitAttrId { get; }
 
+    /// <summary>最終行。区切り線を消して二重にならないようにする。並びが変わったら付け直す。</summary>
+    [ObservableProperty]
+    private bool _isLast;
     public string Key { get; }
 
     [ObservableProperty]

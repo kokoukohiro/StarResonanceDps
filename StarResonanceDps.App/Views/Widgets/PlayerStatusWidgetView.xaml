@@ -1,10 +1,10 @@
 ﻿<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerStatusWidgetView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              Loaded="PlayerStatusWidgetView_Loaded"
-             Unloaded="PlayerStatusWidgetView_Unloaded"
              SizeChanged="PlayerStatusWidgetView_SizeChanged"
              DataContextChanged="PlayerStatusWidgetView_DataContextChanged">
     <UserControl.Resources>
@@ -18,23 +18,51 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
 
-        <!-- 値。行の右端に右寄せ。 -->
+        <!-- 値の増減の三角の形。大きさは StatusList.ValueChangeMark の Width / Height。色は行の ValueChangeBrush(テキストカラーの「数値の増加」「数値の減少」)。 -->
+        <Geometry x:Key="StatusList.IncreaseMarkGeometry">M 0,1 L 0.5,0 L 1,1 Z</Geometry>
+        <Geometry x:Key="StatusList.DecreaseMarkGeometry">M 0,0 L 1,0 L 0.5,1 Z</Geometry>
+
+        <!--
+            値。行の右端に右寄せ。色は行のテキストカラーを使わずウィジェットの既定の白で、
+            差分で変わってからしばらくだけ増減の色にする(PlayerStatusEntry.ValueChangeHighlightDuration)。
+        -->
         <Style x:Key="StatusList.Value" TargetType="TextBlock" BasedOn="{StaticResource StatusList.RowText}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="TextAlignment" Value="Right" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ValueChange}" Value="Increase">
+                    <Setter Property="Foreground" Value="{Binding ValueChangeBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ValueChange}" Value="Decrease">
+                    <Setter Property="Foreground" Value="{Binding ValueChangeBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
-        <!--
-            掴んだ行の落とし先を示す線。<b>枠のレイヤー(WidgetWindow.FrameOverlayHost)へ差し込む</b>。
-            中身のレイヤーに置くと、半透明の背景の上にベタで乗って暗く濁る。
-        -->
-        <Rectangle x:Key="DropIndicator"
-                   Height="1"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
-                   Fill="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                   Visibility="Collapsed" />
 
+        <!-- 値の左の増減の三角。変化が無いときは畳む(右寄せなので数字の位置は動かない)。影は文字と同じ。 -->
+        <Style x:Key="StatusList.ValueChangeMark" TargetType="Path">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Width" Value="7" />
+            <Setter Property="Height" Value="6" />
+            <Setter Property="Margin" Value="0,0,2,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Stretch" Value="Fill" />
+            <Setter Property="Effect" Value="{StaticResource Effect.WidgetWindowTextShadow}" />
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ValueChange}" Value="Increase">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Data" Value="{StaticResource StatusList.IncreaseMarkGeometry}" />
+                    <Setter Property="Fill" Value="{Binding ValueChangeBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ValueChange}" Value="Decrease">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="Data" Value="{StaticResource StatusList.DecreaseMarkGeometry}" />
+                    <Setter Property="Fill" Value="{Binding ValueChangeBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -45,7 +73,9 @@
                       VerticalScrollBarVisibility="Hidden"
                       CanContentScroll="False"
                       ScrollChanged="StatusListScrollViewer_ScrollChanged">
-            <ItemsControl ItemsSource="{Binding PlayerStatus}">
+            <!-- 行を掴んで並べ替える(RowReorderBehavior)。写して薄くするのは行の中身 RowContent だけで、ホバーの背景は写さない。 -->
+            <ItemsControl ItemsSource="{Binding PlayerStatus}"
+                          behaviors:RowReorderBehavior.ContentElementName="RowContent">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel />
@@ -65,8 +95,7 @@
                                 Focusable="False"
                                 IsTabStop="False"
                                 HorizontalContentAlignment="Stretch"
-                                VerticalContentAlignment="Stretch"
-                                PreviewMouseLeftButtonDown="StatusRow_PreviewMouseLeftButtonDown">
+                                VerticalContentAlignment="Stretch">
                             <Button.Style>
                                 <Style TargetType="Button">
                                     <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -105,7 +134,7 @@
                                 </Style>
                             </Button.Style>
 
-                            <Grid VerticalAlignment="Center">
+                            <Grid x:Name="RowContent" VerticalAlignment="Center">
                                 <!-- 列の幅はバフ一覧の行と同じ。名前が残りの幅、値は右端。 -->
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30" />
@@ -130,11 +159,14 @@
                                            Foreground="{Binding TextBrush}"
                                            Text="{Binding Name}" />
 
-                                <TextBlock Grid.Column="2"
-                                           Margin="0,0,8,0"
-                                           Style="{StaticResource StatusList.Value}"
-                                           Foreground="{Binding TextBrush}"
-                                           Text="{Binding ValueText}" />
+                                <StackPanel Grid.Column="2"
+                                            Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal">
+                                    <Path Style="{StaticResource StatusList.ValueChangeMark}" />
+                                    <TextBlock Style="{StaticResource StatusList.Value}"
+                                               Text="{Binding ValueText}" />
+                                </StackPanel>
                             </Grid>
                         </Button>
                     </DataTemplate>

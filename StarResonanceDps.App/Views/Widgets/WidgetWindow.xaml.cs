@@ -38,6 +38,7 @@ public partial class WidgetWindow : Window
     private const uint SwpNoActivate = 0x0010;
     private const uint SwpNoOwnerZOrder = 0x0200;
     private const int WmMouseActivate = 0x0021;
+    private const uint MonitorDefaultToNearest = 0x00000002;
     private static readonly IntPtr HwndTopmost = new(-1);
 
     /// <summary>ヘッダー/フッター1つ分の高さ。XAML の行定義と合わせること。</summary>
@@ -58,6 +59,7 @@ public partial class WidgetWindow : Window
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly IWidgetHorizontalScrollContent? _horizontalScrollContent;
     private readonly IWidgetMouseWheelContent? _mouseWheelContent;
+    private readonly IWidgetAutoFitHeightContent? _autoFitHeightContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
     private bool _isRestoringBounds = true;
@@ -68,6 +70,9 @@ public partial class WidgetWindow : Window
     private bool _hasFooterContent;
 
     private bool _isPinned;
+
+    /// <summary>中身から高さを合わせる合図が来て、まだ合わせていないか(<see cref="FitHeightToContent"/>)。</summary>
+    private bool _isFitHeightPending;
 
     /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
     private readonly WidgetWindowConfig _restoredBounds;
@@ -125,6 +130,13 @@ public partial class WidgetWindow : Window
         if (_mouseWheelContent is not null)
         {
             MouseWheel += WidgetWindow_MouseWheel;
+        }
+
+        // 行の数が変わったら高さを中身に合わせる中身(FitHeightToContent)。
+        _autoFitHeightContent = widgetContent as IWidgetAutoFitHeightContent;
+        if (_autoFitHeightContent is not null)
+        {
+            _autoFitHeightContent.FitHeightRequested += AutoFitHeightContent_FitHeightRequested;
         }
 
         // まだ測れていないときに返す値。窓を出す前に保存を要求されることがある
@@ -422,6 +434,11 @@ public partial class WidgetWindow : Window
             MouseWheel -= WidgetWindow_MouseWheel;
         }
 
+        if (_autoFitHeightContent is not null)
+        {
+            _autoFitHeightContent.FitHeightRequested -= AutoFitHeightContent_FitHeightRequested;
+        }
+
         if (WidgetContentHost.Content is FrameworkElement { DataContext: IDisposable disposable })
         {
             disposable.Dispose();
@@ -435,6 +452,7 @@ public partial class WidgetWindow : Window
         _isRestoringBounds = false;
         UpdateWindowRootClip();
         QueueContentScrollBarUpdate();
+        QueueFitHeightIfPending();
     }
 
     private void WidgetWindow_SourceInitialized(object? sender, EventArgs e)
@@ -599,6 +617,121 @@ public partial class WidgetWindow : Window
     private void WidgetWindow_StateChanged(object? sender, EventArgs e)
     {
         UpdateWindowRootClip();
+        QueueFitHeightIfPending();
+    }
+
+    private void AutoFitHeightContent_FitHeightRequested(object? sender, EventArgs e)
+    {
+        _isFitHeightPending = true;
+        QueueFitHeightIfPending();
+    }
+
+    /// <summary>合わせる合図が残っていれば、描画の後に合わせる(窓を出す前・最小化の間に来た合図は、出した後・戻した後に合わせる)。</summary>
+    private void QueueFitHeightIfPending()
+    {
+        if (_isFitHeightPending)
+        {
+            Dispatcher.BeginInvoke(FitHeightToContent, DispatcherPriority.Loaded);
+        }
+    }
+
+    /// <summary>
+    /// 高さを中身の全部が入る高さにする(<see cref="IWidgetAutoFitHeightContent"/>)。上端はそのままで下端を動かす。
+    ///
+    /// <para>
+    /// 伸ばすのは、窓が載っている画面の作業領域(タスクバーを除いた領域)の下端まで。越える分はスクロールバーで見る
+    /// (上限が無いと、はみ出した行を見る方法が無くなる)。上限は伸ばすときだけで、今の高さがすでに下端を越えていればそれより縮めない
+    /// (端からはみ出して置く使い方を崩さない)。ピン留め中も合わせる(ピン留めが止めるのは手での移動と大きさの変更)。
+    /// </para>
+    /// </summary>
+    private void FitHeightToContent()
+    {
+        if (!_isFitHeightPending
+            || _autoFitHeightContent is null
+            || !IsLoaded
+            || WindowState != WindowState.Normal)
+        {
+            return;
+        }
+
+        _isFitHeightPending = false;
+
+        var shortfall = _autoFitHeightContent.GetHeightShortfall();
+        if (!double.IsFinite(shortfall) || Math.Abs(shortfall) < 0.5d)
+        {
+            return;
+        }
+
+        var currentHeight = ActualHeight;
+        var targetHeight = Math.Max(currentHeight + shortfall, MinHeight);
+        if (targetHeight > currentHeight)
+        {
+            if (TryGetWorkAreaBottom(out var workAreaBottom))
+            {
+                targetHeight = Math.Min(targetHeight, Math.Max(currentHeight, workAreaBottom - Top));
+            }
+            else
+            {
+                Log.Warning("Widget window: could not get the monitor work area; fitting the height without the screen limit.");
+            }
+        }
+
+        if (Math.Abs(targetHeight - currentHeight) < 0.5d)
+        {
+            return;
+        }
+
+        Height = targetHeight;
+    }
+
+    /// <summary>窓が載っている(一番近い)画面の作業領域の下端。窓の座標(論理ピクセル)で返す。</summary>
+    private bool TryGetWorkAreaBottom(out double workAreaBottom)
+    {
+        workAreaBottom = 0d;
+        if (PresentationSource.FromVisual(this) is not HwndSource { CompositionTarget: { } compositionTarget } source)
+        {
+            return false;
+        }
+
+        var monitor = MonitorFromWindow(source.Handle, MonitorDefaultToNearest);
+        if (monitor == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        var monitorInfo = new MonitorInfo { Size = Marshal.SizeOf<MonitorInfo>() };
+        if (!GetMonitorInfo(monitor, ref monitorInfo))
+        {
+            return false;
+        }
+
+        workAreaBottom = compositionTarget.TransformFromDevice.Transform(new Point(0d, monitorInfo.WorkArea.Bottom)).Y;
+        return double.IsFinite(workAreaBottom);
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr windowHandle, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetMonitorInfo(IntPtr monitorHandle, ref MonitorInfo monitorInfo);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorInfo
+    {
+        public int Size;
+        public MonitorRect MonitorArea;
+        public MonitorRect WorkArea;
+        public uint Flags;
     }
 
     private void UpdateWindowRootClip()
@@ -837,12 +970,14 @@ public partial class WidgetWindow : Window
             }
         }
 
+        // 大きさを保存しない辺(WidgetConfigDefaults.GetFixedWindowSize)は書かない。
+        var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
         WidgetStateManager.Instance.SaveWidgetWindowBounds(
             _widget.Kind,
             Left,
             Top,
-            ActualWidth,
-            ActualHeight);
+            fixedSize.Width is null ? ActualWidth : null,
+            fixedSize.Height is null ? ActualHeight : null);
     }
 
     /// <summary>
@@ -860,18 +995,27 @@ public partial class WidgetWindow : Window
     /// <b>大きさだけが既定に戻る</b>。位置は <c>Left</c>/<c>Top</c> がコンストラクタで
     /// 入るので残り、「位置は覚えているのにリサイズだけ忘れる」という形で出る。
     /// </para>
+    ///
+    /// <para>
+    /// 大きさを保存しない辺(<see cref="WidgetConfigDefaults.GetFixedWindowSize"/>)は null。
+    /// </para>
     /// </summary>
     public WidgetWindowConfig GetCurrentBounds()
     {
         var hasMeasuredSize = IsFinitePositive(ActualWidth) && IsFinitePositive(ActualHeight);
         var hasPosition = double.IsFinite(Left) && double.IsFinite(Top);
+        var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
 
         return new WidgetWindowConfig
         {
             X = hasPosition ? Left : _restoredBounds.X,
             Y = hasPosition ? Top : _restoredBounds.Y,
-            Width = hasMeasuredSize ? ActualWidth : _restoredBounds.Width,
-            Height = hasMeasuredSize ? ActualHeight : _restoredBounds.Height
+            Width = fixedSize.Width is not null
+                ? null
+                : hasMeasuredSize ? ActualWidth : _restoredBounds.Width,
+            Height = fixedSize.Height is not null
+                ? null
+                : hasMeasuredSize ? ActualHeight : _restoredBounds.Height
         };
     }
 
@@ -925,10 +1069,14 @@ public partial class WidgetWindow : Window
 
     private void ApplySavedBounds(WidgetWindowConfig savedBounds, Window? owner, int originalIndex)
     {
-        if (IsFinitePositive(savedBounds.Width) && IsFinitePositive(savedBounds.Height))
+        // 大きさを保存しない辺は、保存先に値が残っていてもいつも既定の大きさで開く。
+        var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
+        var width = fixedSize.Width ?? savedBounds.Width;
+        var height = fixedSize.Height ?? savedBounds.Height;
+        if (IsFinitePositive(width) && IsFinitePositive(height))
         {
-            Width = Math.Max(savedBounds.Width!.Value, MinWidth);
-            Height = Math.Max(savedBounds.Height!.Value, MinHeight);
+            Width = Math.Max(width!.Value, MinWidth);
+            Height = Math.Max(height!.Value, MinHeight);
         }
 
         if (double.IsFinite(savedBounds.X ?? double.NaN) && double.IsFinite(savedBounds.Y ?? double.NaN))

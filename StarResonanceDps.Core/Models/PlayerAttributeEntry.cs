@@ -11,4 +11,14 @@ namespace StarResonanceDps.Core.Models;
 /// <param name="AttrId">属性の番号。表示の並び順。</param>
 /// <param name="EnumName">通信の属性の列挙名。列挙に無い番号はその数字が入る。</param>
 /// <param name="ValueText">届いた値。数値以外(一覧・構造体)はその型の文字列表現になる。</param>
-public sealed record PlayerAttributeEntry(int AttrId, string EnumName, string ValueText);
+/// <param name="ChangeSign">
+/// 差分で最後に変わった向き(1 は増、-1 は減、0 は記録なし)。能力値だけで、入場とバフの付け直しの変化は入らない
+/// (<c>SelfAttributeChangeStore</c>)。
+/// </param>
+/// <param name="ChangedAtUtc">その差分の到着時刻。<paramref name="ChangeSign"/> が 0 なら既定値。</param>
+public sealed record PlayerAttributeEntry(
+    int AttrId,
+    string EnumName,
+    string ValueText,
+    int ChangeSign = 0,
+    DateTime ChangedAtUtc = default);

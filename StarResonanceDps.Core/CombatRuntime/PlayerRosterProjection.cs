@@ -470,6 +470,7 @@ internal static class PlayerRosterProjection
 
     /// <summary>
     /// 自分の実体に届いている属性を番号順に全部並べる。ステータス詳細が使う。
+    /// 差分で変わった能力値には、変わった向きと時刻(<see cref="SelfAttributeChangeStore"/>)を添える。
     ///
     /// <para>
     /// <b>自分だけ</b>。他人には能力値が届かない(notes/109)。
@@ -492,7 +493,10 @@ internal static class PlayerRosterProjection
                 continue;
             }
 
-            entries.Add(new PlayerAttributeEntry((int)attrType, key, value?.ToString() ?? string.Empty));
+            var valueText = value?.ToString() ?? string.Empty;
+            entries.Add(SelfAttributeChangeStore.TryGet(key, out var change)
+                ? new PlayerAttributeEntry((int)attrType, key, valueText, change.Sign, change.ArrivalUtc)
+                : new PlayerAttributeEntry((int)attrType, key, valueText));
         }
 
         entries.Sort((left, right) => left.AttrId.CompareTo(right.AttrId));

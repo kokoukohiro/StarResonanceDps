@@ -108,8 +108,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先に被ダメログへ残す。
             netCap.BeforeParsePacket = EncounterManager.RecordEndedAnnouncementBars;
 
-            // 保持していた前の回は、今の回に記録が入ったパケットの後で手放し、プレイヤーリストの名簿をメーターと同じ回へ作り直す。
-            netCap.AfterParsePacket = EncounterManager.ReleaseHeldPastEncounter;
+            netCap.AfterParsePacket = ProcessAfterParsePacket;
 
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
@@ -135,6 +134,24 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             action();
+        }
+
+        /// <summary>
+        /// パケットを1つ処理した後に呼ばれる。
+        ///
+        /// <para>
+        /// 自分の能力値の変化を記録に入れ、記録が変わったら名簿の自分の行を作り直す(入場とバフの付け直しはパケットの単位で見分けるので、ここで締める)。
+        /// 保持していた前の回は、今の回に記録が入ったパケットの後で手放し、プレイヤーリストの名簿をメーターと同じ回へ作り直す。
+        /// </para>
+        /// </summary>
+        private static void ProcessAfterParsePacket()
+        {
+            if (SelfAttributeChangeStore.CommitPacket() && currentUserUuid != 0)
+            {
+                PlayerRosterProjection.UpsertSelf(currentUserUuid);
+            }
+
+            EncounterManager.ReleaseHeldPastEncounter();
         }
 
         public static void StopCapturing()
@@ -173,6 +190,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
             PlayerSkillLevelStateStore.ResetSelfToStartup();
+            SelfAttributeChangeStore.Clear();
 
             // 死亡と自然回復の刻みの控え。止めている間の復活を取りこぼすと、次の死亡を扱わなくなる。
             PlayerDeathStates = [];
@@ -386,6 +404,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     {
                         ResetSelfStatsMissingFromEnterScene(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                         ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, extraData.ArrivalTime);
+                        SelfAttributeChangeStore.MarkFullSnapshot();
                     }
 
                     // 入場の一覧は自分の一時属性の全部(無ければ一時属性が無い)。前のマップの値を置き換える。
@@ -2358,6 +2377,103 @@ namespace StarResonanceDps.Core.CombatRuntime
             BattleStateMachine.CheckDeferredCalls();
         }
 
+        /// <summary>
+        /// バフの付け直しの差分で、最初に付くバフの番号。サーバーは付け直すとき自分のバフを全部この番号から付け直す。
+        /// </summary>
+        private const long ReinitializedFirstBuffUuid = 1;
+
+        /// <summary>その差分が、自分のバフの付け直し(番号 <see cref="ReinitializedFirstBuffUuid"/> のバフの付与を含む)か。</summary>
+        private static bool IsSelfBuffReinitialization(AoiSyncDelta delta)
+        {
+            if (delta.BuffEffect is null)
+            {
+                return false;
+            }
+
+            foreach (var buffEffect in delta.BuffEffect.BuffEffects)
+            {
+                if (buffEffect.BuffUuid == ReinitializedFirstBuffUuid
+                    && buffEffect.LogicEffect.Any(logicEffect => logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectAddBuff))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>差分で届いた自分の能力値の、当てる前の値(無ければ null)。能力値の表に無い番号は見ない。</summary>
+        private static List<(string Key, object? Before)> CaptureSelfStats(long uuid, RepeatedField<Attr> attrs)
+        {
+            var statAttrIds = HelperMethods.DataTables.FightAttrs.StatAttrIds;
+            var captured = new List<(string Key, object? Before)>();
+            foreach (var attr in attrs)
+            {
+                if (attr.Id == 0 || attr.RawData == null || !statAttrIds.Contains(attr.Id))
+                {
+                    continue;
+                }
+
+                var key = ((EAttrType)attr.Id).ToString();
+                captured.Add((key, EncounterManager.Current.GetAttrKV(uuid, key)));
+            }
+
+            return captured;
+        }
+
+        /// <summary>
+        /// 当てた後の値と比べ、変わった番号を <see cref="SelfAttributeChangeStore"/> へ渡す(記録に入るのはパケットの後)。
+        /// 数値でない値は比べない。前の値が無い番号は、入場の全属性を受けた後なら 0 と比べる。
+        /// </summary>
+        private static void RecordSelfStatChanges(long uuid, List<(string Key, object? Before)> captured, DateTime arrivalUtc)
+        {
+            foreach (var (key, before) in captured)
+            {
+                if (!TryGetStatNumber(EncounterManager.Current.GetAttrKV(uuid, key), out var after))
+                {
+                    continue;
+                }
+
+                long previous;
+                if (before is null)
+                {
+                    if (!SelfAttributeChangeStore.HasFullSnapshot)
+                    {
+                        continue;
+                    }
+
+                    previous = 0;
+                }
+                else if (!TryGetStatNumber(before, out previous))
+                {
+                    continue;
+                }
+
+                var sign = after.CompareTo(previous);
+                if (sign != 0)
+                {
+                    SelfAttributeChangeStore.AddPending(key, sign, arrivalUtc);
+                }
+            }
+        }
+
+        /// <summary>能力値の控えは int か long(<see cref="ProcessAttrs"/>)。</summary>
+        private static bool TryGetStatNumber(object? value, out long number)
+        {
+            switch (value)
+            {
+                case int intValue:
+                    number = intValue;
+                    return true;
+                case long longValue:
+                    number = longValue;
+                    return true;
+                default:
+                    number = 0;
+                    return false;
+            }
+        }
+
         public static void ProcessAoiSyncDelta(AoiSyncDelta delta, ExtraPacketData extraData)
         {
             if (delta == null)
@@ -2372,8 +2488,16 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             bool isTargetPlayer = (Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar);
+            var isSelfTarget = isTargetPlayer && IsSelfPlayer(targetUuid);
             var attrCollection = delta.Attrs;
             HashSet<EAttrType> changedAttributes = [];
+
+            // シーン切り替えのたびの自分のバフの付け直しは、能力値の変化として記録しない(SelfAttributeChangeStore)。
+            // 下の早い return(精算・投票の間)より前で見る。
+            if (isSelfTarget && IsSelfBuffReinitialization(delta))
+            {
+                SelfAttributeChangeStore.MarkBuffReinitialized();
+            }
 
             // 差分の中は 属性 → バフ → ダメージ の順に当てるので、死亡の印つきの被弾は属性より先に控える。
             // 同じ差分で状態が「死亡」になる回を、ダメージの無い死亡と取り違えないため。
@@ -2399,7 +2523,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
+                var selfStatsBefore = isSelfTarget ? CaptureSelfStats(targetUuid, attrCollection.Attrs) : null;
                 ProcessAttrs(targetUuid, attrCollection.Attrs, extraData.ArrivalTime);
+                if (selfStatsBefore is not null)
+                {
+                    RecordSelfStatChanges(targetUuid, selfStatsBefore, extraData.ArrivalTime);
+                }
+
                 if (isTargetPlayer)
                 {
                     TrackPlayerDeath(targetUuid, playerVitalsBefore, changedAttributes, extraData);

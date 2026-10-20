@@ -854,8 +854,14 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_PlayerStatus_ShowActualValues" xml:space="preserve">
     <value>Show Actual Values</value>
   </data>
+  <data name="Settings_PlayerStatus_TextColor_ValueIncrease" xml:space="preserve">
+    <value>Value Increase</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColor_ValueDecrease" xml:space="preserve">
+    <value>Value Decrease</value>
+  </data>
   <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
-    <value>Note: Drag items in the widget to reorder them.</value>
+    <value>Note: Drag items in this list or in the widget to reorder them.</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>Skill Name</value>

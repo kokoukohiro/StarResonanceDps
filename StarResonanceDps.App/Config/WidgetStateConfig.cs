@@ -36,9 +36,8 @@ public sealed class WidgetConfig
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
     ///
     /// <para>
-    /// <b>設定ウィンドウは触らない。</b>あちらは開いた時点の設定を丸ごと書き戻すので、
-    /// ウィジェット側で動かした並びを巻き戻してしまう。ウィンドウの位置と同じく、
-    /// 掴んで動かした瞬間にウィジェットから直接保存する。
+    /// 設定の窓が開いていなければ、ウィジェットで掴んで動かした瞬間にこの項目だけを保存する(ウィンドウの位置と同じ)。
+    /// 開いている間は、設定の一覧でもウィジェットでも並べ替えは保存前のプレビューになり、設定の窓の「保存」で設定一式と一緒に保存する。
     /// </para>
     /// </summary>
     public List<int>? PlayerStatusRowOrder { get; set; }
@@ -659,8 +658,8 @@ public sealed class PlayerStatusWidgetSettingsConfig
         WidgetConfigDefaults.CreateDefaultPlayerStatusRowVisibility();
 
     /// <summary>
-    /// 行の文字とアイコンの色。形はクラスカラーと同じで、<b>鍵は属性の番号</b>
-    /// (<c>PlayerStatusEntry.SettingRowAttrIds</c>)。
+    /// 行の文字とアイコンの色、値の増減の色。形はクラスカラーと同じで、鍵は増減の2つの名前と属性の番号
+    /// (<see cref="WidgetConfigDefaults.PlayerStatusTextColorKeys"/>)。
     /// </summary>
     public Dictionary<string, int> TextColorIndexes { get; set; } =
         WidgetConfigDefaults.CreateDefaultPlayerStatusTextColorIndexes();
@@ -798,12 +797,18 @@ public static class WidgetConfigDefaults
     private const double TakenDamageLogInitialWindowHeight = 460d;
     private const double PlayerInfoInitialWindowWidth = 406d;
     private const double PlayerInfoInitialWindowHeight = 265d;
-    private const double PlayerStatusInitialWindowWidth = 360d;
+    private const double PlayerStatusInitialWindowWidth = 280d;
     private const double PlayerStatusInitialWindowHeight = 400d;
     private const double PlayerEquipmentInitialWindowWidth = 360d;
     private const double PlayerEquipmentInitialWindowHeight = 381d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
     private const double PlayerBuffListInitialWindowHeight = 400d;
+    private const double PlayerTalentInitialWindowWidth = 280d;
+    private const double PlayerTalentInitialWindowHeight = 400d;
+    private const double PlayerSeasonTalentInitialWindowWidth = 360d;
+    private const double PlayerSeasonTalentInitialWindowHeight = 400d;
+    private const double PlayerModuleInitialWindowWidth = 280d;
+    private const double PlayerModuleInitialWindowHeight = 240d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
     private const double MetricContributionInitialWindowWidth = 520d;
@@ -1146,8 +1151,8 @@ public static class WidgetConfigDefaults
         [11170] = ["#FFFFFF", "#CDC6FA"],    // レジスト
         [12540] = ["#FFFFFF", "#DCC1FA"],    // レジストダメージ軽減
 
-        [11720] = ["#FFFFFF", "#7EEBFF"],    // 攻撃速度
-        [11730] = ["#FFFFFF", "#8BCBFF"],    // 詠唱速度
+        [11720] = ["#FFFFFF", "#C2F0F5"],    // 攻撃速度
+        [11730] = ["#FFFFFF", "#C2DDF5  "],    // 詠唱速度
         [11960] = ["#FFFFFF", "#A7B6FF"],    // リキャスト加速
         [11830] = ["#FFFFFF", "#FFD77A"],    // ブレイク効率
 
@@ -1329,13 +1334,39 @@ public static class WidgetConfigDefaults
         };
     }
 
+    /// <summary>ステータス詳細のテキストカラーの鍵。値が差分で増えたときの数値と三角の色。</summary>
+    public const string PlayerStatusValueIncreaseTextColorKey = "ValueIncrease";
+
+    /// <summary>ステータス詳細のテキストカラーの鍵。値が差分で減ったときの数値と三角の色。</summary>
+    public const string PlayerStatusValueDecreaseTextColorKey = "ValueDecrease";
+
     /// <summary>
-    /// テキストカラーの見本。1枠目は白で、2枠目に色を置く(クラスカラーと同じ2色)。
-    /// <b>表は一覧の全項目を持つ</b>ので、引けない番号は表の書き忘れ。埋めずに落とす。
+    /// ステータス詳細のテキストカラーの鍵の全部。並びは設定の一覧の順で、先頭が増減の2つ、続いて行の番号
+    /// (<see cref="PlayerStatusEntry.SettingRowAttrIds"/>)。既定・正規化・比べ・保存はこの一覧で回す。
     /// </summary>
-    public static List<string> CreateDefaultPlayerStatusTextColors(int attrId)
+    public static IReadOnlyList<string> PlayerStatusTextColorKeys { get; } =
+    [
+        PlayerStatusValueIncreaseTextColorKey,
+        PlayerStatusValueDecreaseTextColorKey,
+        .. PlayerStatusEntry.SettingRowAttrIds.Select(attrId => attrId.ToString(CultureInfo.InvariantCulture))
+    ];
+
+    /// <summary>増減の色の見本。行の色と違い、1枠目も白ではなく色(2枠目が既定で選ばれる淡い色)。</summary>
+    private static readonly Dictionary<string, string[]> PlayerStatusValueChangeDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
-        return [.. PlayerStatusDefaultTextColorHexes[attrId]];
+        [PlayerStatusValueIncreaseTextColorKey] = ["#43D978", "#83E4A4"],
+        [PlayerStatusValueDecreaseTextColorKey] = ["#FF5A5A", "#FA8E8E"],
+    };
+
+    /// <summary>
+    /// テキストカラーの見本。鍵は <see cref="PlayerStatusTextColorKeys"/>。行の色は1枠目が白で、2枠目に色を置く(クラスカラーと同じ2色)。
+    /// <b>表は一覧の全項目を持つ</b>ので、引けない鍵は表の書き忘れ。埋めずに落とす。
+    /// </summary>
+    public static List<string> CreateDefaultPlayerStatusTextColors(string key)
+    {
+        return PlayerStatusValueChangeDefaultTextColorHexes.TryGetValue(key, out var valueChangeHexes)
+            ? [.. valueChangeHexes]
+            : [.. PlayerStatusDefaultTextColorHexes[int.Parse(key, NumberStyles.None, CultureInfo.InvariantCulture)]];
     }
 
     /// <summary>テキストカラーで最初に選ばれている枠。</summary>
@@ -1344,11 +1375,11 @@ public static class WidgetConfigDefaults
     public static Dictionary<string, int> CreateDefaultPlayerStatusTextColorIndexes()
     {
         var indexes = new Dictionary<string, int>(
-            PlayerStatusEntry.SettingRowAttrIds.Count,
+            PlayerStatusTextColorKeys.Count,
             StringComparer.OrdinalIgnoreCase);
-        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        foreach (var key in PlayerStatusTextColorKeys)
         {
-            indexes[attrId.ToString(CultureInfo.InvariantCulture)] = DefaultPlayerStatusTextColorIndex;
+            indexes[key] = DefaultPlayerStatusTextColorIndex;
         }
 
         return indexes;
@@ -1357,11 +1388,11 @@ public static class WidgetConfigDefaults
     public static Dictionary<string, List<string>> CreateDefaultPlayerStatusTextColorPalettes()
     {
         var palettes = new Dictionary<string, List<string>>(
-            PlayerStatusEntry.SettingRowAttrIds.Count,
+            PlayerStatusTextColorKeys.Count,
             StringComparer.OrdinalIgnoreCase);
-        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        foreach (var key in PlayerStatusTextColorKeys)
         {
-            palettes[attrId.ToString(CultureInfo.InvariantCulture)] = CreateDefaultPlayerStatusTextColors(attrId);
+            palettes[key] = CreateDefaultPlayerStatusTextColors(key);
         }
 
         return palettes;
@@ -1440,19 +1471,18 @@ public static class WidgetConfigDefaults
 
         // 一覧に無い鍵は捨て、足りない鍵は既定で埋める。選択はパレットの範囲に収める。
         var textIndexes = new Dictionary<string, int>(
-            PlayerStatusEntry.SettingRowAttrIds.Count,
+            PlayerStatusTextColorKeys.Count,
             StringComparer.OrdinalIgnoreCase);
         var textPalettes = new Dictionary<string, List<string>>(
-            PlayerStatusEntry.SettingRowAttrIds.Count,
+            PlayerStatusTextColorKeys.Count,
             StringComparer.OrdinalIgnoreCase);
-        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        foreach (var key in PlayerStatusTextColorKeys)
         {
-            var key = attrId.ToString(CultureInfo.InvariantCulture);
             var palette = normalized.TextColorPalettes is not null
                 && normalized.TextColorPalettes.TryGetValue(key, out var saved)
                 && saved is { Count: > 0 }
                     ? new List<string>(saved)
-                    : CreateDefaultPlayerStatusTextColors(attrId);
+                    : CreateDefaultPlayerStatusTextColors(key);
 
             var index = normalized.TextColorIndexes is not null
                 && normalized.TextColorIndexes.TryGetValue(key, out var savedIndex)
@@ -1578,12 +1608,25 @@ public static class WidgetConfigDefaults
                 Width = PlayerEquipmentInitialWindowWidth,
                 Height = PlayerEquipmentInitialWindowHeight
             },
-            // 根のバフの一覧(アビリティ・潜在心相晶・モジュール情報)は行がバフ一覧と同じ形なので、同じ大きさで開く。
-            WidgetKind.BuffList or WidgetKind.DebuffList
-                or WidgetKind.PlayerTalent or WidgetKind.PlayerSeasonTalent or WidgetKind.PlayerModule => new WidgetWindowConfig
+            WidgetKind.BuffList or WidgetKind.DebuffList => new WidgetWindowConfig
             {
                 Width = PlayerBuffListInitialWindowWidth,
                 Height = PlayerBuffListInitialWindowHeight
+            },
+            WidgetKind.PlayerTalent => new WidgetWindowConfig
+            {
+                Width = PlayerTalentInitialWindowWidth,
+                Height = PlayerTalentInitialWindowHeight
+            },
+            WidgetKind.PlayerSeasonTalent => new WidgetWindowConfig
+            {
+                Width = PlayerSeasonTalentInitialWindowWidth,
+                Height = PlayerSeasonTalentInitialWindowHeight
+            },
+            WidgetKind.PlayerModule => new WidgetWindowConfig
+            {
+                Width = PlayerModuleInitialWindowWidth,
+                Height = PlayerModuleInitialWindowHeight
             },
             WidgetKind.BuffDebuffCard => new WidgetWindowConfig
             {
@@ -1611,6 +1654,20 @@ public static class WidgetConfigDefaults
                 Height = MetricTimelineInitialWindowHeight
             },
             _ => new WidgetWindowConfig()
+        };
+    }
+
+    /// <summary>
+    /// 大きさを保存しない辺と、その辺でいつも開く大きさ。null の辺は保存した大きさで開く。
+    /// 出すものの大きさが決まっている窓(プレイヤー情報の幅と高さ、装備情報の高さ)は、手で変えても次に開くときは既定の大きさに戻す。
+    /// </summary>
+    public static (double? Width, double? Height) GetFixedWindowSize(WidgetKind kind)
+    {
+        return kind switch
+        {
+            WidgetKind.PlayerInfo => (PlayerInfoInitialWindowWidth, PlayerInfoInitialWindowHeight),
+            WidgetKind.PlayerEquipment => (null, PlayerEquipmentInitialWindowHeight),
+            _ => (null, null)
         };
     }
 
@@ -2230,11 +2287,20 @@ public static class WidgetConfigDefaults
                 break;
             case WidgetKind.BuffList:
             case WidgetKind.DebuffList:
-            case WidgetKind.PlayerTalent:
-            case WidgetKind.PlayerSeasonTalent:
-            case WidgetKind.PlayerModule:
                 config.Window.Width ??= PlayerBuffListInitialWindowWidth;
                 config.Window.Height ??= PlayerBuffListInitialWindowHeight;
+                break;
+            case WidgetKind.PlayerTalent:
+                config.Window.Width ??= PlayerTalentInitialWindowWidth;
+                config.Window.Height ??= PlayerTalentInitialWindowHeight;
+                break;
+            case WidgetKind.PlayerSeasonTalent:
+                config.Window.Width ??= PlayerSeasonTalentInitialWindowWidth;
+                config.Window.Height ??= PlayerSeasonTalentInitialWindowHeight;
+                break;
+            case WidgetKind.PlayerModule:
+                config.Window.Width ??= PlayerModuleInitialWindowWidth;
+                config.Window.Height ??= PlayerModuleInitialWindowHeight;
                 break;
             case WidgetKind.BuffDebuffCard:
                 config.Window.Width ??= BuffDebuffCardInitialWindowWidth;

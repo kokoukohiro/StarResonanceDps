@@ -13,12 +13,19 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// 行の一覧の作りは「他人のロールスキル」(<see cref="MeterWidgetSettingsViewModel"/>)、
 /// テキストカラーは被ダメログ(<see cref="TakenDamageLogWidgetSettingsViewModel"/>)と同じ。
 /// </summary>
-public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObject, IDisposable
+public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObject, IDisposable, IRowReorderTarget
 {
     private readonly ObservableCollection<PlayerStatusRowItemViewModel> _rows = [];
     private readonly ObservableCollection<PlayerStatusTextColorItemViewModel> _textColors = [];
     private readonly Dictionary<string, PlayerStatusTextColorItemViewModel> _textColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private PlayerStatusWidgetSettingsConfig _lastSaved;
+
+    /// <summary>行の並び(<c>WidgetConfig.PlayerStatusRowOrder</c>、並べ替えの単位の番号)。保存前の今の並びと、保存された並び。</summary>
+    private List<int> _rowOrder;
+    private List<int> _lastSavedRowOrder;
+
+    /// <summary>「ステータス」の一覧で掴んでいる並べ替えの単位。掴んでいなければ null。</summary>
+    private int? _draggingUnitAttrId;
     private bool _isLoading;
 
     [ObservableProperty]
@@ -27,9 +34,13 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     [ObservableProperty]
     private bool _showActualValues = WidgetConfigDefaults.DefaultPlayerStatusShowActualValues;
 
-    public PlayerStatusWidgetSettingsViewModel(PlayerStatusWidgetSettingsConfig? config)
+    /// <param name="rowOrder">保存された行の並び(<c>WidgetConfig.PlayerStatusRowOrder</c>)。2つの一覧をこの順で並べる。</param>
+    public PlayerStatusWidgetSettingsViewModel(PlayerStatusWidgetSettingsConfig? config, IReadOnlyList<int>? rowOrder)
     {
-        var attrIds = PlayerStatusEntry.SettingRowAttrIds;
+        _rowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(rowOrder);
+        _lastSavedRowOrder = [.. _rowOrder];
+
+        var attrIds = PlayerStatusEntry.OrderSettingRowAttrIds(_rowOrder);
         for (var index = 0; index < attrIds.Count; index++)
         {
             _rows.Add(new PlayerStatusRowItemViewModel(
@@ -40,15 +51,16 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
 
         Rows = new ReadOnlyObservableCollection<PlayerStatusRowItemViewModel>(_rows);
 
-        for (var index = 0; index < attrIds.Count; index++)
+        var textColorKeys = OrderTextColorKeys(attrIds);
+        for (var index = 0; index < textColorKeys.Count; index++)
         {
-            var attrId = attrIds[index];
+            var key = textColorKeys[index];
             var colors = new ColorPaletteViewModel(
-                WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors(attrId),
+                WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors(key),
                 WidgetConfigDefaults.MaxPaletteColorCount);
             colors.PaletteChanged += TextColors_PaletteChanged;
 
-            var item = new PlayerStatusTextColorItemViewModel(attrId, colors, index == attrIds.Count - 1);
+            var item = new PlayerStatusTextColorItemViewModel(key, colors, index == textColorKeys.Count - 1);
             _textColorItemsByKey.Add(item.Key, item);
             _textColors.Add(item);
         }
@@ -62,6 +74,9 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     }
 
     public event Action<PlayerStatusWidgetSettingsConfig>? PreviewChanged;
+
+    /// <summary>「ステータス」の一覧で行を並べ替えた(または破棄で保存された並びへ戻す)。引数は保存前の並び。</summary>
+    public event Action<IReadOnlyList<int>>? RowOrderPreviewChanged;
 
     public ReadOnlyObservableCollection<PlayerStatusRowItemViewModel> Rows { get; }
 
@@ -80,7 +95,8 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
     public string ShowActualValuesStateText => LocalizationManager.Instance.GetString(
         ShowActualValues ? "Settings_Switch_On" : "Settings_Switch_Off");
 
-    public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
+    public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved)
+        || !_rowOrder.SequenceEqual(_lastSavedRowOrder);
 
     public void Dispose()
     {
@@ -117,25 +133,42 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         return config;
     }
 
+    /// <summary>既定に戻す。行の並びも既定の並びに戻す(ほかの項目と同じく保存前の値。確定は「保存」)。</summary>
     public void ResetToDefaults()
     {
         Load(WidgetConfigDefaults.CreatePlayerStatusSettings());
         OnPropertyChanged(nameof(HasUnsavedChanges));
         RaisePreviewChanged();
+
+        var defaultRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
+        if (!defaultRowOrder.SequenceEqual(_rowOrder))
+        {
+            ApplyRowOrder(defaultRowOrder);
+            RowOrderPreviewChanged?.Invoke([.. _rowOrder]);
+        }
     }
 
     public void RestoreSavedPreview()
     {
         PreviewChanged?.Invoke(_lastSaved.Clone());
+        RowOrderPreviewChanged?.Invoke([.. _lastSavedRowOrder]);
     }
 
-    public void MarkSaved(PlayerStatusWidgetSettingsConfig? config)
+    /// <param name="rowOrder">一緒に保存した行の並び。</param>
+    public void MarkSaved(PlayerStatusWidgetSettingsConfig? config, IReadOnlyList<int>? rowOrder)
     {
         _lastSaved = WidgetConfigDefaults.CloneNormalizedPlayerStatus(config);
+        _lastSavedRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(rowOrder);
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
-    /// <summary>色選択ウィンドウの初期値。宛先は行番号。</summary>
+    /// <summary>保存前の今の行の並び。「保存」でこの並びを保存する。</summary>
+    public List<int> GetRowOrderSnapshot()
+    {
+        return [.. _rowOrder];
+    }
+
+    /// <summary>色選択ウィンドウの初期値。宛先はテキストカラーの鍵(<see cref="WidgetConfigDefaults.PlayerStatusTextColorKeys"/>)。</summary>
     public Color GetSelectedTextColor(string key)
     {
         return _textColorItemsByKey.TryGetValue(key, out var item)
@@ -151,7 +184,155 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
         }
     }
 
+    /// <summary>「ステータス」の一覧の行の並べ替えの単位(<see cref="PlayerStatusRowItemViewModel.OrderUnitAttrId"/>)。</summary>
+    public object? GetRowReorderKey(object item)
+    {
+        return item is PlayerStatusRowItemViewModel row ? row.OrderUnitAttrId : null;
+    }
 
+    /// <summary>「ステータス」の一覧で行を掴み始めた。並びはまだ変えない。</summary>
+    public void BeginRowReorder(object key)
+    {
+        if (key is int unitAttrId)
+        {
+            _draggingUnitAttrId = unitAttrId;
+        }
+    }
+
+    /// <summary>
+    /// 掴んでいる間の見た目の並び。掴んだ単位の行を <paramref name="beforeKey"/> の単位の前(null なら末尾)へ動かす。
+    /// 保存前の並び・テキストカラーの一覧・ウィジェットへのプレビューは変えない(離したときの <see cref="EndRowReorder"/> で確定)。
+    /// </summary>
+    public void ShowRowReorderAt(object? beforeKey)
+    {
+        if (_draggingUnitAttrId is not { } unitAttrId || Equals(beforeKey, unitAttrId))
+        {
+            return;
+        }
+
+        var dragged = _rows.Where(row => row.OrderUnitAttrId == unitAttrId).ToList();
+        var others = _rows.Where(row => row.OrderUnitAttrId != unitAttrId).ToList();
+        var insertAt = beforeKey is int before
+            ? others.FindIndex(row => row.OrderUnitAttrId == before)
+            : others.Count;
+        if (dragged.Count == 0 || insertAt < 0)
+        {
+            return;
+        }
+
+        others.InsertRange(insertAt, dragged);
+        MoveToOrder(_rows, others.Select(row => row.Key).ToList(), row => row.Key);
+        UpdateRowIsLast();
+    }
+
+    /// <summary>掴んでいる間に、掴んだ単位を元の位置(保存前の今の並びの位置)へ戻す。設定の窓の外に出たときに使う。</summary>
+    public void ShowRowReorderAtOriginalPosition()
+    {
+        if (_draggingUnitAttrId is null)
+        {
+            return;
+        }
+
+        MoveToOrder(_rows, OrderedRowKeys(_rowOrder), row => row.Key);
+        UpdateRowIsLast();
+    }
+
+    /// <summary>
+    /// 掴み終わり。<paramref name="commit"/> なら今の見た目の並びを保存前の並びとして確定し、ウィジェットへプレビューを渡す(保存は「保存」)。
+    /// 取り消しなら元の並びへ戻す。
+    /// </summary>
+    public void EndRowReorder(bool commit)
+    {
+        if (_draggingUnitAttrId is null)
+        {
+            return;
+        }
+
+        _draggingUnitAttrId = null;
+        if (commit)
+        {
+            var order = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(
+                _rows.Select(row => row.OrderUnitAttrId).Distinct().ToList());
+            if (!order.SequenceEqual(_rowOrder))
+            {
+                ApplyRowOrder(order);
+                RowOrderPreviewChanged?.Invoke([.. _rowOrder]);
+                return;
+            }
+        }
+
+        ApplyRowOrder(_rowOrder);
+    }
+
+    /// <summary>
+    /// 行の並びを当てる(ウィジェットで並べ替えたときと、<see cref="EndRowReorder"/>)。「ステータス」と「テキストカラー」の一覧を同じ順に並べ直す。
+    /// 行の部品は作り直さず位置だけ動かし、最後の行の印を付け直す。保存前の並びとして持ち、保存は「保存」で行う。
+    /// </summary>
+    public void ApplyRowOrder(IReadOnlyList<int> rowOrder)
+    {
+        _rowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(rowOrder);
+        var attrIds = PlayerStatusEntry.OrderSettingRowAttrIds(_rowOrder);
+        MoveToOrder(_rows, OrderedRowKeys(_rowOrder), row => row.Key);
+        MoveToOrder(_textColors, OrderTextColorKeys(attrIds), item => item.Key);
+        UpdateRowIsLast();
+
+        for (var index = 0; index < _textColors.Count; index++)
+        {
+            _textColors[index].IsLast = index == _textColors.Count - 1;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>「ステータス」の一覧の行の鍵を、行の並びのとおりに並べる。</summary>
+    private static IReadOnlyList<string> OrderedRowKeys(IReadOnlyList<int> rowOrder)
+    {
+        return PlayerStatusEntry.OrderSettingRowAttrIds(rowOrder)
+            .Select(attrId => attrId.ToString(CultureInfo.InvariantCulture))
+            .ToList();
+    }
+
+    /// <summary>「ステータス」の一覧の最後の行の印を、今の並びで付け直す。</summary>
+    private void UpdateRowIsLast()
+    {
+        for (var index = 0; index < _rows.Count; index++)
+        {
+            _rows[index].IsLast = index == _rows.Count - 1;
+        }
+    }
+
+    /// <summary>テキストカラーの鍵の並び。先頭は値の増減の2つのまま、続く行は「ステータス」の一覧と同じ順。</summary>
+    private static IReadOnlyList<string> OrderTextColorKeys(IReadOnlyList<int> orderedAttrIds)
+    {
+        return
+        [
+            WidgetConfigDefaults.PlayerStatusValueIncreaseTextColorKey,
+            WidgetConfigDefaults.PlayerStatusValueDecreaseTextColorKey,
+            .. orderedAttrIds.Select(attrId => attrId.ToString(CultureInfo.InvariantCulture))
+        ];
+    }
+
+    /// <summary>一覧の項目を、鍵の並びのとおりの位置へ動かす(作り直さない)。</summary>
+    private static void MoveToOrder<T>(ObservableCollection<T> items, IReadOnlyList<string> orderedKeys, Func<T, string> keyOf)
+    {
+        for (var target = 0; target < orderedKeys.Count && target < items.Count; target++)
+        {
+            for (var current = target; current < items.Count; current++)
+            {
+                if (!string.Equals(keyOf(items[current]), orderedKeys[target], StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (current != target)
+                {
+                    items.Move(current, target);
+                }
+
+                break;
+            }
+        }
+    }
 
     partial void OnHideInactiveStatusEffectsChanged(bool value)
     {
@@ -190,7 +371,7 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
                     && config.TextColorPalettes.TryGetValue(item.Key, out var saved)
                     && saved is { Count: > 0 }
                         ? saved
-                        : WidgetConfigDefaults.CreateDefaultPlayerStatusTextColors(item.AttrId);
+                        : item.CreateDefaultColors();
                 var index = config.TextColorIndexes is not null
                     && config.TextColorIndexes.TryGetValue(item.Key, out var savedIndex)
                         ? savedIndex
@@ -277,9 +458,8 @@ public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObje
             }
         }
 
-        foreach (var attrId in PlayerStatusEntry.SettingRowAttrIds)
+        foreach (var key in WidgetConfigDefaults.PlayerStatusTextColorKeys)
         {
-            var key = attrId.ToString(CultureInfo.InvariantCulture);
             if (left.TextColorIndexes is null
                 || right.TextColorIndexes is null
                 || left.TextColorPalettes is null

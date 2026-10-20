@@ -791,8 +791,14 @@
   <data name="Settings_PlayerStatus_ShowActualValues" xml:space="preserve">
     <value>実数値を表示</value>
   </data>
+  <data name="Settings_PlayerStatus_TextColor_ValueIncrease" xml:space="preserve">
+    <value>数値の増加</value>
+  </data>
+  <data name="Settings_PlayerStatus_TextColor_ValueDecrease" xml:space="preserve">
+    <value>数値の減少</value>
+  </data>
   <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
-    <value>※ウィジェット上で項目をドラッグして並び替えできます</value>
+    <value>※この一覧かウィジェット上で項目をドラッグして並び替えできます</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
     <value>スキル名</value>

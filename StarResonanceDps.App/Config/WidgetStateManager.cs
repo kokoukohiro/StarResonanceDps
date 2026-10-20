@@ -88,7 +88,9 @@ public sealed class WidgetStateManager
         }
     }
 
-    public void SaveWidgetWindowBounds(WidgetKind kind, double x, double y, double width, double height)
+    /// <param name="width">幅。保存しない辺(<see cref="WidgetConfigDefaults.GetFixedWindowSize"/>)は null で、読み込みの正規化が既定の大きさで埋める。</param>
+    /// <param name="height">高さ。幅と同じ。</param>
+    public void SaveWidgetWindowBounds(WidgetKind kind, double x, double y, double? width, double? height)
     {
         lock (_syncRoot)
         {
@@ -127,11 +129,10 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
-    /// ステータス詳細の行の並びだけを保存する。
+    /// ステータス詳細の行の並びだけを保存する。設定の窓が開いていないときの、ウィジェットでの並べ替えが使う。
     ///
     /// <para>
-    /// 設定一式を書き戻す形にすると、開いている設定ウィンドウが持っている古い値とぶつかる。
-    /// ウィンドウの位置と同じく、この項目だけを書く。
+    /// ウィンドウの位置と同じく、設定一式は書き戻さずにこの項目だけを書く。
     /// </para>
     /// </summary>
     public void SavePlayerStatusRowOrder(WidgetKind kind, IReadOnlyList<int> order)

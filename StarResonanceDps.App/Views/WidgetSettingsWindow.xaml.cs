@@ -51,8 +51,13 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.SkillDetailPreviewChanged += _widget.ApplySkillDetailSettingsPreview;
         _viewModel.EquipmentPreviewChanged += _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
+        _viewModel.PlayerStatusRowOrderPreviewChanged += _widget.ApplyPlayerStatusRowOrderPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
+
+        // 開いている間は、行の並びを保存前のプレビューとして持つ(ウィジェットでの並べ替えも含めて「保存」で確定、閉じたら戻す)。
+        _widget.BeginPlayerStatusRowOrderPreview();
+        _widget.PlayerStatusRowOrderChanged += Widget_PlayerStatusRowOrderChanged;
         DataContext = _viewModel;
 
         Loaded += WidgetSettingsWindow_Loaded;
@@ -85,8 +90,11 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.SkillDetailPreviewChanged -= _widget.ApplySkillDetailSettingsPreview;
         _viewModel.EquipmentPreviewChanged -= _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
+        _viewModel.PlayerStatusRowOrderPreviewChanged -= _widget.ApplyPlayerStatusRowOrderPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
+        _widget.PlayerStatusRowOrderChanged -= Widget_PlayerStatusRowOrderChanged;
+        _widget.EndPlayerStatusRowOrderPreview();
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -101,6 +109,15 @@ public partial class WidgetSettingsWindow : Window
     private void Widget_MetricTimelineVisibleSecondsChangedFromWidget(int visibleSeconds)
     {
         _viewModel.MetricTimelineSettings?.SetVisibleSecondsFromWidget(visibleSeconds);
+    }
+
+    /// <summary>
+    /// 開いている間にステータス詳細の行の並びが変わった(ウィジェットでの並べ替え、またはこの窓の並べ替えの戻り)。
+    /// 「ステータス」と「テキストカラー」の一覧も同じ順に並べ直す。
+    /// </summary>
+    private void Widget_PlayerStatusRowOrderChanged(IReadOnlyList<int> rowOrder)
+    {
+        _viewModel.PlayerStatusSettings?.ApplyRowOrder(rowOrder);
     }
 
     protected override void OnClosing(CancelEventArgs e)

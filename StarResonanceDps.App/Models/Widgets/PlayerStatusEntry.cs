@@ -18,15 +18,29 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// 並べ替えの単位(組は代表1つ)。行を掴んで動かすときの宛先。
 /// </param>
 /// <param name="TextBrush">
-/// 行の色。アイコンの塗り・名前・値の3つに使う。設定の行数より表示の行数が多いときは、
-/// <c>Create</c> が色の並びを繰り返して割り当てる。
+/// 行の色。アイコンの塗りと名前の2つに使う(値はウィジェットの既定の白で、変わったときだけ増減の色)。
+/// 鍵の無い行は null。
 /// </param>
+/// <param name="ValueChange">値が差分で変わって、まだ増減の色と三角を出している間か(<see cref="PlayerStatusEntry.ValueChangeHighlightDuration"/>)。</param>
+/// <param name="ValueChangeEndsAtUtc">増減の色と三角を消す時刻。<paramref name="ValueChange"/> が無いなら既定値。</param>
+/// <param name="ValueChangeBrush">増減の数値と三角の色(テキストカラーの「数値の増加」「数値の減少」)。<paramref name="ValueChange"/> が無いなら null。</param>
 public sealed record PlayerStatusRow(
     string Name,
     Brush? IconMask,
     string ValueText,
     int OrderUnitAttrId,
-    Brush? TextBrush = null);
+    Brush? TextBrush = null,
+    StatusValueChange ValueChange = StatusValueChange.None,
+    DateTime ValueChangeEndsAtUtc = default,
+    Brush? ValueChangeBrush = null);
+
+/// <summary>ステータス詳細の値の増減の表示。</summary>
+public enum StatusValueChange
+{
+    None,
+    Increase,
+    Decrease,
+}
 
 /// <summary>
 /// ステータス詳細の画面の1行。行の部品は使い回し、届くたびに <see cref="PlayerStatusRow"/> の値だけを入れ替える
@@ -46,6 +60,12 @@ public sealed partial class PlayerStatusRowItem : ObservableObject
     [ObservableProperty]
     private Brush? _textBrush;
 
+    [ObservableProperty]
+    private StatusValueChange _valueChange;
+
+    [ObservableProperty]
+    private Brush? _valueChangeBrush;
+
     /// <summary>並べ替えの単位(<see cref="PlayerStatusRow.OrderUnitAttrId"/>)。</summary>
     public int OrderUnitAttrId { get; private set; }
 
@@ -55,6 +75,8 @@ public sealed partial class PlayerStatusRowItem : ObservableObject
         IconMask = row.IconMask;
         ValueText = row.ValueText;
         TextBrush = row.TextBrush;
+        ValueChangeBrush = row.ValueChangeBrush;
+        ValueChange = row.ValueChange;
         OrderUnitAttrId = row.OrderUnitAttrId;
     }
 }
@@ -128,6 +150,16 @@ public static class PlayerStatusEntry
 
     /// <summary>届いていない属性に出す値。0 が真値なので、作った値にはならない。</summary>
     private const string MissingValueText = "0";
+
+    /// <summary>
+    /// 値が差分で変わってから、増減の色と三角を出しておく時間。新しい変化が来たらそこから数え直す。
+    /// 短いとゲームから目を移す間に消え、長いとバフで数秒ごとに変わる行が光り続けて今の変化が分からなくなる。
+    /// </summary>
+    public static readonly TimeSpan ValueChangeHighlightDuration = TimeSpan.FromSeconds(2);
+
+    /// <param name="Sign">1 は増、-1 は減。</param>
+    /// <param name="ArrivalUtc">変えた差分の到着時刻。</param>
+    private readonly record struct ValueChangeSample(int Sign, DateTime ArrivalUtc);
 
     /// <summary>鍵ごとのアイコンの形。読み込みと生成を1回で済ませる。</summary>
     private static readonly Dictionary<string, ImageBrush> IconMasks = new(StringComparer.Ordinal);
@@ -437,13 +469,19 @@ public static class PlayerStatusEntry
     /// 並べ替えの単位の並び(<see cref="OrderUnitAttrIds"/> の番号)。
     /// <b>隠れている行も含めた全体の順</b>で、空なら表の既定順。
     /// </param>
+    /// <param name="nowUtc">増減の色と三角を出している間かを決める今の時刻。</param>
+    /// <param name="increaseBrush">値が増えた行の数値と三角の色(テキストカラーの「数値の増加」)。</param>
+    /// <param name="decreaseBrush">値が減った行の数値と三角の色(テキストカラーの「数値の減少」)。</param>
     public static IReadOnlyList<PlayerStatusRow> Create(
         PlayerRosterEntry player,
         bool hideInactiveStatusEffects,
         bool showActualValues,
         IReadOnlyDictionary<string, bool> rowVisibility,
         IReadOnlyDictionary<int, Brush> textBrushes,
-        IReadOnlyList<int> rowOrder)
+        IReadOnlyList<int> rowOrder,
+        DateTime nowUtc,
+        Brush? increaseBrush,
+        Brush? decreaseBrush)
     {
         var attributes = player.Attributes;
         if (attributes is null || attributes.Count == 0)
@@ -452,9 +490,14 @@ public static class PlayerStatusEntry
         }
 
         var arrived = new Dictionary<int, string>(attributes.Count);
+        var changes = new Dictionary<int, ValueChangeSample>();
         foreach (var attribute in attributes)
         {
             arrived[attribute.AttrId] = attribute.ValueText;
+            if (attribute.ChangeSign != 0)
+            {
+                changes[attribute.AttrId] = new ValueChangeSample(attribute.ChangeSign, attribute.ChangedAtUtc);
+            }
         }
 
         var shownPrimaryStat = ResolveShown(
@@ -499,9 +542,14 @@ public static class PlayerStatusEntry
             if (TryGetPairedRow(spec.AttrId, out var paired))
             {
                 // 割合側は素の値の位置でまとめて出すので、ここでは行にしない。
+                // 増減は見えている数字だけで決める(実数値を出さないなら割合だけ。同時なら先に並ぶ割合)。
                 if (spec.AttrId == paired.ValueAttrId)
                 {
-                    rows.Add(CreatePairedRow(paired, arrived, showActualValues, localization));
+                    rows.Add(ApplyValueChange(
+                        CreatePairedRow(paired, arrived, showActualValues, localization),
+                        showActualValues ? [paired.PercentAttrId, paired.ValueAttrId] : [paired.PercentAttrId],
+                        changes,
+                        nowUtc));
                     rowKeys.Add(paired.ValueAttrId);
                 }
 
@@ -513,23 +561,33 @@ public static class PlayerStatusEntry
                 // 組は先頭の位置でまとめて出す。残りの番号はここでは何もしない。
                 if (spec.AttrId == group.AttrIds[0])
                 {
-                    AppendMergedGroup(rows, rowKeys, group, spec, arrived, localization);
+                    AppendMergedGroup(rows, rowKeys, group, spec, arrived, changes, nowUtc, localization);
                 }
 
                 continue;
             }
 
-            rows.Add(CreateRow(spec, spec.AttrId, arrived, localization));
+            rows.Add(ApplyValueChange(CreateRow(spec, spec.AttrId, arrived, localization), [spec.AttrId], changes, nowUtc));
             rowKeys.Add(spec.AttrId);
         }
 
-        // 色は行ごとに決まっている。鍵の無い行はそのまま(表示側の既定色)。
+        // 色は行ごとに決まっている。鍵の無い行はそのまま(表示側の既定色)。増減の色は向きで決まる。
         for (var index = 0; index < rows.Count; index++)
         {
+            var row = rows[index];
             if (textBrushes.TryGetValue(rowKeys[index], out var brush))
             {
-                rows[index] = rows[index] with { TextBrush = brush };
+                row = row with { TextBrush = brush };
             }
+
+            row = row.ValueChange switch
+            {
+                StatusValueChange.Increase => row with { ValueChangeBrush = increaseBrush },
+                StatusValueChange.Decrease => row with { ValueChangeBrush = decreaseBrush },
+                _ => row
+            };
+
+            rows[index] = row;
         }
 
         return rows;
@@ -593,31 +651,43 @@ public static class PlayerStatusEntry
         return [.. units];
     }
 
-    /// <summary>
-    /// 保存された並びのとおりに <see cref="Rows"/> を並べ替える。
-    /// 並びに無い単位(表が増えたとき)は既定の順で後ろへ回し、<b>落とさない</b>。
-    /// </summary>
+    /// <summary>保存された並びのとおりに <see cref="Rows"/> を並べ替える(<see cref="OrderByUnits"/>)。</summary>
     private static IReadOnlyList<StatusRowSpec> OrderRows(IReadOnlyList<int> rowOrder)
     {
-        if (rowOrder.Count == 0)
-        {
-            return Rows;
-        }
+        return rowOrder.Count == 0 ? Rows : OrderByUnits(Rows, spec => spec.AttrId, rowOrder);
+    }
 
-        var byUnit = new Dictionary<int, List<StatusRowSpec>>(OrderUnitAttrIds.Count);
-        foreach (var spec in Rows)
+    /// <summary>
+    /// 設定の一覧の番号(<see cref="SettingRowAttrIds"/>)を、行の並び(ウィジェットか設定の一覧で並べ替えたもの)のとおりに並べる。
+    /// ウィジェットの行と同じ決まり(<see cref="OrderByUnits"/>)で、組の項目はまとまって動き、組の中は既定の順。
+    /// </summary>
+    public static IReadOnlyList<int> OrderSettingRowAttrIds(IReadOnlyList<int> rowOrder)
+    {
+        return rowOrder.Count == 0
+            ? SettingRowAttrIds
+            : OrderByUnits(SettingRowAttrIds, attrId => attrId, rowOrder);
+    }
+
+    /// <summary>
+    /// 並べ替えの単位(<see cref="GetOrderUnitAttrId"/>)ごとにまとめ、保存された並びの順に並べる。単位の中は渡された順のまま。
+    /// 並びに無い単位(表が増えたとき)は既定の順で後ろへ回し、<b>落とさない</b>。
+    /// </summary>
+    private static List<T> OrderByUnits<T>(IReadOnlyList<T> items, Func<T, int> attrIdOf, IReadOnlyList<int> rowOrder)
+    {
+        var byUnit = new Dictionary<int, List<T>>(OrderUnitAttrIds.Count);
+        foreach (var item in items)
         {
-            var unit = GetOrderUnitAttrId(spec.AttrId);
+            var unit = GetOrderUnitAttrId(attrIdOf(item));
             if (!byUnit.TryGetValue(unit, out var list))
             {
                 list = [];
                 byUnit[unit] = list;
             }
 
-            list.Add(spec);
+            list.Add(item);
         }
 
-        var ordered = new List<StatusRowSpec>(Rows.Length);
+        var ordered = new List<T>(items.Count);
         var used = new HashSet<int>();
         foreach (var unit in rowOrder)
         {
@@ -740,6 +810,8 @@ public static class PlayerStatusEntry
         MergedGroupSpec group,
         StatusRowSpec spec,
         Dictionary<int, string> arrived,
+        Dictionary<int, ValueChangeSample> changes,
+        DateTime nowUtc,
         LocalizationManager localization)
     {
         var first = arrived.GetValueOrDefault(group.AttrIds[0]) ?? MissingValueText;
@@ -755,22 +827,64 @@ public static class PlayerStatusEntry
 
         if (allSame)
         {
-            rows.Add(new PlayerStatusRow(
-                localization.GetString(group.MergedNameKey),
-                ResolveIconMask(spec.IconKey),
-                FormatValue(spec, first),
-                GetOrderUnitAttrId(group.AttrIds[0])));
+            rows.Add(ApplyValueChange(
+                new PlayerStatusRow(
+                    localization.GetString(group.MergedNameKey),
+                    ResolveIconMask(spec.IconKey),
+                    FormatValue(spec, first),
+                    GetOrderUnitAttrId(group.AttrIds[0])),
+                group.AttrIds,
+                changes,
+                nowUtc));
             rowKeys.Add(group.AttrIds[0]);
             return;
         }
 
         foreach (var attrId in group.AttrIds)
         {
-            rows.Add(CreateRow(spec, attrId, arrived, localization));
+            rows.Add(ApplyValueChange(CreateRow(spec, attrId, arrived, localization), [attrId], changes, nowUtc));
 
             // 畳めずに開いた行も、色は組の代表のものを使う(一覧には代表しか無い)。
             rowKeys.Add(group.AttrIds[0]);
         }
+    }
+
+    /// <summary>
+    /// 行の数字に使った番号のうち、差分で一番新しく変わったものの向きを行に付ける(同時なら先に並べた番号)。
+    /// 変わってから <see cref="ValueChangeHighlightDuration"/> を過ぎていたら付けない。
+    /// </summary>
+    private static PlayerStatusRow ApplyValueChange(
+        PlayerStatusRow row,
+        ReadOnlySpan<int> shownAttrIds,
+        Dictionary<int, ValueChangeSample> changes,
+        DateTime nowUtc)
+    {
+        ValueChangeSample? latest = null;
+        foreach (var attrId in shownAttrIds)
+        {
+            if (changes.TryGetValue(attrId, out var change)
+                && (latest is null || change.ArrivalUtc > latest.Value.ArrivalUtc))
+            {
+                latest = change;
+            }
+        }
+
+        if (latest is not { } shown)
+        {
+            return row;
+        }
+
+        var endsAtUtc = shown.ArrivalUtc + ValueChangeHighlightDuration;
+        if (endsAtUtc <= nowUtc)
+        {
+            return row;
+        }
+
+        return row with
+        {
+            ValueChange = shown.Sign > 0 ? StatusValueChange.Increase : StatusValueChange.Decrease,
+            ValueChangeEndsAtUtc = endsAtUtc,
+        };
     }
 
     /// <summary>1行を作る。名前は番号ごとのリソース。</summary>

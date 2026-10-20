@@ -33,6 +33,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private EquipmentWidgetSettingsConfig _equipment = WidgetConfigDefaults.CreateEquipmentSettings();
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
+
+    /// <summary>
+    /// 設定の窓が開いている間だけの、ステータス詳細の行の並び(保存前のプレビュー)。null は窓が開いていない。
+    /// ある間はウィジェットもこの並びで出し、ウィジェットでの並べ替えもこの並びを変えるだけにする(設定の窓の「保存」で確定、「破棄」で戻る)。
+    /// </summary>
+    private List<int>? _playerStatusRowOrderPreview;
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -174,24 +180,77 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedPlayerStatus(_playerStatus);
     }
 
+    /// <summary>今の行の並び。設定の窓が開いている間はプレビューの並び。</summary>
     public IReadOnlyList<int> GetPlayerStatusRowOrderSnapshot()
     {
-        return [.. _playerStatusRowOrder];
+        return [.. _playerStatusRowOrderPreview ?? _playerStatusRowOrder];
     }
 
     /// <summary>
-    /// 行の並びを1項目だけ書き戻す。<b>設定一式は触らない</b>ので、
-    /// 開いている設定ウィンドウが持つ値とぶつからない。
+    /// ステータス詳細の窓で行を並べ替えた。設定の窓が開いている間はプレビューの並びを変えるだけ(保存は設定の窓の「保存」)、
+    /// 開いていなければその場で並びを1項目だけ書き戻す(<b>設定一式は触らない</b>)。
     /// </summary>
-    public void SavePlayerStatusRowOrder(IReadOnlyList<int> order)
+    public void ChangePlayerStatusRowOrderFromWidget(IReadOnlyList<int> order)
     {
         if (Kind != WidgetKind.PlayerStatus)
         {
             return;
         }
 
+        if (_playerStatusRowOrderPreview is not null)
+        {
+            ApplyPlayerStatusRowOrderPreview(order);
+            return;
+        }
+
+        var before = GetPlayerStatusRowOrderSnapshot();
         _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(order);
         WidgetStateManager.Instance.SavePlayerStatusRowOrder(Kind, _playerStatusRowOrder);
+        RaisePlayerStatusRowOrderChangedIfDifferent(before);
+    }
+
+    /// <summary>設定の窓を開いた。今の保存された並びからプレビューを始める。</summary>
+    public void BeginPlayerStatusRowOrderPreview()
+    {
+        if (Kind == WidgetKind.PlayerStatus)
+        {
+            _playerStatusRowOrderPreview = [.. _playerStatusRowOrder];
+        }
+    }
+
+    /// <summary>設定の窓で並べ替えた(またはウィジェットで並べ替えた)保存前の並び。プレビューの間だけ効く。</summary>
+    public void ApplyPlayerStatusRowOrderPreview(IReadOnlyList<int> order)
+    {
+        if (_playerStatusRowOrderPreview is null)
+        {
+            return;
+        }
+
+        var before = GetPlayerStatusRowOrderSnapshot();
+        _playerStatusRowOrderPreview = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(order);
+        RaisePlayerStatusRowOrderChangedIfDifferent(before);
+    }
+
+    /// <summary>設定の窓を閉じた。プレビューを終え、保存されていない並びは保存された並びに戻す。</summary>
+    public void EndPlayerStatusRowOrderPreview()
+    {
+        if (_playerStatusRowOrderPreview is null)
+        {
+            return;
+        }
+
+        var before = GetPlayerStatusRowOrderSnapshot();
+        _playerStatusRowOrderPreview = null;
+        RaisePlayerStatusRowOrderChangedIfDifferent(before);
+    }
+
+    private void RaisePlayerStatusRowOrderChangedIfDifferent(IReadOnlyList<int> before)
+    {
+        var after = GetPlayerStatusRowOrderSnapshot();
+        if (!before.SequenceEqual(after))
+        {
+            PlayerStatusRowOrderChanged?.Invoke(after);
+        }
     }
 
     /// <summary>
@@ -315,6 +374,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
     public event EventHandler? EquipmentSettingsChanged;
 
     public event EventHandler? PlayerStatusSettingsChanged;
+
+    /// <summary>
+    /// ステータス詳細の行の今の並び(<see cref="GetPlayerStatusRowOrderSnapshot"/>)が変わった(引数は新しい並び)。
+    /// ウィジェットの窓と、開いている設定の窓の一覧が並べ直すのに使う。
+    /// </summary>
+    public event Action<IReadOnlyList<int>>? PlayerStatusRowOrderChanged;
 
     public WidgetListItemViewModel()
     {
@@ -478,7 +543,15 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         if (Kind == WidgetKind.PlayerStatus)
         {
+            // 設定の窓の「保存」もここを通る。プレビューの間ならプレビューも保存した並びにそろえる。
+            var rowOrderBefore = GetPlayerStatusRowOrderSnapshot();
             _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(config.PlayerStatusRowOrder);
+            if (_playerStatusRowOrderPreview is not null)
+            {
+                _playerStatusRowOrderPreview = [.. _playerStatusRowOrder];
+            }
+
+            RaisePlayerStatusRowOrderChangedIfDifferent(rowOrderBefore);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);

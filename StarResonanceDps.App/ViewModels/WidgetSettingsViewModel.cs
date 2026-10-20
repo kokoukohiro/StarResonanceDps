@@ -120,9 +120,10 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
         if (WidgetConfigDefaults.SupportsPlayerStatusSettings(kind))
         {
-            PlayerStatusSettings = new PlayerStatusWidgetSettingsViewModel(config.PlayerStatus);
+            PlayerStatusSettings = new PlayerStatusWidgetSettingsViewModel(config.PlayerStatus, config.PlayerStatusRowOrder);
             PlayerStatusSettings.PropertyChanged += PlayerStatusSettings_PropertyChanged;
             PlayerStatusSettings.PreviewChanged += PlayerStatusSettings_PreviewChanged;
+            PlayerStatusSettings.RowOrderPreviewChanged += PlayerStatusSettings_RowOrderPreviewChanged;
         }
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
@@ -149,6 +150,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<EquipmentWidgetSettingsConfig>? EquipmentPreviewChanged;
 
     public event Action<PlayerStatusWidgetSettingsConfig>? PlayerStatusPreviewChanged;
+
+    /// <summary>ステータス詳細の行の並びの保存前のプレビュー(「ステータス」の一覧の並べ替えと、破棄で保存された並びへ戻すとき)。</summary>
+    public event Action<IReadOnlyList<int>>? PlayerStatusRowOrderPreviewChanged;
 
     public void Dispose()
     {
@@ -221,6 +225,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         {
             PlayerStatusSettings.PropertyChanged -= PlayerStatusSettings_PropertyChanged;
             PlayerStatusSettings.PreviewChanged -= PlayerStatusSettings_PreviewChanged;
+            PlayerStatusSettings.RowOrderPreviewChanged -= PlayerStatusSettings_RowOrderPreviewChanged;
             PlayerStatusSettings.Dispose();
         }
     }
@@ -262,6 +267,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void PlayerStatusSettings_PreviewChanged(PlayerStatusWidgetSettingsConfig config)
     {
         PlayerStatusPreviewChanged?.Invoke(config);
+    }
+
+    private void PlayerStatusSettings_RowOrderPreviewChanged(IReadOnlyList<int> rowOrder)
+    {
+        PlayerStatusRowOrderPreviewChanged?.Invoke(rowOrder);
     }
 
     private void TakenDamageLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -485,6 +495,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         if (PlayerStatusSettings is not null)
         {
             config.PlayerStatus = PlayerStatusSettings.CreateConfig();
+            config.PlayerStatusRowOrder = PlayerStatusSettings.GetRowOrderSnapshot();
         }
 
         if (SkillDetailSettings is not null)
@@ -509,7 +520,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         ElementColorSettings?.MarkSaved(config.ElementColor);
         SkillDetailSettings?.MarkSaved(config.SkillDetail);
         EquipmentSettings?.MarkSaved(config.Equipment);
-        PlayerStatusSettings?.MarkSaved(config.PlayerStatus);
+        PlayerStatusSettings?.MarkSaved(config.PlayerStatus, config.PlayerStatusRowOrder);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }

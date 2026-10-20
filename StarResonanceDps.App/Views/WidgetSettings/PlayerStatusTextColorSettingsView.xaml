@@ -8,7 +8,7 @@
     <!--
         ステータス詳細の行ごとのテキストカラー。行の作りはプレイヤーリストのクラスカラー
         (MeterWidgetClassColorSettingsView)と同じで、左のアイコンを選んだ色で塗る。
-        項目と並びは「ステータス」の一覧と同じ。
+        先頭は値の増減の2行(ウィジェットの数値と三角の色)、続いて「ステータス」の一覧と同じ項目と並び。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
@@ -45,23 +45,60 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Rectangle Grid.Column="0"
-                                           Width="35"
-                                           Height="35"
-                                           Margin="-4,0,0,0"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
-                                           OpacityMask="{Binding IconMask}"
-                                           RenderOptions.BitmapScalingMode="HighQuality">
-                                    <Rectangle.Effect>
-                                        <DropShadowEffect
-                                                Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
-                                                Opacity="0.5"
-                                                ShadowDepth="0"
-                                                BlurRadius="5" />
-                                    </Rectangle.Effect>
-                                </Rectangle>
+                                <!-- 能力値の行はアイコンの形、値の増減の行は ▲ / ▼ の文字を、選んでいる色で出す。 -->
+                                <Grid Grid.Column="0"
+                                      Width="35"
+                                      Height="35"
+                                      Margin="-4,0,0,0"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center">
+                                    <Rectangle Fill="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}"
+                                               OpacityMask="{Binding IconMask}"
+                                               RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasMark}" Value="True">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                        <Rectangle.Effect>
+                                            <DropShadowEffect
+                                                    Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                    Opacity="0.5"
+                                                    ShadowDepth="0"
+                                                    BlurRadius="5" />
+                                        </Rectangle.Effect>
+                                    </Rectangle>
+
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="14.6"
+                                               Text="{Binding Mark}"
+                                               Foreground="{Binding Colors.SelectedColor, Converter={StaticResource ColorToBrushConverter}}">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasMark}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect
+                                                    Color="{Binding Color, Source={StaticResource Brush.TextPrimary}}"
+                                                    Opacity="0.5"
+                                                    ShadowDepth="0"
+                                                    BlurRadius="5" />
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Grid>
 
                                 <TextBlock Grid.Column="1"
                                            Margin="8,0,12,0"
