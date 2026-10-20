@@ -14,7 +14,7 @@ using StarResonanceDps.App.Views.Widgets;
 
 namespace StarResonanceDps.App.Services;
 
-public sealed class WidgetWindowManager
+public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
 {
     private const double PlayerWindowCascadeOffset = 20d;
 
@@ -85,6 +85,21 @@ public sealed class WidgetWindowManager
         if (IsPlayerWindowWidget(widget.Kind))
         {
             TrackPlayerWidget(widget);
+        }
+    }
+
+    public bool CanAdd(BuffEntryKey key)
+    {
+        return key.IsValid
+            && _trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffGroup, out var widget)
+            && !widget.IsBuffDebuffGroupEntryEnabled(key);
+    }
+
+    public void Add(BuffEntryKey key)
+    {
+        if (_trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffGroup, out var widget))
+        {
+            widget.SetBuffDebuffGroupEntryEnabledFromWidget(key, isEnabled: true);
         }
     }
 
@@ -183,14 +198,14 @@ public sealed class WidgetWindowManager
 
         TrackPlayerWidget(playerWidget);
 
-        if (playerWidget.Kind == WidgetKind.PlayerStatus)
+        if (WidgetConfigDefaults.IsSelfOnlyPlayerWindowKind(playerWidget.Kind))
         {
-            var openStatusWindow = _openPlayerWindows
+            var openSelfWindow = _openPlayerWindows
                 .FirstOrDefault(session => ReferenceEquals(session.Widget, playerWidget));
 
-            if (openStatusWindow is not null)
+            if (openSelfWindow is not null)
             {
-                RestoreAndActivate(openStatusWindow.Window);
+                RestoreAndActivate(openSelfWindow.Window);
                 return;
             }
 
@@ -225,16 +240,52 @@ public sealed class WidgetWindowManager
         string buffKey,
         int baseId)
     {
-        if (string.IsNullOrWhiteSpace(buffKey)
-            || !_trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffCard, out var widget))
+        if (string.IsNullOrWhiteSpace(buffKey))
+        {
+            return;
+        }
+
+        // 料理・薬剤は食べ直すたびに別のIDへ入れ替わる。まとまりとして追う。
+        OpenBuffCardForPlayer(characterId, kind, buffKey, CombatDataCatalog.GetBuffGroup(baseId), savedBuffName: null);
+    }
+
+    /// <summary>
+    /// バフ・デバフグループの行から、その行のカードを開く。バフが付いていない行からも開けるので、
+    /// カードが覚える名前(まとまりならまとまりの名前、バフなら内部IDの注記なしの名前)を種に入れる。
+    /// </summary>
+    public void OpenBuffCardForGroupEntry(long characterId, PlayerBuffListKind kind, BuffEntryKey key)
+    {
+        if (!key.IsValid)
+        {
+            return;
+        }
+
+        var buffName = key.IsGroup
+            ? BuffDebuffCardContent.GetGroupName(key.Group)
+            : CombatDataCatalog.GetBuffDisplayNameWithoutInternalId(key.BuffId, SourceLanding.None);
+        OpenBuffCardForPlayer(
+            characterId,
+            kind,
+            key.IsGroup ? null : MeterSnapshotProvider.CreateBuffCardKey(key.BuffId),
+            key.Group,
+            buffName);
+    }
+
+    /// <param name="buffKey">追うバフのカードの鍵。まとまり(<paramref name="group"/>)を追うカードは使わないので null でよい。</param>
+    /// <param name="savedBuffName">新しく開くカードに入れる名前の種(<see cref="BuffDebuffCardWidgetViewModel.SeedLastKnownBuffName"/>)。</param>
+    private void OpenBuffCardForPlayer(
+        long characterId,
+        PlayerBuffListKind kind,
+        string? buffKey,
+        BuffGroup group,
+        string? savedBuffName)
+    {
+        if (!_trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffCard, out var widget))
         {
             return;
         }
 
         TrackPlayerWidget(widget);
-
-        // 料理・薬剤は食べ直すたびに別のIDへ入れ替わる。まとまりとして追う。
-        var group = CombatDataCatalog.GetBuffGroup(baseId);
 
         var existingWindow = _openPlayerWindows
             .FirstOrDefault(session =>
@@ -249,7 +300,7 @@ public sealed class WidgetWindowManager
             return;
         }
 
-        CreatePlayerWindow(widget, characterId, kind, buffKey, buffGroup: group);
+        CreatePlayerWindow(widget, characterId, kind, buffKey, buffGroup: group, savedBuffName: savedBuffName);
     }
 
     /// <summary>モンスターのバフ/デバフ一覧の行から開く版。1ウィンドウ = 1体 × 1バフ。</summary>
@@ -550,7 +601,7 @@ public sealed class WidgetWindowManager
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
         window.Closed += WidgetWindow_Closed;
-        // 開き先を持たない種別(常に自分1枚のステータス詳細)は、種別ごとの保存だけを使う
+        // 開き先を持たない種別(常に自分1枚のステータス詳細・バフ・デバフグループ)は、種別ごとの保存だけを使う
         // (SaveOpenTargets はその種別では何もせず返る)。
         window.SaveWindowBoundsOverride = WidgetConfigDefaults.SupportsOpenTargets(playerWidget.Kind)
             ? () => SaveOpenTargets(playerWidget)
@@ -712,12 +763,14 @@ public sealed class WidgetWindowManager
                 requestedCharacterId,
                 initialPlayer,
                 PlayerBuffListKind.Buff,
+                Instance,
                 Instance.OpenBuffCardForPlayer),
             WidgetKind.DebuffList => new PlayerBuffListWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 PlayerBuffListKind.Debuff,
+                Instance,
                 Instance.OpenBuffCardForPlayer),
             WidgetKind.BuffDebuffCard => new BuffDebuffCardWidgetViewModel(
                 playerWidget,
@@ -728,7 +781,13 @@ public sealed class WidgetWindowManager
                 // 対象の指定が無い(ウィジェットカードから直接開いた)ときは料理を追う。
                 requestedBuffKey is null && buffGroup == BuffGroup.None
                     ? BuffGroup.Cuisine
-                    : buffGroup),
+                    : buffGroup,
+                Instance),
+            // 自分だけを出す1枚の窓(相手の指定は持たない)。
+            WidgetKind.BuffDebuffGroup => new BuffDebuffGroupWidgetViewModel(
+                playerWidget,
+                initialPlayer,
+                Instance.OpenBuffCardForGroupEntry),
             WidgetKind.DamageContribution => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -794,6 +853,10 @@ public sealed class WidgetWindowManager
             BuffDebuffCardWidgetViewModel buffCardViewModel => new BuffDebuffCardWidgetView
             {
                 DataContext = buffCardViewModel
+            },
+            BuffDebuffGroupWidgetViewModel buffDebuffGroupViewModel => new BuffDebuffGroupWidgetView
+            {
+                DataContext = buffDebuffGroupViewModel
             },
             PlayerMetricWidgetViewModel { IsContribution: true } metricViewModel => new PlayerMetricContributionWidgetView
             {
@@ -1164,6 +1227,7 @@ public sealed class WidgetWindowManager
     {
         return kind is WidgetKind.PlayerInfo
             or WidgetKind.PlayerStatus
+            or WidgetKind.BuffDebuffGroup
             or WidgetKind.PlayerEquipment
             or WidgetKind.PlayerTalent
             or WidgetKind.PlayerSeasonTalent

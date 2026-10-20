@@ -36,6 +36,9 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
     private readonly DispatcherTimer _refreshTimer;
 
+    /// <summary>右クリックの「グループに追加」の行き先。</summary>
+    private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
+
     /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
     private readonly BuffCardNotificationTracker _notificationTracker;
 
@@ -47,6 +50,13 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     /// 一度も分かっていないうち(料理バフの自動選択で対象が無い等)は空。
     /// </summary>
     private string _lastKnownBuffName = string.Empty;
+
+    /// <summary>
+    /// 最後に出していた実体の付与者(プレイヤーでなければ null)と、その対象。失効した後の付与者プレイヤー名に使う。
+    /// 対象が替わったら前の対象の付与者は使わない。
+    /// </summary>
+    private TakenDamageLogParty? _lastKnownCaster;
+    private long _lastKnownCasterCharacterId;
 
     private bool _isDisposed;
 
@@ -97,11 +107,13 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         PlayerRosterEntry? initialPlayer,
         PlayerBuffListKind kind,
         string? requestedBuffKey,
-        BuffGroup group)
+        BuffGroup group,
+        IBuffDebuffGroupEntryAdder? groupEntryAdder = null)
         : base(playerWidget, requestedCharacterId)
     {
         _kind = kind;
         _group = group;
+        _groupEntryAdder = groupEntryAdder;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
         _notificationTracker = new BuffCardNotificationTracker(playerWidget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
@@ -128,6 +140,24 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     public string? RequestedBuffKey => _requestedBuffKey;
 
     public BuffGroup Group => _group;
+
+    /// <summary>右クリックのメニューの色を引くウィジェット。</summary>
+    public WidgetListItemViewModel Widget => PlayerWidget;
+
+    /// <summary>右クリックのメニューの項目「グループに追加」。</summary>
+    public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
+
+    /// <summary>
+    /// このカードのバフをバフ・デバフグループに足せるか。自分のカードだけで、グループにまだオンで入っていないとき真。
+    /// 偽なら右クリックのメニューを開かない。バフが今付いていなくても、追っているバフ(まとまり)で決まる。
+    /// </summary>
+    public bool CanAddToGroup()
+    {
+        return IsSelfTarget
+            && _groupEntryAdder is not null
+            && ResolveGroupEntryKey() is { } key
+            && _groupEntryAdder.CanAdd(key);
+    }
 
     /// <summary>最後に分かったバフ名。保存して、次の起動でタイトルに使う。</summary>
     public string? LastKnownBuffName => _lastKnownBuffName;
@@ -207,6 +237,28 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         ApplyScale(ScalePercent - WidgetConfigDefaults.BuffCardScaleStep);
     }
 
+    [RelayCommand]
+    private void AddToGroup()
+    {
+        if (CanAddToGroup() && ResolveGroupEntryKey() is { } key)
+        {
+            _groupEntryAdder!.Add(key);
+        }
+    }
+
+    /// <summary>グループの行の鍵。まとまりを追うカードはまとまり、個別のバフのカードは追っているカードの鍵の番号。</summary>
+    private BuffEntryKey? ResolveGroupEntryKey()
+    {
+        if (_group != BuffGroup.None)
+        {
+            return BuffEntryKey.ForGroup(_group);
+        }
+
+        return MeterSnapshotProvider.TryGetBuffIdFromCardKey(_requestedBuffKey, out var buffId)
+            ? BuffEntryKey.ForBuffDebuffGroup(buffId)
+            : null;
+    }
+
     private bool CanZoomIn() => ScalePercent < WidgetConfigDefaults.MaxBuffCardScale;
 
     private bool CanZoomOut() => ScalePercent > WidgetConfigDefaults.MinBuffCardScale;
@@ -230,6 +282,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
+        OnPropertyChanged(nameof(AddToGroupMenuText));
         Refresh();
     }
 
@@ -252,7 +305,8 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         }
 
         var playerIdentity = MeterSnapshotProvider.GetPlayerIdentity(characterId);
-        var snapshots = MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind);
+        // カードは番号ごとに1枚で、出すのは残り時間の一番長い実体。一覧の「同種バフの表示」は効かない。
+        var snapshots = MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind, groupSameBuffs: true);
         var snapshot = _group != BuffGroup.None
             ? BuffDebuffCardContent.FindByGroup(snapshots, _group)
             : BuffDebuffCardContent.FindByKey(snapshots, _requestedBuffKey ?? string.Empty);
@@ -304,12 +358,16 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
                     _lastKnownBuffName,
                     targetName,
                     _player?.Level ?? 0,
-                    PlayerWidget.BuffInfoFormatString),
+                    PlayerWidget.BuffInfoFormatString,
+                    _lastKnownCasterCharacterId == characterId ? _lastKnownCaster : null),
                 string.Empty,
                 characterId,
                 hasBuff: false);
             return;
         }
+
+        _lastKnownCaster = snapshot.Caster;
+        _lastKnownCasterCharacterId = characterId;
 
         var content = BuffDebuffCardContent.Create(
             snapshot,

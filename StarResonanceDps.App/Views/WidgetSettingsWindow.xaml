@@ -67,6 +67,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding PlayerStatusSettings.RowSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="BuffDebuffGroupEntriesNavButton"
+                                Click="BuffDebuffGroupEntriesNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.RoleSkills}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.EntrySectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="OtherRoleSkillsNavButton"
                                 Click="OtherRoleSkillsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -162,7 +171,25 @@
                                 Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.GaugeColorSectionTitle}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.GaugeColors.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BuffDebuffGroupBuffColorsNavButton"
+                                Click="BuffDebuffGroupBuffColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.BuffGaugeColors.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BuffDebuffGroupDebuffColorsNavButton"
+                                Click="BuffDebuffGroupDebuffColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.DebuffGaugeColors.SectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="ClassColorsNavButton"
@@ -296,6 +323,15 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
+
+                                    <ContentControl Content="{Binding BuffDebuffGroupSettings}"
+                                                    Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:BuffDebuffGroupWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </StackPanel>
 
                                 <ContentControl x:Name="PlayerStatusRowsHost"
@@ -304,6 +340,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:PlayerStatusRowSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffDebuffGroupEntriesHost"
+                                                Content="{Binding BuffDebuffGroupSettings}"
+                                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffDebuffGroupEntrySettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
@@ -485,11 +531,31 @@
                                 </ContentControl>
 
                                 <ContentControl x:Name="BuffListColorsHost"
-                                                Content="{Binding BuffListSettings}"
+                                                Content="{Binding BuffListSettings.GaugeColors}"
                                                 Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:BuffListGaugeColorSettingsView />
+                                            <widgetSettingsViews:BuffGaugeColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffDebuffGroupBuffColorsHost"
+                                                Content="{Binding BuffDebuffGroupSettings.BuffGaugeColors}"
+                                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffGaugeColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffDebuffGroupDebuffColorsHost"
+                                                Content="{Binding BuffDebuffGroupSettings.DebuffGaugeColors}"
+                                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffGaugeColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

@@ -299,11 +299,14 @@
   <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
     <value>テキストカラー</value>
   </data>
-  <data name="Common_Delete" xml:space="preserve">
-    <value>削除</value>
-  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>ステータス</value>
+  </data>
+  <data name="Settings_Section_BuffDebuffGroupEntries_Title" xml:space="preserve">
+    <value>バフ・デバフ</value>
+  </data>
+  <data name="Settings_Section_BuffDebuffGroupEntries_Description" xml:space="preserve">
+    <value>※バフとデバフを右クリックして追加できます</value>
   </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>ロールスキル</value>
@@ -334,6 +337,15 @@
   </data>
   <data name="BuffList_Menu_HideDebuff" xml:space="preserve">
     <value>このデバフを非表示</value>
+  </data>
+  <data name="BuffList_Menu_AddToGroup" xml:space="preserve">
+    <value>グループに追加</value>
+  </data>
+  <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
+    <value>このバフをグループから削除</value>
+  </data>
+  <data name="BuffDebuffGroup_Menu_RemoveDebuff" xml:space="preserve">
+    <value>このデバフをグループから削除</value>
   </data>
   <data name="Settings_Switch_On" xml:space="preserve">
     <value>オン</value>
@@ -530,6 +542,9 @@
   <data name="Settings_Display_GaugeLength" xml:space="preserve">
     <value>ゲージの長さ</value>
   </data>
+  <data name="GaugeLength_Auto" xml:space="preserve">
+    <value>自動</value>
+  </data>
   <data name="GaugeLength_10" xml:space="preserve">
     <value>10秒</value>
   </data>
@@ -539,14 +554,26 @@
   <data name="GaugeLength_30" xml:space="preserve">
     <value>30秒</value>
   </data>
-  <data name="Settings_Display_ModuleEffect" xml:space="preserve">
-    <value>モジュール効果の表示</value>
+  <data name="Settings_Display_SameBuffs" xml:space="preserve">
+    <value>同種バフの表示</value>
   </data>
-  <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
-    <value>装備効果の表示</value>
+  <data name="SameBuffs_Ungrouped" xml:space="preserve">
+    <value>まとめない</value>
   </data>
-  <data name="Settings_Display_FactorEffect" xml:space="preserve">
-    <value>因子効果の表示</value>
+  <data name="SameBuffs_GroupPlayers" xml:space="preserve">
+    <value>プレイヤーのみまとめる</value>
+  </data>
+  <data name="SameBuffs_GroupEntities" xml:space="preserve">
+    <value>エンティティのみまとめる</value>
+  </data>
+  <data name="SameBuffs_GroupAll" xml:space="preserve">
+    <value>すべてまとめる</value>
+  </data>
+  <data name="Settings_Display_CasterName" xml:space="preserve">
+    <value>付与者プレイヤー名の表示</value>
+  </data>
+  <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
+    <value>他者付与のみ</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>エンティティ名</value>
@@ -776,9 +803,6 @@
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
-    <value>{0}({1})</value>
-  </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>デバフリスト</value>
   </data>
@@ -797,7 +821,7 @@
   <data name="Settings_PlayerStatus_TextColor_ValueDecrease" xml:space="preserve">
     <value>数値の減少</value>
   </data>
-  <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
+  <data name="Settings_RowReorderNote" xml:space="preserve">
     <value>※この一覧かウィジェット上で項目をドラッグして並び替えできます</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
@@ -1060,6 +1084,15 @@
   <data name="Settings_Display_SeasonTalent" xml:space="preserve">
     <value>潜在心相晶を表示</value>
   </data>
+  <data name="Settings_Display_CombatState" xml:space="preserve">
+    <value>戦闘状態</value>
+  </data>
+  <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
+    <value>自分のみ表示</value>
+  </data>
+  <data name="CombatState_Tip" xml:space="preserve">
+    <value>交戦中</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>バリア量加算表示</value>
   </data>
@@ -1129,11 +1162,17 @@
   <data name="Settings_BuffInfo_PreviewName" xml:space="preserve">
     <value>プレイヤー1</value>
   </data>
+  <data name="Settings_BuffInfo_PreviewCaster" xml:space="preserve">
+    <value>プレイヤー2</value>
+  </data>
   <data name="Settings_BuffInfo_Field_BuffName" xml:space="preserve">
     <value>バフ名</value>
   </data>
   <data name="Settings_BuffInfo_Field_Name" xml:space="preserve">
-    <value>名前</value>
+    <value>対象者名</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Caster" xml:space="preserve">
+    <value>付与者プレイヤー名</value>
   </data>
   <data name="Settings_BuffInfo_Field_Level" xml:space="preserve">
     <value>レベル</value>
@@ -1152,6 +1191,12 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>薬剤</value>
+  </data>
+  <data name="Widget_BuffDebuffGroup" xml:space="preserve">
+    <value>バフ・デバフグループ</value>
+  </data>
+  <data name="Widget_BuffDebuffGroup_NoEffect" xml:space="preserve">
+    <value>効果なし</value>
   </data>
   <data name="Map_ChannelFormat" xml:space="preserve">
     <value>ch{0}</value>

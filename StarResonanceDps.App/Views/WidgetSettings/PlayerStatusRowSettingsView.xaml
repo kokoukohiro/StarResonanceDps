@@ -16,7 +16,7 @@
                    FontSize="16"
                    FontWeight="SemiBold"
                    Margin="0,0,0,4" />
-        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerStatus_ReorderNote]}"
+        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_RowReorderNote]}"
                    Foreground="{DynamicResource Brush.TextSecondary}"
                    FontSize="13"
                    FontWeight="SemiBold"

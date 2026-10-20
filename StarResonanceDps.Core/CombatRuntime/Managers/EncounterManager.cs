@@ -3808,9 +3808,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             var carriesBuffInfo = payload != BuffEventPayload.None;
             if (buffEventType == EBuffEventType.BuffEventRemove)
             {
-                if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
+                // 前の回で付いた実体なら、控えを消す前にその記録を写して番号を引き継ぐ(根のバフの一覧から外すのに番号が要る)。
+                if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent)
+                    && !TryCopyLiveBuffEvent(buffUuid, out buffEvent))
                 {
-
                     buffEvent = new BuffEvent(buffUuid);
                 }
                 buffEvent.SetRemoveTime(extraPacketData.ArrivalTime);
@@ -3827,6 +3828,18 @@ namespace StarResonanceDps.Core.CombatRuntime
             else
             {
                 var isKnownBuff = BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent);
+
+                // 前の回で付いた実体への、中身(BuffInfo)を伴わない通知(変化・中身なし)は番号を運ばない。
+                // 番号 0 の記録を作ると控えの項目がそれに置き換わり、効いているバフが一覧から消えるので、控えの記録を写して引き継ぐ。
+                // 写した後は知っている実体として扱う(変化の通知だけが層・持続・付与時刻を書き換える)。
+                if (!isKnownBuff
+                    && payload != BuffEventPayload.BuffInfo
+                    && TryCopyLiveBuffEvent(buffUuid, out var liveBuffEvent))
+                {
+                    buffEvent = liveBuffEvent;
+                    isKnownBuff = true;
+                }
+
                 if (!isKnownBuff)
                 {
                     buffEvent = new BuffEvent(buffUuid, baseId, level, fireUuid, entityCasterName, layer, duration, sourceConfigId, fightSourceType ?? BuffEvent.UnknownFightSourceType);
@@ -3875,6 +3888,23 @@ namespace StarResonanceDps.Core.CombatRuntime
                     AddRootBuff(baseId);
                 }
             }
+        }
+
+        /// <summary>
+        /// 前の回(エンカウンター)で付いて、今の回の記録(<see cref="BuffEvents"/>)がまだ知らない実体の記録の写し。
+        /// 回をまたいで持つ控え(<see cref="Services.ActiveBuffStore"/>)の項目から作る。控えに無ければ偽。
+        /// 写しにするのは、控えが持つ記録は前の回のもので、書き換えると保持中の前の回の表示まで変わるため。
+        /// </summary>
+        private bool TryCopyLiveBuffEvent(int buffUuid, out BuffEvent buffEvent)
+        {
+            if (Services.ActiveBuffStore.Instance.TryGetBuffEvent(UUID, (ulong)buffUuid, out var liveBuffEvent))
+            {
+                buffEvent = liveBuffEvent.CopyForNextEncounter();
+                return true;
+            }
+
+            buffEvent = null!;
+            return false;
         }
 
         /// <summary>
@@ -3933,7 +3963,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
             {
-                buffEvent = new BuffEvent(buffUuid);
+                // 前の回で付いた実体なら、控えの記録を写して番号を引き継ぐ。番号 0 の記録を作ると、
+                // 後から来る変化・中身なしの通知が知っている実体としてそれを控えへ入れ、効いているバフが一覧から消える。
+                if (!TryCopyLiveBuffEvent(buffUuid, out buffEvent))
+                {
+                    buffEvent = new BuffEvent(buffUuid);
+                }
 
                 if (attributeName == "AttrShieldList" && attributeValue != null)
                 {
@@ -4632,6 +4667,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetOrigin(Services.BuffOrigin? origin)
         {
             Origin = origin;
+        }
+
+        /// <summary>
+        /// 回(エンカウンター)をまたいで続く実体の記録の写し(浅い写し)。前の回の記録を書き換えずに、次の回の記録として使う。
+        /// </summary>
+        public BuffEvent CopyForNextEncounter()
+        {
+            return (BuffEvent)MemberwiseClone();
         }
 
         [JsonConstructor]

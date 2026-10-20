@@ -17,7 +17,8 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// </para>
 ///
 /// <para>
-/// 行の左クリックはカードを開き、右クリックはメニュー(カード・非表示)を開く。メニューの開き方はエンティティリストと同じ。
+/// 行の左クリックはカードを開き、右クリックはメニュー(カード・非表示・グループに追加)を開く。メニューの開き方はエンティティリストと同じ。
+/// 「グループに追加」は自分の一覧で足せる行だけに出す。
 /// </para>
 /// </summary>
 public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScrollContent
@@ -26,6 +27,9 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
     private const string BuffContextMenuFirstItemStyleKey = "Menu.WidgetWindowBuffListContextMenuItem.First";
     private const string BuffContextMenuMiddleItemStyleKey = "Menu.WidgetWindowBuffListContextMenuItem.Middle";
     private const string BuffContextMenuLastItemStyleKey = "Menu.WidgetWindowBuffListContextMenuItem.Last";
+
+    /// <summary>メニューの「グループに追加」の項目の名前(画面の作りの <c>Name</c>)。</summary>
+    private const string AddToGroupMenuItemName = "AddToGroupMenuItem";
 
     private ContextMenu? _openBuffMenu;
     private PlayerBuffEntry? _openBuffEntry;
@@ -81,11 +85,20 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
 
     private void OpenBuffMenu(Button button)
     {
-        if (DataContext is not IBuffListWindowViewModel
+        if (DataContext is not IBuffListWindowViewModel viewModel
             || button.ContextMenu is not ContextMenu menu
             || button.DataContext is not PlayerBuffEntry entry)
         {
             return;
+        }
+
+        // 「グループに追加」は足せる行(自分の一覧で、グループにまだオンで入っていない)だけに出す。
+        foreach (var menuItem in menu.Items.OfType<MenuItem>())
+        {
+            if (menuItem.Name == AddToGroupMenuItemName)
+            {
+                menuItem.Visibility = viewModel.CanAddToGroup(entry) ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         ApplyBuffMenuStyles(menu);
@@ -183,7 +196,11 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
             menu.Style = contextMenuStyle;
         }
 
-        var menuItems = menu.Items.OfType<MenuItem>().ToArray();
+        // 角丸の型は、出している項目の並びで決める(隠した項目は数えない)。
+        var menuItems = menu.Items
+            .OfType<MenuItem>()
+            .Where(menuItem => menuItem.Visibility == Visibility.Visible)
+            .ToArray();
         for (var index = 0; index < menuItems.Length; index++)
         {
             var styleKey = index switch

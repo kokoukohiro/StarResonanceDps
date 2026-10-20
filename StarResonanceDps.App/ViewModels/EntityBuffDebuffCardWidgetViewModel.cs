@@ -37,6 +37,13 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     /// <summary>最後に分かったバフ名。失効してもタイトルは維持する。</summary>
     private string _lastKnownBuffName = string.Empty;
 
+    /// <summary>
+    /// 最後に出していた実体の付与者(プレイヤーでなければ null)と、その対象の実体。失効した後の付与者プレイヤー名に使う。
+    /// 対象が替わったら前の対象の付与者は使わない。
+    /// </summary>
+    private TakenDamageLogParty? _lastKnownCaster;
+    private long _lastKnownCasterEntityUuid;
+
     private bool _isDisposed;
 
     [ObservableProperty]
@@ -269,7 +276,8 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             return;
         }
 
-        var snapshots = MeterSnapshotProvider.GetEntityBuffs(_target.EntityUuid, _kind);
+        // カードは番号ごとに1枚で、出すのは残り時間の一番長い実体。一覧の「同種バフの表示」は効かない。
+        var snapshots = MeterSnapshotProvider.GetEntityBuffs(_target.EntityUuid, _kind, groupSameBuffs: true);
         var snapshot = _group != BuffGroup.None
             ? BuffDebuffCardContent.FindByGroup(snapshots, _group)
             : BuffDebuffCardContent.FindByKey(snapshots, _requestedBuffKey ?? string.Empty);
@@ -301,10 +309,14 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
                     _lastKnownBuffName,
                     _target.Name,
                     _target.Level,
-                    _widget.BuffInfoFormatString),
+                    _widget.BuffInfoFormatString,
+                    _lastKnownCasterEntityUuid == _target.EntityUuid ? _lastKnownCaster : null),
                 hasBuff: false);
             return;
         }
+
+        _lastKnownCaster = snapshot.Caster;
+        _lastKnownCasterEntityUuid = _target.EntityUuid;
 
         ApplyContent(
             BuffDebuffCardContent.Create(

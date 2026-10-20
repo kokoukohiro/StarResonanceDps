@@ -281,6 +281,46 @@
                                       VerticalAlignment="Center"
                                       ClipToBounds="False">
                                     <Grid.Resources>
+                                        <!--
+                                            名前の行(ブレイクゲージの有無で2か所から使う)。
+                                            戦闘状態の印(設定「戦闘状態」)は名前の左。出さない行は幅も空けない。
+                                            色・型抜き・影は Icon.CombatStateMask、大きさと余白はプレイヤーリストと同じ値。
+                                            ツールチップはプレイヤーリストと同じ作り(Tag にウィジェットを入れて色を窓のパレットから引く)。
+                                        -->
+                                        <DataTemplate x:Key="EntityNameRowTemplate">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Rectangle Width="24"
+                                                           Height="24"
+                                                           Margin="-4,2,-3,0"
+                                                           VerticalAlignment="Center"
+                                                           Style="{StaticResource Icon.CombatStateMask}"
+                                                           Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                                                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Rectangle.ToolTip>
+                                                        <ToolTip Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                                            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                                       FontSize="12"
+                                                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CombatState_Tip]}" />
+                                                        </ToolTip>
+                                                    </Rectangle.ToolTip>
+                                                </Rectangle>
+
+                                                <TextBlock Grid.Column="1"
+                                                           HorizontalAlignment="Left"
+                                                           VerticalAlignment="Center"
+                                                           Style="{StaticResource Text.WidgetWindow}"
+                                                           FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding DisplayName}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                            </Grid>
+                                        </DataTemplate>
+
                                         <DataTemplate x:Key="EntityHealthRowTemplate">
                                             <Grid Height="10"
                                                   ClipToBounds="False">
@@ -440,14 +480,9 @@
                                             <RowDefinition Height="11" />
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   Style="{StaticResource Text.WidgetWindow}"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding DisplayName}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                        <ContentPresenter Grid.Row="0"
+                                                          Content="{Binding}"
+                                                          ContentTemplate="{StaticResource EntityNameRowTemplate}" />
 
                                         <ContentPresenter Grid.Row="1"
                                                           Content="{Binding}"
@@ -477,14 +512,9 @@
                                             <RowDefinition Height="10" />
                                         </Grid.RowDefinitions>
 
-                                        <TextBlock Grid.Row="0"
-                                                   HorizontalAlignment="Left"
-                                                   VerticalAlignment="Center"
-                                                   Style="{StaticResource Text.WidgetWindow}"
-                                                   FontSize="12"
-                                                   FontWeight="SemiBold"
-                                                   Text="{Binding DisplayName}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                        <ContentPresenter Grid.Row="0"
+                                                          Content="{Binding}"
+                                                          ContentTemplate="{StaticResource EntityNameRowTemplate}" />
 
                                         <ContentPresenter Grid.Row="1"
                                                           Content="{Binding}"

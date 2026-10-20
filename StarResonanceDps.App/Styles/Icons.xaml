@@ -40,6 +40,25 @@
     <BitmapImage x:Key="Icon.DamageProperty.Light" UriSource="/Assets/Images/main_progress_icon_light.png" />
     <BitmapImage x:Key="Icon.DamageProperty.Dark" UriSource="/Assets/Images/main_progress_icon_dark.png" />
 
+    <!-- 戦闘状態の印(プレイヤーリスト・エンティティリストの名前の左)。ファイルはステータス詳細の項目の絵と同じ。 -->
+    <BitmapImage x:Key="Icon.CombatState" UriSource="/Assets/Images/common_icon03.png" />
+
+    <!--
+        戦闘状態の印の見た目。Brush.CombatState で塗った面を絵で型抜きし、影は文字と同じ。
+        大きさ・余白・出すか・ツールチップは使う画面が持つ(行の高さが画面ごとに違う)。
+    -->
+    <Style x:Key="Icon.CombatStateMask" TargetType="{x:Type Rectangle}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Fill" Value="{StaticResource Brush.CombatState}" />
+        <Setter Property="OpacityMask">
+            <Setter.Value>
+                <ImageBrush ImageSource="{StaticResource Icon.CombatState}" Stretch="Uniform" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Effect" Value="{StaticResource Effect.WidgetWindowTextShadow}" />
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+    </Style>
+
     <!--
         ステータス詳細の項目のアイコン。鍵の末尾は同梱のファイル名。
         どの項目がどれを使うかは PlayerStatusEntry の表が持つ。

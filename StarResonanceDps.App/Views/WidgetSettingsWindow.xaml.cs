@@ -52,11 +52,14 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.EquipmentPreviewChanged += _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
         _viewModel.PlayerStatusRowOrderPreviewChanged += _widget.ApplyPlayerStatusRowOrderPreview;
+        _viewModel.BuffDebuffGroupPreviewChanged += _widget.ApplyBuffDebuffGroupSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
+        _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
+        _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
 
         // 開いている間は、行の並びを保存前のプレビューとして持つ(ウィジェットでの並べ替えも含めて「保存」で確定、閉じたら戻す)。
-        _widget.BeginPlayerStatusRowOrderPreview();
+        _widget.BeginSettingsPreview();
         _widget.PlayerStatusRowOrderChanged += Widget_PlayerStatusRowOrderChanged;
         DataContext = _viewModel;
 
@@ -91,10 +94,13 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.EquipmentPreviewChanged -= _widget.ApplyEquipmentSettingsPreview;
         _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
         _viewModel.PlayerStatusRowOrderPreviewChanged -= _widget.ApplyPlayerStatusRowOrderPreview;
+        _viewModel.BuffDebuffGroupPreviewChanged -= _widget.ApplyBuffDebuffGroupSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
+        _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
+        _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
         _widget.PlayerStatusRowOrderChanged -= Widget_PlayerStatusRowOrderChanged;
-        _widget.EndPlayerStatusRowOrderPreview();
+        _widget.EndSettingsPreview();
         _viewModel.Dispose();
         base.OnClosed(e);
     }
@@ -103,6 +109,21 @@ public partial class WidgetSettingsWindow : Window
     private void Widget_BuffListHiddenBuffsChanged(WidgetKind kind, int baseId)
     {
         _viewModel.BuffListSettings?.AddHiddenBuffFromWidget(baseId);
+    }
+
+    /// <summary>
+    /// 開いている間に右クリックで、バフ・デバフグループの行がオン/オフになった(一覧・カードの「グループに追加」、グループの窓の「グループから削除」)。
+    /// 設定の行にも同じ変化を入れる。
+    /// </summary>
+    private void Widget_BuffDebuffGroupEntryChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.BuffDebuffGroupSettings?.SetEntryEnabledFromWidget(key, isEnabled);
+    }
+
+    /// <summary>開いている間にバフ・デバフグループの窓で行が並べ替えられた。「バフ・デバフ」の一覧も同じ順に並べ直す。</summary>
+    private void Widget_BuffDebuffGroupEntryOrderChangedFromWidget(IReadOnlyList<BuffEntryKey> order)
+    {
+        _viewModel.BuffDebuffGroupSettings?.ApplyEntryOrderFromWidget(order);
     }
 
     /// <summary>開いている間に推移グラフの窓の上のホイールで横軸の長さが変わった。設定の値にも入れる。</summary>
@@ -223,6 +244,21 @@ public partial class WidgetSettingsWindow : Window
     private void PlayerStatusRowsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(PlayerStatusRowsHost);
+    }
+
+    private void BuffDebuffGroupEntriesNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffDebuffGroupEntriesHost);
+    }
+
+    private void BuffDebuffGroupBuffColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffDebuffGroupBuffColorsHost);
+    }
+
+    private void BuffDebuffGroupDebuffColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffDebuffGroupDebuffColorsHost);
     }
 
     private void PlayerStatusTextColorsNavButton_Click(object sender, RoutedEventArgs e)

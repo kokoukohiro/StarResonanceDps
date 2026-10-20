@@ -137,18 +137,17 @@ public sealed record PlayerMetricSummarySnapshot(
 /// (<see cref="CombatDataCatalog.GetBuffDisplayId"/>)。
 /// </param>
 /// <param name="Key">
-/// 行の鍵。プレイヤーのバフ/デバフリストはバフの番号ごと(付与者に関係なく1行)。畳んだバフは畳み先の番号の行にまとまる。
-/// エンティティリストに載る実体のリストは、プレイヤーが付けたものは番号と付与したプレイヤーごと、それ以外は番号ごと。
+/// 行の鍵。同じ番号のバフをまとめる読み方(リストの設定「同種バフの表示」)なら、バフの番号ごと(付与者に関係なく1行)。
+/// まとめない読み方なら、プレイヤーが付けたものは番号と付与したプレイヤーごと、それ以外は番号ごと。畳んだバフは畳み先の番号の行にまとまる。
 /// 同じ鍵の実体が複数あれば、残り時間の一番長い実体を出す。プレイヤーリストの枠のバッジは <paramref name="CardKey"/> と同じ。
 /// </param>
 /// <param name="CardKey">
 /// カードが追う鍵(<c>base:バフ番号</c>)。実体に関係なく同じで、保存して次の起動でも使える。
-/// 同じ鍵の行が複数(エンティティの付与したプレイヤーごと)あるときは <paramref name="IsCardRepresentative"/> の行をカードに出す。
+/// 同じ鍵の行が複数(まとめない読み方で付与したプレイヤーごと)あるときは <paramref name="IsCardRepresentative"/> の行をカードに出す。
 /// </param>
 /// <param name="Caster">
-/// 行の名前に添える付与者。召喚物は大元の召喚者のプレイヤー。
-/// エンティティリストに載る実体のリストはプレイヤーが付けた行、プレイヤーのリストは本人以外のプレイヤーが付けた行(出している実体の付与者)。
-/// それ以外の行は null。
+/// 出している実体の付与者。召喚物は大元の召喚者のプレイヤー。
+/// 付与者がプレイヤーでなければ null。名前を出すかは表示側が決める(リストの設定「付与者プレイヤー名の表示」、カードの書式 <c>{Caster}</c>)。
 /// </param>
 /// <param name="IsCardRepresentative">同じ <paramref name="CardKey"/> の行のうち、カードに出す行か(残り時間の一番長いもの)。</param>
 public sealed record PlayerBuffSnapshot(
@@ -167,18 +166,16 @@ public sealed record PlayerBuffSnapshot(
     /// 表示側は空欄ではなく「?」を出す。
     /// </summary>
     bool IsRemainingUnknown = false,
-    /// <summary>
-    /// モジュール効果のバフか(<see cref="BuffDisplayRules.GetModuleEffectId"/> が 0 でない)。リストの設定「モジュール効果」で絞るのに使う。
-    /// </summary>
-    bool IsModuleEffect = false,
-    /// <summary>
-    /// 装備効果(セット効果・武器効果)のバフか(<see cref="BuffDisplayRules.IsEquipmentEffect"/>)。リストの設定「装備効果」で絞るのに使う。
-    /// </summary>
-    bool IsEquipmentEffect = false,
-    /// <summary>因子のバフか(<see cref="BuffDisplayRules.IsFactorEffect"/>)。リストの設定「因子効果」で絞るのに使う。</summary>
-    bool IsFactorEffect = false,
+    /// <summary>付与したプレイヤー(召喚物なら大元の召喚者)。付与者がプレイヤーでなければ null。名前を出すかは表示側が決める。</summary>
     TakenDamageLogParty? Caster = null,
-    bool IsCardRepresentative = true);
+    bool IsCardRepresentative = true,
+    /// <summary>付与者が対象者本人(本人の召喚物を含む)か。リストの「付与者プレイヤー名の表示」の「他者付与のみ」が使う。</summary>
+    bool IsCasterTarget = false,
+    /// <summary>
+    /// リストの設定「ゲージの長さ」が自動のときの長さ(秒)。出している実体の効果時間の総量で、延長すると残り時間と一緒に伸びる。
+    /// 持続の無いバフは null。リストの行だけが入れる。
+    /// </summary>
+    double? GaugeLengthSeconds = null);
 
 /// <param name="Grade">技の枠の TIPS に出す G○ の数字(<see cref="MeterSnapshotProvider.ResolveSkillGrade"/>)。出さないなら null。</param>
 public sealed record PlayerCooldownSkillSnapshot(
@@ -711,20 +708,59 @@ public static class MeterSnapshotProvider
     /// バフ/デバフリストとカードが読む。<b>履歴を開いても固めない</b> —
     /// バフの変化はDBから復元できないので、止めても意味のある絵にならない。
     /// </summary>
-    public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerBuffs(long characterId, PlayerBuffListKind kind)
+    /// <param name="groupSameBuffs">
+    /// 同じ番号のバフを1行にまとめるか(リストの設定「同種バフの表示」)。カードはどちらでも出す実体が同じなので、まとめて読む。
+    /// </param>
+    public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerBuffs(long characterId, PlayerBuffListKind kind, bool groupSameBuffs)
+    {
+        return TryGetPlayerBuffs(characterId, kind, groupSameBuffs, out var snapshots)
+            ? snapshots
+            : Array.Empty<PlayerBuffSnapshot>();
+    }
+
+    /// <summary>
+    /// <see cref="GetPlayerBuffs"/> と同じ行。プレイヤーの実体が見つからないときは偽(バフが1つも無いときは真で空)。
+    /// 付いていないバフも行に出すバフ・デバフグループが、相手の分からない間を「何も付いていない」と分けるのに使う。
+    /// </summary>
+    public static bool TryGetPlayerBuffs(
+        long characterId,
+        PlayerBuffListKind kind,
+        bool groupSameBuffs,
+        out IReadOnlyList<PlayerBuffSnapshot> snapshots)
     {
         var encounter = ResolvePlayerDetailEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return Array.Empty<PlayerBuffSnapshot>();
+            snapshots = Array.Empty<PlayerBuffSnapshot>();
+            return false;
         }
 
-        return CreateBuffSnapshots(encounter, entity, kind, BuffRowGrouping.ByBuff);
+        snapshots = CreateBuffSnapshots(encounter, entity, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
+        return true;
+    }
+
+    /// <summary>バフの番号のカードの鍵(<see cref="PlayerBuffSnapshot.CardKey"/>)。番号は畳み先の番号(行の <c>BaseId</c>)。</summary>
+    public static string CreateBuffCardKey(int buffId)
+        => $"{BuffCardKeyBasePrefix}{buffId}";
+
+    /// <summary>カードの鍵(<see cref="PlayerBuffSnapshot.CardKey"/>)からバフの番号を読む。番号の無い実体の鍵なら偽。</summary>
+    public static bool TryGetBuffIdFromCardKey(string? cardKey, out int buffId)
+    {
+        buffId = 0;
+        return cardKey is not null
+            && cardKey.StartsWith(BuffCardKeyBasePrefix, StringComparison.Ordinal)
+            && int.TryParse(
+                cardKey.AsSpan(BuffCardKeyBasePrefix.Length),
+                System.Globalization.NumberStyles.None,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out buffId)
+            && buffId > 0;
     }
 
     /// <summary>エンティティリストに載る実体のバフ/デバフリストとカードが読む。</summary>
-    public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind)
+    /// <param name="groupSameBuffs"><see cref="GetPlayerBuffs"/> と同じ。</param>
+    public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind, bool groupSameBuffs)
     {
         var encounter = EncounterManager.Current;
         if (encounter is null
@@ -733,21 +769,18 @@ public static class MeterSnapshotProvider
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(encounter, entity, kind, BuffRowGrouping.ByPlayerCaster);
+        return CreateBuffSnapshots(encounter, entity, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
     }
 
-    /// <summary>バフ/デバフリストの行のまとめ方。</summary>
+    /// <summary>バフ/デバフリストの行のまとめ方(リストの設定「同種バフの表示」で、対象がプレイヤーかエンティティかごとに選ぶ)。</summary>
     private enum BuffRowGrouping
     {
-        /// <summary>
-        /// バフの番号ごとに1行。付与者に関係なく上書きする(プレイヤーのリスト)。
-        /// 出している実体を付けたのが本人以外のプレイヤーなら、付与者の名前を添える。
-        /// </summary>
+        /// <summary>バフの番号ごとに1行。付与者に関係なく、残り時間の一番長い実体で上書きする(「まとめる」)。</summary>
         ByBuff,
 
         /// <summary>
-        /// プレイヤーが付けたものは番号と付与したプレイヤーごとに1行で、付与者の名前を添える。
-        /// それ以外(付与者なし・モンスター・召喚者の分からない召喚物)は名前を添えず番号ごとに1行(エンティティリストに載る実体のリスト)。
+        /// プレイヤーが付けたものは番号と付与したプレイヤーごとに1行(「まとめない」)。
+        /// それ以外(付与者なし・モンスター・召喚者の分からない召喚物)は名前で見分けられないので、番号ごとに1行。
         /// </summary>
         ByPlayerCaster,
     }
@@ -800,7 +833,7 @@ public static class MeterSnapshotProvider
             double? remainingSeconds;
             bool remainingUnknown;
             var timingResolved = TryResolveLiveBuffTiming(
-                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown);
+                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown, out var durationSeconds);
             if (!timingResolved)
             {
                 continue;
@@ -809,11 +842,6 @@ public static class MeterSnapshotProvider
             var cardKey = ResolveBuffCardKey(buffEvent);
             var playerCasterUuid = ResolveBuffPlayerCasterUuid(encounter, buffEvent.FireUuid);
             var key = ResolveBuffRowKey(cardKey, grouping == BuffRowGrouping.ByPlayerCaster ? playerCasterUuid : 0);
-
-            // プレイヤーのリストでは、本人(と本人の召喚物)が付けたものに名前を添えない。
-            var shownCasterUuid = grouping == BuffRowGrouping.ByBuff && playerCasterUuid == entity.UUID
-                ? 0
-                : playerCasterUuid;
             var isNewRow = !rowsByKey.TryGetValue(key, out var currentRow);
             if (!isNewRow && currentRow!.EffectiveRemoveTime >= effectiveRemoveTime)
             {
@@ -831,10 +859,9 @@ public static class MeterSnapshotProvider
                 buffEvent.Layer,
                 remainingSeconds,
                 remainingUnknown,
-                BuffDisplayRules.GetModuleEffectId(buffEvent) > 0,
-                BuffDisplayRules.IsEquipmentEffect(buffEvent),
-                BuffDisplayRules.IsFactorEffect(buffEvent),
-                shownCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, shownCasterUuid, partyCache) : null);
+                playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null,
+                IsCasterTarget: playerCasterUuid != 0 && playerCasterUuid == entity.UUID,
+                GaugeLengthSeconds: durationSeconds > 0d ? durationSeconds : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
             if (isNewRow)
             {
@@ -1314,7 +1341,7 @@ public static class MeterSnapshotProvider
             TimeSpan effectiveRemoveTime;
             double? seconds;
             var timingResolved = TryResolveLiveBuffTiming(
-                entity.UUID, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown);
+                entity.UUID, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out _);
             // 経過が分からないものはカウントに使わない。出すと切れた後も残る。
             if (!timingResolved || secondsUnknown || seconds is null)
             {
@@ -1415,7 +1442,7 @@ public static class MeterSnapshotProvider
             double? remainingSeconds;
             bool remainingUnknown;
             var timingResolved = TryResolveLiveBuffTiming(
-                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown);
+                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown, out _);
             if (!timingResolved)
             {
                 continue;
@@ -2193,15 +2220,7 @@ public static class MeterSnapshotProvider
 
 
     private static bool IsIncludedBuff(PlayerBuffListKind kind, BuffEvent buffEvent)
-    {
-        return kind switch
-        {
-            PlayerBuffListKind.Buff => buffEvent.BuffType is DataTypes.Enum.EBuffType.Gain
-                or DataTypes.Enum.EBuffType.GainRecovery,
-            PlayerBuffListKind.Debuff => buffEvent.BuffType == DataTypes.Enum.EBuffType.Debuff,
-            _ => false
-        };
-    }
+        => BuffDisplayRules.GetListKind(buffEvent.BuffType) == kind;
 
     private static string ResolveBuffName(BuffEvent buffEvent)
     {
@@ -2225,17 +2244,20 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// カードとプレイヤーリストの枠のバッジの鍵。バフの番号ごと(番号の無い実体はその実体)。
-    /// 畳んだバフは畳み先の番号(<see cref="CombatDataCatalog.GetBuffDisplayId"/>)。
+    /// 畳んだバフは畳み先の番号(<see cref="CombatDataCatalog.GetBuffDisplayId"/>)。番号は <see cref="TryGetBuffIdFromCardKey"/> で読み戻す。
     /// </summary>
     private static string ResolveBuffCardKey(BuffEvent buffEvent)
     {
         if (buffEvent.BaseId > 0)
         {
-            return $"base:{CombatDataCatalog.GetBuffDisplayId(buffEvent.BaseId)}";
+            return CreateBuffCardKey(CombatDataCatalog.GetBuffDisplayId(buffEvent.BaseId));
         }
 
         return $"uuid:{buffEvent.Uuid}";
     }
+
+    /// <summary>カードの鍵のうち、バフの番号の鍵の頭(<see cref="CreateBuffCardKey"/> / <see cref="TryGetBuffIdFromCardKey"/>)。</summary>
+    private const string BuffCardKeyBasePrefix = "base:";
 
     /// <summary>
     /// バフ/デバフリストの行の鍵。バフの番号ごと(<paramref name="cardKey"/>)、付与したプレイヤーで分ける行はその実体を足す
@@ -2262,22 +2284,26 @@ public static class MeterSnapshotProvider
     /// ライブ表示用の残り時間。基準は <see cref="Services.ActiveBuffStore"/> が持つ観測時刻。
     /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の時刻が入る経路があってローカル時計とずれるので使えない。
     /// </summary>
+    /// <param name="durationSeconds">効果時間の総量(秒)。残り時間と同じ値から出す(<see cref="Services.ActiveBuffStore.TryGetRemainingSeconds"/>)。</param>
     private static bool TryResolveLiveBuffTiming(
         long entityUuid,
         BuffEvent buffEvent,
         out TimeSpan orderingKey,
         out double? remainingSeconds,
-        out bool remainingUnknown)
+        out bool remainingUnknown,
+        out double durationSeconds)
     {
         if (!Services.ActiveBuffStore.Instance.TryGetRemainingSeconds(
                 entityUuid,
                 (ulong)buffEvent.Uuid,
                 out remainingSeconds,
-                out remainingUnknown))
+                out remainingUnknown,
+                out durationSeconds))
         {
             orderingKey = TimeSpan.Zero;
             remainingSeconds = null;
             remainingUnknown = false;
+            durationSeconds = 0d;
             return false;
         }
 

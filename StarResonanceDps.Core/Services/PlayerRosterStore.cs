@@ -105,17 +105,17 @@ public sealed class PlayerRosterStore
         PublishIfChanged(
             () =>
             {
-                var normalized = Clone(entry);
-                if (_entries.TryGetValue(normalized.CharacterId, out var existing))
+                var stored = entry;
+                if (_entries.TryGetValue(stored.CharacterId, out var existing))
                 {
-                    if (existing.IsSelf && !normalized.IsSelf)
+                    if (existing.IsSelf && !stored.IsSelf)
                     {
-                        normalized = normalized with { IsSelf = true };
+                        stored = stored with { IsSelf = true };
                     }
                 }
 
-                _entries[normalized.CharacterId] = normalized;
-                EnsureFirstSeenOrderNoLock(normalized.CharacterId);
+                _entries[stored.CharacterId] = stored;
+                EnsureFirstSeenOrderNoLock(stored.CharacterId);
             },
             forcePublish: false);
     }
@@ -126,7 +126,6 @@ public sealed class PlayerRosterStore
 
         var nextEntries = entries
             .Where(entry => entry.CharacterId != 0)
-            .Select(Clone)
             .GroupBy(entry => entry.CharacterId)
             .Select(group =>
             {
@@ -218,7 +217,6 @@ public sealed class PlayerRosterStore
     private IReadOnlyList<PlayerRosterEntry> CreateSnapshotNoLock()
     {
         return Array.AsReadOnly(_entries.Values
-            .Select(Clone)
             .OrderBy(GetGroupRank)
             // パーティ内だけは PT番号順。番号が無い人はその後ろへ初出順で続く。
             .ThenBy(entry => entry.IsPartyMember && entry.PartyNumber.HasValue
@@ -267,40 +265,6 @@ public sealed class PlayerRosterStore
     {
         _firstSeenOrderByCharacterId.Clear();
         _nextFirstSeenOrder = 0;
-    }
-
-    private static PlayerRosterEntry Clone(PlayerRosterEntry entry)
-    {
-        return new PlayerRosterEntry(
-            entry.CharacterId,
-            entry.Name ?? string.Empty,
-            entry.ProfessionId,
-            entry.CombatPower,
-            entry.SeasonStrength,
-            entry.CurrentHp,
-            entry.MaxHp,
-            entry.ClassSpec,
-            entry.IsSelf,
-            entry.CombatAttributes,
-            entry.SubProfessionId,
-            entry.Level,
-            entry.SeasonLevel,
-            entry.EquipmentData,
-            entry.IsNpc,
-            entry.CurrentShield,
-            entry.IsPartyMember,
-            entry.PartyNumber,
-            entry.IsLive,
-            entry.Attributes,
-            entry.SeasonTalentBuffId,
-            entry.IsSeasonTalentInactive,
-            entry.SeasonRankLevel,
-            entry.IsNearby,
-            entry.PartySceneId,
-            entry.PartyLineId,
-            entry.SeasonId,
-            entry.RecordedAvatar,
-            entry.RootBuffData);
     }
 }
 

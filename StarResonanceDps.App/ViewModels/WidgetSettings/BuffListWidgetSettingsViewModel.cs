@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -8,13 +7,23 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、モジュール効果・装備効果・因子効果を出すか、一覧に出さないバフ。
-/// 色の行の作りはクラスカラーと同じ。
+/// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、
+/// 同種バフの表示、付与者プレイヤー名の表示、行のバフ名の書式、一覧に出さないバフ。
+/// 色の節はバフ・デバフグループと共有の部品(<see cref="BuffGaugeColorSettingsViewModel"/>)。
+/// 書式の欄の作りはバフ・デバフカードと同じ(差し込む項目に改行は無い。行は1行のため)。
 /// </summary>
 public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, IDisposable
 {
-    private readonly Dictionary<string, BuffListGaugeColorItemViewModel> _gaugeColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ObservableCollection<HiddenBuffItemViewModel> _hiddenBuffItems = [];
+    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] FormatFieldDefinitions =
+    [
+        ("BuffName", "Settings_BuffInfo_Field_BuffName", "{BuffName}"),
+        ("Name", "Settings_BuffInfo_Field_Name", "{Name}"),
+        ("Caster", "Settings_BuffInfo_Field_Caster", "{Caster}"),
+        ("Level", "Settings_BuffInfo_Field_Level", "{Level}")
+    ];
+
+    private readonly ObservableCollection<BuffSettingRowViewModel> _hiddenBuffItems = [];
+    private readonly ObservableCollection<MeterPlayerInfoFormatField> _availableFormatFields = [];
     private readonly WidgetKind _kind;
     private BuffListWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
@@ -22,81 +31,56 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     [ObservableProperty]
     private int _gaugeLengthIndex;
 
-    /// <summary>設定「モジュール効果」のスイッチ。オンで出す。</summary>
+    /// <summary>設定「同種バフの表示」の選択(<see cref="BuffListWidgetSettingsConfig.SameBuffGroupingIndex"/>)。</summary>
     [ObservableProperty]
-    private bool _showModuleEffects = WidgetConfigDefaults.DefaultShowModuleEffects;
+    private int _sameBuffGroupingIndex = WidgetConfigDefaults.DefaultSameBuffGroupingIndex;
 
-    /// <summary>設定「装備効果」のスイッチ。オンで出す。</summary>
+    /// <summary>設定「付与者プレイヤー名の表示」の選択(<see cref="BuffListWidgetSettingsConfig.CasterNameDisplayModeIndex"/>)。</summary>
     [ObservableProperty]
-    private bool _showEquipmentEffects = WidgetConfigDefaults.DefaultShowEquipmentEffects;
+    private int _casterNameDisplayModeIndex = WidgetConfigDefaults.DefaultCasterNameDisplayModeIndex;
 
-    /// <summary>設定「因子効果」のスイッチ。オンで出す。</summary>
+    /// <summary>設定「バフ名」の書式。</summary>
     [ObservableProperty]
-    private bool _showFactorEffects = WidgetConfigDefaults.DefaultShowFactorEffects;
+    private string _buffInfoFormatString = WidgetConfigDefaults.DefaultBuffListBuffInfoFormatString;
 
-    /// <summary>ゲージの色の不透明度(0〜100)。UI がスライダーなので double で持つ(メーターのクラスカラーと同じ)。</summary>
     [ObservableProperty]
-    private double _gaugeColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
+    private MeterPlayerInfoFormatField? _selectedFormatField;
+
+    [ObservableProperty]
+    private string _formatPreview = string.Empty;
+
+    [ObservableProperty]
+    private string _customizationTitle = string.Empty;
 
     public BuffListWidgetSettingsViewModel(WidgetKind kind, BuffListWidgetSettingsConfig? config)
     {
         _kind = kind;
+        AvailableFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availableFormatFields);
 
-        var items = new ObservableCollection<BuffListGaugeColorItemViewModel>();
-        var keys = WidgetConfigDefaults.BuffListGaugeColorKeys;
-        for (var index = 0; index < keys.Length; index++)
-        {
-            var key = keys[index];
-            var colors = new ColorPaletteViewModel(
-                WidgetConfigDefaults.CreateDefaultGaugeColors(key),
-                WidgetConfigDefaults.MaxPaletteColorCount);
-            colors.PaletteChanged += GaugeColors_PaletteChanged;
-
-            // 節の最後の行は不透明度なので、色の行はどれも下の線を引く。
-            var item = new BuffListGaugeColorItemViewModel(key, colors, isLast: false);
-            _gaugeColorItemsByKey.Add(key, item);
-            items.Add(item);
-        }
-
-        GaugeColorItems = new ReadOnlyObservableCollection<BuffListGaugeColorItemViewModel>(items);
-        HiddenBuffItems = new ReadOnlyObservableCollection<HiddenBuffItemViewModel>(_hiddenBuffItems);
+        GaugeColors = new BuffGaugeColorSettingsViewModel(WidgetConfigDefaults.GetBuffListSide(kind));
+        GaugeColors.Changed += NotifyChanged;
+        HiddenBuffItems = new ReadOnlyObservableCollection<BuffSettingRowViewModel>(_hiddenBuffItems);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
+        RebuildFormatFields();
+        RefreshLocalizedText();
         _lastSaved = WidgetConfigDefaults.CloneNormalizedBuffList(kind, config);
         Load(_lastSaved);
     }
 
     public event Action<BuffListWidgetSettingsConfig>? PreviewChanged;
 
-    /// <summary>ゲージの色の行。左端と右端の2行。</summary>
-    public ReadOnlyObservableCollection<BuffListGaugeColorItemViewModel> GaugeColorItems { get; }
+    /// <summary>「バフ名」の書式に差し込める項目。</summary>
+    public ReadOnlyObservableCollection<MeterPlayerInfoFormatField> AvailableFormatFields { get; }
 
-    /// <summary>節の見出し。バフ一覧なら「バフカラー」、デバフ一覧なら「デバフカラー」。</summary>
-    public string GaugeColorSectionTitle => LocalizationManager.Instance.GetString(
-        _kind == WidgetKind.DebuffList
-            ? "Settings_Section_DebuffListColors_Title"
-            : "Settings_Section_BuffListColors_Title");
+    /// <summary>ゲージの色の節。バフ一覧なら「バフカラー」、デバフ一覧なら「デバフカラー」。</summary>
+    public BuffGaugeColorSettingsViewModel GaugeColors { get; }
 
-    /// <summary>不透明度の行名。見出しと同じく種別で「バフカラー」「デバフカラー」に分かれる。</summary>
-    public string GaugeColorOpacityLabel => LocalizationManager.Instance.GetString(
-        _kind == WidgetKind.DebuffList
-            ? "Settings_DebuffListColors_Opacity"
-            : "Settings_BuffListColors_Opacity");
-
-    /// <summary>モジュール効果のスイッチの右に出す ON / OFF。</summary>
-    public string ShowModuleEffectsStateText => LocalizationManager.Instance.GetString(
-        ShowModuleEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
-
-    /// <summary>装備効果のスイッチの右に出す ON / OFF。</summary>
-    public string ShowEquipmentEffectsStateText => LocalizationManager.Instance.GetString(
-        ShowEquipmentEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
-
-    /// <summary>因子効果のスイッチの右に出す ON / OFF。</summary>
-    public string ShowFactorEffectsStateText => LocalizationManager.Instance.GetString(
-        ShowFactorEffects ? "Settings_Switch_On" : "Settings_Switch_Off");
-
-    /// <summary>非表示のバフの行。並びは非表示にした順。</summary>
-    public ReadOnlyObservableCollection<HiddenBuffItemViewModel> HiddenBuffItems { get; }
+    /// <summary>
+    /// 非表示のバフの行。並びは非表示にした順。スイッチがオンなら非表示のまま、オフにすると保存前のプレビューで一覧に出て、
+    /// 保存すると行が消える。
+    /// </summary>
+    public ReadOnlyObservableCollection<BuffSettingRowViewModel> HiddenBuffItems { get; }
 
     /// <summary>非表示のバフが1つでもあるか。無いときは枠ごと出さない。</summary>
     public bool HasHiddenBuffs => _hiddenBuffItems.Count > 0;
@@ -118,47 +102,24 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
-
-        foreach (var item in GaugeColorItems)
-        {
-            item.Colors.PaletteChanged -= GaugeColors_PaletteChanged;
-        }
+        GaugeColors.Changed -= NotifyChanged;
+        GaugeColors.Dispose();
     }
 
+    /// <summary>非表示リストは、スイッチがオンの行だけを残す。</summary>
     public BuffListWidgetSettingsConfig CreateConfig()
     {
         var config = new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
-            ShowModuleEffects = ShowModuleEffects,
-            ShowEquipmentEffects = ShowEquipmentEffects,
-            ShowFactorEffects = ShowFactorEffects,
-            GaugeColorOpacity = Math.Clamp(
-                (int)Math.Round(GaugeColorOpacity, MidpointRounding.AwayFromZero),
-                WidgetConfigDefaults.MinClassColorOpacity,
-                WidgetConfigDefaults.MaxClassColorOpacity),
-            GaugeColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
-            GaugeColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
-            HiddenBuffIds = [.. _hiddenBuffItems.Select(item => item.BaseId)]
+            SameBuffGroupingIndex = SameBuffGroupingIndex,
+            CasterNameDisplayModeIndex = CasterNameDisplayModeIndex,
+            BuffInfoFormatString = BuffInfoFormatString ?? string.Empty,
+            GaugeColors = GaugeColors.CreateConfig(),
+            HiddenBuffIds = [.. _hiddenBuffItems.Where(item => item.IsEnabled).Select(item => item.Key.BuffId)]
         };
 
-        foreach (var item in GaugeColorItems)
-        {
-            config.GaugeColorIndexes[item.Key] = item.Colors.SelectedIndex;
-            config.GaugeColorPalettes[item.Key] = [.. item.Colors.GetHexColors()];
-        }
-
         return WidgetConfigDefaults.CloneNormalizedBuffList(_kind, config);
-    }
-
-    public Color GetSelectedGaugeColor(string key)
-    {
-        return _gaugeColorItemsByKey[key].Colors.SelectedColor;
-    }
-
-    public void ApplyGaugeColor(string key, Color color)
-    {
-        _gaugeColorItemsByKey[key].Colors.AddOrSelect(color);
     }
 
     public void ResetToDefaults()
@@ -182,8 +143,8 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
     /// <summary>
     /// 開いている間に、一覧の窓の右クリックでバフが非表示になった。その分は既に保存されているので、
-    /// 行と保存済みの値の両方に足す(「保存」で消えず、未保存の印も付かない)。プレビューは鳴らさない
-    /// (ウィジェット側は既に非表示にしている)。
+    /// 行と保存済みの値の両方に足す(「保存」で消えず、未保存の印も付かない)。スイッチをオフにしていた行ならオンに戻す。
+    /// プレビューは鳴らさない(ウィジェット側は既に非表示にしている)。
     /// </summary>
     public void AddHiddenBuffFromWidget(int baseId)
     {
@@ -197,9 +158,14 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             _lastSaved.HiddenBuffIds.Add(baseId);
         }
 
-        if (_hiddenBuffItems.All(item => item.BaseId != baseId))
+        var existing = _hiddenBuffItems.FirstOrDefault(item => item.Key.BuffId == baseId);
+        if (existing is not null)
         {
-            _hiddenBuffItems.Add(new HiddenBuffItemViewModel(baseId, RemoveHiddenBuff));
+            existing.LoadEnabled(true);
+        }
+        else
+        {
+            _hiddenBuffItems.Add(CreateHiddenBuffItem(baseId));
             OnHiddenBuffItemsChanged();
         }
 
@@ -213,21 +179,16 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         _isLoading = true;
         try
         {
-            foreach (var item in GaugeColorItems)
-            {
-                item.Colors.Load(normalized.GaugeColorPalettes[item.Key], normalized.GaugeColorIndexes[item.Key]);
-            }
-
+            GaugeColors.Load(normalized.GaugeColors);
             GaugeLengthIndex = normalized.GaugeLengthIndex;
-            ShowModuleEffects = normalized.ShowModuleEffects;
-            ShowEquipmentEffects = normalized.ShowEquipmentEffects;
-            ShowFactorEffects = normalized.ShowFactorEffects;
-            GaugeColorOpacity = normalized.GaugeColorOpacity;
+            SameBuffGroupingIndex = normalized.SameBuffGroupingIndex;
+            CasterNameDisplayModeIndex = normalized.CasterNameDisplayModeIndex;
+            BuffInfoFormatString = normalized.BuffInfoFormatString ?? string.Empty;
 
             _hiddenBuffItems.Clear();
             foreach (var baseId in normalized.HiddenBuffIds)
             {
-                _hiddenBuffItems.Add(new HiddenBuffItemViewModel(baseId, RemoveHiddenBuff));
+                _hiddenBuffItems.Add(CreateHiddenBuffItem(baseId));
             }
 
             OnHiddenBuffItemsChanged();
@@ -236,17 +197,47 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         {
             _isLoading = false;
         }
+
+        RefreshFormatPreview();
     }
 
-    private void RemoveHiddenBuff(HiddenBuffItemViewModel item)
+    private void RebuildFormatFields()
     {
-        if (!_hiddenBuffItems.Remove(item))
+        var selectedKey = SelectedFormatField?.Key;
+
+        _availableFormatFields.Clear();
+        foreach (var definition in FormatFieldDefinitions)
         {
-            return;
+            _availableFormatFields.Add(new MeterPlayerInfoFormatField(
+                definition.Key,
+                LocalizationManager.Instance.GetString(definition.LabelResourceKey),
+                definition.Placeholder));
         }
 
-        OnHiddenBuffItemsChanged();
-        NotifyChanged();
+        SelectedFormatField = _availableFormatFields
+            .FirstOrDefault(field => string.Equals(field.Key, selectedKey, StringComparison.Ordinal))
+            ?? _availableFormatFields.FirstOrDefault();
+    }
+
+    /// <summary>項目名「バフ名」はバフ・デバフカードと同じ文言。</summary>
+    private void RefreshLocalizedText()
+    {
+        CustomizationTitle = LocalizationManager.Instance.GetString("Settings_BuffInfo_Customization");
+    }
+
+    /// <summary>見本の付与者プレイヤー名は、「付与者プレイヤー名の表示」が非表示なら入れない(見本の付与者は対象者と別人)。</summary>
+    private void RefreshFormatPreview()
+    {
+        FormatPreview = BuffInfoFormatFormatter
+            .FormatPreview(
+                BuffInfoFormatString,
+                showsCaster: CasterNameDisplayModeIndex != WidgetConfigDefaults.CasterNameDisplayHideIndex)
+            .Replace(Environment.NewLine, " ", StringComparison.Ordinal);
+    }
+
+    private BuffSettingRowViewModel CreateHiddenBuffItem(int baseId)
+    {
+        return new BuffSettingRowViewModel(BuffEntryKey.ForBuff(baseId), isDefault: false, isEnabled: true, NotifyChanged);
     }
 
     /// <summary>行が増減したら、最終行の印と枠の有無を当て直す。</summary>
@@ -268,51 +259,29 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
     private static bool SettingsEqual(BuffListWidgetSettingsConfig left, BuffListWidgetSettingsConfig right)
     {
         if (left.GaugeLengthIndex != right.GaugeLengthIndex
-            || left.ShowModuleEffects != right.ShowModuleEffects
-            || left.ShowEquipmentEffects != right.ShowEquipmentEffects
-            || left.ShowFactorEffects != right.ShowFactorEffects
-            || left.GaugeColorOpacity != right.GaugeColorOpacity
+            || left.SameBuffGroupingIndex != right.SameBuffGroupingIndex
+            || left.CasterNameDisplayModeIndex != right.CasterNameDisplayModeIndex
+            || !string.Equals(left.BuffInfoFormatString, right.BuffInfoFormatString, StringComparison.Ordinal)
             || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
             return false;
         }
 
-        foreach (var key in WidgetConfigDefaults.BuffListGaugeColorKeys)
-        {
-            if (left.GaugeColorIndexes[key] != right.GaugeColorIndexes[key]
-                || !left.GaugeColorPalettes[key].SequenceEqual(right.GaugeColorPalettes[key], StringComparer.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void GaugeColors_PaletteChanged(object? sender, EventArgs e)
-    {
-        NotifyChanged();
+        return BuffGaugeColorSettingsViewModel.ConfigEquals(left.GaugeColors, right.GaugeColors);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
-        foreach (var item in GaugeColorItems)
-        {
-            item.RefreshDisplayName();
-        }
-
         foreach (var item in _hiddenBuffItems)
         {
             item.RefreshMetadata();
         }
 
-        OnPropertyChanged(nameof(GaugeColorSectionTitle));
-        OnPropertyChanged(nameof(GaugeColorOpacityLabel));
         OnPropertyChanged(nameof(HiddenBuffSectionTitle));
         OnPropertyChanged(nameof(HiddenBuffSectionDescription));
-        OnPropertyChanged(nameof(ShowModuleEffectsStateText));
-        OnPropertyChanged(nameof(ShowEquipmentEffectsStateText));
-        OnPropertyChanged(nameof(ShowFactorEffectsStateText));
+        RebuildFormatFields();
+        RefreshLocalizedText();
+        RefreshFormatPreview();
     }
 
     partial void OnGaugeLengthIndexChanged(int value)
@@ -320,26 +289,20 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         NotifyChanged();
     }
 
-    partial void OnShowModuleEffectsChanged(bool value)
+    partial void OnSameBuffGroupingIndexChanged(int value)
     {
-        OnPropertyChanged(nameof(ShowModuleEffectsStateText));
         NotifyChanged();
     }
 
-    partial void OnShowEquipmentEffectsChanged(bool value)
+    partial void OnCasterNameDisplayModeIndexChanged(int value)
     {
-        OnPropertyChanged(nameof(ShowEquipmentEffectsStateText));
+        RefreshFormatPreview();
         NotifyChanged();
     }
 
-    partial void OnShowFactorEffectsChanged(bool value)
+    partial void OnBuffInfoFormatStringChanged(string value)
     {
-        OnPropertyChanged(nameof(ShowFactorEffectsStateText));
-        NotifyChanged();
-    }
-
-    partial void OnGaugeColorOpacityChanged(double value)
-    {
+        RefreshFormatPreview();
         NotifyChanged();
     }
 
@@ -352,29 +315,5 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
         OnPropertyChanged(nameof(HasUnsavedChanges));
         RaisePreviewChanged();
-    }
-}
-
-/// <summary>ゲージの色の1行。作りはクラスカラーの行と同じ。</summary>
-public sealed class BuffListGaugeColorItemViewModel : ObservableObject
-{
-    public BuffListGaugeColorItemViewModel(string key, ColorPaletteViewModel colors, bool isLast)
-    {
-        Key = key;
-        Colors = colors;
-        IsLast = isLast;
-    }
-
-    public string Key { get; }
-
-    public ColorPaletteViewModel Colors { get; }
-
-    public bool IsLast { get; }
-
-    public string DisplayName => LocalizationManager.Instance.GetString($"Settings_BuffListGauge_{Key}");
-
-    public void RefreshDisplayName()
-    {
-        OnPropertyChanged(nameof(DisplayName));
     }
 }

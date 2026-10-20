@@ -8,6 +8,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Serilog;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
@@ -59,7 +60,6 @@ public partial class WidgetWindow : Window
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly IWidgetHorizontalScrollContent? _horizontalScrollContent;
     private readonly IWidgetMouseWheelContent? _mouseWheelContent;
-    private readonly IWidgetAutoFitHeightContent? _autoFitHeightContent;
     private readonly DispatcherTimer _saveBoundsTimer;
     private readonly bool _usesWidgetDisplayNameForHeader;
     private bool _isRestoringBounds = true;
@@ -73,6 +73,9 @@ public partial class WidgetWindow : Window
 
     /// <summary>中身から高さを合わせる合図が来て、まだ合わせていないか(<see cref="FitHeightToContent"/>)。</summary>
     private bool _isFitHeightPending;
+
+    /// <summary>高さを合わせる合図を出した、測る <see cref="ScrollViewer"/>(<see cref="AutoFitHeightBehavior"/>)。</summary>
+    private ScrollViewer? _autoFitHeightSource;
 
     /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
     private readonly WidgetWindowConfig _restoredBounds;
@@ -132,12 +135,8 @@ public partial class WidgetWindow : Window
             MouseWheel += WidgetWindow_MouseWheel;
         }
 
-        // 行の数が変わったら高さを中身に合わせる中身(FitHeightToContent)。
-        _autoFitHeightContent = widgetContent as IWidgetAutoFitHeightContent;
-        if (_autoFitHeightContent is not null)
-        {
-            _autoFitHeightContent.FitHeightRequested += AutoFitHeightContent_FitHeightRequested;
-        }
+        // 行の数が変わったら高さを中身に合わせる(中身の ScrollViewer に付けた AutoFitHeightBehavior から合図が上がる。FitHeightToContent)。
+        AddHandler(AutoFitHeightBehavior.FitHeightRequestedEvent, new RoutedEventHandler(AutoFitHeight_FitHeightRequested));
 
         // まだ測れていないときに返す値。窓を出す前に保存を要求されることがある
         // (対象ごとに開く窓は Show() の前に SaveOpenTargets が走る)ので、
@@ -434,10 +433,8 @@ public partial class WidgetWindow : Window
             MouseWheel -= WidgetWindow_MouseWheel;
         }
 
-        if (_autoFitHeightContent is not null)
-        {
-            _autoFitHeightContent.FitHeightRequested -= AutoFitHeightContent_FitHeightRequested;
-        }
+        RemoveHandler(AutoFitHeightBehavior.FitHeightRequestedEvent, new RoutedEventHandler(AutoFitHeight_FitHeightRequested));
+        _autoFitHeightSource = null;
 
         if (WidgetContentHost.Content is FrameworkElement { DataContext: IDisposable disposable })
         {
@@ -620,8 +617,14 @@ public partial class WidgetWindow : Window
         QueueFitHeightIfPending();
     }
 
-    private void AutoFitHeightContent_FitHeightRequested(object? sender, EventArgs e)
+    private void AutoFitHeight_FitHeightRequested(object sender, RoutedEventArgs e)
     {
+        if (e.OriginalSource is not ScrollViewer source)
+        {
+            return;
+        }
+
+        _autoFitHeightSource = source;
         _isFitHeightPending = true;
         QueueFitHeightIfPending();
     }
@@ -636,7 +639,7 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// 高さを中身の全部が入る高さにする(<see cref="IWidgetAutoFitHeightContent"/>)。上端はそのままで下端を動かす。
+    /// 高さを中身の全部が入る高さにする(<see cref="AutoFitHeightBehavior"/>)。上端はそのままで下端を動かす。
     ///
     /// <para>
     /// 伸ばすのは、窓が載っている画面の作業領域(タスクバーを除いた領域)の下端まで。越える分はスクロールバーで見る
@@ -647,7 +650,7 @@ public partial class WidgetWindow : Window
     private void FitHeightToContent()
     {
         if (!_isFitHeightPending
-            || _autoFitHeightContent is null
+            || _autoFitHeightSource is null
             || !IsLoaded
             || WindowState != WindowState.Normal)
         {
@@ -656,7 +659,7 @@ public partial class WidgetWindow : Window
 
         _isFitHeightPending = false;
 
-        var shortfall = _autoFitHeightContent.GetHeightShortfall();
+        var shortfall = AutoFitHeightBehavior.GetHeightShortfall(_autoFitHeightSource);
         if (!double.IsFinite(shortfall) || Math.Abs(shortfall) < 0.5d)
         {
             return;

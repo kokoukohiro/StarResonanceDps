@@ -8,6 +8,7 @@ namespace StarResonanceDps.Core.Models;
 /// ゲーム内でプレイヤーに見える HP バーを持つ実体か。エンティティリストは、これが true なら名前が無くても載せる。
 /// 表で判定できない実体(<c>AttrId</c> が未着・表に無い番号)は true。
 /// </param>
+/// <param name="IsInCombat">いま戦闘状態か(実体の属性 <c>AttrCombatState</c>、104)。出現時の一覧と周りの差分で届く。</param>
 public sealed record NearbyEntityEntry(
     long EntityUuid,
     long EntityId,
@@ -23,7 +24,8 @@ public sealed record NearbyEntityEntry(
     bool IsBreakLocked,
     EntityCampRelation CampRelation,
     long CurrentShield,
-    bool HasHpBar);
+    bool HasHpBar,
+    bool IsInCombat);
 
 public enum EntityCampRelation
 {

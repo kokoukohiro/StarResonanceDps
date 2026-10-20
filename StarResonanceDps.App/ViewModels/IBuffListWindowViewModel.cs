@@ -23,4 +23,16 @@ public interface IBuffListWindowViewModel
 
     /// <summary>行のバフをウィジェットの非表示の一覧に足す。</summary>
     IRelayCommand<PlayerBuffEntry?> HideBuffCommand { get; }
+
+    /// <summary>メニューの3つ目の項目「グループに追加」。</summary>
+    string AddToGroupMenuText { get; }
+
+    /// <summary>
+    /// 行のバフをバフ・デバフグループに足せるか。自分が対象の一覧だけで、グループにまだオンで入っていないとき真。
+    /// 偽ならメニューに項目を出さない。
+    /// </summary>
+    bool CanAddToGroup(PlayerBuffEntry? entry);
+
+    /// <summary>行のバフをバフ・デバフグループに足す(料理・薬剤はまとまりで)。</summary>
+    IRelayCommand<PlayerBuffEntry?> AddToGroupCommand { get; }
 }

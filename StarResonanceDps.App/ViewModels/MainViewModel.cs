@@ -82,6 +82,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.BuffList, "Widget_BuffList");
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
         AddWidget(WidgetKind.BuffDebuffCard, "Widget_BuffDebuffCard");
+        AddWidget(WidgetKind.BuffDebuffGroup, "Widget_BuffDebuffGroup");
         playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
@@ -176,6 +177,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
         widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
+        widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widgetItems.Add(widget);
         _widgetWindowManager.RegisterPlayerWindowWidget(widget);
         return widget;
@@ -194,6 +196,20 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         _widgetStateManager.SaveBuffListHiddenBuffs(kind, [.. hiddenBuffIds, baseId]);
+    }
+
+    /// <summary>
+    /// 右クリックでバフ・デバフグループの行をオン/オフにした。<b>保存済みの行に同じ決まりで当てて</b>
+    /// (<see cref="WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled"/>)その項目だけ書く。
+    /// ウィジェットが持つ行は設定ウィンドウのプレビューを含むので、そのまま書くと未保存の変更まで保存してしまう。
+    /// </summary>
+    private void Widget_BuffDebuffGroupEntryChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var entries = WidgetConfigDefaults
+            .CloneNormalizedBuffDebuffGroup(_widgetStateManager.GetWidgetSnapshot(kind).BuffDebuffGroup)
+            .Entries ?? [];
+        WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled(entries, key, isEnabled);
+        _widgetStateManager.SaveBuffDebuffGroupEntries(kind, entries);
     }
 
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)

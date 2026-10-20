@@ -27,9 +27,11 @@
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
+                        <!-- 並びは WidgetConfigDefaults.BuffGaugeLengthSeconds の添字と同じ。 -->
                         <ComboBox Grid.Column="1"
                                   SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_Auto]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
@@ -45,24 +47,20 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_ModuleEffect]}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SameBuffs]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding ShowModuleEffects, Mode=TwoWay}" />
-                            <TextBlock Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       MinWidth="28"
-                                       Text="{Binding ShowModuleEffectsStateText}"
-                                       Foreground="{DynamicResource Brush.TextPrimary}"
-                                       FontSize="14"
-                                       FontWeight="SemiBold" />
-                        </StackPanel>
+                        <!-- 並びは BuffListWidgetSettingsConfig.SameBuffGroupingIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding SameBuffGroupingIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_Ungrouped]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupPlayers]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupEntities]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupAll]}" />
+                        </ComboBox>
                     </Grid>
                 </Border>
 
@@ -74,53 +72,114 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_EquipmentEffect]}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_CasterName]}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding ShowEquipmentEffects, Mode=TwoWay}" />
-                            <TextBlock Margin="8,0,0,0"
-                                       VerticalAlignment="Center"
-                                       MinWidth="28"
-                                       Text="{Binding ShowEquipmentEffectsStateText}"
-                                       Foreground="{DynamicResource Brush.TextPrimary}"
-                                       FontSize="14"
-                                       FontWeight="SemiBold" />
-                        </StackPanel>
+                        <!-- 並びは BuffListWidgetSettingsConfig.CasterNameDisplayModeIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding CasterNameDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CasterNameDisplay_AppliedByOthers]}" />
+                        </ComboBox>
                     </Grid>
                 </Border>
 
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                <!-- 行のバフ名の書式。作りはバフ・デバフカードの表示設定と同じ。 -->
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Padding" Value="20,11,20,11" />
+                            <Setter Property="BorderThickness" Value="0" />
+                        </Style>
+                    </Border.Style>
+
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="134" />
+                            <ColumnDefinition Width="12" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_FactorEffect]}"
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding CustomizationTitle}"
                                    Foreground="{DynamicResource Brush.TextPrimary}"
                                    FontSize="14"
                                    FontWeight="SemiBold" />
 
-                        <StackPanel Grid.Column="1"
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center">
-                            <ToggleButton Style="{StaticResource Input.Switch}"
-                                          IsChecked="{Binding ShowFactorEffects, Mode=TwoWay}" />
-                            <TextBlock Margin="8,0,0,0"
+                        <TextBox x:Name="BuffInfoFormatTextBox"
+                                 Grid.Row="0"
+                                 Grid.Column="2"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 Text="{Binding BuffInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Loaded="BuffInfoFormatTextBox_Loaded"
+                                 TextChanged="BuffInfoFormatTextBox_TextChanged" />
+
+                        <Grid Grid.Row="1"
+                              Grid.ColumnSpan="4"
+                              Margin="0,4,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="1"
                                        VerticalAlignment="Center"
-                                       MinWidth="28"
-                                       Text="{Binding ShowFactorEffectsStateText}"
-                                       Foreground="{DynamicResource Brush.TextPrimary}"
-                                       FontSize="14"
-                                       FontWeight="SemiBold" />
-                        </StackPanel>
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Preview]}" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding FormatPreview}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="4"
+                              Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="1" x:Name="BuffInfoFormatFieldHost">
+                                <ComboBox Width="{Binding ActualWidth, ElementName=BuffInfoFormatFieldHost}"
+                                          MaxWidth="220"
+                                          HorizontalAlignment="Right"
+                                          ItemsSource="{Binding AvailableFormatFields}"
+                                          SelectedItem="{Binding SelectedFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource Input.SettingsComboBox}" />
+                            </Grid>
+
+                            <Button Grid.Column="3"
+                                    Click="AddFormatField_Click"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}" />
+                        </Grid>
                     </Grid>
                 </Border>
             </StackPanel>

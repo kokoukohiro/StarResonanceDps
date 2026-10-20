@@ -45,7 +45,7 @@ public sealed partial class EntityBuffListWidgetViewModel
         _kind = kind;
         _openCard = openCard;
         _settings = widget.GetBuffListSettingsSnapshot();
-        GaugeBrush = BuffListGaugeBrush.Create(_settings);
+        GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -84,6 +84,11 @@ public sealed partial class EntityBuffListWidgetViewModel
             ? "BuffList_Menu_HideDebuff"
             : "BuffList_Menu_HideBuff");
 
+    public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
+
+    /// <summary>バフ・デバフグループは自分のバフだけを出すので、エンティティの一覧からは足さない(項目を出さない)。</summary>
+    public bool CanAddToGroup(PlayerBuffEntry? entry) => false;
+
     public bool RepresentsEntity(long entityUuid)
     {
         return _target.Represents(entityUuid);
@@ -109,6 +114,12 @@ public sealed partial class EntityBuffListWidgetViewModel
         }
 
         _widget.HideBuffInList(entry.BaseId);
+    }
+
+    /// <summary>項目を出さないので呼ばれない(<see cref="CanAddToGroup"/>)。取り決めを満たすためだけにある。</summary>
+    [RelayCommand(CanExecute = nameof(CanAddToGroup))]
+    private void AddToGroup(PlayerBuffEntry? entry)
+    {
     }
 
     public bool TryApplyEntity(EntityListEntry entity)
@@ -151,7 +162,7 @@ public sealed partial class EntityBuffListWidgetViewModel
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
         _settings = _widget.GetBuffListSettingsSnapshot();
-        GaugeBrush = BuffListGaugeBrush.Create(_settings);
+        GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
         Refresh();
     }
 
@@ -170,6 +181,7 @@ public sealed partial class EntityBuffListWidgetViewModel
     {
         OnPropertyChanged(nameof(CardMenuText));
         OnPropertyChanged(nameof(HideMenuText));
+        OnPropertyChanged(nameof(AddToGroupMenuText));
         RefreshPresentation();
         Refresh();
     }
@@ -181,7 +193,11 @@ public sealed partial class EntityBuffListWidgetViewModel
             return;
         }
 
-        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, MeterSnapshotProvider.GetEntityBuffs(EntityUuid, _kind)));
+        var snapshots = MeterSnapshotProvider.GetEntityBuffs(
+            EntityUuid,
+            _kind,
+            WidgetConfigDefaults.GroupsSameBuffs(_settings, isEntityTarget: true));
+        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, snapshots));
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
@@ -205,15 +221,17 @@ public sealed partial class EntityBuffListWidgetViewModel
         for (var targetIndex = 0; targetIndex < snapshots.Count; targetIndex++)
         {
             var snapshot = snapshots[targetIndex];
+            // 対象者名とレベルはバフ・デバフカードと同じく窓の対象のもの。
+            var name = BuffListRowName.Format(_settings, snapshot, _target.Name, _target.Level);
             var existingIndex = FindEntryIndex(snapshot.Key);
             if (existingIndex < 0)
             {
-                _entries.Insert(targetIndex, new PlayerBuffEntry(snapshot));
+                _entries.Insert(targetIndex, new PlayerBuffEntry(snapshot, name));
                 continue;
             }
 
             var entry = _entries[existingIndex];
-            entry.Update(snapshot);
+            entry.Update(snapshot, name);
             if (existingIndex != targetIndex)
             {
                 _entries.Move(existingIndex, targetIndex);
@@ -221,7 +239,7 @@ public sealed partial class EntityBuffListWidgetViewModel
         }
 
         // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
-        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
+        var gaugeLengthSeconds = BuffGaugeBrush.GetLengthSeconds(_settings.GaugeLengthIndex);
         foreach (var entry in _entries)
         {
             entry.UpdateBar(gaugeLengthSeconds);

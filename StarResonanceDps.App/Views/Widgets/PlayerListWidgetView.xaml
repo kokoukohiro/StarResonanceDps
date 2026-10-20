@@ -615,6 +615,7 @@
                                     <Grid Grid.Row="0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
@@ -622,7 +623,29 @@
                                                         Style="{StaticResource Icon.PartyNumber}"
                                                         Visibility="{Binding IsPartyMember, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                                        <TextBlock Grid.Column="1"
+                                        <!--
+                                            戦闘状態の印(設定「戦闘状態」)。パーティ番号と名前のあいだ、無ければ名前の左。
+                                            出さない行は幅も空けない(戦闘中でない行は今までの見た目)。色・型抜き・影は Icon.CombatStateMask(エンティティリストと同じ)。
+                                            ツールチップは潜在心相晶の絵と同じ作り(Tag にウィジェットを入れて色を窓のパレットから引く)。
+                                        -->
+                                        <Rectangle Grid.Column="1"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="-4,2,-3,0"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource Icon.CombatStateMask}"
+                                                   Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:PlayerListWidgetView}}}"
+                                                   Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Rectangle.ToolTip>
+                                                <ToolTip Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                                    <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                               FontSize="12"
+                                                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CombatState_Tip]}" />
+                                                </ToolTip>
+                                            </Rectangle.ToolTip>
+                                        </Rectangle>
+
+                                        <TextBlock Grid.Column="2"
                                                    HorizontalAlignment="Left"
                                                    VerticalAlignment="Center"
                                                    FontSize="12"

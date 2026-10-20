@@ -79,6 +79,10 @@ public sealed partial class EntityListEntry : ObservableObject
     [ObservableProperty]
     private EntityCampRelation _campRelation = EntityCampRelation.NonHostile;
 
+    /// <summary>名前の左に戦闘状態の印を出すか。設定「戦闘状態」が表示で、いま戦闘状態のとき。</summary>
+    [ObservableProperty]
+    private bool _showsCombatState;
+
     [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
 
@@ -125,6 +129,8 @@ public sealed partial class EntityListEntry : ObservableObject
         IsInvulnerable = entity.IsInvulnerable;
         IsBreakLocked = entity.IsBreakLocked;
         CampRelation = entity.CampRelation;
+        ShowsCombatState = entity.IsInCombat
+            && settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplayShowIndex;
 
         var classColor = GetClassColor(settings, ClassificationKey);
         if (ClassBrush.Color != classColor)

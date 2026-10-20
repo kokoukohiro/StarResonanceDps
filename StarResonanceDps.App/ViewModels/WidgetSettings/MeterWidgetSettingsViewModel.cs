@@ -64,6 +64,10 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [ObservableProperty]
     private bool _showSeasonTalent = true;
 
+    /// <summary>「戦闘状態」の選択(<see cref="MeterWidgetSettingsConfig.CombatStateDisplayModeIndex"/>)。</summary>
+    [ObservableProperty]
+    private int _combatStateDisplayModeIndex = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
+
     [ObservableProperty]
     private int _partyDisplayModeIndex = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
@@ -208,6 +212,25 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public string ShowSeasonTalentStateText => LocalizationManager.Instance.GetString(
         ShowSeasonTalent ? "Settings_Switch_On" : "Settings_Switch_Off");
 
+    /// <summary>「戦闘状態」を出すか。プレイヤーリストとエンティティリスト。</summary>
+    public bool ShowsCombatStateSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
+
+    /// <summary>「戦闘状態」を 表示 / 非表示 / 自分のみ表示 の3択で出すか。プレイヤーリスト。</summary>
+    public bool ShowsCombatStateSelfOnlyOption => _kind == WidgetKind.PlayerList;
+
+    /// <summary>「戦闘状態」を 表示 / 非表示 の2択で出すか。エンティティリスト(自分の行が無い)。</summary>
+    public bool ShowsCombatStateShowHideOption => _kind == WidgetKind.EntityList;
+
+    /// <summary>
+    /// 2択の「戦闘状態」の選択(0=表示 / 1=非表示)。保存する値は <see cref="CombatStateDisplayModeIndex"/> のまま。
+    /// 読むときは非表示に丸める(プレイヤーリストで自分のみ表示を選んでいる間も、隠れている2択の選択に範囲外の添字を渡さない)。
+    /// </summary>
+    public int CombatStateShowHideIndex
+    {
+        get => Math.Min(CombatStateDisplayModeIndex, WidgetConfigDefaults.CombatStateDisplayHideIndex);
+        set => CombatStateDisplayModeIndex = value;
+    }
+
     public bool ShowsPartyDisplaySettings => _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
 
     /// <summary>
@@ -269,6 +292,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
+            CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -373,6 +397,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? string.Empty;
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             ShowSeasonTalent = normalized.ShowSeasonTalent;
+            CombatStateDisplayModeIndex = normalized.CombatStateDisplayModeIndex;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
             EntityDisplayModeIndex = normalized.EntityDisplayModeIndex;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
@@ -404,6 +429,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
             || left.ShowSeasonTalent != right.ShowSeasonTalent
+            || left.CombatStateDisplayModeIndex != right.CombatStateDisplayModeIndex
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
             || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
@@ -559,6 +585,12 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     partial void OnShowSeasonTalentChanged(bool value)
     {
         OnPropertyChanged(nameof(ShowSeasonTalentStateText));
+        NotifyChanged();
+    }
+
+    partial void OnCombatStateDisplayModeIndexChanged(int value)
+    {
+        OnPropertyChanged(nameof(CombatStateShowHideIndex));
         NotifyChanged();
     }
 

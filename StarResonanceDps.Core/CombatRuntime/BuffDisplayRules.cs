@@ -14,12 +14,6 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </para>
 ///
 /// <para>
-/// リストの設定「モジュール効果」「装備効果」「因子効果」(どれも出すか出さないかのスイッチ)はアプリの一覧が当てる。
-/// ここではモジュール効果のバフか(<see cref="GetModuleEffectId"/>)、装備効果(セット効果・武器効果)のバフか(<see cref="IsEquipmentEffect"/>)、
-/// 因子のバフか(<see cref="IsFactorEffect"/>)を行に渡すだけ。どれもバフの番号だけで決め、誰が付けたかでは変わらない。
-/// </para>
-///
-/// <para>
 /// バフ側かデバフ側かは表の種別(<c>BuffType</c>、手修正 <c>BuffOverrides.json</c> 込み)で決め、ここでは見ない。
 /// </para>
 /// </summary>
@@ -52,21 +46,14 @@ public static class BuffDisplayRules
            && !string.IsNullOrWhiteSpace(CombatDataCatalog.GetBuffOwnIconName(buffEvent.BaseId));
 
     /// <summary>
-    /// モジュール効果のバフなら、そのモジュール効果の番号(<c>ModEffectTable.EffectID</c>)。違えば 0。
-    /// 根のバフか根の子のバフかを、バフの番号だけで決める(<see cref="CombatDataCatalog.GetModEffectId"/>)。
+    /// 表の種別のバフが、バフリストとデバフリストのどちらに出るか。強化・回復の強化はバフ、弱体はデバフ。
+    /// どちらにも出ない種別(アイテム)と種別の無いものは null。
     /// </summary>
-    public static int GetModuleEffectId(BuffEvent buffEvent)
-        => CombatDataCatalog.GetModEffectId(buffEvent.BaseId);
-
-    /// <summary>
-    /// 装備効果(セット効果・武器効果)のバフか。根のバフか根の子のバフかを、バフの番号だけで決める(<see cref="CombatDataCatalog.IsEquipmentEffectBuff"/>)。
-    /// </summary>
-    public static bool IsEquipmentEffect(BuffEvent buffEvent)
-        => CombatDataCatalog.IsEquipmentEffectBuff(buffEvent.BaseId);
-
-    /// <summary>
-    /// 因子(シーズンタレントの因子)のバフか。バフの番号だけで決める(<see cref="CombatDataCatalog.IsFactorBuff"/>)。
-    /// </summary>
-    public static bool IsFactorEffect(BuffEvent buffEvent)
-        => CombatDataCatalog.IsFactorBuff(buffEvent.BaseId);
+    public static PlayerBuffListKind? GetListKind(DataTypes.Enum.EBuffType? buffType)
+        => buffType switch
+        {
+            DataTypes.Enum.EBuffType.Gain or DataTypes.Enum.EBuffType.GainRecovery => PlayerBuffListKind.Buff,
+            DataTypes.Enum.EBuffType.Debuff => PlayerBuffListKind.Debuff,
+            _ => null
+        };
 }

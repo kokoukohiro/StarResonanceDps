@@ -35,6 +35,10 @@ public readonly record struct BuffDebuffCardContent(
         false,
         false);
 
+    /// <summary>
+    /// 生きているバフの表示値。付与者プレイヤー名(<c>{Caster}</c>)は、出している実体の付与者がプレイヤーなら書式に入れればいつも出す
+    /// (カードに付与者の表示の設定は無い)。カードはバフの番号で追うので、付与者は出す実体(残り時間の一番長いもの)とともに入れ替わる。
+    /// </summary>
     public static BuffDebuffCardContent Create(
         PlayerBuffSnapshot snapshot,
         string targetName,
@@ -43,13 +47,12 @@ public readonly record struct BuffDebuffCardContent(
     {
         var entry = new PlayerBuffEntry(snapshot);
         var group = CombatDataCatalog.GetBuffGroup(snapshot.BaseId);
-        // 付与者の名前は添えない。カードはバフの番号で追い、出す行(付与者)は残り時間で入れ替わる。見出しと通知の名前とも同じ。
         var name = group != BuffGroup.None
             ? CombatDataCatalog.AppendBuffInternalId(GetGroupName(group), snapshot.BaseId)
             : snapshot.Name;
 
         return new BuffDebuffCardContent(
-            BuffInfoFormatFormatter.Format(name, targetName, level, formatString),
+            BuffInfoFormatFormatter.Format(name, targetName, GetCasterName(snapshot.Caster), level, formatString),
             entry.DurationWithUnitText,
             entry.LayerText,
             entry.IconPath,
@@ -72,8 +75,17 @@ public readonly record struct BuffDebuffCardContent(
             : snapshot.NameWithoutInternalId;
     }
 
-    /// <summary>まとまりの名前。タイトルの「バフ(料理)」と同じ文言。</summary>
-    private static string GetGroupName(BuffGroup group)
+    /// <summary>
+    /// 付与者プレイヤー名(<see cref="PlayerBuffSnapshot.Caster"/>)。付与者がプレイヤーでなければ空。
+    /// 名前の規則は被ダメログと同じ(<see cref="PlayerInfoFormatFormatter.GetPartyDisplayName"/>)。
+    /// </summary>
+    public static string GetCasterName(TakenDamageLogParty? caster)
+        => caster is not null
+            ? PlayerInfoFormatFormatter.GetPartyDisplayName(caster)
+            : string.Empty;
+
+    /// <summary>まとまりの名前。タイトルの「バフ(料理)」と同じ文言。バフ・デバフグループのまとまりの行も同じ名前。</summary>
+    public static string GetGroupName(BuffGroup group)
         => LocalizationManager.Instance.GetString($"Widget_BuffDebuffCard_Group_{group}");
 
     /// <summary>
@@ -86,13 +98,15 @@ public readonly record struct BuffDebuffCardContent(
     ///
     /// <para>
     /// バフ名が一度も分かっていなければ <see cref="Empty"/>。何も出さないのが正しい。
+    /// 付与者プレイヤー名は、同じ対象で最後に分かった付与者(呼び出し側が控える)。名前はバフ名と同じく、ここで規則を通して組み直す。
     /// </para>
     /// </summary>
     public static BuffDebuffCardContent CreateNameOnly(
         string lastKnownBuffName,
         string targetName,
         int level,
-        string? formatString)
+        string? formatString,
+        TakenDamageLogParty? lastKnownCaster)
     {
         if (string.IsNullOrWhiteSpace(lastKnownBuffName))
         {
@@ -100,7 +114,7 @@ public readonly record struct BuffDebuffCardContent(
         }
 
         return new BuffDebuffCardContent(
-            BuffInfoFormatFormatter.Format(lastKnownBuffName, targetName, level, formatString),
+            BuffInfoFormatFormatter.Format(lastKnownBuffName, targetName, GetCasterName(lastKnownCaster), level, formatString),
             string.Empty,
             string.Empty,
             null,

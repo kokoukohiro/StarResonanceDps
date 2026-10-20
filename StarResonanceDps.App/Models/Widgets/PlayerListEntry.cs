@@ -100,6 +100,13 @@ public sealed partial class PlayerListEntry : ObservableObject
     [ObservableProperty]
     private bool _showsSeasonTalent = true;
 
+    /// <summary>
+    /// 名前の左に戦闘状態の印を出すか。いま戦闘状態の人のうち、設定「戦闘状態」が表示なら全員、自分のみ表示なら自分だけ。
+    /// 出さない行は印の幅も空けない(戦闘中でない行は印の無い今までの見た目)。
+    /// </summary>
+    [ObservableProperty]
+    private bool _showsCombatState;
+
     [ObservableProperty]
     private string _displayName = string.Empty;
 
@@ -202,6 +209,9 @@ public sealed partial class PlayerListEntry : ObservableObject
         _currentShield = player.CurrentShield;
         _healthValueDisplayModeIndex = settings.HealthValueDisplayModeIndex;
         ShowsSeasonTalent = settings.ShowSeasonTalent;
+        ShowsCombatState = player.IsInCombat
+            && (settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplayShowIndex
+                || (settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplaySelfOnlyIndex && player.IsSelf));
         UpdateHealthText();
 
         var classColor = GetClassColor(settings, ProfessionKey);

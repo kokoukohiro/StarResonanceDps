@@ -6,14 +6,14 @@ using StarResonanceDps.App.ViewModels.WidgetSettings;
 
 namespace StarResonanceDps.App.Views.WidgetSettings;
 
-public partial class BuffListGaugeColorSettingsView : UserControl
+public partial class BuffGaugeColorSettingsView : UserControl
 {
-    public BuffListGaugeColorSettingsView()
+    public BuffGaugeColorSettingsView()
     {
         InitializeComponent();
     }
 
-    private BuffListWidgetSettingsViewModel ViewModel => (BuffListWidgetSettingsViewModel)DataContext;
+    private BuffGaugeColorSettingsViewModel ViewModel => (BuffGaugeColorSettingsViewModel)DataContext;
 
     private void ColorOptionRadioButton_Click(object sender, RoutedEventArgs e)
     {
@@ -31,7 +31,7 @@ public partial class BuffListGaugeColorSettingsView : UserControl
         }
 
         var owner = Window.GetWindow(this);
-        var window = new ColorPickerWindow(ViewModel.GetSelectedGaugeColor(gaugeKey));
+        var window = new ColorPickerWindow(ViewModel.GetSelectedColor(gaugeKey));
         if (owner is not null)
         {
             window.Owner = owner;
@@ -41,7 +41,7 @@ public partial class BuffListGaugeColorSettingsView : UserControl
         {
             if (window.IsConfirmed)
             {
-                ViewModel.ApplyGaugeColor(gaugeKey, window.SelectedColor);
+                ViewModel.ApplyColor(gaugeKey, window.SelectedColor);
             }
         });
     }

@@ -19,12 +19,36 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     /// </summary>
     private const string UnknownDurationListText = "??";
 
+    /// <summary>名前はバフ名のまま(カードの中身・プレイヤーリストのバッジ)。</summary>
     public PlayerBuffEntry(PlayerBuffSnapshot snapshot)
+        : this(snapshot, snapshot.Name)
+    {
+    }
+
+    /// <param name="name">行に出す名前(バフ・デバフ一覧は表示設定「バフ名」の書式を当てたもの)。</param>
+    public PlayerBuffEntry(PlayerBuffSnapshot snapshot, string name)
     {
         Key = snapshot.Key;
         CardKey = snapshot.CardKey;
         Uuid = snapshot.Uuid;
-        Update(snapshot);
+        Update(snapshot, name);
+    }
+
+    private PlayerBuffEntry()
+    {
+        Key = string.Empty;
+        CardKey = string.Empty;
+    }
+
+    /// <summary>
+    /// 付いていないバフの行(バフ・デバフグループ)。絵と名前だけを出し、ゲージは出さず、時間の欄は <paramref name="inactiveText"/>。
+    /// 付いたら <see cref="Update(PlayerBuffSnapshot, string)"/> で付いている行になる。
+    /// </summary>
+    public static PlayerBuffEntry CreateInactive(string name, string? iconName, string inactiveText)
+    {
+        var entry = new PlayerBuffEntry();
+        entry.UpdateInactive(name, iconName, inactiveText);
+        return entry;
     }
 
     /// <summary>行の鍵(バフの番号ごと、エンティティのリストでプレイヤーが付けたものは番号と付与したプレイヤーごと)。</summary>
@@ -90,30 +114,67 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     [ObservableProperty]
     private bool _isMenuOpen;
 
+    /// <summary>バフが付いているか。付いていない行(<see cref="CreateInactive"/>)はゲージを出さない。</summary>
+    [ObservableProperty]
+    private bool _isActive = true;
+
+    /// <summary>デバフの行か。バフ・デバフグループがゲージの色(バフカラー・デバフカラー)を選ぶのに使う。</summary>
+    [ObservableProperty]
+    private bool _isDebuff;
+
     /// <summary>残り時間をそのまま持つ。ゲージの長さの設定が変わったら比率を計算し直すのに要る。</summary>
     private double? _remainingSeconds;
 
     private bool _isRemainingUnknown;
 
+    /// <summary>ゲージの長さが自動のときの長さ(<see cref="PlayerBuffSnapshot.GaugeLengthSeconds"/>)。持続の無いバフは null。</summary>
+    private double? _autoGaugeLengthSeconds;
+
     public void Update(PlayerBuffSnapshot snapshot)
+        => Update(snapshot, snapshot.Name);
+
+    /// <param name="name">行に出す名前(<see cref="PlayerBuffEntry(PlayerBuffSnapshot, string)"/>)。</param>
+    public void Update(PlayerBuffSnapshot snapshot, string name)
     {
         Key = snapshot.Key;
         CardKey = snapshot.CardKey;
         Uuid = snapshot.Uuid;
         BaseId = snapshot.BaseId;
-        Name = FormatName(snapshot);
+        Name = name;
         // 1スタックは数字を出さない。重なっているときだけ意味がある。
         LayerText = snapshot.Layer > 1 ? snapshot.Layer.ToString() : string.Empty;
         DurationText = FormatDuration(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
         DurationWithUnitText = FormatDurationWithUnit(snapshot.RemainingSeconds, snapshot.IsRemainingUnknown);
-        IconPath = CombatIconResolver.ResolveBuffIcon(snapshot.IconName);
-        IconMask = CombatIconResolver.ResolveBuffIconMask(snapshot.IconName);
-        IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(snapshot.IconName);
-        IsFactorIcon = CombatIconResolver.IsFactorIcon(snapshot.IconName);
-        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(snapshot.IconName) && IconPath is null && IconMask is null;
+        ApplyIcon(snapshot.IconName);
+        IsActive = true;
 
         _remainingSeconds = snapshot.RemainingSeconds;
         _isRemainingUnknown = snapshot.IsRemainingUnknown;
+        _autoGaugeLengthSeconds = snapshot.GaugeLengthSeconds;
+    }
+
+    /// <summary>付いていない行にする(<see cref="CreateInactive"/>)。番号・鍵はそのまま。</summary>
+    public void UpdateInactive(string name, string? iconName, string inactiveText)
+    {
+        Name = name;
+        LayerText = string.Empty;
+        DurationText = string.Empty;
+        DurationWithUnitText = inactiveText;
+        ApplyIcon(iconName);
+        IsActive = false;
+
+        _remainingSeconds = null;
+        _isRemainingUnknown = false;
+        _autoGaugeLengthSeconds = null;
+    }
+
+    private void ApplyIcon(string? iconName)
+    {
+        IconPath = CombatIconResolver.ResolveBuffIcon(iconName);
+        IconMask = CombatIconResolver.ResolveBuffIconMask(iconName);
+        IsModuleEffectIcon = CombatDataCatalog.IsModEffectIcon(iconName);
+        IsFactorIcon = CombatIconResolver.IsFactorIcon(iconName);
+        ShowsUnknownIcon = !string.IsNullOrWhiteSpace(iconName) && IconPath is null && IconMask is null;
     }
 
     /// <summary>
@@ -124,44 +185,40 @@ public sealed partial class PlayerBuffEntry : ObservableObject
     /// 減っていかないものを短いゲージで出すと、消えかけに見えるため。
     /// </para>
     /// </summary>
-    public void UpdateBar(int gaugeLengthSeconds)
+    /// <param name="gaugeLengthSeconds">設定の長さ(秒)。自動なら null で、行の長さ(<see cref="_autoGaugeLengthSeconds"/>)を使う。</param>
+    public void UpdateBar(int? gaugeLengthSeconds)
     {
+        if (!IsActive)
+        {
+            // 付いていない行にゲージは無い。
+            BarRatio = 0d;
+            IsBarFull = false;
+            BarDecaySeconds = 0d;
+            return;
+        }
+
+        var lengthSeconds = gaugeLengthSeconds is { } fixedSeconds
+            ? fixedSeconds
+            : _autoGaugeLengthSeconds ?? 0d;
+
         double ratio;
         double decaySeconds;
-        if (_isRemainingUnknown || _remainingSeconds is not { } seconds || gaugeLengthSeconds <= 0)
+        if (_isRemainingUnknown || _remainingSeconds is not { } seconds || lengthSeconds <= 0d)
         {
             ratio = 1d;
             decaySeconds = 0d;
         }
         else
         {
-            ratio = Math.Clamp(seconds / gaugeLengthSeconds, 0d, 1d);
+            ratio = Math.Clamp(seconds / lengthSeconds, 0d, 1d);
 
             // 満タンで頭打ちの間はまだ縮まない。縮み始めるのは残りがゲージの長さを切ってから。
-            decaySeconds = seconds <= gaugeLengthSeconds ? Math.Max(seconds, 0d) : 0d;
+            decaySeconds = seconds <= lengthSeconds ? Math.Max(seconds, 0d) : 0d;
         }
 
         BarRatio = ratio;
         IsBarFull = ratio >= 1d;
         BarDecaySeconds = decaySeconds;
-    }
-
-    /// <summary>
-    /// 行の名前。付与者のある行(<see cref="PlayerBuffSnapshot.Caster"/>。エンティティのリストはプレイヤーが付けた行、
-    /// プレイヤーのリストは本人以外のプレイヤーが付けた行)だけ「バフ名(付与者名)」にし、内部ID注記はその後に付ける。
-    /// </summary>
-    private static string FormatName(PlayerBuffSnapshot snapshot)
-    {
-        if (snapshot.Caster is not { } caster)
-        {
-            return snapshot.Name ?? string.Empty;
-        }
-
-        var nameWithCaster = LocalizationManager.Instance.Format(
-            "Widget_BuffNameWithCasterFormat",
-            snapshot.NameWithoutInternalId,
-            PlayerInfoFormatFormatter.GetPartyDisplayName(caster));
-        return CombatDataCatalog.AppendBuffInternalId(nameWithCaster, snapshot.BaseId);
     }
 
     /// <summary>

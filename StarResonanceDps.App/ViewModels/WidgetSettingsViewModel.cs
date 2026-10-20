@@ -126,6 +126,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             PlayerStatusSettings.RowOrderPreviewChanged += PlayerStatusSettings_RowOrderPreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(kind))
+        {
+            BuffDebuffGroupSettings = new BuffDebuffGroupWidgetSettingsViewModel(config.BuffDebuffGroup);
+            BuffDebuffGroupSettings.PropertyChanged += BuffDebuffGroupSettings_PropertyChanged;
+            BuffDebuffGroupSettings.PreviewChanged += BuffDebuffGroupSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -153,6 +160,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     /// <summary>ステータス詳細の行の並びの保存前のプレビュー(「ステータス」の一覧の並べ替えと、破棄で保存された並びへ戻すとき)。</summary>
     public event Action<IReadOnlyList<int>>? PlayerStatusRowOrderPreviewChanged;
+
+    public event Action<BuffDebuffGroupWidgetSettingsConfig>? BuffDebuffGroupPreviewChanged;
 
     public void Dispose()
     {
@@ -228,6 +237,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             PlayerStatusSettings.RowOrderPreviewChanged -= PlayerStatusSettings_RowOrderPreviewChanged;
             PlayerStatusSettings.Dispose();
         }
+
+        if (BuffDebuffGroupSettings is not null)
+        {
+            BuffDebuffGroupSettings.PropertyChanged -= BuffDebuffGroupSettings_PropertyChanged;
+            BuffDebuffGroupSettings.PreviewChanged -= BuffDebuffGroupSettings_PreviewChanged;
+            BuffDebuffGroupSettings.Dispose();
+        }
+    }
+
+    private void BuffDebuffGroupSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BuffDebuffGroupWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void BuffDebuffGroupSettings_PreviewChanged(BuffDebuffGroupWidgetSettingsConfig config)
+    {
+        BuffDebuffGroupPreviewChanged?.Invoke(config);
     }
 
     private void SkillDetailSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -395,6 +424,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public PlayerStatusWidgetSettingsViewModel? PlayerStatusSettings { get; }
 
+    public BuffDebuffGroupWidgetSettingsViewModel? BuffDebuffGroupSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -419,6 +450,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasPlayerStatusDisplaySettings => PlayerStatusSettings is not null;
 
+    public bool HasBuffDebuffGroupDisplaySettings => BuffDebuffGroupSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
@@ -426,7 +459,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || HasBuffListDisplaySettings
         || HasSkillDetailDisplaySettings
         || HasEquipmentDisplaySettings
-        || HasPlayerStatusDisplaySettings;
+        || HasPlayerStatusDisplaySettings
+        || HasBuffDebuffGroupDisplaySettings;
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
@@ -438,7 +472,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (ElementColorSettings?.HasUnsavedChanges ?? false)
         || (SkillDetailSettings?.HasUnsavedChanges ?? false)
         || (EquipmentSettings?.HasUnsavedChanges ?? false)
-        || (PlayerStatusSettings?.HasUnsavedChanges ?? false);
+        || (PlayerStatusSettings?.HasUnsavedChanges ?? false)
+        || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -508,6 +543,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.Equipment = EquipmentSettings.CreateConfig();
         }
 
+        if (BuffDebuffGroupSettings is not null)
+        {
+            config.BuffDebuffGroup = BuffDebuffGroupSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -521,6 +561,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         SkillDetailSettings?.MarkSaved(config.SkillDetail);
         EquipmentSettings?.MarkSaved(config.Equipment);
         PlayerStatusSettings?.MarkSaved(config.PlayerStatus, config.PlayerStatusRowOrder);
+        BuffDebuffGroupSettings?.MarkSaved(config.BuffDebuffGroup);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -538,6 +579,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         SkillDetailSettings?.ResetToDefaults();
         EquipmentSettings?.ResetToDefaults();
         PlayerStatusSettings?.ResetToDefaults();
+        BuffDebuffGroupSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -554,6 +596,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         SkillDetailSettings?.RestoreSavedPreview();
         EquipmentSettings?.RestoreSavedPreview();
         PlayerStatusSettings?.RestoreSavedPreview();
+        BuffDebuffGroupSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

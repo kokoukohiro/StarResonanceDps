@@ -699,8 +699,7 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
   },
   "StrengthSeasons": [ { "Kind": <種類>, "Id": <番号>, "Season": <シーズン> } ],
   "SpecSchools": { "<特化の番号>": <特化> },
-  "Rank1Schools": { "<職業ID>": <特化> },
-  "EquipmentEffectBuffs": [<バフID>, ...]
+  "Rank1Schools": { "<職業ID>": <特化> }
 }
 ```
 
@@ -713,7 +712,6 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 | `Stages` | 添字が突破の段階。段階0 は `EquipTable`、段階1〜 は `EquipBreakThroughTable` の行を `BreakThroughTime` の順に。`Basic` / `Advanced` は表の庫の配列 `[型, 庫ID…]` のまま |
 | `Recast` / `Rare` | `EquipTable.RecastingAttrLibId` / `QualityChildAttrLibId`(改鋳 / レアの庫の配列)のまま。アプリは素の項目で届いた行を引く型にだけ使い、空なら型1 で引く(ゲームと同じ。改造の行は見ない) |
 | `AttrLibs` | 型(1 = `EquipAttrLibTable`、2 = `EquipAttrSchoolLibTable`)→ `AttrLibId` → その庫の全行を表の順に。装備の全段階の基礎・進化、改鋳、装備と突破の行のレア、改造(`TransformId` → `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)から参照される庫だけ。改造の庫で付いた行も自分の装備の行ID として届く。改造の行が表に無ければ止まる |
-| `EquipmentEffectBuffs` | 装備効果の根のバフの番号(昇順)。セット効果(`EquipSuitTable.SuitAttrLibId` の庫)と、武器(`EquipPart` 200)の装備と突破の行の進化(`AdvancedAttrLibId`)と改造(`TransformId` → `EquipTransformTable` の `RecastAttrLibId` / `QualityAttrLibId`)の庫の行に出るバフ(効果の種類 3)。庫か改造の行が表に無ければ止まる |
 | `Id` | 行の `Id`。通信で届く自分の装備の値は、この行ID で行を指す |
 | `Parts` / `Specs` | 行の `AllowPart` / `TalentSchoolId`(型1 は空) |
 

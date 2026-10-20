@@ -128,7 +128,8 @@ internal static class NearbyEntityProjection
             GetInt(entity, "AttrIsLockStunned") > 0,
             NearbyEntityCampState.GetRelation(entityUuid),
             Utils.GetCurrentShield(entity),
-            ResolveHasHpBar(entityType, entity));
+            ResolveHasHpBar(entityType, entity),
+            GetInt(entity, "AttrCombatState") > 0);
     }
 
     private static NearbyEntityEntry MergeChangedFields(
@@ -199,6 +200,11 @@ internal static class NearbyEntityProjection
         if (changedAttributes.Contains(EAttrType.AttrIsLockStunned))
         {
             updated = updated with { IsBreakLocked = GetInt(entity, "AttrIsLockStunned") > 0 };
+        }
+
+        if (changedAttributes.Contains(EAttrType.AttrCombatState))
+        {
+            updated = updated with { IsInCombat = GetInt(entity, "AttrCombatState") > 0 };
         }
 
         if (campRelation.HasValue)

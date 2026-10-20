@@ -33,12 +33,16 @@ public partial class WidgetListItemViewModel : ViewModelBase
     private EquipmentWidgetSettingsConfig _equipment = WidgetConfigDefaults.CreateEquipmentSettings();
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
+    private BuffDebuffGroupWidgetSettingsConfig _buffDebuffGroup = WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
 
     /// <summary>
     /// 設定の窓が開いている間だけの、ステータス詳細の行の並び(保存前のプレビュー)。null は窓が開いていない。
     /// ある間はウィジェットもこの並びで出し、ウィジェットでの並べ替えもこの並びを変えるだけにする(設定の窓の「保存」で確定、「破棄」で戻る)。
     /// </summary>
     private List<int>? _playerStatusRowOrderPreview;
+
+    /// <summary>設定の窓が開いているか(<see cref="BeginSettingsPreview"/> / <see cref="EndSettingsPreview"/>)。ウィジェットでの並べ替えを保存するかプレビューにするかを決める。</summary>
+    private bool _isSettingsPreviewing;
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
@@ -104,14 +108,13 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool IsPlayerInfo => Kind == WidgetKind.PlayerInfo;
 
-    public bool IsPlayerStatus => Kind == WidgetKind.PlayerStatus;
-
     public bool IsPlayerEquipment => Kind == WidgetKind.PlayerEquipment;
 
     public bool IsBuffDebuffCard => Kind == WidgetKind.BuffDebuffCard;
 
     public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
+        or WidgetKind.BuffDebuffGroup
         or WidgetKind.PlayerEquipment
         or WidgetKind.PlayerTalent
         or WidgetKind.PlayerSeasonTalent
@@ -128,7 +131,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
-    public bool ShowsPlayerWindowCountBadge => IsPlayerWindowWidget && !IsPlayerStatus;
+    /// <summary>開いている窓の数のバッジを出すか。自分だけを出す1枚の窓(ステータス詳細・バフ・デバフグループ)は出さない。</summary>
+    public bool ShowsPlayerWindowCountBadge => IsPlayerWindowWidget && !WidgetConfigDefaults.IsSelfOnlyPlayerWindowKind(Kind);
 
     public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
     {
@@ -180,6 +184,63 @@ public partial class WidgetListItemViewModel : ViewModelBase
         return WidgetConfigDefaults.CloneNormalizedPlayerStatus(_playerStatus);
     }
 
+    public BuffDebuffGroupWidgetSettingsConfig GetBuffDebuffGroupSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(_buffDebuffGroup);
+    }
+
+    /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffDebuffGroupEntryEnabled(BuffEntryKey key)
+    {
+        return WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
+            && _buffDebuffGroup.Entries is { } entries
+            && entries.Exists(entry => entry.IsEnabled && entry.GetKey() == key);
+    }
+
+    /// <summary>
+    /// 右クリックで、バフ・デバフグループの行をオン/オフにする(一覧とカードの「グループに追加」、グループの窓の「グループから削除」)。
+    /// 決まりは <see cref="WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled"/>。開いているグループの窓へ
+    /// <see cref="BuffDebuffGroupSettingsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffDebuffGroupEntryChangedFromWidget"/> で知らせる。
+    /// 既にその状態なら何もしない。
+    /// </summary>
+    public void SetBuffDebuffGroupEntryEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
+            || !key.IsValid
+            || IsBuffDebuffGroupEntryEnabled(key) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled(_buffDebuffGroup.Entries ??= [], key, isEnabled);
+        BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffDebuffGroupEntryChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
+    /// <summary>
+    /// バフ・デバフグループの窓で行を並べ替えた。設定の窓が開いている間は今の値(保存前のプレビュー)を変えて設定の窓へ
+    /// <see cref="BuffDebuffGroupEntryOrderChangedFromWidget"/> で渡すだけ(保存は設定の窓の「保存」)、
+    /// 開いていなければその場で行だけを書き戻す(<b>設定一式は触らない</b>)。ステータス詳細の行の並べ替えと同じ扱い。
+    /// </summary>
+    public void ChangeBuffDebuffGroupEntryOrderFromWidget(IReadOnlyList<BuffEntryKey> order)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind))
+        {
+            return;
+        }
+
+        _buffDebuffGroup.Entries = WidgetConfigDefaults.OrderBuffDebuffGroupEntries(_buffDebuffGroup.Entries ?? [], order);
+        BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
+
+        if (_isSettingsPreviewing)
+        {
+            BuffDebuffGroupEntryOrderChangedFromWidget?.Invoke([.. _buffDebuffGroup.Entries.Select(entry => entry.GetKey())]);
+            return;
+        }
+
+        WidgetStateManager.Instance.SaveBuffDebuffGroupEntries(Kind, _buffDebuffGroup.Entries);
+    }
+
     /// <summary>今の行の並び。設定の窓が開いている間はプレビューの並び。</summary>
     public IReadOnlyList<int> GetPlayerStatusRowOrderSnapshot()
     {
@@ -209,9 +270,13 @@ public partial class WidgetListItemViewModel : ViewModelBase
         RaisePlayerStatusRowOrderChangedIfDifferent(before);
     }
 
-    /// <summary>設定の窓を開いた。今の保存された並びからプレビューを始める。</summary>
-    public void BeginPlayerStatusRowOrderPreview()
+    /// <summary>
+    /// 設定の窓を開いた。閉じるまで、ウィジェットでの並べ替えは保存前のプレビューになる
+    /// (ステータス詳細は今の保存された並びからプレビューを始める。バフ・デバフグループは今の値がもともとプレビュー)。
+    /// </summary>
+    public void BeginSettingsPreview()
     {
+        _isSettingsPreviewing = true;
         if (Kind == WidgetKind.PlayerStatus)
         {
             _playerStatusRowOrderPreview = [.. _playerStatusRowOrder];
@@ -231,9 +296,10 @@ public partial class WidgetListItemViewModel : ViewModelBase
         RaisePlayerStatusRowOrderChangedIfDifferent(before);
     }
 
-    /// <summary>設定の窓を閉じた。プレビューを終え、保存されていない並びは保存された並びに戻す。</summary>
-    public void EndPlayerStatusRowOrderPreview()
+    /// <summary>設定の窓を閉じた。プレビューを終え、ステータス詳細の保存されていない並びは保存された並びに戻す。</summary>
+    public void EndSettingsPreview()
     {
+        _isSettingsPreviewing = false;
         if (_playerStatusRowOrderPreview is null)
         {
             return;
@@ -375,6 +441,16 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     public event EventHandler? PlayerStatusSettingsChanged;
 
+    public event EventHandler? BuffDebuffGroupSettingsChanged;
+
+    /// <summary>
+    /// 右クリックでバフ・デバフグループの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
+    /// </summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffDebuffGroupEntryChangedFromWidget;
+
+    /// <summary>設定の窓が開いている間に、バフ・デバフグループの窓で行を並べ替えた(引数は新しい行の鍵の並び)。設定の窓の一覧が並べ直すのに使う。</summary>
+    public event Action<IReadOnlyList<BuffEntryKey>>? BuffDebuffGroupEntryOrderChangedFromWidget;
+
     /// <summary>
     /// ステータス詳細の行の今の並び(<see cref="GetPlayerStatusRowOrderSnapshot"/>)が変わった(引数は新しい並び)。
     /// ウィジェットの窓と、開いている設定の窓の一覧が並べ直すのに使う。
@@ -464,6 +540,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 : null,
             PlayerStatusRowOrder = Kind == WidgetKind.PlayerStatus
                 ? [.. _playerStatusRowOrder]
+                : null,
+            BuffDebuffGroup = WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
+                ? _buffDebuffGroup.Clone()
                 : null
         };
     }
@@ -552,6 +631,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
             }
 
             RaisePlayerStatusRowOrderChangedIfDifferent(rowOrderBefore);
+        }
+
+        if (WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind))
+        {
+            _buffDebuffGroup = WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(config.BuffDebuffGroup);
+            BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -669,6 +754,17 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
         _playerStatus = WidgetConfigDefaults.CloneNormalizedPlayerStatus(playerStatus);
         PlayerStatusSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyBuffDebuffGroupSettingsPreview(BuffDebuffGroupWidgetSettingsConfig buffDebuffGroup)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind))
+        {
+            return;
+        }
+
+        _buffDebuffGroup = WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(buffDebuffGroup);
+        BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)

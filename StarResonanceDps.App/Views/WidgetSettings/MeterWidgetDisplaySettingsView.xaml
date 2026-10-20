@@ -224,19 +224,9 @@
                     </Grid>
                 </Border>
 
-                <!-- フィルターの次。プレイヤーリストは下に「自分の表示」が続くので線を引き、エンティティリストは最後の行なので引かない。 -->
-                <Border Visibility="{Binding ShowsListSortSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Border.Style>
-                        <Style TargetType="{x:Type Border}"
-                               BasedOn="{StaticResource Panel.SettingField}">
-                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ShowsSelfDisplaySettings}" Value="False">
-                                    <Setter Property="BorderThickness" Value="0" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
+                <!-- フィルターの次。下にプレイヤーリストは「自分の表示」、エンティティリストは「戦闘状態」が続くので線を引く。 -->
+                <Border Style="{StaticResource Panel.SettingField}"
+                        Visibility="{Binding ShowsListSortSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -299,8 +289,8 @@
                     </Grid>
                 </Border>
 
-                <!-- プレイヤーリストだけ。最後の行なので線を引かない。 -->
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                <!-- プレイヤーリストだけ。下に「戦闘状態」が続くので線を引く。 -->
+                <Border Style="{StaticResource Panel.SettingField}"
                         Visibility="{Binding ShowsSeasonTalentSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -328,6 +318,45 @@
                                        FontSize="14"
                                        FontWeight="SemiBold" />
                         </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!--
+                    プレイヤーリストとエンティティリスト。最後の行なので線を引かない。作りは「並び替え」の行と同じ。
+                    プレイヤーリストは3択、エンティティリストは自分の行が無いので 表示 / 非表示 の2択。
+                -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsCombatStateSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_CombatState]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは MeterWidgetSettingsConfig.CombatStateDisplayModeIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding CombatStateDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  Visibility="{Binding ShowsCombatStateSelfOnlyOption, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CombatStateDisplay_SelfOnly]}" />
+                        </ComboBox>
+
+                        <!-- 2択の添字は CombatStateShowHideIndex(保存する値は同じ項目)。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding CombatStateShowHideIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  Visibility="{Binding ShowsCombatStateShowHideOption, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                        </ComboBox>
                     </Grid>
                 </Border>
             </StackPanel>

@@ -67,11 +67,13 @@
 
     <Grid>
         <!-- 余白はバフ一覧・メーターと同じ(左5・右0)。 -->
+        <!-- 行の数が変わったら窓の高さを全部の行が入る高さに合わせる(AutoFitHeightBehavior)。 -->
         <ScrollViewer x:Name="StatusListScrollViewer"
                       Margin="5,5,0,5"
                       HorizontalScrollBarVisibility="Disabled"
                       VerticalScrollBarVisibility="Hidden"
                       CanContentScroll="False"
+                      behaviors:AutoFitHeightBehavior.IsEnabled="True"
                       ScrollChanged="StatusListScrollViewer_ScrollChanged">
             <!-- 行を掴んで並べ替える(RowReorderBehavior)。写して薄くするのは行の中身 RowContent だけで、ホバーの背景は写さない。 -->
             <ItemsControl ItemsSource="{Binding PlayerStatus}"

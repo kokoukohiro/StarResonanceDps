@@ -22,6 +22,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     [
         ("BuffName", "Settings_BuffInfo_Field_BuffName", "{BuffName}"),
         ("Name", "Settings_BuffInfo_Field_Name", "{Name}"),
+        ("Caster", "Settings_BuffInfo_Field_Caster", "{Caster}"),
         ("Level", "Settings_BuffInfo_Field_Level", "{Level}"),
         ("NewLine", "Settings_BuffInfo_Field_NewLine", "{NewLine}")
     ];

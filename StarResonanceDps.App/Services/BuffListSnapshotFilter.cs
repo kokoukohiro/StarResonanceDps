@@ -5,8 +5,7 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// バフ・デバフ一覧に出す行を、一覧の設定で絞る。プレイヤーから開いた一覧とエンティティリストから開いた一覧の両方が使う。
-/// 絞るのは、非表示リスト(右クリックで足したバフ)と、設定「モジュール効果」(行の <see cref="PlayerBuffSnapshot.IsModuleEffect"/>)・
-/// 「装備効果」(行の <see cref="PlayerBuffSnapshot.IsEquipmentEffect"/>)・「因子効果」(行の <see cref="PlayerBuffSnapshot.IsFactorEffect"/>)。
+/// 絞るのは非表示リスト(右クリックで足したバフ)だけ。
 /// </summary>
 public static class BuffListSnapshotFilter
 {
@@ -31,27 +30,5 @@ public static class BuffListSnapshotFilter
     }
 
     private static bool IsShown(BuffListWidgetSettingsConfig settings, PlayerBuffSnapshot snapshot)
-    {
-        if (settings.HiddenBuffIds.Contains(snapshot.BaseId))
-        {
-            return false;
-        }
-
-        if (snapshot.IsModuleEffect)
-        {
-            return settings.ShowModuleEffects;
-        }
-
-        if (snapshot.IsEquipmentEffect)
-        {
-            return settings.ShowEquipmentEffects;
-        }
-
-        if (snapshot.IsFactorEffect)
-        {
-            return settings.ShowFactorEffects;
-        }
-
-        return true;
-    }
+        => !settings.HiddenBuffIds.Contains(snapshot.BaseId);
 }

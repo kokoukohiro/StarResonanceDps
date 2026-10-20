@@ -185,6 +185,11 @@
                                     <MenuItem Header="{Binding HideMenuText}"
                                               Command="{Binding HideBuffCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <!-- 出すかは開くときに決める(IBuffListWindowViewModel.CanAddToGroup)。名前は画面のコードが項目を見分けるのに使う。 -->
+                                    <MenuItem Name="AddToGroupMenuItem"
+                                              Header="{Binding AddToGroupMenuText}"
+                                              Command="{Binding AddToGroupCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Button.Style>

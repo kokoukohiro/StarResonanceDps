@@ -3,9 +3,105 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
              UseLayoutRounding="True"
-             SnapsToDevicePixels="True">
+             SnapsToDevicePixels="True"
+             Unloaded="BuffDebuffCardWidgetView_Unloaded">
     <UserControl.Resources>
         <converters:ScaleConverter x:Key="BuffDebuffCard.ScaleConverter" />
+
+        <!--
+            右クリックのメニュー。作りはバフ・デバフ一覧の行のメニューと同じで、項目は「グループに追加」の1つだけ(四隅とも角丸)。
+            メニューの DataContext はカードの ViewModel(開くときに画面のコードが入れる)で、色はその Widget から引く。
+        -->
+        <CornerRadius x:Key="Menu.WidgetWindowBuffCardContextMenuItem.SingleCornerRadius">5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowBuffCardContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowBuffCardMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowBuffCardContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowBuffCardMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffCardContextMenuItem.SingleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ContextMenu x:Key="BuffDebuffCard.ContextMenu"
+                     Style="{StaticResource Menu.WidgetWindowBuffCardContextMenu}"
+                     Placement="MousePoint">
+            <MenuItem Style="{StaticResource Menu.WidgetWindowBuffCardContextMenuItem}"
+                      Header="{Binding AddToGroupMenuText}"
+                      Command="{Binding AddToGroupCommand}" />
+        </ContextMenu>
     </UserControl.Resources>
 
     <!--
@@ -22,8 +118,11 @@
         どの状態でも組み全体の大きさが変わらないようにしてある。
 
         文字の影は Effect.WidgetWindowTextShadow と同じ色と濃さで、ぼかしだけ倍率を掛けるので、文字ごとに直に置く。
+
+        右クリックはカードのどこでも受ける(透明の地で当たりを取る)。メニューを開くかは画面のコードが決める。
     -->
-    <Grid>
+    <Grid Background="Transparent"
+          PreviewMouseRightButtonDown="Card_PreviewMouseRightButtonDown">
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center">
             <TextBlock Margin="0,0,0,0"

@@ -1,0 +1,403 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.BuffDebuffGroupWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="BuffDebuffGroupWidgetView_Loaded"
+             Unloaded="BuffDebuffGroupWidgetView_Unloaded"
+             SizeChanged="BuffDebuffGroupWidgetView_SizeChanged"
+             DataContextChanged="BuffDebuffGroupWidgetView_DataContextChanged">
+    <UserControl.Resources>
+        <!-- 行内テキストの共通スタイル。バフ・デバフ一覧と同じ。 -->
+        <Style x:Key="BuffDebuffGroup.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <!-- 残り時間(付いていない行は「効果なし」)。行の右端の列に右寄せで置く。バフ・デバフ一覧と同じ。 -->
+        <Style x:Key="BuffDebuffGroup.Duration" TargetType="TextBlock" BasedOn="{StaticResource BuffDebuffGroup.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="TextAlignment" Value="Right" />
+        </Style>
+
+        <!--
+            行の右クリックのメニュー。作りはバフ・デバフ一覧の行のメニューと同じ。
+            メニューの DataContext はウィジェットの ViewModel で、色はその Widget から引く。
+        -->
+        <CornerRadius x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.SingleCornerRadius">5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowBuffDebuffGroupMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowBuffDebuffGroupMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem.LastCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowBuffDebuffGroupContextMenuItem.Single"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowBuffDebuffGroupContextMenuItem.SingleCornerRadius}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!--
+            余白はバフ・デバフ一覧と同じ(左5・右0)。
+            行の数が変わったら窓の高さを全部の行が入る高さに合わせる(AutoFitHeightBehavior、ステータス詳細と同じ)。
+        -->
+        <ScrollViewer x:Name="EntryScrollViewer"
+                      Margin="5,5,0,5"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden"
+                      CanContentScroll="False"
+                      behaviors:AutoFitHeightBehavior.IsEnabled="True"
+                      ScrollChanged="EntryScrollViewer_ScrollChanged">
+            <!-- 行を掴んで並べ替える(RowReorderBehavior)。写して薄くするのは行の中身 RowContent だけで、ホバーの背景は写さない。 -->
+            <ItemsControl ItemsSource="{Binding Entries}"
+                          behaviors:RowReorderBehavior.ContentElementName="RowContent">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!--
+                            行の作りはバフ・デバフ一覧の行と同じ(高さ31、左クリックでカード、右クリックでメニュー、ホバーの背景)。
+                            掴んで動かすと並べ替えになる(閾値を超えるまでは何も起きず、動かさずに離せばカードを開く)。
+                        -->
+                        <Button Height="31"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Focusable="False"
+                                IsTabStop="False"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                ContextMenuService.IsEnabled="False"
+                                PreviewMouseRightButtonDown="EntryItem_PreviewMouseRightButtonDown"
+                                Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:BuffDebuffGroupWidgetView}}}"
+                                Command="{Binding DataContext.OpenCardCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                CommandParameter="{Binding}">
+                            <Button.ContextMenu>
+                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                             IsOpen="{Binding PlacementTarget.DataContext.IsMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                             Placement="MousePoint"
+                                             Opened="EntryContextMenu_Opened"
+                                             Closed="EntryContextMenu_Closed">
+                                    <!-- 出すかは開くときに決める(BuffDebuffGroupWidgetViewModel.CanOpenCard)。名前は画面のコードが項目を見分けるのに使う。 -->
+                                    <MenuItem Name="OpenCardMenuItem"
+                                              Header="{Binding CardMenuText}"
+                                              Command="{Binding OpenCardCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding RemoveMenuText}"
+                                              Command="{Binding RemoveFromGroupCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid SnapsToDevicePixels="True">
+                                                    <Border x:Name="InteractionBackground"
+                                                            Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                            Visibility="Collapsed">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                                <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                        <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                    </Border>
+                                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                      Content="{TemplateBinding Content}"
+                                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </Trigger>
+                                                    <DataTrigger Binding="{Binding IsMenuOpen}" Value="True">
+                                                        <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+
+                            <!-- 並べ替えで写して薄くするのはこの Grid(絵・ゲージ・名前・時間)だけ。 -->
+                            <Grid x:Name="RowContent" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid Grid.Column="0"
+                                      Width="30"
+                                      Height="30"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center">
+                                    <!-- 絵の大きさと位置はバフ・デバフ一覧と同じ(モジュール効果は小さく、因子は左へずらす)。 -->
+                                    <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                                           Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality">
+                                        <Image.Style>
+                                            <Style TargetType="Image">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
+                                                        <Setter Property="Width" Value="26" />
+                                                        <Setter Property="Height" Value="26" />
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsFactorIcon}" Value="True">
+                                                        <Setter Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <TranslateTransform X="-1" />
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Image.Style>
+                                    </Image>
+
+                                    <!-- 絵のパスはあるのにファイルが無いバフははてな(バフ・デバフ一覧と同じ作り)。 -->
+                                    <Rectangle Fill="White"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                        </Rectangle.OpacityMask>
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+
+                                    <!-- 絵が Icons.xaml の絵(装備効果)なら、白く塗った面をその絵で型抜きする(バフ・デバフ一覧と同じ作り)。 -->
+                                    <Rectangle Fill="White"
+                                               OpacityMask="{Binding IconMask}"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                        <Rectangle.RenderTransform>
+                                            <TranslateTransform X="-0.5" />
+                                        </Rectangle.RenderTransform>
+                                        <Rectangle.Style>
+                                            <Style TargetType="Rectangle">
+                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IconMask}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Rectangle.Style>
+                                    </Rectangle>
+
+                                    <!-- スタック数はアイコンに重ねたまま。 -->
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource Text.WidgetWindow}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Text="{Binding LayerText}"
+                                               TextAlignment="Center" />
+                                </Grid>
+
+                                <!--
+                                    ゲージはアイコンの外(右)だけに伸びる。付いていない行には出さない。
+                                    作りはバフ・デバフ一覧と同じ2層(外は幅が動く窓、中は常に満タンの幅で塗る)で、幅はアニメーションで動かす。
+                                    色はバフの行ならバフカラー、デバフの行ならデバフカラー。
+                                -->
+                                <Grid x:Name="GaugeArea"
+                                      Grid.Column="1"
+                                      Grid.ColumnSpan="2"
+                                      Margin="0,0,2,0"
+                                      ClipToBounds="True">
+                                    <Grid.Style>
+                                        <Style TargetType="Grid">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Grid.Style>
+                                    <Grid Height="26"
+                                          HorizontalAlignment="Left"
+                                          VerticalAlignment="Center"
+                                          ClipToBounds="True"
+                                          behaviors:BarWidthAnimationBehavior.AreaWidth="{Binding ActualWidth, ElementName=GaugeArea}"
+                                          behaviors:BarWidthAnimationBehavior.DecaySeconds="{Binding BarDecaySeconds}"
+                                          behaviors:BarWidthAnimationBehavior.Ratio="{Binding BarRatio}"
+                                          behaviors:BarWidthAnimationBehavior.SnapsToTarget="True">
+                                        <!-- 右端の角丸は窓に切られるので、短いうちは直角、満タンでだけ丸く見える。 -->
+                                        <Border Width="{Binding ActualWidth, ElementName=GaugeArea}"
+                                                HorizontalAlignment="Left"
+                                                CornerRadius="4">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Setter Property="Background" Value="{Binding DataContext.BuffGaugeFill, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsDebuff}" Value="True">
+                                                            <Setter Property="Background" Value="{Binding DataContext.DebuffGaugeFill, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+
+                                <TextBlock Grid.Column="1"
+                                           Margin="6,0,6,0"
+                                           Style="{StaticResource BuffDebuffGroup.RowText}"
+                                           Text="{Binding Name}" />
+
+                                <TextBlock Grid.Column="2"
+                                           Margin="0,0,8,0"
+                                           Style="{StaticResource BuffDebuffGroup.Duration}"
+                                           Text="{Binding DurationWithUnitText}" />
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

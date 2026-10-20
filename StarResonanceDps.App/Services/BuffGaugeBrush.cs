@@ -5,14 +5,14 @@ using StarResonanceDps.App.Config;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// バフ・デバフ一覧の行のゲージの塗り。プレイヤーから開いた一覧とエンティティリストから開いた一覧の両方が使う。
+/// バフ・デバフの行のゲージの塗り。プレイヤーから開いた一覧・エンティティリストから開いた一覧・バフ・デバフグループが使う。
 /// </summary>
-public static class BuffListGaugeBrush
+public static class BuffGaugeBrush
 {
     /// <summary>
     /// 設定の2色で左から右へのグラデーションにする(停止位置はエンティティリストの HP バーと同じ)。
     /// </summary>
-    public static LinearGradientBrush Create(BuffListWidgetSettingsConfig settings)
+    public static LinearGradientBrush Create(BuffGaugeColorConfig colors)
     {
         var brush = new LinearGradientBrush
         {
@@ -20,8 +20,8 @@ public static class BuffListGaugeBrush
             EndPoint = new Point(1, 0.5)
         };
 
-        var start = ResolveColor(settings, "GaugeStart");
-        var end = ResolveColor(settings, "GaugeEnd");
+        var start = ResolveColor(colors, "GaugeStart");
+        var end = ResolveColor(colors, "GaugeEnd");
         brush.GradientStops.Add(new GradientStop(start, 0d));
         brush.GradientStops.Add(new GradientStop(start, 0.05d));
         brush.GradientStops.Add(new GradientStop(end, 0.95d));
@@ -30,18 +30,18 @@ public static class BuffListGaugeBrush
         return brush;
     }
 
-    /// <summary>ゲージが満タンになる残り時間(秒)。</summary>
-    public static int GetLengthSeconds(BuffListWidgetSettingsConfig settings)
+    /// <summary>ゲージが満タンになる残り時間(秒)。自動なら null(行ごとの長さを使う)。</summary>
+    public static int? GetLengthSeconds(int gaugeLengthIndex)
     {
-        return WidgetConfigDefaults.BuffListGaugeLengthSeconds[settings.GaugeLengthIndex];
+        return WidgetConfigDefaults.BuffGaugeLengthSeconds[gaugeLengthIndex];
     }
 
-    private static Color ResolveColor(BuffListWidgetSettingsConfig settings, string key)
+    private static Color ResolveColor(BuffGaugeColorConfig colors, string key)
     {
-        var palette = settings.GaugeColorPalettes.TryGetValue(key, out var colors)
-            ? colors
+        var palette = colors.Palettes.TryGetValue(key, out var saved)
+            ? saved
             : WidgetConfigDefaults.CreateDefaultGaugeColors(key);
-        var selectedIndex = settings.GaugeColorIndexes.TryGetValue(key, out var index)
+        var selectedIndex = colors.Indexes.TryGetValue(key, out var index)
             ? index
             : WidgetConfigDefaults.MinClassColorIndex;
         var selectedColor = palette.Count == 0
@@ -55,7 +55,7 @@ public static class BuffListGaugeBrush
         // 不透明度はメーターのクラスカラーと同じ作りで、表示に使う色のアルファへ掛ける。
         // 設定画面の色見本は素のままにしたいので、ここだけで掛ける。
         var opacity = Math.Clamp(
-            settings.GaugeColorOpacity,
+            colors.Opacity,
             WidgetConfigDefaults.MinClassColorOpacity,
             WidgetConfigDefaults.MaxClassColorOpacity);
 

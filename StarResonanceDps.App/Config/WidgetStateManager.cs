@@ -202,6 +202,27 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
+    /// バフ・デバフグループの行だけを保存する。バフ・デバフ一覧かカードの右クリックで行を足したときに呼ぶ
+    /// (バフ・デバフ一覧の非表示のバフと同じく、この項目だけを書く)。
+    /// </summary>
+    public void SaveBuffDebuffGroupEntries(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> entries)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffDebuffGroup ??= WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
+            config.BuffDebuffGroup.Entries = [.. entries.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
     /// 推移グラフの横軸の長さだけを保存する。窓の上のホイールで変えて、ホイールが止まったときに呼ぶ。
     ///
     /// <para>

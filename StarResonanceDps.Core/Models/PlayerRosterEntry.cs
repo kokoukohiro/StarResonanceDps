@@ -43,4 +43,6 @@ public sealed record PlayerRosterEntry(
     SocialAvatarState? RecordedAvatar = null,
     // 乗っている根のバフ(タレント・潜在心相晶のノードと上級・因子・モジュール効果)。全部をまだ受けていなければ null。
     // 履歴の行はその回に保存した値。
-    PlayerRootBuffData? RootBuffData = null);
+    PlayerRootBuffData? RootBuffData = null,
+    // いま戦闘状態か(実体の属性 AttrCombatState、104)。属性が届くのは自分と周りに見えている人だけで、ほかの行(履歴の行も)は false。
+    bool IsInCombat = false);

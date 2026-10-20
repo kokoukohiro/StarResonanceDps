@@ -13,7 +13,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// </para>
 ///
 /// <para>
-/// 行の数が変わったら窓の高さを全部の行が入る高さに合わせる(<see cref="IWidgetAutoFitHeightContent"/>)。
+/// 行の数が変わったら窓の高さを全部の行が入る高さに合わせる(一覧の ScrollViewer に付けた <c>Behaviors.AutoFitHeightBehavior</c>)。
 /// スクロールバーが出るのは、手で高さを小さくしたときだけ。
 /// </para>
 ///
@@ -21,7 +21,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// 行の並べ替えは一覧に付けた <c>Behaviors.RowReorderBehavior</c> が受け持つ。
 /// </para>
 /// </summary>
-public partial class PlayerStatusWidgetView : UserControl, IWidgetVerticalScrollContent, IWidgetAutoFitHeightContent
+public partial class PlayerStatusWidgetView : UserControl, IWidgetVerticalScrollContent
 {
     public PlayerStatusWidgetView()
     {
@@ -29,13 +29,6 @@ public partial class PlayerStatusWidgetView : UserControl, IWidgetVerticalScroll
     }
 
     public event EventHandler? VerticalScrollMetricsChanged;
-
-    public event EventHandler? FitHeightRequested;
-
-    public double GetHeightShortfall()
-    {
-        return StatusListScrollViewer.ExtentHeight - StatusListScrollViewer.ViewportHeight;
-    }
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
     {
@@ -81,13 +74,6 @@ public partial class PlayerStatusWidgetView : UserControl, IWidgetVerticalScroll
     private void StatusListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
         NotifyVerticalScrollMetricsChanged();
-
-        // 行の高さは一定なので、全体の高さが変わるのは行の数が変わったときだけ(手で窓の大きさを変えても変わらない)。
-        // 行が無くなったときは合わせない(見出しだけまで縮み、次に行が来たら伸びる、を繰り返さないため)。
-        if (e.ExtentHeightChange != 0d && StatusListScrollViewer.ExtentHeight > 0d)
-        {
-            FitHeightRequested?.Invoke(this, EventArgs.Empty);
-        }
     }
 
     private void NotifyVerticalScrollMetricsChanged()

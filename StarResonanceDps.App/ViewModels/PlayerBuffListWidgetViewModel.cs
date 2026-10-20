@@ -9,12 +9,16 @@ using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowViewModel, IBuffListWindowViewModel, IDisposable
 {
     private readonly PlayerBuffListKind _kind;
+
+    /// <summary>右クリックの「グループに追加」の行き先。</summary>
+    private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
 
     /// <summary>行をクリックしたときにバフ・デバフカードを開く経路。</summary>
     private readonly Action<long, PlayerBuffListKind, string, int>? _openCard;
@@ -25,6 +29,9 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
 
     /// <summary>最後に行を当てた相手。名簿の行が変わっても相手が同じなら、行は1秒ごとの更新に任せる。</summary>
     private long? _refreshedCharacterId;
+
+    /// <summary>名簿の対象者の行。行の名前の対象者名とレベル(<c>{Name}</c> <c>{Level}</c>)に使う。</summary>
+    private PlayerRosterEntry? _player;
 
     private bool _isDisposed;
 
@@ -37,13 +44,15 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         long? requestedCharacterId,
         PlayerRosterEntry? initialPlayer,
         PlayerBuffListKind kind,
+        IBuffDebuffGroupEntryAdder? groupEntryAdder = null,
         Action<long, PlayerBuffListKind, string, int>? openCard = null)
         : base(playerWidget, requestedCharacterId)
     {
         _kind = kind;
+        _groupEntryAdder = groupEntryAdder;
         _openCard = openCard;
         _settings = playerWidget.GetBuffListSettingsSnapshot();
-        GaugeBrush = BuffListGaugeBrush.Create(_settings);
+        GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
         Entries = new ReadOnlyObservableCollection<PlayerBuffEntry>(_entries);
         _refreshTimer = new DispatcherTimer
         {
@@ -71,6 +80,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             ? "BuffList_Menu_HideDebuff"
             : "BuffList_Menu_HideBuff");
 
+    public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
+
+    /// <summary>自分が対象の一覧だけ。料理・薬剤はまとまりの行として足す(<see cref="BuffEntryKey.ForBuffDebuffGroup"/>)。</summary>
+    public bool CanAddToGroup(PlayerBuffEntry? entry)
+    {
+        return entry is not null
+            && IsSelfTarget
+            && _groupEntryAdder is not null
+            && _groupEntryAdder.CanAdd(BuffEntryKey.ForBuffDebuffGroup(entry.BaseId));
+    }
+
     public void Dispose()
     {
         if (_isDisposed)
@@ -92,7 +112,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
         _settings = PlayerWidget.GetBuffListSettingsSnapshot();
-        GaugeBrush = BuffListGaugeBrush.Create(_settings);
+        GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
         Refresh();
     }
 
@@ -102,6 +122,9 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     /// </summary>
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
+        // 名前とレベルは控えるだけ。行の名前は1秒ごとの更新で組み直る。
+        _player = player;
+
         if (SelectedCharacterId == _refreshedCharacterId)
         {
             return;
@@ -132,6 +155,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         PlayerWidget.HideBuffInList(entry.BaseId);
     }
 
+    [RelayCommand]
+    private void AddToGroup(PlayerBuffEntry? entry)
+    {
+        if (!CanAddToGroup(entry))
+        {
+            return;
+        }
+
+        _groupEntryAdder!.Add(BuffEntryKey.ForBuffDebuffGroup(entry!.BaseId));
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -141,6 +175,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     {
         OnPropertyChanged(nameof(CardMenuText));
         OnPropertyChanged(nameof(HideMenuText));
+        OnPropertyChanged(nameof(AddToGroupMenuText));
         Refresh();
     }
 
@@ -154,7 +189,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _refreshedCharacterId = SelectedCharacterId;
         if (SelectedCharacterId is not { } characterId)
         {
-            SynchronizeEntries(Array.Empty<PlayerBuffSnapshot>());
+            SynchronizeEntries(Array.Empty<PlayerBuffSnapshot>(), string.Empty, 0);
             return;
         }
 
@@ -164,10 +199,23 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
-        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, MeterSnapshotProvider.GetPlayerBuffs(characterId, _kind)));
+        // 対象者名はバフ・デバフカードと同じ規則(名前がまだ無ければ UID、伏せる設定なら伏せ字、NPC なら職業名)。
+        var targetName = PlayerInfoFormatFormatter.GetDisplayName(
+            _player?.Name ?? playerIdentity?.Name,
+            playerIdentity?.UserId ?? characterId,
+            _player?.IsSelf ?? (AppState.PlayerUID != 0 && characterId == AppState.PlayerUID),
+            _player?.IsNpc ?? playerIdentity?.IsNpc ?? false,
+            _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
+            PlayerRosterPresentationStore.Instance.NameDisplayMode);
+
+        var snapshots = MeterSnapshotProvider.GetPlayerBuffs(
+            characterId,
+            _kind,
+            WidgetConfigDefaults.GroupsSameBuffs(_settings, isEntityTarget: false));
+        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, snapshots), targetName, _player?.Level ?? 0);
     }
 
-    private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots)
+    private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots, string targetName, int level)
     {
         var snapshotKeys = snapshots
             .Select(snapshot => snapshot.Key)
@@ -188,15 +236,16 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         for (var targetIndex = 0; targetIndex < snapshots.Count; targetIndex++)
         {
             var snapshot = snapshots[targetIndex];
+            var name = BuffListRowName.Format(_settings, snapshot, targetName, level);
             var existingIndex = FindEntryIndex(snapshot.Key);
             if (existingIndex < 0)
             {
-                _entries.Insert(targetIndex, new PlayerBuffEntry(snapshot));
+                _entries.Insert(targetIndex, new PlayerBuffEntry(snapshot, name));
                 continue;
             }
 
             var entry = _entries[existingIndex];
-            entry.Update(snapshot);
+            entry.Update(snapshot, name);
             if (existingIndex != targetIndex)
             {
                 _entries.Move(existingIndex, targetIndex);
@@ -204,7 +253,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         }
 
         // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
-        var gaugeLengthSeconds = BuffListGaugeBrush.GetLengthSeconds(_settings);
+        var gaugeLengthSeconds = BuffGaugeBrush.GetLengthSeconds(_settings.GaugeLengthIndex);
         foreach (var entry in _entries)
         {
             entry.UpdateBar(gaugeLengthSeconds);

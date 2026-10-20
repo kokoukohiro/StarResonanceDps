@@ -312,6 +312,25 @@ public sealed class ActiveBuffStore
         }
     }
 
+    /// <summary>
+    /// 項目のバフの記録(番号・付与元などを持つもの)を返す。<b>期限切れでも返す</b>(番号などを引き継ぐための読み出しで、表示の判定ではない)。
+    /// 回(エンカウンター)が作り直されて、今の回の記録がまだ知らない実体に通知が来たときに使う。
+    /// </summary>
+    public bool TryGetBuffEvent(long entityUuid, ulong buffUuid, out BuffEvent buffEvent)
+    {
+        lock (_sync)
+        {
+            if (_buffsByEntity.TryGetValue(entityUuid, out var buffs) && buffs.TryGetValue(buffUuid, out var entry))
+            {
+                buffEvent = entry.BuffEvent;
+                return true;
+            }
+        }
+
+        buffEvent = null!;
+        return false;
+    }
+
     /// <summary>期限切れを除いた、現在有効なバフを返す。</summary>
     public IReadOnlyList<BuffEvent> GetActive(long entityUuid)
     {
@@ -355,14 +374,19 @@ public sealed class ActiveBuffStore
     /// 表示側は「?」を出す。サーバ時刻をまだ受け取っていないうちに
     /// 「見る前から乗っているバフ」を受け取ると立つ。
     /// </param>
+    /// <param name="durationSeconds">
+    /// 残り時間を出すのに使う効果時間の総量(秒、通信の <c>BuffInfo.Duration</c>)。延長すると伸びる。項目が無ければ 0。
+    /// </param>
     public bool TryGetRemainingSeconds(
         long entityUuid,
         ulong buffUuid,
         out double? remainingSeconds,
-        out bool remainingUnknown)
+        out bool remainingUnknown,
+        out double durationSeconds)
     {
         remainingSeconds = null;
         remainingUnknown = false;
+        durationSeconds = 0d;
         if (entityUuid == 0)
         {
             return false;
@@ -381,6 +405,8 @@ public sealed class ActiveBuffStore
         {
             return false;
         }
+
+        durationSeconds = entry.DurationMilliseconds / 1000d;
 
         if (entry.RemainingUnknown)
         {

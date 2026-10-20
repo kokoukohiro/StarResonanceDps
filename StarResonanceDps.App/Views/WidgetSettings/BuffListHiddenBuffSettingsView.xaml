@@ -1,12 +1,11 @@
 <UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffListHiddenBuffSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
         一覧に出さないバフ。見出しと説明はいつも出し、枠は非表示のバフがあるときだけ出す。
-        行は左にアイコンと名前、右に削除ボタン。
+        行は左にアイコンと名前、右にスイッチ。
     -->
     <StackPanel>
         <TextBlock Text="{Binding HiddenBuffSectionTitle}"
@@ -129,11 +128,20 @@
                                            FontSize="14"
                                            FontWeight="SemiBold" />
 
-                                <Button Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Delete]}"
-                                        Style="{StaticResource Button.Text}"
-                                        Command="{Binding RemoveCommand}" />
+                                <!-- オンなら非表示のまま。オフにすると保存前のプレビューで一覧に出て、保存すると行が消える。作りは「ステータス」の行のスイッチと同じ。 -->
+                                <StackPanel Grid.Column="2"
+                                            Orientation="Horizontal"
+                                            VerticalAlignment="Center">
+                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                                    <TextBlock Margin="8,0,0,0"
+                                               VerticalAlignment="Center"
+                                               MinWidth="28"
+                                               Text="{Binding StateText}"
+                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                               FontSize="14"
+                                               FontWeight="SemiBold" />
+                                </StackPanel>
                             </Grid>
                         </Border>
                     </DataTemplate>

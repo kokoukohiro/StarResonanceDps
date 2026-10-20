@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Config;
@@ -31,6 +32,8 @@ public sealed class WidgetConfig
     public EquipmentWidgetSettingsConfig? Equipment { get; set; }
 
     public PlayerStatusWidgetSettingsConfig? PlayerStatus { get; set; }
+
+    public BuffDebuffGroupWidgetSettingsConfig? BuffDebuffGroup { get; set; }
 
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
@@ -72,6 +75,7 @@ public sealed class WidgetConfig
             SkillDetail = SkillDetail?.Clone(),
             Equipment = Equipment?.Clone(),
             PlayerStatus = PlayerStatus?.Clone(),
+            BuffDebuffGroup = BuffDebuffGroup?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -294,22 +298,13 @@ public sealed class PlayerInfoWidgetSettingsConfig
 /// </summary>
 public sealed class BuffListWidgetSettingsConfig
 {
-    /// <summary>
-    /// 選んでいる枠。<b>既定が種別で違う</b>(バフは1枠目、デバフは2枠目)ので、
-    /// <see cref="WidgetKind"/> を知らないここでは入れない。空のまま
-    /// <see cref="WidgetConfigDefaults.CloneNormalizedBuffList"/> を通ると、そこで種別に応じて埋まる。
-    /// </summary>
-    public Dictionary<string, int> GaugeColorIndexes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
-
-    public Dictionary<string, List<string>> GaugeColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultGaugeColorPalettes();
+    /// <summary>ゲージの色。バフ一覧なら「バフカラー」、デバフ一覧なら「デバフカラー」の1組。</summary>
+    public BuffGaugeColorConfig GaugeColors { get; set; } = new();
 
     /// <summary>
-    /// ゲージの色の不透明度(0〜100)。作りはメーターのクラスカラーと同じで、
-    /// 表示に使う色のアルファへ掛ける(設定画面の色見本には掛けない)。
+    /// ゲージが満タンになる残り時間。0=自動 / 1=10秒 / 2=20秒 / 3=30秒(<see cref="WidgetConfigDefaults.BuffGaugeLengthSeconds"/>)。これ以上は満タンで頭打ち。
+    /// 自動はバフごとに、出している実体の効果時間の総量(延長すると残り時間と一緒に伸びる)。
     /// </summary>
-    public int GaugeColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
-
-    /// <summary>ゲージが満タンになる残り時間。0=10秒 / 1=20秒 / 2=30秒。これ以上は満タンで頭打ち。</summary>
     public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultBuffListGaugeLengthIndex;
 
     /// <summary>
@@ -318,34 +313,123 @@ public sealed class BuffListWidgetSettingsConfig
     /// </summary>
     public List<int> HiddenBuffIds { get; set; } = [];
 
-    /// <summary>モジュール効果のバフを出すか(<c>PlayerBuffSnapshot.IsModuleEffect</c>)。</summary>
-    public bool ShowModuleEffects { get; set; } = WidgetConfigDefaults.DefaultShowModuleEffects;
+    /// <summary>
+    /// 同種バフの表示(同じ対象に同じ番号のバフが複数あるとき、残り時間の一番長い1つの行にまとめるか)。
+    /// 0=まとめない / 1=プレイヤーのみまとめる / 2=エンティティのみまとめる / 3=すべてまとめる(<see cref="WidgetConfigDefaults.GroupsSameBuffs"/>)。
+    /// </summary>
+    public int SameBuffGroupingIndex { get; set; } = WidgetConfigDefaults.DefaultSameBuffGroupingIndex;
 
-    /// <summary>装備効果(セット効果・武器効果)のバフを出すか(<c>PlayerBuffSnapshot.IsEquipmentEffect</c>)。</summary>
-    public bool ShowEquipmentEffects { get; set; } = WidgetConfigDefaults.DefaultShowEquipmentEffects;
+    /// <summary>付与者プレイヤー名の表示。0=表示 / 1=非表示 / 2=他者付与のみ(付与者が対象者本人なら出さない)。</summary>
+    public int CasterNameDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCasterNameDisplayModeIndex;
 
-    /// <summary>因子のバフを出すか(<c>PlayerBuffSnapshot.IsFactorEffect</c>)。</summary>
-    public bool ShowFactorEffects { get; set; } = WidgetConfigDefaults.DefaultShowFactorEffects;
+    /// <summary>行のバフ名の書式。差し込む項目は <c>{BuffName}</c> <c>{Name}</c>(対象者名)<c>{Caster}</c>(付与者プレイヤー名)<c>{Level}</c>。</summary>
+    public string? BuffInfoFormatString { get; set; }
 
     public BuffListWidgetSettingsConfig Clone()
     {
         return new BuffListWidgetSettingsConfig
         {
             GaugeLengthIndex = GaugeLengthIndex,
-            GaugeColorOpacity = GaugeColorOpacity,
-            ShowModuleEffects = ShowModuleEffects,
-            ShowEquipmentEffects = ShowEquipmentEffects,
-            ShowFactorEffects = ShowFactorEffects,
-            HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
-            GaugeColorIndexes = GaugeColorIndexes is null
+            GaugeColors = GaugeColors?.Clone() ?? new BuffGaugeColorConfig(),
+            SameBuffGroupingIndex = SameBuffGroupingIndex,
+            CasterNameDisplayModeIndex = CasterNameDisplayModeIndex,
+            BuffInfoFormatString = BuffInfoFormatString,
+            HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds]
+        };
+    }
+}
+
+/// <summary>
+/// バフ・デバフのゲージの色の1組(設定の節「バフカラー」「デバフカラー」)。
+/// 色は左端と右端の2つで、間はグラデーションになる(形はクラスカラーと同じ「色見本＋選んでいる枠」)。
+/// </summary>
+public sealed class BuffGaugeColorConfig
+{
+    /// <summary>
+    /// 選んでいる枠。<b>既定がバフとデバフで違う</b>(バフは1枠目、デバフは2枠目)ので、ここでは入れない。
+    /// 空のまま <see cref="WidgetConfigDefaults.CloneNormalizedBuffGaugeColors"/> を通ると、そこで側に応じて埋まる。
+    /// </summary>
+    public Dictionary<string, int> Indexes { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public Dictionary<string, List<string>> Palettes { get; set; } = WidgetConfigDefaults.CreateDefaultGaugeColorPalettes();
+
+    /// <summary>
+    /// 不透明度(0〜100)。作りはメーターのクラスカラーと同じで、
+    /// 表示に使う色のアルファへ掛ける(設定画面の色見本には掛けない)。
+    /// </summary>
+    public int Opacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
+
+    public BuffGaugeColorConfig Clone()
+    {
+        return new BuffGaugeColorConfig
+        {
+            Opacity = Opacity,
+            Indexes = Indexes is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, int>(GaugeColorIndexes, StringComparer.OrdinalIgnoreCase),
-            GaugeColorPalettes = GaugeColorPalettes is null
+                : new Dictionary<string, int>(Indexes, StringComparer.OrdinalIgnoreCase),
+            Palettes = Palettes is null
                 ? WidgetConfigDefaults.CreateDefaultGaugeColorPalettes()
-                : GaugeColorPalettes.ToDictionary(
+                : Palettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
                     StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// バフ・デバフグループの1行。バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。
+/// </summary>
+public sealed class BuffDebuffGroupEntryConfig
+{
+    public int BuffId { get; set; }
+
+    public BuffGroup Group { get; set; }
+
+    public bool IsEnabled { get; set; } = true;
+
+    public BuffEntryKey GetKey() => new(BuffId, Group);
+
+    public BuffDebuffGroupEntryConfig Clone()
+    {
+        return new BuffDebuffGroupEntryConfig
+        {
+            BuffId = BuffId,
+            Group = Group,
+            IsEnabled = IsEnabled
+        };
+    }
+}
+
+/// <summary>
+/// バフ・デバフグループ(自分のバフ・デバフのうち、選んだものだけを並べるウィジェット)の設定。
+///
+/// <para>
+/// 行の並びは <see cref="Entries"/> の順。既定の行(<see cref="WidgetConfigDefaults.DefaultBuffDebuffGroupEntries"/>)は
+/// オフにしても残り、右クリックで足した行はオフのまま保存すると消える。
+/// </para>
+/// </summary>
+public sealed class BuffDebuffGroupWidgetSettingsConfig
+{
+    /// <summary>ゲージが満タンになる残り時間。添字はバフ一覧と同じ(<see cref="WidgetConfigDefaults.BuffGaugeLengthSeconds"/>)。既定は自動。</summary>
+    public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultBuffDebuffGroupGaugeLengthIndex;
+
+    /// <summary>バフの行のゲージの色(「バフカラー」)。</summary>
+    public BuffGaugeColorConfig? BuffGaugeColors { get; set; }
+
+    /// <summary>デバフの行のゲージの色(「デバフカラー」)。</summary>
+    public BuffGaugeColorConfig? DebuffGaugeColors { get; set; }
+
+    public List<BuffDebuffGroupEntryConfig>? Entries { get; set; }
+
+    public BuffDebuffGroupWidgetSettingsConfig Clone()
+    {
+        return new BuffDebuffGroupWidgetSettingsConfig
+        {
+            GaugeLengthIndex = GaugeLengthIndex,
+            BuffGaugeColors = BuffGaugeColors?.Clone(),
+            DebuffGaugeColors = DebuffGaugeColors?.Clone(),
+            Entries = Entries?.Select(entry => entry.Clone()).ToList()
         };
     }
 }
@@ -496,6 +580,13 @@ public sealed class MeterWidgetSettingsConfig
     /// <summary>プレイヤーリストに潜在心相晶の型の絵を出すか。使うのはプレイヤーリストだけ。</summary>
     public bool ShowSeasonTalent { get; set; } = true;
 
+    /// <summary>
+    /// プレイヤーリストとエンティティリストの設定「戦闘状態」(戦闘状態の人・実体の名前の左に印を出すか)。
+    /// 0=表示 / 1=非表示 / 2=自分のみ表示(<see cref="WidgetConfigDefaults.CombatStateDisplayShowIndex"/> ほか)。
+    /// 2 はプレイヤーリストだけ(エンティティリストには自分の行が無いので、読み込みで 0〜1 に収める)。
+    /// </summary>
+    public int CombatStateDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
+
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
     /// <summary>エンティティリストのフィルター。0=すべて表示 / 1=オブジェクト以外(<c>EntityDisplayMode</c>)。</summary>
@@ -560,6 +651,7 @@ public sealed class MeterWidgetSettingsConfig
             PlayerInfoFormatString = PlayerInfoFormatString,
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
+            CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -811,6 +903,17 @@ public static class WidgetConfigDefaults
     private const double PlayerModuleInitialWindowHeight = 240d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
+
+    /// <summary>バフ・デバフグループの既定の幅(バフ・デバフ一覧と共有しない)。値はステータス詳細と同じ。</summary>
+    private const double BuffDebuffGroupInitialWindowWidth = 280d;
+
+    /// <summary>
+    /// バフ・デバフグループの既定の高さ。既定でオンの行(<see cref="DefaultBuffDebuffGroupEntries"/>)がちょうど入る高さで、
+    /// 窓のヘッダー30 + 一覧の上下の余白10 + 行の高さ31 × オンの行の数。
+    /// 既定の行の一覧はこれより後ろで初期化されるので、値を控える欄にせず読むたびに数える。
+    /// </summary>
+    private static double BuffDebuffGroupInitialWindowHeight =>
+        30d + 10d + 31d * DefaultBuffDebuffGroupEntries.Count(entry => entry.IsEnabled);
     private const double MetricContributionInitialWindowWidth = 520d;
     private const double MetricContributionInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 720d;
@@ -919,32 +1022,151 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
-    /// <summary>ゲージの色の鍵。左端と右端の2つで、間はグラデーションになる。</summary>
-    public static readonly string[] BuffListGaugeColorKeys =
+    /// <summary>ゲージの色の鍵。左端と右端の2つで、間はグラデーションになる。バフ・デバフ一覧とバフ・デバフグループで共通。</summary>
+    public static readonly string[] BuffGaugeColorKeys =
     [
         "GaugeStart",
         "GaugeEnd"
     ];
 
-    public const int MinBuffListGaugeLengthIndex = 0;
+    public const int MinBuffGaugeLengthIndex = 0;
 
-    /// <summary>ゲージが満タンになる残り時間。添字は 0=10秒 / 1=20秒 / 2=30秒。</summary>
-    public static readonly int[] BuffListGaugeLengthSeconds = [10, 20, 30];
+    /// <summary>
+    /// ゲージが満タンになる残り時間。添字は 0=自動 / 1=10秒 / 2=20秒 / 3=30秒。バフ・デバフ一覧とバフ・デバフグループで共通。
+    /// 自動は null で、行ごとの長さ(<c>PlayerBuffSnapshot.GaugeLengthSeconds</c>、実体の効果時間の総量)を使う。
+    /// </summary>
+    public static readonly int?[] BuffGaugeLengthSeconds = [null, 10, 20, 30];
 
     /// <summary>バフ一覧の既定。短いバフを見るので10秒。</summary>
-    public const int DefaultBuffListGaugeLengthIndex = 0;
+    public const int DefaultBuffListGaugeLengthIndex = 1;
 
     /// <summary>デバフ一覧の既定。長いデバフを見るので30秒。</summary>
-    public const int DefaultDebuffListGaugeLengthIndex = 2;
+    public const int DefaultDebuffListGaugeLengthIndex = 3;
 
-    /// <summary>バフ・デバフ一覧の設定「モジュール効果」の既定(出す)。</summary>
-    public const bool DefaultShowModuleEffects = true;
+    /// <summary>バフ・デバフグループの既定。行ごとに実体の効果時間の総量(自動)。</summary>
+    public const int DefaultBuffDebuffGroupGaugeLengthIndex = 0;
 
-    /// <summary>バフ・デバフ一覧の設定「装備効果」の既定(出す)。</summary>
-    public const bool DefaultShowEquipmentEffects = true;
+    /// <summary>
+    /// バフ・デバフグループの既定の行(この並び)。既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffDebuffGroupEntries { get; } =
+    [
+        (BuffEntryKey.ForGroup(BuffGroup.Cuisine), true),
+        (BuffEntryKey.ForGroup(BuffGroup.Potion), true),
+        (BuffEntryKey.ForBuff(2110056), true),  // 時間凝固(ティナの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110049), true),  // 機械の故障(ガトグリフの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110050), true),  // 属性停滞(バジリスクの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110055), true),  // 疲労・烈火の焼身(タータの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110057), false)  // 虚弱・祈り禁止(アルーナの奥義のデバフ)
+    ];
 
-    /// <summary>バフ・デバフ一覧の設定「因子効果」の既定(出す)。</summary>
-    public const bool DefaultShowFactorEffects = true;
+    public static bool IsDefaultBuffDebuffGroupEntry(BuffEntryKey key)
+    {
+        return DefaultBuffDebuffGroupEntries.Any(entry => entry.Key == key);
+    }
+
+    /// <summary>
+    /// バフ・デバフグループの行をオン/オフにする(右クリックの「グループに追加」と「グループから削除」)。
+    /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行はオフにして残し、足した行は消す
+    /// (足した行をオフのまま保存したときと同じ)。ウィジェットの今の値・保存する値・設定の窓の保存済みの値がこの決まりを使う。
+    /// </summary>
+    public static void SetBuffDebuffGroupEntryEnabled(List<BuffDebuffGroupEntryConfig> entries, BuffEntryKey key, bool isEnabled)
+    {
+        var index = entries.FindIndex(entry => entry.GetKey() == key);
+        if (isEnabled)
+        {
+            if (index >= 0)
+            {
+                entries[index].IsEnabled = true;
+                return;
+            }
+
+            entries.Add(new BuffDebuffGroupEntryConfig
+            {
+                BuffId = key.BuffId,
+                Group = key.Group,
+                IsEnabled = true
+            });
+            return;
+        }
+
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (IsDefaultBuffDebuffGroupEntry(key))
+        {
+            entries[index].IsEnabled = false;
+        }
+        else
+        {
+            entries.RemoveAt(index);
+        }
+    }
+
+    /// <summary>
+    /// バフ・デバフグループの行を、鍵の並び <paramref name="order"/> のとおりに並べ直す(ウィジェットでの並べ替え)。
+    /// 並びに無い行は後ろへ、元の順のまま置く。
+    /// </summary>
+    public static List<BuffDebuffGroupEntryConfig> OrderBuffDebuffGroupEntries(
+        IReadOnlyList<BuffDebuffGroupEntryConfig> entries,
+        IReadOnlyList<BuffEntryKey> order)
+    {
+        var position = new Dictionary<BuffEntryKey, int>(order.Count);
+        for (var index = 0; index < order.Count; index++)
+        {
+            position.TryAdd(order[index], index);
+        }
+
+        return
+        [
+            .. entries
+                .Select((entry, index) => (Entry: entry, Index: index))
+                .OrderBy(pair => position.TryGetValue(pair.Entry.GetKey(), out var at) ? at : order.Count + pair.Index)
+                .Select(pair => pair.Entry)
+        ];
+    }
+
+    /// <summary>バフ・デバフ一覧の設定「同種バフの表示」の選択肢の数(まとめない / プレイヤーのみ / エンティティのみ / すべて)。</summary>
+    public const int SameBuffGroupingCount = 4;
+
+    /// <summary>「同種バフの表示」の既定(プレイヤーのみまとめる)。</summary>
+    public const int DefaultSameBuffGroupingIndex = 1;
+
+    /// <summary>バフ・デバフ一覧の設定「付与者プレイヤー名の表示」の添字。</summary>
+    public const int CasterNameDisplayShowIndex = 0;
+    public const int CasterNameDisplayHideIndex = 1;
+    public const int CasterNameDisplayAppliedByOthersIndex = 2;
+
+    /// <summary>「付与者プレイヤー名の表示」の既定(他者付与のみ)。</summary>
+    public const int DefaultCasterNameDisplayModeIndex = CasterNameDisplayAppliedByOthersIndex;
+
+    /// <summary>プレイヤーリストとエンティティリストの設定「戦闘状態」の添字。自分のみ表示はプレイヤーリストだけ。</summary>
+    public const int CombatStateDisplayShowIndex = 0;
+    public const int CombatStateDisplayHideIndex = 1;
+    public const int CombatStateDisplaySelfOnlyIndex = 2;
+
+    /// <summary>「戦闘状態」の既定(表示)。</summary>
+    public const int DefaultCombatStateDisplayModeIndex = CombatStateDisplayShowIndex;
+
+    /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
+    public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({Caster})";
+
+    /// <summary>
+    /// 設定「同種バフの表示」で、その対象の一覧を同じ番号のバフ1行にまとめるか。
+    /// </summary>
+    /// <param name="isEntityTarget">対象がエンティティ(エンティティリストに載る実体)か。偽ならプレイヤー。</param>
+    public static bool GroupsSameBuffs(BuffListWidgetSettingsConfig settings, bool isEntityTarget)
+    {
+        return settings.SameBuffGroupingIndex switch
+        {
+            1 => !isEntityTarget,
+            2 => isEntityTarget,
+            3 => true,
+            _ => false,
+        };
+    }
 
     /// <summary>
     /// ダメージの属性の鍵。<c>EDamageProperty</c> の並び(属性ID 0〜8)。
@@ -1031,10 +1253,10 @@ public static class WidgetConfigDefaults
     /// <para>
     /// 見本は2枠で、<b>1枠目がバフの青緑、2枠目がデバフの紫</b>。2枠目は1枠目の R と G を入れ替えたもので、
     /// 彩度と明度はそのままに色相だけ反対側へ回る。どちらを選んだ状態で始めるかは
-    /// <see cref="GetDefaultGaugeColorIndex"/> が種別で決める。
+    /// <see cref="GetDefaultGaugeColorIndex"/> がバフかデバフかで決める。
     /// </para>
     /// </summary>
-    private static readonly Dictionary<string, string[]> BuffListDefaultGaugeColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string[]> BuffGaugeDefaultColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["GaugeStart"] = ["#5688A4", "#8856A4"],
         ["GaugeEnd"] = ["#56C8C1", "#C856C1"]
@@ -1277,9 +1499,21 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.PlayerStatus;
     }
 
+    /// <summary>バフ・デバフグループの設定(ゲージ・色・行)を持つ種別か。</summary>
+    public static bool SupportsBuffDebuffGroupSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.BuffDebuffGroup;
+    }
+
+    /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
+    public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
+    {
+        return kind is WidgetKind.PlayerStatus or WidgetKind.BuffDebuffGroup;
+    }
+
     /// <summary>
     /// 開いていた窓の対象を保存する種別か。プレイヤー用ウィンドウだけが持つ。
-    /// <see cref="WidgetKind.PlayerStatus"/> は常に自分1枚なので対象外。
+    /// 自分だけを出す窓(<see cref="IsSelfOnlyPlayerWindowKind"/>)は常に自分1枚なので対象外。
     /// </summary>
     public static bool SupportsOpenTargets(WidgetKind kind)
     {
@@ -1317,7 +1551,8 @@ public static class WidgetConfigDefaults
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
             SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
             Equipment = SupportsEquipmentSettings(kind) ? CreateEquipmentSettings() : null,
-            PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null
+            PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
+            BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null
         };
     }
 
@@ -1613,6 +1848,11 @@ public static class WidgetConfigDefaults
                 Width = PlayerBuffListInitialWindowWidth,
                 Height = PlayerBuffListInitialWindowHeight
             },
+            WidgetKind.BuffDebuffGroup => new WidgetWindowConfig
+            {
+                Width = BuffDebuffGroupInitialWindowWidth,
+                Height = BuffDebuffGroupInitialWindowHeight
+            },
             WidgetKind.PlayerTalent => new WidgetWindowConfig
             {
                 Width = PlayerTalentInitialWindowWidth,
@@ -1749,13 +1989,11 @@ public static class WidgetConfigDefaults
             GaugeLengthIndex = kind == WidgetKind.DebuffList
                 ? DefaultDebuffListGaugeLengthIndex
                 : DefaultBuffListGaugeLengthIndex,
-            GaugeColorIndexes = CreateDefaultGaugeColorIndexes(kind),
-            GaugeColorPalettes = CreateDefaultGaugeColorPalettes(),
-            GaugeColorOpacity = MaxClassColorOpacity,
+            GaugeColors = CreateBuffGaugeColors(GetBuffListSide(kind)),
             HiddenBuffIds = [],
-            ShowModuleEffects = DefaultShowModuleEffects,
-            ShowEquipmentEffects = DefaultShowEquipmentEffects,
-            ShowFactorEffects = DefaultShowFactorEffects
+            SameBuffGroupingIndex = DefaultSameBuffGroupingIndex,
+            CasterNameDisplayModeIndex = DefaultCasterNameDisplayModeIndex,
+            BuffInfoFormatString = DefaultBuffListBuffInfoFormatString
         };
     }
 
@@ -1777,41 +2015,145 @@ public static class WidgetConfigDefaults
     /// </summary>
     public static void NormalizeBuffList(WidgetKind kind, BuffListWidgetSettingsConfig buffList)
     {
-        buffList.GaugeLengthIndex = Math.Clamp(
-            buffList.GaugeLengthIndex,
-            MinBuffListGaugeLengthIndex,
-            BuffListGaugeLengthSeconds.Length - 1);
+        buffList.GaugeLengthIndex = ClampBuffGaugeLengthIndex(buffList.GaugeLengthIndex);
+        buffList.GaugeColors = CloneNormalizedBuffGaugeColors(buffList.GaugeColors, GetBuffListSide(kind));
 
-        buffList.GaugeColorOpacity = Math.Clamp(
-            buffList.GaugeColorOpacity,
-            MinClassColorOpacity,
-            MaxClassColorOpacity);
-
-        buffList.GaugeColorIndexes ??= CreateDefaultGaugeColorIndexes(kind);
-        buffList.GaugeColorPalettes ??= CreateDefaultGaugeColorPalettes();
-
-        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var key in BuffListGaugeColorKeys)
-        {
-            var defaultColors = CreateDefaultGaugeColors(key);
-            var sourceColors = buffList.GaugeColorPalettes.TryGetValue(key, out var colors) ? colors : defaultColors;
-            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
-            normalizedPalettes[key] = palette;
-
-            var selectedIndex = buffList.GaugeColorIndexes.TryGetValue(key, out var index)
-                ? index
-                : GetDefaultGaugeColorIndex(kind);
-            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
-        }
-
-        buffList.GaugeColorIndexes = normalizedIndexes;
-        buffList.GaugeColorPalettes = normalizedPalettes;
+        buffList.SameBuffGroupingIndex = Math.Clamp(buffList.SameBuffGroupingIndex, 0, SameBuffGroupingCount - 1);
+        buffList.CasterNameDisplayModeIndex = Math.Clamp(
+            buffList.CasterNameDisplayModeIndex,
+            CasterNameDisplayShowIndex,
+            CasterNameDisplayAppliedByOthersIndex);
+        buffList.BuffInfoFormatString ??= DefaultBuffListBuffInfoFormatString;
 
         // 0 以下はバフのIDではない。重なりは先に足したほうを残し、非表示にした順を保つ。
         buffList.HiddenBuffIds = buffList.HiddenBuffIds is null
             ? []
             : [.. buffList.HiddenBuffIds.Where(baseId => baseId > 0).Distinct()];
+    }
+
+    /// <summary>バフ一覧の色はバフの側、デバフ一覧の色はデバフの側。</summary>
+    public static PlayerBuffListKind GetBuffListSide(WidgetKind kind)
+    {
+        return kind == WidgetKind.DebuffList
+            ? PlayerBuffListKind.Debuff
+            : PlayerBuffListKind.Buff;
+    }
+
+    public static int ClampBuffGaugeLengthIndex(int index)
+    {
+        return Math.Clamp(index, MinBuffGaugeLengthIndex, BuffGaugeLengthSeconds.Length - 1);
+    }
+
+    public static BuffGaugeColorConfig CreateBuffGaugeColors(PlayerBuffListKind side)
+    {
+        return new BuffGaugeColorConfig
+        {
+            Indexes = CreateDefaultGaugeColorIndexes(side),
+            Palettes = CreateDefaultGaugeColorPalettes(),
+            Opacity = MaxClassColorOpacity
+        };
+    }
+
+    /// <summary>
+    /// ゲージの色の保存値を表示できる形に直して写す。選んでいる枠が入っていないときの既定はバフとデバフで違う
+    /// (<see cref="GetDefaultGaugeColorIndex"/>)。
+    /// </summary>
+    public static BuffGaugeColorConfig CloneNormalizedBuffGaugeColors(BuffGaugeColorConfig? colors, PlayerBuffListKind side)
+    {
+        var source = colors ?? CreateBuffGaugeColors(side);
+        var savedIndexes = source.Indexes ?? CreateDefaultGaugeColorIndexes(side);
+        var savedPalettes = source.Palettes ?? CreateDefaultGaugeColorPalettes();
+
+        var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var key in BuffGaugeColorKeys)
+        {
+            var defaultColors = CreateDefaultGaugeColors(key);
+            var sourceColors = savedPalettes.TryGetValue(key, out var saved) ? saved : defaultColors;
+            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+            normalizedPalettes[key] = palette;
+
+            var selectedIndex = savedIndexes.TryGetValue(key, out var index)
+                ? index
+                : GetDefaultGaugeColorIndex(side);
+            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+        }
+
+        return new BuffGaugeColorConfig
+        {
+            Indexes = normalizedIndexes,
+            Palettes = normalizedPalettes,
+            Opacity = Math.Clamp(source.Opacity, MinClassColorOpacity, MaxClassColorOpacity)
+        };
+    }
+
+    /// <summary>バフ・デバフグループの設定の既定。ゲージは自動、色はバフ一覧・デバフ一覧と同じ、行は既定の7行。</summary>
+    public static BuffDebuffGroupWidgetSettingsConfig CreateBuffDebuffGroupSettings()
+    {
+        return new BuffDebuffGroupWidgetSettingsConfig
+        {
+            GaugeLengthIndex = DefaultBuffDebuffGroupGaugeLengthIndex,
+            BuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Buff),
+            DebuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Debuff),
+            Entries = CreateDefaultBuffDebuffGroupEntries()
+        };
+    }
+
+    public static List<BuffDebuffGroupEntryConfig> CreateDefaultBuffDebuffGroupEntries()
+    {
+        return
+        [
+            .. DefaultBuffDebuffGroupEntries.Select(entry => new BuffDebuffGroupEntryConfig
+            {
+                BuffId = entry.Key.BuffId,
+                Group = entry.Key.Group,
+                IsEnabled = entry.IsEnabled
+            })
+        ];
+    }
+
+    /// <summary>
+    /// 保存値を表示できる形に直して写す。行は、鍵として成り立たないものと重なり(先の行を残す)を落とし、
+    /// 欠けた既定の行を既定のオン・オフで末尾に足す(既定の行は消えない)。
+    /// </summary>
+    public static BuffDebuffGroupWidgetSettingsConfig CloneNormalizedBuffDebuffGroup(BuffDebuffGroupWidgetSettingsConfig? settings)
+    {
+        var normalized = (settings ?? CreateBuffDebuffGroupSettings()).Clone();
+        normalized.GaugeLengthIndex = ClampBuffGaugeLengthIndex(normalized.GaugeLengthIndex);
+        normalized.BuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.BuffGaugeColors, PlayerBuffListKind.Buff);
+        normalized.DebuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.DebuffGaugeColors, PlayerBuffListKind.Debuff);
+
+        var entries = new List<BuffDebuffGroupEntryConfig>();
+        var seen = new HashSet<BuffEntryKey>();
+        foreach (var entry in normalized.Entries ?? CreateDefaultBuffDebuffGroupEntries())
+        {
+            if (entry is null)
+            {
+                continue;
+            }
+
+            var key = entry.GetKey();
+            if (key.IsValid && seen.Add(key))
+            {
+                entries.Add(entry);
+            }
+        }
+
+        foreach (var (key, isEnabled) in DefaultBuffDebuffGroupEntries)
+        {
+            if (seen.Add(key))
+            {
+                entries.Add(new BuffDebuffGroupEntryConfig
+                {
+                    BuffId = key.BuffId,
+                    Group = key.Group,
+                    IsEnabled = isEnabled
+                });
+            }
+        }
+
+        normalized.Entries = entries;
+        return normalized;
     }
 
     public static MeterWidgetSettingsConfig CreateMeterSettings(WidgetKind kind)
@@ -1919,25 +2261,25 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// ゲージの色で最初に選ばれている枠。<b>デバフ一覧だけ2枠目(紫)</b>で、残りは1枠目(青緑)から始める。
-    /// 見本そのものは両方で同じ(<see cref="BuffListDefaultGaugeColorHexes"/>)。
+    /// ゲージの色で最初に選ばれている枠。<b>デバフの色だけ2枠目(紫)</b>で、バフの色は1枠目(青緑)から始める。
+    /// 見本そのものは両方で同じ(<see cref="BuffGaugeDefaultColorHexes"/>)。
     /// </summary>
-    public static int GetDefaultGaugeColorIndex(WidgetKind kind)
+    public static int GetDefaultGaugeColorIndex(PlayerBuffListKind side)
     {
-        return kind == WidgetKind.DebuffList
+        return side == PlayerBuffListKind.Debuff
             ? MinClassColorIndex + 1
             : MinClassColorIndex;
     }
 
-    public static Dictionary<string, int> CreateDefaultGaugeColorIndexes(WidgetKind kind)
+    public static Dictionary<string, int> CreateDefaultGaugeColorIndexes(PlayerBuffListKind side)
     {
-        return BuffListGaugeColorKeys
-            .ToDictionary(key => key, _ => GetDefaultGaugeColorIndex(kind), StringComparer.OrdinalIgnoreCase);
+        return BuffGaugeColorKeys
+            .ToDictionary(key => key, _ => GetDefaultGaugeColorIndex(side), StringComparer.OrdinalIgnoreCase);
     }
 
     public static Dictionary<string, List<string>> CreateDefaultGaugeColorPalettes()
     {
-        return BuffListGaugeColorKeys.ToDictionary(
+        return BuffGaugeColorKeys.ToDictionary(
             key => key,
             CreateDefaultGaugeColors,
             StringComparer.OrdinalIgnoreCase);
@@ -1945,7 +2287,7 @@ public static class WidgetConfigDefaults
 
     public static List<string> CreateDefaultGaugeColors(string key)
     {
-        return BuffListDefaultGaugeColorHexes.TryGetValue(key, out var colors)
+        return BuffGaugeDefaultColorHexes.TryGetValue(key, out var colors)
             ? [.. colors]
             : ["#5688A4"];
     }
@@ -2253,6 +2595,9 @@ public static class WidgetConfigDefaults
         config.Equipment = SupportsEquipmentSettings(kind)
             ? CloneNormalizedEquipment(config.Equipment)
             : null;
+        config.BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind)
+            ? CloneNormalizedBuffDebuffGroup(config.BuffDebuffGroup)
+            : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
             : null;
@@ -2289,6 +2634,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.DebuffList:
                 config.Window.Width ??= PlayerBuffListInitialWindowWidth;
                 config.Window.Height ??= PlayerBuffListInitialWindowHeight;
+                break;
+            case WidgetKind.BuffDebuffGroup:
+                config.Window.Width ??= BuffDebuffGroupInitialWindowWidth;
+                config.Window.Height ??= BuffDebuffGroupInitialWindowHeight;
                 break;
             case WidgetKind.PlayerTalent:
                 config.Window.Width ??= PlayerTalentInitialWindowWidth;
@@ -2465,6 +2814,10 @@ public static class WidgetConfigDefaults
             meter.ListSortModeIndex,
             FirstSeenListSortModeIndex,
             NameListSortModeIndex);
+        meter.CombatStateDisplayModeIndex = Math.Clamp(
+            meter.CombatStateDisplayModeIndex,
+            CombatStateDisplayShowIndex,
+            kind == WidgetKind.EntityList ? CombatStateDisplayHideIndex : CombatStateDisplaySelfOnlyIndex);
 
         // クラスカラーのフィルター。持たないウィジェットでは常に無効に倒す。
         var filterDefaults = CreateDefaultClassColorFilterColors(kind);

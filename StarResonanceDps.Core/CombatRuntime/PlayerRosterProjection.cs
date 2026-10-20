@@ -464,7 +464,8 @@ internal static class PlayerRosterProjection
             partyLineId,
             seasonId,
             recordedAvatar,
-            source.RootBuffData);
+            source.RootBuffData,
+            nearbyEntity is not null && PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCombatState") > 0);
         return true;
     }
 

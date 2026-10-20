@@ -28,5 +28,8 @@ public enum WidgetKind
     PlayerSeasonTalent = 21,
 
     /// <summary>モジュール情報。プレイヤーのモジュール効果(根のバフ)の一覧。</summary>
-    PlayerModule = 22
+    PlayerModule = 22,
+
+    /// <summary>バフ・デバフグループ。自分のバフ・デバフのうち、設定で選んだものだけの一覧。</summary>
+    BuffDebuffGroup = 23
 }

@@ -362,11 +362,14 @@
   <data name="Settings_Section_PlayerStatusTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
   </data>
-  <data name="Common_Delete" xml:space="preserve">
-    <value>删除</value>
-  </data>
   <data name="Settings_Section_PlayerStatusRows_Title" xml:space="preserve">
     <value>属性</value>
+  </data>
+  <data name="Settings_Section_BuffDebuffGroupEntries_Title" xml:space="preserve">
+    <value>增益减益</value>
+  </data>
+  <data name="Settings_Section_BuffDebuffGroupEntries_Description" xml:space="preserve">
+    <value>※右键点击增益和减益即可添加</value>
   </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>职责技能</value>
@@ -397,6 +400,15 @@
   </data>
   <data name="BuffList_Menu_HideDebuff" xml:space="preserve">
     <value>隐藏此减益</value>
+  </data>
+  <data name="BuffList_Menu_AddToGroup" xml:space="preserve">
+    <value>添加至分组</value>
+  </data>
+  <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
+    <value>从分组中删除此增益</value>
+  </data>
+  <data name="BuffDebuffGroup_Menu_RemoveDebuff" xml:space="preserve">
+    <value>从分组中删除此减益</value>
   </data>
   <data name="Settings_Switch_On" xml:space="preserve">
     <value>开</value>
@@ -593,6 +605,9 @@
   <data name="Settings_Display_GaugeLength" xml:space="preserve">
     <value>进度条长度</value>
   </data>
+  <data name="GaugeLength_Auto" xml:space="preserve">
+    <value>自动</value>
+  </data>
   <data name="GaugeLength_10" xml:space="preserve">
     <value>10秒</value>
   </data>
@@ -602,14 +617,26 @@
   <data name="GaugeLength_30" xml:space="preserve">
     <value>30秒</value>
   </data>
-  <data name="Settings_Display_ModuleEffect" xml:space="preserve">
-    <value>模组效果显示</value>
+  <data name="Settings_Display_SameBuffs" xml:space="preserve">
+    <value>同类增益显示</value>
   </data>
-  <data name="Settings_Display_EquipmentEffect" xml:space="preserve">
-    <value>装备效果显示</value>
+  <data name="SameBuffs_Ungrouped" xml:space="preserve">
+    <value>不合并</value>
   </data>
-  <data name="Settings_Display_FactorEffect" xml:space="preserve">
-    <value>因子效果显示</value>
+  <data name="SameBuffs_GroupPlayers" xml:space="preserve">
+    <value>仅合并玩家</value>
+  </data>
+  <data name="SameBuffs_GroupEntities" xml:space="preserve">
+    <value>仅合并实体</value>
+  </data>
+  <data name="SameBuffs_GroupAll" xml:space="preserve">
+    <value>全部合并</value>
+  </data>
+  <data name="Settings_Display_CasterName" xml:space="preserve">
+    <value>显示施加者玩家名称</value>
+  </data>
+  <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
+    <value>仅他人施加</value>
   </data>
   <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
     <value>实体名称</value>
@@ -839,9 +866,6 @@
   <data name="Widget_BuffDurationFormat" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Widget_BuffNameWithCasterFormat" xml:space="preserve">
-    <value>{0}({1})</value>
-  </data>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>
   </data>
@@ -860,7 +884,7 @@
   <data name="Settings_PlayerStatus_TextColor_ValueDecrease" xml:space="preserve">
     <value>数值减少</value>
   </data>
-  <data name="Settings_PlayerStatus_ReorderNote" xml:space="preserve">
+  <data name="Settings_RowReorderNote" xml:space="preserve">
     <value>※可在此列表或小组件上拖动项目调整顺序</value>
   </data>
   <data name="Settings_SkillInfo_Customization" xml:space="preserve">
@@ -1123,6 +1147,15 @@
   <data name="Settings_Display_SeasonTalent" xml:space="preserve">
     <value>显示深眠心相仪</value>
   </data>
+  <data name="Settings_Display_CombatState" xml:space="preserve">
+    <value>战斗状态</value>
+  </data>
+  <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
+    <value>仅显示自己</value>
+  </data>
+  <data name="CombatState_Tip" xml:space="preserve">
+    <value>交战中</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>护盾量合并显示</value>
   </data>
@@ -1192,11 +1225,17 @@
   <data name="Settings_BuffInfo_PreviewName" xml:space="preserve">
     <value>玩家1</value>
   </data>
+  <data name="Settings_BuffInfo_PreviewCaster" xml:space="preserve">
+    <value>玩家2</value>
+  </data>
   <data name="Settings_BuffInfo_Field_BuffName" xml:space="preserve">
     <value>增益名称</value>
   </data>
   <data name="Settings_BuffInfo_Field_Name" xml:space="preserve">
-    <value>名称</value>
+    <value>目标名称</value>
+  </data>
+  <data name="Settings_BuffInfo_Field_Caster" xml:space="preserve">
+    <value>施加者玩家名称</value>
   </data>
   <data name="Settings_BuffInfo_Field_Level" xml:space="preserve">
     <value>等级</value>
@@ -1215,6 +1254,12 @@
   </data>
   <data name="Widget_BuffDebuffCard_Group_Potion" xml:space="preserve">
     <value>药剂</value>
+  </data>
+  <data name="Widget_BuffDebuffGroup" xml:space="preserve">
+    <value>增益减益分组</value>
+  </data>
+  <data name="Widget_BuffDebuffGroup_NoEffect" xml:space="preserve">
+    <value>暂无效果</value>
   </data>
   <data name="Map_ChannelFormat" xml:space="preserve">
     <value>{0}线</value>
