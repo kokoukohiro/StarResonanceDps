@@ -492,7 +492,8 @@ public sealed partial class MainViewModel : ViewModelBase
         if (e.PropertyName is not (nameof(WidgetListItemViewModel.DisplayName)
             or nameof(WidgetListItemViewModel.State)
             or nameof(WidgetListItemViewModel.IsFavorite)
-            or nameof(WidgetListItemViewModel.IsPinned)))
+            or nameof(WidgetListItemViewModel.IsPinned)
+            or nameof(WidgetListItemViewModel.IsClickThrough)))
         {
             return;
         }
@@ -653,6 +654,11 @@ public sealed partial class MainViewModel : ViewModelBase
                     Widgets.SortDescriptions.Add(new SortDescription(nameof(WidgetListItemViewModel.OriginalIndex), ListSortDirection.Ascending));
                     break;
 
+                case 5:
+                    Widgets.SortDescriptions.Add(new SortDescription(nameof(WidgetListItemViewModel.IsClickThrough), ListSortDirection.Descending));
+                    Widgets.SortDescriptions.Add(new SortDescription(nameof(WidgetListItemViewModel.OriginalIndex), ListSortDirection.Ascending));
+                    break;
+
                 default:
                     Widgets.SortDescriptions.Add(new SortDescription(nameof(WidgetListItemViewModel.OriginalIndex), ListSortDirection.Ascending));
                     break;
@@ -695,13 +701,24 @@ public sealed partial class MainViewModel : ViewModelBase
         UpdateWidgetClickThroughStates(_widgetItems, isClickThrough: false);
     }
 
-    /// <summary>並び替えにも絞り込みにも関わらないので、ピン留めの一括と違って一覧は並べ直さない。</summary>
-    private static void UpdateWidgetClickThroughStates(IEnumerable<WidgetListItemViewModel> widgets, bool isClickThrough)
+    /// <summary>並べ替え「クリック透過」に効くので、ピン留めの一括と同じく最後に1回だけ一覧を並べ直す。</summary>
+    private void UpdateWidgetClickThroughStates(IEnumerable<WidgetListItemViewModel> widgets, bool isClickThrough)
     {
-        foreach (var widget in widgets)
+        _isBulkUpdatingWidgets = true;
+
+        try
         {
-            widget.IsClickThrough = isClickThrough;
+            foreach (var widget in widgets)
+            {
+                widget.IsClickThrough = isClickThrough;
+            }
         }
+        finally
+        {
+            _isBulkUpdatingWidgets = false;
+        }
+
+        Widgets.Refresh();
     }
 
     private void UpdateWidgetStates(IEnumerable<WidgetListItemViewModel> widgets, WidgetState state)

@@ -59,6 +59,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _widgetWindowTopmostModeIndex = AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
 
+    [ObservableProperty]
+    private int _widgetDataStatusDisplayModeIndex = AppConfigDefaults.WidgetDataStatusDisplayShowIndex;
+
     // --- 集計設定 ---
 
     [ObservableProperty]
@@ -421,6 +424,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
+            WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()],
             StopAggregationInNonCombatAreas = StopAggregationInNonCombatAreas,
@@ -475,6 +479,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
             InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
             WidgetWindowTopmostModeIndex = settings.WidgetWindowTopmostModeIndex;
+            WidgetDataStatusDisplayModeIndex = settings.WidgetDataStatusDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
             StopAggregationInNonCombatAreas = settings.StopAggregationInNonCombatAreas;
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
@@ -756,6 +761,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
             && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
             && left.WidgetWindowTopmostModeIndex == right.WidgetWindowTopmostModeIndex
+            && left.WidgetDataStatusDisplayModeIndex == right.WidgetDataStatusDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
             && left.StopAggregationInNonCombatAreas == right.StopAggregationInNonCombatAreas
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
@@ -1206,7 +1212,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>
-    /// ホットキーが表示設定「ウィジェットウィンドウ」を切り替えて保存した。表示と保存済みの控えの両方を保存した値に合わせる
+    /// ホットキーがウィジェット設定「ウィジェットウィンドウ」を切り替えて保存した。表示と保存済みの控えの両方を保存した値に合わせる
     /// (未保存の扱いにしない)。プレビューは保存の側で合わせてあるので出し直さない。
     /// </summary>
     private void ConfigManager_WidgetWindowTopmostModeSaved(object? sender, EventArgs e)
@@ -1250,6 +1256,16 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     partial void OnWidgetWindowTopmostModeIndexChanged(int value)
+    {
+        if (!_isLoadingSettings)
+        {
+            ApplySettingsPreview();
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnWidgetDataStatusDisplayModeIndexChanged(int value)
     {
         if (!_isLoadingSettings)
         {

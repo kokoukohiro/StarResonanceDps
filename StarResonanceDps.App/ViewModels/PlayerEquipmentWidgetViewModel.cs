@@ -6,6 +6,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -105,8 +106,17 @@ public sealed partial class PlayerEquipmentWidgetViewModel : PlayerWidgetWindowV
         if (_player?.IsSelf == true)
         {
             Rebuild();
+            RefreshDataStatus();
         }
     }
+
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForPlayerEquipment(
+            reception,
+            EncounterHistoryProvider.HasLoadFailed,
+            IsSelfTarget,
+            player,
+            SelfEquipmentStore.HasState);
 
     /// <summary>表示設定(保存かプレビュー)が変わった。</summary>
     private void Widget_EquipmentSettingsChanged(object? sender, EventArgs e)

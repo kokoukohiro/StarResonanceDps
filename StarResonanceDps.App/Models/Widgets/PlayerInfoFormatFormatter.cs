@@ -217,8 +217,16 @@ public static partial class PlayerInfoFormatFormatter
         }
 
         return LocalizationManager.Instance.GetString(
-            isSeasonTalentInactive ? "SeasonTalent_Inactive" : "SeasonTalent_Unknown");
+            IsSeasonTalentUnknown(seasonTalentBuffId, isSeasonTalentInactive) ? "SeasonTalent_Unknown" : "SeasonTalent_Inactive");
     }
+
+    /// <summary>潜在心相晶の型がまだ分からない(型が無く、無効とも確定していない)。表示の「不明」とウィジェットの状態の印が使う。</summary>
+    public static bool IsSeasonTalentUnknown(int seasonTalentBuffId, bool isSeasonTalentInactive)
+        => seasonTalentBuffId <= 0 && !isSeasonTalentInactive;
+
+    /// <summary>書式が潜在心相晶(<c>{Psych}</c>)を出すか。ウィジェットの状態の印が、型の「不明」を数えるかに使う。</summary>
+    public static bool ShowsSeasonTalent(string? format)
+        => !string.IsNullOrEmpty(format) && GetPsychRegex().IsMatch(format);
 
     /// <summary>
     /// 特化の表示値。特化(クラスR2)なら名前の表 <c>ClassSpecNames.json</c> の名前、

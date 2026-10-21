@@ -67,6 +67,15 @@ public sealed class PlayerRootBuffWidgetViewModel : PlayerWidgetWindowViewModel,
         Refresh();
     }
 
+    /// <summary>上級の絵は型で決まるので、上級の行を出しているときだけ型が分からないことを数える。</summary>
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForRootBuffs(
+            reception,
+            EncounterHistoryProvider.HasLoadFailed,
+            IsSelfTarget,
+            player,
+            countsAdvancedType: _entries.Any(entry => entry.Kind == RootBuffKind.SeasonTalentAdvanced));
+
     private void Refresh()
     {
         if (_isDisposed)

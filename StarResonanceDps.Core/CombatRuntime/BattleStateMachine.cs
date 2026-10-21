@@ -41,6 +41,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.BossDbmBarStore.Instance.Clear();
             Services.WarningSkillCastStore.Instance.Clear();
 
+            // 付け直しの有無は、このマップのまとめの差分で決め直す。
+            GameReceptionStateStore.ResetForNewMap();
         }
 
         /// <summary>

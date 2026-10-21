@@ -112,7 +112,25 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         RefreshPresentation();
         Refresh();
+        RefreshDataStatus();
         _refreshTimer.Start();
+    }
+
+    public WidgetDataStatus DataStatus { get; private set; }
+
+    public event EventHandler? DataStatusChanged;
+
+    /// <summary>出現時の一覧の受信と周りから外れたことは対象の変化を伴わないので、1秒ごとの読み直しでも見る。</summary>
+    public void RefreshDataStatus()
+    {
+        var status = _target.CreateDataStatus(GameReceptionStateStore.Current);
+        if (status == DataStatus)
+        {
+            return;
+        }
+
+        DataStatus = status;
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public long EntityId => _target.EntityId;
@@ -256,11 +274,13 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     private void Target_Changed(object? sender, EventArgs e)
     {
         RefreshPresentation();
+        RefreshDataStatus();
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
+        RefreshDataStatus();
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)

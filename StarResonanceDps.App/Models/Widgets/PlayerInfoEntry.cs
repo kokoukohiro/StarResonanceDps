@@ -87,12 +87,16 @@ public sealed record PlayerInfoEntry
     /// <param name="mapChannel">一覧の通知のチャンネル番号。</param>
     /// <param name="seasonId">今のシーズン番号。まだ分からなければ 0。</param>
     /// <param name="iconPalette">アイコンカラーの塗り。</param>
+    /// <param name="isProfileUnknown">
+    /// 冒険者レベル・シーズンレベル・能力スコア・シーズン強度がまだ届いていない(0 のまま)。「不明」と出す。
+    /// </param>
     public static PlayerInfoEntry Create(
         PlayerRosterEntry player,
         string mapName,
         uint mapChannel,
         int seasonId,
-        PlayerInfoIconPalette iconPalette)
+        PlayerInfoIconPalette iconPalette,
+        bool isProfileUnknown)
     {
         var localization = LocalizationManager.Instance;
         var unknownText = localization.GetString("PlayerInfo_Unknown");
@@ -131,10 +135,10 @@ public sealed record PlayerInfoEntry
                 player.ProfessionId,
                 nameDisplayMode),
             UidText = $"{localization.GetString("PlayerInfo_Uid")}: {uid}",
-            LevelText = $"{localization.GetString("PlayerInfo_Level")}: {FormatInteger(player.Level)}(+{FormatInteger(player.SeasonLevel)})",
+            LevelText = $"{localization.GetString("PlayerInfo_Level")}: {(isProfileUnknown ? unknownText : $"{FormatInteger(player.Level)}(+{FormatInteger(player.SeasonLevel)})")}",
             SeasonRankText = $"{localization.GetString("PlayerInfo_SeasonRank")}: {seasonRankName}",
-            AbilityScoreText = $"{localization.GetString("PlayerInfo_AbilityScore")}: {FormatInteger(player.CombatPower)}",
-            SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {FormatInteger(player.SeasonStrength)}",
+            AbilityScoreText = $"{localization.GetString("PlayerInfo_AbilityScore")}: {(isProfileUnknown ? unknownText : FormatInteger(player.CombatPower))}",
+            SeasonStrengthText = $"{localization.GetString("PlayerInfo_SeasonStrength")}: {(isProfileUnknown ? unknownText : FormatInteger(player.SeasonStrength))}",
             LocationText = $"{localization.GetString("PlayerInfo_Location")}: {(string.IsNullOrEmpty(location) ? unknownText : location)}",
             ClassIconMask = ResolveMask($"Icon.Profession.{classKey}"),
             ClassIconBrush = iconPalette.GetBrush(classKey),

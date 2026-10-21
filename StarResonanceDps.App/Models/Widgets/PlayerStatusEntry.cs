@@ -472,6 +472,10 @@ public static class PlayerStatusEntry
     /// <param name="nowUtc">増減の色と三角を出している間かを決める今の時刻。</param>
     /// <param name="increaseBrush">値が増えた行の数値と三角の色(テキストカラーの「数値の増加」)。</param>
     /// <param name="decreaseBrush">値が減った行の数値と三角の色(テキストカラーの「数値の減少」)。</param>
+    /// <param name="hasEnterSceneAttributes">
+    /// 入場の全属性を受けたか。受けた後に届いていない能力値は本当に 0(全属性は値が 0 の属性を含まない)。
+    /// 受ける前(途中起動)に届いていない値は分からないので「不明」と出す。
+    /// </param>
     public static IReadOnlyList<PlayerStatusRow> Create(
         PlayerRosterEntry player,
         bool hideInactiveStatusEffects,
@@ -481,13 +485,17 @@ public static class PlayerStatusEntry
         IReadOnlyList<int> rowOrder,
         DateTime nowUtc,
         Brush? increaseBrush,
-        Brush? decreaseBrush)
+        Brush? decreaseBrush,
+        bool hasEnterSceneAttributes)
     {
         var attributes = player.Attributes;
         if (attributes is null || attributes.Count == 0)
         {
             return [];
         }
+
+        var localization = LocalizationManager.Instance;
+        var unknownValueText = hasEnterSceneAttributes ? null : localization.GetString("PlayerInfo_Unknown");
 
         var arrived = new Dictionary<int, string>(attributes.Count);
         var changes = new Dictionary<int, ValueChangeSample>();
@@ -514,7 +522,6 @@ public static class PlayerStatusEntry
         var shownRefinedAttack = isMagical ? MagicalRefinedAttackAttrId : PhysicalRefinedAttackAttrId;
         var shownSpeed = isMagical ? CastSpeedAttrId : AttackSpeedAttrId;
 
-        var localization = LocalizationManager.Instance;
         var rows = new List<PlayerStatusRow>(Rows.Length);
         var rowKeys = new List<int>(Rows.Length);
         foreach (var spec in OrderRows(rowOrder))
@@ -546,7 +553,7 @@ public static class PlayerStatusEntry
                 if (spec.AttrId == paired.ValueAttrId)
                 {
                     rows.Add(ApplyValueChange(
-                        CreatePairedRow(paired, arrived, showActualValues, localization),
+                        CreatePairedRow(paired, arrived, showActualValues, localization, unknownValueText),
                         showActualValues ? [paired.PercentAttrId, paired.ValueAttrId] : [paired.PercentAttrId],
                         changes,
                         nowUtc));
@@ -561,13 +568,13 @@ public static class PlayerStatusEntry
                 // 組は先頭の位置でまとめて出す。残りの番号はここでは何もしない。
                 if (spec.AttrId == group.AttrIds[0])
                 {
-                    AppendMergedGroup(rows, rowKeys, group, spec, arrived, changes, nowUtc, localization);
+                    AppendMergedGroup(rows, rowKeys, group, spec, arrived, changes, nowUtc, localization, unknownValueText);
                 }
 
                 continue;
             }
 
-            rows.Add(ApplyValueChange(CreateRow(spec, spec.AttrId, arrived, localization), [spec.AttrId], changes, nowUtc));
+            rows.Add(ApplyValueChange(CreateRow(spec, spec.AttrId, arrived, localization, unknownValueText), [spec.AttrId], changes, nowUtc));
             rowKeys.Add(spec.AttrId);
         }
 
@@ -767,14 +774,20 @@ public static class PlayerStatusEntry
         PairedRowSpec paired,
         Dictionary<int, string> arrived,
         bool showActualValues,
-        LocalizationManager localization)
+        LocalizationManager localization,
+        string? unknownValueText)
     {
         var percentSpec = RowsByAttrId[paired.PercentAttrId];
         var valueSpec = RowsByAttrId[paired.ValueAttrId];
 
-        var percentText = FormatValue(percentSpec, arrived.GetValueOrDefault(paired.PercentAttrId));
+        var percentArrived = arrived.GetValueOrDefault(paired.PercentAttrId);
+        var valueArrived = arrived.GetValueOrDefault(paired.ValueAttrId);
+        var percentText = FormatValue(percentSpec, percentArrived, unknownValueText);
+
+        // 両方とも分からなければ「不明」を1つだけ出す。
         var text = showActualValues
-            ? $"{percentText}({FormatValue(valueSpec, arrived.GetValueOrDefault(paired.ValueAttrId))})"
+            && !(unknownValueText is not null && string.IsNullOrEmpty(percentArrived) && string.IsNullOrEmpty(valueArrived))
+            ? $"{percentText}({FormatValue(valueSpec, valueArrived, unknownValueText)})"
             : percentText;
 
         return new PlayerStatusRow(
@@ -812,7 +825,8 @@ public static class PlayerStatusEntry
         Dictionary<int, string> arrived,
         Dictionary<int, ValueChangeSample> changes,
         DateTime nowUtc,
-        LocalizationManager localization)
+        LocalizationManager localization,
+        string? unknownValueText)
     {
         var first = arrived.GetValueOrDefault(group.AttrIds[0]) ?? MissingValueText;
         var allSame = true;
@@ -831,7 +845,7 @@ public static class PlayerStatusEntry
                 new PlayerStatusRow(
                     localization.GetString(group.MergedNameKey),
                     ResolveIconMask(spec.IconKey),
-                    FormatValue(spec, first),
+                    FormatValue(spec, arrived.GetValueOrDefault(group.AttrIds[0]), unknownValueText),
                     GetOrderUnitAttrId(group.AttrIds[0])),
                 group.AttrIds,
                 changes,
@@ -842,7 +856,7 @@ public static class PlayerStatusEntry
 
         foreach (var attrId in group.AttrIds)
         {
-            rows.Add(ApplyValueChange(CreateRow(spec, attrId, arrived, localization), [attrId], changes, nowUtc));
+            rows.Add(ApplyValueChange(CreateRow(spec, attrId, arrived, localization, unknownValueText), [attrId], changes, nowUtc));
 
             // 畳めずに開いた行も、色は組の代表のものを使う(一覧には代表しか無い)。
             rowKeys.Add(group.AttrIds[0]);
@@ -892,12 +906,13 @@ public static class PlayerStatusEntry
         StatusRowSpec spec,
         int attrId,
         Dictionary<int, string> arrived,
-        LocalizationManager localization)
+        LocalizationManager localization,
+        string? unknownValueText)
     {
         return new PlayerStatusRow(
             localization.GetString($"PlayerStatus_{attrId}"),
             ResolveIconMask(spec.IconKey),
-            FormatValue(spec, arrived.GetValueOrDefault(attrId)),
+            FormatValue(spec, arrived.GetValueOrDefault(attrId), unknownValueText),
             GetOrderUnitAttrId(attrId));
     }
 
@@ -916,11 +931,17 @@ public static class PlayerStatusEntry
     }
 
     /// <summary>
-    /// 値の表示。届いていなければ 0。万分率は 100 で割って % を付け、スタミナは 100 で割る。
-    /// 数値として読めない値(一覧・構造体)は、届いたままを出す。
+    /// 値の表示。届いていなければ 0(入場の全属性を受ける前は <paramref name="unknownValueText"/>)。
+    /// 万分率は 100 で割って % を付け、スタミナは 100 で割る。数値として読めない値(一覧・構造体)は、届いたままを出す。
     /// </summary>
-    private static string FormatValue(StatusRowSpec spec, string? arrivedText)
+    /// <param name="unknownValueText">入場の全属性を受ける前の、届いていない値の表示(「不明」)。受けた後は null。</param>
+    private static string FormatValue(StatusRowSpec spec, string? arrivedText, string? unknownValueText)
     {
+        if (string.IsNullOrEmpty(arrivedText) && unknownValueText is not null)
+        {
+            return unknownValueText;
+        }
+
         var text = string.IsNullOrEmpty(arrivedText) ? MissingValueText : arrivedText;
         if (!long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
         {

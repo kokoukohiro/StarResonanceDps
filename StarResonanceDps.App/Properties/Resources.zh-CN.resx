@@ -180,6 +180,9 @@
   <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
     <value>固定</value>
   </data>
+  <data name="Manager_WidgetSort_ClickThrough" xml:space="preserve">
+    <value>鼠标穿透</value>
+  </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
     <value>启动收藏</value>
   </data>
@@ -1156,6 +1159,24 @@
   <data name="CombatState_Tip" xml:space="preserve">
     <value>交战中</value>
   </data>
+  <data name="WidgetDataStatus_MapOrRelogin" xml:space="preserve">
+    <value>切换地图或重新登录前无法接收信息</value>
+  </data>
+  <data name="WidgetDataStatus_PartyScreen" xml:space="preserve">
+    <value>打开队伍界面前无法接收部分信息</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerClick" xml:space="preserve">
+    <value>点击该玩家前无法接收部分信息</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerApproach" xml:space="preserve">
+    <value>重新靠近该玩家前无法接收部分信息</value>
+  </data>
+  <data name="WidgetDataStatus_EnemyApproach" xml:space="preserve">
+    <value>重新靠近该敌人前无法接收部分信息</value>
+  </data>
+  <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
+    <value>无法读取数据</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>护盾量合并显示</value>
   </data>
@@ -1287,6 +1308,15 @@
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>小组件窗口</value>
+  </data>
+  <data name="Settings_Section_Widget_Title" xml:space="preserve">
+    <value>小组件设置</value>
+  </data>
+  <data name="Settings_Widget_DataStatus" xml:space="preserve">
+    <value>小组件状态</value>
+  </data>
+  <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
+    <value>仅非正常状态时显示</value>
   </data>
   <data name="WidgetWindowTopmost_Always" xml:space="preserve">
     <value>始终置顶</value>

@@ -23,7 +23,8 @@ internal sealed record PlayerDataSourceSnapshot(
     int SeasonTalentBuffId,
     bool IsSeasonTalentInactive,
     int? SeasonRankLevel,
-    PlayerRootBuffData? RootBuffData);
+    PlayerRootBuffData? RootBuffData,
+    PlayerDataGaps DataGaps);
 
 internal static class PlayerDataSourceResolver
 {
@@ -193,7 +194,45 @@ internal static class PlayerDataSourceResolver
             ResolveSeasonTalentBuffId(characterId, nearbyEntity, metadataEntity, isSelf),
             ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf),
             ResolveSeasonRankLevel(nearbyEntity, metadataEntity),
-            ResolveRootBuffData(nearbyEntity, metadataEntity));
+            ResolveRootBuffData(nearbyEntity, metadataEntity),
+            ResolveDataGaps(characterId, nearbyEntity, metadataEntity, partySupplement, isSelf));
+    }
+
+    /// <summary>
+    /// 他のプレイヤーについて、まだ届いていない情報(<see cref="PlayerDataGaps"/>)。自分はいつも無し。
+    /// 出現時の情報は周りの実体 → エンカウンターの実体の順に見る(実体は周りから外れても印を残す)。
+    /// </summary>
+    private static PlayerDataGaps ResolveDataGaps(
+        long characterId,
+        Entity? nearbyEntity,
+        Entity? metadataEntity,
+        PartyMemberSupplement? partySupplement,
+        bool isSelf)
+    {
+        if (isSelf)
+        {
+            return PlayerDataGaps.None;
+        }
+
+        var gaps = PlayerDataGaps.None;
+        var hasAppearAttributes = nearbyEntity?.HasAppearAttributes == true || metadataEntity?.HasAppearAttributes == true;
+        if (!hasAppearAttributes)
+        {
+            gaps |= PlayerDataGaps.AppearAttributes;
+            if (partySupplement?.HasSocialData != true)
+            {
+                gaps |= PlayerDataGaps.Identity;
+            }
+        }
+
+        var hasSkillLevels = (nearbyEntity ?? metadataEntity)?.GetAttrKV("AttrSkillLevelIdList") is not null
+            || PartyMemberCache.Instance.TryGetSkillLevels(characterId, out _);
+        if (!hasSkillLevels)
+        {
+            gaps |= PlayerDataGaps.SkillLevels;
+        }
+
+        return gaps;
     }
 
     /// <summary>

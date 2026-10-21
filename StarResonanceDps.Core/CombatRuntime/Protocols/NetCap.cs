@@ -61,7 +61,7 @@ public class NetCap
         CaptureDevice.OnPacketArrival += DeviceOnOnPacketArrival;
 
         // デバイスを開けた後に作る。開けずに例外で抜けたとき、処理のスレッドが待ち行列を待ったまま残らないように。
-        _tcpReassembler = new TcpReassembler(EnqueueMessage, DescribeCaptureStatistics);
+        _tcpReassembler = new TcpReassembler(EnqueueMessage, DescribeCaptureStatistics, () => MidStreamConnectionOpened?.Invoke());
         PacketParseTask = Task.Factory.StartNew(ParsePacketsLoop, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         try
         {
@@ -124,6 +124,12 @@ public class NetCap
     /// (<c>EncounterManager.ReleaseHeldPastEncounter</c>)。
     /// </summary>
     public Action? AfterParsePacket { get; set; }
+
+    /// <summary>
+    /// ゲームの接続を始まり(SYN)を見ずに途中から開いたときに呼ぶ(キャプチャのスレッド)。
+    /// 始まりを見ていない接続では、全体コンテナと入場を取りこぼしている(<c>GameReceptionStateStore</c> の途中起動)。
+    /// </summary>
+    public Action? MidStreamConnectionOpened { get; set; }
 
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {

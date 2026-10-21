@@ -180,6 +180,9 @@
   <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
     <value>고정됨</value>
   </data>
+  <data name="Manager_WidgetSort_ClickThrough" xml:space="preserve">
+    <value>마우스 통과</value>
+  </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
     <value>즐겨찾기 시작</value>
   </data>
@@ -1156,6 +1159,24 @@
   <data name="CombatState_Tip" xml:space="preserve">
     <value>교전 중</value>
   </data>
+  <data name="WidgetDataStatus_MapOrRelogin" xml:space="preserve">
+    <value>맵을 이동하거나 다시 로그인할 때까지 정보를 받을 수 없습니다</value>
+  </data>
+  <data name="WidgetDataStatus_PartyScreen" xml:space="preserve">
+    <value>파티 화면을 열 때까지 일부 정보를 받을 수 없습니다</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerClick" xml:space="preserve">
+    <value>해당 플레이어를 클릭할 때까지 일부 정보를 받을 수 없습니다</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerApproach" xml:space="preserve">
+    <value>해당 플레이어에게 다시 다가갈 때까지 일부 정보를 받을 수 없습니다</value>
+  </data>
+  <data name="WidgetDataStatus_EnemyApproach" xml:space="preserve">
+    <value>해당 적에게 다시 다가갈 때까지 일부 정보를 받을 수 없습니다</value>
+  </data>
+  <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
+    <value>데이터를 읽을 수 없습니다</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>실드 수치 합산 표시</value>
   </data>
@@ -1287,6 +1308,15 @@
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>위젯 창</value>
+  </data>
+  <data name="Settings_Section_Widget_Title" xml:space="preserve">
+    <value>위젯 설정</value>
+  </data>
+  <data name="Settings_Widget_DataStatus" xml:space="preserve">
+    <value>위젯 상태</value>
+  </data>
+  <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
+    <value>정상 상태가 아닐 때만 표시</value>
   </data>
   <data name="WidgetWindowTopmost_Always" xml:space="preserve">
     <value>항상 위에 표시</value>

@@ -58,6 +58,18 @@ public static class SelfEquipmentStore
     /// <summary>自分の装備の値が変わった。パケット処理のスレッドから呼ばれる。</summary>
     public static event Action? Changed;
 
+    /// <summary>自分の装備の具体値(全体コンテナの装備スロットと持ち物)を持っているか。ウィジェットの状態の印が読む。</summary>
+    public static bool HasState
+    {
+        get
+        {
+            lock (StateLock)
+            {
+                return _hasState;
+            }
+        }
+    }
+
     /// <summary>全体コンテナの装備スロットと持ち物で作り直す。どちらかが無ければ値を持たない状態にする。</summary>
     public static void ReplaceSelf(Zproto.EquipList? equipList, Zproto.ItemPackage? itemPackage)
     {

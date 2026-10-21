@@ -73,6 +73,27 @@ public static class EncounterHistoryProvider
     /// <summary>走っている読み込み。閉じるときに終わりを待つ(閉じた接続に当てない)。</summary>
     private static readonly List<Task> PendingLoads = [];
 
+    /// <summary>最新の要求の回を読めなかった(<see cref="HasLoadFailed"/>)。</summary>
+    private static bool _hasLoadFailed;
+
+    /// <summary>
+    /// 最新の要求の回を読めなかった(例外か、DB にその回が無い)。選択は変わらず、窓は前の表示のまま。
+    /// 次に選び直したとき(回を開けた、ライブへ戻した)に下りる。ウィジェットの状態の印が読む。
+    /// </summary>
+    public static bool HasLoadFailed
+    {
+        get
+        {
+            lock (RequestGate)
+            {
+                return _hasLoadFailed;
+            }
+        }
+    }
+
+    /// <summary><see cref="HasLoadFailed"/> が変わったとき。読み込みのスレッドかパケットのスレッドから来る。</summary>
+    public static event Action? LoadFailedChanged;
+
     /// <summary>いま履歴を開いているならその ID。ライブを見ているなら <c>null</c>。</summary>
     public static ulong? SelectedEncounterId => AppState.OpenedHistoricalEncounter?.EncounterId;
 
@@ -183,12 +204,14 @@ public static class EncounterHistoryProvider
         catch (Exception ex)
         {
             Log.Error(ex, "Encounter {EncounterId} could not be loaded from history", encounterId);
+            SetLoadFailedIfLatest(request);
             return HistorySelectResult.Failed;
         }
 
         if (encounter is null)
         {
             Log.Warning("Encounter {EncounterId} could not be opened from history", encounterId);
+            SetLoadFailedIfLatest(request);
             return HistorySelectResult.NotFound;
         }
 
@@ -206,10 +229,42 @@ public static class EncounterHistoryProvider
             }
 
             AppState.OpenedHistoricalEncounter = encounter;
+            ClearLoadFailed();
             PlayerRosterProjection.RebuildRoster();
             SelectionChanged?.Invoke();
         });
         return HistorySelectResult.Opened;
+    }
+
+    /// <summary>読めなかった。古い要求(後から別の回かライブが選ばれた)の失敗は印にしない。</summary>
+    private static void SetLoadFailedIfLatest(long request)
+    {
+        lock (RequestGate)
+        {
+            if (_isShutDown || request != _latestRequest || _hasLoadFailed)
+            {
+                return;
+            }
+
+            _hasLoadFailed = true;
+        }
+
+        LoadFailedChanged?.Invoke();
+    }
+
+    private static void ClearLoadFailed()
+    {
+        lock (RequestGate)
+        {
+            if (!_hasLoadFailed)
+            {
+                return;
+            }
+
+            _hasLoadFailed = false;
+        }
+
+        LoadFailedChanged?.Invoke();
     }
 
     private static bool IsLatestRequest(long request)
@@ -248,6 +303,7 @@ public static class EncounterHistoryProvider
     private static void ApplyLive()
     {
         AppState.OpenedHistoricalEncounter = null;
+        ClearLoadFailed();
         PlayerRosterProjection.RebuildRoster();
         SelectionChanged?.Invoke();
     }

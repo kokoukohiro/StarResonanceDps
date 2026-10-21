@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.Services;
 using Zproto;
 
 namespace StarResonanceDps.App.Models.Widgets;
@@ -71,6 +73,18 @@ public sealed class EntityWindowTarget
     public bool Represents(long entityUuid)
     {
         return IsAcquired && EntityUuid == entityUuid;
+    }
+
+    /// <summary>この対象を出す窓(バフ一覧・バフ・デバフカード)の状態の印。条件は <see cref="WidgetDataStatusRules.ForEntityBuffs"/>。</summary>
+    public WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception)
+    {
+        var isAcquired = IsAcquired;
+        return WidgetDataStatusRules.ForEntityBuffs(
+            reception,
+            isAcquired,
+            isAcquired && MeterSnapshotProvider.HasReceivedEntityAppearBuffList(EntityUuid),
+            isAcquired && NearbyEntityStore.Instance.Contains(EntityUuid),
+            _entity?.IsTypeUnknown == true);
     }
 
     /// <summary>未捕獲のときに捕まえてよい個体か。種類と種別IDの両方が一致するもの。</summary>

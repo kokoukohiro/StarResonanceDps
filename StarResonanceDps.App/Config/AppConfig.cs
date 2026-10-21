@@ -73,6 +73,12 @@ public sealed class SettingsConfig
     /// 反映は <c>WidgetWindow.ApplyTopmost</c>。
     /// </summary>
     public int WidgetWindowTopmostModeIndex { get; set; } = AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
+
+    /// <summary>
+    /// ウィジェットのタイトルの状態の円と TIPS を出す条件。0=表示 / 1=非表示 / 2=正常状態以外のみ。
+    /// 反映は <c>WidgetWindow.ApplyDataStatus</c>。
+    /// </summary>
+    public int WidgetDataStatusDisplayModeIndex { get; set; } = AppConfigDefaults.WidgetDataStatusDisplayShowIndex;
     public int WindowColorIndex { get; set; }
     public List<string> WindowColors { get; set; } = AppConfigDefaults.CreateDefaultWindowColors();
 
@@ -128,6 +134,7 @@ public sealed class SettingsConfig
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
+            WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayModeIndex,
             WindowColorIndex = WindowColorIndex,
             WindowColors = WindowColors is null ? AppConfigDefaults.CreateDefaultWindowColors() : [.. WindowColors],
             Hotkeys = Hotkeys?.Clone() ?? AppConfigDefaults.CreateDefaultHotkeys(),

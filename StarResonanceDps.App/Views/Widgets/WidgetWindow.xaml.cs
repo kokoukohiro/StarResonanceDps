@@ -10,6 +10,8 @@ using System.Windows.Threading;
 using Serilog;
 using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
@@ -56,7 +58,34 @@ public partial class WidgetWindow : Window
         typeof(WidgetWindow),
         new PropertyMetadata(string.Empty));
 
+    public static readonly DependencyProperty DataStatusLevelProperty = DependencyProperty.Register(
+        nameof(DataStatusLevel),
+        typeof(WidgetDataStatusLevel),
+        typeof(WidgetWindow),
+        new PropertyMetadata(WidgetDataStatusLevel.Complete));
+
+    public static readonly DependencyProperty DataStatusTextProperty = DependencyProperty.Register(
+        nameof(DataStatusText),
+        typeof(string),
+        typeof(WidgetWindow),
+        new PropertyMetadata(string.Empty));
+
+    public static readonly DependencyProperty IsDataStatusMarkShownProperty = DependencyProperty.Register(
+        nameof(IsDataStatusMarkShown),
+        typeof(bool),
+        typeof(WidgetWindow),
+        new PropertyMetadata(true));
+
+    public static readonly DependencyProperty IsDataStatusTipShownProperty = DependencyProperty.Register(
+        nameof(IsDataStatusTipShown),
+        typeof(bool),
+        typeof(WidgetWindow),
+        new PropertyMetadata(false));
+
     private readonly WidgetListItemViewModel _widget;
+
+    /// <summary>タイトルの左の円が映す状態の印の持ち主(窓の中身)。</summary>
+    private readonly IWidgetDataStatusSource _dataStatusSource;
     private readonly IWidgetVerticalScrollContent? _verticalScrollContent;
     private readonly IWidgetHorizontalScrollContent? _horizontalScrollContent;
     private readonly IWidgetMouseWheelContent? _mouseWheelContent;
@@ -80,9 +109,11 @@ public partial class WidgetWindow : Window
     /// <summary>この窓を開くときに渡された位置と大きさ。まだ測れていない間の保存に使う。</summary>
     private readonly WidgetWindowConfig _restoredBounds;
 
+    /// <param name="dataStatusSource">タイトルの左の円に映す状態の印の持ち主(窓の中身)。</param>
     public WidgetWindow(
         WidgetListItemViewModel widget,
         FrameworkElement? widgetContent,
+        IWidgetDataStatusSource dataStatusSource,
         WidgetWindowConfig savedBounds,
         Window? owner,
         string? headerText = null,
@@ -91,6 +122,7 @@ public partial class WidgetWindow : Window
         FrameworkElement? footerContent = null)
     {
         _widget = widget;
+        _dataStatusSource = dataStatusSource;
         _usesWidgetDisplayNameForHeader = string.IsNullOrWhiteSpace(headerText);
 
         InitializeComponent();
@@ -104,6 +136,11 @@ public partial class WidgetWindow : Window
         SetFooterContent(footerContent);
         _widget.PropertyChanged += Widget_PropertyChanged;
         ConfigManager.Instance.SettingsPreviewChanged += ConfigManager_SettingsPreviewChanged;
+        _dataStatusSource.DataStatusChanged += DataStatusSource_DataStatusChanged;
+        LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+        // 中身によっては、作った後に何か届くまで印を計算しない。開いた時点の事実で一度計算させる。
+        _dataStatusSource.RefreshDataStatus();
+        ApplyDataStatus();
 
         _verticalScrollContent = widgetContent as IWidgetVerticalScrollContent;
         if (_verticalScrollContent is not null)
@@ -174,6 +211,78 @@ public partial class WidgetWindow : Window
             : headerText;
     }
 
+    /// <summary>タイトルの左の円の色。</summary>
+    public WidgetDataStatusLevel DataStatusLevel
+    {
+        get => (WidgetDataStatusLevel)GetValue(DataStatusLevelProperty);
+        private set => SetValue(DataStatusLevelProperty, value);
+    }
+
+    /// <summary>円の TIPS の文(優先の高い理由1つ)。緑のときは空で、TIPS を出さない。</summary>
+    public string DataStatusText
+    {
+        get => (string)GetValue(DataStatusTextProperty);
+        private set => SetValue(DataStatusTextProperty, value);
+    }
+
+    /// <summary>タイトルの左に円を出すか。全体設定「ウィジェット状態」と今の色で決まる(<see cref="ApplyDataStatus"/>)。</summary>
+    public bool IsDataStatusMarkShown
+    {
+        get => (bool)GetValue(IsDataStatusMarkShownProperty);
+        private set => SetValue(IsDataStatusMarkShownProperty, value);
+    }
+
+    /// <summary>円とタイトルの上で TIPS を出すか。円を出していて、緑でないときだけ。</summary>
+    public bool IsDataStatusTipShown
+    {
+        get => (bool)GetValue(IsDataStatusTipShownProperty);
+        private set => SetValue(IsDataStatusTipShownProperty, value);
+    }
+
+    /// <summary>今の状態の印を、窓が束ねている中身から読む。</summary>
+    public WidgetDataStatus DataStatus => _dataStatusSource.DataStatus;
+
+    /// <summary>窓が束ねている中身に、状態の印を今の値で計算し直させる(受信の状態が変わったとき)。</summary>
+    public void RefreshDataStatus()
+    {
+        _dataStatusSource.RefreshDataStatus();
+    }
+
+    /// <summary>状態の印が変わった(<see cref="Services.WidgetWindowManager"/> がカードの円をまとめ直すのに使う)。</summary>
+    public event EventHandler? DataStatusChanged;
+
+    private void DataStatusSource_DataStatusChanged(object? sender, EventArgs e)
+    {
+        ApplyDataStatus();
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
+    {
+        ApplyDataStatus();
+    }
+
+    /// <summary>
+    /// 円の色と TIPS の文、円と TIPS を出すかを当て直す。出すかは全体設定「ウィジェット状態」で、
+    /// 表示なら常に、非表示なら出さず、正常状態以外のみなら緑でないときだけ円を出す。
+    /// </summary>
+    private void ApplyDataStatus()
+    {
+        var status = _dataStatusSource.DataStatus;
+        var isNormal = status.Level == WidgetDataStatusLevel.Complete;
+        var isMarkShown = ConfigManager.Instance.GetSettingsSnapshot().WidgetDataStatusDisplayModeIndex switch
+        {
+            AppConfigDefaults.WidgetDataStatusDisplayHideIndex => false,
+            AppConfigDefaults.WidgetDataStatusDisplayNonNormalOnlyIndex => !isNormal,
+            _ => true
+        };
+
+        DataStatusLevel = status.Level;
+        DataStatusText = WidgetDataStatusText.Format(status);
+        IsDataStatusMarkShown = isMarkShown;
+        IsDataStatusTipShown = isMarkShown && !isNormal;
+    }
+
     /// <summary>
     /// ピン留めは「配置を終えて、以後は動かさずに使う」状態。
     /// 位置と大きさを固定し(ヘッダーのドラッグと縁での大きさの変更を止める)、クリックの操作は残す。
@@ -231,12 +340,14 @@ public partial class WidgetWindow : Window
     }
 
     /// <summary>
-    /// 全体設定(プレビューか保存)が変わった。最前面の条件を当て直す。
+    /// 全体設定(プレビューか保存)が変わった。最前面の条件と、状態の円と TIPS を出すかを当て直す。
     /// ピン留め時のみ最前面に切り替わって最前面から外れた窓は、前面の窓のすぐ後ろへ置く
     /// (普通の窓がほかの窓をアクティブにされたときと同じ位置。アクティブな窓は OS が前に置くので動かさない)。
     /// </summary>
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {
+        ApplyDataStatus();
+
         var wasTopmost = Topmost;
         ApplyTopmost();
         if (wasTopmost && !Topmost && !IsActive)
@@ -415,6 +526,8 @@ public partial class WidgetWindow : Window
         _saveBoundsTimer.Tick -= SaveBoundsTimer_Tick;
         _widget.PropertyChanged -= Widget_PropertyChanged;
         ConfigManager.Instance.SettingsPreviewChanged -= ConfigManager_SettingsPreviewChanged;
+        _dataStatusSource.DataStatusChanged -= DataStatusSource_DataStatusChanged;
+        LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
 
         if (_verticalScrollContent is not null)
         {

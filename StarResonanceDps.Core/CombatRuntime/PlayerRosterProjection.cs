@@ -273,6 +273,11 @@ internal static class PlayerRosterProjection
                 isMetadataFromHistory = !ReferenceEquals(meterEncounter, encounter);
             }
 
+            // そのうち、開いている履歴の回(DB から読んだ記録)から来た行。保持している前の回は同じ実行中の値なので含めない。
+            var isFromRecord = isMetadataFromHistory
+                && meterEncounter is not null
+                && ReferenceEquals(meterEncounter, AppState.OpenedHistoricalEncounter);
+
             var isPartyMember = party.GetMembership(characterId) == PartyMembershipState.Member;
             // AOI外でもメーターかタイムラインに残る人はリストにも残す。エンカウンターが作り直されて
             // 統計と記録が無くなれば、メーター・タイムラインと同時にここからも消える。
@@ -298,7 +303,8 @@ internal static class PlayerRosterProjection
                 out var entry,
                 useHistoryHealth: isMetadataFromHistory,
                 seasonId: isMetadataFromHistory ? meterEncounter?.ExData.SeasonId ?? 0 : null,
-                recordedAvatar: isMetadataFromHistory ? metadataEntity?.RecordedAvatar : null))
+                recordedAvatar: isMetadataFromHistory ? metadataEntity?.RecordedAvatar : null,
+                isFromRecord: isFromRecord))
             {
                 if (nearbyEntity is not null)
                 {
@@ -386,6 +392,10 @@ internal static class PlayerRosterProjection
     /// 素性の出所が履歴の記録のとき、その回に保存した顔と名刺の写真のリンク(<see cref="Entity.RecordedAvatar"/>)。
     /// ライブの行は null で、名刺の店の今の値を使う。
     /// </param>
+    /// <param name="isFromRecord">
+    /// 素性が開いている履歴の回の記録から来たとき true(<see cref="PlayerRosterEntry.IsFromRecord"/>)。
+    /// 欠けの印は付けない(欠けは実行中にしか分からない印で決まり、記録の実体では意味を持たない)。
+    /// </param>
     private static bool TryCreateEntry(
         long characterId,
         Entity? nearbyEntity,
@@ -394,7 +404,8 @@ internal static class PlayerRosterProjection
         out PlayerRosterEntry entry,
         bool useHistoryHealth = false,
         int? seasonId = null,
-        SocialAvatarState? recordedAvatar = null)
+        SocialAvatarState? recordedAvatar = null,
+        bool isFromRecord = false)
     {
         if (characterId == 0)
         {
@@ -465,7 +476,9 @@ internal static class PlayerRosterProjection
             seasonId,
             recordedAvatar,
             source.RootBuffData,
-            nearbyEntity is not null && PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCombatState") > 0);
+            nearbyEntity is not null && PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCombatState") > 0,
+            isFromRecord ? PlayerDataGaps.None : source.DataGaps,
+            isFromRecord);
         return true;
     }
 

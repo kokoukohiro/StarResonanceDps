@@ -468,7 +468,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                         : current.IsNpc,
                     HasTrustedSocialData = current.HasTrustedSocialData || isTrustedSource,
                     SceneId = sceneInfo?.SceneId ?? current.SceneId,
-                    LineId = sceneInfo?.LineId ?? current.LineId
+                    LineId = sceneInfo?.LineId ?? current.LineId,
+                    HasSocialData = true
                 });
         }
 

@@ -41,6 +41,12 @@ public sealed class ActiveBuffStore
     /// </summary>
     private readonly Dictionary<long, Dictionary<int, HashSet<BuffSource>>> _sourceParentsByEntity = [];
 
+    /// <summary>
+    /// このマップで出現時の全バフの一覧を受けた保持者(他のプレイヤーと敵。0件の一覧も含む)。
+    /// ウィジェットの状態の印が「その相手のバフを受けたか」に使う。バフと同じく <see cref="Clear"/> で消える。
+    /// </summary>
+    private readonly HashSet<long> _appearListEntityUuids = [];
+
     private ActiveBuffStore()
     {
     }
@@ -168,12 +174,12 @@ public sealed class ActiveBuffStore
     }
 
     /// <summary>
-    /// 出現時に届いた全バフの一覧で、その保持者の項目を置き換える。一覧に無い項目は消す。
-    /// 一覧にある項目の追加・更新は、呼び出し側が通常の付与と同じ入口で行う。
+    /// 出現時に届いた全バフの一覧で、その保持者の項目を置き換える。一覧に無い項目は消し、一覧を受けた印を立てる(0件でも)。
+    /// 一覧にある項目の追加・更新は、呼び出し側が通常の付与と同じ入口で先に行う。
     /// </summary>
-    public void RemoveMissingFromSnapshot(long entityUuid, IReadOnlySet<ulong> snapshotBuffUuids)
+    public void ApplyAppearList(long entityUuid, IReadOnlySet<ulong> listedBuffUuids)
     {
-        ArgumentNullException.ThrowIfNull(snapshotBuffUuids);
+        ArgumentNullException.ThrowIfNull(listedBuffUuids);
         if (entityUuid == 0)
         {
             return;
@@ -181,6 +187,7 @@ public sealed class ActiveBuffStore
 
         lock (_sync)
         {
+            _appearListEntityUuids.Add(entityUuid);
             if (!_buffsByEntity.TryGetValue(entityUuid, out var buffs))
             {
                 return;
@@ -188,7 +195,7 @@ public sealed class ActiveBuffStore
 
             foreach (var buffUuid in buffs.Keys.ToArray())
             {
-                if (!snapshotBuffUuids.Contains(buffUuid))
+                if (!listedBuffUuids.Contains(buffUuid))
                 {
                     buffs.Remove(buffUuid);
                 }
@@ -198,6 +205,15 @@ public sealed class ActiveBuffStore
             {
                 _buffsByEntity.Remove(entityUuid);
             }
+        }
+    }
+
+    /// <summary>このマップで、その保持者の出現時の全バフの一覧を受けたか。</summary>
+    public bool HasReceivedAppearList(long entityUuid)
+    {
+        lock (_sync)
+        {
+            return _appearListEntityUuids.Contains(entityUuid);
         }
     }
 
@@ -431,26 +447,13 @@ public sealed class ActiveBuffStore
         return true;
     }
 
-    public void RemoveEntity(long entityUuid)
-    {
-        if (entityUuid == 0)
-        {
-            return;
-        }
-
-        lock (_sync)
-        {
-            _buffsByEntity.Remove(entityUuid);
-            _sourceParentsByEntity.Remove(entityUuid);
-        }
-    }
-
     public void Clear()
     {
         lock (_sync)
         {
             _buffsByEntity.Clear();
             _sourceParentsByEntity.Clear();
+            _appearListEntityUuids.Clear();
         }
     }
 

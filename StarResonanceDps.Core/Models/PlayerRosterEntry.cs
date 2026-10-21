@@ -45,4 +45,8 @@ public sealed record PlayerRosterEntry(
     // 履歴の行はその回に保存した値。
     PlayerRootBuffData? RootBuffData = null,
     // いま戦闘状態か(実体の属性 AttrCombatState、104)。属性が届くのは自分と周りに見えている人だけで、ほかの行(履歴の行も)は false。
-    bool IsInCombat = false);
+    bool IsInCombat = false,
+    // 他のプレイヤーについて、まだ届いていない情報(ウィジェットの状態の印の材料)。自分の行と、記録から来た行(IsFromRecord)はいつも無し。
+    PlayerDataGaps DataGaps = PlayerDataGaps.None,
+    // 素性が開いている履歴の回の記録から来た行。窓の中身は全部が履歴で、ライブの受信の欠けは表さない。
+    bool IsFromRecord = false);

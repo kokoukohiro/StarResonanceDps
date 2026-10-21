@@ -180,6 +180,9 @@
   <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
     <value>Pinned</value>
   </data>
+  <data name="Manager_WidgetSort_ClickThrough" xml:space="preserve">
+    <value>Click-Through</value>
+  </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
     <value>Start favorites</value>
   </data>
@@ -1156,6 +1159,24 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="CombatState_Tip" xml:space="preserve">
     <value>In Combat</value>
   </data>
+  <data name="WidgetDataStatus_MapOrRelogin" xml:space="preserve">
+    <value>Cannot receive information until you change maps or log in again</value>
+  </data>
+  <data name="WidgetDataStatus_PartyScreen" xml:space="preserve">
+    <value>Cannot receive some information until you open the party screen</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerClick" xml:space="preserve">
+    <value>Cannot receive some information until you click the player</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerApproach" xml:space="preserve">
+    <value>Cannot receive some information until you approach the player again</value>
+  </data>
+  <data name="WidgetDataStatus_EnemyApproach" xml:space="preserve">
+    <value>Cannot receive some information until you approach the enemy again</value>
+  </data>
+  <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
+    <value>Cannot read the data</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>Add shield amount</value>
   </data>
@@ -1287,6 +1308,15 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>Widget Windows</value>
+  </data>
+  <data name="Settings_Section_Widget_Title" xml:space="preserve">
+    <value>Widgets</value>
+  </data>
+  <data name="Settings_Widget_DataStatus" xml:space="preserve">
+    <value>Widget Status</value>
+  </data>
+  <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
+    <value>Show Only When Not Normal</value>
   </data>
   <data name="WidgetWindowTopmost_Always" xml:space="preserve">
     <value>Always on Top</value>

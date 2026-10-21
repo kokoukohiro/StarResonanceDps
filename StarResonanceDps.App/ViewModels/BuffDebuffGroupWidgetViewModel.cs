@@ -213,6 +213,9 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         Refresh();
     }
 
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForBuffDebuffGroup(reception);
+
     [RelayCommand]
     private void OpenCard(PlayerBuffEntry? entry)
     {

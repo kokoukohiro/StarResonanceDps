@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// <see cref="Services.WidgetWindowManager"/> は同じ一覧で扱う。
 /// </para>
 /// </summary>
-public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposable
+public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposable, IWidgetDataStatusSource
 {
     /// <summary>種別ID。復元時に対象を捕まえ直すのに使う。</summary>
     long EntityId { get; }

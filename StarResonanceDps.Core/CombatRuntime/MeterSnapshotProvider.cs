@@ -39,7 +39,9 @@ public sealed record MeterPlayerSnapshot(
     double BarRatio,
     // 有効化しているシーズンタレントの型の根ノードのバフID(0 = 不明か無効)と、無効が確定しているか。
     int SeasonTalentBuffId = 0,
-    bool IsSeasonTalentInactive = false);
+    bool IsSeasonTalentInactive = false,
+    // 他のプレイヤーについて、まだ届いていない情報(ウィジェットの状態の印の材料)。自分はいつも無し。
+    PlayerDataGaps DataGaps = PlayerDataGaps.None);
 
 public sealed record MeterSnapshot(
     MeterSnapshotKind Kind,
@@ -216,7 +218,7 @@ internal sealed record PlayerBuffCandidate(
 /// ロスターを通らない表示(ウィンドウのタイトルなど)が使う相手の素性。名前の規則(NPC は職業名)を当てるので NPC の印と職業も持つ。
 /// <see cref="ClassSpec"/> はクラスカラーの鍵を決めるため(変身中か。求め方はメーターの行と同じ)。
 /// </summary>
-public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec);
+public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, PlayerDataGaps DataGaps = PlayerDataGaps.None);
 
 /// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
 /// <param name="IsUnnamedEnemy">
@@ -685,7 +687,8 @@ public static class MeterSnapshotProvider
                 source.SubProfessionId,
                 source.IsSpecAbilityUnequipped,
                 PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID),
-                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)));
+                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)),
+            source.DataGaps);
     }
 
 
@@ -736,7 +739,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        snapshots = CreateBuffSnapshots(encounter, entity, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
+        snapshots = CreateBuffSnapshots(encounter, entity.UUID, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
         return true;
     }
 
@@ -758,19 +761,35 @@ public static class MeterSnapshotProvider
             && buffId > 0;
     }
 
-    /// <summary>エンティティリストに載る実体のバフ/デバフリストとカードが読む。</summary>
+    /// <summary>
+    /// エンティティリストに載る実体のバフ/デバフリストとカードが読む。
+    /// バフは回の外の控え(<see cref="Services.ActiveBuffStore"/>)から作るので、今の回に実体が無くても出す
+    /// (回が区切られた直後は、まだ動いていない敵の実体が今の回に無い)。
+    /// </summary>
     /// <param name="groupSameBuffs"><see cref="GetPlayerBuffs"/> と同じ。</param>
     public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind, bool groupSameBuffs)
     {
         var encounter = EncounterManager.Current;
-        if (encounter is null
-            || !encounter.Entities.TryGetValue(entityUuid, out var entity))
+        if (encounter is null || entityUuid == 0)
         {
             return Array.Empty<PlayerBuffSnapshot>();
         }
 
-        return CreateBuffSnapshots(encounter, entity, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
+        return CreateBuffSnapshots(encounter, entityUuid, kind, groupSameBuffs ? BuffRowGrouping.ByBuff : BuffRowGrouping.ByPlayerCaster);
     }
+
+    /// <summary>このマップで、そのプレイヤーの出現時の全バフの一覧を受けたか(自分は出現しないので偽)。</summary>
+    public static bool HasReceivedPlayerAppearBuffList(long characterId)
+    {
+        var encounter = EncounterManager.Current;
+        return encounter is not null
+            && TryResolvePlayerEntity(encounter, characterId, out _, out var entity)
+            && Services.ActiveBuffStore.Instance.HasReceivedAppearList(entity.UUID);
+    }
+
+    /// <summary>このマップで、その実体(敵)の出現時の全バフの一覧を受けたか。</summary>
+    public static bool HasReceivedEntityAppearBuffList(long entityUuid)
+        => Services.ActiveBuffStore.Instance.HasReceivedAppearList(entityUuid);
 
     /// <summary>バフ/デバフリストの行のまとめ方(リストの設定「同種バフの表示」で、対象がプレイヤーかエンティティかごとに選ぶ)。</summary>
     private enum BuffRowGrouping
@@ -798,11 +817,11 @@ public static class MeterSnapshotProvider
     /// </summary>
     private static IReadOnlyList<PlayerBuffSnapshot> CreateBuffSnapshots(
         Encounter encounter,
-        Entity entity,
+        long entityUuid,
         PlayerBuffListKind kind,
         BuffRowGrouping grouping)
     {
-        var buffEvents = ResolveDisplayBuffEvents(entity);
+        var buffEvents = ResolveDisplayBuffEvents(entityUuid);
         var rowsByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
         var rowKeys = new List<string>(buffEvents.Length);
         var partyCache = new Dictionary<long, TakenDamageLogParty>();
@@ -833,7 +852,7 @@ public static class MeterSnapshotProvider
             double? remainingSeconds;
             bool remainingUnknown;
             var timingResolved = TryResolveLiveBuffTiming(
-                entity.UUID, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown, out var durationSeconds);
+                entityUuid, buffEvent, out effectiveRemoveTime, out remainingSeconds, out remainingUnknown, out var durationSeconds);
             if (!timingResolved)
             {
                 continue;
@@ -860,7 +879,7 @@ public static class MeterSnapshotProvider
                 remainingSeconds,
                 remainingUnknown,
                 playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null,
-                IsCasterTarget: playerCasterUuid != 0 && playerCasterUuid == entity.UUID,
+                IsCasterTarget: playerCasterUuid != 0 && playerCasterUuid == entityUuid,
                 GaugeLengthSeconds: durationSeconds > 0d ? durationSeconds : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
             if (isNewRow)
@@ -1326,7 +1345,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        var buffEvents = ResolveDisplayBuffEvents(entity);
+        var buffEvents = ResolveDisplayBuffEvents(entity.UUID);
         var found = false;
         var latestRemoveTime = TimeSpan.MinValue;
 
@@ -1368,7 +1387,7 @@ public static class MeterSnapshotProvider
         IReadOnlySet<int> trackedSkillIds,
         bool hideReviveBlockDebuff = false)
     {
-        var buffEvents = ResolveDisplayBuffEvents(entity);
+        var buffEvents = ResolveDisplayBuffEvents(entity.UUID);
         var runtimeSourceParentsByBaseId = BuildRuntimeSourceParentsByBaseId(
             entity,
             buffEvents);
@@ -2275,9 +2294,9 @@ public static class MeterSnapshotProvider
     /// (故障時に従来経路で正常に見えてしまうと、ストア側の不具合が発見できなくなるため)。
     /// </para>
     /// </summary>
-    private static BuffEvent[] ResolveDisplayBuffEvents(Entity entity)
+    private static BuffEvent[] ResolveDisplayBuffEvents(long entityUuid)
     {
-        return [.. Services.ActiveBuffStore.Instance.GetActive(entity.UUID)];
+        return [.. Services.ActiveBuffStore.Instance.GetActive(entityUuid)];
     }
 
     /// <summary>
@@ -2601,7 +2620,8 @@ public static class MeterSnapshotProvider
             0d,
             0d,
             source.SeasonTalentBuffId,
-            source.IsSeasonTalentInactive);
+            source.IsSeasonTalentInactive,
+            source.DataGaps);
     }
 
     private static bool IsSelf(Entity entity)

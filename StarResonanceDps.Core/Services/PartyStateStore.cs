@@ -23,7 +23,9 @@ public sealed record PartyMemberSupplement(
     bool HasTrustedSocialData = false,
     // いる場所(userSceneInfo)。マップ番号とチャンネル番号、0 は分からない。古い値を送る NotifySocialData からは入れない。
     int SceneId = 0,
-    int LineId = 0);
+    int LineId = 0,
+    // パーティの社交データ(名前・クラス・能力スコアなど)を受けたか。HP の同期だけでも補完は作られるので、補完があることとは別。
+    bool HasSocialData = false);
 
 public sealed record PartyMemberPosition(int GroupId, int? GroupSlot);
 
@@ -54,6 +56,12 @@ public sealed class PartyStateSnapshot
     public long TeamId { get; }
 
     public bool HasCompleteMembership { get; }
+
+    /// <summary>
+    /// パーティに入っていると分かっているのに、顔ぶれがまだ確定していない(パーティ画面を開くと届く)。
+    /// 始めた直後で入っているか分からない間(<see cref="TeamId"/> 0)は含めない。
+    /// </summary>
+    public bool IsMembershipPending => TeamId != 0 && !HasCompleteMembership;
 
     public bool IsFivePersonParty { get; }
 

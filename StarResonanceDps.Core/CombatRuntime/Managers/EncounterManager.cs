@@ -2802,6 +2802,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public int[]? RootBuffIds { get; set; }
 
+        /// <summary>
+        /// プレイヤーの出現時の情報(全属性)を受けたか。名前・クラス・能力スコアなどの出所で、ウィジェットの状態の印が欠けを見るのに使う。
+        /// 素性なので回の作り直しで運ばれ、ログアウトでは運ばれない。周りから外れても下ろさない(値は実体に残る)。
+        /// </summary>
+        public bool HasAppearAttributes { get; set; }
+
         public int Level { get; set; }
         public long SeasonLevel { get; set; }
         public long SeasonStrength { get; set; }
@@ -2836,6 +2842,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int SeasonTalentBuffId { get => _identity.SeasonTalentBuffId; private set => _identity.SeasonTalentBuffId = value; }
         public int SeasonTalentBuffUuid { get => _identity.SeasonTalentBuffUuid; private set => _identity.SeasonTalentBuffUuid = value; }
         public bool HasSeasonTalentSnapshot { get => _identity.HasSeasonTalentSnapshot; private set => _identity.HasSeasonTalentSnapshot = value; }
+
+        /// <summary>プレイヤーの出現時の情報を受けたか(<see cref="EntityIdentity.HasAppearAttributes"/>)。</summary>
+        public bool HasAppearAttributes { get => _identity.HasAppearAttributes; private set => _identity.HasAppearAttributes = value; }
+
+        /// <summary>出現時の全属性を当てた(プレイヤーだけ)。</summary>
+        internal void MarkAppearAttributesReceived()
+        {
+            HasAppearAttributes = true;
+        }
 
         /// <summary>
         /// シーズンタレントの型が無効(どの型も有効化していない)と確定できる状態か。
@@ -3614,7 +3629,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             SetSubProfessionId(subProfessionId);
-            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+
+            // 行を作り直すだけで、周りにいる人には入れない(周りにいない人のダメージや付与からも決まるため)。
+            PlayerRosterProjection.UpsertPlayer(UUID);
         }
 
         /// <summary>
@@ -3646,7 +3663,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             SetSubProfessionId(subProfessionId);
-            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+
+            // 術者が周りにいるとは限らない(敵や味方に付いたバフの術者)ので、行を作り直すだけにする。
+            PlayerRosterProjection.UpsertPlayer(UUID);
         }
 
         /// <summary>
@@ -3697,7 +3716,9 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             SeasonTalentBuffId = rootBuffId;
             Services.PartyMemberCache.Instance.SetSeasonTalent(Utils.UuidToEntityId(UUID), rootBuffId);
-            PlayerRosterProjection.AddOrUpdateNearbyPlayer(UUID);
+
+            // 術者が周りにいるとは限らないので、行を作り直すだけにする。
+            PlayerRosterProjection.UpsertPlayer(UUID);
         }
 
         /// <summary>
@@ -3772,21 +3793,34 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 次のマップ移動まで欠けている。
         /// </para>
         /// </summary>
-        public void MarkSelfBuffStreamReceived()
+        /// <param name="isBuffSetComplete">
+        /// 偽なら、このマップのまとめの差分に付け直しが無く、今乗っているバフが全部ではない。根のバフの一覧だけ作り直し、
+        /// 「全部見た」の印(未装着・無効の判定)は立てない。
+        /// </param>
+        public void MarkSelfBuffStreamReceived(bool isBuffSetComplete)
         {
-            // シーズンタレントの印も同じ時点で立てる(特化と同じ扱い)。
-            HasSeasonTalentSnapshot = true;
-
             // 根のバフは今乗っているバフから作り直す(このデルタの付与は先に処理されている)。
             // マップ移動では今乗っているバフが空になり、入場の差分で全部が付き直すので、受けるたびに作り直す。
             ReplaceRootBuffIds(Services.ActiveBuffStore.Instance.GetActive(UUID).Select(buff => buff.BaseId));
 
-            if (HasBuffSnapshot)
+            if (!isBuffSetComplete)
             {
                 return;
             }
 
+            // シーズンタレントの印も同じ時点で立てる(特化と同じ扱い)。
+            HasSeasonTalentSnapshot = true;
             HasBuffSnapshot = true;
+        }
+
+        /// <summary>
+        /// 自分のまとめの差分に付け直しが無かった。今乗っているバフが全部ではないので、「全部見た」の印を下ろす
+        /// (未装着・無効と言えなくなり、特化と潜在心相晶は分かっている値か不明になる)。
+        /// </summary>
+        public void ClearSelfBuffSnapshot()
+        {
+            HasBuffSnapshot = false;
+            HasSeasonTalentSnapshot = false;
         }
 
         public SkillSnapshot? AddTakenDamage(

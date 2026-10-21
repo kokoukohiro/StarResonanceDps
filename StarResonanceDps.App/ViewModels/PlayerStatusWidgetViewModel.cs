@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
@@ -75,6 +76,9 @@ public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, I
         RefreshRows();
     }
 
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForPlayerStatus(reception);
+
     /// <summary>表示設定(保存かプレビュー)が変わった。色を作り直して行に当て直す。</summary>
     private void Widget_PlayerStatusSettingsChanged(object? sender, EventArgs e)
     {
@@ -122,7 +126,8 @@ public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, I
                 _previewRowOrder ?? _rowOrder,
                 nowUtc,
                 _increaseBrush,
-                _decreaseBrush);
+                _decreaseBrush,
+                GameReceptionStateStore.Current.HasSelfEnterScene);
 
         SynchronizeRows(rows);
         ScheduleValueChangeTimer(rows, nowUtc);

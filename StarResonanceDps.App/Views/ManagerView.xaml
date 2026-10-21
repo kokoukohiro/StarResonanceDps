@@ -133,6 +133,7 @@
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetSort_Favorite]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetSort_RunningState]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetSort_Pinned]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Manager_WidgetSort_ClickThrough]}" />
                         </ComboBox>
 
                         <ComboBox

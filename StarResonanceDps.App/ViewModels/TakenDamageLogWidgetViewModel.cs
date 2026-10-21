@@ -73,7 +73,7 @@ public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush El
 /// 設定を変えれば、持っている行から組み直す。
 /// </para>
 /// </summary>
-public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
+public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
 {
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromMilliseconds(250);
 
@@ -133,6 +133,25 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
     }
 
     public ReadOnlyObservableCollection<TakenDamageLogEntry> Entries { get; }
+
+    public WidgetDataStatus DataStatus { get; private set; }
+
+    public event EventHandler? DataStatusChanged;
+
+    public void RefreshDataStatus()
+    {
+        var status = WidgetDataStatusRules.ForTakenDamageLog(
+            GameReceptionStateStore.Current,
+            EncounterHistoryProvider.SelectedEncounterId is not null,
+            EncounterHistoryProvider.HasLoadFailed);
+        if (status == DataStatus)
+        {
+            return;
+        }
+
+        DataStatus = status;
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     public void Dispose()
     {
@@ -229,6 +248,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable
         {
             AppendEntries(line);
         }
+
+        RefreshDataStatus();
     }
 
     private void ClearEntries()

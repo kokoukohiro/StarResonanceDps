@@ -93,7 +93,9 @@ public sealed class CombatRuntimeHost
 
             // 履歴の読み込みが閉じた接続に当たらないよう、先に止めて待つ。
             EncounterHistoryProvider.ShutdownLoads();
-            MessageManager.StopCapturing();
+
+            // 受信だけを止め、控えは消さずに最後の回を保存する(保存が控えの値を焼き付けるため)。
+            MessageManager.StopReceiving();
             if (EncounterManager.Current is not null)
             {
                 EncounterManager.ShutdownManager();

@@ -9,6 +9,7 @@ using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -245,7 +246,21 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
+        // 相手の素性・パーティの名簿は名簿の行を変えずに届くことがあるので、読み直すたびに見る。
+        RefreshDataStatus();
     }
+
+    /// <summary>技の段階(G○)はスキルログを出している推移グラフだけ、料理と自然回復はヒール側だけが数える。</summary>
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForPlayerMetric(
+            reception,
+            EncounterHistoryProvider.SelectedEncounterId is not null,
+            EncounterHistoryProvider.HasLoadFailed,
+            IsSelfTarget,
+            SelectedCharacterId is { } characterId ? MeterSnapshotProvider.GetPlayerIdentity(characterId) : null,
+            PartyStateStore.Instance.Current.IsMembershipPending,
+            countsSkillLevels: IsTimeline && TimelineShowsSkillLog,
+            countsHealingSources: _kind == MeterSnapshotKind.Healing);
 
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {

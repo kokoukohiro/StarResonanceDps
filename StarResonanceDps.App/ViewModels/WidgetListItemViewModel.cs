@@ -13,7 +13,7 @@ using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public partial class WidgetListItemViewModel : ViewModelBase
+public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusSource
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
@@ -44,6 +44,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
     /// <summary>設定の窓が開いているか(<see cref="BeginSettingsPreview"/> / <see cref="EndSettingsPreview"/>)。ウィジェットでの並べ替えを保存するかプレビューにするかを決める。</summary>
     private bool _isSettingsPreviewing;
     private IReadOnlyList<PlayerRosterEntry> _playerRoster = Array.Empty<PlayerRosterEntry>();
+
+    /// <summary>プレイヤーリストに出している行(絞り込みの後)。状態の印の計算に使う。</summary>
+    private IReadOnlyList<PlayerRosterEntry> _shownPlayerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
     private string _mapSceneName = string.Empty;
     private uint _mapChannel;
@@ -97,6 +100,12 @@ public partial class WidgetListItemViewModel : ViewModelBase
 
     [ObservableProperty]
     private int _openPlayerWindowCount;
+
+    /// <summary>
+    /// メイン窓のカードの円の色。開いている窓のうち一番悪い印で、開いている窓が無ければ null(停止の灰色)。決めるのは窓を束ねる側(<see cref="WidgetWindowManager"/>)。
+    /// </summary>
+    [ObservableProperty]
+    private WidgetDataStatusLevel? _cardDataStatusLevel;
 
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
@@ -852,6 +861,40 @@ public partial class WidgetListItemViewModel : ViewModelBase
         OpenPlayerWindowCount = Math.Max(count, 0);
     }
 
+    public WidgetDataStatus DataStatus { get; private set; }
+
+    public event EventHandler? DataStatusChanged;
+
+    /// <summary>
+    /// プレイヤーリスト・エンティティリストの窓の状態の印(この2つは窓の中身もこの項目が持つ)。
+    /// ほかの種類の窓の印はそれぞれの中身が持つので、ここで計算することは無い。
+    /// </summary>
+    public void RefreshDataStatus()
+    {
+        var reception = GameReceptionStateStore.Current;
+        var status = Kind switch
+        {
+            WidgetKind.PlayerList => WidgetDataStatusRules.ForPlayerList(
+                reception,
+                EncounterHistoryProvider.HasLoadFailed,
+                PartyStateStore.Instance.Current.IsMembershipPending,
+                _shownPlayerRoster,
+                _meter.ShowSeasonTalent || PlayerInfoFormatFormatter.ShowsSeasonTalent(_meter.PlayerInfoFormatString)),
+            WidgetKind.EntityList => WidgetDataStatusRules.ForEntityList(
+                reception,
+                _entityListEntries.Any(entry => entry.IsTypeUnknown)),
+            _ => throw new InvalidOperationException($"The data status of widget {Kind} is held by its window content.")
+        };
+
+        if (status == DataStatus)
+        {
+            return;
+        }
+
+        DataStatus = status;
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public void RefreshPlayerListEntries()
     {
         SynchronizePlayerListEntries(resetEntries: false);
@@ -1081,6 +1124,9 @@ public partial class WidgetListItemViewModel : ViewModelBase
         {
             _healthNotificationTracker.Observe(visibleRoster, playerNameDisplayMode);
         }
+
+        _shownPlayerRoster = visibleRoster;
+        RefreshDataStatus();
     }
 
     private IReadOnlyList<PlayerRosterEntry> GetVisiblePlayerRoster()
@@ -1218,6 +1264,8 @@ public partial class WidgetListItemViewModel : ViewModelBase
                 _entityListEntries.Move(currentIndex, targetIndex);
             }
         }
+
+        RefreshDataStatus();
     }
 
     /// <summary>

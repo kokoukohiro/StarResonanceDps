@@ -169,7 +169,16 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
+        // 出現時の一覧の受信は名簿の行を変えないことがあるので、読み直すたびに見る。
+        RefreshDataStatus();
     }
+
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+        => WidgetDataStatusRules.ForPlayerBuffs(
+            reception,
+            IsSelfTarget,
+            player,
+            SelectedCharacterId is { } characterId && MeterSnapshotProvider.HasReceivedPlayerAppearBuffList(characterId));
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {

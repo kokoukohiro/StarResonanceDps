@@ -25,6 +25,7 @@ public sealed class TcpReassembler
     private readonly Dictionary<TcpConnectionKey, TcpConnection> _connections = new();
     private readonly Action<byte[], int, DateTime> _onMessage;
     private readonly Func<string> _describeCaptureStatistics;
+    private readonly Action _onMidStreamConnectionOpened;
     private bool _isStopped;
     private bool _hasLoggedPacketAfterStop;
     private long _ignoredWithoutConnection;
@@ -33,10 +34,15 @@ public sealed class TcpReassembler
 
     /// <param name="onMessage">揃ったメッセージ(<see cref="System.Buffers.ArrayPool{T}.Shared"/> から借りたバッファ、長さ、揃ったパケットのキャプチャ時刻)。バッファを返すのは受け手。</param>
     /// <param name="describeCaptureStatistics">ログに添えるキャプチャの統計(英語)。</param>
-    public TcpReassembler(Action<byte[], int, DateTime> onMessage, Func<string> describeCaptureStatistics)
+    /// <param name="onMidStreamConnectionOpened">接続を始まり(SYN)を見ずに途中から開いたとき。lock の中で呼ばれる。</param>
+    public TcpReassembler(
+        Action<byte[], int, DateTime> onMessage,
+        Func<string> describeCaptureStatistics,
+        Action onMidStreamConnectionOpened)
     {
         _onMessage = onMessage;
         _describeCaptureStatistics = describeCaptureStatistics;
+        _onMidStreamConnectionOpened = onMidStreamConnectionOpened;
     }
 
     public void AddPacket(IPv4Packet ip, TcpPacket tcp, DateTime captureTimeUtc)
@@ -84,6 +90,7 @@ public sealed class TcpReassembler
                 }
 
                 connection = Open(key, "mid-stream data", captureTimeUtc);
+                _onMidStreamConnectionOpened();
             }
             else if (connection.IsClosed)
             {
@@ -104,6 +111,7 @@ public sealed class TcpReassembler
                     "TCP {Connection} received data beyond the FIN of a closed connection; treating it as a new connection found mid-stream",
                     key);
                 connection = Open(key, "mid-stream data after close", captureTimeUtc);
+                _onMidStreamConnectionOpened();
             }
 
             connection.Process(fromLow, tcp, payload, captureTimeUtc);

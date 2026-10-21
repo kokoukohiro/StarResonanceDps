@@ -180,6 +180,9 @@
   <data name="Manager_WidgetSort_Pinned" xml:space="preserve">
     <value>ピン留め</value>
   </data>
+  <data name="Manager_WidgetSort_ClickThrough" xml:space="preserve">
+    <value>クリック透過</value>
+  </data>
   <data name="Manager_WidgetAction_StartAllFavorites" xml:space="preserve">
     <value>お気に入りを起動</value>
   </data>
@@ -1093,6 +1096,24 @@
   <data name="CombatState_Tip" xml:space="preserve">
     <value>交戦中</value>
   </data>
+  <data name="WidgetDataStatus_MapOrRelogin" xml:space="preserve">
+    <value>マップを移動するかログインし直すまで、情報を受け取れません</value>
+  </data>
+  <data name="WidgetDataStatus_PartyScreen" xml:space="preserve">
+    <value>パーティ画面を開くまで、一部の情報を受け取れません</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerClick" xml:space="preserve">
+    <value>該当プレイヤーをクリックするまで、一部の情報を受け取れません</value>
+  </data>
+  <data name="WidgetDataStatus_PlayerApproach" xml:space="preserve">
+    <value>該当プレイヤーに近づき直すまで、一部の情報を受け取れません</value>
+  </data>
+  <data name="WidgetDataStatus_EnemyApproach" xml:space="preserve">
+    <value>該当の敵に近づき直すまで、一部の情報を受け取れません</value>
+  </data>
+  <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
+    <value>データを読み込めません</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>バリア量加算表示</value>
   </data>
@@ -1224,6 +1245,15 @@
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>ウィジェットウィンドウ</value>
+  </data>
+  <data name="Settings_Section_Widget_Title" xml:space="preserve">
+    <value>ウィジェット設定</value>
+  </data>
+  <data name="Settings_Widget_DataStatus" xml:space="preserve">
+    <value>ウィジェット状態</value>
+  </data>
+  <data name="WidgetDataStatusDisplay_NonNormalOnly" xml:space="preserve">
+    <value>正常状態以外のみ表示</value>
   </data>
   <data name="WidgetWindowTopmost_Always" xml:space="preserve">
     <value>常に最前面</value>

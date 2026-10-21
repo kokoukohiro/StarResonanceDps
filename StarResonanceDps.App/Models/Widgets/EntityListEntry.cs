@@ -37,6 +37,9 @@ public sealed partial class EntityListEntry : ObservableObject
 
     public int Level { get; private set; }
 
+    /// <summary>種別ID(<c>AttrId</c>)が分からない(アプリの起動前から居た)実体か。名前は「未知の敵」か「味方」になる。</summary>
+    public bool IsTypeUnknown => EntityId == 0;
+
     [ObservableProperty]
     private string _classificationKey = "Unknown";
 

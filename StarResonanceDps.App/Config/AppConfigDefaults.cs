@@ -15,6 +15,15 @@ public static class AppConfigDefaults
     /// <summary>ウィジェットの窓をピン留め中だけ最前面に出す。</summary>
     public const int PinnedOnlyWidgetWindowTopmostModeIndex = 1;
 
+    /// <summary>ウィジェットのタイトルの状態の円と TIPS を出す(既定)。</summary>
+    public const int WidgetDataStatusDisplayShowIndex = 0;
+
+    /// <summary>ウィジェットのタイトルの状態の円と TIPS を出さない。</summary>
+    public const int WidgetDataStatusDisplayHideIndex = 1;
+
+    /// <summary>ウィジェットのタイトルの状態の円と TIPS を、正常(緑)でないときだけ出す。</summary>
+    public const int WidgetDataStatusDisplayNonNormalOnlyIndex = 2;
+
     /// <summary>通知しない(既定)。</summary>
     public const int NotificationMethodNoneIndex = 0;
 
@@ -82,6 +91,7 @@ public static class AppConfigDefaults
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
             WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
+            WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayShowIndex,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors(),
             Hotkeys = CreateDefaultHotkeys(),
@@ -158,6 +168,10 @@ public static class AppConfigDefaults
             settings.WidgetWindowTopmostModeIndex,
             AlwaysWidgetWindowTopmostModeIndex,
             PinnedOnlyWidgetWindowTopmostModeIndex);
+        settings.WidgetDataStatusDisplayModeIndex = Clamp(
+            settings.WidgetDataStatusDisplayModeIndex,
+            WidgetDataStatusDisplayShowIndex,
+            WidgetDataStatusDisplayNonNormalOnlyIndex);
         settings.WindowColors = NormalizeColorList(settings.WindowColors, DefaultWindowColorHexes, MaxPaletteColorCount);
         settings.WindowColorIndex = Clamp(settings.WindowColorIndex, 0, settings.WindowColors.Count - 1);
 

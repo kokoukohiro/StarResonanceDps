@@ -110,6 +110,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.AfterParsePacket = ProcessAfterParsePacket;
 
+            netCap.MidStreamConnectionOpened = GameReceptionStateStore.MarkMidStreamConnection;
+
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
 
@@ -151,18 +153,30 @@ namespace StarResonanceDps.Core.CombatRuntime
                 PlayerRosterProjection.UpsertSelf(currentUserUuid);
             }
 
+            GameReceptionStateStore.Commit();
             EncounterManager.ReleaseHeldPastEncounter();
         }
 
+        /// <summary>
+        /// キャプチャを止める(再開の前)。受信した控えを消し、周りのプレイヤーを見失った扱いにする
+        /// (止めている間の出入りは届かない。周りから外れたときと同じく、特化と潜在心相晶はメーター用の控えへ写してから不明にし、名簿を作り直す)。
+        /// アプリの終了はこれを使わず <see cref="StopReceiving"/> で止める。
+        /// </summary>
         public static void StopCapturing()
         {
-            if (netCap != null)
-            {
-                netCap.Stop();
-            }
-
+            StopReceiving();
             NearbyEntityStore.Instance.Clear();
             ClearReceivedStateStores();
+            PlayerRosterProjection.ResetNearbyPlayers();
+        }
+
+        /// <summary>
+        /// 受信だけを止める(処理のスレッドが終わるまで待つ)。控えは消さない。
+        /// アプリの終了は、これで止めてから最後の回を保存する(保存が写真のリンクなど控えの値を焼き付けるため)。
+        /// </summary>
+        public static void StopReceiving()
+        {
+            netCap?.Stop();
         }
 
         /// <summary>
@@ -192,23 +206,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerSkillLevelStateStore.ResetSelfToStartup();
             SelfAttributeChangeStore.Clear();
 
+            // 入場の全属性の印(上)を消した後で組み直す。
+            GameReceptionStateStore.Clear();
+
             // 死亡と自然回復の刻みの控え。止めている間の復活を取りこぼすと、次の死亡を扱わなくなる。
             PlayerDeathStates = [];
             LastPassiveHealTicks = [];
 
             // 応答待ちの技の要求。止めている間の応答は届かない。
             PendingUseSlotSkills = [];
-        }
-
-        /// <summary>
-        /// キャプチャを止めて再開する前に呼ぶ。止めている間の出入りは届かないので、周りのプレイヤーを見失った扱いにする
-        /// (周りから外れたときと同じく、特化と潜在心相晶はメーター用の控えへ写してから不明にし、名簿を作り直す)。
-        /// <see cref="StopCapturing"/> の中に置かないのは、アプリの終了では停止の後に最後の記録を保存し、
-        /// その保存が名簿の表示値を焼き付けるため。
-        /// </summary>
-        public static void ForgetNearbyPlayersAfterCaptureStop()
-        {
-            PlayerRosterProjection.ResetNearbyPlayers();
         }
 
         /// <summary>
@@ -398,6 +404,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (vData.EnterSceneInfo.PlayerEnt != null)
                 {
+                    GameReceptionStateStore.MarkSelfIdentified();
                     NearbyEntityProjection.SetSelfEntity(vData.EnterSceneInfo.PlayerEnt.Uuid);
 
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
@@ -2225,6 +2232,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                     ProcessAttrs(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordSummonSource(entity.Uuid, attrCollection.Attrs, extraData.ArrivalTime);
                     RecordNearbyMonster(entity.Uuid, attrCollection.Attrs);
+
+                    // 名前・クラスなどの出所を受けた印(名簿へ入れる下の行より前に立てる)。
+                    if (entity.EntType == EEntityType.EntChar)
+                    {
+                        EncounterManager.Current.GetOrCreateEntity(entity.Uuid).MarkAppearAttributesReceived();
+                    }
                 }
 
                 RecordSourceLanding(entity.Uuid, attrCollection?.Attrs, extraData.ArrivalTime, isAppear: true);
@@ -2254,8 +2267,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </para>
         ///
         /// <para>
-        /// <b>特化判定と表示の両方へ渡す。</b> 差分は「見ている間に付いたバフ」しか運ばないので、
-        /// 流さないと<b>自分が見る前から乗っているバフが他人では一生表示されない</b>。
+        /// <b>表示へは種類を問わず(他のプレイヤーも敵も)、特化判定へはプレイヤーだけ渡す。</b> 差分は「見ている間に付いたバフ」しか運ばないので、
+        /// 流さないと<b>自分が見る前から乗っているバフが一生表示されない</b>(敵ではボスの常駐バフや、他の人が先に付けたデバフ)。
         /// 持続の長い料理(1800秒)・薬剤ほど当たりやすく、マップ切替で
         /// <c>ActiveBuffStore.Clear()</c> したあとも復活しない、という見え方になっていた。
         /// 自分は <c>SyncToMeDeltaInfo</c> がイベントとして全部送ってくるので影響を受けない。
@@ -2270,42 +2283,26 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static void ApplyAppearBuffSnapshot(Zproto.Entity entity, ExtraPacketData extraData)
         {
-            // 付与元の索引には敵も含めて入れる。見る前から乗っているバフはこの経路でしか届かない。
-            if (entity.BuffInfos?.BuffInfos is { } appearBuffInfos)
-            {
-                foreach (var appearBuffInfo in appearBuffInfos)
-                {
-                    BuffInstanceIndex.Instance.Add(
-                        entity.Uuid,
-                        appearBuffInfo.BuffUuid,
-                        appearBuffInfo.BaseId,
-                        appearBuffInfo.FireUuid,
-                        appearBuffInfo.FightSourceInfo?.FightSourceType ?? -1,
-                        appearBuffInfo.FightSourceInfo?.SourceConfigId ?? 0,
-                        appearBuffInfo.Duration,
-                        extraData.ArrivalTime);
-                }
-            }
-
-            // 特化を持つのはプレイヤーだけ。モンスターまで通すと診断ログが埋まる。
-            if (Utils.UuidToEntityType(entity.Uuid) != (long)EEntityType.EntChar)
+            // 一覧そのものが届いていない出現では、何が付いているか分からないので触らない(受けた印も立てない)。
+            if (entity.BuffInfos is not { } appearBuffList)
             {
                 return;
             }
 
-            // 出現時の一覧は全件なので、一覧に無い項目は見えない間に消えたもの。
-            // 一覧そのものが届いていない出現では、何が付いているか分からないので触らない。
-            if (entity.BuffInfos is { } appearBuffList)
+            var buffInfos = appearBuffList.BuffInfos;
+
+            // 付与元の索引には全件を先に入れる。見る前から乗っているバフはこの経路でしか届かない。
+            foreach (var appearBuffInfo in buffInfos)
             {
-                ActiveBuffStore.Instance.RemoveMissingFromSnapshot(
+                BuffInstanceIndex.Instance.Add(
                     entity.Uuid,
-                    appearBuffList.BuffInfos.Select(info => (ulong)info.BuffUuid).ToHashSet());
-            }
-
-            var buffInfos = entity.BuffInfos?.BuffInfos;
-            if (buffInfos == null || buffInfos.Count == 0)
-            {
-                return;
+                    appearBuffInfo.BuffUuid,
+                    appearBuffInfo.BaseId,
+                    appearBuffInfo.FireUuid,
+                    appearBuffInfo.FightSourceInfo?.FightSourceType ?? -1,
+                    appearBuffInfo.FightSourceInfo?.SourceConfigId ?? 0,
+                    appearBuffInfo.Duration,
+                    extraData.ArrivalTime);
             }
 
             // FireUuid(術者)と FightSourceType も運ぶ。どちらも特化判定の採用条件。
@@ -2350,12 +2347,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                     buffInfo.FightSourceInfo?.FightSourceType);
             }
 
-            if (snapshot.Count == 0)
-            {
-                return;
-            }
+            // 出現時の一覧は全件なので、一覧に無い項目は見えない間に消えたもの。付与を流した後で、一覧を受けた印と一緒に当てる(0件でも)。
+            ActiveBuffStore.Instance.ApplyAppearList(
+                entity.Uuid,
+                buffInfos.Select(info => (ulong)info.BuffUuid).ToHashSet());
 
-            EncounterManager.Current.GetOrCreateEntity(entity.Uuid).ApplyBuffSnapshotForSpec(snapshot);
+            // 特化を持つのはプレイヤーだけ。0件の一覧でも「全部を見た」になる(未装着・無効を確定する)。
+            if (Utils.UuidToEntityType(entity.Uuid) == (long)EEntityType.EntChar)
+            {
+                EncounterManager.Current.GetOrCreateEntity(entity.Uuid).ApplyBuffSnapshotForSpec(snapshot);
+            }
         }
 
         public static void ProcessSyncNearDeltaInfo(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -2400,6 +2401,20 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// その差分が、シーン切り替えのたびに来る自分のまとめの差分か。目印は <c>AttrResourceLeft</c>(付け直しのある回は必ず同じ差分に入り、ほかの差分には来ない)。
+        /// </summary>
+        private static bool IsSelfBuffSummaryDelta(AoiSyncDelta delta)
+        {
+            return delta.Attrs?.Attrs.Any(attr => attr.Id == (int)EAttrType.AttrResourceLeft) == true;
+        }
+
+        private static bool HasBuffAdd(AoiSyncDelta delta)
+        {
+            return delta.BuffEffect?.BuffEffects.Any(buffEffect =>
+                buffEffect.LogicEffect.Any(logicEffect => logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectAddBuff)) == true;
         }
 
         /// <summary>差分で届いた自分の能力値の、当てる前の値(無ければ null)。能力値の表に無い番号は見ない。</summary>
@@ -2497,6 +2512,15 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (isSelfTarget && IsSelfBuffReinitialization(delta))
             {
                 SelfAttributeChangeStore.MarkBuffReinitialized();
+                GameReceptionStateStore.MarkSelfBuffReinitialized();
+            }
+            else if (isSelfTarget && IsSelfBuffSummaryDelta(delta) && HasBuffAdd(delta))
+            {
+                // まとめの差分にバフの付与があるのに、番号1からの付け直しが無い。マップに入る前のバフが欠けたままなので、
+                // 自分の「全部のバフを見た」を下ろし、次の付け直しまで立てない(誤ってクラスR1・無効と出さない)。
+                // 付与が1つも無いまとめの差分(バフの無い人)は、付け直しの有無が分からないので判定しない。
+                GameReceptionStateStore.MarkSelfBuffReinitMissing();
+                EncounterManager.Current.GetOrCreateEntity(targetUuid).ClearSelfBuffSnapshot();
             }
 
             // 差分の中は 属性 → バフ → ダメージ の順に当てるので、死亡の印つきの被弾は属性より先に控える。
@@ -2687,12 +2711,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 自分は SyncNearEntities.Appear に出ないので、他人のような全バフスナップショットが届かない。
-            // 代わりに自分のコンテナ同期が、起動時とシーン切替のたびに全バフを1デルタで送ってくる。
-            // 自分のバフは付与も除去も取りこぼさないので、流れ始めた時点で完全な像を持っている。
+            // 代わりにサーバーが、シーン切替のたびに自分のバフを番号1から全部付け直す(まとめの差分)。
             // これが立たないと「マーカーが無い = アビリティ未装着」を自分について確定できない。
+            // まとめの差分に付け直しが無かったマップでは、マップに入る前のバフが欠けているので「全部見た」とは扱わない。
             if (sawBuffAdd && IsSelfPlayer(targetUuid))
             {
-                EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived();
+                EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived(
+                    isBuffSetComplete: !GameReceptionStateStore.IsSelfBuffReinitMissing);
             }
 
             if (shieldListChangedByBuffRemoval)
@@ -3040,6 +3065,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             var syncToMeDeltaInfo = SyncToMeDeltaInfo.Parser.ParseFrom(payloadBuffer);
             var aoiSyncToMeDelta = syncToMeDeltaInfo.DeltaInfo;
             long uuid = aoiSyncToMeDelta.Uuid;
+
+            // キャプチャをやり直した後は currentUserUuid が変わらないまま印だけ下りているので、下の判定の外で立てる。
+            if (uuid != 0)
+            {
+                GameReceptionStateStore.MarkSelfIdentified();
+            }
+
             if (uuid != 0 && currentUserUuid != uuid)
             {
                 currentUserUuid = uuid;
@@ -3179,6 +3211,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             long playerUuid = Utils.EntityIdToUuid(vData.CharId, (long)EEntityType.EntChar, false, false);
 
+            GameReceptionStateStore.MarkSelfContainerReceived();
             NearbyEntityProjection.SetSelfEntity(playerUuid);
             SkillCooldownStateStore.SetSelfPlayer(playerUuid);
             AppState.PlayerUID = vData.CharId;

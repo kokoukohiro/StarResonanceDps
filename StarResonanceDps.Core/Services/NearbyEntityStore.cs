@@ -40,6 +40,15 @@ public sealed class NearbyEntityStore
         }
     }
 
+    /// <summary>その実体がいま周りにいるか(エンティティリストの絞り込みの設定に関係なく)。ウィジェットの状態の印が読む。</summary>
+    public bool Contains(long entityUuid)
+    {
+        lock (_sync)
+        {
+            return _entries.ContainsKey(entityUuid);
+        }
+    }
+
     public void BeginMap()
     {
         PublishIfChanged(

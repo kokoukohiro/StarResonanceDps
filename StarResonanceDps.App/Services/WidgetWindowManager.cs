@@ -35,6 +35,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
     private WidgetWindowManager()
     {
         MessageManager.ResetToStartupCompleted += MessageManager_ResetToStartupCompleted;
+        GameReceptionStateStore.Changed += RefreshAllDataStatusLater;
+        EncounterHistoryProvider.SelectionChanged += RefreshAllDataStatusLater;
+        EncounterHistoryProvider.LoadFailedChanged += RefreshAllDataStatusLater;
     }
 
     /// <summary>
@@ -541,14 +544,17 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         var window = new WidgetWindow(
             widget,
             composition.Content,
+            composition.DataStatusSource,
             savedBounds,
             owner,
             headerChromeActions: composition.HeaderChromeActions,
             headerActions: composition.HeaderActions,
             footerContent: composition.FooterContent);
         window.Closed += WidgetWindow_Closed;
+        window.DataStatusChanged += WidgetWindow_DataStatusChanged;
 
         _openSingleWindows.Add(widget.Kind, window);
+        UpdateCardDataStatus(widget);
         window.Show();
     }
 
@@ -593,6 +599,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         var window = new WidgetWindow(
             playerWidget,
             content,
+            playerWindowViewModel,
             savedBounds,
             owner,
             playerWindowViewModel.HeaderText,
@@ -601,6 +608,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
         window.Closed += WidgetWindow_Closed;
+        window.DataStatusChanged += WidgetWindow_DataStatusChanged;
         // 開き先を持たない種別(常に自分1枚のステータス詳細・バフ・デバフグループ)は、種別ごとの保存だけを使う
         // (SaveOpenTargets はその種別では何もせず返る)。
         window.SaveWindowBoundsOverride = WidgetConfigDefaults.SupportsOpenTargets(playerWidget.Kind)
@@ -615,6 +623,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
 
         _openPlayerWindows.Add(new PlayerWidgetWindowSession(playerWidget, playerWindowViewModel, window));
         UpdatePlayerWindowCount(playerWidget);
+        UpdateCardDataStatus(playerWidget);
         SaveOpenTargets(playerWidget);
 
         window.Show();
@@ -694,6 +703,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         var window = new WidgetWindow(
             widget,
             content,
+            viewModel,
             savedBounds,
             owner,
             viewModel.HeaderText,
@@ -701,6 +711,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             headerActions: headerActions);
         viewModel.PropertyChanged += EntityBuffListWindowViewModel_PropertyChanged;
         window.Closed += WidgetWindow_Closed;
+        window.DataStatusChanged += WidgetWindow_DataStatusChanged;
         window.SaveWindowBoundsOverride = () => SaveOpenTargets(widget);
 
         if (savedWindowBounds is null)
@@ -710,6 +721,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
 
         _openEntityBuffWindows.Add(new EntityBuffListWindowSession(widget, viewModel, window));
         UpdatePlayerWindowCount(widget);
+        UpdateCardDataStatus(widget);
         SaveOpenTargets(widget);
 
         window.Show();
@@ -901,32 +913,42 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             });
     }
 
+    /// <summary>1枚だけ開く種類の窓の中身。プレイヤーリストとエンティティリストは窓の中身もウィジェットの項目が持つ。</summary>
     private WidgetWindowComposition CreateWidgetWindowComposition(WidgetListItemViewModel widget)
     {
         return widget.Kind switch
         {
             WidgetKind.PlayerList => new WidgetWindowComposition(
                 new PlayerListWidgetView(),
+                widget,
                 null,
                 null,
                 new PlayerListWidgetFooterView()),
             WidgetKind.EntityList => new WidgetWindowComposition(
                 new EntityListWidgetView(),
+                widget,
                 null,
                 null,
                 new PlayerListWidgetFooterView()),
             WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
-            WidgetKind.TakenDamageLog => new WidgetWindowComposition(
-                new TakenDamageLogWidgetView
-                {
-                    DataContext = new TakenDamageLogWidgetViewModel(widget)
-                },
-                null,
-                null,
-                null),
-            _ => new WidgetWindowComposition(null, null, null, null)
+            WidgetKind.TakenDamageLog => CreateTakenDamageLogComposition(widget),
+            _ => throw new InvalidOperationException($"Widget {widget.Kind} has no single-window content.")
         };
+    }
+
+    private static WidgetWindowComposition CreateTakenDamageLogComposition(WidgetListItemViewModel widget)
+    {
+        var viewModel = new TakenDamageLogWidgetViewModel(widget);
+        return new WidgetWindowComposition(
+            new TakenDamageLogWidgetView
+            {
+                DataContext = viewModel
+            },
+            viewModel,
+            null,
+            null,
+            null);
     }
 
     private WidgetWindowComposition CreateMeterWidgetComposition(
@@ -942,6 +964,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             {
                 DataContext = viewModel
             },
+            viewModel,
             new MeterWidgetHeaderLabelsView
             {
                 DataContext = viewModel
@@ -1312,6 +1335,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         }
 
         window.Closed -= WidgetWindow_Closed;
+        window.DataStatusChanged -= WidgetWindow_DataStatusChanged;
 
         var playerWindow = _openPlayerWindows.FirstOrDefault(
             session => ReferenceEquals(session.Window, window));
@@ -1329,6 +1353,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             _openPlayerWindows.Remove(playerWindow);
             _playerWindowsAwaitingRoster.Remove(playerWindow);
             UpdatePlayerWindowCount(playerWindow.Widget);
+            UpdateCardDataStatus(playerWindow.Widget);
             SaveOpenTargets(playerWindow.Widget);
 
             if (!_isManagerClosing
@@ -1355,6 +1380,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             entityWindow.ViewModel.Dispose();
             _openEntityBuffWindows.Remove(entityWindow);
             UpdatePlayerWindowCount(entityWindow.Widget);
+            UpdateCardDataStatus(entityWindow.Widget);
             SaveOpenTargets(entityWindow.Widget);
 
             if (!_isManagerClosing
@@ -1368,11 +1394,89 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         }
 
         _openSingleWindows.Remove(window.Widget.Kind);
+        UpdateCardDataStatus(window.Widget);
 
         if (!_isManagerClosing && window.Widget.State == WidgetState.Running)
         {
             window.Widget.State = WidgetState.Stopped;
         }
+    }
+
+    private void WidgetWindow_DataStatusChanged(object? sender, EventArgs e)
+    {
+        if (sender is WidgetWindow window)
+        {
+            UpdateCardDataStatus(window.Widget);
+        }
+    }
+
+    /// <summary>
+    /// メイン窓のカードの円。そのウィジェットの開いている窓のうち一番悪い状態の印(赤 → 黄 → 緑)、開いている窓が無ければ null(停止の灰色)。
+    /// </summary>
+    private void UpdateCardDataStatus(WidgetListItemViewModel widget)
+    {
+        WidgetDataStatusLevel? worst = null;
+        foreach (var window in EnumerateOpenWindows(widget))
+        {
+            var level = window.DataStatus.Level;
+            if (worst is null || level > worst)
+            {
+                worst = level;
+            }
+        }
+
+        widget.CardDataStatusLevel = worst;
+    }
+
+    /// <summary>そのウィジェットの開いている窓(1枚だけの窓・プレイヤーの窓・実体の窓)。</summary>
+    private IEnumerable<WidgetWindow> EnumerateOpenWindows(WidgetListItemViewModel widget)
+    {
+        if (_openSingleWindows.TryGetValue(widget.Kind, out var singleWindow) && ReferenceEquals(singleWindow.Widget, widget))
+        {
+            yield return singleWindow;
+        }
+
+        foreach (var session in _openPlayerWindows)
+        {
+            if (ReferenceEquals(session.Widget, widget))
+            {
+                yield return session.Window;
+            }
+        }
+
+        foreach (var session in _openEntityBuffWindows)
+        {
+            if (ReferenceEquals(session.Widget, widget))
+            {
+                yield return session.Window;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 受信の状態(<see cref="GameReceptionStateStore"/>)か、履歴の選択か読み込みの失敗(<see cref="EncounterHistoryProvider"/>)が変わった。
+    /// どちらもパケット処理のスレッドなどから来るので画面のスレッドへ渡し、開いている窓全部の中身に状態の印を計算し直させる
+    /// (変わった窓だけがカードの円をまとめ直す)。
+    /// </summary>
+    private void RefreshAllDataStatusLater()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var window in _openSingleWindows.Values.ToArray())
+            {
+                window.RefreshDataStatus();
+            }
+
+            foreach (var session in _openPlayerWindows.ToArray())
+            {
+                session.Window.RefreshDataStatus();
+            }
+
+            foreach (var session in _openEntityBuffWindows.ToArray())
+            {
+                session.Window.RefreshDataStatus();
+            }
+        });
     }
 
     private sealed record PlayerWindowRoster(
@@ -1418,8 +1522,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         public WidgetWindow Window { get; }
     }
 
+    /// <param name="DataStatusSource">タイトルの左の円に映す状態の印の持ち主(窓の中身)。</param>
     private sealed record WidgetWindowComposition(
-        FrameworkElement? Content,
+        FrameworkElement Content,
+        IWidgetDataStatusSource DataStatusSource,
         FrameworkElement? HeaderChromeActions,
         FrameworkElement? HeaderActions,
         FrameworkElement? FooterContent);

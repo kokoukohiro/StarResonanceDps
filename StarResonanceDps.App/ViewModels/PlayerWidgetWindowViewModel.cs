@@ -5,7 +5,7 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public abstract class PlayerWidgetWindowViewModel : ViewModelBase
+public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataStatusSource
 {
     private readonly long? _requestedCharacterId;
     private readonly bool _showPlayerIdentityInHeader;
@@ -88,6 +88,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         if (RepresentsPlayer(characterId))
         {
             OnSocialDataChanged();
+            RefreshDataStatus();
         }
     }
 
@@ -95,7 +96,31 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
     public void NotifySocialDataCleared()
     {
         OnSocialDataChanged();
+        RefreshDataStatus();
     }
+
+    public WidgetDataStatus DataStatus { get; private set; }
+
+    public event EventHandler? DataStatusChanged;
+
+    /// <summary>今の値で状態の印を計算し直す。相手の行・名刺の値・受信の状態が変わったときと、中身を定期で読み直したときに呼ぶ。</summary>
+    public void RefreshDataStatus()
+    {
+        var status = CreateDataStatus(GameReceptionStateStore.Current, _selectedPlayer);
+        if (status == DataStatus)
+        {
+            return;
+        }
+
+        DataStatus = status;
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// この窓の状態の印。条件は <see cref="WidgetDataStatusRules"/> の窓の種類ごとの関数に書き、ここでは事実を集めて渡すだけにする。
+    /// </summary>
+    /// <param name="player">窓の相手の行(一覧から消えても残した最後の行を含む)。無ければ null。</param>
+    protected abstract WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player);
 
     /// <summary>映している相手の名刺の値が変わったとき。それを表示に使う窓だけが上書きする。</summary>
     protected virtual void OnSocialDataChanged()
@@ -118,6 +143,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
 
         RenderHeaderText();
         OnResetToStartup();
+        RefreshDataStatus();
     }
 
     /// <summary>ログアウトで起動直後の状態へ戻したとき。行が無くても覚えている素性から表示を作る窓だけが上書きする。</summary>
@@ -302,6 +328,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase
         _selectedPlayer = player;
         RefreshHeaderText();
         OnSelectedPlayerChanged(player);
+        RefreshDataStatus();
     }
 
     /// <summary>タイトルを組み直す。<see cref="HeaderPrefix"/> が変わった側から呼ぶ。</summary>

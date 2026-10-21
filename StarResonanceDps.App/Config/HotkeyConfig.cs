@@ -23,7 +23,7 @@ public enum HotkeyAction
 
     /// <summary>
     /// 常に最前面なら「ピン留め時のみ最前面」、そうでなければ「常に最前面」に切り替える。
-    /// 全体設定の表示設定「ウィジェットウィンドウ」と同じ値を書き換えて保存する。
+    /// 全体設定のウィジェット設定「ウィジェットウィンドウ」と同じ値を書き換えて保存する。
     /// </summary>
     WidgetWindowTopmostAlwaysOrPinnedOnly,
 

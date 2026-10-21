@@ -139,10 +139,11 @@
             </Grid.ColumnDefinitions>
 
             <!--
-                停止/実行の丸(13)と起動数バッジ(高さ16・幅は桁数で伸びる)が入れ替わる枠。
+                状態の丸(13)と起動数バッジ(高さ16・幅は桁数で伸びる)が入れ替わる枠。
                 **枠を16固定にして中の2つを中央揃えにする。** Auto にすると列幅が子で変わって
                 右のウィジェット名が動き、Left 揃えだと左端を軸に伸びて中心もずれる。
                 バッジが2桁になると左右へ数pxはみ出すが、中心対称なので名前の位置は動かない。
+                色は開いている窓のうち一番悪い状態の印(CardDataStatusLevel)。窓が無ければ停止の灰色。
             -->
             <Grid Grid.Column="0"
                   Width="16"
@@ -159,8 +160,14 @@
                             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding State}" Value="{x:Static models:WidgetState.Running}">
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Complete}">
                                     <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Partial}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.DataStatusPartial}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Unavailable}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.DataStatusUnavailable}" />
                                 </DataTrigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
@@ -177,7 +184,6 @@
                 <Path x:Name="PlayerWindowCountBadgePath"
                       HorizontalAlignment="Center"
                       VerticalAlignment="Center"
-                      Fill="{DynamicResource Brush.Success}"
                       Stretch="None"
                       UseLayoutRounding="True"
                       SnapsToDevicePixels="True">
@@ -185,7 +191,17 @@
                         <Style TargetType="Path">
                             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Setter Property="Visibility" Value="Collapsed" />
+                            <Setter Property="Fill" Value="{DynamicResource Brush.Stopped}" />
                             <Style.Triggers>
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Complete}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.Success}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Partial}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.DataStatusPartial}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding CardDataStatusLevel}" Value="{x:Static models:WidgetDataStatusLevel.Unavailable}">
+                                    <Setter Property="Fill" Value="{DynamicResource Brush.DataStatusUnavailable}" />
+                                </DataTrigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding ShowsPlayerWindowCountBadge}" Value="True" />

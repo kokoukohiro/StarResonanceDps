@@ -8,10 +8,11 @@ using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
-public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
+public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly MeterSnapshotKind _kind;
@@ -20,6 +21,12 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     private readonly DispatcherTimer _refreshTimer;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly Action<WidgetKind, long> _requestPlayerWindow;
+
+    /// <summary>直前の描き直しで出した行。受信の状態が変わったときの状態の印の計算し直しに使う。</summary>
+    private IReadOnlyList<MeterPlayerSnapshot> _shownPlayers = Array.Empty<MeterPlayerSnapshot>();
+
+    /// <summary>直前の描き直しの名前の書式が潜在心相晶(<c>{Psych}</c>)を出すか。</summary>
+    private bool _showsSeasonTalent;
 
     [ObservableProperty]
     private string _elapsedText = "00:00:00";
@@ -70,6 +77,30 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
     public WidgetListItemViewModel Widget => _widget;
 
     public ReadOnlyObservableCollection<MeterPlayerEntry> Entries { get; }
+
+    public WidgetDataStatus DataStatus { get; private set; }
+
+    public event EventHandler? DataStatusChanged;
+
+    /// <summary>HPS メーターだけ、料理と自然回復を数えられない近くの人(名簿の行)も見る。</summary>
+    public void RefreshDataStatus()
+    {
+        var status = WidgetDataStatusRules.ForMeter(
+            GameReceptionStateStore.Current,
+            EncounterHistoryProvider.SelectedEncounterId is not null,
+            EncounterHistoryProvider.HasLoadFailed,
+            PartyStateStore.Instance.Current.IsMembershipPending,
+            _shownPlayers,
+            _showsSeasonTalent,
+            _kind == MeterSnapshotKind.Healing ? PlayerRosterStore.Instance.Current.Entries : null);
+        if (status == DataStatus)
+        {
+            return;
+        }
+
+        DataStatus = status;
+        DataStatusChanged?.Invoke(this, EventArgs.Empty);
+    }
 
     public void Dispose()
     {
@@ -185,6 +216,10 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable
                 _entries.Move(currentIndex, index);
             }
         }
+
+        _shownPlayers = snapshot.Players;
+        _showsSeasonTalent = PlayerInfoFormatFormatter.ShowsSeasonTalent(settings.PlayerInfoFormatString);
+        RefreshDataStatus();
     }
 
     [RelayCommand]

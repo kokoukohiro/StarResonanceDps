@@ -121,6 +121,18 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         RenderPlayerInfo();
     }
 
+    protected override WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player)
+    {
+        var hasPhoto = player is not null
+            && (player.RecordedAvatar ?? SocialDataStore.GetAvatar(player.CharacterId)) is not null;
+        return WidgetDataStatusRules.ForPlayerInfo(
+            reception,
+            EncounterHistoryProvider.HasLoadFailed,
+            IsSelfTarget,
+            player,
+            hasPhoto);
+    }
+
     /// <summary>相手がまだ一覧に載っていない間は、覚えている素性(保存から戻した名前と UID)が入ったら出し直す。</summary>
     protected override void OnLastKnownPlayerChanged()
     {
@@ -150,7 +162,23 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
                 LastKnownProfessionId,
                 RosterSeasonId,
                 _iconPalette)
-            : PlayerInfoEntry.Create(_player, RosterMapName, RosterMapChannel, _player.SeasonId ?? RosterSeasonId, _iconPalette);
+            : PlayerInfoEntry.Create(
+                _player,
+                RosterMapName,
+                RosterMapChannel,
+                _player.SeasonId ?? RosterSeasonId,
+                _iconPalette,
+                IsProfileUnknown(_player));
+    }
+
+    /// <summary>
+    /// 冒険者レベル・能力スコアなどがまだ届いていないか。自分は途中起動(全体の値がまだ)、他の人は素性の欠け(周りでの出現も名刺も届いていない)。
+    /// </summary>
+    private static bool IsProfileUnknown(PlayerRosterEntry player)
+    {
+        return player.IsSelf
+            ? GameReceptionStateStore.Current.IsMidLaunch
+            : player.DataGaps.HasFlag(PlayerDataGaps.Identity);
     }
 
     /// <summary>
