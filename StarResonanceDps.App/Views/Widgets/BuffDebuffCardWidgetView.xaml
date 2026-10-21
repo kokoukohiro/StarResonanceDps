@@ -9,10 +9,13 @@
         <converters:ScaleConverter x:Key="BuffDebuffCard.ScaleConverter" />
 
         <!--
-            右クリックのメニュー。作りはバフ・デバフ一覧の行のメニューと同じで、項目は「グループに追加」の1つだけ(四隅とも角丸)。
+            右クリックのメニュー。作りはバフ・デバフ一覧の行のメニューと同じで、項目は「グループに追加」と「〇〇カードのショートカットに追加」。
+            足せる項目だけを出し、角丸は出している項目の並びで決める(1つなら四隅、2つなら上の項目の上と下の項目の下。画面のコードが Tag に入れる)。
             メニューの DataContext はカードの ViewModel(開くときに画面のコードが入れる)で、色はその Widget から引く。
         -->
         <CornerRadius x:Key="Menu.WidgetWindowBuffCardContextMenuItem.SingleCornerRadius">5</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowBuffCardContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowBuffCardContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
 
         <Style x:Key="Menu.WidgetWindowBuffCardContextMenu"
                TargetType="{x:Type ContextMenu}">
@@ -98,9 +101,13 @@
         <ContextMenu x:Key="BuffDebuffCard.ContextMenu"
                      Style="{StaticResource Menu.WidgetWindowBuffCardContextMenu}"
                      Placement="MousePoint">
+            <!-- 並びは画面のコードが項目を見分けるのに使う(1つ目がグループ、2つ目がショートカット)。 -->
             <MenuItem Style="{StaticResource Menu.WidgetWindowBuffCardContextMenuItem}"
                       Header="{Binding AddToGroupMenuText}"
                       Command="{Binding AddToGroupCommand}" />
+            <MenuItem Style="{StaticResource Menu.WidgetWindowBuffCardContextMenuItem}"
+                      Header="{Binding AddToShortcutsMenuText}"
+                      Command="{Binding AddToShortcutsCommand}" />
         </ContextMenu>
     </UserControl.Resources>
 

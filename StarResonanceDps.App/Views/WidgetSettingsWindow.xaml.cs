@@ -56,6 +56,7 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
+        _widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
 
         // 開いている間は、行の並びを保存前のプレビューとして持つ(ウィジェットでの並べ替えも含めて「保存」で確定、閉じたら戻す)。
@@ -98,6 +99,7 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
+        _widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
         _widget.PlayerStatusRowOrderChanged -= Widget_PlayerStatusRowOrderChanged;
         _widget.EndSettingsPreview();
@@ -124,6 +126,15 @@ public partial class WidgetSettingsWindow : Window
     private void Widget_BuffDebuffGroupEntryOrderChangedFromWidget(IReadOnlyList<BuffEntryKey> order)
     {
         _viewModel.BuffDebuffGroupSettings?.ApplyEntryOrderFromWidget(order);
+    }
+
+    /// <summary>
+    /// 開いている間に右クリックで、バフ・デバフカードのショートカットの行がオンになった(一覧・カードの「〇〇カードのショートカットに追加」)。
+    /// 設定の行にも同じ変化を入れる。
+    /// </summary>
+    private void Widget_BuffCardShortcutChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.BuffCardSettings?.SetShortcutEnabledFromWidget(key, isEnabled);
     }
 
     /// <summary>開いている間に推移グラフの窓の上のホイールで横軸の長さが変わった。設定の値にも入れる。</summary>
@@ -249,6 +260,11 @@ public partial class WidgetSettingsWindow : Window
     private void BuffDebuffGroupEntriesNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BuffDebuffGroupEntriesHost);
+    }
+
+    private void BuffCardShortcutsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffCardShortcutsHost);
     }
 
     private void BuffDebuffGroupBuffColorsNavButton_Click(object sender, RoutedEventArgs e)

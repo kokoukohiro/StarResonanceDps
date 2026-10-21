@@ -223,6 +223,27 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
+    /// バフ・デバフカードのショートカットだけを保存する。バフ・デバフ一覧かカードの右クリックで行を足したときに呼ぶ
+    /// (バフ・デバフグループの行と同じく、この項目だけを書く)。
+    /// </summary>
+    public void SaveBuffCardShortcuts(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> shortcuts)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffCardSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffCard ??= WidgetConfigDefaults.CreateBuffCardSettings();
+            config.BuffCard.Shortcuts = [.. shortcuts.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
     /// 推移グラフの横軸の長さだけを保存する。窓の上のホイールで変えて、ホイールが止まったときに呼ぶ。
     ///
     /// <para>

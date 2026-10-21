@@ -374,6 +374,12 @@
   <data name="Settings_Section_BuffDebuffGroupEntries_Description" xml:space="preserve">
     <value>※右键点击增益和减益即可添加</value>
   </data>
+  <data name="Settings_Section_BuffCardShortcuts_Title" xml:space="preserve">
+    <value>快捷方式</value>
+  </data>
+  <data name="Settings_ListReorderNote" xml:space="preserve">
+    <value>※可在此列表中拖动项目调整顺序</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>职责技能</value>
   </data>
@@ -406,6 +412,12 @@
   </data>
   <data name="BuffList_Menu_AddToGroup" xml:space="preserve">
     <value>添加至分组</value>
+  </data>
+  <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
+    <value>添加到增益卡片快捷方式</value>
+  </data>
+  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
+    <value>添加到减益卡片快捷方式</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>从分组中删除此增益</value>
@@ -1265,10 +1277,10 @@
     <value>换行</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
-    <value>增益({0})</value>
+    <value>增益卡片({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
-    <value>减益({0})</value>
+    <value>减益卡片({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
     <value>料理</value>

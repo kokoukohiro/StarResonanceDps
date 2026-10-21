@@ -9,6 +9,23 @@ namespace StarResonanceDps.App.Services;
 /// </summary>
 public static class BuffListSnapshotFilter
 {
+    /// <summary>
+    /// プレイヤーのバフ(デバフ)一覧の行。一覧の窓と同じ作り方(設定の「同種バフの表示」で取り、非表示リストで絞る)。
+    /// 一覧の窓・メイン画面のカードの選択リスト・バフ・デバフカードの「指定なし」が同じ行を見るように、ここ1か所で作る。
+    /// </summary>
+    public static IReadOnlyList<PlayerBuffSnapshot> GetPlayerRows(
+        BuffListWidgetSettingsConfig settings,
+        long characterId,
+        PlayerBuffListKind kind)
+    {
+        return Apply(
+            settings,
+            MeterSnapshotProvider.GetPlayerBuffs(
+                characterId,
+                kind,
+                WidgetConfigDefaults.GroupsSameBuffs(settings, isEntityTarget: false)));
+    }
+
     /// <summary>落とす行が無ければ、受け取った一覧をそのまま返す(新しい一覧を作らない)。</summary>
     public static IReadOnlyList<PlayerBuffSnapshot> Apply(
         BuffListWidgetSettingsConfig settings,

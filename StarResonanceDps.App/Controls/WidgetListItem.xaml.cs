@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
 using StarResonanceDps.App.Services;
@@ -114,6 +115,44 @@ public partial class WidgetListItem : UserControl
         }
 
         PlayerWindowCountBadgePath.Data = cutoutGeometry;
+    }
+
+    /// <summary>名前の選択リストを開いた。項目を今の名簿などで作り直してもらう。</summary>
+    /// <summary>リストを開いた。項目を作り直し、並べるものが1つも無ければ閉じる(空のリストを出さない)。</summary>
+    private void TargetSelectBox_DropDownOpened(object? sender, EventArgs e)
+    {
+        if (DataContext is not WidgetListItemViewModel widget)
+        {
+            return;
+        }
+
+        widget.RequestTargetOptions();
+        if (widget.TargetOptions.Count == 0 && sender is ComboBox comboBox)
+        {
+            comboBox.IsDropDownOpen = false;
+        }
+    }
+
+    /// <summary>項目を選んだ。選んだ項目はカードが持つ。</summary>
+    private void TargetSelectBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ComboBox { SelectedItem: WidgetTargetOption option } comboBox
+            || DataContext is not WidgetListItemViewModel widget)
+        {
+            return;
+        }
+
+        widget.SelectTargetOption(option);
+        comboBox.IsDropDownOpen = false;
+    }
+
+    /// <summary>選択リストの選択を戻す。カードが選んでいる項目を持ち、次に同じ項目を選んでも選び直せるように。</summary>
+    private void TargetSelectBox_DropDownClosed(object? sender, EventArgs e)
+    {
+        if (sender is ComboBox comboBox)
+        {
+            comboBox.SelectedIndex = -1;
+        }
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)

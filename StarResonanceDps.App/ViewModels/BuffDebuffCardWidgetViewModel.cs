@@ -18,26 +18,40 @@ namespace StarResonanceDps.App.ViewModels;
 /// <b>失効したら空になるのが正しい挙動。</b>同じ人に同じバフが付き直せば
 /// <c>base:{BaseId}</c> のキーが一致するのでそのまま戻る。
 /// </para>
+///
+/// <para>
+/// バフもまとまりも指定せずに開いた窓(メイン画面のカードの「指定なし」)は、最初に付いたものを待つ(<see cref="IsWaiting"/>)。
+/// タイトルはウィジェット名だけで、その人のバフリストの1行目(無ければデバフリストの1行目)が出たらそのバフに入り、
+/// 以後は普通のカードとして動く(次に来たものへは移らない)。そのバフのカードがもう別の窓で開いていれば、この窓は閉じる
+/// (決めるのは窓の管理、<see cref="FirstBuffRowFound"/>)。
+/// </para>
 /// </summary>
 public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
-    private readonly PlayerBuffListKind _kind;
+    /// <summary>バフかデバフか。待っている窓が入るまでは <see cref="PlayerBuffListKind.Buff"/>。</summary>
+    private PlayerBuffListKind _kind;
 
     /// <summary>
-    /// 追う対象のバフキー。まとまり(<see cref="_group"/>)を追うときは使わない。
+    /// 追う対象のバフキー。まとまり(<see cref="_group"/>)を追うときは使わない。待っている窓が入るときにだけ書き換わる。
     /// </summary>
-    private readonly string? _requestedBuffKey;
+    private string? _requestedBuffKey;
 
     /// <summary>
     /// 追うまとまり。<see cref="BuffGroup.None"/> なら個別のバフを追う。
-    /// まとまりは対象が居なくても名乗れるので、タイトルが空になることがない。
+    /// まとまりは対象が居なくても名乗れるので、タイトルが空になることがない。待っている窓が入るときにだけ書き換わる。
     /// </summary>
-    private readonly BuffGroup _group;
+    private BuffGroup _group;
 
     private readonly DispatcherTimer _refreshTimer;
 
+    /// <summary>待っている窓が入る相手(その人のバフリストの1行目、無ければデバフリストの1行目)を探す経路。</summary>
+    private readonly Func<long, (PlayerBuffListKind Kind, PlayerBuffSnapshot Snapshot)?>? _findFirstBuffRow;
+
     /// <summary>右クリックの「グループに追加」の行き先。</summary>
     private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
+
+    /// <summary>右クリックの「バフカードのショートカットに追加」(デバフのカードは「デバフカードの」)の行き先。</summary>
+    private readonly IBuffCardShortcutAdder? _shortcutAdder;
 
     /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
     private readonly BuffCardNotificationTracker _notificationTracker;
@@ -108,12 +122,16 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         PlayerBuffListKind kind,
         string? requestedBuffKey,
         BuffGroup group,
-        IBuffDebuffGroupEntryAdder? groupEntryAdder = null)
+        Func<long, (PlayerBuffListKind Kind, PlayerBuffSnapshot Snapshot)?>? findFirstBuffRow = null,
+        IBuffDebuffGroupEntryAdder? groupEntryAdder = null,
+        IBuffCardShortcutAdder? shortcutAdder = null)
         : base(playerWidget, requestedCharacterId)
     {
         _kind = kind;
         _group = group;
+        _findFirstBuffRow = findFirstBuffRow;
         _groupEntryAdder = groupEntryAdder;
+        _shortcutAdder = shortcutAdder;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
         _notificationTracker = new BuffCardNotificationTracker(playerWidget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
@@ -136,10 +154,22 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
     public PlayerBuffListKind BuffListKind => _kind;
 
-    /// <summary>開いたときに指定されたバフキー。まとまりを追う窓では <c>null</c>。</summary>
+    /// <summary>開いたときに指定されたバフキー(待っていた窓は入ったバフのキー)。まとまりを追う窓と待っている窓では <c>null</c>。</summary>
     public string? RequestedBuffKey => _requestedBuffKey;
 
     public BuffGroup Group => _group;
+
+    /// <summary>
+    /// 最初に付いたものを待っている窓か(バフもまとまりも決まっていない)。メイン画面のカードの「指定なし」の窓。
+    /// 入ったら偽に変わり、戻らない。
+    /// </summary>
+    public bool IsWaiting => _group == BuffGroup.None && _requestedBuffKey is null;
+
+    /// <summary>
+    /// 待っている間に、その人のバフリストの1行目(無ければデバフリストの1行目)が出た(引数はこの窓・バフかデバフか・その行)。
+    /// 受けた窓の管理が、<see cref="Enter"/> で入れるか、そのカードがもう別の窓で開いていれば窓を閉じる。受け手が無ければ待ったまま。
+    /// </summary>
+    public event Action<BuffDebuffCardWidgetViewModel, PlayerBuffListKind, PlayerBuffSnapshot>? FirstBuffRowFound;
 
     /// <summary>右クリックのメニューの色を引くウィジェット。</summary>
     public WidgetListItemViewModel Widget => PlayerWidget;
@@ -147,9 +177,15 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックのメニューの項目「グループに追加」。</summary>
     public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
 
+    /// <summary>右クリックのメニューの項目「バフカードのショートカットに追加」(デバフのカードは「デバフカードの」)。</summary>
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_AddToDebuffCardShortcuts"
+            : "BuffList_Menu_AddToBuffCardShortcuts");
+
     /// <summary>
     /// このカードのバフをバフ・デバフグループに足せるか。自分のカードだけで、グループにまだオンで入っていないとき真。
-    /// 偽なら右クリックのメニューを開かない。バフが今付いていなくても、追っているバフ(まとまり)で決まる。
+    /// 偽ならメニューに項目を出さない。バフが今付いていなくても、追っているバフ(まとまり)で決まる。待っている窓は偽。
     /// </summary>
     public bool CanAddToGroup()
     {
@@ -157,6 +193,17 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             && _groupEntryAdder is not null
             && ResolveGroupEntryKey() is { } key
             && _groupEntryAdder.CanAdd(key);
+    }
+
+    /// <summary>
+    /// このカードのバフをバフ・デバフカードのショートカットに足せるか。条件は <see cref="CanAddToGroup"/> と同じで、ショートカットにまだオンで入っていないとき真。
+    /// </summary>
+    public bool CanAddToShortcuts()
+    {
+        return IsSelfTarget
+            && _shortcutAdder is not null
+            && ResolveGroupEntryKey() is { } key
+            && _shortcutAdder.CanAddShortcut(key);
     }
 
     /// <summary>最後に分かったバフ名。保存して、次の起動でタイトルに使う。</summary>
@@ -184,7 +231,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     public double Scale => ScalePercent / 100d;
 
     /// <summary>
-    /// タイトルの前半を「バフ(名前)」「デバフ(名前)」にする。
+    /// タイトルの前半を「バフカード(名前)」「デバフカード(名前)」にする。
     /// バフ名が一度も分かっていないときだけウィジェット名のまま。
     /// </summary>
     protected override string HeaderPrefix =>
@@ -193,6 +240,9 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             _kind,
             _group,
             _lastKnownBuffName);
+
+    /// <summary>待っている間はタイトルをウィジェット名だけにする(「 - 名前」を付けない)。</summary>
+    protected override bool ShowsPlayerIdentityInHeader => !IsWaiting;
 
     public bool RepresentsBuff(PlayerBuffListKind kind, string? buffKey, BuffGroup group)
     {
@@ -246,6 +296,33 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         }
     }
 
+    [RelayCommand]
+    private void AddToShortcuts()
+    {
+        if (CanAddToShortcuts() && ResolveGroupEntryKey() is { } key)
+        {
+            _shortcutAdder!.AddShortcut(key);
+        }
+    }
+
+    /// <summary>
+    /// 待っている窓が、そのバフに入る(窓の管理が <see cref="FirstBuffRowFound"/> を受けて呼ぶ)。料理・薬剤ならまとまりを追う。
+    /// 入ったらそのバフのカードとして保存し直す(<see cref="PlayerWidgetWindowViewModel.SavedTargetInfoResolved"/>)。待っていなければ何もしない。
+    /// </summary>
+    public void Enter(PlayerBuffListKind kind, string cardKey, BuffGroup group)
+    {
+        if (!IsWaiting)
+        {
+            return;
+        }
+
+        _kind = kind;
+        _group = group;
+        _requestedBuffKey = group == BuffGroup.None ? cardKey : null;
+        OnPropertyChanged(nameof(AddToShortcutsMenuText));
+        RaiseSavedTargetInfoResolved();
+    }
+
     /// <summary>グループの行の鍵。まとまりを追うカードはまとまり、個別のバフのカードは追っているカードの鍵の番号。</summary>
     private BuffEntryKey? ResolveGroupEntryKey()
     {
@@ -292,6 +369,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(AddToGroupMenuText));
+        OnPropertyChanged(nameof(AddToShortcutsMenuText));
         Refresh();
     }
 
@@ -311,6 +389,17 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             // ここで組み直さないと、直起動のあいだ既定名のまま固定される。
             RefreshHeader();
             return;
+        }
+
+        // 待っている窓は、その人のバフリストの1行目(無ければデバフリストの1行目)が出たら知らせる。
+        // 入るか、そのカードがもう別の窓で開いていて閉じるかは、窓の管理が決める(1つのカードに窓は1枚)。
+        if (IsWaiting && _findFirstBuffRow?.Invoke(characterId) is { } row)
+        {
+            FirstBuffRowFound?.Invoke(this, row.Kind, row.Snapshot);
+            if (_isDisposed)
+            {
+                return;
+            }
         }
 
         var playerIdentity = MeterSnapshotProvider.GetPlayerIdentity(characterId);

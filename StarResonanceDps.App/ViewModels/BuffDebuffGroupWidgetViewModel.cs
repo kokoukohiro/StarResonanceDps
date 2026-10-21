@@ -63,7 +63,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         WidgetListItemViewModel groupWidget,
         PlayerRosterEntry? initialPlayer,
         Action<long, PlayerBuffListKind, BuffEntryKey>? openCard = null)
-        : base(groupWidget, requestedCharacterId: null, showPlayerIdentityInHeader: false)
+        : base(groupWidget, requestedCharacterId: null)
     {
         _openCard = openCard;
         _settings = groupWidget.GetBuffDebuffGroupSettingsSnapshot();
@@ -82,6 +82,9 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
     }
 
     public ReadOnlyObservableCollection<PlayerBuffEntry> Entries { get; }
+
+    /// <summary>自分だけを出す1枚の窓なので、タイトルはウィジェット名だけ。</summary>
+    protected override bool ShowsPlayerIdentityInHeader => false;
 
     /// <summary>メニューの色を引くウィジェット。</summary>
     public WidgetListItemViewModel Widget => PlayerWidget;
@@ -230,7 +233,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         _openCard!.Invoke(characterId, kind, key);
     }
 
-    /// <summary>行をグループから外す(既定の行はオフにして残し、足した行は消す。決まりは <see cref="WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled"/>)。</summary>
+    /// <summary>行をグループから外す(既定の行はオフにして残し、足した行は消す。決まりは <see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。</summary>
     [RelayCommand]
     private void RemoveFromGroup(PlayerBuffEntry? entry)
     {

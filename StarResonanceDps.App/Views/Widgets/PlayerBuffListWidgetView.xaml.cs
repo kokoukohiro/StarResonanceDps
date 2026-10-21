@@ -17,8 +17,8 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// </para>
 ///
 /// <para>
-/// 行の左クリックはカードを開き、右クリックはメニュー(カード・非表示・グループに追加)を開く。メニューの開き方はエンティティリストと同じ。
-/// 「グループに追加」は自分の一覧で足せる行だけに出す。
+/// 行の左クリックはカードを開き、右クリックはメニュー(カード・非表示・グループに追加・カードのショートカットに追加)を開く。メニューの開き方はエンティティリストと同じ。
+/// 「グループに追加」と「カードのショートカットに追加」は自分の一覧で足せる行だけに出す。
 /// </para>
 /// </summary>
 public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScrollContent
@@ -30,6 +30,9 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
 
     /// <summary>メニューの「グループに追加」の項目の名前(画面の作りの <c>Name</c>)。</summary>
     private const string AddToGroupMenuItemName = "AddToGroupMenuItem";
+
+    /// <summary>メニューの「〇〇カードのショートカットに追加」の項目の名前(画面の作りの <c>Name</c>)。</summary>
+    private const string AddToShortcutsMenuItemName = "AddToShortcutsMenuItem";
 
     private ContextMenu? _openBuffMenu;
     private PlayerBuffEntry? _openBuffEntry;
@@ -92,12 +95,16 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
             return;
         }
 
-        // 「グループに追加」は足せる行(自分の一覧で、グループにまだオンで入っていない)だけに出す。
+        // 「グループに追加」と「カードのショートカットに追加」は足せる行(自分の一覧で、まだオンで入っていない)だけに出す。
         foreach (var menuItem in menu.Items.OfType<MenuItem>())
         {
             if (menuItem.Name == AddToGroupMenuItemName)
             {
                 menuItem.Visibility = viewModel.CanAddToGroup(entry) ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else if (menuItem.Name == AddToShortcutsMenuItemName)
+            {
+                menuItem.Visibility = viewModel.CanAddToShortcuts(entry) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 

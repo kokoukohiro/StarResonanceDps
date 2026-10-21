@@ -311,6 +311,12 @@
   <data name="Settings_Section_BuffDebuffGroupEntries_Description" xml:space="preserve">
     <value>※バフとデバフを右クリックして追加できます</value>
   </data>
+  <data name="Settings_Section_BuffCardShortcuts_Title" xml:space="preserve">
+    <value>ショートカット</value>
+  </data>
+  <data name="Settings_ListReorderNote" xml:space="preserve">
+    <value>※この一覧で項目をドラッグして並び替えできます</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>ロールスキル</value>
   </data>
@@ -343,6 +349,12 @@
   </data>
   <data name="BuffList_Menu_AddToGroup" xml:space="preserve">
     <value>グループに追加</value>
+  </data>
+  <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
+    <value>バフカードのショートカットに追加</value>
+  </data>
+  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
+    <value>デバフカードのショートカットに追加</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>このバフをグループから削除</value>
@@ -1202,10 +1214,10 @@
     <value>改行</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
-    <value>バフ({0})</value>
+    <value>バフカード({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
-    <value>デバフ({0})</value>
+    <value>デバフカード({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
     <value>料理</value>

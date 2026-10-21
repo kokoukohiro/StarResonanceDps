@@ -84,7 +84,7 @@ public readonly record struct BuffDebuffCardContent(
             ? PlayerInfoFormatFormatter.GetPartyDisplayName(caster)
             : string.Empty;
 
-    /// <summary>まとまりの名前。タイトルの「バフ(料理)」と同じ文言。バフ・デバフグループのまとまりの行も同じ名前。</summary>
+    /// <summary>まとまりの名前。タイトルの「バフカード(料理)」の括弧の中と同じ文言。バフ・デバフグループのまとまりの行も同じ名前。</summary>
     public static string GetGroupName(BuffGroup group)
         => LocalizationManager.Instance.GetString($"Widget_BuffDebuffCard_Group_{group}");
 
@@ -181,7 +181,7 @@ public readonly record struct BuffDebuffCardContent(
     }
 
     /// <summary>
-    /// タイトルの前半。「バフ(名前)」「デバフ(名前)」の形にする。
+    /// タイトルの前半。「バフカード(名前)」「デバフカード(名前)」の形にする。
     ///
     /// <para>
     /// まとまりを追う窓は個別のバフ名ではなく<b>まとまりの名前</b>(料理・薬剤)を出す。

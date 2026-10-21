@@ -24,6 +24,9 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
 
     bool IsEntityAcquired { get; }
 
+    /// <summary>捕まえている実体。未捕獲なら <c>null</c>。</summary>
+    EntityListEntry? Entity { get; }
+
     /// <summary>保存に使う名前。未捕獲なら復元時に読み込んだ名前。</summary>
     string TargetName { get; }
 

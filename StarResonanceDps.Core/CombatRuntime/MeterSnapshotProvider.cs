@@ -396,6 +396,54 @@ public static class MeterSnapshotProvider
     /// 名前はこの呼び出しの時点の言語と内部ID表示で引く。
     /// </para>
     /// </summary>
+    /// <summary>
+    /// メーターに行が1つでも出るか(<see cref="GetSnapshot"/> と同じ条件)。行は作らない。
+    /// メイン画面のカードが、窓の相手の選択リストに並べるものがあるかを確かめるのに使う。
+    /// </summary>
+    public static bool HasPlayers(
+        MeterSnapshotKind kind,
+        PartyDisplayMode partyDisplayMode = PartyDisplayMode.All)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null)
+        {
+            return false;
+        }
+
+        var effectivePartyDisplayMode = AppState.OpenedHistoricalEncounter is null
+            ? partyDisplayMode
+            : PartyDisplayMode.All;
+        var party = PartyStateStore.Instance.Current;
+        foreach (var entity in encounter.Entities.Values)
+        {
+            if (entity.EntityType != EEntityType.EntChar)
+            {
+                continue;
+            }
+
+            var totalValue = kind == MeterSnapshotKind.Damage
+                ? entity.TotalDamage
+                : entity.TotalHealing;
+            if (totalValue == 0)
+            {
+                continue;
+            }
+
+            if (effectivePartyDisplayMode == PartyDisplayMode.All)
+            {
+                return true;
+            }
+
+            var isSelf = IsSelf(entity);
+            if (party.ShouldInclude(PlayerDataSourceResolver.Resolve(entity, isSelf).CharacterId, isSelf, effectivePartyDisplayMode))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static TakenDamageLogSnapshot GetTakenDamageLog(Encounter? knownEncounter, int startIndex)
     {
         return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);

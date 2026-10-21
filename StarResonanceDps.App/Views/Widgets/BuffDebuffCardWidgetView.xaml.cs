@@ -10,13 +10,17 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// プレイヤー用とモンスター用の2つのViewModelが同じこのビューを使う。
 ///
 /// <para>
-/// 右クリックのメニュー(「グループに追加」)は、自分のカードでグループに足せるときだけ開く
-/// (<see cref="BuffDebuffCardWidgetViewModel.CanAddToGroup"/>)。開き方はバフ・デバフ一覧の行のメニューと同じ。
+/// 右クリックのメニュー(「グループに追加」「〇〇カードのショートカットに追加」)は、自分のカードで足せる項目だけを出し、
+/// 1つも無ければ開かない(<see cref="BuffDebuffCardWidgetViewModel.CanAddToGroup"/> / <see cref="BuffDebuffCardWidgetViewModel.CanAddToShortcuts"/>)。
+/// 開き方はバフ・デバフ一覧の行のメニューと同じ。
 /// </para>
 /// </summary>
 public partial class BuffDebuffCardWidgetView : UserControl
 {
     private const string CardContextMenuKey = "BuffDebuffCard.ContextMenu";
+    private const string SingleCornerRadiusKey = "Menu.WidgetWindowBuffCardContextMenuItem.SingleCornerRadius";
+    private const string FirstCornerRadiusKey = "Menu.WidgetWindowBuffCardContextMenuItem.FirstCornerRadius";
+    private const string LastCornerRadiusKey = "Menu.WidgetWindowBuffCardContextMenuItem.LastCornerRadius";
 
     public BuffDebuffCardWidgetView()
     {
@@ -27,16 +31,49 @@ public partial class BuffDebuffCardWidgetView : UserControl
     {
         if (sender is not FrameworkElement target
             || DataContext is not BuffDebuffCardWidgetViewModel viewModel
-            || !viewModel.CanAddToGroup()
             || TryFindResource(CardContextMenuKey) is not ContextMenu menu)
         {
             return;
         }
 
+        // 項目の並びは画面の作りと同じ(1つ目がグループ、2つ目がショートカット)。
+        var menuItems = menu.Items.OfType<MenuItem>().ToArray();
+        var shows = new[] { viewModel.CanAddToGroup(), viewModel.CanAddToShortcuts() };
+        if (!shows.Any(show => show))
+        {
+            return;
+        }
+
+        for (var index = 0; index < menuItems.Length; index++)
+        {
+            menuItems[index].Visibility = index < shows.Length && shows[index] ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        ApplyCornerRadii(menuItems.Where(menuItem => menuItem.Visibility == Visibility.Visible).ToArray());
+
         menu.DataContext = viewModel;
         menu.PlacementTarget = target;
         menu.IsOpen = true;
         e.Handled = true;
+    }
+
+    /// <summary>角丸の型は、出している項目の並びで決める(1つなら四隅、2つ以上なら先頭の上と末尾の下)。</summary>
+    private void ApplyCornerRadii(IReadOnlyList<MenuItem> visibleItems)
+    {
+        for (var index = 0; index < visibleItems.Count; index++)
+        {
+            var key = visibleItems.Count == 1
+                ? SingleCornerRadiusKey
+                : index == 0
+                    ? FirstCornerRadiusKey
+                    : index == visibleItems.Count - 1
+                        ? LastCornerRadiusKey
+                        : null;
+
+            visibleItems[index].Tag = key is not null && TryFindResource(key) is CornerRadius radius
+                ? radius
+                : new CornerRadius(0);
+        }
     }
 
     private void BuffDebuffCardWidgetView_Unloaded(object sender, RoutedEventArgs e)

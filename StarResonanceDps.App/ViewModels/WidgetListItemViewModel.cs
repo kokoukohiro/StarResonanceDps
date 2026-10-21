@@ -107,6 +107,34 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     [ObservableProperty]
     private WidgetDataStatusLevel? _cardDataStatusLevel;
 
+    /// <summary>名前の選択リストの項目(複数開けるウィジェットだけ)。リストを開いたときに作り直す(<see cref="WidgetTargetSelection"/>)。</summary>
+    [ObservableProperty]
+    private IReadOnlyList<WidgetTargetOption> _targetOptions = Array.Empty<WidgetTargetOption>();
+
+    /// <summary>
+    /// 名前の選択リストで選んでいる項目(複数開けるウィジェットだけ)。起動ボタンはこの項目の窓を開く・閉じる。保存しない。
+    /// 選択リストの選択とは別に持つ(リストは選んだら選択を戻すので、リストに出ていない項目を選んだままでも消えない)。
+    /// </summary>
+    [ObservableProperty]
+    private WidgetTargetOption? _selectedTargetOption;
+
+    /// <summary>名前の欄の文字。選んでいる項目で開く窓のタイトルと同じ(<see cref="WidgetHeaderText"/>)。決めるのは <see cref="WidgetTargetSelection"/>。</summary>
+    [ObservableProperty]
+    private string _targetSelectorText = string.Empty;
+
+    /// <summary>選んでいる項目の窓が開いているか。決めるのは <see cref="WidgetTargetSelection"/>。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsStopIcon))]
+    private bool _isSelectedTargetOpen;
+
+    /// <summary>
+    /// 選択リストに並べるもの(か開いている窓)があるか。決めるのは <see cref="WidgetTargetSelection"/>。
+    /// 無ければ名前の欄はウィジェット名だけの表示に戻り、選択リストは出さない。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsTargetSelector))]
+    private bool _hasTargetOptions;
+
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
     public ReadOnlyObservableCollection<EntityListEntry> EntityListEntries { get; }
@@ -142,6 +170,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     /// <summary>開いている窓の数のバッジを出すか。自分だけを出す1枚の窓(ステータス詳細・バフ・デバフグループ)は出さない。</summary>
     public bool ShowsPlayerWindowCountBadge => IsPlayerWindowWidget && !WidgetConfigDefaults.IsSelfOnlyPlayerWindowKind(Kind);
+
+    /// <summary>名前の欄を、窓の相手を選ぶ選択リストにする種別か(複数開けるウィジェット)。</summary>
+    public bool SupportsTargetSelection => WidgetConfigDefaults.SupportsOpenTargets(Kind);
+
+    /// <summary>名前の欄に選択リストを出すか。相手を選ぶ種別で、並べるものがあるときだけ。</summary>
+    public bool ShowsTargetSelector => SupportsTargetSelection && HasTargetOptions;
+
+    /// <summary>起動ボタンを停止の絵にするか。相手を選ぶ種別は選んでいる項目の窓が開いているか、ほかは起動中か。</summary>
+    public bool ShowsStopIcon => SupportsTargetSelection ? IsSelectedTargetOpen : State == WidgetState.Running;
 
     public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
     {
@@ -208,7 +245,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     /// <summary>
     /// 右クリックで、バフ・デバフグループの行をオン/オフにする(一覧とカードの「グループに追加」、グループの窓の「グループから削除」)。
-    /// 決まりは <see cref="WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled"/>。開いているグループの窓へ
+    /// 決まりは <see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>。開いているグループの窓へ
     /// <see cref="BuffDebuffGroupSettingsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffDebuffGroupEntryChangedFromWidget"/> で知らせる。
     /// 既にその状態なら何もしない。
     /// </summary>
@@ -221,9 +258,56 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             return;
         }
 
-        WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled(_buffDebuffGroup.Entries ??= [], key, isEnabled);
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffDebuffGroup.Entries ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffDebuffGroupEntries);
         BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
         BuffDebuffGroupEntryChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
+    /// <summary>
+    /// バフ・デバフカードのショートカットの、オンの行の鍵(設定の並び。設定の窓のプレビューを含む今の値)。
+    /// メイン画面のカードの選択リストの先頭の項目と既定の選択に使う。
+    /// </summary>
+    public IReadOnlyList<BuffEntryKey> GetEnabledBuffCardShortcuts()
+    {
+        return WidgetConfigDefaults.SupportsBuffCardSettings(Kind) && _buffCard.Shortcuts is { } shortcuts
+            ? [.. shortcuts.Where(entry => entry.IsEnabled).Select(entry => entry.GetKey())]
+            : [];
+    }
+
+    /// <summary>バフ・デバフカードのショートカットに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffCardShortcutEnabled(BuffEntryKey key)
+    {
+        return WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
+            && _buffCard.Shortcuts is { } shortcuts
+            && shortcuts.Exists(entry => entry.IsEnabled && entry.GetKey() == key);
+    }
+
+    /// <summary>
+    /// 右クリックで、バフ・デバフカードのショートカットの行をオンにする(一覧とカードの「〇〇カードのショートカットに追加」)。
+    /// 決まりはグループの行と同じ(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。メイン画面のカードへ
+    /// <see cref="BuffCardShortcutsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffCardShortcutChangedFromWidget"/> で知らせる。
+    /// 既にその状態なら何もしない。
+    /// </summary>
+    public void SetBuffCardShortcutEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
+            || !key.IsValid
+            || IsBuffCardShortcutEnabled(key) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffCard.Shortcuts ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffCardShortcutEntries);
+        BuffCardShortcutsChanged?.Invoke(this, EventArgs.Empty);
+        BuffCardShortcutChangedFromWidget?.Invoke(Kind, key, isEnabled);
     }
 
     /// <summary>
@@ -426,6 +510,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event Action<WidgetKind, EntityListEntry>? EntityWindowRequested;
 
+    /// <summary>名前の選択リストを開いた。項目を作り直す。</summary>
+    public event EventHandler? TargetOptionsRequested;
+
+    /// <summary>選んでいる項目が変わった。名前の欄と起動ボタンを当て直す。</summary>
+    public event EventHandler? SelectedTargetChanged;
+
+    /// <summary>相手を選ぶ種別で起動ボタンを押した。選んでいる項目の窓を開くか閉じる。</summary>
+    public event EventHandler? SelectedTargetToggleRequested;
+
     public event EventHandler? PlayerWindowPresentationChanged;
 
     public event EventHandler? MeterSettingsChanged;
@@ -459,6 +552,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     /// <summary>設定の窓が開いている間に、バフ・デバフグループの窓で行を並べ替えた(引数は新しい行の鍵の並び)。設定の窓の一覧が並べ直すのに使う。</summary>
     public event Action<IReadOnlyList<BuffEntryKey>>? BuffDebuffGroupEntryOrderChangedFromWidget;
+
+    /// <summary>バフ・デバフカードのショートカット(保存かプレビュー)が変わった。メイン画面のカードの選択リストを当て直す。</summary>
+    public event EventHandler? BuffCardShortcutsChanged;
+
+    /// <summary>
+    /// 右クリックでバフ・デバフカードのショートカットの行をオンにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
+    /// </summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffCardShortcutChangedFromWidget;
 
     /// <summary>
     /// ステータス詳細の行の今の並び(<see cref="GetPlayerStatusRowOrderSnapshot"/>)が変わった(引数は新しい並び)。
@@ -585,6 +686,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         {
             _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(config.BuffCard);
             RaisePlayerWindowPresentationChanged();
+            BuffCardShortcutsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind))
@@ -686,6 +788,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _buffCard = WidgetConfigDefaults.CloneNormalizedBuffCard(buffCard);
         RaisePlayerWindowPresentationChanged();
+        BuffCardShortcutsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTakenDamageLogSettingsPreview(TakenDamageLogWidgetSettingsConfig takenDamageLog)
@@ -861,6 +964,23 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         OpenPlayerWindowCount = Math.Max(count, 0);
     }
 
+    /// <summary>名前の選択リストを開いたとき(画面から)。項目の作り直しを頼む。</summary>
+    public void RequestTargetOptions()
+    {
+        TargetOptionsRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>名前の選択リストで項目を選んだとき(画面から)。</summary>
+    public void SelectTargetOption(WidgetTargetOption option)
+    {
+        SelectedTargetOption = option;
+    }
+
+    partial void OnSelectedTargetOptionChanged(WidgetTargetOption? value)
+    {
+        SelectedTargetChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public WidgetDataStatus DataStatus { get; private set; }
 
     public event EventHandler? DataStatusChanged;
@@ -942,9 +1062,19 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         IsClickThrough = !IsClickThrough;
     }
 
+    /// <summary>
+    /// 起動ボタン。相手を選ぶ種別(複数開けるウィジェット)は選んでいる項目の窓だけを開く・閉じる(窓を束ねる側へ頼む)。
+    /// ほかは起動中と停止を切り替える。
+    /// </summary>
     [RelayCommand]
     private void ToggleRunning()
     {
+        if (SupportsTargetSelection)
+        {
+            SelectedTargetToggleRequested?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         State = State == WidgetState.Running
             ? WidgetState.Stopped
             : WidgetState.Running;
@@ -1014,6 +1144,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     {
         OnPropertyChanged(nameof(StateText));
         OnPropertyChanged(nameof(IsRunning));
+        OnPropertyChanged(nameof(ShowsStopIcon));
 
         // 開き直したら、その時点で既に15%以下の人には出さない。
         if (value != WidgetState.Running)

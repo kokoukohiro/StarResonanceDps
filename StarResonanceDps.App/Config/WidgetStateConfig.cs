@@ -378,7 +378,8 @@ public sealed class BuffGaugeColorConfig
 }
 
 /// <summary>
-/// バフ・デバフグループの1行。バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。
+/// バフ・デバフグループの1行と、バフ・デバフカードのショートカットの1行。
+/// バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。
 /// </summary>
 public sealed class BuffDebuffGroupEntryConfig
 {
@@ -557,6 +558,12 @@ public sealed class BuffCardWidgetSettingsConfig
     /// </summary>
     public Dictionary<string, int> Scales { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// ショートカット(メイン画面のカードの選択リストの先頭に並べる自分のバフ・デバフ)。並びは選択リストの並び。
+    /// 既定の行(<see cref="WidgetConfigDefaults.DefaultBuffCardShortcutEntries"/>)はオフにしても残り、右クリックで足した行はオフのまま保存すると消える。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? Shortcuts { get; set; }
+
     public BuffCardWidgetSettingsConfig Clone()
     {
         return new BuffCardWidgetSettingsConfig
@@ -566,7 +573,8 @@ public sealed class BuffCardWidgetSettingsConfig
             CuisinePotionLowNotificationFormatString = CuisinePotionLowNotificationFormatString,
             Scales = Scales is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase),
+            Shortcuts = Shortcuts?.Select(entry => entry.Clone()).ToList()
         };
     }
 }
@@ -1060,17 +1068,30 @@ public static class WidgetConfigDefaults
         (BuffEntryKey.ForBuff(2110057), false)  // 虚弱・祈り禁止(アルーナの奥義のデバフ)
     ];
 
-    public static bool IsDefaultBuffDebuffGroupEntry(BuffEntryKey key)
+    /// <summary>
+    /// バフ・デバフカードのショートカットの既定の行(この並び)。中身もオン・オフもバフ・デバフグループの既定の行と同じ。
+    /// 既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffCardShortcutEntries { get; } =
+    [
+        .. DefaultBuffDebuffGroupEntries
+    ];
+
+    public static bool IsDefaultBuffEntry(IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults, BuffEntryKey key)
     {
-        return DefaultBuffDebuffGroupEntries.Any(entry => entry.Key == key);
+        return defaults.Any(entry => entry.Key == key);
     }
 
     /// <summary>
-    /// バフ・デバフグループの行をオン/オフにする(右クリックの「グループに追加」と「グループから削除」)。
-    /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行はオフにして残し、足した行は消す
+    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット)をオン/オフにする(右クリックの「グループに追加」「ショートカットに追加」と「グループから削除」)。
+    /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行(<paramref name="defaults"/>)はオフにして残し、足した行は消す
     /// (足した行をオフのまま保存したときと同じ)。ウィジェットの今の値・保存する値・設定の窓の保存済みの値がこの決まりを使う。
     /// </summary>
-    public static void SetBuffDebuffGroupEntryEnabled(List<BuffDebuffGroupEntryConfig> entries, BuffEntryKey key, bool isEnabled)
+    public static void SetBuffEntryEnabled(
+        List<BuffDebuffGroupEntryConfig> entries,
+        BuffEntryKey key,
+        bool isEnabled,
+        IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults)
     {
         var index = entries.FindIndex(entry => entry.GetKey() == key);
         if (isEnabled)
@@ -1095,7 +1116,7 @@ public static class WidgetConfigDefaults
             return;
         }
 
-        if (IsDefaultBuffDebuffGroupEntry(key))
+        if (IsDefaultBuffEntry(defaults, key))
         {
             entries[index].IsEnabled = false;
         }
@@ -1955,7 +1976,8 @@ public static class WidgetConfigDefaults
     {
         return new BuffCardWidgetSettingsConfig
         {
-            BuffInfoFormatString = DefaultBuffInfoFormatString
+            BuffInfoFormatString = DefaultBuffInfoFormatString,
+            Shortcuts = CreateBuffEntries(DefaultBuffCardShortcutEntries)
         };
     }
 
@@ -2095,15 +2117,16 @@ public static class WidgetConfigDefaults
             GaugeLengthIndex = DefaultBuffDebuffGroupGaugeLengthIndex,
             BuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Buff),
             DebuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Debuff),
-            Entries = CreateDefaultBuffDebuffGroupEntries()
+            Entries = CreateBuffEntries(DefaultBuffDebuffGroupEntries)
         };
     }
 
-    public static List<BuffDebuffGroupEntryConfig> CreateDefaultBuffDebuffGroupEntries()
+    /// <summary>既定の行(<paramref name="defaults"/>)を、既定の並びとオン・オフで作る。</summary>
+    public static List<BuffDebuffGroupEntryConfig> CreateBuffEntries(IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults)
     {
         return
         [
-            .. DefaultBuffDebuffGroupEntries.Select(entry => new BuffDebuffGroupEntryConfig
+            .. defaults.Select(entry => new BuffDebuffGroupEntryConfig
             {
                 BuffId = entry.Key.BuffId,
                 Group = entry.Key.Group,
@@ -2113,19 +2136,16 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 保存値を表示できる形に直して写す。行は、鍵として成り立たないものと重なり(先の行を残す)を落とし、
-    /// 欠けた既定の行を既定のオン・オフで末尾に足す(既定の行は消えない)。
+    /// 保存値の行を表示できる形に直す。鍵として成り立たないものと重なり(先の行を残す)を落とし、
+    /// 欠けた既定の行(<paramref name="defaults"/>)を既定のオン・オフで末尾に足す(既定の行は消えない)。行が無ければ既定の行。
     /// </summary>
-    public static BuffDebuffGroupWidgetSettingsConfig CloneNormalizedBuffDebuffGroup(BuffDebuffGroupWidgetSettingsConfig? settings)
+    public static List<BuffDebuffGroupEntryConfig> NormalizeBuffEntries(
+        IReadOnlyList<BuffDebuffGroupEntryConfig?>? entries,
+        IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults)
     {
-        var normalized = (settings ?? CreateBuffDebuffGroupSettings()).Clone();
-        normalized.GaugeLengthIndex = ClampBuffGaugeLengthIndex(normalized.GaugeLengthIndex);
-        normalized.BuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.BuffGaugeColors, PlayerBuffListKind.Buff);
-        normalized.DebuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.DebuffGaugeColors, PlayerBuffListKind.Debuff);
-
-        var entries = new List<BuffDebuffGroupEntryConfig>();
+        var normalized = new List<BuffDebuffGroupEntryConfig>();
         var seen = new HashSet<BuffEntryKey>();
-        foreach (var entry in normalized.Entries ?? CreateDefaultBuffDebuffGroupEntries())
+        foreach (var entry in entries ?? CreateBuffEntries(defaults))
         {
             if (entry is null)
             {
@@ -2135,15 +2155,15 @@ public static class WidgetConfigDefaults
             var key = entry.GetKey();
             if (key.IsValid && seen.Add(key))
             {
-                entries.Add(entry);
+                normalized.Add(entry);
             }
         }
 
-        foreach (var (key, isEnabled) in DefaultBuffDebuffGroupEntries)
+        foreach (var (key, isEnabled) in defaults)
         {
             if (seen.Add(key))
             {
-                entries.Add(new BuffDebuffGroupEntryConfig
+                normalized.Add(new BuffDebuffGroupEntryConfig
                 {
                     BuffId = key.BuffId,
                     Group = key.Group,
@@ -2152,7 +2172,17 @@ public static class WidgetConfigDefaults
             }
         }
 
-        normalized.Entries = entries;
+        return normalized;
+    }
+
+    /// <summary>保存値を表示できる形に直して写す。行は <see cref="NormalizeBuffEntries"/> で直す。</summary>
+    public static BuffDebuffGroupWidgetSettingsConfig CloneNormalizedBuffDebuffGroup(BuffDebuffGroupWidgetSettingsConfig? settings)
+    {
+        var normalized = (settings ?? CreateBuffDebuffGroupSettings()).Clone();
+        normalized.GaugeLengthIndex = ClampBuffGaugeLengthIndex(normalized.GaugeLengthIndex);
+        normalized.BuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.BuffGaugeColors, PlayerBuffListKind.Buff);
+        normalized.DebuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.DebuffGaugeColors, PlayerBuffListKind.Debuff);
+        normalized.Entries = NormalizeBuffEntries(normalized.Entries, DefaultBuffDebuffGroupEntries);
         return normalized;
     }
 
@@ -2740,6 +2770,7 @@ public static class WidgetConfigDefaults
     {
         buffCard.BuffInfoFormatString ??= DefaultBuffInfoFormatString;
         buffCard.Scales ??= new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        buffCard.Shortcuts = NormalizeBuffEntries(buffCard.Shortcuts, DefaultBuffCardShortcutEntries);
 
         foreach (var key in buffCard.Scales.Keys.ToList())
         {

@@ -86,6 +86,8 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     public bool IsEntityAcquired => _target.IsAcquired;
 
+    public EntityListEntry? Entity => _target.Entity;
+
     public string TargetName => _target.Name;
 
     public ReadOnlyObservableCollection<PlayerBuffEntry> Entries { get; }
@@ -106,6 +108,14 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     /// <summary>バフ・デバフグループは自分のバフだけを出すので、エンティティの一覧からは足さない(項目を出さない)。</summary>
     public bool CanAddToGroup(PlayerBuffEntry? entry) => false;
+
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_AddToDebuffCardShortcuts"
+            : "BuffList_Menu_AddToBuffCardShortcuts");
+
+    /// <summary>バフ・デバフカードのショートカットは自分のバフだけなので、エンティティの一覧からは足さない(項目を出さない)。</summary>
+    public bool CanAddToShortcuts(PlayerBuffEntry? entry) => false;
 
     public bool RepresentsEntity(long entityUuid)
     {
@@ -140,6 +150,12 @@ public sealed partial class EntityBuffListWidgetViewModel
     {
     }
 
+    /// <summary>項目を出さないので呼ばれない(<see cref="CanAddToShortcuts"/>)。取り決めを満たすためだけにある。</summary>
+    [RelayCommand(CanExecute = nameof(CanAddToShortcuts))]
+    private void AddToShortcuts(PlayerBuffEntry? entry)
+    {
+    }
+
     public bool TryApplyEntity(EntityListEntry entity)
     {
         return _target.TryApply(entity);
@@ -152,9 +168,7 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     public void RefreshPresentation()
     {
-        HeaderText = string.IsNullOrWhiteSpace(_target.DisplayName)
-            ? _widget.DisplayName
-            : $"{_widget.DisplayName} - {_target.DisplayName}";
+        HeaderText = WidgetHeaderText.Join(_widget.DisplayName, _target.DisplayName);
     }
 
     public void Dispose()
@@ -202,6 +216,7 @@ public sealed partial class EntityBuffListWidgetViewModel
         OnPropertyChanged(nameof(CardMenuText));
         OnPropertyChanged(nameof(HideMenuText));
         OnPropertyChanged(nameof(AddToGroupMenuText));
+        OnPropertyChanged(nameof(AddToShortcutsMenuText));
         RefreshPresentation();
         Refresh();
     }

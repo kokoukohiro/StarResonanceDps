@@ -35,4 +35,16 @@ public interface IBuffListWindowViewModel
 
     /// <summary>行のバフをバフ・デバフグループに足す(料理・薬剤はまとまりで)。</summary>
     IRelayCommand<PlayerBuffEntry?> AddToGroupCommand { get; }
+
+    /// <summary>メニューの4つ目の項目。バフ一覧なら「バフカードのショートカットに追加」、デバフ一覧なら「デバフカードのショートカットに追加」。</summary>
+    string AddToShortcutsMenuText { get; }
+
+    /// <summary>
+    /// 行のバフをバフ・デバフカードのショートカットに足せるか。自分が対象の一覧だけで、ショートカットにまだオンで入っていないとき真。
+    /// 偽ならメニューに項目を出さない。
+    /// </summary>
+    bool CanAddToShortcuts(PlayerBuffEntry? entry);
+
+    /// <summary>行のバフをバフ・デバフカードのショートカットに足す(料理・薬剤はまとまりで)。</summary>
+    IRelayCommand<PlayerBuffEntry?> AddToShortcutsCommand { get; }
 }

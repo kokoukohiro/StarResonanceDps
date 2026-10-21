@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffDebuffGroupEntrySettingsView"
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.BuffEntryListSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
@@ -6,12 +6,13 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        バフ・デバフグループに出すバフ・デバフの行ごとのオン/オフ。行の作りは「ステータス」の一覧と同じ(左にアイコンと名前、右にスイッチ)で、
-        アイコンの枠は非表示リストの行と同じ。行はスイッチ以外の所を掴んで並べ替えられる(RowReorderBehavior。写して薄くするのは行の中身 RowContent)。
-        見出しの下の注意書きは2つ。1つ目は行の足し方(作りは非表示リストの説明と同じ)、2つ目は「ステータス」の一覧と同じ並べ替えの文言と作り。
+        バフ・デバフの行ごとのオン/オフ(バフ・デバフグループの「バフ・デバフ」とバフ・デバフカードの「ショートカット」、DataContext は BuffEntryListSettingsViewModel)。
+        行の作りは「ステータス」の一覧と同じ(左にアイコンと名前、右にスイッチ)で、アイコンの枠は非表示リストの行と同じ。
+        行はスイッチ以外の所を掴んで並べ替えられる(RowReorderBehavior。写して薄くするのは行の中身 RowContent)。
+        見出しの下の注意書きは2つ。1つ目は行の足し方(作りは非表示リストの説明と同じ)、2つ目は並べ替えの文言(持ち主ごとに違う)で作りは「ステータス」の一覧と同じ。
     -->
     <StackPanel>
-        <TextBlock Text="{Binding EntrySectionTitle}"
+        <TextBlock Text="{Binding SectionTitle}"
                    Foreground="{DynamicResource Brush.TextPrimary}"
                    FontSize="16"
                    FontWeight="SemiBold"
@@ -22,7 +23,7 @@
                    FontWeight="SemiBold"
                    TextWrapping="Wrap"
                    Margin="0,0,0,4" />
-        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_RowReorderNote]}"
+        <TextBlock Text="{Binding ReorderNote}"
                    Foreground="{DynamicResource Brush.TextSecondary}"
                    FontSize="13"
                    FontWeight="SemiBold"

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -36,6 +37,19 @@ public sealed partial class MainViewModel : ViewModelBase
     private WidgetListItemViewModel? _playerListWidget;
     private WidgetListItemViewModel? _entityListWidget;
 
+    /// <summary>複数開けるウィジェットのカードで、窓の相手を選んで開く・閉じる。</summary>
+    private readonly WidgetTargetSelection _targetSelection;
+
+    /// <summary>
+    /// 複数開けるウィジェットのカードを全部当て直す1秒の時計。選択リストの元のうち、バフの行とメーターの行には変わった合図が無い
+    /// (バフは時間だけでも消え、それを出すウィジェットも時計で読み直している)ので、1秒ごとに読み直す。
+    /// 合図のある元(名簿・周りの実体)は、その合図でもすぐ当て直す。
+    /// </summary>
+    private readonly DispatcherTimer _targetSelectionTimer = new()
+    {
+        Interval = TimeSpan.FromSeconds(1)
+    };
+
     [ObservableProperty]
     private string _searchText = string.Empty;
 
@@ -69,6 +83,8 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
+        _targetSelection = new WidgetTargetSelection(_widgetWindowManager, FindWidget);
+
         var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
         _playerListWidget = playerListWidget;
         var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
@@ -94,6 +110,17 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.HealingContribution, "Widget_HealingSkillDetails");
         AddWidget(WidgetKind.HealingSummary, "Widget_HealingContribution");
         AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
+        _widgetWindowManager.TargetWindowsChanged += WidgetWindowManager_TargetWindowsChanged;
+        _widgetWindowManager.UnspecifiedBuffCardResolved += WidgetWindowManager_UnspecifiedBuffCardResolved;
+        // 起動できないときに見せるだけのメイン窓では Core が初期化されていない(DB も開いていない)。
+        // EncounterManager に触ると静的コンストラクタが回を作り直しに行くので、Core の購読も選択リストを読み直す時計も始めない(集計タブと同じ)。
+        if (CombatRuntimeHost.Instance.IsInitialized)
+        {
+            EncounterManager.EncounterStart += EncounterManager_EncounterStart;
+            EncounterHistoryProvider.SelectionChanged += EncounterHistoryProvider_SelectionChanged;
+            _targetSelectionTimer.Tick += TargetSelectionTimer_Tick;
+            _targetSelectionTimer.Start();
+        }
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
         Widgets.Filter = FilterWidget;
@@ -178,9 +205,104 @@ public sealed partial class MainViewModel : ViewModelBase
         widget.PropertyChanged += OnWidgetPropertyChanged;
         widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
+        widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
+        if (widget.SupportsTargetSelection)
+        {
+            widget.SelectedTargetOption = WidgetTargetSelection.CreateDefault(widget);
+            widget.TargetOptionsRequested += Widget_TargetOptionsRequested;
+            widget.SelectedTargetChanged += Widget_SelectedTargetChanged;
+            widget.SelectedTargetToggleRequested += Widget_SelectedTargetToggleRequested;
+            widget.BuffCardShortcutsChanged += Widget_BuffCardShortcutsChanged;
+        }
+
         _widgetItems.Add(widget);
         _widgetWindowManager.RegisterPlayerWindowWidget(widget);
         return widget;
+    }
+
+    private WidgetListItemViewModel? FindWidget(WidgetKind kind)
+    {
+        return _widgetItems.FirstOrDefault(widget => widget.Kind == kind);
+    }
+
+    private void Widget_TargetOptionsRequested(object? sender, EventArgs e)
+    {
+        if (sender is WidgetListItemViewModel widget)
+        {
+            _targetSelection.BuildOptions(widget);
+        }
+    }
+
+    /// <summary>選んでいる項目が変わった。バフ・デバフカードの相手はバフリスト・デバフリストの選択で決まるので、全部のカードを当て直す。</summary>
+    private void Widget_SelectedTargetChanged(object? sender, EventArgs e)
+    {
+        RefreshTargetSelections();
+    }
+
+    private void Widget_SelectedTargetToggleRequested(object? sender, EventArgs e)
+    {
+        if (sender is WidgetListItemViewModel widget)
+        {
+            _targetSelection.Toggle(widget);
+        }
+    }
+
+    private void WidgetWindowManager_TargetWindowsChanged(WidgetListItemViewModel widget)
+    {
+        _targetSelection.Refresh(widget);
+    }
+
+    private void TargetSelectionTimer_Tick(object? sender, EventArgs e)
+    {
+        RefreshTargetSelections();
+    }
+
+    /// <summary>バフ・デバフカードの「指定なし」で開くカードが決まった。選択を指定なしからそのカードに置き換える。</summary>
+    private void WidgetWindowManager_UnspecifiedBuffCardResolved(WidgetListItemViewModel widget, WidgetTargetOption card)
+    {
+        _targetSelection.ResolveUnspecified(widget, card);
+    }
+
+    /// <summary>バフ・デバフカードのショートカット(保存かプレビュー)が変わった。並べるものの有無と既定が変わるので、そのカードを当て直す。</summary>
+    private void Widget_BuffCardShortcutsChanged(object? sender, EventArgs e)
+    {
+        if (sender is WidgetListItemViewModel widget)
+        {
+            _targetSelection.Refresh(widget);
+        }
+    }
+
+    /// <summary>回を作り直した(メーターの行が空に戻る)。パケットの処理の側から上がるので、画面の側で当て直す。</summary>
+    private void EncounterManager_EncounterStart(EncounterStartEventArgs e)
+    {
+        RefreshTargetSelectionsOnDispatcher();
+    }
+
+    /// <summary>履歴の回を開いた・閉じた(メーターの行が履歴の回のものに替わる)。</summary>
+    private void EncounterHistoryProvider_SelectionChanged()
+    {
+        RefreshTargetSelectionsOnDispatcher();
+    }
+
+    private void RefreshTargetSelectionsOnDispatcher()
+    {
+        if (Application.Current?.Dispatcher is { } dispatcher && !dispatcher.CheckAccess())
+        {
+            dispatcher.BeginInvoke(RefreshTargetSelections);
+            return;
+        }
+
+        RefreshTargetSelections();
+    }
+
+    /// <summary>
+    /// カードの名前の欄(選んでいる項目で開く窓のタイトル)と起動ボタンを当て直す。
+    /// 名簿・周りの実体・言語・表示設定(名前を伏せるか)が変わったときと、1秒ごとの時計(合図の無いバフの行・メーターの行のため)で呼ぶ。
+    /// 値が同じならカードは変えない。
+    /// </summary>
+    private void RefreshTargetSelections()
+    {
+        _targetSelection.RefreshAll(_widgetItems);
     }
 
     /// <summary>
@@ -200,7 +322,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
     /// <summary>
     /// 右クリックでバフ・デバフグループの行をオン/オフにした。<b>保存済みの行に同じ決まりで当てて</b>
-    /// (<see cref="WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled"/>)その項目だけ書く。
+    /// (<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)その項目だけ書く。
     /// ウィジェットが持つ行は設定ウィンドウのプレビューを含むので、そのまま書くと未保存の変更まで保存してしまう。
     /// </summary>
     private void Widget_BuffDebuffGroupEntryChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
@@ -208,8 +330,20 @@ public sealed partial class MainViewModel : ViewModelBase
         var entries = WidgetConfigDefaults
             .CloneNormalizedBuffDebuffGroup(_widgetStateManager.GetWidgetSnapshot(kind).BuffDebuffGroup)
             .Entries ?? [];
-        WidgetConfigDefaults.SetBuffDebuffGroupEntryEnabled(entries, key, isEnabled);
+        WidgetConfigDefaults.SetBuffEntryEnabled(entries, key, isEnabled, WidgetConfigDefaults.DefaultBuffDebuffGroupEntries);
         _widgetStateManager.SaveBuffDebuffGroupEntries(kind, entries);
+    }
+
+    /// <summary>
+    /// 右クリックでバフ・デバフカードのショートカットの行をオンにした。グループの行と同じく、<b>保存済みの行に同じ決まりで当てて</b>その項目だけ書く。
+    /// </summary>
+    private void Widget_BuffCardShortcutChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var shortcuts = WidgetConfigDefaults
+            .CloneNormalizedBuffCard(_widgetStateManager.GetWidgetSnapshot(kind).BuffCard)
+            .Shortcuts ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(shortcuts, key, isEnabled, WidgetConfigDefaults.DefaultBuffCardShortcutEntries);
+        _widgetStateManager.SaveBuffCardShortcuts(kind, shortcuts);
     }
 
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)
@@ -336,6 +470,7 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapChannel,
             roster.MapGeneration);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
+        RefreshTargetSelections();
     }
 
     private void NearbyEntityStore_EntitiesChanged(object? sender, NearbyEntitiesChangedEventArgs e)
@@ -400,6 +535,7 @@ public sealed partial class MainViewModel : ViewModelBase
             snapshot.MapChannel,
             snapshot.MapGeneration);
         _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries);
+        RefreshTargetSelections();
     }
 
     private void ConfigManager_SettingsChanged(object? sender, EventArgs e)
@@ -459,6 +595,7 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         RaiseWidgetActionTextsChanged();
+        RefreshTargetSelections();
         Widgets.Refresh();
     }
 

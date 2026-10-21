@@ -8,7 +8,6 @@ namespace StarResonanceDps.App.ViewModels;
 public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataStatusSource
 {
     private readonly long? _requestedCharacterId;
-    private readonly bool _showPlayerIdentityInHeader;
     private long? _representedCharacterId;
     private PlayerRosterEntry? _selectedPlayer;
     private string _headerText = string.Empty;
@@ -33,12 +32,10 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
 
     protected PlayerWidgetWindowViewModel(
         WidgetListItemViewModel playerWidget,
-        long? requestedCharacterId,
-        bool showPlayerIdentityInHeader = true)
+        long? requestedCharacterId)
     {
         PlayerWidget = playerWidget;
         _requestedCharacterId = requestedCharacterId;
-        _showPlayerIdentityInHeader = showPlayerIdentityInHeader;
 
         // 一覧の通知は中身が変わるまで来ないので、開いた時点の値から始める。
         var roster = PlayerRosterPresentationStore.Instance.Current;
@@ -235,6 +232,12 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     /// </summary>
     protected virtual string HeaderPrefix => PlayerWidget.DisplayName;
 
+    /// <summary>
+    /// タイトルに相手(「 - 名前」)を出すか。既定は出す。自分だけを出す1枚の窓と、最初に付いたものを待つバフ・デバフカードは出さない。
+    /// 基底のコンストラクタからも読まれるので、派生側のフィールドがまだ既定値のときにも答えられる形にする。
+    /// </summary>
+    protected virtual bool ShowsPlayerIdentityInHeader => true;
+
     public string HeaderText
     {
         get => _headerText;
@@ -261,6 +264,13 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     {
         return _requestedCharacterId == characterId
             || _representedCharacterId == characterId;
+    }
+
+    /// <summary>自分を映す窓か。「自分」の指定で開いた窓と、相手の指定が自分の UID の窓。</summary>
+    public bool RepresentsSelf()
+    {
+        return _requestedCharacterId is null
+            || (AppState.PlayerUID != 0 && RepresentsPlayer(AppState.PlayerUID));
     }
 
     public void UpdatePlayerFromRoster(
@@ -366,26 +376,21 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     /// </summary>
     private void RenderHeaderText()
     {
-        var hasName = !string.IsNullOrWhiteSpace(_lastKnownPlayerName);
-
-        if (!_showPlayerIdentityInHeader || (!hasName && _lastKnownPlayerUid == 0))
+        if (!ShowsPlayerIdentityInHeader)
         {
             HeaderText = HeaderPrefix;
             return;
         }
 
-        var isSelf = IsSelfTarget;
-
-        // 名前の出し方はプレイヤー一覧・メーターと同じ規則へ通す。
-        // 名前がまだ取れていなければUID、伏せる設定なら伏せ字、NPC なら職業名になるので、
-        // タイトル専用の分岐は要らない。
-        HeaderText = $"{HeaderPrefix} - {PlayerInfoFormatFormatter.GetDisplayName(
+        // メイン画面のカードの名前の欄と同じ組み立て(WidgetHeaderText)。
+        HeaderText = WidgetHeaderText.ForPlayer(
+            HeaderPrefix,
             _lastKnownPlayerName,
             _lastKnownPlayerUid,
-            isSelf,
+            IsSelfTarget,
             _lastKnownIsNpc,
             _lastKnownProfessionId,
-            PlayerRosterPresentationStore.Instance.NameDisplayMode)}";
+            PlayerRosterPresentationStore.Instance.NameDisplayMode);
     }
 
     /// <summary>

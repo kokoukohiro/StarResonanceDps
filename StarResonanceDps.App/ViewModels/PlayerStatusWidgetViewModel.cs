@@ -39,7 +39,7 @@ public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, I
         WidgetListItemViewModel statusWidget,
         long? requestedCharacterId,
         PlayerRosterEntry? initialPlayer)
-        : base(statusWidget, requestedCharacterId, showPlayerIdentityInHeader: false)
+        : base(statusWidget, requestedCharacterId)
     {
         _settings = statusWidget.GetPlayerStatusSettingsSnapshot();
         _textBrushes = CreateTextBrushes(_settings);
@@ -52,6 +52,9 @@ public sealed class PlayerStatusWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     public WidgetListItemViewModel StatusWidget => PlayerWidget;
+
+    /// <summary>自分だけを出す1枚の窓なので、タイトルはウィジェット名だけ。</summary>
+    protected override bool ShowsPlayerIdentityInHeader => false;
 
     /// <summary>表示する行。行の部品は使い回し、更新では値だけを入れ替える(<see cref="SynchronizeRows"/>)。</summary>
     public ObservableCollection<PlayerStatusRowItem> PlayerStatus { get; } = [];

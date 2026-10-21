@@ -20,6 +20,9 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックの「グループに追加」の行き先。</summary>
     private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
 
+    /// <summary>右クリックの「バフカードのショートカットに追加」(デバフ一覧は「デバフカードの」)の行き先。</summary>
+    private readonly IBuffCardShortcutAdder? _shortcutAdder;
+
     /// <summary>行をクリックしたときにバフ・デバフカードを開く経路。</summary>
     private readonly Action<long, PlayerBuffListKind, string, int>? _openCard;
 
@@ -45,11 +48,13 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         PlayerRosterEntry? initialPlayer,
         PlayerBuffListKind kind,
         IBuffDebuffGroupEntryAdder? groupEntryAdder = null,
+        IBuffCardShortcutAdder? shortcutAdder = null,
         Action<long, PlayerBuffListKind, string, int>? openCard = null)
         : base(playerWidget, requestedCharacterId)
     {
         _kind = kind;
         _groupEntryAdder = groupEntryAdder;
+        _shortcutAdder = shortcutAdder;
         _openCard = openCard;
         _settings = playerWidget.GetBuffListSettingsSnapshot();
         GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors);
@@ -89,6 +94,20 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             && IsSelfTarget
             && _groupEntryAdder is not null
             && _groupEntryAdder.CanAdd(BuffEntryKey.ForBuffDebuffGroup(entry.BaseId));
+    }
+
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
+        _kind == PlayerBuffListKind.Debuff
+            ? "BuffList_Menu_AddToDebuffCardShortcuts"
+            : "BuffList_Menu_AddToBuffCardShortcuts");
+
+    /// <summary>自分が対象の一覧だけ(ショートカットの相手はいつも自分)。料理・薬剤はまとまりの行として足す(グループと同じ)。</summary>
+    public bool CanAddToShortcuts(PlayerBuffEntry? entry)
+    {
+        return entry is not null
+            && IsSelfTarget
+            && _shortcutAdder is not null
+            && _shortcutAdder.CanAddShortcut(BuffEntryKey.ForBuffDebuffGroup(entry.BaseId));
     }
 
     public void Dispose()
@@ -166,6 +185,17 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _groupEntryAdder!.Add(BuffEntryKey.ForBuffDebuffGroup(entry!.BaseId));
     }
 
+    [RelayCommand]
+    private void AddToShortcuts(PlayerBuffEntry? entry)
+    {
+        if (!CanAddToShortcuts(entry))
+        {
+            return;
+        }
+
+        _shortcutAdder!.AddShortcut(BuffEntryKey.ForBuffDebuffGroup(entry!.BaseId));
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
@@ -185,6 +215,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         OnPropertyChanged(nameof(CardMenuText));
         OnPropertyChanged(nameof(HideMenuText));
         OnPropertyChanged(nameof(AddToGroupMenuText));
+        OnPropertyChanged(nameof(AddToShortcutsMenuText));
         Refresh();
     }
 
@@ -217,11 +248,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
             PlayerRosterPresentationStore.Instance.NameDisplayMode);
 
-        var snapshots = MeterSnapshotProvider.GetPlayerBuffs(
-            characterId,
-            _kind,
-            WidgetConfigDefaults.GroupsSameBuffs(_settings, isEntityTarget: false));
-        SynchronizeEntries(BuffListSnapshotFilter.Apply(_settings, snapshots), targetName, _player?.Level ?? 0);
+        SynchronizeEntries(BuffListSnapshotFilter.GetPlayerRows(_settings, characterId, _kind), targetName, _player?.Level ?? 0);
     }
 
     private void SynchronizeEntries(IReadOnlyList<PlayerBuffSnapshot> snapshots, string targetName, int level)

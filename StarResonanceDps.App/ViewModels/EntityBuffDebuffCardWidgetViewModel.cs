@@ -141,6 +141,8 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
 
     public bool IsEntityAcquired => _target.IsAcquired;
 
+    public EntityListEntry? Entity => _target.Entity;
+
     public string TargetName => _target.Name;
 
     public PlayerBuffListKind BuffListKind => _kind;
@@ -212,7 +214,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     }
 
     /// <summary>
-    /// タイトルの前半を「バフ(名前)」「デバフ(名前)」にする。
+    /// タイトルの前半を「バフカード(名前)」「デバフカード(名前)」にする。
     /// バフ名が一度も分かっていないときだけウィジェット名のまま。
     /// </summary>
     private void RefreshHeaderText()
@@ -223,9 +225,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             _group,
             _lastKnownBuffName);
 
-        HeaderText = string.IsNullOrWhiteSpace(_target.DisplayName)
-            ? prefix
-            : $"{prefix} - {_target.DisplayName}";
+        HeaderText = WidgetHeaderText.Join(prefix, _target.DisplayName);
     }
 
     public void Dispose()

@@ -14,7 +14,7 @@ using StarResonanceDps.App.Views.Widgets;
 
 namespace StarResonanceDps.App.Services;
 
-public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
+public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardShortcutAdder
 {
     private const double PlayerWindowCascadeOffset = 20d;
 
@@ -106,6 +106,116 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         }
     }
 
+    public bool CanAddShortcut(BuffEntryKey key)
+    {
+        return key.IsValid
+            && _trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffCard, out var widget)
+            && !widget.IsBuffCardShortcutEnabled(key);
+    }
+
+    public void AddShortcut(BuffEntryKey key)
+    {
+        if (_trackedPlayerWidgets.TryGetValue(WidgetKind.BuffDebuffCard, out var widget))
+        {
+            widget.SetBuffCardShortcutEnabledFromWidget(key, isEnabled: true);
+        }
+    }
+
+    /// <summary>
+    /// その人のバフリストの1行目のバフ(バフが無ければデバフリストの1行目のデバフ)。行はそれぞれの一覧の窓と同じ作り方
+    /// (<see cref="BuffListSnapshotFilter.GetPlayerRows"/>、そのカードの設定)で、カードの鍵ごとの代表の行だけを見る。
+    /// バフ・デバフカードの「指定なし」が開く相手と、待っている窓が入る相手。どちらにも無ければ null。
+    /// </summary>
+    public (PlayerBuffListKind Kind, PlayerBuffSnapshot Snapshot)? FindFirstBuffRow(long characterId)
+    {
+        foreach (var (kind, listKind) in new[]
+        {
+            (PlayerBuffListKind.Buff, WidgetKind.BuffList),
+            (PlayerBuffListKind.Debuff, WidgetKind.DebuffList)
+        })
+        {
+            var settings = _trackedPlayerWidgets.TryGetValue(listKind, out var listWidget)
+                ? listWidget.GetBuffListSettingsSnapshot()
+                : WidgetConfigDefaults.CreateBuffListSettings(listKind);
+            var first = BuffListSnapshotFilter
+                .GetPlayerRows(settings, characterId, kind)
+                .FirstOrDefault(snapshot => snapshot.IsCardRepresentative);
+            if (first is not null)
+            {
+                return (kind, first);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// バフ・デバフカードの「指定なし」の起動ボタン。自分のバフリストの1行目(無ければデバフリストの1行目)のカードを開き、もう開いていれば前に出す
+    /// (<see cref="FindFirstBuffRow"/>、開き方はリストの行から開くのと同じく行のバフのまとまりで)。開くカードが決まったら
+    /// <see cref="UnspecifiedBuffCardResolved"/> で知らせる。どちらにも行が無ければ、最初に付いたものを待つ窓を開く(もう開いていれば前に出す)。
+    /// </summary>
+    /// <param name="selfCharacterId">自分の UID。まだ分からなければ 0(行は探さず、待つ窓にする)。</param>
+    public void OpenUnspecifiedBuffCard(WidgetListItemViewModel widget, long selfCharacterId)
+    {
+        var self = WidgetTargetOption.CreateSelf(selfCharacterId);
+        if (selfCharacterId != 0 && FindFirstBuffRow(selfCharacterId) is { } row)
+        {
+            var card = CreateSelfBuffCardOption(row.Kind, row.Snapshot);
+            OpenTarget(widget, self, card);
+            UnspecifiedBuffCardResolved?.Invoke(widget, card);
+            return;
+        }
+
+        // 待つ窓は相手もバフも指定しない窓(1つだけ)。もう開いていれば OpenTarget が前に出す。
+        OpenTarget(widget, self, WidgetTargetOption.CreateUnspecifiedBuffCard());
+    }
+
+    /// <summary>
+    /// 「指定なし」で開くカードが決まった(引数はウィジェットとそのカードの項目)。起動ボタンで1行目のカードを開いたか前に出したとき、
+    /// 待っていた窓がバフに入ったか、そのカードがもう開いていて待っていた窓を閉じたときに上がる。メイン画面のカードが選択を置き換える。
+    /// </summary>
+    public event Action<WidgetListItemViewModel, WidgetTargetOption>? UnspecifiedBuffCardResolved;
+
+    /// <summary>自分のバフリスト(デバフリスト)の行のカードの項目。開き方はリストの行から開くのと同じく行のバフのまとまりで。</summary>
+    private static WidgetTargetOption CreateSelfBuffCardOption(PlayerBuffListKind kind, PlayerBuffSnapshot snapshot)
+    {
+        return WidgetTargetOption.CreateSelfBuffCard(
+            kind,
+            snapshot.CardKey,
+            CombatDataCatalog.GetBuffGroup(snapshot.BaseId),
+            snapshot.NameWithoutInternalId);
+    }
+
+    /// <summary>
+    /// 待っている窓に1行目が出た。そのカードがもう別の窓で開いていれば待っている窓を閉じ(もう開いている窓は前に出さない。
+    /// ゲーム中に勝手に前面へ出るとゲームの操作を奪うため)、開いていなければ待っている窓をそのバフに入れる。どちらも
+    /// <see cref="UnspecifiedBuffCardResolved"/> で知らせる。
+    /// </summary>
+    private void BuffCardViewModel_FirstBuffRowFound(
+        BuffDebuffCardWidgetViewModel card,
+        PlayerBuffListKind kind,
+        PlayerBuffSnapshot snapshot)
+    {
+        var session = _openPlayerWindows.FirstOrDefault(
+            candidate => ReferenceEquals(candidate.ViewModel, card));
+        if (session is null || !card.IsWaiting)
+        {
+            return;
+        }
+
+        var option = CreateSelfBuffCardOption(kind, snapshot);
+        if (FindTargetWindow(session.Widget, WidgetTargetOption.CreateSelf(AppState.PlayerUID), option) is not null)
+        {
+            session.Window.Close();
+        }
+        else
+        {
+            card.Enter(option.BuffListKind, snapshot.CardKey, option.BuffGroup);
+        }
+
+        UnspecifiedBuffCardResolved?.Invoke(session.Widget, option);
+    }
+
     public void OpenPlayerWindow(WidgetKind kind, long characterId)
     {
         if (_trackedPlayerWidgets.TryGetValue(kind, out var playerWidget))
@@ -127,10 +237,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         var existingWindow = _openEntityBuffWindows
             .FirstOrDefault(session =>
                 ReferenceEquals(session.Widget, widget)
-                && (session.ViewModel.RepresentsEntity(entity.EntityUuid)
-                    || (!session.ViewModel.IsEntityAcquired
-                        && session.ViewModel.EntityId == entity.EntityId
-                        && session.ViewModel.EntityType == entity.EntityType)));
+                && RepresentsEntity(session.ViewModel, entity));
 
         if (existingWindow is not null)
         {
@@ -141,6 +248,174 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         }
 
         CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
+    }
+
+    /// <summary>
+    /// 複数開けるウィジェットの窓が開いた・閉じたときと、開いている窓のタイトルが変わったとき。
+    /// メイン画面のカードが、選んでいる項目の欄(窓のタイトル)と起動ボタンを当て直す。
+    /// </summary>
+    public event Action<WidgetListItemViewModel>? TargetWindowsChanged;
+
+    /// <summary>
+    /// 相手(人・敵)と、バフ・デバフカードならバフを指定して、開いている窓を探す。開いていなければ null。
+    /// 人は、自分なら自分を映す窓(相手の指定なしで開いた窓を含む)、それ以外は UID で探す。
+    /// 敵は実体で探し、捕まえていない窓(復元直後)は種類と種別IDで探す。
+    /// </summary>
+    public WidgetWindow? FindTargetWindow(
+        WidgetListItemViewModel widget,
+        WidgetTargetOption person,
+        WidgetTargetOption? buff)
+    {
+        if (person.Kind == WidgetTargetOptionKind.Entity)
+        {
+            return person.Entity is { } entity
+                ? _openEntityBuffWindows
+                    .FirstOrDefault(session =>
+                        ReferenceEquals(session.Widget, widget)
+                        && RepresentsEntity(session.ViewModel, entity)
+                        && (buff is null
+                            || (session.ViewModel is EntityBuffDebuffCardWidgetViewModel card
+                                && card.RepresentsBuff(buff.BuffListKind, buff.BuffKey, buff.BuffGroup))))
+                    ?.Window
+                : null;
+        }
+
+        return _openPlayerWindows
+            .FirstOrDefault(session =>
+                ReferenceEquals(session.Widget, widget)
+                && (person.IsSelf
+                    ? session.ViewModel.RepresentsSelf()
+                    : session.ViewModel.RepresentsPlayer(person.CharacterId))
+                && (buff is null
+                    || (session.ViewModel is BuffDebuffCardWidgetViewModel card
+                        && card.RepresentsBuff(buff.BuffListKind, buff.BuffKey, buff.BuffGroup))))
+            ?.Window;
+    }
+
+    /// <summary>
+    /// 相手(と、バフ・デバフカードならバフ)の窓を開く。もう開いていれば前に出す。
+    /// 自分は相手の指定なしで開く(カードの起動ボタンで開いていた既定の窓と同じ)。
+    /// </summary>
+    public void OpenTarget(
+        WidgetListItemViewModel widget,
+        WidgetTargetOption person,
+        WidgetTargetOption? buff)
+    {
+        TrackPlayerWidget(widget);
+
+        if (FindTargetWindow(widget, person, buff) is { } existingWindow)
+        {
+            RestoreAndActivate(existingWindow);
+            return;
+        }
+
+        if (person.Kind == WidgetTargetOptionKind.Entity)
+        {
+            if (person.Entity is not { } entity)
+            {
+                return;
+            }
+
+            if (buff is null)
+            {
+                CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
+            }
+            else
+            {
+                CreateEntityBuffCardWindow(widget, new EntityWindowTarget(entity), buff.BuffListKind, buff.BuffKey, buff.BuffGroup);
+            }
+
+            return;
+        }
+
+        long? requestedCharacterId = person.IsSelf ? null : person.CharacterId;
+        if (buff is null)
+        {
+            CreatePlayerWindow(widget, requestedCharacterId);
+        }
+        else
+        {
+            CreatePlayerWindow(widget, requestedCharacterId, buff.BuffListKind, buff.BuffKey, buffGroup: buff.BuffGroup);
+        }
+    }
+
+    /// <summary>相手(と、バフ・デバフカードならバフ)の窓を閉じる。開いていなければ何もしない。</summary>
+    public void CloseTarget(
+        WidgetListItemViewModel widget,
+        WidgetTargetOption person,
+        WidgetTargetOption? buff)
+    {
+        FindTargetWindow(widget, person, buff)?.Close();
+    }
+
+    /// <summary>
+    /// 開いている窓の相手(と、バフ・デバフカードならバフ)。メイン画面のカードの選択リストに、名簿などから外れた相手も並べるのに使う。
+    /// 項目は相手を指す値だけを持ち、表示の文字は持たない。実体を捕まえていない敵の窓(復元直後)は相手を指せないので返さない。
+    /// </summary>
+    public IReadOnlyList<(WidgetTargetOption Person, WidgetTargetOption? Buff)> GetOpenTargets(WidgetListItemViewModel widget)
+    {
+        var targets = new List<(WidgetTargetOption Person, WidgetTargetOption? Buff)>();
+
+        foreach (var session in _openPlayerWindows)
+        {
+            if (!ReferenceEquals(session.Widget, widget))
+            {
+                continue;
+            }
+
+            var viewModel = session.ViewModel;
+            var person = viewModel.RequestedCharacterId is { } characterId
+                ? new WidgetTargetOption { Kind = WidgetTargetOptionKind.Player, CharacterId = characterId }
+                : WidgetTargetOption.CreateSelf(viewModel.LastKnownPlayerUid);
+            var buff = viewModel switch
+            {
+                // 最初に付いたものを待っている窓は「指定なし」。
+                BuffDebuffCardWidgetViewModel { IsWaiting: true } => WidgetTargetOption.CreateUnspecifiedBuffCard(),
+                BuffDebuffCardWidgetViewModel card => new WidgetTargetOption
+                {
+                    Kind = WidgetTargetOptionKind.Buff,
+                    IsSelf = person.IsSelf && card.Group != BuffGroup.None,
+                    BuffListKind = card.BuffListKind,
+                    BuffKey = card.RequestedBuffKey,
+                    BuffGroup = card.Group,
+                    BuffName = card.LastKnownBuffName ?? string.Empty
+                },
+                _ => null
+            };
+            targets.Add((person, buff));
+        }
+
+        foreach (var session in _openEntityBuffWindows)
+        {
+            if (!ReferenceEquals(session.Widget, widget) || session.ViewModel.Entity is not { } entity)
+            {
+                continue;
+            }
+
+            var person = new WidgetTargetOption { Kind = WidgetTargetOptionKind.Entity, Entity = entity };
+            var buff = session.ViewModel is EntityBuffDebuffCardWidgetViewModel card
+                ? new WidgetTargetOption
+                {
+                    Kind = WidgetTargetOptionKind.Buff,
+                    BuffListKind = card.BuffListKind,
+                    BuffKey = card.RequestedBuffKey,
+                    BuffGroup = card.Group,
+                    BuffName = card.LastKnownBuffName ?? string.Empty
+                }
+                : null;
+            targets.Add((person, buff));
+        }
+
+        return targets;
+    }
+
+    /// <summary>敵の窓がその実体を映すか。捕まえていない窓(復元直後)は、種類と種別IDが一致すれば映す。</summary>
+    private static bool RepresentsEntity(IEntityWidgetWindowViewModel viewModel, EntityListEntry entity)
+    {
+        return viewModel.RepresentsEntity(entity.EntityUuid)
+            || (!viewModel.IsEntityAcquired
+                && viewModel.EntityId == entity.EntityId
+                && viewModel.EntityType == entity.EntityType);
     }
 
     public void ApplyWidgetState(WidgetListItemViewModel widget)
@@ -329,10 +604,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
                 ReferenceEquals(session.Widget, widget)
                 && session.ViewModel is EntityBuffDebuffCardWidgetViewModel card
                 && card.RepresentsBuff(kind, buffKey, group)
-                && (card.RepresentsEntity(entity.EntityUuid)
-                    || (!card.IsEntityAcquired
-                        && card.EntityId == entity.EntityId
-                        && card.EntityType == entity.EntityType)));
+                && RepresentsEntity(card, entity));
 
         if (existingWindow is not null)
         {
@@ -508,7 +780,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             if (widget.Kind == WidgetKind.BuffDebuffCard)
             {
                 // 自分の料理と薬剤を1枚ずつ。どちらも対象が居なくても
-                // 「バフ(料理)」「バフ(薬剤)」と名乗れるので、空でも何の枠か分かる。
+                // 「バフカード(料理)」「バフカード(薬剤)」と名乗れるので、空でも何の枠か分かる。
                 CreatePlayerWindow(
                     widget,
                     requestedCharacterId: null,
@@ -607,6 +879,11 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
             headerActions: headerActions.HeaderActions);
         playerWindowViewModel.PropertyChanged += PlayerWindowViewModel_PropertyChanged;
         playerWindowViewModel.SavedTargetInfoResolved += PlayerWindowViewModel_SavedTargetInfoResolved;
+        if (playerWindowViewModel is BuffDebuffCardWidgetViewModel card)
+        {
+            card.FirstBuffRowFound += BuffCardViewModel_FirstBuffRowFound;
+        }
+
         window.Closed += WidgetWindow_Closed;
         window.DataStatusChanged += WidgetWindow_DataStatusChanged;
         // 開き先を持たない種別(常に自分1枚のステータス詳細・バフ・デバフグループ)は、種別ごとの保存だけを使う
@@ -776,6 +1053,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
                 initialPlayer,
                 PlayerBuffListKind.Buff,
                 Instance,
+                Instance,
                 Instance.OpenBuffCardForPlayer),
             WidgetKind.DebuffList => new PlayerBuffListWidgetViewModel(
                 playerWidget,
@@ -783,17 +1061,18 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
                 initialPlayer,
                 PlayerBuffListKind.Debuff,
                 Instance,
+                Instance,
                 Instance.OpenBuffCardForPlayer),
+            // バフもまとまりも指定が無ければ、最初に付いたものを待つ窓(「指定なし」)。
             WidgetKind.BuffDebuffCard => new BuffDebuffCardWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 requestedBuffListKind ?? PlayerBuffListKind.Buff,
                 requestedBuffKey,
-                // 対象の指定が無い(ウィジェットカードから直接開いた)ときは料理を追う。
-                requestedBuffKey is null && buffGroup == BuffGroup.None
-                    ? BuffGroup.Cuisine
-                    : buffGroup,
+                buffGroup,
+                Instance.FindFirstBuffRow,
+                Instance,
                 Instance),
             // 自分だけを出す1枚の窓(相手の指定は持たない)。
             WidgetKind.BuffDebuffGroup => new BuffDebuffGroupWidgetViewModel(
@@ -1149,7 +1428,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
 
         var session = _openPlayerWindows.FirstOrDefault(
             candidate => ReferenceEquals(candidate.ViewModel, playerWindowViewModel));
-        session?.Window.SetHeaderText(playerWindowViewModel.HeaderText);
+        if (session is null)
+        {
+            return;
+        }
+
+        session.Window.SetHeaderText(playerWindowViewModel.HeaderText);
+
+        // メイン画面のカードの欄は、選んでいる項目の窓のタイトルそのもの。
+        TargetWindowsChanged?.Invoke(session.Widget);
     }
 
     /// <summary>
@@ -1194,7 +1481,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
 
         var session = _openEntityBuffWindows.FirstOrDefault(
             candidate => ReferenceEquals(candidate.ViewModel, viewModel));
-        session?.Window.SetHeaderText(viewModel.HeaderText);
+        if (session is null)
+        {
+            return;
+        }
+
+        session.Window.SetHeaderText(viewModel.HeaderText);
+
+        // メイン画面のカードの欄は、選んでいる項目の窓のタイトルそのもの。
+        TargetWindowsChanged?.Invoke(session.Widget);
     }
 
     private void PlayerWidget_PresentationChanged(object? sender, EventArgs e)
@@ -1233,6 +1528,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
     private void UpdatePlayerWindowCount(WidgetListItemViewModel playerWidget)
     {
         playerWidget.SetOpenPlayerWindowCount(CountOpenTargetWindows(playerWidget));
+        TargetWindowsChanged?.Invoke(playerWidget);
     }
 
     private int CountOpenTargetWindows(WidgetListItemViewModel widget)
@@ -1344,6 +1640,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder
         {
             playerWindow.ViewModel.PropertyChanged -= PlayerWindowViewModel_PropertyChanged;
             playerWindow.ViewModel.SavedTargetInfoResolved -= PlayerWindowViewModel_SavedTargetInfoResolved;
+            if (playerWindow.ViewModel is BuffDebuffCardWidgetViewModel card)
+            {
+                card.FirstBuffRowFound -= BuffCardViewModel_FirstBuffRowFound;
+            }
 
             if (playerWindow.ViewModel is IDisposable disposable)
             {

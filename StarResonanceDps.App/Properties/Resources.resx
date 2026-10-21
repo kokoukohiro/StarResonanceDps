@@ -374,6 +374,12 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_Section_BuffDebuffGroupEntries_Description" xml:space="preserve">
     <value>Note: Right-click a buff or debuff to add it.</value>
   </data>
+  <data name="Settings_Section_BuffCardShortcuts_Title" xml:space="preserve">
+    <value>Shortcuts</value>
+  </data>
+  <data name="Settings_ListReorderNote" xml:space="preserve">
+    <value>Note: Drag items in this list to reorder them.</value>
+  </data>
   <data name="Settings_Section_OtherRoleSkills_Title" xml:space="preserve">
     <value>Role skills</value>
   </data>
@@ -406,6 +412,12 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="BuffList_Menu_AddToGroup" xml:space="preserve">
     <value>Add to Group</value>
+  </data>
+  <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
+    <value>Add to Buff Card Shortcuts</value>
+  </data>
+  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
+    <value>Add to Debuff Card Shortcuts</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>Remove This Buff from Group</value>
@@ -1265,10 +1277,10 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Line Break</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleBuff" xml:space="preserve">
-    <value>Buff ({0})</value>
+    <value>Buff Card ({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_TitleDebuff" xml:space="preserve">
-    <value>Debuff ({0})</value>
+    <value>Debuff Card ({0})</value>
   </data>
   <data name="Widget_BuffDebuffCard_Group_Cuisine" xml:space="preserve">
     <value>Cuisine</value>

@@ -8,7 +8,8 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// バフ・デバフカードの設定。表示テキストの書式と、通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の書式。
+/// バフ・デバフカードの設定。表示テキストの書式、ショートカット(メイン画面のカードの選択リストの先頭に並べる行、
+/// バフ・デバフグループの「バフ・デバフ」と共有の部品)、通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の書式。
 ///
 /// <para>
 /// 倍率(<see cref="BuffCardWidgetSettingsConfig.Scales"/>)は<b>この画面では触らない</b>。
@@ -67,6 +68,11 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
             WidgetNotificationTextFormatter.FormatBuffCardCuisinePotionLowPreview);
         ExpiredNotification.Changed += NotificationText_Changed;
         CuisinePotionLowNotification.Changed += NotificationText_Changed;
+        Shortcuts = new BuffEntryListSettingsViewModel(
+            WidgetConfigDefaults.DefaultBuffCardShortcutEntries,
+            "Settings_Section_BuffCardShortcuts_Title",
+            "Settings_ListReorderNote",
+            Shortcuts_Changed);
 
         RebuildFormatFields();
         RefreshLocalizedText();
@@ -84,6 +90,9 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     /// <summary>通知テキスト「薬剤・料理バフ2分以下」。</summary>
     public WidgetNotificationTextItemViewModel CuisinePotionLowNotification { get; }
 
+    /// <summary>「ショートカット」の節。並びはメイン画面のカードの選択リストの並び(並べ替えはこの一覧だけ)。</summary>
+    public BuffEntryListSettingsViewModel Shortcuts { get; }
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -99,7 +108,29 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         config.BuffInfoFormatString = BuffInfoFormatString ?? string.Empty;
         config.ExpiredNotificationFormatString = ExpiredNotification.CreateSavedValue();
         config.CuisinePotionLowNotificationFormatString = CuisinePotionLowNotification.CreateSavedValue();
+        config.Shortcuts = Shortcuts.CreateEntries();
         return WidgetConfigDefaults.CloneNormalizedBuffCard(config);
+    }
+
+    /// <summary>
+    /// 開いている間に、右クリックでショートカットの行がオンになった(一覧・カードの「〇〇カードのショートカットに追加」)。
+    /// その分は既に保存されているので、保存済みの値と行の両方に同じ決まり(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)で入れる
+    /// (「保存」で消えず、未保存の印も付かない)。プレビューは鳴らさない(ウィジェット側は既に変えている)。
+    /// </summary>
+    public void SetShortcutEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!key.IsValid)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _lastSaved.Shortcuts ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffCardShortcutEntries);
+        Shortcuts.SetEntryEnabled(key, isEnabled);
+        OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
     public void ResetToDefaults()
@@ -133,6 +164,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
             BuffInfoFormatString = normalized.BuffInfoFormatString ?? string.Empty;
             ExpiredNotification.Load(normalized.ExpiredNotificationFormatString);
             CuisinePotionLowNotification.Load(normalized.CuisinePotionLowNotificationFormatString);
+            Shortcuts.Load(normalized.Shortcuts);
         }
         finally
         {
@@ -180,6 +212,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         RefreshFormatPreview();
         ExpiredNotification.RefreshLocalizedText();
         CuisinePotionLowNotification.RefreshLocalizedText();
+        Shortcuts.RefreshLocalizedText();
     }
 
     private void RaisePreviewChanged()
@@ -193,7 +226,8 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     {
         return string.Equals(left.BuffInfoFormatString, right.BuffInfoFormatString, StringComparison.Ordinal)
             && string.Equals(left.ExpiredNotificationFormatString, right.ExpiredNotificationFormatString, StringComparison.Ordinal)
-            && string.Equals(left.CuisinePotionLowNotificationFormatString, right.CuisinePotionLowNotificationFormatString, StringComparison.Ordinal);
+            && string.Equals(left.CuisinePotionLowNotificationFormatString, right.CuisinePotionLowNotificationFormatString, StringComparison.Ordinal)
+            && BuffEntryListSettingsViewModel.EntriesEqual(left.Shortcuts, right.Shortcuts);
     }
 
     partial void OnBuffInfoFormatStringChanged(string value)
@@ -210,6 +244,17 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     }
 
     private void NotificationText_Changed(object? sender, EventArgs e)
+    {
+        if (_isLoading)
+        {
+            return;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+        RaisePreviewChanged();
+    }
+
+    private void Shortcuts_Changed()
     {
         if (_isLoading)
         {
