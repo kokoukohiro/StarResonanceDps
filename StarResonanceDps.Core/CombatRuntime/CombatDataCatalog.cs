@@ -1603,6 +1603,17 @@ public static class CombatDataCatalog
         return AppendInternalId(name, InternalIdDisplayMode.EntityOnly, entityId);
     }
 
+    /// <summary>
+    /// <see cref="GetEntityName"/> の表の名前を、内部ID注記と名前の無い実体の代わりの名前なしで返す(表示中の言語)。
+    /// 名前が無ければ空。通知の名前の照合と文に使う。
+    /// </summary>
+    public static string GetEntityNameWithoutInternalId(Zproto.EEntityType entityType, long entityId)
+    {
+        return GetEntityNameTable(entityType) is { } table && entityId is > 0 and <= int.MaxValue
+            ? ResolveText(table.Names, Volatile.Read(ref _cultureName), (int)entityId)
+            : string.Empty;
+    }
+
     /// <summary><see cref="GetEntityName"/> の名前(内部ID注記を除く)が空でないか。</summary>
     public static bool HasEntityName(Zproto.EEntityType entityType, long entityId)
     {

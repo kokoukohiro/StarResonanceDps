@@ -223,9 +223,6 @@
     <value>ホットキー用の補助プログラムを起動できなかったか、途中で停止しました。
 アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ゲームの操作中も効くようになります。</value>
   </data>
-  <data name="Settings_Section_Notification_Title" xml:space="preserve">
-    <value>通知設定</value>
-  </data>
   <data name="Settings_Notification_Speech" xml:space="preserve">
     <value>読み上げ方法</value>
   </data>
@@ -876,7 +873,7 @@
     <value>プレイヤー名</value>
   </data>
   <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
-    <value>名前</value>
+    <value>エンティティ名</value>
   </data>
   <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
     <value>レベル</value>
@@ -1228,6 +1225,15 @@
   <data name="Widget_BuffDebuffGroup" xml:space="preserve">
     <value>バフ・デバフグループ</value>
   </data>
+  <data name="Widget_ReviveList" xml:space="preserve">
+    <value>蘇生リスト</value>
+  </data>
+  <data name="ReviveList_Revivable" xml:space="preserve">
+    <value>蘇生可能</value>
+  </data>
+  <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
+    <value>テキストカラー</value>
+  </data>
   <data name="Widget_BuffDebuffGroup_NoEffect" xml:space="preserve">
     <value>効果なし</value>
   </data>
@@ -1326,6 +1332,81 @@
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>集計</value>
+  </data>
+  <data name="Navigation_Notifications" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Notification_Target" xml:space="preserve">
+    <value>対象プレイヤー</value>
+  </data>
+  <data name="Notification_Target_All" xml:space="preserve">
+    <value>すべて</value>
+  </data>
+  <data name="Notification_HealthLowThreshold" xml:space="preserve">
+    <value>HP低下判定</value>
+  </data>
+  <data name="Notification_Condition" xml:space="preserve">
+    <value>通知条件</value>
+  </data>
+  <data name="HealthLowThreshold_45" xml:space="preserve">
+    <value>HP45%</value>
+  </data>
+  <data name="HealthLowThreshold_35" xml:space="preserve">
+    <value>HP35%</value>
+  </data>
+  <data name="HealthLowThreshold_25" xml:space="preserve">
+    <value>HP25%</value>
+  </data>
+  <data name="HealthLowThreshold_15" xml:space="preserve">
+    <value>HP15%</value>
+  </data>
+  <data name="HealthLowThreshold_5" xml:space="preserve">
+    <value>HP5%</value>
+  </data>
+  <data name="HealthLowCondition_Immediate" xml:space="preserve">
+    <value>無条件</value>
+  </data>
+  <data name="HealthLowCondition_1" xml:space="preserve">
+    <value>HP低下状態1秒以上</value>
+  </data>
+  <data name="HealthLowCondition_2" xml:space="preserve">
+    <value>HP低下状態2秒以上</value>
+  </data>
+  <data name="HealthLowCondition_3" xml:space="preserve">
+    <value>HP低下状態3秒以上</value>
+  </data>
+  <data name="CuisinePotionCondition_1" xml:space="preserve">
+    <value>効果1分以下</value>
+  </data>
+  <data name="CuisinePotionCondition_2" xml:space="preserve">
+    <value>効果2分以下</value>
+  </data>
+  <data name="CuisinePotionCondition_5" xml:space="preserve">
+    <value>効果5分以下</value>
+  </data>
+  <data name="CuisinePotionCondition_10" xml:space="preserve">
+    <value>効果10分以下</value>
+  </data>
+  <data name="Notification_Preview" xml:space="preserve">
+    <value>プレビュー</value>
+  </data>
+  <data name="Notification_BuffWidgetNote" xml:space="preserve">
+    <value>※起動中のバフ・デバフカードとバフ・デバフグループのバフのみ通知します</value>
+  </data>
+  <data name="Notification_PlayerAppeared" xml:space="preserve">
+    <value>プレイヤー出現</value>
+  </data>
+  <data name="Notification_EntityAppeared" xml:space="preserve">
+    <value>エンティティ出現</value>
+  </data>
+  <data name="Notification_TargetPlayerName" xml:space="preserve">
+    <value>対象プレイヤー名</value>
+  </data>
+  <data name="Notification_TargetEntityName" xml:space="preserve">
+    <value>対象エンティティ名</value>
+  </data>
+  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
+    <value>※現在の表示言語のエンティティ名を入力してください</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>集計中</value>
@@ -1779,9 +1860,6 @@
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>通知方法</value>
   </data>
-  <data name="NotificationMethod_None" xml:space="preserve">
-    <value>通知しない</value>
-  </data>
   <data name="NotificationMethod_Windows" xml:space="preserve">
     <value>Windows通知</value>
   </data>
@@ -1792,16 +1870,13 @@
     <value>通知音量</value>
   </data>
   <data name="Settings_Notification_WindowsNote" xml:space="preserve">
-    <value>※ゲーム中は、Windowsの「応答不可を自動的にオンにする」によりバナーが表示されないことがあります</value>
-  </data>
-  <data name="Settings_Notification_BlankNote" xml:space="preserve">
-    <value>※空欄にすると通知しません</value>
+    <value>※ゲーム中は、Windowsの「応答不可を自動的にオンにする」により通知が届かないことがあります</value>
   </data>
   <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
-    <value>効果時間切れ</value>
+    <value>バフ・デバフ効果切れ</value>
   </data>
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
-    <value>薬剤・料理バフ2分以下</value>
+    <value>薬剤・料理効果切れ</value>
   </data>
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>予兆技</value>
@@ -1813,7 +1888,7 @@
     <value>HP低下</value>
   </data>
   <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
-    <value>コンテンツ</value>
+    <value>コンテンツ名</value>
   </data>
   <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
     <value>コンテンツ1</value>
@@ -1833,11 +1908,11 @@
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
     <value>{Name}のHPが低下しました</value>
   </data>
-  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
-    <value>通知テキスト</value>
+  <data name="PlayerAppearedNotification_Default" xml:space="preserve">
+    <value>{Name}が出現しました</value>
   </data>
-  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
-    <value>※起動中のウィジェットのみが通知します</value>
+  <data name="EntityAppearedNotification_Default" xml:space="preserve">
+    <value>{Name}が出現しました</value>
   </data>
   <data name="Startup_Error_Title" xml:space="preserve">
     <value>起動エラー</value>

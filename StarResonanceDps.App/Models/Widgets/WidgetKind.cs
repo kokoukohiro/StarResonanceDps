@@ -31,5 +31,8 @@ public enum WidgetKind
     PlayerModule = 22,
 
     /// <summary>バフ・デバフグループ。自分のバフ・デバフのうち、設定で選んだものだけの一覧。</summary>
-    BuffDebuffGroup = 23
+    BuffDebuffGroup = 23,
+
+    /// <summary>蘇生リスト。戦闘不能のプレイヤーと、蘇生不可デバフの残り時間の一覧。</summary>
+    ReviveList = 24
 }

@@ -1,0 +1,350 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.ReviveListWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <!--
+            行の右クリックのメニュー。作りはプレイヤーリスト・メーターのメニューと同じで、色はメーターと同じく
+            中身(ReviveListWidgetViewModel)の Widget の窓の色から引く。先頭・途中・末尾の角丸は開くときに画面のコードが当てる。
+        -->
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
+        </Style>
+
+        <!-- 行内テキスト。作りはステータス詳細・装備情報の行と同じ。 -->
+        <Style x:Key="ReviveList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <!--
+            名前。PT番号のバッジがあればバッジに続け(プレイヤーリストと同じ並び)、無ければアイコンの欄から 6 空ける(ステータス詳細の名前と同じ)。
+            自分の行だけ色を変える(プレイヤーリストと同じ色)。
+        -->
+        <Style x:Key="ReviveList.NameText" TargetType="TextBlock" BasedOn="{StaticResource ReviveList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="6,0,6,0" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPartyMember}" Value="True">
+                    <Setter Property="Margin" Value="0,0,6,0" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
+                    <Setter Property="Foreground" Value="#F9CD04" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 右寄せの文字(蘇生不可の残り秒・蘇生可能)。蘇生可能のときだけテキストカラー「蘇生可能」の色。 -->
+        <Style x:Key="ReviveList.StateText" TargetType="TextBlock" BasedOn="{StaticResource ReviveList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsRevivable}" Value="True">
+                    <Setter Property="Foreground" Value="{Binding RevivableBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!--
+            一覧の左の余白5は行の側(Button)に置く(プレイヤーリストと同じ)。特化の文字はアイコンの列より広くはみ出すので、
+            ScrollViewer のクリップの境界を窓の内側の端に置く。上下の余白はステータス詳細・装備情報と同じ5。自動の高さ合わせはしない。
+            行は見えている分だけ作る(仮想化。仮想化はリスト自身のテンプレートの中に ScrollViewer が無いと効かない)。
+        -->
+        <ItemsControl x:Name="ReviveListItemsControl"
+                      ItemsSource="{Binding Entries}"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      VirtualizingPanel.VirtualizationMode="Recycling"
+                      VirtualizingPanel.ScrollUnit="Pixel"
+                      VirtualizingStackPanel.CleanUpVirtualizedItem="ReviveListItemsControl_CleanUpVirtualizedItem">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="ItemsControl">
+                    <ScrollViewer x:Name="ReviveListScrollViewer"
+                                  Margin="0,5,0,5"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  CanContentScroll="True">
+                        <ItemsPresenter />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ItemsControl.Template>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <!--
+                        行の高さは中身の34に上下1ずつ。ホバーの作りはステータス詳細・装備情報の行と同じ。
+                        左クリックはその人のプレイヤー情報を開き、右クリックはメニューを開く(プレイヤーリストと同じ)。
+                    -->
+                    <Button Height="36"
+                            Margin="5,0,0,0"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Focusable="False"
+                            IsTabStop="False"
+                            ContextMenuService.IsEnabled="False"
+                            PreviewMouseRightButtonDown="ReviveListItem_PreviewMouseRightButtonDown"
+                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:ReviveListWidgetView}}}"
+                            Click="ReviveListItem_Click"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch">
+                        <!-- 項目と並びはプレイヤーリストの行のメニューと同じ。 -->
+                        <Button.ContextMenu>
+                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                         IsOpen="{Binding PlacementTarget.DataContext.IsPlayerSelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                         Placement="MousePoint"
+                                         Opened="PlayerSelectionContextMenu_Opened"
+                                         Closed="PlayerSelectionContextMenu_Closed">
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
+                                          Command="{Binding RequestPlayerInfoCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <!-- ステータス詳細は自分の行だけ。他人のステータスを取る手段が無いため。 -->
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
+                                          Command="{Binding RequestPlayerStatusCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                          Visibility="{Binding PlacementTarget.DataContext.IsSelf, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
+                                          Command="{Binding RequestPlayerEquipmentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerTalent]}"
+                                          Command="{Binding RequestPlayerTalentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerSeasonTalent]}"
+                                          Command="{Binding RequestPlayerSeasonTalentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerModule]}"
+                                          Command="{Binding RequestPlayerModuleCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
+                                          Command="{Binding RequestBuffListCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
+                                          Command="{Binding RequestDebuffListCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid SnapsToDevicePixels="True">
+                                                <Border x:Name="InteractionBackground"
+                                                        Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        Visibility="Collapsed">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                            <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                    <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </Trigger>
+                                                <!-- メニューを開いている間は、その行の背景を残す(プレイヤーリストと同じ)。 -->
+                                                <DataTrigger Binding="{Binding IsPlayerSelectionMenuOpen}" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+
+                        <!--
+                            クラスアイコンと特化の文字の大きさ・位置はプレイヤーリストと同じ(列33、アイコン25は上寄せ、特化の文字はアイコンの下に重ねる、
+                            中身は行の左から4)。右の文字の右の余白はステータス詳細と同じ8。
+                        -->
+                        <Grid Height="34"
+                              Margin="4,0,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="33" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Rectangle Grid.Column="0"
+                                       Width="25"
+                                       Height="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"
+                                       Fill="{Binding ClassBrush}"
+                                       OpacityMask="{Binding ClassIconMask}"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       Effect="{StaticResource Effect.ProfessionIconShadow}" />
+
+                            <!-- PT番号のバッジ(パーティメンバーだけ)。アイコンの欄から 6 空ける(右の 1 はバッジのスタイルと同じ)。 -->
+                            <ContentControl Grid.Column="1"
+                                            Margin="6,0,1,0"
+                                            VerticalAlignment="Center"
+                                            Content="{Binding PartyNumberText}"
+                                            Style="{StaticResource Icon.PartyNumber}"
+                                            Visibility="{Binding IsPartyMember, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                            <TextBlock Grid.Column="2"
+                                       Style="{StaticResource ReviveList.NameText}"
+                                       Text="{Binding DisplayName}" />
+
+                            <TextBlock Grid.Column="3"
+                                       Margin="0,0,8,0"
+                                       Style="{StaticResource ReviveList.StateText}"
+                                       Text="{Binding StateText}" />
+
+                            <!--
+                                特化の文字。列0(幅33)より広い 52px で描くため、最後の子として Canvas で重ねる(作りと値はプレイヤーリストと同じ。
+                                Canvas でないと Grid が子をセル幅で頭打ちにして幅が通らない)。
+                            -->
+                            <Canvas Grid.Column="0"
+                                    Panel.ZIndex="1"
+                                    IsHitTestVisible="False">
+                                <TextBlock Canvas.Left="-9.5"
+                                           Canvas.Top="21"
+                                           Width="52"
+                                           Style="{StaticResource Text.WidgetWindow}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding ClassSpecDisplayName}"
+                                           TextAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Canvas>
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>

@@ -223,14 +223,8 @@
     <value>The hotkey helper program could not start or stopped unexpectedly.
 Restart the app and select "Yes" in User Account Control to use hotkeys while playing.</value>
   </data>
-  <data name="Settings_Section_Notification_Title" xml:space="preserve">
-    <value>Notifications</value>
-  </data>
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>Notification method</value>
-  </data>
-  <data name="NotificationMethod_None" xml:space="preserve">
-    <value>Don't notify</value>
   </data>
   <data name="NotificationMethod_Windows" xml:space="preserve">
     <value>Windows notification</value>
@@ -242,7 +236,7 @@ Restart the app and select "Yes" in User Account Control to use hotkeys while pl
     <value>Notification volume</value>
   </data>
   <data name="Settings_Notification_WindowsNote" xml:space="preserve">
-    <value>Note: Banners may not appear during games because of the Windows setting "Turn on do not disturb automatically".</value>
+    <value>Note: Notifications may not arrive during games because of the Windows setting "Turn on do not disturb automatically".</value>
   </data>
   <data name="Settings_Notification_Speech" xml:space="preserve">
     <value>Read-aloud method</value>
@@ -293,20 +287,11 @@ If it is not installed, you can download it from the link below.</value>
   <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
     <value>Add a {0} voice in the Windows settings to enable reading aloud.</value>
   </data>
-  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
-    <value>Notification Text</value>
-  </data>
-  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
-    <value>Note: Only running widgets send notifications.</value>
-  </data>
-  <data name="Settings_Notification_BlankNote" xml:space="preserve">
-    <value>Note: Leave a field blank to turn off that notification.</value>
-  </data>
   <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
-    <value>Effect expired</value>
+    <value>Buff &amp; Debuff expired</value>
   </data>
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
-    <value>Potion/cuisine buff 2 min or less</value>
+    <value>Potion/cuisine expired</value>
   </data>
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>Telegraphed skill</value>
@@ -318,7 +303,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>Low HP</value>
   </data>
   <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
-    <value>Content</value>
+    <value>Content Name</value>
   </data>
   <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
     <value>Content1</value>
@@ -337,6 +322,12 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
     <value>{Name}'s HP is low</value>
+  </data>
+  <data name="PlayerAppearedNotification_Default" xml:space="preserve">
+    <value>{Name} appeared</value>
+  </data>
+  <data name="EntityAppearedNotification_Default" xml:space="preserve">
+    <value>{Name} appeared</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
@@ -939,7 +930,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>PlayerName</value>
   </data>
   <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
-    <value>Name</value>
+    <value>Entity Name</value>
   </data>
   <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
     <value>Level</value>
@@ -1291,6 +1282,15 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Widget_BuffDebuffGroup" xml:space="preserve">
     <value>Buff &amp; Debuff Group</value>
   </data>
+  <data name="Widget_ReviveList" xml:space="preserve">
+    <value>Revive List</value>
+  </data>
+  <data name="ReviveList_Revivable" xml:space="preserve">
+    <value>Revivable</value>
+  </data>
+  <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
+    <value>Text Colors</value>
+  </data>
   <data name="Widget_BuffDebuffGroup_NoEffect" xml:space="preserve">
     <value>No effect</value>
   </data>
@@ -1389,6 +1389,81 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>Aggregation</value>
+  </data>
+  <data name="Navigation_Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Notification_Target" xml:space="preserve">
+    <value>Target players</value>
+  </data>
+  <data name="Notification_Target_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Notification_HealthLowThreshold" xml:space="preserve">
+    <value>Low HP threshold</value>
+  </data>
+  <data name="Notification_Condition" xml:space="preserve">
+    <value>Notify when</value>
+  </data>
+  <data name="HealthLowThreshold_45" xml:space="preserve">
+    <value>HP 45%</value>
+  </data>
+  <data name="HealthLowThreshold_35" xml:space="preserve">
+    <value>HP 35%</value>
+  </data>
+  <data name="HealthLowThreshold_25" xml:space="preserve">
+    <value>HP 25%</value>
+  </data>
+  <data name="HealthLowThreshold_15" xml:space="preserve">
+    <value>HP 15%</value>
+  </data>
+  <data name="HealthLowThreshold_5" xml:space="preserve">
+    <value>HP 5%</value>
+  </data>
+  <data name="HealthLowCondition_Immediate" xml:space="preserve">
+    <value>Immediately</value>
+  </data>
+  <data name="HealthLowCondition_1" xml:space="preserve">
+    <value>Low HP for 1 s or more</value>
+  </data>
+  <data name="HealthLowCondition_2" xml:space="preserve">
+    <value>Low HP for 2 s or more</value>
+  </data>
+  <data name="HealthLowCondition_3" xml:space="preserve">
+    <value>Low HP for 3 s or more</value>
+  </data>
+  <data name="CuisinePotionCondition_1" xml:space="preserve">
+    <value>1 min or less left</value>
+  </data>
+  <data name="CuisinePotionCondition_2" xml:space="preserve">
+    <value>2 min or less left</value>
+  </data>
+  <data name="CuisinePotionCondition_5" xml:space="preserve">
+    <value>5 min or less left</value>
+  </data>
+  <data name="CuisinePotionCondition_10" xml:space="preserve">
+    <value>10 min or less left</value>
+  </data>
+  <data name="Notification_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="Notification_BuffWidgetNote" xml:space="preserve">
+    <value>Note: Only buffs in running Buff &amp; Debuff Cards and Buff &amp; Debuff Groups send notifications.</value>
+  </data>
+  <data name="Notification_PlayerAppeared" xml:space="preserve">
+    <value>Player appeared</value>
+  </data>
+  <data name="Notification_EntityAppeared" xml:space="preserve">
+    <value>Entity appeared</value>
+  </data>
+  <data name="Notification_TargetPlayerName" xml:space="preserve">
+    <value>Target player name</value>
+  </data>
+  <data name="Notification_TargetEntityName" xml:space="preserve">
+    <value>Target entity name</value>
+  </data>
+  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
+    <value>Note: Enter the entity name in the current display language.</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>Aggregating</value>

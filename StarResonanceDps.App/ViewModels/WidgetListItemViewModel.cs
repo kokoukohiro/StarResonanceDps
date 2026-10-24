@@ -19,8 +19,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
     private readonly ObservableCollection<EntityListEntry> _entityListEntries = [];
     private readonly Dictionary<long, EntityListEntry> _entityListEntriesByUuid = [];
-    private readonly PlayerListHealthNotificationTracker _healthNotificationTracker;
-    private readonly MatchFoundNotifier _matchFoundNotifier;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings(WidgetKind.DpsGraph);
@@ -34,6 +32,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
     private BuffDebuffGroupWidgetSettingsConfig _buffDebuffGroup = WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
+    private ReviveListWidgetSettingsConfig _reviveList = WidgetConfigDefaults.CreateReviveListSettings();
 
     /// <summary>
     /// 設定の窓が開いている間だけの、ステータス詳細の行の並び(保存前のプレビュー)。null は窓が開いていない。
@@ -190,11 +189,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         return WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, _metricTimeline);
     }
 
-    public BuffCardWidgetSettingsConfig GetBuffCardSettingsSnapshot()
-    {
-        return WidgetConfigDefaults.CloneNormalizedBuffCard(_buffCard);
-    }
-
     public TakenDamageLogWidgetSettingsConfig GetTakenDamageLogSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(_takenDamageLog);
@@ -233,6 +227,11 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public BuffDebuffGroupWidgetSettingsConfig GetBuffDebuffGroupSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(_buffDebuffGroup);
+    }
+
+    public ReviveListWidgetSettingsConfig GetReviveListSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedReviveList(_reviveList);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -545,6 +544,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? BuffDebuffGroupSettingsChanged;
 
+    public event EventHandler? ReviveListSettingsChanged;
+
     /// <summary>
     /// 右クリックでバフ・デバフグループの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
     /// </summary>
@@ -571,8 +572,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     {
         PlayerListEntries = new ReadOnlyObservableCollection<PlayerListEntry>(_playerListEntries);
         EntityListEntries = new ReadOnlyObservableCollection<EntityListEntry>(_entityListEntries);
-        _healthNotificationTracker = new PlayerListHealthNotificationTracker(GetMeterSettingsSnapshot);
-        _matchFoundNotifier = new MatchFoundNotifier(GetMeterSettingsSnapshot);
     }
 
     /// <summary>
@@ -653,6 +652,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                 : null,
             BuffDebuffGroup = WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
                 ? _buffDebuffGroup.Clone()
+                : null,
+            ReviveList = WidgetConfigDefaults.SupportsReviveListSettings(Kind)
+                ? _reviveList.Clone()
                 : null
         };
     }
@@ -748,6 +750,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         {
             _buffDebuffGroup = WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(config.BuffDebuffGroup);
             BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsReviveListSettings(Kind))
+        {
+            _reviveList = WidgetConfigDefaults.CloneNormalizedReviveList(config.ReviveList);
+            ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -877,6 +885,17 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _buffDebuffGroup = WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(buffDebuffGroup);
         BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyReviveListSettingsPreview(ReviveListWidgetSettingsConfig reviveList)
+    {
+        if (!WidgetConfigDefaults.SupportsReviveListSettings(Kind))
+        {
+            return;
+        }
+
+        _reviveList = WidgetConfigDefaults.CloneNormalizedReviveList(reviveList);
+        ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)
@@ -1033,17 +1052,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
     }
 
-    /// <summary>マッチングが成立した。プレイヤーリストを開いているときだけ通知する。UI のスレッドで呼ぶ。</summary>
-    public void NotifyMatchFound(Zproto.EMatchType matchType, long matchTypeUuid)
-    {
-        if (!IsPlayerList || !IsRunning)
-        {
-            return;
-        }
-
-        _matchFoundNotifier.Notify(matchType, matchTypeUuid);
-    }
-
     [RelayCommand]
     private void ToggleFavorite()
     {
@@ -1145,12 +1153,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         OnPropertyChanged(nameof(StateText));
         OnPropertyChanged(nameof(IsRunning));
         OnPropertyChanged(nameof(ShowsStopIcon));
-
-        // 開き直したら、その時点で既に15%以下の人には出さない。
-        if (value != WidgetState.Running)
-        {
-            _healthNotificationTracker.Reset();
-        }
     }
 
     partial void OnOpenPlayerWindowCountChanged(int value)
@@ -1243,17 +1245,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             {
                 _playerListEntries.Move(currentIndex, targetIndex);
             }
-        }
-
-        // 行を作り直した(マップ移動)ときは、全員がリストから外れたのと同じに扱う。
-        if (resetEntries || !IsRunning)
-        {
-            _healthNotificationTracker.Reset();
-        }
-
-        if (IsRunning)
-        {
-            _healthNotificationTracker.Observe(visibleRoster, playerNameDisplayMode);
         }
 
         _shownPlayerRoster = visibleRoster;

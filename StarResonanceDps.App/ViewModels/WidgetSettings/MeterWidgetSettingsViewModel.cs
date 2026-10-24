@@ -12,33 +12,10 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDisposable
 {
-    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] PlayerInfoFormatFieldDefinitions =
-    [
-        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}"),
-        ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
-        ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", "{Psych}"),
-        ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
-        ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", "{SeasonStrength}"),
-        ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", "{SeasonLevel}"),
-        ("Uid", "Settings_PlayerInfo_Field_PlayerUid", "{Uid}")
-    ];
-
     private static readonly (string Key, string LabelResourceKey, string Placeholder)[] EntityInfoFormatFieldDefinitions =
     [
         ("Name", "Settings_EntityInfo_Field_Name", "{Name}"),
         ("Level", "Settings_EntityInfo_Field_Level", "{Level}")
-    ];
-
-    /// <summary>通知テキスト「マッチング成立」に差し込める項目。マッチング先のコンテンツ名だけ。</summary>
-    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] MatchFoundNotificationFieldDefinitions =
-    [
-        ("Content", "Settings_PlayerListNotification_Field_Content", "{Content}")
-    ];
-
-    /// <summary>通知テキスト「HP低下」に差し込める項目。プレイヤー名だけ。</summary>
-    private static readonly (string Key, string LabelResourceKey, string Placeholder)[] HealthLowNotificationFieldDefinitions =
-    [
-        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}")
     ];
 
     private readonly WidgetKind _kind;
@@ -132,19 +109,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         AvailablePlayerInfoFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availablePlayerInfoFormatFields);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
-        MatchFoundNotification = new WidgetNotificationTextItemViewModel(
-            "Settings_PlayerListNotification_MatchFound",
-            WidgetNotificationTextFormatter.MatchFoundDefaultKey,
-            MatchFoundNotificationFieldDefinitions,
-            WidgetNotificationTextFormatter.FormatMatchFoundPreview);
-        HealthLowNotification = new WidgetNotificationTextItemViewModel(
-            "Settings_PlayerListNotification_HealthLow",
-            WidgetNotificationTextFormatter.HealthLowDefaultKey,
-            HealthLowNotificationFieldDefinitions,
-            WidgetNotificationTextFormatter.FormatHealthLowPreview);
-        MatchFoundNotification.Changed += NotificationText_Changed;
-        HealthLowNotification.Changed += NotificationText_Changed;
-
         RebuildPlayerInfoFormatFields();
         _lastSaved = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
         Load(_lastSaved);
@@ -154,15 +118,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
     /// <summary>「他人のロールスキル」設定を出すのはプレイヤーリストだけ。</summary>
     public bool ShowsOtherRoleSkillSettings => _kind == WidgetKind.PlayerList;
-
-    /// <summary>通知テキスト(マッチング成立・HP低下)を出すのはプレイヤーリストだけ。</summary>
-    public bool ShowsPlayerListNotificationSettings => _kind == WidgetKind.PlayerList;
-
-    /// <summary>通知テキスト「マッチング成立」。</summary>
-    public WidgetNotificationTextItemViewModel MatchFoundNotification { get; }
-
-    /// <summary>通知テキスト「HP低下」。</summary>
-    public WidgetNotificationTextItemViewModel HealthLowNotification { get; }
 
     public event Action<MeterWidgetSettingsConfig>? PreviewChanged;
 
@@ -274,8 +229,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public void Dispose()
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
-        MatchFoundNotification.Changed -= NotificationText_Changed;
-        HealthLowNotification.Changed -= NotificationText_Changed;
 
         foreach (var item in Items)
         {
@@ -309,9 +262,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 WidgetConfigDefaults.MinClassColorFilterStrength,
                 WidgetConfigDefaults.MaxClassColorFilterStrength),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
-            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
-            MatchFoundNotificationFormatString = MatchFoundNotification.CreateSavedValue(),
-            HealthLowNotificationFormatString = HealthLowNotification.CreateSavedValue()
+            ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
 
         foreach (var item in Items)
@@ -406,8 +357,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
             ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
             ClassColorFilterStrength = normalized.ClassColorFilterStrength;
-            MatchFoundNotification.Load(normalized.MatchFoundNotificationFormatString);
-            HealthLowNotification.Load(normalized.HealthLowNotificationFormatString);
         }
         finally
         {
@@ -438,8 +387,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
             || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
             || left.ClassColorFilterStrength != right.ClassColorFilterStrength
-            || !string.Equals(left.MatchFoundNotificationFormatString, right.MatchFoundNotificationFormatString, StringComparison.Ordinal)
-            || !string.Equals(left.HealthLowNotificationFormatString, right.HealthLowNotificationFormatString, StringComparison.Ordinal)
             || !(left.ClassColorFilterColors ?? []).SequenceEqual(
                 right.ClassColorFilterColors ?? [],
                 StringComparer.OrdinalIgnoreCase))
@@ -483,9 +430,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         var selectedKey = SelectedPlayerInfoFormatField?.Key;
 
         _availablePlayerInfoFormatFields.Clear();
-        var definitions = _kind == WidgetKind.EntityList
+        IReadOnlyList<(string Key, string LabelResourceKey, string Placeholder)> definitions = _kind == WidgetKind.EntityList
             ? EntityInfoFormatFieldDefinitions
-            : PlayerInfoFormatFieldDefinitions;
+            : PlayerInfoFormatFormatter.FieldDefinitions;
         foreach (var definition in definitions)
         {
             _availablePlayerInfoFormatFields.Add(new MeterPlayerInfoFormatField(
@@ -507,11 +454,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     }
 
     private void Colors_PaletteChanged(object? sender, EventArgs e)
-    {
-        NotifyChanged();
-    }
-
-    private void NotificationText_Changed(object? sender, EventArgs e)
     {
         NotifyChanged();
     }
@@ -544,8 +486,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         OnPropertyChanged(nameof(SelfHighlightStateText));
         RebuildPlayerInfoFormatFields();
         RefreshFormatPreview();
-        MatchFoundNotification.RefreshLocalizedText();
-        HealthLowNotification.RefreshLocalizedText();
     }
 
     private void NotifyChanged()

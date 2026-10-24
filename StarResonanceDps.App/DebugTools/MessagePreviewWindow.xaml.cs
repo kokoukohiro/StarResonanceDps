@@ -161,26 +161,27 @@ public partial class MessagePreviewWindow : Window
             Localization.GetString("PlayerInfo_CopyImageFailed_Detail"));
     }
 
-    // 本物: 起動時・全体設定「通知設定」(VOICEVOX につながらないとき)
+    // 本物: 起動時・通知タブ(VOICEVOX につながらないとき)
     private void VoicevoxConnectFailed_Click(object sender, RoutedEventArgs e)
     {
         NotificationCheckMessage.ShowVoicevoxFailure(this, VoicevoxResultKind.ConnectFailed);
     }
 
-    // 本物: 起動時・全体設定「通知設定」(VOICEVOX の応答を読めないとき)
+    // 本物: 起動時・通知タブ(VOICEVOX の応答を読めないとき)
     private void VoicevoxBadResponse_Click(object sender, RoutedEventArgs e)
     {
         NotificationCheckMessage.ShowVoicevoxFailure(this, VoicevoxResultKind.BadResponse);
     }
 
-    // 本物: 全体設定「通知設定」(利用規約のリンクを押したとき)。規約の本文は起動中のエンジンから取る。
-    // 話者は保存してあるもの、無ければエンジンの一覧の最初。つながらなければ本物と同じく失敗を知らせる。
+    // 本物: 通知タブ(利用規約のリンクを押したとき)。規約の本文は起動中のエンジンから取る。
+    // 話者は通知タブの項目で選んであるもの(並びの最初)、無ければエンジンの一覧の最初。つながらなければ本物と同じく失敗を知らせる。
     private async void VoicevoxPolicy_Click(object sender, RoutedEventArgs e)
     {
-        var settings = ConfigManager.Instance.AppConfig.Settings;
-        if (settings.VoicevoxSpeakerUuid.Length > 0)
+        var savedItem = ConfigManager.Instance.GetNotificationsSnapshot().Items.Values
+            .FirstOrDefault(item => item.VoicevoxSpeakerUuid.Length > 0);
+        if (savedItem is not null)
         {
-            await NotificationCheckMessage.ShowVoicevoxPolicyAsync(this, settings.VoicevoxSpeakerUuid, settings.VoicevoxSpeakerName);
+            await NotificationCheckMessage.ShowVoicevoxPolicyAsync(this, savedItem.VoicevoxSpeakerUuid, savedItem.VoicevoxSpeakerName);
             return;
         }
 
@@ -194,7 +195,7 @@ public partial class MessagePreviewWindow : Window
         await NotificationCheckMessage.ShowVoicevoxPolicyAsync(this, styles.Value[0].SpeakerUuid, styles.Value[0].SpeakerName);
     }
 
-    // 本物: 起動時・全体設定「通知設定」(表示言語の Windows の音声が無いとき)。言語は今の表示言語。
+    // 本物: 起動時・通知タブ・全体設定の言語(表示言語の Windows の音声が無いとき)。言語は今の表示言語。
     private void WindowsVoiceMissing_Click(object sender, RoutedEventArgs e)
     {
         NotificationCheckMessage.ShowWindowsVoiceMissing(this);

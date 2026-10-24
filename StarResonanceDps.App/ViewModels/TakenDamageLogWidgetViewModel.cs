@@ -101,9 +101,6 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>通知(予兆技)の判定。窓の表示(履歴を含む)とは別に、ライブの戦闘を読む。窓を開いている間だけ動く。</summary>
-    private readonly TelegraphedSkillNotificationTracker _notificationTracker;
-
     private Encounter? _encounter;
     private int _nextIndex;
 
@@ -115,7 +112,6 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     {
         _widget = widget;
         _settings = widget.GetTakenDamageLogSettingsSnapshot();
-        _notificationTracker = new TelegraphedSkillNotificationTracker(widget.GetTakenDamageLogSettingsSnapshot, PlayerInfoFormatFormatter.GetPartyDisplayName);
         Entries = new ReadOnlyObservableCollection<TakenDamageLogEntry>(_entries);
 
         _refreshTimer = new DispatcherTimer
@@ -128,7 +124,6 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         Refresh();
-        _notificationTracker.Poll();
         _refreshTimer.Start();
     }
 
@@ -165,7 +160,6 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
-        _notificationTracker.Poll();
     }
 
     /// <summary>

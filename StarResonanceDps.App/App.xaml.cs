@@ -171,6 +171,8 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        // 通知タブで打ったばかりの文章は、保存を待っていることがある。
+        (MainWindow?.DataContext as ViewModels.MainViewModel)?.Notifications.FlushPendingSave();
         GlobalHotkeyService.Instance.Dispose();
         NotificationService.Shutdown();
         SkillCooldownTracker.Instance.Shutdown();

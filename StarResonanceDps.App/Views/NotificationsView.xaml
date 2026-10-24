@@ -1,0 +1,520 @@
+<UserControl x:Class="StarResonanceDps.App.Views.NotificationsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
+             xmlns:notifications="clr-namespace:StarResonanceDps.App.ViewModels.Notifications"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             IsVisibleChanged="NotificationsView_IsVisibleChanged">
+    <UserControl.Resources>
+        <Style x:Key="NotificationsView.Label" TargetType="TextBlock">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+
+        <Style x:Key="NotificationsView.Note" TargetType="TextBlock">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+    </UserControl.Resources>
+
+    <!--
+        パネルは3つ(中央に項目の一覧、右上に文章、右下に設定)。メイン窓の外のスクロールバーの列まで使い、右端は窓の枠まで(ManagerView)。
+        横は、中央と右で残りを分け、中央は 166〜310、右は 410 以上(項目名は入りきらなければ「…」で切れる)。
+        中央の最小 166 は左のタブのパネルの見た目の幅と同じで、窓を一番狭くしたとき(MainWindow の MinWidth)にちょうどこの幅になる。
+        右の最小 410 は、4言語の一番長い行の名前と選択リスト 220 が入る幅。
+        中央の一覧と右下の設定は、それぞれパネルの中でスクロールし、バーはパネルの外に置く(見た目はメイン窓の外のバーと同じ。
+        パネルからバーまで 5・バー 6・次までは 5。上端はパネルの上から 3 下げ、下端はそろえる)。
+        列の幅は変えず、バーが出たらそのパネルの右端を縮めてすき間にバーを置く(中央は 10、右下は 8)。ほかのパネルの幅は変わらない。
+        右上は文章の高さに合わせて伸び縮みし、残りを右下が使う。右上はこの領域の下端を越えず、右下に最低 SettingsPanelMinHeight を残す
+        (NotificationsView.xaml.cs が測るたびに、与えられた高さから上限を決める)。上限に当たったら右上は上限の高さを全部使い、右下はちょうど最小の高さになる。
+    -->
+    <Grid x:Name="RootGrid"
+          Margin="0,1,0,8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="166" MaxWidth="310" />
+            <ColumnDefinition Width="6" />
+            <ColumnDefinition Width="*" MinWidth="410" />
+            <ColumnDefinition Width="8" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="6" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 項目の一覧。行の作りは左のタブと同じで、スイッチは設定画面のもの(ON / OFF の文字は出さない)。スイッチを押しても選んでいる行は変わらない。 -->
+        <ContentControl x:Name="ItemsPanel"
+                        Grid.Row="0"
+                        Grid.RowSpan="3"
+                        Grid.Column="0"
+                        Style="{StaticResource Panel.Root}">
+            <ScrollViewer x:Name="ItemsScrollViewer"
+                          Style="{StaticResource ScrollViewer.WidgetList}"
+                          VerticalScrollBarVisibility="Hidden">
+                <ItemsControl Margin="10" ItemsSource="{Binding Items}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type notifications:NotificationItemViewModel}">
+                            <RadioButton GroupName="NotificationItems"
+                                         Style="{DynamicResource RadioButton.SidebarNavigation}"
+                                         HorizontalContentAlignment="Stretch"
+                                         IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock VerticalAlignment="Center"
+                                               Text="{Binding Label}"
+                                               TextTrimming="CharacterEllipsis" />
+
+                                    <ToggleButton Grid.Column="1"
+                                                  Margin="12,0,0,0"
+                                                  VerticalAlignment="Center"
+                                                  Style="{StaticResource Input.Switch}"
+                                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                                </Grid>
+                            </RadioButton>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </ContentControl>
+
+        <ScrollBar x:Name="ItemsScrollBar"
+                   Grid.Row="0"
+                   Grid.RowSpan="3"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   HorizontalAlignment="Right"
+                   Margin="0,3,5,0"
+                   Orientation="Vertical"
+                   Style="{StaticResource ScrollBar.WidgetList}"
+                   Visibility="Collapsed" />
+
+        <!--
+            文章。入力欄のすぐ下に差し込む項目(左に選択リスト、その右に追加)、その下に見出し「プレビュー」とプレビューの文(改行もそのまま)。
+            高さの上限に当たったら、プレビューの文は残りの高さに入る行だけを出し、その最後の1行を「…」だけの行にする(改行で区切った行も同じ。LineEllipsisDecorator)。
+        -->
+        <ContentControl x:Name="TextPanel"
+                        Grid.Row="0"
+                        Grid.Column="2"
+                        Grid.ColumnSpan="2"
+                        Margin="0,0,8,0"
+                        Style="{StaticResource Panel.Root}"
+                        DataContext="{Binding SelectedItem}">
+            <Grid Margin="20,16,20,16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBox x:Name="NotificationTextBox"
+                         Grid.Row="0"
+                         Height="120"
+                         Style="{StaticResource Input.MultilineTextBox}"
+                         Text="{Binding Text.FormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Loaded="NotificationTextBox_Loaded"
+                         TextChanged="NotificationTextBox_TextChanged" />
+
+                <Grid Grid.Row="1" Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ComboBox Grid.Column="0"
+                              ItemsSource="{Binding Text.AvailableFormatFields}"
+                              SelectedItem="{Binding Text.SelectedFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource Input.SettingsComboBox}" />
+
+                    <Button Grid.Column="2"
+                            Click="AddFormatField_Click"
+                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                            MinWidth="64"
+                            Style="{StaticResource Button.Text}" />
+                </Grid>
+
+                <TextBlock Grid.Row="2"
+                           Margin="0,16,0,6"
+                           Style="{StaticResource NotificationsView.Label}"
+                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Preview]}" />
+
+                <controls:LineEllipsisDecorator Grid.Row="3" Text="{Binding Text.Preview}">
+                    <TextBlock Style="{StaticResource NotificationsView.Note}" />
+                </controls:LineEllipsisDecorator>
+            </Grid>
+        </ContentControl>
+
+        <!--
+            出し方の設定。中身は前の全体設定の通知設定と同じ行で、設定画面の枠を使わずパネルへ直に並べる(下線なし)。
+            行の名前は左寄せ、選択リストと音量バー(どちらも幅 220)は右寄せ。
+            上下の余白 16 はスクロールの外に置く。右下が最小の高さ(NotificationsView.xaml.cs の SettingsPanelMinHeight)のとき、最初の行だけがちょうど真ん中に出る。
+            項目だけの行(出現の対象の名前・注意書き・通知条件・HP低下の3行)を先頭に置き、出し方から下(全部の項目に共通の行)はいつも末尾に置く。
+        -->
+        <ContentControl x:Name="SettingsPanel"
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        Style="{StaticResource Panel.Root}"
+                        DataContext="{Binding SelectedItem}">
+            <ScrollViewer x:Name="SettingsScrollViewer"
+                          Margin="0,16,0,16"
+                          Style="{StaticResource ScrollViewer.WidgetList}"
+                          VerticalScrollBarVisibility="Hidden">
+                <StackPanel Margin="20,0,20,0">
+                    <!-- プレイヤー出現の対象の名前。入力欄の幅は選択リストと同じ 220。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsTargetPlayerName, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetPlayerName]}" />
+
+                        <TextBox Grid.Column="2"
+                                 Width="220"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <!-- エンティティ出現の対象の名前。2行目に、表示言語の名前で書く注意書き。 -->
+                    <Grid Visibility="{Binding ShowsTargetEntityName, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="44" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityName]}" />
+
+                        <TextBox Grid.Column="2"
+                                 Width="220"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="3"
+                                   Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityNameNote]}" />
+                    </Grid>
+
+                    <!-- バフ・デバフ効果切れ・薬剤・料理効果切れだけの注意書き。 -->
+                    <TextBlock Margin="0,0,0,6"
+                               Style="{StaticResource NotificationsView.Note}"
+                               Visibility="{Binding ShowsBuffWidgetNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_BuffWidgetNote]}" />
+
+                    <!-- 薬剤・料理効果切れの通知条件。並びは AppConfigDefaults.CuisinePotionLowMinutes の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsCuisinePotionCondition, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding CuisinePotionConditionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CuisinePotionCondition_1]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CuisinePotionCondition_2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CuisinePotionCondition_5]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CuisinePotionCondition_10]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- HP低下の対象プレイヤー。並びは PartyDisplayMode の番号と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsHealthLowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Target]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding TargetModeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Target_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_MembersOnly]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_NonMembersOnly]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_SelfOnly]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- HP低下判定。並びは AppConfigDefaults.HealthLowThresholdPercents の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsHealthLowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_HealthLowThreshold]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding HealthLowThresholdIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowThreshold_45]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowThreshold_35]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowThreshold_25]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowThreshold_15]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowThreshold_5]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- HP低下の通知条件。並びは AppConfigDefaults.HealthLowDurationSeconds の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsHealthLowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding HealthLowConditionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_Immediate]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_1]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_3]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 出し方。並びは AppConfigDefaults.NotificationMethod*Index の番号と同じ。Windows の通知のときは2行目に応答不可の注意書き。 -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="44" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Method]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding MethodIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NotificationMethod_Windows]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[NotificationMethod_Speech]}" />
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="3"
+                                   Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Visibility="{Binding IsWindowsNotificationSelected, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_WindowsNote]}" />
+                    </Grid>
+
+                    <!-- 通知音量。出し方に関係なく出す。行の作りは前の全体設定と同じ。 -->
+                    <Grid Height="44">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Volume]}" />
+
+                        <Grid Grid.Column="2" Width="220" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="35" />
+                            </Grid.ColumnDefinitions>
+
+                            <!--
+                                範囲は AppConfigDefaults.NotificationVolumeMin / Max と同じ(スタイルの既定は 0〜100)。
+                                値を渡すのは、つまみを手放したときと、ドラッグ以外の操作(クリック・キー・ホイール)のときだけ(NotificationsView.xaml.cs)。
+                                右の数字はスライドバーの値を出すので、ドラッグ中もつまみに合わせて動く。
+                            -->
+                            <Slider x:Name="NotificationVolumeSlider"
+                                    Grid.Column="0"
+                                    Maximum="100"
+                                    IsSnapToTickEnabled="True"
+                                    TickFrequency="1"
+                                    Style="{StaticResource Input.ValueSlider}"
+                                    Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                    Thumb.DragStarted="NotificationVolumeSlider_DragStarted"
+                                    Thumb.DragCompleted="NotificationVolumeSlider_DragCompleted"
+                                    ValueChanged="NotificationVolumeSlider_ValueChanged" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Value, ElementName=NotificationVolumeSlider, StringFormat={}{0:0}%}" />
+                        </Grid>
+                    </Grid>
+
+                    <!-- 読み上げ方法(出し方が読み上げのときだけ)。並びは AppConfigDefaults.SpeechVoice*Index の番号と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding IsSpeechSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_Speech]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding SpeechVoiceIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SpeechVoice_WindowsVoice]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SpeechVoice_Voicevox]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- VOICEVOX の話者(VOICEVOX のときだけ)。注意書きは最後の行の2行目に出す(スタイルの行があるときはそちら)。 -->
+                    <Grid Visibility="{Binding IsVoicevoxSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="44" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxSpeaker]}" />
+
+                        <!-- 開くたびにエンジンへ問い合わせて選択肢を作り直す(NotificationsView.xaml.cs)。DisplayMemberPath は効かないので ItemTemplate。 -->
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  ItemsSource="{Binding VoicevoxSpeakerOptions}"
+                                  SelectedItem="{Binding SelectedVoicevoxSpeaker, Mode=TwoWay}"
+                                  DropDownOpened="VoicevoxComboBox_DropDownOpened">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="3"
+                                   Margin="0,0,0,6">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource NotificationsView.Note}">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowsVoicevoxStyle}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxNote], Mode=OneWay}" />
+                            <Run Text="  " />
+                            <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                            </Hyperlink>
+                            <Run Text="  " />
+                            <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxPolicyLink_Click">
+                                <Run Text="{Binding VoicevoxPolicyLinkText, Mode=OneWay}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </Grid>
+
+                    <!-- VOICEVOX のスタイル(話者のスタイルが2つ以上のときだけ)。注意書きの行は話者の行と同じ中身。 -->
+                    <Grid Visibility="{Binding ShowsVoicevoxStyle, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="44" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxStyle]}" />
+
+                        <!-- 開いたときの作り直しは話者と同じ。 -->
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  ItemsSource="{Binding VoicevoxStyleOptions}"
+                                  SelectedItem="{Binding SelectedVoicevoxStyle, Mode=TwoWay}"
+                                  DropDownOpened="VoicevoxComboBox_DropDownOpened">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <TextBlock Grid.Row="1"
+                                   Grid.ColumnSpan="3"
+                                   Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}">
+                            <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxNote], Mode=OneWay}" />
+                            <Run Text="  " />
+                            <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                            </Hyperlink>
+                            <Run Text="  " />
+                            <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxPolicyLink_Click">
+                                <Run Text="{Binding VoicevoxPolicyLinkText, Mode=OneWay}" />
+                            </Hyperlink>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </ContentControl>
+
+        <ScrollBar x:Name="SettingsScrollBar"
+                   Grid.Row="2"
+                   Grid.Column="2"
+                   Grid.ColumnSpan="2"
+                   HorizontalAlignment="Right"
+                   Margin="0,3,5,0"
+                   Orientation="Vertical"
+                   Style="{StaticResource ScrollBar.WidgetList}"
+                   Visibility="Collapsed" />
+    </Grid>
+</UserControl>

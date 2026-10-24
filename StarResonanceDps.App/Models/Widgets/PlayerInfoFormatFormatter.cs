@@ -13,6 +13,18 @@ public static partial class PlayerInfoFormatFormatter
     /// <summary>設定画面の見本に出すシーズンタレントの型(根ノードのバフ 3002810、4言語とも名前が短い型)。</summary>
     private const int PreviewSeasonTalentBuffId = 3002810;
 
+    /// <summary>書式に差し込める項目(設定の「プレイヤー名」の項目の一覧)。プレイヤーリスト・メーター・蘇生リストで同じ。</summary>
+    public static IReadOnlyList<(string Key, string LabelResourceKey, string Placeholder)> FieldDefinitions { get; } =
+    [
+        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}"),
+        ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
+        ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", "{Psych}"),
+        ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
+        ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", "{SeasonStrength}"),
+        ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", "{SeasonLevel}"),
+        ("Uid", "Settings_PlayerInfo_Field_PlayerUid", "{Uid}")
+    ];
+
     public static string Format(
         MeterPlayerSnapshot player,
         string? formatString,

@@ -509,7 +509,7 @@
         </Setter>
     </Style>
 
-    <!-- 文の中のリンク(全体設定「通知設定」の VOICEVOX の行)。開く処理は Click で受ける。 -->
+    <!-- 文の中のリンク(通知タブの VOICEVOX の行)。開く処理は Click で受ける。 -->
     <Style x:Key="Hyperlink.Inline" TargetType="{x:Type Hyperlink}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />

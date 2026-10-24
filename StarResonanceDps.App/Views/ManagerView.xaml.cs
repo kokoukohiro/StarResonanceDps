@@ -39,6 +39,11 @@ public partial class ManagerView : UserControl
         ShowNavigationContent(ManagerContent.Aggregation);
     }
 
+    private void NotificationsNavigationButton_Checked(object sender, RoutedEventArgs e)
+    {
+        ShowNavigationContent(ManagerContent.Notifications);
+    }
+
     private void PluginsNavigationButton_Checked(object sender, RoutedEventArgs e)
     {
         ShowNavigationContent(ManagerContent.Plugins);
@@ -56,6 +61,13 @@ public partial class ManagerView : UserControl
 
     private void ShowNavigationContent(ManagerContent content)
     {
+        // 通知タブは大きなパネルを使わず、自分のパネルを並べる。
+        ManagerContentPanel.Visibility = content == ManagerContent.Notifications
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        NotificationsContent.Visibility = content == ManagerContent.Notifications
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         WidgetContent.Visibility = content == ManagerContent.Widgets
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -189,6 +201,7 @@ public partial class ManagerView : UserControl
         }
     }
 
+    /// <summary>外のバーが追いかけるスクロール。通知タブ・プラグインタブでは無い(通知タブはパネルごとに自分のバーを持つ)。</summary>
     private ScrollViewer? GetActiveScrollViewer()
     {
         if (WidgetContent.Visibility == Visibility.Visible)
@@ -210,6 +223,7 @@ public partial class ManagerView : UserControl
     {
         Widgets,
         Aggregation,
+        Notifications,
         Plugins,
         Logs
     }

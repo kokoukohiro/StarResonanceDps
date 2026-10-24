@@ -9,26 +9,24 @@ namespace StarResonanceDps.App.Views;
 
 /// <summary>
 /// 読み上げの声を使えるかを確かめ、使えなければメッセージウィンドウで知らせる。
-/// 使うのは全体設定(読み上げにした・声を選んだ・言語を変えた・利用規約のリンクを押した)と起動時だけ。ゲーム中(読み上げようとしたとき)と、話者・スタイルのリストを開いたときには出さない。
+/// 使うのは設定のとき(通知タブで読み上げにした・声を選んだ・読み上げの項目をオンにした、全体設定で言語を変えた、利用規約のリンクを押した)と起動時だけ。
+/// ゲーム中(読み上げようとしたとき)と、話者・スタイルのリストを開いたときには出さない。
 /// 確かめている間にオーナーの窓が閉じたら出さない。
 /// </summary>
 public static partial class NotificationCheckMessage
 {
     /// <summary>
-    /// 通知方式が読み上げなら、選んである声を確かめる。読み上げでなければ何もしない。VOICEVOX はエンジンに問い合わせるので待つ。
+    /// 起動時。オンの読み上げの項目が使っている声を、声の種類ごとに1回ずつ確かめる。使っていなければ何もしない。
+    /// VOICEVOX はエンジンに問い合わせるので待つ。
     /// </summary>
-    public static async Task CheckSpeechVoiceAsync(Window owner, int notificationMethodIndex, int speechVoiceIndex)
+    public static async Task CheckSpeechVoicesAsync(Window owner, NotificationsConfig notifications)
     {
-        if (notificationMethodIndex != AppConfigDefaults.NotificationMethodSpeechIndex)
-        {
-            return;
-        }
-
-        if (speechVoiceIndex == AppConfigDefaults.SpeechVoiceWindowsIndex)
+        if (notifications.AnyEnabled(item => item.UsesWindowsVoice))
         {
             CheckWindowsVoice(owner);
         }
-        else if (speechVoiceIndex == AppConfigDefaults.SpeechVoiceVoicevoxIndex)
+
+        if (notifications.AnyEnabled(item => item.UsesVoicevox))
         {
             var result = await VoicevoxClient.CheckConnectionAsync();
             ShowVoicevoxFailure(owner, result);

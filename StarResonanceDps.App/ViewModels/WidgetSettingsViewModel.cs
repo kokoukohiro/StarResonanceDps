@@ -133,6 +133,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffDebuffGroupSettings.PreviewChanged += BuffDebuffGroupSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsReviveListSettings(kind))
+        {
+            ReviveListSettings = new ReviveListWidgetSettingsViewModel(config.ReviveList);
+            ReviveListSettings.PropertyChanged += ReviveListSettings_PropertyChanged;
+            ReviveListSettings.PreviewChanged += ReviveListSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -162,6 +169,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<IReadOnlyList<int>>? PlayerStatusRowOrderPreviewChanged;
 
     public event Action<BuffDebuffGroupWidgetSettingsConfig>? BuffDebuffGroupPreviewChanged;
+
+    public event Action<ReviveListWidgetSettingsConfig>? ReviveListPreviewChanged;
 
     public void Dispose()
     {
@@ -244,6 +253,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffDebuffGroupSettings.PreviewChanged -= BuffDebuffGroupSettings_PreviewChanged;
             BuffDebuffGroupSettings.Dispose();
         }
+
+        if (ReviveListSettings is not null)
+        {
+            ReviveListSettings.PropertyChanged -= ReviveListSettings_PropertyChanged;
+            ReviveListSettings.PreviewChanged -= ReviveListSettings_PreviewChanged;
+            ReviveListSettings.Dispose();
+        }
+    }
+
+    private void ReviveListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ReviveListWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void ReviveListSettings_PreviewChanged(ReviveListWidgetSettingsConfig config)
+    {
+        ReviveListPreviewChanged?.Invoke(config);
     }
 
     private void BuffDebuffGroupSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -426,6 +455,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public BuffDebuffGroupWidgetSettingsViewModel? BuffDebuffGroupSettings { get; }
 
+    public ReviveListWidgetSettingsViewModel? ReviveListSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -452,7 +483,10 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasBuffDebuffGroupDisplaySettings => BuffDebuffGroupSettings is not null;
 
+    public bool HasReviveListDisplaySettings => ReviveListSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
+        || HasReviveListDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
         || HasTakenDamageLogDisplaySettings
@@ -473,7 +507,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (SkillDetailSettings?.HasUnsavedChanges ?? false)
         || (EquipmentSettings?.HasUnsavedChanges ?? false)
         || (PlayerStatusSettings?.HasUnsavedChanges ?? false)
-        || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false);
+        || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false)
+        || (ReviveListSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -548,6 +583,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.BuffDebuffGroup = BuffDebuffGroupSettings.CreateConfig();
         }
 
+        if (ReviveListSettings is not null)
+        {
+            config.ReviveList = ReviveListSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -562,6 +602,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EquipmentSettings?.MarkSaved(config.Equipment);
         PlayerStatusSettings?.MarkSaved(config.PlayerStatus, config.PlayerStatusRowOrder);
         BuffDebuffGroupSettings?.MarkSaved(config.BuffDebuffGroup);
+        ReviveListSettings?.MarkSaved(config.ReviveList);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -580,6 +621,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EquipmentSettings?.ResetToDefaults();
         PlayerStatusSettings?.ResetToDefaults();
         BuffDebuffGroupSettings?.ResetToDefaults();
+        ReviveListSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -597,6 +639,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         EquipmentSettings?.RestoreSavedPreview();
         PlayerStatusSettings?.RestoreSavedPreview();
         BuffDebuffGroupSettings?.RestoreSavedPreview();
+        ReviveListSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

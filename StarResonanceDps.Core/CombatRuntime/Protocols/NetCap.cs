@@ -136,6 +136,10 @@ public class NetCap
         ProxyHandlers.Add(new ProxyId(serviceId, methodId), handler);
     }
 
+    /// <summary>
+    /// 上りで呼んだメソッドの応答の受け口。渡すのは応答の包み(<c>X_Ret { ret }</c>)そのもので、中身の始まりを推測しない
+    /// (推測は応答の長さや中身の先頭のバイト次第で外れ、包みや長さの途中から読ませていた)。
+    /// </summary>
     public void RegisterProxyReturnHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {
         ProxyReturnHandlers.Add(new ProxyId(serviceId, methodId), handler);
@@ -490,16 +494,6 @@ public class NetCap
             }
         }
 
-        var protoStart = 0;
-        var searchLength = Math.Min(msgData.Length, 4);
-        for (var index = 0; index < searchLength; index++)
-        {
-            if (msgData[index] == 0x0A)
-            {
-                protoStart = index;
-            }
-        }
-
         if (!ProxyReturnsDictionary.TryRemove(returnUid, out var id))
         {
             return;
@@ -507,13 +501,13 @@ public class NetCap
 
         var hasReturnHandler = ProxyReturnHandlers.TryGetValue(id, out var handler);
         var isReturnAllowed = ProxyGate is null || ProxyGate(id.ServiceId, id.MethodId);
-        var finalData = msgData[protoStart..];
         var extraData = new ExtraPacketData(lastPacketTime);
         if (hasReturnHandler && isReturnAllowed)
         {
             try
             {
-                handler!(finalData, returnUid, extraData);
+                // 応答は呼んだメソッドの包み(サービスの X_Ret { ret })のまま渡す。受け口が包みとして読む。
+                handler!(msgData, returnUid, extraData);
             }
             catch (Exception ex)
             {

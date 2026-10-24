@@ -1,7 +1,7 @@
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// 全体設定「通知設定」の VOICEVOX の話者の選択肢1つ(話者1人)。スタイルは <see cref="VoicevoxStyleOption"/>。
+/// 通知タブの VOICEVOX の話者の選択肢1つ(話者1人)。スタイルは <see cref="VoicevoxStyleOption"/>。
 ///
 /// <para>
 /// <see cref="IsMissing"/> は、保存してある話者がエンジンの一覧に無いことを表す。

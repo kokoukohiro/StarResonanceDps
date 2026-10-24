@@ -33,9 +33,6 @@ public partial class SettingsWindow : Window
 
     private bool _isSyncingExternalScrollBar;
 
-    /// <summary>空だった VOICEVOX のリストを、選択肢ができたので開き直している(開き直しでは問い合わせない)。</summary>
-    private bool _isReopeningVoicevoxDropDown;
-
     private SettingsViewModel ViewModel => (SettingsViewModel)DataContext;
 
     public SettingsWindow()
@@ -48,79 +45,18 @@ public partial class SettingsWindow : Window
         Deactivated += SettingsWindow_Deactivated;
     }
 
-    private async void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
+    private void SettingsWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        ViewModel.SpeechVoiceCheckRequested += ViewModel_SpeechVoiceCheckRequested;
+        ViewModel.WindowsVoiceCheckRequested += ViewModel_WindowsVoiceCheckRequested;
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
         ShowBenchmarkDuration();
         QueueUpdateExternalScrollBar();
-
-        // スタイルの行を出すかは、エンジンの一覧で話者のスタイルの数を見ないと決まらない。
-        // つながらなくても知らせない(知らせるのは読み上げで選んだときと起動時。失敗は VoicevoxClient がログに書く)。
-        if (ViewModel.IsVoicevoxSelected)
-        {
-            await ViewModel.RefreshVoicevoxSpeakersAsync();
-        }
     }
 
-    /// <summary>
-    /// 通知方式を読み上げにした・読み上げ方式で声を選んだ・Windows の音声のまま言語を変えた。声を確かめて、使えなければ知らせる。
-    /// VOICEVOX のときは、確かめるのを兼ねて話者の一覧を取る。
-    /// </summary>
-    private async void ViewModel_SpeechVoiceCheckRequested(object? sender, EventArgs e)
+    /// <summary>通知タブで Windows の音声で読み上げるオンの項目があるまま、言語を変えた。声を確かめて、無ければ知らせる。</summary>
+    private void ViewModel_WindowsVoiceCheckRequested(object? sender, EventArgs e)
     {
-        if (ViewModel.IsVoicevoxSelected)
-        {
-            NotificationCheckMessage.ShowVoicevoxFailure(this, await ViewModel.RefreshVoicevoxSpeakersAsync());
-            return;
-        }
-
-        await NotificationCheckMessage.CheckSpeechVoiceAsync(this, ViewModel.NotificationMethodIndex, ViewModel.SpeechVoiceIndex);
-    }
-
-    /// <summary>
-    /// 話者かスタイルのリストを開いた。エンジンに一覧を問い合わせて作り直す。
-    /// つながらなくても知らせない(読み上げで VOICEVOX を選んだときと起動時に知らせている。失敗は VoicevoxClient がログに書く)。
-    /// 選択肢が1つも無いときは空のリストを出さずに閉じ、問い合わせで選択肢ができたら開き直す。
-    /// </summary>
-    private async void VoicevoxComboBox_DropDownOpened(object? sender, EventArgs e)
-    {
-        var comboBox = (ComboBox)sender!;
-        if (_isReopeningVoicevoxDropDown)
-        {
-            _isReopeningVoicevoxDropDown = false;
-            return;
-        }
-
-        var wasEmpty = comboBox.Items.Count == 0;
-        if (wasEmpty)
-        {
-            comboBox.IsDropDownOpen = false;
-        }
-
-        await ViewModel.RefreshVoicevoxSpeakersAsync();
-
-        if (wasEmpty && comboBox.Items.Count > 0 && comboBox.IsVisible)
-        {
-            _isReopeningVoicevoxDropDown = true;
-            comboBox.IsDropDownOpen = true;
-        }
-    }
-
-    private void VoicevoxDownloadLink_Click(object sender, RoutedEventArgs e)
-    {
-        ExternalLinkOpener.Open(VoicevoxClient.DownloadPageUrl);
-    }
-
-    /// <summary>利用規約のリンクを押した。選んである話者の規約の本文をエンジンから取って出す。</summary>
-    private async void VoicevoxPolicyLink_Click(object sender, RoutedEventArgs e)
-    {
-        if (!ViewModel.HasVoicevoxSpeaker)
-        {
-            return;
-        }
-
-        await NotificationCheckMessage.ShowVoicevoxPolicyAsync(this, ViewModel.VoicevoxSpeakerUuid, ViewModel.VoicevoxSpeakerName);
+        NotificationCheckMessage.CheckWindowsVoice(this);
     }
 
 
@@ -134,7 +70,7 @@ public partial class SettingsWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
-        ViewModel.SpeechVoiceCheckRequested -= ViewModel_SpeechVoiceCheckRequested;
+        ViewModel.WindowsVoiceCheckRequested -= ViewModel_WindowsVoiceCheckRequested;
         ViewModel.PropertyChanged -= ViewModel_PropertyChanged;
         ViewModel.Dispose();
         base.OnClosed(e);
@@ -256,11 +192,6 @@ public partial class SettingsWindow : Window
     private void HotkeyNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(HotkeySection);
-    }
-
-    private void NotificationNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(NotificationSection);
     }
 
     /// <summary>ホットキーの欄をクリックした。その行でキーの受付を始める。</summary>
@@ -435,36 +366,6 @@ public partial class SettingsWindow : Window
     private void CommitGameCaptureCustomExeNameEdit()
     {
         GameCaptureCustomExeNameTextBox.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
-    }
-
-    // --- 通知音量のスライドバー ---
-    // 値を設定へ渡す(保存前プレビュー・未保存の印・通知の音量に効く)のは、つまみを手放したときと、
-    // ドラッグ以外の操作(クリック・キー・ホイール)で値が変わったときだけ。ドラッグ中は打つ前の値のまま。
-
-    private bool _isDraggingNotificationVolume;
-
-    private void NotificationVolumeSlider_DragStarted(object sender, DragStartedEventArgs e)
-    {
-        _isDraggingNotificationVolume = true;
-    }
-
-    private void NotificationVolumeSlider_DragCompleted(object sender, DragCompletedEventArgs e)
-    {
-        _isDraggingNotificationVolume = false;
-        CommitNotificationVolume((Slider)sender);
-    }
-
-    private void NotificationVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        if (!_isDraggingNotificationVolume)
-        {
-            CommitNotificationVolume((Slider)sender);
-        }
-    }
-
-    private static void CommitNotificationVolume(Slider slider)
-    {
-        slider.GetBindingExpression(RangeBase.ValueProperty)?.UpdateSource();
     }
 
     // --- 計測時間の入力欄 ---

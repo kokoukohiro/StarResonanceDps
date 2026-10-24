@@ -5,10 +5,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
+using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.ViewModels;
 
@@ -26,6 +28,10 @@ namespace StarResonanceDps.App.ViewModels;
 /// (<see cref="IRowReorderTarget"/>。オフの行も含めた全体の並びの中で動かし、確定はステータス詳細の窓と同じ扱い)。
 /// バフかデバフかは一覧の振り分けと同じ表の種別で決める(<see cref="CombatDataCatalog.GetBuffListKind"/>)。
 /// </para>
+///
+/// <para>
+/// オンの行のバフは、窓を開いている間、通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の対象になる(<see cref="BuffNotificationRegistry"/>)。
+/// </para>
 /// </summary>
 public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IRowReorderTarget
 {
@@ -38,6 +44,13 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
 
     private readonly DispatcherTimer _refreshTimer;
     private BuffDebuffGroupWidgetSettingsConfig _settings;
+
+    /// <summary>
+    /// 通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の判定。オンの行ごとに、窓を開いている間だけ借りる(同じバフを見ているカードと共有)。
+    /// </summary>
+    private readonly Dictionary<BuffEntryKey, BuffNotificationWatch> _notificationWatches = [];
+
+    private PlayerRosterEntry? _player;
 
     /// <summary>行を掴んでいる間の、掴んだ行の鍵と見た目だけの全体の並び。掴んでいなければ null。</summary>
     private BuffEntryKey? _reorderKey;
@@ -113,6 +126,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         _refreshTimer.Tick -= RefreshTimer_Tick;
         PlayerWidget.BuffDebuffGroupSettingsChanged -= Widget_BuffDebuffGroupSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        ReleaseNotificationWatches();
     }
 
     /// <summary>行からカードを開けるか。自分が分かっていて、行がバフかデバフに振り分けられるとき。</summary>
@@ -213,6 +227,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
+        _player = player;
         Refresh();
     }
 
@@ -269,9 +284,13 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         Refresh();
     }
 
-    /// <summary>行を当て直す。行を掴んでいる間は止める。離したときに <see cref="EndRowReorder"/> が必ず当て直す。</summary>
+    /// <summary>
+    /// 通知の判定を進め、行を当て直す。行を掴んでいる間は行の当て直しだけ止める(離したときに <see cref="EndRowReorder"/> が必ず当て直す)。
+    /// 通知の判定は掴んでいる間も止めない(止めると、その間に消えたバフの効果切れを見落とす)。
+    /// </summary>
     private void Refresh()
     {
+        ObserveNotifications();
         if (_reorderKey is not null)
         {
             return;
@@ -323,6 +342,97 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         }
 
         SynchronizeEntries(rows);
+    }
+
+    /// <summary>
+    /// オンの行のバフを、行ごとの通知の判定へ渡す。読み方は行と同じ(同じ番号は残り時間の一番長い実体、料理・薬剤はまとまり)。
+    /// 自分が分からない間・バフかデバフに振り分けられない行は判定を返す。オフにした行の判定も返す。
+    /// </summary>
+    private void ObserveNotifications()
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (SelectedCharacterId is not { } characterId
+            || !MeterSnapshotProvider.TryGetPlayerBuffs(characterId, PlayerBuffListKind.Buff, groupSameBuffs: true, out var buffs)
+            || !MeterSnapshotProvider.TryGetPlayerBuffs(characterId, PlayerBuffListKind.Debuff, groupSameBuffs: true, out var debuffs))
+        {
+            ReleaseNotificationWatches();
+            return;
+        }
+
+        var target = BuffNotificationTarget.ForPlayer(characterId);
+        var targetName = GetTargetName(characterId);
+        var observedKeys = new HashSet<BuffEntryKey>();
+        foreach (var setting in _settings.Entries ?? [])
+        {
+            if (!setting.IsEnabled)
+            {
+                continue;
+            }
+
+            var key = setting.GetKey();
+            var snapshots = ResolveListKind(key) switch
+            {
+                PlayerBuffListKind.Buff => buffs,
+                PlayerBuffListKind.Debuff => debuffs,
+                _ => null
+            };
+            if (snapshots is null || !observedKeys.Add(key))
+            {
+                continue;
+            }
+
+            if (_notificationWatches.TryGetValue(key, out BuffNotificationWatch? watch) && watch.Target != target)
+            {
+                watch.Dispose();
+                _notificationWatches.Remove(key);
+                watch = null;
+            }
+
+            if (watch is null)
+            {
+                watch = BuffNotificationRegistry.Instance.Watch(
+                    target,
+                    BuffNotificationRegistry.CreateBuffKey(
+                        key.Group,
+                        key.IsGroup ? string.Empty : MeterSnapshotProvider.CreateBuffCardKey(key.BuffId)));
+                _notificationWatches.Add(key, watch);
+            }
+
+            watch.Observe(Find(snapshots, key), targetName);
+        }
+
+        foreach (var key in _notificationWatches.Keys.Where(key => !observedKeys.Contains(key)).ToArray())
+        {
+            _notificationWatches[key].Dispose();
+            _notificationWatches.Remove(key);
+        }
+    }
+
+    private void ReleaseNotificationWatches()
+    {
+        foreach (var watch in _notificationWatches.Values)
+        {
+            watch.Dispose();
+        }
+
+        _notificationWatches.Clear();
+    }
+
+    /// <summary>通知に入れる名前。バフ・デバフカードと同じ規則(プレイヤー一覧・メーターと同じ)。</summary>
+    private string GetTargetName(long characterId)
+    {
+        var playerIdentity = MeterSnapshotProvider.GetPlayerIdentity(characterId);
+        return PlayerInfoFormatFormatter.GetDisplayName(
+            _player?.Name ?? playerIdentity?.Name,
+            playerIdentity?.UserId ?? characterId,
+            _player?.IsSelf ?? (AppState.PlayerUID != 0 && characterId == AppState.PlayerUID),
+            _player?.IsNpc ?? playerIdentity?.IsNpc ?? false,
+            _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
+            PlayerRosterPresentationStore.Instance.NameDisplayMode);
     }
 
     /// <summary>設定の行の全体の並び(オフの行も含む)。</summary>

@@ -46,6 +46,20 @@
                                 Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Navigation_Aggregation]}" />
                         </StackPanel>
                     </RadioButton>
+                    <RadioButton x:Name="NotificationsNavigationButton"
+                                 GroupName="ManagerNavigation"
+                                 Style="{DynamicResource RadioButton.SidebarNavigation}"
+                                 Checked="NotificationsNavigationButton_Checked">
+                        <StackPanel Orientation="Horizontal">
+                            <Path
+                                Style="{DynamicResource Icon.Stroke}"
+                                Data="{DynamicResource Icon.Notification}" />
+                            <TextBlock
+                                Margin="12,0,0,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Navigation_Notifications]}" />
+                        </StackPanel>
+                    </RadioButton>
                     <RadioButton x:Name="PluginsNavigationButton"
                                  GroupName="ManagerNavigation"
                                  Style="{DynamicResource RadioButton.SidebarNavigation}"
@@ -102,7 +116,7 @@
             </Grid>
         </ContentControl>
 
-        <ContentControl Grid.Column="1" Margin="0,1,0,8" Style="{StaticResource Panel.Root}">
+        <ContentControl x:Name="ManagerContentPanel" Grid.Column="1" Margin="0,1,0,8" Style="{StaticResource Panel.Root}">
             <Grid>
                 <Grid x:Name="WidgetContent" Margin="24,20,24,20">
                     <Grid.RowDefinitions>
@@ -175,6 +189,16 @@
                 <views:LogsView x:Name="LogsContent" Visibility="Collapsed" />
             </Grid>
         </ContentControl>
+
+        <!--
+            通知タブは大きなパネル1つの代わりに、自分で3つのパネルを並べる(パネルのあいだは左のタブとの間と同じ 6)。
+            スクロールはパネルごとに自分で持つので、外のバーの列まで使って窓の枠までの間隔も自分で決める(外のバーは使わない)。
+        -->
+        <views:NotificationsView x:Name="NotificationsContent"
+                                 Grid.Column="1"
+                                 Grid.ColumnSpan="2"
+                                 Visibility="Collapsed"
+                                 DataContext="{Binding Notifications}" />
 
         <ScrollBar x:Name="ManagerContentExternalScrollBar"
                    Grid.Column="2"

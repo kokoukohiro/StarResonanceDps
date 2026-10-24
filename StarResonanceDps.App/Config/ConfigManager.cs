@@ -43,6 +43,9 @@ public sealed class ConfigManager
     /// <summary><see cref="SavePlayerNameDisplayModeIndex"/> が保存した。開いている全体設定の画面が表示と保存済みの控えを合わせる。</summary>
     public event EventHandler? PlayerNameDisplayModeSaved;
 
+    /// <summary><see cref="SaveNotifications"/> が保存した(通知タブの値が変わった)。</summary>
+    public event EventHandler? NotificationsChanged;
+
     public SettingsConfig GetSettingsSnapshot()
     {
         AppConfigDefaults.Normalize(AppConfig);
@@ -126,6 +129,27 @@ public sealed class ConfigManager
     {
         AppConfig.ColorPicker = AppConfigDefaults.CloneNormalizedColorPicker(colorPicker);
         Save();
+    }
+
+    public NotificationsConfig GetNotificationsSnapshot()
+    {
+        AppConfigDefaults.Normalize(AppConfig);
+        return AppConfig.Notifications.Clone();
+    }
+
+    /// <summary>通知タブの1項目の今の値(写し)。</summary>
+    public NotificationItemConfig GetNotificationItem(NotificationKind kind)
+    {
+        AppConfigDefaults.Normalize(AppConfig);
+        return AppConfig.Notifications.Get(kind).Clone();
+    }
+
+    /// <summary>通知タブの値を保存する。通知タブは保存前プレビューを持たず、変えたらその場で保存する。</summary>
+    public void SaveNotifications(NotificationsConfig notifications)
+    {
+        AppConfig.Notifications = AppConfigDefaults.CloneNormalizedNotifications(notifications);
+        Save();
+        NotificationsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void Save()

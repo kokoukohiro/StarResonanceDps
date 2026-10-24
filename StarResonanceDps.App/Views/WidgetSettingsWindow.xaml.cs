@@ -53,6 +53,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusPreviewChanged += _widget.ApplyPlayerStatusSettingsPreview;
         _viewModel.PlayerStatusRowOrderPreviewChanged += _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged += _widget.ApplyBuffDebuffGroupSettingsPreview;
+        _viewModel.ReviveListPreviewChanged += _widget.ApplyReviveListSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
@@ -96,6 +97,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusPreviewChanged -= _widget.ApplyPlayerStatusSettingsPreview;
         _viewModel.PlayerStatusRowOrderPreviewChanged -= _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged -= _widget.ApplyBuffDebuffGroupSettingsPreview;
+        _viewModel.ReviveListPreviewChanged -= _widget.ApplyReviveListSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
@@ -297,21 +299,6 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(BuffListHiddenBuffsHost);
     }
 
-    private void BuffCardNotificationNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(BuffCardNotificationHost);
-    }
-
-    private void TakenDamageLogNotificationNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(TakenDamageLogNotificationHost);
-    }
-
-    private void PlayerListNotificationNavButton_Click(object sender, RoutedEventArgs e)
-    {
-        ScrollToSection(PlayerListNotificationHost);
-    }
-
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ThemeSection);
@@ -340,6 +327,16 @@ public partial class WidgetSettingsWindow : Window
     private void PlayerInfoClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(PlayerInfoClassColorsHost);
+    }
+
+    private void ReviveListClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ReviveListClassColorsHost);
+    }
+
+    private void ReviveListTextColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ReviveListTextColorsHost);
     }
 
     private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)

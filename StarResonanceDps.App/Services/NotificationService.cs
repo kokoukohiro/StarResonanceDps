@@ -13,8 +13,8 @@ using Windows.UI.Notifications;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// ウィジェットの通知の入口。全体設定(保存前プレビューを含む)の通知方法で、Windows の通知か読み上げに出す。
-/// 何を通知するかは各ウィジェットが決め、文章(Windows の通知の本文・読み上げの内容)を渡す。
+/// 通知の入口。通知タブのその項目の設定(スイッチ・出し方・音量・声)で、Windows の通知か読み上げに出す。スイッチがオフなら出さない。
+/// 何を通知するかは判定の側が決め、文章(Windows の通知の本文・読み上げの内容)を渡す。
 ///
 /// <para>
 /// 失敗はメッセージを出さずログに残す(ゲーム中にエラーの窓を出さない)。同じ種類のログは <see cref="NotificationFailureLog"/> が間引く。
@@ -26,7 +26,7 @@ namespace StarResonanceDps.App.Services;
 /// <see cref="AppDataPaths.WindowsNotificationIconPath"/> へ書き出したもの。
 /// 登録名は <c>StarResonanceDps.</c> ＋ その png のパスの SHA-256。Windows は登録名ごとに最初に読んだアイコンの場所を覚えて
 /// 読み直さないので、png の場所が変われば(フォルダの移動を含む)登録名も変わる形にしてある。
-/// 通知方法をほかに変えて保存したら、通知センターのこのアプリの通知・登録・png を消す
+/// Windows の通知を使うオンの項目が無くなったら、通知センターのこのアプリの通知・登録・png を消す
 /// (<see cref="RemoveWindowsNotificationRegistration"/>)。
 /// </para>
 ///
@@ -70,22 +70,27 @@ public sealed class NotificationService : IDisposable
         }
     }
 
-    public void Notify(string text)
+    public void Notify(NotificationKind kind, string text)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
             return;
         }
 
-        var settings = ConfigManager.Instance.GetSettingsSnapshot();
-        var hasVolume = settings.NotificationVolume > AppConfigDefaults.NotificationVolumeMin;
-        switch (settings.NotificationMethodIndex)
+        var item = ConfigManager.Instance.GetNotificationItem(kind);
+        if (!item.IsEnabled)
+        {
+            return;
+        }
+
+        var hasVolume = item.Volume > AppConfigDefaults.NotificationVolumeMin;
+        switch (item.MethodIndex)
         {
             case AppConfigDefaults.NotificationMethodWindowsIndex:
                 ShowWindowsNotification(text);
                 if (hasVolume)
                 {
-                    _speechQueue.Enqueue(new NotificationSoundRequest(settings.NotificationVolume));
+                    _speechQueue.Enqueue(new NotificationSoundRequest(item.Volume));
                 }
 
                 break;
@@ -94,10 +99,10 @@ public sealed class NotificationService : IDisposable
                 {
                     _speechQueue.Enqueue(new SpeechRequest(
                         text,
-                        settings.SpeechVoiceIndex,
-                        settings.VoicevoxStyleId,
+                        item.SpeechVoiceIndex,
+                        item.VoicevoxStyleId,
                         LocalizationManager.Instance.CurrentCulture,
-                        settings.NotificationVolume));
+                        item.Volume));
                 }
 
                 break;
@@ -110,7 +115,7 @@ public sealed class NotificationService : IDisposable
     }
 
     /// <summary>
-    /// 通知方法を Windows の通知以外にして保存したときに呼ぶ。通知センターのこのアプリの通知、アプリの名前とアイコンの登録、
+    /// Windows の通知を使うオンの項目が無くなったときに呼ぶ。通知センターのこのアプリの通知、アプリの名前とアイコンの登録、
     /// 書き出した png を消す(無ければ何もしない)。
     /// </summary>
     public static void RemoveWindowsNotificationRegistration()

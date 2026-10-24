@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.CombatRuntime.DataTypes;
+using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Config;
 
@@ -24,20 +25,35 @@ public static class AppConfigDefaults
     /// <summary>ウィジェットのタイトルの状態の円と TIPS を、正常(緑)でないときだけ出す。</summary>
     public const int WidgetDataStatusDisplayNonNormalOnlyIndex = 2;
 
-    /// <summary>通知しない(既定)。</summary>
-    public const int NotificationMethodNoneIndex = 0;
+    /// <summary>Windows の通知(トースト)で知らせる(既定)。</summary>
+    public const int NotificationMethodWindowsIndex = 0;
 
-    /// <summary>Windows の通知(トースト)で知らせる。</summary>
-    public const int NotificationMethodWindowsIndex = 1;
-
-    /// <summary>読み上げで知らせる。声は <see cref="SettingsConfig.SpeechVoiceIndex"/>。</summary>
-    public const int NotificationMethodSpeechIndex = 2;
+    /// <summary>読み上げで知らせる。声は <see cref="NotificationItemConfig.SpeechVoiceIndex"/>。</summary>
+    public const int NotificationMethodSpeechIndex = 1;
 
     /// <summary>Windows に入っている声で読み上げる(既定)。</summary>
     public const int SpeechVoiceWindowsIndex = 0;
 
     /// <summary>利用者が入れた VOICEVOX で読み上げる。</summary>
     public const int SpeechVoiceVoicevoxIndex = 1;
+
+    /// <summary>通知「HP低下」の判定の選択肢(最大HPに対する%)。並びは通知タブの選択リストと同じ。</summary>
+    public static readonly int[] HealthLowThresholdPercents = [45, 35, 25, 15, 5];
+
+    /// <summary>既定は15%(ゲーム内で画面の周辺が赤くなる割合)。</summary>
+    public const int DefaultHealthLowThresholdIndex = 3;
+
+    /// <summary>通知「HP低下」の通知条件の選択肢(HP低下が続いた秒数)。0 は無条件(下回ったその場で出す)。並びは通知タブの選択リストと同じ。</summary>
+    public static readonly int[] HealthLowDurationSeconds = [0, 1, 2, 3];
+
+    /// <summary>既定は3秒。</summary>
+    public const int DefaultHealthLowConditionIndex = 3;
+
+    /// <summary>通知「薬剤・料理効果切れ」の通知条件の選択肢(残りの分数)。並びは通知タブの選択リストと同じ。</summary>
+    public static readonly int[] CuisinePotionLowMinutes = [1, 2, 5, 10];
+
+    /// <summary>既定は2分。</summary>
+    public const int DefaultCuisinePotionConditionIndex = 1;
 
     // 通知音量(Windows の通知の音と読み上げ、%)。0 は鳴らさない。
     // 100 は Windows の通知の音と Windows の音声では元の大きさ、VOICEVOX では値を2倍して掛ける(SpeechQueue.VoicevoxVolumeScale)ので 50 が元の大きさ。
@@ -67,7 +83,8 @@ public static class AppConfigDefaults
         {
             StartUpState = null,
             Settings = CreateSettings(),
-            ColorPicker = CreateColorPicker()
+            ColorPicker = CreateColorPicker(),
+            Notifications = CreateNotifications()
         };
     }
 
@@ -94,14 +111,42 @@ public static class AppConfigDefaults
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayShowIndex,
             WindowColorIndex = 1,
             WindowColors = CreateDefaultWindowColors(),
-            Hotkeys = CreateDefaultHotkeys(),
-            NotificationMethodIndex = NotificationMethodNoneIndex,
-            NotificationVolume = NotificationVolumeDefault,
+            Hotkeys = CreateDefaultHotkeys()
+        };
+    }
+
+    public static NotificationsConfig CreateNotifications()
+    {
+        return new NotificationsConfig
+        {
+            Items = CreateNotificationItems()
+        };
+    }
+
+    /// <summary>全部の項目を既定(オフ・既定の文・Windows の通知)で作る。</summary>
+    public static Dictionary<NotificationKind, NotificationItemConfig> CreateNotificationItems()
+    {
+        return System.Enum.GetValues<NotificationKind>().ToDictionary(kind => kind, _ => CreateNotificationItem());
+    }
+
+    public static NotificationItemConfig CreateNotificationItem()
+    {
+        return new NotificationItemConfig
+        {
+            IsEnabled = false,
+            FormatString = null,
+            MethodIndex = NotificationMethodWindowsIndex,
+            Volume = NotificationVolumeDefault,
             SpeechVoiceIndex = SpeechVoiceWindowsIndex,
             VoicevoxSpeakerUuid = string.Empty,
             VoicevoxSpeakerName = string.Empty,
             VoicevoxStyleId = null,
-            VoicevoxStyleName = string.Empty
+            VoicevoxStyleName = string.Empty,
+            TargetModeIndex = (int)PartyDisplayMode.All,
+            HealthLowThresholdIndex = DefaultHealthLowThresholdIndex,
+            HealthLowConditionIndex = DefaultHealthLowConditionIndex,
+            CuisinePotionConditionIndex = DefaultCuisinePotionConditionIndex,
+            TargetName = string.Empty
         };
     }
 
@@ -140,8 +185,59 @@ public static class AppConfigDefaults
     {
         config.Settings ??= CreateSettings();
         config.ColorPicker ??= CreateColorPicker();
+        config.Notifications ??= CreateNotifications();
         NormalizeSettings(config.Settings);
         NormalizeColorPicker(config.ColorPicker);
+        NormalizeNotifications(config.Notifications);
+    }
+
+    public static NotificationsConfig CloneNormalizedNotifications(NotificationsConfig notifications)
+    {
+        var normalized = notifications.Clone();
+        NormalizeNotifications(normalized);
+        return normalized;
+    }
+
+    /// <summary>足りない項目は既定で足し、知らない項目は捨てる。空欄の文は既定に戻す。</summary>
+    public static void NormalizeNotifications(NotificationsConfig notifications)
+    {
+        var items = new Dictionary<NotificationKind, NotificationItemConfig>();
+        foreach (var kind in System.Enum.GetValues<NotificationKind>())
+        {
+            var item = notifications.Items is not null && notifications.Items.TryGetValue(kind, out var saved) && saved is not null
+                ? saved
+                : CreateNotificationItem();
+            NormalizeNotificationItem(item);
+            items[kind] = item;
+        }
+
+        notifications.Items = items;
+    }
+
+    private static void NormalizeNotificationItem(NotificationItemConfig item)
+    {
+        if (string.IsNullOrWhiteSpace(item.FormatString))
+        {
+            item.FormatString = null;
+        }
+
+        item.MethodIndex = Clamp(item.MethodIndex, NotificationMethodWindowsIndex, NotificationMethodSpeechIndex);
+        item.Volume = Clamp(item.Volume, NotificationVolumeMin, NotificationVolumeMax);
+        item.SpeechVoiceIndex = Clamp(item.SpeechVoiceIndex, SpeechVoiceWindowsIndex, SpeechVoiceVoicevoxIndex);
+        item.VoicevoxSpeakerUuid = item.VoicevoxSpeakerUuid?.Trim() ?? string.Empty;
+        item.VoicevoxSpeakerName = item.VoicevoxSpeakerName?.Trim() ?? string.Empty;
+        item.VoicevoxStyleName = item.VoicevoxStyleName?.Trim() ?? string.Empty;
+        item.TargetModeIndex = Clamp(item.TargetModeIndex, (int)PartyDisplayMode.All, (int)PartyDisplayMode.SelfOnly);
+        item.HealthLowThresholdIndex = IndexOrDefault(item.HealthLowThresholdIndex, HealthLowThresholdPercents.Length, DefaultHealthLowThresholdIndex);
+        item.HealthLowConditionIndex = IndexOrDefault(item.HealthLowConditionIndex, HealthLowDurationSeconds.Length, DefaultHealthLowConditionIndex);
+        item.CuisinePotionConditionIndex = IndexOrDefault(item.CuisinePotionConditionIndex, CuisinePotionLowMinutes.Length, DefaultCuisinePotionConditionIndex);
+        item.TargetName = item.TargetName?.Trim() ?? string.Empty;
+    }
+
+    /// <summary>選択肢の番号。範囲の外なら既定。</summary>
+    private static int IndexOrDefault(int index, int count, int defaultIndex)
+    {
+        return index >= 0 && index < count ? index : defaultIndex;
     }
 
     public static SettingsConfig CloneNormalizedSettings(SettingsConfig settings)
@@ -179,13 +275,6 @@ public static class AppConfigDefaults
             ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
             : settings.NetCaptureDeviceName.Trim();
         settings.GameCaptureCustomExeName = settings.GameCaptureCustomExeName?.Trim() ?? string.Empty;
-
-        settings.NotificationMethodIndex = Clamp(settings.NotificationMethodIndex, NotificationMethodNoneIndex, NotificationMethodSpeechIndex);
-        settings.NotificationVolume = Clamp(settings.NotificationVolume, NotificationVolumeMin, NotificationVolumeMax);
-        settings.SpeechVoiceIndex = Clamp(settings.SpeechVoiceIndex, SpeechVoiceWindowsIndex, SpeechVoiceVoicevoxIndex);
-        settings.VoicevoxSpeakerUuid = settings.VoicevoxSpeakerUuid?.Trim() ?? string.Empty;
-        settings.VoicevoxSpeakerName = settings.VoicevoxSpeakerName?.Trim() ?? string.Empty;
-        settings.VoicevoxStyleName = settings.VoicevoxStyleName?.Trim() ?? string.Empty;
 
         // 0 は無限。選べる最大は 99 件。
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);

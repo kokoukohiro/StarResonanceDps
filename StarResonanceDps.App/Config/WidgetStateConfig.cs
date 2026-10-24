@@ -35,6 +35,8 @@ public sealed class WidgetConfig
 
     public BuffDebuffGroupWidgetSettingsConfig? BuffDebuffGroup { get; set; }
 
+    public ReviveListWidgetSettingsConfig? ReviveList { get; set; }
+
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
     ///
@@ -76,6 +78,7 @@ public sealed class WidgetConfig
             Equipment = Equipment?.Clone(),
             PlayerStatus = PlayerStatus?.Clone(),
             BuffDebuffGroup = BuffDebuffGroup?.Clone(),
+            ReviveList = ReviveList?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -225,19 +228,12 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 
     public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorPalettes();
 
-    /// <summary>
-    /// 通知の文章(予兆技 = 予告と警告の技の開始)。読み上げの内容・Windows の通知の本文になる。
-    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
-    /// </summary>
-    public string? TelegraphedSkillNotificationFormatString { get; set; }
-
     public TakenDamageLogWidgetSettingsConfig Clone()
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
-            TelegraphedSkillNotificationFormatString = TelegraphedSkillNotificationFormatString,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -539,15 +535,6 @@ public sealed class BuffCardWidgetSettingsConfig
     public string? BuffInfoFormatString { get; set; }
 
     /// <summary>
-    /// 通知の文章(効果時間切れ)。読み上げの内容・Windows の通知の本文になる。
-    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
-    /// </summary>
-    public string? ExpiredNotificationFormatString { get; set; }
-
-    /// <summary>通知の文章(薬剤・料理バフ2分以下)。null と空の意味は <see cref="ExpiredNotificationFormatString"/> と同じ。</summary>
-    public string? CuisinePotionLowNotificationFormatString { get; set; }
-
-    /// <summary>
     /// 倍率(%)。キーは <c>{対象ID}:{バフキー}</c>。
     ///
     /// <para>
@@ -569,8 +556,6 @@ public sealed class BuffCardWidgetSettingsConfig
         return new BuffCardWidgetSettingsConfig
         {
             BuffInfoFormatString = BuffInfoFormatString,
-            ExpiredNotificationFormatString = ExpiredNotificationFormatString,
-            CuisinePotionLowNotificationFormatString = CuisinePotionLowNotificationFormatString,
             Scales = Scales is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase),
@@ -643,15 +628,6 @@ public sealed class MeterWidgetSettingsConfig
     public int ClassColorFilterStrength { get; set; } =
         WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
-    /// <summary>
-    /// 通知の文章(マッチング成立)。使うのはプレイヤーリストだけ。読み上げの内容・Windows の通知の本文になる。
-    /// null は既定のまま(表示言語の既定の文)、空(空白だけを含む)は通知しない、それ以外は書き換えた文。
-    /// </summary>
-    public string? MatchFoundNotificationFormatString { get; set; }
-
-    /// <summary>通知の文章(HP低下)。使うのはプレイヤーリストだけ。null と空の意味は <see cref="MatchFoundNotificationFormatString"/> と同じ。</summary>
-    public string? HealthLowNotificationFormatString { get; set; }
-
     public MeterWidgetSettingsConfig Clone()
     {
         return new MeterWidgetSettingsConfig
@@ -680,9 +656,7 @@ public sealed class MeterWidgetSettingsConfig
             ClassColorFilterEnabled = ClassColorFilterEnabled,
             ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
             ClassColorFilterColorIndex = ClassColorFilterColorIndex,
-            ClassColorFilterStrength = ClassColorFilterStrength,
-            MatchFoundNotificationFormatString = MatchFoundNotificationFormatString,
-            HealthLowNotificationFormatString = HealthLowNotificationFormatString
+            ClassColorFilterStrength = ClassColorFilterStrength
         };
     }
 }
@@ -736,6 +710,55 @@ public sealed class EquipmentWidgetSettingsConfig
                 : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
             TextColorPalettes = TextColorPalettes is null
                 ? WidgetConfigDefaults.CreateDefaultEquipmentTextColorPalettes()
+                : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// 蘇生リストの設定。プレイヤー名の書式と自分の強調表示(どちらもプレイヤーリストと同じ値の形)、クラスアイコンの色(アイコンカラー)、
+/// 「蘇生可能」の文字の色(テキストカラー)。アイコンカラーの形と既定の色はプレイヤーリストと同じで、フィルターと不透明度は持たない。
+/// </summary>
+public sealed class ReviveListWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultPlayerListPlayerInfoFormatString"/>。</remarks>
+    public string? PlayerInfoFormatString { get; set; }
+
+    /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示(プレイヤーリストと同じ値)。</summary>
+    public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.ReviveList);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.ReviveList);
+
+    /// <summary>文字の色。形はクラスカラーと同じで、鍵は <see cref="WidgetConfigDefaults.ReviveListTextColorKeys"/>。</summary>
+    public Dictionary<string, int> TextColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultReviveListTextColorIndexes();
+
+    public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultReviveListTextColorPalettes();
+
+    public ReviveListWidgetSettingsConfig Clone()
+    {
+        return new ReviveListWidgetSettingsConfig
+        {
+            PlayerInfoFormatString = PlayerInfoFormatString,
+            SelfDisplayModeIndex = SelfDisplayModeIndex,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.ReviveList)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.ReviveList)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase),
+            TextColorIndexes = TextColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultReviveListTextColorIndexes()
+                : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = TextColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultReviveListTextColorPalettes()
                 : TextColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
@@ -922,6 +945,15 @@ public static class WidgetConfigDefaults
     /// </summary>
     private static double BuffDebuffGroupInitialWindowHeight =>
         30d + 10d + 31d * DefaultBuffDebuffGroupEntries.Count(entry => entry.IsEnabled);
+
+    /// <summary>蘇生リストの既定の幅(ほかと共有しない)。値はステータス詳細と同じ。</summary>
+    private const double ReviveListInitialWindowWidth = 280d;
+
+    /// <summary>
+    /// 蘇生リストの既定の高さ(ほかと共有しない)。5人パーティがちょうど入る高さで、
+    /// 窓のヘッダー30 + 一覧の上下の余白10 + 行の高さ36 × 5。
+    /// </summary>
+    private const double ReviveListInitialWindowHeight = 30d + 10d + 36d * 5d;
     private const double MetricContributionInitialWindowWidth = 520d;
     private const double MetricContributionInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 720d;
@@ -1526,6 +1558,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.BuffDebuffGroup;
     }
 
+    /// <summary>蘇生リストの設定(プレイヤー名・自分の強調表示・アイコンカラー・テキストカラー)を持つ種別か。</summary>
+    public static bool SupportsReviveListSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.ReviveList;
+    }
+
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
     public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
     {
@@ -1573,7 +1611,8 @@ public static class WidgetConfigDefaults
             SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
             Equipment = SupportsEquipmentSettings(kind) ? CreateEquipmentSettings() : null,
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
-            BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null
+            BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null,
+            ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null
         };
     }
 
@@ -1835,6 +1874,96 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    /// <summary>蘇生リストの設定の既定。プレイヤー名の書式はプレイヤーリストと同じ既定。</summary>
+    public static ReviveListWidgetSettingsConfig CreateReviveListSettings()
+    {
+        return new ReviveListWidgetSettingsConfig
+        {
+            PlayerInfoFormatString = DefaultPlayerListPlayerInfoFormatString,
+            SelfDisplayModeIndex = DefaultSelfDisplayModeIndex,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.ReviveList),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.ReviveList),
+            TextColorIndexes = CreateDefaultReviveListTextColorIndexes(),
+            TextColorPalettes = CreateDefaultReviveListTextColorPalettes()
+        };
+    }
+
+    /// <summary>蘇生リストのテキストカラーの鍵。蘇生不可デバフの無い人の「蘇生可能」の文字の色。</summary>
+    public const string ReviveListRevivableTextColorKey = "Revivable";
+
+    /// <summary>蘇生リストのテキストカラーの鍵の全部。並びは設定の一覧の順。</summary>
+    public static readonly string[] ReviveListTextColorKeys = [ReviveListRevivableTextColorKey];
+
+    /// <summary>
+    /// 蘇生リストのテキストカラーの見本。「蘇生可能」はステータス詳細の「数値の増加」と同じ2色。
+    /// <b>表は鍵の全項目を持つ</b>ので、引けない鍵は表の書き忘れ。埋めずに落とす。
+    /// </summary>
+    private static readonly Dictionary<string, string[]> ReviveListDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        [ReviveListRevivableTextColorKey] = ["#43D978", "#83E4A4"]
+    };
+
+    /// <summary>蘇生リストのテキストカラーで最初に選ばれている枠(ステータス詳細の「数値の増加」と同じ2枠目)。</summary>
+    public const int DefaultReviveListTextColorIndex = 1;
+
+    public static List<string> CreateDefaultReviveListTextColors(string key)
+    {
+        return [.. ReviveListDefaultTextColorHexes[key]];
+    }
+
+    public static Dictionary<string, int> CreateDefaultReviveListTextColorIndexes()
+    {
+        return ReviveListTextColorKeys.ToDictionary(
+            key => key,
+            _ => DefaultReviveListTextColorIndex,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultReviveListTextColorPalettes()
+    {
+        return ReviveListTextColorKeys.ToDictionary(
+            key => key,
+            CreateDefaultReviveListTextColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>保存値を正規化して写す。書式が無ければ既定を入れ、色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。</summary>
+    public static ReviveListWidgetSettingsConfig CloneNormalizedReviveList(ReviveListWidgetSettingsConfig? reviveList)
+    {
+        var normalized = (reviveList ?? CreateReviveListSettings()).Clone();
+        normalized.PlayerInfoFormatString ??= DefaultPlayerListPlayerInfoFormatString;
+        normalized.SelfDisplayModeIndex = Math.Clamp(
+            normalized.SelfDisplayModeIndex,
+            DefaultSelfDisplayModeIndex,
+            MaxSelfDisplayModeIndex);
+
+        (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.ReviveList,
+            normalized.ClassColorIndexes,
+            normalized.ClassColorPalettes);
+
+        var textIndexes = new Dictionary<string, int>(ReviveListTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        var textPalettes = new Dictionary<string, List<string>>(ReviveListTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        foreach (var key in ReviveListTextColorKeys)
+        {
+            var palette = normalized.TextColorPalettes.TryGetValue(key, out var saved)
+                && saved is { Count: > 0 }
+                    ? new List<string>(saved)
+                    : CreateDefaultReviveListTextColors(key);
+
+            var index = normalized.TextColorIndexes.TryGetValue(key, out var savedIndex)
+                ? savedIndex
+                : DefaultReviveListTextColorIndex;
+
+            textPalettes[key] = palette;
+            textIndexes[key] = Math.Clamp(index, 0, palette.Count - 1);
+        }
+
+        normalized.TextColorIndexes = textIndexes;
+        normalized.TextColorPalettes = textPalettes;
+        return normalized;
+    }
+
     private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
     {
         return kind switch
@@ -1873,6 +2002,11 @@ public static class WidgetConfigDefaults
             {
                 Width = BuffDebuffGroupInitialWindowWidth,
                 Height = BuffDebuffGroupInitialWindowHeight
+            },
+            WidgetKind.ReviveList => new WidgetWindowConfig
+            {
+                Width = ReviveListInitialWindowWidth,
+                Height = ReviveListInitialWindowHeight
             },
             WidgetKind.PlayerTalent => new WidgetWindowConfig
             {
@@ -2510,8 +2644,8 @@ public static class WidgetConfigDefaults
 
         var source = kind switch
         {
-            // 被ダメログとプレイヤー情報のクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo => PlayerListDefaultClassColorHexes,
+            // 被ダメログ・プレイヤー情報・蘇生リストのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList => PlayerListDefaultClassColorHexes,
             WidgetKind.EntityList => EntityListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
@@ -2628,6 +2762,9 @@ public static class WidgetConfigDefaults
         config.BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind)
             ? CloneNormalizedBuffDebuffGroup(config.BuffDebuffGroup)
             : null;
+        config.ReviveList = SupportsReviveListSettings(kind)
+            ? CloneNormalizedReviveList(config.ReviveList)
+            : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
             : null;
@@ -2668,6 +2805,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.BuffDebuffGroup:
                 config.Window.Width ??= BuffDebuffGroupInitialWindowWidth;
                 config.Window.Height ??= BuffDebuffGroupInitialWindowHeight;
+                break;
+            case WidgetKind.ReviveList:
+                config.Window.Width ??= ReviveListInitialWindowWidth;
+                config.Window.Height ??= ReviveListInitialWindowHeight;
                 break;
             case WidgetKind.PlayerTalent:
                 config.Window.Width ??= PlayerTalentInitialWindowWidth;

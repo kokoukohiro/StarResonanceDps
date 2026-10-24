@@ -1,0 +1,480 @@
+using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Services;
+
+namespace StarResonanceDps.App.ViewModels.Notifications;
+
+/// <summary>
+/// 通知タブの1項目。一覧の行(名前・スイッチ)と、選んだときに右に出す文章と設定(項目だけの設定・出し方・音量・声)を持つ。
+/// 値が変わったら <see cref="Changed"/>(文章は <see cref="TextChanged"/>)で通知タブへ知らせ、通知タブが保存する。
+/// </summary>
+public sealed partial class NotificationItemViewModel : ObservableObject
+{
+    private readonly string _labelResourceKey;
+    private bool _isLoading;
+
+    // 選んである VOICEVOX の話者(保存する値)。選択肢を作り直すときに選択リストが null を書き戻しても、ここは変えない。
+    private string _voicevoxSpeakerUuid = string.Empty;
+    private string _voicevoxSpeakerName = string.Empty;
+    private int? _voicevoxStyleId;
+    private string _voicevoxStyleName = string.Empty;
+
+    private readonly ObservableCollection<VoicevoxSpeakerOption> _voicevoxSpeakerOptions = [];
+
+    private readonly ObservableCollection<VoicevoxStyleOption> _voicevoxStyleOptions = [];
+
+    /// <summary>最後にエンジンから取れた話者の一覧(通知タブが全部の項目に配る)。まだ問い合わせていなければ null。</summary>
+    private IReadOnlyList<VoicevoxStyle>? _fetchedVoicevoxStyles;
+
+    private bool _isRebuildingVoicevoxOptions;
+
+    /// <summary>スタイルの行が要るか(<see cref="RebuildVoicevoxStyleOptions"/> が決める)。</summary>
+    private bool _isVoicevoxStyleRowNeeded;
+
+    [ObservableProperty]
+    private string _label = string.Empty;
+
+    /// <summary>一覧で選んでいる行か。選んだ行の文章と設定が右に出る。</summary>
+    [ObservableProperty]
+    private bool _isSelected;
+
+    [ObservableProperty]
+    private bool _isEnabled;
+
+    [ObservableProperty]
+    private int _methodIndex = AppConfigDefaults.NotificationMethodWindowsIndex;
+
+    /// <summary>通知音量。スライダーの値なので double で持ち、保存のときに整数へ丸める。</summary>
+    [ObservableProperty]
+    private double _volume = AppConfigDefaults.NotificationVolumeDefault;
+
+    [ObservableProperty]
+    private int _speechVoiceIndex = AppConfigDefaults.SpeechVoiceWindowsIndex;
+
+    /// <summary>HP低下の対象(<see cref="Core.Models.PartyDisplayMode"/> の番号)。</summary>
+    [ObservableProperty]
+    private int _targetModeIndex;
+
+    /// <summary>HP低下とみなす割合の番号(<see cref="AppConfigDefaults.HealthLowThresholdPercents"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _healthLowThresholdIndex = AppConfigDefaults.DefaultHealthLowThresholdIndex;
+
+    /// <summary>HP低下の通知条件の番号(<see cref="AppConfigDefaults.HealthLowDurationSeconds"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _healthLowConditionIndex = AppConfigDefaults.DefaultHealthLowConditionIndex;
+
+    /// <summary>薬剤・料理効果切れの通知条件の番号(<see cref="AppConfigDefaults.CuisinePotionLowMinutes"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _cuisinePotionConditionIndex = AppConfigDefaults.DefaultCuisinePotionConditionIndex;
+
+    /// <summary>プレイヤー出現・エンティティ出現で、出現を知らせる相手の名前。打ったままの値で持ち、保存のときに前後の空白を除く。</summary>
+    [ObservableProperty]
+    private string _targetName = string.Empty;
+
+    [ObservableProperty]
+    private VoicevoxSpeakerOption? _selectedVoicevoxSpeaker;
+
+    [ObservableProperty]
+    private VoicevoxStyleOption? _selectedVoicevoxStyle;
+
+    public NotificationItemViewModel(
+        NotificationKind kind,
+        string labelResourceKey,
+        (string Key, string LabelResourceKey, string Placeholder)[] fieldDefinitions)
+    {
+        Kind = kind;
+        _labelResourceKey = labelResourceKey;
+        Text = new NotificationTextViewModel(kind, fieldDefinitions);
+        Text.Changed += Text_Changed;
+        VoicevoxSpeakerOptions = new ReadOnlyObservableCollection<VoicevoxSpeakerOption>(_voicevoxSpeakerOptions);
+        VoicevoxStyleOptions = new ReadOnlyObservableCollection<VoicevoxStyleOption>(_voicevoxStyleOptions);
+        Label = LocalizationManager.Instance.GetString(_labelResourceKey);
+    }
+
+    /// <summary>スイッチ・出し方・音量・声・項目だけの設定が変わった。読み込みでは上げない。</summary>
+    public event EventHandler? Changed;
+
+    /// <summary>
+    /// 文章か出現の対象の名前が変わった(どちらも打ち終わってから保存する)。読み込みと、言語を変えたときの既定の文の差し替えでは上げない。
+    /// </summary>
+    public event EventHandler? TextChanged;
+
+    /// <summary>
+    /// 読み上げの声を確かめる時機(読み上げの項目をオンにした・出し方を読み上げにした・読み上げ方法を変えた)。
+    /// 画面が確かめてメッセージを出す。読み込みでは上げない。
+    /// </summary>
+    public event EventHandler? SpeechVoiceCheckRequested;
+
+    public NotificationKind Kind { get; }
+
+    public NotificationTextViewModel Text { get; }
+
+    /// <summary>開いているバフ・デバフカードとバフ・デバフグループのバフだけを通知する項目か。右下に注意書きを出す。</summary>
+    public bool ShowsBuffWidgetNote => Kind is NotificationKind.BuffExpired or NotificationKind.CuisinePotionLow;
+
+    /// <summary>HP低下の項目か。右下の先頭に「対象プレイヤー」「HP低下判定」「通知条件」の行を出す。</summary>
+    public bool ShowsHealthLowSettings => Kind == NotificationKind.HealthLow;
+
+    /// <summary>薬剤・料理効果切れの項目か。右下の注意書きの次に「通知条件」の行を出す。</summary>
+    public bool ShowsCuisinePotionCondition => Kind == NotificationKind.CuisinePotionLow;
+
+    /// <summary>プレイヤー出現の項目か。右下の先頭に「対象プレイヤー名」の行を出す。</summary>
+    public bool ShowsTargetPlayerName => Kind == NotificationKind.PlayerAppeared;
+
+    /// <summary>エンティティ出現の項目か。右下の先頭に「対象エンティティ名」の行と注意書きを出す。</summary>
+    public bool ShowsTargetEntityName => Kind == NotificationKind.EntityAppeared;
+
+    /// <summary>出し方が Windows の通知か。出し方の行に応答不可の注意書きを出す。</summary>
+    public bool IsWindowsNotificationSelected => MethodIndex == AppConfigDefaults.NotificationMethodWindowsIndex;
+
+    /// <summary>出し方が読み上げか。読み上げ方法の行を出す。</summary>
+    public bool IsSpeechSelected => MethodIndex == AppConfigDefaults.NotificationMethodSpeechIndex;
+
+    /// <summary>読み上げを VOICEVOX でするか。VOICEVOX の行(話者・スタイル)を出す。</summary>
+    public bool IsVoicevoxSelected => IsSpeechSelected && SpeechVoiceIndex == AppConfigDefaults.SpeechVoiceVoicevoxIndex;
+
+    public ReadOnlyObservableCollection<VoicevoxSpeakerOption> VoicevoxSpeakerOptions { get; }
+
+    /// <summary>選んでいる話者のスタイル。</summary>
+    public ReadOnlyObservableCollection<VoicevoxStyleOption> VoicevoxStyleOptions { get; }
+
+    /// <summary>
+    /// スタイルの行を出すか。エンジンの一覧で、選んでいる話者のスタイルが2つ以上あるときだけ出す。
+    /// 一覧がまだ取れていないときはスタイルの数が分からないので、保存してあるスタイルを出す。
+    /// </summary>
+    public bool ShowsVoicevoxStyle => IsVoicevoxSelected && _isVoicevoxStyleRowNeeded;
+
+    /// <summary>VOICEVOX の話者を選んであるか。選んでいなければ利用規約のリンクを出さない。</summary>
+    public bool HasVoicevoxSpeaker => _voicevoxSpeakerUuid.Length > 0 && _voicevoxStyleId is not null;
+
+    public string VoicevoxSpeakerUuid => _voicevoxSpeakerUuid;
+
+    public string VoicevoxSpeakerName => _voicevoxSpeakerName;
+
+    /// <summary>選んである話者の利用規約のリンクの文字。選んでいなければ空。</summary>
+    public string VoicevoxPolicyLinkText => HasVoicevoxSpeaker
+        ? LocalizationManager.Instance.Format("Voicevox_Policy_Title", _voicevoxSpeakerName)
+        : string.Empty;
+
+    public void Load(NotificationItemConfig config)
+    {
+        _isLoading = true;
+        try
+        {
+            IsEnabled = config.IsEnabled;
+            MethodIndex = config.MethodIndex;
+            Volume = config.Volume;
+            SpeechVoiceIndex = config.SpeechVoiceIndex;
+            TargetModeIndex = config.TargetModeIndex;
+            HealthLowThresholdIndex = config.HealthLowThresholdIndex;
+            HealthLowConditionIndex = config.HealthLowConditionIndex;
+            CuisinePotionConditionIndex = config.CuisinePotionConditionIndex;
+            TargetName = config.TargetName;
+            _voicevoxSpeakerUuid = config.VoicevoxSpeakerUuid;
+            _voicevoxSpeakerName = config.VoicevoxSpeakerName;
+            _voicevoxStyleId = config.VoicevoxStyleId;
+            _voicevoxStyleName = config.VoicevoxStyleName;
+            Text.Load(config.FormatString);
+            RebuildVoicevoxOptions();
+            OnVoicevoxSpeakerChanged();
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    public NotificationItemConfig CreateConfig()
+    {
+        return new NotificationItemConfig
+        {
+            IsEnabled = IsEnabled,
+            FormatString = Text.CreateSavedValue(),
+            MethodIndex = MethodIndex,
+            Volume = (int)Math.Round(Volume, MidpointRounding.AwayFromZero),
+            SpeechVoiceIndex = SpeechVoiceIndex,
+            VoicevoxSpeakerUuid = _voicevoxSpeakerUuid,
+            VoicevoxSpeakerName = _voicevoxSpeakerName,
+            VoicevoxStyleId = _voicevoxStyleId,
+            VoicevoxStyleName = _voicevoxStyleName,
+            TargetModeIndex = TargetModeIndex,
+            HealthLowThresholdIndex = HealthLowThresholdIndex,
+            HealthLowConditionIndex = HealthLowConditionIndex,
+            CuisinePotionConditionIndex = CuisinePotionConditionIndex,
+            TargetName = TargetName.Trim()
+        };
+    }
+
+    /// <summary>エンジンから取れた話者の一覧を受けて、話者とスタイルの選択肢を作り直す。</summary>
+    public void ApplyFetchedVoicevoxStyles(IReadOnlyList<VoicevoxStyle> styles)
+    {
+        _fetchedVoicevoxStyles = styles;
+        RebuildVoicevoxOptions();
+    }
+
+    public void RefreshLocalizedText()
+    {
+        Label = LocalizationManager.Instance.GetString(_labelResourceKey);
+        Text.RefreshLocalizedText();
+        RebuildVoicevoxOptions();
+        OnPropertyChanged(nameof(VoicevoxPolicyLinkText));
+    }
+
+    private void Text_Changed(object? sender, EventArgs e)
+    {
+        if (!_isLoading)
+        {
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    partial void OnIsEnabledChanged(bool value)
+    {
+        if (_isLoading)
+        {
+            return;
+        }
+
+        Changed?.Invoke(this, EventArgs.Empty);
+        if (value && IsSpeechSelected)
+        {
+            SpeechVoiceCheckRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    partial void OnMethodIndexChanged(int value)
+    {
+        OnSpeechSelectionChanged();
+    }
+
+    partial void OnSpeechVoiceIndexChanged(int value)
+    {
+        OnSpeechSelectionChanged();
+    }
+
+    partial void OnVolumeChanged(double value)
+    {
+        if (!_isLoading)
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    partial void OnTargetModeIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnHealthLowThresholdIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnHealthLowConditionIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnCuisinePotionConditionIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnTargetNameChanged(string value)
+    {
+        if (!_isLoading)
+        {
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void RaiseChanged()
+    {
+        if (!_isLoading)
+        {
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>出し方か読み上げ方法が変わった。読み上げで声を使うことになったら、声を確かめる。</summary>
+    private void OnSpeechSelectionChanged()
+    {
+        OnPropertyChanged(nameof(IsWindowsNotificationSelected));
+        OnPropertyChanged(nameof(IsSpeechSelected));
+        OnPropertyChanged(nameof(IsVoicevoxSelected));
+        OnPropertyChanged(nameof(ShowsVoicevoxStyle));
+
+        if (_isLoading)
+        {
+            return;
+        }
+
+        Changed?.Invoke(this, EventArgs.Empty);
+        if (IsSpeechSelected)
+        {
+            SpeechVoiceCheckRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    partial void OnSelectedVoicevoxSpeakerChanged(VoicevoxSpeakerOption? value)
+    {
+        // 作り直しの途中と、選択リストが null を書き戻したときは、保存する値を変えない。
+        if (_isRebuildingVoicevoxOptions || _isLoading || value is null || value.IsMissing)
+        {
+            return;
+        }
+
+        // 同じ話者が選び直されただけなら、選んでいるスタイルを保つ。
+        if (string.Equals(value.SpeakerUuid, _voicevoxSpeakerUuid, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        // 話者を変えたら、その話者の一覧の最初のスタイルにする(VOICEVOX の既定のスタイルと同じ決め方)。
+        // 保存してある話者のほかの選択肢は、エンジンの一覧から作ったものだけ。
+        var defaultStyle = _fetchedVoicevoxStyles!.First(
+            style => string.Equals(style.SpeakerUuid, value.SpeakerUuid, StringComparison.Ordinal));
+        _voicevoxSpeakerUuid = value.SpeakerUuid;
+        _voicevoxSpeakerName = value.SpeakerName;
+        _voicevoxStyleId = defaultStyle.StyleId;
+        _voicevoxStyleName = defaultStyle.StyleName;
+        RebuildVoicevoxStyleOptions();
+        OnVoicevoxSpeakerChanged();
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    partial void OnSelectedVoicevoxStyleChanged(VoicevoxStyleOption? value)
+    {
+        if (_isRebuildingVoicevoxOptions || _isLoading || value is null || value.IsMissing)
+        {
+            return;
+        }
+
+        _voicevoxStyleId = value.StyleId;
+        _voicevoxStyleName = value.StyleName;
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnVoicevoxSpeakerChanged()
+    {
+        OnPropertyChanged(nameof(HasVoicevoxSpeaker));
+        OnPropertyChanged(nameof(VoicevoxPolicyLinkText));
+    }
+
+    /// <summary>
+    /// 話者とスタイルの選択肢を作り直す。選んである話者は押し直す。
+    /// まだ問い合わせていないときは、選んである話者だけを選択肢にする。問い合わせた一覧に無ければ「見つかりません」付きで残す。
+    /// </summary>
+    private void RebuildVoicevoxOptions()
+    {
+        _isRebuildingVoicevoxOptions = true;
+        try
+        {
+            _voicevoxSpeakerOptions.Clear();
+            VoicevoxSpeakerOption? selected = null;
+            var addedSpeakers = new HashSet<string>(StringComparer.Ordinal);
+
+            foreach (var style in _fetchedVoicevoxStyles ?? [])
+            {
+                if (!addedSpeakers.Add(style.SpeakerUuid))
+                {
+                    continue;
+                }
+
+                var option = CreateVoicevoxSpeakerOption(style.SpeakerUuid, style.SpeakerName, isMissing: false);
+                _voicevoxSpeakerOptions.Add(option);
+                if (HasVoicevoxSpeaker && string.Equals(option.SpeakerUuid, _voicevoxSpeakerUuid, StringComparison.Ordinal))
+                {
+                    selected = option;
+                }
+            }
+
+            if (selected is null && HasVoicevoxSpeaker)
+            {
+                selected = CreateVoicevoxSpeakerOption(
+                    _voicevoxSpeakerUuid,
+                    _voicevoxSpeakerName,
+                    isMissing: _fetchedVoicevoxStyles is not null);
+                _voicevoxSpeakerOptions.Insert(0, selected);
+            }
+
+            SelectedVoicevoxSpeaker = selected;
+        }
+        finally
+        {
+            _isRebuildingVoicevoxOptions = false;
+        }
+
+        OnPropertyChanged(nameof(SelectedVoicevoxSpeaker));
+        RebuildVoicevoxStyleOptions();
+    }
+
+    /// <summary>
+    /// 選んでいる話者のスタイルの選択肢を作り直し、スタイルの行を出すかを決める。選んであるスタイルは押し直す。
+    /// 話者が一覧にあってスタイルだけ無ければ「見つかりません」付きで残す。話者ごと無いときは話者の行が知らせるので、スタイルの行は出さない。
+    /// </summary>
+    private void RebuildVoicevoxStyleOptions()
+    {
+        _isRebuildingVoicevoxOptions = true;
+        try
+        {
+            _voicevoxStyleOptions.Clear();
+            VoicevoxStyleOption? selected = null;
+            var speakerFound = false;
+
+            if (HasVoicevoxSpeaker)
+            {
+                foreach (var style in _fetchedVoicevoxStyles ?? [])
+                {
+                    if (!string.Equals(style.SpeakerUuid, _voicevoxSpeakerUuid, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    speakerFound = true;
+                    var option = CreateVoicevoxStyleOption(style.StyleId, style.StyleName, isMissing: false);
+                    _voicevoxStyleOptions.Add(option);
+                    if (option.StyleId == _voicevoxStyleId)
+                    {
+                        selected = option;
+                    }
+                }
+
+                if (selected is null)
+                {
+                    selected = CreateVoicevoxStyleOption(_voicevoxStyleId!.Value, _voicevoxStyleName, isMissing: speakerFound);
+                    _voicevoxStyleOptions.Insert(0, selected);
+                }
+            }
+
+            _isVoicevoxStyleRowNeeded = HasVoicevoxSpeaker
+                && (_fetchedVoicevoxStyles is null || (speakerFound && _voicevoxStyleOptions.Count > 1));
+            SelectedVoicevoxStyle = selected;
+        }
+        finally
+        {
+            _isRebuildingVoicevoxOptions = false;
+        }
+
+        OnPropertyChanged(nameof(SelectedVoicevoxStyle));
+        OnPropertyChanged(nameof(ShowsVoicevoxStyle));
+    }
+
+    private static VoicevoxSpeakerOption CreateVoicevoxSpeakerOption(string speakerUuid, string speakerName, bool isMissing)
+    {
+        var displayName = isMissing
+            ? LocalizationManager.Instance.Format("Settings_Notification_VoicevoxSpeakerMissing", speakerName)
+            : speakerName;
+        return new VoicevoxSpeakerOption(speakerUuid, speakerName, isMissing, displayName);
+    }
+
+    private static VoicevoxStyleOption CreateVoicevoxStyleOption(int styleId, string styleName, bool isMissing)
+    {
+        var displayName = isMissing
+            ? LocalizationManager.Instance.Format("Settings_Notification_VoicevoxSpeakerMissing", styleName)
+            : styleName;
+        return new VoicevoxStyleOption(styleId, styleName, isMissing, displayName);
+    }
+}

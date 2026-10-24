@@ -1608,20 +1608,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerRosterProjection.UpsertSelf(uuid);
         }
 
+        /// <summary>
+        /// パーティ情報の応答(パーティ画面を開くと届く)。応答は <c>GetTeamInfo_Ret { ret }</c> で1段包まれている。
+        /// 読めなければ例外のまま NetCap の守りに任せる(ログに出す)。
+        /// </summary>
         private static void ProcessGetTeamInfoReturn(
             ReadOnlySpan<byte> payloadBuffer,
             uint returnUid,
             ExtraPacketData extraData)
         {
-            try
+            var response = Zproto.World.Types.GetTeamInfo_Ret.Parser.ParseFrom(payloadBuffer).Ret;
+            if (response is null)
             {
-                var response = GetTeamInfoReply.Parser.ParseFrom(payloadBuffer);
-                GrpcTeamManager.ProcessGetTeamInfo(response, extraData);
+                Log.Warning("Team information response has no reply body (returnUid={ReturnUid}, length={Length})", returnUid, payloadBuffer.Length);
+                return;
             }
-            catch (Exception ex)
-            {
-                Log.Debug(ex, "Failed to parse team information response");
-            }
+
+            GrpcTeamManager.ProcessGetTeamInfo(response, extraData);
         }
 
         /// <summary>
@@ -1705,28 +1708,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        /// <summary>
-        /// 名刺照会の応答は <c>GetSocialData_Ret { ret }</c> で1段包まれている(先頭は 0x0A、ret の長さ、ret)。
-        ///
-        /// <para>
-        /// 応答が 1280〜1407 バイトだと包みの長さの2バイト目が 0x0A になり、NetCap が中身の始まりと見てそこから渡してくる
-        /// (先頭の 0x0A は長さの一部で、その後ろが中身の <c>GetSocialDataReply</c>)。
-        /// 包みの長さが残りとちょうど合えば包みとして、合わなければ先頭1バイトを除いて中身として読む。
-        /// </para>
-        /// </summary>
+        /// <summary>名刺照会の応答は <c>GetSocialData_Ret { ret }</c> で1段包まれている。</summary>
         private static GetSocialDataReply? ParseGetSocialDataReply(ReadOnlySpan<byte> payload)
         {
-            if (payload.IsEmpty || payload[0] != 0x0A)
-            {
-                throw new InvalidDataException("Unexpected framing of social data reply");
-            }
-
-            var rest = payload[1..].ToArray();
-            var input = new Google.Protobuf.CodedInputStream(rest);
-            var length = input.ReadLength();
-            return length == rest.Length - input.Position
-                ? Zproto.World.Types.GetSocialData_Ret.Parser.ParseFrom(payload).Ret
-                : GetSocialDataReply.Parser.ParseFrom(rest);
+            return Zproto.World.Types.GetSocialData_Ret.Parser.ParseFrom(payload).Ret;
         }
 
         /// <summary>

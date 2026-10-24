@@ -223,14 +223,8 @@
     <value>快捷键辅助程序未能启动或已中途停止。
 重新启动应用并在用户帐户控制中选择“是”后，游戏操作期间也能使用快捷键。</value>
   </data>
-  <data name="Settings_Section_Notification_Title" xml:space="preserve">
-    <value>通知设置</value>
-  </data>
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>通知方式</value>
-  </data>
-  <data name="NotificationMethod_None" xml:space="preserve">
-    <value>不通知</value>
   </data>
   <data name="NotificationMethod_Windows" xml:space="preserve">
     <value>Windows通知</value>
@@ -242,7 +236,7 @@
     <value>通知音量</value>
   </data>
   <data name="Settings_Notification_WindowsNote" xml:space="preserve">
-    <value>※游戏中可能会因Windows的“自动打开请勿打扰”而不显示横幅</value>
+    <value>※游戏中可能会因Windows的“自动打开请勿打扰”而收不到通知</value>
   </data>
   <data name="Settings_Notification_Speech" xml:space="preserve">
     <value>朗读方式</value>
@@ -293,20 +287,11 @@
   <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
     <value>在Windows设置中添加{0}语音后即可朗读。</value>
   </data>
-  <data name="Settings_Section_NotificationText_Title" xml:space="preserve">
-    <value>通知文本</value>
-  </data>
-  <data name="Settings_Notification_WidgetNote" xml:space="preserve">
-    <value>※仅运行中的小组件会通知</value>
-  </data>
-  <data name="Settings_Notification_BlankNote" xml:space="preserve">
-    <value>※留空则不通知</value>
-  </data>
   <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
-    <value>效果时间结束</value>
+    <value>增益减益效果结束</value>
   </data>
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
-    <value>药剂·料理增益2分钟以下</value>
+    <value>药剂·料理效果结束</value>
   </data>
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>预兆技能</value>
@@ -318,7 +303,7 @@
     <value>HP降低</value>
   </data>
   <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
-    <value>玩法</value>
+    <value>玩法名称</value>
   </data>
   <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
     <value>玩法1</value>
@@ -337,6 +322,12 @@
   </data>
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
     <value>{Name}的HP降低了</value>
+  </data>
+  <data name="PlayerAppearedNotification_Default" xml:space="preserve">
+    <value>{Name}出现了</value>
+  </data>
+  <data name="EntityAppearedNotification_Default" xml:space="preserve">
+    <value>{Name}出现了</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
@@ -939,7 +930,7 @@
     <value>玩家名</value>
   </data>
   <data name="Settings_EntityInfo_Field_Name" xml:space="preserve">
-    <value>名称</value>
+    <value>实体名称</value>
   </data>
   <data name="Settings_EntityInfo_Field_Level" xml:space="preserve">
     <value>等级</value>
@@ -1291,6 +1282,15 @@
   <data name="Widget_BuffDebuffGroup" xml:space="preserve">
     <value>增益减益分组</value>
   </data>
+  <data name="Widget_ReviveList" xml:space="preserve">
+    <value>复活列表</value>
+  </data>
+  <data name="ReviveList_Revivable" xml:space="preserve">
+    <value>可复活</value>
+  </data>
+  <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
   <data name="Widget_BuffDebuffGroup_NoEffect" xml:space="preserve">
     <value>暂无效果</value>
   </data>
@@ -1389,6 +1389,81 @@
   </data>
   <data name="Navigation_Aggregation" xml:space="preserve">
     <value>统计</value>
+  </data>
+  <data name="Navigation_Notifications" xml:space="preserve">
+    <value>通知</value>
+  </data>
+  <data name="Notification_Target" xml:space="preserve">
+    <value>目标玩家</value>
+  </data>
+  <data name="Notification_Target_All" xml:space="preserve">
+    <value>全部</value>
+  </data>
+  <data name="Notification_HealthLowThreshold" xml:space="preserve">
+    <value>HP降低判定</value>
+  </data>
+  <data name="Notification_Condition" xml:space="preserve">
+    <value>通知条件</value>
+  </data>
+  <data name="HealthLowThreshold_45" xml:space="preserve">
+    <value>HP45%</value>
+  </data>
+  <data name="HealthLowThreshold_35" xml:space="preserve">
+    <value>HP35%</value>
+  </data>
+  <data name="HealthLowThreshold_25" xml:space="preserve">
+    <value>HP25%</value>
+  </data>
+  <data name="HealthLowThreshold_15" xml:space="preserve">
+    <value>HP15%</value>
+  </data>
+  <data name="HealthLowThreshold_5" xml:space="preserve">
+    <value>HP5%</value>
+  </data>
+  <data name="HealthLowCondition_Immediate" xml:space="preserve">
+    <value>无条件</value>
+  </data>
+  <data name="HealthLowCondition_1" xml:space="preserve">
+    <value>HP降低状态1秒以上</value>
+  </data>
+  <data name="HealthLowCondition_2" xml:space="preserve">
+    <value>HP降低状态2秒以上</value>
+  </data>
+  <data name="HealthLowCondition_3" xml:space="preserve">
+    <value>HP降低状态3秒以上</value>
+  </data>
+  <data name="CuisinePotionCondition_1" xml:space="preserve">
+    <value>效果1分钟以下</value>
+  </data>
+  <data name="CuisinePotionCondition_2" xml:space="preserve">
+    <value>效果2分钟以下</value>
+  </data>
+  <data name="CuisinePotionCondition_5" xml:space="preserve">
+    <value>效果5分钟以下</value>
+  </data>
+  <data name="CuisinePotionCondition_10" xml:space="preserve">
+    <value>效果10分钟以下</value>
+  </data>
+  <data name="Notification_Preview" xml:space="preserve">
+    <value>预览</value>
+  </data>
+  <data name="Notification_BuffWidgetNote" xml:space="preserve">
+    <value>※仅通知运行中的增益减益卡片和增益减益分组中的增益</value>
+  </data>
+  <data name="Notification_PlayerAppeared" xml:space="preserve">
+    <value>玩家出现</value>
+  </data>
+  <data name="Notification_EntityAppeared" xml:space="preserve">
+    <value>实体出现</value>
+  </data>
+  <data name="Notification_TargetPlayerName" xml:space="preserve">
+    <value>目标玩家名称</value>
+  </data>
+  <data name="Notification_TargetEntityName" xml:space="preserve">
+    <value>目标实体名称</value>
+  </data>
+  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
+    <value>※请输入当前显示语言的实体名称</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>统计中</value>

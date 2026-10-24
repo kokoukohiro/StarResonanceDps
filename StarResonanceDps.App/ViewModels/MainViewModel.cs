@@ -8,6 +8,7 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.ViewModels.Notifications;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
@@ -36,6 +37,9 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private WidgetListItemViewModel? _playerListWidget;
     private WidgetListItemViewModel? _entityListWidget;
+
+    /// <summary>ウィジェットを開いていなくても通知する項目の判定。起動できないときに見せるだけのメイン窓では作らない。</summary>
+    private readonly NotificationMonitor? _notificationMonitor;
 
     /// <summary>複数開けるウィジェットのカードで、窓の相手を選んで開く・閉じる。</summary>
     private readonly WidgetTargetSelection _targetSelection;
@@ -66,6 +70,9 @@ public sealed partial class MainViewModel : ViewModelBase
 
     public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
 
+    /// <summary>通知タブ。</summary>
+    public NotificationsViewModel Notifications { get; } = new();
+
     // 三点メニューの項目。登録できているホットキーを右に半角括弧で添える。
     // 1つのキーで切り替える2項目(起動/停止など)には同じキーが付く。
 
@@ -89,6 +96,7 @@ public sealed partial class MainViewModel : ViewModelBase
         _playerListWidget = playerListWidget;
         var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         _entityListWidget = entityListWidget;
+        AddWidget(WidgetKind.ReviveList, "Widget_ReviveList");
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
@@ -120,6 +128,7 @@ public sealed partial class MainViewModel : ViewModelBase
             EncounterHistoryProvider.SelectionChanged += EncounterHistoryProvider_SelectionChanged;
             _targetSelectionTimer.Tick += TargetSelectionTimer_Tick;
             _targetSelectionTimer.Start();
+            _notificationMonitor = new NotificationMonitor();
         }
 
         Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
@@ -404,17 +413,17 @@ public sealed partial class MainViewModel : ViewModelBase
         dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfEquipment());
     }
 
-    /// <summary>マッチングが成立した。受信のスレッドから来るので UI のスレッドへ移してプレイヤーリストへ渡す。</summary>
+    /// <summary>マッチングが成立した。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>
     private void MessageManager_MatchFound(Zproto.EMatchType matchType, long matchTypeUuid)
     {
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is null)
         {
-            _playerListWidget?.NotifyMatchFound(matchType, matchTypeUuid);
+            _notificationMonitor?.NotifyMatchFound(matchType, matchTypeUuid);
             return;
         }
 
-        dispatcher.BeginInvoke(() => _playerListWidget?.NotifyMatchFound(matchType, matchTypeUuid));
+        dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyMatchFound(matchType, matchTypeUuid));
     }
 
     private void PartyStateStore_Changed(object? sender, EventArgs e)
@@ -470,6 +479,8 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapChannel,
             roster.MapGeneration);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
+        _widgetWindowManager.UpdateReviveListRoster(roster);
+        _notificationMonitor?.ObserveRoster(roster);
         RefreshTargetSelections();
     }
 
@@ -524,6 +535,8 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void ApplyNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)
     {
+        // エンティティ出現の通知はエンティティリストを開いていなくても見る。
+        _notificationMonitor?.ObserveNearbyEntities(snapshot.Entries);
         if (_entityListWidget is not { } entityListWidget)
         {
             return;

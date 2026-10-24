@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 
@@ -29,8 +30,8 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     private readonly BuffGroup _group;
     private readonly DispatcherTimer _refreshTimer;
 
-    /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
-    private readonly BuffCardNotificationTracker _notificationTracker;
+    /// <summary>通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の判定。カードを開いている間だけ借りる。</summary>
+    private readonly BuffNotificationWatcher _notificationWatcher = new();
 
     private string _scaleKey = string.Empty;
 
@@ -102,7 +103,6 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _kind = kind;
         _group = group;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
-        _notificationTracker = new BuffCardNotificationTracker(widget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -241,6 +241,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _target.Changed -= Target_Changed;
         _target.Dispose();
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        _notificationWatcher.Dispose();
     }
 
     [RelayCommand(CanExecute = nameof(CanZoomIn))]
@@ -319,7 +320,11 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             }
         }
 
-        _notificationTracker.Observe(_target.EntityUuid, snapshot, _target.Name);
+        _notificationWatcher.Observe(
+            BuffNotificationTarget.ForEntity(_target.EntityUuid),
+            BuffNotificationRegistry.CreateBuffKey(_group, _requestedBuffKey ?? string.Empty),
+            snapshot,
+            _target.Name);
 
         if (snapshot is null)
         {

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
@@ -53,8 +54,8 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックの「バフカードのショートカットに追加」(デバフのカードは「デバフカードの」)の行き先。</summary>
     private readonly IBuffCardShortcutAdder? _shortcutAdder;
 
-    /// <summary>通知テキスト(効果時間切れ・薬剤・料理バフ2分以下)の判定。カードを開いている間だけ動く。</summary>
-    private readonly BuffCardNotificationTracker _notificationTracker;
+    /// <summary>通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の判定。カードを開いている間だけ借りる(同じバフを見ているグループと共有)。</summary>
+    private readonly BuffNotificationWatcher _notificationWatcher = new();
 
     private PlayerRosterEntry? _player;
     private string _scaleKey = string.Empty;
@@ -133,7 +134,6 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         _groupEntryAdder = groupEntryAdder;
         _shortcutAdder = shortcutAdder;
         _requestedBuffKey = group == BuffGroup.None ? requestedBuffKey : null;
-        _notificationTracker = new BuffCardNotificationTracker(playerWidget.GetBuffCardSettingsSnapshot);
         _refreshTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromSeconds(1)
@@ -267,6 +267,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         _refreshTimer.Stop();
         _refreshTimer.Tick -= RefreshTimer_Tick;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
+        _notificationWatcher.Dispose();
     }
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
@@ -382,7 +383,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
 
         if (SelectedCharacterId is not { } characterId)
         {
-            _notificationTracker.Reset();
+            _notificationWatcher.Release();
             ApplyContent(BuffDebuffCardContent.Empty, string.Empty, characterId: 0, hasBuff: false);
 
             // 対象が分からなくても、まとまり(料理・薬剤)の名前は出せる。
@@ -446,7 +447,19 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             _player?.ProfessionId ?? playerIdentity?.ProfessionId ?? 0,
             PlayerRosterPresentationStore.Instance.NameDisplayMode);
 
-        _notificationTracker.Observe(characterId, snapshot, targetName);
+        // 入るカードを待っている窓は、まだ見るバフが無い。
+        if (IsWaiting)
+        {
+            _notificationWatcher.Release();
+        }
+        else
+        {
+            _notificationWatcher.Observe(
+                BuffNotificationTarget.ForPlayer(characterId),
+                BuffNotificationRegistry.CreateBuffKey(_group, _requestedBuffKey ?? string.Empty),
+                snapshot,
+                targetName);
+        }
 
         if (snapshot is null)
         {

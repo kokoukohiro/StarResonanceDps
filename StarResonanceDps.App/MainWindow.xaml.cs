@@ -134,9 +134,8 @@ public partial class MainWindow : Window
             OwnerModalWindow.RunWhenNotMovingOrSizing(() => NpcapOutdatedMessage.Show(this, _npcapVersion));
         }
 
-        // 読み上げの声が使えなければ知らせる(通知方式が読み上げでなければ何もしない)。
-        var settings = ConfigManager.Instance.AppConfig.Settings;
-        await NotificationCheckMessage.CheckSpeechVoiceAsync(this, settings.NotificationMethodIndex, settings.SpeechVoiceIndex);
+        // 読み上げの声が使えなければ知らせる(オンの読み上げの項目が無ければ何もしない)。
+        await NotificationCheckMessage.CheckSpeechVoicesAsync(this, ConfigManager.Instance.GetNotificationsSnapshot());
     }
 
     private void HotkeyService_HelperUnavailable(IReadOnlyList<HotkeyRegistrationFailure> failures)

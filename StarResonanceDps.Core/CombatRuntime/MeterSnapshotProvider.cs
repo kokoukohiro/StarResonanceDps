@@ -194,6 +194,22 @@ public sealed record PlayerSkillEffectSnapshot(
     PlayerBuffSnapshot? Buff,
     PlayerBuffSnapshot? Debuff);
 
+/// <summary>戦闘不能の人の、蘇生不可デバフから見た状態(<see cref="MeterSnapshotProvider.GetReviveBlockState"/>)。</summary>
+public enum ReviveBlockStateKind
+{
+    /// <summary>付いているのに残り時間が分からないか、付いているかどうかが分からない(その人のバフが全部は届いていない)。</summary>
+    Unknown,
+
+    /// <summary>付いていない(その人のバフが全部届いている)。</summary>
+    Revivable,
+
+    /// <summary>付いていて、残り時間が分かる。</summary>
+    Blocked
+}
+
+/// <param name="RemainingSeconds">蘇生不可デバフの残り秒。<see cref="ReviveBlockStateKind.Blocked"/> のときだけ意味を持つ。</param>
+public readonly record struct ReviveBlockState(ReviveBlockStateKind Kind, double RemainingSeconds = 0d);
+
 /// <param name="RoleSlotCount">
 /// ロールスキルの枠数。<b>自分と他人で意味が違う。</b>
 ///
@@ -1393,25 +1409,76 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        var buffEvents = ResolveDisplayBuffEvents(entity.UUID);
+        return TryScanReviveBlockDebuff(entity.UUID, out remainingSeconds, out _);
+    }
+
+    /// <summary>
+    /// 戦闘不能の人の、蘇生不可デバフから見た状態。蘇生リストの右の文字と並びに使う。
+    ///
+    /// <para>
+    /// 「付いていない」と言えるのは、その人のバフが全部届いているときだけ。自分は自分のバフがそろっている
+    /// (途中起動でなく、このマップの付け直しが無かったのでもない)とき、他の人は周りにいて、このマップで出現時の全バフの一覧を受けたとき。
+    /// それ以外で見つからないのは、付いていないのか届いていないのか分からないので不明にする(付いていないことにすると、蘇生できない人を蘇生できると出す)。
+    /// </para>
+    /// </summary>
+    public static ReviveBlockState GetReviveBlockState(PlayerRosterEntry player)
+    {
+        if (!PlayerRosterProjection.TryGetPlayerEntityUuid(player.CharacterId, out var entityUuid) || entityUuid == 0)
+        {
+            return new ReviveBlockState(ReviveBlockStateKind.Unknown);
+        }
+
+        if (TryScanReviveBlockDebuff(entityUuid, out var remainingSeconds, out var hasUnresolved))
+        {
+            return new ReviveBlockState(ReviveBlockStateKind.Blocked, remainingSeconds);
+        }
+
+        if (hasUnresolved)
+        {
+            return new ReviveBlockState(ReviveBlockStateKind.Unknown);
+        }
+
+        var reception = GameReceptionStateStore.Current;
+        var hasAllBuffs = player.IsSelf
+            ? !reception.IsMidLaunch && !reception.IsSelfBuffReinitMissing
+            : player.IsNearby && Services.ActiveBuffStore.Instance.HasReceivedAppearList(entityUuid);
+        return new ReviveBlockState(hasAllBuffs ? ReviveBlockStateKind.Revivable : ReviveBlockStateKind.Unknown);
+    }
+
+    /// <summary>
+    /// 実体に付いている蘇生不可デバフを探す。残り秒の分かるものがあれば true で、重ね掛けなら遅く切れるほうの残り秒。
+    /// </summary>
+    /// <param name="hasUnresolved">付いているのに残り秒の出せないもの(持続が負・経過が分からない)があった。</param>
+    private static bool TryScanReviveBlockDebuff(long entityUuid, out double remainingSeconds, out bool hasUnresolved)
+    {
+        remainingSeconds = 0d;
+        hasUnresolved = false;
+        var buffEvents = ResolveDisplayBuffEvents(entityUuid);
         var found = false;
         var latestRemoveTime = TimeSpan.MinValue;
 
         for (var index = 0; index < buffEvents.Length; index++)
         {
             var buffEvent = buffEvents[index];
-            if (buffEvent.BaseId != ReviveBlockDebuffBaseId || buffEvent.Duration < 0)
+            if (buffEvent.BaseId != ReviveBlockDebuffBaseId)
             {
+                continue;
+            }
+
+            if (buffEvent.Duration < 0)
+            {
+                hasUnresolved = true;
                 continue;
             }
 
             TimeSpan effectiveRemoveTime;
             double? seconds;
             var timingResolved = TryResolveLiveBuffTiming(
-                entity.UUID, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out _);
+                entityUuid, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out _);
             // 経過が分からないものはカウントに使わない。出すと切れた後も残る。
             if (!timingResolved || secondsUnknown || seconds is null)
             {
+                hasUnresolved = true;
                 continue;
             }
 

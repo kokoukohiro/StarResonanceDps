@@ -14,81 +14,7 @@
         <ContentControl Style="{StaticResource Panel.SettingSection}"
                         Margin="0,0,0,12">
             <StackPanel>
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <!-- 並びは WidgetConfigDefaults.BuffGaugeLengthSeconds の添字と同じ。 -->
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_Auto]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
-                        </ComboBox>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SameBuffs]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <!-- 並びは BuffListWidgetSettingsConfig.SameBuffGroupingIndex の添字と同じ。 -->
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding SameBuffGroupingIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_Ungrouped]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupPlayers]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupEntities]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupAll]}" />
-                        </ComboBox>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_CasterName]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <!-- 並びは BuffListWidgetSettingsConfig.CasterNameDisplayModeIndex の添字と同じ。 -->
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding CasterNameDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CasterNameDisplay_AppliedByOthers]}" />
-                        </ComboBox>
-                    </Grid>
-                </Border>
-
-                <!-- 行のバフ名の書式。作りはバフ・デバフカードの表示設定と同じ。 -->
+                <!-- 行のバフ名の書式。作りはバフ・デバフカードの表示設定と同じ。下に「ゲージの長さ」が続くので線を引く。 -->
                 <Border>
                     <Border.Style>
                         <Style TargetType="{x:Type Border}"
@@ -96,7 +22,7 @@
                             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                             <Setter Property="Height" Value="Auto" />
                             <Setter Property="Padding" Value="20,11,20,11" />
-                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
                         </Style>
                     </Border.Style>
 
@@ -180,6 +106,80 @@
                                     MinWidth="64"
                                     Style="{StaticResource Button.Text}" />
                         </Grid>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは WidgetConfigDefaults.BuffGaugeLengthSeconds の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_Auto]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SameBuffs]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは BuffListWidgetSettingsConfig.SameBuffGroupingIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding SameBuffGroupingIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_Ungrouped]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupPlayers]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupEntities]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[SameBuffs_GroupAll]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_CasterName]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは BuffListWidgetSettingsConfig.CasterNameDisplayModeIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding CasterNameDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CasterNameDisplay_AppliedByOthers]}" />
+                        </ComboBox>
                     </Grid>
                 </Border>
             </StackPanel>

@@ -12,10 +12,10 @@ using Windows.Media.SpeechSynthesis;
 
 namespace StarResonanceDps.App.Services;
 
-/// <summary>順番待ちの1件。音量は通知した時点の全体設定(保存前プレビューを含む)の通知音量。</summary>
+/// <summary>順番待ちの1件。音量は通知した時点の、通知タブのその項目の通知音量。</summary>
 internal abstract record NotificationAudioRequest(int Volume);
 
-/// <summary>読み上げ1件。声は通知した時点の全体設定(保存前プレビューを含む)。</summary>
+/// <summary>読み上げ1件。声は通知した時点の、通知タブのその項目の設定。</summary>
 internal sealed record SpeechRequest(string Text, int SpeechVoiceIndex, int? VoicevoxStyleId, CultureInfo Culture, int Volume)
     : NotificationAudioRequest(Volume);
 

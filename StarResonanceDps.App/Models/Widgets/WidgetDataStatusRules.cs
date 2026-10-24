@@ -104,6 +104,33 @@ public static class WidgetDataStatusRules
                 PlayerApproach);
     }
 
+    /// <summary>
+    /// 蘇生リスト(いつもライブ)。出している行(戦闘不能の人)だけを数える。
+    /// 自分の行があれば自分のバフ(蘇生不可デバフの元)、他の人の行は蘇生不可・素性・特化が分からないか、PT番号の元のパーティ情報がまだか。
+    /// </summary>
+    /// <param name="rows">出している行の元の名簿の行。</param>
+    /// <param name="hasOtherReviveBlockUnknown">他の人の行に、蘇生不可が分からない(右が「??秒」の)行がある。</param>
+    /// <param name="countsSeasonTalent">名前の書式に潜在心相晶(<c>{Psych}</c>)を出しているか。</param>
+    public static WidgetDataStatus ForReviveList(
+        GameReceptionSnapshot reception,
+        bool isPartyMembershipPending,
+        IReadOnlyCollection<PlayerRosterEntry> rows,
+        bool hasOtherReviveBlockUnknown,
+        bool countsSeasonTalent)
+    {
+        var status = WidgetDataStatus.Complete
+            .WithIf(rows.Count > 0 && isPartyMembershipPending, PartyScreen)
+            .WithIf(
+                hasOtherReviveBlockUnknown
+                    || rows.Any(row => !row.IsSelf
+                        && (row.DataGaps.HasFlag(PlayerDataGaps.Identity)
+                            || IsOtherClassUnknown(row.ClassSpec, row.SeasonTalentBuffId, row.IsSeasonTalentInactive, countsSeasonTalent))),
+                PlayerApproach);
+        return rows.Any(row => row.IsSelf)
+            ? status.Combine(ForSelfBuffs(reception))
+            : status;
+    }
+
     /// <summary>エンティティリスト(いつもライブ)。</summary>
     /// <param name="hasUnknownEnemy">種別ID(<c>AttrId</c>)の分からない「未知の敵」の行がある。</param>
     public static WidgetDataStatus ForEntityList(GameReceptionSnapshot reception, bool hasUnknownEnemy)

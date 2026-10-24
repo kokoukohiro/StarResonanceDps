@@ -9,13 +9,13 @@ namespace StarResonanceDps.App.Services;
 ///
 /// <para>
 /// エンジンは初めて使うスタイルの合成に時間がかかり、合成の打ち切りを越えるとその通知は読み上げられない。
-/// 合成の直前に初期化すると通知が遅れるので、アプリの起動時、全体設定の値が変わったとき(保存前プレビューと保存)、
+/// 合成の直前に初期化すると通知が遅れるので、アプリの起動時、通知タブの値が変わったとき、
 /// VOICEVOX のエディタが起動して <c>runtime-info.json</c> を書いたときに送る。
-/// 送るのは、通知方式が読み上げ・読み上げ方式が VOICEVOX・スタイルを選んでいる、の3つがそろうときだけ。
+/// 送るのは、オンで読み上げ方法が VOICEVOX の項目が選んでいるスタイルだけ(項目ごとに違ってよいので全部)。
 /// </para>
 ///
 /// <para>
-/// 返事は待たない(起動も設定画面も止めない)。初期化が通ったスタイルは、次の設定の変更では送らない(音量のスライダーのたびに送らないため)。
+/// 返事は待たない(起動も通知タブも止めない)。初期化が通ったスタイルは、次の設定の変更では送らない(音量を変えるたびに送らないため)。
 /// 失敗したら、次の設定の変更か起動でまた送る。失敗はログに残す(つながらないことは起動時と設定時の確認がメッセージで知らせる)。
 /// </para>
 ///
@@ -34,16 +34,16 @@ public static class VoicevoxStyleInitializer
     private static bool _isStarted;
     private static FileSystemWatcher? _runtimeInfoWatcher;
 
-    /// <summary>最後に初期化が通ったスタイル。</summary>
-    private static int? _initializedStyleId;
+    /// <summary>初期化が通ったスタイル。</summary>
+    private static readonly HashSet<int> InitializedStyleIds = [];
 
     /// <summary>送って返事を待っているスタイル。</summary>
-    private static int? _pendingStyleId;
+    private static readonly HashSet<int> PendingStyleIds = [];
 
     /// <summary><c>runtime-info.json</c> が書かれるたびに進める。送り直しは自分の番号が古くなったら止まる。</summary>
     private static int _runtimeInfoGeneration;
 
-    /// <summary>アプリの起動時に1回呼ぶ。設定の変更と <c>runtime-info.json</c> の書き込みを受け始め、今の設定のスタイルを初期化する。</summary>
+    /// <summary>アプリの起動時に1回呼ぶ。通知タブの変更と <c>runtime-info.json</c> の書き込みを受け始め、今の設定のスタイルを初期化する。</summary>
     public static void Start()
     {
         lock (Sync)
@@ -56,10 +56,9 @@ public static class VoicevoxStyleInitializer
             _isStarted = true;
         }
 
-        ConfigManager.Instance.SettingsChanged += ConfigManager_SettingsChanged;
-        ConfigManager.Instance.SettingsPreviewChanged += ConfigManager_SettingsChanged;
+        ConfigManager.Instance.NotificationsChanged += ConfigManager_NotificationsChanged;
         WatchRuntimeInfo();
-        InitializeSelectedStyle();
+        InitializeSelectedStyles();
     }
 
     private static void WatchRuntimeInfo()
@@ -89,9 +88,9 @@ public static class VoicevoxStyleInitializer
         }
     }
 
-    private static void ConfigManager_SettingsChanged(object? sender, EventArgs e)
+    private static void ConfigManager_NotificationsChanged(object? sender, EventArgs e)
     {
-        InitializeSelectedStyle();
+        InitializeSelectedStyles();
     }
 
     /// <summary>エディタが起動した(エンジンも起動し直した)。覚えている初期化を捨て、通るまで送り直す。</summary>
@@ -100,8 +99,8 @@ public static class VoicevoxStyleInitializer
         int generation;
         lock (Sync)
         {
-            _initializedStyleId = null;
-            _pendingStyleId = null;
+            InitializedStyleIds.Clear();
+            PendingStyleIds.Clear();
             generation = ++_runtimeInfoGeneration;
         }
 
@@ -111,81 +110,98 @@ public static class VoicevoxStyleInitializer
     private static async Task RetryUntilInitializedAsync(int generation)
     {
         var hasLoggedWaiting = false;
+
+        // つながったが応答を読めなかったスタイルは、送り直しても変わらないのでこの回はもう送らない。
+        var failedStyleIds = new HashSet<int>();
         while (true)
         {
-            if (GetSelectedStyleId() is not { } styleId)
-            {
-                return;
-            }
-
+            int[] styleIds;
             lock (Sync)
             {
-                if (generation != _runtimeInfoGeneration || _initializedStyleId == styleId)
+                if (generation != _runtimeInfoGeneration)
                 {
                     return;
                 }
+
+                styleIds = [.. GetSelectedStyleIds().Where(id => !InitializedStyleIds.Contains(id) && !failedStyleIds.Contains(id))];
             }
 
-            var result = await VoicevoxClient.InitializeStyleAsync(styleId).ConfigureAwait(false);
-            if (result.Kind == VoicevoxResultKind.Success)
+            if (styleIds.Length == 0)
             {
-                lock (Sync)
+                return;
+            }
+
+            var isConnectFailed = false;
+            foreach (var styleId in styleIds)
+            {
+                var result = await VoicevoxClient.InitializeStyleAsync(styleId).ConfigureAwait(false);
+                if (result.Kind == VoicevoxResultKind.Success)
                 {
-                    if (generation == _runtimeInfoGeneration)
+                    lock (Sync)
                     {
-                        _initializedStyleId = styleId;
+                        if (generation == _runtimeInfoGeneration)
+                        {
+                            InitializedStyleIds.Add(styleId);
+                        }
                     }
+
+                    Log.Information("Initialized VOICEVOX style {StyleId} after VOICEVOX started", styleId);
+                    continue;
                 }
 
-                Log.Information("Initialized VOICEVOX style {StyleId} after VOICEVOX started", styleId);
-                return;
+                if (result.Kind != VoicevoxResultKind.ConnectFailed)
+                {
+                    failedStyleIds.Add(styleId);
+                    Log.Warning("Could not initialize VOICEVOX style {StyleId} after VOICEVOX started: {Detail}", styleId, result.Detail);
+                    continue;
+                }
+
+                if (!hasLoggedWaiting)
+                {
+                    hasLoggedWaiting = true;
+                    Log.Information("VOICEVOX started; waiting for the engine to initialize style {StyleId} ({Detail})", styleId, result.Detail);
+                }
+
+                isConnectFailed = true;
+                break;
             }
 
-            // つながったが応答を読めないなら、送り直しても変わらない。
-            if (result.Kind != VoicevoxResultKind.ConnectFailed)
+            if (isConnectFailed)
             {
-                Log.Warning("Could not initialize VOICEVOX style {StyleId} after VOICEVOX started: {Detail}", styleId, result.Detail);
-                return;
+                await Task.Delay(RetryInterval).ConfigureAwait(false);
             }
-
-            if (!hasLoggedWaiting)
-            {
-                hasLoggedWaiting = true;
-                Log.Information("VOICEVOX started; waiting for the engine to initialize style {StyleId} ({Detail})", styleId, result.Detail);
-            }
-
-            await Task.Delay(RetryInterval).ConfigureAwait(false);
         }
     }
 
-    private static void InitializeSelectedStyle()
+    private static void InitializeSelectedStyles()
     {
-        if (GetSelectedStyleId() is not { } styleId)
-        {
-            return;
-        }
-
+        var styleIds = new List<int>();
         lock (Sync)
         {
-            if (_initializedStyleId == styleId || _pendingStyleId == styleId)
+            foreach (var styleId in GetSelectedStyleIds())
             {
-                return;
-            }
+                if (InitializedStyleIds.Contains(styleId) || !PendingStyleIds.Add(styleId))
+                {
+                    continue;
+                }
 
-            _pendingStyleId = styleId;
+                styleIds.Add(styleId);
+            }
         }
 
-        _ = InitializeAsync(styleId);
+        foreach (var styleId in styleIds)
+        {
+            _ = InitializeAsync(styleId);
+        }
     }
 
-    /// <summary>通知方式が読み上げ・読み上げ方式が VOICEVOX のときの、選んでいるスタイル。それ以外は null。</summary>
-    private static int? GetSelectedStyleId()
+    /// <summary>オンで、読み上げ方法が VOICEVOX の項目が選んでいるスタイル(重なりなし)。</summary>
+    private static IEnumerable<int> GetSelectedStyleIds()
     {
-        var settings = ConfigManager.Instance.GetSettingsSnapshot();
-        return settings.NotificationMethodIndex == AppConfigDefaults.NotificationMethodSpeechIndex
-            && settings.SpeechVoiceIndex == AppConfigDefaults.SpeechVoiceVoicevoxIndex
-                ? settings.VoicevoxStyleId
-                : null;
+        return ConfigManager.Instance.GetNotificationsSnapshot().Items.Values
+            .Where(item => item.IsEnabled && item.UsesVoicevox && item.VoicevoxStyleId is not null)
+            .Select(item => item.VoicevoxStyleId!.Value)
+            .Distinct();
     }
 
     private static async Task InitializeAsync(int styleId)
@@ -193,14 +209,10 @@ public static class VoicevoxStyleInitializer
         var result = await VoicevoxClient.InitializeStyleAsync(styleId).ConfigureAwait(false);
         lock (Sync)
         {
-            if (_pendingStyleId == styleId)
-            {
-                _pendingStyleId = null;
-            }
-
+            PendingStyleIds.Remove(styleId);
             if (result.Kind == VoicevoxResultKind.Success)
             {
-                _initializedStyleId = styleId;
+                InitializedStyleIds.Add(styleId);
             }
         }
 
