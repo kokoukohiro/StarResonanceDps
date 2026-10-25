@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              xmlns:viewModels="clr-namespace:StarResonanceDps.App.ViewModels"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
@@ -71,22 +72,128 @@
             </Grid>
         </DataTemplate>
 
+        <!-- 右クリックのメニュー。見た目はほかのウィジェットのメニューと同じで、色と不透明度は窓のパレット(ビューモデルの Widget)から取る。項目は1つなので角は4つとも丸める。 -->
+        <CornerRadius x:Key="Menu.WidgetWindowTakenDamageLogContextMenuItem.SingleCornerRadius">5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowTakenDamageLogContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowTakenDamageLogContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowTakenDamageLogContextMenuItem.SingleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </UserControl.Resources>
 
     <!--
         1エンカウンターで数万行になるので仮想化する。仮想化はリスト自身のテンプレートの中に
         ScrollViewer が無いと効かない(外側に ScrollViewer を置くと全行が実体化する)。
+        文字は行をまたいで選べる(TextRowsSelectionBehavior。時刻の列が前置き、本文、選んだ文字の地)。
+        選んだ文字は右クリックの「コピー」か、窓がアクティブなら Ctrl+C で文字にする。地は透明で塗って、文字の無い所でも押せるようにする。
     -->
     <ItemsControl x:Name="LogItemsControl"
                   Margin="8,4,8,4"
                   ItemsSource="{Binding Entries}"
+                  Background="Transparent"
+                  Focusable="True"
+                  FocusVisualStyle="{x:Null}"
+                  behaviors:TextRowsSelectionBehavior.PrefixElementName="TimeText"
+                  behaviors:TextRowsSelectionBehavior.HighlightElementName="SelectionHighlight"
+                  behaviors:TextRowsSelectionBehavior.BodyElementName="BodyText"
                   Grid.IsSharedSizeScope="True"
                   VirtualizingPanel.IsVirtualizing="True"
                   VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.ScrollUnit="Pixel">
+        <ItemsControl.CommandBindings>
+            <CommandBinding Command="{x:Static ApplicationCommands.Copy}"
+                            CanExecute="CopyCommand_CanExecute"
+                            Executed="CopyCommand_Executed" />
+        </ItemsControl.CommandBindings>
+        <ItemsControl.ContextMenu>
+            <ContextMenu Style="{StaticResource Menu.WidgetWindowTakenDamageLogContextMenu}">
+                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Copy]}"
+                          Command="{x:Static ApplicationCommands.Copy}"
+                          CommandTarget="{Binding PlacementTarget, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                          Style="{StaticResource Menu.WidgetWindowTakenDamageLogContextMenuItem}" />
+            </ContextMenu>
+        </ItemsControl.ContextMenu>
         <ItemsControl.Template>
             <ControlTemplate TargetType="ItemsControl">
                 <ScrollViewer x:Name="LogScrollViewer"
+                              Background="{TemplateBinding Background}"
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Hidden"
                               CanContentScroll="True"
@@ -106,13 +213,27 @@
                     時刻の列は行をまたいで幅を揃える。揃うのは画面に作られている行だけなので、時刻を見せない行(被弾行など)も
                     自分の時刻を Hidden で置いて場所を取る。本文が技の行と同じ位置から始まる。
                 -->
-                <Grid>
+                <Grid Background="Transparent">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" SharedSizeGroup="TakenDamageLogTime" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Column="0"
+                    <!--
+                        選んだ文字の地。位置・幅・見え方は TextRowsSelectionBehavior が決める(左寄せで左の余白と幅)。
+                        色はメニューの項目を指したときと同じ(窓のパレット、不透明度はメニューと同じ)。文字の後ろに置く。
+                    -->
+                    <Border x:Name="SelectionHighlight"
+                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Left"
+                            Width="0"
+                            Visibility="Collapsed"
+                            IsHitTestVisible="False"
+                            Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                            Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+
+                    <TextBlock x:Name="TimeText"
+                               Grid.Column="0"
                                Margin="0,1,8,1"
                                Text="{Binding TimeText}">
                         <TextBlock.Style>
@@ -131,7 +252,8 @@
                         Tag は文字の TIPS の見た目が引く窓のパレット。Run は PlacementTarget になれないので、
                         WPF はホストするこの TextBlock を PlacementTarget にする(実測で確認)。
                     -->
-                    <TextBlock Grid.Column="1"
+                    <TextBlock x:Name="BodyText"
+                               Grid.Column="1"
                                Style="{StaticResource TakenDamageLog.LineText}"
                                Tag="{Binding Widget}"
                                behaviors:TextSegmentsBehavior.RunToolTipStyle="{StaticResource ToolTip.WidgetWindowInfo}"

@@ -16,6 +16,9 @@ public enum TakenDamageLogRowKind
     /// <summary>予告のバーが終わった時刻の行。技の行と同じ書式で、下に被弾は並べない。</summary>
     AnnouncementEnd,
 
+    /// <summary>敵どうしの回復の行(回復した側の技の行の下、回復された敵1体につき1行)。</summary>
+    Heal,
+
     /// <summary>まとめの行。その時刻の後の HP。</summary>
     HealthResult,
 
@@ -27,12 +30,12 @@ public enum TakenDamageLogRowKind
 /// 被ダメログの画面の1行ぶんの中身。
 ///
 /// <para>
-/// <see cref="Line"/> は、予告行・予告のバーの終わりの行・詠唱行・技の行・戦闘不能の行ならその記録、被弾行なら畳んだ被弾のうち最後のもの、
-/// まとめの行ならその時刻のその人の最後の記録(名前とクラスに使う)。
-/// 被弾行の <see cref="Value"/> は畳んだ被弾の値の合計、<see cref="IsLethal"/> は畳んだ被弾のどれかに致死の印があるか。
+/// <see cref="Line"/> は、予告行・予告のバーの終わりの行・詠唱行・技の行・戦闘不能の行ならその記録、被弾行・回復の行なら畳んだもののうち最後のもの、
+/// まとめの行ならその時刻のその人(その敵)の最後の記録(名前とクラスに使う)。
+/// 被弾行・回復の行の <see cref="Value"/> は畳んだ値の合計、<see cref="IsLethal"/> は畳んだ被弾のどれかに致死の印があるか。
 /// HP・最大HP・バリアはまとめの行だけが持つ(その時刻の後の値)。ほかの行は <c>null</c>。
 /// <c>～Before</c> はまとめの行の、その時刻の最初の同期を当てる前の値。分からなければ <c>null</c>(矢印を出さない)。
-/// <see cref="ShowsTime"/> はその時刻の最初の行だけ真。
+/// <see cref="ShowsTime"/> はその時刻のジャンルごとの最初の行だけ真。
 /// </para>
 /// </summary>
 public sealed record TakenDamageLogRow(
@@ -52,25 +55,32 @@ public sealed record TakenDamageLogRow(
 /// 被ダメログの行の並べ方。同じ到着時刻の記録を1つの時刻として扱う。
 ///
 /// <list type="bullet">
+///   <item>
+///     同じ時刻の中はジャンルの順に並べる: ①敵の行動(予告・予告のバーの終わり・詠唱)→ ②味方の被弾(戦闘不能を含む)とプレイヤーのまとめ
+///     → ③敵どうしの回復と敵のまとめ。ジャンルの中は届いた順
+///   </item>
 ///   <item>被弾は、技の行(同じ加害者・同じ発生源)ごとにまとめ、まとまりはその最初の被弾が届いた順に並べる。被弾の行に HP は出さない</item>
 ///   <item>ダメージの無い戦闘不能は、同じ時刻のものを1つの「システムの攻撃」の技の行の下に並べる(1人1行)。まとまりの位置は被弾と同じく届いた順</item>
 ///   <item>技の行の下で、同じ対象・同じ属性の被弾は1行に畳んで値を足す。畳んだ行は、その中で最後の被弾の位置に出す</item>
 ///   <item>属性を持たない被弾(属性を保存していなかった頃の記録)は、同じ属性か分からないので畳まない</item>
 ///   <item>
-///     時刻の最後に、その時刻に出てきた人を出てきた順に1人1行並べる(まとめの行)。その時刻に戦闘不能になった人
+///     敵どうしの回復も被弾と同じく、回復した側・発生源ごとの技の行の下に並べる(被弾のまとまりとは別)。同じ敵への回復は1行に畳んで値を足す
+///   </item>
+///   <item>
+///     ②と③の最後に、そのジャンルに出てきた人(敵)を出てきた順に1人1行並べる(まとめの行)。その時刻に戦闘不能になった人
 ///     (致死の印の被弾か、ダメージの無い戦闘不能)は戦闘不能、ほかはその時刻の後の HP。HP が分からず戦闘不能でもない人は出さない。
 ///     その時刻の最初の同期を当てる前の HP が分かれば、矢印の前に出す(前の値を持つ最初の記録から取る)
 ///   </item>
 ///   <item>
-///     フィルターで隠す被弾は行を出さないが、まとめには入れる。まとめは、その時刻に見える被弾か戦闘不能の行があるときだけ出す
+///     フィルターで隠す被弾は行を出さないが、まとめには入れる。まとめは、そのジャンルに見える被弾・回復か戦闘不能の行があるときだけ出す
 ///   </item>
-///   <item>時刻を出すのは、その時刻の最初の行だけ(直前の行と到着時刻が違う行)</item>
+///   <item>時刻を出すのは、その時刻にあるジャンルのそれぞれ最初の行だけ</item>
 /// </list>
 ///
 /// <para>
-/// 被弾は1件ずつ記録に足されるので、同じ到着時刻の被弾が取得の区切りをまたいで分かれて届くことがある。
-/// 到着時刻が同じ間はその時刻の行を開いたままにして、後から届いた被弾も同じ技の行・同じ畳み・同じまとめへ入れる。
-/// 違う到着時刻の被弾・死亡か、違う到着時刻の予告・詠唱が来たら閉じる。
+/// 記録は1件ずつ足されるので、同じ到着時刻の記録が取得の区切りをまたいで分かれて届くことがある。
+/// 到着時刻が同じ間はその時刻の行を開いたままにして、後から届いた記録も同じジャンル・同じ技の行・同じ畳み・同じまとめへ入れ、並べ直す。
+/// 違う到着時刻の記録が来たら閉じる。
 /// </para>
 /// </summary>
 public sealed class TakenDamageLogLayout
@@ -81,8 +91,11 @@ public sealed class TakenDamageLogLayout
     private int _openStart;
     private DateTime? _openTimestamp;
 
-    /// <summary>開いている時刻に、見える被弾か戦闘不能の行があるか。まとめの行はこれが立ってから出す。</summary>
-    private bool _openHasVisibleOutcome;
+    /// <summary>開いている時刻に、見える被弾か戦闘不能の行があるか。②のまとめの行はこれが立ってから出す。</summary>
+    private bool _openHasVisibleDamage;
+
+    /// <summary>開いている時刻に、見える回復の行があるか。③のまとめの行はこれが立ってから出す。</summary>
+    private bool _openHasVisibleHeal;
 
     public IReadOnlyList<TakenDamageLogRow> Rows => _rows;
 
@@ -93,14 +106,17 @@ public sealed class TakenDamageLogLayout
         _openResults.Clear();
         _openStart = 0;
         _openTimestamp = null;
-        _openHasVisibleOutcome = false;
+        _openHasVisibleDamage = false;
+        _openHasVisibleHeal = false;
     }
 
-    /// <summary>1件足す。</summary>
+    /// <summary>1件足す。表示設定で出さない敵どうしの回復は、呼び出し側が渡さない(まとめにも入れない)。</summary>
     /// <param name="isHidden">フィルターで出さない被弾。行は作らず、まとめにだけ入れる。被弾以外の記録には効かない(隠さない)。</param>
     /// <returns>中身が変わった行の先頭の位置。呼び出し側はそこから後ろを出し直す。変わった行が無ければ <see cref="Rows"/> の件数。</returns>
     public int Append(TakenDamageLogLine line, bool isHidden)
     {
+        OpenTime(line.Timestamp);
+
         if (line.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.AnnouncementEnd or TakenDamageLogRecordKind.Cast)
         {
             var kind = line.Kind switch
@@ -110,21 +126,13 @@ public sealed class TakenDamageLogLayout
                 _ => TakenDamageLogRowKind.Cast
             };
 
-            // 開いている到着時刻と同じなら、その時刻の行の並びに入れる(後から届く同じ時刻の被弾は技の行の下へ差し込まれる)。
-            if (_openTimestamp == line.Timestamp)
-            {
-                _openBlocks.Add(OpenBlock.ForSingle(CreateHeadRow(kind, line)));
-                return RebuildOpenRows();
-            }
-
-            Close();
-            _rows.Add(new TakenDamageLogRow(kind, line, 0, null, null, null, false, StartsNewTime(line.Timestamp, _rows.Count)));
-            _openStart = _rows.Count;
-            return _rows.Count - 1;
+            _openBlocks.Add(OpenBlock.ForSingle(LogGenre.Action, CreateHeadRow(kind, line)));
+            return RebuildOpenRows();
         }
 
-        OpenTime(line.Timestamp);
-        var result = GetOrAddResult(line);
+        var isHeal = line.Kind == TakenDamageLogRecordKind.EnemyHeal;
+        var genre = isHeal ? LogGenre.Heal : LogGenre.Damage;
+        var result = GetOrAddResult(line, genre);
 
         if (line.Kind == TakenDamageLogRecordKind.Death)
         {
@@ -139,7 +147,7 @@ public sealed class TakenDamageLogLayout
             }
 
             deathGroup.Folds.Add(new Fold(null, new TakenDamageLogRow(TakenDamageLogRowKind.Death, line, 0, null, null, null, false, false)));
-            _openHasVisibleOutcome = true;
+            _openHasVisibleDamage = true;
             return RebuildOpenRows();
         }
 
@@ -149,17 +157,21 @@ public sealed class TakenDamageLogLayout
             return RebuildOpenRows();
         }
 
-        var groupKey = new HitGroupKey(line.Attacker.Uuid, line.IsBuffSource, line.SourceId, line.Timestamp);
+        var rowKind = isHeal ? TakenDamageLogRowKind.Heal : TakenDamageLogRowKind.Hit;
+        var groupKey = new HitGroupKey(line.Attacker.Uuid, line.IsBuffSource, line.SourceId, line.Timestamp, isHeal);
         var group = _openBlocks.Find(block => block.GroupKey == groupKey);
         if (group is null)
         {
-            group = OpenBlock.ForGroup(groupKey, CreateHeadRow(TakenDamageLogRowKind.Skill, line));
+            group = OpenBlock.ForGroup(genre, groupKey, CreateHeadRow(TakenDamageLogRowKind.Skill, line));
             _openBlocks.Add(group);
         }
 
-        FoldKey? foldKey = line.DamageElement is { } element
-            ? new FoldKey(line.Target!.Uuid, element)
-            : null;
+        // 回復は属性を持たないので、同じ敵への回復を畳む。
+        FoldKey? foldKey = isHeal
+            ? new FoldKey(line.Target!.Uuid, null)
+            : line.DamageElement is { } element
+                ? new FoldKey(line.Target!.Uuid, element)
+                : null;
         var foldIndex = foldKey is null
             ? -1
             : group.Folds.FindIndex(fold => fold.Key == foldKey);
@@ -170,7 +182,7 @@ public sealed class TakenDamageLogLayout
             var previous = group.Folds[foldIndex].Row;
             group.Folds.RemoveAt(foldIndex);
             hitRow = new TakenDamageLogRow(
-                TakenDamageLogRowKind.Hit,
+                rowKind,
                 line,
                 previous.Value + line.Value,
                 null,
@@ -181,11 +193,19 @@ public sealed class TakenDamageLogLayout
         }
         else
         {
-            hitRow = new TakenDamageLogRow(TakenDamageLogRowKind.Hit, line, line.Value, null, null, null, line.IsLethal, false);
+            hitRow = new TakenDamageLogRow(rowKind, line, line.Value, null, null, null, line.IsLethal, false);
         }
 
         group.Folds.Add(new Fold(foldKey, hitRow));
-        _openHasVisibleOutcome = true;
+        if (isHeal)
+        {
+            _openHasVisibleHeal = true;
+        }
+        else
+        {
+            _openHasVisibleDamage = true;
+        }
+
         return RebuildOpenRows();
     }
 
@@ -202,39 +222,37 @@ public sealed class TakenDamageLogLayout
     {
         _openBlocks.Clear();
         _openResults.Clear();
-        _openHasVisibleOutcome = false;
+        _openHasVisibleDamage = false;
+        _openHasVisibleHeal = false;
         _openStart = _rows.Count;
         _openTimestamp = null;
     }
 
-    /// <summary>開いている時刻のまとまりの先頭の行。まとまりがまだ無ければ、その時刻の最初の行になる。</summary>
-    private TakenDamageLogRow CreateHeadRow(TakenDamageLogRowKind kind, TakenDamageLogLine line)
+    /// <summary>まとまりの先頭の行。時刻を出すかは並べ直すときに決める(<see cref="RebuildOpenRows"/>)。</summary>
+    private static TakenDamageLogRow CreateHeadRow(TakenDamageLogRowKind kind, TakenDamageLogLine line)
     {
-        var showsTime = _openBlocks.Count == 0 && StartsNewTime(line.Timestamp, _openStart);
-        return new TakenDamageLogRow(kind, line, 0, null, null, null, false, showsTime);
+        return new TakenDamageLogRow(kind, line, 0, null, null, null, false, false);
     }
 
-    /// <summary><paramref name="position"/> に置く行が新しい時刻の始まりか(直前の行と到着時刻が違うか)。</summary>
-    private bool StartsNewTime(DateTime timestamp, int position)
-    {
-        return position == 0 || _rows[position - 1].Line.Timestamp != timestamp;
-    }
-
-    private TargetResult GetOrAddResult(TakenDamageLogLine line)
+    /// <summary>そのジャンルの、その人(敵)のまとめ。②のプレイヤーと③の敵は別に持つ。</summary>
+    private TargetResult GetOrAddResult(TakenDamageLogLine line, LogGenre genre)
     {
         var target = line.Target
             ?? throw new InvalidOperationException($"Taken damage log {line.Kind} record has no target (sequence {line.Sequence}).");
-        var result = _openResults.Find(item => item.Uuid == target.Uuid);
+        var result = _openResults.Find(item => item.Uuid == target.Uuid && item.Genre == genre);
         if (result is null)
         {
-            result = new TargetResult(target.Uuid, line);
+            result = new TargetResult(target.Uuid, genre, line);
             _openResults.Add(result);
         }
 
         return result;
     }
 
-    /// <summary>開いている時刻の行を並べ直す。まとまりの行のあとに、まとめの行を置く。開いている範囲の行数は減らない。</summary>
+    /// <summary>
+    /// 開いている時刻の行を並べ直す。ジャンルの順に、まとまりの行と、そのジャンルのまとめの行を置く。
+    /// 各ジャンルの最初の行だけ時刻を出す(先頭の行の印が変わったら、そのまとまりの先頭の行を作り直す)。開いている範囲の行数は減らない。
+    /// </summary>
     private int RebuildOpenRows()
     {
         var index = _openStart;
@@ -259,19 +277,42 @@ public sealed class TakenDamageLogLayout
             index++;
         }
 
-        foreach (var block in _openBlocks)
+        foreach (var genre in GenreOrder)
         {
-            foreach (var row in block.EnumerateRows())
+            var isFirstInGenre = true;
+            foreach (var block in _openBlocks)
             {
-                Place(row);
-            }
-        }
+                if (block.Genre != genre)
+                {
+                    continue;
+                }
 
-        if (_openHasVisibleOutcome)
-        {
+                if (block.Head.ShowsTime != isFirstInGenre)
+                {
+                    block.Head = block.Head with { ShowsTime = isFirstInGenre };
+                }
+
+                isFirstInGenre = false;
+                foreach (var row in block.EnumerateRows())
+                {
+                    Place(row);
+                }
+            }
+
+            var showsResults = genre switch
+            {
+                LogGenre.Damage => _openHasVisibleDamage,
+                LogGenre.Heal => _openHasVisibleHeal,
+                _ => false
+            };
+            if (!showsResults)
+            {
+                continue;
+            }
+
             foreach (var result in _openResults)
             {
-                if (result.GetRow() is { } row)
+                if (result.Genre == genre && result.GetRow() is { } row)
                 {
                     Place(row);
                 }
@@ -287,26 +328,47 @@ public sealed class TakenDamageLogLayout
         return firstChanged < 0 ? _rows.Count : firstChanged;
     }
 
-    private readonly record struct HitGroupKey(long AttackerUuid, bool IsBuffSource, int SourceId, DateTime Timestamp);
+    /// <summary>同じ時刻の中のジャンル。並べる順は <see cref="GenreOrder"/>。</summary>
+    private enum LogGenre
+    {
+        /// <summary>①敵の行動(予告・予告のバーの終わり・詠唱)。</summary>
+        Action,
 
-    private readonly record struct FoldKey(long TargetUuid, EDamageProperty Element);
+        /// <summary>②味方の被弾(ダメージの無い戦闘不能を含む)とプレイヤーのまとめ。</summary>
+        Damage,
+
+        /// <summary>③敵どうしの回復と敵のまとめ。</summary>
+        Heal
+    }
+
+    private static readonly LogGenre[] GenreOrder = [LogGenre.Action, LogGenre.Damage, LogGenre.Heal];
+
+    /// <summary>技の行のまとまりの鍵。同じ出し手・同じ発生源でも、被弾と敵どうしの回復は別のまとまりにする。</summary>
+    private readonly record struct HitGroupKey(long AttackerUuid, bool IsBuffSource, int SourceId, DateTime Timestamp, bool IsHeal);
+
+    /// <summary>畳む鍵。被弾は対象と属性、回復は対象だけ(属性は null)。</summary>
+    private readonly record struct FoldKey(long TargetUuid, EDamageProperty? Element);
 
     private sealed record Fold(FoldKey? Key, TakenDamageLogRow Row);
 
     /// <summary>
-    /// 開いている到着時刻の行のまとまり。予告・予告のバーの終わり・詠唱の1行か、技の行とその下の被弾か、
+    /// 開いている到着時刻の行のまとまり。予告・予告のバーの終わり・詠唱の1行か、技の行とその下の被弾・回復か、
     /// 「システムの攻撃」の技の行とその下のダメージの無い戦闘不能。
     /// </summary>
     private sealed class OpenBlock
     {
-        private OpenBlock(TakenDamageLogRow head, HitGroupKey? groupKey, bool isDeathGroup)
+        private OpenBlock(LogGenre genre, TakenDamageLogRow head, HitGroupKey? groupKey, bool isDeathGroup)
         {
+            Genre = genre;
             Head = head;
             GroupKey = groupKey;
             IsDeathGroup = isDeathGroup;
         }
 
-        public TakenDamageLogRow Head { get; }
+        public LogGenre Genre { get; }
+
+        /// <summary>先頭の行。時刻を出すかが変わったときだけ、並べ直しが作り直して入れ替える。</summary>
+        public TakenDamageLogRow Head { get; set; }
 
         public HitGroupKey? GroupKey { get; }
 
@@ -315,19 +377,19 @@ public sealed class TakenDamageLogLayout
 
         public List<Fold> Folds { get; } = [];
 
-        public static OpenBlock ForSingle(TakenDamageLogRow row)
+        public static OpenBlock ForSingle(LogGenre genre, TakenDamageLogRow row)
         {
-            return new OpenBlock(row, null, isDeathGroup: false);
+            return new OpenBlock(genre, row, null, isDeathGroup: false);
         }
 
-        public static OpenBlock ForGroup(HitGroupKey key, TakenDamageLogRow skillRow)
+        public static OpenBlock ForGroup(LogGenre genre, HitGroupKey key, TakenDamageLogRow skillRow)
         {
-            return new OpenBlock(skillRow, key, isDeathGroup: false);
+            return new OpenBlock(genre, skillRow, key, isDeathGroup: false);
         }
 
         public static OpenBlock ForDeathGroup(TakenDamageLogRow skillRow)
         {
-            return new OpenBlock(skillRow, null, isDeathGroup: true);
+            return new OpenBlock(LogGenre.Damage, skillRow, null, isDeathGroup: true);
         }
 
         public IEnumerable<TakenDamageLogRow> EnumerateRows()
@@ -341,7 +403,7 @@ public sealed class TakenDamageLogLayout
     }
 
     /// <summary>
-    /// 開いている時刻の、1人ぶんのまとめ。HP は記録が持つ同期の後の値で、同じ時刻なら最後に届いたものを使う。
+    /// 開いている時刻の、そのジャンルの1人(1体)ぶんのまとめ。HP は記録が持つ同期の後の値で、同じ時刻なら最後に届いたものを使う。
     /// 同期を当てる前の HP は、前の値を持つ最初の記録から取る(同じ時刻に同期が2つ以上あっても、最初の同期の前)。
     /// 一度戦闘不能になったら、その時刻の中では戦闘不能のまま。行は中身が変わったときだけ作り直す(画面の作り直しを減らすため)。
     /// </summary>
@@ -357,13 +419,17 @@ public sealed class TakenDamageLogLayout
         private long? _shieldBefore;
         private TakenDamageLogRow? _row;
 
-        public TargetResult(long uuid, TakenDamageLogLine line)
+        public TargetResult(long uuid, LogGenre genre, TakenDamageLogLine line)
         {
             Uuid = uuid;
+            Genre = genre;
             _line = line;
         }
 
         public long Uuid { get; }
+
+        /// <summary>まとめの行を置くジャンル(②のプレイヤーか③の敵)。</summary>
+        public LogGenre Genre { get; }
 
         private void ApplyBefore(TakenDamageLogLine line)
         {

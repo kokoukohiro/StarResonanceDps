@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -13,7 +14,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// 画面に出す被ダメログの1行。時刻を見せるのは、その時刻の最初の行だけ(<see cref="IsTimeShown"/>、決めるのは <see cref="TakenDamageLogLayout"/>)。
+/// 画面に出す被ダメログの1行。時刻を見せるのは、その時刻のジャンルごとの最初の行だけ(<see cref="IsTimeShown"/>、決めるのは <see cref="TakenDamageLogLayout"/>)。
 /// <see cref="Segments"/> は文字列とアイコン(<see cref="TakenDamageLogClassIconSegment"/> / <see cref="TakenDamageLogAttributeIconSegment"/>)の並び。
 /// </summary>
 /// <param name="TimeText">
@@ -39,7 +40,7 @@ public sealed record TakenDamageLogClassIconSegment(Brush IconMask, Brush ClassB
 public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush ElementBrush, string Name, WidgetListItemViewModel Widget);
 
 /// <summary>
-/// 被ダメログ。表示中のエンカウンターで、ボス大技の予告、プレイヤー以外の詠唱と、プレイヤーがプレイヤー以外から受けたダメージを出す。
+/// 被ダメログ。表示中のエンカウンターで、ボス大技の予告、プレイヤー以外の詠唱と、プレイヤーがプレイヤー以外から受けたダメージと、敵どうしの回復を出す。
 ///
 /// <code>
 /// 00:22:01  [敵]が[技]を構えている
@@ -49,14 +50,18 @@ public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush El
 ///           [クラス][プレイヤー]に23456[属性]ダメージ → 戦闘不能
 ///           [クラス][プレイヤー]のHP(12468/123456) → HP(123/123456)
 ///           [クラス][プレイヤー]のHP(23456/234567) → 戦闘不能(0/234567)
+/// 00:22:07  [敵]の[技]
+///           [敵]のHPを12345回復
+///           [敵]のHP(100000/200000) → HP(112345/200000)
 /// </code>
 ///
 /// <para>
 /// <b>被弾は発動単位で束ねない。</b> 届いた瞬間ごとに技の行を1行出し、その下に
 /// 同じ瞬間(同じ加害者・同じ発生源・同じ到着時刻)の被弾だけを並べる。
 /// 同じ技の次の被弾は、また技の行から出す。
-/// 技の行の下で同じ対象・同じ属性の被弾は1行に畳む。HP は被弾の行に出さず、その時刻の最後のまとめの行に1人1行で出す
-/// (矢印の前はその時刻の最初の同期を当てる前、後は当てた後。並べ方は <see cref="TakenDamageLogLayout"/>)。
+/// 技の行の下で同じ対象・同じ属性の被弾は1行に畳む。HP は被弾の行に出さず、その時刻のジャンル(被弾・敵の回復)ごとの最後のまとめの行に1人1行で出す
+/// (矢印の前はその時刻の最初の同期を当てる前、後は当てた後)。同じ時刻の中は 敵の行動 → 被弾 → 敵の回復 の順で、時刻はジャンルごとの最初の行に出す
+/// (並べ方は <see cref="TakenDamageLogLayout"/>)。
 /// </para>
 ///
 /// <para>
@@ -71,6 +76,10 @@ public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush El
 /// <para>
 /// 取得した行(<see cref="_lines"/>)は全部持ち、表示の設定は画面に出すときに当てる。
 /// 設定を変えれば、持っている行から組み直す。
+/// </para>
+///
+/// <para>
+/// 画面で選んだ文字は、右クリックの「コピー」で文字にする(<see cref="CreateCopyText"/>)。
 /// </para>
 /// </summary>
 public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
@@ -129,6 +138,9 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     public ReadOnlyObservableCollection<TakenDamageLogEntry> Entries { get; }
 
+    /// <summary>このウィジェット。右クリックのメニューの色と不透明度は、この窓のパレットから取る。</summary>
+    public WidgetListItemViewModel Widget => _widget;
+
     public WidgetDataStatus DataStatus { get; private set; }
 
     public event EventHandler? DataStatusChanged;
@@ -157,13 +169,65 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
+    /// <summary>
+    /// 選んだ文字のコピーの文字。行の間は改行。範囲の行と位置の数え方は画面の選択(<see cref="TextRowsSelectionBehavior"/>)と同じで、
+    /// 行の文字は <see cref="GetRowText"/>。
+    /// </summary>
+    public string CreateCopyText(TextRowsSelection selection)
+    {
+        var text = new StringBuilder();
+        var lastRow = Math.Min(selection.EndRow, _entries.Count - 1);
+        for (var row = Math.Max(selection.StartRow, 0); row <= lastRow; row++)
+        {
+            var rowText = GetRowText(_entries[row]);
+            var start = row == selection.StartRow ? Math.Clamp(selection.StartOffset, 0, rowText.Length) : 0;
+            var end = row == selection.EndRow ? Math.Clamp(selection.EndOffset, start, rowText.Length) : rowText.Length;
+            if (row > selection.StartRow)
+            {
+                text.AppendLine();
+            }
+
+            text.Append(rowText, start, end - start);
+        }
+
+        return text.ToString();
+    }
+
+    /// <summary>
+    /// 行の文字。時刻を出している行は時刻と空白1つの後に本文、ほかの行は時刻と同じ幅の空白と空白1つの後に本文(画面と同じ字下げ)。
+    /// 戦闘の時計が立つ前(時刻が空)は本文だけ。本文は画面の文字そのままで、クラス・属性のアイコンは入れない。
+    /// </summary>
+    private static string GetRowText(TakenDamageLogEntry entry)
+    {
+        var text = new StringBuilder();
+        if (entry.TimeText.Length > 0)
+        {
+            text.Append(entry.IsTimeShown ? entry.TimeText : new string(' ', entry.TimeText.Length)).Append(' ');
+        }
+
+        foreach (var segment in entry.Segments)
+        {
+            switch (segment)
+            {
+                case string part:
+                    text.Append(part);
+                    break;
+                case TextRunSegment run:
+                    text.Append(run.Text);
+                    break;
+            }
+        }
+
+        return text.ToString();
+    }
+
     private void RefreshTimer_Tick(object? sender, EventArgs e)
     {
         Refresh();
     }
 
     /// <summary>
-    /// 表示設定(保存かプレビュー)が変わった。フィルターが変われば並ぶ行が変わるので、持っている行から組み直す。
+    /// 表示設定(保存かプレビュー)が変わった。フィルターか敵の回復の表示が変われば並ぶ行が変わるので、持っている行から組み直す。
     /// HP 数値の出し方とクラスカラーは行の中身だけなので、並びはそのままで各行を作り直す
     /// (色見本を触るたびに全行を並べ直さない)。
     /// </summary>
@@ -174,7 +238,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         _classBrushes.Clear();
         _textBrushes.Clear();
 
-        if (_settings.AttackerFilterIndex != previous.AttackerFilterIndex)
+        if (_settings.AttackerFilterIndex != previous.AttackerFilterIndex
+            || _settings.EnemyHealDisplayModeIndex != previous.EnemyHealDisplayModeIndex)
         {
             ClearEntries();
             foreach (var line in _lines)
@@ -255,6 +320,13 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     private void AppendEntries(TakenDamageLogLine line)
     {
+        // 表示設定「敵の回復」が非表示なら、回復の行にもまとめの行にも入れない(回復の行の無いまま敵の HP の行だけが残らないように)。
+        if (line.Kind == TakenDamageLogRecordKind.EnemyHeal
+            && _settings.EnemyHealDisplayModeIndex == WidgetConfigDefaults.HiddenTakenDamageLogEnemyHealDisplayModeIndex)
+        {
+            return;
+        }
+
         var rows = _layout.Rows;
         for (var index = _layout.Append(line, IsHiddenByFilter(line)); index < rows.Count; index++)
         {
@@ -296,11 +368,17 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
                 return new TakenDamageLogEntry(
                     FormatTime(line),
                     row.ShowsTime,
-                    CreateSourceSegments("TakenDamageLog_SkillFormat", line, "TakenDamageLog_UnnamedSkill"),
+                    CreateSourceSegments(
+                        "TakenDamageLog_SkillFormat",
+                        line,
+                        line.Kind == TakenDamageLogRecordKind.EnemyHeal ? "TakenDamageLog_UnnamedHeal" : "TakenDamageLog_UnnamedSkill"),
                     _widget);
             case TakenDamageLogRowKind.Hit:
                 return new TakenDamageLogEntry(
                     FormatTime(line), row.ShowsTime, CreateHitSegments(row), _widget);
+            case TakenDamageLogRowKind.Heal:
+                return new TakenDamageLogEntry(
+                    FormatTime(line), row.ShowsTime, CreateHealSegments(row), _widget);
             case TakenDamageLogRowKind.Death:
                 return new TakenDamageLogEntry(
                     FormatTime(line), row.ShowsTime, CreateDefeatedSegments(row), _widget);
@@ -328,7 +406,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     /// <summary>
     /// 技(またはバフ)の名前。名前が無ければこのウィジェットだけ <paramref name="unnamedKey"/> の文言を出す。
-    /// 技の行と予告のバーの終わりの行は「攻撃」、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
+    /// 技の行と予告のバーの終わりの行は「攻撃」(敵どうしの回復の技の行は「回復」)、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
     /// 落下は技を持たないので「落下」の文言。
     /// </summary>
     private static string FormatSourceName(TakenDamageLogLine line, string unnamedKey)
@@ -396,6 +474,22 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         }
 
         return SplitByMarkers(text, replacements);
+    }
+
+    /// <summary>
+    /// 敵どうしの回復の行。書式の対象名({0})に回復された敵の名前(エンティティ名の色)、{1} に実際に増えた HP(HP 数値の色)を差し込む。
+    /// HP はまとめの行に出すので、ここには出さない。
+    /// </summary>
+    private IReadOnlyList<object> CreateHealSegments(TakenDamageLogRow row)
+    {
+        var text = LocalizationManager.Instance.Format("TakenDamageLog_HealFormat", TargetNameMarker, DamagePartMarker);
+        EnsureMarkers(text, "TakenDamageLog_HealFormat", TargetNameMarker, DamagePartMarker);
+
+        return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
+        {
+            [TargetNameMarker[0]] = CreateTargetNameSegments(row.Line.Target!),
+            [DamagePartMarker[0]] = [ColoredText(row.Value.ToString(CultureInfo.InvariantCulture), "HpValue")]
+        });
     }
 
     /// <summary>
@@ -527,7 +621,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
             : CreateHealthChangeSegments(row, after);
     }
 
-    /// <summary>書式の対象名({0})の前にクラスアイコンを置き、{1} に <paramref name="part"/> を差し込む。</summary>
+    /// <summary>書式の対象名({0})に対象の名前(<see cref="CreateTargetNameSegments"/>)を置き、{1} に <paramref name="part"/> を差し込む。</summary>
     private IReadOnlyList<object> CreateTargetSegments(string formatKey, TakenDamageLogRow row, IReadOnlyList<object> part)
     {
         var target = row.Line.Target!;
@@ -536,9 +630,20 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
+            [TargetNameMarker[0]] = CreateTargetNameSegments(target),
             [HealthPartMarker[0]] = part
         });
+    }
+
+    /// <summary>
+    /// まとめの行・回復の行の対象の名前。プレイヤーはクラスアイコンとプレイヤー名の色、
+    /// 敵どうしの回復で回復された敵はエンティティ名の色(クラスアイコンなし)。
+    /// </summary>
+    private IReadOnlyList<object> CreateTargetNameSegments(TakenDamageLogParty target)
+    {
+        return target.IsPlayer
+            ? [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")]
+            : [ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "EntityName")];
     }
 
     /// <summary>
@@ -553,7 +658,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
+            [TargetNameMarker[0]] = CreateTargetNameSegments(target),
             [HealthPartMarker[0]] = CreateHealthSegments(row.TargetHpBefore!.Value, row.TargetShieldBefore ?? 0L, row.TargetMaxHpBefore ?? 0L),
             [AfterHealthMarker[0]] = after
         });

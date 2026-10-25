@@ -158,13 +158,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// blob に書くエンティティ。プレイヤー全員と、被ダメログに出てくる加害者・詠唱した敵だけ。
+        /// blob に書くエンティティ。プレイヤー全員と、被ダメログに出てくる加害者・詠唱した敵・敵どうしの回復の両方だけ。
         /// それ以外(弾・設置物・被ダメログに出ないモンスターなど)は履歴で読まれない。
         /// 書く項目は <see cref="EncounterBlobContractResolver"/> が決める。
         /// </summary>
         private static ConcurrentDictionary<long, Entity> SelectPersistedEntities(Encounter encounter)
         {
             var persisted = new ConcurrentDictionary<long, Entity>();
+            foreach (var uuid in encounter.GetEnemyHealEntityUuids())
+            {
+                if (encounter.Entities.TryGetValue(uuid, out var healEntity))
+                {
+                    persisted[uuid] = healEntity;
+                }
+            }
+
             foreach (var (uuid, entity) in encounter.Entities)
             {
                 if (entity.EntityType != Zproto.EEntityType.EntChar)

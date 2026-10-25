@@ -515,6 +515,18 @@
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻撃</value>
   </data>
+  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+    <value>回復</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+    <value>テキストコピーエラー</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+    <value>テキストをコピーできませんでした。</value>
+  </data>
+  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+    <value>{0}のHPを{1}回復</value>
+  </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>システム</value>
   </data>
@@ -1173,6 +1185,9 @@
   </data>
   <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>自傷・フレンドリーファイア以外</value>
+  </data>
+  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+    <value>敵の回復</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>バフ・デバフカード</value>
@@ -1897,7 +1912,7 @@
     <value>{Name}の{BuffName}の効果が切れました</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}の{BuffName}効果が2分以下です</value>
+    <value>{Name}の{BuffName}効果が切れそうです</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}が来ます</value>

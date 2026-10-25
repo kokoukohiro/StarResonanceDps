@@ -256,7 +256,7 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// </para>
 ///
 /// <para>
-/// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、ダメージを与えた敵。<see cref="Target"/> と HP は被弾のときだけ入る
+/// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、ダメージを与えた敵。<see cref="Target"/> と HP は被弾(と下の死亡・敵どうしの回復)のときだけ入る
 /// (HP は記録時点で属性を持っていなければ入らない)。
 /// <see cref="SourceName"/> は内部ID注記を付けない名前で、名前が無ければ空。
 /// <see cref="SourceId"/> は届いた <c>OwnerId</c> そのもの。<see cref="IsBuffSource"/> が真ならバフID、
@@ -270,6 +270,11 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// <para>
 /// 死亡は <see cref="Attacker"/> がシステム、<see cref="Target"/> が死亡したプレイヤー、HP は 0 と死亡時の最大HP。
 /// <see cref="IsFall"/> は落下の被弾(技名は画面側の文言)。
+/// </para>
+///
+/// <para>
+/// 敵どうしの回復は <see cref="Attacker"/> が回復した側、<see cref="Target"/> が回復された敵、<see cref="Value"/> が実際に増えた HP。
+/// HP は被弾と同じく、同期の中で同じ回復した側・同じ発生源の最後の回復だけが持つ。
 /// </para>
 ///
 /// <para>
@@ -557,6 +562,29 @@ public static class MeterSnapshotProvider
                     TargetHpBefore: death.HpBefore,
                     TargetMaxHpBefore: death.MaxHpBefore,
                     TargetShieldBefore: death.ShieldBefore);
+                continue;
+            }
+
+            if (record.Kind == TakenDamageLogRecordKind.EnemyHeal)
+            {
+                var heal = record.EnemyHeal!;
+                lines[index] = new TakenDamageLogLine(
+                    record.Kind,
+                    heal.Sequence,
+                    heal.Timestamp,
+                    ResolveTakenDamageLogParty(encounter, heal.HealerUuid, parties),
+                    ResolveTakenDamageLogParty(encounter, heal.TargetUuid, parties),
+                    heal.OwnerId,
+                    heal.DamageSource == Zproto.EDamageSource.Buff,
+                    ResolveTakenDamageSourceName(false, 0, heal.DamageSource, heal.OwnerId, heal.BuffSourceSkillId, heal.SummonSourceSkillId),
+                    heal.Value,
+                    heal.TargetHp,
+                    heal.TargetMaxHp,
+                    heal.TargetShield,
+                    null,
+                    TargetHpBefore: heal.TargetHpBefore,
+                    TargetMaxHpBefore: heal.TargetMaxHpBefore,
+                    TargetShieldBefore: heal.TargetShieldBefore);
                 continue;
             }
 

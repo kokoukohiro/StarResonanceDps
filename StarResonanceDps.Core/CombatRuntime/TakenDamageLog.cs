@@ -131,6 +131,73 @@ public sealed class PlayerDeathRecord
     public long? ShieldBefore { get; set; }
 }
 
+/// <summary>
+/// 敵どうしの回復1件。回復した側も回復された側もプレイヤー(とその召喚)でない、実際に HP が増えた回復だけを残す
+/// (どれを残すかは <c>MessageManager.ProcessAoiSyncDelta</c> が決める)。
+/// 画面では回復した側の技の行の下の回復の行と、その時刻のまとめの行になる。
+///
+/// <para>
+/// <see cref="TargetHp"/> などの HP は、同期の中で同じ回復した側・同じ発生源の最後の回復にだけ入れ、それ以外は null(被弾の <see cref="SkillSnapshotStamp"/> と同じ)。
+/// </para>
+/// </summary>
+[ProtoContract]
+public sealed class EnemyHealRecord
+{
+    /// <summary>回復した側。召喚体は被弾の加害者と同じく寄せる(<c>Encounter.ResolveTakenDamageLogActor</c>)。</summary>
+    [ProtoMember(1)]
+    public long HealerUuid { get; set; }
+
+    [ProtoMember(2)]
+    public long TargetUuid { get; set; }
+
+    /// <summary><c>SyncDamageInfo.OwnerId</c> の生の値。<see cref="DamageSource"/> によって技・弾・バフの番号になる。</summary>
+    [ProtoMember(3)]
+    public int OwnerId { get; set; }
+
+    [ProtoMember(4)]
+    public EDamageSource DamageSource { get; set; }
+
+    /// <summary>バフ由来のとき、そのバフを付けた技ID。記録した瞬間の実体からしか決まらない。決まらなければ 0。</summary>
+    [ProtoMember(5)]
+    public int BuffSourceSkillId { get; set; }
+
+    /// <summary>回復した実体(仮想体など)を出した技ID。実体の出現時に決めて控えたもの。決まらなければ 0。</summary>
+    [ProtoMember(6)]
+    public int SummonSourceSkillId { get; set; }
+
+    /// <summary>実際に増えた HP(<c>ActualValue</c>)。</summary>
+    [ProtoMember(7)]
+    public long Value { get; set; }
+
+    /// <summary>回復が届いたパケットの到着時刻(UTC)。</summary>
+    [ProtoMember(8)]
+    public DateTime Timestamp { get; set; }
+
+    /// <summary>被ダメと同じ通し番号。並べ直しに使う。</summary>
+    [ProtoMember(9)]
+    public long Sequence { get; set; }
+
+    /// <summary>回復された側の、その同期を当てた後の HP。</summary>
+    [ProtoMember(10)]
+    public long? TargetHp { get; set; }
+
+    [ProtoMember(11)]
+    public long? TargetMaxHp { get; set; }
+
+    [ProtoMember(12)]
+    public long? TargetShield { get; set; }
+
+    /// <summary>回復された側の、その同期を当てる前の HP(まとめの行の矢印の前)。持っていなければ null。</summary>
+    [ProtoMember(13)]
+    public long? TargetHpBefore { get; set; }
+
+    [ProtoMember(14)]
+    public long? TargetMaxHpBefore { get; set; }
+
+    [ProtoMember(15)]
+    public long? TargetShieldBefore { get; set; }
+}
+
 public enum TakenDamageLogRecordKind
 {
     Cast,
@@ -139,11 +206,14 @@ public enum TakenDamageLogRecordKind
     Death,
 
     /// <summary>予告のバーが終わった時刻の行(<see cref="SkillAnnouncementRecord.IsBarEnd"/>)。</summary>
-    AnnouncementEnd
+    AnnouncementEnd,
+
+    /// <summary>敵どうしの回復(<see cref="EnemyHealRecord"/>)。</summary>
+    EnemyHeal
 }
 
 /// <summary>
-/// 被ダメログの1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、被弾と死亡ならそのプレイヤー。
+/// 被ダメログの1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、被弾と死亡ならそのプレイヤー、敵どうしの回復なら回復された敵。
 /// 予告は実体を持たないので 0。
 /// </summary>
 public readonly record struct TakenDamageLogRecord(
@@ -152,13 +222,15 @@ public readonly record struct TakenDamageLogRecord(
     SkillSnapshot? Hit,
     SkillCastRecord? Cast,
     SkillAnnouncementRecord? Announcement,
-    PlayerDeathRecord? Death)
+    PlayerDeathRecord? Death,
+    EnemyHealRecord? EnemyHeal = null)
 {
     public long Sequence => Kind switch
     {
         TakenDamageLogRecordKind.Hit => Hit!.Sequence,
         TakenDamageLogRecordKind.Cast => Cast!.Sequence,
         TakenDamageLogRecordKind.Death => Death!.Sequence,
+        TakenDamageLogRecordKind.EnemyHeal => EnemyHeal!.Sequence,
         _ => Announcement!.Sequence
     };
 
@@ -181,5 +253,10 @@ public readonly record struct TakenDamageLogRecord(
     public static TakenDamageLogRecord ForDeath(PlayerDeathRecord death)
     {
         return new TakenDamageLogRecord(TakenDamageLogRecordKind.Death, death.PlayerUuid, null, null, null, death);
+    }
+
+    public static TakenDamageLogRecord ForEnemyHeal(EnemyHealRecord heal)
+    {
+        return new TakenDamageLogRecord(TakenDamageLogRecordKind.EnemyHeal, heal.TargetUuid, null, null, null, null, heal);
     }
 }

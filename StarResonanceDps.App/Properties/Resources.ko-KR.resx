@@ -312,7 +312,7 @@
     <value>{Name}의 {BuffName} 효과가 끝났습니다</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}의 {BuffName} 효과가 2분 이하입니다</value>
+    <value>{Name}의 {BuffName} 효과가 곧 끝납니다</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}이(가) 옵니다</value>
@@ -571,6 +571,18 @@
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+    <value>회복</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+    <value>텍스트 복사 오류</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+    <value>텍스트를 복사하지 못했습니다.</value>
+  </data>
+  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+    <value>{0}의 HP {1} 회복</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>시스템</value>
@@ -1230,6 +1242,9 @@
   </data>
   <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>자해·아군 공격 제외</value>
+  </data>
+  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+    <value>적의 회복</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>버프·디버프 카드</value>

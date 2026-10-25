@@ -214,6 +214,12 @@ public sealed class TakenDamageLogWidgetSettingsConfig
     public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogAttackerFilterIndex;
 
     /// <summary>
+    /// 敵どうしの回復(回復の行と、回復された敵のまとめの行)を出すか。0=表示 / 1=非表示。
+    /// 出さないときも記録と保存は続く(画面に出すときに絞る)。
+    /// </summary>
+    public int EnemyHealDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogEnemyHealDisplayModeIndex;
+
+    /// <summary>
     /// クラスアイコンの色(クラスカラー)。形はプレイヤーリストのクラスカラーと同じで、被ダメログ専用に持つ。
     /// 既定の色はプレイヤーリストと同じ。フィルターと不透明度は持たない。
     /// </summary>
@@ -234,6 +240,7 @@ public sealed class TakenDamageLogWidgetSettingsConfig
         {
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
+            EnemyHealDisplayModeIndex = EnemyHealDisplayModeIndex,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -890,6 +897,8 @@ public static class WidgetConfigDefaults
     public const int NameListSortModeIndex = 1;
     public const int DefaultTakenDamageLogAttackerFilterIndex = 1;
     public const int NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex = 1;
+    public const int DefaultTakenDamageLogEnemyHealDisplayModeIndex = 0;
+    public const int HiddenTakenDamageLogEnemyHealDisplayModeIndex = 1;
     public const int MinClassColorFilterStrength = 0;
     public const int MaxClassColorFilterStrength = 100;
     public const int DefaultClassColorFilterStrength = 50;
@@ -2130,6 +2139,7 @@ public static class WidgetConfigDefaults
         {
             HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
             AttackerFilterIndex = DefaultTakenDamageLogAttackerFilterIndex,
+            EnemyHealDisplayModeIndex = DefaultTakenDamageLogEnemyHealDisplayModeIndex,
             ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog),
             ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog),
             TextColorIndexes = CreateDefaultTextColorIndexes(),
@@ -2927,8 +2937,12 @@ public static class WidgetConfigDefaults
             SeparateShieldHealthValueDisplayModeIndex);
         takenDamageLog.AttackerFilterIndex = Math.Clamp(
             takenDamageLog.AttackerFilterIndex,
-            DefaultTakenDamageLogAttackerFilterIndex,
+            0,
             NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex);
+        takenDamageLog.EnemyHealDisplayModeIndex = Math.Clamp(
+            takenDamageLog.EnemyHealDisplayModeIndex,
+            DefaultTakenDamageLogEnemyHealDisplayModeIndex,
+            HiddenTakenDamageLogEnemyHealDisplayModeIndex);
 
         takenDamageLog.ClassColorIndexes ??= CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
         takenDamageLog.ClassColorPalettes ??= CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);

@@ -312,7 +312,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>{BuffName} on {Name} has expired</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}'s {BuffName} effect has 2 minutes or less left</value>
+    <value>{Name}'s {BuffName} effect is about to expire</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName} incoming</value>
@@ -571,6 +571,18 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+    <value>Heal</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+    <value>Text copy error</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+    <value>Could not copy the text.</value>
+  </data>
+  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+    <value>{0} recovered {1} HP</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>System</value>
@@ -1230,6 +1242,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>Hide self-damage &amp; friendly fire</value>
+  </data>
+  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+    <value>Enemy healing</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>Buff &amp; Debuff Card</value>

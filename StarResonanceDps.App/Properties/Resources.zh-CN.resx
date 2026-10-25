@@ -312,7 +312,7 @@
     <value>{Name}的{BuffName}效果已结束</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}的{BuffName}效果不足2分钟</value>
+    <value>{Name}的{BuffName}效果即将结束</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}来袭</value>
@@ -571,6 +571,18 @@
   </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻击</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+    <value>治疗</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+    <value>文本复制错误</value>
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+    <value>无法复制文本。</value>
+  </data>
+  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+    <value>{0}恢复{1}HP</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>系统</value>
@@ -1230,6 +1242,9 @@
   </data>
   <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>隐藏自伤与友军伤害</value>
+  </data>
+  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+    <value>敌方治疗</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
     <value>增益减益卡片</value>

@@ -62,6 +62,7 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_ResetWidgetSettings" Click="ResetWidgetSettings_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PlayerInfo_SaveImageFailed" Click="SaveImageFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PlayerInfo_CopyImageFailed" Click="CopyImageFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="TakenDamageLog_CopyTextFailed" Click="CopyTimelineTextFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_ConnectFailed" Click="VoicevoxConnectFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_BadResponse" Click="VoicevoxBadResponse_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_Policy" Click="VoicevoxPolicy_Click" />

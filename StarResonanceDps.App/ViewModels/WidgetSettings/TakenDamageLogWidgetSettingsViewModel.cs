@@ -9,7 +9,7 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// 被ダメログの表示設定。HP数値の出し方、フィルター、クラスアイコンの色(クラスカラー)。
+/// 被ダメログの表示設定。HP数値の出し方、フィルター、敵どうしの回復、クラスアイコンの色(クラスカラー)。
 /// クラスカラーの形はプレイヤーリストと同じで、フィルターと不透明度は持たない。
 /// </summary>
 public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -24,6 +24,9 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
     [ObservableProperty]
     private int _attackerFilterIndex = WidgetConfigDefaults.DefaultTakenDamageLogAttackerFilterIndex;
+
+    [ObservableProperty]
+    private int _enemyHealDisplayModeIndex = WidgetConfigDefaults.DefaultTakenDamageLogEnemyHealDisplayModeIndex;
 
     public TakenDamageLogWidgetSettingsViewModel(TakenDamageLogWidgetSettingsConfig? config)
     {
@@ -101,6 +104,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         {
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             AttackerFilterIndex = AttackerFilterIndex,
+            EnemyHealDisplayModeIndex = EnemyHealDisplayModeIndex,
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
             TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
@@ -180,6 +184,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             AttackerFilterIndex = normalized.AttackerFilterIndex;
+            EnemyHealDisplayModeIndex = normalized.EnemyHealDisplayModeIndex;
         }
         finally
         {
@@ -197,7 +202,8 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         TakenDamageLogWidgetSettingsConfig right)
     {
         if (left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
-            || left.AttackerFilterIndex != right.AttackerFilterIndex)
+            || left.AttackerFilterIndex != right.AttackerFilterIndex
+            || left.EnemyHealDisplayModeIndex != right.EnemyHealDisplayModeIndex)
         {
             return false;
         }
@@ -255,6 +261,11 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     }
 
     partial void OnAttackerFilterIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnEnemyHealDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
     }

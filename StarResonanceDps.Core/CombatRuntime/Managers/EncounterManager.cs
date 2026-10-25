@@ -837,7 +837,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 被ダメログに行があるか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
         ///
         /// <para>
-        /// <b>行数をそのまま見る。</b> 載る経路は予告・詠唱・被弾・ダメージの無い死亡の4つで、
+        /// <b>行数をそのまま見る。</b> 載る経路は予告・詠唱・被弾・ダメージの無い死亡・敵どうしの回復の5つで、
         /// 印を別に持つと経路が増えたときに立て忘れる。判定は実行中のエンカウンターでしか行わないので DB には持たない。
         /// </para>
         /// </summary>
@@ -1153,8 +1153,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <para>
         /// 計測の回は、窓 [起点, 起点 + 計測時間) の中で、かつ自分の出来事のときだけ真。待機中(起点の前)も窓の後も記録しない。
         /// <paramref name="playerUuid"/> は記録の主のプレイヤー(与ダメ・回復の出し手、被弾・死亡の本人、発動したプレイヤー)。
-        /// プレイヤーに属さない記録(敵の詠唱・予告・予告のバーの終わり・敵の死亡)は null で、窓だけを見る。
-        /// 出し手がプレイヤー以外の回復は 0 を渡す(自分ではないので記録しない)。
+        /// プレイヤーに属さない記録(敵の詠唱・予告・予告のバーの終わり・敵の死亡・敵どうしの回復)は null で、窓だけを見る。
         /// </para>
         ///
         /// <para>
@@ -1831,7 +1830,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             bool isCrit, bool isLucky, bool isCauseLucky, bool isMiss, bool isDead, ExtraPacketData extraPacketData)
         {
             // 実際に HP が増えた回復は戦闘の出来事で、MessageManager が記録の前に当てている(最初なら起点を立てる。回復だけの戦闘でも HPS メーターが動く)。
-            // 起点より前の回復は、何も記録しない(過剰回復・行動時刻・履歴表示の解除も)。計測の回は窓の中の自分の回復だけ(出し手がプレイヤー以外の回復は attackerUuid が 0)。
+            // 起点より前の回復は、何も記録しない(過剰回復・行動時刻・履歴表示の解除も)。計測の回は窓の中の自分の回復だけ。
+            // 渡されるのはプレイヤー(とその召喚)の回復だけ。敵どうしの回復は回の合計に入れず、被ダメログにだけ残す(AddEnemyHeal)。
             if (!IsAfterCombatClockStart(extraPacketData.ArrivalTime)
                 || !IsRecorded(extraPacketData.ArrivalTime, attackerUuid))
             {
@@ -2248,6 +2248,73 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 敵どうしの回復を被ダメログに残す。どの回復を残すか(回復した側も回復された側もプレイヤーでない、実際に HP が増えた回復)と、
+        /// HP を載せる回復(<paramref name="carriesHp"/>)は <c>MessageManager</c> が同期全体を見て決める。
+        /// </summary>
+        /// <param name="healerUuid">回復した側。召喚体は寄せた後(<see cref="ResolveTakenDamageLogActor"/>)。</param>
+        /// <param name="value">実際に増えた HP。</param>
+        /// <param name="healthBefore">その同期を当てる前の回復された側の HP・最大HP・バリア量。<paramref name="carriesHp"/> の回復にだけ載せる。</param>
+        public void AddEnemyHeal(
+            long healerUuid, long targetUuid, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId,
+            long value, bool carriesHp, TargetHealth healthBefore, ExtraPacketData extraPacketData)
+        {
+            if (!IsRecorded(extraPacketData.ArrivalTime, null))
+            {
+                return;
+            }
+
+            // 敵どうしの回復も「次のイベント」。AddHealing を通らないので、ここで解除する。
+            EncounterHistoryProvider.NotifyLiveEncounterEvent();
+
+            LastUpdate = extraPacketData.ArrivalTime;
+
+            // 名前は実体(AttrId)から引くので、回を作り直した直後の回復でも引けるように実体を作っておく。
+            GetOrCreateEntity(healerUuid);
+            var targetEntity = GetOrCreateEntity(targetUuid);
+
+            var heal = new EnemyHealRecord
+            {
+                HealerUuid = healerUuid,
+                TargetUuid = targetUuid,
+                OwnerId = ownerId,
+                DamageSource = damageSource,
+                BuffSourceSkillId = buffSourceSkillId,
+                SummonSourceSkillId = summonSourceSkillId,
+                Value = value,
+                Timestamp = extraPacketData.ArrivalTime,
+                Sequence = NextTakenDamageLogSequence(),
+                TargetHp = carriesHp ? targetEntity.GetAttrKV("AttrHp") as long? : null,
+                TargetMaxHp = carriesHp ? targetEntity.GetAttrKV("AttrMaxHp") as long? : null,
+                TargetShield = carriesHp ? Utils.GetCurrentShield(targetEntity) : null,
+                TargetHpBefore = carriesHp ? healthBefore.Hp : null,
+                TargetMaxHpBefore = carriesHp ? healthBefore.MaxHp : null,
+                TargetShieldBefore = carriesHp ? healthBefore.Shield : null,
+            };
+
+            lock (_takenDamageLogGate)
+            {
+                ExData.EnemyHeals.Add(heal);
+                _takenDamageLog.Add(TakenDamageLogRecord.ForEnemyHeal(heal));
+            }
+        }
+
+        /// <summary>敵どうしの回復に出てくる実体(回復した側と回復された側)。DB に保存する実体を選ぶのに使う。</summary>
+        public HashSet<long> GetEnemyHealEntityUuids()
+        {
+            lock (_takenDamageLogGate)
+            {
+                var uuids = new HashSet<long>();
+                foreach (var heal in ExData.EnemyHeals)
+                {
+                    uuids.Add(heal.HealerUuid);
+                    uuids.Add(heal.TargetUuid);
+                }
+
+                return uuids;
+            }
+        }
+
         private long NextTakenDamageLogSequence()
         {
             return Interlocked.Increment(ref _takenDamageLogSequence);
@@ -2273,7 +2340,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>
         /// <b>DB から読んだエンカウンターは並びを持たない</b>ので、実行中のエンカウンター以外で空なら
-        /// 1回だけ、予告とダメージの無い死亡とプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
+        /// 1回だけ、予告とダメージの無い死亡と敵どうしの回復とプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
         /// </para>
         /// </summary>
         public TakenDamageLogRecord[] GetTakenDamageLogRecords(int startIndex)
@@ -2308,6 +2375,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             foreach (var death in ExData.PlayerDeaths)
             {
                 records.Add(TakenDamageLogRecord.ForDeath(death));
+            }
+
+            foreach (var heal in ExData.EnemyHeals)
+            {
+                records.Add(TakenDamageLogRecord.ForEnemyHeal(heal));
             }
 
             foreach (var (uuid, entity) in Entities)
@@ -2681,6 +2753,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         [ProtoMember(14)]
         public int SeasonId { get; set; } = 0;
+        /// <summary>被ダメログの敵どうしの回復(<see cref="Encounter.AddEnemyHeal"/>)。予告と同じくここに持つ。</summary>
+        [ProtoMember(15)]
+        public List<EnemyHealRecord> EnemyHeals { get; set; } = [];
 
         public EncounterExData() { }
     }
