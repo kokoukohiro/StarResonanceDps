@@ -18,7 +18,8 @@ namespace StarResonanceDps.App.Models.Notifications;
 /// </para>
 ///
 /// <para>
-/// 名前とスキル名はタイムラインの行と同じ文字(名前の無い技は行と同じ「何か」)。内部ID注記は付けない。
+/// 名前とスキル名はタイムラインの行と同じ引き方の公式の名前で、名前の無い技は「何か」。
+/// 内部名は使わない(読み上げで日本語以外を読めないため。タイムラインの行は内部名になることがある)。内部ID注記は付けない。
 /// </para>
 /// </summary>
 public sealed class TelegraphedSkillNotificationTracker

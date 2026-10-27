@@ -226,6 +226,9 @@ public static class CombatDataCatalog
     /// </summary>
     private static int _internalIdDisplayMode = (int)InternalIdDisplayMode.Hidden;
 
+    // 名前の無い技に内部名を出すか(全体設定。既定はオン)。Volatile で読み書きする。
+    private static bool _showsUnnamedSkillInternalNames = true;
+
     public static void SetCulture(string? cultureName)
     {
         Volatile.Write(ref _cultureName, NormalizeCultureName(cultureName));
@@ -235,6 +238,18 @@ public static class CombatDataCatalog
     {
         Volatile.Write(ref _internalIdDisplayMode, (int)mode);
     }
+
+    /// <summary>
+    /// 名前の無い技に内部名を出すか。出すのは画面の技名(タイムライン・スキル詳細の行・推移グラフ・プレイヤーリストの技の枠)だけで、
+    /// 空欄の検知(<see cref="GetSourceNameBeforeLanding"/>)・予兆技の通知・保存する名前には効かない。
+    /// </summary>
+    public static void SetUnnamedSkillInternalNameDisplay(bool shows)
+    {
+        Volatile.Write(ref _showsUnnamedSkillInternalNames, shows);
+    }
+
+    /// <summary><see cref="SetUnnamedSkillInternalNameDisplay"/> の今の値。</summary>
+    public static bool ShowsUnnamedSkillInternalNames => Volatile.Read(ref _showsUnnamedSkillInternalNames);
 
     /// <summary>
     /// 参照した内部IDを名前に添える。<b>書式は全言語で半角括弧。</b>
@@ -466,7 +481,8 @@ public static class CombatDataCatalog
     /// 見出し表で名前が空の行は、バフから来た行で鍵のバフが料理なら料理の名前(<c>CuisineBuffs.json</c>)。
     /// それも無ければ、記録時に付与元をたどって着いた先(<paramref name="landing"/>)の名前を出す。
     /// オプションのバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら <c>SkillNames</c>。
-    /// 着いていなければ空のまま(内部ID注記だけ)。見出し表の名前をこれらで上書きすることはない。
+    /// それも空なら、全体設定で内部名を出すときは内部名(<see cref="GetSourceInternalName"/>)、出さなければ空のまま(内部ID注記だけ)。
+    /// 見出し表の名前をこれらで上書きすることはない。
     /// </para>
     ///
     /// <para>
@@ -482,10 +498,40 @@ public static class CombatDataCatalog
             name = GetLandingName(landing);
         }
 
+        if (string.IsNullOrEmpty(name) && ShowsUnnamedSkillInternalNames)
+        {
+            name = GetSourceInternalName(rowKey, isBuffSource, landing);
+        }
+
         return AppendSourceInternalId(
             name,
             isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
             rowKey);
+    }
+
+    /// <summary>
+    /// メーターの行の内部名。付与元をたどって技に着いていればその技の内部名、空なら行の鍵の番号で引く
+    /// (バフの行はバフの内部名、それ以外は技の内部名。弾の番号は親の技へたどる)。どれも無ければ空。
+    /// </summary>
+    private static string GetSourceInternalName(long rowKey, bool isBuffSource, SourceLanding landing)
+    {
+        var name = landing.Kind == SourceLandingKind.Skill
+            ? GetSkillInternalName(landing.Id)
+            : string.Empty;
+        if (name.Length != 0)
+        {
+            return name;
+        }
+
+        var ownerId = SourceKeyOwnerId(rowKey);
+        if (isBuffSource)
+        {
+            return GetBuffInternalName(ownerId);
+        }
+
+        return TryResolveBulletParentSkillId(ownerId, out var skillId)
+            ? GetSkillInternalName(skillId)
+            : string.Empty;
     }
 
     /// <summary>
@@ -766,7 +812,7 @@ public static class CombatDataCatalog
     ///
     /// <para>
     /// 最後に手修正(<see cref="_skillActivationOverrides"/>、押した技の技ID)で、書いてある言語の名前とアイコンだけを差し替える。
-    /// 書いていない言語とアイコンは上の決め方のまま。
+    /// 書いていない言語とアイコンは上の決め方のまま。それでも名前が空なら、全体設定で内部名を出すときは押した技の内部名。
     /// </para>
     ///
     /// <para>
@@ -806,6 +852,11 @@ public static class CombatDataCatalog
             {
                 iconName = overrideIcon;
             }
+        }
+
+        if (string.IsNullOrEmpty(name) && ShowsUnnamedSkillInternalNames)
+        {
+            name = GetSkillInternalName(skillId);
         }
 
         return (
@@ -1382,6 +1433,40 @@ public static class CombatDataCatalog
     public static string GetSkillNameWithoutInternalId(int skillId)
     {
         return ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId);
+    }
+
+    /// <summary>
+    /// 技の内部名(<c>SkillTable.NameDesign</c>。開発用の中国語の名前で、言語で変わらない)。表に行が無いか空なら空を返す。
+    /// 表示名(<see cref="GetSkillNameWithoutInternalId"/>)には混ぜない。名前の無い技に出すのは画面の技名を引く所だけ(<see cref="ShowsUnnamedSkillInternalNames"/>)。
+    /// </summary>
+    public static string GetSkillInternalName(int skillId)
+    {
+        return _skills.TryGetValue(skillId, out var skill) && !string.IsNullOrWhiteSpace(skill.NameDesign)
+            ? skill.NameDesign.Trim()
+            : string.Empty;
+    }
+
+    /// <summary>バフの内部名(<c>BuffTable.NameDesign</c>)。表に行が無いか空なら空を返す。使い方は <see cref="GetSkillInternalName"/> と同じ。</summary>
+    public static string GetBuffInternalName(int buffId)
+    {
+        return _buffs.TryGetValue(buffId, out var buff) && !string.IsNullOrWhiteSpace(buff.NameDesign)
+            ? buff.NameDesign.Trim()
+            : string.Empty;
+    }
+
+    /// <summary>
+    /// 画面に出す技名(内部ID注記つき)。名前が無ければ、全体設定で内部名を出すときは技の内部名。
+    /// プレイヤーリストの技の枠が使う。保存する名前や判定には <see cref="GetSkillName"/> を使う。
+    /// </summary>
+    public static string GetSkillDisplayName(int skillId)
+    {
+        var name = ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId);
+        if (string.IsNullOrEmpty(name) && ShowsUnnamedSkillInternalNames)
+        {
+            name = GetSkillInternalName(skillId);
+        }
+
+        return AppendInternalId(name, InternalIdDisplayMode.SkillOnly, skillId);
     }
 
     /// <summary>

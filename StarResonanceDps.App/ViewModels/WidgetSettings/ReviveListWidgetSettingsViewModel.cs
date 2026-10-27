@@ -4,11 +4,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// 蘇生リストの設定。表示設定の「プレイヤー名」(書式)と「自分の強調表示」はプレイヤーリスト(<see cref="MeterWidgetSettingsViewModel"/>)と同じ作り、
+/// 「ゲージの長さ」とデバフカラーはデバフ一覧(<see cref="BuffListWidgetSettingsViewModel"/>)と同じ作り(色の節は共有の部品 <see cref="BuffGaugeColorSettingsViewModel"/>)、
 /// アイコンカラーは被ダメログ(<see cref="TakenDamageLogWidgetSettingsViewModel"/>)と同じ作り、
 /// テキストカラーは装備詳細(<see cref="EquipmentWidgetSettingsViewModel"/>)と同じ作り(見本は「Aa」)。
 /// </summary>
@@ -21,7 +23,7 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
     private bool _isLoading;
 
     [ObservableProperty]
-    private string _playerInfoFormatString = WidgetConfigDefaults.DefaultPlayerListPlayerInfoFormatString;
+    private string _playerInfoFormatString = WidgetConfigDefaults.DefaultReviveListPlayerInfoFormatString;
 
     [ObservableProperty]
     private MeterPlayerInfoFormatField? _selectedPlayerInfoFormatField;
@@ -32,10 +34,17 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
     [ObservableProperty]
     private int _selfDisplayModeIndex = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
+    /// <summary>ゲージの長さ。添字は <see cref="WidgetConfigDefaults.BuffGaugeLengthSeconds"/> と同じ。</summary>
+    [ObservableProperty]
+    private int _gaugeLengthIndex = WidgetConfigDefaults.DefaultReviveListGaugeLengthIndex;
+
     public ReviveListWidgetSettingsViewModel(ReviveListWidgetSettingsConfig? config)
     {
         AvailablePlayerInfoFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availablePlayerInfoFormatFields);
         RebuildPlayerInfoFormatFields();
+
+        GaugeColors = new BuffGaugeColorSettingsViewModel(PlayerBuffListKind.Debuff);
+        GaugeColors.Changed += NotifyChanged;
 
         var classItems = new ObservableCollection<MeterClassColorItemViewModel>();
         var classColorKeys = WidgetConfigDefaults.GetClassColorKeys(WidgetKind.ReviveList);
@@ -81,6 +90,9 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
 
     public ReadOnlyObservableCollection<MeterPlayerInfoFormatField> AvailablePlayerInfoFormatFields { get; }
 
+    /// <summary>ゲージの色の節(「デバフカラー」)。</summary>
+    public BuffGaugeColorSettingsViewModel GaugeColors { get; }
+
     /// <summary>アイコンカラーの行。職ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
 
@@ -113,6 +125,9 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
     {
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
 
+        GaugeColors.Changed -= NotifyChanged;
+        GaugeColors.Dispose();
+
         foreach (var item in ClassColorItems)
         {
             item.Colors.PaletteChanged -= Colors_PaletteChanged;
@@ -130,6 +145,8 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
         {
             PlayerInfoFormatString = PlayerInfoFormatString ?? string.Empty,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
+            GaugeLengthIndex = GaugeLengthIndex,
+            GaugeColors = GaugeColors.CreateConfig(),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
             TextColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
@@ -197,8 +214,10 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
         _isLoading = true;
         try
         {
-            PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? WidgetConfigDefaults.DefaultPlayerListPlayerInfoFormatString;
+            PlayerInfoFormatString = normalized.PlayerInfoFormatString ?? WidgetConfigDefaults.DefaultReviveListPlayerInfoFormatString;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
+            GaugeLengthIndex = normalized.GaugeLengthIndex;
+            GaugeColors.Load(normalized.GaugeColors);
 
             foreach (var item in ClassColorItems)
             {
@@ -239,6 +258,11 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(SelfHighlightEnabled));
         OnPropertyChanged(nameof(SelfHighlightStateText));
+        NotifyChanged();
+    }
+
+    partial void OnGaugeLengthIndexChanged(int value)
+    {
         NotifyChanged();
     }
 
@@ -309,7 +333,9 @@ public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject
     private static bool SettingsEqual(ReviveListWidgetSettingsConfig left, ReviveListWidgetSettingsConfig right)
     {
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
-            || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex)
+            || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
+            || left.GaugeLengthIndex != right.GaugeLengthIndex
+            || !BuffGaugeColorSettingsViewModel.ConfigEquals(left.GaugeColors!, right.GaugeColors!))
         {
             return false;
         }

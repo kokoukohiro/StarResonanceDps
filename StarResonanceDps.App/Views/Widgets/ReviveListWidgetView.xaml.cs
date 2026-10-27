@@ -21,10 +21,7 @@ public partial class ReviveListWidgetView : UserControl, IWidgetVerticalScrollCo
     private const string PlayerSelectionContextMenuLastItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Last";
 
     /// <summary>スクロールバーの矢印1回で動く量。行の高さと同じ。</summary>
-    private const double SmallScrollChange = 36d;
-
-    /// <summary>一覧のテンプレートの中の ScrollViewer(仮想化のため一覧の中に置く)。読み込むまでは null。</summary>
-    private ScrollViewer? _scrollViewer;
+    private const double SmallScrollChange = 31d;
 
     private ContextMenu? _openPlayerSelectionMenu;
     private ReviveListEntry? _openPlayerSelectionEntry;
@@ -41,46 +38,29 @@ public partial class ReviveListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
     {
-        if (_scrollViewer is null)
-        {
-            return new WidgetVerticalScrollMetrics(0, 0, 0, 1, 1);
-        }
-
-        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
-        var viewport = Math.Max(_scrollViewer.ViewportHeight, 0);
+        var maximum = Math.Max(ReviveListScrollViewer.ScrollableHeight, 0);
+        var viewport = Math.Max(ReviveListScrollViewer.ViewportHeight, 0);
 
         return new WidgetVerticalScrollMetrics(
             maximum,
             viewport,
-            Math.Min(_scrollViewer.VerticalOffset, maximum),
+            Math.Min(ReviveListScrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9, 1),
             SmallScrollChange);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)
     {
-        if (_scrollViewer is null)
-        {
-            return;
-        }
-
-        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
+        var maximum = Math.Max(ReviveListScrollViewer.ScrollableHeight, 0);
         var offset = double.IsFinite(verticalOffset)
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        _scrollViewer.ScrollToVerticalOffset(offset);
+        ReviveListScrollViewer.ScrollToVerticalOffset(offset);
     }
 
     private void ReviveListWidgetView_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_scrollViewer is null)
-        {
-            ReviveListItemsControl.ApplyTemplate();
-            _scrollViewer = (ScrollViewer)ReviveListItemsControl.Template.FindName("ReviveListScrollViewer", ReviveListItemsControl);
-            _scrollViewer.ScrollChanged += ReviveListScrollViewer_ScrollChanged;
-        }
-
         NotifyVerticalScrollMetricsChanged();
     }
 
@@ -96,26 +76,7 @@ public partial class ReviveListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void ReviveListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        // 行の部品は別の人の行に使い回されるので、位置が動いたら開いているメニューを閉じる
-        // (開いたままだと、メニューの相手が使い回した先の人に替わる)。
-        if (e.VerticalChange != 0)
-        {
-            ClosePlayerSelectionMenu();
-        }
-
         NotifyVerticalScrollMetricsChanged();
-    }
-
-    /// <summary>
-    /// 行の部品が見えている範囲から外された(別の行に使い回される)。その行がメニューを開いている行なら閉じる。
-    /// 位置が動かずに行だけが外へ押し出される(並びが動く)ときも、ここで拾う。
-    /// </summary>
-    private void ReviveListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
-    {
-        if (_openPlayerSelectionEntry is not null && ReferenceEquals(e.Value, _openPlayerSelectionEntry))
-        {
-            ClosePlayerSelectionMenu();
-        }
     }
 
     /// <summary>左クリックはメニューを開かず、その行の人のプレイヤー情報を直接開く。メニューは右クリック側が担う。</summary>

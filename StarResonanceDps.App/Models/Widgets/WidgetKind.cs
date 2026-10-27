@@ -34,5 +34,8 @@ public enum WidgetKind
     BuffDebuffGroup = 23,
 
     /// <summary>蘇生リスト。戦闘不能のプレイヤーと、蘇生不可デバフの残り時間の一覧。</summary>
-    ReviveList = 24
+    ReviveList = 24,
+
+    /// <summary>被ダメリスト。被弾したプレイヤーと、その人の最後の被弾の一覧。</summary>
+    DamageTakenList = 25
 }

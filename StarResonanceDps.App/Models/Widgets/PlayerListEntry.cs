@@ -315,6 +315,15 @@ public sealed partial class PlayerListEntry : ObservableObject
         _filteredRoleSkillSnapshots = visible;
     }
 
+    /// <summary>
+    /// 次の <see cref="RefreshSkillDisplay"/> で技の一覧を読み直させる。技の枠の名前は一覧を読んだときに焼き込むので、
+    /// 言語・内部IDの表示・名前の無い技の内部名の設定が変わったら呼ぶ(一覧の元のデータは変わらないので、そのままでは読み直さない)。
+    /// </summary>
+    public void InvalidateSkillLoadout()
+    {
+        _skillLoadoutInitialized = false;
+    }
+
     private bool RefreshSkillLoadoutIfChanged()
     {
         if (!MeterSnapshotProvider.TryGetPlayerListImagineRoleSkillSourceState(

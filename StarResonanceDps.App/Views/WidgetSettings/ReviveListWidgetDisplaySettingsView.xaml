@@ -5,8 +5,8 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        蘇生リストの表示設定。「プレイヤー名」と「自分の強調表示」で、作りはプレイヤーリストの同じ行
-        (MeterWidgetDisplaySettingsView)と同じ。
+        蘇生リストの表示設定。「プレイヤー名」と「自分の強調表示」の作りはプレイヤーリストの同じ行
+        (MeterWidgetDisplaySettingsView)と同じ、「ゲージの長さ」はデバフ一覧の同じ行(BuffListWidgetDisplaySettingsView)と同じ。
     -->
     <StackPanel>
         <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
@@ -113,8 +113,7 @@
                     </Grid>
                 </Border>
 
-                <!-- 最後の行なので線を引かない。 -->
-                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                <Border Style="{StaticResource Panel.SettingField}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -140,6 +139,32 @@
                                        FontSize="14"
                                        FontWeight="SemiBold" />
                         </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 最後の行なので線を引かない。 -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_GaugeLength]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは WidgetConfigDefaults.BuffGaugeLengthSeconds の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding GaugeLengthIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_Auto]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_10]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_20]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[GaugeLength_30]}" />
+                        </ComboBox>
                     </Grid>
                 </Border>
             </StackPanel>

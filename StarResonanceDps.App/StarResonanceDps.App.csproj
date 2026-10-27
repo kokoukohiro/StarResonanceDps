@@ -74,6 +74,8 @@
     <None Remove="Assets\Images\main_progress_icon_no.png" />
     <None Remove="Assets\Images\main_progress_icon_rock.png" />
     <None Remove="Assets\Images\main_progress_icon_wind.png" />
+    <None Remove="Assets\Images\main_warning_base.png" />
+    <None Remove="Assets\Images\map_icon_iocation.png" />
     <None Remove="Assets\Images\profession_horizontal_01.png" />
     <None Remove="Assets\Images\profession_horizontal_02.png" />
     <None Remove="Assets\Images\profession_horizontal_03.png" />
@@ -226,6 +228,8 @@
     <Resource Include="Assets\Images\main_progress_icon_no.png" />
     <Resource Include="Assets\Images\main_progress_icon_rock.png" />
     <Resource Include="Assets\Images\main_progress_icon_wind.png" />
+    <Resource Include="Assets\Images\main_warning_base.png" />
+    <Resource Include="Assets\Images\map_icon_iocation.png" />
     <Resource Include="Assets\Images\profession_horizontal_01.png" />
     <Resource Include="Assets\Images\profession_horizontal_02.png" />
     <Resource Include="Assets\Images\profession_horizontal_03.png" />

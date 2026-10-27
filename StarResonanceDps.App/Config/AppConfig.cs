@@ -71,6 +71,12 @@ public sealed class SettingsConfig
     public int InternalIdDisplayModeIndex { get; set; }
 
     /// <summary>
+    /// 名前の無い技の出し方。0=空欄にする / 1=内部名で表示(画面の技名だけ。予兆技の通知と空欄の検知には効かない)。
+    /// Core へは <c>CombatDataCatalog.SetUnnamedSkillInternalNameDisplay</c> で渡す。
+    /// </summary>
+    public int UnnamedSkillNameDisplayModeIndex { get; set; } = AppConfigDefaults.UnnamedSkillNameInternalNameIndex;
+
+    /// <summary>
     /// ウィジェットの窓を最前面に出す条件。0=常に最前面 / 1=ピン留め時のみ最前面。
     /// 反映は <c>WidgetWindow.ApplyTopmost</c>。
     /// </summary>
@@ -111,6 +117,7 @@ public sealed class SettingsConfig
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
+            UnnamedSkillNameDisplayModeIndex = UnnamedSkillNameDisplayModeIndex,
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayModeIndex,
             WindowColorIndex = WindowColorIndex,

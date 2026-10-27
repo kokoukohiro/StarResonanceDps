@@ -574,8 +574,7 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
     <value>Heal</value>
-  </data>
-  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
     <value>Text copy error</value>
   </data>
   <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
@@ -1231,6 +1230,12 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="EntityList_UnknownEnemy" xml:space="preserve">
     <value>Unknown enemy</value>
   </data>
+  <data name="EntityList_Targeted" xml:space="preserve">
+    <value>Targeted</value>
+  </data>
+  <data name="EntityList_HateValue" xml:space="preserve">
+    <value>Aggro: {0}</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>Sort Order</value>
   </data>
@@ -1300,7 +1305,17 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>Revive List</value>
   </data>
-  <data name="ReviveList_Revivable" xml:space="preserve">
+  <data name="Widget_DamageTakenList" xml:space="preserve">
+    <value>Damage Taken List</value>
+  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+    <value>(Defeated)</value>
+  </data>
+  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
+    <value>{0}s ago</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+    <value>Show cause of defeat</value>
+  </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>Revivable</value>
   </data>
   <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
@@ -1332,6 +1347,18 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>Map IDs only</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
+    <value>Unnamed skills</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
+    <value>Note: Internal names are in Chinese only.</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_Blank" xml:space="preserve">
+    <value>Leave blank</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_InternalName" xml:space="preserve">
+    <value>Show internal name</value>
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>Widget Windows</value>

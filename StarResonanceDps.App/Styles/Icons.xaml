@@ -43,6 +43,10 @@
     <!-- 戦闘状態の印(プレイヤーリスト・エンティティリストの名前の左)。ファイルはステータス詳細の項目の絵と同じ。 -->
     <BitmapImage x:Key="Icon.CombatState" UriSource="/Assets/Images/common_icon03.png" />
 
+    <!-- エンティティリストのヘイトの枠のバッジ。狙っている相手の印と、ヘイトのゲージの形。塗るのは HateBadgeImages。 -->
+    <BitmapImage x:Key="Icon.HateTarget" UriSource="/Assets/Images/map_icon_iocation.png" />
+    <BitmapImage x:Key="Icon.HateGauge" UriSource="/Assets/Images/main_warning_base.png" />
+
     <!--
         戦闘状態の印の見た目。Brush.CombatState で塗った面を絵で型抜きし、影は文字と同じ。
         大きさ・余白・出すか・ツールチップは使う画面が持つ(行の高さが画面ごとに違う)。

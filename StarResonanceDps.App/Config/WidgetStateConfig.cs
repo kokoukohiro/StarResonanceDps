@@ -37,6 +37,8 @@ public sealed class WidgetConfig
 
     public ReviveListWidgetSettingsConfig? ReviveList { get; set; }
 
+    public DamageTakenListWidgetSettingsConfig? DamageTakenList { get; set; }
+
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
     ///
@@ -79,6 +81,7 @@ public sealed class WidgetConfig
             PlayerStatus = PlayerStatus?.Clone(),
             BuffDebuffGroup = BuffDebuffGroup?.Clone(),
             ReviveList = ReviveList?.Clone(),
+            DamageTakenList = DamageTakenList?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -726,16 +729,26 @@ public sealed class EquipmentWidgetSettingsConfig
 }
 
 /// <summary>
-/// 蘇生リストの設定。プレイヤー名の書式と自分の強調表示(どちらもプレイヤーリストと同じ値の形)、クラスアイコンの色(アイコンカラー)、
-/// 「蘇生可能」の文字の色(テキストカラー)。アイコンカラーの形と既定の色はプレイヤーリストと同じで、フィルターと不透明度は持たない。
+/// 蘇生リストの設定。プレイヤー名の書式と自分の強調表示(どちらもプレイヤーリストと同じ値の形)、ゲージの長さと色(デバフカラー、デバフ一覧と同じ形)、
+/// クラスアイコンの色(アイコンカラー)、「蘇生可能」の文字の色(テキストカラー)。
+/// アイコンカラーの形と既定の色はプレイヤーリストと同じで、フィルターと不透明度は持たない。
 /// </summary>
 public sealed class ReviveListWidgetSettingsConfig
 {
-    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultPlayerListPlayerInfoFormatString"/>。</remarks>
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultReviveListPlayerInfoFormatString"/>。</remarks>
     public string? PlayerInfoFormatString { get; set; }
 
     /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示(プレイヤーリストと同じ値)。</summary>
     public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+
+    /// <summary>
+    /// ゲージが満タンになる残り時間。添字はバフ一覧と同じ(<see cref="WidgetConfigDefaults.BuffGaugeLengthSeconds"/>)。
+    /// 自動は蘇生不可デバフの効果時間の総量。
+    /// </summary>
+    public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultReviveListGaugeLengthIndex;
+
+    /// <summary>ゲージの色(「デバフカラー」)。</summary>
+    public BuffGaugeColorConfig? GaugeColors { get; set; }
 
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.ReviveList);
 
@@ -752,6 +765,8 @@ public sealed class ReviveListWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
+            GaugeLengthIndex = GaugeLengthIndex,
+            GaugeColors = GaugeColors?.Clone(),
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.ReviveList)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -767,6 +782,50 @@ public sealed class ReviveListWidgetSettingsConfig
             TextColorPalettes = TextColorPalettes is null
                 ? WidgetConfigDefaults.CreateDefaultReviveListTextColorPalettes()
                 : TextColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// 被ダメリストの設定。プレイヤー名の書式と自分の強調表示(蘇生リストと同じ値の形)、右の書式(設定「スキル名」)、
+/// 戦闘不能の原因を表示するか、クラスアイコンの色(アイコンカラー、蘇生リストと同じ形と既定の色)。
+/// バーの色(節「属性カラー」)は属性カラーの設定(<see cref="WidgetConfig.ElementColor"/>)が持つ。
+/// </summary>
+public sealed class DamageTakenListWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenListPlayerInfoFormatString"/>。</remarks>
+    public string? PlayerInfoFormatString { get; set; }
+
+    /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示(プレイヤーリストと同じ値)。</summary>
+    public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
+
+    /// <remarks>右の書式。<c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenListHitInfoFormatString"/>。</remarks>
+    public string? HitInfoFormatString { get; set; }
+
+    /// <summary>その被弾で倒れた行の被ダメ値の後ろに「(戦闘不能)」を出すか(設定「戦闘不能の原因を表示」)。</summary>
+    public bool ShowsDefeatCause { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListShowsDefeatCause;
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList);
+
+    public DamageTakenListWidgetSettingsConfig Clone()
+    {
+        return new DamageTakenListWidgetSettingsConfig
+        {
+            PlayerInfoFormatString = PlayerInfoFormatString,
+            SelfDisplayModeIndex = SelfDisplayModeIndex,
+            HitInfoFormatString = HitInfoFormatString,
+            ShowsDefeatCause = ShowsDefeatCause,
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList)
+                : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
                     StringComparer.OrdinalIgnoreCase)
@@ -913,13 +972,14 @@ public static class WidgetConfigDefaults
     /// <summary>ステータス詳細で、割合と実数値を1行にまとめた行の括弧の実数値を出すか。</summary>
     public const bool DefaultPlayerStatusShowActualValues = true;
     public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
+    public const string DefaultReviveListPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultDamageTakenListPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
 
     public const int MinBuffCardScale = 100;
     public const int MaxBuffCardScale = 1000;
     public const int DefaultBuffCardScale = 200;
     public const int BuffCardScaleStep = 25;
-
 
     private const double PlayerListInitialWindowWidth = 457d;
     private const double PlayerListInitialWindowHeight = 460d;
@@ -943,9 +1003,17 @@ public static class WidgetConfigDefaults
     private const double PlayerModuleInitialWindowHeight = 240d;
     private const double BuffDebuffCardInitialWindowWidth = 260d;
     private const double BuffDebuffCardInitialWindowHeight = 260d;
-
-    /// <summary>バフ・デバフグループの既定の幅(バフ・デバフ一覧と共有しない)。値はステータス詳細と同じ。</summary>
     private const double BuffDebuffGroupInitialWindowWidth = 280d;
+    private const double ReviveListInitialWindowWidth = 360d;
+    private const double ReviveListInitialWindowHeight = 400d;
+    private const double DamageTakenListInitialWindowWidth = 440d;
+    private const double DamageTakenListInitialWindowHeight = 460d;
+    private const double MetricContributionInitialWindowWidth = 520d;
+    private const double MetricContributionInitialWindowHeight = 460d;
+    private const double MetricSummaryInitialWindowWidth = 720d;
+    private const double MetricSummaryInitialWindowHeight = 180d;
+    private const double MetricTimelineInitialWindowWidth = 440d;
+    private const double MetricTimelineInitialWindowHeight = 260d;
 
     /// <summary>
     /// バフ・デバフグループの既定の高さ。既定でオンの行(<see cref="DefaultBuffDebuffGroupEntries"/>)がちょうど入る高さで、
@@ -954,21 +1022,6 @@ public static class WidgetConfigDefaults
     /// </summary>
     private static double BuffDebuffGroupInitialWindowHeight =>
         30d + 10d + 31d * DefaultBuffDebuffGroupEntries.Count(entry => entry.IsEnabled);
-
-    /// <summary>蘇生リストの既定の幅(ほかと共有しない)。値はステータス詳細と同じ。</summary>
-    private const double ReviveListInitialWindowWidth = 280d;
-
-    /// <summary>
-    /// 蘇生リストの既定の高さ(ほかと共有しない)。5人パーティがちょうど入る高さで、
-    /// 窓のヘッダー30 + 一覧の上下の余白10 + 行の高さ36 × 5。
-    /// </summary>
-    private const double ReviveListInitialWindowHeight = 30d + 10d + 36d * 5d;
-    private const double MetricContributionInitialWindowWidth = 520d;
-    private const double MetricContributionInitialWindowHeight = 460d;
-    private const double MetricSummaryInitialWindowWidth = 720d;
-    private const double MetricSummaryInitialWindowHeight = 180d;
-    private const double MetricTimelineInitialWindowWidth = 440d;
-    private const double MetricTimelineInitialWindowHeight = 260d;
 
     public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [5, 3, 2, 1];
 
@@ -1063,15 +1116,20 @@ public static class WidgetConfigDefaults
         "Unknown"
     ];
 
+    /// <summary>
+    /// エンティティリストのアイコンカラーの鍵。敵の種類、ヘイトの枠のプレイヤーのクラス、最後に不明。
+    /// 不明は敵の不明とプレイヤーの不明の両方を1色で塗る(絵が同じなので分けない)。
+    /// </summary>
     public static readonly string[] EntityClassColorKeys =
     [
         "Monster",
         "Elite",
         "Boss",
+        .. ClassColorKeys.Where(key => key != "Unknown"),
         "Unknown"
     ];
 
-    /// <summary>ゲージの色の鍵。左端と右端の2つで、間はグラデーションになる。バフ・デバフ一覧とバフ・デバフグループで共通。</summary>
+    /// <summary>ゲージの色の鍵。左端と右端の2つで、間はグラデーションになる。バフ・デバフ一覧・バフ・デバフグループ・蘇生リストで共通。</summary>
     public static readonly string[] BuffGaugeColorKeys =
     [
         "GaugeStart",
@@ -1081,7 +1139,7 @@ public static class WidgetConfigDefaults
     public const int MinBuffGaugeLengthIndex = 0;
 
     /// <summary>
-    /// ゲージが満タンになる残り時間。添字は 0=自動 / 1=10秒 / 2=20秒 / 3=30秒。バフ・デバフ一覧とバフ・デバフグループで共通。
+    /// ゲージが満タンになる残り時間。添字は 0=自動 / 1=10秒 / 2=20秒 / 3=30秒。バフ・デバフ一覧・バフ・デバフグループ・蘇生リストで共通。
     /// 自動は null で、行ごとの長さ(<c>PlayerBuffSnapshot.GaugeLengthSeconds</c>、実体の効果時間の総量)を使う。
     /// </summary>
     public static readonly int?[] BuffGaugeLengthSeconds = [null, 10, 20, 30];
@@ -1094,6 +1152,9 @@ public static class WidgetConfigDefaults
 
     /// <summary>バフ・デバフグループの既定。行ごとに実体の効果時間の総量(自動)。</summary>
     public const int DefaultBuffDebuffGroupGaugeLengthIndex = 0;
+
+    /// <summary>蘇生リストの既定。蘇生不可デバフの効果時間の総量(自動)。</summary>
+    public const int DefaultReviveListGaugeLengthIndex = 0;
 
     /// <summary>
     /// バフ・デバフグループの既定の行(この並び)。既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
@@ -1573,6 +1634,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.ReviveList;
     }
 
+    /// <summary>被ダメリストの設定(プレイヤー名・スキル名・自分の強調表示・アイコンカラー・テキストカラー)を持つ種別か。</summary>
+    public static bool SupportsDamageTakenListSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.DamageTakenList;
+    }
+
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
     public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
     {
@@ -1621,7 +1688,8 @@ public static class WidgetConfigDefaults
             Equipment = SupportsEquipmentSettings(kind) ? CreateEquipmentSettings() : null,
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
             BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null,
-            ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null
+            ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null,
+            DamageTakenList = SupportsDamageTakenListSettings(kind) ? CreateDamageTakenListSettings() : null
         };
     }
 
@@ -1883,13 +1951,15 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
-    /// <summary>蘇生リストの設定の既定。プレイヤー名の書式はプレイヤーリストと同じ既定。</summary>
+    /// <summary>蘇生リストの設定の既定。</summary>
     public static ReviveListWidgetSettingsConfig CreateReviveListSettings()
     {
         return new ReviveListWidgetSettingsConfig
         {
-            PlayerInfoFormatString = DefaultPlayerListPlayerInfoFormatString,
+            PlayerInfoFormatString = DefaultReviveListPlayerInfoFormatString,
             SelfDisplayModeIndex = DefaultSelfDisplayModeIndex,
+            GaugeLengthIndex = DefaultReviveListGaugeLengthIndex,
+            GaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Debuff),
             ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.ReviveList),
             ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.ReviveList),
             TextColorIndexes = CreateDefaultReviveListTextColorIndexes(),
@@ -1940,11 +2010,13 @@ public static class WidgetConfigDefaults
     public static ReviveListWidgetSettingsConfig CloneNormalizedReviveList(ReviveListWidgetSettingsConfig? reviveList)
     {
         var normalized = (reviveList ?? CreateReviveListSettings()).Clone();
-        normalized.PlayerInfoFormatString ??= DefaultPlayerListPlayerInfoFormatString;
+        normalized.PlayerInfoFormatString ??= DefaultReviveListPlayerInfoFormatString;
         normalized.SelfDisplayModeIndex = Math.Clamp(
             normalized.SelfDisplayModeIndex,
             DefaultSelfDisplayModeIndex,
             MaxSelfDisplayModeIndex);
+        normalized.GaugeLengthIndex = ClampBuffGaugeLengthIndex(normalized.GaugeLengthIndex);
+        normalized.GaugeColors = CloneNormalizedBuffGaugeColors(normalized.GaugeColors, PlayerBuffListKind.Debuff);
 
         (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
             WidgetKind.ReviveList,
@@ -1970,6 +2042,44 @@ public static class WidgetConfigDefaults
 
         normalized.TextColorIndexes = textIndexes;
         normalized.TextColorPalettes = textPalettes;
+        return normalized;
+    }
+
+    /// <summary>被ダメリストの右(設定「スキル名」)の既定の書式。</summary>
+    public const string DefaultDamageTakenListHitInfoFormatString = "{EntityName}-{SkillName}({Type})";
+
+    /// <summary>被ダメリストの「戦闘不能の原因を表示」の既定。</summary>
+    public const bool DefaultDamageTakenListShowsDefeatCause = true;
+
+    /// <summary>被ダメリストの設定の既定。</summary>
+    public static DamageTakenListWidgetSettingsConfig CreateDamageTakenListSettings()
+    {
+        return new DamageTakenListWidgetSettingsConfig
+        {
+            PlayerInfoFormatString = DefaultDamageTakenListPlayerInfoFormatString,
+            SelfDisplayModeIndex = DefaultSelfDisplayModeIndex,
+            HitInfoFormatString = DefaultDamageTakenListHitInfoFormatString,
+            ShowsDefeatCause = DefaultDamageTakenListShowsDefeatCause,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList)
+        };
+    }
+
+    /// <summary>保存値を正規化して写す。書式が無ければ既定を入れ、クラスの色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。</summary>
+    public static DamageTakenListWidgetSettingsConfig CloneNormalizedDamageTakenList(DamageTakenListWidgetSettingsConfig? damageTakenList)
+    {
+        var normalized = (damageTakenList ?? CreateDamageTakenListSettings()).Clone();
+        normalized.PlayerInfoFormatString ??= DefaultDamageTakenListPlayerInfoFormatString;
+        normalized.HitInfoFormatString ??= DefaultDamageTakenListHitInfoFormatString;
+        normalized.SelfDisplayModeIndex = Math.Clamp(
+            normalized.SelfDisplayModeIndex,
+            DefaultSelfDisplayModeIndex,
+            MaxSelfDisplayModeIndex);
+
+        (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.DamageTakenList,
+            normalized.ClassColorIndexes,
+            normalized.ClassColorPalettes);
         return normalized;
     }
 
@@ -2016,6 +2126,11 @@ public static class WidgetConfigDefaults
             {
                 Width = ReviveListInitialWindowWidth,
                 Height = ReviveListInitialWindowHeight
+            },
+            WidgetKind.DamageTakenList => new WidgetWindowConfig
+            {
+                Width = DamageTakenListInitialWindowWidth,
+                Height = DamageTakenListInitialWindowHeight
             },
             WidgetKind.PlayerTalent => new WidgetWindowConfig
             {
@@ -2523,15 +2638,15 @@ public static class WidgetConfigDefaults
             : ["#B33000", "#6F1F00"];
     }
 
-    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種だけ。</summary>
+    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種と被ダメリスト。</summary>
     public static bool SupportsElementColorSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
+        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution or WidgetKind.DamageTakenList;
     }
 
     /// <summary>
     /// 属性カラーの既定を引くときの読み替え先(ユーザー決定)。
-    /// スキル詳細(与ダメ)は DPS メーター、スキル詳細(ヒール)は HPS メーターに合わせる。
+    /// スキル詳細(与ダメ)と被ダメリストは DPS メーター、スキル詳細(ヒール)は HPS メーターに合わせる。
     /// </summary>
     private static WidgetKind GetElementColorDefaultSource(WidgetKind kind)
     {
@@ -2654,9 +2769,13 @@ public static class WidgetConfigDefaults
 
         var source = kind switch
         {
-            // 被ダメログ・プレイヤー情報・蘇生リストのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList => PlayerListDefaultClassColorHexes,
-            WidgetKind.EntityList => EntityListDefaultClassColorHexes,
+            // 被ダメログ・プレイヤー情報・蘇生リスト・被ダメリストのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenList
+                => PlayerListDefaultClassColorHexes,
+            // エンティティリストのプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.EntityList => EntityListDefaultClassColorHexes.ContainsKey(key)
+                ? EntityListDefaultClassColorHexes
+                : PlayerListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
             _ => MeterDefaultClassColorHexes
         };
@@ -2775,6 +2894,9 @@ public static class WidgetConfigDefaults
         config.ReviveList = SupportsReviveListSettings(kind)
             ? CloneNormalizedReviveList(config.ReviveList)
             : null;
+        config.DamageTakenList = SupportsDamageTakenListSettings(kind)
+            ? CloneNormalizedDamageTakenList(config.DamageTakenList)
+            : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
             : null;
@@ -2819,6 +2941,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.ReviveList:
                 config.Window.Width ??= ReviveListInitialWindowWidth;
                 config.Window.Height ??= ReviveListInitialWindowHeight;
+                break;
+            case WidgetKind.DamageTakenList:
+                config.Window.Width ??= DamageTakenListInitialWindowWidth;
+                config.Window.Height ??= DamageTakenListInitialWindowHeight;
                 break;
             case WidgetKind.PlayerTalent:
                 config.Window.Width ??= PlayerTalentInitialWindowWidth;

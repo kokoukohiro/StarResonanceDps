@@ -391,6 +391,48 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 全属性の一覧(入場の自分の全属性・出現の一覧)に戦闘状態(<c>AttrCombatState</c>、104)と切り替わった時刻(<c>AttrCombatStateTime</c>、114)が無ければ、
+        /// その実体の控えを値なしで届いたときと同じ 0 にする。
+        /// 一覧は値が 0 の属性を含まず、戦闘中にマップを移動しても戦闘を抜けた知らせ(値なし)は届かないので、
+        /// 重ねるだけだと前のマップから写した値・見えなくなる前の値が残り、戦闘していなくても戦闘状態のままになる。
+        /// </summary>
+        private static void ResetCombatStateMissingFromFullAttrs(long uuid, RepeatedField<Attr>? attrs)
+        {
+            if (!EncounterManager.Current.Entities.TryGetValue(uuid, out var entity))
+            {
+                return;
+            }
+
+            var hasCombatState = false;
+            var hasCombatStateTime = false;
+            if (attrs != null)
+            {
+                foreach (var attr in attrs)
+                {
+                    if (attr.Id == (int)EAttrType.AttrCombatState)
+                    {
+                        hasCombatState = true;
+                    }
+                    else if (attr.Id == (int)EAttrType.AttrCombatStateTime)
+                    {
+                        hasCombatStateTime = true;
+                    }
+                }
+            }
+
+            // ProcessAttrs は 104 を int(既定の枝)、114 を long で控える。
+            if (!hasCombatState && entity.GetAttrKV("AttrCombatState") is int combatState && combatState != 0)
+            {
+                EncounterManager.Current.SetAttrKV(uuid, "AttrCombatState", 0);
+            }
+
+            if (!hasCombatStateTime && entity.GetAttrKV("AttrCombatStateTime") is long combatStateTime && combatStateTime != 0)
+            {
+                EncounterManager.Current.SetAttrKV(uuid, "AttrCombatStateTime", 0L);
+            }
+        }
+
         public static void ProcessEnterScene(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
         {
             if (payloadBuffer.Length == 0)
@@ -409,6 +451,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     if (vData.EnterSceneInfo.PlayerEnt.Attrs != null)
                     {
+                        ResetCombatStateMissingFromFullAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                         ResetSelfStatsMissingFromEnterScene(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs);
                         ProcessAttrs(vData.EnterSceneInfo.PlayerEnt.Uuid, vData.EnterSceneInfo.PlayerEnt.Attrs.Attrs, extraData.ArrivalTime);
                         SelfAttributeChangeStore.MarkFullSnapshot();
@@ -2282,6 +2325,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 EncounterManager.Current.SetEntityType(entity.Uuid, entity.EntType);
+                ResetCombatStateMissingFromFullAttrs(entity.Uuid, entity.Attrs?.Attrs);
 
                 // 出現の一覧はその実体の一時属性の全部(無ければ一時属性が無い)。前に見たときの値を置き換える。
                 var appearTempAttrs = entity.TempAttrs?.Attrs ?? (IEnumerable<Zproto.TempAttr>)[];

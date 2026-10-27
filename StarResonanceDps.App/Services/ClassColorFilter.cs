@@ -54,7 +54,7 @@ public static class ClassColorFilter
         return Apply(color, filterColor, settings.ClassColorFilterStrength);
     }
 
-    /// <summary>スキル詳細の属性カラー用。掛け方はクラスカラーとまったく同じ。</summary>
+    /// <summary>属性カラー用(スキル詳細・被ダメリスト)。掛け方はクラスカラーとまったく同じ。</summary>
     public static Color Apply(Color color, ElementColorWidgetSettingsConfig settings)
     {
         if (settings.FilterEnabled != true)

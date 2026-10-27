@@ -140,6 +140,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ReviveListSettings.PreviewChanged += ReviveListSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsDamageTakenListSettings(kind))
+        {
+            DamageTakenListSettings = new DamageTakenListWidgetSettingsViewModel(config.DamageTakenList);
+            DamageTakenListSettings.PropertyChanged += DamageTakenListSettings_PropertyChanged;
+            DamageTakenListSettings.PreviewChanged += DamageTakenListSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -171,6 +178,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<BuffDebuffGroupWidgetSettingsConfig>? BuffDebuffGroupPreviewChanged;
 
     public event Action<ReviveListWidgetSettingsConfig>? ReviveListPreviewChanged;
+
+    public event Action<DamageTakenListWidgetSettingsConfig>? DamageTakenListPreviewChanged;
 
     public void Dispose()
     {
@@ -260,6 +269,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ReviveListSettings.PreviewChanged -= ReviveListSettings_PreviewChanged;
             ReviveListSettings.Dispose();
         }
+
+        if (DamageTakenListSettings is not null)
+        {
+            DamageTakenListSettings.PropertyChanged -= DamageTakenListSettings_PropertyChanged;
+            DamageTakenListSettings.PreviewChanged -= DamageTakenListSettings_PreviewChanged;
+            DamageTakenListSettings.Dispose();
+        }
     }
 
     private void ReviveListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -273,6 +289,19 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     private void ReviveListSettings_PreviewChanged(ReviveListWidgetSettingsConfig config)
     {
         ReviveListPreviewChanged?.Invoke(config);
+    }
+
+    private void DamageTakenListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DamageTakenListWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void DamageTakenListSettings_PreviewChanged(DamageTakenListWidgetSettingsConfig config)
+    {
+        DamageTakenListPreviewChanged?.Invoke(config);
     }
 
     private void BuffDebuffGroupSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -457,6 +486,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public ReviveListWidgetSettingsViewModel? ReviveListSettings { get; }
 
+    public DamageTakenListWidgetSettingsViewModel? DamageTakenListSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -485,8 +516,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasReviveListDisplaySettings => ReviveListSettings is not null;
 
+    public bool HasDamageTakenListDisplaySettings => DamageTakenListSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasReviveListDisplaySettings
+        || HasDamageTakenListDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
         || HasTakenDamageLogDisplaySettings
@@ -508,7 +542,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (EquipmentSettings?.HasUnsavedChanges ?? false)
         || (PlayerStatusSettings?.HasUnsavedChanges ?? false)
         || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false)
-        || (ReviveListSettings?.HasUnsavedChanges ?? false);
+        || (ReviveListSettings?.HasUnsavedChanges ?? false)
+        || (DamageTakenListSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -588,6 +623,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.ReviveList = ReviveListSettings.CreateConfig();
         }
 
+        if (DamageTakenListSettings is not null)
+        {
+            config.DamageTakenList = DamageTakenListSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -603,6 +643,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.MarkSaved(config.PlayerStatus, config.PlayerStatusRowOrder);
         BuffDebuffGroupSettings?.MarkSaved(config.BuffDebuffGroup);
         ReviveListSettings?.MarkSaved(config.ReviveList);
+        DamageTakenListSettings?.MarkSaved(config.DamageTakenList);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -622,6 +663,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.ResetToDefaults();
         BuffDebuffGroupSettings?.ResetToDefaults();
         ReviveListSettings?.ResetToDefaults();
+        DamageTakenListSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -640,6 +682,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.RestoreSavedPreview();
         BuffDebuffGroupSettings?.RestoreSavedPreview();
         ReviveListSettings?.RestoreSavedPreview();
+        DamageTakenListSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

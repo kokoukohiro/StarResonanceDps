@@ -7,7 +7,7 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        スキル詳細の属性カラー。作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じで、
+        スキル詳細と被ダメリストの属性カラー。作りはメーターのクラスカラー(MeterWidgetClassColorSettingsView)と同じで、
         行が9属性になる。左のアイコンはバーカラーの背景に載せ、
         アイコンは白で染めて影を付ける(アイコンの実体は純粋な白ではないので、塗りで白にする)。
     -->

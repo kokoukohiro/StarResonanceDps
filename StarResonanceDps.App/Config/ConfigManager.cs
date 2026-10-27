@@ -207,12 +207,19 @@ public sealed class ConfigManager
     {
         ApplyPlayerNameDisplayMode(settings);
         ApplyInternalIdDisplayMode(settings);
+        ApplyUnnamedSkillInternalNameDisplay(settings);
     }
 
     private static void ApplyInternalIdDisplayMode(SettingsConfig settings)
     {
         CombatDataCatalog.SetInternalIdDisplay(
             (InternalIdDisplayMode)settings.InternalIdDisplayModeIndex);
+    }
+
+    private static void ApplyUnnamedSkillInternalNameDisplay(SettingsConfig settings)
+    {
+        CombatDataCatalog.SetUnnamedSkillInternalNameDisplay(
+            settings.UnnamedSkillNameDisplayModeIndex == AppConfigDefaults.UnnamedSkillNameInternalNameIndex);
     }
 
     private static void ApplyPlayerNameDisplayMode(SettingsConfig settings)

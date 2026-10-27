@@ -1,0 +1,371 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.DamageTakenListWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <!--
+            行の右クリックのメニュー。作りは蘇生リスト(プレイヤーリスト・メーターのメニュー)と同じで、色は
+            中身(DamageTakenListWidgetViewModel)の Widget の窓の色から引く。先頭・途中・末尾の角丸は開くときに画面のコードが当てる。
+        -->
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
+        </Style>
+
+        <!-- 行内テキスト。大きさと太さはメーターの行と同じ(12 / SemiBold)、色は窓の普通の文字。切らない(名前だけ切る)。 -->
+        <Style x:Key="DamageTakenList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!-- 名前。余白はメーターの名前と同じで、幅が足りなければ「…」で切る。自分の行だけ色を変える(メーターと同じ色)。 -->
+        <Style x:Key="DamageTakenList.NameText" TargetType="TextBlock" BasedOn="{StaticResource DamageTakenList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="5,0,6,0" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelfHighlighted}" Value="True">
+                    <Setter Property="Foreground" Value="#F9CD04" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 被ダメ値の後ろの「(戦闘不能)」。行の文字で色が付くのは、これと自分の強調表示の名前だけ。 -->
+        <Style x:Key="DamageTakenList.DefeatText" TargetType="TextBlock" BasedOn="{StaticResource DamageTakenList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Foreground" Value="#FF8080" />
+        </Style>
+
+        <!-- 行の TIPS(属性名)。 -->
+        <Style x:Key="DamageTakenList.ToolTipText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+    </UserControl.Resources>
+
+    <!--
+        一覧の作りはメーターと同じで、仮想化しない(行の部品を別の人の行に使い回すと、バーが前の人の幅から動く)。
+        経過の列の幅は全部の行で一番広い経過に合わせる(タイムラインの時刻の列と同じ仕組み)。自動の高さ合わせはしない。
+    -->
+    <ScrollViewer x:Name="DamageTakenListScrollViewer"
+                  Margin="5,5,0,5"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Hidden"
+                  CanContentScroll="False"
+                  ScrollChanged="DamageTakenListScrollViewer_ScrollChanged">
+        <ItemsControl ItemsSource="{Binding Entries}"
+                      Grid.IsSharedSizeScope="True">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <!--
+                        行の高さとホバーの作りはメーターの行と同じ。
+                        左クリックはその人のプレイヤー情報を開き、右クリックはメニューを開く(プレイヤーリストと同じ)。
+                    -->
+                    <Button Height="31"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Focusable="False"
+                            IsTabStop="False"
+                            ContextMenuService.IsEnabled="False"
+                            PreviewMouseRightButtonDown="DamageTakenListItem_PreviewMouseRightButtonDown"
+                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:DamageTakenListWidgetView}}}"
+                            Click="DamageTakenListItem_Click"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch">
+                        <!-- 項目と並びはプレイヤーリストの行のメニューと同じ。 -->
+                        <Button.ContextMenu>
+                            <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                         IsOpen="{Binding PlacementTarget.DataContext.IsPlayerSelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                         Placement="MousePoint"
+                                         Opened="PlayerSelectionContextMenu_Opened"
+                                         Closed="PlayerSelectionContextMenu_Closed">
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
+                                          Command="{Binding RequestPlayerInfoCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <!-- ステータス詳細は自分の行だけ。他人のステータスを取る手段が無いため。 -->
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
+                                          Command="{Binding RequestPlayerStatusCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                          Visibility="{Binding PlacementTarget.DataContext.IsSelf, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
+                                          Command="{Binding RequestPlayerEquipmentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerTalent]}"
+                                          Command="{Binding RequestPlayerTalentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerSeasonTalent]}"
+                                          Command="{Binding RequestPlayerSeasonTalentCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerModule]}"
+                                          Command="{Binding RequestPlayerModuleCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
+                                          Command="{Binding RequestBuffListCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
+                                          Command="{Binding RequestDebuffListCommand}"
+                                          CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid SnapsToDevicePixels="True">
+                                                <Border x:Name="InteractionBackground"
+                                                        Background="{Binding DataContext.WidgetWindowPalette.WidgetWindowScrollThumbBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                        Visibility="Collapsed">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                            <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.NonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Value="True">
+                                                                    <Setter Property="Opacity" Value="{Binding DataContext.WidgetWindowPalette.ActiveNonTextOpacity, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                            </Grid>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </Trigger>
+                                                <!-- メニューを開いている間は、その行の背景を残す(プレイヤーリストと同じ)。 -->
+                                                <DataTrigger Binding="{Binding IsPlayerSelectionMenuOpen}" Value="True">
+                                                    <Setter TargetName="InteractionBackground" Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+
+                        <!--
+                            行の中身。TIPS は行に1つで属性名(スキル詳細と同じ)。属性の分からない被弾は出さない。
+                            TIPS の色は Tag の窓のパレットから引く。
+                        -->
+                        <Grid SnapsToDevicePixels="True"
+                              UseLayoutRounding="True"
+                              Background="Transparent"
+                              Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:DamageTakenListWidgetView}}}"
+                              ToolTipService.IsEnabled="{Binding HasElement}">
+                            <Grid.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                         Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                    <TextBlock Style="{StaticResource DamageTakenList.ToolTipText}"
+                                               Text="{Binding ElementToolTipText}" />
+                                </ToolTip>
+                            </Grid.ToolTip>
+
+                            <!--
+                                下敷きのバー。作りはメーターと同じで、右から伸ばす。色はその被弾の属性の色。
+                                幅はアニメーションで動かす(behaviors:BarWidthAnimationBehavior)。減衰しない側なので DecaySeconds は既定の 0 のまま。
+                            -->
+                            <Grid x:Name="BarArea"
+                                  Margin="1"
+                                  ClipToBounds="True">
+                                <Border Height="29"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Background="{Binding BarBrush}"
+                                        CornerRadius="4"
+                                        Visibility="{Binding HasElement, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        behaviors:BarWidthAnimationBehavior.AreaWidth="{Binding ActualWidth, ElementName=BarArea}"
+                                        behaviors:BarWidthAnimationBehavior.Ratio="{Binding BarRatio}" />
+                            </Grid>
+
+                            <!--
+                                左はメーターの行と同じ(余白10・順位の位置に経過・クラスアイコン25・名前)。クラスアイコンは設定「アイコンカラー」の色で染める。
+                                右はスキル詳細の左側を左右反転した並び(スキル名・被ダメ値と「(戦闘不能)」・属性アイコン25・余白10)。右の3つは切らない。
+                            -->
+                            <Grid ClipToBounds="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="10" />
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="DamageTakenListElapsed" />
+                                    <ColumnDefinition Width="25" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="10" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="1"
+                                           Margin="0,0,5,0"
+                                           Style="{StaticResource DamageTakenList.RowText}"
+                                           Text="{Binding ElapsedText}" />
+
+                                <Rectangle Grid.Column="2"
+                                           Width="25"
+                                           Height="25"
+                                           VerticalAlignment="Center"
+                                           Fill="{Binding ClassBrush}"
+                                           OpacityMask="{Binding ClassIconMask}"
+                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                           Effect="{StaticResource Effect.ProfessionIconShadow}" />
+
+                                <TextBlock Grid.Column="3"
+                                           Style="{StaticResource DamageTakenList.NameText}"
+                                           Text="{Binding DisplayName}" />
+
+                                <TextBlock Grid.Column="4"
+                                           Margin="4,0,0,0"
+                                           Style="{StaticResource DamageTakenList.RowText}"
+                                           Text="{Binding HitInfoText}" />
+
+                                <TextBlock Grid.Column="5"
+                                           Margin="10,0,0,0"
+                                           Style="{StaticResource DamageTakenList.RowText}"
+                                           Text="{Binding ValueText}" />
+
+                                <TextBlock Grid.Column="6"
+                                           Style="{StaticResource DamageTakenList.DefeatText}"
+                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[DamageTakenList_Defeated]}"
+                                           Visibility="{Binding IsDefeatShown, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                                <!-- 属性アイコン。属性の分からない被弾でも欄の幅は残す(値の位置を行どうしでそろえる)。 -->
+                                <Grid Grid.Column="7"
+                                      Width="25"
+                                      Height="25"
+                                      Margin="5,0,0,0"
+                                      VerticalAlignment="Center">
+                                    <Rectangle Fill="White"
+                                               OpacityMask="{Binding ElementIconMask}"
+                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                               Effect="{StaticResource Effect.ProfessionIconShadow}"
+                                               Visibility="{Binding HasElement, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
+</UserControl>

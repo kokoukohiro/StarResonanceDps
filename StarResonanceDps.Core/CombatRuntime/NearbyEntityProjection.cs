@@ -129,7 +129,9 @@ internal static class NearbyEntityProjection
             NearbyEntityCampState.GetRelation(entityUuid),
             Utils.GetCurrentShield(entity),
             ResolveHasHpBar(entityType, entity),
-            GetInt(entity, "AttrCombatState") > 0);
+            GetInt(entity, "AttrCombatState") > 0,
+            ResolveTargetCharacterId(entity),
+            ResolveHateRanking(entity));
     }
 
     private static NearbyEntityEntry MergeChangedFields(
@@ -207,6 +209,16 @@ internal static class NearbyEntityProjection
             updated = updated with { IsInCombat = GetInt(entity, "AttrCombatState") > 0 };
         }
 
+        if (changedAttributes.Contains(EAttrType.AttrTargetUuid))
+        {
+            updated = updated with { TargetCharacterId = ResolveTargetCharacterId(entity) };
+        }
+
+        if (changedAttributes.Contains(EAttrType.AttrHateList))
+        {
+            updated = updated with { HateRanking = ResolveHateRanking(entity) };
+        }
+
         if (campRelation.HasValue)
         {
             updated = updated with { CampRelation = campRelation.Value };
@@ -255,6 +267,31 @@ internal static class NearbyEntityProjection
         return entity.GetAttrKV("AttrId") is not int attrId
             || attrId <= 0
             || CombatDataCatalog.HasMonsterHpBar(attrId);
+    }
+
+    /// <summary>今狙っている相手(<c>AttrTargetUuid</c>)がプレイヤーなら、そのキャラ番号。プレイヤーでない・いないときは 0。</summary>
+    private static long ResolveTargetCharacterId(Entity entity)
+    {
+        return entity.GetAttrKV("AttrTargetUuid") is long targetUuid && IsPlayerUuid(targetUuid)
+            ? Utils.UuidToEntityId(targetUuid)
+            : 0L;
+    }
+
+    /// <summary>
+    /// ヘイトの一覧(<c>AttrHateList</c>)のプレイヤーだけを、値の大きい順に上位まで。
+    /// 一覧にはプレイヤー以外の実体も載るので外す。同じ値どうしは一覧の並びのまま。
+    /// </summary>
+    private static NearbyEntityHateRanking ResolveHateRanking(Entity entity)
+    {
+        return NearbyEntityHateRanking.Create(entity.ThreatInfoList
+            .Where(threat => IsPlayerUuid(threat.EntityUuid))
+            .OrderByDescending(threat => threat.ThreatValue)
+            .Select(threat => new NearbyEntityHateRank(Utils.UuidToEntityId(threat.EntityUuid), threat.ThreatValue)));
+    }
+
+    private static bool IsPlayerUuid(long uuid)
+    {
+        return uuid != 0 && Utils.UuidToEntityType(uuid) == (long)EEntityType.EntChar;
     }
 
     private static EEntityType ResolveEntityType(long entityUuid, Entity entity)

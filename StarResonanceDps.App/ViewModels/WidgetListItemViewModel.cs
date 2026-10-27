@@ -33,6 +33,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
     private BuffDebuffGroupWidgetSettingsConfig _buffDebuffGroup = WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
     private ReviveListWidgetSettingsConfig _reviveList = WidgetConfigDefaults.CreateReviveListSettings();
+    private DamageTakenListWidgetSettingsConfig _damageTakenList = WidgetConfigDefaults.CreateDamageTakenListSettings();
 
     /// <summary>
     /// 設定の窓が開いている間だけの、ステータス詳細の行の並び(保存前のプレビュー)。null は窓が開いていない。
@@ -47,6 +48,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>プレイヤーリストに出している行(絞り込みの後)。状態の印の計算に使う。</summary>
     private IReadOnlyList<PlayerRosterEntry> _shownPlayerRoster = Array.Empty<PlayerRosterEntry>();
     private IReadOnlyList<NearbyEntityEntry> _nearbyEntities = Array.Empty<NearbyEntityEntry>();
+
+    /// <summary>エンティティリストのヘイトの枠のプレイヤーの見た目を名簿から引く(<see cref="UpdateEntityListRoster"/> で名簿を受ける)。</summary>
+    private readonly EntityHatePlayerResolver _entityHatePlayers = new();
     private string _mapSceneName = string.Empty;
     private uint _mapChannel;
     private long _playerListMapGeneration = -1;
@@ -232,6 +236,11 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public ReviveListWidgetSettingsConfig GetReviveListSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedReviveList(_reviveList);
+    }
+
+    public DamageTakenListWidgetSettingsConfig GetDamageTakenListSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedDamageTakenList(_damageTakenList);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -546,6 +555,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? ReviveListSettingsChanged;
 
+    public event EventHandler? DamageTakenListSettingsChanged;
+
     /// <summary>
     /// 右クリックでバフ・デバフグループの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
     /// </summary>
@@ -604,8 +615,27 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         RenderMapName();
         OnPropertyChanged(nameof(StateText));
         SynchronizePlayerListEntries(resetEntries: false);
+        RefreshPlayerListSkillNames();
         SynchronizeEntityListEntries(resetEntries: false);
         RaisePlayerWindowPresentationChanged();
+    }
+
+    /// <summary>
+    /// プレイヤーリストの技の枠の名前を引き直す。名前は技の一覧を読んだときに焼き込むので、
+    /// 言語と表示設定(内部ID・名前の無い技の内部名)が変わったら一覧を読み直す(<see cref="PlayerListEntry.InvalidateSkillLoadout"/>)。
+    /// </summary>
+    private void RefreshPlayerListSkillNames()
+    {
+        if (!IsPlayerList)
+        {
+            return;
+        }
+
+        foreach (var entry in _playerListEntries)
+        {
+            entry.InvalidateSkillLoadout();
+            entry.RefreshSkillDisplay(refreshEffects: false);
+        }
     }
 
     public WidgetConfig CreateWidgetConfig()
@@ -655,6 +685,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                 : null,
             ReviveList = WidgetConfigDefaults.SupportsReviveListSettings(Kind)
                 ? _reviveList.Clone()
+                : null,
+            DamageTakenList = WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind)
+                ? _damageTakenList.Clone()
                 : null
         };
     }
@@ -756,6 +789,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         {
             _reviveList = WidgetConfigDefaults.CloneNormalizedReviveList(config.ReviveList);
             ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind))
+        {
+            _damageTakenList = WidgetConfigDefaults.CloneNormalizedDamageTakenList(config.DamageTakenList);
+            DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -898,6 +937,17 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    public void ApplyDamageTakenListSettingsPreview(DamageTakenListWidgetSettingsConfig damageTakenList)
+    {
+        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind))
+        {
+            return;
+        }
+
+        _damageTakenList = WidgetConfigDefaults.CloneNormalizedDamageTakenList(damageTakenList);
+        DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
     public void ApplyTheme(WidgetThemeConfig theme)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedTheme(theme);
@@ -976,6 +1026,18 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         var resetEntries = _entityListMapGeneration != mapGeneration;
         _entityListMapGeneration = mapGeneration;
         SynchronizeEntityListEntries(resetEntries);
+    }
+
+    /// <summary>名簿が変わった(エンティティリストのヘイトの枠の名前・クラス・特化を引き直す)。</summary>
+    public void UpdateEntityListRoster(IReadOnlyList<PlayerRosterEntry> playerRoster)
+    {
+        if (!IsEntityList)
+        {
+            return;
+        }
+
+        _entityHatePlayers.SetRoster(playerRoster);
+        SynchronizeEntityListEntries(resetEntries: false);
     }
 
     public void SetOpenPlayerWindowCount(int count)
@@ -1362,18 +1424,22 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             }
         }
 
+        _entityHatePlayers.Prepare(
+            _meter,
+            (PlayerNameDisplayMode)ConfigManager.Instance.GetSettingsSnapshot().PlayerNameDisplayModeIndex);
+
         for (var targetIndex = 0; targetIndex < visibleEntities.Count; targetIndex++)
         {
             var entity = visibleEntities[targetIndex];
             if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
             {
-                entry = EntityListEntry.Create(entity, _meter);
+                entry = EntityListEntry.Create(entity, _meter, _entityHatePlayers);
                 _entityListEntriesByUuid.Add(entity.EntityUuid, entry);
                 _entityListEntries.Insert(targetIndex, entry);
                 continue;
             }
 
-            entry.Update(entity, _meter);
+            entry.Update(entity, _meter, _entityHatePlayers);
 
             if (_entityListEntries[targetIndex].EntityUuid == entity.EntityUuid)
             {

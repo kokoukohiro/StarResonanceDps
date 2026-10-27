@@ -201,20 +201,9 @@ public sealed partial class PlayerBuffEntry : ObservableObject
             ? fixedSeconds
             : _autoGaugeLengthSeconds ?? 0d;
 
-        double ratio;
-        double decaySeconds;
-        if (_isRemainingUnknown || _remainingSeconds is not { } seconds || lengthSeconds <= 0d)
-        {
-            ratio = 1d;
-            decaySeconds = 0d;
-        }
-        else
-        {
-            ratio = Math.Clamp(seconds / lengthSeconds, 0d, 1d);
-
-            // 満タンで頭打ちの間はまだ縮まない。縮み始めるのは残りがゲージの長さを切ってから。
-            decaySeconds = seconds <= lengthSeconds ? Math.Max(seconds, 0d) : 0d;
-        }
+        var (ratio, decaySeconds) = _isRemainingUnknown || _remainingSeconds is not { } seconds
+            ? (1d, 0d)
+            : BuffGaugeBrush.GetBarState(seconds, lengthSeconds);
 
         BarRatio = ratio;
         IsBarFull = ratio >= 1d;

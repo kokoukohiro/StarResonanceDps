@@ -303,7 +303,7 @@
                                             </Grid>
                                         </Border>
 
-                                        <Border Style="{StaticResource Panel.SettingFieldLast}">
+                                        <Border Style="{StaticResource Panel.SettingField}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*" />
@@ -326,6 +326,57 @@
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_BuffOnly]}" />
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_EntityOnly]}" />
                                                     <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[InternalIdDisplay_MapOnly]}" />
+                                                </ComboBox>
+                                            </Grid>
+                                        </Border>
+
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="{x:Type Border}"
+                                                       BasedOn="{StaticResource Panel.SettingFieldLast}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <!-- 注記(内部名は中国語のみ)を出すときだけ2行分の高さにする。 -->
+                                                        <DataTrigger Binding="{Binding ShowsUnnamedSkillNameNote}" Value="True">
+                                                            <Setter Property="Height" Value="75" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_UnnamedSkill]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           Visibility="{Binding ShowsUnnamedSkillNameNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_UnnamedSkill_Description]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <ComboBox Grid.Row="0"
+                                                          Grid.Column="1"
+                                                          Style="{StaticResource Input.SettingsComboBox}"
+                                                          SelectedIndex="{Binding UnnamedSkillNameDisplayModeIndex, Mode=TwoWay}">
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[UnnamedSkillNameDisplay_Blank]}" />
+                                                    <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[UnnamedSkillNameDisplay_InternalName]}" />
                                                 </ComboBox>
                                             </Grid>
                                         </Border>

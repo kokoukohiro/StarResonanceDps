@@ -208,7 +208,11 @@ public enum ReviveBlockStateKind
 }
 
 /// <param name="RemainingSeconds">蘇生不可デバフの残り秒。<see cref="ReviveBlockStateKind.Blocked"/> のときだけ意味を持つ。</param>
-public readonly record struct ReviveBlockState(ReviveBlockStateKind Kind, double RemainingSeconds = 0d);
+/// <param name="DurationSeconds">
+/// 残り秒を出した蘇生不可デバフの効果時間の総量(秒)。<see cref="ReviveBlockStateKind.Blocked"/> のときだけ意味を持つ。
+/// 蘇生リストのゲージの長さの「自動」に使う。
+/// </param>
+public readonly record struct ReviveBlockState(ReviveBlockStateKind Kind, double RemainingSeconds = 0d, double DurationSeconds = 0d);
 
 /// <param name="RoleSlotCount">
 /// ロールスキルの枠数。<b>自分と他人で意味が違う。</b>
@@ -258,7 +262,8 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// <para>
 /// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、ダメージを与えた敵。<see cref="Target"/> と HP は被弾(と下の死亡・敵どうしの回復)のときだけ入る
 /// (HP は記録時点で属性を持っていなければ入らない)。
-/// <see cref="SourceName"/> は内部ID注記を付けない名前で、名前が無ければ空。
+/// <see cref="SourceName"/> は内部ID注記を付けない名前。名前が無ければ、全体設定で内部名を出すとき
+/// (<see cref="CombatDataCatalog.ShowsUnnamedSkillInternalNames"/>)は技かバフの内部名、出さなければ空。
 /// <see cref="SourceId"/> は届いた <c>OwnerId</c> そのもの。<see cref="IsBuffSource"/> が真ならバフID、
 /// 偽なら技IDか弾ID(弾のときの <see cref="SourceName"/> は親の技の名前)。
 /// </para>
@@ -325,6 +330,45 @@ public sealed record TakenDamageLogSnapshot(
     int NextIndex,
     IReadOnlyList<TakenDamageLogLine> Lines,
     DateTime? CombatStartUtc);
+
+/// <summary>
+/// 被ダメリストの1人ぶん。表示中の回の、そのプレイヤーの最後の被弾(<see cref="Entity.TakenStats"/> の最後の記録)。
+///
+/// <para>
+/// 加害者・技名・属性・物理か魔法かはタイムラインの被弾の行(<see cref="TakenDamageLogLine"/>)と同じ決め方で、
+/// <see cref="SourceName"/> は名前が無ければ空(全体設定で内部名を出すときは内部名)。<see cref="SourceId"/> と <see cref="IsBuffSource"/> は内部ID注記に使う。
+/// </para>
+/// </summary>
+/// <param name="Sequence">
+/// その被弾の通し番号(タイムラインの行の並びと同じ番号)。大きいほど新しく、行の並びに使う。
+/// 同じなら中身も同じ(呼び出し側は行の文字を作り直さない)。
+/// </param>
+/// <param name="Timestamp">その被弾の到着時刻(UTC)。経過は持たず、表示側が戦闘の経過(<see cref="Encounter.ToCombatOffset"/>)に直す。</param>
+/// <param name="IsLethal">その被弾で戦闘不能になった。</param>
+public sealed record DamageTakenListHit(
+    long CharacterId,
+    long Sequence,
+    DateTime Timestamp,
+    TakenDamageLogParty Attacker,
+    int SourceId,
+    bool IsBuffSource,
+    string SourceName,
+    bool IsFall,
+    long Value,
+    EDamageProperty? DamageElement,
+    EDamageMode DamageMode,
+    bool IsLethal);
+
+/// <summary>
+/// <see cref="MeterSnapshotProvider.GetDamageTakenList"/> の結果。被弾からの経過は、表示側が <see cref="Encounter"/> の戦闘の時計で数える
+/// (<see cref="Encounter.ReadCombatClock()"/> の経過 − <see cref="Encounter.ToCombatOffset"/> で直した被弾の時刻)。
+/// </summary>
+/// <param name="NextIndex">次に読む被ダメログの位置。次の呼び出しにそのまま渡す。</param>
+/// <param name="Hits">読んだ範囲の、対象がプレイヤーの被弾。古い順(同じ人が複数あれば後ろほど新しい)。</param>
+public sealed record DamageTakenListSnapshot(
+    Encounter? Encounter,
+    int NextIndex,
+    IReadOnlyList<DamageTakenListHit> Hits);
 
 public static class MeterSnapshotProvider
 {
@@ -470,7 +514,64 @@ public static class MeterSnapshotProvider
         return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);
     }
 
-    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。被ダメログの予告の行・詠唱の行と同じ。</summary>
+    /// <summary>
+    /// 被ダメリストの材料。表示中の回(タイムラインと同じ <see cref="ResolveActiveEncounter"/>)の被ダメログを、タイムラインと同じく
+    /// <paramref name="startIndex"/> 件目から読み、対象がプレイヤーの被弾だけを返す。表示中の回が <paramref name="knownEncounter"/> と違えば先頭から読む。
+    /// 新しい被弾が無ければ空で返る。1人ずつの最後の被弾を持つのと並びを決めるのは呼び出し側。
+    /// </summary>
+    public static DamageTakenListSnapshot GetDamageTakenList(Encounter? knownEncounter, int startIndex)
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null)
+        {
+            return new DamageTakenListSnapshot(null, 0, Array.Empty<DamageTakenListHit>());
+        }
+
+        if (!ReferenceEquals(encounter, knownEncounter))
+        {
+            startIndex = 0;
+        }
+
+        var records = encounter.GetTakenDamageLogRecords(startIndex);
+        var parties = new Dictionary<long, TakenDamageLogParty>();
+        var hits = new List<DamageTakenListHit>();
+        foreach (var record in records)
+        {
+            if (record.Kind != TakenDamageLogRecordKind.Hit
+                || record.Hit is not { Timestamp: { } timestamp } last)
+            {
+                continue;
+            }
+
+            var target = ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties);
+            if (!target.IsPlayer)
+            {
+                continue;
+            }
+
+            var attacker = ResolveTakenDamageLogParty(encounter, last.OtherUUID, parties);
+            hits.Add(new DamageTakenListHit(
+                target.CharacterId,
+                last.Sequence,
+                timestamp,
+                attacker,
+                last.OwnerId,
+                last.DamageSource == Zproto.EDamageSource.Buff,
+                ResolveTakenDamageSourceName(attacker.IsPlayer, last.Id, last.DamageSource, last.OwnerId, last.BuffSourceSkillId, last.SummonSourceSkillId),
+                last.DamageSource == Zproto.EDamageSource.Fall,
+                last.Value,
+                last.DamageElement,
+                last.DamageMode,
+                last.IsKill));
+        }
+
+        return new DamageTakenListSnapshot(encounter, startIndex + records.Length, hits);
+    }
+
+    /// <summary>
+    /// 技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。予兆技の通知が使う。
+    /// 内部名は使わない(読み上げで日本語以外を読めないため)。タイムラインの行は名前が無ければ内部名になることがある。
+    /// </summary>
     public static string GetTakenDamageLogSkillName(int skillId)
     {
         return ResolveTakenDamageSkillName(skillId);
@@ -513,7 +614,7 @@ public static class MeterSnapshotProvider
                     null,
                     announcement.SkillId,
                     false,
-                    ResolveTakenDamageSkillName(announcement.SkillId),
+                    ResolveTakenDamageLogLineSkillName(announcement.SkillId),
                     0,
                     null,
                     null,
@@ -533,7 +634,7 @@ public static class MeterSnapshotProvider
                     null,
                     cast.SkillId,
                     false,
-                    ResolveTakenDamageSkillName(cast.SkillId),
+                    ResolveTakenDamageLogLineSkillName(cast.SkillId),
                     0,
                     null,
                     null,
@@ -641,6 +742,11 @@ public static class MeterSnapshotProvider
     /// 弾の番号を <c>SkillNames</c> でそのまま引くと、同じ番号の無関係な技の名前が出る
     /// (<c>3920</c> は弾 普攻假子弹 / 技 奥義！ライフブレス)。
     /// </para>
+    ///
+    /// <para>
+    /// どの名前も空なら、全体設定で内部名を出すときは内部名(<see cref="ResolveTakenDamageSourceInternalName"/>)。
+    /// 加害者がプレイヤーでも同じ。表示名はどの段でも内部名より先に勝つ。
+    /// </para>
     /// </summary>
     private static string ResolveTakenDamageSourceName(bool isPlayerAttacker, long meterKey, Zproto.EDamageSource damageSource, int ownerId, int buffSourceSkillId, int summonSourceSkillId)
     {
@@ -664,8 +770,13 @@ public static class MeterSnapshotProvider
         };
 
         // 当たった技そのものに名前が無いときだけ、ダメージを出した実体(仮想体など)を出した技の名前にする。
-        return string.IsNullOrEmpty(name) && summonSourceSkillId > 0
-            ? ResolveTakenDamageSkillName(summonSourceSkillId)
+        if (string.IsNullOrEmpty(name) && summonSourceSkillId > 0)
+        {
+            name = ResolveTakenDamageSkillName(summonSourceSkillId);
+        }
+
+        return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
+            ? ResolveTakenDamageSourceInternalName(damageSource, ownerId, buffSourceSkillId, summonSourceSkillId)
             : name;
     }
 
@@ -686,6 +797,53 @@ public static class MeterSnapshotProvider
         return string.IsNullOrEmpty(dbmName)
             ? CombatDataCatalog.GetSkillNameWithoutInternalId(skillId)
             : dbmName;
+    }
+
+    /// <summary>
+    /// 予告・詠唱の行の技の名前(<see cref="ResolveTakenDamageSkillName"/>)。空なら、全体設定で内部名を出すときは技の内部名。
+    /// </summary>
+    private static string ResolveTakenDamageLogLineSkillName(int skillId)
+    {
+        var name = ResolveTakenDamageSkillName(skillId);
+        return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
+            ? CombatDataCatalog.GetSkillInternalName(skillId)
+            : name;
+    }
+
+    /// <summary>
+    /// 被弾・敵どうしの回復の行の内部名。引く順は <see cref="ResolveTakenDamageSourceName"/> と同じ
+    /// (バフは付与元の技、無いか内部名が空ならそのバフ。弾は親の技、それ以外はその技。空なら召喚元の技)。
+    /// 弾の番号をそのまま技の表で引かない(同じ番号の無関係な技の内部名が出る)。
+    /// </summary>
+    private static string ResolveTakenDamageSourceInternalName(
+        Zproto.EDamageSource damageSource,
+        int ownerId,
+        int buffSourceSkillId,
+        int summonSourceSkillId)
+    {
+        var name = damageSource switch
+        {
+            Zproto.EDamageSource.Buff => ResolveTakenDamageBuffInternalName(ownerId, buffSourceSkillId),
+            Zproto.EDamageSource.Bullet or Zproto.EDamageSource.FakeBullet =>
+                CombatDataCatalog.TryResolveBulletParentSkillId(ownerId, out var parentSkillId)
+                    ? CombatDataCatalog.GetSkillInternalName(parentSkillId)
+                    : string.Empty,
+            _ => CombatDataCatalog.GetSkillInternalName(ownerId)
+        };
+
+        return name.Length == 0 && summonSourceSkillId > 0
+            ? CombatDataCatalog.GetSkillInternalName(summonSourceSkillId)
+            : name;
+    }
+
+    private static string ResolveTakenDamageBuffInternalName(int buffId, int buffSourceSkillId)
+    {
+        var sourceSkillName = buffSourceSkillId > 0
+            ? CombatDataCatalog.GetSkillInternalName(buffSourceSkillId)
+            : string.Empty;
+        return sourceSkillName.Length == 0
+            ? CombatDataCatalog.GetBuffInternalName(buffId)
+            : sourceSkillName;
     }
 
     /// <summary>被ダメログの登場人物1人を、<paramref name="encounter"/> の実体から決める(被ダメログの行と同じ決め方)。</summary>
@@ -1194,7 +1352,7 @@ public static class MeterSnapshotProvider
                 : 0d;
             var snapshot = new PlayerCooldownSkillSnapshot(
                 skillLevel.SkillId,
-                CombatDataCatalog.GetSkillName(skillLevel.SkillId),
+                CombatDataCatalog.GetSkillDisplayName(skillLevel.SkillId),
                 iconName,
                 isImagine,
                 CombatDataCatalog.GetSkillPveCooldownSeconds(
@@ -1315,7 +1473,7 @@ public static class MeterSnapshotProvider
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(skillId);
         return new PlayerCooldownSkillSnapshot(
             skillId,
-            CombatDataCatalog.GetSkillName(skillId),
+            CombatDataCatalog.GetSkillDisplayName(skillId),
             iconName,
             isImagine,
             CombatDataCatalog.GetSkillPveCooldownSeconds(skillId, currentLevel, tier),
@@ -1437,7 +1595,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        return TryScanReviveBlockDebuff(entity.UUID, out remainingSeconds, out _);
+        return TryScanReviveBlockDebuff(entity.UUID, out remainingSeconds, out _, out _);
     }
 
     /// <summary>
@@ -1456,9 +1614,9 @@ public static class MeterSnapshotProvider
             return new ReviveBlockState(ReviveBlockStateKind.Unknown);
         }
 
-        if (TryScanReviveBlockDebuff(entityUuid, out var remainingSeconds, out var hasUnresolved))
+        if (TryScanReviveBlockDebuff(entityUuid, out var remainingSeconds, out var durationSeconds, out var hasUnresolved))
         {
-            return new ReviveBlockState(ReviveBlockStateKind.Blocked, remainingSeconds);
+            return new ReviveBlockState(ReviveBlockStateKind.Blocked, remainingSeconds, durationSeconds);
         }
 
         if (hasUnresolved)
@@ -1476,10 +1634,16 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// 実体に付いている蘇生不可デバフを探す。残り秒の分かるものがあれば true で、重ね掛けなら遅く切れるほうの残り秒。
     /// </summary>
+    /// <param name="durationSeconds">残り秒を出したデバフの効果時間の総量(秒)。</param>
     /// <param name="hasUnresolved">付いているのに残り秒の出せないもの(持続が負・経過が分からない)があった。</param>
-    private static bool TryScanReviveBlockDebuff(long entityUuid, out double remainingSeconds, out bool hasUnresolved)
+    private static bool TryScanReviveBlockDebuff(
+        long entityUuid,
+        out double remainingSeconds,
+        out double durationSeconds,
+        out bool hasUnresolved)
     {
         remainingSeconds = 0d;
+        durationSeconds = 0d;
         hasUnresolved = false;
         var buffEvents = ResolveDisplayBuffEvents(entityUuid);
         var found = false;
@@ -1502,7 +1666,7 @@ public static class MeterSnapshotProvider
             TimeSpan effectiveRemoveTime;
             double? seconds;
             var timingResolved = TryResolveLiveBuffTiming(
-                entityUuid, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out _);
+                entityUuid, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out var instanceDurationSeconds);
             // 経過が分からないものはカウントに使わない。出すと切れた後も残る。
             if (!timingResolved || secondsUnknown || seconds is null)
             {
@@ -1518,6 +1682,7 @@ public static class MeterSnapshotProvider
 
             latestRemoveTime = effectiveRemoveTime;
             remainingSeconds = seconds.Value;
+            durationSeconds = instanceDurationSeconds;
             found = true;
         }
 

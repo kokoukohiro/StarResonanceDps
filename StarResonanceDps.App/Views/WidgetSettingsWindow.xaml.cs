@@ -54,6 +54,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusRowOrderPreviewChanged += _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged += _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged += _widget.ApplyReviveListSettingsPreview;
+        _viewModel.DamageTakenListPreviewChanged += _widget.ApplyDamageTakenListSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
@@ -98,6 +99,7 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusRowOrderPreviewChanged -= _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged -= _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged -= _widget.ApplyReviveListSettingsPreview;
+        _viewModel.DamageTakenListPreviewChanged -= _widget.ApplyDamageTakenListSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
@@ -279,6 +281,11 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(BuffDebuffGroupDebuffColorsHost);
     }
 
+    private void ReviveListGaugeColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ReviveListGaugeColorsHost);
+    }
+
     private void PlayerStatusTextColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(PlayerStatusTextColorsHost);
@@ -342,6 +349,11 @@ public partial class WidgetSettingsWindow : Window
     private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BuffListColorsHost);
+    }
+
+    private void DamageTakenListClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(DamageTakenListClassColorsHost);
     }
 
     private void ElementColorsNavButton_Click(object sender, RoutedEventArgs e)

@@ -517,8 +517,7 @@
   </data>
   <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
     <value>回復</value>
-  </data>
-  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
     <value>テキストコピーエラー</value>
   </data>
   <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
@@ -1174,6 +1173,12 @@
   <data name="EntityList_UnknownEnemy" xml:space="preserve">
     <value>未知の敵</value>
   </data>
+  <data name="EntityList_Targeted" xml:space="preserve">
+    <value>狙われている</value>
+  </data>
+  <data name="EntityList_HateValue" xml:space="preserve">
+    <value>ヘイト値: {0}</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>並び替え</value>
   </data>
@@ -1243,7 +1248,17 @@
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>蘇生リスト</value>
   </data>
-  <data name="ReviveList_Revivable" xml:space="preserve">
+  <data name="Widget_DamageTakenList" xml:space="preserve">
+    <value>被ダメリスト</value>
+  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+    <value>(戦闘不能)</value>
+  </data>
+  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
+    <value>{0}秒前</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+    <value>戦闘不能の原因を表示</value>
+  </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>蘇生可能</value>
   </data>
   <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
@@ -1275,6 +1290,18 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>マップIDのみ表示</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
+    <value>名前のないスキル</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
+    <value>※内部名は中国語のみ</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_Blank" xml:space="preserve">
+    <value>空欄にする</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_InternalName" xml:space="preserve">
+    <value>内部名で表示</value>
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>ウィジェットウィンドウ</value>

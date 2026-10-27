@@ -2,9 +2,6 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Serilog;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
@@ -29,10 +26,14 @@ namespace StarResonanceDps.App.Controls;
 ///
 /// <para>
 /// 横軸の数字の下(窓の横のスクロールバーの上)に、押した技のアイコンの行を置く(<see cref="SkillMarkers"/>。<see cref="ShowSkillMarkers"/> で隠せる)。
-/// アイコンは技の種類の背景の枠(<see cref="SkillIconFrame"/>)の上に重ねる。枠と絵の大きさはプレイヤーリストの技の枠にそろえ、枠は下寄せ。
-/// 位置は線と同じ式で時刻から決め、見ている窓の中の時刻のものだけを丸ごと出す(横軸の数字と同じ)。重なったら後の開始を上に描く。
+/// アイコン1つは <see cref="SkillMarkerTemplate"/>(XAML)で描き、高さは <see cref="SkillMarkerRowHeight"/>。
+/// 横の位置は線と同じ式で時刻から決め(アイコンの幅の中央を時刻に置く)、見ている窓の中の時刻のものだけを丸ごと出す(横軸の数字と同じ)。重なったら後の開始を上に描く。
 /// 要素を持つのは見ている窓の中の分だけ(窓の外の分を畳んで持つと、畳んだ要素も配置の時間を食う)。
-/// アイコンにマウスを乗せると技の名前を TIPS で出す。TIPS が閉じないよう、窓の中に残る要素は作り直さず使い回す。
+/// TIPS が閉じないよう、窓の中に残る要素は作り直さず使い回し、技が変わったときだけ中身を差し替える。
+/// </para>
+///
+/// <para>
+/// 大きさと位置(軸の数字の大きさ・間、線の太さ、アイコンの行)はどれも XAML から渡す。既定値は 0(軸の数字の大きさは文字のスタイルのまま)。
 /// </para>
 /// </summary>
 public sealed class MetricTimelineChart : FrameworkElement
@@ -45,66 +46,10 @@ public sealed class MetricTimelineChart : FrameworkElement
 
     private const int HorizontalGridCount = 2;
 
-    /// <summary>縦軸の数字の右端と描く領域の左端の間。</summary>
-    private const double ValueLabelGap = 4d;
-
-    /// <summary>描く領域の下端と横軸の数字の上端の間。</summary>
-    private const double SecondLabelGap = 2d;
-    private const double AxisFontSize = 10d;
-
-    /// <summary>技のアイコン1つの幅(プレイヤーリストの技の枠と同じ)。</summary>
-    private const double SkillMarkerWidth = 32d;
-
-    /// <summary>技のアイコン1つの高さ。いちばん背の高い枠(究極スキル、幅 31 で高さ約 34.6)が収まる高さ。枠は下寄せに置く。</summary>
-    private const double SkillMarkerHeight = 35d;
-
-    /// <summary>背景の枠の画像の幅(プレイヤーリストと同じ)。高さは画像の縦横比で決まる。</summary>
-    private const double SkillFrameWidth = 31d;
-
-    /// <summary>クラス不明のアイコンの一辺。プレイヤーリストの技の枠のはてなも同じ値を使う。</summary>
-    public const double UnknownSkillIconSize = 20d;
-
-    /// <summary>01・02 の枠のクラス不明のアイコンの横のずらし。プレイヤーリストの技の枠のはてなも同じ値を使う。</summary>
-    public const double RoleImagineUnknownIconOffsetX = -0.6d;
-
-    /// <summary>01・02 の枠のクラス不明のアイコンの縦のずらし。プレイヤーリストの技の枠のはてなも同じ値を使う。</summary>
-    public const double RoleImagineUnknownIconOffsetY = 1.7d;
-
     /// <summary>
-    /// 枠ごとの背景の画像と、枠の中のアイコンの大きさ・位置(枠の画像の中央からのずらし)。
-    /// 01・02 はプレイヤーリストの技の枠(<c>PlayerListWidgetView</c>)と同じ値。
-    /// 03 は 01 との中の円の位置の差だけずらした値から手で合わせたもの。
-    /// イマジンの絵の値は 01・02 だけが持つ(03 に来る究極スキルにイマジンの絵の技は無い)。
-    /// クラス不明のアイコン(絵のファイルが無い・読めない技)はどの枠にも出るので、どの枠も値を持つ。中の円の中心に置く。
+    /// 03(究極スキル)の枠にイマジンの絵が来たと警告した絵のパス(パスごとに1回だけ警告する)。
+    /// アイコンのテンプレートは 03 のイマジンの絵の置き方を持たず、普通の絵の置き方で描く。
     /// </summary>
-    private static readonly SkillFrameLayout StandardSkillFrameLayout = new(
-        "Icon.RoleSkillFrame",
-        new SkillIconPlacement(27d, -0.2d, 1.3d),
-        new SkillIconPlacement(25d, -1.2d, 2.1d),
-        new SkillIconPlacement(UnknownSkillIconSize, RoleImagineUnknownIconOffsetX, RoleImagineUnknownIconOffsetY));
-
-    private static readonly SkillFrameLayout ImagineSkillFrameLayout = new(
-        "Icon.ImagineSkillFrame",
-        new SkillIconPlacement(27d, -0.2d, 1.3d),
-        new SkillIconPlacement(25d, -1.2d, 2.1d),
-        new SkillIconPlacement(UnknownSkillIconSize, RoleImagineUnknownIconOffsetX, RoleImagineUnknownIconOffsetY));
-
-    private static readonly SkillFrameLayout UltimateSkillFrameLayout = new(
-        "Icon.UltimateSkillFrame",
-        new SkillIconPlacement(27d, -0.2d, 1.6d),
-        null,
-        new SkillIconPlacement(UnknownSkillIconSize, -0.6d, 1.8d));
-
-    /// <summary>横軸の数字の下端と技のアイコンの行の上端の間。</summary>
-    private const double SkillMarkerGap = 2d;
-
-    /// <summary>TIPS の文字の大きさ(ほかのウィジェットの TIPS と同じ)。</summary>
-    private const double SkillMarkerToolTipFontSize = 12d;
-
-    /// <summary>技のアイコンの画像(ファイルのパスごと)。読めなかったファイルは null を控え、クラス不明のアイコンで出す。</summary>
-    private static readonly Dictionary<string, ImageSource?> SkillIconImages = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>イマジンの絵の値を持たない枠にイマジンの絵が来たと警告した絵のパス(パスごとに1回だけ警告する)。</summary>
     private static readonly HashSet<string> ImaginePlacementWarnedPaths = new(StringComparer.OrdinalIgnoreCase);
 
     public static readonly DependencyProperty PointsProperty = DependencyProperty.Register(
@@ -154,22 +99,70 @@ public sealed class MetricTimelineChart : FrameworkElement
 
     /// <summary>
     /// 技のアイコンの TIPS の色を決めるもの。<c>ToolTip.WidgetWindowInfo</c> が TIPS を付けた要素の Tag から窓のパレットを引くので、
-    /// ウィジェット(<c>WidgetListItemViewModel</c>)を渡す。
+    /// ウィジェット(<c>WidgetListItemViewModel</c>)を渡す。アイコンのテンプレートがこのグラフから引いて Tag に入れる。
     /// </summary>
     public static readonly DependencyProperty SkillMarkerToolTipTagProperty = DependencyProperty.Register(
         nameof(SkillMarkerToolTipTag),
         typeof(object),
         typeof(MetricTimelineChart),
-        new FrameworkPropertyMetadata(null, OnSkillMarkerToolTipTagChanged));
+        new FrameworkPropertyMetadata(null));
+
+    /// <summary>技のアイコン1つのテンプレート(中身は <see cref="MetricTimelineSkillMarker"/>)。</summary>
+    public static readonly DependencyProperty SkillMarkerTemplateProperty = DependencyProperty.Register(
+        nameof(SkillMarkerTemplate),
+        typeof(DataTemplate),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(null, OnSkillMarkerTemplateChanged));
+
+    /// <summary>技のアイコンの行の高さ(アイコン1つの高さ)。技が無くても空けておく(軸が上下に動かないように)。</summary>
+    public static readonly DependencyProperty SkillMarkerRowHeightProperty = DependencyProperty.Register(
+        nameof(SkillMarkerRowHeight),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(0d, OnSkillMarkerRowHeightChanged));
+
+    /// <summary>横軸の数字の下端と技のアイコンの行の上端の間。</summary>
+    public static readonly DependencyProperty SkillMarkerGapProperty = DependencyProperty.Register(
+        nameof(SkillMarkerGap),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(0d, OnLayoutValueChanged));
+
+    /// <summary>縦軸の数字の右端と描く領域の左端の間。</summary>
+    public static readonly DependencyProperty ValueLabelGapProperty = DependencyProperty.Register(
+        nameof(ValueLabelGap),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(0d, OnLayoutValueChanged));
+
+    /// <summary>描く領域の下端と横軸の数字の上端の間。</summary>
+    public static readonly DependencyProperty SecondLabelGapProperty = DependencyProperty.Register(
+        nameof(SecondLabelGap),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(0d, OnLayoutValueChanged));
+
+    /// <summary>軸の数字の大きさ。指定が無い(NaN)間は文字のスタイル(<c>Text.WidgetWindow</c>)の大きさ。</summary>
+    public static readonly DependencyProperty AxisFontSizeProperty = DependencyProperty.Register(
+        nameof(AxisFontSize),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(double.NaN, OnAxisFontSizeChanged));
+
+    /// <summary>グラフの線の太さ。</summary>
+    public static readonly DependencyProperty LineThicknessProperty = DependencyProperty.Register(
+        nameof(LineThickness),
+        typeof(double),
+        typeof(MetricTimelineChart),
+        new FrameworkPropertyMetadata(0d, OnLineBrushChanged));
 
     private readonly VisualCollection _children;
     private readonly LineLayer _lineLayer;
     private readonly TextBlock[] _valueLabels;
     private readonly TextBlock[] _secondLabels;
     private readonly Canvas _skillMarkerLayer;
-    /// <summary>見ている窓の中の技の開始の要素。鍵は <see cref="SkillMarkers"/> の何番目か。</summary>
-    private readonly Dictionary<int, SkillMarkerElement> _skillMarkerElements = [];
-    private ImageBrush? _unknownSkillIconMask;
+    /// <summary>見ている窓の中の技の開始の要素(中身は <see cref="MetricTimelineSkillMarker"/>)。鍵は <see cref="SkillMarkers"/> の何番目か。</summary>
+    private readonly Dictionary<int, ContentPresenter> _skillMarkerElements = [];
     private readonly List<double> _secondLabelSeconds = [];
     private MetricTimelinePoint[] _orderedPoints = [];
     private double _maxSeconds;
@@ -232,6 +225,48 @@ public sealed class MetricTimelineChart : FrameworkElement
     {
         get => GetValue(SkillMarkerToolTipTagProperty);
         set => SetValue(SkillMarkerToolTipTagProperty, value);
+    }
+
+    public DataTemplate? SkillMarkerTemplate
+    {
+        get => (DataTemplate?)GetValue(SkillMarkerTemplateProperty);
+        set => SetValue(SkillMarkerTemplateProperty, value);
+    }
+
+    public double SkillMarkerRowHeight
+    {
+        get => (double)GetValue(SkillMarkerRowHeightProperty);
+        set => SetValue(SkillMarkerRowHeightProperty, value);
+    }
+
+    public double SkillMarkerGap
+    {
+        get => (double)GetValue(SkillMarkerGapProperty);
+        set => SetValue(SkillMarkerGapProperty, value);
+    }
+
+    public double ValueLabelGap
+    {
+        get => (double)GetValue(ValueLabelGapProperty);
+        set => SetValue(ValueLabelGapProperty, value);
+    }
+
+    public double SecondLabelGap
+    {
+        get => (double)GetValue(SecondLabelGapProperty);
+        set => SetValue(SecondLabelGapProperty, value);
+    }
+
+    public double AxisFontSize
+    {
+        get => (double)GetValue(AxisFontSizeProperty);
+        set => SetValue(AxisFontSizeProperty, value);
+    }
+
+    public double LineThickness
+    {
+        get => (double)GetValue(LineThicknessProperty);
+        set => SetValue(LineThicknessProperty, value);
     }
 
     /// <summary>横軸の数字の間隔。戦闘の秒に結び付けるので、スクロールすると数字も動く。スクロールバーの1段の移動もこれ。</summary>
@@ -321,7 +356,8 @@ public sealed class MetricTimelineChart : FrameworkElement
         var markerTop = plotBounds.Bottom + SecondLabelGap + GetSecondLabelHeight() + SkillMarkerGap;
         foreach (var element in _skillMarkerElements.Values)
         {
-            Canvas.SetLeft(element, ToX(plotBounds, element.Marker.Seconds) - SkillMarkerWidth / 2d);
+            var marker = (MetricTimelineSkillMarker)element.Content;
+            Canvas.SetLeft(element, ToX(plotBounds, marker.Seconds) - element.DesiredSize.Width / 2d);
             Canvas.SetTop(element, markerTop);
         }
 
@@ -338,7 +374,6 @@ public sealed class MetricTimelineChart : FrameworkElement
         {
             var label = new TextBlock
             {
-                FontSize = AxisFontSize,
                 IsHitTestVisible = false
             };
             label.SetResourceReference(StyleProperty, "Text.WidgetWindow");
@@ -397,13 +432,52 @@ public sealed class MetricTimelineChart : FrameworkElement
         ((MetricTimelineChart)d).Refresh();
     }
 
-    private static void OnSkillMarkerToolTipTagChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    private static void OnSkillMarkerTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var chart = (MetricTimelineChart)d;
         foreach (var element in chart._skillMarkerElements.Values)
         {
-            element.Tag = chart.SkillMarkerToolTipTag;
+            element.ContentTemplate = chart.SkillMarkerTemplate;
         }
+
+        chart.InvalidateMeasure();
+        chart.InvalidateArrange();
+    }
+
+    private static void OnSkillMarkerRowHeightChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var chart = (MetricTimelineChart)d;
+        foreach (var element in chart._skillMarkerElements.Values)
+        {
+            element.Height = chart.SkillMarkerRowHeight;
+        }
+
+        // 描く領域の高さが変わるので、アイコンの要素に加えて線も描き直す。
+        chart.Refresh();
+    }
+
+    private static void OnLayoutValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        ((MetricTimelineChart)d).Refresh();
+    }
+
+    private static void OnAxisFontSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var chart = (MetricTimelineChart)d;
+        var fontSize = chart.AxisFontSize;
+        foreach (var label in chart._valueLabels.Concat(chart._secondLabels))
+        {
+            if (double.IsFinite(fontSize) && fontSize > 0d)
+            {
+                label.FontSize = fontSize;
+            }
+            else
+            {
+                label.ClearValue(TextBlock.FontSizeProperty);
+            }
+        }
+
+        chart.Refresh();
     }
 
     private void ApplySkillMarkers()
@@ -416,7 +490,7 @@ public sealed class MetricTimelineChart : FrameworkElement
     /// <summary>
     /// 技のアイコンの要素を、見ている窓 [<see cref="HorizontalOffset"/>, + <see cref="VisibleSeconds"/>] の中の時刻の技の開始の分だけにする
     /// (横軸の数字と同じ扱い。端のアイコンは半分が描く領域の左右の余白へはみ出す)。
-    /// 要素は一覧の何番目かで持ち、窓に入った番目は作り、出た番目は外し、残る番目は使い回す(中身が変わったところだけ差し替える)。
+    /// 要素は一覧の何番目かで持ち、窓に入った番目は作り、出た番目は外し、残る番目は使い回す(技が変わったところだけ中身を差し替える)。
     /// 作り直さないのは、マウスの下の要素が入れ替わると TIPS が閉じるため。
     /// 窓の中かは一覧の全部を見て決める(並び順に頼らない)。重なったら後の開始を上に描くよう、Z の順は番目で決める(足した順にしない)。
     /// 行を出さない設定(<see cref="ShowSkillMarkers"/>)のときは要素を全部外す。
@@ -450,19 +524,22 @@ public sealed class MetricTimelineChart : FrameworkElement
 
             if (_skillMarkerElements.TryGetValue(index, out var element))
             {
-                if (!string.Equals(element.Marker.IconPath, marker.IconPath, StringComparison.OrdinalIgnoreCase)
-                    || element.Marker.Frame != marker.Frame
-                    || element.Marker.UsesImagineAsset != marker.UsesImagineAsset)
+                if (!Equals(element.Content, marker))
                 {
-                    element.SetIcon(marker, this);
+                    WarnIfNoImaginePlacement(marker);
+                    element.Content = marker;
                 }
 
-                element.Update(marker);
                 continue;
             }
 
-            element = new SkillMarkerElement(marker, this);
-            element.SetIcon(marker, this);
+            WarnIfNoImaginePlacement(marker);
+            element = new ContentPresenter
+            {
+                Content = marker,
+                ContentTemplate = SkillMarkerTemplate,
+                Height = SkillMarkerRowHeight
+            };
             Panel.SetZIndex(element, index);
             _skillMarkerElements.Add(index, element);
             _skillMarkerLayer.Children.Add(element);
@@ -474,50 +551,24 @@ public sealed class MetricTimelineChart : FrameworkElement
         return seconds >= start && seconds <= end;
     }
 
-    /// <summary>クラス不明のアイコンの形(<c>Icon.Profession.Unknown</c>)。白い塗りをこの形で抜く(クラスアイコンと同じ染め方)。</summary>
-    private ImageBrush GetUnknownSkillIconMask()
-    {
-        if (_unknownSkillIconMask is null)
-        {
-            _unknownSkillIconMask = new ImageBrush((ImageSource)FindResource("Icon.Profession.Unknown"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            _unknownSkillIconMask.Freeze();
-        }
-
-        return _unknownSkillIconMask;
-    }
-
     /// <summary>
-    /// 技のアイコンの画像。ファイルは <c>CombatIconResolver</c> が在ることを確かめたもの。
-    /// 読めなかったら記録してクラス不明のアイコンで出す(グラフごと止めない)。
+    /// 03(究極スキル)の枠にイマジンの絵が来たら、絵のパスごとに1回ログに警告する(テンプレートに置き方を足す合図)。
+    /// テンプレートは普通の絵の置き方で描く。
     /// </summary>
-    private static ImageSource? LoadSkillIconImage(string path)
+    private static void WarnIfNoImaginePlacement(MetricTimelineSkillMarker marker)
     {
-        if (SkillIconImages.TryGetValue(path, out var cached))
+        if (marker.Frame != SkillIconFrame.Ultimate
+            || !marker.UsesImagineAsset
+            || marker.IconPath is not { } iconPath
+            || !ImaginePlacementWarnedPaths.Add(iconPath))
         {
-            return cached;
+            return;
         }
 
-        ImageSource? image = null;
-        try
-        {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = new Uri(path, UriKind.Absolute);
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze();
-            image = bitmap;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Failed to load skill icon {Path}; the unknown-class icon is shown instead", path);
-        }
-
-        SkillIconImages[path] = image;
-        return image;
+        Log.Warning(
+            "Skill icon {Path} is imagine art in the {Frame} frame, which has no imagine placement; drawing it with the regular placement",
+            iconPath,
+            marker.Frame);
     }
 
     private void ApplyPoints()
@@ -666,7 +717,7 @@ public sealed class MetricTimelineChart : FrameworkElement
 
         geometry.Freeze();
 
-        var linePen = CreateLinePen(lineBrush);
+        var linePen = CreateLinePen(lineBrush, LineThickness);
         drawingContext.PushClip(new RectangleGeometry(new Rect(plotBounds.Left, bounds.Top, plotBounds.Width, bounds.Height)));
         drawingContext.DrawGeometry(null, linePen, geometry);
         drawingContext.Pop();
@@ -761,7 +812,7 @@ public sealed class MetricTimelineChart : FrameworkElement
         var left = valueLabelWidth + ValueLabelGap;
         var top = valueLabelHeight / 2d;
         var right = secondLabelWidth / 2d;
-        var bottom = secondLabelHeight + SecondLabelGap + (ShowSkillMarkers ? SkillMarkerGap + SkillMarkerHeight : 0d);
+        var bottom = secondLabelHeight + SecondLabelGap + (ShowSkillMarkers ? SkillMarkerGap + SkillMarkerRowHeight : 0d);
         return new Rect(
             left,
             top,
@@ -781,9 +832,9 @@ public sealed class MetricTimelineChart : FrameworkElement
         return height;
     }
 
-    private static Pen CreateLinePen(Brush brush)
+    private static Pen CreateLinePen(Brush brush, double thickness)
     {
-        var pen = new Pen(brush, 1.5d)
+        var pen = new Pen(brush, thickness)
         {
             StartLineCap = PenLineCap.Round,
             EndLineCap = PenLineCap.Round,
@@ -818,166 +869,11 @@ public sealed class MetricTimelineChart : FrameworkElement
         }
     }
 
-    /// <summary>枠の中のアイコンの大きさ(幅。高さは画像の縦横比)と、枠の画像の中央からのずらし。</summary>
-    private readonly record struct SkillIconPlacement(double Width, double OffsetX, double OffsetY);
-
-    /// <param name="FrameResourceKey">背景の枠の画像のリソースの鍵。</param>
-    /// <param name="Icon">普通の絵の置き方。</param>
-    /// <param name="ImagineIcon">イマジンの絵の置き方。この枠にイマジンの絵の技が無ければ null。</param>
-    /// <param name="UnknownIcon">クラス不明のアイコンの置き方。</param>
-    private sealed record SkillFrameLayout(
-        string FrameResourceKey,
-        SkillIconPlacement Icon,
-        SkillIconPlacement? ImagineIcon,
-        SkillIconPlacement UnknownIcon);
-
-    private static SkillFrameLayout GetSkillFrameLayout(SkillIconFrame frame)
-    {
-        return frame switch
-        {
-            SkillIconFrame.Standard => StandardSkillFrameLayout,
-            SkillIconFrame.Imagine => ImagineSkillFrameLayout,
-            SkillIconFrame.Ultimate => UltimateSkillFrameLayout,
-            _ => throw new ArgumentOutOfRangeException(nameof(frame), frame, "Unknown skill icon frame")
-        };
-    }
-
-    /// <summary>
-    /// 技のアイコン1つ。背景を透明で塗ってアイコンの箱全体でマウスを受ける。
-    /// 中身は、下寄せの背景の枠の画像と、その中央に重ねるアイコンの画像かクラス不明のアイコン
-    /// (白の塗りを形で抜き、クラスアイコンと同じ影を付ける)。
-    /// TIPS は <c>ToolTip.WidgetWindowInfo</c> で、色は Tag(ウィジェット)の窓のパレットから取る。
-    /// </summary>
-    private sealed class SkillMarkerElement : Border
-    {
-        private readonly TextBlock _toolTipText;
-
-        public SkillMarkerElement(MetricTimelineSkillMarker marker, MetricTimelineChart owner)
-        {
-            Marker = marker;
-            Width = SkillMarkerWidth;
-            Height = SkillMarkerHeight;
-            Background = Brushes.Transparent;
-            Tag = owner.SkillMarkerToolTipTag;
-
-            _toolTipText = new TextBlock
-            {
-                Style = (Style)owner.FindResource("Text.WidgetWindow"),
-                FontSize = SkillMarkerToolTipFontSize,
-                Text = marker.Name
-            };
-            ToolTip = new ToolTip
-            {
-                Style = (Style)owner.FindResource("ToolTip.WidgetWindowInfo"),
-                Content = _toolTipText
-            };
-        }
-
-        public MetricTimelineSkillMarker Marker { get; private set; }
-
-        public void Update(MetricTimelineSkillMarker marker)
-        {
-            Marker = marker;
-            _toolTipText.Text = marker.Name;
-        }
-
-        /// <summary>
-        /// 中身を <paramref name="marker"/> の枠の背景と、その上のアイコンにする。
-        /// アイコンのパスが無いか読めなければ、アイコンの代わりにクラス不明のアイコンにする。
-        /// 枠の画像とアイコンは同じ箱(高さは枠の画像)の中央に置くので、箱を下寄せにすると枠も下寄せになる(プレイヤーリストの技の枠と同じ組み方)。
-        /// </summary>
-        public void SetIcon(MetricTimelineSkillMarker marker, MetricTimelineChart owner)
-        {
-            var layout = GetSkillFrameLayout(marker.Frame);
-            var frame = new Image
-            {
-                Source = (ImageSource)owner.FindResource(layout.FrameResourceKey),
-                Width = SkillFrameWidth,
-                Stretch = Stretch.Uniform,
-                SnapsToDevicePixels = true
-            };
-            RenderOptions.SetBitmapScalingMode(frame, BitmapScalingMode.HighQuality);
-
-            var slot = new Grid
-            {
-                Width = SkillMarkerWidth,
-                VerticalAlignment = VerticalAlignment.Bottom
-            };
-            slot.Children.Add(frame);
-            slot.Children.Add(CreateIcon(marker, layout, owner));
-            Child = slot;
-        }
-
-        private static FrameworkElement CreateIcon(MetricTimelineSkillMarker marker, SkillFrameLayout layout, MetricTimelineChart owner)
-        {
-            if (marker.IconPath is not null && LoadSkillIconImage(marker.IconPath) is { } image)
-            {
-                var placement = ResolveIconPlacement(marker, marker.IconPath, layout);
-                var picture = new Image
-                {
-                    Source = image,
-                    Width = placement.Width,
-                    Stretch = Stretch.Uniform,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    RenderTransform = CreateOffset(placement)
-                };
-                RenderOptions.SetBitmapScalingMode(picture, BitmapScalingMode.HighQuality);
-                return picture;
-            }
-
-            return new Rectangle
-            {
-                Width = layout.UnknownIcon.Width,
-                Height = layout.UnknownIcon.Width,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center,
-                RenderTransform = CreateOffset(layout.UnknownIcon),
-                Fill = Brushes.White,
-                OpacityMask = owner.GetUnknownSkillIconMask(),
-                Effect = (Effect)owner.FindResource("Effect.ProfessionIconShadow")
-            };
-        }
-
-        /// <summary>
-        /// 絵の置き方。イマジンの絵ならイマジンの絵の値、それ以外は普通の絵の値。
-        /// イマジンの絵の値を持たない枠にイマジンの絵が来たら、普通の絵の値で描き、絵のパスごとに1回ログに警告する(枠の値を足す合図)。
-        /// </summary>
-        private static SkillIconPlacement ResolveIconPlacement(MetricTimelineSkillMarker marker, string iconPath, SkillFrameLayout layout)
-        {
-            if (!marker.UsesImagineAsset)
-            {
-                return layout.Icon;
-            }
-
-            if (layout.ImagineIcon is { } imaginePlacement)
-            {
-                return imaginePlacement;
-            }
-
-            if (ImaginePlacementWarnedPaths.Add(iconPath))
-            {
-                Log.Warning(
-                    "Skill icon {Path} is imagine art in the {Frame} frame, which has no imagine placement; drawing it with the regular placement",
-                    iconPath,
-                    marker.Frame);
-            }
-
-            return layout.Icon;
-        }
-
-        private static TranslateTransform CreateOffset(SkillIconPlacement placement)
-        {
-            var offset = new TranslateTransform(placement.OffsetX, placement.OffsetY);
-            offset.Freeze();
-            return offset;
-        }
-    }
 }
 
 /// <summary>
 /// 推移グラフの格子と軸の線。<b>窓の枠の層(<c>WidgetWindow.FrameOverlayHost</c>)へ差し込む</b>ので、
-/// 分割線と同じく窓の不透明度で合成され、影は付かない。線は1px、色は <see cref="Brush"/>(分割線の色を束縛する)。
+/// 分割線と同じく窓の不透明度で合成され、影は付かない。線の太さは <see cref="LineThickness"/>(XAML で決める)、色は <see cref="Brush"/>(分割線の色を束縛する)。
 ///
 /// <para>
 /// 位置は <see cref="Chart"/> の描く領域から求める。格子は描く領域の位置と大きさだけで決まる(点にも横のずらしにも依らない)ので、
@@ -991,6 +887,12 @@ public sealed class MetricTimelineGridLayer : FrameworkElement
         typeof(Brush),
         typeof(MetricTimelineGridLayer),
         new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    public static readonly DependencyProperty LineThicknessProperty = DependencyProperty.Register(
+        nameof(LineThickness),
+        typeof(double),
+        typeof(MetricTimelineGridLayer),
+        new FrameworkPropertyMetadata(0d, FrameworkPropertyMetadataOptions.AffectsRender));
 
     private (Point Origin, Size PlotSize)? _renderedPlacement;
 
@@ -1006,6 +908,12 @@ public sealed class MetricTimelineGridLayer : FrameworkElement
         set => SetValue(BrushProperty, value);
     }
 
+    public double LineThickness
+    {
+        get => (double)GetValue(LineThicknessProperty);
+        set => SetValue(LineThicknessProperty, value);
+    }
+
     /// <summary>格子を描く相手のグラフ。置くのはビュー。</summary>
     public MetricTimelineChart? Chart { get; set; }
 
@@ -1019,7 +927,7 @@ public sealed class MetricTimelineGridLayer : FrameworkElement
             return;
         }
 
-        var pen = new Pen(Brush, 1d);
+        var pen = new Pen(Brush, LineThickness);
         if (pen.CanFreeze)
         {
             pen.Freeze();

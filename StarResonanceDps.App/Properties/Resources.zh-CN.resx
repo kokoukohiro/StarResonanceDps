@@ -574,8 +574,7 @@
   </data>
   <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
     <value>治疗</value>
-  </data>
-  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
     <value>文本复制错误</value>
   </data>
   <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
@@ -1231,6 +1230,12 @@
   <data name="EntityList_UnknownEnemy" xml:space="preserve">
     <value>未知敌人</value>
   </data>
+  <data name="EntityList_Targeted" xml:space="preserve">
+    <value>被锁定为目标</value>
+  </data>
+  <data name="EntityList_HateValue" xml:space="preserve">
+    <value>仇恨值: {0}</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>排序方式</value>
   </data>
@@ -1300,7 +1305,17 @@
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>复活列表</value>
   </data>
-  <data name="ReviveList_Revivable" xml:space="preserve">
+  <data name="Widget_DamageTakenList" xml:space="preserve">
+    <value>承伤列表</value>
+  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+    <value>(被击败)</value>
+  </data>
+  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
+    <value>{0}秒前</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+    <value>显示被击败原因</value>
+  </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>可复活</value>
   </data>
   <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
@@ -1332,6 +1347,18 @@
   </data>
   <data name="InternalIdDisplay_MapOnly" xml:space="preserve">
     <value>仅显示地图ID</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
+    <value>无名称技能</value>
+  </data>
+  <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
+    <value>※内部名称仅为中文</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_Blank" xml:space="preserve">
+    <value>留空</value>
+  </data>
+  <data name="UnnamedSkillNameDisplay_InternalName" xml:space="preserve">
+    <value>以内部名称显示</value>
   </data>
   <data name="Settings_Display_WidgetWindow" xml:space="preserve">
     <value>小组件窗口</value>

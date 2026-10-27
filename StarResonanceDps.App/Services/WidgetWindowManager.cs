@@ -29,8 +29,11 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// <summary>窓へ当てる最新の顔ぶれ。</summary>
     private PlayerWindowRoster? _latestPlayerWindowRoster;
 
-    /// <summary>開いている蘇生リストの窓の中身。顔ぶれを当てる先(<see cref="UpdateReviveListRoster"/>)。閉じていれば null。</summary>
+    /// <summary>開いている蘇生リストの窓の中身。顔ぶれを当てる先(<see cref="UpdateListWidgetRosters"/>)。閉じていれば null。</summary>
     private ReviveListWidgetViewModel? _reviveListViewModel;
+
+    /// <summary>開いている被ダメリストの窓の中身。顔ぶれを当てる先(<see cref="UpdateListWidgetRosters"/>)。閉じていれば null。</summary>
+    private DamageTakenListWidgetViewModel? _damageTakenListViewModel;
 
     private Window? _managerWindow;
     private bool _isManagerClosing;
@@ -1216,6 +1219,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
             WidgetKind.TakenDamageLog => CreateTakenDamageLogComposition(widget),
             WidgetKind.ReviveList => CreateReviveListComposition(widget),
+            WidgetKind.DamageTakenList => CreateDamageTakenListComposition(widget),
             _ => throw new InvalidOperationException($"Widget {widget.Kind} has no single-window content.")
         };
     }
@@ -1235,10 +1239,26 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             null);
     }
 
-    /// <summary>顔ぶれを蘇生リストの窓へ当てる(画面のスレッドで呼ぶ)。窓が開いていなければ何もしない。</summary>
-    public void UpdateReviveListRoster(PlayerRosterSnapshot roster)
+    private WidgetWindowComposition CreateDamageTakenListComposition(WidgetListItemViewModel widget)
+    {
+        var viewModel = new DamageTakenListWidgetViewModel(widget, PlayerRosterPresentationStore.Instance.Current, OpenPlayerWindow);
+        _damageTakenListViewModel = viewModel;
+        return new WidgetWindowComposition(
+            new DamageTakenListWidgetView
+            {
+                DataContext = viewModel
+            },
+            viewModel,
+            null,
+            null,
+            null);
+    }
+
+    /// <summary>顔ぶれを蘇生リストと被ダメリストの窓へ当てる(画面のスレッドで呼ぶ)。開いていない窓には何もしない。</summary>
+    public void UpdateListWidgetRosters(PlayerRosterSnapshot roster)
     {
         _reviveListViewModel?.UpdateRoster(roster);
+        _damageTakenListViewModel?.UpdateRoster(roster);
     }
 
     private static WidgetWindowComposition CreateTakenDamageLogComposition(WidgetListItemViewModel widget)
@@ -1722,6 +1742,11 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         if (window.Widget.Kind == WidgetKind.ReviveList)
         {
             _reviveListViewModel = null;
+        }
+
+        if (window.Widget.Kind == WidgetKind.DamageTakenList)
+        {
+            _damageTakenListViewModel = null;
         }
 
         UpdateCardDataStatus(window.Widget);

@@ -5,7 +5,7 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
 /// 蘇生リストの1行(戦闘不能の人1人)。行は作り直さず、値だけ入れ替える(<see cref="ViewModels.ReviveListWidgetViewModel"/>)。
-/// クラスアイコン・特化の文字・PT番号・名前の作りはプレイヤーリストの行と同じ。
+/// 行の形とゲージはデバフ一覧の行と同じ。クラスアイコン・名前の作りはプレイヤーリストの行と同じ。
 /// </summary>
 public sealed partial class ReviveListEntry : ObservableObject
 {
@@ -32,17 +32,6 @@ public sealed partial class ReviveListEntry : ObservableObject
     [ObservableProperty]
     private Brush? _classBrush;
 
-    /// <summary>クラスアイコンの下の特化の文字。</summary>
-    [ObservableProperty]
-    private string _classSpecDisplayName = string.Empty;
-
-    [ObservableProperty]
-    private bool _isPartyMember;
-
-    /// <summary>PT番号のバッジの文字。番号が分からなければ「？」(プレイヤーリストと同じ)。</summary>
-    [ObservableProperty]
-    private string _partyNumberText = string.Empty;
-
     /// <summary>名前。書式は設定「プレイヤー名」(プレイヤーリストと同じ)。</summary>
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -62,6 +51,17 @@ public sealed partial class ReviveListEntry : ObservableObject
     /// <summary>テキストカラー「蘇生可能」の色。全部の行で同じブラシ。</summary>
     [ObservableProperty]
     private Brush? _revivableBrush;
+
+    /// <summary>ゲージの長さ(0〜1)。右に残り秒を出している行だけ長さを持ち、ほかの行は 0。</summary>
+    [ObservableProperty]
+    private double _barRatio;
+
+    /// <summary>
+    /// ゲージが 0 になるまでの秒数。表示側はこのぶんかけて線形に縮める。
+    /// 0 は「今は縮まない」(満タンで頭打ちの間と、ゲージを出さない行)。
+    /// </summary>
+    [ObservableProperty]
+    private double _barDecaySeconds;
 
     /// <summary>並びの鍵。蘇生可能は 0、残り秒の分かる行は残り秒、分からない行は最後(正の無限大)。</summary>
     internal double SortKey { get; set; }

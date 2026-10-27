@@ -9,7 +9,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// ゲージの色の節(「バフカラー」「デバフカラー」)1つ。色の行(左端と右端)と不透明度。
-/// バフ・デバフ一覧は1つ、バフ・デバフグループはバフとデバフの2つを持つ。行の作りはクラスカラーと同じ。
+/// バフ・デバフ一覧は1つ、バフ・デバフグループはバフとデバフの2つ、蘇生リストはデバフの1つを持つ。行の作りはクラスカラーと同じ。
 /// </summary>
 public sealed partial class BuffGaugeColorSettingsViewModel : ObservableObject, IDisposable
 {

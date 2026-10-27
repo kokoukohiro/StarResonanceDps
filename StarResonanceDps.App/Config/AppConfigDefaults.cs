@@ -16,6 +16,12 @@ public static class AppConfigDefaults
     /// <summary>ウィジェットの窓をピン留め中だけ最前面に出す。</summary>
     public const int PinnedOnlyWidgetWindowTopmostModeIndex = 1;
 
+    /// <summary>名前の無い技を空欄にする(内部名を出さない)。</summary>
+    public const int UnnamedSkillNameBlankIndex = 0;
+
+    /// <summary>名前の無い技を内部名で表示する(既定)。</summary>
+    public const int UnnamedSkillNameInternalNameIndex = 1;
+
     /// <summary>ウィジェットのタイトルの状態の円と TIPS を出す(既定)。</summary>
     public const int WidgetDataStatusDisplayShowIndex = 0;
 
@@ -107,6 +113,7 @@ public static class AppConfigDefaults
             NumberDisplayFormatIndex = 0,
             PlayerNameDisplayModeIndex = 0,
             InternalIdDisplayModeIndex = 0,
+            UnnamedSkillNameDisplayModeIndex = UnnamedSkillNameInternalNameIndex,
             WidgetWindowTopmostModeIndex = AlwaysWidgetWindowTopmostModeIndex,
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayShowIndex,
             WindowColorIndex = 1,
@@ -260,6 +267,10 @@ public static class AppConfigDefaults
         settings.NumberDisplayFormatIndex = Clamp(settings.NumberDisplayFormatIndex, 0, 1);
         settings.PlayerNameDisplayModeIndex = Clamp(settings.PlayerNameDisplayModeIndex, 0, 2);
         settings.InternalIdDisplayModeIndex = Clamp(settings.InternalIdDisplayModeIndex, 0, 5);
+        settings.UnnamedSkillNameDisplayModeIndex = Clamp(
+            settings.UnnamedSkillNameDisplayModeIndex,
+            UnnamedSkillNameBlankIndex,
+            UnnamedSkillNameInternalNameIndex);
         settings.WidgetWindowTopmostModeIndex = Clamp(
             settings.WidgetWindowTopmostModeIndex,
             AlwaysWidgetWindowTopmostModeIndex,

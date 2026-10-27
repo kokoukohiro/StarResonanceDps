@@ -524,7 +524,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 continue;
             }
 
-            parts.Add((ResolveElementColor(pair.Key), pair.Value));
+            parts.Add((ElementBarColors.Resolve(_elementColorSettings, pair.Key), pair.Value));
         }
 
         if (!ColorUtilities.TryBlendWeighted(parts, out var blended))
@@ -532,36 +532,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             return null;
         }
 
-        var filtered = ClassColorFilter.Apply(blended, _elementColorSettings);
-        var opacity = Math.Clamp(
-            _elementColorSettings.ColorOpacity,
-            WidgetConfigDefaults.MinClassColorOpacity,
-            WidgetConfigDefaults.MaxClassColorOpacity);
-
-        var brush = new SolidColorBrush(Color.FromArgb(
-            (byte)Math.Round(opacity / 100d * byte.MaxValue, MidpointRounding.AwayFromZero),
-            filtered.R,
-            filtered.G,
-            filtered.B));
-        brush.Freeze();
-        return brush;
-    }
-
-    private Color ResolveElementColor(Zproto.EDamageProperty element)
-    {
-        var key = element.ToString();
-        var defaults = WidgetConfigDefaults.CreateDefaultElementColors(key);
-        var palette = _elementColorSettings.ColorPalettes.TryGetValue(key, out var colors) && colors.Count > 0
-            ? colors
-            : defaults;
-        var selectedIndex = _elementColorSettings.ColorIndexes.TryGetValue(key, out var index)
-            ? index
-            : WidgetConfigDefaults.MinClassColorIndex + 1;
-
-        var hex = palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
-        return ColorUtilities.TryParseHex(hex, out var color)
-            ? color
-            : Colors.Gray;
+        return ElementBarColors.CreateBarBrush(_elementColorSettings, blended);
     }
 
     /// <summary>

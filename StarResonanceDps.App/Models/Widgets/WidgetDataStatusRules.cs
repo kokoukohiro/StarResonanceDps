@@ -106,20 +106,18 @@ public static class WidgetDataStatusRules
 
     /// <summary>
     /// 蘇生リスト(いつもライブ)。出している行(戦闘不能の人)だけを数える。
-    /// 自分の行があれば自分のバフ(蘇生不可デバフの元)、他の人の行は蘇生不可・素性・特化が分からないか、PT番号の元のパーティ情報がまだか。
+    /// 自分の行があれば自分のバフ(蘇生不可デバフの元)、他の人の行は蘇生不可・素性・特化が分からないか。
     /// </summary>
     /// <param name="rows">出している行の元の名簿の行。</param>
     /// <param name="hasOtherReviveBlockUnknown">他の人の行に、蘇生不可が分からない(右が「??秒」の)行がある。</param>
     /// <param name="countsSeasonTalent">名前の書式に潜在心相晶(<c>{Psych}</c>)を出しているか。</param>
     public static WidgetDataStatus ForReviveList(
         GameReceptionSnapshot reception,
-        bool isPartyMembershipPending,
         IReadOnlyCollection<PlayerRosterEntry> rows,
         bool hasOtherReviveBlockUnknown,
         bool countsSeasonTalent)
     {
         var status = WidgetDataStatus.Complete
-            .WithIf(rows.Count > 0 && isPartyMembershipPending, PartyScreen)
             .WithIf(
                 hasOtherReviveBlockUnknown
                     || rows.Any(row => !row.IsSelf

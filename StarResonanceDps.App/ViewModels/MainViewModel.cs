@@ -112,6 +112,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
         AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
+        AddWidget(WidgetKind.DamageTakenList, "Widget_DamageTakenList");
         AddWidget(WidgetKind.DamageContribution, "Widget_DamageSkillDetails");
         AddWidget(WidgetKind.DamageSummary, "Widget_DamageContribution");
         AddWidget(WidgetKind.DpsGraph, "Widget_DpsGraph");
@@ -478,8 +479,9 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapName,
             roster.MapChannel,
             roster.MapGeneration);
+        _entityListWidget?.UpdateEntityListRoster(roster.Entries);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
-        _widgetWindowManager.UpdateReviveListRoster(roster);
+        _widgetWindowManager.UpdateListWidgetRosters(roster);
         _notificationMonitor?.ObserveRoster(roster);
         RefreshTargetSelections();
     }

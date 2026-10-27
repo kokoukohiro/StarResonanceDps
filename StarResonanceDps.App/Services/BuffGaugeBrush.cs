@@ -5,7 +5,7 @@ using StarResonanceDps.App.Config;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// バフ・デバフの行のゲージの塗り。プレイヤーから開いた一覧・エンティティリストから開いた一覧・バフ・デバフグループが使う。
+/// バフ・デバフの行のゲージの塗りと長さ。プレイヤーから開いた一覧・エンティティリストから開いた一覧・バフ・デバフグループ・蘇生リストが使う。
 /// </summary>
 public static class BuffGaugeBrush
 {
@@ -34,6 +34,22 @@ public static class BuffGaugeBrush
     public static int? GetLengthSeconds(int gaugeLengthIndex)
     {
         return WidgetConfigDefaults.BuffGaugeLengthSeconds[gaugeLengthIndex];
+    }
+
+    /// <summary>
+    /// 残り時間から、ゲージの長さ(0〜1)と 0 になるまでの秒(表示側はこのぶんかけて縮める)を出す。
+    /// 満タンで頭打ちの間はまだ縮まない(縮み始めるのは残りがゲージの長さを切ってから)。長さが 0 以下ならずっと満タン。
+    /// </summary>
+    public static (double Ratio, double DecaySeconds) GetBarState(double remainingSeconds, double lengthSeconds)
+    {
+        if (lengthSeconds <= 0d)
+        {
+            return (1d, 0d);
+        }
+
+        var ratio = Math.Clamp(remainingSeconds / lengthSeconds, 0d, 1d);
+        var decaySeconds = remainingSeconds <= lengthSeconds ? Math.Max(remainingSeconds, 0d) : 0d;
+        return (ratio, decaySeconds);
     }
 
     private static Color ResolveColor(BuffGaugeColorConfig colors, string key)

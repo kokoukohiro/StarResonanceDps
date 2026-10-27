@@ -138,6 +138,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EquipmentSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="DamageTakenListClassColorsNavButton"
+                                Click="DamageTakenListClassColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding DamageTakenListSettings.ClassColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="ElementColorsNavButton"
                                 Click="ElementColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -172,6 +181,15 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.DebuffGaugeColors.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ReviveListGaugeColorsNavButton"
+                                Click="ReviveListGaugeColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasReviveListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ReviveListSettings.GaugeColors.SectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="ClassColorsNavButton"
@@ -338,6 +356,15 @@
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
                                                 <widgetSettingsViews:ReviveListWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+
+                                    <ContentControl Content="{Binding DamageTakenListSettings}"
+                                                    Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:DamageTakenListWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -509,6 +536,16 @@
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
+                                <ContentControl x:Name="DamageTakenListClassColorsHost"
+                                                Content="{Binding DamageTakenListSettings}"
+                                                Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:DamageTakenListClassColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
                                 <ContentControl x:Name="ElementColorsHost"
                                                 Content="{Binding ElementColorSettings}"
                                                 Visibility="{Binding HasElementColorSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -542,6 +579,16 @@
                                 <ContentControl x:Name="BuffDebuffGroupDebuffColorsHost"
                                                 Content="{Binding BuffDebuffGroupSettings.DebuffGaugeColors}"
                                                 Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffGaugeColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="ReviveListGaugeColorsHost"
+                                                Content="{Binding ReviveListSettings.GaugeColors}"
+                                                Visibility="{Binding HasReviveListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:BuffGaugeColorSettingsView />

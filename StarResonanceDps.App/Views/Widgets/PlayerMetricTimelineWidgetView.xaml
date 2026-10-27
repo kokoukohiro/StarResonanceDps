@@ -2,6 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
+             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             xmlns:runtime="clr-namespace:StarResonanceDps.Core.CombatRuntime;assembly=StarResonanceDps.Core"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <UserControl.Resources>
@@ -10,7 +12,133 @@
             色は分割線と同じ。
         -->
         <controls:MetricTimelineGridLayer x:Key="GridLayer"
+                                          LineThickness="1"
                                           Brush="{Binding DataContext.WidgetWindowPalette.WidgetWindowDividerBrush, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+
+        <converters:SkillIconImageConverter x:Key="MetricTimeline.SkillIconImageConverter" />
+
+        <!-- クラス不明のアイコンの形。白の塗りをこの形で抜く(クラスアイコンと同じ染め方)。アイコンどうしで使い回す。 -->
+        <ImageBrush x:Key="MetricTimeline.UnknownSkillIconMask"
+                    ImageSource="{StaticResource Icon.Profession.Unknown}"
+                    Stretch="Uniform" />
+
+        <!--
+            横軸の下の技のアイコン1つ(中身は MetricTimelineSkillMarker)。組み方はプレイヤーリストの技の枠と同じで、
+            箱の中に下寄せで背景の枠の画像を置き、その中央に絵かクラス不明のアイコンを重ねる。
+            枠の画像と、絵・クラス不明のアイコンの大きさと位置(枠の画像の中央からのずらし)は、枠の種類(01 / 02 / 03)とイマジンの絵かで変える。
+            01・02 はプレイヤーリストの技の枠と同じ値。03 は 01 との中の円の位置の差だけずらした値から手で合わせたもの。
+            03 にイマジンの絵の置き方は無い(来たら普通の絵の置き方で描き、グラフがログに警告する)。
+            絵が無い・読めない技はクラス不明のアイコン(中の円の中心)。
+            箱は背景を透明で塗って全体でマウスを受け、技の名前を TIPS で出す(色は窓のパレット。Tag にグラフの SkillMarkerToolTipTag を入れる)。
+            箱の高さはグラフの SkillMarkerRowHeight。
+        -->
+        <DataTemplate x:Key="MetricTimeline.SkillMarkerTemplate">
+            <Grid Width="32"
+                  Background="Transparent"
+                  Tag="{Binding SkillMarkerToolTipTag, RelativeSource={RelativeSource AncestorType={x:Type controls:MetricTimelineChart}}}">
+                <Grid.ToolTip>
+                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="12"
+                                   Text="{Binding Name}" />
+                    </ToolTip>
+                </Grid.ToolTip>
+
+                <Grid Width="32"
+                      VerticalAlignment="Bottom">
+                    <Image Width="31"
+                           Stretch="Uniform"
+                           SnapsToDevicePixels="True"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="Source" Value="{StaticResource Icon.RoleSkillFrame}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Frame}" Value="{x:Static runtime:SkillIconFrame.Imagine}">
+                                        <Setter Property="Source" Value="{StaticResource Icon.ImagineSkillFrame}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Frame}" Value="{x:Static runtime:SkillIconFrame.Ultimate}">
+                                        <Setter Property="Source" Value="{StaticResource Icon.UltimateSkillFrame}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <Image x:Name="SkillMarkerPicture"
+                           Source="{Binding IconPath, Converter={StaticResource MetricTimeline.SkillIconImageConverter}}"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.Style>
+                            <!-- 後の条件ほど強い。03 はイマジンの絵でも普通の絵の置き方。 -->
+                            <Style TargetType="Image">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="Width" Value="27" />
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="-0.2" Y="1.3" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding UsesImagineAsset}" Value="True">
+                                        <Setter Property="Width" Value="25" />
+                                        <Setter Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="-1.2" Y="2.1" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Frame}" Value="{x:Static runtime:SkillIconFrame.Ultimate}">
+                                        <Setter Property="Width" Value="27" />
+                                        <Setter Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="-0.2" Y="1.6" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <Rectangle Width="20"
+                               Height="20"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Fill="White"
+                               OpacityMask="{StaticResource MetricTimeline.UnknownSkillIconMask}"
+                               Effect="{StaticResource Effect.ProfessionIconShadow}">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform X="-0.6" Y="1.7" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Frame}" Value="{x:Static runtime:SkillIconFrame.Ultimate}">
+                                        <Setter Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="-0.6" Y="1.8" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Source, ElementName=SkillMarkerPicture}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
+                </Grid>
+            </Grid>
+        </DataTemplate>
     </UserControl.Resources>
 
     <!-- 下の隙間は窓の横のスクロールバーの行が受け持つ(バーがあれば16、無ければ5。ほかのウィジェットの右と縦のバーの列と同じ)。 -->
@@ -25,6 +153,13 @@
                                       LineBrush="{Binding TimelineLineBrush}"
                                       SkillMarkers="{Binding TimelineSkillMarkers}"
                                       ShowSkillMarkers="{Binding TimelineShowsSkillLog}"
-                                      SkillMarkerToolTipTag="{Binding PlayerWidget}" />
+                                      SkillMarkerToolTipTag="{Binding PlayerWidget}"
+                                      SkillMarkerTemplate="{StaticResource MetricTimeline.SkillMarkerTemplate}"
+                                      SkillMarkerRowHeight="35"
+                                      SkillMarkerGap="2"
+                                      ValueLabelGap="4"
+                                      SecondLabelGap="2"
+                                      AxisFontSize="10"
+                                      LineThickness="1.5" />
     </Grid>
 </UserControl>

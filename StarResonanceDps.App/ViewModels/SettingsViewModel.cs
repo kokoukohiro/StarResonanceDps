@@ -57,6 +57,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     private int _internalIdDisplayModeIndex;
 
     [ObservableProperty]
+    private int _unnamedSkillNameDisplayModeIndex = AppConfigDefaults.UnnamedSkillNameInternalNameIndex;
+
+    [ObservableProperty]
     private int _widgetWindowTopmostModeIndex = AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
 
     [ObservableProperty]
@@ -322,6 +325,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = NumberDisplayFormatIndex,
             PlayerNameDisplayModeIndex = PlayerNameDisplayModeIndex,
             InternalIdDisplayModeIndex = InternalIdDisplayModeIndex,
+            UnnamedSkillNameDisplayModeIndex = UnnamedSkillNameDisplayModeIndex,
             WidgetWindowTopmostModeIndex = WidgetWindowTopmostModeIndex,
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
@@ -370,6 +374,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             NumberDisplayFormatIndex = settings.NumberDisplayFormatIndex;
             PlayerNameDisplayModeIndex = settings.PlayerNameDisplayModeIndex;
             InternalIdDisplayModeIndex = settings.InternalIdDisplayModeIndex;
+            UnnamedSkillNameDisplayModeIndex = settings.UnnamedSkillNameDisplayModeIndex;
             WidgetWindowTopmostModeIndex = settings.WidgetWindowTopmostModeIndex;
             WidgetDataStatusDisplayModeIndex = settings.WidgetDataStatusDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
@@ -640,6 +645,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.NumberDisplayFormatIndex == right.NumberDisplayFormatIndex
             && left.PlayerNameDisplayModeIndex == right.PlayerNameDisplayModeIndex
             && left.InternalIdDisplayModeIndex == right.InternalIdDisplayModeIndex
+            && left.UnnamedSkillNameDisplayModeIndex == right.UnnamedSkillNameDisplayModeIndex
             && left.WidgetWindowTopmostModeIndex == right.WidgetWindowTopmostModeIndex
             && left.WidgetDataStatusDisplayModeIndex == right.WidgetDataStatusDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
@@ -731,6 +737,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     }
 
     /// <summary>スイッチの右に出す ON / OFF。ウィジェット設定と同じ形。</summary>
+    /// <summary>「名前のないスキル」の注意書き(内部名は中国語のみ)を出すか。「内部名で表示」を選んでいるときだけ。</summary>
+    public bool ShowsUnnamedSkillNameNote =>
+        UnnamedSkillNameDisplayModeIndex == AppConfigDefaults.UnnamedSkillNameInternalNameIndex;
+
     public string StopAggregationInNonCombatAreasStateText => GetSwitchStateText(StopAggregationInNonCombatAreas);
 
     public string SplitEncountersOnNewPhasesStateText => GetSwitchStateText(SplitEncountersOnNewPhases);
@@ -876,6 +886,17 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             ApplySettingsPreview();
         }
 
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnUnnamedSkillNameDisplayModeIndexChanged(int value)
+    {
+        if (!_isLoadingSettings)
+        {
+            ApplySettingsPreview();
+        }
+
+        OnPropertyChanged(nameof(ShowsUnnamedSkillNameNote));
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -26,6 +27,11 @@ namespace StarResonanceDps.App.ViewModels;
 /// 右の文字と並びは <see cref="MeterSnapshotProvider.GetReviveBlockState"/> で決める。残り秒の分かる行は残り秒、
 /// 付いていない行と残りが 0 になった行は「蘇生可能」(並びの鍵は 0)、分からない行は「??秒」で最後。
 /// 同じ鍵どうしは今の並びを動かさない(残りが 0 になって「蘇生可能」に変わっても、その場に留まる)。
+/// </para>
+///
+/// <para>
+/// 行の形とゲージはデバフ一覧と同じ。ゲージは残り秒を出している行だけで、「??秒」(付いているかどうかも分からない人を含む)と「蘇生可能」の行には出さない。
+/// 長さは設定「ゲージの長さ」で、自動は蘇生不可デバフの効果時間の総量。色は設定「デバフカラー」。
 /// </para>
 ///
 /// <para>
@@ -65,6 +71,10 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
     /// <summary>他の人の行に、蘇生不可が分からない行があるか。状態の印の計算に使う。</summary>
     private bool _hasOtherReviveBlockUnknown;
 
+    /// <summary>ゲージの塗り(設定「デバフカラー」)。設定が変わったときだけ作り直す。</summary>
+    [ObservableProperty]
+    private Brush _gaugeBrush;
+
     public ReviveListWidgetViewModel(
         WidgetListItemViewModel widget,
         PlayerRosterSnapshot roster,
@@ -74,6 +84,7 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
         _requestPlayerWindow = requestPlayerWindow;
         _settings = widget.GetReviveListSettingsSnapshot();
         _revivableBrush = CreateRevivableBrush();
+        _gaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors!);
         _roster = roster;
         _mapGeneration = roster.MapGeneration;
         Entries = new ReadOnlyObservableCollection<ReviveListEntry>(_entries);
@@ -103,7 +114,6 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
     {
         var status = WidgetDataStatusRules.ForReviveList(
             GameReceptionStateStore.Current,
-            PartyStateStore.Instance.Current.IsMembershipPending,
             _shownRows,
             _hasOtherReviveBlockUnknown,
             PlayerInfoFormatFormatter.ShowsSeasonTalent(_settings.PlayerInfoFormatString));
@@ -198,6 +208,7 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
         _settings = _widget.GetReviveListSettingsSnapshot();
         _classBrushes.Clear();
         _revivableBrush = CreateRevivableBrush();
+        GaugeBrush = BuffGaugeBrush.Create(_settings.GaugeColors!);
         Refresh();
     }
 
@@ -282,11 +293,6 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
         entry.IsSelf = row.IsSelf;
         entry.ClassIconMask = GetProfessionIconMask(professionKey);
         entry.ClassBrush = GetClassBrush(professionKey);
-        entry.ClassSpecDisplayName = PlayerInfoFormatFormatter.GetClassSpecText(row.ClassSpec);
-        entry.IsPartyMember = row.IsPartyMember;
-        entry.PartyNumberText = row.IsPartyMember
-            ? row.PartyNumber?.ToString(CultureInfo.InvariantCulture) ?? "？"
-            : string.Empty;
         entry.DisplayName = PlayerInfoFormatFormatter.Format(row, _settings.PlayerInfoFormatString, nameDisplayMode);
         entry.IsSelfHighlighted = row.IsSelf
             && _settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
@@ -302,6 +308,17 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
         entry.StateText = isRevivable
             ? LocalizationManager.Instance.GetString("ReviveList_Revivable")
             : FormatSeconds(state.Kind == ReviveBlockStateKind.Unknown ? UnknownSecondsText : roundedSeconds);
+
+        if (state.Kind == ReviveBlockStateKind.Blocked && roundedSeconds > 0)
+        {
+            var lengthSeconds = BuffGaugeBrush.GetLengthSeconds(_settings.GaugeLengthIndex) ?? state.DurationSeconds;
+            (entry.BarRatio, entry.BarDecaySeconds) = BuffGaugeBrush.GetBarState(state.RemainingSeconds, lengthSeconds);
+        }
+        else
+        {
+            entry.BarRatio = 0d;
+            entry.BarDecaySeconds = 0d;
+        }
         entry.SortKey = state.Kind switch
         {
             ReviveBlockStateKind.Unknown => double.PositiveInfinity,

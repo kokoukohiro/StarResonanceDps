@@ -1,0 +1,274 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.DamageTakenListWidgetDisplaySettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        被ダメリストの表示設定。「プレイヤー名」と「自分の強調表示」は蘇生リストの同じ行と同じ作り、
+        「スキル名」(右の書式)は「プレイヤー名」と同じ作り(書式・見本・差し込む項目)、
+        「戦闘不能の原因を表示」は「自分の強調表示」と同じスイッチ。
+    -->
+    <StackPanel>
+        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Display_Title]}"
+                   Foreground="{DynamicResource Brush.TextPrimary}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
+
+        <ContentControl Style="{StaticResource Panel.SettingSection}"
+                        Margin="0,0,0,12">
+            <StackPanel>
+                <!-- 下に「スキル名」が続くので線を引く。 -->
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Padding" Value="20,11,20,11" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="134" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Customization]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <TextBox x:Name="PlayerInfoFormatTextBox"
+                                 Grid.Row="0"
+                                 Grid.Column="2"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 Text="{Binding PlayerInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Loaded="FormatTextBox_Loaded"
+                                 TextChanged="FormatTextBox_TextChanged" />
+
+                        <Grid Grid.Row="1"
+                              Grid.ColumnSpan="4"
+                              Margin="0,4,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Preview]}" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding FormatPreview}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="4"
+                              Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="1" x:Name="PlayerInfoFormatFieldHost">
+                                <ComboBox Width="{Binding ActualWidth, ElementName=PlayerInfoFormatFieldHost}"
+                                          MaxWidth="220"
+                                          HorizontalAlignment="Right"
+                                          ItemsSource="{Binding AvailablePlayerInfoFormatFields}"
+                                          SelectedItem="{Binding SelectedPlayerInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource Input.SettingsComboBox}" />
+                            </Grid>
+
+                            <Button Grid.Column="3"
+                                    Click="AddPlayerInfoFormatField_Click"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- 下に「自分の強調表示」が続くので線を引く。作りは「プレイヤー名」と同じ。 -->
+                <Border>
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldBase}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="Height" Value="Auto" />
+                            <Setter Property="Padding" Value="20,11,20,11" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </Border.Style>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="134" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Metric_SkillName]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <TextBox x:Name="HitInfoFormatTextBox"
+                                 Grid.Row="0"
+                                 Grid.Column="2"
+                                 Height="32"
+                                 Style="{StaticResource Input.PathBox}"
+                                 Text="{Binding HitInfoFormatString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalContentAlignment="Center"
+                                 Loaded="FormatTextBox_Loaded"
+                                 TextChanged="FormatTextBox_TextChanged" />
+
+                        <Grid Grid.Row="1"
+                              Grid.ColumnSpan="4"
+                              Margin="0,4,0,0"
+                              VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_PlayerInfo_Preview]}" />
+
+                            <TextBlock Grid.Column="2"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextSecondary}"
+                                       FontSize="13"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding HitInfoFormatPreview}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="4"
+                              Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="146" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="1" x:Name="HitInfoFormatFieldHost">
+                                <ComboBox Width="{Binding ActualWidth, ElementName=HitInfoFormatFieldHost}"
+                                          MaxWidth="220"
+                                          HorizontalAlignment="Right"
+                                          ItemsSource="{Binding AvailableHitInfoFormatFields}"
+                                          SelectedItem="{Binding SelectedHitInfoFormatField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          Style="{StaticResource Input.SettingsComboBox}" />
+                            </Grid>
+
+                            <Button Grid.Column="3"
+                                    Click="AddHitInfoFormatField_Click"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    MinWidth="64"
+                                    Style="{StaticResource Button.Text}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- 下に「戦闘不能の原因を表示」が続くので線を引く。 -->
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_SelfDisplay]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding SelfHighlightEnabled, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding SelfHighlightStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- 最後の行なので線を引かない。作りは「自分の強調表示」と同じ。 -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_DamageTakenList_ShowsDefeatCause]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding ShowsDefeatCause, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding ShowsDefeatCauseStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </ContentControl>
+    </StackPanel>
+</UserControl>
