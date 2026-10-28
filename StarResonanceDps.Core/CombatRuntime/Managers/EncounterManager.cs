@@ -2865,9 +2865,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         public bool HasSeasonTalentSnapshot { get; set; }
 
         /// <summary>
-        /// NPC(助っ人)か。判定はパーティの社交データ(<c>BotAiId</c>)だけが持っていて実体には届かないので、
+        /// NPC(助っ人)か。判定はパーティの社交データ(<c>BotAiId</c>)と実体の <c>AttrId</c> で決まり、社交データは履歴に残らないので、
         /// 作り直しの前に表示している値を焼き付ける(<see cref="Entity.ApplyDisplayedIdentityForRecord"/>)。
-        /// 履歴では社交データが無く、これが唯一の根拠になる。
         /// </summary>
         public bool IsNpc { get; set; }
 
@@ -2936,8 +2935,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             ProfessionId > 0 && HasSeasonTalentSnapshot && SeasonTalentBuffId == 0;
 
         /// <summary>
-        /// NPC(助っ人)か。判定の出所はパーティの社交データだけで、実体には届かない。
-        /// 作り直しの前に焼き付けて次の回へ持ち越す。社交データが切れた回と履歴ではここだけが根拠。
+        /// NPC(助っ人)か。表示に出していた印(パーティの社交データか <c>AttrId</c> で決まる)を、
+        /// 作り直しの前に焼き付けて次の回へ持ち越す。
         /// </summary>
         public bool IsNpc { get => _identity.IsNpc; private set => _identity.IsNpc = value; }
 
@@ -3279,8 +3278,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             bool isNpc,
             SocialAvatarState? avatar)
         {
-            // NPC かどうかはパーティの社交データ(BotAiId)だけが持っていて、実体には届かない。
-            // 履歴では社交データが無くなるので、表示に出している値と一緒にここで焼き付ける。
+            // NPC の印はパーティの社交データ(BotAiId)でも決まり、社交データは履歴に残らない。
+            // 表示に出している値と一緒にここで焼き付ける。
             IsNpc = isNpc;
 
             // 写真のリンクも同じく名刺の店にしか無い。届いていなければ null のまま書く。
@@ -3868,34 +3867,15 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 次のマップ移動まで欠けている。
         /// </para>
         /// </summary>
-        /// <param name="isBuffSetComplete">
-        /// 偽なら、このマップのまとめの差分に付け直しが無く、今乗っているバフが全部ではない。根のバフの一覧だけ作り直し、
-        /// 「全部見た」の印(未装着・無効の判定)は立てない。
-        /// </param>
-        public void MarkSelfBuffStreamReceived(bool isBuffSetComplete)
+        public void MarkSelfBuffStreamReceived()
         {
             // 根のバフは今乗っているバフから作り直す(このデルタの付与は先に処理されている)。
             // マップ移動では今乗っているバフが空になり、入場の差分で全部が付き直すので、受けるたびに作り直す。
             ReplaceRootBuffIds(Services.ActiveBuffStore.Instance.GetActive(UUID).Select(buff => buff.BaseId));
 
-            if (!isBuffSetComplete)
-            {
-                return;
-            }
-
             // シーズンタレントの印も同じ時点で立てる(特化と同じ扱い)。
             HasSeasonTalentSnapshot = true;
             HasBuffSnapshot = true;
-        }
-
-        /// <summary>
-        /// 自分のまとめの差分に付け直しが無かった。今乗っているバフが全部ではないので、「全部見た」の印を下ろす
-        /// (未装着・無効と言えなくなり、特化と潜在心相晶は分かっている値か不明になる)。
-        /// </summary>
-        public void ClearSelfBuffSnapshot()
-        {
-            HasBuffSnapshot = false;
-            HasSeasonTalentSnapshot = false;
         }
 
         public SkillSnapshot? AddTakenDamage(

@@ -50,6 +50,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             reads.Start<Dictionary<string, SkillLevelGroupOverride>>(Path.Combine(CombatRuntimePaths.OverridesDirectory, "SkillOverrides.json"));
             CombatDataCatalog.StartReads(reads);
             reads.Start<Dictionary<string, SceneEventDungeonConfig>>(RawTablePath("SceneEventDuneonConfigTable.json"));
+            reads.Start<Dictionary<string, TargetRow>>(RawTablePath("TargetTable.json"));
             reads.Start<Dictionary<string, TempAttr>>(RawTablePath("TempAttrTable.json"));
             reads.Start<Dictionary<string, CookCuisine>>(RawTablePath("CookCuisineTable.json"));
             reads.Start<Dictionary<string, FightAttr>>(RawTablePath("FightAttrTable.json"));
@@ -70,6 +71,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             CombatDataCatalog.Load(reads);
 
             LoadRawTable<SceneEventDungeonConfig>(reads, "SceneEventDuneonConfigTable.json", table => HelperMethods.DataTables.SceneEventDungeonConfigs.Data = table);
+            LoadRawTable<TargetRow>(reads, "TargetTable.json", table => HelperMethods.DataTables.Targets.Data = table);
             LoadRawTable<TempAttr>(reads, "TempAttrTable.json", table => HelperMethods.DataTables.TempAttrs.Data = table);
 
             LoadCookCuisineTable(reads);

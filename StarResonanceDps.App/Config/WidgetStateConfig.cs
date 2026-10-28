@@ -328,7 +328,7 @@ public sealed class BuffListWidgetSettingsConfig
     /// <summary>付与者プレイヤー名の表示。0=表示 / 1=非表示 / 2=他者付与のみ(付与者が対象者本人なら出さない)。</summary>
     public int CasterNameDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCasterNameDisplayModeIndex;
 
-    /// <summary>行のバフ名の書式。差し込む項目は <c>{BuffName}</c> <c>{Name}</c>(対象者名)<c>{Caster}</c>(付与者プレイヤー名)<c>{Level}</c>。</summary>
+    /// <summary>行のバフ名の書式。差し込む項目は <c>{BuffName}</c> <c>{TargetName}</c>(対象者名)<c>{CasterName}</c>(付与者プレイヤー名)<c>{Level}</c>。</summary>
     public string? BuffInfoFormatString { get; set; }
 
     public BuffListWidgetSettingsConfig Clone()
@@ -961,8 +961,8 @@ public static class WidgetConfigDefaults
     public const int MinClassColorFilterStrength = 0;
     public const int MaxClassColorFilterStrength = 100;
     public const int DefaultClassColorFilterStrength = 50;
-    public const string DefaultEntityInfoFormatString = "Lv.{Level} {Name}";
-    public const string DefaultMeterPlayerInfoFormatString = "{Name}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultEntityInfoFormatString = "Lv.{Level} {EntityName}";
+    public const string DefaultMeterPlayerInfoFormatString = "{PlayerName}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
     public const string DefaultEquipmentInfoFormatString = "{EquipName}({MainStat})";
 
@@ -971,10 +971,10 @@ public static class WidgetConfigDefaults
 
     /// <summary>ステータス詳細で、割合と実数値を1行にまとめた行の括弧の実数値を出すか。</summary>
     public const bool DefaultPlayerStatusShowActualValues = true;
-    public const string DefaultPlayerListPlayerInfoFormatString = "{Name}({PowerLevel}-{SeasonStrength})";
-    public const string DefaultReviveListPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
-    public const string DefaultDamageTakenListPlayerInfoFormatString = "{Name} - {Spec} ({PowerLevel}-{SeasonStrength})";
-    public const string DefaultBuffInfoFormatString = "{BuffName}({Name})";
+    public const string DefaultPlayerListPlayerInfoFormatString = "{PlayerName}({PowerLevel}-{SeasonStrength})";
+    public const string DefaultReviveListPlayerInfoFormatString = "{PlayerName} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultDamageTakenListPlayerInfoFormatString = "{PlayerName} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultBuffInfoFormatString = "{BuffName}({TargetName})";
 
     public const int MinBuffCardScale = 100;
     public const int MaxBuffCardScale = 1000;
@@ -1274,7 +1274,7 @@ public static class WidgetConfigDefaults
     public const int DefaultCombatStateDisplayModeIndex = CombatStateDisplayShowIndex;
 
     /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
-    public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({Caster})";
+    public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({CasterName})";
 
     /// <summary>
     /// 設定「同種バフの表示」で、その対象の一覧を同じ番号のバフ1行にまとめるか。

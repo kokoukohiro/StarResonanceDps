@@ -22,7 +22,7 @@ public enum WidgetDataStatusReasons
 {
     None = 0,
 
-    /// <summary>マップ移動やログインし直すまで直らない(途中起動・まとめの差分の付け直しが無かったマップ)。赤。</summary>
+    /// <summary>マップ移動やログインし直すまで直らない(途中起動)。赤。</summary>
     MapOrRelogin = 1,
 
     /// <summary>パーティ画面を開くと直る(パーティの顔ぶれ・助っ人・近くにいない仲間の現在地)。黄。</summary>

@@ -55,7 +55,7 @@ public static class WidgetDataStatusRules
 
         var others = players.Where(player => !player.IsSelf);
         return status
-            .WithIf(reception.IsMidLaunch || reception.IsSelfBuffReinitMissing, MapOrRelogin)
+            .WithIf(reception.IsMidLaunch, MapOrRelogin)
             .WithIf(isPartyMembershipPending, PartyScreen)
             .WithIf(
                 others.Any(player => player.DataGaps.HasFlag(PlayerDataGaps.Identity)
@@ -95,7 +95,7 @@ public static class WidgetDataStatusRules
     {
         return WidgetDataStatus.Complete
             .WithIf(hasHistoryLoadFailed, Unreadable)
-            .WithIf(reception.IsSelfEntryMissing || reception.IsSelfBuffReinitMissing, MapOrRelogin)
+            .WithIf(reception.IsSelfEntryMissing, MapOrRelogin)
             .WithIf(isPartyMembershipPending, PartyScreen)
             .WithIf(
                 rows.Any(row => row.IsLive && !row.IsSelf && !row.IsFromRecord
@@ -336,11 +336,11 @@ public static class WidgetDataStatusRules
             .WithIf(isPartyMembershipPending && identity.IsNpc, PartyScreen);
     }
 
-    /// <summary>自分のバフ・特化・潜在心相晶を出す窓。途中起動と、まとめの差分に付け直しが無かったマップ。</summary>
+    /// <summary>自分のバフ・特化・潜在心相晶を出す窓。途中起動。</summary>
     private static WidgetDataStatus ForSelfBuffs(GameReceptionSnapshot reception)
     {
         return WidgetDataStatus.Complete
-            .WithIf(reception.IsMidLaunch || reception.IsSelfBuffReinitMissing, MapOrRelogin);
+            .WithIf(reception.IsMidLaunch, MapOrRelogin);
     }
 
     /// <summary>

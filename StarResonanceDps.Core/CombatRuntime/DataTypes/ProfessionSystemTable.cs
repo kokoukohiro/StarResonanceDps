@@ -25,6 +25,9 @@ namespace StarResonanceDps.Core.CombatRuntime.DataTypes
     {
         public int ProfessionId { get; set; }
 
+        /// <summary>役割のタグ(<c>TalentTagTable</c> の番号。1 攻撃 / 2 支援 / 3 防御)。</summary>
+        public int Talent { get; set; }
+
         /// <summary>
         /// 出す攻撃力の属性番号。<c>[[0, 番号], [1, 番号]]</c> の形で、先頭の値は種別、2つ目が番号。
         /// いまは 2 要素とも同じ番号を指す。

@@ -27,6 +27,7 @@ public sealed partial class MainViewModel : ViewModelBase
     private readonly PlayerRosterPresentationStore _playerRosterStore = PlayerRosterPresentationStore.Instance;
     private readonly PartyStateStore _partyStateStore = PartyStateStore.Instance;
     private readonly NearbyEntityStore _nearbyEntityStore = NearbyEntityStore.Instance;
+    private readonly DungeonScoreStore _dungeonScoreStore = DungeonScoreStore.Instance;
     private readonly object _playerRosterUpdateSync = new();
     private readonly object _nearbyEntityUpdateSync = new();
 
@@ -156,11 +157,14 @@ public sealed partial class MainViewModel : ViewModelBase
         SocialDataStore.Cleared += SocialDataStore_Cleared;
         SelfEquipmentStore.Changed += SelfEquipmentStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
+        _dungeonScoreStore.Changed += DungeonScoreStore_Changed;
         MessageManager.MatchFound += MessageManager_MatchFound;
+        GrpcTeamManager.TeamEntryVoteStarted += GrpcTeamManager_TeamEntryVoteStarted;
 
         var roster = _playerRosterStore.Current;
         ApplyPlayerRosterSnapshot(roster);
         ApplyNearbyEntitySnapshot(_nearbyEntityStore.Current);
+        _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current);
     }
 
     private void AddPluginItem(PluginInfo pluginInfo)
@@ -427,6 +431,19 @@ public sealed partial class MainViewModel : ViewModelBase
         dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyMatchFound(matchType, matchTypeUuid));
     }
 
+    /// <summary>パーティでコンテンツに入るときの承認が始まった。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>
+    private void GrpcTeamManager_TeamEntryVoteStarted(int sceneId, int masterModeDifficulty)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _notificationMonitor?.NotifyTeamEntryVoteStarted(sceneId, masterModeDifficulty);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyTeamEntryVoteStarted(sceneId, masterModeDifficulty));
+    }
+
     private void PartyStateStore_Changed(object? sender, EventArgs e)
     {
         QueuePlayerRosterSnapshot(_playerRosterStore.Current);
@@ -493,6 +510,19 @@ public sealed partial class MainViewModel : ViewModelBase
             e.MapName,
             e.MapChannel,
             e.MapGeneration));
+    }
+
+    /// <summary>ダンジョンの得点が変わった。受信のスレッドから来るので UI のスレッドへ移し、その時点の値をエンティティリストへ渡す。</summary>
+    private void DungeonScoreStore_Changed(object? sender, EventArgs e)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current));
     }
 
     private void QueueNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)

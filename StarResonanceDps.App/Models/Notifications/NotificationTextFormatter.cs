@@ -9,10 +9,11 @@ namespace StarResonanceDps.App.Models.Notifications;
 ///
 /// <para>
 /// 保存した値が null なら表示言語の既定の文(空欄は保存の時点で null にしている)。
-/// 差し込める項目は、バフ・デバフ効果切れが {Name}(対象の名前)と {BuffName}(カードのバフ名)と {Caster}(付与者プレイヤー名)、
-/// 薬剤・料理効果切れが {Name} と {BuffName}、
-/// 予兆技が {Name}(タイムラインの行と同じ名前)と {SkillName}、マッチング成立が {Content}(マッチング先のコンテンツ名)、
-/// HP低下とプレイヤー出現が {Name}(プレイヤーリストの行と同じ名前)、エンティティ出現が {Name}(内部IDの注記なしのエンティティ名)。
+/// 差し込める項目は、バフ・デバフ効果切れが {TargetName}(対象の名前)と {BuffName}(カードのバフ名)と {CasterName}(付与者プレイヤー名)、
+/// 薬剤・料理効果切れが {TargetName} と {BuffName}、
+/// 予兆技が {EntityName}(タイムラインの行と同じ名前)と {SkillName}、入場確認が {Content}(マッチング先のコンテンツ名か、パーティで入る場所の名前)、
+/// HP低下とプレイヤー出現が {PlayerName}(プレイヤーリストの行と同じ名前)、エンティティ出現が {EntityName}(内部IDの注記なしのエンティティ名)、
+/// 狙われ状態が {PlayerName} と {EntityName}、エンティティ詠唱が {EntityName}(詠唱した敵の名前)。
 /// </para>
 /// </summary>
 public static partial class NotificationTextFormatter
@@ -22,13 +23,15 @@ public static partial class NotificationTextFormatter
     {
         return kind switch
         {
-            NotificationKind.MatchFound => "PlayerListNotification_MatchFound_Default",
+            NotificationKind.EntryConfirmation => "EntryConfirmationNotification_Default",
             NotificationKind.HealthLow => "PlayerListNotification_HealthLow_Default",
             NotificationKind.PlayerAppeared => "PlayerAppearedNotification_Default",
             NotificationKind.EntityAppeared => "EntityAppearedNotification_Default",
+            NotificationKind.Targeted => "TargetedNotification_Default",
             NotificationKind.BuffExpired => "BuffCardNotification_Expired_Default",
             NotificationKind.CuisinePotionLow => "BuffCardNotification_CuisinePotionLow_Default",
             NotificationKind.TelegraphedSkill => "TakenDamageLogNotification_TelegraphedSkill_Default",
+            NotificationKind.EntityCast => "EntityCastNotification_Default",
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "No default text for the notification.")
         };
     }
@@ -50,8 +53,8 @@ public static partial class NotificationTextFormatter
             format,
             match => match.Groups[1].Value.ToUpperInvariant() switch
             {
-                "NAME" => name,
-                "CASTER" => casterName,
+                "TARGETNAME" => name,
+                "CASTERNAME" => casterName,
                 _ => buffName
             });
         result = GetEmptyParenthesisRegex().Replace(result, string.Empty);
@@ -62,23 +65,40 @@ public static partial class NotificationTextFormatter
     {
         return GetTelegraphedSkillFieldRegex().Replace(
             format,
-            match => string.Equals(match.Groups[1].Value, "Name", StringComparison.OrdinalIgnoreCase) ? name : skillName);
+            match => string.Equals(match.Groups[1].Value, "EntityName", StringComparison.OrdinalIgnoreCase) ? name : skillName);
     }
 
-    public static string FormatMatchFound(string format, string content)
+    public static string FormatEntryConfirmation(string format, string content)
     {
-        return GetMatchFoundFieldRegex().Replace(format, _ => content);
+        return GetEntryConfirmationFieldRegex().Replace(format, _ => content);
     }
 
     public static string FormatHealthLow(string format, string name)
     {
-        return GetNameFieldRegex().Replace(format, _ => name);
+        return GetPlayerNameFieldRegex().Replace(format, _ => name);
     }
 
-    /// <summary>プレイヤー出現・エンティティ出現の文。差し込めるのは {Name}(出現した相手の名前)だけ。</summary>
-    public static string FormatAppeared(string format, string name)
+    /// <summary>
+    /// プレイヤー出現・エンティティ出現の文。差し込めるのは出現した相手の名前だけで、プレイヤー出現は {PlayerName}、エンティティ出現は {EntityName}。
+    /// </summary>
+    public static string FormatAppeared(NotificationKind kind, string format, string name)
     {
-        return GetNameFieldRegex().Replace(format, _ => name);
+        var regex = kind == NotificationKind.PlayerAppeared ? GetPlayerNameFieldRegex() : GetEntityNameFieldRegex();
+        return regex.Replace(format, _ => name);
+    }
+
+    /// <summary>狙われ状態の文。{PlayerName} は狙われている人、{EntityName} は狙っている敵。</summary>
+    public static string FormatTargeted(string format, string playerName, string entityName)
+    {
+        return GetTargetedFieldRegex().Replace(
+            format,
+            match => string.Equals(match.Groups[1].Value, "PlayerName", StringComparison.OrdinalIgnoreCase) ? playerName : entityName);
+    }
+
+    /// <summary>エンティティ詠唱の文。{EntityName} は詠唱した敵。</summary>
+    public static string FormatEntityCast(string format, string entityName)
+    {
+        return GetEntityNameFieldRegex().Replace(format, _ => entityName);
     }
 
     /// <summary>通知タブの見本。値は実データではなく、書式の形を見せるためのもの。</summary>
@@ -87,14 +107,18 @@ public static partial class NotificationTextFormatter
         var localization = LocalizationManager.Instance;
         return kind switch
         {
-            NotificationKind.MatchFound => FormatMatchFound(
+            NotificationKind.EntryConfirmation => FormatEntryConfirmation(
                 format,
                 localization.GetString("Settings_PlayerListNotification_PreviewContent")),
 
             // 名前はプレイヤー名の書式の見本と同じ。
             NotificationKind.HealthLow => FormatHealthLow(format, localization.GetString("Settings_PlayerInfo_PreviewName")),
-            NotificationKind.PlayerAppeared => FormatAppeared(format, localization.GetString("Settings_PlayerInfo_PreviewName")),
-            NotificationKind.EntityAppeared => FormatAppeared(format, localization.GetString("Settings_EntityInfo_PreviewName")),
+            NotificationKind.PlayerAppeared => FormatAppeared(kind, format, localization.GetString("Settings_PlayerInfo_PreviewName")),
+            NotificationKind.EntityAppeared => FormatAppeared(kind, format, localization.GetString("Settings_EntityInfo_PreviewName")),
+            NotificationKind.Targeted => FormatTargeted(
+                format,
+                localization.GetString("Settings_PlayerInfo_PreviewName"),
+                localization.GetString("Settings_EntityInfo_PreviewName")),
             NotificationKind.BuffExpired => FormatBuff(
                 format,
                 localization.GetString("Settings_BuffInfo_PreviewName"),
@@ -111,11 +135,12 @@ public static partial class NotificationTextFormatter
                 format,
                 localization.GetString("Settings_EntityInfo_PreviewName"),
                 localization.GetString("Settings_SkillInfo_PreviewName")),
+            NotificationKind.EntityCast => FormatEntityCast(format, localization.GetString("Settings_EntityInfo_PreviewName")),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "No preview for the notification.")
         };
     }
 
-    [GeneratedRegex(@"\{(Name|BuffName|Caster)\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{(TargetName|BuffName|CasterName)\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetBuffFieldRegex();
 
     [GeneratedRegex(@"\(\s*\)")]
@@ -124,12 +149,18 @@ public static partial class NotificationTextFormatter
     [GeneratedRegex(@"\[\s*\]")]
     private static partial Regex GetEmptyBracketRegex();
 
-    [GeneratedRegex(@"\{(Name|SkillName)\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{(EntityName|SkillName)\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetTelegraphedSkillFieldRegex();
 
     [GeneratedRegex(@"\{Content\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetMatchFoundFieldRegex();
+    private static partial Regex GetEntryConfirmationFieldRegex();
 
-    [GeneratedRegex(@"\{Name\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetNameFieldRegex();
+    [GeneratedRegex(@"\{PlayerName\}", RegexOptions.IgnoreCase)]
+    private static partial Regex GetPlayerNameFieldRegex();
+
+    [GeneratedRegex(@"\{EntityName\}", RegexOptions.IgnoreCase)]
+    private static partial Regex GetEntityNameFieldRegex();
+
+    [GeneratedRegex(@"\{(PlayerName|EntityName)\}", RegexOptions.IgnoreCase)]
+    private static partial Regex GetTargetedFieldRegex();
 }

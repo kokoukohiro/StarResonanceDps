@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
              xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              xmlns:services="clr-namespace:StarResonanceDps.App.Services"
              UseLayoutRounding="True"
@@ -157,11 +158,11 @@
                 </Grid.Style>
 
                 <!-- 今狙っている相手の印。色を絵の形で抜いて描く(ゲージの充填と同じ作り)。 -->
-                <Rectangle Width="32"
-                           Height="32"
+                <Rectangle Width="30"
+                           Height="30"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           Margin="7,-12,0,0"
+                           Margin="5,-11,0,0"
                            IsHitTestVisible="False"
                            Fill="{x:Static services:HateBadgeImages.AccentBrush}"
                            OpacityMask="{x:Static services:HateBadgeImages.TargetMask}"
@@ -605,7 +606,7 @@
                                         </DataTemplate>
                                     </Grid.Resources>
 
-                                    <!-- ブレイクゲージなし：実際の23 + 11構造 -->
+                                    <!-- ブレイクゲージも詠唱ゲージもなし：実際の23 + 11構造 -->
                                     <Grid>
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
@@ -613,7 +614,7 @@
                                                 <Setter Property="Visibility"
                                                         Value="Visible" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                    <DataTrigger Binding="{Binding ShowsSecondGauge}"
                                                                  Value="True">
                                                         <Setter Property="Visibility"
                                                                 Value="Collapsed" />
@@ -636,7 +637,7 @@
                                                           ContentTemplate="{StaticResource EntityHealthRowTemplate}" />
                                     </Grid>
 
-                                    <!-- ブレイクゲージあり：実際の12 + 11 + 11構造 -->
+                                    <!-- ブレイクゲージか詠唱ゲージあり：実際の12 + 11 + 11構造。詠唱中は3段目をブレイクゲージから詠唱ゲージに替える -->
                                     <Grid Margin="0,-4,0,0">
                                         <Grid.Style>
                                             <Style TargetType="{x:Type Grid}">
@@ -644,7 +645,7 @@
                                                 <Setter Property="Visibility"
                                                         Value="Collapsed" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                    <DataTrigger Binding="{Binding ShowsSecondGauge}"
                                                                  Value="True">
                                                         <Setter Property="Visibility"
                                                                 Value="Visible" />
@@ -667,68 +668,145 @@
                                                           Content="{Binding}"
                                                           ContentTemplate="{StaticResource EntityHealthRowTemplate}" />
 
-                                        <Border Grid.Row="2"
-                                                Width="122"
-                                                Height="10"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                Background="#FF000000"
-                                                CornerRadius="5"
-                                                Padding="1">
-                                            <Grid x:Name="BreakFillHost"
-                                                  Height="8"
-                                                  VerticalAlignment="Center">
-                                                <Grid.Clip>
-                                                    <RectangleGeometry Rect="0,0,120,8"
-                                                                       RadiusX="4"
-                                                                       RadiusY="4" />
-                                                </Grid.Clip>
+                                        <!-- ブレイクゲージ。詠唱中は出さない -->
+                                        <Grid Grid.Row="2">
+                                            <Grid.Style>
+                                                <Style TargetType="{x:Type Grid}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Setter Property="Visibility"
+                                                            Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCasting}"
+                                                                     Value="True">
+                                                            <Setter Property="Visibility"
+                                                                    Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
 
-                                                <Border Height="8"
-                                                        HorizontalAlignment="Left"
-                                                        VerticalAlignment="Center">
-                                                    <Border.Style>
-                                                        <Style TargetType="{x:Type Border}">
-                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                                            <Setter Property="Background"
-                                                                    Value="#FFF7E8D3" />
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsBreakLocked}"
-                                                                             Value="True">
-                                                                    <Setter Property="Background"
-                                                                            Value="#FFA8A8A8" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
+                                            <Border Width="122"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    Background="#FF000000"
+                                                    CornerRadius="5"
+                                                    Padding="1">
+                                                <Grid x:Name="BreakFillHost"
+                                                      Height="8"
+                                                      VerticalAlignment="Center">
+                                                    <Grid.Clip>
+                                                        <RectangleGeometry Rect="0,0,120,8"
+                                                                           RadiusX="4"
+                                                                           RadiusY="4" />
+                                                    </Grid.Clip>
 
-                                                    <Border.Width>
-                                                        <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
-                                                            <Binding Path="BreakRatio" />
-                                                            <Binding ElementName="BreakFillHost"
-                                                                     Path="ActualWidth" />
-                                                        </MultiBinding>
-                                                    </Border.Width>
-                                                </Border>
-                                            </Grid>
-                                        </Border>
+                                                    <Border Height="8"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="{x:Type Border}">
+                                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                                <Setter Property="Background"
+                                                                        Value="#FFF7E8D3" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsBreakLocked}"
+                                                                                 Value="True">
+                                                                        <Setter Property="Background"
+                                                                                Value="#FFA8A8A8" />
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
 
-                                        <Canvas Grid.Row="2"
-                                                Panel.ZIndex="1"
-                                                Width="122"
-                                                Height="10"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Top"
-                                                ClipToBounds="False"
-                                                IsHitTestVisible="False">
-                                            <TextBlock Canvas.Top="-3"
-                                                       Width="122"
-                                                       Style="{StaticResource Text.WidgetWindow}"
-                                                       FontSize="11"
-                                                       FontWeight="SemiBold"
-                                                       Text="{Binding BreakText}"
-                                                       TextAlignment="Center" />
-                                        </Canvas>
+                                                        <Border.Width>
+                                                            <MultiBinding Converter="{StaticResource EntityList.RatioToWidthConverter}">
+                                                                <Binding Path="BreakRatio" />
+                                                                <Binding ElementName="BreakFillHost"
+                                                                         Path="ActualWidth" />
+                                                            </MultiBinding>
+                                                        </Border.Width>
+                                                    </Border>
+                                                </Grid>
+                                            </Border>
+
+                                            <Canvas Panel.ZIndex="1"
+                                                    Width="122"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    ClipToBounds="False"
+                                                    IsHitTestVisible="False">
+                                                <TextBlock Canvas.Top="-3"
+                                                           Width="122"
+                                                           Style="{StaticResource Text.WidgetWindow}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding BreakText}"
+                                                           TextAlignment="Center" />
+                                            </Canvas>
+                                        </Grid>
+
+                                        <!-- 詠唱ゲージ。形と文字はブレイクゲージと同じで、0 から満タンへ満ちていく -->
+                                        <Grid Grid.Row="2">
+                                            <Grid.Style>
+                                                <Style TargetType="{x:Type Grid}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Setter Property="Visibility"
+                                                            Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCasting}"
+                                                                     Value="True">
+                                                            <Setter Property="Visibility"
+                                                                    Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Grid.Style>
+
+                                            <Border Width="122"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    Background="#FF000000"
+                                                    CornerRadius="5"
+                                                    Padding="1">
+                                                <Grid x:Name="CastFillHost"
+                                                      Height="8"
+                                                      VerticalAlignment="Center">
+                                                    <Grid.Clip>
+                                                        <RectangleGeometry Rect="0,0,120,8"
+                                                                           RadiusX="4"
+                                                                           RadiusY="4" />
+                                                    </Grid.Clip>
+
+                                                    <Border Height="8"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Background="#FFE5BE3B"
+                                                            behaviors:BarWidthAnimationBehavior.AreaWidth="{Binding ActualWidth, ElementName=CastFillHost}"
+                                                            behaviors:BarWidthAnimationBehavior.FillSeconds="{Binding CastFillSeconds}"
+                                                            behaviors:BarWidthAnimationBehavior.Ratio="{Binding CastRatio}"
+                                                            behaviors:BarWidthAnimationBehavior.SnapsToTarget="True" />
+                                                </Grid>
+                                            </Border>
+
+                                            <Canvas Panel.ZIndex="1"
+                                                    Width="122"
+                                                    Height="10"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Top"
+                                                    ClipToBounds="False"
+                                                    IsHitTestVisible="False">
+                                                <TextBlock Canvas.Top="-3"
+                                                           Width="122"
+                                                           Style="{StaticResource Text.WidgetWindow}"
+                                                           FontSize="11"
+                                                           FontWeight="SemiBold"
+                                                           Text="{Binding CastText}"
+                                                           TextAlignment="Center" />
+                                            </Canvas>
+                                        </Grid>
                                     </Grid>
                                 </Grid>
 
@@ -749,6 +827,26 @@
                                     <ContentPresenter Content="{Binding HateSlots[4]}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                 </StackPanel>
+
+                                <!--
+                                    倒すと入る得点。アイコンの中央に重ねる(イマジンの回数と同じ置き方)。
+                                    アイコンより広いので、下の分類名と同じく Canvas の幅44の枠に置く。
+                                -->
+                                <Canvas Grid.Column="0"
+                                        Panel.ZIndex="1"
+                                        IsHitTestVisible="False">
+                                    <Grid Canvas.Left="-5.5"
+                                          Width="44"
+                                          Height="25">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="14"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding ScoreText}"
+                                                   TextAlignment="Center" />
+                                    </Grid>
+                                </Canvas>
 
                                 <!--
                                     分類名テキスト。列0(幅33)より広い 44px で描くため、

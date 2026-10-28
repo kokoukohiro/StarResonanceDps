@@ -1214,7 +1214,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 widget,
                 null,
                 null,
-                new PlayerListWidgetFooterView()),
+                new EntityListWidgetFooterView()),
             WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
             WidgetKind.TakenDamageLog => CreateTakenDamageLogComposition(widget),

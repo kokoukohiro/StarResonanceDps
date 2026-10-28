@@ -438,7 +438,6 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     /// <para>
     /// <b>NPC の印と職業は相手ごとの値。</b>相手(UID)が変わったら入れ替える。
     /// 同じ相手なら名前と同じく分かった値を消さない(NPC の印は true から戻さない、職業は 0 で上書きしない)。
-    /// パーティを離れると NPC の印を運ぶ社交データが切れ、ロスターを通らない素性では false になるため。
     /// </para>
     /// </summary>
     private void RememberPlayer(string? playerName, long playerUid, bool isNpc, int professionId)

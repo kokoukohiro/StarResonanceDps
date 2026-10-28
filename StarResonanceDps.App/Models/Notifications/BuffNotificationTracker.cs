@@ -7,12 +7,12 @@ namespace StarResonanceDps.App.Models.Notifications;
 
 /// <summary>
 /// 1つの対象の1つのバフの通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の判定。
-/// 開いているバフ・デバフカードとバフ・デバフグループが、1秒ごとの更新で見つけたバフを渡す。
-/// 同じ対象とバフを見ている窓は、<see cref="BuffNotificationRegistry"/> を通してこの判定を1つ共有する
-/// (先に気づいた窓が通知し、後の窓は同じ状態を見るので通知しない)。
+/// 開いているバフ・デバフカードとバフ・デバフグループと通知の見張り(自分の料理・薬剤)が、1秒ごとの更新で見つけたバフを渡す。
+/// 同じ対象とバフを見ているものは、<see cref="BuffNotificationRegistry"/> を通してこの判定を1つ共有する
+/// (先に気づいたものが通知し、後のものは同じ状態を見るので通知しない)。
 ///
 /// <para>
-/// <b>バフ・デバフ効果切れ</b>: 前の観測で残りが1秒以下だったバフが、次の観測で消えていたら出す。
+/// <b>バフ・デバフ効果切れ</b>: 窓が見ている間だけ、前の観測で残りが1秒以下だったバフが、次の観測で消えていたら出す。
 /// バフが消える通知に時間切れか解除かの理由は無いので、残り時間で決める。1秒はカードとグループの更新間隔。
 /// 残りがあるのに消えた(解除・死亡・マップ移動・周りから外れた)、持続の無いバフ、残りが分からないバフは出さない。
 /// 付与者プレイヤー名は、消える前の最後の観測の付与者。
@@ -37,13 +37,14 @@ public sealed class BuffNotificationTracker
     /// <summary>前の観測の通知条件の秒数。今の観測と違えば(通知条件を変えた)、出さずに構えを決め直す。</summary>
     private double _cuisinePotionArmedSeconds;
 
-    /// <param name="snapshot">窓が見つけたバフ。消えていれば null。</param>
-    /// <param name="targetName">窓に出している対象の名前。</param>
-    public void Observe(PlayerBuffSnapshot? snapshot, string targetName)
+    /// <param name="snapshot">見つけたバフ。消えていれば null。</param>
+    /// <param name="targetName">対象の名前。</param>
+    /// <param name="notifiesExpiry">効果切れを出すか(窓が見ているか)。</param>
+    public void Observe(PlayerBuffSnapshot? snapshot, string targetName, bool notifiesExpiry)
     {
         if (snapshot is null)
         {
-            if (_hasLastBuff && _lastRemainingSeconds is { } remaining && remaining <= ExpiryWindowSeconds)
+            if (notifiesExpiry && _hasLastBuff && _lastRemainingSeconds is { } remaining && remaining <= ExpiryWindowSeconds)
             {
                 Notify(NotificationKind.BuffExpired, _lastTargetName, _lastBuffName, _lastCasterName);
             }

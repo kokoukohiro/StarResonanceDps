@@ -22,8 +22,8 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     private static readonly (string Key, string LabelResourceKey, string Placeholder)[] FormatFieldDefinitions =
     [
         ("BuffName", "Settings_BuffInfo_Field_BuffName", "{BuffName}"),
-        ("Name", "Settings_BuffInfo_Field_Name", "{Name}"),
-        ("Caster", "Settings_BuffInfo_Field_Caster", "{Caster}"),
+        ("TargetName", "Settings_BuffInfo_Field_Name", "{TargetName}"),
+        ("CasterName", "Settings_BuffInfo_Field_Caster", "{CasterName}"),
         ("Level", "Settings_BuffInfo_Field_Level", "{Level}"),
         ("NewLine", "Settings_BuffInfo_Field_NewLine", "{NewLine}")
     ];

@@ -55,6 +55,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private uint _mapChannel;
     private long _playerListMapGeneration = -1;
     private long _entityListMapGeneration = -1;
+    private DungeonScoreSnapshot _dungeonScore = DungeonScoreSnapshot.Empty;
 
     public WidgetKind Kind { get; init; }
 
@@ -100,6 +101,18 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     [ObservableProperty]
     private string _mapName = string.Empty;
+
+    [ObservableProperty]
+    private string _entityCombatScoreLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _entityCombatScoreText = string.Empty;
+
+    [ObservableProperty]
+    private string _entityCurrentScoreLabel = string.Empty;
+
+    [ObservableProperty]
+    private string _entityCurrentScoreText = string.Empty;
 
     [ObservableProperty]
     private int _openPlayerWindowCount;
@@ -1028,6 +1041,18 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         SynchronizeEntityListEntries(resetEntries);
     }
 
+    /// <summary>ダンジョンの得点(空間調査)が変わった(行の「○○pt」とフッターの得点を当て直す)。</summary>
+    public void UpdateDungeonScore(DungeonScoreSnapshot dungeonScore)
+    {
+        if (!IsEntityList || _dungeonScore == dungeonScore)
+        {
+            return;
+        }
+
+        _dungeonScore = dungeonScore;
+        SynchronizeEntityListEntries(resetEntries: false);
+    }
+
     /// <summary>名簿が変わった(エンティティリストのヘイトの枠の名前・クラス・特化を引き直す)。</summary>
     public void UpdateEntityListRoster(IReadOnlyList<PlayerRosterEntry> playerRoster)
     {
@@ -1433,13 +1458,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             var entity = visibleEntities[targetIndex];
             if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
             {
-                entry = EntityListEntry.Create(entity, _meter, _entityHatePlayers);
+                entry = EntityListEntry.Create(entity, _meter, _entityHatePlayers, _dungeonScore.IsScoreRequested);
                 _entityListEntriesByUuid.Add(entity.EntityUuid, entry);
                 _entityListEntries.Insert(targetIndex, entry);
                 continue;
             }
 
-            entry.Update(entity, _meter, _entityHatePlayers);
+            entry.Update(entity, _meter, _entityHatePlayers, _dungeonScore.IsScoreRequested);
 
             if (_entityListEntries[targetIndex].EntityUuid == entity.EntityUuid)
             {
@@ -1453,7 +1478,61 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             }
         }
 
+        RenderEntityScore();
         RefreshDataStatus();
+    }
+
+    /// <summary>
+    /// フッターの右の得点。いつも出す。交戦中は周りにいる敵(一覧の絞り込みの前)のうち、戦闘状態の敵のアイコンの得点の合計
+    /// (<see cref="EntityListEntry.GetDisplayedScore"/>)。現在は今までに得た得点。
+    /// どちらも得点を求めていない場所では 0(求めているかが分からない途中起動の間も、窓の状態の印が赤で知らせるので 0)。
+    /// </summary>
+    private void RenderEntityScore()
+    {
+        var isScoreRequested = _dungeonScore.IsScoreRequested;
+        EntityCombatScoreLabel = $"{LocalizationManager.Instance.GetString("CombatState_Tip")}:";
+        EntityCombatScoreText = EntityListEntry.FormatScore(
+            _nearbyEntities
+                .Where(entry => entry.IsInCombat)
+                .Sum(entry => EntityListEntry.GetDisplayedScore(entry, isScoreRequested)));
+        EntityCurrentScoreLabel = $"{LocalizationManager.Instance.GetString("EntityList_CurrentScore")}:";
+        EntityCurrentScoreText = EntityListEntry.FormatScore(isScoreRequested ? _dungeonScore.TotalScore : 0);
+    }
+
+    /// <summary>
+    /// エンティティリストの画面が出たとき。出ていない間は詠唱ゲージを当て直さないので、今の時刻で当て直す
+    /// (全体秒数が過ぎていれば、満タンの表示を挟まずに外す)。
+    /// </summary>
+    public void ReapplyEntityListCasts()
+    {
+        if (!IsEntityList)
+        {
+            return;
+        }
+
+        var utcNow = DateTime.UtcNow;
+        foreach (var entry in _entityListEntries)
+        {
+            entry.ReapplyCast(utcNow);
+        }
+    }
+
+    /// <summary>
+    /// 詠唱ゲージの文字とゲージを今の時刻で当て直す(画面の 0.1 秒ごとの更新)。
+    /// 当て直すのはこの更新だけ(行の差し替えのたびには当て直さない。満ちた後の「全体/全体」を出す時間が、差分の当たり方で縮まないように)。
+    /// </summary>
+    public void RefreshEntityListCasts()
+    {
+        if (!IsEntityList)
+        {
+            return;
+        }
+
+        var utcNow = DateTime.UtcNow;
+        foreach (var entry in _entityListEntries)
+        {
+            entry.RefreshCast(utcNow);
+        }
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>最後に行を当てた相手。名簿の行が変わっても相手が同じなら、行は1秒ごとの更新に任せる。</summary>
     private long? _refreshedCharacterId;
 
-    /// <summary>名簿の対象者の行。行の名前の対象者名とレベル(<c>{Name}</c> <c>{Level}</c>)に使う。</summary>
+    /// <summary>名簿の対象者の行。行の名前の対象者名とレベル(<c>{TargetName}</c> <c>{Level}</c>)に使う。</summary>
     private PlayerRosterEntry? _player;
 
     private bool _isDisposed;

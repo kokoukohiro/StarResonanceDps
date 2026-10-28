@@ -10,7 +10,7 @@ namespace StarResonanceDps.App.Services;
 /// </summary>
 public static class BuffListRowName
 {
-    /// <param name="targetName">対象者名(<c>{Name}</c>)。</param>
+    /// <param name="targetName">対象者名(<c>{TargetName}</c>)。</param>
     /// <param name="level">対象者のレベル(<c>{Level}</c>)。</param>
     public static string Format(
         BuffListWidgetSettingsConfig settings,

@@ -296,8 +296,8 @@
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>예고 스킬</value>
   </data>
-  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
-    <value>매칭 성공</value>
+  <data name="Notification_EntryConfirmation" xml:space="preserve">
+    <value>입장 확인</value>
   </data>
   <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
     <value>HP 저하</value>
@@ -309,25 +309,91 @@
     <value>콘텐츠1</value>
   </data>
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
-    <value>{Name}의 {BuffName} 효과가 끝났습니다</value>
+    <value>{TargetName}의 {BuffName} 효과가 끝났습니다</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}의 {BuffName} 효과가 곧 끝납니다</value>
+    <value>{TargetName}의 {BuffName} 효과가 곧 끝납니다</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}이(가) 옵니다</value>
   </data>
-  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
-    <value>{Content} 매칭에 성공했습니다</value>
+  <data name="EntryConfirmationNotification_Default" xml:space="preserve">
+    <value>{Content}에 입장합니다</value>
   </data>
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
-    <value>{Name}의 HP가 낮아졌습니다</value>
+    <value>{PlayerName}의 HP가 낮아졌습니다</value>
   </data>
   <data name="PlayerAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}이(가) 출현했습니다</value>
+    <value>{PlayerName}이(가) 출현했습니다</value>
   </data>
   <data name="EntityAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}이(가) 출현했습니다</value>
+    <value>{EntityName}이(가) 출현했습니다</value>
+  </data>
+  <data name="TargetedNotification_Default" xml:space="preserve">
+    <value>{PlayerName}이(가) {EntityName}의 공격 대상이 되었습니다</value>
+  </data>
+  <data name="Notification_Targeted" xml:space="preserve">
+    <value>공격 대상 상태</value>
+  </data>
+  <data name="Notification_TargetEntity" xml:space="preserve">
+    <value>대상 엔티티</value>
+  </data>
+  <data name="Notification_TargetEntity_BossOnly" xml:space="preserve">
+    <value>보스만</value>
+  </data>
+  <data name="Notification_TargetEntity_BossAndElite" xml:space="preserve">
+    <value>보스와 정예</value>
+  </data>
+  <data name="TargetedCondition_Immediate" xml:space="preserve">
+    <value>무조건</value>
+  </data>
+  <data name="TargetedCondition_1" xml:space="preserve">
+    <value>공격 대상 상태 1초 이상</value>
+  </data>
+  <data name="TargetedCondition_2" xml:space="preserve">
+    <value>공격 대상 상태 2초 이상</value>
+  </data>
+  <data name="TargetedCondition_3" xml:space="preserve">
+    <value>공격 대상 상태 3초 이상</value>
+  </data>
+  <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
+    <value>파티 멤버</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardian" xml:space="preserve">
+    <value>수호 클래스 외</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardianPartyMembers" xml:space="preserve">
+    <value>수호 클래스 외 파티 멤버</value>
+  </data>
+  <data name="Notification_EntityCast" xml:space="preserve">
+    <value>엔티티 캐스팅</value>
+  </data>
+  <data name="EntityCastNotification_Default" xml:space="preserve">
+    <value>{EntityName}이(가) 캐스팅 중입니다</value>
+  </data>
+  <data name="EntityCastCondition_Immediate" xml:space="preserve">
+    <value>무조건</value>
+  </data>
+  <data name="EntityCastCondition_1" xml:space="preserve">
+    <value>1초 이상 캐스팅</value>
+  </data>
+  <data name="EntityCastCondition_2" xml:space="preserve">
+    <value>2초 이상 캐스팅</value>
+  </data>
+  <data name="EntityCastCondition_3" xml:space="preserve">
+    <value>3초 이상 캐스팅</value>
+  </data>
+  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+    <value>발동 시</value>
+  </data>
+  <data name="TelegraphedSkillCondition_1" xml:space="preserve">
+    <value>발동 1초 전</value>
+  </data>
+  <data name="TelegraphedSkillCondition_2" xml:space="preserve">
+    <value>발동 2초 전</value>
+  </data>
+  <data name="TelegraphedSkillCondition_3" xml:space="preserve">
+    <value>발동 3초 전</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>기본 설정</value>
@@ -1235,6 +1301,12 @@
   </data>
   <data name="EntityList_HateValue" xml:space="preserve">
     <value>적대 수치: {0}</value>
+  </data>
+  <data name="EntityList_ScoreFormat" xml:space="preserve">
+    <value>{0}pt</value>
+  </data>
+  <data name="EntityList_CurrentScore" xml:space="preserve">
+    <value>현재</value>
   </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>정렬 순서</value>

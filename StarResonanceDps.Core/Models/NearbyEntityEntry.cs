@@ -8,12 +8,20 @@ namespace StarResonanceDps.Core.Models;
 /// ゲーム内でプレイヤーに見える HP バーを持つ実体か。エンティティリストは、これが true なら名前が無くても載せる。
 /// 表で判定できない実体(<c>AttrId</c> が未着・表に無い番号)は true。
 /// </param>
+/// <param name="Score">
+/// 倒すとダンジョンの得点(空間調査)に入る点数(<see cref="CombatDataCatalog.GetMonsterScore"/>)。
+/// 敵だけで、<c>AttrId</c> が未着・表に無い番号は 0。
+/// </param>
 /// <param name="IsInCombat">いま戦闘状態か(実体の属性 <c>AttrCombatState</c>、104)。出現時の一覧と周りの差分で届く。</param>
 /// <param name="TargetCharacterId">
 /// 今狙っている相手のキャラ番号(実体の属性 <c>AttrTargetUuid</c>、450)。相手がプレイヤーでない・いないときは 0。
 /// ヘイトの1位とは限らない。
 /// </param>
 /// <param name="HateRanking">ヘイトの一覧(実体の属性 <c>AttrHateList</c>、474)のプレイヤーだけを、値の大きい順に4人まで。</param>
+/// <param name="Cast">
+/// 始めた詠唱(詠唱バーを持つ技)。詠唱していない・始まりの時刻が分からない(出現したときにすでに詠唱していた)ときは null。
+/// 全体秒数が過ぎても技が続く間は残るので、詠唱が終わったかは表示側が時刻で決める。
+/// </param>
 public sealed record NearbyEntityEntry(
     long EntityUuid,
     long EntityId,
@@ -30,9 +38,17 @@ public sealed record NearbyEntityEntry(
     EntityCampRelation CampRelation,
     long CurrentShield,
     bool HasHpBar,
+    int Score,
     bool IsInCombat,
     long TargetCharacterId,
-    NearbyEntityHateRanking HateRanking);
+    NearbyEntityHateRanking HateRanking,
+    NearbyEntityCast? Cast);
+
+/// <summary>
+/// 詠唱1回。技の開始(<c>AttrSkillId</c> に値が入った周りの差分)の到着時刻と、技の表の詠唱バーの全体秒数。
+/// 同じ技を続けて唱えても始まりの時刻が違うので、別の値になる。
+/// </summary>
+public readonly record struct NearbyEntityCast(int SkillId, DateTime StartedAtUtc, double TotalSeconds);
 
 /// <summary>ヘイトの一覧の1人。</summary>
 public readonly record struct NearbyEntityHateRank(long CharacterId, long HateValue);

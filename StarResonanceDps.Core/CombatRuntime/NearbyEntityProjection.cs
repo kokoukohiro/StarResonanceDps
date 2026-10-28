@@ -54,10 +54,12 @@ internal static class NearbyEntityProjection
             return;
         }
 
-        EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity));
+        // 出現したときにすでに詠唱していても、始まりの時刻が分からないので詠唱は持たない。
+        EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity, cast: null));
     }
 
-    public static void RefreshEntity(long entityUuid, IReadOnlySet<EAttrType> changedAttributes)
+    /// <param name="arrivalUtc">変わった属性が届いたメッセージの到着時刻。技の開始(<c>AttrSkillId</c>)なら詠唱の始まりになる。</param>
+    public static void RefreshEntity(long entityUuid, IReadOnlySet<EAttrType> changedAttributes, DateTime arrivalUtc)
     {
         ArgumentNullException.ThrowIfNull(changedAttributes);
 
@@ -73,12 +75,15 @@ internal static class NearbyEntityProjection
 
         if (EntityStore.TryRefresh(
                 entityUuid,
-                existing => MergeChangedFields(existing, entity, changedAttributes, campRelation)))
+                existing => MergeChangedFields(existing, entity, changedAttributes, campRelation, arrivalUtc)))
         {
             return;
         }
 
-        EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity));
+        var cast = changedAttributes.Contains(EAttrType.AttrSkillId)
+            ? ResolveStartedCast(entity, arrivalUtc)
+            : null;
+        EntityStore.UpsertAppeared(CreateEntry(entityUuid, entity, cast));
     }
 
     public static void RemoveEntity(long entityUuid)
@@ -109,7 +114,7 @@ internal static class NearbyEntityProjection
         return entity;
     }
 
-    private static NearbyEntityEntry CreateEntry(long entityUuid, Entity entity)
+    private static NearbyEntityEntry CreateEntry(long entityUuid, Entity entity, NearbyEntityCast? cast)
     {
         var entityId = ResolveEntityId(entityUuid, entity);
         var entityType = ResolveEntityType(entityUuid, entity);
@@ -129,16 +134,19 @@ internal static class NearbyEntityProjection
             NearbyEntityCampState.GetRelation(entityUuid),
             Utils.GetCurrentShield(entity),
             ResolveHasHpBar(entityType, entity),
+            ResolveScore(entityType, entity),
             GetInt(entity, "AttrCombatState") > 0,
             ResolveTargetCharacterId(entity),
-            ResolveHateRanking(entity));
+            ResolveHateRanking(entity),
+            cast);
     }
 
     private static NearbyEntityEntry MergeChangedFields(
         NearbyEntityEntry existing,
         Entity entity,
         IReadOnlySet<EAttrType> changedAttributes,
-        EntityCampRelation? campRelation)
+        EntityCampRelation? campRelation,
+        DateTime arrivalUtc)
     {
         var updated = existing;
 
@@ -150,7 +158,8 @@ internal static class NearbyEntityProjection
                 EntityId = entityId,
                 Name = ResolveName(entity, entityId, existing.EntityUuid),
                 MonsterType = entity.MonsterType,
-                HasHpBar = ResolveHasHpBar(existing.EntityType, entity)
+                HasHpBar = ResolveHasHpBar(existing.EntityType, entity),
+                Score = ResolveScore(existing.EntityType, entity)
             };
         }
 
@@ -219,6 +228,11 @@ internal static class NearbyEntityProjection
             updated = updated with { HateRanking = ResolveHateRanking(entity) };
         }
 
+        if (changedAttributes.Contains(EAttrType.AttrSkillId))
+        {
+            updated = updated with { Cast = ResolveStartedCast(entity, arrivalUtc) };
+        }
+
         if (campRelation.HasValue)
         {
             updated = updated with { CampRelation = campRelation.Value };
@@ -269,6 +283,16 @@ internal static class NearbyEntityProjection
             || CombatDataCatalog.HasMonsterHpBar(attrId);
     }
 
+    /// <summary>倒すとダンジョンの得点に入る点数。敵だけで、<c>AttrId</c> が未着のときは 0。</summary>
+    private static int ResolveScore(EEntityType entityType, Entity entity)
+    {
+        return entityType == EEntityType.EntMonster
+            && entity.GetAttrKV("AttrId") is int attrId
+            && attrId > 0
+                ? CombatDataCatalog.GetMonsterScore(attrId)
+                : 0;
+    }
+
     /// <summary>今狙っている相手(<c>AttrTargetUuid</c>)がプレイヤーなら、そのキャラ番号。プレイヤーでない・いないときは 0。</summary>
     private static long ResolveTargetCharacterId(Entity entity)
     {
@@ -287,6 +311,19 @@ internal static class NearbyEntityProjection
             .Where(threat => IsPlayerUuid(threat.EntityUuid))
             .OrderByDescending(threat => threat.ThreatValue)
             .Select(threat => new NearbyEntityHateRank(Utils.UuidToEntityId(threat.EntityUuid), threat.ThreatValue)));
+    }
+
+    /// <summary>
+    /// 技の開始(<c>AttrSkillId</c> が変わった差分)から詠唱を作る。技が詠唱バーを持たない・技の終わり(値なしで 0)なら null。
+    /// 判定は被ダメログの詠唱行と同じ <see cref="CombatDataCatalog.HasSingOrGuideTime"/> の表で、詠唱と誘導を分けない。
+    /// </summary>
+    private static NearbyEntityCast? ResolveStartedCast(Entity entity, DateTime arrivalUtc)
+    {
+        return entity.GetAttrKV("AttrSkillId") is int skillId
+            && skillId > 0
+            && CombatDataCatalog.TryGetSingOrGuideSeconds(skillId, out var totalSeconds)
+                ? new NearbyEntityCast(skillId, arrivalUtc, totalSeconds)
+                : null;
     }
 
     private static bool IsPlayerUuid(long uuid)

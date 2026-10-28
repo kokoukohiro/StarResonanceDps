@@ -36,7 +36,7 @@ public readonly record struct BuffDebuffCardContent(
         false);
 
     /// <summary>
-    /// 生きているバフの表示値。付与者プレイヤー名(<c>{Caster}</c>)は、出している実体の付与者がプレイヤーなら書式に入れればいつも出す
+    /// 生きているバフの表示値。付与者プレイヤー名(<c>{CasterName}</c>)は、出している実体の付与者がプレイヤーなら書式に入れればいつも出す
     /// (カードに付与者の表示の設定は無い)。カードはバフの番号で追うので、付与者は出す実体(残り時間の一番長いもの)とともに入れ替わる。
     /// </summary>
     public static BuffDebuffCardContent Create(

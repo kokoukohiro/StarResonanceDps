@@ -1179,6 +1179,12 @@
   <data name="EntityList_HateValue" xml:space="preserve">
     <value>ヘイト値: {0}</value>
   </data>
+  <data name="EntityList_ScoreFormat" xml:space="preserve">
+    <value>{0}pt</value>
+  </data>
+  <data name="EntityList_CurrentScore" xml:space="preserve">
+    <value>現在</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>並び替え</value>
   </data>
@@ -1923,8 +1929,8 @@
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>予兆技</value>
   </data>
-  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
-    <value>マッチング成立</value>
+  <data name="Notification_EntryConfirmation" xml:space="preserve">
+    <value>入場確認</value>
   </data>
   <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
     <value>HP低下</value>
@@ -1936,25 +1942,91 @@
     <value>コンテンツ1</value>
   </data>
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
-    <value>{Name}の{BuffName}の効果が切れました</value>
+    <value>{TargetName}の{BuffName}の効果が切れました</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}の{BuffName}効果が切れそうです</value>
+    <value>{TargetName}の{BuffName}効果が切れそうです</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}が来ます</value>
   </data>
-  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
-    <value>{Content}にマッチングしました</value>
+  <data name="EntryConfirmationNotification_Default" xml:space="preserve">
+    <value>{Content}に入ります</value>
   </data>
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
-    <value>{Name}のHPが低下しました</value>
+    <value>{PlayerName}のHPが低下しました</value>
   </data>
   <data name="PlayerAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}が出現しました</value>
+    <value>{PlayerName}が出現しました</value>
   </data>
   <data name="EntityAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}が出現しました</value>
+    <value>{EntityName}が出現しました</value>
+  </data>
+  <data name="TargetedNotification_Default" xml:space="preserve">
+    <value>{PlayerName}が{EntityName}に狙われました</value>
+  </data>
+  <data name="Notification_Targeted" xml:space="preserve">
+    <value>狙われ状態</value>
+  </data>
+  <data name="Notification_TargetEntity" xml:space="preserve">
+    <value>対象エンティティ</value>
+  </data>
+  <data name="Notification_TargetEntity_BossOnly" xml:space="preserve">
+    <value>ボスのみ</value>
+  </data>
+  <data name="Notification_TargetEntity_BossAndElite" xml:space="preserve">
+    <value>ボスと精鋭</value>
+  </data>
+  <data name="TargetedCondition_Immediate" xml:space="preserve">
+    <value>無条件</value>
+  </data>
+  <data name="TargetedCondition_1" xml:space="preserve">
+    <value>狙われ状態1秒以上</value>
+  </data>
+  <data name="TargetedCondition_2" xml:space="preserve">
+    <value>狙われ状態2秒以上</value>
+  </data>
+  <data name="TargetedCondition_3" xml:space="preserve">
+    <value>狙われ状態3秒以上</value>
+  </data>
+  <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
+    <value>パーティメンバー</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardian" xml:space="preserve">
+    <value>防御クラス以外</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardianPartyMembers" xml:space="preserve">
+    <value>防御クラス以外のパーティメンバー</value>
+  </data>
+  <data name="Notification_EntityCast" xml:space="preserve">
+    <value>エンティティ詠唱</value>
+  </data>
+  <data name="EntityCastNotification_Default" xml:space="preserve">
+    <value>{EntityName}が詠唱中です</value>
+  </data>
+  <data name="EntityCastCondition_Immediate" xml:space="preserve">
+    <value>無条件</value>
+  </data>
+  <data name="EntityCastCondition_1" xml:space="preserve">
+    <value>1秒以上の詠唱</value>
+  </data>
+  <data name="EntityCastCondition_2" xml:space="preserve">
+    <value>2秒以上の詠唱</value>
+  </data>
+  <data name="EntityCastCondition_3" xml:space="preserve">
+    <value>3秒以上の詠唱</value>
+  </data>
+  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+    <value>発動時</value>
+  </data>
+  <data name="TelegraphedSkillCondition_1" xml:space="preserve">
+    <value>発動1秒前</value>
+  </data>
+  <data name="TelegraphedSkillCondition_2" xml:space="preserve">
+    <value>発動2秒前</value>
+  </data>
+  <data name="TelegraphedSkillCondition_3" xml:space="preserve">
+    <value>発動3秒前</value>
   </data>
   <data name="Startup_Error_Title" xml:space="preserve">
     <value>起動エラー</value>

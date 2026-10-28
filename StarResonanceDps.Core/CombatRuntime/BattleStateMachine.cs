@@ -40,9 +40,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.NearbyMonsterIndex.Instance.Clear();
             Services.BossDbmBarStore.Instance.Clear();
             Services.WarningSkillCastStore.Instance.Clear();
-
-            // 付け直しの有無は、このマップのまとめの差分で決め直す。
-            GameReceptionStateStore.ResetForNewMap();
+            Services.DungeonScoreStore.Instance.Clear();
         }
 
         /// <summary>

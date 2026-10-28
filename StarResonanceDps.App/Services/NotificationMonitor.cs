@@ -1,23 +1,32 @@
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.Core.CombatRuntime;
+using StarResonanceDps.Core.CombatRuntime.DataTypes.Enums;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// ウィジェットを開いていなくても通知する項目(マッチング成立・HP低下・プレイヤー出現・エンティティ出現・予兆技)の判定を持つ。
-/// 起動時から動き、画面のスレッドで使う。
-/// バフ・デバフ効果切れ・薬剤・料理効果切れは、開いているバフ・デバフカードとバフ・デバフグループが判定する(<see cref="BuffNotificationRegistry"/>)。
+/// ウィジェットを開いていなくても通知する項目(入場確認・HP低下・プレイヤー出現・エンティティ出現・狙われ状態・
+/// 自分の薬剤・料理効果切れ・予兆技・エンティティ詠唱)の判定を持つ。起動時から動き、画面のスレッドで使う。
+/// バフ・デバフ効果切れと、ほかの人の薬剤・料理効果切れは、開いているバフ・デバフカードとバフ・デバフグループが判定する(<see cref="BuffNotificationRegistry"/>)。
 ///
 /// <para>
 /// 判定はその項目の通知がオンの間だけ動かす。オフにしたら控えを捨て、オンにした時点から見始める。
 /// HP低下の控えはマップが替わったら捨てる(ログアウトとキャプチャの停止では名簿が空になり、判定の側で全員の控えが消える)。
-/// HP低下はプレイヤーの通知なので、NPC(助っ人)と判定された人は渡さない。
+/// HP低下と狙われ状態はプレイヤーの通知なので、NPC(助っ人)と判定された人は渡さない。
 /// 出現の2つは、オンにした・名前を変えたときに今の一覧を「既にいる相手」として控え直す。起動した直後に見えた相手には出す。
+/// 狙われ状態も、オンにした・設定を選び直したときに今の狙われ状態を控え直す。エンティティ詠唱も同じく今の詠唱を控え直す。
+/// 予兆技は、通知条件を選び直したときに予告を控え直す。
+/// </para>
+///
+/// <para>
+/// 自分の薬剤・料理効果切れは、項目がオンの間1秒ごとに自分のバフを読み、カード・グループと同じ判定を借りる(同じバフを窓でも見ていれば通知は1回)。
+/// 借り方は効果切れを出さない形で、バフ・デバフ効果切れは窓が見ている間だけ出る。
 /// </para>
 /// </summary>
 public sealed class NotificationMonitor
@@ -25,12 +34,30 @@ public sealed class NotificationMonitor
     /// <summary>予兆技を確かめる間隔。タイムラインの更新と同じ間隔。</summary>
     private static readonly TimeSpan TelegraphedSkillPollInterval = TimeSpan.FromMilliseconds(250);
 
+    /// <summary>自分の料理・薬剤を確かめる間隔。バフ・デバフカードとグループの更新と同じ間隔。</summary>
+    private static readonly TimeSpan CuisinePotionPollInterval = TimeSpan.FromSeconds(1);
+
+    private static readonly BuffGroup[] CuisinePotionGroups = [BuffGroup.Cuisine, BuffGroup.Potion];
+
     private readonly HealthLowNotificationTracker _healthLowTracker = new();
     private readonly AppearanceNotificationTracker _playerAppearedTracker = new(NotificationKind.PlayerAppeared);
     private readonly AppearanceNotificationTracker _entityAppearedTracker = new(NotificationKind.EntityAppeared);
+    private readonly TargetedNotificationTracker _targetedTracker = new();
+    private readonly EntityCastNotificationTracker _entityCastTracker = new();
     private readonly List<PlayerRosterEntry> _nearbyPlayers = [];
     private readonly DispatcherTimer _telegraphedSkillTimer;
+    private readonly DispatcherTimer _cuisinePotionTimer;
+
+    /// <summary>自分の料理・薬剤の判定。鍵はまとまり。項目がオフの間と自分が分からない間は空。</summary>
+    private readonly Dictionary<BuffGroup, BuffNotificationWatch> _cuisinePotionWatches = [];
+
     private TelegraphedSkillNotificationTracker? _telegraphedSkillTracker;
+
+    /// <summary>狙われ状態の今の設定。変わったら今の狙われ状態を控え直す。</summary>
+    private (bool IsEnabled, int TargetedPlayerModeIndex, int TargetEntityModeIndex, int ConditionIndex) _targetedSettings;
+
+    /// <summary>エンティティ詠唱の今の設定。変わったら今の詠唱を控え直す。</summary>
+    private (bool IsEnabled, int ConditionIndex) _entityCastSettings;
 
     private PlayerRosterSnapshot? _lastRoster;
     private IReadOnlyList<NearbyEntityEntry> _lastNearbyEntities = [];
@@ -53,6 +80,11 @@ public sealed class NotificationMonitor
             Interval = TelegraphedSkillPollInterval
         };
         _telegraphedSkillTimer.Tick += TelegraphedSkillTimer_Tick;
+        _cuisinePotionTimer = new DispatcherTimer
+        {
+            Interval = CuisinePotionPollInterval
+        };
+        _cuisinePotionTimer.Tick += CuisinePotionTimer_Tick;
 
         // 起動時の設定は控え直さずに見始める(起動した直後に見えた相手にも出す)。
         var notifications = ConfigManager.Instance.GetNotificationsSnapshot();
@@ -63,12 +95,21 @@ public sealed class NotificationMonitor
         ApplySettings();
     }
 
-    /// <summary>マッチングが成立した。画面のスレッドで呼ぶ。</summary>
+    /// <summary>マッチングが成立して承諾待ちになった(入場の承認画面が開く)。画面のスレッドで呼ぶ。</summary>
     public void NotifyMatchFound(Zproto.EMatchType matchType, long matchTypeUuid)
     {
-        if (ConfigManager.Instance.GetNotificationItem(NotificationKind.MatchFound).IsEnabled)
+        if (ConfigManager.Instance.GetNotificationItem(NotificationKind.EntryConfirmation).IsEnabled)
         {
-            MatchFoundNotifier.Notify(matchType, matchTypeUuid);
+            EntryConfirmationNotifier.NotifyMatch(matchType, matchTypeUuid);
+        }
+    }
+
+    /// <summary>パーティでコンテンツに入るときの承認が始まった(入場の承認画面が開く)。画面のスレッドで呼ぶ。</summary>
+    public void NotifyTeamEntryVoteStarted(int sceneId, int masterModeDifficulty)
+    {
+        if (ConfigManager.Instance.GetNotificationItem(NotificationKind.EntryConfirmation).IsEnabled)
+        {
+            EntryConfirmationNotifier.NotifyTeamEntry(sceneId, masterModeDifficulty);
         }
     }
 
@@ -78,6 +119,7 @@ public sealed class NotificationMonitor
         _lastRoster = roster;
         ObserveHealthLow();
         ObservePlayerAppearance();
+        ObserveTargeted();
     }
 
     /// <summary>周りのエンティティの一覧(エンティティリストの元)が届いた。画面のスレッドで呼ぶ。</summary>
@@ -85,6 +127,8 @@ public sealed class NotificationMonitor
     {
         _lastNearbyEntities = entities;
         ObserveEntityAppearance();
+        ObserveTargeted();
+        ObserveEntityCast();
     }
 
     private void ConfigManager_NotificationsChanged(object? sender, EventArgs e)
@@ -96,13 +140,21 @@ public sealed class NotificationMonitor
     {
         var notifications = ConfigManager.Instance.GetNotificationsSnapshot();
 
-        var isTelegraphedSkillEnabled = notifications.Get(NotificationKind.TelegraphedSkill).IsEnabled;
-        if (isTelegraphedSkillEnabled && _telegraphedSkillTracker is null)
+        var telegraphedSkill = notifications.Get(NotificationKind.TelegraphedSkill);
+        var telegraphedSkillLeadSeconds = AppConfigDefaults.TelegraphedSkillLeadSeconds[telegraphedSkill.TelegraphedSkillConditionIndex];
+        if (telegraphedSkill.IsEnabled && _telegraphedSkillTracker is null)
         {
-            _telegraphedSkillTracker = new TelegraphedSkillNotificationTracker();
+            _telegraphedSkillTracker = new TelegraphedSkillNotificationTracker(telegraphedSkillLeadSeconds);
             _telegraphedSkillTimer.Start();
         }
-        else if (!isTelegraphedSkillEnabled && _telegraphedSkillTracker is not null)
+        else if (telegraphedSkill.IsEnabled
+            && _telegraphedSkillTracker is { } telegraphedSkillTracker
+            && telegraphedSkillTracker.LeadSeconds != telegraphedSkillLeadSeconds)
+        {
+            // 選び直した時点で時機を過ぎた予告は出さない。
+            telegraphedSkillTracker.Rebaseline(telegraphedSkillLeadSeconds);
+        }
+        else if (!telegraphedSkill.IsEnabled && _telegraphedSkillTracker is not null)
         {
             _telegraphedSkillTimer.Stop();
             _telegraphedSkillTracker = null;
@@ -135,6 +187,38 @@ public sealed class NotificationMonitor
             _entityAppearedWatchName = entityAppearedWatchName;
             _entityAppearedTracker.Rebaseline();
             ObserveEntityAppearance();
+        }
+
+        var targeted = notifications.Get(NotificationKind.Targeted);
+        var targetedSettings = (
+            targeted.IsEnabled,
+            targeted.TargetedPlayerModeIndex,
+            targeted.TargetEntityModeIndex,
+            targeted.TargetedConditionIndex);
+        if (targetedSettings != _targetedSettings)
+        {
+            // オンにした・選び直した時点で既に狙われている人には出さない(出現と同じ)。
+            _targetedSettings = targetedSettings;
+            _targetedTracker.Rebaseline(targetedSettings.IsEnabled ? CollectTargetedStates() : []);
+        }
+
+        var entityCast = notifications.Get(NotificationKind.EntityCast);
+        var entityCastSettings = (entityCast.IsEnabled, entityCast.EntityCastConditionIndex);
+        if (entityCastSettings != _entityCastSettings)
+        {
+            // オンにした・選び直した時点で既に詠唱中の敵には出さない(狙われ状態と同じ)。
+            _entityCastSettings = entityCastSettings;
+            _entityCastTracker.Rebaseline(entityCastSettings.IsEnabled ? CollectEntityCasts() : []);
+        }
+
+        if (notifications.Get(NotificationKind.CuisinePotionLow).IsEnabled)
+        {
+            _cuisinePotionTimer.Start();
+        }
+        else
+        {
+            _cuisinePotionTimer.Stop();
+            ReleaseCuisinePotionWatches();
         }
     }
 
@@ -220,6 +304,193 @@ public sealed class NotificationMonitor
             .Where(entry => !entry.IsNpc && party.ShouldInclude(entry.CharacterId, entry.IsSelf, mode))
             .ToArray();
         _healthLowTracker.Observe(targets, PlayerRosterPresentationStore.Instance.NameDisplayMode);
+    }
+
+    private void ObserveTargeted()
+    {
+        if (_targetedSettings.IsEnabled)
+        {
+            _targetedTracker.Observe(CollectTargetedStates());
+        }
+    }
+
+    private void ObserveEntityCast()
+    {
+        if (_entityCastSettings.IsEnabled)
+        {
+            _entityCastTracker.Observe(CollectEntityCasts());
+        }
+    }
+
+    /// <summary>今詠唱している周りの敵(エンティティリストの詠唱ゲージと同じ詠唱)。</summary>
+    private List<EntityCastObservation> CollectEntityCasts()
+    {
+        var casts = new List<EntityCastObservation>();
+        foreach (var entity in _lastNearbyEntities)
+        {
+            if (entity.Cast is { } cast)
+            {
+                casts.Add(new EntityCastObservation(entity.EntityUuid, cast, GetEntityDisplayName(entity)));
+            }
+        }
+
+        return casts;
+    }
+
+    /// <summary>
+    /// 今の狙われ状態。周りの敵のうち対象エンティティの種類のものが狙っている、対象プレイヤーに入るプレイヤー(NPC を除く)。
+    /// </summary>
+    private List<TargetedState> CollectTargetedStates()
+    {
+        var targets = new List<TargetedState>();
+        if (_lastRoster is not { } roster)
+        {
+            return targets;
+        }
+
+        var playersByCharacterId = new Dictionary<long, PlayerRosterEntry>();
+        foreach (var entry in roster.Entries)
+        {
+            playersByCharacterId.TryAdd(entry.CharacterId, entry);
+        }
+
+        var party = PartyStateStore.Instance.Current;
+        var nameDisplayMode = PlayerRosterPresentationStore.Instance.NameDisplayMode;
+        foreach (var entity in _lastNearbyEntities)
+        {
+            if (entity.TargetCharacterId == 0
+                || !IsTargetEntity(entity.MonsterType, _targetedSettings.TargetEntityModeIndex)
+                || !playersByCharacterId.TryGetValue(entity.TargetCharacterId, out var player)
+                || player.IsNpc
+                || !IsTargetedPlayer(player, party, _targetedSettings.TargetedPlayerModeIndex))
+            {
+                continue;
+            }
+
+            targets.Add(new TargetedState(
+                entity.EntityUuid,
+                player.CharacterId,
+                PlayerInfoFormatFormatter.GetDisplayName(
+                    player.Name,
+                    player.CharacterId,
+                    player.IsSelf,
+                    player.IsNpc,
+                    player.ProfessionId,
+                    nameDisplayMode),
+                GetEntityDisplayName(entity)));
+        }
+
+        return targets;
+    }
+
+    /// <summary>
+    /// 対象プレイヤー(すべて / パーティメンバー / 防御クラス以外 / 防御クラス以外のパーティメンバー)に入る人か。
+    /// パーティメンバーは HP低下の「パーティメンバーのみ」と同じ判定(自分を含む)。
+    /// 防御クラス以外は職業の役割が防御でない人で、職業の分からない人は防御クラスかどうか言えないので入れない。
+    /// </summary>
+    private static bool IsTargetedPlayer(PlayerRosterEntry player, PartyStateSnapshot party, int targetedPlayerModeIndex)
+    {
+        var requiresPartyMember = targetedPlayerModeIndex is AppConfigDefaults.TargetedPlayerPartyMembersIndex
+            or AppConfigDefaults.TargetedPlayerNonGuardianPartyMembersIndex;
+        if (requiresPartyMember && !party.ShouldInclude(player.CharacterId, player.IsSelf, PartyDisplayMode.PartyMembersOnly))
+        {
+            return false;
+        }
+
+        var requiresNonGuardian = targetedPlayerModeIndex is AppConfigDefaults.TargetedPlayerNonGuardianIndex
+            or AppConfigDefaults.TargetedPlayerNonGuardianPartyMembersIndex;
+        return !requiresNonGuardian
+            || (CombatDataCatalog.TryGetProfessionRole(player.ProfessionId, out var role) && role != Professions.ERoleType.Tank);
+    }
+
+    /// <summary>対象エンティティ(ボスのみ / ボスと精鋭 / すべて)に入る敵の種類か。</summary>
+    private static bool IsTargetEntity(EMonsterType monsterType, int targetEntityModeIndex)
+    {
+        return targetEntityModeIndex switch
+        {
+            AppConfigDefaults.TargetEntityBossOnlyIndex => monsterType == EMonsterType.Boss,
+            AppConfigDefaults.TargetEntityBossAndEliteIndex => monsterType is EMonsterType.Boss or EMonsterType.Elite,
+            _ => true
+        };
+    }
+
+    /// <summary>
+    /// 通知に入れる敵の名前(狙われ状態の狙っている敵、エンティティ詠唱の詠唱した敵)。
+    /// エンティティ出現と同じ表示言語の名前(内部IDの注記なし)で、名前の無い敵はエンティティリストと同じ「敵」、種別ID の分からない敵は「未知の敵」。
+    /// </summary>
+    private static string GetEntityDisplayName(NearbyEntityEntry entity)
+    {
+        if (entity.EntityId == 0)
+        {
+            return LocalizationManager.Instance.GetString("EntityList_UnknownEnemy");
+        }
+
+        var name = CombatDataCatalog.GetEntityNameWithoutInternalId(entity.EntityType, entity.EntityId);
+        return string.IsNullOrWhiteSpace(name)
+            ? LocalizationManager.Instance.GetString("EntityList_UnnamedEnemy")
+            : name;
+    }
+
+    /// <summary>
+    /// 自分の料理・薬剤を判定へ渡す。読み方はバフ・デバフグループと同じ(同じ番号は残り時間の一番長い実体、料理・薬剤はまとまり)。
+    /// 自分が分からない間は判定を返す。
+    /// </summary>
+    private void CuisinePotionTimer_Tick(object? sender, EventArgs e)
+    {
+        var characterId = AppState.PlayerUID;
+        if (characterId == 0
+            || !MeterSnapshotProvider.TryGetPlayerBuffs(characterId, PlayerBuffListKind.Buff, groupSameBuffs: true, out var buffs))
+        {
+            ReleaseCuisinePotionWatches();
+            return;
+        }
+
+        var target = BuffNotificationTarget.ForPlayer(characterId);
+        var targetName = GetSelfName(characterId);
+        foreach (var group in CuisinePotionGroups)
+        {
+            if (_cuisinePotionWatches.TryGetValue(group, out BuffNotificationWatch? watch) && watch.Target != target)
+            {
+                watch.Dispose();
+                _cuisinePotionWatches.Remove(group);
+                watch = null;
+            }
+
+            if (watch is null)
+            {
+                watch = BuffNotificationRegistry.Instance.Watch(
+                    target,
+                    BuffNotificationRegistry.CreateBuffKey(group, string.Empty),
+                    notifiesExpiry: false);
+                _cuisinePotionWatches.Add(group, watch);
+            }
+
+            watch.Observe(BuffDebuffCardContent.FindByGroup(buffs, group), targetName);
+        }
+    }
+
+    private void ReleaseCuisinePotionWatches()
+    {
+        foreach (var watch in _cuisinePotionWatches.Values)
+        {
+            watch.Dispose();
+        }
+
+        _cuisinePotionWatches.Clear();
+    }
+
+    /// <summary>通知に入れる自分の名前。バフ・デバフグループと同じ規則(名簿の自分の行が無ければ素性から)。</summary>
+    private string GetSelfName(long characterId)
+    {
+        var self = _lastRoster?.Entries.FirstOrDefault(entry => entry.CharacterId == characterId);
+        var identity = MeterSnapshotProvider.GetPlayerIdentity(characterId);
+        return PlayerInfoFormatFormatter.GetDisplayName(
+            self?.Name ?? identity?.Name,
+            identity?.UserId ?? characterId,
+            true,
+            self?.IsNpc ?? identity?.IsNpc ?? false,
+            self?.ProfessionId ?? identity?.ProfessionId ?? 0,
+            PlayerRosterPresentationStore.Instance.NameDisplayMode);
     }
 
     private void TelegraphedSkillTimer_Tick(object? sender, EventArgs e)

@@ -57,7 +57,7 @@ public sealed class AppearanceNotificationTracker(NotificationKind kind)
             {
                 NotificationService.Instance.Notify(
                     kind,
-                    NotificationTextFormatter.FormatAppeared(NotificationTextFormatter.ResolveFormat(kind), displayName));
+                    NotificationTextFormatter.FormatAppeared(kind, NotificationTextFormatter.ResolveFormat(kind), displayName));
             }
         }
 

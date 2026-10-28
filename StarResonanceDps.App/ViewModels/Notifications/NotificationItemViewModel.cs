@@ -53,9 +53,21 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     [ObservableProperty]
     private int _speechVoiceIndex = AppConfigDefaults.SpeechVoiceWindowsIndex;
 
-    /// <summary>HP低下の対象(<see cref="Core.Models.PartyDisplayMode"/> の番号)。</summary>
+    /// <summary>HP低下の対象プレイヤー(<see cref="Core.Models.PartyDisplayMode"/> の番号)。</summary>
     [ObservableProperty]
     private int _targetModeIndex;
+
+    /// <summary>狙われ状態の対象プレイヤー(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。</summary>
+    [ObservableProperty]
+    private int _targetedPlayerModeIndex = AppConfigDefaults.DefaultTargetedPlayerModeIndex;
+
+    /// <summary>狙われ状態の対象エンティティ(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。</summary>
+    [ObservableProperty]
+    private int _targetEntityModeIndex = AppConfigDefaults.DefaultTargetEntityModeIndex;
+
+    /// <summary>狙われ状態の通知条件の番号(<see cref="AppConfigDefaults.TargetedDurationSeconds"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _targetedConditionIndex = AppConfigDefaults.DefaultTargetedConditionIndex;
 
     /// <summary>HP低下とみなす割合の番号(<see cref="AppConfigDefaults.HealthLowThresholdPercents"/> の添字)。</summary>
     [ObservableProperty]
@@ -68,6 +80,14 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     /// <summary>薬剤・料理効果切れの通知条件の番号(<see cref="AppConfigDefaults.CuisinePotionLowMinutes"/> の添字)。</summary>
     [ObservableProperty]
     private int _cuisinePotionConditionIndex = AppConfigDefaults.DefaultCuisinePotionConditionIndex;
+
+    /// <summary>予兆技の通知条件の番号(<see cref="AppConfigDefaults.TelegraphedSkillLeadSeconds"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _telegraphedSkillConditionIndex = AppConfigDefaults.DefaultTelegraphedSkillConditionIndex;
+
+    /// <summary>エンティティ詠唱の通知条件の番号(<see cref="AppConfigDefaults.EntityCastMinimumSeconds"/> の添字)。</summary>
+    [ObservableProperty]
+    private int _entityCastConditionIndex = AppConfigDefaults.DefaultEntityCastConditionIndex;
 
     /// <summary>プレイヤー出現・エンティティ出現で、出現を知らせる相手の名前。打ったままの値で持ち、保存のときに前後の空白を除く。</summary>
     [ObservableProperty]
@@ -112,13 +132,22 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     public NotificationTextViewModel Text { get; }
 
     /// <summary>開いているバフ・デバフカードとバフ・デバフグループのバフだけを通知する項目か。右下に注意書きを出す。</summary>
-    public bool ShowsBuffWidgetNote => Kind is NotificationKind.BuffExpired or NotificationKind.CuisinePotionLow;
+    public bool ShowsBuffWidgetNote => Kind == NotificationKind.BuffExpired;
 
-    /// <summary>HP低下の項目か。右下の先頭に「対象プレイヤー」「HP低下判定」「通知条件」の行を出す。</summary>
+    /// <summary>HP低下の項目か。右下に「対象プレイヤー」「HP低下判定」「通知条件」の行を出す。</summary>
     public bool ShowsHealthLowSettings => Kind == NotificationKind.HealthLow;
 
-    /// <summary>薬剤・料理効果切れの項目か。右下の注意書きの次に「通知条件」の行を出す。</summary>
+    /// <summary>狙われ状態の項目か。右下に「対象プレイヤー」(狙われ状態の選択肢)「対象エンティティ」「通知条件」の行を出す。</summary>
+    public bool ShowsTargetedSettings => Kind == NotificationKind.Targeted;
+
+    /// <summary>薬剤・料理効果切れの項目か。右下の先頭に「通知条件」の行を出す。</summary>
     public bool ShowsCuisinePotionCondition => Kind == NotificationKind.CuisinePotionLow;
+
+    /// <summary>予兆技の項目か。右下の先頭に「通知条件」の行を出す。</summary>
+    public bool ShowsTelegraphedSkillCondition => Kind == NotificationKind.TelegraphedSkill;
+
+    /// <summary>エンティティ詠唱の項目か。右下の先頭に「通知条件」の行を出す。</summary>
+    public bool ShowsEntityCastCondition => Kind == NotificationKind.EntityCast;
 
     /// <summary>プレイヤー出現の項目か。右下の先頭に「対象プレイヤー名」の行を出す。</summary>
     public bool ShowsTargetPlayerName => Kind == NotificationKind.PlayerAppeared;
@@ -168,9 +197,14 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             Volume = config.Volume;
             SpeechVoiceIndex = config.SpeechVoiceIndex;
             TargetModeIndex = config.TargetModeIndex;
+            TargetedPlayerModeIndex = config.TargetedPlayerModeIndex;
+            TargetEntityModeIndex = config.TargetEntityModeIndex;
+            TargetedConditionIndex = config.TargetedConditionIndex;
             HealthLowThresholdIndex = config.HealthLowThresholdIndex;
             HealthLowConditionIndex = config.HealthLowConditionIndex;
             CuisinePotionConditionIndex = config.CuisinePotionConditionIndex;
+            TelegraphedSkillConditionIndex = config.TelegraphedSkillConditionIndex;
+            EntityCastConditionIndex = config.EntityCastConditionIndex;
             TargetName = config.TargetName;
             _voicevoxSpeakerUuid = config.VoicevoxSpeakerUuid;
             _voicevoxSpeakerName = config.VoicevoxSpeakerName;
@@ -200,9 +234,14 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             VoicevoxStyleId = _voicevoxStyleId,
             VoicevoxStyleName = _voicevoxStyleName,
             TargetModeIndex = TargetModeIndex,
+            TargetedPlayerModeIndex = TargetedPlayerModeIndex,
+            TargetEntityModeIndex = TargetEntityModeIndex,
+            TargetedConditionIndex = TargetedConditionIndex,
             HealthLowThresholdIndex = HealthLowThresholdIndex,
             HealthLowConditionIndex = HealthLowConditionIndex,
             CuisinePotionConditionIndex = CuisinePotionConditionIndex,
+            TelegraphedSkillConditionIndex = TelegraphedSkillConditionIndex,
+            EntityCastConditionIndex = EntityCastConditionIndex,
             TargetName = TargetName.Trim()
         };
     }
@@ -267,6 +306,21 @@ public sealed partial class NotificationItemViewModel : ObservableObject
         RaiseChanged();
     }
 
+    partial void OnTargetedPlayerModeIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnTargetEntityModeIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnTargetedConditionIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
     partial void OnHealthLowThresholdIndexChanged(int value)
     {
         RaiseChanged();
@@ -278,6 +332,16 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     }
 
     partial void OnCuisinePotionConditionIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnTelegraphedSkillConditionIndexChanged(int value)
+    {
+        RaiseChanged();
+    }
+
+    partial void OnEntityCastConditionIndexChanged(int value)
     {
         RaiseChanged();
     }

@@ -16,7 +16,7 @@ public static partial class PlayerInfoFormatFormatter
     /// <summary>書式に差し込める項目(設定の「プレイヤー名」の項目の一覧)。プレイヤーリスト・メーター・蘇生リストで同じ。</summary>
     public static IReadOnlyList<(string Key, string LabelResourceKey, string Placeholder)> FieldDefinitions { get; } =
     [
-        ("Name", "Settings_PlayerInfo_Field_Name", "{Name}"),
+        ("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}"),
         ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
         ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", "{Psych}"),
         ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
@@ -263,7 +263,7 @@ public static partial class PlayerInfoFormatFormatter
         };
     }
 
-    [GeneratedRegex(@"\{Name\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{PlayerName\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetNameRegex();
 
     [GeneratedRegex(@"\{Spec\}", RegexOptions.IgnoreCase)]

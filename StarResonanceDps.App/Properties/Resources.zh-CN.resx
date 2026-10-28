@@ -296,8 +296,8 @@
   <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
     <value>预兆技能</value>
   </data>
-  <data name="Settings_PlayerListNotification_MatchFound" xml:space="preserve">
-    <value>匹配成功</value>
+  <data name="Notification_EntryConfirmation" xml:space="preserve">
+    <value>入场确认</value>
   </data>
   <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
     <value>HP降低</value>
@@ -309,25 +309,91 @@
     <value>玩法1</value>
   </data>
   <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
-    <value>{Name}的{BuffName}效果已结束</value>
+    <value>{TargetName}的{BuffName}效果已结束</value>
   </data>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{Name}的{BuffName}效果即将结束</value>
+    <value>{TargetName}的{BuffName}效果即将结束</value>
   </data>
   <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}来袭</value>
   </data>
-  <data name="PlayerListNotification_MatchFound_Default" xml:space="preserve">
-    <value>已匹配到{Content}</value>
+  <data name="EntryConfirmationNotification_Default" xml:space="preserve">
+    <value>即将进入{Content}</value>
   </data>
   <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
-    <value>{Name}的HP降低了</value>
+    <value>{PlayerName}的HP降低了</value>
   </data>
   <data name="PlayerAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}出现了</value>
+    <value>{PlayerName}出现了</value>
   </data>
   <data name="EntityAppearedNotification_Default" xml:space="preserve">
-    <value>{Name}出现了</value>
+    <value>{EntityName}出现了</value>
+  </data>
+  <data name="TargetedNotification_Default" xml:space="preserve">
+    <value>{PlayerName}成为了{EntityName}的攻击目标</value>
+  </data>
+  <data name="Notification_Targeted" xml:space="preserve">
+    <value>攻击目标状态</value>
+  </data>
+  <data name="Notification_TargetEntity" xml:space="preserve">
+    <value>目标实体</value>
+  </data>
+  <data name="Notification_TargetEntity_BossOnly" xml:space="preserve">
+    <value>仅首领</value>
+  </data>
+  <data name="Notification_TargetEntity_BossAndElite" xml:space="preserve">
+    <value>首领和精英</value>
+  </data>
+  <data name="TargetedCondition_Immediate" xml:space="preserve">
+    <value>无条件</value>
+  </data>
+  <data name="TargetedCondition_1" xml:space="preserve">
+    <value>攻击目标状态1秒以上</value>
+  </data>
+  <data name="TargetedCondition_2" xml:space="preserve">
+    <value>攻击目标状态2秒以上</value>
+  </data>
+  <data name="TargetedCondition_3" xml:space="preserve">
+    <value>攻击目标状态3秒以上</value>
+  </data>
+  <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
+    <value>队伍成员</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardian" xml:space="preserve">
+    <value>守护职业以外</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardianPartyMembers" xml:space="preserve">
+    <value>守护职业以外的队伍成员</value>
+  </data>
+  <data name="Notification_EntityCast" xml:space="preserve">
+    <value>实体吟唱</value>
+  </data>
+  <data name="EntityCastNotification_Default" xml:space="preserve">
+    <value>{EntityName}正在吟唱</value>
+  </data>
+  <data name="EntityCastCondition_Immediate" xml:space="preserve">
+    <value>无条件</value>
+  </data>
+  <data name="EntityCastCondition_1" xml:space="preserve">
+    <value>1秒以上的吟唱</value>
+  </data>
+  <data name="EntityCastCondition_2" xml:space="preserve">
+    <value>2秒以上的吟唱</value>
+  </data>
+  <data name="EntityCastCondition_3" xml:space="preserve">
+    <value>3秒以上的吟唱</value>
+  </data>
+  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+    <value>发动时</value>
+  </data>
+  <data name="TelegraphedSkillCondition_1" xml:space="preserve">
+    <value>发动前1秒</value>
+  </data>
+  <data name="TelegraphedSkillCondition_2" xml:space="preserve">
+    <value>发动前2秒</value>
+  </data>
+  <data name="TelegraphedSkillCondition_3" xml:space="preserve">
+    <value>发动前3秒</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
@@ -1235,6 +1301,12 @@
   </data>
   <data name="EntityList_HateValue" xml:space="preserve">
     <value>仇恨值: {0}</value>
+  </data>
+  <data name="EntityList_ScoreFormat" xml:space="preserve">
+    <value>{0}分</value>
+  </data>
+  <data name="EntityList_CurrentScore" xml:space="preserve">
+    <value>当前</value>
   </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>排序方式</value>

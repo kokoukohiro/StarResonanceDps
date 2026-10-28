@@ -3,7 +3,9 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
@@ -13,6 +15,8 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
     private const string EntitySelectionContextMenuFirstItemStyleKey = "Menu.WidgetWindowEntitySelectionContextMenuItem.First";
     private const string EntitySelectionContextMenuMiddleItemStyleKey = "Menu.WidgetWindowEntitySelectionContextMenuItem.Middle";
     private const string EntitySelectionContextMenuLastItemStyleKey = "Menu.WidgetWindowEntitySelectionContextMenuItem.Last";
+
+    private readonly DispatcherTimer _castRefreshTimer;
 
     /// <summary>一覧のテンプレートの中の ScrollViewer(仮想化のため一覧の中に置く)。読み込むまでは null。</summary>
     private ScrollViewer? _scrollViewer;
@@ -25,6 +29,11 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
     public EntityListWidgetView()
     {
         InitializeComponent();
+        _castRefreshTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(100)
+        };
+        _castRefreshTimer.Tick += CastRefreshTimer_Tick;
         Loaded += EntityListWidgetView_Loaded;
         Unloaded += EntityListWidgetView_Unloaded;
         SizeChanged += EntityListWidgetView_SizeChanged;
@@ -72,12 +81,27 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
             _scrollViewer.ScrollChanged += EntityListScrollViewer_ScrollChanged;
         }
 
+        if (DataContext is WidgetListItemViewModel viewModel)
+        {
+            viewModel.ReapplyEntityListCasts();
+        }
+
+        _castRefreshTimer.Start();
         NotifyVerticalScrollMetricsChanged();
     }
 
     private void EntityListWidgetView_Unloaded(object sender, RoutedEventArgs e)
     {
+        _castRefreshTimer.Stop();
         CloseEntitySelectionMenu();
+    }
+
+    private void CastRefreshTimer_Tick(object? sender, EventArgs e)
+    {
+        if (DataContext is WidgetListItemViewModel viewModel)
+        {
+            viewModel.RefreshEntityListCasts();
+        }
     }
 
     private void EntityListWidgetView_SizeChanged(object sender, SizeChangedEventArgs e)

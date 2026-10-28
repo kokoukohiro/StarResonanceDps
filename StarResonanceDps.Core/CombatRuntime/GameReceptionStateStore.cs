@@ -12,15 +12,11 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// </param>
 /// <param name="HasSelfContainer">自分の全体コンテナを受けた。</param>
 /// <param name="HasSelfEnterScene">入場の全属性を受けた(<see cref="SelfAttributeChangeStore.HasFullSnapshot"/>)。</param>
-/// <param name="IsSelfBuffReinitMissing">
-/// このマップのまとめの差分に、自分のバフの番号1からの付け直しが無かった。自分のバフ・特化・潜在心相晶が欠けている。
-/// </param>
 public readonly record struct GameReceptionSnapshot(
     bool HasIdentifiedSelf,
     bool HasMidStreamConnection,
     bool HasSelfContainer,
-    bool HasSelfEnterScene,
-    bool IsSelfBuffReinitMissing)
+    bool HasSelfEnterScene)
 {
     /// <summary>途中起動: 接続を途中から読み始めて、全体コンテナがまだ届いていない。</summary>
     public bool IsMidLaunch => HasMidStreamConnection && !HasSelfContainer;
@@ -40,8 +36,7 @@ public readonly record struct GameReceptionSnapshot(
 /// パケットを1つ処理し終えたとき(<see cref="Commit"/>)に組み直す。
 ///
 /// <para>
-/// 消すのはログアウトとキャプチャの停止(<see cref="Clear"/>)。マップ移動では、付け直しが無かった印だけ下ろす(<see cref="ResetForNewMap"/>)。
-/// 付け直しの有無は、次のまとめの差分で決め直す。
+/// 消すのはログアウトとキャプチャの停止(<see cref="Clear"/>)だけ。マップ移動では消さない。
 /// </para>
 /// </summary>
 public static class GameReceptionStateStore
@@ -51,7 +46,6 @@ public static class GameReceptionStateStore
     private static bool _hasIdentifiedSelf;
     private static bool _hasMidStreamConnection;
     private static bool _hasSelfContainer;
-    private static bool _isSelfBuffReinitMissing;
     private static GameReceptionSnapshot _current;
 
     /// <summary>組み直した状態が変わったとき。パケットのスレッドか、キャプチャを止めたスレッドで上がる。</summary>
@@ -64,18 +58,6 @@ public static class GameReceptionStateStore
             lock (Sync)
             {
                 return _current;
-            }
-        }
-    }
-
-    /// <summary>このマップのまとめの差分に、自分のバフの付け直しが無かったか。自分の特化の印を立てるかの判定に使う。</summary>
-    internal static bool IsSelfBuffReinitMissing
-    {
-        get
-        {
-            lock (Sync)
-            {
-                return _isSelfBuffReinitMissing;
             }
         }
     }
@@ -106,32 +88,6 @@ public static class GameReceptionStateStore
         }
     }
 
-    /// <summary>まとめの差分で、自分のバフが番号1から付け直された。</summary>
-    internal static void MarkSelfBuffReinitialized()
-    {
-        lock (Sync)
-        {
-            _isSelfBuffReinitMissing = false;
-        }
-    }
-
-    /// <summary>まとめの差分にバフの付与があるのに、番号1からの付け直しが無かった。</summary>
-    internal static void MarkSelfBuffReinitMissing()
-    {
-        lock (Sync)
-        {
-            _isSelfBuffReinitMissing = true;
-        }
-    }
-
-    internal static void ResetForNewMap()
-    {
-        lock (Sync)
-        {
-            _isSelfBuffReinitMissing = false;
-        }
-    }
-
     /// <summary>パケットを処理し終えた。状態を組み直し、変わっていれば知らせる。</summary>
     internal static void Commit()
     {
@@ -139,7 +95,7 @@ public static class GameReceptionStateStore
         bool changed;
         lock (Sync)
         {
-            var next = new GameReceptionSnapshot(_hasIdentifiedSelf, _hasMidStreamConnection, _hasSelfContainer, hasSelfEnterScene, _isSelfBuffReinitMissing);
+            var next = new GameReceptionSnapshot(_hasIdentifiedSelf, _hasMidStreamConnection, _hasSelfContainer, hasSelfEnterScene);
             changed = next != _current;
             _current = next;
         }
@@ -161,7 +117,6 @@ public static class GameReceptionStateStore
             _hasIdentifiedSelf = false;
             _hasMidStreamConnection = false;
             _hasSelfContainer = false;
-            _isSelfBuffReinitMissing = false;
         }
 
         Commit();

@@ -149,7 +149,7 @@ public sealed record PlayerMetricSummarySnapshot(
 /// </param>
 /// <param name="Caster">
 /// 出している実体の付与者。召喚物は大元の召喚者のプレイヤー。
-/// 付与者がプレイヤーでなければ null。名前を出すかは表示側が決める(リストの設定「付与者プレイヤー名の表示」、カードの書式 <c>{Caster}</c>)。
+/// 付与者がプレイヤーでなければ null。名前を出すかは表示側が決める(リストの設定「付与者プレイヤー名の表示」、カードの書式 <c>{CasterName}</c>)。
 /// </param>
 /// <param name="IsCardRepresentative">同じ <paramref name="CardKey"/> の行のうち、カードに出す行か(残り時間の一番長いもの)。</param>
 public sealed record PlayerBuffSnapshot(
@@ -1602,8 +1602,8 @@ public static class MeterSnapshotProvider
     /// 戦闘不能の人の、蘇生不可デバフから見た状態。蘇生リストの右の文字と並びに使う。
     ///
     /// <para>
-    /// 「付いていない」と言えるのは、その人のバフが全部届いているときだけ。自分は自分のバフがそろっている
-    /// (途中起動でなく、このマップの付け直しが無かったのでもない)とき、他の人は周りにいて、このマップで出現時の全バフの一覧を受けたとき。
+    /// 「付いていない」と言えるのは、その人のバフが全部届いているときだけ。自分は途中起動でないとき、
+    /// 他の人は周りにいて、このマップで出現時の全バフの一覧を受けたとき。
     /// それ以外で見つからないのは、付いていないのか届いていないのか分からないので不明にする(付いていないことにすると、蘇生できない人を蘇生できると出す)。
     /// </para>
     /// </summary>
@@ -1626,7 +1626,7 @@ public static class MeterSnapshotProvider
 
         var reception = GameReceptionStateStore.Current;
         var hasAllBuffs = player.IsSelf
-            ? !reception.IsMidLaunch && !reception.IsSelfBuffReinitMissing
+            ? !reception.IsMidLaunch
             : player.IsNearby && Services.ActiveBuffStore.Instance.HasReceivedAppearList(entityUuid);
         return new ReviveBlockState(hasAllBuffs ? ReviveBlockStateKind.Revivable : ReviveBlockStateKind.Unknown);
     }

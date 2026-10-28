@@ -31,43 +31,54 @@ public sealed partial class NotificationsViewModel : ObservableObject
         Items =
         [
             new NotificationItemViewModel(
-                NotificationKind.MatchFound,
-                "Settings_PlayerListNotification_MatchFound",
+                NotificationKind.EntryConfirmation,
+                "Notification_EntryConfirmation",
                 [("Content", "Settings_PlayerListNotification_Field_Content", "{Content}")]),
             new NotificationItemViewModel(
                 NotificationKind.HealthLow,
                 "Settings_PlayerListNotification_HealthLow",
-                [("Name", "Settings_PlayerInfo_Field_Name", "{Name}")]),
+                [("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}")]),
             new NotificationItemViewModel(
                 NotificationKind.PlayerAppeared,
                 "Notification_PlayerAppeared",
-                [("Name", "Settings_PlayerInfo_Field_Name", "{Name}")]),
+                [("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}")]),
             new NotificationItemViewModel(
                 NotificationKind.EntityAppeared,
                 "Notification_EntityAppeared",
-                [("Name", "Settings_EntityInfo_Field_Name", "{Name}")]),
+                [("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}")]),
+            new NotificationItemViewModel(
+                NotificationKind.Targeted,
+                "Notification_Targeted",
+                [
+                    ("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}"),
+                    ("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}")
+                ]),
             new NotificationItemViewModel(
                 NotificationKind.BuffExpired,
                 "Settings_BuffCardNotification_Expired",
                 [
                     ("BuffName", "Settings_BuffInfo_Field_BuffName", "{BuffName}"),
-                    ("Name", "Settings_BuffInfo_Field_Name", "{Name}"),
-                    ("Caster", "Settings_BuffInfo_Field_Caster", "{Caster}")
+                    ("TargetName", "Settings_BuffInfo_Field_Name", "{TargetName}"),
+                    ("CasterName", "Settings_BuffInfo_Field_Caster", "{CasterName}")
                 ]),
             new NotificationItemViewModel(
                 NotificationKind.CuisinePotionLow,
                 "Settings_BuffCardNotification_CuisinePotionLow",
                 [
                     ("BuffName", "Settings_BuffInfo_Field_BuffName", "{BuffName}"),
-                    ("Name", "Settings_BuffInfo_Field_Name", "{Name}")
+                    ("TargetName", "Settings_BuffInfo_Field_Name", "{TargetName}")
                 ]),
             new NotificationItemViewModel(
                 NotificationKind.TelegraphedSkill,
                 "Settings_TakenDamageLogNotification_TelegraphedSkill",
                 [
-                    ("Name", "Settings_EntityInfo_Field_Name", "{Name}"),
+                    ("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}"),
                     ("SkillName", "Metric_SkillName", "{SkillName}")
-                ])
+                ]),
+            new NotificationItemViewModel(
+                NotificationKind.EntityCast,
+                "Notification_EntityCast",
+                [("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}")])
         ];
 
         var notifications = ConfigManager.Instance.GetNotificationsSnapshot();

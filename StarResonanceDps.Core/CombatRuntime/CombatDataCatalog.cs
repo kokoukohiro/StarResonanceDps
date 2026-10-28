@@ -699,7 +699,7 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// マッチング先の名前(マッチング成立の通知の <c>MatchKeyInfo</c>)。番号の意味は種類で決まる:
+    /// マッチング先の名前(マッチングの通知の <c>MatchKeyInfo</c>)。番号の意味は種類で決まる:
     /// パーティのマッチングは <c>TeamTargetTable</c>、活動のマッチングは <c>SeasonActTable</c> の行。表示中の言語で引き、無ければ空。
     /// </summary>
     public static string GetMatchTargetName(Zproto.EMatchType matchType, long matchTypeUuid)
@@ -1550,8 +1550,24 @@ public static class CombatDataCatalog
     /// </summary>
     public static bool HasSingOrGuideTime(int skillId)
     {
-        return _skills.TryGetValue(skillId, out var skill)
-            && skill.SingOrGuideTime is [[> 0f, ..], ..];
+        return TryGetSingOrGuideSeconds(skillId, out _);
+    }
+
+    /// <summary>
+    /// 詠唱(または誘導)のバーの全体秒数(<c>SingOrGuideTime</c> の先頭要素の先頭)。バーを持たない技なら false。
+    /// 表の値は float なので、書かれた10進の値(9.4 など)に直して返す。
+    /// </summary>
+    public static bool TryGetSingOrGuideSeconds(int skillId, out double seconds)
+    {
+        if (_skills.TryGetValue(skillId, out var skill)
+            && skill.SingOrGuideTime is [[> 0f and var totalSeconds, ..], ..])
+        {
+            seconds = (double)(decimal)totalSeconds;
+            return true;
+        }
+
+        seconds = 0d;
+        return false;
     }
 
     /// <summary>
@@ -1750,6 +1766,29 @@ public static class CombatDataCatalog
         };
     }
 
+    /// <summary>
+    /// 倒すとダンジョンの得点(空間調査)に入る点数(<c>MonsterTable.Score</c>)。表に無い番号は 0。
+    /// 場所ごとの倍率と実体ごとの加算は掛けない(掛け方がサーバー側にしか無い)。
+    /// </summary>
+    public static int GetMonsterScore(long monsterId)
+    {
+        return monsterId is > 0 and <= int.MaxValue
+            && HelperMethods.DataTables.Monsters.Data.TryGetValue(
+                monsterId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var monster)
+                ? monster.Score
+                : 0;
+    }
+
+    /// <summary>目標の表の種類が得点の目標(「空間調査を完了してボス戦を開始する」など)か。表に無い番号は false。</summary>
+    public static bool IsDungeonScoreTarget(int targetId)
+    {
+        return HelperMethods.DataTables.Targets.Data.TryGetValue(
+                targetId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var target)
+            && target.TargetType == (int)Zproto.ETargetType.TargetDungeonScore;
+    }
+
     private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids)? GetEntityNameTable(
         Zproto.EEntityType entityType)
     {
@@ -1789,6 +1828,22 @@ public static class CombatDataCatalog
         => GetProfessionShownAttrId(professionId, static row => row.StrOrIntOrDexShow);
 
     /// <summary>
+    /// 職業の役割(職業の表の役割のタグ。ゲームの呼び方は 攻撃 / 支援 / 防御)。職業が分からない・表に行が無ければ false。
+    /// </summary>
+    public static bool TryGetProfessionRole(int professionId, out DataTypes.Enums.Professions.ERoleType role)
+    {
+        if (professionId <= 0
+            || !HelperMethods.DataTables.ProfessionSystems.Data.TryGetValue(professionId.ToString(), out var row))
+        {
+            role = default;
+            return false;
+        }
+
+        role = ToTalentRole(row.Talent, $"ProfessionSystemTable[{professionId}]");
+        return true;
+    }
+
+    /// <summary>
     /// 表の <c>[[種別, 番号], …]</c> から番号を1つ取る。形が想定と違えば 0。
     /// </summary>
     private static int GetProfessionShownAttrId(
@@ -1821,6 +1876,17 @@ public static class CombatDataCatalog
 
     public static string GetSceneName(long levelMapId, int dungeonDifficulty)
     {
+        return levelMapId is > 0 and <= int.MaxValue
+            ? AppendInternalId(GetSceneNameWithoutInternalId(levelMapId, dungeonDifficulty), InternalIdDisplayMode.MapOnly, levelMapId)
+            : string.Empty;
+    }
+
+    /// <summary>
+    /// 場所の名前(注記なし)。難易度名があれば「名前-難易度名」(マスターの段階の名前、無ければダンジョンごとの名前)。
+    /// 通知の入場確認もこの名前を使う。
+    /// </summary>
+    public static string GetSceneNameWithoutInternalId(long levelMapId, int dungeonDifficulty)
+    {
         if (levelMapId is not (> 0 and <= int.MaxValue))
         {
             return string.Empty;
@@ -1841,7 +1907,7 @@ public static class CombatDataCatalog
             name = $"{name}{DungeonTypeNameSeparator}{typeName}";
         }
 
-        return AppendInternalId(name, InternalIdDisplayMode.MapOnly, levelMapId);
+        return name;
     }
 
     /// <summary>難易度名の鍵。段階 0 がダンジョンごとの名前、正の段階がマスターの段階の名前。</summary>

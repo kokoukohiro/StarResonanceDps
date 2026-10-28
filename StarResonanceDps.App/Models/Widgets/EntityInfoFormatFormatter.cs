@@ -24,7 +24,7 @@ public static partial class EntityInfoFormatFormatter
         return result;
     }
 
-    [GeneratedRegex(@"\{Name\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{EntityName\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetNameRegex();
 
     [GeneratedRegex(@"\{Level\}", RegexOptions.IgnoreCase)]

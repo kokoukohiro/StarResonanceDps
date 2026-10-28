@@ -1,0 +1,68 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.EntityListWidgetFooterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Column="0"
+                   Margin="10,0,8,0"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource Text.WidgetWindow}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   Text="{Binding MapName}"
+                   TextAlignment="Left"
+                   TextTrimming="CharacterEllipsis" />
+
+        <!-- 得点(交戦中・現在)。並べ方はメーターの右下の2組と同じ。見出しは言語で長さが違うので幅を文字に合わせる。
+             値の欄は4桁(「4444分」で約43)と10の空き。 -->
+        <Grid Grid.Column="1"
+              Margin="8,0,10,0"
+              VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="53" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="53" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding EntityCombatScoreLabel}" />
+
+            <TextBlock Grid.Column="1"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding EntityCombatScoreText}"
+                       TextAlignment="Right"
+                       TextTrimming="CharacterEllipsis" />
+
+            <TextBlock Grid.Column="3"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding EntityCurrentScoreLabel}" />
+
+            <TextBlock Grid.Column="4"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource Text.WidgetWindow}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Text="{Binding EntityCurrentScoreText}"
+                       TextAlignment="Right"
+                       TextTrimming="CharacterEllipsis" />
+        </Grid>
+    </Grid>
+</UserControl>

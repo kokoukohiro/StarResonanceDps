@@ -99,7 +99,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 入り直し(キャラクター選択)。ログイン画面の門を開ける合図。
             netCap.RegisterProxyHandler((uint)EServiceId.GrpcCharactor, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.SelectChar, ProcessSelectChar);
 
-            // マッチング成立(承諾待ち)。プレイヤーリストの通知に使う。
+            // マッチング成立(承諾待ち)。通知の入場確認に使う。
             netCap.RegisterMatchNotifyHandler(StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.MatchNtf.EnterMatchResult, ProcessEnterMatchResult);
 
             netCap.NotifyGate = ShouldDispatchNotify;
@@ -200,6 +200,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             NearbyMonsterIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
+            DungeonScoreStore.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
@@ -2508,20 +2509,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             return false;
         }
 
-        /// <summary>
-        /// その差分が、シーン切り替えのたびに来る自分のまとめの差分か。目印は <c>AttrResourceLeft</c>(付け直しのある回は必ず同じ差分に入り、ほかの差分には来ない)。
-        /// </summary>
-        private static bool IsSelfBuffSummaryDelta(AoiSyncDelta delta)
-        {
-            return delta.Attrs?.Attrs.Any(attr => attr.Id == (int)EAttrType.AttrResourceLeft) == true;
-        }
-
-        private static bool HasBuffAdd(AoiSyncDelta delta)
-        {
-            return delta.BuffEffect?.BuffEffects.Any(buffEffect =>
-                buffEffect.LogicEffect.Any(logicEffect => logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectAddBuff)) == true;
-        }
-
         /// <summary>差分で届いた自分の能力値の、当てる前の値(無ければ null)。能力値の表に無い番号は見ない。</summary>
         private static List<(string Key, object? Before)> CaptureSelfStats(long uuid, RepeatedField<Attr> attrs)
         {
@@ -2617,15 +2604,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (isSelfTarget && IsSelfBuffReinitialization(delta))
             {
                 SelfAttributeChangeStore.MarkBuffReinitialized();
-                GameReceptionStateStore.MarkSelfBuffReinitialized();
-            }
-            else if (isSelfTarget && IsSelfBuffSummaryDelta(delta) && HasBuffAdd(delta))
-            {
-                // まとめの差分にバフの付与があるのに、番号1からの付け直しが無い。マップに入る前のバフが欠けたままなので、
-                // 自分の「全部のバフを見た」を下ろし、次の付け直しまで立てない(誤ってクラスR1・無効と出さない)。
-                // 付与が1つも無いまとめの差分(バフの無い人)は、付け直しの有無が分からないので判定しない。
-                GameReceptionStateStore.MarkSelfBuffReinitMissing();
-                EncounterManager.Current.GetOrCreateEntity(targetUuid).ClearSelfBuffSnapshot();
             }
 
             // 差分の中は 属性 → バフ → ダメージ の順に当てるので、死亡の印つきの被弾は属性より先に控える。
@@ -2694,7 +2672,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ProcessTempAttrs(targetUuid, delta.TempAttrs.Attrs, extraData.ArrivalTime, isFullList: false);
             }
 
-            NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes);
+            NearbyEntityProjection.RefreshEntity(targetUuid, changedAttributes, extraData.ArrivalTime);
             PlayerRosterProjection.AddOrUpdateNearbyPlayer(targetUuid);
 
 
@@ -2823,16 +2801,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 自分は SyncNearEntities.Appear に出ないので、他人のような全バフスナップショットが届かない。
             // 代わりにサーバーが、シーン切替のたびに自分のバフを番号1から全部付け直す(まとめの差分)。
             // これが立たないと「マーカーが無い = アビリティ未装着」を自分について確定できない。
-            // まとめの差分に付け直しが無かったマップでは、マップに入る前のバフが欠けているので「全部見た」とは扱わない。
             if (sawBuffAdd && IsSelfPlayer(targetUuid))
             {
-                EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived(
-                    isBuffSetComplete: !GameReceptionStateStore.IsSelfBuffReinitMissing);
+                EncounterManager.Current.GetOrCreateEntity(targetUuid).MarkSelfBuffStreamReceived();
             }
 
             if (shieldListChangedByBuffRemoval)
             {
-                NearbyEntityProjection.RefreshEntity(targetUuid, ShieldListChangedAttributes);
+                NearbyEntityProjection.RefreshEntity(targetUuid, ShieldListChangedAttributes, originalArrivalTime);
                 PlayerRosterProjection.UpsertPlayer(targetUuid);
             }
 
@@ -3567,6 +3543,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var vData = syncDungeonData.VData;
+            DungeonScoreStore.Instance.ApplyFull(vData);
 
             if (vData.DungeonPlayerList != null && vData.DungeonPlayerList.PlayerInfos.Count > 0)
             {
@@ -3633,6 +3610,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             bool isStreamSafe = dirty.VData.StreamType == EStreamType.StreamTypeDeltaDirtySafe;
             var dun = new StarResonanceDps.Core.Protocols.Game.Binary.DungeonDirtyData(
                 new StarResonanceDps.Core.Protocols.Game.Binary.BlobReader(buf, isStreamSafe));
+            DungeonScoreStore.Instance.ApplyDirty(dun);
 
             if (dun?.PlayerList != null && dun?.PlayerList.PlayerInfos.Count > 0)
             {

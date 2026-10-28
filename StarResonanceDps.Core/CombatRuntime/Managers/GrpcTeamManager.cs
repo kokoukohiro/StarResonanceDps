@@ -335,27 +335,33 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerRosterProjection.RebuildRoster();
         }
 
+        /// <summary>
+        /// パーティでコンテンツに入るときの承認が始まった(パーティの活動の状態が <c>Voting</c>。ゲームが入場の承認画面を開く)。
+        /// ゲームが画面を開かない合奏と週替わりの塔の続けての挑戦(自動で承認する)、入場を始めたのが自分のときは上げない。
+        /// 値は入る場所の番号と、マスターの難易度(マスターでなければ 0。名前は <see cref="CombatDataCatalog.GetSceneNameWithoutInternalId"/>)。
+        /// パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<int, int>? TeamEntryVoteStarted;
+
         public static void ProcessNotifyTeamActivityState(GrpcTeamNtf.Types.NotifyTeamActivityState vData, ExtraPacketData extraData)
         {
-            if (vData.VRequest.State.State == ETeamActivityState.EteamActivityVoting)
+            var activity = vData.VRequest?.State;
+            if (activity is null
+                || activity.State != ETeamActivityState.EteamActivityVoting
+                || activity.ActivityType == ETeamActivityType.Ensemble)
             {
-
-                if (vData.VRequest.State.AssignSceneParams.CreatorCharId == AppState.PlayerUID)
-                {
-
-                    System.Diagnostics.Debug.WriteLine("Current Player is TeamActivity creator");
-                }
-                else
-                {
-
-                    System.Diagnostics.Debug.WriteLine("Current Player is TeamActivity member and needs to vote");
-                }
+                return;
             }
-            else if (vData.VRequest.State.State == ETeamActivityState.EteamActivityNo)
+
+            var scene = activity.AssignSceneParams;
+            if (scene is null
+                || scene.InitParam?.WeeklyTowerInfo?.Continuous == true
+                || (AppState.PlayerUID != 0 && scene.CreatorCharId == AppState.PlayerUID))
             {
-
-                System.Diagnostics.Debug.WriteLine("ProcessNotifyTeamActivityState State is No, activity vote state ended");
+                return;
             }
+
+            TeamEntryVoteStarted?.Invoke(scene.SceneId, scene.InitParam?.MasterModeDiff ?? 0);
         }
 
         public static void ProcessTeamActivityResult(GrpcTeamNtf.Types.TeamActivityResult vData, ExtraPacketData extraData)

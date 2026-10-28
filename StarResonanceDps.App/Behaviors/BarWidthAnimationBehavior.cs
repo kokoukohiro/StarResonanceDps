@@ -12,9 +12,10 @@ namespace StarResonanceDps.App.Behaviors;
 /// </para>
 ///
 /// <para>
-/// 動き方は <see cref="DecaySecondsProperty"/> で変わる。
-/// <b>0 より大きければ</b>「いまの比率の幅 → 0 へ、その秒数かけて線形」(残り時間が減っていくバー)。
-/// <b>0 なら</b>「いまの幅 → 新しい比率の幅へ <see cref="TransitionDuration"/> で移動」(値が飛び飛びに変わるバー)。
+/// 動き方は <see cref="DecaySecondsProperty"/> と <see cref="FillSecondsProperty"/> で変わる(両方を 0 より大きくはできない)。
+/// <b>DecaySeconds が 0 より大きければ</b>「いまの比率の幅 → 0 へ、その秒数かけて線形」(残り時間が減っていくバー)。
+/// <b>FillSeconds が 0 より大きければ</b>「いまの比率の幅 → 満タンの幅へ、その秒数かけて線形」(経過時間で満ちていくバー)。
+/// <b>どちらも 0 なら</b>「いまの幅 → 新しい比率の幅へ <see cref="TransitionDuration"/> で移動」(値が飛び飛びに変わるバー)。
 /// </para>
 /// </summary>
 public static class BarWidthAnimationBehavior
@@ -39,6 +40,13 @@ public static class BarWidthAnimationBehavior
     /// <summary>0 まで減るのにかかる秒数。0 なら減らさず、新しい値へ移るだけ。</summary>
     public static readonly DependencyProperty DecaySecondsProperty = DependencyProperty.RegisterAttached(
         "DecaySeconds",
+        typeof(double),
+        typeof(BarWidthAnimationBehavior),
+        new PropertyMetadata(0d, OnInputChanged));
+
+    /// <summary>満タンまで満ちるのにかかる秒数。0 なら満たさない。</summary>
+    public static readonly DependencyProperty FillSecondsProperty = DependencyProperty.RegisterAttached(
+        "FillSeconds",
         typeof(double),
         typeof(BarWidthAnimationBehavior),
         new PropertyMetadata(0d, OnInputChanged));
@@ -70,6 +78,10 @@ public static class BarWidthAnimationBehavior
 
     public static void SetDecaySeconds(DependencyObject obj, double value) => obj.SetValue(DecaySecondsProperty, value);
 
+    public static double GetFillSeconds(DependencyObject obj) => (double)obj.GetValue(FillSecondsProperty);
+
+    public static void SetFillSeconds(DependencyObject obj, double value) => obj.SetValue(FillSecondsProperty, value);
+
     public static bool GetSnapsToTarget(DependencyObject obj) => (bool)obj.GetValue(SnapsToTargetProperty);
 
     public static void SetSnapsToTarget(DependencyObject obj, bool value) => obj.SetValue(SnapsToTargetProperty, value);
@@ -94,6 +106,25 @@ public static class BarWidthAnimationBehavior
         var ratio = Math.Clamp(GetRatio(element), 0d, 1d);
         var targetWidth = areaWidth * ratio;
         var decaySeconds = GetDecaySeconds(element);
+        var fillSeconds = GetFillSeconds(element);
+
+        if (decaySeconds > 0d && fillSeconds > 0d)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(BarWidthAnimationBehavior)} cannot decay and fill at the same time.");
+        }
+
+        if (fillSeconds > 0d)
+        {
+            // 経過ぶんの幅から満ちるまでの秒数かけて満タンまで。張り直すたびに実測へ合わせ直す。
+            element.BeginAnimation(
+                FrameworkElement.WidthProperty,
+                new DoubleAnimation(targetWidth, areaWidth, new Duration(TimeSpan.FromSeconds(fillSeconds)))
+                {
+                    FillBehavior = FillBehavior.HoldEnd
+                });
+            return;
+        }
 
         if (decaySeconds > 0d)
         {

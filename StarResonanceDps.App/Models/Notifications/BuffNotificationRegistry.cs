@@ -12,8 +12,13 @@ public readonly record struct BuffNotificationTarget(bool IsEntity, long Id)
 
 /// <summary>
 /// バフの通知の判定(<see cref="BuffNotificationTracker"/>)を、対象とバフごとに1つにまとめる。
-/// バフ・デバフカードとバフ・デバフグループが同じ対象の同じバフを見ているとき、窓ごとに判定すると同じ通知が窓の数だけ出るため。
-/// 見ている窓が全部手放したら判定を捨てる(次に見始めたときは新しく作る)。画面のスレッドだけで使う。
+/// バフ・デバフカード・バフ・デバフグループ・通知の見張り(自分の料理・薬剤、<see cref="Services.NotificationMonitor"/>)が
+/// 同じ対象の同じバフを見ているとき、別々に判定すると同じ通知が見ている数だけ出るため。
+/// 見ているものが全部手放したら判定を捨てる(次に見始めたときは新しく作る)。画面のスレッドだけで使う。
+///
+/// <para>
+/// バフ・デバフ効果切れは、窓(カード・グループ)が見ている間だけ出す。見張りは効果切れを出さない借り方をする(<c>notifiesExpiry</c>)。
+/// </para>
 /// </summary>
 public sealed class BuffNotificationRegistry
 {
@@ -33,7 +38,8 @@ public sealed class BuffNotificationRegistry
     }
 
     /// <summary>対象とバフの判定を借りる。使い終わったら返り値を Dispose する。</summary>
-    public BuffNotificationWatch Watch(BuffNotificationTarget target, string buffKey)
+    /// <param name="notifiesExpiry">バフ・デバフ効果切れを出す借り方か。窓は true、通知の見張りは false。</param>
+    public BuffNotificationWatch Watch(BuffNotificationTarget target, string buffKey, bool notifiesExpiry = true)
     {
         var key = (target, buffKey);
         if (!_entries.TryGetValue(key, out var entry))
@@ -43,10 +49,15 @@ public sealed class BuffNotificationRegistry
         }
 
         entry.WatchCount++;
-        return new BuffNotificationWatch(this, target, buffKey, entry.Tracker);
+        if (notifiesExpiry)
+        {
+            entry.ExpiryWatchCount++;
+        }
+
+        return new BuffNotificationWatch(this, target, buffKey, entry, notifiesExpiry);
     }
 
-    internal void Release(BuffNotificationTarget target, string buffKey)
+    internal void Release(BuffNotificationTarget target, string buffKey, bool notifiesExpiry)
     {
         var key = (target, buffKey);
         if (!_entries.TryGetValue(key, out var entry))
@@ -55,50 +66,61 @@ public sealed class BuffNotificationRegistry
         }
 
         entry.WatchCount--;
+        if (notifiesExpiry)
+        {
+            entry.ExpiryWatchCount--;
+        }
+
         if (entry.WatchCount <= 0)
         {
             _entries.Remove(key);
         }
     }
 
-    private sealed class Entry
+    internal sealed class Entry
     {
         public BuffNotificationTracker Tracker { get; } = new();
 
         public int WatchCount { get; set; }
+
+        /// <summary>効果切れを出す借り方(窓)の数。0 なら判定は効果切れを出さない。</summary>
+        public int ExpiryWatchCount { get; set; }
     }
 }
 
-/// <summary>窓が借りている、1つの対象の1つのバフの判定。</summary>
+/// <summary>窓か通知の見張りが借りている、1つの対象の1つのバフの判定。</summary>
 public sealed class BuffNotificationWatch : IDisposable
 {
     private readonly BuffNotificationRegistry _registry;
-    private readonly BuffNotificationTracker _tracker;
+    private readonly BuffNotificationRegistry.Entry _entry;
+    private readonly bool _notifiesExpiry;
     private bool _isDisposed;
 
     internal BuffNotificationWatch(
         BuffNotificationRegistry registry,
         BuffNotificationTarget target,
         string buffKey,
-        BuffNotificationTracker tracker)
+        BuffNotificationRegistry.Entry entry,
+        bool notifiesExpiry)
     {
         _registry = registry;
         Target = target;
         BuffKey = buffKey;
-        _tracker = tracker;
+        _entry = entry;
+        _notifiesExpiry = notifiesExpiry;
     }
 
     public BuffNotificationTarget Target { get; }
 
     public string BuffKey { get; }
 
-    /// <param name="snapshot">窓が見つけたバフ。消えていれば null。</param>
-    /// <param name="targetName">窓に出している対象の名前。</param>
+    /// <param name="snapshot">見つけたバフ。消えていれば null。</param>
+    /// <param name="targetName">対象の名前(窓に出している名前と同じ規則)。</param>
     public void Observe(PlayerBuffSnapshot? snapshot, string targetName)
     {
         if (!_isDisposed)
         {
-            _tracker.Observe(snapshot, targetName);
+            _entry.Tracker.Observe(snapshot, targetName, _entry.ExpiryWatchCount > 0);
         }
     }
 
@@ -110,7 +132,7 @@ public sealed class BuffNotificationWatch : IDisposable
         }
 
         _isDisposed = true;
-        _registry.Release(Target, BuffKey);
+        _registry.Release(Target, BuffKey, _notifiesExpiry);
     }
 }
 

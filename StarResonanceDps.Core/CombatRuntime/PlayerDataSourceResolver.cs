@@ -173,9 +173,12 @@ internal static class PlayerDataSourceResolver
                     : metadataSeasonLevel,
             currentHp,
             maxHp,
-            // いまの供給(社交データ)が最優先。無ければ実体に焼き付いた印を見る。
-            // 履歴とパーティ離脱後は焼き付けだけが残り、それが唯一の根拠になる。
-            !isSelf && (partySupplement?.IsNpc == true || metadataEntity?.IsNpc == true),
+            // NPC か。パーティの社交データ(BotAiId)、実体の AttrId(プレイヤーの実体ではボットの表の番号で、NPC だけが持つ)、
+            // 実体に焼き付けた印のどれかで決める。パーティにいない NPC は AttrId だけが根拠になる。
+            !isSelf && (partySupplement?.IsNpc == true
+                || GetInt(nearbyEntity, "AttrId") > 0
+                || GetInt(metadataEntity, "AttrId") > 0
+                || metadataEntity?.IsNpc == true),
             ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf),
             GetEquipmentData(nearbyEntity)
                 ?? partySupplement?.EquipmentData

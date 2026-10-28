@@ -14,7 +14,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 {
     private static readonly (string Key, string LabelResourceKey, string Placeholder)[] EntityInfoFormatFieldDefinitions =
     [
-        ("Name", "Settings_EntityInfo_Field_Name", "{Name}"),
+        ("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}"),
         ("Level", "Settings_EntityInfo_Field_Level", "{Level}")
     ];
 

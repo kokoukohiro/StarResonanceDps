@@ -223,7 +223,7 @@
                                    Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityNameNote]}" />
                     </Grid>
 
-                    <!-- バフ・デバフ効果切れ・薬剤・料理効果切れだけの注意書き。 -->
+                    <!-- バフ・デバフ効果切れだけの注意書き。 -->
                     <TextBlock Margin="0,0,0,6"
                                Style="{StaticResource NotificationsView.Note}"
                                Visibility="{Binding ShowsBuffWidgetNote, Converter={StaticResource BooleanToVisibilityConverter}}"
@@ -250,6 +250,48 @@
                         </ComboBox>
                     </Grid>
 
+                    <!-- 予兆技の通知条件。並びは AppConfigDefaults.TelegraphedSkillLeadSeconds の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsTelegraphedSkillCondition, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding TelegraphedSkillConditionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TelegraphedSkillCondition_OnActivation]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TelegraphedSkillCondition_1]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TelegraphedSkillCondition_2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TelegraphedSkillCondition_3]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- エンティティ詠唱の通知条件。並びは AppConfigDefaults.EntityCastMinimumSeconds の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsEntityCastCondition, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding EntityCastConditionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_Immediate]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_1]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_3]}" />
+                        </ComboBox>
+                    </Grid>
+
                     <!-- HP低下の対象プレイヤー。並びは PartyDisplayMode の番号と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsHealthLowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
@@ -268,6 +310,47 @@
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_MembersOnly]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_NonMembersOnly]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_SelfOnly]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 狙われ状態の対象プレイヤー。並びは AppConfigDefaults.TargetedPlayer*Index の番号と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Target]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding TargetedPlayerModeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Target_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedPlayer_PartyMembers]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedPlayer_NonGuardian]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedPlayer_NonGuardianPartyMembers]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 狙われ状態の対象エンティティ。並びは AppConfigDefaults.TargetEntity*Index の番号と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntity]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding TargetEntityModeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntity_BossOnly]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntity_BossAndElite]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Target_All]}" />
                         </ComboBox>
                     </Grid>
 
@@ -311,6 +394,27 @@
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_1]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_2]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthLowCondition_3]}" />
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- 狙われ状態の通知条件。並びは AppConfigDefaults.TargetedDurationSeconds の添字と同じ。 -->
+                    <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
+
+                        <ComboBox Grid.Column="2"
+                                  Style="{StaticResource Input.SettingsComboBox}"
+                                  SelectedIndex="{Binding TargetedConditionIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedCondition_Immediate]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedCondition_1]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedCondition_2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TargetedCondition_3]}" />
                         </ComboBox>
                     </Grid>
 

@@ -6,13 +6,15 @@ namespace StarResonanceDps.App.Config;
 /// <summary>通知タブの項目。並びは通知タブの一覧の並び(メイン窓のウィジェットの順)。</summary>
 public enum NotificationKind
 {
-    MatchFound,
+    EntryConfirmation,
     HealthLow,
     PlayerAppeared,
     EntityAppeared,
+    Targeted,
     BuffExpired,
     CuisinePotionLow,
-    TelegraphedSkill
+    TelegraphedSkill,
+    EntityCast
 }
 
 /// <summary>
@@ -76,6 +78,22 @@ public sealed class NotificationItemConfig
     /// <summary>通知する人(<see cref="PartyDisplayMode"/> の番号)。使うのは HP低下 だけ。</summary>
     public int TargetModeIndex { get; set; } = (int)PartyDisplayMode.All;
 
+    /// <summary>
+    /// 通知する人(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。使うのは 狙われ状態 だけ。
+    /// </summary>
+    public int TargetedPlayerModeIndex { get; set; } = AppConfigDefaults.DefaultTargetedPlayerModeIndex;
+
+    /// <summary>
+    /// 通知する敵の種類(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。使うのは 狙われ状態 だけ。
+    /// </summary>
+    public int TargetEntityModeIndex { get; set; } = AppConfigDefaults.DefaultTargetEntityModeIndex;
+
+    /// <summary>
+    /// 狙われ状態が何秒続いたら出すかの番号(<see cref="AppConfigDefaults.TargetedDurationSeconds"/> の添字)。
+    /// 使うのは 狙われ状態 だけ。
+    /// </summary>
+    public int TargetedConditionIndex { get; set; } = AppConfigDefaults.DefaultTargetedConditionIndex;
+
     /// <summary>HP低下とみなす割合の番号(<see cref="AppConfigDefaults.HealthLowThresholdPercents"/> の添字)。使うのは HP低下 だけ。</summary>
     public int HealthLowThresholdIndex { get; set; } = AppConfigDefaults.DefaultHealthLowThresholdIndex;
 
@@ -86,6 +104,16 @@ public sealed class NotificationItemConfig
     /// 残り何分を下回ったら出すかの番号(<see cref="AppConfigDefaults.CuisinePotionLowMinutes"/> の添字)。使うのは 薬剤・料理効果切れ だけ。
     /// </summary>
     public int CuisinePotionConditionIndex { get; set; } = AppConfigDefaults.DefaultCuisinePotionConditionIndex;
+
+    /// <summary>
+    /// 予告のバーが終わる何秒前に出すかの番号(<see cref="AppConfigDefaults.TelegraphedSkillLeadSeconds"/> の添字)。使うのは 予兆技 の予告だけ(警告は警告が出たときに出す)。
+    /// </summary>
+    public int TelegraphedSkillConditionIndex { get; set; } = AppConfigDefaults.DefaultTelegraphedSkillConditionIndex;
+
+    /// <summary>
+    /// 何秒以上の詠唱なら出すかの番号(<see cref="AppConfigDefaults.EntityCastMinimumSeconds"/> の添字)。使うのは エンティティ詠唱 だけ。
+    /// </summary>
+    public int EntityCastConditionIndex { get; set; } = AppConfigDefaults.DefaultEntityCastConditionIndex;
 
     /// <summary>
     /// 出現を知らせる相手の名前。プレイヤー出現はゲームの中のプレイヤー名、エンティティ出現は表示言語のエンティティ名。
@@ -119,9 +147,14 @@ public sealed class NotificationItemConfig
             VoicevoxStyleId = VoicevoxStyleId,
             VoicevoxStyleName = VoicevoxStyleName,
             TargetModeIndex = TargetModeIndex,
+            TargetedPlayerModeIndex = TargetedPlayerModeIndex,
+            TargetEntityModeIndex = TargetEntityModeIndex,
+            TargetedConditionIndex = TargetedConditionIndex,
             HealthLowThresholdIndex = HealthLowThresholdIndex,
             HealthLowConditionIndex = HealthLowConditionIndex,
             CuisinePotionConditionIndex = CuisinePotionConditionIndex,
+            TelegraphedSkillConditionIndex = TelegraphedSkillConditionIndex,
+            EntityCastConditionIndex = EntityCastConditionIndex,
             TargetName = TargetName
         };
     }

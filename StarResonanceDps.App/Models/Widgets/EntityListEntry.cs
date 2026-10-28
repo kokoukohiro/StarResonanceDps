@@ -1,4 +1,5 @@
-﻿using System.Windows.Media;
+﻿using System.Globalization;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -12,6 +13,8 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 public sealed partial class EntityListEntry : ObservableObject
 {
+    private const string UnknownScoreText = "??";
+
     private EntityListEntry(long entityUuid)
     {
         EntityUuid = entityUuid;
@@ -65,6 +68,7 @@ public sealed partial class EntityListEntry : ObservableObject
     private string _healthText = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsSecondGauge))]
     private bool _hasBreakGauge;
 
     [ObservableProperty]
@@ -72,6 +76,32 @@ public sealed partial class EntityListEntry : ObservableObject
 
     [ObservableProperty]
     private string _breakText = string.Empty;
+
+    /// <summary>詠唱ゲージを出しているか。詠唱バーの全体秒数が過ぎたら、技が続いていても出さない。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowsSecondGauge))]
+    private bool _isCasting;
+
+    /// <summary>詠唱ゲージの満ちた割合(経過 / 全体)。詠唱の始まりと 0.1 秒ごとの更新で張り直し、その間はアニメーションで満ちる。</summary>
+    [ObservableProperty]
+    private double _castRatio;
+
+    /// <summary>詠唱ゲージが満タンになるまでの秒数(全体 − 経過)。詠唱していなければ 0。</summary>
+    [ObservableProperty]
+    private double _castFillSeconds;
+
+    /// <summary>詠唱ゲージの文字「経過/全体」。</summary>
+    [ObservableProperty]
+    private string _castText = string.Empty;
+
+    /// <summary>当てている詠唱。行の詠唱が変わったときだけゲージを張り直すために持つ。</summary>
+    private NearbyEntityCast? _cast;
+
+    /// <summary>満ちた後の満タンと「全体/全体」を出したか。出した次の更新で詠唱ゲージを外す。</summary>
+    private bool _isCastCompleteShown;
+
+    /// <summary>HP バーの下にもう1本ゲージを出すか(名前・HP・ゲージの3段)。詠唱中はブレイクゲージの代わりに詠唱ゲージを出す。</summary>
+    public bool ShowsSecondGauge => HasBreakGauge || IsCasting;
 
     [ObservableProperty]
     private bool _isInvulnerable;
@@ -85,6 +115,10 @@ public sealed partial class EntityListEntry : ObservableObject
     /// <summary>名前の左に戦闘状態の印を出すか。設定「戦闘状態」が表示で、いま戦闘状態のとき。</summary>
     [ObservableProperty]
     private bool _showsCombatState;
+
+    /// <summary>アイコンに重ねる、倒すと入る得点(「○○pt」)。今の場所が得点を求めていない・得点の無い敵・HP バーの無い敵は空。</summary>
+    [ObservableProperty]
+    private string _scoreText = string.Empty;
 
     [ObservableProperty]
     private SolidColorBrush _classBrush = CreateBrush(Color.FromRgb(0xA8, 0xA8, 0xA8));
@@ -102,20 +136,24 @@ public sealed partial class EntityListEntry : ObservableObject
     public IReadOnlyList<EntityHateSlot> HateSlots { get; } =
         Enumerable.Range(0, NearbyEntityHateRanking.MaxCount + 1).Select(_ => new EntityHateSlot()).ToArray();
 
+    /// <param name="showsScore">今の場所が得点を求めているか(<see cref="Core.Services.DungeonScoreSnapshot.IsScoreRequested"/>)。</param>
     public static EntityListEntry Create(
         NearbyEntityEntry entity,
         MeterWidgetSettingsConfig settings,
-        EntityHatePlayerResolver hatePlayers)
+        EntityHatePlayerResolver hatePlayers,
+        bool showsScore)
     {
         var entry = new EntityListEntry(entity.EntityUuid);
-        entry.Update(entity, settings, hatePlayers);
+        entry.Update(entity, settings, hatePlayers, showsScore);
         return entry;
     }
 
+    /// <param name="showsScore">今の場所が得点を求めているか(<see cref="Core.Services.DungeonScoreSnapshot.IsScoreRequested"/>)。</param>
     public void Update(
         NearbyEntityEntry entity,
         MeterWidgetSettingsConfig settings,
-        EntityHatePlayerResolver hatePlayers)
+        EntityHatePlayerResolver hatePlayers,
+        bool showsScore)
     {
         EntityId = entity.EntityId;
         EntityType = entity.EntityType;
@@ -141,9 +179,17 @@ public sealed partial class EntityListEntry : ObservableObject
         BreakText = HasBreakGauge ? FormatValuePair(entity.CurrentBreak, entity.MaxBreak) : string.Empty;
         IsInvulnerable = entity.IsInvulnerable;
         IsBreakLocked = entity.IsBreakLocked;
+        if (_cast != entity.Cast)
+        {
+            _cast = entity.Cast;
+            StartCast(DateTime.UtcNow);
+        }
+
         CampRelation = entity.CampRelation;
         ShowsCombatState = entity.IsInCombat
             && settings.CombatStateDisplayModeIndex == WidgetConfigDefaults.CombatStateDisplayShowIndex;
+        var score = GetDisplayedScore(entity, showsScore);
+        ScoreText = score > 0 ? FormatScore(score) : string.Empty;
 
         var classColor = GetClassColor(settings, ClassificationKey);
         if (ClassBrush.Color != classColor)
@@ -233,6 +279,108 @@ public sealed partial class EntityListEntry : ObservableObject
         OnPropertyChanged(nameof(UsesFriendlyHealthBar));
     }
 
+    /// <summary>
+    /// 詠唱の文字とゲージを今の時刻で当て直す(エンティティリストの 0.1 秒ごとの更新)。
+    /// ゲージも張り直すのは、詠唱の途中で行の部品ができた(窓を開いた・スクロールで見えた)ときに、
+    /// アニメーションが前に張った割合から始まって文字より遅れるため。
+    /// 全体秒数が過ぎた後の1回は満タンと「全体/全体」を出し、その次の更新で詠唱ゲージを外す(最後の表示を更新の当たり方で変えない)。
+    /// </summary>
+    public void RefreshCast(DateTime utcNow)
+    {
+        if (!IsCasting || _cast is not { } cast)
+        {
+            return;
+        }
+
+        if (_isCastCompleteShown)
+        {
+            EndCast();
+            return;
+        }
+
+        var elapsedSeconds = GetCastElapsedSeconds(cast, utcNow);
+        if (elapsedSeconds >= cast.TotalSeconds)
+        {
+            var totalText = RoundToHundredths(cast.TotalSeconds);
+            _isCastCompleteShown = true;
+            CastFillSeconds = 0d;
+            CastRatio = 1d;
+            CastText = FormatCastText(totalText, totalText);
+            return;
+        }
+
+        ApplyCast(cast, elapsedSeconds);
+    }
+
+    /// <summary>窓を開いたときに、今の時刻で詠唱を当て直す。全体秒数が過ぎていれば、満タンの表示を挟まずに外す。</summary>
+    public void ReapplyCast(DateTime utcNow)
+    {
+        StartCast(utcNow);
+    }
+
+    /// <summary>行の詠唱が変わった。ゲージを張り、あいだはアニメーションで満ちる。</summary>
+    private void StartCast(DateTime utcNow)
+    {
+        _isCastCompleteShown = false;
+        if (_cast is not { } cast)
+        {
+            EndCast();
+            return;
+        }
+
+        var elapsedSeconds = GetCastElapsedSeconds(cast, utcNow);
+        if (elapsedSeconds >= cast.TotalSeconds)
+        {
+            EndCast();
+            return;
+        }
+
+        // 前の詠唱と同じ値でもアニメーションを張り直すよう、満ちる秒数を先に 0 へ戻す。
+        CastFillSeconds = 0d;
+        ApplyCast(cast, elapsedSeconds);
+        IsCasting = true;
+    }
+
+    private void ApplyCast(NearbyEntityCast cast, double elapsedSeconds)
+    {
+        CastRatio = elapsedSeconds / cast.TotalSeconds;
+        CastFillSeconds = cast.TotalSeconds - elapsedSeconds;
+        CastText = FormatCastText(FloorToHundredths(elapsedSeconds), RoundToHundredths(cast.TotalSeconds));
+    }
+
+    private void EndCast()
+    {
+        _isCastCompleteShown = false;
+        IsCasting = false;
+        CastFillSeconds = 0d;
+        CastRatio = 0d;
+        CastText = string.Empty;
+    }
+
+    private static double GetCastElapsedSeconds(NearbyEntityCast cast, DateTime utcNow)
+    {
+        return Math.Max((utcNow - cast.StartedAtUtc).TotalSeconds, 0d);
+    }
+
+    /// <summary>「経過/全体」を小数2桁で。単位の s は4言語とも同じ。</summary>
+    private static string FormatCastText(decimal elapsedSeconds, decimal totalSeconds)
+    {
+        return string.Create(
+            CultureInfo.InvariantCulture,
+            $"{elapsedSeconds:0.00}s/{totalSeconds:0.00}s");
+    }
+
+    /// <summary>経過の秒は切り捨て。四捨五入した全体の秒を超えない。</summary>
+    private static decimal FloorToHundredths(double seconds)
+    {
+        return decimal.Floor((decimal)seconds * 100m) / 100m;
+    }
+
+    private static decimal RoundToHundredths(double seconds)
+    {
+        return decimal.Round((decimal)seconds, 2, MidpointRounding.AwayFromZero);
+    }
+
     private void UpdateShieldGeometry(long currentHp, long maxHp, long currentShield)
     {
         if (maxHp <= 0)
@@ -313,6 +461,24 @@ public sealed partial class EntityListEntry : ObservableObject
     private static string FormatValuePair(long currentValue, long maxValue)
     {
         return $"{currentValue}/{maxValue}";
+    }
+
+    /// <summary>得点の文字(「○○pt」)。アイコンとフッターで使う。分からなければ「??pt」。</summary>
+    internal static string FormatScore(int? score)
+    {
+        return LocalizationManager.Instance.Format(
+            "EntityList_ScoreFormat",
+            score?.ToString(CultureInfo.InvariantCulture) ?? UnknownScoreText);
+    }
+
+    /// <summary>
+    /// アイコンに出し、フッターの交戦中に数える得点。今の場所が得点を求めている間の、HP バーのある敵だけ
+    /// (表示設定に関係なく、フィルター「オブジェクト以外」と同じ条件)。それ以外は 0。アイコンとフッターで同じ決まりにする。
+    /// </summary>
+    /// <param name="isScoreRequested">今の場所が得点を求めているか(<see cref="Core.Services.DungeonScoreSnapshot.IsScoreRequested"/>)。</param>
+    internal static int GetDisplayedScore(NearbyEntityEntry entity, bool isScoreRequested)
+    {
+        return isScoreRequested && entity.HasHpBar ? entity.Score : 0;
     }
 
     /// <summary>アイコンカラーで選んでいる色。敵の種類の行と、ヘイトの枠のプレイヤーのクラスの行で使う。</summary>

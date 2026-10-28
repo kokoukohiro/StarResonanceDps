@@ -53,10 +53,10 @@ public static partial class BuffInfoFormatFormatter
     [GeneratedRegex(@"\{BuffName\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetBuffNameRegex();
 
-    [GeneratedRegex(@"\{Name\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{TargetName\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetNameRegex();
 
-    [GeneratedRegex(@"\{Caster\}", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\{CasterName\}", RegexOptions.IgnoreCase)]
     private static partial Regex GetCasterRegex();
 
     [GeneratedRegex(@"\{Level\}", RegexOptions.IgnoreCase)]

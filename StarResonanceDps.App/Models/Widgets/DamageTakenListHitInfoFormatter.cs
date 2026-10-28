@@ -5,7 +5,6 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
 /// 被ダメリストの右の書式(設定「スキル名」)。差し込める項目は スキル名 / エンティティ名 / タイプ。
-/// エンティティ名を <c>{Name}</c> にしないのは、同じ窓の「プレイヤー名」の書式の <c>{Name}</c>(プレイヤー名)とぶつかるため。
 /// </summary>
 public static partial class DamageTakenListHitInfoFormatter
 {
