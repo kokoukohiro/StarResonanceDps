@@ -333,7 +333,7 @@
     <value>{PlayerName}이(가) {EntityName}의 공격 대상이 되었습니다</value>
   </data>
   <data name="Notification_Targeted" xml:space="preserve">
-    <value>공격 대상 상태</value>
+    <value>공격 대상 플레이어</value>
   </data>
   <data name="Notification_TargetEntity" xml:space="preserve">
     <value>대상 엔티티</value>
@@ -370,18 +370,6 @@
   </data>
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}이(가) 캐스팅 중입니다</value>
-  </data>
-  <data name="EntityCastCondition_Immediate" xml:space="preserve">
-    <value>무조건</value>
-  </data>
-  <data name="EntityCastCondition_1" xml:space="preserve">
-    <value>1초 이상 캐스팅</value>
-  </data>
-  <data name="EntityCastCondition_2" xml:space="preserve">
-    <value>2초 이상 캐스팅</value>
-  </data>
-  <data name="EntityCastCondition_3" xml:space="preserve">
-    <value>3초 이상 캐스팅</value>
   </data>
   <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>발동 시</value>
@@ -471,10 +459,19 @@
     <value>그룹에 추가</value>
   </data>
   <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
-    <value>버프 카드 바로가기에 추가</value>
+    <value>버프·디버프 카드 바로가기에 추가</value>
   </data>
-  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
-    <value>디버프 카드 바로가기에 추가</value>
+  <data name="BuffList_Menu_AddBuffToNotificationTargets" xml:space="preserve">
+    <value>이 버프를 알림 대상으로 지정</value>
+  </data>
+  <data name="BuffList_Menu_RemoveBuffFromNotificationTargets" xml:space="preserve">
+    <value>이 버프를 알림 대상에서 제외</value>
+  </data>
+  <data name="BuffList_Menu_AddDebuffToNotificationTargets" xml:space="preserve">
+    <value>이 디버프를 알림 대상으로 지정</value>
+  </data>
+  <data name="BuffList_Menu_RemoveDebuffFromNotificationTargets" xml:space="preserve">
+    <value>이 디버프를 알림 대상에서 제외</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>이 버프를 그룹에서 삭제</value>
@@ -605,36 +602,6 @@
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}의 {1}</value>
   </data>
-  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0}에게 {1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_LethalText" xml:space="preserve">
-    <value>쓰러짐</value>
-  </data>
-  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
-    <value>{0}의 {1}</value>
-  </data>
-  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
-    <value>{0}의 {1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}에게 {1}</value>
-  </data>
-  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
-    <value>{0}{1} 피해</value>
-  </data>
-  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
-    <value>{0}{1} 물리 피해</value>
-  </data>
-  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
-    <value>{0}{1} 마법 피해</value>
-  </data>
-  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
-    <value>HP({0}/{1})</value>
-  </data>
-  <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>쓰러짐({0}/{1})</value>
-  </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
   </data>
@@ -647,7 +614,25 @@
     <value>텍스트를 복사하지 못했습니다.</value>
   </data>
   <data name="TakenDamageLog_HealFormat" xml:space="preserve">
-    <value>{0}의 HP {1} 회복</value>
+    <value>{0}의 HP {1}</value>
+  </data>
+  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+    <value>{0} 회복</value>
+  </data>
+  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+    <value>{0}에게 {1}</value>
+  </data>
+  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+    <value>{0} 피해</value>
+  </data>
+  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+    <value>{0}에게 {1}</value>
+  </data>
+  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+    <value>{0}({1}초)</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+    <value>어떤 효과</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>시스템</value>
@@ -657,9 +642,6 @@
   </data>
   <data name="TakenDamageLog_FallSkill" xml:space="preserve">
     <value>추락</value>
-  </data>
-  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0} {1}</value>
   </data>
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>텍스트 색상</value>
@@ -730,14 +712,11 @@
   <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
     <value>플레이어 이름</value>
   </data>
+  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+    <value>효과</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
     <value>HP 수치</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
-    <value>실드 수치</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>쓰러짐</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>무 원소</value>
@@ -1233,6 +1212,27 @@
   <data name="Settings_Display_CombatState" xml:space="preserve">
     <value>전투 상태</value>
   </data>
+  <data name="Settings_Display_TargetedPlayer" xml:space="preserve">
+    <value>공격 대상 플레이어</value>
+  </data>
+  <data name="Settings_Display_HateValue" xml:space="preserve">
+    <value>적대 수치</value>
+  </data>
+  <data name="HateRankDisplay_Top5" xml:space="preserve">
+    <value>상위 5명 표시</value>
+  </data>
+  <data name="HateRankDisplay_Top4" xml:space="preserve">
+    <value>상위 4명 표시</value>
+  </data>
+  <data name="HateRankDisplay_Top3" xml:space="preserve">
+    <value>상위 3명 표시</value>
+  </data>
+  <data name="HateRankDisplay_Top2" xml:space="preserve">
+    <value>상위 2명 표시</value>
+  </data>
+  <data name="HateRankDisplay_FirstOnly" xml:space="preserve">
+    <value>적대 수치 1위만 표시</value>
+  </data>
   <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
     <value>본인만 표시</value>
   </data>
@@ -1378,15 +1378,21 @@
     <value>부활 목록</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
-    <value>받은 피해 목록</value>
+    <value>받은 피해 로그</value>
   </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(쓰러짐)</value>
   </data>
-  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
-    <value>{0}초 전</value>
-  </data>
   <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
     <value>쓰러짐 원인 표시</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+    <value>최신 받은 피해만 표시</value>
+  </data>
+  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+    <value>전체 표시</value>
+  </data>
+  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+    <value>최신만</value>
   </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>부활 가능</value>
   </data>
@@ -1421,7 +1427,7 @@
     <value>맵 ID만 표시</value>
   </data>
   <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
-    <value>이름 없는 스킬</value>
+    <value>이름 없는 스킬과 버프</value>
   </data>
   <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
     <value>※내부 이름은 중국어로만 표시</value>
@@ -1562,7 +1568,7 @@
     <value>미리보기</value>
   </data>
   <data name="Notification_BuffWidgetNote" xml:space="preserve">
-    <value>※실행 중인 버프·디버프 카드와 버프·디버프 그룹의 버프만 알립니다</value>
+    <value>※실행 중인 위젯 '버프·디버프 카드'와 '버프·디버프 그룹'의 버프만 알립니다</value>
   </data>
   <data name="Notification_PlayerAppeared" xml:space="preserve">
     <value>플레이어 출현</value>
@@ -1576,8 +1582,35 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>대상 엔티티 이름</value>
   </data>
-  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
-    <value>※현재 표시 언어의 엔티티 이름을 입력하세요</value>
+  <data name="Notification_TargetEntityId" xml:space="preserve">
+    <value>대상 엔티티 ID</value>
+  </data>
+  <data name="Notification_TargetPlayerUid" xml:space="preserve">
+    <value>대상 플레이어 UID</value>
+  </data>
+  <data name="Notification_TargetSkillName" xml:space="preserve">
+    <value>대상 스킬 이름</value>
+  </data>
+  <data name="Notification_TargetSkillId" xml:space="preserve">
+    <value>대상 스킬 ID</value>
+  </data>
+  <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
+    <value>※ID를 입력하면 이름보다 우선합니다</value>
+  </data>
+  <data name="Notification_TargetUidPriorityNote" xml:space="preserve">
+    <value>※UID를 입력하면 이름보다 우선합니다</value>
+  </data>
+  <data name="Notification_TargetIdSourceNote" xml:space="preserve">
+    <value>※ID는 표시 설정의 '내부 ID'로 표시할 수 있으며, ID와 이름은 위젯 '타임라인'에서 복사할 수 있습니다</value>
+  </data>
+  <data name="Notification_TargetMultipleNote" xml:space="preserve">
+    <value>※'|'로 구분하여 여러 개를 입력할 수 있습니다</value>
+  </data>
+  <data name="Notification_BuffTargetSettingsNote" xml:space="preserve">
+    <value>※알릴 버프·디버프는 위젯 '버프·디버프 카드'와 '버프·디버프 그룹' 설정의 '알림 대상'에서 선택할 수 있습니다</value>
+  </data>
+  <data name="Settings_Section_NotificationTargets_Title" xml:space="preserve">
+    <value>알림 대상</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>집계 중</value>

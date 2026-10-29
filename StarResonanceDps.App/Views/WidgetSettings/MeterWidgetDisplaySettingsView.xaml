@@ -322,11 +322,22 @@
                 </Border>
 
                 <!--
-                    プレイヤーリストとエンティティリスト。最後の行なので線を引かない。作りは「並び替え」の行と同じ。
+                    プレイヤーリストとエンティティリスト。作りは「並び替え」の行と同じ。
+                    プレイヤーリストは最後の行なので線を引かず、エンティティリストは下に「狙われるプレイヤー」が続くので線を引く。
                     プレイヤーリストは3択、エンティティリストは自分の行が無いので 表示 / 非表示 の2択。
                 -->
-                <Border Style="{StaticResource Panel.SettingFieldLast}"
-                        Visibility="{Binding ShowsCombatStateSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Visibility="{Binding ShowsCombatStateSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border.Style>
+                        <Style TargetType="{x:Type Border}"
+                               BasedOn="{StaticResource Panel.SettingFieldLast}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ShowsHateDisplaySettings}" Value="True">
+                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -356,6 +367,59 @@
                                   Visibility="{Binding ShowsCombatStateShowHideOption, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
                             <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- エンティティリストだけ。下に「ヘイト値」が続くので線を引く。 -->
+                <Border Style="{StaticResource Panel.SettingField}"
+                        Visibility="{Binding ShowsHateDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_TargetedPlayer]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは MeterWidgetSettingsConfig.TargetedPlayerDisplayModeIndex の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding TargetedPlayerDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Show]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PlayerNameDisplay_Hide]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- エンティティリストだけ。最後の行なので線を引かない。 -->
+                <Border Style="{StaticResource Panel.SettingFieldLast}"
+                        Visibility="{Binding ShowsHateDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_HateValue]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <!-- 並びは WidgetConfigDefaults.HateRankDisplayCounts の添字と同じ。 -->
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding HateRankDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HateRankDisplay_Top5]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HateRankDisplay_Top4]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HateRankDisplay_Top3]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HateRankDisplay_Top2]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HateRankDisplay_FirstOnly]}" />
                         </ComboBox>
                     </Grid>
                 </Border>

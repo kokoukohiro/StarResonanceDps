@@ -12,7 +12,7 @@ public enum SourceLandingKind
     /// <summary>オプションのバフ(<c>RogueEntryTable.BuffId</c>)。名前は <c>RogueEntryNames</c>。</summary>
     RogueEntry = 1,
 
-    /// <summary>プレイヤーが使った技。名前は <c>SkillNames</c>。</summary>
+    /// <summary>プレイヤーが使った技。名前は技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。</summary>
     Skill = 2,
 
     /// <summary>

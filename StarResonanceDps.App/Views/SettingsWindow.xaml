@@ -699,7 +699,7 @@
                                                            FontWeight="SemiBold" />
 
                                                 <!--
-                                                    数字だけを受け付け、Enter・フォーカスが外れたとき・保存と閉じるときに確定する(SettingsWindow.xaml.cs)。
+                                                    数字だけを受け付け(DigitsOnlyInputBehavior)、Enter・フォーカスが外れたとき・保存と閉じるときに確定する(SettingsWindow.xaml.cs)。
                                                     文字はバインドせずビューが書く(確定のたびに今の値で書き直す)。
                                                     見た目はゲーム実行ファイルの欄と同じ Input.PathBox、幅はホットキーの欄と同じ 88。
                                                 -->
@@ -712,7 +712,7 @@
                                                              Style="{StaticResource Input.PathBox}"
                                                              InputMethod.IsInputMethodEnabled="False"
                                                              VerticalContentAlignment="Center"
-                                                             PreviewTextInput="BenchmarkDurationTextBox_PreviewTextInput"
+                                                             behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
                                                              PreviewKeyDown="BenchmarkDurationTextBox_PreviewKeyDown"
                                                              LostKeyboardFocus="BenchmarkDurationTextBox_LostKeyboardFocus" />
                                                     <TextBlock Margin="8,0,0,0"

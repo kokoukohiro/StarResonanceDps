@@ -14,58 +14,44 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// 画面に出す被ダメログの1行。時刻を見せるのは、その時刻のジャンルごとの最初の行だけ(<see cref="IsTimeShown"/>、決めるのは <see cref="TakenDamageLogLayout"/>)。
-/// <see cref="Segments"/> は文字列とアイコン(<see cref="TakenDamageLogClassIconSegment"/> / <see cref="TakenDamageLogAttributeIconSegment"/>)の並び。
+/// 画面に出すタイムラインの1行。時刻を見せるのは、その時刻のジャンルごとの最初の行だけ(<see cref="IsTimeShown"/>、決めるのは <see cref="TakenDamageLogLayout"/>)。
+/// <see cref="Segments"/> は文字列と色つきの文字(<see cref="TextRunSegment"/>)と、プレイヤーのクラスアイコン(<see cref="TakenDamageLogClassIconSegment"/>)の並び。
 /// </summary>
 /// <param name="TimeText">
 /// どの行も自分の経過時刻(戦闘の時計の起点から。起点の前は負)を持つ。時刻を見せない行は場所だけ取って描かない。時刻の列の幅は画面に作られている行だけで揃うので、
 /// 空にすると、時刻を見せる行が画面に無いとき列が縮んで本文が左へずれる。空にするのは起点がまだ無い間だけ(立ったら全部の行を作り直す)。
 /// </param>
-/// <param name="Widget">文字の TIPS の見た目が引く窓のパレットの持ち主。行の TextBlock の Tag に載る。</param>
+/// <param name="Widget">選んだ文字の地の色が引く窓のパレットの持ち主。</param>
 public sealed record TakenDamageLogEntry(
     string TimeText,
     bool IsTimeShown,
     IReadOnlyList<object> Segments,
     WidgetListItemViewModel Widget);
 
-/// <summary>被弾行の対象の前に出すクラスアイコン。色はプレイヤーリストのクラスカラー、TIPS は特化名。</summary>
+/// <summary>相手がプレイヤーの行で、名前の前に出すクラスアイコン。色はタイムラインのアイコンカラー、TIPS は特化名。</summary>
 /// <param name="IconMask">職業アイコンの形。クラス色の塗りをこの形で抜く。</param>
 /// <param name="Widget">TIPS の色を取る窓のパレットの持ち主。</param>
 public sealed record TakenDamageLogClassIconSegment(Brush IconMask, Brush ClassBrush, string SpecName, WidgetListItemViewModel Widget);
 
-/// <summary>被弾行の値の後ろに出す属性アイコン。TIPS は属性名。</summary>
-/// <param name="IconMask">属性アイコンの形。テキストカラーの塗りをこの形で抜く(クラスアイコンと同じ染め方)。</param>
-/// <param name="ElementBrush">その属性のテキストカラー。設定を変えるとアイコンの色も変わる。</param>
-/// <param name="Widget">TIPS の色を取る窓のパレットの持ち主。</param>
-public sealed record TakenDamageLogAttributeIconSegment(Brush IconMask, Brush ElementBrush, string Name, WidgetListItemViewModel Widget);
-
 /// <summary>
-/// 被ダメログ。表示中のエンカウンターで、ボス大技の予告、プレイヤー以外の詠唱と、プレイヤーがプレイヤー以外から受けたダメージと、敵どうしの回復を出す。
+/// タイムライン(識別子は被ダメログ)。表示中のエンカウンターで、ボス大技の予告、警告の技の詠唱と、プレイヤーへのダメージ以外の敵の行動
+/// (敵とプレイヤーの回復、敵へのダメージ、敵・自分・プレイヤーへのバフとデバフ)を出す。行動が詠唱から起きたなら、その詠唱の行も出す。
+/// プレイヤーの被弾は被ダメログ(識別子は被ダメリスト)が出す。
 ///
 /// <code>
 /// 00:22:01  [敵]が[技]を構えている
 /// 00:22:03  [敵]が[技]を唱えている
-/// 00:22:05  [敵]の[技]
-///           [クラス][プレイヤー]に12345[属性]ダメージ
-///           [クラス][プレイヤー]に23456[属性]ダメージ → 戦闘不能
-///           [クラス][プレイヤー]のHP(12468/123456) → HP(123/123456)
-///           [クラス][プレイヤー]のHP(23456/234567) → 戦闘不能(0/234567)
+/// 00:22:05  [敵]の[予告技]
 /// 00:22:07  [敵]の[技]
 ///           [敵]のHPを12345回復
-///           [敵]のHP(100000/200000) → HP(112345/200000)
+///           [敵]に12345ダメージ
+///           [敵]に[バフ](30秒)
 /// </code>
 ///
 /// <para>
-/// <b>被弾は発動単位で束ねない。</b> 届いた瞬間ごとに技の行を1行出し、その下に
-/// 同じ瞬間(同じ加害者・同じ発生源・同じ到着時刻)の被弾だけを並べる。
-/// 同じ技の次の被弾は、また技の行から出す。
-/// 技の行の下で同じ対象・同じ属性の被弾は1行に畳む。HP は被弾の行に出さず、その時刻のジャンル(被弾・敵の回復)ごとの最後のまとめの行に1人1行で出す
-/// (矢印の前はその時刻の最初の同期を当てる前、後は当てた後)。同じ時刻の中は 敵の行動 → 被弾 → 敵の回復 の順で、時刻はジャンルごとの最初の行に出す
-/// (並べ方は <see cref="TakenDamageLogLayout"/>)。
-/// </para>
-///
-/// <para>
-/// クラスアイコンの色は被ダメログ自身のクラスカラーの設定を使う(形と既定の色はプレイヤーリストと同じ)。
+/// 効果は、届いた瞬間ごとに技の行を1行出し、その下に同じ瞬間(同じ行動した敵・同じ発生源・同じ到着時刻)の効果だけを並べる。
+/// 技の行の下で同じ相手への回復・ダメージは1行に畳み、同じ相手への同じバフも1行に畳む。同じ時刻の中は 敵の行動 → 効果 の順で、
+/// 時刻はジャンルごとの最初の行に出す。詠唱の行を詠唱の時刻へ差し込むのも並べ方の側(<see cref="TakenDamageLogLayout"/>)。
 /// </para>
 ///
 /// <para>
@@ -86,15 +72,12 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 {
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromMilliseconds(250);
 
-    // 書式の中の対象名({0})と属性アイコン({2})の位置の印。整形した文字列をここで区切ってアイコンを差し込む。
+    // 書式の中の差し込む位置の印。整形した文字列をここで区切って色つきの文字を差し込む。
     private const string TargetNameMarker = "\x01";
-    private const string AttributeIconMarker = "\x02";
     private const string AttackerNameMarker = "\x03";
     private const string SourceNameMarker = "\x04";
     private const string DamagePartMarker = "\x05";
-    private const string HealthPartMarker = "\x06";
-    private const string MaxHealthMarker = "\x07";
-    private const string AfterHealthMarker = "\x08";
+    private const string BuffNameMarker = "\x06";
 
     private readonly WidgetListItemViewModel _widget;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
@@ -105,10 +88,9 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     // 画面の行の並び(技の行・畳み)と、_entries の各行を作った元の行。元の行が変わった位置だけ作り直す。
     private readonly TakenDamageLogLayout _layout = new();
     private readonly List<TakenDamageLogRow> _entryRows = [];
+    private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, SolidColorBrush> _textBrushes = new(StringComparer.OrdinalIgnoreCase);
 
     private Encounter? _encounter;
     private int _nextIndex;
@@ -195,7 +177,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     /// <summary>
     /// 行の文字。時刻を出している行は時刻と空白1つの後に本文、ほかの行は時刻と同じ幅の空白と空白1つの後に本文(画面と同じ字下げ)。
-    /// 戦闘の時計が立つ前(時刻が空)は本文だけ。本文は画面の文字そのままで、クラス・属性のアイコンは入れない。
+    /// 戦闘の時計が立つ前(時刻が空)は本文だけ。本文は画面の文字そのまま。
     /// </summary>
     private static string GetRowText(TakenDamageLogEntry entry)
     {
@@ -227,8 +209,8 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     }
 
     /// <summary>
-    /// 表示設定(保存かプレビュー)が変わった。フィルターか敵の回復の表示が変われば並ぶ行が変わるので、持っている行から組み直す。
-    /// HP 数値の出し方とクラスカラーは行の中身だけなので、並びはそのままで各行を作り直す
+    /// 表示設定(保存かプレビュー)が変わった。敵の回復の表示が変われば並ぶ行が変わるので、持っている行から組み直す。
+    /// テキストカラーは行の中身だけなので、並びはそのままで各行を作り直す
     /// (色見本を触るたびに全行を並べ直さない)。
     /// </summary>
     private void Widget_TakenDamageLogSettingsChanged(object? sender, EventArgs e)
@@ -238,8 +220,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         _classBrushes.Clear();
         _textBrushes.Clear();
 
-        if (_settings.AttackerFilterIndex != previous.AttackerFilterIndex
-            || _settings.EnemyHealDisplayModeIndex != previous.EnemyHealDisplayModeIndex)
+        if (_settings.EnemyHealDisplayModeIndex != previous.EnemyHealDisplayModeIndex)
         {
             ClearEntries();
             foreach (var line in _lines)
@@ -320,15 +301,24 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     private void AppendEntries(TakenDamageLogLine line)
     {
-        // 表示設定「敵の回復」が非表示なら、回復の行にもまとめの行にも入れない(回復の行の無いまま敵の HP の行だけが残らないように)。
+        // 表示設定「敵の回復」が非表示なら、敵の回復は相手が敵でもプレイヤーでも並べ方に渡さない。
         if (line.Kind == TakenDamageLogRecordKind.EnemyHeal
             && _settings.EnemyHealDisplayModeIndex == WidgetConfigDefaults.HiddenTakenDamageLogEnemyHealDisplayModeIndex)
         {
             return;
         }
 
+        var change = _layout.Append(line);
         var rows = _layout.Rows;
-        for (var index = _layout.Append(line, IsHiddenByFilter(line)); index < rows.Count; index++)
+        if (change.InsertedIndex >= 0)
+        {
+            // 前の時刻へ差し込んだ詠唱の行。後ろの行は作り直さずにずらす。
+            var inserted = rows[change.InsertedIndex];
+            _entryRows.Insert(change.InsertedIndex, inserted);
+            _entries.Insert(change.InsertedIndex, CreateEntry(inserted));
+        }
+
+        for (var index = change.FirstChangedIndex; index < rows.Count; index++)
         {
             var row = rows[index];
             if (index < _entryRows.Count)
@@ -368,26 +358,17 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
                 return new TakenDamageLogEntry(
                     FormatTime(line),
                     row.ShowsTime,
-                    CreateSourceSegments(
-                        "TakenDamageLog_SkillFormat",
-                        line,
-                        line.Kind == TakenDamageLogRecordKind.EnemyHeal ? "TakenDamageLog_UnnamedHeal" : "TakenDamageLog_UnnamedSkill"),
+                    CreateSourceSegments("TakenDamageLog_SkillFormat", line, GetUnnamedSourceKey(line)),
                     _widget);
-            case TakenDamageLogRowKind.Hit:
-                return new TakenDamageLogEntry(
-                    FormatTime(line), row.ShowsTime, CreateHitSegments(row), _widget);
             case TakenDamageLogRowKind.Heal:
                 return new TakenDamageLogEntry(
-                    FormatTime(line), row.ShowsTime, CreateHealSegments(row), _widget);
-            case TakenDamageLogRowKind.Death:
+                    FormatTime(line), row.ShowsTime, CreateValueSegments("TakenDamageLog_HealFormat", "TakenDamageLog_HealAmountFormat", row), _widget);
+            case TakenDamageLogRowKind.Damage:
                 return new TakenDamageLogEntry(
-                    FormatTime(line), row.ShowsTime, CreateDefeatedSegments(row), _widget);
-            case TakenDamageLogRowKind.HealthResult:
+                    FormatTime(line), row.ShowsTime, CreateValueSegments("TakenDamageLog_DamageFormat", "TakenDamageLog_DamageAmountFormat", row), _widget);
+            case TakenDamageLogRowKind.Buff:
                 return new TakenDamageLogEntry(
-                    FormatTime(line), row.ShowsTime, CreateHealthResultSegments(row), _widget);
-            case TakenDamageLogRowKind.DeathResult:
-                return new TakenDamageLogEntry(
-                    FormatTime(line), row.ShowsTime, CreateDeathResultSegments(row), _widget);
+                    FormatTime(line), row.ShowsTime, CreateBuffSegments(row), _widget);
             default:
                 throw new ArgumentOutOfRangeException(nameof(row), row.Kind, null);
         }
@@ -405,17 +386,25 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
     }
 
     /// <summary>
-    /// 技(またはバフ)の名前。名前が無ければこのウィジェットだけ <paramref name="unnamedKey"/> の文言を出す。
-    /// 技の行と予告のバーの終わりの行は「攻撃」(敵どうしの回復の技の行は「回復」)、予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」。
-    /// 落下は技を持たないので「落下」の文言。
+    /// 技の行・予告のバーの終わりの行で、発生源の名前が無いときの文言。回復の技の行は「回復」、バフの技の行は「何かの効果」、
+    /// ダメージの技の行と予告のバーの終わりの行は「攻撃」。
+    /// </summary>
+    private static string GetUnnamedSourceKey(TakenDamageLogLine line)
+    {
+        return line.Kind switch
+        {
+            TakenDamageLogRecordKind.EnemyHeal => "TakenDamageLog_UnnamedHeal",
+            TakenDamageLogRecordKind.EnemyBuff => "TakenDamageLog_UnnamedEffect",
+            _ => "TakenDamageLog_UnnamedSkill"
+        };
+    }
+
+    /// <summary>
+    /// 技(またはバフ)の名前。名前が無ければこのウィジェットだけ <paramref name="unnamedKey"/> の文言を出す
+    /// (<see cref="GetUnnamedSourceKey"/>。予告行と詠唱行は「を構えている」「を唱えている」に続くので「何か」)。
     /// </summary>
     private static string FormatSourceName(TakenDamageLogLine line, string unnamedKey)
     {
-        if (line.IsFall)
-        {
-            return LocalizationManager.Instance.GetString("TakenDamageLog_FallSkill");
-        }
-
         var name = string.IsNullOrEmpty(line.SourceName)
             ? LocalizationManager.Instance.GetString(unnamedKey)
             : line.SourceName;
@@ -426,218 +415,66 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
 
     /// <summary>
     /// 予告行・予告のバーの終わりの行・詠唱行・技の行。加害者の名前(エンティティ名)と技の名前(スキル名)に、それぞれのテキストカラーを当てる。
-    /// 加害者がプレイヤー(自傷・フレンドリーファイア)なら、被弾行と同じクラスアイコンを名前の前に置く。
     /// </summary>
     private IReadOnlyList<object> CreateSourceSegments(string formatKey, TakenDamageLogLine line, string unnamedKey)
     {
         var text = LocalizationManager.Instance.Format(formatKey, AttackerNameMarker, SourceNameMarker);
         EnsureMarkers(text, formatKey, AttackerNameMarker, SourceNameMarker);
 
-        IReadOnlyList<object> attacker = line.Attacker.IsPlayer
-            ? [CreateClassIconSegment(line.Attacker), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(line.Attacker), "EntityName")]
-            : [ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(line.Attacker), "EntityName")];
-
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [AttackerNameMarker[0]] = attacker,
+            [AttackerNameMarker[0]] = [ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(line.Attacker), "EntityName")],
             [SourceNameMarker[0]] = [ColoredText(FormatSourceName(line, unnamedKey), "SkillName")]
         });
     }
 
     /// <summary>
-    /// 被弾行。書式の対象名({0})の前にクラスアイコン、ダメージ部({1})を属性の色で差し込む。HP はまとめの行に出すので、ここには出さない。
-    /// 致死の印の被弾は、後ろに戦闘不能の語({2}、戦闘不能の色)を付ける。
-    /// 属性を持たない被弾(属性を保存していなかった頃の記録)は属性アイコンを出さない。
+    /// 回復とダメージの行。書式の {0} に相手の名前、{1} に値の部分(「12345回復」「12345ダメージ」の書式 <paramref name="amountFormatKey"/> で、
+    /// 回復は実際に増えた HP、ダメージはその値。部分全体が HP 数値の色)を差し込む。
     /// </summary>
-    private IReadOnlyList<object> CreateHitSegments(TakenDamageLogRow row)
+    private IReadOnlyList<object> CreateValueSegments(string formatKey, string amountFormatKey, TakenDamageLogRow row)
     {
-        var localization = LocalizationManager.Instance;
-        var target = row.Line.Target!;
-
-        var replacements = new Dictionary<char, IReadOnlyList<object>>
-        {
-            [TargetNameMarker[0]] = [CreateClassIconSegment(target), ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "PlayerName")],
-            [DamagePartMarker[0]] = CreateDamageSegments(row)
-        };
-
-        string text;
-        if (row.IsLethal)
-        {
-            text = localization.Format("TakenDamageLog_LethalHitFormat", TargetNameMarker, DamagePartMarker, HealthPartMarker);
-            EnsureMarkers(text, "TakenDamageLog_LethalHitFormat", TargetNameMarker, DamagePartMarker, HealthPartMarker);
-            replacements[HealthPartMarker[0]] = [ColoredText(localization.GetString("TakenDamageLog_LethalText"), "Death")];
-        }
-        else
-        {
-            text = localization.Format("TakenDamageLog_HitFormatNoHp", TargetNameMarker, DamagePartMarker);
-            EnsureMarkers(text, "TakenDamageLog_HitFormatNoHp", TargetNameMarker, DamagePartMarker);
-        }
-
-        return SplitByMarkers(text, replacements);
-    }
-
-    /// <summary>
-    /// 敵どうしの回復の行。書式の対象名({0})に回復された敵の名前(エンティティ名の色)、{1} に実際に増えた HP(HP 数値の色)を差し込む。
-    /// HP はまとめの行に出すので、ここには出さない。
-    /// </summary>
-    private IReadOnlyList<object> CreateHealSegments(TakenDamageLogRow row)
-    {
-        var text = LocalizationManager.Instance.Format("TakenDamageLog_HealFormat", TargetNameMarker, DamagePartMarker);
-        EnsureMarkers(text, "TakenDamageLog_HealFormat", TargetNameMarker, DamagePartMarker);
+        var text = LocalizationManager.Instance.Format(formatKey, TargetNameMarker, DamagePartMarker);
+        EnsureMarkers(text, formatKey, TargetNameMarker, DamagePartMarker);
+        var amount = LocalizationManager.Instance.Format(amountFormatKey, row.Value.ToString(CultureInfo.InvariantCulture));
 
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
             [TargetNameMarker[0]] = CreateTargetNameSegments(row.Line.Target!),
-            [DamagePartMarker[0]] = [ColoredText(row.Value.ToString(CultureInfo.InvariantCulture), "HpValue")]
+            [DamagePartMarker[0]] = [ColoredText(amount, "HpValue")]
         });
     }
 
     /// <summary>
-    /// ダメージ部(値＋属性アイコン＋「物理ダメージ」などの語)。ひとまとまりで属性の色にし、
-    /// <b>どの要素にも同じ TIPS</b>(属性名)を出す。
-    /// 属性を持たない被弾(属性を保存していなかった頃の記録)はアイコンを出さず、色は無属性のもので TIPS も付けない。
-    ///
-    /// <para>
-    /// 物理か魔法かは語を差し込まず<b>書式ごと分ける</b>。差し込みだと、種類の無い被弾のときに
-    /// 言語によっては空白が二重に残る。
-    /// </para>
+    /// バフの行。書式の {0} に相手の名前、{1} にバフの部分(名前。名前が無ければ「何かの効果」。持続があれば「名前(3秒)」の書式で秒(小数1桁まで)も。
+    /// 部分全体が効果の色)を差し込む。
     /// </summary>
-    private IReadOnlyList<object> CreateDamageSegments(TakenDamageLogRow row)
+    private IReadOnlyList<object> CreateBuffSegments(TakenDamageLogRow row)
     {
-        var localization = LocalizationManager.Instance;
-        var element = row.Line.DamageElement;
-        var colorKey = element?.ToString() ?? "General";
+        var line = row.Line;
+        var buffName = CombatDataCatalog.AppendBuffInternalId(
+            string.IsNullOrEmpty(line.BuffName)
+                ? LocalizationManager.Instance.GetString("TakenDamageLog_UnnamedEffect")
+                : line.BuffName,
+            line.BuffId);
+        var effect = line.BuffDurationMs <= 0
+            ? buffName
+            : LocalizationManager.Instance.Format(
+                "TakenDamageLog_BuffDurationFormat",
+                buffName,
+                (line.BuffDurationMs / 1000d).ToString("0.#", CultureInfo.InvariantCulture));
 
-        var formatKey = row.Line.DamageMode switch
-        {
-            Zproto.EDamageMode.DamagePhysical => "TakenDamageLog_HitDamagePhysical",
-            Zproto.EDamageMode.DamageMagical => "TakenDamageLog_HitDamageMagical",
-            _ => "TakenDamageLog_HitDamage"
-        };
-
-        var text = localization.Format(
-            formatKey,
-            row.Value.ToString(CultureInfo.InvariantCulture),
-            AttributeIconMarker);
-        EnsureMarkers(text, formatKey, AttributeIconMarker);
-
-        IReadOnlyList<object> icon = [];
-        string? attributeName = null;
-        if (element is { } value)
-        {
-            attributeName = localization.GetString($"DamageProperty_{value}");
-            icon =
-            [
-                new TakenDamageLogAttributeIconSegment(
-                    GetElementIconMask(colorKey),
-                    GetTextBrush(colorKey),
-                    attributeName,
-                    _widget)
-            ];
-        }
-
-        return SplitByMarkers(
-            text,
-            new Dictionary<char, IReadOnlyList<object>> { [AttributeIconMarker[0]] = icon },
-            GetTextBrush(colorKey),
-            attributeName);
-    }
-
-    /// <summary>
-    /// HP部。外側の括弧まで HP 数値の色にし、バリア量の括弧だけバリア量の色にする。
-    /// </summary>
-    private IReadOnlyList<object> CreateHealthSegments(long hp, long shield, long maxHp)
-    {
-        var text = LocalizationManager.Instance.Format("TakenDamageLog_HitHealth", TargetNameMarker, MaxHealthMarker);
-        EnsureMarkers(text, "TakenDamageLog_HitHealth", TargetNameMarker, MaxHealthMarker);
-
-        return SplitByMarkers(
-            text,
-            new Dictionary<char, IReadOnlyList<object>>
-            {
-                [TargetNameMarker[0]] = CreateCurrentHealthSegments(hp, shield),
-                [MaxHealthMarker[0]] = [ColoredText(maxHp.ToString(CultureInfo.InvariantCulture), "HpValue")]
-            },
-            GetTextBrush("HpValue"));
-    }
-
-    /// <summary>
-    /// 現在HP。バリア量を分けて出す設定のときだけ、括弧ごとバリア量の色にする
-    /// (足して出す設定と、バリアが無いときは HP 数値だけ)。
-    /// </summary>
-    private IReadOnlyList<object> CreateCurrentHealthSegments(long hp, long shield)
-    {
-        var currentShield = Math.Max(shield, 0L);
-        if (_settings.HealthValueDisplayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex
-            && currentShield > 0)
-        {
-            return
-            [
-                ColoredText(hp.ToString(CultureInfo.InvariantCulture), "HpValue"),
-                ColoredText(string.Create(CultureInfo.InvariantCulture, $"({currentShield})"), "ShieldValue")
-            ];
-        }
-
-        return [ColoredText(FormatHealthValue(hp, shield), "HpValue")];
-    }
-
-    /// <summary>
-    /// ダメージの無い戦闘不能の行(「システムの攻撃」の技の行の下)。書式の対象名({0})の前にクラスアイコンを差し込み、
-    /// 戦闘不能の語だけを戦闘不能の色で出す。数字はまとめの行に出す。
-    /// </summary>
-    private IReadOnlyList<object> CreateDefeatedSegments(TakenDamageLogRow row)
-    {
-        return CreateTargetSegments(
-            "TakenDamageLog_DeathFormat",
-            row,
-            [ColoredText(LocalizationManager.Instance.GetString("TakenDamageLog_LethalText"), "Death")]);
-    }
-
-    /// <summary>
-    /// まとめの行(戦闘不能になった人)。「戦闘不能」の語と HP をまとめて戦闘不能の色にする。
-    /// 最大HP が分からなければ 0 と出す(プレイヤーリストと同じ)。その時刻の前の HP が分かれば「XのHP(…) → 戦闘不能(…)」、分からなければ「Xが戦闘不能(…)」。
-    /// </summary>
-    private IReadOnlyList<object> CreateDeathResultSegments(TakenDamageLogRow row)
-    {
-        var deathText = LocalizationManager.Instance.Format(
-            "TakenDamageLog_DeathText",
-            FormatHealthValue(row.TargetHp ?? 0L, 0L),
-            (row.TargetMaxHp ?? 0L).ToString(CultureInfo.InvariantCulture));
-        IReadOnlyList<object> after = [ColoredText(deathText, "Death")];
-        return row.TargetHpBefore is null
-            ? CreateTargetSegments("TakenDamageLog_DeathFormat", row, after)
-            : CreateHealthChangeSegments(row, after);
-    }
-
-    /// <summary>
-    /// まとめの行(その時刻の後の HP)。HP 部は今の HP の出し方。
-    /// その時刻の前の HP が分かれば「XのHP(…) → HP(…)」、分からなければ「XのHP(…)」。
-    /// </summary>
-    private IReadOnlyList<object> CreateHealthResultSegments(TakenDamageLogRow row)
-    {
-        var after = CreateHealthSegments(row.TargetHp ?? 0L, row.TargetShield ?? 0L, row.TargetMaxHp ?? 0L);
-        return row.TargetHpBefore is null
-            ? CreateTargetSegments("TakenDamageLog_HealthSummaryFormat", row, after)
-            : CreateHealthChangeSegments(row, after);
-    }
-
-    /// <summary>書式の対象名({0})に対象の名前(<see cref="CreateTargetNameSegments"/>)を置き、{1} に <paramref name="part"/> を差し込む。</summary>
-    private IReadOnlyList<object> CreateTargetSegments(string formatKey, TakenDamageLogRow row, IReadOnlyList<object> part)
-    {
-        var target = row.Line.Target!;
-        var text = LocalizationManager.Instance.Format(formatKey, TargetNameMarker, HealthPartMarker);
-        EnsureMarkers(text, formatKey, TargetNameMarker, HealthPartMarker);
-
+        var text = LocalizationManager.Instance.Format("TakenDamageLog_BuffFormat", TargetNameMarker, BuffNameMarker);
+        EnsureMarkers(text, "TakenDamageLog_BuffFormat", TargetNameMarker, BuffNameMarker);
         return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
         {
-            [TargetNameMarker[0]] = CreateTargetNameSegments(target),
-            [HealthPartMarker[0]] = part
+            [TargetNameMarker[0]] = CreateTargetNameSegments(line.Target!),
+            [BuffNameMarker[0]] = [ColoredText(effect, "Effect")]
         });
     }
 
     /// <summary>
-    /// まとめの行・回復の行の対象の名前。プレイヤーはクラスアイコンとプレイヤー名の色、
-    /// 敵どうしの回復で回復された敵はエンティティ名の色(クラスアイコンなし)。
+    /// 回復・ダメージ・バフの行の相手の名前。プレイヤーならクラスアイコンとプレイヤー名の色、それ以外はエンティティ名の色。
     /// </summary>
     private IReadOnlyList<object> CreateTargetNameSegments(TakenDamageLogParty target)
     {
@@ -646,34 +483,59 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
             : [ColoredText(PlayerInfoFormatFormatter.GetPartyDisplayName(target), "EntityName")];
     }
 
-    /// <summary>
-    /// まとめの行の矢印の形。{1} にその時刻の最初の同期を当てる前の HP、{2} に後(HP か戦闘不能)を差し込む。
-    /// 前の HP も今の HP の出し方(バリア量・最大HP はその時点の値。最大HP が分からなければ 0)。
-    /// </summary>
-    private IReadOnlyList<object> CreateHealthChangeSegments(TakenDamageLogRow row, IReadOnlyList<object> after)
+    private TakenDamageLogClassIconSegment CreateClassIconSegment(TakenDamageLogParty target)
     {
-        var target = row.Line.Target!;
-        var text = LocalizationManager.Instance.Format("TakenDamageLog_HealthChangeFormat", TargetNameMarker, HealthPartMarker, AfterHealthMarker);
-        EnsureMarkers(text, "TakenDamageLog_HealthChangeFormat", TargetNameMarker, HealthPartMarker, AfterHealthMarker);
-
-        return SplitByMarkers(text, new Dictionary<char, IReadOnlyList<object>>
+        var professionKey = PlayerProfession.GetKey(target.ProfessionId, target.ClassSpec);
+        if (!_classBrushes.TryGetValue(professionKey, out var brush))
         {
-            [TargetNameMarker[0]] = CreateTargetNameSegments(target),
-            [HealthPartMarker[0]] = CreateHealthSegments(row.TargetHpBefore!.Value, row.TargetShieldBefore ?? 0L, row.TargetMaxHpBefore ?? 0L),
-            [AfterHealthMarker[0]] = after
-        });
+            brush = new SolidColorBrush(GetClassColor(professionKey));
+            brush.Freeze();
+            _classBrushes[professionKey] = brush;
+        }
+
+        if (!_professionIconMasks.TryGetValue(professionKey, out var mask))
+        {
+            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.Profession.{professionKey}"))
+            {
+                Stretch = Stretch.Uniform
+            };
+            mask.Freeze();
+            _professionIconMasks[professionKey] = mask;
+        }
+
+        return new TakenDamageLogClassIconSegment(
+            mask,
+            brush,
+            PlayerInfoFormatFormatter.GetClassSpecText(target.ClassSpec),
+            _widget);
+    }
+
+    /// <summary>クラスアイコンの色。タイムラインのアイコンカラーの設定で選んでいる色(引き方はプレイヤーリストと同じ)。</summary>
+    private Color GetClassColor(string professionKey)
+    {
+        var palette = _settings.ClassColorPalettes.TryGetValue(professionKey, out var colors)
+            ? colors
+            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.TakenDamageLog, professionKey);
+        var selectedIndex = _settings.ClassColorIndexes.TryGetValue(professionKey, out var index)
+            ? index
+            : WidgetConfigDefaults.MinClassColorIndex;
+        var selectedColor = palette.Count == 0
+            ? "#A8A8A8"
+            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
+
+        return ColorUtilities.TryParseHex(selectedColor, out var color)
+            ? color
+            : Color.FromRgb(0xA8, 0xA8, 0xA8);
     }
 
     /// <summary>
     /// マーカーを埋めた文字列を、マーカーの位置で切って segment の並びにする。
     /// <paramref name="textBrush"/> を渡すと、マーカー以外の文字もその色になる(渡さなければ行の既定の色)。
-    /// <paramref name="toolTipText"/> を渡すと、その文字にも TIPS が出る。
     /// </summary>
     private static IReadOnlyList<object> SplitByMarkers(
         string text,
         IReadOnlyDictionary<char, IReadOnlyList<object>> replacements,
-        Brush? textBrush = null,
-        string? toolTipText = null)
+        Brush? textBrush = null)
     {
         var segments = new List<object>();
         var start = 0;
@@ -686,7 +548,7 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
             }
 
             var part = text[start..end];
-            segments.Add(textBrush is null ? part : new TextRunSegment(part, textBrush, toolTipText));
+            segments.Add(textBrush is null ? part : new TextRunSegment(part, textBrush));
         }
 
         for (var index = 0; index < text.Length; index++)
@@ -753,99 +615,5 @@ public sealed class TakenDamageLogWidgetViewModel : ViewModelBase, IDisposable, 
         return ColorUtilities.TryParseHex(selectedColor, out var color)
             ? color
             : Colors.White;
-    }
-
-    /// <summary>属性アイコンの形。塗りをこの形で抜く(クラスアイコンと同じ染め方)。</summary>
-    private ImageBrush GetElementIconMask(string elementKey)
-    {
-        if (!_elementIconMasks.TryGetValue(elementKey, out var mask))
-        {
-            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{elementKey}"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            mask.Freeze();
-            _elementIconMasks[elementKey] = mask;
-        }
-
-        return mask;
-    }
-
-    private TakenDamageLogClassIconSegment CreateClassIconSegment(TakenDamageLogParty target)
-    {
-        var professionKey = PlayerProfession.GetKey(target.ProfessionId, target.ClassSpec);
-        if (!_classBrushes.TryGetValue(professionKey, out var brush))
-        {
-            brush = new SolidColorBrush(GetClassColor(professionKey));
-            brush.Freeze();
-            _classBrushes[professionKey] = brush;
-        }
-
-        if (!_professionIconMasks.TryGetValue(professionKey, out var mask))
-        {
-            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.Profession.{professionKey}"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            mask.Freeze();
-            _professionIconMasks[professionKey] = mask;
-        }
-
-        return new TakenDamageLogClassIconSegment(
-            mask,
-            brush,
-            PlayerInfoFormatFormatter.GetClassSpecText(target.ClassSpec),
-            _widget);
-    }
-
-    /// <summary>クラスアイコンの色。被ダメログのクラスカラーの設定で選んでいる色(引き方はプレイヤーリストと同じ)。</summary>
-    private Color GetClassColor(string professionKey)
-    {
-        var palette = _settings.ClassColorPalettes.TryGetValue(professionKey, out var colors)
-            ? colors
-            : WidgetConfigDefaults.CreateDefaultClassColors(WidgetKind.TakenDamageLog, professionKey);
-        var selectedIndex = _settings.ClassColorIndexes.TryGetValue(professionKey, out var index)
-            ? index
-            : WidgetConfigDefaults.MinClassColorIndex;
-        var selectedColor = palette.Count == 0
-            ? "#A8A8A8"
-            : palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
-
-        return ColorUtilities.TryParseHex(selectedColor, out var color)
-            ? color
-            : Color.FromRgb(0xA8, 0xA8, 0xA8);
-    }
-
-    /// <summary>
-    /// HP の出し方。プレイヤーリスト・エンティティリストと同じ規則で、
-    /// バリア量を足して出すか、括弧で分けて出すかを設定で選ぶ。分けて出すときもバリアが無ければ括弧を出さない。
-    /// </summary>
-    private string FormatHealthValue(long hp, long shield)
-    {
-        var currentShield = Math.Max(shield, 0L);
-        if (_settings.HealthValueDisplayModeIndex == WidgetConfigDefaults.SeparateShieldHealthValueDisplayModeIndex)
-        {
-            return currentShield > 0
-                ? string.Create(CultureInfo.InvariantCulture, $"{hp}({currentShield})")
-                : hp.ToString(CultureInfo.InvariantCulture);
-        }
-
-        var total = currentShield > 0 && hp > long.MaxValue - currentShield
-            ? long.MaxValue
-            : hp + currentShield;
-        return total.ToString(CultureInfo.InvariantCulture);
-    }
-
-    /// <summary>
-    /// フィルター「自傷・フレンドリーファイア以外」で出さない行か。加害者がプレイヤーの被弾(技の行ごと)を出さない。
-    /// 隠した被弾もその時刻のまとめの行には入る。見える被弾も戦闘不能の行も無い時刻は、まとめごと出ない(<see cref="TakenDamageLogLayout"/>)。
-    /// 自傷(加害者の無いバフ・落下・自分の技)は被弾した本人、プレイヤーの召喚体の攻撃は大元のプレイヤーが加害者として記録されている。
-    /// 予告・詠唱・ダメージの無い戦闘不能は絞らない。加害者は記録から決まるので、履歴表示中も同じに効く。
-    /// </summary>
-    private bool IsHiddenByFilter(TakenDamageLogLine line)
-    {
-        return _settings.AttackerFilterIndex == WidgetConfigDefaults.NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex
-            && line.Kind == TakenDamageLogRecordKind.Hit
-            && line.Attacker.IsPlayer;
     }
 }

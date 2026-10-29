@@ -304,7 +304,7 @@ public sealed class PlayerInfoIconPalette(PlayerInfoWidgetSettingsConfig setting
 {
     private readonly Dictionary<string, Brush> _brushes = new(StringComparer.Ordinal);
 
-    /// <summary>アイコンカラーで選んでいる色の塗り。引き方はプレイヤーリスト・被ダメログのクラスカラーと同じ。</summary>
+    /// <summary>アイコンカラーで選んでいる色の塗り。引き方はプレイヤーリストのクラスカラーと同じ。</summary>
     public Brush GetBrush(string colorKey)
     {
         if (_brushes.TryGetValue(colorKey, out var cached))

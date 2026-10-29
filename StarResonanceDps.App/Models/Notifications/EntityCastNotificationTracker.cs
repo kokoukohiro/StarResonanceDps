@@ -1,10 +1,11 @@
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Notifications;
 
-/// <summary>詠唱1つ。周りの敵(エンティティリストの実体)がしている詠唱。</summary>
+/// <summary>詠唱1つ。周りの HP バーのある敵(エンティティリストのフィルター「オブジェクト以外」に載る実体)がしている詠唱。</summary>
 /// <param name="EntityName">詠唱している敵の名前。</param>
 public readonly record struct EntityCastObservation(long EntityUuid, NearbyEntityCast Cast, string EntityName);
 
@@ -13,10 +14,11 @@ public readonly record struct EntityCastObservation(long EntityUuid, NearbyEntit
 /// ウィジェットを開いていなくても動く(<see cref="NotificationMonitor"/>)。
 ///
 /// <para>
-/// 敵ごとに前の一覧の詠唱と比べ、新しく始まった詠唱の全体の秒が通知条件の秒以上なら、その場で1回出す。
+/// 敵ごとに前の一覧の詠唱と比べ、新しく始まった詠唱の技が通知タブの対象(<see cref="NotificationWatchTarget"/>)に当たれば、その場で1回出す。
+/// 技の名前はタイムラインの詠唱の行と同じ名前(<see cref="MeterSnapshotProvider.GetTakenDamageLogLineSkillName"/>)で比べる。
 /// 詠唱はエンティティリストの詠唱ゲージと同じ値で、周りに現れたときにすでに詠唱していた敵は値を持たないので出さない。
 /// 同じ一覧の中で同じ名前の敵がいくつ詠唱を始めても1回(同じ文が並ぶだけになるため。エンティティ出現と同じ)。
-/// オンにした・通知条件を選び直したときは <see cref="Rebaseline"/> で、その時点で詠唱中の敵には出さない。
+/// オンにした・対象を変えたときは <see cref="Rebaseline"/> で、その時点で詠唱中の敵には出さない。
 /// </para>
 /// </summary>
 public sealed class EntityCastNotificationTracker
@@ -36,16 +38,19 @@ public sealed class EntityCastNotificationTracker
         }
     }
 
-    public void Observe(IReadOnlyList<EntityCastObservation> casts)
+    /// <param name="target">見張りが持っている、この項目の対象。</param>
+    public void Observe(IReadOnlyList<EntityCastObservation> casts, NotificationWatchTarget target)
     {
-        var minimumSeconds = GetMinimumSeconds();
         _nextCastsByEntityUuid.Clear();
         _notifiedNames.Clear();
         foreach (var cast in casts)
         {
             _nextCastsByEntityUuid[cast.EntityUuid] = cast.Cast;
             if ((_castsByEntityUuid.TryGetValue(cast.EntityUuid, out var previous) && previous == cast.Cast)
-                || cast.Cast.TotalSeconds < minimumSeconds
+                || !target.Matches(
+                    cast,
+                    static observation => observation.Cast.SkillId,
+                    static observation => MeterSnapshotProvider.GetTakenDamageLogLineSkillName(observation.Cast.SkillId))
                 || !_notifiedNames.Add(cast.EntityName))
             {
                 continue;
@@ -59,12 +64,5 @@ public sealed class EntityCastNotificationTracker
         }
 
         (_castsByEntityUuid, _nextCastsByEntityUuid) = (_nextCastsByEntityUuid, _castsByEntityUuid);
-    }
-
-    /// <summary>通知する詠唱の全体の秒の下限。通知タブの「通知条件」。0 は無条件。</summary>
-    private static int GetMinimumSeconds()
-    {
-        var index = ConfigManager.Instance.GetNotificationItem(NotificationKind.EntityCast).EntityCastConditionIndex;
-        return AppConfigDefaults.EntityCastMinimumSeconds[index];
     }
 }

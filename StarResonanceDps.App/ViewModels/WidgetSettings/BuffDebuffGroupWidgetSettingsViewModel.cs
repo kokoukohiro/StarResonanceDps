@@ -8,10 +8,12 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// バフ・デバフグループの設定。ゲージの長さ、ゲージの色(バフカラーとデバフカラーの2節、バフ・デバフ一覧と共有の部品)、
-/// ウィジェットに出すバフ・デバフの行(「バフ・デバフ」の一覧、バフ・デバフカードのショートカットと共有の部品)。
+/// ウィジェットに出すバフ・デバフの行(「バフ・デバフ」の一覧、バフ・デバフカードのショートカットと共有の部品)、
+/// 効果切れを通知するバフ・デバフ(「通知対象」の一覧、同じ部品で並べ替えなし)。
 ///
 /// <para>
-/// 右クリックで足した行はオフのまま保存すると消え、既定の行(<see cref="WidgetConfigDefaults.DefaultBuffDebuffGroupEntries"/>)は消えない。
+/// 右クリックで足した行はオフのまま保存すると消え、既定の行(<see cref="WidgetConfigDefaults.DefaultBuffDebuffGroupEntries"/>、
+/// <see cref="WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries"/>)は消えない。
 /// </para>
 /// </summary>
 public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -33,6 +35,11 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
             "Settings_Section_BuffDebuffGroupEntries_Title",
             "Settings_RowReorderNote",
             NotifyChanged);
+        NotificationTargets = new BuffEntryListSettingsViewModel(
+            WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries,
+            "Settings_Section_NotificationTargets_Title",
+            reorderNoteResourceKey: null,
+            NotifyChanged);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
         _lastSaved = WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(config);
@@ -49,6 +56,9 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
 
     /// <summary>「バフ・デバフ」の節。並びはウィジェットの行の並び。</summary>
     public BuffEntryListSettingsViewModel Entries { get; }
+
+    /// <summary>「通知対象」の節。並べ替えない。</summary>
+    public BuffEntryListSettingsViewModel NotificationTargets { get; }
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -68,7 +78,8 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
             GaugeLengthIndex = GaugeLengthIndex,
             BuffGaugeColors = BuffGaugeColors.CreateConfig(),
             DebuffGaugeColors = DebuffGaugeColors.CreateConfig(),
-            Entries = Entries.CreateEntries()
+            Entries = Entries.CreateEntries(),
+            NotificationTargets = NotificationTargets.CreateEntries()
         };
 
         return WidgetConfigDefaults.CloneNormalizedBuffDebuffGroup(config);
@@ -117,6 +128,26 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
     }
 
     /// <summary>
+    /// 開いている間に、右クリックで通知対象の行がオン/オフになった(グループの窓の「このバフを通知対象にする」「〜しない」)。
+    /// 扱いは <see cref="SetEntryEnabledFromWidget"/> と同じ。
+    /// </summary>
+    public void SetNotificationTargetEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!key.IsValid)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _lastSaved.NotificationTargets ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries);
+        NotificationTargets.SetEntryEnabled(key, isEnabled);
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>
     /// 開いている間に、バフ・デバフグループの窓で行が並べ替えられた。行を同じ順に並べ直す(作り直さない)。
     /// 保存前の並びになるので未保存の印は付くが、プレビューは鳴らさない(ウィジェット側は既にその並び)。
     /// </summary>
@@ -137,6 +168,7 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
             BuffGaugeColors.Load(normalized.BuffGaugeColors);
             DebuffGaugeColors.Load(normalized.DebuffGaugeColors);
             Entries.Load(normalized.Entries);
+            NotificationTargets.Load(normalized.NotificationTargets);
         }
         finally
         {
@@ -168,6 +200,7 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         Entries.RefreshLocalizedText();
+        NotificationTargets.RefreshLocalizedText();
     }
 
     private static bool SettingsEqual(
@@ -181,6 +214,7 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
             && right.DebuffGaugeColors is not null
             && BuffGaugeColorSettingsViewModel.ConfigEquals(left.BuffGaugeColors, right.BuffGaugeColors)
             && BuffGaugeColorSettingsViewModel.ConfigEquals(left.DebuffGaugeColors, right.DebuffGaugeColors)
-            && BuffEntryListSettingsViewModel.EntriesEqual(left.Entries, right.Entries);
+            && BuffEntryListSettingsViewModel.EntriesEqual(left.Entries, right.Entries)
+            && BuffEntryListSettingsViewModel.EntriesEqual(left.NotificationTargets, right.NotificationTargets);
     }
 }

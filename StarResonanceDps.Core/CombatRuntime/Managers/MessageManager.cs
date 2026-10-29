@@ -1245,14 +1245,6 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static Dictionary<long, PassiveHealTick> LastPassiveHealTicks = [];
 
-        /// <summary>差分を当てる前の実体の HP・最大HP・バリア量。敵どうしの回復のまとめの行の矢印の前に使う。実体が無ければ全部 null。</summary>
-        private static TargetHealth CaptureTargetHealth(long uuid)
-        {
-            return EncounterManager.Current.Entities.TryGetValue(uuid, out var entity)
-                ? new TargetHealth(entity.GetAttrKV("AttrHp") as long?, entity.GetAttrKV("AttrMaxHp") as long?, Utils.GetCurrentShield(entity))
-                : default;
-        }
-
         private static PlayerVitals CapturePlayerVitals(long uuid)
         {
             if (!EncounterManager.Current.Entities.TryGetValue(uuid, out var entity))
@@ -1531,15 +1523,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 被ダメログに残す敵どうしの回復か。回復した側も回復された側もプレイヤー(とその召喚)でなく、実際に HP が増えた回復。
-        /// 自傷扱い(出し手の無いバフ)と発生源が 0 の回復は、ほかの通知と同じく扱わない。
+        /// タイムラインに残す敵の回復か。回復した側がプレイヤー(とその召喚)でなく、実際に HP が増えた回復(回復された側は敵でもプレイヤーでもよい)。
+        /// 自傷扱い(出し手の無いバフ)と発生源が 0 の回復は、ほかの通知と同じく扱わない。回復した側と相手の種類は記録の入口(<c>Encounter.AddEnemyHeal</c>)が見る。
         /// <paramref name="healerUuid"/> は被弾の加害者と同じく寄せた回復した側(<c>Encounter.ResolveTakenDamageLogActor</c>)。
         /// </summary>
-        private static bool TryResolveEnemyHealer(SyncDamageInfo damageInfo, bool isTargetPlayer, out long healerUuid)
+        private static bool TryResolveEnemyHealer(SyncDamageInfo damageInfo, out long healerUuid)
         {
             healerUuid = 0;
             if (damageInfo.Type != EDamageType.Heal
-                || isTargetPlayer
                 || damageInfo.ActualValue <= 0
                 || IsSelfCausedDamage(damageInfo)
                 || damageInfo.OwnerId == 0)
@@ -1558,7 +1549,92 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 敵どうしの回復を被ダメログに残す。バフ由来ならそのバフを付けた技を、回復した実体(仮想体など)ならそれを出した技を、
+        /// 敵の自傷(出し手の無いバフのダメージと落下)をタイムラインの敵から敵へのダメージに残す。加害者は本人。
+        /// プレイヤーの自傷は被ダメログ(<see cref="AddSelfCausedTakenDamage"/>)。付与元の技の決め方も同じ。
+        /// </summary>
+        private static void AddEnemySelfCausedDamageLog(SyncDamageInfo damageInfo, long targetUuid, ExtraPacketData extraData)
+        {
+            var damage = ResolveDamageValue(damageInfo);
+            if (damage == 0)
+            {
+                return;
+            }
+
+            var buffSourceSkillId = damageInfo.DamageSource == EDamageSource.Buff
+                && BuffInstanceIndex.Instance.TryResolveSourceSkill(
+                    damageInfo.OwnerId,
+                    targetUuid,
+                    targetUuid,
+                    extraData.ArrivalTime,
+                    out var resolvedBuffSourceSkillId,
+                    out _)
+                ? resolvedBuffSourceSkillId
+                : 0;
+
+            EncounterManager.Current.AddEnemyDamage(targetUuid, targetUuid, damageInfo.OwnerId, damageInfo.DamageSource, buffSourceSkillId, 0, damage, extraData);
+        }
+
+        /// <summary>
+        /// 敵が付けたバフをタイムラインに残す(差分の付与だけ。出現時の一覧は見る前から付いていたものなので残さない)。
+        /// 付けた側は通知の <c>FireUuid</c> で、召喚体は被弾の加害者と同じく寄せる。付けた側の無いものと、プレイヤー(とその召喚)が付けたものは残さない。
+        /// 付けた側と相手の種類は記録の入口(<c>Encounter.AddEnemyBuff</c>)が見る。
+        /// 付与元(<c>FightSourceInfo</c>)は、技・弾・親のバフを発生源の形(<see cref="EnemyBuffRecord"/>)に置き換え、親のバフはそれを付けた技を控える。
+        /// </summary>
+        private static void AddEnemyBuffLog(long targetUuid, BuffInfo buffInfo, ExtraPacketData extraData)
+        {
+            var fireUuid = buffInfo.FireUuid;
+            if (fireUuid == 0)
+            {
+                return;
+            }
+
+            var encounter = EncounterManager.Current;
+            var topSummonerUuid = encounter.GetAttrKV(fireUuid, "AttrTopSummonerId") is long summonerUuid ? summonerUuid : 0;
+            var casterUuid = encounter.ResolveTakenDamageLogActor(fireUuid, topSummonerUuid);
+            if (casterUuid == 0 || Utils.UuidToEntityType(casterUuid) == (long)EEntityType.EntChar)
+            {
+                return;
+            }
+
+            var source = buffInfo.FightSourceInfo;
+            var sourceConfigId = source?.SourceConfigId ?? 0;
+            var (damageSource, ownerId) = source is null || sourceConfigId <= 0
+                ? (EDamageSource.Other, 0)
+                : (EFightSource)source.FightSourceType switch
+                {
+                    EFightSource.Skill => (EDamageSource.Skill, sourceConfigId),
+                    EFightSource.Bullet => (EDamageSource.Bullet, sourceConfigId),
+                    EFightSource.Buff => (EDamageSource.Buff, sourceConfigId),
+                    _ => (EDamageSource.Other, 0)
+                };
+            var buffSourceSkillId = damageSource == EDamageSource.Buff
+                && BuffInstanceIndex.Instance.TryResolveSourceSkill(
+                    ownerId,
+                    fireUuid,
+                    casterUuid,
+                    extraData.ArrivalTime,
+                    out var parentSourceSkillId,
+                    out _)
+                ? parentSourceSkillId
+                : 0;
+            var summonSourceSkillId = SummonSourceIndex.Instance.TryGet(fireUuid, out var summonSource)
+                ? summonSource.SkillId
+                : 0;
+
+            encounter.AddEnemyBuff(
+                casterUuid,
+                targetUuid,
+                buffInfo.BaseId,
+                buffInfo.Duration,
+                ownerId,
+                damageSource,
+                buffSourceSkillId,
+                summonSourceSkillId,
+                extraData);
+        }
+
+        /// <summary>
+        /// 敵の回復をタイムラインに残す。バフ由来ならそのバフを付けた技を、回復した実体(仮想体など)ならそれを出した技を、
         /// 記録の瞬間に控える(被弾と同じ。表示するころには実体が残っていない)。
         /// </summary>
         /// <param name="attackerUuid">召喚元へ寄せた出し手(通知の最上位の召喚者、無ければ出し手そのもの)。付与元の候補に使う。</param>
@@ -1567,8 +1643,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             long healerUuid,
             long targetUuid,
             long attackerUuid,
-            bool carriesHp,
-            TargetHealth healthBefore,
             ExtraPacketData extraData)
         {
             var buffSourceSkillId = heal.DamageSource == EDamageSource.Buff
@@ -1593,8 +1667,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 buffSourceSkillId,
                 summonSourceSkillId,
                 heal.ActualValue,
-                carriesHp,
-                healthBefore,
                 extraData);
         }
 
@@ -1602,6 +1674,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 戦闘の出来事の通知か。通知の判定はここ1か所(<see cref="ProcessAoiSyncDelta"/> が差分ごとに当てる)。
         /// 最初の出来事が戦闘の時計の起点になり、その後の出来事は自動一時停止の時計を続ける(<c>Encounter.RecordCombatEvent</c>)。
         /// 通知の無い薬・料理・自然回復は <see cref="AddBuffHealing"/> が出来事にする。
+        /// タイムラインと被ダメログに載る記録(ここで出来事にしない自傷・落下・フレンドリーファイアの被弾、敵から敵へのダメージ、詠唱・予告・敵が付けたバフなど)は、
+        /// 記録の入口が出来事にする(<c>Encounter.RecordTakenDamageLogCombatEvent</c>)。
         /// プレイヤーかどうかは UUID の種類で見る(助っ人の NPC もプレイヤーに入る)。
         ///
         /// <list type="bullet">
@@ -1651,7 +1725,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 本人が原因の被弾(<see cref="IsSelfCausedDamage"/>)を被ダメログにだけ残す。
         /// バフ由来なら、本人が付けたそのバフの付与元の技を控える(技の行の名前になる)。
         /// </summary>
-        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, bool carriesHp, TargetHealth healthBefore, ExtraPacketData extraData)
+        private static void AddSelfCausedTakenDamage(SyncDamageInfo damageInfo, long targetUuid, ExtraPacketData extraData)
         {
             var skillId = SkillSourceResolver.Resolve(damageInfo.DamageSource, damageInfo.OwnerId, damageInfo.HitEventId).Key;
             var damage = ResolveDamageValue(damageInfo);
@@ -1690,8 +1764,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 (damageInfo.TypeFlag & 0B100) == 0B100,
                 damageInfo.IsMiss,
                 damageInfo.IsDead,
-                carriesHp,
-                healthBefore,
                 extraData);
         }
 
@@ -2616,14 +2688,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     GetPlayerDeathState(targetUuid).HasLethalHit = true;
                 }
 
-                // 属性を当てる前の値。死亡の判定・料理と自然回復の刻みと、被ダメログの「同期を当てる前の HP」に使う。
+                // 属性を当てる前の値。死亡の判定・料理と自然回復の刻みと、ダメージの無い戦闘不能の記録の「同期を当てる前の HP」に使う。
                 playerVitalsBefore = CapturePlayerVitals(targetUuid);
             }
-
-            // プレイヤー以外の、属性を当てる前の HP。被ダメログの敵どうしの回復の「同期を当てる前の HP」に使う。回復を含む差分だけ控える。
-            var enemyHealHealthBefore = !isTargetPlayer && delta.SkillEffects?.Damages.Any(damage => damage.Type == EDamageType.Heal) == true
-                ? CaptureTargetHealth(targetUuid)
-                : default;
 
             if (attrCollection?.Attrs != null && attrCollection.Attrs.Any())
             {
@@ -2740,6 +2807,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     extraData.ArrivalTime);
 
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo.FightSourceType);
+                                AddEnemyBuffLog(targetUuid, buffInfo, extraData);
                                 handledByLogicEffect = true;
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
@@ -2880,26 +2948,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 被ダメログの加害者を先に決めて、この同期で被ダメログに載る被弾のうち、技の行ごとの最後の被弾を求める。
-            // HP はその被弾に載せる(同期で届く HP は全部当てた後の1つだけなので、同じ同期の技の行には同じ HP が載る。
-            // 被ダメログはこれを、その時刻の最後のまとめの行に1人1行で出す)。
-            // 技の行の鍵は被ダメログの表示(TakenDamageLogLayout)と同じ: 加害者・バフ由来か・発生源の番号(到着時刻は同期の中で同じ)。
-            // 加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
-            // 自分が原因の被弾(加害者の無いバフのダメージと落下)は被弾した本人。
-            // 被ダメログに載る敵どうしの回復も同じく、回復した側を決めて、同じ回復した側・発生源ごとの最後の回復に HP を載せる。
+            // 被ダメログとタイムラインの加害者を先に決める。加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
+            // 自分が原因の被弾(加害者の無いバフのダメージと落下)は被弾した本人。タイムラインに載る敵の回復は回復した側を決める。
             var damages = skillEffect.Damages;
             var takenDamageLogActors = new long[damages.Count];
-            var lastLoggedTakenDamageIndexByGroup = new Dictionary<(long Actor, bool IsBuffSource, int OwnerId), int>();
-            var lastLoggedEnemyHealIndexByGroup = new Dictionary<(long Healer, bool IsBuffSource, int OwnerId), int>();
             for (var index = 0; index < damages.Count; index++)
             {
                 var damageInfo = damages[index];
                 if (damageInfo.Type == EDamageType.Heal)
                 {
-                    if (TryResolveEnemyHealer(damageInfo, isTargetPlayer, out var healerUuid))
+                    if (TryResolveEnemyHealer(damageInfo, out var healerUuid))
                     {
                         takenDamageLogActors[index] = healerUuid;
-                        lastLoggedEnemyHealIndexByGroup[(healerUuid, damageInfo.DamageSource == EDamageSource.Buff, damageInfo.OwnerId)] = index;
                     }
 
                     continue;
@@ -2917,22 +2977,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     takenDamageLogActors[index] = EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
                 }
-
-                if (Encounter.IsTakenDamageLogged(targetUuid, ResolveDamageValue(damageInfo)))
-                {
-                    lastLoggedTakenDamageIndexByGroup[(takenDamageLogActors[index], damageInfo.DamageSource == EDamageSource.Buff, damageInfo.OwnerId)] = index;
-                }
-            }
-
-            var carriesTakenDamageHp = new bool[damages.Count];
-            foreach (var lastIndex in lastLoggedTakenDamageIndexByGroup.Values)
-            {
-                carriesTakenDamageHp[lastIndex] = true;
-            }
-
-            foreach (var lastIndex in lastLoggedEnemyHealIndexByGroup.Values)
-            {
-                carriesTakenDamageHp[lastIndex] = true;
             }
 
             HashSet<long> rosterPlayersToUpsert = [];
@@ -2946,10 +2990,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     if (syncDamageInfo.Type != EDamageType.Heal)
                     {
-                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, carriesTakenDamageHp[damageIndex], playerVitalsBefore.Health, extraData);
+                        AddSelfCausedTakenDamage(syncDamageInfo, targetUuid, extraData);
                         if (isTargetPlayer)
                         {
                             rosterPlayersToUpsert.Add(targetUuid);
+                        }
+                        else
+                        {
+                            AddEnemySelfCausedDamageLog(syncDamageInfo, targetUuid, extraData);
                         }
                     }
 
@@ -3068,7 +3116,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                     else if (takenDamageLogActors[damageIndex] != 0)
                     {
-                        AddEnemyHealLog(syncDamageInfo, takenDamageLogActors[damageIndex], targetUuid, attackerUuid, carriesTakenDamageHp[damageIndex], enemyHealHealthBefore, extraData);
+                        AddEnemyHealLog(syncDamageInfo, takenDamageLogActors[damageIndex], targetUuid, attackerUuid, extraData);
                     }
                 }
                 else
@@ -3079,11 +3127,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
 
-                    // バフ由来の被ダメは、そのバフを付けた技をいま生きている実体から控える。
+                    // 敵の攻撃(プレイヤーへの被弾と敵どうし)のバフ由来のものは、そのバフを付けた技をいま生きている実体から控える。
                     // 表示するころには実体が残っていないので、記録の瞬間にしか決まらない。
                     var buffSourceSkillId = 0;
                     var summonSourceSkillId = 0;
-                    if (!isAttackerPlayer && Utils.UuidToEntityType(targetUuid) == (long)EEntityType.EntChar)
+                    if (!isAttackerPlayer)
                     {
                         if (syncDamageInfo.DamageSource == EDamageSource.Buff
                             && BuffInstanceIndex.Instance.TryResolveSourceSkill(
@@ -3104,14 +3152,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                         }
                     }
 
-                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, carriesTakenDamageHp[damageIndex], playerVitalsBefore.Health, extraData);
+                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
+
+                    // 敵から敵へのダメージはタイムラインに残す(敵からプレイヤーへは上の被ダメログ)。値 0 は HP もバリアも減っていない。
+                    if (!isAttackerPlayer && !isTargetPlayer && takenDamageLogActors[damageIndex] != 0 && damage != 0)
+                    {
+                        EncounterManager.Current.AddEnemyDamage(takenDamageLogActors[damageIndex], targetUuid, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, damage, extraData);
+                    }
                 }
 
                 // 畳めずバフIDのまま出す行は、名前を GetBuffName で引く必要がある。
                 // SkillTable と BuffTable は90IDが重複するので、種別を持たないと取り違える。
                 if (foldedSource.IsBuffSource)
                 {
-                    // 回復の行を持つのはプレイヤーの回復だけ(敵どうしの回復はメーターに入れない)。
+                    // 回復の行を持つのはプレイヤーの回復だけ(敵の回復はメーターに入れない)。
                     if (!isHeal || isAttackerPlayer)
                     {
                         EncounterManager.Current.MarkBuffSourcedSkill(attackerUuid, skillId);

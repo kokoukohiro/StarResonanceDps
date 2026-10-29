@@ -67,7 +67,11 @@ public sealed partial class MainViewModel : ViewModelBase
     private bool _isBulkUpdatingWidgets;
     private bool _isLoadingWidgets;
 
-    public ICollectionView Widgets { get; }
+    /// <summary>
+    /// ウィジェットのカードの一覧の並び。並べ替えに使う値が変わったら、そのカードだけを動かす(live sorting。一覧を組み直すとカードが全部作り直される)。
+    /// 検索に当たらないカードは一覧から外さず隠す(<see cref="WidgetListItemViewModel.IsSearchMatch"/>)。
+    /// </summary>
+    public ListCollectionView Widgets { get; }
 
     public ReadOnlyObservableCollection<PluginListItemViewModel> PluginItems { get; }
 
@@ -133,8 +137,8 @@ public sealed partial class MainViewModel : ViewModelBase
             _notificationMonitor = new NotificationMonitor();
         }
 
-        Widgets = CollectionViewSource.GetDefaultView(_widgetItems);
-        Widgets.Filter = FilterWidget;
+        Widgets = (ListCollectionView)CollectionViewSource.GetDefaultView(_widgetItems);
+        Widgets.IsLiveSorting = true;
         ApplyWidgetSort();
 
         foreach (var manifest in _pluginManager.DiscoverPlugins())
@@ -220,6 +224,8 @@ public sealed partial class MainViewModel : ViewModelBase
         widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
+        widget.BuffCardNotificationTargetChangedFromWidget += Widget_BuffCardNotificationTargetChangedFromWidget;
+        widget.BuffDebuffGroupNotificationTargetChangedFromWidget += Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
         if (widget.SupportsTargetSelection)
         {
             widget.SelectedTargetOption = WidgetTargetSelection.CreateDefault(widget);
@@ -229,6 +235,7 @@ public sealed partial class MainViewModel : ViewModelBase
             widget.BuffCardShortcutsChanged += Widget_BuffCardShortcutsChanged;
         }
 
+        widget.IsSearchMatch = MatchesSearchText(widget);
         _widgetItems.Add(widget);
         _widgetWindowManager.RegisterPlayerWindowWidget(widget);
         return widget;
@@ -358,6 +365,30 @@ public sealed partial class MainViewModel : ViewModelBase
             .Shortcuts ?? [];
         WidgetConfigDefaults.SetBuffEntryEnabled(shortcuts, key, isEnabled, WidgetConfigDefaults.DefaultBuffCardShortcutEntries);
         _widgetStateManager.SaveBuffCardShortcuts(kind, shortcuts);
+    }
+
+    /// <summary>
+    /// 右クリックでバフ・デバフカードの通知対象の行をオン/オフにした。ショートカットと同じく、<b>保存済みの行に同じ決まりで当てて</b>その項目だけ書く。
+    /// </summary>
+    private void Widget_BuffCardNotificationTargetChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var targets = WidgetConfigDefaults
+            .CloneNormalizedBuffCard(_widgetStateManager.GetWidgetSnapshot(kind).BuffCard)
+            .NotificationTargets ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(targets, key, isEnabled, WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries);
+        _widgetStateManager.SaveBuffCardNotificationTargets(kind, targets);
+    }
+
+    /// <summary>
+    /// 右クリックでバフ・デバフグループの通知対象の行をオン/オフにした。グループの行と同じく、<b>保存済みの行に同じ決まりで当てて</b>その項目だけ書く。
+    /// </summary>
+    private void Widget_BuffDebuffGroupNotificationTargetChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var targets = WidgetConfigDefaults
+            .CloneNormalizedBuffDebuffGroup(_widgetStateManager.GetWidgetSnapshot(kind).BuffDebuffGroup)
+            .NotificationTargets ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(targets, key, isEnabled, WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries);
+        _widgetStateManager.SaveBuffDebuffGroupNotificationTargets(kind, targets);
     }
 
     private void PlayerListWidget_PlayerWindowRequested(WidgetKind kind, long characterId)
@@ -641,7 +672,6 @@ public sealed partial class MainViewModel : ViewModelBase
 
         RaiseWidgetActionTextsChanged();
         RefreshTargetSelections();
-        Widgets.Refresh();
     }
 
     private void OnWidgetPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -671,21 +701,13 @@ public sealed partial class MainViewModel : ViewModelBase
             _widgetWindowManager.ApplyWidgetState(widget);
         }
 
-        if (e.PropertyName is not (nameof(WidgetListItemViewModel.DisplayName)
-            or nameof(WidgetListItemViewModel.State)
-            or nameof(WidgetListItemViewModel.IsFavorite)
-            or nameof(WidgetListItemViewModel.IsPinned)
-            or nameof(WidgetListItemViewModel.IsClickThrough)))
+        // 名前の欄に出している文字が変わったら、そのカードだけ検索に当たるかを決め直す。
+        if (e.PropertyName is nameof(WidgetListItemViewModel.DisplayName)
+            or nameof(WidgetListItemViewModel.TargetSelectorText)
+            or nameof(WidgetListItemViewModel.ShowsTargetSelector))
         {
-            return;
+            widget.IsSearchMatch = MatchesSearchText(widget);
         }
-
-        if (_isBulkUpdatingWidgets)
-        {
-            return;
-        }
-
-        Widgets.Refresh();
     }
 
     public void RestoreRunningWidgetWindows()
@@ -792,21 +814,24 @@ public sealed partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(ClearClickThroughActionText));
     }
 
-    private bool FilterWidget(object item)
+    /// <summary>
+    /// 全部のカードの、検索欄の文字に当たるかを決め直す。当たらないカードは隠すだけで、一覧は組み直さない
+    /// (一覧の絞り込みを組み直すと、カードが全部作り直される)。
+    /// </summary>
+    private void ApplySearch()
     {
-        if (item is not WidgetListItemViewModel widget)
+        foreach (var widget in _widgetItems)
         {
-            return false;
+            widget.IsSearchMatch = MatchesSearchText(widget);
         }
-
-        return MatchesSearchText(widget);
     }
 
+    /// <summary>カードの名前の欄に出している文字(<see cref="WidgetListItemViewModel.ShownName"/>)に、検索欄の文字が入っているか。</summary>
     private bool MatchesSearchText(WidgetListItemViewModel widget)
     {
         var searchText = SearchText?.Trim();
         return string.IsNullOrEmpty(searchText)
-            || widget.DisplayName.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
+            || widget.ShownName.Contains(searchText, StringComparison.CurrentCultureIgnoreCase);
     }
 
     private void ApplyWidgetSort()
@@ -844,6 +869,13 @@ public sealed partial class MainViewModel : ViewModelBase
                 default:
                     Widgets.SortDescriptions.Add(new SortDescription(nameof(WidgetListItemViewModel.OriginalIndex), ListSortDirection.Ascending));
                     break;
+            }
+
+            // 並べ替えに使う値だけを見張る(変わったカードだけが動く)。
+            Widgets.LiveSortingProperties.Clear();
+            foreach (var sortDescription in Widgets.SortDescriptions)
+            {
+                Widgets.LiveSortingProperties.Add(sortDescription.PropertyName);
             }
         }
     }
@@ -883,45 +915,23 @@ public sealed partial class MainViewModel : ViewModelBase
         UpdateWidgetClickThroughStates(_widgetItems, isClickThrough: false);
     }
 
-    /// <summary>並べ替え「クリック透過」に効くので、ピン留めの一括と同じく最後に1回だけ一覧を並べ直す。</summary>
     private void UpdateWidgetClickThroughStates(IEnumerable<WidgetListItemViewModel> widgets, bool isClickThrough)
     {
-        _isBulkUpdatingWidgets = true;
-
-        try
+        foreach (var widget in widgets)
         {
-            foreach (var widget in widgets)
-            {
-                widget.IsClickThrough = isClickThrough;
-            }
+            widget.IsClickThrough = isClickThrough;
         }
-        finally
-        {
-            _isBulkUpdatingWidgets = false;
-        }
-
-        Widgets.Refresh();
     }
 
     private void UpdateWidgetStates(IEnumerable<WidgetListItemViewModel> widgets, WidgetState state)
     {
-        _isBulkUpdatingWidgets = true;
-
-        try
+        foreach (var widget in widgets)
         {
-            foreach (var widget in widgets)
-            {
-                widget.State = state;
-            }
+            widget.State = state;
         }
-        finally
-        {
-            _isBulkUpdatingWidgets = false;
-        }
-
-        Widgets.Refresh();
     }
 
+    /// <summary>一括のピン留めでは、窓を1枚ずつ前に出さない(<c>bringToFront</c>)。</summary>
     private void UpdateWidgetPinStates(IEnumerable<WidgetListItemViewModel> widgets, bool isPinned)
     {
         _isBulkUpdatingWidgets = true;
@@ -937,13 +947,11 @@ public sealed partial class MainViewModel : ViewModelBase
         {
             _isBulkUpdatingWidgets = false;
         }
-
-        Widgets.Refresh();
     }
 
     partial void OnSearchTextChanged(string value)
     {
-        Widgets.Refresh();
+        ApplySearch();
     }
 
     partial void OnWidgetSortIndexChanged(int value)

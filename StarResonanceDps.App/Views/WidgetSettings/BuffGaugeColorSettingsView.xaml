@@ -6,7 +6,7 @@
              SnapsToDevicePixels="True">
     <!--
         バフ・デバフのゲージの色の節(DataContext は BuffGaugeColorSettingsViewModel)。
-        行の作りはクラスカラー(TakenDamageLogClassColorSettingsView)と同じで、左のアイコンを持たない。
+        行の作りはクラスカラー(MeterWidgetClassColorSettingsView)と同じで、左のアイコンを持たない。
         節の最後の行は不透明度なので、色の行はどれも下の線を引く。
     -->
     <StackPanel>

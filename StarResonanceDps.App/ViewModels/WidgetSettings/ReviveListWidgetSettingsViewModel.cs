@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// <summary>
 /// 蘇生リストの設定。表示設定の「プレイヤー名」(書式)と「自分の強調表示」はプレイヤーリスト(<see cref="MeterWidgetSettingsViewModel"/>)と同じ作り、
 /// 「ゲージの長さ」とデバフカラーはデバフ一覧(<see cref="BuffListWidgetSettingsViewModel"/>)と同じ作り(色の節は共有の部品 <see cref="BuffGaugeColorSettingsViewModel"/>)、
-/// アイコンカラーは被ダメログ(<see cref="TakenDamageLogWidgetSettingsViewModel"/>)と同じ作り、
+/// アイコンカラーはプレイヤー情報(<see cref="PlayerInfoWidgetSettingsViewModel"/>)と同じ作り、
 /// テキストカラーは装備詳細(<see cref="EquipmentWidgetSettingsViewModel"/>)と同じ作り(見本は「Aa」)。
 /// </summary>
 public sealed partial class ReviveListWidgetSettingsViewModel : ObservableObject, IDisposable

@@ -1,0 +1,20 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.DamageTakenListWidgetHeaderActionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <StackPanel Orientation="Horizontal">
+        <Button Width="Auto"
+                Height="30"
+                Style="{StaticResource Button.WidgetWindowHeaderIcon}"
+                Command="{Binding ToggleLatestHitOnlyCommand}">
+            <Border Margin="8,0">
+                <TextBlock Opacity="0"
+                           IsHitTestVisible="False"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Text="{Binding LatestHitOnlyActionText}" />
+            </Border>
+        </Button>
+    </StackPanel>
+</UserControl>

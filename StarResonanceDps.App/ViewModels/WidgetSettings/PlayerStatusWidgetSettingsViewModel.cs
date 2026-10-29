@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// <summary>
 /// ステータス詳細の表示設定、行ごとのオン/オフ、行ごとのテキストカラー。
 /// 行の一覧の作りは「他人のロールスキル」(<see cref="MeterWidgetSettingsViewModel"/>)、
-/// テキストカラーは被ダメログ(<see cref="TakenDamageLogWidgetSettingsViewModel"/>)と同じ。
+/// テキストカラーはタイムライン(<see cref="TakenDamageLogWidgetSettingsViewModel"/>)と同じ。
 /// </summary>
 public sealed partial class PlayerStatusWidgetSettingsViewModel : ObservableObject, IDisposable, IRowReorderTarget
 {

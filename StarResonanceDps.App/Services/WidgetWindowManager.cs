@@ -1243,15 +1243,26 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     {
         var viewModel = new DamageTakenListWidgetViewModel(widget, PlayerRosterPresentationStore.Instance.Current, OpenPlayerWindow);
         _damageTakenListViewModel = viewModel;
+
+        // ヘッダーの文字ボタン(「最新の被ダメのみ表示」の切り替え)はメーターと同じく2層で1組。
         return new WidgetWindowComposition(
             new DamageTakenListWidgetView
             {
                 DataContext = viewModel
             },
             viewModel,
-            null,
-            null,
-            null);
+            new DamageTakenListWidgetHeaderLabelsView
+            {
+                DataContext = viewModel
+            },
+            new DamageTakenListWidgetHeaderActionsView
+            {
+                DataContext = viewModel
+            },
+            new DamageTakenListWidgetFooterView
+            {
+                DataContext = viewModel
+            });
     }
 
     /// <summary>顔ぶれを蘇生リストと被ダメリストの窓へ当てる(画面のスレッドで呼ぶ)。開いていない窓には何もしない。</summary>

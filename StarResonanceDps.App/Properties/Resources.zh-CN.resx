@@ -333,7 +333,7 @@
     <value>{PlayerName}成为了{EntityName}的攻击目标</value>
   </data>
   <data name="Notification_Targeted" xml:space="preserve">
-    <value>攻击目标状态</value>
+    <value>被锁定玩家</value>
   </data>
   <data name="Notification_TargetEntity" xml:space="preserve">
     <value>目标实体</value>
@@ -348,13 +348,13 @@
     <value>无条件</value>
   </data>
   <data name="TargetedCondition_1" xml:space="preserve">
-    <value>攻击目标状态1秒以上</value>
+    <value>被锁定状态1秒以上</value>
   </data>
   <data name="TargetedCondition_2" xml:space="preserve">
-    <value>攻击目标状态2秒以上</value>
+    <value>被锁定状态2秒以上</value>
   </data>
   <data name="TargetedCondition_3" xml:space="preserve">
-    <value>攻击目标状态3秒以上</value>
+    <value>被锁定状态3秒以上</value>
   </data>
   <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
     <value>队伍成员</value>
@@ -370,18 +370,6 @@
   </data>
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}正在吟唱</value>
-  </data>
-  <data name="EntityCastCondition_Immediate" xml:space="preserve">
-    <value>无条件</value>
-  </data>
-  <data name="EntityCastCondition_1" xml:space="preserve">
-    <value>1秒以上的吟唱</value>
-  </data>
-  <data name="EntityCastCondition_2" xml:space="preserve">
-    <value>2秒以上的吟唱</value>
-  </data>
-  <data name="EntityCastCondition_3" xml:space="preserve">
-    <value>3秒以上的吟唱</value>
   </data>
   <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>发动时</value>
@@ -471,10 +459,19 @@
     <value>添加至分组</value>
   </data>
   <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
-    <value>添加到增益卡片快捷方式</value>
+    <value>添加到增益减益卡片快捷方式</value>
   </data>
-  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
-    <value>添加到减益卡片快捷方式</value>
+  <data name="BuffList_Menu_AddBuffToNotificationTargets" xml:space="preserve">
+    <value>将此增益设为通知目标</value>
+  </data>
+  <data name="BuffList_Menu_RemoveBuffFromNotificationTargets" xml:space="preserve">
+    <value>从通知目标中移除此增益</value>
+  </data>
+  <data name="BuffList_Menu_AddDebuffToNotificationTargets" xml:space="preserve">
+    <value>将此减益设为通知目标</value>
+  </data>
+  <data name="BuffList_Menu_RemoveDebuffFromNotificationTargets" xml:space="preserve">
+    <value>从通知目标中移除此减益</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>从分组中删除此增益</value>
@@ -605,49 +602,38 @@
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}的{1}</value>
   </data>
-  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0}受到{1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_LethalText" xml:space="preserve">
-    <value>被击败</value>
-  </data>
-  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
-    <value>{0}的{1}</value>
-  </data>
-  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
-    <value>{0}的{1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}受到{1}</value>
-  </data>
-  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
-    <value>{0}{1}伤害</value>
-  </data>
-  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
-    <value>{0}{1}物理伤害</value>
-  </data>
-  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
-    <value>{0}{1}魔法伤害</value>
-  </data>
-  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
-    <value>HP({0}/{1})</value>
-  </data>
-  <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>被击败({0}/{1})</value>
-  </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻击</value>
   </data>
   <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
     <value>治疗</value>
-  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
     <value>文本复制错误</value>
   </data>
   <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
     <value>无法复制文本。</value>
   </data>
   <data name="TakenDamageLog_HealFormat" xml:space="preserve">
-    <value>{0}恢复{1}HP</value>
+    <value>{0}{1}HP</value>
+  </data>
+  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+    <value>恢复{0}</value>
+  </data>
+  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+    <value>对{0}造成{1}</value>
+  </data>
+  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+    <value>{0}伤害</value>
+  </data>
+  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+    <value>{0}获得{1}</value>
+  </data>
+  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+    <value>{0}({1}秒)</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+    <value>某种效果</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>系统</value>
@@ -657,9 +643,6 @@
   </data>
   <data name="TakenDamageLog_FallSkill" xml:space="preserve">
     <value>坠落</value>
-  </data>
-  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0}{1}</value>
   </data>
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
@@ -730,14 +713,11 @@
   <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
     <value>玩家名称</value>
   </data>
+  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+    <value>效果</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
     <value>HP数值</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
-    <value>护盾量数值</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>被击败</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>无元素</value>
@@ -1233,6 +1213,27 @@
   <data name="Settings_Display_CombatState" xml:space="preserve">
     <value>战斗状态</value>
   </data>
+  <data name="Settings_Display_TargetedPlayer" xml:space="preserve">
+    <value>被锁定玩家</value>
+  </data>
+  <data name="Settings_Display_HateValue" xml:space="preserve">
+    <value>仇恨值</value>
+  </data>
+  <data name="HateRankDisplay_Top5" xml:space="preserve">
+    <value>显示前5名</value>
+  </data>
+  <data name="HateRankDisplay_Top4" xml:space="preserve">
+    <value>显示前4名</value>
+  </data>
+  <data name="HateRankDisplay_Top3" xml:space="preserve">
+    <value>显示前3名</value>
+  </data>
+  <data name="HateRankDisplay_Top2" xml:space="preserve">
+    <value>显示前2名</value>
+  </data>
+  <data name="HateRankDisplay_FirstOnly" xml:space="preserve">
+    <value>仅显示仇恨第1名</value>
+  </data>
   <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
     <value>仅显示自己</value>
   </data>
@@ -1378,16 +1379,24 @@
     <value>复活列表</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
-    <value>承伤列表</value>
-  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
-    <value>(被击败)</value>
+    <value>承伤日志</value>
   </data>
-  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
-    <value>{0}秒前</value>
+  <data name="DamageTakenList_Defeated" xml:space="preserve">
+    <value>(被击败)</value>
   </data>
   <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
     <value>显示被击败原因</value>
-  </data>  <data name="ReviveList_Revivable" xml:space="preserve">
+  </data>
+  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+    <value>仅显示最新承伤</value>
+  </data>
+  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+    <value>显示全部</value>
+  </data>
+  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+    <value>仅最新</value>
+  </data>
+  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>可复活</value>
   </data>
   <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
@@ -1421,7 +1430,7 @@
     <value>仅显示地图ID</value>
   </data>
   <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
-    <value>无名称技能</value>
+    <value>无名称技能和Buff</value>
   </data>
   <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
     <value>※内部名称仅为中文</value>
@@ -1562,7 +1571,7 @@
     <value>预览</value>
   </data>
   <data name="Notification_BuffWidgetNote" xml:space="preserve">
-    <value>※仅通知运行中的增益减益卡片和增益减益分组中的增益</value>
+    <value>※仅通知运行中的小组件“增益减益卡片”和“增益减益分组”中的增益</value>
   </data>
   <data name="Notification_PlayerAppeared" xml:space="preserve">
     <value>玩家出现</value>
@@ -1576,8 +1585,35 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>目标实体名称</value>
   </data>
-  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
-    <value>※请输入当前显示语言的实体名称</value>
+  <data name="Notification_TargetEntityId" xml:space="preserve">
+    <value>目标实体ID</value>
+  </data>
+  <data name="Notification_TargetPlayerUid" xml:space="preserve">
+    <value>目标玩家UID</value>
+  </data>
+  <data name="Notification_TargetSkillName" xml:space="preserve">
+    <value>目标技能名称</value>
+  </data>
+  <data name="Notification_TargetSkillId" xml:space="preserve">
+    <value>目标技能ID</value>
+  </data>
+  <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
+    <value>※输入ID后将优先于名称</value>
+  </data>
+  <data name="Notification_TargetUidPriorityNote" xml:space="preserve">
+    <value>※输入UID后将优先于名称</value>
+  </data>
+  <data name="Notification_TargetIdSourceNote" xml:space="preserve">
+    <value>※ID可通过显示设置的“内部ID”显示，ID和名称可从小组件“时间轴”复制</value>
+  </data>
+  <data name="Notification_TargetMultipleNote" xml:space="preserve">
+    <value>※可用“|”分隔输入多个</value>
+  </data>
+  <data name="Notification_BuffTargetSettingsNote" xml:space="preserve">
+    <value>※要通知的增益减益可在小组件“增益减益卡片”和“增益减益分组”设置的“通知目标”中选择</value>
+  </data>
+  <data name="Settings_Section_NotificationTargets_Title" xml:space="preserve">
+    <value>通知目标</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>统计中</value>

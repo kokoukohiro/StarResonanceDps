@@ -255,13 +255,13 @@ internal static class NearbyEntityProjection
 
     /// <summary>
     /// 一覧に入れる種類。名前の表を持つモンスターだけ(名前は <c>CombatDataCatalog.GetEntityName</c>)。
-    /// 名前で絞るのは表示側(名前は表示言語で決まる)。
+    /// 名前で絞るのは表示側(名前は表示言語で決まる)。タイムラインの敵の行動の記録も同じ種類で絞る(<c>Encounter.IsEnemyActionRecorded</c>)。
     ///
     /// <para>
     /// <b>召喚ビット(UUID のビット15)では外さない。</b> 敵が召喚した敵にも立つ。
     /// </para>
     /// </summary>
-    private static bool IsListedType(EEntityType entityType)
+    internal static bool IsListedType(EEntityType entityType)
     {
         return entityType is EEntityType.EntMonster;
     }

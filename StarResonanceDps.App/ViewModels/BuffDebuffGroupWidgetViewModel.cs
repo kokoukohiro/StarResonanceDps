@@ -24,13 +24,14 @@ namespace StarResonanceDps.App.ViewModels;
 /// </para>
 ///
 /// <para>
-/// 行の左クリックはその行のカードを開き、右クリックはメニュー(カード・グループから削除)を開く。行を掴んで動かすと並べ替えになる
+/// 行の左クリックはその行のカードを開き、右クリックはメニュー(カード・グループから削除・通知対象にする/しない)を開く。行を掴んで動かすと並べ替えになる
 /// (<see cref="IRowReorderTarget"/>。オフの行も含めた全体の並びの中で動かし、確定はステータス詳細の窓と同じ扱い)。
 /// バフかデバフかは一覧の振り分けと同じ表の種別で決める(<see cref="CombatDataCatalog.GetBuffListKind"/>)。
 /// </para>
 ///
 /// <para>
 /// オンの行のバフは、窓を開いている間、通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の対象になる(<see cref="BuffNotificationRegistry"/>)。
+/// バフ・デバフ効果切れは、そのうちグループの設定の通知対象に入っている行だけ。
 /// </para>
 /// </summary>
 public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IRowReorderTarget
@@ -70,6 +71,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CardMenuText))]
     [NotifyPropertyChangedFor(nameof(RemoveMenuText))]
+    [NotifyPropertyChangedFor(nameof(NotificationTargetMenuText))]
     private PlayerBuffEntry? _menuEntry;
 
     public BuffDebuffGroupWidgetViewModel(
@@ -113,6 +115,19 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         MenuEntry?.IsDebuff == true
             ? "BuffDebuffGroup_Menu_RemoveDebuff"
             : "BuffDebuffGroup_Menu_RemoveBuff");
+
+    /// <summary>
+    /// メニューの3つ目の項目「このバフを通知対象にする」「〜しない」(デバフの行は「このデバフを」)。開いた行の今の通知対象の状態で決まる。
+    /// </summary>
+    public string NotificationTargetMenuText => BuffDebuffCardContent.GetNotificationTargetMenuText(
+        MenuEntry?.IsDebuff == true,
+        TryGetKey(MenuEntry, out var key) && IsNotificationTarget(key));
+
+    /// <summary>メニューを開く直前に、通知対象の項目の文言を今の状態にする(同じ行を開き直すと <see cref="MenuEntry"/> が変わらないため)。</summary>
+    public void RefreshMenuText()
+    {
+        OnPropertyChanged(nameof(NotificationTargetMenuText));
+    }
 
     public void Dispose()
     {
@@ -258,6 +273,23 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
         }
     }
 
+    /// <summary>行のバフをグループの設定の通知対象に入れる・外す(今の状態の逆。決まりは <see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。</summary>
+    [RelayCommand]
+    private void ToggleNotificationTarget(PlayerBuffEntry? entry)
+    {
+        if (TryGetKey(entry, out var key))
+        {
+            PlayerWidget.SetBuffDebuffGroupNotificationTargetEnabledFromWidget(key, !IsNotificationTarget(key));
+        }
+    }
+
+    /// <summary>行のバフがグループの設定の通知対象(設定の窓のプレビューを含む今の値)に入っているか。</summary>
+    private bool IsNotificationTarget(BuffEntryKey key)
+    {
+        return _settings.NotificationTargets is { } targets
+            && targets.Exists(target => target.IsEnabled && target.GetKey() == key);
+    }
+
     /// <summary>設定(保存かプレビュー)が変わった。色を作り直し、行も当て直す(行のオン/オフ・並び・ゲージの長さ)。</summary>
     private void Widget_BuffDebuffGroupSettingsChanged(object? sender, EventArgs e)
     {
@@ -281,6 +313,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
     {
         OnPropertyChanged(nameof(CardMenuText));
         OnPropertyChanged(nameof(RemoveMenuText));
+        RefreshMenuText();
         Refresh();
     }
 
@@ -346,6 +379,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
 
     /// <summary>
     /// オンの行のバフを、行ごとの通知の判定へ渡す。読み方は行と同じ(同じ番号は残り時間の一番長い実体、料理・薬剤はまとまり)。
+    /// バフ・デバフ効果切れを出すのは、グループの設定の通知対象に入っている行だけ(入っていない行は薬剤・料理効果切れだけを見る借り方)。
     /// 自分が分からない間・バフかデバフに振り分けられない行は判定を返す。オフにした行の判定も返す。
     /// </summary>
     private void ObserveNotifications()
@@ -385,21 +419,20 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
                 continue;
             }
 
-            if (_notificationWatches.TryGetValue(key, out BuffNotificationWatch? watch) && watch.Target != target)
+            var notifiesExpiry = IsNotificationTarget(key);
+            _notificationWatches.TryGetValue(key, out BuffNotificationWatch? watch);
+            if (watch is null || watch.Target != target || watch.NotifiesExpiry != notifiesExpiry)
             {
-                watch.Dispose();
-                _notificationWatches.Remove(key);
-                watch = null;
-            }
-
-            if (watch is null)
-            {
+                // 先に借りてから返す(同じ対象とバフのまま借り方だけ変えるとき、判定の控えを捨てない)。
+                var previous = watch;
                 watch = BuffNotificationRegistry.Instance.Watch(
                     target,
                     BuffNotificationRegistry.CreateBuffKey(
                         key.Group,
-                        key.IsGroup ? string.Empty : MeterSnapshotProvider.CreateBuffCardKey(key.BuffId)));
-                _notificationWatches.Add(key, watch);
+                        key.IsGroup ? string.Empty : MeterSnapshotProvider.CreateBuffCardKey(key.BuffId)),
+                    notifiesExpiry);
+                previous?.Dispose();
+                _notificationWatches[key] = watch;
             }
 
             watch.Observe(Find(snapshots, key), targetName);

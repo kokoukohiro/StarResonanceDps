@@ -104,12 +104,6 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(SkillSnapshot.DamageMode),
             nameof(SkillSnapshot.Timestamp),
             nameof(SkillSnapshot.Sequence),
-            nameof(SkillSnapshot.TargetHp),
-            nameof(SkillSnapshot.TargetMaxHp),
-            nameof(SkillSnapshot.TargetShield),
-            nameof(SkillSnapshot.TargetHpBefore),
-            nameof(SkillSnapshot.TargetMaxHpBefore),
-            nameof(SkillSnapshot.TargetShieldBefore),
             nameof(SkillSnapshot.ShieldBreak),
             nameof(SkillSnapshot.OwnerId),
             nameof(SkillSnapshot.DamageSource),
@@ -122,6 +116,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(SkillCastRecord.SkillId),
             nameof(SkillCastRecord.Timestamp),
             nameof(SkillCastRecord.Sequence),
+            nameof(SkillCastRecord.IsWarning),
         ],
     };
 

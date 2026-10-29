@@ -129,8 +129,8 @@ public sealed partial class EntityListEntry : ObservableObject
     public bool UsesFriendlyHealthBar => CampRelation == EntityCampRelation.Friendly;
 
     /// <summary>
-    /// HP バーの右のヘイトの枠(5つ)。狙っている相手がいれば [0] がその相手で [1]〜[4] がヘイト1〜4位、
-    /// いなければ [0]〜[3] がヘイト1〜4位(詰めて並べる)。
+    /// HP バーの右のヘイトの枠(6つ)。狙っている相手がいて表示設定「狙われるプレイヤー」が表示なら [0] がその相手で [1] からヘイト1位、
+    /// そうでなければ [0] からヘイト1位(詰めて並べる)。ヘイトは表示設定「ヘイト値」の人数(1〜5人)まで。
     /// 枠は作ったまま使い回し、行を当て直すたびに値だけ入れ替える。
     /// </summary>
     public IReadOnlyList<EntityHateSlot> HateSlots { get; } =
@@ -197,18 +197,21 @@ public sealed partial class EntityListEntry : ObservableObject
             ClassBrush = CreateBrush(classColor);
         }
 
-        UpdateHateSlots(entity, hatePlayers);
+        UpdateHateSlots(entity, settings, hatePlayers);
     }
 
     /// <summary>
-    /// ヘイトの枠を当て直す。一覧(プレイヤーだけ)の無い敵は5つとも隠す。
-    /// 狙っている相手がプレイヤーなら左端をその相手にし、続けてヘイト1〜4位。プレイヤーでない・いないときは左端からヘイト1〜4位を詰めて並べる。
-    /// 並べるものが無い枠は隠す(場所は残す)。
+    /// ヘイトの枠を当て直す。一覧(プレイヤーだけ)の無い敵は全部隠す。
+    /// 狙っている相手がプレイヤーで「狙われるプレイヤー」が表示なら左端をその相手にし、続けてヘイト1位から。
+    /// そうでなければ左端からヘイト1位を詰めて並べる。ヘイトは「ヘイト値」の人数まで。並べるものが無い枠は隠す(場所は残す)。
     /// </summary>
-    private void UpdateHateSlots(NearbyEntityEntry entity, EntityHatePlayerResolver hatePlayers)
+    private void UpdateHateSlots(NearbyEntityEntry entity, MeterWidgetSettingsConfig settings, EntityHatePlayerResolver hatePlayers)
     {
         var ranking = entity.HateRanking;
-        var hasTarget = ranking.Count > 0 && entity.TargetCharacterId != 0;
+        var hasTarget = ranking.Count > 0
+            && entity.TargetCharacterId != 0
+            && settings.TargetedPlayerDisplayModeIndex == WidgetConfigDefaults.TargetedPlayerDisplayShowIndex;
+        var rankCount = Math.Min(ranking.Count, WidgetConfigDefaults.GetHateRankDisplayCount(settings.HateRankDisplayModeIndex));
         var firstRankSlot = 0;
         if (hasTarget)
         {
@@ -219,7 +222,7 @@ public sealed partial class EntityListEntry : ObservableObject
         for (var slotIndex = firstRankSlot; slotIndex < HateSlots.Count; slotIndex++)
         {
             var rankIndex = slotIndex - firstRankSlot;
-            if (rankIndex < ranking.Count)
+            if (rankIndex < rankCount)
             {
                 var rank = ranking[rankIndex];
                 HateSlots[slotIndex].ShowRank(hatePlayers.Resolve(rank.CharacterId), rank.HateValue);

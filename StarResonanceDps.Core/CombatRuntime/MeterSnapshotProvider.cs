@@ -251,49 +251,27 @@ public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, i
 public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false);
 
 /// <summary>
-/// 被ダメログの1件(予告か詠唱か被弾か、ダメージの無い死亡)。
+/// 被ダメログ(タイムライン)の1件(予告か予告のバーの終わりか詠唱か、敵の回復・敵から敵へのダメージ・敵が付けたバフ)。
 ///
 /// <para>
 /// <see cref="Timestamp"/> はパケットの到着時刻(UTC。予告のバーの終わりはバーが消える時刻)。経過は持たず、表示側が
 /// <see cref="Encounter.ToCombatOffset"/> で戦闘の経過(メーターの経過と同じ。自動一時停止で止まっていた区間を除く)に直す。
-/// 起点が立つまでは直せない(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)。同じ到着時刻の被弾は画面で1つの技の下にまとめる。
+/// 起点が立つまでは直せない(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)。同じ到着時刻の行動は画面で1つの技の下にまとめる。
 /// </para>
 ///
 /// <para>
-/// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、ダメージを与えた敵。<see cref="Target"/> と HP は被弾(と下の死亡・敵どうしの回復)のときだけ入る
-/// (HP は記録時点で属性を持っていなければ入らない)。
-/// <see cref="SourceName"/> は内部ID注記を付けない名前。名前が無ければ、全体設定で内部名を出すとき
+/// <see cref="Attacker"/> は予告を構えた敵(名前だけで UUID は 0)、詠唱した敵か、行動した敵(回復した側・加害者・バフを付けた側)。
+/// <see cref="Target"/> は行動の相手で、予告と詠唱には無い。<see cref="Value"/> は回復なら実際に増えた HP、ダメージならその値。
+/// <see cref="SourceName"/> は内部ID注記を付けない発生源の名前。名前が無ければ、全体設定で内部名を出すとき
 /// (<see cref="CombatDataCatalog.ShowsUnnamedSkillInternalNames"/>)は技かバフの内部名、出さなければ空。
-/// <see cref="SourceId"/> は届いた <c>OwnerId</c> そのもの。<see cref="IsBuffSource"/> が真ならバフID、
+/// <see cref="SourceId"/> は発生源の番号(回復とダメージは届いた <c>OwnerId</c>、バフは付与元の番号、分からなければ 0)。<see cref="IsBuffSource"/> が真ならバフID、
 /// 偽なら技IDか弾ID(弾のときの <see cref="SourceName"/> は親の技の名前)。
 /// </para>
 ///
 /// <para>
-/// <see cref="DamageElement"/> は被弾の属性。予告・詠唱と、属性を保存していなかった頃の被弾は <c>null</c>。
-/// </para>
-///
-/// <para>
-/// 死亡は <see cref="Attacker"/> がシステム、<see cref="Target"/> が死亡したプレイヤー、HP は 0 と死亡時の最大HP。
-/// <see cref="IsFall"/> は落下の被弾(技名は画面側の文言)。
-/// </para>
-///
-/// <para>
-/// 敵どうしの回復は <see cref="Attacker"/> が回復した側、<see cref="Target"/> が回復された敵、<see cref="Value"/> が実際に増えた HP。
-/// HP は被弾と同じく、同期の中で同じ回復した側・同じ発生源の最後の回復だけが持つ。
-/// </para>
-///
-/// <para>
-/// <see cref="IsLethal"/> は「この被弾で死んだ」。表示は被弾の行に戦闘不能の語を付け、その時刻のまとめの行を戦闘不能にする。
-/// </para>
-///
-/// <para>
-/// <see cref="DamageMode"/> は物理と魔法の別。属性(<see cref="DamageElement"/>)とは独立していて、
-/// <c>DamageNormal</c> はどちらでもない。予告・詠唱・死亡は <c>DamageNormal</c>。
-/// </para>
-///
-/// <para>
-/// <see cref="TargetHpBefore"/> / <see cref="TargetMaxHpBefore"/> / <see cref="TargetShieldBefore"/> は、その同期を当てる前の対象の値
-/// (被弾は <see cref="TargetHp"/> を持つものだけ、死亡は死亡を伝えた同期の前)。持っていない記録(この項目を足す前の記録も)は null。
+/// <see cref="CastSequence"/> は行動を起こした詠唱の通し番号(詠唱の行の <see cref="Sequence"/>)。詠唱から起きたのでなければ 0。
+/// <see cref="IsWarning"/> は詠唱の行が戦闘画面の警告の技か。<see cref="BuffId"/> と <see cref="BuffName"/> は付けたバフとその名前(名前の決め方は <see cref="SourceName"/> と同じで、空もある)、
+/// <see cref="BuffDurationMs"/> は付与の持続(ミリ秒、0 以下は持続なし)。
 /// </para>
 /// </summary>
 public sealed record TakenDamageLogLine(
@@ -306,16 +284,11 @@ public sealed record TakenDamageLogLine(
     bool IsBuffSource,
     string SourceName,
     long Value,
-    long? TargetHp,
-    long? TargetMaxHp,
-    long? TargetShield,
-    EDamageProperty? DamageElement,
-    bool IsFall = false,
-    bool IsLethal = false,
-    EDamageMode DamageMode = EDamageMode.DamageNormal,
-    long? TargetHpBefore = null,
-    long? TargetMaxHpBefore = null,
-    long? TargetShieldBefore = null);
+    long CastSequence = 0,
+    bool IsWarning = false,
+    int BuffId = 0,
+    string BuffName = "",
+    int BuffDurationMs = 0);
 
 /// <summary>
 /// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
@@ -335,12 +308,12 @@ public sealed record TakenDamageLogSnapshot(
 /// 被ダメリストの1人ぶん。表示中の回の、そのプレイヤーの最後の被弾(<see cref="Entity.TakenStats"/> の最後の記録)。
 ///
 /// <para>
-/// 加害者・技名・属性・物理か魔法かはタイムラインの被弾の行(<see cref="TakenDamageLogLine"/>)と同じ決め方で、
+/// 加害者は被ダメログの登場人物(<see cref="TakenDamageLogParty"/>)と同じ決め方、技名は被ダメの発生源の名前の引き方で、
 /// <see cref="SourceName"/> は名前が無ければ空(全体設定で内部名を出すときは内部名)。<see cref="SourceId"/> と <see cref="IsBuffSource"/> は内部ID注記に使う。
 /// </para>
 /// </summary>
 /// <param name="Sequence">
-/// その被弾の通し番号(タイムラインの行の並びと同じ番号)。大きいほど新しく、行の並びに使う。
+/// その被弾の通し番号(被ダメログの記録と同じ番号)。大きいほど新しく、行の並びに使う。
 /// 同じなら中身も同じ(呼び出し側は行の文字を作り直さない)。
 /// </param>
 /// <param name="Timestamp">その被弾の到着時刻(UTC)。経過は持たず、表示側が戦闘の経過(<see cref="Encounter.ToCombatOffset"/>)に直す。</param>
@@ -453,15 +426,6 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 被ダメログを <paramref name="startIndex"/> 件目から返す。表示中のエンカウンターは
-    /// メーターと同じく <see cref="ResolveActiveEncounter"/> で決まるので、履歴表示にも追従する。
-    ///
-    /// <para>
-    /// 表示中のエンカウンターが <paramref name="knownEncounter"/> と違えば先頭から返す。
-    /// 名前はこの呼び出しの時点の言語と内部ID表示で引く。
-    /// </para>
-    /// </summary>
-    /// <summary>
     /// メーターに行が1つでも出るか(<see cref="GetSnapshot"/> と同じ条件)。行は作らない。
     /// メイン画面のカードが、窓の相手の選択リストに並べるものがあるかを確かめるのに使う。
     /// </summary>
@@ -509,6 +473,16 @@ public static class MeterSnapshotProvider
         return false;
     }
 
+    /// <summary>
+    /// 被ダメログを <paramref name="startIndex"/> 件目から読み、タイムラインに出す記録(予告・予告のバーの終わり・詠唱・敵の回復・敵から敵へのダメージ・敵が付けたバフ)の行を返す。
+    /// 被弾とダメージの無い死亡の記録は読み進めるだけで行にしない。表示中のエンカウンターは
+    /// メーターと同じく <see cref="ResolveActiveEncounter"/> で決まるので、履歴表示にも追従する。
+    ///
+    /// <para>
+    /// 表示中のエンカウンターが <paramref name="knownEncounter"/> と違えば先頭から返す。
+    /// 名前はこの呼び出しの時点の言語と内部ID表示で引く。
+    /// </para>
+    /// </summary>
     public static TakenDamageLogSnapshot GetTakenDamageLog(Encounter? knownEncounter, int startIndex)
     {
         return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);
@@ -569,12 +543,21 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。予兆技の通知が使う。
+    /// 技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。予兆技の通知が使う。
     /// 内部名は使わない(読み上げで日本語以外を読めないため)。タイムラインの行は名前が無ければ内部名になることがある。
     /// </summary>
     public static string GetTakenDamageLogSkillName(int skillId)
     {
         return ResolveTakenDamageSkillName(skillId);
+    }
+
+    /// <summary>
+    /// タイムラインの予告・詠唱の行に出す技の名前(<see cref="ResolveTakenDamageLogLineSkillName"/>。名前が無ければ、全体設定で内部名を出すときは内部名)。
+    /// エンティティ詠唱の通知が、対象の名前と比べる(タイムラインに出ている名前を入れれば当たる)。
+    /// </summary>
+    public static string GetTakenDamageLogLineSkillName(int skillId)
+    {
+        return ResolveTakenDamageLogLineSkillName(skillId);
     }
 
     /// <summary>予告の主(予告が届いた時点で周囲にいる、その技を持つモンスターの種別ID。0 なら名前なし)。被ダメログの予告の行の加害者。</summary>
@@ -598,15 +581,14 @@ public static class MeterSnapshotProvider
         var combatStartUtc = encounter.ExData.FirstDamageTimeStamp;
         var records = encounter.GetTakenDamageLogRecords(startIndex);
         var parties = new Dictionary<long, TakenDamageLogParty>();
-        var lines = new TakenDamageLogLine[records.Length];
+        var lines = new List<TakenDamageLogLine>(records.Length);
 
-        for (var index = 0; index < records.Length; index++)
+        foreach (var record in records)
         {
-            var record = records[index];
             if (record.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.AnnouncementEnd)
             {
                 var announcement = record.Announcement!;
-                lines[index] = new TakenDamageLogLine(
+                lines.Add(new TakenDamageLogLine(
                     record.Kind,
                     announcement.Sequence,
                     announcement.Timestamp,
@@ -615,18 +597,14 @@ public static class MeterSnapshotProvider
                     announcement.SkillId,
                     false,
                     ResolveTakenDamageLogLineSkillName(announcement.SkillId),
-                    0,
-                    null,
-                    null,
-                    null,
-                    null);
+                    0));
                 continue;
             }
 
             if (record.Kind == TakenDamageLogRecordKind.Cast)
             {
                 var cast = record.Cast!;
-                lines[index] = new TakenDamageLogLine(
+                lines.Add(new TakenDamageLogLine(
                     record.Kind,
                     cast.Sequence,
                     cast.Timestamp,
@@ -636,40 +614,14 @@ public static class MeterSnapshotProvider
                     false,
                     ResolveTakenDamageLogLineSkillName(cast.SkillId),
                     0,
-                    null,
-                    null,
-                    null,
-                    null);
-                continue;
-            }
-
-            if (record.Kind == TakenDamageLogRecordKind.Death)
-            {
-                var death = record.Death!;
-                lines[index] = new TakenDamageLogLine(
-                    record.Kind,
-                    death.Sequence,
-                    death.Timestamp,
-                    new TakenDamageLogParty(0, 0, string.Empty, false, false, false, 0, PlayerClassSpec.Unknown, IsSystem: true),
-                    ResolveTakenDamageLogParty(encounter, death.PlayerUuid, parties),
-                    0,
-                    false,
-                    string.Empty,
-                    0,
-                    0,
-                    death.MaxHp,
-                    null,
-                    null,
-                    TargetHpBefore: death.HpBefore,
-                    TargetMaxHpBefore: death.MaxHpBefore,
-                    TargetShieldBefore: death.ShieldBefore);
+                    IsWarning: cast.IsWarning));
                 continue;
             }
 
             if (record.Kind == TakenDamageLogRecordKind.EnemyHeal)
             {
                 var heal = record.EnemyHeal!;
-                lines[index] = new TakenDamageLogLine(
+                lines.Add(new TakenDamageLogLine(
                     record.Kind,
                     heal.Sequence,
                     heal.Timestamp,
@@ -679,39 +631,52 @@ public static class MeterSnapshotProvider
                     heal.DamageSource == Zproto.EDamageSource.Buff,
                     ResolveTakenDamageSourceName(false, 0, heal.DamageSource, heal.OwnerId, heal.BuffSourceSkillId, heal.SummonSourceSkillId),
                     heal.Value,
-                    heal.TargetHp,
-                    heal.TargetMaxHp,
-                    heal.TargetShield,
-                    null,
-                    TargetHpBefore: heal.TargetHpBefore,
-                    TargetMaxHpBefore: heal.TargetMaxHpBefore,
-                    TargetShieldBefore: heal.TargetShieldBefore);
+                    heal.CastSequence));
                 continue;
             }
 
-            var snapshot = record.Hit!;
-            var isBuffSource = snapshot.DamageSource == Zproto.EDamageSource.Buff;
-            var attacker = ResolveTakenDamageLogParty(encounter, snapshot.OtherUUID, parties);
-            lines[index] = new TakenDamageLogLine(
-                record.Kind,
-                snapshot.Sequence,
-                snapshot.Timestamp!.Value,
-                attacker,
-                ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
-                snapshot.OwnerId,
-                isBuffSource,
-                ResolveTakenDamageSourceName(attacker.IsPlayer, snapshot.Id, snapshot.DamageSource, snapshot.OwnerId, snapshot.BuffSourceSkillId, snapshot.SummonSourceSkillId),
-                snapshot.Value,
-                snapshot.TargetHp,
-                snapshot.TargetMaxHp,
-                snapshot.TargetShield,
-                snapshot.DamageElement,
-                snapshot.DamageSource == Zproto.EDamageSource.Fall,
-                snapshot.IsKill,
-                snapshot.DamageMode,
-                snapshot.TargetHpBefore,
-                snapshot.TargetMaxHpBefore,
-                snapshot.TargetShieldBefore);
+            if (record.Kind == TakenDamageLogRecordKind.EnemyDamage)
+            {
+                var damage = record.EnemyDamage!;
+                lines.Add(new TakenDamageLogLine(
+                    record.Kind,
+                    damage.Sequence,
+                    damage.Timestamp,
+                    ResolveTakenDamageLogParty(encounter, damage.AttackerUuid, parties),
+                    ResolveTakenDamageLogParty(encounter, damage.TargetUuid, parties),
+                    damage.OwnerId,
+                    damage.DamageSource == Zproto.EDamageSource.Buff,
+                    ResolveTakenDamageSourceName(false, 0, damage.DamageSource, damage.OwnerId, damage.BuffSourceSkillId, damage.SummonSourceSkillId),
+                    damage.Value,
+                    damage.CastSequence));
+                continue;
+            }
+
+            if (record.Kind == TakenDamageLogRecordKind.EnemyBuff)
+            {
+                var buff = record.EnemyBuff!;
+                lines.Add(new TakenDamageLogLine(
+                    record.Kind,
+                    buff.Sequence,
+                    buff.Timestamp,
+                    ResolveTakenDamageLogParty(encounter, buff.CasterUuid, parties),
+                    ResolveTakenDamageLogParty(encounter, buff.TargetUuid, parties),
+                    buff.OwnerId,
+                    buff.DamageSource == Zproto.EDamageSource.Buff,
+                    ResolveTakenDamageSourceName(false, 0, buff.DamageSource, buff.OwnerId, buff.BuffSourceSkillId, buff.SummonSourceSkillId),
+                    0,
+                    buff.CastSequence,
+                    BuffId: buff.BuffId,
+                    BuffName: ResolveTakenDamageLogBuffName(buff.BuffId),
+                    BuffDurationMs: buff.DurationMs));
+                continue;
+            }
+
+            // 被弾とダメージの無い死亡はタイムラインに出さない(被ダメリストとプレイヤーリストの顔ぶれが読む)。
+            if (record.Kind is not (TakenDamageLogRecordKind.Hit or TakenDamageLogRecordKind.Death))
+            {
+                throw new InvalidOperationException($"Taken damage log record kind {record.Kind} has no timeline handling (sequence {record.Sequence}).");
+            }
         }
 
         return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines, combatStartUtc);
@@ -790,13 +755,24 @@ public static class MeterSnapshotProvider
             : sourceSkillName;
     }
 
-    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ <c>SkillNames</c>。</summary>
+    /// <summary>技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。</summary>
     private static string ResolveTakenDamageSkillName(int skillId)
     {
         var dbmName = CombatDataCatalog.GetDbmNameWithoutInternalId(skillId);
         return string.IsNullOrEmpty(dbmName)
             ? CombatDataCatalog.GetSkillNameWithoutInternalId(skillId)
             : dbmName;
+    }
+
+    /// <summary>
+    /// 敵が付けたバフの行のバフの名前。空なら、全体設定で内部名を出すときはバフの内部名(出さなければ空のまま。表示側が「何かの効果」と出す)。
+    /// </summary>
+    private static string ResolveTakenDamageLogBuffName(int buffId)
+    {
+        var name = CombatDataCatalog.GetBuffNameWithoutInternalId(buffId);
+        return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
+            ? CombatDataCatalog.GetBuffInternalName(buffId)
+            : name;
     }
 
     /// <summary>
@@ -811,7 +787,7 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 被弾・敵どうしの回復の行の内部名。引く順は <see cref="ResolveTakenDamageSourceName"/> と同じ
+    /// 被弾・敵の行動の行の内部名。引く順は <see cref="ResolveTakenDamageSourceName"/> と同じ
     /// (バフは付与元の技、無いか内部名が空ならそのバフ。弾は親の技、それ以外はその技。空なら召喚元の技)。
     /// 弾の番号をそのまま技の表で引かない(同じ番号の無関係な技の内部名が出る)。
     /// </summary>
@@ -897,11 +873,10 @@ public static class MeterSnapshotProvider
             // 仕掛けそのものを指す名前を出す。
             // 名前の無いモンスターでも、ゲーム内で HP バーが見えるものは「敵」と出す(エンティティリストと同じ条件)。
             // 表に行が無い番号には付けない(表が古いことを、名前の無い雑魚と見分けるため)。
-            // AttrId が届いていない加害者は何者か分からないので「未知の敵」と出す。
+            // AttrId が届いていない加害者と、それ以外の名前の無いモンスター(表に行が無い・名前も HP バーも無い)は「未知の敵」と出す。
             var attrId = entity.GetAttrKV("AttrId");
             var entityType = (EEntityType)Utils.UuidToEntityType(uuid);
             var isSystem = entityType == EEntityType.EntDummy;
-            var isUnknownEnemy = !isSystem && attrId is null;
             var monsterId = attrId is null || entityType != EEntityType.EntMonster ? 0 : Convert.ToInt64(attrId);
             var name = monsterId == 0
                 ? string.Empty
@@ -910,6 +885,11 @@ public static class MeterSnapshotProvider
                 && CombatDataCatalog.HasEntityRow(EEntityType.EntMonster, monsterId)
                 && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)
                 && CombatDataCatalog.HasMonsterHpBar(monsterId);
+            var isUnknownEnemy = !isSystem
+                && (attrId is null
+                    || (entityType == EEntityType.EntMonster
+                        && !isUnnamedEnemy
+                        && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)));
             party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy);
         }
 

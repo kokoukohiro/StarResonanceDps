@@ -6,10 +6,12 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        バフ・デバフの行ごとのオン/オフ(バフ・デバフグループの「バフ・デバフ」とバフ・デバフカードの「ショートカット」、DataContext は BuffEntryListSettingsViewModel)。
+        バフ・デバフの行ごとのオン/オフ(バフ・デバフグループの「バフ・デバフ」とバフ・デバフカードの「ショートカット」、両方の「通知対象」、
+        DataContext は BuffEntryListSettingsViewModel)。
         行の作りは「ステータス」の一覧と同じ(左にアイコンと名前、右にスイッチ)で、アイコンの枠は非表示リストの行と同じ。
-        行はスイッチ以外の所を掴んで並べ替えられる(RowReorderBehavior。写して薄くするのは行の中身 RowContent)。
+        行はスイッチ以外の所を掴んで並べ替えられる(RowReorderBehavior。写して薄くするのは行の中身 RowContent)。「通知対象」は並べ替えない。
         見出しの下の注意書きは2つ。1つ目は行の足し方(作りは非表示リストの説明と同じ)、2つ目は並べ替えの文言(持ち主ごとに違う)で作りは「ステータス」の一覧と同じ。
+        並べ替えない一覧は2つ目を出さない。注意書きと一覧のあいだは、注意書きの数に関係なく 10(行の下の 4 と囲みの下の 6)。
     -->
     <StackPanel>
         <TextBlock Text="{Binding SectionTitle}"
@@ -17,18 +19,21 @@
                    FontSize="16"
                    FontWeight="SemiBold"
                    Margin="0,0,0,4" />
-        <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_BuffDebuffGroupEntries_Description]}"
-                   Foreground="{DynamicResource Brush.TextSecondary}"
-                   FontSize="13"
-                   FontWeight="SemiBold"
-                   TextWrapping="Wrap"
-                   Margin="0,0,0,4" />
-        <TextBlock Text="{Binding ReorderNote}"
-                   Foreground="{DynamicResource Brush.TextSecondary}"
-                   FontSize="13"
-                   FontWeight="SemiBold"
-                   TextWrapping="Wrap"
-                   Margin="0,0,0,10" />
+        <StackPanel Margin="0,0,0,6">
+            <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_BuffDebuffGroupEntries_Description]}"
+                       Foreground="{DynamicResource Brush.TextSecondary}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,4" />
+            <TextBlock Text="{Binding ReorderNote}"
+                       Foreground="{DynamicResource Brush.TextSecondary}"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,4"
+                       Visibility="{Binding AllowsReorder, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        </StackPanel>
 
         <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
             <ItemsControl ItemsSource="{Binding Entries}"

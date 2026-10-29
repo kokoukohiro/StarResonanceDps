@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:notificationModels="clr-namespace:StarResonanceDps.App.Models.Notifications"
              xmlns:notifications="clr-namespace:StarResonanceDps.App.ViewModels.Notifications"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
@@ -163,7 +165,7 @@
             出し方の設定。中身は前の全体設定の通知設定と同じ行で、設定画面の枠を使わずパネルへ直に並べる(下線なし)。
             行の名前は左寄せ、選択リストと音量バー(どちらも幅 220)は右寄せ。
             上下の余白 16 はスクロールの外に置く。右下が最小の高さ(NotificationsView.xaml.cs の SettingsPanelMinHeight)のとき、最初の行だけがちょうど真ん中に出る。
-            項目だけの行(出現の対象の名前・注意書き・通知条件・HP低下の3行)を先頭に置き、出し方から下(全部の項目に共通の行)はいつも末尾に置く。
+            項目だけの行(対象の名前とID・注意書き・通知条件・HP低下の3行)を先頭に置き、出し方から下(全部の項目に共通の行)はいつも末尾に置く。
         -->
         <ContentControl x:Name="SettingsPanel"
                         Grid.Row="2"
@@ -175,59 +177,173 @@
                           Style="{StaticResource ScrollViewer.WidgetList}"
                           VerticalScrollBarVisibility="Hidden">
                 <StackPanel Margin="20,0,20,0">
-                    <!-- プレイヤー出現の対象の名前。入力欄の幅は選択リストと同じ 220。 -->
-                    <Grid Height="44" Visibility="{Binding ShowsTargetPlayerName, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                    <!--
+                        プレイヤー出現・エンティティ出現・エンティティ詠唱の対象。名前の行、IDの行、その下に注意書き。入力欄の幅は選択リストと同じ 220。
+                        名前もIDも区切り(NotificationTargetList.Separator)で複数を並べられる。
+                        IDの欄は数字と区切りだけを受ける(DigitsOnlyInputBehavior、IME は切る、ドラッグで文字を落とさない)。
+                    -->
+                    <StackPanel Visibility="{Binding ShowsTargetPlayerName, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Style="{StaticResource NotificationsView.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetPlayerName]}" />
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetPlayerName]}" />
 
-                        <TextBox Grid.Column="2"
-                                 Width="220"
-                                 Height="32"
-                                 Style="{StaticResource Input.PathBox}"
-                                 VerticalContentAlignment="Center"
-                                 Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </Grid>
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
 
-                    <!-- エンティティ出現の対象の名前。2行目に、表示言語の名前で書く注意書き。 -->
-                    <Grid Visibility="{Binding ShowsTargetEntityName, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="44" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                        <TextBlock Style="{StaticResource NotificationsView.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityName]}" />
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetPlayerUid]}" />
 
-                        <TextBox Grid.Column="2"
-                                 Width="220"
-                                 Height="32"
-                                 Style="{StaticResource Input.PathBox}"
-                                 VerticalContentAlignment="Center"
-                                 Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     AllowDrop="False"
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
+                                     behaviors:DigitsOnlyInputBehavior.ListSeparator="{x:Static notificationModels:NotificationTargetList.Separator}"
+                                     Text="{Binding TargetIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
 
-                        <TextBlock Grid.Row="1"
-                                   Grid.ColumnSpan="3"
-                                   Margin="0,0,0,6"
+                        <TextBlock Margin="0,0,0,4"
                                    Style="{StaticResource NotificationsView.Note}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityNameNote]}" />
-                    </Grid>
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetMultipleNote]}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetUidPriorityNote]}" />
+                    </StackPanel>
 
-                    <!-- バフ・デバフ効果切れだけの注意書き。 -->
-                    <TextBlock Margin="0,0,0,6"
-                               Style="{StaticResource NotificationsView.Note}"
-                               Visibility="{Binding ShowsBuffWidgetNote, Converter={StaticResource BooleanToVisibilityConverter}}"
-                               Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_BuffWidgetNote]}" />
+                    <StackPanel Visibility="{Binding ShowsTargetEntityName, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityName]}" />
+
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityId]}" />
+
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     AllowDrop="False"
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
+                                     behaviors:DigitsOnlyInputBehavior.ListSeparator="{x:Static notificationModels:NotificationTargetList.Separator}"
+                                     Text="{Binding TargetIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <TextBlock Margin="0,0,0,4"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetMultipleNote]}" />
+                        <TextBlock Margin="0,0,0,4"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetIdPriorityNote]}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetIdSourceNote]}" />
+                    </StackPanel>
+
+                    <StackPanel Visibility="{Binding ShowsTargetSkill, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetSkillName]}" />
+
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetSkillId]}" />
+
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     AllowDrop="False"
+                                     InputMethod.IsInputMethodEnabled="False"
+                                     behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
+                                     behaviors:DigitsOnlyInputBehavior.ListSeparator="{x:Static notificationModels:NotificationTargetList.Separator}"
+                                     Text="{Binding TargetIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <TextBlock Margin="0,0,0,4"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetMultipleNote]}" />
+                        <TextBlock Margin="0,0,0,4"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetIdPriorityNote]}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetIdSourceNote]}" />
+                    </StackPanel>
+
+                    <!-- バフ・デバフ効果切れだけの注意書き。2つ目は通知するバフの選び方(カードとグループの設定の「通知対象」)。 -->
+                    <StackPanel Visibility="{Binding ShowsBuffWidgetNote, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Margin="0,0,0,4"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_BuffWidgetNote]}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_BuffTargetSettingsNote]}" />
+                    </StackPanel>
 
                     <!-- 薬剤・料理効果切れの通知条件。並びは AppConfigDefaults.CuisinePotionLowMinutes の添字と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsCuisinePotionCondition, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -271,27 +387,6 @@
                         </ComboBox>
                     </Grid>
 
-                    <!-- エンティティ詠唱の通知条件。並びは AppConfigDefaults.EntityCastMinimumSeconds の添字と同じ。 -->
-                    <Grid Height="44" Visibility="{Binding ShowsEntityCastCondition, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="16" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Style="{StaticResource NotificationsView.Label}"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_Condition]}" />
-
-                        <ComboBox Grid.Column="2"
-                                  Style="{StaticResource Input.SettingsComboBox}"
-                                  SelectedIndex="{Binding EntityCastConditionIndex, Mode=TwoWay}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_Immediate]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_1]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_2]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[EntityCastCondition_3]}" />
-                        </ComboBox>
-                    </Grid>
-
                     <!-- HP低下の対象プレイヤー。並びは PartyDisplayMode の番号と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsHealthLowSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
@@ -313,7 +408,7 @@
                         </ComboBox>
                     </Grid>
 
-                    <!-- 狙われ状態の対象プレイヤー。並びは AppConfigDefaults.TargetedPlayer*Index の番号と同じ。 -->
+                    <!-- 狙われるプレイヤーの対象プレイヤー。並びは AppConfigDefaults.TargetedPlayer*Index の番号と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -334,7 +429,7 @@
                         </ComboBox>
                     </Grid>
 
-                    <!-- 狙われ状態の対象エンティティ。並びは AppConfigDefaults.TargetEntity*Index の番号と同じ。 -->
+                    <!-- 狙われるプレイヤーの対象エンティティ。並びは AppConfigDefaults.TargetEntity*Index の番号と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -397,7 +492,7 @@
                         </ComboBox>
                     </Grid>
 
-                    <!-- 狙われ状態の通知条件。並びは AppConfigDefaults.TargetedDurationSeconds の添字と同じ。 -->
+                    <!-- 狙われるプレイヤーの通知条件。並びは AppConfigDefaults.TargetedDurationSeconds の添字と同じ。 -->
                     <Grid Height="44" Visibility="{Binding ShowsTargetedSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

@@ -26,8 +26,12 @@ namespace StarResonanceDps.App.ViewModels;
 /// 以後は普通のカードとして動く(次に来たものへは移らない)。そのバフのカードがもう別の窓で開いていれば、この窓は閉じる
 /// (決めるのは窓の管理、<see cref="FirstBuffRowFound"/>)。
 /// </para>
+///
+/// <para>
+/// バフ・デバフ効果切れは、追うバフがカードの設定の通知対象に入っているときだけ出す(1秒ごとの更新で今の通知対象を読む)。
+/// </para>
 /// </summary>
-public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
+public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable, IBuffDebuffCardMenuViewModel
 {
     /// <summary>バフかデバフか。待っている窓が入るまでは <see cref="PlayerBuffListKind.Buff"/>。</summary>
     private PlayerBuffListKind _kind;
@@ -51,7 +55,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックの「グループに追加」の行き先。</summary>
     private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
 
-    /// <summary>右クリックの「バフカードのショートカットに追加」(デバフのカードは「デバフカードの」)の行き先。</summary>
+    /// <summary>右クリックの「バフ・デバフカードのショートカットに追加」の行き先。</summary>
     private readonly IBuffCardShortcutAdder? _shortcutAdder;
 
     /// <summary>通知(バフ・デバフ効果切れ・薬剤・料理効果切れ)の判定。カードを開いている間だけ借りる(同じバフを見ているグループと共有)。</summary>
@@ -177,11 +181,24 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックのメニューの項目「グループに追加」。</summary>
     public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
 
-    /// <summary>右クリックのメニューの項目「バフカードのショートカットに追加」(デバフのカードは「デバフカードの」)。</summary>
-    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
-        _kind == PlayerBuffListKind.Debuff
-            ? "BuffList_Menu_AddToDebuffCardShortcuts"
-            : "BuffList_Menu_AddToBuffCardShortcuts");
+    /// <summary>右クリックのメニューの項目「バフ・デバフカードのショートカットに追加」。</summary>
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToBuffCardShortcuts");
+
+    /// <summary>右クリックのメニューの項目「このバフを通知対象にする」「〜しない」(デバフのカードは「このデバフを」)。</summary>
+    public string NotificationTargetMenuText => BuffDebuffCardContent.GetNotificationTargetMenuText(
+        _kind == PlayerBuffListKind.Debuff,
+        IsNotificationTarget());
+
+    /// <summary>追うバフを通知対象にできるか。自分・他人のどちらのカードでも、追うバフが決まっていれば真(待っている窓は偽)。</summary>
+    public bool CanToggleNotificationTarget()
+    {
+        return !IsWaiting && ResolveGroupEntryKey() is not null;
+    }
+
+    public void RefreshMenuText()
+    {
+        OnPropertyChanged(nameof(NotificationTargetMenuText));
+    }
 
     /// <summary>
     /// このカードのバフをバフ・デバフグループに足せるか。自分のカードだけで、グループにまだオンで入っていないとき真。
@@ -306,6 +323,23 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         }
     }
 
+    /// <summary>追うバフをカードの設定の通知対象に入れる・外す(今の状態の逆。決まりは <see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。</summary>
+    [RelayCommand]
+    private void ToggleNotificationTarget()
+    {
+        if (CanToggleNotificationTarget() && ResolveGroupEntryKey() is { } key)
+        {
+            PlayerWidget.SetBuffCardNotificationTargetEnabledFromWidget(key, !PlayerWidget.IsBuffCardNotificationTarget(key));
+            RefreshMenuText();
+        }
+    }
+
+    /// <summary>追うバフがカードの設定の通知対象(設定の窓のプレビューを含む今の値)に入っているか。</summary>
+    private bool IsNotificationTarget()
+    {
+        return ResolveGroupEntryKey() is { } key && PlayerWidget.IsBuffCardNotificationTarget(key);
+    }
+
     /// <summary>
     /// 待っている窓が、そのバフに入る(窓の管理が <see cref="FirstBuffRowFound"/> を受けて呼ぶ)。料理・薬剤ならまとまりを追う。
     /// 入ったらそのバフのカードとして保存し直す(<see cref="PlayerWidgetWindowViewModel.SavedTargetInfoResolved"/>)。待っていなければ何もしない。
@@ -320,21 +354,13 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
         _kind = kind;
         _group = group;
         _requestedBuffKey = group == BuffGroup.None ? cardKey : null;
-        OnPropertyChanged(nameof(AddToShortcutsMenuText));
         RaiseSavedTargetInfoResolved();
     }
 
-    /// <summary>グループの行の鍵。まとまりを追うカードはまとまり、個別のバフのカードは追っているカードの鍵の番号。</summary>
+    /// <summary>設定の行(グループの行・ショートカット・通知対象)の鍵(<see cref="BuffDebuffCardContent.CreateEntryKey"/>)。</summary>
     private BuffEntryKey? ResolveGroupEntryKey()
     {
-        if (_group != BuffGroup.None)
-        {
-            return BuffEntryKey.ForGroup(_group);
-        }
-
-        return MeterSnapshotProvider.TryGetBuffIdFromCardKey(_requestedBuffKey, out var buffId)
-            ? BuffEntryKey.ForBuffDebuffGroup(buffId)
-            : null;
+        return BuffDebuffCardContent.CreateEntryKey(_group, _requestedBuffKey);
     }
 
     private bool CanZoomIn() => ScalePercent < WidgetConfigDefaults.MaxBuffCardScale;
@@ -371,6 +397,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
     {
         OnPropertyChanged(nameof(AddToGroupMenuText));
         OnPropertyChanged(nameof(AddToShortcutsMenuText));
+        RefreshMenuText();
         Refresh();
     }
 
@@ -457,6 +484,7 @@ public sealed partial class BuffDebuffCardWidgetViewModel : PlayerWidgetWindowVi
             _notificationWatcher.Observe(
                 BuffNotificationTarget.ForPlayer(characterId),
                 BuffNotificationRegistry.CreateBuffKey(_group, _requestedBuffKey ?? string.Empty),
+                IsNotificationTarget(),
                 snapshot,
                 targetName);
         }

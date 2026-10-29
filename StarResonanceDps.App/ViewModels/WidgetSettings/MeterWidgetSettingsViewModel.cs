@@ -45,6 +45,14 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [ObservableProperty]
     private int _combatStateDisplayModeIndex = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
 
+    /// <summary>「狙われるプレイヤー」の選択(<see cref="MeterWidgetSettingsConfig.TargetedPlayerDisplayModeIndex"/>)。</summary>
+    [ObservableProperty]
+    private int _targetedPlayerDisplayModeIndex = WidgetConfigDefaults.DefaultTargetedPlayerDisplayModeIndex;
+
+    /// <summary>「ヘイト値」の選択(<see cref="MeterWidgetSettingsConfig.HateRankDisplayModeIndex"/>)。</summary>
+    [ObservableProperty]
+    private int _hateRankDisplayModeIndex = WidgetConfigDefaults.DefaultHateRankDisplayModeIndex;
+
     [ObservableProperty]
     private int _partyDisplayModeIndex = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
@@ -197,6 +205,9 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     /// <summary>エンティティリストのフィルター(すべて表示 / オブジェクト以外)を出すか。</summary>
     public bool ShowsEntityDisplaySettings => _kind == WidgetKind.EntityList;
 
+    /// <summary>ヘイトの枠の設定(「狙われるプレイヤー」「ヘイト値」)を出すか。エンティティリストだけ。</summary>
+    public bool ShowsHateDisplaySettings => _kind == WidgetKind.EntityList;
+
     /// <summary>「自分の強調表示」を出すのはプレイヤーリストとメーター2種。</summary>
     public bool ShowsSelfDisplaySettings =>
         _kind is WidgetKind.PlayerList or WidgetKind.DpsMeter or WidgetKind.HpsMeter;
@@ -246,6 +257,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
             CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
+            TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
+            HateRankDisplayModeIndex = HateRankDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -349,6 +362,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
             ShowSeasonTalent = normalized.ShowSeasonTalent;
             CombatStateDisplayModeIndex = normalized.CombatStateDisplayModeIndex;
+            TargetedPlayerDisplayModeIndex = normalized.TargetedPlayerDisplayModeIndex;
+            HateRankDisplayModeIndex = normalized.HateRankDisplayModeIndex;
             PartyDisplayModeIndex = normalized.PartyDisplayModeIndex;
             EntityDisplayModeIndex = normalized.EntityDisplayModeIndex;
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
@@ -379,6 +394,8 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             || left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
             || left.ShowSeasonTalent != right.ShowSeasonTalent
             || left.CombatStateDisplayModeIndex != right.CombatStateDisplayModeIndex
+            || left.TargetedPlayerDisplayModeIndex != right.TargetedPlayerDisplayModeIndex
+            || left.HateRankDisplayModeIndex != right.HateRankDisplayModeIndex
             || left.PartyDisplayModeIndex != right.PartyDisplayModeIndex
             || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
@@ -531,6 +548,16 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     partial void OnCombatStateDisplayModeIndexChanged(int value)
     {
         OnPropertyChanged(nameof(CombatStateShowHideIndex));
+        NotifyChanged();
+    }
+
+    partial void OnTargetedPlayerDisplayModeIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnHateRankDisplayModeIndexChanged(int value)
+    {
         NotifyChanged();
     }
 

@@ -15,7 +15,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// 行の数が変わったら窓の高さを全部の行が入る高さに合わせる(一覧の ScrollViewer に付けた <c>Behaviors.AutoFitHeightBehavior</c>)。
 ///
 /// <para>
-/// 行の左クリックはカードを開き、右クリックはメニュー(カード・グループから削除)を開く。メニューの開き方はバフ・デバフ一覧と同じ。
+/// 行の左クリックはカードを開き、右クリックはメニュー(カード・グループから削除・通知対象にする/しない)を開く。メニューの開き方はバフ・デバフ一覧と同じ。
 /// メニューの文言(バフかデバフか)は開いた行で決め(<see cref="BuffDebuffGroupWidgetViewModel.MenuEntry"/>)、
 /// カードの項目は開ける行だけに出す。行の並べ替えは一覧に付けた <c>Behaviors.RowReorderBehavior</c> が受け持つ。
 /// </para>
@@ -93,6 +93,7 @@ public partial class BuffDebuffGroupWidgetView : UserControl, IWidgetVerticalScr
         }
 
         viewModel.MenuEntry = entry;
+        viewModel.RefreshMenuText();
 
         // カードの項目は、カードを開ける行(自分が分かっていて、バフかデバフに振り分けられる行)だけに出す。
         foreach (var menuItem in menu.Items.OfType<MenuItem>())

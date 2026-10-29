@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using System.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -9,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -38,7 +38,6 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
-        DataObject.AddPastingHandler(BenchmarkDurationTextBox, BenchmarkDurationTextBox_Pasting);
         Loaded += SettingsWindow_Loaded;
         SourceInitialized += SettingsWindow_SourceInitialized;
         PreviewMouseDown += SettingsWindow_PreviewMouseDown;
@@ -391,44 +390,14 @@ public partial class SettingsWindow : Window
     {
         if (!ViewModel.TryCommitBenchmarkDurationText(BenchmarkDurationTextBox.Text))
         {
-            PlayInvalidInputSound();
+            DigitsOnlyInputBehavior.PlayInvalidInputSound();
         }
 
         ShowBenchmarkDuration();
     }
 
-    /// <summary>数字以外の文字は入れない。文字を伴わない入力(Ctrl との組み合わせなど)は止めない。</summary>
-    private void BenchmarkDurationTextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-        if (e.Text.Length > 0 && !e.Text.All(char.IsAsciiDigit))
-        {
-            e.Handled = true;
-            PlayInvalidInputSound();
-        }
-    }
-
-    private void BenchmarkDurationTextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-    {
-        if (!e.DataObject.GetDataPresent(DataFormats.Text)
-            || e.DataObject.GetData(DataFormats.Text) is not string pastedText
-            || pastedText.Length == 0
-            || !pastedText.All(char.IsAsciiDigit))
-        {
-            e.CancelCommand();
-            PlayInvalidInputSound();
-        }
-    }
-
     private void BenchmarkDurationTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        // スペースは文字の入力(PreviewTextInput)を通らないので、ここで止める。
-        if (e.Key == Key.Space)
-        {
-            e.Handled = true;
-            PlayInvalidInputSound();
-            return;
-        }
-
         if (e.Key == Key.Enter)
         {
             CommitBenchmarkDurationEdit();
@@ -440,11 +409,6 @@ public partial class SettingsWindow : Window
     private void BenchmarkDurationTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
     {
         CommitBenchmarkDurationEdit();
-    }
-
-    private static void PlayInvalidInputSound()
-    {
-        SystemSounds.Beep.Play();
     }
 
     private void ScrollToSection(FrameworkElement target)

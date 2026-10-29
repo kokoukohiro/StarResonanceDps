@@ -11,6 +11,8 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// 被ダメリストの設定。「プレイヤー名」(書式)と「自分の強調表示」とアイコンカラーは蘇生リスト(<see cref="ReviveListWidgetSettingsViewModel"/>)と同じ作り、
 /// 「スキル名」(右の書式)はプレイヤー名と同じ作りで差し込める項目が スキル名 / エンティティ名 / タイプ(<see cref="DamageTakenListHitInfoFormatter"/>)、
 /// 「戦闘不能の原因を表示」は自分の強調表示と同じスイッチ。
+/// 「フィルター設定」はタイムラインから移したもの(すべて表示 / 自傷・フレンドリーファイア以外)。
+/// 「最新の被ダメのみ表示」は自分の強調表示と同じスイッチで、ウィジェットのヘッダーのボタンでも変わり、そのときは <see cref="SetShowsLatestHitOnlyFromWidget"/> で受ける。
 /// 節「属性カラー」(バーの色)はスキル詳細と同じ <see cref="ElementColorWidgetSettingsViewModel"/> が持つ。
 /// </summary>
 public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -45,6 +47,14 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
     /// <summary>「戦闘不能の原因を表示」のスイッチ。オンなら、その被弾で倒れた行の被ダメ値の後ろに「(戦闘不能)」を出す。</summary>
     [ObservableProperty]
     private bool _showsDefeatCause = WidgetConfigDefaults.DefaultDamageTakenListShowsDefeatCause;
+
+    /// <summary>「フィルター設定」の選択(<see cref="DamageTakenListWidgetSettingsConfig.AttackerFilterIndex"/>)。</summary>
+    [ObservableProperty]
+    private int _attackerFilterIndex = WidgetConfigDefaults.DefaultDamageTakenListAttackerFilterIndex;
+
+    /// <summary>「最新の被ダメのみ表示」のスイッチ。オンなら1人1行でその人の一番新しい被弾だけを出す。</summary>
+    [ObservableProperty]
+    private bool _showsLatestHitOnly = WidgetConfigDefaults.DefaultDamageTakenListShowsLatestHitOnly;
 
     public DamageTakenListWidgetSettingsViewModel(DamageTakenListWidgetSettingsConfig? config)
     {
@@ -107,6 +117,10 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
     public string ShowsDefeatCauseStateText => LocalizationManager.Instance.GetString(
         ShowsDefeatCause ? "Settings_Switch_On" : "Settings_Switch_Off");
 
+    /// <summary>「最新の被ダメのみ表示」のスイッチの右に出す ON / OFF。</summary>
+    public string ShowsLatestHitOnlyStateText => LocalizationManager.Instance.GetString(
+        ShowsLatestHitOnly ? "Settings_Switch_On" : "Settings_Switch_Off");
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -127,6 +141,8 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
             SelfDisplayModeIndex = SelfDisplayModeIndex,
             HitInfoFormatString = HitInfoFormatString ?? string.Empty,
             ShowsDefeatCause = ShowsDefeatCause,
+            AttackerFilterIndex = AttackerFilterIndex,
+            ShowsLatestHitOnly = ShowsLatestHitOnly,
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -169,6 +185,28 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    /// <summary>
+    /// ウィジェットのヘッダーのボタンで変わった「最新の被ダメのみ表示」を受ける。ウィジェットの側で保存するので、
+    /// 保存済みの控えと画面の値の両方を合わせる(この項目を未保存に数えず、取り消しで戻さず、保存で古い値を書き戻さない)。
+    /// ほかの項目の未保存の変更はそのまま残す。作りは推移グラフの横軸の長さ(<see cref="MetricTimelineWidgetSettingsViewModel.SetVisibleSecondsFromWidget"/>)と同じ。
+    /// </summary>
+    public void SetShowsLatestHitOnlyFromWidget(bool showsLatestHitOnly)
+    {
+        _lastSaved.ShowsLatestHitOnly = showsLatestHitOnly;
+
+        _isLoading = true;
+        try
+        {
+            ShowsLatestHitOnly = showsLatestHitOnly;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
     private void Load(DamageTakenListWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedDamageTakenList(config);
@@ -180,6 +218,8 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
             HitInfoFormatString = normalized.HitInfoFormatString ?? WidgetConfigDefaults.DefaultDamageTakenListHitInfoFormatString;
             ShowsDefeatCause = normalized.ShowsDefeatCause;
+            AttackerFilterIndex = normalized.AttackerFilterIndex;
+            ShowsLatestHitOnly = normalized.ShowsLatestHitOnly;
 
             foreach (var item in ClassColorItems)
             {
@@ -230,6 +270,17 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
     partial void OnShowsDefeatCauseChanged(bool value)
     {
         OnPropertyChanged(nameof(ShowsDefeatCauseStateText));
+        NotifyChanged();
+    }
+
+    partial void OnAttackerFilterIndexChanged(int value)
+    {
+        NotifyChanged();
+    }
+
+    partial void OnShowsLatestHitOnlyChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowsLatestHitOnlyStateText));
         NotifyChanged();
     }
 
@@ -313,6 +364,7 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
         OnPropertyChanged(nameof(ClassColorSectionTitle));
         OnPropertyChanged(nameof(SelfHighlightStateText));
         OnPropertyChanged(nameof(ShowsDefeatCauseStateText));
+        OnPropertyChanged(nameof(ShowsLatestHitOnlyStateText));
     }
 
     private static bool SettingsEqual(DamageTakenListWidgetSettingsConfig left, DamageTakenListWidgetSettingsConfig right)
@@ -320,7 +372,9 @@ public sealed partial class DamageTakenListWidgetSettingsViewModel : ObservableO
         if (!string.Equals(left.PlayerInfoFormatString, right.PlayerInfoFormatString, StringComparison.Ordinal)
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
             || !string.Equals(left.HitInfoFormatString, right.HitInfoFormatString, StringComparison.Ordinal)
-            || left.ShowsDefeatCause != right.ShowsDefeatCause)
+            || left.ShowsDefeatCause != right.ShowsDefeatCause
+            || left.AttackerFilterIndex != right.AttackerFilterIndex
+            || left.ShowsLatestHitOnly != right.ShowsLatestHitOnly)
         {
             return false;
         }

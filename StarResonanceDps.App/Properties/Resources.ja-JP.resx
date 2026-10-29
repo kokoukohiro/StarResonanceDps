@@ -348,10 +348,19 @@
     <value>グループに追加</value>
   </data>
   <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
-    <value>バフカードのショートカットに追加</value>
+    <value>バフ・デバフカードのショートカットに追加</value>
   </data>
-  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
-    <value>デバフカードのショートカットに追加</value>
+  <data name="BuffList_Menu_AddBuffToNotificationTargets" xml:space="preserve">
+    <value>このバフを通知対象にする</value>
+  </data>
+  <data name="BuffList_Menu_RemoveBuffFromNotificationTargets" xml:space="preserve">
+    <value>このバフを通知対象にしない</value>
+  </data>
+  <data name="BuffList_Menu_AddDebuffToNotificationTargets" xml:space="preserve">
+    <value>このデバフを通知対象にする</value>
+  </data>
+  <data name="BuffList_Menu_RemoveDebuffFromNotificationTargets" xml:space="preserve">
+    <value>このデバフを通知対象にしない</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>このバフをグループから削除</value>
@@ -482,36 +491,6 @@
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}の{1}</value>
   </data>
-  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0}に{1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_LethalText" xml:space="preserve">
-    <value>戦闘不能</value>
-  </data>
-  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
-    <value>{0}の{1}</value>
-  </data>
-  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
-    <value>{0}の{1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0}に{1}</value>
-  </data>
-  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
-    <value>{0}{1}ダメージ</value>
-  </data>
-  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
-    <value>{0}{1}物理ダメージ</value>
-  </data>
-  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
-    <value>{0}{1}魔法ダメージ</value>
-  </data>
-  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
-    <value>HP({0}/{1})</value>
-  </data>
-  <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>戦闘不能({0}/{1})</value>
-  </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>攻撃</value>
   </data>
@@ -524,7 +503,25 @@
     <value>テキストをコピーできませんでした。</value>
   </data>
   <data name="TakenDamageLog_HealFormat" xml:space="preserve">
-    <value>{0}のHPを{1}回復</value>
+    <value>{0}のHPを{1}</value>
+  </data>
+  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+    <value>{0}回復</value>
+  </data>
+  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+    <value>{0}に{1}</value>
+  </data>
+  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+    <value>{0}ダメージ</value>
+  </data>
+  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+    <value>{0}に{1}</value>
+  </data>
+  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+    <value>{0}({1}秒)</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+    <value>何かの効果</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>システム</value>
@@ -534,9 +531,6 @@
   </data>
   <data name="TakenDamageLog_FallSkill" xml:space="preserve">
     <value>落下</value>
-  </data>
-  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0}が{1}</value>
   </data>
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>テキストカラー</value>
@@ -607,14 +601,11 @@
   <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
     <value>プレイヤー名</value>
   </data>
+  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+    <value>効果</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
     <value>HP数値</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
-    <value>バリア量数値</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>戦闘不能</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>無属性</value>
@@ -1110,6 +1101,27 @@
   <data name="Settings_Display_CombatState" xml:space="preserve">
     <value>戦闘状態</value>
   </data>
+  <data name="Settings_Display_TargetedPlayer" xml:space="preserve">
+    <value>狙われるプレイヤー</value>
+  </data>
+  <data name="Settings_Display_HateValue" xml:space="preserve">
+    <value>ヘイト値</value>
+  </data>
+  <data name="HateRankDisplay_Top5" xml:space="preserve">
+    <value>上位5人を表示</value>
+  </data>
+  <data name="HateRankDisplay_Top4" xml:space="preserve">
+    <value>上位4人を表示</value>
+  </data>
+  <data name="HateRankDisplay_Top3" xml:space="preserve">
+    <value>上位3人を表示</value>
+  </data>
+  <data name="HateRankDisplay_Top2" xml:space="preserve">
+    <value>上位2人を表示</value>
+  </data>
+  <data name="HateRankDisplay_FirstOnly" xml:space="preserve">
+    <value>ヘイト1位のみ表示</value>
+  </data>
   <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
     <value>自分のみ表示</value>
   </data>
@@ -1255,15 +1267,21 @@
     <value>蘇生リスト</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
-    <value>被ダメリスト</value>
+    <value>被ダメログ</value>
   </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(戦闘不能)</value>
   </data>
-  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
-    <value>{0}秒前</value>
-  </data>
   <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
     <value>戦闘不能の原因を表示</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+    <value>最新の被ダメのみ表示</value>
+  </data>
+  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+    <value>全件表示</value>
+  </data>
+  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+    <value>最新のみ</value>
   </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>蘇生可能</value>
   </data>
@@ -1298,7 +1316,7 @@
     <value>マップIDのみ表示</value>
   </data>
   <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
-    <value>名前のないスキル</value>
+    <value>名前のないスキルやバフ</value>
   </data>
   <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
     <value>※内部名は中国語のみ</value>
@@ -1439,7 +1457,7 @@
     <value>プレビュー</value>
   </data>
   <data name="Notification_BuffWidgetNote" xml:space="preserve">
-    <value>※起動中のバフ・デバフカードとバフ・デバフグループのバフのみ通知します</value>
+    <value>※起動中のウィジェット「バフ・デバフカード」と「バフ・デバフグループ」のバフのみ通知します</value>
   </data>
   <data name="Notification_PlayerAppeared" xml:space="preserve">
     <value>プレイヤー出現</value>
@@ -1453,8 +1471,35 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>対象エンティティ名</value>
   </data>
-  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
-    <value>※現在の表示言語のエンティティ名を入力してください</value>
+  <data name="Notification_TargetEntityId" xml:space="preserve">
+    <value>対象エンティティID</value>
+  </data>
+  <data name="Notification_TargetPlayerUid" xml:space="preserve">
+    <value>対象プレイヤーUID</value>
+  </data>
+  <data name="Notification_TargetSkillName" xml:space="preserve">
+    <value>対象スキル名</value>
+  </data>
+  <data name="Notification_TargetSkillId" xml:space="preserve">
+    <value>対象スキルID</value>
+  </data>
+  <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
+    <value>※IDを入力すると、名前より優先されます</value>
+  </data>
+  <data name="Notification_TargetUidPriorityNote" xml:space="preserve">
+    <value>※UIDを入力すると、名前より優先されます</value>
+  </data>
+  <data name="Notification_TargetIdSourceNote" xml:space="preserve">
+    <value>※IDは表示設定の「内部ID」で表示でき、IDと名前はウィジェット「タイムライン」からコピーできます</value>
+  </data>
+  <data name="Notification_TargetMultipleNote" xml:space="preserve">
+    <value>※「|」で区切って複数入力できます</value>
+  </data>
+  <data name="Notification_BuffTargetSettingsNote" xml:space="preserve">
+    <value>※通知するバフ・デバフは、ウィジェット「バフ・デバフカード」と「バフ・デバフグループ」の設定の「通知対象」で選べます</value>
+  </data>
+  <data name="Settings_Section_NotificationTargets_Title" xml:space="preserve">
+    <value>通知対象</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>集計中</value>
@@ -1966,7 +2011,7 @@
     <value>{PlayerName}が{EntityName}に狙われました</value>
   </data>
   <data name="Notification_Targeted" xml:space="preserve">
-    <value>狙われ状態</value>
+    <value>狙われるプレイヤー</value>
   </data>
   <data name="Notification_TargetEntity" xml:space="preserve">
     <value>対象エンティティ</value>
@@ -2003,18 +2048,6 @@
   </data>
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}が詠唱中です</value>
-  </data>
-  <data name="EntityCastCondition_Immediate" xml:space="preserve">
-    <value>無条件</value>
-  </data>
-  <data name="EntityCastCondition_1" xml:space="preserve">
-    <value>1秒以上の詠唱</value>
-  </data>
-  <data name="EntityCastCondition_2" xml:space="preserve">
-    <value>2秒以上の詠唱</value>
-  </data>
-  <data name="EntityCastCondition_3" xml:space="preserve">
-    <value>3秒以上の詠唱</value>
   </data>
   <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>発動時</value>

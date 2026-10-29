@@ -76,6 +76,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.Entries.SectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="BuffDebuffGroupNotificationTargetsNavButton"
+                                Click="BuffDebuffGroupNotificationTargetsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.WidgetNotification}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.NotificationTargets.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="BuffCardShortcutsNavButton"
                                 Click="BuffCardShortcutsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -83,6 +92,15 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.RoleSkills}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffCardSettings.Shortcuts.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BuffCardNotificationTargetsNavButton"
+                                Click="BuffCardNotificationTargetsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffCardDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.WidgetNotification}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffCardSettings.NotificationTargets.SectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="OtherRoleSkillsNavButton"
@@ -390,8 +408,28 @@
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
+                                <ContentControl x:Name="BuffDebuffGroupNotificationTargetsHost"
+                                                Content="{Binding BuffDebuffGroupSettings.NotificationTargets}"
+                                                Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffEntryListSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
                                 <ContentControl x:Name="BuffCardShortcutsHost"
                                                 Content="{Binding BuffCardSettings.Shortcuts}"
+                                                Visibility="{Binding HasBuffCardDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffEntryListSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="BuffCardNotificationTargetsHost"
+                                                Content="{Binding BuffCardSettings.NotificationTargets}"
                                                 Visibility="{Binding HasBuffCardDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>

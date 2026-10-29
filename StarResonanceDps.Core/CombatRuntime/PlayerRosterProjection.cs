@@ -721,12 +721,12 @@ internal static class PlayerRosterProjection
     }
 
     /// <summary>
-    /// メーター(DPS/HPS)かタイムラインに出る人か。名簿に載せる条件。
+    /// メーター(DPS/HPS)に出る人か、その回に被弾かダメージの無い戦闘不能の記録がある人か。名簿に載せる条件。
     ///
     /// <para>
     /// メーターは <see cref="MeterSnapshotProvider"/> の <c>TotalValue &gt; 0</c> と同じ(与ダメか回復のどちらかを持っていれば片方のメーターには出る)。
-    /// タイムラインはプレイヤーの行の材料と同じ(被弾の記録 <see cref="Entity.TakenStats"/> か、その回のダメージの無い戦闘不能の記録)。
-    /// タイムラインの絞り込みの設定は見ない。
+    /// 被弾の記録は <see cref="Entity.TakenStats"/>、戦闘不能の記録はその回のダメージの無い戦闘不能の記録。
+    /// 被ダメリストの絞り込みの設定は見ない。
     /// </para>
     /// </summary>
     /// <param name="encounter">その実体がいる回。戦闘不能の記録を引く。</param>

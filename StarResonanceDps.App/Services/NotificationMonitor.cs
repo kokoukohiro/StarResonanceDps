@@ -11,16 +11,17 @@ using StarResonanceDps.Core.Services;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// ウィジェットを開いていなくても通知する項目(入場確認・HP低下・プレイヤー出現・エンティティ出現・狙われ状態・
+/// ウィジェットを開いていなくても通知する項目(入場確認・HP低下・プレイヤー出現・エンティティ出現・狙われるプレイヤー・
 /// 自分の薬剤・料理効果切れ・予兆技・エンティティ詠唱)の判定を持つ。起動時から動き、画面のスレッドで使う。
 /// バフ・デバフ効果切れと、ほかの人の薬剤・料理効果切れは、開いているバフ・デバフカードとバフ・デバフグループが判定する(<see cref="BuffNotificationRegistry"/>)。
 ///
 /// <para>
 /// 判定はその項目の通知がオンの間だけ動かす。オフにしたら控えを捨て、オンにした時点から見始める。
 /// HP低下の控えはマップが替わったら捨てる(ログアウトとキャプチャの停止では名簿が空になり、判定の側で全員の控えが消える)。
-/// HP低下と狙われ状態はプレイヤーの通知なので、NPC(助っ人)と判定された人は渡さない。
-/// 出現の2つは、オンにした・名前を変えたときに今の一覧を「既にいる相手」として控え直す。起動した直後に見えた相手には出す。
-/// 狙われ状態も、オンにした・設定を選び直したときに今の狙われ状態を控え直す。エンティティ詠唱も同じく今の詠唱を控え直す。
+/// HP低下と狙われるプレイヤーはプレイヤーの通知なので、NPC(助っ人)と判定された人は渡さない。
+/// 出現の2つは、オンにした・対象(名前とID)を変えたときに今の一覧を「既にいる相手」として控え直す。起動した直後に見えた相手には出す。
+/// 狙われるプレイヤーも、オンにした・設定を選び直したときに今の狙われ状態を控え直す。エンティティ詠唱も、オンにした・対象を変えたときに今の詠唱を控え直す。
+/// 出現の2つとエンティティ詠唱は、対象の名前もIDも空なら判定を動かさない(<see cref="NotificationWatchTarget"/>)。
 /// 予兆技は、通知条件を選び直したときに予告を控え直す。
 /// </para>
 ///
@@ -53,11 +54,11 @@ public sealed class NotificationMonitor
 
     private TelegraphedSkillNotificationTracker? _telegraphedSkillTracker;
 
-    /// <summary>狙われ状態の今の設定。変わったら今の狙われ状態を控え直す。</summary>
+    /// <summary>狙われるプレイヤーの今の設定。変わったら今の狙われ状態を控え直す。</summary>
     private (bool IsEnabled, int TargetedPlayerModeIndex, int TargetEntityModeIndex, int ConditionIndex) _targetedSettings;
 
-    /// <summary>エンティティ詠唱の今の設定。変わったら今の詠唱を控え直す。</summary>
-    private (bool IsEnabled, int ConditionIndex) _entityCastSettings;
+    /// <summary>エンティティ詠唱で見ているスキル(オフか名前もIDも空なら null)。変わったら今の詠唱を控え直す。</summary>
+    private NotificationWatchTarget? _entityCastTarget;
 
     private PlayerRosterSnapshot? _lastRoster;
     private IReadOnlyList<NearbyEntityEntry> _lastNearbyEntities = [];
@@ -67,11 +68,11 @@ public sealed class NotificationMonitor
     /// <summary>HP低下の判定に使っている「HP低下判定」と「通知条件」の番号。選び直したら控えを捨てて見始め直す。</summary>
     private (int ThresholdIndex, int ConditionIndex) _healthLowCriteria;
 
-    /// <summary>プレイヤー出現で見ている名前(オフか名前が空なら null)。変わったら控え直す。</summary>
-    private string? _playerAppearedWatchName;
+    /// <summary>プレイヤー出現で見ている相手(オフか名前もIDも空なら null)。変わったら控え直す。</summary>
+    private NotificationWatchTarget? _playerAppearedTarget;
 
-    /// <summary>エンティティ出現で見ている名前(オフか名前が空なら null)。変わったら控え直す。</summary>
-    private string? _entityAppearedWatchName;
+    /// <summary>エンティティ出現で見ている相手(オフか名前もIDも空なら null)。変わったら控え直す。</summary>
+    private NotificationWatchTarget? _entityAppearedTarget;
 
     public NotificationMonitor()
     {
@@ -88,8 +89,8 @@ public sealed class NotificationMonitor
 
         // 起動時の設定は控え直さずに見始める(起動した直後に見えた相手にも出す)。
         var notifications = ConfigManager.Instance.GetNotificationsSnapshot();
-        _playerAppearedWatchName = GetAppearanceWatchName(notifications.Get(NotificationKind.PlayerAppeared));
-        _entityAppearedWatchName = GetAppearanceWatchName(notifications.Get(NotificationKind.EntityAppeared));
+        _playerAppearedTarget = NotificationWatchTarget.From(notifications.Get(NotificationKind.PlayerAppeared));
+        _entityAppearedTarget = NotificationWatchTarget.From(notifications.Get(NotificationKind.EntityAppeared));
 
         ConfigManager.Instance.NotificationsChanged += ConfigManager_NotificationsChanged;
         ApplySettings();
@@ -173,18 +174,18 @@ public sealed class NotificationMonitor
         // 対象を変えたときも、次の名簿を待たずに今の名簿で絞り直す。
         ObserveHealthLow();
 
-        var playerAppearedWatchName = GetAppearanceWatchName(notifications.Get(NotificationKind.PlayerAppeared));
-        if (playerAppearedWatchName != _playerAppearedWatchName)
+        var playerAppearedTarget = NotificationWatchTarget.From(notifications.Get(NotificationKind.PlayerAppeared));
+        if (playerAppearedTarget != _playerAppearedTarget)
         {
-            _playerAppearedWatchName = playerAppearedWatchName;
+            _playerAppearedTarget = playerAppearedTarget;
             _playerAppearedTracker.Rebaseline();
             ObservePlayerAppearance();
         }
 
-        var entityAppearedWatchName = GetAppearanceWatchName(notifications.Get(NotificationKind.EntityAppeared));
-        if (entityAppearedWatchName != _entityAppearedWatchName)
+        var entityAppearedTarget = NotificationWatchTarget.From(notifications.Get(NotificationKind.EntityAppeared));
+        if (entityAppearedTarget != _entityAppearedTarget)
         {
-            _entityAppearedWatchName = entityAppearedWatchName;
+            _entityAppearedTarget = entityAppearedTarget;
             _entityAppearedTracker.Rebaseline();
             ObserveEntityAppearance();
         }
@@ -202,13 +203,12 @@ public sealed class NotificationMonitor
             _targetedTracker.Rebaseline(targetedSettings.IsEnabled ? CollectTargetedStates() : []);
         }
 
-        var entityCast = notifications.Get(NotificationKind.EntityCast);
-        var entityCastSettings = (entityCast.IsEnabled, entityCast.EntityCastConditionIndex);
-        if (entityCastSettings != _entityCastSettings)
+        var entityCastTarget = NotificationWatchTarget.From(notifications.Get(NotificationKind.EntityCast));
+        if (entityCastTarget != _entityCastTarget)
         {
-            // オンにした・選び直した時点で既に詠唱中の敵には出さない(狙われ状態と同じ)。
-            _entityCastSettings = entityCastSettings;
-            _entityCastTracker.Rebaseline(entityCastSettings.IsEnabled ? CollectEntityCasts() : []);
+            // オンにした・対象を変えた時点で既に詠唱中の敵には出さない(狙われるプレイヤーと同じ)。
+            _entityCastTarget = entityCastTarget;
+            _entityCastTracker.Rebaseline(entityCastTarget is null ? [] : CollectEntityCasts());
         }
 
         if (notifications.Get(NotificationKind.CuisinePotionLow).IsEnabled)
@@ -222,17 +222,10 @@ public sealed class NotificationMonitor
         }
     }
 
-    /// <summary>出現の項目で見ている名前。オフか名前が空なら null(判定を動かさない)。</summary>
-    private static string? GetAppearanceWatchName(NotificationItemConfig item)
-    {
-        var name = item.TargetName.Trim();
-        return item.IsEnabled && name.Length > 0 ? name : null;
-    }
-
-    /// <summary>名簿のうち、周りに見えているほかのプレイヤー(自分と履歴の行は除く)を渡す。</summary>
+    /// <summary>名簿のうち、周りに見えているほかのプレイヤー(自分と履歴の行は除く)を渡す。IDはUID(キャラクターID)で比べる。</summary>
     private void ObservePlayerAppearance()
     {
-        if (_playerAppearedWatchName is null || _lastRoster is not { } roster)
+        if (_playerAppearedTarget is not { } target || _lastRoster is not { } roster)
         {
             return;
         }
@@ -249,6 +242,8 @@ public sealed class NotificationMonitor
         var nameDisplayMode = PlayerRosterPresentationStore.Instance.NameDisplayMode;
         _playerAppearedTracker.Observe(
             _nearbyPlayers,
+            target,
+            entry => entry.CharacterId,
             entry => entry.CharacterId,
             entry => entry.Name,
             entry => PlayerInfoFormatFormatter.GetDisplayName(
@@ -260,17 +255,22 @@ public sealed class NotificationMonitor
                 nameDisplayMode));
     }
 
-    /// <summary>周りのエンティティを、表示言語の名前(内部IDの注記なし)で渡す。名前の無い実体は一致しない。</summary>
+    /// <summary>
+    /// 周りのエンティティを、表示言語の名前(内部IDの注記なし)で渡す。名前の無い実体は名前では当たらない。
+    /// IDは種別ID(内部IDの注記に出る番号)で比べ、種別IDが未着(0)の実体は当たらない。
+    /// </summary>
     private void ObserveEntityAppearance()
     {
-        if (_entityAppearedWatchName is null)
+        if (_entityAppearedTarget is not { } target)
         {
             return;
         }
 
         _entityAppearedTracker.Observe(
             _lastNearbyEntities,
+            target,
             entity => entity.EntityUuid,
+            entity => entity.EntityId,
             GetEntityName,
             GetEntityName);
 
@@ -316,19 +316,22 @@ public sealed class NotificationMonitor
 
     private void ObserveEntityCast()
     {
-        if (_entityCastSettings.IsEnabled)
+        if (_entityCastTarget is { } target)
         {
-            _entityCastTracker.Observe(CollectEntityCasts());
+            _entityCastTracker.Observe(CollectEntityCasts(), target);
         }
     }
 
-    /// <summary>今詠唱している周りの敵(エンティティリストの詠唱ゲージと同じ詠唱)。</summary>
+    /// <summary>
+    /// 今詠唱している周りの敵(エンティティリストの詠唱ゲージと同じ詠唱)。HP バーのある敵だけ
+    /// (表示設定に関係なく、エンティティリストのフィルター「オブジェクト以外」と同じ条件)。
+    /// </summary>
     private List<EntityCastObservation> CollectEntityCasts()
     {
         var casts = new List<EntityCastObservation>();
         foreach (var entity in _lastNearbyEntities)
         {
-            if (entity.Cast is { } cast)
+            if (entity.HasHpBar && entity.Cast is { } cast)
             {
                 casts.Add(new EntityCastObservation(entity.EntityUuid, cast, GetEntityDisplayName(entity)));
             }
@@ -415,7 +418,7 @@ public sealed class NotificationMonitor
     }
 
     /// <summary>
-    /// 通知に入れる敵の名前(狙われ状態の狙っている敵、エンティティ詠唱の詠唱した敵)。
+    /// 通知に入れる敵の名前(狙われるプレイヤーの狙っている敵、エンティティ詠唱の詠唱した敵)。
     /// エンティティ出現と同じ表示言語の名前(内部IDの注記なし)で、名前の無い敵はエンティティリストと同じ「敵」、種別ID の分からない敵は「未知の敵」。
     /// </summary>
     private static string GetEntityDisplayName(NearbyEntityEntry entity)

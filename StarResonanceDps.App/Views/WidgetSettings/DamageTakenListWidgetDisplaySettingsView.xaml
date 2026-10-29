@@ -209,6 +209,59 @@
                     </Grid>
                 </Border>
 
+                <!-- タイムラインから移した行。下に「最新の被ダメのみ表示」が続くので線を引く。並びは DamageTakenListWidgetSettingsConfig.AttackerFilterIndex の添字と同じ。 -->
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <ComboBox Grid.Column="1"
+                                  SelectedIndex="{Binding AttackerFilterIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource Input.SettingsComboBox}">
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_All]}" />
+                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TakenDamageLog_Filter_NoSelfOrFriendlyFire]}" />
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- 下に「自分の強調表示」が続くので線を引く。作りは「自分の強調表示」と同じ。ウィジェットのヘッダーのボタンでも切り替わる。 -->
+                <Border Style="{StaticResource Panel.SettingField}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_DamageTakenList_ShowsLatestHitOnly]}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+
+                        <StackPanel Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center">
+                            <ToggleButton Style="{StaticResource Input.Switch}"
+                                          IsChecked="{Binding ShowsLatestHitOnly, Mode=TwoWay}" />
+                            <TextBlock Margin="8,0,0,0"
+                                       VerticalAlignment="Center"
+                                       MinWidth="28"
+                                       Text="{Binding ShowsLatestHitOnlyStateText}"
+                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       FontSize="14"
+                                       FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
                 <!-- 下に「戦闘不能の原因を表示」が続くので線を引く。 -->
                 <Border Style="{StaticResource Panel.SettingField}">
                     <Grid>

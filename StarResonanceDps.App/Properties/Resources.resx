@@ -333,7 +333,7 @@ If it is not installed, you can download it from the link below.</value>
     <value>{PlayerName} became the target of {EntityName}'s attacks</value>
   </data>
   <data name="Notification_Targeted" xml:space="preserve">
-    <value>Attack target</value>
+    <value>Targeted Player</value>
   </data>
   <data name="Notification_TargetEntity" xml:space="preserve">
     <value>Target entity</value>
@@ -370,18 +370,6 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName} is chanting</value>
-  </data>
-  <data name="EntityCastCondition_Immediate" xml:space="preserve">
-    <value>Any chant</value>
-  </data>
-  <data name="EntityCastCondition_1" xml:space="preserve">
-    <value>Chants of 1 s or more</value>
-  </data>
-  <data name="EntityCastCondition_2" xml:space="preserve">
-    <value>Chants of 2 s or more</value>
-  </data>
-  <data name="EntityCastCondition_3" xml:space="preserve">
-    <value>Chants of 3 s or more</value>
   </data>
   <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>On activation</value>
@@ -471,10 +459,19 @@ If it is not installed, you can download it from the link below.</value>
     <value>Add to Group</value>
   </data>
   <data name="BuffList_Menu_AddToBuffCardShortcuts" xml:space="preserve">
-    <value>Add to Buff Card Shortcuts</value>
+    <value>Add to Buff &amp; Debuff Card Shortcuts</value>
   </data>
-  <data name="BuffList_Menu_AddToDebuffCardShortcuts" xml:space="preserve">
-    <value>Add to Debuff Card Shortcuts</value>
+  <data name="BuffList_Menu_AddBuffToNotificationTargets" xml:space="preserve">
+    <value>Add This Buff to Notification Targets</value>
+  </data>
+  <data name="BuffList_Menu_RemoveBuffFromNotificationTargets" xml:space="preserve">
+    <value>Remove This Buff from Notification Targets</value>
+  </data>
+  <data name="BuffList_Menu_AddDebuffToNotificationTargets" xml:space="preserve">
+    <value>Add This Debuff to Notification Targets</value>
+  </data>
+  <data name="BuffList_Menu_RemoveDebuffFromNotificationTargets" xml:space="preserve">
+    <value>Remove This Debuff from Notification Targets</value>
   </data>
   <data name="BuffDebuffGroup_Menu_RemoveBuff" xml:space="preserve">
     <value>Remove This Buff from Group</value>
@@ -605,36 +602,6 @@ If it is not installed, you can download it from the link below.</value>
   <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
     <value>{0}'s {1}</value>
   </data>
-  <data name="TakenDamageLog_LethalHitFormat" xml:space="preserve">
-    <value>{0} took {1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_LethalText" xml:space="preserve">
-    <value>was defeated</value>
-  </data>
-  <data name="TakenDamageLog_HealthSummaryFormat" xml:space="preserve">
-    <value>{0}'s {1}</value>
-  </data>
-  <data name="TakenDamageLog_HealthChangeFormat" xml:space="preserve">
-    <value>{0}'s {1} → {2}</value>
-  </data>
-  <data name="TakenDamageLog_HitFormatNoHp" xml:space="preserve">
-    <value>{0} took {1}</value>
-  </data>
-  <data name="TakenDamageLog_HitDamage" xml:space="preserve">
-    <value>{0}{1} damage</value>
-  </data>
-  <data name="TakenDamageLog_HitDamagePhysical" xml:space="preserve">
-    <value>{0}{1} Physical damage</value>
-  </data>
-  <data name="TakenDamageLog_HitDamageMagical" xml:space="preserve">
-    <value>{0}{1} Magic damage</value>
-  </data>
-  <data name="TakenDamageLog_HitHealth" xml:space="preserve">
-    <value>HP({0}/{1})</value>
-  </data>
-  <data name="TakenDamageLog_DeathText" xml:space="preserve">
-    <value>was defeated ({0}/{1})</value>
-  </data>
   <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
   </data>
@@ -647,7 +614,25 @@ If it is not installed, you can download it from the link below.</value>
     <value>Could not copy the text.</value>
   </data>
   <data name="TakenDamageLog_HealFormat" xml:space="preserve">
-    <value>{0} recovered {1} HP</value>
+    <value>{0} {1} HP</value>
+  </data>
+  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+    <value>recovered {0}</value>
+  </data>
+  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+    <value>{1} to {0}</value>
+  </data>
+  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+    <value>{0} damage</value>
+  </data>
+  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+    <value>{1} on {0}</value>
+  </data>
+  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+    <value>{0} ({1}s)</value>
+  </data>
+  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+    <value>Some effect</value>
   </data>
   <data name="TakenDamageLog_SystemActor" xml:space="preserve">
     <value>System</value>
@@ -657,9 +642,6 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="TakenDamageLog_FallSkill" xml:space="preserve">
     <value>Fall</value>
-  </data>
-  <data name="TakenDamageLog_DeathFormat" xml:space="preserve">
-    <value>{0} {1}</value>
   </data>
   <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
     <value>Text Colors</value>
@@ -730,14 +712,11 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
     <value>Player name</value>
   </data>
+  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+    <value>Effect</value>
+  </data>
   <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
     <value>HP value</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_ShieldValue" xml:space="preserve">
-    <value>Shield value</value>
-  </data>
-  <data name="Settings_TakenDamageLogTextColor_Death" xml:space="preserve">
-    <value>Defeated</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
     <value>No element</value>
@@ -1233,6 +1212,27 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Display_CombatState" xml:space="preserve">
     <value>Combat State</value>
   </data>
+  <data name="Settings_Display_TargetedPlayer" xml:space="preserve">
+    <value>Targeted Player</value>
+  </data>
+  <data name="Settings_Display_HateValue" xml:space="preserve">
+    <value>Aggro</value>
+  </data>
+  <data name="HateRankDisplay_Top5" xml:space="preserve">
+    <value>Show Top 5</value>
+  </data>
+  <data name="HateRankDisplay_Top4" xml:space="preserve">
+    <value>Show Top 4</value>
+  </data>
+  <data name="HateRankDisplay_Top3" xml:space="preserve">
+    <value>Show Top 3</value>
+  </data>
+  <data name="HateRankDisplay_Top2" xml:space="preserve">
+    <value>Show Top 2</value>
+  </data>
+  <data name="HateRankDisplay_FirstOnly" xml:space="preserve">
+    <value>Show Top Aggro Only</value>
+  </data>
   <data name="CombatStateDisplay_SelfOnly" xml:space="preserve">
     <value>Show Self Only</value>
   </data>
@@ -1378,15 +1378,21 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Revive List</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
-    <value>Damage Taken List</value>
+    <value>Damage Taken Log</value>
   </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(Defeated)</value>
   </data>
-  <data name="DamageTakenList_SecondsAgo" xml:space="preserve">
-    <value>{0}s ago</value>
-  </data>
   <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
     <value>Show cause of defeat</value>
+  </data>
+  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+    <value>Show latest hit only</value>
+  </data>
+  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+    <value>Show All</value>
+  </data>
+  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+    <value>Latest Only</value>
   </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>Revivable</value>
   </data>
@@ -1421,7 +1427,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Map IDs only</value>
   </data>
   <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
-    <value>Unnamed skills</value>
+    <value>Unnamed skills and buffs</value>
   </data>
   <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
     <value>Note: Internal names are in Chinese only.</value>
@@ -1562,7 +1568,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Preview</value>
   </data>
   <data name="Notification_BuffWidgetNote" xml:space="preserve">
-    <value>Note: Only buffs in running Buff &amp; Debuff Cards and Buff &amp; Debuff Groups send notifications.</value>
+    <value>Note: Only buffs in running "Buff &amp; Debuff Card" and "Buff &amp; Debuff Group" widgets send notifications.</value>
   </data>
   <data name="Notification_PlayerAppeared" xml:space="preserve">
     <value>Player appeared</value>
@@ -1576,8 +1582,35 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>Target entity name</value>
   </data>
-  <data name="Notification_TargetEntityNameNote" xml:space="preserve">
-    <value>Note: Enter the entity name in the current display language.</value>
+  <data name="Notification_TargetEntityId" xml:space="preserve">
+    <value>Target entity ID</value>
+  </data>
+  <data name="Notification_TargetPlayerUid" xml:space="preserve">
+    <value>Target player UID</value>
+  </data>
+  <data name="Notification_TargetSkillName" xml:space="preserve">
+    <value>Target skill name</value>
+  </data>
+  <data name="Notification_TargetSkillId" xml:space="preserve">
+    <value>Target skill ID</value>
+  </data>
+  <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
+    <value>Note: An entered ID takes priority over the name.</value>
+  </data>
+  <data name="Notification_TargetUidPriorityNote" xml:space="preserve">
+    <value>Note: An entered UID takes priority over the name.</value>
+  </data>
+  <data name="Notification_TargetIdSourceNote" xml:space="preserve">
+    <value>Note: Show IDs with "Internal ID" in Display, and copy IDs and names from the "Timeline" widget.</value>
+  </data>
+  <data name="Notification_TargetMultipleNote" xml:space="preserve">
+    <value>Note: Separate multiple entries with "|".</value>
+  </data>
+  <data name="Notification_BuffTargetSettingsNote" xml:space="preserve">
+    <value>Note: Choose the buffs and debuffs to notify in "Notification Targets" of the "Buff &amp; Debuff Card" and "Buff &amp; Debuff Group" widget settings.</value>
+  </data>
+  <data name="Settings_Section_NotificationTargets_Title" xml:space="preserve">
+    <value>Notification Targets</value>
   </data>
   <data name="Aggregation_StatusLive" xml:space="preserve">
     <value>Aggregating</value>

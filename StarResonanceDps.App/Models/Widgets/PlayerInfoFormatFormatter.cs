@@ -185,9 +185,10 @@ public static partial class PlayerInfoFormatFormatter
             return LocalizationManager.Instance["EntityList_UnnamedEnemy"] + person.Name;
         }
 
+        // 何者か分からない敵。名前の無いモンスターなら、名前には内部ID注記だけが入っていることがある。
         if (person.IsUnknownEnemy)
         {
-            return LocalizationManager.Instance["EntityList_UnknownEnemy"];
+            return LocalizationManager.Instance["EntityList_UnknownEnemy"] + person.Name;
         }
 
         return person.IsPlayer

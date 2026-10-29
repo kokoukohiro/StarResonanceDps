@@ -10,8 +10,8 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// プレイヤー用とモンスター用の2つのViewModelが同じこのビューを使う。
 ///
 /// <para>
-/// 右クリックのメニュー(「グループに追加」「〇〇カードのショートカットに追加」)は、自分のカードで足せる項目だけを出し、
-/// 1つも無ければ開かない(<see cref="BuffDebuffCardWidgetViewModel.CanAddToGroup"/> / <see cref="BuffDebuffCardWidgetViewModel.CanAddToShortcuts"/>)。
+/// 右クリックのメニュー(「グループに追加」「バフ・デバフカードのショートカットに追加」「このバフを通知対象にする」など)は、出せる項目だけを出し、
+/// 1つも無ければ開かない(<see cref="IBuffDebuffCardMenuViewModel"/>。グループとショートカットは自分のカードだけ、通知対象はどのカードでも)。
 /// 開き方はバフ・デバフ一覧の行のメニューと同じ。
 /// </para>
 /// </summary>
@@ -30,19 +30,21 @@ public partial class BuffDebuffCardWidgetView : UserControl
     private void Card_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (sender is not FrameworkElement target
-            || DataContext is not BuffDebuffCardWidgetViewModel viewModel
+            || DataContext is not IBuffDebuffCardMenuViewModel viewModel
             || TryFindResource(CardContextMenuKey) is not ContextMenu menu)
         {
             return;
         }
 
-        // 項目の並びは画面の作りと同じ(1つ目がグループ、2つ目がショートカット)。
+        // 項目の並びは画面の作りと同じ(1つ目がグループ、2つ目がショートカット、3つ目が通知対象)。
         var menuItems = menu.Items.OfType<MenuItem>().ToArray();
-        var shows = new[] { viewModel.CanAddToGroup(), viewModel.CanAddToShortcuts() };
+        var shows = new[] { viewModel.CanAddToGroup(), viewModel.CanAddToShortcuts(), viewModel.CanToggleNotificationTarget() };
         if (!shows.Any(show => show))
         {
             return;
         }
+
+        viewModel.RefreshMenuText();
 
         for (var index = 0; index < menuItems.Length; index++)
         {

@@ -59,7 +59,10 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
+        _widget.BuffCardNotificationTargetChangedFromWidget += Widget_BuffCardNotificationTargetChangedFromWidget;
+        _widget.BuffDebuffGroupNotificationTargetChangedFromWidget += Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
+        _widget.DamageTakenListShowsLatestHitOnlyChangedFromWidget += Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget;
 
         // 開いている間は、行の並びを保存前のプレビューとして持つ(ウィジェットでの並べ替えも含めて「保存」で確定、閉じたら戻す)。
         _widget.BeginSettingsPreview();
@@ -104,7 +107,10 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
+        _widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
+        _widget.BuffDebuffGroupNotificationTargetChangedFromWidget -= Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
         _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
+        _widget.DamageTakenListShowsLatestHitOnlyChangedFromWidget -= Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget;
         _widget.PlayerStatusRowOrderChanged -= Widget_PlayerStatusRowOrderChanged;
         _widget.EndSettingsPreview();
         _viewModel.Dispose();
@@ -133,7 +139,7 @@ public partial class WidgetSettingsWindow : Window
     }
 
     /// <summary>
-    /// 開いている間に右クリックで、バフ・デバフカードのショートカットの行がオンになった(一覧・カードの「〇〇カードのショートカットに追加」)。
+    /// 開いている間に右クリックで、バフ・デバフカードのショートカットの行がオンになった(一覧・カードの「バフ・デバフカードのショートカットに追加」)。
     /// 設定の行にも同じ変化を入れる。
     /// </summary>
     private void Widget_BuffCardShortcutChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
@@ -141,10 +147,28 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.BuffCardSettings?.SetShortcutEnabledFromWidget(key, isEnabled);
     }
 
+    /// <summary>開いている間に右クリックで、バフ・デバフカードの通知対象の行がオン/オフになった。設定の行にも同じ変化を入れる。</summary>
+    private void Widget_BuffCardNotificationTargetChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.BuffCardSettings?.SetNotificationTargetEnabledFromWidget(key, isEnabled);
+    }
+
+    /// <summary>開いている間に右クリックで、バフ・デバフグループの通知対象の行がオン/オフになった。設定の行にも同じ変化を入れる。</summary>
+    private void Widget_BuffDebuffGroupNotificationTargetChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.BuffDebuffGroupSettings?.SetNotificationTargetEnabledFromWidget(key, isEnabled);
+    }
+
     /// <summary>開いている間に推移グラフの窓の上のホイールで横軸の長さが変わった。設定の値にも入れる。</summary>
     private void Widget_MetricTimelineVisibleSecondsChangedFromWidget(int visibleSeconds)
     {
         _viewModel.MetricTimelineSettings?.SetVisibleSecondsFromWidget(visibleSeconds);
+    }
+
+    /// <summary>開いている間に被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」が変わった。設定の値にも入れる。</summary>
+    private void Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget(bool showsLatestHitOnly)
+    {
+        _viewModel.DamageTakenListSettings?.SetShowsLatestHitOnlyFromWidget(showsLatestHitOnly);
     }
 
     /// <summary>
@@ -269,6 +293,16 @@ public partial class WidgetSettingsWindow : Window
     private void BuffCardShortcutsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BuffCardShortcutsHost);
+    }
+
+    private void BuffDebuffGroupNotificationTargetsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffDebuffGroupNotificationTargetsHost);
+    }
+
+    private void BuffCardNotificationTargetsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffCardNotificationTargetsHost);
     }
 
     private void BuffDebuffGroupBuffColorsNavButton_Click(object sender, RoutedEventArgs e)

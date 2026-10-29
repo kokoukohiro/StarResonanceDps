@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.ViewModels.Notifications;
@@ -57,15 +58,15 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     [ObservableProperty]
     private int _targetModeIndex;
 
-    /// <summary>狙われ状態の対象プレイヤー(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。</summary>
+    /// <summary>狙われるプレイヤーの対象プレイヤー(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。</summary>
     [ObservableProperty]
     private int _targetedPlayerModeIndex = AppConfigDefaults.DefaultTargetedPlayerModeIndex;
 
-    /// <summary>狙われ状態の対象エンティティ(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。</summary>
+    /// <summary>狙われるプレイヤーの対象エンティティ(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。</summary>
     [ObservableProperty]
     private int _targetEntityModeIndex = AppConfigDefaults.DefaultTargetEntityModeIndex;
 
-    /// <summary>狙われ状態の通知条件の番号(<see cref="AppConfigDefaults.TargetedDurationSeconds"/> の添字)。</summary>
+    /// <summary>狙われるプレイヤーの通知条件の番号(<see cref="AppConfigDefaults.TargetedDurationSeconds"/> の添字)。</summary>
     [ObservableProperty]
     private int _targetedConditionIndex = AppConfigDefaults.DefaultTargetedConditionIndex;
 
@@ -85,13 +86,19 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     [ObservableProperty]
     private int _telegraphedSkillConditionIndex = AppConfigDefaults.DefaultTelegraphedSkillConditionIndex;
 
-    /// <summary>エンティティ詠唱の通知条件の番号(<see cref="AppConfigDefaults.EntityCastMinimumSeconds"/> の添字)。</summary>
-    [ObservableProperty]
-    private int _entityCastConditionIndex = AppConfigDefaults.DefaultEntityCastConditionIndex;
-
-    /// <summary>プレイヤー出現・エンティティ出現で、出現を知らせる相手の名前。打ったままの値で持ち、保存のときに前後の空白を除く。</summary>
+    /// <summary>
+    /// エンティティ詠唱・プレイヤー出現・エンティティ出現の対象の名前(区切りで並べた複数、<see cref="NotificationTargetList"/>)。
+    /// 打ったままの値で持ち、保存のときに分ける。
+    /// </summary>
     [ObservableProperty]
     private string _targetName = string.Empty;
+
+    /// <summary>
+    /// 対象の名前と同じ項目の、対象のID(区切りで並べた複数)。打ったままの値で持ち、保存のときに分けて数にする。空なら入力なし。
+    /// 入力欄は数字と区切りだけを受け、区切りのあいだの桁は long に収まる長さまで(<see cref="Behaviors.DigitsOnlyInputBehavior"/>)。
+    /// </summary>
+    [ObservableProperty]
+    private string _targetIdText = string.Empty;
 
     [ObservableProperty]
     private VoicevoxSpeakerOption? _selectedVoicevoxSpeaker;
@@ -117,7 +124,7 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     public event EventHandler? Changed;
 
     /// <summary>
-    /// 文章か出現の対象の名前が変わった(どちらも打ち終わってから保存する)。読み込みと、言語を変えたときの既定の文の差し替えでは上げない。
+    /// 文章か対象の名前・IDが変わった(どれも打ち終わってから保存する)。読み込みと、言語を変えたときの既定の文の差し替えでは上げない。
     /// </summary>
     public event EventHandler? TextChanged;
 
@@ -137,7 +144,7 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     /// <summary>HP低下の項目か。右下に「対象プレイヤー」「HP低下判定」「通知条件」の行を出す。</summary>
     public bool ShowsHealthLowSettings => Kind == NotificationKind.HealthLow;
 
-    /// <summary>狙われ状態の項目か。右下に「対象プレイヤー」(狙われ状態の選択肢)「対象エンティティ」「通知条件」の行を出す。</summary>
+    /// <summary>狙われるプレイヤーの項目か。右下に「対象プレイヤー」(狙われるプレイヤーの選択肢)「対象エンティティ」「通知条件」の行を出す。</summary>
     public bool ShowsTargetedSettings => Kind == NotificationKind.Targeted;
 
     /// <summary>薬剤・料理効果切れの項目か。右下の先頭に「通知条件」の行を出す。</summary>
@@ -146,13 +153,13 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     /// <summary>予兆技の項目か。右下の先頭に「通知条件」の行を出す。</summary>
     public bool ShowsTelegraphedSkillCondition => Kind == NotificationKind.TelegraphedSkill;
 
-    /// <summary>エンティティ詠唱の項目か。右下の先頭に「通知条件」の行を出す。</summary>
-    public bool ShowsEntityCastCondition => Kind == NotificationKind.EntityCast;
+    /// <summary>エンティティ詠唱の項目か。右下の先頭に「対象スキル名」「対象スキルID」の行と注意書きを出す。</summary>
+    public bool ShowsTargetSkill => Kind == NotificationKind.EntityCast;
 
-    /// <summary>プレイヤー出現の項目か。右下の先頭に「対象プレイヤー名」の行を出す。</summary>
+    /// <summary>プレイヤー出現の項目か。右下の先頭に「対象プレイヤー名」「対象プレイヤーUID」の行と注意書きを出す。</summary>
     public bool ShowsTargetPlayerName => Kind == NotificationKind.PlayerAppeared;
 
-    /// <summary>エンティティ出現の項目か。右下の先頭に「対象エンティティ名」の行と注意書きを出す。</summary>
+    /// <summary>エンティティ出現の項目か。右下の先頭に「対象エンティティ名」「対象エンティティID」の行と注意書きを出す。</summary>
     public bool ShowsTargetEntityName => Kind == NotificationKind.EntityAppeared;
 
     /// <summary>出し方が Windows の通知か。出し方の行に応答不可の注意書きを出す。</summary>
@@ -204,8 +211,8 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             HealthLowConditionIndex = config.HealthLowConditionIndex;
             CuisinePotionConditionIndex = config.CuisinePotionConditionIndex;
             TelegraphedSkillConditionIndex = config.TelegraphedSkillConditionIndex;
-            EntityCastConditionIndex = config.EntityCastConditionIndex;
-            TargetName = config.TargetName;
+            TargetName = NotificationTargetList.JoinNames(config.TargetNames);
+            TargetIdText = NotificationTargetList.JoinIds(config.TargetIds);
             _voicevoxSpeakerUuid = config.VoicevoxSpeakerUuid;
             _voicevoxSpeakerName = config.VoicevoxSpeakerName;
             _voicevoxStyleId = config.VoicevoxStyleId;
@@ -241,8 +248,8 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             HealthLowConditionIndex = HealthLowConditionIndex,
             CuisinePotionConditionIndex = CuisinePotionConditionIndex,
             TelegraphedSkillConditionIndex = TelegraphedSkillConditionIndex,
-            EntityCastConditionIndex = EntityCastConditionIndex,
-            TargetName = TargetName.Trim()
+            TargetNames = NotificationTargetList.SplitNames(TargetName),
+            TargetIds = NotificationTargetList.ParseIds(TargetIdText)
         };
     }
 
@@ -341,12 +348,15 @@ public sealed partial class NotificationItemViewModel : ObservableObject
         RaiseChanged();
     }
 
-    partial void OnEntityCastConditionIndexChanged(int value)
+    partial void OnTargetNameChanged(string value)
     {
-        RaiseChanged();
+        if (!_isLoading)
+        {
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
-    partial void OnTargetNameChanged(string value)
+    partial void OnTargetIdTextChanged(string value)
     {
         if (!_isLoading)
         {

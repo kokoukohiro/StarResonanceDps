@@ -17,9 +17,14 @@ namespace StarResonanceDps.App.ViewModels;
 /// 倍率の保存キーには <see cref="EntityListEntry.EntityId"/>(種別ID)を使う。
 /// <c>EntityUuid</c> は実体ごとの値なので、再起動をまたぐと二度と当たらない。
 /// </para>
+///
+/// <para>
+/// バフ・デバフ効果切れは、追うバフがカードの設定の通知対象(プレイヤーのカードと共通)に入っているときだけ出す。
+/// 右クリックのメニューは通知対象の項目だけ(グループとショートカットは自分のバフの設定なので出さない)。
+/// </para>
 /// </summary>
 public sealed partial class EntityBuffDebuffCardWidgetViewModel
-    : ViewModelBase, IEntityWidgetWindowViewModel, IDisposable
+    : ViewModelBase, IEntityWidgetWindowViewModel, IDisposable, IBuffDebuffCardMenuViewModel
 {
     private readonly WidgetListItemViewModel _widget;
     private readonly EntityWindowTarget _target;
@@ -180,6 +185,34 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
 
     public double Scale => ScalePercent / 100d;
 
+    /// <summary>右クリックのメニューの色を引くウィジェット。</summary>
+    public WidgetListItemViewModel Widget => _widget;
+
+    public string AddToGroupMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToGroup");
+
+    /// <summary>モンスターのバフはグループに足さないので、項目を出さない。</summary>
+    public bool CanAddToGroup() => false;
+
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToBuffCardShortcuts");
+
+    /// <summary>モンスターのバフはショートカットに足さないので、項目を出さない。</summary>
+    public bool CanAddToShortcuts() => false;
+
+    /// <summary>右クリックのメニューの項目「このバフを通知対象にする」「〜しない」(デバフのカードは「このデバフを」)。</summary>
+    public string NotificationTargetMenuText => BuffDebuffCardContent.GetNotificationTargetMenuText(
+        _kind == PlayerBuffListKind.Debuff,
+        IsNotificationTarget());
+
+    public bool CanToggleNotificationTarget()
+    {
+        return BuffDebuffCardContent.CreateEntryKey(_group, _requestedBuffKey) is not null;
+    }
+
+    public void RefreshMenuText()
+    {
+        OnPropertyChanged(nameof(NotificationTargetMenuText));
+    }
+
     public bool RepresentsEntity(long entityUuid)
     {
         return _target.Represents(entityUuid);
@@ -244,6 +277,36 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _notificationWatcher.Dispose();
     }
 
+    /// <summary>項目を出さないので呼ばれない(<see cref="CanAddToGroup"/>)。取り決めを満たすためだけにある。</summary>
+    [RelayCommand]
+    private void AddToGroup()
+    {
+    }
+
+    /// <summary>項目を出さないので呼ばれない(<see cref="CanAddToShortcuts"/>)。取り決めを満たすためだけにある。</summary>
+    [RelayCommand]
+    private void AddToShortcuts()
+    {
+    }
+
+    /// <summary>追うバフをカードの設定の通知対象に入れる・外す(今の状態の逆。決まりは <see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。</summary>
+    [RelayCommand]
+    private void ToggleNotificationTarget()
+    {
+        if (BuffDebuffCardContent.CreateEntryKey(_group, _requestedBuffKey) is { } key)
+        {
+            _widget.SetBuffCardNotificationTargetEnabledFromWidget(key, !_widget.IsBuffCardNotificationTarget(key));
+            RefreshMenuText();
+        }
+    }
+
+    /// <summary>追うバフがカードの設定の通知対象(設定の窓のプレビューを含む今の値)に入っているか。</summary>
+    private bool IsNotificationTarget()
+    {
+        return BuffDebuffCardContent.CreateEntryKey(_group, _requestedBuffKey) is { } key
+            && _widget.IsBuffCardNotificationTarget(key);
+    }
+
     [RelayCommand(CanExecute = nameof(CanZoomIn))]
     private void ZoomIn()
     {
@@ -288,6 +351,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     {
         // タイトルの「バフ/デバフ」もカルチャ依存なので、中身だけでなく組み直す。
         RefreshPresentation();
+        RefreshMenuText();
     }
 
     private void Refresh()
@@ -323,6 +387,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _notificationWatcher.Observe(
             BuffNotificationTarget.ForEntity(_target.EntityUuid),
             BuffNotificationRegistry.CreateBuffKey(_group, _requestedBuffKey ?? string.Empty),
+            IsNotificationTarget(),
             snapshot,
             _target.Name);
 

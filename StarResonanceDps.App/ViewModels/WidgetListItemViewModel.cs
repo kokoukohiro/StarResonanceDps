@@ -151,6 +151,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     [NotifyPropertyChangedFor(nameof(ShowsTargetSelector))]
     private bool _hasTargetOptions;
 
+    /// <summary>
+    /// メイン画面のウィジェットの検索欄の文字に当たるか。偽ならカードを隠す(カードは作り直さない)。決めるのはメイン画面(<see cref="MainViewModel"/>)で、
+    /// 比べるのは名前の欄に出している文字(<see cref="ShownName"/>)。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSearchMatch = true;
+
     public ReadOnlyObservableCollection<PlayerListEntry> PlayerListEntries { get; }
 
     public ReadOnlyObservableCollection<EntityListEntry> EntityListEntries { get; }
@@ -192,6 +199,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     /// <summary>名前の欄に選択リストを出すか。相手を選ぶ種別で、並べるものがあるときだけ。</summary>
     public bool ShowsTargetSelector => SupportsTargetSelection && HasTargetOptions;
+
+    /// <summary>カードの名前の欄に出している文字。選択リストを出しているときは選んでいる窓のタイトル、そうでなければウィジェット名。</summary>
+    public string ShownName => ShowsTargetSelector ? TargetSelectorText : DisplayName;
 
     /// <summary>起動ボタンを停止の絵にするか。相手を選ぶ種別は選んでいる項目の窓が開いているか、ほかは起動中か。</summary>
     public bool ShowsStopIcon => SupportsTargetSelection ? IsSelectedTargetOpen : State == WidgetState.Running;
@@ -307,8 +317,70 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             && shortcuts.Exists(entry => entry.IsEnabled && entry.GetKey() == key);
     }
 
+    /// <summary>バフ・デバフカードの通知対象に、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffCardNotificationTarget(BuffEntryKey key)
+    {
+        return WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
+            && _buffCard.NotificationTargets is { } targets
+            && targets.Exists(entry => entry.IsEnabled && entry.GetKey() == key);
+    }
+
     /// <summary>
-    /// 右クリックで、バフ・デバフカードのショートカットの行をオンにする(一覧とカードの「〇〇カードのショートカットに追加」)。
+    /// 右クリックで、バフ・デバフカードの通知対象の行をオン/オフにする(カードの「このバフを通知対象にする」「〜しない」)。
+    /// 決まりはショートカットと同じ(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。保存と設定ウィンドウへ
+    /// <see cref="BuffCardNotificationTargetChangedFromWidget"/> で知らせる。カードは1秒ごとの更新で今の値を読む。既にその状態なら何もしない。
+    /// </summary>
+    public void SetBuffCardNotificationTargetEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
+            || !key.IsValid
+            || IsBuffCardNotificationTarget(key) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffCard.NotificationTargets ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries);
+        BuffCardNotificationTargetChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
+    /// <summary>バフ・デバフグループの通知対象に、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffDebuffGroupNotificationTarget(BuffEntryKey key)
+    {
+        return WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
+            && _buffDebuffGroup.NotificationTargets is { } targets
+            && targets.Exists(entry => entry.IsEnabled && entry.GetKey() == key);
+    }
+
+    /// <summary>
+    /// 右クリックで、バフ・デバフグループの通知対象の行をオン/オフにする(グループの行の「このバフを通知対象にする」「〜しない」)。
+    /// 決まりはグループの行と同じ(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。開いているグループの窓へ
+    /// <see cref="BuffDebuffGroupSettingsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffDebuffGroupNotificationTargetChangedFromWidget"/> で知らせる。
+    /// 既にその状態なら何もしない。
+    /// </summary>
+    public void SetBuffDebuffGroupNotificationTargetEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(Kind)
+            || !key.IsValid
+            || IsBuffDebuffGroupNotificationTarget(key) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffDebuffGroup.NotificationTargets ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries);
+        BuffDebuffGroupSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffDebuffGroupNotificationTargetChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
+    /// <summary>
+    /// 右クリックで、バフ・デバフカードのショートカットの行をオンにする(一覧とカードの「バフ・デバフカードのショートカットに追加」)。
     /// 決まりはグループの行と同じ(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)。メイン画面のカードへ
     /// <see cref="BuffCardShortcutsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffCardShortcutChangedFromWidget"/> で知らせる。
     /// 既にその状態なら何もしない。
@@ -493,6 +565,24 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(visibleSeconds));
     }
 
+    /// <summary>
+    /// 被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」を切り替える。窓へ設定の変化を知らせ、
+    /// 開いている設定の窓へ <see cref="DamageTakenListShowsLatestHitOnlyChangedFromWidget"/> で知らせ、この項目だけを保存する。
+    /// </summary>
+    public void SetDamageTakenListShowsLatestHitOnlyFromWidget(bool showsLatestHitOnly)
+    {
+        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind)
+            || _damageTakenList.ShowsLatestHitOnly == showsLatestHitOnly)
+        {
+            return;
+        }
+
+        _damageTakenList.ShowsLatestHitOnly = showsLatestHitOnly;
+        DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        DamageTakenListShowsLatestHitOnlyChangedFromWidget?.Invoke(showsLatestHitOnly);
+        WidgetStateManager.Instance.SaveDamageTakenListShowsLatestHitOnly(Kind, showsLatestHitOnly);
+    }
+
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
     public string BuffInfoFormatString =>
         _buffCard.BuffInfoFormatString ?? WidgetConfigDefaults.DefaultBuffInfoFormatString;
@@ -556,6 +646,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>推移グラフの窓の上のホイールで横軸の長さが変わった(引数は新しい秒数)。設定の窓のスライダーでは上げない。</summary>
     public event Action<int>? MetricTimelineVisibleSecondsChangedFromWidget;
 
+    /// <summary>被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」が変わった(引数は新しい値)。設定の窓のスイッチでは上げない。</summary>
+    public event Action<bool>? DamageTakenListShowsLatestHitOnlyChangedFromWidget;
+
     public event EventHandler? ElementColorSettingsChanged;
 
     public event EventHandler? SkillDetailSettingsChanged;
@@ -585,6 +678,16 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// 右クリックでバフ・デバフカードのショートカットの行をオンにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
     /// </summary>
     public event Action<WidgetKind, BuffEntryKey, bool>? BuffCardShortcutChangedFromWidget;
+
+    /// <summary>
+    /// 右クリックでバフ・デバフカードの通知対象の行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
+    /// </summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffCardNotificationTargetChangedFromWidget;
+
+    /// <summary>
+    /// 右クリックでバフ・デバフグループの通知対象の行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
+    /// </summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffDebuffGroupNotificationTargetChangedFromWidget;
 
     /// <summary>
     /// ステータス詳細の行の今の並び(<see cref="GetPlayerStatusRowOrderSnapshot"/>)が変わった(引数は新しい並び)。

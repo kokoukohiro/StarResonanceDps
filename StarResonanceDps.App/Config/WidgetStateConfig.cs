@@ -205,25 +205,13 @@ public sealed class MetricTimelineWidgetSettingsConfig
 public sealed class TakenDamageLogWidgetSettingsConfig
 {
     /// <summary>
-    /// 被弾行の HP の出し方。0=バリア量加算表示 / 1=バリア量個別表示。
-    /// プレイヤーリスト・エンティティリストと同じ規則。
-    /// </summary>
-    public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
-
-    /// <summary>
-    /// フィルター。0=すべて表示 / 1=自傷・フレンドリーファイア以外(加害者がプレイヤーの被弾を出さない)。
-    /// 以前のフィルター(撤去済み)の <c>FilterIndex</c> とは別の名前にしてある。古い保存の値を拾わないため。
-    /// </summary>
-    public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogAttackerFilterIndex;
-
-    /// <summary>
-    /// 敵どうしの回復(回復の行と、回復された敵のまとめの行)を出すか。0=表示 / 1=非表示。
+    /// 敵の回復(相手が敵でもプレイヤーでも)を出すか。0=表示 / 1=非表示。
     /// 出さないときも記録と保存は続く(画面に出すときに絞る)。
     /// </summary>
     public int EnemyHealDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogEnemyHealDisplayModeIndex;
 
     /// <summary>
-    /// クラスアイコンの色(クラスカラー)。形はプレイヤーリストのクラスカラーと同じで、被ダメログ専用に持つ。
+    /// 相手がプレイヤーの行のクラスアイコンの色(アイコンカラー)。形はプレイヤーリストのクラスカラーと同じで、タイムライン専用に持つ。
     /// 既定の色はプレイヤーリストと同じ。フィルターと不透明度は持たない。
     /// </summary>
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
@@ -241,8 +229,6 @@ public sealed class TakenDamageLogWidgetSettingsConfig
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
-            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
-            AttackerFilterIndex = AttackerFilterIndex,
             EnemyHealDisplayModeIndex = EnemyHealDisplayModeIndex,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
@@ -429,6 +415,12 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
 
     public List<BuffDebuffGroupEntryConfig>? Entries { get; set; }
 
+    /// <summary>
+    /// 通知対象(窓に出ている行のうち、バフ・デバフ効果切れを通知するバフ・デバフ)。並びに意味は無い。
+    /// 既定の行(<see cref="WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries"/>)はオフにしても残り、右クリックで足した行はオフのまま保存すると消える。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? NotificationTargets { get; set; }
+
     public BuffDebuffGroupWidgetSettingsConfig Clone()
     {
         return new BuffDebuffGroupWidgetSettingsConfig
@@ -436,7 +428,8 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
             GaugeLengthIndex = GaugeLengthIndex,
             BuffGaugeColors = BuffGaugeColors?.Clone(),
             DebuffGaugeColors = DebuffGaugeColors?.Clone(),
-            Entries = Entries?.Select(entry => entry.Clone()).ToList()
+            Entries = Entries?.Select(entry => entry.Clone()).ToList(),
+            NotificationTargets = NotificationTargets?.Select(entry => entry.Clone()).ToList()
         };
     }
 }
@@ -561,6 +554,12 @@ public sealed class BuffCardWidgetSettingsConfig
     /// </summary>
     public List<BuffDebuffGroupEntryConfig>? Shortcuts { get; set; }
 
+    /// <summary>
+    /// 通知対象(カードに出ているバフのうち、バフ・デバフ効果切れを通知するバフ・デバフ)。全部のカード(自分・他人・エンティティ)で共通。並びに意味は無い。
+    /// 既定の行(<see cref="WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries"/>)はオフにしても残り、右クリックで足した行はオフのまま保存すると消える。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? NotificationTargets { get; set; }
+
     public BuffCardWidgetSettingsConfig Clone()
     {
         return new BuffCardWidgetSettingsConfig
@@ -569,7 +568,8 @@ public sealed class BuffCardWidgetSettingsConfig
             Scales = Scales is null
                 ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, int>(Scales, StringComparer.OrdinalIgnoreCase),
-            Shortcuts = Shortcuts?.Select(entry => entry.Clone()).ToList()
+            Shortcuts = Shortcuts?.Select(entry => entry.Clone()).ToList(),
+            NotificationTargets = NotificationTargets?.Select(entry => entry.Clone()).ToList()
         };
     }
 }
@@ -589,6 +589,18 @@ public sealed class MeterWidgetSettingsConfig
     /// 2 はプレイヤーリストだけ(エンティティリストには自分の行が無いので、読み込みで 0〜1 に収める)。
     /// </summary>
     public int CombatStateDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
+
+    /// <summary>
+    /// エンティティリストの設定「狙われるプレイヤー」(ヘイトの枠の左端に今狙っている相手を出すか)。
+    /// 0=表示 / 1=非表示(<see cref="WidgetConfigDefaults.TargetedPlayerDisplayShowIndex"/> ほか)。
+    /// </summary>
+    public int TargetedPlayerDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTargetedPlayerDisplayModeIndex;
+
+    /// <summary>
+    /// エンティティリストの設定「ヘイト値」(ヘイトの枠に何位まで並べるか)。
+    /// 人数は <see cref="WidgetConfigDefaults.HateRankDisplayCounts"/> の添字で引く(0=上位5人 … 4=ヘイト1位のみ)。
+    /// </summary>
+    public int HateRankDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHateRankDisplayModeIndex;
 
     public int PartyDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultPartyDisplayModeIndex;
 
@@ -646,6 +658,8 @@ public sealed class MeterWidgetSettingsConfig
             HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
             ShowSeasonTalent = ShowSeasonTalent,
             CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
+            TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
+            HateRankDisplayModeIndex = HateRankDisplayModeIndex,
             PartyDisplayModeIndex = PartyDisplayModeIndex,
             EntityDisplayModeIndex = EntityDisplayModeIndex,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -791,7 +805,7 @@ public sealed class ReviveListWidgetSettingsConfig
 
 /// <summary>
 /// 被ダメリストの設定。プレイヤー名の書式と自分の強調表示(蘇生リストと同じ値の形)、右の書式(設定「スキル名」)、
-/// 戦闘不能の原因を表示するか、クラスアイコンの色(アイコンカラー、蘇生リストと同じ形と既定の色)。
+/// 戦闘不能の原因を表示するか、フィルター、最新の被弾だけを出すか、クラスアイコンの色(アイコンカラー、蘇生リストと同じ形と既定の色)。
 /// バーの色(節「属性カラー」)は属性カラーの設定(<see cref="WidgetConfig.ElementColor"/>)が持つ。
 /// </summary>
 public sealed class DamageTakenListWidgetSettingsConfig
@@ -808,6 +822,15 @@ public sealed class DamageTakenListWidgetSettingsConfig
     /// <summary>その被弾で倒れた行の被ダメ値の後ろに「(戦闘不能)」を出すか(設定「戦闘不能の原因を表示」)。</summary>
     public bool ShowsDefeatCause { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListShowsDefeatCause;
 
+    /// <summary>
+    /// 設定「フィルター設定」。0=すべて表示 / 1=自傷・フレンドリーファイア以外(加害者がプレイヤーの被弾を出さない)。
+    /// <see cref="WidgetConfigDefaults.NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex"/>。
+    /// </summary>
+    public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListAttackerFilterIndex;
+
+    /// <summary>設定「最新の被ダメのみ表示」。真なら1人1行でその人の一番新しい被弾だけ、偽なら被弾を全部出す。ヘッダーのボタンでも切り替わる。</summary>
+    public bool ShowsLatestHitOnly { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListShowsLatestHitOnly;
+
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList);
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList);
@@ -820,6 +843,8 @@ public sealed class DamageTakenListWidgetSettingsConfig
             SelfDisplayModeIndex = SelfDisplayModeIndex,
             HitInfoFormatString = HitInfoFormatString,
             ShowsDefeatCause = ShowsDefeatCause,
+            AttackerFilterIndex = AttackerFilterIndex,
+            ShowsLatestHitOnly = ShowsLatestHitOnly,
             ClassColorIndexes = ClassColorIndexes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
@@ -954,8 +979,6 @@ public static class WidgetConfigDefaults
 
     /// <summary>一覧の並び替え: 名前順(群の中を画面に出している名前で並べる)。</summary>
     public const int NameListSortModeIndex = 1;
-    public const int DefaultTakenDamageLogAttackerFilterIndex = 1;
-    public const int NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex = 1;
     public const int DefaultTakenDamageLogEnemyHealDisplayModeIndex = 0;
     public const int HiddenTakenDamageLogEnemyHealDisplayModeIndex = 1;
     public const int MinClassColorFilterStrength = 0;
@@ -1179,13 +1202,32 @@ public static class WidgetConfigDefaults
         .. DefaultBuffDebuffGroupEntries
     ];
 
+    /// <summary>
+    /// バフ・デバフカードの通知対象の既定の行。中身もオン・オフもバフ・デバフグループの既定の行と同じ。
+    /// 既定の行はオフにしても消えず、初期化で既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffCardNotificationTargetEntries { get; } =
+    [
+        .. DefaultBuffDebuffGroupEntries
+    ];
+
+    /// <summary>
+    /// バフ・デバフグループの通知対象の既定の行。中身もオン・オフもバフ・デバフグループの既定の行と同じ。
+    /// 既定の行はオフにしても消えず、初期化で既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffDebuffGroupNotificationTargetEntries { get; } =
+    [
+        .. DefaultBuffDebuffGroupEntries
+    ];
+
     public static bool IsDefaultBuffEntry(IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults, BuffEntryKey key)
     {
         return defaults.Any(entry => entry.Key == key);
     }
 
     /// <summary>
-    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット)をオン/オフにする(右クリックの「グループに追加」「ショートカットに追加」と「グループから削除」)。
+    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット、カードとグループの通知対象)をオン/オフにする
+    /// (右クリックの「グループに追加」「ショートカットに追加」「通知対象にする」と「グループから削除」「通知対象にしない」)。
     /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行(<paramref name="defaults"/>)はオフにして残し、足した行は消す
     /// (足した行をオフのまま保存したときと同じ)。ウィジェットの今の値・保存する値・設定の窓の保存済みの値がこの決まりを使う。
     /// </summary>
@@ -1273,6 +1315,25 @@ public static class WidgetConfigDefaults
     /// <summary>「戦闘状態」の既定(表示)。</summary>
     public const int DefaultCombatStateDisplayModeIndex = CombatStateDisplayShowIndex;
 
+    /// <summary>エンティティリストの設定「狙われるプレイヤー」の添字。</summary>
+    public const int TargetedPlayerDisplayShowIndex = 0;
+    public const int TargetedPlayerDisplayHideIndex = 1;
+
+    /// <summary>「狙われるプレイヤー」の既定(表示)。</summary>
+    public const int DefaultTargetedPlayerDisplayModeIndex = TargetedPlayerDisplayShowIndex;
+
+    /// <summary>エンティティリストの設定「ヘイト値」の選択肢(並べる人数)。並びは設定の選択リストと同じ。</summary>
+    public static IReadOnlyList<int> HateRankDisplayCounts { get; } = [5, 4, 3, 2, 1];
+
+    /// <summary>「ヘイト値」の既定(上位5人)。</summary>
+    public const int DefaultHateRankDisplayModeIndex = 0;
+
+    /// <summary>「ヘイト値」の選択の添字から並べる人数。範囲の外は端の値。</summary>
+    public static int GetHateRankDisplayCount(int index)
+    {
+        return HateRankDisplayCounts[Math.Clamp(index, 0, HateRankDisplayCounts.Count - 1)];
+    }
+
     /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
     public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({CasterName})";
 
@@ -1308,23 +1369,15 @@ public static class WidgetConfigDefaults
         "Dark"
     ];
 
-    /// <summary>被ダメログのテキストカラーの鍵。属性の9行はこの並びのまま真ん中に入る。</summary>
+    /// <summary>タイムラインのテキストカラーの鍵。</summary>
     public static readonly string[] TakenDamageLogTextColorKeys =
     [
         "EntityName",
         "SkillName",
         "PlayerName",
-        .. DamagePropertyKeys,
-        "HpValue",
-        "ShieldValue",
-        "Death"
+        "Effect",
+        "HpValue"
     ];
-
-    /// <summary>テキストカラーの鍵のうち、ダメージの属性のもの。行の左にアイコンを出す。</summary>
-    public static bool IsDamagePropertyKey(string key)
-    {
-        return DamagePropertyKeys.Contains(key, StringComparer.OrdinalIgnoreCase);
-    }
 
     private static readonly Dictionary<string, string[]> PlayerListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -1386,30 +1439,19 @@ public static class WidgetConfigDefaults
     };
 
     /// <summary>
-    /// 被ダメログのテキストカラーの既定色。属性は属性らしい色、それ以外は白と差し色の2枠。
+    /// タイムラインのテキストカラーの既定色。白と差し色の2枠。
     /// </summary>
     private static readonly Dictionary<string, string[]> TakenDamageLogDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["EntityName"] = ["#FFFFFF", "#FFD98A"],
         ["SkillName"] = ["#FFFFFF", "#D9866C"],
         ["PlayerName"] = ["#FFFFFF", "#9FD1FF"],
-        ["General"] = ["#FFFFFF", "#D0E1E9"],
-        ["Fire"] = ["#FFFFFF", "#FF8100"],
-        ["Water"] = ["#FFFFFF", "#9EECFF"],
-        ["Electricity"] = ["#FFFFFF", "#8787FF"],
-        ["Wood"] = ["#FFFFFF", "#CEF700"],
-        ["Wind"] = ["#FFFFFF", "#80FFCE"],
-        ["Rock"] = ["#FFFFFF", "#F7C600"],
-        ["Light"] = ["#FFFFFF", "#F5EFB3"],
-        ["Dark"] = ["#FFFFFF", "#8C70E0"],
-        ["HpValue"] = ["#FFFFFF", "#81E5C6"],
-        ["ShieldValue"] = ["#FFFFFF", "#DCDCDC"],
-        ["Death"] = ["#FFFFFF", "#FF8080"]
+        ["Effect"] = ["#FFFFFF", "#C9A8FF"],
+        ["HpValue"] = ["#FFFFFF", "#81E5C6"]
     };
 
     /// <summary>
-    /// スキル詳細の属性カラーの既定色。<b>被ダメログの属性テキストカラーと同じ2枠</b>で、
-    /// 既定で選ばれるのも同じく2枠目の差し色。
+    /// スキル詳細の属性カラーの既定色(2枠)。
     /// </summary>
     private static readonly Dictionary<string, string[]> ElementDefaultColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -1634,7 +1676,7 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.ReviveList;
     }
 
-    /// <summary>被ダメリストの設定(プレイヤー名・スキル名・自分の強調表示・アイコンカラー・テキストカラー)を持つ種別か。</summary>
+    /// <summary>被ダメリストの設定(プレイヤー名・スキル名・フィルター設定・自分の強調表示・戦闘不能の原因を表示・アイコンカラー)を持つ種別か。</summary>
     public static bool SupportsDamageTakenListSettings(WidgetKind kind)
     {
         return kind is WidgetKind.DamageTakenList;
@@ -2051,6 +2093,16 @@ public static class WidgetConfigDefaults
     /// <summary>被ダメリストの「戦闘不能の原因を表示」の既定。</summary>
     public const bool DefaultDamageTakenListShowsDefeatCause = true;
 
+    /// <summary>被ダメリストの「フィルター設定」の添字。並びは設定の選択リストと同じ。</summary>
+    public const int AllDamageTakenListAttackerFilterIndex = 0;
+    public const int NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex = 1;
+
+    /// <summary>「フィルター設定」の既定(自傷・フレンドリーファイア以外)。</summary>
+    public const int DefaultDamageTakenListAttackerFilterIndex = NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex;
+
+    /// <summary>被ダメリストの「最新の被ダメのみ表示」の既定。</summary>
+    public const bool DefaultDamageTakenListShowsLatestHitOnly = true;
+
     /// <summary>被ダメリストの設定の既定。</summary>
     public static DamageTakenListWidgetSettingsConfig CreateDamageTakenListSettings()
     {
@@ -2060,6 +2112,8 @@ public static class WidgetConfigDefaults
             SelfDisplayModeIndex = DefaultSelfDisplayModeIndex,
             HitInfoFormatString = DefaultDamageTakenListHitInfoFormatString,
             ShowsDefeatCause = DefaultDamageTakenListShowsDefeatCause,
+            AttackerFilterIndex = DefaultDamageTakenListAttackerFilterIndex,
+            ShowsLatestHitOnly = DefaultDamageTakenListShowsLatestHitOnly,
             ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList),
             ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList)
         };
@@ -2075,6 +2129,10 @@ public static class WidgetConfigDefaults
             normalized.SelfDisplayModeIndex,
             DefaultSelfDisplayModeIndex,
             MaxSelfDisplayModeIndex);
+        normalized.AttackerFilterIndex = Math.Clamp(
+            normalized.AttackerFilterIndex,
+            AllDamageTakenListAttackerFilterIndex,
+            NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex);
 
         (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
             WidgetKind.DamageTakenList,
@@ -2235,7 +2293,8 @@ public static class WidgetConfigDefaults
         return new BuffCardWidgetSettingsConfig
         {
             BuffInfoFormatString = DefaultBuffInfoFormatString,
-            Shortcuts = CreateBuffEntries(DefaultBuffCardShortcutEntries)
+            Shortcuts = CreateBuffEntries(DefaultBuffCardShortcutEntries),
+            NotificationTargets = CreateBuffEntries(DefaultBuffCardNotificationTargetEntries)
         };
     }
 
@@ -2252,8 +2311,6 @@ public static class WidgetConfigDefaults
     {
         return new TakenDamageLogWidgetSettingsConfig
         {
-            HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
-            AttackerFilterIndex = DefaultTakenDamageLogAttackerFilterIndex,
             EnemyHealDisplayModeIndex = DefaultTakenDamageLogEnemyHealDisplayModeIndex,
             ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog),
             ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog),
@@ -2376,7 +2433,8 @@ public static class WidgetConfigDefaults
             GaugeLengthIndex = DefaultBuffDebuffGroupGaugeLengthIndex,
             BuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Buff),
             DebuffGaugeColors = CreateBuffGaugeColors(PlayerBuffListKind.Debuff),
-            Entries = CreateBuffEntries(DefaultBuffDebuffGroupEntries)
+            Entries = CreateBuffEntries(DefaultBuffDebuffGroupEntries),
+            NotificationTargets = CreateBuffEntries(DefaultBuffDebuffGroupNotificationTargetEntries)
         };
     }
 
@@ -2442,6 +2500,7 @@ public static class WidgetConfigDefaults
         normalized.BuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.BuffGaugeColors, PlayerBuffListKind.Buff);
         normalized.DebuffGaugeColors = CloneNormalizedBuffGaugeColors(normalized.DebuffGaugeColors, PlayerBuffListKind.Debuff);
         normalized.Entries = NormalizeBuffEntries(normalized.Entries, DefaultBuffDebuffGroupEntries);
+        normalized.NotificationTargets = NormalizeBuffEntries(normalized.NotificationTargets, DefaultBuffDebuffGroupNotificationTargetEntries);
         return normalized;
     }
 
@@ -2538,7 +2597,7 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// テキストカラーで最初に選ばれている枠。エンティティ名とプレイヤー名だけ1枠目(白)で、
+    /// タイムラインのテキストカラーで最初に選ばれている枠。エンティティ名とプレイヤー名だけ1枠目(白)で、
     /// 残りは2枠目の差し色から始める。
     /// </summary>
     public static int GetDefaultTextColorIndex(string key)
@@ -2615,7 +2674,8 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.PlayerList
             or WidgetKind.EntityList
             or WidgetKind.DpsMeter
-            or WidgetKind.HpsMeter;
+            or WidgetKind.HpsMeter
+            or WidgetKind.DamageTakenList;
     }
 
     /// <summary>クラスカラーのフィルターを持つウィジェット。</summary>
@@ -2769,7 +2829,7 @@ public static class WidgetConfigDefaults
 
         var source = kind switch
         {
-            // 被ダメログ・プレイヤー情報・蘇生リスト・被ダメリストのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            // タイムライン(被ダメログ)・プレイヤー情報・蘇生リスト・被ダメログ(被ダメリスト)のクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
             WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenList
                 => PlayerListDefaultClassColorHexes,
             // エンティティリストのプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
@@ -3048,6 +3108,7 @@ public static class WidgetConfigDefaults
         buffCard.BuffInfoFormatString ??= DefaultBuffInfoFormatString;
         buffCard.Scales ??= new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         buffCard.Shortcuts = NormalizeBuffEntries(buffCard.Shortcuts, DefaultBuffCardShortcutEntries);
+        buffCard.NotificationTargets = NormalizeBuffEntries(buffCard.NotificationTargets, DefaultBuffCardNotificationTargetEntries);
 
         foreach (var key in buffCard.Scales.Keys.ToList())
         {
@@ -3057,14 +3118,6 @@ public static class WidgetConfigDefaults
 
     public static void NormalizeTakenDamageLog(TakenDamageLogWidgetSettingsConfig takenDamageLog)
     {
-        takenDamageLog.HealthValueDisplayModeIndex = Math.Clamp(
-            takenDamageLog.HealthValueDisplayModeIndex,
-            DefaultHealthValueDisplayModeIndex,
-            SeparateShieldHealthValueDisplayModeIndex);
-        takenDamageLog.AttackerFilterIndex = Math.Clamp(
-            takenDamageLog.AttackerFilterIndex,
-            0,
-            NoSelfOrFriendlyFireTakenDamageLogAttackerFilterIndex);
         takenDamageLog.EnemyHealDisplayModeIndex = Math.Clamp(
             takenDamageLog.EnemyHealDisplayModeIndex,
             DefaultTakenDamageLogEnemyHealDisplayModeIndex,
@@ -3130,6 +3183,14 @@ public static class WidgetConfigDefaults
             meter.CombatStateDisplayModeIndex,
             CombatStateDisplayShowIndex,
             kind == WidgetKind.EntityList ? CombatStateDisplayHideIndex : CombatStateDisplaySelfOnlyIndex);
+        meter.TargetedPlayerDisplayModeIndex = Math.Clamp(
+            meter.TargetedPlayerDisplayModeIndex,
+            TargetedPlayerDisplayShowIndex,
+            TargetedPlayerDisplayHideIndex);
+        meter.HateRankDisplayModeIndex = Math.Clamp(
+            meter.HateRankDisplayModeIndex,
+            0,
+            HateRankDisplayCounts.Count - 1);
 
         // クラスカラーのフィルター。持たないウィジェットでは常に無効に倒す。
         var filterDefaults = CreateDefaultClassColorFilterColors(kind);

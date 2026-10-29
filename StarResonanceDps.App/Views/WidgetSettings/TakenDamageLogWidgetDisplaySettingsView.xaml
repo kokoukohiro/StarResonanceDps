@@ -14,51 +14,7 @@
         <ContentControl Style="{StaticResource Panel.SettingSection}"
                         Margin="0,0,0,12">
             <StackPanel>
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_HealthValue]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding HealthValueDisplayModeIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_AddShield]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[HealthValueDisplay_SeparateShield]}" />
-                        </ComboBox>
-                    </Grid>
-                </Border>
-
-                <Border Style="{StaticResource Panel.SettingField}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Display_Filter]}"
-                                   Foreground="{DynamicResource Brush.TextPrimary}"
-                                   FontSize="14"
-                                   FontWeight="SemiBold" />
-
-                        <ComboBox Grid.Column="1"
-                                  SelectedIndex="{Binding AttackerFilterIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource Input.SettingsComboBox}">
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[PartyDisplay_All]}" />
-                            <ComboBoxItem Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[TakenDamageLog_Filter_NoSelfOrFriendlyFire]}" />
-                        </ComboBox>
-                    </Grid>
-                </Border>
-
-                <!-- 敵どうしの回復を出すか。並びは WidgetConfigDefaults の EnemyHealDisplayModeIndex(0 表示 / 1 非表示)。 -->
+                <!-- 敵の回復(相手が敵でもプレイヤーでも)を出すか。並びは WidgetConfigDefaults の EnemyHealDisplayModeIndex(0 表示 / 1 非表示)。 -->
                 <Border Style="{StaticResource Panel.SettingFieldLast}">
                     <Grid>
                         <Grid.ColumnDefinitions>

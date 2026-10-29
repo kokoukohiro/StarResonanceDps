@@ -1,0 +1,17 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.DamageTakenListWidgetHeaderLabelsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <StackPanel Orientation="Horizontal">
+        <Border Height="30" Margin="8,0">
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowCloseBrush,
+                                            RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                       Text="{Binding LatestHitOnlyActionText}" />
+        </Border>
+    </StackPanel>
+</UserControl>

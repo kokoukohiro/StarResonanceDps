@@ -6,7 +6,7 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        蘇生リストのアイコンカラー。行の作りは被ダメログのクラスカラー(TakenDamageLogClassColorSettingsView)と同じ。
+        蘇生リストのアイコンカラー。行の作りはプレイヤー情報のアイコンカラー(PlayerInfoClassColorSettingsView)と同じ。
         フィルターと不透明度は持たない。
     -->
     <UserControl.Resources>

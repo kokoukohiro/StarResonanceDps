@@ -1,10 +1,11 @@
 using System.Text.RegularExpressions;
 using StarResonanceDps.App.Localization;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
-/// 被ダメリストの右の書式(設定「スキル名」)。差し込める項目は スキル名 / エンティティ名 / タイプ。
+/// 被ダメリストと被ダメ履歴の右の書式(設定「スキル名」)。差し込める項目は スキル名 / エンティティ名 / タイプ。
 /// </summary>
 public static partial class DamageTakenListHitInfoFormatter
 {
@@ -33,6 +34,47 @@ public static partial class DamageTakenListHitInfoFormatter
             "ENTITYNAME" => entityName,
             _ => typeText
         });
+    }
+
+    /// <summary>被弾1回の右の文字。エンティティ名は加害者のパーティでの表示名(タイムラインと同じ)。</summary>
+    public static string Format(string? formatString, DamageTakenListHit hit)
+    {
+        return Format(
+            formatString,
+            FormatSourceName(hit),
+            PlayerInfoFormatFormatter.GetPartyDisplayName(hit.Attacker),
+            FormatDamageModeText(hit.DamageMode));
+    }
+
+    /// <summary>
+    /// 技(またはバフ)の名前。タイムラインの技の行と同じで、落下は「落下」、名前が無ければ「攻撃」、内部ID注記は全体設定に従う。
+    /// </summary>
+    private static string FormatSourceName(DamageTakenListHit hit)
+    {
+        var localization = LocalizationManager.Instance;
+        if (hit.IsFall)
+        {
+            return localization.GetString("TakenDamageLog_FallSkill");
+        }
+
+        var name = string.IsNullOrEmpty(hit.SourceName)
+            ? localization.GetString("TakenDamageLog_UnnamedSkill")
+            : hit.SourceName;
+        return hit.IsBuffSource
+            ? CombatDataCatalog.AppendBuffInternalId(name, hit.SourceId)
+            : CombatDataCatalog.AppendSkillInternalId(name, hit.SourceId);
+    }
+
+    /// <summary>書式の <c>{Type}</c>。値はスキル詳細の書式の <c>{Type}</c> と同じ(物理 / 魔法 / 無分類)。</summary>
+    private static string FormatDamageModeText(Zproto.EDamageMode mode)
+    {
+        var localization = LocalizationManager.Instance;
+        return mode switch
+        {
+            Zproto.EDamageMode.DamagePhysical => localization.GetString("Metric_DamageMode_Physical"),
+            Zproto.EDamageMode.DamageMagical => localization.GetString("Metric_DamageMode_Magical"),
+            _ => localization.GetString("Metric_DamageMode_Normal")
+        };
     }
 
     /// <summary>設定画面の見本。値は実データではなく、書式の形を見せるためのもの(スキル詳細・エンティティリストの見本と同じ)。</summary>

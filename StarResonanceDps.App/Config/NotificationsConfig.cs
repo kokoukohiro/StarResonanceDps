@@ -79,18 +79,18 @@ public sealed class NotificationItemConfig
     public int TargetModeIndex { get; set; } = (int)PartyDisplayMode.All;
 
     /// <summary>
-    /// 通知する人(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。使うのは 狙われ状態 だけ。
+    /// 通知する人(<see cref="AppConfigDefaults.TargetedPlayerAllIndex"/> など)。使うのは 狙われるプレイヤー だけ。
     /// </summary>
     public int TargetedPlayerModeIndex { get; set; } = AppConfigDefaults.DefaultTargetedPlayerModeIndex;
 
     /// <summary>
-    /// 通知する敵の種類(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。使うのは 狙われ状態 だけ。
+    /// 通知する敵の種類(<see cref="AppConfigDefaults.TargetEntityBossOnlyIndex"/> など)。使うのは 狙われるプレイヤー だけ。
     /// </summary>
     public int TargetEntityModeIndex { get; set; } = AppConfigDefaults.DefaultTargetEntityModeIndex;
 
     /// <summary>
     /// 狙われ状態が何秒続いたら出すかの番号(<see cref="AppConfigDefaults.TargetedDurationSeconds"/> の添字)。
-    /// 使うのは 狙われ状態 だけ。
+    /// 使うのは 狙われるプレイヤー だけ。
     /// </summary>
     public int TargetedConditionIndex { get; set; } = AppConfigDefaults.DefaultTargetedConditionIndex;
 
@@ -111,15 +111,16 @@ public sealed class NotificationItemConfig
     public int TelegraphedSkillConditionIndex { get; set; } = AppConfigDefaults.DefaultTelegraphedSkillConditionIndex;
 
     /// <summary>
-    /// 何秒以上の詠唱なら出すかの番号(<see cref="AppConfigDefaults.EntityCastMinimumSeconds"/> の添字)。使うのは エンティティ詠唱 だけ。
+    /// 対象の名前(どれかに当たれば通知する)。エンティティ詠唱は表示言語のスキル名、プレイヤー出現はゲームの中のプレイヤー名、エンティティ出現は表示言語のエンティティ名。
+    /// <see cref="TargetIds"/> が1つでもあれば使わない。使うのは エンティティ詠唱・プレイヤー出現・エンティティ出現 だけ(名前もIDも無ければ通知しない)。
     /// </summary>
-    public int EntityCastConditionIndex { get; set; } = AppConfigDefaults.DefaultEntityCastConditionIndex;
+    public List<string> TargetNames { get; set; } = [];
 
     /// <summary>
-    /// 出現を知らせる相手の名前。プレイヤー出現はゲームの中のプレイヤー名、エンティティ出現は表示言語のエンティティ名。
-    /// 空なら通知しない。使うのは プレイヤー出現 と エンティティ出現 だけ。
+    /// 対象のID(どれかに当たれば通知する)。エンティティ詠唱はスキルID、プレイヤー出現はUID(キャラクターID)、エンティティ出現はエンティティの種別ID。
+    /// 1つでもあれば <see cref="TargetNames"/> より優先する。使うのは <see cref="TargetNames"/> と同じ項目だけ。
     /// </summary>
-    public string TargetName { get; set; } = string.Empty;
+    public List<long> TargetIds { get; set; } = [];
 
     [JsonIgnore]
     public bool IsWindowsNotification => MethodIndex == AppConfigDefaults.NotificationMethodWindowsIndex;
@@ -154,8 +155,8 @@ public sealed class NotificationItemConfig
             HealthLowConditionIndex = HealthLowConditionIndex,
             CuisinePotionConditionIndex = CuisinePotionConditionIndex,
             TelegraphedSkillConditionIndex = TelegraphedSkillConditionIndex,
-            EntityCastConditionIndex = EntityCastConditionIndex,
-            TargetName = TargetName
+            TargetNames = [.. TargetNames],
+            TargetIds = [.. TargetIds]
         };
     }
 }

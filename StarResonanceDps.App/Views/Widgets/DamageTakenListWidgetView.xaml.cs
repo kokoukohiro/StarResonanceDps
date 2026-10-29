@@ -10,8 +10,14 @@ using StarResonanceDps.App.ViewModels;
 namespace StarResonanceDps.App.Views.Widgets;
 
 /// <summary>
-/// 被ダメリストの中身。縦のスクロールバーは窓の枠の層が出す(蘇生リストと同じ)。
+/// 被ダメログ(識別子は被ダメリスト)の中身。縦のスクロールバーは窓の枠の層が出す(蘇生リストと同じ)。
 /// 行の左クリックと右クリックのメニューの作りは蘇生リスト(プレイヤーリスト)と同じ。
+///
+/// <para>
+/// 新しい行は一番上に入る。<b>一番上に居るときだけ新しい行に付いていく</b>(タイムラインの末尾への追従を上下逆にしたもの)。
+/// 下の古い行を読んでいる間に行が増えたら、増えた高さぶん位置をずらして、読んでいる行を動かさない。
+/// 一番上に居るかは、利用者のスクロール(内容の高さが変わっていない回)で決める。
+/// </para>
 /// </summary>
 public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScrollContent
 {
@@ -23,6 +29,8 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
     /// <summary>スクロールバーの矢印1回で動く量。行の高さと同じ。</summary>
     private const double SmallScrollChange = 31d;
 
+    private ScrollViewer? _scrollViewer;
+    private bool _followsHead = true;
     private ContextMenu? _openPlayerSelectionMenu;
     private DamageTakenListEntry? _openPlayerSelectionEntry;
 
@@ -38,29 +46,46 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
 
     public WidgetVerticalScrollMetrics GetVerticalScrollMetrics()
     {
-        var maximum = Math.Max(DamageTakenListScrollViewer.ScrollableHeight, 0);
-        var viewport = Math.Max(DamageTakenListScrollViewer.ViewportHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return new WidgetVerticalScrollMetrics(0, 0, 0, 1, 1);
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
+        var viewport = Math.Max(_scrollViewer.ViewportHeight, 0);
 
         return new WidgetVerticalScrollMetrics(
             maximum,
             viewport,
-            Math.Min(DamageTakenListScrollViewer.VerticalOffset, maximum),
+            Math.Min(_scrollViewer.VerticalOffset, maximum),
             Math.Max(viewport * 0.9, 1),
             SmallScrollChange);
     }
 
     public void SetVerticalScrollOffset(double verticalOffset)
     {
-        var maximum = Math.Max(DamageTakenListScrollViewer.ScrollableHeight, 0);
+        if (_scrollViewer is null)
+        {
+            return;
+        }
+
+        var maximum = Math.Max(_scrollViewer.ScrollableHeight, 0);
         var offset = double.IsFinite(verticalOffset)
             ? Math.Clamp(verticalOffset, 0, maximum)
             : 0;
 
-        DamageTakenListScrollViewer.ScrollToVerticalOffset(offset);
+        _scrollViewer.ScrollToVerticalOffset(offset);
     }
 
     private void DamageTakenListWidgetView_Loaded(object sender, RoutedEventArgs e)
     {
+        if (_scrollViewer is null)
+        {
+            DamageTakenListItemsControl.ApplyTemplate();
+            _scrollViewer = (ScrollViewer)DamageTakenListItemsControl.Template.FindName("DamageTakenListScrollViewer", DamageTakenListItemsControl);
+            _scrollViewer.ScrollChanged += DamageTakenListScrollViewer_ScrollChanged;
+        }
+
         NotifyVerticalScrollMetricsChanged();
     }
 
@@ -76,7 +101,32 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
 
     private void DamageTakenListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
+        var scrollViewer = (ScrollViewer)sender;
+
+        if (e.ExtentHeightChange == 0)
+        {
+            _followsHead = scrollViewer.VerticalOffset <= 1;
+        }
+        else if (_followsHead)
+        {
+            scrollViewer.ScrollToTop();
+        }
+        else if (e.ExtentHeightChange > 0)
+        {
+            // 行は一番上にしか増えない(組み直しは一覧ごと作り直す)ので、増えた高さぶん下げると読んでいる行がそのままの位置に残る。
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + e.ExtentHeightChange);
+        }
+
         NotifyVerticalScrollMetricsChanged();
+    }
+
+    /// <summary>行の部品が別の行に使い回される(仮想化)。開いているメニューの行なら閉じる(プレイヤーリストと同じ)。</summary>
+    private void DamageTakenListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
+    {
+        if (_openPlayerSelectionEntry is not null && ReferenceEquals(e.Value, _openPlayerSelectionEntry))
+        {
+            ClosePlayerSelectionMenu();
+        }
     }
 
     /// <summary>左クリックはメニューを開かず、その行の人のプレイヤー情報を直接開く。メニューは右クリック側が担う。</summary>

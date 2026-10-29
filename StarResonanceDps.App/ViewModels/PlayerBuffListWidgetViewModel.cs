@@ -20,7 +20,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     /// <summary>右クリックの「グループに追加」の行き先。</summary>
     private readonly IBuffDebuffGroupEntryAdder? _groupEntryAdder;
 
-    /// <summary>右クリックの「バフカードのショートカットに追加」(デバフ一覧は「デバフカードの」)の行き先。</summary>
+    /// <summary>右クリックの「バフ・デバフカードのショートカットに追加」の行き先。</summary>
     private readonly IBuffCardShortcutAdder? _shortcutAdder;
 
     /// <summary>行をクリックしたときにバフ・デバフカードを開く経路。</summary>
@@ -96,10 +96,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             && _groupEntryAdder.CanAdd(BuffEntryKey.ForBuffDebuffGroup(entry.BaseId));
     }
 
-    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
-        _kind == PlayerBuffListKind.Debuff
-            ? "BuffList_Menu_AddToDebuffCardShortcuts"
-            : "BuffList_Menu_AddToBuffCardShortcuts");
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToBuffCardShortcuts");
 
     /// <summary>自分が対象の一覧だけ(ショートカットの相手はいつも自分)。料理・薬剤はまとまりの行として足す(グループと同じ)。</summary>
     public bool CanAddToShortcuts(PlayerBuffEntry? entry)

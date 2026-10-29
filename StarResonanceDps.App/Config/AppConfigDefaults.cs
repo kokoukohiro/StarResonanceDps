@@ -61,7 +61,7 @@ public static class AppConfigDefaults
     /// <summary>既定は2分。</summary>
     public const int DefaultCuisinePotionConditionIndex = 1;
 
-    // 通知「狙われ状態」の対象プレイヤー。並びは通知タブの選択リストと同じ。
+    // 通知「狙われるプレイヤー」の対象プレイヤー。並びは通知タブの選択リストと同じ。
     public const int TargetedPlayerAllIndex = 0;
     public const int TargetedPlayerPartyMembersIndex = 1;
     public const int TargetedPlayerNonGuardianIndex = 2;
@@ -70,7 +70,7 @@ public static class AppConfigDefaults
     /// <summary>既定は防御クラス以外。</summary>
     public const int DefaultTargetedPlayerModeIndex = TargetedPlayerNonGuardianIndex;
 
-    // 通知「狙われ状態」の対象エンティティ。並びは通知タブの選択リストと同じ。
+    // 通知「狙われるプレイヤー」の対象エンティティ。並びは通知タブの選択リストと同じ。
     public const int TargetEntityBossOnlyIndex = 0;
     public const int TargetEntityBossAndEliteIndex = 1;
     public const int TargetEntityAllIndex = 2;
@@ -78,7 +78,7 @@ public static class AppConfigDefaults
     /// <summary>既定はすべて。</summary>
     public const int DefaultTargetEntityModeIndex = TargetEntityAllIndex;
 
-    /// <summary>通知「狙われ状態」の通知条件の選択肢(狙われ状態が続いた秒数)。0 は無条件(狙われたその場で出す)。</summary>
+    /// <summary>通知「狙われるプレイヤー」の通知条件の選択肢(狙われ状態が続いた秒数)。0 は無条件(狙われたその場で出す)。</summary>
     public static readonly int[] TargetedDurationSeconds = [0, 1, 2, 3];
 
     /// <summary>既定は3秒。</summary>
@@ -89,12 +89,6 @@ public static class AppConfigDefaults
 
     /// <summary>既定は発動時。</summary>
     public const int DefaultTelegraphedSkillConditionIndex = 0;
-
-    /// <summary>通知「エンティティ詠唱」の通知条件の選択肢(詠唱の全体の秒が何秒以上なら出すか)。0 は無条件。並びは通知タブの選択リストと同じ。</summary>
-    public static readonly int[] EntityCastMinimumSeconds = [0, 1, 2, 3];
-
-    /// <summary>既定は3秒以上。</summary>
-    public const int DefaultEntityCastConditionIndex = 3;
 
     // 通知音量(Windows の通知の音と読み上げ、%)。0 は鳴らさない。
     // 100 は Windows の通知の音と Windows の音声では元の大きさ、VOICEVOX では値を2倍して掛ける(SpeechQueue.VoicevoxVolumeScale)ので 50 が元の大きさ。
@@ -192,8 +186,8 @@ public static class AppConfigDefaults
             HealthLowConditionIndex = DefaultHealthLowConditionIndex,
             CuisinePotionConditionIndex = DefaultCuisinePotionConditionIndex,
             TelegraphedSkillConditionIndex = DefaultTelegraphedSkillConditionIndex,
-            EntityCastConditionIndex = DefaultEntityCastConditionIndex,
-            TargetName = string.Empty
+            TargetNames = [],
+            TargetIds = []
         };
     }
 
@@ -288,8 +282,8 @@ public static class AppConfigDefaults
             item.TelegraphedSkillConditionIndex,
             TelegraphedSkillLeadSeconds.Length,
             DefaultTelegraphedSkillConditionIndex);
-        item.EntityCastConditionIndex = IndexOrDefault(item.EntityCastConditionIndex, EntityCastMinimumSeconds.Length, DefaultEntityCastConditionIndex);
-        item.TargetName = item.TargetName?.Trim() ?? string.Empty;
+        item.TargetNames = [.. (item.TargetNames ?? []).Select(name => name?.Trim() ?? string.Empty).Where(name => name.Length > 0)];
+        item.TargetIds = [.. (item.TargetIds ?? []).Where(id => id >= 0)];
     }
 
     /// <summary>選択肢の番号。範囲の外なら既定。</summary>

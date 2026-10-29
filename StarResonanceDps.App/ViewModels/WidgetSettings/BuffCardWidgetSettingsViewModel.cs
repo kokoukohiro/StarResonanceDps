@@ -9,7 +9,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// バフ・デバフカードの設定。表示テキストの書式と、ショートカット(メイン画面のカードの選択リストの先頭に並べる行、
-/// バフ・デバフグループの「バフ・デバフ」と共有の部品)。
+/// バフ・デバフグループの「バフ・デバフ」と共有の部品)と、通知対象(効果切れを通知するバフ・デバフ、同じ部品で並べ替えなし)。
 ///
 /// <para>
 /// 倍率(<see cref="BuffCardWidgetSettingsConfig.Scales"/>)は<b>この画面では触らない</b>。
@@ -53,7 +53,12 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
             WidgetConfigDefaults.DefaultBuffCardShortcutEntries,
             "Settings_Section_BuffCardShortcuts_Title",
             "Settings_ListReorderNote",
-            Shortcuts_Changed);
+            EntryList_Changed);
+        NotificationTargets = new BuffEntryListSettingsViewModel(
+            WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries,
+            "Settings_Section_NotificationTargets_Title",
+            reorderNoteResourceKey: null,
+            EntryList_Changed);
 
         RebuildFormatFields();
         RefreshLocalizedText();
@@ -68,6 +73,9 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
     /// <summary>「ショートカット」の節。並びはメイン画面のカードの選択リストの並び(並べ替えはこの一覧だけ)。</summary>
     public BuffEntryListSettingsViewModel Shortcuts { get; }
 
+    /// <summary>「通知対象」の節。全部のカードで共通。並べ替えない。</summary>
+    public BuffEntryListSettingsViewModel NotificationTargets { get; }
+
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
     public void Dispose()
@@ -80,11 +88,32 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         var config = _lastSaved.Clone();
         config.BuffInfoFormatString = BuffInfoFormatString ?? string.Empty;
         config.Shortcuts = Shortcuts.CreateEntries();
+        config.NotificationTargets = NotificationTargets.CreateEntries();
         return WidgetConfigDefaults.CloneNormalizedBuffCard(config);
     }
 
     /// <summary>
-    /// 開いている間に、右クリックでショートカットの行がオンになった(一覧・カードの「〇〇カードのショートカットに追加」)。
+    /// 開いている間に、右クリックで通知対象の行がオン/オフになった(カードの「このバフを通知対象にする」「〜しない」)。
+    /// 扱いは <see cref="SetShortcutEnabledFromWidget"/> と同じ。
+    /// </summary>
+    public void SetNotificationTargetEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!key.IsValid)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _lastSaved.NotificationTargets ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries);
+        NotificationTargets.SetEntryEnabled(key, isEnabled);
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    /// <summary>
+    /// 開いている間に、右クリックでショートカットの行がオンになった(一覧・カードの「バフ・デバフカードのショートカットに追加」)。
     /// その分は既に保存されているので、保存済みの値と行の両方に同じ決まり(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)で入れる
     /// (「保存」で消えず、未保存の印も付かない)。プレビューは鳴らさない(ウィジェット側は既に変えている)。
     /// </summary>
@@ -134,6 +163,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         {
             BuffInfoFormatString = normalized.BuffInfoFormatString ?? string.Empty;
             Shortcuts.Load(normalized.Shortcuts);
+            NotificationTargets.Load(normalized.NotificationTargets);
         }
         finally
         {
@@ -180,6 +210,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         RefreshLocalizedText();
         RefreshFormatPreview();
         Shortcuts.RefreshLocalizedText();
+        NotificationTargets.RefreshLocalizedText();
     }
 
     private void RaisePreviewChanged()
@@ -192,7 +223,8 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         BuffCardWidgetSettingsConfig right)
     {
         return string.Equals(left.BuffInfoFormatString, right.BuffInfoFormatString, StringComparison.Ordinal)
-            && BuffEntryListSettingsViewModel.EntriesEqual(left.Shortcuts, right.Shortcuts);
+            && BuffEntryListSettingsViewModel.EntriesEqual(left.Shortcuts, right.Shortcuts)
+            && BuffEntryListSettingsViewModel.EntriesEqual(left.NotificationTargets, right.NotificationTargets);
     }
 
     partial void OnBuffInfoFormatStringChanged(string value)
@@ -208,7 +240,7 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         RaisePreviewChanged();
     }
 
-    private void Shortcuts_Changed()
+    private void EntryList_Changed()
     {
         if (_isLoading)
         {

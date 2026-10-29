@@ -172,9 +172,16 @@
                                   VerticalScrollBarVisibility="Hidden"
                                   ScrollChanged="WidgetListScrollViewer_ScrollChanged"
                                   SizeChanged="WidgetListScrollViewer_SizeChanged">
+                        <!-- 検索に当たらないカードは隠す(一覧は組み直さない。当たるかは MainViewModel が決める)。 -->
                         <ItemsControl x:Name="WidgetItemsControl"
                                       ItemsSource="{Binding Widgets}"
                                       SizeChanged="WidgetItemsControl_SizeChanged">
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Visibility" Value="{Binding IsSearchMatch, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <controls:WidgetListItem />

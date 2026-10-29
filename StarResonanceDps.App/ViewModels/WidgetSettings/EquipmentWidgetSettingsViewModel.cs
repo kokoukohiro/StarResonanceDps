@@ -249,8 +249,8 @@ public sealed partial class EquipmentWidgetSettingsViewModel : ObservableObject,
 }
 
 /// <summary>
-/// テキストカラーの1行(アイテムの品質1つ)。行の作りは被ダメログのテキストカラー
-/// (<see cref="TakenDamageLogTextColorItemViewModel"/>)のアイコンの無い行と同じ。
+/// テキストカラーの1行(アイテムの品質1つ)。行の作りはタイムラインのテキストカラー
+/// (<see cref="TakenDamageLogTextColorItemViewModel"/>)と同じ。
 /// </summary>
 public sealed class EquipmentTextColorItemViewModel : ObservableObject
 {

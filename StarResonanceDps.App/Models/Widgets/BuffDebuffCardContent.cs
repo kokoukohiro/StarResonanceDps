@@ -125,6 +125,38 @@ public readonly record struct BuffDebuffCardContent(
     }
 
     /// <summary>
+    /// カードが追うバフの、設定の行(グループの行・ショートカット・通知対象)の鍵。まとまりを追うカードはまとまり、個別のバフのカードはカードの鍵の番号。
+    /// 追うバフが決まっていなければ null。
+    /// </summary>
+    public static BuffEntryKey? CreateEntryKey(BuffGroup group, string? buffKey)
+    {
+        if (group != BuffGroup.None)
+        {
+            return BuffEntryKey.ForGroup(group);
+        }
+
+        return MeterSnapshotProvider.TryGetBuffIdFromCardKey(buffKey, out var buffId)
+            ? BuffEntryKey.ForBuffDebuffGroup(buffId)
+            : null;
+    }
+
+    /// <summary>
+    /// 右クリックの項目「このバフを通知対象にする」「このバフを通知対象にしない」(デバフは「このデバフを」)の文言。
+    /// バフ・デバフカードとバフ・デバフグループで共通。
+    /// </summary>
+    public static string GetNotificationTargetMenuText(bool isDebuff, bool isNotificationTarget)
+    {
+        var key = (isDebuff, isNotificationTarget) switch
+        {
+            (false, false) => "BuffList_Menu_AddBuffToNotificationTargets",
+            (false, true) => "BuffList_Menu_RemoveBuffFromNotificationTargets",
+            (true, false) => "BuffList_Menu_AddDebuffToNotificationTargets",
+            (true, true) => "BuffList_Menu_RemoveDebuffFromNotificationTargets"
+        };
+        return LocalizationManager.Instance.GetString(key);
+    }
+
+    /// <summary>
     /// 倍率の保存キー。まとまりを追う窓は <c>{対象ID}:group:{まとまり}</c>、
     /// 個別のバフを追う窓は <c>{対象ID}:{バフキー}</c>。
     ///

@@ -8,7 +8,7 @@
 cd StarResonanceDps/DataTools
 python gen_recounts.py    # メーターの行名
 python gen_buffs.py       # バフ名(BuffTable の全行)
-python gen_skills.py      # スキル名(SkillTable の全行)
+python gen_skills.py      # スキル名と公式の技名(SkillTable の全行の Name と SkillTalk)
 python gen_dbms.py        # ボス大技の予告(DbmTable)の技名
 python gen_scenes.py      # シーン名(ダンジョンではダンジョン名)と難易度名
 python gen_monsters.py    # モンスターの名前
@@ -96,7 +96,7 @@ export BPSR_TABLES=<置き場所>     # bash
 |---|---|
 | `gen_recounts.py` | `Data/Localization/RecountRows.json` |
 | `gen_buffs.py` | `Data/Localization/BuffNames.json` |
-| `gen_skills.py` | `Data/Localization/SkillNames.json` |
+| `gen_skills.py` | `Data/Localization/SkillNames.json`<br>`Data/Localization/SkillTalkNames.json` |
 | `gen_dbms.py` | `Data/Localization/DbmNames.json` |
 | `gen_scenes.py` | `Data/Localization/SceneNames.json`<br>`Data/Localization/DungeonTypeNames.json` |
 | `gen_monsters.py` | `Data/Localization/MonsterNames.json` |
@@ -438,6 +438,17 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 モンスターの技の大半は未翻訳で、名前が埋め草 `场地标记01` になっている。これは空になる
 (→「プレースホルダは名前として扱わない」)。
+
+### SkillTalkNames.json
+
+**`SkillTalk` は公式の技名。** `Name` が埋め草の技にも名前があり、`Name` と違う名前を持つ技もある。
+`SkillNames.json` とは別の表に `SkillTalk` をそのまま書き(埋め草は空)、どちらを先に引くかはアプリが決める。
+
+アプリは技の名前を次の順で重ねる。上ほど優先する。
+
+1. `SkillTalkNames.json`(その言語に名前がある技だけ差し替わる)
+2. `Data/Overrides/SkillNameOverrides.json`(表の更新で落ちた名前)
+3. `SkillNames.json`
 
 ### 埋め草と同じ文字列が本物の名前になっている行
 

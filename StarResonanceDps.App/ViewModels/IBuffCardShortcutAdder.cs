@@ -3,7 +3,7 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// バフ・デバフ一覧とカードの右クリック「バフカードのショートカットに追加」「デバフカードのショートカットに追加」の行き先(バフ・デバフカードのウィジェット)。
+/// バフ・デバフ一覧とカードの右クリック「バフ・デバフカードのショートカットに追加」の行き先(バフ・デバフカードのウィジェット)。
 /// 窓の管理(<c>Services.WidgetWindowManager</c>)が実装し、一覧とカードの ViewModel へ渡す。
 /// </summary>
 public interface IBuffCardShortcutAdder

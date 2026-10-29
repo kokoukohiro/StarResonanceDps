@@ -1,20 +1,26 @@
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using StarResonanceDps.Core.CombatRuntime;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
 /// <summary>
-/// 被ダメリストの1行(被弾したプレイヤー1人)。行は作り直さず、値だけ入れ替える(<see cref="ViewModels.DamageTakenListWidgetViewModel"/>)。
-/// 作りはメーターの行と同じで、左に経過・クラスアイコン(設定「アイコンカラー」で染める)・名前、右にその人の最後の被弾(スキル名・被ダメ値・属性アイコン)、下敷きに右から伸びるバー。
+/// 被ダメログの1行(被弾1回)。作りはメーターの行と同じで、左に時刻(タイムラインの行と同じ)・クラスアイコン(設定「アイコンカラー」で染める)・名前、
+/// 右に被弾(スキル名・被ダメ値・属性アイコン)、下敷きに右から伸びるバー。一覧は上が新しい(<see cref="ViewModels.DamageTakenListWidgetViewModel"/>)。
+/// 当て直すのは時刻・名前とクラス(名簿)・文字(設定・言語)・バー(最大が変わったとき)と、設定「最新の被ダメのみ表示」で同じ人が被弾したときの被弾。
 /// </summary>
 public sealed partial class DamageTakenListEntry : ObservableObject
 {
-    public DamageTakenListEntry(long characterId)
+    public DamageTakenListEntry(DamageTakenListHit hit)
     {
-        CharacterId = characterId;
+        Hit = hit;
     }
 
-    public long CharacterId { get; }
+    /// <summary>この行の被弾。設定「最新の被ダメのみ表示」では、同じ人の新しい被弾に入れ替わる(人は変わらない)。</summary>
+    public DamageTakenListHit Hit { get; set; }
+
+    /// <summary>被弾した人のキャラ番号。右クリックのメニューと左クリックが開く窓の相手。</summary>
+    public long CharacterId => Hit.CharacterId;
 
     /// <summary>自分の行か。右クリックのメニューの「ステータス詳細」は自分の行だけに出す(プレイヤーリストと同じ)。</summary>
     [ObservableProperty]
@@ -23,6 +29,10 @@ public sealed partial class DamageTakenListEntry : ObservableObject
     /// <summary>この行の右クリックのメニューを開いているか。開いている間は行のホバーの背景を残す。下ろすとメニューを閉じる(画面のコード)。</summary>
     [ObservableProperty]
     private bool _isPlayerSelectionMenuOpen;
+
+    /// <summary>時刻(戦闘の経過「0:00」、タイムラインの行と同じ)。戦闘の時計の起点がまだ無ければ空欄。</summary>
+    [ObservableProperty]
+    private string _timeText = string.Empty;
 
     /// <summary>クラスアイコンの形。鍵(職業)ごとに使い回す。</summary>
     [ObservableProperty]
@@ -40,11 +50,7 @@ public sealed partial class DamageTakenListEntry : ObservableObject
     [ObservableProperty]
     private bool _isSelfHighlighted;
 
-    /// <summary>経過(「1秒前」)。メーターの順位の位置に出す。更新のたびに数え直す(同じ秒の間は同じ文字)。</summary>
-    [ObservableProperty]
-    private string _elapsedText = string.Empty;
-
-    /// <summary>右の書式(設定「スキル名」)の文字。被弾か設定が変わったときだけ作り直す。</summary>
+    /// <summary>右の書式(設定「スキル名」)の文字。</summary>
     [ObservableProperty]
     private string _hitInfoText = string.Empty;
 
@@ -74,22 +80,7 @@ public sealed partial class DamageTakenListEntry : ObservableObject
     [ObservableProperty]
     private Brush? _barBrush;
 
-    /// <summary>バーの長さ(0〜1)。一覧の中で被ダメ値が一番大きい人を 1 にする。</summary>
+    /// <summary>バーの長さ(0〜1)。一覧の中で被ダメ値が一番大きい被弾を 1 にする。</summary>
     [ObservableProperty]
     private double _barRatio;
-
-    /// <summary>今出している被弾の被ダメ値。バーの長さの比べに使う。</summary>
-    internal long HitValue { get; set; }
-
-    /// <summary>今出している被弾の到着時刻(UTC)。経過の文字を数えるのに使う。</summary>
-    internal DateTime HitTimestamp { get; set; }
-
-    /// <summary>今出している被弾の通し番号。同じなら右の文字を作り直さない。</summary>
-    internal long HitSequence { get; set; } = -1;
-
-    /// <summary>右の文字を作ったときの設定・言語の版。違えば作り直す。</summary>
-    internal int HitTextVersion { get; set; } = -1;
-
-    /// <summary>並びの鍵。最後の被弾の通し番号で、大きい(新しい)行ほど上。</summary>
-    internal long SortKey { get; set; }
 }

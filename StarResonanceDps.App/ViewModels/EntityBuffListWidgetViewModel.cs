@@ -109,10 +109,7 @@ public sealed partial class EntityBuffListWidgetViewModel
     /// <summary>バフ・デバフグループは自分のバフだけを出すので、エンティティの一覧からは足さない(項目を出さない)。</summary>
     public bool CanAddToGroup(PlayerBuffEntry? entry) => false;
 
-    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString(
-        _kind == PlayerBuffListKind.Debuff
-            ? "BuffList_Menu_AddToDebuffCardShortcuts"
-            : "BuffList_Menu_AddToBuffCardShortcuts");
+    public string AddToShortcutsMenuText => LocalizationManager.Instance.GetString("BuffList_Menu_AddToBuffCardShortcuts");
 
     /// <summary>バフ・デバフカードのショートカットは自分のバフだけなので、エンティティの一覧からは足さない(項目を出さない)。</summary>
     public bool CanAddToShortcuts(PlayerBuffEntry? entry) => false;

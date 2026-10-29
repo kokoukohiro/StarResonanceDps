@@ -19,14 +19,8 @@
             <Setter Property="Margin" Value="0,1,0,1" />
         </Style>
 
-        <!-- 文字に付ける TIPS。アイコンの TIPS(下の DataTemplate)と同じ見た目にそろえる。 -->
-        <Style x:Key="TakenDamageLog.ToolTipText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="FontSize" Value="12" />
-        </Style>
-
         <!--
-            行の中のアイコン。大きさの違う画像を同じ見た目にそろえるため、正方形の枠の中に中央寄せで置く。
+            行の中のプレイヤーのクラスアイコン。大きさの違う画像を同じ見た目にそろえるため、正方形の枠の中に中央寄せで置く。
             影はプレイヤーリストのクラスアイコンと同じ。TIPS の色は Tag(ウィジェット)の窓のパレットから取る。
         -->
         <DataTemplate DataType="{x:Type viewModels:TakenDamageLogClassIconSegment}">
@@ -44,28 +38,6 @@
                     </ToolTip>
                 </Grid.ToolTip>
                 <Rectangle Fill="{Binding ClassBrush}"
-                           OpacityMask="{Binding IconMask}"
-                           Effect="{StaticResource Effect.ProfessionIconShadow}"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
-            </Grid>
-        </DataTemplate>
-
-        <!-- 属性アイコン。クラスアイコンと同じ染め方で、塗りはその属性のテキストカラー。 -->
-        <DataTemplate DataType="{x:Type viewModels:TakenDamageLogAttributeIconSegment}">
-            <Grid Width="16"
-                  Height="16"
-                  Margin="1,0"
-                  Background="Transparent"
-                  Tag="{Binding Widget}">
-                <Grid.ToolTip>
-                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
-                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
-                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
-                                   FontSize="12"
-                                   Text="{Binding Name}" />
-                    </ToolTip>
-                </Grid.ToolTip>
-                <Rectangle Fill="{Binding ElementBrush}"
                            OpacityMask="{Binding IconMask}"
                            Effect="{StaticResource Effect.ProfessionIconShadow}"
                            RenderOptions.BitmapScalingMode="HighQuality" />
@@ -248,16 +220,9 @@
                         </TextBlock.Style>
                     </TextBlock>
 
-                    <!--
-                        Tag は文字の TIPS の見た目が引く窓のパレット。Run は PlacementTarget になれないので、
-                        WPF はホストするこの TextBlock を PlacementTarget にする(実測で確認)。
-                    -->
                     <TextBlock x:Name="BodyText"
                                Grid.Column="1"
                                Style="{StaticResource TakenDamageLog.LineText}"
-                               Tag="{Binding Widget}"
-                               behaviors:TextSegmentsBehavior.RunToolTipStyle="{StaticResource ToolTip.WidgetWindowInfo}"
-                               behaviors:TextSegmentsBehavior.RunToolTipTextStyle="{StaticResource TakenDamageLog.ToolTipText}"
                                behaviors:TextSegmentsBehavior.Segments="{Binding Segments}" />
                 </Grid>
             </DataTemplate>

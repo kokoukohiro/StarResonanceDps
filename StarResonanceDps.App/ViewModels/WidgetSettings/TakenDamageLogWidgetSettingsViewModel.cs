@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
@@ -9,8 +8,8 @@ using StarResonanceDps.App.Models.Widgets;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// 被ダメログの表示設定。HP数値の出し方、フィルター、敵どうしの回復、クラスアイコンの色(クラスカラー)。
-/// クラスカラーの形はプレイヤーリストと同じで、フィルターと不透明度は持たない。
+/// タイムライン(識別子は被ダメログ)の表示設定。敵の回復を出すか、相手がプレイヤーの行のクラスアイコンの色(アイコンカラー)、文字の色(テキストカラー)。
+/// アイコンカラーの形はプレイヤーリストのクラスカラーと同じで、フィルターと不透明度は持たない。
 /// </summary>
 public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableObject, IDisposable
 {
@@ -18,12 +17,6 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     private readonly Dictionary<string, TakenDamageLogTextColorItemViewModel> _textColorItemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private TakenDamageLogWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
-
-    [ObservableProperty]
-    private int _healthValueDisplayModeIndex = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
-
-    [ObservableProperty]
-    private int _attackerFilterIndex = WidgetConfigDefaults.DefaultTakenDamageLogAttackerFilterIndex;
 
     [ObservableProperty]
     private int _enemyHealDisplayModeIndex = WidgetConfigDefaults.DefaultTakenDamageLogEnemyHealDisplayModeIndex;
@@ -71,7 +64,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 
     public event Action<TakenDamageLogWidgetSettingsConfig>? PreviewChanged;
 
-    /// <summary>クラスカラーの行。職ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
+    /// <summary>アイコンカラーの行。職ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
 
     /// <summary>テキストカラーの行。行ごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
@@ -102,8 +95,6 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
     {
         var config = new TakenDamageLogWidgetSettingsConfig
         {
-            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
-            AttackerFilterIndex = AttackerFilterIndex,
             EnemyHealDisplayModeIndex = EnemyHealDisplayModeIndex,
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase),
@@ -182,8 +173,6 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
                 item.Colors.Load(normalized.TextColorPalettes[item.Key], normalized.TextColorIndexes[item.Key]);
             }
 
-            HealthValueDisplayModeIndex = normalized.HealthValueDisplayModeIndex;
-            AttackerFilterIndex = normalized.AttackerFilterIndex;
             EnemyHealDisplayModeIndex = normalized.EnemyHealDisplayModeIndex;
         }
         finally
@@ -201,9 +190,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         TakenDamageLogWidgetSettingsConfig left,
         TakenDamageLogWidgetSettingsConfig right)
     {
-        if (left.HealthValueDisplayModeIndex != right.HealthValueDisplayModeIndex
-            || left.AttackerFilterIndex != right.AttackerFilterIndex
-            || left.EnemyHealDisplayModeIndex != right.EnemyHealDisplayModeIndex)
+        if (left.EnemyHealDisplayModeIndex != right.EnemyHealDisplayModeIndex)
         {
             return false;
         }
@@ -255,16 +242,6 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
         OnPropertyChanged(nameof(TextColorSectionTitle));
     }
 
-    partial void OnHealthValueDisplayModeIndexChanged(int value)
-    {
-        NotifyChanged();
-    }
-
-    partial void OnAttackerFilterIndexChanged(int value)
-    {
-        NotifyChanged();
-    }
-
     partial void OnEnemyHealDisplayModeIndexChanged(int value)
     {
         NotifyChanged();
@@ -283,8 +260,7 @@ public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableOb
 }
 
 /// <summary>
-/// テキストカラーの1行。行の作りはクラスカラー(<see cref="MeterClassColorItemViewModel"/>)と同じで、
-/// 左の欄はダメージの属性の行が属性アイコン、それ以外の行が「Aa」の見本。
+/// テキストカラーの1行。行の作りはクラスカラー(<see cref="MeterClassColorItemViewModel"/>)と同じで、左の欄は「Aa」の見本。
 /// </summary>
 public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
 {
@@ -293,16 +269,6 @@ public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
         Key = key;
         Colors = colors;
         IsLast = isLast;
-        IsDamageProperty = WidgetConfigDefaults.IsDamagePropertyKey(key);
-        if (IsDamageProperty)
-        {
-            var mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            mask.Freeze();
-            IconMask = mask;
-        }
     }
 
     public string Key { get; }
@@ -311,16 +277,8 @@ public sealed class TakenDamageLogTextColorItemViewModel : ObservableObject
 
     public bool IsLast { get; }
 
-    /// <summary>ダメージの属性の行。左にアイコンを出す。</summary>
-    public bool IsDamageProperty { get; }
-
-    /// <summary>属性アイコンの形。その行の選択色をこの形で抜く(クラスアイコンと同じ染め方)。</summary>
-    public Brush? IconMask { get; }
-
-    /// <summary>属性の行は属性名、それ以外は被ダメログ専用の項目名。</summary>
-    public string DisplayName => IsDamageProperty
-        ? LocalizationManager.Instance.GetString($"DamageProperty_{Key}")
-        : LocalizationManager.Instance.GetString($"Settings_TakenDamageLogTextColor_{Key}");
+    /// <summary>タイムライン専用の項目名。</summary>
+    public string DisplayName => LocalizationManager.Instance.GetString($"Settings_TakenDamageLogTextColor_{Key}");
 
     public void RefreshDisplayName()
     {

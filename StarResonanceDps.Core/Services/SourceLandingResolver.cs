@@ -8,7 +8,7 @@ namespace StarResonanceDps.Core.Services;
 ///
 /// <para>
 /// 着地は2種類。オプションのバフ(<c>RogueEntryTable.BuffId</c>)に着けばオプション、着かずにプレイヤーが使った技に着けば技。
-/// 技は <c>SkillNames</c> に名前があるときだけで、空なら着かない。どちらにも着かなければ <see cref="SourceLanding.None"/>。
+/// 技は技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)があるときだけで、空なら着かない。どちらにも着かなければ <see cref="SourceLanding.None"/>。
 /// 名前の引き先は <see cref="CombatDataCatalog.GetSourceDisplayName"/>。
 /// </para>
 ///

@@ -1,15 +1,19 @@
 """
 スキル名テーブルを生成する。
 
-  Data/Localization/SkillNames.json
+  Data/Localization/SkillNames.json      (`SkillTable.Name`)
+  Data/Localization/SkillTalkNames.json  (`SkillTable.SkillTalk`)
 
 **`SkillTable` の全行を収録する。** 使い道を決めて絞らない。
 スキル枠(イマジン・ロール)に加えて、モンスターの技など枠に置かれないスキルも名前を引ける。
 
+`SkillTalk` は公式の技名で、`Name` より優先する。重ねる順はアプリが読み込むときに決める
+(`SkillNames` に `SkillNameOverrides` を重ね、その上に `SkillTalkNames` を重ねる)。
+
 鍵は出所と言語の和集合。版差でどれか1つにしか無い行でも落とさない。
 
 未翻訳の行は埋め草(`_common.PLACEHOLDERS`)が入っているので空にする。
-ただし埋め草と同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`)。
+ただし埋め草と同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`。`Name` だけ)。
 """
 from _common import LANGS, name_of, table, write_localized
 
@@ -37,6 +41,9 @@ def main():
 
     values = {lang: {i: skill_name(i, t.get(i)) for i in keys} for lang, t in tables.items()}
     write_localized("SkillNames", values, keys)
+
+    talks = {lang: {i: name_of(t.get(i), "SkillTalk") for i in keys} for lang, t in tables.items()}
+    write_localized("SkillTalkNames", talks, keys)
 
 
 if __name__ == "__main__":

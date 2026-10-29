@@ -36,7 +36,7 @@ public interface IBuffListWindowViewModel
     /// <summary>行のバフをバフ・デバフグループに足す(料理・薬剤はまとまりで)。</summary>
     IRelayCommand<PlayerBuffEntry?> AddToGroupCommand { get; }
 
-    /// <summary>メニューの4つ目の項目。バフ一覧なら「バフカードのショートカットに追加」、デバフ一覧なら「デバフカードのショートカットに追加」。</summary>
+    /// <summary>メニューの4つ目の項目「バフ・デバフカードのショートカットに追加」。</summary>
     string AddToShortcutsMenuText { get; }
 
     /// <summary>

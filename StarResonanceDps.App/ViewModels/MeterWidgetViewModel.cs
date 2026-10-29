@@ -288,7 +288,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
 
     /// <summary>
     /// メーターのタイマーの書式。被ダメログの時刻も同じ書式で出す。
-    /// 秒は床関数で丸め、負は符号を付けて出す(起点より前の被ダメログの行。-0.4 秒は -00:00:01)。
+    /// 秒は床関数で丸め、負は符号を付けて出す(接続をまたいで到着の順が前後し、起点より前の時刻になった被ダメログの行。-0.4 秒は -00:00:01)。
     /// </summary>
     internal static string FormatDuration(TimeSpan duration)
     {

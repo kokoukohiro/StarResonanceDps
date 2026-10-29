@@ -244,6 +244,46 @@ public sealed class WidgetStateManager
     }
 
     /// <summary>
+    /// バフ・デバフカードの通知対象だけを保存する。カードの右クリックで通知対象にした・しないときに呼ぶ(ショートカットと同じく、この項目だけを書く)。
+    /// </summary>
+    public void SaveBuffCardNotificationTargets(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> notificationTargets)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffCardSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffCard ??= WidgetConfigDefaults.CreateBuffCardSettings();
+            config.BuffCard.NotificationTargets = [.. notificationTargets.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
+    /// バフ・デバフグループの通知対象だけを保存する。グループの行の右クリックで通知対象にした・しないときに呼ぶ(グループの行と同じく、この項目だけを書く)。
+    /// </summary>
+    public void SaveBuffDebuffGroupNotificationTargets(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> notificationTargets)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffDebuffGroupSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffDebuffGroup ??= WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
+            config.BuffDebuffGroup.NotificationTargets = [.. notificationTargets.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
     /// 推移グラフの横軸の長さだけを保存する。窓の上のホイールで変えて、ホイールが止まったときに呼ぶ。
     ///
     /// <para>
@@ -263,6 +303,27 @@ public sealed class WidgetStateManager
             var config = GetOrCreateWidgetConfig(kind);
             config.MetricTimeline ??= WidgetConfigDefaults.CreateMetricTimelineSettings(kind);
             config.MetricTimeline.VisibleSeconds = visibleSeconds;
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
+    /// 被ダメログの「最新の被ダメのみ表示」だけを保存する。ヘッダーのボタンで切り替えたときに呼ぶ。
+    /// 横軸の長さ(<see cref="SaveMetricTimelineVisibleSeconds"/>)と同じく、開いている設定ウィンドウの未保存の値とぶつからないよう、この項目だけを書く。
+    /// </summary>
+    public void SaveDamageTakenListShowsLatestHitOnly(WidgetKind kind, bool showsLatestHitOnly)
+    {
+        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.DamageTakenList ??= WidgetConfigDefaults.CreateDamageTakenListSettings();
+            config.DamageTakenList.ShowsLatestHitOnly = showsLatestHitOnly;
             WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }

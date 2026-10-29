@@ -6,8 +6,8 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <!--
-        装備詳細の品質ごとのテキストカラー。行の作りは被ダメログのテキストカラー
-        (TakenDamageLogTextColorSettingsView)の属性以外の行と同じで、左の欄に「Aa」を出す。
+        装備詳細の品質ごとのテキストカラー。行の作りはタイムラインのテキストカラー
+        (TakenDamageLogTextColorSettingsView)と同じで、左の欄に「Aa」を出す。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />

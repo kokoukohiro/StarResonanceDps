@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -15,24 +16,28 @@ using StarResonanceDps.Core.Services;
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// 被ダメリスト。表示中の回(ライブか履歴、タイムラインと同じ)で被弾したプレイヤーを並べ、右にその人の最後の被弾を出す(1枚だけ開く窓)。
+/// 被ダメログ(識別子は被ダメリスト)。表示中の回(ライブか履歴、タイムラインと同じ)のプレイヤーの被弾を1回1行で、一番上が一番新しい順に並べる(1枚だけ開く窓)。
+/// 設定「最新の被ダメのみ表示」がオンなら1人1行で、その人の出す被弾のうち一番新しいものだけを、最後に被弾した人が上の順に並べる。
+/// ヘッダーのボタンでも切り替わる(<see cref="ToggleLatestHitOnlyCommand"/>)。
 ///
 /// <para>
-/// 被弾は <see cref="MeterSnapshotProvider.GetDamageTakenList"/>、名前・クラス・特化は名簿(蘇生リストと同じ)。名簿に居ない人は出さない。
-/// 並びは最後の被弾の新しい順(被弾の通し番号の大きい順)で、新しく被弾した人の行が一番上へ上がる。
+/// 被弾は <see cref="MeterSnapshotProvider.GetDamageTakenList"/> で回の被ダメログの控えを 0.25秒ごとに前回の続きから読む(タイムラインと同じ読み方)。
+/// 読んだ被弾はここで全部持ち、設定「フィルター設定」(自傷・フレンドリーファイア以外なら加害者がプレイヤーの被弾を出さない)と名簿で、出す行を決める。
+/// 名前・クラス・特化は名簿(蘇生リストと同じ)で、名簿に居ない人の被弾は出さない(名簿は回に被弾の記録がある人を載せるので、出ないのは名簿が届くまでの間だけ)。
 /// </para>
 ///
 /// <para>
-/// 行の作りはメーターと同じ。左は経過「n秒前」(回の戦闘の時計で数える。メーターのタイマーと同じで、ライブも履歴も同じ式)・クラスアイコン・名前、
+/// 行の作りはメーターと同じ。左は時刻(タイムラインの行と同じ戦闘の経過)・クラスアイコン・名前、
 /// 右は設定「スキル名」の書式(エンティティ名・スキル名・タイプ、決め方はタイムラインの被弾の行と同じ)・被ダメ値・属性アイコン。
 /// クラスアイコンは設定「アイコンカラー」の色で染め、ほかの文字とアイコンは白で、自分の強調表示と「(戦闘不能)」だけ色が付く(画面の側)。
-/// 下敷きのバーは右から伸び、色はその被弾の属性の色(設定「属性カラー」)、長さは一覧の中で被ダメ値が一番大きい人を100%にする。
+/// 下敷きのバーは右から伸び、色はその被弾の属性の色(設定「属性カラー」)、長さは一覧の中で被ダメ値が一番大きい被弾を100%にする。
 /// </para>
 ///
 /// <para>
-/// 被弾は変化の合図が無いので、メーターと同じ 0.25秒ごとに回の被ダメログの控えを前回の続きから読む(タイムラインと同じ読み方)。
-/// 1人ずつの最後の被弾はここで持ち、新しい被弾か名簿・設定が変わったときだけ行を当て直す。何も変わらなければ書き換えるのは経過の文字だけ。
-/// 行は作り直さず値だけ入れ替え、右の文字は被弾か設定が変わったときだけ作る。行の左クリックと右クリックのメニューは蘇生リストと同じ。
+/// 行は作り直さず値だけ入れ替える。名前とクラスは人ごとに1回だけ作り、名簿が変わったらその人の行にだけ当て直す。
+/// 出す行が変わる(フィルターか「最新の被ダメのみ表示」を変えた、名簿に人が増えた・減った)ときだけ、持っている被弾から一覧を組み直す。
+/// 「最新の被ダメのみ表示」で同じ人が被弾したら、その人の行の被弾を入れ替えて一番上へ動かす。
+/// フッターの左は戦闘の時計の経過(メーターのタイマーと同じ)。行の左クリックはその人のプレイヤー情報を開き、右クリックのメニューはプレイヤーリストと同じ。
 /// </para>
 /// </summary>
 public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
@@ -47,15 +52,25 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
 
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<DamageTakenListEntry> _entries = [];
-    private readonly Dictionary<long, DamageTakenListEntry> _entriesByCharacterId = [];
+
+    /// <summary>読んだ被弾の全部(古い順)。出す行はここから決める。回が替わったら捨てる。</summary>
+    private readonly List<DamageTakenListHit> _hits = [];
+
+    /// <summary>読んだ被弾に出てくる人。名簿に居るかが変わった人がいれば一覧を組み直す。</summary>
+    private readonly HashSet<long> _hitCharacterIds = [];
+
+    private readonly Dictionary<long, PlayerRosterEntry> _rosterRowsByCharacterId = [];
+
+    /// <summary>人ごとの名前とクラス。名簿・設定・言語が変わったら作り直す。</summary>
+    private readonly Dictionary<long, PersonDisplay> _personDisplays = [];
+
+    /// <summary>「最新の被ダメのみ表示」の人ごとの行。全部出すときは空。</summary>
+    private readonly Dictionary<long, DamageTakenListEntry> _latestEntriesByCharacterId = [];
+
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
     private readonly Dictionary<Zproto.EDamageProperty, ImageBrush> _elementIconMasks = [];
     private readonly Dictionary<Zproto.EDamageProperty, Brush> _barBrushes = [];
-    private readonly Dictionary<long, PlayerRosterEntry> _rosterRowsByCharacterId = [];
-
-    /// <summary>1人ずつの最後の被弾。回が替わったら捨てる。</summary>
-    private readonly Dictionary<long, DamageTakenListHit> _lastHitsByCharacterId = [];
 
     private DamageTakenListWidgetSettingsConfig _settings;
     private ElementColorWidgetSettingsConfig _elementColorSettings;
@@ -64,11 +79,19 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
     /// <summary>次に読む被ダメログの位置(<see cref="DamageTakenListSnapshot.NextIndex"/>)。</summary>
     private int _nextRecordIndex;
 
-    /// <summary>行を当て直す要があるか。新しい被弾・名簿・設定・言語・回の切り替わりで立てる。</summary>
-    private bool _rowsDirty = true;
+    /// <summary>行の時刻を作ったときの戦闘の時計の起点。変わったら全部の行の時刻を作り直す。</summary>
+    private DateTime? _combatStartUtc;
 
-    /// <summary>右の文字の版。設定・言語・全体設定が変わったら進め、全部の行の文字を作り直させる。</summary>
-    private int _hitTextVersion;
+    /// <summary>今のバーの長さの基準(出している行の中で一番大きい被ダメ値)。</summary>
+    private long _maxHitValue;
+
+    /// <summary>フッターの左。戦闘の時計の経過(メーターのタイマーと同じ書式)。</summary>
+    [ObservableProperty]
+    private string _elapsedText = string.Empty;
+
+    /// <summary>ヘッダーのボタンの文字。押すとどうなるかを出す(メーターの「計測」/「計測停止」と同じ決まり)。</summary>
+    [ObservableProperty]
+    private string _latestHitOnlyActionText = string.Empty;
 
     public DamageTakenListWidgetViewModel(
         WidgetListItemViewModel widget,
@@ -79,8 +102,9 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         _requestPlayerWindow = requestPlayerWindow;
         _settings = widget.GetDamageTakenListSettingsSnapshot();
         _elementColorSettings = widget.GetElementColorSettingsSnapshot();
-        SetRoster(roster);
+        LatestHitOnlyActionText = CreateLatestHitOnlyActionText();
         Entries = new ReadOnlyObservableCollection<DamageTakenListEntry>(_entries);
+        SetRosterRows(roster);
 
         _refreshTimer = new DispatcherTimer
         {
@@ -96,6 +120,7 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         _refreshTimer.Start();
     }
 
+    /// <summary>行。上が新しく下が古い。</summary>
     public ReadOnlyObservableCollection<DamageTakenListEntry> Entries { get; }
 
     /// <summary>このウィジェットのカード。右クリックのメニューと行の TIPS が窓の色(<c>WidgetWindowPalette</c>)を引く。</summary>
@@ -121,23 +146,33 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         DataStatusChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>名簿が変わった(画面のスレッドで窓の管理から呼ばれる)。</summary>
+    /// <summary>
+    /// 名簿が変わった(画面のスレッドで窓の管理から呼ばれる)。被弾に出てくる人が名簿に居るかが変わったら一覧を組み直し、
+    /// そうでなければ名前とクラスが変わった人の行にだけ当て直す。
+    /// </summary>
     public void UpdateRoster(PlayerRosterSnapshot roster)
     {
-        SetRoster(roster);
-        Refresh();
+        var previousRows = new Dictionary<long, PlayerRosterEntry>(_rosterRowsByCharacterId);
+        SetRosterRows(roster);
+
+        if (_hitCharacterIds.Any(id => previousRows.ContainsKey(id) != _rosterRowsByCharacterId.ContainsKey(id)))
+        {
+            RebuildRows();
+            return;
+        }
+
+        RefreshPersonDisplays(_hitCharacterIds.Where(id => !Equals(
+            previousRows.GetValueOrDefault(id),
+            _rosterRowsByCharacterId.GetValueOrDefault(id))));
     }
 
-    /// <summary>名簿の行を人の番号で引けるように控え、行を当て直させる。</summary>
-    private void SetRoster(PlayerRosterSnapshot roster)
+    private void SetRosterRows(PlayerRosterSnapshot roster)
     {
         _rosterRowsByCharacterId.Clear();
         foreach (var row in roster.Entries)
         {
             _rosterRowsByCharacterId.TryAdd(row.CharacterId, row);
         }
-
-        _rowsDirty = true;
     }
 
     public void Dispose()
@@ -203,6 +238,13 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         RequestPlayerWindow(WidgetKind.DebuffList, player);
     }
 
+    /// <summary>ヘッダーのボタン。「最新の被ダメのみ表示」を切り替えて、その項目だけを保存する(設定の窓が開いていればそちらの表示も合わせる)。</summary>
+    [RelayCommand]
+    private void ToggleLatestHitOnly()
+    {
+        _widget.SetDamageTakenListShowsLatestHitOnlyFromWidget(!_settings.ShowsLatestHitOnly);
+    }
+
     private void RequestPlayerWindow(WidgetKind kind, DamageTakenListEntry? player)
     {
         if (player is not null)
@@ -211,14 +253,28 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         }
     }
 
-    /// <summary>表示設定とアイコンカラー(保存かプレビュー)が変わった。クラスの色のブラシを作り直し、全部の行の文字を作り直す。</summary>
+    /// <summary>
+    /// 表示設定とアイコンカラー(保存かプレビュー、ヘッダーのボタン)が変わった。フィルターか「最新の被ダメのみ表示」が変われば一覧を組み直し、
+    /// そうでなければ名前とクラス・右の文字を当て直す(書式の入力の1文字ごとに来るので、行は作り直さない)。
+    /// </summary>
     private void Widget_DamageTakenListSettingsChanged(object? sender, EventArgs e)
     {
+        var previousFilterIndex = _settings.AttackerFilterIndex;
+        var previousShowsLatestHitOnly = _settings.ShowsLatestHitOnly;
         _settings = _widget.GetDamageTakenListSettingsSnapshot();
         _classBrushes.Clear();
-        _hitTextVersion++;
-        _rowsDirty = true;
-        Refresh();
+        _personDisplays.Clear();
+        LatestHitOnlyActionText = CreateLatestHitOnlyActionText();
+
+        if (_settings.AttackerFilterIndex != previousFilterIndex
+            || _settings.ShowsLatestHitOnly != previousShowsLatestHitOnly)
+        {
+            RebuildRows();
+            return;
+        }
+
+        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshHitTexts();
     }
 
     /// <summary>属性カラー(保存かプレビュー)が変わった。バーの色のブラシを作り直す。</summary>
@@ -226,23 +282,26 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
     {
         _elementColorSettings = _widget.GetElementColorSettingsSnapshot();
         _barBrushes.Clear();
-        _rowsDirty = true;
-        Refresh();
+        foreach (var entry in _entries)
+        {
+            entry.BarBrush = entry.Hit.DamageElement is { } element ? GetBarBrush(element) : null;
+        }
     }
 
     /// <summary>全体設定(内部IDの表示・名前の無い技の出し方・プレイヤー名)は行の文字に入るので作り直す。</summary>
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {
-        _hitTextVersion++;
-        _rowsDirty = true;
-        Refresh();
+        _personDisplays.Clear();
+        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshHitTexts();
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
-        _hitTextVersion++;
-        _rowsDirty = true;
-        Refresh();
+        LatestHitOnlyActionText = CreateLatestHitOnlyActionText();
+        _personDisplays.Clear();
+        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshHitTexts();
     }
 
     private void Refresh()
@@ -250,126 +309,170 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         var snapshot = MeterSnapshotProvider.GetDamageTakenList(_encounter, _nextRecordIndex);
         if (!ReferenceEquals(snapshot.Encounter, _encounter))
         {
-            // 回が替わった(Core は先頭から読み直している)。被弾の通し番号は回をまたいで比べないので、
-            // 1人ずつの最後の被弾を捨て、全部の行の文字を作り直させる。
+            // 回が替わった(Core は先頭から読み直している)。持っている被弾と行を捨てる。
             _encounter = snapshot.Encounter;
-            _lastHitsByCharacterId.Clear();
-            _hitTextVersion++;
-            _rowsDirty = true;
+            _hits.Clear();
+            _hitCharacterIds.Clear();
+            ClearEntries();
         }
 
         _nextRecordIndex = snapshot.NextIndex;
+
+        var clock = _encounter?.ReadCombatClock();
+        var combatStartUtc = clock?.StartUtc;
+        if (combatStartUtc != _combatStartUtc)
+        {
+            _combatStartUtc = combatStartUtc;
+            foreach (var entry in _entries)
+            {
+                entry.TimeText = FormatTime(entry.Hit);
+            }
+        }
+
+        List<DamageTakenListEntry>? addedEntries = null;
+        var latestEntriesChanged = false;
         foreach (var hit in snapshot.Hits)
         {
-            _lastHitsByCharacterId[hit.CharacterId] = hit;
-            _rowsDirty = true;
+            _hits.Add(hit);
+            if (_hitCharacterIds.Add(hit.CharacterId))
+            {
+                RefreshPersonDisplays([hit.CharacterId]);
+            }
+
+            if (!IsShown(hit))
+            {
+                continue;
+            }
+
+            if (_settings.ShowsLatestHitOnly)
+            {
+                ShowLatestHit(hit);
+                latestEntriesChanged = true;
+                continue;
+            }
+
+            // 被弾は古い順に届くので、1件ずつ先頭に入れると一番新しいものが一番上になる。
+            var entry = CreateEntry(hit);
+            _entries.Insert(0, entry);
+            (addedEntries ??= []).Add(entry);
         }
 
-        if (_rowsDirty)
+        if (latestEntriesChanged)
         {
-            _rowsDirty = false;
-            RebuildRows();
+            // 入れ替えた被弾が前の最大より小さいと最大が下がるので、全部の行から決め直す(1人1行なので行は多くない)。
+            UpdateAllBarRatios();
+        }
+        else if (addedEntries is not null)
+        {
+            UpdateBarRatios(addedEntries);
         }
 
-        UpdateElapsedTexts();
+        ElapsedText = MeterWidgetViewModel.FormatDuration(clock?.Elapsed ?? TimeSpan.Zero);
         RefreshDataStatus();
     }
 
-    /// <summary>1人ずつの最後の被弾を行へ当て直す。名簿に居ない人は出さない。</summary>
+    /// <summary>持っている被弾から一覧を組み直す(出す行が変わったとき)。名前とクラスは先に名簿から作り直す。</summary>
     private void RebuildRows()
     {
-        var nameDisplayMode = (PlayerNameDisplayMode)_configManager.GetSettingsSnapshot().PlayerNameDisplayModeIndex;
-        var shownCharacterIds = new HashSet<long>();
-        foreach (var hit in _lastHitsByCharacterId.Values)
+        ClearEntries();
+        RefreshPersonDisplays(_hitCharacterIds);
+        for (var index = _hits.Count - 1; index >= 0; index--)
         {
-            if (!_rosterRowsByCharacterId.TryGetValue(hit.CharacterId, out var row))
+            var hit = _hits[index];
+            if (!IsShown(hit))
             {
                 continue;
             }
 
-            shownCharacterIds.Add(hit.CharacterId);
-
-            // 新しい行は後ろに足し、並べ直しで最後の被弾の新しさの位置へ動かす。
-            if (!_entriesByCharacterId.TryGetValue(hit.CharacterId, out var entry))
+            // 新しい順に見るので、「最新の被ダメのみ表示」ではその人の最初に見つかった被弾が一番新しい。
+            if (_settings.ShowsLatestHitOnly)
             {
-                entry = new DamageTakenListEntry(hit.CharacterId);
-                _entriesByCharacterId.Add(hit.CharacterId, entry);
-                _entries.Add(entry);
-            }
+                if (_latestEntriesByCharacterId.ContainsKey(hit.CharacterId))
+                {
+                    continue;
+                }
 
-            UpdateEntry(entry, row, hit, nameDisplayMode);
-        }
-
-        for (var index = _entries.Count - 1; index >= 0; index--)
-        {
-            var entry = _entries[index];
-            if (shownCharacterIds.Contains(entry.CharacterId))
-            {
+                var latestEntry = CreateEntry(hit);
+                _latestEntriesByCharacterId.Add(hit.CharacterId, latestEntry);
+                _entries.Add(latestEntry);
                 continue;
             }
 
-            // 一覧から消える人(回が替わった、名簿から外れた)のメニューは閉じる。開いたままだと消えた人のメニューが残る。
-            entry.IsPlayerSelectionMenuOpen = false;
-            _entriesByCharacterId.Remove(entry.CharacterId);
-            _entries.RemoveAt(index);
+            _entries.Add(CreateEntry(hit));
         }
 
-        UpdateBarRatios();
-        SortEntries();
+        UpdateBarRatios(_entries);
     }
 
     /// <summary>
-    /// 経過の文字。回の戦闘の時計で数える(メーターのタイマーと同じ。自動一時停止で止まっている間は進まず、履歴はタイマーの終わりで止まる)。
-    /// 同じ秒の間は同じ文字なので通知は出ない。
+    /// 「最新の被ダメのみ表示」の1件。その人の行があれば被弾を入れ替えて一番上へ動かし(行は作り直さない)、無ければ一番上に足す。
     /// </summary>
-    private void UpdateElapsedTexts()
+    private void ShowLatestHit(DamageTakenListHit hit)
     {
-        var combatElapsed = _encounter?.ReadCombatClock() is { StartUtc: not null } clock
-            ? clock.Elapsed
-            : (TimeSpan?)null;
-        foreach (var entry in _entries)
+        if (!_latestEntriesByCharacterId.TryGetValue(hit.CharacterId, out var entry))
         {
-            entry.ElapsedText = FormatElapsed(combatElapsed, _encounter?.ToCombatOffset(entry.HitTimestamp));
+            entry = CreateEntry(hit);
+            _latestEntriesByCharacterId.Add(hit.CharacterId, entry);
+            _entries.Insert(0, entry);
+            return;
+        }
+
+        entry.Hit = hit;
+        ApplyHit(entry);
+        var index = _entries.IndexOf(entry);
+        if (index > 0)
+        {
+            _entries.Move(index, 0);
         }
     }
 
-    private void UpdateEntry(
-        DamageTakenListEntry entry,
-        PlayerRosterEntry row,
-        DamageTakenListHit hit,
-        PlayerNameDisplayMode nameDisplayMode)
+    /// <summary>
+    /// 行を全部外す。開いているメニューは閉じる(開いたままだと消えた行のメニューが残る)。
+    /// </summary>
+    private void ClearEntries()
     {
-        var professionKey = PlayerProfession.GetKey(row.ProfessionId, row.ClassSpec);
-        entry.IsSelf = row.IsSelf;
-        entry.ClassIconMask = GetProfessionIconMask(professionKey);
-        entry.ClassBrush = GetClassBrush(professionKey);
-        entry.DisplayName = PlayerInfoFormatFormatter.Format(row, _settings.PlayerInfoFormatString, nameDisplayMode);
-        entry.IsSelfHighlighted = row.IsSelf
-            && _settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
-        entry.SortKey = hit.Sequence;
-        entry.HitValue = hit.Value;
-
-        if (entry.HitSequence != hit.Sequence || entry.HitTextVersion != _hitTextVersion)
+        foreach (var entry in _entries)
         {
-            entry.HitSequence = hit.Sequence;
-            entry.HitTextVersion = _hitTextVersion;
-            entry.HitInfoText = DamageTakenListHitInfoFormatter.Format(
-                _settings.HitInfoFormatString,
-                FormatSourceName(hit),
-                PlayerInfoFormatFormatter.GetPartyDisplayName(hit.Attacker),
-                FormatDamageModeText(hit.DamageMode));
-            entry.ValueText = hit.Value.ToString(CultureInfo.InvariantCulture);
-            entry.ElementToolTipText = hit.DamageElement is { } element
-                ? LocalizationManager.Instance.GetString($"DamageProperty_{element}")
-                : string.Empty;
+            entry.IsPlayerSelectionMenuOpen = false;
         }
 
-        entry.IsDefeatShown = hit.IsLethal && _settings.ShowsDefeatCause;
-        if (hit.DamageElement is { } hitElement)
+        _entries.Clear();
+        _latestEntriesByCharacterId.Clear();
+        _maxHitValue = 0;
+    }
+
+    /// <summary>出す被弾か。名簿に居る人の被弾で、フィルターが自傷・フレンドリーファイア以外なら加害者がプレイヤーでないもの(タイムラインのフィルターと同じ決まり)。</summary>
+    private bool IsShown(DamageTakenListHit hit)
+    {
+        return _rosterRowsByCharacterId.ContainsKey(hit.CharacterId)
+            && !(_settings.AttackerFilterIndex == WidgetConfigDefaults.NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex
+                && hit.Attacker.IsPlayer);
+    }
+
+    private DamageTakenListEntry CreateEntry(DamageTakenListHit hit)
+    {
+        var entry = new DamageTakenListEntry(hit);
+        ApplyHit(entry);
+        if (_personDisplays.TryGetValue(hit.CharacterId, out var person))
+        {
+            ApplyPerson(entry, person);
+        }
+
+        return entry;
+    }
+
+    /// <summary>行の被弾から決まるもの(時刻・被ダメ値・設定と言語で変わる文字・属性のアイコンとバーの色)。</summary>
+    private void ApplyHit(DamageTakenListEntry entry)
+    {
+        var hit = entry.Hit;
+        entry.TimeText = FormatTime(hit);
+        entry.ValueText = hit.Value.ToString(CultureInfo.InvariantCulture);
+        ApplyHitTexts(entry);
+        if (hit.DamageElement is { } element)
         {
             entry.HasElement = true;
-            entry.ElementIconMask = GetElementIconMask(hitElement);
-            entry.BarBrush = GetBarBrush(hitElement);
+            entry.ElementIconMask = GetElementIconMask(element);
+            entry.BarBrush = GetBarBrush(element);
         }
         else
         {
@@ -377,85 +480,127 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
             entry.ElementIconMask = null;
             entry.BarBrush = null;
         }
-
-        entry.HitTimestamp = hit.Timestamp;
     }
 
-    /// <summary>バーの長さ。一覧の中で被ダメ値が一番大きい人を 1 にする(スクロールで見えていない行も含める、メーターと同じ)。</summary>
-    private void UpdateBarRatios()
+    /// <summary>設定・言語で変わる行の文字(右の書式・「(戦闘不能)」・TIPS の属性名)。</summary>
+    private void ApplyHitTexts(DamageTakenListEntry entry)
     {
-        var maxValue = 0L;
-        foreach (var entry in _entries)
-        {
-            maxValue = Math.Max(maxValue, entry.HitValue);
-        }
+        var hit = entry.Hit;
+        entry.HitInfoText = DamageTakenListHitInfoFormatter.Format(_settings.HitInfoFormatString, hit);
+        entry.IsDefeatShown = hit.IsLethal && _settings.ShowsDefeatCause;
+        entry.ElementToolTipText = hit.DamageElement is { } element
+            ? LocalizationManager.Instance.GetString($"DamageProperty_{element}")
+            : string.Empty;
+    }
 
+    private void RefreshHitTexts()
+    {
         foreach (var entry in _entries)
         {
-            entry.BarRatio = maxValue > 0
-                ? Math.Clamp(entry.HitValue / (double)maxValue, 0d, 1d)
-                : 0d;
+            ApplyHitTexts(entry);
         }
     }
 
-    /// <summary>最後の被弾の新しい順に並べ直す。動く行だけ動かす。</summary>
-    private void SortEntries()
+    /// <summary>
+    /// 人ごとの名前とクラスを名簿から作り直し、変わった人の行にだけ当て直す。名簿に居ない人は捨てる(その人の行は出さない)。
+    /// </summary>
+    private void RefreshPersonDisplays(IEnumerable<long> characterIds)
     {
-        var ordered = _entries.OrderByDescending(entry => entry.SortKey).ToArray();
-        for (var targetIndex = 0; targetIndex < ordered.Length; targetIndex++)
+        var nameDisplayMode = (PlayerNameDisplayMode)_configManager.GetSettingsSnapshot().PlayerNameDisplayModeIndex;
+        HashSet<long>? changedCharacterIds = null;
+        foreach (var characterId in characterIds)
         {
-            var currentIndex = _entries.IndexOf(ordered[targetIndex]);
-            if (currentIndex != targetIndex)
+            if (!_rosterRowsByCharacterId.TryGetValue(characterId, out var row))
             {
-                _entries.Move(currentIndex, targetIndex);
+                _personDisplays.Remove(characterId);
+                continue;
+            }
+
+            var person = CreatePersonDisplay(row, nameDisplayMode);
+            if (_personDisplays.TryGetValue(characterId, out var current) && current == person)
+            {
+                continue;
+            }
+
+            _personDisplays[characterId] = person;
+            (changedCharacterIds ??= []).Add(characterId);
+        }
+
+        if (changedCharacterIds is null)
+        {
+            return;
+        }
+
+        foreach (var entry in _entries)
+        {
+            if (changedCharacterIds.Contains(entry.CharacterId))
+            {
+                ApplyPerson(entry, _personDisplays[entry.CharacterId]);
             }
         }
     }
 
-    /// <summary>
-    /// 技(またはバフ)の名前。タイムラインの技の行と同じで、落下は「落下」、名前が無ければ「攻撃」、内部ID注記は全体設定に従う。
-    /// </summary>
-    private static string FormatSourceName(DamageTakenListHit hit)
+    private PersonDisplay CreatePersonDisplay(PlayerRosterEntry row, PlayerNameDisplayMode nameDisplayMode)
     {
-        var localization = LocalizationManager.Instance;
-        if (hit.IsFall)
-        {
-            return localization.GetString("TakenDamageLog_FallSkill");
-        }
-
-        var name = string.IsNullOrEmpty(hit.SourceName)
-            ? localization.GetString("TakenDamageLog_UnnamedSkill")
-            : hit.SourceName;
-        return hit.IsBuffSource
-            ? CombatDataCatalog.AppendBuffInternalId(name, hit.SourceId)
-            : CombatDataCatalog.AppendSkillInternalId(name, hit.SourceId);
+        var professionKey = PlayerProfession.GetKey(row.ProfessionId, row.ClassSpec);
+        return new PersonDisplay(
+            PlayerInfoFormatFormatter.Format(row, _settings.PlayerInfoFormatString, nameDisplayMode),
+            GetProfessionIconMask(professionKey),
+            GetClassBrush(professionKey),
+            row.IsSelf,
+            row.IsSelf && _settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex);
     }
 
-    /// <summary>書式の <c>{Type}</c>。値はスキル詳細の書式の <c>{Type}</c> と同じ(物理 / 魔法 / 無分類)。</summary>
-    private static string FormatDamageModeText(Zproto.EDamageMode mode)
+    private static void ApplyPerson(DamageTakenListEntry entry, PersonDisplay person)
     {
-        var localization = LocalizationManager.Instance;
-        return mode switch
-        {
-            Zproto.EDamageMode.DamagePhysical => localization.GetString("Metric_DamageMode_Physical"),
-            Zproto.EDamageMode.DamageMagical => localization.GetString("Metric_DamageMode_Magical"),
-            _ => localization.GetString("Metric_DamageMode_Normal")
-        };
+        entry.DisplayName = person.DisplayName;
+        entry.ClassIconMask = person.ClassIconMask;
+        entry.ClassBrush = person.ClassBrush;
+        entry.IsSelf = person.IsSelf;
+        entry.IsSelfHighlighted = person.IsSelfHighlighted;
     }
 
     /// <summary>
-    /// 経過「n秒前」。戦闘の時計の今の経過 <paramref name="combatElapsed"/> − 被弾の戦闘の経過 <paramref name="hitOffset"/>(切り捨て、何秒でも秒)。
-    /// 時計の起点がまだ無ければ空欄(タイムラインの行の時刻と同じ)。
+    /// バーの長さ。出している行の中で被ダメ値が一番大きい被弾を 1 にする。
+    /// 足した行で最大が変わったら全部の行を、変わらなければ足した行だけを当て直す。
     /// </summary>
-    private static string FormatElapsed(TimeSpan? combatElapsed, TimeSpan? hitOffset)
+    private void UpdateBarRatios(IReadOnlyList<DamageTakenListEntry> addedEntries)
     {
-        if (combatElapsed is not { } elapsed || hitOffset is not { } offset)
+        var maxValue = _maxHitValue;
+        foreach (var entry in addedEntries)
         {
-            return string.Empty;
+            maxValue = Math.Max(maxValue, entry.Hit.Value);
         }
 
-        var seconds = Math.Max(0, (int)Math.Floor((elapsed - offset).TotalSeconds));
-        return LocalizationManager.Instance.Format("DamageTakenList_SecondsAgo", seconds);
+        var targets = maxValue != _maxHitValue ? (IReadOnlyList<DamageTakenListEntry>)_entries : addedEntries;
+        _maxHitValue = maxValue;
+        foreach (var entry in targets)
+        {
+            entry.BarRatio = maxValue > 0
+                ? Math.Clamp(entry.Hit.Value / (double)maxValue, 0d, 1d)
+                : 0d;
+        }
+    }
+
+    /// <summary>バーの長さを全部の行から決め直す。「最新の被ダメのみ表示」で行の被弾を入れ替えたとき(最大が下がることがある)に使う。</summary>
+    private void UpdateAllBarRatios()
+    {
+        _maxHitValue = 0;
+        UpdateBarRatios(_entries);
+    }
+
+    private string CreateLatestHitOnlyActionText() => LocalizationManager.Instance.GetString(
+        _settings.ShowsLatestHitOnly ? "DamageTakenList_ShowAllHits" : "DamageTakenList_ShowLatestHitOnly");
+
+    /// <summary>
+    /// 行の時刻。タイムラインの行と同じく戦闘の経過(<see cref="Encounter.ToCombatOffset"/>、自動一時停止で止まっていた区間を除く)で、
+    /// 起点の前は負。起点がまだ無い間は空欄。
+    /// </summary>
+    private string FormatTime(DamageTakenListHit hit)
+    {
+        return _combatStartUtc is not null && _encounter?.ToCombatOffset(hit.Timestamp) is { } offset
+            ? MeterWidgetViewModel.FormatDuration(offset)
+            : string.Empty;
     }
 
     /// <summary>クラスアイコンの形。絵は職業ごとに1つなので鍵ごとに使い回す。</summary>
@@ -533,4 +678,12 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
 
         return brush;
     }
+
+    /// <summary>1人ぶんの名前とクラス。ブラシは使い回すので、中身が同じなら等しい。</summary>
+    private sealed record PersonDisplay(
+        string DisplayName,
+        Brush ClassIconMask,
+        Brush ClassBrush,
+        bool IsSelf,
+        bool IsSelfHighlighted);
 }

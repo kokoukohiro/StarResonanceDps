@@ -226,7 +226,7 @@ public static class CombatDataCatalog
     /// </summary>
     private static int _internalIdDisplayMode = (int)InternalIdDisplayMode.Hidden;
 
-    // 名前の無い技に内部名を出すか(全体設定。既定はオン)。Volatile で読み書きする。
+    // 名前の無い技とバフに内部名を出すか(全体設定。既定はオン)。Volatile で読み書きする。
     private static bool _showsUnnamedSkillInternalNames = true;
 
     public static void SetCulture(string? cultureName)
@@ -240,8 +240,8 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// 名前の無い技に内部名を出すか。出すのは画面の技名(タイムライン・スキル詳細の行・推移グラフ・プレイヤーリストの技の枠)だけで、
-    /// 空欄の検知(<see cref="GetSourceNameBeforeLanding"/>)・予兆技の通知・保存する名前には効かない。
+    /// 名前の無い技とバフに内部名を出すか。出すのは画面の技名(タイムライン・スキル詳細の行・推移グラフ・プレイヤーリストの技の枠)と、
+    /// タイムラインのバフの名前(バフ由来の行・敵が付けたバフ)だけで、空欄の検知(<see cref="GetSourceNameBeforeLanding"/>)・予兆技の通知・保存する名前には効かない。
     /// </summary>
     public static void SetUnnamedSkillInternalNameDisplay(bool shows)
     {
@@ -314,7 +314,7 @@ public static class CombatDataCatalog
     /// <summary><see cref="ReadLocalizedFile"/> で読む名前テーブル(<c>Data/Localization/{名前}.json</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
     private static readonly string[] LocalizedFileNames =
     [
-        "SkillNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
+        "SkillNames", "SkillTalkNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
         "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "EquipNames", "EquipEffectTexts",
         "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames",
     ];
@@ -380,7 +380,9 @@ public static class CombatDataCatalog
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillIconFrames = BuildSkillIconFrames();
             var skillNames = LoadLocalizedText(reads, "SkillNames", out var skillNameIds);
-            (_skillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
+            var (restoredSkillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
+            // 公式の技名(SkillTalk)。技の表の名前と、表の更新で落ちた名前を戻したもの(SkillNameOverrides)の上に重ねる。
+            _skillNames = ApplySkillTalkNames(restoredSkillNames, LoadLocalizedText(reads, "SkillTalkNames", out _));
             var buffNames = LoadLocalizedText(reads, "BuffNames", out var buffNameIds);
             var (restoredBuffNames, restoredBuffNameIds) = ApplyNameOverrides(reads, buffNames, buffNameIds, "BuffNameOverrides.json");
             // 名前の無いバフと名前を変えるバフに割り当てた名前。表の更新で落ちた名前を戻したもの(BuffNameOverrides)の上に重ねる。
@@ -480,7 +482,7 @@ public static class CombatDataCatalog
     /// <para>
     /// 見出し表で名前が空の行は、バフから来た行で鍵のバフが料理なら料理の名前(<c>CuisineBuffs.json</c>)。
     /// それも無ければ、記録時に付与元をたどって着いた先(<paramref name="landing"/>)の名前を出す。
-    /// オプションのバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら <c>SkillNames</c>。
+    /// オプションのバフなら <c>RogueEntryNames</c>、プレイヤーが使った技なら技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。
     /// それも空なら、全体設定で内部名を出すときは内部名(<see cref="GetSourceInternalName"/>)、出さなければ空のまま(内部ID注記だけ)。
     /// 見出し表の名前をこれらで上書きすることはない。
     /// </para>
@@ -1229,6 +1231,34 @@ public static class CombatDataCatalog
                     {
                         namesById.Remove(buffId);
                     }
+                }
+
+                return namesById.ToFrozenDictionary();
+            },
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// 技の名前に公式の技名(<c>SkillTable.SkillTalk</c>、<c>SkillTalkNames.json</c>)を言語ごとに重ねる。
+    /// その言語に <c>SkillTalk</c> の名前がある技だけ差し替わり、無い技は技の表の名前(と <c>SkillNameOverrides</c>)のまま。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> ApplySkillTalkNames(
+        FrozenDictionary<string, FrozenDictionary<int, string>> names,
+        FrozenDictionary<string, FrozenDictionary<int, string>> talkNames)
+    {
+        return names.ToFrozenDictionary(
+            pair => pair.Key,
+            pair =>
+            {
+                if (!talkNames.TryGetValue(pair.Key, out var talks) || talks.Count == 0)
+                {
+                    return pair.Value;
+                }
+
+                var namesById = pair.Value.ToDictionary();
+                foreach (var (skillId, talk) in talks)
+                {
+                    namesById[skillId] = talk;
                 }
 
                 return namesById.ToFrozenDictionary();

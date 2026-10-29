@@ -13,7 +13,7 @@ namespace StarResonanceDps.App.Models.Notifications;
 /// 薬剤・料理効果切れが {TargetName} と {BuffName}、
 /// 予兆技が {EntityName}(タイムラインの行と同じ名前)と {SkillName}、入場確認が {Content}(マッチング先のコンテンツ名か、パーティで入る場所の名前)、
 /// HP低下とプレイヤー出現が {PlayerName}(プレイヤーリストの行と同じ名前)、エンティティ出現が {EntityName}(内部IDの注記なしのエンティティ名)、
-/// 狙われ状態が {PlayerName} と {EntityName}、エンティティ詠唱が {EntityName}(詠唱した敵の名前)。
+/// 狙われるプレイヤーが {PlayerName} と {EntityName}、エンティティ詠唱が {EntityName}(詠唱した敵の名前)。
 /// </para>
 /// </summary>
 public static partial class NotificationTextFormatter
@@ -87,7 +87,7 @@ public static partial class NotificationTextFormatter
         return regex.Replace(format, _ => name);
     }
 
-    /// <summary>狙われ状態の文。{PlayerName} は狙われている人、{EntityName} は狙っている敵。</summary>
+    /// <summary>狙われるプレイヤーの文。{PlayerName} は狙われている人、{EntityName} は狙っている敵。</summary>
     public static string FormatTargeted(string format, string playerName, string entityName)
     {
         return GetTargetedFieldRegex().Replace(

@@ -10,7 +10,7 @@ namespace StarResonanceDps.App.Models.Notifications;
 public readonly record struct TargetedState(long EntityUuid, long CharacterId, string PlayerName, string EntityName);
 
 /// <summary>
-/// 通知「狙われ状態」の判定。周りの敵の一覧か名簿が届くたびに、今の狙われ状態(通知タブの対象エンティティ・対象プレイヤーで絞ったもの)を渡す。
+/// 通知「狙われるプレイヤー」の判定。周りの敵の一覧か名簿が届くたびに、今の狙われ状態(通知タブの対象エンティティ・対象プレイヤーで絞ったもの)を渡す。
 /// ウィジェットを開いていなくても動く(<see cref="NotificationMonitor"/>)。
 ///
 /// <para>
