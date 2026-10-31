@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using StarResonanceDps.App.Config;
@@ -66,7 +65,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<MetricSkillTableEntry> _skillEntries = [];
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
-    private readonly Dictionary<string, ImageBrush> _elementIconMasks = new(StringComparer.Ordinal);
     private IReadOnlyList<MetricTimelinePoint> _timelinePoints = Array.Empty<MetricTimelinePoint>();
     private IReadOnlyList<MetricTimelineSkillMarker> _timelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
     private int _timelineVisibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
@@ -143,7 +141,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         private set => SetProperty(ref _timelineShowsSkillLog, value);
     }
 
-    /// <summary>推移グラフの線の色。その人のクラスのグラフカラー(フィルターを掛けた色)。相手が分かるまでは null。</summary>
+    /// <summary>推移グラフの線の色。その人のクラスのグラフカラー。相手が分かるまでは null。</summary>
     public Brush? TimelineLineBrush
     {
         get => _timelineLineBrush;
@@ -384,7 +382,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     /// <summary>
-    /// 線の色。クラスの鍵の選んでいる色にフィルターを掛ける(メーターの行のクラスカラーと同じ掛け方)。グラフカラーは不透明度を持たないので不透明で描く。
+    /// 線の色。クラスの鍵の選んでいる色。グラフカラーは不透明度を持たないので不透明で描く。
     /// </summary>
     private void ApplyTimelineLineColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
     {
@@ -400,7 +398,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     /// <summary>
-    /// グラフカラーの <paramref name="classKey"/> の選んでいる色にフィルターを掛けた不透明の色。
+    /// グラフカラーの <paramref name="classKey"/> の選んでいる色を不透明にした色。
     /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
     /// </summary>
     private static Color ResolveGraphColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
@@ -412,8 +410,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             throw new InvalidOperationException($"Graph color is not a valid color (class={classKey}, value={hex}).");
         }
 
-        var filtered = ClassColorFilter.Apply(color, settings);
-        return Color.FromRgb(filtered.R, filtered.G, filtered.B);
+        return Color.FromRgb(color.R, color.G, color.B);
     }
 
     /// <summary>
@@ -511,7 +508,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     }
 
     /// <summary>
-    /// 行のバーの塗り。属性ごとの色を<b>その行の割合で混ぜ</b>、フィルターと不透明度を掛ける。
+    /// 行のバーの塗り。属性ごとの色を<b>その行の割合で混ぜ</b>、不透明度を掛ける。
     /// 材料(属性の内訳)が無ければ色を作れないので <c>null</c> を返す(バーを出さない)。
     /// </summary>
     private Brush? CreateBarBrush(MetricSkillTableRowSnapshot entry)
@@ -550,7 +547,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 break;
             }
 
-            masks.Add(GetElementIconMask(pair.Key.ToString()));
+            masks.Add(ElementIconMasks.Get(pair.Key));
         }
 
         return masks.Count switch
@@ -559,22 +556,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             1 => [new MetricElementIconSegment(masks[0], null)],
             _ => [new MetricElementIconSegment(masks[0], masks[1])]
         };
-    }
-
-    /// <summary>属性アイコンの形。白い塗りをこの形で抜く(クラスアイコンと同じ染め方)。</summary>
-    private ImageBrush GetElementIconMask(string elementKey)
-    {
-        if (!_elementIconMasks.TryGetValue(elementKey, out var mask))
-        {
-            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{elementKey}"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            mask.Freeze();
-            _elementIconMasks[elementKey] = mask;
-        }
-
-        return mask;
     }
 
     /// <summary>

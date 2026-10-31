@@ -39,6 +39,9 @@
     <BitmapImage x:Key="Icon.DamageProperty.Rock" UriSource="/Assets/Images/main_progress_icon_rock.png" />
     <BitmapImage x:Key="Icon.DamageProperty.Light" UriSource="/Assets/Images/main_progress_icon_light.png" />
     <BitmapImage x:Key="Icon.DamageProperty.Dark" UriSource="/Assets/Images/main_progress_icon_dark.png" />
+    <!-- ダメージの物理・魔法。キーの末尾は EDamageMode の名前。ファイルはステータス詳細の物理攻撃力・魔法攻撃力の絵と同じ。無分類の絵は無い。 -->
+    <BitmapImage x:Key="Icon.DamageMode.DamagePhysical" UriSource="/Assets/Images/common_attrattack.png" />
+    <BitmapImage x:Key="Icon.DamageMode.DamageMagical" UriSource="/Assets/Images/common_attrmattack.png" />
 
     <!-- 戦闘状態の印(プレイヤーリスト・エンティティリストの名前の左)。ファイルはステータス詳細の項目の絵と同じ。 -->
     <BitmapImage x:Key="Icon.CombatState" UriSource="/Assets/Images/common_icon03.png" />

@@ -7,7 +7,7 @@
              SnapsToDevicePixels="True">
     <!--
         蘇生リストのアイコンカラー。行の作りはプレイヤー情報のアイコンカラー(PlayerInfoClassColorSettingsView)と同じ。
-        フィルターと不透明度は持たない。
+        不透明度は持たない。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />

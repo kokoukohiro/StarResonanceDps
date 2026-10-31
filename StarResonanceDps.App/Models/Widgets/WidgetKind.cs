@@ -37,5 +37,8 @@ public enum WidgetKind
     ReviveList = 24,
 
     /// <summary>被ダメリスト。被弾したプレイヤーと、その人の最後の被弾の一覧。</summary>
-    DamageTakenList = 25
+    DamageTakenList = 25,
+
+    /// <summary>被ダメ詳細。プレイヤーの被ダメの合計・通常・会心・幸運と属性ごとの割合。</summary>
+    DamageTakenSummary = 26
 }

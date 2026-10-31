@@ -241,18 +241,20 @@ public sealed class NearbyEntityStore
     }
 
     /// <summary>
-    /// 群の順。<b>ボス → 精鋭 → 普通 → その他。</b>並び替えの設定(発見順 / 名前順)はこの中だけを決めるので、
-    /// 表示側もこの関数を使う(同じ規則を2か所に書かない)。
+    /// 群の順。<b>戦闘状態 → それ以外、それぞれの中で ボス → 精鋭 → 普通 → その他。</b>
+    /// 並び替えの設定(発見順 / 名前順)はこの中だけを決めるので、表示側もこの関数を使う(同じ規則を2か所に書かない)。
     /// </summary>
-    public static int GetSortRank(NearbyEntityEntry entry)
+    public static (int CombatRank, int TypeRank) GetSortRank(NearbyEntityEntry entry)
     {
-        return entry.MonsterType switch
+        var typeRank = entry.MonsterType switch
         {
             EMonsterType.Boss => 0,
             EMonsterType.Elite => 1,
             EMonsterType.Monster => 2,
             _ => 3
         };
+
+        return (entry.IsInCombat ? 0 : 1, typeRank);
     }
 }
 

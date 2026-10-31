@@ -45,22 +45,4 @@ public partial class MetricTimelineGraphColorSettingsView : UserControl
             }
         });
     }
-
-    private void ClassColorFilterPickerButton_Click(object sender, RoutedEventArgs e)
-    {
-        var owner = Window.GetWindow(this);
-        var window = new ColorPickerWindow(ViewModel.GetSelectedClassColorFilterColor());
-        if (owner is not null)
-        {
-            window.Owner = owner;
-        }
-
-        OwnerModalWindow.Show(window, owner, () =>
-        {
-            if (window.IsConfirmed)
-            {
-                ViewModel.ApplyClassColorFilterColor(window.SelectedColor);
-            }
-        });
-    }
 }

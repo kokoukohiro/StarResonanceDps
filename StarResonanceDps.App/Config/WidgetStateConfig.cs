@@ -27,7 +27,12 @@ public sealed class WidgetConfig
     public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
     public PlayerInfoWidgetSettingsConfig? PlayerInfo { get; set; }
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
+    /// <summary>
+    /// 属性カラー(鍵は <c>EDamageProperty</c> の名前)。与ダメ詳細・ヒール詳細・被ダメ詳細では節の名前がアイコンカラーで、
+    /// 物理・魔法・無分類の行(鍵は <c>EDamageMode</c> の名前)も持つ(<see cref="WidgetConfigDefaults.HasDamageModeColorRows"/>)。
+    /// </summary>
     public ElementColorWidgetSettingsConfig? ElementColor { get; set; }
+
     public SkillDetailWidgetSettingsConfig? SkillDetail { get; set; }
     public EquipmentWidgetSettingsConfig? Equipment { get; set; }
 
@@ -143,7 +148,7 @@ public sealed class WidgetWindowConfig
 
 /// <summary>
 /// 推移グラフ(DPS / HPS)の設定。描画間隔、横軸の長さ、線の色(グラフカラー)。
-/// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色・フィルター。不透明度は持たない)で、既定は読み替え先のメーターと同じ
+/// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色。不透明度は持たない)で、既定は読み替え先のメーターと同じ
 /// (<see cref="WidgetConfigDefaults.GetMetricTimelineColorDefaultSource"/>)。ここの初期値は種類が分からないので DPS の既定で、
 /// 種類に合わせるのは <see cref="WidgetConfigDefaults.NormalizeMetricTimeline"/>。
 /// </summary>
@@ -164,20 +169,6 @@ public sealed class MetricTimelineWidgetSettingsConfig
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter);
 
-    /// <summary>
-    /// 線の色にフィルター(レンズ)を掛けるか。<c>null</c> は「設定されていない」で、種類ごとの既定は
-    /// <see cref="WidgetConfigDefaults.NormalizeMetricTimeline"/> で埋める(メーターと同じ)。
-    /// </summary>
-    public bool? ClassColorFilterEnabled { get; set; }
-
-    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
-    public List<string>? ClassColorFilterColors { get; set; }
-
-    public int ClassColorFilterColorIndex { get; set; }
-
-    /// <summary>フィルター色をどれだけ反映するか(0〜100)。</summary>
-    public int ClassColorFilterStrength { get; set; } = WidgetConfigDefaults.DefaultClassColorFilterStrength;
-
     public MetricTimelineWidgetSettingsConfig Clone()
     {
         return new MetricTimelineWidgetSettingsConfig
@@ -193,11 +184,7 @@ public sealed class MetricTimelineWidgetSettingsConfig
                 : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
-                    StringComparer.OrdinalIgnoreCase),
-            ClassColorFilterEnabled = ClassColorFilterEnabled,
-            ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
-            ClassColorFilterColorIndex = ClassColorFilterColorIndex,
-            ClassColorFilterStrength = ClassColorFilterStrength
+                    StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -212,7 +199,7 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 
     /// <summary>
     /// 相手がプレイヤーの行のクラスアイコンの色(アイコンカラー)。形はプレイヤーリストのクラスカラーと同じで、タイムライン専用に持つ。
-    /// 既定の色はプレイヤーリストと同じ。フィルターと不透明度は持たない。
+    /// 既定の色はプレイヤーリストと同じ。不透明度は持たない。
     /// </summary>
     public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
 
@@ -255,7 +242,7 @@ public sealed class TakenDamageLogWidgetSettingsConfig
 /// <summary>
 /// プレイヤー情報の設定。バッジの絵の色(アイコンカラー)。
 /// 鍵は <see cref="WidgetConfigDefaults.PlayerInfoClassColorKeys"/>(クラス・潜在心相晶・シーズン・不明)。
-/// フィルターと不透明度は持たない。
+/// 不透明度は持たない。
 /// </summary>
 public sealed class PlayerInfoWidgetSettingsConfig
 {
@@ -612,7 +599,7 @@ public sealed class MeterWidgetSettingsConfig
 
     /// <summary>
     /// 一覧の並び替え。0=発見順 / 1=名前順。既定はプレイヤーリストが発見順、エンティティリストが名前順。
-    /// <b>群(プレイヤーリストの 自分→パーティ→灰色→ライブ、エンティティリストの ボス→精鋭→普通)の順は変えない。</b>
+    /// <b>群(プレイヤーリストの 自分→パーティ→灰色→戦闘中→その他、エンティティリストの 戦闘状態→それ以外、ボス→精鋭→普通)の順は変えない。</b>
     /// この設定が決めるのは、その群の中の並びだけ。使うのはプレイヤーリストとエンティティリストだけ。
     /// </summary>
     public int ListSortModeIndex { get; set; } = WidgetConfigDefaults.FirstSeenListSortModeIndex;
@@ -629,26 +616,6 @@ public sealed class MeterWidgetSettingsConfig
     /// </summary>
     public Dictionary<string, bool> OtherRoleSkillVisibility { get; set; } =
         WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility();
-
-    /// <summary>
-    /// クラスカラーにフィルター(レンズ)を掛けるか。
-    /// 掛かるのはウィジェットの表示だけで、<b>設定画面の色見本は素のまま</b>。
-    /// </summary>
-    /// <remarks>
-    /// <c>null</c> は「設定されていない」。ウィジェット種別ごとの既定は
-    /// <see cref="WidgetConfigDefaults.NormalizeMeter"/> で埋める。
-    /// bool のままだと、この設定が無かった頃のファイルと「明示的にオフ」を区別できない。
-    /// </remarks>
-    public bool? ClassColorFilterEnabled { get; set; }
-
-    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
-    public List<string>? ClassColorFilterColors { get; set; }
-
-    public int ClassColorFilterColorIndex { get; set; }
-
-    /// <summary>フィルター色をどれだけ反映するか(0〜100)。レンズの濃さ。</summary>
-    public int ClassColorFilterStrength { get; set; } =
-        WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
     public MeterWidgetSettingsConfig Clone()
     {
@@ -676,23 +643,11 @@ public sealed class MeterWidgetSettingsConfig
                     StringComparer.OrdinalIgnoreCase),
             OtherRoleSkillVisibility = OtherRoleSkillVisibility is null
                 ? WidgetConfigDefaults.CreateDefaultOtherRoleSkillVisibility()
-                : new Dictionary<string, bool>(OtherRoleSkillVisibility, StringComparer.OrdinalIgnoreCase),
-            ClassColorFilterEnabled = ClassColorFilterEnabled,
-            ClassColorFilterColors = ClassColorFilterColors is null ? null : [.. ClassColorFilterColors],
-            ClassColorFilterColorIndex = ClassColorFilterColorIndex,
-            ClassColorFilterStrength = ClassColorFilterStrength
+                : new Dictionary<string, bool>(OtherRoleSkillVisibility, StringComparer.OrdinalIgnoreCase)
         };
     }
 }
 
-/// <summary>
-/// スキル詳細の属性カラー。作りはメーターのクラスカラーと同じで、行が9属性になる。
-///
-/// <para>
-/// ウィジェットが実際に使う色は<b>その行に出た属性の割合で混ぜたもの</b>で、そこへフィルターと
-/// 不透明度が掛かる。<b>設定画面の色見本にはどちらも掛けない</b>(クラスカラーと同じ)。
-/// </para>
-/// </summary>
 /// <summary>スキル詳細の表示設定。いまは行名の書式だけ。</summary>
 public sealed class SkillDetailWidgetSettingsConfig
 {
@@ -745,7 +700,7 @@ public sealed class EquipmentWidgetSettingsConfig
 /// <summary>
 /// 蘇生リストの設定。プレイヤー名の書式と自分の強調表示(どちらもプレイヤーリストと同じ値の形)、ゲージの長さと色(デバフカラー、デバフ一覧と同じ形)、
 /// クラスアイコンの色(アイコンカラー)、「蘇生可能」の文字の色(テキストカラー)。
-/// アイコンカラーの形と既定の色はプレイヤーリストと同じで、フィルターと不透明度は持たない。
+/// アイコンカラーの形と既定の色はプレイヤーリストと同じで、不透明度は持たない。
 /// </summary>
 public sealed class ReviveListWidgetSettingsConfig
 {
@@ -903,7 +858,14 @@ public sealed class PlayerStatusWidgetSettingsConfig
     }
 }
 
-
+/// <summary>
+/// スキル詳細の属性カラー。作りはメーターのクラスカラーと同じで、行が9属性になる。
+///
+/// <para>
+/// ウィジェットが実際に使う色は<b>その行に出た属性の割合で混ぜたもの</b>で、そこへ
+/// 不透明度が掛かる。<b>設定画面の色見本には掛けない</b>(クラスカラーと同じ)。
+/// </para>
+/// </summary>
 public sealed class ElementColorWidgetSettingsConfig
 {
     public int ColorOpacity { get; set; } = WidgetConfigDefaults.MaxClassColorOpacity;
@@ -911,20 +873,6 @@ public sealed class ElementColorWidgetSettingsConfig
     public Dictionary<string, int> ColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultElementColorIndexes();
 
     public Dictionary<string, List<string>> ColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultElementColorPalettes();
-
-    /// <remarks>
-    /// <c>null</c> は「設定されていない」。ウィジェット種別ごとの既定は
-    /// <see cref="WidgetConfigDefaults.NormalizeElementColor"/> で埋める。
-    /// </remarks>
-    public bool? FilterEnabled { get; set; }
-
-    /// <summary>フィルター色のパレット。クラスカラーと同じく最大5枠。</summary>
-    public List<string>? FilterColors { get; set; }
-
-    public int FilterColorIndex { get; set; }
-
-    /// <summary>フィルター色をどれだけ反映するか(0〜100)。レンズの濃さ。</summary>
-    public int FilterStrength { get; set; } = WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
     public ElementColorWidgetSettingsConfig Clone()
     {
@@ -939,11 +887,7 @@ public sealed class ElementColorWidgetSettingsConfig
                 : ColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
-                    StringComparer.OrdinalIgnoreCase),
-            FilterEnabled = FilterEnabled,
-            FilterColors = FilterColors is null ? null : [.. FilterColors],
-            FilterColorIndex = FilterColorIndex,
-            FilterStrength = FilterStrength
+                    StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -981,9 +925,6 @@ public static class WidgetConfigDefaults
     public const int NameListSortModeIndex = 1;
     public const int DefaultTakenDamageLogEnemyHealDisplayModeIndex = 0;
     public const int HiddenTakenDamageLogEnemyHealDisplayModeIndex = 1;
-    public const int MinClassColorFilterStrength = 0;
-    public const int MaxClassColorFilterStrength = 100;
-    public const int DefaultClassColorFilterStrength = 50;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {EntityName}";
     public const string DefaultMeterPlayerInfoFormatString = "{PlayerName}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
@@ -1033,8 +974,10 @@ public static class WidgetConfigDefaults
     private const double DamageTakenListInitialWindowHeight = 460d;
     private const double MetricContributionInitialWindowWidth = 520d;
     private const double MetricContributionInitialWindowHeight = 460d;
-    private const double MetricSummaryInitialWindowWidth = 720d;
-    private const double MetricSummaryInitialWindowHeight = 180d;
+    private const double MetricSummaryInitialWindowWidth = 280d;
+    private const double MetricSummaryInitialWindowHeight = 327d;
+    private const double DamageTakenSummaryInitialWindowWidth = 280d;
+    private const double DamageTakenSummaryInitialWindowHeight = 327d;
     private const double MetricTimelineInitialWindowWidth = 440d;
     private const double MetricTimelineInitialWindowHeight = 260d;
 
@@ -1369,6 +1312,17 @@ public static class WidgetConfigDefaults
         "Dark"
     ];
 
+    /// <summary>
+    /// ダメージの種類(タイプ)の鍵。<c>EDamageMode</c> の名前で、アイコンカラーの物理・魔法・無分類の行の並び。
+    /// 表示名は <c>Metric_DamageMode_*</c>、アイコンは <c>Icon.DamageMode.*</c>(無分類は無い)。
+    /// </summary>
+    public static readonly string[] DamageModeKeys =
+    [
+        "DamagePhysical",
+        "DamageMagical",
+        "DamageNormal"
+    ];
+
     /// <summary>タイムラインのテキストカラーの鍵。</summary>
     public static readonly string[] TakenDamageLogTextColorKeys =
     [
@@ -1464,6 +1418,13 @@ public static class WidgetConfigDefaults
         ["Rock"] = ["#997951", "#9C714F"],
         ["Light"] = ["#F9ED73", "#F5CF64"],
         ["Dark"] = ["#B36AF4", "#9D66AA"]
+    };
+
+    private static readonly Dictionary<string, string[]> DamageModeDefaultColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["DamagePhysical"] = ["#E7BC69", "#927742"],
+        ["DamageMagical"] = ["#A369E7", "#674292"],
+        ["DamageNormal"] = ["#B8B8B8", "#747474"]
     };
 
     private static readonly Dictionary<string, string[]> EntityListDefaultClassColorHexes = new(StringComparer.OrdinalIgnoreCase)
@@ -1707,7 +1668,8 @@ public static class WidgetConfigDefaults
             or WidgetKind.DpsGraph
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
-            or WidgetKind.HpsGraph;
+            or WidgetKind.HpsGraph
+            or WidgetKind.DamageTakenSummary;
     }
 
     public static WidgetConfig Create(WidgetKind kind)
@@ -1726,7 +1688,7 @@ public static class WidgetConfigDefaults
             PlayerInfo = SupportsPlayerInfoSettings(kind) ? CreatePlayerInfoSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
-            SkillDetail = SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
+            SkillDetail =SupportsSkillDetailSettings(kind) ? CreateSkillDetailSettings() : null,
             Equipment = SupportsEquipmentSettings(kind) ? CreateEquipmentSettings() : null,
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
             BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null,
@@ -2225,6 +2187,11 @@ public static class WidgetConfigDefaults
                 Width = MetricSummaryInitialWindowWidth,
                 Height = MetricSummaryInitialWindowHeight
             },
+            WidgetKind.DamageTakenSummary => new WidgetWindowConfig
+            {
+                Width = DamageTakenSummaryInitialWindowWidth,
+                Height = DamageTakenSummaryInitialWindowHeight
+            },
             WidgetKind.DpsGraph or WidgetKind.HpsGraph => new WidgetWindowConfig
             {
                 Width = MetricTimelineInitialWindowWidth,
@@ -2270,16 +2237,13 @@ public static class WidgetConfigDefaults
             VisibleSeconds = DefaultMetricTimelineVisibleSeconds,
             ShowSkillLog = true,
             ClassColorIndexes = CreateDefaultClassColorIndexes(source),
-            ClassColorPalettes = CreateDefaultClassColorPalettes(source),
-            ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(source),
-            ClassColorFilterColors = CreateDefaultClassColorFilterColors(source),
-            ClassColorFilterStrength = DefaultClassColorFilterStrength
+            ClassColorPalettes = CreateDefaultClassColorPalettes(source)
         };
     }
 
     /// <summary>
     /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS推移グラフは DPS メーター、HPS推移グラフは HPS メーターに合わせる
-    /// (行の並び・色・最初に選ぶ枠・フィルター)。
+    /// (行の並び・色・最初に選ぶ枠)。
     /// </summary>
     public static WidgetKind GetMetricTimelineColorDefaultSource(WidgetKind kind)
     {
@@ -2514,9 +2478,6 @@ public static class WidgetConfigDefaults
             EntityDisplayModeIndex = DefaultEntityDisplayModeIndex,
             ListSortModeIndex = GetDefaultListSortModeIndex(kind),
             ClassColorOpacity = MaxClassColorOpacity,
-            ClassColorFilterEnabled = IsClassColorFilterEnabledByDefault(kind),
-            ClassColorFilterColors = CreateDefaultClassColorFilterColors(kind),
-            ClassColorFilterStrength = DefaultClassColorFilterStrength,
             ClassColorIndexes = CreateDefaultClassColorIndexes(kind),
             ClassColorPalettes = CreateDefaultClassColorPalettes(kind)
         };
@@ -2565,14 +2526,12 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// クラスカラーで最初に選ばれている枠。HPSのビートパフォーマーと、プレイヤーリストの潜在心相晶(不明を含む)と、
+    /// クラスカラーで最初に選ばれている枠。プレイヤーリストの潜在心相晶(不明を含む)と、
     /// プレイヤー情報の潜在心相晶(無効を含む)とシーズンだけ2枠目。
     /// </summary>
     public static int GetDefaultClassColorIndex(WidgetKind kind, string key)
     {
-        return (kind == WidgetKind.HpsMeter
-                && string.Equals(key, "SoulMusician", StringComparison.OrdinalIgnoreCase))
-            || (kind == WidgetKind.PlayerList
+        return (kind == WidgetKind.PlayerList
                 && PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key))
             || (kind == WidgetKind.PlayerInfo
                 && (PlayerListDefaultSeasonTalentColorHexes.ContainsKey(key)
@@ -2678,62 +2637,37 @@ public static class WidgetConfigDefaults
             or WidgetKind.DamageTakenList;
     }
 
-    /// <summary>クラスカラーのフィルターを持つウィジェット。</summary>
-    public static bool UsesClassColorFilter(WidgetKind kind)
-    {
-        return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
-    }
-
-    /// <summary>フィルターの既定の有効/無効。HPSだけ既定で有効。</summary>
-    public static bool IsClassColorFilterEnabledByDefault(WidgetKind kind)
-    {
-        return kind == WidgetKind.HpsMeter;
-    }
-
-    /// <summary>フィルター色の既定パレット。DPSは赤系、HPSは緑系。</summary>
-    public static List<string> CreateDefaultClassColorFilterColors(WidgetKind kind)
-    {
-        return kind == WidgetKind.HpsMeter
-            ? ["#43D978", "#227A20"]
-            : ["#B33000", "#6F1F00"];
-    }
-
-    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種と被ダメリスト。</summary>
+    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種・被ダメリスト・与ダメ詳細・ヒール詳細・被ダメ詳細。</summary>
     public static bool SupportsElementColorSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution or WidgetKind.DamageTakenList;
-    }
-
-    /// <summary>
-    /// 属性カラーの既定を引くときの読み替え先(ユーザー決定)。
-    /// スキル詳細(与ダメ)と被ダメリストは DPS メーター、スキル詳細(ヒール)は HPS メーターに合わせる。
-    /// </summary>
-    private static WidgetKind GetElementColorDefaultSource(WidgetKind kind)
-    {
-        return kind == WidgetKind.HealingContribution
-            ? WidgetKind.HpsMeter
-            : WidgetKind.DpsMeter;
-    }
-
-    /// <summary>属性カラーのフィルター色の既定パレット。読み替え先のメーターと同じ色。</summary>
-    public static List<string> CreateDefaultElementFilterColors(WidgetKind kind)
-    {
-        return CreateDefaultClassColorFilterColors(GetElementColorDefaultSource(kind));
+        return kind is WidgetKind.DamageContribution
+            or WidgetKind.HealingContribution
+            or WidgetKind.DamageTakenList
+            or WidgetKind.DamageSummary
+            or WidgetKind.HealingSummary
+            or WidgetKind.DamageTakenSummary;
     }
 
     public static ElementColorWidgetSettingsConfig CreateElementColorSettings(WidgetKind kind)
     {
-        var source = GetElementColorDefaultSource(kind);
-
-        return new ElementColorWidgetSettingsConfig
+        var config = new ElementColorWidgetSettingsConfig
         {
             ColorOpacity = MaxClassColorOpacity,
             ColorIndexes = CreateDefaultElementColorIndexes(),
-            ColorPalettes = CreateDefaultElementColorPalettes(),
-            FilterEnabled = IsClassColorFilterEnabledByDefault(source),
-            FilterColors = CreateDefaultClassColorFilterColors(source),
-            FilterStrength = DefaultClassColorFilterStrength
+            ColorPalettes = CreateDefaultElementColorPalettes()
         };
+
+        if (HasDamageModeColorRows(kind))
+        {
+            // 物理・魔法・無分類の行は、最初に選ばれている枠が1枠目。
+            foreach (var key in DamageModeKeys)
+            {
+                config.ColorIndexes[key] = MinClassColorIndex;
+                config.ColorPalettes[key] = CreateDefaultDamageModeColors(key);
+            }
+        }
+
+        return config;
     }
 
     /// <summary>属性カラーで最初に選ばれている枠。9属性とも1枠目(白)。</summary>
@@ -2769,48 +2703,72 @@ public static class WidgetConfigDefaults
 
     public static void NormalizeElementColor(WidgetKind kind, ElementColorWidgetSettingsConfig elementColor)
     {
-        var source = GetElementColorDefaultSource(kind);
-
-        elementColor.ColorOpacity = Math.Clamp(
-            elementColor.ColorOpacity,
-            MinClassColorOpacity,
-            MaxClassColorOpacity);
-        elementColor.FilterStrength = Math.Clamp(
-            elementColor.FilterStrength,
-            MinClassColorFilterStrength,
-            MaxClassColorFilterStrength);
-        elementColor.FilterEnabled ??= IsClassColorFilterEnabledByDefault(source);
-
         elementColor.ColorIndexes ??= CreateDefaultElementColorIndexes();
         elementColor.ColorPalettes ??= CreateDefaultElementColorPalettes();
+        if (HasDamageModeColorRows(kind))
+        {
+            NormalizeKeyedColor(
+                elementColor,
+                (DamagePropertyKeys, CreateDefaultElementColors, MinClassColorIndex + 1),
+                (DamageModeKeys, CreateDefaultDamageModeColors, MinClassColorIndex));
+        }
+        else
+        {
+            NormalizeKeyedColor(
+                elementColor,
+                (DamagePropertyKeys, CreateDefaultElementColors, MinClassColorIndex + 1));
+        }
+    }
+
+    /// <summary>
+    /// 属性カラーの設定に物理・魔法・無分類の行も持つウィジェット(節の名前はアイコンカラー)。与ダメ詳細・ヒール詳細・被ダメ詳細。
+    /// 不透明度は属性の行と1組。
+    /// </summary>
+    public static bool HasDamageModeColorRows(WidgetKind kind)
+    {
+        return kind is WidgetKind.DamageSummary or WidgetKind.HealingSummary or WidgetKind.DamageTakenSummary;
+    }
+
+    public static List<string> CreateDefaultDamageModeColors(string key)
+    {
+        return DamageModeDefaultColorHexes.TryGetValue(key, out var colors)
+            ? [.. colors]
+            : [.. DamageModeDefaultColorHexes["DamageNormal"]];
+    }
+
+    /// <summary>
+    /// 属性カラーの保存値を正規化する。行は <paramref name="rowGroups"/> の鍵だけに揃え(無い鍵は既定、余分な鍵は捨てる)、
+    /// 選んでいる枠が無い行はその組の <c>MissingColorIndex</c> の枠にする。
+    /// </summary>
+    private static void NormalizeKeyedColor(
+        ElementColorWidgetSettingsConfig colorConfig,
+        params (IReadOnlyList<string> Keys, Func<string, List<string>> CreateDefaultColors, int MissingColorIndex)[] rowGroups)
+    {
+        colorConfig.ColorOpacity = Math.Clamp(
+            colorConfig.ColorOpacity,
+            MinClassColorOpacity,
+            MaxClassColorOpacity);
 
         var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-        foreach (var key in DamagePropertyKeys)
+        foreach (var (keys, createDefaultColors, missingColorIndex) in rowGroups)
         {
-            var defaultColors = CreateDefaultElementColors(key);
-            var sourceColors = elementColor.ColorPalettes.TryGetValue(key, out var colors) ? colors : defaultColors;
-            var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
-            normalizedPalettes[key] = palette;
+            foreach (var key in keys)
+            {
+                var defaultColors = createDefaultColors(key);
+                var sourceColors = colorConfig.ColorPalettes.TryGetValue(key, out var colors) ? colors : defaultColors;
+                var palette = NormalizeColorList(sourceColors, defaultColors, MaxPaletteColorCount);
+                normalizedPalettes[key] = palette;
 
-            var selectedIndex = elementColor.ColorIndexes.TryGetValue(key, out var index)
-                ? index
-                : MinClassColorIndex + 1;
-            normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+                var selectedIndex = colorConfig.ColorIndexes.TryGetValue(key, out var index)
+                    ? index
+                    : missingColorIndex;
+                normalizedIndexes[key] = Math.Clamp(selectedIndex, MinClassColorIndex, palette.Count - 1);
+            }
         }
 
-        elementColor.ColorIndexes = normalizedIndexes;
-        elementColor.ColorPalettes = normalizedPalettes;
-
-        var filterDefaults = CreateDefaultClassColorFilterColors(source);
-        elementColor.FilterColors = NormalizeColorList(
-            elementColor.FilterColors ?? filterDefaults,
-            filterDefaults,
-            MaxPaletteColorCount);
-        elementColor.FilterColorIndex = Math.Clamp(
-            elementColor.FilterColorIndex,
-            MinClassColorIndex,
-            elementColor.FilterColors.Count - 1);
+        colorConfig.ColorIndexes = normalizedIndexes;
+        colorConfig.ColorPalettes = normalizedPalettes;
     }
 
     public static List<string> CreateDefaultClassColors(WidgetKind kind, string key)
@@ -3036,6 +2994,10 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= MetricSummaryInitialWindowWidth;
                 config.Window.Height ??= MetricSummaryInitialWindowHeight;
                 break;
+            case WidgetKind.DamageTakenSummary:
+                config.Window.Width ??= DamageTakenSummaryInitialWindowWidth;
+                config.Window.Height ??= DamageTakenSummaryInitialWindowHeight;
+                break;
             case WidgetKind.DpsGraph:
             case WidgetKind.HpsGraph:
                 config.Window.Width ??= MetricTimelineInitialWindowWidth;
@@ -3077,24 +3039,8 @@ public static class WidgetConfigDefaults
 
         metricTimeline.VisibleSeconds = ClampMetricTimelineVisibleSeconds(metricTimeline.VisibleSeconds);
 
-        // グラフカラー。行の並び・既定の色・フィルターの既定は読み替え先のメーターと同じ。
+        // グラフカラー。行の並び・既定の色は読み替え先のメーターと同じ。
         var source = GetMetricTimelineColorDefaultSource(kind);
-        metricTimeline.ClassColorFilterEnabled ??= IsClassColorFilterEnabledByDefault(source);
-
-        var filterDefaults = CreateDefaultClassColorFilterColors(source);
-        metricTimeline.ClassColorFilterColors = NormalizeColorList(
-            metricTimeline.ClassColorFilterColors ?? filterDefaults,
-            filterDefaults,
-            MaxPaletteColorCount);
-        metricTimeline.ClassColorFilterColorIndex = Math.Clamp(
-            metricTimeline.ClassColorFilterColorIndex,
-            MinClassColorIndex,
-            metricTimeline.ClassColorFilterColors.Count - 1);
-        metricTimeline.ClassColorFilterStrength = Math.Clamp(
-            metricTimeline.ClassColorFilterStrength,
-            MinClassColorFilterStrength,
-            MaxClassColorFilterStrength);
-
         metricTimeline.ClassColorIndexes ??= CreateDefaultClassColorIndexes(source);
         metricTimeline.ClassColorPalettes ??= CreateDefaultClassColorPalettes(source);
         (metricTimeline.ClassColorIndexes, metricTimeline.ClassColorPalettes) = NormalizeClassColors(
@@ -3192,22 +3138,6 @@ public static class WidgetConfigDefaults
             0,
             HateRankDisplayCounts.Count - 1);
 
-        // クラスカラーのフィルター。持たないウィジェットでは常に無効に倒す。
-        var filterDefaults = CreateDefaultClassColorFilterColors(kind);
-        meter.ClassColorFilterEnabled = UsesClassColorFilter(kind)
-            && (meter.ClassColorFilterEnabled ?? IsClassColorFilterEnabledByDefault(kind));
-        meter.ClassColorFilterColors = NormalizeColorList(
-            meter.ClassColorFilterColors ?? filterDefaults,
-            filterDefaults,
-            MaxPaletteColorCount);
-        meter.ClassColorFilterColorIndex = Math.Clamp(
-            meter.ClassColorFilterColorIndex,
-            MinClassColorIndex,
-            meter.ClassColorFilterColors.Count - 1);
-        meter.ClassColorFilterStrength = Math.Clamp(
-            meter.ClassColorFilterStrength,
-            MinClassColorFilterStrength,
-            MaxClassColorFilterStrength);
         meter.ClassColorOpacity = UsesMeterClassColorOpacity(kind)
             ? Math.Clamp(meter.ClassColorOpacity, MinClassColorOpacity, MaxClassColorOpacity)
             : MaxClassColorOpacity;

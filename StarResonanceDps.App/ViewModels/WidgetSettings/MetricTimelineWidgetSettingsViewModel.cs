@@ -9,7 +9,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// 推移グラフ(DPS / HPS)の設定。表示設定(描画間隔・横軸の長さ・スキルログを表示)と、線の色(グラフカラー)。
-/// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色・フィルター。不透明度は持たない)で、アイコンの欄には折れ線の見本を出す。
+/// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色。不透明度は持たない)で、アイコンの欄には折れ線の見本を出す。
 /// 行の並びと既定は読み替え先のメーター(<see cref="WidgetConfigDefaults.GetMetricTimelineColorDefaultSource"/>)と同じ。
 /// 横軸の長さはウィジェットの窓の上のホイールでも変わり、そのときは <see cref="SetVisibleSecondsFromWidget"/> で受ける。
 /// </summary>
@@ -31,12 +31,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
 
     [ObservableProperty]
     private bool _showSkillLog = true;
-
-    [ObservableProperty]
-    private bool _classColorFilterEnabled;
-
-    [ObservableProperty]
-    private double _classColorFilterStrength = WidgetConfigDefaults.DefaultClassColorFilterStrength;
 
     public MetricTimelineWidgetSettingsViewModel(WidgetKind kind, MetricTimelineWidgetSettingsConfig? config)
     {
@@ -60,11 +54,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         }
 
         ClassColorItems = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
-
-        ClassColorFilterColors = new ColorPaletteViewModel(
-            WidgetConfigDefaults.CreateDefaultClassColorFilterColors(_colorDefaultSource),
-            WidgetConfigDefaults.MaxPaletteColorCount);
-        ClassColorFilterColors.PaletteChanged += Colors_PaletteChanged;
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
@@ -99,17 +88,7 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     /// <summary>グラフカラーの行。クラスごとに色見本(最大5枠)と、選んでいる枠を持つ。</summary>
     public ReadOnlyObservableCollection<MeterClassColorItemViewModel> ClassColorItems { get; }
 
-    /// <summary>フィルター色のパレット。クラスカラーと同じ枠を使う。</summary>
-    public ColorPaletteViewModel ClassColorFilterColors { get; }
-
     public string GraphColorSectionTitle => LocalizationManager.Instance.GetString("Settings_Section_GraphColors_Title");
-
-    /// <summary>フィルターの色と強さを出すか。スイッチがオフのときは隠す。</summary>
-    public bool ShowsClassColorFilterOptions => ClassColorFilterEnabled;
-
-    /// <summary>スイッチの右に出す ON / OFF。</summary>
-    public string ClassColorFilterStateText => LocalizationManager.Instance.GetString(
-        ClassColorFilterEnabled ? "Settings_Switch_On" : "Settings_Switch_Off");
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -121,8 +100,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         {
             item.Colors.PaletteChanged -= Colors_PaletteChanged;
         }
-
-        ClassColorFilterColors.PaletteChanged -= Colors_PaletteChanged;
     }
 
     public MetricTimelineWidgetSettingsConfig CreateConfig()
@@ -132,13 +109,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = RoundVisibleSeconds(VisibleSeconds),
             ShowSkillLog = ShowSkillLog,
-            ClassColorFilterEnabled = ClassColorFilterEnabled,
-            ClassColorFilterColors = [.. ClassColorFilterColors.GetHexColors()],
-            ClassColorFilterColorIndex = ClassColorFilterColors.SelectedIndex,
-            ClassColorFilterStrength = Math.Clamp(
-                (int)Math.Round(ClassColorFilterStrength, MidpointRounding.AwayFromZero),
-                WidgetConfigDefaults.MinClassColorFilterStrength,
-                WidgetConfigDefaults.MaxClassColorFilterStrength),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -203,16 +173,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         _classColorItemsByKey[key].Colors.AddOrSelect(color);
     }
 
-    public Color GetSelectedClassColorFilterColor()
-    {
-        return ClassColorFilterColors.SelectedColor;
-    }
-
-    public void ApplyClassColorFilterColor(Color color)
-    {
-        ClassColorFilterColors.AddOrSelect(color);
-    }
-
     private void Load(MetricTimelineWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedMetricTimeline(_kind, config);
@@ -228,10 +188,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
             {
                 item.Colors.Load(normalized.ClassColorPalettes[item.Key], normalized.ClassColorIndexes[item.Key]);
             }
-
-            ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
-            ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
-            ClassColorFilterStrength = normalized.ClassColorFilterStrength;
         }
         finally
         {
@@ -271,7 +227,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
         }
 
         OnPropertyChanged(nameof(GraphColorSectionTitle));
-        OnPropertyChanged(nameof(ClassColorFilterStateText));
         OnPropertyChanged(nameof(ShowSkillLogStateText));
         OnPropertyChanged(nameof(VisibleSecondsText));
         OnPropertyChanged(nameof(VisibleSecondsMaxText));
@@ -288,13 +243,7 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     {
         if (left.AggregationIntervalSeconds != right.AggregationIntervalSeconds
             || left.VisibleSeconds != right.VisibleSeconds
-            || left.ShowSkillLog != right.ShowSkillLog
-            || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
-            || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
-            || left.ClassColorFilterStrength != right.ClassColorFilterStrength
-            || !(left.ClassColorFilterColors ?? []).SequenceEqual(
-                right.ClassColorFilterColors ?? [],
-                StringComparer.OrdinalIgnoreCase))
+            || left.ShowSkillLog != right.ShowSkillLog)
         {
             return false;
         }
@@ -341,19 +290,6 @@ public sealed partial class MetricTimelineWidgetSettingsViewModel : ObservableOb
     partial void OnShowSkillLogChanged(bool value)
     {
         OnPropertyChanged(nameof(ShowSkillLogStateText));
-        NotifyChanged();
-    }
-
-    partial void OnClassColorFilterEnabledChanged(bool value)
-    {
-        // オフの間は「フィルターカラー」「フィルターの強さ」の行ごと消す。
-        OnPropertyChanged(nameof(ShowsClassColorFilterOptions));
-        OnPropertyChanged(nameof(ClassColorFilterStateText));
-        NotifyChanged();
-    }
-
-    partial void OnClassColorFilterStrengthChanged(double value)
-    {
         NotifyChanged();
     }
 }

@@ -137,7 +137,7 @@
         選んだ文字は右クリックの「コピー」か、窓がアクティブなら Ctrl+C で文字にする。地は透明で塗って、文字の無い所でも押せるようにする。
     -->
     <ItemsControl x:Name="LogItemsControl"
-                  Margin="8,4,8,4"
+                  Margin="8,4,0,4"
                   ItemsSource="{Binding Entries}"
                   Background="Transparent"
                   Focusable="True"

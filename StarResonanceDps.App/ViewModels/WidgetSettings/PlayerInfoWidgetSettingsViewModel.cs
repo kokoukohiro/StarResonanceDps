@@ -10,7 +10,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 /// <summary>
 /// プレイヤー情報の設定。バッジの絵の色(アイコンカラー)。
 /// 行の作りはプレイヤーリストのアイコンカラーと同じで、心相晶の無効とシーズンの行があり、不明は末尾の1行だけ。
-/// フィルターと不透明度は持たない。
+/// 不透明度は持たない。
 /// </summary>
 public sealed class PlayerInfoWidgetSettingsViewModel : ObservableObject, IDisposable
 {

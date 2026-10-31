@@ -1,84 +1,87 @@
 using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// スキル詳細と被ダメリストの属性カラー。作りはメーターのクラスカラーと同じで、行が9属性になる。
+/// 属性カラー(スキル詳細・被ダメリスト)と、与ダメ詳細・ヒール詳細・被ダメ詳細のアイコンカラー。作りはメーターのクラスカラーと同じで、
+/// 行は9属性、アイコンカラーはその後に物理・魔法・無分類が続く(<see cref="WidgetConfigDefaults.HasDamageModeColorRows"/>)。
+/// 不透明度は全部の行で1組。保存の型は <see cref="ElementColorWidgetSettingsConfig"/>。
 ///
 /// <para>
-/// ウィジェットの行のバーは、その行に出た属性の割合でこの色を混ぜたもの(被ダメリストはその被弾の属性の色)を使う。
-/// フィルターと不透明度が掛かるのもバーだけで、<b>ここの色見本は素のまま</b>。
+/// ウィジェットのバーは、この色を使う(スキル詳細の行のバーは、その行に出た属性の割合で混ぜたもの)。
+/// 不透明度が掛かるのもウィジェットの側だけで、<b>ここの色見本は素のまま</b>。
 /// </para>
 /// </summary>
 public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObject, IDisposable
 {
     private readonly Dictionary<string, ElementColorItemViewModel> _itemsByKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly WidgetKind _kind;
+    private readonly bool _hasDamageModeRows;
     private ElementColorWidgetSettingsConfig _lastSaved;
     private bool _isLoading;
 
     [ObservableProperty]
     private double _colorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
 
-    [ObservableProperty]
-    private bool _filterEnabled;
-
-    [ObservableProperty]
-    private double _filterStrength = WidgetConfigDefaults.DefaultClassColorFilterStrength;
-
     public ElementColorWidgetSettingsViewModel(WidgetKind kind, ElementColorWidgetSettingsConfig? config)
     {
         _kind = kind;
+        _hasDamageModeRows = WidgetConfigDefaults.HasDamageModeColorRows(kind);
 
         var items = new ObservableCollection<ElementColorItemViewModel>();
         foreach (var key in WidgetConfigDefaults.DamagePropertyKeys)
         {
-            var colors = new ColorPaletteViewModel(
+            items.Add(CreateItem(
+                key,
                 WidgetConfigDefaults.CreateDefaultElementColors(key),
-                WidgetConfigDefaults.MaxPaletteColorCount);
-            colors.PaletteChanged += Colors_PaletteChanged;
+                ElementIconMasks.Get(Enum.Parse<Zproto.EDamageProperty>(key)),
+                usesPlayerStatusAsset: false,
+                $"DamageProperty_{key}"));
+        }
 
-            var item = new ElementColorItemViewModel(key, colors);
-            _itemsByKey.Add(key, item);
-            items.Add(item);
+        if (_hasDamageModeRows)
+        {
+            foreach (var key in WidgetConfigDefaults.DamageModeKeys)
+            {
+                items.Add(CreateItem(
+                    key,
+                    WidgetConfigDefaults.CreateDefaultDamageModeColors(key),
+                    DamageModeIconMasks.Get(Enum.Parse<Zproto.EDamageMode>(key)),
+                    usesPlayerStatusAsset: true,
+                    GetDamageModeNameKey(key)));
+            }
         }
 
         Items = new ReadOnlyObservableCollection<ElementColorItemViewModel>(items);
 
-        FilterColors = new ColorPaletteViewModel(
-            WidgetConfigDefaults.CreateDefaultElementFilterColors(kind),
-            WidgetConfigDefaults.MaxPaletteColorCount);
-        FilterColors.PaletteChanged += Colors_PaletteChanged;
-
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
-        _lastSaved = WidgetConfigDefaults.CloneNormalizedElementColor(_kind, config);
+        _lastSaved = CloneNormalized(config);
         Load(_lastSaved);
     }
 
     public event Action<ElementColorWidgetSettingsConfig>? PreviewChanged;
 
-    /// <summary>属性の行。9件で、並びは属性ID順。</summary>
+    /// <summary>色の行。9属性を属性ID順、アイコンカラーはその後に物理・魔法・無分類。</summary>
     public ReadOnlyObservableCollection<ElementColorItemViewModel> Items { get; }
 
-    /// <summary>フィルター色のパレット。クラスカラーと同じ枠を使う。</summary>
-    public ColorPaletteViewModel FilterColors { get; }
+    public string SectionTitle => LocalizationManager.Instance.GetString(
+        _hasDamageModeRows
+            ? "Settings_Section_IconColors_Title"
+            : "Settings_Section_ElementColors_Title");
 
-    public string SectionTitle => LocalizationManager.Instance.GetString("Settings_Section_ElementColors_Title");
-
-    /// <summary>フィルターの色と強さを出すか。スイッチがオフのときは隠す。</summary>
-    public bool ShowsFilterOptions => FilterEnabled;
-
-    /// <summary>スイッチの右に出す ON / OFF。</summary>
-    public string FilterStateText => LocalizationManager.Instance.GetString(
-        FilterEnabled ? "Settings_Switch_On" : "Settings_Switch_Off");
+    /// <summary>不透明度の行の名前。節の名前に合わせる(属性カラーの不透明度 / アイコンカラーの不透明度)。</summary>
+    public string OpacityLabel => LocalizationManager.Instance.GetString(
+        _hasDamageModeRows
+            ? "Settings_IconColors_Opacity"
+            : "Settings_ElementColors_Opacity");
 
     public bool HasUnsavedChanges => !SettingsEqual(CreateConfig(), _lastSaved);
 
@@ -90,8 +93,6 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
         {
             item.Colors.PaletteChanged -= Colors_PaletteChanged;
         }
-
-        FilterColors.PaletteChanged -= Colors_PaletteChanged;
     }
 
     public ElementColorWidgetSettingsConfig CreateConfig()
@@ -102,13 +103,6 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
                 (int)Math.Round(ColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
                 WidgetConfigDefaults.MaxClassColorOpacity),
-            FilterEnabled = FilterEnabled,
-            FilterColors = [.. FilterColors.GetHexColors()],
-            FilterColorIndex = FilterColors.SelectedIndex,
-            FilterStrength = Math.Clamp(
-                (int)Math.Round(FilterStrength, MidpointRounding.AwayFromZero),
-                WidgetConfigDefaults.MinClassColorFilterStrength,
-                WidgetConfigDefaults.MaxClassColorFilterStrength),
             ColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -133,16 +127,6 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
         _itemsByKey[key].Colors.AddOrSelect(color);
     }
 
-    public Color GetSelectedFilterColor()
-    {
-        return FilterColors.SelectedColor;
-    }
-
-    public void ApplyFilterColor(Color color)
-    {
-        FilterColors.AddOrSelect(color);
-    }
-
     public void ResetToDefaults()
     {
         Load(WidgetConfigDefaults.CreateElementColorSettings(_kind));
@@ -157,14 +141,44 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
 
     public void MarkSaved(ElementColorWidgetSettingsConfig? config)
     {
-        _lastSaved = WidgetConfigDefaults.CloneNormalizedElementColor(_kind, config);
+        _lastSaved = CloneNormalized(config);
         Load(_lastSaved);
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    private ElementColorWidgetSettingsConfig CloneNormalized(ElementColorWidgetSettingsConfig? config)
+    {
+        return WidgetConfigDefaults.CloneNormalizedElementColor(_kind, config);
+    }
+
+    private ElementColorItemViewModel CreateItem(
+        string key,
+        List<string> defaultColors,
+        Brush? iconMask,
+        bool usesPlayerStatusAsset,
+        string displayNameKey)
+    {
+        var colors = new ColorPaletteViewModel(defaultColors, WidgetConfigDefaults.MaxPaletteColorCount);
+        colors.PaletteChanged += Colors_PaletteChanged;
+
+        var item = new ElementColorItemViewModel(key, colors, iconMask, usesPlayerStatusAsset, displayNameKey);
+        _itemsByKey.Add(key, item);
+        return item;
+    }
+
+    private static string GetDamageModeNameKey(string key)
+    {
+        return Enum.Parse<Zproto.EDamageMode>(key) switch
+        {
+            Zproto.EDamageMode.DamagePhysical => "Metric_DamageMode_Physical",
+            Zproto.EDamageMode.DamageMagical => "Metric_DamageMode_Magical",
+            _ => "Metric_DamageMode_Normal"
+        };
+    }
+
     private void Load(ElementColorWidgetSettingsConfig? config)
     {
-        var normalized = WidgetConfigDefaults.CloneNormalizedElementColor(_kind, config);
+        var normalized = CloneNormalized(config);
 
         _isLoading = true;
         try
@@ -175,9 +189,6 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
             }
 
             ColorOpacity = normalized.ColorOpacity;
-            FilterColors.Load(normalized.FilterColors, normalized.FilterColorIndex);
-            FilterEnabled = normalized.FilterEnabled ?? false;
-            FilterStrength = normalized.FilterStrength;
         }
         finally
         {
@@ -190,24 +201,14 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
         PreviewChanged?.Invoke(CreateConfig());
     }
 
-    private static bool SettingsEqual(ElementColorWidgetSettingsConfig left, ElementColorWidgetSettingsConfig right)
+    private bool SettingsEqual(ElementColorWidgetSettingsConfig left, ElementColorWidgetSettingsConfig right)
     {
-        if (left.ColorOpacity != right.ColorOpacity
-            || left.FilterEnabled != right.FilterEnabled
-            || left.FilterColorIndex != right.FilterColorIndex
-            || left.FilterStrength != right.FilterStrength)
+        if (left.ColorOpacity != right.ColorOpacity)
         {
             return false;
         }
 
-        var leftFilterColors = left.FilterColors ?? [];
-        var rightFilterColors = right.FilterColors ?? [];
-        if (!leftFilterColors.SequenceEqual(rightFilterColors, StringComparer.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        foreach (var key in WidgetConfigDefaults.DamagePropertyKeys)
+        foreach (var key in _itemsByKey.Keys)
         {
             if (left.ColorIndexes[key] != right.ColorIndexes[key]
                 || !left.ColorPalettes[key].SequenceEqual(right.ColorPalettes[key], StringComparer.OrdinalIgnoreCase))
@@ -232,23 +233,10 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
         }
 
         OnPropertyChanged(nameof(SectionTitle));
-        OnPropertyChanged(nameof(FilterStateText));
+        OnPropertyChanged(nameof(OpacityLabel));
     }
 
     partial void OnColorOpacityChanged(double value)
-    {
-        NotifyChanged();
-    }
-
-    partial void OnFilterEnabledChanged(bool value)
-    {
-        // オフの間は「フィルターカラー」「フィルターの強さ」の行ごと消す。
-        OnPropertyChanged(nameof(ShowsFilterOptions));
-        OnPropertyChanged(nameof(FilterStateText));
-        NotifyChanged();
-    }
-
-    partial void OnFilterStrengthChanged(double value)
     {
         NotifyChanged();
     }
@@ -265,31 +253,37 @@ public sealed partial class ElementColorWidgetSettingsViewModel : ObservableObje
     }
 }
 
-/// <summary>属性カラーの1行。作りはメーターのクラスカラーの行と同じで、アイコンは白で染めて影を付ける。</summary>
+/// <summary>属性カラー・アイコンカラーの1行。作りはメーターのクラスカラーの行と同じで、アイコンは白で染めて影を付ける。</summary>
 public sealed class ElementColorItemViewModel : ObservableObject
 {
-    public ElementColorItemViewModel(string key, ColorPaletteViewModel colors)
+    private readonly string _displayNameKey;
+
+    public ElementColorItemViewModel(
+        string key,
+        ColorPaletteViewModel colors,
+        Brush? iconMask,
+        bool usesPlayerStatusAsset,
+        string displayNameKey)
     {
         Key = key;
         Colors = colors;
-
-        var mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{key}"))
-        {
-            Stretch = Stretch.Uniform
-        };
-        mask.Freeze();
-        IconMask = mask;
+        IconMask = iconMask;
+        UsesPlayerStatusAsset = usesPlayerStatusAsset;
+        _displayNameKey = displayNameKey;
     }
 
     public string Key { get; }
 
     public ColorPaletteViewModel Colors { get; }
 
-    /// <summary>属性アイコンの形。塗りをこの形で抜く。</summary>
-    public Brush IconMask { get; }
+    /// <summary>アイコンの形。塗りをこの形で抜く。絵の無い行(無分類)は null で、はてなを出す。</summary>
+    public Brush? IconMask { get; }
 
-    /// <summary>行名は属性名。その属性だけで出来た行の色、という意味。</summary>
-    public string DisplayName => LocalizationManager.Instance.GetString($"DamageProperty_{Key}");
+    /// <summary>アイコンがステータス詳細の絵(物理攻撃力・魔法攻撃力)か。画面はステータス詳細と同じ大きさで出す。</summary>
+    public bool UsesPlayerStatusAsset { get; }
+
+    /// <summary>行名は属性名かタイプ名。その種類だけで出来たときの色、という意味。</summary>
+    public string DisplayName => LocalizationManager.Instance.GetString(_displayNameKey);
 
     public void RefreshDisplayName()
     {

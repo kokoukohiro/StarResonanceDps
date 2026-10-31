@@ -7,7 +7,7 @@
              SnapsToDevicePixels="True">
     <!--
         プレイヤー情報のアイコンカラー。行の作りはプレイヤーリストのアイコンカラー(MeterWidgetClassColorSettingsView)と同じ。
-        行の絵はクラス・不明(クラスアイコンの形)、潜在心相晶(型の絵と無効)、シーズンの3種類。フィルターと不透明度は持たない。
+        行の絵はクラス・不明(クラスアイコンの形)、潜在心相晶(型の絵と無効)、シーズンの3種類。不透明度は持たない。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />

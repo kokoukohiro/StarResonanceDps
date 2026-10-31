@@ -9,7 +9,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// タイムライン(識別子は被ダメログ)の表示設定。敵の回復を出すか、相手がプレイヤーの行のクラスアイコンの色(アイコンカラー)、文字の色(テキストカラー)。
-/// アイコンカラーの形はプレイヤーリストのクラスカラーと同じで、フィルターと不透明度は持たない。
+/// アイコンカラーの形はプレイヤーリストのクラスカラーと同じで、不透明度は持たない。
 /// </summary>
 public sealed partial class TakenDamageLogWidgetSettingsViewModel : ObservableObject, IDisposable
 {

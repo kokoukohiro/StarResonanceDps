@@ -207,11 +207,11 @@ public sealed class PlayerRosterStore
     }
 
     /// <summary>
-    /// 並びは <b>自分 → パーティ(PT順) → PT外の灰色 → PT外のライブ(初出順)</b>。
+    /// 並びは <b>自分 → パーティ(PT順) → PT外の灰色 → PT外の戦闘中 → PT外のその他(それぞれ初出順)</b>。
     ///
     /// <para>
-    /// <b>名前や値でソートしない。</b> 新しい行は必ず末尾に付く。
-    /// 勝手に並べ替わると、見ている行が動いて追えなくなる。
+    /// <b>名前や値でソートしない。</b> 新しい行はその段の末尾に付く。
+    /// 段が変わるのは、パーティの出入り・灰色とライブの切り替わり・戦闘状態の出入りのときだけ。
     /// </para>
     /// </summary>
     private IReadOnlyList<PlayerRosterEntry> CreateSnapshotNoLock()
@@ -227,8 +227,9 @@ public sealed class PlayerRosterStore
     }
 
     /// <summary>
-    /// 群の順。<b>自分 → パーティ → PT外の灰色 → PT外のライブ。</b>並び替えの設定(発見順 / 名前順)は
+    /// 群の順。<b>自分 → パーティ → PT外の灰色 → PT外の戦闘中 → PT外のその他。</b>並び替えの設定(発見順 / 名前順)は
     /// この中だけを決めるので、表示側もこの関数を使う(同じ規則を2か所に書かない)。
+    /// 上から順に当てるので、戦闘中の自分とパーティの人は自分・パーティの群のまま。
     /// </summary>
     public static int GetGroupRank(PlayerRosterEntry entry)
     {
@@ -243,7 +244,12 @@ public sealed class PlayerRosterStore
         }
 
         // 灰色(キャッシュしか無い行)はライブより上。
-        return entry.IsLive ? 3 : 2;
+        if (!entry.IsLive)
+        {
+            return 2;
+        }
+
+        return entry.IsInCombat ? 3 : 4;
     }
 
     private long GetFirstSeenOrderNoLock(PlayerRosterEntry entry)

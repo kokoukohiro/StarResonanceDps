@@ -883,29 +883,17 @@
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>부활 불가({0})</value>
   </data>
-  <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>직업 색상 필터</value>
-  </data>
-  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
-    <value>필터 색상</value>
-  </data>
-  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
-    <value>필터 강도</value>
-  </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>원소 색상</value>
+  </data>
+  <data name="Settings_IconColors_Opacity" xml:space="preserve">
+    <value>아이콘 색상 불투명도</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>원소 색상 불투명도</value>
   </data>
-  <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>원소 색상 필터</value>
-  </data>
   <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
     <value>그래프 색상</value>
-  </data>
-  <data name="Settings_GraphColors_Filter" xml:space="preserve">
-    <value>그래프 색상 필터</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>합계</value>
@@ -1119,74 +1107,26 @@
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
     <value>스킬 상세(치유)</value>
   </data>
-  <data name="Metric_LabelValueFormat" xml:space="preserve">
-    <value>{0}: {1}</value>
+  <data name="Metric_SummaryTotal" xml:space="preserve">
+    <value>합계</value>
   </data>
-  <data name="Metric_TotalValue" xml:space="preserve">
-    <value>총 {0}: {1}</value>
+  <data name="Metric_SummaryNormal" xml:space="preserve">
+    <value>일반</value>
   </data>
-  <data name="Metric_TotalPerSecond" xml:space="preserve">
-    <value>총 {0}: {1}</value>
+  <data name="Metric_SummaryCrit" xml:space="preserve">
+    <value>치명타</value>
   </data>
-  <data name="Metric_Dps" xml:space="preserve">
-    <value>DPS</value>
+  <data name="Metric_SummaryLucky" xml:space="preserve">
+    <value>행운</value>
   </data>
-  <data name="Metric_Hps" xml:space="preserve">
-    <value>HPS</value>
+  <data name="Metric_SummaryHitsFormat" xml:space="preserve">
+    <value>{0} 적중</value>
   </data>
-  <data name="Metric_TotalShieldBreak" xml:space="preserve">
-    <value>총 실드 파괴</value>
+  <data name="Metric_SummaryElementShare" xml:space="preserve">
+    <value>원소 비율</value>
   </data>
-  <data name="Metric_TotalOverheal" xml:space="preserve">
-    <value>총 초과 치유</value>
-  </data>
-  <data name="Metric_TotalHits" xml:space="preserve">
-    <value>총 적중 수</value>
-  </data>
-  <data name="Metric_TotalCritRate" xml:space="preserve">
-    <value>총 치명타율</value>
-  </data>
-  <data name="Metric_TotalLuckyRate" xml:space="preserve">
-    <value>총 행운율</value>
-  </data>
-  <data name="Metric_TotalCrits" xml:space="preserve">
-    <value>총 치명타 수</value>
-  </data>
-  <data name="Metric_TotalImmunes" xml:space="preserve">
-    <value>총 면역 수</value>
-  </data>
-  <data name="Metric_TotalNormalDamage" xml:space="preserve">
-    <value>총 일반 피해</value>
-  </data>
-  <data name="Metric_TotalNormalHealing" xml:space="preserve">
-    <value>총 일반 치유</value>
-  </data>
-  <data name="Metric_TotalCritDamage" xml:space="preserve">
-    <value>총 치명타 피해</value>
-  </data>
-  <data name="Metric_TotalCritHealing" xml:space="preserve">
-    <value>총 치명타 치유</value>
-  </data>
-  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
-    <value>총 행운 피해</value>
-  </data>
-  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
-    <value>총 행운 치유</value>
-  </data>
-  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
-    <value>총 행운 발동 수</value>
-  </data>
-  <data name="Metric_TotalAverageDamage" xml:space="preserve">
-    <value>총 평균 피해</value>
-  </data>
-  <data name="Metric_TotalAverageHealing" xml:space="preserve">
-    <value>총 평균 치유</value>
-  </data>
-  <data name="Metric_TotalCasts" xml:space="preserve">
-    <value>총 시전 수</value>
-  </data>
-  <data name="Metric_CastsPerMinute" xml:space="preserve">
-    <value>분당 시전</value>
+  <data name="Metric_SummaryModeShare" xml:space="preserve">
+    <value>유형 비율</value>
   </data>
   <data name="Meter_Benchmark" xml:space="preserve">
     <value>측정</value>
@@ -1379,6 +1319,9 @@
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>받은 피해 로그</value>
+  </data>
+  <data name="Widget_DamageTakenSummary" xml:space="preserve">
+    <value>받은 피해 상세</value>
   </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(쓰러짐)</value>
   </data>
@@ -1582,8 +1525,14 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>대상 엔티티 이름</value>
   </data>
+  <data name="Notification_TargetEntityName_Placeholder" xml:space="preserve">
+    <value>예: 수호자 05형</value>
+  </data>
   <data name="Notification_TargetEntityId" xml:space="preserve">
     <value>대상 엔티티 ID</value>
+  </data>
+  <data name="Notification_TargetEntityId_Placeholder" xml:space="preserve">
+    <value>예: 21004</value>
   </data>
   <data name="Notification_TargetPlayerUid" xml:space="preserve">
     <value>대상 플레이어 UID</value>
@@ -1591,8 +1540,14 @@
   <data name="Notification_TargetSkillName" xml:space="preserve">
     <value>대상 스킬 이름</value>
   </data>
+  <data name="Notification_TargetSkillName_Placeholder" xml:space="preserve">
+    <value>예: 영혼 사슬</value>
+  </data>
   <data name="Notification_TargetSkillId" xml:space="preserve">
     <value>대상 스킬 ID</value>
+  </data>
+  <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
+    <value>예: 304221</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※ID를 입력하면 이름보다 우선합니다</value>

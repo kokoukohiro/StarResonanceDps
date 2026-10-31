@@ -1095,7 +1095,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
-                MeterSnapshotKind.Damage),
+                PlayerMetricSummaryKind.Damage),
             WidgetKind.DpsGraph => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -1112,13 +1112,18 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
-                MeterSnapshotKind.Healing),
+                PlayerMetricSummaryKind.Healing),
             WidgetKind.HpsGraph => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Healing,
                 PlayerMetricDisplayMode.Timeline),
+            WidgetKind.DamageTakenSummary => new PlayerMetricSummaryWidgetViewModel(
+                playerWidget,
+                requestedCharacterId,
+                initialPlayer,
+                PlayerMetricSummaryKind.DamageTaken),
             _ => throw new ArgumentOutOfRangeException(nameof(playerWidget))
         };
     }
@@ -1615,7 +1620,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             or WidgetKind.DpsGraph
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
-            or WidgetKind.HpsGraph;
+            or WidgetKind.HpsGraph
+            or WidgetKind.DamageTakenSummary;
     }
 
     private static void RestoreAndActivate(WidgetWindow window)

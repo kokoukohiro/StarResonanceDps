@@ -474,6 +474,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public BuffListWidgetSettingsViewModel? BuffListSettings { get; }
 
+    /// <summary>属性カラー(与ダメ詳細・ヒール詳細・被ダメ詳細ではアイコンカラー)。</summary>
     public ElementColorWidgetSettingsViewModel? ElementColorSettings { get; }
 
     public SkillDetailWidgetSettingsViewModel? SkillDetailSettings { get; }
@@ -490,7 +491,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasMeterSettings => MeterSettings is not null;
 
-    /// <summary>属性カラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
+    /// <summary>属性カラー(アイコンカラー)の節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
     public bool HasElementColorSettings => ElementColorSettings is not null;
 
     public bool HasMeterDisplaySettings => HasMeterSettings;

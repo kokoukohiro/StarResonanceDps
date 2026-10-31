@@ -117,9 +117,6 @@ public sealed partial class MeterPlayerEntry : ObservableObject
             ? parsed
             : Color.FromRgb(0xA8, 0xA8, 0xA8);
 
-        // レンズフィルター。設定画面の色見本は素のままにしたいので、ここだけで掛ける。
-        color = ClassColorFilter.Apply(color, settings);
-
         var opacity = Math.Clamp(settings.ClassColorOpacity, WidgetConfigDefaults.MinClassColorOpacity, WidgetConfigDefaults.MaxClassColorOpacity);
 
         return Color.FromArgb(

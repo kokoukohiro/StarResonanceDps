@@ -3,7 +3,7 @@ using StarResonanceDps.Core.CombatRuntime;
 namespace StarResonanceDps.Core.Services;
 
 /// <summary>
-/// AOI外へ出てもメーターかタイムラインに残り続けるプレイヤーの、職業特化だけを保持する。
+/// AOI外へ出てもメーター・被ダメログ・タイムラインに残り続けるプレイヤーの、職業特化だけを保持する。
 ///
 /// <para>
 /// AOIから消えたプレイヤーは <see cref="PlayerRosterProjection"/> が

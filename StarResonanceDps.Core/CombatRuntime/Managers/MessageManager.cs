@@ -2806,7 +2806,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     buffInfo.Duration,
                                     extraData.ArrivalTime);
 
-                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo.SourceConfigId, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo.FightSourceType);
+                                EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo?.SourceConfigId ?? 0, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo?.FightSourceType);
                                 AddEnemyBuffLog(targetUuid, buffInfo, extraData);
                                 handledByLogicEffect = true;
                             }
@@ -3386,19 +3386,19 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             long playerUid = vData.CharId;
 
-            if (vData.RoleLevel?.Level != 0)
+            if (vData.RoleLevel is { Level: not 0 } roleLevel)
             {
-                EncounterManager.Current.SetAttrKV(playerUuid, "AttrLevel", vData.RoleLevel.Level);
+                EncounterManager.Current.SetAttrKV(playerUuid, "AttrLevel", roleLevel.Level);
             }
 
-            if (vData.Attr?.CurHp != 0)
+            if (vData.Attr is { CurHp: not 0 } currentHpAttr)
             {
-                EncounterManager.Current.SetAttrKV(playerUuid, "AttrHp", vData.Attr.CurHp);
+                EncounterManager.Current.SetAttrKV(playerUuid, "AttrHp", currentHpAttr.CurHp);
             }
 
-            if (vData.Attr?.MaxHp != 0)
+            if (vData.Attr is { MaxHp: not 0 } maxHpAttr)
             {
-                EncounterManager.Current.SetAttrKV(playerUuid, "AttrMaxHp", vData.Attr.MaxHp);
+                EncounterManager.Current.SetAttrKV(playerUuid, "AttrMaxHp", maxHpAttr.MaxHp);
             }
 
             if (vData.Attr != null)

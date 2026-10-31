@@ -10,11 +10,12 @@
     <UserControl.Resources>
         <!--
             行の右クリックのメニュー。作りは蘇生リスト(プレイヤーリスト・メーターのメニュー)と同じで、色は
-            中身(DamageTakenListWidgetViewModel)の Widget の窓の色から引く。先頭・途中・末尾の角丸は開くときに画面のコードが当てる。
+            中身(DamageTakenListWidgetViewModel)の Widget の窓の色から引く。先頭・途中・末尾(1つだけなら四隅)の角丸は開くときに画面のコードが当てる。
         -->
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.MiddleCornerRadius">0</CornerRadius>
         <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.SingleCornerRadius">5</CornerRadius>
 
         <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenu"
                TargetType="{x:Type ContextMenu}">
@@ -118,6 +119,13 @@
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.LastCornerRadius}" />
         </Style>
 
+        <Style x:Key="Menu.WidgetWindowPlayerSelectionContextMenuItem.Single"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowPlayerSelectionContextMenuItem.SingleCornerRadius}" />
+        </Style>
+
         <!-- 行内テキスト。大きさと太さはメーターの行と同じ(12 / SemiBold)、色は窓の普通の文字。切らない(名前とスキル名だけ切る)。 -->
         <Style x:Key="DamageTakenList.RowText" TargetType="TextBlock" BasedOn="{StaticResource Text.WidgetWindow}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -185,7 +193,7 @@
             <DataTemplate>
                 <!--
                     行の高さとホバーの作りはメーターの行と同じ。
-                    左クリックはその人のプレイヤー情報を開き、右クリックはメニューを開く(プレイヤーリストと同じ)。
+                    左クリックはその人の被ダメ詳細を開き、右クリックはメニュー(被ダメ詳細の1項目)を開く。
                 -->
                 <Button Height="31"
                         Padding="0"
@@ -205,31 +213,8 @@
                                      Placement="MousePoint"
                                      Opened="PlayerSelectionContextMenu_Opened"
                                      Closed="PlayerSelectionContextMenu_Closed">
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerInfo]}"
-                                      Command="{Binding RequestPlayerInfoCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <!-- ステータス詳細は自分の行だけ。他人のステータスを取る手段が無いため。 -->
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerStatus]}"
-                                      Command="{Binding RequestPlayerStatusCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                      Visibility="{Binding PlacementTarget.DataContext.IsSelf, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerEquipment]}"
-                                      Command="{Binding RequestPlayerEquipmentCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerTalent]}"
-                                      Command="{Binding RequestPlayerTalentCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerSeasonTalent]}"
-                                      Command="{Binding RequestPlayerSeasonTalentCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_PlayerModule]}"
-                                      Command="{Binding RequestPlayerModuleCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
-                                      Command="{Binding RequestBuffListCommand}"
-                                      CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
-                                      Command="{Binding RequestDebuffListCommand}"
+                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DamageTakenSummary]}"
+                                      Command="{Binding RequestDamageTakenSummaryCommand}"
                                       CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                         </ContextMenu>
                     </Button.ContextMenu>

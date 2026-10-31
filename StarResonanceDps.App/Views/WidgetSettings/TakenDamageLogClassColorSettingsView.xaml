@@ -7,7 +7,7 @@
              SnapsToDevicePixels="True">
     <!--
         タイムラインのアイコンカラー(相手がプレイヤーの行のクラスアイコン)。行の作りはプレイヤーリストのクラスカラー(MeterWidgetClassColorSettingsView)と同じ。
-        フィルターと不透明度は持たない。
+        不透明度は持たない。
     -->
     <UserControl.Resources>
         <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />

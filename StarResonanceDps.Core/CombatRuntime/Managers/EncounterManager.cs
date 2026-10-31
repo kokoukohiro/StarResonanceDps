@@ -2252,12 +2252,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        /// <summary>この回に、そのプレイヤーのダメージの無い戦闘不能の記録(タイムラインの行)があるか。</summary>
-        public bool HasPlayerDeathRecord(long playerUuid)
+        /// <summary>
+        /// この回のタイムラインに、そのプレイヤーが出る記録があるか。ダメージの無い戦闘不能の記録と、
+        /// 敵の回復・敵が付けたバフの相手。
+        /// </summary>
+        public bool HasPlayerTimelineRecord(long playerUuid)
         {
             lock (_takenDamageLogGate)
             {
-                return ExData.PlayerDeaths.Any(death => death.PlayerUuid == playerUuid);
+                return ExData.PlayerDeaths.Any(death => death.PlayerUuid == playerUuid)
+                    || ExData.EnemyHeals.Any(heal => heal.TargetUuid == playerUuid)
+                    || ExData.EnemyBuffs.Any(buff => buff.TargetUuid == playerUuid);
             }
         }
 
@@ -4471,6 +4476,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public uint CritLuckyCount { get; private set; }
 
         public uint NormalCount { get; private set; }
+        public double NormalRate { get; private set; }
         public uint KillCount { get; private set; }
         public ulong HitsCount { get; private set; }
         public uint CastsCount { get; private set; }
@@ -4745,6 +4751,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             ValueAverage = HitsCount > 0 ? Math.Round(((double)ValueTotal / (double)HitsCount), 0) : 0.0;
             // 率は小数点以下2位まで持つ。表示側は F2 で固定2桁にする。
             CritRate = HitsCount > 0 ? Math.Round(((double)CritCount / (double)HitsCount) * 100.0, 2) : 0.0;
+            NormalRate = HitsCount > 0 ? Math.Round(((double)NormalCount / (double)HitsCount) * 100.0, 2) : 0.0;
             LuckyRate = HitsCount > 0 && HitsCount >= LuckyHitCount ? Math.Round(((double)LuckyHitCount / Math.Clamp((double)(HitsCount - LuckyHitCount), 1, double.MaxValue)) * 100.0, 2) : 0.0;
 
             return AddSnapshot(otherUuid, skillId, level, value, isCrit, isLucky, hpLessenValue, shieldBreak, isCauseLucky, damageElement, damageType, damageMode, isDead, now, stamp);

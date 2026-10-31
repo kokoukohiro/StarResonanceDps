@@ -403,7 +403,7 @@ internal static class PlayerDataSourceResolver
     /// <para>
     /// 順序はパーティ(<see cref="PartyMemberCache"/>)が先。在籍中はそちらのほうが
     /// 更新機会が多く、パーティを抜けるまで生きる。次に
-    /// <see cref="MeterPlayerSpecCache"/>(AOI外でもメーターかタイムラインに残る人ぶん)。
+    /// <see cref="MeterPlayerSpecCache"/>(AOI外でもメーター・被ダメログ・タイムラインに残る人ぶん)。
     /// </para>
     /// </summary>
     private static bool TryResolveCachedSpec(

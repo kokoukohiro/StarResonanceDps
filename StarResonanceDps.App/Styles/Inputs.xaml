@@ -128,6 +128,10 @@
         </Setter>
     </Style>
 
+    <!--
+        1行の入力欄。Tag に文字を渡すと、欄が空でカーソルが無いあいだ例の文字として出す(見た目と条件は SearchBox の例の文字と同じ)。
+        例の文字の Padding 2 は、TextBox が入力した文字を Padding からさらに 2 内側に描くのにそろえるため。
+    -->
     <Style x:Key="Input.PathBox"
        TargetType="{x:Type TextBox}"
        BasedOn="{StaticResource Input.SearchBox}">
@@ -142,9 +146,28 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}">
-                        <ScrollViewer x:Name="PART_ContentHost"
-                                  VerticalAlignment="Center" />
+                        <Grid>
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                      VerticalAlignment="Center" />
+                            <TextBlock x:Name="Placeholder"
+                                       Margin="{TemplateBinding Padding}"
+                                       Padding="2,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Brush.TextMuted}"
+                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       IsHitTestVisible="False"
+                                       Visibility="Collapsed" />
+                        </Grid>
                     </ContentControl>
+                    <ControlTemplate.Triggers>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Text" Value="" />
+                                <Condition Property="IsKeyboardFocusWithin" Value="False" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

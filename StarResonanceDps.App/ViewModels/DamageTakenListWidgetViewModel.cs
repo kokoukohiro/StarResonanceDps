@@ -37,7 +37,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// 行は作り直さず値だけ入れ替える。名前とクラスは人ごとに1回だけ作り、名簿が変わったらその人の行にだけ当て直す。
 /// 出す行が変わる(フィルターか「最新の被ダメのみ表示」を変えた、名簿に人が増えた・減った)ときだけ、持っている被弾から一覧を組み直す。
 /// 「最新の被ダメのみ表示」で同じ人が被弾したら、その人の行の被弾を入れ替えて一番上へ動かす。
-/// フッターの左は戦闘の時計の経過(メーターのタイマーと同じ)。行の左クリックはその人のプレイヤー情報を開き、右クリックのメニューはプレイヤーリストと同じ。
+/// フッターの左は戦闘の時計の経過(メーターのタイマーと同じ)。行の左クリックと右クリックのメニュー(1項目)は、その人の被ダメ詳細を開く。
 /// </para>
 /// </summary>
 public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDisposable, IWidgetDataStatusSource
@@ -69,7 +69,6 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
 
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
-    private readonly Dictionary<Zproto.EDamageProperty, ImageBrush> _elementIconMasks = [];
     private readonly Dictionary<Zproto.EDamageProperty, Brush> _barBrushes = [];
 
     private DamageTakenListWidgetSettingsConfig _settings;
@@ -191,51 +190,12 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
     }
 
     [RelayCommand]
-    private void RequestPlayerInfo(DamageTakenListEntry? player)
+    private void RequestDamageTakenSummary(DamageTakenListEntry? player)
     {
-        RequestPlayerWindow(WidgetKind.PlayerInfo, player);
-    }
-
-    [RelayCommand]
-    private void RequestPlayerStatus(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerStatus, player);
-    }
-
-    [RelayCommand]
-    private void RequestPlayerEquipment(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
-    }
-
-    [RelayCommand]
-    private void RequestPlayerTalent(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerTalent, player);
-    }
-
-    [RelayCommand]
-    private void RequestPlayerSeasonTalent(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerSeasonTalent, player);
-    }
-
-    [RelayCommand]
-    private void RequestPlayerModule(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.PlayerModule, player);
-    }
-
-    [RelayCommand]
-    private void RequestBuffList(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.BuffList, player);
-    }
-
-    [RelayCommand]
-    private void RequestDebuffList(DamageTakenListEntry? player)
-    {
-        RequestPlayerWindow(WidgetKind.DebuffList, player);
+        if (player is not null)
+        {
+            _requestPlayerWindow(WidgetKind.DamageTakenSummary, player.CharacterId);
+        }
     }
 
     /// <summary>ヘッダーのボタン。「最新の被ダメのみ表示」を切り替えて、その項目だけを保存する(設定の窓が開いていればそちらの表示も合わせる)。</summary>
@@ -243,14 +203,6 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
     private void ToggleLatestHitOnly()
     {
         _widget.SetDamageTakenListShowsLatestHitOnlyFromWidget(!_settings.ShowsLatestHitOnly);
-    }
-
-    private void RequestPlayerWindow(WidgetKind kind, DamageTakenListEntry? player)
-    {
-        if (player is not null)
-        {
-            _requestPlayerWindow(kind, player.CharacterId);
-        }
     }
 
     /// <summary>
@@ -471,7 +423,7 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         if (hit.DamageElement is { } element)
         {
             entry.HasElement = true;
-            entry.ElementIconMask = GetElementIconMask(element);
+            entry.ElementIconMask = ElementIconMasks.Get(element);
             entry.BarBrush = GetBarBrush(element);
         }
         else
@@ -547,7 +499,6 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
             PlayerInfoFormatFormatter.Format(row, _settings.PlayerInfoFormatString, nameDisplayMode),
             GetProfessionIconMask(professionKey),
             GetClassBrush(professionKey),
-            row.IsSelf,
             row.IsSelf && _settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex);
     }
 
@@ -556,7 +507,6 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         entry.DisplayName = person.DisplayName;
         entry.ClassIconMask = person.ClassIconMask;
         entry.ClassBrush = person.ClassBrush;
-        entry.IsSelf = person.IsSelf;
         entry.IsSelfHighlighted = person.IsSelfHighlighted;
     }
 
@@ -649,22 +599,6 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
             : fallback;
     }
 
-    /// <summary>属性アイコンの形。塗りをこの形で抜く(タイムラインと同じ)。</summary>
-    private ImageBrush GetElementIconMask(Zproto.EDamageProperty element)
-    {
-        if (!_elementIconMasks.TryGetValue(element, out var mask))
-        {
-            mask = new ImageBrush((ImageSource)Application.Current.FindResource($"Icon.DamageProperty.{element}"))
-            {
-                Stretch = Stretch.Uniform
-            };
-            mask.Freeze();
-            _elementIconMasks[element] = mask;
-        }
-
-        return mask;
-    }
-
     /// <summary>バーの塗り。設定が変われば <see cref="_barBrushes"/> ごと捨てて作り直す。</summary>
     private Brush GetBarBrush(Zproto.EDamageProperty element)
     {
@@ -684,6 +618,5 @@ public sealed partial class DamageTakenListWidgetViewModel : ViewModelBase, IDis
         string DisplayName,
         Brush ClassIconMask,
         Brush ClassBrush,
-        bool IsSelf,
         bool IsSelfHighlighted);
 }

@@ -207,6 +207,7 @@ public sealed class WidgetTargetSelection
                 => MeterSnapshotProvider.HasPlayers(MeterSnapshotKind.Damage, GetPartyDisplayMode(WidgetKind.DpsMeter)),
             WidgetKind.HealingContribution or WidgetKind.HealingSummary or WidgetKind.HpsGraph
                 => MeterSnapshotProvider.HasPlayers(MeterSnapshotKind.Healing, GetPartyDisplayMode(WidgetKind.HpsMeter)),
+            WidgetKind.DamageTakenSummary => MeterSnapshotProvider.HasDamageTakenPlayers(),
             _ => PlayerRosterPresentationStore.Instance.Current.Entries.Count > 0
                 || MeterSnapshotProvider.GetSelfPlayerIdentity() is not null
                 || (widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList
@@ -223,6 +224,7 @@ public sealed class WidgetTargetSelection
                 => CreateMeterOptions(MeterSnapshotKind.Damage, WidgetKind.DpsMeter),
             WidgetKind.HealingContribution or WidgetKind.HealingSummary or WidgetKind.HpsGraph
                 => CreateMeterOptions(MeterSnapshotKind.Healing, WidgetKind.HpsMeter),
+            WidgetKind.DamageTakenSummary => CreateDamageTakenOptions(),
             _ => CreateRosterOptions(includesEntities: widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList)
         };
     }
@@ -375,6 +377,18 @@ public sealed class WidgetTargetSelection
             IsSelf = player.IsSelf,
             // メーターの行から開くときと同じ相手の指定(MeterPlayerEntry.PlayerId)。
             CharacterId = player.UserId != 0 ? player.UserId : player.CharacterId
+        })];
+    }
+
+    /// <summary>被ダメ詳細。被ダメログに出る人(その回で被弾の記録がある人)を、被ダメの合計の多い順。</summary>
+    private static List<WidgetTargetOption> CreateDamageTakenOptions()
+    {
+        return [.. MeterSnapshotProvider.GetDamageTakenPlayers().Select(player => new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Player,
+            IsSelf = player.IsSelf,
+            // 被ダメログの行から開くときと同じ相手の指定(DamageTakenListEntry.CharacterId)。
+            CharacterId = player.CharacterId
         })];
     }
 

@@ -118,6 +118,7 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
         AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
         AddWidget(WidgetKind.DamageTakenList, "Widget_DamageTakenList");
+        AddWidget(WidgetKind.DamageTakenSummary, "Widget_DamageTakenSummary");
         AddWidget(WidgetKind.DamageContribution, "Widget_DamageSkillDetails");
         AddWidget(WidgetKind.DamageSummary, "Widget_DamageContribution");
         AddWidget(WidgetKind.DpsGraph, "Widget_DpsGraph");

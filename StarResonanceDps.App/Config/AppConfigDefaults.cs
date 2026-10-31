@@ -75,8 +75,8 @@ public static class AppConfigDefaults
     public const int TargetEntityBossAndEliteIndex = 1;
     public const int TargetEntityAllIndex = 2;
 
-    /// <summary>既定はすべて。</summary>
-    public const int DefaultTargetEntityModeIndex = TargetEntityAllIndex;
+    /// <summary>既定はボスのみ。</summary>
+    public const int DefaultTargetEntityModeIndex = TargetEntityBossOnlyIndex;
 
     /// <summary>通知「狙われるプレイヤー」の通知条件の選択肢(狙われ状態が続いた秒数)。0 は無条件(狙われたその場で出す)。</summary>
     public static readonly int[] TargetedDurationSeconds = [0, 1, 2, 3];

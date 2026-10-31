@@ -247,6 +247,7 @@
                                      Height="32"
                                      Style="{StaticResource Input.PathBox}"
                                      VerticalContentAlignment="Center"
+                                     Tag="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityName_Placeholder]}"
                                      Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
 
@@ -265,6 +266,7 @@
                                      Height="32"
                                      Style="{StaticResource Input.PathBox}"
                                      VerticalContentAlignment="Center"
+                                     Tag="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetEntityId_Placeholder]}"
                                      AllowDrop="False"
                                      InputMethod.IsInputMethodEnabled="False"
                                      behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
@@ -299,6 +301,7 @@
                                      Height="32"
                                      Style="{StaticResource Input.PathBox}"
                                      VerticalContentAlignment="Center"
+                                     Tag="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetSkillName_Placeholder]}"
                                      Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </Grid>
 
@@ -317,6 +320,7 @@
                                      Height="32"
                                      Style="{StaticResource Input.PathBox}"
                                      VerticalContentAlignment="Center"
+                                     Tag="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetSkillId_Placeholder]}"
                                      AllowDrop="False"
                                      InputMethod.IsInputMethodEnabled="False"
                                      behaviors:DigitsOnlyInputBehavior.IsEnabled="True"

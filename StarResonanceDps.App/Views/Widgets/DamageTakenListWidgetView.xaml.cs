@@ -11,7 +11,7 @@ namespace StarResonanceDps.App.Views.Widgets;
 
 /// <summary>
 /// 被ダメログ(識別子は被ダメリスト)の中身。縦のスクロールバーは窓の枠の層が出す(蘇生リストと同じ)。
-/// 行の左クリックと右クリックのメニューの作りは蘇生リスト(プレイヤーリスト)と同じ。
+/// 行の左クリックはその人の被ダメ詳細を開く。右クリックのメニューの作りは蘇生リスト(プレイヤーリスト)と同じで、項目は被ダメ詳細だけ。
 ///
 /// <para>
 /// 新しい行は一番上に入る。<b>一番上に居るときだけ新しい行に付いていく</b>(タイムラインの末尾への追従を上下逆にしたもの)。
@@ -25,6 +25,7 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
     private const string PlayerSelectionContextMenuFirstItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.First";
     private const string PlayerSelectionContextMenuMiddleItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Middle";
     private const string PlayerSelectionContextMenuLastItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Last";
+    private const string PlayerSelectionContextMenuSingleItemStyleKey = "Menu.WidgetWindowPlayerSelectionContextMenuItem.Single";
 
     /// <summary>スクロールバーの矢印1回で動く量。行の高さと同じ。</summary>
     private const double SmallScrollChange = 31d;
@@ -129,12 +130,12 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
         }
     }
 
-    /// <summary>左クリックはメニューを開かず、その行の人のプレイヤー情報を直接開く。メニューは右クリック側が担う。</summary>
+    /// <summary>左クリックはメニューを開かず、その行の人の被ダメ詳細を直接開く。メニューは右クリック側が担う。</summary>
     private void DamageTakenListItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { Tag: DamageTakenListWidgetViewModel viewModel, DataContext: DamageTakenListEntry entry })
         {
-            viewModel.RequestPlayerInfoCommand.Execute(entry);
+            viewModel.RequestDamageTakenSummaryCommand.Execute(entry);
         }
     }
 
@@ -250,19 +251,20 @@ public partial class DamageTakenListWidgetView : UserControl, IWidgetVerticalScr
             menu.Style = contextMenuStyle;
         }
 
-        // 隠れている項目は数に入れない。自分の行だけに出る「ステータス詳細」を
-        // Collapsed のまま数えると、見えていない項目に先頭/末尾の角丸が当たる。
+        // 隠れている項目は数に入れない(見えていない項目に先頭/末尾の角丸が当たらないように)。1つだけなら四隅とも角丸。
         var menuItems = menu.Items.OfType<MenuItem>()
             .Where(item => item.Visibility == Visibility.Visible)
             .ToArray();
         for (var index = 0; index < menuItems.Length; index++)
         {
-            var styleKey = index switch
-            {
-                0 => PlayerSelectionContextMenuFirstItemStyleKey,
-                var lastIndex when lastIndex == menuItems.Length - 1 => PlayerSelectionContextMenuLastItemStyleKey,
-                _ => PlayerSelectionContextMenuMiddleItemStyleKey
-            };
+            var styleKey = menuItems.Length == 1
+                ? PlayerSelectionContextMenuSingleItemStyleKey
+                : index switch
+                {
+                    0 => PlayerSelectionContextMenuFirstItemStyleKey,
+                    var lastIndex when lastIndex == menuItems.Length - 1 => PlayerSelectionContextMenuLastItemStyleKey,
+                    _ => PlayerSelectionContextMenuMiddleItemStyleKey
+                };
 
             if (TryFindResource(styleKey) is Style menuItemStyle)
             {

@@ -226,7 +226,7 @@ internal static class PlayerRosterProjection
             AddCharacterId(characterId);
         }
 
-        // AOI外でもメーターかタイムラインに残っている人。ここで候補に入れないと下の関門まで届かない。
+        // AOI外でもメーター・被ダメログ・タイムラインに残っている人。ここで候補に入れないと下の関門まで届かない。
         foreach (var pair in metadataPlayersByCharacterId)
         {
             if (IsShownInMeterOrTimeline(meterEncounter, pair.Value))
@@ -279,8 +279,8 @@ internal static class PlayerRosterProjection
                 && ReferenceEquals(meterEncounter, AppState.OpenedHistoricalEncounter);
 
             var isPartyMember = party.GetMembership(characterId) == PartyMembershipState.Member;
-            // AOI外でもメーターかタイムラインに残る人はリストにも残す。エンカウンターが作り直されて
-            // 統計と記録が無くなれば、メーター・タイムラインと同時にここからも消える。
+            // AOI外でもメーター・被ダメログ・タイムラインに残る人はリストにも残す。エンカウンターが作り直されて
+            // 統計と記録が無くなれば、メーター・被ダメログ・タイムラインと同時にここからも消える。
             if (!isSelf
                 && !isPartyMember
                 && nearbyEntity is null
@@ -674,7 +674,7 @@ internal static class PlayerRosterProjection
     }
 
     /// <summary>
-    /// AOI外へ出る直前の特化を控える。<b>メーターかタイムラインに残り続ける人だけ</b>が対象。
+    /// AOI外へ出る直前の特化を控える。<b>メーター・被ダメログ・タイムラインに残り続ける人だけ</b>が対象。
     ///
     /// <para>
     /// 「分からない」も含めて必ず現在値で置き換える。何も書かずに素通りさせると、
@@ -721,22 +721,23 @@ internal static class PlayerRosterProjection
     }
 
     /// <summary>
-    /// メーター(DPS/HPS)に出る人か、その回に被弾かダメージの無い戦闘不能の記録がある人か。名簿に載せる条件。
+    /// メーター(DPS/HPS)に出る人か、その回の被ダメログかタイムラインに出る人か。名簿に載せる条件。
     ///
     /// <para>
     /// メーターは <see cref="MeterSnapshotProvider"/> の <c>TotalValue &gt; 0</c> と同じ(与ダメか回復のどちらかを持っていれば片方のメーターには出る)。
-    /// 被弾の記録は <see cref="Entity.TakenStats"/>、戦闘不能の記録はその回のダメージの無い戦闘不能の記録。
-    /// 被ダメリストの絞り込みの設定は見ない。
+    /// 被ダメログは被弾の記録 <see cref="Entity.TakenStats"/>(被ダメログに出る被弾は全部ここにも残る)、
+    /// タイムラインはダメージの無い戦闘不能の記録と、敵の回復・敵が付けたバフの相手(<see cref="Encounter.HasPlayerTimelineRecord"/>)。
+    /// 被ダメログの絞り込みの設定は見ない。
     /// </para>
     /// </summary>
-    /// <param name="encounter">その実体がいる回。戦闘不能の記録を引く。</param>
+    /// <param name="encounter">その実体がいる回。タイムラインの記録を引く。</param>
     private static bool IsShownInMeterOrTimeline(Encounter? encounter, Entity? entity)
     {
         return entity is not null
             && (entity.TotalDamage > 0
                 || entity.TotalHealing > 0
                 || entity.TakenStats.HasSkillSnapshots()
-                || encounter?.HasPlayerDeathRecord(entity.UUID) == true);
+                || encounter?.HasPlayerTimelineRecord(entity.UUID) == true);
     }
 
     private static bool TryGetCharacterEntity(long playerUuid, out Entity entity)

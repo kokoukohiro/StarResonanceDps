@@ -14,6 +14,17 @@ public enum MeterSnapshotKind
     Healing
 }
 
+/// <summary>
+/// 与ダメ詳細・ヒール詳細・被ダメ詳細が読む統計。<see cref="MeterSnapshotKind"/> とは別にしてあるのは、
+/// メーターの側が「与ダメでなければヒール」と分けている所に被ダメを入れないため。
+/// </summary>
+public enum PlayerMetricSummaryKind
+{
+    Damage,
+    Healing,
+    DamageTaken
+}
+
 public enum PlayerBuffListKind
 {
     Buff,
@@ -113,25 +124,30 @@ public sealed record MetricSkillTableRowSnapshot(
 public sealed record MetricSkillTableSnapshot(
     IReadOnlyList<MetricSkillTableRowSnapshot> Entries);
 
+/// <summary>
+/// 与ダメ詳細・ヒール詳細・被ダメ詳細の中身。合計・通常・会心・幸運の値・率・ヒット数と、属性ごとの合計。
+///
+/// <para>
+/// 会心と幸運が同時に出た1発は、会心と幸運の両方に入る(通常には入らない)。
+/// 幸運のヒット数は幸運ダメージの数(<c>LuckyHitCount</c>)で、幸運を起こした数ではない。
+/// <see cref="ValueByElement"/> と <see cref="ValueByMode"/> は <see cref="MetricSkillTableRowSnapshot"/> の内訳と同じく enum の値の順で、
+/// 値が入った種類だけが載る。どちらも合計は <see cref="TotalValue"/> に一致する。
+/// </para>
+/// </summary>
 public sealed record PlayerMetricSummarySnapshot(
     ulong TotalValue,
-    double ValuePerSecondActive,
-    double ValuePerSecond,
-    ulong ExtraTotalValue,
     ulong HitsCount,
-    double CritRate,
-    double LuckyRate,
-    uint CritCount,
-    ulong ImmuneCount,
-    bool ShowsImmuneCount,
     ulong NormalValue,
+    double NormalRate,
+    uint NormalCount,
     ulong CritValue,
+    double CritRate,
+    uint CritCount,
     ulong LuckyValue,
-    uint LuckyCount,
-    double AverageValue,
-    ulong CastsCount,
-    double? CastsPerMinute,
-    double? CastsPerSecond);
+    double LuckyRate,
+    uint LuckyHitCount,
+    IReadOnlyList<KeyValuePair<EDamageProperty, ulong>> ValueByElement,
+    IReadOnlyList<KeyValuePair<EDamageMode, ulong>> ValueByMode);
 
 
 /// <param name="BaseId">
@@ -343,6 +359,9 @@ public sealed record DamageTakenListSnapshot(
     int NextIndex,
     IReadOnlyList<DamageTakenListHit> Hits);
 
+/// <summary><see cref="MeterSnapshotProvider.GetDamageTakenPlayers"/> の1人。</summary>
+public sealed record DamageTakenPlayer(long CharacterId, bool IsSelf);
+
 public static class MeterSnapshotProvider
 {
     /// <summary>
@@ -465,6 +484,49 @@ public static class MeterSnapshotProvider
 
             var isSelf = IsSelf(entity);
             if (party.ShouldInclude(PlayerDataSourceResolver.Resolve(entity, isSelf).CharacterId, isSelf, effectivePartyDisplayMode))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 表示中の回で被弾の記録があるプレイヤー(被ダメログに出る人)を、被ダメの合計の多い順に返す。
+    /// 相手の指定は <c>DamageTakenListHit.CharacterId</c> と同じ番号。メイン画面の被ダメ詳細のカードが、窓の相手の選択リストに並べる。
+    /// </summary>
+    public static IReadOnlyList<DamageTakenPlayer> GetDamageTakenPlayers()
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null)
+        {
+            return [];
+        }
+
+        return [.. encounter.Entities.Values
+            .Where(entity => entity.EntityType == EEntityType.EntChar && entity.TakenStats.HitsCount > 0UL)
+            .OrderByDescending(entity => entity.TakenStats.ValueTotal)
+            .ThenBy(entity => entity.UUID)
+            .Select(entity =>
+            {
+                var isSelf = IsSelf(entity);
+                return new DamageTakenPlayer(PlayerDataSourceResolver.Resolve(entity, isSelf).CharacterId, isSelf);
+            })];
+    }
+
+    /// <summary>被弾の記録があるプレイヤーが1人でもいるか(<see cref="GetDamageTakenPlayers"/> と同じ条件)。一覧は作らない。</summary>
+    public static bool HasDamageTakenPlayers()
+    {
+        var encounter = ResolveActiveEncounter();
+        if (encounter is null)
+        {
+            return false;
+        }
+
+        foreach (var entity in encounter.Entities.Values)
+        {
+            if (entity.EntityType == EEntityType.EntChar && entity.TakenStats.HitsCount > 0UL)
             {
                 return true;
             }
@@ -2343,83 +2405,53 @@ public static class MeterSnapshotProvider
         return grades;
     }
 
-    public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(MeterSnapshotKind kind, long characterId)
+    public static PlayerMetricSummarySnapshot GetPlayerMetricSummary(PlayerMetricSummaryKind kind, long characterId)
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return CreateEmptyMetricSummary(kind);
+            return EmptyMetricSummary;
         }
 
-        var stats = kind == MeterSnapshotKind.Damage
-            ? entity.DamageStats
-            : entity.HealingStats;
-        var extraTotal = kind == MeterSnapshotKind.Damage
-            ? entity.TotalShieldBreak
-            : entity.TotalOverhealing;
-        var castsPerMinute = default(double?);
-        var castsPerSecond = default(double?);
-
-        // 行動の間は戦闘の経過で測る(自動一時停止で止まっていた区間を除く)。
-        if (entity.FirstCombatActionTime is { } firstAction
-            && entity.LastCombatActionTime is { } lastAction
-            && encounter.ToCombatOffset(firstAction) is { } firstOffset
-            && encounter.ToCombatOffset(lastAction) is { } lastOffset)
+        var stats = kind switch
         {
-            var activeDuration = lastOffset - firstOffset;
-            if (activeDuration.TotalSeconds > 0d)
-            {
-                var totalCasts = (double)entity.TotalCasts;
-                castsPerSecond = Math.Round(totalCasts / activeDuration.TotalSeconds, 2);
-                castsPerMinute = Math.Round(totalCasts / activeDuration.TotalMinutes, 2);
-            }
-        }
+            PlayerMetricSummaryKind.Damage => entity.DamageStats,
+            PlayerMetricSummaryKind.Healing => entity.HealingStats,
+            PlayerMetricSummaryKind.DamageTaken => entity.TakenStats,
+            _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+        };
 
-        var clock = encounter.ReadCombatClock();
         return new PlayerMetricSummarySnapshot(
             stats.ValueTotal,
-            CombatClockReading.PerSecond(stats.ValueTotal, entity.GetActiveSeconds(clock, encounter.ToCombatOffset)),
-            CombatClockReading.PerSecond(stats.ValueTotal, clock.Elapsed.TotalSeconds),
-            extraTotal,
             stats.HitsCount,
-            stats.CritRate,
-            stats.LuckyRate,
-            stats.CritCount,
-            stats.ImmuneCount,
-            kind == MeterSnapshotKind.Damage,
             stats.ValueNormalTotal,
+            stats.NormalRate,
+            stats.NormalCount,
             stats.ValueCritTotal,
+            stats.CritRate,
+            stats.CritCount,
             stats.ValueLuckyTotal,
-            stats.LuckyCount,
-            stats.ValueAverage,
-            entity.TotalCasts,
-            castsPerMinute,
-            castsPerSecond);
+            stats.LuckyRate,
+            stats.LuckyHitCount,
+            [.. stats.GetValueTotalByElementCopy().Where(pair => pair.Value > 0UL).OrderBy(pair => pair.Key)],
+            [.. stats.GetValueTotalByModeCopy().Where(pair => pair.Value > 0UL).OrderBy(pair => pair.Key)]);
     }
 
-    private static PlayerMetricSummarySnapshot CreateEmptyMetricSummary(MeterSnapshotKind kind)
-    {
-        return new PlayerMetricSummarySnapshot(
-            0UL,
-            0d,
-            0d,
-            0UL,
-            0UL,
-            0d,
-            0d,
-            0U,
-            0UL,
-            kind == MeterSnapshotKind.Damage,
-            0UL,
-            0UL,
-            0UL,
-            0U,
-            0d,
-            0UL,
-            null,
-            null);
-    }
+    private static readonly PlayerMetricSummarySnapshot EmptyMetricSummary = new(
+        0UL,
+        0UL,
+        0UL,
+        0d,
+        0U,
+        0UL,
+        0d,
+        0U,
+        0UL,
+        0d,
+        0U,
+        [],
+        []);
 
     public static MetricSkillTableSnapshot GetPlayerSkillTable(MeterSnapshotKind kind, long characterId)
     {

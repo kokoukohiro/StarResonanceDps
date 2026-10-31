@@ -883,29 +883,17 @@ If it is not installed, you can download it from the link below.</value>
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>No Revive ({0})</value>
   </data>
-  <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>Class Color Filter</value>
-  </data>
-  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
-    <value>Filter Color</value>
-  </data>
-  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
-    <value>Filter Strength</value>
-  </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>Element Colors</value>
+  </data>
+  <data name="Settings_IconColors_Opacity" xml:space="preserve">
+    <value>Icon Colors Opacity</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>Element Colors Opacity</value>
   </data>
-  <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>Element Colors Filter</value>
-  </data>
   <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
     <value>Graph Colors</value>
-  </data>
-  <data name="Settings_GraphColors_Filter" xml:space="preserve">
-    <value>Graph Colors Filter</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>Total</value>
@@ -1119,74 +1107,26 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
     <value>Skill Details (Healing)</value>
   </data>
-  <data name="Metric_LabelValueFormat" xml:space="preserve">
-    <value>{0}: {1}</value>
+  <data name="Metric_SummaryTotal" xml:space="preserve">
+    <value>Total</value>
   </data>
-  <data name="Metric_TotalValue" xml:space="preserve">
-    <value>Total {0}: {1}</value>
+  <data name="Metric_SummaryNormal" xml:space="preserve">
+    <value>Normal</value>
   </data>
-  <data name="Metric_TotalPerSecond" xml:space="preserve">
-    <value>Total {0}: {1}</value>
+  <data name="Metric_SummaryCrit" xml:space="preserve">
+    <value>Crit</value>
   </data>
-  <data name="Metric_Dps" xml:space="preserve">
-    <value>DPS</value>
+  <data name="Metric_SummaryLucky" xml:space="preserve">
+    <value>Lucky</value>
   </data>
-  <data name="Metric_Hps" xml:space="preserve">
-    <value>HPS</value>
+  <data name="Metric_SummaryHitsFormat" xml:space="preserve">
+    <value>{0} hits</value>
   </data>
-  <data name="Metric_TotalShieldBreak" xml:space="preserve">
-    <value>Total Shield Break</value>
+  <data name="Metric_SummaryElementShare" xml:space="preserve">
+    <value>Element Share</value>
   </data>
-  <data name="Metric_TotalOverheal" xml:space="preserve">
-    <value>Total Overheal</value>
-  </data>
-  <data name="Metric_TotalHits" xml:space="preserve">
-    <value>Total Hits</value>
-  </data>
-  <data name="Metric_TotalCritRate" xml:space="preserve">
-    <value>Total Crit Rate</value>
-  </data>
-  <data name="Metric_TotalLuckyRate" xml:space="preserve">
-    <value>Total Lucky Rate</value>
-  </data>
-  <data name="Metric_TotalCrits" xml:space="preserve">
-    <value>Total Crits</value>
-  </data>
-  <data name="Metric_TotalImmunes" xml:space="preserve">
-    <value>Total Immunes</value>
-  </data>
-  <data name="Metric_TotalNormalDamage" xml:space="preserve">
-    <value>Total Normal Damage</value>
-  </data>
-  <data name="Metric_TotalNormalHealing" xml:space="preserve">
-    <value>Total Normal Healing</value>
-  </data>
-  <data name="Metric_TotalCritDamage" xml:space="preserve">
-    <value>Total Crit Damage</value>
-  </data>
-  <data name="Metric_TotalCritHealing" xml:space="preserve">
-    <value>Total Crit Healing</value>
-  </data>
-  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
-    <value>Total Lucky Damage</value>
-  </data>
-  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
-    <value>Total Lucky Healing</value>
-  </data>
-  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
-    <value>Total Lucky Strikes</value>
-  </data>
-  <data name="Metric_TotalAverageDamage" xml:space="preserve">
-    <value>Total Average Damage</value>
-  </data>
-  <data name="Metric_TotalAverageHealing" xml:space="preserve">
-    <value>Total Average Healing</value>
-  </data>
-  <data name="Metric_TotalCasts" xml:space="preserve">
-    <value>Total Casts</value>
-  </data>
-  <data name="Metric_CastsPerMinute" xml:space="preserve">
-    <value>Casts Per Min</value>
+  <data name="Metric_SummaryModeShare" xml:space="preserve">
+    <value>Type Share</value>
   </data>
   <data name="Meter_Benchmark" xml:space="preserve">
     <value>Benchmark</value>
@@ -1379,6 +1319,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>Damage Taken Log</value>
+  </data>
+  <data name="Widget_DamageTakenSummary" xml:space="preserve">
+    <value>Damage Taken Details</value>
   </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(Defeated)</value>
   </data>
@@ -1582,8 +1525,14 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>Target entity name</value>
   </data>
+  <data name="Notification_TargetEntityName_Placeholder" xml:space="preserve">
+    <value>e.g. Defensive Type 05</value>
+  </data>
   <data name="Notification_TargetEntityId" xml:space="preserve">
     <value>Target entity ID</value>
+  </data>
+  <data name="Notification_TargetEntityId_Placeholder" xml:space="preserve">
+    <value>e.g. 21004</value>
   </data>
   <data name="Notification_TargetPlayerUid" xml:space="preserve">
     <value>Target player UID</value>
@@ -1591,8 +1540,14 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Notification_TargetSkillName" xml:space="preserve">
     <value>Target skill name</value>
   </data>
+  <data name="Notification_TargetSkillName_Placeholder" xml:space="preserve">
+    <value>e.g. Soulchain</value>
+  </data>
   <data name="Notification_TargetSkillId" xml:space="preserve">
     <value>Target skill ID</value>
+  </data>
+  <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
+    <value>e.g. 304221</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>Note: An entered ID takes priority over the name.</value>

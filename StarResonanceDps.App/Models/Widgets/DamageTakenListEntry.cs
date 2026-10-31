@@ -19,12 +19,8 @@ public sealed partial class DamageTakenListEntry : ObservableObject
     /// <summary>この行の被弾。設定「最新の被ダメのみ表示」では、同じ人の新しい被弾に入れ替わる(人は変わらない)。</summary>
     public DamageTakenListHit Hit { get; set; }
 
-    /// <summary>被弾した人のキャラ番号。右クリックのメニューと左クリックが開く窓の相手。</summary>
+    /// <summary>被弾した人のキャラ番号。右クリックのメニューと左クリックが開く窓(被ダメ詳細)の相手。</summary>
     public long CharacterId => Hit.CharacterId;
-
-    /// <summary>自分の行か。右クリックのメニューの「ステータス詳細」は自分の行だけに出す(プレイヤーリストと同じ)。</summary>
-    [ObservableProperty]
-    private bool _isSelf;
 
     /// <summary>この行の右クリックのメニューを開いているか。開いている間は行のホバーの背景を残す。下ろすとメニューを閉じる(画面のコード)。</summary>
     [ObservableProperty]
@@ -76,7 +72,7 @@ public sealed partial class DamageTakenListEntry : ObservableObject
     [ObservableProperty]
     private string _elementToolTipText = string.Empty;
 
-    /// <summary>バーの塗り(設定「属性カラー」のその属性の色に、フィルターと不透明度を掛けたもの)。属性ごとに使い回す。</summary>
+    /// <summary>バーの塗り(設定「属性カラー」のその属性の色に、不透明度を掛けたもの)。属性ごとに使い回す。</summary>
     [ObservableProperty]
     private Brush? _barBrush;
 

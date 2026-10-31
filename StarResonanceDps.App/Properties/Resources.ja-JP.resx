@@ -223,6 +223,21 @@
     <value>ホットキー用の補助プログラムを起動できなかったか、途中で停止しました。
 アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ゲームの操作中も効くようになります。</value>
   </data>
+  <data name="Settings_Notification_Method" xml:space="preserve">
+    <value>通知方法</value>
+  </data>
+  <data name="NotificationMethod_Windows" xml:space="preserve">
+    <value>Windows通知</value>
+  </data>
+  <data name="NotificationMethod_Speech" xml:space="preserve">
+    <value>読み上げ</value>
+  </data>
+  <data name="Settings_Notification_Volume" xml:space="preserve">
+    <value>通知音量</value>
+  </data>
+  <data name="Settings_Notification_WindowsNote" xml:space="preserve">
+    <value>※ゲーム中は、Windowsの「応答不可を自動的にオンにする」により通知が届かないことがあります</value>
+  </data>
   <data name="Settings_Notification_Speech" xml:space="preserve">
     <value>読み上げ方法</value>
   </data>
@@ -271,6 +286,102 @@
   </data>
   <data name="WindowsVoice_Missing_Detail" xml:space="preserve">
     <value>Windowsの設定で{0}の音声を追加すると、読み上げられるようになります。</value>
+  </data>
+  <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
+    <value>バフ・デバフ効果切れ</value>
+  </data>
+  <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
+    <value>薬剤・料理効果切れ</value>
+  </data>
+  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+    <value>予兆技</value>
+  </data>
+  <data name="Notification_EntryConfirmation" xml:space="preserve">
+    <value>入場確認</value>
+  </data>
+  <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
+    <value>HP低下</value>
+  </data>
+  <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
+    <value>コンテンツ名</value>
+  </data>
+  <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
+    <value>コンテンツ1</value>
+  </data>
+  <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
+    <value>{TargetName}の{BuffName}の効果が切れました</value>
+  </data>
+  <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
+    <value>{TargetName}の{BuffName}効果が切れそうです</value>
+  </data>
+  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+    <value>{SkillName}が来ます</value>
+  </data>
+  <data name="EntryConfirmationNotification_Default" xml:space="preserve">
+    <value>{Content}に入ります</value>
+  </data>
+  <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
+    <value>{PlayerName}のHPが低下しました</value>
+  </data>
+  <data name="PlayerAppearedNotification_Default" xml:space="preserve">
+    <value>{PlayerName}が出現しました</value>
+  </data>
+  <data name="EntityAppearedNotification_Default" xml:space="preserve">
+    <value>{EntityName}が出現しました</value>
+  </data>
+  <data name="TargetedNotification_Default" xml:space="preserve">
+    <value>{PlayerName}が{EntityName}に狙われました</value>
+  </data>
+  <data name="Notification_Targeted" xml:space="preserve">
+    <value>狙われるプレイヤー</value>
+  </data>
+  <data name="Notification_TargetEntity" xml:space="preserve">
+    <value>対象エンティティ</value>
+  </data>
+  <data name="Notification_TargetEntity_BossOnly" xml:space="preserve">
+    <value>ボスのみ</value>
+  </data>
+  <data name="Notification_TargetEntity_BossAndElite" xml:space="preserve">
+    <value>ボスと精鋭</value>
+  </data>
+  <data name="TargetedCondition_Immediate" xml:space="preserve">
+    <value>無条件</value>
+  </data>
+  <data name="TargetedCondition_1" xml:space="preserve">
+    <value>狙われ状態1秒以上</value>
+  </data>
+  <data name="TargetedCondition_2" xml:space="preserve">
+    <value>狙われ状態2秒以上</value>
+  </data>
+  <data name="TargetedCondition_3" xml:space="preserve">
+    <value>狙われ状態3秒以上</value>
+  </data>
+  <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
+    <value>パーティメンバー</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardian" xml:space="preserve">
+    <value>防御クラス以外</value>
+  </data>
+  <data name="TargetedPlayer_NonGuardianPartyMembers" xml:space="preserve">
+    <value>防御クラス以外のパーティメンバー</value>
+  </data>
+  <data name="Notification_EntityCast" xml:space="preserve">
+    <value>エンティティ詠唱</value>
+  </data>
+  <data name="EntityCastNotification_Default" xml:space="preserve">
+    <value>{EntityName}が詠唱中です</value>
+  </data>
+  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+    <value>発動時</value>
+  </data>
+  <data name="TelegraphedSkillCondition_1" xml:space="preserve">
+    <value>発動1秒前</value>
+  </data>
+  <data name="TelegraphedSkillCondition_2" xml:space="preserve">
+    <value>発動2秒前</value>
+  </data>
+  <data name="TelegraphedSkillCondition_3" xml:space="preserve">
+    <value>発動3秒前</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>
@@ -496,7 +607,8 @@
   </data>
   <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
     <value>回復</value>
-  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>
+  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
     <value>テキストコピーエラー</value>
   </data>
   <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
@@ -772,29 +884,17 @@
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>蘇生不可({0})</value>
   </data>
-  <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>クラスカラーのフィルター</value>
-  </data>
-  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
-    <value>フィルターカラー</value>
-  </data>
-  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
-    <value>フィルターの強さ</value>
-  </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>属性カラー</value>
+  </data>
+  <data name="Settings_IconColors_Opacity" xml:space="preserve">
+    <value>アイコンカラーの不透明度</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>属性カラーの不透明度</value>
   </data>
-  <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>属性カラーのフィルター</value>
-  </data>
   <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
     <value>グラフカラー</value>
-  </data>
-  <data name="Settings_GraphColors_Filter" xml:space="preserve">
-    <value>グラフカラーのフィルター</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合計</value>
@@ -1008,74 +1108,26 @@
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
     <value>スキル詳細(ヒール)</value>
   </data>
-  <data name="Metric_LabelValueFormat" xml:space="preserve">
-    <value>{0}: {1}</value>
+  <data name="Metric_SummaryTotal" xml:space="preserve">
+    <value>合計</value>
   </data>
-  <data name="Metric_TotalValue" xml:space="preserve">
-    <value>合計{0}: {1}</value>
+  <data name="Metric_SummaryNormal" xml:space="preserve">
+    <value>通常</value>
   </data>
-  <data name="Metric_TotalPerSecond" xml:space="preserve">
-    <value>合計{0}: {1}</value>
+  <data name="Metric_SummaryCrit" xml:space="preserve">
+    <value>会心</value>
   </data>
-  <data name="Metric_Dps" xml:space="preserve">
-    <value>DPS</value>
+  <data name="Metric_SummaryLucky" xml:space="preserve">
+    <value>幸運</value>
   </data>
-  <data name="Metric_Hps" xml:space="preserve">
-    <value>HPS</value>
+  <data name="Metric_SummaryHitsFormat" xml:space="preserve">
+    <value>{0}ヒット</value>
   </data>
-  <data name="Metric_TotalShieldBreak" xml:space="preserve">
-    <value>合計シールドブレイク</value>
+  <data name="Metric_SummaryElementShare" xml:space="preserve">
+    <value>属性割合</value>
   </data>
-  <data name="Metric_TotalOverheal" xml:space="preserve">
-    <value>合計オーバーヒール</value>
-  </data>
-  <data name="Metric_TotalHits" xml:space="preserve">
-    <value>合計ヒット数</value>
-  </data>
-  <data name="Metric_TotalCritRate" xml:space="preserve">
-    <value>合計会心率</value>
-  </data>
-  <data name="Metric_TotalLuckyRate" xml:space="preserve">
-    <value>合計ラッキー率</value>
-  </data>
-  <data name="Metric_TotalCrits" xml:space="preserve">
-    <value>合計会心数</value>
-  </data>
-  <data name="Metric_TotalImmunes" xml:space="preserve">
-    <value>合計免疫数</value>
-  </data>
-  <data name="Metric_TotalNormalDamage" xml:space="preserve">
-    <value>合計通常ダメージ</value>
-  </data>
-  <data name="Metric_TotalNormalHealing" xml:space="preserve">
-    <value>合計通常ヒール</value>
-  </data>
-  <data name="Metric_TotalCritDamage" xml:space="preserve">
-    <value>合計会心ダメージ</value>
-  </data>
-  <data name="Metric_TotalCritHealing" xml:space="preserve">
-    <value>合計会心ヒール</value>
-  </data>
-  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
-    <value>合計ラッキーダメージ</value>
-  </data>
-  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
-    <value>合計ラッキーヒール</value>
-  </data>
-  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
-    <value>合計ラッキーストライク</value>
-  </data>
-  <data name="Metric_TotalAverageDamage" xml:space="preserve">
-    <value>合計平均ダメージ</value>
-  </data>
-  <data name="Metric_TotalAverageHealing" xml:space="preserve">
-    <value>合計平均ヒール</value>
-  </data>
-  <data name="Metric_TotalCasts" xml:space="preserve">
-    <value>合計キャスト数</value>
-  </data>
-  <data name="Metric_CastsPerMinute" xml:space="preserve">
-    <value>毎分キャスト</value>
+  <data name="Metric_SummaryModeShare" xml:space="preserve">
+    <value>タイプ割合</value>
   </data>
   <data name="Meter_Benchmark" xml:space="preserve">
     <value>計測</value>
@@ -1268,7 +1320,11 @@
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>被ダメログ</value>
-  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+  </data>
+  <data name="Widget_DamageTakenSummary" xml:space="preserve">
+    <value>被ダメ詳細</value>
+  </data>
+  <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(戦闘不能)</value>
   </data>
   <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
@@ -1282,7 +1338,8 @@
   </data>
   <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
     <value>最新のみ</value>
-  </data>  <data name="ReviveList_Revivable" xml:space="preserve">
+  </data>
+  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>蘇生可能</value>
   </data>
   <data name="Settings_Section_ReviveListTextColors_Title" xml:space="preserve">
@@ -1316,7 +1373,7 @@
     <value>マップIDのみ表示</value>
   </data>
   <data name="Settings_Display_UnnamedSkill" xml:space="preserve">
-    <value>名前のないスキルやバフ</value>
+    <value>名前のないスキルとバフ</value>
   </data>
   <data name="Settings_Display_UnnamedSkill_Description" xml:space="preserve">
     <value>※内部名は中国語のみ</value>
@@ -1471,8 +1528,14 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>対象エンティティ名</value>
   </data>
+  <data name="Notification_TargetEntityName_Placeholder" xml:space="preserve">
+    <value>例: ディフェンダー05型</value>
+  </data>
   <data name="Notification_TargetEntityId" xml:space="preserve">
     <value>対象エンティティID</value>
+  </data>
+  <data name="Notification_TargetEntityId_Placeholder" xml:space="preserve">
+    <value>例: 21004</value>
   </data>
   <data name="Notification_TargetPlayerUid" xml:space="preserve">
     <value>対象プレイヤーUID</value>
@@ -1480,8 +1543,14 @@
   <data name="Notification_TargetSkillName" xml:space="preserve">
     <value>対象スキル名</value>
   </data>
+  <data name="Notification_TargetSkillName_Placeholder" xml:space="preserve">
+    <value>例: 魂の鎖</value>
+  </data>
   <data name="Notification_TargetSkillId" xml:space="preserve">
     <value>対象スキルID</value>
+  </data>
+  <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
+    <value>例: 304221</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※IDを入力すると、名前より優先されます</value>
@@ -1949,117 +2018,6 @@
   <data name="PlayerInfo_CopyImageFailed_Detail" xml:space="preserve">
     <value>ほかのアプリがクリップボードを使っている可能性があります。
 少し待ってから、もう一度コピーしてください。</value>
-  </data>
-  <data name="Settings_Notification_Method" xml:space="preserve">
-    <value>通知方法</value>
-  </data>
-  <data name="NotificationMethod_Windows" xml:space="preserve">
-    <value>Windows通知</value>
-  </data>
-  <data name="NotificationMethod_Speech" xml:space="preserve">
-    <value>読み上げ</value>
-  </data>
-  <data name="Settings_Notification_Volume" xml:space="preserve">
-    <value>通知音量</value>
-  </data>
-  <data name="Settings_Notification_WindowsNote" xml:space="preserve">
-    <value>※ゲーム中は、Windowsの「応答不可を自動的にオンにする」により通知が届かないことがあります</value>
-  </data>
-  <data name="Settings_BuffCardNotification_Expired" xml:space="preserve">
-    <value>バフ・デバフ効果切れ</value>
-  </data>
-  <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
-    <value>薬剤・料理効果切れ</value>
-  </data>
-  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
-    <value>予兆技</value>
-  </data>
-  <data name="Notification_EntryConfirmation" xml:space="preserve">
-    <value>入場確認</value>
-  </data>
-  <data name="Settings_PlayerListNotification_HealthLow" xml:space="preserve">
-    <value>HP低下</value>
-  </data>
-  <data name="Settings_PlayerListNotification_Field_Content" xml:space="preserve">
-    <value>コンテンツ名</value>
-  </data>
-  <data name="Settings_PlayerListNotification_PreviewContent" xml:space="preserve">
-    <value>コンテンツ1</value>
-  </data>
-  <data name="BuffCardNotification_Expired_Default" xml:space="preserve">
-    <value>{TargetName}の{BuffName}の効果が切れました</value>
-  </data>
-  <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
-    <value>{TargetName}の{BuffName}効果が切れそうです</value>
-  </data>
-  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
-    <value>{SkillName}が来ます</value>
-  </data>
-  <data name="EntryConfirmationNotification_Default" xml:space="preserve">
-    <value>{Content}に入ります</value>
-  </data>
-  <data name="PlayerListNotification_HealthLow_Default" xml:space="preserve">
-    <value>{PlayerName}のHPが低下しました</value>
-  </data>
-  <data name="PlayerAppearedNotification_Default" xml:space="preserve">
-    <value>{PlayerName}が出現しました</value>
-  </data>
-  <data name="EntityAppearedNotification_Default" xml:space="preserve">
-    <value>{EntityName}が出現しました</value>
-  </data>
-  <data name="TargetedNotification_Default" xml:space="preserve">
-    <value>{PlayerName}が{EntityName}に狙われました</value>
-  </data>
-  <data name="Notification_Targeted" xml:space="preserve">
-    <value>狙われるプレイヤー</value>
-  </data>
-  <data name="Notification_TargetEntity" xml:space="preserve">
-    <value>対象エンティティ</value>
-  </data>
-  <data name="Notification_TargetEntity_BossOnly" xml:space="preserve">
-    <value>ボスのみ</value>
-  </data>
-  <data name="Notification_TargetEntity_BossAndElite" xml:space="preserve">
-    <value>ボスと精鋭</value>
-  </data>
-  <data name="TargetedCondition_Immediate" xml:space="preserve">
-    <value>無条件</value>
-  </data>
-  <data name="TargetedCondition_1" xml:space="preserve">
-    <value>狙われ状態1秒以上</value>
-  </data>
-  <data name="TargetedCondition_2" xml:space="preserve">
-    <value>狙われ状態2秒以上</value>
-  </data>
-  <data name="TargetedCondition_3" xml:space="preserve">
-    <value>狙われ状態3秒以上</value>
-  </data>
-  <data name="TargetedPlayer_PartyMembers" xml:space="preserve">
-    <value>パーティメンバー</value>
-  </data>
-  <data name="TargetedPlayer_NonGuardian" xml:space="preserve">
-    <value>防御クラス以外</value>
-  </data>
-  <data name="TargetedPlayer_NonGuardianPartyMembers" xml:space="preserve">
-    <value>防御クラス以外のパーティメンバー</value>
-  </data>
-  <data name="Notification_EntityCast" xml:space="preserve">
-    <value>エンティティ詠唱</value>
-  </data>
-  <data name="EntityCastNotification_Default" xml:space="preserve">
-    <value>{EntityName}が詠唱中です</value>
-  </data>
-  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
-    <value>発動時</value>
-  </data>
-  <data name="TelegraphedSkillCondition_1" xml:space="preserve">
-    <value>発動1秒前</value>
-  </data>
-  <data name="TelegraphedSkillCondition_2" xml:space="preserve">
-    <value>発動2秒前</value>
-  </data>
-  <data name="TelegraphedSkillCondition_3" xml:space="preserve">
-    <value>発動3秒前</value>
   </data>
   <data name="Startup_Error_Title" xml:space="preserve">
     <value>起動エラー</value>

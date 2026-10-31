@@ -4,8 +4,8 @@ using StarResonanceDps.App.Config;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// 属性カラー(<see cref="ElementColorWidgetSettingsConfig"/>)から行のバーの色を作る。スキル詳細と被ダメリストが使う。
-/// フィルターと不透明度が掛かるのはバーだけで、設定画面の色見本は素のまま。
+/// 属性カラー(<see cref="ElementColorWidgetSettingsConfig"/>。与ダメ詳細などでは節の名前がアイコンカラーで、物理・魔法・無分類の行も持つ)からバーの色を作る。
+/// スキル詳細・被ダメリスト・与ダメ詳細などが使う。不透明度が掛かるのはウィジェットの側だけで、設定画面の色見本は素のまま。
 /// </summary>
 public static class ElementBarColors
 {
@@ -13,13 +13,24 @@ public static class ElementBarColors
     public static Color Resolve(ElementColorWidgetSettingsConfig settings, Zproto.EDamageProperty element)
     {
         var key = element.ToString();
-        var defaults = WidgetConfigDefaults.CreateDefaultElementColors(key);
+        return Resolve(settings, key, WidgetConfigDefaults.CreateDefaultElementColors(key), WidgetConfigDefaults.MinClassColorIndex + 1);
+    }
+
+    /// <summary>そのタイプ(物理・魔法・無分類)の色見本で選んでいる色。</summary>
+    public static Color Resolve(ElementColorWidgetSettingsConfig settings, Zproto.EDamageMode mode)
+    {
+        var key = mode.ToString();
+        return Resolve(settings, key, WidgetConfigDefaults.CreateDefaultDamageModeColors(key), WidgetConfigDefaults.MinClassColorIndex);
+    }
+
+    private static Color Resolve(ElementColorWidgetSettingsConfig settings, string key, List<string> defaults, int missingColorIndex)
+    {
         var palette = settings.ColorPalettes.TryGetValue(key, out var colors) && colors.Count > 0
             ? colors
             : defaults;
         var selectedIndex = settings.ColorIndexes.TryGetValue(key, out var index)
             ? index
-            : WidgetConfigDefaults.MinClassColorIndex + 1;
+            : missingColorIndex;
 
         var hex = palette[Math.Clamp(selectedIndex, 0, palette.Count - 1)];
         return ColorUtilities.TryParseHex(hex, out var color)
@@ -27,10 +38,9 @@ public static class ElementBarColors
             : Colors.Gray;
     }
 
-    /// <summary>バーの塗り。色にフィルターと不透明度を掛ける。</summary>
+    /// <summary>バーの塗り。色に不透明度を掛ける。</summary>
     public static SolidColorBrush CreateBarBrush(ElementColorWidgetSettingsConfig settings, Color color)
     {
-        var filtered = ClassColorFilter.Apply(color, settings);
         var opacity = Math.Clamp(
             settings.ColorOpacity,
             WidgetConfigDefaults.MinClassColorOpacity,
@@ -38,9 +48,9 @@ public static class ElementBarColors
 
         var brush = new SolidColorBrush(Color.FromArgb(
             (byte)Math.Round(opacity / 100d * byte.MaxValue, MidpointRounding.AwayFromZero),
-            filtered.R,
-            filtered.G,
-            filtered.B));
+            color.R,
+            color.G,
+            color.B));
         brush.Freeze();
         return brush;
     }

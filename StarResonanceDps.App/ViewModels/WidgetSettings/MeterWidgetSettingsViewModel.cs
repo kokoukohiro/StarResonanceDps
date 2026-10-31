@@ -68,12 +68,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     [ObservableProperty]
     private double _classColorOpacity = WidgetConfigDefaults.MaxClassColorOpacity;
 
-    [ObservableProperty]
-    private bool _classColorFilterEnabled;
-
-    [ObservableProperty]
-    private double _classColorFilterStrength = WidgetConfigDefaults.DefaultClassColorFilterStrength;
-
     public MeterWidgetSettingsViewModel(WidgetKind kind, MeterWidgetSettingsConfig? config)
     {
         _kind = kind;
@@ -98,11 +92,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         }
 
         Items = new ReadOnlyObservableCollection<MeterClassColorItemViewModel>(items);
-
-        ClassColorFilterColors = new ColorPaletteViewModel(
-            WidgetConfigDefaults.CreateDefaultClassColorFilterColors(_kind),
-            WidgetConfigDefaults.MaxPaletteColorCount);
-        ClassColorFilterColors.PaletteChanged += Colors_PaletteChanged;
 
         var roleSkillIds = WidgetConfigDefaults.OtherRoleSkillIds;
         for (var index = 0; index < roleSkillIds.Count; index++)
@@ -152,19 +141,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     public bool ShowsPlayerListProfessionIcons => !UsesMeterClassColorIconBackground;
 
     public bool HasClassColorOpacity => UsesMeterClassColorIconBackground;
-
-    /// <summary>フィルター色のパレット。クラスカラーと同じ枠を使う。</summary>
-    public ColorPaletteViewModel ClassColorFilterColors { get; }
-
-    /// <summary>「クラスカラーのフィルター」のスイッチを出すか。</summary>
-    public bool ShowsClassColorFilterSettings => WidgetConfigDefaults.UsesClassColorFilter(_kind);
-
-    /// <summary>フィルターの色と強さを出すか。スイッチがオフのときは隠す。</summary>
-    public bool ShowsClassColorFilterOptions => ShowsClassColorFilterSettings && ClassColorFilterEnabled;
-
-    /// <summary>スイッチの右に出す ON / OFF。</summary>
-    public string ClassColorFilterStateText => LocalizationManager.Instance.GetString(
-        ClassColorFilterEnabled ? "Settings_Switch_On" : "Settings_Switch_Off");
 
     public bool ShowsHealthValueSettings => _kind is WidgetKind.PlayerList or WidgetKind.EntityList;
 
@@ -245,8 +221,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         {
             item.Colors.PaletteChanged -= Colors_PaletteChanged;
         }
-
-        ClassColorFilterColors.PaletteChanged -= Colors_PaletteChanged;
     }
 
     public MeterWidgetSettingsConfig CreateConfig()
@@ -267,13 +241,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
                 (int)Math.Round(ClassColorOpacity, MidpointRounding.AwayFromZero),
                 WidgetConfigDefaults.MinClassColorOpacity,
                 WidgetConfigDefaults.MaxClassColorOpacity),
-            ClassColorFilterEnabled = ClassColorFilterEnabled,
-            ClassColorFilterColors = [.. ClassColorFilterColors.GetHexColors()],
-            ClassColorFilterColorIndex = ClassColorFilterColors.SelectedIndex,
-            ClassColorFilterStrength = Math.Clamp(
-                (int)Math.Round(ClassColorFilterStrength, MidpointRounding.AwayFromZero),
-                WidgetConfigDefaults.MinClassColorFilterStrength,
-                WidgetConfigDefaults.MaxClassColorFilterStrength),
             ClassColorIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
         };
@@ -323,16 +290,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
         GetItem(key).Colors.AddOrSelect(color);
     }
 
-    public Color GetSelectedClassColorFilterColor()
-    {
-        return ClassColorFilterColors.SelectedColor;
-    }
-
-    public void ApplyClassColorFilterColor(Color color)
-    {
-        ClassColorFilterColors.AddOrSelect(color);
-    }
-
     private void Load(MeterWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedMeter(_kind, config);
@@ -369,9 +326,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             SelfDisplayModeIndex = normalized.SelfDisplayModeIndex;
             ListSortModeIndex = normalized.ListSortModeIndex;
             ClassColorOpacity = normalized.ClassColorOpacity;
-            ClassColorFilterColors.Load(normalized.ClassColorFilterColors, normalized.ClassColorFilterColorIndex);
-            ClassColorFilterEnabled = normalized.ClassColorFilterEnabled ?? false;
-            ClassColorFilterStrength = normalized.ClassColorFilterStrength;
         }
         finally
         {
@@ -400,13 +354,7 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
             || left.EntityDisplayModeIndex != right.EntityDisplayModeIndex
             || left.SelfDisplayModeIndex != right.SelfDisplayModeIndex
             || left.ListSortModeIndex != right.ListSortModeIndex
-            || left.ClassColorOpacity != right.ClassColorOpacity
-            || left.ClassColorFilterEnabled != right.ClassColorFilterEnabled
-            || left.ClassColorFilterColorIndex != right.ClassColorFilterColorIndex
-            || left.ClassColorFilterStrength != right.ClassColorFilterStrength
-            || !(left.ClassColorFilterColors ?? []).SequenceEqual(
-                right.ClassColorFilterColors ?? [],
-                StringComparer.OrdinalIgnoreCase))
+            || left.ClassColorOpacity != right.ClassColorOpacity)
         {
             return false;
         }
@@ -498,7 +446,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
 
         OnPropertyChanged(nameof(PlayerInfoCustomizationTitle));
         OnPropertyChanged(nameof(ClassColorSectionTitle));
-        OnPropertyChanged(nameof(ClassColorFilterStateText));
         OnPropertyChanged(nameof(ShowSeasonTalentStateText));
         OnPropertyChanged(nameof(SelfHighlightStateText));
         RebuildPlayerInfoFormatFields();
@@ -584,19 +531,6 @@ public sealed partial class MeterWidgetSettingsViewModel : ObservableObject, IDi
     }
 
     partial void OnClassColorOpacityChanged(double value)
-    {
-        NotifyChanged();
-    }
-
-    partial void OnClassColorFilterEnabledChanged(bool value)
-    {
-        // オフの間は「フィルターカラー」「フィルターの強さ」の行ごと消す。
-        OnPropertyChanged(nameof(ShowsClassColorFilterOptions));
-        OnPropertyChanged(nameof(ClassColorFilterStateText));
-        NotifyChanged();
-    }
-
-    partial void OnClassColorFilterStrengthChanged(double value)
     {
         NotifyChanged();
     }

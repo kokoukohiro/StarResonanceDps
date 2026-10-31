@@ -884,29 +884,17 @@
   <data name="PlayerList_ReviveBlocked" xml:space="preserve">
     <value>无法复活({0})</value>
   </data>
-  <data name="Settings_ClassColors_Filter" xml:space="preserve">
-    <value>职业颜色滤镜</value>
-  </data>
-  <data name="Settings_ClassColors_FilterColor" xml:space="preserve">
-    <value>滤镜颜色</value>
-  </data>
-  <data name="Settings_ClassColors_FilterStrength" xml:space="preserve">
-    <value>滤镜强度</value>
-  </data>
   <data name="Settings_Section_ElementColors_Title" xml:space="preserve">
     <value>元素颜色</value>
+  </data>
+  <data name="Settings_IconColors_Opacity" xml:space="preserve">
+    <value>图标颜色不透明度</value>
   </data>
   <data name="Settings_ElementColors_Opacity" xml:space="preserve">
     <value>元素颜色不透明度</value>
   </data>
-  <data name="Settings_ElementColors_Filter" xml:space="preserve">
-    <value>元素颜色滤镜</value>
-  </data>
   <data name="Settings_Section_GraphColors_Title" xml:space="preserve">
     <value>图表颜色</value>
-  </data>
-  <data name="Settings_GraphColors_Filter" xml:space="preserve">
-    <value>图表颜色滤镜</value>
   </data>
   <data name="Meter_Total" xml:space="preserve">
     <value>合计</value>
@@ -1120,74 +1108,26 @@
   <data name="Widget_HealingSkillDetails" xml:space="preserve">
     <value>技能详情(治疗)</value>
   </data>
-  <data name="Metric_LabelValueFormat" xml:space="preserve">
-    <value>{0}: {1}</value>
+  <data name="Metric_SummaryTotal" xml:space="preserve">
+    <value>合计</value>
   </data>
-  <data name="Metric_TotalValue" xml:space="preserve">
-    <value>总{0}: {1}</value>
+  <data name="Metric_SummaryNormal" xml:space="preserve">
+    <value>普通</value>
   </data>
-  <data name="Metric_TotalPerSecond" xml:space="preserve">
-    <value>总{0}: {1}</value>
+  <data name="Metric_SummaryCrit" xml:space="preserve">
+    <value>暴击</value>
   </data>
-  <data name="Metric_Dps" xml:space="preserve">
-    <value>DPS</value>
+  <data name="Metric_SummaryLucky" xml:space="preserve">
+    <value>幸运</value>
   </data>
-  <data name="Metric_Hps" xml:space="preserve">
-    <value>HPS</value>
+  <data name="Metric_SummaryHitsFormat" xml:space="preserve">
+    <value>{0}次命中</value>
   </data>
-  <data name="Metric_TotalShieldBreak" xml:space="preserve">
-    <value>总破盾</value>
+  <data name="Metric_SummaryElementShare" xml:space="preserve">
+    <value>元素占比</value>
   </data>
-  <data name="Metric_TotalOverheal" xml:space="preserve">
-    <value>总过量治疗</value>
-  </data>
-  <data name="Metric_TotalHits" xml:space="preserve">
-    <value>总命中数</value>
-  </data>
-  <data name="Metric_TotalCritRate" xml:space="preserve">
-    <value>总暴击率</value>
-  </data>
-  <data name="Metric_TotalLuckyRate" xml:space="preserve">
-    <value>总幸运率</value>
-  </data>
-  <data name="Metric_TotalCrits" xml:space="preserve">
-    <value>总暴击数</value>
-  </data>
-  <data name="Metric_TotalImmunes" xml:space="preserve">
-    <value>总免疫数</value>
-  </data>
-  <data name="Metric_TotalNormalDamage" xml:space="preserve">
-    <value>总普通伤害</value>
-  </data>
-  <data name="Metric_TotalNormalHealing" xml:space="preserve">
-    <value>总普通治疗</value>
-  </data>
-  <data name="Metric_TotalCritDamage" xml:space="preserve">
-    <value>总暴击伤害</value>
-  </data>
-  <data name="Metric_TotalCritHealing" xml:space="preserve">
-    <value>总暴击治疗</value>
-  </data>
-  <data name="Metric_TotalLuckyDamage" xml:space="preserve">
-    <value>总幸运伤害</value>
-  </data>
-  <data name="Metric_TotalLuckyHealing" xml:space="preserve">
-    <value>总幸运治疗</value>
-  </data>
-  <data name="Metric_TotalLuckyStrikes" xml:space="preserve">
-    <value>总幸运触发数</value>
-  </data>
-  <data name="Metric_TotalAverageDamage" xml:space="preserve">
-    <value>总平均伤害</value>
-  </data>
-  <data name="Metric_TotalAverageHealing" xml:space="preserve">
-    <value>总平均治疗</value>
-  </data>
-  <data name="Metric_TotalCasts" xml:space="preserve">
-    <value>总施放数</value>
-  </data>
-  <data name="Metric_CastsPerMinute" xml:space="preserve">
-    <value>每分钟施放</value>
+  <data name="Metric_SummaryModeShare" xml:space="preserve">
+    <value>类型占比</value>
   </data>
   <data name="Meter_Benchmark" xml:space="preserve">
     <value>测量</value>
@@ -1380,6 +1320,9 @@
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>承伤日志</value>
+  </data>
+  <data name="Widget_DamageTakenSummary" xml:space="preserve">
+    <value>承伤详情</value>
   </data>
   <data name="DamageTakenList_Defeated" xml:space="preserve">
     <value>(被击败)</value>
@@ -1585,8 +1528,14 @@
   <data name="Notification_TargetEntityName" xml:space="preserve">
     <value>目标实体名称</value>
   </data>
+  <data name="Notification_TargetEntityName_Placeholder" xml:space="preserve">
+    <value>例: 捍卫者05型</value>
+  </data>
   <data name="Notification_TargetEntityId" xml:space="preserve">
     <value>目标实体ID</value>
+  </data>
+  <data name="Notification_TargetEntityId_Placeholder" xml:space="preserve">
+    <value>例: 21004</value>
   </data>
   <data name="Notification_TargetPlayerUid" xml:space="preserve">
     <value>目标玩家UID</value>
@@ -1594,8 +1543,14 @@
   <data name="Notification_TargetSkillName" xml:space="preserve">
     <value>目标技能名称</value>
   </data>
+  <data name="Notification_TargetSkillName_Placeholder" xml:space="preserve">
+    <value>例: 魂链</value>
+  </data>
   <data name="Notification_TargetSkillId" xml:space="preserve">
     <value>目标技能ID</value>
+  </data>
+  <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
+    <value>例: 304221</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※输入ID后将优先于名称</value>

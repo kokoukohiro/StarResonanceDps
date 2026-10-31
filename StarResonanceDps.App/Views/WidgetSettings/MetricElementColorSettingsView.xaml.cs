@@ -45,22 +45,4 @@ public partial class MetricElementColorSettingsView : UserControl
             }
         });
     }
-
-    private void FilterColorPickerButton_Click(object sender, RoutedEventArgs e)
-    {
-        var owner = Window.GetWindow(this);
-        var window = new ColorPickerWindow(ViewModel.GetSelectedFilterColor());
-        if (owner is not null)
-        {
-            window.Owner = owner;
-        }
-
-        OwnerModalWindow.Show(window, owner, () =>
-        {
-            if (window.IsConfirmed)
-            {
-                ViewModel.ApplyFilterColor(window.SelectedColor);
-            }
-        });
-    }
 }

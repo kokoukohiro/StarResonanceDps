@@ -187,7 +187,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.DpsGraph
         or WidgetKind.HealingContribution
         or WidgetKind.HealingSummary
-        or WidgetKind.HpsGraph;
+        or WidgetKind.HpsGraph
+        or WidgetKind.DamageTakenSummary;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
@@ -1468,7 +1469,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     /// <summary>
     /// 並び替えが名前順のときに、<b>自分とパーティ以外</b>を名前順にする。
-    /// 自分とパーティ(PT番号順)の並びと、PT外の 灰色 → ライブ の群は守る。
+    /// 自分とパーティ(PT番号順)の並びと、PT外の 灰色 → 戦闘中 → その他 の群は守る。
     /// 名前は画面に出しているものと同じ(伏せ字・NPC の職業名込み)。同じ名前どうしは元の並び(発見順)のまま。
     /// </summary>
     private IReadOnlyList<PlayerRosterEntry> SortNonPartyByName(IReadOnlyList<PlayerRosterEntry> roster)
@@ -1654,7 +1655,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             return visibleEntities;
         }
 
-        // ボス → 精鋭 → 普通 の群は守り、その中だけを名前順にする。
+        // 戦闘状態とボス → 精鋭 → 普通 の群は守り、その中だけを名前順にする。
         // 並べ替えは安定なので、同じ名前どうしは元の並び(発見順)のまま。
         return [.. visibleEntities
             .OrderBy(NearbyEntityStore.GetSortRank)
