@@ -154,6 +154,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
+            // 通知の途中(全滅・ボス部屋の区切り)で作り直すときは、それまでに控えた敵のバフを閉じる前の回に残す。
+            MessageManager.FlushPendingEnemyBuffLogs();
+
             string priorBossName = "";
             int priorEncounterPhase = 0;
 

@@ -17,7 +17,7 @@ namespace StarResonanceDps.Core.Models;
 /// 今狙っている相手のキャラ番号(実体の属性 <c>AttrTargetUuid</c>、450)。相手がプレイヤーでない・いないときは 0。
 /// ヘイトの1位とは限らない。
 /// </param>
-/// <param name="HateRanking">ヘイトの一覧(実体の属性 <c>AttrHateList</c>、474)のプレイヤーだけを、値の大きい順に5人まで。</param>
+/// <param name="HateRanking">ヘイトの一覧(実体の属性 <c>AttrHateList</c>、474)のプレイヤーだけを、値の大きい順に全員。</param>
 /// <param name="Cast">
 /// 始めた詠唱(詠唱バーを持つ技)。詠唱していない・始まりの時刻が分からない(出現したときにすでに詠唱していた)ときは null。
 /// 全体秒数が過ぎても技が続く間は残るので、詠唱が終わったかは表示側が時刻で決める。
@@ -54,13 +54,11 @@ public readonly record struct NearbyEntityCast(int SkillId, DateTime StartedAtUt
 public readonly record struct NearbyEntityHateRank(long CharacterId, long HateValue);
 
 /// <summary>
-/// ヘイトの一覧の上位(プレイヤーだけ、値の大きい順、<see cref="MaxCount"/> 人まで)。
+/// ヘイトの一覧(プレイヤーだけ、値の大きい順、全員)。何人まで出すかは画面の設定が決める。
 /// 中身が同じなら等しい(行の値が変わらないときに通知を出さないため)。
 /// </summary>
 public sealed class NearbyEntityHateRanking : IEquatable<NearbyEntityHateRanking>
 {
-    public const int MaxCount = 5;
-
     private readonly NearbyEntityHateRank[] _ranks;
 
     private NearbyEntityHateRanking(NearbyEntityHateRank[] ranks)
@@ -74,12 +72,12 @@ public sealed class NearbyEntityHateRanking : IEquatable<NearbyEntityHateRanking
 
     public NearbyEntityHateRank this[int index] => _ranks[index];
 
-    /// <param name="ranks">値の大きい順に並べた、プレイヤーだけの上位。<see cref="MaxCount"/> 人より多ければ後ろを捨てる。</param>
+    /// <param name="ranks">値の大きい順に並べた、プレイヤーだけの一覧。</param>
     public static NearbyEntityHateRanking Create(IEnumerable<NearbyEntityHateRank> ranks)
     {
         ArgumentNullException.ThrowIfNull(ranks);
 
-        var items = ranks.Take(MaxCount).ToArray();
+        var items = ranks.ToArray();
         return items.Length == 0 ? Empty : new NearbyEntityHateRanking(items);
     }
 

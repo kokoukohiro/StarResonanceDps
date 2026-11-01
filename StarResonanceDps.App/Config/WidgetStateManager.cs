@@ -201,6 +201,62 @@ public sealed class WidgetStateManager
         }
     }
 
+    /// <summary>エンティティ情報の非表示のバフだけを保存する。枠の右クリックで非表示にしたときに呼ぶ(バフ・デバフ一覧と同じく、この項目だけを書く)。</summary>
+    public void SaveEntityInfoHiddenBuffs(WidgetKind kind, IReadOnlyList<int> hiddenBuffIds)
+    {
+        if (!WidgetConfigDefaults.SupportsEntityInfoSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.EntityInfo ??= WidgetConfigDefaults.CreateEntityInfoSettings();
+            config.EntityInfo.HiddenBuffIds = [.. hiddenBuffIds];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>
+    /// バフ・デバフ一覧の優先表示リストだけを保存する。窓の右クリックで優先表示にした・やめたときに呼ぶ(非表示のバフと同じく、この項目だけを書く)。
+    /// </summary>
+    public void SaveBuffListPriorityBuffs(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> priorityBuffs)
+    {
+        if (!WidgetConfigDefaults.SupportsBuffListSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.BuffList ??= WidgetConfigDefaults.CreateBuffListSettings(kind);
+            config.BuffList.PriorityBuffs = [.. priorityBuffs.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>エンティティ情報の優先表示リストだけを保存する。枠の右クリックで優先表示にした・やめたときに呼ぶ(バフ・デバフ一覧と同じく、この項目だけを書く)。</summary>
+    public void SaveEntityInfoPriorityBuffs(WidgetKind kind, IReadOnlyList<BuffDebuffGroupEntryConfig> priorityBuffs)
+    {
+        if (!WidgetConfigDefaults.SupportsEntityInfoSettings(kind))
+        {
+            return;
+        }
+
+        lock (_syncRoot)
+        {
+            var config = GetOrCreateWidgetConfig(kind);
+            config.EntityInfo ??= WidgetConfigDefaults.CreateEntityInfoSettings();
+            config.EntityInfo.PriorityBuffs = [.. priorityBuffs.Select(entry => entry.Clone())];
+            WidgetConfigDefaults.Normalize(kind, config);
+            SaveCore();
+        }
+    }
+
     /// <summary>
     /// バフ・デバフグループの行だけを保存する。バフ・デバフ一覧かカードの右クリックで行を足したときに呼ぶ
     /// (バフ・デバフ一覧の非表示のバフと同じく、この項目だけを書く)。

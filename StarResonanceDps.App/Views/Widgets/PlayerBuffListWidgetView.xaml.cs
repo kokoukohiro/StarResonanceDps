@@ -17,7 +17,8 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// </para>
 ///
 /// <para>
-/// 行の左クリックはカードを開き、右クリックはメニュー(カード・非表示・グループに追加・バフ・デバフカードのショートカットに追加)を開く。メニューの開き方はエンティティリストと同じ。
+/// 行の左クリックはカードを開き、右クリックはメニュー(カード・優先表示にする/やめる・非表示・グループに追加・バフ・デバフカードのショートカットに追加)を開く。
+/// メニューの開き方はエンティティリストと同じ。優先表示の項目の文言は開いた行の今の状態で決め(<see cref="IBuffListWindowViewModel.MenuEntry"/>)、
 /// 「グループに追加」と「バフ・デバフカードのショートカットに追加」は自分の一覧で足せる行だけに出す。
 /// </para>
 /// </summary>
@@ -94,6 +95,9 @@ public partial class PlayerBuffListWidgetView : UserControl, IWidgetVerticalScro
         {
             return;
         }
+
+        viewModel.MenuEntry = entry;
+        viewModel.RefreshMenuText();
 
         // 「グループに追加」と「バフ・デバフカードのショートカットに追加」は足せる行(自分の一覧で、まだオンで入っていない)だけに出す。
         foreach (var menuItem in menu.Items.OfType<MenuItem>())

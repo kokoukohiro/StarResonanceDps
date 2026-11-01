@@ -44,6 +44,8 @@ public sealed class WidgetConfig
 
     public DamageTakenListWidgetSettingsConfig? DamageTakenList { get; set; }
 
+    public EntityInfoWidgetSettingsConfig? EntityInfo { get; set; }
+
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
     ///
@@ -87,6 +89,7 @@ public sealed class WidgetConfig
             BuffDebuffGroup = BuffDebuffGroup?.Clone(),
             ReviveList = ReviveList?.Clone(),
             DamageTakenList = DamageTakenList?.Clone(),
+            EntityInfo = EntityInfo?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -287,6 +290,13 @@ public sealed class BuffListWidgetSettingsConfig
     public int GaugeLengthIndex { get; set; } = WidgetConfigDefaults.DefaultBuffListGaugeLengthIndex;
 
     /// <summary>
+    /// 優先表示リスト(一覧の先頭からこの並びで出すバフ)。行はバフの番号だけ。並びは設定の窓で並べ替える。
+    /// 既定の行(<see cref="WidgetConfigDefaults.GetBuffListPriorityDefaults"/>、バフ一覧とデバフ一覧で別)はオフにしても残り、
+    /// 右クリックで足した行はオフのまま保存すると消える。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? PriorityBuffs { get; set; }
+
+    /// <summary>
     /// 一覧に出さないバフのID(<c>BaseId</c>)。並びは非表示にした順。
     /// 窓の右クリックで足し、設定画面の削除で外す。
     /// </summary>
@@ -313,6 +323,7 @@ public sealed class BuffListWidgetSettingsConfig
             SameBuffGroupingIndex = SameBuffGroupingIndex,
             CasterNameDisplayModeIndex = CasterNameDisplayModeIndex,
             BuffInfoFormatString = BuffInfoFormatString,
+            PriorityBuffs = PriorityBuffs?.Select(entry => entry.Clone()).ToList(),
             HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds]
         };
     }
@@ -357,8 +368,8 @@ public sealed class BuffGaugeColorConfig
 }
 
 /// <summary>
-/// バフ・デバフグループの1行と、バフ・デバフカードのショートカットの1行。
-/// バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。
+/// バフ・デバフグループの1行と、バフ・デバフカードのショートカットの1行、両方の通知対象の1行、バフ・デバフ一覧とエンティティ情報の優先表示リストの1行。
+/// バフの番号(<c>BaseId</c>)か、料理・薬剤のまとまり(<see cref="BuffGroup"/>)のどちらか(<see cref="BuffEntryKey"/>)。優先表示リストはバフの番号だけ。
 /// </summary>
 public sealed class BuffDebuffGroupEntryConfig
 {
@@ -813,6 +824,85 @@ public sealed class DamageTakenListWidgetSettingsConfig
     }
 }
 
+/// <summary>
+/// エンティティ情報の設定。エンティティ名とバフ名の書式、HP数値・戦闘状態・狙われるプレイヤー・ヘイト値(エンティティリストと同じ値の形で、
+/// ヘイト値だけ先頭に「全員を表示」がある)、同種バフの表示・付与者プレイヤー名の表示、優先表示リスト、一覧に出さないバフ、
+/// アイコンカラー(エンティティリストと同じ鍵と既定の色)。
+/// </summary>
+public sealed class EntityInfoWidgetSettingsConfig
+{
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultEntityInfoFormatString"/>。</remarks>
+    public string? EntityInfoFormatString { get; set; }
+
+    /// <remarks>
+    /// バフ・デバフの枠の名前の書式(差し込む項目はバフ・デバフ一覧と同じ)。
+    /// <c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultBuffListBuffInfoFormatString"/>。
+    /// </remarks>
+    public string? BuffInfoFormatString { get; set; }
+
+    public int HealthValueDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultHealthValueDisplayModeIndex;
+
+    /// <summary>名前の左に戦闘状態の印を出すか。0=表示 / 1=非表示(エンティティリストと同じ値)。</summary>
+    public int CombatStateDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCombatStateDisplayModeIndex;
+
+    /// <summary>ヘイトの行の左端に今狙っている相手を出すか。0=表示 / 1=非表示(エンティティリストと同じ値)。</summary>
+    public int TargetedPlayerDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTargetedPlayerDisplayModeIndex;
+
+    /// <summary>
+    /// ヘイトの行に何位まで並べるか。人数は <see cref="WidgetConfigDefaults.EntityInfoHateRankDisplayCounts"/> の添字で引く
+    /// (0=全員を表示 / 1=上位5人 … 5=ヘイト1位のみ)。
+    /// </summary>
+    public int HateRankDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultEntityInfoHateRankDisplayModeIndex;
+
+    /// <summary>同じ番号のバフを、残り時間の一番長い1つの枠にまとめるか。0=まとめない / 1=まとめる。</summary>
+    public int SameBuffGroupingIndex { get; set; } = WidgetConfigDefaults.DefaultEntityInfoSameBuffGroupingIndex;
+
+    /// <summary>付与者プレイヤー名の表示。0=表示 / 1=非表示 / 2=他者付与のみ(バフ・デバフ一覧と同じ値)。</summary>
+    public int CasterNameDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultCasterNameDisplayModeIndex;
+
+    /// <summary>
+    /// 優先表示リスト(バフとデバフの枠の1枠目からこの並びで出すバフ)。扱いはバフ・デバフ一覧と同じで、
+    /// 既定の行は <see cref="WidgetConfigDefaults.DefaultEntityInfoPriorityBuffEntries"/>。
+    /// </summary>
+    public List<BuffDebuffGroupEntryConfig>? PriorityBuffs { get; set; }
+
+    /// <summary>
+    /// 枠に出さないバフのID(<c>BaseId</c>)。並びは非表示にした順。
+    /// 枠の右クリックで足し、設定画面のスイッチで外す。
+    /// </summary>
+    public List<int> HiddenBuffIds { get; set; } = [];
+
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.EntityInfo);
+
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.EntityInfo);
+
+    public EntityInfoWidgetSettingsConfig Clone()
+    {
+        return new EntityInfoWidgetSettingsConfig
+        {
+            EntityInfoFormatString = EntityInfoFormatString,
+            BuffInfoFormatString = BuffInfoFormatString,
+            HealthValueDisplayModeIndex = HealthValueDisplayModeIndex,
+            CombatStateDisplayModeIndex = CombatStateDisplayModeIndex,
+            TargetedPlayerDisplayModeIndex = TargetedPlayerDisplayModeIndex,
+            HateRankDisplayModeIndex = HateRankDisplayModeIndex,
+            SameBuffGroupingIndex = SameBuffGroupingIndex,
+            CasterNameDisplayModeIndex = CasterNameDisplayModeIndex,
+            PriorityBuffs = PriorityBuffs?.Select(entry => entry.Clone()).ToList(),
+            HiddenBuffIds = HiddenBuffIds is null ? [] : [.. HiddenBuffIds],
+            ClassColorIndexes = ClassColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.EntityInfo)
+                : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
+            ClassColorPalettes = ClassColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.EntityInfo)
+                : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
 public sealed class PlayerStatusWidgetSettingsConfig
 {
     /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultHideInactiveStatusEffects"/>。</remarks>
@@ -972,6 +1062,8 @@ public static class WidgetConfigDefaults
     private const double ReviveListInitialWindowHeight = 400d;
     private const double DamageTakenListInitialWindowWidth = 440d;
     private const double DamageTakenListInitialWindowHeight = 460d;
+    private const double EntityInfoInitialWindowWidth = 360d;
+    private const double EntityInfoInitialWindowHeight = 240d;
     private const double MetricContributionInitialWindowWidth = 520d;
     private const double MetricContributionInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 280d;
@@ -1163,14 +1255,55 @@ public static class WidgetConfigDefaults
         .. DefaultBuffDebuffGroupEntries
     ];
 
+    /// <summary>
+    /// バフ一覧の優先表示リストの既定の行(この並び)。既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultBuffListPriorityBuffEntries { get; } =
+    [
+        (BuffEntryKey.ForBuff(2110034), false),  // リキャスト短縮(ティナの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110140), false),  // 機械の力(ガトグリフの奥義のバフ)
+        (BuffEntryKey.ForBuff(2110125), false)   // 高原血統(バジリスクの奥義のバフ)
+    ];
+
+    /// <summary>
+    /// デバフ一覧の優先表示リストの既定の行(この並び)。既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultDebuffListPriorityBuffEntries { get; } =
+    [
+        (BuffEntryKey.ForBuff(2110056), false),  // 時間凝固(ティナの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110049), false),  // 機械の故障(ガトグリフの奥義のデバフ)
+        (BuffEntryKey.ForBuff(2110050), false),  // 属性停滞(バジリスクの奥義のデバフ)
+        (BuffEntryKey.ForBuff(510571), true),    // 重傷
+        (BuffEntryKey.ForBuff(2110100), true),   // 回復禁止(鉄牙のデバフ、15秒)
+        (BuffEntryKey.ForBuff(2110305), true)    // 回復禁止(ロールスキルの鉄牙のデバフ、10秒)
+    ];
+
+    /// <summary>
+    /// エンティティ情報の優先表示リストの既定の行(この並び)。既定の行はオフにしても消えず、初期化でこの並びと既定のオン・オフに戻る。
+    /// </summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> DefaultEntityInfoPriorityBuffEntries { get; } =
+    [
+        (BuffEntryKey.ForBuff(510571), true),    // 重傷
+        (BuffEntryKey.ForBuff(2110100), true),   // 回復禁止(鉄牙のデバフ、15秒)
+        (BuffEntryKey.ForBuff(2110305), true)    // 回復禁止(ロールスキルの鉄牙のデバフ、10秒)
+    ];
+
+    /// <summary>バフ・デバフ一覧の優先表示リストの既定の行。バフ一覧とデバフ一覧で別。</summary>
+    public static IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> GetBuffListPriorityDefaults(WidgetKind kind)
+    {
+        return kind == WidgetKind.DebuffList
+            ? DefaultDebuffListPriorityBuffEntries
+            : DefaultBuffListPriorityBuffEntries;
+    }
+
     public static bool IsDefaultBuffEntry(IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults, BuffEntryKey key)
     {
         return defaults.Any(entry => entry.Key == key);
     }
 
     /// <summary>
-    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット、カードとグループの通知対象)をオン/オフにする
-    /// (右クリックの「グループに追加」「ショートカットに追加」「通知対象にする」と「グループから削除」「通知対象にしない」)。
+    /// 行(バフ・デバフグループの行、バフ・デバフカードのショートカット、カードとグループの通知対象、バフ・デバフ一覧とエンティティ情報の優先表示リスト)をオン/オフにする
+    /// (右クリックの「グループに追加」「ショートカットに追加」「通知対象にする」「優先表示」と「グループから削除」「通知対象にしない」「優先表示をやめる」)。
     /// オンにするときは、行があればオンに戻し、無ければ末尾に足す。オフにするときは、既定の行(<paramref name="defaults"/>)はオフにして残し、足した行は消す
     /// (足した行をオフのまま保存したときと同じ)。ウィジェットの今の値・保存する値・設定の窓の保存済みの値がこの決まりを使う。
     /// </summary>
@@ -1276,6 +1409,25 @@ public static class WidgetConfigDefaults
     {
         return HateRankDisplayCounts[Math.Clamp(index, 0, HateRankDisplayCounts.Count - 1)];
     }
+
+    /// <summary>エンティティ情報の設定「ヘイト値」の選択肢(並べる人数)。先頭は全員。並びは設定の選択リストと同じ。</summary>
+    public static IReadOnlyList<int> EntityInfoHateRankDisplayCounts { get; } = [int.MaxValue, 5, 4, 3, 2, 1];
+
+    /// <summary>エンティティ情報の「ヘイト値」の既定(全員を表示)。</summary>
+    public const int DefaultEntityInfoHateRankDisplayModeIndex = 0;
+
+    /// <summary>エンティティ情報の「ヘイト値」の選択の添字から並べる人数。範囲の外は端の値。</summary>
+    public static int GetEntityInfoHateRankDisplayCount(int index)
+    {
+        return EntityInfoHateRankDisplayCounts[Math.Clamp(index, 0, EntityInfoHateRankDisplayCounts.Count - 1)];
+    }
+
+    /// <summary>エンティティ情報の設定「同種バフの表示」の添字。</summary>
+    public const int EntityInfoSameBuffUngroupedIndex = 0;
+    public const int EntityInfoSameBuffGroupedIndex = 1;
+
+    /// <summary>エンティティ情報の「同種バフの表示」の既定(まとめない)。</summary>
+    public const int DefaultEntityInfoSameBuffGroupingIndex = EntityInfoSameBuffUngroupedIndex;
 
     /// <summary>バフ・デバフ一覧の行のバフ名の書式の既定。付与者が出ないときは空になった括弧ごと消える。</summary>
     public const string DefaultBuffListBuffInfoFormatString = "{BuffName}({CasterName})";
@@ -1643,6 +1795,12 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.DamageTakenList;
     }
 
+    /// <summary>エンティティ情報の設定(表示設定・非表示リスト・アイコンカラー)を持つ種別か。</summary>
+    public static bool SupportsEntityInfoSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.EntityInfo;
+    }
+
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
     public static bool IsSelfOnlyPlayerWindowKind(WidgetKind kind)
     {
@@ -1669,7 +1827,8 @@ public static class WidgetConfigDefaults
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph
-            or WidgetKind.DamageTakenSummary;
+            or WidgetKind.DamageTakenSummary
+            or WidgetKind.EntityInfo;
     }
 
     public static WidgetConfig Create(WidgetKind kind)
@@ -1693,7 +1852,8 @@ public static class WidgetConfigDefaults
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
             BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null,
             ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null,
-            DamageTakenList = SupportsDamageTakenListSettings(kind) ? CreateDamageTakenListSettings() : null
+            DamageTakenList = SupportsDamageTakenListSettings(kind) ? CreateDamageTakenListSettings() : null,
+            EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null
         };
     }
 
@@ -2103,6 +2263,72 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    /// <summary>エンティティ情報の設定の既定。</summary>
+    public static EntityInfoWidgetSettingsConfig CreateEntityInfoSettings()
+    {
+        return new EntityInfoWidgetSettingsConfig
+        {
+            EntityInfoFormatString = DefaultEntityInfoFormatString,
+            BuffInfoFormatString = DefaultBuffListBuffInfoFormatString,
+            HealthValueDisplayModeIndex = DefaultHealthValueDisplayModeIndex,
+            CombatStateDisplayModeIndex = DefaultCombatStateDisplayModeIndex,
+            TargetedPlayerDisplayModeIndex = DefaultTargetedPlayerDisplayModeIndex,
+            HateRankDisplayModeIndex = DefaultEntityInfoHateRankDisplayModeIndex,
+            SameBuffGroupingIndex = DefaultEntityInfoSameBuffGroupingIndex,
+            CasterNameDisplayModeIndex = DefaultCasterNameDisplayModeIndex,
+            PriorityBuffs = CreateBuffEntries(DefaultEntityInfoPriorityBuffEntries),
+            HiddenBuffIds = [],
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.EntityInfo),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.EntityInfo)
+        };
+    }
+
+    /// <summary>
+    /// 保存値を正規化して写す。書式が無ければ既定を入れ、選択は範囲に収め、優先表示リストは <see cref="NormalizeBuffEntries"/> で直し、
+    /// クラスの色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。
+    /// </summary>
+    public static EntityInfoWidgetSettingsConfig CloneNormalizedEntityInfo(EntityInfoWidgetSettingsConfig? entityInfo)
+    {
+        var normalized = (entityInfo ?? CreateEntityInfoSettings()).Clone();
+        normalized.EntityInfoFormatString ??= DefaultEntityInfoFormatString;
+        normalized.BuffInfoFormatString ??= DefaultBuffListBuffInfoFormatString;
+        normalized.HealthValueDisplayModeIndex = Math.Clamp(
+            normalized.HealthValueDisplayModeIndex,
+            DefaultHealthValueDisplayModeIndex,
+            SeparateShieldHealthValueDisplayModeIndex);
+        normalized.CombatStateDisplayModeIndex = Math.Clamp(
+            normalized.CombatStateDisplayModeIndex,
+            CombatStateDisplayShowIndex,
+            CombatStateDisplayHideIndex);
+        normalized.TargetedPlayerDisplayModeIndex = Math.Clamp(
+            normalized.TargetedPlayerDisplayModeIndex,
+            TargetedPlayerDisplayShowIndex,
+            TargetedPlayerDisplayHideIndex);
+        normalized.HateRankDisplayModeIndex = Math.Clamp(
+            normalized.HateRankDisplayModeIndex,
+            0,
+            EntityInfoHateRankDisplayCounts.Count - 1);
+        normalized.SameBuffGroupingIndex = Math.Clamp(
+            normalized.SameBuffGroupingIndex,
+            EntityInfoSameBuffUngroupedIndex,
+            EntityInfoSameBuffGroupedIndex);
+        normalized.CasterNameDisplayModeIndex = Math.Clamp(
+            normalized.CasterNameDisplayModeIndex,
+            CasterNameDisplayShowIndex,
+            CasterNameDisplayAppliedByOthersIndex);
+
+        normalized.PriorityBuffs = NormalizeBuffEntries(normalized.PriorityBuffs, DefaultEntityInfoPriorityBuffEntries);
+
+        // 0 以下はバフのIDではない。重なりは先に足したほうを残し、非表示にした順を保つ(バフ・デバフ一覧と同じ)。
+        normalized.HiddenBuffIds = [.. normalized.HiddenBuffIds.Where(baseId => baseId > 0).Distinct()];
+
+        (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.EntityInfo,
+            normalized.ClassColorIndexes,
+            normalized.ClassColorPalettes);
+        return normalized;
+    }
+
     private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
     {
         return kind switch
@@ -2146,6 +2372,11 @@ public static class WidgetConfigDefaults
             {
                 Width = ReviveListInitialWindowWidth,
                 Height = ReviveListInitialWindowHeight
+            },
+            WidgetKind.EntityInfo => new WidgetWindowConfig
+            {
+                Width = EntityInfoInitialWindowWidth,
+                Height = EntityInfoInitialWindowHeight
             },
             WidgetKind.DamageTakenList => new WidgetWindowConfig
             {
@@ -2283,7 +2514,7 @@ public static class WidgetConfigDefaults
         };
     }
 
-    /// <summary>ゲージの長さの既定は種別で違う。バフは10秒、デバフは30秒。</summary>
+    /// <summary>ゲージの長さの既定は種別で違う。バフは10秒、デバフは30秒。優先表示リストの既定の行も種別で違う。</summary>
     public static BuffListWidgetSettingsConfig CreateBuffListSettings(WidgetKind kind)
     {
         return new BuffListWidgetSettingsConfig
@@ -2292,6 +2523,7 @@ public static class WidgetConfigDefaults
                 ? DefaultDebuffListGaugeLengthIndex
                 : DefaultBuffListGaugeLengthIndex,
             GaugeColors = CreateBuffGaugeColors(GetBuffListSide(kind)),
+            PriorityBuffs = CreateBuffEntries(GetBuffListPriorityDefaults(kind)),
             HiddenBuffIds = [],
             SameBuffGroupingIndex = DefaultSameBuffGroupingIndex,
             CasterNameDisplayModeIndex = DefaultCasterNameDisplayModeIndex,
@@ -2312,8 +2544,8 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 保存値を表示できる形に直す。<b>選んでいる枠が入っていないときの既定は種別で違う</b>ので
-    /// <see cref="WidgetKind"/> を受け取る(<see cref="GetDefaultGaugeColorIndex"/>)。
+    /// 保存値を表示できる形に直す。<b>選んでいる枠が入っていないときの既定と、優先表示リストの既定の行は種別で違う</b>ので
+    /// <see cref="WidgetKind"/> を受け取る(<see cref="GetDefaultGaugeColorIndex"/>・<see cref="GetBuffListPriorityDefaults"/>)。
     /// </summary>
     public static void NormalizeBuffList(WidgetKind kind, BuffListWidgetSettingsConfig buffList)
     {
@@ -2326,6 +2558,7 @@ public static class WidgetConfigDefaults
             CasterNameDisplayShowIndex,
             CasterNameDisplayAppliedByOthersIndex);
         buffList.BuffInfoFormatString ??= DefaultBuffListBuffInfoFormatString;
+        buffList.PriorityBuffs = NormalizeBuffEntries(buffList.PriorityBuffs, GetBuffListPriorityDefaults(kind));
 
         // 0 以下はバフのIDではない。重なりは先に足したほうを残し、非表示にした順を保つ。
         buffList.HiddenBuffIds = buffList.HiddenBuffIds is null
@@ -2518,7 +2751,7 @@ public static class WidgetConfigDefaults
     {
         return kind switch
         {
-            WidgetKind.EntityList => EntityClassColorKeys,
+            WidgetKind.EntityList or WidgetKind.EntityInfo => EntityClassColorKeys,
             WidgetKind.PlayerList => PlayerListClassColorKeys,
             WidgetKind.PlayerInfo => PlayerInfoClassColorKeys,
             _ => ClassColorKeys
@@ -2790,8 +3023,8 @@ public static class WidgetConfigDefaults
             // タイムライン(被ダメログ)・プレイヤー情報・蘇生リスト・被ダメログ(被ダメリスト)のクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
             WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenList
                 => PlayerListDefaultClassColorHexes,
-            // エンティティリストのプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.EntityList => EntityListDefaultClassColorHexes.ContainsKey(key)
+            // エンティティリスト・エンティティ情報のプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.EntityList or WidgetKind.EntityInfo => EntityListDefaultClassColorHexes.ContainsKey(key)
                 ? EntityListDefaultClassColorHexes
                 : PlayerListDefaultClassColorHexes,
             WidgetKind.HpsMeter => HpsMeterDefaultClassColorHexes,
@@ -2915,6 +3148,9 @@ public static class WidgetConfigDefaults
         config.DamageTakenList = SupportsDamageTakenListSettings(kind)
             ? CloneNormalizedDamageTakenList(config.DamageTakenList)
             : null;
+        config.EntityInfo = SupportsEntityInfoSettings(kind)
+            ? CloneNormalizedEntityInfo(config.EntityInfo)
+            : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
             : null;
@@ -2959,6 +3195,10 @@ public static class WidgetConfigDefaults
             case WidgetKind.ReviveList:
                 config.Window.Width ??= ReviveListInitialWindowWidth;
                 config.Window.Height ??= ReviveListInitialWindowHeight;
+                break;
+            case WidgetKind.EntityInfo:
+                config.Window.Width ??= EntityInfoInitialWindowWidth;
+                config.Window.Height ??= EntityInfoInitialWindowHeight;
                 break;
             case WidgetKind.DamageTakenList:
                 config.Window.Width ??= DamageTakenListInitialWindowWidth;

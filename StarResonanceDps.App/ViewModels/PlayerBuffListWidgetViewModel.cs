@@ -42,6 +42,11 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     [ObservableProperty]
     private Brush _gaugeBrush = Brushes.Transparent;
 
+    /// <summary>右クリックのメニューを開いた行。優先表示の項目の文言はこの行で決める。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PriorityMenuText))]
+    private PlayerBuffEntry? _menuEntry;
+
     public PlayerBuffListWidgetViewModel(
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,
@@ -79,6 +84,15 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         _kind == PlayerBuffListKind.Debuff
             ? "BuffList_Menu_DebuffCard"
             : "BuffList_Menu_BuffCard");
+
+    public string PriorityMenuText => BuffDebuffCardContent.GetPriorityMenuText(
+        _kind == PlayerBuffListKind.Debuff,
+        MenuEntry is { } entry && PlayerWidget.IsBuffListPriorityBuff(entry.BaseId));
+
+    public void RefreshMenuText()
+    {
+        OnPropertyChanged(nameof(PriorityMenuText));
+    }
 
     public string HideMenuText => LocalizationManager.Instance.GetString(
         _kind == PlayerBuffListKind.Debuff
@@ -123,7 +137,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
 
     /// <summary>
     /// 表示設定(保存かプレビュー)が変わった。色を作り直し、行も作り直す
-    /// (非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
+    /// (優先表示と非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
     /// </summary>
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
@@ -158,6 +172,19 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
         }
 
         _openCard?.Invoke(characterId, _kind, entry.CardKey, entry.BaseId);
+    }
+
+    [RelayCommand]
+    private void TogglePriority(PlayerBuffEntry? entry)
+    {
+        if (entry is null)
+        {
+            return;
+        }
+
+        PlayerWidget.SetBuffListPriorityBuffEnabledFromWidget(
+            entry.BaseId,
+            !PlayerWidget.IsBuffListPriorityBuff(entry.BaseId));
     }
 
     [RelayCommand]
@@ -210,6 +237,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(CardMenuText));
+        OnPropertyChanged(nameof(PriorityMenuText));
         OnPropertyChanged(nameof(HideMenuText));
         OnPropertyChanged(nameof(AddToGroupMenuText));
         OnPropertyChanged(nameof(AddToShortcutsMenuText));

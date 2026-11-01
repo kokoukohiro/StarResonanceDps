@@ -112,6 +112,24 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_OtherRoleSkills_Title]}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="BuffListPriorityBuffsNavButton"
+                                Click="BuffListPriorityBuffsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PriorityList}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.PriorityBuffs.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="EntityInfoPriorityBuffsNavButton"
+                                Click="EntityInfoPriorityBuffsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PriorityList}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.PriorityBuffs.SectionTitle}" />
+                            </StackPanel>
+                        </Button>
                         <Button x:Name="BuffListHiddenBuffsNavButton"
                                 Click="BuffListHiddenBuffsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
@@ -119,6 +137,15 @@
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.EyeOff}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffListSettings.HiddenBuffSectionTitle}" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="EntityInfoHiddenBuffsNavButton"
+                                Click="EntityInfoHiddenBuffsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.EyeOff}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.HiddenBuffSectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="ThemeNavButton"
@@ -264,6 +291,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ReviveListSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="EntityInfoClassColorsNavButton"
+                                Click="EntityInfoClassColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.ClassColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </ContentControl>
 
@@ -386,6 +422,15 @@
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
+
+                                    <ContentControl Content="{Binding EntityInfoSettings}"
+                                                    Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <widgetSettingsViews:EntityInfoWidgetDisplaySettingsView />
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
                                 </StackPanel>
 
                                 <ContentControl x:Name="PlayerStatusRowsHost"
@@ -448,9 +493,41 @@
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
+                                <ContentControl x:Name="BuffListPriorityBuffsHost"
+                                                Content="{Binding BuffListSettings.PriorityBuffs}"
+                                                Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffEntryListSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <!-- エンティティ情報の優先表示リスト。中身はバフ・デバフ一覧と同じ部品。 -->
+                                <ContentControl x:Name="EntityInfoPriorityBuffsHost"
+                                                Content="{Binding EntityInfoSettings.PriorityBuffs}"
+                                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffEntryListSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
                                 <ContentControl x:Name="BuffListHiddenBuffsHost"
                                                 Content="{Binding BuffListSettings}"
                                                 Visibility="{Binding HasBuffListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:BuffListHiddenBuffSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <!-- エンティティ情報の非表示リスト。中身はバフ・デバフ一覧と同じ部品。 -->
+                                <ContentControl x:Name="EntityInfoHiddenBuffsHost"
+                                                Content="{Binding EntityInfoSettings}"
+                                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:BuffListHiddenBuffSettingsView />
@@ -690,6 +767,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:ReviveListTextColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="EntityInfoClassColorsHost"
+                                                Content="{Binding EntityInfoSettings}"
+                                                Visibility="{Binding HasEntityInfoDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:EntityInfoClassColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

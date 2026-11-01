@@ -8,7 +8,8 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// バフの番号か料理・薬剤のまとまり(<see cref="BuffEntryKey"/>)の行を、スイッチと掴んでの並べ替えで出す一覧(設定の窓の節)。
-/// バフ・デバフグループの「バフ・デバフ」とバフ・デバフカードの「ショートカット」、両方の「通知対象」が使う。
+/// バフ・デバフグループの「バフ・デバフ」とバフ・デバフカードの「ショートカット」、両方の「通知対象」、
+/// バフ・デバフ一覧とエンティティ情報の「優先表示リスト」が使う。
 ///
 /// <para>
 /// 行はスイッチでオン/オフし、掴んで並べ替える(<see cref="IRowReorderTarget"/>。並べ替えの注意書きの鍵が無い一覧は並べ替えない)。
@@ -22,6 +23,7 @@ public sealed partial class BuffEntryListSettingsViewModel : ObservableObject, I
     private readonly ObservableCollection<BuffSettingRowViewModel> _entries = [];
     private readonly IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> _defaults;
     private readonly string _titleResourceKey;
+    private readonly string _descriptionResourceKey;
     private readonly string? _reorderNoteResourceKey;
     private readonly Action _onChanged;
 
@@ -31,6 +33,7 @@ public sealed partial class BuffEntryListSettingsViewModel : ObservableObject, I
 
     /// <param name="defaults">既定の行(オフにしても消えない行)。</param>
     /// <param name="titleResourceKey">節の名前の文言の鍵。</param>
+    /// <param name="descriptionResourceKey">見出しの下の1つ目の注意書き(行の足し方)の文言の鍵。</param>
     /// <param name="reorderNoteResourceKey">
     /// 並べ替えの注意書きの文言の鍵(ウィジェットでも並べ替えられるかで違う)。null なら並べ替えない一覧で、注意書きも出さない(並びに意味の無い「通知対象」)。
     /// </param>
@@ -38,11 +41,13 @@ public sealed partial class BuffEntryListSettingsViewModel : ObservableObject, I
     public BuffEntryListSettingsViewModel(
         IReadOnlyList<(BuffEntryKey Key, bool IsEnabled)> defaults,
         string titleResourceKey,
+        string descriptionResourceKey,
         string? reorderNoteResourceKey,
         Action onChanged)
     {
         _defaults = defaults;
         _titleResourceKey = titleResourceKey;
+        _descriptionResourceKey = descriptionResourceKey;
         _reorderNoteResourceKey = reorderNoteResourceKey;
         _onChanged = onChanged;
         Entries = new ReadOnlyObservableCollection<BuffSettingRowViewModel>(_entries);
@@ -52,6 +57,8 @@ public sealed partial class BuffEntryListSettingsViewModel : ObservableObject, I
     public ReadOnlyObservableCollection<BuffSettingRowViewModel> Entries { get; }
 
     public string SectionTitle => LocalizationManager.Instance.GetString(_titleResourceKey);
+
+    public string Description => LocalizationManager.Instance.GetString(_descriptionResourceKey);
 
     /// <summary>行を掴んで並べ替えられる一覧か。偽なら並べ替えの注意書きを出さない。</summary>
     public bool AllowsReorder => _reorderNoteResourceKey is not null;
@@ -135,6 +142,7 @@ public sealed partial class BuffEntryListSettingsViewModel : ObservableObject, I
         }
 
         OnPropertyChanged(nameof(SectionTitle));
+        OnPropertyChanged(nameof(Description));
         OnPropertyChanged(nameof(ReorderNote));
     }
 

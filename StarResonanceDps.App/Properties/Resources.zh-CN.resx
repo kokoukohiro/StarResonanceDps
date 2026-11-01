@@ -431,6 +431,18 @@
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>※显示其他玩家已习得的职责技能（显示的技能不一定处于装备状态）</value>
   </data>
+  <data name="Settings_Section_PriorityBuffs_Title" xml:space="preserve">
+    <value>优先显示列表</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffs_Description" xml:space="preserve">
+    <value>※右键点击增益即可优先显示</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffDebuffs_Description" xml:space="preserve">
+    <value>※右键点击增益和减益即可优先显示</value>
+  </data>
+  <data name="Settings_Section_PriorityDebuffs_Description" xml:space="preserve">
+    <value>※右键点击减益即可优先显示</value>
+  </data>
   <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
     <value>隐藏列表</value>
   </data>
@@ -440,6 +452,9 @@
   <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
     <value>※右键点击增益即可隐藏</value>
   </data>
+  <data name="Settings_Section_HiddenBuffDebuffs_Description" xml:space="preserve">
+    <value>※右键点击增益和减益即可隐藏</value>
+  </data>
   <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
     <value>※右键点击减益即可隐藏</value>
   </data>
@@ -448,6 +463,18 @@
   </data>
   <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
     <value>减益卡片</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeBuff" xml:space="preserve">
+    <value>优先显示此增益</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeDebuff" xml:space="preserve">
+    <value>优先显示此减益</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeBuff" xml:space="preserve">
+    <value>取消优先显示此增益</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeDebuff" xml:space="preserve">
+    <value>取消优先显示此减益</value>
   </data>
   <data name="BuffList_Menu_HideBuff" xml:space="preserve">
     <value>隐藏此增益</value>
@@ -688,6 +715,9 @@
   </data>
   <data name="SameBuffs_Ungrouped" xml:space="preserve">
     <value>不合并</value>
+  </data>
+  <data name="SameBuffs_Grouped" xml:space="preserve">
+    <value>合并</value>
   </data>
   <data name="SameBuffs_GroupPlayers" xml:space="preserve">
     <value>仅合并玩家</value>
@@ -1159,6 +1189,9 @@
   <data name="Settings_Display_HateValue" xml:space="preserve">
     <value>仇恨值</value>
   </data>
+  <data name="HateRankDisplay_All" xml:space="preserve">
+    <value>显示全部</value>
+  </data>
   <data name="HateRankDisplay_Top5" xml:space="preserve">
     <value>显示前5名</value>
   </data>
@@ -1317,6 +1350,9 @@
   </data>
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>复活列表</value>
+  </data>
+  <data name="Widget_EntityInfo" xml:space="preserve">
+    <value>实体信息</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>承伤日志</value>

@@ -20,7 +20,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private readonly Dictionary<WidgetKind, WidgetWindow> _openSingleWindows = new();
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
-    private readonly List<EntityBuffListWindowSession> _openEntityBuffWindows = [];
+    private readonly List<EntityWindowSession> _openEntityWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
 
     /// <summary>顔ぶれを当てる処理を積んだまま、まだ当てていないプレイヤーの窓(<see cref="UpdatePlayerWindowPresentations"/>)。</summary>
@@ -75,7 +75,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private void ReleaseEntityWindows()
     {
-        foreach (var session in _openEntityBuffWindows)
+        foreach (var session in _openEntityWindows)
         {
             if (!session.ViewModel.IsEntityAcquired || session.ViewModel.EntityId == 0)
             {
@@ -230,9 +230,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
+    /// <summary>エンティティリスト(とエンティティ情報の枠)から、その個体のバフリスト・デバフリスト・エンティティ情報を開く。もう開いていれば前に出す。</summary>
     public void OpenEntityWindow(WidgetKind kind, EntityListEntry entity)
     {
-        if (kind is not (WidgetKind.BuffList or WidgetKind.DebuffList)
+        if (kind is not (WidgetKind.BuffList or WidgetKind.DebuffList or WidgetKind.EntityInfo)
             || !_trackedPlayerWidgets.TryGetValue(kind, out var widget))
         {
             return;
@@ -240,7 +241,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         TrackPlayerWidget(widget);
 
-        var existingWindow = _openEntityBuffWindows
+        var existingWindow = _openEntityWindows
             .FirstOrDefault(session =>
                 ReferenceEquals(session.Widget, widget)
                 && RepresentsEntity(session.ViewModel, entity));
@@ -253,7 +254,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
+        CreateEntityTargetWindow(widget, new EntityWindowTarget(entity));
     }
 
     /// <summary>
@@ -275,7 +276,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         if (person.Kind == WidgetTargetOptionKind.Entity)
         {
             return person.Entity is { } entity
-                ? _openEntityBuffWindows
+                ? _openEntityWindows
                     .FirstOrDefault(session =>
                         ReferenceEquals(session.Widget, widget)
                         && RepresentsEntity(session.ViewModel, entity)
@@ -324,7 +325,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
             if (buff is null)
             {
-                CreateEntityBuffWindow(widget, new EntityWindowTarget(entity));
+                CreateEntityTargetWindow(widget, new EntityWindowTarget(entity));
             }
             else
             {
@@ -391,7 +392,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             targets.Add((person, buff));
         }
 
-        foreach (var session in _openEntityBuffWindows)
+        foreach (var session in _openEntityWindows)
         {
             if (!ReferenceEquals(session.Widget, widget) || session.ViewModel.Entity is not { } entity)
             {
@@ -448,7 +449,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             var targetWindows = _openPlayerWindows
                 .Where(session => ReferenceEquals(session.Widget, widget))
                 .Select(session => session.Window)
-                .Concat(_openEntityBuffWindows
+                .Concat(_openEntityWindows
                     .Where(session => ReferenceEquals(session.Widget, widget))
                     .Select(session => session.Window))
                 .ToArray();
@@ -605,7 +606,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         var group = CombatDataCatalog.GetBuffGroup(baseId);
 
-        var existingWindow = _openEntityBuffWindows
+        var existingWindow = _openEntityWindows
             .FirstOrDefault(session =>
                 ReferenceEquals(session.Widget, widget)
                 && session.ViewModel is EntityBuffDebuffCardWidgetViewModel card
@@ -666,7 +667,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         if (widget.Kind != WidgetKind.BuffDebuffCard)
         {
-            CreateEntityBuffWindow(widget, entityTarget, target.Window);
+            CreateEntityTargetWindow(widget, entityTarget, target.Window);
             return;
         }
 
@@ -725,7 +726,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             });
         }
 
-        foreach (var session in _openEntityBuffWindows)
+        foreach (var session in _openEntityWindows)
         {
             if (!ReferenceEquals(session.Widget, widget))
             {
@@ -783,6 +784,13 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             }
 
             // 対象の記録が無い。ここはウィジェットカードから初めて起動したときの経路。
+            // エンティティ情報は個体を選んで開くもので、相手の指定なしの既定の窓が無い。窓を開かずに停止へ戻す。
+            if (widget.Kind == WidgetKind.EntityInfo)
+            {
+                widget.State = WidgetState.Stopped;
+                return;
+            }
+
             if (widget.Kind == WidgetKind.BuffDebuffCard)
             {
                 // 自分の料理と薬剤を1枚ずつ。どちらも対象が居なくても
@@ -917,6 +925,46 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
+    /// <summary>個体1つを映す窓(バフリスト・デバフリスト・エンティティ情報)を開く。バフ・デバフカードは <see cref="CreateEntityBuffCardWindow"/>。</summary>
+    private void CreateEntityTargetWindow(
+        WidgetListItemViewModel widget,
+        EntityWindowTarget target,
+        WidgetWindowConfig? savedWindowBounds = null)
+    {
+        if (widget.Kind == WidgetKind.EntityInfo)
+        {
+            CreateEntityInfoWindow(widget, target, savedWindowBounds);
+            return;
+        }
+
+        CreateEntityBuffWindow(widget, target, savedWindowBounds);
+    }
+
+    private void CreateEntityInfoWindow(
+        WidgetListItemViewModel widget,
+        EntityWindowTarget target,
+        WidgetWindowConfig? savedWindowBounds)
+    {
+        var viewModel = new EntityInfoWidgetViewModel(
+            widget,
+            target,
+            PlayerRosterPresentationStore.Instance.Current.Entries,
+            NearbyEntityStore.Instance.Current.Entries,
+            OpenEntityWindow,
+            OpenBuffCardForEntity);
+
+        CreateEntityWindow(
+            widget,
+            viewModel,
+            new EntityInfoWidgetView
+            {
+                DataContext = viewModel
+            },
+            headerActions: null,
+            headerChromeActions: null,
+            savedWindowBounds);
+    }
+
     private void CreateEntityBuffWindow(
         WidgetListItemViewModel widget,
         EntityWindowTarget target,
@@ -992,7 +1040,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             viewModel.HeaderText,
             headerChromeActions: headerChromeActions,
             headerActions: headerActions);
-        viewModel.PropertyChanged += EntityBuffListWindowViewModel_PropertyChanged;
+        viewModel.PropertyChanged += EntityWindowViewModel_PropertyChanged;
         window.Closed += WidgetWindow_Closed;
         window.DataStatusChanged += WidgetWindow_DataStatusChanged;
         window.SaveWindowBoundsOverride = () => SaveOpenTargets(widget);
@@ -1002,7 +1050,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
         }
 
-        _openEntityBuffWindows.Add(new EntityBuffListWindowSession(widget, viewModel, window));
+        _openEntityWindows.Add(new EntityWindowSession(widget, viewModel, window));
         UpdatePlayerWindowCount(widget);
         UpdateCardDataStatus(widget);
         SaveOpenTargets(widget);
@@ -1334,7 +1382,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         foreach (var targetWindow in _openPlayerWindows
                      .Where(session => ReferenceEquals(session.Widget, playerWidget))
                      .Select(session => session.Window)
-                     .Concat(_openEntityBuffWindows
+                     .Concat(_openEntityWindows
                          .Where(session => ReferenceEquals(session.Widget, playerWidget))
                          .Select(session => session.Window))
                      .ToArray())
@@ -1448,11 +1496,17 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
-    public void UpdateEntityWindowPresentations(IReadOnlyList<EntityListEntry> entities)
+    /// <summary>
+    /// 周りの実体が変わった。実体の窓に、エンティティリストの行で個体を捕まえ直させ(<paramref name="entities"/>)、
+    /// エンティティ情報の窓には周りの実体の値(<paramref name="nearbyEntities"/>)を渡す。
+    /// </summary>
+    public void UpdateEntityWindowPresentations(
+        IReadOnlyList<EntityListEntry> entities,
+        IReadOnlyList<NearbyEntityEntry> nearbyEntities)
     {
         var entitiesByUuid = entities.ToDictionary(entity => entity.EntityUuid);
 
-        foreach (var entityWindow in _openEntityBuffWindows.ToArray())
+        foreach (var entityWindow in _openEntityWindows.ToArray())
         {
             var viewModel = entityWindow.ViewModel;
             EntityListEntry? entity;
@@ -1469,13 +1523,29 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                         && candidate.EntityType == viewModel.EntityType);
             }
 
-            if (entity is null)
+            if (entity is not null)
             {
-                continue;
+                viewModel.TryApplyEntity(entity);
+                entityWindow.Window.SetHeaderText(viewModel.HeaderText);
             }
 
-            viewModel.TryApplyEntity(entity);
-            entityWindow.Window.SetHeaderText(viewModel.HeaderText);
+            // 捕まえた直後の窓にも、同じ一覧で値を当てる。
+            if (viewModel is EntityInfoWidgetViewModel entityInfo)
+            {
+                entityInfo.UpdateNearbyEntities(nearbyEntities);
+            }
+        }
+    }
+
+    /// <summary>名簿が変わった。エンティティ情報の窓のヘイトの枠(名前・クラス・特化)を引き直させる。</summary>
+    public void UpdateEntityInfoRosters(IReadOnlyList<PlayerRosterEntry> roster)
+    {
+        foreach (var entityWindow in _openEntityWindows.ToArray())
+        {
+            if (entityWindow.ViewModel is EntityInfoWidgetViewModel entityInfo)
+            {
+                entityInfo.UpdateRoster(roster);
+            }
         }
     }
 
@@ -1523,7 +1593,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private void EntityBuffCardViewModel_SavedTargetInfoResolved(object? sender, EventArgs e)
     {
-        var session = _openEntityBuffWindows.FirstOrDefault(
+        var session = _openEntityWindows.FirstOrDefault(
             candidate => ReferenceEquals(candidate.ViewModel, sender));
 
         if (session is not null)
@@ -1532,7 +1602,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
-    private void EntityBuffListWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void EntityWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(IEntityWidgetWindowViewModel.HeaderText)
             || sender is not IEntityWidgetWindowViewModel viewModel)
@@ -1540,7 +1610,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        var session = _openEntityBuffWindows.FirstOrDefault(
+        var session = _openEntityWindows.FirstOrDefault(
             candidate => ReferenceEquals(candidate.ViewModel, viewModel));
         if (session is null)
         {
@@ -1568,7 +1638,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
         }
 
-        foreach (var entityWindow in _openEntityBuffWindows
+        foreach (var entityWindow in _openEntityWindows
                      .Where(session => ReferenceEquals(session.Widget, playerWidget))
                      .ToArray())
         {
@@ -1595,7 +1665,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     private int CountOpenTargetWindows(WidgetListItemViewModel widget)
     {
         return _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, widget))
-            + _openEntityBuffWindows.Count(session => ReferenceEquals(session.Widget, widget));
+            + _openEntityWindows.Count(session => ReferenceEquals(session.Widget, widget));
     }
 
     private bool HasOpenTargetWindows(WidgetListItemViewModel widget)
@@ -1621,7 +1691,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             or WidgetKind.HealingContribution
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph
-            or WidgetKind.DamageTakenSummary;
+            or WidgetKind.DamageTakenSummary
+            or WidgetKind.EntityInfo;
     }
 
     private static void RestoreAndActivate(WidgetWindow window)
@@ -1678,7 +1749,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         foreach (var window in _openSingleWindows.Values
                      .Concat(_openPlayerWindows.Select(session => session.Window))
-                     .Concat(_openEntityBuffWindows.Select(session => session.Window))
+                     .Concat(_openEntityWindows.Select(session => session.Window))
                      .ToArray())
         {
             window.Close();
@@ -1728,19 +1799,19 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        var entityWindow = _openEntityBuffWindows.FirstOrDefault(
+        var entityWindow = _openEntityWindows.FirstOrDefault(
             session => ReferenceEquals(session.Window, window));
 
         if (entityWindow is not null)
         {
-            entityWindow.ViewModel.PropertyChanged -= EntityBuffListWindowViewModel_PropertyChanged;
+            entityWindow.ViewModel.PropertyChanged -= EntityWindowViewModel_PropertyChanged;
             if (entityWindow.ViewModel is EntityBuffDebuffCardWidgetViewModel entityCard)
             {
                 entityCard.SavedTargetInfoResolved -= EntityBuffCardViewModel_SavedTargetInfoResolved;
             }
 
             entityWindow.ViewModel.Dispose();
-            _openEntityBuffWindows.Remove(entityWindow);
+            _openEntityWindows.Remove(entityWindow);
             UpdatePlayerWindowCount(entityWindow.Widget);
             UpdateCardDataStatus(entityWindow.Widget);
             SaveOpenTargets(entityWindow.Widget);
@@ -1816,7 +1887,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             }
         }
 
-        foreach (var session in _openEntityBuffWindows)
+        foreach (var session in _openEntityWindows)
         {
             if (ReferenceEquals(session.Widget, widget))
             {
@@ -1844,7 +1915,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 session.Window.RefreshDataStatus();
             }
 
-            foreach (var session in _openEntityBuffWindows.ToArray())
+            foreach (var session in _openEntityWindows.ToArray())
             {
                 session.Window.RefreshDataStatus();
             }
@@ -1875,9 +1946,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         public WidgetWindow Window { get; }
     }
 
-    private sealed class EntityBuffListWindowSession
+    private sealed class EntityWindowSession
     {
-        public EntityBuffListWindowSession(
+        public EntityWindowSession(
             WidgetListItemViewModel widget,
             IEntityWidgetWindowViewModel viewModel,
             WidgetWindow window)

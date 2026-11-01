@@ -182,6 +182,9 @@
                                     <MenuItem Header="{Binding CardMenuText}"
                                               Command="{Binding OpenCardCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                    <MenuItem Header="{Binding PriorityMenuText}"
+                                              Command="{Binding TogglePriorityCommand}"
+                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding HideMenuText}"
                                               Command="{Binding HideBuffCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />

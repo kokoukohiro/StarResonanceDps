@@ -33,11 +33,13 @@ public sealed partial class BuffDebuffGroupWidgetSettingsViewModel : ObservableO
         Entries = new BuffEntryListSettingsViewModel(
             WidgetConfigDefaults.DefaultBuffDebuffGroupEntries,
             "Settings_Section_BuffDebuffGroupEntries_Title",
+            "Settings_Section_BuffDebuffGroupEntries_Description",
             "Settings_RowReorderNote",
             NotifyChanged);
         NotificationTargets = new BuffEntryListSettingsViewModel(
             WidgetConfigDefaults.DefaultBuffDebuffGroupNotificationTargetEntries,
             "Settings_Section_NotificationTargets_Title",
+            "Settings_Section_BuffDebuffGroupEntries_Description",
             reorderNoteResourceKey: null,
             NotifyChanged);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;

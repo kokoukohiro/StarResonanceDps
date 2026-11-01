@@ -157,6 +157,22 @@ public readonly record struct BuffDebuffCardContent(
     }
 
     /// <summary>
+    /// 右クリックの項目「このバフを優先表示」「このバフの優先表示をやめる」(デバフは「このデバフを」「このデバフの」)の文言。
+    /// バフ・デバフ一覧とエンティティ情報で共通。
+    /// </summary>
+    public static string GetPriorityMenuText(bool isDebuff, bool isPrioritized)
+    {
+        var key = (isDebuff, isPrioritized) switch
+        {
+            (false, false) => "BuffList_Menu_PrioritizeBuff",
+            (false, true) => "BuffList_Menu_UnprioritizeBuff",
+            (true, false) => "BuffList_Menu_PrioritizeDebuff",
+            (true, true) => "BuffList_Menu_UnprioritizeDebuff"
+        };
+        return LocalizationManager.Instance.GetString(key);
+    }
+
+    /// <summary>
     /// 倍率の保存キー。まとまりを追う窓は <c>{対象ID}:group:{まとまり}</c>、
     /// 個別のバフを追う窓は <c>{対象ID}:{バフキー}</c>。
     ///

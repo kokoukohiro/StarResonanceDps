@@ -101,6 +101,7 @@ public sealed partial class MainViewModel : ViewModelBase
         _playerListWidget = playerListWidget;
         var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         _entityListWidget = entityListWidget;
+        AddWidget(WidgetKind.EntityInfo, "Widget_EntityInfo");
         AddWidget(WidgetKind.ReviveList, "Widget_ReviveList");
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
@@ -223,13 +224,16 @@ public sealed partial class MainViewModel : ViewModelBase
 
         widget.PropertyChanged += OnWidgetPropertyChanged;
         widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
+        widget.EntityInfoHiddenBuffsChanged += Widget_EntityInfoHiddenBuffsChanged;
+        widget.BuffListPriorityBuffChangedFromWidget += Widget_BuffListPriorityBuffChangedFromWidget;
+        widget.EntityInfoPriorityBuffChangedFromWidget += Widget_EntityInfoPriorityBuffChangedFromWidget;
         widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
         widget.BuffCardNotificationTargetChangedFromWidget += Widget_BuffCardNotificationTargetChangedFromWidget;
         widget.BuffDebuffGroupNotificationTargetChangedFromWidget += Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
         if (widget.SupportsTargetSelection)
         {
-            widget.SelectedTargetOption = WidgetTargetSelection.CreateDefault(widget);
+            widget.SelectedTargetOption = _targetSelection.CreateDefault(widget);
             widget.TargetOptionsRequested += Widget_TargetOptionsRequested;
             widget.SelectedTargetChanged += Widget_SelectedTargetChanged;
             widget.SelectedTargetToggleRequested += Widget_SelectedTargetToggleRequested;
@@ -340,6 +344,41 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         _widgetStateManager.SaveBuffListHiddenBuffs(kind, [.. hiddenBuffIds, baseId]);
+    }
+
+    /// <summary>エンティティ情報の枠の右クリックでバフを非表示にした。バフ・デバフ一覧と同じく、保存済みの一覧に足してその項目だけ書く。</summary>
+    private void Widget_EntityInfoHiddenBuffsChanged(WidgetKind kind, int baseId)
+    {
+        var hiddenBuffIds = _widgetStateManager.GetWidgetSnapshot(kind).EntityInfo?.HiddenBuffIds ?? [];
+        if (hiddenBuffIds.Contains(baseId))
+        {
+            return;
+        }
+
+        _widgetStateManager.SaveEntityInfoHiddenBuffs(kind, [.. hiddenBuffIds, baseId]);
+    }
+
+    /// <summary>
+    /// 窓の右クリックでバフを優先表示にした・やめた。グループの行と同じく、<b>保存済みの行に同じ決まりで当てて</b>
+    /// (<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)その項目だけ書く。
+    /// </summary>
+    private void Widget_BuffListPriorityBuffChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var priorityBuffs = WidgetConfigDefaults
+            .CloneNormalizedBuffList(kind, _widgetStateManager.GetWidgetSnapshot(kind).BuffList)
+            .PriorityBuffs ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(priorityBuffs, key, isEnabled, WidgetConfigDefaults.GetBuffListPriorityDefaults(kind));
+        _widgetStateManager.SaveBuffListPriorityBuffs(kind, priorityBuffs);
+    }
+
+    /// <summary>エンティティ情報の枠の右クリックでバフを優先表示にした・やめた。バフ・デバフ一覧と同じく、保存済みの行に同じ決まりで当ててその項目だけ書く。</summary>
+    private void Widget_EntityInfoPriorityBuffChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        var priorityBuffs = WidgetConfigDefaults
+            .CloneNormalizedEntityInfo(_widgetStateManager.GetWidgetSnapshot(kind).EntityInfo)
+            .PriorityBuffs ?? [];
+        WidgetConfigDefaults.SetBuffEntryEnabled(priorityBuffs, key, isEnabled, WidgetConfigDefaults.DefaultEntityInfoPriorityBuffEntries);
+        _widgetStateManager.SaveEntityInfoPriorityBuffs(kind, priorityBuffs);
     }
 
     /// <summary>
@@ -529,6 +568,7 @@ public sealed partial class MainViewModel : ViewModelBase
             roster.MapChannel,
             roster.MapGeneration);
         _entityListWidget?.UpdateEntityListRoster(roster.Entries);
+        _widgetWindowManager.UpdateEntityInfoRosters(roster.Entries);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
         _widgetWindowManager.UpdateListWidgetRosters(roster);
         _notificationMonitor?.ObserveRoster(roster);
@@ -611,7 +651,7 @@ public sealed partial class MainViewModel : ViewModelBase
             snapshot.MapName,
             snapshot.MapChannel,
             snapshot.MapGeneration);
-        _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries);
+        _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries, snapshot.Entries);
         RefreshTargetSelections();
     }
 

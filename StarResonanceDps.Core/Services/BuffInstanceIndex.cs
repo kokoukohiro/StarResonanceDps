@@ -232,6 +232,48 @@ public sealed class BuffInstanceIndex
         }
     }
 
+    /// <summary>
+    /// <paramref name="holderUuid"/> が持っている <paramref name="baseId"/> の生きている実体の術者(同じ術者は1つにまとめる)。無ければ空。
+    ///
+    /// <para>
+    /// 親のバフの中で付いた子のバフは、親を持っている実体が術者として届く(光のプリズムの子のバフは、プレイヤーが付けた親を持つモンスターが術者)。
+    /// その親を付けた本当の術者を引くのに使う。<see cref="TryResolveSource"/> は術者で候補を選ぶので、この形の親は引けない。
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<long> GetHeldInstanceFireUuids(int baseId, long holderUuid, DateTime arrivalTime)
+    {
+        lock (_sync)
+        {
+            if (!_keysByBaseId.TryGetValue(baseId, out var keys))
+            {
+                return [];
+            }
+
+            List<long>? fireUuids = null;
+            foreach (var key in keys)
+            {
+                if (key.Holder != holderUuid)
+                {
+                    continue;
+                }
+
+                var instance = _instances[key];
+                if (!instance.IsAlive(arrivalTime))
+                {
+                    continue;
+                }
+
+                fireUuids ??= [];
+                if (!fireUuids.Contains(instance.FireUuid))
+                {
+                    fireUuids.Add(instance.FireUuid);
+                }
+            }
+
+            return fireUuids ?? [];
+        }
+    }
+
     private void SweepNoLock(DateTime arrivalTime)
     {
         List<(long Holder, int BuffUuid)>? expired = null;

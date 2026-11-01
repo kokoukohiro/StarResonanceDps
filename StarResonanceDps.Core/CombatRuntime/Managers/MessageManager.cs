@@ -197,6 +197,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SummonSourceIndex.Instance.Clear();
             SourceLandingResolver.Instance.Clear();
             BuffOriginResolver.Instance.Clear();
+            PendingEnemyBuffLogs.Clear();
             NearbyMonsterIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
@@ -1549,6 +1550,74 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// 被ダメログとタイムラインに載せる、その通知の行動した側。回復はタイムラインに残す敵の回復なら回復した側(<see cref="TryResolveEnemyHealer"/>)、
+        /// 被弾した本人が原因の被弾は本人、それ以外は加害者を寄せた先(見えて名前がある召喚体ならその召喚体、無ければ大元の召喚者)。決まらなければ 0。
+        /// </summary>
+        private static long ResolveTakenDamageLogActor(SyncDamageInfo damageInfo, long targetUuid)
+        {
+            if (damageInfo.Type == EDamageType.Heal)
+            {
+                return TryResolveEnemyHealer(damageInfo, out var healerUuid) ? healerUuid : 0;
+            }
+
+            if (IsSelfCausedDamage(damageInfo))
+            {
+                return targetUuid;
+            }
+
+            return damageInfo.OwnerId == 0
+                ? 0
+                : EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
+        }
+
+        /// <summary>
+        /// 敵の攻撃の発生源の技を、いま生きている実体から控える(表示するころには実体が残っていないので、記録の瞬間にしか決まらない)。
+        /// バフ由来ならそのバフを付けた技、仮想体などが出したものならその実体を出した技(出現時に決めてある)。決まらなければ 0。
+        /// </summary>
+        private static (int BuffSourceSkillId, int SummonSourceSkillId) ResolveEnemyAttackSourceSkills(SyncDamageInfo damageInfo, DateTime arrivalTime)
+        {
+            var attackerUuid = damageInfo.TopSummonerId != 0 ? damageInfo.TopSummonerId : damageInfo.AttackerUuid;
+            var buffSourceSkillId = damageInfo.DamageSource == EDamageSource.Buff
+                && BuffInstanceIndex.Instance.TryResolveSourceSkill(
+                    damageInfo.OwnerId,
+                    damageInfo.AttackerUuid,
+                    attackerUuid,
+                    arrivalTime,
+                    out var resolvedBuffSourceSkillId,
+                    out _)
+                ? resolvedBuffSourceSkillId
+                : 0;
+            var summonSourceSkillId = SummonSourceIndex.Instance.TryGet(damageInfo.AttackerUuid, out var summonSource)
+                ? summonSource.SkillId
+                : 0;
+            return (buffSourceSkillId, summonSourceSkillId);
+        }
+
+        /// <summary>
+        /// 同じ差分で、付けた敵が相手に当てた最初の被弾(回復でないもの)。被弾したときに付くバフ(敵のパッシブが付ける凍傷など)の引き金。
+        /// 行動した側の決め方は被ダメログと同じ(<see cref="ResolveTakenDamageLogActor(SyncDamageInfo, long)"/>)。無ければ null。
+        /// </summary>
+        private static SyncDamageInfo? FindTriggeringHit(IEnumerable<SyncDamageInfo>? deltaDamages, long casterUuid, long targetUuid)
+        {
+            if (deltaDamages is null)
+            {
+                return null;
+            }
+
+            foreach (var damageInfo in deltaDamages)
+            {
+                if (damageInfo.Type != EDamageType.Heal
+                    && damageInfo.OwnerId != 0
+                    && ResolveTakenDamageLogActor(damageInfo, targetUuid) == casterUuid)
+                {
+                    return damageInfo;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// 敵の自傷(出し手の無いバフのダメージと落下)をタイムラインの敵から敵へのダメージに残す。加害者は本人。
         /// プレイヤーの自傷は被ダメログ(<see cref="AddSelfCausedTakenDamage"/>)。付与元の技の決め方も同じ。
         /// </summary>
@@ -1575,12 +1644,74 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
+        /// 通知1件の差分で受けた敵のバフ。通知の全部の差分を処理し終えたところ(と、回を作り直す前)で <see cref="FlushPendingEnemyBuffLogs"/> がまとめて残す。
+        /// 触るのはパケットのスレッドだけ(キャプチャを止めた後の消去を除く)。
+        /// </summary>
+        private static readonly List<(long TargetUuid, BuffInfo BuffInfo, IEnumerable<SyncDamageInfo>? DeltaDamages, ExtraPacketData ExtraData)> PendingEnemyBuffLogs = [];
+
+        /// <summary>
+        /// 控えていた敵のバフをタイムラインに残す(<see cref="AddEnemyBuffLog"/>)。通知1件の処理の最後に呼ぶ。
+        /// 回を作り直す <c>EncounterManager.EnterDungeon</c> も、閉じる前に呼ぶ(通知の途中の全滅・ボス部屋の区切りより前に届いた分は前の回のもの)。
+        /// </summary>
+        internal static void FlushPendingEnemyBuffLogs()
+        {
+            if (PendingEnemyBuffLogs.Count == 0)
+            {
+                return;
+            }
+
+            (long TargetUuid, BuffInfo BuffInfo, IEnumerable<SyncDamageInfo>? DeltaDamages, ExtraPacketData ExtraData)[] items = [.. PendingEnemyBuffLogs];
+            PendingEnemyBuffLogs.Clear();
+            foreach (var (targetUuid, buffInfo, deltaDamages, extraData) in items)
+            {
+                AddEnemyBuffLog(targetUuid, buffInfo, deltaDamages, extraData);
+            }
+        }
+
+        /// <summary>
+        /// バフの付けた側(<c>FireUuid</c>)を、被弾の加害者と同じく召喚体なら召喚者へ寄せる。
+        /// </summary>
+        private static long ResolveBuffCaster(long fireUuid)
+        {
+            var encounter = EncounterManager.Current;
+            var topSummonerUuid = encounter.GetAttrKV(fireUuid, "AttrTopSummonerId") is long summonerUuid ? summonerUuid : 0;
+            return encounter.ResolveTakenDamageLogActor(fireUuid, topSummonerUuid);
+        }
+
+        /// <summary>
+        /// <paramref name="holderUuid"/> が持つ親のバフ <paramref name="parentBuffId"/> を付けたのが、全部プレイヤー(とその召喚)か。親が見つからなければ false。
+        /// </summary>
+        private static bool IsParentBuffCastByPlayers(int parentBuffId, long holderUuid, DateTime arrivalTime)
+        {
+            var parentFireUuids = BuffInstanceIndex.Instance.GetHeldInstanceFireUuids(parentBuffId, holderUuid, arrivalTime);
+            if (parentFireUuids.Count == 0)
+            {
+                return false;
+            }
+
+            foreach (var parentFireUuid in parentFireUuids)
+            {
+                if (Utils.UuidToEntityType(ResolveBuffCaster(parentFireUuid)) != (long)EEntityType.EntChar)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 敵が付けたバフをタイムラインに残す(差分の付与だけ。出現時の一覧は見る前から付いていたものなので残さない)。
+        /// 差分の中では控えるだけで(<see cref="PendingEnemyBuffLogs"/>)、通知の全部の差分を処理してから呼ぶ。親のバフが別の実体の差分で後ろに届くことがある。
         /// 付けた側は通知の <c>FireUuid</c> で、召喚体は被弾の加害者と同じく寄せる。付けた側の無いものと、プレイヤー(とその召喚)が付けたものは残さない。
+        /// 親のバフの中で付いた子のバフは、親を持つ実体が付けた側として届く。付けた側が持つ親を付けたのが全部プレイヤー(とその召喚)なら、
+        /// プレイヤーの効果(光のプリズムの子のバフなど)なので同じく残さない。
         /// 付けた側と相手の種類は記録の入口(<c>Encounter.AddEnemyBuff</c>)が見る。
         /// 付与元(<c>FightSourceInfo</c>)は、技・弾・親のバフを発生源の形(<see cref="EnemyBuffRecord"/>)に置き換え、親のバフはそれを付けた技を控える。
+        /// 親のバフを付けた技が分からず、同じ差分に付けた敵の被弾があるときは、その被弾を引き金としてその発生源を残す(被弾したときに付くバフ)。
         /// </summary>
-        private static void AddEnemyBuffLog(long targetUuid, BuffInfo buffInfo, ExtraPacketData extraData)
+        /// <param name="deltaDamages">同じ差分のダメージ・回復の通知。</param>
+        private static void AddEnemyBuffLog(long targetUuid, BuffInfo buffInfo, IEnumerable<SyncDamageInfo>? deltaDamages, ExtraPacketData extraData)
         {
             var fireUuid = buffInfo.FireUuid;
             if (fireUuid == 0)
@@ -1589,8 +1720,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var encounter = EncounterManager.Current;
-            var topSummonerUuid = encounter.GetAttrKV(fireUuid, "AttrTopSummonerId") is long summonerUuid ? summonerUuid : 0;
-            var casterUuid = encounter.ResolveTakenDamageLogActor(fireUuid, topSummonerUuid);
+            var casterUuid = ResolveBuffCaster(fireUuid);
             if (casterUuid == 0 || Utils.UuidToEntityType(casterUuid) == (long)EEntityType.EntChar)
             {
                 return;
@@ -1607,6 +1737,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                     EFightSource.Buff => (EDamageSource.Buff, sourceConfigId),
                     _ => (EDamageSource.Other, 0)
                 };
+            if (damageSource == EDamageSource.Buff && IsParentBuffCastByPlayers(ownerId, fireUuid, extraData.ArrivalTime))
+            {
+                return;
+            }
+
             var buffSourceSkillId = damageSource == EDamageSource.Buff
                 && BuffInstanceIndex.Instance.TryResolveSourceSkill(
                     ownerId,
@@ -1620,6 +1755,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             var summonSourceSkillId = SummonSourceIndex.Instance.TryGet(fireUuid, out var summonSource)
                 ? summonSource.SkillId
                 : 0;
+
+            // 被弾したときに付くバフ(敵のパッシブが付ける凍傷など)は、付与元が敵に乗った親のバフで、親を付けた技が分からない。
+            // 引き金の被弾は同じ差分に一緒に届くので、その被弾の発生源を付与元にする。
+            if (damageSource == EDamageSource.Buff
+                && buffSourceSkillId == 0
+                && FindTriggeringHit(deltaDamages, casterUuid, targetUuid) is { } triggeringHit)
+            {
+                ownerId = triggeringHit.OwnerId;
+                damageSource = triggeringHit.DamageSource;
+                (buffSourceSkillId, summonSourceSkillId) = ResolveEnemyAttackSourceSkills(triggeringHit, extraData.ArrivalTime);
+            }
 
             encounter.AddEnemyBuff(
                 casterUuid,
@@ -2550,7 +2696,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                 ProcessAoiSyncDelta(aoiSyncDelta, extraData);
             }
 
-            // 表に名前の無いバフの由来は、通知の全部の差分を処理してからたどる(親のバフが別の実体の差分で後ろに届くことがある)。
+            // 敵が付けたバフと、表に名前の無いバフの由来は、通知の全部の差分を処理してから決める(親のバフが別の実体の差分で後ろに届くことがある)。
+            FlushPendingEnemyBuffLogs();
             BuffOriginResolver.Instance.ResolvePending();
 
             BattleStateMachine.CheckDeferredCalls();
@@ -2807,7 +2954,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                                     extraData.ArrivalTime);
 
                                 EncounterManager.Current.NotifyBuffEvent(targetUuid, buffEffect.Type, buffEffect.BuffUuid, buffInfo.BaseId, buffInfo.Level, buffInfo.FireUuid, buffInfo.Layer, buffInfo.Duration, buffInfo.FightSourceInfo?.SourceConfigId ?? 0, creationTime, extraData, BuffEventPayload.BuffInfo, buffInfo.FightSourceInfo?.FightSourceType);
-                                AddEnemyBuffLog(targetUuid, buffInfo, extraData);
+                                PendingEnemyBuffLogs.Add((targetUuid, buffInfo, delta.SkillEffects?.Damages, new ExtraPacketData(extraData.ArrivalTime)));
                                 handledByLogicEffect = true;
                             }
                             else if (logicEffect.EffectType == EBuffEffectLogicPbType.BuffEffectBuffChange)
@@ -2890,25 +3037,36 @@ namespace StarResonanceDps.Core.CombatRuntime
             // **見るのは自分の付与だけ。** バフは戦っていた全員に付くが、PT では到着が分かれることがあり
             // (実測で 0.47秒差)、間に記録が入ると人数分だけ区切ってしまう。1つの出来事につき自分への付与は1回なので、
             // 自分だけを見れば区切りも1回になる。
+            //
+            // 全滅なら、区切りの設定に関係なく予告のバーの控えを消す。ゲームは全滅でも予告を消す通知を送らないので、
+            // 消さないと全滅の後にバーの終わりの行(タイマーも動かす)と通知が出る。
             if (isTargetPlayer
                 && addedBuffIds.Exists(CooldownResetBuffDelays.ContainsKey)
-                && IsSelfPlayer(targetUuid)
-                && CombatRuntimeSettings.SplitEncountersOnNewPhases
-                && EncounterManager.Current.HasStatsBeenRecorded())
+                && IsSelfPlayer(targetUuid))
             {
-                if (addedBuffIds.Contains(WipeResetBuffId)
+                var isWipe = addedBuffIds.Contains(WipeResetBuffId)
                     && addedBuffIds.Contains(ReviveStartBuffId)
                     && changedAttributes.Contains(EAttrType.AttrState)
-                    && EncounterManager.Current.GetAttrKV(targetUuid, "AttrState") is EActorState.ActorStateResurrection)
+                    && EncounterManager.Current.GetAttrKV(targetUuid, "AttrState") is EActorState.ActorStateResurrection;
+                if (isWipe)
                 {
                     Log.Information("Wipe detected: {Uuid} received the wipe reset buffs and was resurrected", targetUuid);
-                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
+                    BossDbmBarStore.Instance.Clear();
                 }
-                else if (!addedBuffIds.Contains(ReviveStartBuffId)
-                    && BattleStateMachine.IsDungeonPlaying())
+
+                if (CombatRuntimeSettings.SplitEncountersOnNewPhases
+                    && EncounterManager.Current.HasStatsBeenRecorded())
                 {
-                    Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
-                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
+                    if (isWipe)
+                    {
+                        EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
+                    }
+                    else if (!addedBuffIds.Contains(ReviveStartBuffId)
+                        && BattleStateMachine.IsDungeonPlaying())
+                    {
+                        Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
+                        EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
+                    }
                 }
             }
 
@@ -2948,35 +3106,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 被ダメログとタイムラインの加害者を先に決める。加害者は、見えて名前がある召喚体なら大元の召喚者ではなくその召喚体にする。
-            // 自分が原因の被弾(加害者の無いバフのダメージと落下)は被弾した本人。タイムラインに載る敵の回復は回復した側を決める。
+            // 被ダメログとタイムラインの加害者を先に決める(タイムラインに載る敵の回復は回復した側)。
             var damages = skillEffect.Damages;
             var takenDamageLogActors = new long[damages.Count];
             for (var index = 0; index < damages.Count; index++)
             {
-                var damageInfo = damages[index];
-                if (damageInfo.Type == EDamageType.Heal)
-                {
-                    if (TryResolveEnemyHealer(damageInfo, out var healerUuid))
-                    {
-                        takenDamageLogActors[index] = healerUuid;
-                    }
-
-                    continue;
-                }
-
-                if (IsSelfCausedDamage(damageInfo))
-                {
-                    takenDamageLogActors[index] = targetUuid;
-                }
-                else if (damageInfo.OwnerId == 0)
-                {
-                    continue;
-                }
-                else
-                {
-                    takenDamageLogActors[index] = EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
-                }
+                takenDamageLogActors[index] = ResolveTakenDamageLogActor(damages[index], targetUuid);
             }
 
             HashSet<long> rosterPlayersToUpsert = [];
@@ -3127,29 +3262,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                         EncounterManager.Current.AddDamage(attackerUuid, targetUuid, skillId, identitySkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
 
-                    // 敵の攻撃(プレイヤーへの被弾と敵どうし)のバフ由来のものは、そのバフを付けた技をいま生きている実体から控える。
-                    // 表示するころには実体が残っていないので、記録の瞬間にしか決まらない。
+                    // 敵の攻撃(プレイヤーへの被弾と敵どうし)は、発生源の技を記録の瞬間に控える。
                     var buffSourceSkillId = 0;
                     var summonSourceSkillId = 0;
                     if (!isAttackerPlayer)
                     {
-                        if (syncDamageInfo.DamageSource == EDamageSource.Buff
-                            && BuffInstanceIndex.Instance.TryResolveSourceSkill(
-                                syncDamageInfo.OwnerId,
-                                syncDamageInfo.AttackerUuid,
-                                attackerUuid,
-                                extraData.ArrivalTime,
-                                out var resolvedBuffSourceSkillId,
-                                out _))
-                        {
-                            buffSourceSkillId = resolvedBuffSourceSkillId;
-                        }
-
-                        // 仮想体などが出した被ダメは、その実体を出した技を控えから引く(出現時に決めてある)。
-                        if (SummonSourceIndex.Instance.TryGet(syncDamageInfo.AttackerUuid, out var summonSource))
-                        {
-                            summonSourceSkillId = summonSource.SkillId;
-                        }
+                        (buffSourceSkillId, summonSourceSkillId) = ResolveEnemyAttackSourceSkills(syncDamageInfo, extraData.ArrivalTime);
                     }
 
                     EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
@@ -3255,7 +3373,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             ProcessAoiSyncDelta(aoiSyncDelta, extraData);
 
-            // 表に名前の無いバフの由来は、差分を処理し終えてからたどる。
+            // 敵が付けたバフと、表に名前の無いバフの由来は、差分を処理し終えてから決める。
+            FlushPendingEnemyBuffLogs();
             BuffOriginResolver.Instance.ResolvePending();
 
             BattleStateMachine.CheckDeferredCalls();

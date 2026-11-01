@@ -431,6 +431,18 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>Note: Shows role skills other players have learned (a skill shown here is not necessarily equipped).</value>
   </data>
+  <data name="Settings_Section_PriorityBuffs_Title" xml:space="preserve">
+    <value>Priority List</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a buff to prioritize it.</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffDebuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a buff or debuff to prioritize it.</value>
+  </data>
+  <data name="Settings_Section_PriorityDebuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a debuff to prioritize it.</value>
+  </data>
   <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
     <value>Hide List</value>
   </data>
@@ -440,6 +452,9 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
     <value>Note: Right-click a buff to hide it.</value>
   </data>
+  <data name="Settings_Section_HiddenBuffDebuffs_Description" xml:space="preserve">
+    <value>Note: Right-click a buff or debuff to hide it.</value>
+  </data>
   <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
     <value>Note: Right-click a debuff to hide it.</value>
   </data>
@@ -448,6 +463,18 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
     <value>Debuff Card</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeBuff" xml:space="preserve">
+    <value>Prioritize This Buff</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeDebuff" xml:space="preserve">
+    <value>Prioritize This Debuff</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeBuff" xml:space="preserve">
+    <value>Stop Prioritizing This Buff</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeDebuff" xml:space="preserve">
+    <value>Stop Prioritizing This Debuff</value>
   </data>
   <data name="BuffList_Menu_HideBuff" xml:space="preserve">
     <value>Hide This Buff</value>
@@ -687,6 +714,9 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="SameBuffs_Ungrouped" xml:space="preserve">
     <value>Don't Group</value>
+  </data>
+  <data name="SameBuffs_Grouped" xml:space="preserve">
+    <value>Group</value>
   </data>
   <data name="SameBuffs_GroupPlayers" xml:space="preserve">
     <value>Group Players Only</value>
@@ -1158,6 +1188,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_Display_HateValue" xml:space="preserve">
     <value>Aggro</value>
   </data>
+  <data name="HateRankDisplay_All" xml:space="preserve">
+    <value>Show All</value>
+  </data>
   <data name="HateRankDisplay_Top5" xml:space="preserve">
     <value>Show Top 5</value>
   </data>
@@ -1316,6 +1349,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>Revive List</value>
+  </data>
+  <data name="Widget_EntityInfo" xml:space="preserve">
+    <value>Entity Info</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>Damage Taken Log</value>

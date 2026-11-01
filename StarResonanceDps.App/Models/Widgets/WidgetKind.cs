@@ -40,5 +40,8 @@ public enum WidgetKind
     DamageTakenList = 25,
 
     /// <summary>被ダメ詳細。プレイヤーの被ダメの合計・通常・会心・幸運と属性ごとの割合。</summary>
-    DamageTakenSummary = 26
+    DamageTakenSummary = 26,
+
+    /// <summary>エンティティ情報。エンティティリストの実体1つの HP・ヘイト・バフ・デバフ。</summary>
+    EntityInfo = 27
 }

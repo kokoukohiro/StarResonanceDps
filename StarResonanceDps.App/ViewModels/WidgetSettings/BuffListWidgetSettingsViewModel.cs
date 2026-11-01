@@ -8,8 +8,9 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// バフ・デバフ一覧の表示設定。行のゲージの色(左端と右端)と、満タンになる残り時間、
-/// 同種バフの表示、付与者プレイヤー名の表示、行のバフ名の書式、一覧に出さないバフ。
-/// 色の節はバフ・デバフグループと共有の部品(<see cref="BuffGaugeColorSettingsViewModel"/>)。
+/// 同種バフの表示、付与者プレイヤー名の表示、行のバフ名の書式、優先表示リスト、一覧に出さないバフ。
+/// 色の節はバフ・デバフグループと共有の部品(<see cref="BuffGaugeColorSettingsViewModel"/>)、
+/// 優先表示リストはバフ・デバフカードのショートカットと共有の部品(<see cref="BuffEntryListSettingsViewModel"/>)。
 /// 書式の欄の作りはバフ・デバフカードと同じ(差し込む項目に改行は無い。行は1行のため)。
 /// </summary>
 public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, IDisposable
@@ -59,6 +60,14 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
         GaugeColors = new BuffGaugeColorSettingsViewModel(WidgetConfigDefaults.GetBuffListSide(kind));
         GaugeColors.Changed += NotifyChanged;
+        PriorityBuffs = new BuffEntryListSettingsViewModel(
+            WidgetConfigDefaults.GetBuffListPriorityDefaults(kind),
+            "Settings_Section_PriorityBuffs_Title",
+            kind == WidgetKind.DebuffList
+                ? "Settings_Section_PriorityDebuffs_Description"
+                : "Settings_Section_PriorityBuffs_Description",
+            "Settings_ListReorderNote",
+            NotifyChanged);
         HiddenBuffItems = new ReadOnlyObservableCollection<BuffSettingRowViewModel>(_hiddenBuffItems);
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
 
@@ -75,6 +84,9 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
 
     /// <summary>ゲージの色の節。バフ一覧なら「バフカラー」、デバフ一覧なら「デバフカラー」。</summary>
     public BuffGaugeColorSettingsViewModel GaugeColors { get; }
+
+    /// <summary>「優先表示リスト」の節。並びは一覧の先頭からの並び(並べ替えはこの一覧だけ)。</summary>
+    public BuffEntryListSettingsViewModel PriorityBuffs { get; }
 
     /// <summary>
     /// 非表示のバフの行。並びは非表示にした順。スイッチがオンなら非表示のまま、オフにすると保存前のプレビューで一覧に出て、
@@ -106,7 +118,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         GaugeColors.Dispose();
     }
 
-    /// <summary>非表示リストは、スイッチがオンの行だけを残す。</summary>
+    /// <summary>非表示リストは、スイッチがオンの行だけを残す。優先表示リストは足した行のうちスイッチがオフの行を落とす(<see cref="BuffEntryListSettingsViewModel.CreateEntries"/>)。</summary>
     public BuffListWidgetSettingsConfig CreateConfig()
     {
         var config = new BuffListWidgetSettingsConfig
@@ -116,6 +128,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             CasterNameDisplayModeIndex = CasterNameDisplayModeIndex,
             BuffInfoFormatString = BuffInfoFormatString ?? string.Empty,
             GaugeColors = GaugeColors.CreateConfig(),
+            PriorityBuffs = PriorityBuffs.CreateEntries(),
             HiddenBuffIds = [.. _hiddenBuffItems.Where(item => item.IsEnabled).Select(item => item.Key.BuffId)]
         };
 
@@ -172,6 +185,27 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
+    /// <summary>
+    /// 開いている間に、一覧の窓の右クリックで優先表示リストの行がオン/オフになった(「このバフを優先表示」「このバフの優先表示をやめる」)。
+    /// 扱いはバフ・デバフカードのショートカット(<see cref="BuffCardWidgetSettingsViewModel.SetShortcutEnabledFromWidget"/>)と同じで、
+    /// 保存済みの値と行の両方に同じ決まり(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>)で入れる。プレビューは鳴らさない。
+    /// </summary>
+    public void SetPriorityBuffEnabledFromWidget(BuffEntryKey key, bool isEnabled)
+    {
+        if (!key.IsValid)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _lastSaved.PriorityBuffs ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.GetBuffListPriorityDefaults(_kind));
+        PriorityBuffs.SetEntryEnabled(key, isEnabled);
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
     private void Load(BuffListWidgetSettingsConfig? config)
     {
         var normalized = WidgetConfigDefaults.CloneNormalizedBuffList(_kind, config);
@@ -184,6 +218,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             SameBuffGroupingIndex = normalized.SameBuffGroupingIndex;
             CasterNameDisplayModeIndex = normalized.CasterNameDisplayModeIndex;
             BuffInfoFormatString = normalized.BuffInfoFormatString ?? string.Empty;
+            PriorityBuffs.Load(normalized.PriorityBuffs);
 
             _hiddenBuffItems.Clear();
             foreach (var baseId in normalized.HiddenBuffIds)
@@ -262,6 +297,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             || left.SameBuffGroupingIndex != right.SameBuffGroupingIndex
             || left.CasterNameDisplayModeIndex != right.CasterNameDisplayModeIndex
             || !string.Equals(left.BuffInfoFormatString, right.BuffInfoFormatString, StringComparison.Ordinal)
+            || !BuffEntryListSettingsViewModel.EntriesEqual(left.PriorityBuffs, right.PriorityBuffs)
             || !left.HiddenBuffIds.SequenceEqual(right.HiddenBuffIds))
         {
             return false;
@@ -277,6 +313,7 @@ public sealed partial class BuffListWidgetSettingsViewModel : ObservableObject, 
             item.RefreshMetadata();
         }
 
+        PriorityBuffs.RefreshLocalizedText();
         OnPropertyChanged(nameof(HiddenBuffSectionTitle));
         OnPropertyChanged(nameof(HiddenBuffSectionDescription));
         RebuildFormatFields();

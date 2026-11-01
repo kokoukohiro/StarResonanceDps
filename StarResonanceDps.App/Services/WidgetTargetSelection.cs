@@ -13,6 +13,7 @@ namespace StarResonanceDps.App.Services;
 /// <para>
 /// 項目は名前の選択リストを開いたときにだけ作る(閉じている間は作り直さない)。並べるものは種別で決まる:
 /// 人の窓は名簿の全員(自分 → パーティの番号順 → そのほかの名前順)、バフリスト・デバフリストはそれに続けてエンティティリストの敵、
+/// エンティティ情報はエンティティリストの敵だけ、
 /// 与ダメ・ヒールの詳細とグラフはメーターの行、バフ・デバフカードはカードの設定のショートカットのオンの行(自分のバフ・デバフ、設定の並び)と、
 /// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)。
 /// 開いている窓の相手と選んでいる項目は、名簿などから外れていても末尾に足す(選んで閉じられるように)。
@@ -31,6 +32,11 @@ namespace StarResonanceDps.App.Services;
 /// 指定なしは別の項目として残さない)。指定なしは並べるものが1つも無いときだけの項目で、並べるものが出たらその1つ目で上書きし(<see cref="Refresh"/>)、
 /// 並べるものが無くなれば既定として戻る。
 /// </para>
+///
+/// <para>
+/// エンティティ情報の既定はエンティティリストの1番目の敵。敵がいなければ、敵を選んでいない項目(<see cref="CreateUnselectedEntity"/>、欄はウィジェット名だけ)で、
+/// 起動ボタンは押せない(<see cref="WidgetListItemViewModel.IsTargetToggleEnabled"/>)。敵が出たらその1番目で上書きする(<see cref="Refresh"/>)。
+/// </para>
 /// </summary>
 public sealed class WidgetTargetSelection
 {
@@ -45,16 +51,33 @@ public sealed class WidgetTargetSelection
         _findWidget = findWidget;
     }
 
-    /// <summary>選んでいる項目の既定。バフ・デバフカードはショートカットの1つ目(無ければ「指定なし」)、ほかは自分。</summary>
-    public static WidgetTargetOption CreateDefault(WidgetListItemViewModel widget)
+    /// <summary>
+    /// 選んでいる項目の既定。バフ・デバフカードはショートカットの1つ目(無ければ「指定なし」)、
+    /// エンティティ情報はエンティティリストの1番目の敵(無ければ敵を選んでいない項目)、ほかは自分。
+    /// </summary>
+    public WidgetTargetOption CreateDefault(WidgetListItemViewModel widget)
     {
-        if (widget.Kind != WidgetKind.BuffDebuffCard)
+        return widget.Kind switch
         {
-            return WidgetTargetOption.CreateSelf(AppState.PlayerUID);
-        }
+            WidgetKind.BuffDebuffCard => CreateShortcutOptions(widget).FirstOrDefault()
+                ?? WidgetTargetOption.CreateUnspecifiedBuffCard(),
+            WidgetKind.EntityInfo => CreateEntityOptions().FirstOrDefault() ?? CreateUnselectedEntity(),
+            _ => WidgetTargetOption.CreateSelf(AppState.PlayerUID)
+        };
+    }
 
-        return CreateShortcutOptions(widget).FirstOrDefault()
-            ?? WidgetTargetOption.CreateUnspecifiedBuffCard();
+    /// <summary>エンティティ情報で、敵を選んでいない項目(エンティティリストに敵がいないときの既定)。開く窓は無い。</summary>
+    private static WidgetTargetOption CreateUnselectedEntity()
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Entity
+        };
+    }
+
+    private static bool IsUnselectedEntity(WidgetTargetOption option)
+    {
+        return option.Kind == WidgetTargetOptionKind.Entity && option.Entity is null;
     }
 
     /// <summary>
@@ -132,7 +155,8 @@ public sealed class WidgetTargetSelection
     /// <summary>
     /// カードの名前の欄と起動ボタンを、選んでいる項目と開いている窓で当て直す。値が同じなら変えない。
     /// 並べるものが無いときは名前だけの表示(直す前と同じ)になるので、起動ボタンも直す前と同じく既定を開くよう、選択を既定に戻す。
-    /// バフ・デバフカードの「指定なし」は並べるものが1つも無いときだけの項目で、並べるものが出たらその1つ目で上書きする。
+    /// バフ・デバフカードの「指定なし」とエンティティ情報の敵を選んでいない項目は、並べるものが1つも無いときだけの項目で、
+    /// 並べるものが出たらその1つ目で上書きする。
     /// 選択リストの元のうちバフの行とメーターの行には変わった合図が無いので、メイン画面が全部のカードについて1秒ごとにここを呼ぶ。
     /// </summary>
     public void Refresh(WidgetListItemViewModel widget)
@@ -142,8 +166,8 @@ public sealed class WidgetTargetSelection
             return;
         }
 
-        // バフ・デバフカードは並べるもの(ショートカット・リストのカードの相手の行・開いている窓)を作って数える。指定なしの上書きにも使う。
-        var listed = widget.Kind == WidgetKind.BuffDebuffCard ? CreateListedOptions(widget) : null;
+        // バフ・デバフカードとエンティティ情報は並べるもの(候補・開いている窓)を作って数える。既定の項目の上書きにも使う。
+        var listed = widget.Kind is WidgetKind.BuffDebuffCard or WidgetKind.EntityInfo ? CreateListedOptions(widget) : null;
         var hasOptions = listed is not null ? listed.Count > 0 : HasOptions(widget);
         widget.HasTargetOptions = hasOptions;
         var defaultOption = CreateDefault(widget);
@@ -151,13 +175,16 @@ public sealed class WidgetTargetSelection
         {
             widget.SelectedTargetOption = defaultOption;
         }
-        else if (listed is { Count: > 0 } && widget.SelectedTargetOption?.IsUnspecifiedBuffCard == true)
+        else if (listed is { Count: > 0 }
+                 && widget.SelectedTargetOption is { } placeholder
+                 && (placeholder.IsUnspecifiedBuffCard || IsUnselectedEntity(placeholder)))
         {
             widget.SelectedTargetOption = listed[0];
         }
 
         var selected = GetSelected(widget);
         widget.TargetSelectorText = FormatSelectorText(widget, selected);
+        widget.IsTargetToggleEnabled = !IsUnselectedEntity(selected);
 
         // 「指定なし」は開くか前に出すだけなので、いつも起動の絵。
         var (person, buff) = Resolve(widget, selected);
@@ -185,7 +212,7 @@ public sealed class WidgetTargetSelection
         }
     }
 
-    private static WidgetTargetOption GetSelected(WidgetListItemViewModel widget)
+    private WidgetTargetOption GetSelected(WidgetListItemViewModel widget)
     {
         return widget.SelectedTargetOption ??= CreateDefault(widget);
     }
@@ -225,6 +252,7 @@ public sealed class WidgetTargetSelection
             WidgetKind.HealingContribution or WidgetKind.HealingSummary or WidgetKind.HpsGraph
                 => CreateMeterOptions(MeterSnapshotKind.Healing, WidgetKind.HpsMeter),
             WidgetKind.DamageTakenSummary => CreateDamageTakenOptions(),
+            WidgetKind.EntityInfo => CreateEntityOptions(),
             _ => CreateRosterOptions(includesEntities: widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList)
         };
     }
@@ -289,7 +317,7 @@ public sealed class WidgetTargetSelection
     {
         if (person.Kind == WidgetTargetOptionKind.Entity)
         {
-            return WidgetHeaderText.Join(prefix, person.Entity?.DisplayName);
+            return WidgetHeaderText.Join(prefix, person.Entity?.Name);
         }
 
         var identity = ResolvePlayerIdentity(person);
@@ -359,12 +387,20 @@ public sealed class WidgetTargetSelection
             .OrderBy(identity => identity.DisplayName, StringComparer.CurrentCulture)
             .Select(CreatePlayerOption));
 
-        if (includesEntities && _findWidget(WidgetKind.EntityList) is { } entityList)
+        if (includesEntities)
         {
-            options.AddRange(entityList.EntityListEntries.Select(CreateEntityOption));
+            options.AddRange(CreateEntityOptions());
         }
 
         return options;
+    }
+
+    /// <summary>エンティティリストの敵(エンティティリストの並び)。</summary>
+    private List<WidgetTargetOption> CreateEntityOptions()
+    {
+        return _findWidget(WidgetKind.EntityList) is { } entityList
+            ? [.. entityList.EntityListEntries.Select(CreateEntityOption)]
+            : [];
     }
 
     /// <summary>メーターに出ている行(メーターの並びと、メーターのカードの設定のパーティ表示のまま)。</summary>
@@ -565,6 +601,12 @@ public sealed class WidgetTargetSelection
     private void AppendSelectedTarget(WidgetListItemViewModel widget, List<WidgetTargetOption> options)
     {
         var selected = GetSelected(widget);
+        // 敵を選んでいない項目は、並べるものがあるときには残さない(次の当て直しで1つ目に替わる)。
+        if (IsUnselectedEntity(selected))
+        {
+            return;
+        }
+
         var isListed = widget.Kind == WidgetKind.BuffDebuffCard && !selected.IsUnspecifiedBuffCard
             ? options.Any(option => IsSameCard(option, selected, ResolveBuffPerson(selected)))
             : options.Any(option => option.IsSameTarget(selected));

@@ -82,12 +82,12 @@ internal readonly record struct EntityHatePlayerLook(
     string DisplayName);
 
 /// <summary>
-/// ヘイトの枠に出すプレイヤーの見た目を名簿から引く。エンティティリストの項目(<c>WidgetListItemViewModel</c>)が1つ持つ。
+/// ヘイトの枠に出すプレイヤーの見た目を名簿から引く。エンティティリストの項目(<c>WidgetListItemViewModel</c>)とエンティティ情報の窓が1つずつ持つ。
 ///
 /// <para>
 /// 名前・クラス・特化は名簿の行から。名前はほかの画面と同じプレイヤー名の決まり(<see cref="PlayerInfoFormatFormatter.GetDisplayName(string?, long, bool, bool, int, PlayerNameDisplayMode)"/>、
 /// 全体設定の表示設定「プレイヤー名」に従う)。特化名はプレイヤーリストと同じ <see cref="PlayerInfoFormatFormatter.GetClassSpecText"/>。
-/// 色はエンティティリストのアイコンカラーのクラスの行。名簿に居ない相手は、はてなのアイコン・名前も特化名も「不明」。
+/// 色は持ち主のウィジェットのアイコンカラーのクラスの行。名簿に居ない相手は、はてなのアイコン・名前も特化名も「不明」。
 /// </para>
 ///
 /// <para>
@@ -101,7 +101,7 @@ public sealed class EntityHatePlayerResolver
     private readonly Dictionary<string, ImageBrush> _professionIconMasks = new(StringComparer.Ordinal);
     private readonly Dictionary<string, SolidColorBrush> _classBrushes = new(StringComparer.Ordinal);
     private Dictionary<long, PlayerRosterEntry> _rosterByCharacterId = [];
-    private MeterWidgetSettingsConfig? _settings;
+    private EntityRowSettings? _settings;
     private PlayerNameDisplayMode _nameDisplayMode;
 
     /// <summary>名簿が変わった。同じキャラ番号の行が2つあれば後ろの行(プレイヤーリストと同じ)。</summary>
@@ -119,7 +119,7 @@ public sealed class EntityHatePlayerResolver
     }
 
     /// <summary>行を当て直す前に、今の設定と名前の見せ方を渡す。設定が替わっていれば色を作り直す。</summary>
-    public void Prepare(MeterWidgetSettingsConfig settings, PlayerNameDisplayMode nameDisplayMode)
+    public void Prepare(EntityRowSettings settings, PlayerNameDisplayMode nameDisplayMode)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
@@ -174,7 +174,7 @@ public sealed class EntityHatePlayerResolver
         return mask;
     }
 
-    private SolidColorBrush GetClassBrush(MeterWidgetSettingsConfig settings, string professionKey)
+    private SolidColorBrush GetClassBrush(EntityRowSettings settings, string professionKey)
     {
         if (!_classBrushes.TryGetValue(professionKey, out var brush))
         {

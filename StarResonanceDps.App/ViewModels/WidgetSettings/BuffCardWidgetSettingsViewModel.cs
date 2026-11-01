@@ -52,11 +52,13 @@ public sealed partial class BuffCardWidgetSettingsViewModel : ObservableObject, 
         Shortcuts = new BuffEntryListSettingsViewModel(
             WidgetConfigDefaults.DefaultBuffCardShortcutEntries,
             "Settings_Section_BuffCardShortcuts_Title",
+            "Settings_Section_BuffDebuffGroupEntries_Description",
             "Settings_ListReorderNote",
             EntryList_Changed);
         NotificationTargets = new BuffEntryListSettingsViewModel(
             WidgetConfigDefaults.DefaultBuffCardNotificationTargetEntries,
             "Settings_Section_NotificationTargets_Title",
+            "Settings_Section_BuffDebuffGroupEntries_Description",
             reorderNoteResourceKey: null,
             EntryList_Changed);
 

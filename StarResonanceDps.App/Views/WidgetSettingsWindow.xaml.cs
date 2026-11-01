@@ -55,7 +55,11 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.BuffDebuffGroupPreviewChanged += _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged += _widget.ApplyReviveListSettingsPreview;
         _viewModel.DamageTakenListPreviewChanged += _widget.ApplyDamageTakenListSettingsPreview;
+        _viewModel.EntityInfoPreviewChanged += _widget.ApplyEntityInfoSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
+        _widget.EntityInfoHiddenBuffsChanged += Widget_EntityInfoHiddenBuffsChanged;
+        _widget.BuffListPriorityBuffChangedFromWidget += Widget_BuffListPriorityBuffChangedFromWidget;
+        _widget.EntityInfoPriorityBuffChangedFromWidget += Widget_EntityInfoPriorityBuffChangedFromWidget;
         _widget.BuffDebuffGroupEntryChangedFromWidget += Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget += Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
@@ -103,7 +107,11 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.BuffDebuffGroupPreviewChanged -= _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged -= _widget.ApplyReviveListSettingsPreview;
         _viewModel.DamageTakenListPreviewChanged -= _widget.ApplyDamageTakenListSettingsPreview;
+        _viewModel.EntityInfoPreviewChanged -= _widget.ApplyEntityInfoSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
+        _widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;
+        _widget.BuffListPriorityBuffChangedFromWidget -= Widget_BuffListPriorityBuffChangedFromWidget;
+        _widget.EntityInfoPriorityBuffChangedFromWidget -= Widget_EntityInfoPriorityBuffChangedFromWidget;
         _widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
         _widget.BuffDebuffGroupEntryOrderChangedFromWidget -= Widget_BuffDebuffGroupEntryOrderChangedFromWidget;
         _widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
@@ -121,6 +129,24 @@ public partial class WidgetSettingsWindow : Window
     private void Widget_BuffListHiddenBuffsChanged(WidgetKind kind, int baseId)
     {
         _viewModel.BuffListSettings?.AddHiddenBuffFromWidget(baseId);
+    }
+
+    /// <summary>開いている間にエンティティ情報の枠の右クリックでバフが非表示になった。設定の行にも足す。</summary>
+    private void Widget_EntityInfoHiddenBuffsChanged(WidgetKind kind, int baseId)
+    {
+        _viewModel.EntityInfoSettings?.AddHiddenBuffFromWidget(baseId);
+    }
+
+    /// <summary>開いている間に一覧の窓の右クリックで優先表示リストの行がオン/オフになった。設定の行にも同じ変化を入れる。</summary>
+    private void Widget_BuffListPriorityBuffChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.BuffListSettings?.SetPriorityBuffEnabledFromWidget(key, isEnabled);
+    }
+
+    /// <summary>開いている間にエンティティ情報の枠の右クリックで優先表示リストの行がオン/オフになった。設定の行にも同じ変化を入れる。</summary>
+    private void Widget_EntityInfoPriorityBuffChangedFromWidget(WidgetKind kind, BuffEntryKey key, bool isEnabled)
+    {
+        _viewModel.EntityInfoSettings?.SetPriorityBuffEnabledFromWidget(key, isEnabled);
     }
 
     /// <summary>
@@ -335,9 +361,24 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(OtherRoleSkillsHost);
     }
 
+    private void BuffListPriorityBuffsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(BuffListPriorityBuffsHost);
+    }
+
+    private void EntityInfoPriorityBuffsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(EntityInfoPriorityBuffsHost);
+    }
+
     private void BuffListHiddenBuffsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BuffListHiddenBuffsHost);
+    }
+
+    private void EntityInfoHiddenBuffsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(EntityInfoHiddenBuffsHost);
     }
 
     private void ThemeNavButton_Click(object sender, RoutedEventArgs e)
@@ -378,6 +419,11 @@ public partial class WidgetSettingsWindow : Window
     private void ReviveListTextColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(ReviveListTextColorsHost);
+    }
+
+    private void EntityInfoClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(EntityInfoClassColorsHost);
     }
 
     private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)

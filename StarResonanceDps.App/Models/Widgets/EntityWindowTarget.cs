@@ -46,7 +46,7 @@ public sealed class EntityWindowTarget
         _savedName = savedName ?? string.Empty;
     }
 
-    /// <summary>対象が差し替わったとき(捕獲・実体の作り直し・表示名の変化)に上がる。</summary>
+    /// <summary>対象が差し替わったとき(捕獲・実体の作り直し・名前の変化)に上がる。</summary>
     public event EventHandler? Changed;
 
     public long EntityId { get; }
@@ -62,10 +62,7 @@ public sealed class EntityWindowTarget
     /// <summary>捕まえている実体。未捕獲なら <c>null</c>。</summary>
     public EntityListEntry? Entity => _entity;
 
-    /// <summary>ヘッダーに出す名前。未捕獲なら保存しておいた名前。</summary>
-    public string DisplayName => _entity?.DisplayName ?? _savedName;
-
-    /// <summary>書式を通していない素の名前。</summary>
+    /// <summary>ヘッダーに出す名前(書式を通していない素の名前)。未捕獲なら保存しておいた名前。</summary>
     public string Name => _entity?.Name ?? _savedName;
 
     public int Level => _entity?.Level ?? 0;
@@ -166,7 +163,7 @@ public sealed class EntityWindowTarget
 
     private void Entity_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(EntityListEntry.DisplayName))
+        if (e.PropertyName == nameof(EntityListEntry.Name))
         {
             Changed?.Invoke(this, EventArgs.Empty);
         }

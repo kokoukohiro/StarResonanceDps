@@ -34,6 +34,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private BuffDebuffGroupWidgetSettingsConfig _buffDebuffGroup = WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
     private ReviveListWidgetSettingsConfig _reviveList = WidgetConfigDefaults.CreateReviveListSettings();
     private DamageTakenListWidgetSettingsConfig _damageTakenList = WidgetConfigDefaults.CreateDamageTakenListSettings();
+    private EntityInfoWidgetSettingsConfig _entityInfo = WidgetConfigDefaults.CreateEntityInfoSettings();
+
+    /// <summary>エンティティリストの行を組む設定。メーターの設定(<c>_meter</c>)が変わったときに作り直す。</summary>
+    private EntityRowSettings _entityRowSettings;
+
+    /// <summary>エンティティリストのヘイトの枠の数。狙っている相手の1つと、「ヘイト値」の一番多い人数。</summary>
+    private static readonly int EntityListHateSlotCount = WidgetConfigDefaults.HateRankDisplayCounts.Max() + 1;
 
     /// <summary>
     /// 設定の窓が開いている間だけの、ステータス詳細の行の並び(保存前のプレビュー)。null は窓が開いていない。
@@ -138,6 +145,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     [ObservableProperty]
     private string _targetSelectorText = string.Empty;
 
+    /// <summary>
+    /// 起動ボタンを押せるか。押せないのは、エンティティ情報でエンティティリストに敵がいなくて敵を選んでいないときだけ。
+    /// 決めるのは <see cref="WidgetTargetSelection"/>。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ToggleRunningCommand))]
+    private bool _isTargetToggleEnabled = true;
+
     /// <summary>選んでいる項目の窓が開いているか。決めるのは <see cref="WidgetTargetSelection"/>。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowsStopIcon))]
@@ -188,7 +203,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.HealingContribution
         or WidgetKind.HealingSummary
         or WidgetKind.HpsGraph
-        or WidgetKind.DamageTakenSummary;
+        or WidgetKind.DamageTakenSummary
+        or WidgetKind.EntityInfo;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
@@ -265,6 +281,11 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public DamageTakenListWidgetSettingsConfig GetDamageTakenListSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedDamageTakenList(_damageTakenList);
+    }
+
+    public EntityInfoWidgetSettingsConfig GetEntityInfoSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedEntityInfo(_entityInfo);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -525,6 +546,90 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         BuffListHiddenBuffsChanged?.Invoke(Kind, baseId);
     }
 
+    /// <summary>
+    /// エンティティ情報の窓のバフ・デバフの枠の右クリックで、そのバフを非表示にする。
+    /// 開いているエンティティ情報の窓へ <see cref="EntityInfoSettingsChanged"/> で、保存と設定ウィンドウへ
+    /// <see cref="EntityInfoHiddenBuffsChanged"/> で知らせる。既に非表示なら何もしない(バフ・デバフ一覧と同じ扱い)。
+    /// </summary>
+    public void HideBuffInEntityInfo(int baseId)
+    {
+        if (!WidgetConfigDefaults.SupportsEntityInfoSettings(Kind)
+            || baseId <= 0
+            || _entityInfo.HiddenBuffIds.Contains(baseId))
+        {
+            return;
+        }
+
+        _entityInfo.HiddenBuffIds.Add(baseId);
+        EntityInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
+        EntityInfoHiddenBuffsChanged?.Invoke(Kind, baseId);
+    }
+
+    /// <summary>バフ・デバフ一覧の優先表示リストに、そのバフの行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsBuffListPriorityBuff(int baseId)
+    {
+        return WidgetConfigDefaults.SupportsBuffListSettings(Kind)
+            && _buffList.PriorityBuffs is { } priorityBuffs
+            && priorityBuffs.Exists(entry => entry.IsEnabled && entry.GetKey() == BuffEntryKey.ForBuff(baseId));
+    }
+
+    /// <summary>
+    /// バフ・デバフ一覧の窓の右クリックで、そのバフを優先表示にする・やめる(優先表示リストの行をオン/オフにする)。
+    /// 決まりはグループの行と同じ(<see cref="WidgetConfigDefaults.SetBuffEntryEnabled"/>。やめると既定の行はオフで残り、足した行は消える)。
+    /// 開いている一覧の窓へ <see cref="BuffListSettingsChanged"/> で、保存と設定ウィンドウへ <see cref="BuffListPriorityBuffChangedFromWidget"/> で知らせる。
+    /// 既にその状態なら何もしない。
+    /// </summary>
+    public void SetBuffListPriorityBuffEnabledFromWidget(int baseId, bool isEnabled)
+    {
+        var key = BuffEntryKey.ForBuff(baseId);
+        if (!WidgetConfigDefaults.SupportsBuffListSettings(Kind)
+            || !key.IsValid
+            || IsBuffListPriorityBuff(baseId) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _buffList.PriorityBuffs ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.GetBuffListPriorityDefaults(Kind));
+        BuffListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        BuffListPriorityBuffChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
+    /// <summary>エンティティ情報の優先表示リストに、そのバフの行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
+    public bool IsEntityInfoPriorityBuff(int baseId)
+    {
+        return WidgetConfigDefaults.SupportsEntityInfoSettings(Kind)
+            && _entityInfo.PriorityBuffs is { } priorityBuffs
+            && priorityBuffs.Exists(entry => entry.IsEnabled && entry.GetKey() == BuffEntryKey.ForBuff(baseId));
+    }
+
+    /// <summary>
+    /// エンティティ情報の窓のバフ・デバフの枠の右クリックで、そのバフを優先表示にする・やめる。
+    /// 開いているエンティティ情報の窓へ <see cref="EntityInfoSettingsChanged"/> で、保存と設定ウィンドウへ
+    /// <see cref="EntityInfoPriorityBuffChangedFromWidget"/> で知らせる。既にその状態なら何もしない(バフ・デバフ一覧と同じ扱い)。
+    /// </summary>
+    public void SetEntityInfoPriorityBuffEnabledFromWidget(int baseId, bool isEnabled)
+    {
+        var key = BuffEntryKey.ForBuff(baseId);
+        if (!WidgetConfigDefaults.SupportsEntityInfoSettings(Kind)
+            || !key.IsValid
+            || IsEntityInfoPriorityBuff(baseId) == isEnabled)
+        {
+            return;
+        }
+
+        WidgetConfigDefaults.SetBuffEntryEnabled(
+            _entityInfo.PriorityBuffs ??= [],
+            key,
+            isEnabled,
+            WidgetConfigDefaults.DefaultEntityInfoPriorityBuffEntries);
+        EntityInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
+        EntityInfoPriorityBuffChangedFromWidget?.Invoke(Kind, key, isEnabled);
+    }
+
     /// <summary>推移グラフの今の横軸の長さ(設定の窓のプレビューを含む)。</summary>
     public int MetricTimelineVisibleSeconds => _metricTimeline.VisibleSeconds;
 
@@ -644,6 +749,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面の削除では上げない。</summary>
     public event Action<WidgetKind, int>? BuffListHiddenBuffsChanged;
 
+    /// <summary>窓の右クリックで優先表示リストの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。</summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? BuffListPriorityBuffChangedFromWidget;
+
     /// <summary>推移グラフの窓の上のホイールで横軸の長さが変わった(引数は新しい秒数)。設定の窓のスライダーでは上げない。</summary>
     public event Action<int>? MetricTimelineVisibleSecondsChangedFromWidget;
 
@@ -663,6 +771,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public event EventHandler? ReviveListSettingsChanged;
 
     public event EventHandler? DamageTakenListSettingsChanged;
+
+    public event EventHandler? EntityInfoSettingsChanged;
+
+    /// <summary>エンティティ情報の窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面のスイッチでは上げない。</summary>
+    public event Action<WidgetKind, int>? EntityInfoHiddenBuffsChanged;
+
+    /// <summary>エンティティ情報の窓の右クリックで優先表示リストの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。</summary>
+    public event Action<WidgetKind, BuffEntryKey, bool>? EntityInfoPriorityBuffChangedFromWidget;
 
     /// <summary>
     /// 右クリックでバフ・デバフグループの行をオン/オフにした(引数はウィジェットの種別・行の鍵・オンか)。設定画面のスイッチでは上げない。
@@ -700,6 +816,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     {
         PlayerListEntries = new ReadOnlyObservableCollection<PlayerListEntry>(_playerListEntries);
         EntityListEntries = new ReadOnlyObservableCollection<EntityListEntry>(_entityListEntries);
+        _entityRowSettings = EntityRowSettings.FromEntityList(_meter);
     }
 
     /// <summary>
@@ -805,6 +922,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                 : null,
             DamageTakenList = WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind)
                 ? _damageTakenList.Clone()
+                : null,
+            EntityInfo = WidgetConfigDefaults.SupportsEntityInfoSettings(Kind)
+                ? _entityInfo.Clone()
                 : null
         };
     }
@@ -826,6 +946,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         if (WidgetConfigDefaults.SupportsMeterSettings(Kind))
         {
             _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, config.Meter);
+            _entityRowSettings = EntityRowSettings.FromEntityList(_meter);
         }
 
         if (WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
@@ -914,6 +1035,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        if (WidgetConfigDefaults.SupportsEntityInfoSettings(Kind))
+        {
+            _entityInfo = WidgetConfigDefaults.CloneNormalizedEntityInfo(config.EntityInfo);
+            EntityInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         SynchronizePlayerListEntries(resetEntries: false);
         SynchronizeEntityListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -927,6 +1054,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
 
         _meter = WidgetConfigDefaults.CloneNormalizedMeter(Kind, meter);
+        _entityRowSettings = EntityRowSettings.FromEntityList(_meter);
         SynchronizePlayerListEntries(resetEntries: false);
         SynchronizeEntityListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -1063,6 +1191,17 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _damageTakenList = WidgetConfigDefaults.CloneNormalizedDamageTakenList(damageTakenList);
         DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyEntityInfoSettingsPreview(EntityInfoWidgetSettingsConfig entityInfo)
+    {
+        if (!WidgetConfigDefaults.SupportsEntityInfoSettings(Kind))
+        {
+            return;
+        }
+
+        _entityInfo = WidgetConfigDefaults.CloneNormalizedEntityInfo(entityInfo);
+        EntityInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyTheme(WidgetThemeConfig theme)
@@ -1265,7 +1404,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// 起動ボタン。相手を選ぶ種別(複数開けるウィジェット)は選んでいる項目の窓だけを開く・閉じる(窓を束ねる側へ頼む)。
     /// ほかは起動中と停止を切り替える。
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsTargetToggleEnabled))]
     private void ToggleRunning()
     {
         if (SupportsTargetSelection)
@@ -1325,6 +1464,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private void RequestDebuffList(PlayerListEntry? player)
     {
         RequestPlayerWindow(WidgetKind.DebuffList, player);
+    }
+
+    [RelayCommand]
+    private void RequestEntityInfo(EntityListEntry? entity)
+    {
+        RequestEntityWindow(WidgetKind.EntityInfo, entity);
     }
 
     [RelayCommand]
@@ -1554,7 +1699,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
 
         _entityHatePlayers.Prepare(
-            _meter,
+            _entityRowSettings,
             (PlayerNameDisplayMode)ConfigManager.Instance.GetSettingsSnapshot().PlayerNameDisplayModeIndex);
 
         for (var targetIndex = 0; targetIndex < visibleEntities.Count; targetIndex++)
@@ -1562,13 +1707,18 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             var entity = visibleEntities[targetIndex];
             if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
             {
-                entry = EntityListEntry.Create(entity, _meter, _entityHatePlayers, _dungeonScore.IsScoreRequested);
+                entry = EntityListEntry.Create(
+                    entity,
+                    _entityRowSettings,
+                    _entityHatePlayers,
+                    _dungeonScore.IsScoreRequested,
+                    EntityListHateSlotCount);
                 _entityListEntriesByUuid.Add(entity.EntityUuid, entry);
                 _entityListEntries.Insert(targetIndex, entry);
                 continue;
             }
 
-            entry.Update(entity, _meter, _entityHatePlayers, _dungeonScore.IsScoreRequested);
+            entry.Update(entity, _entityRowSettings, _entityHatePlayers, _dungeonScore.IsScoreRequested);
 
             if (_entityListEntries[targetIndex].EntityUuid == entity.EntityUuid)
             {

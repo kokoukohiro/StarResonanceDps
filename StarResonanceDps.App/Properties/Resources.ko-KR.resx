@@ -431,6 +431,18 @@
   <data name="Settings_Section_OtherRoleSkills_Description" xml:space="preserve">
     <value>※다른 플레이어가 습득한 역할 스킬을 표시합니다(표시되어 있어도 장착 중이라고는 할 수 없습니다)</value>
   </data>
+  <data name="Settings_Section_PriorityBuffs_Title" xml:space="preserve">
+    <value>우선 표시 목록</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffs_Description" xml:space="preserve">
+    <value>※버프를 우클릭하면 우선 표시할 수 있습니다</value>
+  </data>
+  <data name="Settings_Section_PriorityBuffDebuffs_Description" xml:space="preserve">
+    <value>※버프와 디버프를 우클릭하면 우선 표시할 수 있습니다</value>
+  </data>
+  <data name="Settings_Section_PriorityDebuffs_Description" xml:space="preserve">
+    <value>※디버프를 우클릭하면 우선 표시할 수 있습니다</value>
+  </data>
   <data name="Settings_Section_HiddenBuffs_Title" xml:space="preserve">
     <value>숨김 목록</value>
   </data>
@@ -440,6 +452,9 @@
   <data name="Settings_Section_HiddenBuffs_Description" xml:space="preserve">
     <value>※버프를 우클릭하면 숨길 수 있습니다</value>
   </data>
+  <data name="Settings_Section_HiddenBuffDebuffs_Description" xml:space="preserve">
+    <value>※버프와 디버프를 우클릭하면 숨길 수 있습니다</value>
+  </data>
   <data name="Settings_Section_HiddenDebuffs_Description" xml:space="preserve">
     <value>※디버프를 우클릭하면 숨길 수 있습니다</value>
   </data>
@@ -448,6 +463,18 @@
   </data>
   <data name="BuffList_Menu_DebuffCard" xml:space="preserve">
     <value>디버프 카드</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeBuff" xml:space="preserve">
+    <value>이 버프 우선 표시</value>
+  </data>
+  <data name="BuffList_Menu_PrioritizeDebuff" xml:space="preserve">
+    <value>이 디버프 우선 표시</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeBuff" xml:space="preserve">
+    <value>이 버프 우선 표시 해제</value>
+  </data>
+  <data name="BuffList_Menu_UnprioritizeDebuff" xml:space="preserve">
+    <value>이 디버프 우선 표시 해제</value>
   </data>
   <data name="BuffList_Menu_HideBuff" xml:space="preserve">
     <value>이 버프 숨기기</value>
@@ -687,6 +714,9 @@
   </data>
   <data name="SameBuffs_Ungrouped" xml:space="preserve">
     <value>묶지 않음</value>
+  </data>
+  <data name="SameBuffs_Grouped" xml:space="preserve">
+    <value>묶기</value>
   </data>
   <data name="SameBuffs_GroupPlayers" xml:space="preserve">
     <value>플레이어만 묶기</value>
@@ -1158,6 +1188,9 @@
   <data name="Settings_Display_HateValue" xml:space="preserve">
     <value>적대 수치</value>
   </data>
+  <data name="HateRankDisplay_All" xml:space="preserve">
+    <value>전원 표시</value>
+  </data>
   <data name="HateRankDisplay_Top5" xml:space="preserve">
     <value>상위 5명 표시</value>
   </data>
@@ -1316,6 +1349,9 @@
   </data>
   <data name="Widget_ReviveList" xml:space="preserve">
     <value>부활 목록</value>
+  </data>
+  <data name="Widget_EntityInfo" xml:space="preserve">
+    <value>엔티티 정보</value>
   </data>
   <data name="Widget_DamageTakenList" xml:space="preserve">
     <value>받은 피해 로그</value>

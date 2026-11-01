@@ -220,6 +220,7 @@ public sealed class EnemyDamageRecord
 /// 付与元は通信の <c>FightSourceInfo</c> を、ほかの記録と同じ発生源の形(<see cref="OwnerId"/> と <see cref="DamageSource"/>)に置き換えて持つ:
 /// 技 → <c>Skill</c> と技ID、弾 → <c>Bullet</c> と弾ID、親のバフ → <c>Buff</c> とそのバフID(<see cref="BuffSourceSkillId"/> は親のバフを付けた技)、
 /// それ以外(タレント・シーンなど)と番号の無いものは <c>Other</c> と 0。
+/// 親のバフを付けた技が分からず、同じ差分に付けた敵の被弾があるときは、その被弾の発生源(被弾したときに付くバフの引き金)を持つ。
 /// </para>
 /// </summary>
 [ProtoContract]
@@ -248,7 +249,7 @@ public sealed class EnemyBuffRecord
     [ProtoMember(7)]
     public int BuffSourceSkillId { get; set; }
 
-    /// <summary>付けた実体(仮想体など)を出した技ID。決まらなければ 0。</summary>
+    /// <summary>付けた実体(仮想体など)を出した技ID。付与元を引き金の被弾にしたときは、その被弾を出した実体を出した技ID。決まらなければ 0。</summary>
     [ProtoMember(8)]
     public int SummonSourceSkillId { get; set; }
 

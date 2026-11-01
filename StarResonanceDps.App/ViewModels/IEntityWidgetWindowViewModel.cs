@@ -7,7 +7,7 @@ namespace StarResonanceDps.App.ViewModels;
 /// エンティティ(モンスター)に紐づくウィジェットウィンドウのViewModel。
 ///
 /// <para>
-/// バフ/デバフ一覧とバフ・デバフカードの2種類があり、
+/// バフ/デバフ一覧とバフ・デバフカードとエンティティ情報の3種類があり、
 /// <see cref="Services.WidgetWindowManager"/> は同じ一覧で扱う。
 /// </para>
 /// </summary>

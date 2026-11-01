@@ -147,6 +147,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             DamageTakenListSettings.PreviewChanged += DamageTakenListSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsEntityInfoSettings(kind))
+        {
+            EntityInfoSettings = new EntityInfoWidgetSettingsViewModel(config.EntityInfo);
+            EntityInfoSettings.PropertyChanged += EntityInfoSettings_PropertyChanged;
+            EntityInfoSettings.PreviewChanged += EntityInfoSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -180,6 +187,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public event Action<ReviveListWidgetSettingsConfig>? ReviveListPreviewChanged;
 
     public event Action<DamageTakenListWidgetSettingsConfig>? DamageTakenListPreviewChanged;
+
+    public event Action<EntityInfoWidgetSettingsConfig>? EntityInfoPreviewChanged;
 
     public void Dispose()
     {
@@ -276,6 +285,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             DamageTakenListSettings.PreviewChanged -= DamageTakenListSettings_PreviewChanged;
             DamageTakenListSettings.Dispose();
         }
+
+        if (EntityInfoSettings is not null)
+        {
+            EntityInfoSettings.PropertyChanged -= EntityInfoSettings_PropertyChanged;
+            EntityInfoSettings.PreviewChanged -= EntityInfoSettings_PreviewChanged;
+            EntityInfoSettings.Dispose();
+        }
+    }
+
+    private void EntityInfoSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(EntityInfoWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void EntityInfoSettings_PreviewChanged(EntityInfoWidgetSettingsConfig config)
+    {
+        EntityInfoPreviewChanged?.Invoke(config);
     }
 
     private void ReviveListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -489,6 +518,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public DamageTakenListWidgetSettingsViewModel? DamageTakenListSettings { get; }
 
+    public EntityInfoWidgetSettingsViewModel? EntityInfoSettings { get; }
+
     public bool HasMeterSettings => MeterSettings is not null;
 
     /// <summary>属性カラー(アイコンカラー)の節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
@@ -519,9 +550,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasDamageTakenListDisplaySettings => DamageTakenListSettings is not null;
 
+    public bool HasEntityInfoDisplaySettings => EntityInfoSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasReviveListDisplaySettings
         || HasDamageTakenListDisplaySettings
+        || HasEntityInfoDisplaySettings
         || HasMetricTimelineDisplaySettings
         || HasBuffCardDisplaySettings
         || HasTakenDamageLogDisplaySettings
@@ -544,7 +578,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (PlayerStatusSettings?.HasUnsavedChanges ?? false)
         || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false)
         || (ReviveListSettings?.HasUnsavedChanges ?? false)
-        || (DamageTakenListSettings?.HasUnsavedChanges ?? false);
+        || (DamageTakenListSettings?.HasUnsavedChanges ?? false)
+        || (EntityInfoSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -629,6 +664,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.DamageTakenList = DamageTakenListSettings.CreateConfig();
         }
 
+        if (EntityInfoSettings is not null)
+        {
+            config.EntityInfo = EntityInfoSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
@@ -645,6 +685,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffDebuffGroupSettings?.MarkSaved(config.BuffDebuffGroup);
         ReviveListSettings?.MarkSaved(config.ReviveList);
         DamageTakenListSettings?.MarkSaved(config.DamageTakenList);
+        EntityInfoSettings?.MarkSaved(config.EntityInfo);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -665,6 +706,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffDebuffGroupSettings?.ResetToDefaults();
         ReviveListSettings?.ResetToDefaults();
         DamageTakenListSettings?.ResetToDefaults();
+        EntityInfoSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -684,6 +726,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         BuffDebuffGroupSettings?.RestoreSavedPreview();
         ReviveListSettings?.RestoreSavedPreview();
         DamageTakenListSettings?.RestoreSavedPreview();
+        EntityInfoSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

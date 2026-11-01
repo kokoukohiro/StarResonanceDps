@@ -1,0 +1,992 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.EntityInfoWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:StarResonanceDps.App.Views.Widgets"
+             xmlns:controls="clr-namespace:StarResonanceDps.App.Controls"
+             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             xmlns:services="clr-namespace:StarResonanceDps.App.Services"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="EntityInfoWidgetView_Loaded"
+             Unloaded="EntityInfoWidgetView_Unloaded"
+             SizeChanged="EntityInfoWidgetView_SizeChanged"
+             DataContextChanged="EntityInfoWidgetView_DataContextChanged">
+    <UserControl.Resources>
+        <converters:HealthRatioToWidthConverter x:Key="EntityInfo.RatioToWidthConverter" />
+        <converters:HateGaugeFillHeightConverter x:Key="EntityInfo.HateGaugeFillHeightConverter" />
+        <converters:CenteredOffsetConverter x:Key="EntityInfo.CenteredOffsetConverter" />
+
+        <!--
+            1行に並べる枠(ヘイト・バフ・デバフ)の数と HP ゲージの長さを中身の幅から決める。
+            枠は幅 42 で中身の左から 4(敵のアイコンの左端)に並べ、ゲージは中身の左から 39(アイコンの列 33 ＋ 名前の欄の左の 6)に置き、
+            ゲージの右端を枠の並びの右端にそろえる。
+        -->
+        <converters:EntityInfoGaugeWidthConverter x:Key="EntityInfo.GaugeWidthConverter"
+                                                  SlotWidth="42"
+                                                  SlotsLeft="4"
+                                                  GaugeLeft="39" />
+
+        <!-- 長さの変わるゲージの塗りの角丸(エンティティリストのゲージの切り抜きと同じ丸み)。 -->
+        <converters:RoundedRectClipConverter x:Key="EntityInfo.GaugeFillClipConverter"
+                                             RadiusX="4"
+                                             RadiusY="4" />
+
+        <!--
+            枠の右クリックのメニュー。作りはバフ・デバフ一覧と同じ。
+            メニューの DataContext は窓の ViewModel で、色はその Widget から引く。
+        -->
+        <CornerRadius x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.FirstCornerRadius">5,5,0,0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.MiddleCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.LastCornerRadius">0,0,5,5</CornerRadius>
+
+        <Style x:Key="Menu.WidgetWindowEntityInfoContextMenu"
+               TargetType="{x:Type ContextMenu}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Background" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowMenuSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{Binding Widget.WidgetWindowPalette.WidgetWindowDividerBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="HasDropShadow" Value="False" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <Border BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="{StaticResource Radius.Default}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}" />
+                            <StackPanel Margin="{TemplateBinding Padding}"
+                                        IsItemsHost="True"
+                                        KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="DataTemplate.WidgetWindowMenuText">
+            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                       Text="{Binding}" />
+        </DataTemplate>
+
+        <Style x:Key="Menu.WidgetWindowEntityInfoContextMenuItem"
+               TargetType="{x:Type MenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="HeaderTemplate" Value="{StaticResource DataTemplate.WidgetWindowMenuText}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem.MiddleCornerRadius}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="UseLayoutRounding" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type MenuItem}">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="InteractionBackground"
+                                    Background="{Binding Widget.WidgetWindowPalette.WidgetWindowScrollThumbBrush}"
+                                    CornerRadius="{TemplateBinding Tag}"
+                                    Opacity="{Binding Widget.WidgetWindowPalette.MenuOpacity}"
+                                    Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding Header}"
+                                              ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                              ContentStringFormat="{TemplateBinding HeaderStringFormat}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="InteractionBackground"
+                                        Property="Visibility"
+                                        Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.First"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem.FirstCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.Middle"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem.MiddleCornerRadius}" />
+        </Style>
+
+        <Style x:Key="Menu.WidgetWindowEntityInfoContextMenuItem.Last"
+               TargetType="{x:Type MenuItem}"
+               BasedOn="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntityInfoContextMenuItem.LastCornerRadius}" />
+        </Style>
+
+        <!--
+            1行目の名前の行(ブレイクゲージの有無で2か所から使う)。エンティティリストの名前の行と同じ作りで、
+            右に詠唱している技の名前と詠唱ゲージ(長さはエンティティリストと同じ 122、右端は HP ゲージの右端)を置く。
+            名前と技の名前は入りきらなければ同じ扱いで縮める(PairShrinkPanel)。詠唱していなければ技の名前もゲージも出さない。
+        -->
+        <DataTemplate x:Key="EntityInfo.NameRowTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Rectangle Width="24"
+                           Height="24"
+                           Margin="-4,2,-3,0"
+                           VerticalAlignment="Center"
+                           Style="{StaticResource Icon.CombatStateMask}"
+                           Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Rectangle.ToolTip>
+                        <ToolTip Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="12"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[CombatState_Tip]}" />
+                        </ToolTip>
+                    </Rectangle.ToolTip>
+                </Rectangle>
+
+                <controls:PairShrinkPanel Grid.Column="1">
+                    <TextBlock VerticalAlignment="Center"
+                               Style="{StaticResource Text.WidgetWindow}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Text="{Binding DisplayName}"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock Margin="6,0,6,0"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource Text.WidgetWindow}"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               Text="{Binding CastSkillName}"
+                               TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding IsCasting, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </controls:PairShrinkPanel>
+
+                <!-- 詠唱ゲージ。形と文字はエンティティリストの詠唱ゲージと同じ。 -->
+                <Grid Grid.Column="2"
+                      Width="122"
+                      Height="10"
+                      VerticalAlignment="Center"
+                      Visibility="{Binding IsCasting, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Border Width="122"
+                            Height="10"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Background="#FF000000"
+                            CornerRadius="5"
+                            Padding="1">
+                        <Grid x:Name="CastFillHost"
+                              Height="8"
+                              VerticalAlignment="Center">
+                            <Grid.Clip>
+                                <RectangleGeometry Rect="0,0,120,8"
+                                                   RadiusX="4"
+                                                   RadiusY="4" />
+                            </Grid.Clip>
+
+                            <Border Height="8"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Background="#FFE5BE3B"
+                                    behaviors:BarWidthAnimationBehavior.AreaWidth="{Binding ActualWidth, ElementName=CastFillHost}"
+                                    behaviors:BarWidthAnimationBehavior.FillSeconds="{Binding CastFillSeconds}"
+                                    behaviors:BarWidthAnimationBehavior.Ratio="{Binding CastRatio}"
+                                    behaviors:BarWidthAnimationBehavior.SnapsToTarget="True" />
+                        </Grid>
+                    </Border>
+
+                    <Canvas Panel.ZIndex="1"
+                            Width="122"
+                            Height="10"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            ClipToBounds="False"
+                            IsHitTestVisible="False">
+                        <TextBlock Canvas.Top="-3"
+                                   Width="122"
+                                   Style="{StaticResource Text.WidgetWindow}"
+                                   FontSize="11"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding CastText}"
+                                   TextAlignment="Center" />
+                    </Canvas>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!--
+            1行目の HP ゲージ。エンティティリストの HP ゲージと同じ作りで、長さは名前の欄の幅(中身の幅で決まる)。
+            塗りの色の移り変わりはゲージの全長に掛けて、塗った長さで切る。
+        -->
+        <DataTemplate x:Key="EntityInfo.HealthRowTemplate">
+            <Grid Height="10"
+                  ClipToBounds="False">
+                <Border Height="10"
+                        VerticalAlignment="Center"
+                        Background="#FF000000"
+                        CornerRadius="5"
+                        Padding="1">
+                    <Grid x:Name="EntityHealthFillHost"
+                          Height="8"
+                          VerticalAlignment="Center">
+                        <Grid.Clip>
+                            <MultiBinding Converter="{StaticResource EntityInfo.GaugeFillClipConverter}">
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}" />
+                                <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}" />
+                            </MultiBinding>
+                        </Grid.Clip>
+
+                        <Canvas Height="8">
+                            <Grid Panel.ZIndex="0"
+                                  Canvas.Left="0"
+                                  Height="8"
+                                  ClipToBounds="True">
+                                <Grid.Width>
+                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                        <Binding Path="HealthRatio" />
+                                        <Binding ElementName="EntityHealthFillHost"
+                                                 Path="ActualWidth" />
+                                    </MultiBinding>
+                                </Grid.Width>
+
+                                <Border Width="{Binding ActualWidth, ElementName=EntityHealthFillHost}"
+                                        Height="8"
+                                        HorizontalAlignment="Left">
+                                    <Border.Style>
+                                        <Style TargetType="{x:Type Border}">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Background">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush StartPoint="0,0.5"
+                                                                         EndPoint="1,0.5">
+                                                        <GradientStop Color="#FFFF0900"
+                                                                      Offset="0" />
+                                                        <GradientStop Color="#FFFF0900"
+                                                                      Offset="0.05" />
+                                                        <GradientStop Color="#FFFF8604"
+                                                                      Offset="0.95" />
+                                                        <GradientStop Color="#FFFF8604"
+                                                                      Offset="1" />
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding UsesFriendlyHealthBar}"
+                                                             Value="True">
+                                                    <Setter Property="Background"
+                                                            Value="#FF1CE6A7" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsInvulnerable}"
+                                                             Value="True">
+                                                    <Setter Property="Background"
+                                                            Value="#FFA8A8A8" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </Grid>
+
+                            <Border Panel.ZIndex="1"
+                                    Height="8"
+                                    Background="#FFFEFEFE">
+                                <Canvas.Left>
+                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                        <Binding Path="HealthRatio" />
+                                        <Binding ElementName="EntityHealthFillHost"
+                                                 Path="ActualWidth" />
+                                    </MultiBinding>
+                                </Canvas.Left>
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                        <Binding Path="ShieldVisibleRatio" />
+                                        <Binding ElementName="EntityHealthFillHost"
+                                                 Path="ActualWidth" />
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+
+                            <Border Panel.ZIndex="2"
+                                    Height="8"
+                                    Background="#FFFEFEFE">
+                                <Canvas.Left>
+                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                        <Binding Path="ShieldOverflowStartRatio" />
+                                        <Binding ElementName="EntityHealthFillHost"
+                                                 Path="ActualWidth" />
+                                    </MultiBinding>
+                                </Canvas.Left>
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                        <Binding Path="ShieldOverflowRatio" />
+                                        <Binding ElementName="EntityHealthFillHost"
+                                                 Path="ActualWidth" />
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+                        </Canvas>
+                    </Grid>
+                </Border>
+
+                <Canvas Panel.ZIndex="3"
+                        Height="10"
+                        VerticalAlignment="Center"
+                        ClipToBounds="False"
+                        IsHitTestVisible="False">
+                    <!-- 幅は数字の長さのまま、ゲージの中心にそろえる。ゲージより長ければ左右に同じだけはみ出す(切らない)。 -->
+                    <TextBlock Canvas.Top="-3"
+                               Style="{StaticResource Text.WidgetWindow}"
+                               FontSize="11"
+                               FontWeight="SemiBold"
+                               Text="{Binding HealthText}">
+                        <Canvas.Left>
+                            <MultiBinding Converter="{StaticResource EntityInfo.CenteredOffsetConverter}">
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource AncestorType={x:Type Canvas}}" />
+                                <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}" />
+                            </MultiBinding>
+                        </Canvas.Left>
+                    </TextBlock>
+                </Canvas>
+            </Grid>
+        </DataTemplate>
+
+        <!--
+            ヘイトの枠(EntityHateSlot)。中身と TIPS はエンティティリストのヘイトの枠と同じ(説明はエンティティリストの画面)。
+            ここでは並べる人数だけ枠があるので、隠す枠は無い。枠の下の 4 は行の間(折り返したときの行の間と、次の行までの間)。
+            ツールチップの色は窓のパレット(TIPS を持つ要素の Tag にウィジェットを入れる)。
+        -->
+        <DataTemplate x:Key="EntityInfo.HateSlotTemplate">
+            <Grid Width="42"
+                  Height="34"
+                  Margin="0,0,0,4">
+                <Rectangle Width="30"
+                           Height="30"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Margin="5,-11,0,0"
+                           Fill="{x:Static services:HateBadgeImages.AccentBrush}"
+                           OpacityMask="{x:Static services:HateBadgeImages.TargetMask}"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Visibility="{Binding IsTarget, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                    <Rectangle.ToolTip>
+                        <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                 Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="12"
+                                       Text="{Binding ToolTipText}" />
+                        </ToolTip>
+                    </Rectangle.ToolTip>
+                </Rectangle>
+
+                <Grid x:Name="HateGaugeHost"
+                      Width="45"
+                      Height="45"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Margin="5,-11,0,0">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsTarget}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Canvas VerticalAlignment="Top"
+                            ClipToBounds="True"
+                            UseLayoutRounding="False"
+                            IsHitTestVisible="False">
+                        <Canvas.Height>
+                            <MultiBinding Converter="{StaticResource EntityInfo.HateGaugeFillHeightConverter}"
+                                          ConverterParameter="Empty">
+                                <Binding Path="GaugeRatio" />
+                                <Binding ElementName="HateGaugeHost"
+                                         Path="ActualWidth" />
+                                <Binding ElementName="HateGaugeHost"
+                                         Path="ActualHeight" />
+                            </MultiBinding>
+                        </Canvas.Height>
+                        <Rectangle Canvas.Top="0"
+                                   Width="{Binding ActualWidth, ElementName=HateGaugeHost}"
+                                   Height="{Binding ActualHeight, ElementName=HateGaugeHost}"
+                                   Fill="#FF000000"
+                                   OpacityMask="{x:Static services:HateBadgeImages.GaugeMask}"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Canvas>
+                    <Canvas VerticalAlignment="Bottom"
+                            ClipToBounds="True"
+                            UseLayoutRounding="False"
+                            IsHitTestVisible="False">
+                        <Canvas.Height>
+                            <MultiBinding Converter="{StaticResource EntityInfo.HateGaugeFillHeightConverter}">
+                                <Binding Path="GaugeRatio" />
+                                <Binding ElementName="HateGaugeHost"
+                                         Path="ActualWidth" />
+                                <Binding ElementName="HateGaugeHost"
+                                         Path="ActualHeight" />
+                            </MultiBinding>
+                        </Canvas.Height>
+                        <Rectangle Canvas.Bottom="0"
+                                   Width="{Binding ActualWidth, ElementName=HateGaugeHost}"
+                                   Height="{Binding ActualHeight, ElementName=HateGaugeHost}"
+                                   Fill="{x:Static services:HateBadgeImages.AccentBrush}"
+                                   OpacityMask="{x:Static services:HateBadgeImages.GaugeMask}"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                    </Canvas>
+                    <Rectangle Width="35"
+                               Height="17"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Fill="Transparent"
+                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                        <Rectangle.ToolTip>
+                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                     Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                           FontSize="12"
+                                           Text="{Binding ToolTipText}" />
+                            </ToolTip>
+                        </Rectangle.ToolTip>
+                    </Rectangle>
+                </Grid>
+
+                <Grid Width="25"
+                      HorizontalAlignment="Left">
+                    <Rectangle Width="25"
+                               Height="25"
+                               VerticalAlignment="Top"
+                               Fill="{Binding ClassBrush}"
+                               OpacityMask="{Binding ClassIconMask}"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Effect="{StaticResource Effect.ProfessionIconShadow}"
+                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                        <Rectangle.ToolTip>
+                            <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                     Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                           FontSize="12"
+                                           Text="{Binding ToolTipText}" />
+                            </ToolTip>
+                        </Rectangle.ToolTip>
+                    </Rectangle>
+                    <Canvas>
+                        <Grid Canvas.Left="-8.5"
+                              Canvas.Top="21"
+                              Width="42">
+                            <TextBlock HorizontalAlignment="Center"
+                                       Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding PlayerName}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                                <TextBlock.ToolTip>
+                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="12"
+                                                   Text="{Binding ToolTipText}" />
+                                    </ToolTip>
+                                </TextBlock.ToolTip>
+                            </TextBlock>
+                        </Grid>
+                    </Canvas>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+
+        <!--
+            バフ・デバフの枠(PlayerBuffEntry)。大きさはヘイトの枠1つ分の幅で、上に名前(バフ・デバフ一覧と同じ書式、字はカードの名前と同じ 8)、
+            その下にバフの絵(25)と重ね数、絵の下に残り秒数。名前と残り秒数は絵の中心にそろえる(ヘイトの枠のプレイヤー名と同じ置き方)。
+            絵の置き方はバフ・デバフ一覧の絵と同じで、値は絵の大きさの比(25 / 30)に直したもの。
+            左クリックは、バフの枠ならその個体のバフリスト、デバフの枠ならデバフリストを開く。右クリックはメニュー(画面のコードが開く)。
+            マウスを乗せても背景は付けない。TIPS は名前の文字そのまま(ツールチップの色は窓のパレット)。
+            枠の下の 4 は行の間。
+        -->
+        <DataTemplate x:Key="EntityInfo.BuffSlotTemplate">
+            <Button Width="42"
+                    Height="45"
+                    Margin="0,0,0,4"
+                    Padding="0"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Focusable="False"
+                    IsTabStop="False"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch"
+                    ContextMenuService.IsEnabled="False"
+                    PreviewMouseRightButtonDown="BuffSlot_PreviewMouseRightButtonDown"
+                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                    Command="{Binding DataContext.OpenListCommand, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                    CommandParameter="{Binding}">
+                <Button.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
+                                 IsOpen="{Binding PlacementTarget.DataContext.IsMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
+                                 Placement="MousePoint"
+                                 Opened="BuffContextMenu_Opened"
+                                 Closed="BuffContextMenu_Closed">
+                        <MenuItem Header="{Binding ListMenuText}"
+                                  Command="{Binding OpenListCommand}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="{Binding CardMenuText}"
+                                  Command="{Binding OpenCardCommand}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="{Binding PriorityMenuText}"
+                                  Command="{Binding TogglePriorityCommand}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                        <MenuItem Header="{Binding HideMenuText}"
+                                  Command="{Binding HideBuffCommand}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                    </ContextMenu>
+                </Button.ContextMenu>
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                      Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Button.Style>
+
+                <Grid Background="Transparent"
+                      Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                    <Grid.ToolTip>
+                        <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                 Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                            <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="12"
+                                       Text="{Binding Name}" />
+                        </ToolTip>
+                    </Grid.ToolTip>
+
+                    <Grid Width="25"
+                          HorizontalAlignment="Left">
+                        <Canvas>
+                            <Grid Canvas.Left="-8.5"
+                                  Canvas.Top="0"
+                                  Width="42"
+                                  Height="11">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Style="{StaticResource Text.WidgetWindow}"
+                                           FontSize="8"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding Name}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Canvas>
+
+                        <Grid Width="25"
+                              Height="25"
+                              Margin="0,11,0,0"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Top">
+                            <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
+                                   Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="HighQuality">
+                                <Image.Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsModuleEffectIcon}" Value="True">
+                                                <Setter Property="Width" Value="21.67" />
+                                                <Setter Property="Height" Value="21.67" />
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <TranslateTransform X="-0.83" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsFactorIcon}" Value="True">
+                                                <Setter Property="RenderTransform">
+                                                    <Setter.Value>
+                                                        <TranslateTransform X="-0.83" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Image.Style>
+                            </Image>
+
+                            <Rectangle Fill="White"
+                                       Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                <Rectangle.OpacityMask>
+                                    <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                </Rectangle.OpacityMask>
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+
+                            <Rectangle Fill="White"
+                                       OpacityMask="{Binding IconMask}"
+                                       Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                <Rectangle.RenderTransform>
+                                    <TranslateTransform X="-0.42" />
+                                </Rectangle.RenderTransform>
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IconMask}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="15"
+                                       FontWeight="Bold"
+                                       Text="{Binding LayerText}"
+                                       TextAlignment="Center" />
+                        </Grid>
+
+                        <Canvas>
+                            <Grid Canvas.Left="-8.5"
+                                  Canvas.Top="32"
+                                  Width="42">
+                                <TextBlock HorizontalAlignment="Center"
+                                           Style="{StaticResource Text.WidgetWindow}"
+                                           FontSize="10"
+                                           FontWeight="SemiBold"
+                                           Text="{Binding DurationWithUnitText}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </Grid>
+                        </Canvas>
+                    </Grid>
+                </Grid>
+            </Button>
+        </DataTemplate>
+
+        <!--
+            ヘイト・バフ・デバフの並び。左から 4 に置き、並べるものが無ければ高さも取らない。
+            折り返しの幅(1行の枠の数 × 枠の幅)は、使う側で中身の幅から決める。
+        -->
+        <Style x:Key="EntityInfo.SlotList"
+               TargetType="{x:Type ItemsControl}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="HasItems" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <!--
+            窓の高さを中身に合わせる(AutoFitHeightBehavior、バフ・デバフグループと同じ)。手で小さくしたときだけ窓の枠のスクロールバーで動かす。
+            左右の余白は中身(EntityInfoContent)に置く: ScrollViewer は自分の枠で切るので、左端の枠の名前(絵の中心にそろえて左へはみ出す)が切れないように。
+            中身の左の 9 はエンティティリストの行と同じ位置(行の左の 5 ＋ 右へのずらし 4)。
+            下の 5 は、最後の行の枠の下の 4 と合わせて、その枠の下端から 9(枠の下端と名前・残り秒数の文字の下端はほぼ同じ)。
+            1行目だけのときは1行目の枠(高さ 44)の下端から 5 で、枠の中の中身の下の空き 5 と合わせて、文字からはほぼ同じ 9。
+        -->
+        <ScrollViewer x:Name="EntityInfoScrollViewer"
+                      Margin="0,5,0,5"
+                      HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Hidden"
+                      CanContentScroll="False"
+                      behaviors:AutoFitHeightBehavior.IsEnabled="True"
+                      ScrollChanged="EntityInfoScrollViewer_ScrollChanged">
+            <StackPanel x:Name="EntityInfoContent"
+                        Margin="9,0,11,0">
+                <!-- 1行目。エンティティリストの1行と同じ組み方(高さ 44 の中央に 34)で、得点は出さない。 -->
+                <Grid Height="44"
+                      DataContext="{Binding Row}">
+                    <Grid.Style>
+                        <Style TargetType="{x:Type Grid}">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="33" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0">
+                            <Rectangle Width="25"
+                                       Height="25"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Top"
+                                       Fill="{Binding ClassBrush}"
+                                       Effect="{StaticResource Effect.ProfessionIconShadow}">
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
+                                        <Setter Property="OpacityMask">
+                                            <Setter.Value>
+                                                <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ClassificationKey}" Value="Monster">
+                                                <Setter Property="OpacityMask">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Monster}" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ClassificationKey}" Value="Elite">
+                                                <Setter Property="OpacityMask">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Elite}" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ClassificationKey}" Value="Boss">
+                                                <Setter Property="OpacityMask">
+                                                    <Setter.Value>
+                                                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Boss}" Stretch="Uniform" />
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+                        </Grid>
+
+                        <!-- 名前の欄の幅は HP ゲージの長さ。HP の数字はゲージより長いと左右にはみ出す。 -->
+                        <Grid Grid.Column="1"
+                              Width="{Binding ActualWidth, ElementName=EntityInfoContent, Converter={StaticResource EntityInfo.GaugeWidthConverter}}"
+                              Height="34"
+                              Margin="6,0,0,0"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Center"
+                              ClipToBounds="False">
+                            <!-- ブレイクゲージなし: 名前 23 ＋ HP 11 -->
+                            <Grid>
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="Visibility"
+                                                Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                         Value="True">
+                                                <Setter Property="Visibility"
+                                                        Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="23" />
+                                    <RowDefinition Height="11" />
+                                </Grid.RowDefinitions>
+
+                                <ContentPresenter Grid.Row="0"
+                                                  Content="{Binding}"
+                                                  ContentTemplate="{StaticResource EntityInfo.NameRowTemplate}" />
+
+                                <ContentPresenter Grid.Row="1"
+                                                  Content="{Binding}"
+                                                  ContentTemplate="{StaticResource EntityInfo.HealthRowTemplate}" />
+                            </Grid>
+
+                            <!-- ブレイクゲージあり: 名前 15 ＋ HP 10 ＋ ブレイク 10 -->
+                            <Grid Margin="0,-4,0,0">
+                                <Grid.Style>
+                                    <Style TargetType="{x:Type Grid}">
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Setter Property="Visibility"
+                                                Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasBreakGauge}"
+                                                         Value="True">
+                                                <Setter Property="Visibility"
+                                                        Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Grid.Style>
+
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="15" />
+                                    <RowDefinition Height="10" />
+                                    <RowDefinition Height="10" />
+                                </Grid.RowDefinitions>
+
+                                <ContentPresenter Grid.Row="0"
+                                                  Content="{Binding}"
+                                                  ContentTemplate="{StaticResource EntityInfo.NameRowTemplate}" />
+
+                                <ContentPresenter Grid.Row="1"
+                                                  Content="{Binding}"
+                                                  ContentTemplate="{StaticResource EntityInfo.HealthRowTemplate}" />
+
+                                <!-- ブレイクゲージ。エンティティリストのブレイクゲージと同じ作りで、長さは HP ゲージと同じ。 -->
+                                <Grid Grid.Row="2">
+                                    <Border Height="10"
+                                            VerticalAlignment="Top"
+                                            Background="#FF000000"
+                                            CornerRadius="5"
+                                            Padding="1">
+                                        <Grid x:Name="BreakFillHost"
+                                              Height="8"
+                                              VerticalAlignment="Center">
+                                            <Grid.Clip>
+                                                <MultiBinding Converter="{StaticResource EntityInfo.GaugeFillClipConverter}">
+                                                    <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}" />
+                                                    <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}" />
+                                                </MultiBinding>
+                                            </Grid.Clip>
+
+                                            <Border Height="8"
+                                                    HorizontalAlignment="Left"
+                                                    VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="{x:Type Border}">
+                                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                        <Setter Property="Background"
+                                                                Value="#FFF7E8D3" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsBreakLocked}"
+                                                                         Value="True">
+                                                                <Setter Property="Background"
+                                                                        Value="#FFA8A8A8" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
+
+                                                <Border.Width>
+                                                    <MultiBinding Converter="{StaticResource EntityInfo.RatioToWidthConverter}">
+                                                        <Binding Path="BreakRatio" />
+                                                        <Binding ElementName="BreakFillHost"
+                                                                 Path="ActualWidth" />
+                                                    </MultiBinding>
+                                                </Border.Width>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+
+                                    <Canvas Panel.ZIndex="1"
+                                            Height="10"
+                                            VerticalAlignment="Top"
+                                            ClipToBounds="False"
+                                            IsHitTestVisible="False">
+                                        <TextBlock Canvas.Top="-3"
+                                                   Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type Canvas}}}"
+                                                   Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Text="{Binding BreakText}"
+                                                   TextAlignment="Center" />
+                                    </Canvas>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+
+                        <!-- 分類名。エンティティリストと同じく、列0(幅33)より広い 44px で Canvas に重ねる(アイコンの中心にそろえる)。 -->
+                        <Canvas Grid.Column="0"
+                                Panel.ZIndex="1"
+                                IsHitTestVisible="False">
+                            <TextBlock Canvas.Left="-5.5"
+                                       Canvas.Top="21"
+                                       Width="44"
+                                       Style="{StaticResource Text.WidgetWindow}"
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding ClassificationDisplayName}"
+                                       TextAlignment="Center"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Canvas>
+                    </Grid>
+                </Grid>
+
+                <!--
+                    ヘイトの行。左端が狙われている人(敵のアイコンの真下から)で、続けてヘイト順位を設定の人数まで。入りきらなければ折り返す。
+                    1行目の内側の下端から 1 上に重ねる(ゲージの絵の箱は枠の上へはみ出すが、上の部分は透明)。
+                -->
+                <ItemsControl Width="{Binding ActualWidth, ElementName=EntityInfoContent, Converter={StaticResource EntityInfo.GaugeWidthConverter}, ConverterParameter=Slots}"
+                              Margin="4,-1,0,0"
+                              Style="{StaticResource EntityInfo.SlotList}"
+                              ItemsSource="{Binding Row.HateSlots}"
+                              ItemTemplate="{StaticResource EntityInfo.HateSlotTemplate}" />
+
+                <!-- バフを並べ、改行してデバフを並べる。並べ方はヘイトの行と同じ。 -->
+                <ItemsControl Width="{Binding ActualWidth, ElementName=EntityInfoContent, Converter={StaticResource EntityInfo.GaugeWidthConverter}, ConverterParameter=Slots}"
+                              Style="{StaticResource EntityInfo.SlotList}"
+                              ItemsSource="{Binding Buffs}"
+                              ItemTemplate="{StaticResource EntityInfo.BuffSlotTemplate}" />
+
+                <ItemsControl Width="{Binding ActualWidth, ElementName=EntityInfoContent, Converter={StaticResource EntityInfo.GaugeWidthConverter}, ConverterParameter=Slots}"
+                              Style="{StaticResource EntityInfo.SlotList}"
+                              ItemsSource="{Binding Debuffs}"
+                              ItemTemplate="{StaticResource EntityInfo.BuffSlotTemplate}" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

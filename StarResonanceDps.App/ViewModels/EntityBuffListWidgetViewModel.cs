@@ -34,6 +34,11 @@ public sealed partial class EntityBuffListWidgetViewModel
     [ObservableProperty]
     private string _headerText = string.Empty;
 
+    /// <summary>右クリックのメニューを開いた行。優先表示の項目の文言はこの行で決める。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PriorityMenuText))]
+    private PlayerBuffEntry? _menuEntry;
+
     public EntityBuffListWidgetViewModel(
         WidgetListItemViewModel widget,
         EntityWindowTarget target,
@@ -99,6 +104,16 @@ public sealed partial class EntityBuffListWidgetViewModel
             ? "BuffList_Menu_DebuffCard"
             : "BuffList_Menu_BuffCard");
 
+    /// <summary>優先表示リストはプレイヤーから開いた一覧と同じウィジェットのもの。</summary>
+    public string PriorityMenuText => BuffDebuffCardContent.GetPriorityMenuText(
+        _kind == PlayerBuffListKind.Debuff,
+        MenuEntry is { } entry && _widget.IsBuffListPriorityBuff(entry.BaseId));
+
+    public void RefreshMenuText()
+    {
+        OnPropertyChanged(nameof(PriorityMenuText));
+    }
+
     public string HideMenuText => LocalizationManager.Instance.GetString(
         _kind == PlayerBuffListKind.Debuff
             ? "BuffList_Menu_HideDebuff"
@@ -128,6 +143,19 @@ public sealed partial class EntityBuffListWidgetViewModel
         }
 
         _openCard?.Invoke(_target, _kind, entry.CardKey, entry.BaseId);
+    }
+
+    [RelayCommand]
+    private void TogglePriority(PlayerBuffEntry? entry)
+    {
+        if (entry is null)
+        {
+            return;
+        }
+
+        _widget.SetBuffListPriorityBuffEnabledFromWidget(
+            entry.BaseId,
+            !_widget.IsBuffListPriorityBuff(entry.BaseId));
     }
 
     [RelayCommand]
@@ -165,7 +193,7 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     public void RefreshPresentation()
     {
-        HeaderText = WidgetHeaderText.Join(_widget.DisplayName, _target.DisplayName);
+        HeaderText = WidgetHeaderText.Join(_widget.DisplayName, _target.Name);
     }
 
     public void Dispose()
@@ -186,7 +214,7 @@ public sealed partial class EntityBuffListWidgetViewModel
 
     /// <summary>
     /// 表示設定(保存かプレビュー)が変わった。色を作り直し、行も作り直す
-    /// (非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
+    /// (優先表示と非表示のバフを効かせる。ゲージの長さもそこで当て直る)。
     /// </summary>
     private void Widget_BuffListSettingsChanged(object? sender, EventArgs e)
     {
@@ -211,6 +239,7 @@ public sealed partial class EntityBuffListWidgetViewModel
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(CardMenuText));
+        OnPropertyChanged(nameof(PriorityMenuText));
         OnPropertyChanged(nameof(HideMenuText));
         OnPropertyChanged(nameof(AddToGroupMenuText));
         OnPropertyChanged(nameof(AddToShortcutsMenuText));

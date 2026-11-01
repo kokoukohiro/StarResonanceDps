@@ -302,7 +302,7 @@ internal static class NearbyEntityProjection
     }
 
     /// <summary>
-    /// ヘイトの一覧(<c>AttrHateList</c>)のプレイヤーだけを、値の大きい順に上位まで。
+    /// ヘイトの一覧(<c>AttrHateList</c>)のプレイヤーだけを、値の大きい順に全員。
     /// 一覧にはプレイヤー以外の実体も載るので外す。同じ値どうしは一覧の並びのまま。
     /// </summary>
     private static NearbyEntityHateRanking ResolveHateRanking(Entity entity)

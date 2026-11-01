@@ -258,7 +258,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             _group,
             _lastKnownBuffName);
 
-        HeaderText = WidgetHeaderText.Join(prefix, _target.DisplayName);
+        HeaderText = WidgetHeaderText.Join(prefix, _target.Name);
     }
 
     public void Dispose()

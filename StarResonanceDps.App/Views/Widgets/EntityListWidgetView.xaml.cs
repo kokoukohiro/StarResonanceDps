@@ -133,11 +133,13 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         }
     }
 
+    /// <summary>行の左クリックはエンティティ情報を開く(右クリックのメニューの1行目と同じ)。</summary>
     private void EntityListItem_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is Button button)
+        if (sender is Button { DataContext: EntityListEntry entry }
+            && DataContext is WidgetListItemViewModel viewModel)
         {
-            OpenEntitySelectionMenu(button);
+            viewModel.RequestEntityInfoCommand.Execute(entry);
         }
     }
 
