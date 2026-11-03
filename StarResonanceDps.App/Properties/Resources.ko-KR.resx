@@ -293,7 +293,7 @@
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
     <value>포션·요리 효과 종료</value>
   </data>
-  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+  <data name="Settings_TimelineNotification_TelegraphedSkill" xml:space="preserve">
     <value>예고 스킬</value>
   </data>
   <data name="Notification_EntryConfirmation" xml:space="preserve">
@@ -314,7 +314,7 @@
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}의 {BuffName} 효과가 곧 끝납니다</value>
   </data>
-  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+  <data name="TimelineNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}이(가) 옵니다</value>
   </data>
   <data name="EntryConfirmationNotification_Default" xml:space="preserve">
@@ -371,7 +371,18 @@
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}이(가) 캐스팅 중입니다</value>
   </data>
-  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+  <data name="Notification_PrivateChat" xml:space="preserve">
+    <value>귓속말</value>
+  </data>
+  <data name="PrivateChatNotification_Default" xml:space="preserve">
+    <value>{PlayerName}의 귓속말이 도착했습니다</value>
+  </data>
+  <data name="Notification_WorldChat" xml:space="preserve">
+    <value>월드 채팅</value>
+  </data>
+  <data name="WorldChatNotification_Default" xml:space="preserve">
+    <value>{PlayerName}의 모집이 있습니다</value>
+  </data>  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>발동 시</value>
   </data>
   <data name="TelegraphedSkillCondition_1" xml:space="preserve">
@@ -608,69 +619,66 @@
   <data name="Widget_State_Stopped" xml:space="preserve">
     <value>중지됨</value>
   </data>
-  <data name="Menu_DpsMeter" xml:space="preserve">
+  <data name="Widget_DpsMeter" xml:space="preserve">
     <value>DPS 미터</value>
   </data>
-  <data name="Menu_HpsMeter" xml:space="preserve">
+  <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS 미터</value>
   </data>
-  <data name="Menu_DtpsMeter" xml:space="preserve">
-    <value>DTPS 미터</value>
-  </data>
-  <data name="Widget_TakenDamageLog" xml:space="preserve">
+  <data name="Widget_Timeline" xml:space="preserve">
     <value>타임라인</value>
   </data>
-  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+  <data name="Timeline_CastFormat" xml:space="preserve">
     <value>{0}이(가) {1} 영창 중</value>
   </data>
-  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+  <data name="Timeline_AnnounceFormat" xml:space="preserve">
     <value>{0}이(가) {1} 준비 중</value>
   </data>
-  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+  <data name="Timeline_SkillFormat" xml:space="preserve">
     <value>{0}의 {1}</value>
   </data>
-  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+  <data name="CombatEventLog_UnnamedSkill" xml:space="preserve">
     <value>공격</value>
   </data>
-  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+  <data name="Timeline_UnnamedHeal" xml:space="preserve">
     <value>회복</value>
-  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>  <data name="TextCopyFailed_Title" xml:space="preserve">
     <value>텍스트 복사 오류</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+  <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>텍스트를 복사하지 못했습니다.</value>
   </data>
-  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+  <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0}의 HP {1}</value>
   </data>
-  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+  <data name="Timeline_HealAmountFormat" xml:space="preserve">
     <value>{0} 회복</value>
   </data>
-  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+  <data name="Timeline_DamageFormat" xml:space="preserve">
     <value>{0}에게 {1}</value>
   </data>
-  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+  <data name="Timeline_DamageAmountFormat" xml:space="preserve">
     <value>{0} 피해</value>
   </data>
-  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+  <data name="Timeline_BuffFormat" xml:space="preserve">
     <value>{0}에게 {1}</value>
   </data>
-  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+  <data name="Timeline_BuffDurationFormat" xml:space="preserve">
     <value>{0}({1}초)</value>
   </data>
-  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+  <data name="Timeline_UnnamedEffect" xml:space="preserve">
     <value>어떤 효과</value>
   </data>
-  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+  <data name="CombatEventLog_SystemActor" xml:space="preserve">
     <value>시스템</value>
   </data>
-  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+  <data name="Timeline_UnnamedCastSkill" xml:space="preserve">
     <value>무언가</value>
   </data>
-  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+  <data name="DamageTakenLog_FallSkill" xml:space="preserve">
     <value>추락</value>
   </data>
-  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+  <data name="Settings_Section_TimelineTextColors_Title" xml:space="preserve">
     <value>텍스트 색상</value>
   </data>
   <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
@@ -733,19 +741,19 @@
   <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
     <value>타인 부여만</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_EntityName" xml:space="preserve">
     <value>엔티티 이름</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_SkillName" xml:space="preserve">
     <value>스킬 이름</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_PlayerName" xml:space="preserve">
     <value>플레이어 이름</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_Effect" xml:space="preserve">
     <value>효과</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_HpValue" xml:space="preserve">
     <value>HP 수치</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
@@ -886,6 +894,9 @@
   <data name="Widget_PlayerTalent" xml:space="preserve">
     <value>어빌리티 정보</value>
   </data>
+  <data name="PlayerTalent_ActivationUnknown" xml:space="preserve">
+    <value>활성화 여부 알 수 없음</value>
+  </data>
   <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
     <value>깊은 잠 심상의 정보</value>
   </data>
@@ -931,13 +942,13 @@
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS 추이 그래프</value>
   </data>
-  <data name="Widget_HealingContribution" xml:space="preserve">
+  <data name="Widget_HealingSummary" xml:space="preserve">
     <value>치유 상세</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>DPS 추이 그래프</value>
   </data>
-  <data name="Widget_DamageContribution" xml:space="preserve">
+  <data name="Widget_DamageSummary" xml:space="preserve">
     <value>피해 상세</value>
   </data>
   <data name="Widget_BuffList" xml:space="preserve">
@@ -1045,7 +1056,7 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>미분류</value>
   </data>
-  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+  <data name="MetricGraph_UnknownSkill" xml:space="preserve">
     <value>알 수 없음</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
@@ -1116,25 +1127,25 @@
   <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
     <value>사용자 지정 실행 파일 이름</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval" xml:space="preserve">
     <value>그리기 간격</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval_Option" xml:space="preserve">
     <value>{0}초</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds" xml:space="preserve">
     <value>가로축 길이</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}초</value>
   </data>
-  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+  <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>스킬 로그 표시</value>
   </data>
-  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+  <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>스킬 상세(피해)</value>
   </data>
-  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+  <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>스킬 상세(치유)</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
@@ -1230,6 +1241,9 @@
   <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
     <value>데이터를 읽을 수 없습니다</value>
   </data>
+  <data name="WidgetDataStatus_PastChatRelogin" xml:space="preserve">
+    <value>다시 로그인할 때까지 이전 채팅을 받을 수 없습니다</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>실드 수치 합산 표시</value>
   </data>
@@ -1290,10 +1304,10 @@
   <data name="ListSort_Name" xml:space="preserve">
     <value>이름 순</value>
   </data>
-  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+  <data name="DamageTakenLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>자해·아군 공격 제외</value>
   </data>
-  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+  <data name="Settings_Timeline_EnemyHeal" xml:space="preserve">
     <value>적의 회복</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
@@ -1353,24 +1367,72 @@
   <data name="Widget_EntityInfo" xml:space="preserve">
     <value>엔티티 정보</value>
   </data>
-  <data name="Widget_DamageTakenList" xml:space="preserve">
+  <data name="Widget_Chat" xml:space="preserve">
+    <value>채팅</value>
+  </data>
+  <data name="Chat_Channel_World" xml:space="preserve">
+    <value>월드</value>
+  </data>
+  <data name="Chat_Channel_Guild" xml:space="preserve">
+    <value>길드</value>
+  </data>
+  <data name="Chat_Channel_Party" xml:space="preserve">
+    <value>파티</value>
+  </data>
+  <data name="Chat_Channel_Local" xml:space="preserve">
+    <value>로컬</value>
+  </data>
+  <data name="Chat_Channel_Newbie" xml:space="preserve">
+    <value>초보자</value>
+  </data>
+  <data name="Chat_PrivateFormat" xml:space="preserve">
+    <value>귓속말({0})</value>
+  </data>
+  <data name="Chat_Sticker" xml:space="preserve">
+    <value>[스티커]</value>
+  </data>
+  <data name="Chat_Hyperlink" xml:space="preserve">
+    <value>[링크]</value>
+  </data>
+  <data name="Chat_Image" xml:space="preserve">
+    <value>[이미지]</value>
+  </data>
+  <data name="Chat_Voice" xml:space="preserve">
+    <value>[음성]</value>
+  </data>
+  <data name="Chat_VoiceTextFormat" xml:space="preserve">
+    <value>[음성] {0}</value>
+  </data>
+  <data name="Settings_Section_ChatTextColors_Title" xml:space="preserve">
+    <value>텍스트 색상</value>
+  </data>
+  <data name="Settings_ChatTextColor_PlayerName" xml:space="preserve">
+    <value>플레이어 이름</value>
+  </data>
+  <data name="Settings_ChatTextColor_Time" xml:space="preserve">
+    <value>시간</value>
+  </data>
+  <data name="Settings_ChatTextColor_Message" xml:space="preserve">
+    <value>메시지</value>
+  </data>
+  <data name="Widget_DamageTakenLog" xml:space="preserve">
     <value>받은 피해 로그</value>
   </data>
   <data name="Widget_DamageTakenSummary" xml:space="preserve">
     <value>받은 피해 상세</value>
-  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+  </data>  <data name="DamageTakenLog_Defeated" xml:space="preserve">
     <value>(쓰러짐)</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsDefeatCause" xml:space="preserve">
     <value>쓰러짐 원인 표시</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsLatestHitOnly" xml:space="preserve">
     <value>최신 받은 피해만 표시</value>
   </data>
-  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+  <data name="DamageTakenLog_ShowAllHits" xml:space="preserve">
     <value>전체 표시</value>
   </data>
-  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+  <data name="DamageTakenLog_ShowLatestHitOnly" xml:space="preserve">
     <value>최신만</value>
   </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>부활 가능</value>
@@ -1584,6 +1646,15 @@
   </data>
   <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
     <value>예: 304221</value>
+  </data>
+  <data name="Notification_MatchWords" xml:space="preserve">
+    <value>일치 단어</value>
+  </data>
+  <data name="Notification_MatchWords_Placeholder" xml:space="preserve">
+    <value>예: 모집</value>
+  </data>
+  <data name="Notification_MatchWordsAllNote" xml:space="preserve">
+    <value>※공백으로 구분하여 여러 개를 입력하면 모두 포함된 발언만 알립니다</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※ID를 입력하면 이름보다 우선합니다</value>

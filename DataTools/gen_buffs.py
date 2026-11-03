@@ -11,6 +11,8 @@
 未翻訳の行は埋め草(`_common.PLACEHOLDERS`)が入っているので空にする。
 埋め草 `气刃突刺计数` は先頭行 `201` の名前だが、`201` 自身も4言語とも中国語のままなので同じく空にする。
 
+前の出力にあって今回空になった名前は `Data/Overrides/BuffNameOverrides.json` へ書き足す(`_common.carry_dropped_names`)。
+
 > **表示条件そのものはこのファイルで判定しない。**
 > 同梱 `Data/Raw/BuffTable.json` の `BuffPriority` で判定する。言語別テーブルで判定すると、
 > 片方にしか無いバフが特定の表示言語でだけ出なくなる。
@@ -29,7 +31,7 @@ def main():
 
     values = {lang: {i: name_of(t.get(i)) for i in keys} for lang, t in tables.items()}
     print("")
-    write_localized("BuffNames", values, keys)
+    write_localized("BuffNames", values, keys, dropped_names_overrides="BuffNameOverrides")
 
 
 if __name__ == "__main__":

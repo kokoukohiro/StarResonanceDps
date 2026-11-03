@@ -266,8 +266,8 @@
   "53": {
     "zh-CN": "苍穹之上·昼夜尽头",
     "en-US": "Twilight's Edge",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "蒼穹の彼方・昼夜の果て",
+    "ko-KR": "푸른 하늘 너머・낮과 밤의 끝"
   },
   "101": {
     "zh-CN": "弥妄·黯影堡垒",
@@ -507,13 +507,13 @@
     "zh-CN": "怪奇夜的衣橱",
     "en-US": "Nocturne Wardrobe",
     "ja-JP": "奇妙な夜の衣装部屋",
-    "ko-KR": "기이한 밤의 옷장"
+    "ko-KR": "괴기한 밤의 옷장"
   },
   "322": {
     "zh-CN": "捣蛋者的糖罐",
     "en-US": "Trickster's Candy Jar",
     "ja-JP": "いたずら者のキャンディポット",
-    "ko-KR": "장난꾸러기의 사탕단지"
+    "ko-KR": "말썽꾼의 사탕 단지"
   },
   "323": {
     "zh-CN": "幻光掠影",
@@ -693,7 +693,7 @@
     "zh-CN": "海风节庆典<br>～星之行迹～",
     "en-US": "Seabreeze Festival Celebration<br>~Stellar Paths~",
     "ja-JP": "海風祭記念<br>～星の軌跡～",
-    "ko-KR": "해풍절 축제<br>~별의 발자취~"
+    "ko-KR": "해풍절 축제<br>~별의 궤적~"
   },
   "361": {
     "zh-CN": "星光花火夜",
@@ -754,6 +754,60 @@
     "en-US": "Earth, Sky, Ancestral Spirits, and the Kanamians",
     "ja-JP": "大地、大空、祖霊と族人",
     "ko-KR": "대지, 하늘, 선조령 그리고 부족민"
+  },
+  "371": {
+    "zh-CN": "午夜猫咪派对",
+    "en-US": "Midnight Kitty Party",
+    "ja-JP": "ミッドナイトキャッツ",
+    "ko-KR": "한밤중의 고양이 파티"
+  },
+  "372": {
+    "zh-CN": "怪奇夜的衣橱",
+    "en-US": "Nocturne Wardrobe",
+    "ja-JP": "奇妙な夜の衣装部屋",
+    "ko-KR": "괴기한 밤의 옷장"
+  },
+  "373": {
+    "zh-CN": "魔女的数字游戏",
+    "en-US": "Witch's Number Game",
+    "ja-JP": "魔女のビンゴ",
+    "ko-KR": "마녀의 숫자 놀이"
+  },
+  "374": {
+    "zh-CN": "恶作剧进行中",
+    "en-US": "Prank in Progress",
+    "ja-JP": "いたずら進行中",
+    "ko-KR": "장난 진행 중"
+  },
+  "375": {
+    "zh-CN": "捣蛋惊魂·星脉调谐",
+    "en-US": "Mischief Nightmare: Engram Line Tuning",
+    "ja-JP": "いたずらホラー・星脈同調",
+    "ko-KR": "오싹한 장난・엔그램 라인 조율"
+  },
+  "376": {
+    "zh-CN": "捣蛋惊魂·三重夜廻",
+    "en-US": "Mischief Nightmare - Triple Reincarnation",
+    "ja-JP": "いたずらホラー・トリプルナイト",
+    "ko-KR": "오싹한 장난・세 밤의 배회"
+  },
+  "377": {
+    "zh-CN": "南瓜奇遇",
+    "en-US": "Pumpkin Encounter",
+    "ja-JP": "パンプキン・サプライズ",
+    "ko-KR": "호박의 만남"
+  },
+  "378": {
+    "zh-CN": "寻觅吧，猫之宝藏",
+    "en-US": "Seek It, Cat's Treasure",
+    "ja-JP": "探せ！ネコの秘宝",
+    "ko-KR": "찾아라, 고양이의 보물"
+  },
+  "379": {
+    "zh-CN": "惊吓巡游",
+    "en-US": "Scare Parade",
+    "ja-JP": "びっくりパレード",
+    "ko-KR": "서프라이즈 퍼레이드"
   },
   "401": {
     "zh-CN": "星光花火夜",
@@ -1013,6 +1067,12 @@
     "ja-JP": "異次元の制裁",
     "ko-KR": "이차원 응징"
   },
+  "2001": {
+    "zh-CN": "惊吓巡游",
+    "en-US": "Scare Parade",
+    "ja-JP": "びっくりパレード",
+    "ko-KR": "서프라이즈 퍼레이드"
+  },
   "3011": {
     "zh-CN": "时装礼盒",
     "en-US": "Fashion Box",
@@ -1190,8 +1250,8 @@
   "3266": {
     "zh-CN": "烟花大会",
     "en-US": "Fireworks Show",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "花火大会",
+    "ko-KR": "불꽃놀이 축제"
   },
   "3267": {
     "zh-CN": "祖息孢培育计划预告",
@@ -1204,6 +1264,12 @@
     "en-US": "Kanamia Brave Preview",
     "ja-JP": "ナダニの予告",
     "ko-KR": "제1용사 예고"
+  },
+  "3269": {
+    "zh-CN": "惊吓巡游",
+    "en-US": "Scare Parade",
+    "ja-JP": "びっくりパレード",
+    "ko-KR": "서프라이즈 퍼레이드"
   },
   "10000": {
     "zh-CN": "适格者特训",
@@ -1310,6 +1376,66 @@
   "11008": {
     "zh-CN": "大师试炼！祈愿共战",
     "en-US": "Master's Trial: Oath Resonance",
+    "ja-JP": "マスター試練！祈り共闘",
+    "ko-KR": "마스터의 시련! 기원 협동전"
+  },
+  "11009": {
+    "zh-CN": "无间的昼夜",
+    "en-US": "Unbroken Twilight",
+    "ja-JP": "果て無き昼夜",
+    "ko-KR": "끝없는 낮과 밤"
+  },
+  "11010": {
+    "zh-CN": "无间的昼夜",
+    "en-US": "Unbroken Twilight",
+    "ja-JP": "果て無き昼夜",
+    "ko-KR": "끝없는 낮과 밤"
+  },
+  "11020": {
+    "zh-CN": "勇者试炼",
+    "en-US": "Hero Trials",
+    "ja-JP": "勇者の試練",
+    "ko-KR": "용사의 시련"
+  },
+  "11021": {
+    "zh-CN": "镜中的审判",
+    "en-US": "Mirror Judgment",
+    "ja-JP": "鏡中の審判",
+    "ko-KR": "거울 속의 심판"
+  },
+  "11022": {
+    "zh-CN": "弥妄·巨龙爪痕",
+    "en-US": "Illusion-Shroud - Dragon Claw Valley",
+    "ja-JP": "迷妄・巨竜の爪痕",
+    "ko-KR": "미망・거룡의 발톱"
+  },
+  "11023": {
+    "zh-CN": "荒芜之庭",
+    "en-US": "Barren Courtyard",
+    "ja-JP": "荒廃の庭",
+    "ko-KR": "황폐한 정원"
+  },
+  "11024": {
+    "zh-CN": "弥妄·流月之野",
+    "en-US": "Illusion-Shroud - Moonveil Wilds",
+    "ja-JP": "迷妄・流月の野",
+    "ko-KR": "미망・빛이 흐르는 들판"
+  },
+  "11025": {
+    "zh-CN": "弥妄·黯影堡垒",
+    "en-US": "Illusion-Shroud - Dark Mist Fortress",
+    "ja-JP": "迷妄・暗霧要塞",
+    "ko-KR": "미망・검은 안개 요새"
+  },
+  "11026": {
+    "zh-CN": "远天的神槛",
+    "en-US": "Cavern Zero",
+    "ja-JP": "遠天の神檻",
+    "ko-KR": "먼 하늘의 신단"
+  },
+  "11027": {
+    "zh-CN": "大师分目标",
+    "en-US": "",
     "ja-JP": "",
     "ko-KR": ""
   },
@@ -1438,6 +1564,42 @@
     "en-US": "Warrior's Journey Dailies",
     "ja-JP": "勇士の長旅の日常",
     "ko-KR": "용사의 원정 일상"
+  },
+  "20032": {
+    "zh-CN": "捣蛋事件簿",
+    "en-US": "Prankster Incident Record",
+    "ja-JP": "いたずら事件簿",
+    "ko-KR": "말썽쟁이 사건부"
+  },
+  "20033": {
+    "zh-CN": "南瓜大冒险",
+    "en-US": "Pumpkin Adventure",
+    "ja-JP": "パンプキン大冒険",
+    "ko-KR": "호박 대모험"
+  },
+  "20034": {
+    "zh-CN": "午夜猫咪派对",
+    "en-US": "Midnight Kitty Party",
+    "ja-JP": "ミッドナイトキャッツ",
+    "ko-KR": "한밤중의 고양이 파티"
+  },
+  "20035": {
+    "zh-CN": "第一夜·冰火森林",
+    "en-US": "First Night: Forest of Ice and Fire",
+    "ja-JP": "第一夜・氷火の森",
+    "ko-KR": "첫 번째 밤・얼음과 불의 숲"
+  },
+  "20036": {
+    "zh-CN": "第二夜·光暗森林",
+    "en-US": "Second Night: Forest of Light and Dark",
+    "ja-JP": "第二夜・光闇の森",
+    "ko-KR": "두 번째 밤・빛과 어둠의 숲"
+  },
+  "20037": {
+    "zh-CN": "第三夜·无尽狂欢",
+    "en-US": "Third Night: Endless Carnival",
+    "ja-JP": "第三夜・果てなき宴",
+    "ko-KR": "세 번째 밤・끝없는 축제"
   },
   "30001": {
     "zh-CN": "游星手册",

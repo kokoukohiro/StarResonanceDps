@@ -14,8 +14,8 @@ namespace StarResonanceDps.App.ViewModels;
 
 public enum PlayerMetricDisplayMode
 {
-    Contribution,
-    Timeline
+    SkillDetail,
+    Graph
 }
 
 /// <summary>
@@ -65,11 +65,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<MetricSkillTableEntry> _skillEntries = [];
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
-    private IReadOnlyList<MetricTimelinePoint> _timelinePoints = Array.Empty<MetricTimelinePoint>();
-    private IReadOnlyList<MetricTimelineSkillMarker> _timelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
-    private int _timelineVisibleSeconds = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
-    private bool _timelineShowsSkillLog = true;
-    private Brush? _timelineLineBrush;
+    private IReadOnlyList<MetricGraphPoint> _graphPoints = Array.Empty<MetricGraphPoint>();
+    private IReadOnlyList<MetricGraphSkillMarker> _graphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
+    private int _graphVisibleSeconds = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
+    private bool _graphShowsSkillLog = true;
+    private Brush? _graphLineBrush;
     private readonly DispatcherTimer _wheelSaveTimer;
 
     /// <summary>ホイールで決めて、まだ保存していない横軸の長さ。保存待ちが無ければ null。</summary>
@@ -108,51 +108,51 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         _refreshTimer.Start();
     }
 
-    public bool IsContribution => _displayMode == PlayerMetricDisplayMode.Contribution;
+    public bool IsSkillDetail => _displayMode == PlayerMetricDisplayMode.SkillDetail;
 
-    public bool IsTimeline => _displayMode == PlayerMetricDisplayMode.Timeline;
+    public bool IsGraph => _displayMode == PlayerMetricDisplayMode.Graph;
 
     /// <summary>
     /// 推移グラフの点。値が前回と同じなら差し替えない(毎回新しい配列を入れると、値が同じでもグラフが線と配置を全部やり直す)。
     /// </summary>
-    public IReadOnlyList<MetricTimelinePoint> TimelinePoints
+    public IReadOnlyList<MetricGraphPoint> GraphPoints
     {
-        get => _timelinePoints;
+        get => _graphPoints;
         private set
         {
-            if (!_timelinePoints.SequenceEqual(value))
+            if (!_graphPoints.SequenceEqual(value))
             {
-                SetProperty(ref _timelinePoints, value);
+                SetProperty(ref _graphPoints, value);
             }
         }
     }
 
     /// <summary>推移グラフの横軸の長さ(秒)。設定「横軸の長さ」(窓の上のホイールでも変わる)。</summary>
-    public int TimelineVisibleSeconds
+    public int GraphVisibleSeconds
     {
-        get => _timelineVisibleSeconds;
-        private set => SetProperty(ref _timelineVisibleSeconds, value);
+        get => _graphVisibleSeconds;
+        private set => SetProperty(ref _graphVisibleSeconds, value);
     }
 
     /// <summary>推移グラフの横軸の下に技のアイコンの行を出すか。設定「スキルログを表示」。</summary>
-    public bool TimelineShowsSkillLog
+    public bool GraphShowsSkillLog
     {
-        get => _timelineShowsSkillLog;
-        private set => SetProperty(ref _timelineShowsSkillLog, value);
+        get => _graphShowsSkillLog;
+        private set => SetProperty(ref _graphShowsSkillLog, value);
     }
 
     /// <summary>推移グラフの線の色。その人のクラスのグラフカラー。相手が分かるまでは null。</summary>
-    public Brush? TimelineLineBrush
+    public Brush? GraphLineBrush
     {
-        get => _timelineLineBrush;
-        private set => SetProperty(ref _timelineLineBrush, value);
+        get => _graphLineBrush;
+        private set => SetProperty(ref _graphLineBrush, value);
     }
 
     /// <summary>推移グラフの横軸の下に出す、その人の技の開始のアイコン(届いた順)。</summary>
-    public IReadOnlyList<MetricTimelineSkillMarker> TimelineSkillMarkers
+    public IReadOnlyList<MetricGraphSkillMarker> GraphSkillMarkers
     {
-        get => _timelineSkillMarkers;
-        private set => SetProperty(ref _timelineSkillMarkers, value);
+        get => _graphSkillMarkers;
+        private set => SetProperty(ref _graphSkillMarkers, value);
     }
 
     public ReadOnlyObservableCollection<MetricSkillTableEntry> SkillEntries { get; }
@@ -194,26 +194,26 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
     /// <summary>
     /// 推移グラフの窓の上のホイール。<paramref name="notches"/> は奥へ回すと正で、1回ごとに横軸を
-    /// <see cref="WidgetConfigDefaults.MetricTimelineVisibleSecondsWheelStep"/> 秒短くする(手前へ回すと長くする)。
+    /// <see cref="WidgetConfigDefaults.MetricGraphVisibleSecondsWheelStep"/> 秒短くする(手前へ回すと長くする)。
     /// 同じ種類の窓の描き直しと設定の窓の表示はすぐ変え、保存はホイールが止まってから(<see cref="WheelSaveDelay"/>)行う。
     /// 保存するのはホイールが決めた値(止まるまでに設定の窓のスライダーを動かしても、そのプレビューの値は書かない)。
     /// </summary>
-    public void ChangeTimelineVisibleSecondsByWheel(int notches)
+    public void ChangeGraphVisibleSecondsByWheel(int notches)
     {
-        if (!IsTimeline || notches == 0)
+        if (!IsGraph || notches == 0)
         {
             return;
         }
 
-        var current = PlayerWidget.MetricTimelineVisibleSeconds;
-        var visibleSeconds = WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(
-            current - notches * WidgetConfigDefaults.MetricTimelineVisibleSecondsWheelStep);
+        var current = PlayerWidget.MetricGraphVisibleSeconds;
+        var visibleSeconds = WidgetConfigDefaults.ClampMetricGraphVisibleSeconds(
+            current - notches * WidgetConfigDefaults.MetricGraphVisibleSecondsWheelStep);
         if (visibleSeconds == current)
         {
             return;
         }
 
-        PlayerWidget.SetMetricTimelineVisibleSecondsFromWidget(visibleSeconds);
+        PlayerWidget.SetMetricGraphVisibleSecondsFromWidget(visibleSeconds);
         _pendingWheelVisibleSeconds = visibleSeconds;
         _wheelSaveTimer.Stop();
         _wheelSaveTimer.Start();
@@ -238,7 +238,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         }
 
         _pendingWheelVisibleSeconds = null;
-        PlayerWidget.SaveMetricTimelineVisibleSeconds(visibleSeconds);
+        PlayerWidget.SaveMetricGraphVisibleSeconds(visibleSeconds);
     }
 
     private void RefreshTimer_Tick(object? sender, EventArgs e)
@@ -257,7 +257,7 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             IsSelfTarget,
             SelectedCharacterId is { } characterId ? MeterSnapshotProvider.GetPlayerIdentity(characterId) : null,
             PartyStateStore.Instance.Current.IsMembershipPending,
-            countsSkillLevels: IsTimeline && TimelineShowsSkillLog,
+            countsSkillLevels: IsGraph && GraphShowsSkillLog,
             countsHealingSources: _kind == MeterSnapshotKind.Healing);
 
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
@@ -293,11 +293,11 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             return;
         }
 
-        var timelineSettings = IsTimeline ? PlayerWidget.GetMetricTimelineSettingsSnapshot() : null;
-        if (timelineSettings is not null)
+        var graphSettings = IsGraph ? PlayerWidget.GetMetricGraphSettingsSnapshot() : null;
+        if (graphSettings is not null)
         {
-            TimelineVisibleSeconds = timelineSettings.VisibleSeconds;
-            TimelineShowsSkillLog = timelineSettings.ShowSkillLog;
+            GraphVisibleSeconds = graphSettings.VisibleSeconds;
+            GraphShowsSkillLog = graphSettings.ShowSkillLog;
         }
 
         if (SelectedCharacterId is not { } characterId)
@@ -312,26 +312,26 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             SetHeaderText(playerIdentity.Name, playerIdentity.UserId, playerIdentity.IsNpc, playerIdentity.ProfessionId);
         }
 
-        if (timelineSettings is not null)
+        if (graphSettings is not null)
         {
-            var timeline = MeterSnapshotProvider.GetPlayerTimeline(
+            var graph = MeterSnapshotProvider.GetPlayerGraph(
                 _kind,
                 characterId,
-                timelineSettings.AggregationIntervalSeconds);
-            TimelinePoints = timeline.Points;
-            if (timelineSettings.ShowSkillLog)
+                graphSettings.AggregationIntervalSeconds);
+            GraphPoints = graph.Points;
+            if (graphSettings.ShowSkillLog)
             {
-                ApplyTimelineSkillMarkers(MeterSnapshotProvider.GetPlayerSkillActivations(characterId));
+                ApplyGraphSkillMarkers(MeterSnapshotProvider.GetPlayerSkillActivations(characterId));
             }
-            else if (TimelineSkillMarkers.Count != 0)
+            else if (GraphSkillMarkers.Count != 0)
             {
                 // 出さない間は技の開始を取りに行かず、アイコンの部品も作らない。
-                TimelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
+                GraphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
             }
             if (playerIdentity is not null)
             {
-                ApplyTimelineLineColor(
-                    timelineSettings,
+                ApplyGraphLineColor(
+                    graphSettings,
                     PlayerProfession.GetKey(playerIdentity.ProfessionId, playerIdentity.ClassSpec));
             }
 
@@ -340,14 +340,14 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
         }
 
         var table = MeterSnapshotProvider.GetPlayerSkillTable(_kind, characterId);
-        TimelinePoints = Array.Empty<MetricTimelinePoint>();
+        GraphPoints = Array.Empty<MetricGraphPoint>();
         SynchronizeSkillEntries(table.Entries, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
     }
 
     private void ApplyEmptyData()
     {
-        TimelinePoints = Array.Empty<MetricTimelinePoint>();
-        TimelineSkillMarkers = Array.Empty<MetricTimelineSkillMarker>();
+        GraphPoints = Array.Empty<MetricGraphPoint>();
+        GraphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
         ClearSkillEntries();
     }
 
@@ -357,15 +357,15 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     /// 背景の枠とイマジンの絵かは Core が決めた値をそのまま渡す。
     /// 中身が前と同じなら差し替えない(グラフの並べ直しを毎回起こさない)。
     /// </summary>
-    private void ApplyTimelineSkillMarkers(IReadOnlyList<MetricTimelineSkillActivation> activations)
+    private void ApplyGraphSkillMarkers(IReadOnlyList<MetricGraphSkillActivation> activations)
     {
-        var unknownName = LocalizationManager.Instance.GetString("MetricTimeline_UnknownSkill");
-        var markers = new MetricTimelineSkillMarker[activations.Count];
+        var unknownName = LocalizationManager.Instance.GetString("MetricGraph_UnknownSkill");
+        var markers = new MetricGraphSkillMarker[activations.Count];
         for (var index = 0; index < activations.Count; index++)
         {
             var activation = activations[index];
             var name = string.IsNullOrWhiteSpace(activation.Name) ? unknownName : activation.Name;
-            markers[index] = new MetricTimelineSkillMarker(
+            markers[index] = new MetricGraphSkillMarker(
                 activation.Seconds,
                 CombatIconResolver.ResolveSkillIcon(activation.IconName),
                 MeterSnapshotProvider.FormatSkillNameWithGrade(name, activation.Grade),
@@ -373,35 +373,35 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 activation.UsesImagineAsset);
         }
 
-        if (markers.SequenceEqual(TimelineSkillMarkers))
+        if (markers.SequenceEqual(GraphSkillMarkers))
         {
             return;
         }
 
-        TimelineSkillMarkers = markers;
+        GraphSkillMarkers = markers;
     }
 
     /// <summary>
     /// 線の色。クラスの鍵の選んでいる色。グラフカラーは不透明度を持たないので不透明で描く。
     /// </summary>
-    private void ApplyTimelineLineColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
+    private void ApplyGraphLineColor(MetricGraphWidgetSettingsConfig settings, string classKey)
     {
         var lineColor = ResolveGraphColor(settings, classKey);
-        if (TimelineLineBrush is SolidColorBrush current && current.Color == lineColor)
+        if (GraphLineBrush is SolidColorBrush current && current.Color == lineColor)
         {
             return;
         }
 
         var brush = new SolidColorBrush(lineColor);
         brush.Freeze();
-        TimelineLineBrush = brush;
+        GraphLineBrush = brush;
     }
 
     /// <summary>
     /// グラフカラーの <paramref name="classKey"/> の選んでいる色を不透明にした色。
     /// 設定はそろえた後なので、鍵の行と色の形は必ずある。
     /// </summary>
-    private static Color ResolveGraphColor(MetricTimelineWidgetSettingsConfig settings, string classKey)
+    private static Color ResolveGraphColor(MetricGraphWidgetSettingsConfig settings, string classKey)
     {
         var palette = settings.ClassColorPalettes[classKey];
         var hex = palette[Math.Clamp(settings.ClassColorIndexes[classKey], 0, palette.Count - 1)];

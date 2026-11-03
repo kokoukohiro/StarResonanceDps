@@ -268,7 +268,7 @@ internal static class NearbyEntityProjection
 
     /// <summary>
     /// ゲーム内でプレイヤーに見える HP バーを持つ実体か。持つ実体は名前が無くても一覧に載せる。
-    /// 判定は被ダメログと同じ <see cref="CombatDataCatalog.HasMonsterHpBar"/>。
+    /// 判定はタイムライン・被ダメログと同じ <see cref="CombatDataCatalog.HasMonsterHpBar"/>。
     /// <c>AttrId</c> が未着のときは判定できないので、持つ側に倒す。
     /// </summary>
     private static bool ResolveHasHpBar(EEntityType entityType, Entity entity)
@@ -315,7 +315,7 @@ internal static class NearbyEntityProjection
 
     /// <summary>
     /// 技の開始(<c>AttrSkillId</c> が変わった差分)から詠唱を作る。技が詠唱バーを持たない・技の終わり(値なしで 0)なら null。
-    /// 判定は被ダメログの詠唱行と同じ <see cref="CombatDataCatalog.HasSingOrGuideTime"/> の表で、詠唱と誘導を分けない。
+    /// 判定はタイムラインの詠唱の行と同じ <see cref="CombatDataCatalog.HasSingOrGuideTime"/> の表で、詠唱と誘導を分けない。
     /// </summary>
     private static NearbyEntityCast? ResolveStartedCast(Entity entity, DateTime arrivalUtc)
     {

@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Behaviors;
 
@@ -62,21 +62,21 @@ public static class FocusBehavior
         }
     }
 
+    /// <summary>押した所が操作する部品か、今キーボードの焦点を持つ要素の中か(焦点を外さない)。</summary>
     private static bool IsInsideInteractiveElement(DependencyObject source)
     {
-        while (source is not null)
+        for (DependencyObject? current = source; current is not null; current = ElementTree.GetParent(current))
         {
-            if (source is TextBoxBase
+            if (current is TextBoxBase
                 or PasswordBox
                 or ButtonBase
                 or ComboBox
                 or Selector
-                or MenuItem)
+                or MenuItem
+                or IInputElement { IsKeyboardFocused: true })
             {
                 return true;
             }
-
-            source = VisualTreeHelper.GetParent(source);
         }
 
         return false;

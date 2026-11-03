@@ -158,8 +158,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// blob に書くエンティティ。プレイヤー全員と、被ダメログに出てくる加害者・詠唱した敵・敵の回復・ダメージ・バフの行動した側と相手だけ。
-        /// それ以外(弾・設置物・被ダメログに出ないモンスターなど)は履歴で読まれない。
+        /// blob に書くエンティティ。プレイヤー全員と、タイムライン・被ダメログに出てくる加害者・詠唱した敵・敵の回復・ダメージ・バフの行動した側と相手だけ。
+        /// それ以外(弾・設置物・タイムライン・被ダメログに出ないモンスターなど)は履歴で読まれない。
         /// 書く項目は <see cref="EncounterBlobContractResolver"/> が決める。
         /// </summary>
         private static ConcurrentDictionary<long, Entity> SelectPersistedEntities(Encounter encounter)

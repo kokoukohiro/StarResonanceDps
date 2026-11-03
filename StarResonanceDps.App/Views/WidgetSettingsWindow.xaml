@@ -159,10 +159,10 @@
                         <Button x:Name="GraphColorsNavButton"
                                 Click="GraphColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasMetricGraphDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MetricTimelineSettings.GraphColorSectionTitle}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MetricGraphSettings.GraphColorSectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="PlayerStatusTextColorsNavButton"
@@ -183,13 +183,13 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EquipmentSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="DamageTakenListClassColorsNavButton"
-                                Click="DamageTakenListClassColorsNavButton_Click"
+                        <Button x:Name="DamageTakenLogClassColorsNavButton"
+                                Click="DamageTakenLogClassColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasDamageTakenLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding DamageTakenListSettings.ClassColorSectionTitle}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding DamageTakenLogSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="ElementColorsNavButton"
@@ -246,22 +246,22 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding MeterSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="TakenDamageLogClassColorsNavButton"
-                                Click="TakenDamageLogClassColorsNavButton_Click"
+                        <Button x:Name="TimelineClassColorsNavButton"
+                                Click="TimelineClassColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Fill}" Data="{DynamicResource Icon.PaintBrush}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TakenDamageLogSettings.ClassColorSectionTitle}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TimelineSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="TakenDamageLogTextColorsNavButton"
-                                Click="TakenDamageLogTextColorsNavButton_Click"
+                        <Button x:Name="TimelineTextColorsNavButton"
+                                Click="TimelineTextColorsNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}"
-                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Visibility="{Binding HasTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.TextColor}" />
-                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TakenDamageLogSettings.TextColorSectionTitle}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding TimelineSettings.TextColorSectionTitle}" />
                             </StackPanel>
                         </Button>
                         <Button x:Name="PlayerInfoClassColorsNavButton"
@@ -300,6 +300,15 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.ClassColorSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <Button x:Name="ChatTextColorsNavButton"
+                                Click="ChatTextColorsNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding HasChatSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.TextColor}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding ChatSettings.TextColorSectionTitle}" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </ContentControl>
 
@@ -333,11 +342,11 @@
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
 
-                                    <ContentControl Content="{Binding MetricTimelineSettings}"
-                                                    Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl Content="{Binding MetricGraphSettings}"
+                                                    Visibility="{Binding HasMetricGraphDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
-                                                <widgetSettingsViews:MetricTimelineWidgetDisplaySettingsView />
+                                                <widgetSettingsViews:MetricGraphWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -351,11 +360,11 @@
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
 
-                                    <ContentControl Content="{Binding TakenDamageLogSettings}"
-                                                    Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl Content="{Binding TimelineSettings}"
+                                                    Visibility="{Binding HasTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
-                                                <widgetSettingsViews:TakenDamageLogWidgetDisplaySettingsView />
+                                                <widgetSettingsViews:TimelineWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -414,11 +423,11 @@
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
 
-                                    <ContentControl Content="{Binding DamageTakenListSettings}"
-                                                    Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl Content="{Binding DamageTakenLogSettings}"
+                                                    Visibility="{Binding HasDamageTakenLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <ContentControl.ContentTemplate>
                                             <DataTemplate>
-                                                <widgetSettingsViews:DamageTakenListWidgetDisplaySettingsView />
+                                                <widgetSettingsViews:DamageTakenLogWidgetDisplaySettingsView />
                                             </DataTemplate>
                                         </ContentControl.ContentTemplate>
                                     </ContentControl>
@@ -622,11 +631,11 @@
                                 </ContentControl>
 
                                 <ContentControl x:Name="GraphColorsHost"
-                                                Content="{Binding MetricTimelineSettings}"
-                                                Visibility="{Binding HasMetricTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                Content="{Binding MetricGraphSettings}"
+                                                Visibility="{Binding HasMetricGraphDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:MetricTimelineGraphColorSettingsView />
+                                            <widgetSettingsViews:MetricGraphColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
@@ -651,12 +660,12 @@
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
-                                <ContentControl x:Name="DamageTakenListClassColorsHost"
-                                                Content="{Binding DamageTakenListSettings}"
-                                                Visibility="{Binding HasDamageTakenListDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ContentControl x:Name="DamageTakenLogClassColorsHost"
+                                                Content="{Binding DamageTakenLogSettings}"
+                                                Visibility="{Binding HasDamageTakenLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:DamageTakenListClassColorSettingsView />
+                                            <widgetSettingsViews:DamageTakenLogClassColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
@@ -721,22 +730,22 @@
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
-                                <ContentControl x:Name="TakenDamageLogClassColorsHost"
-                                                Content="{Binding TakenDamageLogSettings}"
-                                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ContentControl x:Name="TimelineClassColorsHost"
+                                                Content="{Binding TimelineSettings}"
+                                                Visibility="{Binding HasTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:TakenDamageLogClassColorSettingsView />
+                                            <widgetSettingsViews:TimelineClassColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
 
-                                <ContentControl x:Name="TakenDamageLogTextColorsHost"
-                                                Content="{Binding TakenDamageLogSettings}"
-                                                Visibility="{Binding HasTakenDamageLogDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <ContentControl x:Name="TimelineTextColorsHost"
+                                                Content="{Binding TimelineSettings}"
+                                                Visibility="{Binding HasTimelineDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
-                                            <widgetSettingsViews:TakenDamageLogTextColorSettingsView />
+                                            <widgetSettingsViews:TimelineTextColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
@@ -777,6 +786,16 @@
                                     <ContentControl.ContentTemplate>
                                         <DataTemplate>
                                             <widgetSettingsViews:EntityInfoClassColorSettingsView />
+                                        </DataTemplate>
+                                    </ContentControl.ContentTemplate>
+                                </ContentControl>
+
+                                <ContentControl x:Name="ChatTextColorsHost"
+                                                Content="{Binding ChatSettings}"
+                                                Visibility="{Binding HasChatSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <ContentControl.ContentTemplate>
+                                        <DataTemplate>
+                                            <widgetSettingsViews:ChatTextColorSettingsView />
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>

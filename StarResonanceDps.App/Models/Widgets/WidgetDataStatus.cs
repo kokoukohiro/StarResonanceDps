@@ -6,10 +6,10 @@ public enum WidgetDataStatusLevel
     /// <summary>緑。欠けたと分かる事実が無い(既定)。</summary>
     Complete,
 
-    /// <summary>黄。マップ移動やログインし直す以外の操作で直る欠けがある。</summary>
+    /// <summary>黄。一部の情報が欠けている。</summary>
     Partial,
 
-    /// <summary>赤。マップ移動やログインし直さないと直らない、または直らない欠けがある。</summary>
+    /// <summary>赤。マップ移動かログインし直すまで情報を受け取れない、または直らない欠けがある。</summary>
     Unavailable
 }
 
@@ -38,7 +38,13 @@ public enum WidgetDataStatusReasons
     EnemyApproach = 16,
 
     /// <summary>データを読めない(装備情報・履歴の回の読み込み)。直らないので赤。</summary>
-    Unreadable = 32
+    Unreadable = 32,
+
+    /// <summary>
+    /// ゲームに入った後に起動して、その窓の過去のチャットを受け取っていない。ログインし直すと直る
+    /// (ワールドと初心者はチャンネルの切り替え、プライベートトークはその相手を開いたときにも直る)。新しいチャットは届くので黄。
+    /// </summary>
+    PastChatRelogin = 64
 }
 
 /// <summary>ウィジェットの状態。欠けの理由の組で、色は理由から決まる。値で比べられるので、同じなら通知しない。</summary>

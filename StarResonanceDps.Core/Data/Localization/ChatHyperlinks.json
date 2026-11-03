@@ -1,0 +1,440 @@
+{
+  "3622": {
+    "zh-CN": "累积消耗了300点专注，获得了1点生活职业专精",
+    "en-US": "You've spent 300 Focus and gained 1 Life Skill Mastery",
+    "ja-JP": "フォーカスを300pt消費し、クラフトクラス熟練ポイントを1獲得しました",
+    "ko-KR": "집중력 300pt를 누적 소모하여 생활 클래스 마스터리 1pt를 획득했습니다."
+  },
+  "3623": {
+    "zh-CN": "首次解锁任意生活职业，获得了{*val*}点生活职业专精",
+    "en-US": "Life skills unlocked for the first time! {*val*} Life Skill Mastery obtained",
+    "ja-JP": "初めてクラフトクラスを解放し、クラフトクラス熟練ポイントを{*val*}獲得しました",
+    "ko-KR": "임의 생활 클래스를 처음으로 해제하여 생활 클래스 마스터리 {*val*}pt를 획득했습니다."
+  },
+  "11675": {
+    "zh-CN": "首次解锁任意生活职业，获得了{*val*}点生活职业专精",
+    "en-US": "Life skills unlocked for the first time! {*val*} Life Skill Mastery obtained",
+    "ja-JP": "初めてクラフトクラスを解放し、クラフトクラス熟練ポイントを{*val*}獲得しました",
+    "ko-KR": "임의 생활 클래스를 처음으로 해제하여 생활 클래스 마스터리 {*val*}pt를 획득했습니다."
+  },
+  "11676": {
+    "zh-CN": "累积消耗了300点专注，获得了1点生活职业专精",
+    "en-US": "You've spent 300 Focus and gained 1 Life Skill Mastery",
+    "ja-JP": "フォーカスを300pt消費し、クラフトクラス熟練ポイントを1獲得しました",
+    "ko-KR": "집중력 300pt를 누적 소모하여 생활 클래스 마스터리 1pt를 획득했습니다."
+  },
+  "11677": {
+    "zh-CN": "生活职业专精已重置, 返还了{*val*}点专精",
+    "en-US": "Mastery of Life Skills has been reset-{*val*} points refunded.",
+    "ja-JP": "クラフトクラスの熟練ポイントがリセットされ、熟練ポイントが{*val*}返還されました",
+    "ko-KR": "생활 클래스 마스터리가 초기화되었습니다. 마스터리 {*val*}pt가 반환되었습니다."
+  },
+  "1004013": {
+    "zh-CN": "幸运女神降临，{*player.name*}积极参与狩猎活动，竟然获得了{*item.name*}的奖励",
+    "en-US": "The goddess of luck has arrived, {*player.name*} actively participated in the hunting event and surprisingly received a reward of {*item.name*}",
+    "ja-JP": "幸運の女神が降臨！{*player.name*}がハントイベントに積極的に参加した結果、なんと報酬として{*item.name*}を獲得しました！",
+    "ko-KR": "행운의 여신님이 강림했습니다. {*player.name*} 님이 사냥 이벤트에 참여해 {*item.name*} 보상을 획득했습니다!"
+  },
+  "1004014": {
+    "zh-CN": "幸运女神降临，{*player.name*}打开狩猎嘉奖宝箱，竟然获得了{*item.name*}的奖励",
+    "en-US": "The goddess of luck has arrived, {*player.name*} opened the hunting reward chest and surprisingly received a reward of {*item.name*}",
+    "ja-JP": "幸運の女神が降臨！{*player.name*}がハント褒賞宝箱を開けた結果、なんと{*item.name*}を獲得しました！",
+    "ko-KR": "행운의 여신님이 강림했습니다. {*player.name*} 님이 사냥 보상 보물 상자를 열어 {*item.name*} 보상을 획득했습니다!"
+  },
+  "1004015": {
+    "zh-CN": "幸运女神降临，{*player.name*}打开首领讨伐宝箱，竟然获得了{*item.name*}的奖励",
+    "en-US": "The goddess of luck has arrived, {*player.name*} opened the Boss crusade chest and surprisingly received a reward of {*item.name*}",
+    "ja-JP": "幸運の女神が降臨！{*player.name*}がボス討伐宝箱を開けた結果、なんと{*item.name*}を獲得しました！",
+    "ko-KR": "행운의 여신님이 강림했습니다. {*player.name*} 님이 보스 토벌 보물 상자를 열어 {*item.name*} 보상을 획득했습니다!"
+  },
+  "1004020": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "1004081": {
+    "zh-CN": "本次协会狩猎已结束，大家成功的完成了狩猎任务，感谢大家的努力，再次感谢{*player.name*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone successfully completed the hunting quest, thank you for your efforts, and special thanks to {*player.name*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。皆さんのおかげで無事にハントクエストを完了することができました。ご協力ありがとうございました。そして、今回のイベントで積極的に活躍してくれた{*player.name*}に改めて感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 모두의 노력 덕분에 사냥 퀘스트를 성공적으로 완료했습니다. 이번 이벤트에서 적극적으로 활약해주신 {*player.name*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004082": {
+    "zh-CN": "本次协会狩猎已结束，大家成功的完成了狩猎任务，感谢大家的努力，再次感谢{*player.names[1]*}、{*player.names[2]*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone successfully completed the hunting quest, thank you for your efforts, and special thanks to {*player.names[1]*}, {*player.names[2]*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。皆さんのおかげで無事にハントクエストを完了することができました。ご協力ありがとうございました。そして、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}に改めて感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 모두의 노력 덕분에 사냥 퀘스트를 성공적으로 완료했습니다. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004083": {
+    "zh-CN": "本次协会狩猎已结束，大家成功的完成了狩猎任务，感谢大家的努力，再次感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone successfully completed the hunting quest, thank you for your efforts, and special thanks to {*player.names[1]*}, {*player.names[2]*}, {*player.names[3]*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。皆さんのおかげで無事にハントクエストを完了することができました。ご協力ありがとうございました。そして、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}に改めて感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 모두의 노력 덕분에 사냥 퀘스트를 성공적으로 완료했습니다. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004084": {
+    "zh-CN": "本次协会狩猎已结束，大家成功的完成了狩猎任务，感谢大家的努力，再次感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone successfully completed the hunting quest, thank you for your efforts, and special thanks to {*player.names[1]*}, {*player.names[2]*}, {*player.names[3]*}, {*player.names[4]*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。皆さんのおかげで無事にハントクエストを完了することができました。ご協力ありがとうございました。そして、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}に改めて感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 모두의 노력 덕분에 사냥 퀘스트를 성공적으로 완료했습니다. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님, {*player.names[4]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004085": {
+    "zh-CN": "本次协会狩猎已结束，大家成功的完成了狩猎任务，感谢大家的努力，再次感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}、{*player.names[5]*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone successfully completed the hunting quest, thank you for your efforts, and special thanks to {*player.names[1]*}, {*player.names[2]*}, {*player.names[3]*}, {*player.names[4]*}, {*player.names[5]*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。皆さんのおかげで無事にハントクエストを完了することができました。ご協力ありがとうございました。そして、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}、{*player.names[5]*}に改めて感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 모두의 노력 덕분에 사냥 퀘스트를 성공적으로 완료했습니다. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님, {*player.names[4]*} 님, {*player.names[5]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004091": {
+    "zh-CN": "本次协会狩猎已结束，大家未成功完成协会进度奖励，下次还需努力，还是要感谢{*player.name*}在这次活动中的积极表现！",
+    "en-US": "This Guild Hunt has ended, everyone did not successfully complete the Guild progress reward, more effort is needed next time, still thank you to {*player.name*} for their active performance in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。残念ながらギルドの進度報酬を獲得できませんでした。次回はもっと頑張りましょう。それでも、今回のイベントで積極的に活躍してくれた{*player.name*}に感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 아쉽게도 목표 달성에 실패하여 길드 보상을 획득하지 못했습니다. 다음 기회를 노려 주세요. 이번 이벤트에서 적극적으로 활약해주신 {*player.name*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004092": {
+    "zh-CN": "本次协会狩猎已结束，大家未成功完成协会进度奖励，下次还需努力，还是要感谢{*player.names[1]*}、{*player.names[2]*}在这次活动中的积极表现！",
+    "en-US": "The Guild Hunt has ended. We did not successfully complete the Guild progress reward this time. We need to work harder next time. Still, we want to thank {*player.names[1]*} and {*player.names[2]*} for their active participation in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。残念ながらギルドの進度報酬を獲得できませんでした。次回はもっと頑張りましょう。それでも、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}に感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 아쉽게도 목표 달성에 실패하여 길드 보상을 획득하지 못했습니다. 다음 기회를 노려 주세요. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004093": {
+    "zh-CN": "本次协会狩猎已结束，大家未成功完成协会进度奖励，下次还需努力，还是要感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}在这次活动中的积极表现！",
+    "en-US": "The Guild Hunt has ended. We did not successfully complete the Guild progress reward this time. We need to work harder next time. Still, we want to thank {*player.names[1]*}, {*player.names[2]*}, and {*player.names[3]*} for their active participation in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。残念ながらギルドの進度報酬を獲得できませんでした。次回はもっと頑張りましょう。それでも、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}に感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 아쉽게도 목표 달성에 실패하여 길드 보상을 획득하지 못했습니다. 다음 기회를 노려 주세요. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004094": {
+    "zh-CN": "本次协会狩猎已结束，大家未成功完成协会进度奖励，下次还需努力，还是要感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}在这次活动中的积极表现！",
+    "en-US": "The Guild Hunt has ended. We did not successfully complete the Guild progress reward this time. We need to work harder next time. Still, we want to thank {*player.names[1]*}, {*player.names[2]*}, {*player.names[3]*}, and {*player.names[4]*} for their active participation in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。残念ながらギルドの進度報酬を獲得できませんでした。次回はもっと頑張りましょう。それでも、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}に感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 아쉽게도 목표 달성에 실패하여 길드 보상을 획득하지 못했습니다. 다음 기회를 노려 주세요. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님, {*player.names[4]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004095": {
+    "zh-CN": "本次协会狩猎已结束，大家未成功完成协会进度奖励，下次还需努力，还是要感谢{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}、{*player.names[5]*}在这次活动中的积极表现！",
+    "en-US": "The Guild Hunt has ended. We did not successfully complete the Guild progress reward this time. We need to work harder next time. Still, we want to thank {*player.names[1]*}, {*player.names[2]*}, {*player.names[3]*}, {*player.names[4]*}, and {*player.names[5]*} for their active participation in this event!",
+    "ja-JP": "今回のギルドハントは終了しました。残念ながらギルドの進度報酬を獲得できませんでした。次回はもっと頑張りましょう。それでも、今回のイベントで積極的に活躍してくれた{*player.names[1]*}、{*player.names[2]*}、{*player.names[3]*}、{*player.names[4]*}、{*player.names[5]*}に感謝します！",
+    "ko-KR": "이번 길드 사냥이 종료되었습니다. 아쉽게도 목표 달성에 실패하여 길드 보상을 획득하지 못했습니다. 다음 기회를 노려 주세요. 이번 이벤트에서 적극적으로 활약해주신 {*player.names[1]*} 님, {*player.names[2]*} 님, {*player.names[3]*} 님, {*player.names[4]*} 님, {*player.names[5]*} 님께 다시 한번 감사드립니다!"
+  },
+  "1004101": {
+    "zh-CN": "{*player.name*}运气爆棚，获得了{*item.name*}，真是意外之喜！",
+    "en-US": "{*player.name*} had incredible luck and obtained {*item.name*}, what a pleasant surprise!",
+    "ja-JP": "{*player.name*}の幸運が爆発し、{*item.name*}を獲得しました。まさにうれしいサプライズです！",
+    "ko-KR": "{*player.name*} 님의 행운이 폭발하여 {*item.name*} 아이템을 획득했습니다!"
+  },
+  "1004102": {
+    "zh-CN": "{*player.name*}运气爆棚，从奇迹星拓箱中获得了{*item.name*}，真是意外之喜！",
+    "en-US": "{*player.name*} had incredible luck and obtained {*item.name*} from the Miracle Star Chest, what a pleasant surprise!",
+    "ja-JP": "{*player.name*}の幸運が爆発し、奇跡の星宝箱を開けて{*item.name*}を獲得しました。まさにうれしいサプライズです！",
+    "ko-KR": "{*player.name*} 님의 행운이 폭발하여 기적의 개척 상자에서 {*item.name*} 아이템을 획득했습니다!"
+  },
+  "1004103": {
+    "zh-CN": "{*player.name*}运气爆棚，从扭蛋活动中获得了{*item.name*}，真是意外之喜！",
+    "en-US": "{*player.name*} had incredible luck and obtained {*item.name*} from the Wish event, what a pleasant surprise!",
+    "ja-JP": "{*player.name*}の幸運が爆発し、ガシャイベントで{*item.name*}を獲得しました。まさにうれしいサプライズです！",
+    "ko-KR": "{*player.name*} 님의 행운이 폭발하여 뽑기 이벤트에서 {*item.name*} 아이템을 획득했습니다!"
+  },
+  "1004104": {
+    "zh-CN": "{*player.name*}运气爆棚，从初级星拓箱中获得了{*item.name*}，真是意外之喜！",
+    "en-US": "{*player.name*} had incredible luck and obtained {*item.name*} from the Basic Star Chest, what a pleasant surprise!",
+    "ja-JP": "{*player.name*}の幸運が爆発し、初級星宝箱を開けて{*item.name*}を獲得しました。まさにうれしいサプライズです！",
+    "ko-KR": "{*player.name*} 님의 행운이 폭발하여 초급 개척 상자에서 {*item.name*} 아이템을 획득했습니다!"
+  },
+  "1005001": {
+    "zh-CN": "协会战舞将在19:30开启，是否进入协会？<u><link=1>点击进入</link><u>",
+    "en-US": "Guild Dance starts at 19:30. Enter Guild? <u><link=1>Enter</link><u>",
+    "ja-JP": "ギルドダンスが19:30に始まります。ギルドに入りますか？<u><link=1>クリックして入る</link><u>",
+    "ko-KR": "19:30에 길드 무도회가 오픈됩니다. 길드에 입장하시겠습니까? <u><link=1>바로가기</link><u>"
+  },
+  "1005002": {
+    "zh-CN": "协会战舞已经开启，是否进入协会？<u><link=1>点击进入</link><u>",
+    "en-US": "The Guild Dance has started, go now?",
+    "ja-JP": "ギルドダンスが始まりました。ギルドに入りますか？<u><link=1>クリックして入る</link><u>",
+    "ko-KR": "길드 무도회가 오픈되었습니다. 길드에 입장하시겠습니까? <u><link=1>바로가기</link><u>"
+  },
+  "1005003": {
+    "zh-CN": "小伊已经携带了奖励来到了协会中，快来找找小伊领取奖励把~",
+    "en-US": "Ee-chan has brought rewards to the Guild, come and find Ee-chan to claim your rewards~",
+    "ja-JP": "イーが報酬を持ってギルドにやって来ました。早くイーを探して報酬を受け取りましょう〜",
+    "ko-KR": "이짱이 보상을 가지고 길드에 도착했습니다. 어서 이짱을 찾아 보상을 수령하세요."
+  },
+  "1005004": {
+    "zh-CN": "协会战舞活动已经结束，请下次继续参与哦~",
+    "en-US": "The Guild Dance event has ended, please continue to participate next time~",
+    "ja-JP": "ギルドダンスイベントは終了しました。次回もぜひご参加ください〜",
+    "ko-KR": "길드 무도회 이벤트가 종료되었습니다. 다음에도 많은 참여 부탁드립니다!"
+  },
+  "1006001": {
+    "zh-CN": "{*player.name*}已经获得了本层奖励，无法再次获得",
+    "en-US": "{*player.name*} has received the reward for this floor",
+    "ja-JP": "{*player.name*}はすでにこの階層の報酬を獲得しているため、再度獲得することはできません",
+    "ko-KR": "{*player.name*} 님은 이미 해당 층의 보상을 획득하여 다시 받을 수 없습니다."
+  },
+  "1006002": {
+    "zh-CN": "{*player.name*}已经获得了本层惊喜奖励，无法再次获得",
+    "en-US": "{*player.name*} has received the surprise reward for this floor",
+    "ja-JP": "{*player.name*}はすでにこの階層のサプライズ報酬を獲得しているため、再度獲得することはできません",
+    "ko-KR": "{*player.name*} 님은 이미 해당 층의 깜짝 보상을 획득하여 다시 받을 수 없습니다."
+  },
+  "1043001": {
+    "zh-CN": "{*player.name*}放弃了奖励",
+    "en-US": "{*player.name*} gave up the reward",
+    "ja-JP": "{*player.name*}は報酬を放棄しました",
+    "ko-KR": "{*player.name*} 님이 보상을 포기했습니다."
+  },
+  "1043005": {
+    "zh-CN": "{*player.name*}通过插入钥匙获得奖励{*item.name*}",
+    "en-US": "{*player.name*} obtained the reward {*item.name*} by inserting the key",
+    "ja-JP": "{*player.name*}が鍵を投入し、報酬{*item.name*}を獲得しました",
+    "ko-KR": "{*player.name*} 님이 열쇠를 사용하여 {*item.name*} 보상을 획득했습니다."
+  },
+  "1043010": {
+    "zh-CN": "<style=\"player_name\">{*player.name*}</style> 掷出了 {*val*} 点，获得了{*item.name*}",
+    "en-US": "<style=\"player_name\">{*player.name*}</style> rolled {*val*} points and obtained {*item.name*}",
+    "ja-JP": "<style=\"player_name\">{*player.name*}</style> は {*val*} を出して{*item.name*}を獲得しました",
+    "ko-KR": "<style=\"player_name\">{*player.name*}</style> 님이 굴린 주사위에서 {*val*}점이 나와 {*item.name*}(을)를 획득했습니다."
+  },
+  "1043011": {
+    "zh-CN": "{*player.name*}掷出的点数最高，获得了{*item.name*}",
+    "en-US": "{*player.name*} rolled the highest points and obtained {*item.name*}",
+    "ja-JP": "{*player.name*}が出した目が最も大きく、{*item.name*}を獲得しました",
+    "ko-KR": "{*player.name*} 님의 주사위에서 가장 높은 수가 나와 {*item.name*}의 주인이 되었습니다."
+  },
+  "1043013": {
+    "zh-CN": "{*player.name*}掷出了{*val*}点",
+    "en-US": "{*player.name*} rolled {*val*} points",
+    "ja-JP": "{*player.name*}は{*val*}を出しました",
+    "ko-KR": "{*player.name*} 님의 주사위에서 {*val*}점이 나왔습니다!"
+  },
+  "1050001": {
+    "zh-CN": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}的大师之证</style></link></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}'s Master Seal</style></link></u> ]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}のマスターの証</style></link></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*} 님의 마스터의 증표 </style></link></u> ]{*string[2]*}"
+  },
+  "2000001": {
+    "zh-CN": "{*item.name*} 预购成功, 请在邮件中查看",
+    "en-US": "{*item.name*} pre-order successful, please check your mail",
+    "ja-JP": "{*item.name*} の予約購入が完了しました。メールをご確認ください",
+    "ko-KR": "{*item.name*} 예약 구매 성공! 우편에서 확인해 주세요!"
+  },
+  "2000002": {
+    "zh-CN": "{*item.name*} 预购失败, 请在邮件中查看",
+    "en-US": "{*item.name*} pre-order failed, please check your mail",
+    "ja-JP": "{*item.name*} の予約購入ができませんでした。メールをご確認ください",
+    "ko-KR": "{*item.name*} 예약 구매 실패! 우편에서 확인해 주세요!"
+  },
+  "3000001": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  },
+  "3000002": {
+    "zh-CN": "{*string[1]*}[ <u><link=1>{*scence.name*} {*val1*}线（{*val2*}，{*val3*}，{*val4*}）</link></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><link=1>{*scence.name*} Line {*val1*} ({*val2*}, {*val3*}, {*val4*})</link></u> ]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><link=1>{*scence.name*} ch{*val1*}（{*val2*}、{*val3*}、{*val4*}）</link></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><link=1>{*scence.name*} {*val1*} 채널 ({*val2*}, {*val3*}, {*val4*})</link></u> ]{*string[2]*}"
+  },
+  "3001001": {
+    "zh-CN": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}的个人空间</style></link></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}'s personal space</style></link></u> ]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*}の個人スペース</style></link></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><link=1><style=chat_fishing_share_profile>{*player.names*} 님의 개인 공간 </style></link></u> ]{*string[2]*}"
+  },
+  "5001001": {
+    "zh-CN": "{*union.build*}升级中，等级{*arrVal[1]*}升级到等级{*arrVal[2]*}，请前往加速升级",
+    "en-US": "{*union.build*} is upgrading from Lv.{*arrVal[1]*} to Lv.{*arrVal[2]*}, go to accelerate the upgrade.",
+    "ja-JP": "{*union.build*}がレベルアップ中です。Lv.{*arrVal[1]*}からLv.{*arrVal[2]*}にレベルアップします。",
+    "ko-KR": "{*union.build*}(이)가 Lv.{*arrVal[1]*}에서 Lv.{*arrVal[2]*}(으)로 레벨업했습니다. 어서 가속하여 레벨업을 앞당기세요!"
+  },
+  "5001002": {
+    "zh-CN": "经过大家的努力，{*union.build*}升级到{*val*}级",
+    "en-US": "Thanks to everyone's efforts, {*union.build*} has been upgraded to Lv.{*val*}",
+    "ja-JP": "皆さんの努力により、{*union.build*}がLv.{*val*}になりました",
+    "ko-KR": "모두가 노력한 결과, {*union.build*}(이)가 Lv.{*val*}(이)가 되었습니다."
+  },
+  "5001003": {
+    "zh-CN": "{*buff.name*}效果已开启成功，有效期为{*val*}小时",
+    "en-US": "The {*buff.name*} has been successfully activated, valid for {*val*} hours",
+    "ja-JP": "{*buff.name*}効果が発動しました。有効期間は{*val*}時間です",
+    "ko-KR": "{*buff.name*} 효과가 활성화되었습니다. 효과는 {*val*}시간 동안 지속됩니다."
+  },
+  "5001004": {
+    "zh-CN": "{*buff.name*}效果已关闭",
+    "en-US": "The {*buff.name*} has been deactivated",
+    "ja-JP": "{*buff.name*}効果が終了しました",
+    "ko-KR": "{*buff.name*} 효과가 종료되었습니다."
+  },
+  "5001005": {
+    "zh-CN": "协会商人已返航，请前往协会活动中心",
+    "en-US": "The Guild merchant has returned, please proceed to the Guild Center",
+    "ja-JP": "ギルド商人が帰還しました。ギルド活動所へ向かってください",
+    "ko-KR": "길드 상인이 돌아왔습니다. 길드 이벤트 센터를 방문해 주세요."
+  },
+  "5001006": {
+    "zh-CN": "预计{*timestamp*}开启协会活动中心众筹任务，敬请期待！",
+    "en-US": "The Guild crowdfunding is expected to start at {*timestamp*}, stay tuned!",
+    "ja-JP": "{*timestamp*}にギルド活動所の署名が開始される予定です。ご期待ください！",
+    "ko-KR": "{*timestamp*}에 길드 이벤트 센터에서 펀딩 퀘스트가 오픈될 예정입니다. 기대해 주세요."
+  },
+  "5001007": {
+    "zh-CN": "协会活动中心众筹任务已开启，请积极前往参加 <u><link=1>点击进入</link><u>",
+    "en-US": "The crowdfunding has started, go now?",
+    "ja-JP": "ギルド活動所の署名が始まりました。積極的にご参加ください <u><link=1>クリックして参加</link><u>",
+    "ko-KR": "길드 이벤트 센터 펀딩 퀘스트가 시작되었습니다. 지금 바로 참여하세요. <u><link=1>바로가기</link><u>"
+  },
+  "5001008": {
+    "zh-CN": "{*player.name*}完成协会众筹，进行中。",
+    "en-US": "{*player.name*} has made the Guild crowdfunding",
+    "ja-JP": "{*player.name*}がギルド署名を完了しました。進行中です。",
+    "ko-KR": "{*player.name*} 님이 길드 펀딩을 완료했습니다(진행 중)."
+  },
+  "5001009": {
+    "zh-CN": "在大家的努力下，协会众筹已完成！协会活动中心开启建设，预计{*timestamp*}建设完成！",
+    "en-US": "Thanks to everyone's efforts, the Guild crowdfunding has been completed! The Guild Center is under construction, expected to be completed by {*timestamp*}!",
+    "ja-JP": "署名が完了しました！ギルド活動所の建設が開始され、{*timestamp*}に完成予定です！",
+    "ko-KR": "모두의 노력 끝에 길드 펀딩이 성공적으로 완료되었습니다! {*timestamp*}에 오픈을 목표로 길드 이벤트 센터 건설을 시작합니다."
+  },
+  "5001010": {
+    "zh-CN": "协会活动中心建设完成，大家可以通过协会主页的【回到协会】前往协会活动中心！快去找协会管理员萝拉完成游览协会任务吧！",
+    "en-US": "The construction of the Guild Center is complete, everyone can go to there through the \"Guild Center\" on the Guild homepage! Go find the Guild administrator Laura to complete the Guild tour quest!",
+    "ja-JP": "ギルド活動所が完成しました。ギルドホーム画面の【ギルドに戻る】からギルド活動所へ移動できます！ギルド管理者のルオラに会ってギルド見学クエストを完了しましょう！",
+    "ko-KR": "길드 이벤트 센터 건설 완료! 길드 메인 화면의 [길드로 돌아가기]를 통해 길드 이벤트 센터로 이동하고, 길드 관리자 롤라에게 말을 걸어 길드 둘러보기 퀘스트를 완료하세요."
+  },
+  "5001011": {
+    "zh-CN": "{*player.name*}上传了照片到协会临时相册，请管理员尽快审核",
+    "en-US": "{*player.name*} uploaded a photo to the Guild's temporary album.",
+    "ja-JP": "{*player.name*}がギルド臨時アルバムに写真をアップロードしました。管理員の方は速やかにご確認ください",
+    "ko-KR": "{*player.name*} 님이 길드 임시 앨범에 사진을 업로드했습니다. 관리자님, 어서 심사해 주세요."
+  },
+  "5001012": {
+    "zh-CN": "欢迎{*player.name*}加入协会，大家快来认识一下吧！",
+    "en-US": "Welcome {*player.name*} to the Guild!",
+    "ja-JP": "{*player.name*}がギルドに加入しました。皆さん、仲良くしてあげてくださいね！",
+    "ko-KR": "{*player.name*} 님이 길드에 새로 가입하셨습니다. 다들 반갑게 맞이해주세요!"
+  },
+  "5001013": {
+    "zh-CN": "协会功能未开启，点击查看开启预估",
+    "en-US": "Guild is not enabled, please check the preview.",
+    "ja-JP": "ギルド機能が開放されていません。クリックして開放予告をご確認ください",
+    "ko-KR": "길드 기능은 아직 오픈되지 않았습니다. 눌러서 예상 오픈 일정을 확인하세요."
+  },
+  "5001014": {
+    "zh-CN": "协会已开启，快来看看协会有什么内容吧！",
+    "en-US": "The Guild is now open, come and see what it has to offer!",
+    "ja-JP": "ギルドが開放されました。どんなコンテンツがあるか見てみましょう！",
+    "ko-KR": "길드가 오픈되었습니다. 어서 길드 콘텐츠를 확인해 보세요!"
+  },
+  "5001015": {
+    "zh-CN": "{*player.name*}完成协会众筹，已完成。",
+    "en-US": "{*player.name*} completed the Guild crowdfunding, completed.",
+    "ja-JP": "{*player.name*}がギルド署名を完了しました。",
+    "ko-KR": "{*player.name*} 님이 길드 펀딩을 완료했습니다. (완료)"
+  },
+  "5001016": {
+    "zh-CN": "{*player.name*}分享协会众筹。",
+    "en-US": "{*player.name*} shared the Guild crowdfunding.",
+    "ja-JP": "{*player.name*}がギルド署名をシェアしました。",
+    "ko-KR": "{*player.name*} 님이 길드 펀딩을 공유했습니다."
+  },
+  "5010001": {
+    "zh-CN": "协会狩猎活动将在{*val*}秒后开启，是否进入协会？<u><link=1>点击进入</link><u>",
+    "en-US": "Guild Hunt event starts in {*val*}s. <u><link=1>Join</link><u>",
+    "ja-JP": "ギルドハントイベントが{*val*}秒後に始まります。ギルドに入りますか？<u><link=1>クリックして入る</link><u>",
+    "ko-KR": "{*val*}초 후 길드 사냥 이벤트가 오픈됩니다. 길드로 이동하시겠습니까? <u><link=1>바로가기</link><u>"
+  },
+  "5010002": {
+    "zh-CN": "协会狩猎活动已经开启，是否进入协会？<u><link=1>点击进入</link><u>",
+    "en-US": "Guild Hunt event has started. <u><link=1>Join</link><u>",
+    "ja-JP": "ギルドハントイベントが始まりました。ギルドに入りますか？<u><link=1>クリックして入る</link><u>",
+    "ko-KR": "길드 사냥 이벤트가 오픈되었습니다. 길드에 입장하시겠습니까? <u><link=1>바로가기</link><u>"
+  },
+  "5010003": {
+    "zh-CN": "在大家的积极参与下，狩猎进度已经达到{*val*}%，大家可以打开活动界面领取开拓局提供的额外奖励",
+    "en-US": "With everyone's active participation, the hunting progress has reached {*val*}%, you can open the event interface to receive additional rewards provided by the Pioneer Bureau.",
+    "ja-JP": "皆さんの積極的な参加のおかげで、ハントの進度は{*val*}%に達しました。イベント画面を開いて開拓局から提供される追加報酬を受け取れます",
+    "ko-KR": "여러분의 적극적인 참여 덕분에 사냥 진행도가 {*val*}%에 도달했습니다. 이벤트 화면에서 개척국이 제공하는 추가 보상을 수령하세요!"
+  },
+  "5010004": {
+    "zh-CN": "狩猎目前进度已达到{*val*}%，尚未完成，大家还要继续努力啊！",
+    "en-US": "The hunting progress has reached {*val*}%, not yet completed, everyone needs to keep working hard!",
+    "ja-JP": "ハントの現在の進度は{*val*}%ですが、まだ完了していません。皆さん、引き続き頑張ってください！",
+    "ko-KR": "현재 사냥 진행도 {*val*}%! 아직 목표에 도달하지 못했어요. 조금만 더 힘을 내주세요!"
+  },
+  "5010005": {
+    "zh-CN": "在大家的努力下，本次狩猎目标已完成，未进行狩猎的成员可继续进入传送门进行狩猎",
+    "en-US": "With everyone's efforts, this hunting target has been completed, members who have not hunted can continue to enter the Teleportal for hunting.",
+    "ja-JP": "皆さんの努力により、今回のハント目標は達成されました。まだハントに参加していないメンバーは引き続き転送ゲートからハントに参加できます",
+    "ko-KR": "여러분의 노력 덕분에 사냥 목표를 달성했습니다! 아직 사냥에 참여하지 않은 길드원은 순간 이동문을 통해 계속 진행할 수 있습니다."
+  },
+  "5010006": {
+    "zh-CN": "协会功能开启，快来看看协会有什么内容吧!",
+    "en-US": "Guild unlocked, come and see what the Guild has to offer!",
+    "ja-JP": "ギルド機能が開放されました。どんなコンテンツがあるか見てみましょう！",
+    "ko-KR": "길드 기능이 오픈되었습니다. 어서 길드 콘텐츠를 확인해 보세요!"
+  },
+  "5010007": {
+    "zh-CN": "协会功能还未开启，点击查看开启预告",
+    "en-US": "Guild is locked, let's see the preview.",
+    "ja-JP": "ギルド機能が開放されていません。クリックして開放予告をご確認ください",
+    "ko-KR": "길드 기능이 아직 열리지 않았습니다. 눌러서 오픈 예고를 확인하세요."
+  },
+  "6000001": {
+    "zh-CN": "来我家玩吧！",
+    "en-US": "Come over to my place and hang out!",
+    "ja-JP": "うちへ遊びにおいでよ！",
+    "ko-KR": "우리 집에 놀러 와!"
+  },
+  "6000002": {
+    "zh-CN": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*home.playerName*}的家园蓝图</link></style></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[<u><style=chat_fishing_share_profile><link=1>{*home.playerName*}'s Homestead Blueprint</link></style></u>]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*home.playerName*}のホーム設計図</link></style></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*home.playerName*}의 가든 블루프린트</link></style></u> ]{*string[2]*}"
+  },
+  "8009001": {
+    "zh-CN": "讨伐领主活动即将在{*val*}分后开启，请大家安排好时间",
+    "en-US": "The World Boss Crusade will start in {*val*} minutes, please arrange your time accordingly.",
+    "ja-JP": "ワールドレイドイベントが{*val*}分後に始まります。皆さん、時間を空けておいてください",
+    "ko-KR": "월드 보스 토벌 이벤트가 {*val*}분에 개방됩니다. 미리 준비해 주세요!"
+  },
+  "8009002": {
+    "zh-CN": "讨伐领主活动已经开启，<u><link=1>点击参与</link><u>",
+    "en-US": "The World Boss Crusade has started. <u><link=1>Join</link><u>",
+    "ja-JP": "ワールドレイドが始まりました。<u><link=1>クリックして参加</link><u>",
+    "ko-KR": "월드 보스 토벌 이벤트가 오픈되었습니다. <u><link=1>바로가기</link><u>"
+  },
+  "8009003": {
+    "zh-CN": "{*string[1]*}[ <u><style=chat_fishing_share_tujian><link=1>{*fishing.playerName*}的{*fishing.fishName*}记录</link></style></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><style=chat_fishing_share_tujian><link=1>{*fishing.playerName*}'s record of {*fishing.fishName*}</link></style></u> ] {*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><style=chat_fishing_share_tujian><link=1>{*fishing.playerName*}の{*fishing.fishName*}記録</link></style></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_tujian><link=1>{*fishing.playerName*} 님의 {*fishing.fishName*} 기록 </link></style></u> ]{*string[2]*}"
+  },
+  "8009004": {
+    "zh-CN": "{*string[1]*}[ <u><style=chat_fishing_share_rank><link=1>{*fishing.playerName*}的{*fishing.fishName*}排名：{*fishing.rank*}</link></style></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><style=chat_fishing_share_rank><link=1>{*fishing.playerName*}'s ranking of {*fishing.fishName*}: {*fishing.rank*}</link></style></u> ]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><style=chat_fishing_share_rank><link=1>{*fishing.playerName*}の{*fishing.fishName*}ランキング：{*fishing.rank*}</link></style></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_rank><link=1>{*fishing.playerName*} 님의 {*fishing.fishName*} 랭킹: {*fishing.rank*}</link></style></u> ]{*string[2]*}"
+  },
+  "8009005": {
+    "zh-CN": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}的钓鱼档案</link></style></u> ]{*string[2]*}",
+    "en-US": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}'s fishing profile</link></style></u> ]{*string[2]*}",
+    "ja-JP": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*}の釣りファイル</link></style></u> ]{*string[2]*}",
+    "ko-KR": "{*string[1]*}[ <u><style=chat_fishing_share_profile><link=1>{*fishing.playerName*} 님의 낚시 프로필</link></style></u> ]{*string[2]*}"
+  },
+  "8009006": {
+    "zh-CN": "讨伐领主活动已经开启，可通过推荐玩法参与。",
+    "en-US": "The World Boss Crusade has started, you can participate through the Features.",
+    "ja-JP": "ワールドレイドが始まりました。「おすすめ」から参加できます。",
+    "ko-KR": "월드 보스 토벌 이벤트가 오픈되었습니다. 추천 콘텐츠를 통해 참여할 수 있습니다."
+  },
+  "8009007": {
+    "zh-CN": "等待时间过长，已自动取消匹配",
+    "en-US": "Matchmaking canceled due to inactivity",
+    "ja-JP": "待機時間が長すぎたため、マッチングがキャンセルされました。",
+    "ko-KR": "대기 시간이 너무 길어, 자동으로 매칭이 취소되었습니다."
+  },
+  "10000001": {
+    "zh-CN": "",
+    "en-US": "",
+    "ja-JP": "",
+    "ko-KR": ""
+  }
+}

@@ -14,6 +14,9 @@
 
 未翻訳の行は埋め草(`_common.PLACEHOLDERS`)が入っているので空にする。
 ただし埋め草と同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`。`Name` だけ)。
+
+`SkillNames` で前の出力にあって今回空になった名前は `Data/Overrides/SkillNameOverrides.json` へ書き足す
+(`_common.carry_dropped_names`)。`SkillTalkNames` には上書きファイルが無いので書き足さない。
 """
 from _common import LANGS, name_of, table, write_localized
 
@@ -40,7 +43,7 @@ def main():
     print("")
 
     values = {lang: {i: skill_name(i, t.get(i)) for i in keys} for lang, t in tables.items()}
-    write_localized("SkillNames", values, keys)
+    write_localized("SkillNames", values, keys, dropped_names_overrides="SkillNameOverrides")
 
     talks = {lang: {i: name_of(t.get(i), "SkillTalk") for i in keys} for lang, t in tables.items()}
     write_localized("SkillTalkNames", talks, keys)

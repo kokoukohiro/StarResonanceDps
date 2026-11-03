@@ -1,5 +1,4 @@
 ﻿using StarResonanceDps.Core.CombatRuntime.Protocols;
-using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
 using System;
 using System.Collections.Generic;
@@ -434,13 +433,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             var socialData = member.SocialData;
             SocialDataStore.Apply(member.CharId, socialData.AvatarInfo);
-
-            var receivedEquipment = socialData.EquipData != null
-                && socialData.EquipData.EquipInfos.Count > 0
-                    ? PlayerEquipmentData.Create(
-                        socialData.EquipData.EquipInfos.Select(
-                            item => new PlayerEquipmentItem(item.Slot, item.EquipID)))
-                    : null;
+            var values = SocialDataValues.Read(socialData);
 
             // いる場所は NotifySocialData だけ古い値を送り続ける(移動しても変わらない)ので、そこからは入れない。
             var sceneInfo = isTrustedSource ? socialData.UserSceneInfo : null;
@@ -450,28 +443,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 member.CharId,
                 current => current with
                 {
-                    Name = !string.IsNullOrEmpty(socialData.BasicData?.Name)
-                        ? socialData.BasicData.Name
-                        : current.Name,
-                    Level = socialData.BasicData?.Level > 0
-                        ? socialData.BasicData.Level
-                        : current.Level,
-                    SeasonLevel = socialData.BasicData?.SeasonLevel > 0
-                        ? socialData.BasicData.SeasonLevel
-                        : current.SeasonLevel,
-                    CombatPower = socialData.UserAttrData?.FightPoint > 0
-                        ? ToInt32Saturating(socialData.UserAttrData.FightPoint)
-                        : current.CombatPower,
-                    SeasonStrength = socialData.UserAttrData?.SeasonStrength > 0
-                        ? socialData.UserAttrData.SeasonStrength
-                        : current.SeasonStrength,
-                    ProfessionId = socialData.ProfessionData?.ProfessionId > 0
-                        ? socialData.ProfessionData.ProfessionId
-                        : current.ProfessionId,
-                    EquipmentData = receivedEquipment ?? current.EquipmentData,
-                    IsNpc = socialData.BasicData != null
-                        ? socialData.BasicData.BotAiId > 0
-                        : current.IsNpc,
+                    Name = values.Name.Length > 0 ? values.Name : current.Name,
+                    Level = values.Level > 0 ? values.Level : current.Level,
+                    SeasonLevel = values.SeasonLevel > 0 ? values.SeasonLevel : current.SeasonLevel,
+                    CombatPower = values.CombatPower > 0 ? values.CombatPower : current.CombatPower,
+                    SeasonStrength = values.SeasonStrength > 0 ? values.SeasonStrength : current.SeasonStrength,
+                    ProfessionId = values.ProfessionId > 0 ? values.ProfessionId : current.ProfessionId,
+                    EquipmentData = values.EquipmentData ?? current.EquipmentData,
+                    IsNpc = values.IsNpc ?? current.IsNpc,
                     HasTrustedSocialData = current.HasTrustedSocialData || isTrustedSource,
                     SceneId = sceneInfo?.SceneId ?? current.SceneId,
                     LineId = sceneInfo?.LineId ?? current.LineId,
@@ -493,6 +472,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             // サーバは死亡中も死ぬ前の HP を送ってくる。
             var isDead = fastSyncData.State == (int)EActorState.ActorStateDead;
 
+            // HP も最大HPも 0 の同期は位置などだけの同期で、状態も入っていない(0)。戦闘不能の印は HP を運ぶ同期でだけ下ろす。
+            var carriesHp = fastSyncData.Hp > 0 || fastSyncData.MaxHp > 0;
+
             PartyState.UpdateSupplement(
                 AppState.PartyTeamId,
                 charId,
@@ -500,10 +482,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     CurrentHp = isDead
                         ? 0
-                        : fastSyncData.Hp > 0 || fastSyncData.MaxHp > 0
+                        : carriesHp
                             ? Math.Max(fastSyncData.Hp, 0)
                             : current.CurrentHp,
-                    MaxHp = fastSyncData.MaxHp > 0 ? fastSyncData.MaxHp : current.MaxHp
+                    MaxHp = fastSyncData.MaxHp > 0 ? fastSyncData.MaxHp : current.MaxHp,
+                    IsDead = isDead || (!carriesHp && current.IsDead)
                 });
         }
 
@@ -546,11 +529,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 EncounterManager.Current.SetAttrKV(AppState.PlayerUUID, "AttrTeamId", teamId);
             }
-        }
-
-        private static int ToInt32Saturating(long value)
-        {
-            return value > int.MaxValue ? int.MaxValue : (int)value;
         }
     }
 }

@@ -293,7 +293,7 @@
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
     <value>薬剤・料理効果切れ</value>
   </data>
-  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+  <data name="Settings_TimelineNotification_TelegraphedSkill" xml:space="preserve">
     <value>予兆技</value>
   </data>
   <data name="Notification_EntryConfirmation" xml:space="preserve">
@@ -314,7 +314,7 @@
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}の{BuffName}効果が切れそうです</value>
   </data>
-  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+  <data name="TimelineNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}が来ます</value>
   </data>
   <data name="EntryConfirmationNotification_Default" xml:space="preserve">
@@ -371,7 +371,18 @@
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}が詠唱中です</value>
   </data>
-  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+  <data name="Notification_PrivateChat" xml:space="preserve">
+    <value>プライベートトーク</value>
+  </data>
+  <data name="PrivateChatNotification_Default" xml:space="preserve">
+    <value>{PlayerName}からプライベートトークが届きました</value>
+  </data>
+  <data name="Notification_WorldChat" xml:space="preserve">
+    <value>ワールドチャット</value>
+  </data>
+  <data name="WorldChatNotification_Default" xml:space="preserve">
+    <value>{PlayerName}から募集がありました</value>
+  </data>  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>発動時</value>
   </data>
   <data name="TelegraphedSkillCondition_1" xml:space="preserve">
@@ -608,70 +619,67 @@
   <data name="Widget_State_Stopped" xml:space="preserve">
     <value>停止中</value>
   </data>
-  <data name="Menu_DpsMeter" xml:space="preserve">
+  <data name="Widget_DpsMeter" xml:space="preserve">
     <value>DPSメーター</value>
   </data>
-  <data name="Menu_HpsMeter" xml:space="preserve">
+  <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPSメーター</value>
   </data>
-  <data name="Menu_DtpsMeter" xml:space="preserve">
-    <value>DTPSメーター</value>
-  </data>
-  <data name="Widget_TakenDamageLog" xml:space="preserve">
+  <data name="Widget_Timeline" xml:space="preserve">
     <value>タイムライン</value>
   </data>
-  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+  <data name="Timeline_CastFormat" xml:space="preserve">
     <value>{0}が{1}を唱えている</value>
   </data>
-  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+  <data name="Timeline_AnnounceFormat" xml:space="preserve">
     <value>{0}が{1}を構えている</value>
   </data>
-  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+  <data name="Timeline_SkillFormat" xml:space="preserve">
     <value>{0}の{1}</value>
   </data>
-  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+  <data name="CombatEventLog_UnnamedSkill" xml:space="preserve">
     <value>攻撃</value>
   </data>
-  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+  <data name="Timeline_UnnamedHeal" xml:space="preserve">
     <value>回復</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  <data name="TextCopyFailed_Title" xml:space="preserve">
     <value>テキストコピーエラー</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+  <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>テキストをコピーできませんでした。</value>
   </data>
-  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+  <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0}のHPを{1}</value>
   </data>
-  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+  <data name="Timeline_HealAmountFormat" xml:space="preserve">
     <value>{0}回復</value>
   </data>
-  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+  <data name="Timeline_DamageFormat" xml:space="preserve">
     <value>{0}に{1}</value>
   </data>
-  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+  <data name="Timeline_DamageAmountFormat" xml:space="preserve">
     <value>{0}ダメージ</value>
   </data>
-  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+  <data name="Timeline_BuffFormat" xml:space="preserve">
     <value>{0}に{1}</value>
   </data>
-  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+  <data name="Timeline_BuffDurationFormat" xml:space="preserve">
     <value>{0}({1}秒)</value>
   </data>
-  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+  <data name="Timeline_UnnamedEffect" xml:space="preserve">
     <value>何かの効果</value>
   </data>
-  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+  <data name="CombatEventLog_SystemActor" xml:space="preserve">
     <value>システム</value>
   </data>
-  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+  <data name="Timeline_UnnamedCastSkill" xml:space="preserve">
     <value>何か</value>
   </data>
-  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+  <data name="DamageTakenLog_FallSkill" xml:space="preserve">
     <value>落下</value>
   </data>
-  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+  <data name="Settings_Section_TimelineTextColors_Title" xml:space="preserve">
     <value>テキストカラー</value>
   </data>
   <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
@@ -734,19 +742,19 @@
   <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
     <value>他者付与のみ</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_EntityName" xml:space="preserve">
     <value>エンティティ名</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_SkillName" xml:space="preserve">
     <value>スキル名</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_PlayerName" xml:space="preserve">
     <value>プレイヤー名</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_Effect" xml:space="preserve">
     <value>効果</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_HpValue" xml:space="preserve">
     <value>HP数値</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
@@ -887,6 +895,9 @@
   <data name="Widget_PlayerTalent" xml:space="preserve">
     <value>アビリティ情報</value>
   </data>
+  <data name="PlayerTalent_ActivationUnknown" xml:space="preserve">
+    <value>解放状況不明</value>
+  </data>
   <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
     <value>潜在心相晶情報</value>
   </data>
@@ -932,13 +943,13 @@
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS推移グラフ</value>
   </data>
-  <data name="Widget_HealingContribution" xml:space="preserve">
+  <data name="Widget_HealingSummary" xml:space="preserve">
     <value>ヒール詳細</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>DPS推移グラフ</value>
   </data>
-  <data name="Widget_DamageContribution" xml:space="preserve">
+  <data name="Widget_DamageSummary" xml:space="preserve">
     <value>与ダメ詳細</value>
   </data>
   <data name="Widget_BuffList" xml:space="preserve">
@@ -1046,7 +1057,7 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>無分類</value>
   </data>
-  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+  <data name="MetricGraph_UnknownSkill" xml:space="preserve">
     <value>不明</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
@@ -1117,25 +1128,25 @@
   <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
     <value>カスタム実行ファイル名</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval" xml:space="preserve">
     <value>描画間隔</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds" xml:space="preserve">
     <value>横軸の長さ</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+  <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>スキルログを表示</value>
   </data>
-  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+  <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>スキル詳細(与ダメ)</value>
   </data>
-  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+  <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>スキル詳細(ヒール)</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
@@ -1231,6 +1242,9 @@
   <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
     <value>データを読み込めません</value>
   </data>
+  <data name="WidgetDataStatus_PastChatRelogin" xml:space="preserve">
+    <value>ログインし直すまで、過去のチャットを受け取れません</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>バリア量加算表示</value>
   </data>
@@ -1291,10 +1305,10 @@
   <data name="ListSort_Name" xml:space="preserve">
     <value>名前順</value>
   </data>
-  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+  <data name="DamageTakenLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>自傷・フレンドリーファイア以外</value>
   </data>
-  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+  <data name="Settings_Timeline_EnemyHeal" xml:space="preserve">
     <value>敵の回復</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
@@ -1354,25 +1368,73 @@
   <data name="Widget_EntityInfo" xml:space="preserve">
     <value>エンティティ情報</value>
   </data>
-  <data name="Widget_DamageTakenList" xml:space="preserve">
+  <data name="Widget_Chat" xml:space="preserve">
+    <value>チャット</value>
+  </data>
+  <data name="Chat_Channel_World" xml:space="preserve">
+    <value>ワールド</value>
+  </data>
+  <data name="Chat_Channel_Guild" xml:space="preserve">
+    <value>ギルド</value>
+  </data>
+  <data name="Chat_Channel_Party" xml:space="preserve">
+    <value>パーティ</value>
+  </data>
+  <data name="Chat_Channel_Local" xml:space="preserve">
+    <value>Ch</value>
+  </data>
+  <data name="Chat_Channel_Newbie" xml:space="preserve">
+    <value>初心者</value>
+  </data>
+  <data name="Chat_PrivateFormat" xml:space="preserve">
+    <value>プライベートトーク({0})</value>
+  </data>
+  <data name="Chat_Sticker" xml:space="preserve">
+    <value>[スタンプ]</value>
+  </data>
+  <data name="Chat_Hyperlink" xml:space="preserve">
+    <value>[リンク]</value>
+  </data>
+  <data name="Chat_Image" xml:space="preserve">
+    <value>[画像]</value>
+  </data>
+  <data name="Chat_Voice" xml:space="preserve">
+    <value>[ボイス]</value>
+  </data>
+  <data name="Chat_VoiceTextFormat" xml:space="preserve">
+    <value>[ボイス] {0}</value>
+  </data>
+  <data name="Settings_Section_ChatTextColors_Title" xml:space="preserve">
+    <value>テキストカラー</value>
+  </data>
+  <data name="Settings_ChatTextColor_PlayerName" xml:space="preserve">
+    <value>プレイヤー名</value>
+  </data>
+  <data name="Settings_ChatTextColor_Time" xml:space="preserve">
+    <value>時刻</value>
+  </data>
+  <data name="Settings_ChatTextColor_Message" xml:space="preserve">
+    <value>メッセージ</value>
+  </data>
+  <data name="Widget_DamageTakenLog" xml:space="preserve">
     <value>被ダメログ</value>
   </data>
   <data name="Widget_DamageTakenSummary" xml:space="preserve">
     <value>被ダメ詳細</value>
   </data>
-  <data name="DamageTakenList_Defeated" xml:space="preserve">
+  <data name="DamageTakenLog_Defeated" xml:space="preserve">
     <value>(戦闘不能)</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsDefeatCause" xml:space="preserve">
     <value>戦闘不能の原因を表示</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsLatestHitOnly" xml:space="preserve">
     <value>最新の被ダメのみ表示</value>
   </data>
-  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+  <data name="DamageTakenLog_ShowAllHits" xml:space="preserve">
     <value>全件表示</value>
   </data>
-  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+  <data name="DamageTakenLog_ShowLatestHitOnly" xml:space="preserve">
     <value>最新のみ</value>
   </data>
   <data name="ReviveList_Revivable" xml:space="preserve">
@@ -1587,6 +1649,15 @@
   </data>
   <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
     <value>例: 304221</value>
+  </data>
+  <data name="Notification_MatchWords" xml:space="preserve">
+    <value>一致ワード</value>
+  </data>
+  <data name="Notification_MatchWords_Placeholder" xml:space="preserve">
+    <value>例: 募集</value>
+  </data>
+  <data name="Notification_MatchWordsAllNote" xml:space="preserve">
+    <value>※スペースで区切って複数入力すると、すべてを含む発言だけ通知します</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※IDを入力すると、名前より優先されます</value>

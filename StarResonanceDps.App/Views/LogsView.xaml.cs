@@ -1,17 +1,32 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using StarResonanceDps.App.Behaviors;
+using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.Core.Logging;
 
 namespace StarResonanceDps.App.Views;
 
 /// <summary>
-/// ログタブ。見えている間だけ文字を読み直す。隠れている間に来た通知は印だけ付けて、次に見えたときに1回読む。
+/// ログタブ。見えている間だけ行を読み直す。隠れている間に来た通知は印だけ付けて、次に見えたときに1回読む。
+///
+/// <para>
+/// <b>末尾に居るときだけ追記に追従する</b>(タイムライン・チャットと同じ)。途中を読んでいる間に行が増えても位置は動かさない。
+/// 追従するかは、利用者のスクロール(内容の高さが変わっていない回)で決める。
+/// </para>
+///
+/// <para>
+/// 文字は行をまたいで選べ、選んだ文字は右クリックの「コピー」(窓がアクティブなら Ctrl+C も)でクリップボードへ入れる。
+/// 選ぶ・コピーするのは <see cref="TextRowsSelectionBehavior"/>、文字にするのは <see cref="LogsViewModel.CreateCopyText"/>。
+/// </para>
 /// </summary>
 public partial class LogsView : UserControl
 {
     private readonly PacketDiagnosticLogStore _diagnosticLog = PacketDiagnosticLogStore.Instance;
+    private readonly LogsViewModel _viewModel = new();
+    private readonly ScrollViewer _scrollViewer;
     private bool _isSubscribed;
+    private bool _followsTail = true;
 
     /// <summary>画面のスレッドへの読み直しを予約済みか(0 / 1)。通知が続けて来ても予約は1回にまとめる。</summary>
     private int _isRefreshQueued;
@@ -19,11 +34,18 @@ public partial class LogsView : UserControl
     /// <summary>まだ読んでいない通知がある。画面のスレッドだけが触る。</summary>
     private bool _needsRefresh = true;
 
-    internal ScrollViewer ContentScrollViewer => PacketDiagnosticsScrollViewer;
+    /// <summary>メイン画面の外のバーが追いかけるスクロール。メイン画面が作られるときに要るので、テンプレートはここで当てる。</summary>
+    internal ScrollViewer ContentScrollViewer => _scrollViewer;
 
     public LogsView()
     {
         InitializeComponent();
+        DataContext = _viewModel;
+
+        LogItemsControl.ApplyTemplate();
+        _scrollViewer = (ScrollViewer)LogItemsControl.Template.FindName("LogScrollViewer", LogItemsControl);
+        _scrollViewer.ScrollChanged += LogScrollViewer_ScrollChanged;
+
         Loaded += LogsView_Loaded;
         Unloaded += LogsView_Unloaded;
         IsVisibleChanged += LogsView_IsVisibleChanged;
@@ -88,19 +110,18 @@ public partial class LogsView : UserControl
         }
 
         _needsRefresh = false;
-        RefreshLogText();
+        _viewModel.Refresh(_diagnosticLog.Snapshot);
     }
 
-    private void RefreshLogText()
+    private void LogScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        var wasAtBottom = PacketDiagnosticsScrollViewer.VerticalOffset >= PacketDiagnosticsScrollViewer.ScrollableHeight - 1;
-        PacketDiagnosticsTextBox.Text = _diagnosticLog.GetDisplayText();
-
-        if (wasAtBottom)
+        if (e.ExtentHeightChange == 0)
         {
-            Dispatcher.BeginInvoke(
-                PacketDiagnosticsScrollViewer.ScrollToEnd,
-                DispatcherPriority.Background);
+            _followsTail = _scrollViewer.VerticalOffset >= _scrollViewer.ScrollableHeight - 1;
+        }
+        else if (_followsTail)
+        {
+            _scrollViewer.ScrollToEnd();
         }
     }
 }

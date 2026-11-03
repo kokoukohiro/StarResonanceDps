@@ -579,7 +579,7 @@ public sealed partial class PlayerListEntry : ObservableObject
             : value + nonNegativeAddition;
     }
 
-    /// <summary>プレイヤーリストのクラス色。被ダメログのクラスアイコンも同じ設定から引く。</summary>
+    /// <summary>プレイヤーリストのクラス色。</summary>
     internal static Color GetClassColor(MeterWidgetSettingsConfig classColors, string professionKey)
     {
         var palette = classColors.ClassColorPalettes.TryGetValue(professionKey, out var colors)

@@ -13,7 +13,9 @@ namespace StarResonanceDps.App.Models.Notifications;
 /// 薬剤・料理効果切れが {TargetName} と {BuffName}、
 /// 予兆技が {EntityName}(タイムラインの行と同じ名前)と {SkillName}、入場確認が {Content}(マッチング先のコンテンツ名か、パーティで入る場所の名前)、
 /// HP低下とプレイヤー出現が {PlayerName}(プレイヤーリストの行と同じ名前)、エンティティ出現が {EntityName}(内部IDの注記なしのエンティティ名)、
-/// 狙われるプレイヤーが {PlayerName} と {EntityName}、エンティティ詠唱が {EntityName}(詠唱した敵の名前)。
+/// 狙われるプレイヤーが {PlayerName} と {EntityName}、エンティティ詠唱が {EntityName}(詠唱した敵の名前)、
+/// プライベートトークが {PlayerName}(送った人の名前。チャットの窓のタイトルと同じ規則)、
+/// ワールドチャットが {PlayerName}(発言した人の名前。プライベートトークと同じ規則)。
 /// </para>
 /// </summary>
 public static partial class NotificationTextFormatter
@@ -30,8 +32,10 @@ public static partial class NotificationTextFormatter
             NotificationKind.Targeted => "TargetedNotification_Default",
             NotificationKind.BuffExpired => "BuffCardNotification_Expired_Default",
             NotificationKind.CuisinePotionLow => "BuffCardNotification_CuisinePotionLow_Default",
-            NotificationKind.TelegraphedSkill => "TakenDamageLogNotification_TelegraphedSkill_Default",
+            NotificationKind.TelegraphedSkill => "TimelineNotification_TelegraphedSkill_Default",
             NotificationKind.EntityCast => "EntityCastNotification_Default",
+            NotificationKind.PrivateChat => "PrivateChatNotification_Default",
+            NotificationKind.WorldChat => "WorldChatNotification_Default",
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "No default text for the notification.")
         };
     }
@@ -101,6 +105,18 @@ public static partial class NotificationTextFormatter
         return GetEntityNameFieldRegex().Replace(format, _ => entityName);
     }
 
+    /// <summary>プライベートトークの文。{PlayerName} は送った人。</summary>
+    public static string FormatPrivateChat(string format, string playerName)
+    {
+        return GetPlayerNameFieldRegex().Replace(format, _ => playerName);
+    }
+
+    /// <summary>ワールドチャットの文。{PlayerName} は発言した人。</summary>
+    public static string FormatWorldChat(string format, string playerName)
+    {
+        return GetPlayerNameFieldRegex().Replace(format, _ => playerName);
+    }
+
     /// <summary>通知タブの見本。値は実データではなく、書式の形を見せるためのもの。</summary>
     public static string FormatPreview(NotificationKind kind, string format)
     {
@@ -136,6 +152,8 @@ public static partial class NotificationTextFormatter
                 localization.GetString("Settings_EntityInfo_PreviewName"),
                 localization.GetString("Settings_SkillInfo_PreviewName")),
             NotificationKind.EntityCast => FormatEntityCast(format, localization.GetString("Settings_EntityInfo_PreviewName")),
+            NotificationKind.PrivateChat => FormatPrivateChat(format, localization.GetString("Settings_PlayerInfo_PreviewName")),
+            NotificationKind.WorldChat => FormatWorldChat(format, localization.GetString("Settings_PlayerInfo_PreviewName")),
             _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "No preview for the notification.")
         };
     }
@@ -162,5 +180,4 @@ public static partial class NotificationTextFormatter
     private static partial Regex GetEntityNameFieldRegex();
 
     [GeneratedRegex(@"\{(PlayerName|EntityName)\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetTargetedFieldRegex();
-}
+    private static partial Regex GetTargetedFieldRegex();}

@@ -80,7 +80,7 @@ public partial class MeterWidgetView : UserControl, IWidgetVerticalScrollContent
     {
         if (sender is Button { Tag: MeterWidgetViewModel viewModel, DataContext: MeterPlayerEntry entry })
         {
-            viewModel.RequestContributionCommand.Execute(entry);
+            viewModel.RequestSkillDetailCommand.Execute(entry);
         }
     }
 

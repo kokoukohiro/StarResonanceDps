@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using System.Windows.Threading;
 using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
@@ -278,9 +277,7 @@ public partial class SettingsWindow : Window
                 return true;
             }
 
-            element = element is Visual or System.Windows.Media.Media3D.Visual3D
-                ? VisualTreeHelper.GetParent(element)
-                : LogicalTreeHelper.GetParent(element);
+            element = ElementTree.GetParent(element);
         }
 
         return false;

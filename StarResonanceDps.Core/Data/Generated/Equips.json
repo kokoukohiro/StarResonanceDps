@@ -7422,6 +7422,195 @@
       "Recast": [],
       "Rare": []
     },
+    "2000644": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11030,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043110
+          ],
+          "Advanced": [
+            2,
+            2043110
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000645": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043120
+          ],
+          "Advanced": [
+            2,
+            2043120
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000646": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043130
+          ],
+          "Advanced": [
+            2,
+            2043130
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000647": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043140
+          ],
+          "Advanced": [
+            2,
+            2043140
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000648": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043160
+          ],
+          "Advanced": [
+            2,
+            2043160
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000649": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11030,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043150
+          ],
+          "Advanced": [
+            2,
+            2043150
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000650": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043170
+          ],
+          "Advanced": [
+            2,
+            2043170
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000651": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043180
+          ],
+          "Advanced": [
+            2,
+            2043180
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2000652": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 380,
+          "Basic": [
+            2,
+            1043190
+          ],
+          "Advanced": [
+            2,
+            2043190
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
     "2000701": {
       "Part": 200,
       "Quality": 1,
@@ -27532,6 +27721,195 @@
       "Rare": []
     },
     "2002018": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039180
+          ],
+          "Advanced": [
+            2,
+            2039180
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002020": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11030,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039110
+          ],
+          "Advanced": [
+            2,
+            2039110
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002021": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039120
+          ],
+          "Advanced": [
+            2,
+            2039120
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002022": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039190
+          ],
+          "Advanced": [
+            2,
+            2039190
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002023": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039130
+          ],
+          "Advanced": [
+            2,
+            2039130
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002024": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11020,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039140
+          ],
+          "Advanced": [
+            2,
+            2039140
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002025": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039160
+          ],
+          "Advanced": [
+            2,
+            2039160
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002026": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11030,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039150
+          ],
+          "Advanced": [
+            2,
+            2039150
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002027": {
+      "Part": 200,
+      "Quality": 5,
+      "PerfectUpperLimit": 100,
+      "MainStat": 11010,
+      "Stages": [
+        {
+          "Gs": 370,
+          "Basic": [
+            2,
+            1039170
+          ],
+          "Advanced": [
+            2,
+            2039170
+          ]
+        }
+      ],
+      "Recast": [],
+      "Rare": []
+    },
+    "2002028": {
       "Part": 200,
       "Quality": 5,
       "PerfectUpperLimit": 100,
@@ -327726,6 +328104,1644 @@
           ]
         }
       ],
+      "3043110": [
+        {
+          "Id": 2815,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2816,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2817,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2818,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2819,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2820,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2821,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2822,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2823,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2824,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043120": [
+        {
+          "Id": 2825,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2826,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2827,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2828,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2829,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2830,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2831,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2832,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2833,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2834,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043130": [
+        {
+          "Id": 2835,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2836,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2837,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2838,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2839,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2840,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2841,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2842,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2843,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2844,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043140": [
+        {
+          "Id": 2845,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2846,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2847,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2848,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2849,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2850,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2851,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2852,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2853,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2854,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043150": [
+        {
+          "Id": 2865,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2866,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2867,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2868,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2869,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2870,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2871,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2872,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2873,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2874,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043160": [
+        {
+          "Id": 2855,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2856,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2857,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2858,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2859,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2860,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2861,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2862,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2863,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2864,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043170": [
+        {
+          "Id": 2885,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2886,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2887,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2888,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2889,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2890,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2891,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2892,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2893,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2894,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043180": [
+        {
+          "Id": 2875,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2876,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2877,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2878,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2879,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2880,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2881,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2882,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2883,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2884,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "3043190": [
+        {
+          "Id": 2895,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2896,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2897,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2898,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2899,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2900,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11712,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2901,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11932,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2902,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2903,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11942,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 2904,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11952,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
       "5006110": [
         {
           "Id": 145,
@@ -341636,6 +343652,1644 @@
           ]
         }
       ],
+      "6043110": [
+        {
+          "Id": 3355,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11034,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3356,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3357,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3358,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13142,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3359,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3360,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11034,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3361,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3362,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3363,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13142,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3364,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043120": [
+        {
+          "Id": 3365,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3366,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3367,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3368,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13122,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3369,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3370,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3371,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3372,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3373,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13122,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3374,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11732,
+              "Min": 1000,
+              "Max": 1000,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043130": [
+        {
+          "Id": 3375,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3376,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3377,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3378,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13152,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3379,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3380,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3381,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3382,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3383,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13152,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3384,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12532,
+              "Min": 2000,
+              "Max": 2000,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043140": [
+        {
+          "Id": 3385,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3386,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3387,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3388,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13132,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3389,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2404170,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3390,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3391,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3392,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3393,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13132,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3394,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11792,
+              "Min": 1000,
+              "Max": 1000,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043150": [
+        {
+          "Id": 3405,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11034,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3406,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3407,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3408,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13172,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3409,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3410,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11034,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3411,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3412,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3413,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13172,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3414,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043160": [
+        {
+          "Id": 3395,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3396,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 1200,
+              "Max": 1200,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3397,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3398,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13162,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3399,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11812,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3400,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3401,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 1200,
+              "Max": 1200,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3402,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3403,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13162,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3404,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11782,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043170": [
+        {
+          "Id": 3425,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3426,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 1200,
+              "Max": 1200,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3427,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3428,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13172,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3429,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11354,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3430,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3431,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 1200,
+              "Max": 1200,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3432,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3433,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13172,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3434,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11324,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043180": [
+        {
+          "Id": 3415,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3416,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3417,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3418,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13112,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3419,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2408230,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3420,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11024,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3421,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11344,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3422,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400004,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3423,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13112,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3424,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12742,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "6043190": [
+        {
+          "Id": 3435,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3436,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3437,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3438,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13112,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3439,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12532,
+              "Min": 2000,
+              "Max": 2000,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3440,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11014,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3441,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 11334,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3442,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2400003,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3443,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 13112,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3444,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12512,
+              "Min": 1500,
+              "Max": 1500,
+              "Format": 1
+            }
+          ]
+        }
+      ],
       "7029110": [
         {
           "Id": 2203,
@@ -343599,6 +347253,996 @@
         },
         {
           "Id": 3498,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2409040,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043110": [
+        {
+          "Id": 3607,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3608,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2401250,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3609,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            101
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2401020,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3610,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3611,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2401030,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3612,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            102
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2401040,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043120": [
+        {
+          "Id": 3613,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3614,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2402010,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3615,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            104
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2402020,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3616,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3617,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2402280,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3618,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            105
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2402030,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043130": [
+        {
+          "Id": 3619,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3620,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2403250,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3621,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            107
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2403010,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3622,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3623,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2403260,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3624,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            108
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2403020,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043140": [
+        {
+          "Id": 3625,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3626,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2404010,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3627,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            110
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2404020,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3628,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3629,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2404280,
+              "Min": 1000,
+              "Max": 1000,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3630,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            111
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2404030,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043150": [
+        {
+          "Id": 3637,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3638,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2405010,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3639,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            116
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2405020,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3640,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3641,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2405030,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3642,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            117
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2405040,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043160": [
+        {
+          "Id": 3631,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3632,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12582,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3633,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            113
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2406250,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3634,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3635,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12582,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3636,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            114
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2406260,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043170": [
+        {
+          "Id": 3649,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3650,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12582,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3651,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            122
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2407260,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3652,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3653,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12582,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3654,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            123
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2407270,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043180": [
+        {
+          "Id": 3643,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3644,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2408010,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3645,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            119
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2408020,
+              "Min": 600,
+              "Max": 600,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3646,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12572,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3647,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2408240,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3648,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            120
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2408030,
+              "Min": 800,
+              "Max": 800,
+              "Format": 1
+            }
+          ]
+        }
+      ],
+      "7043190": [
+        {
+          "Id": 3655,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3656,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2409010,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3657,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            128
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2409020,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3658,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 1,
+              "Id": 12552,
+              "Min": 400,
+              "Max": 400,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3659,
+          "Parts": [
+            200
+          ],
+          "Specs": [
+            129
+          ],
+          "Effects": [
+            {
+              "Kind": 3,
+              "Id": 2409030,
+              "Min": 500,
+              "Max": 500,
+              "Format": 1
+            }
+          ]
+        },
+        {
+          "Id": 3660,
           "Parts": [
             200
           ],

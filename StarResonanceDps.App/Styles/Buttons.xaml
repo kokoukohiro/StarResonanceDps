@@ -509,12 +509,21 @@
         </Setter>
     </Style>
 
-    <!-- 文の中のリンク(通知タブの VOICEVOX の行)。開く処理は Click で受ける。 -->
-    <Style x:Key="Hyperlink.Inline" TargetType="{x:Type Hyperlink}">
+    <!--
+        全部のリンクの土台。WPF の既定のリンクの見た目(青、マウスを乗せると赤)を当てない。
+        色は書かない(まわりの文字の色を受け継ぐ)。色を決めるリンクは自分のスタイルに書く。
+    -->
+    <Style x:Key="Hyperlink.Base" TargetType="{x:Type Hyperlink}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+        <Setter Property="OverridesDefaultStyle" Value="True" />
         <Setter Property="TextDecorations" Value="Underline" />
         <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- 文の中のリンク(通知タブの VOICEVOX の行)。開く処理は Click で受ける。 -->
+    <Style x:Key="Hyperlink.Inline" TargetType="{x:Type Hyperlink}" BasedOn="{StaticResource Hyperlink.Base}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
     </Style>
 
 

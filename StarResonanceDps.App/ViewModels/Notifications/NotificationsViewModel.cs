@@ -70,7 +70,7 @@ public sealed partial class NotificationsViewModel : ObservableObject
                 ]),
             new NotificationItemViewModel(
                 NotificationKind.TelegraphedSkill,
-                "Settings_TakenDamageLogNotification_TelegraphedSkill",
+                "Settings_TimelineNotification_TelegraphedSkill",
                 [
                     ("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}"),
                     ("SkillName", "Metric_SkillName", "{SkillName}")
@@ -78,7 +78,15 @@ public sealed partial class NotificationsViewModel : ObservableObject
             new NotificationItemViewModel(
                 NotificationKind.EntityCast,
                 "Notification_EntityCast",
-                [("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}")])
+                [("EntityName", "Settings_EntityInfo_Field_Name", "{EntityName}")]),
+            new NotificationItemViewModel(
+                NotificationKind.PrivateChat,
+                "Notification_PrivateChat",
+                [("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}")]),
+            new NotificationItemViewModel(
+                NotificationKind.WorldChat,
+                "Notification_WorldChat",
+                [("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}")])
         ];
 
         var notifications = ConfigManager.Instance.GetNotificationsSnapshot();

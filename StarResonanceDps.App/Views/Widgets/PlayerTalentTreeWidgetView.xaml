@@ -1,0 +1,236 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PlayerTalentTreeWidgetView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:converters="clr-namespace:StarResonanceDps.App.Converters"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             Loaded="PlayerTalentTreeWidgetView_Loaded"
+             SizeChanged="PlayerTalentTreeWidgetView_SizeChanged"
+             DataContextChanged="PlayerTalentTreeWidgetView_DataContextChanged">
+    <UserControl.Resources>
+        <converters:ScaleConverter x:Key="TalentTree.ScaleConverter" />
+        <converters:GrayscaleImageConverter x:Key="TalentTree.GrayscaleConverter" />
+
+        <!-- 木の表の位置を画面の位置にする倍率。 -->
+        <sys:String x:Key="TalentTree.Scale">0.15</sys:String>
+    </UserControl.Resources>
+
+    <!-- 右と下の隙間は窓の縦・横のスクロールバーの列と行が受け持つ(バーがあれば16、無ければ5)。 -->
+    <ScrollViewer x:Name="TreeScrollViewer"
+                  Margin="5,5,0,0"
+                  HorizontalScrollBarVisibility="Hidden"
+                  VerticalScrollBarVisibility="Hidden"
+                  CanContentScroll="False"
+                  ScrollChanged="TreeScrollViewer_ScrollChanged">
+        <!--
+            大きさは節の位置の端まで。節も線も位置が節の中心。窓より狭いときは横の中央に置く。
+        -->
+        <Grid HorizontalAlignment="Center"
+              VerticalAlignment="Top"
+              Margin="15,25,15,25"
+              Width="{Binding TreeWidth, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}"
+              Height="{Binding TreeHeight, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}">
+            <!--
+                線と点。どちらも白で描いて層ごと半透明にする。層の中を描き終えてから半透明にするので、
+                重なった所が濃くならず、線と点が同じ色に見える。
+            -->
+            <Grid IsHitTestVisible="False"
+                  Opacity="0.278">
+                <ItemsControl ItemsSource="{Binding Lines}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Line X1="{Binding X1, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}"
+                                  Y1="{Binding Y1, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}"
+                                  X2="{Binding X2, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}"
+                                  Y2="{Binding Y2, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}"
+                                  Stroke="White"
+                                  StrokeThickness="2" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl ItemsSource="{Binding Nodes}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}" />
+                            <Setter Property="Canvas.Top" Value="{Binding Y, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}" />
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <!-- 点だけ。半分だけ左上へずらして、節の位置を点の中心にする。 -->
+                            <Canvas>
+                                <Ellipse Width="10"
+                                         Height="10"
+                                         Canvas.Left="-5"
+                                         Canvas.Top="-5"
+                                         Fill="White"
+                                         Visibility="{Binding IsDot, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </Canvas>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </Grid>
+
+            <ItemsControl ItemsSource="{Binding Nodes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Canvas />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="ContentPresenter">
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Setter Property="Canvas.Left" Value="{Binding X, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}" />
+                        <Setter Property="Canvas.Top" Value="{Binding Y, Converter={StaticResource TalentTree.ScaleConverter}, ConverterParameter={StaticResource TalentTree.Scale}}" />
+                    </Style>
+                </ItemsControl.ItemContainerStyle>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Canvas>
+                            <!--
+                                節の箱。半分だけ左上へずらして、節の位置を箱の中心にする。中身は箱の中央に置く。
+                                中身を箱(60)より大きくすると切れるので、そのときは箱の大きさとずらし(-30)も直す。
+                                TIPS は点でない節だけ(作りはエンティティリストの TIPS と同じ)。
+                            -->
+                            <Grid Width="60"
+                                  Height="60"
+                                  Canvas.Left="-30"
+                                  Canvas.Top="-30"
+                                  ToolTipService.IsEnabled="{Binding HasToolTip}"
+                                  Tag="{Binding DataContext.PlayerWidget, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
+                                <Grid.ToolTip>
+                                    <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
+                                             Style="{StaticResource ToolTip.WidgetWindowInfo}">
+                                        <TextBlock Style="{StaticResource Text.WidgetWindow}"
+                                                   FontSize="12"
+                                                   Text="{Binding ToolTipText}" />
+                                    </ToolTip>
+                                </Grid.ToolTip>
+
+                                <!--
+                                    背景。取っているアビリティは役割の色、分からないアビリティは役割の背景を灰色にしたもの(絵も灰色、どちらも不透明)、
+                                    特化型の根は職業に関係なく特化型のもの。大きさは根だけ切り替えで別にする。
+                                -->
+                                <Image HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="HighQuality">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                            <Setter Property="Width" Value="30" />
+                                            <Setter Property="Height" Value="30" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsTankTalent}" Value="True">
+                                                    <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Tank}" />
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsHealerTalent}" Value="True">
+                                                    <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Healer}" />
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsDpsTalent}" Value="True">
+                                                    <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Dps}" />
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsUnknown}" Value="True" />
+                                                        <Condition Binding="{Binding IsTankTalent}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Source" Value="{Binding Source={StaticResource Icon.TalentBackground.Tank}, Converter={StaticResource TalentTree.GrayscaleConverter}}" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsUnknown}" Value="True" />
+                                                        <Condition Binding="{Binding IsHealerTalent}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Source" Value="{Binding Source={StaticResource Icon.TalentBackground.Healer}, Converter={StaticResource TalentTree.GrayscaleConverter}}" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsUnknown}" Value="True" />
+                                                        <Condition Binding="{Binding IsDpsTalent}" Value="True" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Source" Value="{Binding Source={StaticResource Icon.TalentBackground.Dps}, Converter={StaticResource TalentTree.GrayscaleConverter}}" />
+                                                </MultiDataTrigger>
+                                                <DataTrigger Binding="{Binding IsSpecRoot}" Value="True">
+                                                    <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Spec}" />
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Setter Property="Width" Value="35" />
+                                                    <Setter Property="Height" Value="35" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+
+                                <Image HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="HighQuality">
+                                    <Image.Style>
+                                        <Style TargetType="Image">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Source" Value="{Binding IconPath, TargetNullValue={x:Null}}" />
+                                            <Setter Property="Width" Value="22" />
+                                            <Setter Property="Height" Value="22" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsUnknown}" Value="True">
+                                                    <Setter Property="Source" Value="{Binding IconPath, Converter={StaticResource TalentTree.GrayscaleConverter}}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsSpecRoot}" Value="True">
+                                                    <Setter Property="Width" Value="27" />
+                                                    <Setter Property="Height" Value="27" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Image.Style>
+                                </Image>
+
+                                <!-- 絵が分からない(ファイルが無い)ときははてな。作りは潜在心相晶情報の行と同じ。 -->
+                                <Rectangle HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Fill="White"
+                                           Effect="{StaticResource Effect.ProfessionIconShadow}"
+                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                           Visibility="{Binding ShowsUnknownIcon, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <Rectangle.OpacityMask>
+                                        <ImageBrush ImageSource="{StaticResource Icon.Profession.Unknown}" Stretch="Uniform" />
+                                    </Rectangle.OpacityMask>
+                                    <Rectangle.Style>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                            <Setter Property="Width" Value="22" />
+                                            <Setter Property="Height" Value="22" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSpecRoot}" Value="True">
+                                                    <Setter Property="Width" Value="22" />
+                                                    <Setter Property="Height" Value="22" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Rectangle.Style>
+                                </Rectangle>
+                            </Grid>
+                        </Canvas>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -26,6 +26,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         private const uint GetTeamInfoMethodId = 0x4C01F;
         private const uint GetSocialDataMethodId = 0x47065;
         private const uint UseSlotMethodId = 0x3D002;
+        private const uint ChitChatProxyServiceId = 1321197368;
+        private const uint SendChitChatMsgMethodId = 1;
+        private const uint GetChipChatRecordsMethodId = 2;
+        private const uint GetPrivateChatTargetsMethodId = 3;
+        private const uint SetPrivateChatHasReadMethodId = 6;
 
         public static NetCap? netCap = null;
         public static string NetCaptureDeviceName = "";
@@ -93,6 +98,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.RegisterNotifyHandler((ulong)EServiceId.SocialNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.SocialNtf.NotifySocialData, ProcessNotifySocialData);
 
+            netCap.RegisterNotifyHandler((ulong)EServiceId.ChitChatNtf, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.ChitChatNtf.NotifyNewestChitChatMsgs, ProcessNotifyNewestChitChatMsgs);
+
             // ログイン画面へ戻ると、サーバーから GrpcCharactor(通知の service も GrpcCharactor)の ExitGame が通知で届く。
             netCap.RegisterNotifyHandler((ulong)EServiceId.GrpcCharactor, (uint)StarResonanceDps.Core.CombatRuntime.Protocols.ServiceMethods.GrpcCharactorNtf.ExitGame, ProcessExitGame);
 
@@ -105,12 +112,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             netCap.NotifyGate = ShouldDispatchNotify;
             netCap.ProxyGate = ShouldDispatchProxy;
 
-            // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先に被ダメログへ残す。
+            // 予告のバーが終わった行を、そのあとに届いたパケットの中身より先にタイムラインへ残す。
             netCap.BeforeParsePacket = EncounterManager.RecordEndedAnnouncementBars;
 
             netCap.AfterParsePacket = ProcessAfterParsePacket;
 
             netCap.MidStreamConnectionOpened = GameReceptionStateStore.MarkMidStreamConnection;
+
+            netCap.GameConnectionIdentified = GameServerStore.SetFromExeName;
 
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
@@ -118,6 +127,17 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 自分が技を使うときの上りの要求とその応答。自分の推移グラフの技の記録はここから取る。
             netCap.RegisterProxyHandler(WorldProxyServiceId, UseSlotMethodId, ProcessUseSlotCall);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, UseSlotMethodId, ProcessUseSlotReturn);
+
+            // 過去のチャットの記録と、プライベートトークの相手の一覧の要求と応答。
+            netCap.RegisterProxyHandler(ChitChatProxyServiceId, GetChipChatRecordsMethodId, ProcessGetChipChatRecordsCall);
+            netCap.RegisterProxyReturnHandler(ChitChatProxyServiceId, GetChipChatRecordsMethodId, ProcessGetChipChatRecordsReturn);
+            netCap.RegisterProxyReturnHandler(ChitChatProxyServiceId, GetPrivateChatTargetsMethodId, ProcessGetPrivateChatTargetsReturn);
+
+            // プライベートトークの既読の要求(通知「プライベートトーク」が、画面を開いている相手の新着を出さないために使う)。
+            netCap.RegisterProxyHandler(ChitChatProxyServiceId, SetPrivateChatHasReadMethodId, ProcessSetPrivateChatHasReadCall);
+
+            // チャットの送信の要求(自分のキャラIDが分からないうちに、届いたプライベートトークが自分の発言かを見分けるために使う)。
+            netCap.RegisterProxyHandler(ChitChatProxyServiceId, SendChitChatMsgMethodId, ProcessSendChitChatMsgCall);
 
             netCap.Start();
             System.Diagnostics.Debug.WriteLine("MessageManager.InitializeCapturing : Capturing Started...");
@@ -215,8 +235,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerDeathStates = [];
             LastPassiveHealTicks = [];
 
-            // 応答待ちの技の要求。止めている間の応答は届かない。
+            // 応答待ちの技の要求とチャットの記録の要求。止めている間の応答は届かない。
             PendingUseSlotSkills = [];
+            PendingChatRecordRequests = [];
         }
 
         /// <summary>
@@ -570,42 +591,42 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var entity = EncounterManager.Current.GetOrCreateEntity(selfUuid);
+            var values = SocialDataValues.Read(socialData);
             var changed = false;
 
-            if (string.IsNullOrEmpty(entity.Name)
-                && !string.IsNullOrEmpty(socialData.BasicData?.Name))
+            if (string.IsNullOrEmpty(entity.Name) && values.Name.Length > 0)
             {
-                entity.SetName(socialData.BasicData.Name);
+                entity.SetName(values.Name);
                 changed = true;
             }
 
-            if (entity.ProfessionId == 0 && socialData.ProfessionData?.ProfessionId > 0 && !IsTransformed(entity.UUID))
+            if (entity.ProfessionId == 0 && values.ProfessionId > 0 && !IsTransformed(entity.UUID))
             {
-                entity.SetProfessionId(socialData.ProfessionData.ProfessionId);
+                entity.SetProfessionId(values.ProfessionId);
                 changed = true;
             }
 
-            if (entity.Level == 0 && socialData.BasicData?.Level > 0)
+            if (entity.Level == 0 && values.Level > 0)
             {
-                entity.SetLevel(socialData.BasicData.Level);
+                entity.SetLevel(values.Level);
                 changed = true;
             }
 
-            if (entity.SeasonLevel == 0 && socialData.BasicData?.SeasonLevel > 0)
+            if (entity.SeasonLevel == 0 && values.SeasonLevel > 0)
             {
-                entity.SetSeasonLevel(socialData.BasicData.SeasonLevel);
+                entity.SetSeasonLevel(values.SeasonLevel);
                 changed = true;
             }
 
-            if (entity.AbilityScore == 0 && socialData.UserAttrData?.FightPoint > 0)
+            if (entity.AbilityScore == 0 && values.CombatPower > 0)
             {
-                entity.SetAbilityScore(ToInt32Saturating(socialData.UserAttrData.FightPoint));
+                entity.SetAbilityScore(values.CombatPower);
                 changed = true;
             }
 
-            if (entity.SeasonStrength == 0 && socialData.UserAttrData?.SeasonStrength > 0)
+            if (entity.SeasonStrength == 0 && values.SeasonStrength > 0)
             {
-                entity.SetSeasonStrength(socialData.UserAttrData.SeasonStrength);
+                entity.SetSeasonStrength(values.SeasonStrength);
                 changed = true;
             }
 
@@ -613,11 +634,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 PlayerRosterProjection.UpsertSelf(selfUuid);
             }
-        }
-
-        private static int ToInt32Saturating(long value)
-        {
-            return value > int.MaxValue ? int.MaxValue : (int)value;
         }
 
         /// <summary>
@@ -682,7 +698,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// ログアウトで起動直後の状態へ戻し終えた。パケット処理のスレッドで上がる。
         /// App の実体の窓はこれを受けて、捕まえている個体を放し、起動時と同じく種類と種別IDで捕まえ直す。
-        /// プレイヤー情報の窓は、一覧から外れても残していた最後の値を捨てて、起動時の表示に戻す。
+        /// プレイヤー情報の窓は、出していた行を捨てて、起動時の表示に戻す(一覧から外れた人の最後の行も <see cref="PlayerDirectory.ResetToStartup"/> で捨てている)。
         /// </summary>
         public static event Action? ResetToStartupCompleted;
 
@@ -768,7 +784,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             // マップ移動では残していたもの(自分の陣営・シーズン・プレイヤーリストの行など)。
             SeasonStateStore.ResetToStartup();
 
+            // チャットはキャプチャの停止でも残すので、消すのはログアウトだけ。
+            ChatMessageStore.ResetToStartup();
+
             PlayerRosterProjection.ResetToStartup();
+            PlayerDirectory.ResetToStartup();
 
             NearbyEntityProjection.ResetToStartup();
 
@@ -777,6 +797,80 @@ namespace StarResonanceDps.Core.CombatRuntime
             EncounterHistoryProvider.ResetSelectionForLogout();
 
             ResetToStartupCompleted?.Invoke();
+        }
+
+        /// <summary>
+        /// ほかの人からプライベートトークが届いた(自分の発言では上げない)。値は相手のキャラID・メッセージの番号・発言者名。
+        /// パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<long, long, string>? PrivateChatMessageReceived;
+
+        /// <summary>
+        /// ゲームがプライベートトークを既読にした(上りの要求 <c>SetPrivateChatHasRead</c>)。値は相手のキャラIDと、どの番号まで読んだか。
+        /// ゲームはその相手とのプライベートトークを画面で開いている間、新着のたびにすぐ送る(開いていなければ送らない)。パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<long, long>? PrivateChatRead;
+
+        /// <summary>
+        /// ワールドチャットにほかの人の文の発言が届いた(スタンプ・画像などは上げない)。値は発言者のキャラID・発言者名・本文。
+        /// 自分の発言は、自分のキャラIDが分かっていれば上げない。パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<long, string, string>? WorldChatMessageReceived;
+
+        /// <summary>チャットの新しいメッセージ。自分の発言も同じ通知で届く。</summary>
+        public static void ProcessNotifyNewestChitChatMsgs(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
+        {
+            var notify = ChitChatNtf.Types.NotifyNewestChitChatMsgs.Parser.ParseFrom(payloadBuffer);
+            if (notify.VRequest?.ChatMsg is not { } message)
+            {
+                return;
+            }
+
+            ChatMessageStore.Add(notify.VRequest.ChannelType, message);
+            if (notify.VRequest.ChannelType == ChitChatChannelType.ChannelPrivate)
+            {
+                RaisePrivateChatMessageReceived(message);
+            }
+            else if (notify.VRequest.ChannelType == ChitChatChannelType.ChannelWorld)
+            {
+                RaiseWorldChatMessageReceived(message);
+            }
+        }
+
+        /// <summary>
+        /// ワールドチャットの新着が、ほかの人の文の発言なら <see cref="WorldChatMessageReceived"/> を上げる。
+        /// 自分のキャラIDが分からない途中起動のうちは、自分の発言も上がる。
+        /// </summary>
+        private static void RaiseWorldChatMessageReceived(ChitChatMsg message)
+        {
+            if (message.MsgInfo is not { MsgType: ChitChatMsgType.ChatMsgTextMessage } info)
+            {
+                return;
+            }
+
+            var senderId = message.SendCharInfo?.CharID ?? 0;
+            if (AppState.PlayerUID != 0 && senderId == AppState.PlayerUID)
+            {
+                return;
+            }
+
+            WorldChatMessageReceived?.Invoke(senderId, message.SendCharInfo?.Name ?? string.Empty, info.MsgText ?? string.Empty);
+        }
+
+        /// <summary>
+        /// プライベートトークの新着が、ほかの人の発言なら <see cref="PrivateChatMessageReceived"/> を上げる。
+        /// 自分の発言かは控えと同じ決め方(<see cref="ChatMessageStore.ResolvePrivateMessage"/>)で、自分のキャラIDが分からない途中起動のうちも決まる。
+        /// 相手が決まらない(0)メッセージは、控えがログに残す。
+        /// </summary>
+        private static void RaisePrivateChatMessageReceived(ChitChatMsg message)
+        {
+            var side = ChatMessageStore.ResolvePrivateMessage(message.SendCharInfo?.CharID ?? 0, message.MsgInfo?.TargetId ?? 0);
+            if (side.IsFromSelf || side.PartnerId == 0)
+            {
+                return;
+            }
+
+            PrivateChatMessageReceived?.Invoke(side.PartnerId, message.MsgId, message.SendCharInfo?.Name ?? string.Empty);
         }
 
         public static void ProcessNotifySocialData(ReadOnlySpan<byte> payloadBuffer, ExtraPacketData extraData)
@@ -1211,7 +1305,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>差分を当てる前のプレイヤーの状態・死亡時刻・HP・最大HP・バリア量。</summary>
         private readonly record struct PlayerVitals(EActorState? State, long DeadTime, long? Hp, long? MaxHp, long? Shield)
         {
-            /// <summary>被ダメログに渡す「同期を当てる前の HP」。</summary>
+            /// <summary>記録に渡す「同期を当てる前の HP」。</summary>
             public TargetHealth Health => new(Hp, MaxHp, Shield);
         }
 
@@ -1221,7 +1315,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             /// <summary>死亡の印つきの被弾を受けた。</summary>
             public bool HasLethalHit;
 
-            /// <summary>この死亡を扱い終えた(ダメージの無い死亡なら被ダメログに残した)。</summary>
+            /// <summary>この死亡を扱い終えた(ダメージの無い死亡なら記録に残した)。</summary>
             public bool IsDeathHandled;
         }
 
@@ -1277,7 +1371,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 状態の「死亡」は、死亡の印つきの被弾と同じ差分でいきなり復活(27)になる回に届かず、死亡時刻は遅れて届く。
         ///
         /// <para>
-        /// 死亡の印つきの被弾が無いまま死亡したら、ダメージの無い死亡として被ダメログに1回だけ残す。
+        /// 死亡の印つきの被弾が無いまま死亡したら、ダメージの無い死亡として記録に1回だけ残す。
         /// 印つきの被弾がある死亡は被弾の行で分かるので何も足さない。死亡数は死亡時刻が新しい値になったときに数える。
         /// 状態が「死亡」から外れるか復活になったら、次の死亡に備えて消す。
         /// </para>
@@ -1526,7 +1620,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// タイムラインに残す敵の回復か。回復した側がプレイヤー(とその召喚)でなく、実際に HP が増えた回復(回復された側は敵でもプレイヤーでもよい)。
         /// 自傷扱い(出し手の無いバフ)と発生源が 0 の回復は、ほかの通知と同じく扱わない。回復した側と相手の種類は記録の入口(<c>Encounter.AddEnemyHeal</c>)が見る。
-        /// <paramref name="healerUuid"/> は被弾の加害者と同じく寄せた回復した側(<c>Encounter.ResolveTakenDamageLogActor</c>)。
+        /// <paramref name="healerUuid"/> は被弾の加害者と同じく寄せた回復した側(<c>Encounter.ResolveCombatEventLogActor</c>)。
         /// </summary>
         private static bool TryResolveEnemyHealer(SyncDamageInfo damageInfo, out long healerUuid)
         {
@@ -1545,7 +1639,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return false;
             }
 
-            healerUuid = EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
+            healerUuid = EncounterManager.Current.ResolveCombatEventLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
             return healerUuid != 0;
         }
 
@@ -1553,7 +1647,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 被ダメログとタイムラインに載せる、その通知の行動した側。回復はタイムラインに残す敵の回復なら回復した側(<see cref="TryResolveEnemyHealer"/>)、
         /// 被弾した本人が原因の被弾は本人、それ以外は加害者を寄せた先(見えて名前がある召喚体ならその召喚体、無ければ大元の召喚者)。決まらなければ 0。
         /// </summary>
-        private static long ResolveTakenDamageLogActor(SyncDamageInfo damageInfo, long targetUuid)
+        private static long ResolveCombatEventLogActor(SyncDamageInfo damageInfo, long targetUuid)
         {
             if (damageInfo.Type == EDamageType.Heal)
             {
@@ -1567,7 +1661,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             return damageInfo.OwnerId == 0
                 ? 0
-                : EncounterManager.Current.ResolveTakenDamageLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
+                : EncounterManager.Current.ResolveCombatEventLogActor(damageInfo.AttackerUuid, damageInfo.TopSummonerId);
         }
 
         /// <summary>
@@ -1595,7 +1689,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 同じ差分で、付けた敵が相手に当てた最初の被弾(回復でないもの)。被弾したときに付くバフ(敵のパッシブが付ける凍傷など)の引き金。
-        /// 行動した側の決め方は被ダメログと同じ(<see cref="ResolveTakenDamageLogActor(SyncDamageInfo, long)"/>)。無ければ null。
+        /// 行動した側の決め方はタイムライン・被ダメログと同じ(<see cref="ResolveCombatEventLogActor(SyncDamageInfo, long)"/>)。無ければ null。
         /// </summary>
         private static SyncDamageInfo? FindTriggeringHit(IEnumerable<SyncDamageInfo>? deltaDamages, long casterUuid, long targetUuid)
         {
@@ -1608,7 +1702,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 if (damageInfo.Type != EDamageType.Heal
                     && damageInfo.OwnerId != 0
-                    && ResolveTakenDamageLogActor(damageInfo, targetUuid) == casterUuid)
+                    && ResolveCombatEventLogActor(damageInfo, targetUuid) == casterUuid)
                 {
                     return damageInfo;
                 }
@@ -1675,7 +1769,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             var encounter = EncounterManager.Current;
             var topSummonerUuid = encounter.GetAttrKV(fireUuid, "AttrTopSummonerId") is long summonerUuid ? summonerUuid : 0;
-            return encounter.ResolveTakenDamageLogActor(fireUuid, topSummonerUuid);
+            return encounter.ResolveCombatEventLogActor(fireUuid, topSummonerUuid);
         }
 
         /// <summary>
@@ -1821,7 +1915,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 最初の出来事が戦闘の時計の起点になり、その後の出来事は自動一時停止の時計を続ける(<c>Encounter.RecordCombatEvent</c>)。
         /// 通知の無い薬・料理・自然回復は <see cref="AddBuffHealing"/> が出来事にする。
         /// タイムラインと被ダメログに載る記録(ここで出来事にしない自傷・落下・フレンドリーファイアの被弾、敵から敵へのダメージ、詠唱・予告・敵が付けたバフなど)は、
-        /// 記録の入口が出来事にする(<c>Encounter.RecordTakenDamageLogCombatEvent</c>)。
+        /// 記録の入口が出来事にする(<c>Encounter.RecordCombatEventForLog</c>)。
         /// プレイヤーかどうかは UUID の種類で見る(助っ人の NPC もプレイヤーに入る)。
         ///
         /// <list type="bullet">
@@ -1946,6 +2040,12 @@ namespace StarResonanceDps.Core.CombatRuntime
             PlayerRosterProjection.UpsertSelf(uuid);
         }
 
+        /// <summary>取ったタレントの木の節の番号(<c>ProfessionTalentInfo.TalentNodeIds</c>)を、昇順・重なりなしにする。</summary>
+        private static int[] ToTalentNodeIds(IEnumerable<uint> nodeIds)
+        {
+            return [.. nodeIds.Select(nodeId => (int)nodeId).Distinct().Order()];
+        }
+
         /// <summary>
         /// パーティ情報の応答(パーティ画面を開くと届く)。応答は <c>GetTeamInfo_Ret { ret }</c> で1段包まれている。
         /// 読めなければ例外のまま NetCap の守りに任せる(ログに出す)。
@@ -2023,7 +2123,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             var selfUuid = AppState.PlayerUUID;
             if (selfUuid == 0)
             {
-                Log.Warning("UseSlot succeeded for skill {SkillId} before the player's own entity was known; not recording it in the skill timeline", skillId);
+                Log.Warning("UseSlot succeeded for skill {SkillId} before the player's own entity was known; not recording it in the graph skill log", skillId);
                 return;
             }
 
@@ -2031,8 +2131,140 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 名刺照会の応答。顔写真と名刺を控える(プレイヤー情報が出す)。
+        /// 過去のチャットの記録の要求 <c>GetChipChatRecords</c> の相手(チャンネルとプライベートトークの相手)と、最新の分から読み直す要求(起点 0)か。
+        /// 応答の番号(returnUid)ごとに、応答が来るまで控える。
+        /// 消すときは <see cref="PendingUseSlotSkills"/> と同じく新しい辞書に差し替える(<see cref="ClearReceivedStateStores"/>)。
+        /// </summary>
+        private static Dictionary<uint, (ChatTarget Target, bool IsLatestLoad)> PendingChatRecordRequests = [];
+
+        /// <summary>
+        /// 過去のチャットの記録の要求。起点(<c>descMsgId</c>)が 0 の要求は、ゲームが一覧を空にしてから最新の記録を読むとき
+        /// (ログインの後・ワールドと初心者のチャンネルの切り替え・プライベートトークを初めて開いたとき)なので、控えの一覧も空にする。
+        /// 起点のある要求は、ゲームの一覧の一番古いメッセージより前の分(画面を上へ引っ張ったとき)。
+        /// </summary>
+        private static void ProcessGetChipChatRecordsCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var request = ChitChat.Types.GetChipChatRecords.Parser.ParseFrom(payloadBuffer).VRequest;
+            if (request is null || !ChatMessageStore.IsKeptChannel(request.ChannelType))
+            {
+                return;
+            }
+
+            var target = new ChatTarget(
+                request.ChannelType,
+                request.ChannelType == ChitChatChannelType.ChannelPrivate ? request.TargetId : 0);
+            var isLatestLoad = request.DescMsgId == 0;
+            if (isLatestLoad)
+            {
+                ChatMessageStore.BeginRecordLoad(target);
+            }
+
+            PendingChatRecordRequests[returnUid] = (target, isLatestLoad);
+        }
+
+        /// <summary>
+        /// 過去のチャットの記録の応答。新しい順の一覧で届く。「記録なし」(<c>ErrChatRecordListIsEmpty</c>)は古い分が無いという意味で、失敗ではない。
+        /// 最新の分から読み直した要求の応答なら、成功でも記録なしでも、その窓の過去のチャットを受け取ったことにする。
+        /// </summary>
+        private static void ProcessGetChipChatRecordsReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            if (!PendingChatRecordRequests.Remove(returnUid, out var pending))
+            {
+                return;
+            }
+
+            var (target, isLatestLoad) = pending;
+
+            var reply = ChitChat.Types.GetChipChatRecords_Ret.Parser.ParseFrom(payloadBuffer).Ret;
+            if (reply is null)
+            {
+                Log.Warning("Chat records response has no reply body (returnUid={ReturnUid}, length={Length})", returnUid, payloadBuffer.Length);
+                return;
+            }
+
+            switch (reply.ErrCode)
+            {
+                case EErrorCode.ErrSuccess:
+                    ChatMessageStore.AddRecords(target, reply.MultiMsgList, isLatestLoad);
+                    break;
+                case EErrorCode.ErrChatRecordListIsEmpty:
+                    ChatMessageStore.AddRecords(target, [], isLatestLoad);
+                    break;
+                default:
+                    Log.Warning(
+                        "Chat records request failed with {ErrorCode} (channel={Channel}, partner={PartnerId})",
+                        reply.ErrCode,
+                        target.Channel,
+                        target.PartnerId);
+                    break;
+            }
+        }
+
+        /// <summary>プライベートトークの相手の一覧の応答。ゲームはログインの後の最初の入場と再接続で、過去のチャットより先に要求する。</summary>
+        private static void ProcessGetPrivateChatTargetsReturn(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var reply = ChitChat.Types.GetPrivateChatTargets_Ret.Parser.ParseFrom(payloadBuffer).Ret;
+            if (reply is null)
+            {
+                Log.Warning("Private chat targets response has no reply body (returnUid={ReturnUid}, length={Length})", returnUid, payloadBuffer.Length);
+                return;
+            }
+
+            if (reply.ErrCode != EErrorCode.ErrSuccess)
+            {
+                Log.Warning("Private chat targets request failed with {ErrorCode}", reply.ErrCode);
+                return;
+            }
+
+            ChatMessageStore.ReplacePrivatePartners(reply.TargetList);
+        }
+
+        /// <summary>
+        /// チャットの送信の要求(上り)。プライベートトークなら相手を控える(<see cref="ChatMessageStore.AddOwnPrivateSend"/>)。
+        /// 自分の発言の通知は必ずこの要求の後に届くので、自分のキャラIDが分からないうちも、届いた通知が自分の発言かを見分けられる。
+        /// </summary>
+        private static void ProcessSendChitChatMsgCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var request = ChitChat.Types.SendChitChatMsg.Parser.ParseFrom(payloadBuffer).VRequest;
+            if (request is null || request.ChannelType != ChitChatChannelType.ChannelPrivate)
+            {
+                return;
+            }
+
+            ChatMessageStore.AddOwnPrivateSend(request.MsgInfo?.TargetId ?? 0);
+        }
+
+        /// <summary>プライベートトークの既読の要求(上り)。<see cref="PrivateChatRead"/> を上げる。</summary>
+        private static void ProcessSetPrivateChatHasReadCall(
+            ReadOnlySpan<byte> payloadBuffer,
+            uint returnUid,
+            ExtraPacketData extraData)
+        {
+            var request = ChitChat.Types.SetPrivateChatHasRead.Parser.ParseFrom(payloadBuffer).VRequest;
+            if (request is null)
+            {
+                return;
+            }
+
+            PrivateChatRead?.Invoke(request.TargetId, request.MaxReadMsgId);
+        }
+
+        /// <summary>
+        /// 名刺照会の応答。入っている値を全部控える(<see cref="SocialDataStore.ApplySocialData"/>)。
         /// 照会はゲームが送ったものだけで、照会の種類によって入っている部分が違う。
+        /// 名簿に載っている人の値が変わったら、名簿の行を作り直す(空の項目を名刺の値で埋めるため)。
         /// </summary>
         private static void ProcessGetSocialDataReturn(
             ReadOnlySpan<byte> payloadBuffer,
@@ -2040,9 +2272,11 @@ namespace StarResonanceDps.Core.CombatRuntime
             ExtraPacketData extraData)
         {
             var data = ParseGetSocialDataReply(payloadBuffer)?.Data;
-            if (data is not null)
+            if (data is not null
+                && SocialDataStore.ApplySocialData(data)
+                && PlayerRosterStore.Instance.Snapshot.Any(entry => entry.CharacterId == data.CharId))
             {
-                SocialDataStore.Apply(data.CharId, data.AvatarInfo);
+                PlayerRosterProjection.RebuildRoster();
             }
         }
 
@@ -3108,10 +3342,10 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // 被ダメログとタイムラインの加害者を先に決める(タイムラインに載る敵の回復は回復した側)。
             var damages = skillEffect.Damages;
-            var takenDamageLogActors = new long[damages.Count];
+            var combatEventLogActors = new long[damages.Count];
             for (var index = 0; index < damages.Count; index++)
             {
-                takenDamageLogActors[index] = ResolveTakenDamageLogActor(damages[index], targetUuid);
+                combatEventLogActors[index] = ResolveCombatEventLogActor(damages[index], targetUuid);
             }
 
             HashSet<long> rosterPlayersToUpsert = [];
@@ -3249,9 +3483,9 @@ namespace StarResonanceDps.Core.CombatRuntime
                     {
                         EncounterManager.Current.AddHealing(attackerUuid, targetUuid, skillId, syncDamageInfo.OwnerLevel, syncDamageInfo.ActualValue, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
                     }
-                    else if (takenDamageLogActors[damageIndex] != 0)
+                    else if (combatEventLogActors[damageIndex] != 0)
                     {
-                        AddEnemyHealLog(syncDamageInfo, takenDamageLogActors[damageIndex], targetUuid, attackerUuid, extraData);
+                        AddEnemyHealLog(syncDamageInfo, combatEventLogActors[damageIndex], targetUuid, attackerUuid, extraData);
                     }
                 }
                 else
@@ -3270,12 +3504,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                         (buffSourceSkillId, summonSourceSkillId) = ResolveEnemyAttackSourceSkills(syncDamageInfo, extraData.ArrivalTime);
                     }
 
-                    EncounterManager.Current.AddTakenDamage(takenDamageLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
+                    EncounterManager.Current.AddTakenDamage(combatEventLogActors[damageIndex], targetUuid, skillId, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, syncDamageInfo.OwnerLevel, damage, hpLessen, shieldBreak, syncDamageInfo.Property, syncDamageInfo.Type, syncDamageInfo.DamageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraData);
 
                     // 敵から敵へのダメージはタイムラインに残す(敵からプレイヤーへは上の被ダメログ)。値 0 は HP もバリアも減っていない。
-                    if (!isAttackerPlayer && !isTargetPlayer && takenDamageLogActors[damageIndex] != 0 && damage != 0)
+                    if (!isAttackerPlayer && !isTargetPlayer && combatEventLogActors[damageIndex] != 0 && damage != 0)
                     {
-                        EncounterManager.Current.AddEnemyDamage(takenDamageLogActors[damageIndex], targetUuid, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, damage, extraData);
+                        EncounterManager.Current.AddEnemyDamage(combatEventLogActors[damageIndex], targetUuid, syncDamageInfo.OwnerId, syncDamageInfo.DamageSource, buffSourceSkillId, summonSourceSkillId, damage, extraData);
                     }
                 }
 
@@ -3549,6 +3783,13 @@ namespace StarResonanceDps.Core.CombatRuntime
                 UpdateProfessionId(playerUuid, professionList.CurProfessionId);
             }
 
+            if (professionList != null)
+            {
+                EncounterManager.Current.ReplaceTalentNodes(
+                    playerUuid,
+                    professionList.TalentList.ToDictionary(pair => pair.Key, pair => ToTalentNodeIds(pair.Value.TalentNodeIds)));
+            }
+
             PlayerSkillLevelStateStore.ReplaceSelfSkillLevels(
                 professionList,
                 vData.DutyList);
@@ -3678,6 +3919,30 @@ namespace StarResonanceDps.Core.CombatRuntime
 
                     PlayerSkillLevelStateStore.ApplySelfProfessionListChanges(
                         ser.ProfessionList);
+
+                    if (ser.ProfessionList.TalentInfoChanges is { } talentChanges)
+                    {
+                        // 差分は変わった職業の一覧を丸ごと運ぶ。新しい職業に一覧が無ければ空、既にある職業に無ければ変わっていない。
+                        var changedNodeIds = new Dictionary<int, int[]>();
+                        foreach (var (talentProfessionId, talentInfo) in talentChanges.Added)
+                        {
+                            changedNodeIds[talentProfessionId] = ToTalentNodeIds(talentInfo.TalentNodeIds ?? []);
+                        }
+
+                        foreach (var (talentProfessionId, talentInfo) in talentChanges.Updated)
+                        {
+                            if (talentInfo.TalentNodeIds is { } nodeIds)
+                            {
+                                changedNodeIds[talentProfessionId] = ToTalentNodeIds(nodeIds);
+                            }
+                        }
+
+                        EncounterManager.Current.ApplyTalentNodeChanges(
+                            currentUserUuid,
+                            talentChanges.ReplacesExisting,
+                            talentChanges.Removed,
+                            changedNodeIds);
+                    }
                 }
 
                 if (ser.DutyList is not null)

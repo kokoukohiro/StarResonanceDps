@@ -38,7 +38,7 @@ public sealed partial class MetricSkillTableEntry(long skillId) : ObservableObje
 
     /// <summary>
     /// 属性の内訳。アイコンを「/」で並べる。
-    /// 組み立ては <c>TextSegmentsBehavior</c> で、被ダメログの行と同じ仕組み。
+    /// 組み立ては <c>TextSegmentsBehavior</c> で、タイムラインの行と同じ仕組み。
     /// </summary>
     [ObservableProperty]
     private IReadOnlyList<object> _elementSegments = [];

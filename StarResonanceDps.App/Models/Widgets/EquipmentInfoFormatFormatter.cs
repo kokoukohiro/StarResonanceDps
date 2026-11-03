@@ -46,7 +46,7 @@ public static partial class EquipmentInfoFormatFormatter
     public static string Format(EquipmentDefinition equipment, string? formatString, int? breakThroughTime = null)
     {
         return Format(
-            CombatDataCatalog.GetEquipName(equipment.Id),
+            CombatDataCatalog.GetItemName(equipment.Id),
             FormatLevel(equipment, breakThroughTime),
             CreateMainStatText(equipment),
             formatString);

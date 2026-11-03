@@ -4,24 +4,23 @@ public enum WidgetKind
 {
     DpsMeter,
     HpsMeter,
-    DtpsMeter,
-    TakenDamageLog,
-    PlayerList,
-    PlayerInfo,
-    PlayerStatus,
-    PlayerEquipment,
-    BuffList,
-    DebuffList,
-    DamageContribution,
-    DpsGraph,
-    HealingContribution,
-    HpsGraph,
-    DamageSummary,
-    HealingSummary,
+    Timeline = 3,
+    PlayerList = 4,
+    PlayerInfo = 5,
+    PlayerStatus = 6,
+    PlayerEquipment = 7,
+    BuffList = 8,
+    DebuffList = 9,
+    DamageSkillDetail = 10,
+    DpsGraph = 11,
+    HealingSkillDetail = 12,
+    HpsGraph = 13,
+    DamageSummary = 14,
+    HealingSummary = 15,
     EntityList = 18,
     BuffDebuffCard = 19,
 
-    /// <summary>アビリティ情報。プレイヤーのタレント(根のバフ)の一覧。</summary>
+    /// <summary>アビリティ情報。プレイヤーのタレントの木(取っているアビリティは根のバフで決める)。</summary>
     PlayerTalent = 20,
 
     /// <summary>潜在心相晶情報。プレイヤーの心相晶のノード・上級と因子(根のバフ)の一覧。</summary>
@@ -36,12 +35,15 @@ public enum WidgetKind
     /// <summary>蘇生リスト。戦闘不能のプレイヤーと、蘇生不可デバフの残り時間の一覧。</summary>
     ReviveList = 24,
 
-    /// <summary>被ダメリスト。被弾したプレイヤーと、その人の最後の被弾の一覧。</summary>
-    DamageTakenList = 25,
+    /// <summary>被ダメログ。プレイヤーの被弾を新しい順に1行ずつ出す一覧(設定で1人1行の一番新しい被弾だけにもできる)。</summary>
+    DamageTakenLog = 25,
 
     /// <summary>被ダメ詳細。プレイヤーの被ダメの合計・通常・会心・幸運と属性ごとの割合。</summary>
     DamageTakenSummary = 26,
 
     /// <summary>エンティティ情報。エンティティリストの実体1つの HP・ヘイト・バフ・デバフ。</summary>
-    EntityInfo = 27
+    EntityInfo = 27,
+
+    /// <summary>チャット。ワールド・ギルド・パーティ・Ch・初心者のチャンネルか、プライベートトークの相手1人のメッセージ。</summary>
+    Chat = 28
 }

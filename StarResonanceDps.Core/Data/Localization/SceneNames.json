@@ -104,20 +104,20 @@
   "101": {
     "zh-CN": "沐光林道",
     "en-US": "Sunlit Trail",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "光の林道",
+    "ko-KR": "쏟아지는 빛의 숲길"
   },
   "102": {
     "zh-CN": "绯染的树林",
     "en-US": "Crimson Woods",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "緋染めの森",
+    "ko-KR": "붉게 물든 숲"
   },
   "103": {
     "zh-CN": "流金沙湾",
     "en-US": "Golden Sand Beach",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "金砂の入り江",
+    "ko-KR": "금빛 모래 해변"
   },
   "1001": {
     "zh-CN": "蒂娜·精神之界",
@@ -501,31 +501,31 @@
     "zh-CN": "不稳定空间·弥妄·流月之野",
     "en-US": "Unstable - Illusion-Shroud - Moonveil Wilds",
     "ja-JP": "不安定な空間・迷妄・流月の野",
-    "ko-KR": "불안정 공간・미망・달의 들판"
+    "ko-KR": "불안정 공간・미망・빛이 흐르는 들판"
   },
   "1712": {
     "zh-CN": "不稳定空间·弥妄·流月之野",
     "en-US": "Unstable - Illusion-Shroud - Moonveil Wilds",
     "ja-JP": "不安定な空間・迷妄・流月の野",
-    "ko-KR": "불안정 공간・미망・달의 들판"
+    "ko-KR": "불안정 공간・미망・빛이 흐르는 들판"
   },
   "1721": {
     "zh-CN": "弥妄·流月之野",
     "en-US": "Illusion-Shroud - Moonveil Wilds",
     "ja-JP": "迷妄・流月の野",
-    "ko-KR": "미망・달의 들판"
+    "ko-KR": "미망・빛이 흐르는 들판"
   },
   "1722": {
     "zh-CN": "弥妄·流月之野",
     "en-US": "Illusion-Shroud - Moonveil Wilds",
     "ja-JP": "迷妄・流月の野",
-    "ko-KR": "미망・달의 들판"
+    "ko-KR": "미망・빛이 흐르는 들판"
   },
   "1723": {
     "zh-CN": "弥妄·流月之野",
     "en-US": "Illusion-Shroud - Moonveil Wilds",
     "ja-JP": "迷妄・流月の野",
-    "ko-KR": "미망・달의 들판"
+    "ko-KR": "미망・빛이 흐르는 들판"
   },
   "1901": {
     "zh-CN": "远天的神槛",
@@ -674,8 +674,8 @@
   "5920": {
     "zh-CN": "梦境",
     "en-US": "Dreamscape",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "夢世界",
+    "ko-KR": "꿈"
   },
   "6001": {
     "zh-CN": "英雄本功能测试副本",
@@ -1034,61 +1034,61 @@
   "6591": {
     "zh-CN": "不稳定空间·镜中的审判",
     "en-US": "Unstable - Mirror Judgment",
-    "ja-JP": "不安定な空間・ミラーパニッシュ",
+    "ja-JP": "不安定な空間・鏡中の審判",
     "ko-KR": "불안정 공간・거울 속의 심판"
   },
   "6592": {
     "zh-CN": "不稳定空间·镜中的审判",
     "en-US": "Unstable - Mirror Judgment",
-    "ja-JP": "不安定な空間・ミラーパニッシュ",
+    "ja-JP": "不安定な空間・鏡中の審判",
     "ko-KR": "불안정 공간・거울 속의 심판"
   },
   "6593": {
     "zh-CN": "镜中的审判",
     "en-US": "Mirror Judgment",
-    "ja-JP": "ミラーパニッシュ",
+    "ja-JP": "鏡中の審判",
     "ko-KR": "거울 속의 심판"
   },
   "6594": {
     "zh-CN": "镜中的审判",
     "en-US": "Mirror Judgment",
-    "ja-JP": "ミラーパニッシュ",
+    "ja-JP": "鏡中の審判",
     "ko-KR": "거울 속의 심판"
   },
   "6610": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "バレンコート",
+    "ja-JP": "荒廃の庭",
     "ko-KR": "황폐한 정원"
   },
   "6611": {
     "zh-CN": "不稳定空间·荒芜之庭",
     "en-US": "Unstable - Barren Courtyard",
-    "ja-JP": "不安定な空間・バレンコート",
+    "ja-JP": "不安定な空間・荒廃の庭",
     "ko-KR": "불안정 공간・황폐한 정원"
   },
   "6612": {
     "zh-CN": "不稳定空间·荒芜之庭",
     "en-US": "Unstable - Barren Courtyard",
-    "ja-JP": "不安定な空間・バレンコート",
+    "ja-JP": "不安定な空間・荒廃の庭",
     "ko-KR": "불안정 공간・황폐한 정원"
   },
   "6613": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "バレンコート",
+    "ja-JP": "荒廃の庭",
     "ko-KR": "황폐한 정원"
   },
   "6614": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "バレンコート",
+    "ja-JP": "荒廃の庭",
     "ko-KR": "황폐한 정원"
   },
   "6615": {
     "zh-CN": "荒芜之庭",
     "en-US": "Barren Courtyard",
-    "ja-JP": "バレンコート",
+    "ja-JP": "荒廃の庭",
     "ko-KR": "황폐한 정원"
   },
   "7001": {
@@ -1484,7 +1484,7 @@
   "11002": {
     "zh-CN": "不思议的追逃游戏",
     "en-US": "Wondrous Tag",
-    "ja-JP": "不思議なチェイスゲーム",
+    "ja-JP": "チェイスゲーム",
     "ko-KR": "신비한 술래잡기"
   },
   "12000": {
@@ -1664,20 +1664,20 @@
   "13031": {
     "zh-CN": "血战！苍穹之上，昼夜尽头",
     "en-US": "Brutal! Twilight's Edge",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "S4レイド・ハード配置",
+    "ko-KR": "혈전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "13032": {
     "zh-CN": "决战！苍穹之上，昼夜尽头",
     "en-US": "Purge! Twilight's Edge",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "S4レイド・ナイトメア配置",
+    "ko-KR": "결전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "13033": {
     "zh-CN": "连战！苍穹之上，昼夜尽头",
     "en-US": "Relentless! Twilight's Edge",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "S4レイド・チャレンジ配置",
+    "ko-KR": "연전! 푸른 하늘 너머, 낮과 밤의 끝"
   },
   "14001": {
     "zh-CN": "翼鲸调查区·一",
@@ -1690,6 +1690,36 @@
     "en-US": "Winged Whale Investigation Area II",
     "ja-JP": "翼鯨調査エリア・二",
     "ko-KR": "날개고래 조사 구역・2"
+  },
+  "14003": {
+    "zh-CN": "游夜之森·冰",
+    "en-US": "Nightveil Woods (Ice)",
+    "ja-JP": "夜巡りの森・氷",
+    "ko-KR": "떠도는 밤의 숲・얼음"
+  },
+  "14004": {
+    "zh-CN": "游夜之森·火",
+    "en-US": "Nightveil Woods (Fire)",
+    "ja-JP": "夜巡りの森・火",
+    "ko-KR": "떠도는 밤의 숲・불"
+  },
+  "14005": {
+    "zh-CN": "游夜之森·光",
+    "en-US": "Nightveil Woods (Light)",
+    "ja-JP": "夜巡りの森・光",
+    "ko-KR": "떠도는 밤의 숲・빛"
+  },
+  "14006": {
+    "zh-CN": "游夜之森·暗",
+    "en-US": "Nightveil Woods (Dark)",
+    "ja-JP": "夜巡りの森・闇",
+    "ko-KR": "떠도는 밤의 숲・어둠"
+  },
+  "14007": {
+    "zh-CN": "游夜之森·无尽",
+    "en-US": "Nightveil Woods (Endless)",
+    "ja-JP": "夜巡りの森・無限",
+    "ko-KR": "떠도는 밤의 숲・무한"
   },
   "15001": {
     "zh-CN": "记忆1：普通·怪物讨伐",

@@ -21,6 +21,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     private readonly Dictionary<WidgetKind, WidgetWindow> _openSingleWindows = new();
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
     private readonly List<EntityWindowSession> _openEntityWindows = [];
+    private readonly List<ChatWindowSession> _openChatWindows = [];
     private readonly Dictionary<WidgetKind, WidgetListItemViewModel> _trackedPlayerWidgets = new();
 
     /// <summary>顔ぶれを当てる処理を積んだまま、まだ当てていないプレイヤーの窓(<see cref="UpdatePlayerWindowPresentations"/>)。</summary>
@@ -32,8 +33,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// <summary>開いている蘇生リストの窓の中身。顔ぶれを当てる先(<see cref="UpdateListWidgetRosters"/>)。閉じていれば null。</summary>
     private ReviveListWidgetViewModel? _reviveListViewModel;
 
-    /// <summary>開いている被ダメリストの窓の中身。顔ぶれを当てる先(<see cref="UpdateListWidgetRosters"/>)。閉じていれば null。</summary>
-    private DamageTakenListWidgetViewModel? _damageTakenListViewModel;
+    /// <summary>開いている被ダメログの窓の中身。顔ぶれを当てる先(<see cref="UpdateListWidgetRosters"/>)。閉じていれば null。</summary>
+    private DamageTakenLogWidgetViewModel? _damageTakenLogViewModel;
 
     private Window? _managerWindow;
     private bool _isManagerClosing;
@@ -266,13 +267,22 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// <summary>
     /// 相手(人・敵)と、バフ・デバフカードならバフを指定して、開いている窓を探す。開いていなければ null。
     /// 人は、自分なら自分を映す窓(相手の指定なしで開いた窓を含む)、それ以外は UID で探す。
-    /// 敵は実体で探し、捕まえていない窓(復元直後)は種類と種別IDで探す。
+    /// 敵は実体で探し、捕まえていない窓(復元直後)は種類と種別IDで探す。チャットはチャンネル(プライベートトークは相手)で探す。
     /// </summary>
     public WidgetWindow? FindTargetWindow(
         WidgetListItemViewModel widget,
         WidgetTargetOption person,
         WidgetTargetOption? buff)
     {
+        if (person.Kind == WidgetTargetOptionKind.Chat)
+        {
+            return _openChatWindows
+                .FirstOrDefault(session =>
+                    ReferenceEquals(session.Widget, widget)
+                    && session.ViewModel.Represents(person.ChatChannel, person.CharacterId))
+                ?.Window;
+        }
+
         if (person.Kind == WidgetTargetOptionKind.Entity)
         {
             return person.Entity is { } entity
@@ -313,6 +323,12 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         if (FindTargetWindow(widget, person, buff) is { } existingWindow)
         {
             RestoreAndActivate(existingWindow);
+            return;
+        }
+
+        if (person.Kind == WidgetTargetOptionKind.Chat)
+        {
+            CreateChatWindow(widget, person.ChatChannel, person.CharacterId, savedPartnerName: null);
             return;
         }
 
@@ -413,6 +429,14 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             targets.Add((person, buff));
         }
 
+        foreach (var session in _openChatWindows)
+        {
+            if (ReferenceEquals(session.Widget, widget))
+            {
+                targets.Add((WidgetTargetOption.CreateChat(session.ViewModel.Channel, session.ViewModel.PartnerId), null));
+            }
+        }
+
         return targets;
     }
 
@@ -450,6 +474,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 .Where(session => ReferenceEquals(session.Widget, widget))
                 .Select(session => session.Window)
                 .Concat(_openEntityWindows
+                    .Where(session => ReferenceEquals(session.Widget, widget))
+                    .Select(session => session.Window))
+                .Concat(_openChatWindows
                     .Where(session => ReferenceEquals(session.Widget, widget))
                     .Select(session => session.Window))
                 .ToArray();
@@ -635,6 +662,26 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// </summary>
     private void RestoreTargetWindow(WidgetListItemViewModel widget, WidgetOpenTargetConfig target)
     {
+        if (widget.Kind == WidgetKind.Chat)
+        {
+            if (target.ChatChannel is not { } chatChannelValue
+                || !Enum.IsDefined(typeof(Zproto.ChitChatChannelType), chatChannelValue)
+                || !ChatMessageStore.IsKeptChannel((Zproto.ChitChatChannelType)chatChannelValue))
+            {
+                return;
+            }
+
+            var chatChannel = (Zproto.ChitChatChannelType)chatChannelValue;
+            var partnerId = chatChannel == Zproto.ChitChatChannelType.ChannelPrivate ? target.CharacterId ?? 0 : 0;
+            if (chatChannel == Zproto.ChitChatChannelType.ChannelPrivate && partnerId == 0)
+            {
+                return;
+            }
+
+            CreateChatWindow(widget, chatChannel, partnerId, target.Name, target.Window);
+            return;
+        }
+
         var buffListKind = target.BuffListKind is { } value
             && Enum.IsDefined(typeof(PlayerBuffListKind), value)
                 ? (PlayerBuffListKind)value
@@ -754,6 +801,23 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             });
         }
 
+        foreach (var session in _openChatWindows)
+        {
+            if (!ReferenceEquals(session.Widget, widget))
+            {
+                continue;
+            }
+
+            var isPrivate = session.ViewModel.Channel == Zproto.ChitChatChannelType.ChannelPrivate;
+            targets.Add(new WidgetOpenTargetConfig
+            {
+                ChatChannel = (int)session.ViewModel.Channel,
+                CharacterId = isPrivate ? session.ViewModel.PartnerId : null,
+                Name = isPrivate ? session.ViewModel.LastKnownPartnerName : null,
+                Window = session.Window.GetCurrentBounds()
+            });
+        }
+
         WidgetStateManager.Instance.SaveWidgetOpenTargets(widget.Kind, targets);
     }
 
@@ -788,6 +852,13 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             if (widget.Kind == WidgetKind.EntityInfo)
             {
                 widget.State = WidgetState.Stopped;
+                return;
+            }
+
+            // チャットはカードの既定と同じチャンネル。
+            if (widget.Kind == WidgetKind.Chat)
+            {
+                CreateChatWindow(widget, WidgetTargetSelection.DefaultChatChannel, 0, savedPartnerName: null);
                 return;
             }
 
@@ -1063,6 +1134,55 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
+    /// <summary>チャットの窓(チャンネル1つか、プライベートトークの相手1人)を開く。</summary>
+    /// <param name="partnerId">プライベートトークの相手の UID。ほかのチャンネルは 0。</param>
+    /// <param name="savedPartnerName">復元のときに保存しておいた相手の名前。</param>
+    private void CreateChatWindow(
+        WidgetListItemViewModel widget,
+        Zproto.ChitChatChannelType channel,
+        long partnerId,
+        string? savedPartnerName,
+        WidgetWindowConfig? savedWindowBounds = null)
+    {
+        var owner = Application.Current?.MainWindow;
+        TrackManagerWindow(owner);
+
+        var viewModel = new ChatWidgetViewModel(widget, channel, partnerId, savedPartnerName);
+        var savedBounds = savedWindowBounds
+            ?? WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
+        var window = new WidgetWindow(
+            widget,
+            new ChatWidgetView
+            {
+                DataContext = viewModel
+            },
+            viewModel,
+            savedBounds,
+            owner,
+            viewModel.HeaderText);
+        viewModel.PropertyChanged += ChatWindowViewModel_PropertyChanged;
+        window.Closed += WidgetWindow_Closed;
+        window.DataStatusChanged += WidgetWindow_DataStatusChanged;
+        window.SaveWindowBoundsOverride = () => SaveOpenTargets(widget);
+
+        if (savedWindowBounds is null)
+        {
+            ApplyPlayerWindowCascade(window, CountOpenTargetWindows(widget));
+        }
+
+        _openChatWindows.Add(new ChatWindowSession(widget, viewModel, window));
+        UpdatePlayerWindowCount(widget);
+        UpdateCardDataStatus(widget);
+        SaveOpenTargets(widget);
+
+        window.Show();
+
+        if (widget.State != WidgetState.Running)
+        {
+            widget.State = WidgetState.Running;
+        }
+    }
+
     private static PlayerWidgetWindowViewModel CreatePlayerWindowViewModel(
         WidgetListItemViewModel playerWidget,
         long? requestedCharacterId,
@@ -1085,11 +1205,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer),
-            WidgetKind.PlayerTalent => new PlayerRootBuffWidgetViewModel(
+            WidgetKind.PlayerTalent => new PlayerTalentTreeWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
-                initialPlayer,
-                [RootBuffKind.Talent]),
+                initialPlayer),
             // 上にノード効果(ノード・上級)、下に因子効果。
             WidgetKind.PlayerSeasonTalent => new PlayerRootBuffWidgetViewModel(
                 playerWidget,
@@ -1133,12 +1252,12 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 playerWidget,
                 initialPlayer,
                 Instance.OpenBuffCardForGroupEntry),
-            WidgetKind.DamageContribution => new PlayerMetricWidgetViewModel(
+            WidgetKind.DamageSkillDetail => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Damage,
-                PlayerMetricDisplayMode.Contribution),
+                PlayerMetricDisplayMode.SkillDetail),
             WidgetKind.DamageSummary => new PlayerMetricSummaryWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -1149,13 +1268,13 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Damage,
-                PlayerMetricDisplayMode.Timeline),
-            WidgetKind.HealingContribution => new PlayerMetricWidgetViewModel(
+                PlayerMetricDisplayMode.Graph),
+            WidgetKind.HealingSkillDetail => new PlayerMetricWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Healing,
-                PlayerMetricDisplayMode.Contribution),
+                PlayerMetricDisplayMode.SkillDetail),
             WidgetKind.HealingSummary => new PlayerMetricSummaryWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -1166,7 +1285,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 requestedCharacterId,
                 initialPlayer,
                 MeterSnapshotKind.Healing,
-                PlayerMetricDisplayMode.Timeline),
+                PlayerMetricDisplayMode.Graph),
             WidgetKind.DamageTakenSummary => new PlayerMetricSummaryWidgetViewModel(
                 playerWidget,
                 requestedCharacterId,
@@ -1192,6 +1311,10 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             {
                 DataContext = equipmentViewModel
             },
+            PlayerTalentTreeWidgetViewModel talentTreeViewModel => new PlayerTalentTreeWidgetView
+            {
+                DataContext = talentTreeViewModel
+            },
             PlayerRootBuffWidgetViewModel rootBuffViewModel => new PlayerRootBuffWidgetView
             {
                 DataContext = rootBuffViewModel
@@ -1208,7 +1331,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             {
                 DataContext = buffDebuffGroupViewModel
             },
-            PlayerMetricWidgetViewModel { IsContribution: true } metricViewModel => new PlayerMetricContributionWidgetView
+            PlayerMetricWidgetViewModel { IsSkillDetail: true } metricViewModel => new SkillDetailWidgetView
             {
                 DataContext = metricViewModel
             },
@@ -1216,7 +1339,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             {
                 DataContext = summaryViewModel
             },
-            PlayerMetricWidgetViewModel metricViewModel => new PlayerMetricTimelineWidgetView
+            PlayerMetricWidgetViewModel metricViewModel => new PlayerMetricGraphWidgetView
             {
                 DataContext = metricViewModel
             },
@@ -1270,9 +1393,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                 new EntityListWidgetFooterView()),
             WidgetKind.DpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Damage),
             WidgetKind.HpsMeter => CreateMeterWidgetComposition(widget, MeterSnapshotKind.Healing),
-            WidgetKind.TakenDamageLog => CreateTakenDamageLogComposition(widget),
+            WidgetKind.Timeline => CreateTimelineComposition(widget),
             WidgetKind.ReviveList => CreateReviveListComposition(widget),
-            WidgetKind.DamageTakenList => CreateDamageTakenListComposition(widget),
+            WidgetKind.DamageTakenLog => CreateDamageTakenLogComposition(widget),
             _ => throw new InvalidOperationException($"Widget {widget.Kind} has no single-window content.")
         };
     }
@@ -1292,44 +1415,44 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             null);
     }
 
-    private WidgetWindowComposition CreateDamageTakenListComposition(WidgetListItemViewModel widget)
+    private WidgetWindowComposition CreateDamageTakenLogComposition(WidgetListItemViewModel widget)
     {
-        var viewModel = new DamageTakenListWidgetViewModel(widget, PlayerRosterPresentationStore.Instance.Current, OpenPlayerWindow);
-        _damageTakenListViewModel = viewModel;
+        var viewModel = new DamageTakenLogWidgetViewModel(widget, PlayerRosterPresentationStore.Instance.Current, OpenPlayerWindow);
+        _damageTakenLogViewModel = viewModel;
 
         // ヘッダーの文字ボタン(「最新の被ダメのみ表示」の切り替え)はメーターと同じく2層で1組。
         return new WidgetWindowComposition(
-            new DamageTakenListWidgetView
+            new DamageTakenLogWidgetView
             {
                 DataContext = viewModel
             },
             viewModel,
-            new DamageTakenListWidgetHeaderLabelsView
+            new DamageTakenLogWidgetHeaderLabelsView
             {
                 DataContext = viewModel
             },
-            new DamageTakenListWidgetHeaderActionsView
+            new DamageTakenLogWidgetHeaderActionsView
             {
                 DataContext = viewModel
             },
-            new DamageTakenListWidgetFooterView
+            new DamageTakenLogWidgetFooterView
             {
                 DataContext = viewModel
             });
     }
 
-    /// <summary>顔ぶれを蘇生リストと被ダメリストの窓へ当てる(画面のスレッドで呼ぶ)。開いていない窓には何もしない。</summary>
+    /// <summary>顔ぶれを蘇生リストと被ダメログの窓へ当てる(画面のスレッドで呼ぶ)。開いていない窓には何もしない。</summary>
     public void UpdateListWidgetRosters(PlayerRosterSnapshot roster)
     {
         _reviveListViewModel?.UpdateRoster(roster);
-        _damageTakenListViewModel?.UpdateRoster(roster);
+        _damageTakenLogViewModel?.UpdateRoster(roster);
     }
 
-    private static WidgetWindowComposition CreateTakenDamageLogComposition(WidgetListItemViewModel widget)
+    private static WidgetWindowComposition CreateTimelineComposition(WidgetListItemViewModel widget)
     {
-        var viewModel = new TakenDamageLogWidgetViewModel(widget);
+        var viewModel = new TimelineWidgetViewModel(widget);
         return new WidgetWindowComposition(
-            new TakenDamageLogWidgetView
+            new TimelineWidgetView
             {
                 DataContext = viewModel
             },
@@ -1385,6 +1508,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
                      .Concat(_openEntityWindows
                          .Where(session => ReferenceEquals(session.Widget, playerWidget))
                          .Select(session => session.Window))
+                     .Concat(_openChatWindows
+                         .Where(session => ReferenceEquals(session.Widget, playerWidget))
+                         .Select(session => session.Window))
                      .ToArray())
         {
             targetWindow.Close();
@@ -1410,16 +1536,17 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         playerWidget.PlayerWindowPresentationChanged += PlayerWidget_PresentationChanged;
     }
 
-    /// <summary>その相手の名刺の値(顔写真・名刺)が変わった。開いているプレイヤーの窓へ渡す。</summary>
-    public void UpdatePlayerWindowSocialData(long characterId)
+    /// <summary>その相手の名簿の外の値(名刺照会の値・チャットの発言者の値)が変わった。開いているプレイヤーの窓へ渡す。</summary>
+    public void UpdatePlayerWindowPlayerData(long characterId)
     {
         foreach (var playerWindow in _openPlayerWindows.ToArray())
         {
-            playerWindow.ViewModel.NotifySocialDataChanged(characterId);
+            playerWindow.ViewModel.NotifyPlayerDataChanged(characterId);
+            playerWindow.Window.SetHeaderText(playerWindow.ViewModel.HeaderText);
         }
     }
 
-    /// <summary>名刺の値の控えが全部消えた。開いているプレイヤーの窓すべてへ渡す(一覧から外れて値を残している窓も含む)。</summary>
+    /// <summary>名刺の値の控えが全部消えた。開いているプレイヤーの窓すべてへ渡す(一覧に居ない相手を出している窓も含む)。</summary>
     public void ClearPlayerWindowSocialData()
     {
         foreach (var playerWindow in _openPlayerWindows.ToArray())
@@ -1623,6 +1750,28 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         TargetWindowsChanged?.Invoke(session.Widget);
     }
 
+    /// <summary>
+    /// チャットの窓のタイトルが変わった(相手の名前が分かった・名前の伏せ字・言語)。窓のタイトルとカードの欄を当て直し、
+    /// 次の起動のタイトルに使う相手の名前を保存する。
+    /// </summary>
+    private void ChatWindowViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(ChatWidgetViewModel.HeaderText) || sender is not ChatWidgetViewModel viewModel)
+        {
+            return;
+        }
+
+        var session = _openChatWindows.FirstOrDefault(candidate => ReferenceEquals(candidate.ViewModel, viewModel));
+        if (session is null)
+        {
+            return;
+        }
+
+        session.Window.SetHeaderText(viewModel.HeaderText);
+        SaveOpenTargets(session.Widget);
+        TargetWindowsChanged?.Invoke(session.Widget);
+    }
+
     private void PlayerWidget_PresentationChanged(object? sender, EventArgs e)
     {
         if (sender is not WidgetListItemViewModel playerWidget)
@@ -1665,7 +1814,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     private int CountOpenTargetWindows(WidgetListItemViewModel widget)
     {
         return _openPlayerWindows.Count(session => ReferenceEquals(session.Widget, widget))
-            + _openEntityWindows.Count(session => ReferenceEquals(session.Widget, widget));
+            + _openEntityWindows.Count(session => ReferenceEquals(session.Widget, widget))
+            + _openChatWindows.Count(session => ReferenceEquals(session.Widget, widget));
     }
 
     private bool HasOpenTargetWindows(WidgetListItemViewModel widget)
@@ -1685,14 +1835,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
             or WidgetKind.BuffDebuffCard
-            or WidgetKind.DamageContribution
+            or WidgetKind.DamageSkillDetail
             or WidgetKind.DamageSummary
             or WidgetKind.DpsGraph
-            or WidgetKind.HealingContribution
+            or WidgetKind.HealingSkillDetail
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph
             or WidgetKind.DamageTakenSummary
-            or WidgetKind.EntityInfo;
+            or WidgetKind.EntityInfo
+            or WidgetKind.Chat;
     }
 
     private static void RestoreAndActivate(WidgetWindow window)
@@ -1750,6 +1901,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         foreach (var window in _openSingleWindows.Values
                      .Concat(_openPlayerWindows.Select(session => session.Window))
                      .Concat(_openEntityWindows.Select(session => session.Window))
+                     .Concat(_openChatWindows.Select(session => session.Window))
                      .ToArray())
         {
             window.Close();
@@ -1826,15 +1978,37 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
+        var chatWindow = _openChatWindows.FirstOrDefault(
+            session => ReferenceEquals(session.Window, window));
+
+        if (chatWindow is not null)
+        {
+            chatWindow.ViewModel.PropertyChanged -= ChatWindowViewModel_PropertyChanged;
+            chatWindow.ViewModel.Dispose();
+            _openChatWindows.Remove(chatWindow);
+            UpdatePlayerWindowCount(chatWindow.Widget);
+            UpdateCardDataStatus(chatWindow.Widget);
+            SaveOpenTargets(chatWindow.Widget);
+
+            if (!_isManagerClosing
+                && chatWindow.Widget.State == WidgetState.Running
+                && !HasOpenTargetWindows(chatWindow.Widget))
+            {
+                chatWindow.Widget.State = WidgetState.Stopped;
+            }
+
+            return;
+        }
+
         _openSingleWindows.Remove(window.Widget.Kind);
         if (window.Widget.Kind == WidgetKind.ReviveList)
         {
             _reviveListViewModel = null;
         }
 
-        if (window.Widget.Kind == WidgetKind.DamageTakenList)
+        if (window.Widget.Kind == WidgetKind.DamageTakenLog)
         {
-            _damageTakenListViewModel = null;
+            _damageTakenLogViewModel = null;
         }
 
         UpdateCardDataStatus(window.Widget);
@@ -1871,7 +2045,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         widget.CardDataStatusLevel = worst;
     }
 
-    /// <summary>そのウィジェットの開いている窓(1枚だけの窓・プレイヤーの窓・実体の窓)。</summary>
+    /// <summary>そのウィジェットの開いている窓(1枚だけの窓・プレイヤーの窓・実体の窓・チャットの窓)。</summary>
     private IEnumerable<WidgetWindow> EnumerateOpenWindows(WidgetListItemViewModel widget)
     {
         if (_openSingleWindows.TryGetValue(widget.Kind, out var singleWindow) && ReferenceEquals(singleWindow.Widget, widget))
@@ -1888,6 +2062,14 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
 
         foreach (var session in _openEntityWindows)
+        {
+            if (ReferenceEquals(session.Widget, widget))
+            {
+                yield return session.Window;
+            }
+        }
+
+        foreach (var session in _openChatWindows)
         {
             if (ReferenceEquals(session.Widget, widget))
             {
@@ -1916,6 +2098,11 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             }
 
             foreach (var session in _openEntityWindows.ToArray())
+            {
+                session.Window.RefreshDataStatus();
+            }
+
+            foreach (var session in _openChatWindows.ToArray())
             {
                 session.Window.RefreshDataStatus();
             }
@@ -1961,6 +2148,25 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         public WidgetListItemViewModel Widget { get; }
 
         public IEntityWidgetWindowViewModel ViewModel { get; }
+
+        public WidgetWindow Window { get; }
+    }
+
+    private sealed class ChatWindowSession
+    {
+        public ChatWindowSession(
+            WidgetListItemViewModel widget,
+            ChatWidgetViewModel viewModel,
+            WidgetWindow window)
+        {
+            Widget = widget;
+            ViewModel = viewModel;
+            Window = window;
+        }
+
+        public WidgetListItemViewModel Widget { get; }
+
+        public ChatWidgetViewModel ViewModel { get; }
 
         public WidgetWindow Window { get; }
     }

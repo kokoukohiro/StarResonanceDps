@@ -347,9 +347,9 @@ public sealed class WidgetStateManager
     /// バフ・デバフ一覧の非表示のバフと同じく、この項目だけを書く。
     /// </para>
     /// </summary>
-    public void SaveMetricTimelineVisibleSeconds(WidgetKind kind, int visibleSeconds)
+    public void SaveMetricGraphVisibleSeconds(WidgetKind kind, int visibleSeconds)
     {
-        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(kind))
+        if (!WidgetConfigDefaults.SupportsMetricGraphSettings(kind))
         {
             return;
         }
@@ -357,8 +357,8 @@ public sealed class WidgetStateManager
         lock (_syncRoot)
         {
             var config = GetOrCreateWidgetConfig(kind);
-            config.MetricTimeline ??= WidgetConfigDefaults.CreateMetricTimelineSettings(kind);
-            config.MetricTimeline.VisibleSeconds = visibleSeconds;
+            config.MetricGraph ??= WidgetConfigDefaults.CreateMetricGraphSettings(kind);
+            config.MetricGraph.VisibleSeconds = visibleSeconds;
             WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }
@@ -366,11 +366,11 @@ public sealed class WidgetStateManager
 
     /// <summary>
     /// 被ダメログの「最新の被ダメのみ表示」だけを保存する。ヘッダーのボタンで切り替えたときに呼ぶ。
-    /// 横軸の長さ(<see cref="SaveMetricTimelineVisibleSeconds"/>)と同じく、開いている設定ウィンドウの未保存の値とぶつからないよう、この項目だけを書く。
+    /// 横軸の長さ(<see cref="SaveMetricGraphVisibleSeconds"/>)と同じく、開いている設定ウィンドウの未保存の値とぶつからないよう、この項目だけを書く。
     /// </summary>
-    public void SaveDamageTakenListShowsLatestHitOnly(WidgetKind kind, bool showsLatestHitOnly)
+    public void SaveDamageTakenLogShowsLatestHitOnly(WidgetKind kind, bool showsLatestHitOnly)
     {
-        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(kind))
+        if (!WidgetConfigDefaults.SupportsDamageTakenLogSettings(kind))
         {
             return;
         }
@@ -378,8 +378,8 @@ public sealed class WidgetStateManager
         lock (_syncRoot)
         {
             var config = GetOrCreateWidgetConfig(kind);
-            config.DamageTakenList ??= WidgetConfigDefaults.CreateDamageTakenListSettings();
-            config.DamageTakenList.ShowsLatestHitOnly = showsLatestHitOnly;
+            config.DamageTakenLog ??= WidgetConfigDefaults.CreateDamageTakenLogSettings();
+            config.DamageTakenLog.ShowsLatestHitOnly = showsLatestHitOnly;
             WidgetConfigDefaults.Normalize(kind, config);
             SaveCore();
         }

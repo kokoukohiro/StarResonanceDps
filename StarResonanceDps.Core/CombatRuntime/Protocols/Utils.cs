@@ -4,24 +4,25 @@ namespace StarResonanceDps.Core.CombatRuntime.Protocols;
 
 public class Utils
 {
-    public static List<TcpHelper.TcpRow> GetTCPConnectionsForExe(string[] filenames)
+    /// <summary>実行ファイルの名前の一覧のどれかのプロセスが持つ TCP 接続と、その実行ファイルの名前。</summary>
+    public static List<(TcpHelper.TcpRow Row, string ExeName)> GetTCPConnectionsForExe(string[] filenames)
     {
-        List<TcpHelper.TcpRow> tcpConns = [];
+        List<(TcpHelper.TcpRow Row, string ExeName)> tcpConns = [];
 
         var procs = GetProcessesFromList(filenames);
-        List<int> pids = [];
+        Dictionary<int, string> exeNameByPid = [];
         foreach (var filename in filenames)
         {
             if (procs.TryGetValue(filename, out var process))
             {
-                pids.Add(process.Id);
+                exeNameByPid.TryAdd(process.Id, filename);
             }
         }
 
         var tcpConnections = TcpHelper.GetExtendedTcpTable();
         foreach (var conn in tcpConnections) {
-            if (pids.Contains(conn.owningPid)) {
-                tcpConns.Add(conn);
+            if (exeNameByPid.TryGetValue(conn.owningPid, out var exeName)) {
+                tcpConns.Add((conn, exeName));
             }
         }
 

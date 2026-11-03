@@ -303,6 +303,7 @@ internal static class PlayerRosterProjection
                 out var entry,
                 useHistoryHealth: isMetadataFromHistory,
                 seasonId: isMetadataFromHistory ? meterEncounter?.ExData.SeasonId ?? 0 : null,
+                gameServer: isMetadataFromHistory ? meterEncounter?.ExData.GameServer ?? GameServer.Unknown : null,
                 recordedAvatar: isMetadataFromHistory ? metadataEntity?.RecordedAvatar : null,
                 isFromRecord: isFromRecord))
             {
@@ -388,6 +389,10 @@ internal static class PlayerRosterProjection
     /// 素性の出所が履歴の記録のとき、その回のシーズン番号(<see cref="EncounterExData.SeasonId"/>、0 は分からない)。
     /// ライブの行は null で、一覧の今のシーズンを使う。
     /// </param>
+    /// <param name="gameServer">
+    /// 素性の出所が履歴の記録のとき、その回のゲームのサーバー(<see cref="EncounterExData.GameServer"/>)。
+    /// ライブの行は null で、今のサーバーを使う。
+    /// </param>
     /// <param name="recordedAvatar">
     /// 素性の出所が履歴の記録のとき、その回に保存した顔と名刺の写真のリンク(<see cref="Entity.RecordedAvatar"/>)。
     /// ライブの行は null で、名刺の店の今の値を使う。
@@ -404,6 +409,7 @@ internal static class PlayerRosterProjection
         out PlayerRosterEntry entry,
         bool useHistoryHealth = false,
         int? seasonId = null,
+        GameServer? gameServer = null,
         SocialAvatarState? recordedAvatar = null,
         bool isFromRecord = false)
     {
@@ -474,11 +480,22 @@ internal static class PlayerRosterProjection
             partySceneId,
             partyLineId,
             seasonId,
+            gameServer,
             recordedAvatar,
             source.RootBuffData,
             nearbyEntity is not null && PlayerDataSourceResolver.GetInt(nearbyEntity, "AttrCombatState") > 0,
             isFromRecord ? PlayerDataGaps.None : source.DataGaps,
-            isFromRecord);
+            isFromRecord,
+            !useHistoryHealth && source.IsIncapacitated,
+            source.TalentNodeIds,
+            source.LastReplaceableSkills);
+
+        // 空の項目は名刺照会とチャットの値で埋める(名簿の外の人と同じ決まり)。記録から来た行はその回の値のまま。
+        if (!isFromRecord)
+        {
+            entry = PlayerDirectory.ApplyProfile(entry);
+        }
+
         return true;
     }
 

@@ -1,6 +1,7 @@
 <UserControl x:Class="StarResonanceDps.App.Views.LogsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
              xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
@@ -8,31 +9,69 @@
         <ContentControl Style="{StaticResource Panel.ManagerItemCard}"
                         Margin="0">
             <Border Padding="0,8,0,8">
-                <ScrollViewer x:Name="PacketDiagnosticsScrollViewer"
-                              Style="{StaticResource ScrollViewer.WidgetList}"
-                              VerticalScrollBarVisibility="Hidden">
-                    <TextBox x:Name="PacketDiagnosticsTextBox"
-                             Padding="0"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             Foreground="{DynamicResource Brush.TextSecondary}"
-                             FontSize="13"
-                             TextOptions.TextFormattingMode="Display"
-                             IsReadOnly="True"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             HorizontalScrollBarVisibility="Disabled"
-                             VerticalScrollBarVisibility="Disabled">
-                        <TextBox.ContextMenu>
-                            <ContextMenu Style="{StaticResource Menu.TextSelectionContextMenu}">
-                                <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Copy]}"
-                                          Command="{x:Static ApplicationCommands.Copy}"
-                                          CommandTarget="{Binding PlacementTarget, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
-                                          Style="{StaticResource Menu.TextSelectionContextMenuItem}" />
-                            </ContextMenu>
-                        </TextBox.ContextMenu>
-                    </TextBox>
-                </ScrollViewer>
+                <!--
+                    1件の記録を1行にして仮想化する(作りはタイムライン・チャットと同じ)。仮想化はリスト自身のテンプレートの中に
+                    ScrollViewer が無いと効かない。縦のスクロールバーはメイン画面の外のバーに繋ぐので隠す。
+                    文字は行をまたいで選べる(TextRowsSelectionBehavior。部品は記録の文、選んだ文字の地)。
+                -->
+                <ItemsControl x:Name="LogItemsControl"
+                              ItemsSource="{Binding Lines}"
+                              Background="Transparent"
+                              Focusable="True"
+                              FocusVisualStyle="{x:Null}"
+                              behaviors:TextRowsSelectionBehavior.PartElementNames="LineText"
+                              behaviors:TextRowsSelectionBehavior.HighlightElementName="SelectionHighlight"
+                              VirtualizingPanel.IsVirtualizing="True"
+                              VirtualizingPanel.VirtualizationMode="Recycling"
+                              VirtualizingPanel.ScrollUnit="Pixel">
+                    <ItemsControl.ContextMenu>
+                        <ContextMenu Style="{StaticResource Menu.TextSelectionContextMenu}">
+                            <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Copy]}"
+                                      Command="{x:Static ApplicationCommands.Copy}"
+                                      CommandTarget="{Binding PlacementTarget, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}"
+                                      Style="{StaticResource Menu.TextSelectionContextMenuItem}" />
+                        </ContextMenu>
+                    </ItemsControl.ContextMenu>
+                    <ItemsControl.Template>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <ScrollViewer x:Name="LogScrollViewer"
+                                          Background="{TemplateBinding Background}"
+                                          HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Hidden"
+                                          CanContentScroll="True"
+                                          Focusable="False">
+                                <ItemsPresenter />
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Background="Transparent">
+                                <!--
+                                    選んだ文字の地。形は TextRowsSelectionBehavior が決める(画面の文字の1行ごとの四角)。地の形で行の大きさが変わらないよう Canvas に入れる。
+                                    色は文字の入力欄の選択と同じ(システムの強調色、不透明度 0.4)。文字の後ろに置く。
+                                -->
+                                <Canvas IsHitTestVisible="False">
+                                    <Path x:Name="SelectionHighlight"
+                                          Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}"
+                                          Opacity="0.4" />
+                                </Canvas>
+
+                                <TextBlock x:Name="LineText"
+                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                           FontSize="13"
+                                           TextOptions.TextFormattingMode="Display"
+                                           TextWrapping="Wrap"
+                                           Text="{Binding DisplayText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Border>
         </ContentControl>
     </Grid>

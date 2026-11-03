@@ -161,13 +161,13 @@ public partial class MessagePreviewWindow : Window
             Localization.GetString("PlayerInfo_CopyImageFailed_Detail"));
     }
 
-    // 本物: タイムライン(選んだ行をコピーできなかったとき)
-    private void CopyTimelineTextFailed_Click(object sender, RoutedEventArgs e)
+    // 本物: タイムライン・チャット(選んだ文字をコピーできなかったとき)
+    private void CopyTextFailed_Click(object sender, RoutedEventArgs e)
     {
         MessageWindow.Show(
             this,
-            Localization.GetString("TakenDamageLog_CopyTextFailed_Title"),
-            Localization.GetString("TakenDamageLog_CopyTextFailed_Message"));
+            Localization.GetString("TextCopyFailed_Title"),
+            Localization.GetString("TextCopyFailed_Message"));
     }
 
     // 本物: 起動時・通知タブ(VOICEVOX につながらないとき)

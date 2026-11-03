@@ -14,7 +14,9 @@ public enum NotificationKind
     BuffExpired,
     CuisinePotionLow,
     TelegraphedSkill,
-    EntityCast
+    EntityCast,
+    PrivateChat,
+    WorldChat
 }
 
 /// <summary>
@@ -113,12 +115,13 @@ public sealed class NotificationItemConfig
     /// <summary>
     /// 対象の名前(どれかに当たれば通知する)。エンティティ詠唱は表示言語のスキル名、プレイヤー出現はゲームの中のプレイヤー名、エンティティ出現は表示言語のエンティティ名。
     /// <see cref="TargetIds"/> が1つでもあれば使わない。使うのは エンティティ詠唱・プレイヤー出現・エンティティ出現 だけ(名前もIDも無ければ通知しない)。
+    /// ワールドチャットは一致ワード(入力欄でスペースで区切った語。全部が発言の本文に含まれていれば通知する。無ければ通知しない)に使う。
     /// </summary>
     public List<string> TargetNames { get; set; } = [];
 
     /// <summary>
     /// 対象のID(どれかに当たれば通知する)。エンティティ詠唱はスキルID、プレイヤー出現はUID(キャラクターID)、エンティティ出現はエンティティの種別ID。
-    /// 1つでもあれば <see cref="TargetNames"/> より優先する。使うのは <see cref="TargetNames"/> と同じ項目だけ。
+    /// 1つでもあれば <see cref="TargetNames"/> より優先する。使うのは エンティティ詠唱・プレイヤー出現・エンティティ出現 だけ。
     /// </summary>
     public List<long> TargetIds { get; set; } = [];
 

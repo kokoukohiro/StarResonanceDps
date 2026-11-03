@@ -16,6 +16,7 @@ internal sealed record PlayerDataSourceSnapshot(
     int SeasonLevel,
     long CurrentHp,
     long MaxHp,
+    bool IsIncapacitated,
     bool IsNpc,
     bool IsSpecAbilityUnequipped,
     PlayerEquipmentData? EquipmentData,
@@ -24,6 +25,8 @@ internal sealed record PlayerDataSourceSnapshot(
     bool IsSeasonTalentInactive,
     int? SeasonRankLevel,
     PlayerRootBuffData? RootBuffData,
+    IReadOnlyList<int>? TalentNodeIds,
+    IReadOnlyDictionary<int, int>? LastReplaceableSkills,
     PlayerDataGaps DataGaps);
 
 internal static class PlayerDataSourceResolver
@@ -119,6 +122,10 @@ internal static class PlayerDataSourceResolver
         var maxHp = hpEntity?.MaxHp ?? 0;
         var hasNearbyMaxHp = nearbyEntity is not null
             && TryGetPositiveInt64(nearbyEntity.GetAttrKV("AttrMaxHp"), out _);
+
+        // 戦闘不能かは HP を取った出所で決める。実体の HP は戦闘不能なら 0 になる。
+        // パーティの同期の HP は読み込み中などの生きている人にも 0 で届く(ゲームの HP バーも空になる)ので、同期の状態で決める。
+        var isIncapacitated = maxHp > 0 && currentHp <= 0;
         if (!hasNearbyMaxHp
             && partySupplement is not null)
         {
@@ -131,12 +138,20 @@ internal static class PlayerDataSourceResolver
                 && TryGetNonNegativeInt64(nearbyEntity.GetAttrKV("AttrHp"), out var nearbyHp))
             {
                 currentHp = nearbyHp;
+                isIncapacitated = maxHp > 0 && currentHp <= 0;
             }
             else if (partySupplement.MaxHp > 0 || !partySupplement.IsNpc)
             {
                 currentHp = Math.Max(partySupplement.CurrentHp, 0);
+                isIncapacitated = partySupplement.IsDead;
             }
         }
+
+        var professionId = nearbyProfessionId > 0
+            ? nearbyProfessionId
+            : partySupplement is { ProfessionId: > 0 }
+                ? partySupplement.ProfessionId
+                : metadataProfessionId;
 
         return new PlayerDataSourceSnapshot(
             characterId,
@@ -145,11 +160,7 @@ internal static class PlayerDataSourceResolver
                 : partySupplement is { Name.Length: > 0 }
                     ? partySupplement.Name
                     : metadataName,
-            nearbyProfessionId > 0
-                ? nearbyProfessionId
-                : partySupplement is { ProfessionId: > 0 }
-                    ? partySupplement.ProfessionId
-                    : metadataProfessionId,
+            professionId,
             nearbyCombatPower > 0
                 ? nearbyCombatPower
                 : partySupplement is { CombatPower: > 0 }
@@ -173,6 +184,7 @@ internal static class PlayerDataSourceResolver
                     : metadataSeasonLevel,
             currentHp,
             maxHp,
+            isIncapacitated,
             // NPC か。パーティの社交データ(BotAiId)、実体の AttrId(プレイヤーの実体ではボットの表の番号で、NPC だけが持つ)、
             // 実体に焼き付けた印のどれかで決める。パーティにいない NPC は AttrId だけが根拠になる。
             !isSelf && (partySupplement?.IsNpc == true
@@ -198,6 +210,8 @@ internal static class PlayerDataSourceResolver
             ResolveSeasonTalentInactive(characterId, nearbyEntity, metadataEntity, isSelf),
             ResolveSeasonRankLevel(nearbyEntity, metadataEntity),
             ResolveRootBuffData(nearbyEntity, metadataEntity),
+            ResolveTalentNodeIds(nearbyEntity, metadataEntity, professionId),
+            nearbyEntity?.LastReplaceableSkills ?? metadataEntity?.LastReplaceableSkills,
             ResolveDataGaps(characterId, nearbyEntity, metadataEntity, partySupplement, isSelf));
     }
 
@@ -247,6 +261,19 @@ internal static class PlayerDataSourceResolver
     {
         var buffIds = nearbyEntity?.RootBuffIds ?? metadataEntity?.RootBuffIds;
         return buffIds is null ? null : PlayerRootBuffData.FromSorted(buffIds);
+    }
+
+    /// <summary>
+    /// 今の職業の取ったタレントの木の節(<see cref="Entity.TalentNodeIdsByProfession"/>)。周りの実体 → エンカウンターの実体の順。
+    /// 自分にしか届かないので、ほかのプレイヤーはいつも null。届いた一覧にその職業が無くても null。履歴の行は保存した値。
+    /// 配列は実体の持つものをそのまま渡す(中身が変わらなければ同じ参照で、名簿の行の知らせが出ない)。
+    /// </summary>
+    private static IReadOnlyList<int>? ResolveTalentNodeIds(Entity? nearbyEntity, Entity? metadataEntity, int professionId)
+    {
+        var nodeIdsByProfession = nearbyEntity?.TalentNodeIdsByProfession ?? metadataEntity?.TalentNodeIdsByProfession;
+        return nodeIdsByProfession is not null && nodeIdsByProfession.TryGetValue(professionId, out var nodeIds)
+            ? nodeIds
+            : null;
     }
 
     /// <summary>

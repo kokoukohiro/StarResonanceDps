@@ -93,6 +93,9 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
             else if (dungeonState == EDungeonState.DungeonStateEnd)
             {
+                // ダンジョンが終わったら予告のバーを残さない(残すとバーの終わりに通知とタイムラインの行が出る)。計測中も同じ。
+                Services.BossDbmBarStore.Instance.Clear();
+
                 // 計測中は回を閉じない(窓の途中で時計が止まらないように。待機中の回は記録が無く、次の区切りで作り直す)。
                 if (EncounterManager.IsBenchmarkActive)
                 {
@@ -155,6 +158,23 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static bool IsDungeonPlaying()
         {
             return !DungeonStateHistory.IsEmpty && DungeonStateHistory.Last().Key == EDungeonState.DungeonStatePlaying;
+        }
+
+        /// <summary>
+        /// ダンジョンが終わった後(終了・結果画面・投票)か。予兆技(予告と警告)をここから先は受けない。
+        /// マップ移動で履歴が消えるので、次のダンジョンでは元に戻る。
+        /// </summary>
+        public static bool IsDungeonFinished()
+        {
+            if (DungeonStateHistory.IsEmpty)
+            {
+                return false;
+            }
+
+            var state = DungeonStateHistory.Last().Key;
+            return state is EDungeonState.DungeonStateEnd
+                or EDungeonState.DungeonStateSettlement
+                or EDungeonState.DungeonStateVote;
         }
 
         public static bool IsInOpenWorld()

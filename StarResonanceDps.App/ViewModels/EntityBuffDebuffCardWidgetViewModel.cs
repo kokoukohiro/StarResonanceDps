@@ -47,7 +47,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
     /// 最後に出していた実体の付与者(プレイヤーでなければ null)と、その対象の実体。失効した後の付与者プレイヤー名に使う。
     /// 対象が替わったら前の対象の付与者は使わない。
     /// </summary>
-    private TakenDamageLogParty? _lastKnownCaster;
+    private CombatEventLogParty? _lastKnownCaster;
     private long _lastKnownCasterEntityUuid;
 
     private bool _isDisposed;

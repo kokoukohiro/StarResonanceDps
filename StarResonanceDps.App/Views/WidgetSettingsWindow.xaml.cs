@@ -42,9 +42,9 @@ public partial class WidgetSettingsWindow : Window
         _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayNameResourceKey);
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
-        _viewModel.MetricTimelinePreviewChanged += _widget.ApplyMetricTimelineSettingsPreview;
+        _viewModel.MetricGraphPreviewChanged += _widget.ApplyMetricGraphSettingsPreview;
         _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
-        _viewModel.TakenDamageLogPreviewChanged += _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.TimelinePreviewChanged += _widget.ApplyTimelineSettingsPreview;
         _viewModel.PlayerInfoPreviewChanged += _widget.ApplyPlayerInfoSettingsPreview;
         _viewModel.BuffListPreviewChanged += _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged += _widget.ApplyElementColorSettingsPreview;
@@ -54,8 +54,9 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusRowOrderPreviewChanged += _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged += _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged += _widget.ApplyReviveListSettingsPreview;
-        _viewModel.DamageTakenListPreviewChanged += _widget.ApplyDamageTakenListSettingsPreview;
+        _viewModel.DamageTakenLogPreviewChanged += _widget.ApplyDamageTakenLogSettingsPreview;
         _viewModel.EntityInfoPreviewChanged += _widget.ApplyEntityInfoSettingsPreview;
+        _viewModel.ChatPreviewChanged += _widget.ApplyChatSettingsPreview;
         _widget.BuffListHiddenBuffsChanged += Widget_BuffListHiddenBuffsChanged;
         _widget.EntityInfoHiddenBuffsChanged += Widget_EntityInfoHiddenBuffsChanged;
         _widget.BuffListPriorityBuffChangedFromWidget += Widget_BuffListPriorityBuffChangedFromWidget;
@@ -65,8 +66,8 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffCardShortcutChangedFromWidget += Widget_BuffCardShortcutChangedFromWidget;
         _widget.BuffCardNotificationTargetChangedFromWidget += Widget_BuffCardNotificationTargetChangedFromWidget;
         _widget.BuffDebuffGroupNotificationTargetChangedFromWidget += Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
-        _widget.MetricTimelineVisibleSecondsChangedFromWidget += Widget_MetricTimelineVisibleSecondsChangedFromWidget;
-        _widget.DamageTakenListShowsLatestHitOnlyChangedFromWidget += Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget;
+        _widget.MetricGraphVisibleSecondsChangedFromWidget += Widget_MetricGraphVisibleSecondsChangedFromWidget;
+        _widget.DamageTakenLogShowsLatestHitOnlyChangedFromWidget += Widget_DamageTakenLogShowsLatestHitOnlyChangedFromWidget;
 
         // 開いている間は、行の並びを保存前のプレビューとして持つ(ウィジェットでの並べ替えも含めて「保存」で確定、閉じたら戻す)。
         _widget.BeginSettingsPreview();
@@ -94,9 +95,9 @@ public partial class WidgetSettingsWindow : Window
     {
         _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
         _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
-        _viewModel.MetricTimelinePreviewChanged -= _widget.ApplyMetricTimelineSettingsPreview;
+        _viewModel.MetricGraphPreviewChanged -= _widget.ApplyMetricGraphSettingsPreview;
         _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
-        _viewModel.TakenDamageLogPreviewChanged -= _widget.ApplyTakenDamageLogSettingsPreview;
+        _viewModel.TimelinePreviewChanged -= _widget.ApplyTimelineSettingsPreview;
         _viewModel.PlayerInfoPreviewChanged -= _widget.ApplyPlayerInfoSettingsPreview;
         _viewModel.BuffListPreviewChanged -= _widget.ApplyBuffListSettingsPreview;
         _viewModel.ElementColorPreviewChanged -= _widget.ApplyElementColorSettingsPreview;
@@ -106,8 +107,9 @@ public partial class WidgetSettingsWindow : Window
         _viewModel.PlayerStatusRowOrderPreviewChanged -= _widget.ApplyPlayerStatusRowOrderPreview;
         _viewModel.BuffDebuffGroupPreviewChanged -= _widget.ApplyBuffDebuffGroupSettingsPreview;
         _viewModel.ReviveListPreviewChanged -= _widget.ApplyReviveListSettingsPreview;
-        _viewModel.DamageTakenListPreviewChanged -= _widget.ApplyDamageTakenListSettingsPreview;
+        _viewModel.DamageTakenLogPreviewChanged -= _widget.ApplyDamageTakenLogSettingsPreview;
         _viewModel.EntityInfoPreviewChanged -= _widget.ApplyEntityInfoSettingsPreview;
+        _viewModel.ChatPreviewChanged -= _widget.ApplyChatSettingsPreview;
         _widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
         _widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;
         _widget.BuffListPriorityBuffChangedFromWidget -= Widget_BuffListPriorityBuffChangedFromWidget;
@@ -117,8 +119,8 @@ public partial class WidgetSettingsWindow : Window
         _widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
         _widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
         _widget.BuffDebuffGroupNotificationTargetChangedFromWidget -= Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
-        _widget.MetricTimelineVisibleSecondsChangedFromWidget -= Widget_MetricTimelineVisibleSecondsChangedFromWidget;
-        _widget.DamageTakenListShowsLatestHitOnlyChangedFromWidget -= Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget;
+        _widget.MetricGraphVisibleSecondsChangedFromWidget -= Widget_MetricGraphVisibleSecondsChangedFromWidget;
+        _widget.DamageTakenLogShowsLatestHitOnlyChangedFromWidget -= Widget_DamageTakenLogShowsLatestHitOnlyChangedFromWidget;
         _widget.PlayerStatusRowOrderChanged -= Widget_PlayerStatusRowOrderChanged;
         _widget.EndSettingsPreview();
         _viewModel.Dispose();
@@ -186,15 +188,15 @@ public partial class WidgetSettingsWindow : Window
     }
 
     /// <summary>開いている間に推移グラフの窓の上のホイールで横軸の長さが変わった。設定の値にも入れる。</summary>
-    private void Widget_MetricTimelineVisibleSecondsChangedFromWidget(int visibleSeconds)
+    private void Widget_MetricGraphVisibleSecondsChangedFromWidget(int visibleSeconds)
     {
-        _viewModel.MetricTimelineSettings?.SetVisibleSecondsFromWidget(visibleSeconds);
+        _viewModel.MetricGraphSettings?.SetVisibleSecondsFromWidget(visibleSeconds);
     }
 
     /// <summary>開いている間に被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」が変わった。設定の値にも入れる。</summary>
-    private void Widget_DamageTakenListShowsLatestHitOnlyChangedFromWidget(bool showsLatestHitOnly)
+    private void Widget_DamageTakenLogShowsLatestHitOnlyChangedFromWidget(bool showsLatestHitOnly)
     {
-        _viewModel.DamageTakenListSettings?.SetShowsLatestHitOnlyFromWidget(showsLatestHitOnly);
+        _viewModel.DamageTakenLogSettings?.SetShowsLatestHitOnlyFromWidget(showsLatestHitOnly);
     }
 
     /// <summary>
@@ -396,14 +398,14 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(ClassColorsHost);
     }
 
-    private void TakenDamageLogClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    private void TimelineClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
-        ScrollToSection(TakenDamageLogClassColorsHost);
+        ScrollToSection(TimelineClassColorsHost);
     }
 
-    private void TakenDamageLogTextColorsNavButton_Click(object sender, RoutedEventArgs e)
+    private void TimelineTextColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
-        ScrollToSection(TakenDamageLogTextColorsHost);
+        ScrollToSection(TimelineTextColorsHost);
     }
 
     private void PlayerInfoClassColorsNavButton_Click(object sender, RoutedEventArgs e)
@@ -426,14 +428,19 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(EntityInfoClassColorsHost);
     }
 
+    private void ChatTextColorsNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(ChatTextColorsHost);
+    }
+
     private void BuffListColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BuffListColorsHost);
     }
 
-    private void DamageTakenListClassColorsNavButton_Click(object sender, RoutedEventArgs e)
+    private void DamageTakenLogClassColorsNavButton_Click(object sender, RoutedEventArgs e)
     {
-        ScrollToSection(DamageTakenListClassColorsHost);
+        ScrollToSection(DamageTakenLogClassColorsHost);
     }
 
     private void ElementColorsNavButton_Click(object sender, RoutedEventArgs e)

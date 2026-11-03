@@ -77,16 +77,23 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     }
 
     /// <summary>
-    /// 名刺の値(顔写真・名刺)が変わった相手。その相手を映している窓(一覧から外れて最後の値を残している窓も含む)だけ
-    /// <see cref="OnSocialDataChanged"/> を呼ぶ。
+    /// 名簿の外の値(名刺照会の値・チャットの発言者の値、<see cref="PlayerDirectory.Changed"/>)が変わった相手。その相手を映している窓だけ、
+    /// 一覧に居ない相手を引き直し(<see cref="ShowsKnownPlayerOffList"/> の窓)、<see cref="OnSocialDataChanged"/> を呼ぶ。
     /// </summary>
-    public void NotifySocialDataChanged(long characterId)
+    public void NotifyPlayerDataChanged(long characterId)
     {
-        if (RepresentsPlayer(characterId))
+        if (!RepresentsPlayer(characterId))
         {
-            OnSocialDataChanged();
-            RefreshDataStatus();
+            return;
         }
+
+        if (_requestedCharacterId is { } requestedCharacterId && ShowsKnownPlayerOffList)
+        {
+            UpdatePlayer(PlayerRosterPresentationStore.Instance.GetPlayer(requestedCharacterId));
+        }
+
+        OnSocialDataChanged();
+        RefreshDataStatus();
     }
 
     /// <summary>名刺の値の控えが全部消えた(キャプチャの停止とログアウト)。相手を問わず <see cref="OnSocialDataChanged"/> を呼ぶ。</summary>
@@ -116,7 +123,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     /// <summary>
     /// この窓の状態の印。条件は <see cref="WidgetDataStatusRules"/> の窓の種類ごとの関数に書き、ここでは事実を集めて渡すだけにする。
     /// </summary>
-    /// <param name="player">窓の相手の行(一覧から消えても残した最後の行を含む)。無ければ null。</param>
+    /// <param name="player">窓の相手の行(一覧に居ない相手を <see cref="PlayerDirectory"/> から引いた行を含む)。無ければ null。</param>
     protected abstract WidgetDataStatus CreateDataStatus(GameReceptionSnapshot reception, PlayerRosterEntry? player);
 
     /// <summary>映している相手の名刺の値が変わったとき。それを表示に使う窓だけが上書きする。</summary>
@@ -126,7 +133,7 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
 
     /// <summary>
     /// ログアウトで起動直後の状態へ戻したとき。覚えている素性のうち、保存して次の起動へ持ち越す名前と UID だけを残し、
-    /// NPC の印と職業は捨てる(起動時の復元と同じ)。一覧から消えても残していた最後の行も、キャラが替わり得るので捨てる。
+    /// NPC の印と職業は捨てる(起動時の復元と同じ)。出していた行も、キャラが替わり得るので捨てる。
     /// </summary>
     public void ResetToStartup()
     {
@@ -149,10 +156,10 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
     }
 
     /// <summary>
-    /// 相手が一覧から消えても(パーティ外で周りから外れた)、最後に届いた行を残す窓か。既定は残さない。
-    /// 中身が今の状態を表す窓(バフ・グラフなど)は残さない。
+    /// 相手が一覧に居ないとき(一覧から外れた人・チャットから開いた人など)も、分かっている値(<see cref="PlayerDirectory"/>)で出す窓か。既定は出さない。
+    /// 中身が今の状態を表す窓(バフ・グラフなど)は出さない。
     /// </summary>
-    protected virtual bool KeepsLastPlayerWhenRemoved => false;
+    protected virtual bool ShowsKnownPlayerOffList => false;
 
     public WidgetListItemViewModel PlayerWidget { get; }
 
@@ -281,7 +288,10 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
 
         if (_requestedCharacterId is { } characterId)
         {
-            playersByCharacterId.TryGetValue(characterId, out player);
+            if (!playersByCharacterId.TryGetValue(characterId, out player))
+            {
+                player = FindOffListPlayer(characterId);
+            }
         }
         else
         {
@@ -304,22 +314,24 @@ public abstract class PlayerWidgetWindowViewModel : ViewModelBase, IWidgetDataSt
         OnSelectedPlayerChanged(_selectedPlayer);
     }
 
+    /// <param name="player">一覧での相手の行。一覧に居なければ null(<see cref="ShowsKnownPlayerOffList"/> の窓は分かっている値で引く)。</param>
     protected void InitializePlayer(PlayerRosterEntry? player)
     {
-        UpdatePlayer(player);
+        UpdatePlayer(player ?? (_requestedCharacterId is { } characterId ? FindOffListPlayer(characterId) : null));
     }
 
     protected abstract void OnSelectedPlayerChanged(PlayerRosterEntry? player);
 
+    /// <summary>一覧に居ない相手の行。分かっている値で出す窓だけ引く。</summary>
+    private PlayerRosterEntry? FindOffListPlayer(long characterId)
+    {
+        return ShowsKnownPlayerOffList
+            ? PlayerRosterPresentationStore.Instance.GetPlayer(characterId)
+            : null;
+    }
+
     private void UpdatePlayer(PlayerRosterEntry? player)
     {
-        // 相手が一覧から消えたら(パーティ外で周りから外れた)、残す窓は最後に届いた行のまま残す。
-        // 周りにいない形にする(現在地は分からない)。ログアウトで捨てる(ResetToStartup)。
-        if (player is null && KeepsLastPlayerWhenRemoved && _selectedPlayer is not null)
-        {
-            player = _selectedPlayer with { IsNearby = false, PartySceneId = 0, PartyLineId = 0 };
-        }
-
         if (player is not null)
         {
             if (_requestedCharacterId is null)

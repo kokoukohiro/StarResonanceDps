@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Views;
@@ -93,32 +94,15 @@ public partial class ColorPickerWindow : Window, INotifyPropertyChanged
 
     private static bool IsInsideTextBox(DependencyObject source)
     {
-        var current = source;
-        while (current != null)
+        for (DependencyObject? current = source; current is not null; current = ElementTree.GetParent(current))
         {
             if (current is TextBox)
             {
                 return true;
             }
-
-            current = GetParent(current);
         }
 
         return false;
-    }
-
-    private static DependencyObject? GetParent(DependencyObject current)
-    {
-        DependencyObject? visualParent = null;
-        try
-        {
-            visualParent = VisualTreeHelper.GetParent(current);
-        }
-        catch (InvalidOperationException)
-        {
-        }
-
-        return visualParent ?? LogicalTreeHelper.GetParent(current);
     }
 
     private void OkButton_Click(object sender, RoutedEventArgs e)

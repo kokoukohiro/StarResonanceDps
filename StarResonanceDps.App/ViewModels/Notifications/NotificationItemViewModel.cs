@@ -87,14 +87,14 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     private int _telegraphedSkillConditionIndex = AppConfigDefaults.DefaultTelegraphedSkillConditionIndex;
 
     /// <summary>
-    /// エンティティ詠唱・プレイヤー出現・エンティティ出現の対象の名前(区切りで並べた複数、<see cref="NotificationTargetList"/>)。
-    /// 打ったままの値で持ち、保存のときに分ける。
+    /// エンティティ詠唱・プレイヤー出現・エンティティ出現の対象の名前と、ワールドチャットの一致ワード(区切りで並べた複数、<see cref="NotificationTargetList"/>)。
+    /// 区切りは対象の名前が「|」、一致ワードが空白。打ったままの値で持ち、保存のときに分ける。
     /// </summary>
     [ObservableProperty]
     private string _targetName = string.Empty;
 
     /// <summary>
-    /// 対象の名前と同じ項目の、対象のID(区切りで並べた複数)。打ったままの値で持ち、保存のときに分けて数にする。空なら入力なし。
+    /// エンティティ詠唱・プレイヤー出現・エンティティ出現の対象のID(区切りで並べた複数)。打ったままの値で持ち、保存のときに分けて数にする。空なら入力なし。
     /// 入力欄は数字と区切りだけを受け、区切りのあいだの桁は long に収まる長さまで(<see cref="Behaviors.DigitsOnlyInputBehavior"/>)。
     /// </summary>
     [ObservableProperty]
@@ -162,6 +162,9 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     /// <summary>エンティティ出現の項目か。右下の先頭に「対象エンティティ名」「対象エンティティID」の行と注意書きを出す。</summary>
     public bool ShowsTargetEntityName => Kind == NotificationKind.EntityAppeared;
 
+    /// <summary>ワールドチャットの項目か。右下の先頭に「一致ワード」の行と注意書きを出す。</summary>
+    public bool ShowsMatchWords => Kind == NotificationKind.WorldChat;
+
     /// <summary>出し方が Windows の通知か。出し方の行に応答不可の注意書きを出す。</summary>
     public bool IsWindowsNotificationSelected => MethodIndex == AppConfigDefaults.NotificationMethodWindowsIndex;
 
@@ -211,7 +214,9 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             HealthLowConditionIndex = config.HealthLowConditionIndex;
             CuisinePotionConditionIndex = config.CuisinePotionConditionIndex;
             TelegraphedSkillConditionIndex = config.TelegraphedSkillConditionIndex;
-            TargetName = NotificationTargetList.JoinNames(config.TargetNames);
+            TargetName = ShowsMatchWords
+                ? NotificationTargetList.JoinMatchWords(config.TargetNames)
+                : NotificationTargetList.JoinNames(config.TargetNames);
             TargetIdText = NotificationTargetList.JoinIds(config.TargetIds);
             _voicevoxSpeakerUuid = config.VoicevoxSpeakerUuid;
             _voicevoxSpeakerName = config.VoicevoxSpeakerName;
@@ -248,16 +253,37 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             HealthLowConditionIndex = HealthLowConditionIndex,
             CuisinePotionConditionIndex = CuisinePotionConditionIndex,
             TelegraphedSkillConditionIndex = TelegraphedSkillConditionIndex,
-            TargetNames = NotificationTargetList.SplitNames(TargetName),
+            TargetNames = ShowsMatchWords
+                ? NotificationTargetList.SplitMatchWords(TargetName)
+                : NotificationTargetList.SplitNames(TargetName),
             TargetIds = NotificationTargetList.ParseIds(TargetIdText)
         };
     }
 
-    /// <summary>エンジンから取れた話者の一覧を受けて、話者とスタイルの選択肢を作り直す。</summary>
+    /// <summary>
+    /// エンジンから取れた話者の一覧を受けて、話者とスタイルの選択肢を作り直す。
+    /// 読み上げ方法が VOICEVOX でまだ話者を選んでいなければ、一覧の先頭の話者(リストの一番上)とその最初のスタイル
+    /// (話者を選び直したときと同じ決め方)を選んで保存する。選んである話者は、一覧に無くても替えない。
+    /// </summary>
     public void ApplyFetchedVoicevoxStyles(IReadOnlyList<VoicevoxStyle> styles)
     {
         _fetchedVoicevoxStyles = styles;
+        var selectsDefaultSpeaker = IsVoicevoxSelected && !HasVoicevoxSpeaker && styles.Count > 0;
+        if (selectsDefaultSpeaker)
+        {
+            var defaultStyle = styles[0];
+            _voicevoxSpeakerUuid = defaultStyle.SpeakerUuid;
+            _voicevoxSpeakerName = defaultStyle.SpeakerName;
+            _voicevoxStyleId = defaultStyle.StyleId;
+            _voicevoxStyleName = defaultStyle.StyleName;
+        }
+
         RebuildVoicevoxOptions();
+        if (selectsDefaultSpeaker)
+        {
+            OnVoicevoxSpeakerChanged();
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public void RefreshLocalizedText()

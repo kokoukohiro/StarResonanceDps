@@ -77,9 +77,9 @@ public readonly record struct BuffDebuffCardContent(
 
     /// <summary>
     /// 付与者プレイヤー名(<see cref="PlayerBuffSnapshot.Caster"/>)。付与者がプレイヤーでなければ空。
-    /// 名前の規則は被ダメログと同じ(<see cref="PlayerInfoFormatFormatter.GetPartyDisplayName"/>)。
+    /// 名前の規則はタイムライン・被ダメログと同じ(<see cref="PlayerInfoFormatFormatter.GetPartyDisplayName"/>)。
     /// </summary>
-    public static string GetCasterName(TakenDamageLogParty? caster)
+    public static string GetCasterName(CombatEventLogParty? caster)
         => caster is not null
             ? PlayerInfoFormatFormatter.GetPartyDisplayName(caster)
             : string.Empty;
@@ -106,7 +106,7 @@ public readonly record struct BuffDebuffCardContent(
         string targetName,
         int level,
         string? formatString,
-        TakenDamageLogParty? lastKnownCaster)
+        CombatEventLogParty? lastKnownCaster)
     {
         if (string.IsNullOrWhiteSpace(lastKnownBuffName))
         {

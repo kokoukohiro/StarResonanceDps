@@ -21,20 +21,21 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private readonly Dictionary<long, EntityListEntry> _entityListEntriesByUuid = [];
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
-    private MetricTimelineWidgetSettingsConfig _metricTimeline = WidgetConfigDefaults.CreateMetricTimelineSettings(WidgetKind.DpsGraph);
+    private MetricGraphWidgetSettingsConfig _metricGraph = WidgetConfigDefaults.CreateMetricGraphSettings(WidgetKind.DpsGraph);
     private BuffCardWidgetSettingsConfig _buffCard = WidgetConfigDefaults.CreateBuffCardSettings();
-    private TakenDamageLogWidgetSettingsConfig _takenDamageLog = WidgetConfigDefaults.CreateTakenDamageLogSettings();
+    private TimelineWidgetSettingsConfig _timeline = WidgetConfigDefaults.CreateTimelineSettings();
     private PlayerInfoWidgetSettingsConfig _playerInfo = WidgetConfigDefaults.CreatePlayerInfoSettings();
     private BuffListWidgetSettingsConfig _buffList = WidgetConfigDefaults.CreateBuffListSettings(WidgetKind.BuffList);
-    private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageContribution);
+    private ElementColorWidgetSettingsConfig _elementColor = WidgetConfigDefaults.CreateElementColorSettings(WidgetKind.DamageSkillDetail);
     private SkillDetailWidgetSettingsConfig _skillDetail = WidgetConfigDefaults.CreateSkillDetailSettings();
     private EquipmentWidgetSettingsConfig _equipment = WidgetConfigDefaults.CreateEquipmentSettings();
     private PlayerStatusWidgetSettingsConfig _playerStatus = WidgetConfigDefaults.CreatePlayerStatusSettings();
     private List<int> _playerStatusRowOrder = WidgetConfigDefaults.NormalizePlayerStatusRowOrder(null);
     private BuffDebuffGroupWidgetSettingsConfig _buffDebuffGroup = WidgetConfigDefaults.CreateBuffDebuffGroupSettings();
     private ReviveListWidgetSettingsConfig _reviveList = WidgetConfigDefaults.CreateReviveListSettings();
-    private DamageTakenListWidgetSettingsConfig _damageTakenList = WidgetConfigDefaults.CreateDamageTakenListSettings();
+    private DamageTakenLogWidgetSettingsConfig _damageTakenLog = WidgetConfigDefaults.CreateDamageTakenLogSettings();
     private EntityInfoWidgetSettingsConfig _entityInfo = WidgetConfigDefaults.CreateEntityInfoSettings();
+    private ChatWidgetSettingsConfig _chat = WidgetConfigDefaults.CreateChatSettings();
 
     /// <summary>エンティティリストの行を組む設定。メーターの設定(<c>_meter</c>)が変わったときに作り直す。</summary>
     private EntityRowSettings _entityRowSettings;
@@ -197,14 +198,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         or WidgetKind.BuffList
         or WidgetKind.DebuffList
         or WidgetKind.BuffDebuffCard
-        or WidgetKind.DamageContribution
+        or WidgetKind.DamageSkillDetail
         or WidgetKind.DamageSummary
         or WidgetKind.DpsGraph
-        or WidgetKind.HealingContribution
+        or WidgetKind.HealingSkillDetail
         or WidgetKind.HealingSummary
         or WidgetKind.HpsGraph
         or WidgetKind.DamageTakenSummary
-        or WidgetKind.EntityInfo;
+        or WidgetKind.EntityInfo
+        or WidgetKind.Chat;
 
     public bool HasOpenPlayerWindows => IsPlayerWindowWidget && OpenPlayerWindowCount > 0;
 
@@ -228,14 +230,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         return WidgetConfigDefaults.CloneNormalizedMeter(Kind, _meter);
     }
 
-    public MetricTimelineWidgetSettingsConfig GetMetricTimelineSettingsSnapshot()
+    public MetricGraphWidgetSettingsConfig GetMetricGraphSettingsSnapshot()
     {
-        return WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, _metricTimeline);
+        return WidgetConfigDefaults.CloneNormalizedMetricGraph(Kind, _metricGraph);
     }
 
-    public TakenDamageLogWidgetSettingsConfig GetTakenDamageLogSettingsSnapshot()
+    public TimelineWidgetSettingsConfig GetTimelineSettingsSnapshot()
     {
-        return WidgetConfigDefaults.CloneNormalizedTakenDamageLog(_takenDamageLog);
+        return WidgetConfigDefaults.CloneNormalizedTimeline(_timeline);
     }
 
     public PlayerInfoWidgetSettingsConfig GetPlayerInfoSettingsSnapshot()
@@ -278,14 +280,19 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         return WidgetConfigDefaults.CloneNormalizedReviveList(_reviveList);
     }
 
-    public DamageTakenListWidgetSettingsConfig GetDamageTakenListSettingsSnapshot()
+    public DamageTakenLogWidgetSettingsConfig GetDamageTakenLogSettingsSnapshot()
     {
-        return WidgetConfigDefaults.CloneNormalizedDamageTakenList(_damageTakenList);
+        return WidgetConfigDefaults.CloneNormalizedDamageTakenLog(_damageTakenLog);
     }
 
     public EntityInfoWidgetSettingsConfig GetEntityInfoSettingsSnapshot()
     {
         return WidgetConfigDefaults.CloneNormalizedEntityInfo(_entityInfo);
+    }
+
+    public ChatWidgetSettingsConfig GetChatSettingsSnapshot()
+    {
+        return WidgetConfigDefaults.CloneNormalizedChat(_chat);
     }
 
     /// <summary>バフ・デバフグループに、その鍵の行がオンで入っているか(設定の窓のプレビューを含む今の値)。</summary>
@@ -631,62 +638,62 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     }
 
     /// <summary>推移グラフの今の横軸の長さ(設定の窓のプレビューを含む)。</summary>
-    public int MetricTimelineVisibleSeconds => _metricTimeline.VisibleSeconds;
+    public int MetricGraphVisibleSeconds => _metricGraph.VisibleSeconds;
 
     /// <summary>
     /// 推移グラフの窓の上のホイールで横軸の長さを変える。同じ種類の開いている窓を全部描き直し、
-    /// 開いている設定の窓へ <see cref="MetricTimelineVisibleSecondsChangedFromWidget"/> で知らせる。
-    /// 保存はホイールが止まってから <see cref="SaveMetricTimelineVisibleSeconds"/> で行う。
+    /// 開いている設定の窓へ <see cref="MetricGraphVisibleSecondsChangedFromWidget"/> で知らせる。
+    /// 保存はホイールが止まってから <see cref="SaveMetricGraphVisibleSeconds"/> で行う。
     /// </summary>
-    public void SetMetricTimelineVisibleSecondsFromWidget(int visibleSeconds)
+    public void SetMetricGraphVisibleSecondsFromWidget(int visibleSeconds)
     {
-        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        if (!WidgetConfigDefaults.SupportsMetricGraphSettings(Kind))
         {
             return;
         }
 
-        var normalized = WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(visibleSeconds);
-        if (_metricTimeline.VisibleSeconds == normalized)
+        var normalized = WidgetConfigDefaults.ClampMetricGraphVisibleSeconds(visibleSeconds);
+        if (_metricGraph.VisibleSeconds == normalized)
         {
             return;
         }
 
-        _metricTimeline.VisibleSeconds = normalized;
+        _metricGraph.VisibleSeconds = normalized;
         RaisePlayerWindowPresentationChanged();
-        MetricTimelineVisibleSecondsChangedFromWidget?.Invoke(normalized);
+        MetricGraphVisibleSecondsChangedFromWidget?.Invoke(normalized);
     }
 
     /// <summary>
     /// 横軸の長さを1項目だけ書き戻す。<b>設定一式は触らない</b>ので、開いている設定の窓が持つ未保存の値とぶつからない。
     /// </summary>
-    public void SaveMetricTimelineVisibleSeconds(int visibleSeconds)
+    public void SaveMetricGraphVisibleSeconds(int visibleSeconds)
     {
-        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        if (!WidgetConfigDefaults.SupportsMetricGraphSettings(Kind))
         {
             return;
         }
 
-        WidgetStateManager.Instance.SaveMetricTimelineVisibleSeconds(
+        WidgetStateManager.Instance.SaveMetricGraphVisibleSeconds(
             Kind,
-            WidgetConfigDefaults.ClampMetricTimelineVisibleSeconds(visibleSeconds));
+            WidgetConfigDefaults.ClampMetricGraphVisibleSeconds(visibleSeconds));
     }
 
     /// <summary>
     /// 被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」を切り替える。窓へ設定の変化を知らせ、
-    /// 開いている設定の窓へ <see cref="DamageTakenListShowsLatestHitOnlyChangedFromWidget"/> で知らせ、この項目だけを保存する。
+    /// 開いている設定の窓へ <see cref="DamageTakenLogShowsLatestHitOnlyChangedFromWidget"/> で知らせ、この項目だけを保存する。
     /// </summary>
-    public void SetDamageTakenListShowsLatestHitOnlyFromWidget(bool showsLatestHitOnly)
+    public void SetDamageTakenLogShowsLatestHitOnlyFromWidget(bool showsLatestHitOnly)
     {
-        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind)
-            || _damageTakenList.ShowsLatestHitOnly == showsLatestHitOnly)
+        if (!WidgetConfigDefaults.SupportsDamageTakenLogSettings(Kind)
+            || _damageTakenLog.ShowsLatestHitOnly == showsLatestHitOnly)
         {
             return;
         }
 
-        _damageTakenList.ShowsLatestHitOnly = showsLatestHitOnly;
-        DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
-        DamageTakenListShowsLatestHitOnlyChangedFromWidget?.Invoke(showsLatestHitOnly);
-        WidgetStateManager.Instance.SaveDamageTakenListShowsLatestHitOnly(Kind, showsLatestHitOnly);
+        _damageTakenLog.ShowsLatestHitOnly = showsLatestHitOnly;
+        DamageTakenLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+        DamageTakenLogShowsLatestHitOnlyChangedFromWidget?.Invoke(showsLatestHitOnly);
+        WidgetStateManager.Instance.SaveDamageTakenLogShowsLatestHitOnly(Kind, showsLatestHitOnly);
     }
 
     /// <summary>カードの表示書式。倍率辞書を丸ごと複製しないよう、これだけ直に返す。</summary>
@@ -740,7 +747,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? MeterSettingsChanged;
 
-    public event EventHandler? TakenDamageLogSettingsChanged;
+    public event EventHandler? TimelineSettingsChanged;
 
     public event EventHandler? PlayerInfoSettingsChanged;
 
@@ -753,10 +760,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public event Action<WidgetKind, BuffEntryKey, bool>? BuffListPriorityBuffChangedFromWidget;
 
     /// <summary>推移グラフの窓の上のホイールで横軸の長さが変わった(引数は新しい秒数)。設定の窓のスライダーでは上げない。</summary>
-    public event Action<int>? MetricTimelineVisibleSecondsChangedFromWidget;
+    public event Action<int>? MetricGraphVisibleSecondsChangedFromWidget;
 
     /// <summary>被ダメログのヘッダーのボタンで「最新の被ダメのみ表示」が変わった(引数は新しい値)。設定の窓のスイッチでは上げない。</summary>
-    public event Action<bool>? DamageTakenListShowsLatestHitOnlyChangedFromWidget;
+    public event Action<bool>? DamageTakenLogShowsLatestHitOnlyChangedFromWidget;
 
     public event EventHandler? ElementColorSettingsChanged;
 
@@ -770,9 +777,11 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? ReviveListSettingsChanged;
 
-    public event EventHandler? DamageTakenListSettingsChanged;
+    public event EventHandler? DamageTakenLogSettingsChanged;
 
     public event EventHandler? EntityInfoSettingsChanged;
+
+    public event EventHandler? ChatSettingsChanged;
 
     /// <summary>エンティティ情報の窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面のスイッチでは上げない。</summary>
     public event Action<WidgetKind, int>? EntityInfoHiddenBuffsChanged;
@@ -884,14 +893,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             Meter = WidgetConfigDefaults.SupportsMeterSettings(Kind)
                 ? _meter.Clone()
                 : null,
-            MetricTimeline = WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind)
-                ? _metricTimeline.Clone()
+            MetricGraph = WidgetConfigDefaults.SupportsMetricGraphSettings(Kind)
+                ? _metricGraph.Clone()
                 : null,
             BuffCard = WidgetConfigDefaults.SupportsBuffCardSettings(Kind)
                 ? _buffCard.Clone()
                 : null,
-            TakenDamageLog = WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind)
-                ? _takenDamageLog.Clone()
+            Timeline = WidgetConfigDefaults.SupportsTimelineSettings(Kind)
+                ? _timeline.Clone()
                 : null,
             PlayerInfo = WidgetConfigDefaults.SupportsPlayerInfoSettings(Kind)
                 ? _playerInfo.Clone()
@@ -920,11 +929,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             ReviveList = WidgetConfigDefaults.SupportsReviveListSettings(Kind)
                 ? _reviveList.Clone()
                 : null,
-            DamageTakenList = WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind)
-                ? _damageTakenList.Clone()
+            DamageTakenLog = WidgetConfigDefaults.SupportsDamageTakenLogSettings(Kind)
+                ? _damageTakenLog.Clone()
                 : null,
             EntityInfo = WidgetConfigDefaults.SupportsEntityInfoSettings(Kind)
                 ? _entityInfo.Clone()
+                : null,
+            Chat = WidgetConfigDefaults.SupportsChatSettings(Kind)
+                ? _chat.Clone()
                 : null
         };
     }
@@ -949,9 +961,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             _entityRowSettings = EntityRowSettings.FromEntityList(_meter);
         }
 
-        if (WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        if (WidgetConfigDefaults.SupportsMetricGraphSettings(Kind))
         {
-            _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, config.MetricTimeline);
+            _metricGraph = WidgetConfigDefaults.CloneNormalizedMetricGraph(Kind, config.MetricGraph);
             RaisePlayerWindowPresentationChanged();
         }
 
@@ -962,10 +974,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             BuffCardShortcutsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        if (WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind))
+        if (WidgetConfigDefaults.SupportsTimelineSettings(Kind))
         {
-            _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(config.TakenDamageLog);
-            TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+            _timeline = WidgetConfigDefaults.CloneNormalizedTimeline(config.Timeline);
+            TimelineSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (WidgetConfigDefaults.SupportsPlayerInfoSettings(Kind))
@@ -1029,16 +1041,22 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        if (WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind))
+        if (WidgetConfigDefaults.SupportsDamageTakenLogSettings(Kind))
         {
-            _damageTakenList = WidgetConfigDefaults.CloneNormalizedDamageTakenList(config.DamageTakenList);
-            DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
+            _damageTakenLog = WidgetConfigDefaults.CloneNormalizedDamageTakenLog(config.DamageTakenLog);
+            DamageTakenLogSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         if (WidgetConfigDefaults.SupportsEntityInfoSettings(Kind))
         {
             _entityInfo = WidgetConfigDefaults.CloneNormalizedEntityInfo(config.EntityInfo);
             EntityInfoSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (WidgetConfigDefaults.SupportsChatSettings(Kind))
+        {
+            _chat = WidgetConfigDefaults.CloneNormalizedChat(config.Chat);
+            ChatSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         SynchronizePlayerListEntries(resetEntries: false);
@@ -1060,14 +1078,14 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ApplyMetricTimelineSettingsPreview(MetricTimelineWidgetSettingsConfig metricTimeline)
+    public void ApplyMetricGraphSettingsPreview(MetricGraphWidgetSettingsConfig metricGraph)
     {
-        if (!WidgetConfigDefaults.SupportsMetricTimelineSettings(Kind))
+        if (!WidgetConfigDefaults.SupportsMetricGraphSettings(Kind))
         {
             return;
         }
 
-        _metricTimeline = WidgetConfigDefaults.CloneNormalizedMetricTimeline(Kind, metricTimeline);
+        _metricGraph = WidgetConfigDefaults.CloneNormalizedMetricGraph(Kind, metricGraph);
         RaisePlayerWindowPresentationChanged();
     }
 
@@ -1083,15 +1101,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         BuffCardShortcutsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ApplyTakenDamageLogSettingsPreview(TakenDamageLogWidgetSettingsConfig takenDamageLog)
+    public void ApplyTimelineSettingsPreview(TimelineWidgetSettingsConfig timeline)
     {
-        if (!WidgetConfigDefaults.SupportsTakenDamageLogSettings(Kind))
+        if (!WidgetConfigDefaults.SupportsTimelineSettings(Kind))
         {
             return;
         }
 
-        _takenDamageLog = WidgetConfigDefaults.CloneNormalizedTakenDamageLog(takenDamageLog);
-        TakenDamageLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+        _timeline = WidgetConfigDefaults.CloneNormalizedTimeline(timeline);
+        TimelineSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyPlayerInfoSettingsPreview(PlayerInfoWidgetSettingsConfig playerInfo)
@@ -1182,15 +1200,26 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         ReviveListSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ApplyDamageTakenListSettingsPreview(DamageTakenListWidgetSettingsConfig damageTakenList)
+    public void ApplyDamageTakenLogSettingsPreview(DamageTakenLogWidgetSettingsConfig damageTakenLog)
     {
-        if (!WidgetConfigDefaults.SupportsDamageTakenListSettings(Kind))
+        if (!WidgetConfigDefaults.SupportsDamageTakenLogSettings(Kind))
         {
             return;
         }
 
-        _damageTakenList = WidgetConfigDefaults.CloneNormalizedDamageTakenList(damageTakenList);
-        DamageTakenListSettingsChanged?.Invoke(this, EventArgs.Empty);
+        _damageTakenLog = WidgetConfigDefaults.CloneNormalizedDamageTakenLog(damageTakenLog);
+        DamageTakenLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    public void ApplyChatSettingsPreview(ChatWidgetSettingsConfig chat)
+    {
+        if (!WidgetConfigDefaults.SupportsChatSettings(Kind))
+        {
+            return;
+        }
+
+        _chat = WidgetConfigDefaults.CloneNormalizedChat(chat);
+        ChatSettingsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public void ApplyEntityInfoSettingsPreview(EntityInfoWidgetSettingsConfig entityInfo)

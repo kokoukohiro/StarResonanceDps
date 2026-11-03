@@ -57,7 +57,7 @@
     "zh-CN": "累功刻痕",
     "en-US": "Cumulative Engraving",
     "ja-JP": "累功の刻傷",
-    "ko-KR": "공덕의 각인"
+    "ko-KR": "누적되는 각인"
   },
   "3005300": {
     "zh-CN": "幻想具现",
@@ -87,6 +87,6 @@
     "zh-CN": "属性交响",
     "en-US": "Stat Symphony",
     "ja-JP": "ステータスハーモニー",
-    "ko-KR": "능력치 하모니"
+    "ko-KR": "스테이터스 하모니"
   }
 }

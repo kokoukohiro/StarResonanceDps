@@ -8,13 +8,13 @@ using StarResonanceDps.Core.Models;
 namespace StarResonanceDps.App.ViewModels;
 
 /// <summary>
-/// アビリティ情報・潜在心相晶情報・モジュール情報。プレイヤーに乗っている根のバフ(名簿の行の <see cref="PlayerRosterEntry.RootBuffData"/>)のうち、
+/// 潜在心相晶情報・モジュール情報。プレイヤーに乗っている根のバフ(名簿の行の <see cref="PlayerRosterEntry.RootBuffData"/>)のうち、
 /// このウィジェットの種類のものを、種類の順・表の順で1行ずつ出す。根のバフの一覧をまだ受けていなければ何も出さない。
 ///
 /// <para>
 /// 名簿の行は HP などで頻繁に入れ替わるので、行の中身(名前・絵)を作り直して前の中身と値で比べ、違う行だけ差し替える。
 /// 根のバフは時間では変わらないのでタイマーは持たない。
-/// 相手が一覧から消えても(パーティ外で周りから外れた)最後に届いた値のまま残し、ログアウトで捨てる(プレイヤー情報と同じ)。
+/// 相手が一覧に居なくても分かっている値(<c>PlayerDirectory</c>。一覧から外れた人は最後の値)で出す(プレイヤー情報と同じ)。
 /// </para>
 /// </summary>
 public sealed class PlayerRootBuffWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
@@ -53,8 +53,8 @@ public sealed class PlayerRootBuffWidgetViewModel : PlayerWidgetWindowViewModel,
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
-    /// <summary>相手が一覧から消えても最後に届いた値のまま残す(プレイヤー情報と同じ)。</summary>
-    protected override bool KeepsLastPlayerWhenRemoved => true;
+    /// <summary>相手が一覧に居なくても分かっている値で出す(プレイヤー情報と同じ)。</summary>
+    protected override bool ShowsKnownPlayerOffList => true;
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
@@ -142,8 +142,7 @@ public sealed class PlayerRootBuffWidgetViewModel : PlayerWidgetWindowViewModel,
             entries.Add(new PlayerRootBuffEntry(
                 CombatDataCatalog.GetRootBuffName(buffId),
                 CombatIconResolver.ResolveRootBuffIcon(kind, iconName),
-                kind,
-                CombatDataCatalog.GetRootBuffTalentRole(buffId)));
+                kind));
         }
 
         return entries;

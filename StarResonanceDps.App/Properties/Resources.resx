@@ -293,7 +293,7 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
     <value>Potion/cuisine expired</value>
   </data>
-  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+  <data name="Settings_TimelineNotification_TelegraphedSkill" xml:space="preserve">
     <value>Telegraphed skill</value>
   </data>
   <data name="Notification_EntryConfirmation" xml:space="preserve">
@@ -314,7 +314,7 @@ If it is not installed, you can download it from the link below.</value>
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}'s {BuffName} effect is about to expire</value>
   </data>
-  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+  <data name="TimelineNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName} incoming</value>
   </data>
   <data name="EntryConfirmationNotification_Default" xml:space="preserve">
@@ -371,7 +371,18 @@ If it is not installed, you can download it from the link below.</value>
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName} is chanting</value>
   </data>
-  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+  <data name="Notification_PrivateChat" xml:space="preserve">
+    <value>Private Chat</value>
+  </data>
+  <data name="PrivateChatNotification_Default" xml:space="preserve">
+    <value>Private chat from {PlayerName}</value>
+  </data>
+  <data name="Notification_WorldChat" xml:space="preserve">
+    <value>World Chat</value>
+  </data>
+  <data name="WorldChatNotification_Default" xml:space="preserve">
+    <value>Recruitment from {PlayerName}</value>
+  </data>  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>On activation</value>
   </data>
   <data name="TelegraphedSkillCondition_1" xml:space="preserve">
@@ -608,69 +619,66 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Widget_State_Stopped" xml:space="preserve">
     <value>Stopped</value>
   </data>
-  <data name="Menu_DpsMeter" xml:space="preserve">
+  <data name="Widget_DpsMeter" xml:space="preserve">
     <value>DPS Meter</value>
   </data>
-  <data name="Menu_HpsMeter" xml:space="preserve">
+  <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS Meter</value>
   </data>
-  <data name="Menu_DtpsMeter" xml:space="preserve">
-    <value>DTPS Meter</value>
-  </data>
-  <data name="Widget_TakenDamageLog" xml:space="preserve">
+  <data name="Widget_Timeline" xml:space="preserve">
     <value>Timeline</value>
   </data>
-  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+  <data name="Timeline_CastFormat" xml:space="preserve">
     <value>{0} is casting {1}</value>
   </data>
-  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+  <data name="Timeline_AnnounceFormat" xml:space="preserve">
     <value>{0} is readying {1}</value>
   </data>
-  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+  <data name="Timeline_SkillFormat" xml:space="preserve">
     <value>{0}'s {1}</value>
   </data>
-  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+  <data name="CombatEventLog_UnnamedSkill" xml:space="preserve">
     <value>Attack</value>
   </data>
-  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+  <data name="Timeline_UnnamedHeal" xml:space="preserve">
     <value>Heal</value>
-  </data>  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  </data>  <data name="TextCopyFailed_Title" xml:space="preserve">
     <value>Text copy error</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+  <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>Could not copy the text.</value>
   </data>
-  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+  <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0} {1} HP</value>
   </data>
-  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+  <data name="Timeline_HealAmountFormat" xml:space="preserve">
     <value>recovered {0}</value>
   </data>
-  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+  <data name="Timeline_DamageFormat" xml:space="preserve">
     <value>{1} to {0}</value>
   </data>
-  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+  <data name="Timeline_DamageAmountFormat" xml:space="preserve">
     <value>{0} damage</value>
   </data>
-  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+  <data name="Timeline_BuffFormat" xml:space="preserve">
     <value>{1} on {0}</value>
   </data>
-  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+  <data name="Timeline_BuffDurationFormat" xml:space="preserve">
     <value>{0} ({1}s)</value>
   </data>
-  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+  <data name="Timeline_UnnamedEffect" xml:space="preserve">
     <value>Some effect</value>
   </data>
-  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+  <data name="CombatEventLog_SystemActor" xml:space="preserve">
     <value>System</value>
   </data>
-  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+  <data name="Timeline_UnnamedCastSkill" xml:space="preserve">
     <value>something</value>
   </data>
-  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+  <data name="DamageTakenLog_FallSkill" xml:space="preserve">
     <value>Fall</value>
   </data>
-  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+  <data name="Settings_Section_TimelineTextColors_Title" xml:space="preserve">
     <value>Text Colors</value>
   </data>
   <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
@@ -733,19 +741,19 @@ If it is not installed, you can download it from the link below.</value>
   <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
     <value>Applied by Others</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_EntityName" xml:space="preserve">
     <value>Entity name</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_SkillName" xml:space="preserve">
     <value>Skill name</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_PlayerName" xml:space="preserve">
     <value>Player name</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_Effect" xml:space="preserve">
     <value>Effect</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_HpValue" xml:space="preserve">
     <value>HP value</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
@@ -886,6 +894,9 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Widget_PlayerTalent" xml:space="preserve">
     <value>Talent Info</value>
   </data>
+  <data name="PlayerTalent_ActivationUnknown" xml:space="preserve">
+    <value>Activation unknown</value>
+  </data>
   <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
     <value>Deep-Slumber Psychoscope Info</value>
   </data>
@@ -931,13 +942,13 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS Trend Graph</value>
   </data>
-  <data name="Widget_HealingContribution" xml:space="preserve">
+  <data name="Widget_HealingSummary" xml:space="preserve">
     <value>Healing Details</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>DPS Trend Graph</value>
   </data>
-  <data name="Widget_DamageContribution" xml:space="preserve">
+  <data name="Widget_DamageSummary" xml:space="preserve">
     <value>Damage Details</value>
   </data>
   <data name="Widget_BuffList" xml:space="preserve">
@@ -1045,7 +1056,7 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>Unclassified</value>
   </data>
-  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+  <data name="MetricGraph_UnknownSkill" xml:space="preserve">
     <value>Unknown</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
@@ -1116,25 +1127,25 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
     <value>Custom Executable Name</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval" xml:space="preserve">
     <value>Drawing interval</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval_Option" xml:space="preserve">
     <value>{0} seconds</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds" xml:space="preserve">
     <value>X-axis length</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds_Option" xml:space="preserve">
     <value>{0} seconds</value>
   </data>
-  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+  <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>Show Skill Log</value>
   </data>
-  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+  <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>Skill Details (Damage)</value>
   </data>
-  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+  <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>Skill Details (Healing)</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
@@ -1230,6 +1241,9 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
     <value>Cannot read the data</value>
   </data>
+  <data name="WidgetDataStatus_PastChatRelogin" xml:space="preserve">
+    <value>Cannot receive past chat until you log in again</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>Add shield amount</value>
   </data>
@@ -1290,10 +1304,10 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="ListSort_Name" xml:space="preserve">
     <value>Name Order</value>
   </data>
-  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+  <data name="DamageTakenLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>Hide self-damage &amp; friendly fire</value>
   </data>
-  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+  <data name="Settings_Timeline_EnemyHeal" xml:space="preserve">
     <value>Enemy healing</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
@@ -1353,24 +1367,72 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="Widget_EntityInfo" xml:space="preserve">
     <value>Entity Info</value>
   </data>
-  <data name="Widget_DamageTakenList" xml:space="preserve">
+  <data name="Widget_Chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="Chat_Channel_World" xml:space="preserve">
+    <value>World</value>
+  </data>
+  <data name="Chat_Channel_Guild" xml:space="preserve">
+    <value>Guild</value>
+  </data>
+  <data name="Chat_Channel_Party" xml:space="preserve">
+    <value>Team</value>
+  </data>
+  <data name="Chat_Channel_Local" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <data name="Chat_Channel_Newbie" xml:space="preserve">
+    <value>Newbie</value>
+  </data>
+  <data name="Chat_PrivateFormat" xml:space="preserve">
+    <value>Private Chat ({0})</value>
+  </data>
+  <data name="Chat_Sticker" xml:space="preserve">
+    <value>[Sticker]</value>
+  </data>
+  <data name="Chat_Hyperlink" xml:space="preserve">
+    <value>[Link]</value>
+  </data>
+  <data name="Chat_Image" xml:space="preserve">
+    <value>[Image]</value>
+  </data>
+  <data name="Chat_Voice" xml:space="preserve">
+    <value>[Voice]</value>
+  </data>
+  <data name="Chat_VoiceTextFormat" xml:space="preserve">
+    <value>[Voice] {0}</value>
+  </data>
+  <data name="Settings_Section_ChatTextColors_Title" xml:space="preserve">
+    <value>Text Colors</value>
+  </data>
+  <data name="Settings_ChatTextColor_PlayerName" xml:space="preserve">
+    <value>Player name</value>
+  </data>
+  <data name="Settings_ChatTextColor_Time" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="Settings_ChatTextColor_Message" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Widget_DamageTakenLog" xml:space="preserve">
     <value>Damage Taken Log</value>
   </data>
   <data name="Widget_DamageTakenSummary" xml:space="preserve">
     <value>Damage Taken Details</value>
-  </data>  <data name="DamageTakenList_Defeated" xml:space="preserve">
+  </data>  <data name="DamageTakenLog_Defeated" xml:space="preserve">
     <value>(Defeated)</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsDefeatCause" xml:space="preserve">
     <value>Show cause of defeat</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsLatestHitOnly" xml:space="preserve">
     <value>Show latest hit only</value>
   </data>
-  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+  <data name="DamageTakenLog_ShowAllHits" xml:space="preserve">
     <value>Show All</value>
   </data>
-  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+  <data name="DamageTakenLog_ShowLatestHitOnly" xml:space="preserve">
     <value>Latest Only</value>
   </data>  <data name="ReviveList_Revivable" xml:space="preserve">
     <value>Revivable</value>
@@ -1584,6 +1646,15 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   </data>
   <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
     <value>e.g. 304221</value>
+  </data>
+  <data name="Notification_MatchWords" xml:space="preserve">
+    <value>Match words</value>
+  </data>
+  <data name="Notification_MatchWords_Placeholder" xml:space="preserve">
+    <value>e.g. Recruit</value>
+  </data>
+  <data name="Notification_MatchWordsAllNote" xml:space="preserve">
+    <value>Note: When separated by spaces, only messages containing all of them are notified.</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>Note: An entered ID takes priority over the name.</value>

@@ -131,6 +131,12 @@ public class NetCap
     /// </summary>
     public Action? MidStreamConnectionOpened { get; set; }
 
+    /// <summary>
+    /// 新しい接続をゲームの接続と分かったときに、その接続を持つ実行ファイルの名前で呼ぶ(キャプチャのスレッド)。
+    /// 今のサーバー(<c>GameServerStore</c>)を決めるのに使う。
+    /// </summary>
+    public Action<string>? GameConnectionIdentified { get; set; }
+
     public void RegisterProxyHandler(uint serviceId, uint methodId, Action<ReadOnlySpan<byte>, uint, ExtraPacketData> handler)
     {
         ProxyHandlers.Add(new ProxyId(serviceId, methodId), handler);
@@ -178,8 +184,12 @@ public class NetCap
                 TcpEndpoint.From(ipv4.DestinationAddress, tcpPacket.DestinationPort));
             if (!ConnectionFilters.TryGetValue(connectionKey, out var allowed))
             {
-                allowed = IsFromGame(ipv4, tcpPacket);
-                ConnectionFilters.TryAdd(connectionKey, allowed);
+                var gameExeName = FindGameExeName(ipv4, tcpPacket);
+                allowed = gameExeName is not null;
+                if (ConnectionFilters.TryAdd(connectionKey, allowed) && gameExeName is not null)
+                {
+                    GameConnectionIdentified?.Invoke(gameExeName);
+                }
             }
 
             if (!allowed)
@@ -601,18 +611,20 @@ public class NetCap
         }
     }
 
-    private bool IsFromGame(IPv4Packet ip, TcpPacket tcp)
+    /// <summary>ゲームの接続なら、その接続を持つ実行ファイルの名前。ゲームの接続でなければ null。</summary>
+    private string? FindGameExeName(IPv4Packet ip, TcpPacket tcp)
     {
         var conns = Utils.GetTCPConnectionsForExe(Config.ExeNames);
-        var isGameConnection = conns.Any((x =>
-            (x.LocalAddress == ip.SourceAddress.ToString() && x.LocalPort == tcp.SourcePort) ||
-            (x.RemoteAddress == ip.SourceAddress.ToString() && x.RemotePort == tcp.SourcePort) ||
-            (x.LocalAddress == ip.DestinationAddress.ToString() && x.LocalPort == tcp.DestinationPort) ||
-            (x.RemoteAddress == ip.DestinationAddress.ToString() && x.RemotePort == tcp.DestinationPort)));
+        var gameConnection = conns.FirstOrDefault((x =>
+            (x.Row.LocalAddress == ip.SourceAddress.ToString() && x.Row.LocalPort == tcp.SourcePort) ||
+            (x.Row.RemoteAddress == ip.SourceAddress.ToString() && x.Row.RemotePort == tcp.SourcePort) ||
+            (x.Row.LocalAddress == ip.DestinationAddress.ToString() && x.Row.LocalPort == tcp.DestinationPort) ||
+            (x.Row.RemoteAddress == ip.DestinationAddress.ToString() && x.Row.RemotePort == tcp.DestinationPort)));
+        var exeName = gameConnection.ExeName;
 
-        Log.Logger.Debug($"Checking {ip.SourceAddress}:{tcp.SourcePort} > {ip.DestinationAddress}:{tcp.DestinationPort} is game connection: {isGameConnection}");
+        Log.Logger.Debug($"Checking {ip.SourceAddress}:{tcp.SourcePort} > {ip.DestinationAddress}:{tcp.DestinationPort} is game connection: {exeName is not null}");
 
-        return isGameConnection;
+        return exeName;
     }
 
     /// <summary>

@@ -179,4 +179,17 @@ public static class Utils
 
         return exeNameToCapture;
     }
+
+    /// <summary>ゲームの実行ファイル名(上の一覧の名前)のサーバー。一覧に無い名前(カスタム)は分からない。</summary>
+    public static Models.GameServer GameServerFromExeName(string exeName)
+    {
+        return exeName switch
+        {
+            "StarASIA" or "StarASIA_STEAM" => Models.GameServer.Asia,
+            "Star" => Models.GameServer.China,
+            "BPSR" or "BPSR_STEAM" or "BPSR_EPIC" => Models.GameServer.Global,
+            "StarSEA" or "StarSEA_STEAM" => Models.GameServer.SoutheastAsia,
+            _ => Models.GameServer.Unknown
+        };
+    }
 }

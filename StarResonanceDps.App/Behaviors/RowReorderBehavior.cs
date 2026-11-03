@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Serilog;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels;
 
 namespace StarResonanceDps.App.Behaviors;
@@ -615,7 +616,7 @@ internal sealed class RowReorderController
     {
         var content = FindContent(container);
         var sawButton = false;
-        for (var current = source; current is not null && !ReferenceEquals(current, container); current = GetParent(current))
+        for (var current = source; current is not null && !ReferenceEquals(current, container); current = ElementTree.GetParent(current))
         {
             if (ReferenceEquals(current, content))
             {
@@ -634,7 +635,7 @@ internal sealed class RowReorderController
     private static T? FindAncestor<T>(DependencyObject start)
         where T : DependencyObject
     {
-        for (var current = GetParent(start); current is not null; current = GetParent(current))
+        for (var current = ElementTree.GetParent(start); current is not null; current = ElementTree.GetParent(current))
         {
             if (current is T found)
             {
@@ -643,13 +644,6 @@ internal sealed class RowReorderController
         }
 
         return null;
-    }
-
-    private static DependencyObject? GetParent(DependencyObject element)
-    {
-        return element is Visual or System.Windows.Media.Media3D.Visual3D
-            ? VisualTreeHelper.GetParent(element)
-            : LogicalTreeHelper.GetParent(element);
     }
 
     /// <summary>並べ替えの単位1つぶんの行。</summary>

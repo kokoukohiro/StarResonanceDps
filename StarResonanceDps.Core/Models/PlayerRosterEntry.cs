@@ -38,6 +38,9 @@ public sealed record PlayerRosterEntry(
     // この行のシーズン番号。素性が履歴の回から来た行だけその回のシーズン(0 は分からない)。
     // ライブの行は null で、一覧の今のシーズン(PlayerRosterSnapshot.SeasonId)を使う。
     int? SeasonId = null,
+    // この行のゲームのサーバー。素性が履歴の回から来た行だけその回のサーバー(保存する前の回は Unknown)。
+    // ライブの行は null で、今のサーバー(GameServerStore.Current)を使う。
+    GameServer? GameServer = null,
     // この行の顔と名刺の写真のリンク。素性が履歴の回から来た行だけ、その回に保存した値(保存の時点で届いていなければ null)。
     // ライブの行は null で、名刺の店(SocialDataStore)の今の値を使う。
     SocialAvatarState? RecordedAvatar = null,
@@ -49,4 +52,13 @@ public sealed record PlayerRosterEntry(
     // 他のプレイヤーについて、まだ届いていない情報(ウィジェットの状態の印の材料)。自分の行と、記録から来た行(IsFromRecord)はいつも無し。
     PlayerDataGaps DataGaps = PlayerDataGaps.None,
     // 素性が開いている履歴の回の記録から来た行。窓の中身は全部が履歴で、ライブの受信の欠けは表さない。
-    bool IsFromRecord = false);
+    bool IsFromRecord = false,
+    // 戦闘不能か。HP を取った出所で決める(実体なら最大HPが分かっていて HP 0、パーティの同期なら同期の状態が戦闘不能)。
+    // パーティの同期の HP は読み込み中などの生きている人にも 0 で届くので、HP 0 だけでは決めない。
+    bool IsIncapacitated = false,
+    // 今の職業の取ったタレントの木の節の番号(昇順)。自分にしか届かないので、ほかのプレイヤーの行はいつも null。
+    // 自分も全体コンテナかタレントを付け替えた差分を受けるまでは null。履歴の行はその回に保存した値。
+    IReadOnlyList<int>? TalentNodeIds = null,
+    // バフを付けないアビリティの節の技の置き換えに出てくる技の、元の技 → 最後に使ったほう(元の技か置き換え後の技)。
+    // どれもまだ使っていなければ null。履歴の行はその回に保存した値。
+    IReadOnlyDictionary<int, int>? LastReplaceableSkills = null);

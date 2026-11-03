@@ -10,7 +10,7 @@ using StarResonanceDps.App.ViewModels;
 namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
-/// 属性カラー(スキル詳細・被ダメリスト)と、与ダメ詳細・ヒール詳細・被ダメ詳細のアイコンカラー。作りはメーターのクラスカラーと同じで、
+/// 属性カラー(スキル詳細・被ダメログ)と、与ダメ詳細・ヒール詳細・被ダメ詳細のアイコンカラー。作りはメーターのクラスカラーと同じで、
 /// 行は9属性、アイコンカラーはその後に物理・魔法・無分類が続く(<see cref="WidgetConfigDefaults.HasDamageModeColorRows"/>)。
 /// 不透明度は全部の行で1組。保存の型は <see cref="ElementColorWidgetSettingsConfig"/>。
 ///

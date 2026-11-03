@@ -19,14 +19,14 @@ namespace StarResonanceDps.App.ViewModels;
 /// 蘇生リスト。名簿の戦闘不能の人を、蘇生不可デバフの残り時間の小さい順に並べる(1枚だけ開く窓、いつもライブ)。
 ///
 /// <para>
-/// 戦闘不能は、値が届いている(灰色でない)・記録から来た行でない・最大HPが分かっている・HPが 0 の行。
-/// 死亡の状態のプレイヤーの HP は Core が 0 にしている(周りの人は状態の属性、パーティは状態の同期)。
+/// 戦闘不能は、値が届いている(灰色でない)・記録から来た行でない・名簿の <see cref="PlayerRosterEntry.IsIncapacitated"/> が真の行
+/// (周りにいる人は最大HPが分かっていて HP が 0、周りにいないパーティの人はパーティの同期の状態が戦闘不能)。
 /// </para>
 ///
 /// <para>
-/// 右の文字と並びは <see cref="MeterSnapshotProvider.GetReviveBlockState"/> で決める。残り秒の分かる行は残り秒、
-/// 付いていない行と残りが 0 になった行は「蘇生可能」(並びの鍵は 0)、分からない行は「??秒」で最後。
-/// 同じ鍵どうしは今の並びを動かさない(残りが 0 になって「蘇生可能」に変わっても、その場に留まる)。
+/// 右の文字と並びは <see cref="MeterSnapshotProvider.GetReviveBlockState"/> で決める。残り秒の分かる行は残り秒(並びは切れる時刻の早い順)、
+/// 付いていない行は「蘇生可能」で最初、分からない行は「??秒」で最後。残りが 0 になった行も「蘇生可能」と出す。
+/// 同じ鍵どうしは今の並びを動かさない。
 /// </para>
 ///
 /// <para>
@@ -272,15 +272,14 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
     }
 
     /// <summary>
-    /// 戦闘不能の行か。灰色の行(控えしか無い)のHPは最後に見た値でいまの状態ではなく、記録から来た行も同じなので外す。
-    /// 最大HPの分からない行は HP も分からない(0 のまま)ので外す。
+    /// 戦闘不能の行か(決め方は名簿の <see cref="PlayerRosterEntry.IsIncapacitated"/>)。
+    /// 灰色の行(控えしか無い)は最後に見た状態でいまの状態ではなく、記録から来た行も同じなので外す。
     /// </summary>
     private static bool IsIncapacitated(PlayerRosterEntry player)
     {
         return player.IsLive
             && !player.IsFromRecord
-            && player.MaxHp > 0
-            && player.CurrentHp <= 0;
+            && player.IsIncapacitated;
     }
 
     private void UpdateEntry(
@@ -321,13 +320,16 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
         }
         entry.SortKey = state.Kind switch
         {
-            ReviveBlockStateKind.Unknown => double.PositiveInfinity,
-            ReviveBlockStateKind.Revivable => 0d,
-            _ => Math.Max(0d, state.RemainingSeconds)
+            ReviveBlockStateKind.Unknown => DateTime.MaxValue,
+            ReviveBlockStateKind.Revivable => DateTime.MinValue,
+            _ => state.EndTimeUtc
         };
     }
 
-    /// <summary>残り秒の小さい順に並べ直す。OrderBy は安定なので、同じ鍵どうしは今の並びのまま。動く行だけ動かす。</summary>
+    /// <summary>
+    /// 蘇生不可デバフの切れる早い順に並べ直す。残り秒ではなく切れる時刻で比べる(残り秒は人ごとに読む瞬間が違い、
+    /// 切れる時刻のほぼ同じ人どうしで大小が入れ替わる)。OrderBy は安定なので、同じ鍵どうしは今の並びのまま。動く行だけ動かす。
+    /// </summary>
     private void SortEntries()
     {
         var ordered = _entries.OrderBy(entry => entry.SortKey).ToArray();

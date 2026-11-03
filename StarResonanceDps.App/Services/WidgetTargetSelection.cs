@@ -4,6 +4,7 @@ using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
+using Zproto;
 
 namespace StarResonanceDps.App.Services;
 
@@ -15,7 +16,7 @@ namespace StarResonanceDps.App.Services;
 /// 人の窓は名簿の全員(自分 → パーティの番号順 → そのほかの名前順)、バフリスト・デバフリストはそれに続けてエンティティリストの敵、
 /// エンティティ情報はエンティティリストの敵だけ、
 /// 与ダメ・ヒールの詳細とグラフはメーターの行、バフ・デバフカードはカードの設定のショートカットのオンの行(自分のバフ・デバフ、設定の並び)と、
-/// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)。
+/// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)、チャットはチャンネルとプライベートトークの相手。
 /// 開いている窓の相手と選んでいる項目は、名簿などから外れていても末尾に足す(選んで閉じられるように)。
 /// 行の文字は、その項目で開く窓のタイトル(<see cref="WidgetHeaderText"/>)。
 /// </para>
@@ -40,6 +41,19 @@ namespace StarResonanceDps.App.Services;
 /// </summary>
 public sealed class WidgetTargetSelection
 {
+    /// <summary>チャットの選択リストに並べるチャンネル。並びはゲームのチャンネルの並び。先頭がカードの既定。</summary>
+    private static readonly ChitChatChannelType[] ChatChannels =
+    [
+        ChitChatChannelType.ChannelWorld,
+        ChitChatChannelType.ChannelUnion,
+        ChitChatChannelType.ChannelTeam,
+        ChitChatChannelType.ChannelScene,
+        ChitChatChannelType.ChannelNewbie
+    ];
+
+    /// <summary>チャットのカードの既定のチャンネル(ワールド)。カードから初めて起動したときもこのチャンネルの窓を開く。</summary>
+    public static ChitChatChannelType DefaultChatChannel => ChatChannels[0];
+
     private readonly WidgetWindowManager _windowManager;
     private readonly Func<WidgetKind, WidgetListItemViewModel?> _findWidget;
 
@@ -53,7 +67,7 @@ public sealed class WidgetTargetSelection
 
     /// <summary>
     /// 選んでいる項目の既定。バフ・デバフカードはショートカットの1つ目(無ければ「指定なし」)、
-    /// エンティティ情報はエンティティリストの1番目の敵(無ければ敵を選んでいない項目)、ほかは自分。
+    /// エンティティ情報はエンティティリストの1番目の敵(無ければ敵を選んでいない項目)、チャットはワールド、ほかは自分。
     /// </summary>
     public WidgetTargetOption CreateDefault(WidgetListItemViewModel widget)
     {
@@ -62,6 +76,7 @@ public sealed class WidgetTargetSelection
             WidgetKind.BuffDebuffCard => CreateShortcutOptions(widget).FirstOrDefault()
                 ?? WidgetTargetOption.CreateUnspecifiedBuffCard(),
             WidgetKind.EntityInfo => CreateEntityOptions().FirstOrDefault() ?? CreateUnselectedEntity(),
+            WidgetKind.Chat => WidgetTargetOption.CreateChat(DefaultChatChannel, 0),
             _ => WidgetTargetOption.CreateSelf(AppState.PlayerUID)
         };
     }
@@ -230,11 +245,12 @@ public sealed class WidgetTargetSelection
 
         return widget.Kind switch
         {
-            WidgetKind.DamageContribution or WidgetKind.DamageSummary or WidgetKind.DpsGraph
+            WidgetKind.DamageSkillDetail or WidgetKind.DamageSummary or WidgetKind.DpsGraph
                 => MeterSnapshotProvider.HasPlayers(MeterSnapshotKind.Damage, GetPartyDisplayMode(WidgetKind.DpsMeter)),
-            WidgetKind.HealingContribution or WidgetKind.HealingSummary or WidgetKind.HpsGraph
+            WidgetKind.HealingSkillDetail or WidgetKind.HealingSummary or WidgetKind.HpsGraph
                 => MeterSnapshotProvider.HasPlayers(MeterSnapshotKind.Healing, GetPartyDisplayMode(WidgetKind.HpsMeter)),
             WidgetKind.DamageTakenSummary => MeterSnapshotProvider.HasDamageTakenPlayers(),
+            WidgetKind.Chat => true,
             _ => PlayerRosterPresentationStore.Instance.Current.Entries.Count > 0
                 || MeterSnapshotProvider.GetSelfPlayerIdentity() is not null
                 || (widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList
@@ -247,12 +263,13 @@ public sealed class WidgetTargetSelection
         return widget.Kind switch
         {
             WidgetKind.BuffDebuffCard => CreateBuffCardOptions(widget),
-            WidgetKind.DamageContribution or WidgetKind.DamageSummary or WidgetKind.DpsGraph
+            WidgetKind.DamageSkillDetail or WidgetKind.DamageSummary or WidgetKind.DpsGraph
                 => CreateMeterOptions(MeterSnapshotKind.Damage, WidgetKind.DpsMeter),
-            WidgetKind.HealingContribution or WidgetKind.HealingSummary or WidgetKind.HpsGraph
+            WidgetKind.HealingSkillDetail or WidgetKind.HealingSummary or WidgetKind.HpsGraph
                 => CreateMeterOptions(MeterSnapshotKind.Healing, WidgetKind.HpsMeter),
             WidgetKind.DamageTakenSummary => CreateDamageTakenOptions(),
             WidgetKind.EntityInfo => CreateEntityOptions(),
+            WidgetKind.Chat => CreateChatOptions(),
             _ => CreateRosterOptions(includesEntities: widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList)
         };
     }
@@ -298,6 +315,16 @@ public sealed class WidgetTargetSelection
         if (_windowManager.FindTargetWindow(widget, person, buff) is { } window)
         {
             return window.HeaderText;
+        }
+
+        if (option.Kind == WidgetTargetOptionKind.Chat)
+        {
+            return WidgetHeaderText.ForChat(
+                widget.DisplayName,
+                option.ChatChannel,
+                option.CharacterId,
+                ChatMessageStore.GetPrivatePartnerName(option.CharacterId),
+                PlayerRosterPresentationStore.Instance.NameDisplayMode);
         }
 
         if (option.Kind == WidgetTargetOptionKind.Buff)
@@ -395,6 +422,17 @@ public sealed class WidgetTargetSelection
         return options;
     }
 
+    /// <summary>チャットのチャンネル(<see cref="ChatChannels"/> の並び)と、プライベートトークの相手(最後のメッセージが新しい順)。</summary>
+    private static List<WidgetTargetOption> CreateChatOptions()
+    {
+        var options = ChatChannels
+            .Select(channel => WidgetTargetOption.CreateChat(channel, 0))
+            .ToList();
+        options.AddRange(ChatMessageStore.GetPrivatePartners()
+            .Select(partner => WidgetTargetOption.CreateChat(ChitChatChannelType.ChannelPrivate, partner.CharacterId)));
+        return options;
+    }
+
     /// <summary>エンティティリストの敵(エンティティリストの並び)。</summary>
     private List<WidgetTargetOption> CreateEntityOptions()
     {
@@ -423,7 +461,7 @@ public sealed class WidgetTargetSelection
         {
             Kind = WidgetTargetOptionKind.Player,
             IsSelf = player.IsSelf,
-            // 被ダメログの行から開くときと同じ相手の指定(DamageTakenListEntry.CharacterId)。
+            // 被ダメログの行から開くときと同じ相手の指定(DamageTakenLogEntry.CharacterId)。
             CharacterId = player.CharacterId
         })];
     }

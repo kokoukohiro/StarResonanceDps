@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Controls;
 
@@ -48,14 +49,12 @@ public partial class SearchBox : UserControl
 
     private static bool IsFromTextBox(DependencyObject source)
     {
-        while (source is not null)
+        for (DependencyObject? current = source; current is not null; current = ElementTree.GetParent(current))
         {
-            if (source is TextBox)
+            if (current is TextBox)
             {
                 return true;
             }
-
-            source = System.Windows.Media.VisualTreeHelper.GetParent(source);
         }
 
         return false;

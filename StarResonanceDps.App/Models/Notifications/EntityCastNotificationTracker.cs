@@ -15,7 +15,7 @@ public readonly record struct EntityCastObservation(long EntityUuid, NearbyEntit
 ///
 /// <para>
 /// 敵ごとに前の一覧の詠唱と比べ、新しく始まった詠唱の技が通知タブの対象(<see cref="NotificationWatchTarget"/>)に当たれば、その場で1回出す。
-/// 技の名前はタイムラインの詠唱の行と同じ名前(<see cref="MeterSnapshotProvider.GetTakenDamageLogLineSkillName"/>)で比べる。
+/// 技の名前はタイムラインの詠唱の行と同じ名前(<see cref="MeterSnapshotProvider.GetTimelineLineSkillName"/>)で比べる。
 /// 詠唱はエンティティリストの詠唱ゲージと同じ値で、周りに現れたときにすでに詠唱していた敵は値を持たないので出さない。
 /// 同じ一覧の中で同じ名前の敵がいくつ詠唱を始めても1回(同じ文が並ぶだけになるため。エンティティ出現と同じ)。
 /// オンにした・対象を変えたときは <see cref="Rebaseline"/> で、その時点で詠唱中の敵には出さない。
@@ -50,7 +50,7 @@ public sealed class EntityCastNotificationTracker
                 || !target.Matches(
                     cast,
                     static observation => observation.Cast.SkillId,
-                    static observation => MeterSnapshotProvider.GetTakenDamageLogLineSkillName(observation.Cast.SkillId))
+                    static observation => MeterSnapshotProvider.GetTimelineLineSkillName(observation.Cast.SkillId))
                 || !_notifiedNames.Add(cast.EntityName))
             {
                 continue;

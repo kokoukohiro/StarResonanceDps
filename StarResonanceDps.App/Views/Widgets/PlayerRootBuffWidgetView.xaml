@@ -95,36 +95,8 @@
                                       Height="30"
                                       HorizontalAlignment="Left"
                                       VerticalAlignment="Center">
-                                    <!-- タレントの背景(役割の色)。枠いっぱいに置き、タレントの絵はその上に小さく置く。 -->
-                                    <Image Width="30"
-                                           Height="30"
-                                           Stretch="Uniform"
-                                           RenderOptions.BitmapScalingMode="HighQuality">
-                                        <Image.Style>
-                                            <Style TargetType="Image">
-                                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsTankTalent}" Value="True">
-                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Tank}" />
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsHealerTalent}" Value="True">
-                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Healer}" />
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsDpsTalent}" Value="True">
-                                                        <Setter Property="Source" Value="{StaticResource Icon.TalentBackground.Dps}" />
-                                                        <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Image.Style>
-                                    </Image>
-
                                     <!--
-                                        モジュール効果と因子の絵の大きさと位置はバフ一覧の行と同じ値。
-                                        タレントの絵の大きさは、ゲームのタレントの木の輪と絵の比を目安にした値(はてなも同じ値)。心相晶のノード・上級の絵は白いので影を付ける。
+                                        モジュール効果と因子の絵の大きさと位置はバフ一覧の行と同じ値。心相晶のノード・上級の絵は白いので影を付ける。
                                     -->
                                     <Image Source="{Binding IconPath, TargetNullValue={x:Null}}"
                                            Stretch="Uniform"
@@ -133,10 +105,6 @@
                                             <Style TargetType="Image">
                                                 <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsTalentIcon}" Value="True">
-                                                        <Setter Property="Width" Value="22" />
-                                                        <Setter Property="Height" Value="22" />
-                                                    </DataTrigger>
                                                     <DataTrigger Binding="{Binding IsSeasonTalentIcon}" Value="True">
                                                         <Setter Property="Effect" Value="{StaticResource Effect.ProfessionIconShadow}" />
                                                     </DataTrigger>
@@ -161,7 +129,7 @@
                                         </Image.Style>
                                     </Image>
 
-                                    <!-- 絵が分からない(ファイルが無い・型が分からない上級)ときははてな。作りはバフ一覧の行と同じ。タレントは絵と同じ大きさで背景の上に置く。 -->
+                                    <!-- 絵が分からない(ファイルが無い・型が分からない上級)ときははてな。作りはバフ一覧の行と同じ。 -->
                                     <Rectangle Fill="White"
                                                Effect="{StaticResource Effect.ProfessionIconShadow}">
                                         <Rectangle.OpacityMask>
@@ -175,10 +143,6 @@
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding ShowsUnknownIcon}" Value="True">
                                                         <Setter Property="Visibility" Value="Visible" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding IsTalentIcon}" Value="True">
-                                                        <Setter Property="Width" Value="22" />
-                                                        <Setter Property="Height" Value="22" />
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>

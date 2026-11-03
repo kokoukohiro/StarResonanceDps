@@ -25,7 +25,9 @@ public sealed record PartyMemberSupplement(
     int SceneId = 0,
     int LineId = 0,
     // パーティの社交データ(名前・クラス・能力スコアなど)を受けたか。HP の同期だけでも補完は作られるので、補完があることとは別。
-    bool HasSocialData = false);
+    bool HasSocialData = false,
+    // HP の同期の状態が戦闘不能か。同期の HP は読み込み中などの生きている人にも 0 で届くので、戦闘不能はこちらで決める。
+    bool IsDead = false);
 
 public sealed record PartyMemberPosition(int GroupId, int? GroupSlot);
 

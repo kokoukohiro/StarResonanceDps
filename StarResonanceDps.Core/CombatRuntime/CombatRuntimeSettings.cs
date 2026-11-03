@@ -57,7 +57,7 @@ public static class CombatRuntimeSettings
     public static bool SplitEncountersOnNewPhases { get; private set; }
 
     /// <summary>
-    /// 設定「次のイベントまで結果を保持」。新しいエンカウンターに記録(与ダメ・回復・被ダメログの行)が入るまで、前の結果をメーターに出し続けるか。
+    /// 設定「次のイベントまで結果を保持」。新しいエンカウンターに記録(与ダメ・回復・タイムラインと被ダメログの行)が入るまで、前の結果をメーターに出し続けるか。
     /// 保持するのは「進行で自動リセット」の区切りとマップ移動で、手動のリセット・計測の開始と停止・ログアウトはすぐ新しい回を出す。
     /// 回を作るとき(<c>EncounterManager.EnterDungeon</c>)、メーターとプレイヤーリストが映す回を決めるとき(<c>MeterSnapshotProvider.ResolveActiveEncounter</c>)、
     /// 前の回を手放すとき(<c>EncounterManager.ReleaseHeldPastEncounter</c>)に見る。

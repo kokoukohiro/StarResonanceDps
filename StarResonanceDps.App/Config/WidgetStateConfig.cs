@@ -22,9 +22,9 @@ public sealed class WidgetConfig
     public WidgetThemeConfig Theme { get; set; } = WidgetConfigDefaults.CreateTheme();
     public WidgetWindowConfig Window { get; set; } = new();
     public MeterWidgetSettingsConfig? Meter { get; set; }
-    public MetricTimelineWidgetSettingsConfig? MetricTimeline { get; set; }
+    public MetricGraphWidgetSettingsConfig? MetricGraph { get; set; }
     public BuffCardWidgetSettingsConfig? BuffCard { get; set; }
-    public TakenDamageLogWidgetSettingsConfig? TakenDamageLog { get; set; }
+    public TimelineWidgetSettingsConfig? Timeline { get; set; }
     public PlayerInfoWidgetSettingsConfig? PlayerInfo { get; set; }
     public BuffListWidgetSettingsConfig? BuffList { get; set; }
     /// <summary>
@@ -42,9 +42,11 @@ public sealed class WidgetConfig
 
     public ReviveListWidgetSettingsConfig? ReviveList { get; set; }
 
-    public DamageTakenListWidgetSettingsConfig? DamageTakenList { get; set; }
+    public DamageTakenLogWidgetSettingsConfig? DamageTakenLog { get; set; }
 
     public EntityInfoWidgetSettingsConfig? EntityInfo { get; set; }
+
+    public ChatWidgetSettingsConfig? Chat { get; set; }
 
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
@@ -77,9 +79,9 @@ public sealed class WidgetConfig
             Theme = Theme?.Clone() ?? WidgetConfigDefaults.CreateTheme(),
             Window = Window?.Clone() ?? new WidgetWindowConfig(),
             Meter = Meter?.Clone(),
-            MetricTimeline = MetricTimeline?.Clone(),
+            MetricGraph = MetricGraph?.Clone(),
             BuffCard = BuffCard?.Clone(),
-            TakenDamageLog = TakenDamageLog?.Clone(),
+            Timeline = Timeline?.Clone(),
             PlayerInfo = PlayerInfo?.Clone(),
             BuffList = BuffList?.Clone(),
             ElementColor = ElementColor?.Clone(),
@@ -88,8 +90,9 @@ public sealed class WidgetConfig
             PlayerStatus = PlayerStatus?.Clone(),
             BuffDebuffGroup = BuffDebuffGroup?.Clone(),
             ReviveList = ReviveList?.Clone(),
-            DamageTakenList = DamageTakenList?.Clone(),
+            DamageTakenLog = DamageTakenLog?.Clone(),
             EntityInfo = EntityInfo?.Clone(),
+            Chat = Chat?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -152,18 +155,18 @@ public sealed class WidgetWindowConfig
 /// <summary>
 /// 推移グラフ(DPS / HPS)の設定。描画間隔、横軸の長さ、線の色(グラフカラー)。
 /// グラフカラーの形はメーターのクラスカラーと同じ(クラスごとの色。不透明度は持たない)で、既定は読み替え先のメーターと同じ
-/// (<see cref="WidgetConfigDefaults.GetMetricTimelineColorDefaultSource"/>)。ここの初期値は種類が分からないので DPS の既定で、
-/// 種類に合わせるのは <see cref="WidgetConfigDefaults.NormalizeMetricTimeline"/>。
+/// (<see cref="WidgetConfigDefaults.GetMetricGraphColorDefaultSource"/>)。ここの初期値は種類が分からないので DPS の既定で、
+/// 種類に合わせるのは <see cref="WidgetConfigDefaults.NormalizeMetricGraph"/>。
 /// </summary>
-public sealed class MetricTimelineWidgetSettingsConfig
+public sealed class MetricGraphWidgetSettingsConfig
 {
-    public int AggregationIntervalSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineAggregationIntervalSeconds;
+    public int AggregationIntervalSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricGraphAggregationIntervalSeconds;
 
     /// <summary>
-    /// 横軸に入れる秒数(<see cref="WidgetConfigDefaults.MinMetricTimelineVisibleSeconds"/>〜<see cref="WidgetConfigDefaults.MaxMetricTimelineVisibleSeconds"/>)。
+    /// 横軸に入れる秒数(<see cref="WidgetConfigDefaults.MinMetricGraphVisibleSeconds"/>〜<see cref="WidgetConfigDefaults.MaxMetricGraphVisibleSeconds"/>)。
     /// 設定の窓のスライダーと、ウィジェットの窓の上のホイールで変える。
     /// </summary>
-    public int VisibleSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricTimelineVisibleSeconds;
+    public int VisibleSeconds { get; set; } = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
 
     /// <summary>横軸の下に押した技のアイコンの行(スキルログ)を出すか。</summary>
     public bool ShowSkillLog { get; set; } = true;
@@ -172,9 +175,9 @@ public sealed class MetricTimelineWidgetSettingsConfig
 
     public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DpsMeter);
 
-    public MetricTimelineWidgetSettingsConfig Clone()
+    public MetricGraphWidgetSettingsConfig Clone()
     {
-        return new MetricTimelineWidgetSettingsConfig
+        return new MetricGraphWidgetSettingsConfig
         {
             AggregationIntervalSeconds = AggregationIntervalSeconds,
             VisibleSeconds = VisibleSeconds,
@@ -192,39 +195,39 @@ public sealed class MetricTimelineWidgetSettingsConfig
     }
 }
 
-public sealed class TakenDamageLogWidgetSettingsConfig
+public sealed class TimelineWidgetSettingsConfig
 {
     /// <summary>
     /// 敵の回復(相手が敵でもプレイヤーでも)を出すか。0=表示 / 1=非表示。
     /// 出さないときも記録と保存は続く(画面に出すときに絞る)。
     /// </summary>
-    public int EnemyHealDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTakenDamageLogEnemyHealDisplayModeIndex;
+    public int EnemyHealDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultTimelineEnemyHealDisplayModeIndex;
 
     /// <summary>
     /// 相手がプレイヤーの行のクラスアイコンの色(アイコンカラー)。形はプレイヤーリストのクラスカラーと同じで、タイムライン専用に持つ。
     /// 既定の色はプレイヤーリストと同じ。不透明度は持たない。
     /// </summary>
-    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.Timeline);
 
-    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.Timeline);
 
     /// <summary>
-    /// 行の文字の色(テキストカラー)。形はクラスカラーと同じで、鍵は <see cref="WidgetConfigDefaults.TakenDamageLogTextColorKeys"/>。
+    /// 行の文字の色(テキストカラー)。形はクラスカラーと同じで、鍵は <see cref="WidgetConfigDefaults.TimelineTextColorKeys"/>。
     /// </summary>
     public Dictionary<string, int> TextColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorIndexes();
 
     public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultTextColorPalettes();
 
-    public TakenDamageLogWidgetSettingsConfig Clone()
+    public TimelineWidgetSettingsConfig Clone()
     {
-        return new TakenDamageLogWidgetSettingsConfig
+        return new TimelineWidgetSettingsConfig
         {
             EnemyHealDisplayModeIndex = EnemyHealDisplayModeIndex,
             ClassColorIndexes = ClassColorIndexes is null
-                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog)
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.Timeline)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = ClassColorPalettes is null
-                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog)
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.Timeline)
                 : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
@@ -436,8 +439,8 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
 /// 開いていたウィンドウ1枚ぶんの対象。
 ///
 /// <para>
-/// プレイヤーとエンティティリストの実体(モンスター)の両方を1つの型で表す。
-/// <see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー。
+/// プレイヤーとエンティティリストの実体(モンスター)とチャットのチャンネルを1つの型で表す。
+/// <see cref="ChatChannel"/> があればチャット、<see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー。
 /// </para>
 /// </summary>
 public sealed class WidgetOpenTargetConfig
@@ -511,6 +514,12 @@ public sealed class WidgetOpenTargetConfig
     /// </summary>
     public WidgetWindowConfig? Window { get; set; }
 
+    /// <summary>
+    /// チャット専用。<c>ChitChatChannelType</c> の値。プライベートトークの相手は <see cref="CharacterId"/>、
+    /// 最後に分かっていた相手の名前は <see cref="Name"/>。
+    /// </summary>
+    public int? ChatChannel { get; set; }
+
     public bool IsEntity => EntityId != 0;
 
     public WidgetOpenTargetConfig Clone()
@@ -526,7 +535,8 @@ public sealed class WidgetOpenTargetConfig
             BuffKey = BuffKey,
             BuffName = BuffName,
             BuffGroup = BuffGroup,
-            Window = Window?.Clone()
+            Window = Window?.Clone(),
+            ChatChannel = ChatChannel
         };
     }
 }
@@ -770,40 +780,40 @@ public sealed class ReviveListWidgetSettingsConfig
 }
 
 /// <summary>
-/// 被ダメリストの設定。プレイヤー名の書式と自分の強調表示(蘇生リストと同じ値の形)、右の書式(設定「スキル名」)、
+/// 被ダメログの設定。プレイヤー名の書式と自分の強調表示(蘇生リストと同じ値の形)、右の書式(設定「スキル名」)、
 /// 戦闘不能の原因を表示するか、フィルター、最新の被弾だけを出すか、クラスアイコンの色(アイコンカラー、蘇生リストと同じ形と既定の色)。
 /// バーの色(節「属性カラー」)は属性カラーの設定(<see cref="WidgetConfig.ElementColor"/>)が持つ。
 /// </summary>
-public sealed class DamageTakenListWidgetSettingsConfig
+public sealed class DamageTakenLogWidgetSettingsConfig
 {
-    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenListPlayerInfoFormatString"/>。</remarks>
+    /// <remarks><c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenLogPlayerInfoFormatString"/>。</remarks>
     public string? PlayerInfoFormatString { get; set; }
 
     /// <summary>自分の行の見せ方。0=強調表示 / 1=通常表示(プレイヤーリストと同じ値)。</summary>
     public int SelfDisplayModeIndex { get; set; } = WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
 
-    /// <remarks>右の書式。<c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenListHitInfoFormatString"/>。</remarks>
+    /// <remarks>右の書式。<c>null</c> は「設定されていない」。既定は <see cref="WidgetConfigDefaults.DefaultDamageTakenLogHitInfoFormatString"/>。</remarks>
     public string? HitInfoFormatString { get; set; }
 
     /// <summary>その被弾で倒れた行の被ダメ値の後ろに「(戦闘不能)」を出すか(設定「戦闘不能の原因を表示」)。</summary>
-    public bool ShowsDefeatCause { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListShowsDefeatCause;
+    public bool ShowsDefeatCause { get; set; } = WidgetConfigDefaults.DefaultDamageTakenLogShowsDefeatCause;
 
     /// <summary>
     /// 設定「フィルター設定」。0=すべて表示 / 1=自傷・フレンドリーファイア以外(加害者がプレイヤーの被弾を出さない)。
-    /// <see cref="WidgetConfigDefaults.NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex"/>。
+    /// <see cref="WidgetConfigDefaults.NoSelfOrFriendlyFireDamageTakenLogAttackerFilterIndex"/>。
     /// </summary>
-    public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListAttackerFilterIndex;
+    public int AttackerFilterIndex { get; set; } = WidgetConfigDefaults.DefaultDamageTakenLogAttackerFilterIndex;
 
     /// <summary>設定「最新の被ダメのみ表示」。真なら1人1行でその人の一番新しい被弾だけ、偽なら被弾を全部出す。ヘッダーのボタンでも切り替わる。</summary>
-    public bool ShowsLatestHitOnly { get; set; } = WidgetConfigDefaults.DefaultDamageTakenListShowsLatestHitOnly;
+    public bool ShowsLatestHitOnly { get; set; } = WidgetConfigDefaults.DefaultDamageTakenLogShowsLatestHitOnly;
 
-    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList);
+    public Dictionary<string, int> ClassColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenLog);
 
-    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList);
+    public Dictionary<string, List<string>> ClassColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenLog);
 
-    public DamageTakenListWidgetSettingsConfig Clone()
+    public DamageTakenLogWidgetSettingsConfig Clone()
     {
-        return new DamageTakenListWidgetSettingsConfig
+        return new DamageTakenLogWidgetSettingsConfig
         {
             PlayerInfoFormatString = PlayerInfoFormatString,
             SelfDisplayModeIndex = SelfDisplayModeIndex,
@@ -812,10 +822,10 @@ public sealed class DamageTakenListWidgetSettingsConfig
             AttackerFilterIndex = AttackerFilterIndex,
             ShowsLatestHitOnly = ShowsLatestHitOnly,
             ClassColorIndexes = ClassColorIndexes is null
-                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList)
+                ? WidgetConfigDefaults.CreateDefaultClassColorIndexes(WidgetKind.DamageTakenLog)
                 : new Dictionary<string, int>(ClassColorIndexes, StringComparer.OrdinalIgnoreCase),
             ClassColorPalettes = ClassColorPalettes is null
-                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList)
+                ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.DamageTakenLog)
                 : ClassColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
@@ -896,6 +906,31 @@ public sealed class EntityInfoWidgetSettingsConfig
             ClassColorPalettes = ClassColorPalettes is null
                 ? WidgetConfigDefaults.CreateDefaultClassColorPalettes(WidgetKind.EntityInfo)
                 : ClassColorPalettes.ToDictionary(
+                    pair => pair.Key,
+                    pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
+                    StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>チャットの設定。発言者の名前の色(テキストカラー)。形は蘇生リストのテキストカラーと同じ。</summary>
+public sealed class ChatWidgetSettingsConfig
+{
+    /// <summary>文字の色。形はクラスカラーと同じで、鍵は <see cref="WidgetConfigDefaults.ChatTextColorKeys"/>。</summary>
+    public Dictionary<string, int> TextColorIndexes { get; set; } = WidgetConfigDefaults.CreateDefaultChatTextColorIndexes();
+
+    public Dictionary<string, List<string>> TextColorPalettes { get; set; } = WidgetConfigDefaults.CreateDefaultChatTextColorPalettes();
+
+    public ChatWidgetSettingsConfig Clone()
+    {
+        return new ChatWidgetSettingsConfig
+        {
+            TextColorIndexes = TextColorIndexes is null
+                ? WidgetConfigDefaults.CreateDefaultChatTextColorIndexes()
+                : new Dictionary<string, int>(TextColorIndexes, StringComparer.OrdinalIgnoreCase),
+            TextColorPalettes = TextColorPalettes is null
+                ? WidgetConfigDefaults.CreateDefaultChatTextColorPalettes()
+                : TextColorPalettes.ToDictionary(
                     pair => pair.Key,
                     pair => pair.Value is null ? new List<string>() : new List<string>(pair.Value),
                     StringComparer.OrdinalIgnoreCase)
@@ -991,13 +1026,13 @@ public static class WidgetConfigDefaults
     public const int MinClassColorIndex = 0;
     public const int MinClassColorOpacity = 0;
     public const int MaxClassColorOpacity = 100;
-    public const int DefaultMetricTimelineAggregationIntervalSeconds = 2;
-    public const int DefaultMetricTimelineVisibleSeconds = 12;
-    public const int MinMetricTimelineVisibleSeconds = 4;
-    public const int MaxMetricTimelineVisibleSeconds = 120;
+    public const int DefaultMetricGraphAggregationIntervalSeconds = 2;
+    public const int DefaultMetricGraphVisibleSeconds = 12;
+    public const int MinMetricGraphVisibleSeconds = 4;
+    public const int MaxMetricGraphVisibleSeconds = 120;
 
     /// <summary>推移グラフの窓の上でホイールを1回回したときに横軸の長さを変える秒数。</summary>
-    public const int MetricTimelineVisibleSecondsWheelStep = 2;
+    public const int MetricGraphVisibleSecondsWheelStep = 2;
     public const int DefaultHealthValueDisplayModeIndex = 0;
     public const int SeparateShieldHealthValueDisplayModeIndex = 1;
     public const int DefaultPartyDisplayModeIndex = 0;
@@ -1013,8 +1048,8 @@ public static class WidgetConfigDefaults
 
     /// <summary>一覧の並び替え: 名前順(群の中を画面に出している名前で並べる)。</summary>
     public const int NameListSortModeIndex = 1;
-    public const int DefaultTakenDamageLogEnemyHealDisplayModeIndex = 0;
-    public const int HiddenTakenDamageLogEnemyHealDisplayModeIndex = 1;
+    public const int DefaultTimelineEnemyHealDisplayModeIndex = 0;
+    public const int HiddenTimelineEnemyHealDisplayModeIndex = 1;
     public const string DefaultEntityInfoFormatString = "Lv.{Level} {EntityName}";
     public const string DefaultMeterPlayerInfoFormatString = "{PlayerName}[{Psych}] - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultSkillInfoFormatString = "{SkillName} - {Type} ({Hits}hits-CRT{CritRate})";
@@ -1027,7 +1062,7 @@ public static class WidgetConfigDefaults
     public const bool DefaultPlayerStatusShowActualValues = true;
     public const string DefaultPlayerListPlayerInfoFormatString = "{PlayerName}({PowerLevel}-{SeasonStrength})";
     public const string DefaultReviveListPlayerInfoFormatString = "{PlayerName} - {Spec} ({PowerLevel}-{SeasonStrength})";
-    public const string DefaultDamageTakenListPlayerInfoFormatString = "{PlayerName} - {Spec} ({PowerLevel}-{SeasonStrength})";
+    public const string DefaultDamageTakenLogPlayerInfoFormatString = "{PlayerName} - {Spec} ({PowerLevel}-{SeasonStrength})";
     public const string DefaultBuffInfoFormatString = "{BuffName}({TargetName})";
 
     public const int MinBuffCardScale = 100;
@@ -1039,8 +1074,8 @@ public static class WidgetConfigDefaults
     private const double PlayerListInitialWindowHeight = 460d;
     private const double MeterInitialWindowWidth = 440d;
     private const double MeterInitialWindowHeight = 460d;
-    private const double TakenDamageLogInitialWindowWidth = 440d;
-    private const double TakenDamageLogInitialWindowHeight = 460d;
+    private const double TimelineInitialWindowWidth = 440d;
+    private const double TimelineInitialWindowHeight = 460d;
     private const double PlayerInfoInitialWindowWidth = 406d;
     private const double PlayerInfoInitialWindowHeight = 265d;
     private const double PlayerStatusInitialWindowWidth = 280d;
@@ -1049,8 +1084,8 @@ public static class WidgetConfigDefaults
     private const double PlayerEquipmentInitialWindowHeight = 381d;
     private const double PlayerBuffListInitialWindowWidth = 360d;
     private const double PlayerBuffListInitialWindowHeight = 400d;
-    private const double PlayerTalentInitialWindowWidth = 280d;
-    private const double PlayerTalentInitialWindowHeight = 400d;
+    private const double PlayerTalentInitialWindowWidth = 360d;
+    private const double PlayerTalentInitialWindowHeight = 440d;
     private const double PlayerSeasonTalentInitialWindowWidth = 360d;
     private const double PlayerSeasonTalentInitialWindowHeight = 400d;
     private const double PlayerModuleInitialWindowWidth = 280d;
@@ -1060,18 +1095,20 @@ public static class WidgetConfigDefaults
     private const double BuffDebuffGroupInitialWindowWidth = 280d;
     private const double ReviveListInitialWindowWidth = 360d;
     private const double ReviveListInitialWindowHeight = 400d;
-    private const double DamageTakenListInitialWindowWidth = 440d;
-    private const double DamageTakenListInitialWindowHeight = 460d;
+    private const double DamageTakenLogInitialWindowWidth = 440d;
+    private const double DamageTakenLogInitialWindowHeight = 460d;
     private const double EntityInfoInitialWindowWidth = 360d;
     private const double EntityInfoInitialWindowHeight = 240d;
-    private const double MetricContributionInitialWindowWidth = 520d;
-    private const double MetricContributionInitialWindowHeight = 460d;
+    private const double ChatInitialWindowWidth = 360d;
+    private const double ChatInitialWindowHeight = 400d;
+    private const double SkillDetailInitialWindowWidth = 520d;
+    private const double SkillDetailInitialWindowHeight = 460d;
     private const double MetricSummaryInitialWindowWidth = 280d;
     private const double MetricSummaryInitialWindowHeight = 327d;
     private const double DamageTakenSummaryInitialWindowWidth = 280d;
     private const double DamageTakenSummaryInitialWindowHeight = 327d;
-    private const double MetricTimelineInitialWindowWidth = 440d;
-    private const double MetricTimelineInitialWindowHeight = 260d;
+    private const double MetricGraphInitialWindowWidth = 440d;
+    private const double MetricGraphInitialWindowHeight = 260d;
 
     /// <summary>
     /// バフ・デバフグループの既定の高さ。既定でオンの行(<see cref="DefaultBuffDebuffGroupEntries"/>)がちょうど入る高さで、
@@ -1081,12 +1118,12 @@ public static class WidgetConfigDefaults
     private static double BuffDebuffGroupInitialWindowHeight =>
         30d + 10d + 31d * DefaultBuffDebuffGroupEntries.Count(entry => entry.IsEnabled);
 
-    public static IReadOnlyList<int> MetricTimelineAggregationIntervals { get; } = [5, 3, 2, 1];
+    public static IReadOnlyList<int> MetricGraphAggregationIntervals { get; } = [5, 3, 2, 1];
 
-    /// <summary>推移グラフの横軸の長さ(秒)を範囲に収める。軸の数字の間隔は <c>MetricTimelineChart</c> が長さから決める。</summary>
-    public static int ClampMetricTimelineVisibleSeconds(int seconds)
+    /// <summary>推移グラフの横軸の長さ(秒)を範囲に収める。軸の数字の間隔は <c>MetricGraphChart</c> が長さから決める。</summary>
+    public static int ClampMetricGraphVisibleSeconds(int seconds)
     {
-        return Math.Clamp(seconds, MinMetricTimelineVisibleSeconds, MaxMetricTimelineVisibleSeconds);
+        return Math.Clamp(seconds, MinMetricGraphVisibleSeconds, MaxMetricGraphVisibleSeconds);
     }
 
     /// <summary>
@@ -1109,11 +1146,11 @@ public static class WidgetConfigDefaults
     /// 既定でオンにするロールスキル。
     ///
     /// <para>
-    /// 3021 Thunderfall Grasp / 3027 Blessing of Life / 3028 Guardian's Boundary /
+    /// 3021 Thunderfall Grasp / 3024 Infernal Thrust / 3027 Blessing of Life /
     /// 3312 Renewal Prayer の4件。
     /// </para>
     /// </summary>
-    private static readonly int[] DefaultVisibleOtherRoleSkillIds = [3021, 3027, 3028, 3312];
+    private static readonly int[] DefaultVisibleOtherRoleSkillIds = [3021, 3024, 3027, 3312];
 
     /// <summary>既定でオンかどうか。</summary>
     public static bool IsOtherRoleSkillVisibleByDefault(int skillId)
@@ -1476,7 +1513,7 @@ public static class WidgetConfigDefaults
     ];
 
     /// <summary>タイムラインのテキストカラーの鍵。</summary>
-    public static readonly string[] TakenDamageLogTextColorKeys =
+    public static readonly string[] TimelineTextColorKeys =
     [
         "EntityName",
         "SkillName",
@@ -1547,11 +1584,11 @@ public static class WidgetConfigDefaults
     /// <summary>
     /// タイムラインのテキストカラーの既定色。白と差し色の2枠。
     /// </summary>
-    private static readonly Dictionary<string, string[]> TakenDamageLogDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string[]> TimelineDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
     {
         ["EntityName"] = ["#FFFFFF", "#FFD98A"],
         ["SkillName"] = ["#FFFFFF", "#D9866C"],
-        ["PlayerName"] = ["#FFFFFF", "#9FD1FF"],
+        ["PlayerName"] = ["#FFFFFF", "#70D0E8"],
         ["Effect"] = ["#FFFFFF", "#C9A8FF"],
         ["HpValue"] = ["#FFFFFF", "#81E5C6"]
     };
@@ -1738,7 +1775,7 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.DpsMeter or WidgetKind.HpsMeter;
     }
 
-    public static bool SupportsMetricTimelineSettings(WidgetKind kind)
+    public static bool SupportsMetricGraphSettings(WidgetKind kind)
     {
         return kind is WidgetKind.DpsGraph or WidgetKind.HpsGraph;
     }
@@ -1748,9 +1785,9 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.BuffDebuffCard;
     }
 
-    public static bool SupportsTakenDamageLogSettings(WidgetKind kind)
+    public static bool SupportsTimelineSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.TakenDamageLog;
+        return kind is WidgetKind.Timeline;
     }
 
     /// <summary>プレイヤー情報の設定(アイコンカラー)を持つ種別か。</summary>
@@ -1762,7 +1799,7 @@ public static class WidgetConfigDefaults
     /// <summary>スキル詳細の表示設定(行名の書式)を持つ種別か。</summary>
     public static bool SupportsSkillDetailSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageContribution or WidgetKind.HealingContribution;
+        return kind is WidgetKind.DamageSkillDetail or WidgetKind.HealingSkillDetail;
     }
 
     /// <summary>装備詳細の表示設定(行の書式)を持つ種別か。</summary>
@@ -1789,16 +1826,22 @@ public static class WidgetConfigDefaults
         return kind is WidgetKind.ReviveList;
     }
 
-    /// <summary>被ダメリストの設定(プレイヤー名・スキル名・フィルター設定・自分の強調表示・戦闘不能の原因を表示・アイコンカラー)を持つ種別か。</summary>
-    public static bool SupportsDamageTakenListSettings(WidgetKind kind)
+    /// <summary>被ダメログの設定(プレイヤー名・スキル名・フィルター設定・自分の強調表示・戦闘不能の原因を表示・アイコンカラー)を持つ種別か。</summary>
+    public static bool SupportsDamageTakenLogSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageTakenList;
+        return kind is WidgetKind.DamageTakenLog;
     }
 
     /// <summary>エンティティ情報の設定(表示設定・非表示リスト・アイコンカラー)を持つ種別か。</summary>
     public static bool SupportsEntityInfoSettings(WidgetKind kind)
     {
         return kind is WidgetKind.EntityInfo;
+    }
+
+    /// <summary>チャットの設定(テキストカラー)を持つ種別か。</summary>
+    public static bool SupportsChatSettings(WidgetKind kind)
+    {
+        return kind is WidgetKind.Chat;
     }
 
     /// <summary>自分だけを出す、1枚だけ開くプレイヤーの窓の種別か(ステータス詳細・バフ・デバフグループ)。</summary>
@@ -1821,14 +1864,15 @@ public static class WidgetConfigDefaults
             or WidgetKind.BuffList
             or WidgetKind.DebuffList
             or WidgetKind.BuffDebuffCard
-            or WidgetKind.DamageContribution
+            or WidgetKind.DamageSkillDetail
             or WidgetKind.DamageSummary
             or WidgetKind.DpsGraph
-            or WidgetKind.HealingContribution
+            or WidgetKind.HealingSkillDetail
             or WidgetKind.HealingSummary
             or WidgetKind.HpsGraph
             or WidgetKind.DamageTakenSummary
-            or WidgetKind.EntityInfo;
+            or WidgetKind.EntityInfo
+            or WidgetKind.Chat;
     }
 
     public static WidgetConfig Create(WidgetKind kind)
@@ -1842,8 +1886,8 @@ public static class WidgetConfigDefaults
             Theme = CreateTheme(),
             Window = CreateDefaultWindowConfig(kind),
             Meter = SupportsMeterSettings(kind) ? CreateMeterSettings(kind) : null,
-            MetricTimeline = SupportsMetricTimelineSettings(kind) ? CreateMetricTimelineSettings(kind) : null,
-            TakenDamageLog = SupportsTakenDamageLogSettings(kind) ? CreateTakenDamageLogSettings() : null,
+            MetricGraph = SupportsMetricGraphSettings(kind) ? CreateMetricGraphSettings(kind) : null,
+            Timeline = SupportsTimelineSettings(kind) ? CreateTimelineSettings() : null,
             PlayerInfo = SupportsPlayerInfoSettings(kind) ? CreatePlayerInfoSettings() : null,
             BuffList = SupportsBuffListSettings(kind) ? CreateBuffListSettings(kind) : null,
             ElementColor = SupportsElementColorSettings(kind) ? CreateElementColorSettings(kind) : null,
@@ -1852,8 +1896,9 @@ public static class WidgetConfigDefaults
             PlayerStatus = SupportsPlayerStatusSettings(kind) ? CreatePlayerStatusSettings() : null,
             BuffDebuffGroup = SupportsBuffDebuffGroupSettings(kind) ? CreateBuffDebuffGroupSettings() : null,
             ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null,
-            DamageTakenList = SupportsDamageTakenListSettings(kind) ? CreateDamageTakenListSettings() : null,
-            EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null
+            DamageTakenLog = SupportsDamageTakenLogSettings(kind) ? CreateDamageTakenLogSettings() : null,
+            EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null,
+            Chat = SupportsChatSettings(kind) ? CreateChatSettings() : null
         };
     }
 
@@ -2209,55 +2254,55 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
-    /// <summary>被ダメリストの右(設定「スキル名」)の既定の書式。</summary>
-    public const string DefaultDamageTakenListHitInfoFormatString = "{EntityName}-{SkillName}({Type})";
+    /// <summary>被ダメログの右(設定「スキル名」)の既定の書式。</summary>
+    public const string DefaultDamageTakenLogHitInfoFormatString = "{EntityName}-{SkillName}({Type})";
 
-    /// <summary>被ダメリストの「戦闘不能の原因を表示」の既定。</summary>
-    public const bool DefaultDamageTakenListShowsDefeatCause = true;
+    /// <summary>被ダメログの「戦闘不能の原因を表示」の既定。</summary>
+    public const bool DefaultDamageTakenLogShowsDefeatCause = true;
 
-    /// <summary>被ダメリストの「フィルター設定」の添字。並びは設定の選択リストと同じ。</summary>
-    public const int AllDamageTakenListAttackerFilterIndex = 0;
-    public const int NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex = 1;
+    /// <summary>被ダメログの「フィルター設定」の添字。並びは設定の選択リストと同じ。</summary>
+    public const int AllDamageTakenLogAttackerFilterIndex = 0;
+    public const int NoSelfOrFriendlyFireDamageTakenLogAttackerFilterIndex = 1;
 
     /// <summary>「フィルター設定」の既定(自傷・フレンドリーファイア以外)。</summary>
-    public const int DefaultDamageTakenListAttackerFilterIndex = NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex;
+    public const int DefaultDamageTakenLogAttackerFilterIndex = NoSelfOrFriendlyFireDamageTakenLogAttackerFilterIndex;
 
-    /// <summary>被ダメリストの「最新の被ダメのみ表示」の既定。</summary>
-    public const bool DefaultDamageTakenListShowsLatestHitOnly = true;
+    /// <summary>被ダメログの「最新の被ダメのみ表示」の既定。</summary>
+    public const bool DefaultDamageTakenLogShowsLatestHitOnly = true;
 
-    /// <summary>被ダメリストの設定の既定。</summary>
-    public static DamageTakenListWidgetSettingsConfig CreateDamageTakenListSettings()
+    /// <summary>被ダメログの設定の既定。</summary>
+    public static DamageTakenLogWidgetSettingsConfig CreateDamageTakenLogSettings()
     {
-        return new DamageTakenListWidgetSettingsConfig
+        return new DamageTakenLogWidgetSettingsConfig
         {
-            PlayerInfoFormatString = DefaultDamageTakenListPlayerInfoFormatString,
+            PlayerInfoFormatString = DefaultDamageTakenLogPlayerInfoFormatString,
             SelfDisplayModeIndex = DefaultSelfDisplayModeIndex,
-            HitInfoFormatString = DefaultDamageTakenListHitInfoFormatString,
-            ShowsDefeatCause = DefaultDamageTakenListShowsDefeatCause,
-            AttackerFilterIndex = DefaultDamageTakenListAttackerFilterIndex,
-            ShowsLatestHitOnly = DefaultDamageTakenListShowsLatestHitOnly,
-            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.DamageTakenList),
-            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.DamageTakenList)
+            HitInfoFormatString = DefaultDamageTakenLogHitInfoFormatString,
+            ShowsDefeatCause = DefaultDamageTakenLogShowsDefeatCause,
+            AttackerFilterIndex = DefaultDamageTakenLogAttackerFilterIndex,
+            ShowsLatestHitOnly = DefaultDamageTakenLogShowsLatestHitOnly,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.DamageTakenLog),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.DamageTakenLog)
         };
     }
 
     /// <summary>保存値を正規化して写す。書式が無ければ既定を入れ、クラスの色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。</summary>
-    public static DamageTakenListWidgetSettingsConfig CloneNormalizedDamageTakenList(DamageTakenListWidgetSettingsConfig? damageTakenList)
+    public static DamageTakenLogWidgetSettingsConfig CloneNormalizedDamageTakenLog(DamageTakenLogWidgetSettingsConfig? damageTakenLog)
     {
-        var normalized = (damageTakenList ?? CreateDamageTakenListSettings()).Clone();
-        normalized.PlayerInfoFormatString ??= DefaultDamageTakenListPlayerInfoFormatString;
-        normalized.HitInfoFormatString ??= DefaultDamageTakenListHitInfoFormatString;
+        var normalized = (damageTakenLog ?? CreateDamageTakenLogSettings()).Clone();
+        normalized.PlayerInfoFormatString ??= DefaultDamageTakenLogPlayerInfoFormatString;
+        normalized.HitInfoFormatString ??= DefaultDamageTakenLogHitInfoFormatString;
         normalized.SelfDisplayModeIndex = Math.Clamp(
             normalized.SelfDisplayModeIndex,
             DefaultSelfDisplayModeIndex,
             MaxSelfDisplayModeIndex);
         normalized.AttackerFilterIndex = Math.Clamp(
             normalized.AttackerFilterIndex,
-            AllDamageTakenListAttackerFilterIndex,
-            NoSelfOrFriendlyFireDamageTakenListAttackerFilterIndex);
+            AllDamageTakenLogAttackerFilterIndex,
+            NoSelfOrFriendlyFireDamageTakenLogAttackerFilterIndex);
 
         (normalized.ClassColorIndexes, normalized.ClassColorPalettes) = NormalizeClassColors(
-            WidgetKind.DamageTakenList,
+            WidgetKind.DamageTakenLog,
             normalized.ClassColorIndexes,
             normalized.ClassColorPalettes);
         return normalized;
@@ -2329,6 +2374,89 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
+    /// <summary>チャットの設定の既定。</summary>
+    public static ChatWidgetSettingsConfig CreateChatSettings()
+    {
+        return new ChatWidgetSettingsConfig
+        {
+            TextColorIndexes = CreateDefaultChatTextColorIndexes(),
+            TextColorPalettes = CreateDefaultChatTextColorPalettes()
+        };
+    }
+
+    /// <summary>チャットのテキストカラーの鍵。発言者の名前。</summary>
+    public const string ChatPlayerNameTextColorKey = "PlayerName";
+
+    /// <summary>チャットのテキストカラーの鍵。送られた時刻。</summary>
+    public const string ChatTimeTextColorKey = "Time";
+
+    /// <summary>チャットのテキストカラーの鍵。メッセージの本文(本文の中のリンクは除く)。</summary>
+    public const string ChatMessageTextColorKey = "Message";
+
+    /// <summary>チャットのテキストカラーの鍵の全部。並びは設定の一覧の順で、行の上から出る順。</summary>
+    public static readonly string[] ChatTextColorKeys = [ChatPlayerNameTextColorKey, ChatTimeTextColorKey, ChatMessageTextColorKey];
+
+    /// <summary>チャットのテキストカラーの既定色。白と差し色の2枠。プレイヤー名はタイムラインの「プレイヤー名」と同じ。</summary>
+    private static readonly Dictionary<string, string[]> ChatDefaultTextColorHexes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        [ChatPlayerNameTextColorKey] = ["#FFFFFF", "#70D0E8"],
+        [ChatTimeTextColorKey] = ["#FFFFFF", "#DDDDDD"],
+        [ChatMessageTextColorKey] = ["#FFFFFF", "#EEEEEE"]
+    };
+
+    public static List<string> CreateDefaultChatTextColors(string key)
+    {
+        return [.. ChatDefaultTextColorHexes[key]];
+    }
+
+    /// <summary>チャットのテキストカラーで最初に選ばれている枠。メッセージだけ1枠目(白)で、残りは2枠目の差し色から始める。</summary>
+    public static int GetDefaultChatTextColorIndex(string key)
+    {
+        return string.Equals(key, ChatMessageTextColorKey, StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+    }
+
+    public static Dictionary<string, int> CreateDefaultChatTextColorIndexes()
+    {
+        return ChatTextColorKeys.ToDictionary(
+            key => key,
+            GetDefaultChatTextColorIndex,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    public static Dictionary<string, List<string>> CreateDefaultChatTextColorPalettes()
+    {
+        return ChatTextColorKeys.ToDictionary(
+            key => key,
+            CreateDefaultChatTextColors,
+            StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>保存値を正規化して写す。色は一覧に無い鍵を捨てて足りない鍵を既定で埋める。</summary>
+    public static ChatWidgetSettingsConfig CloneNormalizedChat(ChatWidgetSettingsConfig? chat)
+    {
+        var normalized = (chat ?? CreateChatSettings()).Clone();
+        var textIndexes = new Dictionary<string, int>(ChatTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        var textPalettes = new Dictionary<string, List<string>>(ChatTextColorKeys.Length, StringComparer.OrdinalIgnoreCase);
+        foreach (var key in ChatTextColorKeys)
+        {
+            var palette = normalized.TextColorPalettes.TryGetValue(key, out var saved)
+                && saved is { Count: > 0 }
+                    ? new List<string>(saved)
+                    : CreateDefaultChatTextColors(key);
+
+            var index = normalized.TextColorIndexes.TryGetValue(key, out var savedIndex)
+                ? savedIndex
+                : GetDefaultChatTextColorIndex(key);
+
+            textPalettes[key] = palette;
+            textIndexes[key] = Math.Clamp(index, 0, palette.Count - 1);
+        }
+
+        normalized.TextColorIndexes = textIndexes;
+        normalized.TextColorPalettes = textPalettes;
+        return normalized;
+    }
+
     private static WidgetWindowConfig CreateDefaultWindowConfig(WidgetKind kind)
     {
         return kind switch
@@ -2378,10 +2506,15 @@ public static class WidgetConfigDefaults
                 Width = EntityInfoInitialWindowWidth,
                 Height = EntityInfoInitialWindowHeight
             },
-            WidgetKind.DamageTakenList => new WidgetWindowConfig
+            WidgetKind.Chat => new WidgetWindowConfig
             {
-                Width = DamageTakenListInitialWindowWidth,
-                Height = DamageTakenListInitialWindowHeight
+                Width = ChatInitialWindowWidth,
+                Height = ChatInitialWindowHeight
+            },
+            WidgetKind.DamageTakenLog => new WidgetWindowConfig
+            {
+                Width = DamageTakenLogInitialWindowWidth,
+                Height = DamageTakenLogInitialWindowHeight
             },
             WidgetKind.PlayerTalent => new WidgetWindowConfig
             {
@@ -2403,15 +2536,15 @@ public static class WidgetConfigDefaults
                 Width = BuffDebuffCardInitialWindowWidth,
                 Height = BuffDebuffCardInitialWindowHeight
             },
-            WidgetKind.DamageContribution or WidgetKind.HealingContribution => new WidgetWindowConfig
+            WidgetKind.DamageSkillDetail or WidgetKind.HealingSkillDetail => new WidgetWindowConfig
             {
-                Width = MetricContributionInitialWindowWidth,
-                Height = MetricContributionInitialWindowHeight
+                Width = SkillDetailInitialWindowWidth,
+                Height = SkillDetailInitialWindowHeight
             },
-            WidgetKind.TakenDamageLog => new WidgetWindowConfig
+            WidgetKind.Timeline => new WidgetWindowConfig
             {
-                Width = TakenDamageLogInitialWindowWidth,
-                Height = TakenDamageLogInitialWindowHeight
+                Width = TimelineInitialWindowWidth,
+                Height = TimelineInitialWindowHeight
             },
             WidgetKind.DamageSummary or WidgetKind.HealingSummary => new WidgetWindowConfig
             {
@@ -2425,8 +2558,8 @@ public static class WidgetConfigDefaults
             },
             WidgetKind.DpsGraph or WidgetKind.HpsGraph => new WidgetWindowConfig
             {
-                Width = MetricTimelineInitialWindowWidth,
-                Height = MetricTimelineInitialWindowHeight
+                Width = MetricGraphInitialWindowWidth,
+                Height = MetricGraphInitialWindowHeight
             },
             _ => new WidgetWindowConfig()
         };
@@ -2457,15 +2590,15 @@ public static class WidgetConfigDefaults
         };
     }
 
-    /// <summary>推移グラフの既定。グラフカラーの既定は読み替え先のメーター(<see cref="GetMetricTimelineColorDefaultSource"/>)と同じ。</summary>
-    public static MetricTimelineWidgetSettingsConfig CreateMetricTimelineSettings(WidgetKind kind)
+    /// <summary>推移グラフの既定。グラフカラーの既定は読み替え先のメーター(<see cref="GetMetricGraphColorDefaultSource"/>)と同じ。</summary>
+    public static MetricGraphWidgetSettingsConfig CreateMetricGraphSettings(WidgetKind kind)
     {
-        var source = GetMetricTimelineColorDefaultSource(kind);
+        var source = GetMetricGraphColorDefaultSource(kind);
 
-        return new MetricTimelineWidgetSettingsConfig
+        return new MetricGraphWidgetSettingsConfig
         {
-            AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds,
-            VisibleSeconds = DefaultMetricTimelineVisibleSeconds,
+            AggregationIntervalSeconds = DefaultMetricGraphAggregationIntervalSeconds,
+            VisibleSeconds = DefaultMetricGraphVisibleSeconds,
             ShowSkillLog = true,
             ClassColorIndexes = CreateDefaultClassColorIndexes(source),
             ClassColorPalettes = CreateDefaultClassColorPalettes(source)
@@ -2476,7 +2609,7 @@ public static class WidgetConfigDefaults
     /// 推移グラフのグラフカラーの既定を引くときの読み替え先。DPS推移グラフは DPS メーター、HPS推移グラフは HPS メーターに合わせる
     /// (行の並び・色・最初に選ぶ枠)。
     /// </summary>
-    public static WidgetKind GetMetricTimelineColorDefaultSource(WidgetKind kind)
+    public static WidgetKind GetMetricGraphColorDefaultSource(WidgetKind kind)
     {
         return kind == WidgetKind.HpsGraph
             ? WidgetKind.HpsMeter
@@ -2502,13 +2635,13 @@ public static class WidgetConfigDefaults
         };
     }
 
-    public static TakenDamageLogWidgetSettingsConfig CreateTakenDamageLogSettings()
+    public static TimelineWidgetSettingsConfig CreateTimelineSettings()
     {
-        return new TakenDamageLogWidgetSettingsConfig
+        return new TimelineWidgetSettingsConfig
         {
-            EnemyHealDisplayModeIndex = DefaultTakenDamageLogEnemyHealDisplayModeIndex,
-            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog),
-            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog),
+            EnemyHealDisplayModeIndex = DefaultTimelineEnemyHealDisplayModeIndex,
+            ClassColorIndexes = CreateDefaultClassColorIndexes(WidgetKind.Timeline),
+            ClassColorPalettes = CreateDefaultClassColorPalettes(WidgetKind.Timeline),
             TextColorIndexes = CreateDefaultTextColorIndexes(),
             TextColorPalettes = CreateDefaultTextColorPalettes()
         };
@@ -2834,13 +2967,13 @@ public static class WidgetConfigDefaults
 
     public static Dictionary<string, int> CreateDefaultTextColorIndexes()
     {
-        return TakenDamageLogTextColorKeys
+        return TimelineTextColorKeys
             .ToDictionary(key => key, GetDefaultTextColorIndex, StringComparer.OrdinalIgnoreCase);
     }
 
     public static Dictionary<string, List<string>> CreateDefaultTextColorPalettes()
     {
-        return TakenDamageLogTextColorKeys.ToDictionary(
+        return TimelineTextColorKeys.ToDictionary(
             key => key,
             CreateDefaultTextColors,
             StringComparer.OrdinalIgnoreCase);
@@ -2848,7 +2981,7 @@ public static class WidgetConfigDefaults
 
     public static List<string> CreateDefaultTextColors(string key)
     {
-        return TakenDamageLogDefaultTextColorHexes.TryGetValue(key, out var colors)
+        return TimelineDefaultTextColorHexes.TryGetValue(key, out var colors)
             ? [.. colors]
             : ["#FFFFFF", "#A8A8A8"];
     }
@@ -2867,15 +3000,15 @@ public static class WidgetConfigDefaults
             or WidgetKind.EntityList
             or WidgetKind.DpsMeter
             or WidgetKind.HpsMeter
-            or WidgetKind.DamageTakenList;
+            or WidgetKind.DamageTakenLog;
     }
 
-    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種・被ダメリスト・与ダメ詳細・ヒール詳細・被ダメ詳細。</summary>
+    /// <summary>属性カラーの節を持つウィジェット。スキル詳細の2種・被ダメログ・与ダメ詳細・ヒール詳細・被ダメ詳細。</summary>
     public static bool SupportsElementColorSettings(WidgetKind kind)
     {
-        return kind is WidgetKind.DamageContribution
-            or WidgetKind.HealingContribution
-            or WidgetKind.DamageTakenList
+        return kind is WidgetKind.DamageSkillDetail
+            or WidgetKind.HealingSkillDetail
+            or WidgetKind.DamageTakenLog
             or WidgetKind.DamageSummary
             or WidgetKind.HealingSummary
             or WidgetKind.DamageTakenSummary;
@@ -3020,8 +3153,8 @@ public static class WidgetConfigDefaults
 
         var source = kind switch
         {
-            // タイムライン(被ダメログ)・プレイヤー情報・蘇生リスト・被ダメログ(被ダメリスト)のクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
-            WidgetKind.PlayerList or WidgetKind.TakenDamageLog or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenList
+            // タイムライン・プレイヤー情報・蘇生リスト・被ダメログのクラスアイコンは、プレイヤーリストと同じ既定の色で始める。
+            WidgetKind.PlayerList or WidgetKind.Timeline or WidgetKind.PlayerInfo or WidgetKind.ReviveList or WidgetKind.DamageTakenLog
                 => PlayerListDefaultClassColorHexes,
             // エンティティリスト・エンティティ情報のプレイヤーのクラスの行(ヘイトの枠)は、プレイヤーリストと同じ既定の色で始める。
             WidgetKind.EntityList or WidgetKind.EntityInfo => EntityListDefaultClassColorHexes.ContainsKey(key)
@@ -3057,12 +3190,12 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
-    public static MetricTimelineWidgetSettingsConfig CloneNormalizedMetricTimeline(
+    public static MetricGraphWidgetSettingsConfig CloneNormalizedMetricGraph(
         WidgetKind kind,
-        MetricTimelineWidgetSettingsConfig? metricTimeline)
+        MetricGraphWidgetSettingsConfig? metricGraph)
     {
-        var normalized = (metricTimeline ?? CreateMetricTimelineSettings(kind)).Clone();
-        NormalizeMetricTimeline(kind, normalized);
+        var normalized = (metricGraph ?? CreateMetricGraphSettings(kind)).Clone();
+        NormalizeMetricGraph(kind, normalized);
         return normalized;
     }
 
@@ -3073,10 +3206,10 @@ public static class WidgetConfigDefaults
         return normalized;
     }
 
-    public static TakenDamageLogWidgetSettingsConfig CloneNormalizedTakenDamageLog(TakenDamageLogWidgetSettingsConfig? takenDamageLog)
+    public static TimelineWidgetSettingsConfig CloneNormalizedTimeline(TimelineWidgetSettingsConfig? timeline)
     {
-        var normalized = (takenDamageLog ?? CreateTakenDamageLogSettings()).Clone();
-        NormalizeTakenDamageLog(normalized);
+        var normalized = (timeline ?? CreateTimelineSettings()).Clone();
+        NormalizeTimeline(normalized);
         return normalized;
     }
 
@@ -3108,14 +3241,14 @@ public static class WidgetConfigDefaults
         config.Meter = SupportsMeterSettings(kind)
             ? CloneNormalizedMeter(kind, config.Meter)
             : null;
-        config.MetricTimeline = SupportsMetricTimelineSettings(kind)
-            ? CloneNormalizedMetricTimeline(kind, config.MetricTimeline)
+        config.MetricGraph = SupportsMetricGraphSettings(kind)
+            ? CloneNormalizedMetricGraph(kind, config.MetricGraph)
             : null;
         config.BuffCard = SupportsBuffCardSettings(kind)
             ? CloneNormalizedBuffCard(config.BuffCard)
             : null;
-        config.TakenDamageLog = SupportsTakenDamageLogSettings(kind)
-            ? CloneNormalizedTakenDamageLog(config.TakenDamageLog)
+        config.Timeline = SupportsTimelineSettings(kind)
+            ? CloneNormalizedTimeline(config.Timeline)
             : null;
         config.PlayerInfo = SupportsPlayerInfoSettings(kind)
             ? CloneNormalizedPlayerInfo(config.PlayerInfo)
@@ -3145,11 +3278,14 @@ public static class WidgetConfigDefaults
         config.ReviveList = SupportsReviveListSettings(kind)
             ? CloneNormalizedReviveList(config.ReviveList)
             : null;
-        config.DamageTakenList = SupportsDamageTakenListSettings(kind)
-            ? CloneNormalizedDamageTakenList(config.DamageTakenList)
+        config.DamageTakenLog = SupportsDamageTakenLogSettings(kind)
+            ? CloneNormalizedDamageTakenLog(config.DamageTakenLog)
             : null;
         config.EntityInfo = SupportsEntityInfoSettings(kind)
             ? CloneNormalizedEntityInfo(config.EntityInfo)
+            : null;
+        config.Chat = SupportsChatSettings(kind)
+            ? CloneNormalizedChat(config.Chat)
             : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
@@ -3200,9 +3336,13 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= EntityInfoInitialWindowWidth;
                 config.Window.Height ??= EntityInfoInitialWindowHeight;
                 break;
-            case WidgetKind.DamageTakenList:
-                config.Window.Width ??= DamageTakenListInitialWindowWidth;
-                config.Window.Height ??= DamageTakenListInitialWindowHeight;
+            case WidgetKind.Chat:
+                config.Window.Width ??= ChatInitialWindowWidth;
+                config.Window.Height ??= ChatInitialWindowHeight;
+                break;
+            case WidgetKind.DamageTakenLog:
+                config.Window.Width ??= DamageTakenLogInitialWindowWidth;
+                config.Window.Height ??= DamageTakenLogInitialWindowHeight;
                 break;
             case WidgetKind.PlayerTalent:
                 config.Window.Width ??= PlayerTalentInitialWindowWidth;
@@ -3220,14 +3360,14 @@ public static class WidgetConfigDefaults
                 config.Window.Width ??= BuffDebuffCardInitialWindowWidth;
                 config.Window.Height ??= BuffDebuffCardInitialWindowHeight;
                 break;
-            case WidgetKind.DamageContribution:
-            case WidgetKind.HealingContribution:
-                config.Window.Width ??= MetricContributionInitialWindowWidth;
-                config.Window.Height ??= MetricContributionInitialWindowHeight;
+            case WidgetKind.DamageSkillDetail:
+            case WidgetKind.HealingSkillDetail:
+                config.Window.Width ??= SkillDetailInitialWindowWidth;
+                config.Window.Height ??= SkillDetailInitialWindowHeight;
                 break;
-            case WidgetKind.TakenDamageLog:
-                config.Window.Width ??= TakenDamageLogInitialWindowWidth;
-                config.Window.Height ??= TakenDamageLogInitialWindowHeight;
+            case WidgetKind.Timeline:
+                config.Window.Width ??= TimelineInitialWindowWidth;
+                config.Window.Height ??= TimelineInitialWindowHeight;
                 break;
             case WidgetKind.DamageSummary:
             case WidgetKind.HealingSummary:
@@ -3240,8 +3380,8 @@ public static class WidgetConfigDefaults
                 break;
             case WidgetKind.DpsGraph:
             case WidgetKind.HpsGraph:
-                config.Window.Width ??= MetricTimelineInitialWindowWidth;
-                config.Window.Height ??= MetricTimelineInitialWindowHeight;
+                config.Window.Width ??= MetricGraphInitialWindowWidth;
+                config.Window.Height ??= MetricGraphInitialWindowHeight;
                 break;
         }
     }
@@ -3270,23 +3410,23 @@ public static class WidgetConfigDefaults
             : theme.BackgroundImageAverageColorSourcePath.Trim();
     }
 
-    public static void NormalizeMetricTimeline(WidgetKind kind, MetricTimelineWidgetSettingsConfig metricTimeline)
+    public static void NormalizeMetricGraph(WidgetKind kind, MetricGraphWidgetSettingsConfig metricGraph)
     {
-        if (!MetricTimelineAggregationIntervals.Contains(metricTimeline.AggregationIntervalSeconds))
+        if (!MetricGraphAggregationIntervals.Contains(metricGraph.AggregationIntervalSeconds))
         {
-            metricTimeline.AggregationIntervalSeconds = DefaultMetricTimelineAggregationIntervalSeconds;
+            metricGraph.AggregationIntervalSeconds = DefaultMetricGraphAggregationIntervalSeconds;
         }
 
-        metricTimeline.VisibleSeconds = ClampMetricTimelineVisibleSeconds(metricTimeline.VisibleSeconds);
+        metricGraph.VisibleSeconds = ClampMetricGraphVisibleSeconds(metricGraph.VisibleSeconds);
 
         // グラフカラー。行の並び・既定の色は読み替え先のメーターと同じ。
-        var source = GetMetricTimelineColorDefaultSource(kind);
-        metricTimeline.ClassColorIndexes ??= CreateDefaultClassColorIndexes(source);
-        metricTimeline.ClassColorPalettes ??= CreateDefaultClassColorPalettes(source);
-        (metricTimeline.ClassColorIndexes, metricTimeline.ClassColorPalettes) = NormalizeClassColors(
+        var source = GetMetricGraphColorDefaultSource(kind);
+        metricGraph.ClassColorIndexes ??= CreateDefaultClassColorIndexes(source);
+        metricGraph.ClassColorPalettes ??= CreateDefaultClassColorPalettes(source);
+        (metricGraph.ClassColorIndexes, metricGraph.ClassColorPalettes) = NormalizeClassColors(
             source,
-            metricTimeline.ClassColorIndexes,
-            metricTimeline.ClassColorPalettes);
+            metricGraph.ClassColorIndexes,
+            metricGraph.ClassColorPalettes);
     }
 
     public static void NormalizeBuffCard(BuffCardWidgetSettingsConfig buffCard)
@@ -3302,25 +3442,25 @@ public static class WidgetConfigDefaults
         }
     }
 
-    public static void NormalizeTakenDamageLog(TakenDamageLogWidgetSettingsConfig takenDamageLog)
+    public static void NormalizeTimeline(TimelineWidgetSettingsConfig timeline)
     {
-        takenDamageLog.EnemyHealDisplayModeIndex = Math.Clamp(
-            takenDamageLog.EnemyHealDisplayModeIndex,
-            DefaultTakenDamageLogEnemyHealDisplayModeIndex,
-            HiddenTakenDamageLogEnemyHealDisplayModeIndex);
+        timeline.EnemyHealDisplayModeIndex = Math.Clamp(
+            timeline.EnemyHealDisplayModeIndex,
+            DefaultTimelineEnemyHealDisplayModeIndex,
+            HiddenTimelineEnemyHealDisplayModeIndex);
 
-        takenDamageLog.ClassColorIndexes ??= CreateDefaultClassColorIndexes(WidgetKind.TakenDamageLog);
-        takenDamageLog.ClassColorPalettes ??= CreateDefaultClassColorPalettes(WidgetKind.TakenDamageLog);
-        (takenDamageLog.ClassColorIndexes, takenDamageLog.ClassColorPalettes) = NormalizeClassColors(
-            WidgetKind.TakenDamageLog,
-            takenDamageLog.ClassColorIndexes,
-            takenDamageLog.ClassColorPalettes);
+        timeline.ClassColorIndexes ??= CreateDefaultClassColorIndexes(WidgetKind.Timeline);
+        timeline.ClassColorPalettes ??= CreateDefaultClassColorPalettes(WidgetKind.Timeline);
+        (timeline.ClassColorIndexes, timeline.ClassColorPalettes) = NormalizeClassColors(
+            WidgetKind.Timeline,
+            timeline.ClassColorIndexes,
+            timeline.ClassColorPalettes);
 
-        takenDamageLog.TextColorIndexes ??= CreateDefaultTextColorIndexes();
-        takenDamageLog.TextColorPalettes ??= CreateDefaultTextColorPalettes();
-        (takenDamageLog.TextColorIndexes, takenDamageLog.TextColorPalettes) = NormalizeTextColors(
-            takenDamageLog.TextColorIndexes,
-            takenDamageLog.TextColorPalettes);
+        timeline.TextColorIndexes ??= CreateDefaultTextColorIndexes();
+        timeline.TextColorPalettes ??= CreateDefaultTextColorPalettes();
+        (timeline.TextColorIndexes, timeline.TextColorPalettes) = NormalizeTextColors(
+            timeline.TextColorIndexes,
+            timeline.TextColorPalettes);
     }
 
     public static void NormalizePlayerInfo(PlayerInfoWidgetSettingsConfig playerInfo)
@@ -3406,7 +3546,7 @@ public static class WidgetConfigDefaults
 
     /// <summary>
     /// クラスカラーの色の一覧と選んでいる枠を、<paramref name="kind"/> の職の並びと既定値で揃える。
-    /// メーター系の設定と被ダメログとプレイヤー情報と推移グラフ(読み替え先のメーターの種類で呼ぶ)が使う。
+    /// メーター系の設定とタイムラインとプレイヤー情報と推移グラフ(読み替え先のメーターの種類で呼ぶ)が使う。
     /// </summary>
     private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeClassColors(
         WidgetKind kind,
@@ -3435,7 +3575,7 @@ public static class WidgetConfigDefaults
     }
 
     /// <summary>
-    /// 被ダメログのテキストカラーを、鍵の並びと既定値で揃える。クラスカラーと同じ規則。
+    /// タイムラインのテキストカラーを、鍵の並びと既定値で揃える。クラスカラーと同じ規則。
     /// </summary>
     private static (Dictionary<string, int> Indexes, Dictionary<string, List<string>> Palettes) NormalizeTextColors(
         Dictionary<string, int> indexes,
@@ -3444,7 +3584,7 @@ public static class WidgetConfigDefaults
         var normalizedIndexes = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var normalizedPalettes = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var key in TakenDamageLogTextColorKeys)
+        foreach (var key in TimelineTextColorKeys)
         {
             var defaultColors = CreateDefaultTextColors(key);
             var sourceColors = palettes.TryGetValue(key, out var colors)

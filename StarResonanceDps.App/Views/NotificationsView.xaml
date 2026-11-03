@@ -339,6 +339,32 @@
                                    Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_TargetIdSourceNote]}" />
                     </StackPanel>
 
+                    <!-- ワールドチャットの一致ワード。スペースで区切った語が全部本文に含まれていれば通知する。 -->
+                    <StackPanel Visibility="{Binding ShowsMatchWords, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Height="44">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Style="{StaticResource NotificationsView.Label}"
+                                       Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_MatchWords]}" />
+
+                            <TextBox Grid.Column="2"
+                                     Width="220"
+                                     Height="32"
+                                     Style="{StaticResource Input.PathBox}"
+                                     VerticalContentAlignment="Center"
+                                     Tag="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_MatchWords_Placeholder]}"
+                                     Text="{Binding TargetName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </Grid>
+
+                        <TextBlock Margin="0,0,0,6"
+                                   Style="{StaticResource NotificationsView.Note}"
+                                   Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Notification_MatchWordsAllNote]}" />
+                    </StackPanel>
+
                     <!-- バフ・デバフ効果切れだけの注意書き。2つ目は通知するバフの選び方(カードとグループの設定の「通知対象」)。 -->
                     <StackPanel Visibility="{Binding ShowsBuffWidgetNote, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Margin="0,0,0,4"

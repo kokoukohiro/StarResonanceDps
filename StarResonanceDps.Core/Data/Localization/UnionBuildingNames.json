@@ -1,0 +1,44 @@
+{
+  "1": {
+    "zh-CN": "活动中心",
+    "en-US": "Guild Center",
+    "ja-JP": "活動所",
+    "ko-KR": "이벤트 센터"
+  },
+  "2": {
+    "zh-CN": "祝祷之泉",
+    "en-US": "Boon Fountain",
+    "ja-JP": "祝福の泉",
+    "ko-KR": "축복의 샘"
+  },
+  "3": {
+    "zh-CN": "练习室",
+    "en-US": "Practice Room",
+    "ja-JP": "訓練場",
+    "ko-KR": "트레이닝 룸"
+  },
+  "4": {
+    "zh-CN": "休闲区",
+    "en-US": "Leisure Area",
+    "ja-JP": "くつろぎゾーン",
+    "ko-KR": "휴식 구역"
+  },
+  "5": {
+    "zh-CN": "协会杂货铺",
+    "en-US": "Grocery Store",
+    "ja-JP": "ギルド雑貨屋",
+    "ko-KR": "길드 잡화점"
+  },
+  "6": {
+    "zh-CN": "动画栏",
+    "en-US": "Photo Panel",
+    "ja-JP": "スクリーン",
+    "ko-KR": "연출란"
+  },
+  "7": {
+    "zh-CN": "证件机",
+    "en-US": "ID Machine",
+    "ja-JP": "ID発行機",
+    "ko-KR": "신분증 기계"
+  }
+}

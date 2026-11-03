@@ -5,7 +5,7 @@ using System.Windows.Controls;
 namespace StarResonanceDps.App.Views.Widgets;
 
 /// <summary>
-/// アビリティ情報・潜在心相晶情報・モジュール情報。作りは装備情報と同じで、縦スクロールはウィンドウ枠側の細いスクロールバーに繋ぐ。
+/// 潜在心相晶情報・モジュール情報。作りは装備情報と同じで、縦スクロールはウィンドウ枠側の細いスクロールバーに繋ぐ。
 /// </summary>
 public partial class PlayerRootBuffWidgetView : UserControl, IWidgetVerticalScrollContent
 {

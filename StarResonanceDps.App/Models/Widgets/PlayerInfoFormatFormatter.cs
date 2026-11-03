@@ -167,16 +167,16 @@ public static partial class PlayerInfoFormatFormatter
     }
 
     /// <summary>
-    /// 被ダメログの登場人物(加害者・対象)と、バフ/デバフリストの付与者(エンティティのリストでプレイヤーが付けた行)の表示値。
+    /// タイムライン・被ダメログの登場人物(加害者・対象)と、バフ/デバフリストの付与者(エンティティのリストでプレイヤーが付けた行)の表示値。
     /// システム(召喚者へ寄せられなかった仮想体)は「システム」、名前の無い HP バーの見える敵は「敵」、何者か分からない敵は「未知の敵」、
     /// プレイヤーはプレイヤー名の規則(<see cref="GetDisplayName(string?, long, bool, bool, int, PlayerNameDisplayMode)"/>)、
     /// それ以外は名前のまま。
     /// </summary>
-    public static string GetPartyDisplayName(TakenDamageLogParty person)
+    public static string GetPartyDisplayName(CombatEventLogParty person)
     {
         if (person.IsSystem)
         {
-            return LocalizationManager.Instance["TakenDamageLog_SystemActor"];
+            return LocalizationManager.Instance["CombatEventLog_SystemActor"];
         }
 
         // 名前の無い、HP バーの見える敵。文言はエンティティリストと同じ。名前には内部ID注記だけが入っていることがある。
@@ -244,7 +244,7 @@ public static partial class PlayerInfoFormatFormatter
     /// <summary>
     /// 特化の表示値。特化(クラスR2)なら名前の表 <c>ClassSpecNames.json</c> の名前、
     /// それ以外(クラスR1・変身・不明)はリソース <c>ClassSpec_&lt;特化&gt;</c> の文字。
-    /// 書式の <c>{Spec}</c>、プレイヤーリスト、被ダメログ、プレイヤー情報が使う。
+    /// 書式の <c>{Spec}</c>、プレイヤーリスト、タイムライン、プレイヤー情報が使う。
     /// </summary>
     public static string GetClassSpecText(PlayerClassSpec classSpec)
     {

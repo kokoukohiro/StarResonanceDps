@@ -63,6 +63,6 @@ public sealed partial class ReviveListEntry : ObservableObject
     [ObservableProperty]
     private double _barDecaySeconds;
 
-    /// <summary>並びの鍵。蘇生可能は 0、残り秒の分かる行は残り秒、分からない行は最後(正の無限大)。</summary>
-    internal double SortKey { get; set; }
+    /// <summary>並びの鍵。蘇生可能は最初、残り秒の分かる行は蘇生不可デバフの切れる時刻、分からない行は最後。</summary>
+    internal DateTime SortKey { get; set; }
 }

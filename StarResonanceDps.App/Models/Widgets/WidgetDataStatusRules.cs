@@ -70,7 +70,7 @@ public static class WidgetDataStatusRules
     /// タイムライン。履歴を出している間は中身の全部が履歴。記録済みの行の欠け(未知の敵・名前の無い人)は記録の中身なので数えない
     /// (近づき直しても書き直されない。元の事実はエンティティリストとメーターが数える)。
     /// </summary>
-    public static WidgetDataStatus ForTakenDamageLog(
+    public static WidgetDataStatus ForTimeline(
         GameReceptionSnapshot reception,
         bool isHistory,
         bool hasHistoryLoadFailed)
@@ -158,7 +158,7 @@ public static class WidgetDataStatusRules
     /// 途中起動でどちらかがまだなら相手が誰でもマップ移動まで欠ける。
     /// </summary>
     /// <param name="hasHistoryLoadFailed">履歴の回を読めなかった(次に選び直すまで)。</param>
-    /// <param name="player">窓の相手の行(一覧から消えても残した最後の行を含む)。無ければ null。</param>
+    /// <param name="player">窓の相手の行(一覧に居ない相手を分かっている値で引いた行を含む)。無ければ null。</param>
     /// <param name="hasPhoto">顔・名刺の写真の値を受けたか(写真が無い人の「無い」という値も含む)。</param>
     public static WidgetDataStatus ForPlayerInfo(
         GameReceptionSnapshot reception,
@@ -341,6 +341,18 @@ public static class WidgetDataStatusRules
     {
         return WidgetDataStatus.Complete
             .WithIf(reception.IsMidLaunch, MapOrRelogin);
+    }
+
+    /// <summary>
+    /// チャット。新しいメッセージは1件ずつ完結した通知で届き、途中から読み始めても以後の分は欠けない。
+    /// 過去のチャットはゲームがログインの後(と再接続)にまとめて読み直すので、ゲームに入った後に起動したときは欠ける。
+    /// ワールドと初心者はチャンネルの切り替え、プライベートトークはその相手を開いたときにも、その窓の分を読み直す。
+    /// </summary>
+    /// <param name="hasPastChat">その窓の過去のチャットを受け取った(<see cref="ChatMessageStore.HasPastChat"/>)。</param>
+    public static WidgetDataStatus ForChat(bool hasPastChat)
+    {
+        return WidgetDataStatus.Complete
+            .WithIf(!hasPastChat, WidgetDataStatusReasons.PastChatRelogin);
     }
 
     /// <summary>

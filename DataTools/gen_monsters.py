@@ -10,6 +10,8 @@
 どの表の名前かは実体の種類でしか決まらない。
 
 `MonsterTable` は行があっても `Name` が空のことがあり、その数は言語で大きく違う。
+
+前の出力にあって今回空になった名前は `Data/Overrides/MonsterNameOverrides.json` へ書き足す(`_common.carry_dropped_names`)。
 """
 from _common import LANGS, name_of, table, write_localized
 
@@ -29,7 +31,7 @@ def main():
     for lang, source in tables.items():
         values[lang] = {key: name_of(source.get(key)) for key in keys}
 
-    write_localized("MonsterNames", values, keys)
+    write_localized("MonsterNames", values, keys, dropped_names_overrides="MonsterNameOverrides")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// 属性カラー(<see cref="ElementColorWidgetSettingsConfig"/>。与ダメ詳細などでは節の名前がアイコンカラーで、物理・魔法・無分類の行も持つ)からバーの色を作る。
-/// スキル詳細・被ダメリスト・与ダメ詳細などが使う。不透明度が掛かるのはウィジェットの側だけで、設定画面の色見本は素のまま。
+/// スキル詳細・被ダメログ・与ダメ詳細などが使う。不透明度が掛かるのはウィジェットの側だけで、設定画面の色見本は素のまま。
 /// </summary>
 public static class ElementBarColors
 {

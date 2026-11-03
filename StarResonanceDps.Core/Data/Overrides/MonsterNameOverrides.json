@@ -5287,6 +5287,190 @@
       "ko-KR": "파파라-포지션"
     }
   },
+  "5000000": {
+    "Name": {
+      "zh-CN": "姆克头目",
+      "en-US": "Muku Chief",
+      "ja-JP": "ムークボス",
+      "ko-KR": "무크 두목"
+    }
+  },
+  "5000001": {
+    "Name": {
+      "zh-CN": "火焰食人魔",
+      "en-US": "Inferno Ogre",
+      "ja-JP": "フレイムオーガ",
+      "ko-KR": "화염 오우거"
+    }
+  },
+  "5000002": {
+    "Name": {
+      "zh-CN": "凶猛金牙",
+      "en-US": "Golden Juggernaut",
+      "ja-JP": "猛る金色",
+      "ko-KR": "사나운 황금 이빨"
+    }
+  },
+  "5000003": {
+    "Name": {
+      "zh-CN": "蟹蛛王",
+      "en-US": "Arachnocrab King",
+      "ja-JP": "ゴーストカニクモ",
+      "ko-KR": "환영 거미게"
+    }
+  },
+  "5000004": {
+    "Name": {
+      "zh-CN": "圣域飞鱼",
+      "en-US": "Celestial Flier",
+      "ja-JP": "ヘヴンスカイ",
+      "ko-KR": "성스러운 날치"
+    }
+  },
+  "5000005": {
+    "Name": {
+      "zh-CN": "雷电食人魔",
+      "en-US": "Tempest Ogre",
+      "ja-JP": "サンダーオーガ",
+      "ko-KR": "번개 오우거"
+    }
+  },
+  "5000006": {
+    "Name": {
+      "zh-CN": "寒霜食人魔",
+      "en-US": "Frost Ogre",
+      "ja-JP": "フロストオーガ",
+      "ko-KR": "서리 오우거"
+    }
+  },
+  "5000007": {
+    "Name": {
+      "zh-CN": "姆克王",
+      "en-US": "Muku King",
+      "ja-JP": "キングムーク",
+      "ko-KR": "무크왕"
+    }
+  },
+  "5000008": {
+    "Name": {
+      "zh-CN": "哥布林王",
+      "en-US": "Goblin King",
+      "ja-JP": "キングゴブリン",
+      "ko-KR": "고블린 왕"
+    }
+  },
+  "5000009": {
+    "Name": {
+      "zh-CN": "飓风哥布林王",
+      "en-US": "Storm Goblin King",
+      "ja-JP": "嵐のキングゴブリン",
+      "ko-KR": "태풍 고블린 왕"
+    }
+  },
+  "5000010": {
+    "Name": {
+      "zh-CN": "山贼头目",
+      "en-US": "Brigand Leader",
+      "ja-JP": "異国の山賊長ヒグマ",
+      "ko-KR": "산적 두목"
+    }
+  },
+  "5000011": {
+    "Name": {
+      "zh-CN": "铁牙",
+      "en-US": "Iron Fang",
+      "ja-JP": "鉄牙",
+      "ko-KR": "무쇠 이빨"
+    }
+  },
+  "5000012": {
+    "Name": {
+      "zh-CN": "蜥蜴人王",
+      "en-US": "Lizardman King",
+      "ja-JP": "キングギルミー",
+      "ko-KR": "리자드맨 킹"
+    }
+  },
+  "5000013": {
+    "Name": {
+      "zh-CN": "剧毒蜂巢",
+      "en-US": "Venobzzar Incubator",
+      "ja-JP": "ヴェノミーンの巣",
+      "ko-KR": "맹독 민의 둥지"
+    }
+  },
+  "5000014": {
+    "Name": {
+      "zh-CN": "艾露娜",
+      "en-US": "Airona",
+      "ja-JP": "アルーナ",
+      "ko-KR": "아이로나"
+    }
+  },
+  "5000015": {
+    "Name": {
+      "zh-CN": "塔塔",
+      "en-US": "Tatta",
+      "ja-JP": "タータ",
+      "ko-KR": "타타"
+    }
+  },
+  "5000016": {
+    "Name": {
+      "zh-CN": "奥尔维拉",
+      "en-US": "Olvera",
+      "ja-JP": "オルヴェラ",
+      "ko-KR": "올베라"
+    }
+  },
+  "5000017": {
+    "Name": {
+      "zh-CN": "蒂娜",
+      "en-US": "Tina",
+      "ja-JP": "ティナ",
+      "ko-KR": "티나"
+    }
+  },
+  "5000018": {
+    "Name": {
+      "zh-CN": "灾厄之主",
+      "en-US": "Bane Lord",
+      "ja-JP": "災厄の主",
+      "ko-KR": "재앙의 주인"
+    }
+  },
+  "5000019": {
+    "Name": {
+      "zh-CN": "圣域飞鱼召唤怪",
+      "en-US": "Celestial Flier Summon",
+      "ja-JP": "ヘヴンスカイの召喚モンスター",
+      "ko-KR": "성스러운 날치 소환 몹"
+    }
+  },
+  "5000020": {
+    "Name": {
+      "zh-CN": "召唤近战姆克",
+      "en-US": "Summon Melee Muku",
+      "ja-JP": "近接戦ムーク召喚",
+      "ko-KR": "소환된 근거리 무크"
+    }
+  },
+  "5000021": {
+    "Name": {
+      "zh-CN": "召唤弩手姆克",
+      "en-US": "Summon Crossbow Muku",
+      "ja-JP": "ボウガンムーク召喚",
+      "ko-KR": "소환된 석궁 무크"
+    }
+  },
+  "5000022": {
+    "Name": {
+      "zh-CN": "召唤姆克头目",
+      "en-US": "Summon Muku Chief",
+      "ja-JP": "ムークボス召喚",
+      "ko-KR": "소환된 무크 두목"
+    }
+  },
   "5100301": {
     "Name": {
       "zh-CN": "法法菈",

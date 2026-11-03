@@ -9,7 +9,7 @@ namespace StarResonanceDps.Core.CombatRuntime.Database;
 /// エンカウンターの blob に書く項目を決める。<b>許可制</b>で、履歴表示が読むものだけを書く。
 ///
 /// <para>
-/// 読み手は <c>MeterSnapshotProvider</c> の履歴に追従する入口(メーター・スキル詳細・詳細・グラフ・被ダメログ)、
+/// 読み手は <c>MeterSnapshotProvider</c> の履歴に追従する入口(メーター・スキル詳細・詳細・グラフ・タイムライン・被ダメログ)、
 /// プレイヤーリストの顔ぶれ(<c>PlayerRosterProjection.RebuildRoster</c>)と、そこから呼ばれる
 /// <c>PlayerDataSourceResolver</c>。<b>履歴で読む項目を足したら、ここにも足さないと履歴で既定値になる。</b>
 /// </para>
@@ -56,6 +56,8 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(Entity.SkillCasts),
             nameof(Entity.RecordedAvatar),
             nameof(Entity.RootBuffIds),
+            nameof(Entity.TalentNodeIdsByProfession),
+            nameof(Entity.LastReplaceableSkills),
         ],
         [typeof(SocialAvatarState)] =
         [
@@ -124,7 +126,7 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
     };
 
     /// <summary>
-    /// プレイヤー以外のエンティティで書く項目。履歴で読むのは被ダメログの加害者名(<c>AttrId</c>)と詠唱だけ。
+    /// プレイヤー以外のエンティティで書く項目。履歴で読むのはタイムライン・被ダメログの加害者名(<c>AttrId</c>)と詠唱だけ。
     /// <c>UUID</c> はコンストラクタの引数なので外せない。
     /// </summary>
     private static readonly HashSet<string> NonPlayerEntityMembers =

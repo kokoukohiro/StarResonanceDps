@@ -1,4 +1,5 @@
 using StarResonanceDps.Core.CombatRuntime;
+using Zproto;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
@@ -15,7 +16,10 @@ public enum WidgetTargetOptionKind
     /// バフ・デバフカードのバフ・デバフ。相手は、料理・薬剤のまとまりなら自分、
     /// それ以外はバフリスト(デバフならデバフリスト)のカードで選んでいる項目。
     /// </summary>
-    Buff
+    Buff,
+
+    /// <summary>チャットのチャンネル。プライベートトークは相手1人(<see cref="WidgetTargetOption.CharacterId"/>)。</summary>
+    Chat
 }
 
 /// <summary>
@@ -29,8 +33,11 @@ public sealed class WidgetTargetOption
     /// <summary>人: 自分(相手の指定なしで開く)。バフ: 相手がいつも自分のカード(ショートカット・「指定なし」とそれが決まった項目)。</summary>
     public bool IsSelf { get; init; }
 
-    /// <summary>人: 相手の UID。自分なら分かっていれば自分のもの(0 はまだ分からない)。</summary>
+    /// <summary>人: 相手の UID。自分なら分かっていれば自分のもの(0 はまだ分からない)。チャット: プライベートトークの相手の UID(ほかのチャンネルは 0)。</summary>
     public long CharacterId { get; init; }
+
+    /// <summary>チャット: チャンネル。</summary>
+    public ChitChatChannelType ChatChannel { get; init; }
 
     /// <summary>敵: 実体。</summary>
     public EntityListEntry? Entity { get; init; }
@@ -65,6 +72,7 @@ public sealed class WidgetTargetOption
         {
             WidgetTargetOptionKind.Player => IsSelf == other.IsSelf && (IsSelf || CharacterId == other.CharacterId),
             WidgetTargetOptionKind.Entity => Entity?.EntityUuid == other.Entity?.EntityUuid,
+            WidgetTargetOptionKind.Chat => ChatChannel == other.ChatChannel && CharacterId == other.CharacterId,
             _ => IsSelf == other.IsSelf
                 && BuffListKind == other.BuffListKind
                 && BuffGroup == other.BuffGroup
@@ -80,6 +88,7 @@ public sealed class WidgetTargetOption
             Kind = Kind,
             IsSelf = IsSelf,
             CharacterId = CharacterId,
+            ChatChannel = ChatChannel,
             Entity = Entity,
             BuffListKind = BuffListKind,
             BuffKey = BuffKey,
@@ -98,6 +107,17 @@ public sealed class WidgetTargetOption
             Kind = WidgetTargetOptionKind.Player,
             IsSelf = true,
             CharacterId = selfCharacterId
+        };
+    }
+
+    /// <summary>チャットのチャンネル。プライベートトークは相手の UID を渡す(ほかのチャンネルは 0)。</summary>
+    public static WidgetTargetOption CreateChat(ChitChatChannelType channel, long partnerId)
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Chat,
+            ChatChannel = channel,
+            CharacterId = partnerId
         };
     }
 

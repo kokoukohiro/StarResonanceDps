@@ -12,7 +12,7 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// ウィジェットを開いていなくても通知する項目(入場確認・HP低下・プレイヤー出現・エンティティ出現・狙われるプレイヤー・
-/// 自分の薬剤・料理効果切れ・予兆技・エンティティ詠唱)の判定を持つ。起動時から動き、画面のスレッドで使う。
+/// 自分の薬剤・料理効果切れ・予兆技・エンティティ詠唱・プライベートトーク・ワールドチャット)の判定を持つ。起動時から動き、画面のスレッドで使う。
 /// バフ・デバフ効果切れと、ほかの人の薬剤・料理効果切れは、開いているバフ・デバフカードとバフ・デバフグループが判定する(<see cref="BuffNotificationRegistry"/>)。
 ///
 /// <para>
@@ -21,7 +21,7 @@ namespace StarResonanceDps.App.Services;
 /// HP低下と狙われるプレイヤーはプレイヤーの通知なので、NPC(助っ人)と判定された人は渡さない。
 /// 出現の2つは、オンにした・対象(名前とID)を変えたときに今の一覧を「既にいる相手」として控え直す。起動した直後に見えた相手には出す。
 /// 狙われるプレイヤーも、オンにした・設定を選び直したときに今の狙われ状態を控え直す。エンティティ詠唱も、オンにした・対象を変えたときに今の詠唱を控え直す。
-/// 出現の2つとエンティティ詠唱は、対象の名前もIDも空なら判定を動かさない(<see cref="NotificationWatchTarget"/>)。
+/// 出現の2つとエンティティ詠唱は、対象の名前もIDも空なら判定を動かさない(<see cref="NotificationWatchTarget"/>)。ワールドチャットは一致ワードが空なら出さない。
 /// 予兆技は、通知条件を選び直したときに予告を控え直す。
 /// </para>
 ///
@@ -45,6 +45,8 @@ public sealed class NotificationMonitor
     private readonly AppearanceNotificationTracker _entityAppearedTracker = new(NotificationKind.EntityAppeared);
     private readonly TargetedNotificationTracker _targetedTracker = new();
     private readonly EntityCastNotificationTracker _entityCastTracker = new();
+    private readonly PrivateChatNotificationTracker _privateChatTracker = new();
+    private readonly WorldChatNotificationTracker _worldChatTracker = new();
     private readonly List<PlayerRosterEntry> _nearbyPlayers = [];
     private readonly DispatcherTimer _telegraphedSkillTimer;
     private readonly DispatcherTimer _cuisinePotionTimer;
@@ -111,6 +113,30 @@ public sealed class NotificationMonitor
         if (ConfigManager.Instance.GetNotificationItem(NotificationKind.EntryConfirmation).IsEnabled)
         {
             EntryConfirmationNotifier.NotifyTeamEntry(sceneId, masterModeDifficulty);
+        }
+    }
+
+    /// <summary>ほかの人からプライベートトークが届いた。画面のスレッドで呼ぶ。</summary>
+    public void NotifyPrivateChatMessage(long partnerId, long messageId, string senderName)
+    {
+        if (ConfigManager.Instance.GetNotificationItem(NotificationKind.PrivateChat).IsEnabled)
+        {
+            _privateChatTracker.Observe(partnerId, messageId, senderName);
+        }
+    }
+
+    /// <summary>ゲームがプライベートトークを既読にした。画面のスレッドで呼ぶ。</summary>
+    public void NotifyPrivateChatRead(long partnerId, long maxReadMessageId)
+    {
+        _privateChatTracker.MarkRead(partnerId, maxReadMessageId);
+    }
+
+    /// <summary>ワールドチャットにほかの人の文の発言が届いた。画面のスレッドで呼ぶ。</summary>
+    public void NotifyWorldChatMessage(long senderId, string senderName, string message)
+    {
+        if (ConfigManager.Instance.GetNotificationItem(NotificationKind.WorldChat).IsEnabled)
+        {
+            _worldChatTracker.Observe(senderId, senderName, message);
         }
     }
 
@@ -220,6 +246,13 @@ public sealed class NotificationMonitor
             _cuisinePotionTimer.Stop();
             ReleaseCuisinePotionWatches();
         }
+
+        if (!notifications.Get(NotificationKind.PrivateChat).IsEnabled)
+        {
+            _privateChatTracker.Clear();
+        }
+
+        _worldChatTracker.SetMatchWords(notifications.Get(NotificationKind.WorldChat).TargetNames);
     }
 
     /// <summary>名簿のうち、周りに見えているほかのプレイヤー(自分と履歴の行は除く)を渡す。IDはUID(キャラクターID)で比べる。</summary>

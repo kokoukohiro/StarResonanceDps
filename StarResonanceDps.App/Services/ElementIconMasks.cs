@@ -5,7 +5,7 @@ namespace StarResonanceDps.App.Services;
 
 /// <summary>
 /// 属性アイコンの形(<c>Icon.DamageProperty.*</c>)。塗りをこの形で抜いて描く(クラスアイコンと同じ染め方)。
-/// スキル詳細・被ダメリスト・与ダメ詳細などと、属性カラーの設定の行が使う。形は凍結して全部の窓で共有する。画面のスレッドから使う。
+/// スキル詳細・被ダメログ・与ダメ詳細などと、属性カラーの設定の行が使う。形は凍結して全部の窓で共有する。画面のスレッドから使う。
 /// </summary>
 public static class ElementIconMasks
 {

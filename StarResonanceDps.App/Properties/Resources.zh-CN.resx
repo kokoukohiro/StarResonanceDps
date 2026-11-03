@@ -293,7 +293,7 @@
   <data name="Settings_BuffCardNotification_CuisinePotionLow" xml:space="preserve">
     <value>药剂·料理效果结束</value>
   </data>
-  <data name="Settings_TakenDamageLogNotification_TelegraphedSkill" xml:space="preserve">
+  <data name="Settings_TimelineNotification_TelegraphedSkill" xml:space="preserve">
     <value>预兆技能</value>
   </data>
   <data name="Notification_EntryConfirmation" xml:space="preserve">
@@ -314,7 +314,7 @@
   <data name="BuffCardNotification_CuisinePotionLow_Default" xml:space="preserve">
     <value>{TargetName}的{BuffName}效果即将结束</value>
   </data>
-  <data name="TakenDamageLogNotification_TelegraphedSkill_Default" xml:space="preserve">
+  <data name="TimelineNotification_TelegraphedSkill_Default" xml:space="preserve">
     <value>{SkillName}来袭</value>
   </data>
   <data name="EntryConfirmationNotification_Default" xml:space="preserve">
@@ -371,7 +371,18 @@
   <data name="EntityCastNotification_Default" xml:space="preserve">
     <value>{EntityName}正在吟唱</value>
   </data>
-  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
+  <data name="Notification_PrivateChat" xml:space="preserve">
+    <value>私聊</value>
+  </data>
+  <data name="PrivateChatNotification_Default" xml:space="preserve">
+    <value>收到{PlayerName}的私聊</value>
+  </data>
+  <data name="Notification_WorldChat" xml:space="preserve">
+    <value>世界聊天</value>
+  </data>
+  <data name="WorldChatNotification_Default" xml:space="preserve">
+    <value>收到{PlayerName}的招募</value>
+  </data>  <data name="TelegraphedSkillCondition_OnActivation" xml:space="preserve">
     <value>发动时</value>
   </data>
   <data name="TelegraphedSkillCondition_1" xml:space="preserve">
@@ -608,70 +619,67 @@
   <data name="Widget_State_Stopped" xml:space="preserve">
     <value>已停止</value>
   </data>
-  <data name="Menu_DpsMeter" xml:space="preserve">
+  <data name="Widget_DpsMeter" xml:space="preserve">
     <value>DPS计量器</value>
   </data>
-  <data name="Menu_HpsMeter" xml:space="preserve">
+  <data name="Widget_HpsMeter" xml:space="preserve">
     <value>HPS计量器</value>
   </data>
-  <data name="Menu_DtpsMeter" xml:space="preserve">
-    <value>DTPS计量器</value>
-  </data>
-  <data name="Widget_TakenDamageLog" xml:space="preserve">
+  <data name="Widget_Timeline" xml:space="preserve">
     <value>时间轴</value>
   </data>
-  <data name="TakenDamageLog_CastFormat" xml:space="preserve">
+  <data name="Timeline_CastFormat" xml:space="preserve">
     <value>{0}正在咏唱{1}</value>
   </data>
-  <data name="TakenDamageLog_AnnounceFormat" xml:space="preserve">
+  <data name="Timeline_AnnounceFormat" xml:space="preserve">
     <value>{0}正在准备{1}</value>
   </data>
-  <data name="TakenDamageLog_SkillFormat" xml:space="preserve">
+  <data name="Timeline_SkillFormat" xml:space="preserve">
     <value>{0}的{1}</value>
   </data>
-  <data name="TakenDamageLog_UnnamedSkill" xml:space="preserve">
+  <data name="CombatEventLog_UnnamedSkill" xml:space="preserve">
     <value>攻击</value>
   </data>
-  <data name="TakenDamageLog_UnnamedHeal" xml:space="preserve">
+  <data name="Timeline_UnnamedHeal" xml:space="preserve">
     <value>治疗</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Title" xml:space="preserve">
+  <data name="TextCopyFailed_Title" xml:space="preserve">
     <value>文本复制错误</value>
   </data>
-  <data name="TakenDamageLog_CopyTextFailed_Message" xml:space="preserve">
+  <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>无法复制文本。</value>
   </data>
-  <data name="TakenDamageLog_HealFormat" xml:space="preserve">
+  <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0}{1}HP</value>
   </data>
-  <data name="TakenDamageLog_HealAmountFormat" xml:space="preserve">
+  <data name="Timeline_HealAmountFormat" xml:space="preserve">
     <value>恢复{0}</value>
   </data>
-  <data name="TakenDamageLog_DamageFormat" xml:space="preserve">
+  <data name="Timeline_DamageFormat" xml:space="preserve">
     <value>对{0}造成{1}</value>
   </data>
-  <data name="TakenDamageLog_DamageAmountFormat" xml:space="preserve">
+  <data name="Timeline_DamageAmountFormat" xml:space="preserve">
     <value>{0}伤害</value>
   </data>
-  <data name="TakenDamageLog_BuffFormat" xml:space="preserve">
+  <data name="Timeline_BuffFormat" xml:space="preserve">
     <value>{0}获得{1}</value>
   </data>
-  <data name="TakenDamageLog_BuffDurationFormat" xml:space="preserve">
+  <data name="Timeline_BuffDurationFormat" xml:space="preserve">
     <value>{0}({1}秒)</value>
   </data>
-  <data name="TakenDamageLog_UnnamedEffect" xml:space="preserve">
+  <data name="Timeline_UnnamedEffect" xml:space="preserve">
     <value>某种效果</value>
   </data>
-  <data name="TakenDamageLog_SystemActor" xml:space="preserve">
+  <data name="CombatEventLog_SystemActor" xml:space="preserve">
     <value>系统</value>
   </data>
-  <data name="TakenDamageLog_UnnamedCastSkill" xml:space="preserve">
+  <data name="Timeline_UnnamedCastSkill" xml:space="preserve">
     <value>某个技能</value>
   </data>
-  <data name="TakenDamageLog_FallSkill" xml:space="preserve">
+  <data name="DamageTakenLog_FallSkill" xml:space="preserve">
     <value>坠落</value>
   </data>
-  <data name="Settings_Section_TakenDamageLogTextColors_Title" xml:space="preserve">
+  <data name="Settings_Section_TimelineTextColors_Title" xml:space="preserve">
     <value>文本颜色</value>
   </data>
   <data name="Settings_Section_EquipmentTextColors_Title" xml:space="preserve">
@@ -734,19 +742,19 @@
   <data name="CasterNameDisplay_AppliedByOthers" xml:space="preserve">
     <value>仅他人施加</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_EntityName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_EntityName" xml:space="preserve">
     <value>实体名称</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_SkillName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_SkillName" xml:space="preserve">
     <value>技能名称</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_PlayerName" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_PlayerName" xml:space="preserve">
     <value>玩家名称</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_Effect" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_Effect" xml:space="preserve">
     <value>效果</value>
   </data>
-  <data name="Settings_TakenDamageLogTextColor_HpValue" xml:space="preserve">
+  <data name="Settings_TimelineTextColor_HpValue" xml:space="preserve">
     <value>HP数值</value>
   </data>
   <data name="DamageProperty_General" xml:space="preserve">
@@ -887,6 +895,9 @@
   <data name="Widget_PlayerTalent" xml:space="preserve">
     <value>天赋信息</value>
   </data>
+  <data name="PlayerTalent_ActivationUnknown" xml:space="preserve">
+    <value>激活状态未知</value>
+  </data>
   <data name="Widget_PlayerSeasonTalent" xml:space="preserve">
     <value>深眠心相仪信息</value>
   </data>
@@ -932,13 +943,13 @@
   <data name="Widget_HpsGraph" xml:space="preserve">
     <value>HPS趋势图表</value>
   </data>
-  <data name="Widget_HealingContribution" xml:space="preserve">
+  <data name="Widget_HealingSummary" xml:space="preserve">
     <value>治疗详情</value>
   </data>
   <data name="Widget_DpsGraph" xml:space="preserve">
     <value>DPS趋势图表</value>
   </data>
-  <data name="Widget_DamageContribution" xml:space="preserve">
+  <data name="Widget_DamageSummary" xml:space="preserve">
     <value>伤害详情</value>
   </data>
   <data name="Widget_BuffList" xml:space="preserve">
@@ -1046,7 +1057,7 @@
   <data name="Metric_DamageMode_Normal" xml:space="preserve">
     <value>无分类</value>
   </data>
-  <data name="MetricTimeline_UnknownSkill" xml:space="preserve">
+  <data name="MetricGraph_UnknownSkill" xml:space="preserve">
     <value>未知</value>
   </data>
   <data name="Metric_SkillName" xml:space="preserve">
@@ -1117,25 +1128,25 @@
   <data name="Settings_GameCaptureCustomExeName_Label" xml:space="preserve">
     <value>自定义执行文件名</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval" xml:space="preserve">
     <value>绘制间隔</value>
   </data>
-  <data name="Settings_Timeline_AggregationInterval_Option" xml:space="preserve">
+  <data name="Settings_Graph_AggregationInterval_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds" xml:space="preserve">
     <value>横轴长度</value>
   </data>
-  <data name="Settings_Timeline_VisibleSeconds_Option" xml:space="preserve">
+  <data name="Settings_Graph_VisibleSeconds_Option" xml:space="preserve">
     <value>{0}秒</value>
   </data>
-  <data name="Settings_Timeline_ShowSkillLog" xml:space="preserve">
+  <data name="Settings_Graph_ShowSkillLog" xml:space="preserve">
     <value>显示技能日志</value>
   </data>
-  <data name="Widget_DamageSkillDetails" xml:space="preserve">
+  <data name="Widget_DamageSkillDetail" xml:space="preserve">
     <value>技能详情(伤害)</value>
   </data>
-  <data name="Widget_HealingSkillDetails" xml:space="preserve">
+  <data name="Widget_HealingSkillDetail" xml:space="preserve">
     <value>技能详情(治疗)</value>
   </data>
   <data name="Metric_SummaryTotal" xml:space="preserve">
@@ -1231,6 +1242,9 @@
   <data name="WidgetDataStatus_Unreadable" xml:space="preserve">
     <value>无法读取数据</value>
   </data>
+  <data name="WidgetDataStatus_PastChatRelogin" xml:space="preserve">
+    <value>重新登录前无法接收过往聊天</value>
+  </data>
   <data name="HealthValueDisplay_AddShield" xml:space="preserve">
     <value>护盾量合并显示</value>
   </data>
@@ -1291,10 +1305,10 @@
   <data name="ListSort_Name" xml:space="preserve">
     <value>名称顺序</value>
   </data>
-  <data name="TakenDamageLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
+  <data name="DamageTakenLog_Filter_NoSelfOrFriendlyFire" xml:space="preserve">
     <value>隐藏自伤与友军伤害</value>
   </data>
-  <data name="Settings_TakenDamageLog_EnemyHeal" xml:space="preserve">
+  <data name="Settings_Timeline_EnemyHeal" xml:space="preserve">
     <value>敌方治疗</value>
   </data>
   <data name="Widget_BuffDebuffCard" xml:space="preserve">
@@ -1354,25 +1368,73 @@
   <data name="Widget_EntityInfo" xml:space="preserve">
     <value>实体信息</value>
   </data>
-  <data name="Widget_DamageTakenList" xml:space="preserve">
+  <data name="Widget_Chat" xml:space="preserve">
+    <value>聊天</value>
+  </data>
+  <data name="Chat_Channel_World" xml:space="preserve">
+    <value>世界</value>
+  </data>
+  <data name="Chat_Channel_Guild" xml:space="preserve">
+    <value>协会</value>
+  </data>
+  <data name="Chat_Channel_Party" xml:space="preserve">
+    <value>队伍</value>
+  </data>
+  <data name="Chat_Channel_Local" xml:space="preserve">
+    <value>当前</value>
+  </data>
+  <data name="Chat_Channel_Newbie" xml:space="preserve">
+    <value>萌新</value>
+  </data>
+  <data name="Chat_PrivateFormat" xml:space="preserve">
+    <value>私聊({0})</value>
+  </data>
+  <data name="Chat_Sticker" xml:space="preserve">
+    <value>[贴纸]</value>
+  </data>
+  <data name="Chat_Hyperlink" xml:space="preserve">
+    <value>[链接]</value>
+  </data>
+  <data name="Chat_Image" xml:space="preserve">
+    <value>[图片]</value>
+  </data>
+  <data name="Chat_Voice" xml:space="preserve">
+    <value>[语音]</value>
+  </data>
+  <data name="Chat_VoiceTextFormat" xml:space="preserve">
+    <value>[语音] {0}</value>
+  </data>
+  <data name="Settings_Section_ChatTextColors_Title" xml:space="preserve">
+    <value>文本颜色</value>
+  </data>
+  <data name="Settings_ChatTextColor_PlayerName" xml:space="preserve">
+    <value>玩家名称</value>
+  </data>
+  <data name="Settings_ChatTextColor_Time" xml:space="preserve">
+    <value>时间</value>
+  </data>
+  <data name="Settings_ChatTextColor_Message" xml:space="preserve">
+    <value>消息</value>
+  </data>
+  <data name="Widget_DamageTakenLog" xml:space="preserve">
     <value>承伤日志</value>
   </data>
   <data name="Widget_DamageTakenSummary" xml:space="preserve">
     <value>承伤详情</value>
   </data>
-  <data name="DamageTakenList_Defeated" xml:space="preserve">
+  <data name="DamageTakenLog_Defeated" xml:space="preserve">
     <value>(被击败)</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsDefeatCause" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsDefeatCause" xml:space="preserve">
     <value>显示被击败原因</value>
   </data>
-  <data name="Settings_DamageTakenList_ShowsLatestHitOnly" xml:space="preserve">
+  <data name="Settings_DamageTakenLog_ShowsLatestHitOnly" xml:space="preserve">
     <value>仅显示最新承伤</value>
   </data>
-  <data name="DamageTakenList_ShowAllHits" xml:space="preserve">
+  <data name="DamageTakenLog_ShowAllHits" xml:space="preserve">
     <value>显示全部</value>
   </data>
-  <data name="DamageTakenList_ShowLatestHitOnly" xml:space="preserve">
+  <data name="DamageTakenLog_ShowLatestHitOnly" xml:space="preserve">
     <value>仅最新</value>
   </data>
   <data name="ReviveList_Revivable" xml:space="preserve">
@@ -1587,6 +1649,15 @@
   </data>
   <data name="Notification_TargetSkillId_Placeholder" xml:space="preserve">
     <value>例: 304221</value>
+  </data>
+  <data name="Notification_MatchWords" xml:space="preserve">
+    <value>匹配关键词</value>
+  </data>
+  <data name="Notification_MatchWords_Placeholder" xml:space="preserve">
+    <value>例: 招募</value>
+  </data>
+  <data name="Notification_MatchWordsAllNote" xml:space="preserve">
+    <value>※用空格分隔输入多个时，仅通知包含全部关键词的发言</value>
   </data>
   <data name="Notification_TargetIdPriorityNote" xml:space="preserve">
     <value>※输入ID后将优先于名称</value>

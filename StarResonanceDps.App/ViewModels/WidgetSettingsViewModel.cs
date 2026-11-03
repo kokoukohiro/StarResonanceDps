@@ -62,11 +62,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MeterSettings.PreviewChanged += MeterSettings_PreviewChanged;
         }
 
-        if (WidgetConfigDefaults.SupportsMetricTimelineSettings(kind))
+        if (WidgetConfigDefaults.SupportsMetricGraphSettings(kind))
         {
-            MetricTimelineSettings = new MetricTimelineWidgetSettingsViewModel(kind, config.MetricTimeline);
-            MetricTimelineSettings.PropertyChanged += MetricTimelineSettings_PropertyChanged;
-            MetricTimelineSettings.PreviewChanged += MetricTimelineSettings_PreviewChanged;
+            MetricGraphSettings = new MetricGraphWidgetSettingsViewModel(kind, config.MetricGraph);
+            MetricGraphSettings.PropertyChanged += MetricGraphSettings_PropertyChanged;
+            MetricGraphSettings.PreviewChanged += MetricGraphSettings_PreviewChanged;
         }
 
         if (WidgetConfigDefaults.SupportsBuffCardSettings(kind))
@@ -76,11 +76,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffCardSettings.PreviewChanged += BuffCardSettings_PreviewChanged;
         }
 
-        if (WidgetConfigDefaults.SupportsTakenDamageLogSettings(kind))
+        if (WidgetConfigDefaults.SupportsTimelineSettings(kind))
         {
-            TakenDamageLogSettings = new TakenDamageLogWidgetSettingsViewModel(config.TakenDamageLog);
-            TakenDamageLogSettings.PropertyChanged += TakenDamageLogSettings_PropertyChanged;
-            TakenDamageLogSettings.PreviewChanged += TakenDamageLogSettings_PreviewChanged;
+            TimelineSettings = new TimelineWidgetSettingsViewModel(config.Timeline);
+            TimelineSettings.PropertyChanged += TimelineSettings_PropertyChanged;
+            TimelineSettings.PreviewChanged += TimelineSettings_PreviewChanged;
         }
 
         if (WidgetConfigDefaults.SupportsPlayerInfoSettings(kind))
@@ -140,11 +140,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ReviveListSettings.PreviewChanged += ReviveListSettings_PreviewChanged;
         }
 
-        if (WidgetConfigDefaults.SupportsDamageTakenListSettings(kind))
+        if (WidgetConfigDefaults.SupportsDamageTakenLogSettings(kind))
         {
-            DamageTakenListSettings = new DamageTakenListWidgetSettingsViewModel(config.DamageTakenList);
-            DamageTakenListSettings.PropertyChanged += DamageTakenListSettings_PropertyChanged;
-            DamageTakenListSettings.PreviewChanged += DamageTakenListSettings_PreviewChanged;
+            DamageTakenLogSettings = new DamageTakenLogWidgetSettingsViewModel(config.DamageTakenLog);
+            DamageTakenLogSettings.PropertyChanged += DamageTakenLogSettings_PropertyChanged;
+            DamageTakenLogSettings.PreviewChanged += DamageTakenLogSettings_PreviewChanged;
         }
 
         if (WidgetConfigDefaults.SupportsEntityInfoSettings(kind))
@@ -154,6 +154,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             EntityInfoSettings.PreviewChanged += EntityInfoSettings_PreviewChanged;
         }
 
+        if (WidgetConfigDefaults.SupportsChatSettings(kind))
+        {
+            ChatSettings = new ChatWidgetSettingsViewModel(config.Chat);
+            ChatSettings.PropertyChanged += ChatSettings_PropertyChanged;
+            ChatSettings.PreviewChanged += ChatSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
     }
 
@@ -161,11 +168,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public event Action<MeterWidgetSettingsConfig>? MeterPreviewChanged;
 
-    public event Action<MetricTimelineWidgetSettingsConfig>? MetricTimelinePreviewChanged;
+    public event Action<MetricGraphWidgetSettingsConfig>? MetricGraphPreviewChanged;
 
     public event Action<BuffCardWidgetSettingsConfig>? BuffCardPreviewChanged;
 
-    public event Action<TakenDamageLogWidgetSettingsConfig>? TakenDamageLogPreviewChanged;
+    public event Action<TimelineWidgetSettingsConfig>? TimelinePreviewChanged;
 
     public event Action<PlayerInfoWidgetSettingsConfig>? PlayerInfoPreviewChanged;
 
@@ -186,9 +193,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public event Action<ReviveListWidgetSettingsConfig>? ReviveListPreviewChanged;
 
-    public event Action<DamageTakenListWidgetSettingsConfig>? DamageTakenListPreviewChanged;
+    public event Action<DamageTakenLogWidgetSettingsConfig>? DamageTakenLogPreviewChanged;
 
     public event Action<EntityInfoWidgetSettingsConfig>? EntityInfoPreviewChanged;
+
+    public event Action<ChatWidgetSettingsConfig>? ChatPreviewChanged;
 
     public void Dispose()
     {
@@ -201,11 +210,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             MeterSettings.Dispose();
         }
 
-        if (MetricTimelineSettings is not null)
+        if (MetricGraphSettings is not null)
         {
-            MetricTimelineSettings.PropertyChanged -= MetricTimelineSettings_PropertyChanged;
-            MetricTimelineSettings.PreviewChanged -= MetricTimelineSettings_PreviewChanged;
-            MetricTimelineSettings.Dispose();
+            MetricGraphSettings.PropertyChanged -= MetricGraphSettings_PropertyChanged;
+            MetricGraphSettings.PreviewChanged -= MetricGraphSettings_PreviewChanged;
+            MetricGraphSettings.Dispose();
         }
 
         if (BuffCardSettings is not null)
@@ -215,11 +224,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             BuffCardSettings.Dispose();
         }
 
-        if (TakenDamageLogSettings is not null)
+        if (TimelineSettings is not null)
         {
-            TakenDamageLogSettings.PropertyChanged -= TakenDamageLogSettings_PropertyChanged;
-            TakenDamageLogSettings.PreviewChanged -= TakenDamageLogSettings_PreviewChanged;
-            TakenDamageLogSettings.Dispose();
+            TimelineSettings.PropertyChanged -= TimelineSettings_PropertyChanged;
+            TimelineSettings.PreviewChanged -= TimelineSettings_PreviewChanged;
+            TimelineSettings.Dispose();
         }
 
         if (PlayerInfoSettings is not null)
@@ -279,11 +288,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ReviveListSettings.Dispose();
         }
 
-        if (DamageTakenListSettings is not null)
+        if (DamageTakenLogSettings is not null)
         {
-            DamageTakenListSettings.PropertyChanged -= DamageTakenListSettings_PropertyChanged;
-            DamageTakenListSettings.PreviewChanged -= DamageTakenListSettings_PreviewChanged;
-            DamageTakenListSettings.Dispose();
+            DamageTakenLogSettings.PropertyChanged -= DamageTakenLogSettings_PropertyChanged;
+            DamageTakenLogSettings.PreviewChanged -= DamageTakenLogSettings_PreviewChanged;
+            DamageTakenLogSettings.Dispose();
         }
 
         if (EntityInfoSettings is not null)
@@ -292,6 +301,26 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             EntityInfoSettings.PreviewChanged -= EntityInfoSettings_PreviewChanged;
             EntityInfoSettings.Dispose();
         }
+
+        if (ChatSettings is not null)
+        {
+            ChatSettings.PropertyChanged -= ChatSettings_PropertyChanged;
+            ChatSettings.PreviewChanged -= ChatSettings_PreviewChanged;
+            ChatSettings.Dispose();
+        }
+    }
+
+    private void ChatSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ChatWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void ChatSettings_PreviewChanged(ChatWidgetSettingsConfig config)
+    {
+        ChatPreviewChanged?.Invoke(config);
     }
 
     private void EntityInfoSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -320,17 +349,17 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         ReviveListPreviewChanged?.Invoke(config);
     }
 
-    private void DamageTakenListSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void DamageTakenLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(DamageTakenListWidgetSettingsViewModel.HasUnsavedChanges))
+        if (e.PropertyName == nameof(DamageTakenLogWidgetSettingsViewModel.HasUnsavedChanges))
         {
             OnPropertyChanged(nameof(HasUnsavedChanges));
         }
     }
 
-    private void DamageTakenListSettings_PreviewChanged(DamageTakenListWidgetSettingsConfig config)
+    private void DamageTakenLogSettings_PreviewChanged(DamageTakenLogWidgetSettingsConfig config)
     {
-        DamageTakenListPreviewChanged?.Invoke(config);
+        DamageTakenLogPreviewChanged?.Invoke(config);
     }
 
     private void BuffDebuffGroupSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -390,17 +419,17 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusRowOrderPreviewChanged?.Invoke(rowOrder);
     }
 
-    private void TakenDamageLogSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void TimelineSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(TakenDamageLogWidgetSettingsViewModel.HasUnsavedChanges))
+        if (e.PropertyName == nameof(TimelineWidgetSettingsViewModel.HasUnsavedChanges))
         {
             OnPropertyChanged(nameof(HasUnsavedChanges));
         }
     }
 
-    private void TakenDamageLogSettings_PreviewChanged(TakenDamageLogWidgetSettingsConfig config)
+    private void TimelineSettings_PreviewChanged(TimelineWidgetSettingsConfig config)
     {
-        TakenDamageLogPreviewChanged?.Invoke(config);
+        TimelinePreviewChanged?.Invoke(config);
     }
 
     private void PlayerInfoSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -468,17 +497,17 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         MeterPreviewChanged?.Invoke(config);
     }
 
-    private void MetricTimelineSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void MetricGraphSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MetricTimelineWidgetSettingsViewModel.HasUnsavedChanges))
+        if (e.PropertyName == nameof(MetricGraphWidgetSettingsViewModel.HasUnsavedChanges))
         {
             OnPropertyChanged(nameof(HasUnsavedChanges));
         }
     }
 
-    private void MetricTimelineSettings_PreviewChanged(MetricTimelineWidgetSettingsConfig config)
+    private void MetricGraphSettings_PreviewChanged(MetricGraphWidgetSettingsConfig config)
     {
-        MetricTimelinePreviewChanged?.Invoke(config);
+        MetricGraphPreviewChanged?.Invoke(config);
     }
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
@@ -493,11 +522,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public MeterWidgetSettingsViewModel? MeterSettings { get; }
 
-    public MetricTimelineWidgetSettingsViewModel? MetricTimelineSettings { get; }
+    public MetricGraphWidgetSettingsViewModel? MetricGraphSettings { get; }
 
     public BuffCardWidgetSettingsViewModel? BuffCardSettings { get; }
 
-    public TakenDamageLogWidgetSettingsViewModel? TakenDamageLogSettings { get; }
+    public TimelineWidgetSettingsViewModel? TimelineSettings { get; }
 
     public PlayerInfoWidgetSettingsViewModel? PlayerInfoSettings { get; }
 
@@ -516,9 +545,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public ReviveListWidgetSettingsViewModel? ReviveListSettings { get; }
 
-    public DamageTakenListWidgetSettingsViewModel? DamageTakenListSettings { get; }
+    public DamageTakenLogWidgetSettingsViewModel? DamageTakenLogSettings { get; }
 
     public EntityInfoWidgetSettingsViewModel? EntityInfoSettings { get; }
+
+    public ChatWidgetSettingsViewModel? ChatSettings { get; }
 
     public bool HasMeterSettings => MeterSettings is not null;
 
@@ -527,11 +558,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasMeterDisplaySettings => HasMeterSettings;
 
-    public bool HasMetricTimelineDisplaySettings => MetricTimelineSettings is not null;
+    public bool HasMetricGraphDisplaySettings => MetricGraphSettings is not null;
 
     public bool HasBuffCardDisplaySettings => BuffCardSettings is not null;
 
-    public bool HasTakenDamageLogDisplaySettings => TakenDamageLogSettings is not null;
+    public bool HasTimelineDisplaySettings => TimelineSettings is not null;
 
     /// <summary>プレイヤー情報のアイコンカラーの節を出すか。表示の節とは別なので <c>HasDisplaySettings</c> には入れない。</summary>
     public bool HasPlayerInfoSettings => PlayerInfoSettings is not null;
@@ -548,17 +579,20 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasReviveListDisplaySettings => ReviveListSettings is not null;
 
-    public bool HasDamageTakenListDisplaySettings => DamageTakenListSettings is not null;
+    public bool HasDamageTakenLogDisplaySettings => DamageTakenLogSettings is not null;
 
     public bool HasEntityInfoDisplaySettings => EntityInfoSettings is not null;
 
+    /// <summary>チャットのテキストカラーの節を出すか。チャットに表示の節は無いので <c>HasDisplaySettings</c> には入れない。</summary>
+    public bool HasChatSettings => ChatSettings is not null;
+
     public bool HasDisplaySettings => HasMeterDisplaySettings
         || HasReviveListDisplaySettings
-        || HasDamageTakenListDisplaySettings
+        || HasDamageTakenLogDisplaySettings
         || HasEntityInfoDisplaySettings
-        || HasMetricTimelineDisplaySettings
+        || HasMetricGraphDisplaySettings
         || HasBuffCardDisplaySettings
-        || HasTakenDamageLogDisplaySettings
+        || HasTimelineDisplaySettings
         || HasBuffListDisplaySettings
         || HasSkillDetailDisplaySettings
         || HasEquipmentDisplaySettings
@@ -567,9 +601,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public bool HasUnsavedChanges => !ThemeEquals(CreateTheme(), _lastSavedTheme)
         || (MeterSettings?.HasUnsavedChanges ?? false)
-        || (MetricTimelineSettings?.HasUnsavedChanges ?? false)
+        || (MetricGraphSettings?.HasUnsavedChanges ?? false)
         || (BuffCardSettings?.HasUnsavedChanges ?? false)
-        || (TakenDamageLogSettings?.HasUnsavedChanges ?? false)
+        || (TimelineSettings?.HasUnsavedChanges ?? false)
         || (PlayerInfoSettings?.HasUnsavedChanges ?? false)
         || (BuffListSettings?.HasUnsavedChanges ?? false)
         || (ElementColorSettings?.HasUnsavedChanges ?? false)
@@ -578,8 +612,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (PlayerStatusSettings?.HasUnsavedChanges ?? false)
         || (BuffDebuffGroupSettings?.HasUnsavedChanges ?? false)
         || (ReviveListSettings?.HasUnsavedChanges ?? false)
-        || (DamageTakenListSettings?.HasUnsavedChanges ?? false)
-        || (EntityInfoSettings?.HasUnsavedChanges ?? false);
+        || (DamageTakenLogSettings?.HasUnsavedChanges ?? false)
+        || (EntityInfoSettings?.HasUnsavedChanges ?? false)
+        || (ChatSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -603,9 +638,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.Meter = MeterSettings.CreateConfig();
         }
 
-        if (MetricTimelineSettings is not null)
+        if (MetricGraphSettings is not null)
         {
-            config.MetricTimeline = MetricTimelineSettings.CreateConfig();
+            config.MetricGraph = MetricGraphSettings.CreateConfig();
         }
 
         if (BuffCardSettings is not null)
@@ -613,9 +648,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.BuffCard = BuffCardSettings.CreateConfig();
         }
 
-        if (TakenDamageLogSettings is not null)
+        if (TimelineSettings is not null)
         {
-            config.TakenDamageLog = TakenDamageLogSettings.CreateConfig();
+            config.Timeline = TimelineSettings.CreateConfig();
         }
 
         if (PlayerInfoSettings is not null)
@@ -659,9 +694,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.ReviveList = ReviveListSettings.CreateConfig();
         }
 
-        if (DamageTakenListSettings is not null)
+        if (DamageTakenLogSettings is not null)
         {
-            config.DamageTakenList = DamageTakenListSettings.CreateConfig();
+            config.DamageTakenLog = DamageTakenLogSettings.CreateConfig();
         }
 
         if (EntityInfoSettings is not null)
@@ -669,13 +704,18 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.EntityInfo = EntityInfoSettings.CreateConfig();
         }
 
+        if (ChatSettings is not null)
+        {
+            config.Chat = ChatSettings.CreateConfig();
+        }
+
         _stateManager.SaveWidget(_kind, config);
 
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
-        MetricTimelineSettings?.MarkSaved(config.MetricTimeline);
+        MetricGraphSettings?.MarkSaved(config.MetricGraph);
         BuffCardSettings?.MarkSaved(config.BuffCard);
-        TakenDamageLogSettings?.MarkSaved(config.TakenDamageLog);
+        TimelineSettings?.MarkSaved(config.Timeline);
         PlayerInfoSettings?.MarkSaved(config.PlayerInfo);
         BuffListSettings?.MarkSaved(config.BuffList);
         ElementColorSettings?.MarkSaved(config.ElementColor);
@@ -684,8 +724,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.MarkSaved(config.PlayerStatus, config.PlayerStatusRowOrder);
         BuffDebuffGroupSettings?.MarkSaved(config.BuffDebuffGroup);
         ReviveListSettings?.MarkSaved(config.ReviveList);
-        DamageTakenListSettings?.MarkSaved(config.DamageTakenList);
+        DamageTakenLogSettings?.MarkSaved(config.DamageTakenLog);
         EntityInfoSettings?.MarkSaved(config.EntityInfo);
+        ChatSettings?.MarkSaved(config.Chat);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -694,9 +735,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     {
         LoadFromTheme(WidgetConfigDefaults.CreateTheme(), raisePreview: true);
         MeterSettings?.ResetToDefaults();
-        MetricTimelineSettings?.ResetToDefaults();
+        MetricGraphSettings?.ResetToDefaults();
         BuffCardSettings?.ResetToDefaults();
-        TakenDamageLogSettings?.ResetToDefaults();
+        TimelineSettings?.ResetToDefaults();
         PlayerInfoSettings?.ResetToDefaults();
         BuffListSettings?.ResetToDefaults();
         ElementColorSettings?.ResetToDefaults();
@@ -705,8 +746,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.ResetToDefaults();
         BuffDebuffGroupSettings?.ResetToDefaults();
         ReviveListSettings?.ResetToDefaults();
-        DamageTakenListSettings?.ResetToDefaults();
+        DamageTakenLogSettings?.ResetToDefaults();
         EntityInfoSettings?.ResetToDefaults();
+        ChatSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -714,9 +756,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     {
         ThemePreviewChanged?.Invoke(_lastSavedTheme.Clone());
         MeterSettings?.RestoreSavedPreview();
-        MetricTimelineSettings?.RestoreSavedPreview();
+        MetricGraphSettings?.RestoreSavedPreview();
         BuffCardSettings?.RestoreSavedPreview();
-        TakenDamageLogSettings?.RestoreSavedPreview();
+        TimelineSettings?.RestoreSavedPreview();
         PlayerInfoSettings?.RestoreSavedPreview();
         BuffListSettings?.RestoreSavedPreview();
         ElementColorSettings?.RestoreSavedPreview();
@@ -725,8 +767,9 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         PlayerStatusSettings?.RestoreSavedPreview();
         BuffDebuffGroupSettings?.RestoreSavedPreview();
         ReviveListSettings?.RestoreSavedPreview();
-        DamageTakenListSettings?.RestoreSavedPreview();
+        DamageTakenLogSettings?.RestoreSavedPreview();
         EntityInfoSettings?.RestoreSavedPreview();
+        ChatSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()

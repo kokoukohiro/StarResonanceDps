@@ -65,7 +65,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// パケットを1つ処理する直前に呼ぶ(<c>NetCap.BeforeParsePacket</c>)。そのパケットの到着時刻までに終わった予告のバーを、
-        /// 今のエンカウンターの被ダメログへ終わりの行として残す。パケットの出来事より前に入るので、並びはバーの終わりの時刻どおりになる。
+        /// 今のエンカウンターの記録へ、タイムラインの終わりの行として残す。パケットの出来事より前に入るので、並びはバーの終わりの時刻どおりになる。
         /// 途中で消えたバー・上書きされたバーは控え(<see cref="Services.BossDbmBarStore"/>)に無いので残らない。
         /// </summary>
         public static void RecordEndedAnnouncementBars(DateTime arrivalTime)
@@ -476,7 +476,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 記録する回に、<b>いま画面に出している素性をエンティティへ焼き付ける。</b>写真のリンクは名刺の店から書く(<see cref="Entity.RecordedAvatar"/>)。
-        /// あわせて今のシーズンを回に書く(<see cref="EncounterExData.SeasonId"/>)。
+        /// あわせて今のシーズンとゲームのサーバーを回に書く(<see cref="EncounterExData.SeasonId"/>・<see cref="EncounterExData.GameServer"/>)。
         /// <b>エンカウンターの作り直しより前に呼ぶこと</b> — 焼いた値をそのまま次の回へ持ち越すため。
         ///
         /// <para>
@@ -498,8 +498,9 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         private static void ApplyDisplayedIdentitiesForRecord(Encounter encounter)
         {
-            // シーズンは回に1つ。名簿が空でも書く。
+            // シーズンとサーバーは回に1つ。名簿が空でも書く。
             encounter.ExData.SeasonId = SeasonStateStore.CurrentSeasonId;
+            encounter.ExData.GameServer = GameServerStore.Current;
 
             var roster = Services.PlayerRosterStore.Instance.Current.Entries;
             if (roster.Count == 0)
@@ -837,21 +838,21 @@ namespace StarResonanceDps.Core.CombatRuntime
         public ulong TotalOverhealing { get; set; } = 0;
 
         /// <summary>
-        /// 被ダメログに行があるか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
+        /// タイムライン・被ダメログの記録があるか。記録すべき戦闘かの判定(<see cref="HasStatsBeenRecorded"/>)に使う。
         ///
         /// <para>
         /// <b>行数をそのまま見る。</b> 載る経路は予告・予告のバーの終わり・詠唱・被弾・ダメージの無い死亡・敵の回復・敵から敵へのダメージ・敵が付けたバフで、
-        /// どれも戦闘の時計を動かす出来事(<see cref="RecordTakenDamageLogCombatEvent"/>)なので全部数える。
+        /// どれも戦闘の時計を動かす出来事(<see cref="RecordCombatEventForLog"/>)なので全部数える。
         /// 印を別に持つと経路が増えたときに立て忘れる。判定は実行中のエンカウンターでしか行わないので DB には持たない。
         /// </para>
         /// </summary>
-        public bool HasTakenDamageLogRecords
+        public bool HasCombatEventLogRecords
         {
             get
             {
-                lock (_takenDamageLogGate)
+                lock (_combatEventLogGate)
                 {
-                    return _takenDamageLog.Count > 0;
+                    return _combatEventLog.Count > 0;
                 }
             }
         }
@@ -893,12 +894,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public uint ChannelLine { get; set; } = 0;
         public Dictionary<long, EncounterBossDataCache> PreviousBossCache = new();
 
-        // 被ダメログの並び。記録した順に積むだけで、DB には入れない。
+        // タイムラインと被ダメログが読む記録の並び。記録した順に積むだけで、DB には入れない。
         // DB から読んだエンカウンターは空なので、最初に読まれたときにスナップショットの Sequence から組み直す。
-        private readonly object _takenDamageLogGate = new();
-        private readonly List<TakenDamageLogRecord> _takenDamageLog = [];
-        private bool _takenDamageLogRebuiltFromSnapshots;
-        private long _takenDamageLogSequence;
+        private readonly object _combatEventLogGate = new();
+        private readonly List<CombatEventLogRecord> _combatEventLog = [];
+        private bool _combatEventLogRebuiltFromSnapshots;
+        private long _combatEventLogSequence;
 
         // 着地先が決まらなかった行の控え。鍵は(記録先の UUID, 行代表キー)、値は最初に着かなかった記録。
         // 後の記録で着けば消え、保存の直後に残りを検知ログへ送る(ReportUnresolvedBlankSources)。DB には入れない。
@@ -989,7 +990,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public CombatClockReading ReadCombatClock() => ReadCombatClock(DateTime.UtcNow);
 
         /// <summary>
-        /// 戦闘の時計を読む。経過・DPS/HPS の分母・推移グラフ・被ダメログの時刻の起点はどれもここ。
+        /// 戦闘の時計を読む。経過・DPS/HPS の分母・推移グラフ・タイムライン・被ダメログの時刻の起点はどれもここ。
         ///
         /// <para>
         /// 起点は <see cref="EncounterExData.FirstDamageTimeStamp"/>(最初の戦闘の出来事の到着時刻、UTC)。無ければ経過は 0。
@@ -1044,7 +1045,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 戦闘の出来事を1回受ける。判定は <c>MessageManager</c>(通知は <c>IsCombatEvent</c>、薬・料理・自然回復は <c>AddBuffHealing</c>)と、
-        /// タイムラインと被ダメログの記録の入口(<see cref="RecordTakenDamageLogCombatEvent"/>)。
+        /// タイムラインと被ダメログの記録の入口(<see cref="RecordCombatEventForLog"/>)。
         /// 最初の出来事で戦闘の時計の起点を立て、一度立てたら動かさない。前の出来事から自動一時停止の秒数を超えて空いていたら、
         /// 止まり始めた時刻(<see cref="GetPauseStart"/>)からこの出来事までを止まっていた区間として残す。
         /// 集計を止めている回(<see cref="IsAggregationStopped"/>)では受けない(時計を立てず、進めない)。
@@ -1084,7 +1085,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 到着時刻(UTC)を戦闘の経過に直す。起点からの時間から、それより前に止まっていた区間を除いたもの。止まっている区間の中の時刻は、止まった時点の経過になる。
-        /// 経過・推移グラフの1秒の区切りと技のアイコン・被ダメログの時刻・有効DPS と毎分キャストはどれもこれを通す。起点が無ければ null、起点より前は負。
+        /// 経過・推移グラフの1秒の区切りと技のアイコン・タイムライン・被ダメログの時刻・有効DPS と毎分キャストはどれもこれを通す。起点が無ければ null、起点より前は負。
         /// </summary>
         public TimeSpan? ToCombatOffset(DateTime utc)
         {
@@ -1210,6 +1211,22 @@ namespace StarResonanceDps.Core.CombatRuntime
         public void SetAbilityScore(long uuid, int power)
         {
             GetOrCreateEntity(uuid).SetAbilityScore(power);
+        }
+
+        /// <inheritdoc cref="Entity.ReplaceTalentNodes"/>
+        public void ReplaceTalentNodes(long uuid, IReadOnlyDictionary<int, int[]> nodeIdsByProfession)
+        {
+            GetOrCreateEntity(uuid).ReplaceTalentNodes(nodeIdsByProfession);
+        }
+
+        /// <inheritdoc cref="Entity.ApplyTalentNodeChanges"/>
+        public void ApplyTalentNodeChanges(
+            long uuid,
+            bool replacesExisting,
+            IReadOnlyList<int> removedProfessionIds,
+            IReadOnlyDictionary<int, int[]> changedNodeIds)
+        {
+            GetOrCreateEntity(uuid).ApplyTalentNodeChanges(replacesExisting, removedProfessionIds, changedNodeIds);
         }
 
         public void SetProfessionId(long uuid,  int professionId)
@@ -1420,8 +1437,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                     }
                 }
 
-                RecordBossDbmBar(sceneEvent.IntParams?.Count ?? 0, skillId, duration, insertion, extraPacketData);
-                AddSkillAnnouncement(skillId, extraPacketData);
+                // ダンジョンが終わった後の予告は、バーにもタイムラインにも入れない。
+                if (!BattleStateMachine.IsDungeonFinished())
+                {
+                    RecordBossDbmBar(sceneEvent.IntParams?.Count ?? 0, skillId, duration, insertion, extraPacketData);
+                    AddSkillAnnouncement(skillId, extraPacketData);
+                }
                 OnSceneEvent(this, new SceneEventBossDbmEventArgs() { EventType = WorldEventType.BossDbm, SkillId = skillId, Duration = duration, Insertion = insertion, Timestamp = timestamp });
             }
             else if (sceneEvent.EventType == (int)WorldEventType.NoticeTip)
@@ -1592,18 +1613,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// このエンカウンターに記録すべき戦闘があったか。**プレイヤーのダメージか回復か、被ダメログの行が1でもあれば真。**
+        /// このエンカウンターに記録すべき戦闘があったか。**プレイヤーのダメージか回復か、タイムライン・被ダメログの記録が1件でもあれば真。**
         ///
         /// <para>
         /// <b>ダメージだけで判定しない</b> — 回復のみの戦闘が落ちる。
-        /// <b>被ダメログの行も数える</b> — 殴られただけの戦闘に加えて、ギミックの即死・詠唱・構えだけの回も残す
+        /// <b>タイムライン・被ダメログの記録も数える</b> — 殴られただけの戦闘に加えて、ギミックの即死・詠唱・構えだけの回も残す
         /// (被弾を印にすると、ダメージの無い死亡や予告だけの回が履歴に残らない)。敵の攻撃そのもの(敵同士の戦闘を含む)は数えない。
-        /// 見るのは <c>TotalDamage</c> / <c>TotalHealing</c> / <see cref="HasTakenDamageLogRecords"/> の3つ。
+        /// 見るのは <c>TotalDamage</c> / <c>TotalHealing</c> / <see cref="HasCombatEventLogRecords"/> の3つ。
         /// </para>
         /// </summary>
         public bool HasStatsBeenRecorded()
         {
-            return TotalDamage > 0 || TotalHealing > 0 || HasTakenDamageLogRecords;
+            return TotalDamage > 0 || TotalHealing > 0 || HasCombatEventLogRecords;
         }
 
         /// <summary>
@@ -1877,7 +1898,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <param name="ownerId">
         /// <c>SyncDamageInfo.OwnerId</c> の生の値。<paramref name="skillId"/> はメーター用に畳んだ鍵なので、
-        /// 被ダメログの技名はこちらと <paramref name="damageSource"/> で引く。
+        /// タイムライン・被ダメログの技名はこちらと <paramref name="damageSource"/> で引く。
         /// </param>
         /// <param name="buffSourceSkillId">
         /// バフ由来のとき、そのバフを付けた技(<see cref="Services.BuffInstanceIndex.TryResolveSourceSkill"/>)。決まらなければ 0。
@@ -1898,10 +1919,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             // 被ダメログに載る被弾は、加害者を問わず(自傷・フレンドリーファイア・落下も)戦闘の出来事にする。行動時刻より先に当てる。
-            var isLogged = IsTakenDamageLogged(targetUuid, damage);
+            var isLogged = IsDamageTakenLogged(targetUuid, damage);
             if (isLogged)
             {
-                RecordTakenDamageLogCombatEvent(arrivalUtc);
+                RecordCombatEventForLog(arrivalUtc);
             }
 
             // 被弾も「次のイベント」。自傷(加害者の無いバフ・落下・自分の技が自分に当たった被弾)は AddDamage を通らないので、ここで解除する。
@@ -1931,27 +1952,27 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             var snapshot = targetEntity.AddTakenDamage(attackerUuid, skillId, skillLevel, damage, hpLessen, shieldBreak, damageElement, damageType, damageMode, isCrit, isLucky, isCauseLucky, isMiss, isDead, extraPacketData,
                 new SkillSnapshotStamp(
-                    NextTakenDamageLogSequence(),
+                    NextCombatEventLogSequence(),
                     ownerId,
                     damageSource,
                     buffSourceSkillId,
                     summonSourceSkillId));
 
-            AppendTakenDamageLog(targetUuid, snapshot);
+            AppendCombatEventLog(targetUuid, snapshot);
         }
 
         /// <summary>
         /// 被ダメログに載る被弾か。対象がプレイヤーで、値が 0 でないもの。加害者は問わない
         /// (自傷・落下・フレンドリーファイアも載せる)。値 0 は HP もバリアも減っていない被弾。
         /// </summary>
-        internal static bool IsTakenDamageLogged(long targetUuid, long damage)
+        internal static bool IsDamageTakenLogged(long targetUuid, long damage)
         {
             return damage != 0
                 && (EEntityType)Utils.UuidToEntityType(targetUuid) == EEntityType.EntChar;
         }
 
         /// <summary>
-        /// 被ダメログに載せる加害者・詠唱者を決める。召喚体は大元の召喚者へ寄せるが、
+        /// タイムライン・被ダメログに載せる加害者・詠唱者を決める。召喚体は大元の召喚者へ寄せるが、
         /// <b>プレイヤーから見えて表に名前がある召喚体は、その召喚体自身</b>にする。
         ///
         /// <para>
@@ -1963,7 +1984,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 大元の召喚者がプレイヤーなら、召喚体の名前に関係なくプレイヤーを返す(フレンドリーファイアは打ったプレイヤーとして出す)。
         /// </para>
         /// </summary>
-        internal long ResolveTakenDamageLogActor(long rawUuid, long topSummonerUuid)
+        internal long ResolveCombatEventLogActor(long rawUuid, long topSummonerUuid)
         {
             if (topSummonerUuid == 0 || topSummonerUuid == rawUuid)
             {
@@ -1992,8 +2013,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// 技の開始を被ダメログの詠唱として残す。<b>詠唱バーを持つ技</b>と<b>戦闘画面の警告の技</b>だけで、
-        /// プレイヤーとプレイヤーの召喚物は対象外。召喚物の扱いは <see cref="ResolveTakenDamageLogActor"/>。
+        /// 技の開始をタイムラインの詠唱として残す。<b>詠唱バーを持つ技</b>と<b>戦闘画面の警告の技</b>だけで、
+        /// プレイヤーとプレイヤーの召喚物は対象外。召喚物の扱いは <see cref="ResolveCombatEventLogActor"/>。
         /// </summary>
         /// <param name="skillLevel">技の開始と同じ差分で届く <c>AttrSkillLevel</c>。届いていなければ 0。</param>
         public void AddSkillCast(long entityUuid, int skillId, int skillLevel, ExtraPacketData extraPacketData)
@@ -2022,18 +2043,26 @@ namespace StarResonanceDps.Core.CombatRuntime
             var topSummonerUuid = GetOrCreateEntity(entityUuid).GetAttrKV("AttrTopSummonerId") is long summonerUuid
                 ? summonerUuid
                 : 0;
-            var casterUuid = ResolveTakenDamageLogActor(entityUuid, topSummonerUuid);
+            var casterUuid = ResolveCombatEventLogActor(entityUuid, topSummonerUuid);
             if ((EEntityType)Utils.UuidToEntityType(casterUuid) == EEntityType.EntChar)
             {
                 return;
             }
 
+            var isWarningSkill = CombatDataCatalog.IsWarningSkillId(skillId);
+
+            // ダンジョンが終わった後の警告の技は、通知にもタイムラインにも入れない。
+            if (isWarningSkill && BattleStateMachine.IsDungeonFinished())
+            {
+                return;
+            }
+
             // 警告の通知は記録とは別に流す(計測の窓の外でも通知は止めない)。詠唱者の名前はこの回の実体から決める。
-            if (CombatDataCatalog.IsWarningSkillId(skillId))
+            if (isWarningSkill)
             {
                 GetOrCreateEntity(casterUuid);
                 Services.WarningSkillCastStore.Instance.Add(
-                    MeterSnapshotProvider.CreateTakenDamageLogParty(this, casterUuid),
+                    MeterSnapshotProvider.CreateCombatEventLogParty(this, casterUuid),
                     skillId,
                     extraPacketData.ArrivalTime);
             }
@@ -2043,7 +2072,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // 詠唱も「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2052,14 +2081,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             {
                 SkillId = skillId,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 IsWarning = skillLevel > 0 && CombatDataCatalog.IsWarningSkill(skillId, skillLevel),
             };
             GetOrCreateEntity(casterUuid).AddSkillCast(cast);
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
-                _takenDamageLog.Add(TakenDamageLogRecord.ForCast(casterUuid, cast));
+                _combatEventLog.Add(CombatEventLogRecord.ForCast(casterUuid, cast));
             }
         }
 
@@ -2100,7 +2129,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// ボス大技の予告を被ダメログの予告行として残す。通知の番号(<c>DbmTable.Id</c>)から技を引き、
+        /// ボス大技の予告をタイムラインの予告の行として残す。通知の番号(<c>DbmTable.Id</c>)から技を引き、
         /// 周囲にいるモンスターからその技を持つものを構えた側とする。
         /// </summary>
         public void AddSkillAnnouncement(int dbmId, ExtraPacketData extraPacketData)
@@ -2110,7 +2139,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // 予告も「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2122,18 +2151,18 @@ namespace StarResonanceDps.Core.CombatRuntime
                 SkillId = skillId,
                 OwnerMonsterId = ownerMonsterId,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.SkillAnnouncements.Add(announcement);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+                _combatEventLog.Add(CombatEventLogRecord.ForAnnouncement(announcement));
             }
         }
 
         /// <summary>
-        /// 予告のバーが終わった時刻に、被ダメログへ「主の予告技」の行を残す。技と主はバーに控えた値(予告の行と同じ決め方)。
+        /// 予告のバーが終わった時刻に、タイムラインへ「主の予告技」の行を残す。技と主はバーに控えた値(予告の行と同じ決め方)。
         /// 呼ぶのは <see cref="EncounterManager.RecordEndedAnnouncementBars"/> だけ。
         /// </summary>
         public void AddSkillAnnouncementBarEnd(Services.BossDbmBarStore.BossDbmBar bar)
@@ -2143,7 +2172,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(bar.EndTimeUtc);
+            RecordCombatEventForLog(bar.EndTimeUtc);
 
             // 予告のバーの終わりも「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2153,20 +2182,20 @@ namespace StarResonanceDps.Core.CombatRuntime
                 SkillId = bar.SkillId,
                 OwnerMonsterId = bar.OwnerMonsterId,
                 Timestamp = bar.EndTimeUtc,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 IsBarEnd = true,
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.SkillAnnouncements.Add(announcement);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+                _combatEventLog.Add(CombatEventLogRecord.ForAnnouncement(announcement));
             }
         }
 
         /// <summary>
         /// 予告の番号から技を引き、周囲にいるモンスターからその技を持つものの種別IDを引く。引けなければどちらも 0。
-        /// 被ダメログの予告の行と予告のバーの控えが同じ決め方を使う。
+        /// タイムラインの予告の行と予告のバーの控えが同じ決め方を使う。
         /// </summary>
         private static (int SkillId, int OwnerMonsterId) ResolveAnnouncementSource(int dbmId)
         {
@@ -2221,7 +2250,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// ダメージの無い死亡(死亡の印つきの被弾が無いまま死亡したもの)を被ダメログに残す。
+        /// ダメージの無い死亡(死亡の印つきの被弾が無いまま死亡したもの)を記録に残す。
         /// 死亡かどうか・印つきの被弾があったかは <c>MessageManager</c> が差分全体を見て決める。
         /// </summary>
         /// <param name="healthBefore">死亡を伝えた同期を当てる前の HP・最大HP・バリア量。</param>
@@ -2232,7 +2261,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // ダメージの無い死亡も「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2242,16 +2271,16 @@ namespace StarResonanceDps.Core.CombatRuntime
                 PlayerUuid = playerUuid,
                 MaxHp = GetOrCreateEntity(playerUuid).GetAttrKV("AttrMaxHp") as long?,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 HpBefore = healthBefore.Hp,
                 MaxHpBefore = healthBefore.MaxHp,
                 ShieldBefore = healthBefore.Shield,
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.PlayerDeaths.Add(death);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForDeath(death));
+                _combatEventLog.Add(CombatEventLogRecord.ForDeath(death));
             }
         }
 
@@ -2261,7 +2290,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         public bool HasPlayerTimelineRecord(long playerUuid)
         {
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 return ExData.PlayerDeaths.Any(death => death.PlayerUuid == playerUuid)
                     || ExData.EnemyHeals.Any(heal => heal.TargetUuid == playerUuid)
@@ -2273,7 +2302,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 敵の回復をタイムラインに残す。回復した側がプレイヤーでない、実際に HP が増えた回復を <c>MessageManager</c> が渡し、
         /// 回復した側と相手の種類(<see cref="IsEnemyActionRecorded"/>)と発生源の有無(<see cref="HasEnemyActionSource"/>)はここで見る。
         /// </summary>
-        /// <param name="healerUuid">回復した側。召喚体は寄せた後(<see cref="ResolveTakenDamageLogActor"/>)。</param>
+        /// <param name="healerUuid">回復した側。召喚体は寄せた後(<see cref="ResolveCombatEventLogActor"/>)。</param>
         /// <param name="value">実際に増えた HP。</param>
         public void AddEnemyHeal(
             long healerUuid, long targetUuid, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId,
@@ -2286,7 +2315,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // 敵の回復も「次のイベント」。AddHealing を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2307,14 +2336,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 SummonSourceSkillId = summonSourceSkillId,
                 Value = value,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 CastSequence = FindLinkedCastSequence(healerUuid, damageSource, ownerId, buffSourceSkillId, summonSourceSkillId),
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.EnemyHeals.Add(heal);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForEnemyHeal(heal));
+                _combatEventLog.Add(CombatEventLogRecord.ForEnemyHeal(heal));
             }
         }
 
@@ -2322,7 +2351,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 敵から敵へのダメージをタイムラインに残す。加害者も対象もプレイヤーでない、値が 0 でないダメージを <c>MessageManager</c> が渡し、
         /// 加害者と対象の種類(<see cref="IsEnemyActionRecorded"/>)と発生源の有無(<see cref="HasEnemyActionSource"/>)はここで見る。
         /// </summary>
-        /// <param name="attackerUuid">加害者。召喚体は寄せた後(<see cref="ResolveTakenDamageLogActor"/>)。</param>
+        /// <param name="attackerUuid">加害者。召喚体は寄せた後(<see cref="ResolveCombatEventLogActor"/>)。</param>
         public void AddEnemyDamage(
             long attackerUuid, long targetUuid, int ownerId, EDamageSource damageSource, int buffSourceSkillId, int summonSourceSkillId,
             long value, ExtraPacketData extraPacketData)
@@ -2334,7 +2363,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // 敵から敵へのダメージも「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2352,14 +2381,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 SummonSourceSkillId = summonSourceSkillId,
                 Value = value,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 CastSequence = FindLinkedCastSequence(attackerUuid, damageSource, ownerId, buffSourceSkillId, summonSourceSkillId),
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.EnemyDamages.Add(damage);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForEnemyDamage(damage));
+                _combatEventLog.Add(CombatEventLogRecord.ForEnemyDamage(damage));
             }
         }
 
@@ -2367,7 +2396,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 敵が付けたバフをタイムラインに残す。付けた側がプレイヤーでない差分の付与を、付与元を発生源の形に置き換えて <c>MessageManager</c> が渡し、
         /// 付けた側と相手の種類(<see cref="IsEnemyActionRecorded"/>)と発生源の有無(<see cref="HasEnemyActionSource"/>)はここで見る。
         /// </summary>
-        /// <param name="casterUuid">付けた敵。召喚体は寄せた後(<see cref="ResolveTakenDamageLogActor"/>)。</param>
+        /// <param name="casterUuid">付けた敵。召喚体は寄せた後(<see cref="ResolveCombatEventLogActor"/>)。</param>
         public void AddEnemyBuff(
             long casterUuid, long targetUuid, int buffId, int durationMs, int ownerId, EDamageSource damageSource, int buffSourceSkillId,
             int summonSourceSkillId, ExtraPacketData extraPacketData)
@@ -2379,7 +2408,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            RecordTakenDamageLogCombatEvent(extraPacketData.ArrivalTime);
+            RecordCombatEventForLog(extraPacketData.ArrivalTime);
 
             // 敵が付けたバフも「次のイベント」。AddDamage を通らないので、ここで解除する。
             EncounterHistoryProvider.NotifyLiveEncounterEvent();
@@ -2398,14 +2427,14 @@ namespace StarResonanceDps.Core.CombatRuntime
                 BuffSourceSkillId = buffSourceSkillId,
                 SummonSourceSkillId = summonSourceSkillId,
                 Timestamp = extraPacketData.ArrivalTime,
-                Sequence = NextTakenDamageLogSequence(),
+                Sequence = NextCombatEventLogSequence(),
                 CastSequence = FindLinkedCastSequence(casterUuid, damageSource, ownerId, buffSourceSkillId, summonSourceSkillId),
             };
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 ExData.EnemyBuffs.Add(buff);
-                _takenDamageLog.Add(TakenDamageLogRecord.ForEnemyBuff(buff));
+                _combatEventLog.Add(CombatEventLogRecord.ForEnemyBuff(buff));
             }
         }
 
@@ -2435,7 +2464,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 最初なら時計を始め、その後は自動一時停止の時計を進める。記録の入口が門を通った直後、ほかの処理より前に呼ぶ。
         /// 計測の回は出来事にしない(計測の時計は自分の与ダメと回復だけで動き、記録は窓の中だけ)。
         /// </summary>
-        private void RecordTakenDamageLogCombatEvent(DateTime timestampUtc)
+        private void RecordCombatEventForLog(DateTime timestampUtc)
         {
             if (!IsBenchmark)
             {
@@ -2469,7 +2498,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>敵の行動(回復・ダメージ・バフ)に出てくる実体(行動した側と相手)。DB に保存する実体を選ぶのに使う。</summary>
         public HashSet<long> GetEnemyActionEntityUuids()
         {
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
                 var uuids = new HashSet<long>();
                 foreach (var heal in ExData.EnemyHeals)
@@ -2494,88 +2523,88 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
-        private long NextTakenDamageLogSequence()
+        private long NextCombatEventLogSequence()
         {
-            return Interlocked.Increment(ref _takenDamageLogSequence);
+            return Interlocked.Increment(ref _combatEventLogSequence);
         }
 
-        private void AppendTakenDamageLog(long targetUuid, SkillSnapshot? snapshot)
+        private void AppendCombatEventLog(long targetUuid, SkillSnapshot? snapshot)
         {
             // TakenStats は必ずスナップショットを作る。null はその前提が崩れたということ。
             if (snapshot is null)
             {
                 throw new InvalidOperationException(
-                    $"Taken damage log snapshot was not recorded (target={targetUuid}).");
+                    $"Combat event log snapshot was not recorded (target={targetUuid}).");
             }
 
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
-                _takenDamageLog.Add(TakenDamageLogRecord.ForHit(targetUuid, snapshot));
+                _combatEventLog.Add(CombatEventLogRecord.ForHit(targetUuid, snapshot));
             }
         }
 
         /// <summary>
-        /// 被ダメログの <paramref name="startIndex"/> 番目以降を返す。ライブ中は差分の追記に使う。
+        /// 記録の <paramref name="startIndex"/> 番目以降を返す。ライブ中は差分の追記に使う。
         ///
         /// <para>
         /// <b>DB から読んだエンカウンターは並びを持たない</b>ので、実行中のエンカウンター以外で空なら
         /// 1回だけ、予告とダメージの無い死亡と敵の回復・ダメージ・バフとプレイヤーの <c>TakenStats</c> と全エンティティの詠唱を通し番号順に並べ直す。
         /// </para>
         /// </summary>
-        public TakenDamageLogRecord[] GetTakenDamageLogRecords(int startIndex)
+        public CombatEventLogRecord[] GetCombatEventLogRecords(int startIndex)
         {
-            lock (_takenDamageLogGate)
+            lock (_combatEventLogGate)
             {
-                if (_takenDamageLog.Count == 0
-                    && !_takenDamageLogRebuiltFromSnapshots
+                if (_combatEventLog.Count == 0
+                    && !_combatEventLogRebuiltFromSnapshots
                     && !ReferenceEquals(this, EncounterManager.Current))
                 {
-                    _takenDamageLogRebuiltFromSnapshots = true;
-                    RebuildTakenDamageLogFromSnapshots();
+                    _combatEventLogRebuiltFromSnapshots = true;
+                    RebuildCombatEventLogFromSnapshots();
                 }
 
-                if (startIndex >= _takenDamageLog.Count)
+                if (startIndex >= _combatEventLog.Count)
                 {
                     return [];
                 }
 
-                return _takenDamageLog.GetRange(startIndex, _takenDamageLog.Count - startIndex).ToArray();
+                return _combatEventLog.GetRange(startIndex, _combatEventLog.Count - startIndex).ToArray();
             }
         }
 
-        private void RebuildTakenDamageLogFromSnapshots()
+        private void RebuildCombatEventLogFromSnapshots()
         {
-            var records = new List<TakenDamageLogRecord>();
+            var records = new List<CombatEventLogRecord>();
             foreach (var announcement in ExData.SkillAnnouncements)
             {
-                records.Add(TakenDamageLogRecord.ForAnnouncement(announcement));
+                records.Add(CombatEventLogRecord.ForAnnouncement(announcement));
             }
 
             foreach (var death in ExData.PlayerDeaths)
             {
-                records.Add(TakenDamageLogRecord.ForDeath(death));
+                records.Add(CombatEventLogRecord.ForDeath(death));
             }
 
             foreach (var heal in ExData.EnemyHeals)
             {
-                records.Add(TakenDamageLogRecord.ForEnemyHeal(heal));
+                records.Add(CombatEventLogRecord.ForEnemyHeal(heal));
             }
 
             foreach (var damage in ExData.EnemyDamages)
             {
-                records.Add(TakenDamageLogRecord.ForEnemyDamage(damage));
+                records.Add(CombatEventLogRecord.ForEnemyDamage(damage));
             }
 
             foreach (var buff in ExData.EnemyBuffs)
             {
-                records.Add(TakenDamageLogRecord.ForEnemyBuff(buff));
+                records.Add(CombatEventLogRecord.ForEnemyBuff(buff));
             }
 
             foreach (var (uuid, entity) in Entities)
             {
                 foreach (var cast in entity.GetSkillCastsCopy())
                 {
-                    records.Add(TakenDamageLogRecord.ForCast(uuid, cast));
+                    records.Add(CombatEventLogRecord.ForCast(uuid, cast));
                 }
 
                 if ((EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntChar)
@@ -2591,12 +2620,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                         continue;
                     }
 
-                    records.Add(TakenDamageLogRecord.ForHit(uuid, snapshot));
+                    records.Add(CombatEventLogRecord.ForHit(uuid, snapshot));
                 }
             }
 
             records.Sort((left, right) => left.Sequence.CompareTo(right.Sequence));
-            _takenDamageLog.AddRange(records);
+            _combatEventLog.AddRange(records);
         }
 
         public void AddShieldGained(long entityUuid, long shieldBuffUuid, long value, long initialValue, long maxValue = 0)
@@ -2915,10 +2944,10 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int BenchmarkTime { get; set; } = 0;
         [ProtoMember(7)]
         public DateTime? FirstDamageTimeStamp { get; set; } = null;
-        /// <summary>被ダメログの予告行(<see cref="Encounter.AddSkillAnnouncement"/>)。実体に属さないのでここに持つ。</summary>
+        /// <summary>タイムラインの予告の行(<see cref="Encounter.AddSkillAnnouncement"/>)。実体に属さないのでここに持つ。</summary>
         [ProtoMember(8)]
         public List<SkillAnnouncementRecord> SkillAnnouncements { get; set; } = [];
-        /// <summary>被ダメログのダメージの無い死亡(<see cref="Encounter.AddPlayerDeathWithoutDamage"/>)。予告と同じくここに持つ。</summary>
+        /// <summary>記録のダメージの無い死亡(<see cref="Encounter.AddPlayerDeathWithoutDamage"/>)。予告と同じくここに持つ。</summary>
         [ProtoMember(9)]
         public List<PlayerDeathRecord> PlayerDeaths { get; set; } = [];
         /// <summary>この回の自動一時停止の秒数(回を作ったときの <see cref="CombatRuntimeSettings.CombatExitSeconds"/>)。0 は止めない。計測の回は 0。</summary>
@@ -2951,6 +2980,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>タイムラインの敵が付けたバフ(<see cref="Encounter.AddEnemyBuff"/>)。</summary>
         [ProtoMember(17)]
         public List<EnemyBuffRecord> EnemyBuffs { get; set; } = [];
+        /// <summary>
+        /// この回のゲームのサーバー(<see cref="GameServerStore.Current"/>)。保存の直前に書く(<c>ApplyDisplayedIdentitiesForRecord</c>)。
+        /// 履歴から来たプレイヤーの行のタレントの木は、今のサーバーではなくこの値で出す。分からなければ <see cref="Models.GameServer.Unknown"/>。
+        /// </summary>
+        [ProtoMember(18)]
+        public Models.GameServer GameServer { get; set; } = Models.GameServer.Unknown;
 
         public EncounterExData() { }
     }
@@ -3072,6 +3107,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int[]? RootBuffIds { get; set; }
 
         /// <summary>
+        /// 自分の職業ごとの取ったタレントの木の節の番号(昇順)。null はまだ受けていない。
+        /// <b>辞書も配列も書き換えず差し替える</b>(素性の写しが同じものを持つため)。
+        /// </summary>
+        public IReadOnlyDictionary<int, int[]>? TalentNodeIdsByProfession { get; set; }
+
+        /// <summary>
+        /// バフを付けないアビリティの節の技の置き換えに出てくる技の、元の技 → 最後に使ったほう。null はどれもまだ使っていない。
+        /// <b>辞書は書き換えず差し替える</b>(素性の写しが同じものを持つため)。
+        /// </summary>
+        public IReadOnlyDictionary<int, int>? LastReplaceableSkills { get; set; }
+
+        /// <summary>
         /// プレイヤーの出現時の情報(全属性)を受けたか。名前・クラス・能力スコアなどの出所で、ウィジェットの状態の印が欠けを見るのに使う。
         /// 素性なので回の作り直しで運ばれ、ログアウトでは運ばれない。周りから外れても下ろさない(値は実体に残る)。
         /// </summary>
@@ -3147,6 +3194,23 @@ namespace StarResonanceDps.Core.CombatRuntime
         public int[]? RootBuffIds { get => _identity.RootBuffIds; private set => _identity.RootBuffIds = value; }
 
         /// <summary>
+        /// 自分の職業ごとの取ったタレントの木の節の番号(昇順)。アビリティ情報が今の職業の一覧で取った節を決める。
+        ///
+        /// <para>
+        /// 全体コンテナ(マップ移動・ログイン)で置き換え、タレントを付け替えたときの差分(変えた職業の一覧を丸ごと運ぶ)で重ねる。
+        /// null はどちらもまだ受けていない(ほかのプレイヤーはいつも null)。回に保存する。
+        /// </para>
+        /// </summary>
+        public IReadOnlyDictionary<int, int[]>? TalentNodeIdsByProfession { get => _identity.TalentNodeIdsByProfession; private set => _identity.TalentNodeIdsByProfession = value; }
+
+        /// <summary>
+        /// バフを付けないアビリティの節の技の置き換えに出てくる技の、元の技 → 最後に使ったほう(元の技か置き換え後の技)。
+        /// 取った節の一覧が無いプレイヤー(ほかのプレイヤー)の、その節を取っているかを決める。null はどれもまだ使っていない。
+        /// 周りから外れても消さない(最後に使った技を出し、そのまま回に保存する)。
+        /// </summary>
+        public IReadOnlyDictionary<int, int>? LastReplaceableSkills { get => _identity.LastReplaceableSkills; private set => _identity.LastReplaceableSkills = value; }
+
+        /// <summary>
         /// 保存した回の顔と名刺の写真のリンク(名刺の店 <see cref="SocialDataStore"/> の保存の時点の値、届いていなければ null)。
         /// 書くのは保存の直前の焼き付け(<see cref="ApplyDisplayedIdentityForRecord"/>)だけで、回の作り直しでは運ばない。
         /// 履歴から来たプレイヤーの行は、今の店の値ではなくこの値で写真を取る。画像そのものは持たない。
@@ -3197,7 +3261,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// このエンティティが始めた詠唱。被ダメログの詠唱行の材料で、
+        /// このエンティティが始めた詠唱。タイムラインの詠唱の行の材料で、
         /// <see cref="Encounter.AddSkillCast"/> がプレイヤー以外の詠唱バーを持つ技だけを積む。
         /// </summary>
         public List<SkillCastRecord> SkillCasts { get; private set; } = new();
@@ -3666,6 +3730,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             // 特化判定はここに置く。詠唱の AttrSkillId 経由でも AddDamage 経由でも必ず通るため、
             // 空振り(当たらなかった一撃)でも特定できる。記録の門とは関係なく判定する。
             UpdateSubProfessionFromReplacedSkill(skillId);
+            RecordReplaceableSkillUse(skillId);
 
             if (countsTowardStats)
             {
@@ -4261,6 +4326,89 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// 自分の職業ごとの取ったタレントの木の節を、全体コンテナの一覧で置き換える。
+        /// 名簿の行は呼び出し側(自分の全体コンテナの処理)が作り直す。
+        /// </summary>
+        /// <param name="nodeIdsByProfession">職業 → 取った節の番号(昇順・重なりなし)。</param>
+        public void ReplaceTalentNodes(IReadOnlyDictionary<int, int[]> nodeIdsByProfession)
+        {
+            SetTalentNodes(new Dictionary<int, int[]>(nodeIdsByProfession.Count), nodeIdsByProfession);
+        }
+
+        /// <summary>
+        /// 自分の職業ごとの取ったタレントの木の節に、差分を重ねる。差分は変わった職業の一覧を丸ごと運ぶ。
+        /// まだ全体コンテナを受けていなければ、差分で届いた職業だけを持つ。名簿の行は呼び出し側(自分の差分の処理)が作り直す。
+        /// </summary>
+        /// <param name="replacesExisting">差分が前の中身を捨てて置き換えるか。</param>
+        /// <param name="removedProfessionIds">外れた職業。</param>
+        /// <param name="changedNodeIds">一覧が届いた職業 → 取った節の番号(昇順・重なりなし)。</param>
+        public void ApplyTalentNodeChanges(
+            bool replacesExisting,
+            IReadOnlyList<int> removedProfessionIds,
+            IReadOnlyDictionary<int, int[]> changedNodeIds)
+        {
+            var next = replacesExisting || TalentNodeIdsByProfession is null
+                ? new Dictionary<int, int[]>(changedNodeIds.Count)
+                : new Dictionary<int, int[]>(TalentNodeIdsByProfession);
+            foreach (var professionId in removedProfessionIds)
+            {
+                next.Remove(professionId);
+            }
+
+            SetTalentNodes(next, changedNodeIds);
+        }
+
+        /// <summary>
+        /// <paramref name="next"/> に届いた職業の一覧を入れて差し替える。中身が前と同じ職業は前の配列を使い(名簿の行の参照が変わらない)、
+        /// どの職業も前と同じなら差し替えない。
+        /// </summary>
+        private void SetTalentNodes(Dictionary<int, int[]> next, IReadOnlyDictionary<int, int[]> nodeIdsByProfession)
+        {
+            var current = TalentNodeIdsByProfession;
+            foreach (var (professionId, nodeIds) in nodeIdsByProfession)
+            {
+                next[professionId] = current is not null
+                    && current.TryGetValue(professionId, out var known)
+                    && known.AsSpan().SequenceEqual(nodeIds)
+                        ? known
+                        : nodeIds;
+            }
+
+            if (current is not null
+                && current.Count == next.Count
+                && next.All(pair => current.TryGetValue(pair.Key, out var known) && ReferenceEquals(known, pair.Value)))
+            {
+                return;
+            }
+
+            TalentNodeIdsByProfession = next;
+        }
+
+        /// <summary>
+        /// プレイヤーの技の開始のうち、バフを付けないアビリティの節の技の置き換えに出てくる技を控える(元の技 → 最後に使ったほう)。
+        /// 元の技を使ったら置き換えていない(その節を取っていない)側へ戻す。
+        /// </summary>
+        private void RecordReplaceableSkillUse(int skillId)
+        {
+            if (Utils.UuidToEntityType(UUID) != (long)EEntityType.EntChar
+                || !CombatDataCatalog.TryGetReplaceableSkillOriginal(skillId, out var originalSkillId))
+            {
+                return;
+            }
+
+            var current = LastReplaceableSkills;
+            if (current is not null && current.TryGetValue(originalSkillId, out var lastSkillId) && lastSkillId == skillId)
+            {
+                return;
+            }
+
+            var next = current is null ? new Dictionary<int, int>() : new Dictionary<int, int>(current);
+            next[originalSkillId] = skillId;
+            LastReplaceableSkills = next;
+            PlayerRosterProjection.UpsertPlayer(UUID);
+        }
+
         public void AddBuffEventAttribute(int buffUuid, string attributeName, object? attributeValue)
         {
             if (!BuffEvents.TryGetValue((ulong)buffUuid, out var buffEvent))
@@ -4852,7 +5000,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         public DateTime? Timestamp { get; set; } = null;
 
         /// <summary>
-        /// エンカウンター内の通し番号。被ダメログがエンティティをまたいで並べ直すのに使う。
+        /// エンカウンター内の通し番号。タイムライン・被ダメログがエンティティをまたいで並べ直すのに使う。
         /// <b>0 は通し番号を持たない古い記録</b>で、ログには載らない。
         /// </summary>
         public long Sequence { get; set; }
@@ -4860,7 +5008,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// <c>SyncDamageInfo.OwnerId</c> の生の値。<see cref="DamageSource"/> が <c>Buff</c> ならバフID、
         /// <c>Bullet</c> / <c>FakeBullet</c> なら弾ID、それ以外はスキルID。
-        /// <see cref="Id"/> はメーター用に畳んだ鍵なので、被ダメログの技名はこちらで引く。
+        /// <see cref="Id"/> はメーター用に畳んだ鍵なので、タイムライン・被ダメログの技名はこちらで引く。
         /// </summary>
         public int OwnerId { get; set; }
 

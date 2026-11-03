@@ -393,16 +393,22 @@ public sealed class ActiveBuffStore
     /// <param name="durationSeconds">
     /// 残り時間を出すのに使う効果時間の総量(秒、通信の <c>BuffInfo.Duration</c>)。延長すると伸びる。項目が無ければ 0。
     /// </param>
+    /// <param name="endUtc">
+    /// 切れる時刻(起点＋持続、UTC)。<paramref name="remainingSeconds"/> があるときだけ値を持つ。
+    /// 残り秒は読んだ瞬間で変わるので、複数のバフの切れる順を比べるときはこちらを使う(読む瞬間のずれで大小が入れ替わらない)。
+    /// </param>
     public bool TryGetRemainingSeconds(
         long entityUuid,
         ulong buffUuid,
         out double? remainingSeconds,
         out bool remainingUnknown,
-        out double durationSeconds)
+        out double durationSeconds,
+        out DateTime? endUtc)
     {
         remainingSeconds = null;
         remainingUnknown = false;
         durationSeconds = 0d;
+        endUtc = null;
         if (entityUuid == 0)
         {
             return false;
@@ -444,6 +450,7 @@ public sealed class ActiveBuffStore
         }
 
         remainingSeconds = seconds;
+        endUtc = entry.GetEndUtc();
         return true;
     }
 
@@ -482,9 +489,14 @@ public sealed class ActiveBuffStore
         long FirstSeenOrder,
         bool RemainingUnknown)
     {
+        public DateTime GetEndUtc()
+        {
+            return ObservedAt + TimeSpan.FromMilliseconds(DurationMilliseconds);
+        }
+
         public double GetRemainingSeconds(DateTime now)
         {
-            return (ObservedAt + TimeSpan.FromMilliseconds(DurationMilliseconds) - now).TotalSeconds;
+            return (GetEndUtc() - now).TotalSeconds;
         }
 
         /// <summary>

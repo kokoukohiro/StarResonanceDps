@@ -15,6 +15,7 @@ public static class WidgetDataStatusText
     [
         WidgetDataStatusReasons.Unreadable,
         WidgetDataStatusReasons.MapOrRelogin,
+        WidgetDataStatusReasons.PastChatRelogin,
         WidgetDataStatusReasons.PartyScreen,
         WidgetDataStatusReasons.PlayerClick,
         WidgetDataStatusReasons.PlayerApproach,
@@ -44,6 +45,7 @@ public static class WidgetDataStatusText
             WidgetDataStatusReasons.PlayerApproach => "WidgetDataStatus_PlayerApproach",
             WidgetDataStatusReasons.EnemyApproach => "WidgetDataStatus_EnemyApproach",
             WidgetDataStatusReasons.Unreadable => "WidgetDataStatus_Unreadable",
+            WidgetDataStatusReasons.PastChatRelogin => "WidgetDataStatus_PastChatRelogin",
             _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, "No status text for the reason."),
         };
     }

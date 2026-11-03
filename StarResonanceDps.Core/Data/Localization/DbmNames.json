@@ -141,7 +141,7 @@
     "zh-CN": "虚蚀灭迹",
     "en-US": "​Void Corruption Purge",
     "ja-JP": "虚蝕の滅跡",
-    "ko-KR": "허무의 침식 소멸"
+    "ko-KR": "허식의 멸적"
   },
   "170256": {
     "zh-CN": "虚蚀穿刺",
@@ -183,7 +183,7 @@
     "zh-CN": "虚痕剥解",
     "en-US": "Voidscar Dissolution",
     "ja-JP": "虚痕の剥解",
-    "ko-KR": "허무의 낙인 해체"
+    "ko-KR": "허식의 흔적 해제"
   },
   "3320110": {
     "zh-CN": "遁地",
@@ -326,50 +326,50 @@
   "3395103": {
     "zh-CN": "金曜神祭",
     "en-US": "Golden Sacrifice",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "黄金神祭",
+    "ko-KR": "금요의 신제"
   },
   "3395166": {
-    "zh-CN": "灭烬时针",
-    "en-US": "",
-    "ja-JP": "",
-    "ko-KR": ""
+    "zh-CN": "巨型光矛",
+    "en-US": "Giant Light Spear",
+    "ja-JP": "巨大光槍",
+    "ko-KR": "거대한 빛의 창"
   },
   "3395177": {
-    "zh-CN": "心如永昼，谒彼诸天",
-    "en-US": "",
-    "ja-JP": "",
-    "ko-KR": ""
+    "zh-CN": "连续爆发",
+    "en-US": "Consecutive Explosion",
+    "ja-JP": "連続爆発",
+    "ko-KR": "연속 폭발"
   },
   "3395178": {
-    "zh-CN": "名启归愿，信者皆苦",
-    "en-US": "",
-    "ja-JP": "",
-    "ko-KR": ""
+    "zh-CN": "化光眷属召唤",
+    "en-US": "Lightbound Minion Summon",
+    "ja-JP": "化光の眷属召喚",
+    "ko-KR": "빛의 권속 소환"
   },
   "3395179": {
-    "zh-CN": "影似澄炼，喻形成殇",
-    "en-US": "",
-    "ja-JP": "",
-    "ko-KR": ""
+    "zh-CN": "巨型光剪",
+    "en-US": "Giant Light Scissors",
+    "ja-JP": "巨大光刃",
+    "ko-KR": "거대한 빛의 가위"
   },
   "3400005": {
     "zh-CN": "冰华万象",
     "en-US": "Frost Kaleidoscope",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "氷華万象",
+    "ko-KR": "빙화만상"
   },
   "3400023": {
     "zh-CN": "暴风雪",
     "en-US": "Blizzard",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "暴風雪",
+    "ko-KR": "눈보라"
   },
   "3400025": {
     "zh-CN": "冰之狂想曲",
     "en-US": "Ice Rhapsody",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "アイスラプソディ",
+    "ko-KR": "아이스 랩소디"
   },
   "4001007": {
     "zh-CN": "电光火石",
@@ -716,85 +716,85 @@
   "10350001": {
     "zh-CN": "光陨坍塌",
     "en-US": "Lightfall Collapse",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "光隕崩壊",
+    "ko-KR": "빛의 붕괴"
   },
   "10350003": {
     "zh-CN": "幻光拟形",
     "en-US": "Illusory Lightform",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "幻光具現",
+    "ko-KR": "환광 의태"
   },
   "10350011": {
     "zh-CN": "穹顶耀斑",
     "en-US": "Skyflare",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "ドームフレア",
+    "ko-KR": "창공의 플레어"
   },
   "10350014": {
     "zh-CN": "天光打击",
     "en-US": "Light Strike",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "天光撃",
+    "ko-KR": "천광의 일격"
   },
   "10350015": {
     "zh-CN": "苍穹觉醒",
     "en-US": "Sky Awakening",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "蒼穹覚醒",
+    "ko-KR": "창공의 각성"
   },
   "10350016": {
     "zh-CN": "天光告诫",
     "en-US": "Light's Admonition",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "天光戒告",
+    "ko-KR": "천광의 경고"
   },
   "10350018": {
     "zh-CN": "扬升",
     "en-US": "Ascension",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "アセンション",
+    "ko-KR": "승천"
   },
   "10360004": {
     "zh-CN": "召唤黑洞",
     "en-US": "Summon Black Hole",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "ブラックホール召喚",
+    "ko-KR": "블랙홀 소환"
   },
   "10360010": {
     "zh-CN": "天体召唤",
     "en-US": "Celestial Summoning",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "アストロサモン",
+    "ko-KR": "천체 소환"
   },
   "10360011": {
     "zh-CN": "天体旋转",
     "en-US": "Celestial Rotation",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "アストロスピン",
+    "ko-KR": "천체 회전"
   },
   "10360012": {
     "zh-CN": "黑暗降临",
     "en-US": "Darkfall",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "闇の降臨",
+    "ko-KR": "어둠 강림"
   },
   "10360013": {
     "zh-CN": "光暗抉择",
     "en-US": "Light or Dark",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "光と闇の選択",
+    "ko-KR": "빛과 어둠의 선택"
   },
   "10360014": {
     "zh-CN": "神鸟降世",
     "en-US": "Divine Bird Descends",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "神鳥降臨",
+    "ko-KR": "신조 강림"
   },
   "10360015": {
     "zh-CN": "空间穿梭",
     "en-US": "Spatial Translocation",
-    "ja-JP": "",
-    "ko-KR": ""
+    "ja-JP": "空間転移",
+    "ko-KR": "공간 이동"
   }
 }

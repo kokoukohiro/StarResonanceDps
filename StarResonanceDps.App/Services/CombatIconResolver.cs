@@ -100,10 +100,25 @@ public static class CombatIconResolver
         return Resolve(iconName, category);
     }
 
+    /// <summary>ゲームの用意した顔のアイコン。<c>Avatars</c> のフォルダだけを探す。</summary>
+    public static string? ResolveAvatarIcon(string? iconName)
+    {
+        return Resolve(iconName, "Avatars");
+    }
+
     /// <summary>技のアイコン。スキルのフォルダだけを探す(イマジンの技もここ)。</summary>
     public static string? ResolveSkillIcon(string? iconName)
     {
         return Resolve(iconName, "Skills");
+    }
+
+    /// <summary>
+    /// チャットのスタンプの絵。表示言語のフォルダ(<c>Stickers/ja-JP</c> など。文字の入ったスタンプの言語別の絵)を先に、
+    /// 無ければ <c>Stickers</c> を探す。
+    /// </summary>
+    public static string? ResolveChatStickerIcon(string? iconName, string cultureName)
+    {
+        return Resolve(iconName, Path.Combine("Stickers", cultureName), "Stickers");
     }
 
 

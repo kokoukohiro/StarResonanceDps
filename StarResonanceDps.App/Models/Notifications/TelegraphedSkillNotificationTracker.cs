@@ -15,6 +15,7 @@ namespace StarResonanceDps.App.Models.Notifications;
 /// <b>警告</b>は警告の技の開始が届いたとき(<see cref="WarningSkillCastStore"/>)に出す(警告に通知条件は使わない)。
 /// 予告のバーがその秒数より短ければ、届いた時点で出す。同じ技に予告と警告の両方があっても、それぞれの時機に別々に出す。
 /// どちらもライブの戦闘で決め、タイムラインが履歴を表示していても、計測の窓の外で記録が止まっていても止まらない。
+/// ダンジョンが終わった後は、どちらの控えにも入らないので出ない。
 /// 判定を始めた時点(通知をオンにした・アプリを起動した・通知条件を選び直した)で時機を過ぎたものは出さない。
 /// </para>
 ///
@@ -69,8 +70,8 @@ public sealed class TelegraphedSkillNotificationTracker
             }
 
             Notify(
-                PlayerInfoFormatFormatter.GetPartyDisplayName(MeterSnapshotProvider.CreateTakenDamageLogAnnouncementParty(bar.OwnerMonsterId)),
-                MeterSnapshotProvider.GetTakenDamageLogSkillName(bar.SkillId));
+                PlayerInfoFormatFormatter.GetPartyDisplayName(MeterSnapshotProvider.CreateCombatEventLogAnnouncementParty(bar.OwnerMonsterId)),
+                MeterSnapshotProvider.GetCombatEventLogSkillName(bar.SkillId));
         }
 
         _lastBarCheckUtc = now;
@@ -79,7 +80,7 @@ public sealed class TelegraphedSkillNotificationTracker
         foreach (var cast in WarningSkillCastStore.Instance.GetAfter(_lastWarningSequence))
         {
             _lastWarningSequence = cast.Sequence;
-            Notify(PlayerInfoFormatFormatter.GetPartyDisplayName(cast.Caster), MeterSnapshotProvider.GetTakenDamageLogSkillName(cast.SkillId));
+            Notify(PlayerInfoFormatFormatter.GetPartyDisplayName(cast.Caster), MeterSnapshotProvider.GetCombatEventLogSkillName(cast.SkillId));
         }
     }
 
@@ -87,7 +88,7 @@ public sealed class TelegraphedSkillNotificationTracker
     {
         if (string.IsNullOrEmpty(skillName))
         {
-            skillName = LocalizationManager.Instance.GetString("TakenDamageLog_UnnamedCastSkill");
+            skillName = LocalizationManager.Instance.GetString("Timeline_UnnamedCastSkill");
         }
 
         NotificationService.Instance.Notify(

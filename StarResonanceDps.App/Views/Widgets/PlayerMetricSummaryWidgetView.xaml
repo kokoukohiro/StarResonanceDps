@@ -33,7 +33,7 @@
             物理・魔法の絵はステータス詳細と同じ 30×30 で、欄(25)の中央に置く(名前の位置は属性の行とそろう)。
             絵の無い無分類は、メーターのクラスアイコンのはてなと同じ絵・大きさ(25×25)。
             名前・値・割合が行に全部出るので、TIPS は付けない。
-            押しても何も起きないが、ホバーの背景はほかの行と同じ形で出す(Button の ControlTemplate、アビリティ情報・ステータス詳細の行と同じ)。
+            押しても何も起きないが、ホバーの背景はほかの行と同じ形で出す(Button の ControlTemplate、潜在心相晶情報・ステータス詳細の行と同じ)。
         -->
         <Style x:Key="MetricSummaryShareBars" TargetType="ItemsControl">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />

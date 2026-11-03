@@ -18,9 +18,11 @@ python gen_buff_groups.py     # 料理・薬剤のバフの名前
 python gen_season_talents.py  # シーズンタレントの型の根ノードの名前
 python gen_class_specs.py     # 職業の特化の名前
 python gen_seasons.py         # シーズンの名前とシーズンランクの名前
-python gen_equips.py          # 装備の名前・数値・効果の文言
+python gen_equips.py          # 装備の数値・効果の文言
 python gen_match_targets.py   # マッチング先(パーティ・活動)の名前
-python gen_root_buffs.py      # 根のバフ(タレント・心相晶・因子・モジュール効果)の名前・種類・絵
+python gen_root_buffs.py      # 根のバフ(タレント・心相晶・因子・モジュール効果)の名前・種類・絵と、タレントの木の形・タレントの名前
+python gen_items.py           # アイテムの名前(装備の名前もここ)
+python gen_chat_hyperlinks.py # チャットのリンクの発言の文の型と、ギルドの建物の名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -89,26 +91,29 @@ export BPSR_TABLES=<置き場所>     # bash
 名前を引く言語ごとに、同じ出所の同じ行を指していることを確かめてから取る。
 
 **各ツールが読むのは入力側だけ。** 手動編集ファイルは読みも書きもしない。
+例外は `gen_buffs.py` / `gen_skills.py` / `gen_monsters.py` で、空になった名前を名前の上書きファイルへ書き足す(→「空になった名前の書き足し」)。
 
 ## 出力
 
 | ツール | 出力 |
 |---|---|
 | `gen_recounts.py` | `Data/Localization/RecountRows.json` |
-| `gen_buffs.py` | `Data/Localization/BuffNames.json` |
-| `gen_skills.py` | `Data/Localization/SkillNames.json`<br>`Data/Localization/SkillTalkNames.json` |
+| `gen_buffs.py` | `Data/Localization/BuffNames.json`<br>`Data/Overrides/BuffNameOverrides.json`(空になった名前を書き足す) |
+| `gen_skills.py` | `Data/Localization/SkillNames.json`<br>`Data/Localization/SkillTalkNames.json`<br>`Data/Overrides/SkillNameOverrides.json`(空になった名前を書き足す) |
 | `gen_dbms.py` | `Data/Localization/DbmNames.json` |
 | `gen_scenes.py` | `Data/Localization/SceneNames.json`<br>`Data/Localization/DungeonTypeNames.json` |
-| `gen_monsters.py` | `Data/Localization/MonsterNames.json` |
+| `gen_monsters.py` | `Data/Localization/MonsterNames.json`<br>`Data/Overrides/MonsterNameOverrides.json`(空になった名前を書き足す) |
 | `gen_skill_warnings.py` | `Data/Generated/SkillWarnings.json` |
 | `gen_rogue_entries.py` | `Data/Localization/RogueEntryNames.json` |
 | `gen_buff_groups.py` | `Data/Localization/CuisineBuffs.json`<br>`Data/Localization/PotionBuffs.json` |
 | `gen_season_talents.py` | `Data/Localization/SeasonTalentNames.json` |
 | `gen_class_specs.py` | `Data/Localization/ClassSpecNames.json` |
 | `gen_seasons.py` | `Data/Localization/SeasonNames.json`<br>`Data/Localization/SeasonRankNames.json` |
-| `gen_equips.py` | `Data/Localization/EquipNames.json`<br>`Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
+| `gen_equips.py` | `Data/Generated/Equips.json`<br>`Data/Localization/EquipEffectTexts.json` |
 | `gen_match_targets.py` | `Data/Localization/TeamTargetNames.json`<br>`Data/Localization/SeasonActNames.json` |
-| `gen_root_buffs.py` | `Data/Localization/RootBuffNames.json`<br>`Data/Generated/RootBuffs.json` |
+| `gen_root_buffs.py` | `Data/Localization/RootBuffNames.json`<br>`Data/Localization/TalentNames.json`<br>`Data/Generated/RootBuffs.json` |
+| `gen_items.py` | `Data/Localization/ItemNames.json` |
+| `gen_chat_hyperlinks.py` | `Data/Localization/ChatHyperlinks.json`<br>`Data/Localization/UnionBuildingNames.json` |
 
 ## 全ツール共通の仕様
 
@@ -138,7 +143,8 @@ export BPSR_TABLES=<置き場所>     # bash
 
 ### 完全な上書き
 
-**出力は入力だけで決まる。前の出力は読まない。** 入力に名前が無ければ空になる。
+**出力は入力だけで決まる。** 入力に名前が無ければ空になる。
+前の出力を読むのは、`gen_buffs.py` / `gen_skills.py` / `gen_monsters.py` が空になった名前を上書きファイルへ書き足すときだけで、出力そのものには使わない。
 
 生成物を直接編集しても次に流せば消える。残したい手修正は上書きファイルへ置く。
 
@@ -148,7 +154,8 @@ export BPSR_TABLES=<置き場所>     # bash
 
 ## 手動編集ファイル
 
-**ツールが読みも書きもしないファイル。** 生成物とは独立していて、再生成しても消えない。
+**生成物ではないファイル。** ツールは作り直さないので、再生成しても消えない。
+`MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` にだけ、生成器が空になった名前を書き足す(→「空になった名前の書き足し」)。
 
 **名前の表に重ねるものはファイル名を `～NameOverrides.json` にする。** 残りは同梱の生の表に重ねる。
 
@@ -171,6 +178,21 @@ export BPSR_TABLES=<置き場所>     # bash
 生成物は入力だけで決まるため、ここに置かないと流すたびに空へ戻る。
 
 **逆に、ゲーム側が名前を入れ直しても上書きのほうが勝つ。** 名前が復活した鍵は手で外す。
+
+### 空になった名前の書き足し
+
+`gen_monsters.py` / `gen_skills.py` / `gen_buffs.py` は、`MonsterNames.json` / `SkillNames.json` / `BuffNames.json` を書く前に前の出力と比べ、
+**前に名前があって今回空になった言語**を `MonsterNameOverrides.json` / `SkillNameOverrides.json` / `BuffNameOverrides.json` へ書き足す(`_common.carry_dropped_names`)。
+比べるのは鍵と言語ごと。
+
+| | |
+|---|---|
+| 上書きに鍵が無い | 空になった言語だけを持つ項目を足す。空になっていない言語は書かない(空文字は生成値を消す意味になるため) |
+| 上書きに鍵がある | 空になった言語だけ前の名前で上書きする。ほかの言語はそのまま |
+| 今回の入力に行ごと無い鍵 | 書き足さず、鍵を表示する(上書きは行が残って名前だけ消えたものを戻すため) |
+
+上書きファイルを先に書き、名前の表は後に書く。上書きファイルが無いか形が違えば止まり、名前の表も書かない。
+書き足した鍵・言語・名前は全部表示する。
 
 ### MonsterNameOverrides.json
 
@@ -404,6 +426,8 @@ DamageId の下2桁                    = 枝番(HitEventId)
 
 言語によって収録数に差があるので、鍵は和集合。
 
+前の出力にあって今回空になった名前は `BuffNameOverrides.json` へ書き足す(→「空になった名前の書き足し」)。
+
 > **表示条件はこのファイルで判定しない。**
 > アプリが同梱 `Data/Raw/BuffTable.json` の `BuffPriority`・アイコン・持続などで判定する（`BuffDisplayRules`）。
 > 名前テーブルに載っていることは、バフバーに出ることを意味しない。
@@ -438,6 +462,9 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 モンスターの技の大半は未翻訳で、名前が埋め草 `场地标记01` になっている。これは空になる
 (→「プレースホルダは名前として扱わない」)。
+
+`SkillNames.json` で前の出力にあって今回空になった名前は `SkillNameOverrides.json` へ書き足す(→「空になった名前の書き足し」)。
+`SkillTalkNames.json` は対象外。
 
 ### SkillTalkNames.json
 
@@ -618,6 +645,8 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 **名前が空の行も鍵を持つ。** エンティティリストは「表に行があって名前が空」と「表に行が無い(アプリの表が古い)」を
 鍵の有無で見分ける(前者は HP バーが見えなければ出さず、見えれば「敵」「味方」と出す。後者は空欄のまま出す)。
 
+前の出力にあって今回空になった名前は `MonsterNameOverrides.json` へ書き足す(→「空になった名前の書き足し」)。
+
 ---
 
 ## gen_season_talents.py
@@ -679,13 +708,12 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ## gen_equips.py
 
-装備の名前・数値・効果の文言を書く。
+装備の数値・効果の文言を書く。装備の名前は `gen_items.py` のアイテムの名前を使う(装備IDもアイテムID)。
 
-- `EquipNames.json`: **鍵は装備ID**(`EquipTable` の全行)。値は `ItemTable.Name`。名前の空の鍵も残す
 - `Equips.json`: 装備ごとの数値と、装備が参照する属性庫の行
 - `EquipEffectTexts.json`: **鍵は効果の番号。** 進化・改鋳・レアの側に出る一時属性とバフの文言
 
-名前と文言の出所は上の「土台は言語で分ける」と同じ。
+文言の出所は上の「土台は言語で分ける」と同じ。
 
 ### 数値は `Star` で作る
 
@@ -805,24 +833,25 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 
 ## gen_root_buffs.py
 
-根のバフの名前を `RootBuffNames.json` に、種類・並び・絵を `RootBuffs.json` に書く。鍵はどちらも根のバフのバフID。
+根のバフの名前を `RootBuffNames.json` に、種類・並び・絵とタレントの木の形を `RootBuffs.json` に、タレントの名前を `TalentNames.json` に書く。
+`RootBuffNames.json` と `RootBuffs.json` の鍵は根のバフのバフID(木は除く)、`TalentNames.json` の鍵はタレントの番号(`TalentTable` の `Id`)。
 
 根のバフは、タレント・心相晶のノード・心相晶の上級・因子・モジュール効果を付けている間、ずっと乗るバフ(それぞれの効果の `[3, バフID, 1]`)。
-アプリはプレイヤーに乗っている根のバフから、アビリティ情報(タレント)・潜在心相晶情報(ノード・上級・因子)・モジュール情報(モジュール効果)の一覧を出す。
+アプリはプレイヤーに乗っている根のバフから、アビリティ情報(タレントの木)・潜在心相晶情報(ノード・上級・因子)・モジュール情報(モジュール効果)を出す。
 名前の表と手修正に名前の無いバフで、付与元をたどってモジュールの根のバフ(同梱 `Data/Raw/ModEffectTable.json` で引く)に着いたものも、この名前で出る。
 モジュール効果のバフの名前と絵を番号で出すときは、`BuffNameAssignedOverrides.json` と `BuffOverrides.json` の `Icon` に書く
 (絵のパスが `EffectConfigIcon` の形なら、アプリは `Data/Images/Modules` からファイル名で探す)。
 
 | 種類(`RootBuffs.json` の項目) | 表 | 名前 | 絵 | 並び |
 |---|---|---|---|---|
-| `Talents` | `TalentTable.TalentEffect` | `TalentName` | `TalentIcon` | `Id` |
+| `Talents` | `TalentTable.TalentEffect` | なし(木の節のタレントの名前を使う) | なし(木の節の絵を使う) | `Id` |
 | `SeasonTalentNodes` | `SeasonTalentEffectOrdinaryTable.Effect` | `Name` | `IconNormal` | `Id` |
 | `SeasonTalentAdvanced` | `SeasonTalentEffectAdvancedTable.Effect` | `Name` | `Icon`(型の上級の番号ごと) | `Id` |
 | `Factors` | `SeasonTalentFactorItemTable.FactorItemEffect` | `ItemTable.Name` から等級を外した名前 | `ItemTable.Icon` | バフID |
 | `ModuleEffects` | `ModEffectTable.EffectConfig` | `EffectName` | `EffectConfigIcon` | `EffectID` |
 
-- 各項目は `{ "Buff": <バフID>, "Icon": "<絵の全体のパス>" }` の配列で、配列の順が並び。上級だけ `Icon` の代わりに `Icons`(型の上級の番号 → 絵)を持つ
-- タレントは役割のタグ `TalentTag` も持つ。タレントの木の職業(`TalentTreeTable.WeaponType`)の `ProfessionSystemTable.Talent`(`TalentTagTable` の番号。1 攻撃 / 2 支援 / 3 防御)。アプリは絵の背景の色を選ぶのに使う
+- 各項目は `{ "Buff": <バフID>, "Icon": "<絵の全体のパス>" }` の配列で、配列の順が並び。上級だけ `Icon` の代わりに `Icons`(型の上級の番号 → 絵)を持つ。
+  タレントは `{ "Buff": <バフID> }` だけ(アプリは取っている節を見分けるのに使う。名前と絵は木の節のタレントから出す)
 - `SeasonTalentAdvancedEffects` は型の根のバフ → 型の上級の番号(`SeasonTalentTemplateTable.AdvancedEffectId`)。上級の絵はその人の型で選ぶ。番号が 0 の型(上級を持たない)は入れない
 - タレントは、段階の根のタレント(`TalentStageTable.RootId` → `TalentTreeTable.TalentId`)のバフを入れない。特化型のバフで、特化はプレイヤーリストが出す
 - 心相晶の上級は、1つの型の上級(`EffectId`)にしか出てこないバフ(型の専用効果)を入れない。入れるのは全部の型が使う共通の効果
@@ -830,17 +859,56 @@ cn は Star 土台なので、zh-CN には Star の `终焉前奏` / `虚蚀圆�
 - 因子は、等級を外した名前が2つ以上になる根(シーズンが変わって効果を失った因子の共通の説明のバフ)を入れない。等級の書き方は言語で違う(jp / kr「・G1」、cn「·G1」、en「 - G1」)
 - アプリは絵をタレント・ノード・上級は `Data/Images/Talents`、因子は `Data/Images/Factors`、モジュール効果は `Data/Images/Modules` から、パスの最後の部分のファイル名で探す
 
+**タレントの木(`TalentTrees`)** は、アビリティ情報がゲームと同じ形の木を描くのに使う。
+
+- 出所ごとに分けて持つ: `{ "Star": [<木>…], "StarASIA": [<木>…] }`。それぞれその出所の表だけで作る(出所でタレントが違う節や、2つのタレントの位置が入れ替わった節がある)。
+  アプリはアジアサーバーのゲームのときだけ `StarASIA` の木、それ以外は `Star` の木を使う
+- 両方の出所で中身の違う節は一覧を出す(止めない)
+- 木は段階の行(`TalentStageTable` の `RootId` が 0 でない行)ごとに1本。節はその行と同じ(`WeaponType`, `TalentStage`, `BdType`)の `TalentTreeTable` の行
+- 1本は `{ "Profession": <職業ID>, "Spec": <特化の番号>, "Root": <根の節>, "Nodes": [...] }`。根の絵と名前は根の節のタレントのもの。
+  クラスR1(`TalentStage` 0)の木は `Spec` 0・`Root` 0。クラスR2 の木の `Spec` は、段階が職業の `ShowTalentStage` の何番目かで決める(職業ID × 10000 ＋ 並び、アプリの特化の番号)
+- 節は `{ "Id": <TalentTreeTable の Id>, "X", "Y", "Next": [<つなぐ先の節>], "Buffs": [<バフID>], "Talent": <タレントの番号>, "Ability": <真偽>, "Icon": "<絵の全体のパス>", "TalentTag": <役割のタグ>, "Replace": [[<元の技>, <置き換え後の技>]] }`。
+  位置は `TalentPosition` を木の左上が 0 になるようにずらした値(下へ増える)、つなぎは `NextTalent`
+- `Buffs` は節のタレントの `[3, バフID, 1]` で、どれも `Talents` にある。能力値だけの節は空。クラスR2 の根は特化型のバフなので入れない
+- `Talent` は `TalentTreeTable.TalentId`、`Ability` は `TalentTable.TalentType` が 4(アビリティの節。1 は能力値の小さい節、5 は特化型の根)、`Icon` は `TalentIcon`
+- `TalentTag` は役割のタグ。その木の職業(`TalentTreeTable.WeaponType`)の `ProfessionSystemTable.Talent`(`TalentTagTable` の番号。1 攻撃 / 2 支援 / 3 防御)。アプリは絵の背景の色を選ぶのに使う
+- `Replace` は節のタレントの `[6, 元の技, 置き換え後の技]` の元と先の組の一覧(無ければ空)。アプリは、バフの無いアビリティの節を取っているかを、最後に使ったのが置き換え後の技かで決めるのに使う
+- タレントの名前(`TalentNames.json`)は、木の節に出てくるタレント全部。値は `TalentName`
+
 **名前の土台はバフIDの単位で決める**(cn / en は `Star`、jp / kr は `StarASIA`)。土台にそのバフIDの名前があれば土台だけを使い、無いときだけもう一方を使う。
 心相晶のノードで同じ出所の中の1つのバフIDに複数の行が当たったら、型の `BelongSeasonId` が一番大きい行の名前を採る。
 ほかの種類で1つのバフIDに名前の違う行が当たったら、並びの一番小さい行の名前を採り、一覧を出す。
+タレントの名前も同じ土台で、タレントの番号の単位で決める。
 
-**種類・並び・絵は `StarASIA` を土台にし、無いバフだけ `Star` で補う。** 出所で絵が違うバフは一覧を出す。
+**種類・並び・絵は `Star` を土台にし、無いバフだけ `StarASIA` で補う。** 出所で絵が違うバフは一覧を出す。
 
 次のときは止まる。
 
 - 1つのバフIDが2つの種類に当たる
 - 段階の根が木の表に無い、上級の番号が1つしか無い(型の専用効果を見分けられない)
-- タレントの役割のタグが1つに決まらない(1つのバフで行や出所によって違う場合も)、1〜3 のどれでもない
 - 心相晶のノードの行がどの型の木にも無い、主の型とローグライクの型の両方の木に入る
 - 一番新しいシーズンの中で、同じノードのバフIDの名前が食い違う
 - 型の根のバフに上級の番号が2つ以上当たる、1つのモジュールの根のバフに効果が2つ以上当たる
+- タレントの木が空、つなぎが同じ木の節に無い、クラスR2 の根が木の節に無い、クラスR2 の段階が職業の `ShowTalentStage` に無い、1つの職業・特化に木が2本ある
+- 節のバフが `Talents` に無い、1つのバフが同じ木の2つ以上の節にある、クラスR2 の木がある職業にクラスR1 の木が無い(どれも出所ごと)
+- 節のタレントが表に無い、`TalentType` が 1 / 4 / 5 のどれでもない、バフのある節がアビリティの節でない、役割のタグが 1〜3 のどれでもない(どれも出所ごと)
+- アビリティの節のタレントに、どの言語の名前も無い
+
+## gen_items.py
+
+アイテムの名前を `ItemNames.json` に書く。**鍵はアイテムID**(`ItemTable` の全行、4言語ぶんの和)。値は `ItemTable.Name`。名前の空の鍵も残す。
+
+装備IDもアイテムIDなので、装備の名前もここから引く。チャットのリンクの発言では、魚の名前とアイテムの名前に使う。
+名前の出所は上の「土台は言語で分ける」と同じ。
+
+## gen_chat_hyperlinks.py
+
+チャットのリンクの発言(個人スペースの共有など)の文の型と、その文に入るギルドの建物の名前を書く。
+
+- `ChatHyperlinks.json`: **鍵はリンクの番号**(`ChatHyperlink` の全行、4言語ぶんの和)。値は `Content`(文の型)。型の空の鍵も残す
+- `UnionBuildingNames.json`: **鍵はギルドの建物の番号**(`UnionBuildingTable` の全行、4言語ぶんの和)。値は `BuildingName`
+
+リンクの発言は本文が空で届き、表の番号と差し込みの値だけを持つ。アプリは型の `{*…*}` を差し込みの値で埋め、
+`<u>` `<link=1>` `<style=…>` などの書式を外して出す。型が空か値の取れない差し込みがあれば、その発言は「[リンク]」の文字で出る。
+
+型と名前の出所は上の「土台は言語で分ける」と同じ。

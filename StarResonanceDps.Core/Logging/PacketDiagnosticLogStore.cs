@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace StarResonanceDps.Core.Logging;
 
 public enum PacketDiagnosticLogLevel
@@ -55,33 +53,6 @@ public sealed class PacketDiagnosticLogStore
                 return _entries.ToArray();
             }
         }
-    }
-
-    public string GetDisplayText()
-    {
-        PacketDiagnosticLogEntry[] entries;
-        lock (_sync)
-        {
-            entries = _entries.ToArray();
-        }
-
-        if (entries.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        var text = new StringBuilder();
-        foreach (var entry in entries)
-        {
-            if (text.Length > 0)
-            {
-                text.AppendLine();
-            }
-
-            text.Append(entry.DisplayText);
-        }
-
-        return text.ToString();
     }
 
     public void Information(string source, string message)

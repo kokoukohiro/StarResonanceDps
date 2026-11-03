@@ -1,11 +1,8 @@
 """
-装備の名前・数値・効果の文言のテーブルを生成する。
+装備の数値・効果の文言のテーブルを生成する。装備の名前は `gen_items.py` のアイテムの名前(装備IDもアイテムID)。
 
-  Data/Localization/EquipNames.json
   Data/Generated/Equips.json
   Data/Localization/EquipEffectTexts.json
-
-EquipNames: 鍵は装備ID(`EquipTable` の全行)。値は `ItemTable.Name`。名前の空の鍵も残す。
 
 Equips: **数値は `Star` の表で作る。** 形は次のとおり。
 - `Equips`: 装備ID → 部位(`EquipPart`)・品質(`ItemTable.Quality`)・完成度の上限(`PerfectUpperLimit` の2要素目)・
@@ -29,7 +26,7 @@ EquipEffectTexts: 鍵は効果の番号。進化・改鋳・レアの側に出�
 バフ(`AttrDescription[BuffTable.TipsDescription].Description`)の文言。値の差し込みは、そのままの値を `{0}`、
 % の値(`{*tempAttr.up*}`)を `{1}` に置き換える。
 
-名前と文言の出所の土台は言語フォルダごと(`_common.table`)。
+文言の出所の土台は言語フォルダごと(`_common.table`)。
 
 次のときは書かずに止まる。
 - 装備の行がアイテムの表に無い、`PerfectUpperLimit` に2要素目が無い
@@ -495,12 +492,6 @@ def main():
     print("         特化 %d / クラスR1 %d / 改鋳・レアの庫 %d / 文言の一時属性 %d / 文言のバフ %d"
           % (len(spec_schools), len(rank1_schools), len(side_refs), len(temp_ids), len(buff_ids)))
     print()
-
-    names = {}
-    for lang, lang_dir in LANGS.items():
-        item_names = table(lang_dir, "ItemTable")
-        names[lang] = {equip_id: name_of(item_names.get(equip_id)) for equip_id in equip_entries}
-    write_localized("EquipNames", names, list(equip_entries))
 
     path = os.path.join(GENERATED, "Equips.json")
     dump(path, {

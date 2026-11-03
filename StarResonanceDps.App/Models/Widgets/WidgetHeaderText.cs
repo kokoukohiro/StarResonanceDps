@@ -1,4 +1,6 @@
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.Models;
+using Zproto;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
@@ -32,5 +34,36 @@ public static class WidgetHeaderText
         return string.IsNullOrWhiteSpace(name) && userId == 0
             ? prefix
             : Join(prefix, PlayerInfoFormatFormatter.GetDisplayName(name, userId, isSelf, isNpc, professionId, nameDisplayMode));
+    }
+
+    /// <summary>
+    /// チャットの窓。チャンネルはチャンネル名、プライベートトークは「プライベートトーク(相手の名前)」。
+    /// 相手の名前の出し方は人の窓と同じ規則(名前がまだ分からなければ UID、伏せる設定なら伏せ字)。
+    /// </summary>
+    public static string ForChat(
+        string prefix,
+        ChitChatChannelType channel,
+        long partnerId,
+        string? partnerName,
+        PlayerNameDisplayMode nameDisplayMode)
+    {
+        var localization = LocalizationManager.Instance;
+        if (channel == ChitChatChannelType.ChannelPrivate)
+        {
+            return Join(prefix, localization.Format(
+                "Chat_PrivateFormat",
+                PlayerInfoFormatFormatter.GetDisplayName(partnerName, partnerId, false, false, 0, nameDisplayMode)));
+        }
+
+        var channelKey = channel switch
+        {
+            ChitChatChannelType.ChannelWorld => "Chat_Channel_World",
+            ChitChatChannelType.ChannelUnion => "Chat_Channel_Guild",
+            ChitChatChannelType.ChannelTeam => "Chat_Channel_Party",
+            ChitChatChannelType.ChannelScene => "Chat_Channel_Local",
+            ChitChatChannelType.ChannelNewbie => "Chat_Channel_Newbie",
+            _ => throw new ArgumentOutOfRangeException(nameof(channel), channel, null)
+        };
+        return Join(prefix, localization.GetString(channelKey));
     }
 }

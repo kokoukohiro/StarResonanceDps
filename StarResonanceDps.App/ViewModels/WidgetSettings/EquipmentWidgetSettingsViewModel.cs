@@ -9,7 +9,7 @@ namespace StarResonanceDps.App.ViewModels.WidgetSettings;
 
 /// <summary>
 /// 装備詳細の表示設定。行の書式(作りはスキル詳細の行名 <see cref="SkillDetailWidgetSettingsViewModel"/> と同じ)と、
-/// 品質ごとのテキストカラー(作りは被ダメログ <see cref="TakenDamageLogWidgetSettingsViewModel"/> と同じ)。
+/// 品質ごとのテキストカラー(作りはタイムライン <see cref="TimelineWidgetSettingsViewModel"/> と同じ)。
 /// </summary>
 public sealed partial class EquipmentWidgetSettingsViewModel : ObservableObject, IDisposable
 {
@@ -250,7 +250,7 @@ public sealed partial class EquipmentWidgetSettingsViewModel : ObservableObject,
 
 /// <summary>
 /// テキストカラーの1行(アイテムの品質1つ)。行の作りはタイムラインのテキストカラー
-/// (<see cref="TakenDamageLogTextColorItemViewModel"/>)と同じ。
+/// (<see cref="TimelineTextColorItemViewModel"/>)と同じ。
 /// </summary>
 public sealed class EquipmentTextColorItemViewModel : ObservableObject
 {
@@ -268,8 +268,8 @@ public sealed class EquipmentTextColorItemViewModel : ObservableObject
 
     public bool IsLast { get; }
 
-    /// <summary>「レアリティ＋品質の番号」。</summary>
-    public string DisplayName => LocalizationManager.Instance.Format("PlayerEquipment_Quality", Key);
+    /// <summary>「レアリティ＋番号」。番号は品質の番号に 1 を足した数(品質 0〜5 を 1〜6 と出す)。</summary>
+    public string DisplayName => LocalizationManager.Instance.Format("PlayerEquipment_Quality", int.Parse(Key, System.Globalization.CultureInfo.InvariantCulture) + 1);
 
     public void RefreshDisplayName()
     {

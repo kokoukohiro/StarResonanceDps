@@ -4397,7 +4397,7 @@
     "IsClass": true,
     "IsSyncMe": true,
     "IsSyncAoi": false,
-    "AttrLowerLimit": 0,
+    "AttrLowerLimit": -9000,
     "AttrUpperLimit": -1,
     "Level": 4,
     "AttrFinal": 12750,

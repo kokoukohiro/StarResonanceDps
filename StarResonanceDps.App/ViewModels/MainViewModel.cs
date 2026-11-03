@@ -36,8 +36,8 @@ public sealed partial class MainViewModel : ViewModelBase
     private bool _isPlayerRosterUpdateQueued;
     private bool _isNearbyEntityUpdateQueued;
 
-    private WidgetListItemViewModel? _playerListWidget;
-    private WidgetListItemViewModel? _entityListWidget;
+    private readonly WidgetListItemViewModel _playerListWidget;
+    private readonly WidgetListItemViewModel _entityListWidget;
 
     /// <summary>ウィジェットを開いていなくても通知する項目の判定。起動できないときに見せるだけのメイン窓では作らない。</summary>
     private readonly NotificationMonitor? _notificationMonitor;
@@ -97,13 +97,10 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         _targetSelection = new WidgetTargetSelection(_widgetWindowManager, FindWidget);
 
-        var playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
-        _playerListWidget = playerListWidget;
-        var entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
-        _entityListWidget = entityListWidget;
-        AddWidget(WidgetKind.EntityInfo, "Widget_EntityInfo");
-        AddWidget(WidgetKind.ReviveList, "Widget_ReviveList");
+        _playerListWidget = AddWidget(WidgetKind.PlayerList, "Widget_PlayerList");
+        _entityListWidget = AddWidget(WidgetKind.EntityList, "Widget_EntityList");
         AddWidget(WidgetKind.PlayerInfo, "Widget_PlayerInfo");
+        AddWidget(WidgetKind.EntityInfo, "Widget_EntityInfo");
         AddWidget(WidgetKind.PlayerStatus, "Widget_PlayerStatus");
         AddWidget(WidgetKind.PlayerEquipment, "Widget_PlayerEquipment");
         AddWidget(WidgetKind.PlayerTalent, "Widget_PlayerTalent");
@@ -113,19 +110,22 @@ public sealed partial class MainViewModel : ViewModelBase
         AddWidget(WidgetKind.DebuffList, "Widget_DebuffList");
         AddWidget(WidgetKind.BuffDebuffCard, "Widget_BuffDebuffCard");
         AddWidget(WidgetKind.BuffDebuffGroup, "Widget_BuffDebuffGroup");
-        playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
-        entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
-        AddWidget(WidgetKind.DpsMeter, "Menu_DpsMeter");
-        AddWidget(WidgetKind.HpsMeter, "Menu_HpsMeter");
-        AddWidget(WidgetKind.TakenDamageLog, "Widget_TakenDamageLog");
-        AddWidget(WidgetKind.DamageTakenList, "Widget_DamageTakenList");
-        AddWidget(WidgetKind.DamageTakenSummary, "Widget_DamageTakenSummary");
-        AddWidget(WidgetKind.DamageContribution, "Widget_DamageSkillDetails");
-        AddWidget(WidgetKind.DamageSummary, "Widget_DamageContribution");
+        AddWidget(WidgetKind.ReviveList, "Widget_ReviveList");
+        AddWidget(WidgetKind.Timeline, "Widget_Timeline");
+        AddWidget(WidgetKind.DpsMeter, "Widget_DpsMeter");
+        AddWidget(WidgetKind.HpsMeter, "Widget_HpsMeter");
+        AddWidget(WidgetKind.DamageTakenLog, "Widget_DamageTakenLog");
+        AddWidget(WidgetKind.DamageSkillDetail, "Widget_DamageSkillDetail");
+        AddWidget(WidgetKind.DamageSummary, "Widget_DamageSummary");
         AddWidget(WidgetKind.DpsGraph, "Widget_DpsGraph");
-        AddWidget(WidgetKind.HealingContribution, "Widget_HealingSkillDetails");
-        AddWidget(WidgetKind.HealingSummary, "Widget_HealingContribution");
+        AddWidget(WidgetKind.HealingSkillDetail, "Widget_HealingSkillDetail");
+        AddWidget(WidgetKind.HealingSummary, "Widget_HealingSummary");
         AddWidget(WidgetKind.HpsGraph, "Widget_HpsGraph");
+        AddWidget(WidgetKind.DamageTakenSummary, "Widget_DamageTakenSummary");
+        AddWidget(WidgetKind.Chat, "Widget_Chat");
+
+        _playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
+        _entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
         _widgetWindowManager.TargetWindowsChanged += WidgetWindowManager_TargetWindowsChanged;
         _widgetWindowManager.UnspecifiedBuffCardResolved += WidgetWindowManager_UnspecifiedBuffCardResolved;
         // 起動できないときに見せるだけのメイン窓では Core が初期化されていない(DB も開いていない)。
@@ -159,18 +159,21 @@ public sealed partial class MainViewModel : ViewModelBase
 
         _playerRosterStore.RosterChanged += PlayerRosterPresentationStore_RosterChanged;
         _partyStateStore.Changed += PartyStateStore_Changed;
-        SocialDataStore.Changed += SocialDataStore_Changed;
+        PlayerDirectory.Changed += PlayerDirectory_Changed;
         SocialDataStore.Cleared += SocialDataStore_Cleared;
         SelfEquipmentStore.Changed += SelfEquipmentStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
         _dungeonScoreStore.Changed += DungeonScoreStore_Changed;
         MessageManager.MatchFound += MessageManager_MatchFound;
         GrpcTeamManager.TeamEntryVoteStarted += GrpcTeamManager_TeamEntryVoteStarted;
+        MessageManager.PrivateChatMessageReceived += MessageManager_PrivateChatMessageReceived;
+        MessageManager.PrivateChatRead += MessageManager_PrivateChatRead;
+        MessageManager.WorldChatMessageReceived += MessageManager_WorldChatMessageReceived;
 
         var roster = _playerRosterStore.Current;
         ApplyPlayerRosterSnapshot(roster);
         ApplyNearbyEntitySnapshot(_nearbyEntityStore.Current);
-        _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current);
+        _entityListWidget.UpdateDungeonScore(_dungeonScoreStore.Current);
     }
 
     private void AddPluginItem(PluginInfo pluginInfo)
@@ -451,17 +454,20 @@ public sealed partial class MainViewModel : ViewModelBase
             e.SeasonId));
     }
 
-    /// <summary>名刺の値(顔写真・名刺)が変わった相手。受信のスレッドから来るので UI のスレッドへ移して窓へ渡す。</summary>
-    private void SocialDataStore_Changed(long characterId)
+    /// <summary>
+    /// 名簿の外の値(名刺照会の値・チャットの発言者の値)が変わった相手。受信のスレッドから来るので UI のスレッドへ移して、
+    /// プレイヤーの窓へ渡す。
+    /// </summary>
+    private void PlayerDirectory_Changed(long characterId)
     {
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is null)
         {
-            _widgetWindowManager.UpdatePlayerWindowSocialData(characterId);
+            _widgetWindowManager.UpdatePlayerWindowPlayerData(characterId);
             return;
         }
 
-        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSocialData(characterId));
+        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowPlayerData(characterId));
     }
 
     /// <summary>名刺の値の控えが全部消えた(キャプチャの停止とログアウト)。UI のスレッドへ移して全部の窓へ渡す。</summary>
@@ -515,6 +521,45 @@ public sealed partial class MainViewModel : ViewModelBase
         dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyTeamEntryVoteStarted(sceneId, masterModeDifficulty));
     }
 
+    /// <summary>ほかの人からプライベートトークが届いた。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>
+    private void MessageManager_PrivateChatMessageReceived(long partnerId, long messageId, string senderName)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _notificationMonitor?.NotifyPrivateChatMessage(partnerId, messageId, senderName);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyPrivateChatMessage(partnerId, messageId, senderName));
+    }
+
+    /// <summary>ゲームがプライベートトークを既読にした。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>
+    private void MessageManager_PrivateChatRead(long partnerId, long maxReadMessageId)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _notificationMonitor?.NotifyPrivateChatRead(partnerId, maxReadMessageId);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyPrivateChatRead(partnerId, maxReadMessageId));
+    }
+
+    /// <summary>ワールドチャットにほかの人の文の発言が届いた。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>
+    private void MessageManager_WorldChatMessageReceived(long senderId, string senderName, string message)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _notificationMonitor?.NotifyWorldChatMessage(senderId, senderName, message);
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _notificationMonitor?.NotifyWorldChatMessage(senderId, senderName, message));
+    }
+
     private void PartyStateStore_Changed(object? sender, EventArgs e)
     {
         QueuePlayerRosterSnapshot(_playerRosterStore.Current);
@@ -562,12 +607,12 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void ApplyPlayerRosterSnapshot(PlayerRosterSnapshot roster)
     {
-        _playerListWidget?.UpdatePlayerRoster(
+        _playerListWidget.UpdatePlayerRoster(
             roster.Entries,
             roster.MapName,
             roster.MapChannel,
             roster.MapGeneration);
-        _entityListWidget?.UpdateEntityListRoster(roster.Entries);
+        _entityListWidget.UpdateEntityListRoster(roster.Entries);
         _widgetWindowManager.UpdateEntityInfoRosters(roster.Entries);
         _widgetWindowManager.UpdatePlayerWindowPresentations(roster);
         _widgetWindowManager.UpdateListWidgetRosters(roster);
@@ -590,11 +635,11 @@ public sealed partial class MainViewModel : ViewModelBase
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher is null)
         {
-            _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current);
+            _entityListWidget.UpdateDungeonScore(_dungeonScoreStore.Current);
             return;
         }
 
-        dispatcher.BeginInvoke(() => _entityListWidget?.UpdateDungeonScore(_dungeonScoreStore.Current));
+        dispatcher.BeginInvoke(() => _entityListWidget.UpdateDungeonScore(_dungeonScoreStore.Current));
     }
 
     private void QueueNearbyEntitySnapshot(NearbyEntitySnapshot snapshot)
@@ -641,17 +686,12 @@ public sealed partial class MainViewModel : ViewModelBase
     {
         // エンティティ出現の通知はエンティティリストを開いていなくても見る。
         _notificationMonitor?.ObserveNearbyEntities(snapshot.Entries);
-        if (_entityListWidget is not { } entityListWidget)
-        {
-            return;
-        }
-
-        entityListWidget.UpdateNearbyEntities(
+        _entityListWidget.UpdateNearbyEntities(
             snapshot.Entries,
             snapshot.MapName,
             snapshot.MapChannel,
             snapshot.MapGeneration);
-        _widgetWindowManager.UpdateEntityWindowPresentations(entityListWidget.EntityListEntries, snapshot.Entries);
+        _widgetWindowManager.UpdateEntityWindowPresentations(_entityListWidget.EntityListEntries, snapshot.Entries);
         RefreshTargetSelections();
     }
 

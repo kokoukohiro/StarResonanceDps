@@ -235,14 +235,14 @@
                                              Placement="MousePoint"
                                              Opened="PlayerSelectionContextMenu_Opened"
                                              Closed="PlayerSelectionContextMenu_Closed">
-                                    <MenuItem Header="{Binding ContributionMenuText}"
-                                              Command="{Binding RequestContributionCommand}"
+                                    <MenuItem Header="{Binding SkillDetailMenuText}"
+                                              Command="{Binding RequestSkillDetailCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding SummaryMenuText}"
                                               Command="{Binding RequestSummaryCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
-                                    <MenuItem Header="{Binding TimelineMenuText}"
-                                              Command="{Binding RequestTimelineCommand}"
+                                    <MenuItem Header="{Binding GraphMenuText}"
+                                              Command="{Binding RequestGraphCommand}"
                                               CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                 </ContextMenu>
                             </Button.ContextMenu>

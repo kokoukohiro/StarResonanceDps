@@ -111,17 +111,17 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
 
-    public string ContributionMenuText => LocalizationManager.Instance.GetString(
+    public string SkillDetailMenuText => LocalizationManager.Instance.GetString(
         _kind == MeterSnapshotKind.Damage
-            ? "Widget_DamageSkillDetails"
-            : "Widget_HealingSkillDetails");
+            ? "Widget_DamageSkillDetail"
+            : "Widget_HealingSkillDetail");
 
     public string SummaryMenuText => LocalizationManager.Instance.GetString(
         _kind == MeterSnapshotKind.Damage
-            ? "Widget_DamageContribution"
-            : "Widget_HealingContribution");
+            ? "Widget_DamageSummary"
+            : "Widget_HealingSummary");
 
-    public string TimelineMenuText => LocalizationManager.Instance.GetString(
+    public string GraphMenuText => LocalizationManager.Instance.GetString(
         _kind == MeterSnapshotKind.Damage
             ? "Widget_DpsGraph"
             : "Widget_HpsGraph");
@@ -143,9 +143,9 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
-        OnPropertyChanged(nameof(ContributionMenuText));
+        OnPropertyChanged(nameof(SkillDetailMenuText));
         OnPropertyChanged(nameof(SummaryMenuText));
-        OnPropertyChanged(nameof(TimelineMenuText));
+        OnPropertyChanged(nameof(GraphMenuText));
         Refresh();
     }
 
@@ -236,12 +236,12 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     }
 
     [RelayCommand]
-    private void RequestContribution(MeterPlayerEntry? player)
+    private void RequestSkillDetail(MeterPlayerEntry? player)
     {
         RequestPlayerWindow(
             _kind == MeterSnapshotKind.Damage
-                ? WidgetKind.DamageContribution
-                : WidgetKind.HealingContribution,
+                ? WidgetKind.DamageSkillDetail
+                : WidgetKind.HealingSkillDetail,
             player);
     }
 
@@ -256,7 +256,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     }
 
     [RelayCommand]
-    private void RequestTimeline(MeterPlayerEntry? player)
+    private void RequestGraph(MeterPlayerEntry? player)
     {
         RequestPlayerWindow(
             _kind == MeterSnapshotKind.Damage
@@ -287,8 +287,8 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     }
 
     /// <summary>
-    /// メーターのタイマーの書式。被ダメログの時刻も同じ書式で出す。
-    /// 秒は床関数で丸め、負は符号を付けて出す(接続をまたいで到着の順が前後し、起点より前の時刻になった被ダメログの行。-0.4 秒は -00:00:01)。
+    /// メーターのタイマーの書式。タイムライン・被ダメログの時刻も同じ書式で出す。
+    /// 秒は床関数で丸め、負は符号を付けて出す(接続をまたいで到着の順が前後し、起点より前の時刻になったタイムライン・被ダメログの行。-0.4 秒は -00:00:01)。
     /// </summary>
     internal static string FormatDuration(TimeSpan duration)
     {

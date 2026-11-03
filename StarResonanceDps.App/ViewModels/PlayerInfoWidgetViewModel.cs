@@ -1,4 +1,3 @@
-using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StarResonanceDps.App.Config;
@@ -11,9 +10,6 @@ namespace StarResonanceDps.App.ViewModels;
 
 public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewModel, IDisposable
 {
-    /// <summary>顔の既定の絵。写真を取れたとき以外はこれを出す。</summary>
-    private const string DefaultAvatarResourceKey = "Icon.Avatar.head_photo_000";
-
     /// <summary>名刺の既定の絵。写真を取れたとき以外はこれを出す。</summary>
     private const string DefaultCardResourceKey = "Icon.IdCard.idcard_common_01";
 
@@ -30,8 +26,8 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     [ObservableProperty]
     private ImageSource? _cardImage;
 
-    private readonly PhotoSlot _avatarSlot;
-    private readonly PhotoSlot _cardSlot;
+    private readonly PlayerPhotoSlot _avatarSlot;
+    private readonly PlayerPhotoSlot _cardSlot;
     private PlayerRosterEntry? _player;
 
     /// <summary>アイコンカラーの塗り。基底のコンストラクタから描き直しが呼ばれることがあるので、既定値で始める。</summary>
@@ -47,8 +43,8 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     {
         _iconPalette = new PlayerInfoIconPalette(infoWidget.GetPlayerInfoSettingsSnapshot());
         infoWidget.PlayerInfoSettingsChanged += InfoWidget_PlayerInfoSettingsChanged;
-        _avatarSlot = new PhotoSlot(DefaultAvatarResourceKey, image => AvatarImage = image);
-        _cardSlot = new PhotoSlot(DefaultCardResourceKey, image => CardImage = image);
+        _avatarSlot = new PlayerPhotoSlot(PlayerPhotoLoader.DefaultAvatarResourceKey, image => AvatarImage = image);
+        _cardSlot = new PlayerPhotoSlot(DefaultCardResourceKey, image => CardImage = image);
         // 相手が決まる前から既定の絵を用意する(何も分からない間は画面ごと隠れる)。
         RefreshPhotos(force: true);
         InitializePlayer(initialPlayer);
@@ -61,7 +57,10 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     /// <summary>何か出すものがあるか。無ければ画面ごと隠して、ほかのウィンドウと同じく何も出さない。</summary>
     public bool HasPlayerInfo => PlayerInfo is not null;
 
-    /// <summary>自分の顔の写真を出しているときだけ、その写真。右クリックのメニュー(保存・コピー)はこれがあるときだけ出す。</summary>
+    /// <summary>
+    /// 自分の顔の写真(URL から取った絵)を出しているときだけ、その写真。右クリックのメニュー(保存・コピー)はこれがあるときだけ出す。
+    /// 既定の絵とゲームの用意したアイコンには出さない。
+    /// </summary>
     public PlayerPhoto? SavableAvatarPhoto => _player?.IsSelf == true ? _avatarSlot.Photo : null;
 
     /// <summary>自分の名刺の写真を出しているときだけ、その写真。扱いは顔と同じ。</summary>
@@ -85,8 +84,8 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
         RenderPlayerInfo();
     }
 
-    /// <summary>相手が一覧から消えても最後に届いた値のまま残す。現在地は「不明」になる。顔と名刺は同じ相手なので取り直さない。</summary>
-    protected override bool KeepsLastPlayerWhenRemoved => true;
+    /// <summary>相手が一覧に居なくても分かっている値で出す(一覧から外れた人は最後の値で、現在地は「不明」)。顔と名刺は同じ相手なので取り直さない。</summary>
+    protected override bool ShowsKnownPlayerOffList => true;
 
     protected override void OnSelectedPlayerChanged(PlayerRosterEntry? player)
     {
@@ -113,7 +112,7 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     }
 
     /// <summary>
-    /// ログアウト。残していた最後の行は基底が捨てる(相手が変わったときと同じく既定の絵に戻る)。
+    /// ログアウト。出していた行は基底が捨てる(相手が変わったときと同じく既定の絵に戻る)。
     /// 行が無い表示は覚えている素性(捨てた NPC の印と職業を含む)から作るので出し直す。
     /// </summary>
     protected override void OnResetToStartup()
@@ -188,77 +187,7 @@ public sealed partial class PlayerInfoWidgetViewModel : PlayerWidgetWindowViewMo
     {
         var characterId = _player?.CharacterId ?? 0;
         var avatar = characterId == 0 ? null : _player?.RecordedAvatar ?? SocialDataStore.GetAvatar(characterId);
-        _avatarSlot.Show(GetAvatarPhotoUrl(avatar), characterId, force);
-        _cardSlot.Show(GetCardPhotoUrl(avatar), characterId, force);
-    }
-
-    /// <summary>
-    /// 顔の写真の URL。アップロードした写真の人(<c>avatarId</c> 0 か 1)で審査済みの写真があるときだけ。
-    /// ゲームの用意したアイコンを選んだ人(それ以外の <c>avatarId</c>)の絵は持っていないので無し(既定の絵)。
-    /// </summary>
-    private static string? GetAvatarPhotoUrl(SocialAvatarState? avatar)
-    {
-        return avatar is { AvatarId: 0 or 1, IsProfileReviewed: true } && !string.IsNullOrEmpty(avatar.ProfileUrl)
-            ? avatar.ProfileUrl
-            : null;
-    }
-
-    /// <summary>名刺の半身の写真の URL。審査済みの写真があるときだけ(ゲームの名刺と同じ条件)。</summary>
-    private static string? GetCardPhotoUrl(SocialAvatarState? avatar)
-    {
-        return avatar is { IsHalfBodyReviewed: true } && !string.IsNullOrEmpty(avatar.HalfBodyUrl)
-            ? avatar.HalfBodyUrl
-            : null;
-    }
-
-    /// <summary>
-    /// 顔と名刺それぞれの絵。写真の URL があれば取っている間も既定の絵を出し、取れたら写真に替える。
-    /// 取れなかったら既定の絵のまま(失敗は <see cref="PlayerPhotoLoader"/> がログに出す)。
-    /// </summary>
-    private sealed class PhotoSlot(string defaultResourceKey, Action<ImageSource?> apply)
-    {
-        private bool _hasShown;
-        private string? _shownUrl;
-        private CancellationTokenSource? _loading;
-
-        /// <summary>いま出している写真。既定の絵を出している間(取得中も含む)は null。</summary>
-        public PlayerPhoto? Photo { get; private set; }
-
-        /// <param name="url">写真の URL。無ければ既定の絵。</param>
-        /// <param name="force">同じ URL でも取り直す。</param>
-        public void Show(string? url, long characterId, bool force)
-        {
-            if (!force && _hasShown && url == _shownUrl)
-            {
-                return;
-            }
-
-            _hasShown = true;
-            _shownUrl = url;
-            // 取り消しは取得中の要求が見ているので Dispose しない。
-            _loading?.Cancel();
-            _loading = null;
-
-            Photo = null;
-            apply(Application.Current?.TryFindResource(defaultResourceKey) as ImageSource);
-            if (url is null)
-            {
-                return;
-            }
-
-            var loading = new CancellationTokenSource();
-            _loading = loading;
-            _ = LoadAsync(url, characterId, loading);
-        }
-
-        private async Task LoadAsync(string url, long characterId, CancellationTokenSource loading)
-        {
-            var photo = await PlayerPhotoLoader.LoadAsync(url, characterId, loading.Token);
-            if (photo is not null && !loading.IsCancellationRequested)
-            {
-                Photo = photo;
-                apply(photo.Image);
-            }
-        }
+        _avatarSlot.Show(PlayerPhotoLoader.GetAvatarPhotoUrl(avatar), PlayerPhotoLoader.GetAvatarPresetPath(avatar), characterId, force);
+        _cardSlot.Show(PlayerPhotoLoader.GetCardPhotoUrl(avatar), null, characterId, force);
     }
 }

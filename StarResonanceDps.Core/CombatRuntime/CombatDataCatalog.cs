@@ -100,8 +100,8 @@ public static class CombatDataCatalog
     private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
     /// <summary>
-    /// 根のバフ(タレント・心相晶のノードと上級・因子・モジュール効果)→ 名前。<c>Data/Localization/RootBuffNames.json</c>。
-    /// アビリティ情報・潜在心相晶情報・モジュール情報の行と、付与元をたどってモジュールの根に着いたバフの名前に使う。
+    /// 根のバフ(心相晶のノードと上級・因子・モジュール効果。タレントは入らない)→ 名前。<c>Data/Localization/RootBuffNames.json</c>。
+    /// 潜在心相晶情報とモジュール情報の行と、付与元をたどってモジュールの根に着いたバフの名前に使う。
     /// </summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _rootBuffNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -112,6 +112,27 @@ public static class CombatDataCatalog
 
     /// <summary>潜在心相晶の型の根のバフ → 型の上級の番号(上級の絵を選ぶのに使う)。<c>Data/Generated/RootBuffs.json</c>。</summary>
     private static FrozenDictionary<int, int> _seasonTalentAdvancedEffectIds = FrozenDictionary<int, int>.Empty;
+
+    /// <summary>
+    /// アジアサーバーの表(StarASIA)のタレントの木。(職業ID, 特化の番号。クラスR1 は 0)→ 木の形。<c>Data/Generated/RootBuffs.json</c>。
+    /// </summary>
+    private static FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> _asiaTalentTrees =
+        FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition>.Empty;
+
+    /// <summary>中国サーバーの表(Star)のタレントの木。形は <see cref="_asiaTalentTrees"/> と同じ。</summary>
+    private static FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> _chinaTalentTrees =
+        FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition>.Empty;
+
+    /// <summary>
+    /// バフを付けないアビリティの節の技の置き換えに出てくる技(元の技と置き換え後の技)→ 元の技。両方のサーバーの木から作る。
+    /// ほかのプレイヤーがその節を取っているかを、最後に使った技で決めるのに使う。
+    /// </summary>
+    private static FrozenDictionary<int, int> _replaceableSkillOriginals = FrozenDictionary<int, int>.Empty;
+
+    /// <summary>タレント → 名前。<c>Data/Localization/TalentNames.json</c>。アビリティ情報の節の TIPS に使う。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _talentNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// モジュールの根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)→ モジュール効果の番号。
@@ -161,8 +182,18 @@ public static class CombatDataCatalog
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
-    /// <summary>装備ID → 装備名(<c>ItemTable.Name</c>)。<c>Data/Localization/EquipNames.json</c>。</summary>
-    private static FrozenDictionary<string, FrozenDictionary<int, string>> _equipNames =
+    /// <summary>アイテムID → アイテム名(<c>ItemTable.Name</c>)。装備IDもアイテムID。<c>Data/Localization/ItemNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _itemNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>チャットのリンクの番号 → 文の型(<c>ChatHyperlink.Content</c>)。<c>Data/Localization/ChatHyperlinks.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _chatHyperlinkTemplates =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>ギルドの建物の番号 → 名前(<c>UnionBuildingTable.BuildingName</c>)。<c>Data/Localization/UnionBuildingNames.json</c>。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _unionBuildingNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
@@ -219,6 +250,22 @@ public static class CombatDataCatalog
 
     /// <summary>ダンジョン名と難易度名の区切り。ゲームの表示と同じで、全言語で同じ文字。</summary>
     private const string DungeonTypeNameSeparator = "-";
+
+    /// <summary>
+    /// チャットの文に混ぜる顔文字を、本文の <c>&lt;sprite=N&gt;</c> の N の順(0始まり)に並べた絵文字の文字。
+    /// 並びはゲームの顔文字の資源と同じ(ゲームの顔文字の窓が出すのは 1〜63)。
+    /// </summary>
+    private static readonly string[] ChatEmojis =
+    [
+        "😀", "😁", "😂", "😃", "😄", "😅", "😆", "😇",
+        "😈", "😉", "😐", "😑", "😒", "😓", "😔", "😕",
+        "😖", "😗", "😘", "😙", "😠", "😡", "😢", "😣",
+        "😤", "😥", "😦", "😧", "😨", "😩", "😰", "😱",
+        "😲", "😳", "😴", "😵", "😶", "😷", "🙁", "🙂",
+        "🙃", "🙄", "😊", "😋", "😌", "😍", "😎", "😏",
+        "😚", "😛", "😜", "😝", "😞", "😟", "😪", "😫",
+        "😬", "😭", "😮", "😯", "😺", "😼", "😽", "😾"
+    ];
     private static string _cultureName = "en-US";
 
     /// <summary>
@@ -315,8 +362,8 @@ public static class CombatDataCatalog
     private static readonly string[] LocalizedFileNames =
     [
         "SkillNames", "SkillTalkNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
-        "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "EquipNames", "EquipEffectTexts",
-        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames",
+        "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "ItemNames", "EquipEffectTexts",
+        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames", "TalentNames", "ChatHyperlinks", "UnionBuildingNames",
     ];
 
     /// <summary><see cref="ApplyNameOverrides"/> で重ねる名前の上書き(<c>Data/Overrides/</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
@@ -394,6 +441,7 @@ public static class CombatDataCatalog
             _rogueEntryNames = LoadLocalizedText(reads, "RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
             _rootBuffNames = LoadLocalizedText(reads, "RootBuffNames", out _);
+            _talentNames = LoadLocalizedText(reads, "TalentNames", out _);
             LoadRootBuffs(reads);
             _modEffectIdByRootBuff = BuildModEffectIdByRootBuff();
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
@@ -404,7 +452,7 @@ public static class CombatDataCatalog
             _seasonRankNames = LoadLocalizedText(reads, "SeasonRankNames", out _);
             _teamTargetNames = LoadLocalizedText(reads, "TeamTargetNames", out _);
             _seasonActNames = LoadLocalizedText(reads, "SeasonActNames", out _);
-            _equipNames = LoadLocalizedText(reads, "EquipNames", out _);
+            _itemNames = LoadLocalizedText(reads, "ItemNames", out _);
             _equipEffectTexts = LoadLocalizedText(reads, "EquipEffectTexts", out _);
             _skillIdByEffectId = BuildSkillIdByEffectId(_skills);
             _monsterIdsBySkillId = BuildMonsterIdsBySkillId();
@@ -415,6 +463,8 @@ public static class CombatDataCatalog
             LoadBuffGroups(reads);
             _sceneNames = LoadLocalizedText(reads, "SceneNames", out _);
             _dungeonTypeNames = LoadDungeonTypeNames(reads);
+            _chatHyperlinkTemplates = LoadLocalizedText(reads, "ChatHyperlinks", out _);
+            _unionBuildingNames = LoadLocalizedText(reads, "UnionBuildingNames", out _);
             LoadRecounts(reads);
             _skillActivationOverrides = LoadSkillActivationOverrides(reads);
         }
@@ -640,14 +690,26 @@ public static class CombatDataCatalog
             : string.Empty;
     }
 
+    /// <summary>タレントの名前(<c>TalentNames.json</c>)。名前が無ければ空。</summary>
+    public static string GetTalentName(int talentId)
+        => ResolveText(_talentNames, Volatile.Read(ref _cultureName), talentId);
+
     /// <summary>
-    /// タレントの根のバフの役割(タレントの木の職業の役割のタグ。絵の背景の色を選ぶのに使う)。
-    /// タレントでなければ <see cref="DataTypes.Enums.Professions.ERoleType.None"/>。
+    /// バフを付けないアビリティの節の技の置き換えに出てくる技(元の技か置き換え後の技)なら、その元の技。ほかの技なら false。
     /// </summary>
-    public static DataTypes.Enums.Professions.ERoleType GetRootBuffTalentRole(int buffId)
-        => _rootBuffs.TryGetValue(buffId, out var definition)
-            ? definition.TalentRole
-            : DataTypes.Enums.Professions.ERoleType.None;
+    public static bool TryGetReplaceableSkillOriginal(int skillId, out int originalSkillId)
+        => _replaceableSkillOriginals.TryGetValue(skillId, out originalSkillId);
+
+    /// <summary>
+    /// タレントの木の形。<paramref name="subProfessionId"/> は特化の番号(クラスR2 の木)、クラスR1 の木は 0。
+    /// サーバーで表の版が違い、2つのタレントの位置が入れ替わった節などがあるので、アジアサーバーならアジアサーバーの表の木、
+    /// それ以外(中国・グローバル・東南アジア・分からない)は中国サーバーの表の木を返す。表に無い組(変身クラスなど)なら <c>null</c>。
+    /// </summary>
+    public static TalentTreeDefinition? GetTalentTree(GameServer server, int professionId, int subProfessionId)
+    {
+        var trees = server == GameServer.Asia ? _asiaTalentTrees : _chinaTalentTrees;
+        return trees.TryGetValue((professionId, subProfessionId), out var tree) ? tree : null;
+    }
 
     /// <summary>
     /// バフ/デバフリストで使うバフの番号。手修正 <c>BuffOverrides.json</c> の <c>FoldInto</c> で畳んだバフは畳み先の番号、ほかは自分の番号。
@@ -729,10 +791,10 @@ public static class CombatDataCatalog
         return ResolveText(_seasonRankNames, Volatile.Read(ref _cultureName), seasonId * 100 + rankLevel);
     }
 
-    /// <summary>装備名(<c>ItemTable.Name</c>)。鍵は装備ID。表示中の言語で引き、無ければ空。</summary>
-    public static string GetEquipName(int equipId)
+    /// <summary>アイテム名(<c>ItemTable.Name</c>)。鍵はアイテムID(装備IDも同じ)。表示中の言語で引き、無ければ空。</summary>
+    public static string GetItemName(int itemId)
     {
-        return ResolveText(_equipNames, Volatile.Read(ref _cultureName), equipId);
+        return ResolveText(_itemNames, Volatile.Read(ref _cultureName), itemId);
     }
 
     /// <summary>
@@ -1765,7 +1827,7 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// そのモンスターがゲーム内でプレイヤーに見える HP バーを持つか。エンティティリストと被ダメログが同じ判定を使う。
+    /// そのモンスターがゲーム内でプレイヤーに見える HP バーを持つか。エンティティリストとタイムライン・被ダメログが同じ判定を使う。
     ///
     /// <para>
     /// <c>MonsterTable.HudShowParam</c> の3番目が HP バーを出すか。値が1つの形は全部の位置がその値。
@@ -1817,6 +1879,56 @@ public static class CombatDataCatalog
                 targetId.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 out var target)
             && target.TargetType == (int)Zproto.ETargetType.TargetDungeonScore;
+    }
+
+    /// <summary>チャットの本文の <c>&lt;sprite=N&gt;</c> の N から、顔文字(絵文字の文字)を引く。並びの外の番号は null。</summary>
+    public static string? GetChatEmoji(int number)
+    {
+        return number >= 0 && number < ChatEmojis.Length ? ChatEmojis[number] : null;
+    }
+
+    /// <summary>
+    /// ゲームの用意した顔のアイコン(名刺照会の <c>avatarId</c>)の絵の全体のパス。プロフィールの絵の表の種類1(アイコン)の行の <c>Image</c>。
+    /// 表に無い番号・種類1でない行は null。
+    /// </summary>
+    public static string? GetAvatarPresetImage(int avatarId)
+    {
+        return HelperMethods.DataTables.ProfileImages.Data.TryGetValue(
+                avatarId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var image)
+            && image.Type == AvatarProfileImageType
+                ? image.Image
+                : null;
+    }
+
+    /// <summary>プロフィールの絵の表で、顔のアイコンの行の種類。</summary>
+    private const int AvatarProfileImageType = 1;
+
+    /// <summary>チャットのスタンプの番号(configId)から、絵の名前を引く。定型文(絵なし)は空、表に無い番号は null。</summary>
+    public static string? GetChatStickerResource(uint configId)
+    {
+        return HelperMethods.DataTables.ChatStickers.Data.TryGetValue(
+                configId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                out var sticker)
+            ? sticker.Res
+            : null;
+    }
+
+    /// <summary>
+    /// チャットのリンクの発言の文の型(表 <c>ChatHyperlink</c> の <c>Content</c>)。差し込みの値の <c>{*…*}</c> とゲームの書式のタグを含む。
+    /// 表示中の言語で引き、表に無い番号と型が空の行は空。
+    /// </summary>
+    public static string GetChatHyperlinkTemplate(uint configId)
+    {
+        return configId <= int.MaxValue
+            ? ResolveText(_chatHyperlinkTemplates, Volatile.Read(ref _cultureName), (int)configId)
+            : string.Empty;
+    }
+
+    /// <summary>ギルドの建物の名前(<c>UnionBuildingTable.BuildingName</c>)。表示中の言語で引き、無ければ空。</summary>
+    public static string GetUnionBuildingName(int buildingId)
+    {
+        return ResolveText(_unionBuildingNames, Volatile.Read(ref _cultureName), buildingId);
     }
 
     private static (FrozenDictionary<string, FrozenDictionary<int, string>> Names, FrozenSet<int> Ids)? GetEntityNameTable(
@@ -2592,6 +2704,9 @@ public static class CombatDataCatalog
 
         FrozenDictionary<int, RootBuffDefinition> rootBuffs;
         FrozenDictionary<int, int> advancedEffectIds;
+        FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> asiaTalentTrees;
+        FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> chinaTalentTrees;
+        FrozenDictionary<int, int> replaceableSkillOriginals;
         try
         {
             // 解けなかったときの例外は受け取るときに出るので、受け取りもこの try の中。
@@ -2613,6 +2728,9 @@ public static class CombatDataCatalog
             advancedEffectIds = file.SeasonTalentAdvancedEffects.ToFrozenDictionary(
                 pair => ParseRootBuffKey(pair.Key, nameof(RootBuffFile.SeasonTalentAdvancedEffects)),
                 pair => pair.Value);
+            asiaTalentTrees = ReadTalentTrees(file.TalentTrees.Asia, rootBuffs, $"{nameof(RootBuffFile.TalentTrees)}.StarASIA");
+            chinaTalentTrees = ReadTalentTrees(file.TalentTrees.China, rootBuffs, $"{nameof(RootBuffFile.TalentTrees)}.Star");
+            replaceableSkillOriginals = BuildReplaceableSkillOriginals(asiaTalentTrees.Values.Concat(chinaTalentTrees.Values));
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidDataException)
         {
@@ -2622,9 +2740,159 @@ public static class CombatDataCatalog
 
         _rootBuffs = rootBuffs;
         _seasonTalentAdvancedEffectIds = advancedEffectIds;
+        _asiaTalentTrees = asiaTalentTrees;
+        _chinaTalentTrees = chinaTalentTrees;
+        _replaceableSkillOriginals = replaceableSkillOriginals;
         Log.Information(
-            "Loaded {FileName}: {RootBuffs} root buffs / {AdvancedEffects} psychoscope types with advanced effects",
-            relativePath, rootBuffs.Count, advancedEffectIds.Count);
+            "Loaded {FileName}: {RootBuffs} root buffs / {AdvancedEffects} psychoscope types with advanced effects / {AsiaTalentTrees} Asia and {ChinaTalentTrees} China talent trees",
+            relativePath, rootBuffs.Count, advancedEffectIds.Count, asiaTalentTrees.Count, chinaTalentTrees.Count);
+    }
+
+    /// <summary>
+    /// タレントの木を読む。線は節のつなぎ(<c>Next</c>)から作る。節のバフはタレントの根のバフで、バフのある節はアビリティの節でなければならず、
+    /// つなぎの先は同じ木の節、クラスR2 の木(特化の番号が 0 でない)だけが根の節を持ち、役割のタグは 1〜3、技の置き換えは2つの正の技の番号。
+    /// 合わなければ形の誤りとして止める。
+    /// </summary>
+    private static FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> ReadTalentTrees(
+        List<TalentTreeEntry?> entries,
+        FrozenDictionary<int, RootBuffDefinition> rootBuffs,
+        string listPath)
+    {
+        var trees = new Dictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition>(entries.Count);
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var itemPath = $"{listPath}[{index}]";
+            var entry = entries[index] ?? throw new InvalidDataException($"{itemPath} is null");
+            if (entry.Profession <= 0 || entry.Spec < 0 || (entry.Spec == 0) != (entry.Root == 0))
+            {
+                throw new InvalidDataException(
+                    $"{itemPath} has an invalid profession {entry.Profession} / spec {entry.Spec} / root {entry.Root}");
+            }
+
+            if (entry.Nodes.Count == 0)
+            {
+                throw new InvalidDataException($"{itemPath} has no nodes");
+            }
+
+            var nodeEntries = new List<TalentTreeNodeEntry>(entry.Nodes.Count);
+            var nodeEntriesById = new Dictionary<int, TalentTreeNodeEntry>(entry.Nodes.Count);
+            for (var nodeIndex = 0; nodeIndex < entry.Nodes.Count; nodeIndex++)
+            {
+                var node = entry.Nodes[nodeIndex] ?? throw new InvalidDataException($"{itemPath}.Nodes[{nodeIndex}] is null");
+                if (!nodeEntriesById.TryAdd(node.Id, node))
+                {
+                    throw new InvalidDataException($"{itemPath} lists node {node.Id} twice");
+                }
+
+                nodeEntries.Add(node);
+            }
+
+            if (entry.Root != 0 && !nodeEntriesById.ContainsKey(entry.Root))
+            {
+                throw new InvalidDataException($"{itemPath} root {entry.Root} is not one of its nodes");
+            }
+
+            var nodes = new List<TalentTreeNode>(nodeEntries.Count);
+            var lines = new List<TalentTreeLine>();
+            foreach (var node in nodeEntries)
+            {
+                foreach (var buffId in node.Buffs)
+                {
+                    if (!rootBuffs.TryGetValue(buffId, out var definition) || definition.Kind != RootBuffKind.Talent)
+                    {
+                        throw new InvalidDataException($"{itemPath} node {node.Id} has buff {buffId} that is not a talent root buff");
+                    }
+                }
+
+                if (node.Buffs.Count > 0 && !node.Ability)
+                {
+                    throw new InvalidDataException($"{itemPath} node {node.Id} has buffs but is not an ability node");
+                }
+
+                var replacements = new List<TalentSkillReplacement>(node.Replace.Count);
+                foreach (var pair in node.Replace)
+                {
+                    if (pair is not [> 0 and var originalSkillId, > 0 and var replacedSkillId])
+                    {
+                        throw new InvalidDataException($"{itemPath} node {node.Id} has a skill replacement that is not two positive skill ids");
+                    }
+
+                    replacements.Add(new TalentSkillReplacement(originalSkillId, replacedSkillId));
+                }
+
+                nodes.Add(new TalentTreeNode(
+                    node.Id,
+                    node.X,
+                    node.Y,
+                    [.. node.Buffs],
+                    node.Id == entry.Root,
+                    node.Talent,
+                    node.Ability,
+                    node.Icon,
+                    ToTalentRole(node.TalentTag, $"{itemPath} node {node.Id}"),
+                    replacements));
+                foreach (var nextId in node.Next)
+                {
+                    if (!nodeEntriesById.TryGetValue(nextId, out var next))
+                    {
+                        throw new InvalidDataException($"{itemPath} node {node.Id} links to {nextId} outside the tree");
+                    }
+
+                    lines.Add(new TalentTreeLine(node.X, node.Y, next.X, next.Y));
+                }
+            }
+
+            var tree = new TalentTreeDefinition(
+                entry.Profession,
+                entry.Spec,
+                nodes.Max(node => node.X),
+                nodes.Max(node => node.Y),
+                nodes,
+                lines);
+            if (!trees.TryAdd((entry.Profession, entry.Spec), tree))
+            {
+                throw new InvalidDataException($"{itemPath} repeats profession {entry.Profession} / spec {entry.Spec}");
+            }
+        }
+
+        return trees.ToFrozenDictionary();
+    }
+
+    /// <summary>
+    /// バフを付けないアビリティの節の技の置き換えに出てくる技 → 元の技。1つの技が2つの元の技に当たったら形の誤りとして止める。
+    /// バフを付ける節は根のバフで取っているかが分かるので入れない(ふだん使う技を数えないため)。
+    /// </summary>
+    private static FrozenDictionary<int, int> BuildReplaceableSkillOriginals(IEnumerable<TalentTreeDefinition> trees)
+    {
+        var originals = new Dictionary<int, int>();
+        foreach (var tree in trees)
+        {
+            foreach (var node in tree.Nodes)
+            {
+                if (!node.IsAbility || node.Buffs.Count > 0)
+                {
+                    continue;
+                }
+
+                foreach (var replacement in node.SkillReplacements)
+                {
+                    AddReplaceableSkill(originals, replacement.OriginalSkillId, replacement.OriginalSkillId);
+                    AddReplaceableSkill(originals, replacement.ReplacedSkillId, replacement.OriginalSkillId);
+                }
+            }
+        }
+
+        return originals.ToFrozenDictionary();
+    }
+
+    private static void AddReplaceableSkill(Dictionary<int, int> originals, int skillId, int originalSkillId)
+    {
+        if (originals.TryGetValue(skillId, out var known) && known != originalSkillId)
+        {
+            throw new InvalidDataException($"Skill {skillId} is replaced from two skills ({known} and {originalSkillId})");
+        }
+
+        originals[skillId] = originalSkillId;
     }
 
     /// <summary>種類の配列を、並び(配列の順)を付けて表へ足す。1つのバフが2つの種類に当たったら形の誤りとして止める。</summary>
@@ -2647,10 +2915,7 @@ public static class CombatDataCatalog
                 : entry.Icons.ToFrozenDictionary(
                     pair => ParseRootBuffKey(pair.Key, $"{itemPath}[{index}].Icons"),
                     pair => pair.Value ?? string.Empty);
-            var talentRole = kind == RootBuffKind.Talent
-                ? ToTalentRole(entry.TalentTag, $"{itemPath}[{index}]")
-                : DataTypes.Enums.Professions.ERoleType.None;
-            if (!definitions.TryAdd(entry.Buff, new RootBuffDefinition(kind, index, entry.Icon ?? string.Empty, advancedIcons, talentRole)))
+            if (!definitions.TryAdd(entry.Buff, new RootBuffDefinition(kind, index, entry.Icon ?? string.Empty, advancedIcons)))
             {
                 throw new InvalidDataException($"{itemPath}[{index}].Buff {entry.Buff} is listed in two kinds");
             }
@@ -2674,14 +2939,13 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// 根のバフ1つの種類・並び(種類の中の順)・絵。心相晶の上級だけ、型の上級の番号ごとの絵を持つ。
-    /// タレントだけ役割を持つ(ほかは None)。
+    /// タレントは絵を持たない(アビリティ情報は木の節の絵で描く)。
     /// </summary>
     private sealed record RootBuffDefinition(
         RootBuffKind Kind,
         int Order,
         string Icon,
-        FrozenDictionary<int, string> AdvancedIcons,
-        DataTypes.Enums.Professions.ERoleType TalentRole);
+        FrozenDictionary<int, string> AdvancedIcons);
 
     /// <summary><c>RootBuffs.json</c> の形。項目はどれも省略できない。</summary>
     [JsonObject(ItemRequired = Required.Always)]
@@ -2699,11 +2963,64 @@ public static class CombatDataCatalog
 
         /// <summary>型の根のバフ → 型の上級の番号。</summary>
         public Dictionary<string, int> SeasonTalentAdvancedEffects { get; set; } = null!;
+
+        public TalentTreeFile TalentTrees { get; set; } = null!;
+    }
+
+    /// <summary>タレントの木を出所(サーバーの表)ごとに。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class TalentTreeFile
+    {
+        [JsonProperty("StarASIA")]
+        public List<TalentTreeEntry?> Asia { get; set; } = null!;
+
+        [JsonProperty("Star")]
+        public List<TalentTreeEntry?> China { get; set; } = null!;
+    }
+
+    /// <summary>タレントの木1本。<c>Root</c> は根の節(クラスR1 の木は 0)。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class TalentTreeEntry
+    {
+        public int Profession { get; set; }
+
+        public int Spec { get; set; }
+
+        public int Root { get; set; }
+
+        public List<TalentTreeNodeEntry?> Nodes { get; set; } = null!;
     }
 
     /// <summary>
-    /// 根のバフ1つ。上級は <see cref="Icons"/>(型の上級の番号 → 絵)、ほかは <see cref="Icon"/> を持つ。
-    /// タレントは <see cref="TalentTag"/>(役割のタグ)も持つ。
+    /// 木の節1つ。<c>Id</c> は木の表の番号、<c>Next</c> はつなぐ先の節、<c>Talent</c> は節のタレント、
+    /// <c>Ability</c> はアビリティの節か、<c>TalentTag</c> は役割のタグ、<c>Replace</c> は技の置き換え(元の技, 置き換え後の技)の組。
+    /// </summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class TalentTreeNodeEntry
+    {
+        public int Id { get; set; }
+
+        public double X { get; set; }
+
+        public double Y { get; set; }
+
+        public List<int> Next { get; set; } = null!;
+
+        public List<int> Buffs { get; set; } = null!;
+
+        public int Talent { get; set; }
+
+        public bool Ability { get; set; }
+
+        public string Icon { get; set; } = null!;
+
+        public int TalentTag { get; set; }
+
+        public List<List<int>> Replace { get; set; } = null!;
+    }
+
+    /// <summary>
+    /// 根のバフ1つ。上級は <see cref="Icons"/>(型の上級の番号 → 絵)、タレントは番号だけ、ほかは <see cref="Icon"/> を持つ。
     /// </summary>
     private sealed class RootBuffEntry
     {
@@ -2713,8 +3030,6 @@ public static class CombatDataCatalog
         public string? Icon { get; set; }
 
         public Dictionary<string, string?>? Icons { get; set; }
-
-        public int? TalentTag { get; set; }
     }
 
     private static FrozenDictionary<int, EquipmentDefinition> ReadEquipmentDefinitions(

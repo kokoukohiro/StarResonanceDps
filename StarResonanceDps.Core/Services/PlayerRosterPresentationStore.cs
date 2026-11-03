@@ -65,6 +65,24 @@ public sealed class PlayerRosterPresentationStore
         }
     }
 
+    /// <summary>
+    /// その人について分かっていること(<see cref="PlayerDirectory.Get"/>)を、一覧と同じく名前を伏せて返す。
+    /// 一覧に載っていない人も引ける。何も分かっていなければ null。
+    /// </summary>
+    public PlayerRosterEntry? GetPlayer(long characterId)
+    {
+        var entry = PlayerDirectory.Get(characterId);
+        if (entry is null)
+        {
+            return null;
+        }
+
+        var nameDisplayMode = NameDisplayMode;
+        return ShouldHideName(entry, nameDisplayMode)
+            ? entry with { Name = HiddenPlayerName }
+            : entry;
+    }
+
     public void SetNameDisplayMode(PlayerNameDisplayMode mode)
     {
         mode = NormalizeNameDisplayMode(mode);

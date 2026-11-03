@@ -70,10 +70,10 @@ public sealed record BenchmarkStateSnapshot(
 /// 推移の区切り1つ。<see cref="StartSeconds"/>〜<see cref="EndSeconds"/> は <c>FirstDamageTimeStamp</c> からの秒(右閉じ)、
 /// <see cref="ValuePerSecond"/> はその区切りの合計 ÷ 区切りの長さ。
 /// </summary>
-public sealed record MetricTimelinePoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
+public sealed record MetricGraphPoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
 
-public sealed record MetricTimelineSnapshot(
-    IReadOnlyList<MetricTimelinePoint> Points);
+public sealed record MetricGraphSnapshot(
+    IReadOnlyList<MetricGraphPoint> Points);
 
 /// <summary>
 /// 推移グラフの横軸の下に出す、プレイヤーの技の開始1件。<see cref="Seconds"/> は戦闘の時計の経過(<c>Encounter.ToCombatOffset</c>)で、
@@ -84,7 +84,7 @@ public sealed record MetricTimelineSnapshot(
 /// <see cref="Grade"/>(G○ の数字)はプレイヤーリストの技の枠と同じ規則で、押した技がその人の技の一覧にあるときだけ持つ
 /// (イマジンは改造段階、CD がレベルで変わるロールスキルはレベル。今の、履歴なら保存した時点の値で、押した時点の値ではない)。
 /// </summary>
-public sealed record MetricTimelineSkillActivation(
+public sealed record MetricGraphSkillActivation(
     double Seconds,
     int SkillId,
     string IconName,
@@ -185,7 +185,7 @@ public sealed record PlayerBuffSnapshot(
     /// </summary>
     bool IsRemainingUnknown = false,
     /// <summary>付与したプレイヤー(召喚物なら大元の召喚者)。付与者がプレイヤーでなければ null。名前を出すかは表示側が決める。</summary>
-    TakenDamageLogParty? Caster = null,
+    CombatEventLogParty? Caster = null,
     bool IsCardRepresentative = true,
     /// <summary>付与者が対象者本人(本人の召喚物を含む)か。リストの「付与者プレイヤー名の表示」の「他者付与のみ」が使う。</summary>
     bool IsCasterTarget = false,
@@ -228,7 +228,15 @@ public enum ReviveBlockStateKind
 /// 残り秒を出した蘇生不可デバフの効果時間の総量(秒)。<see cref="ReviveBlockStateKind.Blocked"/> のときだけ意味を持つ。
 /// 蘇生リストのゲージの長さの「自動」に使う。
 /// </param>
-public readonly record struct ReviveBlockState(ReviveBlockStateKind Kind, double RemainingSeconds = 0d, double DurationSeconds = 0d);
+/// <param name="EndTimeUtc">
+/// 蘇生不可デバフの切れる時刻(UTC)。<see cref="ReviveBlockStateKind.Blocked"/> のときだけ意味を持つ。
+/// 蘇生リストの並びはこれで比べる(残り秒は人ごとに読む瞬間が違い、切れる時刻のほぼ同じ人どうしで大小が入れ替わる)。
+/// </param>
+public readonly record struct ReviveBlockState(
+    ReviveBlockStateKind Kind,
+    double RemainingSeconds = 0d,
+    double DurationSeconds = 0d,
+    DateTime EndTimeUtc = default);
 
 /// <param name="RoleSlotCount">
 /// ロールスキルの枠数。<b>自分と他人で意味が違う。</b>
@@ -248,7 +256,7 @@ public sealed record PlayerImagineRoleSkillLoadoutSnapshot(
 
 internal sealed record PlayerBuffCandidate(
     PlayerBuffSnapshot Snapshot,
-    TimeSpan EffectiveRemoveTime);
+    DateTime EffectiveRemoveTime);
 
 /// <summary>
 /// ロスターを通らない表示(ウィンドウのタイトルなど)が使う相手の素性。名前の規則(NPC は職業名)を当てるので NPC の印と職業も持つ。
@@ -256,7 +264,7 @@ internal sealed record PlayerBuffCandidate(
 /// </summary>
 public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, PlayerDataGaps DataGaps = PlayerDataGaps.None);
 
-/// <summary>被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
+/// <summary>タイムライン・被ダメログの登場人物1人。プレイヤーなら名前は伏せ字にする前の生の名前。<see cref="ClassSpec"/> はプレイヤーのときだけ意味を持つ。</summary>
 /// <param name="IsUnnamedEnemy">
 /// 名前の無いモンスターで、ゲーム内で HP バーが見えるもの。表示側が「敵」と出す(名前は内部ID注記だけか空)。
 /// </param>
@@ -264,15 +272,15 @@ public sealed record MeterPlayerIdentity(string Name, long UserId, bool IsNpc, i
 /// プレイヤーでも仮想体でもなく、実体か種別ID(AttrId)が無くて何者か分からない加害者。表示側が「未知の敵」と出す(名前は空)。
 /// AttrId は実体が現れたときの通知でしか届かないので、アプリの起動前から居た敵がこうなる。
 /// </param>
-public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false);
+public sealed record CombatEventLogParty(long Uuid, long CharacterId, string Name, bool IsPlayer, bool IsSelf, bool IsNpc, int ProfessionId, PlayerClassSpec ClassSpec, bool IsSystem = false, bool IsUnnamedEnemy = false, bool IsUnknownEnemy = false);
 
 /// <summary>
-/// 被ダメログ(タイムライン)の1件(予告か予告のバーの終わりか詠唱か、敵の回復・敵から敵へのダメージ・敵が付けたバフ)。
+/// タイムラインの1件(予告か予告のバーの終わりか詠唱か、敵の回復・敵から敵へのダメージ・敵が付けたバフ)。
 ///
 /// <para>
 /// <see cref="Timestamp"/> はパケットの到着時刻(UTC。予告のバーの終わりはバーが消える時刻)。経過は持たず、表示側が
 /// <see cref="Encounter.ToCombatOffset"/> で戦闘の経過(メーターの経過と同じ。自動一時停止で止まっていた区間を除く)に直す。
-/// 起点が立つまでは直せない(<see cref="TakenDamageLogSnapshot.CombatStartUtc"/>)。同じ到着時刻の行動は画面で1つの技の下にまとめる。
+/// 起点が立つまでは直せない(<see cref="TimelineSnapshot.CombatStartUtc"/>)。同じ到着時刻の行動は画面で1つの技の下にまとめる。
 /// </para>
 ///
 /// <para>
@@ -290,12 +298,12 @@ public sealed record TakenDamageLogParty(long Uuid, long CharacterId, string Nam
 /// <see cref="BuffDurationMs"/> は付与の持続(ミリ秒、0 以下は持続なし)。
 /// </para>
 /// </summary>
-public sealed record TakenDamageLogLine(
-    TakenDamageLogRecordKind Kind,
+public sealed record TimelineLine(
+    CombatEventLogRecordKind Kind,
     long Sequence,
     DateTime Timestamp,
-    TakenDamageLogParty Attacker,
-    TakenDamageLogParty? Target,
+    CombatEventLogParty Attacker,
+    CombatEventLogParty? Target,
     int SourceId,
     bool IsBuffSource,
     string SourceName,
@@ -307,38 +315,38 @@ public sealed record TakenDamageLogLine(
     int BuffDurationMs = 0);
 
 /// <summary>
-/// <see cref="MeterSnapshotProvider.GetTakenDamageLog"/> の結果。
+/// <see cref="MeterSnapshotProvider.GetTimeline"/> の結果。
 /// <see cref="Encounter"/> が前回と違えば、呼び出し側は持っている行を捨てて読み直す。
 /// </summary>
 /// <param name="CombatStartUtc">
 /// 読んだ時点の戦闘の時計の起点(メーターの経過と同じ)。まだ無ければ null。起点の前の行は負の経過になる。
 /// 同じエンカウンターでも後から立つので、呼び出し側は変わったら持っている行の時刻を作り直す。
 /// </param>
-public sealed record TakenDamageLogSnapshot(
+public sealed record TimelineSnapshot(
     Encounter? Encounter,
     int NextIndex,
-    IReadOnlyList<TakenDamageLogLine> Lines,
+    IReadOnlyList<TimelineLine> Lines,
     DateTime? CombatStartUtc);
 
 /// <summary>
-/// 被ダメリストの1人ぶん。表示中の回の、そのプレイヤーの最後の被弾(<see cref="Entity.TakenStats"/> の最後の記録)。
+/// 被ダメログの1行(プレイヤーの被弾1回。<see cref="Entity.TakenStats"/> の記録)。
 ///
 /// <para>
-/// 加害者は被ダメログの登場人物(<see cref="TakenDamageLogParty"/>)と同じ決め方、技名は被ダメの発生源の名前の引き方で、
+/// 加害者はタイムライン・被ダメログの登場人物(<see cref="CombatEventLogParty"/>)と同じ決め方、技名は被ダメの発生源の名前の引き方で、
 /// <see cref="SourceName"/> は名前が無ければ空(全体設定で内部名を出すときは内部名)。<see cref="SourceId"/> と <see cref="IsBuffSource"/> は内部ID注記に使う。
 /// </para>
 /// </summary>
 /// <param name="Sequence">
-/// その被弾の通し番号(被ダメログの記録と同じ番号)。大きいほど新しく、行の並びに使う。
+/// その被弾の通し番号(記録と同じ番号)。大きいほど新しく、行の並びに使う。
 /// 同じなら中身も同じ(呼び出し側は行の文字を作り直さない)。
 /// </param>
 /// <param name="Timestamp">その被弾の到着時刻(UTC)。経過は持たず、表示側が戦闘の経過(<see cref="Encounter.ToCombatOffset"/>)に直す。</param>
 /// <param name="IsLethal">その被弾で戦闘不能になった。</param>
-public sealed record DamageTakenListHit(
+public sealed record DamageTakenLogHit(
     long CharacterId,
     long Sequence,
     DateTime Timestamp,
-    TakenDamageLogParty Attacker,
+    CombatEventLogParty Attacker,
     int SourceId,
     bool IsBuffSource,
     string SourceName,
@@ -349,15 +357,15 @@ public sealed record DamageTakenListHit(
     bool IsLethal);
 
 /// <summary>
-/// <see cref="MeterSnapshotProvider.GetDamageTakenList"/> の結果。被弾からの経過は、表示側が <see cref="Encounter"/> の戦闘の時計で数える
+/// <see cref="MeterSnapshotProvider.GetDamageTakenLog"/> の結果。被弾からの経過は、表示側が <see cref="Encounter"/> の戦闘の時計で数える
 /// (<see cref="Encounter.ReadCombatClock()"/> の経過 − <see cref="Encounter.ToCombatOffset"/> で直した被弾の時刻)。
 /// </summary>
-/// <param name="NextIndex">次に読む被ダメログの位置。次の呼び出しにそのまま渡す。</param>
+/// <param name="NextIndex">次に読む記録の位置。次の呼び出しにそのまま渡す。</param>
 /// <param name="Hits">読んだ範囲の、対象がプレイヤーの被弾。古い順(同じ人が複数あれば後ろほど新しい)。</param>
-public sealed record DamageTakenListSnapshot(
+public sealed record DamageTakenLogSnapshot(
     Encounter? Encounter,
     int NextIndex,
-    IReadOnlyList<DamageTakenListHit> Hits);
+    IReadOnlyList<DamageTakenLogHit> Hits);
 
 /// <summary><see cref="MeterSnapshotProvider.GetDamageTakenPlayers"/> の1人。</summary>
 public sealed record DamageTakenPlayer(long CharacterId, bool IsSelf);
@@ -382,7 +390,7 @@ public static class MeterSnapshotProvider
     private const int ReviveBlockDebuffBaseId = 2110057;
 
     // 推移グラフの記録が時計の終点より後ろにあったのを、どの回について残したか(回ごとに1回だけ)。
-    private static Encounter? _timelineEndErrorEncounter;
+    private static Encounter? _graphEndErrorEncounter;
 
     public static MeterSnapshot GetSnapshot(
         MeterSnapshotKind kind,
@@ -494,7 +502,7 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// 表示中の回で被弾の記録があるプレイヤー(被ダメログに出る人)を、被ダメの合計の多い順に返す。
-    /// 相手の指定は <c>DamageTakenListHit.CharacterId</c> と同じ番号。メイン画面の被ダメ詳細のカードが、窓の相手の選択リストに並べる。
+    /// 相手の指定は <c>DamageTakenLogHit.CharacterId</c> と同じ番号。メイン画面の被ダメ詳細のカードが、窓の相手の選択リストに並べる。
     /// </summary>
     public static IReadOnlyList<DamageTakenPlayer> GetDamageTakenPlayers()
     {
@@ -536,7 +544,7 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 被ダメログを <paramref name="startIndex"/> 件目から読み、タイムラインに出す記録(予告・予告のバーの終わり・詠唱・敵の回復・敵から敵へのダメージ・敵が付けたバフ)の行を返す。
+    /// 記録を <paramref name="startIndex"/> 件目から読み、タイムラインに出す記録(予告・予告のバーの終わり・詠唱・敵の回復・敵から敵へのダメージ・敵が付けたバフ)の行を返す。
     /// 被弾とダメージの無い死亡の記録は読み進めるだけで行にしない。表示中のエンカウンターは
     /// メーターと同じく <see cref="ResolveActiveEncounter"/> で決まるので、履歴表示にも追従する。
     ///
@@ -545,22 +553,22 @@ public static class MeterSnapshotProvider
     /// 名前はこの呼び出しの時点の言語と内部ID表示で引く。
     /// </para>
     /// </summary>
-    public static TakenDamageLogSnapshot GetTakenDamageLog(Encounter? knownEncounter, int startIndex)
+    public static TimelineSnapshot GetTimeline(Encounter? knownEncounter, int startIndex)
     {
-        return BuildTakenDamageLog(ResolveActiveEncounter(), knownEncounter, startIndex);
+        return BuildTimeline(ResolveActiveEncounter(), knownEncounter, startIndex);
     }
 
     /// <summary>
-    /// 被ダメリストの材料。表示中の回(タイムラインと同じ <see cref="ResolveActiveEncounter"/>)の被ダメログを、タイムラインと同じく
+    /// 被ダメログの材料。表示中の回(タイムラインと同じ <see cref="ResolveActiveEncounter"/>)の記録を、タイムラインと同じく
     /// <paramref name="startIndex"/> 件目から読み、対象がプレイヤーの被弾だけを返す。表示中の回が <paramref name="knownEncounter"/> と違えば先頭から読む。
     /// 新しい被弾が無ければ空で返る。1人ずつの最後の被弾を持つのと並びを決めるのは呼び出し側。
     /// </summary>
-    public static DamageTakenListSnapshot GetDamageTakenList(Encounter? knownEncounter, int startIndex)
+    public static DamageTakenLogSnapshot GetDamageTakenLog(Encounter? knownEncounter, int startIndex)
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null)
         {
-            return new DamageTakenListSnapshot(null, 0, Array.Empty<DamageTakenListHit>());
+            return new DamageTakenLogSnapshot(null, 0, Array.Empty<DamageTakenLogHit>());
         }
 
         if (!ReferenceEquals(encounter, knownEncounter))
@@ -568,25 +576,25 @@ public static class MeterSnapshotProvider
             startIndex = 0;
         }
 
-        var records = encounter.GetTakenDamageLogRecords(startIndex);
-        var parties = new Dictionary<long, TakenDamageLogParty>();
-        var hits = new List<DamageTakenListHit>();
+        var records = encounter.GetCombatEventLogRecords(startIndex);
+        var parties = new Dictionary<long, CombatEventLogParty>();
+        var hits = new List<DamageTakenLogHit>();
         foreach (var record in records)
         {
-            if (record.Kind != TakenDamageLogRecordKind.Hit
+            if (record.Kind != CombatEventLogRecordKind.Hit
                 || record.Hit is not { Timestamp: { } timestamp } last)
             {
                 continue;
             }
 
-            var target = ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties);
+            var target = ResolveCombatEventLogParty(encounter, record.EntityUuid, parties);
             if (!target.IsPlayer)
             {
                 continue;
             }
 
-            var attacker = ResolveTakenDamageLogParty(encounter, last.OtherUUID, parties);
-            hits.Add(new DamageTakenListHit(
+            var attacker = ResolveCombatEventLogParty(encounter, last.OtherUUID, parties);
+            hits.Add(new DamageTakenLogHit(
                 target.CharacterId,
                 last.Sequence,
                 timestamp,
@@ -601,38 +609,38 @@ public static class MeterSnapshotProvider
                 last.IsKill));
         }
 
-        return new DamageTakenListSnapshot(encounter, startIndex + records.Length, hits);
+        return new DamageTakenLogSnapshot(encounter, startIndex + records.Length, hits);
     }
 
     /// <summary>
     /// 技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。予兆技の通知が使う。
     /// 内部名は使わない(読み上げで日本語以外を読めないため)。タイムラインの行は名前が無ければ内部名になることがある。
     /// </summary>
-    public static string GetTakenDamageLogSkillName(int skillId)
+    public static string GetCombatEventLogSkillName(int skillId)
     {
         return ResolveTakenDamageSkillName(skillId);
     }
 
     /// <summary>
-    /// タイムラインの予告・詠唱の行に出す技の名前(<see cref="ResolveTakenDamageLogLineSkillName"/>。名前が無ければ、全体設定で内部名を出すときは内部名)。
+    /// タイムラインの予告・詠唱の行に出す技の名前(<see cref="ResolveTimelineLineSkillName"/>。名前が無ければ、全体設定で内部名を出すときは内部名)。
     /// エンティティ詠唱の通知が、対象の名前と比べる(タイムラインに出ている名前を入れれば当たる)。
     /// </summary>
-    public static string GetTakenDamageLogLineSkillName(int skillId)
+    public static string GetTimelineLineSkillName(int skillId)
     {
-        return ResolveTakenDamageLogLineSkillName(skillId);
+        return ResolveTimelineLineSkillName(skillId);
     }
 
-    /// <summary>予告の主(予告が届いた時点で周囲にいる、その技を持つモンスターの種別ID。0 なら名前なし)。被ダメログの予告の行の加害者。</summary>
-    public static TakenDamageLogParty CreateTakenDamageLogAnnouncementParty(int ownerMonsterId)
+    /// <summary>予告の主(予告が届いた時点で周囲にいる、その技を持つモンスターの種別ID。0 なら名前なし)。タイムラインの予告の行の加害者。</summary>
+    public static CombatEventLogParty CreateCombatEventLogAnnouncementParty(int ownerMonsterId)
     {
-        return new TakenDamageLogParty(0, 0, CombatDataCatalog.GetMonsterName(ownerMonsterId), false, false, false, 0, PlayerClassSpec.Unknown);
+        return new CombatEventLogParty(0, 0, CombatDataCatalog.GetMonsterName(ownerMonsterId), false, false, false, 0, PlayerClassSpec.Unknown);
     }
 
-    private static TakenDamageLogSnapshot BuildTakenDamageLog(Encounter? encounter, Encounter? knownEncounter, int startIndex)
+    private static TimelineSnapshot BuildTimeline(Encounter? encounter, Encounter? knownEncounter, int startIndex)
     {
         if (encounter is null)
         {
-            return new TakenDamageLogSnapshot(null, 0, Array.Empty<TakenDamageLogLine>(), null);
+            return new TimelineSnapshot(null, 0, Array.Empty<TimelineLine>(), null);
         }
 
         if (!ReferenceEquals(encounter, knownEncounter))
@@ -641,54 +649,54 @@ public static class MeterSnapshotProvider
         }
 
         var combatStartUtc = encounter.ExData.FirstDamageTimeStamp;
-        var records = encounter.GetTakenDamageLogRecords(startIndex);
-        var parties = new Dictionary<long, TakenDamageLogParty>();
-        var lines = new List<TakenDamageLogLine>(records.Length);
+        var records = encounter.GetCombatEventLogRecords(startIndex);
+        var parties = new Dictionary<long, CombatEventLogParty>();
+        var lines = new List<TimelineLine>(records.Length);
 
         foreach (var record in records)
         {
-            if (record.Kind is TakenDamageLogRecordKind.Announcement or TakenDamageLogRecordKind.AnnouncementEnd)
+            if (record.Kind is CombatEventLogRecordKind.Announcement or CombatEventLogRecordKind.AnnouncementEnd)
             {
                 var announcement = record.Announcement!;
-                lines.Add(new TakenDamageLogLine(
+                lines.Add(new TimelineLine(
                     record.Kind,
                     announcement.Sequence,
                     announcement.Timestamp,
-                    CreateTakenDamageLogAnnouncementParty(announcement.OwnerMonsterId),
+                    CreateCombatEventLogAnnouncementParty(announcement.OwnerMonsterId),
                     null,
                     announcement.SkillId,
                     false,
-                    ResolveTakenDamageLogLineSkillName(announcement.SkillId),
+                    ResolveTimelineLineSkillName(announcement.SkillId),
                     0));
                 continue;
             }
 
-            if (record.Kind == TakenDamageLogRecordKind.Cast)
+            if (record.Kind == CombatEventLogRecordKind.Cast)
             {
                 var cast = record.Cast!;
-                lines.Add(new TakenDamageLogLine(
+                lines.Add(new TimelineLine(
                     record.Kind,
                     cast.Sequence,
                     cast.Timestamp,
-                    ResolveTakenDamageLogParty(encounter, record.EntityUuid, parties),
+                    ResolveCombatEventLogParty(encounter, record.EntityUuid, parties),
                     null,
                     cast.SkillId,
                     false,
-                    ResolveTakenDamageLogLineSkillName(cast.SkillId),
+                    ResolveTimelineLineSkillName(cast.SkillId),
                     0,
                     IsWarning: cast.IsWarning));
                 continue;
             }
 
-            if (record.Kind == TakenDamageLogRecordKind.EnemyHeal)
+            if (record.Kind == CombatEventLogRecordKind.EnemyHeal)
             {
                 var heal = record.EnemyHeal!;
-                lines.Add(new TakenDamageLogLine(
+                lines.Add(new TimelineLine(
                     record.Kind,
                     heal.Sequence,
                     heal.Timestamp,
-                    ResolveTakenDamageLogParty(encounter, heal.HealerUuid, parties),
-                    ResolveTakenDamageLogParty(encounter, heal.TargetUuid, parties),
+                    ResolveCombatEventLogParty(encounter, heal.HealerUuid, parties),
+                    ResolveCombatEventLogParty(encounter, heal.TargetUuid, parties),
                     heal.OwnerId,
                     heal.DamageSource == Zproto.EDamageSource.Buff,
                     ResolveTakenDamageSourceName(false, 0, heal.DamageSource, heal.OwnerId, heal.BuffSourceSkillId, heal.SummonSourceSkillId),
@@ -697,15 +705,15 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            if (record.Kind == TakenDamageLogRecordKind.EnemyDamage)
+            if (record.Kind == CombatEventLogRecordKind.EnemyDamage)
             {
                 var damage = record.EnemyDamage!;
-                lines.Add(new TakenDamageLogLine(
+                lines.Add(new TimelineLine(
                     record.Kind,
                     damage.Sequence,
                     damage.Timestamp,
-                    ResolveTakenDamageLogParty(encounter, damage.AttackerUuid, parties),
-                    ResolveTakenDamageLogParty(encounter, damage.TargetUuid, parties),
+                    ResolveCombatEventLogParty(encounter, damage.AttackerUuid, parties),
+                    ResolveCombatEventLogParty(encounter, damage.TargetUuid, parties),
                     damage.OwnerId,
                     damage.DamageSource == Zproto.EDamageSource.Buff,
                     ResolveTakenDamageSourceName(false, 0, damage.DamageSource, damage.OwnerId, damage.BuffSourceSkillId, damage.SummonSourceSkillId),
@@ -714,34 +722,34 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            if (record.Kind == TakenDamageLogRecordKind.EnemyBuff)
+            if (record.Kind == CombatEventLogRecordKind.EnemyBuff)
             {
                 var buff = record.EnemyBuff!;
-                lines.Add(new TakenDamageLogLine(
+                lines.Add(new TimelineLine(
                     record.Kind,
                     buff.Sequence,
                     buff.Timestamp,
-                    ResolveTakenDamageLogParty(encounter, buff.CasterUuid, parties),
-                    ResolveTakenDamageLogParty(encounter, buff.TargetUuid, parties),
+                    ResolveCombatEventLogParty(encounter, buff.CasterUuid, parties),
+                    ResolveCombatEventLogParty(encounter, buff.TargetUuid, parties),
                     buff.OwnerId,
                     buff.DamageSource == Zproto.EDamageSource.Buff,
                     ResolveTakenDamageSourceName(false, 0, buff.DamageSource, buff.OwnerId, buff.BuffSourceSkillId, buff.SummonSourceSkillId),
                     0,
                     buff.CastSequence,
                     BuffId: buff.BuffId,
-                    BuffName: ResolveTakenDamageLogBuffName(buff.BuffId),
+                    BuffName: ResolveTimelineBuffName(buff.BuffId),
                     BuffDurationMs: buff.DurationMs));
                 continue;
             }
 
-            // 被弾とダメージの無い死亡はタイムラインに出さない(被ダメリストとプレイヤーリストの顔ぶれが読む)。
-            if (record.Kind is not (TakenDamageLogRecordKind.Hit or TakenDamageLogRecordKind.Death))
+            // 被弾とダメージの無い死亡はタイムラインに出さない(被ダメログとプレイヤーリストの顔ぶれが読む)。
+            if (record.Kind is not (CombatEventLogRecordKind.Hit or CombatEventLogRecordKind.Death))
             {
-                throw new InvalidOperationException($"Taken damage log record kind {record.Kind} has no timeline handling (sequence {record.Sequence}).");
+                throw new InvalidOperationException($"Combat event log record kind {record.Kind} has no timeline handling (sequence {record.Sequence}).");
             }
         }
 
-        return new TakenDamageLogSnapshot(encounter, startIndex + records.Length, lines, combatStartUtc);
+        return new TimelineSnapshot(encounter, startIndex + records.Length, lines, combatStartUtc);
     }
 
     /// <summary>
@@ -829,7 +837,7 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// 敵が付けたバフの行のバフの名前。空なら、全体設定で内部名を出すときはバフの内部名(出さなければ空のまま。表示側が「何かの効果」と出す)。
     /// </summary>
-    private static string ResolveTakenDamageLogBuffName(int buffId)
+    private static string ResolveTimelineBuffName(int buffId)
     {
         var name = CombatDataCatalog.GetBuffNameWithoutInternalId(buffId);
         return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
@@ -840,7 +848,7 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// 予告・詠唱の行の技の名前(<see cref="ResolveTakenDamageSkillName"/>)。空なら、全体設定で内部名を出すときは技の内部名。
     /// </summary>
-    private static string ResolveTakenDamageLogLineSkillName(int skillId)
+    private static string ResolveTimelineLineSkillName(int skillId)
     {
         var name = ResolveTakenDamageSkillName(skillId);
         return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
@@ -884,16 +892,16 @@ public static class MeterSnapshotProvider
             : sourceSkillName;
     }
 
-    /// <summary>被ダメログの登場人物1人を、<paramref name="encounter"/> の実体から決める(被ダメログの行と同じ決め方)。</summary>
-    internal static TakenDamageLogParty CreateTakenDamageLogParty(Encounter encounter, long uuid)
+    /// <summary>タイムライン・被ダメログの登場人物1人を、<paramref name="encounter"/> の実体から決める。</summary>
+    internal static CombatEventLogParty CreateCombatEventLogParty(Encounter encounter, long uuid)
     {
-        return ResolveTakenDamageLogParty(encounter, uuid, []);
+        return ResolveCombatEventLogParty(encounter, uuid, []);
     }
 
-    private static TakenDamageLogParty ResolveTakenDamageLogParty(
+    private static CombatEventLogParty ResolveCombatEventLogParty(
         Encounter encounter,
         long uuid,
-        Dictionary<long, TakenDamageLogParty> cache)
+        Dictionary<long, CombatEventLogParty> cache)
     {
         if (cache.TryGetValue(uuid, out var cached))
         {
@@ -901,18 +909,18 @@ public static class MeterSnapshotProvider
         }
 
         var isPlayer = Utils.UuidToEntityType(uuid) == (long)EEntityType.EntChar;
-        TakenDamageLogParty party;
+        CombatEventLogParty party;
         if (!encounter.Entities.TryGetValue(uuid, out var entity))
         {
             var isUnknownEnemy = !isPlayer && (EEntityType)Utils.UuidToEntityType(uuid) != EEntityType.EntDummy;
-            party = new TakenDamageLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid), false, 0, PlayerClassSpec.Unknown, IsUnknownEnemy: isUnknownEnemy);
+            party = new CombatEventLogParty(uuid, isPlayer ? Utils.UuidToEntityId(uuid) : 0, string.Empty, isPlayer, IsSelfEntity(uuid), false, 0, PlayerClassSpec.Unknown, IsUnknownEnemy: isUnknownEnemy);
         }
         else if (isPlayer)
         {
             var isSelf = IsSelf(entity);
             var source = PlayerDataSourceResolver.Resolve(entity, isSelf);
             // NPC は名前ではなく職業名を出す(プレイヤーリストと同じ規則)。判定と職業IDは表示側が使う。
-            party = new TakenDamageLogParty(
+            party = new CombatEventLogParty(
                 uuid,
                 source.CharacterId,
                 source.Name,
@@ -931,7 +939,7 @@ public static class MeterSnapshotProvider
         {
             // 名前はモンスターの実体だけ、種別ID(AttrId)から表示言語で引く。
             // 同じ番号が仮想体や NPC では別のものを指すので、モンスター以外と属性が無いものは名前を空のままにする。
-            // 仮想体が加害者として残るのは親(召喚者)を特定できなかったときだけなので(Encounter.ResolveTakenDamageLogActor)、
+            // 仮想体が加害者として残るのは親(召喚者)を特定できなかったときだけなので(Encounter.ResolveCombatEventLogActor)、
             // 仕掛けそのものを指す名前を出す。
             // 名前の無いモンスターでも、ゲーム内で HP バーが見えるものは「敵」と出す(エンティティリストと同じ条件)。
             // 表に行が無い番号には付けない(表が古いことを、名前の無い雑魚と見分けるため)。
@@ -952,7 +960,7 @@ public static class MeterSnapshotProvider
                     || (entityType == EEntityType.EntMonster
                         && !isUnnamedEnemy
                         && !CombatDataCatalog.HasEntityName(EEntityType.EntMonster, monsterId)));
-            party = new TakenDamageLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy);
+            party = new CombatEventLogParty(uuid, 0, name, false, false, false, 0, PlayerClassSpec.Unknown, isSystem, isUnnamedEnemy, isUnknownEnemy);
         }
 
         cache[uuid] = party;
@@ -1116,7 +1124,7 @@ public static class MeterSnapshotProvider
         var buffEvents = ResolveDisplayBuffEvents(entityUuid);
         var rowsByKey = new Dictionary<string, PlayerBuffCandidate>(StringComparer.Ordinal);
         var rowKeys = new List<string>(buffEvents.Length);
-        var partyCache = new Dictionary<long, TakenDamageLogParty>();
+        var partyCache = new Dictionary<long, CombatEventLogParty>();
 
         // 初出順(古い順)で回す。ソートせず、新しいバフが末尾に付く並びにする。
         // ストアが初出順で返すので、ここで逆順にすると並びが反転する。
@@ -1140,7 +1148,7 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            TimeSpan effectiveRemoveTime;
+            DateTime effectiveRemoveTime;
             double? remainingSeconds;
             bool remainingUnknown;
             var timingResolved = TryResolveLiveBuffTiming(
@@ -1170,7 +1178,7 @@ public static class MeterSnapshotProvider
                 buffEvent.Layer,
                 remainingSeconds,
                 remainingUnknown,
-                playerCasterUuid != 0 ? ResolveTakenDamageLogParty(encounter, playerCasterUuid, partyCache) : null,
+                playerCasterUuid != 0 ? ResolveCombatEventLogParty(encounter, playerCasterUuid, partyCache) : null,
                 IsCasterTarget: playerCasterUuid != 0 && playerCasterUuid == entityUuid,
                 GaugeLengthSeconds: durationSeconds > 0d ? durationSeconds : null);
             rowsByKey[key] = new PlayerBuffCandidate(snapshot, effectiveRemoveTime);
@@ -1207,7 +1215,7 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// バフを付けたプレイヤーの実体。付与者の実体がプレイヤーならその人、召喚物で大元の召喚者(付与者の実体の <c>AttrTopSummonerId</c>)が
-    /// プレイヤーならその人(被ダメログの加害者の寄せ方 <see cref="Encounter.ResolveTakenDamageLogActor"/> と同じ結果)。
+    /// プレイヤーならその人(タイムライン・被ダメログの加害者の寄せ方 <see cref="Encounter.ResolveCombatEventLogActor"/> と同じ結果)。
     /// プレイヤーでなければ 0(付与者なし・モンスター・召喚者の分からない召喚物)。
     /// </summary>
     private static long ResolveBuffPlayerCasterUuid(Encounter encounter, long fireUuid)
@@ -1637,7 +1645,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        return TryScanReviveBlockDebuff(entity.UUID, out remainingSeconds, out _, out _);
+        return TryScanReviveBlockDebuff(entity.UUID, out remainingSeconds, out _, out _, out _);
     }
 
     /// <summary>
@@ -1656,9 +1664,9 @@ public static class MeterSnapshotProvider
             return new ReviveBlockState(ReviveBlockStateKind.Unknown);
         }
 
-        if (TryScanReviveBlockDebuff(entityUuid, out var remainingSeconds, out var durationSeconds, out var hasUnresolved))
+        if (TryScanReviveBlockDebuff(entityUuid, out var remainingSeconds, out var durationSeconds, out var endTimeUtc, out var hasUnresolved))
         {
-            return new ReviveBlockState(ReviveBlockStateKind.Blocked, remainingSeconds, durationSeconds);
+            return new ReviveBlockState(ReviveBlockStateKind.Blocked, remainingSeconds, durationSeconds, endTimeUtc);
         }
 
         if (hasUnresolved)
@@ -1677,19 +1685,22 @@ public static class MeterSnapshotProvider
     /// 実体に付いている蘇生不可デバフを探す。残り秒の分かるものがあれば true で、重ね掛けなら遅く切れるほうの残り秒。
     /// </summary>
     /// <param name="durationSeconds">残り秒を出したデバフの効果時間の総量(秒)。</param>
+    /// <param name="endTimeUtc">残り秒を出したデバフの切れる時刻(UTC)。</param>
     /// <param name="hasUnresolved">付いているのに残り秒の出せないもの(持続が負・経過が分からない)があった。</param>
     private static bool TryScanReviveBlockDebuff(
         long entityUuid,
         out double remainingSeconds,
         out double durationSeconds,
+        out DateTime endTimeUtc,
         out bool hasUnresolved)
     {
         remainingSeconds = 0d;
         durationSeconds = 0d;
+        endTimeUtc = default;
         hasUnresolved = false;
         var buffEvents = ResolveDisplayBuffEvents(entityUuid);
         var found = false;
-        var latestRemoveTime = TimeSpan.MinValue;
+        var latestRemoveTime = DateTime.MinValue;
 
         for (var index = 0; index < buffEvents.Length; index++)
         {
@@ -1705,7 +1716,7 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            TimeSpan effectiveRemoveTime;
+            DateTime effectiveRemoveTime;
             double? seconds;
             var timingResolved = TryResolveLiveBuffTiming(
                 entityUuid, buffEvent, out effectiveRemoveTime, out seconds, out var secondsUnknown, out var instanceDurationSeconds);
@@ -1725,6 +1736,7 @@ public static class MeterSnapshotProvider
             latestRemoveTime = effectiveRemoveTime;
             remainingSeconds = seconds.Value;
             durationSeconds = instanceDurationSeconds;
+            endTimeUtc = effectiveRemoveTime;
             found = true;
         }
 
@@ -1807,7 +1819,7 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            TimeSpan effectiveRemoveTime;
+            DateTime effectiveRemoveTime;
             double? remainingSeconds;
             bool remainingUnknown;
             var timingResolved = TryResolveLiveBuffTiming(
@@ -1832,7 +1844,7 @@ public static class MeterSnapshotProvider
                 remainingSeconds,
                 remainingUnknown);
             // 持続なし・経過不明は、残り時間を持つバフに譲る。同点なら先に並ぶものが残る。
-            var badgeOrderingKey = effectiveRemoveTime == TimeSpan.MaxValue ? TimeSpan.Zero : effectiveRemoveTime;
+            var badgeOrderingKey = effectiveRemoveTime == DateTime.MaxValue ? DateTime.MinValue : effectiveRemoveTime;
             var candidate = new PlayerBuffCandidate(snapshot, badgeOrderingKey);
 
             if (isDebuff)
@@ -2256,7 +2268,7 @@ public static class MeterSnapshotProvider
     /// 実際の長さ(1秒未満の端数を含む)で割って出す。選べる N は App の一覧が決め、ここは1秒以上なら受ける。
     /// </para>
     /// </summary>
-    public static MetricTimelineSnapshot GetPlayerTimeline(
+    public static MetricGraphSnapshot GetPlayerGraph(
         MeterSnapshotKind kind,
         long characterId,
         int aggregationIntervalSeconds)
@@ -2267,7 +2279,7 @@ public static class MeterSnapshotProvider
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
+            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
         }
 
         var stats = kind == MeterSnapshotKind.Damage
@@ -2277,7 +2289,7 @@ public static class MeterSnapshotProvider
 
         if (totals.Length == 0 || lastTimestamp is not { } lastValueTime)
         {
-            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
+            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
         }
 
         // 秒の区切りは記録時に戦闘の時計の起点から切ってある。起点が無いのに合計があるなら記録側が壊れている。
@@ -2288,10 +2300,10 @@ public static class MeterSnapshotProvider
 
         // 記録は時計の終点より前にしか入らないはず(ライブは今、閉じた回は閉じた時刻、計測は窓の終わり)。
         // 後ろにあれば時刻の出所が食い違っているので、伸ばさずに終点まで描き、回ごとに1回だけ残す。
-        if (lastValueTime > endTime && !ReferenceEquals(_timelineEndErrorEncounter, encounter))
+        if (lastValueTime > endTime && !ReferenceEquals(_graphEndErrorEncounter, encounter))
         {
-            _timelineEndErrorEncounter = encounter;
-            Log.Error("Timeline value at {LastValue:o} is after the combat clock end {End:o} (encounter={EncounterId}); values after the end are not drawn",
+            _graphEndErrorEncounter = encounter;
+            Log.Error("Graph value at {LastValue:o} is after the combat clock end {End:o} (encounter={EncounterId}); values after the end are not drawn",
                 lastValueTime, endTime, encounter.EncounterId);
         }
 
@@ -2302,7 +2314,7 @@ public static class MeterSnapshotProvider
         var bucketCount = fullBucketCount + (hasPartialBucket ? 1 : 0);
         if (bucketCount == 0)
         {
-            return new MetricTimelineSnapshot(Array.Empty<MetricTimelinePoint>());
+            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
         }
 
         // 1秒の鍵 k は (k, k+1] 秒なので、区切り j に入るのは k / N == j の鍵。
@@ -2316,10 +2328,10 @@ public static class MeterSnapshotProvider
             }
         }
 
-        var points = new MetricTimelinePoint[bucketCount];
+        var points = new MetricGraphPoint[bucketCount];
         for (var bucket = 0; bucket < fullBucketCount; bucket++)
         {
-            points[bucket] = new MetricTimelinePoint(
+            points[bucket] = new MetricGraphPoint(
                 bucket * (double)intervalSeconds,
                 (bucket + 1) * (double)intervalSeconds,
                 bucketTotals[bucket] / intervalSeconds);
@@ -2327,13 +2339,13 @@ public static class MeterSnapshotProvider
 
         if (hasPartialBucket)
         {
-            points[fullBucketCount] = new MetricTimelinePoint(
+            points[fullBucketCount] = new MetricGraphPoint(
                 fullBucketCount * (double)intervalSeconds,
                 elapsedSeconds,
                 bucketTotals[fullBucketCount] / partialBucketSeconds);
         }
 
-        return new MetricTimelineSnapshot(points);
+        return new MetricGraphSnapshot(points);
     }
 
     /// <summary>
@@ -2341,27 +2353,27 @@ public static class MeterSnapshotProvider
     /// 戦闘の時計の起点がまだ無い回は空(線も無い)。起点より前の開始は 0 秒に置く
     /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
     /// </summary>
-    public static IReadOnlyList<MetricTimelineSkillActivation> GetPlayerSkillActivations(long characterId)
+    public static IReadOnlyList<MetricGraphSkillActivation> GetPlayerSkillActivations(long characterId)
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
-            return Array.Empty<MetricTimelineSkillActivation>();
+            return Array.Empty<MetricGraphSkillActivation>();
         }
 
         var records = encounter.GetSkillActivationsCopy(entityUuid);
         var grades = ResolveSkillGrades(entityUuid, entity, characterId);
-        var activations = new List<MetricTimelineSkillActivation>(records.Length);
+        var activations = new List<MetricGraphSkillActivation>(records.Length);
         foreach (var record in records)
         {
             if (encounter.ToCombatOffset(record.Timestamp) is not { } offset)
             {
-                return Array.Empty<MetricTimelineSkillActivation>();
+                return Array.Empty<MetricGraphSkillActivation>();
             }
 
             var (name, iconName, frame, usesImagineAsset) = CombatDataCatalog.GetSkillActivationDisplay(record.SkillId);
-            activations.Add(new MetricTimelineSkillActivation(
+            activations.Add(new MetricGraphSkillActivation(
                 Math.Max(offset.TotalSeconds, 0d),
                 record.SkillId,
                 iconName,
@@ -2623,11 +2635,15 @@ public static class MeterSnapshotProvider
     /// ライブ表示用の残り時間。基準は <see cref="Services.ActiveBuffStore"/> が持つ観測時刻。
     /// <see cref="BuffEvent.AddDateTime"/> はサーバ由来の時刻が入る経路があってローカル時計とずれるので使えない。
     /// </summary>
+    /// <param name="orderingKey">
+    /// 切れる順を比べる鍵。切れる時刻(UTC)で、遅いほど大きい。残り秒ではなく時刻で比べる(残り秒はバフごとに読む瞬間が違い、
+    /// 切れる時刻のほぼ同じバフどうしで大小が入れ替わる)。
+    /// </param>
     /// <param name="durationSeconds">効果時間の総量(秒)。残り時間と同じ値から出す(<see cref="Services.ActiveBuffStore.TryGetRemainingSeconds"/>)。</param>
     private static bool TryResolveLiveBuffTiming(
         long entityUuid,
         BuffEvent buffEvent,
-        out TimeSpan orderingKey,
+        out DateTime orderingKey,
         out double? remainingSeconds,
         out bool remainingUnknown,
         out double durationSeconds)
@@ -2637,9 +2653,10 @@ public static class MeterSnapshotProvider
                 (ulong)buffEvent.Uuid,
                 out remainingSeconds,
                 out remainingUnknown,
-                out durationSeconds))
+                out durationSeconds,
+                out var endUtc))
         {
-            orderingKey = TimeSpan.Zero;
+            orderingKey = DateTime.MinValue;
             remainingSeconds = null;
             remainingUnknown = false;
             durationSeconds = 0d;
@@ -2648,9 +2665,7 @@ public static class MeterSnapshotProvider
 
         // 持続時間なし(null)のものと経過が分からないものは残り時間を出さないが、
         // 表示は残すので最後尾に並べる。
-        orderingKey = remainingSeconds is > 0d
-            ? TimeSpan.FromSeconds(remainingSeconds.Value)
-            : remainingSeconds == 0d ? TimeSpan.Zero : TimeSpan.MaxValue;
+        orderingKey = endUtc ?? DateTime.MaxValue;
         return true;
     }
 

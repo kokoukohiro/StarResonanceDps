@@ -19,5 +19,7 @@ public class HelperMethods
         public static ModEffectTable ModEffects = new ModEffectTable();
         public static SkillAoyiTable SkillAoyis = new SkillAoyiTable();
         public static SkillAoyiStarTable SkillAoyiStars = new SkillAoyiStarTable();
+        public static ChatStickerTable ChatStickers = new ChatStickerTable();
+        public static ProfileImageTable ProfileImages = new ProfileImageTable();
     }
 }
