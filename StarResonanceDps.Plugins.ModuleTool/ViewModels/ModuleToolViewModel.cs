@@ -102,7 +102,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
         : _texts.Format("Module.Inventory.Summary", _inventory.Modules.Count, _inventory.EquippedUuidBySlot.Count, _catalog.SlotCount);
 
     public string EquippedFightText => _equipped is not null
-        ? _texts.Format("Module.Inventory.EquippedFight", FormatNumber(_equipped.FightValue))
+        ? _texts.Format("Module.Inventory.EquippedFight", _equipped.FightValue)
         : _texts["Module.Inventory.EquippedFightUnavailable"];
 
     public bool HasEquippedFight => _inventory is not null && _inventory.EquippedUuidBySlot.Count > 0;
@@ -185,7 +185,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
 
             var candidates = GetCandidates();
             var size = Math.Min(_catalog.SlotCount, candidates.Count);
-            return _texts.Format("Module.Calculate.Count", size, FormatNumber(CountCombinations(candidates.Count, size)));
+            return _texts.Format("Module.Calculate.Count", size, CountCombinations(candidates.Count, size));
         }
     }
 
@@ -564,7 +564,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             isEquippedCard,
             title,
             _texts["Module.Card.FightValue"],
-            FormatNumber(combination.FightValue),
+            combination.FightValue.ToString(culture),
             delta is { } value ? FormatDelta(value) : null,
             delta ?? 0,
             _texts.Format("Module.Card.LinkTotal", combination.TotalLinks),
@@ -616,24 +616,9 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
         return _texts[string.Create(CultureInfo.InvariantCulture, $"Module.Quality.{quality}")];
     }
 
-    private string FormatNumber(long value)
-    {
-        return value.ToString("N0", _texts.CurrentCulture);
-    }
-
-    private string FormatNumber(BigInteger value)
-    {
-        return value.ToString("N0", _texts.CurrentCulture);
-    }
-
     private string FormatDelta(int delta)
     {
-        return delta switch
-        {
-            > 0 => "+" + FormatNumber(delta),
-            < 0 => "-" + FormatNumber(-delta),
-            _ => "±0",
-        };
+        return delta.ToString("+0;-0;±0", _texts.CurrentCulture);
     }
 
     private static BigInteger CountCombinations(int count, int size)

@@ -11,6 +11,7 @@
         <SolidColorBrush x:Key="Module.Level5Brush" Color="#8FB8FF" />
         <SolidColorBrush x:Key="Module.Level6Brush" Color="#FFCC4D" />
         <SolidColorBrush x:Key="Module.EquippedBadgeBrush" Color="#B3000000" />
+        <SolidColorBrush x:Key="Module.EquippedBadgeTextBrush" Color="#FFFFFF" />
 
         <Style x:Key="Module.SectionTitle" TargetType="{x:Type TextBlock}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
@@ -179,7 +180,7 @@
                                 Background="{StaticResource Module.EquippedBadgeBrush}"
                                 Visibility="{Binding IsEquipped, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <TextBlock HorizontalAlignment="Center"
-                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                       Foreground="{StaticResource Module.EquippedBadgeTextBrush}"
                                        FontSize="9"
                                        Text="{Binding DataContext.Texts[Module.Tile.Equipped], RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" />
                         </Border>
@@ -299,10 +300,10 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid Margin="8,1,8,8">
+    <!-- スクロールバーは左右 5 の間。出ていないときは、バーの列の最小の幅(左右のあいだ 12、窓の端 8)が間隔になる。 -->
+    <Grid Margin="8,1,0,8">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="268" />
-            <ColumnDefinition Width="12" />
+            <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -316,7 +317,7 @@
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" MinWidth="12" />
                 </Grid.ColumnDefinitions>
 
                 <ScrollViewer x:Name="ConditionsScrollViewer"
@@ -488,13 +489,13 @@
 
                 <ScrollBar x:Name="ConditionsScrollBar"
                            Grid.Column="1"
-                           Margin="5,0,0,0"
+                           Margin="5,0,5,0"
                            Orientation="Vertical"
                            Style="{StaticResource ScrollBar.WidgetList}"
                            Visibility="Collapsed" />
             </Grid>
 
-            <StackPanel Grid.Row="1" Margin="0,10,0,0">
+            <StackPanel Grid.Row="1" Margin="0,10,12,0">
                 <Button Width="Auto"
                         Height="36"
                         HorizontalAlignment="Stretch"
@@ -511,7 +512,7 @@
         </Grid>
 
         <!-- 右: 結果 -->
-        <Grid Grid.Column="2">
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -546,7 +547,7 @@
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" MinWidth="8" />
                 </Grid.ColumnDefinitions>
 
                 <ScrollViewer x:Name="ResultsScrollViewer"
@@ -557,7 +558,7 @@
 
                 <ScrollBar x:Name="ResultsScrollBar"
                            Grid.Column="1"
-                           Margin="5,0,0,0"
+                           Margin="5,0,5,0"
                            Orientation="Vertical"
                            Style="{StaticResource ScrollBar.WidgetList}"
                            Visibility="Collapsed" />
