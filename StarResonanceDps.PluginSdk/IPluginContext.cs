@@ -11,4 +11,6 @@ public interface IPluginContext
     IPluginLocalizationService Localization { get; }
 
     IPluginLogger Logger { get; }
+
+    IPluginGameDataService GameData { get; }
 }

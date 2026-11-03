@@ -1,0 +1,1163 @@
+{
+  "SlotCount": 5,
+  "Effects": {
+    "1110": {
+      "Icon": "mod_effect_icon_011",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1111": {
+      "Icon": "mod_effect_icon_039",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1112": {
+      "Icon": "mod_effect_icon_034",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1113": {
+      "Icon": "mod_effect_icon_002",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1114": {
+      "Icon": "mod_effect_icon_038",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1205": {
+      "Icon": "mod_effect_icon_023",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1206": {
+      "Icon": "mod_effect_icon_042",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1307": {
+      "Icon": "mod_effect_icon_009",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1308": {
+      "Icon": "mod_effect_icon_014",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1407": {
+      "Icon": "mod_effect_icon_013",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1408": {
+      "Icon": "mod_effect_icon_026",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1409": {
+      "Icon": "mod_effect_icon_019",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "1410": {
+      "Icon": "mod_effect_icon_048",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 7
+        },
+        {
+          "Links": 4,
+          "FightValue": 14
+        },
+        {
+          "Links": 8,
+          "FightValue": 29
+        },
+        {
+          "Links": 12,
+          "FightValue": 44
+        },
+        {
+          "Links": 16,
+          "FightValue": 167
+        },
+        {
+          "Links": 20,
+          "FightValue": 254
+        }
+      ]
+    },
+    "2104": {
+      "Icon": "mod_effect_icon_016",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2105": {
+      "Icon": "mod_effect_icon_006",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2204": {
+      "Icon": "mod_effect_icon_012",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2205": {
+      "Icon": "mod_effect_icon_024",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2304": {
+      "Icon": "mod_effect_icon_045",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2404": {
+      "Icon": "mod_effect_icon_004",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2405": {
+      "Icon": "mod_effect_icon_035",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    },
+    "2406": {
+      "Icon": "mod_effect_icon_017",
+      "Levels": [
+        {
+          "Links": 0,
+          "FightValue": 0
+        },
+        {
+          "Links": 1,
+          "FightValue": 14
+        },
+        {
+          "Links": 4,
+          "FightValue": 29
+        },
+        {
+          "Links": 8,
+          "FightValue": 59
+        },
+        {
+          "Links": 12,
+          "FightValue": 89
+        },
+        {
+          "Links": 16,
+          "FightValue": 298
+        },
+        {
+          "Links": 20,
+          "FightValue": 448
+        }
+      ]
+    }
+  },
+  "Modules": {
+    "5500101": {
+      "Icon": "item_mod_device_attack2",
+      "Quality": 2
+    },
+    "5500102": {
+      "Icon": "item_mod_device_attack3",
+      "Quality": 3
+    },
+    "5500103": {
+      "Icon": "item_mod_device_attack4",
+      "Quality": 4
+    },
+    "5500104": {
+      "Icon": "item_icons_mod_device_attack5",
+      "Quality": 4
+    },
+    "5500201": {
+      "Icon": "item_mod_device_2",
+      "Quality": 2
+    },
+    "5500202": {
+      "Icon": "item_mod_device_3",
+      "Quality": 3
+    },
+    "5500203": {
+      "Icon": "item_mod_device_4",
+      "Quality": 4
+    },
+    "5500204": {
+      "Icon": "item_icons_mod_device_5",
+      "Quality": 4
+    },
+    "5500301": {
+      "Icon": "item_mod_device_protect2",
+      "Quality": 2
+    },
+    "5500302": {
+      "Icon": "item_mod_device_protect3",
+      "Quality": 3
+    },
+    "5500303": {
+      "Icon": "item_mod_device_protect4",
+      "Quality": 4
+    },
+    "5500304": {
+      "Icon": "item_icons_device_protect5",
+      "Quality": 4
+    }
+  },
+  "LinkFightValues": {
+    "StarASIA": [
+      0,
+      5,
+      11,
+      17,
+      23,
+      29,
+      34,
+      40,
+      46,
+      52,
+      58,
+      64,
+      69,
+      75,
+      81,
+      87,
+      93,
+      99,
+      104,
+      110,
+      116,
+      122,
+      128,
+      133,
+      139,
+      145,
+      151,
+      157,
+      163,
+      168,
+      174,
+      180,
+      186,
+      192,
+      198,
+      203,
+      209,
+      215,
+      221,
+      227,
+      233,
+      238,
+      244,
+      250,
+      256,
+      262,
+      267,
+      273,
+      279,
+      285,
+      291,
+      297,
+      302,
+      308,
+      314,
+      320,
+      326,
+      332,
+      337,
+      343,
+      349,
+      355,
+      361,
+      366,
+      372,
+      378,
+      384,
+      390,
+      396,
+      401,
+      407,
+      413,
+      419,
+      425,
+      431,
+      436,
+      442,
+      448,
+      454,
+      460,
+      466,
+      471,
+      477,
+      483,
+      489,
+      495,
+      500,
+      506,
+      512,
+      518,
+      524,
+      530,
+      535,
+      541,
+      547,
+      553,
+      559,
+      565,
+      570,
+      576,
+      582,
+      588,
+      594,
+      599,
+      605,
+      611,
+      617,
+      623,
+      629,
+      634,
+      640,
+      646,
+      652,
+      658,
+      664,
+      669,
+      675,
+      681,
+      687,
+      693,
+      699
+    ],
+    "Star": [
+      0,
+      5,
+      11,
+      17,
+      23,
+      29,
+      34,
+      40,
+      46,
+      52,
+      58,
+      64,
+      69,
+      75,
+      81,
+      87,
+      93,
+      99,
+      104,
+      110,
+      116,
+      122,
+      128,
+      133,
+      139,
+      145,
+      151,
+      157,
+      163,
+      168,
+      174,
+      180,
+      186,
+      192,
+      198,
+      203,
+      209,
+      215,
+      221,
+      227,
+      233,
+      238,
+      244,
+      250,
+      256,
+      262,
+      267,
+      273,
+      279,
+      285,
+      291,
+      297,
+      302,
+      308,
+      314,
+      320,
+      326,
+      332,
+      337,
+      343,
+      349,
+      355,
+      361,
+      366,
+      372,
+      378,
+      384,
+      390,
+      396,
+      401,
+      407,
+      413,
+      419,
+      425,
+      431,
+      436,
+      442,
+      448,
+      454,
+      460,
+      466,
+      471,
+      477,
+      483,
+      489,
+      495,
+      500,
+      506,
+      512,
+      518,
+      524,
+      530,
+      535,
+      541,
+      547,
+      553,
+      559,
+      565,
+      570,
+      576,
+      582,
+      588,
+      594,
+      599,
+      605,
+      611,
+      617,
+      623,
+      629,
+      634,
+      640,
+      646,
+      652,
+      658,
+      664,
+      669,
+      675,
+      681,
+      687,
+      693,
+      699,
+      704,
+      710,
+      716,
+      722,
+      728,
+      733,
+      739,
+      745,
+      751,
+      757
+    ]
+  },
+  "RecommendedEffects": {
+    "10001": [
+      1111,
+      1113,
+      1114,
+      1409,
+      2104,
+      2105,
+      2404
+    ],
+    "10002": [
+      1111,
+      1113,
+      1114,
+      1408,
+      1410,
+      2104,
+      2105,
+      2404
+    ],
+    "20001": [
+      1112,
+      1113,
+      1114,
+      1407,
+      1409,
+      1410,
+      2104,
+      2105
+    ],
+    "20002": [
+      1112,
+      1113,
+      1114,
+      1407,
+      2104,
+      2105
+    ],
+    "30001": [
+      1110,
+      1114,
+      1410,
+      2104,
+      2105,
+      2404
+    ],
+    "30002": [
+      1110,
+      1114,
+      1408,
+      1409,
+      2104,
+      2105,
+      2404
+    ],
+    "40001": [
+      1110,
+      1113,
+      1114,
+      1408,
+      2104,
+      2105,
+      2404
+    ],
+    "40002": [
+      1110,
+      1113,
+      1114,
+      1409,
+      1410,
+      2104,
+      2105,
+      2404
+    ],
+    "50001": [
+      1112,
+      1205,
+      1206,
+      1410,
+      2204,
+      2205,
+      2406
+    ],
+    "50002": [
+      1205,
+      1206,
+      1407,
+      2204,
+      2205,
+      2406
+    ],
+    "90001": [
+      1307,
+      1308,
+      2304
+    ],
+    "90002": [
+      1307,
+      1308,
+      1410,
+      2304
+    ],
+    "110001": [
+      1111,
+      1113,
+      1114,
+      1408,
+      2104,
+      2105
+    ],
+    "110002": [
+      1111,
+      1113,
+      1114,
+      1408,
+      1409,
+      1410,
+      2104,
+      2105
+    ],
+    "120001": [
+      1307,
+      1308,
+      1409,
+      2204,
+      2304,
+      2404,
+      2405
+    ],
+    "120002": [
+      1307,
+      1308,
+      2204,
+      2304,
+      2404,
+      2405
+    ],
+    "130001": [
+      1112,
+      1205,
+      1206,
+      1408,
+      1410,
+      2204,
+      2205,
+      2406
+    ],
+    "130002": [
+      1205,
+      1206,
+      1407,
+      1409,
+      2204,
+      2205,
+      2406
+    ]
+  }
+}

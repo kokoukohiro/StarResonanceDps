@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Module.Button.AddEffect" xml:space="preserve">
+    <value>Add Effect</value>
+  </data>
+  <data name="Module.Button.Calculate" xml:space="preserve">
+    <value>Calculate</value>
+  </data>
+  <data name="Module.Button.Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Module.Calculate.Count" xml:space="preserve">
+    <value>Searching {1} combinations of {0} modules</value>
+  </data>
+  <data name="Module.Calculate.Progress" xml:space="preserve">
+    <value>{0}% · {1}s</value>
+  </data>
+  <data name="Module.Card.Equipped" xml:space="preserve">
+    <value>Equipped</value>
+  </data>
+  <data name="Module.Card.FightValue" xml:space="preserve">
+    <value>Ability Score</value>
+  </data>
+  <data name="Module.Card.LinkTotal" xml:space="preserve">
+    <value>Link Total {0}</value>
+  </data>
+  <data name="Module.Card.Rank" xml:space="preserve">
+    <value>#{0}</value>
+  </data>
+  <data name="Module.Inventory.EquippedFight" xml:space="preserve">
+    <value>Equipped Ability Score {0}</value>
+  </data>
+  <data name="Module.Inventory.EquippedFightUnavailable" xml:space="preserve">
+    <value>Cannot calculate the equipped Ability Score</value>
+  </data>
+  <data name="Module.Inventory.MissingLinks" xml:space="preserve">
+    <value>{0} modules with unknown link counts are excluded from the calculation</value>
+  </data>
+  <data name="Module.Inventory.NotLoaded" xml:space="preserve">
+    <value>Modules have not been loaded</value>
+  </data>
+  <data name="Module.Inventory.NotLoadedDetail" xml:space="preserve">
+    <value>They are loaded when you change maps or log in again</value>
+  </data>
+  <data name="Module.Inventory.ReceivedAt" xml:space="preserve">
+    <value>Received at {0}</value>
+  </data>
+  <data name="Module.Inventory.Summary" xml:space="preserve">
+    <value>{0} modules · Equipped {1}/{2}</value>
+  </data>
+  <data name="Module.Inventory.UnknownModules" xml:space="preserve">
+    <value>{0} unsupported modules are excluded from the calculation</value>
+  </data>
+  <data name="Module.Label.PriorityEffects" xml:space="preserve">
+    <value>Priority Effects</value>
+  </data>
+  <data name="Module.Label.Recommend" xml:space="preserve">
+    <value>Recommended</value>
+  </data>
+  <data name="Module.Level.Any" xml:space="preserve">
+    <value>Not specified</value>
+  </data>
+  <data name="Module.Level.AtLeast" xml:space="preserve">
+    <value>Lv{0} or higher</value>
+  </data>
+  <data name="Module.Message.CalculationError.Message" xml:space="preserve">
+    <value>Could not calculate module combinations.</value>
+  </data>
+  <data name="Module.Message.CalculationError.Title" xml:space="preserve">
+    <value>Calculation Error</value>
+  </data>
+  <data name="Module.Message.ErrorDetail" xml:space="preserve">
+    <value>The cause has been recorded in the log.
+You can check it in "Logs" on the main window.</value>
+  </data>
+  <data name="Module.Message.SaveError.Message" xml:space="preserve">
+    <value>Could not save the Module Tool settings.</value>
+  </data>
+  <data name="Module.Message.SaveError.Title" xml:space="preserve">
+    <value>Settings Save Error</value>
+  </data>
+  <data name="Module.Quality.2" xml:space="preserve">
+    <value>Basic</value>
+  </data>
+  <data name="Module.Quality.3" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="Module.Quality.4" xml:space="preserve">
+    <value>Excellent</value>
+  </data>
+  <data name="Module.Recommend.None" xml:space="preserve">
+    <value>Not specified</value>
+  </data>
+  <data name="Module.Results.Empty" xml:space="preserve">
+    <value>No combination meets the conditions</value>
+  </data>
+  <data name="Module.Results.Summary" xml:space="preserve">
+    <value>Top {0} · {1}s</value>
+  </data>
+  <data name="Module.Section.Conditions" xml:space="preserve">
+    <value>Conditions</value>
+  </data>
+  <data name="Module.Section.Inventory" xml:space="preserve">
+    <value>Owned Modules</value>
+  </data>
+  <data name="Module.Section.Quality" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="Module.Section.Results" xml:space="preserve">
+    <value>Results</value>
+  </data>
+  <data name="Module.Stale" xml:space="preserve">
+    <value>Your modules or the conditions have changed. Please calculate again.</value>
+  </data>
+  <data name="Module.Tile.Equipped" xml:space="preserve">
+    <value>Equipped</value>
+  </data>
+</root>

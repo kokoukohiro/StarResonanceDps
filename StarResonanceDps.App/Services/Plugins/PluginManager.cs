@@ -1,11 +1,12 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Windows;
+using Serilog;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.Views;
 using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Services;
@@ -64,6 +65,7 @@ public sealed class PluginManager
 
         if (!TryGetOrLoadPlugin(pluginItem.PluginId, out var loadedPlugin))
         {
+            PluginOpenFailureMessage.Show(Application.Current?.MainWindow);
             return;
         }
 
@@ -84,6 +86,7 @@ public sealed class PluginManager
         catch (Exception exception)
         {
             WritePluginError(pluginItem.PluginId, "Failed to create plugin window content.", exception);
+            PluginOpenFailureMessage.Show(Application.Current?.MainWindow);
         }
     }
 
@@ -156,10 +159,16 @@ public sealed class PluginManager
                 throw new InvalidOperationException("The plugin entry type could not be instantiated.");
             }
 
-            var logger = new PluginDebugLogger(registration.Info.Id);
+            var logger = new PluginLogger(registration.Info.Id);
             var settingsStore = new PluginSettingsStore(_pluginsDirectory, logger);
             var messages = new PluginMessageService();
-            var context = new PluginHostContext(registration.Info.Id, settingsStore, messages, PluginLocalizationService.Instance, logger);
+            var context = new PluginHostContext(
+                registration.Info.Id,
+                settingsStore,
+                messages,
+                PluginLocalizationService.Instance,
+                logger,
+                PluginGameDataService.Instance);
 
             plugin.Initialize(context);
 
@@ -260,8 +269,7 @@ public sealed class PluginManager
 
     private static void WritePluginError(string pluginId, string message, Exception? exception)
     {
-        var suffix = exception is null ? string.Empty : $"{Environment.NewLine}{exception}";
-        Debug.WriteLine($"[ERROR] [Plugin:{pluginId}] {message}{suffix}");
+        Log.Error(exception, "[Plugin:{PluginId}] {Message}", pluginId, message);
     }
 
     private sealed record PluginRegistration(PluginInfo Info, Type EntryType);

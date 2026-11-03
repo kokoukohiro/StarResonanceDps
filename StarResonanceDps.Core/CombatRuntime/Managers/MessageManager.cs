@@ -225,6 +225,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
+            SelfModuleStore.ResetSelfToStartup();
             PlayerSkillLevelStateStore.ResetSelfToStartup();
             SelfAttributeChangeStore.Clear();
 
@@ -3820,6 +3821,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             SelfEquipmentStore.ReplaceSelf(vData.Equip, vData.ItemPackage);
+            SelfModuleStore.ReplaceSelf(vData.Mod, vData.ItemPackage);
 
             if (vData.Equip != null)
             {
@@ -3867,6 +3869,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (ser.EquipList is not null || ser.ItemPackage is not null)
                 {
                     SelfEquipmentStore.ApplySelfChanges(ser.EquipList, ser.ItemPackage);
+                }
+
+                if (ser.Mod is not null || ser.ItemPackage is not null)
+                {
+                    SelfModuleStore.ApplySelfChanges(ser.Mod, ser.ItemPackage);
                 }
 
                 if (ser.CharBaseInfo != null)

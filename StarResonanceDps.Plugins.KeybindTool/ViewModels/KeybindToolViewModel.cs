@@ -8,7 +8,7 @@ using StarResonanceDps.Plugins.KeybindTool.Services;
 
 namespace StarResonanceDps.Plugins.KeybindTool.ViewModels;
 
-internal sealed class KeybindToolViewModel : ObservableObject
+internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
 {
     private readonly IPluginContext _context;
     private readonly PluginLocalizer _texts;
@@ -2364,6 +2364,13 @@ internal sealed class KeybindToolViewModel : ObservableObject
                 StringComparer.Ordinal)
                 ?? new Dictionary<string, KeyMouseActionLayout>(StringComparer.Ordinal)
         };
+    }
+
+    /// <summary>窓を閉じたとき。本体の言語の知らせの購読を外す。</summary>
+    public void Dispose()
+    {
+        _texts.CultureChanged -= Texts_CultureChanged;
+        _texts.Dispose();
     }
 
     private void Texts_CultureChanged(object? sender, EventArgs e)

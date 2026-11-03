@@ -437,6 +437,16 @@
   <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
     <value>設定の「起動設定」で、VOICEVOXのインストール先を確かめてください。</value>
   </data>
+  <data name="PluginOpenFailed_Title" xml:space="preserve">
+    <value>プラグインエラー</value>
+  </data>
+  <data name="PluginOpenFailed_Message" xml:space="preserve">
+    <value>プラグインを開けませんでした。</value>
+  </data>
+  <data name="PluginOpenFailed_Detail" xml:space="preserve">
+    <value>原因はログに記録しました。
+メイン画面の「ログ」で確認できます。</value>
+  </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>
   </data>

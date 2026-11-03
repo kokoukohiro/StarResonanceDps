@@ -1,6 +1,6 @@
 namespace StarResonanceDps.Core.Models;
 
-/// <summary>根のバフの種類。表は <c>Data/Generated/RootBuffs.json</c>(<c>DataTools/gen_root_buffs.py</c>)。</summary>
+/// <summary>根のバフの種類。表は <c>Data/Generated/RootBuffs.json</c>(<c>DataTools/Core/gen_root_buffs.py</c>)。</summary>
 public enum RootBuffKind
 {
     /// <summary>タレント(アビリティ情報。特化型を除く)。</summary>

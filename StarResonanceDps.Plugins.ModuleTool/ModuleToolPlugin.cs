@@ -1,6 +1,8 @@
 using System.Windows;
-using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
+using StarResonanceDps.Plugins.ModuleTool.Services;
+using StarResonanceDps.Plugins.ModuleTool.ViewModels;
+using StarResonanceDps.Plugins.ModuleTool.Views;
 
 [assembly: PluginRegistration(
     typeof(StarResonanceDps.Plugins.ModuleTool.ModuleToolPlugin),
@@ -8,7 +10,7 @@ using StarResonanceDps.PluginSdk;
     PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "モジュールツール")]
 [assembly: PluginDisplayName("ko-KR", "모듈 도구")]
-[assembly: PluginDisplayName("zh-CN", "模块工具")]
+[assembly: PluginDisplayName("zh-CN", "模组工具")]
 [assembly: PluginDisplayName("en-US", "Module Tool")]
 
 namespace StarResonanceDps.Plugins.ModuleTool;
@@ -22,6 +24,7 @@ public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOption
         minHeight: 480);
 
     private IPluginContext? _context;
+    private ModuleCatalog? _catalog;
 
     public PluginWindowOptions GetWindowOptions()
     {
@@ -31,22 +34,24 @@ public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOption
     public void Initialize(IPluginContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _catalog = new ModuleCatalog();
         _context.Logger.Info("Initialized.");
     }
 
     public FrameworkElement CreateContent()
     {
-        if (_context is null)
+        if (_context is null || _catalog is null)
         {
             throw new InvalidOperationException("The plugin has not been initialized.");
         }
 
-                return new Grid();
+        return new ModuleToolView(new ModuleToolViewModel(_context, _catalog));
     }
 
     public void Shutdown()
     {
         _context?.Logger.Info("Shutdown.");
         _context = null;
+        _catalog = null;
     }
 }

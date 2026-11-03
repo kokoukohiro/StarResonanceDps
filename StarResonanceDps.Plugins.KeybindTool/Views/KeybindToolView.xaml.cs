@@ -7,17 +7,25 @@ using StarResonanceDps.Plugins.KeybindTool.ViewModels;
 
 namespace StarResonanceDps.Plugins.KeybindTool.Views;
 
-public partial class KeybindToolView : UserControl
+public partial class KeybindToolView : UserControl, IDisposable
 {
+    private readonly KeybindToolViewModel _viewModel;
     private bool _isSyncingExternalScrollBar;
 
     internal KeybindToolView(KeybindToolViewModel viewModel)
     {
         ArgumentNullException.ThrowIfNull(viewModel);
 
+        _viewModel = viewModel;
         InitializeComponent();
         DataContext = viewModel;
         Loaded += KeybindToolView_Loaded;
+    }
+
+    /// <summary>本体が窓を閉じた後に呼ぶ。</summary>
+    public void Dispose()
+    {
+        _viewModel.Dispose();
     }
 
     private void KeybindToolView_Loaded(object sender, RoutedEventArgs e)

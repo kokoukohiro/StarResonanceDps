@@ -437,6 +437,16 @@ If it is not installed, you can download it from the link below.</value>
   <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
     <value>Check the VOICEVOX install folder in Settings &gt; Startup.</value>
   </data>
+  <data name="PluginOpenFailed_Title" xml:space="preserve">
+    <value>Plugin Error</value>
+  </data>
+  <data name="PluginOpenFailed_Message" xml:space="preserve">
+    <value>Could not open the plugin.</value>
+  </data>
+  <data name="PluginOpenFailed_Detail" xml:space="preserve">
+    <value>The cause has been recorded in the log.
+You can check it in "Logs" on the main window.</value>
+  </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>Network Adapter</value>
   </data>

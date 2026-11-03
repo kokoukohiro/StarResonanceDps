@@ -1,0 +1,314 @@
+{
+  "Effects": {
+    "1110": {
+      "zh-CN": "力量加持",
+      "en-US": "Strength Boost",
+      "ja-JP": "筋力強化",
+      "ko-KR": "힘 강화"
+    },
+    "1111": {
+      "zh-CN": "敏捷加持",
+      "en-US": "Agility Boost",
+      "ja-JP": "敏捷強化",
+      "ko-KR": "민첩 강화"
+    },
+    "1112": {
+      "zh-CN": "智力加持",
+      "en-US": "Intellect Boost",
+      "ja-JP": "知力強化",
+      "ko-KR": "지력 강화"
+    },
+    "1113": {
+      "zh-CN": "特攻伤害加持",
+      "en-US": "Special Attack",
+      "ja-JP": "特攻ダメージ強化",
+      "ko-KR": "특수 공격 대미지 강화"
+    },
+    "1114": {
+      "zh-CN": "精英打击",
+      "en-US": "Elite Strike",
+      "ja-JP": "精鋭打撃",
+      "ko-KR": "엘리트 타격"
+    },
+    "1205": {
+      "zh-CN": "特攻治疗加持",
+      "en-US": "Healing Boost",
+      "ja-JP": "特攻回復強化",
+      "ko-KR": "특수 공격 치료 강화"
+    },
+    "1206": {
+      "zh-CN": "专精治疗加持",
+      "en-US": "Healing Enhance",
+      "ja-JP": "マスタリー回復強化",
+      "ko-KR": "마스터리 치료 강화"
+    },
+    "1307": {
+      "zh-CN": "抵御魔法",
+      "en-US": "Resistance",
+      "ja-JP": "魔法耐性",
+      "ko-KR": "마법 저항"
+    },
+    "1308": {
+      "zh-CN": "抵御物理",
+      "en-US": "Armor",
+      "ja-JP": "物理耐性",
+      "ko-KR": "물리 저항"
+    },
+    "1407": {
+      "zh-CN": "施法专注",
+      "en-US": "Cast Focus",
+      "ja-JP": "集中・詠唱",
+      "ko-KR": "스킬 시전 집중력"
+    },
+    "1408": {
+      "zh-CN": "攻速专注",
+      "en-US": "Attack SPD",
+      "ja-JP": "集中・攻撃速度",
+      "ko-KR": "공격 속도 집중력"
+    },
+    "1409": {
+      "zh-CN": "暴击专注",
+      "en-US": "Crit Focus",
+      "ja-JP": "集中・会心",
+      "ko-KR": "치명타 집중력"
+    },
+    "1410": {
+      "zh-CN": "幸运专注",
+      "en-US": "Luck Focus",
+      "ja-JP": "集中・幸運",
+      "ko-KR": "행운 집중력"
+    },
+    "2104": {
+      "zh-CN": "极·伤害叠加",
+      "en-US": "DMG Stack",
+      "ja-JP": "極・ダメージ増強",
+      "ko-KR": "극・대미지 중첩"
+    },
+    "2105": {
+      "zh-CN": "极·灵活身法",
+      "en-US": "Agile",
+      "ja-JP": "極・適応力",
+      "ko-KR": "극・유연한 신법"
+    },
+    "2204": {
+      "zh-CN": "极·生命凝聚",
+      "en-US": "Life Condense",
+      "ja-JP": "極・HP凝縮",
+      "ko-KR": "극・체력 응집"
+    },
+    "2205": {
+      "zh-CN": "极·急救措施",
+      "en-US": "First Aid",
+      "ja-JP": "極・応急処置",
+      "ko-KR": "극・응급 처치"
+    },
+    "2304": {
+      "zh-CN": "极·绝境守护",
+      "en-US": "Final Protection",
+      "ja-JP": "極・絶境守護",
+      "ko-KR": "극・절경 수호"
+    },
+    "2404": {
+      "zh-CN": "极·生命波动",
+      "en-US": "Life Wave",
+      "ja-JP": "極・HP変動",
+      "ko-KR": "극・생명 파동"
+    },
+    "2405": {
+      "zh-CN": "极·生命吸取",
+      "en-US": "Life Steal",
+      "ja-JP": "極・HP吸収",
+      "ko-KR": "극・생명 흡수"
+    },
+    "2406": {
+      "zh-CN": "极·全队幸暴",
+      "en-US": "Team Luck & Crit",
+      "ja-JP": "極・幸運会心",
+      "ko-KR": "극・팀 전체 행운 치명타"
+    }
+  },
+  "Modules": {
+    "5500101": {
+      "zh-CN": "基础的攻击型模组",
+      "en-US": "Basic Attack Module",
+      "ja-JP": "基本攻撃型モジュール",
+      "ko-KR": "기본 공격형 모듈"
+    },
+    "5500102": {
+      "zh-CN": "高性能的攻击型模组",
+      "en-US": "Advanced Attack Module",
+      "ja-JP": "高性能攻撃型モジュール",
+      "ko-KR": "고성능 공격형 모듈"
+    },
+    "5500103": {
+      "zh-CN": "卓越的攻击型模组",
+      "en-US": "Excellent Attack Module",
+      "ja-JP": "卓越攻撃型モジュール",
+      "ko-KR": "탁월 공격형 모듈"
+    },
+    "5500104": {
+      "zh-CN": "卓越的攻击型模组·优选",
+      "en-US": "Excellent Attack Module - Premium",
+      "ja-JP": "EXC攻撃型モジュール・精選",
+      "ko-KR": "탁월 공격형 모듈・추천"
+    },
+    "5500201": {
+      "zh-CN": "基础的辅助型模组",
+      "en-US": "Basic Support Module",
+      "ja-JP": "基本支援型モジュール",
+      "ko-KR": "기본 지원형 모듈"
+    },
+    "5500202": {
+      "zh-CN": "高性能的辅助型模组",
+      "en-US": "Advanced Support Module",
+      "ja-JP": "高性能支援型モジュール",
+      "ko-KR": "고성능 지원형 모듈"
+    },
+    "5500203": {
+      "zh-CN": "卓越的辅助型模组",
+      "en-US": "Excellent Support Module",
+      "ja-JP": "卓越支援型モジュール",
+      "ko-KR": "탁월 지원형 모듈"
+    },
+    "5500204": {
+      "zh-CN": "卓越的辅助型模组·优选",
+      "en-US": "Excellent Support Module - Premium",
+      "ja-JP": "EXC支援型モジュール・精選",
+      "ko-KR": "탁월 지원형 모듈・추천"
+    },
+    "5500301": {
+      "zh-CN": "基础的守护型模组",
+      "en-US": "Basic Guard Module",
+      "ja-JP": "基本防御型モジュール",
+      "ko-KR": "기본 방어형 모듈"
+    },
+    "5500302": {
+      "zh-CN": "高性能的守护型模组",
+      "en-US": "Advanced Guard Module",
+      "ja-JP": "高性能防御型モジュール",
+      "ko-KR": "고성능 방어형 모듈"
+    },
+    "5500303": {
+      "zh-CN": "卓越的守护型模组",
+      "en-US": "Excellent Guard Module",
+      "ja-JP": "卓越防御型モジュール",
+      "ko-KR": "탁월 방어형 모듈"
+    },
+    "5500304": {
+      "zh-CN": "卓越的守护型模组·优选",
+      "en-US": "Excellent Guard Module - Premium",
+      "ja-JP": "EXC防御型モジュール・精選",
+      "ko-KR": "탁월 방어형 모듈・추천"
+    }
+  },
+  "Specs": {
+    "10001": {
+      "zh-CN": "居合斩",
+      "en-US": "Iaido Slash",
+      "ja-JP": "雷刃",
+      "ko-KR": "발도"
+    },
+    "10002": {
+      "zh-CN": "月刃召唤",
+      "en-US": "Moonstrike",
+      "ja-JP": "月影",
+      "ko-KR": "월광의 낫"
+    },
+    "20001": {
+      "zh-CN": "冰矛",
+      "en-US": "Icicle",
+      "ja-JP": "氷牙",
+      "ko-KR": "스피어"
+    },
+    "20002": {
+      "zh-CN": "射线",
+      "en-US": "Frostbeam",
+      "ja-JP": "霜天",
+      "ko-KR": "레이"
+    },
+    "30001": {
+      "zh-CN": "无相",
+      "en-US": "Formless",
+      "ja-JP": "双炎",
+      "ko-KR": "무상"
+    },
+    "30002": {
+      "zh-CN": "赤红",
+      "en-US": "Crimson",
+      "ja-JP": "炎舞",
+      "ko-KR": "적홍"
+    },
+    "40001": {
+      "zh-CN": "重装",
+      "en-US": "Vanguard",
+      "ja-JP": "烈風",
+      "ko-KR": "질풍"
+    },
+    "40002": {
+      "zh-CN": "空战",
+      "en-US": "Skyward",
+      "ja-JP": "乱風",
+      "ko-KR": "난무"
+    },
+    "50001": {
+      "zh-CN": "惩击",
+      "en-US": "Smite",
+      "ja-JP": "威咲",
+      "ko-KR": "숲의 심판"
+    },
+    "50002": {
+      "zh-CN": "愈合",
+      "en-US": "Lifebind",
+      "ja-JP": "森癒",
+      "ko-KR": "숲의 치유"
+    },
+    "90001": {
+      "zh-CN": "岩盾",
+      "en-US": "Earthfort",
+      "ja-JP": "剛身",
+      "ko-KR": "암석 방패"
+    },
+    "90002": {
+      "zh-CN": "格挡",
+      "en-US": "Block",
+      "ja-JP": "剛守",
+      "ko-KR": "가드"
+    },
+    "110001": {
+      "zh-CN": "驭兽",
+      "en-US": "Wildpack",
+      "ja-JP": "狼弓",
+      "ko-KR": "야수 조련사"
+    },
+    "110002": {
+      "zh-CN": "驯鹰",
+      "en-US": "Falconry",
+      "ja-JP": "鷹弓",
+      "ko-KR": "맹금 조련사"
+    },
+    "120001": {
+      "zh-CN": "防护回复",
+      "en-US": "Recovery",
+      "ja-JP": "光砕",
+      "ko-KR": "신성한 방패"
+    },
+    "120002": {
+      "zh-CN": "光盾回复",
+      "en-US": "Shield",
+      "ja-JP": "光盾",
+      "ko-KR": "광휘의 축복"
+    },
+    "130001": {
+      "zh-CN": "狂音",
+      "en-US": "Dissonance",
+      "ja-JP": "狂音",
+      "ko-KR": "음파"
+    },
+    "130002": {
+      "zh-CN": "协奏",
+      "en-US": "Concerto",
+      "ja-JP": "響奏",
+      "ko-KR": "협주"
+    }
+  }
+}

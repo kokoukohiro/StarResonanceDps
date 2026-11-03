@@ -437,6 +437,16 @@
   <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
     <value>请在设置的“启动设置”中确认VOICEVOX安装路径。</value>
   </data>
+  <data name="PluginOpenFailed_Title" xml:space="preserve">
+    <value>插件错误</value>
+  </data>
+  <data name="PluginOpenFailed_Message" xml:space="preserve">
+    <value>无法打开插件。</value>
+  </data>
+  <data name="PluginOpenFailed_Detail" xml:space="preserve">
+    <value>已将原因记录到日志。
+可在主界面的“日志”中查看。</value>
+  </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>监听网卡</value>
   </data>

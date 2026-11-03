@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using Serilog;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Plugins;
 using StarResonanceDps.PluginSdk;
@@ -102,6 +103,19 @@ public sealed class PluginWindowManager
         if (!string.IsNullOrWhiteSpace(window.Plugin.PluginId))
         {
             _openWindows.Remove(window.Plugin.PluginId);
+        }
+
+        // SDK の約束: 中身が IDisposable なら、閉じた後に後始末させる(本体の知らせの購読を外す)。
+        if (window.PluginContent is IDisposable disposableContent)
+        {
+            try
+            {
+                disposableContent.Dispose();
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception, "[Plugin:{PluginId}] {Message}", window.Plugin.PluginId, "Plugin content disposal failed.");
+            }
         }
     }
 }

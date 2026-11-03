@@ -15,7 +15,7 @@ namespace StarResonanceDps.App.DebugTools;
 /// <summary>
 /// アプリのメッセージウィンドウ・確認ウィンドウを、エラーを起こさずに出して見た目を確かめる。Debug の構成でだけビルドされる。
 /// 本物の呼び出しと同じ文言の鍵の組を並べてある。本物の窓を足したり本文と詳細の分け方を変えたら、ここも直す。
-/// キーバインドツールの窓は、プラグインの文言(<see cref="PluginLocalizer"/>)を引き、プラグインの文が通る本体側の表示(<see cref="PluginMessageService"/>)で出す。
+/// キーバインドツール・モジュールツールの窓は、プラグインの文言(<see cref="PluginLocalizer"/>)を引き、プラグインの文が通る本体側の表示(<see cref="PluginMessageService"/>)で出す。
 /// </summary>
 public partial class MessagePreviewWindow : Window
 {
@@ -32,22 +32,34 @@ public partial class MessagePreviewWindow : Window
     private const string KeybindAssemblyName = "KeybindTool";
     private const string KeybindResourceBaseName = "StarResonanceDps.Plugins.KeybindTool.Properties.Resources";
     private const string KeybindLayoutFileName = "keybind_config.json";
+    private const string ModuleAssemblyName = "ModuleTool";
+    private const string ModuleResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
 
     private readonly PluginMessageService _pluginMessages = new();
     private PluginLocalizer? _keybindTexts;
+    private PluginLocalizer? _moduleTexts;
 
     public MessagePreviewWindow()
     {
         InitializeComponent();
-        Closed += (_, _) => _keybindTexts?.Dispose();
+        Closed += (_, _) =>
+        {
+            _keybindTexts?.Dispose();
+            _moduleTexts?.Dispose();
+        };
     }
 
     private static LocalizationManager Localization => LocalizationManager.Instance;
 
     private PluginLocalizer KeybindTexts => _keybindTexts ??= new PluginLocalizer(
         PluginLocalizationService.Instance,
-        LoadKeybindAssembly(),
+        LoadPluginAssembly(KeybindAssemblyName),
         KeybindResourceBaseName);
+
+    private PluginLocalizer ModuleTexts => _moduleTexts ??= new PluginLocalizer(
+        PluginLocalizationService.Instance,
+        LoadPluginAssembly(ModuleAssemblyName),
+        ModuleResourceBaseName);
 
     // キーバインドツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
     private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindLayoutFileName);
@@ -74,6 +86,12 @@ public partial class MessagePreviewWindow : Window
     private void VoicevoxLaunchFailed_Click(object sender, RoutedEventArgs e)
     {
         VoicevoxLaunchFailureMessage.Show(this);
+    }
+
+    // 本物: メイン画面のプラグインの一覧(プラグインを開けなかったとき)
+    private void PluginOpenFailed_Click(object sender, RoutedEventArgs e)
+    {
+        PluginOpenFailureMessage.Show(this);
     }
 
     // 本物: MainWindow(ホットキーの補助が使えなかったとき)
@@ -367,12 +385,30 @@ public partial class MessagePreviewWindow : Window
             string.IsNullOrWhiteSpace(detail) ? null : detail);
     }
 
-    // 本体がプラグインを読むのと同じ場所(既定のロード コンテキスト)から取る。まだ読まれていなければ読む。
-    private static Assembly LoadKeybindAssembly()
+    // 本物: モジュールツール(組み合わせの計算で例外が出た)
+    private void ModuleCalculationError_Click(object sender, RoutedEventArgs e)
     {
-        return AssemblyLoadContext.Default.Assemblies.FirstOrDefault(assembly => assembly.GetName().Name == KeybindAssemblyName)
+        _pluginMessages.Show(
+            ModuleTexts["Module.Message.CalculationError.Title"],
+            ModuleTexts["Module.Message.CalculationError.Message"],
+            ModuleTexts["Module.Message.ErrorDetail"]);
+    }
+
+    // 本物: モジュールツール(設定を保存できなかった。起動中の最初の1回だけ出る)
+    private void ModuleSaveError_Click(object sender, RoutedEventArgs e)
+    {
+        _pluginMessages.Show(
+            ModuleTexts["Module.Message.SaveError.Title"],
+            ModuleTexts["Module.Message.SaveError.Message"],
+            ModuleTexts["Module.Message.ErrorDetail"]);
+    }
+
+    // 本体がプラグインを読むのと同じ場所(既定のロード コンテキスト)から取る。まだ読まれていなければ読む。
+    private static Assembly LoadPluginAssembly(string assemblyName)
+    {
+        return AssemblyLoadContext.Default.Assemblies.FirstOrDefault(assembly => assembly.GetName().Name == assemblyName)
             ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(
-                Path.Combine(AppDataPaths.PluginsDirectory, KeybindAssemblyName + ".dll"));
+                Path.Combine(AppDataPaths.PluginsDirectory, assemblyName + ".dll"));
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

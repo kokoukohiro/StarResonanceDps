@@ -43,7 +43,7 @@ public static class CombatDataCatalog
     private static FrozenDictionary<int, FrozenSet<int>> _monsterIdsBySkillId = FrozenDictionary<int, FrozenSet<int>>.Empty;
     /// <summary>
     /// 戦闘画面の警告バーを出す技の技レベルID(技ID×100＋レベル)。<c>Data/Generated/SkillWarnings.json</c>。
-    /// <c>DataTools/gen_skill_warnings.py</c> が生成する。
+    /// <c>DataTools/Core/gen_skill_warnings.py</c> が生成する。
     /// </summary>
     private static FrozenSet<int> _warningSkillLevelIds = FrozenSet<int>.Empty;
     /// <summary><see cref="_warningSkillLevelIds"/> のどれかのレベルを持つ技ID。</summary>
@@ -55,7 +55,7 @@ public static class CombatDataCatalog
     private static FrozenDictionary<int, int> _dbmCountCdTimes = FrozenDictionary<int, int>.Empty;
     /// <summary>
     /// 料理のバフ → 名前(そのバフを付けるアイテムの名前)。<c>Data/Localization/CuisineBuffs.json</c>。
-    /// <c>DataTools/gen_buff_groups.py</c> が生成する。バフ自身の名前は「料理」の1語に丸められているので、こちらを先に引く。
+    /// <c>DataTools/Core/gen_buff_groups.py</c> が生成する。バフ自身の名前は「料理」の1語に丸められているので、こちらを先に引く。
     /// </summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _cuisineBuffNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
@@ -2102,7 +2102,7 @@ public static class CombatDataCatalog
 
     /// <summary>
     /// 個別に扱わず1つのまとまりとして見るバフか。<c>Data/Localization/CuisineBuffs.json</c> にあれば料理、
-    /// <c>Data/Localization/PotionBuffs.json</c> にあれば薬剤。選ぶ条件は <c>DataTools/gen_buff_groups.py</c> が持つ。
+    /// <c>Data/Localization/PotionBuffs.json</c> にあれば薬剤。選ぶ条件は <c>DataTools/Core/gen_buff_groups.py</c> が持つ。
     /// </summary>
     public static BuffGroup GetBuffGroup(int buffId)
     {
@@ -2637,7 +2637,7 @@ public static class CombatDataCatalog
         => ((long)first << 32) | (uint)second;
 
     /// <summary>
-    /// 装備の定義 <c>Data/Generated/Equips.json</c> を読む。<c>DataTools/gen_equips.py</c> が生成する。
+    /// 装備の定義 <c>Data/Generated/Equips.json</c> を読む。<c>DataTools/Core/gen_equips.py</c> が生成する。
     ///
     /// <para>
     /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(装備詳細は定義を出せない)。
@@ -2690,7 +2690,7 @@ public static class CombatDataCatalog
     }
 
     /// <summary>
-    /// 根のバフの表 <c>Data/Generated/RootBuffs.json</c> を読む。<c>DataTools/gen_root_buffs.py</c> が生成する。
+    /// 根のバフの表 <c>Data/Generated/RootBuffs.json</c> を読む。<c>DataTools/Core/gen_root_buffs.py</c> が生成する。
     ///
     /// <para>
     /// ファイルが無い・形が合わないときはエラーログを出して全部空のまま続ける(アビリティ情報・潜在心相晶情報・モジュール情報は何も出さない)。
