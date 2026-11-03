@@ -54,6 +54,7 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Startup_InitializationFailed" Click="StartupInitializationFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Error_Unhandled" Click="UnhandledException_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="SettingsFile_LoadFailed" Click="SettingsLoadFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="StartupSettings_WindowsRegistrationFailed" Click="WindowsStartupRegistrationFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Hotkey_HelperUnavailable" Click="HotkeyHelperUnavailable_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Hotkey_RegisterFailed" Click="HotkeyRegisterFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_NpcapOutdated" Click="NpcapOutdated_Click" />
@@ -64,6 +65,7 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PlayerInfo_CopyImageFailed" Click="CopyImageFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="TextCopyFailed" Click="CopyTextFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_ConnectFailed" Click="VoicevoxConnectFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_LaunchFailed" Click="VoicevoxLaunchFailed_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_BadResponse" Click="VoicevoxBadResponse_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_Policy" Click="VoicevoxPolicy_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="WindowsVoice_Missing" Click="WindowsVoiceMissing_Click" />

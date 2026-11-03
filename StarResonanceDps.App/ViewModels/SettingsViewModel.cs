@@ -65,6 +65,20 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _widgetDataStatusDisplayModeIndex = AppConfigDefaults.WidgetDataStatusDisplayShowIndex;
 
+    // --- 起動設定 ---
+
+    [ObservableProperty]
+    private bool _launchAtWindowsStartup;
+
+    [ObservableProperty]
+    private bool _startHotkeyHelperOnLaunch = true;
+
+    [ObservableProperty]
+    private bool _launchVoicevoxOnLaunch;
+
+    [ObservableProperty]
+    private string _voicevoxInstallFolder = string.Empty;
+
     // --- 集計設定 ---
 
     [ObservableProperty]
@@ -133,12 +147,20 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         WindowColors = new ColorPaletteViewModel(AppConfigDefaults.CreateDefaultWindowColors(), AppConfigDefaults.MaxPaletteColorCount);
         WindowColors.PaletteChanged += WindowColors_PaletteChanged;
 
+        // 開いたときに動いている VOICEVOX があれば、起動設定のインストール先をその場所に合わせてから読む。
+        if (!IsInDesignMode)
+        {
+            VoicevoxLauncher.UpdateInstallFolder();
+        }
+
         var settings = _configManager.GetSettingsSnapshot();
         _lastSavedSettings = settings.Clone();
         LoadFromSettings(settings, applyLanguage: false, applyPreview: false);
         LoadCaptureSettings();
         _configManager.WidgetWindowTopmostModeSaved += ConfigManager_WidgetWindowTopmostModeSaved;
         _configManager.PlayerNameDisplayModeSaved += ConfigManager_PlayerNameDisplayModeSaved;
+        _configManager.VoicevoxInstallFolderSaved += ConfigManager_VoicevoxInstallFolderSaved;
+        _hotkeyService.RegistrationChanged += HotkeyService_RegistrationChanged;
     }
 
     public ColorPaletteViewModel WindowColors { get; }
@@ -154,12 +176,17 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
     public bool IsCapturingHotkey => _capturingHotkeyItem is not null;
 
+    /// <summary>ホットキーのナビと節を出すか。補助が使えない間(起動設定でオフ・起動できない・途中で止まった)はホットキーが無効なので隠す。</summary>
+    public bool IsHotkeySectionVisible => _hotkeyService.IsAvailable;
+
     public void Dispose()
     {
         // 受付中に閉じたら取り消して、外していたホットキーを戻す(戻せなかったものはサービスがログに書く)。
         EndHotkeyCapture();
         _configManager.WidgetWindowTopmostModeSaved -= ConfigManager_WidgetWindowTopmostModeSaved;
         _configManager.PlayerNameDisplayModeSaved -= ConfigManager_PlayerNameDisplayModeSaved;
+        _configManager.VoicevoxInstallFolderSaved -= ConfigManager_VoicevoxInstallFolderSaved;
+        _hotkeyService.RegistrationChanged -= HotkeyService_RegistrationChanged;
         _configManager.ClearSettingsPreview();
         _hotkeyService.PreviewGameProcessNames(null);
         WindowColors.PaletteChanged -= WindowColors_PaletteChanged;
@@ -188,6 +215,12 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
         ApplyCurrentGlobalTheme();
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return _hotkeyService.Apply(settings.Hotkeys);
+    }
+
+    /// <summary>保存した「Windows起動時にアプリを起動」を Windows に書く。書けなかったら false(画面がメッセージで知らせる)。</summary>
+    public bool ApplyWindowsStartupRegistration()
+    {
+        return WindowsStartupRegistration.Apply(_lastSavedSettings.LaunchAtWindowsStartup);
     }
 
     /// <summary>
@@ -330,6 +363,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WidgetDataStatusDisplayModeIndex = WidgetDataStatusDisplayModeIndex,
             WindowColorIndex = WindowColors.SelectedIndex,
             WindowColors = [.. WindowColors.GetHexColors()],
+            LaunchAtWindowsStartup = LaunchAtWindowsStartup,
+            StartHotkeyHelperOnLaunch = StartHotkeyHelperOnLaunch,
+            LaunchVoicevoxOnLaunch = LaunchVoicevoxOnLaunch,
+            VoicevoxInstallFolder = VoicevoxInstallFolder,
             StopAggregationInNonCombatAreas = StopAggregationInNonCombatAreas,
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,
@@ -378,6 +415,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             WidgetWindowTopmostModeIndex = settings.WidgetWindowTopmostModeIndex;
             WidgetDataStatusDisplayModeIndex = settings.WidgetDataStatusDisplayModeIndex;
             WindowColors.Load(settings.WindowColors, settings.WindowColorIndex);
+            LaunchAtWindowsStartup = settings.LaunchAtWindowsStartup;
+            StartHotkeyHelperOnLaunch = settings.StartHotkeyHelperOnLaunch;
+            LaunchVoicevoxOnLaunch = settings.LaunchVoicevoxOnLaunch;
+            VoicevoxInstallFolder = settings.VoicevoxInstallFolder;
             StopAggregationInNonCombatAreas = settings.StopAggregationInNonCombatAreas;
             SplitEncountersOnNewPhases = settings.SplitEncountersOnNewPhases;
             KeepPastEncounterInMeterUntilNextDamage = settings.KeepPastEncounterInMeterUntilNextDamage;
@@ -533,6 +574,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
 
         // ON / OFF は言語で変わるので、開いたまま切り替えられても追従させる
         // (言語の選択肢はこの画面の中にあるので、開いたままの切り替えが普通に起きる)。
+        OnPropertyChanged(nameof(LaunchAtWindowsStartupStateText));
+        OnPropertyChanged(nameof(StartHotkeyHelperOnLaunchStateText));
+        OnPropertyChanged(nameof(LaunchVoicevoxOnLaunchStateText));
         OnPropertyChanged(nameof(StopAggregationInNonCombatAreasStateText));
         OnPropertyChanged(nameof(SplitEncountersOnNewPhasesStateText));
         OnPropertyChanged(nameof(KeepPastEncounterInMeterUntilNextDamageStateText));
@@ -649,6 +693,10 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             && left.WidgetWindowTopmostModeIndex == right.WidgetWindowTopmostModeIndex
             && left.WidgetDataStatusDisplayModeIndex == right.WidgetDataStatusDisplayModeIndex
             && left.WindowColorIndex == right.WindowColorIndex
+            && left.LaunchAtWindowsStartup == right.LaunchAtWindowsStartup
+            && left.StartHotkeyHelperOnLaunch == right.StartHotkeyHelperOnLaunch
+            && left.LaunchVoicevoxOnLaunch == right.LaunchVoicevoxOnLaunch
+            && string.Equals(left.VoicevoxInstallFolder, right.VoicevoxInstallFolder, StringComparison.OrdinalIgnoreCase)
             && left.StopAggregationInNonCombatAreas == right.StopAggregationInNonCombatAreas
             && left.SplitEncountersOnNewPhases == right.SplitEncountersOnNewPhases
             && left.KeepPastEncounterInMeterUntilNextDamage == right.KeepPastEncounterInMeterUntilNextDamage
@@ -705,6 +753,64 @@ public sealed partial class SettingsViewModel : ViewModelBase, IDisposable
             {
                 WindowsVoiceCheckRequested?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    // 起動設定もプレビューを持たない。Windows の登録は保存したときに書き、ほかはアプリの次の起動から効く。未保存の印だけ更新する。
+    partial void OnLaunchAtWindowsStartupChanged(bool value)
+    {
+        OnPropertyChanged(nameof(LaunchAtWindowsStartupStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnStartHotkeyHelperOnLaunchChanged(bool value)
+    {
+        OnPropertyChanged(nameof(StartHotkeyHelperOnLaunchStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnLaunchVoicevoxOnLaunchChanged(bool value)
+    {
+        OnPropertyChanged(nameof(LaunchVoicevoxOnLaunchStateText));
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    partial void OnVoicevoxInstallFolderChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasUnsavedChanges));
+    }
+
+    public string LaunchAtWindowsStartupStateText => GetSwitchStateText(LaunchAtWindowsStartup);
+
+    public string StartHotkeyHelperOnLaunchStateText => GetSwitchStateText(StartHotkeyHelperOnLaunch);
+
+    public string LaunchVoicevoxOnLaunchStateText => GetSwitchStateText(LaunchVoicevoxOnLaunch);
+
+    /// <summary>補助が使えるかが変わった(途中で止まったなど)。ホットキーのナビと節の出し方を合わせる。</summary>
+    private void HotkeyService_RegistrationChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(IsHotkeySectionVisible));
+    }
+
+    /// <summary>
+    /// 動いている VOICEVOX の場所でインストール先が保存された。表示と保存済みの控えの両方を保存した値に合わせる
+    /// (未保存の扱いにしない。画面で選んで保存していないフォルダーも、見つけた場所で置き換える)。
+    /// </summary>
+    private void ConfigManager_VoicevoxInstallFolderSaved(object? sender, EventArgs e)
+    {
+        var savedFolder = _configManager.AppConfig.Settings.VoicevoxInstallFolder;
+        _lastSavedSettings.VoicevoxInstallFolder = savedFolder;
+
+        _isLoadingSettings = true;
+        try
+        {
+            VoicevoxInstallFolder = savedFolder;
+        }
+        finally
+        {
+            _isLoadingSettings = false;
         }
 
         OnPropertyChanged(nameof(HasUnsavedChanges));

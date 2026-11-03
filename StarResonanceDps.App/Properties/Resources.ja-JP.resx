@@ -217,11 +217,12 @@
     <value>「{0}」を設定できませんでした(エラー{1})。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
-    <value>ゲームの操作中はホットキーが効きません。</value>
+    <value>ホットキーが無効になりました。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
     <value>ホットキー用の補助プログラムを起動できなかったか、途中で停止しました。
-アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ゲームの操作中も効くようになります。</value>
+アプリを起動し直してユーザーアカウント制御で「はい」を選ぶと、ホットキーが使えるようになります。
+ホットキーを使わない場合は、設定の「起動設定」で「アプリ起動時にホットキー補助プログラムを起動」をオフにしてください。</value>
   </data>
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>通知方法</value>
@@ -396,6 +397,45 @@
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基本設定</value>
+  </data>
+  <data name="Settings_Section_Startup_Title" xml:space="preserve">
+    <value>起動設定</value>
+  </data>
+  <data name="Settings_Startup_LaunchAtWindowsStartup" xml:space="preserve">
+    <value>Windows起動時にアプリを起動</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
+    <value>アプリ起動時にホットキー補助プログラムを起動</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper_Note" xml:space="preserve">
+    <value>※補助プログラムが起動しないとホットキーは無効になります</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox" xml:space="preserve">
+    <value>アプリ起動時にVOICEVOXを起動</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox_Note" xml:space="preserve">
+    <value>※VOICEVOXは日本語のみ対応</value>
+  </data>
+  <data name="Settings_Startup_VoicevoxInstallFolder" xml:space="preserve">
+    <value>インストール先</value>
+  </data>
+  <data name="Settings_Startup_SelectFolder" xml:space="preserve">
+    <value>フォルダを選択</value>
+  </data>
+  <data name="StartupSettings_Error_Title" xml:space="preserve">
+    <value>起動設定エラー</value>
+  </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
+    <value>Windows起動時の起動を設定できませんでした。</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
+    <value>VOICEVOX起動エラー</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Message" xml:space="preserve">
+    <value>VOICEVOXを起動できませんでした。</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
+    <value>設定の「起動設定」で、VOICEVOXのインストール先を確かめてください。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>

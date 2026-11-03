@@ -217,11 +217,12 @@
     <value>无法设置“{0}”(错误{1})。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
-    <value>游戏操作期间快捷键无效。</value>
+    <value>快捷键已停用。</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
     <value>快捷键辅助程序未能启动或已中途停止。
-重新启动应用并在用户帐户控制中选择“是”后，游戏操作期间也能使用快捷键。</value>
+重新启动应用并在用户帐户控制中选择“是”后，即可使用快捷键。
+如不使用快捷键，请在设置的“启动设置”中关闭“应用启动时运行快捷键辅助程序”。</value>
   </data>
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>通知方式</value>
@@ -396,6 +397,45 @@
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>基础设置</value>
+  </data>
+  <data name="Settings_Section_Startup_Title" xml:space="preserve">
+    <value>启动设置</value>
+  </data>
+  <data name="Settings_Startup_LaunchAtWindowsStartup" xml:space="preserve">
+    <value>Windows启动时运行应用</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
+    <value>应用启动时运行快捷键辅助程序</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper_Note" xml:space="preserve">
+    <value>※辅助程序未运行时快捷键将停用</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox" xml:space="preserve">
+    <value>应用启动时运行VOICEVOX</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox_Note" xml:space="preserve">
+    <value>※VOICEVOX仅支持日语</value>
+  </data>
+  <data name="Settings_Startup_VoicevoxInstallFolder" xml:space="preserve">
+    <value>安装路径</value>
+  </data>
+  <data name="Settings_Startup_SelectFolder" xml:space="preserve">
+    <value>选择文件夹</value>
+  </data>
+  <data name="StartupSettings_Error_Title" xml:space="preserve">
+    <value>启动设置错误</value>
+  </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
+    <value>无法设置Windows启动时运行。</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
+    <value>VOICEVOX启动错误</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Message" xml:space="preserve">
+    <value>无法启动VOICEVOX。</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
+    <value>请在设置的“启动设置”中确认VOICEVOX安装路径。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>监听网卡</value>

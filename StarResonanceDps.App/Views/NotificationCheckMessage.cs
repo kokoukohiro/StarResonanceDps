@@ -19,14 +19,18 @@ public static partial class NotificationCheckMessage
     /// 起動時。オンの読み上げの項目が使っている声を、声の種類ごとに1回ずつ確かめる。使っていなければ何もしない。
     /// VOICEVOX はエンジンに問い合わせるので待つ。
     /// </summary>
-    public static async Task CheckSpeechVoicesAsync(Window owner, NotificationsConfig notifications)
+    /// <param name="checksVoicevox">
+    /// VOICEVOX を確かめるか。この起動でアプリが VOICEVOX を起動したときは false(エンジンがまだ受け付けず必ずつながらないため。
+    /// エンジンを起動できなければ VOICEVOX 自身が知らせる)。
+    /// </param>
+    public static async Task CheckSpeechVoicesAsync(Window owner, NotificationsConfig notifications, bool checksVoicevox)
     {
         if (notifications.AnyEnabled(item => item.UsesWindowsVoice))
         {
             CheckWindowsVoice(owner);
         }
 
-        if (notifications.AnyEnabled(item => item.UsesVoicevox))
+        if (checksVoicevox && notifications.AnyEnabled(item => item.UsesVoicevox))
         {
             var result = await VoicevoxClient.CheckConnectionAsync();
             ShowVoicevoxFailure(owner, result);

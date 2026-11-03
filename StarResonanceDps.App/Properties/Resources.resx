@@ -217,11 +217,12 @@
     <value>Could not set "{0}" (error {1}).</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Message" xml:space="preserve">
-    <value>Hotkeys do not work while you are playing the game.</value>
+    <value>Hotkeys have been disabled.</value>
   </data>
   <data name="Hotkey_HelperUnavailable_Detail" xml:space="preserve">
     <value>The hotkey helper program could not start or stopped unexpectedly.
-Restart the app and select "Yes" in User Account Control to use hotkeys while playing.</value>
+Restart the app and select "Yes" in User Account Control to use hotkeys.
+If you do not use hotkeys, turn off "Launch hotkey helper at app startup" in Settings &gt; Startup.</value>
   </data>
   <data name="Settings_Notification_Method" xml:space="preserve">
     <value>Notification method</value>
@@ -396,6 +397,45 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="Settings_Section_Basic_Title" xml:space="preserve">
     <value>General</value>
+  </data>
+  <data name="Settings_Section_Startup_Title" xml:space="preserve">
+    <value>Startup</value>
+  </data>
+  <data name="Settings_Startup_LaunchAtWindowsStartup" xml:space="preserve">
+    <value>Launch app when Windows starts</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper" xml:space="preserve">
+    <value>Launch hotkey helper at app startup</value>
+  </data>
+  <data name="Settings_Startup_StartHotkeyHelper_Note" xml:space="preserve">
+    <value>Note: Hotkeys are disabled if the helper program is not running.</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox" xml:space="preserve">
+    <value>Launch VOICEVOX at app startup</value>
+  </data>
+  <data name="Settings_Startup_LaunchVoicevox_Note" xml:space="preserve">
+    <value>Note: VOICEVOX supports Japanese only.</value>
+  </data>
+  <data name="Settings_Startup_VoicevoxInstallFolder" xml:space="preserve">
+    <value>Install folder</value>
+  </data>
+  <data name="Settings_Startup_SelectFolder" xml:space="preserve">
+    <value>Select Folder</value>
+  </data>
+  <data name="StartupSettings_Error_Title" xml:space="preserve">
+    <value>Startup settings error</value>
+  </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
+    <value>Could not set the app to launch when Windows starts.</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
+    <value>VOICEVOX launch error</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Message" xml:space="preserve">
+    <value>Could not launch VOICEVOX.</value>
+  </data>
+  <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
+    <value>Check the VOICEVOX install folder in Settings &gt; Startup.</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>Network Adapter</value>

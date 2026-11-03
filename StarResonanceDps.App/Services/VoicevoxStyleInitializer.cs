@@ -1,4 +1,5 @@
 using System.IO;
+using System.Windows;
 using Serilog;
 using StarResonanceDps.App.Config;
 
@@ -93,9 +94,14 @@ public static class VoicevoxStyleInitializer
         InitializeSelectedStyles();
     }
 
-    /// <summary>エディタが起動した(エンジンも起動し直した)。覚えている初期化を捨て、通るまで送り直す。</summary>
+    /// <summary>
+    /// エディタが起動した(エンジンも起動し直した)。覚えている初期化を捨て、通るまで送り直す。
+    /// 起動設定の VOICEVOX のインストール先も、動いているエディタの場所に合わせる(設定の保存は UI スレッドで)。
+    /// </summary>
     private static void RuntimeInfo_Written(object sender, FileSystemEventArgs e)
     {
+        Application.Current?.Dispatcher.InvokeAsync(VoicevoxLauncher.UpdateInstallFolder);
+
         int generation;
         lock (Sync)
         {

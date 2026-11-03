@@ -64,6 +64,18 @@ public partial class MessagePreviewWindow : Window
         SettingsLoadFailureMessage.Show(this, AppDataPaths.AppSettingsPath);
     }
 
+    // 本物: 起動時のメイン窓・全体設定の保存(Windows起動時の起動を書けなかったとき)
+    private void WindowsStartupRegistrationFailed_Click(object sender, RoutedEventArgs e)
+    {
+        WindowsStartupRegistrationFailureMessage.Show(this);
+    }
+
+    // 本物: 起動時のメイン窓(起動設定で VOICEVOX を起動できなかったとき)
+    private void VoicevoxLaunchFailed_Click(object sender, RoutedEventArgs e)
+    {
+        VoicevoxLaunchFailureMessage.Show(this);
+    }
+
     // 本物: MainWindow(ホットキーの補助が使えなかったとき)
     private void HotkeyHelperUnavailable_Click(object sender, RoutedEventArgs e)
     {

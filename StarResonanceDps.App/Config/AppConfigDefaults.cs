@@ -131,6 +131,10 @@ public static class AppConfigDefaults
             NetCaptureDeviceName = CombatRuntimeSettings.AutomaticNetCaptureDeviceName,
             GameCapturePreference = EGameCapturePreference.Auto,
             GameCaptureCustomExeName = string.Empty,
+            LaunchAtWindowsStartup = false,
+            StartHotkeyHelperOnLaunch = true,
+            LaunchVoicevoxOnLaunch = false,
+            VoicevoxInstallFolder = string.Empty,
             StopAggregationInNonCombatAreas = true,
             SplitEncountersOnNewPhases = true,
             KeepPastEncounterInMeterUntilNextDamage = true,
@@ -331,6 +335,7 @@ public static class AppConfigDefaults
             ? CombatRuntimeSettings.AutomaticNetCaptureDeviceName
             : settings.NetCaptureDeviceName.Trim();
         settings.GameCaptureCustomExeName = settings.GameCaptureCustomExeName?.Trim() ?? string.Empty;
+        settings.VoicevoxInstallFolder = settings.VoicevoxInstallFolder?.Trim() ?? string.Empty;
 
         // 0 は無限。選べる最大は 99 件。
         settings.DatabaseMaxEncounterCount = Clamp(settings.DatabaseMaxEncounterCount, 0, 99);

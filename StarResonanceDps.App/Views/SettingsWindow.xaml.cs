@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
@@ -170,6 +172,34 @@ public partial class SettingsWindow : Window
     private void BasicNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(BasicSection);
+    }
+
+    private void StartupNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        ScrollToSection(StartupSection);
+    }
+
+    private void VoicevoxDownloadLink_Click(object sender, RoutedEventArgs e)
+    {
+        ExternalLinkOpener.Open(VoicevoxClient.DownloadPageUrl);
+    }
+
+    private void SelectVoicevoxInstallFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Multiselect = false
+        };
+
+        if (Directory.Exists(ViewModel.VoicevoxInstallFolder))
+        {
+            dialog.InitialDirectory = ViewModel.VoicevoxInstallFolder;
+        }
+
+        if (dialog.ShowDialog(this) == true)
+        {
+            ViewModel.VoicevoxInstallFolder = dialog.FolderName;
+        }
     }
 
     private void DisplayNavButton_Click(object sender, RoutedEventArgs e)
@@ -344,6 +374,11 @@ public partial class SettingsWindow : Window
         CommitBenchmarkDurationEdit();
         var hotkeyFailures = ViewModel.SaveSettings();
         HotkeyRegistrationFailureMessage.Show(this, hotkeyFailures);
+        if (!ViewModel.ApplyWindowsStartupRegistration())
+        {
+            WindowsStartupRegistrationFailureMessage.Show(this);
+        }
+
         Close();
     }
 

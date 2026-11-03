@@ -54,6 +54,15 @@
                             </StackPanel>
                         </Button>
 
+                        <Button x:Name="StartupNavButton"
+                                Click="StartupNavButton_Click"
+                                Style="{StaticResource Button.Sidebar}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Power}" />
+                                <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Startup_Title]}" />
+                            </StackPanel>
+                        </Button>
+
                         <Button x:Name="DisplayNavButton"
                                 Click="DisplayNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -83,7 +92,8 @@
 
                         <Button x:Name="HotkeyNavButton"
                                 Click="HotkeyNavButton_Click"
-                                Style="{StaticResource Button.Sidebar}">
+                                Style="{StaticResource Button.Sidebar}"
+                                Visibility="{Binding IsHotkeySectionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.Hotkey}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Hotkeys_Title]}" />
@@ -217,6 +227,231 @@
                                                          Text="{Binding GameCaptureCustomExeName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
                                                          KeyDown="GameCaptureCustomExeNameTextBox_KeyDown"
                                                          VerticalContentAlignment="Center" />
+                                            </Grid>
+                                        </Border>
+                                    </StackPanel>
+                                </ContentControl>
+
+                                <TextBlock x:Name="StartupSection"
+                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Startup_Title]}"
+                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,10" />
+                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <Border Style="{StaticResource Panel.SettingField}">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBlock Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_LaunchAtWindowsStartup]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding LaunchAtWindowsStartup, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding LaunchAtWindowsStartupStateText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- 行の名前と注記の2行。形と高さは集計設定の2行の行と同じ。 -->
+                                        <Border Style="{StaticResource Panel.SettingField}" Height="75">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_StartHotkeyHelper]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_StartHotkeyHelper_Note]}"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap" />
+
+                                                <StackPanel Grid.Row="0"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding StartHotkeyHelperOnLaunch, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding StartHotkeyHelperOnLaunchStateText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!--
+                                            オフのときは行の名前と、注記とダウンロードのリンクの2行(形と高さは集計設定の2行の行と同じ)。
+                                            オンのときは下にインストール先の行が続き、注記とリンクはそちらの2行目へ移るので1行で、下線を引く。
+                                        -->
+                                        <Border>
+                                            <Border.Style>
+                                                <Style TargetType="Border" BasedOn="{StaticResource Panel.SettingField}">
+                                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding LaunchVoicevoxOnLaunch}" Value="False">
+                                                            <Setter Property="Height" Value="75" />
+                                                            <Setter Property="BorderThickness" Value="0" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="0"
+                                                           Grid.Column="0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_LaunchVoicevox]}"
+                                                           Foreground="{DynamicResource Brush.TextPrimary}"
+                                                           FontSize="14"
+                                                           FontWeight="SemiBold" />
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.Column="0"
+                                                           Margin="0,4,0,0"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                                            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding LaunchVoicevoxOnLaunch}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                    <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_LaunchVoicevox_Note], Mode=OneWay}" />
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                                        <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                </TextBlock>
+
+                                                <StackPanel Grid.Row="0"
+                                                            Grid.Column="1"
+                                                            Orientation="Horizontal"
+                                                            VerticalAlignment="Center">
+                                                    <ToggleButton Style="{StaticResource Input.Switch}"
+                                                                  IsChecked="{Binding LaunchVoicevoxOnLaunch, Mode=TwoWay}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               MinWidth="28"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold"
+                                                               Text="{Binding LaunchVoicevoxOnLaunchStateText}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
+                                        <!--
+                                            1行目の作りは背景画像の行(ウィジェット設定)と同じ。欄は手で選ぶほか、動いている VOICEVOX を見たら場所が入る。
+                                            2行目は上の行から移った注記とダウンロードのリンク(通知設定の話者とスタイルの行の注記と同じ組み方)。
+                                        -->
+                                        <Border Style="{StaticResource Panel.SettingFieldLast}"
+                                                Height="75"
+                                                Visibility="{Binding LaunchVoicevoxOnLaunch, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="134" />
+                                                    <ColumnDefinition Width="12" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Grid.Row="1"
+                                                           Grid.ColumnSpan="3"
+                                                           Margin="0,4,0,0"
+                                                           Foreground="{DynamicResource Brush.TextSecondary}"
+                                                           FontSize="13"
+                                                           FontWeight="SemiBold"
+                                                           TextWrapping="Wrap">
+                                                    <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_LaunchVoicevox_Note], Mode=OneWay}" />
+                                                    <Run Text="  " />
+                                                    <Hyperlink Style="{StaticResource Hyperlink.Inline}" Click="VoicevoxDownloadLink_Click">
+                                                        <Run Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Notification_VoicevoxDownload], Mode=OneWay}" />
+                                                    </Hyperlink>
+                                                </TextBlock>
+
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_VoicevoxInstallFolder]}"
+                                                               Foreground="{DynamicResource Brush.TextPrimary}"
+                                                               FontSize="14"
+                                                               FontWeight="SemiBold" />
+                                                </StackPanel>
+
+                                                <Grid Grid.Column="2" VerticalAlignment="Center">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="10" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <TextBox Grid.Column="0"
+                                                             Width="Auto"
+                                                             Height="32"
+                                                             IsReadOnly="True"
+                                                             Style="{StaticResource Input.PathBox}"
+                                                             Text="{Binding VoicevoxInstallFolder, Mode=OneWay}" />
+
+                                                    <Button Grid.Column="2"
+                                                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Startup_SelectFolder]}"
+                                                            Style="{StaticResource Button.Text}"
+                                                            Click="SelectVoicevoxInstallFolderButton_Click" />
+                                                </Grid>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
@@ -778,13 +1013,17 @@
                                     </StackPanel>
                                 </ContentControl>
 
+                                <!-- ホットキーの補助が使えない間(起動設定でオフ・起動できない・途中で止まった)はホットキーが無効なので、見出しと節を隠す。 -->
                                 <TextBlock x:Name="HotkeySection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Hotkeys_Title]}"
                                            Foreground="{DynamicResource Brush.TextPrimary}"
                                            FontSize="16"
                                            FontWeight="SemiBold"
-                                           Margin="0,0,0,10" />
-                                <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                                           Margin="0,0,0,10"
+                                           Visibility="{Binding IsHotkeySectionVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                <ContentControl Style="{StaticResource Panel.SettingSection}"
+                                                Margin="0,0,0,12"
+                                                Visibility="{Binding IsHotkeySectionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <ItemsControl ItemsSource="{Binding HotkeyItems}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>

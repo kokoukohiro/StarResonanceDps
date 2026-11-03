@@ -47,6 +47,23 @@ public sealed class SettingsConfig
     public EGameCapturePreference GameCapturePreference { get; set; } = EGameCapturePreference.Auto;
     public string GameCaptureCustomExeName { get; set; } = string.Empty;
 
+    // --- 起動設定 ---
+
+    /// <summary>Windows にサインインしたときにアプリを起動する。反映は <c>WindowsStartupRegistration</c>(保存時とアプリの起動時)。</summary>
+    public bool LaunchAtWindowsStartup { get; set; }
+
+    /// <summary>アプリの起動時にホットキーの補助を起動する。オフなら補助を起動せず、ホットキーは無効。次の起動から効く。</summary>
+    public bool StartHotkeyHelperOnLaunch { get; set; } = true;
+
+    /// <summary>アプリの起動時に VOICEVOX を起動する(動いていなければ)。次の起動から効く。</summary>
+    public bool LaunchVoicevoxOnLaunch { get; set; }
+
+    /// <summary>
+    /// VOICEVOX のインストール先のフォルダー(中の <c>VOICEVOX.exe</c> を起動する)。空は未設定。
+    /// 動いている VOICEVOX を見たらそのフォルダーに書き換える(<c>VoicevoxLauncher.UpdateInstallFolder</c>)。
+    /// </summary>
+    public string VoicevoxInstallFolder { get; set; } = string.Empty;
+
     // --- 集計設定 ---
 
     /// <summary>非戦闘エリア(アステルリーズ・ホームガーデン・ホームハウス)では戦闘の時計を立てず、何も記録しない。</summary>
@@ -106,6 +123,10 @@ public sealed class SettingsConfig
             NetCaptureDeviceName = NetCaptureDeviceName,
             GameCapturePreference = GameCapturePreference,
             GameCaptureCustomExeName = GameCaptureCustomExeName,
+            LaunchAtWindowsStartup = LaunchAtWindowsStartup,
+            StartHotkeyHelperOnLaunch = StartHotkeyHelperOnLaunch,
+            LaunchVoicevoxOnLaunch = LaunchVoicevoxOnLaunch,
+            VoicevoxInstallFolder = VoicevoxInstallFolder,
             StopAggregationInNonCombatAreas = StopAggregationInNonCombatAreas,
             SplitEncountersOnNewPhases = SplitEncountersOnNewPhases,
             KeepPastEncounterInMeterUntilNextDamage = KeepPastEncounterInMeterUntilNextDamage,

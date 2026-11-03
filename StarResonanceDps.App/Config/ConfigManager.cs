@@ -43,6 +43,9 @@ public sealed class ConfigManager
     /// <summary><see cref="SavePlayerNameDisplayModeIndex"/> が保存した。開いている全体設定の画面が表示と保存済みの控えを合わせる。</summary>
     public event EventHandler? PlayerNameDisplayModeSaved;
 
+    /// <summary><see cref="SaveVoicevoxInstallFolder"/> が保存した。開いている全体設定の画面が表示と保存済みの控えを合わせる。</summary>
+    public event EventHandler? VoicevoxInstallFolderSaved;
+
     /// <summary><see cref="SaveNotifications"/> が保存した(通知タブの値が変わった)。</summary>
     public event EventHandler? NotificationsChanged;
 
@@ -123,6 +126,23 @@ public sealed class ConfigManager
         Save();
         PlayerNameDisplayModeSaved?.Invoke(this, EventArgs.Empty);
         SettingsPreviewChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 起動設定「VOICEVOXのインストール先」だけを書き換えて保存する。見つけた VOICEVOX の場所を入れるときに使う。
+    /// 全体設定の画面で変更中の値(プレビュー)があれば、その中の同じ項目も合わせる。
+    /// ほかの項目のプレビューは保存しない(画面の未保存の変更を巻き込まない)。
+    /// </summary>
+    public void SaveVoicevoxInstallFolder(string folder)
+    {
+        AppConfig.Settings.VoicevoxInstallFolder = folder;
+        if (_settingsPreview is not null)
+        {
+            _settingsPreview.VoicevoxInstallFolder = folder;
+        }
+
+        Save();
+        VoicevoxInstallFolderSaved?.Invoke(this, EventArgs.Empty);
     }
 
     public void SaveColorPicker(ColorPickerConfig colorPicker)

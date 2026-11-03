@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace StarResonanceDps.HotkeyHost;
 
 /// <summary>
-/// 低レベルのキーボードフック(<c>WH_KEYBOARD_LL</c>)でホットキーを受ける。補助と本体の両方がこのファイルをコンパイルする。
+/// 低レベルのキーボードフック(<c>WH_KEYBOARD_LL</c>)でホットキーを受ける。
 ///
 /// <para>
 /// 割り当てたキーが押されたら前面の窓のプロセスを見て、ゲームかこのアプリ(<c>ownerProcessId</c>)のときだけ番号を知らせ、

@@ -23,8 +23,9 @@ internal sealed class HotkeyHelperException(string message, Exception? innerExce
 
 /// <summary>
 /// 補助(StarResonanceDps.HotkeyHost.exe)にキーを受けるのを任せる。補助は管理者権限で動くので、
-/// ゲームが管理者権限で前面にあってもキーを受ける。
+/// ゲームが管理者権限で前面にあってもキーを受ける。受けるのはゲームかこのアプリが前面のときだけ(補助の <c>KeyboardHotkeyHook</c>)。
 /// このアプリが名前付きパイプのサーバーになり、補助を起動してつながせる(取り決めは <see cref="HotkeyHostProtocol"/>)。
+/// 番号・修飾(<c>MOD_*</c>)・仮想キーは <c>RegisterHotKey</c> と同じ値。
 ///
 /// <para>
 /// 呼ぶのは UI スレッドだけ。返事は同期で待つ。<see cref="Pressed"/> と <see cref="Lost"/> は UI スレッドで後から上がる。
@@ -32,7 +33,7 @@ internal sealed class HotkeyHelperException(string message, Exception? innerExce
 /// (命令の合間に切れたときは <see cref="Lost"/>)。一度使えなくなったら戻らない。
 /// </para>
 /// </summary>
-internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
+internal sealed class HelperHotkeyRegistrar : IDisposable
 {
     private const int ErrorCancelled = 1223;
     private const int ExitWaitMilliseconds = 1000;
@@ -69,6 +70,7 @@ internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
         }.Start();
     }
 
+    /// <summary>キーが押された。番号は割り当てたときのもの。UI スレッドで上がる。</summary>
     public event Action<int>? Pressed;
 
     /// <summary>命令の合間に補助との接続が切れた。</summary>
@@ -144,6 +146,7 @@ internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
         }
     }
 
+    /// <summary>割り当てを足す。足せたら 0、足せなければ Windows のエラー番号(ほかのアプリが同じキーを登録しているときなど)。</summary>
     public int Register(int id, uint modifiers, uint virtualKey)
     {
         return Request(string.Join(
@@ -159,6 +162,7 @@ internal sealed class HelperHotkeyRegistrar : IHotkeyRegistrar
         Request($"{HotkeyHostProtocol.Unregister} {id.ToString(CultureInfo.InvariantCulture)}");
     }
 
+    /// <summary>ゲームとして扱うプロセス名(拡張子なし)。</summary>
     public void SetGameProcessNames(IReadOnlyList<string> names)
     {
         Request(HotkeyHostProtocol.ClearGameProcessNames);

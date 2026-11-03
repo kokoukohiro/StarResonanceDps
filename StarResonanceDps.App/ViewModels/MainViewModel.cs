@@ -800,12 +800,14 @@ public sealed partial class MainViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// 保存してあるホットキーを登録する(起動時)。登録できなかったものを返す。
+    /// 起動設定に従って補助を起動し、保存してあるホットキーを登録する(起動時)。登録できなかったものを返す。
     /// 全体設定での登録(プレビュー・リセット・保存・保存せずに閉じる)は全体設定の画面が行う。
     /// </summary>
     public IReadOnlyList<HotkeyRegistrationFailure> ApplyHotkeys()
     {
-        return _hotkeyService.Apply(_configManager.GetSettingsSnapshot().Hotkeys);
+        var settings = _configManager.GetSettingsSnapshot();
+        _hotkeyService.Start(settings.StartHotkeyHelperOnLaunch);
+        return _hotkeyService.Apply(settings.Hotkeys);
     }
 
     private void HotkeyService_Pressed(HotkeyAction action)

@@ -88,7 +88,8 @@ public partial class MainWindow : Window
     /// </para>
     ///
     /// <para>
-    /// 起動できないときはその窓を出して終わる。続けるときは、設定ファイルの知らせ → ウィジェットの復元 → ホットキー →
+    /// 起動できないときはその窓を出して終わる。続けるときは、設定ファイルの知らせ → Windows起動の登録を合わせる →
+    /// ウィジェットの復元 → ホットキー(起動設定でオンなら補助を起動) → VOICEVOX の起動(起動設定でオンなら) →
     /// VOICEVOX の初期化 → 古い Npcap の確認 → 読み上げの声の確認、の順。1つの処理に直列なので、途中で
     /// メッセージが回ってもこの順は崩れない。
     /// </para>
@@ -118,12 +119,20 @@ public partial class MainWindow : Window
         // 起動時に読めなかった設定ファイルを知らせる。ウィジェットを開く前に出す(開くとウィジェットの設定が保存され、壊れたファイルが上書きされる)。
         SettingsLoadFailureMessage.Show(this);
 
+        // フォルダーを動かしたときに場所を合わせるため、起動のたびに書き直す。
+        if (!WindowsStartupRegistration.Apply(ConfigManager.Instance.GetSettingsSnapshot().LaunchAtWindowsStartup))
+        {
+            WindowsStartupRegistrationFailureMessage.Show(this);
+        }
+
         viewModel.RestoreRunningWidgetWindows();
 
         // ホットキーの補助が使えなかったこと・登録できなかったホットキーはここで知らせる
         // (メッセージの親にこの窓が要るので、開いた後に登録する)。
         GlobalHotkeyService.Instance.HelperUnavailable += HotkeyService_HelperUnavailable;
         HotkeyRegistrationFailureMessage.Show(this, viewModel.ApplyHotkeys());
+
+        var hasLaunchedVoicevox = LaunchVoicevoxOnStartup();
 
         // 読み上げに使う VOICEVOX のスタイルを、最初の通知より前に初期化しておく(返事は待たない)。
         VoicevoxStyleInitializer.Start();
@@ -135,10 +144,35 @@ public partial class MainWindow : Window
         }
 
         // 読み上げの声が使えなければ知らせる(オンの読み上げの項目が無ければ何もしない)。
-        await NotificationCheckMessage.CheckSpeechVoicesAsync(this, ConfigManager.Instance.GetNotificationsSnapshot());
+        await NotificationCheckMessage.CheckSpeechVoicesAsync(
+            this,
+            ConfigManager.Instance.GetNotificationsSnapshot(),
+            checksVoicevox: !hasLaunchedVoicevox);
     }
 
-    private void HotkeyService_HelperUnavailable(IReadOnlyList<HotkeyRegistrationFailure> failures)
+    /// <summary>
+    /// 起動設定の VOICEVOX のインストール先を見つけた場所に合わせ、オンなら VOICEVOX を起動する(動いていなければ)。
+    /// 起動できなければ知らせる。この処理で起動したかを返す。
+    /// </summary>
+    private bool LaunchVoicevoxOnStartup()
+    {
+        VoicevoxLauncher.UpdateInstallFolder();
+        var settings = ConfigManager.Instance.GetSettingsSnapshot();
+        if (!settings.LaunchVoicevoxOnLaunch)
+        {
+            return false;
+        }
+
+        var result = VoicevoxLauncher.LaunchOnStartup(settings.VoicevoxInstallFolder);
+        if (result == VoicevoxLaunchResult.Failed)
+        {
+            VoicevoxLaunchFailureMessage.Show(this);
+        }
+
+        return result == VoicevoxLaunchResult.Launched;
+    }
+
+    private void HotkeyService_HelperUnavailable(object? sender, EventArgs e)
     {
         var localization = LocalizationManager.Instance;
         MessageWindow.Show(
@@ -146,7 +180,6 @@ public partial class MainWindow : Window
             localization.GetString("Hotkey_Error_Title"),
             localization.GetString("Hotkey_HelperUnavailable_Message"),
             localization.GetString("Hotkey_HelperUnavailable_Detail"));
-        HotkeyRegistrationFailureMessage.Show(this, failures);
     }
 
 #if DEBUG
