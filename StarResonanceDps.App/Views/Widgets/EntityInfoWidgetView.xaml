@@ -162,7 +162,9 @@
                            VerticalAlignment="Center"
                            Style="{StaticResource Icon.CombatStateMask}"
                            Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
-                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           behaviors:ToolTipBehavior.IsEnabled="True"
+                           behaviors:ToolTipBehavior.KeepsOnClick="True">
                     <Rectangle.ToolTip>
                         <ToolTip Style="{StaticResource ToolTip.WidgetWindowInfo}">
                             <TextBlock Style="{StaticResource Text.WidgetWindow}"
@@ -395,7 +397,9 @@
                            OpacityMask="{x:Static services:HateBadgeImages.TargetMask}"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            Visibility="{Binding IsTarget, Converter={StaticResource BooleanToVisibilityConverter}}"
-                           Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                           Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                           behaviors:ToolTipBehavior.IsEnabled="True"
+                           behaviors:ToolTipBehavior.KeepsOnClick="True">
                     <Rectangle.ToolTip>
                         <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                  Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -469,7 +473,9 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Fill="Transparent"
-                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                               behaviors:ToolTipBehavior.IsEnabled="True"
+                               behaviors:ToolTipBehavior.KeepsOnClick="True">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -490,7 +496,9 @@
                                OpacityMask="{Binding ClassIconMask}"
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Effect="{StaticResource Effect.ProfessionIconShadow}"
-                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                               Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                               behaviors:ToolTipBehavior.IsEnabled="True"
+                               behaviors:ToolTipBehavior.KeepsOnClick="True">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -510,7 +518,9 @@
                                        FontWeight="SemiBold"
                                        Text="{Binding PlayerName}"
                                        TextTrimming="CharacterEllipsis"
-                                       Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                                       Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                                       behaviors:ToolTipBehavior.IsEnabled="True"
+                                       behaviors:ToolTipBehavior.KeepsOnClick="True">
                                 <TextBlock.ToolTip>
                                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                              Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -587,7 +597,8 @@
                 </Button.Style>
 
                 <Grid Background="Transparent"
-                      Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}">
+                      Tag="{Binding DataContext.Widget, RelativeSource={RelativeSource AncestorType={x:Type local:EntityInfoWidgetView}}}"
+                      behaviors:ToolTipBehavior.IsEnabled="True">
                     <Grid.ToolTip>
                         <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                  Style="{StaticResource ToolTip.WidgetWindowInfo}">

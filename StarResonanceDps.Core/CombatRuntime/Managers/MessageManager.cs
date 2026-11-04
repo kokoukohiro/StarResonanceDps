@@ -226,6 +226,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             SocialDataStore.ResetToStartup();
             SelfEquipmentStore.ResetSelfToStartup();
             SelfModuleStore.ResetSelfToStartup();
+            SelfSeasonCultivateStore.ResetSelfToStartup();
             PlayerSkillLevelStateStore.ResetSelfToStartup();
             SelfAttributeChangeStore.Clear();
 
@@ -3822,6 +3823,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             SelfEquipmentStore.ReplaceSelf(vData.Equip, vData.ItemPackage);
             SelfModuleStore.ReplaceSelf(vData.Mod, vData.ItemPackage);
+            SelfSeasonCultivateStore.ReplaceSelf(vData.SeasonCultivateLineData);
 
             if (vData.Equip != null)
             {
@@ -3874,6 +3876,11 @@ namespace StarResonanceDps.Core.CombatRuntime
                 if (ser.Mod is not null || ser.ItemPackage is not null)
                 {
                     SelfModuleStore.ApplySelfChanges(ser.Mod, ser.ItemPackage);
+                }
+
+                if (ser.SeasonCultivateLineData is not null)
+                {
+                    SelfSeasonCultivateStore.ApplySelfChanges(ser.SeasonCultivateLineData);
                 }
 
                 if (ser.CharBaseInfo != null)

@@ -1,0 +1,128 @@
+{
+  "1110": {
+    "zh-CN": "力量加持",
+    "en-US": "Strength Boost",
+    "ja-JP": "筋力強化",
+    "ko-KR": "힘 강화"
+  },
+  "1111": {
+    "zh-CN": "敏捷加持",
+    "en-US": "Agility Boost",
+    "ja-JP": "敏捷強化",
+    "ko-KR": "민첩 강화"
+  },
+  "1112": {
+    "zh-CN": "智力加持",
+    "en-US": "Intellect Boost",
+    "ja-JP": "知力強化",
+    "ko-KR": "지력 강화"
+  },
+  "1113": {
+    "zh-CN": "特攻伤害加持",
+    "en-US": "Special Attack",
+    "ja-JP": "特攻ダメージ強化",
+    "ko-KR": "특수 공격 대미지 강화"
+  },
+  "1114": {
+    "zh-CN": "精英打击",
+    "en-US": "Elite Strike",
+    "ja-JP": "精鋭打撃",
+    "ko-KR": "엘리트 타격"
+  },
+  "1205": {
+    "zh-CN": "特攻治疗加持",
+    "en-US": "Healing Boost",
+    "ja-JP": "特攻回復強化",
+    "ko-KR": "특수 공격 치료 강화"
+  },
+  "1206": {
+    "zh-CN": "专精治疗加持",
+    "en-US": "Healing Enhance",
+    "ja-JP": "マスタリー回復強化",
+    "ko-KR": "마스터리 치료 강화"
+  },
+  "1307": {
+    "zh-CN": "抵御魔法",
+    "en-US": "Resistance",
+    "ja-JP": "魔法耐性",
+    "ko-KR": "마법 저항"
+  },
+  "1308": {
+    "zh-CN": "抵御物理",
+    "en-US": "Armor",
+    "ja-JP": "物理耐性",
+    "ko-KR": "물리 저항"
+  },
+  "1407": {
+    "zh-CN": "施法专注",
+    "en-US": "Cast Focus",
+    "ja-JP": "集中・詠唱",
+    "ko-KR": "스킬 시전 집중력"
+  },
+  "1408": {
+    "zh-CN": "攻速专注",
+    "en-US": "Attack SPD",
+    "ja-JP": "集中・攻撃速度",
+    "ko-KR": "공격 속도 집중력"
+  },
+  "1409": {
+    "zh-CN": "暴击专注",
+    "en-US": "Crit Focus",
+    "ja-JP": "集中・会心",
+    "ko-KR": "치명타 집중력"
+  },
+  "1410": {
+    "zh-CN": "幸运专注",
+    "en-US": "Luck Focus",
+    "ja-JP": "集中・幸運",
+    "ko-KR": "행운 집중력"
+  },
+  "2104": {
+    "zh-CN": "极·伤害叠加",
+    "en-US": "DMG Stack",
+    "ja-JP": "極・ダメージ増強",
+    "ko-KR": "극・대미지 중첩"
+  },
+  "2105": {
+    "zh-CN": "极·灵活身法",
+    "en-US": "Agile",
+    "ja-JP": "極・適応力",
+    "ko-KR": "극・유연한 신법"
+  },
+  "2204": {
+    "zh-CN": "极·生命凝聚",
+    "en-US": "Life Condense",
+    "ja-JP": "極・HP凝縮",
+    "ko-KR": "극・체력 응집"
+  },
+  "2205": {
+    "zh-CN": "极·急救措施",
+    "en-US": "First Aid",
+    "ja-JP": "極・応急処置",
+    "ko-KR": "극・응급 처치"
+  },
+  "2304": {
+    "zh-CN": "极·绝境守护",
+    "en-US": "Final Protection",
+    "ja-JP": "極・絶境守護",
+    "ko-KR": "극・절경 수호"
+  },
+  "2404": {
+    "zh-CN": "极·生命波动",
+    "en-US": "Life Wave",
+    "ja-JP": "極・HP変動",
+    "ko-KR": "극・생명 파동"
+  },
+  "2405": {
+    "zh-CN": "极·生命吸取",
+    "en-US": "Life Steal",
+    "ja-JP": "極・HP吸収",
+    "ko-KR": "극・생명 흡수"
+  },
+  "2406": {
+    "zh-CN": "极·全队幸暴",
+    "en-US": "Team Luck & Crit",
+    "ja-JP": "極・幸運会心",
+    "ko-KR": "극・팀 전체 행운 치명타"
+  }
+}

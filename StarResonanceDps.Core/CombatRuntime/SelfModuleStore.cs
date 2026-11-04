@@ -38,6 +38,11 @@ public static class SelfModuleStore
     private static readonly Dictionary<long, ItemState> Items = [];
     private static bool _hasState;
 
+    /// <summary>
+    /// 装着中の枠のモジュールの、効果ごとのリンク数の和(<see cref="GetEquippedEffectLinks"/>)。中身が変わったら捨て、次に読むときに作り直す。
+    /// </summary>
+    private static IReadOnlyList<SelfModuleEffect>? _equippedEffectLinks;
+
     /// <summary>自分のモジュールが変わった。パケット処理のスレッドから呼ばれる。</summary>
     public static event Action? Changed;
 
@@ -69,6 +74,7 @@ public static class SelfModuleStore
             }
 
             _hasState = true;
+            _equippedEffectLinks = null;
             WarnMissingLinkCounts(Items);
         }
 
@@ -100,6 +106,11 @@ public static class SelfModuleStore
                 ApplySlotChanges(slotChanges);
                 changed = true;
             }
+
+            if (changed)
+            {
+                _equippedEffectLinks = null;
+            }
         }
 
         if (changed)
@@ -119,6 +130,7 @@ public static class SelfModuleStore
             SlotItems.Clear();
             Items.Clear();
             _hasState = false;
+            _equippedEffectLinks = null;
         }
 
         Changed?.Invoke();
@@ -140,6 +152,48 @@ public static class SelfModuleStore
                 .ToList();
             return new SelfModuleInventory(modules, new Dictionary<int, long>(SlotItems));
         }
+    }
+
+    /// <summary>
+    /// 装着中の枠のモジュールの、効果ごとのリンク数の和(効果の番号の順)。和に入るリンク数が1つでも届いていない効果は <c>null</c>。
+    /// 全体コンテナがまだなら <c>null</c>。中身が変わるまでは同じ一覧を返す。
+    /// </summary>
+    public static IReadOnlyList<SelfModuleEffect>? GetEquippedEffectLinks()
+    {
+        lock (StateLock)
+        {
+            if (!_hasState)
+            {
+                return null;
+            }
+
+            return _equippedEffectLinks ??= SumEquippedEffectLinks();
+        }
+    }
+
+    private static IReadOnlyList<SelfModuleEffect> SumEquippedEffectLinks()
+    {
+        var totals = new SortedDictionary<int, int?>();
+        foreach (var (slot, uuid) in SlotItems)
+        {
+            if (!Items.TryGetValue(uuid, out var state))
+            {
+                Serilog.Log.Warning(
+                    "Equipped module {Uuid} in slot {Slot} is not in the module bag; its effects are not counted",
+                    uuid,
+                    slot);
+                continue;
+            }
+
+            foreach (var effect in state.ToModule(uuid).Effects)
+            {
+                totals[effect.EffectId] = totals.TryGetValue(effect.EffectId, out var total)
+                    ? total + effect.LinkCount
+                    : effect.LinkCount;
+            }
+        }
+
+        return totals.Select(pair => new SelfModuleEffect(pair.Key, pair.Value)).ToList();
     }
 
     private static bool TouchesModulePackage(BlobHashMapDelta<int, BinaryPackage> changes)

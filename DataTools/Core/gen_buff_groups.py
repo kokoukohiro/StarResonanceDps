@@ -4,39 +4,39 @@
   Data/Localization/CuisineBuffs.json
   Data/Localization/PotionBuffs.json
 
-料理・薬剤は食べ直すたびに別のIDへ入れ替わるので、アプリは個別のIDではなくまとまりとして追う。
+料理・薬剤は使い直すたびに別のIDへ入れ替わるので、アプリは個別のIDではなくまとまりとして扱う。
 この2つにあるバフが、それぞれ料理・薬剤のまとまりになる。形はほかの名前テーブルと同じ。
 
-**選ぶ条件は `BuffTable` の2つの項目だけ。名前は見ない。**
+**選ぶ条件は`BuffTable`の2つの項目だけ。名前は見ない。**
 
-- `Tags` に消耗品のタグを持つ
-- アイコン(`ShowHUDIcon`、空なら `Icon`)が料理のアイコンなら料理、薬剤のアイコンなら薬剤
+- `Tags`に消耗品のタグを持つ
+- アイコン(`ShowHUDIcon`、空なら`Icon`)が料理のアイコンなら料理、薬剤のアイコンなら薬剤
 
 アイコンだけでは、料理・薬剤でないバフも同じアイコンを使っていて混ざる。タグを併せると料理・薬剤だけになる。
 
-**名前はそのバフを付けるアイテムの名前。** バフ自身の名前は料理・薬剤の1語に丸められている。
-料理の表(`CookCuisineTable`)・薬剤の表(`ChemistryCuisineTable`)の行の `Id` がアイテムの `Id` で、`BuffPar` の先頭がそのアイテムが付けるバフ。
+**名前はそのバフを付けるアイテムの名前。**バフ自身の名前は料理・薬剤の1語だけ。
+料理の表(`CookCuisineTable`)・薬剤の表(`ChemistryCuisineTable`)の行の`Id`がアイテムの`Id`で、`BuffPar`の各要素の先頭がそのアイテムが付けるバフ。
 
 - 付けるアイテムが1つなら、その名前
-- 複数なら、アイテムの `Id` の順に ` / ` でつなぐ(どのアイテムで付いたかはバフからは決まらない)
+- 複数なら、アイテムの`Id`の順に` / `でつなぐ(どのアイテムで付いたかはバフからは決まらない)
 - 無ければ、バフ自身の名前
 
-言語ごとに、つなぐ名前が1つでも空なら、その言語は空にする(表示時に zh-CN へ落ちる)。
+言語ごとに、つなぐ名前が1つでも空なら、その言語は空にする(表示時にzh-CNにフォールバックする)。
 
-**出力は `Star` で作る。** 次のときは書かずに止まる。
+**出力は`Star`で作る。**次のときは書かずに止まる。
 
-- `StarASIA` にだけある料理・薬剤のバフがある、料理と薬剤が入れ替わっている
-- 料理・薬剤の表に、`StarASIA` にだけある行か、付けるバフが `Star` と違う行がある
+- `StarASIA`にだけある料理・薬剤のバフがある、料理と薬剤が入れ替わっている
+- 料理・薬剤の表に、`StarASIA`にだけある行か、付けるバフが`Star`と違う行がある
 - 料理・薬剤の表の行が、アイテムの表に無い
 """
 import sys
 
-# _common を読み込む前に置く(後ろだと __pycache__ が作られる)
+# _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
 from _common import LANGS, SOURCES, TABLES_ENV, name_of, table, table_of_source, write_localized
 
-# 出力を作る出所。ほかの出所の料理・薬剤を全部含んでいることを実行のたびに確かめる。
+# 出力を作るデータソース。ほかのデータソースの料理・薬剤を全部含んでいることを実行のたびに確かめる。
 PRIMARY_SOURCE = "Star"
 
 # 選ぶ条件を読む言語フォルダ。タグとアイコンは言語で変わらない。
@@ -47,7 +47,7 @@ CONSUMABLE_TAG = 100
 # アイコン名に含まれる語 → まとまり。
 GROUP_ICONS = (("buff_food_up", "Cuisine"), ("buff_agentia_up", "Potion"))
 
-# アイテムが付けるバフを持つ表。行の Id がアイテムの Id。
+# アイテムが付けるバフを持つ表。行のIdがアイテムのId。
 ITEM_BUFF_TABLES = ("CookCuisineTable", "ChemistryCuisineTable")
 
 # 付けるアイテムが複数あるときの区切り。
@@ -60,7 +60,7 @@ def raw_table(source, name):
     found = table_of_source(source, SELECTION_LANG_DIR, name)
     if found is None:
         raise FileNotFoundError(
-            "%s の %s/%s が無い。入力の置き場は環境変数 %s か、_common.py の TABLES_DIR で設定する"
+            "%sの%s/%sが無い。入力の置き場は環境変数%sか、_common.pyのTABLES_DIRで設定する"
             % (source, SELECTION_LANG_DIR, name, TABLES_ENV))
     return found
 
@@ -70,25 +70,25 @@ def icon_of(row):
 
 
 def group_of(buff_id, row):
-    """料理なら "Cuisine"、薬剤なら "Potion"、どちらでもなければ None。"""
+    """料理なら "Cuisine"、薬剤なら "Potion"、どちらでもなければNone。"""
     if CONSUMABLE_TAG not in (row.get("Tags") or []):
         return None
     icon = icon_of(row).lower()
     groups = [group for marker, group in GROUP_ICONS if marker in icon]
     if len(groups) > 1:
-        raise ValueError("バフ %d のアイコン %s が料理と薬剤の両方に当たる" % (buff_id, icon))
+        raise ValueError("バフ%dのアイコン%sが料理と薬剤の両方に該当する" % (buff_id, icon))
     return groups[0] if groups else None
 
 
 def groups_of(source):
-    """その出所の料理・薬剤のバフ。バフID → まとまり。"""
+    """そのデータソースの料理・薬剤のバフ。バフID → まとまり。"""
     result = {}
     for row in raw_table(source, "BuffTable").values():
         buff_id = int(row["Id"])
         group = group_of(buff_id, row)
         if group is not None:
             result[buff_id] = group
-    print("%-8s 料理 %d / 薬剤 %d"
+    print("%-8s料理%d / 薬剤%d"
           % (source,
              sum(1 for group in result.values() if group == "Cuisine"),
              sum(1 for group in result.values() if group == "Potion")))
@@ -96,7 +96,7 @@ def groups_of(source):
 
 
 def item_buffs_of(source):
-    """その出所の料理・薬剤の表の、アイテムID → 付けるバフID の組(表の名前 → {アイテムID: (バフID, ...)})。"""
+    """そのデータソースの料理・薬剤の表の、アイテムID → 付けるバフIDの組(表の名前 → {アイテムID: (バフID, ...)})。"""
     return {name: {int(row["Id"]): tuple(par[0] for par in row.get("BuffPar") or [] if par)
                    for row in raw_table(source, name).values()}
             for name in ITEM_BUFF_TABLES}
@@ -104,8 +104,8 @@ def item_buffs_of(source):
 
 def items_by_buff(primary_group):
     """
-    バフID → そのバフを付けるアイテムIDの一覧(昇順)。`Star` の料理・薬剤の表から作る。
-    `StarASIA` の表の行が全部 `Star` にあって付けるバフも同じこと、行がアイテムの表にあることを確かめる。
+    バフID → そのバフを付けるアイテムIDの一覧(昇順)。`Star`の料理・薬剤の表から作る。
+    `StarASIA`の表の行が全部`Star`にあって付けるバフも同じこと、行がアイテムの表にあることを確かめる。
     """
     found = {source: item_buffs_of(source) for source in SOURCES}
     primary = found[PRIMARY_SOURCE]
@@ -115,18 +115,18 @@ def items_by_buff(primary_group):
         for name, rows in tables.items():
             extra = sorted(item for item in rows if item not in primary[name])
             if extra:
-                raise ValueError("%s の %s にだけある行が %d 件: %s" % (source, name, len(extra), extra))
+                raise ValueError("%sの%sにだけある行が%d件: %s" % (source, name, len(extra), extra))
             differ = sorted(item for item, buffs in rows.items() if primary[name][item] != buffs)
             if differ:
-                raise ValueError("%s と %s の %s で付けるバフが違う行: %s" % (source, PRIMARY_SOURCE, name, differ))
-        print("%-8s 料理・薬剤の表 %s に無い行 0 / 付けるバフの違い 0" % (source, PRIMARY_SOURCE))
+                raise ValueError("%sと%sの%sで付けるバフが違う行: %s" % (source, PRIMARY_SOURCE, name, differ))
+        print("%-8s料理・薬剤の表%sに無い行0 / 付けるバフの違い0" % (source, PRIMARY_SOURCE))
 
     items = raw_table(PRIMARY_SOURCE, "ItemTable")
     result = {}
     for name, rows in primary.items():
         missing = sorted(item for item in rows if str(item) not in items)
         if missing:
-            raise ValueError("%s の %s の行がアイテムの表に無い: %s" % (PRIMARY_SOURCE, name, missing))
+            raise ValueError("%sの%sの行がアイテムの表に無い: %s" % (PRIMARY_SOURCE, name, missing))
         for item, buffs in rows.items():
             for buff_id in buffs:
                 if buff_id in primary_group:
@@ -164,12 +164,12 @@ def main():
             continue
         extra = sorted(b for b in buffs if b not in primary)
         if extra:
-            raise ValueError("%s にだけある料理・薬剤のバフが %d 件: %s(%s で作ると取りこぼす)"
+            raise ValueError("%sにだけある料理・薬剤のバフが%d件: %s(%sで作ると取りこぼす)"
                              % (source, len(extra), extra, PRIMARY_SOURCE))
         moved = sorted(b for b, group in buffs.items() if primary[b] != group)
         if moved:
-            raise ValueError("%s と %s で料理と薬剤が入れ替わっているバフ: %s" % (source, PRIMARY_SOURCE, moved))
-        print("%-8s %s に無いもの 0 / 入れ替わり 0" % (source, PRIMARY_SOURCE))
+            raise ValueError("%sと%sで料理と薬剤が入れ替わっているバフ: %s" % (source, PRIMARY_SOURCE, moved))
+        print("%-8s %sに無いもの0 / 入れ替わり0" % (source, PRIMARY_SOURCE))
 
     items_of = items_by_buff(primary)
     names = names_of(sorted(primary), items_of)
@@ -178,7 +178,7 @@ def main():
     for group, basename in OUTPUTS:
         buff_ids = [b for b in sorted(primary) if primary[b] == group]
         counts = [len(items_of.get(b, ())) for b in buff_ids]
-        print("  %s: アイテム 0: %d / 1: %d / 複数: %d"
+        print("  %s: アイテム0: %d / 1: %d / 複数: %d"
               % (basename, counts.count(0), counts.count(1), sum(1 for c in counts if c > 1)))
         write_localized(basename, names, [str(b) for b in buff_ids])
 

@@ -22,6 +22,9 @@ internal sealed class ControllerActionRowViewModel : ObservableObject
 
     public ControllerActionDefinition Definition { get; }
 
+    /// <summary>一覧でこの行が入る節(まとまりの鍵)。</summary>
+    public required KeybindSectionViewModel Section { get; init; }
+
     public string DisplayName
     {
         get => _displayName;
@@ -151,6 +154,9 @@ internal sealed class KeyMouseActionRowViewModel : ObservableObject
     public event EventHandler? SelectionChanged;
 
     public KeyMouseActionDefinition Definition { get; }
+
+    /// <summary>一覧でこの行が入る節(まとまりの鍵)。</summary>
+    public required KeybindSectionViewModel Section { get; init; }
 
     public string DisplayName
     {

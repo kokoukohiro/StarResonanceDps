@@ -44,6 +44,9 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
     private bool _isUpdatingDetectedSelection;
     private bool _pendingInitialPresetUnavailableMessage;
     private bool _pendingLayoutLoadFailedMessage;
+    private readonly IReadOnlyDictionary<KeybindModeGroup, KeybindSectionViewModel> _sections;
+    private readonly KeybindSettingsBlock _settingsBlock;
+    private ObservableCollection<object> _listItems;
 
     public KeybindToolViewModel(IPluginContext context)
     {
@@ -56,6 +59,15 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
         _saveService = new KeybindSaveService(_texts);
 
         _layoutFilePath = _context.Settings.GetFilePath(KeybindCatalog.ButtonLayoutFileName);
+
+        _sections = new Dictionary<KeybindModeGroup, KeybindSectionViewModel>
+        {
+            [KeybindModeGroup.Main] = new(this, KeybindSectionKind.Main, "Keybind.Section.MainKeySettings", null),
+            [KeybindModeGroup.QuickWheel] = new(this, KeybindSectionKind.QuickWheel, "Keybind.Section.QuickWheelKeySettings", "Keybind.CheckBox.QuickWheelIndependent"),
+            [KeybindModeGroup.Photo] = new(this, KeybindSectionKind.Photo, "Keybind.Section.PhotoModeKeySettings", "Keybind.CheckBox.PhotoIndependent"),
+            [KeybindModeGroup.Fishing] = new(this, KeybindSectionKind.Fishing, "Keybind.Section.FishingModeKeySettings", "Keybind.CheckBox.FishingIndependent"),
+        };
+        _settingsBlock = new KeybindSettingsBlock(this, new KeybindSectionViewModel(this, KeybindSectionKind.Settings, null, null));
 
         ControllerMainActions = CreateControllerRows(KeybindModeGroup.Main);
         ControllerQuickWheelActions = CreateControllerRows(KeybindModeGroup.QuickWheel);
@@ -85,6 +97,7 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
         _keyMouseRowsById = _allKeyMouseRows.ToDictionary(
             row => row.Definition.Id,
             StringComparer.Ordinal);
+        _listItems = BuildListItems();
 
         foreach (var row in _allControllerRows)
         {
@@ -123,6 +136,13 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
     public ObservableCollection<HelperBindingOption> HelperOptions { get; } = new();
 
     public ObservableCollection<PresetOption> PresetOptions { get; } = new();
+
+    /// <summary>一覧に並べるもの。先頭の固定の節と、今の入力方法の行(節の順)。入力方法を切り替えたら作り直す。</summary>
+    public ObservableCollection<object> ListItems
+    {
+        get => _listItems;
+        private set => SetProperty(ref _listItems, value);
+    }
 
     public ObservableCollection<ControllerActionRowViewModel> ControllerMainActions { get; }
 
@@ -470,7 +490,10 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
             KeybindCatalog.GetControllerActions(group)
                 .Select(definition => new ControllerActionRowViewModel(
                      definition,
-                     Texts[KeybindCatalog.GetActionLocalizationKey(definition)])));
+                     Texts[KeybindCatalog.GetActionLocalizationKey(definition)])
+                {
+                    Section = _sections[group],
+                }));
 
         if (rows.Count > 0)
         {
@@ -487,7 +510,10 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
                 .Select(definition => new KeyMouseActionRowViewModel(
                     definition,
                     Texts[KeybindCatalog.GetActionLocalizationKey(definition)],
-                    KeybindCatalog.UsesLControlPrefix(definition))));
+                    KeybindCatalog.UsesLControlPrefix(definition))
+                {
+                    Section = _sections[group],
+                }));
 
         if (rows.Count > 0)
         {
@@ -495,6 +521,12 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
         }
 
         return rows;
+    }
+
+    private ObservableCollection<object> BuildListItems()
+    {
+        IEnumerable<object> rows = _isControllerMode ? _allControllerRows : _allKeyMouseRows;
+        return new ObservableCollection<object>(new object[] { _settingsBlock }.Concat(rows));
     }
 
     private void ActionRow_SelectionChanged(object? sender, EventArgs e)
@@ -523,6 +555,7 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
             _isControllerMode = isControllerMode;
             OnPropertyChanged(nameof(IsControllerMode));
             OnPropertyChanged(nameof(IsKeyMouseMode));
+            ListItems = BuildListItems();
 
             ApplyCachedLayoutForCurrentInput();
             SynchronizeModeLinks();

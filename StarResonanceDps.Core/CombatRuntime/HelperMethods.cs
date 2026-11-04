@@ -16,7 +16,6 @@ public class HelperMethods
         public static ProfessionSystemTable ProfessionSystems = new ProfessionSystemTable();
         public static CookCuisineTable CookCuisines = new CookCuisineTable();
         public static FightAttrTable FightAttrs = new FightAttrTable();
-        public static ModEffectTable ModEffects = new ModEffectTable();
         public static SkillAoyiTable SkillAoyis = new SkillAoyiTable();
         public static SkillAoyiStarTable SkillAoyiStars = new SkillAoyiStarTable();
         public static ChatStickerTable ChatStickers = new ChatStickerTable();

@@ -3,19 +3,19 @@
 
   Data/Localization/MonsterNames.json
 
-エンティティリストや被ダメログで、モンスターの実体の `AttrId` から表示名を引くのに使う。
+エンティティリストや被ダメログで、モンスターの実体の`AttrId`から表示名を引くのに使う。
 
-鍵は **`MonsterTable`** の行(4言語ぶんの和)。
-`DummyTable` と `NpcTable` は混ぜない。同じ番号が別の表で別のものを指すことがあり、
+キーは**`MonsterTable`**の行(4言語ぶんの和集合)。
+`DummyTable`と`NpcTable`は混ぜない。同じ番号が別の表で別のものを指すことがあり、
 どの表の名前かは実体の種類でしか決まらない。
 
-`MonsterTable` は行があっても `Name` が空のことがあり、その数は言語で大きく違う。
+`MonsterTable`は行があっても`Name`が空のことがあり、その数は言語で大きく違う。
 
-前の出力にあって今回空になった名前は `Data/Overrides/MonsterNameOverrides.json` へ書き足す(`_common.carry_dropped_names`)。
+前の出力にあって今回空になった名前は`Data/Overrides/MonsterNameOverrides.json`へ書き足す(`_common.carry_dropped_names`)。
 """
 import sys
 
-# _common を読み込む前に置く(後ろだと __pycache__ が作られる)
+# _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
 from _common import LANGS, name_of, table, write_localized
@@ -30,7 +30,7 @@ def main():
     for lang, source in tables.items():
         keys |= set(source)
         print("%-6s %s %5d件" % (lang, SOURCE_TABLE, len(source)))
-    print("→ 4言語の和集合 %d件\n" % len(keys))
+    print("→ 4言語の和集合%d件\n" % len(keys))
 
     values = {}
     for lang, source in tables.items():

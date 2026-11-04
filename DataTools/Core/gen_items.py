@@ -3,14 +3,14 @@
 
   Data/Localization/ItemNames.json
 
-鍵はアイテムID(`ItemTable` の全行、4言語ぶんの和)。値は `ItemTable.Name`。名前の空の鍵も残す。
+キーはアイテムID(`ItemTable`の全行、4言語ぶんの和集合)。値は`ItemTable.Name`。名前の空のキーも残す。
 装備IDもアイテムIDなので、装備の名前もここから引く。
 
-名前の出所の土台は言語フォルダごと(`_common.table`)。
+名前でベースにするデータソースは言語フォルダごと(`_common.table`)。
 """
 import sys
 
-# _common を読み込む前に置く(後ろだと __pycache__ が作られる)
+# _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
 from _common import LANGS, name_of, table, write_localized

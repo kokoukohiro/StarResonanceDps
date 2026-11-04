@@ -1567,6 +1567,30 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
     }
 
+    /// <summary>自分のモジュールが変わった。モジュール情報の窓に知らせる(自分を出している窓だけ作り直す)。</summary>
+    public void UpdatePlayerWindowSelfModules()
+    {
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            if (playerWindow.ViewModel is PlayerRootBuffWidgetViewModel rootBuffs)
+            {
+                rootBuffs.NotifySelfModulesChanged();
+            }
+        }
+    }
+
+    /// <summary>自分の心相晶の育成データが変わった。潜在心相晶情報の窓に知らせる(自分を出している窓だけ作り直す)。</summary>
+    public void UpdatePlayerWindowSelfSeasonCultivate()
+    {
+        foreach (var playerWindow in _openPlayerWindows.ToArray())
+        {
+            if (playerWindow.ViewModel is PlayerRootBuffWidgetViewModel rootBuffs)
+            {
+                rootBuffs.NotifySelfSeasonCultivateChanged();
+            }
+        }
+    }
+
     /// <summary>
     /// 顔ぶれをプレイヤーの窓へ当てる。<b>窓ごとに別の処理(Background)として積む。</b>
     /// 相手が変わった窓はその場で中身を作り直すので、1つの処理で全部の窓に当てると、全部の窓の作り直しの間は入力も描画も止まる。

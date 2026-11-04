@@ -158,7 +158,8 @@
                            OpacityMask="{x:Static services:HateBadgeImages.TargetMask}"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            Visibility="{Binding IsTarget, Converter={StaticResource BooleanToVisibilityConverter}}"
-                           Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}">
+                           Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                           behaviors:ToolTipBehavior.IsEnabled="True">
                     <Rectangle.ToolTip>
                         <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                  Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -236,7 +237,8 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Fill="Transparent"
-                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}">
+                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                               behaviors:ToolTipBehavior.IsEnabled="True">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -264,7 +266,8 @@
                                OpacityMask="{Binding ClassIconMask}"
                                RenderOptions.BitmapScalingMode="HighQuality"
                                Effect="{StaticResource Effect.ProfessionIconShadow}"
-                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}">
+                               Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                               behaviors:ToolTipBehavior.IsEnabled="True">
                         <Rectangle.ToolTip>
                             <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                      Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -284,7 +287,8 @@
                                        FontWeight="SemiBold"
                                        Text="{Binding PlayerName}"
                                        TextTrimming="CharacterEllipsis"
-                                       Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}">
+                                       Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
+                                       behaviors:ToolTipBehavior.IsEnabled="True">
                                 <TextBlock.ToolTip>
                                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                                              Style="{StaticResource ToolTip.WidgetWindowInfo}">
@@ -491,7 +495,8 @@
                                                            VerticalAlignment="Center"
                                                            Style="{StaticResource Icon.CombatStateMask}"
                                                            Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type local:EntityListWidgetView}}}"
-                                                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                           Visibility="{Binding ShowsCombatState, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                           behaviors:ToolTipBehavior.IsEnabled="True">
                                                     <Rectangle.ToolTip>
                                                         <ToolTip Style="{StaticResource ToolTip.WidgetWindowInfo}">
                                                             <TextBlock Style="{StaticResource Text.WidgetWindow}"

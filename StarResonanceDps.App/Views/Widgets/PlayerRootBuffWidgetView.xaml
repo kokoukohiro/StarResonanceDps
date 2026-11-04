@@ -16,6 +16,18 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
+
+        <!-- 段階(自分のモジュール効果の行だけ)。作りは装備情報の装備レベルと同じで、行の右端の列に右寄せで置く。段階の無い行では出さない。 -->
+        <Style x:Key="RootBuffList.LevelText" TargetType="TextBlock" BasedOn="{StaticResource RootBuffList.RowText}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding LevelText}" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -88,6 +100,7 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="30" />
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
                                 <Grid Grid.Column="0"
@@ -154,6 +167,11 @@
                                            Margin="6,0,8,0"
                                            Style="{StaticResource RootBuffList.RowText}"
                                            Text="{Binding Name}" />
+
+                                <TextBlock Grid.Column="2"
+                                           Margin="0,0,8,0"
+                                           Style="{StaticResource RootBuffList.LevelText}"
+                                           Text="{Binding LevelText}" />
                             </Grid>
                         </Button>
                     </DataTemplate>

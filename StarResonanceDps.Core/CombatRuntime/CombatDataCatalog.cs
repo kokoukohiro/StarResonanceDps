@@ -100,12 +100,31 @@ public static class CombatDataCatalog
     private static FrozenSet<int> _rogueEntryBuffIds = FrozenSet<int>.Empty;
 
     /// <summary>
-    /// 根のバフ(心相晶のノードと上級・因子・モジュール効果。タレントは入らない)→ 名前。<c>Data/Localization/RootBuffNames.json</c>。
-    /// 潜在心相晶情報とモジュール情報の行と、付与元をたどってモジュールの根に着いたバフの名前に使う。
+    /// 根のバフ(心相晶のノードと上級・因子。タレントとモジュール効果は入らない)→ 名前。<c>Data/Localization/RootBuffNames.json</c>。
+    /// 潜在心相晶情報の行に使う。
     /// </summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _rootBuffNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// モジュール効果の番号 → 名前。<c>Data/Localization/ModuleEffectNames.json</c>。
+    /// モジュール情報の行(根のバフの行も効果の番号で引く)と、付与元をたどってモジュールの根に着いたバフの名前に使う。
+    /// </summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _moduleEffectNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>モジュール効果の番号 → 根のバフ・絵・段階に要るリンク数。<c>Data/Generated/RootBuffs.json</c> の <c>ModuleEffects</c>。</summary>
+    private static FrozenDictionary<int, ModuleEffectDefinition> _moduleEffects = FrozenDictionary<int, ModuleEffectDefinition>.Empty;
+
+    /// <summary>
+    /// 因子のアイテム → 付けるバフ・絵。<c>Data/Generated/RootBuffs.json</c> の <c>FactorItems</c>。
+    /// 同じアイテムでもサーバーで付けるバフが違う(前のシーズンの因子は無効の説明のバフに置き換わる)ので、サーバーの表ごとに持つ。
+    /// </summary>
+    private static FrozenDictionary<int, FactorItemDefinition> _asiaFactorItems = FrozenDictionary<int, FactorItemDefinition>.Empty;
+
+    private static FrozenDictionary<int, FactorItemDefinition> _chinaFactorItems = FrozenDictionary<int, FactorItemDefinition>.Empty;
 
     /// <summary>根のバフ → 種類・並び・絵。<c>Data/Generated/RootBuffs.json</c>。</summary>
     private static FrozenDictionary<int, RootBuffDefinition> _rootBuffs = FrozenDictionary<int, RootBuffDefinition>.Empty;
@@ -135,8 +154,8 @@ public static class CombatDataCatalog
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    /// モジュールの根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)→ モジュール効果の番号。
-    /// バフの由来をたどるときの止まり先(<see cref="Services.SourceLandingResolver.ResolveBuffOrigin"/>)に使う。
+    /// モジュールの根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)→ モジュール効果の番号。<see cref="_moduleEffects"/> から作る。
+    /// バフの由来をたどるときの止まり先(<see cref="Services.SourceLandingResolver.ResolveBuffOrigin"/>)と、根のバフの名前に使う。
     /// </summary>
     private static FrozenDictionary<int, int> _modEffectIdByRootBuff = FrozenDictionary<int, int>.Empty;
 
@@ -363,7 +382,8 @@ public static class CombatDataCatalog
     [
         "SkillNames", "SkillTalkNames", "BuffNames", "MonsterNames", "DbmNames", "RogueEntryNames", "SeasonTalentNames", "ClassSpecNames",
         "SeasonNames", "SeasonRankNames", "TeamTargetNames", "SeasonActNames", "ItemNames", "EquipEffectTexts",
-        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames", "TalentNames", "ChatHyperlinks", "UnionBuildingNames",
+        "CuisineBuffs", "PotionBuffs", "SceneNames", "DungeonTypeNames", "RootBuffNames", "ModuleEffectNames", "TalentNames", "ChatHyperlinks",
+        "UnionBuildingNames",
     ];
 
     /// <summary><see cref="ApplyNameOverrides"/> で重ねる名前の上書き(<c>Data/Overrides/</c>)。<see cref="StartReads"/> が先に解き始める。</summary>
@@ -441,9 +461,9 @@ public static class CombatDataCatalog
             _rogueEntryNames = LoadLocalizedText(reads, "RogueEntryNames", out var rogueEntryBuffIds);
             _rogueEntryBuffIds = rogueEntryBuffIds;
             _rootBuffNames = LoadLocalizedText(reads, "RootBuffNames", out _);
+            _moduleEffectNames = LoadLocalizedText(reads, "ModuleEffectNames", out _);
             _talentNames = LoadLocalizedText(reads, "TalentNames", out _);
             LoadRootBuffs(reads);
-            _modEffectIdByRootBuff = BuildModEffectIdByRootBuff();
             _imagineSkillIdByPassiveRoot = BuildImagineSkillIdByPassiveRoot();
             _seasonTalentNames = LoadLocalizedText(reads, "SeasonTalentNames", out var seasonTalentRootBuffIds);
             _seasonTalentRootBuffIds = seasonTalentRootBuffIds;
@@ -615,7 +635,7 @@ public static class CombatDataCatalog
         {
             SourceLandingKind.RogueEntry => ResolveText(_rogueEntryNames, cultureName, landing.Id),
             SourceLandingKind.Skill => ResolveText(_skillNames, cultureName, landing.Id),
-            SourceLandingKind.Module => ResolveText(_rootBuffNames, cultureName, landing.Id),
+            SourceLandingKind.Module => ResolveRootBuffName(cultureName, landing.Id),
             _ => string.Empty
         };
     }
@@ -666,7 +686,49 @@ public static class CombatDataCatalog
 
     /// <summary>根のバフの名前。内部ID注記はバフと同じ設定で付く。名前が無ければ空(注記だけ)。</summary>
     public static string GetRootBuffName(int buffId)
-        => AppendInternalId(ResolveText(_rootBuffNames, Volatile.Read(ref _cultureName), buffId), InternalIdDisplayMode.BuffOnly, buffId);
+        => AppendInternalId(ResolveRootBuffName(Volatile.Read(ref _cultureName), buffId), InternalIdDisplayMode.BuffOnly, buffId);
+
+    /// <summary>根のバフの名前(注記なし)。モジュールの根のバフはその効果の名前、ほかは根のバフの名前。</summary>
+    private static string ResolveRootBuffName(string cultureName, int buffId)
+        => _modEffectIdByRootBuff.TryGetValue(buffId, out var effectId)
+            ? ResolveText(_moduleEffectNames, cultureName, effectId)
+            : ResolveText(_rootBuffNames, cultureName, buffId);
+
+    /// <summary>
+    /// モジュール効果の名前。内部ID注記は、根のバフのある効果ならその根のバフの番号で、バフと同じ設定で付く(根のバフの行と同じ見た目)。
+    /// 名前が無ければ空(注記だけ)。
+    /// </summary>
+    public static string GetModuleEffectName(int effectId)
+    {
+        var name = ResolveText(_moduleEffectNames, Volatile.Read(ref _cultureName), effectId);
+        return _moduleEffects.TryGetValue(effectId, out var definition) && definition.RootBuffId > 0
+            ? AppendInternalId(name, InternalIdDisplayMode.BuffOnly, definition.RootBuffId)
+            : name;
+    }
+
+    /// <summary>モジュール効果の絵の全体のパス(表の値のまま)。表に無い効果は空。</summary>
+    public static string GetModuleEffectIconName(int effectId)
+        => _moduleEffects.TryGetValue(effectId, out var definition) ? definition.Icon : string.Empty;
+
+    /// <summary>
+    /// モジュール効果のリンク数の和から段階(0〜6)を決める。段階ごとに要るリンク数は表の値で、届いている一番上の段階。
+    /// 表に無い効果は null。
+    /// </summary>
+    public static int? GetModuleEffectLevel(int effectId, int linkCount)
+    {
+        if (!_moduleEffects.TryGetValue(effectId, out var definition))
+        {
+            return null;
+        }
+
+        var level = 0;
+        while (level < definition.LevelLinks.Length && linkCount >= definition.LevelLinks[level])
+        {
+            level++;
+        }
+
+        return level;
+    }
 
     /// <summary>
     /// 根のバフの絵の全体のパス(表の値のまま)。心相晶の上級は型ごとに絵が違うので、その人の型の根のバフ
@@ -709,6 +771,27 @@ public static class CombatDataCatalog
     {
         var trees = server == GameServer.Asia ? _asiaTalentTrees : _chinaTalentTrees;
         return trees.TryGetValue((professionId, subProfessionId), out var tree) ? tree : null;
+    }
+
+    /// <summary>
+    /// 因子のアイテムの名前(等級つきのアイテム名 <c>ItemNames.json</c>)。内部ID注記は、そのサーバーでアイテムがバフを付けるなら
+    /// そのバフの番号で、バフと同じ設定で付く(根のバフの行と同じ見た目)。名前が無ければ空(注記だけ)。
+    /// サーバーの表はタレントの木と同じ決め方(アジアサーバーだけアジアの表、それ以外は中国の表)。
+    /// </summary>
+    public static string GetFactorItemName(GameServer server, int itemId)
+    {
+        var name = GetItemName(itemId);
+        var items = server == GameServer.Asia ? _asiaFactorItems : _chinaFactorItems;
+        return items.TryGetValue(itemId, out var item) && item.BuffId > 0
+            ? AppendInternalId(name, InternalIdDisplayMode.BuffOnly, item.BuffId)
+            : name;
+    }
+
+    /// <summary>因子のアイテムの絵の全体のパス(表の値のまま)。そのサーバーの表に無いアイテムは空。</summary>
+    public static string GetFactorItemIconName(GameServer server, int itemId)
+    {
+        var items = server == GameServer.Asia ? _asiaFactorItems : _chinaFactorItems;
+        return items.TryGetValue(itemId, out var item) ? item.Icon : string.Empty;
     }
 
     /// <summary>
@@ -2528,20 +2611,6 @@ public static class CombatDataCatalog
     /// <summary>効果の並び(<c>[種類, 番号, …]</c>)のうち、種類 3(バフを付ける)の番号。</summary>
     private const int GrantBuffEffectKind = 3;
 
-    private static FrozenDictionary<int, int> BuildModEffectIdByRootBuff()
-    {
-        var targets = new Dictionary<int, HashSet<int>>();
-        foreach (var modEffect in HelperMethods.DataTables.ModEffects.Data.Values)
-        {
-            foreach (var effect in modEffect.EffectConfig ?? [])
-            {
-                AddGrantedBuffTarget(targets, effect, modEffect.EffectID);
-            }
-        }
-
-        return ToUniqueTargets(targets, "ModEffectTable", "module effect");
-    }
-
     private static FrozenDictionary<int, int> BuildImagineSkillIdByPassiveRoot()
     {
         var targets = new Dictionary<int, HashSet<int>>();
@@ -2703,6 +2772,10 @@ public static class CombatDataCatalog
         var path = RootBuffsPath;
 
         FrozenDictionary<int, RootBuffDefinition> rootBuffs;
+        FrozenDictionary<int, ModuleEffectDefinition> moduleEffects;
+        FrozenDictionary<int, int> modEffectIdByRootBuff;
+        FrozenDictionary<int, FactorItemDefinition> asiaFactorItems;
+        FrozenDictionary<int, FactorItemDefinition> chinaFactorItems;
         FrozenDictionary<int, int> advancedEffectIds;
         FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> asiaTalentTrees;
         FrozenDictionary<(int ProfessionId, int SubProfessionId), TalentTreeDefinition> chinaTalentTrees;
@@ -2723,7 +2796,12 @@ public static class CombatDataCatalog
             AddRootBuffs(definitions, RootBuffKind.SeasonTalentNode, file.SeasonTalentNodes, nameof(RootBuffFile.SeasonTalentNodes));
             AddRootBuffs(definitions, RootBuffKind.SeasonTalentAdvanced, file.SeasonTalentAdvanced, nameof(RootBuffFile.SeasonTalentAdvanced));
             AddRootBuffs(definitions, RootBuffKind.Factor, file.Factors, nameof(RootBuffFile.Factors));
-            AddRootBuffs(definitions, RootBuffKind.ModuleEffect, file.ModuleEffects, nameof(RootBuffFile.ModuleEffects));
+            moduleEffects = ReadModuleEffects(definitions, file.ModuleEffects, nameof(RootBuffFile.ModuleEffects));
+            modEffectIdByRootBuff = moduleEffects.Values
+                .Where(definition => definition.RootBuffId > 0)
+                .ToFrozenDictionary(definition => definition.RootBuffId, definition => definition.EffectId);
+            asiaFactorItems = ReadFactorItems(file.FactorItems.Asia, $"{nameof(RootBuffFile.FactorItems)}.StarASIA");
+            chinaFactorItems = ReadFactorItems(file.FactorItems.China, $"{nameof(RootBuffFile.FactorItems)}.Star");
             rootBuffs = definitions.ToFrozenDictionary();
             advancedEffectIds = file.SeasonTalentAdvancedEffects.ToFrozenDictionary(
                 pair => ParseRootBuffKey(pair.Key, nameof(RootBuffFile.SeasonTalentAdvancedEffects)),
@@ -2739,13 +2817,17 @@ public static class CombatDataCatalog
         }
 
         _rootBuffs = rootBuffs;
+        _moduleEffects = moduleEffects;
+        _modEffectIdByRootBuff = modEffectIdByRootBuff;
+        _asiaFactorItems = asiaFactorItems;
+        _chinaFactorItems = chinaFactorItems;
         _seasonTalentAdvancedEffectIds = advancedEffectIds;
         _asiaTalentTrees = asiaTalentTrees;
         _chinaTalentTrees = chinaTalentTrees;
         _replaceableSkillOriginals = replaceableSkillOriginals;
         Log.Information(
-            "Loaded {FileName}: {RootBuffs} root buffs / {AdvancedEffects} psychoscope types with advanced effects / {AsiaTalentTrees} Asia and {ChinaTalentTrees} China talent trees",
-            relativePath, rootBuffs.Count, advancedEffectIds.Count, asiaTalentTrees.Count, chinaTalentTrees.Count);
+            "Loaded {FileName}: {RootBuffs} root buffs / {ModuleEffects} module effects / {AsiaFactorItems} Asia and {ChinaFactorItems} China factor items / {AdvancedEffects} psychoscope types with advanced effects / {AsiaTalentTrees} Asia and {ChinaTalentTrees} China talent trees",
+            relativePath, rootBuffs.Count, moduleEffects.Count, asiaFactorItems.Count, chinaFactorItems.Count, advancedEffectIds.Count, asiaTalentTrees.Count, chinaTalentTrees.Count);
     }
 
     /// <summary>
@@ -2922,6 +3004,72 @@ public static class CombatDataCatalog
         }
     }
 
+    /// <summary>
+    /// モジュール効果を読む。根のバフのある効果は、根のバフ(種類はモジュール効果、並びは配列の順)として表へも足す。
+    /// 効果の番号は正で重ならず、根のバフは 0 か正、段階ごとのリンク数は段階1〜6 の6つで、正で段階とともに増える。合わなければ形の誤りとして止める。
+    /// </summary>
+    private static FrozenDictionary<int, ModuleEffectDefinition> ReadModuleEffects(
+        Dictionary<int, RootBuffDefinition> definitions,
+        List<ModuleEffectEntry?> entries,
+        string itemPath)
+    {
+        var result = new Dictionary<int, ModuleEffectDefinition>(entries.Count);
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entryPath = $"{itemPath}[{index}]";
+            var entry = entries[index] ?? throw new InvalidDataException($"{entryPath} is null");
+            if (entry.Effect <= 0 || entry.Buff < 0)
+            {
+                throw new InvalidDataException($"{entryPath} has an invalid effect {entry.Effect} / buff {entry.Buff}");
+            }
+
+            var links = entry.Links.ToArray();
+            if (links.Length != ModuleEffectLevelCount
+                || links[0] <= 0
+                || links.Zip(links.Skip(1)).Any(pair => pair.Second <= pair.First))
+            {
+                throw new InvalidDataException($"{entryPath}.Links [{string.Join(", ", links)}] is not {ModuleEffectLevelCount} increasing positive numbers");
+            }
+
+            if (!result.TryAdd(entry.Effect, new ModuleEffectDefinition(entry.Effect, entry.Buff, entry.Icon, links)))
+            {
+                throw new InvalidDataException($"{entryPath}.Effect {entry.Effect} is listed twice");
+            }
+
+            if (entry.Buff > 0
+                && !definitions.TryAdd(entry.Buff, new RootBuffDefinition(RootBuffKind.ModuleEffect, index, entry.Icon, FrozenDictionary<int, string>.Empty)))
+            {
+                throw new InvalidDataException($"{entryPath}.Buff {entry.Buff} is listed in two kinds");
+            }
+        }
+
+        return result.ToFrozenDictionary();
+    }
+
+    /// <summary>
+    /// 因子のアイテムを読む。アイテムは正で重ならず、バフは 0 か正、絵は空でない。合わなければ形の誤りとして止める。
+    /// </summary>
+    private static FrozenDictionary<int, FactorItemDefinition> ReadFactorItems(List<FactorItemEntry?> entries, string itemPath)
+    {
+        var result = new Dictionary<int, FactorItemDefinition>(entries.Count);
+        for (var index = 0; index < entries.Count; index++)
+        {
+            var entryPath = $"{itemPath}[{index}]";
+            var entry = entries[index] ?? throw new InvalidDataException($"{entryPath} is null");
+            if (entry.Item <= 0 || entry.Buff < 0 || string.IsNullOrWhiteSpace(entry.Icon))
+            {
+                throw new InvalidDataException($"{entryPath} has an invalid item {entry.Item} / buff {entry.Buff} / icon \"{entry.Icon}\"");
+            }
+
+            if (!result.TryAdd(entry.Item, new FactorItemDefinition(entry.Buff, entry.Icon)))
+            {
+                throw new InvalidDataException($"{entryPath}.Item {entry.Item} is listed twice");
+            }
+        }
+
+        return result.ToFrozenDictionary();
+    }
+
     /// <summary>タレントの役割のタグ(<c>TalentTagTable</c> の番号。1 攻撃 / 2 支援 / 3 防御)→ 役割。</summary>
     private static DataTypes.Enums.Professions.ERoleType ToTalentRole(int? talentTag, string itemPath)
         => talentTag switch
@@ -2947,6 +3095,21 @@ public static class CombatDataCatalog
         string Icon,
         FrozenDictionary<int, string> AdvancedIcons);
 
+    /// <summary>モジュール効果の段階の数(段階1〜6)。</summary>
+    private const int ModuleEffectLevelCount = 6;
+
+    /// <summary>
+    /// モジュール効果1つ。根のバフ(段階5・6 が付けるバフ、無ければ 0)・絵・段階1 から順にその段階に要るリンク数。
+    /// </summary>
+    private sealed record ModuleEffectDefinition(
+        int EffectId,
+        int RootBuffId,
+        string Icon,
+        int[] LevelLinks);
+
+    /// <summary>因子のアイテム1つ。付けるバフ(付けなければ 0)と絵。</summary>
+    private sealed record FactorItemDefinition(int BuffId, string Icon);
+
     /// <summary><c>RootBuffs.json</c> の形。項目はどれも省略できない。</summary>
     [JsonObject(ItemRequired = Required.Always)]
     private sealed class RootBuffFile
@@ -2959,12 +3122,36 @@ public static class CombatDataCatalog
 
         public List<RootBuffEntry?> Factors { get; set; } = null!;
 
-        public List<RootBuffEntry?> ModuleEffects { get; set; } = null!;
+        public List<ModuleEffectEntry?> ModuleEffects { get; set; } = null!;
+
+        public FactorItemFile FactorItems { get; set; } = null!;
 
         /// <summary>型の根のバフ → 型の上級の番号。</summary>
         public Dictionary<string, int> SeasonTalentAdvancedEffects { get; set; } = null!;
 
         public TalentTreeFile TalentTrees { get; set; } = null!;
+    }
+
+    /// <summary>因子のアイテムを出所(サーバーの表)ごとに。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class FactorItemFile
+    {
+        [JsonProperty("StarASIA")]
+        public List<FactorItemEntry?> Asia { get; set; } = null!;
+
+        [JsonProperty("Star")]
+        public List<FactorItemEntry?> China { get; set; } = null!;
+    }
+
+    /// <summary>因子のアイテム1つ。<c>Buff</c> はアイテムが付けるバフ(付けなければ 0)。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class FactorItemEntry
+    {
+        public int Item { get; set; }
+
+        public int Buff { get; set; }
+
+        public string Icon { get; set; } = null!;
     }
 
     /// <summary>タレントの木を出所(サーバーの表)ごとに。項目はどれも省略できない。</summary>
@@ -3030,6 +3217,19 @@ public static class CombatDataCatalog
         public string? Icon { get; set; }
 
         public Dictionary<string, string?>? Icons { get; set; }
+    }
+
+    /// <summary>モジュール効果1つ。<c>Buff</c> は根のバフ(無ければ 0)、<c>Links</c> は段階1 から順にその段階に要るリンク数。項目はどれも省略できない。</summary>
+    [JsonObject(ItemRequired = Required.Always)]
+    private sealed class ModuleEffectEntry
+    {
+        public int Effect { get; set; }
+
+        public int Buff { get; set; }
+
+        public string Icon { get; set; } = null!;
+
+        public List<int> Links { get; set; } = null!;
     }
 
     private static FrozenDictionary<int, EquipmentDefinition> ReadEquipmentDefinitions(

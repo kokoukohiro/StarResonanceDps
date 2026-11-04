@@ -24,6 +24,7 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
     public ItemPackage? ItemPackage;
     public EquipList? EquipList;
     public Mod? Mod;
+    public SeasonCultivateLineData? SeasonCultivateLineData;
 
     /// <summary>読み損ねを一度だけログに出した項目。</summary>
     private static readonly HashSet<int> ReportedReadFailures = [];
@@ -76,6 +77,8 @@ public class CharSerialize(BlobReader blob) : BlobType(ref blob)
                 return TryReadWithoutDisturbingStream(blob, index, reader => EquipList = new(reader));
             case Zproto.CharSerialize.ModFieldNumber:
                 return TryReadWithoutDisturbingStream(blob, index, reader => Mod = new(reader));
+            case Zproto.CharSerialize.SeasonCultivateLineDataFieldNumber:
+                return TryReadWithoutDisturbingStream(blob, index, reader => SeasonCultivateLineData = new(reader));
             default:
                 return false;
         }

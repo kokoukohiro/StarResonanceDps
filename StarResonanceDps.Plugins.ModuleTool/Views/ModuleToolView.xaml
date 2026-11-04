@@ -160,6 +160,7 @@
             <Border Width="105"
                     Margin="3,0,3,0"
                     Padding="6,4,4,4"
+                    Style="{StaticResource ToolTipOwner.KeepsOnClick}"
                     CornerRadius="5"
                     Background="{DynamicResource Brush.InputBackground}"
                     BorderBrush="{DynamicResource Brush.BorderSoft}"

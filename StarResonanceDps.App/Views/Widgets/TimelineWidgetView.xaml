@@ -28,7 +28,9 @@
                   Height="16"
                   Margin="0,0,2,0"
                   Background="Transparent"
-                  Tag="{Binding Widget}">
+                  Tag="{Binding Widget}"
+                  behaviors:ToolTipBehavior.IsEnabled="True"
+                  behaviors:ToolTipBehavior.KeepsOnClick="True">
                 <Grid.ToolTip>
                     <ToolTip DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}"
                              Style="{StaticResource ToolTip.WidgetWindowInfo}">

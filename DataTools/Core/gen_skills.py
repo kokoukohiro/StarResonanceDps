@@ -4,30 +4,30 @@
   Data/Localization/SkillNames.json      (`SkillTable.Name`)
   Data/Localization/SkillTalkNames.json  (`SkillTable.SkillTalk`)
 
-**`SkillTable` の全行を収録する。** 使い道を決めて絞らない。
+**`SkillTable`の全行を収録する。**使い道を決めて絞らない。
 スキル枠(イマジン・ロール)に加えて、モンスターの技など枠に置かれないスキルも名前を引ける。
 
-`SkillTalk` は公式の技名で、`Name` より優先する。重ねる順はアプリが読み込むときに決める
-(`SkillNames` に `SkillNameOverrides` を重ね、その上に `SkillTalkNames` を重ねる)。
+`SkillTalk`は公式の技名で、`Name`より優先する。適用する順はアプリが読み込むときに決める
+(`SkillNames`に`SkillNameOverrides`を適用し、その上に`SkillTalkNames`を適用する)。
 
-鍵は出所と言語の和集合。版差でどれか1つにしか無い行でも落とさない。
+キーはデータソースと言語の和集合。版によってどれか1つにしか無い行でも除かない。
 
-未翻訳の行は埋め草(`_common.PLACEHOLDERS`)が入っているので空にする。
-ただし埋め草と同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`。`Name` だけ)。
+未翻訳の行はプレースホルダ(`_common.PLACEHOLDERS`)が入っているので空にする。
+ただしプレースホルダと同じ文字列を本物の名前として持つ行がある(`GENUINE_PLACEHOLDER_NAME_IDS`。`Name`だけ)。
 
-`SkillNames` で前の出力にあって今回空になった名前は `Data/Overrides/SkillNameOverrides.json` へ書き足す
-(`_common.carry_dropped_names`)。`SkillTalkNames` には上書きファイルが無いので書き足さない。
+`SkillNames`で前の出力にあって今回空になった名前は`Data/Overrides/SkillNameOverrides.json`へ書き足す
+(`_common.carry_dropped_names`)。`SkillTalkNames`には上書きファイルが無いので書き足さない。
 """
 import sys
 
-# _common を読み込む前に置く(後ろだと __pycache__ が作られる)
+# _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
 from _common import LANGS, name_of, table, write_localized
 
-# 埋め草と同じ文字列が本物の名前になっている行。
-# 1101 は連番の「フィールドマーク」01〜06 の先頭で、他言語には訳語が入っている。
-# 埋め草として空にすると zh-CN だけ名前が消え、表示時の落とし先も失う。
+# プレースホルダと同じ文字列が本物の名前になっている行。
+# 1101は連番の「フィールドマーク」01〜06の先頭で、他言語には訳語が入っている。
+# プレースホルダとして空にするとzh-CNだけ名前が消え、表示時のフォールバック先も失う。
 GENUINE_PLACEHOLDER_NAME_IDS = {"1101"}
 
 
@@ -43,8 +43,8 @@ def main():
     keys = set()
     for lang, skill_table in tables.items():
         keys |= set(skill_table)
-        print("%-6s 行 %d" % (lang, len(skill_table)))
-    print("→ 和集合 %d" % len(keys))
+        print("%-6s行%d" % (lang, len(skill_table)))
+    print("→ 和集合%d" % len(keys))
     print("")
 
     values = {lang: {i: skill_name(i, t.get(i)) for i in keys} for lang, t in tables.items()}

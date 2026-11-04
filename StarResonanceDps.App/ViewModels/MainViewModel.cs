@@ -162,6 +162,8 @@ public sealed partial class MainViewModel : ViewModelBase
         PlayerDirectory.Changed += PlayerDirectory_Changed;
         SocialDataStore.Cleared += SocialDataStore_Cleared;
         SelfEquipmentStore.Changed += SelfEquipmentStore_Changed;
+        SelfModuleStore.Changed += SelfModuleStore_Changed;
+        SelfSeasonCultivateStore.Changed += SelfSeasonCultivateStore_Changed;
         _nearbyEntityStore.EntitiesChanged += NearbyEntityStore_EntitiesChanged;
         _dungeonScoreStore.Changed += DungeonScoreStore_Changed;
         MessageManager.MatchFound += MessageManager_MatchFound;
@@ -493,6 +495,30 @@ public sealed partial class MainViewModel : ViewModelBase
         }
 
         dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfEquipment());
+    }
+
+    private void SelfModuleStore_Changed()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _widgetWindowManager.UpdatePlayerWindowSelfModules();
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfModules());
+    }
+
+    private void SelfSeasonCultivateStore_Changed()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher is null)
+        {
+            _widgetWindowManager.UpdatePlayerWindowSelfSeasonCultivate();
+            return;
+        }
+
+        dispatcher.BeginInvoke(() => _widgetWindowManager.UpdatePlayerWindowSelfSeasonCultivate());
     }
 
     /// <summary>マッチングが成立した。受信のスレッドから来るので UI のスレッドへ移して通知の判定へ渡す。</summary>

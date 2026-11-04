@@ -82,7 +82,7 @@
                             <!--
                                 行の高さとホバーの作りはメーターの行に合わせてある。
                                 Button の ControlTemplate でないとホバーの背景を同じ形で出せない。
-                                押したときは TIPS を開き直す(WPF は押すと閉じ、カーソルを外へ出すまで出し直さない)。
+                                押しても何も起きない行なので、TIPSは押しても閉じない(ToolTipBehavior.KeepsOnClick)。
                             -->
                             <Button Height="31"
                                     Padding="0"
@@ -93,8 +93,8 @@
                                     IsHitTestVisible="True"
                                     HorizontalContentAlignment="Stretch"
                                     VerticalContentAlignment="Stretch"
-                                    Click="SkillRow_Click"
-                                    MouseLeave="SkillRow_MouseLeave"
+                                    behaviors:ToolTipBehavior.IsEnabled="True"
+                                    behaviors:ToolTipBehavior.KeepsOnClick="True"
                                     Tag="{Binding DataContext.PlayerWidget, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}">
                                 <!-- TIPS は行(ホバーの範囲)に1つ。属性の内訳とタイプの内訳を出す。 -->
                                 <Button.ToolTip>

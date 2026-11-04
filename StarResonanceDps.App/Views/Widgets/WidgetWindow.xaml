@@ -159,7 +159,9 @@
                     -->
                     <Grid Margin="10,0,0,0"
                           DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
-                          Tag="{Binding Widget}">
+                          Tag="{Binding Widget}"
+                          behaviors:ToolTipBehavior.IsEnabled="True"
+                          behaviors:ToolTipBehavior.KeepsOnClick="True">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />

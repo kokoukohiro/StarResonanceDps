@@ -4,23 +4,23 @@
   Data/Localization/SceneNames.json
   Data/Localization/DungeonTypeNames.json
 
-SceneNames の鍵は `SceneTable` と `DungeonsTable` の番号の和。アプリはマップの番号(`LevelMapId`)で引く。
+SceneNamesのキーは`SceneTable`と`DungeonsTable`の番号の和集合。アプリはマップの番号(`LevelMapId`)で引く。
 ダンジョンではこの番号がダンジョンの番号で、ダンジョンの番号はシーン表にも行があるので、
 番号ごとに次の順で名前を選ぶ。
 
-  両方の表にある   `SceneTable.SceneSubType` がダンジョンなら `DungeonsTable.Name`、それ以外は `SceneTable.Name`
-  片方だけにある   その表の `Name`
+  両方の表にある   `SceneTable.SceneSubType`がダンジョンなら`DungeonsTable.Name`、それ以外は`SceneTable.Name`
+  片方だけにある   その表の`Name`
 
-DungeonTypeNames は、SceneNames でダンジョン名を選んだ番号にだけ難易度名を持つ。鍵は2つの形で、どの言語にも名前が無い鍵は書かない。
+DungeonTypeNamesは、SceneNamesでダンジョン名を選んだ番号にだけ難易度名を持つ。キーは2つの形で、どの言語にも名前が無いキーは書かない。
 
-  番号          `DungeonsTable.DungeonTypeName`。マスターのダンジョン(`PlayType` が MasterMode)は持たない
-  番号:段階     マスターのダンジョンの段階ごとの名前。`MasterChallengeDungeonTable` の `DungeonId` と `Difficulty` から作る
+  番号          `DungeonsTable.DungeonTypeName`。マスター難易度のダンジョン(`PlayType`がMasterMode)は持たない
+  番号:段階     マスター難易度のダンジョンの段階ごとの名前。`MasterChallengeDungeonTable`の`DungeonId`と`Difficulty`から作る
 
-どちらも鍵は4言語の和集合。言語によって収録数に差があるので、無い行は空文字で入り、表示時に zh-CN へ落ちる。
+どちらもキーは4言語の和集合。言語によって収録数に差があるので、無い行は空文字で入り、表示時にzh-CNにフォールバックする。
 """
 import sys
 
-# _common を読み込む前に置く(後ろだと __pycache__ が作られる)
+# _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
 from _common import LANGS, name_of, table, write_localized
@@ -88,22 +88,22 @@ def main():
             dungeon_key = str(stage["DungeonId"])
             difficulty = stage["Difficulty"]
             if dungeon_key not in dungeon_name_keys:
-                raise ValueError("%s: MasterChallengeDungeonTable %s のダンジョン %s はダンジョン名を選んだ番号にない"
+                raise ValueError("%s: MasterChallengeDungeonTable %sのダンジョン%sはダンジョン名を選んだ番号にない"
                                  % (lang, stage_key, dungeon_key))
             if dungeons[dungeon_key].get("PlayType") != PLAY_TYPE_MASTER_MODE:
-                raise ValueError("%s: MasterChallengeDungeonTable %s のダンジョン %s はマスターのダンジョンでない"
+                raise ValueError("%s: MasterChallengeDungeonTable %sのダンジョン%sはマスター難易度のダンジョンでない"
                                  % (lang, stage_key, dungeon_key))
             if not isinstance(difficulty, int) or difficulty <= 0:
-                raise ValueError("%s: MasterChallengeDungeonTable %s の Difficulty が正の整数でない: %r"
+                raise ValueError("%s: MasterChallengeDungeonTable %sのDifficultyが正の整数でない: %r"
                                  % (lang, stage_key, difficulty))
             key = "%s:%d" % (dungeon_key, difficulty)
             if key in type_names:
-                raise ValueError("%s: 段階の鍵 %s が重なる(MasterChallengeDungeonTable %s)" % (lang, key, stage_key))
+                raise ValueError("%s: 段階のキー%sが重複する(MasterChallengeDungeonTable %s)" % (lang, key, stage_key))
             type_names[key] = name_of(stage, "DungeonTypeName")
             if type_names[key]:
                 type_keys.add(key)
         type_values[lang] = type_names
-    print("→ 4言語の和集合 %d件\n" % len(keys))
+    print("→ 4言語の和集合%d件\n" % len(keys))
 
     write_localized("SceneNames", values, keys)
     write_localized("DungeonTypeNames", type_values, type_keys, sort_key=dungeon_type_sort_key)

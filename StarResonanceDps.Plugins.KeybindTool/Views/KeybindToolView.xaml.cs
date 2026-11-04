@@ -10,6 +10,7 @@ namespace StarResonanceDps.Plugins.KeybindTool.Views;
 public partial class KeybindToolView : UserControl, IDisposable
 {
     private readonly KeybindToolViewModel _viewModel;
+    private ScrollViewer? _contentScrollViewer;
     private bool _isSyncingExternalScrollBar;
 
     internal KeybindToolView(KeybindToolViewModel viewModel)
@@ -30,6 +31,9 @@ public partial class KeybindToolView : UserControl, IDisposable
 
     private void KeybindToolView_Loaded(object sender, RoutedEventArgs e)
     {
+        // 一覧のスクロールは一覧のテンプレートの中にある。
+        ActionList.ApplyTemplate();
+        _contentScrollViewer = ActionList.Template.FindName("ContentScrollViewer", ActionList) as ScrollViewer;
         QueueUpdateExternalScrollBar();
 
         if (DataContext is KeybindToolViewModel viewModel)
@@ -53,19 +57,14 @@ public partial class KeybindToolView : UserControl, IDisposable
         QueueUpdateExternalScrollBar();
     }
 
-    private void ContentStackPanel_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        QueueUpdateExternalScrollBar();
-    }
-
     private void ContentExternalScrollBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (_isSyncingExternalScrollBar || !IsLoaded)
+        if (_isSyncingExternalScrollBar || !IsLoaded || _contentScrollViewer is null)
         {
             return;
         }
 
-        ContentScrollViewer.ScrollToVerticalOffset(e.NewValue);
+        _contentScrollViewer.ScrollToVerticalOffset(e.NewValue);
     }
 
     private void QueueUpdateExternalScrollBar()
@@ -77,16 +76,22 @@ public partial class KeybindToolView : UserControl, IDisposable
 
     private void UpdateExternalScrollBar()
     {
+        var scrollViewer = _contentScrollViewer;
+        if (scrollViewer is null)
+        {
+            return;
+        }
+
         _isSyncingExternalScrollBar = true;
 
         try
         {
-            var maximum = Math.Max(ContentScrollViewer.ScrollableHeight, 0);
+            var maximum = Math.Max(scrollViewer.ScrollableHeight, 0);
             ContentExternalScrollBar.Maximum = maximum;
-            ContentExternalScrollBar.ViewportSize = Math.Max(ContentScrollViewer.ViewportHeight, 0);
-            ContentExternalScrollBar.LargeChange = Math.Max(ContentScrollViewer.ViewportHeight * 0.9, 1);
+            ContentExternalScrollBar.ViewportSize = Math.Max(scrollViewer.ViewportHeight, 0);
+            ContentExternalScrollBar.LargeChange = Math.Max(scrollViewer.ViewportHeight * 0.9, 1);
             ContentExternalScrollBar.SmallChange = 48;
-            ContentExternalScrollBar.Value = Math.Min(ContentScrollViewer.VerticalOffset, maximum);
+            ContentExternalScrollBar.Value = Math.Min(scrollViewer.VerticalOffset, maximum);
 
             var isScrollBarVisible = maximum > 0;
             ContentExternalScrollBar.Visibility = isScrollBarVisible

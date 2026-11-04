@@ -16,7 +16,7 @@ public enum SourceLandingKind
     Skill = 2,
 
     /// <summary>
-    /// モジュール効果の根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)。名前は <c>RootBuffNames</c>。
+    /// モジュール効果の根のバフ(<c>ModEffectTable.EffectConfig</c> の <c>[3, バフID, 1]</c>)。名前はその効果の名前(<c>ModuleEffectNames</c>)。
     /// バフの由来(<c>SourceLandingResolver.ResolveBuffOrigin</c>)だけが着く。メーターの行は着かない。
     /// </summary>
     Module = 3,
