@@ -64,6 +64,33 @@
         </Setter>
     </Style>
 
+    <!-- メイン画面とプラグインの窓の TIPS。地・枠・余白は Menu.TextSelectionContextMenu と同じ。 -->
+    <Style x:Key="ToolTip.Info" TargetType="{x:Type ToolTip}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="HasDropShadow" Value="False" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="UseLayoutRounding" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ToolTip}">
+                    <ContentControl Style="{StaticResource Surface.RoundedOutline}"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    Padding="{TemplateBinding Padding}">
+                        <ContentPresenter />
+                    </ContentControl>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!--
         ウィジェット窓の中の TIPS。色と不透明度は窓のパレットから取るので、
         TIPS を付ける要素の Tag に WidgetWindowPalette を持つもの(ウィジェットの WidgetListItemViewModel)を入れること。

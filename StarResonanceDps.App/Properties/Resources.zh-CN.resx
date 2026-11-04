@@ -210,6 +210,9 @@
   <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
     <value>无法设置以下快捷键。</value>
   </data>
+  <data name="Hotkey_RegisterFailed_Detail" xml:space="preserve">
+    <value>请改用其他按键。</value>
+  </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
     <value>“{0}”已被其他程序占用。</value>
   </data>
@@ -275,6 +278,10 @@
   </data>
   <data name="Voicevox_BadResponse_Message" xml:space="preserve">
     <value>无法读取VOICEVOX的响应。</value>
+  </data>
+  <data name="Voicevox_BadResponse_Detail" xml:space="preserve">
+    <value>VOICEVOX返回了错误，或响应的不是VOICEVOX。
+请重新启动VOICEVOX。</value>
   </data>
   <data name="Voicevox_Policy_Title" xml:space="preserve">
     <value>{0}的使用条款</value>
@@ -428,6 +435,9 @@
   <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
     <value>无法设置Windows启动时运行。</value>
   </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Detail" xml:space="preserve">
+    <value>请检查安全软件是否阻止了添加到启动项。</value>
+  </data>
   <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
     <value>VOICEVOX启动错误</value>
   </data>
@@ -444,8 +454,8 @@
     <value>无法打开插件。</value>
   </data>
   <data name="PluginOpenFailed_Detail" xml:space="preserve">
-    <value>已将原因记录到日志。
-可在主界面的“日志”中查看。</value>
+    <value>插件文件可能已损坏，或与应用的版本不一致。
+请重新安装插件后再次打开。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>监听网卡</value>
@@ -698,6 +708,10 @@
   </data>
   <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>无法复制文本。</value>
+  </data>
+  <data name="TextCopyFailed_Detail" xml:space="preserve">
+    <value>剪贴板可能正被其他程序占用。
+请稍后再复制一次。</value>
   </data>
   <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0}{1}HP</value>
@@ -1749,7 +1763,7 @@
     <value>无法打开历史记录。</value>
   </data>
   <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
-    <value>显示内容保持不变。</value>
+    <value>找不到该历史记录的数据，或数据已损坏无法读取。</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>无历史记录</value>
@@ -2190,11 +2204,18 @@
   <data name="Startup_InitializationFailed_Message" xml:space="preserve">
     <value>初始化失败。</value>
   </data>
+  <data name="Startup_InitializationFailed_Detail" xml:space="preserve">
+    <value>应用的数据文件可能缺失或已损坏。
+请重新安装应用后再次启动。</value>
+  </data>
   <data name="Error_Unhandled_Title" xml:space="preserve">
     <value>错误</value>
   </data>
   <data name="Error_Unhandled_Message" xml:space="preserve">
     <value>发生意外错误，程序将退出。</value>
+  </data>
+  <data name="Error_Unhandled_Detail" xml:space="preserve">
+    <value>请重新启动应用。</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>设置读取错误</value>

@@ -7,7 +7,7 @@
 
 ```bash
 cd StarResonanceDps/DataTools/ModuleTool
-python gen_modules.py    # モジュールの効果・モジュール・リンクの戦闘力・おすすめの効果と、その名前
+python gen_modules.py    # モジュールの効果・モジュール・リンクの戦闘力と、その名前
 ```
 
 作業ディレクトリはどこでもよい（`_common.py` が自身の位置からリポジトリを求める）。
@@ -18,7 +18,7 @@ python gen_modules.py    # モジュールの効果・モジュール・リン�
 置き場は環境変数 `BPSR_TABLES` で指定する。無ければリポジトリの隣の `JSONS` を見る。
 期待する構成は「出所 → `Ztable` → 言語フォルダ → `ZTable` → `*.json`」で、本体用と同じ。
 
-使う表: `ModEffectTable` / `ModLinkEffectTable` / `ModHoleTable` / `ModTable` / `ItemTable` / `ProfessionSystemTable` / `TalentStageTable`。
+使う表: `ModEffectTable` / `ModLinkEffectTable` / `ModHoleTable` / `ModTable` / `ItemTable`。
 
 ## 出力
 
@@ -26,12 +26,9 @@ python gen_modules.py    # モジュールの効果・モジュール・リン�
 
 | ファイル | 中身 |
 |---|---|
-| `ModuleTables.json` | 枠の数、効果ごとの絵と段階(必要なリンク数・戦闘力)、モジュールごとの絵と品質、出所ごとの「リンクの総和 → 戦闘力」の並び、特化ごとのおすすめの効果 |
-| `ModuleNames.json` | 効果・モジュール・特化の4言語の名前 |
+| `ModuleTables.json` | 枠の数、効果ごとの絵と段階(必要なリンク数・戦闘力)、モジュールごとの絵と品質、出所ごとの「リンクの総和 → 戦闘力」の並び |
+| `ModuleNames.json` | 効果・モジュールの4言語の名前 |
 
-- 特化の番号は 職業ID × 10000 ＋ 特化の並び(1始まり、`ProfessionSystemTable.ShowTalentStage` の並び)。本体の特化の番号と同じ決め方
-- 特化の名前は `TalentStageTable.Name` の2番目から、全特化に共通する語尾(cn 流 / en Spec / jp 型 / kr 계열)を落としたもの。本体用の `gen_class_specs.py` と同じ決まりで、変えるときは両方を直す
-- おすすめの効果が無い特化は入れない
 - リンクの戦闘力は出所ごとに持つ。出所で表の長さが違い、表の最後を超えた総和は最後の行の値になるため。両方にある総和の値は同じでなければ止まる
 
 ## 名前の土台
@@ -48,8 +45,6 @@ python gen_modules.py    # モジュールの効果・モジュール・リン�
 - リンクの総和が 0 から続いていない、両方の出所にある総和で戦闘力が違う
 - 枠の数が出所で違う
 - モジュールの行がアイテムの表に無い、絵が無い、絵か品質が言語で違う
-- おすすめの効果が出所で違う、効果の表に無い
-- 特化の段階の行が無い、段階の名前が2要素でない、名前が共通の語尾で終わっていない
 
 ## 絵
 

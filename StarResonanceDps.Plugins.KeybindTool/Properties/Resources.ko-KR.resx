@@ -633,6 +633,9 @@
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>설정 파일을 불러오지 못했습니다.</value>
   </data>
+  <data name="Keybind.Message.LoadErrorDetail" xml:space="preserve">
+    <value>설정 파일이 손상되었거나 읽을 수 없습니다.</value>
+  </data>
   <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
     <value>일부 키 설정을 편집할 수 없습니다</value>
   </data>

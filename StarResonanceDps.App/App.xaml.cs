@@ -75,7 +75,7 @@ public partial class App : Application
         catch (Exception exception)
         {
             Log.Fatal(exception, "Startup initialization failed");
-            ShowStartupFailureAndExit(mainWindow => StartupInitializationFailedMessage.Show(mainWindow, exception));
+            ShowStartupFailureAndExit(StartupInitializationFailedMessage.Show);
             return;
         }
 
@@ -155,7 +155,7 @@ public partial class App : Application
 
         void ShowAndExit()
         {
-            UnhandledExceptionMessage.Show(MainWindow is { IsVisible: true } mainWindow ? mainWindow : null, exception);
+            UnhandledExceptionMessage.Show(MainWindow is { IsVisible: true } mainWindow ? mainWindow : null);
             Shutdown(1);
         }
 

@@ -43,8 +43,8 @@ internal sealed class ModuleScorer
             }
         }
 
-        // 優先する効果は全部が条件。段階を問わない効果は、入っていること(Lv1以上)を条件にする。
-        var requirements = new List<(int, int)>();
+        // 優先する効果は全部が条件。段階は 1(その効果が入っていること)から効果の最後の段階まで。
+        var requirements = new List<(int EffectIndex, int MinLevel)>();
         foreach (var priority in priorityEffects)
         {
             if (!EffectIndexById.TryGetValue(priority.EffectId, out var index))
@@ -52,15 +52,28 @@ internal sealed class ModuleScorer
                 throw new ArgumentException($"Unknown priority effect {priority.EffectId}.", nameof(priorityEffects));
             }
 
-            requirements.Add((index, Math.Max(priority.MinLevel, 1)));
+            if (priority.MinLevel < 1 || priority.MinLevel > effects[index].MaxLevel)
+            {
+                throw new ArgumentException(
+                    $"The minimum level {priority.MinLevel} of priority effect {priority.EffectId} is out of range.",
+                    nameof(priorityEffects));
+            }
+
+            requirements.Add((index, priority.MinLevel));
         }
 
         _requirements = [.. requirements];
+        RequiredLinks = requirements
+            .Select(requirement => (requirement.EffectIndex, effects[requirement.EffectIndex].Levels[requirement.MinLevel].Links))
+            .ToArray();
     }
 
     public IReadOnlyList<ModuleEffectDefinition> Effects { get; }
 
     public IReadOnlyDictionary<int, int> EffectIndexById { get; }
+
+    /// <summary>優先する効果ごとの、条件の段階になるリンク数の合計。</summary>
+    public IReadOnlyList<(int EffectIndex, int Links)> RequiredLinks { get; }
 
     public int GetLevel(int effectIndex, int links)
     {

@@ -9,13 +9,10 @@ ModuleTables.json:
   Effects              効果の番号 → 絵のファイル名と段階ごとの「必要なリンク数・戦闘力」(`ModEffectTable`)
   Modules              モジュールのアイテムID → 絵のファイル名と品質(`ModTable` の行、`ItemTable` の `Icon` と `Quality`)
   LinkFightValues      出所ごとの「リンクの総和 → 戦闘力」の並び(`ModLinkEffectTable`、添字がリンクの総和)
-  RecommendedEffects   特化の番号 → おすすめの効果の並び(`TalentStageTable.RecommendModEffectId`)
 
 ModuleNames.json:
-  Effects / Modules / Specs   鍵ごとの4言語の名前。効果は `ModEffectTable.EffectName`、モジュールは `ItemTable.Name`、
-                              特化は `TalentStageTable.Name` の2番目から全特化に共通する語尾を落としたもの
+  Effects / Modules    鍵ごとの4言語の名前。効果は `ModEffectTable.EffectName`、モジュールは `ItemTable.Name`
 
-特化の番号は 職業ID × 10000 ＋ 特化の並び(1始まり、`ProfessionSystemTable.ShowTalentStage` の並び)。
 名前の出所の土台は言語フォルダごと(`_common.table`)。数値は出所をまたいで同じでなければならない。
 
 次のときは一覧を出して止める。
@@ -23,22 +20,16 @@ ModuleNames.json:
 - リンクの総和が 0 から続いていない、出所の両方にあるリンクの総和で戦闘力が違う
 - 枠の数が出所で違う
 - モジュールの行がアイテムの表に無い、絵が無い、絵か品質が言語で違う
-- おすすめの効果が出所で違う、効果の表に無い
-- 特化の段階の行が無い、段階の名前が2要素でない、名前が共通の語尾で終わっていない
 """
 import sys
 
 # _common を読み込む前に置く(後ろだと __pycache__ が作られる)
 sys.dont_write_bytecode = True
 
-from _common import LANGS, SOURCES, dump, name_of, named, per_lang, table, table_of_source, tables_by_source
+from _common import LANGS, SOURCES, dump, name_of, per_lang, table, table_of_source, tables_by_source
 
 # 数値を比べる言語フォルダ(出所ごとに1つ)。数値は言語に依らない。
 NUMBER_LANG_DIRS = {"Star": "cn", "StarASIA": "jp"}
-# 特化の番号は 職業ID × これ ＋ 特化の並び(1始まり)。アプリの特化の番号と同じ決め方。
-PROFESSION_DIGIT = 10000
-# 言語フォルダごとの、全特化の名前に共通する語尾。名前から落とす。
-COMMON_SUFFIX = {"cn": "流", "en": " Spec", "jp": "型", "kr": " 계열"}
 
 
 def file_name(path):
@@ -156,89 +147,12 @@ def build_effect_names(effect_ids):
     return {effect_id: per_lang(names, effect_id) for effect_id in effect_ids}
 
 
-def specs_of(label, professions, stages, problems):
-    """1つの出所の表から「特化の番号 → 段階の行」を作る。"""
-    found = {}
-    for profession_id, profession in professions.items():
-        for index, stage_id in enumerate(profession.get("ShowTalentStage") or []):
-            stage = stages.get(str(stage_id))
-            if stage is None:
-                problems.append("%s 職業 %s の段階 %s が TalentStageTable に無い" % (label, profession_id, stage_id))
-                continue
-            found[str(int(profession_id) * PROFESSION_DIGIT + index + 1)] = stage
-    return found
-
-
-def build_recommended(effect_ids, problems):
-    """特化の番号 → おすすめの効果の並び。おすすめの無い特化は入れない。"""
-    by_source = {}
-    for source in SOURCES:
-        lang_dir = NUMBER_LANG_DIRS[source]
-        professions = table_of_source(source, lang_dir, "ProfessionSystemTable")
-        stages = table_of_source(source, lang_dir, "TalentStageTable")
-        if professions is None or stages is None:
-            problems.append("%s に ProfessionSystemTable か TalentStageTable が無い" % source)
-            continue
-        by_source[source] = {
-            spec: list(stage.get("RecommendModEffectId") or [])
-            for spec, stage in specs_of(source, professions, stages, problems).items()
-        }
-
-    result = {}
-    for source, specs in by_source.items():
-        for spec, effects in specs.items():
-            if not effects:
-                continue
-            unknown = [effect for effect in effects if str(effect) not in effect_ids]
-            if unknown:
-                problems.append("%s 特化 %s のおすすめの効果が効果の表に無い: %s" % (source, spec, unknown))
-                continue
-            if spec in result and result[spec] != effects:
-                problems.append("特化 %s のおすすめの効果が出所で違う: %s / %s" % (spec, result[spec], effects))
-                continue
-            result[spec] = effects
-    return {spec: result[spec] for spec in sorted(result, key=int)}
-
-
-def build_spec_names(spec_ids, problems):
-    """特化の番号 → 4言語の名前(共通の語尾を落とす)。土台にその鍵の名前があれば土台だけを使う。"""
-    names = {lang: {} for lang in LANGS}
-    for lang, lang_dir in LANGS.items():
-        suffix = COMMON_SUFFIX[lang_dir]
-        stages_by_source = dict(tables_by_source(lang_dir, "TalentStageTable"))
-        decided = set()
-        for source, professions in tables_by_source(lang_dir, "ProfessionSystemTable"):
-            label = "%s %s" % (lang_dir, source)
-            stages = stages_by_source.get(source)
-            if stages is None:
-                problems.append("%s に TalentStageTable が無い" % label)
-                continue
-            for spec, stage in specs_of(label, professions, stages, problems).items():
-                if spec not in spec_ids or spec in decided:
-                    continue
-                stage_names = stage.get("Name") or []
-                if len(stage_names) != 2:
-                    problems.append("%s 特化 %s の段階の名前が2要素でない: %s" % (label, spec, stage_names))
-                    continue
-                name = (stage_names[1] or "").strip()
-                if not named(name):
-                    continue
-                decided.add(spec)
-                if not name.endswith(suffix):
-                    problems.append("%s 特化 %s の名前「%s」が共通の語尾「%s」で終わらない" % (label, spec, name, suffix))
-                    continue
-                names[lang][spec] = name[:-len(suffix)].strip()
-    return {spec: per_lang(names, spec) for spec in sorted(spec_ids, key=int)}
-
-
 def main():
     problems = []
     effects = build_effects(problems)
     link_fight_values = build_link_fight_values(problems)
     slot_count = build_slot_count(problems)
     modules, module_names = build_modules(problems)
-    recommended = build_recommended(set(effects), problems)
-    spec_names = build_spec_names(set(recommended), problems)
     effect_names = build_effect_names(sorted(effects, key=int))
 
     if problems:
@@ -251,19 +165,16 @@ def main():
         "Effects": {effect_id: effects[effect_id] for effect_id in sorted(effects, key=int)},
         "Modules": modules,
         "LinkFightValues": link_fight_values,
-        "RecommendedEffects": recommended,
     })
     dump("ModuleNames", {
         "Effects": effect_names,
         "Modules": {module_id: per_lang(module_names, module_id) for module_id in modules},
-        "Specs": spec_names,
     })
 
-    print("効果 %d / モジュール %d / 枠 %d / リンクの表 %s / おすすめのある特化 %d"
+    print("効果 %d / モジュール %d / 枠 %d / リンクの表 %s"
           % (len(effects), len(modules), slot_count,
-             " / ".join("%s 0〜%d" % (source, len(values) - 1) for source, values in link_fight_values.items()),
-             len(recommended)))
-    for title, names in (("効果", effect_names), ("モジュール", module_names), ("特化", spec_names)):
+             " / ".join("%s 0〜%d" % (source, len(values) - 1) for source, values in link_fight_values.items())))
+    for title, names in (("効果", effect_names), ("モジュール", module_names)):
         if title == "モジュール":
             counts = {lang: sum(1 for module_id in modules if names[lang].get(module_id)) for lang in LANGS}
         else:

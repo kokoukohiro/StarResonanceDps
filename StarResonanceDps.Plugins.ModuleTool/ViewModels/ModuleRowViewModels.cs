@@ -1,8 +1,9 @@
+using System.Globalization;
 using System.Windows.Media;
 
 namespace StarResonanceDps.Plugins.ModuleTool.ViewModels;
 
-/// <summary>選択リストの1行(特化・段階)。</summary>
+/// <summary>選択リストの1行(段階)。</summary>
 internal sealed record ModuleOption<T>(T Value, string Label)
 {
     public override string ToString() => Label;
@@ -47,6 +48,12 @@ internal sealed class ModuleQualityToggleViewModel : ObservableObject
                 _changed();
             }
         }
+    }
+
+    /// <summary>変化の知らせ(保存)を出さずに選択を入れる。設定をまとめて当てるとき。</summary>
+    public void SetSelected(bool isSelected)
+    {
+        SetProperty(ref _isSelected, isSelected, nameof(IsSelected));
     }
 }
 
@@ -125,13 +132,22 @@ internal sealed class ModulePriorityEffectRowViewModel : ObservableObject
 }
 
 /// <summary>結果のカードの効果1つ。</summary>
-internal sealed record ModuleEffectChipViewModel(ImageSource Icon, string Name, int Links, int Level, bool IsPriority)
+internal sealed record ModuleEffectChipViewModel(ImageSource Icon, string Name, int Links, int Level)
 {
-    public string LevelText => $"Lv{Level}";
+    public string LevelText => ModuleLevelText.Format(Level);
 }
 
-/// <summary>モジュールの効果1つ(絵とリンク数)。</summary>
-internal sealed record ModulePartViewModel(ImageSource Icon, string Name, int Links)
+/// <summary>段階の表示(「Lv5」)。結果の効果と条件の段階の選択リストで使う。</summary>
+internal static class ModuleLevelText
+{
+    public static string Format(int level)
+    {
+        return string.Create(CultureInfo.InvariantCulture, $"Lv{level}");
+    }
+}
+
+/// <summary>モジュールの効果1つ(絵とリンク数)。<see cref="TipText"/> はモジュールの TIPS の1行(効果名とリンク数)。</summary>
+internal sealed record ModulePartViewModel(ImageSource Icon, int Links, string TipText)
 {
     public string LinksText => $"+{Links}";
 }

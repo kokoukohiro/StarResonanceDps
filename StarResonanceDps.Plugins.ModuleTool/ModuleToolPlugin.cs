@@ -18,13 +18,14 @@ namespace StarResonanceDps.Plugins.ModuleTool;
 public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOptionsProvider
 {
     private static readonly PluginWindowOptions WindowOptions = new(
-        width: 780,
+        width: 877,
         height: 640,
-        minWidth: 740,
+        minWidth: 877,
         minHeight: 480);
 
     private IPluginContext? _context;
     private ModuleCatalog? _catalog;
+    private ModuleInventoryHolder? _inventory;
 
     public PluginWindowOptions GetWindowOptions()
     {
@@ -35,22 +36,25 @@ public sealed class ModuleToolPlugin : IStarResonancePlugin, IPluginWindowOption
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _catalog = new ModuleCatalog();
+        _inventory = new ModuleInventoryHolder(_context.GameData);
         _context.Logger.Info("Initialized.");
     }
 
     public FrameworkElement CreateContent()
     {
-        if (_context is null || _catalog is null)
+        if (_context is null || _catalog is null || _inventory is null)
         {
             throw new InvalidOperationException("The plugin has not been initialized.");
         }
 
-        return new ModuleToolView(new ModuleToolViewModel(_context, _catalog));
+        return new ModuleToolView(new ModuleToolViewModel(_context, _catalog, _inventory));
     }
 
     public void Shutdown()
     {
         _context?.Logger.Info("Shutdown.");
+        _inventory?.Dispose();
+        _inventory = null;
         _context = null;
         _catalog = null;
     }

@@ -24,7 +24,6 @@ internal sealed class ModuleCatalog
     private readonly Dictionary<int, ModuleEffectDefinition> _effects;
     private readonly Dictionary<int, ModuleDefinition> _modules;
     private readonly Dictionary<string, int[]> _linkFightValues;
-    private readonly Dictionary<int, IReadOnlyList<int>> _recommendedEffects;
     private readonly ModuleNamesFile _names;
     private readonly Dictionary<string, ImageSource> _images = new(StringComparer.Ordinal);
 
@@ -56,14 +55,7 @@ internal sealed class ModuleCatalog
             ValidateNonDecreasing(values, $"link fight values of {source}");
         }
 
-        _recommendedEffects = tables.RecommendedEffects.ToDictionary(
-            pair => ParseId(pair.Key),
-            pair => pair.Value.All(_effects.ContainsKey)
-                ? (IReadOnlyList<int>)pair.Value
-                : throw new InvalidDataException($"The recommended effects of spec {pair.Key} include an unknown effect."));
-
         Effects = _effects.Values.OrderBy(effect => effect.EffectId).ToArray();
-        RecommendedSpecIds = _recommendedEffects.Keys.Order().ToArray();
         Qualities = _modules.Values.Select(module => module.Quality).Distinct().Order().ToArray();
 
         // 絵は開く前に全部読む。足りなければここで止まる。
@@ -79,8 +71,6 @@ internal sealed class ModuleCatalog
 
     public IReadOnlyList<ModuleEffectDefinition> Effects { get; }
 
-    public IReadOnlyList<int> RecommendedSpecIds { get; }
-
     /// <summary>モジュールの品質(表の値)の全部。小さい順。</summary>
     public IReadOnlyList<int> Qualities { get; }
 
@@ -94,11 +84,6 @@ internal sealed class ModuleCatalog
         return _modules.TryGetValue(configId, out module!);
     }
 
-    public IReadOnlyList<int> GetRecommendedEffects(int specId)
-    {
-        return _recommendedEffects.TryGetValue(specId, out var effects) ? effects : [];
-    }
-
     /// <summary>今のサーバーの「リンクの総和 → 戦闘力」。アジアサーバーだけ StarASIA の表、それ以外は Star の表。</summary>
     public IReadOnlyList<int> GetLinkFightValues(PluginGameServer server)
     {
@@ -108,8 +93,6 @@ internal sealed class ModuleCatalog
     public string GetEffectName(int effectId, CultureInfo culture) => GetName(_names.Effects, effectId, culture);
 
     public string GetModuleName(int configId, CultureInfo culture) => GetName(_names.Modules, configId, culture);
-
-    public string GetSpecName(int specId, CultureInfo culture) => GetName(_names.Specs, specId, culture);
 
     public ImageSource GetImage(string icon) => _images[icon];
 

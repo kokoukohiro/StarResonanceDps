@@ -1051,15 +1051,6 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void ShowMessage(
-        string titleResourceKey,
-        string messageResourceKey)
-    {
-        _context.Messages.Show(
-            Texts[titleResourceKey],
-            Texts[messageResourceKey]);
-    }
-
     private void ShowMessageWithDetail(
         string titleResourceKey,
         string messageResourceKey,
@@ -1158,9 +1149,10 @@ internal sealed class KeybindToolViewModel : ObservableObject, IDisposable
 
             if (showErrors)
             {
-                ShowMessage(
+                ShowMessageWithDetail(
                     "Keybind.Message.Title.LoadError",
-                    "Keybind.Message.LoadErrorBody");
+                    "Keybind.Message.LoadErrorBody",
+                    Texts["Keybind.Message.LoadErrorDetail"]);
             }
         }
     }

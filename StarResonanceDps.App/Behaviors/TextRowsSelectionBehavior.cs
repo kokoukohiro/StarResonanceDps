@@ -274,7 +274,8 @@ internal sealed class TextRowsSelectionController
             MessageWindow.Show(
                 Window.GetWindow(_itemsControl),
                 localization.GetString("TextCopyFailed_Title"),
-                localization.GetString("TextCopyFailed_Message"));
+                localization.GetString("TextCopyFailed_Message"),
+                localization.GetString("TextCopyFailed_Detail"));
         }
     }
 

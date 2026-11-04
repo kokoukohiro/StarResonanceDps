@@ -210,6 +210,9 @@
   <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
     <value>The following hotkeys could not be set.</value>
   </data>
+  <data name="Hotkey_RegisterFailed_Detail" xml:space="preserve">
+    <value>Assign a different key.</value>
+  </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
     <value>"{0}" is in use by another app.</value>
   </data>
@@ -275,6 +278,10 @@ If it is not installed, you can download it from the link below.</value>
   </data>
   <data name="Voicevox_BadResponse_Message" xml:space="preserve">
     <value>Could not read the response from VOICEVOX.</value>
+  </data>
+  <data name="Voicevox_BadResponse_Detail" xml:space="preserve">
+    <value>VOICEVOX returned an error, or something other than VOICEVOX responded.
+Restart VOICEVOX.</value>
   </data>
   <data name="Voicevox_Policy_Title" xml:space="preserve">
     <value>{0} terms of use</value>
@@ -428,6 +435,9 @@ If it is not installed, you can download it from the link below.</value>
   <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
     <value>Could not set the app to launch when Windows starts.</value>
   </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Detail" xml:space="preserve">
+    <value>Check whether security software is blocking adding the app to startup.</value>
+  </data>
   <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
     <value>VOICEVOX launch error</value>
   </data>
@@ -444,8 +454,8 @@ If it is not installed, you can download it from the link below.</value>
     <value>Could not open the plugin.</value>
   </data>
   <data name="PluginOpenFailed_Detail" xml:space="preserve">
-    <value>The cause has been recorded in the log.
-You can check it in "Logs" on the main window.</value>
+    <value>The plugin file may be damaged or may not match the app version.
+Reinstall the plugin, then open it again.</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>Network Adapter</value>
@@ -697,6 +707,10 @@ You can check it in "Logs" on the main window.</value>
   </data>
   <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>Could not copy the text.</value>
+  </data>
+  <data name="TextCopyFailed_Detail" xml:space="preserve">
+    <value>Another app may be using the clipboard.
+Wait a moment and copy again.</value>
   </data>
   <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0} {1} HP</value>
@@ -1746,7 +1760,7 @@ It is strongly recommended to update to this version, or higher, to avoid proble
     <value>Could not open the history entry.</value>
   </data>
   <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
-    <value>The current display is unchanged.</value>
+    <value>The data for this history entry was not found or is damaged and could not be read.</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>No history</value>
@@ -2187,11 +2201,18 @@ Check the folder's write permissions and your security software settings, or mov
   <data name="Startup_InitializationFailed_Message" xml:space="preserve">
     <value>Initialization failed.</value>
   </data>
+  <data name="Startup_InitializationFailed_Detail" xml:space="preserve">
+    <value>Some of the app's data files may be missing or damaged.
+Reinstall the app, then start it again.</value>
+  </data>
   <data name="Error_Unhandled_Title" xml:space="preserve">
     <value>Error</value>
   </data>
   <data name="Error_Unhandled_Message" xml:space="preserve">
     <value>An unexpected error occurred. The application will exit.</value>
+  </data>
+  <data name="Error_Unhandled_Detail" xml:space="preserve">
+    <value>Start the app again.</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>Settings load error</value>

@@ -633,6 +633,9 @@ Check read permissions for the file and whether sync or security software is usi
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>Failed to load the settings file.</value>
   </data>
+  <data name="Keybind.Message.LoadErrorDetail" xml:space="preserve">
+    <value>The settings file is damaged or could not be read.</value>
+  </data>
   <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
     <value>Some Key Settings Cannot Be Edited</value>
   </data>

@@ -84,7 +84,11 @@ public static partial class NotificationCheckMessage
         }
         else
         {
-            MessageWindow.Show(owner, title, localization.GetString("Voicevox_BadResponse_Message"));
+            MessageWindow.Show(
+                owner,
+                title,
+                localization.GetString("Voicevox_BadResponse_Message"),
+                localization.GetString("Voicevox_BadResponse_Detail"));
         }
     }
 

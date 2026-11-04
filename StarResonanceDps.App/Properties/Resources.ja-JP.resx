@@ -210,6 +210,9 @@
   <data name="Hotkey_RegisterFailed_Message" xml:space="preserve">
     <value>次のホットキーを設定できませんでした。</value>
   </data>
+  <data name="Hotkey_RegisterFailed_Detail" xml:space="preserve">
+    <value>別のキーを割り当ててください。</value>
+  </data>
   <data name="Hotkey_RegisterFailed_InUse" xml:space="preserve">
     <value>「{0}」はほかのアプリが使用中です。</value>
   </data>
@@ -275,6 +278,10 @@
   </data>
   <data name="Voicevox_BadResponse_Message" xml:space="preserve">
     <value>VOICEVOXの応答を読み取れませんでした。</value>
+  </data>
+  <data name="Voicevox_BadResponse_Detail" xml:space="preserve">
+    <value>VOICEVOXがエラーを返したか、VOICEVOXではないものが応答しました。
+VOICEVOXを起動し直してください。</value>
   </data>
   <data name="Voicevox_Policy_Title" xml:space="preserve">
     <value>{0}の利用規約</value>
@@ -428,6 +435,9 @@
   <data name="StartupSettings_WindowsRegistrationFailed_Message" xml:space="preserve">
     <value>Windows起動時の起動を設定できませんでした。</value>
   </data>
+  <data name="StartupSettings_WindowsRegistrationFailed_Detail" xml:space="preserve">
+    <value>セキュリティソフトがスタートアップへの登録を止めていないか確認してください。</value>
+  </data>
   <data name="Voicevox_LaunchFailed_Title" xml:space="preserve">
     <value>VOICEVOX起動エラー</value>
   </data>
@@ -444,8 +454,8 @@
     <value>プラグインを開けませんでした。</value>
   </data>
   <data name="PluginOpenFailed_Detail" xml:space="preserve">
-    <value>原因はログに記録しました。
-メイン画面の「ログ」で確認できます。</value>
+    <value>プラグインのファイルが壊れているか、アプリと版が合っていない可能性があります。
+プラグインを入れ直してから、もう一度開いてください。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>
@@ -698,6 +708,10 @@
   </data>
   <data name="TextCopyFailed_Message" xml:space="preserve">
     <value>テキストをコピーできませんでした。</value>
+  </data>
+  <data name="TextCopyFailed_Detail" xml:space="preserve">
+    <value>ほかのアプリがクリップボードを使っている可能性があります。
+少し待ってから、もう一度コピーしてください。</value>
   </data>
   <data name="Timeline_HealFormat" xml:space="preserve">
     <value>{0}のHPを{1}</value>
@@ -1749,7 +1763,7 @@
     <value>履歴を開けませんでした。</value>
   </data>
   <data name="Aggregation_LoadFailed_Detail" xml:space="preserve">
-    <value>表示はこれまでのままです。</value>
+    <value>この履歴のデータが見つからないか、壊れていて読み取れませんでした。</value>
   </data>
   <data name="Aggregation_NoHistory" xml:space="preserve">
     <value>履歴がありません</value>
@@ -2190,11 +2204,18 @@
   <data name="Startup_InitializationFailed_Message" xml:space="preserve">
     <value>初期化に失敗しました。</value>
   </data>
+  <data name="Startup_InitializationFailed_Detail" xml:space="preserve">
+    <value>アプリのデータのファイルが足りないか、壊れている可能性があります。
+アプリを入れ直してから、もう一度起動してください。</value>
+  </data>
   <data name="Error_Unhandled_Title" xml:space="preserve">
     <value>エラー</value>
   </data>
   <data name="Error_Unhandled_Message" xml:space="preserve">
     <value>予期しないエラーが発生したため終了します。</value>
+  </data>
+  <data name="Error_Unhandled_Detail" xml:space="preserve">
+    <value>アプリをもう一度起動してください。</value>
   </data>
   <data name="SettingsFile_LoadFailed_Title" xml:space="preserve">
     <value>設定読み込みエラー</value>

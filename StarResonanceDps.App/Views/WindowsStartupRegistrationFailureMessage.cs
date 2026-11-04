@@ -12,6 +12,7 @@ public static class WindowsStartupRegistrationFailureMessage
         MessageWindow.Show(
             owner,
             localization.GetString("StartupSettings_Error_Title"),
-            localization.GetString("StartupSettings_WindowsRegistrationFailed_Message"));
+            localization.GetString("StartupSettings_WindowsRegistrationFailed_Message"),
+            localization.GetString("StartupSettings_WindowsRegistrationFailed_Detail"));
     }
 }

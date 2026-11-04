@@ -62,17 +62,14 @@
   <data name="Module.Button.AddEffect" xml:space="preserve">
     <value>効果を追加</value>
   </data>
-  <data name="Module.Button.Calculate" xml:space="preserve">
-    <value>計算する</value>
-  </data>
   <data name="Module.Button.Cancel" xml:space="preserve">
-    <value>中断</value>
+    <value>キャンセル</value>
   </data>
-  <data name="Module.Calculate.Count" xml:space="preserve">
-    <value>{0}個の組{1}通りから探します</value>
+  <data name="Module.Button.Reset" xml:space="preserve">
+    <value>リセット</value>
   </data>
-  <data name="Module.Calculate.Progress" xml:space="preserve">
-    <value>{0}%・{1}秒</value>
+  <data name="Module.Button.Search" xml:space="preserve">
+    <value>検索</value>
   </data>
   <data name="Module.Card.Equipped" xml:space="preserve">
     <value>装着中</value>
@@ -81,10 +78,13 @@
     <value>能力スコア</value>
   </data>
   <data name="Module.Card.LinkTotal" xml:space="preserve">
-    <value>リンク合計{0}</value>
+    <value>リンク効果{0}</value>
   </data>
   <data name="Module.Card.Rank" xml:space="preserve">
     <value>#{0}</value>
+  </data>
+  <data name="Module.Conditions.Effect" xml:space="preserve">
+    <value>{0}Lv{1}</value>
   </data>
   <data name="Module.Inventory.EquippedFight" xml:space="preserve">
     <value>装着中の能力スコア{0}</value>
@@ -93,7 +93,7 @@
     <value>装着中の能力スコアを計算できません</value>
   </data>
   <data name="Module.Inventory.MissingLinks" xml:space="preserve">
-    <value>リンク数の分からないモジュール{0}個は計算に入れていません</value>
+    <value>リンク数の分からないモジュール{0}個は検索に入れていません</value>
   </data>
   <data name="Module.Inventory.NotLoaded" xml:space="preserve">
     <value>モジュールを読み込んでいません</value>
@@ -105,38 +105,38 @@
     <value>{0}に受信</value>
   </data>
   <data name="Module.Inventory.Summary" xml:space="preserve">
-    <value>{0}個・装着中{1}/{2}</value>
+    <value>{0}個(装着中{1}/{2})</value>
   </data>
   <data name="Module.Inventory.UnknownModules" xml:space="preserve">
-    <value>対応していないモジュール{0}個は計算に入れていません</value>
-  </data>
-  <data name="Module.Label.PriorityEffects" xml:space="preserve">
-    <value>優先する効果</value>
-  </data>
-  <data name="Module.Label.Recommend" xml:space="preserve">
-    <value>おすすめ</value>
-  </data>
-  <data name="Module.Level.Any" xml:space="preserve">
-    <value>指定なし</value>
-  </data>
-  <data name="Module.Level.AtLeast" xml:space="preserve">
-    <value>Lv{0}以上</value>
-  </data>
-  <data name="Module.Message.CalculationError.Message" xml:space="preserve">
-    <value>モジュールの組み合わせを計算できませんでした。</value>
-  </data>
-  <data name="Module.Message.CalculationError.Title" xml:space="preserve">
-    <value>計算エラー</value>
-  </data>
-  <data name="Module.Message.ErrorDetail" xml:space="preserve">
-    <value>原因はログに記録しました。
-メイン画面の「ログ」で確認できます。</value>
+    <value>対応していないモジュール{0}個は検索に入れていません</value>
   </data>
   <data name="Module.Message.SaveError.Message" xml:space="preserve">
     <value>モジュールツールの設定を保存できませんでした。</value>
   </data>
   <data name="Module.Message.SaveError.Title" xml:space="preserve">
     <value>設定保存エラー</value>
+  </data>
+  <data name="Module.Message.SearchError.Detail" xml:space="preserve">
+    <value>もう一度検索してください。
+直らない場合は、モジュールツールを開き直してから検索してください。</value>
+  </data>
+  <data name="Module.Message.SearchError.Message" xml:space="preserve">
+    <value>モジュールの組み合わせを検索できませんでした。</value>
+  </data>
+  <data name="Module.Message.SearchError.Title" xml:space="preserve">
+    <value>検索エラー</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Detail" xml:space="preserve">
+    <value>次の設定ファイルが壊れているか、読み取れませんでした。
+{0}
+このファイルは、次に設定を保存したときに上書きされます。
+必要に応じて、設定をやり直してください。</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Message" xml:space="preserve">
+    <value>設定を読み込めなかったため、初期値で開きました。</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Title" xml:space="preserve">
+    <value>設定読み込みエラー</value>
   </data>
   <data name="Module.Quality.2" xml:space="preserve">
     <value>基本</value>
@@ -147,14 +147,20 @@
   <data name="Module.Quality.4" xml:space="preserve">
     <value>卓越</value>
   </data>
-  <data name="Module.Recommend.None" xml:space="preserve">
-    <value>指定なし</value>
+  <data name="Module.Results.ConditionsWithNote" xml:space="preserve">
+    <value>{0}({1})</value>
   </data>
-  <data name="Module.Results.Empty" xml:space="preserve">
-    <value>条件を満たす組がありません</value>
+  <data name="Module.Results.Count" xml:space="preserve">
+    <value>{0}件({1}秒)</value>
+  </data>
+  <data name="Module.Results.InventoryChanged" xml:space="preserve">
+    <value>所持モジュールが変わりました、検索し直してください</value>
   </data>
   <data name="Module.Results.Summary" xml:space="preserve">
-    <value>上位{0}件・{1}秒</value>
+    <value>{0}件中上位{1}件({2}秒)</value>
+  </data>
+  <data name="Module.Search.Progress" xml:space="preserve">
+    <value>{0}%({1}秒)</value>
   </data>
   <data name="Module.Section.Conditions" xml:space="preserve">
     <value>条件</value>
@@ -168,10 +174,13 @@
   <data name="Module.Section.Results" xml:space="preserve">
     <value>結果</value>
   </data>
-  <data name="Module.Stale" xml:space="preserve">
-    <value>所持モジュールか条件が変わりました。計算し直してください</value>
+  <data name="Module.Section.Searching" xml:space="preserve">
+    <value>検索中</value>
   </data>
   <data name="Module.Tile.Equipped" xml:space="preserve">
     <value>装着中</value>
+  </data>
+  <data name="Module.Tile.PartTip" xml:space="preserve">
+    <value>{0}+{1}</value>
   </data>
 </root>

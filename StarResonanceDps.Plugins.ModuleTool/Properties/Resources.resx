@@ -62,17 +62,14 @@
   <data name="Module.Button.AddEffect" xml:space="preserve">
     <value>Add Effect</value>
   </data>
-  <data name="Module.Button.Calculate" xml:space="preserve">
-    <value>Calculate</value>
-  </data>
   <data name="Module.Button.Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
-  <data name="Module.Calculate.Count" xml:space="preserve">
-    <value>Searching {1} combinations of {0} modules</value>
+  <data name="Module.Button.Reset" xml:space="preserve">
+    <value>Reset</value>
   </data>
-  <data name="Module.Calculate.Progress" xml:space="preserve">
-    <value>{0}% · {1}s</value>
+  <data name="Module.Button.Search" xml:space="preserve">
+    <value>Search</value>
   </data>
   <data name="Module.Card.Equipped" xml:space="preserve">
     <value>Equipped</value>
@@ -81,10 +78,13 @@
     <value>Ability Score</value>
   </data>
   <data name="Module.Card.LinkTotal" xml:space="preserve">
-    <value>Link Total {0}</value>
+    <value>Effects {0}</value>
   </data>
   <data name="Module.Card.Rank" xml:space="preserve">
     <value>#{0}</value>
+  </data>
+  <data name="Module.Conditions.Effect" xml:space="preserve">
+    <value>{0} Lv{1}</value>
   </data>
   <data name="Module.Inventory.EquippedFight" xml:space="preserve">
     <value>Equipped Ability Score {0}</value>
@@ -93,7 +93,7 @@
     <value>Cannot calculate the equipped Ability Score</value>
   </data>
   <data name="Module.Inventory.MissingLinks" xml:space="preserve">
-    <value>{0} modules with unknown link counts are excluded from the calculation</value>
+    <value>{0} modules with unknown link counts are excluded from the search</value>
   </data>
   <data name="Module.Inventory.NotLoaded" xml:space="preserve">
     <value>Modules have not been loaded</value>
@@ -105,38 +105,38 @@
     <value>Received at {0}</value>
   </data>
   <data name="Module.Inventory.Summary" xml:space="preserve">
-    <value>{0} modules · Equipped {1}/{2}</value>
+    <value>{0} modules (Equipped {1}/{2})</value>
   </data>
   <data name="Module.Inventory.UnknownModules" xml:space="preserve">
-    <value>{0} unsupported modules are excluded from the calculation</value>
-  </data>
-  <data name="Module.Label.PriorityEffects" xml:space="preserve">
-    <value>Priority Effects</value>
-  </data>
-  <data name="Module.Label.Recommend" xml:space="preserve">
-    <value>Recommended</value>
-  </data>
-  <data name="Module.Level.Any" xml:space="preserve">
-    <value>Not specified</value>
-  </data>
-  <data name="Module.Level.AtLeast" xml:space="preserve">
-    <value>Lv{0} or higher</value>
-  </data>
-  <data name="Module.Message.CalculationError.Message" xml:space="preserve">
-    <value>Could not calculate module combinations.</value>
-  </data>
-  <data name="Module.Message.CalculationError.Title" xml:space="preserve">
-    <value>Calculation Error</value>
-  </data>
-  <data name="Module.Message.ErrorDetail" xml:space="preserve">
-    <value>The cause has been recorded in the log.
-You can check it in "Logs" on the main window.</value>
+    <value>{0} unsupported modules are excluded from the search</value>
   </data>
   <data name="Module.Message.SaveError.Message" xml:space="preserve">
     <value>Could not save the Module Tool settings.</value>
   </data>
   <data name="Module.Message.SaveError.Title" xml:space="preserve">
     <value>Settings Save Error</value>
+  </data>
+  <data name="Module.Message.SearchError.Detail" xml:space="preserve">
+    <value>Search again.
+If that does not help, reopen the Module Tool and search again.</value>
+  </data>
+  <data name="Module.Message.SearchError.Message" xml:space="preserve">
+    <value>Could not search module combinations.</value>
+  </data>
+  <data name="Module.Message.SearchError.Title" xml:space="preserve">
+    <value>Search Error</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Detail" xml:space="preserve">
+    <value>The following settings file is damaged or could not be read.
+{0}
+This file will be overwritten the next time the settings are saved.
+Change the settings again if needed.</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Message" xml:space="preserve">
+    <value>Could not load the settings, so the tool opened with the defaults.</value>
+  </data>
+  <data name="Module.Message.SettingsLoadError.Title" xml:space="preserve">
+    <value>Settings load error</value>
   </data>
   <data name="Module.Quality.2" xml:space="preserve">
     <value>Basic</value>
@@ -147,14 +147,20 @@ You can check it in "Logs" on the main window.</value>
   <data name="Module.Quality.4" xml:space="preserve">
     <value>Excellent</value>
   </data>
-  <data name="Module.Recommend.None" xml:space="preserve">
-    <value>Not specified</value>
+  <data name="Module.Results.ConditionsWithNote" xml:space="preserve">
+    <value>{0} ({1})</value>
   </data>
-  <data name="Module.Results.Empty" xml:space="preserve">
-    <value>No combination meets the conditions</value>
+  <data name="Module.Results.Count" xml:space="preserve">
+    <value>{0} found ({1}s)</value>
+  </data>
+  <data name="Module.Results.InventoryChanged" xml:space="preserve">
+    <value>Your modules have changed. Please search again.</value>
   </data>
   <data name="Module.Results.Summary" xml:space="preserve">
-    <value>Top {0} · {1}s</value>
+    <value>Top {1} of {0} ({2}s)</value>
+  </data>
+  <data name="Module.Search.Progress" xml:space="preserve">
+    <value>{0}% ({1}s)</value>
   </data>
   <data name="Module.Section.Conditions" xml:space="preserve">
     <value>Conditions</value>
@@ -168,10 +174,13 @@ You can check it in "Logs" on the main window.</value>
   <data name="Module.Section.Results" xml:space="preserve">
     <value>Results</value>
   </data>
-  <data name="Module.Stale" xml:space="preserve">
-    <value>Your modules or the conditions have changed. Please calculate again.</value>
+  <data name="Module.Section.Searching" xml:space="preserve">
+    <value>Searching</value>
   </data>
   <data name="Module.Tile.Equipped" xml:space="preserve">
     <value>Equipped</value>
+  </data>
+  <data name="Module.Tile.PartTip" xml:space="preserve">
+    <value>{0} +{1}</value>
   </data>
 </root>

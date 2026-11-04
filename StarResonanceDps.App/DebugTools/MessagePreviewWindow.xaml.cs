@@ -34,6 +34,7 @@ public partial class MessagePreviewWindow : Window
     private const string KeybindLayoutFileName = "keybind_config.json";
     private const string ModuleAssemblyName = "ModuleTool";
     private const string ModuleResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
+    private const string ModuleConfigFileName = "module_config.json";
 
     private readonly PluginMessageService _pluginMessages = new();
     private PluginLocalizer? _keybindTexts;
@@ -63,6 +64,9 @@ public partial class MessagePreviewWindow : Window
 
     // キーバインドツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
     private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindLayoutFileName);
+
+    // モジュールツールが使う設定ファイルの場所。
+    private static string ModuleConfigFilePath => Path.Combine(AppDataPaths.PluginsDirectory, ModuleConfigFileName);
 
     // 本物: 起動時(実行フォルダの Data に書けないとき)。場所は実際の Data のフォルダ。
     private void DataFolderNotWritable_Click(object sender, RoutedEventArgs e)
@@ -123,16 +127,16 @@ public partial class MessagePreviewWindow : Window
         NpcapInstallMessage.Show(this);
     }
 
-    // 本物: 起動時(初期化で例外が出たとき)。例外は試しのもの。
+    // 本物: 起動時(初期化で例外が出たとき)
     private void StartupInitializationFailed_Click(object sender, RoutedEventArgs e)
     {
-        StartupInitializationFailedMessage.Show(this, new InvalidOperationException("Sample exception"));
+        StartupInitializationFailedMessage.Show(this);
     }
 
-    // 本物: 受け手の無い例外で終わるとき。例外は試しのもの(終了はしない)。
+    // 本物: 受け手の無い例外で終わるとき(終了はしない)
     private void UnhandledException_Click(object sender, RoutedEventArgs e)
     {
-        UnhandledExceptionMessage.Show(this, new InvalidOperationException("Sample exception"));
+        UnhandledExceptionMessage.Show(this);
     }
 
     // 本物: 起動時のメイン窓(Npcap が古いとき)。バージョンはこの PC に入っている Npcap のもの。
@@ -197,7 +201,8 @@ public partial class MessagePreviewWindow : Window
         MessageWindow.Show(
             this,
             Localization.GetString("TextCopyFailed_Title"),
-            Localization.GetString("TextCopyFailed_Message"));
+            Localization.GetString("TextCopyFailed_Message"),
+            Localization.GetString("TextCopyFailed_Detail"));
     }
 
     // 本物: 起動時・通知タブ(VOICEVOX につながらないとき)
@@ -279,7 +284,7 @@ public partial class MessagePreviewWindow : Window
         ShowKeybindMessage(
             "Keybind.Message.Title.LoadError",
             "Keybind.Message.LoadErrorBody",
-            null);
+            KeybindTexts["Keybind.Message.LoadErrorDetail"]);
     }
 
     // 本物: キーバインドツール(キー設定プリセットが無い)
@@ -385,22 +390,31 @@ public partial class MessagePreviewWindow : Window
             string.IsNullOrWhiteSpace(detail) ? null : detail);
     }
 
-    // 本物: モジュールツール(組み合わせの計算で例外が出た)
-    private void ModuleCalculationError_Click(object sender, RoutedEventArgs e)
+    // 本物: モジュールツール(組み合わせの検索で例外が出た)
+    private void ModuleSearchError_Click(object sender, RoutedEventArgs e)
     {
         _pluginMessages.Show(
-            ModuleTexts["Module.Message.CalculationError.Title"],
-            ModuleTexts["Module.Message.CalculationError.Message"],
-            ModuleTexts["Module.Message.ErrorDetail"]);
+            ModuleTexts["Module.Message.SearchError.Title"],
+            ModuleTexts["Module.Message.SearchError.Message"],
+            ModuleTexts["Module.Message.SearchError.Detail"]);
     }
 
-    // 本物: モジュールツール(設定を保存できなかった。起動中の最初の1回だけ出る)
+    // 本物: モジュールツール(設定を保存できなかった。起動中の最初の1回だけ出る)。場所は実際の module_config.json。
     private void ModuleSaveError_Click(object sender, RoutedEventArgs e)
     {
         _pluginMessages.Show(
             ModuleTexts["Module.Message.SaveError.Title"],
             ModuleTexts["Module.Message.SaveError.Message"],
-            ModuleTexts["Module.Message.ErrorDetail"]);
+            ModuleConfigFilePath);
+    }
+
+    // 本物: モジュールツール(開くときに設定ファイルを読めなかった。窓が出たところで出る)。場所は実際の module_config.json。
+    private void ModuleSettingsLoadError_Click(object sender, RoutedEventArgs e)
+    {
+        _pluginMessages.Show(
+            ModuleTexts["Module.Message.SettingsLoadError.Title"],
+            ModuleTexts["Module.Message.SettingsLoadError.Message"],
+            ModuleTexts.Format("Module.Message.SettingsLoadError.Detail", ModuleConfigFilePath));
     }
 
     // 本体がプラグインを読むのと同じ場所(既定のロード コンテキスト)から取る。まだ読まれていなければ読む。

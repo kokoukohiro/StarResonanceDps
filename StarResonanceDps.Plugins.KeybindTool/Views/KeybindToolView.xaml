@@ -178,6 +178,7 @@
                        Height="18"
                        Stretch="Uniform"
                        SnapsToDevicePixels="True"
+                       RenderOptions.BitmapScalingMode="HighQuality"
                        Source="{Binding IconUri}"
                        Visibility="{Binding HasIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 <TextBlock Text="{Binding Text}"

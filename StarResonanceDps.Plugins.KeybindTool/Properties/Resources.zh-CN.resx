@@ -633,6 +633,9 @@
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>读取设置文件失败。</value>
   </data>
+  <data name="Keybind.Message.LoadErrorDetail" xml:space="preserve">
+    <value>设置文件已损坏或无法读取。</value>
+  </data>
   <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
     <value>部分键位设置无法编辑</value>
   </data>

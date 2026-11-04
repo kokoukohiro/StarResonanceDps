@@ -29,10 +29,10 @@ internal sealed record ModuleEffectDefinition(int EffectId, string Icon, IReadOn
 /// <summary>モジュール1種類(アイテムID)の定義。</summary>
 internal sealed record ModuleDefinition(int ConfigId, string Icon, int Quality);
 
-/// <summary>優先する効果1つの条件。<see cref="MinLevel"/> が 0 なら段階を問わず、その効果が入っていればよい(Lv1以上と同じ)。</summary>
+/// <summary>優先する効果1つの条件。<see cref="MinLevel"/> は 1 から効果の最後の段階まで(Lv1 はその効果が入っていること)。</summary>
 internal sealed record ModulePriorityEffect(int EffectId, int MinLevel);
 
-/// <summary>計算に使うモジュール1つ。効果は (効果の添字, リンク数)。</summary>
+/// <summary>検索に使うモジュール1つ。効果は (効果の添字, リンク数)。</summary>
 internal sealed record ModuleCandidate(long Uuid, int ConfigId, IReadOnlyList<(int EffectIndex, int Links)> Effects)
 {
     public int TotalLinks { get; } = Effects.Sum(effect => effect.Links);
@@ -41,20 +41,19 @@ internal sealed record ModuleCandidate(long Uuid, int ConfigId, IReadOnlyList<(i
 /// <summary>見つけた組1つ。モジュールは表示に使う代表(装着中を先、次に uuid の小さい順)。</summary>
 internal sealed record ModuleCombination(int FightValue, int TotalLinks, IReadOnlyList<ModuleCandidate> Modules);
 
+/// <summary>検索の結果。<see cref="MatchingCount"/> は条件を満たす組の数(<see cref="Combinations"/> と同じ単位)。</summary>
+internal sealed record ModuleSearchResult(IReadOnlyList<ModuleCombination> Combinations, long MatchingCount);
+
 /// <summary>保存する設定(<c>module_config.json</c>)。</summary>
 internal sealed class ModuleToolConfig
 {
     [JsonPropertyName("version")]
     public int Version { get; set; } = 1;
 
-    /// <summary>おすすめで選んだ特化の番号。0 は指定なし。</summary>
-    [JsonPropertyName("recommend_spec_id")]
-    public int RecommendSpecId { get; set; }
-
     [JsonPropertyName("priority_effects")]
     public List<ModulePriorityEffectConfig> PriorityEffects { get; set; } = [];
 
-    /// <summary>計算に入れない品質。</summary>
+    /// <summary>検索に入れない品質。</summary>
     [JsonPropertyName("excluded_qualities")]
     public List<int> ExcludedQualities { get; set; } = [];
 }
@@ -77,8 +76,6 @@ internal sealed class ModuleTablesFile
     public Dictionary<string, ModuleFile> Modules { get; set; } = [];
 
     public Dictionary<string, int[]> LinkFightValues { get; set; } = [];
-
-    public Dictionary<string, int[]> RecommendedEffects { get; set; } = [];
 }
 
 internal sealed class ModuleEffectFile
@@ -107,6 +104,4 @@ internal sealed class ModuleNamesFile
     public Dictionary<string, Dictionary<string, string>> Effects { get; set; } = [];
 
     public Dictionary<string, Dictionary<string, string>> Modules { get; set; } = [];
-
-    public Dictionary<string, Dictionary<string, string>> Specs { get; set; } = [];
 }

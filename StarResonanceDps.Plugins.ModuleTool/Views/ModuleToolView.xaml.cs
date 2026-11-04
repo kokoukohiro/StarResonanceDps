@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 using StarResonanceDps.Plugins.ModuleTool.ViewModels;
 
 namespace StarResonanceDps.Plugins.ModuleTool.Views;
@@ -18,12 +19,18 @@ public partial class ModuleToolView : UserControl, IDisposable
         DataContext = viewModel;
         _ = new ScrollBarLink(ConditionsScrollViewer, ConditionsScrollBar);
         _ = new ScrollBarLink(ResultsScrollViewer, ResultsScrollBar);
+        Loaded += ModuleToolView_Loaded;
     }
 
     /// <summary>本体が窓を閉じた後に呼ぶ。</summary>
     public void Dispose()
     {
         _viewModel.Dispose();
+    }
+
+    private void ModuleToolView_Loaded(object sender, RoutedEventArgs e)
+    {
+        Dispatcher.BeginInvoke(_viewModel.ShowPendingSettingsLoadFailedMessage, DispatcherPriority.ContextIdle);
     }
 
     // 選んだ効果を足したら選択を外し、次も同じ欄から選べるようにする。

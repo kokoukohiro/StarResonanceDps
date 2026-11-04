@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Numerics;
+using System.IO;
 using System.Windows.Threading;
 using StarResonanceDps.PluginSdk;
 using StarResonanceDps.Plugins.ModuleTool.Models;
@@ -14,11 +14,12 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
     private const string ConfigFileName = "module_config.json";
     private const string ResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
     private const int ResultCount = 10;
-    private const int NoSpecId = 0;
+    private const string ConditionSeparator = ", ";
     private static readonly TimeSpan ElapsedRefreshInterval = TimeSpan.FromMilliseconds(100);
 
     private readonly IPluginContext _context;
     private readonly ModuleCatalog _catalog;
+    private readonly ModuleInventoryHolder _inventoryHolder;
     private readonly PluginLocalizer _texts;
     private readonly ModuleToolConfig _config;
     private readonly Dictionary<int, int> _effectIndexById;
@@ -33,61 +34,57 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
     private DateTime? _receivedAt;
     private ModuleCombination? _equipped;
     private IReadOnlyList<ModuleCombination>? _results;
+    private long _resultMatchingCount;
     private double _resultElapsedSeconds;
-    private CancellationTokenSource? _calculation;
-    private double _progress;
-    private bool _isStale;
-    private bool _hasReportedSaveFailure;
 
-    private IReadOnlyList<ModuleOption<int>> _specOptions = [];
-    private ModuleOption<int>? _selectedSpec;
+    // カードの効果の並びと結果の上の行に使う、最後に検索したときの条件(検索する前は開いたときの条件)。
+    private IReadOnlyList<ModulePriorityEffect> _shownConditions = [];
+    private bool _resultsInventoryChanged;
+
+    private CancellationTokenSource? _search;
+    private IReadOnlyList<ModulePriorityEffect> _runningConditions = [];
+    private bool _runningInventoryChanged;
+    private double _progress;
+    private bool _hasReportedSaveFailure;
+    private bool _pendingSettingsLoadFailedMessage;
+
     private IReadOnlyList<ModuleEffectOption> _addEffectOptions = [];
 
-    public ModuleToolViewModel(IPluginContext context, ModuleCatalog catalog)
+    public ModuleToolViewModel(IPluginContext context, ModuleCatalog catalog, ModuleInventoryHolder inventoryHolder)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+        _inventoryHolder = inventoryHolder ?? throw new ArgumentNullException(nameof(inventoryHolder));
         _texts = new PluginLocalizer(_context.Localization, typeof(ModuleToolViewModel).Assembly, ResourceBaseName);
         _texts.CultureChanged += Texts_CultureChanged;
-        _config = _context.Settings.Load<ModuleToolConfig>(ConfigFileName);
+        _config = LoadConfig();
         _effectIndexById = _catalog.Effects
             .Select((effect, index) => (effect.EffectId, index))
             .ToDictionary(pair => pair.EffectId, pair => pair.index);
 
         _elapsedTimer = new DispatcherTimer { Interval = ElapsedRefreshInterval };
-        _elapsedTimer.Tick += (_, _) => OnPropertyChanged(nameof(CalculationNoteText));
+        _elapsedTimer.Tick += (_, _) => OnPropertyChanged(nameof(ResultsSummaryText));
 
-        CalculateCommand = new RelayCommand(StartOrCancelCalculation, CanStartOrCancelCalculation);
-
-        foreach (var priority in _config.PriorityEffects)
-        {
-            if (_effectIndexById.ContainsKey(priority.EffectId) && PriorityEffects.All(row => row.EffectId != priority.EffectId))
-            {
-                PriorityEffects.Add(CreatePriorityRow(priority.EffectId, priority.MinLevel));
-            }
-            else
-            {
-                _context.Logger.Warning($"Ignored a saved priority effect {priority.EffectId} that is unknown or duplicated.");
-            }
-        }
+        SearchCommand = new RelayCommand(StartOrCancelSearch, CanStartOrCancelSearch);
+        ResetCommand = new RelayCommand(ResetConditions);
 
         foreach (var quality in _catalog.Qualities)
         {
-            QualityToggles.Add(new ModuleQualityToggleViewModel(
-                quality,
-                GetQualityLabel(quality),
-                !_config.ExcludedQualities.Contains(quality),
-                OnQualitiesChanged));
+            QualityToggles.Add(new ModuleQualityToggleViewModel(quality, GetQualityLabel(quality), true, OnQualitiesChanged));
         }
 
-        RebuildOptions();
-        _context.GameData.SelfModulesChanged += GameData_SelfModulesChanged;
-        ApplyInventory(_context.GameData.SelfModules, isUpdate: false);
+        ApplyConditions(_config);
+        _shownConditions = GetConditions();
+        _inventoryHolder.InventoryChanged += InventoryHolder_InventoryChanged;
+        _inventoryHolder.ReceivedAgain += InventoryHolder_ReceivedAgain;
+        ApplyInventory(isUpdate: false);
     }
 
     public PluginLocalizer Texts => _texts;
 
-    public RelayCommand CalculateCommand { get; }
+    public RelayCommand SearchCommand { get; }
+
+    public RelayCommand ResetCommand { get; }
 
     public ObservableCollection<ModulePriorityEffectRowViewModel> PriorityEffects { get; } = [];
 
@@ -121,39 +118,6 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
 
     public bool HasUnknownModules => _inventory is not null && _unknownModuleCount > 0;
 
-    public IReadOnlyList<ModuleOption<int>> SpecOptions
-    {
-        get => _specOptions;
-        private set => SetProperty(ref _specOptions, value);
-    }
-
-    /// <summary>おすすめ。特化を選ぶと、優先する効果をその特化のおすすめの効果に置き換える。</summary>
-    public ModuleOption<int>? SelectedSpec
-    {
-        get => _selectedSpec;
-        set
-        {
-            if (value is null || !SetProperty(ref _selectedSpec, value))
-            {
-                return;
-            }
-
-            _config.RecommendSpecId = value.Value;
-            if (value.Value != NoSpecId)
-            {
-                PriorityEffects.Clear();
-                foreach (var effectId in _catalog.GetRecommendedEffects(value.Value))
-                {
-                    PriorityEffects.Add(CreatePriorityRow(effectId, 0));
-                }
-
-                RebuildAddEffectOptions();
-            }
-
-            OnConditionsChanged();
-        }
-    }
-
     public IReadOnlyList<ModuleEffectOption> AddEffectOptions
     {
         get => _addEffectOptions;
@@ -162,50 +126,82 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
 
     public bool CanAddEffect => _addEffectOptions.Count > 0;
 
-    public bool IsCalculating => _calculation is not null;
+    public bool IsSearching => _search is not null;
 
-    public string CalculateButtonText => IsCalculating ? _texts["Module.Button.Cancel"] : _texts["Module.Button.Calculate"];
+    public string SearchButtonText => IsSearching ? _texts["Module.Button.Cancel"] : _texts["Module.Button.Search"];
 
-    public string CalculationNoteText
+    public bool HasResults => _results is not null;
+
+    public string ResultsTitleText => IsSearching ? _texts["Module.Section.Searching"] : _texts["Module.Section.Results"];
+
+    /// <summary>検索中は進み具合と経過、検索の後は件数(11件以上なら全体の件数と上位の件数)と秒数。</summary>
+    public string ResultsSummaryText
     {
         get
         {
-            if (IsCalculating)
+            var culture = _texts.CurrentCulture;
+            if (IsSearching)
             {
                 return _texts.Format(
-                    "Module.Calculate.Progress",
-                    Math.Floor(_progress * 100).ToString("0", _texts.CurrentCulture),
-                    _stopwatch.Elapsed.TotalSeconds.ToString("0.0", _texts.CurrentCulture));
+                    "Module.Search.Progress",
+                    Math.Floor(_progress * 100).ToString("0", culture),
+                    _stopwatch.Elapsed.TotalSeconds.ToString("0.000", culture));
             }
 
-            if (_inventory is null)
+            if (_results is null)
             {
                 return string.Empty;
             }
 
-            var candidates = GetCandidates();
-            var size = Math.Min(_catalog.SlotCount, candidates.Count);
-            return _texts.Format("Module.Calculate.Count", size, CountCombinations(candidates.Count, size));
+            var seconds = _resultElapsedSeconds.ToString("0.000", culture);
+            return _resultMatchingCount > _results.Count
+                ? _texts.Format("Module.Results.Summary", _resultMatchingCount, _results.Count, seconds)
+                : _texts.Format("Module.Results.Count", _results.Count, seconds);
         }
     }
 
-    public bool HasResults => _results is not null;
-
-    public string ResultsSummaryText => _results switch
+    /// <summary>
+    /// 検索中は走っている検索の条件、検索の後は表示している結果の条件。
+    /// その検索を始めた後に所持モジュールが変わったら、検索し直す知らせを後ろに付ける。
+    /// </summary>
+    public string SearchConditionsText
     {
-        null => string.Empty,
-        { Count: 0 } => _texts["Module.Results.Empty"],
-        _ => _texts.Format(
-            "Module.Results.Summary",
-            _results.Count,
-            _resultElapsedSeconds.ToString("0.0", _texts.CurrentCulture)),
-    };
+        get
+        {
+            IReadOnlyList<ModulePriorityEffect> conditions;
+            bool inventoryChanged;
+            if (IsSearching)
+            {
+                conditions = _runningConditions;
+                inventoryChanged = _runningInventoryChanged;
+            }
+            else if (_results is not null)
+            {
+                conditions = _shownConditions;
+                inventoryChanged = _resultsInventoryChanged;
+            }
+            else
+            {
+                return string.Empty;
+            }
 
-    public bool IsStale
-    {
-        get => _isStale;
-        private set => SetProperty(ref _isStale, value);
+            var text = string.Join(
+                ConditionSeparator,
+                conditions.Select(condition => _texts.Format(
+                    "Module.Conditions.Effect",
+                    _catalog.GetEffectName(condition.EffectId, _texts.CurrentCulture),
+                    condition.MinLevel)));
+            if (!inventoryChanged)
+            {
+                return text;
+            }
+
+            var note = _texts["Module.Results.InventoryChanged"];
+            return text.Length == 0 ? note : _texts.Format("Module.Results.ConditionsWithNote", text, note);
+        }
     }
+
+    public bool HasSearchConditionsText => SearchConditionsText.Length > 0;
 
     /// <summary>効果を追加する選択リストで選ばれた効果を、優先する効果の最後に足す。</summary>
     public void AddPriorityEffect(int effectId)
@@ -215,24 +211,48 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             return;
         }
 
-        PriorityEffects.Add(CreatePriorityRow(effectId, 0));
+        PriorityEffects.Add(CreatePriorityRow(effectId, 1));
         RebuildAddEffectOptions();
         OnConditionsChanged();
     }
 
-    /// <summary>窓を閉じたとき。本体の知らせの購読を外し、計算を止める。</summary>
+    /// <summary>開くときに読めなかった設定ファイルを、画面が出たところで知らせる。</summary>
+    internal void ShowPendingSettingsLoadFailedMessage()
+    {
+        if (!_pendingSettingsLoadFailedMessage)
+        {
+            return;
+        }
+
+        _pendingSettingsLoadFailedMessage = false;
+        _context.Messages.Show(
+            _texts["Module.Message.SettingsLoadError.Title"],
+            _texts["Module.Message.SettingsLoadError.Message"],
+            _texts.Format("Module.Message.SettingsLoadError.Detail", _context.Settings.GetFilePath(ConfigFileName)));
+    }
+
+    /// <summary>窓を閉じたとき。所持モジュールの知らせの購読を外し、検索を止める。</summary>
     public void Dispose()
     {
-        _context.GameData.SelfModulesChanged -= GameData_SelfModulesChanged;
+        _inventoryHolder.InventoryChanged -= InventoryHolder_InventoryChanged;
+        _inventoryHolder.ReceivedAgain -= InventoryHolder_ReceivedAgain;
         _texts.CultureChanged -= Texts_CultureChanged;
         _texts.Dispose();
         _elapsedTimer.Stop();
-        _calculation?.Cancel();
+        _search?.Cancel();
     }
 
-    private void GameData_SelfModulesChanged(object? sender, EventArgs e)
+    private void InventoryHolder_InventoryChanged(object? sender, EventArgs e)
     {
-        ApplyInventory(_context.GameData.SelfModules, isUpdate: true);
+        ApplyInventory(isUpdate: true);
+    }
+
+    // 中身が同じなので、カード・検索の印は変えず、受け取った時刻だけを出し直す。
+    private void InventoryHolder_ReceivedAgain(object? sender, EventArgs e)
+    {
+        _receivedAt = _inventoryHolder.ReceivedAt;
+        OnPropertyChanged(nameof(ReceivedAtText));
+        OnPropertyChanged(nameof(HasReceivedAt));
     }
 
     private void Texts_CultureChanged(object? sender, EventArgs e)
@@ -248,17 +268,17 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             row.Relabel(_catalog.GetEffectName(row.EffectId, _texts.CurrentCulture), levelOptions);
         }
 
-        RebuildOptions();
+        RebuildAddEffectOptions();
         RebuildCards();
         RaiseInventoryChanged();
-        RaiseCalculationChanged();
-        OnPropertyChanged(nameof(ResultsSummaryText));
+        RaiseSearchChanged();
     }
 
-    private void ApplyInventory(PluginModuleInventory? inventory, bool isUpdate)
+    private void ApplyInventory(bool isUpdate)
     {
+        var inventory = _inventoryHolder.Inventory;
         _inventory = inventory;
-        _receivedAt = isUpdate && inventory is not null ? DateTime.Now : null;
+        _receivedAt = _inventoryHolder.ReceivedAt;
         _missingLinkModuleCount = 0;
         _unknownModuleCount = 0;
 
@@ -292,14 +312,15 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
 
         _usableModules = usable;
         _equipped = CreateEquippedCombination();
-        if (isUpdate && _results is not null)
+        if (isUpdate)
         {
-            IsStale = true;
+            _resultsInventoryChanged |= _results is not null;
+            _runningInventoryChanged |= IsSearching;
         }
 
         RebuildCards();
         RaiseInventoryChanged();
-        RaiseCalculationChanged();
+        RaiseSearchChanged();
     }
 
     private ModuleCombination? CreateEquippedCombination()
@@ -321,7 +342,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             modules.Add(module);
         }
 
-        var scorer = CreateScorer();
+        var scorer = CreateScorer([]);
         var links = SumLinks(modules);
         var totalLinks = modules.Sum(module => module.TotalLinks);
         return new ModuleCombination(scorer.GetFightValue(links, totalLinks), totalLinks, modules);
@@ -335,89 +356,124 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             .ToArray();
     }
 
-    private ModuleScorer CreateScorer()
+    private ModuleScorer CreateScorer(IReadOnlyList<ModulePriorityEffect> conditions)
     {
         return new ModuleScorer(
             _catalog.Effects,
             _catalog.GetLinkFightValues(_context.GameData.CurrentServer),
-            PriorityEffects.Select(row => new ModulePriorityEffect(row.EffectId, row.MinLevel)).ToArray());
+            conditions);
     }
 
-    private bool CanStartOrCancelCalculation()
+    private IReadOnlyList<ModulePriorityEffect> GetConditions()
     {
-        return IsCalculating || (_inventory is not null && GetCandidates().Count > 0);
+        return PriorityEffects.Select(row => new ModulePriorityEffect(row.EffectId, row.MinLevel)).ToArray();
     }
 
-    private async void StartOrCancelCalculation()
+    private bool CanStartOrCancelSearch()
     {
-        if (_calculation is not null)
+        return IsSearching || (_inventory is not null && GetCandidates().Count > 0);
+    }
+
+    private async void StartOrCancelSearch()
+    {
+        if (_search is not null)
         {
-            _calculation.Cancel();
+            _search.Cancel();
             return;
         }
 
         var candidates = GetCandidates();
         var equippedUuids = _inventory?.EquippedUuidBySlot.Values.ToHashSet() ?? [];
-        using var calculation = new CancellationTokenSource();
-        _calculation = calculation;
+        var conditions = GetConditions();
+        using var search = new CancellationTokenSource();
+        _search = search;
+        _runningConditions = conditions;
+        _runningInventoryChanged = false;
         _progress = 0;
         _stopwatch.Restart();
         _elapsedTimer.Start();
-        RaiseCalculationChanged();
+        RaiseSearchChanged();
 
         var progress = new Progress<double>(value =>
         {
             _progress = value;
-            OnPropertyChanged(nameof(CalculationNoteText));
+            OnPropertyChanged(nameof(ResultsSummaryText));
         });
 
         try
         {
-            var scorer = CreateScorer();
-            var results = await Task.Run(
+            var scorer = CreateScorer(conditions);
+            var result = await Task.Run(
                 () => new ModuleSolver(scorer, candidates, equippedUuids, _catalog.SlotCount, ResultCount)
-                    .Solve(progress, calculation.Token),
-                calculation.Token);
+                    .Solve(progress, search.Token));
             _stopwatch.Stop();
-            _results = results;
-            _resultElapsedSeconds = _stopwatch.Elapsed.TotalSeconds;
-            IsStale = false;
-            RebuildCards();
-            OnPropertyChanged(nameof(HasResults));
-            OnPropertyChanged(nameof(ResultsSummaryText));
-        }
-        catch (OperationCanceledException) when (calculation.IsCancellationRequested)
-        {
-            // 中断。前の結果はそのまま残す。
+
+            // null はキャンセル。前の結果をそのまま残す。
+            if (result is not null)
+            {
+                _results = result.Combinations;
+                _resultMatchingCount = result.MatchingCount;
+                _resultElapsedSeconds = _stopwatch.Elapsed.TotalSeconds;
+                _shownConditions = conditions;
+                _resultsInventoryChanged = _runningInventoryChanged;
+                RebuildCards();
+                OnPropertyChanged(nameof(HasResults));
+            }
         }
         catch (Exception exception)
         {
-            _context.Logger.Error("Module combination calculation failed.", exception);
+            _context.Logger.Error("Module combination search failed.", exception);
             _context.Messages.Show(
-                _texts["Module.Message.CalculationError.Title"],
-                _texts["Module.Message.CalculationError.Message"],
-                _texts["Module.Message.ErrorDetail"]);
+                _texts["Module.Message.SearchError.Title"],
+                _texts["Module.Message.SearchError.Message"],
+                _texts["Module.Message.SearchError.Detail"]);
         }
         finally
         {
             _stopwatch.Stop();
             _elapsedTimer.Stop();
-            _calculation = null;
-            RaiseCalculationChanged();
+            _search = null;
+            _runningConditions = [];
+            RaiseSearchChanged();
         }
     }
 
+    // 条件と品質を変えても、結果とカードは次の検索まで変えない(保存と、検索ボタンが押せるかだけ)。
     private void OnConditionsChanged()
     {
-        if (_results is not null)
+        SaveConfig();
+        SearchCommand.RaiseCanExecuteChanged();
+    }
+
+    /// <summary>条件と品質を、新しく作った設定ファイルと同じ状態に戻す。</summary>
+    private void ResetConditions()
+    {
+        ApplyConditions(new ModuleToolConfig());
+        OnConditionsChanged();
+    }
+
+    /// <summary>設定の条件と品質を画面へ当てる。開いたときとリセットで使う。品質の変化の知らせ(保存)は出さない。</summary>
+    private void ApplyConditions(ModuleToolConfig config)
+    {
+        PriorityEffects.Clear();
+        foreach (var priority in config.PriorityEffects)
         {
-            IsStale = true;
+            if (_effectIndexById.ContainsKey(priority.EffectId) && PriorityEffects.All(row => row.EffectId != priority.EffectId))
+            {
+                PriorityEffects.Add(CreatePriorityRow(priority.EffectId, priority.MinLevel));
+            }
+            else
+            {
+                _context.Logger.Warning($"Ignored a saved priority effect {priority.EffectId} that is unknown or duplicated.");
+            }
         }
 
-        SaveConfig();
-        _equipped = CreateEquippedCombination();
-        RebuildCards();
-        RaiseCalculationChanged();
+        foreach (var toggle in QualityToggles)
+        {
+            toggle.SetSelected(!config.ExcludedQualities.Contains(toggle.Quality));
+        }
+
+        RebuildAddEffectOptions();
     }
 
     private void OnQualitiesChanged()
@@ -446,28 +502,13 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             RemovePriorityEffect);
     }
 
-    // 「指定なし」は入っていること(Lv1以上)が条件なので、Lv1以上は並べない。
+    // 選んだ段階以上が条件。Lv1 はその効果が入っていること。
     private IReadOnlyList<ModuleOption<int>> CreateLevelOptions()
     {
         var maxLevel = _catalog.Effects.Max(effect => effect.MaxLevel);
-        return Enumerable.Range(0, maxLevel + 1)
-            .Where(level => level != 1)
-            .Select(level => new ModuleOption<int>(
-                level,
-                level == 0 ? _texts["Module.Level.Any"] : _texts.Format("Module.Level.AtLeast", level)))
+        return Enumerable.Range(1, maxLevel)
+            .Select(level => new ModuleOption<int>(level, ModuleLevelText.Format(level)))
             .ToArray();
-    }
-
-    private void RebuildOptions()
-    {
-        var specOptions = new List<ModuleOption<int>> { new(NoSpecId, _texts["Module.Recommend.None"]) };
-        specOptions.AddRange(_catalog.RecommendedSpecIds.Select(specId =>
-            new ModuleOption<int>(specId, _catalog.GetSpecName(specId, _texts.CurrentCulture))));
-        SpecOptions = specOptions;
-        _selectedSpec = specOptions.FirstOrDefault(option => option.Value == _config.RecommendSpecId) ?? specOptions[0];
-        OnPropertyChanged(nameof(SelectedSpec));
-
-        RebuildAddEffectOptions();
     }
 
     private void RebuildAddEffectOptions()
@@ -490,9 +531,9 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var scorer = CreateScorer();
-        var priorityOrder = PriorityEffects
-            .Select((row, index) => (row.EffectId, index))
+        var scorer = CreateScorer([]);
+        var priorityOrder = _shownConditions
+            .Select((condition, index) => (condition.EffectId, index))
             .ToDictionary(pair => _effectIndexById[pair.EffectId], pair => pair.index);
         var equippedUuids = _inventory.EquippedUuidBySlot.Values.ToHashSet();
 
@@ -532,8 +573,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
                     _catalog.GetImage(definition.Icon),
                     _catalog.GetEffectName(definition.EffectId, culture),
                     effect.Links,
-                    effect.Level,
-                    priorityOrder.ContainsKey(effect.EffectIndex));
+                    effect.Level);
             })
             .ToArray();
 
@@ -552,8 +592,11 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
                             var effectDefinition = _catalog.Effects[effect.EffectIndex];
                             return new ModulePartViewModel(
                                 _catalog.GetImage(effectDefinition.Icon),
-                                _catalog.GetEffectName(effectDefinition.EffectId, culture),
-                                effect.Links);
+                                effect.Links,
+                                _texts.Format(
+                                    "Module.Tile.PartTip",
+                                    _catalog.GetEffectName(effectDefinition.EffectId, culture),
+                                    effect.Links));
                         })
                         .ToArray());
             })
@@ -586,6 +629,20 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
         return links;
     }
 
+    // 読めない設定ファイルは使わずに初期値で開き、画面が出たところで知らせる(ModuleToolView の Loaded)。
+    private ModuleToolConfig LoadConfig()
+    {
+        try
+        {
+            return _context.Settings.Load<ModuleToolConfig>(ConfigFileName);
+        }
+        catch (InvalidDataException)
+        {
+            _pendingSettingsLoadFailedMessage = true;
+            return new ModuleToolConfig();
+        }
+    }
+
     private void SaveConfig()
     {
         _config.PriorityEffects = PriorityEffects
@@ -606,7 +663,7 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
                 _context.Messages.Show(
                     _texts["Module.Message.SaveError.Title"],
                     _texts["Module.Message.SaveError.Message"],
-                    _texts["Module.Message.ErrorDetail"]);
+                    _context.Settings.GetFilePath(ConfigFileName));
             }
         }
     }
@@ -619,17 +676,6 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
     private string FormatDelta(int delta)
     {
         return delta.ToString("+0;-0;±0", _texts.CurrentCulture);
-    }
-
-    private static BigInteger CountCombinations(int count, int size)
-    {
-        BigInteger result = BigInteger.One;
-        for (var index = 0; index < size; index++)
-        {
-            result = result * (count - index) / (index + 1);
-        }
-
-        return result;
     }
 
     private void RaiseInventoryChanged()
@@ -646,11 +692,14 @@ internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(HasUnknownModules));
     }
 
-    private void RaiseCalculationChanged()
+    private void RaiseSearchChanged()
     {
-        OnPropertyChanged(nameof(IsCalculating));
-        OnPropertyChanged(nameof(CalculateButtonText));
-        OnPropertyChanged(nameof(CalculationNoteText));
-        CalculateCommand.RaiseCanExecuteChanged();
+        OnPropertyChanged(nameof(IsSearching));
+        OnPropertyChanged(nameof(SearchButtonText));
+        OnPropertyChanged(nameof(ResultsTitleText));
+        OnPropertyChanged(nameof(ResultsSummaryText));
+        OnPropertyChanged(nameof(SearchConditionsText));
+        OnPropertyChanged(nameof(HasSearchConditionsText));
+        SearchCommand.RaiseCanExecuteChanged();
     }
 }

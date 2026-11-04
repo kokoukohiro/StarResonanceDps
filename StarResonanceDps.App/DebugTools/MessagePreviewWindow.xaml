@@ -89,8 +89,9 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Keybind.SaveErrorBody" Click="KeybindSaveError_Click" />
 
                         <!-- モジュールツールの窓 -->
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Module.CalculationError" Click="ModuleCalculationError_Click" />
-                        <Button Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SaveError" Click="ModuleSaveError_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SearchError" Click="ModuleSearchError_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SaveError" Click="ModuleSaveError_Click" />
+                        <Button Style="{StaticResource Button.Text}" Width="Auto" Content="Module.SettingsLoadError" Click="ModuleSettingsLoadError_Click" />
                     </StackPanel>
                 </Grid>
             </ContentControl>

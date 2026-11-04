@@ -691,6 +691,9 @@
   <data name="Keybind.Message.LoadErrorBody" xml:space="preserve">
     <value>設定ファイルの読み込みに失敗しました。</value>
   </data>
+  <data name="Keybind.Message.LoadErrorDetail" xml:space="preserve">
+    <value>設定ファイルが壊れているか、読み取れませんでした。</value>
+  </data>
   <data name="Keybind.Message.Title.PresetUnavailable" xml:space="preserve">
     <value>一部のキー設定は編集できません</value>
   </data>
