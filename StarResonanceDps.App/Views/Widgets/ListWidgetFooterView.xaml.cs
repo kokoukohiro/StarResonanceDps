@@ -2,9 +2,9 @@ using System.Windows.Controls;
 
 namespace StarResonanceDps.App.Views.Widgets;
 
-public partial class EntityListWidgetFooterView : UserControl
+public partial class ListWidgetFooterView : UserControl
 {
-    public EntityListWidgetFooterView()
+    public ListWidgetFooterView()
     {
         InitializeComponent();
     }

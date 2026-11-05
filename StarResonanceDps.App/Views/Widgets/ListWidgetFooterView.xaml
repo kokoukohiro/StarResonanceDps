@@ -1,4 +1,4 @@
-<UserControl x:Class="StarResonanceDps.App.Views.Widgets.EntityListWidgetFooterView"
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.ListWidgetFooterView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              UseLayoutRounding="True"
@@ -19,8 +19,8 @@
                    TextAlignment="Left"
                    TextTrimming="CharacterEllipsis" />
 
-        <!-- 得点(交戦中・現在)。並べ方はメーターの右下の2組と同じ。見出しは言語で長さが違うので幅を文字に合わせる。
-             値の欄は4桁(「4444分」で約43)と10の空き。 -->
+        <!-- 交戦中と現在(得点)か付近(個数)。並べ方はメーターの右下の2組と同じ。見出しは言語で長さが違うので幅を文字に合わせる。
+             値の欄は得点の4桁(「4444分」で約43)と10の空き。個数は3桁の「999마리」で約48。 -->
         <Grid Grid.Column="1"
               Margin="8,0,10,0"
               VerticalAlignment="Center">
@@ -37,14 +37,14 @@
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
-                       Text="{Binding EntityCombatScoreLabel}" />
+                       Text="{Binding FooterCombatLabel}" />
 
             <TextBlock Grid.Column="1"
                        VerticalAlignment="Center"
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
-                       Text="{Binding EntityCombatScoreText}"
+                       Text="{Binding FooterCombatValueText}"
                        TextAlignment="Right"
                        TextTrimming="CharacterEllipsis" />
 
@@ -53,14 +53,14 @@
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
-                       Text="{Binding EntityCurrentScoreLabel}" />
+                       Text="{Binding FooterOverallLabel}" />
 
             <TextBlock Grid.Column="4"
                        VerticalAlignment="Center"
                        Style="{StaticResource Text.WidgetWindow}"
                        FontSize="13"
                        FontWeight="SemiBold"
-                       Text="{Binding EntityCurrentScoreText}"
+                       Text="{Binding FooterOverallValueText}"
                        TextAlignment="Right"
                        TextTrimming="CharacterEllipsis" />
         </Grid>

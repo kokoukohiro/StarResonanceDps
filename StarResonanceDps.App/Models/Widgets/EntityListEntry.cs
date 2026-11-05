@@ -207,7 +207,7 @@ public sealed partial class EntityListEntry : ObservableObject
 
         // 名前は言語で変わるので、詠唱が変わらなくても引き直す(名前と同じ)。
         CastSkillName = entity.Cast is { } cast
-            ? MeterSnapshotProvider.GetTimelineLineSkillName(cast.SkillId)
+            ? MeterSnapshotProvider.GetCastSkillName(cast.SkillId)
             : string.Empty;
         CampRelation = entity.CampRelation;
         ShowsCombatState = entity.IsInCombat && settings.ShowsCombatState;

@@ -1360,6 +1360,15 @@
   <data name="EntityList_CurrentScore" xml:space="preserve">
     <value>当前</value>
   </data>
+  <data name="EntityList_CountFormat" xml:space="preserve">
+    <value>{0}只</value>
+  </data>
+  <data name="PlayerList_CountFormat" xml:space="preserve">
+    <value>{0}人</value>
+  </data>
+  <data name="ListFooter_Nearby" xml:space="preserve">
+    <value>附近</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>排序方式</value>
   </data>

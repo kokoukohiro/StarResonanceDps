@@ -17,89 +17,28 @@
 
 読めない形、件数・スロット数・区切りの食い違いがあれば止まる。
 """
-import glob
 import os
-import re
 import struct
 import sys
 
 # _commonを読み込む前に置く(後ろだと__pycache__が作られる)
 sys.dont_write_bytecode = True
 
-from _common import GENERATED, SOURCES, bundles_dir, dump, unk_dir
+from _common import (GENERATED, SOURCES, bundles_dir, dump, find_address_list, object_name, present_bundles,
+                     read_address_list, read_unityfs, serialized_objects)
 
 # 出力を作るデータソース。ほかのデータソースの警告の技を全部含んでいることを実行のたびに確かめる。
 PRIMARY_SOURCE = "Star"
 
 SHOW_DATA_ADDRESS = "bin/datas/show_data"
 SHOW_DATA_ASSET = "show_data"
-ADDRESS_LIST_MARKER = b"->>>> bundleHash:"
 WARNING_SLOT = 52
 SLOT_COUNT = 68
 TEXT_ASSET_CLASS_ID = 49
 
 
 # ---------------------------------------------------------------------------
-# アドレス一覧
-
-
-def find_address_list(source):
-    """データソースの`Unk/*.bin`から、中身でアドレス一覧を1本だけ探す。"""
-    directory = unk_dir(source)
-    paths = sorted(glob.glob(os.path.join(directory, "*.bin")))
-    if not paths:
-        raise FileNotFoundError("%sに*.binが無い" % directory)
-    found = []
-    for path in paths:
-        with open(path, "rb") as fh:
-            data = fh.read()
-        if ADDRESS_LIST_MARKER in data:
-            found.append((path, data))
-    if len(found) != 1:
-        raise ValueError("%sのアドレス一覧が1本に決まらない: %s" % (directory, [p for p, _ in found]))
-    return found[0]
-
-
-def header_count(path, data, name):
-    counts = re.findall(rb"^(?:\xef\xbb\xbf)?" + re.escape(name.encode()) + rb":(\d+) ", data, re.MULTILINE)
-    if len(counts) != 1:
-        raise ValueError("%sに%sのヘッダー行が%d件ある" % (path, name, len(counts)))
-    return int(counts[0])
-
-
-def read_address_list(path, data):
-    """
-    アドレス一覧から、アドレス → バンドル番号 と、バンドルの一覧(番号の集合)を読む。
-
-    アドレス行は`address:<アドレス> ->>>> hash:<数字> ->>>> bundleHash:<数字>`(アドレスは空白を含むことがある)で、
-    件数はヘッダー行`AddressCount`。バンドルの一覧はヘッダー行`DepsDictCount`のあとの`bundleHash:<数字>`の行。
-    どちらもヘッダー行の件数と行数が合わなければ止まる。
-    """
-    rows = re.findall(rb"^address:(.*) ->>>> hash:\d+ ->>>> bundleHash:(\d+)\r?$", data, re.MULTILINE)
-    address_count = header_count(path, data, "AddressCount")
-    if len(rows) != address_count:
-        raise ValueError("%sのアドレス行が%d行で、AddressCountは%d" % (path, len(rows), address_count))
-    addresses = {}
-    for address, number in rows:
-        address = address.decode("utf-8")
-        if address in addresses:
-            raise ValueError("%sにアドレス%sが重複" % (path, address))
-        addresses[address] = int(number)
-
-    bundles = [int(n) for n in re.findall(rb"^bundleHash:(\d+)\r?$", data, re.MULTILINE)]
-    bundle_count = header_count(path, data, "DepsDictCount")
-    if len(bundles) != bundle_count or len(set(bundles)) != bundle_count:
-        raise ValueError("%sのバンドル一覧が%d行(異なる番号%d)で、DepsDictCountは%d"
-                         % (path, len(bundles), len(set(bundles)), bundle_count))
-    return addresses, set(bundles)
-
-
-def present_bundles(source):
-    """そのデータソースの`Bundles`にある`<番号>.ab`の番号。"""
-    directory = bundles_dir(source)
-    if not os.path.isdir(directory):
-        raise FileNotFoundError("%sが無い" % directory)
-    return {int(name[:-3]) for name in os.listdir(directory) if re.fullmatch(r"\d+\.ab", name)}
+# アドレス一覧(読み方は_common)
 
 
 def show_data_bundle_path(source):
@@ -118,151 +57,17 @@ def show_data_bundle_path(source):
 
 
 # ---------------------------------------------------------------------------
-# UnityFS
-
-
-def lz4_block(src, size):
-    dst = bytearray()
-    i = 0
-    n = len(src)
-    while i < n:
-        token = src[i]
-        i += 1
-        literal = token >> 4
-        if literal == 15:
-            while True:
-                b = src[i]
-                i += 1
-                literal += b
-                if b != 255:
-                    break
-        dst += src[i:i + literal]
-        i += literal
-        if i >= n:
-            break
-        offset = src[i] | (src[i + 1] << 8)
-        i += 2
-        match = token & 15
-        if match == 15:
-            while True:
-                b = src[i]
-                i += 1
-                match += b
-                if b != 255:
-                    break
-        match += 4
-        start = len(dst) - offset
-        if offset == 0 or start < 0:
-            raise ValueError("LZ4の参照先が不正")
-        if offset >= match:
-            dst += dst[start:start + match]
-        else:
-            for k in range(match):
-                dst.append(dst[start + k])
-    if len(dst) != size:
-        raise ValueError("LZ4の展開後の長さが%dで、期待は%d" % (len(dst), size))
-    return bytes(dst)
-
-
-def decompress(data, flags, size):
-    kind = flags & 0x3F
-    if kind == 0:
-        return data
-    if kind in (2, 3):
-        return lz4_block(data, size)
-    raise ValueError("未対応の圧縮形式%d" % kind)
-
-
-def cstring(data, i):
-    end = data.index(0, i)
-    return data[i:end].decode("utf-8"), end + 1
-
-
-def read_unityfs(path):
-    """UnityFSのバンドルから、ノードのパス → 中身 を返す。"""
-    with open(path, "rb") as fh:
-        ab = fh.read()
-    signature, i = cstring(ab, 0)
-    if signature != "UnityFS":
-        raise ValueError("%sはUnityFSではない(%s)" % (path, signature))
-    version = struct.unpack_from(">I", ab, i)[0]
-    i += 4
-    _, i = cstring(ab, i)
-    _, i = cstring(ab, i)
-    _, compressed_info_size, info_size, flags = struct.unpack_from(">qIII", ab, i)
-    i += 20
-    if version >= 7:
-        i = (i + 15) // 16 * 16
-    if flags & 0x80:
-        raise ValueError("ブロック情報が末尾にある形は未対応")
-    info = decompress(ab[i:i + compressed_info_size], flags, info_size)
-    i += compressed_info_size
-    if flags & 0x200:
-        i = (i + 15) // 16 * 16
-
-    j = 16
-    block_count = struct.unpack_from(">i", info, j)[0]
-    j += 4
-    blocks = []
-    for _ in range(block_count):
-        blocks.append(struct.unpack_from(">IIH", info, j))
-        j += 10
-    node_count = struct.unpack_from(">i", info, j)[0]
-    j += 4
-    nodes = []
-    for _ in range(node_count):
-        offset, size, _ = struct.unpack_from(">qqI", info, j)
-        j += 20
-        name, j = cstring(info, j)
-        nodes.append((offset, size, name))
-
-    raw = bytearray()
-    for size, compressed_size, block_flags in blocks:
-        raw += decompress(ab[i:i + compressed_size], block_flags, size)
-        i += compressed_size
-    return {name: bytes(raw[offset:offset + size]) for offset, size, name in nodes}
+# TextAsset(バンドルの読み方は_common)
 
 
 def text_assets(serialized):
     """SerializedFile(版22以上)のTextAssetを 名前 → 中身 で返す。"""
-    version = struct.unpack_from(">I", serialized, 8)[0]
-    if version < 22:
-        raise ValueError("SerializedFileの版%dは未対応" % version)
-    endian = ">" if serialized[16] else "<"
-    data_offset = struct.unpack_from(">q", serialized, 32)[0]
-    k = 48
-    _, k = cstring(serialized, k)
-    k += 4
-    has_type_tree = serialized[k]
-    k += 1
-    type_count = struct.unpack_from(endian + "i", serialized, k)[0]
-    k += 4
-    class_ids = []
-    for _ in range(type_count):
-        class_id = struct.unpack_from(endian + "i", serialized, k)[0]
-        k += 4 + 1 + 2
-        if class_id == 114:
-            k += 16
-        k += 16
-        if has_type_tree:
-            node_count, string_size = struct.unpack_from(endian + "ii", serialized, k)
-            k += 8 + node_count * 32 + string_size
-            dependency_count = struct.unpack_from(endian + "i", serialized, k)[0]
-            k += 4 + dependency_count * 4
-        class_ids.append(class_id)
-    object_count = struct.unpack_from(endian + "i", serialized, k)[0]
-    k += 4
+    endian, objects = serialized_objects(serialized)
     assets = {}
-    for _ in range(object_count):
-        k = (k + 3) // 4 * 4
-        _, start, size, type_index = struct.unpack_from(endian + "qqIi", serialized, k)
-        k += 24
-        if class_ids[type_index] != TEXT_ASSET_CLASS_ID:
+    for _, class_id, body in objects:
+        if class_id != TEXT_ASSET_CLASS_ID:
             continue
-        body = serialized[data_offset + start:data_offset + start + size]
-        name_length = struct.unpack_from(endian + "i", body, 0)[0]
-        name = body[4:4 + name_length].decode("utf-8")
-        q = (4 + name_length + 3) // 4 * 4
+        name, q = object_name(body, endian)
         script_length = struct.unpack_from(endian + "i", body, q)[0]
         if name in assets:
             raise ValueError("TextAsset %sが複数ある" % name)
@@ -280,7 +85,7 @@ def text_assets(serialized):
 #   型5: ff uint16 uint16文字列ff
 #   型6: ff uint16 uint16文字列 文字列ff
 #   型8: ff uint16 uint16文字列 文字列ff uint16 ff
-# 文字列: int32が -1なら無し、0以上なら4バイトの値、それ以外は ~値 がバイト長で、int32文字数とUTF-8が続く。
+# 文字列: int32が-1なら無し、0以上なら4バイトの値、それ以外は`~値`がバイト長で、int32文字数とUTF-8が続く。
 
 
 class ShowDataReader:

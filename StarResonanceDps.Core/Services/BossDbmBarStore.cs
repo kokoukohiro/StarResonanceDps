@@ -11,6 +11,7 @@ namespace StarResonanceDps.Core.Services;
 ///
 /// <para>
 /// マップに付くバーなので、マップ切替・計測の停止・ログアウトで消す。全滅でも消す(ゲームは全滅でも予告を消す通知を送らない)。ダンジョンの終了でも消し、終わった後に届いた予告は控えない(<c>BattleStateMachine.IsDungeonFinished</c>)。
+/// ダンジョンの未完了の目標が完了する・目標から消えるとき(ボスの撃破と段の切り替わり)も消す(<see cref="DungeonTargetStore"/>。ゲームはそのときも予告を消す通知を送らない)。
 /// それ以外のエンカウンターの作り直しでは消さない(区切りをまたいでバーが続く)。
 /// </para>
 /// </summary>

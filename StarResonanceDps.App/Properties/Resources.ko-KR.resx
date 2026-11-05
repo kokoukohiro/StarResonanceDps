@@ -1359,6 +1359,15 @@ VOICEVOX를 다시 시작하세요.</value>
   <data name="EntityList_CurrentScore" xml:space="preserve">
     <value>현재</value>
   </data>
+  <data name="EntityList_CountFormat" xml:space="preserve">
+    <value>{0}마리</value>
+  </data>
+  <data name="PlayerList_CountFormat" xml:space="preserve">
+    <value>{0}명</value>
+  </data>
+  <data name="ListFooter_Nearby" xml:space="preserve">
+    <value>근처</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>정렬 순서</value>
   </data>

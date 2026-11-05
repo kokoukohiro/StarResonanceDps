@@ -20,7 +20,7 @@ namespace StarResonanceDps.App.Models.Notifications;
 /// </para>
 ///
 /// <para>
-/// 名前とスキル名はタイムラインの行と同じ引き方の公式の名前で、名前の無い技は「何か」。
+/// 名前とスキル名はタイムラインの行と同じ引き方の公式の名前(予告は予告の行、警告は詠唱の行と同じ)で、名前の無い技は「何か」。
 /// 内部名は使わない(読み上げで日本語以外を読めないため。タイムラインの行は内部名になることがある)。内部ID注記は付けない。
 /// </para>
 /// </summary>
@@ -71,7 +71,7 @@ public sealed class TelegraphedSkillNotificationTracker
 
             Notify(
                 PlayerInfoFormatFormatter.GetPartyDisplayName(MeterSnapshotProvider.CreateCombatEventLogAnnouncementParty(bar.OwnerMonsterId)),
-                MeterSnapshotProvider.GetCombatEventLogSkillName(bar.SkillId));
+                MeterSnapshotProvider.GetTelegraphedAnnouncementSkillName(bar.SkillId));
         }
 
         _lastBarCheckUtc = now;
@@ -80,7 +80,7 @@ public sealed class TelegraphedSkillNotificationTracker
         foreach (var cast in WarningSkillCastStore.Instance.GetAfter(_lastWarningSequence))
         {
             _lastWarningSequence = cast.Sequence;
-            Notify(PlayerInfoFormatFormatter.GetPartyDisplayName(cast.Caster), MeterSnapshotProvider.GetCombatEventLogSkillName(cast.SkillId));
+            Notify(PlayerInfoFormatFormatter.GetPartyDisplayName(cast.Caster), MeterSnapshotProvider.GetTelegraphedCastSkillName(cast.SkillId));
         }
     }
 

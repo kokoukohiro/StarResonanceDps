@@ -163,6 +163,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         ///
         /// <para>
         /// 自分の能力値の変化を記録に入れ、記録が変わったら名簿の自分の行を作り直す(入場とバフの付け直しはパケットの単位で見分けるので、ここで締める)。
+        /// 全滅を見つけたパケットなら、ここで回を区切る(<see cref="SplitEncounterOnPendingWipe"/>)。
         /// 保持していた前の回は、今の回に記録が入ったパケットの後で手放し、プレイヤーリストの名簿をメーターと同じ回へ作り直す。
         /// </para>
         /// </summary>
@@ -174,7 +175,33 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             GameReceptionStateStore.Commit();
+            SplitEncounterOnPendingWipe();
             EncounterManager.ReleaseHeldPastEncounter();
+        }
+
+        /// <summary>全滅で区切る回の番号。全滅を見つけたパケットを処理し終えたところで区切る(<see cref="SplitEncounterOnPendingWipe"/>)。</summary>
+        private static ulong? _pendingWipeSplitEncounterId;
+
+        /// <summary>
+        /// 全滅を見つけたパケットの最後に、その回を区切る(設定「進行で自動リセット」がオンで、回に記録があるとき)。
+        /// パケットの途中で回が作り直されていたら(マップ移動など)区切らない。
+        /// </summary>
+        private static void SplitEncounterOnPendingWipe()
+        {
+            if (_pendingWipeSplitEncounterId is not ulong encounterId)
+            {
+                return;
+            }
+
+            _pendingWipeSplitEncounterId = null;
+            if (EncounterManager.Current.EncounterId != encounterId
+                || !CombatRuntimeSettings.SplitEncountersOnNewPhases
+                || !EncounterManager.Current.HasStatsBeenRecorded())
+            {
+                return;
+            }
+
+            EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
         }
 
         /// <summary>
@@ -221,6 +248,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             NearbyMonsterIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
+            DungeonTargetStore.Instance.Clear();
             DungeonScoreStore.Instance.Clear();
             PartyMemberCache.Instance.Clear();
             SocialDataStore.ResetToStartup();
@@ -1747,7 +1775,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// 控えていた敵のバフをタイムラインに残す(<see cref="AddEnemyBuffLog"/>)。通知1件の処理の最後に呼ぶ。
-        /// 回を作り直す <c>EncounterManager.EnterDungeon</c> も、閉じる前に呼ぶ(通知の途中の全滅・ボス部屋の区切りより前に届いた分は前の回のもの)。
+        /// 回を作り直す <c>EncounterManager.EnterDungeon</c> も、閉じる前に呼ぶ(通知の途中のボス部屋の区切りより前に届いた分は前の回のもの)。
         /// </summary>
         internal static void FlushPendingEnemyBuffLogs()
         {
@@ -2372,19 +2400,24 @@ namespace StarResonanceDps.Core.CombatRuntime
         }
 
         /// <summary>
-        /// モンスターの種別ID(<c>AttrId</c>)が届いたら <see cref="NearbyMonsterIndex"/> に入れる。属性を当てた後に呼ぶ。
+        /// モンスターの種別ID(<c>AttrId</c>)か召喚者(<c>AttrSummonerId</c>・<c>AttrTopSummonerId</c>)が届いたら、
+        /// 今の値を <see cref="NearbyMonsterIndex"/> に入れる。属性を当てた後に呼ぶ。
         /// </summary>
         private static void RecordNearbyMonster(long uuid, RepeatedField<Attr> attrs)
         {
             if (Utils.UuidToEntityType(uuid) != (long)EEntityType.EntMonster
-                || !attrs.Any(attr => (EAttrType)attr.Id == EAttrType.AttrId && attr.RawData != null))
+                || !attrs.Any(attr => ((EAttrType)attr.Id == EAttrType.AttrId && attr.RawData != null)
+                    || (EAttrType)attr.Id is EAttrType.AttrSummonerId or EAttrType.AttrTopSummonerId))
             {
                 return;
             }
 
             if (EncounterManager.Current.GetAttrKV(uuid, "AttrId") is int monsterId && monsterId > 0)
             {
-                NearbyMonsterIndex.Instance.Set(uuid, monsterId);
+                NearbyMonsterIndex.Instance.Set(uuid, new NearbyMonsterIndex.NearbyMonster(
+                    monsterId,
+                    EncounterManager.Current.GetAttrKV(uuid, "AttrSummonerId") as long? ?? 0,
+                    EncounterManager.Current.GetAttrKV(uuid, "AttrTopSummonerId") as long? ?? 0));
             }
             else
             {
@@ -3276,6 +3309,10 @@ namespace StarResonanceDps.Core.CombatRuntime
             //
             // 全滅なら、区切りの設定に関係なく予告のバーの控えを消す。ゲームは全滅でも予告を消す通知を送らないので、
             // 消さないと全滅の後にバーの終わりの行(タイマーも動かす)と通知が出る。
+            //
+            // 全滅の区切りは、全滅を見つけたパケットを処理し終えたところで行う(SplitEncounterOnPendingWipe)。
+            // 最後に倒れた人の戦闘不能の被弾は全滅と同じ差分で届き、差分の中ではバフより後に当てるため、
+            // 見つけた時点で区切るとその被弾だけが次の回に入る。
             if (isTargetPlayer
                 && addedBuffIds.Exists(CooldownResetBuffDelays.ContainsKey)
                 && IsSelfPlayer(targetUuid))
@@ -3288,21 +3325,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                 {
                     Log.Information("Wipe detected: {Uuid} received the wipe reset buffs and was resurrected", targetUuid);
                     BossDbmBarStore.Instance.Clear();
+                    _pendingWipeSplitEncounterId = EncounterManager.Current.EncounterId;
                 }
-
-                if (CombatRuntimeSettings.SplitEncountersOnNewPhases
-                    && EncounterManager.Current.HasStatsBeenRecorded())
+                else if (CombatRuntimeSettings.SplitEncountersOnNewPhases
+                    && EncounterManager.Current.HasStatsBeenRecorded()
+                    && !addedBuffIds.Contains(ReviveStartBuffId)
+                    && BattleStateMachine.IsDungeonPlaying())
                 {
-                    if (isWipe)
-                    {
-                        EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.Wipe);
-                    }
-                    else if (!addedBuffIds.Contains(ReviveStartBuffId)
-                        && BattleStateMachine.IsDungeonPlaying())
-                    {
-                        Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
-                        EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
-                    }
+                    Log.Information("Boss room entry detected: {Uuid} received a reset buff without being resurrected", targetUuid);
+                    EncounterManager.EnterDungeon(keepPastEncounterInMeter: true, force: false, reason: EncounterStartReason.NewObjective);
                 }
             }
 
@@ -3995,6 +4026,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var vData = syncDungeonData.VData;
+            ClearAnnouncementBarsOnTargetProgress(DungeonTargetStore.Instance.ApplyFull(vData));
             DungeonScoreStore.Instance.ApplyFull(vData);
 
             if (vData.DungeonPlayerList != null && vData.DungeonPlayerList.PlayerInfos.Count > 0)
@@ -4030,7 +4062,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             foreach (var targetData in vData.Target.TargetData)
             {
-                BattleStateMachine.LogDungeonTarget(targetData.Value);
+                BattleStateMachine.LogDungeonTarget(targetData.Key, targetData.Value.Complete, targetData.Value.Nums);
                 System.Diagnostics.Debug.WriteLine($"Target.TargetData[{targetData.Key}]: TargetId={targetData.Value.TargetId},Nums={targetData.Value.Nums},Complete={targetData.Value.Complete}");
             }
 
@@ -4062,6 +4094,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             bool isStreamSafe = dirty.VData.StreamType == EStreamType.StreamTypeDeltaDirtySafe;
             var dun = new StarResonanceDps.Core.Protocols.Game.Binary.DungeonDirtyData(
                 new StarResonanceDps.Core.Protocols.Game.Binary.BlobReader(buf, isStreamSafe));
+            ClearAnnouncementBarsOnTargetProgress(DungeonTargetStore.Instance.ApplyDirty(dun));
             DungeonScoreStore.Instance.ApplyDirty(dun);
 
             if (dun?.PlayerList != null && dun?.PlayerList.PlayerInfos.Count > 0)
@@ -4146,20 +4179,33 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
             }
 
-            if (dun?.Target?.TargetData != null)
+            if (dun?.Target?.TargetChanges is { } targetChanges)
             {
-                if (dun.Target.TargetData.Count > 1)
+                foreach (var (targetId, targetData) in targetChanges.Added.Concat(targetChanges.Updated))
                 {
-                    System.Diagnostics.Debug.WriteLine("Target.TargetData.Count > 1!!");
+                    BattleStateMachine.LogDungeonTarget(targetId, targetData.Complete, targetData.Nums);
                 }
 
-                foreach (var target in dun.Target.TargetData)
+                foreach (var targetId in targetChanges.Removed)
                 {
-                    System.Diagnostics.Debug.WriteLine($"dun.Target.TargetData.Target = {target.Key}, [TargetId:{target.Value.TargetId}, Complete:{target.Value.Complete}, Nums:{target.Value.Nums}]");
-
-                    BattleStateMachine.LogDungeonTarget(target.Value);
+                    BattleStateMachine.LogDungeonTargetRemoved(targetId);
                 }
             }
+        }
+
+        /// <summary>
+        /// 未完了の目標が完了した・目標から消えたら(ボスの撃破と段の切り替わり)、予告のバーを全部消す。
+        /// ゲームはどちらのときも予告を消す通知を送らないので、消さないとバーの終わりに通知とタイムラインの行が出る。
+        /// </summary>
+        private static void ClearAnnouncementBarsOnTargetProgress(IReadOnlyList<int> progressedTargetIds)
+        {
+            if (progressedTargetIds.Count == 0)
+            {
+                return;
+            }
+
+            Log.Information("Dungeon targets {TargetIds} completed or were removed. Boss announcement bars cleared", progressedTargetIds);
+            BossDbmBarStore.Instance.Clear();
         }
     }
 }

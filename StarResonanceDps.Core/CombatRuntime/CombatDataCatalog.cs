@@ -19,7 +19,16 @@ public static class CombatDataCatalog
         new Dictionary<int, FrozenDictionary<int, float>>().ToFrozenDictionary();
     /// <summary>技ID → 技のアイコンの背景の枠(<see cref="BuildSkillIconFrames"/>)。技の表の全部の技。</summary>
     private static FrozenDictionary<int, SkillIconFrame> _skillIconFrames = FrozenDictionary<int, SkillIconFrame>.Empty;
+    /// <summary>技の名前。技の表の名前(<c>SkillNames</c>)に古い版の名前(<c>SkillNameOverrides</c>)と <c>SkillTalk</c> を重ねたもの。</summary>
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary>技の表の名前に古い版の名前を重ねたもの(<c>SkillTalk</c> を重ねる前)。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillTableNames =
+        new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
+            .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+    /// <summary>技の <c>SkillTalk</c>(<c>SkillTalkNames.json</c>)だけ。</summary>
+    private static FrozenDictionary<string, FrozenDictionary<int, string>> _skillTalkNames =
         new Dictionary<string, FrozenDictionary<int, string>>(StringComparer.OrdinalIgnoreCase)
             .ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
     private static FrozenDictionary<string, FrozenDictionary<int, string>> _buffNames =
@@ -447,9 +456,10 @@ public static class CombatDataCatalog
             _skillCooldownsByLevel = LoadSkillCooldowns();
             _skillIconFrames = BuildSkillIconFrames();
             var skillNames = LoadLocalizedText(reads, "SkillNames", out var skillNameIds);
-            var (restoredSkillNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
+            (_skillTableNames, _) = ApplyNameOverrides(reads, skillNames, skillNameIds, "SkillNameOverrides.json");
+            _skillTalkNames = LoadLocalizedText(reads, "SkillTalkNames", out _);
             // 公式の技名(SkillTalk)。技の表の名前と、表の更新で落ちた名前を戻したもの(SkillNameOverrides)の上に重ねる。
-            _skillNames = ApplySkillTalkNames(restoredSkillNames, LoadLocalizedText(reads, "SkillTalkNames", out _));
+            _skillNames = ApplySkillTalkNames(_skillTableNames, _skillTalkNames);
             var buffNames = LoadLocalizedText(reads, "BuffNames", out var buffNameIds);
             var (restoredBuffNames, restoredBuffNameIds) = ApplyNameOverrides(reads, buffNames, buffNameIds, "BuffNameOverrides.json");
             // 名前の無いバフと名前を変えるバフに割り当てた名前。表の更新で落ちた名前を戻したもの(BuffNameOverrides)の上に重ねる。
@@ -1608,6 +1618,18 @@ public static class CombatDataCatalog
     public static string GetSkillNameWithoutInternalId(int skillId)
     {
         return ResolveText(_skillNames, Volatile.Read(ref _cultureName), skillId);
+    }
+
+    /// <summary>技の表の名前(古い版の名前を含む、<c>SkillTalk</c> は見ない)。内部ID注記は付けない。名前が取れていなければ空。</summary>
+    public static string GetSkillTableNameWithoutInternalId(int skillId)
+    {
+        return ResolveText(_skillTableNames, Volatile.Read(ref _cultureName), skillId);
+    }
+
+    /// <summary>技の <c>SkillTalk</c> だけ。内部ID注記は付けない。無ければ空。</summary>
+    public static string GetSkillTalkNameWithoutInternalId(int skillId)
+    {
+        return ResolveText(_skillTalkNames, Volatile.Read(ref _cultureName), skillId);
     }
 
     /// <summary>

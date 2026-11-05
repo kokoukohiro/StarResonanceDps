@@ -154,7 +154,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 return;
             }
 
-            // 通知の途中(全滅・ボス部屋の区切り)で作り直すときは、それまでに控えた敵のバフを閉じる前の回に残す。
+            // 通知の途中(ボス部屋の区切り)で作り直すときは、それまでに控えた敵のバフを閉じる前の回に残す。
             MessageManager.FlushPendingEnemyBuffLogs();
 
             string priorBossName = "";
@@ -3405,14 +3405,22 @@ namespace StarResonanceDps.Core.CombatRuntime
                     encounter.PreviousBossCache.Remove(uuid);
                 }
 
-                // AttrId は出現時にしか届かず、区切りをまたいで運ばれない敵もいる。周囲にいる敵なら索引から戻す。
+                // AttrId と召喚者は出現時にしか届かず、区切りをまたいで運ばれない敵もいる。周囲にいる敵なら索引から戻す。
                 // 索引はいまの周囲を表すので、実行中のエンカウンターの実体にだけ入れる。
                 if (ReferenceEquals(encounter, EncounterManager.Current)
                     && (EEntityType)Utils.UuidToEntityType(uuid) == EEntityType.EntMonster
-                    && !Attributes.ContainsKey("AttrId")
-                    && Services.NearbyMonsterIndex.Instance.TryGetMonsterId(uuid, out var nearbyMonsterId))
+                    && Services.NearbyMonsterIndex.Instance.TryGet(uuid, out var nearbyMonster))
                 {
-                    Attributes["AttrId"] = nearbyMonsterId;
+                    Attributes.TryAdd("AttrId", nearbyMonster.MonsterId);
+                    if (nearbyMonster.SummonerUuid != 0)
+                    {
+                        Attributes.TryAdd("AttrSummonerId", nearbyMonster.SummonerUuid);
+                    }
+
+                    if (nearbyMonster.TopSummonerUuid != 0)
+                    {
+                        Attributes.TryAdd("AttrTopSummonerId", nearbyMonster.TopSummonerUuid);
+                    }
                 }
             }
 

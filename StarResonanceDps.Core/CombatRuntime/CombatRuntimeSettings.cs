@@ -52,7 +52,7 @@ public static class CombatRuntimeSettings
 
     /// <summary>
     /// 設定「進行で自動リセット」。ダンジョンの開始・ボス部屋の入場・全滅でエンカウンターを分けるか。
-    /// 開始は <c>BattleStateMachine</c>、ボス部屋の入場と全滅は <c>MessageManager.ProcessAoiSyncDelta</c> が見て、<c>EnterDungeon</c> で作り直す。
+    /// 開始は <c>BattleStateMachine</c>、ボス部屋の入場と全滅は <c>MessageManager.ProcessAoiSyncDelta</c> が見て(全滅はそのパケットを処理し終えたところで)、<c>EnterDungeon</c> で作り直す。
     /// </summary>
     public static bool SplitEncountersOnNewPhases { get; private set; }
 

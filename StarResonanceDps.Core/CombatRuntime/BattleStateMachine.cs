@@ -40,6 +40,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             Services.NearbyMonsterIndex.Instance.Clear();
             Services.BossDbmBarStore.Instance.Clear();
             Services.WarningSkillCastStore.Instance.Clear();
+            Services.DungeonTargetStore.Instance.Clear();
             Services.DungeonScoreStore.Instance.Clear();
         }
 
@@ -111,10 +112,17 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// <summary>
         /// ダンジョンの目標が届いたことをログに残すだけ。区切りの判定には使わない
         /// (ボス部屋の入場はリセット系バフで見る。<see cref="Managers.MessageManager"/> の差分の処理)。
+        /// 差分の更新で届かなかった項目は「-」。
         /// </summary>
-        public static void LogDungeonTarget(DungeonTargetData dungeonTargetData)
+        public static void LogDungeonTarget(int targetId, int? complete, int? nums)
         {
-            Log.Information($"{DateTime.Now} - BattleStateMachine.LogDungeonTarget: TargetId={dungeonTargetData.TargetId}, Complete={dungeonTargetData.Complete}, Nums={dungeonTargetData.Nums}");
+            Log.Information($"{DateTime.Now} - BattleStateMachine.LogDungeonTarget: TargetId={targetId}, Complete={complete?.ToString() ?? "-"}, Nums={nums?.ToString() ?? "-"}");
+        }
+
+        /// <summary>ダンジョンの目標が消えたことをログに残すだけ。</summary>
+        public static void LogDungeonTargetRemoved(int targetId)
+        {
+            Log.Information($"{DateTime.Now} - BattleStateMachine.LogDungeonTarget: TargetId={targetId} removed");
         }
 
         public static void SetDeferredEncounterEndFinalData(DateTime dateTime, EncounterEndFinalData data)

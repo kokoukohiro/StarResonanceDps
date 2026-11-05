@@ -65,12 +65,6 @@
   "827206": {
     "BuffType": 1
   },
-  "829201": {
-    "Icon": "buff_blue_cd"
-  },
-  "829210": {
-    "Icon": "buff_blue_cd"
-  },
   "833016": {
     "Icon": "buff_talent_passive_icon_general_dps_arrtuprandom"
   },
@@ -90,8 +84,7 @@
     "Icon": "buff_talent_passive_icon_general_dps_iceenergyget"
   },
   "974343": {
-    "BuffType": 1,
-    "Icon": "buff_fairytail_icon001"
+    "BuffType": 1
   },
   "997047": {
     "Icon": "buff_talent_passive_icon_dps_sacrifice04"
@@ -103,8 +96,7 @@
     "Icon": "buff_talent_passive_icon_general_sup_grassarea"
   },
   "2010060": {
-    "BuffType": 1,
-    "BuffPriority": 1
+    "BuffType": 1
   },
   "2100401": {
     "Icon": "buff_talent_passive_icon_sup_meleeconversion"
@@ -480,9 +472,8 @@
     "Icon": "Icon.EquipSlot.202"
   },
   "3002411": {
-    "BuffType": 1,
     "BuffPriority": 1,
-    "Icon": "buff_passive_icon_general_dps_crithreetimes"
+    "Icon": "debuff_icon_103"
   },
   "3002812": {
     "BuffType": 1,

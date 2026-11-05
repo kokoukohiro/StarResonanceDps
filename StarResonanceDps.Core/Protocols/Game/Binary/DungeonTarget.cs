@@ -2,7 +2,8 @@ namespace StarResonanceDps.Core.Protocols.Game.Binary;
 
 public class DungeonTarget : BlobType
 {
-    public Dictionary<int, DungeonTargetData> TargetData = null!;
+    /// <summary>目標の番号 → 目標の差分(足す・消す・更新)。</summary>
+    public BlobHashMapDelta<int, DungeonTargetData>? TargetChanges;
 
     public DungeonTarget()
     {
@@ -16,20 +17,10 @@ public class DungeonTarget : BlobType
     {
         switch (index) {
             case Zproto.DungeonTarget.TargetDataFieldNumber:
-                TargetData = blob.ReadHashMap<int, DungeonTargetData>();
+                TargetChanges = blob.ReadHashMapDelta<int, DungeonTargetData>();
                 return true;
             default:
                 return false;
         }
-    }
-
-    public static implicit operator Zproto.DungeonTarget(DungeonTarget dungeonTarget)
-    {
-        var target = new Zproto.DungeonTarget();
-        foreach (var item in dungeonTarget.TargetData)
-        {
-            target.TargetData.Add(item.Key, item.Value);
-        }
-        return target;
     }
 }

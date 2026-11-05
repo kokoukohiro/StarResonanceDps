@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -111,16 +112,16 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private string _mapName = string.Empty;
 
     [ObservableProperty]
-    private string _entityCombatScoreLabel = string.Empty;
+    private string _footerCombatLabel = string.Empty;
 
     [ObservableProperty]
-    private string _entityCombatScoreText = string.Empty;
+    private string _footerCombatValueText = string.Empty;
 
     [ObservableProperty]
-    private string _entityCurrentScoreLabel = string.Empty;
+    private string _footerOverallLabel = string.Empty;
 
     [ObservableProperty]
-    private string _entityCurrentScoreText = string.Empty;
+    private string _footerOverallValueText = string.Empty;
 
     [ObservableProperty]
     private int _openPlayerWindowCount;
@@ -1313,7 +1314,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         SynchronizeEntityListEntries(resetEntries);
     }
 
-    /// <summary>ダンジョンの得点(空間調査)が変わった(行の「○○pt」とフッターの得点を当て直す)。</summary>
+    /// <summary>ダンジョンの得点(空間調査)が変わった(行の「○○pt」とフッターを当て直す)。</summary>
     public void UpdateDungeonScore(DungeonScoreSnapshot dungeonScore)
     {
         if (!IsEntityList || _dungeonScore == dungeonScore)
@@ -1613,6 +1614,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
 
         _shownPlayerRoster = visibleRoster;
+        RenderPlayerListFooter(visibleRoster);
         RefreshDataStatus();
     }
 
@@ -1761,25 +1763,67 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             }
         }
 
-        RenderEntityScore();
+        RenderEntityListFooter(visibleEntities);
         RefreshDataStatus();
     }
 
     /// <summary>
-    /// フッターの右の得点。いつも出す。交戦中は周りにいる敵(一覧の絞り込みの前)のうち、戦闘状態の敵のアイコンの得点の合計
-    /// (<see cref="EntityListEntry.GetDisplayedScore"/>)。現在は今までに得た得点。
-    /// どちらも得点を求めていない場所では 0(求めているかが分からない途中起動の間も、窓の状態の印が赤で知らせるので 0)。
+    /// フッターの右の2組。いつも出す。
+    ///
+    /// <para>
+    /// 今の場所が得点を求めている間は得点。交戦中は周りにいる敵(一覧の絞り込みの前)のうち、戦闘状態の敵のアイコンの得点の合計
+    /// (<see cref="EntityListEntry.GetDisplayedScore"/>)、現在は今までに得た得点。
+    /// </para>
+    ///
+    /// <para>
+    /// それ以外(求めているかが分からない途中起動の間も)は個数。付近は一覧に載っている行の数、交戦中はそのうち戦闘状態の行の数
+    /// (付近より多くならないよう、一覧に載っている行の中で数える)。
+    /// </para>
     /// </summary>
-    private void RenderEntityScore()
+    private void RenderEntityListFooter(IReadOnlyList<NearbyEntityEntry> visibleEntities)
     {
-        var isScoreRequested = _dungeonScore.IsScoreRequested;
-        EntityCombatScoreLabel = $"{LocalizationManager.Instance.GetString("CombatState_Tip")}:";
-        EntityCombatScoreText = EntityListEntry.FormatScore(
-            _nearbyEntities
-                .Where(entry => entry.IsInCombat)
-                .Sum(entry => EntityListEntry.GetDisplayedScore(entry, isScoreRequested)));
-        EntityCurrentScoreLabel = $"{LocalizationManager.Instance.GetString("EntityList_CurrentScore")}:";
-        EntityCurrentScoreText = EntityListEntry.FormatScore(isScoreRequested ? _dungeonScore.TotalScore : 0);
+        FooterCombatLabel = $"{LocalizationManager.Instance.GetString("CombatState_Tip")}:";
+
+        if (_dungeonScore.IsScoreRequested)
+        {
+            FooterCombatValueText = EntityListEntry.FormatScore(
+                _nearbyEntities
+                    .Where(entry => entry.IsInCombat)
+                    .Sum(entry => EntityListEntry.GetDisplayedScore(entry, isScoreRequested: true)));
+            FooterOverallLabel = $"{LocalizationManager.Instance.GetString("EntityList_CurrentScore")}:";
+            FooterOverallValueText = EntityListEntry.FormatScore(_dungeonScore.TotalScore);
+            return;
+        }
+
+        FooterCombatValueText = FormatEntityCount(visibleEntities.Count(entry => entry.IsInCombat));
+        FooterOverallLabel = $"{LocalizationManager.Instance.GetString("ListFooter_Nearby")}:";
+        FooterOverallValueText = FormatEntityCount(visibleEntities.Count);
+    }
+
+    private static string FormatEntityCount(int count)
+    {
+        return LocalizationManager.Instance.Format(
+            "EntityList_CountFormat",
+            count.ToString(CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// フッターの右の2組。付近は一覧に載っている行のうち周りにいる人(自分を含む)の数で、灰色の行と周りにいないパーティの人は数えない。
+    /// 交戦中はそのうち戦闘状態の人の数(戦闘状態が届くのは自分と周りにいる人だけ)。
+    /// </summary>
+    private void RenderPlayerListFooter(IReadOnlyList<PlayerRosterEntry> visibleRoster)
+    {
+        FooterCombatLabel = $"{LocalizationManager.Instance.GetString("CombatState_Tip")}:";
+        FooterCombatValueText = FormatPlayerCount(visibleRoster.Count(entry => entry.IsNearby && entry.IsInCombat));
+        FooterOverallLabel = $"{LocalizationManager.Instance.GetString("ListFooter_Nearby")}:";
+        FooterOverallValueText = FormatPlayerCount(visibleRoster.Count(entry => entry.IsNearby));
+    }
+
+    private static string FormatPlayerCount(int count)
+    {
+        return LocalizationManager.Instance.Format(
+            "PlayerList_CountFormat",
+            count.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>

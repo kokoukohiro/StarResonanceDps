@@ -1360,6 +1360,15 @@ VOICEVOXを起動し直してください。</value>
   <data name="EntityList_CurrentScore" xml:space="preserve">
     <value>現在</value>
   </data>
+  <data name="EntityList_CountFormat" xml:space="preserve">
+    <value>{0}体</value>
+  </data>
+  <data name="PlayerList_CountFormat" xml:space="preserve">
+    <value>{0}人</value>
+  </data>
+  <data name="ListFooter_Nearby" xml:space="preserve">
+    <value>付近</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>並び替え</value>
   </data>

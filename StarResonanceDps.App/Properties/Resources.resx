@@ -1359,6 +1359,15 @@ It is strongly recommended to update to this version, or higher, to avoid proble
   <data name="EntityList_CurrentScore" xml:space="preserve">
     <value>Current</value>
   </data>
+  <data name="EntityList_CountFormat" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="PlayerList_CountFormat" xml:space="preserve">
+    <value>{0}</value>
+  </data>
+  <data name="ListFooter_Nearby" xml:space="preserve">
+    <value>Nearby</value>
+  </data>
   <data name="Settings_Display_ListSort" xml:space="preserve">
     <value>Sort Order</value>
   </data>

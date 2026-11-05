@@ -613,21 +613,29 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 技の名前。ボス大技の予告(<c>DbmTable</c>)の正式名を先に引き、無ければ技の名前(<c>SkillTalkNames</c> → <c>SkillNames</c>)。予兆技の通知が使う。
+    /// 予兆技の通知の予告に出す技の名前(<see cref="ResolveAnnouncementSkillName"/>)。
     /// 内部名は使わない(読み上げで日本語以外を読めないため)。タイムラインの行は名前が無ければ内部名になることがある。
     /// </summary>
-    public static string GetCombatEventLogSkillName(int skillId)
+    public static string GetTelegraphedAnnouncementSkillName(int skillId)
     {
-        return ResolveTakenDamageSkillName(skillId);
+        return ResolveAnnouncementSkillName(skillId);
     }
 
     /// <summary>
-    /// タイムラインの予告・詠唱の行に出す技の名前(<see cref="ResolveTimelineLineSkillName"/>。名前が無ければ、全体設定で内部名を出すときは内部名)。
-    /// エンティティ詠唱の通知が、対象の名前と比べる(タイムラインに出ている名前を入れれば当たる)。
+    /// 予兆技の通知の警告に出す技の名前(<see cref="ResolveCastSkillName"/>)。内部名は使わない(<see cref="GetTelegraphedAnnouncementSkillName"/> と同じ)。
     /// </summary>
-    public static string GetTimelineLineSkillName(int skillId)
+    public static string GetTelegraphedCastSkillName(int skillId)
     {
-        return ResolveTimelineLineSkillName(skillId);
+        return ResolveCastSkillName(skillId);
+    }
+
+    /// <summary>
+    /// 詠唱の技の名前(<see cref="ResolveCastSkillName"/>。名前が無ければ、全体設定で内部名を出すときは内部名)。タイムラインの詠唱の行と同じ。
+    /// エンティティ情報の詠唱バーの左の技名と、エンティティ詠唱の通知が対象の名前と比べるのに使う。
+    /// </summary>
+    public static string GetCastSkillName(int skillId)
+    {
+        return ResolveCastLineSkillName(skillId);
     }
 
     /// <summary>予告の主(予告が届いた時点で周囲にいる、その技を持つモンスターの種別ID。0 なら名前なし)。タイムラインの予告の行の加害者。</summary>
@@ -666,7 +674,7 @@ public static class MeterSnapshotProvider
                     null,
                     announcement.SkillId,
                     false,
-                    ResolveTimelineLineSkillName(announcement.SkillId),
+                    ResolveAnnouncementLineSkillName(announcement.SkillId),
                     0));
                 continue;
             }
@@ -682,7 +690,7 @@ public static class MeterSnapshotProvider
                     null,
                     cast.SkillId,
                     false,
-                    ResolveTimelineLineSkillName(cast.SkillId),
+                    ResolveCastLineSkillName(cast.SkillId),
                     0,
                     IsWarning: cast.IsWarning));
                 continue;
@@ -846,11 +854,48 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 予告・詠唱の行の技の名前(<see cref="ResolveTakenDamageSkillName"/>)。空なら、全体設定で内部名を出すときは技の内部名。
+    /// 予告の技の名前。予告の名前(<c>DbmTable.Content</c>)→ 技の表の名前(古い版の名前を含む)→ <c>SkillTalk</c>。
+    /// 予告の名前はゲームの予告のバーに出る名前。<c>SkillTalk</c> は詠唱のテキストなので一番後ろ。
     /// </summary>
-    private static string ResolveTimelineLineSkillName(int skillId)
+    private static string ResolveAnnouncementSkillName(int skillId)
     {
-        var name = ResolveTakenDamageSkillName(skillId);
+        var name = CombatDataCatalog.GetDbmNameWithoutInternalId(skillId);
+        if (string.IsNullOrEmpty(name))
+        {
+            name = CombatDataCatalog.GetSkillTableNameWithoutInternalId(skillId);
+        }
+
+        return string.IsNullOrEmpty(name)
+            ? CombatDataCatalog.GetSkillTalkNameWithoutInternalId(skillId)
+            : name;
+    }
+
+    /// <summary>
+    /// 詠唱と警告の技の名前。技の名前(<c>SkillTalk</c> → 技の表の名前 → 古い版の名前)→ 予告の名前。
+    /// ゲームの詠唱バー(ボスの HP バーの詠唱欄)と警告バー(ボス技の発動バー)は技の名前を出す。予告の名前は技の名前が無いときだけ。
+    /// </summary>
+    private static string ResolveCastSkillName(int skillId)
+    {
+        var name = CombatDataCatalog.GetSkillNameWithoutInternalId(skillId);
+        return string.IsNullOrEmpty(name)
+            ? CombatDataCatalog.GetDbmNameWithoutInternalId(skillId)
+            : name;
+    }
+
+    /// <summary>タイムラインの予告の行の技の名前(<see cref="ResolveAnnouncementSkillName"/>)。空なら、全体設定で内部名を出すときは技の内部名。</summary>
+    private static string ResolveAnnouncementLineSkillName(int skillId)
+    {
+        return WithSkillInternalName(ResolveAnnouncementSkillName(skillId), skillId);
+    }
+
+    /// <summary>タイムラインの詠唱の行の技の名前(<see cref="ResolveCastSkillName"/>)。空なら、全体設定で内部名を出すときは技の内部名。</summary>
+    private static string ResolveCastLineSkillName(int skillId)
+    {
+        return WithSkillInternalName(ResolveCastSkillName(skillId), skillId);
+    }
+
+    private static string WithSkillInternalName(string name, int skillId)
+    {
         return string.IsNullOrEmpty(name) && CombatDataCatalog.ShowsUnnamedSkillInternalNames
             ? CombatDataCatalog.GetSkillInternalName(skillId)
             : name;

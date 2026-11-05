@@ -18,7 +18,9 @@ namespace StarResonanceDps.App.ViewModels;
 /// 1行目とヘイトは、周りの実体の一覧(<see cref="UpdateNearbyEntities"/>)と名簿(<see cref="UpdateRoster"/>)から、窓ごとに自分の行(<see cref="Row"/>)を
 /// このウィジェットの設定で組む(名前の書式・ヘイトの人数などがエンティティリストと別なので、エンティティリストの行は使わない)。
 /// 窓が追う個体は <see cref="EntityWindowTarget"/> が決める(エンティティのバフ一覧と同じ)。
-/// 周りから外れても最後の値のまま残し、ログアウトで個体を放したら中身を空にする。
+/// 個体が周りの実体の一覧に居ない(倒された・周りから外れた)間は、エンティティリストと同じく何も出さない(バフ・デバフも)。
+/// 同じ個体が一覧に戻れば、また出す。ログアウトで個体を放したら中身を空にする。
+/// 何も出さない間は中身の高さが 0 になり、窓は高さ自動の決まりどおり今の高さで待つ。
 /// </para>
 ///
 /// <para>
@@ -44,7 +46,10 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
     private EntityInfoWidgetSettingsConfig _settings;
     private EntityRowSettings _rowSettings;
 
-    /// <summary>窓が追う個体の、最後に受けた周りの実体の値。名簿や設定が変わったときに行を組み直すのに使う。</summary>
+    /// <summary>
+    /// 窓が追う個体の、最後に受けた周りの実体の値。名簿や設定が変わったときに行を組み直すのに使う。
+    /// 個体が周りの実体の一覧に居ない間は null(1行目・ヘイト・バフ・デバフを出さない)。
+    /// </summary>
     private NearbyEntityEntry? _lastEntity;
 
     private bool _isDisposed;
@@ -185,8 +190,9 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
     }
 
     /// <summary>
-    /// 周りの実体の一覧が変わった。窓が追う個体の値で1行目とヘイトを組み直す。
-    /// 未捕獲の窓と、一覧に居ない(周りから外れた)個体は何もしない(外れた個体は最後の値のまま)。値が同じなら組み直さない。
+    /// 周りの実体の一覧が変わった。窓が追う個体の値で1行目とヘイトを組み直す。値が同じなら組み直さない。
+    /// 個体が一覧に居ない(倒された・周りから外れた)間は、1行目・ヘイト・バフ・デバフを出さない(エンティティリストと同じ)。
+    /// 同じ個体が一覧に戻れば、また出す。未捕獲の窓は何もしない。
     /// </summary>
     public void UpdateNearbyEntities(IReadOnlyList<NearbyEntityEntry> nearbyEntities)
     {
@@ -208,10 +214,25 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
                 return;
             }
 
+            var returned = _lastEntity is null;
             _lastEntity = entity;
             ApplyRow();
+            if (returned)
+            {
+                RefreshBuffs();
+            }
+
             return;
         }
+
+        if (_lastEntity is null)
+        {
+            return;
+        }
+
+        _lastEntity = null;
+        Row = null;
+        RefreshBuffs();
     }
 
     /// <summary>名簿が変わった(ヘイトの枠の名前・クラス・特化を引き直す)。</summary>
@@ -381,9 +402,12 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
         PlayerBuffListKind kind,
         bool groupsSameBuffs)
     {
-        var snapshots = BuffListSnapshotFilter.Apply(
-            _settings,
-            MeterSnapshotProvider.GetEntityBuffs(EntityUuid, kind, groupsSameBuffs));
+        // 個体が周りの一覧に居ない間は出さない(倒された後もバフの控えが残ることがある)。
+        IReadOnlyList<PlayerBuffSnapshot> snapshots = _lastEntity is null
+            ? []
+            : BuffListSnapshotFilter.Apply(
+                _settings,
+                MeterSnapshotProvider.GetEntityBuffs(EntityUuid, kind, groupsSameBuffs));
         var snapshotKeys = snapshots
             .Select(snapshot => snapshot.Key)
             .ToHashSet(StringComparer.Ordinal);
