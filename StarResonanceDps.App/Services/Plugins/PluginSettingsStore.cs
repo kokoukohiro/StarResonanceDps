@@ -5,9 +5,7 @@ using StarResonanceDps.PluginSdk;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// Shared JSON settings storage for plugins.
-/// The host fixes the directory to the runtime Plugins directory; plugins supply only
-/// the file name they own, so no plugin-specific Data subdirectories are created.
+/// プラグインの設定ファイル(JSON)の置き場所。本体がプラグインのフォルダに決め、プラグインはファイルの名前だけを渡す。
 /// </summary>
 internal sealed class PluginSettingsStore : IPluginSettingsStore
 {

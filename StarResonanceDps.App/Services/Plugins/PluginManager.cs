@@ -1,21 +1,56 @@
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
+using System.Threading;
 using System.Windows;
+using Microsoft.Win32;
 using Serilog;
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views;
 using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Services;
 
+/// <summary>
+/// プラグインの読み込み・初期化・止める・終える。
+///
+/// <para>
+/// プラグインは <c>Plugins\&lt;アセンブリ名&gt;\&lt;アセンブリ名&gt;.dll</c> に1つずつ置き、プラグインごとの読み込み先(<see cref="PluginLoadContext"/>)に読む。
+/// 一覧はフォルダから読み(<see cref="DiscoverPlugins"/>)、初期化は起動の処理(<see cref="InitializeAll"/>、メイン窓が描かれた後)でまとめて行う。
+/// ウィジェットと通知の項目を足すプラグインは、初期化の後に定義を確かめてメイン画面と通知タブへ渡す(<see cref="PluginWidgetRegistry"/>・<see cref="PluginNotificationRegistry"/>)。
+/// 決まりに合わなければそのプラグインを止める。
+/// </para>
+///
+/// <para>
+/// プラグインのコードは全部 <see cref="PluginCallGuard"/> を通して呼ぶ。例外を出したプラグインはその起動の間だけ止め(読み込んだものは外せない)、次の起動でまた読む。
+/// アプリを終わらせた例外(プラグインが作ったスレッドの例外)を出したプラグインは、フォルダに印を書き、印がある間は初期化しない。
+/// </para>
+///
+/// <para>
+/// アンインストール(<see cref="Uninstall"/>)は、読み込んだ DLL を動いている間は消せないので、フォルダに印を書いてプラグインを止め、
+/// 次の起動で読み込む前にフォルダを消す(<see cref="DiscoverPlugins"/>)。
+/// </para>
+/// </summary>
 public sealed class PluginManager
 {
+    /// <summary>このプラグインの例外でアプリが終わった印。プラグインのフォルダに置く。</summary>
+    private const string TerminatedAppMarkerFileName = "app_terminated.marker";
+
+    /// <summary>アンインストールした印。プラグインのフォルダに置き、次の起動でフォルダごと消す。</summary>
+    private const string UninstallMarkerFileName = "uninstall.marker";
+
+    // 前に使ったフォルダと窓の大きさの記録を、ほかのファイル・フォルダの窓と分ける番号。
+    private static readonly Guid AddPluginDialogClientGuid = new("1F44B92B-21EC-41A9-831C-1103136B4600");
+
     private readonly string _pluginsDirectory;
-    private readonly Dictionary<string, PluginRegistration> _registrations = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, LoadedPlugin> _loadedPlugins = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, PluginEntry> _entries = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>例外の持ち主を探す処理(ほかのスレッドから来る)が読む写し。</summary>
+    private PluginEntry[] _entrySnapshot = [];
 
     private bool _hasDiscoveredPlugins;
 
@@ -26,6 +61,21 @@ public sealed class PluginManager
 
     public static PluginManager Instance { get; } = new();
 
+    /// <summary>
+    /// プラグインの一覧の「＋」(<see cref="AddFromFile"/>)からプラグインを足した。起動時の一覧(<see cref="DiscoverPlugins"/>)では出さない。
+    /// </summary>
+    public event EventHandler<PluginInfo>? PluginRegistered;
+
+    /// <summary>
+    /// 一覧の行の状態(<see cref="GetStatus"/>)が変わった。値はプラグインの鍵(<see cref="PluginInfo.Key"/>)。
+    /// 初期化の結果・止めた・アンインストールしたときに、画面のスレッドで出す。
+    /// </summary>
+    public event EventHandler<string>? PluginStatusChanged;
+
+    /// <summary>
+    /// Plugins のフォルダを読み、一覧に出すプラグインを返す(フォルダの名前の順)。初期化はしない。
+    /// アンインストールの印のあるフォルダは、読む前に消す。消せなければ読まずに、削除できなかった行にする(次の起動でまた消す)。
+    /// </summary>
     public IReadOnlyList<PluginInfo> DiscoverPlugins()
     {
         if (_hasDiscoveredPlugins)
@@ -40,157 +90,714 @@ public sealed class PluginManager
             return [];
         }
 
-        foreach (var assemblyPath in Directory.EnumerateFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly)
-                     .OrderBy(path => Path.GetFileName(path) ?? string.Empty, StringComparer.OrdinalIgnoreCase))
+        foreach (var misplacedAssembly in Directory.EnumerateFiles(_pluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly))
         {
-            TryRegisterPlugin(assemblyPath);
+            Log.Warning("Ignored a plugin DLL placed directly in the plugins folder; each plugin must be in its own folder: {Path}", misplacedAssembly);
+        }
+
+        foreach (var folder in Directory.EnumerateDirectories(_pluginsDirectory)
+                     .OrderBy(path => Path.GetFileName(path), StringComparer.OrdinalIgnoreCase))
+        {
+            if (!File.Exists(Path.Combine(folder, UninstallMarkerFileName)))
+            {
+                AddEntry(ReadPlugin(folder));
+                continue;
+            }
+
+            if (!TryDeleteUninstalledFolder(folder))
+            {
+                var entry = new PluginEntry(Path.GetFileName(folder), folder);
+                SetFailure(entry, PluginErrorReason.DeletionFailed, []);
+                AddEntry(entry);
+            }
         }
 
         return GetDiscoveredPlugins();
     }
 
+    /// <summary>
+    /// 読めたプラグインを全部初期化する(起動の処理で1回)。読めなかった・初期化できなかったプラグインの名前を返す。
+    /// 削除できなかったフォルダは返さない(読み込みの失敗ではなく、直し方も違う)。
+    /// </summary>
+    public IReadOnlyList<string> InitializeAll()
+    {
+        DiscoverPlugins();
+
+        var entries = _entries.Values.OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase).ToArray();
+        foreach (var entry in entries.Where(entry => entry.State == PluginState.Loaded))
+        {
+            Initialize(entry);
+        }
+
+        var culture = LocalizationManager.Instance.CurrentCulture;
+        return entries
+            .Where(entry => entry.State == PluginState.Failed && entry.ErrorReason != PluginErrorReason.DeletionFailed)
+            .Select(entry => entry.Info.GetDisplayName(culture))
+            .ToArray();
+    }
+
+    /// <summary>一覧の行の状態。<paramref name="pluginKey"/> は <see cref="DiscoverPlugins"/> が返したプラグインの鍵。</summary>
+    public PluginStatus GetStatus(string pluginKey)
+    {
+        var entry = _entries[pluginKey];
+        return entry.State switch
+        {
+            PluginState.PendingDeletion => new PluginStatus(PluginRowState.PendingDeletion, null, [], CanUninstall: false),
+            PluginState.Failed or PluginState.Stopped => new PluginStatus(
+                PluginRowState.Error,
+                entry.ErrorReason ?? throw new InvalidOperationException($"The plugin '{entry.Key}' failed without a reason."),
+                entry.MissingFiles,
+                CanUninstall: !IsAwaitingDeletion(entry)),
+            _ => new PluginStatus(
+                entry.Info.HasWindow ? PluginRowState.Openable : PluginRowState.NoWindow,
+                null,
+                [],
+                CanUninstall: true),
+        };
+    }
+
+    /// <summary>窓を開く。開いていれば前に出す。動いていなければ何もしない(押せる行で動いていないのは、初期化の前の行だけ)。</summary>
     public void Open(PluginListItemViewModel pluginItem)
     {
         ArgumentNullException.ThrowIfNull(pluginItem);
 
-        if (pluginItem.IsAddItem || string.IsNullOrWhiteSpace(pluginItem.PluginId))
+        if (!_entries.TryGetValue(pluginItem.PluginKey, out var entry) || entry.State != PluginState.Running)
         {
             return;
         }
 
-        if (PluginWindowManager.Instance.ActivateExisting(pluginItem.PluginId))
+        if (entry.Instance is not IPluginWindowProvider windowProvider
+            || PluginWindowManager.Instance.ActivateExisting(entry.Key))
         {
             return;
         }
 
-        if (!TryGetOrLoadPlugin(pluginItem.PluginId, out var loadedPlugin))
+        var guard = entry.Guard!;
+        if (!guard.TryInvoke(
+                "Window content creation",
+                () => windowProvider.CreateContent() ?? throw new InvalidOperationException("CreateContent returned null."),
+                out var content))
         {
-            PluginOpenFailureMessage.Show(Application.Current?.MainWindow);
             return;
         }
 
-        try
+        if (!guard.TryInvoke("Window options", windowProvider.GetWindowOptions, out var windowOptions))
         {
-            var content = loadedPlugin.Instance.CreateContent();
-            if (content is null)
-            {
-                throw new InvalidOperationException("CreateContent returned null.");
-            }
-
-            var windowOptions = loadedPlugin.Instance is IPluginWindowOptionsProvider windowOptionsProvider
-                ? windowOptionsProvider.GetWindowOptions()
-                : null;
-
-            PluginWindowManager.Instance.Open(pluginItem, content, windowOptions);
+            DisposeContent(entry, content);
+            return;
         }
-        catch (Exception exception)
-        {
-            WritePluginError(pluginItem.PluginId, "Failed to create plugin window content.", exception);
-            PluginOpenFailureMessage.Show(Application.Current?.MainWindow);
-        }
+
+        PluginWindowManager.Instance.Open(pluginItem, content, windowOptions, closedContent => DisposeContent(entry, closedContent));
     }
 
-    public void ShutdownAll()
+    /// <summary>
+    /// プラグインの一覧の「＋」。DLLを選ばせ、要るファイル(<see cref="PluginDependencyScanner"/>)が全部あれば
+    /// <c>Plugins\&lt;アセンブリ名&gt;\</c> へ写して読み込み、初期化して、<see cref="PluginRegistered"/> を出す。
+    /// 選んだファイルがプラグインかは写す前に確かめる(<see cref="ReadPluginIdentity"/>)。プラグインでないファイルを写すと、
+    /// 起動のたびに読めないフォルダが Plugins に残るため。
+    /// </summary>
+    public void AddFromFile()
     {
-        foreach (var loadedPlugin in _loadedPlugins.Values.ToArray())
+        var owner = Application.Current?.MainWindow;
+        var dialog = new OpenFileDialog
         {
-            try
-            {
-                loadedPlugin.Instance.Shutdown();
-            }
-            catch (Exception exception)
-            {
-                WritePluginError(loadedPlugin.Registration.Info.Id, "Plugin shutdown failed.", exception);
-            }
+            ClientGuid = AddPluginDialogClientGuid,
+            Filter = $"{LocalizationManager.Instance.GetString("PluginAdd_FileFilter")}|*.dll",
+            CheckFileExists = true,
+            Multiselect = false
+        };
+
+        if (UserFolders.Downloads is { } downloads)
+        {
+            dialog.DefaultDirectory = downloads;
         }
 
-        _loadedPlugins.Clear();
-    }
-
-    private IReadOnlyList<PluginInfo> GetDiscoveredPlugins()
-    {
-        return _registrations.Values
-            .OrderBy(registration => registration.Info.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(registration => registration.Info)
-            .ToArray();
-    }
-
-    private void TryRegisterPlugin(string assemblyPath)
-    {
-        try
+        var selected = owner is null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+        if (selected != true)
         {
-            var fullAssemblyPath = Path.GetFullPath(assemblyPath);
-            var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(fullAssemblyPath);
-            var registration = CreateRegistration(assembly);
-
-            if (!_registrations.TryAdd(registration.Info.Id, registration))
-            {
-                throw new InvalidOperationException($"A plugin with id '{registration.Info.Id}' is already registered.");
-            }
-        }
-        catch (Exception exception)
-        {
-            var pluginFileName = Path.GetFileNameWithoutExtension(assemblyPath) ?? "unknown";
-            WritePluginError(pluginFileName, "Plugin DLL registration failed.", exception);
-        }
-    }
-
-    private bool TryGetOrLoadPlugin(string pluginId, out LoadedPlugin loadedPlugin)
-    {
-        if (_loadedPlugins.TryGetValue(pluginId, out var existingPlugin))
-        {
-            loadedPlugin = existingPlugin;
-            return true;
+            return;
         }
 
         DiscoverPlugins();
 
-        if (!_registrations.TryGetValue(pluginId, out var registration))
+        var sourcePath = Path.GetFullPath(dialog.FileName);
+        var sourceName = Path.GetFileNameWithoutExtension(sourcePath);
+        if (!string.Equals(Path.GetExtension(sourcePath), ".dll", StringComparison.OrdinalIgnoreCase))
         {
-            WritePluginError(pluginId, "The requested plugin is not registered.", null);
-            loadedPlugin = null!;
-            return false;
+            PluginAddFailureMessage.ShowInvalidFile(owner);
+            return;
+        }
+
+        PluginDependencyScan scan;
+        try
+        {
+            scan = PluginDependencyScanner.Scan(sourcePath);
+        }
+        catch (Exception exception)
+        {
+            LogPluginError(sourceName, "The selected file is not a supported plugin DLL.", exception);
+            PluginAddFailureMessage.ShowInvalidFile(owner);
+            return;
+        }
+
+        if (scan.MissingFiles.Count > 0)
+        {
+            LogPluginError(sourceName, $"The selected plugin is missing files: {string.Join(", ", scan.MissingFiles)}", null);
+            PluginAddFailureMessage.ShowMissingFiles(owner, scan.MissingFiles);
+            return;
+        }
+
+        if (ReadPluginIdentity(sourcePath) is not { } identity)
+        {
+            PluginAddFailureMessage.ShowInvalidFile(owner);
+            return;
+        }
+
+        var targetFolder = Path.Combine(Path.GetFullPath(_pluginsDirectory), identity.AssemblyName);
+        var existingEntries = _entries.Values
+            .Where(entry => string.Equals(entry.Key, identity.AssemblyName, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(entry.Info.Id, identity.PluginId, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (existingEntries.Any(IsAwaitingDeletion))
+        {
+            PluginAddFailureMessage.ShowPendingDeletion(owner);
+            return;
+        }
+
+        if (existingEntries.Length > 0 || Directory.Exists(targetFolder))
+        {
+            PluginAlreadyAddedMessage.Show(owner);
+            return;
         }
 
         try
         {
-            if (Activator.CreateInstance(registration.EntryType) is not IStarResonancePlugin plugin)
+            foreach (var file in scan.Files)
             {
-                throw new InvalidOperationException("The plugin entry type could not be instantiated.");
+                var targetPath = Path.Combine(targetFolder, Path.GetRelativePath(scan.Folder, file));
+                Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+                File.Copy(file, targetPath, overwrite: false);
             }
-
-            var logger = new PluginLogger(registration.Info.Id);
-            var settingsStore = new PluginSettingsStore(_pluginsDirectory, logger);
-            var messages = new PluginMessageService();
-            var context = new PluginHostContext(
-                registration.Info.Id,
-                settingsStore,
-                messages,
-                PluginLocalizationService.Instance,
-                logger,
-                PluginGameDataService.Instance);
-
-            plugin.Initialize(context);
-
-            loadedPlugin = new LoadedPlugin(registration, plugin);
-            _loadedPlugins.Add(registration.Info.Id, loadedPlugin);
-            return true;
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
-            WritePluginError(pluginId, "Plugin loading or initialization failed.", exception);
-            loadedPlugin = null!;
-            return false;
+            LogPluginError(identity.AssemblyName, "Failed to copy the plugin files to the plugins folder.", exception);
+            TryDeleteFolder(targetFolder);
+            PluginAddFailureMessage.ShowCannotPlaceFile(owner);
+            return;
+        }
+
+        var addedEntry = ReadPlugin(targetFolder);
+        AddEntry(addedEntry);
+        if (addedEntry.State == PluginState.Loaded)
+        {
+            Initialize(addedEntry);
+        }
+
+        if (addedEntry.State == PluginState.Failed)
+        {
+            PluginLoadFailureMessage.Show(owner, [addedEntry.Info.GetDisplayName(LocalizationManager.Instance.CurrentCulture)]);
+        }
+
+        PluginRegistered?.Invoke(this, addedEntry.Info);
+    }
+
+    /// <summary>
+    /// プラグインの一覧のゴミ箱。確かめてから、フォルダにアンインストールの印を書き、動いていれば止めて、削除を待つ状態にし、通知タブとウィジェットのそのプラグインの設定を消す。
+    /// フォルダは次の起動で消す(<see cref="DiscoverPlugins"/>)。印を書けなければ止めずに、手で消す直し方の窓を出す。
+    /// </summary>
+    public void Uninstall(string pluginKey)
+    {
+        if (!_entries.TryGetValue(pluginKey, out var entry)
+            || IsAwaitingDeletion(entry)
+            || Application.Current?.MainWindow is not { } owner
+            || !PluginUninstallMessage.Confirm(owner, entry.Info.GetDisplayName(LocalizationManager.Instance.CurrentCulture)))
+        {
+            return;
+        }
+
+        try
+        {
+            File.WriteAllText(Path.Combine(entry.Folder, UninstallMarkerFileName), $"{DateTime.Now:O}{Environment.NewLine}");
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log.Error(exception, "[Plugin:{Plugin}] Failed to write the uninstall marker", entry.LogName);
+            PluginDeleteFailureMessage.Show(owner, entry.Key);
+            return;
+        }
+
+        Log.Information("[Plugin:{Plugin}] Uninstalled the plugin; its folder is deleted at the next start", entry.LogName);
+        if (entry.State == PluginState.Running)
+        {
+            Stop(entry, StopCause.Uninstall);
+        }
+        else
+        {
+            entry.State = PluginState.PendingDeletion;
+            RaiseStatusChanged(entry);
+        }
+
+        // 通知タブから項目を外し、ウィジェットの窓を閉じた(止める処理)後に消す。外すときに通知タブは待っている文章を、窓は位置を保存し、先に消すと作り直されるため。
+        ConfigManager.Instance.RemovePluginNotifications(entry.Key);
+        WidgetStateManager.Instance.RemovePluginWidgets(entry.Key);
+    }
+
+    /// <summary>アプリを終えるときに、動いているプラグインを全部終える。</summary>
+    public void ShutdownAll()
+    {
+        foreach (var entry in _entries.Values.Where(entry => entry.State == PluginState.Running).ToArray())
+        {
+            entry.State = PluginState.Stopped;
+            entry.Runtime!.Release();
+            entry.Guard!.TryInvoke("Plugin shutdown", entry.Instance!.Shutdown);
         }
     }
 
-    private static PluginRegistration CreateRegistration(Assembly assembly)
+    /// <summary>
+    /// 画面のスレッドの受け手の無い例外が、プラグインのコードから出たものなら、そのプラグインを止めて true を返す(アプリは続ける)。
+    /// </summary>
+    public bool TryStopForUnhandledException(Exception exception)
     {
+        if (FindPluginOf(exception) is not { } entry)
+        {
+            return false;
+        }
+
+        StopForUnhandledException(entry, exception);
+        return true;
+    }
+
+    /// <summary>
+    /// ほかのスレッドの受け手の無い例外(待たれなかった <see cref="Task"/>)が、プラグインのコードから出たものなら、
+    /// 画面のスレッドでそのプラグインを止めて true を返す(アプリは続ける)。
+    /// </summary>
+    public bool TryStopForUnobservedException(Exception exception)
+    {
+        if (FindPluginOf(exception) is not { } entry)
+        {
+            return false;
+        }
+
+        if (Application.Current?.Dispatcher is { } dispatcher)
+        {
+            dispatcher.BeginInvoke(() => StopForUnhandledException(entry, exception));
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// アプリを終わらせる例外(ほかのスレッドの例外)が、プラグインのコードから出たものなら、そのプラグインのフォルダに印を書く。
+    /// 次の起動からは、印を消すまでそのプラグインを初期化しない。
+    /// </summary>
+    public void MarkTerminatedApp(Exception exception)
+    {
+        if (FindPluginOf(exception) is not { } entry)
+        {
+            return;
+        }
+
+        Log.Error("[Plugin:{Plugin}] The plugin terminated the app; it is not initialized from the next start", entry.LogName);
+        try
+        {
+            File.WriteAllText(
+                Path.Combine(entry.Folder, TerminatedAppMarkerFileName),
+                $"{DateTime.Now:O}{Environment.NewLine}{exception.GetType().FullName}: {exception.Message}{Environment.NewLine}");
+        }
+        catch (Exception markerException) when (markerException is IOException or UnauthorizedAccessException)
+        {
+            Log.Error(markerException, "[Plugin:{Plugin}] Failed to write the terminated-app marker", entry.LogName);
+        }
+    }
+
+    /// <summary>読み込んだプラグインの DLL(確認用の一覧が文言を引くのに使う)。読めていなければ null。</summary>
+    internal Assembly? FindPluginAssembly(string assemblyName)
+    {
+        DiscoverPlugins();
+        return _entries.TryGetValue(assemblyName, out var entry)
+            ? entry.LoadContext?.Assemblies.FirstOrDefault(assembly =>
+                string.Equals(assembly.GetName().Name, assemblyName, StringComparison.OrdinalIgnoreCase))
+            : null;
+    }
+
+    private IReadOnlyList<PluginInfo> GetDiscoveredPlugins()
+    {
+        return _entries.Values
+            .OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => entry.Info)
+            .ToArray();
+    }
+
+    private void AddEntry(PluginEntry entry)
+    {
+        _entries.Add(entry.Key, entry);
+        Volatile.Write(ref _entrySnapshot, _entries.Values.ToArray());
+    }
+
+    /// <summary>プラグインのフォルダを読む。要るファイルが足りない・読めない・属性が足りないときは失敗の状態で返す(一覧には出す)。</summary>
+    private PluginEntry ReadPlugin(string folder)
+    {
+        var entry = new PluginEntry(Path.GetFileName(folder), folder);
+        try
+        {
+            if (!File.Exists(entry.MainAssemblyPath))
+            {
+                Fail(
+                    entry,
+                    PluginErrorReason.MissingFiles,
+                    "The plugin folder has no DLL with the folder's name.",
+                    null,
+                    [Path.GetFileName(entry.MainAssemblyPath)]);
+                return entry;
+            }
+
+            var scan = PluginDependencyScanner.Scan(entry.MainAssemblyPath);
+            if (scan.MissingFiles.Count > 0)
+            {
+                Fail(
+                    entry,
+                    PluginErrorReason.MissingFiles,
+                    $"The plugin is missing files: {string.Join(", ", scan.MissingFiles)}",
+                    null,
+                    scan.MissingFiles);
+                return entry;
+            }
+
+            var loadContext = new PluginLoadContext(entry.MainAssemblyPath, readsFromMemory: false);
+            var assembly = loadContext.LoadPluginAssembly(entry.MainAssemblyPath);
+
+            // WPF の資源の指定(/アセンブリ名;component/...)は、まだ読まれていない部品をこの読み込み先から探せないので、部品を先に読む。
+            foreach (var dependencyPath in scan.ManagedAssemblies.Where(path =>
+                         !string.Equals(path, scan.ManagedAssemblies[0], StringComparison.OrdinalIgnoreCase)))
+            {
+                loadContext.LoadFromAssemblyName(AssemblyName.GetAssemblyName(dependencyPath));
+            }
+
+            var registration = CreateRegistration(assembly, entry.Key);
+            var isDuplicateId = _entries.Values.Any(other =>
+                string.Equals(other.Info.Id, registration.Info.Id, StringComparison.OrdinalIgnoreCase));
+
+            // 同じ ID のときも、どのプラグインかが一覧で分かるように情報は持つ。
+            entry.LoadContext = loadContext;
+            entry.Info = registration.Info;
+            if (isDuplicateId)
+            {
+                Fail(entry, PluginErrorReason.DuplicateId, $"A plugin with id '{registration.Info.Id}' is already registered.", null);
+                return entry;
+            }
+
+            entry.EntryType = registration.EntryType;
+            entry.State = PluginState.Loaded;
+        }
+        catch (Exception exception)
+        {
+            Fail(entry, PluginErrorReason.Invalid, "Plugin DLL registration failed.", exception);
+        }
+
+        return entry;
+    }
+
+    private void Initialize(PluginEntry entry)
+    {
+        InitializeCore(entry);
+        RaiseStatusChanged(entry);
+    }
+
+    private void InitializeCore(PluginEntry entry)
+    {
+        if (File.Exists(Path.Combine(entry.Folder, TerminatedAppMarkerFileName)))
+        {
+            Fail(
+                entry,
+                PluginErrorReason.TerminatedApp,
+                $"The plugin terminated the app in an earlier run; delete {TerminatedAppMarkerFileName} in its folder or reinstall it to load it again.",
+                null);
+            return;
+        }
+
+        entry.State = PluginState.Initializing;
+        var guard = new PluginCallGuard((operation, exception) => OnPluginCallFailed(entry, operation, exception));
+        if (!guard.TryInvoke(
+                "Plugin construction",
+                () => (IStarResonancePlugin)Activator.CreateInstance(entry.EntryType!)!,
+                out var instance))
+        {
+            SetFailure(entry, PluginErrorReason.Stopped, []);
+            return;
+        }
+
+        var pluginId = entry.Info.Id!;
+        var logger = new PluginLogger(pluginId);
+        var runtime = new PluginRuntime(
+            guard,
+            entry.Key,
+            PluginPacketHub.Instance.CreateAccount(() => OnPacketBacklog(entry)));
+        var context = new PluginHostContext(
+            pluginId,
+            new PluginSettingsStore(entry.Folder, logger),
+            new PluginMessageService(),
+            runtime.Localization,
+            logger,
+            runtime.GameData,
+            PluginNameService.Instance,
+            runtime.Packets,
+            runtime.Notifications,
+            runtime.Stopping);
+
+        entry.Instance = instance;
+        entry.Guard = guard;
+        entry.Runtime = runtime;
+        if (!guard.TryInvoke("Plugin initialization", () => instance.Initialize(context)))
+        {
+            StopInitializing(entry, PluginErrorReason.Stopped);
+            return;
+        }
+
+        IReadOnlyList<PluginWidgetDefinition>? widgetDefinitions = null;
+        if (instance is IPluginWidgetProvider widgetProvider && !TryReadWidgets(entry, widgetProvider, out widgetDefinitions))
+        {
+            return;
+        }
+
+        if (instance is IPluginNotificationProvider notificationProvider && !TryRegisterNotifications(entry, notificationProvider))
+        {
+            return;
+        }
+
+        // ウィジェットのカードは動き出した後に足す(カードから窓を開くと中身を作るのにプラグインを呼び、その例外で止められる状態にしておく)。
+        entry.State = PluginState.Running;
+        if (instance is IPluginWidgetProvider provider)
+        {
+            PluginWidgetRegistry.Instance.Register(entry.Info, widgetDefinitions!, guard, provider);
+        }
+    }
+
+    /// <summary>
+    /// 初期化の後にウィジェットの定義を受け取って確かめる。定義を返すときの例外と、決まりに合わない定義では、そのプラグインを止めて false を返す。
+    /// </summary>
+    private static bool TryReadWidgets(
+        PluginEntry entry,
+        IPluginWidgetProvider provider,
+        out IReadOnlyList<PluginWidgetDefinition>? definitions)
+    {
+        definitions = null;
+        if (!entry.Guard!.TryInvoke("Widget definitions", provider.GetWidgetDefinitions, out var returned))
+        {
+            StopInitializing(entry, PluginErrorReason.Stopped);
+            return false;
+        }
+
+        if (!PluginWidgetValidator.TryValidate(returned, out definitions, out var error))
+        {
+            LogPluginError(entry.LogName, $"The widget definitions are invalid: {error}", null);
+            StopInitializing(entry, PluginErrorReason.InvalidWidgets);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// 初期化の後に通知の項目の定義を受け取り、確かめて通知タブへ渡す。定義を返すときの例外と、決まりに合わない定義では、そのプラグインを止めて false を返す。
+    /// </summary>
+    private static bool TryRegisterNotifications(PluginEntry entry, IPluginNotificationProvider provider)
+    {
+        if (!entry.Guard!.TryInvoke("Notification definitions", provider.GetNotificationDefinitions, out var definitions))
+        {
+            StopInitializing(entry, PluginErrorReason.Stopped);
+            return false;
+        }
+
+        if (!PluginNotificationValidator.TryValidate(definitions, out var copies, out var error))
+        {
+            LogPluginError(entry.LogName, $"The notification definitions are invalid: {error}", null);
+            StopInitializing(entry, PluginErrorReason.InvalidNotifications);
+            return false;
+        }
+
+        PluginNotificationRegistry.Instance.Register(entry.Info, copies, entry.Runtime!.Notifications);
+        return true;
+    }
+
+    /// <summary>初期化の途中で失敗した(動き出す前)。理由を付け、渡した口を外して、終わりを呼ぶ。</summary>
+    private static void StopInitializing(PluginEntry entry, PluginErrorReason reason)
+    {
+        SetFailure(entry, reason, []);
+        entry.Runtime!.Release();
+        entry.Guard!.TryInvoke("Plugin shutdown", entry.Instance!.Shutdown);
+    }
+
+    /// <summary>
+    /// 動いているプラグインを止める(その起動の間)。窓を閉じて中身を後始末し、ウィジェットのカードと窓・通知タブの項目を外し(設定は残す)、止める合図を出し、通信の受け手から外し、終わりを呼ぶ。
+    /// 例外と通信の取り残しで止めたときは「停止しました」の窓を出す。アンインストールでは出さず、削除を待つ状態にする。
+    /// 画面のスレッドで呼ぶ。
+    /// </summary>
+    private void Stop(PluginEntry entry, StopCause cause)
+    {
+        if (entry.State != PluginState.Running)
+        {
+            return;
+        }
+
+        if (cause == StopCause.Uninstall)
+        {
+            entry.State = PluginState.PendingDeletion;
+        }
+        else
+        {
+            entry.State = PluginState.Stopped;
+            entry.ErrorReason = cause == StopCause.PacketBacklog ? PluginErrorReason.PacketBacklog : PluginErrorReason.Stopped;
+            Log.Warning("[Plugin:{Plugin}] Stopped the plugin until the app restarts", entry.LogName);
+        }
+
+        PluginWindowManager.Instance.Close(entry.Key);
+        PluginWidgetRegistry.Instance.Unregister(entry.Key);
+        PluginNotificationRegistry.Instance.Unregister(entry.Key);
+        entry.Runtime!.Release();
+        entry.Guard!.TryInvoke("Plugin shutdown", entry.Instance!.Shutdown);
+        RaiseStatusChanged(entry);
+
+        if (cause == StopCause.Uninstall)
+        {
+            return;
+        }
+
+        // 本体の知らせを配っている途中で窓を待たない。
+        var name = entry.Info.GetDisplayName(LocalizationManager.Instance.CurrentCulture);
+        if (Application.Current?.Dispatcher is { HasShutdownStarted: false } dispatcher)
+        {
+            dispatcher.BeginInvoke(() => PluginStoppedMessage.Show(
+                Application.Current?.MainWindow,
+                name,
+                isPacketBacklog: cause == StopCause.PacketBacklog));
+        }
+    }
+
+    private void StopForUnhandledException(PluginEntry entry, Exception exception)
+    {
+        Log.Error(exception, "[Plugin:{Plugin}] Unhandled exception in plugin code", entry.LogName);
+        Stop(entry, StopCause.Exception);
+    }
+
+    /// <summary>本体がプラグインを呼んだ処理の例外(<see cref="PluginCallGuard"/>)。動いていれば止める。</summary>
+    private void OnPluginCallFailed(PluginEntry entry, string operation, Exception exception)
+    {
+        Log.Error(exception, "[Plugin:{Plugin}] {Operation} failed", entry.LogName, operation);
+        Stop(entry, StopCause.Exception);
+    }
+
+    /// <summary>取り残しが上限を越えた(パケット処理のスレッド)。すぐに受け取りをやめて溜まった分を捨て、画面のスレッドで止める。</summary>
+    private void OnPacketBacklog(PluginEntry entry)
+    {
+        Log.Error(
+            "[Plugin:{Plugin}] The plugin did not read game messages; unread messages exceeded {Limit} bytes",
+            entry.LogName,
+            PluginPacketHub.MaxPendingBytesPerPlugin);
+        entry.Runtime?.Packets.Close();
+        Application.Current?.Dispatcher.BeginInvoke(() => Stop(entry, StopCause.PacketBacklog));
+    }
+
+    private static void DisposeContent(PluginEntry entry, FrameworkElement content)
+    {
+        if (content is IDisposable disposableContent)
+        {
+            entry.Guard!.TryInvoke("Window content disposal", disposableContent.Dispose);
+        }
+    }
+
+    /// <summary>例外の経路(内側の例外を含む)にプラグインの読み込み先の関数があれば、そのプラグイン。</summary>
+    private PluginEntry? FindPluginOf(Exception exception)
+    {
+        var entries = Volatile.Read(ref _entrySnapshot);
+        if (entries.Length == 0)
+        {
+            return null;
+        }
+
+        foreach (var current in EnumerateExceptions(exception))
+        {
+            foreach (var frame in new StackTrace(current, fNeedFileInfo: false).GetFrames())
+            {
+                if (frame.GetMethod()?.Module.Assembly is not { } assembly
+                    || AssemblyLoadContext.GetLoadContext(assembly) is not PluginLoadContext loadContext)
+                {
+                    continue;
+                }
+
+                if (entries.FirstOrDefault(entry => ReferenceEquals(entry.LoadContext, loadContext)) is { } owner)
+                {
+                    return owner;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<Exception> EnumerateExceptions(Exception exception)
+    {
+        yield return exception;
+        if (exception is AggregateException aggregate)
+        {
+            foreach (var inner in aggregate.InnerExceptions.SelectMany(EnumerateExceptions))
+            {
+                yield return inner;
+            }
+        }
+        else if (exception.InnerException is { } innerException)
+        {
+            foreach (var inner in EnumerateExceptions(innerException))
+            {
+                yield return inner;
+            }
+        }
+    }
+
+    /// <summary>
+    /// DLLが起動時と同じ確かめ(<see cref="CreateRegistration"/>)を通るプラグインかを見て、IDとアセンブリ名を返す。通らなければnull。
+    /// ファイルを掴まないよう、中身をメモリから捨てられる読み込み先に読み(部品も選んだDLLのフォルダから)、見終わったら捨てる。
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static PluginIdentity? ReadPluginIdentity(string assemblyPath)
+    {
+        var loadContext = new PluginLoadContext(assemblyPath, readsFromMemory: true);
+        try
+        {
+            var assembly = loadContext.LoadPluginAssembly(assemblyPath);
+            var registration = CreateRegistration(assembly, Path.GetFileNameWithoutExtension(assemblyPath));
+            return new PluginIdentity(registration.Info.Id!, registration.Info.Key);
+        }
+        catch (Exception exception)
+        {
+            LogPluginError(Path.GetFileNameWithoutExtension(assemblyPath), "The selected file is not a supported plugin DLL.", exception);
+            return null;
+        }
+        finally
+        {
+            loadContext.Unload();
+        }
+    }
+
+    /// <param name="fileName">入口の DLL のファイル名(拡張子なし)。アセンブリ名と同じでなければならない(フォルダの名前と WPF の資源の指定に使う)。</param>
+    private static PluginRegistration CreateRegistration(Assembly assembly, string fileName)
+    {
+        var assemblyName = assembly.GetName().Name ?? string.Empty;
+        if (!string.Equals(assemblyName, fileName, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException($"The plugin DLL file name '{fileName}' must match its assembly name '{assemblyName}'.");
+        }
+
+        if (PluginDependencyScanner.IsHostAssemblyName(assemblyName))
+        {
+            throw new InvalidOperationException($"The plugin assembly name '{assemblyName}' is used by the app.");
+        }
+
         var registrationAttribute = assembly.GetCustomAttribute<PluginRegistrationAttribute>()
             ?? throw new InvalidOperationException("The plugin registration attribute is missing.");
 
         var pluginId = registrationAttribute.Id?.Trim() ?? string.Empty;
-        if (!IsValidPluginId(pluginId))
+        if (!PluginIdRules.IsValid(pluginId))
         {
             throw new InvalidOperationException("Plugin id is missing or contains unsupported characters.");
         }
@@ -226,53 +833,255 @@ public sealed class PluginManager
             throw new InvalidOperationException("The plugin entry type must have a public parameterless constructor.");
         }
 
-        var displayNames = ReadDisplayNames(assembly);
-        var info = new PluginInfo(pluginId, displayNames);
-        return new PluginRegistration(info, entryType);
-    }
-
-    private static IReadOnlyDictionary<string, string> ReadDisplayNames(Assembly assembly)
-    {
-        var displayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var displayNameAttribute in assembly.GetCustomAttributes<PluginDisplayNameAttribute>())
-        {
-            var cultureName = displayNameAttribute.CultureName?.Trim() ?? string.Empty;
-            var displayName = displayNameAttribute.DisplayName?.Trim() ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(cultureName) || string.IsNullOrWhiteSpace(displayName))
-            {
-                continue;
-            }
-
-            if (!displayNames.TryAdd(cultureName, displayName))
-            {
-                throw new InvalidOperationException($"The plugin contains duplicate display names for culture '{cultureName}'.");
-            }
-        }
-
+        var displayNames = ReadLocalizedTexts(
+            assembly.GetCustomAttributes<PluginDisplayNameAttribute>().Select(attribute => (attribute.CultureName, attribute.DisplayName)),
+            "display name");
         if (displayNames.Count == 0)
         {
             throw new InvalidOperationException("At least one localized plugin display name is required.");
         }
 
-        return new ReadOnlyDictionary<string, string>(displayNames);
+        var author = assembly.GetCustomAttribute<PluginAuthorAttribute>()?.Author.Trim();
+        if (string.IsNullOrEmpty(author))
+        {
+            throw new InvalidOperationException("The plugin author attribute is missing or empty.");
+        }
+
+        var version = assembly.GetCustomAttribute<PluginVersionAttribute>()?.Version.Trim();
+        if (!PluginVersionRules.IsValid(version))
+        {
+            throw new InvalidOperationException("The plugin version attribute is missing or is not three numbers separated by dots.");
+        }
+
+        var hasWindow = typeof(IPluginWindowProvider).IsAssignableFrom(entryType);
+        IReadOnlyDictionary<string, string>? genres = null;
+        if (hasWindow)
+        {
+            genres = ReadLocalizedTexts(
+                assembly.GetCustomAttributes<PluginGenreAttribute>().Select(attribute => (attribute.CultureName, attribute.Genre)),
+                "genre");
+            if (genres.Count == 0)
+            {
+                throw new InvalidOperationException("A plugin with a window requires at least one localized genre.");
+            }
+        }
+
+        var iconPath = assembly.GetCustomAttribute<PluginIconAttribute>()?.ResourcePath.Trim();
+        var info = new PluginInfo(
+            assemblyName,
+            pluginId,
+            displayNames,
+            genres,
+            author,
+            version,
+            string.IsNullOrEmpty(iconPath) ? null : iconPath,
+            hasWindow,
+            hasWidgets: typeof(IPluginWidgetProvider).IsAssignableFrom(entryType),
+            hasNotifications: typeof(IPluginNotificationProvider).IsAssignableFrom(entryType));
+        return new PluginRegistration(info, entryType);
     }
 
-    private static bool IsValidPluginId(string pluginId)
+    private static IReadOnlyDictionary<string, string> ReadLocalizedTexts(
+        IEnumerable<(string CultureName, string Text)> attributes,
+        string description)
     {
-        return !string.IsNullOrWhiteSpace(pluginId)
-            && pluginId.Length <= 128
-            && pluginId.All(character => char.IsAsciiLetterOrDigit(character)
-                || character is '.' or '-' or '_');
+        return PluginTexts.TryCopy(attributes.Select(attribute => KeyValuePair.Create(attribute.CultureName, attribute.Text)))
+            ?? throw new InvalidOperationException($"The plugin contains duplicate {description}s for one culture.");
     }
 
-    private static void WritePluginError(string pluginId, string message, Exception? exception)
+    private static void Fail(
+        PluginEntry entry,
+        PluginErrorReason reason,
+        string message,
+        Exception? exception,
+        IReadOnlyList<string>? missingFiles = null)
     {
-        Log.Error(exception, "[Plugin:{PluginId}] {Message}", pluginId, message);
+        SetFailure(entry, reason, missingFiles ?? []);
+        LogPluginError(entry.LogName, message, exception);
+    }
+
+    private static void SetFailure(PluginEntry entry, PluginErrorReason reason, IReadOnlyList<string> missingFiles)
+    {
+        entry.State = PluginState.Failed;
+        entry.ErrorReason = reason;
+        entry.MissingFiles = missingFiles;
+    }
+
+    /// <summary>アンインストールした(削除を待っている、または削除できず次の起動でまた消す)。</summary>
+    private static bool IsAwaitingDeletion(PluginEntry entry)
+    {
+        return entry.State == PluginState.PendingDeletion || entry.ErrorReason == PluginErrorReason.DeletionFailed;
+    }
+
+    private void RaiseStatusChanged(PluginEntry entry)
+    {
+        PluginStatusChanged?.Invoke(this, entry.Key);
+    }
+
+    /// <summary>
+    /// アンインストールの印のあるフォルダを消す。印は最後に消す(途中で失敗しても印が残り、次の起動でまた消せる)。
+    /// </summary>
+    private static bool TryDeleteUninstalledFolder(string folder)
+    {
+        var markerPath = Path.Combine(folder, UninstallMarkerFileName);
+        try
+        {
+            foreach (var directory in Directory.GetDirectories(folder))
+            {
+                Directory.Delete(directory, recursive: true);
+            }
+
+            foreach (var file in Directory.GetFiles(folder)
+                         .Where(path => !string.Equals(Path.GetFileName(path), UninstallMarkerFileName, StringComparison.OrdinalIgnoreCase)))
+            {
+                File.Delete(file);
+            }
+
+            File.Delete(markerPath);
+            Directory.Delete(folder);
+            Log.Information("Deleted the uninstalled plugin folder: {Folder}", folder);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log.Error(exception, "Failed to delete the uninstalled plugin folder; it is deleted again at the next start: {Folder}", folder);
+            return false;
+        }
+    }
+
+    private static void LogPluginError(string pluginName, string message, Exception? exception)
+    {
+        Log.Error(exception, "[Plugin:{Plugin}] {Message}", pluginName, message);
+    }
+
+    private static void TryDeleteFolder(string folder)
+    {
+        try
+        {
+            if (Directory.Exists(folder))
+            {
+                Directory.Delete(folder, recursive: true);
+            }
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log.Error(exception, "Failed to delete the partially copied plugin folder: {Folder}", folder);
+        }
+    }
+
+    private enum PluginState
+    {
+        /// <summary>読めた。まだ初期化していない。</summary>
+        Loaded,
+
+        Initializing,
+
+        Running,
+
+        /// <summary>読めない・初期化できない。初期化はしない。</summary>
+        Failed,
+
+        /// <summary>この起動の間は止めた(例外・取り残し・アプリの終わり)。次の起動でまた読む。</summary>
+        Stopped,
+
+        /// <summary>アンインストールした。次の起動で、読む前にフォルダを消す。</summary>
+        PendingDeletion,
+    }
+
+    private enum StopCause
+    {
+        Exception,
+
+        PacketBacklog,
+
+        Uninstall,
+    }
+
+    private sealed class PluginEntry
+    {
+        public PluginEntry(string key, string folder)
+        {
+            Key = key;
+            Folder = folder;
+            Info = new PluginInfo(
+                key,
+                id: null,
+                displayNames: null,
+                genres: null,
+                author: null,
+                version: null,
+                iconPath: null,
+                hasWindow: false,
+                hasWidgets: false,
+                hasNotifications: false);
+        }
+
+        public string Key { get; }
+
+        public string Folder { get; }
+
+        public string MainAssemblyPath => Path.Combine(Folder, Key + ".dll");
+
+        public PluginInfo Info { get; set; }
+
+        public string LogName => Info.Id ?? Key;
+
+        public PluginState State { get; set; } = PluginState.Failed;
+
+        /// <summary>失敗した・止めた理由。<see cref="PluginState.Failed"/> と <see cref="PluginState.Stopped"/> のときに値がある。</summary>
+        public PluginErrorReason? ErrorReason { get; set; }
+
+        /// <summary><see cref="PluginErrorReason.MissingFiles"/> のときの、足りないファイルの名前。</summary>
+        public IReadOnlyList<string> MissingFiles { get; set; } = [];
+
+        public PluginLoadContext? LoadContext { get; set; }
+
+        public Type? EntryType { get; set; }
+
+        public IStarResonancePlugin? Instance { get; set; }
+
+        public PluginCallGuard? Guard { get; set; }
+
+        public PluginRuntime? Runtime { get; set; }
+    }
+
+    /// <summary>プラグイン1つに渡した、本体の知らせを受ける口と通信の受け取りと通知の口と止める合図。止める・終えるときにまとめて外す。</summary>
+    private sealed class PluginRuntime
+    {
+        private readonly PluginCallGuard _guard;
+        private readonly CancellationTokenSource _stopping = new();
+
+        public PluginRuntime(PluginCallGuard guard, string pluginKey, PluginPacketHub.Account packets)
+        {
+            _guard = guard;
+            Packets = packets;
+            Localization = new PluginLocalizationService(guard);
+            GameData = new PluginGameDataService(guard, PluginGameDataSource.Instance);
+            Notifications = new PluginNotificationService(guard, pluginKey);
+        }
+
+        public PluginLocalizationService Localization { get; }
+
+        public PluginGameDataService GameData { get; }
+
+        public PluginPacketHub.Account Packets { get; }
+
+        public PluginNotificationService Notifications { get; }
+
+        public CancellationToken Stopping => _stopping.Token;
+
+        public void Release()
+        {
+            // 取り消しはプラグインが登録した処理をその場で呼ぶ。
+            _guard.TryInvoke("Stopping notification", _stopping.Cancel);
+            Packets.Close();
+            Localization.Detach();
+            GameData.Detach();
+            Notifications.Detach();
+        }
     }
 
     private sealed record PluginRegistration(PluginInfo Info, Type EntryType);
 
-    private sealed record LoadedPlugin(PluginRegistration Registration, IStarResonancePlugin Instance);
+    private sealed record PluginIdentity(string PluginId, string AssemblyName);
 }

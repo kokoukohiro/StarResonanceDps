@@ -4,16 +4,26 @@ using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.Services;
+using StarResonanceDps.App.ViewModels.Plugins;
+using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.ViewModels.Notifications;
 
 /// <summary>
 /// 通知タブの1項目。一覧の行(名前・スイッチ)と、選んだときに右に出す文章と設定(項目だけの設定・出し方・音量・声)を持つ。
 /// 値が変わったら <see cref="Changed"/>(文章は <see cref="TextChanged"/>)で通知タブへ知らせ、通知タブが保存する。
+///
+/// <para>
+/// 本体の項目(<see cref="Kind"/>)とプラグインの項目(<see cref="PluginItemKey"/>)がある。プラグインの項目は、項目だけの設定の代わりに
+/// プラグインが定義した設定(<see cref="PluginSettings"/>)を持ち、プラグインの最初の項目の上にプラグインの名前の見出し(<see cref="GroupHeader"/>)を出す。
+/// </para>
 /// </summary>
 public sealed partial class NotificationItemViewModel : ObservableObject
 {
-    private readonly string _labelResourceKey;
+    private readonly string? _labelResourceKey;
+    private readonly PluginNotificationGroup? _pluginGroup;
+    private readonly PluginNotificationDefinition? _pluginDefinition;
+    private readonly bool _isFirstInPluginGroup;
     private bool _isLoading;
 
     // 選んである VOICEVOX の話者(保存する値)。選択肢を作り直すときに選択リストが null を書き戻しても、ここは変えない。
@@ -36,6 +46,11 @@ public sealed partial class NotificationItemViewModel : ObservableObject
 
     [ObservableProperty]
     private string _label = string.Empty;
+
+    /// <summary>行の上の見出し(プラグインの名前)。プラグインの最初の項目だけで、ほかは空。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasGroupHeader))]
+    private string _groupHeader = string.Empty;
 
     /// <summary>一覧で選んでいる行か。選んだ行の文章と設定が右に出る。</summary>
     [ObservableProperty]
@@ -106,18 +121,42 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     [ObservableProperty]
     private VoicevoxStyleOption? _selectedVoicevoxStyle;
 
+    /// <summary>本体の項目。</summary>
     public NotificationItemViewModel(
         NotificationKind kind,
         string labelResourceKey,
         (string Key, string LabelResourceKey, string Placeholder)[] fieldDefinitions)
+        : this(new HostNotificationTextSource(kind, fieldDefinitions), [])
     {
         Kind = kind;
         _labelResourceKey = labelResourceKey;
-        Text = new NotificationTextViewModel(kind, fieldDefinitions);
+        RefreshLabel();
+    }
+
+    /// <summary>プラグインの項目。<paramref name="isFirstInGroup"/> ならプラグインの名前の見出しを出す。</summary>
+    internal NotificationItemViewModel(PluginNotificationGroup group, PluginNotificationDefinition definition, bool isFirstInGroup)
+        : this(new PluginNotificationTextSource(definition), [.. definition.Settings.Select(PluginSettingViewModel.Create)])
+    {
+        _pluginGroup = group;
+        _pluginDefinition = definition;
+        _isFirstInPluginGroup = isFirstInGroup;
+        PluginItemKey = NotificationsConfig.GetPluginItemKey(group.PluginKey, definition.Id);
+        RefreshLabel();
+    }
+
+    private NotificationItemViewModel(INotificationTextSource textSource, IReadOnlyList<PluginSettingViewModel> pluginSettings)
+    {
+        Text = new NotificationTextViewModel(textSource);
         Text.Changed += Text_Changed;
+        PluginSettings = pluginSettings;
+        foreach (var setting in pluginSettings)
+        {
+            setting.Changed += PluginSetting_Changed;
+            setting.TextChanged += PluginSetting_TextChanged;
+        }
+
         VoicevoxSpeakerOptions = new ReadOnlyObservableCollection<VoicevoxSpeakerOption>(_voicevoxSpeakerOptions);
         VoicevoxStyleOptions = new ReadOnlyObservableCollection<VoicevoxStyleOption>(_voicevoxStyleOptions);
-        Label = LocalizationManager.Instance.GetString(_labelResourceKey);
     }
 
     /// <summary>スイッチ・出し方・音量・声・項目だけの設定が変わった。読み込みでは上げない。</summary>
@@ -134,7 +173,19 @@ public sealed partial class NotificationItemViewModel : ObservableObject
     /// </summary>
     public event EventHandler? SpeechVoiceCheckRequested;
 
-    public NotificationKind Kind { get; }
+    /// <summary>本体の項目の種類。プラグインの項目は null。</summary>
+    public NotificationKind? Kind { get; }
+
+    /// <summary>プラグインの項目の保存の鍵(<see cref="NotificationsConfig.GetPluginItemKey"/>)。本体の項目は null。</summary>
+    public string? PluginItemKey { get; }
+
+    /// <summary>プラグインの項目の、どのプラグインの項目か。本体の項目は null。</summary>
+    public string? PluginKey => _pluginGroup?.PluginKey;
+
+    public bool HasGroupHeader => GroupHeader.Length > 0;
+
+    /// <summary>プラグインが定義した設定の行(右下の、出し方の上)。本体の項目は空。</summary>
+    public IReadOnlyList<PluginSettingViewModel> PluginSettings { get; }
 
     public NotificationTextViewModel Text { get; }
 
@@ -232,6 +283,34 @@ public sealed partial class NotificationItemViewModel : ObservableObject
         }
     }
 
+    /// <summary>プラグインの項目の保存した値を読む。保存したことが無ければ null(全部既定)。</summary>
+    public void LoadPlugin(PluginNotificationItemConfig? config)
+    {
+        Load(config?.Item ?? AppConfigDefaults.CreateNotificationItem());
+        foreach (var setting in PluginSettings)
+        {
+            string? saved = null;
+            config?.Settings.TryGetValue(setting.Definition.Id, out saved);
+            setting.Load(saved);
+        }
+    }
+
+    /// <summary>プラグインの項目の保存する値。</summary>
+    public PluginNotificationItemConfig CreatePluginConfig()
+    {
+        var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var setting in PluginSettings)
+        {
+            settings[setting.Definition.Id] = setting.CreateSavedValue();
+        }
+
+        return new PluginNotificationItemConfig
+        {
+            Item = CreateConfig(),
+            Settings = settings
+        };
+    }
+
     public NotificationItemConfig CreateConfig()
     {
         return new NotificationItemConfig
@@ -288,13 +367,46 @@ public sealed partial class NotificationItemViewModel : ObservableObject
 
     public void RefreshLocalizedText()
     {
-        Label = LocalizationManager.Instance.GetString(_labelResourceKey);
+        RefreshLabel();
         Text.RefreshLocalizedText();
+        foreach (var setting in PluginSettings)
+        {
+            setting.RefreshLocalizedText();
+        }
+
         RebuildVoicevoxOptions();
         OnPropertyChanged(nameof(VoicevoxPolicyLinkText));
     }
 
+    /// <summary>行の名前と見出し。本体の項目は文言の鍵、プラグインの項目は定義の名前とプラグインの名前。</summary>
+    private void RefreshLabel()
+    {
+        var culture = LocalizationManager.Instance.CurrentCulture;
+        if (_pluginDefinition is null)
+        {
+            Label = LocalizationManager.Instance.GetString(_labelResourceKey!);
+            return;
+        }
+
+        Label = PluginTexts.Resolve(_pluginDefinition.Names, culture)
+            ?? throw new InvalidOperationException($"The validated notification '{_pluginDefinition.Id}' has no name.");
+        GroupHeader = _isFirstInPluginGroup ? _pluginGroup!.Info.GetDisplayName(culture) : string.Empty;
+    }
+
     private void Text_Changed(object? sender, EventArgs e)
+    {
+        if (!_isLoading)
+        {
+            TextChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private void PluginSetting_Changed(object? sender, EventArgs e)
+    {
+        RaiseChanged();
+    }
+
+    private void PluginSetting_TextChanged(object? sender, EventArgs e)
     {
         if (!_isLoading)
         {

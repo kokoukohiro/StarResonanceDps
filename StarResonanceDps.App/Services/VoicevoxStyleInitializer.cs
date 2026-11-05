@@ -201,10 +201,10 @@ public static class VoicevoxStyleInitializer
         }
     }
 
-    /// <summary>オンで、読み上げ方法が VOICEVOX の項目が選んでいるスタイル(重なりなし)。</summary>
+    /// <summary>オンで、読み上げ方法が VOICEVOX の項目(プラグインの項目も)が選んでいるスタイル(重なりなし)。</summary>
     private static IEnumerable<int> GetSelectedStyleIds()
     {
-        return ConfigManager.Instance.GetNotificationsSnapshot().Items.Values
+        return ConfigManager.Instance.GetNotificationsSnapshot().AllItems
             .Where(item => item.IsEnabled && item.UsesVoicevox && item.VoicevoxStyleId is not null)
             .Select(item => item.VoicevoxStyleId!.Value)
             .Distinct();

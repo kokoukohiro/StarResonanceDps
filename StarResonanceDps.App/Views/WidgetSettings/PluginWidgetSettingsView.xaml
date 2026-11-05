@@ -1,0 +1,248 @@
+<UserControl x:Class="StarResonanceDps.App.Views.WidgetSettings.PluginWidgetSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:localization="clr-namespace:StarResonanceDps.App.Localization"
+             xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
+             xmlns:plugins="clr-namespace:StarResonanceDps.App.ViewModels.Plugins"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!--
+        プラグインのウィジェットの設定の節(プラグインが定義した節と行)。節の見出しと枠、行の作りはほかの表示設定の節と同じ。
+        数の欄は全体設定の計測時間の欄と同じく、Enter・欄を離れたときに確定する(PluginWidgetSettingsView.xaml.cs)。
+    -->
+    <UserControl.Resources>
+        <!-- 最後の行は下の線を引かない(節の枠が閉じる)。注意書きのある行は2行分の高さ。 -->
+        <Style x:Key="PluginWidgetSettings.Field"
+               TargetType="{x:Type Border}"
+               BasedOn="{StaticResource Panel.SettingField}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLast}" Value="True">
+                    <Setter Property="BorderThickness" Value="0" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding HasNote}" Value="True">
+                    <Setter Property="Height" Value="75" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PluginWidgetSettings.Label" TargetType="{x:Type TextBlock}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextPrimary}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="PluginWidgetSettings.Note" TargetType="{x:Type TextBlock}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextSecondary}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!-- 行の名前と、その下の注意書き。 -->
+        <DataTemplate x:Key="PluginWidgetSettings.LabelTemplate">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource PluginWidgetSettings.Label}" Text="{Binding Label}" />
+                <TextBlock Style="{StaticResource PluginWidgetSettings.Note}"
+                           Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           Text="{Binding Note}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginSwitchSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                        <ToggleButton Style="{StaticResource Input.Switch}"
+                                      IsChecked="{Binding IsOn, Mode=TwoWay}" />
+                        <TextBlock Margin="8,0,0,0"
+                                   VerticalAlignment="Center"
+                                   MinWidth="28"
+                                   Text="{Binding StateText}"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginChoiceSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <!-- DisplayMemberPath は効かないので ItemTemplate。 -->
+                    <ComboBox Grid.Column="1"
+                              VerticalAlignment="Center"
+                              Style="{StaticResource Input.SettingsComboBox}"
+                              ItemsSource="{Binding Options}"
+                              SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginNumberSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <!-- 幅は全体設定の計測時間の欄と同じ 88。 -->
+                    <TextBox Grid.Column="1"
+                             Width="88"
+                             Height="32"
+                             VerticalAlignment="Center"
+                             VerticalContentAlignment="Center"
+                             Style="{StaticResource Input.PathBox}"
+                             AllowDrop="False"
+                             InputMethod.IsInputMethodEnabled="False"
+                             behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
+                             Loaded="NumberTextBox_Loaded"
+                             PreviewKeyDown="NumberTextBox_PreviewKeyDown"
+                             LostKeyboardFocus="NumberTextBox_LostKeyboardFocus" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginTextSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <!-- 幅は選択リストと同じ 220。 -->
+                    <TextBox Grid.Column="1"
+                             Width="220"
+                             Height="32"
+                             VerticalAlignment="Center"
+                             VerticalContentAlignment="Center"
+                             Style="{StaticResource Input.PathBox}"
+                             Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginSliderSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="260" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <!-- 範囲と刻みを値より先に置く(値が範囲で切られないように)。 -->
+                    <Grid Grid.Column="2" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="Auto" MinWidth="35" />
+                        </Grid.ColumnDefinitions>
+                        <Slider Grid.Column="0"
+                                Minimum="{Binding Minimum, Mode=OneTime}"
+                                Maximum="{Binding Maximum, Mode=OneTime}"
+                                TickFrequency="{Binding Step, Mode=OneTime}"
+                                IsSnapToTickEnabled="True"
+                                Style="{StaticResource Input.ValueSlider}"
+                                Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Grid.Column="2"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource Brush.TextPrimary}"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding Value, StringFormat={}{0:0.####}}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type plugins:PluginColorSettingViewModel}">
+            <Border Style="{StaticResource PluginWidgetSettings.Field}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PluginWidgetSettings.LabelTemplate}" />
+
+                    <!-- テーマのウィンドウの色と同じ形(色の枠と「色を選択」)。 -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <ItemsControl ItemsSource="{Binding Colors.Colors}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <RadioButton GroupName="{Binding DataContext.ColorGroupName, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                 Background="{Binding Brush}"
+                                                 Style="{StaticResource Button.ColorSwatchRadioButton}"
+                                                 IsChecked="{Binding IsSelected, Mode=OneWay}"
+                                                 Click="ColorOptionRadioButton_Click" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_SelectColor]}"
+                                Style="{StaticResource Button.Text}"
+                                Click="ColorPickerButton_Click" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <ItemsControl x:Name="SectionsHost" ItemsSource="{Binding Sections}">
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}"
+                               Foreground="{DynamicResource Brush.TextPrimary}"
+                               FontSize="16"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,10" />
+                    <ContentControl Style="{StaticResource Panel.SettingSection}" Margin="0,0,0,12">
+                        <ItemsControl ItemsSource="{Binding Rows}" />
+                    </ContentControl>
+                </StackPanel>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

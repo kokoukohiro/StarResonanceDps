@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -143,13 +144,23 @@ public sealed partial class MainViewModel : ViewModelBase
         Widgets.IsLiveSorting = true;
         ApplyWidgetSort();
 
+        // プラグインのウィジェットは、プラグインを初期化したとき(起動の処理と「＋」)に足し、止めたときに外す。
+        foreach (var group in PluginWidgetRegistry.Instance.Groups)
+        {
+            PluginWidgetRegistry_GroupAdded(this, group);
+        }
+
+        PluginWidgetRegistry.Instance.GroupAdded += PluginWidgetRegistry_GroupAdded;
+        PluginWidgetRegistry.Instance.GroupRemoved += PluginWidgetRegistry_GroupRemoved;
+
         foreach (var manifest in _pluginManager.DiscoverPlugins())
         {
             AddPluginItem(manifest);
         }
 
-        AddPluginAddItem();
         PluginItems = new ReadOnlyObservableCollection<PluginListItemViewModel>(_pluginItems);
+        _pluginManager.PluginRegistered += PluginManager_PluginRegistered;
+        _pluginManager.PluginStatusChanged += PluginManager_PluginStatusChanged;
 
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
         _hotkeyService.Pressed += HotkeyService_Pressed;
@@ -180,46 +191,113 @@ public sealed partial class MainViewModel : ViewModelBase
 
     private void AddPluginItem(PluginInfo pluginInfo)
     {
+        _pluginItems.Add(CreatePluginItem(pluginInfo, _pluginItems.Count));
+    }
+
+    // 「＋ プラグインを追加」から足したプラグイン。起動時の一覧と同じくフォルダの名前の順の位置に入れ、窓をずらす番号を振り直す。
+    private void PluginManager_PluginRegistered(object? sender, PluginInfo pluginInfo)
+    {
+        var index = 0;
+        while (index < _pluginItems.Count
+               && StringComparer.OrdinalIgnoreCase.Compare(_pluginItems[index].PluginKey, pluginInfo.Key) < 0)
+        {
+            index++;
+        }
+
+        _pluginItems.Insert(index, CreatePluginItem(pluginInfo, index));
+        for (var i = 0; i < _pluginItems.Count; i++)
+        {
+            _pluginItems[i].OriginalIndex = i;
+        }
+    }
+
+    private void PluginManager_PluginStatusChanged(object? sender, string pluginKey)
+    {
+        _pluginItems
+            .FirstOrDefault(plugin => string.Equals(plugin.PluginKey, pluginKey, StringComparison.OrdinalIgnoreCase))
+            ?.RefreshStatus();
+    }
+
+    private static PluginListItemViewModel CreatePluginItem(PluginInfo pluginInfo, int originalIndex)
+    {
         var plugin = new PluginListItemViewModel
         {
-            PluginId = pluginInfo.Id,
-            OriginalIndex = _pluginItems.Count,
-            DisplayNames = new Dictionary<string, string>(pluginInfo.DisplayNames, StringComparer.OrdinalIgnoreCase)
+            Info = pluginInfo,
+            Icon = PluginIconLoader.Load(pluginInfo),
+            OriginalIndex = originalIndex
         };
 
         plugin.RefreshLocalizedText();
-        _pluginItems.Add(plugin);
+        plugin.RefreshStatus();
+        return plugin;
     }
 
-    private void AddPluginAddItem()
+    [RelayCommand]
+    private void AddPlugin()
     {
-        _pluginItems.Add(new PluginListItemViewModel
-        {
-            OriginalIndex = _pluginItems.Count,
-            IsAddItem = true
-        });
+        _pluginManager.AddFromFile();
     }
 
     private WidgetListItemViewModel AddWidget(WidgetKind kind, string displayNameResourceKey)
     {
-        var widget = new WidgetListItemViewModel
+        return AddWidget(new WidgetListItemViewModel
         {
             Kind = kind,
             DisplayNameResourceKey = displayNameResourceKey,
             State = WidgetState.Stopped,
             OriginalIndex = _widgetItems.Count
-        };
+        });
+    }
+
+    /// <summary>動き出したプラグインのウィジェットのカードを、本体のカードの後ろに足す(並びの番号は足した順)。</summary>
+    private void PluginWidgetRegistry_GroupAdded(object? sender, PluginWidgetGroup group)
+    {
+        foreach (var registration in group.Widgets)
+        {
+            AddWidget(new WidgetListItemViewModel
+            {
+                Kind = WidgetKind.Plugin,
+                PluginWidget = registration,
+                State = WidgetState.Stopped,
+                OriginalIndex = _widgetItems.Count
+            });
+        }
+    }
+
+    /// <summary>
+    /// 止めたプラグインのウィジェットのカードを外す。開いている窓は保存した状態(起動中)を変えずに閉じ、次の起動で開き直す。
+    /// </summary>
+    private void PluginWidgetRegistry_GroupRemoved(object? sender, PluginWidgetGroup group)
+    {
+        foreach (var widget in _widgetItems.Where(widget => widget.PluginWidget is { } registration && group.Widgets.Contains(registration)).ToArray())
+        {
+            _widgetWindowManager.CloseKeepingState(widget);
+            widget.PropertyChanged -= OnWidgetPropertyChanged;
+            widget.BuffListHiddenBuffsChanged -= Widget_BuffListHiddenBuffsChanged;
+            widget.EntityInfoHiddenBuffsChanged -= Widget_EntityInfoHiddenBuffsChanged;
+            widget.BuffListPriorityBuffChangedFromWidget -= Widget_BuffListPriorityBuffChangedFromWidget;
+            widget.EntityInfoPriorityBuffChangedFromWidget -= Widget_EntityInfoPriorityBuffChangedFromWidget;
+            widget.BuffDebuffGroupEntryChangedFromWidget -= Widget_BuffDebuffGroupEntryChangedFromWidget;
+            widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
+            widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
+            widget.BuffDebuffGroupNotificationTargetChangedFromWidget -= Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
+            _widgetItems.Remove(widget);
+        }
+    }
+
+    private WidgetListItemViewModel AddWidget(WidgetListItemViewModel widget)
+    {
         widget.RefreshLocalizedText();
 
         _isLoadingWidgets = true;
         try
         {
-            var persistedConfig = _widgetStateManager.GetWidgetSnapshot(kind);
+            var persistedConfig = _widgetStateManager.GetWidgetSnapshot(widget.Key);
             widget.ApplyWidgetConfig(persistedConfig);
 
             if (persistedConfig.State is null)
             {
-                _widgetStateManager.SaveWidgetState(kind, widget.State);
+                _widgetStateManager.SaveWidgetState(widget.Key, widget.State);
             }
         }
         finally
@@ -792,7 +870,7 @@ public sealed partial class MainViewModel : ViewModelBase
             or nameof(WidgetListItemViewModel.IsPinned)
             or nameof(WidgetListItemViewModel.IsClickThrough))
         {
-            _widgetStateManager.SaveWidgetFlags(widget.Kind, widget.IsFavorite, widget.IsPinned, widget.IsClickThrough);
+            _widgetStateManager.SaveWidgetFlags(widget.Key, widget.IsFavorite, widget.IsPinned, widget.IsClickThrough);
 
             if (e.PropertyName == nameof(WidgetListItemViewModel.IsPinned))
             {
@@ -804,7 +882,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         if (e.PropertyName == nameof(WidgetListItemViewModel.State))
         {
-            _widgetStateManager.SaveWidgetState(widget.Kind, widget.State);
+            _widgetStateManager.SaveWidgetState(widget.Key, widget.State);
             _widgetWindowManager.ApplyWidgetState(widget);
         }
 

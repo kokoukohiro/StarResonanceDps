@@ -3,12 +3,14 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.ViewModels.WidgetSettings;
 using StarResonanceDps.App.Services;
 
 namespace StarResonanceDps.App.Views;
@@ -39,8 +41,9 @@ public partial class WidgetSettingsWindow : Window
         _widget = widget;
 
         InitializeComponent();
-        _viewModel = new WidgetSettingsViewModel(widget.Kind, widget.DisplayNameResourceKey);
+        _viewModel = new WidgetSettingsViewModel(widget);
         _viewModel.ThemePreviewChanged += _widget.ApplyTheme;
+        _viewModel.PluginPreviewChanged += _widget.ApplyPluginSettingsPreview;
         _viewModel.MeterPreviewChanged += _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricGraphPreviewChanged += _widget.ApplyMetricGraphSettingsPreview;
         _viewModel.BuffCardPreviewChanged += _widget.ApplyBuffCardSettingsPreview;
@@ -94,6 +97,7 @@ public partial class WidgetSettingsWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         _viewModel.ThemePreviewChanged -= _widget.ApplyTheme;
+        _viewModel.PluginPreviewChanged -= _widget.ApplyPluginSettingsPreview;
         _viewModel.MeterPreviewChanged -= _widget.ApplyMeterSettingsPreview;
         _viewModel.MetricGraphPreviewChanged -= _widget.ApplyMetricGraphSettingsPreview;
         _viewModel.BuffCardPreviewChanged -= _widget.ApplyBuffCardSettingsPreview;
@@ -303,6 +307,15 @@ public partial class WidgetSettingsWindow : Window
         ScrollToSection(WindowSettingsHost);
     }
 
+    private void PluginSectionNavButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: PluginWidgetSettingSectionViewModel section }
+            && PluginSettingsView.FindSectionElement(section) is { } target)
+        {
+            ScrollToSection(target);
+        }
+    }
+
     private void DisplaySettingsNavButton_Click(object sender, RoutedEventArgs e)
     {
         ScrollToSection(DisplaySettingsHost);
@@ -492,15 +505,24 @@ public partial class WidgetSettingsWindow : Window
         });
     }
 
+    // 前に使ったフォルダと窓の大きさの記録を、ほかのファイル・フォルダの窓と分ける番号。
+    private static readonly Guid BackgroundImageDialogClientGuid = new("3F9B97ED-A2F2-48A1-9B10-BCBBD41D8418");
+
     private void SelectBackgroundImageButton_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFileDialog
         {
+            ClientGuid = BackgroundImageDialogClientGuid,
             Filter = $"{LocalizationManager.Instance.GetString("Settings_Theme_BackgroundImage_Filter")}|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.webp",
             CheckFileExists = true,
             Multiselect = false,
             FileName = ViewModel.BackgroundImagePath ?? string.Empty
         };
+
+        if (UserFolders.Pictures is { } pictures)
+        {
+            dialog.DefaultDirectory = pictures;
+        }
 
         if (dialog.ShowDialog() == true)
         {
@@ -511,6 +533,8 @@ public partial class WidgetSettingsWindow : Window
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
+        // 確定していない数の欄(プラグインの設定)は、欄を離れたときに確定する。
+        Keyboard.ClearFocus();
         var config = ViewModel.SaveSettings();
         _widget.ApplyWidgetConfig(config);
         Close();

@@ -10,7 +10,11 @@ internal sealed class PluginHostContext : IPluginContext
         IPluginMessageService messages,
         IPluginLocalizationService localization,
         IPluginLogger logger,
-        IPluginGameDataService gameData)
+        IPluginGameDataService gameData,
+        IPluginNameService names,
+        IPluginPacketService packets,
+        IPluginNotificationService notifications,
+        CancellationToken stopping)
     {
         PluginId = pluginId;
         Settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -18,6 +22,10 @@ internal sealed class PluginHostContext : IPluginContext
         Localization = localization ?? throw new ArgumentNullException(nameof(localization));
         Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         GameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
+        Names = names ?? throw new ArgumentNullException(nameof(names));
+        Packets = packets ?? throw new ArgumentNullException(nameof(packets));
+        Notifications = notifications ?? throw new ArgumentNullException(nameof(notifications));
+        Stopping = stopping;
     }
 
     public string PluginId { get; }
@@ -31,4 +39,12 @@ internal sealed class PluginHostContext : IPluginContext
     public IPluginLogger Logger { get; }
 
     public IPluginGameDataService GameData { get; }
+
+    public IPluginNameService Names { get; }
+
+    public IPluginPacketService Packets { get; }
+
+    public IPluginNotificationService Notifications { get; }
+
+    public CancellationToken Stopping { get; }
 }

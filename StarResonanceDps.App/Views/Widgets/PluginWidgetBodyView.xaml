@@ -1,0 +1,12 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PluginWidgetBodyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!-- プラグインが作った本体かフッター。DataContext を切り、本体の型を受け継がせない(プラグインは自分で入れる)。 -->
+    <ContentControl x:Name="ElementHost"
+                    DataContext="{x:Null}"
+                    Focusable="False"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch" />
+</UserControl>

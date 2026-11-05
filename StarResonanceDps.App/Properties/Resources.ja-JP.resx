@@ -447,15 +447,123 @@ VOICEVOXを起動し直してください。</value>
   <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
     <value>設定の「起動設定」で、VOICEVOXのインストール先を確かめてください。</value>
   </data>
-  <data name="PluginOpenFailed_Title" xml:space="preserve">
+  <data name="PluginAdd_FileFilter" xml:space="preserve">
+    <value>プラグインファイル</value>
+  </data>
+  <data name="PluginAddFailed_Title" xml:space="preserve">
+    <value>プラグイン追加エラー</value>
+  </data>
+  <data name="PluginAddFailed_Message" xml:space="preserve">
+    <value>プラグインを追加できませんでした。</value>
+  </data>
+  <data name="PluginAddFailed_InvalidFile_Detail" xml:space="preserve">
+    <value>選んだファイルがこのアプリのプラグインではないか、アプリと版が合っていません。</value>
+  </data>
+  <data name="PluginAddFailed_CannotPlace_Detail" xml:space="preserve">
+    <value>アプリを終了して、Pluginsフォルダの中にDLLと同じ名前のフォルダを作り、選んだDLLのフォルダの中身をコピーしてから、アプリを起動し直してください。</value>
+  </data>
+  <data name="PluginAlreadyAdded_Title" xml:space="preserve">
+    <value>プラグイン追加</value>
+  </data>
+  <data name="PluginAlreadyAdded_Message" xml:space="preserve">
+    <value>このプラグインはすでに追加されています。</value>
+  </data>
+  <data name="PluginError_Title" xml:space="preserve">
     <value>プラグインエラー</value>
   </data>
-  <data name="PluginOpenFailed_Message" xml:space="preserve">
-    <value>プラグインを開けませんでした。</value>
+  <data name="PluginAddFailed_MissingDependency_Detail" xml:space="preserve">
+    <value>必要なファイル({0})が、選んだDLLと同じフォルダにありません。</value>
   </data>
-  <data name="PluginOpenFailed_Detail" xml:space="preserve">
-    <value>プラグインのファイルが壊れているか、アプリと版が合っていない可能性があります。
-プラグインを入れ直してから、もう一度開いてください。</value>
+  <data name="PluginStopped_Message" xml:space="preserve">
+    <value>{0}を停止しました。</value>
+  </data>
+  <data name="PluginStopped_Detail" xml:space="preserve">
+    <value>アプリを再起動すると、もう一度読み込みます。
+直らないときは、プラグインを入れ直すか作者に知らせてください。</value>
+  </data>
+  <data name="PluginStoppedPacketBacklog_Detail" xml:space="preserve">
+    <value>{0}が通信の受け取りに追いつかなくなりました。</value>
+  </data>
+  <data name="PluginLoadFailed_Message" xml:space="preserve">
+    <value>読み込めなかったプラグインがあります。</value>
+  </data>
+  <data name="PluginLoadFailed_Detail" xml:space="preserve">
+    <value>{0}
+プラグインを入れ直すか作者に知らせてください。</value>
+  </data>
+  <data name="PluginAddFailed_PendingDeletion_Detail" xml:space="preserve">
+    <value>同じプラグインが削除を待っています。
+アプリを再起動してから追加してください。</value>
+  </data>
+  <data name="Plugins_Title" xml:space="preserve">
+    <value>インストール済みのプラグイン</value>
+  </data>
+  <data name="Plugins_Add" xml:space="preserve">
+    <value>プラグインを追加</value>
+  </data>
+  <data name="Plugins_GenreOther" xml:space="preserve">
+    <value>その他</value>
+  </data>
+  <data name="Plugins_WidgetExtension" xml:space="preserve">
+    <value>ウィジェット拡張</value>
+  </data>
+  <data name="Plugins_NotificationExtension" xml:space="preserve">
+    <value>通知拡張</value>
+  </data>
+  <data name="Plugins_Author" xml:space="preserve">
+    <value>制作: {0}</value>
+  </data>
+  <data name="PluginStatus_Error" xml:space="preserve">
+    <value>エラー</value>
+  </data>
+  <data name="PluginStatus_PendingDeletion" xml:space="preserve">
+    <value>再起動後に削除</value>
+  </data>
+  <data name="PluginStatus_MissingFiles" xml:space="preserve">
+    <value>必要なファイル({0})が見つかりません</value>
+  </data>
+  <data name="PluginStatus_Invalid" xml:space="preserve">
+    <value>このアプリのプラグインではないか、アプリと版が合っていません</value>
+  </data>
+  <data name="PluginStatus_DuplicateId" xml:space="preserve">
+    <value>同じプラグインがほかのフォルダにもあります</value>
+  </data>
+  <data name="PluginStatus_Stopped" xml:space="preserve">
+    <value>エラーが起きたため停止中、次の起動で再開</value>
+  </data>
+  <data name="PluginStatus_InvalidNotifications" xml:space="preserve">
+    <value>通知の項目の作りに誤りがあります</value>
+  </data>
+  <data name="PluginStatus_InvalidWidgets" xml:space="preserve">
+    <value>ウィジェットの作りに誤りがあります</value>
+  </data>
+  <data name="PluginStatus_PacketBacklog" xml:space="preserve">
+    <value>通信の受け取りに追いつかなくなったため停止中、次の起動で再開</value>
+  </data>
+  <data name="PluginStatus_TerminatedApp" xml:space="preserve">
+    <value>アプリを終了させたため停止中、入れ直すと再開</value>
+  </data>
+  <data name="PluginStatus_DeletionFailed" xml:space="preserve">
+    <value>削除できませんでした、次の起動でもう一度削除します</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
+    <value>プラグインの削除</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Message" xml:space="preserve">
+    <value>{0}を削除しますか？</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Detail" xml:space="preserve">
+    <value>アプリを再起動したときに削除します。
+設定も消えます。</value>
+  </data>
+  <data name="PluginDeleteFailed_Title" xml:space="preserve">
+    <value>プラグイン削除エラー</value>
+  </data>
+  <data name="PluginDeleteFailed_Message" xml:space="preserve">
+    <value>プラグインを削除できませんでした。</value>
+  </data>
+  <data name="PluginDeleteFailed_Detail" xml:space="preserve">
+    <value>アプリを終了して、Pluginsフォルダの中の{0}フォルダを削除してください。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>ネットワークアダプター</value>

@@ -112,6 +112,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static event EncounterEndFinalEventHandler? EncounterEndFinal;
 
         /// <summary>
+        /// 記録のある回を閉じた(<see cref="EnterDungeon"/> の作り直しで、DB に保存する回と同じ回)。値は閉じた回で、
+        /// 素性を焼き付けた後・新しい回に替える前に上がる。閉じた回にはもう記録が入らない。パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<Encounter>? EncounterClosing;
+
+        /// <summary>
         /// 走っている計測の長さ(秒)と、最初に攻撃した敵だけを数えるか。計測の開始のときに設定(<see cref="CombatRuntimeSettings"/>)から控え、
         /// 計測中に作る回へ写す。計測の途中で設定を保存しても、その計測は控えた値のまま。
         /// </summary>
@@ -241,6 +247,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             if (priorEncounter != null && nextEncounterIdModifier != 0)
             {
                 ApplyDisplayedIdentitiesForRecord(priorEncounter);
+                EncounterClosing?.Invoke(priorEncounter);
             }
 
             // 記録が入るまでメーターに出す前の回。記録の無い前の回は飛ばし、それが持っていた回を引き継ぐ

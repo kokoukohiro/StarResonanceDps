@@ -7,6 +7,7 @@
     <AssemblyName>ModuleTool</AssemblyName>
     <RootNamespace>StarResonanceDps.Plugins.ModuleTool</RootNamespace>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
 
   <!-- Keep every locale, table and image inside the plugin DLL so plugins remain self-contained under runtime\Plugins. -->
@@ -43,9 +44,14 @@
     <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <!-- SDK のパッケージと同じ、プラグインの属性の検査。 -->
+    <ProjectReference Include="..\StarResonanceDps.PluginSdk.Analyzers\StarResonanceDps.PluginSdk.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\*.png" />
+    <Resource Include="Assets\*.png" Exclude="Assets\icon.png" />
+    <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 </Project>

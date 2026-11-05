@@ -1,7 +1,7 @@
 namespace StarResonanceDps.PluginSdk;
 
 /// <summary>
-/// Provides JSON settings files stored directly in the runtime Plugins directory.
+/// Provides JSON settings files stored in the plugin's own folder (<c>Plugins\&lt;assembly name&gt;\</c>).
 /// Each plugin explicitly chooses the file name it owns.
 /// </summary>
 public interface IPluginSettingsStore

@@ -164,12 +164,39 @@ public sealed class ConfigManager
         return AppConfig.Notifications.Get(kind).Clone();
     }
 
+    /// <summary>プラグインの通知の項目の今の値(写し)。保存したことが無ければ null。鍵は <see cref="NotificationsConfig.GetPluginItemKey"/>。</summary>
+    public PluginNotificationItemConfig? GetPluginNotificationItem(string itemKey)
+    {
+        AppConfigDefaults.Normalize(AppConfig);
+        return AppConfig.Notifications.PluginItems.TryGetValue(itemKey, out var item) ? item.Clone() : null;
+    }
+
     /// <summary>通知タブの値を保存する。通知タブは保存前プレビューを持たず、変えたらその場で保存する。</summary>
     public void SaveNotifications(NotificationsConfig notifications)
     {
         AppConfig.Notifications = AppConfigDefaults.CloneNormalizedNotifications(notifications);
         Save();
         NotificationsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>プラグインの通知の項目の設定を全部消す(プラグインをアンインストールしたとき)。無ければ何もしない。</summary>
+    public void RemovePluginNotifications(string pluginKey)
+    {
+        var notifications = GetNotificationsSnapshot();
+        var removedKeys = notifications.PluginItems.Keys
+            .Where(key => NotificationsConfig.IsPluginItemKeyOf(key, pluginKey))
+            .ToArray();
+        if (removedKeys.Length == 0)
+        {
+            return;
+        }
+
+        foreach (var key in removedKeys)
+        {
+            notifications.PluginItems.Remove(key);
+        }
+
+        SaveNotifications(notifications);
     }
 
     public void Save()

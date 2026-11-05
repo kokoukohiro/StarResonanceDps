@@ -447,15 +447,123 @@
   <data name="Voicevox_LaunchFailed_Detail" xml:space="preserve">
     <value>请在设置的“启动设置”中确认VOICEVOX安装路径。</value>
   </data>
-  <data name="PluginOpenFailed_Title" xml:space="preserve">
+  <data name="PluginAdd_FileFilter" xml:space="preserve">
+    <value>插件文件</value>
+  </data>
+  <data name="PluginAddFailed_Title" xml:space="preserve">
+    <value>插件添加错误</value>
+  </data>
+  <data name="PluginAddFailed_Message" xml:space="preserve">
+    <value>无法添加插件。</value>
+  </data>
+  <data name="PluginAddFailed_InvalidFile_Detail" xml:space="preserve">
+    <value>所选文件不是本应用的插件，或与应用的版本不一致。</value>
+  </data>
+  <data name="PluginAddFailed_CannotPlace_Detail" xml:space="preserve">
+    <value>请退出应用，在Plugins文件夹中创建与DLL同名的文件夹，并将所选DLL所在文件夹中的内容复制到其中后，重新启动应用。</value>
+  </data>
+  <data name="PluginAlreadyAdded_Title" xml:space="preserve">
+    <value>添加插件</value>
+  </data>
+  <data name="PluginAlreadyAdded_Message" xml:space="preserve">
+    <value>此插件已添加。</value>
+  </data>
+  <data name="PluginError_Title" xml:space="preserve">
     <value>插件错误</value>
   </data>
-  <data name="PluginOpenFailed_Message" xml:space="preserve">
-    <value>无法打开插件。</value>
+  <data name="PluginAddFailed_MissingDependency_Detail" xml:space="preserve">
+    <value>所选DLL所在的文件夹中没有所需的文件({0})。</value>
   </data>
-  <data name="PluginOpenFailed_Detail" xml:space="preserve">
-    <value>插件文件可能已损坏，或与应用的版本不一致。
-请重新安装插件后再次打开。</value>
+  <data name="PluginStopped_Message" xml:space="preserve">
+    <value>已停止{0}。</value>
+  </data>
+  <data name="PluginStopped_Detail" xml:space="preserve">
+    <value>重新启动应用后会再次加载。
+如果仍未解决，请重新安装插件或告知作者。</value>
+  </data>
+  <data name="PluginStoppedPacketBacklog_Detail" xml:space="preserve">
+    <value>{0}无法及时接收通信数据。</value>
+  </data>
+  <data name="PluginLoadFailed_Message" xml:space="preserve">
+    <value>有无法加载的插件。</value>
+  </data>
+  <data name="PluginLoadFailed_Detail" xml:space="preserve">
+    <value>{0}
+请重新安装插件或告知作者。</value>
+  </data>
+  <data name="PluginAddFailed_PendingDeletion_Detail" xml:space="preserve">
+    <value>相同的插件正在等待删除。
+请重新启动应用后再添加。</value>
+  </data>
+  <data name="Plugins_Title" xml:space="preserve">
+    <value>已安装的插件</value>
+  </data>
+  <data name="Plugins_Add" xml:space="preserve">
+    <value>添加插件</value>
+  </data>
+  <data name="Plugins_GenreOther" xml:space="preserve">
+    <value>其他</value>
+  </data>
+  <data name="Plugins_WidgetExtension" xml:space="preserve">
+    <value>小组件扩展</value>
+  </data>
+  <data name="Plugins_NotificationExtension" xml:space="preserve">
+    <value>通知扩展</value>
+  </data>
+  <data name="Plugins_Author" xml:space="preserve">
+    <value>制作: {0}</value>
+  </data>
+  <data name="PluginStatus_Error" xml:space="preserve">
+    <value>错误</value>
+  </data>
+  <data name="PluginStatus_PendingDeletion" xml:space="preserve">
+    <value>重启后删除</value>
+  </data>
+  <data name="PluginStatus_MissingFiles" xml:space="preserve">
+    <value>找不到必要的文件({0})</value>
+  </data>
+  <data name="PluginStatus_Invalid" xml:space="preserve">
+    <value>不是本应用的插件，或与应用的版本不一致</value>
+  </data>
+  <data name="PluginStatus_DuplicateId" xml:space="preserve">
+    <value>其他文件夹中也有相同的插件</value>
+  </data>
+  <data name="PluginStatus_Stopped" xml:space="preserve">
+    <value>因发生错误已停止，下次启动时恢复</value>
+  </data>
+  <data name="PluginStatus_InvalidNotifications" xml:space="preserve">
+    <value>通知项目的结构有误</value>
+  </data>
+  <data name="PluginStatus_InvalidWidgets" xml:space="preserve">
+    <value>小组件的结构有误</value>
+  </data>
+  <data name="PluginStatus_PacketBacklog" xml:space="preserve">
+    <value>因无法及时接收通信数据已停止，下次启动时恢复</value>
+  </data>
+  <data name="PluginStatus_TerminatedApp" xml:space="preserve">
+    <value>因导致应用退出已停止，重新安装后恢复</value>
+  </data>
+  <data name="PluginStatus_DeletionFailed" xml:space="preserve">
+    <value>无法删除，下次启动时会再次删除</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Title" xml:space="preserve">
+    <value>删除插件</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Message" xml:space="preserve">
+    <value>要删除{0}吗？</value>
+  </data>
+  <data name="Confirm_UninstallPlugin_Detail" xml:space="preserve">
+    <value>将在重新启动应用时删除。
+设置也会被删除。</value>
+  </data>
+  <data name="PluginDeleteFailed_Title" xml:space="preserve">
+    <value>插件删除错误</value>
+  </data>
+  <data name="PluginDeleteFailed_Message" xml:space="preserve">
+    <value>无法删除插件。</value>
+  </data>
+  <data name="PluginDeleteFailed_Detail" xml:space="preserve">
+    <value>请退出应用，然后删除Plugins文件夹中的{0}文件夹。</value>
   </data>
   <data name="Settings_NetworkAdapter_Label" xml:space="preserve">
     <value>监听网卡</value>

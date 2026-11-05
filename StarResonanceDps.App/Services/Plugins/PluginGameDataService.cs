@@ -1,85 +1,121 @@
-using System.Threading;
-using System.Windows;
-using StarResonanceDps.Core.CombatRuntime;
-using StarResonanceDps.Core.Models;
 using StarResonanceDps.PluginSdk;
 
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// 本体が通信から控えた値をプラグインへ渡す。値は Core の控えを SDK の型へ写したもので、画面のスレッドで置き換えて知らせる。
+/// プラグイン1つに渡す、本体が通信から控えた値の口。値は全部のプラグインで共有(<see cref="PluginGameDataSource"/>)し、
+/// 知らせはプラグインごとに受け止め(<see cref="PluginCallGuard"/>)の中で出す。
 /// </summary>
 internal sealed class PluginGameDataService : IPluginGameDataService
 {
-    private int _isSelfModulesRefreshQueued;
+    private readonly PluginCallGuard _guard;
+    private readonly PluginGameDataSource _source;
+    private bool _isDetached;
 
-    private PluginGameDataService()
+    public PluginGameDataService(PluginCallGuard guard, PluginGameDataSource source)
     {
-        SelfModules = ToPluginInventory(SelfModuleStore.GetSnapshot());
-        SelfModuleStore.Changed += SelfModuleStore_Changed;
+        _guard = guard ?? throw new ArgumentNullException(nameof(guard));
+        _source = source ?? throw new ArgumentNullException(nameof(source));
+        _source.SelfModulesChanged += Source_SelfModulesChanged;
+        _source.SessionChanged += Source_SessionChanged;
+        _source.PlayersChanged += Source_PlayersChanged;
+        _source.EntitiesChanged += Source_EntitiesChanged;
+        _source.EncounterStarted += Source_EncounterStarted;
+        _source.EncounterClosed += Source_EncounterClosed;
+        _source.MapEntered += Source_MapEntered;
+        _source.LoggedOut += Source_LoggedOut;
     }
 
-    public static PluginGameDataService Instance { get; } = new();
+    public PluginGameServer CurrentServer => _source.CurrentServer;
 
-    public PluginGameServer CurrentServer => ToPluginServer(GameServerStore.Current);
+    public PluginModuleInventory? SelfModules => _source.SelfModules;
 
-    public PluginModuleInventory? SelfModules { get; private set; }
+    public PluginSessionState Session => _source.Session;
+
+    public IReadOnlyList<PluginPlayer> Players => _source.Players;
+
+    public IReadOnlyList<PluginEntity> Entities => _source.Entities;
 
     public event EventHandler? SelfModulesChanged;
 
-    /// <summary>受信のスレッドから来る。画面のスレッドへの予約は1回にまとめ、予約が走った時点の控えを写す。</summary>
-    private void SelfModuleStore_Changed()
+    public event EventHandler? SessionChanged;
+
+    public event EventHandler? PlayersChanged;
+
+    public event EventHandler? EntitiesChanged;
+
+    public event EventHandler? EncounterStarted;
+
+    public event EventHandler<PluginEncounterResult>? EncounterClosed;
+
+    public event EventHandler? MapEntered;
+
+    public event EventHandler? LoggedOut;
+
+    public IReadOnlyList<PluginBuff> GetPlayerBuffs(long characterId) => _source.GetPlayerBuffs(characterId);
+
+    public IReadOnlyList<PluginBuff> GetEntityBuffs(long entityUuid) => _source.GetEntityBuffs(entityUuid);
+
+    public PluginEncounterSnapshot GetEncounter() => _source.GetEncounter();
+
+    public IReadOnlyList<PluginSkillTotals> GetSkillTotals(long characterId, PluginCombatKind kind) => _source.GetSkillTotals(characterId, kind);
+
+    /// <summary>プラグインを止めた・終えたときに、本体の知らせから外す。</summary>
+    public void Detach()
     {
-        if (Interlocked.Exchange(ref _isSelfModulesRefreshQueued, 1) == 1)
+        if (_isDetached)
         {
             return;
         }
 
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher is null)
-        {
-            // 終了の途中で画面が無い。知らせる相手も無い。
-            Interlocked.Exchange(ref _isSelfModulesRefreshQueued, 0);
-            return;
-        }
-
-        dispatcher.BeginInvoke(RefreshSelfModules);
+        _isDetached = true;
+        _source.SelfModulesChanged -= Source_SelfModulesChanged;
+        _source.SessionChanged -= Source_SessionChanged;
+        _source.PlayersChanged -= Source_PlayersChanged;
+        _source.EntitiesChanged -= Source_EntitiesChanged;
+        _source.EncounterStarted -= Source_EncounterStarted;
+        _source.EncounterClosed -= Source_EncounterClosed;
+        _source.MapEntered -= Source_MapEntered;
+        _source.LoggedOut -= Source_LoggedOut;
     }
 
-    private void RefreshSelfModules()
+    private void Source_SelfModulesChanged(object? sender, EventArgs e)
     {
-        Interlocked.Exchange(ref _isSelfModulesRefreshQueued, 0);
-        SelfModules = ToPluginInventory(SelfModuleStore.GetSnapshot());
-        SelfModulesChanged?.Invoke(this, EventArgs.Empty);
+        _guard.TryInvoke("Self modules notification", () => SelfModulesChanged?.Invoke(this, EventArgs.Empty));
     }
 
-    private static PluginModuleInventory? ToPluginInventory(SelfModuleInventory? inventory)
+    private void Source_SessionChanged(object? sender, EventArgs e)
     {
-        if (inventory is null)
-        {
-            return null;
-        }
-
-        var modules = inventory.Modules
-            .Select(module => new PluginModuleItem(
-                module.Uuid,
-                module.ConfigId,
-                module.Quality,
-                module.Effects.Select(effect => new PluginModuleEffect(effect.EffectId, effect.LinkCount)).ToArray()))
-            .ToArray();
-        return new PluginModuleInventory(modules, inventory.EquippedUuidBySlot);
+        _guard.TryInvoke("Session notification", () => SessionChanged?.Invoke(this, EventArgs.Empty));
     }
 
-    private static PluginGameServer ToPluginServer(GameServer server)
+    private void Source_PlayersChanged(object? sender, EventArgs e)
     {
-        return server switch
-        {
-            GameServer.Unknown => PluginGameServer.Unknown,
-            GameServer.Asia => PluginGameServer.Asia,
-            GameServer.China => PluginGameServer.China,
-            GameServer.Global => PluginGameServer.Global,
-            GameServer.SoutheastAsia => PluginGameServer.SoutheastAsia,
-            _ => throw new ArgumentOutOfRangeException(nameof(server), server, "The game server has no plugin equivalent."),
-        };
+        _guard.TryInvoke("Players notification", () => PlayersChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private void Source_EntitiesChanged(object? sender, EventArgs e)
+    {
+        _guard.TryInvoke("Entities notification", () => EntitiesChanged?.Invoke(this, EventArgs.Empty));
+    }
+
+    private void Source_EncounterStarted(object? sender, EventArgs e)
+    {
+        _guard.TryInvoke("Encounter start notification", () => EncounterStarted?.Invoke(this, EventArgs.Empty));
+    }
+
+    private void Source_EncounterClosed(object? sender, PluginEncounterResult result)
+    {
+        _guard.TryInvoke("Encounter close notification", () => EncounterClosed?.Invoke(this, result));
+    }
+
+    private void Source_MapEntered(object? sender, EventArgs e)
+    {
+        _guard.TryInvoke("Map enter notification", () => MapEntered?.Invoke(this, EventArgs.Empty));
+    }
+
+    private void Source_LoggedOut(object? sender, EventArgs e)
+    {
+        _guard.TryInvoke("Logout notification", () => LoggedOut?.Invoke(this, EventArgs.Empty));
     }
 }

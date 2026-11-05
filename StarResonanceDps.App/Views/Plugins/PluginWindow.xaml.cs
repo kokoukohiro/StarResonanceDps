@@ -37,6 +37,12 @@ public partial class PluginWindow : Window
         ApplyInitialWindowOptions(windowOptions);
         DataContext = plugin;
 
+        // アイコンの無いプラグインの窓は、XAML のアプリのアイコンのまま。
+        if (plugin.Icon is { } icon)
+        {
+            Icon = icon;
+        }
+
         // This is a top-level tool window, not an owned window. An owned WPF window is
         // always kept above its owner, which prevented the manager from being brought forward.
         PositionRelativeToOwner(owner, plugin.OriginalIndex);

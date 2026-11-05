@@ -11,7 +11,7 @@ namespace StarResonanceDps.Plugins.ModuleTool.ViewModels;
 
 internal sealed class ModuleToolViewModel : ObservableObject, IDisposable
 {
-    private const string ConfigFileName = "module_config.json";
+    internal const string ConfigFileName = "module_config.json";
     private const string ResourceBaseName = "StarResonanceDps.Plugins.ModuleTool.Properties.Resources";
     private const int ResultCount = 10;
     private const string ConditionSeparator = ", ";

@@ -7,6 +7,7 @@ using System.Windows.Threading;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
+using StarResonanceDps.App.ViewModels.Plugins;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Services;
@@ -18,7 +19,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 {
     private const double PlayerWindowCascadeOffset = 20d;
 
-    private readonly Dictionary<WidgetKind, WidgetWindow> _openSingleWindows = new();
+    /// <summary>1枚だけ開く窓。鍵はカード(本体の種別は1枚ずつ、プラグインのウィジェットは同じ種別でカードが分かれる)。</summary>
+    private readonly Dictionary<WidgetListItemViewModel, WidgetWindow> _openSingleWindows = new();
     private readonly List<PlayerWidgetWindowSession> _openPlayerWindows = [];
     private readonly List<EntityWindowSession> _openEntityWindows = [];
     private readonly List<ChatWindowSession> _openChatWindows = [];
@@ -38,6 +40,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private Window? _managerWindow;
     private bool _isManagerClosing;
+
+    /// <summary>保存した状態(起動中)を変えずに窓を閉じている(<see cref="CloseKeepingState"/>)。</summary>
+    private bool _isClosingKeepingState;
 
     private WidgetWindowManager()
     {
@@ -463,7 +468,28 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        Close(widget.Kind);
+        Close(widget);
+    }
+
+    /// <summary>
+    /// 1枚だけの窓を、保存した状態(起動中)を変えずに閉じる。プラグインを止めてカードを外すときに使い、次の起動で開き直す。
+    /// </summary>
+    public void CloseKeepingState(WidgetListItemViewModel widget)
+    {
+        if (!_openSingleWindows.TryGetValue(widget, out var window))
+        {
+            return;
+        }
+
+        _isClosingKeepingState = true;
+        try
+        {
+            window.Close();
+        }
+        finally
+        {
+            _isClosingKeepingState = false;
+        }
     }
 
     public void ApplyWidgetPinState(WidgetListItemViewModel widget, bool bringToFront)
@@ -493,7 +519,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        if (!_openSingleWindows.TryGetValue(widget.Kind, out var window))
+        if (!_openSingleWindows.TryGetValue(widget, out var window))
         {
             return;
         }
@@ -886,7 +912,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private void Open(WidgetListItemViewModel widget)
     {
-        if (_openSingleWindows.TryGetValue(widget.Kind, out var existingWindow))
+        if (_openSingleWindows.TryGetValue(widget, out var existingWindow))
         {
             existingWindow.ApplyPinState(widget.IsPinned);
             RestoreAndActivate(existingWindow);
@@ -896,8 +922,21 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         var owner = Application.Current?.MainWindow;
         TrackManagerWindow(owner);
 
-        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Kind).Window;
-        var composition = CreateWidgetWindowComposition(widget);
+        var savedBounds = WidgetStateManager.Instance.GetWidgetSnapshot(widget.Key).Window;
+        if (widget.PluginWidget is { } pluginWidget)
+        {
+            // プラグインのウィジェットの既定の大きさは定義にある(保存の正規化では分からない)。
+            savedBounds.Width ??= pluginWidget.Definition.DefaultWidth;
+            savedBounds.Height ??= pluginWidget.Definition.DefaultHeight;
+        }
+
+        // プラグインのウィジェットは中身を作れないことがある(プラグインの例外。受け止めがプラグインを止め、カードも外れる)。
+        if (CreateWidgetWindowComposition(widget) is not { } composition)
+        {
+            widget.State = WidgetState.Stopped;
+            return;
+        }
+
         var window = new WidgetWindow(
             widget,
             composition.Content,
@@ -910,7 +949,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         window.Closed += WidgetWindow_Closed;
         window.DataStatusChanged += WidgetWindow_DataStatusChanged;
 
-        _openSingleWindows.Add(widget.Kind, window);
+        _openSingleWindows.Add(widget, window);
         UpdateCardDataStatus(widget);
         window.Show();
     }
@@ -1374,11 +1413,15 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             });
     }
 
-    /// <summary>1枚だけ開く種類の窓の中身。プレイヤーリストとエンティティリストは窓の中身もウィジェットの項目が持つ。</summary>
-    private WidgetWindowComposition CreateWidgetWindowComposition(WidgetListItemViewModel widget)
+    /// <summary>
+    /// 1枚だけ開く種類の窓の中身。プレイヤーリストとエンティティリストは窓の中身もウィジェットの項目が持つ。
+    /// プラグインのウィジェットの中身を作れなかったときだけ null。
+    /// </summary>
+    private WidgetWindowComposition? CreateWidgetWindowComposition(WidgetListItemViewModel widget)
     {
         return widget.Kind switch
         {
+            WidgetKind.Plugin => CreatePluginWidgetComposition(widget),
             WidgetKind.PlayerList => new WidgetWindowComposition(
                 new PlayerListWidgetView(),
                 widget,
@@ -1398,6 +1441,30 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             WidgetKind.DamageTakenLog => CreateDamageTakenLogComposition(widget),
             _ => throw new InvalidOperationException($"Widget {widget.Kind} has no single-window content.")
         };
+    }
+
+    /// <summary>
+    /// プラグインのウィジェットの中身。本体と本体のスクロールは定義で決め、ヘッダーのボタンはメーターと同じく2層で1組(ボタンが無ければ渡さない)。
+    /// 窓は中身の DataContext(<see cref="PluginWidgetWindowViewModel"/>)を閉じたときに後始末する。
+    /// </summary>
+    private static WidgetWindowComposition? CreatePluginWidgetComposition(WidgetListItemViewModel widget)
+    {
+        if (widget.PluginWidget!.CreateWindowViewModel(widget) is not { } viewModel)
+        {
+            return null;
+        }
+
+        FrameworkElement content = viewModel.ScrollsVertically
+            ? new PluginWidgetScrollBodyView(viewModel.Body)
+            : new PluginWidgetBodyView(viewModel.Body);
+        content.DataContext = viewModel;
+        var hasHeaderButtons = viewModel.HeaderButtons.Count > 0;
+        return new WidgetWindowComposition(
+            content,
+            viewModel,
+            hasHeaderButtons ? new PluginWidgetHeaderLabelsView { DataContext = viewModel } : null,
+            hasHeaderButtons ? new PluginWidgetHeaderActionsView { DataContext = viewModel } : null,
+            viewModel.Footer is null ? null : new PluginWidgetBodyView(viewModel.Footer));
     }
 
     private WidgetWindowComposition CreateReviveListComposition(WidgetListItemViewModel widget)
@@ -1490,9 +1557,9 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             });
     }
 
-    private void Close(WidgetKind kind)
+    private void Close(WidgetListItemViewModel widget)
     {
-        if (!_openSingleWindows.TryGetValue(kind, out var window))
+        if (!_openSingleWindows.TryGetValue(widget, out var window))
         {
             return;
         }
@@ -2024,7 +2091,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
             return;
         }
 
-        _openSingleWindows.Remove(window.Widget.Kind);
+        _openSingleWindows.Remove(window.Widget);
         if (window.Widget.Kind == WidgetKind.ReviveList)
         {
             _reviveListViewModel = null;
@@ -2037,7 +2104,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
         UpdateCardDataStatus(window.Widget);
 
-        if (!_isManagerClosing && window.Widget.State == WidgetState.Running)
+        if (!_isManagerClosing && !_isClosingKeepingState && window.Widget.State == WidgetState.Running)
         {
             window.Widget.State = WidgetState.Stopped;
         }
@@ -2072,7 +2139,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     /// <summary>そのウィジェットの開いている窓(1枚だけの窓・プレイヤーの窓・実体の窓・チャットの窓)。</summary>
     private IEnumerable<WidgetWindow> EnumerateOpenWindows(WidgetListItemViewModel widget)
     {
-        if (_openSingleWindows.TryGetValue(widget.Kind, out var singleWindow) && ReferenceEquals(singleWindow.Widget, widget))
+        if (_openSingleWindows.TryGetValue(widget, out var singleWindow))
         {
             yield return singleWindow;
         }

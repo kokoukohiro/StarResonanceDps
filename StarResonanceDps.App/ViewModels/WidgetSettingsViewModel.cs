@@ -13,8 +13,8 @@ namespace StarResonanceDps.App.ViewModels;
 public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 {
     private readonly WidgetStateManager _stateManager = WidgetStateManager.Instance;
-    private readonly WidgetKind _kind;
-    private readonly string _displayNameResourceKey;
+    private readonly WidgetListItemViewModel _widget;
+    private readonly WidgetKey _key;
     private WidgetThemeConfig _lastSavedTheme;
     private bool _isLoadingTheme;
 
@@ -33,11 +33,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string? _backgroundImageAverageColorSourcePath;
 
-    public WidgetSettingsViewModel(WidgetKind kind, string displayNameResourceKey)
+    public WidgetSettingsViewModel(WidgetListItemViewModel widget)
     {
-        _kind = kind;
-        _displayNameResourceKey = displayNameResourceKey;
-        DisplayName = LocalizationManager.Instance.GetString(displayNameResourceKey);
+        _widget = widget;
+        _key = widget.Key;
+        var kind = widget.Kind;
+        DisplayName = GetWidgetDisplayName();
         WindowColors = new ColorPaletteViewModel(
             WidgetConfigDefaults.CreateDefaultWindowColors(),
             WidgetConfigDefaults.MaxPaletteColorCount);
@@ -51,7 +52,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             }
         };
 
-        var config = _stateManager.GetWidgetSnapshot(kind);
+        var config = _stateManager.GetWidgetSnapshot(_key);
         _lastSavedTheme = WidgetConfigDefaults.CloneNormalizedTheme(config.Theme);
         LoadFromTheme(config.Theme, raisePreview: false);
 
@@ -161,7 +162,42 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ChatSettings.PreviewChanged += ChatSettings_PreviewChanged;
         }
 
+        if (widget.PluginWidget is { } pluginWidget)
+        {
+            PluginSettings = new PluginWidgetSettingsViewModel(pluginWidget, config.Plugin);
+            PluginSettings.PropertyChanged += PluginSettings_PropertyChanged;
+            PluginSettings.PreviewChanged += PluginSettings_PreviewChanged;
+        }
+
         LocalizationManager.Instance.CultureChanged += LocalizationManager_CultureChanged;
+    }
+
+    /// <summary>プラグインのウィジェットの節(プラグインのウィジェットだけ)。</summary>
+    public PluginWidgetSettingsViewModel? PluginSettings { get; }
+
+    public bool HasPluginSettings => PluginSettings is not null;
+
+    public event Action<PluginWidgetSettingsConfig>? PluginPreviewChanged;
+
+    private void PluginSettings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(PluginWidgetSettingsViewModel.HasUnsavedChanges))
+        {
+            OnPropertyChanged(nameof(HasUnsavedChanges));
+        }
+    }
+
+    private void PluginSettings_PreviewChanged(PluginWidgetSettingsConfig config)
+    {
+        PluginPreviewChanged?.Invoke(config);
+    }
+
+    /// <summary>カードと同じ名前(本体は文言の鍵、プラグインのウィジェットは定義の名前)。</summary>
+    private string GetWidgetDisplayName()
+    {
+        return _widget.PluginWidget is { } pluginWidget
+            ? pluginWidget.GetDisplayName(LocalizationManager.Instance.CurrentCulture)
+            : LocalizationManager.Instance.GetString(_widget.DisplayNameResourceKey);
     }
 
     public event Action<WidgetThemeConfig>? ThemePreviewChanged;
@@ -307,6 +343,13 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             ChatSettings.PropertyChanged -= ChatSettings_PropertyChanged;
             ChatSettings.PreviewChanged -= ChatSettings_PreviewChanged;
             ChatSettings.Dispose();
+        }
+
+        if (PluginSettings is not null)
+        {
+            PluginSettings.PropertyChanged -= PluginSettings_PropertyChanged;
+            PluginSettings.PreviewChanged -= PluginSettings_PreviewChanged;
+            PluginSettings.Dispose();
         }
     }
 
@@ -512,11 +555,11 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     private void LocalizationManager_CultureChanged(object? sender, EventArgs e)
     {
-        DisplayName = LocalizationManager.Instance.GetString(_displayNameResourceKey);
+        DisplayName = GetWidgetDisplayName();
         OnPropertyChanged(nameof(WindowTitle));
     }
 
-    public string WindowTitle => LocalizationManager.Instance.Format("Window_WidgetSettings_Title", LocalizationManager.Instance.GetString(_displayNameResourceKey));
+    public string WindowTitle => LocalizationManager.Instance.Format("Window_WidgetSettings_Title", GetWidgetDisplayName());
 
     public ColorPaletteViewModel WindowColors { get; }
 
@@ -614,7 +657,8 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         || (ReviveListSettings?.HasUnsavedChanges ?? false)
         || (DamageTakenLogSettings?.HasUnsavedChanges ?? false)
         || (EntityInfoSettings?.HasUnsavedChanges ?? false)
-        || (ChatSettings?.HasUnsavedChanges ?? false);
+        || (ChatSettings?.HasUnsavedChanges ?? false)
+        || (PluginSettings?.HasUnsavedChanges ?? false);
 
     [RelayCommand]
     private void Save()
@@ -630,7 +674,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
 
     public WidgetConfig SaveSettings()
     {
-        var config = _stateManager.GetWidgetSnapshot(_kind);
+        var config = _stateManager.GetWidgetSnapshot(_key);
         var theme = CreateTheme();
         config.Theme = theme;
         if (MeterSettings is not null)
@@ -709,7 +753,12 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
             config.Chat = ChatSettings.CreateConfig();
         }
 
-        _stateManager.SaveWidget(_kind, config);
+        if (PluginSettings is not null)
+        {
+            config.Plugin = PluginSettings.CreateConfig();
+        }
+
+        _stateManager.SaveWidget(_key, config);
 
         _lastSavedTheme = theme.Clone();
         MeterSettings?.MarkSaved(config.Meter);
@@ -727,6 +776,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         DamageTakenLogSettings?.MarkSaved(config.DamageTakenLog);
         EntityInfoSettings?.MarkSaved(config.EntityInfo);
         ChatSettings?.MarkSaved(config.Chat);
+        PluginSettings?.MarkSaved(config.Plugin);
         OnPropertyChanged(nameof(HasUnsavedChanges));
         return config.Clone();
     }
@@ -749,6 +799,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         DamageTakenLogSettings?.ResetToDefaults();
         EntityInfoSettings?.ResetToDefaults();
         ChatSettings?.ResetToDefaults();
+        PluginSettings?.ResetToDefaults();
         OnPropertyChanged(nameof(HasUnsavedChanges));
     }
 
@@ -770,6 +821,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
         DamageTakenLogSettings?.RestoreSavedPreview();
         EntityInfoSettings?.RestoreSavedPreview();
         ChatSettings?.RestoreSavedPreview();
+        PluginSettings?.RestoreSavedPreview();
     }
 
     public Color GetSelectedWindowColor()
@@ -841,7 +893,7 @@ public sealed partial class WidgetSettingsViewModel : ViewModelBase, IDisposable
     public bool HasWindowSettings => true;
 
     /// <summary>「ピン留め中フッターを隠す」を出すか。フッターを持つウィジェットだけ。</summary>
-    public bool HasFooterSetting => WidgetConfigDefaults.HasFooter(_kind);
+    public bool HasFooterSetting => _widget.HasFooter;
 
     /// <summary>スイッチの右に出す ON / OFF。</summary>
     public string HideHeaderWhenInactiveStateText => GetSwitchStateText(HideHeaderWhenInactive);

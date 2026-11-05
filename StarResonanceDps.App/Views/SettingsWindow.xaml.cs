@@ -184,16 +184,26 @@ public partial class SettingsWindow : Window
         ExternalLinkOpener.Open(VoicevoxClient.DownloadPageUrl);
     }
 
+    // 前に使ったフォルダと窓の大きさの記録を、ほかのファイル・フォルダの窓と分ける番号。
+    private static readonly Guid VoicevoxInstallFolderDialogClientGuid = new("28CFC64F-D3A2-49EB-8326-5E5104911C39");
+
     private void SelectVoicevoxInstallFolderButton_Click(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFolderDialog
         {
+            ClientGuid = VoicevoxInstallFolderDialogClientGuid,
             Multiselect = false
         };
 
+        // 今のインストール先の中を開くとそのフォルダを選べないので、親のフォルダから開いて一覧に見せる。親の無いドライブの直下はそのまま。
         if (Directory.Exists(ViewModel.VoicevoxInstallFolder))
         {
-            dialog.InitialDirectory = ViewModel.VoicevoxInstallFolder;
+            var installFolder = Path.TrimEndingDirectorySeparator(Path.GetFullPath(ViewModel.VoicevoxInstallFolder));
+            dialog.InitialDirectory = Path.GetDirectoryName(installFolder) ?? installFolder;
+        }
+        else if (UserFolders.Documents is { } documents)
+        {
+            dialog.DefaultDirectory = documents;
         }
 
         if (dialog.ShowDialog(this) == true)

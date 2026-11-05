@@ -37,6 +37,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private DamageTakenLogWidgetSettingsConfig _damageTakenLog = WidgetConfigDefaults.CreateDamageTakenLogSettings();
     private EntityInfoWidgetSettingsConfig _entityInfo = WidgetConfigDefaults.CreateEntityInfoSettings();
     private ChatWidgetSettingsConfig _chat = WidgetConfigDefaults.CreateChatSettings();
+    private PluginWidgetSettingsConfig _pluginSettings = new();
 
     /// <summary>エンティティリストの行を組む設定。メーターの設定(<c>_meter</c>)が変わったときに作り直す。</summary>
     private EntityRowSettings _entityRowSettings;
@@ -67,6 +68,15 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     private DungeonScoreSnapshot _dungeonScore = DungeonScoreSnapshot.Empty;
 
     public WidgetKind Kind { get; init; }
+
+    /// <summary>プラグインのウィジェットのカードなら、その定義(<see cref="WidgetKind.Plugin"/> のときだけ)。</summary>
+    public PluginWidgetRegistration? PluginWidget { get; init; }
+
+    /// <summary>保存の鍵。本体のウィジェットは種別、プラグインのウィジェットは「プラグインの鍵/ウィジェットの ID」。</summary>
+    public WidgetKey Key => PluginWidget?.Key ?? Kind;
+
+    /// <summary>窓にフッターの行があるか(設定の窓の「ピン留め中フッターを隠す」を出すか)。</summary>
+    public bool HasFooter => PluginWidget?.Definition.HasFooter ?? WidgetConfigDefaults.HasFooter(Kind);
 
     public int OriginalIndex { get; init; }
 
@@ -784,6 +794,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event EventHandler? ChatSettingsChanged;
 
+    /// <summary>プラグインのウィジェットの設定が変わった(保存・保存前のプレビュー・破棄・初期化)。</summary>
+    public event EventHandler? PluginSettingsChanged;
+
     /// <summary>エンティティ情報の窓の右クリックでバフを1つ非表示にした(引数はウィジェットの種別とバフのID)。設定画面のスイッチでは上げない。</summary>
     public event Action<WidgetKind, int>? EntityInfoHiddenBuffsChanged;
 
@@ -855,7 +868,9 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public void RefreshLocalizedText()
     {
-        DisplayName = LocalizationManager.Instance.GetString(DisplayNameResourceKey);
+        DisplayName = PluginWidget is null
+            ? LocalizationManager.Instance.GetString(DisplayNameResourceKey)
+            : PluginWidget.GetDisplayName(LocalizationManager.Instance.CurrentCulture);
         RenderMapName();
         OnPropertyChanged(nameof(StateText));
         SynchronizePlayerListEntries(resetEntries: false);
@@ -1060,6 +1075,12 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             ChatSettingsChanged?.Invoke(this, EventArgs.Empty);
         }
 
+        if (Kind == WidgetKind.Plugin)
+        {
+            _pluginSettings = WidgetConfigDefaults.CloneNormalizedPlugin(config.Plugin);
+            PluginSettingsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         SynchronizePlayerListEntries(resetEntries: false);
         SynchronizeEntityListEntries(resetEntries: false);
         MeterSettingsChanged?.Invoke(this, EventArgs.Empty);
@@ -1210,6 +1231,24 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
         _damageTakenLog = WidgetConfigDefaults.CloneNormalizedDamageTakenLog(damageTakenLog);
         DamageTakenLogSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>プラグインのウィジェットの設定の保存前のプレビュー(設定の窓)。開いている窓の中身へは <see cref="PluginSettingsChanged"/> で届く。</summary>
+    public void ApplyPluginSettingsPreview(PluginWidgetSettingsConfig plugin)
+    {
+        if (Kind != WidgetKind.Plugin)
+        {
+            return;
+        }
+
+        _pluginSettings = WidgetConfigDefaults.CloneNormalizedPlugin(plugin);
+        PluginSettingsChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>プラグインのウィジェットの今の設定(設定の窓のプレビューを含む)。</summary>
+    public PluginWidgetSettingsConfig GetPluginSettingsSnapshot()
+    {
+        return _pluginSettings.Clone();
     }
 
     public void ApplyChatSettingsPreview(ChatWidgetSettingsConfig chat)

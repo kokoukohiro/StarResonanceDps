@@ -77,6 +77,9 @@ public partial class PlayerInfoWidgetView : UserControl
         }
     }
 
+    // 前に使ったフォルダと窓の大きさの記録を、ほかのファイル・フォルダの窓と分ける番号。
+    private static readonly Guid SaveImageDialogClientGuid = new("70D85BC1-61E7-4628-9ED6-6F2649BD7D4A");
+
     /// <summary>
     /// 届いたままの中身をそのまま書く。既定のファイル名はリンクの最後の部分、種類はリンクの拡張子とすべてのファイルの2択。
     /// オーナーはこのウィジェットの窓(ピン留め中はクリックしてもアクティブにならないので、渡さないと別の窓がオーナーになる)。
@@ -98,10 +101,16 @@ public partial class PlayerInfoWidgetView : UserControl
 
         var dialog = new SaveFileDialog
         {
+            ClientGuid = SaveImageDialogClientGuid,
             Title = localization.GetString("PlayerInfo_SaveImageDialogTitle"),
             FileName = fileName,
             Filter = filter
         };
+
+        if (UserFolders.Pictures is { } pictures)
+        {
+            dialog.DefaultDirectory = pictures;
+        }
 
         var owner = Window.GetWindow(this);
         if (dialog.ShowDialog(owner) != true)

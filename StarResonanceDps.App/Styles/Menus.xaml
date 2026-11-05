@@ -92,6 +92,12 @@
         </Setter>
     </Style>
 
+    <!-- プラグインのTIPSを付ける要素のスタイル(押すと何か起きる要素)。プラグインは本体の振る舞いの型を参照できないので、このキーで付ける。 -->
+    <Style x:Key="ToolTipOwner.Default" TargetType="{x:Type FrameworkElement}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="behaviors:ToolTipBehavior.IsEnabled" Value="True" />
+    </Style>
+
     <!-- プラグインのTIPSを付ける要素のスタイル(左クリックで何も起きない要素)。プラグインは本体の振る舞いの型を参照できないので、このキーで付ける。 -->
     <Style x:Key="ToolTipOwner.KeepsOnClick" TargetType="{x:Type FrameworkElement}">
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />

@@ -45,5 +45,10 @@ public enum WidgetKind
     EntityInfo = 27,
 
     /// <summary>チャット。ワールド・ギルド・パーティ・Ch・初心者のチャンネルか、プライベートトークの相手1人のメッセージ。</summary>
-    Chat = 28
+    Chat = 28,
+
+    /// <summary>
+    /// プラグインが足したウィジェット(1枚だけ開く)。どのウィジェットかは <see cref="WidgetKey"/> で見分け、種別ごとの設定の節は持たない。
+    /// </summary>
+    Plugin = 29
 }

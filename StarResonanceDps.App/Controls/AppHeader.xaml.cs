@@ -1,14 +1,27 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace StarResonanceDps.App.Controls;
 
 public partial class AppHeader : UserControl
 {
+    public static readonly DependencyProperty IconSourceProperty = DependencyProperty.Register(
+        nameof(IconSource),
+        typeof(ImageSource),
+        typeof(AppHeader));
+
     public AppHeader()
     {
         InitializeComponent();
+    }
+
+    /// <summary>左上のアイコン。null ならアプリのアイコン。</summary>
+    public ImageSource? IconSource
+    {
+        get => (ImageSource?)GetValue(IconSourceProperty);
+        set => SetValue(IconSourceProperty, value);
     }
 
     private Window? OwnerWindow => Window.GetWindow(this);

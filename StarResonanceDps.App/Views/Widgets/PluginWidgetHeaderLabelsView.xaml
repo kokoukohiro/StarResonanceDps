@@ -1,0 +1,27 @@
+<UserControl x:Class="StarResonanceDps.App.Views.Widgets.PluginWidgetHeaderLabelsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <!-- プラグインのヘッダーのボタンの見える文字(枠の層)。並びと幅は押せる層(PluginWidgetHeaderActionsView)と同じ。作りはメーターと同じ。 -->
+    <ItemsControl ItemsSource="{Binding HeaderButtons}" Focusable="False">
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+            <DataTemplate>
+                <Border Height="30" Margin="8,0">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="{Binding DataContext.WidgetWindowPalette.WidgetWindowCloseBrush,
+                                                    RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                               Text="{Binding Button.Text}" />
+                </Border>
+            </DataTemplate>
+        </ItemsControl.ItemTemplate>
+    </ItemsControl>
+</UserControl>

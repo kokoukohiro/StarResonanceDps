@@ -10,26 +10,10 @@
             Button.AggregationAction / Button.AggregationRow。
             **枠は Surface.RoundedOutline が持つ**ので、ここには置かない。
 
-            残すのはこのビューの中でしか意味を持たないピルだけ。
+            残すのは、共有のピル(Styles/Panels.xaml の Panel.StatusPill)をこのビューの条件で出す派生だけ。
         -->
 
-        <!--
-            行の右端のピル(「表示中」「読み込み中」)。角丸トークン(6/5/4)は角丸の四角用なので、
-            ここだけ高さの半分を直接入れて完全な丸にする。出す条件はそれぞれの派生のスタイルが持つ。
-        -->
-        <Style x:Key="Aggregation.Pill" TargetType="{x:Type Border}">
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="Height" Value="26" />
-            <Setter Property="CornerRadius" Value="13" />
-            <Setter Property="Padding" Value="14,0" />
-            <Setter Property="Margin" Value="16,0,0,0" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Background" Value="{DynamicResource Brush.ControlActiveBackground}" />
-            <Setter Property="SnapsToDevicePixels" Value="True" />
-            <Setter Property="Visibility" Value="Collapsed" />
-        </Style>
-
-        <Style x:Key="Aggregation.ViewingPill" TargetType="{x:Type Border}" BasedOn="{StaticResource Aggregation.Pill}">
+        <Style x:Key="Aggregation.ViewingPill" TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.StatusPill}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
@@ -39,7 +23,7 @@
         </Style>
 
         <!-- 押した回を DB から読んでいる間。読み終えて表示中になれば「表示中」に替わる。 -->
-        <Style x:Key="Aggregation.LoadingPill" TargetType="{x:Type Border}" BasedOn="{StaticResource Aggregation.Pill}">
+        <Style x:Key="Aggregation.LoadingPill" TargetType="{x:Type Border}" BasedOn="{StaticResource Panel.StatusPill}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsLoading}" Value="True">

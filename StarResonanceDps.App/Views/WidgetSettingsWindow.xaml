@@ -148,6 +148,28 @@
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding EntityInfoSettings.HiddenBuffSectionTitle}" />
                             </StackPanel>
                         </Button>
+                        <!-- プラグインのウィジェットの節(アイコンと名前はプラグインの定義。線で描くか塗るかも定義で決まる)。 -->
+                        <ItemsControl ItemsSource="{Binding PluginSettings.Sections}"
+                                      Visibility="{Binding HasPluginSettings, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Click="PluginSectionNavButton_Click"
+                                            Style="{StaticResource Button.Sidebar}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Grid>
+                                                <Path Style="{DynamicResource Icon.Stroke}"
+                                                      Data="{Binding IconGeometry}"
+                                                      Visibility="{Binding UsesStrokeIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <Path Style="{DynamicResource Icon.Fill}"
+                                                      Data="{Binding IconGeometry}"
+                                                      Visibility="{Binding UsesFillIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            </Grid>
+                                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding Title}" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Button x:Name="ThemeNavButton"
                                 Click="ThemeNavButton_Click"
                                 Style="{StaticResource Button.Sidebar}">
@@ -543,6 +565,11 @@
                                         </DataTemplate>
                                     </ContentControl.ContentTemplate>
                                 </ContentControl>
+
+                                <!-- プラグインのウィジェットの節。ウィンドウ設定とテーマのあいだ。 -->
+                                <widgetSettingsViews:PluginWidgetSettingsView x:Name="PluginSettingsView"
+                                                                              DataContext="{Binding PluginSettings}"
+                                                                              Visibility="{Binding DataContext.HasPluginSettings, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                                 <TextBlock x:Name="ThemeSection"
                                            Text="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Settings_Section_Theme_Title]}"

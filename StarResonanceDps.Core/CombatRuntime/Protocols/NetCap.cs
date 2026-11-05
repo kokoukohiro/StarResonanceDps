@@ -114,6 +114,12 @@ public class NetCap
     public Func<uint, uint, bool>? ProxyGate { get; set; }
 
     /// <summary>
+    /// 届いたメッセージを、関門(<see cref="NotifyGate"/>・<see cref="ProxyGate"/>)と本体の受け口より前にのぞく口(処理のスレッド)。
+    /// 通知は解凍の後、呼び出しはそのまま、応答は呼び出しと結んだ後に呼ぶ。プラグインへ渡すのに使う。
+    /// </summary>
+    public Action<ObservedMessage>? MessageObserved { get; set; }
+
+    /// <summary>
     /// パケットを1つ処理する直前に、その到着時刻で呼ぶ。到着時刻までに起きた出来事を、パケットの中身より先に記録するのに使う
     /// (<c>EncounterManager.RecordEndedAnnouncementBars</c>)。
     /// </summary>
@@ -374,6 +380,8 @@ public class NetCap
             Log.Logger.Information($"Unknown ServiceId = {serviceUuid} MethodId = {methodId}");
         }
 
+        Observe(new ObservedMessage(ObservedMessageKind.Notify, serviceUuid, methodId, 0, msgData, lastPacketTime));
+
         var id = new NotifyId(serviceUuid, methodId);
         var hasNotifyHandler = NotifyHandlers.TryGetValue(id, out var handler);
         var isNotifyAllowed = NotifyGate is null || NotifyGate(serviceUuid, methodId);
@@ -509,6 +517,8 @@ public class NetCap
             return;
         }
 
+        Observe(new ObservedMessage(ObservedMessageKind.Return, id.ServiceId, id.MethodId, returnUid, msgData, lastPacketTime));
+
         var hasReturnHandler = ProxyReturnHandlers.TryGetValue(id, out var handler);
         var isReturnAllowed = ProxyGate is null || ProxyGate(id.ServiceId, id.MethodId);
         var extraData = new ExtraPacketData(lastPacketTime);
@@ -532,6 +542,8 @@ public class NetCap
         uint returnUid,
         DateTime lastPacketTime)
     {
+        Observe(new ObservedMessage(ObservedMessageKind.Call, id.ServiceId, id.MethodId, returnUid, data, lastPacketTime));
+
         var extraData = new ExtraPacketData(lastPacketTime);
         var hasProxyHandler = ProxyHandlers.TryGetValue(id, out var handler);
         var isProxyAllowed = ProxyGate is null || ProxyGate(id.ServiceId, id.MethodId);
@@ -545,6 +557,24 @@ public class NetCap
             {
                 LogFailureAndContinue($"call service={id.ServiceId} method={id.MethodId}", ex);
             }
+        }
+    }
+
+    private void Observe(ObservedMessage message)
+    {
+        if (MessageObserved is not { } observer)
+        {
+            return;
+        }
+
+        try
+        {
+            observer(message);
+        }
+        catch (Exception ex)
+        {
+            // のぞく側の失敗で本体の処理を止めない。
+            LogFailureAndContinue($"message observer kind={message.Kind} service={message.ServiceId} method={message.MethodId}", ex);
         }
     }
 

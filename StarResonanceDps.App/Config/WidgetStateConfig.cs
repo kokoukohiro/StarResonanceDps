@@ -48,6 +48,9 @@ public sealed class WidgetConfig
 
     public ChatWidgetSettingsConfig? Chat { get; set; }
 
+    /// <summary>プラグインのウィジェットの設定(プラグインが定義した設定の値)。プラグインのウィジェットだけ持つ。</summary>
+    public PluginWidgetSettingsConfig? Plugin { get; set; }
+
     /// <summary>
     /// ステータス詳細の行の並び(<c>PlayerStatusEntry.OrderUnitAttrIds</c> の番号)。
     ///
@@ -93,6 +96,7 @@ public sealed class WidgetConfig
             DamageTakenLog = DamageTakenLog?.Clone(),
             EntityInfo = EntityInfo?.Clone(),
             Chat = Chat?.Clone(),
+            Plugin = Plugin?.Clone(),
             PlayerStatusRowOrder = PlayerStatusRowOrder is null ? null : [.. PlayerStatusRowOrder],
             OpenTargets = OpenTargets?.Select(target => target.Clone()).ToList()
         };
@@ -129,6 +133,25 @@ public sealed class WidgetThemeConfig
             BackgroundImageAverageColorSourcePath = BackgroundImageAverageColorSourcePath,
             HideHeaderWhenInactive = HideHeaderWhenInactive,
             HideFooterWhenInactive = HideFooterWhenInactive
+        };
+    }
+}
+
+/// <summary>
+/// プラグインのウィジェットの設定の値。鍵は設定の ID(大文字と小文字を区別しない)、値の形は <c>PluginSettingValueCodec</c>。
+/// 定義に合わせるのは読むとき(定義はプラグインを読み込んだ後でないと分からない)。
+/// </summary>
+public sealed class PluginWidgetSettingsConfig
+{
+    public Dictionary<string, string> Values { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public PluginWidgetSettingsConfig Clone()
+    {
+        return new PluginWidgetSettingsConfig
+        {
+            Values = Values is null
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>(Values, StringComparer.OrdinalIgnoreCase)
         };
     }
 }
@@ -1898,7 +1921,8 @@ public static class WidgetConfigDefaults
             ReviveList = SupportsReviveListSettings(kind) ? CreateReviveListSettings() : null,
             DamageTakenLog = SupportsDamageTakenLogSettings(kind) ? CreateDamageTakenLogSettings() : null,
             EntityInfo = SupportsEntityInfoSettings(kind) ? CreateEntityInfoSettings() : null,
-            Chat = SupportsChatSettings(kind) ? CreateChatSettings() : null
+            Chat = SupportsChatSettings(kind) ? CreateChatSettings() : null,
+            Plugin = kind == WidgetKind.Plugin ? new PluginWidgetSettingsConfig() : null
         };
     }
 
@@ -3287,6 +3311,9 @@ public static class WidgetConfigDefaults
         config.Chat = SupportsChatSettings(kind)
             ? CloneNormalizedChat(config.Chat)
             : null;
+        config.Plugin = kind == WidgetKind.Plugin
+            ? CloneNormalizedPlugin(config.Plugin)
+            : null;
         config.OpenTargets = SupportsOpenTargets(kind)
             ? config.OpenTargets
             : null;
@@ -3602,9 +3629,19 @@ public static class WidgetConfigDefaults
         return (normalizedIndexes, normalizedPalettes);
     }
 
-    public static string GetKey(WidgetKind kind)
+    /// <summary>プラグインのウィジェットの設定。値の無い行を捨てる(値を定義に合わせるのは読むとき)。</summary>
+    public static PluginWidgetSettingsConfig CloneNormalizedPlugin(PluginWidgetSettingsConfig? plugin)
     {
-        return kind.ToString();
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (settingId, value) in plugin?.Values ?? [])
+        {
+            if (settingId is not null && value is not null)
+            {
+                values[settingId] = value;
+            }
+        }
+
+        return new PluginWidgetSettingsConfig { Values = values };
     }
 
     private static List<string> NormalizeColorList(IEnumerable<string>? colors, IEnumerable<string> fallback, int maxCount)

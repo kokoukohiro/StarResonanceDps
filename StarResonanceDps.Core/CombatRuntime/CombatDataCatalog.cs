@@ -574,12 +574,7 @@ public static class CombatDataCatalog
     /// </summary>
     public static string GetSourceDisplayName(long rowKey, bool isBuffSource, SourceLanding landing)
     {
-        var name = GetSourceNameBeforeLanding(rowKey, isBuffSource);
-        if (string.IsNullOrEmpty(name))
-        {
-            name = GetLandingName(landing);
-        }
-
+        var name = GetSourceNameWithoutInternalId(rowKey, isBuffSource, landing);
         if (string.IsNullOrEmpty(name) && ShowsUnnamedSkillInternalNames)
         {
             name = GetSourceInternalName(rowKey, isBuffSource, landing);
@@ -589,6 +584,18 @@ public static class CombatDataCatalog
             name,
             isBuffSource ? InternalIdDisplayMode.BuffOnly : InternalIdDisplayMode.SkillOnly,
             rowKey);
+    }
+
+    /// <summary>
+    /// メーターの行名から、内部名と内部ID注記を除いたもの(見出し表と料理 → 着地先の名前)。どちらも無ければ空。
+    /// 表示(<see cref="GetSourceDisplayName"/>)と、プラグインへ渡す行名がこれを使う。
+    /// </summary>
+    public static string GetSourceNameWithoutInternalId(long rowKey, bool isBuffSource, SourceLanding landing)
+    {
+        var name = GetSourceNameBeforeLanding(rowKey, isBuffSource);
+        return string.IsNullOrEmpty(name)
+            ? GetLandingName(landing)
+            : name;
     }
 
     /// <summary>

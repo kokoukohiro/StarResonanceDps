@@ -19,6 +19,7 @@
     <None Remove="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
     <None Remove="Assets\Images\achievement_simclass_new_s4.png" />
     <None Remove="Assets\Images\achievement_simclass_new_xushirongguang.png" />
+    <None Remove="Assets\Images\ApplicationIcon.png" />
     <None Remove="Assets\Images\ApplicationIcon_22x22.png" />
     <None Remove="Assets\Images\ApplicationIcon_32x32.png" />
     <None Remove="Assets\Images\ApplicationIcon.ico" />
@@ -214,6 +215,7 @@
     <Resource Include="Assets\Images\achievement_simclass_new_jinkonghuixiang.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_s4.png" />
     <Resource Include="Assets\Images\achievement_simclass_new_xushirongguang.png" />
+    <Resource Include="Assets\Images\ApplicationIcon.png" />
     <Resource Include="Assets\Images\ApplicationIcon_22x22.png" />
     <EmbeddedResource Include="Assets\Images\ApplicationIcon_32x32.png" LogicalName="Icon.png" />
     <Resource Include="Assets\Images\ApplicationIcon.ico" />
@@ -279,22 +281,21 @@
     <ModulePluginAssembly>$(MSBuildProjectDirectory)\..\StarResonanceDps.Plugins.ModuleTool\bin\$(Configuration)\$(BundledPluginOutputSubdirectory)\ModuleTool.dll</ModulePluginAssembly>
   </PropertyGroup>
 
+  <!-- プラグインは Plugins\<アセンブリ名>\ に1つずつ置く。フォルダには設定ファイルも入るので、フォルダごと消さない。直下の DLL は前の置き方の残り。 -->
   <Target Name="CopyBundledPluginAssemblies" AfterTargets="Build">
-    <RemoveDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
-    <Delete Files="$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
+    <Delete Files="$(OutDir)Plugins\KeybindTool.dll;$(OutDir)Plugins\ModuleTool.dll;$(OutDir)Plugins\plugin.json;$(OutDir)Plugins\KeybindTool.deps.json;$(OutDir)Plugins\ModuleTool.deps.json;$(OutDir)Plugins\KeybindTool.runtimeconfig.json;$(OutDir)Plugins\ModuleTool.runtimeconfig.json" />
 
-    <MakeDir Directories="$(OutDir)Plugins" />
-    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(OutDir)Plugins\KeybindTool.dll" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(OutDir)Plugins\KeybindTool;$(OutDir)Plugins\ModuleTool" />
+    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(OutDir)Plugins\KeybindTool\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(OutDir)Plugins\ModuleTool\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyBundledPluginAssembliesToPublish" AfterTargets="Publish">
-    <RemoveDir Directories="$(PublishDir)Plugins\KeybindTool;$(PublishDir)Plugins\ModuleTool" />
-    <Delete Files="$(PublishDir)Plugins\plugin.json;$(PublishDir)Plugins\KeybindTool.deps.json;$(PublishDir)Plugins\ModuleTool.deps.json;$(PublishDir)Plugins\KeybindTool.runtimeconfig.json;$(PublishDir)Plugins\ModuleTool.runtimeconfig.json" />
+    <Delete Files="$(PublishDir)Plugins\KeybindTool.dll;$(PublishDir)Plugins\ModuleTool.dll;$(PublishDir)Plugins\plugin.json;$(PublishDir)Plugins\KeybindTool.deps.json;$(PublishDir)Plugins\ModuleTool.deps.json;$(PublishDir)Plugins\KeybindTool.runtimeconfig.json;$(PublishDir)Plugins\ModuleTool.runtimeconfig.json" />
 
-    <MakeDir Directories="$(PublishDir)Plugins" />
-    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(PublishDir)Plugins\KeybindTool.dll" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(PublishDir)Plugins\ModuleTool.dll" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(PublishDir)Plugins\KeybindTool;$(PublishDir)Plugins\ModuleTool" />
+    <Copy SourceFiles="$(KeybindPluginAssembly)" DestinationFiles="$(PublishDir)Plugins\KeybindTool\KeybindTool.dll" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ModulePluginAssembly)" DestinationFiles="$(PublishDir)Plugins\ModuleTool\ModuleTool.dll" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- ホットキーの補助(管理者権限で動く別の実行ファイル)は実行フォルダの直下に置く。 -->

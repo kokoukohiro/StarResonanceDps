@@ -7,6 +7,7 @@
     <AssemblyName>KeybindTool</AssemblyName>
     <RootNamespace>StarResonanceDps.Plugins.KeybindTool</RootNamespace>
     <GenerateDependencyFile>false</GenerateDependencyFile>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\2016.png" />
@@ -45,6 +46,10 @@
     <ProjectReference Include="..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <!-- SDK のパッケージと同じ、プラグインの属性の検査。 -->
+    <ProjectReference Include="..\StarResonanceDps.PluginSdk.Analyzers\StarResonanceDps.PluginSdk.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,5 +99,6 @@
     <Resource Include="Assets\324.png" />
     <Resource Include="Assets\325.png" />
     <Resource Include="Assets\326.png" />
+    <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 </Project>

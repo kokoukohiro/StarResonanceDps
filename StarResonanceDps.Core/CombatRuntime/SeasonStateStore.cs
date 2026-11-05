@@ -19,6 +19,9 @@ public static class SeasonStateStore
     private static int _currentSeasonId;
     private static Dictionary<int, int> _selfSeasonLevels = [];
 
+    /// <summary>今のシーズン番号(<see cref="CurrentSeasonId"/>)が変わった。パケットのスレッドで上がる。</summary>
+    public static event Action? Changed;
+
     /// <summary>今のシーズン番号。まだ届いていなければ 0。</summary>
     public static int CurrentSeasonId
     {
@@ -33,9 +36,16 @@ public static class SeasonStateStore
 
     public static void SetCurrentSeasonId(int seasonId)
     {
+        bool changed;
         lock (StateLock)
         {
+            changed = _currentSeasonId != seasonId;
             _currentSeasonId = seasonId;
+        }
+
+        if (changed)
+        {
+            Changed?.Invoke();
         }
     }
 
@@ -63,10 +73,17 @@ public static class SeasonStateStore
     /// <summary>起動時の値に戻す(ログアウト)。キャラ交代があるので自分の控えも消す。</summary>
     public static void ResetToStartup()
     {
+        bool changed;
         lock (StateLock)
         {
+            changed = _currentSeasonId != 0;
             _currentSeasonId = 0;
             _selfSeasonLevels = [];
+        }
+
+        if (changed)
+        {
+            Changed?.Invoke();
         }
     }
 }

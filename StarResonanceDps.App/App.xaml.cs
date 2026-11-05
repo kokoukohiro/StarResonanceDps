@@ -128,19 +128,38 @@ public partial class App : Application
     /// <summary>
     /// 受け手の無い例外は、ログに全文を書き、「エラー」の窓を出してから終了コード 1 で終わる。
     /// 画面のスレッドの例外は WPF に渡さず(渡すと窓を出さずに落ちる)、ほかのスレッドと Task の例外は画面のスレッドで窓を出す。
+    ///
+    /// <para>
+    /// プラグインのコードから出た例外(<see cref="PluginManager"/> が例外の経路で見分ける)は、画面のスレッドと Task のものならそのプラグインを止めて続ける。
+    /// ほかのスレッドのものは .NET が終わらせるので止められない。次の起動から初期化しないよう、プラグインに印を書いてから今までどおり終わる。
+    /// </para>
     /// </summary>
     private void RegisterUnhandledExceptionHandlers()
     {
         DispatcherUnhandledException += (_, args) =>
         {
             args.Handled = true;
+            if (PluginManager.Instance.TryStopForUnhandledException(args.Exception))
+            {
+                return;
+            }
+
             HandleUnhandledException(args.Exception);
         };
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-            HandleUnhandledException(args.ExceptionObject as Exception ?? new InvalidOperationException(args.ExceptionObject?.ToString()));
+        {
+            var exception = args.ExceptionObject as Exception ?? new InvalidOperationException(args.ExceptionObject?.ToString());
+            PluginManager.Instance.MarkTerminatedApp(exception);
+            HandleUnhandledException(exception);
+        };
         TaskScheduler.UnobservedTaskException += (_, args) =>
         {
             args.SetObserved();
+            if (PluginManager.Instance.TryStopForUnobservedException(args.Exception))
+            {
+                return;
+            }
+
             HandleUnhandledException(args.Exception);
         };
     }

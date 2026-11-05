@@ -13,7 +13,7 @@
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
             <Image Width="22"
                    Height="22"
-                   Source="/Assets/Images/ApplicationIcon_22x22.png"
+                   Source="{Binding IconSource, RelativeSource={RelativeSource AncestorType=UserControl}, TargetNullValue={StaticResource Icon.ApplicationHeader}}"
                    Stretch="Uniform"
                    RenderOptions.BitmapScalingMode="HighQuality"
                    SnapsToDevicePixels="True" />

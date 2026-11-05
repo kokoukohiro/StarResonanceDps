@@ -72,13 +72,13 @@ public sealed class NotificationService : IDisposable
 
     public void Notify(NotificationKind kind, string text)
     {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return;
-        }
+        Notify(ConfigManager.Instance.GetNotificationItem(kind), text);
+    }
 
-        var item = ConfigManager.Instance.GetNotificationItem(kind);
-        if (!item.IsEnabled)
+    /// <summary>項目の設定(本体の項目もプラグインの項目も)で出す。オフの項目と空の文は出さない。</summary>
+    public void Notify(NotificationItemConfig item, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || !item.IsEnabled)
         {
             return;
         }

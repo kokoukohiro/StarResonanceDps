@@ -5,4 +5,5 @@
   <Project Path="StarResonanceDps.Plugins.KeybindTool/StarResonanceDps.Plugins.KeybindTool.csproj" />
   <Project Path="StarResonanceDps.Plugins.ModuleTool/StarResonanceDps.Plugins.ModuleTool.csproj" />
   <Project Path="StarResonanceDps.PluginSdk/StarResonanceDps.PluginSdk.csproj" />
+  <Project Path="StarResonanceDps.PluginSdk.Analyzers/StarResonanceDps.PluginSdk.Analyzers.csproj" />
 </Solution>

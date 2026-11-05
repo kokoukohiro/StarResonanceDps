@@ -89,7 +89,7 @@ public partial class MainWindow : Window
     ///
     /// <para>
     /// 起動できないときはその窓を出して終わる。続けるときは、設定ファイルの知らせ → Windows起動の登録を合わせる →
-    /// ウィジェットの復元 → ホットキー(起動設定でオンなら補助を起動) → VOICEVOX の起動(起動設定でオンなら) →
+    /// プラグインの初期化 → ウィジェットの復元 → ホットキー(起動設定でオンなら補助を起動) → VOICEVOX の起動(起動設定でオンなら) →
     /// VOICEVOX の初期化 → 古い Npcap の確認 → 読み上げの声の確認、の順。1つの処理に直列なので、途中で
     /// メッセージが回ってもこの順は崩れない。
     /// </para>
@@ -124,6 +124,9 @@ public partial class MainWindow : Window
         {
             WindowsStartupRegistrationFailureMessage.Show(this);
         }
+
+        // プラグインはウィジェットを開く前に初期化する。読めなかったものはここで1回だけ知らせる。
+        PluginLoadFailureMessage.Show(this, PluginManager.Instance.InitializeAll());
 
         viewModel.RestoreRunningWidgetWindows();
 

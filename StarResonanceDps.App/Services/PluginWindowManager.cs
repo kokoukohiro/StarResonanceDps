@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using Serilog;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.App.Views.Plugins;
 using StarResonanceDps.PluginSdk;
@@ -11,7 +10,7 @@ namespace StarResonanceDps.App.Services;
 
 public sealed class PluginWindowManager
 {
-    private readonly Dictionary<string, PluginWindow> _openWindows = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, OpenWindow> _openWindows = new(StringComparer.OrdinalIgnoreCase);
     private Window? _managerWindow;
 
     private PluginWindowManager()
@@ -20,37 +19,35 @@ public sealed class PluginWindowManager
 
     public static PluginWindowManager Instance { get; } = new();
 
-    public bool ActivateExisting(string pluginId)
+    public bool ActivateExisting(string pluginKey)
     {
-        if (string.IsNullOrWhiteSpace(pluginId)
-            || !_openWindows.TryGetValue(pluginId, out var existingWindow))
+        if (string.IsNullOrWhiteSpace(pluginKey)
+            || !_openWindows.TryGetValue(pluginKey, out var existingWindow))
         {
             return false;
         }
 
-        if (existingWindow.WindowState == WindowState.Minimized)
+        if (existingWindow.Window.WindowState == WindowState.Minimized)
         {
-            existingWindow.WindowState = WindowState.Normal;
+            existingWindow.Window.WindowState = WindowState.Normal;
         }
 
-        existingWindow.Activate();
+        existingWindow.Window.Activate();
         return true;
     }
 
+    /// <param name="contentClosed">窓を閉じた後に、中身を渡して呼ぶ(中身の後始末をする)。</param>
     public void Open(
         PluginListItemViewModel plugin,
         FrameworkElement content,
-        PluginWindowOptions? windowOptions)
+        PluginWindowOptions? windowOptions,
+        Action<FrameworkElement> contentClosed)
     {
         ArgumentNullException.ThrowIfNull(plugin);
         ArgumentNullException.ThrowIfNull(content);
+        ArgumentNullException.ThrowIfNull(contentClosed);
 
-        if (plugin.IsAddItem || string.IsNullOrWhiteSpace(plugin.PluginId))
-        {
-            return;
-        }
-
-        if (ActivateExisting(plugin.PluginId))
+        if (ActivateExisting(plugin.PluginKey))
         {
             return;
         }
@@ -61,8 +58,17 @@ public sealed class PluginWindowManager
         var window = new PluginWindow(plugin, content, managerWindow, windowOptions);
         window.Closed += PluginWindow_Closed;
 
-        _openWindows.Add(plugin.PluginId, window);
+        _openWindows.Add(plugin.PluginKey, new OpenWindow(window, contentClosed));
         window.Show();
+    }
+
+    /// <summary>プラグインの窓が開いていれば閉じる(本体がプラグインを止めるとき)。</summary>
+    public void Close(string pluginKey)
+    {
+        if (_openWindows.TryGetValue(pluginKey, out var openWindow))
+        {
+            openWindow.Window.Close();
+        }
     }
 
     private void TrackManagerWindow(Window? managerWindow)
@@ -83,9 +89,9 @@ public sealed class PluginWindowManager
 
     private void ManagerWindow_Closed(object? sender, EventArgs eventArgs)
     {
-        foreach (var window in _openWindows.Values.ToArray())
+        foreach (var openWindow in _openWindows.Values.ToArray())
         {
-            window.Close();
+            openWindow.Window.Close();
         }
 
         _managerWindow = null;
@@ -100,22 +106,13 @@ public sealed class PluginWindowManager
 
         window.Closed -= PluginWindow_Closed;
 
-        if (!string.IsNullOrWhiteSpace(window.Plugin.PluginId))
+        if (!_openWindows.Remove(window.Plugin.PluginKey, out var openWindow))
         {
-            _openWindows.Remove(window.Plugin.PluginId);
+            return;
         }
 
-        // SDK の約束: 中身が IDisposable なら、閉じた後に後始末させる(本体の知らせの購読を外す)。
-        if (window.PluginContent is IDisposable disposableContent)
-        {
-            try
-            {
-                disposableContent.Dispose();
-            }
-            catch (Exception exception)
-            {
-                Log.Error(exception, "[Plugin:{PluginId}] {Message}", window.Plugin.PluginId, "Plugin content disposal failed.");
-            }
-        }
+        openWindow.ContentClosed(window.PluginContent);
     }
+
+    private sealed record OpenWindow(PluginWindow Window, Action<FrameworkElement> ContentClosed);
 }

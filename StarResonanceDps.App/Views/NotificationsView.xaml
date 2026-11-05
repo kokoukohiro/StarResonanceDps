@@ -6,6 +6,7 @@
              xmlns:behaviors="clr-namespace:StarResonanceDps.App.Behaviors"
              xmlns:notificationModels="clr-namespace:StarResonanceDps.App.Models.Notifications"
              xmlns:notifications="clr-namespace:StarResonanceDps.App.ViewModels.Notifications"
+             xmlns:plugins="clr-namespace:StarResonanceDps.App.ViewModels.Plugins"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True"
              IsVisibleChanged="NotificationsView_IsVisibleChanged">
@@ -25,6 +26,16 @@
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!-- 一覧のプラグインの名前の見出し。左は行の文字(RadioButton.SidebarNavigation の Padding 14)にそろえる。 -->
+        <Style x:Key="NotificationsView.GroupHeader" TargetType="TextBlock">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Margin" Value="14,8,14,6" />
+            <Setter Property="Foreground" Value="{DynamicResource Brush.TextMuted}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
     </UserControl.Resources>
 
@@ -53,7 +64,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- 項目の一覧。行の作りは左のタブと同じで、スイッチは設定画面のもの(ON / OFF の文字は出さない)。スイッチを押しても選んでいる行は変わらない。 -->
+        <!--
+            項目の一覧。行の作りは左のタブと同じで、スイッチは設定画面のもの(ON / OFF の文字は出さない)。スイッチを押しても選んでいる行は変わらない。
+            本体の項目の後ろにプラグインの項目を並べ、プラグインの最初の項目の上にプラグインの名前の見出しを出す。
+        -->
         <ContentControl x:Name="ItemsPanel"
                         Grid.Row="0"
                         Grid.RowSpan="3"
@@ -65,27 +79,33 @@
                 <ItemsControl Margin="10" ItemsSource="{Binding Items}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type notifications:NotificationItemViewModel}">
-                            <RadioButton GroupName="NotificationItems"
-                                         Style="{DynamicResource RadioButton.SidebarNavigation}"
-                                         HorizontalContentAlignment="Stretch"
-                                         IsChecked="{Binding IsSelected, Mode=TwoWay}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource NotificationsView.GroupHeader}"
+                                           Visibility="{Binding HasGroupHeader, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                           Text="{Binding GroupHeader}" />
 
-                                    <TextBlock VerticalAlignment="Center"
-                                               Text="{Binding Label}"
-                                               TextTrimming="CharacterEllipsis" />
+                                <RadioButton GroupName="NotificationItems"
+                                             Style="{DynamicResource RadioButton.SidebarNavigation}"
+                                             HorizontalContentAlignment="Stretch"
+                                             IsChecked="{Binding IsSelected, Mode=TwoWay}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
 
-                                    <ToggleButton Grid.Column="1"
-                                                  Margin="12,0,0,0"
-                                                  VerticalAlignment="Center"
-                                                  Style="{StaticResource Input.Switch}"
-                                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
-                                </Grid>
-                            </RadioButton>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   Text="{Binding Label}"
+                                                   TextTrimming="CharacterEllipsis" />
+
+                                        <ToggleButton Grid.Column="1"
+                                                      Margin="12,0,0,0"
+                                                      VerticalAlignment="Center"
+                                                      Style="{StaticResource Input.Switch}"
+                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+                                    </Grid>
+                                </RadioButton>
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -165,7 +185,7 @@
             出し方の設定。中身は前の全体設定の通知設定と同じ行で、設定画面の枠を使わずパネルへ直に並べる(下線なし)。
             行の名前は左寄せ、選択リストと音量バー(どちらも幅 220)は右寄せ。
             上下の余白 16 はスクロールの外に置く。右下が最小の高さ(NotificationsView.xaml.cs の SettingsPanelMinHeight)のとき、最初の行だけがちょうど真ん中に出る。
-            項目だけの行(対象の名前とID・注意書き・通知条件・HP低下の3行)を先頭に置き、出し方から下(全部の項目に共通の行)はいつも末尾に置く。
+            項目だけの行(対象の名前とID・注意書き・通知条件・HP低下の3行、プラグインの項目はプラグインが定義した設定)を先頭に置き、出し方から下(全部の項目に共通の行)はいつも末尾に置く。
         -->
         <ContentControl x:Name="SettingsPanel"
                         Grid.Row="2"
@@ -543,6 +563,174 @@
                         </ComboBox>
                     </Grid>
 
+                    <!--
+                        プラグインが定義した設定(プラグインの項目だけ)。行の作りは上の本体の行と同じで、注意書きは行の下。
+                        数の欄は確定したとき(Enter・欄を離れたとき)だけ値にする(全体設定の計測時間の欄と同じ、NotificationsView.xaml.cs)。
+                        スライドバーは通知音量と同じく、つまみを手放したときに値を渡す。範囲と刻みを先に置く(値が範囲で切られないように)。
+                    -->
+                    <ItemsControl ItemsSource="{Binding PluginSettings}">
+                        <ItemsControl.Resources>
+                            <DataTemplate DataType="{x:Type plugins:PluginSwitchSettingViewModel}">
+                                <StackPanel>
+                                    <Grid Height="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Style="{StaticResource NotificationsView.Label}" Text="{Binding Label}" />
+
+                                        <ToggleButton Grid.Column="2"
+                                                      VerticalAlignment="Center"
+                                                      Style="{StaticResource Input.Switch}"
+                                                      IsChecked="{Binding IsOn, Mode=TwoWay}" />
+                                    </Grid>
+
+                                    <TextBlock Margin="0,0,0,6"
+                                               Style="{StaticResource NotificationsView.Note}"
+                                               Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type plugins:PluginChoiceSettingViewModel}">
+                                <StackPanel>
+                                    <Grid Height="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Style="{StaticResource NotificationsView.Label}" Text="{Binding Label}" />
+
+                                        <!-- DisplayMemberPath は効かないので ItemTemplate(VOICEVOX の話者と同じ)。 -->
+                                        <ComboBox Grid.Column="2"
+                                                  Style="{StaticResource Input.SettingsComboBox}"
+                                                  ItemsSource="{Binding Options}"
+                                                  SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </Grid>
+
+                                    <TextBlock Margin="0,0,0,6"
+                                               Style="{StaticResource NotificationsView.Note}"
+                                               Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type plugins:PluginNumberSettingViewModel}">
+                                <StackPanel>
+                                    <Grid Height="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Style="{StaticResource NotificationsView.Label}" Text="{Binding Label}" />
+
+                                        <TextBox Grid.Column="2"
+                                                 Width="220"
+                                                 Height="32"
+                                                 Style="{StaticResource Input.PathBox}"
+                                                 VerticalContentAlignment="Center"
+                                                 AllowDrop="False"
+                                                 InputMethod.IsInputMethodEnabled="False"
+                                                 behaviors:DigitsOnlyInputBehavior.IsEnabled="True"
+                                                 Loaded="PluginNumberTextBox_Loaded"
+                                                 PreviewKeyDown="PluginNumberTextBox_PreviewKeyDown"
+                                                 LostKeyboardFocus="PluginNumberTextBox_LostKeyboardFocus" />
+                                    </Grid>
+
+                                    <TextBlock Margin="0,0,0,6"
+                                               Style="{StaticResource NotificationsView.Note}"
+                                               Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type plugins:PluginTextSettingViewModel}">
+                                <StackPanel>
+                                    <Grid Height="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Style="{StaticResource NotificationsView.Label}" Text="{Binding Label}" />
+
+                                        <TextBox Grid.Column="2"
+                                                 Width="220"
+                                                 Height="32"
+                                                 Style="{StaticResource Input.PathBox}"
+                                                 VerticalContentAlignment="Center"
+                                                 Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    </Grid>
+
+                                    <TextBlock Margin="0,0,0,6"
+                                               Style="{StaticResource NotificationsView.Note}"
+                                               Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
+                            </DataTemplate>
+
+                            <DataTemplate DataType="{x:Type plugins:PluginSliderSettingViewModel}">
+                                <StackPanel>
+                                    <Grid Height="44">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Style="{StaticResource NotificationsView.Label}" Text="{Binding Label}" />
+
+                                        <Grid Grid.Column="2" Width="220" VerticalAlignment="Center">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="10" />
+                                                <ColumnDefinition Width="Auto" MinWidth="35" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Slider x:Name="PluginSettingSlider"
+                                                    Grid.Column="0"
+                                                    Minimum="{Binding Minimum, Mode=OneTime}"
+                                                    Maximum="{Binding Maximum, Mode=OneTime}"
+                                                    TickFrequency="{Binding Step, Mode=OneTime}"
+                                                    IsSnapToTickEnabled="True"
+                                                    Style="{StaticResource Input.ValueSlider}"
+                                                    Value="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
+                                                    Thumb.DragStarted="ReleaseCommitSlider_DragStarted"
+                                                    Thumb.DragCompleted="ReleaseCommitSlider_DragCompleted"
+                                                    ValueChanged="ReleaseCommitSlider_ValueChanged" />
+
+                                            <TextBlock Grid.Column="2"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Right"
+                                                       Foreground="{DynamicResource Brush.TextPrimary}"
+                                                       FontSize="14"
+                                                       FontWeight="SemiBold"
+                                                       Text="{Binding Value, ElementName=PluginSettingSlider, StringFormat={}{0:0.####}}" />
+                                        </Grid>
+                                    </Grid>
+
+                                    <TextBlock Margin="0,0,0,6"
+                                               Style="{StaticResource NotificationsView.Note}"
+                                               Visibility="{Binding HasNote, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                               Text="{Binding Note}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.Resources>
+                    </ItemsControl>
+
                     <!-- 出し方。並びは AppConfigDefaults.NotificationMethod*Index の番号と同じ。Windows の通知のときは2行目に応答不可の注意書き。 -->
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -603,9 +791,9 @@
                                     TickFrequency="1"
                                     Style="{StaticResource Input.ValueSlider}"
                                     Value="{Binding Volume, Mode=TwoWay, UpdateSourceTrigger=Explicit}"
-                                    Thumb.DragStarted="NotificationVolumeSlider_DragStarted"
-                                    Thumb.DragCompleted="NotificationVolumeSlider_DragCompleted"
-                                    ValueChanged="NotificationVolumeSlider_ValueChanged" />
+                                    Thumb.DragStarted="ReleaseCommitSlider_DragStarted"
+                                    Thumb.DragCompleted="ReleaseCommitSlider_DragCompleted"
+                                    ValueChanged="ReleaseCommitSlider_ValueChanged" />
 
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"

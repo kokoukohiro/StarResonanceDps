@@ -121,6 +121,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             netCap.GameConnectionIdentified = GameServerStore.SetFromExeName;
 
+            netCap.MessageObserved = message => MessageObserved?.Invoke(message);
+
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetTeamInfoMethodId, ProcessGetTeamInfoReturn);
             netCap.RegisterProxyReturnHandler(WorldProxyServiceId, GetSocialDataMethodId, ProcessGetSocialDataReturn);
 
@@ -731,6 +733,18 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// プレイヤー情報の窓は、出していた行を捨てて、起動時の表示に戻す(一覧から外れた人の最後の行も <see cref="PlayerDirectory.ResetToStartup"/> で捨てている)。
         /// </summary>
         public static event Action? ResetToStartupCompleted;
+
+        /// <summary>
+        /// 届いたメッセージ全部(関門の前。<see cref="NetCap.MessageObserved"/>)。パケット処理のスレッドで上がる。
+        /// 中身は受け手の中でだけ有効。App がプラグインへ渡すのに使う。
+        /// </summary>
+        public static event Action<ObservedMessage>? MessageObserved;
+
+        /// <summary>
+        /// シーン情報を反映した(<see cref="ApplySceneData"/> の終わり)。値はマップを移動して一覧を作り直したか
+        /// (偽は同じマップのシーン通知の重複か、起動して最初のシーンの確定)。パケット処理のスレッドで上がる。
+        /// </summary>
+        public static event Action<bool>? SceneApplied;
 
         /// <summary>
         /// マッチングが成立して承諾待ちになった(<c>MatchNtf.EnterMatchResult</c> の状態が <c>WaitReady</c>。ゲームの「マッチング成功、確認待ち」)。
@@ -3703,6 +3717,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             EncounterManager.Current.SetChannelLineNumber(lineId);
             PlayerRosterProjection.UpdateMapName();
             NearbyEntityProjection.UpdateMapName();
+
+            SceneApplied?.Invoke(resetForSceneChange);
         }
 
         /// <summary>

@@ -1,14 +1,11 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using StarResonanceDps.App.Config;
-using StarResonanceDps.App.Localization;
-using StarResonanceDps.App.Models.Notifications;
 using StarResonanceDps.App.ViewModels.WidgetSettings;
 
 namespace StarResonanceDps.App.ViewModels.Notifications;
 
 /// <summary>
-/// 通知タブの項目の文章(入力欄・プレビュー・差し込む項目)。
+/// 通知タブの項目の文章(入力欄・プレビュー・差し込む項目)。既定の文・プレビュー・差し込む項目の決まりは <see cref="INotificationTextSource"/>。
 ///
 /// <para>
 /// 保存する値は、null が既定のまま(表示言語の既定の文。言語を変えると入力欄も替わる)、それ以外は書き換えた文。
@@ -18,8 +15,7 @@ namespace StarResonanceDps.App.ViewModels.Notifications;
 /// </summary>
 public sealed partial class NotificationTextViewModel : ObservableObject
 {
-    private readonly NotificationKind _kind;
-    private readonly (string Key, string LabelResourceKey, string Placeholder)[] _fieldDefinitions;
+    private readonly INotificationTextSource _source;
     private readonly ObservableCollection<MeterPlayerInfoFormatField> _availableFormatFields = [];
     private bool _isLoading;
 
@@ -35,12 +31,9 @@ public sealed partial class NotificationTextViewModel : ObservableObject
     [ObservableProperty]
     private string _preview = string.Empty;
 
-    public NotificationTextViewModel(
-        NotificationKind kind,
-        (string Key, string LabelResourceKey, string Placeholder)[] fieldDefinitions)
+    public NotificationTextViewModel(INotificationTextSource source)
     {
-        _kind = kind;
-        _fieldDefinitions = fieldDefinitions;
+        _source = source;
         AvailableFormatFields = new ReadOnlyObservableCollection<MeterPlayerInfoFormatField>(_availableFormatFields);
         RefreshLocalizedText();
     }
@@ -50,7 +43,7 @@ public sealed partial class NotificationTextViewModel : ObservableObject
 
     public ReadOnlyObservableCollection<MeterPlayerInfoFormatField> AvailableFormatFields { get; }
 
-    private string DefaultText => LocalizationManager.Instance.GetString(NotificationTextFormatter.GetDefaultKey(_kind));
+    private string DefaultText => _source.GetDefaultText();
 
     /// <summary>保存する値。今の言語の既定の文か空欄なら null。</summary>
     public string? CreateSavedValue()
@@ -101,12 +94,9 @@ public sealed partial class NotificationTextViewModel : ObservableObject
         var selectedKey = SelectedFormatField?.Key;
 
         _availableFormatFields.Clear();
-        foreach (var definition in _fieldDefinitions)
+        foreach (var field in _source.CreateFormatFields())
         {
-            _availableFormatFields.Add(new MeterPlayerInfoFormatField(
-                definition.Key,
-                LocalizationManager.Instance.GetString(definition.LabelResourceKey),
-                definition.Placeholder));
+            _availableFormatFields.Add(field);
         }
 
         SelectedFormatField = _availableFormatFields
@@ -118,7 +108,7 @@ public sealed partial class NotificationTextViewModel : ObservableObject
     {
         // 改行はそのまま出す(通知と同じ文を見せる)。空欄は既定の文で通知するので、既定の文で出す。
         var format = string.IsNullOrWhiteSpace(FormatString) ? DefaultText : FormatString;
-        Preview = NotificationTextFormatter.FormatPreview(_kind, format);
+        Preview = _source.FormatPreview(format);
     }
 
     partial void OnFormatStringChanged(string value)

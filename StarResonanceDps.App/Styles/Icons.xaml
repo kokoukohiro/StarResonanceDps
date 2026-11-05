@@ -138,6 +138,12 @@
     <BitmapImage x:Key="Icon.Season.achievement_simclass_new_jinkonghuixiang" UriSource="/Assets/Images/achievement_simclass_new_jinkonghuixiang.png" />
     <BitmapImage x:Key="Icon.Season.achievement_simclass_new_s4" UriSource="/Assets/Images/achievement_simclass_new_s4.png" />
 
+    <!-- アプリのアイコン。プラグインの一覧で、アイコンを持たないプラグインの行に出す。 -->
+    <BitmapImage x:Key="Icon.Application" UriSource="/Assets/Images/ApplicationIcon.png" />
+
+    <!-- アプリのアイコン。窓の左上(AppHeader)に出す。 -->
+    <BitmapImage x:Key="Icon.ApplicationHeader" UriSource="/Assets/Images/ApplicationIcon_22x22.png" />
+
     <!-- プレイヤー情報の顔と名刺の既定の絵(写真を設定していない人)。プレイヤーの基本モデルはどれもこの2枚。 -->
     <BitmapImage x:Key="Icon.Avatar.head_photo_000" UriSource="/Assets/Images/head_photo_000.png" />
     <BitmapImage x:Key="Icon.IdCard.idcard_common_01" UriSource="/Assets/Images/idcard_common_01.png" />
@@ -488,6 +494,11 @@
     <Geometry x:Key="Icon.Add">
         M12 5V19
         M5 12H19
+    </Geometry>
+
+    <!-- ゴミ箱(プラグインの一覧のアンインストール)。 -->
+    <Geometry x:Key="Icon.Delete">
+        M6 6v13a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V6M4 6h16M8 6V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1m-6 4v7m4-7v7
     </Geometry>
 
     <Geometry x:Key="Icon.ChevronDown">

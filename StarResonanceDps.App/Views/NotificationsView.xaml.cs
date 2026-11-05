@@ -1,8 +1,11 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using StarResonanceDps.App.Behaviors;
 using StarResonanceDps.App.Services;
 using StarResonanceDps.App.ViewModels.Notifications;
+using StarResonanceDps.App.ViewModels.Plugins;
 using StarResonanceDps.App.Views.WidgetSettings;
 
 namespace StarResonanceDps.App.Views;
@@ -22,7 +25,7 @@ public partial class NotificationsView : UserControl
     /// <summary>空だった VOICEVOX のリストを、選択肢ができたので開き直している(開き直しでは問い合わせない)。</summary>
     private bool _isReopeningVoicevoxDropDown;
 
-    private bool _isDraggingNotificationVolume;
+    private bool _isDraggingSlider;
 
     private NotificationsViewModel? _subscribedViewModel;
 
@@ -189,32 +192,72 @@ public partial class NotificationsView : UserControl
         FormatFieldInsertion.MoveCaretToEndWhenUnfocused((TextBox)sender);
     }
 
-    // --- 通知音量のスライドバー ---
-    // 値を項目へ渡す(保存と通知の音量に効く)のは、つまみを手放したときと、
+    // --- 通知音量とプラグインの設定のスライドバー ---
+    // 値を項目へ渡す(保存と通知に効く)のは、つまみを手放したときと、
     // ドラッグ以外の操作(クリック・キー・ホイール)で値が変わったときだけ。ドラッグ中は打つ前の値のまま。
+    // 作っている途中(範囲と値を入れているあいだ)の値の変化は渡さない。
 
-    private void NotificationVolumeSlider_DragStarted(object sender, DragStartedEventArgs e)
+    private void ReleaseCommitSlider_DragStarted(object sender, DragStartedEventArgs e)
     {
-        _isDraggingNotificationVolume = true;
+        _isDraggingSlider = true;
     }
 
-    private void NotificationVolumeSlider_DragCompleted(object sender, DragCompletedEventArgs e)
+    private void ReleaseCommitSlider_DragCompleted(object sender, DragCompletedEventArgs e)
     {
-        _isDraggingNotificationVolume = false;
-        CommitNotificationVolume((Slider)sender);
+        _isDraggingSlider = false;
+        CommitSlider((Slider)sender);
     }
 
-    private void NotificationVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    private void ReleaseCommitSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
-        if (!_isDraggingNotificationVolume)
+        if (!_isDraggingSlider && ((Slider)sender).IsLoaded)
         {
-            CommitNotificationVolume((Slider)sender);
+            CommitSlider((Slider)sender);
         }
     }
 
-    private static void CommitNotificationVolume(Slider slider)
+    private static void CommitSlider(Slider slider)
     {
         slider.GetBindingExpression(RangeBase.ValueProperty)?.UpdateSource();
+    }
+
+    // --- プラグインの設定の数の欄 ---
+    // 文字はバインドせず、出すときと確定のたびに今の値で書き直す。空なら打つ前の値に戻して警告音(全体設定の計測時間の欄と同じ)。
+
+    private void PluginNumberTextBox_Loaded(object sender, RoutedEventArgs e)
+    {
+        var textBox = (TextBox)sender;
+        textBox.Text = ((PluginNumberSettingViewModel)textBox.DataContext).DisplayText;
+    }
+
+    private void PluginNumberTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            CommitPluginNumber((TextBox)sender);
+            Keyboard.ClearFocus();
+            e.Handled = true;
+        }
+    }
+
+    private void PluginNumberTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+    {
+        CommitPluginNumber((TextBox)sender);
+    }
+
+    private static void CommitPluginNumber(TextBox textBox)
+    {
+        if (textBox.DataContext is not PluginNumberSettingViewModel setting)
+        {
+            return;
+        }
+
+        if (!setting.TryCommitText(textBox.Text))
+        {
+            DigitsOnlyInputBehavior.PlayInvalidInputSound();
+        }
+
+        textBox.Text = setting.DisplayText;
     }
 
     /// <summary>

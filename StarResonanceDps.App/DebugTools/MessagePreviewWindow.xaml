@@ -69,7 +69,16 @@
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_BadResponse" Click="VoicevoxBadResponse_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Voicevox_Policy" Click="VoicevoxPolicy_Click" />
                         <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="WindowsVoice_Missing" Click="WindowsVoiceMissing_Click" />
-                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginOpenFailed" Click="PluginOpenFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_InvalidFile" Click="PluginAddFailedInvalidFile_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_CannotPlace" Click="PluginAddFailedCannotPlace_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAlreadyAdded" Click="PluginAlreadyAdded_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_MissingDependency" Click="PluginAddFailedMissingDependency_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginAddFailed_PendingDeletion" Click="PluginAddFailedPendingDeletion_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="Confirm_UninstallPlugin" Click="ConfirmUninstallPlugin_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginDeleteFailed" Click="PluginDeleteFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginLoadFailed" Click="PluginLoadFailed_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginStopped" Click="PluginStopped_Click" />
+                        <Button Margin="0,0,0,6" Style="{StaticResource Button.Text}" Width="Auto" Content="PluginStopped_PacketBacklog" Click="PluginStoppedPacketBacklog_Click" />
                         <Button Style="{StaticResource Button.Text}" Width="Auto" Content="Aggregation_LoadFailed" Click="HistoryLoadFailed_Click" />
                     </StackPanel>
 

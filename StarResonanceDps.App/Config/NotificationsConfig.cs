@@ -25,17 +25,44 @@ public enum NotificationKind
 /// </summary>
 public sealed class NotificationsConfig
 {
+    /// <summary>プラグインの項目の鍵(<see cref="GetPluginItemKey"/>)の、プラグインの鍵と項目の ID のあいだの文字。</summary>
+    public const char PluginItemKeySeparator = '/';
+
     public Dictionary<NotificationKind, NotificationItemConfig> Items { get; set; } = AppConfigDefaults.CreateNotificationItems();
+
+    /// <summary>
+    /// プラグインの項目。鍵は <see cref="GetPluginItemKey"/>(大文字と小文字を区別しない)。
+    /// 止まっている・読めないプラグインの項目も残し、アンインストールしたときに消す(<see cref="ConfigManager.RemovePluginNotifications"/>)。
+    /// </summary>
+    public Dictionary<string, PluginNotificationItemConfig> PluginItems { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>本体とプラグインの全部の項目の設定。</summary>
+    [JsonIgnore]
+    public IEnumerable<NotificationItemConfig> AllItems => Items.Values.Concat(PluginItems.Values.Select(item => item.Item));
 
     public NotificationItemConfig Get(NotificationKind kind)
     {
         return Items[kind];
     }
 
-    /// <summary>オンの項目のどれかが、その出し方を使っているか。</summary>
+    /// <summary>オンの項目(プラグインの項目も)のどれかが、その出し方を使っているか。</summary>
     public bool AnyEnabled(Func<NotificationItemConfig, bool> predicate)
     {
-        return Items.Values.Any(item => item.IsEnabled && predicate(item));
+        return AllItems.Any(item => item.IsEnabled && predicate(item));
+    }
+
+    /// <summary>プラグインの項目の鍵。プラグインの鍵(フォルダの名前)と項目の ID を <see cref="PluginItemKeySeparator"/> でつなぐ。</summary>
+    public static string GetPluginItemKey(string pluginKey, string itemId)
+    {
+        return pluginKey + PluginItemKeySeparator + itemId;
+    }
+
+    /// <summary>そのプラグインの項目の鍵か。</summary>
+    public static bool IsPluginItemKeyOf(string itemKey, string pluginKey)
+    {
+        return itemKey.Length > pluginKey.Length
+            && itemKey[pluginKey.Length] == PluginItemKeySeparator
+            && itemKey.StartsWith(pluginKey, StringComparison.OrdinalIgnoreCase);
     }
 
     public NotificationsConfig Clone()
@@ -44,7 +71,34 @@ public sealed class NotificationsConfig
         {
             Items = Items is null
                 ? AppConfigDefaults.CreateNotificationItems()
-                : Items.ToDictionary(pair => pair.Key, pair => pair.Value?.Clone() ?? AppConfigDefaults.CreateNotificationItem())
+                : Items.ToDictionary(pair => pair.Key, pair => pair.Value?.Clone() ?? AppConfigDefaults.CreateNotificationItem()),
+            PluginItems = PluginItems is null
+                ? new Dictionary<string, PluginNotificationItemConfig>(StringComparer.OrdinalIgnoreCase)
+                : PluginItems
+                    .Where(pair => pair.Value is not null)
+                    .ToDictionary(pair => pair.Key, pair => pair.Value.Clone(), StringComparer.OrdinalIgnoreCase)
+        };
+    }
+}
+
+/// <summary>
+/// プラグインの通知の項目の設定。本体の項目と同じ設定(<see cref="Item"/>。使うのはスイッチ・文章・出し方・音量・声)に、
+/// プラグインが定義した設定の値(<see cref="Settings"/>、鍵は設定の ID、値の形は <c>PluginSettingValueCodec</c>)を足す。
+/// </summary>
+public sealed class PluginNotificationItemConfig
+{
+    public NotificationItemConfig Item { get; set; } = AppConfigDefaults.CreateNotificationItem();
+
+    public Dictionary<string, string> Settings { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public PluginNotificationItemConfig Clone()
+    {
+        return new PluginNotificationItemConfig
+        {
+            Item = Item?.Clone() ?? AppConfigDefaults.CreateNotificationItem(),
+            Settings = Settings is null
+                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, string>(Settings, StringComparer.OrdinalIgnoreCase)
         };
     }
 }

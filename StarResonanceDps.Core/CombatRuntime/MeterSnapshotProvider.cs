@@ -107,10 +107,13 @@ public sealed record MetricGraphSkillActivation(
 /// 内訳を溜め始める前に保存した履歴では、どちらも空になる。
 /// </para>
 /// </summary>
+/// <param name="Name">表示する行名(設定しだいで内部名・内部ID注記つき)。</param>
+/// <param name="PlainName">内部名と内部ID注記の無い行名(<see cref="CombatDataCatalog.GetSourceNameWithoutInternalId"/>)。無ければ空。</param>
 public sealed record MetricSkillTableRowSnapshot(
     long SkillId,
     string SkillIdText,
     string Name,
+    string PlainName,
     ulong TotalValue,
     double ValuePerSecondActive,
     double ValuePerSecond,
@@ -123,6 +126,56 @@ public sealed record MetricSkillTableRowSnapshot(
 
 public sealed record MetricSkillTableSnapshot(
     IReadOnlyList<MetricSkillTableRowSnapshot> Entries);
+
+/// <summary>
+/// 回1つの全員の集計(与ダメ・回復・被ダメ)。メーター・スキル詳細と同じ数で、時計は1回だけ読む。
+/// </summary>
+/// <param name="IsHistory">開いている履歴の回か。</param>
+/// <param name="StartUtc">戦闘の時計の起点。まだ起点が無ければ null。</param>
+/// <param name="IsClosed">閉じた回(終了時刻がある)か、計測の窓が終わった。</param>
+/// <param name="Players">どれかの合計が 0 より大きいプレイヤー。パーティで絞らない。</param>
+public sealed record EncounterTotalsSnapshot(
+    bool IsHistory,
+    DateTime? StartUtc,
+    TimeSpan Elapsed,
+    bool IsClosed,
+    IReadOnlyList<EncounterPlayerTotals> Players);
+
+/// <param name="CharacterId">キャラ番号(名簿の <c>PlayerRosterEntry.CharacterId</c> と同じ)。</param>
+public sealed record EncounterPlayerTotals(
+    long CharacterId,
+    CombatTotalsSnapshot Damage,
+    CombatTotalsSnapshot Healing,
+    CombatTotalsSnapshot DamageTaken);
+
+/// <param name="Total">合計。与ダメと回復はメーターの行と同じ値(<c>Entity.TotalDamage</c> / <c>TotalHealing</c>)。</param>
+/// <param name="PerSecond">メーターの秒間値と同じ(統計の合計 ÷ 回の経過)。</param>
+/// <param name="ActivePerSecond">スキル詳細の有効の秒間値と同じ(統計の合計 ÷ その人の有効な秒数)。</param>
+public readonly record struct CombatTotalsSnapshot(
+    ulong Total,
+    double PerSecond,
+    double ActivePerSecond,
+    ulong Hits,
+    ulong CritTotal,
+    uint CritCount,
+    ulong LuckyTotal,
+    uint LuckyCount);
+
+/// <summary>実体に付いているバフ1つ(見せ方の決まりを通さない、控えのまま)。</summary>
+/// <param name="DurationSeconds">効果時間の総量(延長で伸びる)。持続が無ければ null。</param>
+/// <param name="EndUtc">切れる時刻。持続が無いか、残りが分からなければ null。</param>
+/// <param name="IsRemainingUnknown">経過が分からないまま受けたバフ(残り時間を出せない)。</param>
+/// <param name="CasterCharacterId">付けた実体がプレイヤーならそのキャラ番号。</param>
+public sealed record ActiveBuffSnapshot(
+    long BuffUuid,
+    int BuffId,
+    int Level,
+    int Layer,
+    double? DurationSeconds,
+    DateTime? EndUtc,
+    bool IsRemainingUnknown,
+    long CasterEntityUuid,
+    long? CasterCharacterId);
 
 /// <summary>
 /// 与ダメ詳細・ヒール詳細・被ダメ詳細の中身。合計・通常・会心・幸運の値・率・ヒット数と、属性ごとの合計。
@@ -2510,11 +2563,18 @@ public static class MeterSnapshotProvider
         [],
         []);
 
+    /// <summary>メーターが映している回(<see cref="ResolveActiveEncounter"/>)の、その人の技ごとの内訳。</summary>
     public static MetricSkillTableSnapshot GetPlayerSkillTable(MeterSnapshotKind kind, long characterId)
     {
-        var encounter = ResolveActiveEncounter();
-        if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+        return ResolveActiveEncounter() is { } encounter
+            ? GetPlayerSkillTable(encounter, kind, characterId)
+            : new MetricSkillTableSnapshot(Array.Empty<MetricSkillTableRowSnapshot>());
+    }
+
+    /// <summary>渡した回の、その人の技ごとの内訳(閉じた回の結果にも使う)。</summary>
+    public static MetricSkillTableSnapshot GetPlayerSkillTable(Encounter encounter, MeterSnapshotKind kind, long characterId)
+    {
+        if (!TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
             return new MetricSkillTableSnapshot(Array.Empty<MetricSkillTableRowSnapshot>());
         }
@@ -2569,6 +2629,7 @@ public static class MeterSnapshotProvider
                 rowKeyText,
                 // 記録時の名前(英語)ではなく、表示中の言語で引き直す。
                 CombatDataCatalog.GetSourceDisplayName(stat.Key, isBuffSource, landing),
+                CombatDataCatalog.GetSourceNameWithoutInternalId(stat.Key, isBuffSource, landing),
                 value.ValueTotal,
                 CombatClockReading.PerSecond(value.ValueTotal, activeSeconds),
                 CombatClockReading.PerSecond(value.ValueTotal, elapsedSeconds),
@@ -2582,6 +2643,110 @@ public static class MeterSnapshotProvider
         }
 
         return new MetricSkillTableSnapshot(rows);
+    }
+
+    /// <summary>メーターが映している回(<see cref="ResolveActiveEncounter"/>)の全員の集計。回がまだ無ければ空。</summary>
+    public static EncounterTotalsSnapshot GetEncounterTotals()
+    {
+        return ResolveActiveEncounter() is { } encounter
+            ? CreateEncounterTotals(encounter, isHistory: AppState.OpenedHistoricalEncounter is not null)
+            : new EncounterTotalsSnapshot(false, null, TimeSpan.Zero, false, Array.Empty<EncounterPlayerTotals>());
+    }
+
+    /// <summary>渡したライブの回の全員の集計(閉じた回の結果に使う)。</summary>
+    public static EncounterTotalsSnapshot GetEncounterTotals(Encounter encounter)
+    {
+        return CreateEncounterTotals(encounter, isHistory: false);
+    }
+
+    private static EncounterTotalsSnapshot CreateEncounterTotals(Encounter encounter, bool isHistory)
+    {
+        var clock = encounter.ReadCombatClock();
+        var elapsedSeconds = clock.Elapsed.TotalSeconds;
+        var players = encounter.Entities
+            .Where(pair => pair.Value.EntityType == EEntityType.EntChar)
+            .Select(pair => pair.Value)
+            .Where(entity => entity.TotalDamage > 0UL || entity.TotalHealing > 0UL || entity.TakenStats.ValueTotal > 0UL)
+            .Select(entity =>
+            {
+                var activeSeconds = entity.GetActiveSeconds(clock, encounter.ToCombatOffset);
+                return new EncounterPlayerTotals(
+                    entity.UID != 0 ? entity.UID : Utils.UuidToEntityId(entity.UUID),
+                    CreateCombatTotals(entity.TotalDamage, entity.DamageStats, elapsedSeconds, activeSeconds),
+                    CreateCombatTotals(entity.TotalHealing, entity.HealingStats, elapsedSeconds, activeSeconds),
+                    CreateCombatTotals(entity.TakenStats.ValueTotal, entity.TakenStats, elapsedSeconds, activeSeconds));
+            })
+            .ToArray();
+
+        return new EncounterTotalsSnapshot(isHistory, clock.StartUtc, clock.Elapsed, clock.IsClosed, players);
+    }
+
+    private static CombatTotalsSnapshot CreateCombatTotals(ulong total, CombatStats stats, double elapsedSeconds, double activeSeconds)
+    {
+        return new CombatTotalsSnapshot(
+            total,
+            CombatClockReading.PerSecond(stats.ValueTotal, elapsedSeconds),
+            CombatClockReading.PerSecond(stats.ValueTotal, activeSeconds),
+            stats.HitsCount,
+            stats.ValueCritTotal,
+            stats.CritCount,
+            stats.ValueLuckyTotal,
+            stats.LuckyHitCount);
+    }
+
+    /// <summary>
+    /// そのプレイヤーに付いているバフを全部(<see cref="GetActiveEntityBuffs"/>)。実体の番号はキャラ番号から作る(自分と同じ形)。
+    /// </summary>
+    public static IReadOnlyList<ActiveBuffSnapshot> GetActivePlayerBuffs(long characterId)
+    {
+        return characterId == 0
+            ? Array.Empty<ActiveBuffSnapshot>()
+            : GetActiveEntityBuffs(Utils.EntityIdToUuid(characterId, (long)EEntityType.EntChar, false, false));
+    }
+
+    /// <summary>
+    /// その実体に付いているバフを全部、付いた順に。バフ/デバフリストの見せ方の決まり(優先度・手修正・同じバフをまとめる)は通さない。
+    /// 履歴を開いても今の値(バフは記録から復元できない)。
+    /// </summary>
+    public static IReadOnlyList<ActiveBuffSnapshot> GetActiveEntityBuffs(long entityUuid)
+    {
+        var store = Services.ActiveBuffStore.Instance;
+        var buffs = store.GetActive(entityUuid);
+        if (buffs.Count == 0)
+        {
+            return Array.Empty<ActiveBuffSnapshot>();
+        }
+
+        var snapshots = new List<ActiveBuffSnapshot>(buffs.Count);
+        foreach (var buff in buffs)
+        {
+            // 読む間に切れたバフは除く。
+            if (!store.TryGetRemainingSeconds(
+                    entityUuid,
+                    (ulong)buff.Uuid,
+                    out _,
+                    out var isRemainingUnknown,
+                    out var durationSeconds,
+                    out var endUtc))
+            {
+                continue;
+            }
+
+            var casterUuid = buff.FireUuid;
+            var casterIsPlayer = casterUuid != 0 && (EEntityType)Utils.UuidToEntityType(casterUuid) == EEntityType.EntChar;
+            snapshots.Add(new ActiveBuffSnapshot(
+                buff.Uuid,
+                buff.BaseId,
+                buff.Level,
+                buff.Layer,
+                durationSeconds > 0d ? durationSeconds : null,
+                endUtc,
+                isRemainingUnknown,
+                casterUuid,
+                casterIsPlayer ? Utils.UuidToEntityId(casterUuid) : null));
+        }
+
+        return snapshots;
     }
 
     /// <summary>

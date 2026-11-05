@@ -243,7 +243,11 @@ public static class AppConfigDefaults
         return normalized;
     }
 
-    /// <summary>足りない項目は既定で足し、知らない項目は捨てる。空欄の文は既定に戻す。</summary>
+    /// <summary>
+    /// 足りない項目は既定で足し、知らない項目は捨てる。空欄の文は既定に戻す。
+    /// プラグインの項目は、鍵の形(プラグインの鍵 / 項目の ID)が合うものを残す(どのプラグインの項目かは読み込みの後でないと分からない)。
+    /// 設定の値を定義に合わせるのは、読むとき(<c>PluginSettingValueCodec</c>)。
+    /// </summary>
     public static void NormalizeNotifications(NotificationsConfig notifications)
     {
         var items = new Dictionary<NotificationKind, NotificationItemConfig>();
@@ -257,6 +261,32 @@ public static class AppConfigDefaults
         }
 
         notifications.Items = items;
+
+        var pluginItems = new Dictionary<string, PluginNotificationItemConfig>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (key, pluginItem) in notifications.PluginItems ?? [])
+        {
+            var separatorIndex = key?.IndexOf(NotificationsConfig.PluginItemKeySeparator) ?? -1;
+            if (pluginItem is null || separatorIndex <= 0 || separatorIndex == key!.Length - 1)
+            {
+                continue;
+            }
+
+            pluginItem.Item ??= CreateNotificationItem();
+            NormalizeNotificationItem(pluginItem.Item);
+            var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (settingId, value) in pluginItem.Settings ?? [])
+            {
+                if (settingId is not null && value is not null)
+                {
+                    settings[settingId] = value;
+                }
+            }
+
+            pluginItem.Settings = settings;
+            pluginItems[key] = pluginItem;
+        }
+
+        notifications.PluginItems = pluginItems;
     }
 
     private static void NormalizeNotificationItem(NotificationItemConfig item)

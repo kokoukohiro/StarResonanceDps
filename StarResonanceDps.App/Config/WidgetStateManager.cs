@@ -28,73 +28,66 @@ public sealed class WidgetStateManager
     /// <summary>起動時に、ファイルはあるのに読めなかった(壊れている・ウィジェットの設定が入っていない)か。既定値で動いている。</summary>
     public bool HasLoadFailed { get; private set; }
 
-    public WidgetConfig GetWidgetSnapshot(WidgetKind kind)
+    public WidgetConfig GetWidgetSnapshot(WidgetKey key)
     {
         lock (_syncRoot)
         {
-            var key = WidgetConfigDefaults.GetKey(kind);
-            if (!_document.Widgets.TryGetValue(key, out var config))
-            {
-                config = WidgetConfigDefaults.Create(kind);
-                _document.Widgets[key] = config;
-            }
-
-            return WidgetConfigDefaults.CloneNormalized(kind, config);
+            var config = GetOrCreateWidgetConfig(key);
+            return WidgetConfigDefaults.CloneNormalized(key.Kind, config);
         }
     }
 
-    public void SaveWidget(WidgetKind kind, WidgetConfig config)
+    public void SaveWidget(WidgetKey key, WidgetConfig config)
     {
         lock (_syncRoot)
         {
-            var key = WidgetConfigDefaults.GetKey(kind);
-            _document.Widgets[key] = WidgetConfigDefaults.CloneNormalized(kind, config);
+            _document.Widgets[key.DocumentKey] = WidgetConfigDefaults.CloneNormalized(key.Kind, config);
             SaveCore();
         }
     }
 
-    public void SaveWidgetFlags(WidgetKind kind, bool isFavorite, bool isPinned, bool isClickThrough)
+    public void SaveWidgetFlags(WidgetKey key, bool isFavorite, bool isPinned, bool isClickThrough)
     {
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(kind);
+            var config = GetOrCreateWidgetConfig(key);
             config.IsFavorite = isFavorite;
             config.IsPinned = isPinned;
             config.IsClickThrough = isClickThrough;
-            WidgetConfigDefaults.Normalize(kind, config);
+            WidgetConfigDefaults.Normalize(key.Kind, config);
             SaveCore();
         }
     }
 
-    public void SaveWidgetState(WidgetKind kind, WidgetState state)
+    public void SaveWidgetState(WidgetKey key, WidgetState state)
     {
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(kind);
+            var config = GetOrCreateWidgetConfig(key);
             config.State = state;
-            WidgetConfigDefaults.Normalize(kind, config);
+            WidgetConfigDefaults.Normalize(key.Kind, config);
             SaveCore();
         }
     }
 
-    public void SaveWidgetTheme(WidgetKind kind, WidgetThemeConfig theme)
+    public void SaveWidgetTheme(WidgetKey key, WidgetThemeConfig theme)
     {
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(kind);
+            var config = GetOrCreateWidgetConfig(key);
             config.Theme = WidgetConfigDefaults.CloneNormalizedTheme(theme);
-            WidgetConfigDefaults.Normalize(kind, config);
+            WidgetConfigDefaults.Normalize(key.Kind, config);
             SaveCore();
         }
     }
 
     /// <param name="width">幅。保存しない辺(<see cref="WidgetConfigDefaults.GetFixedWindowSize"/>)は null で、読み込みの正規化が既定の大きさで埋める。</param>
     /// <param name="height">高さ。幅と同じ。</param>
-    public void SaveWidgetWindowBounds(WidgetKind kind, double x, double y, double? width, double? height)
+    public void SaveWidgetWindowBounds(WidgetKey key, double x, double y, double? width, double? height)
     {
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(kind);
+            var config = GetOrCreateWidgetConfig(key);
             config.Window = new WidgetWindowConfig
             {
                 X = x,
@@ -102,7 +95,29 @@ public sealed class WidgetStateManager
                 Width = width,
                 Height = height
             };
-            WidgetConfigDefaults.Normalize(kind, config);
+            WidgetConfigDefaults.Normalize(key.Kind, config);
+            SaveCore();
+        }
+    }
+
+    /// <summary>プラグインのウィジェットの保存を全部消す(プラグインをアンインストールしたとき)。無ければ何もしない。</summary>
+    public void RemovePluginWidgets(string pluginKey)
+    {
+        lock (_syncRoot)
+        {
+            var removedKeys = _document.Widgets.Keys
+                .Where(key => WidgetKey.IsPluginDocumentKeyOf(key, pluginKey))
+                .ToArray();
+            if (removedKeys.Length == 0)
+            {
+                return;
+            }
+
+            foreach (var key in removedKeys)
+            {
+                _document.Widgets.Remove(key);
+            }
+
             SaveCore();
         }
     }
@@ -385,16 +400,15 @@ public sealed class WidgetStateManager
         }
     }
 
-    private WidgetConfig GetOrCreateWidgetConfig(WidgetKind kind)
+    private WidgetConfig GetOrCreateWidgetConfig(WidgetKey key)
     {
-        var key = WidgetConfigDefaults.GetKey(kind);
-        if (_document.Widgets.TryGetValue(key, out var config))
+        if (_document.Widgets.TryGetValue(key.DocumentKey, out var config))
         {
             return config;
         }
 
-        config = WidgetConfigDefaults.Create(kind);
-        _document.Widgets[key] = config;
+        config = WidgetConfigDefaults.Create(key.Kind);
+        _document.Widgets[key.DocumentKey] = config;
         return config;
     }
 
@@ -433,20 +447,45 @@ public sealed class WidgetStateManager
         return document;
     }
 
+    /// <summary>
+    /// 本体の種別は全部そろえる(無ければ既定で足す)。プラグインのウィジェットは、どのプラグインのものかは読み込みの後でないと分からないので、
+    /// あるものだけを正規化して残す(アンインストールで消す、<see cref="RemovePluginWidgets"/>)。
+    /// </summary>
     private static void Normalize(WidgetStateDocument document)
     {
         document.Widgets ??= new Dictionary<string, WidgetConfig>(StringComparer.OrdinalIgnoreCase);
 
         foreach (WidgetKind kind in Enum.GetValues<WidgetKind>())
         {
-            var key = WidgetConfigDefaults.GetKey(kind);
-            if (!document.Widgets.TryGetValue(key, out var config))
+            if (kind == WidgetKind.Plugin)
             {
-                document.Widgets[key] = WidgetConfigDefaults.Create(kind);
+                continue;
+            }
+
+            WidgetKey key = kind;
+            if (!document.Widgets.TryGetValue(key.DocumentKey, out var config))
+            {
+                document.Widgets[key.DocumentKey] = WidgetConfigDefaults.Create(kind);
                 continue;
             }
 
             WidgetConfigDefaults.Normalize(kind, config);
+        }
+
+        foreach (var (documentKey, config) in document.Widgets.ToArray())
+        {
+            if (!WidgetKey.IsPluginDocumentKey(documentKey))
+            {
+                continue;
+            }
+
+            if (config is null)
+            {
+                document.Widgets.Remove(documentKey);
+                continue;
+            }
+
+            WidgetConfigDefaults.Normalize(WidgetKind.Plugin, config);
         }
     }
 

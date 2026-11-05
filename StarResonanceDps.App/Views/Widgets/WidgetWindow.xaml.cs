@@ -1089,7 +1089,7 @@ public partial class WidgetWindow : Window
         // 大きさを保存しない辺(WidgetConfigDefaults.GetFixedWindowSize)は書かない。
         var fixedSize = WidgetConfigDefaults.GetFixedWindowSize(_widget.Kind);
         WidgetStateManager.Instance.SaveWidgetWindowBounds(
-            _widget.Kind,
+            _widget.Key,
             Left,
             Top,
             fixedSize.Width is null ? ActualWidth : null,

@@ -1,8 +1,8 @@
 using System.IO;
 using System.Reflection;
-using System.Runtime.Loader;
 using System.Windows;
 using System.Windows.Input;
+using Serilog;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Services;
@@ -37,6 +37,8 @@ public partial class MessagePreviewWindow : Window
     private const string ModuleConfigFileName = "module_config.json";
 
     private readonly PluginMessageService _pluginMessages = new();
+    private readonly PluginLocalizationService _pluginLocalization = new(new PluginCallGuard((operation, exception) =>
+        Log.Error(exception, "[MessagePreview] {Operation} failed", operation)));
     private PluginLocalizer? _keybindTexts;
     private PluginLocalizer? _moduleTexts;
 
@@ -47,26 +49,27 @@ public partial class MessagePreviewWindow : Window
         {
             _keybindTexts?.Dispose();
             _moduleTexts?.Dispose();
+            _pluginLocalization.Detach();
         };
     }
 
     private static LocalizationManager Localization => LocalizationManager.Instance;
 
     private PluginLocalizer KeybindTexts => _keybindTexts ??= new PluginLocalizer(
-        PluginLocalizationService.Instance,
+        _pluginLocalization,
         LoadPluginAssembly(KeybindAssemblyName),
         KeybindResourceBaseName);
 
     private PluginLocalizer ModuleTexts => _moduleTexts ??= new PluginLocalizer(
-        PluginLocalizationService.Instance,
+        _pluginLocalization,
         LoadPluginAssembly(ModuleAssemblyName),
         ModuleResourceBaseName);
 
     // キーバインドツールが使う設定ファイルの場所(プラグインの設定は本体がプラグインのフォルダに置く)。
-    private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindLayoutFileName);
+    private static string KeybindLayoutFilePath => Path.Combine(AppDataPaths.PluginsDirectory, KeybindAssemblyName, KeybindLayoutFileName);
 
     // モジュールツールが使う設定ファイルの場所。
-    private static string ModuleConfigFilePath => Path.Combine(AppDataPaths.PluginsDirectory, ModuleConfigFileName);
+    private static string ModuleConfigFilePath => Path.Combine(AppDataPaths.PluginsDirectory, ModuleAssemblyName, ModuleConfigFileName);
 
     // 本物: 起動時(実行フォルダの Data に書けないとき)。場所は実際の Data のフォルダ。
     private void DataFolderNotWritable_Click(object sender, RoutedEventArgs e)
@@ -92,11 +95,69 @@ public partial class MessagePreviewWindow : Window
         VoicevoxLaunchFailureMessage.Show(this);
     }
 
-    // 本物: メイン画面のプラグインの一覧(プラグインを開けなかったとき)
-    private void PluginOpenFailed_Click(object sender, RoutedEventArgs e)
+    // 本物: メイン画面のプラグインの一覧の「＋」(選んだファイルがプラグインでない・版が合わないとき)
+    private void PluginAddFailedInvalidFile_Click(object sender, RoutedEventArgs e)
     {
-        PluginOpenFailureMessage.Show(this);
+        PluginAddFailureMessage.ShowInvalidFile(this);
     }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(Pluginsフォルダへ写せないとき)
+    private void PluginAddFailedCannotPlace_Click(object sender, RoutedEventArgs e)
+    {
+        PluginAddFailureMessage.ShowCannotPlaceFile(this);
+    }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(同じフォルダ・同じIDのプラグインがすでにあるとき)
+    private void PluginAlreadyAdded_Click(object sender, RoutedEventArgs e)
+    {
+        PluginAlreadyAddedMessage.Show(this);
+    }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(プラグインが使うファイルが選んだDLLのフォルダに無いとき)。ファイル名は同梱のプラグインのもの。
+    private void PluginAddFailedMissingDependency_Click(object sender, RoutedEventArgs e)
+    {
+        PluginAddFailureMessage.ShowMissingFiles(this, [KeybindAssemblyName + ".dll", ModuleAssemblyName + ".dll"]);
+    }
+
+    // 本物: メイン画面のプラグインの一覧の「＋」(同じプラグインがアンインストールして削除を待っているとき)
+    private void PluginAddFailedPendingDeletion_Click(object sender, RoutedEventArgs e)
+    {
+        PluginAddFailureMessage.ShowPendingDeletion(this);
+    }
+
+    // 本物: メイン画面のプラグインの一覧のゴミ箱。名前は今の一覧の最初のプラグイン。
+    private void ConfirmUninstallPlugin_Click(object sender, RoutedEventArgs e)
+    {
+        _ = PluginUninstallMessage.Confirm(this, PluginNames[0]);
+    }
+
+    // 本物: メイン画面のプラグインの一覧のゴミ箱(削除の印を書けなかったとき)。フォルダは今の一覧の最初のプラグイン。
+    private void PluginDeleteFailed_Click(object sender, RoutedEventArgs e)
+    {
+        PluginDeleteFailureMessage.Show(this, PluginManager.Instance.DiscoverPlugins()[0].Key);
+    }
+
+    // 本物: 起動時のメイン窓(読めなかった・初期化できなかったプラグインがあるとき)。名前は今の一覧のプラグイン。
+    private void PluginLoadFailed_Click(object sender, RoutedEventArgs e)
+    {
+        PluginLoadFailureMessage.Show(this, PluginNames);
+    }
+
+    // 本物: プラグインの例外で、そのプラグインを止めたとき。名前は今の一覧の最初のプラグイン。
+    private void PluginStopped_Click(object sender, RoutedEventArgs e)
+    {
+        PluginStoppedMessage.Show(this, PluginNames[0], isPacketBacklog: false);
+    }
+
+    // 本物: プラグインが通信を取り残して、そのプラグインを止めたとき。名前は今の一覧の最初のプラグイン。
+    private void PluginStoppedPacketBacklog_Click(object sender, RoutedEventArgs e)
+    {
+        PluginStoppedMessage.Show(this, PluginNames[0], isPacketBacklog: true);
+    }
+
+    private static IReadOnlyList<string> PluginNames => PluginManager.Instance.DiscoverPlugins()
+        .Select(plugin => plugin.GetDisplayName(Localization.CurrentCulture))
+        .ToArray();
 
     // 本物: MainWindow(ホットキーの補助が使えなかったとき)
     private void HotkeyHelperUnavailable_Click(object sender, RoutedEventArgs e)
@@ -221,7 +282,7 @@ public partial class MessagePreviewWindow : Window
     // 話者は通知タブの項目で選んであるもの(並びの最初)、無ければエンジンの一覧の最初。つながらなければ本物と同じく失敗を知らせる。
     private async void VoicevoxPolicy_Click(object sender, RoutedEventArgs e)
     {
-        var savedItem = ConfigManager.Instance.GetNotificationsSnapshot().Items.Values
+        var savedItem = ConfigManager.Instance.GetNotificationsSnapshot().AllItems
             .FirstOrDefault(item => item.VoicevoxSpeakerUuid.Length > 0);
         if (savedItem is not null)
         {
@@ -417,12 +478,11 @@ public partial class MessagePreviewWindow : Window
             ModuleTexts.Format("Module.Message.SettingsLoadError.Detail", ModuleConfigFilePath));
     }
 
-    // 本体がプラグインを読むのと同じ場所(既定のロード コンテキスト)から取る。まだ読まれていなければ読む。
+    // 本体が読んだプラグインの DLL(プラグインごとの読み込み先)から取る。
     private static Assembly LoadPluginAssembly(string assemblyName)
     {
-        return AssemblyLoadContext.Default.Assemblies.FirstOrDefault(assembly => assembly.GetName().Name == assemblyName)
-            ?? AssemblyLoadContext.Default.LoadFromAssemblyPath(
-                Path.Combine(AppDataPaths.PluginsDirectory, assemblyName + ".dll"));
+        return PluginManager.Instance.FindPluginAssembly(assemblyName)
+            ?? throw new InvalidOperationException($"The plugin '{assemblyName}' is not loaded.");
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

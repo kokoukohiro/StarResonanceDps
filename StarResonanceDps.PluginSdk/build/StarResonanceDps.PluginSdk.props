@@ -1,0 +1,9 @@
+<Project>
+  <!--
+    The app loads each plugin into its own load context and resolves the plugin's dependencies from the plugin folder,
+    so plugins are built with dynamic loading (dependencies are copied to the output). A value set in the project wins.
+  -->
+  <PropertyGroup>
+    <EnableDynamicLoading Condition="'$(EnableDynamicLoading)' == ''">true</EnableDynamicLoading>
+  </PropertyGroup>
+</Project>

@@ -16,6 +16,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         public static DateTime? DeferredEncounterEndFinalTime { get; private set; } = null;
         public static EncounterEndFinalData? DeferredEncounterEndFinalData { get; private set; } = null;
 
+        /// <summary>
+        /// ダンジョンの状態の履歴(<see cref="DungeonStateHistory"/>)が変わった(状態が届いた・マップ移動とログアウトで消した)。パケットのスレッドで上がる。
+        /// </summary>
+        public static event Action? DungeonStateChanged;
+
         public static void StartNewMap()
         {
             Log.Information($"{DateTime.Now} - BattleStateMachine.StartNewMap");
@@ -26,6 +31,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalTime = null;
 
             DungeonStateHistory.Clear();
+            DungeonStateChanged?.Invoke();
 
             EncounterManager.StartNewMap();
             // マップ移動は前の結果を保持してよい区切り(ここで終えた計測の結果も、次の記録まで出す)。
@@ -53,6 +59,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             DeferredEncounterEndFinalTime = null;
 
             DungeonStateHistory.Clear();
+            DungeonStateChanged?.Invoke();
         }
 
         /// <summary>
@@ -69,6 +76,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             DungeonStateHistory.Enqueue(new KeyValuePair<EDungeonState, DateTime>(dungeonState, DateTime.Now));
             Log.Information($"{DateTime.Now} - BattleStateMachine.DungeonStateHistoryAdd: {dungeonState}");
+            DungeonStateChanged?.Invoke();
 
 
             if (dungeonState == EDungeonState.DungeonStateNull)
