@@ -231,7 +231,7 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
             _entriesByCharacterId.Clear();
         }
 
-        var nameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance.GetSettingsSnapshot().PlayerNameDisplayModeIndex;
+        var nameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance.CurrentSettings.PlayerNameDisplayModeIndex;
         var rows = _roster.Entries.Where(IsIncapacitated).ToArray();
         var rowCharacterIds = rows.Select(row => row.CharacterId).ToHashSet();
 
@@ -332,15 +332,7 @@ public sealed partial class ReviveListWidgetViewModel : ViewModelBase, IDisposab
     /// </summary>
     private void SortEntries()
     {
-        var ordered = _entries.OrderBy(entry => entry.SortKey).ToArray();
-        for (var targetIndex = 0; targetIndex < ordered.Length; targetIndex++)
-        {
-            var currentIndex = _entries.IndexOf(ordered[targetIndex]);
-            if (currentIndex != targetIndex)
-            {
-                _entries.Move(currentIndex, targetIndex);
-            }
-        }
+        CollectionOrder.Apply(_entries, _entries.OrderBy(entry => entry.SortKey).ToArray());
     }
 
     private static string FormatSeconds(object value)

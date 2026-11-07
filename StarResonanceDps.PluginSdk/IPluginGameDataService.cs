@@ -59,13 +59,15 @@ public interface IPluginGameDataService
     event EventHandler? EntitiesChanged;
 
     /// <summary>
-    /// The buffs on a player, in the order they were applied. Empty when the host has no buffs for the player.
+    /// The buffs on a player, in the order they were applied. Empty when the host has no buffs for the player,
+    /// and for another player who is not around.
     /// Always live, even while a history encounter is open.
     /// </summary>
     IReadOnlyList<PluginBuff> GetPlayerBuffs(long characterId);
 
     /// <summary>
     /// The buffs on an entity (for example <see cref="PluginEntity.EntityUuid"/>), in the order they were applied.
+    /// Empty when the entity is no longer around.
     /// Always live, even while a history encounter is open.
     /// </summary>
     IReadOnlyList<PluginBuff> GetEntityBuffs(long entityUuid);

@@ -65,8 +65,19 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<MetricSkillTableEntry> _skillEntries = [];
     private readonly Dictionary<long, MetricSkillTableEntry> _skillEntriesBySkillId = [];
+    private readonly List<MetricSkillTableEntry> _orderedSkillEntries = [];
     private IReadOnlyList<MetricGraphPoint> _graphPoints = Array.Empty<MetricGraphPoint>();
+    private readonly MetricGraphPointBuffer _graphPointBuffer = new();
     private IReadOnlyList<MetricGraphSkillMarker> _graphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
+
+    /// <summary>技のアイコンの置き場。後ろに足すだけで使い回し、読み直すときは頭から書く。窓と一緒に解放する。</summary>
+    private MetricGraphSkillMarker[] _graphMarkerItems = [];
+    private int _graphMarkerCount;
+    private long _graphMarkerCharacterId;
+    private int _graphMarkerNameRevision;
+    private Encounter? _graphMarkerEncounter;
+    private object? _graphMarkerGradeSource;
+    private int _graphMarkerNextIndex;
     private int _graphVisibleSeconds = WidgetConfigDefaults.DefaultMetricGraphVisibleSeconds;
     private bool _graphShowsSkillLog = true;
     private Brush? _graphLineBrush;
@@ -113,18 +124,12 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
     public bool IsGraph => _displayMode == PlayerMetricDisplayMode.Graph;
 
     /// <summary>
-    /// 推移グラフの点。値が前回と同じなら差し替えない(毎回新しい配列を入れると、値が同じでもグラフが線と配置を全部やり直す)。
+    /// 推移グラフの点。値が変わったときだけ差し替える(差し替えるとグラフが線と配置を全部やり直す)。
     /// </summary>
     public IReadOnlyList<MetricGraphPoint> GraphPoints
     {
         get => _graphPoints;
-        private set
-        {
-            if (!_graphPoints.SequenceEqual(value))
-            {
-                SetProperty(ref _graphPoints, value);
-            }
-        }
+        private set => SetProperty(ref _graphPoints, value);
     }
 
     /// <summary>推移グラフの横軸の長さ(秒)。設定「横軸の長さ」(窓の上のホイールでも変わる)。</summary>
@@ -314,18 +319,23 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
         if (graphSettings is not null)
         {
-            var graph = MeterSnapshotProvider.GetPlayerGraph(
-                _kind,
-                characterId,
-                graphSettings.AggregationIntervalSeconds);
-            GraphPoints = graph.Points;
+            if (MeterSnapshotProvider.ReadPlayerGraph(
+                    _kind,
+                    characterId,
+                    graphSettings.AggregationIntervalSeconds,
+                    _graphPointBuffer))
+            {
+                GraphPoints = _graphPointBuffer.CreateView();
+            }
+
             if (graphSettings.ShowSkillLog)
             {
-                ApplyGraphSkillMarkers(MeterSnapshotProvider.GetPlayerSkillActivations(characterId));
+                RefreshGraphSkillMarkers(characterId);
             }
             else if (GraphSkillMarkers.Count != 0)
             {
                 // 出さない間は技の開始を取りに行かず、アイコンの部品も作らない。
+                ForgetGraphSkillMarkers();
                 GraphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
             }
             if (playerIdentity is not null)
@@ -341,31 +351,69 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
 
         var table = MeterSnapshotProvider.GetPlayerSkillTable(_kind, characterId);
         GraphPoints = Array.Empty<MetricGraphPoint>();
-        SynchronizeSkillEntries(table.Entries, _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex);
+        SynchronizeSkillEntries(table.Entries, _configManager.CurrentSettings.NumberDisplayFormatIndex);
     }
 
     private void ApplyEmptyData()
     {
+        _graphPointBuffer.Clear();
         GraphPoints = Array.Empty<MetricGraphPoint>();
+        ForgetGraphSkillMarkers();
         GraphSkillMarkers = Array.Empty<MetricGraphSkillMarker>();
         ClearSkillEntries();
     }
 
     /// <summary>
-    /// 技のアイコンの一覧。アイコンは技の表のアイコンの欄を Skills のフォルダで探し(無ければ null = クラス不明のアイコン)、
+    /// 技のアイコンを、前回の続きだけ読んで足す(タイムラインと同じ読み方)。足す分が無ければ何も作らず何も知らせない。
+    /// 回・相手・G○ の元の一覧・名前の決め方(言語と表示設定)が替わったら頭から読み直す。読み直しても同じ番目の中身が同じなら、グラフは部品を差し替えない。
+    /// アイコンは技の表のアイコンの欄を Skills のフォルダで探し(無ければ null = クラス不明のアイコン)、
     /// 名前が無い技の TIPS は「不明」。G○ の数字があれば、プレイヤーリストの技の枠の TIPS と同じ組み立て(<c>MeterSnapshotProvider.FormatSkillNameWithGrade</c>)で「名前 G○」にする。
     /// 背景の枠とイマジンの絵かは Core が決めた値をそのまま渡す。
-    /// 中身が前と同じなら差し替えない(グラフの並べ直しを毎回起こさない)。
     /// </summary>
-    private void ApplyGraphSkillMarkers(IReadOnlyList<MetricGraphSkillActivation> activations)
+    private void RefreshGraphSkillMarkers(long characterId)
     {
-        var unknownName = LocalizationManager.Instance.GetString("MetricGraph_UnknownSkill");
-        var markers = new MetricGraphSkillMarker[activations.Count];
-        for (var index = 0; index < activations.Count; index++)
+        var nameRevision = CombatDataCatalog.DisplayNameRevision;
+        var isReread = characterId != _graphMarkerCharacterId || nameRevision != _graphMarkerNameRevision;
+        if (isReread)
         {
-            var activation = activations[index];
+            _graphMarkerCharacterId = characterId;
+            _graphMarkerNameRevision = nameRevision;
+            ForgetGraphSkillMarkers();
+        }
+
+        var slice = MeterSnapshotProvider.GetPlayerSkillActivations(
+            characterId,
+            _graphMarkerEncounter,
+            _graphMarkerGradeSource,
+            _graphMarkerNextIndex);
+        if (!ReferenceEquals(slice.Encounter, _graphMarkerEncounter)
+            || !ReferenceEquals(slice.GradeSource, _graphMarkerGradeSource))
+        {
+            _graphMarkerEncounter = slice.Encounter;
+            _graphMarkerGradeSource = slice.GradeSource;
+            ClearGraphMarkerItems();
+            isReread = true;
+        }
+
+        _graphMarkerNextIndex = slice.NextIndex;
+        var added = slice.Added;
+        if (!isReread && added.Count == 0)
+        {
+            return;
+        }
+
+        var neededCount = _graphMarkerCount + added.Count;
+        if (neededCount > _graphMarkerItems.Length)
+        {
+            Array.Resize(ref _graphMarkerItems, Math.Max(neededCount, _graphMarkerItems.Length * 2));
+        }
+
+        var unknownName = LocalizationManager.Instance.GetString("MetricGraph_UnknownSkill");
+        for (var index = 0; index < added.Count; index++)
+        {
+            var activation = added[index];
             var name = string.IsNullOrWhiteSpace(activation.Name) ? unknownName : activation.Name;
-            markers[index] = new MetricGraphSkillMarker(
+            _graphMarkerItems[_graphMarkerCount++] = new MetricGraphSkillMarker(
                 activation.Seconds,
                 CombatIconResolver.ResolveSkillIcon(activation.IconName),
                 MeterSnapshotProvider.FormatSkillNameWithGrade(name, activation.Grade),
@@ -373,12 +421,24 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 activation.UsesImagineAsset);
         }
 
-        if (markers.SequenceEqual(GraphSkillMarkers))
-        {
-            return;
-        }
+        GraphSkillMarkers = _graphMarkerCount == 0
+            ? Array.Empty<MetricGraphSkillMarker>()
+            : new ArrayPrefixList<MetricGraphSkillMarker>(_graphMarkerItems, _graphMarkerCount);
+    }
 
-        GraphSkillMarkers = markers;
+    /// <summary>読んだ位置と控えを捨てる。次に読むときは先頭から。</summary>
+    private void ForgetGraphSkillMarkers()
+    {
+        _graphMarkerEncounter = null;
+        _graphMarkerGradeSource = null;
+        _graphMarkerNextIndex = 0;
+        ClearGraphMarkerItems();
+    }
+
+    private void ClearGraphMarkerItems()
+    {
+        Array.Clear(_graphMarkerItems, 0, _graphMarkerCount);
+        _graphMarkerCount = 0;
     }
 
     /// <summary>
@@ -446,24 +506,15 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
             if (!_skillEntriesBySkillId.TryGetValue(entry.SkillId, out var item))
             {
                 item = new MetricSkillTableEntry(entry.SkillId);
-                ApplySkillEntry(item, entry, index, numberDisplayFormatIndex, topValue);
                 _skillEntriesBySkillId.Add(entry.SkillId, item);
-                _skillEntries.Insert(index, item);
-                continue;
             }
 
             ApplySkillEntry(item, entry, index, numberDisplayFormatIndex, topValue);
-            if (_skillEntries[index].SkillId == entry.SkillId)
-            {
-                continue;
-            }
-
-            var currentIndex = FindSkillEntryIndex(entry.SkillId);
-            if (currentIndex >= 0)
-            {
-                _skillEntries.Move(currentIndex, index);
-            }
+            _orderedSkillEntries.Add(item);
         }
+
+        CollectionOrder.Apply(_skillEntries, _orderedSkillEntries);
+        _orderedSkillEntries.Clear();
     }
 
     /// <param name="topValue">一覧の1位の総量。バーの長さはこれに対する比(メーターと同じ)。</param>
@@ -492,19 +543,6 @@ public sealed class PlayerMetricWidgetViewModel : PlayerWidgetWindowViewModel, I
                 + $" {entry.Percentage.ToString("F2", CultureInfo.CurrentCulture)}%",
             CreateBarBrush(entry),
             topValue == 0UL ? 0d : Math.Clamp(entry.TotalValue / (double)topValue, 0d, 1d));
-    }
-
-    private int FindSkillEntryIndex(long skillId)
-    {
-        for (var index = 0; index < _skillEntries.Count; index++)
-        {
-            if (_skillEntries[index].SkillId == skillId)
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 
     /// <summary>

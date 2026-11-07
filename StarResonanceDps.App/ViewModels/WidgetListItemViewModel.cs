@@ -17,9 +17,17 @@ namespace StarResonanceDps.App.ViewModels;
 public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusSource
 {
     private readonly ObservableCollection<PlayerListEntry> _playerListEntries = [];
-    private readonly Dictionary<long, PlayerListEntry> _playerListEntriesByCharacterId = [];
     private readonly ObservableCollection<EntityListEntry> _entityListEntries = [];
-    private readonly Dictionary<long, EntityListEntry> _entityListEntriesByUuid = [];
+
+    /// <summary>プレイヤーリストの人ごとの技の枠の値。一覧から外れた人はその同期で、全員はマップ移動で手放す。</summary>
+    private readonly Dictionary<long, PlayerSkillDisplayState> _playerSkillStates = [];
+    private readonly Func<long, PlayerSkillDisplayState> _getPlayerSkillState;
+
+    /// <summary>右クリックのメニューを開いた行(閉じていれば null)と、開いた時の相手。</summary>
+    private PlayerListEntry? _playerMenuRow;
+    private long _playerMenuCharacterId;
+    private EntityListEntry? _entityMenuRow;
+    private long _entityMenuUuid;
     private WidgetThemeConfig _theme = WidgetConfigDefaults.CreateTheme();
     private MeterWidgetSettingsConfig _meter = WidgetConfigDefaults.CreateMeterSettings(WidgetKind.PlayerList);
     private MetricGraphWidgetSettingsConfig _metricGraph = WidgetConfigDefaults.CreateMetricGraphSettings(WidgetKind.DpsGraph);
@@ -236,10 +244,8 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>起動ボタンを停止の絵にするか。相手を選ぶ種別は選んでいる項目の窓が開いているか、ほかは起動中か。</summary>
     public bool ShowsStopIcon => SupportsTargetSelection ? IsSelectedTargetOpen : State == WidgetState.Running;
 
-    public MeterWidgetSettingsConfig GetMeterSettingsSnapshot()
-    {
-        return WidgetConfigDefaults.CloneNormalizedMeter(Kind, _meter);
-    }
+    /// <summary>メーター系の今の設定。<b>複製しない。読むだけで、書き換えない。</b>定期更新と名簿の更新が読む。値は代入の時点で正規化してある。</summary>
+    public MeterWidgetSettingsConfig MeterSettings => _meter;
 
     public MetricGraphWidgetSettingsConfig GetMetricGraphSettingsSnapshot()
     {
@@ -743,7 +749,16 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public event Action<WidgetKind, long>? PlayerWindowRequested;
 
-    public event Action<WidgetKind, EntityListEntry>? EntityWindowRequested;
+    public event Action<WidgetKind, EntityTargetInfo>? EntityWindowRequested;
+
+    /// <summary>エンティティリストの行が映す個体やその値が変わった。実体の窓が当て直す。</summary>
+    public event EventHandler? EntityListTargetsChanged;
+
+    /// <summary>右クリックのメニューの相手が一覧から消えたか、開いた行が外れた(マップ移動も)。画面がメニューを閉じる。</summary>
+    public event EventHandler? PlayerMenuTargetLeft;
+
+    /// <summary>右クリックのメニューの相手が一覧から消えたか、開いた行が外れた(マップ移動も)。画面がメニューを閉じる。</summary>
+    public event EventHandler? EntityMenuTargetLeft;
 
     /// <summary>名前の選択リストを開いた。項目を作り直す。</summary>
     public event EventHandler? TargetOptionsRequested;
@@ -837,6 +852,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public WidgetListItemViewModel()
     {
+        _getPlayerSkillState = GetPlayerSkillState;
         PlayerListEntries = new ReadOnlyObservableCollection<PlayerListEntry>(_playerListEntries);
         EntityListEntries = new ReadOnlyObservableCollection<EntityListEntry>(_entityListEntries);
         _entityRowSettings = EntityRowSettings.FromEntityList(_meter);
@@ -1488,67 +1504,67 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     }
 
     [RelayCommand]
-    private void RequestPlayerInfo(PlayerListEntry? player)
+    private void RequestPlayerInfo(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerInfo, player);
     }
 
     [RelayCommand]
-    private void RequestPlayerStatus(PlayerListEntry? player)
+    private void RequestPlayerStatus(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerStatus, player);
     }
 
     [RelayCommand]
-    private void RequestPlayerEquipment(PlayerListEntry? player)
+    private void RequestPlayerEquipment(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerEquipment, player);
     }
 
     [RelayCommand]
-    private void RequestPlayerTalent(PlayerListEntry? player)
+    private void RequestPlayerTalent(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerTalent, player);
     }
 
     [RelayCommand]
-    private void RequestPlayerSeasonTalent(PlayerListEntry? player)
+    private void RequestPlayerSeasonTalent(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerSeasonTalent, player);
     }
 
     [RelayCommand]
-    private void RequestPlayerModule(PlayerListEntry? player)
+    private void RequestPlayerModule(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.PlayerModule, player);
     }
 
     [RelayCommand]
-    private void RequestBuffList(PlayerListEntry? player)
+    private void RequestBuffList(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.BuffList, player);
     }
 
     [RelayCommand]
-    private void RequestDebuffList(PlayerListEntry? player)
+    private void RequestDebuffList(PlayerMenuTarget? player)
     {
         RequestPlayerWindow(WidgetKind.DebuffList, player);
     }
 
     [RelayCommand]
-    private void RequestEntityInfo(EntityListEntry? entity)
+    private void RequestEntityInfo(EntityTargetInfo? entity)
     {
         RequestEntityWindow(WidgetKind.EntityInfo, entity);
     }
 
     [RelayCommand]
-    private void RequestEntityBuffList(EntityListEntry? entity)
+    private void RequestEntityBuffList(EntityTargetInfo? entity)
     {
         RequestEntityWindow(WidgetKind.BuffList, entity);
     }
 
     [RelayCommand]
-    private void RequestEntityDebuffList(EntityListEntry? entity)
+    private void RequestEntityDebuffList(EntityTargetInfo? entity)
     {
         RequestEntityWindow(WidgetKind.DebuffList, entity);
     }
@@ -1565,7 +1581,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         OnPropertyChanged(nameof(HasOpenPlayerWindows));
     }
 
-    private void RequestPlayerWindow(WidgetKind kind, PlayerListEntry? player)
+    private void RequestPlayerWindow(WidgetKind kind, PlayerMenuTarget? player)
     {
         if (!IsPlayerList || player is null)
         {
@@ -1575,7 +1591,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         PlayerWindowRequested?.Invoke(kind, player.CharacterId);
     }
 
-    private void RequestEntityWindow(WidgetKind kind, EntityListEntry? entity)
+    private void RequestEntityWindow(WidgetKind kind, EntityTargetInfo? entity)
     {
         if (!IsEntityList || entity is null)
         {
@@ -1585,6 +1601,73 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         EntityWindowRequested?.Invoke(kind, entity);
     }
 
+    /// <summary>
+    /// 右クリックのメニューを開いた行を受ける(閉じたら null)。行の強調は開いた時の人についていく。
+    /// メニューの相手が一覧から消えたか、開いた行が外れたら <see cref="PlayerMenuTargetLeft"/> で知らせる。
+    /// </summary>
+    public void SetPlayerMenuTarget(PlayerListEntry? row)
+    {
+        _playerMenuRow = row;
+        _playerMenuCharacterId = row?.CharacterId ?? 0;
+        foreach (var entry in _playerListEntries)
+        {
+            entry.IsPlayerSelectionMenuOpen = IsPlayerMenuTarget(entry.CharacterId);
+        }
+    }
+
+    /// <summary>右クリックのメニューを開いた行を受ける(閉じたら null)。形は <see cref="SetPlayerMenuTarget"/> と同じ。</summary>
+    public void SetEntityMenuTarget(EntityListEntry? row)
+    {
+        _entityMenuRow = row;
+        _entityMenuUuid = row?.EntityUuid ?? 0;
+        foreach (var entry in _entityListEntries)
+        {
+            entry.IsEntitySelectionMenuOpen = IsEntityMenuTarget(entry.EntityUuid);
+        }
+    }
+
+    private bool IsPlayerMenuTarget(long characterId) => _playerMenuRow is not null && characterId == _playerMenuCharacterId;
+
+    private bool IsEntityMenuTarget(long entityUuid) => _entityMenuRow is not null && entityUuid == _entityMenuUuid;
+
+    private PlayerSkillDisplayState GetPlayerSkillState(long characterId)
+    {
+        if (!_playerSkillStates.TryGetValue(characterId, out var state))
+        {
+            state = new PlayerSkillDisplayState(characterId);
+            _playerSkillStates.Add(characterId, state);
+        }
+
+        return state;
+    }
+
+    /// <summary>一覧から外れた人の技の枠の値を手放す。外れた人がいなければ何も作らない。</summary>
+    private void ReleaseLeftPlayerSkillStates(IReadOnlyList<PlayerRosterEntry> visibleRoster)
+    {
+        if (_playerSkillStates.Count <= visibleRoster.Count)
+        {
+            return;
+        }
+
+        var shownCharacterIds = new HashSet<long>(visibleRoster.Count);
+        foreach (var player in visibleRoster)
+        {
+            shownCharacterIds.Add(player.CharacterId);
+        }
+
+        foreach (var characterId in _playerSkillStates.Keys.ToArray())
+        {
+            if (!shownCharacterIds.Contains(characterId))
+            {
+                _playerSkillStates.Remove(characterId);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 行を位置ごとに当て直す(順が変わっても行の部品を作り直さない)。足りなければ末尾に足し、余れば末尾から外す。
+    /// マップが替わったら行を作り直す。
+    /// </summary>
     private void SynchronizePlayerListEntries(bool resetEntries)
     {
         if (!IsPlayerList)
@@ -1593,68 +1676,53 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
 
         var visibleRoster = GetVisiblePlayerRoster();
+        var menuRowRemoved = resetEntries;
 
         if (resetEntries)
         {
-            foreach (var entry in _playerListEntries)
-            {
-                entry.IsPlayerSelectionMenuOpen = false;
-            }
-
-            _playerListEntriesByCharacterId.Clear();
             _playerListEntries.Clear();
+            _playerSkillStates.Clear();
         }
-        else
+
+        var playerNameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance.CurrentSettings.PlayerNameDisplayModeIndex;
+
+        var isMenuTargetShown = false;
+        for (var index = 0; index < visibleRoster.Count; index++)
         {
-            var activeCharacterIds = visibleRoster
-                .Select(entry => entry.CharacterId)
-                .ToHashSet();
-
-            for (var index = _playerListEntries.Count - 1; index >= 0; index--)
+            var player = visibleRoster[index];
+            PlayerListEntry entry;
+            if (index < _playerListEntries.Count)
             {
-                var entry = _playerListEntries[index];
-                if (activeCharacterIds.Contains(entry.CharacterId))
-                {
-                    continue;
-                }
-
-                entry.IsPlayerSelectionMenuOpen = false;
-                _playerListEntriesByCharacterId.Remove(entry.CharacterId);
-                _playerListEntries.RemoveAt(index);
+                entry = _playerListEntries[index];
+                entry.Update(player, _meter, playerNameDisplayMode, _getPlayerSkillState);
             }
+            else
+            {
+                entry = PlayerListEntry.Create(player, _meter, playerNameDisplayMode, _getPlayerSkillState);
+                _playerListEntries.Add(entry);
+            }
+
+            var isMenuTarget = IsPlayerMenuTarget(player.CharacterId);
+            entry.IsPlayerSelectionMenuOpen = isMenuTarget;
+            isMenuTargetShown |= isMenuTarget;
         }
 
-        var globalSettings = ConfigManager.Instance.GetSettingsSnapshot();
-        var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
-
-        for (var targetIndex = 0; targetIndex < visibleRoster.Count; targetIndex++)
+        for (var index = _playerListEntries.Count - 1; index >= visibleRoster.Count; index--)
         {
-            var player = visibleRoster[targetIndex];
-            if (!_playerListEntriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
-            {
-                entry = PlayerListEntry.Create(player, _meter, playerNameDisplayMode);
-                _playerListEntriesByCharacterId.Add(player.CharacterId, entry);
-                _playerListEntries.Insert(targetIndex, entry);
-                continue;
-            }
-
-            entry.Update(player, _meter, playerNameDisplayMode);
-
-            if (_playerListEntries[targetIndex].CharacterId == player.CharacterId)
-            {
-                continue;
-            }
-
-            var currentIndex = FindPlayerListEntryIndex(player.CharacterId, targetIndex + 1);
-            if (currentIndex >= 0)
-            {
-                _playerListEntries.Move(currentIndex, targetIndex);
-            }
+            menuRowRemoved |= ReferenceEquals(_playerListEntries[index], _playerMenuRow);
+            _playerListEntries.RemoveAt(index);
         }
+
+        ReleaseLeftPlayerSkillStates(visibleRoster);
 
         _shownPlayerRoster = visibleRoster;
         RenderPlayerListFooter(visibleRoster);
         RefreshDataStatus();
+
+        if (_playerMenuRow is not null && (menuRowRemoved || !isMenuTargetShown))
+        {
+            PlayerMenuTargetLeft?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private IReadOnlyList<PlayerRosterEntry> GetVisiblePlayerRoster()
@@ -1694,9 +1762,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             return roster;
         }
 
-        var nameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance
-            .GetSettingsSnapshot()
-            .PlayerNameDisplayModeIndex;
+        var nameDisplayMode = (PlayerNameDisplayMode)ConfigManager.Instance.CurrentSettings.PlayerNameDisplayModeIndex;
 
         return
         [
@@ -1716,19 +1782,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         ];
     }
 
-    private int FindPlayerListEntryIndex(long characterId, int startIndex)
-    {
-        for (var index = startIndex; index < _playerListEntries.Count; index++)
-        {
-            if (_playerListEntries[index].CharacterId == characterId)
-            {
-                return index;
-            }
-        }
-
-        return -1;
-    }
-
+    /// <summary>
+    /// 行を位置ごとに当て直す(順が変わっても行の部品を作り直さない)。足りなければ末尾に足し、余れば末尾から外す。
+    /// マップが替わったら行を作り直す。
+    /// </summary>
     private void SynchronizeEntityListEntries(bool resetEntries)
     {
         if (!IsEntityList)
@@ -1737,45 +1794,31 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         }
 
         var visibleEntities = GetVisibleNearbyEntities();
+        var menuRowRemoved = resetEntries;
 
         if (resetEntries)
         {
-            foreach (var entry in _entityListEntries)
-            {
-                entry.IsEntitySelectionMenuOpen = false;
-            }
-
-            _entityListEntriesByUuid.Clear();
             _entityListEntries.Clear();
-        }
-        else
-        {
-            var activeEntityUuids = visibleEntities
-                .Select(entry => entry.EntityUuid)
-                .ToHashSet();
-
-            for (var index = _entityListEntries.Count - 1; index >= 0; index--)
-            {
-                var entry = _entityListEntries[index];
-                if (activeEntityUuids.Contains(entry.EntityUuid))
-                {
-                    continue;
-                }
-
-                entry.IsEntitySelectionMenuOpen = false;
-                _entityListEntriesByUuid.Remove(entry.EntityUuid);
-                _entityListEntries.RemoveAt(index);
-            }
         }
 
         _entityHatePlayers.Prepare(
             _entityRowSettings,
-            (PlayerNameDisplayMode)ConfigManager.Instance.GetSettingsSnapshot().PlayerNameDisplayModeIndex);
+            (PlayerNameDisplayMode)ConfigManager.Instance.CurrentSettings.PlayerNameDisplayModeIndex);
 
-        for (var targetIndex = 0; targetIndex < visibleEntities.Count; targetIndex++)
+        var targetsChanged = false;
+        var isMenuTargetShown = false;
+        for (var index = 0; index < visibleEntities.Count; index++)
         {
-            var entity = visibleEntities[targetIndex];
-            if (!_entityListEntriesByUuid.TryGetValue(entity.EntityUuid, out var entry))
+            var entity = visibleEntities[index];
+            EntityListEntry entry;
+            if (index < _entityListEntries.Count)
+            {
+                entry = _entityListEntries[index];
+                var previousTarget = entry.Target;
+                entry.Update(entity, _entityRowSettings, _entityHatePlayers, _dungeonScore.IsScoreRequested);
+                targetsChanged |= !ReferenceEquals(previousTarget, entry.Target);
+            }
+            else
             {
                 entry = EntityListEntry.Create(
                     entity,
@@ -1783,27 +1826,32 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
                     _entityHatePlayers,
                     _dungeonScore.IsScoreRequested,
                     EntityListHateSlotCount);
-                _entityListEntriesByUuid.Add(entity.EntityUuid, entry);
-                _entityListEntries.Insert(targetIndex, entry);
-                continue;
+                _entityListEntries.Add(entry);
+                targetsChanged = true;
             }
 
-            entry.Update(entity, _entityRowSettings, _entityHatePlayers, _dungeonScore.IsScoreRequested);
+            var isMenuTarget = IsEntityMenuTarget(entity.EntityUuid);
+            entry.IsEntitySelectionMenuOpen = isMenuTarget;
+            isMenuTargetShown |= isMenuTarget;
+        }
 
-            if (_entityListEntries[targetIndex].EntityUuid == entity.EntityUuid)
-            {
-                continue;
-            }
-
-            var currentIndex = FindEntityListEntryIndex(entity.EntityUuid, targetIndex + 1);
-            if (currentIndex >= 0)
-            {
-                _entityListEntries.Move(currentIndex, targetIndex);
-            }
+        for (var index = _entityListEntries.Count - 1; index >= visibleEntities.Count; index--)
+        {
+            menuRowRemoved |= ReferenceEquals(_entityListEntries[index], _entityMenuRow);
+            _entityListEntries.RemoveAt(index);
         }
 
         RenderEntityListFooter(visibleEntities);
         RefreshDataStatus();
+        if (targetsChanged)
+        {
+            EntityListTargetsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (_entityMenuRow is not null && (menuRowRemoved || !isMenuTargetShown))
+        {
+            EntityMenuTargetLeft?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     /// <summary>
@@ -1956,19 +2004,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
             || entry.HasHpBar
             || !CombatDataCatalog.HasEntityRow(entry.EntityType, entry.EntityId)
             || CombatDataCatalog.HasEntityName(entry.EntityType, entry.EntityId);
-    }
-
-    private int FindEntityListEntryIndex(long entityUuid, int startIndex)
-    {
-        for (var index = startIndex; index < _entityListEntries.Count; index++)
-        {
-            if (_entityListEntries[index].EntityUuid == entityUuid)
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 
     private void RaisePlayerWindowPresentationChanged()

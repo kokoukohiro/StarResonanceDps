@@ -20,12 +20,20 @@ namespace StarResonanceDps.Core.Services;
 /// </para>
 ///
 /// <para>
-/// 統計用の履歴は従来どおり <c>Encounter.Entities[].BuffEvents</c> に残る。ここはライブ表示専用。
+/// <c>Encounter.Entities[].BuffEvents</c> は今付いている実体の記録だけで、除去で消す。ここはライブ表示専用。
+/// </para>
+///
+/// <para>
+/// 敵のバフを読むのは周りにいる間の窓だけなので、周りから消えたときに手放す(<see cref="RemoveEntity"/>)。
+/// 他のプレイヤーのバフは周りにいる間の窓と、名簿の行の機能(技の枠のバッジ・蘇生不可・変身のアイコン)が読む。周りから消えても行があれば残すが、
+/// 見えない人には除去の通知が届かないので、切れた項目は読んだときに手放し(<see cref="GetActive"/>)、行が無くなったら全部手放す(<see cref="ReleaseOutOfSightPlayersWithoutRow"/>)。
 /// </para>
 /// </summary>
 public sealed class ActiveBuffStore
 {
     private static readonly Lazy<ActiveBuffStore> LazyInstance = new(() => new ActiveBuffStore());
+
+    private const int MaxStackSortCount = 128;
 
     private readonly object _sync = new();
     private readonly Dictionary<long, Dictionary<ulong, ActiveBuffEntry>> _buffsByEntity = [];
@@ -34,8 +42,9 @@ public sealed class ActiveBuffStore
     private long _nextFirstSeenOrder;
 
     /// <summary>
-    /// エンティティごとの BaseId -> 付与元(種類と番号)の対応。バフからスキルを逆引きする多段解決に使う。
-    /// 期限切れや解除で消えたバフの分も残す(索引であって表示ソースではない)。
+    /// プレイヤーごとの BaseId -> 付与元(種類と番号)の対応。バフからスキルを逆引きする多段解決に使う。
+    /// 読むのは技の枠のバッジだけなので、プレイヤーの分だけを持つ。
+    /// 期限切れや解除で消えたバフの分も残す(索引であって表示ソースではない)。周りから消えても残し、マップ切替で消える(人数と番号の種類で頭打ち)。
     /// これが痩せると、直接一致しないスキル(ロールスキル等)の紐付けが解決できなくなる。
     /// <b>種類を落とさない。</b>付与元の番号はスキルの表とバフの表で重なるので、番号だけでは辿り先が決まらない。
     /// </summary>
@@ -43,9 +52,12 @@ public sealed class ActiveBuffStore
 
     /// <summary>
     /// このマップで出現時の全バフの一覧を受けた保持者(他のプレイヤーと敵。0件の一覧も含む)。
-    /// ウィジェットの状態の印が「その相手のバフを受けたか」に使う。バフと同じく <see cref="Clear"/> で消える。
+    /// ウィジェットの状態の印が「その相手のバフを受けたか」に使う。バフと同じく <see cref="Clear"/> と <see cref="RemoveEntity"/> で消える。
     /// </summary>
     private readonly HashSet<long> _appearListEntityUuids = [];
+
+    /// <summary>周りから消えて、まだ名簿の行がある他のプレイヤー。また現れるか、行が無くなるか、マップ切替で外れる。</summary>
+    private readonly HashSet<long> _outOfSightPlayerUuids = [];
 
     private ActiveBuffStore()
     {
@@ -253,7 +265,8 @@ public sealed class ActiveBuffStore
 
     private void RecordSourceParentNoLock(long entityUuid, BuffEvent buffEvent)
     {
-        if (buffEvent.BaseId <= 0
+        if (Utils.UuidToEntityType(entityUuid) != (long)Zproto.EEntityType.EntChar
+            || buffEvent.BaseId <= 0
             || buffEvent.SourceConfigId <= 0
             || (buffEvent.FightSourceType == (int)Zproto.EFightSource.Buff && buffEvent.BaseId == buffEvent.SourceConfigId))
         {
@@ -347,33 +360,84 @@ public sealed class ActiveBuffStore
         return false;
     }
 
-    /// <summary>期限切れを除いた、現在有効なバフを返す。</summary>
-    public IReadOnlyList<BuffEvent> GetActive(long entityUuid)
+    /// <summary>
+    /// 期限切れを除いた、現在有効なバフを付いた順に返す。何度も通る道で呼ばれるので、作るのは返す配列だけにする。
+    /// 見えない他のプレイヤーの切れた項目はここで手放す(除去の通知が届かない)。周りにいる実体の切れた項目は、遅れて届く通知の番号の引き継ぎに要るので残す。
+    /// </summary>
+    public BuffEvent[] GetActive(long entityUuid)
     {
         if (entityUuid == 0)
         {
-            return Array.Empty<BuffEvent>();
+            return [];
         }
 
-        ActiveBuffEntry[] entries;
+        var now = DateTime.UtcNow;
         lock (_sync)
         {
             if (!_buffsByEntity.TryGetValue(entityUuid, out var buffs) || buffs.Count == 0)
             {
-                return Array.Empty<BuffEvent>();
+                return [];
             }
 
-            entries = [.. buffs.Values];
+            var releasesExpired = _outOfSightPlayerUuids.Contains(entityUuid);
+            var events = new BuffEvent[buffs.Count];
+            Span<long> orders = buffs.Count <= MaxStackSortCount ? stackalloc long[buffs.Count] : new long[buffs.Count];
+            var count = 0;
+            foreach (var (buffUuid, entry) in buffs)
+            {
+                if (!entry.IsExpired(now))
+                {
+                    events[count] = entry.BuffEvent;
+                    orders[count] = entry.FirstSeenOrder;
+                    count++;
+                }
+                else if (releasesExpired)
+                {
+                    buffs.Remove(buffUuid);
+                }
+            }
+
+            if (buffs.Count == 0)
+            {
+                _buffsByEntity.Remove(entityUuid);
+            }
+
+            orders[..count].Sort(events.AsSpan(0, count));
+            if (count != events.Length)
+            {
+                Array.Resize(ref events, count);
+            }
+
+            return events;
+        }
+    }
+
+    /// <summary>その番号のバフが今付いているか(期限切れを除く)。一覧を作らない。</summary>
+    public bool HasActive(long entityUuid, int baseId)
+    {
+        if (entityUuid == 0)
+        {
+            return false;
         }
 
         var now = DateTime.UtcNow;
-        return
-        [
-            .. entries
-                .Where(entry => !entry.IsExpired(now))
-                .OrderBy(entry => entry.FirstSeenOrder)
-                .Select(entry => entry.BuffEvent)
-        ];
+        lock (_sync)
+        {
+            if (!_buffsByEntity.TryGetValue(entityUuid, out var buffs))
+            {
+                return false;
+            }
+
+            foreach (var entry in buffs.Values)
+            {
+                if (entry.BuffEvent.BaseId == baseId && !entry.IsExpired(now))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -454,6 +518,55 @@ public sealed class ActiveBuffStore
         return true;
     }
 
+    /// <summary>
+    /// 周りから消えた、プレイヤー以外の実体の分を手放す(<c>Encounter.RemoveDisappearedEntity</c>)。
+    /// その実体が付けたバフは付いた側の項目なので消えない。
+    /// </summary>
+    public void RemoveEntity(long entityUuid)
+    {
+        lock (_sync)
+        {
+            _buffsByEntity.Remove(entityUuid);
+            _appearListEntityUuids.Remove(entityUuid);
+        }
+    }
+
+    /// <summary>他のプレイヤーが周りから消えた。名簿を作り直す前に呼ぶ(<see cref="ReleaseOutOfSightPlayersWithoutRow"/>が見る)。</summary>
+    public void MarkPlayerOutOfSight(long playerUuid)
+    {
+        lock (_sync)
+        {
+            _outOfSightPlayerUuids.Add(playerUuid);
+        }
+    }
+
+    public void MarkPlayerInSight(long playerUuid)
+    {
+        lock (_sync)
+        {
+            _outOfSightPlayerUuids.Remove(playerUuid);
+        }
+    }
+
+    /// <summary>周りから消えた他のプレイヤーのうち、名簿の行が無くなった人のバフを手放す。付与元の索引はまた現れたときのバッジに要るので残す。</summary>
+    public void ReleaseOutOfSightPlayersWithoutRow(IReadOnlySet<long> rosterCharacterIds)
+    {
+        lock (_sync)
+        {
+            _outOfSightPlayerUuids.RemoveWhere(playerUuid =>
+            {
+                if (rosterCharacterIds.Contains(Utils.UuidToEntityId(playerUuid)))
+                {
+                    return false;
+                }
+
+                _buffsByEntity.Remove(playerUuid);
+                _appearListEntityUuids.Remove(playerUuid);
+                return true;
+            });
+        }
+    }
+
     public void Clear()
     {
         lock (_sync)
@@ -461,6 +574,7 @@ public sealed class ActiveBuffStore
             _buffsByEntity.Clear();
             _sourceParentsByEntity.Clear();
             _appearListEntityUuids.Clear();
+            _outOfSightPlayerUuids.Clear();
         }
     }
 

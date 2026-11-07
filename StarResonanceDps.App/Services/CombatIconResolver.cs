@@ -23,8 +23,7 @@ public static class CombatIconResolver
     /// </summary>
     private const string FactorIconPrefix = "Factors/";
 
-    private static readonly ConcurrentDictionary<string, string> ResolvedPaths =
-        new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<(string Category, string? FallbackCategory, string IconName), string> ResolvedPaths = new();
 
     /// <summary>Icons.xaml の鍵 → 型抜きのブラシ。鍵ごとに1つ作って使い回す。Icons.xaml に無い鍵は null。画面のスレッドだけで使う。</summary>
     private static readonly Dictionary<string, ImageBrush?> AppIconMasks = new(StringComparer.Ordinal);
@@ -122,17 +121,21 @@ public static class CombatIconResolver
     }
 
 
-    private static string? Resolve(string? iconName, params string[] categories)
+    private static string? Resolve(string? iconName, string category, string? fallbackCategory = null)
     {
         if (string.IsNullOrWhiteSpace(iconName))
         {
             return null;
         }
 
-        var cacheKey = string.Join('|', categories) + '|' + iconName;
-        var resolvedPath = ResolvedPaths.GetOrAdd(
-            cacheKey,
-            _ => ResolveUncached(iconName, categories) ?? string.Empty);
+        var key = (category, fallbackCategory, iconName);
+        if (!ResolvedPaths.TryGetValue(key, out var resolvedPath))
+        {
+            string[] categories = fallbackCategory is null ? [category] : [category, fallbackCategory];
+            resolvedPath = ResolveUncached(iconName, categories) ?? string.Empty;
+            ResolvedPaths[key] = resolvedPath;
+        }
+
         return string.IsNullOrEmpty(resolvedPath) ? null : resolvedPath;
     }
 

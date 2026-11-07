@@ -34,7 +34,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
     private readonly EntityWindowTarget _target;
 
     /// <summary>枠からバフリスト・デバフリストを開く経路。</summary>
-    private readonly Action<WidgetKind, EntityListEntry> _openList;
+    private readonly Action<WidgetKind, EntityTargetInfo> _openList;
 
     /// <summary>枠からバフ・デバフカードを開く経路。</summary>
     private readonly Action<EntityWindowTarget, PlayerBuffListKind, string, int> _openCard;
@@ -42,6 +42,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
     private readonly EntityHatePlayerResolver _hatePlayers = new();
     private readonly ObservableCollection<PlayerBuffEntry> _buffs = [];
     private readonly ObservableCollection<PlayerBuffEntry> _debuffs = [];
+    private readonly List<PlayerBuffEntry> _orderedEntries = [];
     private readonly DispatcherTimer _refreshTimer;
     private EntityInfoWidgetSettingsConfig _settings;
     private EntityRowSettings _rowSettings;
@@ -74,7 +75,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
         EntityWindowTarget target,
         IReadOnlyList<PlayerRosterEntry> roster,
         IReadOnlyList<NearbyEntityEntry> nearbyEntities,
-        Action<WidgetKind, EntityListEntry> openList,
+        Action<WidgetKind, EntityTargetInfo> openList,
         Action<EntityWindowTarget, PlayerBuffListKind, string, int> openCard)
     {
         _widget = widget;
@@ -113,7 +114,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
 
     public bool IsEntityAcquired => _target.IsAcquired;
 
-    public EntityListEntry? Entity => _target.Entity;
+    public EntityTargetInfo? Entity => _target.Entity;
 
     public string TargetName => _target.Name;
 
@@ -174,7 +175,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
         return _target.Represents(entityUuid);
     }
 
-    public bool TryApplyEntity(EntityListEntry entity)
+    public bool TryApplyEntity(EntityTargetInfo entity)
     {
         return _target.TryApply(entity);
     }
@@ -317,7 +318,6 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
         _refreshTimer.Stop();
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _target.Changed -= Target_Changed;
-        _target.Dispose();
         _widget.EntityInfoSettingsChanged -= Widget_EntityInfoSettingsChanged;
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
     }
@@ -373,7 +373,7 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
         // プレイヤー名の見せ方はエンティティリストと同じく、組むたびに全体設定から読む。
         _hatePlayers.Prepare(
             _rowSettings,
-            (PlayerNameDisplayMode)ConfigManager.Instance.GetSettingsSnapshot().PlayerNameDisplayModeIndex);
+            (PlayerNameDisplayMode)ConfigManager.Instance.CurrentSettings.PlayerNameDisplayModeIndex);
 
         if (Row is { } row && row.EntityUuid == entity.EntityUuid)
         {
@@ -423,9 +423,9 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
             entries.RemoveAt(index);
         }
 
-        for (var targetIndex = 0; targetIndex < snapshots.Count; targetIndex++)
+        for (var index = 0; index < snapshots.Count; index++)
         {
-            var snapshot = snapshots[targetIndex];
+            var snapshot = snapshots[index];
             // 対象者名とレベルはエンティティのバフ一覧と同じく窓の対象のもの。
             var name = BuffListRowName.Format(
                 _settings.BuffInfoFormatString,
@@ -436,19 +436,20 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
             var existingIndex = FindEntryIndex(entries, snapshot.Key);
             if (existingIndex < 0)
             {
-                entries.Insert(targetIndex, new PlayerBuffEntry(snapshot, name)
+                _orderedEntries.Add(new PlayerBuffEntry(snapshot, name)
                 {
                     IsDebuff = kind == PlayerBuffListKind.Debuff
                 });
                 continue;
             }
 
-            entries[existingIndex].Update(snapshot, name);
-            if (existingIndex != targetIndex)
-            {
-                entries.Move(existingIndex, targetIndex);
-            }
+            var entry = entries[existingIndex];
+            entry.Update(snapshot, name);
+            _orderedEntries.Add(entry);
         }
+
+        CollectionOrder.Apply(entries, _orderedEntries);
+        _orderedEntries.Clear();
     }
 
     private static int FindEntryIndex(ObservableCollection<PlayerBuffEntry> entries, string key)

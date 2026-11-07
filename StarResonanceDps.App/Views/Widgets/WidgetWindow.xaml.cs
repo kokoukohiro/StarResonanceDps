@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -102,6 +103,9 @@ public partial class WidgetWindow : Window
 
     /// <summary>中身から高さを合わせる合図が来て、まだ合わせていないか(<see cref="FitHeightToContent"/>)。</summary>
     private bool _isFitHeightPending;
+
+    /// <summary>中身に合わせて高さを変えている最中か。この大きさの変化は保存しない(手で変えた大きさではない)。</summary>
+    private bool _isFittingHeight;
 
     /// <summary>高さを合わせる合図を出した、測る <see cref="ScrollViewer"/>(<see cref="AutoFitHeightBehavior"/>)。</summary>
     private ScrollViewer? _autoFitHeightSource;
@@ -270,7 +274,7 @@ public partial class WidgetWindow : Window
     {
         var status = _dataStatusSource.DataStatus;
         var isNormal = status.Level == WidgetDataStatusLevel.Complete;
-        var isMarkShown = ConfigManager.Instance.GetSettingsSnapshot().WidgetDataStatusDisplayModeIndex switch
+        var isMarkShown = ConfigManager.Instance.CurrentSettings.WidgetDataStatusDisplayModeIndex switch
         {
             AppConfigDefaults.WidgetDataStatusDisplayHideIndex => false,
             AppConfigDefaults.WidgetDataStatusDisplayNonNormalOnlyIndex => !isNormal,
@@ -306,7 +310,7 @@ public partial class WidgetWindow : Window
     private void ApplyTopmost()
     {
         Topmost = _isPinned
-            || ConfigManager.Instance.GetSettingsSnapshot().WidgetWindowTopmostModeIndex
+            || ConfigManager.Instance.CurrentSettings.WidgetWindowTopmostModeIndex
                 == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex;
 
         if (Topmost)
@@ -516,6 +520,20 @@ public partial class WidgetWindow : Window
         WidgetFooterHost.Content = footerContent;
         _hasFooterContent = footerContent is not null;
         UpdateFooterVisibility();
+    }
+
+    /// <summary>
+    /// UIオートメーションに見せるのは窓そのもの(名前と位置)だけで、中の要素は見せない。
+    /// ほかのプログラムが変化の通知を登録すると、WPF はレイアウトのたびに peer の子をたどり直し、行の数に比例して割り当てるため。
+    /// </summary>
+    protected override AutomationPeer OnCreateAutomationPeer() => new WidgetWindowAutomationPeer(this);
+
+    private sealed class WidgetWindowAutomationPeer(Window owner) : WindowAutomationPeer(owner)
+    {
+        protected override List<AutomationPeer>? GetChildrenCore() => null;
+
+        // 既定は読むたびに窓の文字を取り直して割り当てる。レイアウトのたびに読まれるので、同じ文字の Title を返す。
+        protected override string GetNameCore() => ((Window)Owner).Title;
     }
 
     protected override void OnClosed(EventArgs e)
@@ -797,7 +815,9 @@ public partial class WidgetWindow : Window
             return;
         }
 
+        _isFittingHeight = true;
         Height = targetHeight;
+        _isFittingHeight = false;
     }
 
     /// <summary>窓が載っている(一番近い)画面の作業領域の下端。窓の座標(論理ピクセル)で返す。</summary>
@@ -1025,7 +1045,7 @@ public partial class WidgetWindow : Window
 
     private void ScheduleBoundsSave()
     {
-        if (_isRestoringBounds || !IsLoaded || WindowState == WindowState.Minimized)
+        if (_isRestoringBounds || _isFittingHeight || !IsLoaded || WindowState == WindowState.Minimized)
         {
             return;
         }

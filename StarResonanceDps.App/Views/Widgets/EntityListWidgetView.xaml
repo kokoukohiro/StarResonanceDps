@@ -119,10 +119,19 @@
             <Setter Property="Tag" Value="{StaticResource Menu.WidgetWindowEntitySelectionContextMenuItem.LastCornerRadius}" />
         </Style>
 
+        <!-- 出すものが無いヘイトの枠は中身を作らない。枠は左から詰めて並ぶので、出ている枠の位置は動かない。 -->
+        <Style x:Key="EntityList.HateSlotPresenter" TargetType="ContentPresenter">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Content.IsShown, RelativeSource={RelativeSource Self}}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <!--
             ヘイトの枠(EntityHateSlot)。HP バーの右に、狙っている相手がいて表示設定「狙われるプレイヤー」が表示なら左端がその相手で続けてヘイト1位から、
             そうでなければ左端からヘイト1位を詰めて並べる。ヘイトは表示設定「ヘイト値」の人数(1〜5人)まで(並べ方は EntityListEntry)。
-            出すものが無い枠は場所を残して隠す。
             中身はクラスアイコン(25、プレイヤーリストと同じ大きさ)・プレイヤー名・バッジ。
             バッジは枠の中に寄せ方と Margin で置く(プレイヤーリストのデバフバッジと同じ作り)。枠を越えた分は切れる。バッジはクラスアイコンの背面。
             大きさはこの XAML の数字。ゲージの塗る高さは、ゲージの実際の大きさと割合から決める(HateGaugeFillHeightConverter)。
@@ -137,17 +146,6 @@
         <DataTemplate x:Key="EntityList.HateSlotTemplate">
             <Grid Width="42"
                   Height="34">
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsShown}" Value="False">
-                                <Setter Property="Visibility" Value="Hidden" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-
                 <!-- 今狙っている相手の印。色を絵の形で抜いて描く(ゲージの充填と同じ作り)。 -->
                 <Rectangle Width="30"
                            Height="30"
@@ -319,8 +317,7 @@
                           ItemsSource="{Binding EntityListEntries}"
                           VirtualizingPanel.IsVirtualizing="True"
                           VirtualizingPanel.VirtualizationMode="Recycling"
-                          VirtualizingPanel.ScrollUnit="Pixel"
-                          VirtualizingStackPanel.CleanUpVirtualizedItem="EntityListItemsControl_CleanUpVirtualizedItem">
+                          VirtualizingPanel.ScrollUnit="Pixel">
                 <ItemsControl.Template>
                     <ControlTemplate TargetType="ItemsControl">
                         <ScrollViewer x:Name="EntityListScrollViewer"
@@ -353,20 +350,18 @@
                                 HorizontalContentAlignment="Stretch"
                                 VerticalContentAlignment="Stretch">
                             <Button.ContextMenu>
-                                <ContextMenu DataContext="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource Self}}"
-                                             IsOpen="{Binding PlacementTarget.DataContext.IsEntitySelectionMenuOpen, RelativeSource={RelativeSource Self}, Mode=TwoWay}"
-                                             Placement="MousePoint"
-                                             Opened="EntitySelectionContextMenu_Opened"
+                                <!-- 行は別の敵に替わるので、開いた時の相手を Tag に持つ(DataContext と Tag は開くときに画面のコードが入れる)。 -->
+                                <ContextMenu Placement="MousePoint"
                                              Closed="EntitySelectionContextMenu_Closed">
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_EntityInfo]}"
                                               Command="{Binding RequestEntityInfoCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                              CommandParameter="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_BuffList]}"
                                               Command="{Binding RequestEntityBuffListCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                              CommandParameter="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                     <MenuItem Header="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Widget_DebuffList]}"
                                               Command="{Binding RequestEntityDebuffListCommand}"
-                                              CommandParameter="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
+                                              CommandParameter="{Binding Tag, RelativeSource={RelativeSource AncestorType={x:Type ContextMenu}}}" />
                                 </ContextMenu>
                             </Button.ContextMenu>
                             <Button.Style>
@@ -865,16 +860,22 @@
                                             VerticalAlignment="Center"
                                             Orientation="Horizontal">
                                     <ContentPresenter Content="{Binding HateSlots[0]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                     <ContentPresenter Content="{Binding HateSlots[1]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                     <ContentPresenter Content="{Binding HateSlots[2]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                     <ContentPresenter Content="{Binding HateSlots[3]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                     <ContentPresenter Content="{Binding HateSlots[4]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                     <ContentPresenter Content="{Binding HateSlots[5]}"
+                                                      Style="{StaticResource EntityList.HateSlotPresenter}"
                                                       ContentTemplate="{StaticResource EntityList.HateSlotTemplate}" />
                                 </StackPanel>
 

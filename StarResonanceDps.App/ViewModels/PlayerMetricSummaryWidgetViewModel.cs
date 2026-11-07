@@ -21,6 +21,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     private readonly Dictionary<Zproto.EDamageMode, Brush> _modeBrushes = [];
     private readonly Dictionary<Zproto.EDamageProperty, PlayerMetricShareItem> _elementShareItems = [];
     private readonly Dictionary<Zproto.EDamageMode, PlayerMetricShareItem> _modeShareItems = [];
+    private readonly List<PlayerMetricShareItem> _orderedShareItems = [];
     private ElementColorWidgetSettingsConfig _elementColorSettings;
     private bool _isDisposed;
 
@@ -114,7 +115,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
             return;
         }
 
-        var numberDisplayFormatIndex = _configManager.GetSettingsSnapshot().NumberDisplayFormatIndex;
+        var numberDisplayFormatIndex = _configManager.CurrentSettings.NumberDisplayFormatIndex;
         if (SelectedCharacterId is not { } characterId)
         {
             ApplySnapshot(MeterSnapshotProvider.GetPlayerMetricSummary(_kind, 0), numberDisplayFormatIndex);
@@ -189,7 +190,7 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
     /// 行ごと並べ替えるので、順位が入れ替わってもバーはその種類の前の長さから伸び縮みする。
     /// 値の無くなった種類の行は一覧から外す(行は <paramref name="items"/> に残して、また値が入ったら使う)。
     /// </summary>
-    private static void ApplyShares<TKey>(
+    private void ApplyShares<TKey>(
         ObservableCollection<PlayerMetricShareItem> shares,
         Dictionary<TKey, PlayerMetricShareItem> items,
         ulong totalValue,
@@ -224,23 +225,11 @@ public sealed partial class PlayerMetricSummaryWidgetViewModel : PlayerWidgetWin
             item.ValueText = FormatValue(pair.Value, numberDisplayFormatIndex)
                 + " "
                 + FormatPercent(pair.Value / (double)totalValue * 100d);
-
-            var currentIndex = shares.IndexOf(item);
-            if (currentIndex < 0)
-            {
-                shares.Insert(index, item);
-            }
-            else if (currentIndex != index)
-            {
-                shares.Move(currentIndex, index);
-            }
+            _orderedShareItems.Add(item);
         }
 
-        // 前から順に並べたので、値のある種類の後ろに残るのは値の無くなった種類だけ。
-        while (shares.Count > ordered.Count)
-        {
-            shares.RemoveAt(shares.Count - 1);
-        }
+        CollectionOrder.Apply(shares, _orderedShareItems);
+        _orderedShareItems.Clear();
     }
 
     private static string GetModeName(Zproto.EDamageMode mode)

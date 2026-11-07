@@ -85,29 +85,11 @@ public static class PlayerClassSpecResolver
 
     /// <summary>その実体にミーンの変身のバフが今乗っているか。外れるか時間切れになれば false。</summary>
     public static bool HasMeanTransformBuff(long entityUuid)
-        => HasBuff(entityUuid, MeanTransformBuffId);
+        => Services.ActiveBuffStore.Instance.HasActive(entityUuid, MeanTransformBuffId);
 
     /// <summary>その実体にゴーレムの変身のバフが今乗っているか。マップ移動で消えれば false。</summary>
     public static bool HasGolemTransformBuff(long entityUuid)
-        => HasBuff(entityUuid, GolemTransformBuffId);
-
-    private static bool HasBuff(long entityUuid, int buffId)
-    {
-        if (entityUuid == 0)
-        {
-            return false;
-        }
-
-        foreach (var buff in Services.ActiveBuffStore.Instance.GetActive(entityUuid))
-        {
-            if (buff.BaseId == buffId)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
+        => Services.ActiveBuffStore.Instance.HasActive(entityUuid, GolemTransformBuffId);
 
     /// <summary>変身している間の特化か(アイコンは変身のものにそろえる)。</summary>
     public static bool IsTransformation(PlayerClassSpec spec)

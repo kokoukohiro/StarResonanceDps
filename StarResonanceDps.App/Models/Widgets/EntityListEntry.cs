@@ -12,6 +12,10 @@ using MonsterClassification = StarResonanceDps.Core.CombatRuntime.EMonsterType;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
+/// <summary>
+/// エンティティの行の中身。エンティティリストの行は位置に結びつき、順が変わると別の個体の値に替わる(行の部品は作り直さない)。
+/// 個体そのものを持ちたいときは <see cref="Target"/> を持つ。エンティティ情報の窓は自分専用の行を1つ持つ。
+/// </summary>
 public sealed partial class EntityListEntry : ObservableObject
 {
     private const string UnknownScoreText = "??";
@@ -21,9 +25,10 @@ public sealed partial class EntityListEntry : ObservableObject
     /// <summary>ヘイトの枠の数を決めておくなら、その数。null なら並べる人数だけ枠を作る(<see cref="HateSlots"/>)。</summary>
     private readonly int? _fixedHateSlotCount;
 
-    private EntityListEntry(long entityUuid, int? fixedHateSlotCount)
+    private EntityListEntry(NearbyEntityEntry entity, int? fixedHateSlotCount)
     {
-        EntityUuid = entityUuid;
+        EntityUuid = entity.EntityUuid;
+        Target = new EntityTargetInfo(entity.EntityUuid, entity.EntityId, entity.EntityType, ResolveName(entity), entity.Level);
         _fixedHateSlotCount = fixedHateSlotCount;
         HateSlots = new ReadOnlyObservableCollection<EntityHateSlot>(_hateSlots);
         for (var index = 0; index < fixedHateSlotCount; index++)
@@ -32,7 +37,10 @@ public sealed partial class EntityListEntry : ObservableObject
         }
     }
 
-    public long EntityUuid { get; }
+    public long EntityUuid { get; private set; }
+
+    /// <summary>いま映している個体の値。値が変わったときだけ作り直す。</summary>
+    public EntityTargetInfo Target { get; private set; }
 
     /// <summary>
     /// 種別ID(<c>AttrId</c>。モンスターなら <c>MonsterTable</c> のキー)。
@@ -149,7 +157,7 @@ public sealed partial class EntityListEntry : ObservableObject
     /// <summary>
     /// ヘイトの枠。狙っている相手がいて「狙われるプレイヤー」が表示なら [0] がその相手で [1] からヘイト1位、
     /// そうでなければ [0] からヘイト1位(詰めて並べる)。ヘイトは設定の人数まで。
-    /// 枠の数を決めておく行(エンティティリスト)は、枠を作ったまま使い回して並べるものが無い枠を隠し(場所は残す)、
+    /// 枠の数を決めておく行(エンティティリスト)は、枠を作ったまま使い回して並べるものが無い枠を隠し(中身も作らない)、
     /// 決めていない行(エンティティ情報)は並べる人数だけ枠を持つ(増えた分だけ足し、減った分だけ外す)。どちらも値だけ入れ替える。
     /// </summary>
     public ReadOnlyObservableCollection<EntityHateSlot> HateSlots { get; }
@@ -163,7 +171,7 @@ public sealed partial class EntityListEntry : ObservableObject
         bool showsScore,
         int? fixedHateSlotCount)
     {
-        var entry = new EntityListEntry(entity.EntityUuid, fixedHateSlotCount);
+        var entry = new EntityListEntry(entity, fixedHateSlotCount);
         entry.Update(entity, settings, hatePlayers, showsScore);
         return entry;
     }
@@ -175,6 +183,7 @@ public sealed partial class EntityListEntry : ObservableObject
         EntityHatePlayerResolver hatePlayers,
         bool showsScore)
     {
+        EntityUuid = entity.EntityUuid;
         EntityId = entity.EntityId;
         EntityType = entity.EntityType;
 
@@ -184,6 +193,7 @@ public sealed partial class EntityListEntry : ObservableObject
         // ここを通していれば自動で入れ替わる。
         Name = ResolveName(entity);
         Level = entity.Level;
+        UpdateTarget();
         ClassificationKey = GetClassificationKey(entity);
         ClassificationDisplayName = LocalizationManager.Instance.GetString($"Classes_{ClassificationKey}");
         DisplayName = EntityInfoFormatFormatter.Format(Name, entity.Level, settings.NameFormatString);
@@ -221,6 +231,18 @@ public sealed partial class EntityListEntry : ObservableObject
         }
 
         UpdateHateSlots(entity, settings, hatePlayers);
+    }
+
+    private void UpdateTarget()
+    {
+        if (Target.EntityUuid != EntityUuid
+            || Target.EntityId != EntityId
+            || Target.EntityType != EntityType
+            || Target.Level != Level
+            || !string.Equals(Target.Name, Name, StringComparison.Ordinal))
+        {
+            Target = new EntityTargetInfo(EntityUuid, EntityId, EntityType, Name, Level);
+        }
     }
 
     /// <summary>

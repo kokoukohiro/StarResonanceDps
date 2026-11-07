@@ -572,19 +572,7 @@ public sealed partial class BuffDebuffGroupWidgetViewModel : PlayerWidgetWindowV
             _entries.RemoveAt(index);
         }
 
-        for (var targetIndex = 0; targetIndex < rows.Count; targetIndex++)
-        {
-            var row = rows[targetIndex];
-            var currentIndex = _entries.IndexOf(row);
-            if (currentIndex < 0)
-            {
-                _entries.Insert(targetIndex, row);
-            }
-            else if (currentIndex != targetIndex)
-            {
-                _entries.Move(currentIndex, targetIndex);
-            }
-        }
+        CollectionOrder.Apply(_entries, rows);
 
         // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
         var gaugeLengthSeconds = BuffGaugeBrush.GetLengthSeconds(_settings.GaugeLengthIndex);

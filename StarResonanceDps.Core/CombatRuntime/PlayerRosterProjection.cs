@@ -103,9 +103,15 @@ internal static class PlayerRosterProjection
             return;
         }
 
+        bool added;
         lock (NearbyPlayerSync)
         {
-            NearbyPlayerUuids.Add(playerUuid);
+            added = NearbyPlayerUuids.Add(playerUuid);
+        }
+
+        if (added)
+        {
+            ActiveBuffStore.Instance.MarkPlayerInSight(playerUuid);
         }
 
         UpsertPlayer(playerUuid, isSelfHint: false);
@@ -136,6 +142,7 @@ internal static class PlayerRosterProjection
 
         if (removed)
         {
+            ActiveBuffStore.Instance.MarkPlayerOutOfSight(playerUuid);
             ClearTransientHumanSubProfession(playerUuid);
             RebuildRoster();
         }
@@ -195,7 +202,8 @@ internal static class PlayerRosterProjection
             .Where(player => player.CharacterId > 0)
             .GroupBy(player => player.CharacterId)
             .ToDictionary(group => group.Key, group => group.Last().EntityUuid);
-        var metadataPlayersByCharacterId = meterEncounter?.Entities.Values
+        var metadataPlayersByCharacterId = meterEncounter?.Entities
+            .Select(pair => pair.Value)
             .Where(IsCharacterEntity)
             .Select(entity => (
                 Entity: entity,
@@ -330,6 +338,12 @@ internal static class PlayerRosterProjection
         }
 
         RosterStore.Replace(entries);
+
+        // 行の機能だけが読む、周りにいない人のバフを手放す。履歴を開いている間は行が開いた回で決まるので、閉じて作り直すときに見る。
+        if (AppState.OpenedHistoricalEncounter is null)
+        {
+            ActiveBuffStore.Instance.ReleaseOutOfSightPlayersWithoutRow(addedCharacterIds);
+        }
 
         void AddCharacterId(long characterId)
         {
@@ -742,7 +756,7 @@ internal static class PlayerRosterProjection
     ///
     /// <para>
     /// メーターは <see cref="MeterSnapshotProvider"/> の <c>TotalValue &gt; 0</c> と同じ(与ダメか回復のどちらかを持っていれば片方のメーターには出る)。
-    /// 被ダメログは被弾の記録 <see cref="Entity.TakenStats"/>(被ダメログに出る被弾は全部ここにも残る)、
+    /// 被ダメログは被弾の記録があるか(<see cref="CombatStats.HasSkillSnapshots"/>)、
     /// タイムラインはダメージの無い戦闘不能の記録と、敵の回復・敵が付けたバフの相手(<see cref="Encounter.HasPlayerTimelineRecord"/>)。
     /// 被ダメログの絞り込みの設定は見ない。
     /// </para>
@@ -777,7 +791,7 @@ internal static class PlayerRosterProjection
             || Utils.UuidToEntityType(entity.UUID) == (long)EEntityType.EntChar;
     }
 
-    private static bool IsNearbyPlayer(long playerUuid)
+    internal static bool IsNearbyPlayer(long playerUuid)
     {
         lock (NearbyPlayerSync)
         {

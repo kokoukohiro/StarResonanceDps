@@ -9,6 +9,8 @@ namespace StarResonanceDps.App.Models.Widgets;
 
 public sealed partial class MeterPlayerEntry : ObservableObject
 {
+    private readonly PlayerInfoFormatCache _displayNameFormat = new();
+
     private MeterPlayerEntry(long characterId)
     {
         CharacterId = characterId;
@@ -91,7 +93,7 @@ public sealed partial class MeterPlayerEntry : ObservableObject
         SeasonTalentName = player.SeasonTalentBuffId > 0
             ? CombatDataCatalog.GetSeasonTalentName(player.SeasonTalentBuffId)
             : string.Empty;
-        DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode);
+        DisplayName = PlayerInfoFormatFormatter.Format(player, settings.PlayerInfoFormatString, playerNameDisplayMode, _displayNameFormat);
         ValueText = $"{MeterNumberFormatter.Format(player.TotalValue, numberDisplayFormatIndex)} ({MeterNumberFormatter.Format(player.ValuePerSecond, numberDisplayFormatIndex)}) {player.Contribution:F2}%";
         BarRatio = player.BarRatio;
 

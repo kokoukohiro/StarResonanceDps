@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,7 +21,7 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
     private ScrollViewer? _scrollViewer;
 
     private ContextMenu? _openEntitySelectionMenu;
-    private EntityListEntry? _openEntitySelectionEntry;
+    private WidgetListItemViewModel? _openEntitySelectionWidget;
 
     public event EventHandler? VerticalScrollMetricsChanged;
 
@@ -111,8 +110,7 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void EntityListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        // 行の部品は別の敵の行に使い回されるので、位置が動いたら開いているメニューを閉じる
-        // (開いたままだと、メニューの相手が使い回した先の敵に替わる)。
+        // スクロールしたら開いているメニューを閉じる(押した行とメニューの位置が離れる)。
         if (e.VerticalChange != 0)
         {
             CloseEntitySelectionMenu();
@@ -121,25 +119,13 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         NotifyVerticalScrollMetricsChanged();
     }
 
-    /// <summary>
-    /// 行の部品が見えている範囲から外された(別の行に使い回される)。その行がメニューを開いている行なら閉じる。
-    /// 位置が動かずに行だけが外へ押し出される(敵の出入りで並びが動く)ときも、ここで拾う。
-    /// </summary>
-    private void EntityListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
-    {
-        if (_openEntitySelectionEntry is not null && ReferenceEquals(e.Value, _openEntitySelectionEntry))
-        {
-            CloseEntitySelectionMenu();
-        }
-    }
-
     /// <summary>行の左クリックはエンティティ情報を開く(右クリックのメニューの1行目と同じ)。</summary>
     private void EntityListItem_Click(object sender, RoutedEventArgs e)
     {
         if (sender is Button { DataContext: EntityListEntry entry }
             && DataContext is WidgetListItemViewModel viewModel)
         {
-            viewModel.RequestEntityInfoCommand.Execute(entry);
+            viewModel.RequestEntityInfoCommand.Execute(entry.Target);
         }
     }
 
@@ -154,30 +140,29 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void OpenEntitySelectionMenu(Button button)
     {
-        if (button.ContextMenu is not ContextMenu menu || button.DataContext is not EntityListEntry entry)
+        if (button.ContextMenu is not ContextMenu menu
+            || button.DataContext is not EntityListEntry entry
+            || DataContext is not WidgetListItemViewModel widget)
         {
             return;
         }
 
-        ApplyEntitySelectionMenuStyles(menu);
-
         if (!ReferenceEquals(_openEntitySelectionMenu, menu))
         {
             CloseEntitySelectionMenu();
+            _openEntitySelectionMenu = menu;
+            _openEntitySelectionWidget = widget;
+            widget.EntityMenuTargetLeft += Widget_EntityMenuTargetLeft;
         }
 
+        // 行は位置に結びつき別の敵に替わるので、メニューは開いた時の相手に固定する。
+        // 項目の引数は Tag を読み、コマンドは押した行の部品に頼らない(開いている間に行が替わっても開いた時の相手を開く)。
+        menu.DataContext = widget;
+        menu.Tag = entry.Target;
+        ApplyEntitySelectionMenuStyles(menu);
         menu.PlacementTarget = button;
-        SetOpenEntitySelectionMenu(menu, entry);
+        widget.SetEntityMenuTarget(entry);
         menu.IsOpen = true;
-    }
-
-    private void EntitySelectionContextMenu_Opened(object sender, RoutedEventArgs e)
-    {
-        if (sender is ContextMenu menu
-            && menu.PlacementTarget is Button { DataContext: EntityListEntry entry })
-        {
-            SetOpenEntitySelectionMenu(menu, entry);
-        }
     }
 
     private void EntitySelectionContextMenu_Closed(object sender, RoutedEventArgs e)
@@ -188,21 +173,9 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
         }
     }
 
-    private void SetOpenEntitySelectionMenu(ContextMenu menu, EntityListEntry entry)
+    private void Widget_EntityMenuTargetLeft(object? sender, EventArgs e)
     {
-        if (ReferenceEquals(_openEntitySelectionMenu, menu)
-            && ReferenceEquals(_openEntitySelectionEntry, entry))
-        {
-            entry.IsEntitySelectionMenuOpen = true;
-            return;
-        }
-
         CloseEntitySelectionMenu();
-
-        _openEntitySelectionMenu = menu;
-        _openEntitySelectionEntry = entry;
-        entry.PropertyChanged += OpenEntitySelectionEntry_PropertyChanged;
-        entry.IsEntitySelectionMenuOpen = true;
     }
 
     private void CloseEntitySelectionMenu()
@@ -224,27 +197,17 @@ public partial class EntityListWidgetView : UserControl, IWidgetVerticalScrollCo
             return;
         }
 
-        var entry = _openEntitySelectionEntry;
+        var widget = _openEntitySelectionWidget;
         _openEntitySelectionMenu = null;
-        _openEntitySelectionEntry = null;
+        _openEntitySelectionWidget = null;
 
-        if (entry is null)
+        if (widget is null)
         {
             return;
         }
 
-        entry.PropertyChanged -= OpenEntitySelectionEntry_PropertyChanged;
-        entry.IsEntitySelectionMenuOpen = false;
-    }
-
-    private void OpenEntitySelectionEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(EntityListEntry.IsEntitySelectionMenuOpen)
-            && sender is EntityListEntry { IsEntitySelectionMenuOpen: false } entry
-            && ReferenceEquals(entry, _openEntitySelectionEntry))
-        {
-            CloseEntitySelectionMenu();
-        }
+        widget.EntityMenuTargetLeft -= Widget_EntityMenuTargetLeft;
+        widget.SetEntityMenuTarget(null);
     }
 
     private void ApplyEntitySelectionMenuStyles(ContextMenu menu)

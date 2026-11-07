@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StarResonanceDps.PluginSdk" Version="0.1.0" />
+  </ItemGroup>
+
+  <!-- Keep every language inside the plugin DLL. PluginLocalizer reads these names. -->
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>SampleLocalization.Properties.Resources.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ja-JP.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>SampleLocalization.Properties.Resources.ja-JP.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.ko-KR.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>SampleLocalization.Properties.Resources.ko-KR.resources</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.zh-CN.resx">
+      <WithCulture>false</WithCulture>
+      <LogicalName>SampleLocalization.Properties.Resources.zh-CN.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

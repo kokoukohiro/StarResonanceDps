@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StarResonanceDps.PluginSdk" Version="0.1.0" />
+  </ItemGroup>
+
+  <!-- The DLLs the plugin needs are copied next to the plugin DLL. Adding the plugin with the "+" button copies them to the plugin's folder. -->
+  <ItemGroup>
+    <ProjectReference Include="..\SampleDependency.Library\SampleDependency.Library.csproj" />
+  </ItemGroup>
+</Project>

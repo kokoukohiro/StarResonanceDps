@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
@@ -23,7 +22,7 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
     private ScrollViewer? _scrollViewer;
 
     private ContextMenu? _openPlayerSelectionMenu;
-    private PlayerListEntry? _openPlayerSelectionEntry;
+    private WidgetListItemViewModel? _openPlayerSelectionWidget;
 
     public event EventHandler? VerticalScrollMetricsChanged;
 
@@ -125,26 +124,13 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void PlayerListScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-        // 行の部品は別の人の行に使い回されるので、位置が動いたら開いているメニューを閉じる
-        // (開いたままだと、メニューの相手が使い回した先の人に替わる)。
+        // スクロールしたら開いているメニューを閉じる(押した行とメニューの位置が離れる)。
         if (e.VerticalChange != 0)
         {
             ClosePlayerSelectionMenu();
         }
 
         NotifyVerticalScrollMetricsChanged();
-    }
-
-    /// <summary>
-    /// 行の部品が見えている範囲から外された(別の行に使い回される)。その行がメニューを開いている行なら閉じる。
-    /// 位置が動かずに行だけが外へ押し出される(顔ぶれの更新で並びが動く)ときも、ここで拾う。
-    /// </summary>
-    private void PlayerListItemsControl_CleanUpVirtualizedItem(object sender, CleanUpVirtualizedItemEventArgs e)
-    {
-        if (_openPlayerSelectionEntry is not null && ReferenceEquals(e.Value, _openPlayerSelectionEntry))
-        {
-            ClosePlayerSelectionMenu();
-        }
     }
 
     /// <summary>
@@ -155,7 +141,7 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
     {
         if (sender is Button { Tag: WidgetListItemViewModel widget, DataContext: PlayerListEntry entry })
         {
-            widget.RequestPlayerInfoCommand.Execute(entry);
+            widget.RequestPlayerInfoCommand.Execute(new PlayerMenuTarget(entry.CharacterId, entry.IsSelf));
         }
     }
 
@@ -170,30 +156,29 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
 
     private void OpenPlayerSelectionMenu(Button button)
     {
-        if (button.ContextMenu is not ContextMenu menu || button.DataContext is not PlayerListEntry entry)
+        if (button.ContextMenu is not ContextMenu menu
+            || button.DataContext is not PlayerListEntry entry
+            || DataContext is not WidgetListItemViewModel widget)
         {
             return;
         }
 
-        ApplyPlayerSelectionMenuStyles(menu);
-
         if (!ReferenceEquals(_openPlayerSelectionMenu, menu))
         {
             ClosePlayerSelectionMenu();
+            _openPlayerSelectionMenu = menu;
+            _openPlayerSelectionWidget = widget;
+            widget.PlayerMenuTargetLeft += Widget_PlayerMenuTargetLeft;
         }
 
+        // 行は位置に結びつき別の人に替わるので、メニューは開いた時の相手に固定する。
+        // 項目の引数と出し分けは Tag を読み、コマンドは押した行の部品に頼らない(開いている間に行が替わっても開いた時の相手を開く)。
+        menu.DataContext = widget;
+        menu.Tag = new PlayerMenuTarget(entry.CharacterId, entry.IsSelf);
+        ApplyPlayerSelectionMenuStyles(menu);
         menu.PlacementTarget = button;
-        SetOpenPlayerSelectionMenu(menu, entry);
+        widget.SetPlayerMenuTarget(entry);
         menu.IsOpen = true;
-    }
-
-    private void PlayerSelectionContextMenu_Opened(object sender, RoutedEventArgs e)
-    {
-        if (sender is ContextMenu menu
-            && menu.PlacementTarget is Button { DataContext: PlayerListEntry entry })
-        {
-            SetOpenPlayerSelectionMenu(menu, entry);
-        }
     }
 
     private void PlayerSelectionContextMenu_Closed(object sender, RoutedEventArgs e)
@@ -204,21 +189,9 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
         }
     }
 
-    private void SetOpenPlayerSelectionMenu(ContextMenu menu, PlayerListEntry entry)
+    private void Widget_PlayerMenuTargetLeft(object? sender, EventArgs e)
     {
-        if (ReferenceEquals(_openPlayerSelectionMenu, menu)
-            && ReferenceEquals(_openPlayerSelectionEntry, entry))
-        {
-            entry.IsPlayerSelectionMenuOpen = true;
-            return;
-        }
-
         ClosePlayerSelectionMenu();
-
-        _openPlayerSelectionMenu = menu;
-        _openPlayerSelectionEntry = entry;
-        entry.PropertyChanged += OpenPlayerSelectionEntry_PropertyChanged;
-        entry.IsPlayerSelectionMenuOpen = true;
     }
 
     private void ClosePlayerSelectionMenu()
@@ -240,27 +213,17 @@ public partial class PlayerListWidgetView : UserControl, IWidgetVerticalScrollCo
             return;
         }
 
-        var entry = _openPlayerSelectionEntry;
+        var widget = _openPlayerSelectionWidget;
         _openPlayerSelectionMenu = null;
-        _openPlayerSelectionEntry = null;
+        _openPlayerSelectionWidget = null;
 
-        if (entry is null)
+        if (widget is null)
         {
             return;
         }
 
-        entry.PropertyChanged -= OpenPlayerSelectionEntry_PropertyChanged;
-        entry.IsPlayerSelectionMenuOpen = false;
-    }
-
-    private void OpenPlayerSelectionEntry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(PlayerListEntry.IsPlayerSelectionMenuOpen)
-            && sender is PlayerListEntry { IsPlayerSelectionMenuOpen: false } entry
-            && ReferenceEquals(entry, _openPlayerSelectionEntry))
-        {
-            ClosePlayerSelectionMenu();
-        }
+        widget.PlayerMenuTargetLeft -= Widget_PlayerMenuTargetLeft;
+        widget.SetPlayerMenuTarget(null);
     }
 
     private void ApplyPlayerSelectionMenuStyles(ContextMenu menu)

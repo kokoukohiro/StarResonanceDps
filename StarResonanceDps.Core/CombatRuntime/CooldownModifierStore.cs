@@ -20,6 +20,7 @@ namespace StarResonanceDps.Core.CombatRuntime;
 ///
 /// <para>
 /// 入場(自分)・出現(他人)の一覧はその人の値を丸ごと置き換え(<see cref="Replace"/>)、周りの差分は重ねる(<see cref="Merge"/>)。値 0 は外す。
+/// 持つのはプレイヤーだけ(ほかの実体の UUID は置き換える機会が無く、残り続ける)。
 /// マップ移動では消さない(次の入場・出現が置き換える)。消すのはログアウトとキャプチャの停止(<see cref="Clear"/>)。
 /// 移り変わりは届いた時刻(UTC)で控え、他人の CD の推定が発動から今までの進みを区間ごとに数えるのに使う。
 /// 古い移り変わりは推定の側が要らなくなった時点で捨てる(<see cref="Prune"/>)。
@@ -74,7 +75,7 @@ public static class CooldownModifierStore
         lock (Sync)
         {
             return Histories.TryGetValue(uuid, out var history)
-                ? SumRatio(history[^1].Values, skillId)
+                ? SumRatio(history[^1], skillId)
                 : 0d;
         }
     }
@@ -95,7 +96,7 @@ public static class CooldownModifierStore
             var changes = new List<(DateTime StartUtc, double Ratio)> { (fromUtc, 0d) };
             foreach (var snapshot in history)
             {
-                var ratio = SumRatio(snapshot.Values, skillId);
+                var ratio = SumRatio(snapshot, skillId);
                 if (snapshot.StartUtc <= fromUtc)
                 {
                     changes[0] = (fromUtc, ratio);
@@ -107,6 +108,37 @@ public static class CooldownModifierStore
             }
 
             return changes;
+        }
+    }
+
+    /// <summary>
+    /// その人のその技の短縮の率が <paramref name="fromUtc"/> より後に変わっていなければ、その率を返す。一覧を作らない。
+    /// 変わっていれば偽で、区間ごとに数えるときは <see cref="GetReductionChanges"/> を使う。
+    /// </summary>
+    public static bool TryGetConstantReductionRatio(long uuid, int skillId, DateTime fromUtc, out double ratio)
+    {
+        ratio = 0d;
+        lock (Sync)
+        {
+            if (!Histories.TryGetValue(uuid, out var history))
+            {
+                return true;
+            }
+
+            foreach (var snapshot in history)
+            {
+                var snapshotRatio = SumRatio(snapshot, skillId);
+                if (snapshot.StartUtc <= fromUtc)
+                {
+                    ratio = snapshotRatio;
+                }
+                else if (snapshotRatio != ratio)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 
@@ -207,12 +239,11 @@ public static class CooldownModifierStore
             && next.All(pair => current.TryGetValue(pair.Key, out var value) && value == pair.Value);
     }
 
-    private static double SumRatio(FrozenDictionary<int, int> values, int skillId)
+    private static double SumRatio(Snapshot snapshot, int skillId)
     {
         var total = 0;
-        foreach (var (tempAttrId, value) in values)
+        foreach (var (row, value) in snapshot.Rows)
         {
-            var row = HelperMethods.DataTables.TempAttrs.Data[tempAttrId.ToString(System.Globalization.CultureInfo.InvariantCulture)];
             if (row.AttrParams.Contains(skillId)
                 || row.AttrParams.Contains(ImagineCategoryParam) && CombatDataCatalog.IsSkillImagine(skillId))
             {
@@ -225,5 +256,13 @@ public static class CooldownModifierStore
 
     /// <param name="StartUtc">この値になった時刻(届いた時刻、UTC)。</param>
     /// <param name="Values">一時属性の番号 → 値(万分比)。種類 100 だけ。</param>
-    private sealed record Snapshot(DateTime StartUtc, FrozenDictionary<int, int> Values);
+    private sealed record Snapshot(DateTime StartUtc, FrozenDictionary<int, int> Values)
+    {
+        /// <summary>値の一時属性の行と値。率を足すたびに表を引かないよう、作るときに1回だけ引く。</summary>
+        public (DataTypes.TempAttr Row, int Value)[] Rows { get; } = Values
+            .Select(pair => (
+                HelperMethods.DataTables.TempAttrs.Data[pair.Key.ToString(System.Globalization.CultureInfo.InvariantCulture)],
+                pair.Value))
+            .ToArray();
+    }
 }

@@ -164,7 +164,8 @@ public sealed class MetricGraphChart : FrameworkElement
     /// <summary>見ている窓の中の技の開始の要素(中身は <see cref="MetricGraphSkillMarker"/>)。鍵は <see cref="SkillMarkers"/> の何番目か。</summary>
     private readonly Dictionary<int, ContentPresenter> _skillMarkerElements = [];
     private readonly List<double> _secondLabelSeconds = [];
-    private MetricGraphPoint[] _orderedPoints = [];
+    /// <summary>今の点。並びは区切りの順(Core が並べる)。</summary>
+    private IReadOnlyList<MetricGraphPoint> _points = Array.Empty<MetricGraphPoint>();
     private double _maxSeconds;
     private double _maxValuePerSecond;
     private int _lastPointCount;
@@ -574,15 +575,18 @@ public sealed class MetricGraphChart : FrameworkElement
     private void ApplyPoints()
     {
         var points = Points ?? Array.Empty<MetricGraphPoint>();
-        _orderedPoints = points
-            .OrderBy(static point => point.StartSeconds)
-            .ToArray();
-        _maxSeconds = points.Count == 0
-            ? 0d
-            : points.Max(static point => point.EndSeconds);
-        _maxValuePerSecond = points.Count == 0
-            ? 0d
-            : points.Max(static point => point.ValuePerSecond);
+        var maxSeconds = 0d;
+        var maxValuePerSecond = 0d;
+        for (var index = 0; index < points.Count; index++)
+        {
+            var point = points[index];
+            maxSeconds = Math.Max(maxSeconds, point.EndSeconds);
+            maxValuePerSecond = Math.Max(maxValuePerSecond, point.ValuePerSecond);
+        }
+
+        _points = points;
+        _maxSeconds = maxSeconds;
+        _maxValuePerSecond = maxValuePerSecond;
 
         if (points.Count < _lastPointCount)
         {
@@ -690,7 +694,7 @@ public sealed class MetricGraphChart : FrameworkElement
             return;
         }
 
-        if (_orderedPoints.Length == 0 || LineBrush is not { } lineBrush)
+        if (_points.Count == 0 || LineBrush is not { } lineBrush)
         {
             return;
         }
@@ -701,8 +705,9 @@ public sealed class MetricGraphChart : FrameworkElement
         using (var context = geometry.Open())
         {
             context.BeginFigure(new Point(ToX(plotBounds, 0d), plotBounds.Bottom), false, false);
-            foreach (var point in _orderedPoints)
+            for (var index = 0; index < _points.Count; index++)
             {
+                var point = _points[index];
                 var ratio = _maxValuePerSecond > 0d
                     ? point.ValuePerSecond / _maxValuePerSecond
                     : 0d;

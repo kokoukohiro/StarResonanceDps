@@ -28,9 +28,7 @@ namespace StarResonanceDps.Core.CombatRuntime
         private static object DBLock = new object();
         private static readonly RuntimeSerializationBinder SerializationBinder = new();
         private static readonly EncounterBlobContractResolver BlobContractResolver = new();
-        private static readonly List<BaseMigration> Migrations = [
-                new SkillStatsMigration()
-            ];
+        private static readonly List<BaseMigration> Migrations = [];
 
         public static void Init()
         {
@@ -102,7 +100,16 @@ namespace StarResonanceDps.Core.CombatRuntime
             lock (DBLock)
             {
                 using var encMs = new MemoryStream();
-                ProtoBuf.Serializer.Serialize(encMs, encounter.ExData);
+                encounter.FillSkillActivationsForSave();
+                try
+                {
+                    ProtoBuf.Serializer.Serialize(encMs, encounter.ExData);
+                }
+                finally
+                {
+                    encounter.ClearSkillActivationsAfterSave();
+                }
+
                 encMs.Flush();
                 encounter.ExDataBlob = Compressor.Wrap(encMs.ToArray()).ToArray();
 
@@ -140,7 +147,15 @@ namespace StarResonanceDps.Core.CombatRuntime
                             };
                             lock (encounter.Entities)
                             {
-                                serializer.Serialize(writer, SelectPersistedEntities(encounter));
+                                encounter.FillTakenSnapshotsForSave();
+                                try
+                                {
+                                    serializer.Serialize(writer, SelectPersistedEntities(encounter));
+                                }
+                                finally
+                                {
+                                    encounter.ClearTakenSnapshotsAfterSave();
+                                }
                             }
                             writer.Flush();
                         }
@@ -186,7 +201,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 }
 
                 persisted[uuid] = entity;
-                foreach (var snapshot in entity.TakenStats.GetSkillSnapshotsCopy())
+                if (entity.TakenStats.SkillSnapshots is not { } snapshots)
+                {
+                    continue;
+                }
+
+                foreach (var snapshot in snapshots)
                 {
                     if (encounter.Entities.TryGetValue(snapshot.OtherUUID, out var attacker))
                     {

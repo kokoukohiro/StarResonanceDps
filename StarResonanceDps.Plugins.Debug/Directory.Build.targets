@@ -1,0 +1,23 @@
+<Project>
+  <!-- わざと属性を欠くプラグインは SkipPluginAnalyzer で解析器を外す。 -->
+  <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('.Library'))">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" Private="false" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\StarResonanceDps.PluginSdk.Analyzers\StarResonanceDps.PluginSdk.Analyzers.csproj"
+                      Condition="'$(SkipPluginAnalyzer)' != 'true'"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- 本体はこのフォルダを読まない。試すときに「＋」で足すか、フォルダごと Plugins へ写す。 -->
+  <Target Name="CopyDebugPluginToRunFolder"
+          AfterTargets="Build"
+          Condition="'$(Configuration)' == 'Debug' And !$(MSBuildProjectName.EndsWith('.Library'))">
+    <ItemGroup>
+      <DebugPluginOutputFile Include="$(TargetDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DebugPluginOutputFile)"
+          DestinationFiles="@(DebugPluginOutputFile->'$(MSBuildThisFileDirectory)..\StarResonanceDps.App\bin\$(Configuration)\net10.0-windows10.0.19041.0\DebugPlugins\$(AssemblyName)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

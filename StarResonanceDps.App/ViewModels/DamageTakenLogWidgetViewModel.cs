@@ -22,7 +22,8 @@ namespace StarResonanceDps.App.ViewModels;
 ///
 /// <para>
 /// 被弾は <see cref="MeterSnapshotProvider.GetDamageTakenLog"/> で回の記録の控えを 0.25秒ごとに前回の続きから読む(タイムラインと同じ読み方)。
-/// 読んだ被弾はここで全部持ち、設定「フィルター設定」(自傷・フレンドリーファイア以外なら加害者がプレイヤーの被弾を出さない)と名簿で、出す行を決める。
+/// 窓が持つのは出している行と人ごとの一番新しい被弾だけで、回の記録の写しは持たない。
+/// 設定「フィルター設定」(自傷・フレンドリーファイア以外なら加害者がプレイヤーの被弾を出さない)と名簿で、出す行を決める。
 /// 名前・クラス・特化は名簿(蘇生リストと同じ)で、名簿に居ない人の被弾は出さない(名簿は回に被弾の記録がある人を載せるので、出ないのは名簿が届くまでの間だけ)。
 /// </para>
 ///
@@ -35,7 +36,8 @@ namespace StarResonanceDps.App.ViewModels;
 ///
 /// <para>
 /// 行は作り直さず値だけ入れ替える。名前とクラスは人ごとに1回だけ作り、名簿が変わったらその人の行にだけ当て直す。
-/// 出す行が変わる(フィルターか「最新の被ダメのみ表示」を変えた、名簿に人が増えた・減った)ときだけ、持っている被弾から一覧を組み直す。
+/// 出す行が変わる(フィルターか「最新の被ダメのみ表示」を変えた、名簿に人が増えた・減った)ときだけ、一覧を組み直す
+/// (「最新の被ダメのみ表示」は人ごとの一番新しい被弾から、全部出すときは回の記録を先頭から読み直す)。
 /// 「最新の被ダメのみ表示」で同じ人が被弾したら、その人の行の被弾を入れ替えて一番上へ動かす。
 /// フッターの左は戦闘の時計の経過(メーターのタイマーと同じ)。行の左クリックと右クリックのメニュー(1項目)は、その人の被ダメ詳細を開く。
 /// </para>
@@ -53,11 +55,11 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
     private readonly DispatcherTimer _refreshTimer;
     private readonly ObservableCollection<DamageTakenLogEntry> _entries = [];
 
-    /// <summary>読んだ被弾の全部(古い順)。出す行はここから決める。回が替わったら捨てる。</summary>
-    private readonly List<DamageTakenLogHit> _hits = [];
-
-    /// <summary>読んだ被弾に出てくる人。名簿に居るかが変わった人がいれば一覧を組み直す。</summary>
-    private readonly HashSet<long> _hitCharacterIds = [];
+    /// <summary>
+    /// 読んだ被弾に出てくる人と、その人の一番新しい被弾。名簿に居るかが変わった人がいれば一覧を組み直し、「最新の被ダメのみ表示」の行はここから作る。
+    /// 人の数で頭打ち。回が替わったら捨てる。
+    /// </summary>
+    private readonly Dictionary<long, LatestHits> _latestHitsByCharacterId = [];
 
     private readonly Dictionary<long, PlayerRosterEntry> _rosterRowsByCharacterId = [];
 
@@ -154,13 +156,13 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
         var previousRows = new Dictionary<long, PlayerRosterEntry>(_rosterRowsByCharacterId);
         SetRosterRows(roster);
 
-        if (_hitCharacterIds.Any(id => previousRows.ContainsKey(id) != _rosterRowsByCharacterId.ContainsKey(id)))
+        if (_latestHitsByCharacterId.Keys.Any(id => previousRows.ContainsKey(id) != _rosterRowsByCharacterId.ContainsKey(id)))
         {
             RebuildRows();
             return;
         }
 
-        RefreshPersonDisplays(_hitCharacterIds.Where(id => !Equals(
+        RefreshPersonDisplays(_latestHitsByCharacterId.Keys.Where(id => !Equals(
             previousRows.GetValueOrDefault(id),
             _rosterRowsByCharacterId.GetValueOrDefault(id))));
     }
@@ -225,7 +227,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
             return;
         }
 
-        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshPersonDisplays(_latestHitsByCharacterId.Keys);
         RefreshHitTexts();
     }
 
@@ -244,7 +246,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
     private void ConfigManager_SettingsPreviewChanged(object? sender, EventArgs e)
     {
         _personDisplays.Clear();
-        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshPersonDisplays(_latestHitsByCharacterId.Keys);
         RefreshHitTexts();
     }
 
@@ -252,7 +254,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
     {
         LatestHitOnlyActionText = CreateLatestHitOnlyActionText();
         _personDisplays.Clear();
-        RefreshPersonDisplays(_hitCharacterIds);
+        RefreshPersonDisplays(_latestHitsByCharacterId.Keys);
         RefreshHitTexts();
     }
 
@@ -263,8 +265,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
         {
             // 回が替わった(Core は先頭から読み直している)。持っている被弾と行を捨てる。
             _encounter = snapshot.Encounter;
-            _hits.Clear();
-            _hitCharacterIds.Clear();
+            _latestHitsByCharacterId.Clear();
             ClearEntries();
         }
 
@@ -285,12 +286,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
         var latestEntriesChanged = false;
         foreach (var hit in snapshot.Hits)
         {
-            _hits.Add(hit);
-            if (_hitCharacterIds.Add(hit.CharacterId))
-            {
-                RefreshPersonDisplays([hit.CharacterId]);
-            }
-
+            RememberLatestHit(hit);
             if (!IsShown(hit))
             {
                 continue;
@@ -303,10 +299,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
                 continue;
             }
 
-            // 被弾は古い順に届くので、1件ずつ先頭に入れると一番新しいものが一番上になる。
-            var entry = CreateEntry(hit);
-            _entries.Insert(0, entry);
-            (addedEntries ??= []).Add(entry);
+            (addedEntries ??= []).Add(CreateEntry(hit));
         }
 
         if (latestEntriesChanged)
@@ -316,6 +309,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
         }
         else if (addedEntries is not null)
         {
+            InsertNewestAtTop(addedEntries);
             UpdateBarRatios(addedEntries);
         }
 
@@ -323,37 +317,101 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
         RefreshDataStatus();
     }
 
-    /// <summary>持っている被弾から一覧を組み直す(出す行が変わったとき)。名前とクラスは先に名簿から作り直す。</summary>
+    /// <summary>その人の一番新しい被弾を覚える。初めて出てきた人なら名前とクラスを作る。</summary>
+    private void RememberLatestHit(DamageTakenLogHit hit)
+    {
+        var isNewPerson = !_latestHitsByCharacterId.TryGetValue(hit.CharacterId, out var latest);
+        _latestHitsByCharacterId[hit.CharacterId] = new LatestHits(hit, hit.Attacker.IsPlayer ? latest.FromNonPlayer : hit);
+        if (isNewPerson)
+        {
+            RefreshPersonDisplays([hit.CharacterId]);
+        }
+    }
+
+    /// <summary>古い順の行を、一番新しいものが一番上になるように入れる。一覧が空なら後ろへ足す(先頭へ1件ずつ入れると件数の2乗になる)。</summary>
+    private void InsertNewestAtTop(List<DamageTakenLogEntry> entries)
+    {
+        if (_entries.Count == 0)
+        {
+            for (var index = entries.Count - 1; index >= 0; index--)
+            {
+                _entries.Add(entries[index]);
+            }
+
+            return;
+        }
+
+        foreach (var entry in entries)
+        {
+            _entries.Insert(0, entry);
+        }
+    }
+
+    /// <summary>一覧を組み直す(出す行が変わったとき)。名前とクラスは先に名簿から作り直す。</summary>
     private void RebuildRows()
     {
         ClearEntries();
-        RefreshPersonDisplays(_hitCharacterIds);
-        for (var index = _hits.Count - 1; index >= 0; index--)
+        RefreshPersonDisplays(_latestHitsByCharacterId.Keys);
+        if (_settings.ShowsLatestHitOnly)
         {
-            var hit = _hits[index];
-            if (!IsShown(hit))
-            {
-                continue;
-            }
-
-            // 新しい順に見るので、「最新の被ダメのみ表示」ではその人の最初に見つかった被弾が一番新しい。
-            if (_settings.ShowsLatestHitOnly)
-            {
-                if (_latestEntriesByCharacterId.ContainsKey(hit.CharacterId))
-                {
-                    continue;
-                }
-
-                var latestEntry = CreateEntry(hit);
-                _latestEntriesByCharacterId.Add(hit.CharacterId, latestEntry);
-                _entries.Add(latestEntry);
-                continue;
-            }
-
-            _entries.Add(CreateEntry(hit));
+            AddLatestHitRows();
+        }
+        else
+        {
+            AddAllHitRows();
         }
 
         UpdateBarRatios(_entries);
+    }
+
+    /// <summary>「最新の被ダメのみ表示」の行を、最後に被弾した人が上の順で足す。</summary>
+    private void AddLatestHitRows()
+    {
+        var excludesPlayerAttackers = _settings.AttackerFilterIndex == WidgetConfigDefaults.NoSelfOrFriendlyFireDamageTakenLogAttackerFilterIndex;
+        var hits = new List<DamageTakenLogHit>(_latestHitsByCharacterId.Count);
+        foreach (var latest in _latestHitsByCharacterId.Values)
+        {
+            if ((excludesPlayerAttackers ? latest.FromNonPlayer : latest.Any) is { } hit && IsShown(hit))
+            {
+                hits.Add(hit);
+            }
+        }
+
+        hits.Sort((left, right) => right.Sequence.CompareTo(left.Sequence));
+        foreach (var hit in hits)
+        {
+            var entry = CreateEntry(hit);
+            _latestEntriesByCharacterId.Add(hit.CharacterId, entry);
+            _entries.Add(entry);
+        }
+    }
+
+    /// <summary>
+    /// 被弾を全部、新しい順で足す。回の記録を先頭から読み直すので、続きの位置と人ごとの一番新しい被弾も今の記録に合わせる。
+    /// 読んだときに回が替わっていれば何も足さない(次の更新が回の替わりとして読み直す)。
+    /// </summary>
+    private void AddAllHitRows()
+    {
+        var snapshot = MeterSnapshotProvider.GetDamageTakenLog(_encounter, 0);
+        if (!ReferenceEquals(snapshot.Encounter, _encounter))
+        {
+            return;
+        }
+
+        _nextRecordIndex = snapshot.NextIndex;
+        foreach (var hit in snapshot.Hits)
+        {
+            RememberLatestHit(hit);
+        }
+
+        for (var index = snapshot.Hits.Count - 1; index >= 0; index--)
+        {
+            var hit = snapshot.Hits[index];
+            if (IsShown(hit))
+            {
+                _entries.Add(CreateEntry(hit));
+            }
+        }
     }
 
     /// <summary>
@@ -462,7 +520,7 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
     /// </summary>
     private void RefreshPersonDisplays(IEnumerable<long> characterIds)
     {
-        var nameDisplayMode = (PlayerNameDisplayMode)_configManager.GetSettingsSnapshot().PlayerNameDisplayModeIndex;
+        var nameDisplayMode = (PlayerNameDisplayMode)_configManager.CurrentSettings.PlayerNameDisplayModeIndex;
         HashSet<long>? changedCharacterIds = null;
         foreach (var characterId in characterIds)
         {
@@ -618,6 +676,9 @@ public sealed partial class DamageTakenLogWidgetViewModel : ViewModelBase, IDisp
 
         return brush;
     }
+
+    /// <summary>1人の一番新しい被弾。<paramref name="FromNonPlayer"/> は加害者がプレイヤーでない被弾のうち一番新しいもので、無ければ null。</summary>
+    private readonly record struct LatestHits(DamageTakenLogHit Any, DamageTakenLogHit? FromNonPlayer);
 
     /// <summary>1人ぶんの名前とクラス。ブラシは使い回すので、中身が同じなら等しい。</summary>
     private sealed record PersonDisplay(

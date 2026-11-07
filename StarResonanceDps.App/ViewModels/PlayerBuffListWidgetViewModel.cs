@@ -27,6 +27,7 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
     private readonly Action<long, PlayerBuffListKind, string, int>? _openCard;
 
     private readonly ObservableCollection<PlayerBuffEntry> _entries = [];
+    private readonly List<PlayerBuffEntry> _orderedEntries = [];
     private readonly DispatcherTimer _refreshTimer;
     private BuffListWidgetSettingsConfig _settings;
 
@@ -294,24 +295,24 @@ public sealed partial class PlayerBuffListWidgetViewModel : PlayerWidgetWindowVi
             _entries.RemoveAt(index);
         }
 
-        for (var targetIndex = 0; targetIndex < snapshots.Count; targetIndex++)
+        for (var index = 0; index < snapshots.Count; index++)
         {
-            var snapshot = snapshots[targetIndex];
+            var snapshot = snapshots[index];
             var name = BuffListRowName.Format(_settings, snapshot, targetName, level);
             var existingIndex = FindEntryIndex(snapshot.Key);
             if (existingIndex < 0)
             {
-                _entries.Insert(targetIndex, new PlayerBuffEntry(snapshot, name));
+                _orderedEntries.Add(new PlayerBuffEntry(snapshot, name));
                 continue;
             }
 
             var entry = _entries[existingIndex];
             entry.Update(snapshot, name);
-            if (existingIndex != targetIndex)
-            {
-                _entries.Move(existingIndex, targetIndex);
-            }
+            _orderedEntries.Add(entry);
         }
+
+        CollectionOrder.Apply(_entries, _orderedEntries);
+        _orderedEntries.Clear();
 
         // 行を入れ替えた後にまとめて計算する。作った直後の行にも同じ長さが当たる。
         var gaugeLengthSeconds = BuffGaugeBrush.GetLengthSeconds(_settings.GaugeLengthIndex);

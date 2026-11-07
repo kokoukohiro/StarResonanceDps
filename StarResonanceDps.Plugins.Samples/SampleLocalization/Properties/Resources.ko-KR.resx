@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Greeting" xml:space="preserve"><value>플러그인에서 보내는 인사입니다.</value></data>
+  <data name="SavedCount" xml:space="preserve"><value>저장한 수: {0}</value></data>
+  <data name="CountUp" xml:space="preserve"><value>수 늘리기</value></data>
+  <data name="ShowMessage" xml:space="preserve"><value>메시지 표시</value></data>
+  <data name="MessageTitle" xml:space="preserve"><value>샘플 메시지</value></data>
+  <data name="MessageText" xml:space="preserve"><value>이 창은 앱이 표시합니다.</value></data>
+  <data name="MessageDetail" xml:space="preserve"><value>플러그인도 앱과 같은 메시지 창을 사용할 수 있습니다.</value></data>
+</root>

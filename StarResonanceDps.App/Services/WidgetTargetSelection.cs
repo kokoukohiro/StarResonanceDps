@@ -468,7 +468,7 @@ public sealed class WidgetTargetSelection
 
     private PartyDisplayMode GetPartyDisplayMode(WidgetKind meterKind)
     {
-        return (PartyDisplayMode)(_findWidget(meterKind)?.GetMeterSettingsSnapshot().PartyDisplayModeIndex ?? 0);
+        return (PartyDisplayMode)(_findWidget(meterKind)?.MeterSettings.PartyDisplayModeIndex ?? 0);
     }
 
     /// <summary>
@@ -686,7 +686,7 @@ public sealed class WidgetTargetSelection
         return new WidgetTargetOption
         {
             Kind = WidgetTargetOptionKind.Entity,
-            Entity = entity
+            Entity = entity.Target
         };
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
@@ -13,22 +14,32 @@ public static partial class PlayerInfoFormatFormatter
     /// <summary>設定画面の見本に出すシーズンタレントの型(根ノードのバフ 3002810、4言語とも名前が短い型)。</summary>
     private const int PreviewSeasonTalentBuffId = 3002810;
 
+    private const string NamePlaceholder = "{PlayerName}";
+    private const string SpecPlaceholder = "{Spec}";
+    private const string PsychPlaceholder = "{Psych}";
+    private const string PowerLevelPlaceholder = "{PowerLevel}";
+    private const string SeasonStrengthPlaceholder = "{SeasonStrength}";
+    private const string SeasonLevelPlaceholder = "{SeasonLevel}";
+    private const string UidPlaceholder = "{Uid}";
+
     /// <summary>書式に差し込める項目(設定の「プレイヤー名」の項目の一覧)。プレイヤーリスト・メーター・蘇生リストで同じ。</summary>
     public static IReadOnlyList<(string Key, string LabelResourceKey, string Placeholder)> FieldDefinitions { get; } =
     [
-        ("PlayerName", "Settings_PlayerInfo_Field_Name", "{PlayerName}"),
-        ("Spec", "Settings_PlayerInfo_Field_Class", "{Spec}"),
-        ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", "{Psych}"),
-        ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", "{PowerLevel}"),
-        ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", "{SeasonStrength}"),
-        ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", "{SeasonLevel}"),
-        ("Uid", "Settings_PlayerInfo_Field_PlayerUid", "{Uid}")
+        ("PlayerName", "Settings_PlayerInfo_Field_Name", NamePlaceholder),
+        ("Spec", "Settings_PlayerInfo_Field_Class", SpecPlaceholder),
+        ("Psych", "Settings_PlayerInfo_Field_SeasonTalent", PsychPlaceholder),
+        ("PowerLevel", "Settings_PlayerInfo_Field_AbilityScore", PowerLevelPlaceholder),
+        ("SeasonStrength", "Settings_PlayerInfo_Field_SeasonStrength", SeasonStrengthPlaceholder),
+        ("SeasonLevel", "Settings_PlayerInfo_Field_SeasonLevel", SeasonLevelPlaceholder),
+        ("Uid", "Settings_PlayerInfo_Field_PlayerUid", UidPlaceholder)
     ];
 
+    /// <param name="cache">行ごとの控え。定期更新や名簿の更新で同じ行から何度も呼ぶ所が渡す。</param>
     public static string Format(
         MeterPlayerSnapshot player,
         string? formatString,
-        PlayerNameDisplayMode nameDisplayMode)
+        PlayerNameDisplayMode nameDisplayMode,
+        PlayerInfoFormatCache? cache = null)
     {
         // 特化は Core で解決済みのものをそのまま使う。ここで SubProfessionId から
         // 組み立て直すと Rank1(アビリティ未装着)を表現できず、メーターだけ「不明」になる。
@@ -46,13 +57,16 @@ public static partial class PlayerInfoFormatFormatter
                 player.SeasonTalentBuffId,
                 player.IsSeasonTalentInactive),
             formatString,
-            nameDisplayMode);
+            nameDisplayMode,
+            cache);
     }
 
+    /// <param name="cache">行ごとの控え。定期更新や名簿の更新で同じ行から何度も呼ぶ所が渡す。</param>
     public static string Format(
         PlayerRosterEntry player,
         string? formatString,
-        PlayerNameDisplayMode nameDisplayMode)
+        PlayerNameDisplayMode nameDisplayMode,
+        PlayerInfoFormatCache? cache = null)
     {
         return Format(
             new PlayerInfoFormatData(
@@ -68,7 +82,8 @@ public static partial class PlayerInfoFormatFormatter
                 player.SeasonTalentBuffId,
                 player.IsSeasonTalentInactive),
             formatString,
-            nameDisplayMode);
+            nameDisplayMode,
+            cache);
     }
 
     public static string FormatPreview(string? formatString)
@@ -87,28 +102,51 @@ public static partial class PlayerInfoFormatFormatter
                 PreviewSeasonTalentBuffId,
                 false),
             formatString,
-            PlayerNameDisplayMode.Show);
+            PlayerNameDisplayMode.Show,
+            null);
     }
 
     private static string Format(
         PlayerInfoFormatData player,
         string? formatString,
-        PlayerNameDisplayMode nameDisplayMode)
+        PlayerNameDisplayMode nameDisplayMode,
+        PlayerInfoFormatCache? cache)
     {
         if (string.IsNullOrEmpty(formatString))
         {
             return string.Empty;
         }
 
-        var result = formatString;
+        // 控えの比べは差し込む文字で行う。言語や内部IDの表示を変えると、ここで引く文字が変わる。
+        var input = new PlayerInfoFormatInput(
+            formatString,
+            GetName(player, nameDisplayMode),
+            GetClassSpecText(player.ClassSpec),
+            GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive),
+            player.AbilityScore,
+            player.SeasonStrength,
+            player.SeasonLevel,
+            player.UserId);
+        if (cache is not null && cache.TryGet(input, out var cached))
+        {
+            return cached;
+        }
 
-        result = GetNameRegex().Replace(result, GetName(player, nameDisplayMode));
-        result = GetSpecRegex().Replace(result, GetClassSpecText(player.ClassSpec));
-        result = GetPsychRegex().Replace(result, GetSeasonTalentText(player.SeasonTalentBuffId, player.IsSeasonTalentInactive));
-        result = GetPowerLevelRegex().Replace(result, player.AbilityScore.ToString());
-        result = GetSeasonStrengthRegex().Replace(result, player.SeasonStrength.ToString());
-        result = GetSeasonLevelRegex().Replace(result, player.SeasonLevel.ToString());
-        result = GetUidRegex().Replace(result, player.UserId.ToString());
+        var formatted = Build(input);
+        cache?.Set(input, formatted);
+        return formatted;
+    }
+
+    private static string Build(in PlayerInfoFormatInput input)
+    {
+        var result = input.FormatString
+            .Replace(NamePlaceholder, input.Name, StringComparison.OrdinalIgnoreCase)
+            .Replace(SpecPlaceholder, input.Spec, StringComparison.OrdinalIgnoreCase)
+            .Replace(PsychPlaceholder, input.SeasonTalent, StringComparison.OrdinalIgnoreCase)
+            .Replace(PowerLevelPlaceholder, input.AbilityScore.ToString(), StringComparison.OrdinalIgnoreCase)
+            .Replace(SeasonStrengthPlaceholder, input.SeasonStrength.ToString(), StringComparison.OrdinalIgnoreCase)
+            .Replace(SeasonLevelPlaceholder, input.SeasonLevel.ToString(), StringComparison.OrdinalIgnoreCase)
+            .Replace(UidPlaceholder, input.UserId.ToString(), StringComparison.OrdinalIgnoreCase);
 
         result = GetCollapseWhitespaceRegex().Replace(result, " ");
         result = GetEmptyParenthesisRegex().Replace(result, string.Empty);
@@ -239,7 +277,7 @@ public static partial class PlayerInfoFormatFormatter
 
     /// <summary>書式が潜在心相晶(<c>{Psych}</c>)を出すか。ウィジェットの状態の印が、型の「不明」を数えるかに使う。</summary>
     public static bool ShowsSeasonTalent(string? format)
-        => !string.IsNullOrEmpty(format) && GetPsychRegex().IsMatch(format);
+        => !string.IsNullOrEmpty(format) && format.Contains(PsychPlaceholder, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// 特化の表示値。特化(クラスR2)なら名前の表 <c>ClassSpecNames.json</c> の名前、
@@ -263,27 +301,6 @@ public static partial class PlayerInfoFormatFormatter
             _ => false
         };
     }
-
-    [GeneratedRegex(@"\{PlayerName\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetNameRegex();
-
-    [GeneratedRegex(@"\{Spec\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetSpecRegex();
-
-    [GeneratedRegex(@"\{Psych\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetPsychRegex();
-
-    [GeneratedRegex(@"\{PowerLevel\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetPowerLevelRegex();
-
-    [GeneratedRegex(@"\{SeasonStrength\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetSeasonStrengthRegex();
-
-    [GeneratedRegex(@"\{SeasonLevel\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetSeasonLevelRegex();
-
-    [GeneratedRegex(@"\{Uid\}", RegexOptions.IgnoreCase)]
-    private static partial Regex GetUidRegex();
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex GetCollapseWhitespaceRegex();
@@ -312,4 +329,34 @@ public static partial class PlayerInfoFormatFormatter
         bool IsNpc,
         int SeasonTalentBuffId,
         bool IsSeasonTalentInactive);
+}
+
+/// <summary>書式に差し込む値。同じなら結果の文字列も同じ。</summary>
+internal readonly record struct PlayerInfoFormatInput(
+    string FormatString,
+    string Name,
+    string Spec,
+    string SeasonTalent,
+    int AbilityScore,
+    int SeasonStrength,
+    int SeasonLevel,
+    long UserId);
+
+/// <summary>行ごとに持つ、書式の前回の入力と結果。入力が同じなら前の文字列を返す。行と一緒に解放される。</summary>
+public sealed class PlayerInfoFormatCache
+{
+    private PlayerInfoFormatInput _input;
+    private string? _result;
+
+    internal bool TryGet(in PlayerInfoFormatInput input, [NotNullWhen(true)] out string? result)
+    {
+        result = _result;
+        return result is not null && _input == input;
+    }
+
+    internal void Set(in PlayerInfoFormatInput input, string result)
+    {
+        _input = input;
+        _result = result;
+    }
 }

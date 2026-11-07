@@ -109,7 +109,6 @@ internal sealed class EncounterBlobContractResolver : DefaultContractResolver
             nameof(SkillSnapshot.DamageMode),
             nameof(SkillSnapshot.Timestamp),
             nameof(SkillSnapshot.Sequence),
-            nameof(SkillSnapshot.ShieldBreak),
             nameof(SkillSnapshot.OwnerId),
             nameof(SkillSnapshot.DamageSource),
             nameof(SkillSnapshot.BuffSourceSkillId),

@@ -1,0 +1,10 @@
+<Project>
+  <!--
+    The samples are built inside the app's solution. Each sample's project file is what a plugin outside this repository writes;
+    Directory.Build.targets replaces its package reference with the SDK projects.
+    The package turns on dynamic loading; project references do not, so it is turned on here.
+  -->
+  <PropertyGroup>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+</Project>

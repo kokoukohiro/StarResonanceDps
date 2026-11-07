@@ -9,7 +9,7 @@
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <UserControl.Resources>
-        <!-- 行のカード。枠の作りは Panel.ManagerItemCard。下の余白(行の間隔)は集計タブの履歴の行と同じ。押せるのは窓を開く行だけで、その行だけ手の形のカーソルと乗せたときの地の色を出す。 -->
+        <!-- 行のカード。枠の作りは Panel.ManagerItemCard。下の余白(行の間隔)は集計タブの履歴の行と同じ。押せるのは窓を開く行だけで、その行だけ手の形のカーソルと乗せたときの地の色を出す。窓の無いプラグインは状態に関係なく、いつも乗せたときの地の色にする(情報を読めなかったプラグインは窓があるか分からないので除く)。 -->
         <Style x:Key="Panel.PluginItemCard"
                TargetType="{x:Type ContentControl}"
                BasedOn="{StaticResource Panel.ManagerItemCard}">
@@ -21,6 +21,13 @@
                 </DataTrigger>
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Info.HasWindow}" Value="False" />
+                        <Condition Binding="{Binding HasDetails}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource Brush.InputHoverBackground}" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
                         <Condition Binding="{Binding RowState}" Value="{x:Static services:PluginRowState.Openable}" />
                         <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
                     </MultiDataTrigger.Conditions>
@@ -29,12 +36,15 @@
             </Style.Triggers>
         </Style>
 
-        <!-- 押せない行は、ゴミ箱以外(アイコン・文字・ピル)を押せないボタンと同じ不透明度にする。 -->
+        <!-- エラーと削除待ちの行は、ゴミ箱以外(アイコン・文字・ピル)を押せないボタンと同じ不透明度にする。窓なしの正常な行は押せないが灰色にしない。 -->
         <Style x:Key="PluginItem.Content" TargetType="{x:Type Grid}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Opacity" Value="0.45" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding RowState}" Value="{x:Static services:PluginRowState.Openable}">
+                    <Setter Property="Opacity" Value="1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding RowState}" Value="{x:Static services:PluginRowState.NoWindow}">
                     <Setter Property="Opacity" Value="1" />
                 </DataTrigger>
             </Style.Triggers>

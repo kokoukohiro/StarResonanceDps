@@ -22,6 +22,7 @@ public sealed class ConfigManager
     {
         _configPath = AppDataPaths.AppSettingsPath;
         AppConfig = LoadAppConfig();
+        AppConfigDefaults.Normalize(AppConfig);
         ApplyDisplaySettings(AppConfig.Settings);
         ApplyRuntimeSettings(AppConfig.Settings);
     }
@@ -49,10 +50,15 @@ public sealed class ConfigManager
     /// <summary><see cref="SaveNotifications"/> が保存した(通知タブの値が変わった)。</summary>
     public event EventHandler? NotificationsChanged;
 
+    /// <summary>
+    /// 今の設定(プレビューがあればプレビュー)。<b>複製しない。読むだけで、書き換えない。</b>
+    /// 定期更新と名簿の更新はこれを読む。値は読み込みと保存とプレビューの時点で正規化してある。
+    /// </summary>
+    public SettingsConfig CurrentSettings => _settingsPreview ?? AppConfig.Settings;
+
     public SettingsConfig GetSettingsSnapshot()
     {
-        AppConfigDefaults.Normalize(AppConfig);
-        return AppConfigDefaults.CloneNormalizedSettings(_settingsPreview ?? AppConfig.Settings);
+        return AppConfigDefaults.CloneNormalizedSettings(CurrentSettings);
     }
 
     public void SetSettingsPreview(SettingsConfig settings)
@@ -76,7 +82,6 @@ public sealed class ConfigManager
 
     public ColorPickerConfig GetColorPickerSnapshot()
     {
-        AppConfigDefaults.Normalize(AppConfig);
         return AppConfig.ColorPicker.Clone();
     }
 
@@ -153,21 +158,18 @@ public sealed class ConfigManager
 
     public NotificationsConfig GetNotificationsSnapshot()
     {
-        AppConfigDefaults.Normalize(AppConfig);
         return AppConfig.Notifications.Clone();
     }
 
-    /// <summary>通知タブの1項目の今の値(写し)。</summary>
+    /// <summary>通知タブの1項目の今の値。<b>複製しない。読むだけで、書き換えない。</b>名簿の更新のたびに読まれる。</summary>
     public NotificationItemConfig GetNotificationItem(NotificationKind kind)
     {
-        AppConfigDefaults.Normalize(AppConfig);
-        return AppConfig.Notifications.Get(kind).Clone();
+        return AppConfig.Notifications.Get(kind);
     }
 
     /// <summary>プラグインの通知の項目の今の値(写し)。保存したことが無ければ null。鍵は <see cref="NotificationsConfig.GetPluginItemKey"/>。</summary>
     public PluginNotificationItemConfig? GetPluginNotificationItem(string itemKey)
     {
-        AppConfigDefaults.Normalize(AppConfig);
         return AppConfig.Notifications.PluginItems.TryGetValue(itemKey, out var item) ? item.Clone() : null;
     }
 

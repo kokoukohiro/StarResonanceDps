@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Private を false にして、部品の DLL を出力に置かない。 -->
+  <ItemGroup>
+    <ProjectReference Include="..\DebugMissingFile.Library\DebugMissingFile.Library.csproj" Private="false" />
+  </ItemGroup>
+</Project>

@@ -23,7 +23,7 @@ namespace StarResonanceDps.Core.Services;
 /// </para>
 ///
 /// <para>
-/// <see cref="ActiveBuffStore"/> はプレイヤーのバフの表示用で、敵のバフも付与元も持たない。別物。
+/// <see cref="ActiveBuffStore"/>は画面に出すバフの控えで、敵の分は周りにいる間だけ持ち、除去した実体は引けない。別物。
 /// </para>
 /// </summary>
 public sealed class BuffInstanceIndex

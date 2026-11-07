@@ -24,8 +24,8 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
 
     bool IsEntityAcquired { get; }
 
-    /// <summary>捕まえている実体。未捕獲なら <c>null</c>。</summary>
-    EntityListEntry? Entity { get; }
+    /// <summary>捕まえている実体の値。未捕獲なら <c>null</c>。</summary>
+    EntityTargetInfo? Entity { get; }
 
     /// <summary>保存に使う名前。未捕獲なら復元時に読み込んだ名前。</summary>
     string TargetName { get; }
@@ -34,8 +34,8 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
 
     bool RepresentsEntity(long entityUuid);
 
-    /// <summary>個体を採用する。未捕獲なら種別一致で捕まえる。</summary>
-    bool TryApplyEntity(EntityListEntry entity);
+    /// <summary>個体の値を採用する。未捕獲なら種別一致で捕まえる。</summary>
+    bool TryApplyEntity(EntityTargetInfo entity);
 
     /// <summary>捕まえている個体を放し、未捕獲に戻す(ログアウトで起動時の状態へ戻したとき)。</summary>
     void ReleaseEntity();

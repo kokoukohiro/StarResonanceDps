@@ -1,6 +1,6 @@
 namespace StarResonanceDps.App.Services;
 
-/// <summary>プラグインの一覧の行の状態。押せるのは <see cref="Openable"/> の行だけで、ほかの行は灰色にする。</summary>
+/// <summary>プラグインの一覧の行の状態。押せるのは <see cref="Openable"/> の行だけ。<see cref="Error"/> と <see cref="PendingDeletion"/> の行は灰色にする。</summary>
 public enum PluginRowState
 {
     /// <summary>窓を開くプラグイン(初期化の前も含む)。行を押すと窓を開く。</summary>

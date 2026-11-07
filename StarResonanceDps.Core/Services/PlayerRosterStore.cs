@@ -28,9 +28,11 @@ public sealed class PlayerRosterStore
     private uint _mapChannel;
     private long _mapGeneration;
     private int _seasonId;
+    private readonly Comparison<PlayerRosterEntry> _snapshotOrder;
 
     private PlayerRosterStore()
     {
+        _snapshotOrder = CompareSnapshotOrderNoLock;
     }
 
     public static PlayerRosterStore Instance => LazyInstance.Value;
@@ -102,22 +104,38 @@ public sealed class PlayerRosterStore
             return;
         }
 
+        // 差分のたびに通る。中身が同じなら並べ直さない。
+        lock (_sync)
+        {
+            if (_entries.TryGetValue(entry.CharacterId, out var existing)
+                && existing.Equals(ApplyKnownSelf(entry, existing)))
+            {
+                return;
+            }
+        }
+
+        UpsertChanged(entry);
+    }
+
+    private void UpsertChanged(PlayerRosterEntry entry)
+    {
         PublishIfChanged(
             () =>
             {
-                var stored = entry;
-                if (_entries.TryGetValue(stored.CharacterId, out var existing))
-                {
-                    if (existing.IsSelf && !stored.IsSelf)
-                    {
-                        stored = stored with { IsSelf = true };
-                    }
-                }
-
+                var stored = _entries.TryGetValue(entry.CharacterId, out var existing)
+                    ? ApplyKnownSelf(entry, existing)
+                    : entry;
                 _entries[stored.CharacterId] = stored;
                 EnsureFirstSeenOrderNoLock(stored.CharacterId);
             },
             forcePublish: false);
+    }
+
+    private static PlayerRosterEntry ApplyKnownSelf(PlayerRosterEntry entry, PlayerRosterEntry existing)
+    {
+        return existing.IsSelf && !entry.IsSelf
+            ? entry with { IsSelf = true }
+            : entry;
     }
 
     public void Replace(IEnumerable<PlayerRosterEntry> entries, string? mapName = null)
@@ -216,14 +234,32 @@ public sealed class PlayerRosterStore
     /// </summary>
     private IReadOnlyList<PlayerRosterEntry> CreateSnapshotNoLock()
     {
-        return Array.AsReadOnly(_entries.Values
-            .OrderBy(GetGroupRank)
-            // パーティ内だけは PT番号順。番号が無い人はその後ろへ初出順で続く。
-            .ThenBy(entry => entry.IsPartyMember && entry.PartyNumber.HasValue
-                ? entry.PartyNumber!.Value
-                : int.MaxValue)
-            .ThenBy(GetFirstSeenOrderNoLock)
-            .ToArray());
+        var entries = new PlayerRosterEntry[_entries.Count];
+        _entries.Values.CopyTo(entries, 0);
+        Array.Sort(entries, _snapshotOrder);
+        return Array.AsReadOnly(entries);
+    }
+
+    private int CompareSnapshotOrderNoLock(PlayerRosterEntry left, PlayerRosterEntry right)
+    {
+        var order = GetGroupRank(left).CompareTo(GetGroupRank(right));
+        if (order != 0)
+        {
+            return order;
+        }
+
+        order = GetPartyOrder(left).CompareTo(GetPartyOrder(right));
+        return order != 0
+            ? order
+            : GetFirstSeenOrderNoLock(left).CompareTo(GetFirstSeenOrderNoLock(right));
+    }
+
+    /// <summary>パーティ内だけは PT番号順。番号が無い人はその後ろへ初出順で続く。</summary>
+    private static int GetPartyOrder(PlayerRosterEntry entry)
+    {
+        return entry.IsPartyMember && entry.PartyNumber.HasValue
+            ? entry.PartyNumber!.Value
+            : int.MaxValue;
     }
 
     /// <summary>

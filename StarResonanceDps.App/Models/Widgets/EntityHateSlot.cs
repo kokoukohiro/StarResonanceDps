@@ -12,7 +12,7 @@ namespace StarResonanceDps.App.Models.Widgets;
 /// エンティティリストの HP バーの右に並ぶヘイトの枠の1つ。中身は「今狙っている相手」かヘイトの順位の1人
 /// (どの枠に何を入れるかは <c>EntityListEntry</c> が決める)。
 /// 中身はクラスアイコン・プレイヤー名・バッジ(狙っている相手の印か、ヘイトのゲージ)。TIPS は枠全体。
-/// 枠は行ごとに作ったまま使い回し、値だけ入れ替える。出すものが無い枠は場所を残して隠す。
+/// 枠は行ごとに作ったまま使い回し、値だけ入れ替える。出すものが無い枠は隠し、中身の部品も作らない。
 /// </summary>
 public sealed partial class EntityHateSlot : ObservableObject
 {

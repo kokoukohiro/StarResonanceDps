@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using StarResonanceDps.Core.CombatRuntime;
+﻿using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Services;
 using Zproto;
 
@@ -22,17 +21,17 @@ namespace StarResonanceDps.App.Models.Widgets;
 public sealed class EntityWindowTarget
 {
     private readonly string _savedName;
-    private EntityListEntry? _entity;
+    private EntityTargetInfo? _entity;
 
     /// <summary>実体が分かっている状態で作る。エンティティリストからの経路。</summary>
-    public EntityWindowTarget(EntityListEntry entity)
+    public EntityWindowTarget(EntityTargetInfo entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
         EntityId = entity.EntityId;
         EntityType = entity.EntityType;
         _savedName = entity.Name;
-        Attach(entity);
+        _entity = entity;
     }
 
     /// <summary>
@@ -46,7 +45,7 @@ public sealed class EntityWindowTarget
         _savedName = savedName ?? string.Empty;
     }
 
-    /// <summary>対象が差し替わったとき(捕獲・実体の作り直し・名前の変化)に上がる。</summary>
+    /// <summary>捕まえた個体やその値(名前・レベル)が変わったとき、個体を放したときに上がる。</summary>
     public event EventHandler? Changed;
 
     public long EntityId { get; }
@@ -59,8 +58,8 @@ public sealed class EntityWindowTarget
 
     public bool IsAcquired => _entity is not null;
 
-    /// <summary>捕まえている実体。未捕獲なら <c>null</c>。</summary>
-    public EntityListEntry? Entity => _entity;
+    /// <summary>捕まえている実体の値。未捕獲なら <c>null</c>。</summary>
+    public EntityTargetInfo? Entity => _entity;
 
     /// <summary>ヘッダーに出す名前(書式を通していない素の名前)。未捕獲なら保存しておいた名前。</summary>
     public string Name => _entity?.Name ?? _savedName;
@@ -85,7 +84,7 @@ public sealed class EntityWindowTarget
     }
 
     /// <summary>未捕獲のときに捕まえてよい個体か。種類と種別IDの両方が一致するもの。</summary>
-    public bool Matches(EntityListEntry entity)
+    public bool Matches(EntityTargetInfo entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
@@ -93,11 +92,11 @@ public sealed class EntityWindowTarget
     }
 
     /// <summary>
-    /// 与えられた個体を採用する。未捕獲なら種類と種別が一致するものを捕まえ、
-    /// 捕獲済みなら同じ実体の新しいエントリにだけ差し替える。
+    /// 与えられた個体の値を採用する。未捕獲なら種類と種別が一致するものを捕まえ、
+    /// 捕獲済みなら同じ実体の新しい値にだけ差し替える。
     /// </summary>
     /// <returns>採用したら <c>true</c>。</returns>
-    public bool TryApply(EntityListEntry entity)
+    public bool TryApply(EntityTargetInfo entity)
     {
         ArgumentNullException.ThrowIfNull(entity);
 
@@ -107,19 +106,13 @@ public sealed class EntityWindowTarget
             {
                 return false;
             }
-
-            Attach(entity);
-            Changed?.Invoke(this, EventArgs.Empty);
-            return true;
         }
-
-        if (entity.EntityUuid != EntityUuid || ReferenceEquals(_entity, entity))
+        else if (entity.EntityUuid != EntityUuid || entity == _entity)
         {
             return false;
         }
 
-        Detach();
-        Attach(entity);
+        _entity = entity;
         Changed?.Invoke(this, EventArgs.Empty);
         return true;
     }
@@ -135,37 +128,7 @@ public sealed class EntityWindowTarget
             return;
         }
 
-        Detach();
-        Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    public void Dispose()
-    {
-        Detach();
-    }
-
-    private void Attach(EntityListEntry entity)
-    {
-        _entity = entity;
-        _entity.PropertyChanged += Entity_PropertyChanged;
-    }
-
-    private void Detach()
-    {
-        if (_entity is null)
-        {
-            return;
-        }
-
-        _entity.PropertyChanged -= Entity_PropertyChanged;
         _entity = null;
-    }
-
-    private void Entity_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(EntityListEntry.Name))
-        {
-            Changed?.Invoke(this, EventArgs.Empty);
-        }
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 }

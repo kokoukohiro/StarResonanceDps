@@ -70,10 +70,7 @@ public sealed record BenchmarkStateSnapshot(
 /// 推移の区切り1つ。<see cref="StartSeconds"/>〜<see cref="EndSeconds"/> は <c>FirstDamageTimeStamp</c> からの秒(右閉じ)、
 /// <see cref="ValuePerSecond"/> はその区切りの合計 ÷ 区切りの長さ。
 /// </summary>
-public sealed record MetricGraphPoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
-
-public sealed record MetricGraphSnapshot(
-    IReadOnlyList<MetricGraphPoint> Points);
+public readonly record struct MetricGraphPoint(double StartSeconds, double EndSeconds, double ValuePerSecond);
 
 /// <summary>
 /// 推移グラフの横軸の下に出す、プレイヤーの技の開始1件。<see cref="Seconds"/> は戦闘の時計の経過(<c>Encounter.ToCombatOffset</c>)で、
@@ -92,6 +89,20 @@ public sealed record MetricGraphSkillActivation(
     SkillIconFrame Frame,
     bool UsesImagineAsset,
     int? Grade);
+
+/// <summary>
+/// <see cref="MeterSnapshotProvider.GetPlayerSkillActivations"/> の結果。
+/// 読み手は <see cref="Encounter"/> と <see cref="GradeSource"/> を控えて次に渡す。どちらかが控えと違えば <see cref="Added"/> は先頭からの全部。
+/// </summary>
+/// <param name="Encounter">読んだ回。回か相手が無ければ null。</param>
+/// <param name="GradeSource">G○ の元の一覧(参照を比べる)。</param>
+/// <param name="NextIndex">次に読む番号。</param>
+/// <param name="Added">足す分(届いた順)。</param>
+public readonly record struct MetricGraphSkillActivationSlice(
+    Encounter? Encounter,
+    object? GradeSource,
+    int NextIndex,
+    IReadOnlyList<MetricGraphSkillActivation> Added);
 
 /// <summary>
 /// スキル詳細の1行。
@@ -382,7 +393,7 @@ public sealed record TimelineSnapshot(
     DateTime? CombatStartUtc);
 
 /// <summary>
-/// 被ダメログの1行(プレイヤーの被弾1回。<see cref="Entity.TakenStats"/> の記録)。
+/// 被ダメログの1行(プレイヤーの被弾1回。回の記録 <see cref="TakenHitRecord"/>)。
 ///
 /// <para>
 /// 加害者はタイムライン・被ダメログの登場人物(<see cref="CombatEventLogParty"/>)と同じ決め方、技名は被ダメの発生源の名前の引き方で、
@@ -523,7 +534,7 @@ public static class MeterSnapshotProvider
             ? partyDisplayMode
             : PartyDisplayMode.All;
         var party = PartyStateStore.Instance.Current;
-        foreach (var entity in encounter.Entities.Values)
+        foreach (var (_, entity) in encounter.Entities)
         {
             if (entity.EntityType != EEntityType.EntChar)
             {
@@ -565,7 +576,8 @@ public static class MeterSnapshotProvider
             return [];
         }
 
-        return [.. encounter.Entities.Values
+        return [.. encounter.Entities
+            .Select(pair => pair.Value)
             .Where(entity => entity.EntityType == EEntityType.EntChar && entity.TakenStats.HitsCount > 0UL)
             .OrderByDescending(entity => entity.TakenStats.ValueTotal)
             .ThenBy(entity => entity.UUID)
@@ -585,7 +597,7 @@ public static class MeterSnapshotProvider
             return false;
         }
 
-        foreach (var entity in encounter.Entities.Values)
+        foreach (var (_, entity) in encounter.Entities)
         {
             if (entity.EntityType == EEntityType.EntChar && entity.TakenStats.HitsCount > 0UL)
             {
@@ -612,7 +624,7 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// 被ダメログの材料。表示中の回(タイムラインと同じ <see cref="ResolveActiveEncounter"/>)の記録を、タイムラインと同じく
+    /// 被ダメログの材料。表示中の回(タイムラインと同じ <see cref="ResolveActiveEncounter"/>)の被弾の記録を、タイムラインと同じく
     /// <paramref name="startIndex"/> 件目から読み、対象がプレイヤーの被弾だけを返す。表示中の回が <paramref name="knownEncounter"/> と違えば先頭から読む。
     /// 新しい被弾が無ければ空で返る。1人ずつの最後の被弾を持つのと並びを決めるのは呼び出し側。
     /// </summary>
@@ -629,37 +641,31 @@ public static class MeterSnapshotProvider
             startIndex = 0;
         }
 
-        var records = encounter.GetCombatEventLogRecords(startIndex);
+        var records = encounter.GetTakenHitRecords(startIndex);
         var parties = new Dictionary<long, CombatEventLogParty>();
-        var hits = new List<DamageTakenLogHit>();
+        var hits = new List<DamageTakenLogHit>(records.Length);
         foreach (var record in records)
         {
-            if (record.Kind != CombatEventLogRecordKind.Hit
-                || record.Hit is not { Timestamp: { } timestamp } last)
-            {
-                continue;
-            }
-
-            var target = ResolveCombatEventLogParty(encounter, record.EntityUuid, parties);
+            var target = ResolveCombatEventLogParty(encounter, record.TargetUuid, parties);
             if (!target.IsPlayer)
             {
                 continue;
             }
 
-            var attacker = ResolveCombatEventLogParty(encounter, last.OtherUUID, parties);
+            var attacker = ResolveCombatEventLogParty(encounter, record.OtherUuid, parties);
             hits.Add(new DamageTakenLogHit(
                 target.CharacterId,
-                last.Sequence,
-                timestamp,
+                record.Sequence,
+                record.Timestamp,
                 attacker,
-                last.OwnerId,
-                last.DamageSource == Zproto.EDamageSource.Buff,
-                ResolveTakenDamageSourceName(attacker.IsPlayer, last.Id, last.DamageSource, last.OwnerId, last.BuffSourceSkillId, last.SummonSourceSkillId),
-                last.DamageSource == Zproto.EDamageSource.Fall,
-                last.Value,
-                last.DamageElement,
-                last.DamageMode,
-                last.IsKill));
+                record.OwnerId,
+                record.DamageSource == Zproto.EDamageSource.Buff,
+                ResolveTakenDamageSourceName(attacker.IsPlayer, record.Id, record.DamageSource, record.OwnerId, record.BuffSourceSkillId, record.SummonSourceSkillId),
+                record.DamageSource == Zproto.EDamageSource.Fall,
+                record.Value,
+                record.DamageElement,
+                record.DamageMode,
+                record.IsKill));
         }
 
         return new DamageTakenLogSnapshot(encounter, startIndex + records.Length, hits);
@@ -803,8 +809,8 @@ public static class MeterSnapshotProvider
                 continue;
             }
 
-            // 被弾とダメージの無い死亡はタイムラインに出さない(被ダメログとプレイヤーリストの顔ぶれが読む)。
-            if (record.Kind is not (CombatEventLogRecordKind.Hit or CombatEventLogRecordKind.Death))
+            // ダメージの無い死亡はタイムラインに出さない(プレイヤーリストの顔ぶれが読む)。
+            if (record.Kind != CombatEventLogRecordKind.Death)
             {
                 throw new InvalidOperationException($"Combat event log record kind {record.Kind} has no timeline handling (sequence {record.Sequence}).");
             }
@@ -1108,6 +1114,7 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// バフ/デバフリストとカードが読む。<b>履歴を開いても固めない</b> —
     /// バフの変化はDBから復元できないので、止めても意味のある絵にならない。
+    /// 周りにいない他のプレイヤーは空(見えない相手の除去は届かない。また現れたら出現時の一覧の残り時間で出る)。
     /// </summary>
     /// <param name="groupSameBuffs">
     /// 同じ番号のバフを1行にまとめるか(リストの設定「同種バフの表示」)。カードはどちらでも出す実体が同じなので、まとめて読む。
@@ -1120,7 +1127,7 @@ public static class MeterSnapshotProvider
     }
 
     /// <summary>
-    /// <see cref="GetPlayerBuffs"/> と同じ行。プレイヤーの実体が見つからないときは偽(バフが1つも無いときは真で空)。
+    /// <see cref="GetPlayerBuffs"/> と同じ行。プレイヤーの実体が見つからないとき、周りにいない他のプレイヤーのときは偽(バフが1つも無いときは真で空)。
     /// 付いていないバフも行に出すバフ・デバフグループが、相手の分からない間を「何も付いていない」と分けるのに使う。
     /// </summary>
     public static bool TryGetPlayerBuffs(
@@ -1131,7 +1138,8 @@ public static class MeterSnapshotProvider
     {
         var encounter = ResolvePlayerDetailEncounter();
         if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
+            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity)
+            || !IsSelfOrNearbyPlayer(entity.UUID))
         {
             snapshots = Array.Empty<PlayerBuffSnapshot>();
             return false;
@@ -1162,7 +1170,7 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// エンティティリストに載る実体のバフ/デバフリストとカードが読む。
     /// バフは回の外の控え(<see cref="Services.ActiveBuffStore"/>)から作るので、今の回に実体が無くても出す
-    /// (回が区切られた直後は、まだ動いていない敵の実体が今の回に無い)。
+    /// (回が区切られた直後は、まだ動いていない敵の実体が今の回に無い)。周りから消えた実体は空。
     /// </summary>
     /// <param name="groupSameBuffs"><see cref="GetPlayerBuffs"/> と同じ。</param>
     public static IReadOnlyList<PlayerBuffSnapshot> GetEntityBuffs(long entityUuid, PlayerBuffListKind kind, bool groupSameBuffs)
@@ -1314,6 +1322,7 @@ public static class MeterSnapshotProvider
     /// <summary>
     /// バフを付けたプレイヤーの実体。付与者の実体がプレイヤーならその人、召喚物で大元の召喚者(付与者の実体の <c>AttrTopSummonerId</c>)が
     /// プレイヤーならその人(タイムライン・被ダメログの加害者の寄せ方 <see cref="Encounter.ResolveCombatEventLogActor"/> と同じ結果)。
+    /// 付与者が周りから消えて回から外れた後は、召喚者を控え<see cref="Services.EntityOriginIndex"/>から読む(バフは実体より長く残る)。
     /// プレイヤーでなければ 0(付与者なし・モンスター・召喚者の分からない召喚物)。
     /// </summary>
     private static long ResolveBuffPlayerCasterUuid(Encounter encounter, long fireUuid)
@@ -1328,9 +1337,21 @@ public static class MeterSnapshotProvider
             return fireUuid;
         }
 
-        return encounter.Entities.TryGetValue(fireUuid, out var fireEntity)
-            && fireEntity.GetAttrKV("AttrTopSummonerId") is long summonerUuid
-            && (EEntityType)Utils.UuidToEntityType(summonerUuid) == EEntityType.EntChar
+        long summonerUuid;
+        if (encounter.Entities.TryGetValue(fireUuid, out var fireEntity))
+        {
+            summonerUuid = fireEntity.GetAttrKV("AttrTopSummonerId") as long? ?? 0;
+        }
+        else if (Services.EntityOriginIndex.Instance.TryGetDisappeared(fireUuid, out var disappeared))
+        {
+            summonerUuid = disappeared.TopSummonerUuid;
+        }
+        else
+        {
+            return 0;
+        }
+
+        return (EEntityType)Utils.UuidToEntityType(summonerUuid) == EEntityType.EntChar
             ? summonerUuid
             : 0;
     }
@@ -1664,28 +1685,6 @@ public static class MeterSnapshotProvider
             0);
     }
 
-    public static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> GetPlayerSkillEffects(
-        long characterId,
-        IReadOnlyCollection<int> skillIds)
-    {
-        if (skillIds.Count == 0)
-        {
-            return new Dictionary<int, PlayerSkillEffectSnapshot>();
-        }
-
-        var encounter = ResolvePlayerDetailEncounter();
-        if (encounter is null
-            || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
-        {
-            return new Dictionary<int, PlayerSkillEffectSnapshot>();
-        }
-
-        return CreateSkillEffectSnapshots(
-            encounter,
-            entity,
-            skillIds.ToHashSet());
-    }
-
     public static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> GetPlayerListSkillEffects(
         long characterId,
         long entityUuid,
@@ -1710,8 +1709,7 @@ public static class MeterSnapshotProvider
         return CreateSkillEffectSnapshots(
             encounter,
             entity,
-            skillIds,
-            hideReviveBlockDebuff: true);
+            skillIds);
     }
 
     /// <summary>
@@ -1844,8 +1842,7 @@ public static class MeterSnapshotProvider
     private static IReadOnlyDictionary<int, PlayerSkillEffectSnapshot> CreateSkillEffectSnapshots(
         Encounter encounter,
         Entity entity,
-        IReadOnlySet<int> trackedSkillIds,
-        bool hideReviveBlockDebuff = false)
+        IReadOnlySet<int> trackedSkillIds)
     {
         var buffEvents = ResolveDisplayBuffEvents(entity.UUID);
         var runtimeSourceParentsByBaseId = BuildRuntimeSourceParentsByBaseId(
@@ -1867,7 +1864,7 @@ public static class MeterSnapshotProvider
             }
 
             // 蘇生不可はスキル枠のバッジには出さない。HPテキストのほうで扱う。
-            if (hideReviveBlockDebuff && buffEvent.BaseId == ReviveBlockDebuffBaseId)
+            if (buffEvent.BaseId == ReviveBlockDebuffBaseId)
             {
                 continue;
             }
@@ -2118,10 +2115,20 @@ public static class MeterSnapshotProvider
 
         var resolved = 0;
 
-        if (encounter.Entities.TryGetValue(fireUuid, out var caster)
-            && caster.UID > 0
+        // 召喚体が周りから消えて回から外れた後は、種別IDを控えから読む(バフは実体より長く残る)。
+        long summonMonsterId = 0;
+        if (encounter.Entities.TryGetValue(fireUuid, out var caster))
+        {
+            summonMonsterId = caster.UID;
+        }
+        else if (Services.EntityOriginIndex.Instance.TryGetDisappearedMonsterId(fireUuid, out var disappearedMonsterId))
+        {
+            summonMonsterId = disappearedMonsterId;
+        }
+
+        if (summonMonsterId > 0
             && HelperMethods.DataTables.Monsters.Data.TryGetValue(
-                caster.UID.ToString(),
+                summonMonsterId.ToString(),
                 out var monster))
         {
             var summonSkillIds = new HashSet<int>();
@@ -2310,9 +2317,13 @@ public static class MeterSnapshotProvider
             AddRuntimeSourceParent(result, buffEvent);
         }
 
-        foreach (var buffEvent in entity.RecentBuffEventHistory.Values)
+        var recentBuffEvents = entity.RecentBuffEventHistory;
+        if (recentBuffEvents is not null)
         {
-            AddRuntimeSourceParent(result, buffEvent);
+            foreach (var buffEvent in recentBuffEvents.Values)
+            {
+                AddRuntimeSourceParent(result, buffEvent);
+            }
         }
 
         // 既に切れた/解除されたバフの対応も逆引きには必要。
@@ -2365,11 +2376,17 @@ public static class MeterSnapshotProvider
     /// ライブでは満ちていない最後の区切りを出さない。戦闘が閉じているときだけ、最後の半端な区切りを
     /// 実際の長さ(1秒未満の端数を含む)で割って出す。選べる N は App の一覧が決め、ここは1秒以上なら受ける。
     /// </para>
+    ///
+    /// <para>
+    /// 読むたびに全部の区切りを計算し直すが(遅れて届いた分も反映する)、<paramref name="buffer"/> は値が変わった区切りだけ書き換え、何も作らない。
+    /// 点が変わったら true を返すので、読み手はそのときだけ表示へ渡す。
+    /// </para>
     /// </summary>
-    public static MetricGraphSnapshot GetPlayerGraph(
+    public static bool ReadPlayerGraph(
         MeterSnapshotKind kind,
         long characterId,
-        int aggregationIntervalSeconds)
+        int aggregationIntervalSeconds,
+        MetricGraphPointBuffer buffer)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(aggregationIntervalSeconds, 1);
         var intervalSeconds = aggregationIntervalSeconds;
@@ -2377,17 +2394,17 @@ public static class MeterSnapshotProvider
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out _, out var entity))
         {
-            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
+            return buffer.Clear();
         }
 
         var stats = kind == MeterSnapshotKind.Damage
             ? entity.DamageStats
             : entity.HealingStats;
-        var totals = stats.GetPerSecondTotalsCopy(out var lastTimestamp);
 
-        if (totals.Length == 0 || lastTimestamp is not { } lastValueTime)
+        // 最後の値の時刻は時計より先に読む(後に読むと、その間に届いた値の時刻が読んだ時計の終点より後になる)。
+        if (!stats.TryGetLastPerSecondTimestamp(out var lastValueTime))
         {
-            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
+            return buffer.Clear();
         }
 
         // 秒の区切りは記録時に戦闘の時計の起点から切ってある。起点が無いのに合計があるなら記録側が壊れている。
@@ -2412,76 +2429,115 @@ public static class MeterSnapshotProvider
         var bucketCount = fullBucketCount + (hasPartialBucket ? 1 : 0);
         if (bucketCount == 0)
         {
-            return new MetricGraphSnapshot(Array.Empty<MetricGraphPoint>());
+            return buffer.Clear();
         }
 
-        // 1秒の鍵 k は (k, k+1] 秒なので、区切り j に入るのは k / N == j の鍵。
-        var bucketTotals = new double[bucketCount];
-        foreach (var (second, value) in totals)
-        {
-            var bucket = second / intervalSeconds;
-            if (bucket < bucketCount)
-            {
-                bucketTotals[bucket] += value;
-            }
-        }
+        var bucketTotals = buffer.GetClearedBucketTotals(bucketCount);
+        stats.AddPerSecondTotalsTo(bucketTotals, bucketCount, intervalSeconds);
 
-        var points = new MetricGraphPoint[bucketCount];
+        buffer.EnsureCapacity(bucketCount);
+        var changed = false;
         for (var bucket = 0; bucket < fullBucketCount; bucket++)
         {
-            points[bucket] = new MetricGraphPoint(
-                bucket * (double)intervalSeconds,
-                (bucket + 1) * (double)intervalSeconds,
-                bucketTotals[bucket] / intervalSeconds);
+            changed |= buffer.SetPoint(
+                bucket,
+                new MetricGraphPoint(
+                    bucket * (double)intervalSeconds,
+                    (bucket + 1) * (double)intervalSeconds,
+                    bucketTotals[bucket] / intervalSeconds));
         }
 
         if (hasPartialBucket)
         {
-            points[fullBucketCount] = new MetricGraphPoint(
-                fullBucketCount * (double)intervalSeconds,
-                elapsedSeconds,
-                bucketTotals[fullBucketCount] / partialBucketSeconds);
+            changed |= buffer.SetPoint(
+                fullBucketCount,
+                new MetricGraphPoint(
+                    fullBucketCount * (double)intervalSeconds,
+                    elapsedSeconds,
+                    bucketTotals[fullBucketCount] / partialBucketSeconds));
         }
 
-        return new MetricGraphSnapshot(points);
+        changed |= buffer.SetCount(bucketCount);
+        return changed;
     }
 
     /// <summary>
-    /// 推移グラフに出すプレイヤーの技の開始(届いた順)。回は線と同じ(<see cref="ResolveActiveEncounter"/>)。
-    /// 戦闘の時計の起点がまだ無い回は空(線も無い)。起点より前の開始は 0 秒に置く
+    /// 推移グラフに出すプレイヤーの技の開始(届いた順)の、<paramref name="startIndex"/> 番目から後の分。回は線と同じ(<see cref="ResolveActiveEncounter"/>)。
+    /// 表示中の回か G○ の元の一覧が控え(<paramref name="knownEncounter"/>・<paramref name="knownGradeSource"/>)と違えば先頭から読む。足す分が無ければ何も作らない。
+    /// 戦闘の時計の起点がまだ無い回は読み進めない(線も無い)。起点より前の開始は 0 秒に置く
     /// (時計は戦闘していない時間を1点に縮める。自動一時停止の中の開始が止まった時点に重なるのと同じ扱い)。
     /// </summary>
-    public static IReadOnlyList<MetricGraphSkillActivation> GetPlayerSkillActivations(long characterId)
+    public static MetricGraphSkillActivationSlice GetPlayerSkillActivations(
+        long characterId,
+        Encounter? knownEncounter,
+        object? knownGradeSource,
+        int startIndex)
     {
         var encounter = ResolveActiveEncounter();
         if (encounter is null
             || !TryResolvePlayerEntity(encounter, characterId, out var entityUuid, out var entity))
         {
-            return Array.Empty<MetricGraphSkillActivation>();
+            return new MetricGraphSkillActivationSlice(null, null, 0, Array.Empty<MetricGraphSkillActivation>());
         }
 
-        var records = encounter.GetSkillActivationsCopy(entityUuid);
-        var grades = ResolveSkillGrades(entityUuid, entity, characterId);
-        var activations = new List<MetricGraphSkillActivation>(records.Length);
-        foreach (var record in records)
+        var gradeSource = ResolveSkillGradeSource(entityUuid, entity, characterId);
+        if (!ReferenceEquals(encounter, knownEncounter) || !ReferenceEquals(gradeSource, knownGradeSource))
         {
-            if (encounter.ToCombatOffset(record.Timestamp) is not { } offset)
-            {
-                return Array.Empty<MetricGraphSkillActivation>();
-            }
+            startIndex = 0;
+        }
 
+        if (encounter.ToCombatOffset(DateTime.UtcNow) is null)
+        {
+            return new MetricGraphSkillActivationSlice(encounter, gradeSource, startIndex, Array.Empty<MetricGraphSkillActivation>());
+        }
+
+        var records = encounter.GetSkillActivationsFrom(entityUuid, startIndex, out var nextIndex);
+        if (records.Length == 0)
+        {
+            return new MetricGraphSkillActivationSlice(encounter, gradeSource, nextIndex, Array.Empty<MetricGraphSkillActivation>());
+        }
+
+        var grades = ResolveSkillGrades(entityUuid, entity, characterId);
+        var activations = new MetricGraphSkillActivation[records.Length];
+        for (var index = 0; index < records.Length; index++)
+        {
+            var record = records[index];
             var (name, iconName, frame, usesImagineAsset) = CombatDataCatalog.GetSkillActivationDisplay(record.SkillId);
-            activations.Add(new MetricGraphSkillActivation(
-                Math.Max(offset.TotalSeconds, 0d),
+            activations[index] = new MetricGraphSkillActivation(
+                Math.Max(encounter.ToCombatOffset(record.Timestamp)!.Value.TotalSeconds, 0d),
                 record.SkillId,
                 iconName,
                 name,
                 frame,
                 usesImagineAsset,
-                grades.TryGetValue(record.SkillId, out var grade) ? grade : null));
+                grades.TryGetValue(record.SkillId, out var grade) ? grade : null);
         }
 
-        return activations;
+        return new MetricGraphSkillActivationSlice(encounter, gradeSource, nextIndex, activations);
+    }
+
+    /// <summary>
+    /// G○ の元の一覧(<see cref="ResolvePlayerSkillLevels"/> が読む一覧そのもの)。参照が替わったら G○ を読み直す。
+    /// プレイヤーリストの技の枠が一覧の変化を見る目印と同じ参照。
+    /// </summary>
+    private static object? ResolveSkillGradeSource(long entityUuid, Entity? entity, long characterId)
+    {
+        var isSelf = IsSelfEntity(entityUuid);
+        if (isSelf && PlayerSkillLevelStateStore.TryGetSelfCurrentSkillLevels(out var currentSkillLevels))
+        {
+            return currentSkillLevels;
+        }
+
+        var received = entity?.GetAttrKV("AttrSkillLevelIdList");
+        var isEmpty = received switch
+        {
+            List<DataTypes.Skills.SkillLevelInfo> typedList => typedList.Count == 0,
+            JArray jsonArray => jsonArray.Count == 0,
+            _ => true
+        };
+        return isEmpty && !isSelf && PartyMemberCache.Instance.TryGetSkillLevels(characterId, out var cachedSkillLevels)
+            ? cachedSkillLevels
+            : received;
     }
 
     /// <summary>
@@ -2696,12 +2752,19 @@ public static class MeterSnapshotProvider
 
     /// <summary>
     /// そのプレイヤーに付いているバフを全部(<see cref="GetActiveEntityBuffs"/>)。実体の番号はキャラ番号から作る(自分と同じ形)。
+    /// 周りにいない他のプレイヤーは空(<see cref="GetPlayerBuffs"/>と同じ)。
     /// </summary>
     public static IReadOnlyList<ActiveBuffSnapshot> GetActivePlayerBuffs(long characterId)
     {
-        return characterId == 0
-            ? Array.Empty<ActiveBuffSnapshot>()
-            : GetActiveEntityBuffs(Utils.EntityIdToUuid(characterId, (long)EEntityType.EntChar, false, false));
+        if (characterId == 0)
+        {
+            return Array.Empty<ActiveBuffSnapshot>();
+        }
+
+        var entityUuid = Utils.EntityIdToUuid(characterId, (long)EEntityType.EntChar, false, false);
+        return IsSelfOrNearbyPlayer(entityUuid)
+            ? GetActiveEntityBuffs(entityUuid)
+            : Array.Empty<ActiveBuffSnapshot>();
     }
 
     /// <summary>
@@ -2712,12 +2775,12 @@ public static class MeterSnapshotProvider
     {
         var store = Services.ActiveBuffStore.Instance;
         var buffs = store.GetActive(entityUuid);
-        if (buffs.Count == 0)
+        if (buffs.Length == 0)
         {
             return Array.Empty<ActiveBuffSnapshot>();
         }
 
-        var snapshots = new List<ActiveBuffSnapshot>(buffs.Count);
+        var snapshots = new List<ActiveBuffSnapshot>(buffs.Length);
         foreach (var buff in buffs)
         {
             // 読む間に切れたバフは除く。
@@ -2838,7 +2901,7 @@ public static class MeterSnapshotProvider
     /// </summary>
     private static BuffEvent[] ResolveDisplayBuffEvents(long entityUuid)
     {
-        return [.. Services.ActiveBuffStore.Instance.GetActive(entityUuid)];
+        return Services.ActiveBuffStore.Instance.GetActive(entityUuid);
     }
 
     /// <summary>
@@ -2923,6 +2986,11 @@ public static class MeterSnapshotProvider
                 || entityUuid == AppState.PlayerUUID
                 || (AppState.PlayerUID != 0
                     && Utils.UuidToEntityId(entityUuid) == AppState.PlayerUID));
+    }
+
+    private static bool IsSelfOrNearbyPlayer(long entityUuid)
+    {
+        return IsSelfEntity(entityUuid) || PlayerRosterProjection.IsNearbyPlayer(entityUuid);
     }
 
     private static IReadOnlyList<DataTypes.Skills.SkillLevelInfo> ResolvePlayerSkillLevels(

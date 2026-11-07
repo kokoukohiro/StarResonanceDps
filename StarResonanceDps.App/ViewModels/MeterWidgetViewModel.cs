@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using StarResonanceDps.App.Config;
 using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
+using StarResonanceDps.App.Services;
 using StarResonanceDps.Core.CombatRuntime;
 using StarResonanceDps.Core.Models;
 using StarResonanceDps.Core.Services;
@@ -18,6 +19,7 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     private readonly MeterSnapshotKind _kind;
     private readonly ObservableCollection<MeterPlayerEntry> _entries = [];
     private readonly Dictionary<long, MeterPlayerEntry> _entriesByCharacterId = [];
+    private readonly List<MeterPlayerEntry> _orderedEntries = [];
     private readonly DispatcherTimer _refreshTimer;
     private readonly ConfigManager _configManager = ConfigManager.Instance;
     private readonly Action<WidgetKind, long> _requestPlayerWindow;
@@ -153,8 +155,8 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
     {
         // 計測の完了後も描き直してよい。時計が窓の終わりで止まり、窓の後は記録されない(Core)。
         var benchmarkState = MeterSnapshotProvider.GetBenchmarkState();
-        var settings = _widget.GetMeterSettingsSnapshot();
-        var globalSettings = _configManager.GetSettingsSnapshot();
+        var settings = _widget.MeterSettings;
+        var globalSettings = _configManager.CurrentSettings;
         var numberDisplayFormatIndex = globalSettings.NumberDisplayFormatIndex;
         var playerNameDisplayMode = (PlayerNameDisplayMode)globalSettings.PlayerNameDisplayModeIndex;
         var snapshot = MeterSnapshotProvider.GetSnapshot(
@@ -196,27 +198,21 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
         for (var index = 0; index < snapshot.Players.Count; index++)
         {
             var player = snapshot.Players[index];
-            if (!_entriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
+            if (_entriesByCharacterId.TryGetValue(player.CharacterId, out var entry))
+            {
+                entry.Update(player, index + 1, settings, _widget.Kind, numberDisplayFormatIndex, playerNameDisplayMode);
+            }
+            else
             {
                 entry = MeterPlayerEntry.Create(player, index + 1, settings, _widget.Kind, numberDisplayFormatIndex, playerNameDisplayMode);
                 _entriesByCharacterId.Add(player.CharacterId, entry);
-                _entries.Insert(index, entry);
-                continue;
             }
 
-            entry.Update(player, index + 1, settings, _widget.Kind, numberDisplayFormatIndex, playerNameDisplayMode);
-            if (_entries[index].CharacterId == player.CharacterId)
-            {
-                continue;
-            }
-
-            var currentIndex = FindEntryIndex(player.CharacterId, index + 1);
-            if (currentIndex >= 0)
-            {
-                _entries.Move(currentIndex, index);
-            }
+            _orderedEntries.Add(entry);
         }
 
+        CollectionOrder.Apply(_entries, _orderedEntries);
+        _orderedEntries.Clear();
         _shownPlayers = snapshot.Players;
         _showsSeasonTalent = PlayerInfoFormatFormatter.ShowsSeasonTalent(settings.PlayerInfoFormatString);
         RefreshDataStatus();
@@ -271,19 +267,6 @@ public sealed partial class MeterWidgetViewModel : ViewModelBase, IDisposable, I
         {
             _requestPlayerWindow(widgetKind, player.PlayerId);
         }
-    }
-
-    private int FindEntryIndex(long characterId, int startIndex)
-    {
-        for (var index = startIndex; index < _entries.Count; index++)
-        {
-            if (_entries[index].CharacterId == characterId)
-            {
-                return index;
-            }
-        }
-
-        return -1;
     }
 
     /// <summary>

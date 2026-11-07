@@ -248,6 +248,7 @@ namespace StarResonanceDps.Core.CombatRuntime
             BuffOriginResolver.Instance.Clear();
             PendingEnemyBuffLogs.Clear();
             NearbyMonsterIndex.Instance.Clear();
+            EntityOriginIndex.Instance.Clear();
             BossDbmBarStore.Instance.Clear();
             WarningSkillCastStore.Instance.Clear();
             DungeonTargetStore.Instance.Clear();
@@ -2781,6 +2782,11 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             // 自分なら、短縮が変わる前の速さでここまでの CD の進みを確定してから変える。
             SkillCooldownStateStore.SettleSelfProgress(uuid);
+            if (Utils.UuidToEntityType(uuid) != (long)EEntityType.EntChar)
+            {
+                return;
+            }
+
             if (isFullList)
             {
                 CooldownModifierStore.Replace(uuid, tempAttrs, arrivalUtc);
@@ -2788,18 +2794,6 @@ namespace StarResonanceDps.Core.CombatRuntime
             else
             {
                 CooldownModifierStore.Merge(uuid, tempAttrs, arrivalUtc);
-            }
-
-            foreach (var tempAttr in tempAttrs)
-            {
-                if (HelperMethods.DataTables.TempAttrs.Data.TryGetValue(tempAttr.Id.ToString(), out var matchedTempAttr))
-                {
-                    EncounterManager.Current.SetTempAttrKV(uuid, tempAttr.Id, new TempAttributesContainer() { Id = tempAttr.Id, Value = tempAttr.Value, TempAttr = matchedTempAttr });
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"WARN: Unmatched TempAttr: UUID={uuid} Id={tempAttr.Id} Value={tempAttr.Value}");
-                }
             }
         }
 
@@ -2815,10 +2809,12 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyMonsterIndex.Instance.Remove(disappearedEntity.Uuid);
                 PlayerDeathStates.Remove(disappearedEntity.Uuid);
                 LastPassiveHealTicks.Remove(disappearedEntity.Uuid);
+                EncounterManager.Current.RemoveDisappearedEntity(disappearedEntity.Uuid);
             }
 
             foreach (var entity in syncNearEntities.Appear)
             {
+                EntityOriginIndex.Instance.RemoveDisappeared(entity.Uuid);
                 long uid = Utils.UuidToEntityId(entity.Uuid);
 
                 if (uid == 0)
@@ -3455,14 +3451,6 @@ namespace StarResonanceDps.Core.CombatRuntime
                 var identitySkillId = syncDamageInfo.DamageSource == EDamageSource.Skill
                     ? syncDamageInfo.OwnerId
                     : 0;
-
-                if (syncDamageInfo.TopSummonerId != 0)
-                {
-                    if (EncounterManager.Current.Entities.TryGetValue(syncDamageInfo.AttackerUuid, out var summonedEntity))
-                    {
-                        EncounterManager.Current.UpdateCasterSkillTierLevel(syncDamageInfo.TopSummonerId, summonedEntity);
-                    }
-                }
 
                 if (isAttackerPlayer && attackerUuid != 0)
                 {

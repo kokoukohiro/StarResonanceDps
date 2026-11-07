@@ -14,9 +14,9 @@ namespace StarResonanceDps.Core.Services;
 ///
 /// <para>
 /// バフの段は、同じ番号の生きている実体の付与元を <see cref="BuffInstanceIndex"/> から引く(候補の選び方も同じ)。
-/// 実体(弾・仮想体・召喚モンスター)の段は、出現した瞬間に付与元と召喚者から決めて UUID ごとに控える。
+/// 実体(弾・仮想体・召喚モンスター)の段は、出現した瞬間に付与元と召喚者から決めて<see cref="EntityOriginIndex"/>へ控える。
 /// 弾は消えたあとにダメージが届くことがあるので、<b>控えは消える通知では消さない</b>。
-/// 同じ UUID の出現で上書きし、マップ切替と計測の停止で消す。
+/// 同じUUIDの出現で上書きし、マップ切替と計測の停止で消す。
 /// </para>
 ///
 /// <para>
@@ -42,7 +42,6 @@ public sealed class SourceLandingResolver
     private static readonly Lazy<SourceLandingResolver> LazyInstance = new(() => new SourceLandingResolver());
 
     private readonly object _sync = new();
-    private readonly Dictionary<long, (EntityOrigin Origin, SourceLanding Landing, string Trace)> _entities = [];
 
     /// <summary>
     /// (持ち主のプレイヤー, 弾の番号) → 着地先。<c>IsSplit</c> は同じ組で別の着地先が出たこと。
@@ -73,10 +72,7 @@ public sealed class SourceLandingResolver
         {
             if (isAppear)
             {
-                lock (_sync)
-                {
-                    _entities.Remove(uuid);
-                }
+                EntityOriginIndex.Instance.RemoveOrigin(uuid);
             }
 
             return;
@@ -85,24 +81,28 @@ public sealed class SourceLandingResolver
         var origin = new EntityOrigin(attrId, source.FightSourceType, source.SourceConfigId, summonerUuid, topSummonerUuid);
         var walk = new Walk();
         var landing = ResolveEntity(walk, uuid, origin, arrivalTime);
-        Store(uuid, origin, landing, walk.ToString());
+        Store(uuid, origin, landing, walk);
     }
 
     /// <summary>実体の控えを書き、弾ならプレイヤー×弾の番号の控えも更新する。着地先は先に着いたものを残し、別の先が出たら割れた印を付ける。</summary>
-    private void Store(long uuid, EntityOrigin origin, SourceLanding landing, string trace)
+    private void Store(long uuid, EntityOrigin origin, SourceLanding landing, Walk walk)
     {
+        var index = EntityOriginIndex.Instance;
+        if (!index.TrySetOrigin(uuid, origin, landing))
+        {
+            index.AddOrigin(uuid, origin, landing, walk.ToString());
+        }
+
         var owner = IsPlayer(origin.TopSummonerUuid) ? origin.TopSummonerUuid : IsPlayer(origin.SummonerUuid) ? origin.SummonerUuid : 0;
+        if (owner == 0
+            || origin.AttrId <= 0
+            || Utils.UuidToEntityType(uuid) != (long)EEntityType.EntBullet)
+        {
+            return;
+        }
+
         lock (_sync)
         {
-            _entities[uuid] = (origin, landing, trace);
-
-            if (owner == 0
-                || origin.AttrId <= 0
-                || Utils.UuidToEntityType(uuid) != (long)EEntityType.EntBullet)
-            {
-                return;
-            }
-
             var key = (owner, origin.AttrId);
             _bulletsByPlayer.TryGetValue(key, out var known);
             var isSplit = known.IsSplit
@@ -140,7 +140,6 @@ public sealed class SourceLandingResolver
     {
         lock (_sync)
         {
-            _entities.Clear();
             _bulletsByPlayer.Clear();
         }
     }
@@ -328,31 +327,24 @@ public sealed class SourceLandingResolver
 
     private SourceLanding FromEntity(Walk walk, long uuid, DateTime arrivalTime)
     {
-        (EntityOrigin Origin, SourceLanding Landing, string Trace) entry;
-        bool found;
-        lock (_sync)
-        {
-            found = _entities.TryGetValue(uuid, out entry);
-        }
-
-        if (!found)
+        if (!EntityOriginIndex.Instance.TryGetOrigin(uuid, out var origin, out var storedLanding, out var trace))
         {
             return walk.Stop($"実体 {uuid} の控えなし");
         }
 
-        if (entry.Landing.Kind != SourceLandingKind.None)
+        if (storedLanding.Kind != SourceLandingKind.None)
         {
-            walk.Add($"[{entry.Trace}]");
-            return entry.Landing;
+            walk.Add($"[{trace}]");
+            return storedLanding;
         }
 
         // 出現の瞬間には着地できなかった控え。いまの状態でたどり直し、着けば控えを更新する。
         var retry = walk.Child();
-        var landing = ResolveEntity(retry, uuid, entry.Origin, arrivalTime);
+        var landing = ResolveEntity(retry, uuid, origin, arrivalTime);
         walk.Add($"[たどり直し {retry}]");
         if (landing.Kind != SourceLandingKind.None)
         {
-            Store(uuid, entry.Origin, landing, retry.ToString());
+            Store(uuid, origin, landing, retry);
         }
 
         return landing;
@@ -372,9 +364,6 @@ public sealed class SourceLandingResolver
         => Enum.IsDefined(typeof(EFightSource), fightSourceType)
             ? ((EFightSource)fightSourceType).ToString()
             : fightSourceType.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-    /// <summary>実体の控えの元になった値。着地できなかったときのたどり直しに使う。</summary>
-    private readonly record struct EntityOrigin(int AttrId, int SourceType, int SourceId, long SummonerUuid, long TopSummonerUuid);
 
     /// <summary>たどった鎖を1行にまとめる。ログにそのまま書く。通った実体は子の鎖と共有して、循環で止める。</summary>
     private sealed class Walk

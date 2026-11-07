@@ -9,32 +9,22 @@ using StarResonanceDps.Core.Models;
 
 namespace StarResonanceDps.App.Models.Widgets;
 
+/// <summary>
+/// プレイヤーリストの1行。行は位置に結びつき、順が変わると別の人の値に替わる(行の部品は作り直さない)。
+/// </summary>
 public sealed partial class PlayerListEntry : ObservableObject
 {
     private readonly ObservableCollection<PlayerImagineRoleSkillEntry> _imagineSkillEntries = [];
     private readonly ObservableCollection<PlayerImagineRoleSkillEntry> _roleSkillEntries = [];
-    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _imagineSkillSnapshots =
-        Array.Empty<PlayerCooldownSkillSnapshot?>();
-    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _roleSkillSnapshots =
-        Array.Empty<PlayerCooldownSkillSnapshot?>();
     private const int SelfRoleSlotCount = 4;
 
-    private readonly HashSet<int> _trackedSkillIds = [];
+    private readonly PlayerInfoFormatCache _displayNameFormat = new();
 
-    /// <summary>
-    /// 他人のロールスキル表示設定。設定が変わると別インスタンスが渡ってくるので、
-    /// 参照の一致で「設定が変わったか」を判定する。<b>自分には適用しない。</b>
-    /// </summary>
+    /// <summary>他人のロールスキル表示設定。<b>自分には適用しない。</b></summary>
     private IReadOnlyDictionary<string, bool>? _otherRoleSkillVisibility;
-    private IReadOnlyDictionary<string, bool>? _appliedRoleSkillVisibility;
-    private IReadOnlyList<PlayerCooldownSkillSnapshot?> _filteredRoleSkillSnapshots =
-        Array.Empty<PlayerCooldownSkillSnapshot?>();
-    private int _roleSlotCount;
-    private long _skillEntityUuid;
-    private int _skillProfessionId;
-    private object? _skillSourceToken;
-    private object? _roleFilterToken;
-    private bool _skillLoadoutInitialized;
+
+    /// <summary>いま映している人の技の枠の値。</summary>
+    private PlayerSkillDisplayState _skillState;
 
     // HPテキストは HP更新(Update)とデバフ更新(RefreshSkillDisplay)の
     // どちらからでも組み立て直す。呼ばれるタイミングが別なので値を控えておく。
@@ -43,21 +33,19 @@ public sealed partial class PlayerListEntry : ObservableObject
     private long _currentShield;
     private int _healthValueDisplayModeIndex;
 
-    /// <summary>蘇生不可デバフの残り秒。取れていなければ <c>null</c>。</summary>
-    private double? _reviveBlockSeconds;
-
-    private PlayerListEntry(long characterId)
+    private PlayerListEntry(long characterId, PlayerSkillDisplayState skillState)
     {
         CharacterId = characterId;
+        _skillState = skillState;
         FillSkillSlots(_imagineSkillEntries, 2, isImagine: true);
-        // 自分はここで作った4枠のまま動かさない(装備スロットが分かるので空欄を出せる)。
-        // 他人だけ RefreshSkillDisplay で取得できた数に合わせて増減させる。
+        // 自分は4枠のまま(装備スロットが分かるので空欄を出せる)。
+        // 他人は RefreshSkillDisplay で取得できた数に合わせる。
         FillSkillSlots(_roleSkillEntries, SelfRoleSlotCount, isImagine: false);
         ImagineSkillEntries = new ReadOnlyObservableCollection<PlayerImagineRoleSkillEntry>(_imagineSkillEntries);
         RoleSkillEntries = new ReadOnlyObservableCollection<PlayerImagineRoleSkillEntry>(_roleSkillEntries);
     }
 
-    public long CharacterId { get; }
+    public long CharacterId { get; private set; }
 
     public ReadOnlyObservableCollection<PlayerImagineRoleSkillEntry> ImagineSkillEntries { get; }
 
@@ -160,22 +148,33 @@ public sealed partial class PlayerListEntry : ObservableObject
     /// <summary>潜在心相晶の枠の中に絵があるか。無ければ枠だけを出す。</summary>
     public bool HasSeasonTalentIcon => SeasonTalentIconMask is not null;
 
+    /// <param name="skillStates">キャラIDからその人の技の枠の値を引く。</param>
     public static PlayerListEntry Create(
         PlayerRosterEntry player,
         MeterWidgetSettingsConfig settings,
-        PlayerNameDisplayMode playerNameDisplayMode)
+        PlayerNameDisplayMode playerNameDisplayMode,
+        Func<long, PlayerSkillDisplayState> skillStates)
     {
-        var entry = new PlayerListEntry(player.CharacterId);
-        entry.Update(player, settings, playerNameDisplayMode);
-        entry.RefreshSkillDisplay(refreshEffects: true);
+        var entry = new PlayerListEntry(player.CharacterId, skillStates(player.CharacterId));
+        entry.Update(player, settings, playerNameDisplayMode, skillStates);
+        entry.ShowPlayerSkills();
         return entry;
     }
 
+    /// <param name="skillStates">キャラIDからその人の技の枠の値を引く。人が替わったときだけ呼ぶ。</param>
     public void Update(
         PlayerRosterEntry player,
         MeterWidgetSettingsConfig settings,
-        PlayerNameDisplayMode playerNameDisplayMode)
+        PlayerNameDisplayMode playerNameDisplayMode,
+        Func<long, PlayerSkillDisplayState> skillStates)
     {
+        var playerChanged = player.CharacterId != CharacterId;
+        if (playerChanged)
+        {
+            CharacterId = player.CharacterId;
+            _skillState = skillStates(player.CharacterId);
+        }
+
         IsSelf = player.IsSelf;
         IsSelfHighlighted = player.IsSelf
             && settings.SelfDisplayModeIndex == WidgetConfigDefaults.DefaultSelfDisplayModeIndex;
@@ -200,7 +199,8 @@ public sealed partial class PlayerListEntry : ObservableObject
         DisplayName = PlayerInfoFormatFormatter.Format(
             player,
             settings.PlayerInfoFormatString,
-            playerNameDisplayMode);
+            playerNameDisplayMode,
+            _displayNameFormat);
 
         HealthRatio = GetRatio(player.CurrentHp, player.MaxHp);
         UpdateShieldGeometry(player.CurrentHp, player.MaxHp, player.CurrentShield);
@@ -225,177 +225,83 @@ public sealed partial class PlayerListEntry : ObservableObject
         {
             SeasonTalentBrush = CreateBrush(seasonTalentColor);
         }
+
+        // 前の人の技の枠を次の描画に残さない。
+        if (playerChanged)
+        {
+            ShowPlayerSkills();
+        }
     }
 
+    /// <summary>定期の更新。今の人の値を Core から読んで枠へ書く。</summary>
     public void RefreshSkillDisplay(bool refreshEffects)
     {
-        var loadoutChanged = RefreshSkillLoadoutIfChanged();
-        var filterChanged = !ReferenceEquals(_appliedRoleSkillVisibility, _otherRoleSkillVisibility);
-        if (loadoutChanged || filterChanged)
+        if (_skillState.RefreshSkills(IsSelf, _otherRoleSkillVisibility))
         {
-            ApplyRoleSkillVisibility();
-
-            // 自分の枠は触らない。コンストラクタで作った4枠のままにする。
-            if (!IsSelf)
-            {
-                SyncSkillSlotCount(
-                    _roleSkillEntries,
-                    _filteredRoleSkillSnapshots.Count,
-                    isImagine: false);
-            }
-            UpdateSkillMetadata(_imagineSkillEntries, _imagineSkillSnapshots);
-            UpdateSkillMetadata(_roleSkillEntries, _filteredRoleSkillSnapshots);
+            WriteSkillSlots();
         }
 
-        UpdateSkillCooldowns(
-            _imagineSkillEntries,
-            _imagineSkillSnapshots,
-            _skillEntityUuid);
-        UpdateSkillCooldowns(
-            _roleSkillEntries,
-            _filteredRoleSkillSnapshots,
-            _skillEntityUuid);
+        _skillState.RefreshCooldowns();
+        WriteSkillCooldowns();
 
         if (!refreshEffects)
         {
             return;
         }
 
-        var effectsBySkillId = MeterSnapshotProvider.GetPlayerListSkillEffects(
-            CharacterId,
-            _skillEntityUuid,
-            _trackedSkillIds);
-        UpdateSkillEffects(_imagineSkillEntries, effectsBySkillId);
-        UpdateSkillEffects(_roleSkillEntries, effectsBySkillId);
-
-        // 蘇生不可はスキル枠のバッジには出さず、HPテキストのほうへ回す。
-        _reviveBlockSeconds = MeterSnapshotProvider.TryGetReviveBlockSeconds(
-            CharacterId,
-            _skillEntityUuid,
-            out var reviveBlockSeconds)
-            ? reviveBlockSeconds
-            : null;
-        UpdateHealthText();
+        _skillState.RefreshEffects();
+        WriteSkillEffects();
     }
 
-    /// <summary>
-    /// 他人のロールスキル枠に、表示オンのものだけを残す。
-    ///
-    /// <para>
-    /// <b>自分は対象外。</b> 自分はアクションバーの枠をそのまま出すので、
-    /// ここで間引くと枠の位置がゲームとずれる。
-    /// </para>
-    /// </summary>
-    private void ApplyRoleSkillVisibility()
-    {
-        _appliedRoleSkillVisibility = _otherRoleSkillVisibility;
-
-        if (IsSelf || _otherRoleSkillVisibility is null)
-        {
-            _filteredRoleSkillSnapshots = _roleSkillSnapshots;
-            return;
-        }
-
-        var visible = new List<PlayerCooldownSkillSnapshot?>(_roleSkillSnapshots.Count);
-        foreach (var snapshot in _roleSkillSnapshots)
-        {
-            if (snapshot is null)
-            {
-                continue;
-            }
-
-            var key = snapshot.SkillId.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            // 設定に無いスキルは既定どおり表示する。設定は20件ぶんしか持たない。
-            if (!_otherRoleSkillVisibility.TryGetValue(key, out var isVisible) || isVisible)
-            {
-                visible.Add(snapshot);
-            }
-        }
-
-        _filteredRoleSkillSnapshots = visible;
-    }
-
-    /// <summary>
-    /// 次の <see cref="RefreshSkillDisplay"/> で技の一覧を読み直させる。技の枠の名前は一覧を読んだときに焼き込むので、
-    /// 言語・内部IDの表示・名前の無い技の内部名の設定が変わったら呼ぶ(一覧の元のデータは変わらないので、そのままでは読み直さない)。
-    /// </summary>
+    /// <summary>次の <see cref="RefreshSkillDisplay"/> で技の一覧を読み直させる(<see cref="PlayerSkillDisplayState.InvalidateLoadout"/>)。</summary>
     public void InvalidateSkillLoadout()
     {
-        _skillLoadoutInitialized = false;
+        _skillState.InvalidateLoadout();
     }
 
-    private bool RefreshSkillLoadoutIfChanged()
+    /// <summary>
+    /// 行が映す人が替わった。枠を今の人の値で書き直す。読み済みの人は Core を読まずに控えの値を写し
+    /// (値は最後の定期の更新のもの)、まだ読んでいない人だけ読む。
+    /// </summary>
+    private void ShowPlayerSkills()
     {
-        if (!MeterSnapshotProvider.TryGetPlayerListImagineRoleSkillSourceState(
-                CharacterId,
-                _skillEntityUuid,
-                out var entityUuid,
-                out var professionId,
-                out var skillSourceToken,
-                out var roleFilterToken))
+        if (_skillState.HasRead)
         {
-            return ResetSkillLoadoutCache();
+            _skillState.ApplyRoleSkillVisibilityIfChanged(IsSelf, _otherRoleSkillVisibility);
+        }
+        else
+        {
+            _skillState.RefreshSkills(IsSelf, _otherRoleSkillVisibility);
+            _skillState.RefreshCooldowns();
+            _skillState.RefreshEffects();
         }
 
-        if (_skillLoadoutInitialized
-            && entityUuid == _skillEntityUuid
-            && professionId == _skillProfessionId
-            && ReferenceEquals(skillSourceToken, _skillSourceToken)
-            && ReferenceEquals(roleFilterToken, _roleFilterToken))
-        {
-            return false;
-        }
-
-        var snapshot = MeterSnapshotProvider.GetPlayerListImagineRoleSkills(
-            CharacterId,
-            entityUuid);
-        _skillEntityUuid = snapshot.EntityUuid;
-        _skillProfessionId = professionId;
-        _skillSourceToken = skillSourceToken;
-        _roleFilterToken = roleFilterToken;
-        _imagineSkillSnapshots = snapshot.ImagineSkills;
-        _roleSkillSnapshots = snapshot.RoleSkills;
-        _roleSlotCount = snapshot.RoleSlotCount;
-        RebuildTrackedSkillIds();
-        _skillLoadoutInitialized = true;
-        return true;
+        WriteSkillSlots();
+        WriteSkillCooldowns();
+        WriteSkillEffects();
     }
 
-    private bool ResetSkillLoadoutCache()
+    private void WriteSkillSlots()
     {
-        var changed = _skillLoadoutInitialized
-            || _imagineSkillSnapshots.Count != 0
-            || _roleSkillSnapshots.Count != 0;
-        _skillEntityUuid = 0;
-        _skillProfessionId = 0;
-        _skillSourceToken = null;
-        _roleFilterToken = null;
-        _imagineSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot?>();
-        _roleSkillSnapshots = Array.Empty<PlayerCooldownSkillSnapshot?>();
-        _roleSlotCount = 0;
-        _trackedSkillIds.Clear();
-        _skillLoadoutInitialized = false;
-        return changed;
+        SyncSkillSlotCount(
+            _roleSkillEntries,
+            IsSelf ? SelfRoleSlotCount : _skillState.RoleSkills.Count,
+            isImagine: false);
+        UpdateSkillMetadata(_imagineSkillEntries, _skillState.ImagineSkills);
+        UpdateSkillMetadata(_roleSkillEntries, _skillState.RoleSkills);
     }
 
-    private void RebuildTrackedSkillIds()
+    private void WriteSkillCooldowns()
     {
-        _trackedSkillIds.Clear();
-        foreach (var snapshot in _imagineSkillSnapshots)
-        {
-            if (snapshot is { SkillId: > 0 })
-            {
-                _trackedSkillIds.Add(snapshot.SkillId);
-            }
-        }
+        UpdateSkillCooldowns(_imagineSkillEntries, _skillState.ImagineSkills, _skillState.ImagineCooldowns);
+        UpdateSkillCooldowns(_roleSkillEntries, _skillState.RoleSkills, _skillState.RoleCooldowns);
+    }
 
-        foreach (var snapshot in _roleSkillSnapshots)
-        {
-            if (snapshot is { SkillId: > 0 })
-            {
-                _trackedSkillIds.Add(snapshot.SkillId);
-            }
-        }
+    private void WriteSkillEffects()
+    {
+        UpdateSkillEffects(_imagineSkillEntries, _skillState.Effects);
+        UpdateSkillEffects(_roleSkillEntries, _skillState.Effects);
+        UpdateHealthText();
     }
 
     private static void FillSkillSlots(
@@ -410,22 +316,22 @@ public sealed partial class PlayerListEntry : ObservableObject
     }
 
     /// <summary>
-    /// 枠の数を <paramref name="count"/> に合わせる。増減は末尾で行い、
-    /// 既存の枠のインスタンスは作り直さない(表示のちらつきを避けるため)。
+    /// 出す枠の数を <paramref name="count"/> に合わせる。足りなければ末尾に足し、余った枠は外さずに隠す
+    /// (人が替わるたびに枠の部品を作り直さない)。
     /// </summary>
     private static void SyncSkillSlotCount(
         ObservableCollection<PlayerImagineRoleSkillEntry> entries,
         int count,
         bool isImagine)
     {
-        while (entries.Count > count)
-        {
-            entries.RemoveAt(entries.Count - 1);
-        }
-
         while (entries.Count < count)
         {
             entries.Add(new PlayerImagineRoleSkillEntry(isImagine));
+        }
+
+        for (var index = 0; index < entries.Count; index++)
+        {
+            entries[index].IsSlotInUse = index < count;
         }
     }
 
@@ -444,21 +350,13 @@ public sealed partial class PlayerListEntry : ObservableObject
     private static void UpdateSkillCooldowns(
         IReadOnlyList<PlayerImagineRoleSkillEntry> entries,
         IReadOnlyList<PlayerCooldownSkillSnapshot?> snapshots,
-        long entityUuid)
+        IReadOnlyList<SkillCooldownDisplayState> cooldowns)
     {
         for (var index = 0; index < entries.Count; index++)
         {
-            var snapshot = index < snapshots.Count ? snapshots[index] : null;
-            var cooldownState = snapshot is null || entityUuid == 0
-                ? default
-                : SkillCooldownTracker.Instance.GetDisplayState(
-                    entityUuid,
-                    snapshot.SkillId,
-                    snapshot.CooldownSeconds,
-                    snapshot.IsImagine,
-                    snapshot.MaxCharges,
-                    snapshot.ChargeCooldownSeconds);
-            entries[index].UpdateCooldown(snapshot, cooldownState);
+            entries[index].UpdateCooldown(
+                index < snapshots.Count ? snapshots[index] : null,
+                index < cooldowns.Count ? cooldowns[index] : default);
         }
     }
 
@@ -540,7 +438,7 @@ public sealed partial class PlayerListEntry : ObservableObject
     /// </summary>
     private void UpdateHealthText()
     {
-        if (_currentHp <= 0 && _reviveBlockSeconds is { } seconds)
+        if (_currentHp <= 0 && _skillState.ReviveBlockSeconds is { } seconds)
         {
             var roundedSeconds = Math.Max(0, (int)Math.Ceiling(seconds));
             HealthText = string.Format(

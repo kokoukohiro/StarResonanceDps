@@ -304,14 +304,34 @@ public static class CombatDataCatalog
     // 名前の無い技とバフに内部名を出すか(全体設定。既定はオン)。Volatile で読み書きする。
     private static bool _showsUnnamedSkillInternalNames = true;
 
+    private static int _displayNameRevision;
+
+    /// <summary>
+    /// 名前の決め方(言語・内部IDの表示・名前の無い技の内部名)が変わるたびに増える番号。引いた名前を控えて持つ所が読み直す目印にする。
+    /// </summary>
+    public static int DisplayNameRevision => Volatile.Read(ref _displayNameRevision);
+
     public static void SetCulture(string? cultureName)
     {
-        Volatile.Write(ref _cultureName, NormalizeCultureName(cultureName));
+        var normalized = NormalizeCultureName(cultureName);
+        if (normalized == Volatile.Read(ref _cultureName))
+        {
+            return;
+        }
+
+        Volatile.Write(ref _cultureName, normalized);
+        Interlocked.Increment(ref _displayNameRevision);
     }
 
     public static void SetInternalIdDisplay(InternalIdDisplayMode mode)
     {
+        if ((int)mode == Volatile.Read(ref _internalIdDisplayMode))
+        {
+            return;
+        }
+
         Volatile.Write(ref _internalIdDisplayMode, (int)mode);
+        Interlocked.Increment(ref _displayNameRevision);
     }
 
     /// <summary>
@@ -320,7 +340,13 @@ public static class CombatDataCatalog
     /// </summary>
     public static void SetUnnamedSkillInternalNameDisplay(bool shows)
     {
+        if (shows == Volatile.Read(ref _showsUnnamedSkillInternalNames))
+        {
+            return;
+        }
+
         Volatile.Write(ref _showsUnnamedSkillInternalNames, shows);
+        Interlocked.Increment(ref _displayNameRevision);
     }
 
     /// <summary><see cref="SetUnnamedSkillInternalNameDisplay"/> の今の値。</summary>
@@ -3683,16 +3709,13 @@ public static class CombatDataCatalog
         return "en-US";
     }
 
-    private static string FirstNonEmpty(params string?[] values)
+    private static string FirstNonEmpty(string? first, string? second)
     {
-        foreach (var value in values)
+        if (!string.IsNullOrWhiteSpace(first))
         {
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value.Trim();
-            }
+            return first.Trim();
         }
 
-        return string.Empty;
+        return string.IsNullOrWhiteSpace(second) ? string.Empty : second.Trim();
     }
 }

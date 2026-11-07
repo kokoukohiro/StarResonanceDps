@@ -240,6 +240,12 @@ public sealed class SkillCooldownTracker
 
     private void Encounter_SkillActivated(object sender, SkillActivatedEventArgs e)
     {
+        // 履歴を読むのはプレイヤーの行だけ。ほかの実体の分はログアウトまで残り続ける。
+        if (Utils.UuidToEntityType(e.CasterUuid) != (long)Zproto.EEntityType.EntChar)
+        {
+            return;
+        }
+
         var activation = new SkillActivationState(e.ActivationDateTime);
         var maxCharges = CombatDataCatalog.GetSkillMaxCharges(e.SkillId);
         var rawChargeCooldownSeconds = maxCharges > 1
@@ -470,9 +476,23 @@ public sealed class SkillCooldownTracker
             return 0d;
         }
 
+        // 率が変わらず CD を早めるバフも無ければ区間は1つだけ。描画のたびに通るので、一覧を作らずに数える。
+        LowerCdIntervalLog? log = null;
+        var hasLowerCdInterval = isImagine
+            && _lowerCdIntervals.TryGetValue(entityUuid, out log)
+            && log.HasIntervalIn(startUtc, endUtc);
+        if (!hasLowerCdInterval
+            && CooldownModifierStore.TryGetConstantReductionRatio(entityUuid, skillId, startUtc, out var constantRatio))
+        {
+            var constantLengthSeconds = CooldownModifierStore.ToReducedLength(lengthSeconds, constantRatio);
+            return constantLengthSeconds <= 0d
+                ? double.PositiveInfinity
+                : endUtc.Subtract(startUtc).TotalSeconds / constantLengthSeconds;
+        }
+
         var ratioChanges = CooldownModifierStore.GetReductionChanges(entityUuid, skillId, startUtc);
-        IReadOnlyList<LowerCdInterval> lowerCdIntervals = isImagine && _lowerCdIntervals.TryGetValue(entityUuid, out var log)
-            ? log.GetMergedIntervals(startUtc, endUtc)
+        IReadOnlyList<LowerCdInterval> lowerCdIntervals = hasLowerCdInterval
+            ? log!.GetMergedIntervals(startUtc, endUtc)
             : [];
 
         var boundaries = new SortedSet<DateTime> { startUtc, endUtc };
@@ -496,8 +516,8 @@ public sealed class SkillCooldownTracker
         {
             if (previous is { } segmentStart)
             {
-                var ratio = ratioChanges.Last(change => change.StartUtc <= segmentStart).Ratio;
-                var acceleration = lowerCdIntervals.Any(interval => interval.Start <= segmentStart && segmentStart < interval.End)
+                var ratio = GetRatioAt(ratioChanges, segmentStart);
+                var acceleration = IsInLowerCdInterval(lowerCdIntervals, segmentStart)
                     ? LowerCdAcceleration
                     : 0d;
                 var reducedLengthSeconds = CooldownModifierStore.ToReducedLength(lengthSeconds, ratio);
@@ -513,6 +533,33 @@ public sealed class SkillCooldownTracker
         }
 
         return total;
+    }
+
+    /// <summary>その時刻に効いている短縮の率。<paramref name="changes"/> は時刻の順で、最初の要素が区間の始まり。</summary>
+    private static double GetRatioAt(IReadOnlyList<(DateTime StartUtc, double Ratio)> changes, DateTime time)
+    {
+        for (var index = changes.Count - 1; index >= 0; index--)
+        {
+            if (changes[index].StartUtc <= time)
+            {
+                return changes[index].Ratio;
+            }
+        }
+
+        throw new InvalidOperationException($"No cooldown reduction ratio applies at {time:o}.");
+    }
+
+    private static bool IsInLowerCdInterval(IReadOnlyList<LowerCdInterval> intervals, DateTime time)
+    {
+        for (var index = 0; index < intervals.Count; index++)
+        {
+            if (intervals[index].Start <= time && time < intervals[index].End)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private readonly record struct SkillActivationKey(long EntityUuid, int SkillId);
@@ -592,6 +639,31 @@ public sealed class SkillCooldownTracker
                     _openByBuffUuid.Remove(buffUuid);
                 }
             }
+        }
+
+        /// <summary>[<paramref name="rangeStartUtc"/>, <paramref name="rangeEndUtc"/>] に重なる区間があるか。一覧を作らない。</summary>
+        public bool HasIntervalIn(DateTime rangeStartUtc, DateTime rangeEndUtc)
+        {
+            lock (_sync)
+            {
+                foreach (var interval in _closed)
+                {
+                    if (interval.End > rangeStartUtc && interval.Start < rangeEndUtc)
+                    {
+                        return true;
+                    }
+                }
+
+                foreach (var open in _openByBuffUuid.Values)
+                {
+                    if (open.ScheduledEnd > rangeStartUtc && open.Start < rangeEndUtc)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>[<paramref name="rangeStartUtc"/>, <paramref name="rangeEndUtc"/>] に切り詰め、重なる区間をまとめた区間(始まりの順)。</summary>

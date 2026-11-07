@@ -53,6 +53,10 @@ public sealed partial class PlayerImagineRoleSkillEntry : ObservableObject
     [ObservableProperty]
     private bool _isSlotKnown;
 
+    /// <summary>行が映している人の枠の数に入っているか。入っていない枠は場所も空けない(人が替わるたびに枠の部品を作り直さないよう、外さずに隠す)。</summary>
+    [ObservableProperty]
+    private bool _isSlotInUse = true;
+
     [ObservableProperty]
     private string _nameDisplayText = string.Empty;
 

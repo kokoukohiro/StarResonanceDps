@@ -31,6 +31,9 @@ public sealed class PluginWidgetRegistration
 
     public WidgetKey Key { get; }
 
+    /// <summary>プラグインを止めた。カードが一覧から外れるまでの間も、プラグインのコードを呼ばない。</summary>
+    public bool IsStopped { get; private set; }
+
     /// <summary>全部の節の設定(節の順、節の中の順)。</summary>
     public IEnumerable<PluginSettingDefinition> Settings => Definition.SettingSections.SelectMany(section => section.Settings);
 
@@ -38,6 +41,11 @@ public sealed class PluginWidgetRegistration
     {
         return PluginTexts.Resolve(Definition.Names, culture)
             ?? throw new InvalidOperationException($"The validated widget '{Definition.Id}' has no name.");
+    }
+
+    internal void MarkStopped()
+    {
+        IsStopped = true;
     }
 
     /// <summary>
@@ -150,6 +158,11 @@ internal sealed class PluginWidgetRegistry
 
         var group = _groups[index];
         _groups.RemoveAt(index);
+        foreach (var widget in group.Widgets)
+        {
+            widget.MarkStopped();
+        }
+
         GroupRemoved?.Invoke(this, group);
     }
 }

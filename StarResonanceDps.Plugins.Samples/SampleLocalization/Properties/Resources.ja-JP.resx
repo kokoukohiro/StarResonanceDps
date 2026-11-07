@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Greeting" xml:space="preserve"><value>プラグインからこんにちは。</value></data>
+  <data name="SavedCount" xml:space="preserve"><value>保存した数: {0}</value></data>
+  <data name="CountUp" xml:space="preserve"><value>数を増やす</value></data>
+  <data name="ShowMessage" xml:space="preserve"><value>メッセージを出す</value></data>
+  <data name="MessageTitle" xml:space="preserve"><value>サンプルのメッセージ</value></data>
+  <data name="MessageText" xml:space="preserve"><value>この窓は本体が出しています。</value></data>
+  <data name="MessageDetail" xml:space="preserve"><value>プラグインも本体と同じメッセージの窓を使えます。</value></data>
+</root>

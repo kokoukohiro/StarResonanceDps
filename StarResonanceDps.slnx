@@ -6,4 +6,36 @@
   <Project Path="StarResonanceDps.Plugins.ModuleTool/StarResonanceDps.Plugins.ModuleTool.csproj" />
   <Project Path="StarResonanceDps.PluginSdk/StarResonanceDps.PluginSdk.csproj" />
   <Project Path="StarResonanceDps.PluginSdk.Analyzers/StarResonanceDps.PluginSdk.Analyzers.csproj" />
+  <Folder Name="/SamplePlugins/">
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleAll/SampleAll.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleDependency/SampleDependency.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleDependency.Library/SampleDependency.Library.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleGameData/SampleGameData.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleLocalization/SampleLocalization.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleNotification/SampleNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SamplePackets/SamplePackets.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleWidget/SampleWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Samples/SampleWindow/SampleWindow.csproj"><Build Solution="Release|*" Project="false" /></Project>
+  </Folder>
+  <Folder Name="/DebugPlugins/">
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugDuplicateA/DebugDuplicateA.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugDuplicateB/DebugDuplicateB.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugIconMissing/DebugIconMissing.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugInvalid/DebugInvalid.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugInvalidNotification/DebugInvalidNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugInvalidWidget/DebugInvalidWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugLongName/DebugLongName.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugMissingFile/DebugMissingFile.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugMissingFile.Library/DebugMissingFile.Library.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugStopButtons/DebugStopButtons.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowDefinition/DebugThrowDefinition.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowDispose/DebugThrowDispose.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowInitialize/DebugThrowInitialize.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowOpen/DebugThrowOpen.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowShutdown/DebugThrowShutdown.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugThrowWidget/DebugThrowWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugWidgetNotification/DebugWidgetNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugWindowNotification/DebugWindowNotification.csproj"><Build Solution="Release|*" Project="false" /></Project>
+    <Project Path="StarResonanceDps.Plugins.Debug/DebugWindowWidget/DebugWindowWidget.csproj"><Build Solution="Release|*" Project="false" /></Project>
+  </Folder>
 </Solution>

@@ -237,7 +237,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     }
 
     /// <summary>エンティティリスト(とエンティティ情報の枠)から、その個体のバフリスト・デバフリスト・エンティティ情報を開く。もう開いていれば前に出す。</summary>
-    public void OpenEntityWindow(WidgetKind kind, EntityListEntry entity)
+    public void OpenEntityWindow(WidgetKind kind, EntityTargetInfo entity)
     {
         if (kind is not (WidgetKind.BuffList or WidgetKind.DebuffList or WidgetKind.EntityInfo)
             || !_trackedPlayerWidgets.TryGetValue(kind, out var widget))
@@ -446,7 +446,7 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
     }
 
     /// <summary>敵の窓がその実体を映すか。捕まえていない窓(復元直後)は、種類と種別IDが一致すれば映す。</summary>
-    private static bool RepresentsEntity(IEntityWidgetWindowViewModel viewModel, EntityListEntry entity)
+    private static bool RepresentsEntity(IEntityWidgetWindowViewModel viewModel, EntityTargetInfo entity)
     {
         return viewModel.RepresentsEntity(entity.EntityUuid)
             || (!viewModel.IsEntityAcquired
@@ -912,6 +912,12 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
     private void Open(WidgetListItemViewModel widget)
     {
+        // 止めたプラグインのカードは、一覧から外れるまでの間に順番が回ることがある。保存した状態は変えず、次の起動で開く。
+        if (widget.PluginWidget is { IsStopped: true })
+        {
+            return;
+        }
+
         if (_openSingleWindows.TryGetValue(widget, out var existingWindow))
         {
             existingWindow.ApplyPinState(widget.IsPinned);
@@ -931,9 +937,11 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         }
 
         // プラグインのウィジェットは中身を作れないことがある(プラグインの例外。受け止めがプラグインを止め、カードも外れる)。
+        // カードの知らせはもう解除されているので、次の起動で同じ例外を繰り返さないよう保存を直接直す。
         if (CreateWidgetWindowComposition(widget) is not { } composition)
         {
             widget.State = WidgetState.Stopped;
+            WidgetStateManager.Instance.SaveWidgetState(widget.Key, WidgetState.Stopped);
             return;
         }
 
@@ -1722,6 +1730,24 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
         IReadOnlyList<EntityListEntry> entities,
         IReadOnlyList<NearbyEntityEntry> nearbyEntities)
     {
+        ApplyEntityTargets(entities);
+
+        // 捕まえた直後の窓にも、同じ一覧で値を当てる。
+        foreach (var entityWindow in _openEntityWindows.ToArray())
+        {
+            if (entityWindow.ViewModel is EntityInfoWidgetViewModel entityInfo)
+            {
+                entityInfo.UpdateNearbyEntities(nearbyEntities);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 実体の窓に、エンティティリストの行で個体を捕まえ直させ、捕まえている個体の値(名前・レベル)を当て直させる。
+    /// 行の値が変わったとき(言語や表示設定の変更を含む)に呼ぶ。
+    /// </summary>
+    public void ApplyEntityTargets(IReadOnlyList<EntityListEntry> entities)
+    {
         var entitiesByUuid = entities.ToDictionary(entity => entity.EntityUuid);
 
         foreach (var entityWindow in _openEntityWindows.ToArray())
@@ -1743,14 +1769,8 @@ public sealed class WidgetWindowManager : IBuffDebuffGroupEntryAdder, IBuffCardS
 
             if (entity is not null)
             {
-                viewModel.TryApplyEntity(entity);
+                viewModel.TryApplyEntity(entity.Target);
                 entityWindow.Window.SetHeaderText(viewModel.HeaderText);
-            }
-
-            // 捕まえた直後の窓にも、同じ一覧で値を当てる。
-            if (viewModel is EntityInfoWidgetViewModel entityInfo)
-            {
-                entityInfo.UpdateNearbyEntities(nearbyEntities);
             }
         }
     }

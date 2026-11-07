@@ -127,6 +127,7 @@ public sealed partial class MainViewModel : ViewModelBase
 
         _playerListWidget.PlayerWindowRequested += PlayerListWidget_PlayerWindowRequested;
         _entityListWidget.EntityWindowRequested += EntityListWidget_EntityWindowRequested;
+        _entityListWidget.EntityListTargetsChanged += EntityListWidget_EntityListTargetsChanged;
         _widgetWindowManager.TargetWindowsChanged += WidgetWindowManager_TargetWindowsChanged;
         _widgetWindowManager.UnspecifiedBuffCardResolved += WidgetWindowManager_UnspecifiedBuffCardResolved;
         // 起動できないときに見せるだけのメイン窓では Core が初期化されていない(DB も開いていない)。
@@ -266,10 +267,14 @@ public sealed partial class MainViewModel : ViewModelBase
 
     /// <summary>
     /// 止めたプラグインのウィジェットのカードを外す。開いている窓は保存した状態(起動中)を変えずに閉じ、次の起動で開き直す。
+    /// プラグインはカードの一覧を回している途中の例外でも止まるので、一覧から外すのは今の処理が終わってから。
     /// </summary>
     private void PluginWidgetRegistry_GroupRemoved(object? sender, PluginWidgetGroup group)
     {
-        foreach (var widget in _widgetItems.Where(widget => widget.PluginWidget is { } registration && group.Widgets.Contains(registration)).ToArray())
+        var removedWidgets = _widgetItems
+            .Where(widget => widget.PluginWidget is { } registration && group.Widgets.Contains(registration))
+            .ToArray();
+        foreach (var widget in removedWidgets)
         {
             _widgetWindowManager.CloseKeepingState(widget);
             widget.PropertyChanged -= OnWidgetPropertyChanged;
@@ -281,7 +286,17 @@ public sealed partial class MainViewModel : ViewModelBase
             widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
             widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
             widget.BuffDebuffGroupNotificationTargetChangedFromWidget -= Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
-            _widgetItems.Remove(widget);
+        }
+
+        if (Application.Current?.Dispatcher is { HasShutdownStarted: false } dispatcher)
+        {
+            dispatcher.BeginInvoke(() =>
+            {
+                foreach (var widget in removedWidgets)
+                {
+                    _widgetItems.Remove(widget);
+                }
+            });
         }
     }
 
@@ -519,9 +534,14 @@ public sealed partial class MainViewModel : ViewModelBase
         _widgetWindowManager.OpenPlayerWindow(kind, characterId);
     }
 
-    private void EntityListWidget_EntityWindowRequested(WidgetKind kind, EntityListEntry entity)
+    private void EntityListWidget_EntityWindowRequested(WidgetKind kind, EntityTargetInfo entity)
     {
         _widgetWindowManager.OpenEntityWindow(kind, entity);
+    }
+
+    private void EntityListWidget_EntityListTargetsChanged(object? sender, EventArgs e)
+    {
+        _widgetWindowManager.ApplyEntityTargets(_entityListWidget.EntityListEntries);
     }
 
     private void PlayerRosterPresentationStore_RosterChanged(object? sender, PlayerRosterChangedEventArgs e)
@@ -956,14 +976,14 @@ public sealed partial class MainViewModel : ViewModelBase
 
             case HotkeyAction.PlayerNameShowOrHide:
                 _configManager.SavePlayerNameDisplayModeIndex(
-                    _configManager.GetSettingsSnapshot().PlayerNameDisplayModeIndex == (int)PlayerNameDisplayMode.Show
+                    _configManager.CurrentSettings.PlayerNameDisplayModeIndex == (int)PlayerNameDisplayMode.Show
                         ? (int)PlayerNameDisplayMode.Hide
                         : (int)PlayerNameDisplayMode.Show);
                 break;
 
             case HotkeyAction.WidgetWindowTopmostAlwaysOrPinnedOnly:
                 _configManager.SaveWidgetWindowTopmostModeIndex(
-                    _configManager.GetSettingsSnapshot().WidgetWindowTopmostModeIndex == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex
+                    _configManager.CurrentSettings.WidgetWindowTopmostModeIndex == AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex
                         ? AppConfigDefaults.PinnedOnlyWidgetWindowTopmostModeIndex
                         : AppConfigDefaults.AlwaysWidgetWindowTopmostModeIndex);
                 break;

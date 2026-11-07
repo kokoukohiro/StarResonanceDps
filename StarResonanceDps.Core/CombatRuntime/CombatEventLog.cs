@@ -4,15 +4,18 @@ using Zproto;
 namespace StarResonanceDps.Core.CombatRuntime;
 
 /// <summary>
-/// スナップショットを作るときに押す印。
+/// プレイヤーの被弾1件。被ダメログの材料で、回の <see cref="CompressedRecordLog{T}"/> に持つ。
+/// DB の形は <see cref="SkillSnapshot"/>(保存のときに写し、履歴を読むときに戻す)。
 /// </summary>
-/// <param name="Sequence">
-/// エンカウンター内の通し番号。エンティティをまたいで並べ直すのに使う。
-/// <c>Timestamp</c> はパケットの到着時刻なので、同じパケットのイベントどうしで順序が決まらない。
-/// </param>
+/// <param name="TargetUuid">被弾したプレイヤー。</param>
+/// <param name="OtherUuid">加害者。</param>
+/// <param name="Id">メーターの行のキー。<see cref="CombatStats.Id"/> と同じ形。</param>
+/// <param name="Value">被ダメ値。</param>
+/// <param name="Timestamp">パケットの到着時刻(UTC)。同じパケットのイベントどうしで順序は決まらない。</param>
+/// <param name="Sequence">エンカウンター内の通し番号。保存した記録を読むときに並べ直すのに使う。</param>
 /// <param name="OwnerId">
-/// <c>SyncDamageInfo.OwnerId</c> の生の値。<c>DamageSource</c> によってスキルIDかバフIDになる。
-/// スナップショットの <c>Id</c> はメーター用に畳んだ鍵なので、技名はこちらで引く。
+/// <c>SyncDamageInfo.OwnerId</c> の生の値。<paramref name="DamageSource"/> によってスキルIDかバフIDになる。
+/// <paramref name="Id"/> はメーター用に畳んだ鍵なので、技名はこちらで引く。
 /// </param>
 /// <param name="BuffSourceSkillId">
 /// バフ由来のとき、そのバフを付けた技ID。記録した瞬間の実体からしか決まらない。決まらなければ 0。
@@ -20,12 +23,24 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// <param name="SummonSourceSkillId">
 /// ダメージを出した実体(仮想体など)を出した技ID。実体の出現時に決めて控えたもの。決まらなければ 0。
 /// </param>
-public readonly record struct SkillSnapshotStamp(
+/// <param name="DamageElement">属性。<c>null</c> は属性を保存していなかった頃の記録で、無属性とは別物。</param>
+/// <param name="DamageMode">物理・魔法。</param>
+/// <param name="DamageSource">発生源の種類。</param>
+/// <param name="IsKill">この被弾で戦闘不能になった。</param>
+public readonly record struct TakenHitRecord(
+    long TargetUuid,
+    long OtherUuid,
+    long Id,
+    long Value,
+    DateTime Timestamp,
     long Sequence,
     int OwnerId,
-    EDamageSource DamageSource,
     int BuffSourceSkillId,
-    int SummonSourceSkillId);
+    int SummonSourceSkillId,
+    EDamageProperty? DamageElement,
+    EDamageMode DamageMode,
+    EDamageSource DamageSource,
+    bool IsKill);
 
 /// <summary>
 /// 対象の HP・最大HP・バリア量の組。ダメージの無い戦闘不能の記録に、同期を当てる前の値として渡す。
@@ -269,7 +284,6 @@ public sealed class EnemyBuffRecord
 public enum CombatEventLogRecordKind
 {
     Cast,
-    Hit,
     Announcement,
     Death,
 
@@ -287,14 +301,13 @@ public enum CombatEventLogRecordKind
 }
 
 /// <summary>
-/// タイムラインと被ダメログが読む記録の1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、被弾と死亡ならそのプレイヤー、敵の回復・ダメージ・バフなら相手。
+/// タイムラインが読む記録の1件。詠唱なら <see cref="EntityUuid"/> は詠唱した敵、死亡ならそのプレイヤー、敵の回復・ダメージ・バフなら相手。
 /// 予告は実体を持たないので 0。タイムラインに出すのは予告・予告のバーの終わり・詠唱・敵の回復・ダメージ・バフで、
-/// 被弾は被ダメログ、被弾と死亡はプレイヤーリストの顔ぶれの判定が読む。
+/// 死亡はプレイヤーリストの顔ぶれの判定が読む。プレイヤーの被弾はここに入れない(<see cref="TakenHitRecord"/>)。
 /// </summary>
 public readonly record struct CombatEventLogRecord(
     CombatEventLogRecordKind Kind,
     long EntityUuid,
-    SkillSnapshot? Hit,
     SkillCastRecord? Cast,
     SkillAnnouncementRecord? Announcement,
     PlayerDeathRecord? Death,
@@ -304,7 +317,6 @@ public readonly record struct CombatEventLogRecord(
 {
     public long Sequence => Kind switch
     {
-        CombatEventLogRecordKind.Hit => Hit!.Sequence,
         CombatEventLogRecordKind.Cast => Cast!.Sequence,
         CombatEventLogRecordKind.Death => Death!.Sequence,
         CombatEventLogRecordKind.EnemyHeal => EnemyHeal!.Sequence,
@@ -313,39 +325,34 @@ public readonly record struct CombatEventLogRecord(
         _ => Announcement!.Sequence
     };
 
-    public static CombatEventLogRecord ForHit(long targetUuid, SkillSnapshot snapshot)
-    {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.Hit, targetUuid, snapshot, null, null, null);
-    }
-
     public static CombatEventLogRecord ForCast(long casterUuid, SkillCastRecord cast)
     {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.Cast, casterUuid, null, cast, null, null);
+        return new CombatEventLogRecord(CombatEventLogRecordKind.Cast, casterUuid, cast, null, null);
     }
 
     public static CombatEventLogRecord ForAnnouncement(SkillAnnouncementRecord announcement)
     {
         var kind = announcement.IsBarEnd ? CombatEventLogRecordKind.AnnouncementEnd : CombatEventLogRecordKind.Announcement;
-        return new CombatEventLogRecord(kind, 0, null, null, announcement, null);
+        return new CombatEventLogRecord(kind, 0, null, announcement, null);
     }
 
     public static CombatEventLogRecord ForDeath(PlayerDeathRecord death)
     {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.Death, death.PlayerUuid, null, null, null, death);
+        return new CombatEventLogRecord(CombatEventLogRecordKind.Death, death.PlayerUuid, null, null, death);
     }
 
     public static CombatEventLogRecord ForEnemyHeal(EnemyHealRecord heal)
     {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyHeal, heal.TargetUuid, null, null, null, null, heal);
+        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyHeal, heal.TargetUuid, null, null, null, heal);
     }
 
     public static CombatEventLogRecord ForEnemyDamage(EnemyDamageRecord damage)
     {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyDamage, damage.TargetUuid, null, null, null, null, EnemyDamage: damage);
+        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyDamage, damage.TargetUuid, null, null, null, EnemyDamage: damage);
     }
 
     public static CombatEventLogRecord ForEnemyBuff(EnemyBuffRecord buff)
     {
-        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyBuff, buff.TargetUuid, null, null, null, null, EnemyBuff: buff);
+        return new CombatEventLogRecord(CombatEventLogRecordKind.EnemyBuff, buff.TargetUuid, null, null, null, EnemyBuff: buff);
     }
 }

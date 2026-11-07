@@ -69,6 +69,23 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>一番古い項目を外す。空なら何もしない。全件を写す列挙を通らない。</summary>
+        public void RemoveFirst()
+        {
+            _readerWriterLock.EnterWriteLock();
+            try
+            {
+                if (_innerDictionary.Count > 0)
+                {
+                    _innerDictionary.RemoveAt(0);
+                }
+            }
+            finally
+            {
+                _readerWriterLock.ExitWriteLock();
+            }
+        }
+
         public bool TryGetValue(TKey key, out TValue value)
         {
             _readerWriterLock.EnterReadLock();

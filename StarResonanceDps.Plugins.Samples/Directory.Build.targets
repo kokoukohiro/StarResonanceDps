@@ -1,0 +1,25 @@
+<Project>
+  <!-- Inside this repository the samples use the SDK projects, so that a change to the SDK breaks their build right away. -->
+  <ItemGroup>
+    <PackageReference Remove="StarResonanceDps.PluginSdk" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(MSBuildProjectName.EndsWith('.Library'))">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\StarResonanceDps.PluginSdk\StarResonanceDps.PluginSdk.csproj" Private="false" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\StarResonanceDps.PluginSdk.Analyzers\StarResonanceDps.PluginSdk.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- The app does not load this folder. To try a sample, add its DLL with the plugin list's "+" button. -->
+  <Target Name="CopySampleToRunFolder"
+          AfterTargets="Build"
+          Condition="'$(Configuration)' == 'Debug' And !$(MSBuildProjectName.EndsWith('.Library'))">
+    <ItemGroup>
+      <SampleOutputFile Include="$(TargetDir)**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SampleOutputFile)"
+          DestinationFiles="@(SampleOutputFile->'$(MSBuildThisFileDirectory)..\StarResonanceDps.App\bin\$(Configuration)\net10.0-windows10.0.19041.0\SamplePlugins\$(AssemblyName)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

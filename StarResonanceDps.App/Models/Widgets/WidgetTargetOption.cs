@@ -39,8 +39,8 @@ public sealed class WidgetTargetOption
     /// <summary>チャット: チャンネル。</summary>
     public ChitChatChannelType ChatChannel { get; init; }
 
-    /// <summary>敵: 実体。</summary>
-    public EntityListEntry? Entity { get; init; }
+    /// <summary>敵: 実体の値。</summary>
+    public EntityTargetInfo? Entity { get; init; }
 
     /// <summary>バフ: バフかデバフか。</summary>
     public PlayerBuffListKind BuffListKind { get; init; }

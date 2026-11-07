@@ -146,7 +146,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
 
     public bool IsEntityAcquired => _target.IsAcquired;
 
-    public EntityListEntry? Entity => _target.Entity;
+    public EntityTargetInfo? Entity => _target.Entity;
 
     public string TargetName => _target.Name;
 
@@ -230,7 +230,7 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
             || string.Equals(_requestedBuffKey, buffKey, StringComparison.Ordinal);
     }
 
-    public bool TryApplyEntity(EntityListEntry entity)
+    public bool TryApplyEntity(EntityTargetInfo entity)
     {
         return _target.TryApply(entity);
     }
@@ -272,7 +272,6 @@ public sealed partial class EntityBuffDebuffCardWidgetViewModel
         _refreshTimer.Stop();
         _refreshTimer.Tick -= RefreshTimer_Tick;
         _target.Changed -= Target_Changed;
-        _target.Dispose();
         LocalizationManager.Instance.CultureChanged -= LocalizationManager_CultureChanged;
         _notificationWatcher.Dispose();
     }
