@@ -1,6 +1,6 @@
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleNotification.SampleNotificationPlugin), "kokoukohiro.sample-notification", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleNotification.SampleNotificationPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Notification")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: 通知")]
 [assembly: PluginAuthor("kokoukohiro")]

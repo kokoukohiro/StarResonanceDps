@@ -1032,12 +1032,7 @@ public static class MeterSnapshotProvider
                 isSelf,
                 source.IsNpc,
                 source.ProfessionId,
-                PlayerClassSpecResolver.Resolve(
-                    source.ProfessionId,
-                    source.SubProfessionId,
-                    source.IsSpecAbilityUnequipped,
-                    PlayerClassSpecResolver.HasMeanTransformBuff(uuid),
-                    PlayerClassSpecResolver.HasGolemTransformBuff(uuid)));
+                source.ClassSpec);
         }
         else
         {
@@ -1086,12 +1081,7 @@ public static class MeterSnapshotProvider
             source.CharacterId,
             source.IsNpc,
             source.ProfessionId,
-            PlayerClassSpecResolver.Resolve(
-                source.ProfessionId,
-                source.SubProfessionId,
-                source.IsSpecAbilityUnequipped,
-                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID),
-                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)),
+            source.ClassSpec,
             source.DataGaps);
     }
 
@@ -3216,12 +3206,7 @@ public static class MeterSnapshotProvider
             source.Name,
             source.ProfessionId,
             source.SubProfessionId,
-            PlayerClassSpecResolver.Resolve(
-                source.ProfessionId,
-                source.SubProfessionId,
-                source.IsSpecAbilityUnequipped,
-                PlayerClassSpecResolver.HasMeanTransformBuff(entity.UUID),
-                PlayerClassSpecResolver.HasGolemTransformBuff(entity.UUID)),
+            source.ClassSpec,
             source.CombatPower,
             source.SeasonStrength,
             source.Level,

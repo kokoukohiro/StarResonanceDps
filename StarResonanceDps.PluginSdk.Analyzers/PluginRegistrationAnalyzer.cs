@@ -20,7 +20,6 @@ public sealed class PluginRegistrationAnalyzer : DiagnosticAnalyzer
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(
         PluginDiagnostics.MissingRegistration,
-        PluginDiagnostics.InvalidId,
         PluginDiagnostics.ApiVersionMismatch,
         PluginDiagnostics.InvalidEntryType,
         PluginDiagnostics.MissingDisplayName,
@@ -107,7 +106,7 @@ public sealed class PluginRegistrationAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    /// <summary>登録の属性(入口の型・ID・API 版)を確かめ、入口の型を返す(型が無ければ null)。</summary>
+    /// <summary>登録の属性(入口の型・API 版)を確かめ、入口の型を返す(型が無ければ null)。</summary>
     private static INamedTypeSymbol? AnalyzeRegistration(CompilationAnalysisContext context, SdkSymbols sdk, AttributeData? registration)
     {
         if (registration is null)
@@ -118,19 +117,13 @@ public sealed class PluginRegistrationAnalyzer : DiagnosticAnalyzer
 
         // 引数の数が違う呼び出しは、コンパイラーがエラーにする。
         var arguments = registration.ConstructorArguments;
-        if (arguments.Length != 3)
+        if (arguments.Length != 2)
         {
             return null;
         }
 
         var location = GetLocation(registration);
-        var id = arguments[1].Value as string;
-        if (!PluginIdRules.IsValid(id))
-        {
-            Report(context, PluginDiagnostics.InvalidId, location, id ?? string.Empty, PluginIdRules.MaxLength);
-        }
-
-        if (arguments[2].Value is int apiVersion && apiVersion != sdk.CurrentApiVersion)
+        if (arguments[1].Value is int apiVersion && apiVersion != sdk.CurrentApiVersion)
         {
             Report(context, PluginDiagnostics.ApiVersionMismatch, location, apiVersion, sdk.CurrentApiVersion);
         }

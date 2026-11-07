@@ -1,7 +1,7 @@
 using System.Windows;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugThrowOpen.Plugin), "kokoukohiro.debug-throw-open", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugThrowOpen.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 窓を開くときに例外")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

@@ -462,8 +462,9 @@ public sealed class BuffDebuffGroupWidgetSettingsConfig
 /// 開いていたウィンドウ1枚ぶんの対象。
 ///
 /// <para>
-/// プレイヤーとエンティティリストの実体(モンスター)とチャットのチャンネルを1つの型で表す。
-/// <see cref="ChatChannel"/> があればチャット、<see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー。
+/// プレイヤーとエンティティリストの実体(モンスター)とチャットのチャンネルとプラグインの相手を1つの型で表す。
+/// <see cref="PluginTargetId"/> があればプラグインの相手、<see cref="ChatChannel"/> があればチャット、<see cref="EntityId"/> が 0 以外なら実体、そうでなければプレイヤー
+/// (エンティティ情報にプレイヤーの窓は無いので、エンティティ情報でそうなら敵を待つ空の窓)。
 /// </para>
 /// </summary>
 public sealed class WidgetOpenTargetConfig
@@ -543,6 +544,11 @@ public sealed class WidgetOpenTargetConfig
     /// </summary>
     public int? ChatChannel { get; set; }
 
+    /// <summary>
+    /// プラグインの複数起動のウィジェット専用。相手の ID(プラグインが返した値)。最後に分かっていた相手の名前は <see cref="Name"/>。
+    /// </summary>
+    public string? PluginTargetId { get; set; }
+
     public bool IsEntity => EntityId != 0;
 
     public WidgetOpenTargetConfig Clone()
@@ -559,7 +565,8 @@ public sealed class WidgetOpenTargetConfig
             BuffName = BuffName,
             BuffGroup = BuffGroup,
             Window = Window?.Clone(),
-            ChatChannel = ChatChannel
+            ChatChannel = ChatChannel,
+            PluginTargetId = PluginTargetId
         };
     }
 }
@@ -3314,7 +3321,8 @@ public static class WidgetConfigDefaults
         config.Plugin = kind == WidgetKind.Plugin
             ? CloneNormalizedPlugin(config.Plugin)
             : null;
-        config.OpenTargets = SupportsOpenTargets(kind)
+        // プラグインのウィジェットは、複数起動かが定義でしか分からない。1枚だけ開くウィジェットは書かないので null のまま。
+        config.OpenTargets = SupportsOpenTargets(kind) || kind == WidgetKind.Plugin
             ? config.OpenTargets
             : null;
 

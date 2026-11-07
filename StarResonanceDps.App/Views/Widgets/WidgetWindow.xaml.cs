@@ -515,6 +515,13 @@ public partial class WidgetWindow : Window
         WidgetFooterHost.Visibility = hidden ? Visibility.Hidden : Visibility.Visible;
     }
 
+    /// <summary>ヘッダーの文字ボタンの2層を後から入れる(プラグインの空の窓に中身が入ったとき)。</summary>
+    public void SetHeaderActions(FrameworkElement headerChromeActions, FrameworkElement headerActions)
+    {
+        WidgetHeaderChromeActionsHost.Content = headerChromeActions;
+        WidgetHeaderActionsHost.Content = headerActions;
+    }
+
     private void SetFooterContent(FrameworkElement? footerContent)
     {
         WidgetFooterHost.Content = footerContent;

@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugThrowDispose.Plugin), "kokoukohiro.debug-throw-dispose", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugThrowDispose.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 閉じるときに例外")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

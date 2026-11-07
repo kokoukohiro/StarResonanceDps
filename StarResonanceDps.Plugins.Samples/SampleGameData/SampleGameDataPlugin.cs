@@ -1,7 +1,7 @@
 using System.Windows;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleGameData.SampleGameDataPlugin), "kokoukohiro.sample-game-data", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleGameData.SampleGameDataPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Game data")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: ゲームのデータ")]
 [assembly: PluginGenre("en-US", "Sample")]

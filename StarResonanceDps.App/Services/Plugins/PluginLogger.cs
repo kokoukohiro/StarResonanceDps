@@ -5,25 +5,25 @@ namespace StarResonanceDps.App.Services;
 
 internal sealed class PluginLogger : IPluginLogger
 {
-    private readonly string _pluginId;
+    private readonly string _pluginKey;
 
-    public PluginLogger(string pluginId)
+    public PluginLogger(string pluginKey)
     {
-        _pluginId = pluginId;
+        _pluginKey = pluginKey;
     }
 
     public void Info(string message)
     {
-        Log.Information("[Plugin:{PluginId}] {Message}", _pluginId, message);
+        Log.Information("[Plugin:{Plugin}] {Message}", _pluginKey, message);
     }
 
     public void Warning(string message)
     {
-        Log.Warning("[Plugin:{PluginId}] {Message}", _pluginId, message);
+        Log.Warning("[Plugin:{Plugin}] {Message}", _pluginKey, message);
     }
 
     public void Error(string message, Exception? exception = null)
     {
-        Log.Error(exception, "[Plugin:{PluginId}] {Message}", _pluginId, message);
+        Log.Error(exception, "[Plugin:{Plugin}] {Message}", _pluginKey, message);
     }
 }

@@ -128,7 +128,7 @@ public partial class NotificationsView : UserControl
     /// <summary>
     /// 話者かスタイルのリストを開いた。エンジンに一覧を問い合わせて作り直す。
     /// つながらなくても知らせない(読み上げで VOICEVOX を選んだときと起動時に知らせている。失敗は VoicevoxClient がログに書く)。
-    /// 選択肢が1つも無いときは空のリストを出さずに閉じ、問い合わせで選択肢ができたら開き直す。
+    /// 選択肢が1つも無いときは選択リストのスタイルが閉じるので、問い合わせで選択肢ができたら開き直す。
     /// </summary>
     private async void VoicevoxComboBox_DropDownOpened(object? sender, EventArgs e)
     {
@@ -145,11 +145,6 @@ public partial class NotificationsView : UserControl
         }
 
         var wasEmpty = comboBox.Items.Count == 0;
-        if (wasEmpty)
-        {
-            comboBox.IsDropDownOpen = false;
-        }
-
         await viewModel.RefreshVoicevoxSpeakersAsync();
 
         if (wasEmpty && comboBox.Items.Count > 0 && comboBox.IsVisible)

@@ -25,9 +25,6 @@ public enum PluginErrorReason
     /// <summary>このアプリのプラグインとして読めない(属性が足りない・版が違うなど)。</summary>
     Invalid,
 
-    /// <summary>同じ ID のプラグインを、ほかのフォルダから先に読んだ。</summary>
-    DuplicateId,
-
     /// <summary>初期化か動いている途中の例外で止めた。次の起動でまた読む。</summary>
     Stopped,
 

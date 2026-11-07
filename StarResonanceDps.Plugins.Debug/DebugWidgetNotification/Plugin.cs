@@ -1,7 +1,7 @@
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugWidgetNotification.Plugin), "kokoukohiro.debug-widget-notification", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugWidgetNotification.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: ウィジェットと通知")]
 [assembly: PluginAuthor("kokoukohiro")]
 [assembly: PluginVersion("1.0.0")]

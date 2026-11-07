@@ -81,7 +81,7 @@
                                 Style="{StaticResource Button.Sidebar}"
                                 Visibility="{Binding HasBuffDebuffGroupDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.WidgetNotification}" />
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.NotificationTarget}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffDebuffGroupSettings.NotificationTargets.SectionTitle}" />
                             </StackPanel>
                         </Button>
@@ -99,7 +99,7 @@
                                 Style="{StaticResource Button.Sidebar}"
                                 Visibility="{Binding HasBuffCardDisplaySettings, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
-                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.WidgetNotification}" />
+                                <Path Style="{DynamicResource Icon.Stroke}" Data="{DynamicResource Icon.NotificationTarget}" />
                                 <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="{Binding BuffCardSettings.NotificationTargets.SectionTitle}" />
                             </StackPanel>
                         </Button>

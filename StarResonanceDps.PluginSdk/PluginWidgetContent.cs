@@ -4,7 +4,7 @@ using System.Windows;
 namespace StarResonanceDps.PluginSdk;
 
 /// <summary>
-/// The content of one widget window, returned by <see cref="IPluginWidgetProvider.CreateWidget"/>.
+/// The content of one widget window, returned by <see cref="IPluginWidgetProvider.CreateWidget"/> and <see cref="IPluginMultiWidgetProvider.CreateWidget"/>.
 /// The host places the elements without margins and does not set their <see cref="FrameworkElement.DataContext"/>.
 /// The window's text is white with a shadow (<see cref="PluginResourceKeys.Text.WidgetWindow"/>).
 /// </summary>

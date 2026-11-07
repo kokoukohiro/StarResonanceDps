@@ -125,20 +125,20 @@ public sealed class WidgetStateManager
     /// <summary>
     /// 開いていた窓の対象一覧を保存する。窓が増減したときだけ呼ぶ。
     /// </summary>
-    public void SaveWidgetOpenTargets(WidgetKind kind, IReadOnlyList<WidgetOpenTargetConfig> targets)
+    public void SaveWidgetOpenTargets(WidgetKey key, IReadOnlyList<WidgetOpenTargetConfig> targets)
     {
-        if (!WidgetConfigDefaults.SupportsOpenTargets(kind))
+        if (!key.IsPlugin && !WidgetConfigDefaults.SupportsOpenTargets(key.Kind))
         {
             return;
         }
 
         lock (_syncRoot)
         {
-            var config = GetOrCreateWidgetConfig(kind);
+            var config = GetOrCreateWidgetConfig(key);
             config.OpenTargets = targets.Count == 0
                 ? null
                 : targets.Select(target => target.Clone()).ToList();
-            WidgetConfigDefaults.Normalize(kind, config);
+            WidgetConfigDefaults.Normalize(key.Kind, config);
             SaveCore();
         }
     }

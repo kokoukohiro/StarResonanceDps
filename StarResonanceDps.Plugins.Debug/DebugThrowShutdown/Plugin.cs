@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugThrowShutdown.Plugin), "kokoukohiro.debug-throw-shutdown", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugThrowShutdown.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 終了時に例外")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

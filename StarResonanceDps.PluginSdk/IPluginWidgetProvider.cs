@@ -6,7 +6,8 @@ namespace StarResonanceDps.PluginSdk;
 ///
 /// <para>
 /// The host calls <see cref="GetWidgetDefinitions"/> once, right after <see cref="IStarResonancePlugin.Initialize"/> returns,
-/// and adds one card per definition after the host's own cards. Each widget opens one window at a time.
+/// and adds one card per definition after the host's own cards. Each widget opens one window at a time;
+/// for one window per target, use <see cref="IPluginMultiWidgetProvider"/>.
 /// The host owns the card, the window frame (semi-transparent black by default), the title, the common settings (window, theme),
 /// the saved position, size and state, and the settings window with its preview. The plugin gives the body, the footer when the definition has one,
 /// header buttons, and the definitions of its own settings.

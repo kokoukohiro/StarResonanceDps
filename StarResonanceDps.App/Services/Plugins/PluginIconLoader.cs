@@ -33,7 +33,7 @@ public static class PluginIconLoader
             Log.Warning(
                 exception,
                 "[Plugin:{Plugin}] Failed to load the plugin icon {Path}; the app icon is shown instead",
-                pluginInfo.Id ?? pluginInfo.Key,
+                pluginInfo.Key,
                 iconPath);
             return null;
         }

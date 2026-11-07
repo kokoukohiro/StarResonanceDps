@@ -525,9 +525,6 @@ VOICEVOXを起動し直してください。</value>
   <data name="PluginStatus_Invalid" xml:space="preserve">
     <value>このアプリのプラグインではないか、アプリと版が合っていません</value>
   </data>
-  <data name="PluginStatus_DuplicateId" xml:space="preserve">
-    <value>同じプラグインがほかのフォルダにもあります</value>
-  </data>
   <data name="PluginStatus_Stopped" xml:space="preserve">
     <value>エラーが起きたため停止中、次の起動で再開</value>
   </data>
@@ -1133,8 +1130,8 @@ VOICEVOXを起動し直してください。</value>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>デバフリスト</value>
   </data>
-  <data name="Common_Add" xml:space="preserve">
-    <value>追加</value>
+  <data name="Common_Insert" xml:space="preserve">
+    <value>挿入</value>
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>無効なステータス効果を隠す</value>

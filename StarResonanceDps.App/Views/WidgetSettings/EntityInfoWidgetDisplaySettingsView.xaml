@@ -107,7 +107,7 @@
 
                             <Button Grid.Column="3"
                                     Click="AddEntityInfoFormatField_Click"
-                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Insert]}"
                                     MinWidth="64"
                                     Style="{StaticResource Button.Text}" />
                         </Grid>
@@ -202,7 +202,7 @@
 
                             <Button Grid.Column="3"
                                     Click="AddBuffInfoFormatField_Click"
-                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                    Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Insert]}"
                                     MinWidth="64"
                                     Style="{StaticResource Button.Text}" />
                         </Grid>

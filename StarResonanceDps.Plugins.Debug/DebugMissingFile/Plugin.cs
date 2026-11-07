@@ -3,7 +3,7 @@ using DebugMissingFile.Library;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugMissingFile.Plugin), "kokoukohiro.debug-missing-file", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugMissingFile.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 部品のDLLなし")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

@@ -1,12 +1,12 @@
 namespace StarResonanceDps.PluginSdk;
 
 /// <summary>
-/// One widget a plugin adds (<see cref="IPluginWidgetProvider"/>).
+/// One widget a plugin adds (<see cref="IPluginWidgetProvider"/> or <see cref="IPluginMultiWidgetProvider"/>).
 ///
 /// <para>
 /// Localized texts follow the rules of <see cref="PluginNotificationDefinition"/>.
 /// The host checks the definitions when the plugin starts and stops the plugin when any of these rules is broken:
-/// <see cref="Id"/> follows the plugin ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique in the plugin (without case);
+/// <see cref="Id"/> follows the ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique among the plugin's widgets of both interfaces (without case);
 /// <see cref="Names"/> has at least one text; the default size is finite and above 0;
 /// each section and setting is valid, and setting IDs are unique among all sections of the widget (without case).
 /// </para>

@@ -37,6 +37,49 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
         </Style>
+
+        <Style x:Key="NotificationsView.EnabledCheckBox" TargetType="{x:Type CheckBox}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="{DynamicResource Brush.InputBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Brush.TextSecondary}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="2"
+                                SnapsToDevicePixels="True">
+                            <Path x:Name="CheckMark"
+                                  Width="10"
+                                  Height="8"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Data="M 0 3 L 3 6 L 10 0"
+                                  Stretch="Fill"
+                                  Stroke="{DynamicResource Brush.InputBackground}"
+                                  StrokeThickness="1.8"
+                                  StrokeStartLineCap="Square"
+                                  StrokeEndLineCap="Square"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource Brush.TextSecondary}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <!--
@@ -65,7 +108,7 @@
         </Grid.RowDefinitions>
 
         <!--
-            項目の一覧。行の作りは左のタブと同じで、スイッチは設定画面のもの(ON / OFF の文字は出さない)。スイッチを押しても選んでいる行は変わらない。
+            項目の一覧。行の作りは左のタブと同じで、通知するかは行の左のチェックで切り替える。チェックを押すとその行も選ばれる(NotificationItemViewModel.OnIsEnabledChanged)。
             本体の項目の後ろにプラグインの項目を並べ、プラグインの最初の項目の上にプラグインの名前の見出しを出す。
         -->
         <ContentControl x:Name="ItemsPanel"
@@ -90,19 +133,20 @@
                                              IsChecked="{Binding IsSelected, Mode=TwoWay}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
 
-                                        <TextBlock VerticalAlignment="Center"
+                                        <CheckBox Grid.Column="0"
+                                                  Margin="0,0,12,0"
+                                                  VerticalAlignment="Center"
+                                                  Style="{StaticResource NotificationsView.EnabledCheckBox}"
+                                                  IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
+
+                                        <TextBlock Grid.Column="1"
+                                                   VerticalAlignment="Center"
                                                    Text="{Binding Label}"
                                                    TextTrimming="CharacterEllipsis" />
-
-                                        <ToggleButton Grid.Column="1"
-                                                      Margin="12,0,0,0"
-                                                      VerticalAlignment="Center"
-                                                      Style="{StaticResource Input.Switch}"
-                                                      IsChecked="{Binding IsEnabled, Mode=TwoWay}" />
                                     </Grid>
                                 </RadioButton>
                             </StackPanel>
@@ -165,7 +209,7 @@
 
                     <Button Grid.Column="2"
                             Click="AddFormatField_Click"
-                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                            Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Insert]}"
                             MinWidth="64"
                             Style="{StaticResource Button.Text}" />
                 </Grid>

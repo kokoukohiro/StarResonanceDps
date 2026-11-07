@@ -24,6 +24,9 @@ public interface IEntityWidgetWindowViewModel : INotifyPropertyChanged, IDisposa
 
     bool IsEntityAcquired { get; }
 
+    /// <summary>敵を待つ窓がまだ個体を捕まえていない(<see cref="Models.Widgets.EntityWindowTarget.CreateWaiting"/>)。</summary>
+    bool IsWaitingForEntity { get; }
+
     /// <summary>捕まえている実体の値。未捕獲なら <c>null</c>。</summary>
     EntityTargetInfo? Entity { get; }
 

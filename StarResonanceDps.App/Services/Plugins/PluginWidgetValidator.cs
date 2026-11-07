@@ -19,20 +19,21 @@ internal static class PluginWidgetValidator
         .Where(key => key is not PluginResourceKeys.Icons.StrokeStyle and not PluginResourceKeys.Icons.FillStyle)
         .ToHashSet(StringComparer.Ordinal);
 
+    /// <param name="ids">そのプラグインでもう使った ID(大文字と小文字を区別しない)。確かめた ID を足す。両方の口を通して重ならないように渡す。</param>
     public static bool TryValidate(
         IReadOnlyList<PluginWidgetDefinition>? definitions,
+        HashSet<string> ids,
         [NotNullWhen(true)] out IReadOnlyList<PluginWidgetDefinition>? copies,
         [NotNullWhen(false)] out string? error)
     {
         copies = null;
         if (definitions is null)
         {
-            error = "GetWidgetDefinitions returned null.";
+            error = "The list of widget definitions is null.";
             return false;
         }
 
         var result = new List<PluginWidgetDefinition>(definitions.Count);
-        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var definition in definitions)
         {
             if (definition is null)
@@ -81,6 +82,61 @@ internal static class PluginWidgetValidator
                 HasFooter = definition.HasFooter,
                 ScrollsVertically = definition.ScrollsVertically,
                 SettingSections = sections
+            });
+        }
+
+        copies = result;
+        error = null;
+        return true;
+    }
+
+    /// <summary>相手の一覧を確かめ、本体が持つ写しを作る。決まりは SDK の <see cref="PluginWidgetTarget"/> の説明と同じ。空の一覧は決まりに合っている。</summary>
+    public static bool TryCopyTargets(
+        IReadOnlyList<PluginWidgetTarget>? targets,
+        [NotNullWhen(true)] out IReadOnlyList<PluginWidgetTarget>? copies,
+        [NotNullWhen(false)] out string? error)
+    {
+        copies = null;
+        if (targets is null)
+        {
+            error = "The list of targets is null.";
+            return false;
+        }
+
+        var result = new List<PluginWidgetTarget>(targets.Count);
+        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var target in targets)
+        {
+            if (target is null)
+            {
+                error = "A target is null.";
+                return false;
+            }
+
+            if (!PluginIdRules.IsValid(target.Id))
+            {
+                error = $"The target ID '{target.Id}' is missing or contains unsupported characters.";
+                return false;
+            }
+
+            var id = target.Id.Trim();
+            if (!ids.Add(id))
+            {
+                error = $"The target ID '{id}' is returned more than once.";
+                return false;
+            }
+
+            if (!PluginSettingValidator.TryCopyRequiredTexts(target.Names, out var names))
+            {
+                error = $"The target '{id}' needs at least one name, and each culture only once.";
+                return false;
+            }
+
+            result.Add(new PluginWidgetTarget
+            {
+                Id = id,
+                Names = names,
+                IsDefault = target.IsDefault
             });
         }
 

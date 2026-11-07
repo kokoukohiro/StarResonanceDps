@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.PluginSdk;
 
 // The app reads these attributes to list the plugin. A build error tells you when a required one is missing.
-[assembly: PluginRegistration(typeof(SampleWindow.SampleWindowPlugin), "kokoukohiro.sample-window", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleWindow.SampleWindowPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Window")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: 窓")]
 [assembly: PluginGenre("en-US", "Sample")]

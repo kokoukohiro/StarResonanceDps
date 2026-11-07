@@ -4,13 +4,12 @@ using System.Globalization;
 namespace StarResonanceDps.App.Services;
 
 /// <summary>
-/// 一覧に出すプラグイン1つの情報。読めなかったプラグインも、フォルダの名前で並べる(<see cref="Id"/> と名前は無い)。
+/// 一覧に出すプラグイン1つの情報。読めなかったプラグインも、フォルダの名前で出す(名前や版などの情報は無い)。
 /// </summary>
 public sealed class PluginInfo
 {
     public PluginInfo(
         string key,
-        string? id,
         IReadOnlyDictionary<string, string>? displayNames,
         IReadOnlyDictionary<string, string>? genres,
         string? author,
@@ -23,7 +22,6 @@ public sealed class PluginInfo
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
         Key = key;
-        Id = id;
         DisplayNames = CopyTexts(displayNames);
         Genres = CopyTexts(genres);
         Author = author;
@@ -34,11 +32,8 @@ public sealed class PluginInfo
         HasNotifications = hasNotifications;
     }
 
-    /// <summary>一覧と窓の鍵。プラグインのフォルダの名前(= 入口の DLL のアセンブリ名)。</summary>
+    /// <summary>プラグインを見分ける鍵。プラグインのフォルダの名前(= 入口の DLL のアセンブリ名)。</summary>
     public string Key { get; }
-
-    /// <summary>プラグインの ID(属性)。読めなかったプラグインは null。</summary>
-    public string? Id { get; }
 
     /// <summary>言語ごとの名前。</summary>
     public IReadOnlyDictionary<string, string> DisplayNames { get; }
@@ -57,7 +52,7 @@ public sealed class PluginInfo
     /// <summary>窓を開くプラグインか(<c>IPluginWindowProvider</c>)。</summary>
     public bool HasWindow { get; }
 
-    /// <summary>ウィジェットを足すプラグインか(<c>IPluginWidgetProvider</c>)。</summary>
+    /// <summary>ウィジェットを足すプラグインか(<c>IPluginWidgetProvider</c>・<c>IPluginMultiWidgetProvider</c>)。</summary>
     public bool HasWidgets { get; }
 
     /// <summary>通知の項目を足すプラグインか(<c>IPluginNotificationProvider</c>)。</summary>

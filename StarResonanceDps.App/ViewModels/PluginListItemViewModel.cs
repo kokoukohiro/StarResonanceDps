@@ -22,7 +22,7 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
     public ImageSource? Icon { get; init; }
 
     /// <summary>2段目(分類・本体に足すもの・制作者)を出すか。情報を読めなかったプラグイン(読み込みの失敗・削除できなかったフォルダ)は出さない。</summary>
-    public bool HasDetails => Info.Id is not null;
+    public bool HasDetails => Info.Version is not null;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -99,7 +99,6 @@ public sealed partial class PluginListItemViewModel : ViewModelBase
             null => string.Empty,
             PluginErrorReason.MissingFiles => localization.Format("PluginStatus_MissingFiles", string.Join(", ", status.MissingFiles)),
             PluginErrorReason.Invalid => localization.GetString("PluginStatus_Invalid"),
-            PluginErrorReason.DuplicateId => localization.GetString("PluginStatus_DuplicateId"),
             PluginErrorReason.Stopped => localization.GetString("PluginStatus_Stopped"),
             PluginErrorReason.InvalidNotifications => localization.GetString("PluginStatus_InvalidNotifications"),
             PluginErrorReason.InvalidWidgets => localization.GetString("PluginStatus_InvalidWidgets"),

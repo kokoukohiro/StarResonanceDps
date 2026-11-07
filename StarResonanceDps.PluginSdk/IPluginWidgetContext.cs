@@ -1,6 +1,9 @@
 namespace StarResonanceDps.PluginSdk;
 
-/// <summary>What the host gives one open widget window (<see cref="IPluginWidgetProvider.CreateWidget"/>).</summary>
+/// <summary>
+/// What the host gives one open widget window
+/// (<see cref="IPluginWidgetProvider.CreateWidget"/> and <see cref="IPluginMultiWidgetProvider.CreateWidget"/>).
+/// </summary>
 public interface IPluginWidgetContext
 {
     string WidgetId { get; }

@@ -205,6 +205,12 @@
                                    behaviors:TextSegmentsBehavior.Segments="{Binding Segments}" />
                     </StackPanel>
                 </Grid>
+                <!-- 名前が無い行は、時刻を本文の左端にそろえる。 -->
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding SenderName}" Value="">
+                        <Setter TargetName="TimeText" Property="Margin" Value="0,1,0,1" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
             </DataTemplate>
         </ItemsControl.ItemTemplate>
     </ItemsControl>

@@ -525,9 +525,6 @@
   <data name="PluginStatus_Invalid" xml:space="preserve">
     <value>不是本应用的插件，或与应用的版本不一致</value>
   </data>
-  <data name="PluginStatus_DuplicateId" xml:space="preserve">
-    <value>其他文件夹中也有相同的插件</value>
-  </data>
   <data name="PluginStatus_Stopped" xml:space="preserve">
     <value>因发生错误已停止，下次启动时恢复</value>
   </data>
@@ -1133,8 +1130,8 @@
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>减益列表</value>
   </data>
-  <data name="Common_Add" xml:space="preserve">
-    <value>添加</value>
+  <data name="Common_Insert" xml:space="preserve">
+    <value>插入</value>
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>隐藏无效的属性效果</value>

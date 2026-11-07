@@ -114,6 +114,8 @@ public sealed partial class EntityInfoWidgetViewModel : ViewModelBase, IEntityWi
 
     public bool IsEntityAcquired => _target.IsAcquired;
 
+    public bool IsWaitingForEntity => _target.IsWaitingForEntity;
+
     public EntityTargetInfo? Entity => _target.Entity;
 
     public string TargetName => _target.Name;

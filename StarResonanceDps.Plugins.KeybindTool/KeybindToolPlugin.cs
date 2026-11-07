@@ -7,7 +7,6 @@ using StarResonanceDps.Plugins.KeybindTool.Views;
 
 [assembly: PluginRegistration(
     typeof(StarResonanceDps.Plugins.KeybindTool.KeybindToolPlugin),
-    "kokoukohiro.keybind-tool",
     PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "BPSR：パッド勢を救いたい")]
 [assembly: PluginGenre("ja-JP", "キーバインドツール")]

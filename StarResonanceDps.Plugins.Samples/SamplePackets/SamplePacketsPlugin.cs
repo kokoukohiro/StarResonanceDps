@@ -1,6 +1,6 @@
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SamplePackets.SamplePacketsPlugin), "kokoukohiro.sample-packets", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SamplePackets.SamplePacketsPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Game messages")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: ゲームのメッセージ")]
 [assembly: PluginAuthor("kokoukohiro")]

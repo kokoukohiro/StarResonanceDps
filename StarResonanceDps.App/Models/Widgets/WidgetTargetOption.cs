@@ -19,7 +19,10 @@ public enum WidgetTargetOptionKind
     Buff,
 
     /// <summary>チャットのチャンネル。プライベートトークは相手1人(<see cref="WidgetTargetOption.CharacterId"/>)。</summary>
-    Chat
+    Chat,
+
+    /// <summary>プラグインのウィジェットの相手(<see cref="WidgetTargetOption.PluginTargetId"/>)。何を指すかは本体には分からない。</summary>
+    Plugin
 }
 
 /// <summary>
@@ -39,8 +42,29 @@ public sealed class WidgetTargetOption
     /// <summary>チャット: チャンネル。</summary>
     public ChitChatChannelType ChatChannel { get; init; }
 
-    /// <summary>敵: 実体の値。</summary>
+    /// <summary>敵: 実体の値。実体を捕まえていない窓の項目と、敵を選んでいない項目は null。</summary>
     public EntityTargetInfo? Entity { get; init; }
+
+    /// <summary>敵: 実体を捕まえていない窓(復元直後)の種別ID。0 は敵を選んでいない(<see cref="IsUnselectedEntity"/>)。</summary>
+    public long UnacquiredEntityId { get; init; }
+
+    /// <summary>敵: 実体を捕まえていない窓の、実体の種類。種別IDと組で比べる。</summary>
+    public EEntityType? UnacquiredEntityType { get; init; }
+
+    /// <summary>敵: 実体を捕まえていない窓の、保存しておいた名前。</summary>
+    public string UnacquiredEntityName { get; init; } = string.Empty;
+
+    /// <summary>バフ: カードの相手。開いている窓の項目だけが持つ(<see cref="WidgetTargetOptionKind.Buff"/> の相手の決め方より先に使う)。</summary>
+    public WidgetTargetOption? BuffPerson { get; init; }
+
+    /// <summary>プラグイン: 相手の ID。相手を選んでいない項目と空の窓は null(<see cref="IsUnselectedPlugin"/>)。</summary>
+    public string? PluginTargetId { get; init; }
+
+    /// <summary>プラグイン: 相手の名前(言語ごと)。</summary>
+    public IReadOnlyDictionary<string, string>? PluginTargetNames { get; init; }
+
+    /// <summary>プラグイン: プラグインが既定に指定した相手(手で選ぶまでカードがこれを選ぶ)。</summary>
+    public bool IsDefaultPluginTarget { get; init; }
 
     /// <summary>バフ: バフかデバフか。</summary>
     public PlayerBuffListKind BuffListKind { get; init; }
@@ -71,12 +95,18 @@ public sealed class WidgetTargetOption
         return Kind switch
         {
             WidgetTargetOptionKind.Player => IsSelf == other.IsSelf && (IsSelf || CharacterId == other.CharacterId),
-            WidgetTargetOptionKind.Entity => Entity?.EntityUuid == other.Entity?.EntityUuid,
+            WidgetTargetOptionKind.Entity => Entity is not null || other.Entity is not null
+                ? Entity?.EntityUuid == other.Entity?.EntityUuid
+                : UnacquiredEntityId == other.UnacquiredEntityId && UnacquiredEntityType == other.UnacquiredEntityType,
             WidgetTargetOptionKind.Chat => ChatChannel == other.ChatChannel && CharacterId == other.CharacterId,
+            WidgetTargetOptionKind.Plugin => string.Equals(PluginTargetId, other.PluginTargetId, StringComparison.OrdinalIgnoreCase),
             _ => IsSelf == other.IsSelf
                 && BuffListKind == other.BuffListKind
                 && BuffGroup == other.BuffGroup
                 && string.Equals(BuffKey, other.BuffKey, StringComparison.Ordinal)
+                && (BuffPerson is null
+                    ? other.BuffPerson is null
+                    : other.BuffPerson is not null && BuffPerson.IsSameTarget(other.BuffPerson))
         };
     }
 
@@ -90,6 +120,13 @@ public sealed class WidgetTargetOption
             CharacterId = CharacterId,
             ChatChannel = ChatChannel,
             Entity = Entity,
+            UnacquiredEntityId = UnacquiredEntityId,
+            UnacquiredEntityType = UnacquiredEntityType,
+            UnacquiredEntityName = UnacquiredEntityName,
+            BuffPerson = BuffPerson,
+            PluginTargetId = PluginTargetId,
+            PluginTargetNames = PluginTargetNames,
+            IsDefaultPluginTarget = IsDefaultPluginTarget,
             BuffListKind = BuffListKind,
             BuffKey = BuffKey,
             BuffGroup = BuffGroup,
@@ -167,4 +204,28 @@ public sealed class WidgetTargetOption
 
     /// <summary>バフ・デバフカードの「指定なし」か(<see cref="CreateUnspecifiedBuffCard"/>)。</summary>
     public bool IsUnspecifiedBuffCard => Kind == WidgetTargetOptionKind.Buff && BuffKey is null && BuffGroup == BuffGroup.None;
+
+    /// <summary>エンティティ情報で、敵を選んでいない項目(エンティティリストに敵がいないときの既定)。開く窓は敵を待つ空の窓。</summary>
+    public static WidgetTargetOption CreateUnselectedEntity()
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Entity
+        };
+    }
+
+    /// <summary>敵を選んでいない項目か(<see cref="CreateUnselectedEntity"/>)。</summary>
+    public bool IsUnselectedEntity => Kind == WidgetTargetOptionKind.Entity && Entity is null && UnacquiredEntityId == 0;
+
+    /// <summary>プラグインのウィジェットで、相手を選んでいない項目(相手の一覧を読む前と、一覧が空のときの既定)。開く窓は本体が出す空の窓。</summary>
+    public static WidgetTargetOption CreateUnselectedPlugin()
+    {
+        return new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Plugin
+        };
+    }
+
+    /// <summary>相手を選んでいない項目か(<see cref="CreateUnselectedPlugin"/>)。</summary>
+    public bool IsUnselectedPlugin => Kind == WidgetTargetOptionKind.Plugin && PluginTargetId is null;
 }

@@ -6,7 +6,6 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 SRDPS001 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
-SRDPS002 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
 SRDPS003 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
 SRDPS004 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
 SRDPS005 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
@@ -17,3 +16,5 @@ SRDPS009 | StarResonanceDps.Plugin | Warning | PluginRegistrationAnalyzer
 SRDPS010 | StarResonanceDps.Plugin | Warning | PluginRegistrationAnalyzer
 SRDPS011 | StarResonanceDps.Plugin | Warning | PluginRegistrationAnalyzer
 SRDPS012 | StarResonanceDps.Plugin | Error | PluginRegistrationAnalyzer
+SRDPS013 | StarResonanceDps.Plugin | Error | PluginDefinitionAnalyzer
+SRDPS014 | StarResonanceDps.Plugin | Error | PluginDefinitionAnalyzer

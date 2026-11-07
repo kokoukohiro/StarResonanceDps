@@ -469,12 +469,7 @@ internal static class PlayerRosterProjection
             source.SeasonStrength,
             useHistoryHealth ? source.MaxHp : source.CurrentHp,
             source.MaxHp,
-            PlayerClassSpecResolver.Resolve(
-                source.ProfessionId,
-                source.SubProfessionId,
-                source.IsSpecAbilityUnequipped,
-                nearbyEntity is not null && PlayerClassSpecResolver.HasMeanTransformBuff(nearbyEntity.UUID),
-                nearbyEntity is not null && PlayerClassSpecResolver.HasGolemTransformBuff(nearbyEntity.UUID)),
+            source.ClassSpec,
             isSelf,
             combatAttributes,
             source.SubProfessionId,

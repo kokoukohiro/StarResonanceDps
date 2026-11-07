@@ -13,9 +13,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- 本体の読み込みと同じ ID と版の決まりを使う。 -->
+  <!-- 本体の読み込みと同じ版の決まりを使う。 -->
   <ItemGroup>
-    <Compile Include="..\StarResonanceDps.PluginSdk\PluginIdRules.cs" Link="Shared\PluginIdRules.cs" />
     <Compile Include="..\StarResonanceDps.PluginSdk\PluginVersionRules.cs" Link="Shared\PluginVersionRules.cs" />
   </ItemGroup>
 

@@ -100,7 +100,7 @@
 
                         <Button Grid.Column="3"
                                 Click="AddFormatField_Click"
-                                Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Add]}"
+                                Content="{Binding Source={x:Static localization:LocalizationManager.Instance}, Path=[Common_Insert]}"
                                 MinWidth="64"
                                 Style="{StaticResource Button.Text}" />
                     </Grid>

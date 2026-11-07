@@ -1,7 +1,7 @@
 using System.Windows;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleLocalization.SampleLocalizationPlugin), "kokoukohiro.sample-localization", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleLocalization.SampleLocalizationPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Languages")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: 多言語")]
 [assembly: PluginDisplayName("ko-KR", "샘플: 다국어")]

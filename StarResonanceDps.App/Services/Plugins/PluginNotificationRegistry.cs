@@ -37,7 +37,7 @@ internal sealed class PluginNotificationRegistry
 
     public static PluginNotificationRegistry Instance { get; } = new();
 
-    /// <summary>項目のあるプラグイン。並びはプラグインの鍵の順(プラグインの一覧と同じ)。</summary>
+    /// <summary>項目のあるプラグイン。並びは足した順(プラグインの一覧と同じ)。</summary>
     public IReadOnlyList<PluginNotificationGroup> Groups => _groups;
 
     /// <summary>プラグインの項目を足した。値は足したプラグイン。</summary>
@@ -57,8 +57,7 @@ internal sealed class PluginNotificationRegistry
         }
 
         var group = new PluginNotificationGroup(info, definitions);
-        var index = _groups.FindIndex(other => string.Compare(other.PluginKey, info.Key, StringComparison.OrdinalIgnoreCase) > 0);
-        _groups.Insert(index < 0 ? _groups.Count : index, group);
+        _groups.Add(group);
         GroupAdded?.Invoke(this, group);
     }
 

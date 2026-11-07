@@ -95,13 +95,13 @@ public static class PlayerDirectory
 
         var name = FirstNonEmpty(entry.Name, profile?.Name, chatIdentity?.Name);
         var professionId = FirstPositive(entry.ProfessionId, profile?.ProfessionId ?? 0);
-        var classSpec = entry.ProfessionId == 0 && professionId > 0
+        // 職業IDの無い変身(ミーン・ゴーレム)は、名刺の職業で元の職に戻さない。
+        var classSpec = entry.ProfessionId == 0 && professionId > 0 && !PlayerClassSpecResolver.IsTransformation(entry.ClassSpec)
             ? PlayerClassSpecResolver.Resolve(
                 professionId,
                 entry.SubProfessionId,
                 entry.ClassSpec == PlayerClassSpec.Rank1,
-                hasMeanTransformBuff: false,
-                hasGolemTransformBuff: false)
+                buffTransformation: null)
             : entry.ClassSpec;
         var dataGaps = profile is { Name.Length: > 0, ProfessionId: > 0 }
             ? entry.DataGaps & ~PlayerDataGaps.Identity

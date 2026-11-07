@@ -6,16 +6,22 @@ namespace StarResonanceDps.App.Views.Widgets;
 /// <summary>
 /// プラグインのウィジェットの本体を、窓の枠の層のバーでスクロールする置き場(メーターなど本体のリストと同じ動き)。余白は付けない。
 /// </summary>
-public partial class PluginWidgetScrollBodyView : UserControl, IWidgetVerticalScrollContent
+public partial class PluginWidgetScrollBodyView : UserControl, IWidgetVerticalScrollContent, IPluginWidgetElementHost
 {
     private const double SmallChange = 31d;
 
-    public PluginWidgetScrollBodyView(FrameworkElement element)
+    /// <param name="element">中身。空の窓は null で、後から <see cref="SetElement"/> で入れる。</param>
+    public PluginWidgetScrollBodyView(FrameworkElement? element)
     {
         InitializeComponent();
         ElementHost.Content = element;
         Loaded += PluginWidgetScrollBodyView_Loaded;
         SizeChanged += PluginWidgetScrollBodyView_SizeChanged;
+    }
+
+    public void SetElement(FrameworkElement element)
+    {
+        ElementHost.Content = element;
     }
 
     public event EventHandler? VerticalScrollMetricsChanged;

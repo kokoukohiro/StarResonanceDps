@@ -6,7 +6,7 @@ namespace StarResonanceDps.PluginSdk;
 ///
 /// <para>
 /// Localized texts follow the rules of <see cref="PluginNotificationDefinition"/>.
-/// <see cref="Id"/> follows the plugin ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique among the settings of the item (without case).
+/// <see cref="Id"/> follows the ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique among the settings of the item (without case).
 /// The saved value is kept under this ID, so do not change it between versions.
 /// When a saved value no longer fits the definition (an option was removed, the range changed), the host uses the default or the nearest end of the range.
 /// </para>
@@ -35,7 +35,7 @@ public sealed class PluginSwitchSetting : PluginSettingDefinition
 /// <summary>A drop-down list. Read the chosen <see cref="PluginChoiceOption.Id"/> with <see cref="PluginSettingValues.GetChoice"/>.</summary>
 public sealed class PluginChoiceSetting : PluginSettingDefinition
 {
-    /// <summary>The options in list order (at least one). Option IDs follow the plugin ID rules and are unique (without case).</summary>
+    /// <summary>The options in list order (at least one). Option IDs follow the ID rules and are unique (without case).</summary>
     public required IReadOnlyList<PluginChoiceOption> Options { get; init; }
 
     /// <summary>The ID of the option chosen until the user changes it. Must be one of <see cref="Options"/>.</summary>

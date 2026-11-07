@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugWindowNotification.Plugin), "kokoukohiro.debug-window-notification", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugWindowNotification.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 窓と通知")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

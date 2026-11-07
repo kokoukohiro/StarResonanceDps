@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugStopButtons.Plugin), "kokoukohiro.debug-stop-buttons", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugStopButtons.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 押して止める")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

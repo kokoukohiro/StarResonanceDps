@@ -858,7 +858,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// ワールドチャットにほかの人の文の発言が届いた(スタンプ・画像などは上げない)。値は発言者のキャラID・発言者名・本文。
-        /// 自分の発言は、自分のキャラIDが分かっていれば上げない。パケット処理のスレッドで上がる。
+        /// 発言者のいないメッセージ(システムの通知)と、自分のキャラIDが分かっていれば自分の発言は上げない。パケット処理のスレッドで上がる。
         /// </summary>
         public static event Action<long, string, string>? WorldChatMessageReceived;
 
@@ -894,12 +894,14 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
 
             var senderId = message.SendCharInfo?.CharID ?? 0;
-            if (AppState.PlayerUID != 0 && senderId == AppState.PlayerUID)
+            var senderName = message.SendCharInfo?.Name ?? string.Empty;
+            if ((senderId <= 0 && string.IsNullOrWhiteSpace(senderName))
+                || (AppState.PlayerUID != 0 && senderId == AppState.PlayerUID))
             {
                 return;
             }
 
-            WorldChatMessageReceived?.Invoke(senderId, message.SendCharInfo?.Name ?? string.Empty, info.MsgText ?? string.Empty);
+            WorldChatMessageReceived?.Invoke(senderId, senderName, info.MsgText ?? string.Empty);
         }
 
         /// <summary>
@@ -3701,7 +3703,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 NearbyEntityProjection.BeginMap();
             }
 
-            // StartNewMap は Current を作り直すので、チャンネル番号はその後に入れる。
+            // 移動でない通知(フルコンテナなど)で届いたチャンネルも今の回に入れる。
             EncounterManager.Current.SetChannelLineNumber(lineId);
             PlayerRosterProjection.UpdateMapName();
             NearbyEntityProjection.UpdateMapName();

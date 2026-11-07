@@ -1,7 +1,7 @@
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugInvalidWidget.Plugin), "kokoukohiro.debug-invalid-widget", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugInvalidWidget.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: ウィジェットの定義の誤り")]
 [assembly: PluginAuthor("kokoukohiro")]
 [assembly: PluginVersion("1.0.0")]

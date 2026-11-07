@@ -19,6 +19,9 @@ namespace StarResonanceDps.Core.CombatRuntime;
 /// ダンジョン同期で届いた難易度(マスターの段階)。出所は <c>EncounterExData.DungeonDifficulty</c>。
 /// シーン名を引き直すときに難易度名を選ぶのに使う。
 /// </param>
+/// <param name="ChannelLine">
+/// チャンネル番号。出所は <c>EncounterExData.ChannelLine</c>。チャンネルの無い場所の回は 0。
+/// </param>
 public sealed record EncounterHistoryEntry(
     ulong EncounterId,
     DateTime StartTime,
@@ -26,7 +29,8 @@ public sealed record EncounterHistoryEntry(
     string SceneName,
     bool IsWipe,
     int BenchmarkSeconds,
-    int DungeonDifficulty);
+    int DungeonDifficulty,
+    uint ChannelLine);
 
 /// <summary>履歴の1件を選んだ結果(<see cref="EncounterHistoryProvider.SelectAsync"/>)。</summary>
 public enum HistorySelectResult
@@ -156,7 +160,8 @@ public static class EncounterHistoryProvider
                 encounter.IsWipe,
                 // LoadEncounterSummaries が全行の ExData を復元済みなので追加の読み込みは無い。
                 encounter.ExData.BenchmarkTime,
-                encounter.ExData.DungeonDifficulty));
+                encounter.ExData.DungeonDifficulty,
+                encounter.ExData.ChannelLine));
         }
 
         return entries;

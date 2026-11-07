@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugIconMissing.Plugin), "kokoukohiro.debug-icon-missing", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugIconMissing.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: アイコンのパスの誤り")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

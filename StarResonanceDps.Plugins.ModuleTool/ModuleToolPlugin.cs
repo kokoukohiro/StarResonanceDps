@@ -7,7 +7,6 @@ using StarResonanceDps.Plugins.ModuleTool.Views;
 
 [assembly: PluginRegistration(
     typeof(StarResonanceDps.Plugins.ModuleTool.ModuleToolPlugin),
-    "kokoukohiro.module-tool",
     PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "ただのモジュールツール")]
 [assembly: PluginGenre("ja-JP", "モジュールツール")]

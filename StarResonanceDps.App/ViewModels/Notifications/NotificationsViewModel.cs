@@ -245,7 +245,7 @@ public sealed partial class NotificationsViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 動き出したプラグインの項目を、保存した値で足す。置き場所は、本体の項目と、プラグインの鍵の順で前にあるプラグインの項目の後ろ。
+    /// 動き出したプラグインの項目を、保存した値で足す。置き場所は、本体の項目と、プラグインの一覧で前にあるプラグインの項目の後ろ。
     /// </summary>
     private void AddPluginGroup(PluginNotificationGroup group)
     {

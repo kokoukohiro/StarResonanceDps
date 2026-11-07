@@ -251,7 +251,7 @@ public sealed partial class EncounterHistoryItem : ObservableObject
     /// <summary>
     /// シーン名は<b>表示時に引き直す</b>。DBの <c>SceneName</c> は記録時の言語と
     /// 内部ID注記のまま固定されているので、そのまま出すと表示言語に追従しない。
-    /// 引けなかったときだけ保存値へ落とす。
+    /// 引けなかったときだけ保存値へ落とす。チャンネルのある回はプレイヤーリストの左下と同じ書き方で付ける。
     ///
     /// <para>
     /// 注記は<b>半角括弧で詰めて末尾に足す</b>(スペースを入れない)。
@@ -270,7 +270,9 @@ public sealed partial class EncounterHistoryItem : ObservableObject
                 resolved = _entry.SceneName;
             }
 
-            var text = string.IsNullOrWhiteSpace(resolved) ? UnknownSceneText : resolved;
+            var text = string.IsNullOrWhiteSpace(resolved)
+                ? UnknownSceneText
+                : WidgetListItemViewModel.FormatMapName(resolved, _entry.ChannelLine);
 
             if (_entry.BenchmarkSeconds > 0)
             {

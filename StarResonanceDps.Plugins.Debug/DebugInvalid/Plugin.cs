@@ -3,7 +3,7 @@ using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
 // PluginVersion をわざと書かない。
-[assembly: PluginRegistration(typeof(DebugInvalid.Plugin), "kokoukohiro.debug-invalid", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugInvalid.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 版の属性なし")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

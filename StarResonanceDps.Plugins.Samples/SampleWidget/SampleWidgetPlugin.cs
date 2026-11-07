@@ -1,8 +1,9 @@
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleWidget.SampleWidgetPlugin), "kokoukohiro.sample-widget", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleWidget.SampleWidgetPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Widget")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: ウィジェット")]
 [assembly: PluginAuthor("kokoukohiro")]
@@ -12,16 +13,22 @@ using StarResonanceDps.PluginSdk;
 namespace SampleWidget;
 
 /// <summary>
-/// A plugin that adds two widgets to the app's widget list: one with everything a widget can have, and the smallest one.
+/// A plugin that adds widgets to the app's widget list. Two open one window: one with everything a widget can have, and the smallest one.
+/// Two open one window per target: one with a fixed list of targets, and one with the nearby players.
 /// A plugin without a window has no genre.
 /// </summary>
-public sealed class SampleWidgetPlugin : IStarResonancePlugin, IPluginWidgetProvider
+public sealed class SampleWidgetPlugin : IStarResonancePlugin, IPluginWidgetProvider, IPluginMultiWidgetProvider
 {
     private const string FullWidgetId = "full";
     private const string MinimalWidgetId = "minimal";
+    private const string SlotsWidgetId = "slots";
+    private const string PlayersWidgetId = "players";
+
+    private IPluginGameDataService? _gameData;
 
     public void Initialize(IPluginContext context)
     {
+        _gameData = context.GameData;
     }
 
     public IReadOnlyList<PluginWidgetDefinition> GetWidgetDefinitions()
@@ -74,8 +81,79 @@ public sealed class SampleWidgetPlugin : IStarResonancePlugin, IPluginWidgetProv
         };
     }
 
+    public IReadOnlyList<PluginWidgetDefinition> GetMultiWidgetDefinitions()
+    {
+        return
+        [
+            new PluginWidgetDefinition
+            {
+                Id = SlotsWidgetId,
+                Names = Texts("Sample slots", "サンプルの枠"),
+                DefaultWidth = 240,
+                DefaultHeight = 80
+            },
+            new PluginWidgetDefinition
+            {
+                Id = PlayersWidgetId,
+                Names = Texts("Sample players", "サンプルのプレイヤー"),
+                DefaultWidth = 240,
+                DefaultHeight = 80
+            }
+        ];
+    }
+
+    public IReadOnlyList<PluginWidgetTarget> GetWidgetTargets(string widgetId)
+    {
+        return widgetId switch
+        {
+            SlotsWidgetId => CreateSlotTargets(),
+            PlayersWidgetId => CreatePlayerTargets(),
+            _ => throw new ArgumentOutOfRangeException(nameof(widgetId), widgetId, "Unknown widget.")
+        };
+    }
+
+    public PluginWidgetContent CreateWidget(string widgetId, string targetId, IPluginWidgetContext context)
+    {
+        return new PluginWidgetContent { Body = CreateWindowText($"Target: {targetId}") };
+    }
+
     public void Shutdown()
     {
+    }
+
+    private static IReadOnlyList<PluginWidgetTarget> CreateSlotTargets()
+    {
+        return
+        [
+            new PluginWidgetTarget { Id = "a", Names = Texts("Slot A", "枠A") },
+            new PluginWidgetTarget { Id = "b", Names = Texts("Slot B", "枠B") }
+        ];
+    }
+
+    /// <summary>
+    /// The list is empty until the app knows a player; meanwhile the start button opens an empty window, which gets its content when a target appears.
+    /// IsDefault makes the card select the local player as soon as they are known.
+    /// A target needs a name, and a player's name can be unknown for a moment, so the ID stands in for it.
+    /// </summary>
+    private IReadOnlyList<PluginWidgetTarget> CreatePlayerTargets()
+    {
+        var players = _gameData?.Players ?? [];
+        return
+        [
+            .. players
+                .Where(player => player.CharacterId != 0 && (player.IsSelf || player.IsNearby))
+                .Select(player =>
+                {
+                    var id = player.CharacterId.ToString(CultureInfo.InvariantCulture);
+                    var name = string.IsNullOrWhiteSpace(player.Name) ? id : player.Name;
+                    return new PluginWidgetTarget
+                    {
+                        Id = id,
+                        Names = Texts(name, name),
+                        IsDefault = player.IsSelf
+                    };
+                })
+        ];
     }
 
     private static PluginWidgetContent CreateFullWidget(IPluginWidgetContext context)

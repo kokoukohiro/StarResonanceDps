@@ -91,6 +91,17 @@ public static class PlayerClassSpecResolver
     public static bool HasGolemTransformBuff(long entityUuid)
         => Services.ActiveBuffStore.Instance.HasActive(entityUuid, GolemTransformBuffId);
 
+    /// <summary>その実体の今のバフで決まる変身(ミーン・ゴーレム)。どちらのバフも乗っていなければ null。</summary>
+    public static PlayerClassSpec? GetBuffTransformation(long entityUuid)
+    {
+        if (HasMeanTransformBuff(entityUuid))
+        {
+            return PlayerClassSpec.TransformMean;
+        }
+
+        return HasGolemTransformBuff(entityUuid) ? PlayerClassSpec.TransformGolem : null;
+    }
+
     /// <summary>変身している間の特化か(アイコンは変身のものにそろえる)。</summary>
     public static bool IsTransformation(PlayerClassSpec spec)
     {
@@ -110,25 +121,19 @@ public static class PlayerClassSpecResolver
     /// 未装着が確定したかどうかのフラグと組にして初めて区別できる。
     /// </para>
     /// </summary>
-    /// <param name="hasMeanTransformBuff">ミーンの変身のバフが乗っているか(<see cref="HasMeanTransformBuff"/>)。</param>
-    /// <param name="hasGolemTransformBuff">ゴーレムの変身のバフが乗っているか(<see cref="HasGolemTransformBuff"/>)。</param>
+    /// <param name="buffTransformation">
+    /// バフで決まる変身(今のバフ <see cref="GetBuffTransformation"/> か、保存した回の記録)。ミーンとゴーレム以外の値と null は変身していない。
+    /// </param>
     public static PlayerClassSpec Resolve(
         int professionId,
         int subProfessionId,
         bool isSpecAbilityUnequipped,
-        bool hasMeanTransformBuff,
-        bool hasGolemTransformBuff)
+        PlayerClassSpec? buffTransformation)
     {
-        // ミーンの変身は職業IDを持たないので、バフで決める。
-        if (hasMeanTransformBuff)
+        // ミーンとゴーレムの変身は職業IDを持たないので、バフで決める。
+        if (buffTransformation is PlayerClassSpec.TransformMean or PlayerClassSpec.TransformGolem)
         {
-            return PlayerClassSpec.TransformMean;
-        }
-
-        // ゴーレムも職業IDを持たないので、ミーンと同じくバフで決める。
-        if (hasGolemTransformBuff)
-        {
-            return PlayerClassSpec.TransformGolem;
+            return buffTransformation.Value;
         }
 
         // 変身クラスは特化を持たない。職業IDだけで決まり、SubProfessionId は見ない。

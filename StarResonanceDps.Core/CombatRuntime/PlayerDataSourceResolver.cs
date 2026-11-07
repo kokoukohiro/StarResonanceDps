@@ -19,6 +19,7 @@ internal sealed record PlayerDataSourceSnapshot(
     bool IsIncapacitated,
     bool IsNpc,
     bool IsSpecAbilityUnequipped,
+    PlayerClassSpec ClassSpec,
     PlayerEquipmentData? EquipmentData,
     bool IsLive,
     int SeasonTalentBuffId,
@@ -152,6 +153,8 @@ internal static class PlayerDataSourceResolver
             : partySupplement is { ProfessionId: > 0 }
                 ? partySupplement.ProfessionId
                 : metadataProfessionId;
+        var subProfessionId = ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf);
+        var isSpecAbilityUnequipped = ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf);
 
         return new PlayerDataSourceSnapshot(
             characterId,
@@ -166,7 +169,7 @@ internal static class PlayerDataSourceResolver
                 : partySupplement is { CombatPower: > 0 }
                     ? partySupplement.CombatPower
                     : metadataCombatPower,
-            ResolveSubProfessionId(characterId, nearbyEntity, metadataEntity, isSelf),
+            subProfessionId,
             nearbySeasonStrength > 0
                 ? nearbySeasonStrength
                 : partySupplement is { SeasonStrength: > 0 }
@@ -191,7 +194,12 @@ internal static class PlayerDataSourceResolver
                 || GetInt(nearbyEntity, "AttrId") > 0
                 || GetInt(metadataEntity, "AttrId") > 0
                 || metadataEntity?.IsNpc == true),
-            ResolveSpecAbilityUnequipped(characterId, nearbyEntity, metadataEntity, isSelf),
+            isSpecAbilityUnequipped,
+            PlayerClassSpecResolver.Resolve(
+                professionId,
+                subProfessionId,
+                isSpecAbilityUnequipped,
+                ResolveBuffTransformation(nearbyEntity, metadataEntity)),
             GetEquipmentData(nearbyEntity)
                 ?? partySupplement?.EquipmentData
                 ?? GetEquipmentData(metadataEntity),
@@ -213,6 +221,17 @@ internal static class PlayerDataSourceResolver
             ResolveTalentNodeIds(nearbyEntity, metadataEntity, professionId),
             nearbyEntity?.LastReplaceableSkills ?? metadataEntity?.LastReplaceableSkills,
             ResolveDataGaps(characterId, nearbyEntity, metadataEntity, partySupplement, isSelf));
+    }
+
+    /// <summary>
+    /// バフで決まる変身(ミーン・ゴーレム)。保存した回の実体は記録で決まり、今のバフを見ない。
+    /// ライブの実体は記録を持たないので今のバフで決まる。周りにいない人の今のバフは見ない。
+    /// </summary>
+    private static PlayerClassSpec? ResolveBuffTransformation(Entity? nearbyEntity, Entity? metadataEntity)
+    {
+        return nearbyEntity is not null
+            ? nearbyEntity.RecordedBuffTransformation ?? PlayerClassSpecResolver.GetBuffTransformation(nearbyEntity.UUID)
+            : metadataEntity?.RecordedBuffTransformation;
     }
 
     /// <summary>

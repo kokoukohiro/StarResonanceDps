@@ -199,6 +199,7 @@
         -->
         <Style x:Key="WidgetItem.NameSelectBox" TargetType="{x:Type ComboBox}">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="behaviors:EmptyDropDownBehavior.IsEnabled" Value="True" />
             <Setter Property="Focusable" Value="False" />
             <Setter Property="IsTabStop" Value="False" />
             <Setter Property="Cursor" Value="Hand" />

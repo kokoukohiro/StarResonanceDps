@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugThrowInitialize.Plugin), "kokoukohiro.debug-throw-initialize", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugThrowInitialize.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 初期化で例外")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

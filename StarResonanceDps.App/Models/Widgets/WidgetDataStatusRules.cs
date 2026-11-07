@@ -345,14 +345,15 @@ public static class WidgetDataStatusRules
 
     /// <summary>
     /// チャット。新しいメッセージは1件ずつ完結した通知で届き、途中から読み始めても以後の分は欠けない。
-    /// 過去のチャットはゲームがログインの後(と再接続)にまとめて読み直すので、ゲームに入った後に起動したときは欠ける。
+    /// 過去のチャットはゲームがログインの後(と再接続)にまとめて読み直すので、接続を途中から読み始めたときは、マップを移動しても欠けたまま。
     /// ワールドと初心者はチャンネルの切り替え、プライベートトークはその相手を開いたときにも、その窓の分を読み直す。
+    /// 最初から読んでいれば、届くまでの間は欠けではない。
     /// </summary>
     /// <param name="hasPastChat">その窓の過去のチャットを受け取った(<see cref="ChatMessageStore.HasPastChat"/>)。</param>
-    public static WidgetDataStatus ForChat(bool hasPastChat)
+    public static WidgetDataStatus ForChat(GameReceptionSnapshot reception, bool hasPastChat)
     {
         return WidgetDataStatus.Complete
-            .WithIf(!hasPastChat, WidgetDataStatusReasons.PastChatRelogin);
+            .WithIf(reception.HasMidStreamConnection && !hasPastChat, WidgetDataStatusReasons.PastChatRelogin);
     }
 
     /// <summary>

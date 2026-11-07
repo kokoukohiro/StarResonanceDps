@@ -5,7 +5,6 @@ namespace StarResonanceDps.App.Services;
 internal sealed class PluginHostContext : IPluginContext
 {
     public PluginHostContext(
-        string pluginId,
         IPluginSettingsStore settings,
         IPluginMessageService messages,
         IPluginLocalizationService localization,
@@ -16,7 +15,6 @@ internal sealed class PluginHostContext : IPluginContext
         IPluginNotificationService notifications,
         CancellationToken stopping)
     {
-        PluginId = pluginId;
         Settings = settings ?? throw new ArgumentNullException(nameof(settings));
         Messages = messages ?? throw new ArgumentNullException(nameof(messages));
         Localization = localization ?? throw new ArgumentNullException(nameof(localization));
@@ -27,8 +25,6 @@ internal sealed class PluginHostContext : IPluginContext
         Notifications = notifications ?? throw new ArgumentNullException(nameof(notifications));
         Stopping = stopping;
     }
-
-    public string PluginId { get; }
 
     public IPluginSettingsStore Settings { get; }
 

@@ -165,14 +165,6 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     [ObservableProperty]
     private string _targetSelectorText = string.Empty;
 
-    /// <summary>
-    /// 起動ボタンを押せるか。押せないのは、エンティティ情報でエンティティリストに敵がいなくて敵を選んでいないときだけ。
-    /// 決めるのは <see cref="WidgetTargetSelection"/>。
-    /// </summary>
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ToggleRunningCommand))]
-    private bool _isTargetToggleEnabled = true;
-
     /// <summary>選んでいる項目の窓が開いているか。決めるのは <see cref="WidgetTargetSelection"/>。</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ShowsStopIcon))]
@@ -207,7 +199,10 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
 
     public bool IsBuffDebuffCard => Kind == WidgetKind.BuffDebuffCard;
 
-    public bool IsPlayerWindowWidget => Kind is WidgetKind.PlayerInfo
+    /// <summary>
+    /// 相手ごとに窓を開く(か、自分の窓を1枚だけ開く)ウィジェットか。名前は本体の人の窓から来ていて、プラグインの複数起動のウィジェットも入る。
+    /// </summary>
+    public bool IsPlayerWindowWidget => PluginWidget is { IsMultiWindow: true } || Kind is WidgetKind.PlayerInfo
         or WidgetKind.PlayerStatus
         or WidgetKind.BuffDebuffGroup
         or WidgetKind.PlayerEquipment
@@ -233,7 +228,13 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     public bool ShowsPlayerWindowCountBadge => IsPlayerWindowWidget && !WidgetConfigDefaults.IsSelfOnlyPlayerWindowKind(Kind);
 
     /// <summary>名前の欄を、窓の相手を選ぶ選択リストにする種別か(複数開けるウィジェット)。</summary>
-    public bool SupportsTargetSelection => WidgetConfigDefaults.SupportsOpenTargets(Kind);
+    public bool SupportsTargetSelection => PluginWidget is { IsMultiWindow: true } || WidgetConfigDefaults.SupportsOpenTargets(Kind);
+
+    /// <summary>
+    /// 選択リストで手で項目を選んだか。選んだ後は既定の決め方(自分・プラグインが指定した相手)で選択を替えない。保存しない。
+    /// 並べるものが無くなって既定に戻ったら偽に戻る。
+    /// </summary>
+    public bool IsTargetChosenByUser { get; set; }
 
     /// <summary>名前の欄に選択リストを出すか。相手を選ぶ種別で、並べるものがあるときだけ。</summary>
     public bool ShowsTargetSelector => SupportsTargetSelection && HasTargetOptions;
@@ -874,7 +875,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
         MapName = FormatMapName(_mapSceneName, _mapChannel);
     }
 
-    /// <summary>マップ名とチャンネルの表示。プレイヤーリストの左下とプレイヤー情報の現在地が使う。</summary>
+    /// <summary>マップ名とチャンネルの表示。プレイヤーリストの左下・プレイヤー情報の現在地・集計タブの履歴の行が使う。</summary>
     public static string FormatMapName(string mapName, uint mapChannel)
     {
         return mapChannel > 0 && !string.IsNullOrEmpty(mapName)
@@ -1407,6 +1408,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// <summary>名前の選択リストで項目を選んだとき(画面から)。</summary>
     public void SelectTargetOption(WidgetTargetOption option)
     {
+        IsTargetChosenByUser = true;
         SelectedTargetOption = option;
     }
 
@@ -1489,7 +1491,7 @@ public partial class WidgetListItemViewModel : ViewModelBase, IWidgetDataStatusS
     /// 起動ボタン。相手を選ぶ種別(複数開けるウィジェット)は選んでいる項目の窓だけを開く・閉じる(窓を束ねる側へ頼む)。
     /// ほかは起動中と停止を切り替える。
     /// </summary>
-    [RelayCommand(CanExecute = nameof(IsTargetToggleEnabled))]
+    [RelayCommand]
     private void ToggleRunning()
     {
         if (SupportsTargetSelection)

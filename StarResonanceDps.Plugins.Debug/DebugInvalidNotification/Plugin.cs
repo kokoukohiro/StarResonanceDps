@@ -1,7 +1,7 @@
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugInvalidNotification.Plugin), "kokoukohiro.debug-invalid-notification", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugInvalidNotification.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 通知の定義の誤り")]
 [assembly: PluginAuthor("kokoukohiro")]
 [assembly: PluginVersion("1.0.0")]

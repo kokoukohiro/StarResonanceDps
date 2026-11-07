@@ -421,6 +421,7 @@ public sealed partial class NotificationItemViewModel : ObservableObject
             return;
         }
 
+        IsSelected = true;
         Changed?.Invoke(this, EventArgs.Empty);
         if (value && IsSpeechSelected)
         {

@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleAll.SampleAllPlugin), "kokoukohiro.sample-all", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleAll.SampleAllPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Everything")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: 全部")]
 [assembly: PluginDisplayName("ko-KR", "샘플: 전부")]

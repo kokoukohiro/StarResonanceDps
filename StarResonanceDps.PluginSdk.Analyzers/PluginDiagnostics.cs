@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 namespace StarResonanceDps.PluginSdk.Analyzers;
 
 /// <summary>
-/// プラグインの属性の検査。中身は本体が読み込むときの確かめ(<c>PluginManager.CreateRegistration</c>)と同じにする
-/// (ビルドで通ったものが本体で弾かれないように)。ID を変えない・消さない(AnalyzerReleases の表と組)。
-/// 検査はコンパイルの終わりに1回だけ走るので、全部に <see cref="WellKnownDiagnosticTags.CompilationEnd"/> を付ける。
+/// プラグインの検査。属性の検査の中身は本体が読み込むときの確かめ(<c>PluginManager.CreateRegistration</c>)と同じにする
+/// (ビルドで通ったものが本体で弾かれないように)。公開した検査の ID を変えない・消さない(AnalyzerReleases の表と組)。
+/// 属性の検査はコンパイルの終わりに1回だけ走るので <see cref="WellKnownDiagnosticTags.CompilationEnd"/> を付ける。定義の検査(<see cref="PluginDefinitionAnalyzer"/>)には付けない。
 /// </summary>
 internal static class PluginDiagnostics
 {
@@ -15,15 +15,6 @@ internal static class PluginDiagnostics
         "SRDPS001",
         "Plugin registration attribute is missing",
         "This assembly defines a plugin, but it has no [assembly: PluginRegistration(...)] attribute",
-        Category,
-        DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        customTags: WellKnownDiagnosticTags.CompilationEnd);
-
-    public static readonly DiagnosticDescriptor InvalidId = new(
-        "SRDPS002",
-        "Plugin id is invalid",
-        "The plugin id '{0}' must be 1 to {1} characters of ASCII letters, digits, '.', '-' or '_'",
         Category,
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
@@ -118,4 +109,20 @@ internal static class PluginDiagnostics
         DiagnosticSeverity.Error,
         isEnabledByDefault: true,
         customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+    public static readonly DiagnosticDescriptor EmptyWidgetTargets = new(
+        "SRDPS013",
+        "Multi-window widget never has targets",
+        "GetWidgetTargets always returns an empty list, so the widget can never open a window; return at least one target",
+        Category,
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor EmptyRequiredText = new(
+        "SRDPS014",
+        "Required plugin text is empty",
+        "{0} has no text; set at least one culture with a non-blank text",
+        Category,
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

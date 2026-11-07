@@ -136,6 +136,7 @@ public sealed partial class MainViewModel : ViewModelBase
         {
             EncounterManager.EncounterStart += EncounterManager_EncounterStart;
             EncounterHistoryProvider.SelectionChanged += EncounterHistoryProvider_SelectionChanged;
+            MessageManager.ResetToStartupCompleted += MessageManager_ResetToStartupCompleted;
             _targetSelectionTimer.Tick += TargetSelectionTimer_Tick;
             _targetSelectionTimer.Start();
             _notificationMonitor = new NotificationMonitor();
@@ -195,21 +196,10 @@ public sealed partial class MainViewModel : ViewModelBase
         _pluginItems.Add(CreatePluginItem(pluginInfo, _pluginItems.Count));
     }
 
-    // 「＋ プラグインを追加」から足したプラグイン。起動時の一覧と同じくフォルダの名前の順の位置に入れ、窓をずらす番号を振り直す。
+    // 「＋ プラグインを追加」から足したプラグイン。一覧は入れた順なので末尾に足す。
     private void PluginManager_PluginRegistered(object? sender, PluginInfo pluginInfo)
     {
-        var index = 0;
-        while (index < _pluginItems.Count
-               && StringComparer.OrdinalIgnoreCase.Compare(_pluginItems[index].PluginKey, pluginInfo.Key) < 0)
-        {
-            index++;
-        }
-
-        _pluginItems.Insert(index, CreatePluginItem(pluginInfo, index));
-        for (var i = 0; i < _pluginItems.Count; i++)
-        {
-            _pluginItems[i].OriginalIndex = i;
-        }
+        AddPluginItem(pluginInfo);
     }
 
     private void PluginManager_PluginStatusChanged(object? sender, string pluginKey)
@@ -286,6 +276,13 @@ public sealed partial class MainViewModel : ViewModelBase
             widget.BuffCardShortcutChangedFromWidget -= Widget_BuffCardShortcutChangedFromWidget;
             widget.BuffCardNotificationTargetChangedFromWidget -= Widget_BuffCardNotificationTargetChangedFromWidget;
             widget.BuffDebuffGroupNotificationTargetChangedFromWidget -= Widget_BuffDebuffGroupNotificationTargetChangedFromWidget;
+            if (widget.SupportsTargetSelection)
+            {
+                widget.TargetOptionsRequested -= Widget_TargetOptionsRequested;
+                widget.SelectedTargetChanged -= Widget_SelectedTargetChanged;
+                widget.SelectedTargetToggleRequested -= Widget_SelectedTargetToggleRequested;
+                widget.BuffCardShortcutsChanged -= Widget_BuffCardShortcutsChanged;
+            }
         }
 
         if (Application.Current?.Dispatcher is { HasShutdownStarted: false } dispatcher)
@@ -406,6 +403,12 @@ public sealed partial class MainViewModel : ViewModelBase
     private void EncounterHistoryProvider_SelectionChanged()
     {
         RefreshTargetSelectionsOnDispatcher();
+    }
+
+    /// <summary>ログアウトで起動時の状態へ戻した。パケットの処理の側から上がるので、画面の側でプラグインのカードの選択を戻す。</summary>
+    private void MessageManager_ResetToStartupCompleted()
+    {
+        Application.Current?.Dispatcher.BeginInvoke(() => _targetSelection.ResetPluginSelections(_widgetItems));
     }
 
     private void RefreshTargetSelectionsOnDispatcher()

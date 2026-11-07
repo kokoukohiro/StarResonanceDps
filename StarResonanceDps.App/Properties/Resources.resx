@@ -525,9 +525,6 @@ Restart the app, then add it again.</value>
   <data name="PluginStatus_Invalid" xml:space="preserve">
     <value>This is not a plugin for this app, or it does not match the app version.</value>
   </data>
-  <data name="PluginStatus_DuplicateId" xml:space="preserve">
-    <value>The same plugin is also in another folder.</value>
-  </data>
   <data name="PluginStatus_Stopped" xml:space="preserve">
     <value>Stopped after an error; it resumes the next time the app starts.</value>
   </data>
@@ -1132,8 +1129,8 @@ Wait a moment and copy again.</value>
   <data name="Widget_DebuffList" xml:space="preserve">
     <value>Debuff List</value>
   </data>
-  <data name="Common_Add" xml:space="preserve">
-    <value>Add</value>
+  <data name="Common_Insert" xml:space="preserve">
+    <value>Insert</value>
   </data>
   <data name="Settings_PlayerStatus_HideInactiveStatusEffects" xml:space="preserve">
     <value>Hide Inactive Status Effects</value>

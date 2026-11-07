@@ -142,7 +142,9 @@ public sealed partial class ChatWidgetViewModel : ViewModelBase, IDisposable, IW
 
     public void RefreshDataStatus()
     {
-        var status = WidgetDataStatusRules.ForChat(ChatMessageStore.HasPastChat(new ChatTarget(Channel, PartnerId)));
+        var status = WidgetDataStatusRules.ForChat(
+            GameReceptionStateStore.Current,
+            ChatMessageStore.HasPastChat(new ChatTarget(Channel, PartnerId)));
         if (status == DataStatus)
         {
             return;
@@ -307,13 +309,16 @@ public sealed partial class ChatWidgetViewModel : ViewModelBase, IDisposable, IW
             ? sentAt.ToLocalTime().ToString("HH:mm", CultureInfo.InvariantCulture)
             : string.Empty;
 
-        var senderName = PlayerInfoFormatFormatter.GetDisplayName(
-            record.SenderName,
-            record.SenderId,
-            AppState.PlayerUID != 0 && record.SenderId == AppState.PlayerUID,
-            false,
-            0,
-            PlayerRosterPresentationStore.Instance.NameDisplayMode);
+        // 発言者のいないメッセージ(システムの通知)は、ゲームと同じく時刻だけを出す。
+        var senderName = record.SenderId <= 0 && string.IsNullOrWhiteSpace(record.SenderName)
+            ? string.Empty
+            : PlayerInfoFormatFormatter.GetDisplayName(
+                record.SenderName,
+                record.SenderId,
+                AppState.PlayerUID != 0 && record.SenderId == AppState.PlayerUID,
+                false,
+                0,
+                PlayerRosterPresentationStore.Instance.NameDisplayMode);
 
         var segments = new List<object>();
         AddBodySegments(segments, record);

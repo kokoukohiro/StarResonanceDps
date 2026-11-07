@@ -11,7 +11,7 @@ namespace StarResonanceDps.PluginSdk;
 ///
 /// <para>
 /// The host checks the definitions when the plugin starts and stops the plugin when any of these rules is broken:
-/// <see cref="Id"/> follows the plugin ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique in the plugin (without case);
+/// <see cref="Id"/> follows the ID rules (1 to 128 ASCII letters, digits, <c>.</c>, <c>-</c> or <c>_</c>) and is unique in the plugin (without case);
 /// <see cref="Names"/> and <see cref="DefaultTexts"/> have at least one text;
 /// each field and setting is valid and their keys and IDs are unique (without case).
 /// </para>

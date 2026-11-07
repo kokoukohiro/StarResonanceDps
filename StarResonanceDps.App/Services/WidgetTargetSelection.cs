@@ -1,4 +1,5 @@
 using StarResonanceDps.App.Config;
+using StarResonanceDps.App.Localization;
 using StarResonanceDps.App.Models.Widgets;
 using StarResonanceDps.App.ViewModels;
 using StarResonanceDps.Core.CombatRuntime;
@@ -16,7 +17,8 @@ namespace StarResonanceDps.App.Services;
 /// 人の窓は名簿の全員(自分 → パーティの番号順 → そのほかの名前順)、バフリスト・デバフリストはそれに続けてエンティティリストの敵、
 /// エンティティ情報はエンティティリストの敵だけ、
 /// 与ダメ・ヒールの詳細とグラフはメーターの行、バフ・デバフカードはカードの設定のショートカットのオンの行(自分のバフ・デバフ、設定の並び)と、
-/// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)、チャットはチャンネルとプライベートトークの相手。
+/// バフリスト(デバフはデバフリスト)のカードで選んでいる相手のバフ(デバフ)、チャットはチャンネルとプライベートトークの相手、
+/// プラグインのウィジェットはプラグインが返す相手の一覧。
 /// 開いている窓の相手と選んでいる項目は、名簿などから外れていても末尾に足す(選んで閉じられるように)。
 /// 行の文字は、その項目で開く窓のタイトル(<see cref="WidgetHeaderText"/>)。
 /// </para>
@@ -27,16 +29,27 @@ namespace StarResonanceDps.App.Services;
 /// </para>
 ///
 /// <para>
+/// 人の窓の既定は自分。自分が分からない間は、手で選ぶまでそのカードの一覧の1番目を入れ、自分が分かったら自分に替える(<see cref="ApplySelfDefault"/>)。
+/// </para>
+///
+/// <para>
 /// バフ・デバフカードの既定はショートカットの1つ目で、オンの行が1つも無ければ「指定なし」(<see cref="WidgetTargetOption.CreateUnspecifiedBuffCard"/>)。
-/// 指定なしの欄の文字はウィジェット名だけで、起動ボタンはいつも起動の絵(押すと、自分のバフリストの1行目のカードか、最初に付いたものを待つ窓を開くか前に出す。
-/// <see cref="WidgetWindowManager.OpenUnspecifiedBuffCard"/>)。開くカードが決まったら、選択をそのカードに置き換える(<see cref="ResolveUnspecified"/>、
-/// 指定なしは別の項目として残さない)。指定なしは並べるものが1つも無いときだけの項目で、並べるものが出たらその1つ目で上書きし(<see cref="Refresh"/>)、
+/// 指定なしの欄の文字はウィジェット名だけ。起動ボタンは、待っている窓が開いていなければ、自分のバフリストの1行目のカードか最初に付いたものを待つ窓を開き
+/// (<see cref="WidgetWindowManager.OpenUnspecifiedBuffCard"/>)、開いていれば閉じる。開くカードが決まったら、選択をそのカードに置き換える(<see cref="ResolveUnspecified"/>)。
+/// 待っている窓が開いていない指定なしは並べるものが1つも無いときだけの項目で、並べるものが出たらその1つ目で上書きし(<see cref="Refresh"/>)、
 /// 並べるものが無くなれば既定として戻る。
 /// </para>
 ///
 /// <para>
-/// エンティティ情報の既定はエンティティリストの1番目の敵。敵がいなければ、敵を選んでいない項目(<see cref="CreateUnselectedEntity"/>、欄はウィジェット名だけ)で、
-/// 起動ボタンは押せない(<see cref="WidgetListItemViewModel.IsTargetToggleEnabled"/>)。敵が出たらその1番目で上書きする(<see cref="Refresh"/>)。
+/// エンティティ情報の既定はエンティティリストの1番目の敵。敵がいなければ、敵を選んでいない項目(<see cref="WidgetTargetOption.CreateUnselectedEntity"/>、欄はウィジェット名だけ)で、
+/// 起動ボタンは敵を待つ空の窓を開く・閉じる。空の窓が開いていないときに敵が出たら、その1番目で上書きする(<see cref="Refresh"/>)。
+/// </para>
+///
+/// <para>
+/// プラグインのウィジェットの既定は相手を選んでいない項目(<see cref="WidgetTargetOption.CreateUnselectedPlugin"/>)で、起動ボタンは本体が出す空の窓を開く・閉じる。
+/// 手で選ぶまで、プラグインが既定に指定した相手、無ければ一覧の1番目を入れる(<see cref="ApplyPluginOptions"/>)。本体は相手が何かを知らないので、自分を選ぶかはプラグインが指定で決める。
+/// プラグインのコードを呼ぶのは、リストを開いたときと、手で選んでおらず既定の相手も選べていない間・空の窓がある間の当て直しだけ。
+/// カードを足す処理の中では呼ばない(プラグインが例外で止まると、足している途中のカードと定義の一覧を外すことになる)。
 /// </para>
 /// </summary>
 public sealed class WidgetTargetSelection
@@ -57,6 +70,9 @@ public sealed class WidgetTargetSelection
     private readonly WidgetWindowManager _windowManager;
     private readonly Func<WidgetKind, WidgetListItemViewModel?> _findWidget;
 
+    /// <summary>プラグインの相手の一覧を選択に当てている途中。選択の知らせで戻ってきた当て直しではプラグインのコードを呼ばない。</summary>
+    private bool _isApplyingPluginOptions;
+
     public WidgetTargetSelection(
         WidgetWindowManager windowManager,
         Func<WidgetKind, WidgetListItemViewModel?> findWidget)
@@ -67,7 +83,8 @@ public sealed class WidgetTargetSelection
 
     /// <summary>
     /// 選んでいる項目の既定。バフ・デバフカードはショートカットの1つ目(無ければ「指定なし」)、
-    /// エンティティ情報はエンティティリストの1番目の敵(無ければ敵を選んでいない項目)、チャットはワールド、ほかは自分。
+    /// エンティティ情報はエンティティリストの1番目の敵(無ければ敵を選んでいない項目)、チャットはワールド、
+    /// プラグインのウィジェットは相手を選んでいない項目、ほかは自分。
     /// </summary>
     public WidgetTargetOption CreateDefault(WidgetListItemViewModel widget)
     {
@@ -75,24 +92,26 @@ public sealed class WidgetTargetSelection
         {
             WidgetKind.BuffDebuffCard => CreateShortcutOptions(widget).FirstOrDefault()
                 ?? WidgetTargetOption.CreateUnspecifiedBuffCard(),
-            WidgetKind.EntityInfo => CreateEntityOptions().FirstOrDefault() ?? CreateUnselectedEntity(),
+            WidgetKind.EntityInfo => CreateEntityOptions().FirstOrDefault() ?? WidgetTargetOption.CreateUnselectedEntity(),
             WidgetKind.Chat => WidgetTargetOption.CreateChat(DefaultChatChannel, 0),
+            WidgetKind.Plugin => WidgetTargetOption.CreateUnselectedPlugin(),
             _ => WidgetTargetOption.CreateSelf(AppState.PlayerUID)
         };
     }
 
-    /// <summary>エンティティ情報で、敵を選んでいない項目(エンティティリストに敵がいないときの既定)。開く窓は無い。</summary>
-    private static WidgetTargetOption CreateUnselectedEntity()
+    /// <summary>
+    /// ログアウトで起動時の状態へ戻した。手で選んでいないプラグインの相手は前のキャラのものかもしれないので、既定から選び直す。
+    /// </summary>
+    public void ResetPluginSelections(IEnumerable<WidgetListItemViewModel> widgets)
     {
-        return new WidgetTargetOption
+        foreach (var widget in widgets)
         {
-            Kind = WidgetTargetOptionKind.Entity
-        };
-    }
-
-    private static bool IsUnselectedEntity(WidgetTargetOption option)
-    {
-        return option.Kind == WidgetTargetOptionKind.Entity && option.Entity is null;
+            if (widget.PluginWidget is not null && widget.SupportsTargetSelection && !widget.IsTargetChosenByUser)
+            {
+                widget.SelectedTargetOption = CreateDefault(widget);
+                Refresh(widget);
+            }
+        }
     }
 
     /// <summary>
@@ -106,7 +125,9 @@ public sealed class WidgetTargetSelection
             return;
         }
 
-        var options = CreateListedOptions(widget);
+        var options = widget.PluginWidget is not null
+            ? ReadPluginOptions(widget)
+            : CreateListedOptions(widget);
         if (options.Count > 0)
         {
             AppendSelectedTarget(widget, options);
@@ -136,7 +157,7 @@ public sealed class WidgetTargetSelection
         return options;
     }
 
-    /// <summary>選んでいる項目の窓を開くか閉じる(起動ボタン)。バフ・デバフカードの「指定なし」は開くか前に出すだけ。</summary>
+    /// <summary>選んでいる項目の窓を開くか閉じる(起動ボタン)。バフ・デバフカードの「指定なし」は、待っている窓が開いていなければ開くカードを決める。</summary>
     public void Toggle(WidgetListItemViewModel widget)
     {
         if (!widget.SupportsTargetSelection)
@@ -145,19 +166,16 @@ public sealed class WidgetTargetSelection
         }
 
         var selected = GetSelected(widget);
-        if (selected.IsUnspecifiedBuffCard)
-        {
-            _windowManager.OpenUnspecifiedBuffCard(
-                widget,
-                ResolvePlayerIdentity(WidgetTargetOption.CreateSelf(AppState.PlayerUID)).UserId);
-            Refresh(widget);
-            return;
-        }
-
         var (person, buff) = Resolve(widget, selected);
         if (_windowManager.FindTargetWindow(widget, person, buff) is not null)
         {
             _windowManager.CloseTarget(widget, person, buff);
+        }
+        else if (selected.IsUnspecifiedBuffCard)
+        {
+            _windowManager.OpenUnspecifiedBuffCard(
+                widget,
+                ResolvePlayerIdentity(WidgetTargetOption.CreateSelf(AppState.PlayerUID)).UserId);
         }
         else
         {
@@ -169,9 +187,6 @@ public sealed class WidgetTargetSelection
 
     /// <summary>
     /// カードの名前の欄と起動ボタンを、選んでいる項目と開いている窓で当て直す。値が同じなら変えない。
-    /// 並べるものが無いときは名前だけの表示(直す前と同じ)になるので、起動ボタンも直す前と同じく既定を開くよう、選択を既定に戻す。
-    /// バフ・デバフカードの「指定なし」とエンティティ情報の敵を選んでいない項目は、並べるものが1つも無いときだけの項目で、
-    /// 並べるものが出たらその1つ目で上書きする。
     /// 選択リストの元のうちバフの行とメーターの行には変わった合図が無いので、メイン画面が全部のカードについて1秒ごとにここを呼ぶ。
     /// </summary>
     public void Refresh(WidgetListItemViewModel widget)
@@ -181,30 +196,175 @@ public sealed class WidgetTargetSelection
             return;
         }
 
-        // バフ・デバフカードとエンティティ情報は並べるもの(候補・開いている窓)を作って数える。既定の項目の上書きにも使う。
-        var listed = widget.Kind is WidgetKind.BuffDebuffCard or WidgetKind.EntityInfo ? CreateListedOptions(widget) : null;
-        var hasOptions = listed is not null ? listed.Count > 0 : HasOptions(widget);
-        widget.HasTargetOptions = hasOptions;
-        var defaultOption = CreateDefault(widget);
-        if (!hasOptions && widget.SelectedTargetOption is { } current && !current.IsSameTarget(defaultOption))
+        if (widget.PluginWidget is not null)
         {
-            widget.SelectedTargetOption = defaultOption;
+            RefreshPluginSelection(widget);
         }
-        else if (listed is { Count: > 0 }
-                 && widget.SelectedTargetOption is { } placeholder
-                 && (placeholder.IsUnspecifiedBuffCard || IsUnselectedEntity(placeholder)))
+        else
         {
-            widget.SelectedTargetOption = listed[0];
+            RefreshHostSelection(widget);
         }
 
         var selected = GetSelected(widget);
         widget.TargetSelectorText = FormatSelectorText(widget, selected);
-        widget.IsTargetToggleEnabled = !IsUnselectedEntity(selected);
 
-        // 「指定なし」は開くか前に出すだけなので、いつも起動の絵。
         var (person, buff) = Resolve(widget, selected);
-        widget.IsSelectedTargetOpen = !selected.IsUnspecifiedBuffCard
-            && _windowManager.FindTargetWindow(widget, person, buff) is not null;
+        widget.IsSelectedTargetOpen = _windowManager.FindTargetWindow(widget, person, buff) is not null;
+    }
+
+    /// <summary>
+    /// 本体のウィジェットの選択を当て直す。並べるものが無いときは名前だけの表示になるので、起動ボタンが既定を開くよう、選択を既定に戻す。
+    /// </summary>
+    private void RefreshHostSelection(WidgetListItemViewModel widget)
+    {
+        // バフ・デバフカードとエンティティ情報は並べるもの(候補・開いている窓)を作って数える。既定の項目の上書きにも使う。
+        var listed = widget.Kind is WidgetKind.BuffDebuffCard or WidgetKind.EntityInfo ? CreateListedOptions(widget) : null;
+        var hasOptions = listed is not null ? listed.Count > 0 : HasOptions(widget);
+        widget.HasTargetOptions = hasOptions;
+        if (!hasOptions)
+        {
+            widget.IsTargetChosenByUser = false;
+            var defaultOption = CreateDefault(widget);
+            if (widget.SelectedTargetOption is { } current && !current.IsSameTarget(defaultOption))
+            {
+                widget.SelectedTargetOption = defaultOption;
+            }
+
+            return;
+        }
+
+        if (listed is not null)
+        {
+            ReplacePlaceholder(widget, listed[0]);
+        }
+        else if (UsesSelfDefault(widget.Kind) && !widget.IsTargetChosenByUser)
+        {
+            ApplySelfDefault(widget);
+        }
+    }
+
+    /// <summary>
+    /// バフ・デバフカードの「指定なし」とエンティティ情報の敵を選んでいない項目は、窓が開いていなければ、並べるものの1つ目で上書きする。
+    /// 窓が開いていれば残す(選んで閉じられるように)。
+    /// </summary>
+    private void ReplacePlaceholder(WidgetListItemViewModel widget, WidgetTargetOption first)
+    {
+        if (widget.SelectedTargetOption is not { } placeholder
+            || !(placeholder.IsUnspecifiedBuffCard || placeholder.IsUnselectedEntity)
+            || placeholder.IsSameTarget(first))
+        {
+            return;
+        }
+
+        var (person, buff) = Resolve(widget, placeholder);
+        if (_windowManager.FindTargetWindow(widget, person, buff) is null)
+        {
+            widget.SelectedTargetOption = first;
+        }
+    }
+
+    /// <summary>既定が自分の種別か(人の窓)。</summary>
+    private static bool UsesSelfDefault(WidgetKind kind)
+    {
+        return kind is not (WidgetKind.BuffDebuffCard or WidgetKind.EntityInfo or WidgetKind.Chat);
+    }
+
+    /// <summary>
+    /// 手で選んでいない人の窓のカード。自分が分かれば自分を選び、分からない間は一覧の1番目を入れる。
+    /// 一覧を作るのは、自分が分からず自分の項目を選んでいる間だけ。
+    /// </summary>
+    private void ApplySelfDefault(WidgetListItemViewModel widget)
+    {
+        var selected = GetSelected(widget);
+        var self = WidgetTargetOption.CreateSelf(AppState.PlayerUID);
+        if (ResolvePlayerIdentity(self).UserId != 0)
+        {
+            if (!selected.IsSelf)
+            {
+                widget.SelectedTargetOption = self;
+            }
+
+            return;
+        }
+
+        if (selected.IsSelf && CreateListedOptions(widget).FirstOrDefault() is { IsSelf: false } first)
+        {
+            widget.SelectedTargetOption = first;
+        }
+    }
+
+    /// <summary>
+    /// プラグインのウィジェットの選択を当て直す。プラグインのコードを呼ぶのは、手で選んでおらず既定の相手も選べていない間と、空の窓がある間だけ。
+    /// </summary>
+    private void RefreshPluginSelection(WidgetListItemViewModel widget)
+    {
+        if (_isApplyingPluginOptions)
+        {
+            return;
+        }
+
+        var selected = GetSelected(widget);
+        var isSettled = (widget.IsTargetChosenByUser && !selected.IsUnselectedPlugin) || selected.IsDefaultPluginTarget;
+        if (isSettled && !_windowManager.HasEmptyPluginWindow(widget))
+        {
+            return;
+        }
+
+        ReadPluginOptions(widget);
+    }
+
+    /// <summary>
+    /// プラグインの相手の一覧を読んで選択に当て、並べるものを返す。読んでいる間は、知らせで戻ってきた当て直しではプラグインのコードを呼ばない
+    /// (読むたびに名前が変わるプラグインでも、知らせと読み直しが繰り返さない)。
+    /// </summary>
+    private List<WidgetTargetOption> ReadPluginOptions(WidgetListItemViewModel widget)
+    {
+        _isApplyingPluginOptions = true;
+        try
+        {
+            var options = CreateListedOptions(widget);
+            ApplyPluginOptions(widget, options);
+            return options;
+        }
+        finally
+        {
+            _isApplyingPluginOptions = false;
+        }
+    }
+
+    /// <summary>
+    /// 読んだ相手の一覧(と開いている窓)を選択に当てる。空なら名前だけの表示に戻して相手を選んでいない項目へ戻す。
+    /// 手で選ぶまでは、既定に指定された相手か、相手を選んでいなければ1番目を入れる。
+    /// </summary>
+    private void ApplyPluginOptions(WidgetListItemViewModel widget, IReadOnlyList<WidgetTargetOption> listed)
+    {
+        widget.HasTargetOptions = listed.Count > 0;
+        var selected = GetSelected(widget);
+        if (listed.Count == 0)
+        {
+            widget.IsTargetChosenByUser = false;
+            if (!selected.IsUnselectedPlugin)
+            {
+                widget.SelectedTargetOption = CreateDefault(widget);
+            }
+
+            return;
+        }
+
+        // 相手を選んでいない項目は、手で選んでも選択が決まったことにならない(空の窓に相手が入ったら、その相手へ替える)。
+        if (widget.IsTargetChosenByUser && !selected.IsUnselectedPlugin)
+        {
+            return;
+        }
+
+        var preferred = listed.FirstOrDefault(option => option.IsDefaultPluginTarget)
+            ?? (selected.IsUnselectedPlugin ? listed[0] : null);
+        if (preferred is not null
+            && (!selected.IsSameTarget(preferred) || selected.IsDefaultPluginTarget != preferred.IsDefaultPluginTarget))
+        {
+            widget.IsTargetChosenByUser = false;
+            widget.SelectedTargetOption = preferred;
+        }
     }
 
     /// <summary>
@@ -238,7 +398,7 @@ public sealed class WidgetTargetSelection
     /// </summary>
     private bool HasOptions(WidgetListItemViewModel widget)
     {
-        if (GetOpenTargets(widget).Count > 0)
+        if (_windowManager.GetOpenTargets(widget).Count > 0)
         {
             return true;
         }
@@ -270,12 +430,27 @@ public sealed class WidgetTargetSelection
             WidgetKind.DamageTakenSummary => CreateDamageTakenOptions(),
             WidgetKind.EntityInfo => CreateEntityOptions(),
             WidgetKind.Chat => CreateChatOptions(),
+            WidgetKind.Plugin => CreatePluginOptions(widget),
             _ => CreateRosterOptions(includesEntities: widget.Kind is WidgetKind.BuffList or WidgetKind.DebuffList)
         };
     }
 
+    /// <summary>プラグインが返す相手の一覧。読むたびに、開いている窓へ新しい名前を当て、空の窓に相手を入れる。</summary>
+    private List<WidgetTargetOption> CreatePluginOptions(WidgetListItemViewModel widget)
+    {
+        var targets = widget.PluginWidget!.ReadTargets();
+        _windowManager.ApplyPluginTargets(widget, targets);
+        return [.. targets.Select(target => new WidgetTargetOption
+        {
+            Kind = WidgetTargetOptionKind.Plugin,
+            PluginTargetId = target.Id,
+            PluginTargetNames = target.Names,
+            IsDefaultPluginTarget = target.IsDefault
+        })];
+    }
+
     /// <summary>
-    /// 項目から、開く窓の相手とバフを決める。バフ・デバフカードの相手は、料理・薬剤のまとまりなら自分、
+    /// 項目から、開く窓の相手とバフを決める。バフ・デバフカードの相手は、開いている窓の項目ならその窓の相手、料理・薬剤のまとまりなら自分、
     /// それ以外はバフリスト(デバフはデバフリスト)のカードで今選んでいる項目。
     /// </summary>
     private (WidgetTargetOption Person, WidgetTargetOption? Buff) Resolve(WidgetListItemViewModel widget, WidgetTargetOption option)
@@ -290,6 +465,11 @@ public sealed class WidgetTargetSelection
 
     private WidgetTargetOption ResolveBuffPerson(WidgetTargetOption buff)
     {
+        if (buff.BuffPerson is { } openWindowPerson)
+        {
+            return openWindowPerson;
+        }
+
         if (buff.IsSelf)
         {
             return WidgetTargetOption.CreateSelf(AppState.PlayerUID);
@@ -327,6 +507,13 @@ public sealed class WidgetTargetSelection
                 PlayerRosterPresentationStore.Instance.NameDisplayMode);
         }
 
+        if (option.Kind == WidgetTargetOptionKind.Plugin)
+        {
+            return WidgetHeaderText.Join(
+                widget.DisplayName,
+                PluginTexts.Resolve(option.PluginTargetNames ?? PluginTexts.Empty, LocalizationManager.Instance.CurrentCulture));
+        }
+
         if (option.Kind == WidgetTargetOptionKind.Buff)
         {
             var prefix = BuffDebuffCardContent.CreateHeaderPrefix(
@@ -344,7 +531,7 @@ public sealed class WidgetTargetSelection
     {
         if (person.Kind == WidgetTargetOptionKind.Entity)
         {
-            return WidgetHeaderText.Join(prefix, person.Entity?.Name);
+            return WidgetHeaderText.Join(prefix, person.Entity?.Name ?? person.UnacquiredEntityName);
         }
 
         var identity = ResolvePlayerIdentity(person);
@@ -599,29 +786,18 @@ public sealed class WidgetTargetSelection
         }
     }
 
-    /// <summary>
-    /// 開いている窓の相手。バフ・デバフカードの待っている窓(「指定なし」)は除く(指定なしは並べるものが無いときの形で、起動ボタンでは閉じないため)。
-    /// </summary>
-    private IReadOnlyList<(WidgetTargetOption Person, WidgetTargetOption? Buff)> GetOpenTargets(WidgetListItemViewModel widget)
-    {
-        return [.. _windowManager.GetOpenTargets(widget).Where(target => target.Buff?.IsUnspecifiedBuffCard != true)];
-    }
-
-    /// <summary>開いている窓の相手で、リストに無いものを末尾に足す。バフ・デバフカードは、今のリストの相手のカードだけ(相手を項目で指せないため)。</summary>
+    /// <summary>開いている窓の相手で、リストに無いものを末尾に足す(選んで閉じられるように)。バフ・デバフカードの項目は窓の相手を持つ。</summary>
     private void AppendOpenTargets(WidgetListItemViewModel widget, List<WidgetTargetOption> options)
     {
-        foreach (var (person, buff) in GetOpenTargets(widget))
+        foreach (var (person, buff) in _windowManager.GetOpenTargets(widget))
         {
             if (widget.Kind == WidgetKind.BuffDebuffCard)
             {
-                if (buff is null
-                    || options.Any(existing => IsSameCard(existing, buff, person))
-                    || (!buff.IsSelf && !IsSamePerson(ResolveBuffPerson(buff), person)))
+                if (buff is not null && !options.Any(existing => IsSameCard(existing, buff, person)))
                 {
-                    continue;
+                    options.Add(buff);
                 }
 
-                options.Add(buff);
                 continue;
             }
 
@@ -639,8 +815,8 @@ public sealed class WidgetTargetSelection
     private void AppendSelectedTarget(WidgetListItemViewModel widget, List<WidgetTargetOption> options)
     {
         var selected = GetSelected(widget);
-        // 敵を選んでいない項目は、並べるものがあるときには残さない(次の当て直しで1つ目に替わる)。
-        if (IsUnselectedEntity(selected))
+        // 敵・相手を選んでいない項目は、並べるものがあるときには残さない(次の当て直しで1つ目に替わる)。
+        if (selected.IsUnselectedEntity || selected.IsUnselectedPlugin)
         {
             return;
         }
@@ -663,7 +839,7 @@ public sealed class WidgetTargetSelection
 
         if (left.Kind == WidgetTargetOptionKind.Entity)
         {
-            return left.Entity?.EntityUuid == right.Entity?.EntityUuid;
+            return left.IsSameTarget(right);
         }
 
         var leftId = left.IsSelf ? AppState.PlayerUID : left.CharacterId;

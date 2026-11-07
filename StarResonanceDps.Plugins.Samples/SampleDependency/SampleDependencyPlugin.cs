@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using SampleDependency.Library;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(SampleDependency.SampleDependencyPlugin), "kokoukohiro.sample-dependency", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(SampleDependency.SampleDependencyPlugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("en-US", "Sample: Dependency")]
 [assembly: PluginDisplayName("ja-JP", "サンプル: 部品のDLL")]
 [assembly: PluginGenre("en-US", "Sample")]

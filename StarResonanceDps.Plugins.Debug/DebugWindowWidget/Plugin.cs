@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugWindowWidget.Plugin), "kokoukohiro.debug-window-widget", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugWindowWidget.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: 窓とウィジェット")]
 [assembly: PluginGenre("ja-JP", "デバッグ")]
 [assembly: PluginAuthor("kokoukohiro")]

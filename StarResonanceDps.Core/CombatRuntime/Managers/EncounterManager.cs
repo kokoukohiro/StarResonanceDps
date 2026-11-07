@@ -30,7 +30,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         /// <summary>
         /// チャンネル(回線)番号。チャンネルの無い場所では 0。出所は <c>SceneData.LineId</c>。
-        /// エンカウンターは頻繁に作り直されるため、Encounter ではなくここで保持する。
+        /// エンカウンターは頻繁に作り直されるため、今の値はここで保持し、回には作るたびに写す(<see cref="EncounterExData.ChannelLine"/>)。
         /// </summary>
         public static uint ChannelLineId { get; private set; }
 
@@ -356,6 +356,7 @@ namespace StarResonanceDps.Core.CombatRuntime
                 // シーン名は難易度から難易度名を引くので、難易度を先に入れる。
                 Current.SetDungeonDifficulty(currentDifficulty);
                 SetSceneId(LevelMapId, true);
+                Current.SetChannelLineNumber(ChannelLineId);
             }
 
             // 計測中に作った回は計測の回(待機中の作り直しも)。計測時間を写しておくと、履歴でも同じ窓で読める。
@@ -553,7 +554,8 @@ namespace StarResonanceDps.Core.CombatRuntime
                     displayed.SeasonStrength,
                     displayed.MaxHp,
                     displayed.IsNpc,
-                    SocialDataStore.GetAvatar(characterId));
+                    SocialDataStore.GetAvatar(characterId),
+                    Models.PlayerClassSpecResolver.GetBuffTransformation(entity.UUID) ?? Models.PlayerClassSpec.Unknown);
             }
         }
 
@@ -900,7 +902,6 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public List<long> BossUUIDs { get; set; } = new();
         public EDungeonState DungeonState { get; set; } = EDungeonState.DungeonStateNull;
-        public uint ChannelLine { get; set; } = 0;
         public Dictionary<long, EncounterBossDataCache> PreviousBossCache = new();
 
         // タイムラインが読む記録の並びと、被ダメログが読むプレイヤーの被弾。記録した順に積むだけで、この形では DB に入れない。
@@ -1546,7 +1547,7 @@ namespace StarResonanceDps.Core.CombatRuntime
 
         public void SetChannelLineNumber(uint line)
         {
-            ChannelLine = line;
+            ExData.ChannelLine = line;
         }
 
         public void SetDungeonDifficulty(int difficulty)
@@ -2896,6 +2897,8 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </para>
         ///
         /// <para>あることしか示さない。除去は見ない。</para>
+        ///
+        /// <para>術者の今の職の特化でなければ何も書かない(<see cref="Entity.AcceptsSubProfessionId"/>)。</para>
         /// </summary>
         public void ApplySpecFromTalentBuff(int observedBuffId, int buffUuid, long fireUuid, int fightSourceType, long holderUuid = 0, int sourceConfigId = 0)
         {
@@ -2933,8 +2936,13 @@ namespace StarResonanceDps.Core.CombatRuntime
             var isMarker = distanceFromRoot == 0 && observedBuffId == grantedBuffId;
             var target = GetOrCreateEntity(fireUuid);
 
+            if (!target.AcceptsSubProfessionId((int)spec))
+            {
+                return;
+            }
+
             // 常設の食い違い検知。枝タレント(距離1以上)が、控えてあるマーカーと違う特化を
-            // 書こうとしたら記録する。鳴ったら判定表か10刻み丸めの誤り。
+            // 書こうとしたら記録する(同じ職の2特化のあいだだけ)。鳴ったら判定表か10刻み丸めの誤りを疑う。
             //
             // マーカー自身(距離0)は除く。クラス変更でも、ビルドプリセットの一括配信でも
             // 別のマーカーが正当に来るため、食い違いの証拠にならない。
@@ -3138,6 +3146,12 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// </summary>
         [ProtoMember(18)]
         public Models.GameServer GameServer { get; set; } = Models.GameServer.Unknown;
+        /// <summary>
+        /// この回のチャンネル番号。回を作るときとチャンネルが届いたときに書く(<see cref="Encounter.SetChannelLineNumber"/>)。
+        /// 保存の直前には書かない(マップ移動では保存より先に <see cref="EncounterManager.ChannelLineId"/> が移動先へ変わる)。チャンネルの無い場所では 0。
+        /// </summary>
+        [ProtoMember(19)]
+        public uint ChannelLine { get; set; } = 0;
 
         public EncounterExData() { }
     }
@@ -3361,6 +3375,13 @@ namespace StarResonanceDps.Core.CombatRuntime
         /// 履歴から来たプレイヤーの行は、今の店の値ではなくこの値で写真を取る。画像そのものは持たない。
         /// </summary>
         public SocialAvatarState? RecordedAvatar { get; private set; }
+
+        /// <summary>
+        /// 保存した回の、バフで決まる変身(ミーン・ゴーレム。変身していなければ <see cref="Models.PlayerClassSpec.Unknown"/>)。null は保存の焼き付けを通っていない。
+        /// 書くのは保存の直前の焼き付け(<see cref="ApplyDisplayedIdentityForRecord"/>)だけで、回の作り直しでは運ばない。
+        /// バフは保存しないので、履歴はこの値で変身を決める。
+        /// </summary>
+        public Models.PlayerClassSpec? RecordedBuffTransformation { get; private set; }
 
         /// <summary>
         /// 特化が「アビリティ未装着」(ゲーム内呼称 クラスR1)と確定できる状態か。
@@ -3654,6 +3675,18 @@ namespace StarResonanceDps.Core.CombatRuntime
             }
         }
 
+        /// <summary>
+        /// その特化をこの実体へ書いてよいか。職が分かっているなら、今の職の2特化だけを受け付ける。
+        /// 職を替えた後も前の職の効果が届くので、受け付けると特化と一緒に職まで前の職へ戻る。職を替えるのは <c>AttrProfessionId</c>(同じ差分の新しい職の木より先に当たる)。
+        /// 職がまだ分からない実体(途中起動など)は受け付ける。変身クラスの間は <see cref="SetSubProfessionId"/> の関門に任せる。
+        /// </summary>
+        public bool AcceptsSubProfessionId(int subProfessionId)
+        {
+            return ProfessionId <= 0
+                || Models.PlayerClassSpecResolver.TryResolveTransformation(ProfessionId, out _)
+                || Professions.GetProfessionIdFromSubProfessionId(subProfessionId) == ProfessionId;
+        }
+
         public void SetSubProfessionId(int id)
         {
             if (id <= 0)
@@ -3722,7 +3755,8 @@ namespace StarResonanceDps.Core.CombatRuntime
             long seasonStrength,
             long maxHp,
             bool isNpc,
-            SocialAvatarState? avatar)
+            SocialAvatarState? avatar,
+            Models.PlayerClassSpec buffTransformation)
         {
             // NPC の印はパーティの社交データ(BotAiId)でも決まり、社交データは履歴に残らない。
             // 表示に出している値と一緒にここで焼き付ける。
@@ -3730,6 +3764,8 @@ namespace StarResonanceDps.Core.CombatRuntime
 
             // 写真のリンクも同じく名刺の店にしか無い。届いていなければ null のまま書く。
             RecordedAvatar = avatar;
+
+            RecordedBuffTransformation = buffTransformation;
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -4083,12 +4119,14 @@ namespace StarResonanceDps.Core.CombatRuntime
         {
             var resolved = DataTypes.SpecDetectionTables.GetSubProfessionIdByReplacedSkillId(skillId);
             var subProfessionId = (int)resolved;
-            if (subProfessionId <= 0 || SubProfessionId == subProfessionId)
+            if (subProfessionId <= 0
+                || SubProfessionId == subProfessionId
+                || !AcceptsSubProfessionId(subProfessionId))
             {
                 return;
             }
 
-            // 常設の食い違い検知。置換後スキルが示す特化と、控えてあるマーカーが違うなら記録する。
+            // 常設の食い違い検知。置換後スキルが示す特化と、控えてあるマーカーが違うなら記録する(同じ職の2特化のあいだだけ)。
             // 味方に発生させるスキル(安可など)を自分のものとして数えていると、この形で出る。
             if (SpecMarkerBuffId != 0
                 && DataTypes.SpecDetectionTables.TryResolveSpecTalentBuff(

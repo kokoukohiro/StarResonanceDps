@@ -2,7 +2,7 @@ using System.Windows;
 using StarResonanceDps.Plugins.Debug;
 using StarResonanceDps.PluginSdk;
 
-[assembly: PluginRegistration(typeof(DebugLongName.Plugin), "kokoukohiro.debug-long-name", PluginSdkVersion.Current)]
+[assembly: PluginRegistration(typeof(DebugLongName.Plugin), PluginSdkVersion.Current)]
 [assembly: PluginDisplayName("ja-JP", "デバッグ: とても長い名前のプラグインで、一覧の行の幅に入りきらないときに名前が切れて版が残ることを確かめるためのものです。窓の幅を変えながら見てください。")]
 [assembly: PluginGenre("ja-JP", "デバッグ: とても長いジャンル名で2段目の幅に入りきらないときの見え方を確かめるためのものです")]
 [assembly: PluginAuthor("とても長い制作者の名前で2段目の幅に入りきらないときの見え方を確かめるためのものです")]

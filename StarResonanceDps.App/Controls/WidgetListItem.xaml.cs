@@ -118,18 +118,11 @@ public partial class WidgetListItem : UserControl
     }
 
     /// <summary>名前の選択リストを開いた。項目を今の名簿などで作り直してもらう。</summary>
-    /// <summary>リストを開いた。項目を作り直し、並べるものが1つも無ければ閉じる(空のリストを出さない)。</summary>
     private void TargetSelectBox_DropDownOpened(object? sender, EventArgs e)
     {
-        if (DataContext is not WidgetListItemViewModel widget)
+        if (DataContext is WidgetListItemViewModel widget)
         {
-            return;
-        }
-
-        widget.RequestTargetOptions();
-        if (widget.TargetOptions.Count == 0 && sender is ComboBox comboBox)
-        {
-            comboBox.IsDropDownOpen = false;
+            widget.RequestTargetOptions();
         }
     }
 
