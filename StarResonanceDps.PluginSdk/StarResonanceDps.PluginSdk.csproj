@@ -11,6 +11,7 @@
     <PackageId>StarResonanceDps.PluginSdk</PackageId>
     <Version>0.1.0</Version>
     <Authors>kokoukohiro</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>SDK for StarResonanceDps plugins: the plugin interfaces and attributes, and an analyzer that checks the plugin attributes at build time.</Description>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);AddPluginSdkAnalyzerToPackage</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
